@@ -1,0 +1,4 @@
+**/node_modules
+main.wasm
+yarn-error.log
+/dist
