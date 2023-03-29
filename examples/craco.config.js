@@ -11,11 +11,11 @@ module.exports = {
           configFile: 'tsconfig.json',
         },
       })
-      // webpackConfig.resolve.fallback = {
-      //   // crypto and stream needed for @celo/utils
-      //   "crypto": require.resolve("crypto-browserify"),
-      //   "stream": require.resolve("stream-browserify"),
-      // }
+      webpackConfig.resolve.fallback = {
+        // crypto and stream needed for @celo/utils
+        "crypto": require.resolve("crypto-browserify"),
+        "stream": require.resolve("stream-browserify"),
+      }
 
       return webpackConfig;
     },

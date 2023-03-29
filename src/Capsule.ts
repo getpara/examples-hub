@@ -1,5 +1,7 @@
 import { Chain, PublicKeyStatus, PublicKeyType } from '@capsule/client';
 import { pki } from 'node-forge';
+import { useLocalStorage } from 'react-use';
+import { Dispatch, SetStateAction } from 'react';
 
 import {
   decryptWithKeyPair,
@@ -27,22 +29,45 @@ function biometricVerifiedRecently(verifiedAt: number): boolean {
 
 // TODO: see if we can override default logging of fields that should be secure
 export class Capsule {
-  // we'll want most/all of these set in session storage or similar
-  // so it's there across refreshes or page open and close
-  private userId?: string;
-  private email: string;
-  private currentWalletId?: string;
-  private wallets: Record<string, Wallet>;
-  private loginEncryptionKeyPair?: pki.rsa.KeyPair;
   private ctx: Ctx;
+  private email: string;
 
+  private userId?: string;
+  private currentWalletId?: string;
+  private loginEncryptionKeyPair?: pki.rsa.KeyPair;
+  private wallets: Record<string, Wallet>;
+
+  private storageSetUserId: Dispatch<SetStateAction<string | undefined>>;
+  private storageSetCurrentWalletId: Dispatch<
+    SetStateAction<string | undefined>
+  >;
+  private storageSetLoginEncryptionKeyPair: Dispatch<
+    SetStateAction<pki.rsa.KeyPair | undefined>
+  >;
+  private storageSetWallets: Dispatch<SetStateAction<Record<string, Wallet>>>;
+
+  // prefix local storage keys with email to avoid collisions
   constructor(env: Environment, email: string) {
-    this.email = email;
-    this.wallets = {};
     this.ctx = {
       env,
       capsuleClient: initClient(env),
     };
+    this.email = email;
+
+    [this.userId, this.storageSetUserId] = useLocalStorage(
+      `${email}-userId`,
+      undefined,
+    );
+    [this.currentWalletId, this.storageSetCurrentWalletId] = useLocalStorage(
+      `${email}-currentWalletId`,
+      undefined,
+    );
+    [this.loginEncryptionKeyPair, this.storageSetLoginEncryptionKeyPair] =
+      useLocalStorage(`${email}-loginEncryptionKeyPair`, undefined);
+    [this.wallets, this.storageSetWallets] = useLocalStorage(
+      `${email}-wallets`,
+      {},
+    );
 
     initClient(env);
   }
@@ -70,6 +95,7 @@ export class Capsule {
         this.wallets[wallet.id].address = wallet.address;
       }
     });
+    this.storageSetWallets(this.wallets);
   }
 
   async createUser(): Promise<void> {
@@ -77,6 +103,7 @@ export class Capsule {
       email: this.email,
     });
     this.userId = userId;
+    this.storageSetUserId(this.userId);
   }
 
   // returns web auth url for creating a new credential
@@ -104,6 +131,7 @@ export class Capsule {
     if (!this.loginEncryptionKeyPair) {
       const keyPair = await getAsymmetricKeyPair(this.ctx);
       this.loginEncryptionKeyPair = keyPair;
+      this.storageSetLoginEncryptionKeyPair(this.loginEncryptionKeyPair);
     }
 
     return this.getWebAuthURLForLogin(
@@ -132,6 +160,10 @@ export class Capsule {
     this.userId = res.data.userId;
     await this.populateWalletAddresses();
     this.loginEncryptionKeyPair = undefined;
+
+    this.storageSetUserId(this.userId);
+    this.storageSetWallets(this.wallets);
+    this.storageSetLoginEncryptionKeyPair(this.loginEncryptionKeyPair);
   }
 
   async createWallet(): Promise<string> {
@@ -142,6 +174,7 @@ export class Capsule {
     };
     await this.populateWalletAddresses();
 
+    this.storageSetWallets(this.wallets);
     return walletId;
   }
 
@@ -172,6 +205,7 @@ export class Capsule {
 
   setCurrentWallet(walletId: string): Wallet {
     this.currentWalletId = walletId;
+    this.storageSetCurrentWalletId(this.currentWalletId);
     return this.wallets[walletId];
   }
 

@@ -11,7 +11,7 @@ export function keygen(ctx: Ctx, userId: string): Promise<{
     const worker = setupWorker(async (res) => {
       await new Promise((resolve) => setTimeout(resolve, 6000));
       const signer = res.shares[0];
-      await distributeNewShare(userId, res.walletId, signer);
+      await distributeNewShare(ctx, userId, res.walletId, signer);
       // TODO: remove this API call as isn't really necessary for functionality
       const capsuleShare = await ctx.capsuleClient.getCapsuleShare(
         userId,

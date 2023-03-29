@@ -2,15 +2,16 @@ import { EncryptorType, KeyType } from '@capsule/client';
 
 import { encryptWithDerivedPublicKey } from '../cryptography/utils';
 import { sendRecoveryForShare } from './recovery';
-import { userManagementClient } from '../external/userManagementClient';
+import { Ctx } from '../definitions';
 
 // function to call on new user share to perform all necessary distribution
 export async function distributeNewShare(
+  ctx: Ctx,
   userId: string,
   walletId: string,
   userShare: string
 ): Promise<void> {
-  const publicKeysRes = await userManagementClient.getSessionPublicKeys(userId);
+  const publicKeysRes = await ctx.capsuleClient.getSessionPublicKeys(userId);
   const biometricEncryptedShares = publicKeysRes.data.keys.map((key) => {
     // TODO add some sort of support/check to work for mobile biometrics
     // if (key.biometricType !== 'WEB') {
@@ -29,29 +30,10 @@ export async function distributeNewShare(
     };
   });
   await sendRecoveryForShare(
+    ctx,
     userId,
     walletId,
     biometricEncryptedShares,
     userShare
   );
-}
-
-export async function uploadSharesForNewBiometric(
-  userId: string,
-  biometric: any,
-  userKeyShares: { walletId: string; signer: string }[]
-): Promise<void> {
-  const newEncryptedShares = userKeyShares.map((share) => {
-    const { encryptedMessageHex, encryptedKeyHex } =
-      encryptWithDerivedPublicKey(biometric.sigDerivedPublicKey, share.signer);
-    return {
-      walletId: share.walletId,
-      encryptedShare: encryptedMessageHex,
-      encryptedKey: encryptedKeyHex,
-      type: KeyType.USER,
-      encryptor: EncryptorType.BIOMETRICS,
-      biometricPublicKey: biometric.sigDerivedPublicKey,
-    };
-  });
-  await userManagementClient.uploadUserKeyShares(userId, newEncryptedShares);
 }
