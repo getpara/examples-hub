@@ -73,7 +73,7 @@ export async function sendTransaction(
   tx: string,
   chain: Chain,
 ): Promise<string> {
-  const { protocolId } = await ctx.capsuleClient.sendTransaction(
+  const { data: { protocolId } } = await ctx.capsuleClient.sendTransaction(
     userId,
     walletId,
     { transaction: tx, chain }

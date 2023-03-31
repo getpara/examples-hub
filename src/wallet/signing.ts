@@ -15,7 +15,8 @@ export async function sendTransaction(
       resolve(signature);
     });
     worker.postMessage({
-      params: { env: ctx.env, share, walletId, userId, tx, chain },
+      env: ctx.env,
+      params: { share, walletId, userId, tx, chain },
       functionType: 'SEND_TRANSACTION',
     });
   });
@@ -33,7 +34,8 @@ export async function signMessage(
       resolve(signature);
     });
     worker.postMessage({
-      params: { env: ctx.env, share, walletId, userId, message },
+      env: ctx.env,
+      params: { share, walletId, userId, message },
       functionType: 'SIGN_MESSAGE',
     });
   });

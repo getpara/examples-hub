@@ -63,8 +63,6 @@ export class Capsule {
       'loginEncryptionKeyPair',
       undefined,
     );
-
-    initClient(env);
   }
 
   private getWebAuthURLForCreate(webAuthId: string): string {
