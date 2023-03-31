@@ -6,7 +6,7 @@ import * as eutil from 'ethereumjs-util';
 import * as elliptic from 'elliptic';
 import { createHash } from 'crypto-browserify';
 import * as forge from 'node-forge';
-import { Buffer } from 'buffer';
+// import { Buffer } from 'buffer';
 
 const ec = new elliptic.ec('secp256k1');
 

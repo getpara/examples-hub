@@ -2,26 +2,32 @@ import { setupWorker } from '../workers/workerWrapper';
 
 import { distributeNewShare } from '../shares/shareDistribution';
 import { Ctx } from '../definitions';
+import { waitUntilTrue } from '../utils/pollingUtils';
+
+async function isKeygenComplete(ctx: Ctx, userId: string, walletId: string): Promise<boolean> {
+  const wallets = await ctx.capsuleClient.getWallets(userId);
+  const wallet = wallets.data.wallets.find(w => w.id === walletId);
+  return !!wallet.address;
+}
 
 export function keygen(ctx: Ctx, userId: string): Promise<{
-  shares: [string, string];
+  signer: string;
   walletId: string;
 }> {
   return new Promise((resolve) => {
     const worker = setupWorker(async (res) => {
-      await new Promise((resolve) => setTimeout(resolve, 6000));
-      const signer = res.shares[0];
-      await distributeNewShare(ctx, userId, res.walletId, signer);
-      // TODO: remove this API call as isn't really necessary for functionality
-      const capsuleShare = await ctx.capsuleClient.getCapsuleShare(
-        userId,
-        res.walletId
+      await waitUntilTrue(
+        async () => isKeygenComplete(ctx, userId, res.walletId),
+        15000,
+        1000,
       );
+
+      await distributeNewShare(ctx, userId, res.walletId, res.signer);
       resolve({
-        shares: [res.shares[0], capsuleShare.data.signer.signer],
+        signer: res.signer,
         walletId: res.walletId,
       });
     });
-    worker.postMessage({ ctx, params: { userId }, functionType: 'KEYGEN' });
+    worker.postMessage({ env: ctx.env, params: { userId }, functionType: 'KEYGEN' });
   });
 }

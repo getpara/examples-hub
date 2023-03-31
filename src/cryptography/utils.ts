@@ -1,8 +1,6 @@
 import forge from 'node-forge';
 import { promisify } from 'util';
 
-import { Ctx, getPortalBaseURL } from '../definitions';
-
 interface EncryptedShare {
   walletId: string;
   encryptedShare: string;
@@ -13,10 +11,6 @@ const rsa = forge.pki.rsa;
 const RSA_ENCRYPTION_SCHEME = 'RSAES-PKCS1-V1_5';
 // iv can be constant only because every key is only ever used to encrypt one message
 const CONSTANT_IV = '794241bc819a125a7b78ea313decc0bc';
-
-function getForgerWorkerURL(ctx: Ctx): string {
-  return `${getPortalBaseURL(ctx)}/prime.worker.min.js`;
-}
 
 export function getSHA256HashHex(str: string): string {
   const md = forge.md.sha256.create();
@@ -34,7 +28,6 @@ function publicKeyHexToPem(publicKeyHex: string): string {
 }
 
 export async function getAsymmetricKeyPair(
-  ctx: Ctx,
   seedValue?: string
 ): Promise<forge.pki.rsa.KeyPair> {
   const prng = forge.random.createInstance();
@@ -53,7 +46,7 @@ export async function getAsymmetricKeyPair(
         workers: seedValue ? 1 : -1,
         e: 65537,
         workLoad: 100,
-        workerScript: getForgerWorkerURL(ctx),
+        workerScript: new URL('./scripts/prime.worker.min.js', import.meta.url).toString(),
         prng,
       },
       cb
@@ -61,8 +54,8 @@ export async function getAsymmetricKeyPair(
   )() as Promise<forge.pki.rsa.KeyPair>;
 }
 
-export async function getPublicKeyFromSignature(ctx: Ctx, id: string): Promise<string> {
-  const keyPair = await getAsymmetricKeyPair(ctx, id);
+export async function getPublicKeyFromSignature(id: string): Promise<string> {
+  const keyPair = await getAsymmetricKeyPair(id);
   return getPublicKeyHex(keyPair);
 }
 
@@ -90,6 +83,7 @@ export function decryptWithKeyPair(
 ): string {
   const encryptedKey = Buffer.from(encryptedKeyHex, 'hex').toString('utf-8');
   const key = keyPair.privateKey.decrypt(encryptedKey, RSA_ENCRYPTION_SCHEME);
+  
   const decipher = forge.cipher.createDecipher('AES-CBC', key);
   // iv can be constant only because every key is only ever used to encrypt one message
   decipher.start({ iv: CONSTANT_IV });
@@ -101,17 +95,15 @@ export function decryptWithKeyPair(
 }
 
 async function decryptWithDerivedPrivateKey(
-  ctx: Ctx,
   id: string,
   encryptedMessageHex: string,
   encryptedKeyHex: string
 ): Promise<string> {
-  const keyPair = await getAsymmetricKeyPair(ctx, id);
+  const keyPair = await getAsymmetricKeyPair(id);
   return decryptWithKeyPair(keyPair, encryptedMessageHex, encryptedKeyHex);
 }
 
 export async function getDerivedPrivateKeyAndDecrypt(
-  ctx: Ctx,
   seedValue: string,
   encryptedShares: EncryptedShare[]
 ): Promise<{ walletId: string; signer: string }[]> {
@@ -119,7 +111,6 @@ export async function getDerivedPrivateKeyAndDecrypt(
     encryptedShares.map(async (share) => ({
       walletId: share.walletId,
       signer: await decryptWithDerivedPrivateKey(
-        ctx,
         seedValue,
         share.encryptedShare,
         share.encryptedKey

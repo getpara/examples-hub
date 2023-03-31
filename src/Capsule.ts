@@ -1,6 +1,6 @@
 import { Chain, PublicKeyStatus, PublicKeyType } from '@capsule/client';
 import { pki } from 'node-forge';
-import { useLocalStorage } from 'react-use';
+import { useLocalStorage, useSessionStorage } from 'react-use';
 import { Dispatch, SetStateAction } from 'react';
 
 import {
@@ -27,46 +27,41 @@ function biometricVerifiedRecently(verifiedAt: number): boolean {
   return Date.now() - verifiedAt <= BIOMETRIC_VERIFICATION_TIME_MS;
 }
 
-// TODO: see if we can override default logging of fields that should be secure
 export class Capsule {
   private ctx: Ctx;
-  private email: string;
 
+  private email?: string;
   private userId?: string;
-  private currentWalletId?: string;
   private loginEncryptionKeyPair?: pki.rsa.KeyPair;
   private wallets: Record<string, Wallet>;
 
+  private storageSetEmail: Dispatch<SetStateAction<string | undefined>>;
   private storageSetUserId: Dispatch<SetStateAction<string | undefined>>;
-  private storageSetCurrentWalletId: Dispatch<
-    SetStateAction<string | undefined>
-  >;
-  private storageSetLoginEncryptionKeyPair: Dispatch<
-    SetStateAction<pki.rsa.KeyPair | undefined>
-  >;
   private storageSetWallets: Dispatch<SetStateAction<Record<string, Wallet>>>;
+  private storageSetLoginEncryptionKeyPair: (value: pki.rsa.KeyPair) => void;
 
-  // prefix local storage keys with email to avoid collisions
-  constructor(env: Environment, email: string) {
+  // TODO: consider using sessionStorage instead of localStorage
+  constructor(env: Environment) {
     this.ctx = {
       env,
       capsuleClient: initClient(env),
     };
-    this.email = email;
 
+    [this.email, this.storageSetEmail] = useLocalStorage(
+      'email',
+      undefined,
+    );
     [this.userId, this.storageSetUserId] = useLocalStorage(
-      `${email}-userId`,
+      'userId',
       undefined,
     );
-    [this.currentWalletId, this.storageSetCurrentWalletId] = useLocalStorage(
-      `${email}-currentWalletId`,
-      undefined,
-    );
-    [this.loginEncryptionKeyPair, this.storageSetLoginEncryptionKeyPair] =
-      useLocalStorage(`${email}-loginEncryptionKeyPair`, undefined);
     [this.wallets, this.storageSetWallets] = useLocalStorage(
-      `${email}-wallets`,
+      'wallets',
       {},
+    );
+    [this.loginEncryptionKeyPair, this.storageSetLoginEncryptionKeyPair] = useSessionStorage<pki.rsa.KeyPair>(
+      'loginEncryptionKeyPair',
+      undefined,
     );
 
     initClient(env);
@@ -90,12 +85,21 @@ export class Capsule {
   private async populateWalletAddresses(): Promise<void> {
     const res = await this.ctx.capsuleClient.getWallets(this.userId);
     const wallets = res.data.wallets;
-    wallets.forEach((wallet) => {
+    wallets.forEach((wallet: { id: string; address?: string }) => {
       if (this.wallets[wallet.id]) {
         this.wallets[wallet.id].address = wallet.address;
       }
     });
     this.storageSetWallets(this.wallets);
+  }
+
+  setEmail(email: string): void {
+    this.email = email;
+    this.storageSetEmail(email);
+  }
+
+  getEmail(): string | undefined {
+    return this.email;
   }
 
   async createUser(): Promise<void> {
@@ -117,7 +121,9 @@ export class Capsule {
     return this.getWebAuthURLForCreate(res.data.id);
   }
 
-  async isFullyAuthed(): Promise<boolean> {
+  // TODO: consider changing this to just hit a new endpoint that returns
+  //   true/false if session is active
+  async isSessionActive(): Promise<boolean> {
     const res = await this.ctx.capsuleClient.touchSession();
     return (
       res.data.biometricVerifiedAt &&
@@ -129,7 +135,7 @@ export class Capsule {
   async initiateUserLogin(): Promise<string> {
     const res = await this.ctx.capsuleClient.touchSession(true);
     if (!this.loginEncryptionKeyPair) {
-      const keyPair = await getAsymmetricKeyPair(this.ctx);
+      const keyPair = await getAsymmetricKeyPair();
       this.loginEncryptionKeyPair = keyPair;
       this.storageSetLoginEncryptionKeyPair(this.loginEncryptionKeyPair);
     }
@@ -158,31 +164,30 @@ export class Capsule {
     });
 
     this.userId = res.data.userId;
-    await this.populateWalletAddresses();
     this.loginEncryptionKeyPair = undefined;
 
+    await this.populateWalletAddresses();
     this.storageSetUserId(this.userId);
-    this.storageSetWallets(this.wallets);
     this.storageSetLoginEncryptionKeyPair(this.loginEncryptionKeyPair);
   }
 
-  async createWallet(): Promise<string> {
-    const { shares, walletId } = await keygen(this.ctx, this.userId);
+  async createWallet(): Promise<Wallet> {
+    const { signer, walletId } = await keygen(this.ctx, this.userId);
     this.wallets[walletId] = {
       id: walletId,
-      signer: shares[0],
+      signer,
     };
     await this.populateWalletAddresses();
 
-    this.storageSetWallets(this.wallets);
-    return walletId;
+    return this.wallets[walletId];
   }
 
-  async signMessage(message: string): Promise<string> {
+  async signMessage(walletId: string, message: string): Promise<string> {
     const messageSignature = await signMessage(
+      this.ctx,
       this.userId,
-      this.currentWalletId,
-      this.wallets[this.currentWalletId].signer,
+      walletId,
+      this.wallets[walletId].signer,
       message,
     );
     return messageSignature;
@@ -190,37 +195,56 @@ export class Capsule {
 
   // pass in rlp encoded tx as base64 string
   async sendTransaction(
+    walletId: string,
     rlpEncodedTxBase64: string,
     chain: Chain,
   ): Promise<string> {
     const txSignature = await sendTransaction(
+      this.ctx,
       this.userId,
-      this.currentWalletId,
-      this.wallets[this.currentWalletId].signer,
+      walletId,
+      this.wallets[walletId].signer,
       rlpEncodedTxBase64,
       chain,
     );
     return txSignature;
   }
 
-  setCurrentWallet(walletId: string): Wallet {
-    this.currentWalletId = walletId;
-    this.storageSetCurrentWalletId(this.currentWalletId);
-    return this.wallets[walletId];
-  }
-
-  getCurrentWallet(): Wallet | undefined {
-    return this.wallets[this.currentWalletId];
-  }
-
   getWallets(): Record<string, Wallet> {
     return this.wallets;
+  }
+
+  clearStorage(): void {
+    localStorage.removeItem('email');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('wallets');
+    sessionStorage.removeItem('loginEncryptionKeyPair');
   }
 
   async logout(): Promise<void> {
     await this.ctx.capsuleClient.logout();
   }
-}
 
-// Notes:
-// when session is expired, dapp expected to go through login flow again
+  // remove sensitive data when logging this class
+  toString(): string {
+    const redactedWallets = Object.keys(this.wallets).reduce(
+      (acc, walletId) => ({
+        ...acc,
+        [walletId]: {
+          id: walletId,
+          address: this.wallets[walletId].address,
+          signer: this.wallets[walletId].signer ? '[REDACTED]' : undefined,
+        },
+      }),
+      {},
+    );
+    const obj = {
+      email: this.email,
+      userId: this.userId,
+      wallets: redactedWallets,
+      loginEncryptionKeyPair: this.loginEncryptionKeyPair ? '[REDACTED]' : undefined,
+    }
+
+    return `Capsule ${JSON.stringify(obj)}`;
+  }
+}

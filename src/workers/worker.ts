@@ -1,9 +1,10 @@
 import '../wasm/wasm_exec.js';
 import * as walletUtils from './walletUtils';
-import { Ctx, getPortalBaseURL } from '../definitions';
+import { Ctx, Environment, getPortalBaseURL } from '../definitions';
+import { initClient } from '../external/userManagementClient';
 
 interface Message {
-  ctx: Ctx;
+  env: Environment;
   functionType: string;
   params: Record<string, any>;
 }
@@ -19,8 +20,9 @@ async function loadWasm(ctx: Ctx) {
   goWasm.run(newRes.instance);
 }
 
-async function executeMessage(message: Message): Promise<any> {
-  const { ctx, functionType, params } = message;
+async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
+  const { functionType, params } = message;
+
   switch (functionType) {
     case 'KEYGEN': {
       const { userId } = params;
@@ -46,10 +48,14 @@ async function executeMessage(message: Message): Promise<any> {
 }
 
 addEventListener('message', async (e: { data: Message }) => {
-  const { ctx } = e.data;
+  const { env } = e.data;
+  const ctx = {
+    env,
+    capsuleClient: initClient(env),
+  };
   await loadWasm(ctx);
 
-  const result = await executeMessage(e.data);
+  const result = await executeMessage(ctx, e.data);
   self.postMessage(result);
   self.close();
 });

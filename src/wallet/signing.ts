@@ -1,7 +1,9 @@
 import { Chain } from '@capsule/client';
+import { Ctx } from '../definitions';
 import { setupWorker } from '../workers/workerWrapper';
 
 export async function sendTransaction(
+  ctx: Ctx,
   userId: string,
   walletId: string,
   share: string,
@@ -13,13 +15,14 @@ export async function sendTransaction(
       resolve(signature);
     });
     worker.postMessage({
-      params: { share, walletId, userId, tx, chain },
+      params: { env: ctx.env, share, walletId, userId, tx, chain },
       functionType: 'SEND_TRANSACTION',
     });
   });
 }
 
 export async function signMessage(
+  ctx: Ctx,
   userId: string,
   walletId: string,
   share: string,
@@ -30,7 +33,7 @@ export async function signMessage(
       resolve(signature);
     });
     worker.postMessage({
-      params: { share, walletId, userId, message },
+      params: { env: ctx.env, share, walletId, userId, message },
       functionType: 'SIGN_MESSAGE',
     });
   });

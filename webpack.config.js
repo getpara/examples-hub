@@ -26,12 +26,15 @@ module.exports = {
     extensions: ['.ts', '.js', '.json'],
     fallback: {
       // crypto and stream needed for @celo/utils
-      "crypto": require.resolve("crypto-browserify"),
-      "stream": require.resolve("stream-browserify"),
+      crypto: require.resolve('crypto-browserify'),
+      stream: require.resolve('stream-browserify'),
     },
   },
-  // externals: {
-  //   react: 'react',
-  //   'react-dom': 'react-dom',
-  // },
+  ignore: [
+    '**/examples/**',
+  ],
+  externals: {
+    react: 'react',
+    'react-dom': 'react-dom',
+  },
 };

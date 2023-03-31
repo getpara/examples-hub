@@ -13,28 +13,7 @@ function getServerUrl(ctx: Ctx, userId: string) {
 export async function keygen(
   ctx: Ctx,
   userId: string
-): Promise<{ shares: string[]; walletId: string }> {
-  // @osdnk: @Norwood, that's the code form the worker
-  // const publicKeysRes = await userManagementClient.getSessionPublicKeys(userId);
-  // const encryptedKeyShares = await Promise.all(
-  //   publicKeysRes.map(key => {
-  //     const signer = keygenRes.shares[0];
-  //     if (key.type === 'WEB') {
-  //       const encryptedShare = encryptWithDerivedPublicKey(key.derivedPublicKey, signer);
-  //       return {
-  //         encryptedShare,
-  //         type: KeyType.USER,
-  //         encryptorType: EncryptorType.BIOMETRICS,
-  //         biometricPublicKey: key.derivedPublicKey,
-  //       };
-  //     } else {
-  //       // TODO: also encrypt with biometric public key from mobile and persist in backend
-  //       throw new Error('only support type WEB biometrics for web wallets');
-  //     }
-  //   }),
-  // );
-  // await userManagementClient.uploadKeyshares(userId, keygenRes.walletId, encryptedKeyShares);
-
+): Promise<{ signer: string; walletId: string }> {
   const { walletId, protocolId } = await ctx.capsuleClient.createWallet(
     userId,
     { useTwoSigners: true }
@@ -54,7 +33,7 @@ export async function keygen(
       }
     )
   )) as string;
-  return { shares: [newSigner], walletId };
+  return { signer: newSigner, walletId };
 }
 
 export async function signMessage(
