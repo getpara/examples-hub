@@ -1085,9 +1085,9 @@
   dependencies:
     axios "^0.27.2"
 
-"@capsule/web-sdk@capsule-org/web-sdk#norwood/passChainId":
+"@capsule/web-sdk@capsule-org/web-sdk":
   version "1.0.0"
-  resolved "git+ssh://git@github.com/capsule-org/web-sdk.git#ca76534e21099c46f541abb45d2164616a2daf84"
+  resolved "git+ssh://git@github.com/capsule-org/web-sdk.git#8aeb89081395a3d800afba93ba56ceb5c995bfb1"
   dependencies:
     "@capsule/client" capsule-org/user-management-client
     "@celo/utils" "3.2.0"

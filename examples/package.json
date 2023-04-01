@@ -5,7 +5,7 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "@capsule/web-sdk": "capsule-org/web-sdk#norwood/passChainId",
+    "@capsule/web-sdk": "capsule-org/web-sdk",
     "@chakra-ui/react": "2.5.4",
     "@emotion/react": "11.10.6",
     "@emotion/styled": "11.10.6",
