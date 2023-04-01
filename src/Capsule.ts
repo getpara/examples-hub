@@ -195,7 +195,7 @@ export class Capsule {
   async sendTransaction(
     walletId: string,
     rlpEncodedTxBase64: string,
-    chain: Chain,
+    chainId: string,
   ): Promise<string> {
     const txSignature = await sendTransaction(
       this.ctx,
@@ -203,7 +203,7 @@ export class Capsule {
       walletId,
       this.wallets[walletId].signer,
       rlpEncodedTxBase64,
-      chain,
+      chainId,
     );
     return txSignature;
   }

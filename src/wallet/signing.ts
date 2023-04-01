@@ -8,7 +8,7 @@ export async function sendTransaction(
   walletId: string,
   share: string,
   tx: string,
-  chain: Chain,
+  chainId: string,
 ): Promise<string> {
   return await new Promise((resolve) => {
     const worker = setupWorker(async (signature) => {
@@ -16,7 +16,7 @@ export async function sendTransaction(
     });
     worker.postMessage({
       env: ctx.env,
-      params: { share, walletId, userId, tx, chain },
+      params: { share, walletId, userId, tx, chainId },
       functionType: 'SEND_TRANSACTION',
     });
   });

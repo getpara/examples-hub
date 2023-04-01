@@ -30,8 +30,8 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
       return keygenRes;
     }
     case 'SEND_TRANSACTION': {
-      const { share, walletId, userId, tx, chain } = params;
-      return walletUtils.sendTransaction(ctx, share, walletId, userId, tx, chain);
+      const { share, walletId, userId, tx, chainId } = params;
+      return walletUtils.sendTransaction(ctx, share, walletId, userId, tx, chainId);
     }
     case 'SIGN_MESSAGE': {
       const { share, walletId, userId, message } = params;

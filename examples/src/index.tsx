@@ -11,32 +11,33 @@ import {
 import QRCode from 'react-qr-code';
 import Capsule, { Environment } from '@capsule/web-sdk';
 import Web3 from 'web3';
-import { Chain } from '@capsule/client';
-import { Transaction } from 'ethereumjs-tx';
+import { Transaction } from '@ethereumjs/tx';
+import { Common } from '@ethereumjs/common'
 
 const DEFAULT_TO_ADDRESS = '0x42C9a72C9dfCc92CAe0de9510160cEa2Da27Af91';
 const DEFAULT_VALUE = '1000';
 const DEFAULT_GAS_AMOUNT = '21000';
 const DEFAULT_GAS_PRICE = '100';
 const DEFAULT_NONCE = '0';
-const GEORLI_CHAIN_ID = 5;
+// goerli chain id
+const DEFAULT_CHAIN_ID = '5';
 const web3 = new Web3();
 
-function createTransaction(toAddress: string, value: string, gasAmount: string, gasPrice: string, nonce: string): string {
+function createTransaction(toAddress: string, value: string, gasAmount: string, gasPrice: string, nonce: string, chainId: string): string {
   const tx = new Transaction({
     to: toAddress,
     value: web3.utils.toHex(web3.utils.toWei(value, 'gwei')),
     gasLimit: web3.utils.toHex(Number(gasAmount)),
     gasPrice: web3.utils.toHex(web3.utils.toWei(gasPrice, 'gwei')),
     nonce: web3.utils.toHex(Number(nonce)),
-  }, { chain: GEORLI_CHAIN_ID });
+  }, { common: new Common({ chain: Number(chainId) }) });
   return tx.serialize().toString('base64');
 }
 
 function App() {
   const capsule = new Capsule(Environment.SANDBOX);
 
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(capsule.getEmail());
   const [verificationCode, setVerificationCode] = useState('');
   const [webAuthURLForCreate, setWebAuthURLForCreate] = useState('');
   const [webAuthURLForLogin, setWebAuthURLForLogin] = useState('');
@@ -47,6 +48,7 @@ function App() {
   const [txGasAmount, setTxGasAmount] = useState(DEFAULT_GAS_AMOUNT);
   const [txGasPrice, setTxGasPrice] = useState(DEFAULT_GAS_PRICE);
   const [nonce, setNonce] = useState(DEFAULT_NONCE);
+  const [chainId, setChainId] = useState(DEFAULT_CHAIN_ID);
 
   async function checkIsSessionActive() {
     const isSessionActive = await capsule.isSessionActive();
@@ -59,7 +61,7 @@ function App() {
         <VStack align="left" spacing={5}>
           <Input placeholder="e-mail" onChange={(e) => {
             setEmail(e.target.value)
-          }} value={email || capsule.getEmail() || ''}/>
+          }} value={email || ''}/>
           <Button colorScheme="teal" onClick={async () => {
             capsule.clearStorage();
             capsule.setEmail(email);
@@ -82,7 +84,7 @@ function App() {
           <Button colorScheme="teal" onClick={async () => {
              await capsule.createWallet();
           }}>Create Wallet</Button>
-          <Text>Wallet Address: {capsule.getWallets()?.[Object.keys(capsule.getWallets())[0]]?.address}</Text>
+          <Text>Wallet Address: <strong>{capsule.getWallets()?.[Object.keys(capsule.getWallets())[0]]?.address}</strong></Text>
 
           <Button colorScheme="teal" onClick={async () => {
             capsule.clearStorage();
@@ -108,11 +110,13 @@ function App() {
           <Input name='Gas Price (gwei)' onChange={(e) => setTxGasPrice(e.target.value)} value={txGasPrice}/>
           <Text>Nonce:</Text>
           <Input name='Nonce' onChange={(e) => setNonce(e.target.value)} value={nonce}/>
+          <Text>Chain ID:</Text>
+          <Input name='Chain ID' onChange={(e) => setChainId(e.target.value)} value={chainId}/>
 
           <Button colorScheme="teal" onClick={async () => {
             const walletId = capsule.getWallets()?.[Object.keys(capsule.getWallets())[0]]?.id;
-            const tx = createTransaction(txToAddress, txValue, txGasAmount, txGasPrice, nonce);
-            await capsule.sendTransaction(walletId, tx, Chain.ETH);
+            const tx = createTransaction(txToAddress, txValue, txGasAmount, txGasPrice, nonce, chainId);
+            await capsule.sendTransaction(walletId, tx, `${chainId}`);
           }}>Send Transaction</Button>
 
           <Button colorScheme="red" onClick={async () => {

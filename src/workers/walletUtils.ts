@@ -65,18 +65,19 @@ export async function signMessage(
     )
   );
 }
+
 export async function sendTransaction(
   ctx: Ctx,
   share: string,
   walletId: string,
   userId: string,
   tx: string,
-  chain: Chain,
+  chainId: string,
 ): Promise<string> {
   const { data: { protocolId } } = await ctx.capsuleClient.sendTransaction(
     userId,
     walletId,
-    { transaction: tx, chain }
+    { transaction: tx, chainId }
   );
   const serverUrl = getServerUrl(ctx, userId);
 
