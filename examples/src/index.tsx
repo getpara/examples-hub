@@ -64,8 +64,7 @@ function App() {
           }} value={email || ''}/>
           <Button colorScheme="teal" onClick={async () => {
             capsule.clearStorage();
-            capsule.setEmail(email);
-            await capsule.createUser();
+            await capsule.createUser(email);
           }}>Create Account</Button>
 
           <Input placeholder="verification-code" onChange={(e) => setVerificationCode(e.target.value)} value={verificationCode}/>
@@ -88,8 +87,7 @@ function App() {
 
           <Button colorScheme="teal" onClick={async () => {
             capsule.clearStorage();
-            capsule.setEmail(email);
-            setWebAuthURLForLogin(await capsule.initiateUserLogin());
+            setWebAuthURLForLogin(await capsule.initiateUserLogin(email));
           }}>Login</Button>
           {
             webAuthURLForLogin && !isSessionActive && <a href={webAuthURLForLogin} rel="noreferrer" target="_blank">

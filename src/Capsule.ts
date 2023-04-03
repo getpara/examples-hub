@@ -48,7 +48,7 @@ export class Capsule {
     }
   }
 
-  setEmail(email: string): void {
+  private setEmail(email: string): void {
     this.email = email;
     localStorage.setItem('email', email);
   }
@@ -102,7 +102,8 @@ export class Capsule {
     this.setWallets(this.wallets);
   }
 
-  async createUser(): Promise<void> {
+  async createUser(email: string): Promise<void> {
+    this.setEmail(email)
     const { userId } = await this.ctx.capsuleClient.createUser({
       email: this.email,
     });
@@ -131,7 +132,8 @@ export class Capsule {
   }
 
   // returns web auth url for logging in
-  async initiateUserLogin(): Promise<string> {
+  async initiateUserLogin(email: string): Promise<string> {
+    this.setEmail(email)
     const res = await this.ctx.capsuleClient.touchSession(true);
     if (!this.loginEncryptionKeyPair) {
       const keyPair = await getAsymmetricKeyPair();
