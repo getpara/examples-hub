@@ -44,7 +44,7 @@ export class Capsule {
     this.userId = localStorage.getItem('userId') || undefined;
     this.wallets = JSON.parse(localStorage.getItem('wallets') || '{}');
     if (sessionStorage.getItem('loginEncryptionKeyPair') && sessionStorage.getItem('loginEncryptionKeyPair') !== 'undefined') {
-      this.loginEncryptionKeyPair = JSON.parse(sessionStorage.getItem('loginEncryptionKeyPair'));
+      this.loginEncryptionKeyPair = JSON.parse(sessionStorage.getItem('loginEncryptionKeyPair')!);
     }
   }
 
@@ -68,6 +68,11 @@ export class Capsule {
     sessionStorage.setItem('loginEncryptionKeyPair', JSON.stringify(keyPair));
   }
 
+  private deleteLoginEncryptionKeyPair(): void {
+    this.loginEncryptionKeyPair = undefined;
+    sessionStorage.removeItem('loginEncryptionKeyPair');
+  }
+
   getEmail(): string | undefined {
     return this.email;
   }
@@ -79,7 +84,7 @@ export class Capsule {
   private getWebAuthURLForCreate(webAuthId: string): string {
     return `${getPortalBaseURL(this.ctx)}/web/users/${
       this.userId
-    }/biometrics/${webAuthId}?email=${this.email}`;
+    }/biometrics/${webAuthId}?email=${encodeURIComponent(this.email)}`;
   }
 
   private getWebAuthURLForLogin(
@@ -87,7 +92,7 @@ export class Capsule {
     loginEncryptionPublicKey: string,
   ): string {
     return `${getPortalBaseURL(this.ctx)}/web/biometrics/login?email=${
-      this.email
+      encodeURIComponent(this.email)
     }&sessionId=${sessionId}&encryptionKey=${loginEncryptionPublicKey}`;
   }
 
@@ -105,7 +110,7 @@ export class Capsule {
   async createUser(email: string): Promise<void> {
     this.setEmail(email)
     const { userId } = await this.ctx.capsuleClient.createUser({
-      email: this.email,
+      email: this.email!,
     });
     this.setUserId(userId);
   }
@@ -164,7 +169,7 @@ export class Capsule {
     });
 
     this.setUserId(res.data.userId);
-    this.setLoginEncryptionKeyPair(undefined);
+    this.deleteLoginEncryptionKeyPair();
     await this.populateWalletAddresses();
   }
 
@@ -176,6 +181,7 @@ export class Capsule {
     };
     await this.populateWalletAddresses();
 
+    this.setWallets(this.wallets);
     return this.wallets[walletId];
   }
 
