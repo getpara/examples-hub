@@ -1085,9 +1085,9 @@
   dependencies:
     axios "^0.27.2"
 
-"@capsule/web-sdk@capsule-org/web-sdk#norwood/refactoring":
+"@capsule/web-sdk@capsule-org/web-sdk":
   version "1.0.0"
-  resolved "git+ssh://git@github.com/capsule-org/web-sdk.git#c61c138cb38a12a73a43b685fc8ba05bdae374eb"
+  resolved "git+ssh://git@github.com/capsule-org/web-sdk.git#3e0c3eb21da60b96615b66d235d1249036c67a89"
   dependencies:
     "@capsule/client" capsule-org/user-management-client
     "@celo/utils" "3.2.0"
