@@ -1,5 +1,4 @@
 import forge from 'node-forge';
-import { promisify } from 'util';
 
 interface EncryptedShare {
   walletId: string;
@@ -37,7 +36,7 @@ export async function getAsymmetricKeyPair(
       cb(null, seedValue);
     };
   }
-  return promisify((cb) =>
+  return new Promise((resolve, reject) =>
     rsa.generateKeyPair(
       {
         bits: 2048,
@@ -49,9 +48,14 @@ export async function getAsymmetricKeyPair(
         workerScript: new URL('./scripts/prime.worker.min.js', import.meta.url).toString(),
         prng,
       },
-      cb
+        (err, keypair) => {
+          if (err) {
+            reject(err)
+          }
+          resolve(keypair)
+        }
     )
-  )() as Promise<forge.pki.rsa.KeyPair>;
+  );
 }
 
 export async function getPublicKeyFromSignature(id: string): Promise<string> {
@@ -83,7 +87,7 @@ export function decryptWithKeyPair(
 ): string {
   const encryptedKey = Buffer.from(encryptedKeyHex, 'hex').toString('utf-8');
   const key = keyPair.privateKey.decrypt(encryptedKey, RSA_ENCRYPTION_SCHEME);
-  
+
   const decipher = forge.cipher.createDecipher('AES-CBC', key);
   // iv can be constant only because every key is only ever used to encrypt one message
   decipher.start({ iv: CONSTANT_IV });
