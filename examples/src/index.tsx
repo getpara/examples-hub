@@ -34,9 +34,9 @@ function createTransaction(toAddress: string, value: string, gasAmount: string, 
   return tx.serialize().toString('base64');
 }
 
-function App() {
-  const capsule = new Capsule(Environment.SANDBOX);
+const capsule = new Capsule(Environment.SANDBOX);
 
+function App() {
   const [email, setEmail] = useState(capsule.getEmail());
   const [verificationCode, setVerificationCode] = useState('');
   const [webAuthURLForCreate, setWebAuthURLForCreate] = useState('');

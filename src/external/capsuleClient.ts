@@ -7,7 +7,7 @@ export function getBaseUrl(env: Environment): string {
     case Environment.DEV:
       return 'http://localhost:8080/';
     case Environment.SANDBOX:
-      return 'https://user-management.sandbox.usecapsule.com/';
+      return 'https://api.sandbox.usecapsule.com/';
     case Environment.BETA:
       return 'https://api.beta.usecapsule.com/';
     case Environment.PROD:

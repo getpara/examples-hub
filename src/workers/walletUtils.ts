@@ -1,6 +1,5 @@
-import { Chain } from '@capsule/client';
 import { Ctx } from '../definitions';
-import { getBaseUrl } from '../external/userManagementClient';
+import { getBaseUrl } from '../external/capsuleClient';
 
 const configBase = (serverUrl: string, walletId: string, id: string) =>
   `{"ServerUrl":"${serverUrl}", "WalletId": "${walletId}", "Id":"${id}", "Ids":["USER","CAPSULE"], "Threshold":1}`;
@@ -51,7 +50,7 @@ export async function signMessage(
   const serverUrl = getServerUrl(ctx, userId);
 
   return new Promise((resolve, reject) =>
-    global.sendTransaction(
+    global.signMessage(
       share,
       serverUrl,
       message,
@@ -82,7 +81,7 @@ export async function sendTransaction(
   const serverUrl = getServerUrl(ctx, userId);
 
   return new Promise((resolve, reject) =>
-    global.sendTransaction(share, serverUrl, tx, protocolId, (err, result) => {
+    global.sendTransaction(share, serverUrl, tx, chainId, protocolId, (err, result) => {
       if (err) {
         reject(err);
       }

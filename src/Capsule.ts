@@ -1,7 +1,5 @@
-import { Chain, PublicKeyStatus, PublicKeyType } from '@capsule/client';
+import { PublicKeyStatus, PublicKeyType } from '@capsule/client';
 import { pki } from 'node-forge';
-import { useLocalStorage, useSessionStorage } from 'react-use';
-import { Dispatch, SetStateAction } from 'react';
 
 import {
   decryptWithKeyPair,
@@ -12,7 +10,7 @@ import { keygen } from './wallet/keygen';
 import { sendTransaction, signMessage } from './wallet/signing';
 import { Ctx, getPortalBaseURL } from './definitions';
 import { Environment } from './definitions';
-import { initClient } from './external/userManagementClient';
+import { initClient } from './external/capsuleClient';
 
 // amount of time in ms that a web auth session lasts
 const BIOMETRIC_VERIFICATION_TIME_MS = 5 * 60 * 1000;
@@ -35,11 +33,6 @@ export class Capsule {
   private loginEncryptionKeyPair?: pki.rsa.KeyPair;
   private wallets: Record<string, Wallet>;
 
-  private storageSetEmail: Dispatch<SetStateAction<string | undefined>>;
-  private storageSetUserId: Dispatch<SetStateAction<string | undefined>>;
-  private storageSetWallets: Dispatch<SetStateAction<Record<string, Wallet>>>;
-  private storageSetLoginEncryptionKeyPair: (value: pki.rsa.KeyPair) => void;
-
   // TODO: consider using sessionStorage instead of localStorage
   constructor(env: Environment) {
     this.ctx = {
@@ -47,22 +40,40 @@ export class Capsule {
       capsuleClient: initClient(env),
     };
 
-    [this.email, this.storageSetEmail] = useLocalStorage(
-      'email',
-      undefined,
-    );
-    [this.userId, this.storageSetUserId] = useLocalStorage(
-      'userId',
-      undefined,
-    );
-    [this.wallets, this.storageSetWallets] = useLocalStorage(
-      'wallets',
-      {},
-    );
-    [this.loginEncryptionKeyPair, this.storageSetLoginEncryptionKeyPair] = useSessionStorage<pki.rsa.KeyPair>(
-      'loginEncryptionKeyPair',
-      undefined,
-    );
+    this.email = localStorage.getItem('email') || undefined;
+    this.userId = localStorage.getItem('userId') || undefined;
+    this.wallets = JSON.parse(localStorage.getItem('wallets') || '{}');
+    if (sessionStorage.getItem('loginEncryptionKeyPair') && sessionStorage.getItem('loginEncryptionKeyPair') !== 'undefined') {
+      this.loginEncryptionKeyPair = JSON.parse(sessionStorage.getItem('loginEncryptionKeyPair'));
+    }
+  }
+
+  setEmail(email: string): void {
+    this.email = email;
+    localStorage.setItem('email', email);
+  }
+
+  private setUserId(userId: string): void {
+    this.userId = userId;
+    localStorage.setItem('userId', userId);
+  }
+
+  private setWallets(wallets: Record<string, Wallet>): void {
+    this.wallets = wallets;
+    localStorage.setItem('wallets', JSON.stringify(wallets));
+  }
+
+  private setLoginEncryptionKeyPair(keyPair: pki.rsa.KeyPair): void {
+    this.loginEncryptionKeyPair = keyPair;
+    sessionStorage.setItem('loginEncryptionKeyPair', JSON.stringify(keyPair));
+  }
+
+  getEmail(): string | undefined {
+    return this.email;
+  }
+
+  getWallets(): Record<string, Wallet> {
+    return this.wallets;
   }
 
   private getWebAuthURLForCreate(webAuthId: string): string {
@@ -88,24 +99,14 @@ export class Capsule {
         this.wallets[wallet.id].address = wallet.address;
       }
     });
-    this.storageSetWallets(this.wallets);
-  }
-
-  setEmail(email: string): void {
-    this.email = email;
-    this.storageSetEmail(email);
-  }
-
-  getEmail(): string | undefined {
-    return this.email;
+    this.setWallets(this.wallets);
   }
 
   async createUser(): Promise<void> {
     const { userId } = await this.ctx.capsuleClient.createUser({
       email: this.email,
     });
-    this.userId = userId;
-    this.storageSetUserId(this.userId);
+    this.setUserId(userId);
   }
 
   // returns web auth url for creating a new credential
@@ -134,8 +135,7 @@ export class Capsule {
     const res = await this.ctx.capsuleClient.touchSession(true);
     if (!this.loginEncryptionKeyPair) {
       const keyPair = await getAsymmetricKeyPair();
-      this.loginEncryptionKeyPair = keyPair;
-      this.storageSetLoginEncryptionKeyPair(this.loginEncryptionKeyPair);
+      this.setLoginEncryptionKeyPair(keyPair);
     }
 
     return this.getWebAuthURLForLogin(
@@ -161,12 +161,9 @@ export class Capsule {
       };
     });
 
-    this.userId = res.data.userId;
-    this.loginEncryptionKeyPair = undefined;
-
+    this.setUserId(res.data.userId);
+    this.setLoginEncryptionKeyPair(undefined);
     await this.populateWalletAddresses();
-    this.storageSetUserId(this.userId);
-    this.storageSetLoginEncryptionKeyPair(this.loginEncryptionKeyPair);
   }
 
   async createWallet(): Promise<Wallet> {
@@ -208,10 +205,6 @@ export class Capsule {
     return txSignature;
   }
 
-  getWallets(): Record<string, Wallet> {
-    return this.wallets;
-  }
-
   clearStorage(): void {
     localStorage.removeItem('email');
     localStorage.removeItem('userId');
@@ -224,6 +217,7 @@ export class Capsule {
   }
 
   // remove sensitive data when logging this class
+  // doesn't work for all types of logging
   toString(): string {
     const redactedWallets = Object.keys(this.wallets).reduce(
       (acc, walletId) => ({

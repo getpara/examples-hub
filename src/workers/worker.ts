@@ -1,7 +1,7 @@
 import '../wasm/wasm_exec.js';
 import * as walletUtils from './walletUtils';
 import { Ctx, Environment, getPortalBaseURL } from '../definitions';
-import { initClient } from '../external/userManagementClient';
+import { initClient } from '../external/capsuleClient';
 
 interface Message {
   env: Environment;
