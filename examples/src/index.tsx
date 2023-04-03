@@ -9,7 +9,7 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import QRCode from 'react-qr-code';
-import Capsule, { Environment } from '@capsule/web-sdk';
+import Capsule, { Environment } from './library';
 import Web3 from 'web3';
 import { Transaction } from '@ethereumjs/tx';
 import { Common } from '@ethereumjs/common'
