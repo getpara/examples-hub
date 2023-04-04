@@ -21,6 +21,12 @@ export interface Wallet {
   address?: string;
 }
 
+const PREFIX = "@CAPSULE/"
+const LOCAL_STORAGE_EMAIL = `${PREFIX}e-mail`
+const LOCAL_STORAGE_USER_ID = `${PREFIX}userId`
+const LOCAL_STORAGE_WALLETS = `${PREFIX}wallets`
+const LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR = `${PREFIX}loginEncryptionKeyPair`
+
 function biometricVerifiedRecently(verifiedAt: number): boolean {
   return Date.now() - verifiedAt <= BIOMETRIC_VERIFICATION_TIME_MS;
 }
@@ -40,32 +46,32 @@ export class Capsule {
       capsuleClient: initClient(env),
     };
 
-    this.email = localStorage.getItem('email') || undefined;
-    this.userId = localStorage.getItem('userId') || undefined;
-    this.wallets = JSON.parse(localStorage.getItem('wallets') || '{}');
-    if (sessionStorage.getItem('loginEncryptionKeyPair') && sessionStorage.getItem('loginEncryptionKeyPair') !== 'undefined') {
-      this.loginEncryptionKeyPair = JSON.parse(sessionStorage.getItem('loginEncryptionKeyPair')!);
+    this.email = localStorage.getItem(LOCAL_STORAGE_EMAIL) || undefined;
+    this.userId = localStorage.getItem(LOCAL_STORAGE_USER_ID) || undefined;
+    this.wallets = JSON.parse(localStorage.getItem(LOCAL_STORAGE_WALLETS) || '{}');
+    if (sessionStorage.getItem(LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR) && sessionStorage.getItem(LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR) !== 'undefined') {
+      this.loginEncryptionKeyPair = JSON.parse(sessionStorage.getItem(LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR));
     }
   }
 
   private setEmail(email: string): void {
     this.email = email;
-    localStorage.setItem('email', email);
+    localStorage.setItem(LOCAL_STORAGE_EMAIL, email);
   }
 
   private setUserId(userId: string): void {
     this.userId = userId;
-    localStorage.setItem('userId', userId);
+    localStorage.setItem(LOCAL_STORAGE_USER_ID, userId);
   }
 
   private setWallets(wallets: Record<string, Wallet>): void {
     this.wallets = wallets;
-    localStorage.setItem('wallets', JSON.stringify(wallets));
+    localStorage.setItem(LOCAL_STORAGE_WALLETS, JSON.stringify(wallets));
   }
 
   private setLoginEncryptionKeyPair(keyPair: pki.rsa.KeyPair): void {
     this.loginEncryptionKeyPair = keyPair;
-    sessionStorage.setItem('loginEncryptionKeyPair', JSON.stringify(keyPair));
+    sessionStorage.setItem(LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR, JSON.stringify(keyPair));
   }
 
   private deleteLoginEncryptionKeyPair(): void {
@@ -214,10 +220,10 @@ export class Capsule {
   }
 
   clearStorage(): void {
-    localStorage.removeItem('email');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('wallets');
-    sessionStorage.removeItem('loginEncryptionKeyPair');
+    localStorage.removeItem(LOCAL_STORAGE_EMAIL);
+    localStorage.removeItem(LOCAL_STORAGE_USER_ID);
+    localStorage.removeItem(LOCAL_STORAGE_WALLETS);
+    sessionStorage.removeItem(LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR);
   }
 
   async logout(): Promise<void> {
