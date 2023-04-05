@@ -9,8 +9,8 @@ export async function distributeNewShare(
   ctx: Ctx,
   userId: string,
   walletId: string,
-  userShare: string
-): Promise<void> {
+  userShare: string,
+): Promise<string> {
   const publicKeysRes = await ctx.capsuleClient.getSessionPublicKeys(userId);
   const biometricEncryptedShares = publicKeysRes.data.keys.map((key) => {
     // TODO add some sort of support/check to work for mobile biometrics
@@ -29,11 +29,11 @@ export async function distributeNewShare(
       biometricPublicKey: key.sigDerivedPublicKey,
     };
   });
-  await sendRecoveryForShare(
+  return await sendRecoveryForShare(
     ctx,
     userId,
     walletId,
     biometricEncryptedShares,
-    userShare
+    userShare,
   );
 }

@@ -9,7 +9,7 @@ export async function sendRecoveryForShare(
   walletId: string,
   otherEncryptedShares: encryptedKeyshare[],
   userSigner: string
-): Promise<void> {
+): Promise<string> {
   const capsuleShare = await ctx.capsuleClient.getCapsuleShare(
     userId,
     walletId
@@ -32,6 +32,7 @@ export async function sendRecoveryForShare(
   ]);
   console.log('recovery:');
   console.log(JSON.stringify(recoveryPrivateKeyContainer));
+  return JSON.stringify(recoveryPrivateKeyContainer);
   // TODO: add functionality to email recovery or distribute it somehow
   // distribute recovery right here
 }

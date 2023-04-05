@@ -11,6 +11,7 @@ import { sendTransaction, signMessage } from './wallet/signing';
 import { Ctx, getPortalBaseURL } from './definitions';
 import { Environment } from './definitions';
 import { initClient } from './external/capsuleClient';
+import { KeyContainer } from './shares/KeyContainer';
 
 // amount of time in ms that a web auth session lasts
 const BIOMETRIC_VERIFICATION_TIME_MS = 5 * 60 * 1000;
@@ -21,11 +22,11 @@ export interface Wallet {
   address?: string;
 }
 
-const PREFIX = "@CAPSULE/"
-const LOCAL_STORAGE_EMAIL = `${PREFIX}e-mail`
-const LOCAL_STORAGE_USER_ID = `${PREFIX}userId`
-const LOCAL_STORAGE_WALLETS = `${PREFIX}wallets`
-const LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR = `${PREFIX}loginEncryptionKeyPair`
+const PREFIX = '@CAPSULE/';
+const LOCAL_STORAGE_EMAIL = `${PREFIX}e-mail`;
+const LOCAL_STORAGE_USER_ID = `${PREFIX}userId`;
+const LOCAL_STORAGE_WALLETS = `${PREFIX}wallets`;
+const LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR = `${PREFIX}loginEncryptionKeyPair`;
 
 function biometricVerifiedRecently(verifiedAt: number): boolean {
   return Date.now() - verifiedAt <= BIOMETRIC_VERIFICATION_TIME_MS;
@@ -48,9 +49,17 @@ export class Capsule {
 
     this.email = localStorage.getItem(LOCAL_STORAGE_EMAIL) || undefined;
     this.userId = localStorage.getItem(LOCAL_STORAGE_USER_ID) || undefined;
-    this.wallets = JSON.parse(localStorage.getItem(LOCAL_STORAGE_WALLETS) || '{}');
-    if (sessionStorage.getItem(LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR) && sessionStorage.getItem(LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR) !== 'undefined') {
-      this.loginEncryptionKeyPair = JSON.parse(sessionStorage.getItem(LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR));
+    this.wallets = JSON.parse(
+      localStorage.getItem(LOCAL_STORAGE_WALLETS) || '{}',
+    );
+    if (
+      sessionStorage.getItem(LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR) &&
+      sessionStorage.getItem(LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR) !==
+        'undefined'
+    ) {
+      this.loginEncryptionKeyPair = JSON.parse(
+        sessionStorage.getItem(LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR),
+      );
     }
   }
 
@@ -71,7 +80,10 @@ export class Capsule {
 
   private setLoginEncryptionKeyPair(keyPair: pki.rsa.KeyPair): void {
     this.loginEncryptionKeyPair = keyPair;
-    sessionStorage.setItem(LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR, JSON.stringify(keyPair));
+    sessionStorage.setItem(
+      LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR,
+      JSON.stringify(keyPair),
+    );
   }
 
   private deleteLoginEncryptionKeyPair(): void {
@@ -97,9 +109,11 @@ export class Capsule {
     sessionId: string,
     loginEncryptionPublicKey: string,
   ): string {
-    return `${getPortalBaseURL(this.ctx)}/web/biometrics/login?email=${
-      encodeURIComponent(this.email)
-    }&sessionId=${sessionId}&encryptionKey=${loginEncryptionPublicKey}`;
+    return `${getPortalBaseURL(
+      this.ctx,
+    )}/web/biometrics/login?email=${encodeURIComponent(
+      this.email,
+    )}&sessionId=${sessionId}&encryptionKey=${loginEncryptionPublicKey}`;
   }
 
   private async populateWalletAddresses(): Promise<void> {
@@ -114,7 +128,7 @@ export class Capsule {
   }
 
   async createUser(email: string): Promise<void> {
-    this.setEmail(email)
+    this.setEmail(email);
     const { userId } = await this.ctx.capsuleClient.createUser({
       email: this.email!,
     });
@@ -144,7 +158,7 @@ export class Capsule {
 
   // returns web auth url for logging in
   async initiateUserLogin(email: string): Promise<string> {
-    this.setEmail(email)
+    this.setEmail(email);
     const res = await this.ctx.capsuleClient.touchSession(true);
     if (!this.loginEncryptionKeyPair) {
       const keyPair = await getAsymmetricKeyPair();
@@ -179,8 +193,11 @@ export class Capsule {
     await this.populateWalletAddresses();
   }
 
-  async createWallet(): Promise<Wallet> {
-    const { signer, walletId } = await keygen(this.ctx, this.userId);
+  async createWallet(): Promise<[Wallet, string]> {
+    const { signer, walletId, recoveryShare } = await keygen(
+      this.ctx,
+      this.userId,
+    );
     this.wallets[walletId] = {
       id: walletId,
       signer,
@@ -188,7 +205,7 @@ export class Capsule {
     await this.populateWalletAddresses();
 
     this.setWallets(this.wallets);
-    return this.wallets[walletId];
+    return [this.wallets[walletId], recoveryShare];
   }
 
   async signMessage(walletId: string, message: string): Promise<string> {
@@ -248,8 +265,10 @@ export class Capsule {
       email: this.email,
       userId: this.userId,
       wallets: redactedWallets,
-      loginEncryptionKeyPair: this.loginEncryptionKeyPair ? '[REDACTED]' : undefined,
-    }
+      loginEncryptionKeyPair: this.loginEncryptionKeyPair
+        ? '[REDACTED]'
+        : undefined,
+    };
 
     return `Capsule ${JSON.stringify(obj)}`;
   }
