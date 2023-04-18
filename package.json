@@ -1,6 +1,6 @@
 {
   "name": "@usecapsule/web-sdk",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -43,6 +43,10 @@
     "webpack-cli": "5.0.1"
   },
   "files": [
-    "!examples"
+    "!examples",
+    "dist",
+    "src",
+    "package.json",
+    "yarn.lock"
   ]
 }
