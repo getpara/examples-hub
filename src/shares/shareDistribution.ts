@@ -10,9 +10,13 @@ export async function distributeNewShare(
   userId: string,
   walletId: string,
   userShare: string,
+  ignoreRedistributingBackupEncryptedShare = false
 ): Promise<string> {
   const publicKeysRes = await ctx.capsuleClient.getSessionPublicKeys(userId);
   const biometricEncryptedShares = publicKeysRes.data.keys.map((key) => {
+    if (!key.publicKey) {
+      return
+    }
     // TODO add some sort of support/check to work for mobile biometrics
     // if (key.biometricType !== 'WEB') {
     //   // TODO: also encrypt with biometric public key from mobile and persist in backend
@@ -28,12 +32,13 @@ export async function distributeNewShare(
       encryptor: EncryptorType.BIOMETRICS,
       biometricPublicKey: key.sigDerivedPublicKey,
     };
-  });
+  }).filter(Boolean);
   return await sendRecoveryForShare(
     ctx,
     userId,
     walletId,
     biometricEncryptedShares,
     userShare,
+    ignoreRedistributingBackupEncryptedShare,
   );
 }

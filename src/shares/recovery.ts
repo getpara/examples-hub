@@ -8,7 +8,8 @@ export async function sendRecoveryForShare(
   userId: string,
   walletId: string,
   otherEncryptedShares: encryptedKeyshare[],
-  userSigner: string
+  userSigner: string,
+  ignoreRedistributingBackupEncryptedShare = false,
 ): Promise<string> {
   const capsuleShare = await ctx.capsuleClient.getCapsuleShare(
     userId,
@@ -28,7 +29,7 @@ export async function sendRecoveryForShare(
   };
   await ctx.capsuleClient.uploadKeyshares(userId, walletId, [
     ...otherEncryptedShares,
-    userBackupKeyShareOpts,
+      ...(ignoreRedistributingBackupEncryptedShare ? [] : [userBackupKeyShareOpts]),
   ]);
   console.log('recovery:');
   console.log(JSON.stringify(recoveryPrivateKeyContainer));

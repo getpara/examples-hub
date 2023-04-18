@@ -1,3 +1,4 @@
+import base64url from 'base64url'
 import forge from 'node-forge';
 
 interface EncryptedShare {
@@ -58,10 +59,14 @@ export async function getAsymmetricKeyPair(
   );
 }
 
-export async function getPublicKeyFromSignature(id: string): Promise<string> {
-  const keyPair = await getAsymmetricKeyPair(id);
-  return getPublicKeyHex(keyPair);
+export async function getPublicKeyFromSignature(
+    userHandle: Uint8Array,
+): Promise<string> {
+  const encodedUserHandle = base64url.encode(userHandle as any)
+  const keyPair = await getAsymmetricKeyPair(encodedUserHandle);
+  return getPublicKeyHex(keyPair)
 }
+
 
 // only use for one time key encryptions as iv is constant
 export function symmetricKeyEncryptMessage(message: string): {
@@ -98,12 +103,8 @@ export function decryptWithKeyPair(
   return decipher.output.toString();
 }
 
-async function decryptWithDerivedPrivateKey(
-  id: string,
-  encryptedMessageHex: string,
-  encryptedKeyHex: string
-): Promise<string> {
-  const keyPair = await getAsymmetricKeyPair(id);
+async function decryptWithDerivedPrivateKey(seedValue: string, encryptedMessageHex: string, encryptedKeyHex: string): Promise<string> {
+  const keyPair = await getAsymmetricKeyPair(seedValue);
   return decryptWithKeyPair(keyPair, encryptedMessageHex, encryptedKeyHex);
 }
 

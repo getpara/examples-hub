@@ -86,14 +86,30 @@ export function parseCredentialCreationRes(creds: any): {
   };
 }
 
-export async function createCredential(userId: string, email: string) {
+// generate a random 16 byte user handle
+function generateUserHandle() {
+  // constant user handle for localhost to not create many creds
+  if (window.location.hostname === 'localhost') {
+    return new Uint8Array(16)
+  }
+  const userHandle = new Uint8Array(16)
+  // uncomment when we want to use real user handles
+  // window.crypto.getRandomValues(userHandle)
+  return userHandle
+}
+
+export async function createCredential(userId: string, email: string): Promise<{
+  creds: any,
+  userHandle: Uint8Array,
+}> {
+  const userHandle = generateUserHandle()
   const createCredentialDefaultArgs = {
     publicKey: {
       rp: {
         name: 'Capsule',
       },
       user: {
-        id: new Uint8Array(16),
+        id: userHandle,
         name: email + '-webauthn',
         displayName: email,
       },
@@ -108,12 +124,15 @@ export async function createCredential(userId: string, email: string) {
       // TODO: don't think we really get value from verifying this, but should revisit
       challenge: Buffer.from(userId, 'utf-8'),
     },
-  } as CredentialCreationOptions;
+  } as CredentialCreationOptions
 
   const credential = await navigator.credentials.create(
-    createCredentialDefaultArgs
-  );
-  return publicKeyCredentialToJSON(credential);
+      createCredentialDefaultArgs
+  )
+  return {
+    creds: publicKeyCredentialToJSON(credential),
+    userHandle,
+  }
 }
 
 export async function generateSignature(challenge: string) {

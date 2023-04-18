@@ -138,6 +138,11 @@ export class Capsule {
   // returns web auth url for creating a new credential
   async verifyEmail(verificationCode: string): Promise<string> {
     await this.ctx.capsuleClient.verifyEmail(this.userId, { verificationCode });
+    return await this.getSetUpBiometricsURL();
+  }
+
+  // returns web auth url for creating a new credential
+  async getSetUpBiometricsURL(): Promise<string> {
     const res = await this.ctx.capsuleClient.addSessionPublicKey(this.userId, {
       status: PublicKeyStatus.PENDING,
       type: PublicKeyType.WEB,
