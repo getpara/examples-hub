@@ -1,5 +1,5 @@
 {
-  "name": "web-sdk",
+  "name": "@usecapsule/web-sdk",
   "version": "1.0.0",
   "license": "MIT",
   "private": true,
