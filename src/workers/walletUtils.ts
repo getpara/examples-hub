@@ -11,7 +11,9 @@ function getServerUrl(ctx: Ctx, userId: string) {
 
 export async function keygen(
   ctx: Ctx,
-  userId: string
+  userId: string,
+  secretKey: string | null,
+  callCustomFunction: Function,
 ): Promise<{ signer: string; walletId: string }> {
   const { walletId, protocolId } = await ctx.capsuleClient.createWallet(
     userId,
@@ -20,10 +22,12 @@ export async function keygen(
   const serverUrl = getServerUrl(ctx, userId);
   const signerConfigUser = configBase(serverUrl, walletId, 'USER');
   const newSigner = (await new Promise((resolve, reject) =>
-    global.createAccount(
+    global.createAccountV2(
       signerConfigUser,
       serverUrl,
       protocolId,
+      secretKey,
+      callCustomFunction,
       (err, result) => {
         if (err) {
           reject(err);
@@ -108,4 +112,19 @@ export async function refresh(
       resolve(result);
     })
   );
+}
+
+export async function generatePaillierSecretKey(): Promise<string> {
+  // secret key is base64 of json of p and q values
+  const secretKey = (await new Promise((resolve, reject) =>
+    global.generatePaillierSecretKey(
+      (err, result) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(result);
+      }
+    )
+  )) as string;
+  return secretKey;
 }

@@ -13,6 +13,7 @@ import Capsule, { Environment } from './library';
 import Web3 from 'web3';
 import { Transaction } from '@ethereumjs/tx';
 import { Common } from '@ethereumjs/common'
+import { CapsuleModal } from './modal/CapsuleModal';
 
 const DEFAULT_TO_ADDRESS = '0x42C9a72C9dfCc92CAe0de9510160cEa2Da27Af91';
 const DEFAULT_VALUE = '1000';
@@ -50,6 +51,8 @@ function App() {
   const [nonce, setNonce] = useState(DEFAULT_NONCE);
   const [chainId, setChainId] = useState(DEFAULT_CHAIN_ID);
 
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+
   async function checkIsSessionActive() {
     const isSessionActive = await capsule.isSessionActive();
     setIsSessionActive(isSessionActive);
@@ -59,6 +62,8 @@ function App() {
     <ChakraProvider>
       <Container maxW="ld" padding={10}>
         <VStack align="left" spacing={5}>
+          <Button colorScheme="green" onClick={()=>{setModalIsOpen(true)}}>Open Modal</Button>
+          <CapsuleModal capsule={capsule} isOpen={modalIsOpen} onClose={() => {setModalIsOpen(false)}}/>
           <Input placeholder="e-mail" onChange={(e) => {
             setEmail(e.target.value)
           }} value={email || ''}/>
@@ -81,7 +86,8 @@ function App() {
           <Text>{isSessionActive ? 'Fully Logged In!' : 'Log In Pending...'}</Text>
 
           <Button colorScheme="teal" onClick={async () => {
-             await capsule.createWallet();
+            // eslint-disable-next-line
+            await capsule.createWallet(false, () => {});
           }}>Create Wallet</Button>
           <Text>Wallet Address: <strong>{capsule.getWallets()?.[Object.keys(capsule.getWallets())[0]]?.address}</strong></Text>
 

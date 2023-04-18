@@ -6,12 +6,13 @@ import {
   getAsymmetricKeyPair,
   getPublicKeyHex,
 } from './cryptography/utils';
-import { keygen } from './wallet/keygen';
+import { generatePaillierSecretKey, keygen } from './wallet/keygen';
 import { sendTransaction, signMessage } from './wallet/signing';
 import { Ctx, getPortalBaseURL } from './definitions';
 import { Environment } from './definitions';
 import { initClient } from './external/capsuleClient';
 import { KeyContainer } from './shares/KeyContainer';
+import { distributeNewShare } from './shares/shareDistribution';
 
 // amount of time in ms that a web auth session lasts
 const BIOMETRIC_VERIFICATION_TIME_MS = 5 * 60 * 1000;
@@ -27,6 +28,7 @@ const LOCAL_STORAGE_EMAIL = `${PREFIX}e-mail`;
 const LOCAL_STORAGE_USER_ID = `${PREFIX}userId`;
 const LOCAL_STORAGE_WALLETS = `${PREFIX}wallets`;
 const LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR = `${PREFIX}loginEncryptionKeyPair`;
+const SESSION_STORAGE_PAILLIER_SECRET_KEY = `${PREFIX}paillierSecretKey`;
 
 function biometricVerifiedRecently(verifiedAt: number): boolean {
   return Date.now() - verifiedAt <= BIOMETRIC_VERIFICATION_TIME_MS;
@@ -63,12 +65,26 @@ export class Capsule {
     }
   }
 
+  getPaillierKey(): string | null {
+    return sessionStorage.getItem(SESSION_STORAGE_PAILLIER_SECRET_KEY);
+  }
+
+  async generatePaillierKey(): Promise<void> {  
+    const paillierKey = sessionStorage.getItem(SESSION_STORAGE_PAILLIER_SECRET_KEY);
+    if (paillierKey) {
+      return;
+    }
+
+    const newKey = await generatePaillierSecretKey(this.ctx.env);
+    sessionStorage.setItem(SESSION_STORAGE_PAILLIER_SECRET_KEY, newKey);
+  };
+
   private setEmail(email: string): void {
     this.email = email;
     localStorage.setItem(LOCAL_STORAGE_EMAIL, email);
   }
 
-  private setUserId(userId: string): void {
+  setUserId(userId: string): void {
     this.userId = userId;
     localStorage.setItem(LOCAL_STORAGE_USER_ID, userId);
   }
@@ -114,6 +130,11 @@ export class Capsule {
     )}/web/biometrics/login?email=${encodeURIComponent(
       this.email,
     )}&sessionId=${sessionId}&encryptionKey=${loginEncryptionPublicKey}`;
+  }
+
+  async fetchWallets(): Promise<any[]> {
+    const res = await this.ctx.capsuleClient.getWallets(this.userId);
+    return res.data.wallets;
   }
 
   private async populateWalletAddresses(): Promise<void> {
@@ -176,6 +197,15 @@ export class Capsule {
     );
   }
 
+  async userSetupAfterLogin(): Promise<void> {
+    const res = await this.ctx.capsuleClient.touchSession();
+    this.setUserId(res.data.userId);
+  }
+
+  async getTransmissionKeyShares(): Promise<any> {
+    return this.ctx.capsuleClient.getTransmissionKeyshares(this.userId);
+  }
+
   async setupAfterLogin(): Promise<void> {
     const res = await this.ctx.capsuleClient.touchSession(true);
     const tempSharesRes = await this.ctx.capsuleClient.getTransmissionKeyshares(
@@ -198,10 +228,22 @@ export class Capsule {
     await this.populateWalletAddresses();
   }
 
-  async createWallet(): Promise<[Wallet, string]> {
+  async distributeNewWalletShare(
+    walletId: string,
+    userShare: string,
+  ): Promise<string> {
+    const recoveryShare = await distributeNewShare(this.ctx, this.userId, walletId, userShare);
+    return recoveryShare;
+  }
+
+  async createWallet(skipDistribute: boolean = false, customFunction: Function): Promise<[Wallet, string | null]> {
+    const secretKey = sessionStorage.getItem(SESSION_STORAGE_PAILLIER_SECRET_KEY);
     const { signer, walletId, recoveryShare } = await keygen(
       this.ctx,
       this.userId,
+      secretKey,
+      skipDistribute,
+      customFunction,
     );
     this.wallets[walletId] = {
       id: walletId,
@@ -241,11 +283,24 @@ export class Capsule {
     return txSignature;
   }
 
+  // remove all local storage and session storage prefixed for capsule
   clearStorage(): void {
-    localStorage.removeItem(LOCAL_STORAGE_EMAIL);
-    localStorage.removeItem(LOCAL_STORAGE_USER_ID);
-    localStorage.removeItem(LOCAL_STORAGE_WALLETS);
-    sessionStorage.removeItem(LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR);
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+  
+      if (key && key.startsWith(PREFIX)) {
+        localStorage.removeItem(key);
+        i--;
+      }
+    }
+    for (let j = 0; j < sessionStorage.length; j++) {
+      const key = sessionStorage.key(j);
+  
+      if (key && key.startsWith(PREFIX)) {
+        sessionStorage.removeItem(key);
+        j--;
+      }
+    }
   }
 
   async logout(): Promise<void> {

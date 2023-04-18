@@ -20,13 +20,13 @@ async function loadWasm(ctx: Ctx) {
   goWasm.run(newRes.instance);
 }
 
-async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
+async function executeMessage(ctx: Ctx, message: Message, callCustomFunction: Function): Promise<any> {
   const { functionType, params } = message;
 
   switch (functionType) {
     case 'KEYGEN': {
-      const { userId } = params;
-      const keygenRes = await walletUtils.keygen(ctx, userId);
+      const { userId, secretKey } = params;
+      const keygenRes = await walletUtils.keygen(ctx, userId, secretKey, callCustomFunction);
       return keygenRes;
     }
     case 'SEND_TRANSACTION': {
@@ -41,11 +41,15 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
       const { share, walletId, userId } = params;
       return walletUtils.refresh(ctx, share, walletId, userId);
     }
+    case 'PAILLIER': {
+      return walletUtils.generatePaillierSecretKey();
+    }
     default: {
       throw new Error(`functionType: ${functionType} not supported`);
     }
   }
 }
+
 
 addEventListener('message', async (e: { data: Message }) => {
   const { env } = e.data;
@@ -55,7 +59,14 @@ addEventListener('message', async (e: { data: Message }) => {
   };
   await loadWasm(ctx);
 
-  const result = await executeMessage(ctx, e.data);
+  function callCustomFunction(params: any): void {
+    self.postMessage({
+      functionType: 'CUSTOM',
+      params,
+    });
+  }
+
+  const result = await executeMessage(ctx, e.data, callCustomFunction);
   self.postMessage(result);
   self.close();
 });
