@@ -18,7 +18,6 @@ export function getPortalBaseURL(ctx: Ctx) {
     case Environment.DEV:
       return 'http://localhost:3001';
     case Environment.SANDBOX:
-      return 'http://localhost:3002'; // TODO REMOVE ME
       return 'https://web.sandbox.usecapsule.com';
     case Environment.BETA:
       return 'https://web.beta.usecapsule.com';
