@@ -43,10 +43,10 @@ export class Capsule {
   private wallets: Record<string, Wallet>;
 
   // TODO: consider using sessionStorage instead of localStorage
-  constructor(env: Environment) {
+  constructor(env: Environment, apiKey?: string) {
     this.ctx = {
       env,
-      capsuleClient: initClient(env),
+      capsuleClient: initClient(env, apiKey),
     };
 
     this.email = localStorage.getItem(LOCAL_STORAGE_EMAIL) || undefined;

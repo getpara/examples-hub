@@ -20,6 +20,7 @@ const DEFAULT_VALUE = '1000';
 const DEFAULT_GAS_AMOUNT = '21000';
 const DEFAULT_GAS_PRICE = '100';
 const DEFAULT_NONCE = '0';
+const DEFAULT_API_KEY = 'my-api-key'
 // goerli chain id
 const DEFAULT_CHAIN_ID = '5';
 const web3 = new Web3();
@@ -35,7 +36,7 @@ function createTransaction(toAddress: string, value: string, gasAmount: string, 
   return tx.serialize().toString('base64');
 }
 
-const capsule = new Capsule(Environment.SANDBOX);
+const capsule = new Capsule(Environment.SANDBOX, DEFAULT_API_KEY);
 
 function App() {
   const [email, setEmail] = useState(capsule.getEmail());

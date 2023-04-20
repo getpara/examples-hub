@@ -23,9 +23,9 @@ export function getPortalBaseURL(ctx: Ctx) {
     case Environment.SANDBOX:
       return 'https://app.sandbox.usecapsule.com';
     case Environment.BETA:
-      return 'https://web.beta.usecapsule.com';
+      return 'https://app.beta.usecapsule.com';
     case Environment.PROD:
-      return 'https://web.usecapsule.com';
+      return 'https://app.usecapsule.com';
     default:
       throw new Error(`env: ${env} not supported`);
   }
