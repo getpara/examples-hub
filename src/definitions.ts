@@ -14,9 +14,9 @@ export interface Ctx {
 
 export function getPortalBaseURL(ctx: Ctx) {
   const { env } = ctx;
-  if (location.hostname === "localhost" ) {
-    return "http://localhost:3002"
-  }
+  // if (location.hostname === "localhost" ) {
+  //   return "http://localhost:3003"
+  // }
   switch (env) {
     case Environment.DEV:
       return 'http://localhost:3001';
