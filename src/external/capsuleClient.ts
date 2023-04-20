@@ -17,8 +17,9 @@ export function getBaseUrl(env: Environment): string {
   }
 }
 
-export function initClient(env: Environment): Client {
+export function initClient(env: Environment, apiKey?: string): Client {
   return new Client({
     userManagementHost: getBaseUrl(env),
+    apiKey: apiKey,
   });
 }
