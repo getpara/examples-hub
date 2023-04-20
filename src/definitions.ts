@@ -14,11 +14,14 @@ export interface Ctx {
 
 export function getPortalBaseURL(ctx: Ctx) {
   const { env } = ctx;
+  if (location.hostname === "localhost" ) {
+    return "http://localhost:3002"
+  }
   switch (env) {
     case Environment.DEV:
       return 'http://localhost:3001';
     case Environment.SANDBOX:
-      return 'https://web.sandbox.usecapsule.com';
+      return 'https://app.sandbox.usecapsule.com';
     case Environment.BETA:
       return 'https://web.beta.usecapsule.com';
     case Environment.PROD:
