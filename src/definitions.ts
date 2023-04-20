@@ -18,11 +18,11 @@ export function getPortalBaseURL(ctx: Ctx) {
     case Environment.DEV:
       return 'http://localhost:3001';
     case Environment.SANDBOX:
-      return 'https://web.sandbox.usecapsule.com';
+      return 'https://portal.sandbox.usecapsule.com';
     case Environment.BETA:
-      return 'https://web.beta.usecapsule.com';
+      return 'https://portal.beta.usecapsule.com';
     case Environment.PROD:
-      return 'https://web.usecapsule.com';
+      return 'https://portal.usecapsule.com';
     default:
       throw new Error(`env: ${env} not supported`);
   }
