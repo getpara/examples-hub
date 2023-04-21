@@ -6,7 +6,7 @@ import {
   getAsymmetricKeyPair,
   getPublicKeyHex,
 } from './cryptography/utils';
-import { generatePaillierSecretKey, keygen } from './wallet/keygen';
+import { generateBlumPrimes, keygen } from './wallet/keygen';
 import { sendTransaction, signMessage } from './wallet/signing';
 import { Ctx, getPortalBaseURL } from './definitions';
 import { Environment } from './definitions';
@@ -69,14 +69,15 @@ export class Capsule {
     return sessionStorage.getItem(SESSION_STORAGE_PAILLIER_SECRET_KEY);
   }
 
-  async generatePaillierKey(): Promise<void> {  
+  async generatePaillierKey(): Promise<void> {
     const paillierKey = sessionStorage.getItem(SESSION_STORAGE_PAILLIER_SECRET_KEY);
     if (paillierKey) {
       return;
     }
 
-    const newKey = await generatePaillierSecretKey(this.ctx.env);
-    sessionStorage.setItem(SESSION_STORAGE_PAILLIER_SECRET_KEY, newKey);
+    const { p, q } = await generateBlumPrimes(this.ctx.env);
+    const base64Enc = Buffer.from(JSON.stringify({ pBase64: p, qBase64: q }), 'utf-8').toString('base64');
+    sessionStorage.setItem(SESSION_STORAGE_PAILLIER_SECRET_KEY, base64Enc);
   };
 
   private setEmail(email: string): void {
@@ -284,7 +285,7 @@ export class Capsule {
   }
 
   // remove all local storage and session storage prefixed for capsule
-  clearStorage(): void {
+  clearStorage(keepSecretKey?: boolean): void {
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
   
@@ -296,7 +297,8 @@ export class Capsule {
     for (let j = 0; j < sessionStorage.length; j++) {
       const key = sessionStorage.key(j);
   
-      if (key && key.startsWith(PREFIX)) {
+      // paillier secret key may be generated before this is called on account creation
+      if (key && key.startsWith(PREFIX) && !(keepSecretKey && key === SESSION_STORAGE_PAILLIER_SECRET_KEY)) {
         sessionStorage.removeItem(key);
         j--;
       }

@@ -38,6 +38,7 @@ export function keygen(
           walletId: res.walletId,
           recoveryShare: null,
         });
+        worker.terminate();
         return;
       }
 
@@ -52,6 +53,7 @@ export function keygen(
         walletId: res.walletId,
         recoveryShare,
       });
+      worker.terminate();
     }, customFunction);
     worker.postMessage({
       env: ctx.env,
@@ -61,11 +63,28 @@ export function keygen(
   });
 }
 
-export function generatePaillierSecretKey(env: Environment): Promise<any> {
-  return new Promise((resolve) => {
-    const worker = setupWorker(async (res) => {
-      resolve(res);
-    });
-    worker.postMessage({ env, functionType: 'PAILLIER' });
-  });
+function getNumWorkers(): number {
+  return navigator.hardwareConcurrency || 4;
+}
+
+export async function generateBlumPrimes(env: Environment): Promise<{ p: string; q: string; }> {
+  const numWorkers = getNumWorkers();
+  let workerResponses: Promise<any>[] = [];
+  let workers: Worker[] = [];
+
+  for (let i = 0; i < numWorkers; i++) {
+    workerResponses.push(new Promise((resolve) => {
+      const worker = setupWorker(async (res) => {
+        resolve({ res, index: i });
+      });
+      worker.postMessage({ env, functionType: 'BLUM_PRIME' });
+      workers.push(worker);
+    }));
+  }
+
+  const { res: p, index } = await Promise.race(workerResponses);
+  const newWorkerResponses = [...workerResponses.slice(0, index), ...workerResponses.slice(index + 1)];
+  const { res: q } = await Promise.race(newWorkerResponses);
+  workers.forEach((w) => w.terminate());
+  return { p, q };
 }

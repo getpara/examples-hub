@@ -69,7 +69,7 @@ function App() {
             setEmail(e.target.value)
           }} value={email || ''}/>
           <Button colorScheme="teal" onClick={async () => {
-            capsule.clearStorage();
+            capsule.clearStorage(true);
             await capsule.createUser(email);
           }}>Create Account</Button>
 

@@ -114,10 +114,10 @@ export async function refresh(
   );
 }
 
-export async function generatePaillierSecretKey(): Promise<string> {
+export async function generateBlumPrime(): Promise<string> {
   // secret key is base64 of json of p and q values
-  const secretKey = (await new Promise((resolve, reject) =>
-    global.generatePaillierSecretKey(
+  const blumPrime = (await new Promise((resolve, reject) =>
+    global.generateBlumPrime(
       (err, result) => {
         if (err) {
           reject(err);
@@ -126,5 +126,5 @@ export async function generatePaillierSecretKey(): Promise<string> {
       }
     )
   )) as string;
-  return secretKey;
+  return blumPrime;
 }

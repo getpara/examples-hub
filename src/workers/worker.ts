@@ -41,8 +41,8 @@ async function executeMessage(ctx: Ctx, message: Message, callCustomFunction: Fu
       const { share, walletId, userId } = params;
       return walletUtils.refresh(ctx, share, walletId, userId);
     }
-    case 'PAILLIER': {
-      return walletUtils.generatePaillierSecretKey();
+    case 'BLUM_PRIME': {
+      return walletUtils.generateBlumPrime();
     }
     default: {
       throw new Error(`functionType: ${functionType} not supported`);

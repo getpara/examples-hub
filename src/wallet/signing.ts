@@ -13,6 +13,7 @@ export async function sendTransaction(
   return await new Promise((resolve) => {
     const worker = setupWorker(async (signature) => {
       resolve(signature);
+      worker.terminate();
     });
     worker.postMessage({
       env: ctx.env,
@@ -32,6 +33,7 @@ export async function signMessage(
   return await new Promise((resolve) => {
     const worker = setupWorker(async (signature) => {
       resolve(signature);
+      worker.terminate();
     });
     worker.postMessage({
       env: ctx.env,

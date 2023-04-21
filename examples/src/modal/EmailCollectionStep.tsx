@@ -44,7 +44,7 @@ export function EmailCollectionStep({
           if (!email) {
             throw new Error('email is required');
           }
-          capsule.clearStorage();
+          capsule.clearStorage(true);
 
           try {
             await capsule.createUser(email);
