@@ -46,6 +46,8 @@ export async function authLogin(
     return;
   }
   const decryptedShares = await getDerivedPrivateKeyAndDecrypt(
+    // @ts-ignore
+    capsule.ctx,
     sig.response.userHandle,
     encryptedSharesRes.data.keyShares,
   );

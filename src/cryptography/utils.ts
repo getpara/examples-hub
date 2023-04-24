@@ -1,5 +1,6 @@
 import base64url from 'base64url'
 import forge from 'node-forge';
+import { Ctx, getPortalBaseURL } from '../definitions';
 
 interface EncryptedShare {
   walletId: string;
@@ -28,6 +29,7 @@ function publicKeyHexToPem(publicKeyHex: string): string {
 }
 
 export async function getAsymmetricKeyPair(
+  ctx: Ctx,
   seedValue?: string
 ): Promise<forge.pki.rsa.KeyPair> {
   const prng = forge.random.createInstance();
@@ -46,7 +48,7 @@ export async function getAsymmetricKeyPair(
         workers: seedValue ? 1 : -1,
         e: 65537,
         workLoad: 100,
-        workerScript: new URL('./scripts/prime.worker.min.js', import.meta.url).toString(),
+        workerScript: new URL(`${getPortalBaseURL(ctx)}/prime.worker.min.js`, import.meta.url).toString(),
         prng,
       },
         (err, keypair) => {
@@ -60,10 +62,11 @@ export async function getAsymmetricKeyPair(
 }
 
 export async function getPublicKeyFromSignature(
-    userHandle: Uint8Array,
+  ctx: Ctx,
+  userHandle: Uint8Array,
 ): Promise<string> {
   const encodedUserHandle = base64url.encode(userHandle as any)
-  const keyPair = await getAsymmetricKeyPair(encodedUserHandle);
+  const keyPair = await getAsymmetricKeyPair(ctx, encodedUserHandle);
   return getPublicKeyHex(keyPair)
 }
 
@@ -103,12 +106,13 @@ export function decryptWithKeyPair(
   return decipher.output.toString();
 }
 
-async function decryptWithDerivedPrivateKey(seedValue: string, encryptedMessageHex: string, encryptedKeyHex: string): Promise<string> {
-  const keyPair = await getAsymmetricKeyPair(seedValue);
+async function decryptWithDerivedPrivateKey(ctx: Ctx, seedValue: string, encryptedMessageHex: string, encryptedKeyHex: string): Promise<string> {
+  const keyPair = await getAsymmetricKeyPair(ctx, seedValue);
   return decryptWithKeyPair(keyPair, encryptedMessageHex, encryptedKeyHex);
 }
 
 export async function getDerivedPrivateKeyAndDecrypt(
+  ctx: Ctx,
   seedValue: string,
   encryptedShares: EncryptedShare[]
 ): Promise<{ walletId: string; signer: string }[]> {
@@ -116,6 +120,7 @@ export async function getDerivedPrivateKeyAndDecrypt(
     encryptedShares.map(async (share) => ({
       walletId: share.walletId,
       signer: await decryptWithDerivedPrivateKey(
+        ctx,
         seedValue,
         share.encryptedShare,
         share.encryptedKey

@@ -27,7 +27,8 @@ export async function authCreation(
 ): Promise<void> {
   const { creds, userHandle } = await createCredential(userId, email);
   const { cosePublicKey, clientDataJSON } = parseCredentialCreationRes(creds);
-  const publicKeyHex = await getPublicKeyFromSignature(userHandle);
+  // @ts-ignore
+  const publicKeyHex = await getPublicKeyFromSignature(capsule.ctx, userHandle);
   // @ts-ignore
   await capsule.ctx.capsuleClient.patchSessionPublicKey(userId, biometricId, {
     publicKey: creds.id,

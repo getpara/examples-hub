@@ -188,7 +188,7 @@ export class Capsule {
     this.setEmail(email);
     const res = await this.ctx.capsuleClient.touchSession(true);
     if (!this.loginEncryptionKeyPair) {
-      const keyPair = await getAsymmetricKeyPair();
+      const keyPair = await getAsymmetricKeyPair(this.ctx);
       this.setLoginEncryptionKeyPair(keyPair);
     }
 

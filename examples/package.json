@@ -38,16 +38,13 @@
     "webpack-cli": "5.0.1",
     "webpack-dev-server": "4.13.1"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
+  "browserslist": [
+    "chrome > 52",
+    "opera > 39",
+    "edge > 14",
+    "firefox > 52",
+    "safari > 10.1",
+    "not dead",
+    "not op_mini all"
+  ]
 }
