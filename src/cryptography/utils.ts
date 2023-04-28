@@ -48,7 +48,7 @@ export async function getAsymmetricKeyPair(
         workers: seedValue ? 1 : -1,
         e: 65537,
         workLoad: 100,
-        workerScript: new URL(`${getPortalBaseURL(ctx)}/prime.worker.min.js`, import.meta.url).toString(),
+        workerScript: new URL('./scripts/prime.worker.min.js', import.meta.url).toString(),
         prng,
       },
         (err, keypair) => {
