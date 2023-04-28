@@ -208,6 +208,7 @@ export const CapsuleModal = ({
                 webAuthURLForCreate={webAuthURLForCreate}
               />
               <BiometricLoginStep
+                capsule={capsule}
                 currentStep={currentStep}
                 webAuthURLForLogin={webAuthURLForLogin}
               />

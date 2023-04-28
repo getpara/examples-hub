@@ -46,7 +46,7 @@ const ConcatKDF = (px: Buffer, kdLen: number) => {
  * @param {Buffer} encrypted Encrypted message, serialized, 113+ bytes
  * @returns {Buffer} plaintext
  */
-function ECIESDecrypt(privKey: Buffer, encrypted: Buffer) {
+export function ECIESDecrypt(privKey: Buffer, encrypted: Buffer) {
   // Read iv, ephemPubKey, mac, ciphertext from encrypted message
   const ephemPubKeyEncoded = encrypted.slice(0, 65);
   const symmetricEncrypted = encrypted.slice(65);

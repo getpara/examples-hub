@@ -122,6 +122,10 @@ export class Capsule {
     }/biometrics/${webAuthId}?email=${encodeURIComponent(this.email)}`;
   }
 
+  private getShortUrl(compressedUrl: string): string {
+    return `${getPortalBaseURL(this.ctx)}/short/${compressedUrl}`;
+  }
+
   private getWebAuthURLForLogin(
     sessionId: string,
     loginEncryptionPublicKey: string,
@@ -288,7 +292,7 @@ export class Capsule {
   clearStorage(keepSecretKey?: boolean): void {
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-  
+
       if (key && key.startsWith(PREFIX)) {
         localStorage.removeItem(key);
         i--;
