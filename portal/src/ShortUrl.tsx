@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
-import { retrieve } from '../../src/transmission/transmissionUtils';
+import { retrieve } from './library/transmission/transmissionUtils';
 import capsule from './capsule';
 
 export default function ShortUrl() {
