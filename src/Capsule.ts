@@ -153,6 +153,11 @@ export class Capsule {
     this.setWallets(this.wallets);
   }
 
+  async checkIfUserExists(email: string): Promise<boolean> {
+    const res = await this.ctx.capsuleClient.checkUserExists(email);
+    return res.data.exists;
+  }
+
   async createUser(email: string): Promise<void> {
     this.setEmail(email);
     const { userId } = await this.ctx.capsuleClient.createUser({

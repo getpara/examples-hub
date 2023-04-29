@@ -32,7 +32,7 @@
 
 "@capsule/client@capsule-org/user-management-client":
   version "0.0.1"
-  resolved "git+ssh://git@github.com/capsule-org/user-management-client.git#51de65165aadec790430f29fb97fef3f2c716bd5"
+  resolved "git+ssh://git@github.com/capsule-org/user-management-client.git#c83d320d08bd5f9db7e71ea10f9eac6c4efbb498"
   dependencies:
     axios "^0.27.2"
 

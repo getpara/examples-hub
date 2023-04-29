@@ -46,20 +46,17 @@ export function EmailCollectionStep({
           }
           capsule.clearStorage(true);
 
-          try {
-            await capsule.createUser(email);
-            setIsCreateAccountType(true);
-            setCurrentStep(ModalStep.VERIFICATION_CODE);
-            return;
-          } catch (e) {
-            // 409 status code means user already exists so user is logging in
-            if (e?.response?.status !== 409) {
-              throw e;
-            }
+          const userExists = await capsule.checkIfUserExists(email);
+          if (userExists) {
             const webAuthUrlForLogin = await capsule.initiateUserLogin(email);
             setCurrentStep(ModalStep.BIOMETRIC_LOGIN);
             setWebAuthURLForLogin(webAuthUrlForLogin);
+            return;
           }
+
+          await capsule.createUser(email);
+          setIsCreateAccountType(true);
+          setCurrentStep(ModalStep.VERIFICATION_CODE);
         }}
       >
         Enter
