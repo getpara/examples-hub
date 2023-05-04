@@ -1,4 +1,4 @@
-import { PublicKeyStatus, PublicKeyType } from '@capsule/client';
+import { PublicKeyStatus, PublicKeyType } from '@usecapsule/user-management-client';
 import { pki } from 'node-forge';
 
 import {
@@ -70,15 +70,20 @@ export class Capsule {
   }
 
   async generatePaillierKey(): Promise<void> {
-    const paillierKey = sessionStorage.getItem(SESSION_STORAGE_PAILLIER_SECRET_KEY);
+    const paillierKey = sessionStorage.getItem(
+      SESSION_STORAGE_PAILLIER_SECRET_KEY,
+    );
     if (paillierKey) {
       return;
     }
 
     const { p, q } = await generateBlumPrimes(this.ctx.env);
-    const base64Enc = Buffer.from(JSON.stringify({ pBase64: p, qBase64: q }), 'utf-8').toString('base64');
+    const base64Enc = Buffer.from(
+      JSON.stringify({ pBase64: p, qBase64: q }),
+      'utf-8',
+    ).toString('base64');
     sessionStorage.setItem(SESSION_STORAGE_PAILLIER_SECRET_KEY, base64Enc);
-  };
+  }
 
   private setEmail(email: string): void {
     this.email = email;
@@ -242,12 +247,22 @@ export class Capsule {
     walletId: string,
     userShare: string,
   ): Promise<string> {
-    const recoveryShare = await distributeNewShare(this.ctx, this.userId, walletId, userShare);
+    const recoveryShare = await distributeNewShare(
+      this.ctx,
+      this.userId,
+      walletId,
+      userShare,
+    );
     return recoveryShare;
   }
 
-  async createWallet(skipDistribute: boolean = false, customFunction: Function): Promise<[Wallet, string | null]> {
-    const secretKey = sessionStorage.getItem(SESSION_STORAGE_PAILLIER_SECRET_KEY);
+  async createWallet(
+    skipDistribute: boolean = false,
+    customFunction: Function,
+  ): Promise<[Wallet, string | null]> {
+    const secretKey = sessionStorage.getItem(
+      SESSION_STORAGE_PAILLIER_SECRET_KEY,
+    );
     const { signer, walletId, recoveryShare } = await keygen(
       this.ctx,
       this.userId,
@@ -305,9 +320,13 @@ export class Capsule {
     }
     for (let j = 0; j < sessionStorage.length; j++) {
       const key = sessionStorage.key(j);
-  
+
       // paillier secret key may be generated before this is called on account creation
-      if (key && key.startsWith(PREFIX) && !(keepSecretKey && key === SESSION_STORAGE_PAILLIER_SECRET_KEY)) {
+      if (
+        key &&
+        key.startsWith(PREFIX) &&
+        !(keepSecretKey && key === SESSION_STORAGE_PAILLIER_SECRET_KEY)
+      ) {
         sessionStorage.removeItem(key);
         j--;
       }

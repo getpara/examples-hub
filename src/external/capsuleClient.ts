@@ -1,4 +1,4 @@
-import Client from '@capsule/client/client';
+import Client from '@usecapsule/user-management-client';
 
 import { Environment } from '../definitions';
 

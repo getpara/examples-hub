@@ -17,7 +17,7 @@ import {
 import capsule from './capsule';
 import { distributeNewShare } from './library/shares/shareDistribution';
 import { KeyContainer } from './library/shares/KeyContainer';
-import { EncryptorType, KeyType } from '@capsule/client';
+import { EncryptorType, KeyType } from '@usecapsule/user-management-client';
 import SingleInputModal from './singleInputModal';
 import SetUpBiometricsModal from './setUpBiometricsModal';
 import FinalModal, { ModalState, ModalStateType } from './FinalModal';

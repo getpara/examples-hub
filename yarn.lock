@@ -30,12 +30,6 @@
   dependencies:
     regenerator-runtime "^0.13.11"
 
-"@capsule/client@capsule-org/user-management-client":
-  version "0.0.1"
-  resolved "git+ssh://git@github.com/capsule-org/user-management-client.git#c83d320d08bd5f9db7e71ea10f9eac6c4efbb498"
-  dependencies:
-    axios "^0.27.2"
-
 "@celo/base@3.2.0":
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/@celo/base/-/base-3.2.0.tgz#19dcff6a822abb1f6b57af8f9db35a4c673aee62"
@@ -553,6 +547,13 @@
   dependencies:
     "@typescript-eslint/types" "5.57.0"
     eslint-visitor-keys "^3.3.0"
+
+"@usecapsule/user-management-client@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@usecapsule/user-management-client/-/user-management-client-0.0.2.tgz#b7adfb4c34dbb3018f8b256ca01ad30a5ac2e218"
+  integrity sha512-m5mG//86AZj3sur9csX+MgaG8bovHfwnN7ovyeD++qN5KlokpAe/QVXDYOMkXnbtSCeWKdQzPlhC7oZexBMCQA==
+  dependencies:
+    axios "^0.27.2"
 
 "@webassemblyjs/ast@1.11.1":
   version "1.11.1"

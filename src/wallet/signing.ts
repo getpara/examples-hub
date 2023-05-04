@@ -1,4 +1,4 @@
-import { Chain } from '@capsule/client';
+import { Chain } from '@usecapsule/user-management-client';
 import { Ctx } from '../definitions';
 import { setupWorker } from '../workers/workerWrapper';
 

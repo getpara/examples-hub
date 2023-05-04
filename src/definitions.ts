@@ -1,4 +1,4 @@
-import Client from '@capsule/client/client';
+import Client from '@usecapsule/user-management-client';
 
 export enum Environment {
   DEV = 'DEV',

@@ -1,4 +1,4 @@
-import { encryptedKeyshare, EncryptorType, KeyType } from '@capsule/client';
+import { encryptedKeyshare, EncryptorType, KeyType } from '@usecapsule/user-management-client';
 
 import { KeyContainer } from './KeyContainer';
 import { Ctx } from '../definitions';

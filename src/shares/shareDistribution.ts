@@ -1,4 +1,4 @@
-import { EncryptorType, KeyType } from '@capsule/client';
+import { EncryptorType, KeyType } from '@usecapsule/user-management-client';
 
 import { encryptWithDerivedPublicKey } from '../cryptography/utils';
 import { sendRecoveryForShare } from './recovery';

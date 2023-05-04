@@ -17,7 +17,7 @@ import {
   parseCredentialCreationRes,
 } from './library/cryptography/webAuth';
 import { getPublicKeyFromSignature } from './library/cryptography/utils';
-import { PublicKeyStatus } from '@capsule/client';
+import { PublicKeyStatus } from '@usecapsule/user-management-client';
 import capsule from './capsule';
 
 export async function authCreation(
