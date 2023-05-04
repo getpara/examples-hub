@@ -1,7 +1,4 @@
-// TODO MOVE THIS INTO web-sdk
-// symlink creates issues with exporting component from Capsule so will
-// have to fix that first
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import {
   ChakraProvider,
@@ -12,7 +9,6 @@ import {
   Theme,
   VStack,
 } from '@chakra-ui/react';
-import Capsule from '../library';
 import { ModalStep } from './steps';
 import { EmailCollectionStep } from './EmailCollectionStep';
 import { BiometricLoginStep } from './BiometricLoginStep';
@@ -22,7 +18,7 @@ import { LoginDoneStep } from './LoginDoneStep';
 import { BiometricCreationStep } from './BiometricCreationStep';
 import { VerificationCodeStep } from './VerificationCodeStep';
 import { darkTheme, lightTheme } from './theme';
-import { Wallet } from '../library/Capsule';
+import { Capsule, Wallet } from '../Capsule';
 
 interface CapsuleModalProps {
   capsule: Capsule;

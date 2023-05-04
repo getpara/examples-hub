@@ -2,11 +2,7 @@ import { ModalStep } from './steps';
 import { ModalCloseButton, Text } from '@chakra-ui/react';
 import React from 'react';
 
-export function LoginDoneStep({
-  currentStep,
-}: {
-  currentStep: ModalStep;
-}) {
+export function LoginDoneStep({ currentStep }: { currentStep: ModalStep }) {
   if (currentStep !== ModalStep.LOGIN_DONE) {
     return null;
   }

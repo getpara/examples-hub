@@ -1,5 +1,5 @@
 import { ModalStep } from './steps';
-import Capsule from '../library';
+import { Capsule } from '../Capsule';
 import { Button, Input, Spacer, Text } from '@chakra-ui/react';
 import React from 'react';
 

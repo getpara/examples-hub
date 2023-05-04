@@ -13,7 +13,7 @@ import Capsule, { Environment } from './library';
 import Web3 from 'web3';
 import { Transaction } from '@ethereumjs/tx';
 import { Common } from '@ethereumjs/common'
-import { CapsuleModal } from './modal/CapsuleModal';
+import { CapsuleModal } from './library/modal/CapsuleModal';
 
 const DEFAULT_TO_ADDRESS = '0x42C9a72C9dfCc92CAe0de9510160cEa2Da27Af91';
 const DEFAULT_VALUE = '1000';

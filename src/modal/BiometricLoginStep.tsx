@@ -2,8 +2,8 @@ import { ModalStep } from './steps';
 import { Spacer, Text, useTheme } from '@chakra-ui/react';
 import QRCode from 'react-qr-code';
 import React, { useEffect, useState } from 'react';
-import { Capsule } from '../library/Capsule';
-import { upload } from '../library/transmission/transmissionUtils';
+import { Capsule } from '../Capsule';
+import { upload } from '../transmission/transmissionUtils';
 
 const SHORTENING_AVAILABLE = false;
 
@@ -36,7 +36,7 @@ export function BiometricLoginStep({
     if (SHORTENING_AVAILABLE) {
       shortenUrl();
     } else {
-      setShortLoginLink(webAuthURLForLogin)
+      setShortLoginLink(webAuthURLForLogin);
     }
   }, [webAuthURLForLogin]);
 

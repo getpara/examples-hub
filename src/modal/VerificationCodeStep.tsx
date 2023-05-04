@@ -1,7 +1,7 @@
-import Capsule from '../library';
 import { ModalStep } from './steps';
 import React, { useState } from 'react';
 import { Button, Input, Spacer, Text } from '@chakra-ui/react';
+import { Capsule } from '../Capsule';
 
 export function VerificationCodeStep({
   setWebAuthURLForCreate,

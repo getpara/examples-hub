@@ -11,7 +11,6 @@ import React from 'react';
 
 export function AccountCreationDoneStep({
   currentStep,
-  onClose,
   recoveryShare,
 }: {
   currentStep: ModalStep;
