@@ -1,6 +1,6 @@
 {
   "name": "@usecapsule/web-sdk",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -18,7 +18,11 @@
     "react-qr-code": "2.0.11",
     "@chakra-ui/react": "2.5.4",
     "react-use": "17.4.0",
-    "stream-browserify": "3.0.0"
+    "stream-browserify": "3.0.0",
+    "@emotion/react": "^11.10.8",
+    "@emotion/styled": "^11.10.8",
+    "@usecapsule/web-sdk": "^0.0.9",
+    "framer-motion": "^10.12.7"
   },
   "peerDependencies": {
     "react": "*",
