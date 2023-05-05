@@ -1,4 +1,5 @@
 import { ModalStep } from './steps';
+import { getMailtoLink } from '../utils/emailUtils'
 import {
   Box,
   Button,
@@ -6,14 +7,16 @@ import {
   HStack,
   ModalCloseButton,
   Text,
+  useClipboard,
 } from '@chakra-ui/react';
-import React, { useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { RampInstantSDK } from '@ramp-network/ramp-instant-sdk';
 import { Capsule } from '../Capsule';
 
 export function AccountCreationDoneStep({
   currentStep,
   recoveryShare,
+  email,
   capsule,
   defaultAsset,
   onRampAvailable,
@@ -22,6 +25,7 @@ export function AccountCreationDoneStep({
 }: {
   currentStep: ModalStep;
   recoveryShare: string;
+  email: string;
   capsule: Capsule;
   defaultAsset: string;
   onRampAvailable: boolean;
@@ -45,6 +49,20 @@ export function AccountCreationDoneStep({
   }, [defaultAsset, capsule, onClose, rampNetworkApiKey]);
 
   const handleToggle = () => setShow(!show);
+  const { onCopy, setValue, hasCopied } = useClipboard('placeholder');
+  useEffect(() => {
+    setValue(recoveryShare);
+  })
+
+  const handleDownload = () => {
+    const element = document.createElement("a");
+    const file = new Blob([recoveryShare], {type: 'text/plain'});
+    element.href = URL.createObjectURL(file);
+    element.download = "recovery.txt";
+    document.body.appendChild(element); // Required for this to work in FireFox
+    element.click();
+  }
+
   if (currentStep !== ModalStep.ACCOUNT_CREATION_DONE) {
     return null;
   }
@@ -54,19 +72,20 @@ export function AccountCreationDoneStep({
         <ModalCloseButton color="brand.text" />
         <Text marginBottom={2}>
           Your account has been created! Keep your recovery share safe!
+          <Button onClick={handleToggle} variant='link' ml={3}>
+            {show ? 'Hide' : 'Show'}
+          </Button>
         </Text>
         <HStack justifyContent="space-between" width="100%">
-          <Button size="sm">Action 1</Button>
-          <Button size="sm">Action 2</Button>
-          <Button onClick={handleToggle} size="sm">
-            {show ? 'Collapse' : 'Expand'}
-          </Button>
-        </HStack>
+          <Button onClick={onCopy} size="sm">{hasCopied ? "Share Copied!" : "Copy" }</Button>
+          <Button onClick={handleDownload} size="sm">Download</Button>
+          <Button size="sm"><a href={getMailtoLink(email, recoveryShare)}>Email</a></Button>
         {onRampAvailable ? (
           <Button size="sm" marginTop={6} onClick={addCash}>
             Add cash
           </Button>
         ) : null}
+        </HStack>
         <Collapse in={show} startingHeight={80}>
           <Text
             borderColor="brand.button"

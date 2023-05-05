@@ -221,6 +221,7 @@ export const CapsuleModal = ({
               <AccountCreationDoneStep
                 currentStep={currentStep}
                 recoveryShare={recoveryShare}
+                email={email}
                 defaultAsset={onRampCurrency}
                 onRampAvailable={onRampAvailable}
                 capsule={capsule}
