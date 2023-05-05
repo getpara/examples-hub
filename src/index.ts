@@ -1,6 +1,6 @@
 import { Capsule } from './Capsule';
 export { Environment } from './definitions';
-import { CapsuleModal as Modal } from "./modal/CapsuleModal"
+import { CapsuleModal as Modal } from './modal/CapsuleModal';
 export default Capsule;
 export { Modal };
 

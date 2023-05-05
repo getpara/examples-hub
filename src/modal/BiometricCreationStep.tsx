@@ -1,7 +1,8 @@
 import { ModalStep } from './steps';
-import { Text, useTheme } from '@chakra-ui/react';
+import { Box, Text, useTheme } from '@chakra-ui/react';
 import QRCode from 'react-qr-code';
 import React from 'react';
+import { openPopup } from './utils';
 
 export function BiometricCreationStep({
   currentStep,
@@ -24,13 +25,13 @@ export function BiometricCreationStep({
       <Text marginBottom={8}>
         Scan or click this QR code to make logging in easy next time.
       </Text>
-      <a href={webAuthURLForCreate} rel="noreferrer" target="_blank">
+      <Box cursor="pointer" onClick={() => openPopup(webAuthURLForCreate)}>
         <QRCode
           fgColor={fgColor}
           bgColor={bgColor}
           value={webAuthURLForCreate}
         />
-      </a>
+      </Box>
     </>
   );
 }

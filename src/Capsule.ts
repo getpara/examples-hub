@@ -1,4 +1,7 @@
-import { PublicKeyStatus, PublicKeyType } from '@usecapsule/user-management-client';
+import {
+  PublicKeyStatus,
+  PublicKeyType,
+} from '@usecapsule/user-management-client';
 import { pki } from 'node-forge';
 
 import {

@@ -1,9 +1,10 @@
 import { ModalStep } from './steps';
-import { Spacer, Text, useTheme } from '@chakra-ui/react';
+import { Box, Spacer, Text, useTheme } from '@chakra-ui/react';
 import QRCode from 'react-qr-code';
 import React, { useEffect, useState } from 'react';
 import { Capsule } from '../Capsule';
 import { upload } from '../transmission/transmissionUtils';
+import { openPopup } from './utils';
 
 const SHORTENING_AVAILABLE = false;
 
@@ -50,9 +51,10 @@ export function BiometricLoginStep({
         Scan or click this QR code to login from the same device you used during
         account setup.
       </Text>
-      <a href={shortLoginLink} rel="noreferrer" target="_blank">
+      <Box cursor="pointer" onClick={() => openPopup(shortLoginLink)}>
         <QRCode fgColor={fgColor} bgColor={bgColor} value={shortLoginLink} />
-      </a>
+      </Box>
+      e
       <Spacer />
     </>
   );
