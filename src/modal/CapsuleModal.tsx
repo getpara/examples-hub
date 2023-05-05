@@ -25,6 +25,9 @@ interface CapsuleModalProps {
   isOpen: boolean;
   onClose: () => void;
   theme?: 'dark' | 'light' | Theme;
+  onRampCurrency?: string;
+  onRampAvailable?: boolean;
+  rampNetworkApiKey?: string;
 }
 
 const themeResolve: Record<string, Theme> = {
@@ -37,6 +40,9 @@ export const CapsuleModal = ({
   isOpen,
   onClose,
   theme = 'dark',
+  onRampCurrency = 'ARBITRUM_ETH',
+  rampNetworkApiKey = '7t45dxm7yhho7fr9u4b9k8nv9gvczansfu8zt9pm', // staging
+  onRampAvailable = false,
 }: CapsuleModalProps) => {
   const resolvedTheme = typeof theme === 'string' ? themeResolve[theme] : theme;
   const [email, setEmail] = useState(capsule.getEmail());
@@ -214,8 +220,12 @@ export const CapsuleModal = ({
               />
               <AccountCreationDoneStep
                 currentStep={currentStep}
-                onClose={onClose}
                 recoveryShare={recoveryShare}
+                defaultAsset={onRampCurrency}
+                onRampAvailable={onRampAvailable}
+                capsule={capsule}
+                onClose={onClose}
+                rampNetworkApiKey={rampNetworkApiKey}
               />
               <LoginDoneStep currentStep={currentStep} />
             </VStack>

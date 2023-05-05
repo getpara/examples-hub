@@ -64,7 +64,7 @@ function App() {
       <Container maxW="ld" padding={10}>
         <VStack align="left" spacing={5}>
           <Button colorScheme="green" onClick={()=>{setModalIsOpen(true)}}>Open Modal</Button>
-          <CapsuleModal capsule={capsule} isOpen={modalIsOpen} onClose={() => {setModalIsOpen(false)}}/>
+          <CapsuleModal capsule={capsule} isOpen={modalIsOpen} onClose={() => {setModalIsOpen(false)}} onRampAvailable/>
           <Input placeholder="e-mail" onChange={(e) => {
             setEmail(e.target.value)
           }} value={email || ''}/>

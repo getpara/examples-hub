@@ -7,17 +7,42 @@ import {
   ModalCloseButton,
   Text,
 } from '@chakra-ui/react';
-import React from 'react';
+import React, { useCallback } from 'react';
+import { RampInstantSDK } from '@ramp-network/ramp-instant-sdk';
+import { Capsule } from '../Capsule';
 
 export function AccountCreationDoneStep({
   currentStep,
   recoveryShare,
+  capsule,
+  defaultAsset,
+  onRampAvailable,
+  onClose,
+  rampNetworkApiKey
 }: {
   currentStep: ModalStep;
-  onClose: () => void;
   recoveryShare: string;
+  capsule: Capsule;
+  defaultAsset: string;
+  onRampAvailable: boolean;
+  onClose: () => void;
+  rampNetworkApiKey: string;
 }) {
   const [show, setShow] = React.useState(false);
+
+  const addCash = useCallback(() => {
+    onClose();
+    new RampInstantSDK({
+      hostAppName: 'Your App',
+      defaultAsset: defaultAsset,
+      hostLogoUrl: 'https://app.sandbox.usecapsule.com/wordmark_black.svg',
+      hostApiKey: rampNetworkApiKey,
+      userAddress: Object.values(capsule.getWallets())[0].address,
+      userEmailAddress: capsule.getEmail(),
+      url: 'https://app.demo.ramp.network',
+      enabledFlows: ['ONRAMP'],
+    }).show();
+  }, [defaultAsset, capsule, onClose, rampNetworkApiKey]);
 
   const handleToggle = () => setShow(!show);
   if (currentStep !== ModalStep.ACCOUNT_CREATION_DONE) {
@@ -37,6 +62,11 @@ export function AccountCreationDoneStep({
             {show ? 'Collapse' : 'Expand'}
           </Button>
         </HStack>
+        {onRampAvailable ? (
+          <Button size="sm" marginTop={6} onClick={addCash}>
+            Add cash
+          </Button>
+        ) : null}
         <Collapse in={show} startingHeight={80}>
           <Text
             borderColor="brand.button"
