@@ -5,6 +5,7 @@ import { initClient } from '../external/capsuleClient';
 
 interface Message {
   env: Environment;
+  apiKey?: string;
   functionType: string;
   params: Record<string, any>;
 }
@@ -52,10 +53,11 @@ async function executeMessage(ctx: Ctx, message: Message, callCustomFunction: Fu
 
 
 addEventListener('message', async (e: { data: Message }) => {
-  const { env } = e.data;
+  const { env, apiKey } = e.data;
   const ctx = {
     env,
-    capsuleClient: initClient(env),
+    apiKey,
+    capsuleClient: initClient(env, apiKey),
   };
   await loadWasm(ctx);
 

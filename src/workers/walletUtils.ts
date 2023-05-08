@@ -77,11 +77,14 @@ export async function sendTransaction(
   tx: string,
   chainId: string,
 ): Promise<string> {
-  const { data: { protocolId } } = await ctx.capsuleClient.sendTransaction(
+  const { data: { protocolId, denied } } = await ctx.capsuleClient.sendTransaction(
     userId,
     walletId,
     { transaction: tx, chainId }
   );
+  if (denied) {
+    return 'TRANSACTION_DENIED';
+  }
   const serverUrl = getServerUrl(ctx, userId);
 
   return new Promise((resolve, reject) =>

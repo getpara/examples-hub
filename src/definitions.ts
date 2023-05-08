@@ -9,6 +9,7 @@ export enum Environment {
 
 export interface Ctx {
   env: Environment;
+  apiKey?: string;
   capsuleClient: Client;
 }
 

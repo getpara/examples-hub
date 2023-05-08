@@ -49,6 +49,7 @@ export class Capsule {
   constructor(env: Environment, apiKey?: string) {
     this.ctx = {
       env,
+      apiKey,
       capsuleClient: initClient(env, apiKey),
     };
 

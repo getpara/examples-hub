@@ -17,6 +17,7 @@ export async function sendTransaction(
     });
     worker.postMessage({
       env: ctx.env,
+      apiKey: ctx.apiKey,
       params: { share, walletId, userId, tx, chainId },
       functionType: 'SEND_TRANSACTION',
     });
