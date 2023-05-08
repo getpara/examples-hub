@@ -9,7 +9,7 @@ interface EncryptedShare {
 }
 
 const rsa = forge.pki.rsa;
-const RSA_ENCRYPTION_SCHEME = 'RSAES-PKCS1-V1_5';
+const RSA_ENCRYPTION_SCHEME = 'RSA-OAEP';
 // iv can be constant only because every key is only ever used to encrypt one message
 const CONSTANT_IV = '794241bc819a125a7b78ea313decc0bc';
 
