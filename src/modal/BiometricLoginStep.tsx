@@ -6,7 +6,7 @@ import { Capsule } from '../Capsule';
 import { upload } from '../transmission/transmissionUtils';
 import { openPopup } from './utils';
 
-const SHORTENING_AVAILABLE = false;
+const SHORTENING_AVAILABLE = true;
 
 export function BiometricLoginStep({
   currentStep,
