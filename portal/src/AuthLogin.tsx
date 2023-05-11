@@ -28,7 +28,7 @@ export async function authLogin(
   const { data } = await capsule.ctx.capsuleClient.getWebChallenge(
     encodeURIComponent(email),
   );
-  const sig = await generateSignature(data.challenge);
+  const sig = await generateSignature(data.challenge, data.allowedPublicKeys);
   // @ts-ignore
   const verifyRes = await capsule.ctx.capsuleClient.verifyWebChallenge({
     signature: sig.response,

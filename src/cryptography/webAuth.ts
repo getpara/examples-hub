@@ -105,6 +105,12 @@ export async function createCredential(userId: string, email: string): Promise<{
   const userHandle = generateUserHandle()
   const createCredentialDefaultArgs = {
     publicKey: {
+      authenticatorSelection: {
+        authenticatorAttachment: 'platform' as any,
+        requireResidentKey: true,
+        residentKey: 'required' as any,
+        userVerification: 'required' as any,
+      },
       rp: {
         name: 'Capsule',
       },
@@ -114,20 +120,20 @@ export async function createCredential(userId: string, email: string): Promise<{
         displayName: email,
       },
       pubKeyCredParams: [
-        { type: 'public-key', alg: -7 },
+        { type: 'public-key' as any, alg: -7 },
         // may need this for windows hello or similar browsers
         // TODO: test if windows hello works with above or if we need below alg
         // { type: "public-key", alg: -257 },
       ],
-      attestation: 'direct',
+      attestation: 'direct' as any,
       timeout: 60000,
       // TODO: don't think we really get value from verifying this, but should revisit
       challenge: Buffer.from(userId, 'utf-8'),
     },
-  } as CredentialCreationOptions
+  }
 
   const credential = await navigator.credentials.create(
-      createCredentialDefaultArgs
+    createCredentialDefaultArgs
   )
   return {
     creds: publicKeyCredentialToJSON(credential),
@@ -135,11 +141,16 @@ export async function createCredential(userId: string, email: string): Promise<{
   }
 }
 
-export async function generateSignature(challenge: string) {
+export async function generateSignature(challenge: string, allowedPublicKeys: string[]) {
   const getCredentialDefaultArgs = {
     publicKey: {
       timeout: 60000,
       challenge: Buffer.from(challenge, 'base64'),
+      allowCredentials: allowedPublicKeys.map((key) => ({
+        id: base64url.toBuffer(key),
+        type: 'public-key',
+      })),
+      userVerification: 'required',
     },
   } as CredentialRequestOptions;
 
