@@ -29,8 +29,11 @@ export const themeFactory = (colors: typeof lightColors) =>
     },
     components: {
       Text: {
-        baseStyle: {
+        defaultProps: {
           color: 'brand.text',
+        },
+        baseStyle: {
+          textColor: 'brand.text',
         },
       },
       Button: {
@@ -47,6 +50,16 @@ export const themeFactory = (colors: typeof lightColors) =>
           },
 
           color: 'brand.buttonText',
+          textColor: 'brand.text',
+        },
+      },
+      Input: {
+        baseStyle: {
+          borderColor: 'brand.frameColor',
+          textColor: 'brand.text',
+          background: 'rgba(255, 255, 255, 0.05)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          borderRadius: '5px',
         },
       },
     },
@@ -54,3 +67,35 @@ export const themeFactory = (colors: typeof lightColors) =>
 
 export const lightTheme = themeFactory(lightColors);
 export const darkTheme = themeFactory(darkColors);
+
+export const newTheme = extendTheme({
+  colors: {
+    brand: {
+      background: '#080B0F',
+      content: '#FFFFFF',
+      dimmed: '#E5E5E5',
+      dimmed2: '#C8C8C8',
+      text: '#E5E5E5',
+      addressColor: '#E5E5E5',
+      contentSecondary: '#39393A',
+    },
+  },
+  components: {
+    Text: {
+      baseStyle: {
+        color: 'brand.text',
+        fontSize: 'm',
+      },
+      defaultProps: {
+        fontSize: '40px',
+      },
+    },
+  },
+  fontSizes: {
+    l: '24px',
+    ml: '22px',
+    m: '16px',
+    s: '14px',
+    xs: '12px',
+  },
+}) as Theme;

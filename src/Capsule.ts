@@ -16,6 +16,7 @@ import { Environment } from './definitions';
 import { initClient } from './external/capsuleClient';
 import { KeyContainer } from './shares/KeyContainer';
 import { distributeNewShare } from './shares/shareDistribution';
+import { openPopup } from "./modal/utils";
 
 // amount of time in ms that a web auth session lasts
 const BIOMETRIC_VERIFICATION_TIME_MS = 5 * 60 * 1000;
@@ -216,6 +217,25 @@ export class Capsule {
     );
   }
 
+  async refreshSession(shouldOpenPopup: boolean): Promise<string> {
+    const res = await this.ctx.capsuleClient.touchSession(true);
+    if (!this.loginEncryptionKeyPair) {
+      const keyPair = await getAsymmetricKeyPair(this.ctx);
+      this.setLoginEncryptionKeyPair(keyPair);
+    }
+
+    const link = this.getWebAuthURLForLogin(
+      res.data.sessionId,
+      getPublicKeyHex(this.loginEncryptionKeyPair),
+    );
+
+    if (shouldOpenPopup) {
+      openPopup(link);
+    }
+
+    return link
+  }
+
   async userSetupAfterLogin(): Promise<void> {
     const res = await this.ctx.capsuleClient.touchSession();
     this.setUserId(res.data.userId);
@@ -339,6 +359,11 @@ export class Capsule {
 
   async logout(): Promise<void> {
     await this.ctx.capsuleClient.logout();
+    this.clearStorage();
+    this.wallets = {}
+    this.loginEncryptionKeyPair = undefined
+    this.email = undefined
+    this.userId = undefined
   }
 
   // remove sensitive data when logging this class

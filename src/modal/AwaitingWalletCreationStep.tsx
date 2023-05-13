@@ -3,8 +3,10 @@ import {
   Box,
   CircularProgress,
   CircularProgressLabel,
+  Flex,
   Progress,
   Text,
+  VStack,
 } from '@chakra-ui/react';
 import React from 'react';
 
@@ -20,22 +22,18 @@ export function AwaitingWalletCreationStep({
   }
   return (
     <>
-      <Text>
-        Almost there! Just a little bit longer until wallet creation is done.
+      <Text fontSize="l" position="absolute">
+        Creating Wallet
       </Text>
-      <Box width="100%" justifyContent="center" display="flex">
+      <Flex flex={1} justifyContent="center" alignItems="center">
         <CircularProgress
-          size="100px"
+          size="60px"
           thickness="10px"
-          color={'brand.button'}
-          trackColor={'brand.backgroundLight'}
+          color={'brand.content'}
+          trackColor={'brand.contentSecondary'}
           value={percentKeygenDone}
-        >
-          <CircularProgressLabel fontSize="md" color="brand.text">
-            {percentKeygenDone}%
-          </CircularProgressLabel>
-        </CircularProgress>
-      </Box>
+        />
+      </Flex>
     </>
   );
 }

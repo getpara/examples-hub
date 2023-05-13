@@ -8,3 +8,14 @@ export enum ModalStep {
   AWAITING_WALLET_RETRIEVAL = 'AWAITING_WALLET_RETRIEVAL',
   LOGIN_DONE = 'LOGIN_DONE',
 }
+
+export const ModalStepNumber: { [key in ModalStep]: number } = {
+  [ModalStep.EMAIL_COLLECTION]: 1,
+  [ModalStep.VERIFICATION_CODE]: 2,
+  [ModalStep.BIOMETRIC_CREATION]: 2,
+  [ModalStep.AWAITING_WALLET_CREATION]: 3,
+  [ModalStep.ACCOUNT_CREATION_DONE]: 4,
+  [ModalStep.BIOMETRIC_LOGIN]: 2,
+  [ModalStep.AWAITING_WALLET_RETRIEVAL]: 3,
+  [ModalStep.LOGIN_DONE]: 4,
+};

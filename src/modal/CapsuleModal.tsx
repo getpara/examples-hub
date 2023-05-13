@@ -1,15 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import {
-  ChakraProvider,
+  Box,
+  Button,
+  ChakraProvider, Flex, HStack,
   Modal,
   ModalBody,
   ModalContent,
   ModalOverlay,
-  Theme,
+  Text,
+  Theme, Tooltip,
   VStack,
 } from '@chakra-ui/react';
-import { ModalStep } from './steps';
+import { ModalStep, ModalStepNumber } from './steps';
 import { EmailCollectionStep } from './EmailCollectionStep';
 import { BiometricLoginStep } from './BiometricLoginStep';
 import { AwaitingWalletCreationStep } from './AwaitingWalletCreationStep';
@@ -17,17 +20,23 @@ import { AccountCreationDoneStep } from './AccountCreationDoneStep';
 import { LoginDoneStep } from './LoginDoneStep';
 import { BiometricCreationStep } from './BiometricCreationStep';
 import { VerificationCodeStep } from './VerificationCodeStep';
-import { darkTheme, lightTheme } from './theme';
+import { darkTheme, lightTheme, newTheme } from './theme';
 import { Capsule, Wallet } from '../Capsule';
+import CapsuleSmall from './assets/capsuleSmall';
+import { Header } from './Header';
+import { Footer } from './Footer';
+import {truncateEthAddress} from "./utils";
+import CapsuleBox from "./assets/capsuleBox";
 
 interface CapsuleModalProps {
   capsule: Capsule;
   isOpen: boolean;
   onClose: () => void;
-  theme?: 'dark' | 'light' | Theme;
+  theme?: 'dark' | 'light' | any;
   onRampCurrency?: string;
   onRampAvailable?: boolean;
   rampNetworkApiKey?: string;
+  appName: string;
 }
 
 const themeResolve: Record<string, Theme> = {
@@ -40,6 +49,7 @@ export const CapsuleModal = ({
   isOpen,
   onClose,
   theme = 'dark',
+  appName,
   onRampCurrency = 'ARBITRUM_ETH',
   rampNetworkApiKey = '7t45dxm7yhho7fr9u4b9k8nv9gvczansfu8zt9pm', // staging
   onRampAvailable = false,
@@ -54,6 +64,7 @@ export const CapsuleModal = ({
   const [isFullyLoggedIn, setIsFullyLoggedIn] = useState(false);
   const [webAuthURLForCreate, setWebAuthURLForCreate] = useState('');
   const [currentStep, setCurrentStep] = useState(ModalStep.EMAIL_COLLECTION);
+  // const currentStep = ModalStep.ACCOUNT_CREATION_DONE;
   const [createWalletRes, setCreateWalletRes] =
     useState<[Wallet, string]>(null);
   const [recoveryShare, setRecoveryShare] = useState<string>(null);
@@ -184,12 +195,17 @@ export const CapsuleModal = ({
         <ModalOverlay />
         <ModalContent
           backgroundColor={'brand.background'}
-          padding={10}
-          maxWidth={'500px'}
-          minWidth={'200px'}
+          width="356px"
+          height="632px"
         >
-          <ModalBody>
-            <VStack alignItems="center" width="100%">
+          <ModalBody padding={0} display="flex" flexDirection="column">
+            <Header step={ModalStepNumber[currentStep]} onClose={onClose} />
+            <VStack
+              alignItems="center"
+              display="flex"
+              flex={1}
+              margin="22px 22px 0px"
+            >
               <EmailCollectionStep
                 setWebAuthURLForLogin={setWebAuthURLForLogin}
                 setCurrentStep={setCurrentStep}
@@ -198,6 +214,7 @@ export const CapsuleModal = ({
                 capsule={capsule}
                 setIsCreateAccountType={setIsCreateAccountType}
                 currentStep={currentStep}
+                appName={appName}
               />
               <VerificationCodeStep
                 setCurrentStep={setCurrentStep}
@@ -228,11 +245,89 @@ export const CapsuleModal = ({
                 onClose={onClose}
                 rampNetworkApiKey={rampNetworkApiKey}
               />
-              <LoginDoneStep currentStep={currentStep} />
+              <LoginDoneStep currentStep={currentStep} onClose={onClose}/>
             </VStack>
+            <Footer />
           </ModalBody>
         </ModalContent>
       </Modal>
     </ChakraProvider>
   );
 };
+
+function Helper() {
+  return <Box w="300px" h="158px" backgroundColor="brand.background" padding="18px" display={"flex"} flexDirection={"column"}>
+    <Text fontSize="18px" color="brand.content">
+      What is Connect?
+    </Text>
+    <HStack flex={1}>
+      <Box width="60px">
+        <CapsuleBox/>
+      </Box>
+      <Flex flexDirection="column" alignItems="left" justifyContent="center">
+        <Text fontSize="xs" color="brand.content">
+          A New Way to Log In
+        </Text>
+        <Text fontSize="xs" color="brand.dimmed2">
+          Create a Capsule wallet and login to Lens today. Click the button to start today.
+        </Text>
+      </Flex>
+    </HStack>
+  </Box>
+}
+
+export function CapsuleButton({
+  capsule,
+  appName,
+}: {
+  capsule: Capsule;
+  appName: string;
+}) {
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [address, setAddress] = useState(Object.values(capsule.getWallets())?.[0]?.address);
+
+  return (
+    <ChakraProvider theme={newTheme}>
+      <CapsuleModal
+        appName={appName}
+        isOpen={modalIsOpen}
+        onClose={() => {
+          const newAddress = Object.values(capsule.getWallets())?.[0]?.address
+          setAddress(newAddress)
+          console.log(newAddress)
+          setModalIsOpen(false);
+        }}
+        theme={newTheme}
+        capsule={capsule}
+      />
+      <HStack>
+        {address ? <Text textColor={"brand.addressColor"}>
+          {truncateEthAddress(address)}
+        </Text> : null}
+        <Tooltip isDisabled={!!address} label={<Helper/>} backgroundColor={"brand.background"} borderRadius="4px">
+          <Button
+            width={'163px'}
+            height={'50px'}
+            backgroundColor={'brand.background'}
+            color={'white'}
+            onClick={() => {
+              if (address) {
+                capsule.logout().then(() => {
+                  setAddress(undefined)
+                })
+              } else {
+                setModalIsOpen(true);
+              }
+            }}
+          >
+            <Text size="18px" marginRight="9px">
+              {address ? "Logout" : "Connect"}
+            </Text>
+            <CapsuleSmall />
+          </Button>
+        </Tooltip>
+
+      </HStack>
+    </ChakraProvider>
+  );
+}

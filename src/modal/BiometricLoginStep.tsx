@@ -1,10 +1,11 @@
 import { ModalStep } from './steps';
-import { Box, Spacer, Text, useTheme } from '@chakra-ui/react';
+import { Box, HStack, Spacer, Text, useTheme, VStack } from '@chakra-ui/react';
 import QRCode from 'react-qr-code';
 import React, { useEffect, useState } from 'react';
 import { Capsule } from '../Capsule';
 import { upload } from '../transmission/transmissionUtils';
 import { openPopup } from './utils';
+import Identity from './assets/Identity';
 
 const SHORTENING_AVAILABLE = true;
 
@@ -19,7 +20,7 @@ export function BiometricLoginStep({
 }) {
   const {
     colors: {
-      brand: { text: fgColor, background: bgColor },
+      brand: { dimmed: bgColor, background: fgColor },
     },
   } = useTheme();
 
@@ -46,16 +47,41 @@ export function BiometricLoginStep({
   }
 
   return (
-    <>
-      <Text marginBottom={8}>
-        Scan or click this QR code to login from the same device you used during
-        account setup.
+    <VStack flex={1} alignItems="center">
+      <Text fontSize="l">Finish login</Text>
+      <Text textColor="brand.text" fontSize="s" width="90%" textAlign="center">
+        Scan or click this QR code to login from the same device you used.
       </Text>
-      <Box cursor="pointer" onClick={() => openPopup(shortLoginLink)}>
-        <QRCode fgColor={fgColor} bgColor={bgColor} value={shortLoginLink} />
-      </Box>
-      e
       <Spacer />
-    </>
+      <Box
+        cursor="pointer"
+        backgroundColor="brand.dimmed"
+        borderRadius="12px"
+        padding="12px"
+        onClick={() => openPopup(shortLoginLink)}
+      >
+        <QRCode
+          fgColor={fgColor}
+          bgColor={bgColor}
+          size={200}
+          value={shortLoginLink}
+        />
+      </Box>
+      <Spacer />
+      <HStack alignItems="start">
+        <Box marginTop="6px">
+          <Identity />
+        </Box>
+        <Box>
+          <Text textColor="brand.content" fontSize="m">
+            Verify Identity
+          </Text>
+          <Text textColor="brand.content" fontSize="s">
+            Follow the modal prompts that appear to ask you to verify.
+          </Text>
+        </Box>
+      </HStack>
+      <Spacer />
+    </VStack>
   );
 }

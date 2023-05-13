@@ -13,7 +13,7 @@ import Capsule, { Environment } from './library';
 import Web3 from 'web3';
 import { Transaction } from '@ethereumjs/tx';
 import { Common } from '@ethereumjs/common'
-import { CapsuleModal } from './library/modal/CapsuleModal';
+import {CapsuleButton, CapsuleModal} from './library/modal/CapsuleModal';
 
 // sample transaction params
 const DEFAULT_TO_ADDRESS = '0x42c9a72c9dfcc92cae0de9510160cea2da27af91';
@@ -124,7 +124,8 @@ function App() {
       <Container maxW="ld" padding={10}>
         <VStack align="left" spacing={5}>
           <Button colorScheme="green" onClick={()=>{setModalIsOpen(true)}}>Open Modal</Button>
-          <CapsuleModal capsule={capsule} isOpen={modalIsOpen} onClose={() => {setModalIsOpen(false)}} onRampAvailable/>
+          <CapsuleButton capsule={capsule} appName="Example"/>
+          {/*<CapsuleModal capsule={capsule} isOpen={modalIsOpen} onClose={() => {setModalIsOpen(false)}} onRampAvailable/>*/}
           <Input placeholder="e-mail" onChange={(e) => {
             setEmail(e.target.value)
           }} value={email || ''}/>
