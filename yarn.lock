@@ -1513,10 +1513,10 @@
     "@typescript-eslint/types" "5.57.0"
     eslint-visitor-keys "^3.3.0"
 
-"@usecapsule/user-management-client@0.0.4":
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/@usecapsule/user-management-client/-/user-management-client-0.0.4.tgz#930486179080497bf0ed08805a971112729810d7"
-  integrity sha512-DrPUyNrk+mm8AtGXK5PkEbS/8yuhKg2V7tj4pM7+fFeAHjTIwP44Lq4FwTQ1z6pmSSWF+qDErJpd/DBUQauK0Q==
+"@usecapsule/user-management-client@^0.0.6":
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/@usecapsule/user-management-client/-/user-management-client-0.0.6.tgz#cbf486b376eb11a3293d98aff5f2798b5fe13d84"
+  integrity sha512-Rwkz8cvySBLd3HOkWHhrARAilze/gv4ETyUzxAZvbVFoY9ouS+YeOg4gc5eo3EptUf2zX4LKdoVauyrMesjApA==
   dependencies:
     axios "^0.27.2"
 

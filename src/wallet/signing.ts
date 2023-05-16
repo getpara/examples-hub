@@ -1,5 +1,6 @@
 import { Chain } from '@usecapsule/user-management-client';
 import { Ctx } from '../definitions';
+import { SignatureRes } from '../types/walletTypes';
 import { setupWorker } from '../workers/workerWrapper';
 
 export async function sendTransaction(
@@ -9,10 +10,10 @@ export async function sendTransaction(
   share: string,
   tx: string,
   chainId: string,
-): Promise<string> {
+): Promise<SignatureRes> {
   return await new Promise((resolve) => {
-    const worker = setupWorker(async (signature) => {
-      resolve(signature);
+    const worker = setupWorker(async (sendTransactionRes) => {
+      resolve(sendTransactionRes);
       worker.terminate();
     });
     worker.postMessage({
@@ -30,10 +31,10 @@ export async function signMessage(
   walletId: string,
   share: string,
   message: string
-): Promise<string> {
+): Promise<SignatureRes> {
   return await new Promise((resolve) => {
-    const worker = setupWorker(async (signature) => {
-      resolve(signature);
+    const worker = setupWorker(async (signMessageRes) => {
+      resolve(signMessageRes);
       worker.terminate();
     });
     worker.postMessage({

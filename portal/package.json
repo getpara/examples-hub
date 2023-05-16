@@ -11,6 +11,7 @@
     "@emotion/styled": "11.10.6",
     "@ethereumjs/common": "3.1.1",
     "@ethereumjs/tx": "4.1.1",
+    "@usecapsule/user-management-client": "capsule-org/user-management-client#norwood/partner-policies",
     "crypto-browserify": "3.12.0",
     "ethereumjs-tx": "2.1.2",
     "ethereumjs-util": "7.1.5",
@@ -28,7 +29,7 @@
     "webpack": "5.76.3"
   },
   "scripts": {
-    "start": "PORT=3003 craco start",
+    "start": "REACT_APP_ENV=sandbox PORT=3003 craco start",
     "build": "craco build",
     "check-wasm-file-exists": "test -f ./public/static/js/main.wasm || (echo 'public/static/js/main.wasm file does not exist!'; exit 1)",
     "deploy-s3": "yarn check-wasm-file-exists && craco build && aws s3 sync build/ s3://capsule-$REACT_APP_ENV-web-portal --acl public-read --profile $REACT_APP_ENV",

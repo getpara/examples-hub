@@ -23,7 +23,7 @@ function SetUpBiometricsModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} motionPreset="slideInBottom">
       <ModalOverlay />
-      <ModalContent backgroundColor={"gray.700"}>
+      <ModalContent backgroundColor={'gray.700'}>
         <ModalHeader>Set up biometrics</ModalHeader>
         <Flex
           alignItems="center"

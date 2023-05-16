@@ -9,7 +9,7 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import QRCode from 'react-qr-code';
-import Capsule, { Environment } from './library';
+import Capsule, { Environment, DeniedSignatureResWithUrl } from './library';
 import Web3 from 'web3';
 import { FeeMarketEIP1559Transaction } from '@ethereumjs/tx';
 import {CapsuleButton, CapsuleModal} from './library/modal/CapsuleModal';
@@ -96,7 +96,8 @@ async function createTransaction(
   return tx.serialize().toString('base64');
 }
 
-const capsule = new Capsule(Environment.SANDBOX, DEFAULT_API_KEY);
+// const capsule = new Capsule(Environment.SANDBOX, DEFAULT_API_KEY);
+const capsule = new Capsule(Environment.SANDBOX, "fdba16e45ba41e80185eb2c0195e89d4");
 
 function App() {
   const [email, setEmail] = useState(capsule.getEmail());
@@ -116,6 +117,7 @@ function App() {
   const [smartContractFunctionArgs, setSmartContractFunctionArgs] = useState('');
   const [smartContractAbi, setSmartContractAbi] = useState(JSON.stringify(DEFAULT_CONTRACT_ABI));
   const [smartContractByteCode, setSmartContractByteCode] = useState('');
+  const [transactionReviewUrl, setTransactionReviewUrl] = useState('');
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
@@ -209,8 +211,12 @@ function App() {
               smartContractFunctionArgs ? JSON.parse(smartContractFunctionArgs) : [],
               smartContractByteCode,
             );
-            await capsule.sendTransaction(walletId, tx, `${chainId}`);
+            const res = await capsule.sendTransaction(walletId, tx, `${chainId}`);
+            if ((res as DeniedSignatureResWithUrl).transactionReviewUrl) {
+              setTransactionReviewUrl((res as DeniedSignatureResWithUrl).transactionReviewUrl);
+            }
           }}>Send Transaction</Button>
+          {transactionReviewUrl && <Text>Transaction Review URL is: {transactionReviewUrl}</Text>}
 
           <Button colorScheme="red" onClick={async () => {
             await capsule.logout();

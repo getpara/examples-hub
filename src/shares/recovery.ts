@@ -1,4 +1,8 @@
-import { encryptedKeyshare, EncryptorType, KeyType } from '@usecapsule/user-management-client';
+import {
+  encryptedKeyshare,
+  EncryptorType,
+  KeyType,
+} from '@usecapsule/user-management-client';
 
 import { KeyContainer } from './KeyContainer';
 import { Ctx } from '../definitions';
@@ -13,12 +17,12 @@ export async function sendRecoveryForShare(
 ): Promise<string> {
   const capsuleShare = await ctx.capsuleClient.getCapsuleShare(
     userId,
-    walletId
+    walletId,
   );
   const recoveryPrivateKeyContainer = new KeyContainer(
     walletId,
     capsuleShare.data.signer.signer,
-    '' // TODO: add in if needed
+    '', // TODO: add in if needed
   );
   const encryptedUserBackup =
     recoveryPrivateKeyContainer.encryptForSelf(userSigner);
@@ -29,7 +33,9 @@ export async function sendRecoveryForShare(
   };
   await ctx.capsuleClient.uploadKeyshares(userId, walletId, [
     ...otherEncryptedShares,
-      ...(ignoreRedistributingBackupEncryptedShare ? [] : [userBackupKeyShareOpts]),
+    ...(ignoreRedistributingBackupEncryptedShare
+      ? []
+      : [userBackupKeyShareOpts]),
   ]);
   console.log('recovery:');
   console.log(JSON.stringify(recoveryPrivateKeyContainer));

@@ -18,12 +18,13 @@ import {
   getDerivedPrivateKeyAndDecrypt,
 } from './library/cryptography/utils';
 import capsule from './capsule';
+import PermissionSelection from './PermissionSelection';
 
 export async function authLogin(
   email: string,
   sessionId: string,
   encryptionKey: string,
-) {
+): Promise<string> {
   // @ts-ignore
   const { data } = await capsule.ctx.capsuleClient.getWebChallenge(
     encodeURIComponent(email),
@@ -65,43 +66,61 @@ export async function authLogin(
     userId,
     tempShareOpts,
   );
+  return userId;
 }
 
 function AuthLogin() {
   const [loginDone, updateLoginDone] = useState(false);
+  const [userId, setUserId] = useState('');
 
   const [searchParams, _] = useSearchParams();
   const paramsEmail = decodeURIComponent(searchParams.get('email'));
   const encryptionKey = searchParams.get('encryptionKey');
   const sessionId = searchParams.get('sessionId');
+  const paramsPartnerId = searchParams.get('partnerId');
 
   const login = useCallback(() => {
-    authLogin(paramsEmail, sessionId, encryptionKey).then(() => {
+    authLogin(paramsEmail, sessionId, encryptionKey).then((userId: string) => {
       updateLoginDone(true);
-      setTimeout(function () {
-        window.close();
-      }, 200);
+      setUserId(userId);
+      // setTimeout(function () {
+      //   window.close();
+      // }, 200);
     });
   }, [paramsEmail, sessionId, encryptionKey]);
+
+  // maybe show some text somewhere before closing
+  const onPermissionsDone = () => {
+    setTimeout(function () {
+      window.close();
+    }, 200);
+  };
 
   return (
     <ChakraProvider>
       <Container color="white" maxW="ld" padding={10}>
+        {/* if first time logging into app, then need to accept scopes */}
+        {loginDone && (
+          <PermissionSelection
+            onDone={onPermissionsDone}
+            userId={userId}
+            partnerId={paramsPartnerId}
+            isLogin
+          ></PermissionSelection>
+        )}
         <Flex alignItems="center" justifyContent="left" mb={12}>
           <Image
-              src="/wordmark_white.svg"
-              alt="Logo"
-              width="50%"
-              maxWidth={300}
-              marginRight={2}
+            src="/wordmark_white.svg"
+            alt="Logo"
+            width="50%"
+            maxWidth={300}
+            marginRight={2}
           />
         </Flex>
         <Heading size="xl" mb={8}>
           Login Portal
         </Heading>
-        <Text mb={8}>
-          Login with Capsule to create your wallet.
-        </Text>
+        <Text mb={8}>Login with Capsule to create your wallet.</Text>
         <Text mb={8}>
           We're using your device to safely store your wallet for use across
           web3. Don't worry, Capsule never collects or stores this information,

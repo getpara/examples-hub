@@ -43,7 +43,7 @@ function SingleInputModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} motionPreset="slideInBottom">
       <ModalOverlay />
-      <ModalContent  backgroundColor={"gray.700"}>
+      <ModalContent backgroundColor={'gray.700'}>
         <ModalHeader>{title}</ModalHeader>
         <ModalBody>
           <FormControl>

@@ -6,6 +6,7 @@ import { BrowserRouter } from 'react-router-dom';
 import AuthCreation from './AuthCreation';
 import AuthLogin from './AuthLogin';
 import ShortUrl from './ShortUrl';
+import TransactionReview from './TransactionReview';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -19,6 +20,10 @@ root.render(
         />
         <Route element={<AuthLogin />} path="/web/biometrics/login" />
         <Route element={<ShortUrl />} path="/short/:shortenedUrl" />
+        <Route
+          element={<TransactionReview />}
+          path="/web/users/:userId/transaction-review/:pendingTransactionId"
+        />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>,

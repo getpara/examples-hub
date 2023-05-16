@@ -16,7 +16,12 @@ import { Environment } from './definitions';
 import { initClient } from './external/capsuleClient';
 import { KeyContainer } from './shares/KeyContainer';
 import { distributeNewShare } from './shares/shareDistribution';
-import { openPopup } from "./modal/utils";
+import { openPopup } from './modal/utils';
+import {
+  FullSignatureRes,
+  SuccessfulSignatureRes,
+  DeniedSignatureRes,
+} from './types/walletTypes';
 
 // amount of time in ms that a web auth session lasts
 const BIOMETRIC_VERIFICATION_TIME_MS = 5 * 60 * 1000;
@@ -126,10 +131,16 @@ export class Capsule {
     return this.wallets;
   }
 
-  private getWebAuthURLForCreate(webAuthId: string): string {
+  private getWebAuthURLForCreate(
+    webAuthId: string,
+    partnerId?: string,
+  ): string {
+    const partnerIdQueryParam = partnerId ? `&partnerId=${partnerId}` : '';
     return `${getPortalBaseURL(this.ctx)}/web/users/${
       this.userId
-    }/biometrics/${webAuthId}?email=${encodeURIComponent(this.email)}`;
+    }/biometrics/${webAuthId}?email=${encodeURIComponent(
+      this.email,
+    )}${partnerIdQueryParam}`;
   }
 
   private getShortUrl(compressedUrl: string): string {
@@ -139,12 +150,14 @@ export class Capsule {
   private getWebAuthURLForLogin(
     sessionId: string,
     loginEncryptionPublicKey: string,
+    partnerId?: string,
   ): string {
+    const partnerIdQueryParam = partnerId ? `&partnerId=${partnerId}` : '';
     return `${getPortalBaseURL(
       this.ctx,
     )}/web/biometrics/login?email=${encodeURIComponent(
       this.email,
-    )}&sessionId=${sessionId}&encryptionKey=${loginEncryptionPublicKey}`;
+    )}&sessionId=${sessionId}&encryptionKey=${loginEncryptionPublicKey}${partnerIdQueryParam}`;
   }
 
   async fetchWallets(): Promise<any[]> {
@@ -189,7 +202,7 @@ export class Capsule {
       type: PublicKeyType.WEB,
     });
 
-    return this.getWebAuthURLForCreate(res.data.id);
+    return this.getWebAuthURLForCreate(res.data.id, res.data.partnerId);
   }
 
   // TODO: consider changing this to just hit a new endpoint that returns
@@ -214,6 +227,7 @@ export class Capsule {
     return this.getWebAuthURLForLogin(
       res.data.sessionId,
       getPublicKeyHex(this.loginEncryptionKeyPair),
+      res.data.partnerId,
     );
   }
 
@@ -233,7 +247,7 @@ export class Capsule {
       openPopup(link);
     }
 
-    return link
+    return link;
   }
 
   async userSetupAfterLogin(): Promise<void> {
@@ -304,15 +318,35 @@ export class Capsule {
     return [this.wallets[walletId], recoveryShare];
   }
 
-  async signMessage(walletId: string, message: string): Promise<string> {
-    const messageSignature = await signMessage(
+  private getTransactionReviewUrl(transactionId: string): string {
+    return `${getPortalBaseURL(this.ctx)}/web/users/${
+      this.userId
+    }/transaction-review/${transactionId}?email=${encodeURIComponent(
+      this.email,
+    )}`;
+  }
+
+  async signMessage(
+    walletId: string,
+    message: string,
+  ): Promise<FullSignatureRes> {
+    const res = await signMessage(
       this.ctx,
       this.userId,
       walletId,
       this.wallets[walletId].signer,
       message,
     );
-    return messageSignature;
+    if ((res as DeniedSignatureRes).pendingTransactionId) {
+      return {
+        ...res,
+        transactionReviewUrl: this.getTransactionReviewUrl(
+          (res as DeniedSignatureRes).pendingTransactionId,
+        ),
+      };
+    }
+
+    return res as SuccessfulSignatureRes;
   }
 
   // pass in rlp encoded tx as base64 string
@@ -320,8 +354,8 @@ export class Capsule {
     walletId: string,
     rlpEncodedTxBase64: string,
     chainId: string,
-  ): Promise<string> {
-    const txSignature = await sendTransaction(
+  ): Promise<FullSignatureRes> {
+    const res = await sendTransaction(
       this.ctx,
       this.userId,
       walletId,
@@ -329,7 +363,16 @@ export class Capsule {
       rlpEncodedTxBase64,
       chainId,
     );
-    return txSignature;
+    if ((res as DeniedSignatureRes).pendingTransactionId) {
+      return {
+        ...res,
+        transactionReviewUrl: this.getTransactionReviewUrl(
+          (res as DeniedSignatureRes).pendingTransactionId,
+        ),
+      };
+    }
+
+    return res as SuccessfulSignatureRes;
   }
 
   // remove all local storage and session storage prefixed for capsule
@@ -360,10 +403,10 @@ export class Capsule {
   async logout(): Promise<void> {
     await this.ctx.capsuleClient.logout();
     this.clearStorage();
-    this.wallets = {}
-    this.loginEncryptionKeyPair = undefined
-    this.email = undefined
-    this.userId = undefined
+    this.wallets = {};
+    this.loginEncryptionKeyPair = undefined;
+    this.email = undefined;
+    this.userId = undefined;
   }
 
   // remove sensitive data when logging this class

@@ -4,7 +4,13 @@ import React from 'react';
 import WalletSuccess from './assets/walletSuccess';
 import Copy from './assets/copy';
 
-export function LoginDoneStep({ currentStep, onClose }: { currentStep: ModalStep, onClose: () => void }) {
+export function LoginDoneStep({
+  currentStep,
+  onClose,
+}: {
+  currentStep: ModalStep;
+  onClose: () => void;
+}) {
   if (currentStep !== ModalStep.LOGIN_DONE) {
     return null;
   }

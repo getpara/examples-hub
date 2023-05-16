@@ -3,13 +3,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   Box,
   Button,
-  ChakraProvider, Flex, HStack,
+  ChakraProvider,
+  Flex,
+  HStack,
   Modal,
   ModalBody,
   ModalContent,
   ModalOverlay,
   Text,
-  Theme, Tooltip,
+  Theme,
+  Tooltip,
   VStack,
 } from '@chakra-ui/react';
 import { ModalStep, ModalStepNumber } from './steps';
@@ -25,8 +28,8 @@ import { Capsule, Wallet } from '../Capsule';
 import CapsuleSmall from './assets/capsuleSmall';
 import { Header } from './Header';
 import { Footer } from './Footer';
-import {truncateEthAddress} from "./utils";
-import CapsuleBox from "./assets/capsuleBox";
+import { truncateEthAddress } from './utils';
+import CapsuleBox from './assets/capsuleBox';
 
 interface CapsuleModalProps {
   capsule: Capsule;
@@ -245,7 +248,7 @@ export const CapsuleModal = ({
                 onClose={onClose}
                 rampNetworkApiKey={rampNetworkApiKey}
               />
-              <LoginDoneStep currentStep={currentStep} onClose={onClose}/>
+              <LoginDoneStep currentStep={currentStep} onClose={onClose} />
             </VStack>
             <Footer />
           </ModalBody>
@@ -256,24 +259,34 @@ export const CapsuleModal = ({
 };
 
 function Helper() {
-  return <Box w="300px" h="158px" backgroundColor="brand.background" padding="18px" display={"flex"} flexDirection={"column"}>
-    <Text fontSize="18px" color="brand.content">
-      What is Connect?
-    </Text>
-    <HStack flex={1}>
-      <Box width="60px">
-        <CapsuleBox/>
-      </Box>
-      <Flex flexDirection="column" alignItems="left" justifyContent="center">
-        <Text fontSize="xs" color="brand.content">
-          A New Way to Log In
-        </Text>
-        <Text fontSize="xs" color="brand.dimmed2">
-          Create a Capsule wallet and login to Lens today. Click the button to start today.
-        </Text>
-      </Flex>
-    </HStack>
-  </Box>
+  return (
+    <Box
+      w="300px"
+      h="158px"
+      backgroundColor="brand.background"
+      padding="18px"
+      display={'flex'}
+      flexDirection={'column'}
+    >
+      <Text fontSize="18px" color="brand.content">
+        What is Connect?
+      </Text>
+      <HStack flex={1}>
+        <Box width="60px">
+          <CapsuleBox />
+        </Box>
+        <Flex flexDirection="column" alignItems="left" justifyContent="center">
+          <Text fontSize="xs" color="brand.content">
+            A New Way to Log In
+          </Text>
+          <Text fontSize="xs" color="brand.dimmed2">
+            Create a Capsule wallet and login to Lens today. Click the button to
+            start today.
+          </Text>
+        </Flex>
+      </HStack>
+    </Box>
+  );
 }
 
 export function CapsuleButton({
@@ -284,7 +297,9 @@ export function CapsuleButton({
   appName: string;
 }) {
   const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [address, setAddress] = useState(Object.values(capsule.getWallets())?.[0]?.address);
+  const [address, setAddress] = useState(
+    Object.values(capsule.getWallets())?.[0]?.address,
+  );
 
   return (
     <ChakraProvider theme={newTheme}>
@@ -292,19 +307,26 @@ export function CapsuleButton({
         appName={appName}
         isOpen={modalIsOpen}
         onClose={() => {
-          const newAddress = Object.values(capsule.getWallets())?.[0]?.address
-          setAddress(newAddress)
-          console.log(newAddress)
+          const newAddress = Object.values(capsule.getWallets())?.[0]?.address;
+          setAddress(newAddress);
+          console.log(newAddress);
           setModalIsOpen(false);
         }}
         theme={newTheme}
         capsule={capsule}
       />
       <HStack>
-        {address ? <Text textColor={"brand.addressColor"}>
-          {truncateEthAddress(address)}
-        </Text> : null}
-        <Tooltip isDisabled={!!address} label={<Helper/>} backgroundColor={"brand.background"} borderRadius="4px">
+        {address ? (
+          <Text textColor={'brand.addressColor'}>
+            {truncateEthAddress(address)}
+          </Text>
+        ) : null}
+        <Tooltip
+          isDisabled={!!address}
+          label={<Helper />}
+          backgroundColor={'brand.background'}
+          borderRadius="4px"
+        >
           <Button
             width={'163px'}
             height={'50px'}
@@ -313,20 +335,19 @@ export function CapsuleButton({
             onClick={() => {
               if (address) {
                 capsule.logout().then(() => {
-                  setAddress(undefined)
-                })
+                  setAddress(undefined);
+                });
               } else {
                 setModalIsOpen(true);
               }
             }}
           >
             <Text size="18px" marginRight="9px">
-              {address ? "Logout" : "Connect"}
+              {address ? 'Logout' : 'Connect'}
             </Text>
             <CapsuleSmall />
           </Button>
         </Tooltip>
-
       </HStack>
     </ChakraProvider>
   );

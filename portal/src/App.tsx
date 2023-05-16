@@ -21,7 +21,7 @@ import { EncryptorType, KeyType } from '@usecapsule/user-management-client';
 import SingleInputModal from './singleInputModal';
 import SetUpBiometricsModal from './setUpBiometricsModal';
 import FinalModal, { ModalState, ModalStateType } from './FinalModal';
-import theme from "./theme";
+import theme from './theme';
 
 export function useIsSemiLoggedIn() {
   const interval = useRef<number>();
@@ -254,9 +254,18 @@ export default function App() {
             />
           </Flex>
           <Flex alignItems="center" justifyContent="center" mb={12}>
-            <Card align="center" height="360" width={'50%'} maxWidth={800} backgroundColor={"gray.700"}>
+            <Card
+              align="center"
+              height="360"
+              width={'50%'}
+              maxWidth={800}
+              backgroundColor={'gray.700'}
+            >
               <CardHeader>
-                <Heading size="md" color="gray.300"> Enter Recovery Share </Heading>
+                <Heading size="md" color="gray.300">
+                  {' '}
+                  Enter Recovery Share{' '}
+                </Heading>
               </CardHeader>
 
               <CardBody height="200" overflow="scroll" width="100%">

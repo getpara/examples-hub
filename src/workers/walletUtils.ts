@@ -1,5 +1,6 @@
 import { Ctx } from '../definitions';
 import { getBaseUrl } from '../external/capsuleClient';
+import { SignatureRes } from '../types/walletTypes';
 
 const configBase = (serverUrl: string, walletId: string, id: string) =>
   `{"ServerUrl":"${serverUrl}", "WalletId": "${walletId}", "Id":"${id}", "Ids":["USER","CAPSULE"], "Threshold":1}`;
@@ -45,12 +46,16 @@ export async function signMessage(
   walletId: string,
   userId: string,
   message: string
-): Promise<string> {
-  const { protocolId } = await ctx.capsuleClient.preSignMessage(
+): Promise<SignatureRes> {
+  const { protocolId, pendingTransactionId } = await ctx.capsuleClient.preSignMessage(
     userId,
     walletId,
     message
   );
+  if (pendingTransactionId) {
+    console.log('sign message denied');
+    return { pendingTransactionId };
+  }
   const serverUrl = getServerUrl(ctx, userId);
 
   return new Promise((resolve, reject) =>
@@ -63,7 +68,7 @@ export async function signMessage(
         if (err) {
           reject(err);
         }
-        resolve(result);
+        resolve({ signature: result });
       }
     )
   );
@@ -76,14 +81,15 @@ export async function sendTransaction(
   userId: string,
   tx: string,
   chainId: string,
-): Promise<string> {
-  const { data: { protocolId, denied } } = await ctx.capsuleClient.sendTransaction(
+): Promise<SignatureRes> {
+  const { data: { protocolId, pendingTransactionId } } = await ctx.capsuleClient.sendTransaction(
     userId,
     walletId,
     { transaction: tx, chainId }
   );
-  if (denied) {
-    return 'TRANSACTION_DENIED';
+  if (pendingTransactionId) {
+    console.log('send transaction denied');
+    return { pendingTransactionId };
   }
   const serverUrl = getServerUrl(ctx, userId);
 
@@ -92,7 +98,7 @@ export async function sendTransaction(
       if (err) {
         reject(err);
       }
-      resolve(result);
+      resolve({ signature: result });
     })
   );
 }
