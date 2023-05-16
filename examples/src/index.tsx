@@ -11,15 +11,15 @@ import {
 import QRCode from 'react-qr-code';
 import Capsule, { Environment } from './library';
 import Web3 from 'web3';
-import { Transaction } from '@ethereumjs/tx';
-import { Common } from '@ethereumjs/common'
+import { FeeMarketEIP1559Transaction } from '@ethereumjs/tx';
 import {CapsuleButton, CapsuleModal} from './library/modal/CapsuleModal';
 
 // sample transaction params
 const DEFAULT_TO_ADDRESS = '0x42c9a72c9dfcc92cae0de9510160cea2da27af91';
 const DEFAULT_VALUE = '1000';
 const DEFAULT_GAS_AMOUNT = '21000';
-const DEFAULT_GAS_PRICE = '100';
+const DEFAULT_MAX_PRIORITY_FEE_PER_GAS = '1';
+const DEFAULT_MAX_FEE_PER_GAS = '3';
 const DEFAULT_NONCE = '0';
 const DEFAULT_API_KEY = '2e021f62e0a32dec5f9c2ac6bd24be6b'
 // goerli chain id
@@ -67,7 +67,8 @@ async function createTransaction(
   toAddress: string,
   value: string,
   gasAmount: string,
-  gasPrice: string,
+  maxPriorityFeePerGas: string,
+  maxFeePerGas: string,
   nonce: string,
   chainId: string,
   contractAbi: string,
@@ -81,14 +82,17 @@ async function createTransaction(
     functionCallData = contract.methods[functionName](...functionArgs).encodeABI();
   }
 
-  const tx = new Transaction({
+  const tx = new FeeMarketEIP1559Transaction({
     to: !deployByteCode ? toAddress : undefined,
     value: value ? web3.utils.toHex(web3.utils.toWei(value, 'gwei')) : undefined,
     gasLimit: web3.utils.toHex(Number(gasAmount)),
-    gasPrice: web3.utils.toHex(web3.utils.toWei(gasPrice, 'gwei')),
+    maxPriorityFeePerGas: web3.utils.toHex(web3.utils.toWei(maxPriorityFeePerGas, 'gwei')),
+    maxFeePerGas: web3.utils.toHex(web3.utils.toWei(maxFeePerGas, 'gwei')),
     nonce: web3.utils.toHex(Number(nonce)),
     data: functionCallData || deployByteCode || undefined,
-  }, { common: Common.custom({ chainId: Number(chainId) }) });
+    chainId: web3.utils.toHex(chainId),
+    type: '0x02',
+  });
   return tx.serialize().toString('base64');
 }
 
@@ -104,7 +108,8 @@ function App() {
   const [txToAddress, setTxToAddress] = useState(DEFAULT_TO_ADDRESS);
   const [txValue, setTxValue] = useState(DEFAULT_VALUE);
   const [txGasAmount, setTxGasAmount] = useState(DEFAULT_GAS_AMOUNT);
-  const [txGasPrice, setTxGasPrice] = useState(DEFAULT_GAS_PRICE);
+  const [txMaxPriorityFeePerGas, setTxMaxPriorityFeePerGas] = useState(DEFAULT_MAX_PRIORITY_FEE_PER_GAS);
+  const [txMaxFeePerGas, setTxMaxFeePerGas] = useState(DEFAULT_MAX_FEE_PER_GAS);
   const [nonce, setNonce] = useState(DEFAULT_NONCE);
   const [chainId, setChainId] = useState(DEFAULT_CHAIN_ID);
   const [smartContractFunctionName, setSmartContractFunctionName] = useState('');
@@ -172,8 +177,10 @@ function App() {
           <Input name='Value (gwei)' onChange={(e) => setTxValue(e.target.value)} value={txValue}/>
           <Text>Gas Amount:</Text>
           <Input name='Gas Amount' onChange={(e) => setTxGasAmount(e.target.value)} value={txGasAmount}/>
-          <Text>Gas Price (gwei):</Text>
-          <Input name='Gas Price (gwei)' onChange={(e) => setTxGasPrice(e.target.value)} value={txGasPrice}/>
+          <Text>Max Priority Fee Per Gas (gwei):</Text>
+          <Input name='Max Priority Fee Per Gas (gwei)' onChange={(e) => setTxMaxPriorityFeePerGas(e.target.value)} value={txMaxPriorityFeePerGas}/>
+          <Text>Max Fee Per Gas (gwei):</Text>
+          <Input name='Max Fee Per Gas (gwei)' onChange={(e) => setTxMaxFeePerGas(e.target.value)} value={txMaxFeePerGas}/>
           <Text>Nonce:</Text>
           <Input name='Nonce' onChange={(e) => setNonce(e.target.value)} value={nonce}/>
           <Text>Chain ID:</Text>
@@ -193,7 +200,8 @@ function App() {
               txToAddress,
               txValue,
               txGasAmount,
-              txGasPrice,
+              txMaxPriorityFeePerGas,
+              txMaxFeePerGas,
               nonce,
               chainId,
               smartContractAbi,
