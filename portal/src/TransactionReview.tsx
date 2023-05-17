@@ -5,18 +5,21 @@ import {
   Button,
   Container,
   Text,
-  ChakraProvider, Box, Spacer, VStack, Flex,
+  ChakraProvider, Box, Spacer, VStack, Flex, Progress, HStack,
 } from '@chakra-ui/react';
 
 import { userManagementClient } from './userManagementClient';
 import { generateSignature } from './library/cryptography/webAuth';
 import CapsuleBox from "./assets/CapsuleBox";
 import PoweredByCapsule from "./assets/poweredByCapsule";
+import ScatteredDivider from "./assets/scatteredDivider";
+import {newTheme} from "./library/modal/theme";
 
 function TransactionReview() {
   const { userId, pendingTransactionId } = useParams();
   const [searchParams, _] = useSearchParams();
   const email = searchParams.get('email');
+  const riskScore = searchParams.get('risk_temp') === null ? undefined : Number(searchParams.get('risk_temp'));
   const [pendingTransaction, setPendingTransaction] = useState(null);
 
   const partnerName = pendingTransaction?.partner?.name
@@ -54,11 +57,14 @@ function TransactionReview() {
     fetchPendingTransaction();
   }, []);
 
+  const label = riskScore < 20 ? "Safe" : riskScore < 60 ? "Moderate" : "Risky";
+  const color = riskScore < 20 ? "green" : riskScore < 60 ? "blue" : "red";
+  const labelDolor = riskScore < 20 ? "#40902a" : riskScore < 60 ? "#254589" : "#992727";
   if (!pendingTransaction) {
     return <div></div>;
   }
   return (
-    <ChakraProvider>
+    <ChakraProvider theme={newTheme}>
       <Box height="100%" padding="32px">
         <VStack alignItems="center" color="white" maxW="ld">
           <Text fontSize="m" textAlign="center">
@@ -74,8 +80,22 @@ function TransactionReview() {
           <Spacer />
         </VStack>
       </Box>
-      <Container color="white" maxW="ld" padding={10}>
-        <Text fontFamily={"monospace"} mb={8}>{JSON.stringify(pendingTransaction.decodedTx, null, 2)}</Text>
+      <Container color="white" maxW="ld" padding={10} justifyContent="center">
+        {riskScore !== undefined && <><HStack justifyContent="space-between">
+          <Text fontSize="s" margin="12px">
+            Risk score
+          </Text>
+          <Text borderColor={labelDolor} textColor={labelDolor} fontSize="s" margin="2px" marginRight="12px !important"
+                borderWidth="2px" paddingRight="10px" paddingLeft="10px" paddingTop="4px" paddingBottom="4px"
+                borderRadius="26px">
+            {label}
+          </Text>
+        </HStack>
+          <Progress margin="12px" borderRadius="7px" value={Math.max(riskScore, 5)} backgroundColor="transparent" colorScheme={color} /></>}
+          <Flex mb="18px" mt="18px" width="100%" justifyContent="center">
+          <ScatteredDivider/>
+        </Flex>
+        <Text fontFamily={"monospace"} wordBreak="break-all" mb={8}>{JSON.stringify(pendingTransaction.decodedTx, null, 2)}</Text>
 
         <Container width="100%" display="flex" justifyContent="center">
           <Button
