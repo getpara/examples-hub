@@ -19,7 +19,7 @@ function TransactionReview() {
   const email = searchParams.get('email');
   const [pendingTransaction, setPendingTransaction] = useState(null);
 
-  const partnerName = pendingTransaction.partner.name
+  const partnerName = pendingTransaction?.partner?.name
   async function onClickAccept() {
     const { data } = await userManagementClient.getWebChallenge(
       decodeURIComponent(email),
