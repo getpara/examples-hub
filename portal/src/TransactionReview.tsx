@@ -31,6 +31,9 @@ function TransactionReview() {
       userId,
       pendingTransactionId,
     );
+    setTimeout(function () {
+      window.close();
+    }, 200);
   }
 
   async function fetchPendingTransaction() {
