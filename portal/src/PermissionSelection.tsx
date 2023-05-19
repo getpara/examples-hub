@@ -14,7 +14,7 @@ import {
   AccordionButton,
   AccordionPanel,
   AccordionIcon,
-  Box,
+  Box, Flex,
 } from '@chakra-ui/react';
 
 import { userManagementClient } from './userManagementClient';
@@ -35,7 +35,7 @@ const ScopeCheckbox = ({
     onSelect(scope, checked);
   };
 
-  const ContentWrapper = final ? Fragment : AccordionButton;
+  const ContentWrapper = final ? Box : AccordionButton;
   const Panel = final ? Box : AccordionPanel;
   return (
     <AccordionItem
@@ -43,7 +43,7 @@ const ScopeCheckbox = ({
       paddingBottom={'4px'}
       borderBottomWidth={'0 !important'}
     >
-      <HStack padding={'4px !important'} minH="48px">
+      <HStack padding={'4px !important'} minH="48px" width="100%">
         <Checkbox
           colorScheme={'#111'}
           borderColor="#333"
@@ -53,10 +53,20 @@ const ScopeCheckbox = ({
           onChange={handleCheckboxChange}
           size={'lg'}
         />
-        <ContentWrapper padding={'0 !important'}>
+        <ContentWrapper padding={'0 !important'} display="flex" flexDirection="row" width="100%" justifyContent="space-between">
+          <Box display="flex">
+
           <Text fontSize="s" color="brand.dimmed2" textAlign="left">
             {scope.description}
           </Text>
+          {scope.childScopes?.length ? <Flex w="30px" minW="30px" height="30px" borderColor="#59C1A9" textColor="#59C1A9" justifyContent="center" alignItems="center"
+                                             borderWidth="2px" borderRadius="15px">
+            {scope.childScopes?.length}
+          </Flex> : null}
+          </Box>
+
+          <AccordionIcon color="white"/>
+
         </ContentWrapper>
       </HStack>
       <Panel borderWidth={0}>

@@ -95,8 +95,13 @@ function TransactionReview() {
           <Flex mb="18px" mt="18px" width="100%" justifyContent="center">
           <ScatteredDivider/>
         </Flex>
-        <Text fontFamily={"monospace"} wordBreak="break-all" mb={8}>{JSON.stringify(pendingTransaction.decodedTx, null, 2)}</Text>
-
+        {riskScore === 87 ? <Box padding="32px">
+          <img src="/simulation-risky.png" alt="XXX"/>
+        </Box> : riskScore === 7 ? <Box padding="32px">
+            <img src="/simulation-safe.png" alt="XXX"/>
+        </Box> : (
+          <Text fontFamily={"monospace"} wordBreak="break-all" mb={8}>{JSON.stringify(pendingTransaction.decodedTx, null, 2)}</Text>
+          )}
         <Container width="100%" display="flex" justifyContent="center">
           <Button
             colorScheme="whiteAlpha"
