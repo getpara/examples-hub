@@ -147,7 +147,7 @@ const ScopeSelection = ({ scopes, userId, partnerId, onDone }) => {
       <Button
         mt="8px"
         width="100%"
-        color="brand.contentSecondary"
+        colorScheme="green"
         onClick={handleSubmit}
       >
         Submit

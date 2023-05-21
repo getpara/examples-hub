@@ -30,6 +30,7 @@
   },
   "scripts": {
     "start": "REACT_APP_ENV=sandbox PORT=3003 craco start",
+    "start-dev": "REACT_APP_ENV=dev PORT=3003 craco start",
     "build": "craco build",
     "check-wasm-file-exists": "test -f ./public/static/js/main.wasm || (echo 'public/static/js/main.wasm file does not exist!'; exit 1)",
     "deploy-s3": "cd .. && yarn && cd portal && yarn check-wasm-file-exists && craco build && aws s3 sync build/ s3://capsule-$REACT_APP_ENV-web-portal --acl public-read --profile $REACT_APP_ENV",

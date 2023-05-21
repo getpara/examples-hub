@@ -43,7 +43,7 @@ export async function authCreation(
 }
 
 function AuthCreation() {
-  const [biometricDone, updateBiometricDone] = useState(true);
+  const [biometricDone, updateBiometricDone] = useState(false);
 
   const { biometricId: paramsBiometricId, userId: paramsUserId } = useParams();
   const [searchParams, _] = useSearchParams();

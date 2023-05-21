@@ -100,14 +100,6 @@ function AuthLogin() {
     <ChakraProvider>
       <Container color="white" maxW="ld" padding={10}>
         {/* if first time logging into app, then need to accept scopes */}
-        {loginDone && (
-          <PermissionSelection
-            onDone={onPermissionsDone}
-            userId={userId}
-            partnerId={paramsPartnerId}
-            isLogin
-          ></PermissionSelection>
-        )}
         <Flex alignItems="center" justifyContent="left" mb={12}>
           <Image
             src="/wordmark_white.svg"
@@ -117,6 +109,14 @@ function AuthLogin() {
             marginRight={2}
           />
         </Flex>
+        {loginDone && (
+          <PermissionSelection
+            onDone={onPermissionsDone}
+            userId={userId}
+            partnerId={paramsPartnerId}
+            isLogin
+          ></PermissionSelection>
+        )}
         <Heading size="xl" mb={8}>
           Login Portal
         </Heading>

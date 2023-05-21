@@ -25,7 +25,7 @@ function TransactionReview() {
   const partnerName = pendingTransaction?.partner?.name
   async function onClickAccept() {
     const { data } = await userManagementClient.getWebChallenge(
-      decodeURIComponent(email),
+      encodeURIComponent(email),
     );
     const sig = await generateSignature(data.challenge, data.allowedPublicKeys);
     await userManagementClient.verifyWebChallenge({
@@ -65,7 +65,7 @@ function TransactionReview() {
   }
   return (
     <ChakraProvider theme={newTheme}>
-      <Box height="100%" padding="32px">
+      <Box height="100%" padding="32px" paddingBottom="0px" marginBottom="-46px">
         <VStack alignItems="center" color="white" maxW="ld">
           <Text fontSize="m" textAlign="center">
             <b>{partnerName}</b> is requesting access to perform the following
@@ -77,7 +77,7 @@ function TransactionReview() {
           <Box height="60px" alignItems="center" display="flex">
             <CapsuleBox />
           </Box>
-          <Spacer />
+          {/* <Spacer /> */}
         </VStack>
       </Box>
       <Container color="white" maxW="ld" padding={10} justifyContent="center">
