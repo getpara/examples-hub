@@ -52,9 +52,9 @@ function AuthCreation() {
 
   const setUpBiometrics = useCallback(() => {
     authCreation(paramsUserId, paramsEmail, paramsBiometricId).then(() => {
-      if (paramsPartnerId) {
-        updateBiometricDone(true);
-      } else {
+      updateBiometricDone(true);
+
+      if (!paramsPartnerId) {
         setTimeout(function () {
           window.close();
         }, 200);
@@ -71,7 +71,7 @@ function AuthCreation() {
   return (
     <ChakraProvider theme={newTheme}>
       <Container color="white" maxW="ld" padding={10} height="100%">
-        {biometricDone ? (
+        {(biometricDone && paramsPartnerId) ? (
           <PermissionSelection
             onDone={onPermissionsDone}
             userId={paramsUserId}

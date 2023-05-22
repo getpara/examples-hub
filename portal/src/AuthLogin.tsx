@@ -83,9 +83,11 @@ function AuthLogin() {
     authLogin(paramsEmail, sessionId, encryptionKey).then((userId: string) => {
       updateLoginDone(true);
       setUserId(userId);
-      // setTimeout(function () {
-      //   window.close();
-      // }, 200);
+      if (!paramsPartnerId) {
+        setTimeout(function () {
+          window.close();
+        }, 200);
+      }
     });
   }, [paramsEmail, sessionId, encryptionKey]);
 
@@ -109,7 +111,7 @@ function AuthLogin() {
             marginRight={2}
           />
         </Flex>
-        {loginDone && (
+        {loginDone && paramsPartnerId && (
           <PermissionSelection
             onDone={onPermissionsDone}
             userId={userId}
