@@ -1,9 +1,6 @@
-import Capsule, { Environment } from './library';
+import Capsule from './library';
+import { ENV } from './definitions';
 
-const env = process.env.REACT_APP_ENV
-  ? (process.env.REACT_APP_ENV.toUpperCase() as Environment)
-  : Environment.SANDBOX;
-
-const capsule = new Capsule(env);
+const capsule = new Capsule(ENV);
 
 export default capsule;

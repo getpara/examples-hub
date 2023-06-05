@@ -1,5 +1,6 @@
 import base64url from 'base64url';
 import * as cbor from 'cbor-web';
+import { Environment } from '../definitions';
 
 function publicKeyCredentialToJSON(
   // eslint-disable-next-line @typescript-eslint/ban-types
@@ -87,22 +88,20 @@ export function parseCredentialCreationRes(creds: any): {
 }
 
 // generate a random 16 byte user handle
-function generateUserHandle() {
-  // constant user handle for localhost to not create many creds
-  if (window.location.hostname === 'localhost') {
-    return new Uint8Array(16)
-  }
+function generateUserHandle(env: Environment) {
+  // constant user handle for non-prod to not create many creds
   const userHandle = new Uint8Array(16)
-  // uncomment when we want to use real user handles
-  // window.crypto.getRandomValues(userHandle)
+  if (env === Environment.PROD) {
+    window.crypto.getRandomValues(userHandle)
+  }
   return userHandle
 }
 
-export async function createCredential(userId: string, email: string): Promise<{
+export async function createCredential(env: Environment, userId: string, email: string): Promise<{
   creds: any,
   userHandle: Uint8Array,
 }> {
-  const userHandle = generateUserHandle()
+  const userHandle = generateUserHandle(env)
   const createCredentialDefaultArgs = {
     publicKey: {
       authenticatorSelection: {

@@ -22,13 +22,14 @@ import {
 import { getPublicKeyFromSignature } from './library/cryptography/utils';
 import capsule from './capsule';
 import PermissionSelection from './PermissionSelection';
+import { ENV } from './definitions';
 
 export async function authCreation(
   userId: string,
   email: string,
   biometricId: string,
 ): Promise<void> {
-  const { creds, userHandle } = await createCredential(userId, email);
+  const { creds, userHandle } = await createCredential(ENV, userId, email);
   const { cosePublicKey, clientDataJSON } = parseCredentialCreationRes(creds);
   // @ts-ignore
   const publicKeyHex = await getPublicKeyFromSignature(capsule.ctx, userHandle);
