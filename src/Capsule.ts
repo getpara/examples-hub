@@ -32,6 +32,17 @@ export interface Wallet {
   address?: string;
 }
 
+export interface ConstructorOpts {
+  useStorageOverrides?: boolean;
+  disableWorkers?: boolean;
+  localStorageGetItemOverride?: (key: string) => Promise<string | null>;
+  localStorageSetItemOverride?: (key: string, value: string) => Promise<void>;
+  sessionStorageGetItemOverride?: (key: string) => Promise<string | null>;
+  sessionStorageSetItemOverride?: (key: string, value: string) => Promise<void>;
+  sessionStorageRemoveItemOverride?: (key: string) => Promise<void>;
+  clearStorageOverride?: () => Promise<void>;
+}
+
 const PREFIX = '@CAPSULE/';
 const LOCAL_STORAGE_EMAIL = `${PREFIX}e-mail`;
 const LOCAL_STORAGE_USER_ID = `${PREFIX}userId`;
@@ -51,13 +62,65 @@ export class Capsule {
   private loginEncryptionKeyPair?: pki.rsa.KeyPair;
   private wallets: Record<string, Wallet>;
 
+  private localStorageGetItem = async (key: string): Promise<string | null> => {
+    return localStorage.getItem(key);
+  };
+  private localStorageSetItem = async (key: string, value: string): Promise<void> => {
+    return localStorage.setItem(key, value);
+  };
+  private sessionStorageGetItem = async (key: string): Promise<string | null> => {
+    return sessionStorage.getItem(key);
+  };
+  private sessionStorageSetItem = async (key: string, value: string): Promise<void> => {
+    return sessionStorage.setItem(key, value);
+  };
+  private sessionStorageRemoveItem = async (key: string): Promise<void> => {
+    return sessionStorage.removeItem(key);
+  };
+  // remove all local storage and session storage prefixed for capsule
+  clearStorage = async (keepSecretKey?: boolean): Promise<void> => {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+
+      if (key && key.startsWith(PREFIX)) {
+        localStorage.removeItem(key);
+        i--;
+      }
+    }
+    for (let j = 0; j < sessionStorage.length; j++) {
+      const key = sessionStorage.key(j);
+
+      // paillier secret key may be generated before this is called on account creation
+      if (
+        key &&
+        key.startsWith(PREFIX) &&
+        !(keepSecretKey && key === SESSION_STORAGE_PAILLIER_SECRET_KEY)
+      ) {
+        sessionStorage.removeItem(key);
+        j--;
+      }
+    }
+  }
+
   // TODO: consider using sessionStorage instead of localStorage
-  constructor(env: Environment, apiKey?: string) {
+  constructor(env: Environment, apiKey?: string, opts?: ConstructorOpts) {
+    if (!opts) opts = {};
     this.ctx = {
       env,
       apiKey,
-      capsuleClient: initClient(env, apiKey),
+      capsuleClient: initClient(env, apiKey, opts.disableWorkers),
+      disableWorkers: opts.disableWorkers,
     };
+
+    if (opts.useStorageOverrides) {
+      this.localStorageGetItem = opts.localStorageGetItemOverride;
+      this.localStorageSetItem = opts.localStorageSetItemOverride;
+      this.sessionStorageGetItem = opts.sessionStorageGetItemOverride;
+      this.sessionStorageSetItem = opts.sessionStorageSetItemOverride;
+      this.sessionStorageRemoveItem = opts.sessionStorageRemoveItemOverride;
+      this.clearStorage = opts.clearStorageOverride;
+      return;
+    }
 
     this.email = localStorage.getItem(LOCAL_STORAGE_EMAIL) || undefined;
     this.userId = localStorage.getItem(LOCAL_STORAGE_USER_ID) || undefined;
@@ -75,52 +138,65 @@ export class Capsule {
     }
   }
 
-  getPaillierKey(): string | null {
-    return sessionStorage.getItem(SESSION_STORAGE_PAILLIER_SECRET_KEY);
+  async init(): Promise<void> {
+    this.email = await this.localStorageGetItem(LOCAL_STORAGE_EMAIL) || undefined;
+    this.userId = await this.localStorageGetItem(LOCAL_STORAGE_USER_ID) || undefined;
+    this.wallets = JSON.parse(
+      await this.localStorageGetItem(LOCAL_STORAGE_WALLETS) || '{}',
+    );
+    if (
+      (await this.sessionStorageGetItem(LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR)) &&
+      (await this.sessionStorageGetItem(LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR)) !==
+        'undefined'
+    ) {
+      this.loginEncryptionKeyPair = JSON.parse(
+        await this.sessionStorageGetItem(LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR),
+      );
+    }
   }
 
   async generatePaillierKey(): Promise<void> {
-    const paillierKey = sessionStorage.getItem(
+    const paillierKey = await this.sessionStorageGetItem(
       SESSION_STORAGE_PAILLIER_SECRET_KEY,
     );
     if (paillierKey) {
       return;
     }
 
-    const { p, q } = await generateBlumPrimes(this.ctx.env);
+    const { p, q } = await generateBlumPrimes(this.ctx);
     const base64Enc = Buffer.from(
       JSON.stringify({ pBase64: p, qBase64: q }),
       'utf-8',
     ).toString('base64');
-    sessionStorage.setItem(SESSION_STORAGE_PAILLIER_SECRET_KEY, base64Enc);
+    await this.sessionStorageSetItem(SESSION_STORAGE_PAILLIER_SECRET_KEY, base64Enc);
   }
 
-  private setEmail(email: string): void {
+  async setEmail(email: string): Promise<void> {
     this.email = email;
-    localStorage.setItem(LOCAL_STORAGE_EMAIL, email);
+    await this.localStorageSetItem(LOCAL_STORAGE_EMAIL, email);
   }
 
-  setUserId(userId: string): void {
+  async setUserId(userId: string): Promise<void> {
     this.userId = userId;
-    localStorage.setItem(LOCAL_STORAGE_USER_ID, userId);
+    await this.localStorageSetItem(LOCAL_STORAGE_USER_ID, userId);
   }
 
-  private setWallets(wallets: Record<string, Wallet>): void {
+  async setWallets(wallets: Record<string, Wallet>): Promise<void> {
     this.wallets = wallets;
-    localStorage.setItem(LOCAL_STORAGE_WALLETS, JSON.stringify(wallets));
+    await this.localStorageSetItem(LOCAL_STORAGE_WALLETS, JSON.stringify(wallets));
   }
 
-  private setLoginEncryptionKeyPair(keyPair: pki.rsa.KeyPair): void {
+  private async setLoginEncryptionKeyPair(keyPair: pki.rsa.KeyPair): Promise<void> {
     this.loginEncryptionKeyPair = keyPair;
-    sessionStorage.setItem(
+    await this.sessionStorageSetItem(
       LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR,
       JSON.stringify(keyPair),
     );
   }
 
-  private deleteLoginEncryptionKeyPair(): void {
+  private async deleteLoginEncryptionKeyPair(): Promise<void> {
     this.loginEncryptionKeyPair = undefined;
-    sessionStorage.removeItem('loginEncryptionKeyPair');
+    await this.sessionStorageRemoveItem('loginEncryptionKeyPair');
   }
 
   getEmail(): string | undefined {
@@ -277,7 +353,7 @@ export class Capsule {
     });
 
     this.setUserId(res.data.userId);
-    this.deleteLoginEncryptionKeyPair();
+    await this.deleteLoginEncryptionKeyPair();
     await this.populateWalletAddresses();
   }
 
@@ -298,7 +374,7 @@ export class Capsule {
     skipDistribute: boolean = false,
     customFunction: Function,
   ): Promise<[Wallet, string | null]> {
-    const secretKey = sessionStorage.getItem(
+    const secretKey = await this.sessionStorageGetItem(
       SESSION_STORAGE_PAILLIER_SECRET_KEY,
     );
     const { signer, walletId, recoveryShare } = await keygen(
@@ -373,31 +449,6 @@ export class Capsule {
     }
 
     return res as SuccessfulSignatureRes;
-  }
-
-  // remove all local storage and session storage prefixed for capsule
-  clearStorage(keepSecretKey?: boolean): void {
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-
-      if (key && key.startsWith(PREFIX)) {
-        localStorage.removeItem(key);
-        i--;
-      }
-    }
-    for (let j = 0; j < sessionStorage.length; j++) {
-      const key = sessionStorage.key(j);
-
-      // paillier secret key may be generated before this is called on account creation
-      if (
-        key &&
-        key.startsWith(PREFIX) &&
-        !(keepSecretKey && key === SESSION_STORAGE_PAILLIER_SECRET_KEY)
-      ) {
-        sessionStorage.removeItem(key);
-        j--;
-      }
-    }
   }
 
   async logout(): Promise<void> {

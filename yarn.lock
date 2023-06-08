@@ -1306,6 +1306,14 @@
   dependencies:
     "@types/node" "*"
 
+"@types/chrome@0.0.237":
+  version "0.0.237"
+  resolved "https://registry.yarnpkg.com/@types/chrome/-/chrome-0.0.237.tgz#20a38e1d1134e2725fc7eb43c881e55e1b24ddd7"
+  integrity sha512-krsRmyfMlck5r+H1EapsrrucDRq6iRm0NAi5fapr93CgnpVMDdK+h2+z4x79GegdW7BNH9Vb//gkptORwwwVIQ==
+  dependencies:
+    "@types/filesystem" "*"
+    "@types/har-format" "*"
+
 "@types/elliptic@^6.4.9":
   version "6.4.14"
   resolved "https://registry.yarnpkg.com/@types/elliptic/-/elliptic-6.4.14.tgz#7bbaad60567a588c1f08b10893453e6b9b4de48e"
@@ -1346,6 +1354,23 @@
   dependencies:
     "@types/bn.js" "*"
     "@types/node" "*"
+
+"@types/filesystem@*":
+  version "0.0.32"
+  resolved "https://registry.yarnpkg.com/@types/filesystem/-/filesystem-0.0.32.tgz#307df7cc084a2293c3c1a31151b178063e0a8edf"
+  integrity sha512-Yuf4jR5YYMR2DVgwuCiP11s0xuVRyPKmz8vo6HBY3CGdeMj8af93CFZX+T82+VD1+UqHOxTq31lO7MI7lepBtQ==
+  dependencies:
+    "@types/filewriter" "*"
+
+"@types/filewriter@*":
+  version "0.0.29"
+  resolved "https://registry.yarnpkg.com/@types/filewriter/-/filewriter-0.0.29.tgz#a48795ecadf957f6c0d10e0c34af86c098fa5bee"
+  integrity sha512-BsPXH/irW0ht0Ji6iw/jJaK8Lj3FJemon2gvEqHKpCdDCeemHa+rI3WBGq5z7cDMZgoLjY40oninGxqk+8NzNQ==
+
+"@types/har-format@*":
+  version "1.2.11"
+  resolved "https://registry.yarnpkg.com/@types/har-format/-/har-format-1.2.11.tgz#26aff34e9c782b2648cc45778abadcd930f7db43"
+  integrity sha512-T232/TneofqK30AD1LRrrf8KnjLvzrjWDp7eWST5KoiSzrBfRsLrWDPk4STQPW4NZG6v2MltnduBVmakbZOBIQ==
 
 "@types/js-cookie@^2.2.6":
   version "2.2.7"
@@ -1513,10 +1538,10 @@
     "@typescript-eslint/types" "5.57.0"
     eslint-visitor-keys "^3.3.0"
 
-"@usecapsule/user-management-client@^0.0.6":
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@usecapsule/user-management-client/-/user-management-client-0.0.6.tgz#cbf486b376eb11a3293d98aff5f2798b5fe13d84"
-  integrity sha512-Rwkz8cvySBLd3HOkWHhrARAilze/gv4ETyUzxAZvbVFoY9ouS+YeOg4gc5eo3EptUf2zX4LKdoVauyrMesjApA==
+"@usecapsule/user-management-client@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@usecapsule/user-management-client/-/user-management-client-0.1.0.tgz#9db50f9645116a0a4a5fdf0f76bc270d6333f885"
+  integrity sha512-7tWQr0RRblTm4fnDaP++vM/oa+KIUv698Mo/UO+DlZlodx+N2wtbLPk6M10bGHAIQsgB2KJ6Zy2k3B5tdDIoOg==
   dependencies:
     axios "^0.27.2"
 

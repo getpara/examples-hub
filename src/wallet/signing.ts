@@ -11,8 +11,8 @@ export async function sendTransaction(
   tx: string,
   chainId: string,
 ): Promise<SignatureRes> {
-  return await new Promise((resolve) => {
-    const worker = setupWorker(async (sendTransactionRes) => {
+  return await new Promise(async (resolve) => {
+    const worker = await setupWorker(ctx, async (sendTransactionRes) => {
       resolve(sendTransactionRes);
       worker.terminate();
     });
@@ -32,8 +32,8 @@ export async function signMessage(
   share: string,
   message: string
 ): Promise<SignatureRes> {
-  return await new Promise((resolve) => {
-    const worker = setupWorker(async (signMessageRes) => {
+  return await new Promise(async (resolve) => {
+    const worker = await setupWorker(ctx, async (signMessageRes) => {
       resolve(signMessageRes);
       worker.terminate();
     });

@@ -1,3 +1,7 @@
+// ANY CHANGES TO THIS FILE REQUIRE A REBUILD OF THE WORKER
+// FILE IN THE PORTAL!
+// run `yarn build-webpack` to rebuild the worker file
+
 import '../wasm/wasm_exec.js';
 import * as walletUtils from './walletUtils';
 import { Ctx, Environment, getPortalBaseURL } from '../definitions';
@@ -51,24 +55,27 @@ async function executeMessage(ctx: Ctx, message: Message, callCustomFunction: Fu
   }
 }
 
-
-addEventListener('message', async (e: { data: Message }) => {
+export async function handleMessage(e: { data: Message }, postMessage: (message: any) => void, useFetchAdapter?: boolean): Promise<any> {
   const { env, apiKey } = e.data;
   const ctx = {
     env,
     apiKey,
-    capsuleClient: initClient(env, apiKey),
+    capsuleClient: initClient(env, apiKey, useFetchAdapter),
   };
   await loadWasm(ctx);
 
   function callCustomFunction(params: any): void {
-    self.postMessage({
+    postMessage({
       functionType: 'CUSTOM',
       params,
     });
   }
 
   const result = await executeMessage(ctx, e.data, callCustomFunction);
-  self.postMessage(result);
+  postMessage(result);
+}
+
+addEventListener('message', async (e: { data: Message }) => {
+  await handleMessage(e, self.postMessage);
   self.close();
 });

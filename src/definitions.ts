@@ -11,6 +11,7 @@ export interface Ctx {
   env: Environment;
   apiKey?: string;
   capsuleClient: Client;
+  disableWorkers?: boolean;
 }
 
 export function getPortalBaseURL(ctx: Ctx) {

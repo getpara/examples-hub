@@ -39,24 +39,32 @@ export async function getAsymmetricKeyPair(
       cb(null, seedValue);
     };
   }
+
+  const options: forge.pki.rsa.GenerateKeyPairOptions = {
+    bits: 2048,
+    // only using 1 web worker as more makes the call non-deterministic
+    // -1 uses optimal amount of web workers
+    e: 65537,
+    prng,
+  };
+  if (!ctx.disableWorkers) {
+    options.workLoad = 100;
+    options.workers = seedValue ? 1 : -1;
+
+    const workerRes = await fetch(`${getPortalBaseURL(ctx)}/static/js/prime.worker.min.js`);
+    const workerBlob = new Blob([await workerRes.text()], { type: 'application/javascript' });
+    options.workerScript = URL.createObjectURL(workerBlob);
+  }
+
   return new Promise((resolve, reject) =>
     rsa.generateKeyPair(
-      {
-        bits: 2048,
-        // only using 1 web worker as more makes the call non-deterministic
-        // -1 uses optimal amount of web workers
-        workers: seedValue ? 1 : -1,
-        e: 65537,
-        workLoad: 100,
-        workerScript: new URL('./scripts/prime.worker.min.js', import.meta.url).toString(),
-        prng,
-      },
-        (err, keypair) => {
-          if (err) {
-            reject(err)
-          }
-          resolve(keypair)
+      options,
+      (err, keypair) => {
+        if (err) {
+          reject(err)
         }
+        resolve(keypair)
+      }
     )
   );
 }

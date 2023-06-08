@@ -1,4 +1,4 @@
-import { setupWorker } from '../workers/workerWrapper';
+import { setupWorker, SyncWorker } from '../workers/workerWrapper';
 
 import { distributeNewShare } from '../shares/shareDistribution';
 import { Ctx, Environment } from '../definitions';
@@ -25,8 +25,8 @@ export function keygen(
   walletId: string;
   recoveryShare: string | null;
 }> {
-  return new Promise((resolve) => {
-    const worker = setupWorker(async (res) => {
+  return new Promise(async (resolve) => {
+    const worker = await setupWorker(ctx, async (res) => {
       await waitUntilTrue(
         async () => isKeygenComplete(ctx, userId, res.walletId),
         15000,
@@ -63,21 +63,25 @@ export function keygen(
   });
 }
 
-function getNumWorkers(): number {
+function getNumWorkers(ctx): number {
+  if (ctx.disableWorkers) {
+    return 2
+  }
   return navigator.hardwareConcurrency || 4;
 }
 
-export async function generateBlumPrimes(env: Environment): Promise<{ p: string; q: string; }> {
-  const numWorkers = getNumWorkers();
+export async function generateBlumPrimes(ctx: Ctx): Promise<{ p: string; q: string; }> {
+  const numWorkers = getNumWorkers(ctx);
   let workerResponses: Promise<any>[] = [];
-  let workers: Worker[] = [];
+  let workers: (Worker | SyncWorker)[] = [];
 
   for (let i = 0; i < numWorkers; i++) {
-    workerResponses.push(new Promise((resolve) => {
-      const worker = setupWorker(async (res) => {
+    workerResponses.push(new Promise(async (resolve) => {
+      const worker = await setupWorker(ctx, async (res) => {
         resolve({ res, index: i });
       });
-      worker.postMessage({ env, functionType: 'BLUM_PRIME' });
+
+      worker.postMessage({ env: ctx.env, functionType: 'BLUM_PRIME' });
       workers.push(worker);
     }));
   }
