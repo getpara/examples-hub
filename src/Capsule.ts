@@ -2,7 +2,7 @@ import {
   PublicKeyStatus,
   PublicKeyType,
 } from '@usecapsule/user-management-client';
-import { pki } from 'node-forge';
+import { pki, jsbn } from 'node-forge';
 
 import {
   decryptWithKeyPair,
@@ -24,7 +24,7 @@ import {
 } from './types/walletTypes';
 
 // amount of time in ms that a web auth session lasts
-const BIOMETRIC_VERIFICATION_TIME_MS = 5 * 60 * 1000;
+const BIOMETRIC_VERIFICATION_TIME_MS = 15 * 60 * 1000;
 
 export interface Wallet {
   id: string;
@@ -102,6 +102,33 @@ export class Capsule {
     }
   }
 
+  private convertBigInt(bigInt: Record<string, any>): jsbn.BigInteger {
+    const convertedBigInt = new jsbn.BigInteger(null);
+    convertedBigInt.data = bigInt.data;
+    convertedBigInt.s = bigInt.s;
+    convertedBigInt.t = bigInt.t;
+    return convertedBigInt;
+  }
+
+  private convertEncryptionKeyPair(jsonKeyPair: Record<string, any>): pki.rsa.KeyPair {
+    return {
+      privateKey: pki.setRsaPrivateKey(
+        this.convertBigInt(jsonKeyPair.privateKey.n),
+        this.convertBigInt(jsonKeyPair.privateKey.e),
+        this.convertBigInt(jsonKeyPair.privateKey.d),
+        this.convertBigInt(jsonKeyPair.privateKey.p),
+        this.convertBigInt(jsonKeyPair.privateKey.q),
+        this.convertBigInt(jsonKeyPair.privateKey.dP),
+        this.convertBigInt(jsonKeyPair.privateKey.dQ),
+        this.convertBigInt(jsonKeyPair.privateKey.qInv),
+      ),
+      publicKey: pki.setRsaPublicKey(
+        this.convertBigInt(jsonKeyPair.publicKey.n),
+        this.convertBigInt(jsonKeyPair.publicKey.e),
+      ),
+    };
+  }
+
   // TODO: consider using sessionStorage instead of localStorage
   constructor(env: Environment, apiKey?: string, opts?: ConstructorOpts) {
     if (!opts) opts = {};
@@ -132,9 +159,9 @@ export class Capsule {
       sessionStorage.getItem(LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR) !==
         'undefined'
     ) {
-      this.loginEncryptionKeyPair = JSON.parse(
+      this.loginEncryptionKeyPair = this.convertEncryptionKeyPair(JSON.parse(
         sessionStorage.getItem(LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR),
-      );
+      ));
     }
   }
 
@@ -149,9 +176,9 @@ export class Capsule {
       (await this.sessionStorageGetItem(LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR)) !==
         'undefined'
     ) {
-      this.loginEncryptionKeyPair = JSON.parse(
+      this.loginEncryptionKeyPair = this.convertEncryptionKeyPair(JSON.parse(
         await this.sessionStorageGetItem(LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR),
-      );
+      ));
     }
   }
 
@@ -249,7 +276,7 @@ export class Capsule {
         this.wallets[wallet.id].address = wallet.address;
       }
     });
-    this.setWallets(this.wallets);
+    await this.setWallets(this.wallets);
   }
 
   async checkIfUserExists(email: string): Promise<boolean> {
@@ -258,17 +285,17 @@ export class Capsule {
   }
 
   async createUser(email: string): Promise<void> {
-    this.setEmail(email);
+    await this.setEmail(email);
     const { userId } = await this.ctx.capsuleClient.createUser({
       email: this.email!,
     });
-    this.setUserId(userId);
+    await this.setUserId(userId);
   }
 
   // returns web auth url for creating a new credential
   async verifyEmail(verificationCode: string): Promise<string> {
     await this.ctx.capsuleClient.verifyEmail(this.userId, { verificationCode });
-    return await this.getSetUpBiometricsURL();
+    return this.getSetUpBiometricsURL();
   }
 
   // returns web auth url for creating a new credential
@@ -293,11 +320,11 @@ export class Capsule {
 
   // returns web auth url for logging in
   async initiateUserLogin(email: string): Promise<string> {
-    this.setEmail(email);
+    await this.setEmail(email);
     const res = await this.ctx.capsuleClient.touchSession(true);
     if (!this.loginEncryptionKeyPair) {
       const keyPair = await getAsymmetricKeyPair(this.ctx);
-      this.setLoginEncryptionKeyPair(keyPair);
+      await this.setLoginEncryptionKeyPair(keyPair);
     }
 
     return this.getWebAuthURLForLogin(
@@ -311,7 +338,7 @@ export class Capsule {
     const res = await this.ctx.capsuleClient.touchSession(true);
     if (!this.loginEncryptionKeyPair) {
       const keyPair = await getAsymmetricKeyPair(this.ctx);
-      this.setLoginEncryptionKeyPair(keyPair);
+      await this.setLoginEncryptionKeyPair(keyPair);
     }
 
     const link = this.getWebAuthURLForLogin(
@@ -328,7 +355,7 @@ export class Capsule {
 
   async userSetupAfterLogin(): Promise<void> {
     const res = await this.ctx.capsuleClient.touchSession();
-    this.setUserId(res.data.userId);
+    await this.setUserId(res.data.userId);
   }
 
   async getTransmissionKeyShares(): Promise<any> {
@@ -352,7 +379,7 @@ export class Capsule {
       };
     });
 
-    this.setUserId(res.data.userId);
+    await this.setUserId(res.data.userId);
     await this.deleteLoginEncryptionKeyPair();
     await this.populateWalletAddresses();
   }
@@ -390,7 +417,7 @@ export class Capsule {
     };
     await this.populateWalletAddresses();
 
-    this.setWallets(this.wallets);
+    await this.setWallets(this.wallets);
     return [this.wallets[walletId], recoveryShare];
   }
 
@@ -453,7 +480,7 @@ export class Capsule {
 
   async logout(): Promise<void> {
     await this.ctx.capsuleClient.logout();
-    this.clearStorage();
+    await this.clearStorage();
     this.wallets = {};
     this.loginEncryptionKeyPair = undefined;
     this.email = undefined;
