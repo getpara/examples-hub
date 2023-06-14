@@ -83,7 +83,6 @@ export default function App() {
   const [userId, setUserId] = useState();
   // @ts-ignore
   const isSemiLoggedIn = useIsSemiLoggedIn() && !!userId;
-  console.log(isSemiLoggedIn);
 
   const isSessionActive = useIsFullyLoggedIn();
 
@@ -157,12 +156,10 @@ export default function App() {
       onCloseSetUpBiometricsModal();
       setLoadingState(ModalState.Loading);
       onOpenFinalModal();
-      console.log('CONTINUE');
       distribute();
     }
   }, [isSessionActive, isOpenSetUpBiometricsModal]);
 
-  console.log({ isSessionActive, isOpenSetUpBiometricsModal });
 
   // @ts-ignore
   return (
@@ -182,7 +179,6 @@ export default function App() {
         title={'Login'}
         label={'Email'}
         onAction={async () => {
-          console.log(email);
           // @ts-ignore
           await capsule.ctx.capsuleClient.recoveryInit(email);
           // @ts-ignore
@@ -207,7 +203,6 @@ export default function App() {
             email,
             '123456',
           );
-          console.log(userId);
           // @ts-ignore
           capsule.userId = userId;
           setUserId(userId);
@@ -287,11 +282,8 @@ export default function App() {
                   console.log(userShare);
                   setUserShare(userShare);
                   const link = await capsule.getSetUpBiometricsURL();
-                  console.log(link);
                   setWebAuthURLForCreate(link);
                   onOpenSetUpBiometricsModal();
-
-                  console.log(webAuthURLForCreate);
                 }}
               >
                 Recover

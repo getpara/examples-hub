@@ -133,14 +133,11 @@ export const CapsuleModal = ({
       return;
     }
 
-    console.log('distributing...');
-
     async function distributeShare() {
       const result = await capsule.distributeNewWalletShare(
         createWalletRes[0].id,
         createWalletRes[0].signer,
       );
-      console.log(result);
       setRecoveryShare(result);
       setDistributeDone(true);
       setCurrentStep(ModalStep.ACCOUNT_CREATION_DONE);
@@ -309,7 +306,6 @@ export function CapsuleButton({
         onClose={() => {
           const newAddress = Object.values(capsule.getWallets())?.[0]?.address;
           setAddress(newAddress);
-          console.log(newAddress);
           setModalIsOpen(false);
         }}
         theme={newTheme}

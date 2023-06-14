@@ -100,7 +100,6 @@ const allPoliciesIds = (scopes) => {
     // @ts-ignore
     policies = [...policies, ...allPoliciesIds(scope.childScopes)];
   }
-  console.log(scopes, policies);
   return policies;
 };
 
@@ -118,12 +117,10 @@ const ScopeSelection = ({ scopes, userId, partnerId, onDone }) => {
       selectedScopeIds.delete(scope.id);
       setSelectedScopeIds(selectedScopeIds);
     }
-    console.log(selectedScopeIds);
   };
 
   const handleSubmit = async () => {
     const scopeIds = Array.from(selectedScopeIds);
-    console.log(scopeIds);
     await userManagementClient.acceptScopes(userId, { partnerId, scopeIds });
     onDone();
     // add some check in backend to not allow editing in case accidental click twice
@@ -178,16 +175,13 @@ function PermissionSelection({
       const { permissions } = (
         await userManagementClient.getPolicyPermissions(userId, policy.id)
       ).data;
-      console.log(permissions);
       if (permissions.length > 0) {
         // user is logging into a partner they already have permissions for
         // so no need to go through again
-        console.log('permissions exist');
         onDone();
       }
     }
 
-    console.log(JSON.stringify(detailsRes))
     setPartnerDetails(detailsRes);
   }
 
