@@ -6,10 +6,12 @@ import '../wasm/wasm_exec.js';
 import * as walletUtils from './walletUtils';
 import { Ctx, Environment, getPortalBaseURL } from '../definitions';
 import { initClient } from '../external/capsuleClient';
+import * as mpcComputationClient from '../external/mpcComputationClient';
 
 interface Message {
   env: Environment;
   apiKey?: string;
+  offloadMPCComputationURL?: string;
   functionType: string;
   params: Record<string, any>;
 }
@@ -56,13 +58,17 @@ async function executeMessage(ctx: Ctx, message: Message, callCustomFunction: Fu
 }
 
 export async function handleMessage(e: { data: Message }, postMessage: (message: any) => void, useFetchAdapter?: boolean): Promise<any> {
-  const { env, apiKey } = e.data;
+  const { env, apiKey, offloadMPCComputationURL } = e.data;
   const ctx = {
     env,
     apiKey,
     capsuleClient: initClient(env, apiKey, useFetchAdapter),
+    offloadMPCComputationURL: offloadMPCComputationURL,
+    mpcComputationClient: mpcComputationClient.initClient(offloadMPCComputationURL),
   };
-  await loadWasm(ctx);
+  if (!ctx.offloadMPCComputationURL) {
+    await loadWasm(ctx);
+  }
 
   function callCustomFunction(params: any): void {
     postMessage({

@@ -1,4 +1,5 @@
 import Client from '@usecapsule/user-management-client';
+import { AxiosInstance } from 'axios';
 
 export enum Environment {
   DEV = 'DEV',
@@ -12,6 +13,9 @@ export interface Ctx {
   apiKey?: string;
   capsuleClient: Client;
   disableWorkers?: boolean;
+  offloadMPCComputationURL?: string;
+  mpcComputationClient?: AxiosInstance;
+  useLocalFiles?: boolean;
 }
 
 export function getPortalBaseURL(ctx: Ctx) {

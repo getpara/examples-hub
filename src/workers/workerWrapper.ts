@@ -28,10 +28,15 @@ export async function setupWorker(ctx: Ctx, resFunction: (arg: any) => void, cus
     return syncWorker;
   }
 
-  const workerRes = await fetch(`${getPortalBaseURL(ctx)}/static/js/mpcWorker-bundle.js`);
-  const workerBlob = new Blob([await workerRes.text()], { type: 'application/javascript' });
-  const workerScriptURL = URL.createObjectURL(workerBlob);
-  const worker = new Worker(workerScriptURL);
+  let worker: Worker;
+  if (ctx.useLocalFiles) {
+    worker = new Worker(new URL('./worker.ts', import.meta.url));
+  } else {
+    const workerRes = await fetch(`${getPortalBaseURL(ctx)}/static/js/mpcWorker-bundle.js`);
+    const workerBlob = new Blob([await workerRes.text()], { type: 'application/javascript' });
+    const workerScriptURL = URL.createObjectURL(workerBlob);
+    worker = new Worker(workerScriptURL);
+  }
 
   worker.onmessage = onmessage;
   return worker;

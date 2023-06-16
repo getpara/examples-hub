@@ -59,6 +59,7 @@ export function keygen(
       env: ctx.env,
       params: { userId, secretKey },
       functionType: 'KEYGEN',
+      offloadMPCComputationURL: ctx.offloadMPCComputationURL,
     });
   });
 }

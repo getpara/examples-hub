@@ -14,6 +14,7 @@ import { sendTransaction, signMessage } from './wallet/signing';
 import { Ctx, getPortalBaseURL } from './definitions';
 import { Environment } from './definitions';
 import { initClient } from './external/capsuleClient';
+import * as mpcComputationClient from './external/mpcComputationClient';
 import { KeyContainer } from './shares/KeyContainer';
 import { distributeNewShare } from './shares/shareDistribution';
 import { openPopup } from './modal/utils';
@@ -35,6 +36,8 @@ export interface Wallet {
 export interface ConstructorOpts {
   useStorageOverrides?: boolean;
   disableWorkers?: boolean;
+  offloadMPCComputationURL?: string;
+  useLocalFiles?: boolean;
   localStorageGetItemOverride?: (key: string) => Promise<string | null>;
   localStorageSetItemOverride?: (key: string, value: string) => Promise<void>;
   sessionStorageGetItemOverride?: (key: string) => Promise<string | null>;
@@ -137,7 +140,12 @@ export class Capsule {
       apiKey,
       capsuleClient: initClient(env, apiKey, opts.disableWorkers),
       disableWorkers: opts.disableWorkers,
+      offloadMPCComputationURL: opts.offloadMPCComputationURL,
+      useLocalFiles: opts.useLocalFiles,
     };
+    if (opts.offloadMPCComputationURL) {
+      this.ctx.mpcComputationClient = mpcComputationClient.initClient(opts.offloadMPCComputationURL);
+    }
 
     if (opts.useStorageOverrides) {
       this.localStorageGetItem = opts.localStorageGetItemOverride;
@@ -183,6 +191,9 @@ export class Capsule {
   }
 
   async generatePaillierKey(): Promise<void> {
+    if (this.ctx.offloadMPCComputationURL) {
+      return;
+    }
     const paillierKey = await this.sessionStorageGetItem(
       SESSION_STORAGE_PAILLIER_SECRET_KEY,
     );

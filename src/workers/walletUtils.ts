@@ -10,6 +10,56 @@ function getServerUrl(ctx: Ctx, userId: string) {
   return `${baseUrl}users/${userId}/mpc-network`;
 }
 
+async function keygenRequest(
+  ctx: Ctx,
+  userId: string,
+  walletId: string,
+  protocolId: string,
+): Promise<{ signer: string }> {
+  const { data } = await ctx.mpcComputationClient.post('/wallets', {
+    userId,
+    walletId,
+    protocolId,
+  });
+  return data;
+}
+
+async function signMessageRequest(
+  ctx: Ctx,
+  userId: string,
+  walletId: string,
+  protocolId: string,
+  message: string,
+  signer: string,
+): Promise<{ signature: string }> {
+  const { data } = await ctx.mpcComputationClient.post(`/wallets/${walletId}/messages/sign`, {
+    userId,
+    protocolId,
+    message,
+    signer,
+  });
+  return data;
+}
+
+async function sendTransactionRequest(
+  ctx: Ctx,
+  userId: string,
+  walletId: string,
+  protocolId: string,
+  transaction: string,
+  signer: string,
+  chainId: string,
+): Promise<{ signature: string }> {
+  const { data } = await ctx.mpcComputationClient.post(`/wallets/${walletId}/transactions/send`, {
+    userId,
+    protocolId,
+    transaction,
+    signer,
+    chainId,
+  });
+  return data;
+}
+
 export async function keygen(
   ctx: Ctx,
   userId: string,
@@ -20,6 +70,14 @@ export async function keygen(
     userId,
     { useTwoSigners: true }
   );
+
+  if (ctx.offloadMPCComputationURL) {
+    return {
+      signer: (await keygenRequest(ctx, userId, walletId, protocolId)).signer,
+      walletId,
+    };
+  }
+
   const serverUrl = getServerUrl(ctx, userId);
   const signerConfigUser = configBase(serverUrl, walletId, 'USER');
   const newSigner = (await new Promise((resolve, reject) =>
@@ -56,8 +114,12 @@ export async function signMessage(
     console.log('sign message denied');
     return { pendingTransactionId };
   }
-  const serverUrl = getServerUrl(ctx, userId);
 
+  if (ctx.offloadMPCComputationURL) {
+    return signMessageRequest(ctx, userId, walletId, protocolId, message, share);
+  }
+
+  const serverUrl = getServerUrl(ctx, userId);
   return new Promise((resolve, reject) =>
     global.signMessage(
       share,
@@ -91,8 +153,12 @@ export async function sendTransaction(
     console.log('send transaction denied');
     return { pendingTransactionId };
   }
-  const serverUrl = getServerUrl(ctx, userId);
 
+  if (ctx.offloadMPCComputationURL) {
+    return sendTransactionRequest(ctx, userId, walletId, protocolId, tx, share, chainId);
+  }
+
+  const serverUrl = getServerUrl(ctx, userId);
   return new Promise((resolve, reject) =>
     global.sendTransaction(share, serverUrl, tx, chainId, protocolId, (err, result) => {
       if (err) {

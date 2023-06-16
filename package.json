@@ -12,6 +12,7 @@
     "@ramp-network/ramp-instant-sdk": "^4.0.2",
     "@usecapsule/user-management-client": "0.1.0",
     "assert": "2.0.0",
+    "axios": "1.4.0",
     "base64url": "3.0.1",
     "buffer": "6.0.3",
     "cbor-web": "8.1.0",
