@@ -3559,9 +3559,10 @@
     "@typescript-eslint/types" "5.57.0"
     eslint-visitor-keys "^3.3.0"
 
-"@usecapsule/user-management-client@capsule-org/user-management-client#norwood/partner-policies":
-  version "0.0.4"
-  resolved "git+ssh://git@github.com/capsule-org/user-management-client.git#d287188d92d4fb8bd13edae98d72c3f542cd017b"
+"@usecapsule/user-management-client@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@usecapsule/user-management-client/-/user-management-client-0.1.0.tgz#9db50f9645116a0a4a5fdf0f76bc270d6333f885"
+  integrity sha512-7tWQr0RRblTm4fnDaP++vM/oa+KIUv698Mo/UO+DlZlodx+N2wtbLPk6M10bGHAIQsgB2KJ6Zy2k3B5tdDIoOg==
   dependencies:
     axios "^0.27.2"
 
