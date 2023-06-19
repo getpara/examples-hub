@@ -60,6 +60,7 @@ export function keygen(
       params: { userId, secretKey },
       functionType: 'KEYGEN',
       offloadMPCComputationURL: ctx.offloadMPCComputationURL,
+      disableWorkers: ctx.disableWorkers,
     });
   });
 }

@@ -12,6 +12,7 @@ interface Message {
   env: Environment;
   apiKey?: string;
   offloadMPCComputationURL?: string;
+  disableWorkers?: boolean;
   functionType: string;
   params: Record<string, any>;
 }
@@ -58,13 +59,13 @@ async function executeMessage(ctx: Ctx, message: Message, callCustomFunction: Fu
 }
 
 export async function handleMessage(e: { data: Message }, postMessage: (message: any) => void, useFetchAdapter?: boolean): Promise<any> {
-  const { env, apiKey, offloadMPCComputationURL } = e.data;
+  const { env, apiKey, offloadMPCComputationURL, disableWorkers } = e.data;
   const ctx = {
     env,
     apiKey,
     capsuleClient: initClient(env, apiKey, useFetchAdapter),
     offloadMPCComputationURL: offloadMPCComputationURL,
-    mpcComputationClient: mpcComputationClient.initClient(offloadMPCComputationURL),
+    mpcComputationClient: offloadMPCComputationURL ? mpcComputationClient.initClient(offloadMPCComputationURL, !!disableWorkers) : undefined,
   };
   if (!ctx.offloadMPCComputationURL) {
     await loadWasm(ctx);

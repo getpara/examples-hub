@@ -30,7 +30,8 @@ export async function setupWorker(ctx: Ctx, resFunction: (arg: any) => void, cus
 
   let worker: Worker;
   if (ctx.useLocalFiles) {
-    worker = new Worker(new URL('./worker.ts', import.meta.url));
+    // worker = new Worker(new URL('./worker.ts', import.meta.url));
+    throw new Error('useLocalFiles only supported locally');
   } else {
     const workerRes = await fetch(`${getPortalBaseURL(ctx)}/static/js/mpcWorker-bundle.js`);
     const workerBlob = new Blob([await workerRes.text()], { type: 'application/javascript' });

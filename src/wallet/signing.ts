@@ -22,6 +22,7 @@ export async function sendTransaction(
       params: { share, walletId, userId, tx, chainId },
       functionType: 'SEND_TRANSACTION',
       offloadMPCComputationURL: ctx.offloadMPCComputationURL,
+      disableWorkers: ctx.disableWorkers,
     });
   });
 }
@@ -43,6 +44,7 @@ export async function signMessage(
       params: { share, walletId, userId, message },
       functionType: 'SIGN_MESSAGE',
       offloadMPCComputationURL: ctx.offloadMPCComputationURL,
+      disableWorkers: ctx.disableWorkers,
     });
   });
 }

@@ -144,7 +144,7 @@ export class Capsule {
       useLocalFiles: opts.useLocalFiles,
     };
     if (opts.offloadMPCComputationURL) {
-      this.ctx.mpcComputationClient = mpcComputationClient.initClient(opts.offloadMPCComputationURL);
+      this.ctx.mpcComputationClient = mpcComputationClient.initClient(opts.offloadMPCComputationURL, opts.disableWorkers);
     }
 
     if (opts.useStorageOverrides) {
