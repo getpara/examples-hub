@@ -277,8 +277,7 @@ function Helper() {
             A New Way to Log In
           </Text>
           <Text fontSize="xs" color="brand.dimmed2">
-            Create a Capsule wallet and login to Lens today. Click the button to
-            start today.
+            Get started and create a wallet or log in, powered by Capsule.
           </Text>
         </Flex>
       </HStack>
