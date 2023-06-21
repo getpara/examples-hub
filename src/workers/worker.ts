@@ -58,8 +58,12 @@ async function executeMessage(ctx: Ctx, message: Message, callCustomFunction: Fu
   }
 }
 
-export async function handleMessage(e: { data: Message }, postMessage: (message: any) => void, useFetchAdapter?: boolean): Promise<any> {
+export async function handleMessage(e: { data: Message }, postMessage: (message: any) => void, useFetchAdapter?: boolean): Promise<boolean> {
   const { env, apiKey, offloadMPCComputationURL, disableWorkers } = e.data;
+  if (!env) {
+    // this means a message we didn't send was received and we want to ignore it
+    return true;
+  }
   const ctx = {
     env,
     apiKey,
@@ -67,6 +71,7 @@ export async function handleMessage(e: { data: Message }, postMessage: (message:
     offloadMPCComputationURL: offloadMPCComputationURL,
     mpcComputationClient: offloadMPCComputationURL ? mpcComputationClient.initClient(offloadMPCComputationURL, !!disableWorkers) : undefined,
   };
+
   if (!ctx.offloadMPCComputationURL) {
     await loadWasm(ctx);
   }
@@ -80,9 +85,13 @@ export async function handleMessage(e: { data: Message }, postMessage: (message:
 
   const result = await executeMessage(ctx, e.data, callCustomFunction);
   postMessage(result);
+  return false;
 }
 
 addEventListener('message', async (e: { data: Message }) => {
-  await handleMessage(e, self.postMessage);
+  const skipClose = await handleMessage(e, self.postMessage);
+  if (skipClose) {
+    return;
+  }
   self.close();
 });
