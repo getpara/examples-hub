@@ -440,16 +440,18 @@ export class Capsule {
     )}`;
   }
 
+  // pass in base64 encoding of exact message that should be signed
+  // if you want to sign the keccak256 hash of a message, hash the message first and then pass in the base64 encoded hash
   async signMessage(
     walletId: string,
-    message: string,
+    messageBase64: string,
   ): Promise<FullSignatureRes> {
     const res = await signMessage(
       this.ctx,
       this.userId,
       walletId,
       this.wallets[walletId].signer,
-      message,
+      messageBase64,
     );
     if ((res as DeniedSignatureRes).pendingTransactionId) {
       return {
