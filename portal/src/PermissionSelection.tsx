@@ -170,6 +170,12 @@ function PermissionSelection({
 
   async function performSetup() {
     const detailsRes = (await userManagementClient.getPartner(partnerId)).data;
+    if (!detailsRes.policy) {
+      // no policy so no need to show any permission selection
+      onDone();
+      return;
+    }
+
     if (isLogin) {
       const { policy } = detailsRes;
       const { permissions } = (
@@ -189,7 +195,7 @@ function PermissionSelection({
     performSetup();
   }, []);
 
-  if (!partnerDetails) {
+  if (!partnerDetails || !partnerDetails.policy) {
     return <div></div>;
   }
 
