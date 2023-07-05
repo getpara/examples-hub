@@ -25,7 +25,8 @@ import {
 } from './types/walletTypes';
 
 // amount of time in ms that a web auth session lasts
-const BIOMETRIC_VERIFICATION_TIME_MS = 15 * 60 * 1000;
+const BIOMETRIC_VERIFICATION_TIME_MS = 30 * 60 * 1000;
+const DEV_BIOMETRIC_VERIFICATION_TIME_MS = 60 * 60 * 1000;
 
 export interface Wallet {
   id: string;
@@ -53,7 +54,10 @@ const LOCAL_STORAGE_WALLETS = `${PREFIX}wallets`;
 const LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR = `${PREFIX}loginEncryptionKeyPair`;
 const SESSION_STORAGE_PAILLIER_SECRET_KEY = `${PREFIX}paillierSecretKey`;
 
-function biometricVerifiedRecently(verifiedAt: number): boolean {
+function biometricVerifiedRecently(ctx: Ctx, verifiedAt: number): boolean {
+  if (ctx.env !== Environment.PROD) {
+    return Date.now() - verifiedAt <= DEV_BIOMETRIC_VERIFICATION_TIME_MS;
+  }
   return Date.now() - verifiedAt <= BIOMETRIC_VERIFICATION_TIME_MS;
 }
 
@@ -325,7 +329,7 @@ export class Capsule {
     const res = await this.ctx.capsuleClient.touchSession();
     return (
       res.data.biometricVerifiedAt &&
-      biometricVerifiedRecently(res.data.biometricVerifiedAt)
+      biometricVerifiedRecently(this.ctx, res.data.biometricVerifiedAt)
     );
   }
 
