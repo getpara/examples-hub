@@ -10,7 +10,7 @@
     "@emotion/react": "^11.10.8",
     "@emotion/styled": "^11.10.8",
     "@ramp-network/ramp-instant-sdk": "^4.0.2",
-    "@usecapsule/user-management-client": "0.1.0",
+    "@usecapsule/user-management-client": "0.2.0",
     "assert": "2.0.0",
     "axios": "1.4.0",
     "base64url": "3.0.1",
