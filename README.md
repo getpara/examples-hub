@@ -2,7 +2,10 @@
 
 ## Setup
 
-Ask a coworker to add you to the "@usecapsule" organization on NPM and `npm login`.
+Ask a coworker to add you to the "@usecapsule" organization on NPM and ensure you're logged in:
+```sh
+npm login
+```
 
 To run the example locally, navigate to `web-sdk` directory root, and install dependencies:
 ```sh
