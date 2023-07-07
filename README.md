@@ -2,13 +2,18 @@
 
 ## Setup
 
+Ask a coworker to add you to the "@usecapsule" organization on NPM and ensure you're logged in:
+```sh
+npm login
+```
+
 To run the example locally, navigate to `web-sdk` directory root, and install dependencies:
 ```sh
 yarn
 ```
 Then navigate to `examples` and install dependencies:
 ```sh
-cd examples and yarn
+cd examples && yarn
 ```
 Start running the example with:
 ```sh
