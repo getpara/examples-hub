@@ -2,7 +2,7 @@
 
 ## Setup
 
-Ask a coworker to add you to the "@usecapsule" organization on yarn.
+Ask a coworker to add you to the "@usecapsule" organization on NPM and `npm login`.
 
 To run the example locally, navigate to `web-sdk` directory root, and install dependencies:
 ```sh
