@@ -18,6 +18,7 @@ module.exports = {
         "url" : false,
         "zlib": false,
         "https": false,
+        "http": false,
       }
 
       return webpackConfig;

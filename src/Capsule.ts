@@ -313,6 +313,10 @@ export class Capsule {
     return this.getSetUpBiometricsURL();
   }
 
+  async resendVerificationCode(): Promise<void> {
+    await this.ctx.capsuleClient.resendVerificationCode(this.userId);
+  }
+
   // returns web auth url for creating a new credential
   async getSetUpBiometricsURL(): Promise<string> {
     const res = await this.ctx.capsuleClient.addSessionPublicKey(this.userId, {

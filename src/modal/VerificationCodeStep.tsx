@@ -11,7 +11,6 @@ import {
 } from '@chakra-ui/react';
 import { Capsule } from '../Capsule';
 import Console from './assets/console';
-import Plus from './assets/plus';
 import VerifyCode from './assets/verifyCode';
 
 export function VerificationCodeStep({
@@ -26,7 +25,6 @@ export function VerificationCodeStep({
   setWebAuthURLForCreate: (newValue: string) => void;
 }) {
   const [verificationCode, setVerificationCode] = useState('');
-
   if (currentStep !== ModalStep.VERIFICATION_CODE) {
     return null;
   }
@@ -84,6 +82,14 @@ export function VerificationCodeStep({
           }}
         >
           Continue
+        </Button>
+        <Button 
+          variant="link" 
+          onClick={async () => {
+            await capsule.resendVerificationCode();
+          }
+        }>
+          <Text fontSize={11}>Resend Code</Text>
         </Button>
       </VStack>
     </>
