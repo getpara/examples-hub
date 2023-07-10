@@ -29,7 +29,6 @@ import CapsuleSmall from './assets/capsuleSmall';
 import { Header } from './Header';
 import { Footer } from './Footer';
 import { truncateEthAddress } from './utils';
-import CapsuleBox from './assets/capsuleBox';
 
 interface CapsuleModalProps {
   capsule: Capsule;
@@ -270,7 +269,7 @@ function Helper() {
       </Text>
       <HStack flex={1}>
         <Box width="60px">
-          <CapsuleBox />
+          <CapsuleSmall w={27} h={48} />
         </Box>
         <Flex flexDirection="column" alignItems="left" justifyContent="center">
           <Text fontSize="xs" color="brand.content">
