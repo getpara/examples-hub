@@ -25,6 +25,22 @@ export function VerificationCodeStep({
   setWebAuthURLForCreate: (newValue: string) => void;
 }) {
   const [verificationCode, setVerificationCode] = useState('');
+  const [incorrectCode, setIncorrectCode] = useState(false);
+  const [tooManyAttempts, setTooManyAttempts] = useState(false);
+  const [resendStatus, setResendStatus] = useState('Resend Code');
+  const [isResendButtonDisabled, setResendButtonDisabled] = useState(false);
+
+  const handleClick = async () => {
+    setResendStatus("Code Resent!");
+    setResendButtonDisabled(true);
+    await capsule.resendVerificationCode();
+
+    setTimeout(() => {
+      setResendStatus("Resend Code");
+      setResendButtonDisabled(false);
+    }, 3000);
+  };
+
   if (currentStep !== ModalStep.VERIFICATION_CODE) {
     return null;
   }
@@ -62,6 +78,9 @@ export function VerificationCodeStep({
         </Text>
         <Input
           type="string"
+          errorBorderColor='red.500'
+          isInvalid={incorrectCode}
+          isDisabled={tooManyAttempts}
           borderColor="brand.frameColor"
           textColor="brand.text"
           background="rgba(255, 255, 255, 0.05)"
@@ -73,23 +92,41 @@ export function VerificationCodeStep({
             setVerificationCode(e.target.value);
           }}
         />
+        {incorrectCode && <Text alignSelf="flex-start" color="red.500" fontSize="x-small">Incorrect Code</Text>}
+        {tooManyAttempts && <Text alignSelf="flex-start" color="red.500" fontSize="x-small">Too many incorrect attempts. Please try again in 10 minutes.</Text>}
         <Spacer />
         <Button
           width="100%"
           onClick={async () => {
-            setWebAuthURLForCreate(await capsule.verifyEmail(verificationCode));
-            setCurrentStep(ModalStep.BIOMETRIC_CREATION);
+            if (verificationCode.length === 6 && /^\d+$/.test(verificationCode)) {
+              try {
+                setWebAuthURLForCreate(await capsule.verifyEmail(verificationCode));
+                setIncorrectCode(false);
+                setCurrentStep(ModalStep.BIOMETRIC_CREATION);
+              } catch (e) {
+                if (e.message.includes('429')) {
+                  setIncorrectCode(false);
+                  setTooManyAttempts(true);
+                } else {
+                  setIncorrectCode(true);
+                  setTooManyAttempts(false);
+                }
+              }
+            } else {
+              setIncorrectCode(true);
+            }
           }}
         >
           Continue
         </Button>
-        <Button 
-          variant="link" 
+        <Button
+          variant="link"
           onClick={async () => {
-            await capsule.resendVerificationCode();
-          }
-        }>
-          <Text fontSize={11}>Resend Code</Text>
+            await handleClick();
+          }}
+          isDisabled={isResendButtonDisabled || tooManyAttempts}
+        >
+          <Text fontSize={11}>{resendStatus}</Text>
         </Button>
       </VStack>
     </>
