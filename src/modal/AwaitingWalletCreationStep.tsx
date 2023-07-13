@@ -17,7 +17,7 @@ export function AwaitingWalletCreationStep({
   currentStep: ModalStep;
   percentKeygenDone: number;
 }) {
-  if (currentStep !== ModalStep.AWAITING_WALLET_CREATION) {
+  if (currentStep !== ModalStep.AWAITING_WALLET_CREATION && currentStep !== ModalStep.AWAITING_WALLET_CREATION_AFTER_LOGIN) {
     return null;
   }
   return (

@@ -15,7 +15,6 @@ import { Ctx, getPortalBaseURL } from './definitions';
 import { Environment } from './definitions';
 import { initClient } from './external/capsuleClient';
 import * as mpcComputationClient from './external/mpcComputationClient';
-import { KeyContainer } from './shares/KeyContainer';
 import { distributeNewShare } from './shares/shareDistribution';
 import { openPopup } from './modal/utils';
 import {
@@ -417,8 +416,8 @@ export class Capsule {
   }
 
   async createWallet(
-    skipDistribute: boolean = false,
-    customFunction: Function,
+    skipDistribute = false,
+    customFunction: () => void,
   ): Promise<[Wallet, string | null]> {
     const secretKey = await this.sessionStorageGetItem(
       SESSION_STORAGE_PAILLIER_SECRET_KEY,

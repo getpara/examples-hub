@@ -97,9 +97,9 @@ async function createTransaction(
 }
 
 // const capsule = new Capsule(Environment.SANDBOX, DEFAULT_API_KEY);
-const capsule = new Capsule(Environment.SANDBOX, DEFAULT_API_KEY, {
+const capsule = new Capsule(Environment.SANDBOX, undefined, {
   // useLocalFiles: true,
-  // offloadMPCComputationURL: 'https://partner-mpc-computation.sandbox.usecapsule.com',
+  offloadMPCComputationURL: 'https://partner-mpc-computation.sandbox.usecapsule.com',
 });
 
 function App() {

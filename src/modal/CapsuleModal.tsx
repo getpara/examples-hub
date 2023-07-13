@@ -46,6 +46,8 @@ const themeResolve: Record<string, Theme> = {
   light: lightTheme,
 } as const;
 
+const STORAGE_PREFIX = '@CAPSULE/';
+
 export const CapsuleModal = ({
   capsule,
   isOpen,
@@ -60,13 +62,33 @@ export const CapsuleModal = ({
   const [email, setEmail] = useState(capsule.getEmail());
   const [paillierGenDone, setPaillierGenDone] = useState(false);
   const [walletCreated, setWalletCreated] = useState(false);
-  const [webAuthURLForLogin, setWebAuthURLForLogin] = useState('');
-  const [isCreateAccountType, setIsCreateAccountType] = useState(false);
+  const [walletCreationInProgress, setWalletCreationInProgress] = useState(false);
+  const [webAuthURLForLogin, setWebAuthURLForLoginState] = useState(sessionStorage.getItem(`${STORAGE_PREFIX}webAuthURLForLogin`) || '');
+  const setWebAuthURLForLogin = (value: string) => {
+    setWebAuthURLForLoginState(value);
+    sessionStorage.setItem(`${STORAGE_PREFIX}webAuthURLForLogin`, value);
+  };
+  const [isCreateAccountType, setIsCreateAccountTypeState] = useState(sessionStorage.getItem(`${STORAGE_PREFIX}isCreateAccountType`) === 'true');
+  const setIsCreateAccountType = (value: boolean) => {
+    setIsCreateAccountTypeState(value);
+    sessionStorage.setItem(`${STORAGE_PREFIX}isCreateAccountType`, value.toString());
+  };
   const [distributeDone, setDistributeDone] = useState(false);
-  const [isFullyLoggedIn, setIsFullyLoggedIn] = useState(false);
-  const [webAuthURLForCreate, setWebAuthURLForCreate] = useState('');
-  const [currentStep, setCurrentStep] = useState(ModalStep.EMAIL_COLLECTION);
-  // const currentStep = ModalStep.ACCOUNT_CREATION_DONE;
+  const [isFullyLoggedIn, setIsFullyLoggedInState] = useState(sessionStorage.getItem(`${STORAGE_PREFIX}isFullyLoggedIn`) === 'true');
+  const setIsFullyLoggedIn = (value: boolean) => {
+    setIsFullyLoggedInState(value);
+    sessionStorage.setItem(`${STORAGE_PREFIX}isFullyLoggedIn`, value.toString());
+  };
+  const [webAuthURLForCreate, setWebAuthURLForCreateState] = useState(sessionStorage.getItem(`${STORAGE_PREFIX}webAuthURLForCreate`) || '');
+  const setWebAuthURLForCreate = (value: string) => {
+    setWebAuthURLForCreateState(value);
+    sessionStorage.setItem(`${STORAGE_PREFIX}webAuthURLForCreate`, value);
+  };
+  const [currentStep, setCurrentStepState] = useState(sessionStorage.getItem(`${STORAGE_PREFIX}currentStep`) as ModalStep || ModalStep.EMAIL_COLLECTION);
+  const setCurrentStep = (value: ModalStep) => {
+    setCurrentStepState(value);
+    sessionStorage.setItem(`${STORAGE_PREFIX}currentStep`, value);
+  };
   const [createWalletRes, setCreateWalletRes] =
     useState<[Wallet, string]>(null);
   const [recoveryShare, setRecoveryShare] = useState<string>(null);
@@ -79,7 +101,7 @@ export const CapsuleModal = ({
   );
 
   useEffect(() => {
-    if (!isOpen) {
+    if (!isOpen && [ModalStep.LOGIN_DONE, ModalStep.ACCOUNT_CREATION_DONE].includes(currentStep)) {
       setCurrentStep(ModalStep.EMAIL_COLLECTION);
       setIsFullyLoggedIn(false);
       setDistributeDone(false);
@@ -112,19 +134,26 @@ export const CapsuleModal = ({
 
   // generate wallet once we know it's account creation
   useEffect(() => {
-    if (!isCreateAccountType || walletCreated || !paillierGenDone) {
+    if (
+      (!isCreateAccountType && currentStep !== ModalStep.AWAITING_WALLET_CREATION_AFTER_LOGIN) ||
+      walletCreated ||
+      !paillierGenDone ||
+      walletCreationInProgress
+    ) {
       return;
     }
     async function genWallet() {
+      setWalletCreationInProgress(true);
       const createWalletRes = await capsule.createWallet(
         true,
         keygenStatusFunction,
       );
       setCreateWalletRes(createWalletRes);
       setWalletCreated(true);
+      setWalletCreationInProgress(false);
     }
     genWallet();
-  }, [paillierGenDone, isCreateAccountType]);
+  }, [paillierGenDone, isCreateAccountType, currentStep]);
 
   // distribute share once we know keygen is done
   useEffect(() => {
@@ -139,7 +168,11 @@ export const CapsuleModal = ({
       );
       setRecoveryShare(result);
       setDistributeDone(true);
-      setCurrentStep(ModalStep.ACCOUNT_CREATION_DONE);
+      if (currentStep === ModalStep.AWAITING_WALLET_CREATION_AFTER_LOGIN) {
+        setCurrentStep(ModalStep.LOGIN_DONE);
+      } else {
+        setCurrentStep(ModalStep.ACCOUNT_CREATION_DONE);
+      }
     }
     distributeShare();
   }, [isFullyLoggedIn, walletCreated, createWalletRes]);
@@ -169,7 +202,9 @@ export const CapsuleModal = ({
         }
         await capsule.userSetupAfterLogin();
 
-        const fetchedWallets = await capsule.fetchWallets();
+        const fetchedWallets = (await capsule.fetchWallets()).filter(
+          wallet => !!wallet.address,
+        );
         const tempSharesRes = await capsule.getTransmissionKeyShares();
         // need this check for the case where user has logged in but temp encrypted shares
         // haven't been sent to the backend yet
@@ -180,6 +215,10 @@ export const CapsuleModal = ({
           setIsFullyLoggedIn(true);
           setWebAuthURLForLogin('');
           clearInterval(loginInterval.current);
+          if (Object.values(capsule.getWallets()).length === 0) {
+            setCurrentStep(ModalStep.AWAITING_WALLET_CREATION_AFTER_LOGIN);
+            return;
+          }
           setCurrentStep(ModalStep.LOGIN_DONE);
           return;
         }

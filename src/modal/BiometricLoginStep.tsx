@@ -24,7 +24,7 @@ export function BiometricLoginStep({
     },
   } = useTheme();
 
-  const [shortLoginLink, setShortLoginLink] = useState<string>();
+  const [shortLoginLink, setShortLoginLink] = useState<string>(webAuthURLForLogin);
 
   useEffect(() => {
     if (currentStep !== ModalStep.BIOMETRIC_LOGIN) {
