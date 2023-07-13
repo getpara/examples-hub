@@ -29,8 +29,8 @@ export async function authCreation(
   email: string,
   biometricId: string,
 ): Promise<void> {
-  const { creds, userHandle } = await createCredential(ENV, userId, email);
-  const { cosePublicKey, clientDataJSON } = parseCredentialCreationRes(creds);
+  const { creds, userHandle, algorithm } = await createCredential(ENV, userId, email);
+  const { cosePublicKey, clientDataJSON } = parseCredentialCreationRes(creds, algorithm);
   // @ts-ignore
   const publicKeyHex = await getPublicKeyFromSignature(capsule.ctx, userHandle);
   // @ts-ignore

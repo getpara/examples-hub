@@ -1,6 +1,11 @@
 import base64url from 'base64url';
 import * as cbor from 'cbor-web';
+import forge from 'node-forge';
+
 import { Environment } from '../definitions';
+
+const ES256_ALGORITHM = -7;
+const RS256_ALGORITHM = -257;
 
 function publicKeyCredentialToJSON(
   // eslint-disable-next-line @typescript-eslint/ban-types
@@ -63,7 +68,7 @@ function parseAttestationObject(attestationObject: string): any {
   return cbor.decodeAllSync(attestationObjectBuffer)[0];
 }
 
-function COSEECDHAtoPKCS(COSEPublicKey: Buffer): Buffer {
+function COSEECDSAtoPKCS(COSEPublicKey: Buffer): Buffer {
   const coseStruct = cbor.decodeAllSync(COSEPublicKey)[0];
   const tag = Buffer.from([0x04]);
   const x = coseStruct.get(-2);
@@ -72,7 +77,26 @@ function COSEECDHAtoPKCS(COSEPublicKey: Buffer): Buffer {
   return Buffer.concat([tag, x, y]);
 }
 
-export function parseCredentialCreationRes(creds: any): {
+function COSERSAtoPKCS(COSEPublicKey: Buffer): Buffer {
+  const coseStruct = cbor.decodeAllSync(COSEPublicKey)[0];
+  const n = coseStruct.get(-1);
+  const e = coseStruct.get(-2);
+
+  // Convert to Forge's format:
+  const nForge = forge.util.createBuffer(n.toString('binary'));
+  const eForge = forge.util.createBuffer(e.toString('binary'));
+
+  // Create a new public key object:
+  const publicKey = forge.pki.setRsaPublicKey(
+    new forge.jsbn.BigInteger(nForge.toHex(), 16),
+    new forge.jsbn.BigInteger(eForge.toHex(), 16)
+  );
+
+  // Export as a PKCS#1 public key buffer:
+  return Buffer.from(forge.pki.publicKeyToPem(publicKey), 'utf-8');
+}
+
+export function parseCredentialCreationRes(creds: any, algorithm: number): {
   cosePublicKey: string;
   clientDataJSON: string;
 } {
@@ -81,8 +105,15 @@ export function parseCredentialCreationRes(creds: any): {
   );
   const { COSEPublicKey } = parseMakeCredAuthData(parsedAttestation.authData);
 
+  if (algorithm === RS256_ALGORITHM) {
+    return {
+      cosePublicKey: base64url.encode(COSERSAtoPKCS(COSEPublicKey)),
+      clientDataJSON: creds.response.clientDataJSON,
+    };
+  }
+
   return {
-    cosePublicKey: base64url.encode(COSEECDHAtoPKCS(COSEPublicKey)),
+    cosePublicKey: base64url.encode(COSEECDSAtoPKCS(COSEPublicKey)),
     clientDataJSON: creds.response.clientDataJSON,
   };
 }
@@ -100,6 +131,7 @@ function generateUserHandle(env: Environment) {
 export async function createCredential(env: Environment, userId: string, email: string): Promise<{
   creds: any,
   userHandle: Uint8Array,
+  algorithm: number,
 }> {
   const userHandle = generateUserHandle(env)
   const createCredentialDefaultArgs = {
@@ -119,24 +151,23 @@ export async function createCredential(env: Environment, userId: string, email: 
         displayName: email,
       },
       pubKeyCredParams: [
-        { type: 'public-key' as any, alg: -7 },
-        // may need this for windows hello or similar browsers
-        // TODO: test if windows hello works with above or if we need below alg
-        // { type: "public-key", alg: -257 },
+        { type: 'public-key' as PublicKeyCredentialType, alg: ES256_ALGORITHM },
+        // RS256_ALGORITHM should only be needed for windows hello
+        { type: 'public-key' as PublicKeyCredentialType, alg: RS256_ALGORITHM },
       ],
       attestation: 'direct' as any,
       timeout: 60000,
       // TODO: don't think we really get value from verifying this, but should revisit
       challenge: Buffer.from(userId, 'utf-8'),
     },
-  }
+  };
 
-  const credential = await navigator.credentials.create(
-    createCredentialDefaultArgs
-  )
+  const credential = await navigator.credentials.create(createCredentialDefaultArgs);
+
   return {
     creds: publicKeyCredentialToJSON(credential),
     userHandle,
+    algorithm: ((credential as PublicKeyCredential).response as AuthenticatorAttestationResponse).getPublicKeyAlgorithm(),
   }
 }
 
