@@ -334,28 +334,39 @@ export function CapsuleButton({
   const [address, setAddress] = useState(
     Object.values(capsule.getWallets())?.[0]?.address,
   );
+  const [isSessionActive, setIsSessionActive] = useState(false);
+
+  useEffect(() => {
+    async function checkSession() {
+      setIsSessionActive(await capsule.isSessionActive());
+    }
+    checkSession();
+  }, []);
 
   return (
     <ChakraProvider theme={newTheme}>
       <CapsuleModal
         appName={appName}
         isOpen={modalIsOpen}
-        onClose={() => {
-          const newAddress = Object.values(capsule.getWallets())?.[0]?.address;
-          setAddress(newAddress);
+        onClose={async () => {
+          if (await capsule.isSessionActive()) {
+            const newAddress = Object.values(capsule.getWallets())?.[0]?.address;
+            setAddress(newAddress);
+            setIsSessionActive(true);
+          }
           setModalIsOpen(false);
         }}
         theme={newTheme}
         capsule={capsule}
       />
       <HStack>
-        {address ? (
+        {(isSessionActive && address) ? (
           <Text textColor={'brand.addressColor'}>
             {truncateEthAddress(address)}
           </Text>
         ) : null}
         <Tooltip
-          isDisabled={!!address}
+          isDisabled={!!(isSessionActive && address)}
           label={<Helper />}
           backgroundColor={'brand.background'}
           borderRadius="4px"
@@ -366,9 +377,10 @@ export function CapsuleButton({
             backgroundColor={'brand.background'}
             color={'white'}
             onClick={() => {
-              if (address) {
+              if (isSessionActive && address) {
                 capsule.logout().then(() => {
                   setAddress(undefined);
+                  setIsSessionActive(false);
                 });
               } else {
                 setModalIsOpen(true);
@@ -376,7 +388,7 @@ export function CapsuleButton({
             }}
           >
             <Text size="18px" marginRight="9px">
-              {address ? 'Logout' : 'Connect'}
+              {(isSessionActive && address) ? 'Logout' : 'Connect'}
             </Text>
             <CapsuleSmall />
           </Button>
