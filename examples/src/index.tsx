@@ -125,7 +125,7 @@ function App() {
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
   async function checkIsSessionActive() {
-    const isSessionActive = await capsule.isSessionActive();
+    const isSessionActive = await capsule.isFullyLoggedIn();
     setIsSessionActive(isSessionActive);
   }
 

@@ -336,6 +336,13 @@ export class Capsule {
     );
   }
 
+  async isFullyLoggedIn(): Promise<boolean> {
+    const isSessionActive = await this.isSessionActive();
+    const walletAddress = this.getWallets()?.[Object.keys(this.getWallets())[0]]?.address;
+
+    return isSessionActive && !!walletAddress;
+  }
+
   // returns web auth url for logging in
   async initiateUserLogin(email: string): Promise<string> {
     await this.setEmail(email);
