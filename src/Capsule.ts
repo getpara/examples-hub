@@ -50,7 +50,7 @@ const PREFIX = '@CAPSULE/';
 const LOCAL_STORAGE_EMAIL = `${PREFIX}e-mail`;
 const LOCAL_STORAGE_USER_ID = `${PREFIX}userId`;
 const LOCAL_STORAGE_WALLETS = `${PREFIX}wallets`;
-const LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR = `${PREFIX}loginEncryptionKeyPair`;
+const SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR = `${PREFIX}loginEncryptionKeyPair`;
 const SESSION_STORAGE_PAILLIER_SECRET_KEY = `${PREFIX}paillierSecretKey`;
 
 function biometricVerifiedRecently(ctx: Ctx, verifiedAt: number): boolean {
@@ -166,12 +166,12 @@ export class Capsule {
       localStorage.getItem(LOCAL_STORAGE_WALLETS) || '{}',
     );
     if (
-      sessionStorage.getItem(LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR) &&
-      sessionStorage.getItem(LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR) !==
+      sessionStorage.getItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR) &&
+      sessionStorage.getItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR) !==
         'undefined'
     ) {
       this.loginEncryptionKeyPair = this.convertEncryptionKeyPair(JSON.parse(
-        sessionStorage.getItem(LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR),
+        sessionStorage.getItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR),
       ));
     }
   }
@@ -183,12 +183,12 @@ export class Capsule {
       await this.localStorageGetItem(LOCAL_STORAGE_WALLETS) || '{}',
     );
     if (
-      (await this.sessionStorageGetItem(LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR)) &&
-      (await this.sessionStorageGetItem(LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR)) !==
+      (await this.sessionStorageGetItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR)) &&
+      (await this.sessionStorageGetItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR)) !==
         'undefined'
     ) {
       this.loginEncryptionKeyPair = this.convertEncryptionKeyPair(JSON.parse(
-        await this.sessionStorageGetItem(LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR),
+        await this.sessionStorageGetItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR),
       ));
     }
   }
@@ -230,14 +230,14 @@ export class Capsule {
   private async setLoginEncryptionKeyPair(keyPair: pki.rsa.KeyPair): Promise<void> {
     this.loginEncryptionKeyPair = keyPair;
     await this.sessionStorageSetItem(
-      LOCAL_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR,
+      SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR,
       JSON.stringify(keyPair),
     );
   }
 
   private async deleteLoginEncryptionKeyPair(): Promise<void> {
     this.loginEncryptionKeyPair = undefined;
-    await this.sessionStorageRemoveItem('loginEncryptionKeyPair');
+    await this.sessionStorageRemoveItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR);
   }
 
   getEmail(): string | undefined {
@@ -384,16 +384,16 @@ export class Capsule {
   }
 
   async getTransmissionKeyShares(): Promise<any> {
-    return this.ctx.capsuleClient.getTransmissionKeyshares(this.userId);
+    const res = await this.ctx.capsuleClient.touchSession();
+    return this.ctx.capsuleClient.getTransmissionKeyshares(this.userId, res.data.sessionLookupId);
   }
 
-  async setupAfterLogin(): Promise<void> {
-    const res = await this.ctx.capsuleClient.touchSession(true);
-    const tempSharesRes = await this.ctx.capsuleClient.getTransmissionKeyshares(
-      res.data.userId,
-    );
+  async setupAfterLogin(temporaryShares?: any[]): Promise<void> {
+    if (!temporaryShares) {
+      temporaryShares = (await this.getTransmissionKeyShares()).data.temporaryShares;
+    }
 
-    tempSharesRes.data.temporaryShares.forEach((share) => {
+    temporaryShares.forEach((share) => {
       this.wallets[share.walletId] = {
         id: share.walletId,
         signer: decryptWithKeyPair(
@@ -404,9 +404,9 @@ export class Capsule {
       };
     });
 
-    await this.setUserId(res.data.userId);
     await this.deleteLoginEncryptionKeyPair();
     await this.populateWalletAddresses();
+    await this.ctx.capsuleClient.touchSession(true);
   }
 
   async distributeNewWalletShare(
@@ -424,7 +424,7 @@ export class Capsule {
 
   async createWallet(
     skipDistribute = false,
-    customFunction: () => void,
+    customFunction: (params?: any) => void,
   ): Promise<[Wallet, string | null]> {
     const secretKey = await this.sessionStorageGetItem(
       SESSION_STORAGE_PAILLIER_SECRET_KEY,

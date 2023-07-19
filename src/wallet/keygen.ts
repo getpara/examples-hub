@@ -18,8 +18,8 @@ export function keygen(
   ctx: Ctx,
   userId: string,
   secretKey: string | null,
-  skipDistribute: boolean = false,
-  customFunction: Function,
+  skipDistribute = false,
+  customFunction: (params?: any) => void,
 ): Promise<{
   signer: string;
   walletId: string;
@@ -74,8 +74,8 @@ function getNumWorkers(ctx): number {
 
 export async function generateBlumPrimes(ctx: Ctx): Promise<{ p: string; q: string; }> {
   const numWorkers = getNumWorkers(ctx);
-  let workerResponses: Promise<any>[] = [];
-  let workers: (Worker | SyncWorker)[] = [];
+  const workerResponses: Promise<any>[] = [];
+  const workers: (Worker | SyncWorker)[] = [];
 
   for (let i = 0; i < numWorkers; i++) {
     workerResponses.push(new Promise(async (resolve) => {

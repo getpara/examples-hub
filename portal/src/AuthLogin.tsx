@@ -22,7 +22,7 @@ import PermissionSelection from './PermissionSelection';
 
 export async function authLogin(
   email: string,
-  sessionId: string,
+  sessionLookupId: string,
   encryptionKey: string,
 ): Promise<string> {
   // @ts-ignore
@@ -35,7 +35,7 @@ export async function authLogin(
     signature: sig.response,
     publicKey: sig.id,
     email,
-    sessionId,
+    sessionLookupId,
   });
   const userId = verifyRes.data.userId;
 
@@ -59,6 +59,7 @@ export async function authLogin(
       walletId: share.walletId,
       encryptedShare: encryptedMessageHex,
       encryptedKey: encryptedKeyHex,
+      sessionLookupId,
     };
   });
   // @ts-ignore

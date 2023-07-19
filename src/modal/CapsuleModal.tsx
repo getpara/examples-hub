@@ -211,10 +211,11 @@ export const CapsuleModal = ({
         if (
           tempSharesRes.data.temporaryShares.length === fetchedWallets.length
         ) {
-          await capsule.setupAfterLogin();
+          clearInterval(loginInterval.current);
+          await capsule.setupAfterLogin(tempSharesRes.data.temporaryShares);
           setIsFullyLoggedIn(true);
           setWebAuthURLForLogin('');
-          clearInterval(loginInterval.current);
+
           if (Object.values(capsule.getWallets()).length === 0) {
             setCurrentStep(ModalStep.AWAITING_WALLET_CREATION_AFTER_LOGIN);
             return;
