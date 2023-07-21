@@ -21,7 +21,8 @@ const DEFAULT_GAS_AMOUNT = '21000';
 const DEFAULT_MAX_PRIORITY_FEE_PER_GAS = '1';
 const DEFAULT_MAX_FEE_PER_GAS = '3';
 const DEFAULT_NONCE = '0';
-const DEFAULT_API_KEY = 'fdba16e45ba41e80185eb2c0195e89d4';
+const API_KEY_WITH_PERMISSIONS = 'fdba16e45ba41e80185eb2c0195e89d4';
+const API_KEY_WITH_BRANDING = '2f938ac0c48ef356050a79bd66042a23';
 // goerli chain id
 const DEFAULT_CHAIN_ID = '11155111';
 const DEFAULT_CONTRACT_ABI = [
@@ -96,10 +97,12 @@ async function createTransaction(
   return tx.serialize().toString('base64');
 }
 
-// const capsule = new Capsule(Environment.SANDBOX, DEFAULT_API_KEY);
 const capsule = new Capsule(Environment.SANDBOX, undefined, {
   // useLocalFiles: true,
   offloadMPCComputationURL: 'https://partner-mpc-computation.sandbox.usecapsule.com',
+  // portalBackgroundColor: '#df092d',
+  // portalPrimaryButtonColor: '#322e47',
+  // portalTextColor: '#ffffff',
 });
 
 function App() {

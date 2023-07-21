@@ -44,6 +44,9 @@ export interface ConstructorOpts {
   sessionStorageSetItemOverride?: (key: string, value: string) => Promise<void>;
   sessionStorageRemoveItemOverride?: (key: string) => Promise<void>;
   clearStorageOverride?: () => Promise<void>;
+  portalBackgroundColor?: string; // please use hex color codes
+  portalPrimaryButtonColor?: string; // please use hex color codes
+  portalTextColor?: string; // please use hex color codes
 }
 
 const PREFIX = '@CAPSULE/';
@@ -67,6 +70,9 @@ export class Capsule {
   private userId?: string;
   private loginEncryptionKeyPair?: pki.rsa.KeyPair;
   private wallets: Record<string, Wallet>;
+  private portalBackgroundColor?: string;
+  private portalPrimaryButtonColor?: string;
+  private portalTextColor?: string;
 
   private localStorageGetItem = async (key: string): Promise<string | null> => {
     return localStorage.getItem(key);
@@ -165,6 +171,11 @@ export class Capsule {
     this.wallets = JSON.parse(
       localStorage.getItem(LOCAL_STORAGE_WALLETS) || '{}',
     );
+
+    this.portalBackgroundColor = opts.portalBackgroundColor;
+    this.portalPrimaryButtonColor = opts.portalPrimaryButtonColor;
+    this.portalTextColor = opts.portalTextColor;
+
     if (
       sessionStorage.getItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR) &&
       sessionStorage.getItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR) !==
@@ -248,33 +259,42 @@ export class Capsule {
     return this.wallets;
   }
 
-  private getWebAuthURLForCreate(
+  private async getPartnerURL(partnerId: string): Promise<string | undefined> {
+    const res = await this.ctx.capsuleClient.getPartner(partnerId);
+    return res.data.partner.portalUrl;
+  }
+
+  private async getWebAuthURLForCreate(
     webAuthId: string,
     partnerId?: string,
-  ): string {
+  ): Promise<string> {
     const partnerIdQueryParam = partnerId ? `&partnerId=${partnerId}` : '';
-    return `${getPortalBaseURL(this.ctx)}/web/users/${
+    const portalBackgroundColorQueryParam = this.portalBackgroundColor ? `&portalBackgroundColor=${encodeURIComponent(this.portalBackgroundColor)}` : '';
+    const portalPrimaryButtonColorQueryParam = this.portalPrimaryButtonColor ? `&portalPrimaryButtonColor=${encodeURIComponent(this.portalPrimaryButtonColor)}` : '';
+    const portalTextColorQueryParam = this.portalTextColor ? `&portalTextColor=${encodeURIComponent(this.portalTextColor)}` : '';
+    return `${(partnerId && await this.getPartnerURL(partnerId)) || getPortalBaseURL(this.ctx)}/web/users/${
       this.userId
     }/biometrics/${webAuthId}?email=${encodeURIComponent(
       this.email,
-    )}${partnerIdQueryParam}`;
+    )}${partnerIdQueryParam}${portalBackgroundColorQueryParam}${portalPrimaryButtonColorQueryParam}${portalTextColorQueryParam}`;
   }
 
   private getShortUrl(compressedUrl: string): string {
     return `${getPortalBaseURL(this.ctx)}/short/${compressedUrl}`;
   }
 
-  private getWebAuthURLForLogin(
+  private async getWebAuthURLForLogin(
     sessionId: string,
     loginEncryptionPublicKey: string,
     partnerId?: string,
-  ): string {
+  ): Promise<string> {
     const partnerIdQueryParam = partnerId ? `&partnerId=${partnerId}` : '';
-    return `${getPortalBaseURL(
-      this.ctx,
-    )}/web/biometrics/login?email=${encodeURIComponent(
+    const portalBackgroundColorQueryParam = this.portalBackgroundColor ? `&portalBackgroundColor=${encodeURIComponent(this.portalBackgroundColor)}` : '';
+    const portalPrimaryButtonColorQueryParam = this.portalPrimaryButtonColor ? `&portalPrimaryButtonColor=${encodeURIComponent(this.portalPrimaryButtonColor)}` : '';
+    const portalTextColorQueryParam = this.portalTextColor ? `&portalTextColor=${encodeURIComponent(this.portalTextColor)}` : '';
+    return `${(partnerId && await this.getPartnerURL(partnerId)) || getPortalBaseURL(this.ctx)}/web/biometrics/login?email=${encodeURIComponent(
       this.email,
-    )}&sessionId=${sessionId}&encryptionKey=${loginEncryptionPublicKey}${partnerIdQueryParam}`;
+    )}&sessionId=${sessionId}&encryptionKey=${loginEncryptionPublicKey}${partnerIdQueryParam}${portalBackgroundColorQueryParam}${portalPrimaryButtonColorQueryParam}${portalTextColorQueryParam}`;
   }
 
   async fetchWallets(): Promise<any[]> {
@@ -366,7 +386,7 @@ export class Capsule {
       await this.setLoginEncryptionKeyPair(keyPair);
     }
 
-    const link = this.getWebAuthURLForLogin(
+    const link = await this.getWebAuthURLForLogin(
       res.data.sessionId,
       getPublicKeyHex(this.loginEncryptionKeyPair),
     );

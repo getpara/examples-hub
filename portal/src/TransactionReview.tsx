@@ -14,6 +14,7 @@ import CapsuleBox from "./assets/CapsuleBox";
 import PoweredByCapsule from "./assets/poweredByCapsule";
 import ScatteredDivider from "./assets/scatteredDivider";
 import {newTheme} from "./library/modal/theme";
+import { ENV } from './definitions';
 
 function TransactionReview() {
   const { userId, pendingTransactionId } = useParams();
@@ -27,7 +28,7 @@ function TransactionReview() {
     const { data } = await userManagementClient.getWebChallenge(
       encodeURIComponent(email),
     );
-    const sig = await generateSignature(data.challenge, data.allowedPublicKeys);
+    const sig = await generateSignature(ENV, data.challenge, data.allowedPublicKeys);
     await userManagementClient.verifyWebChallenge({
       signature: sig.response,
       publicKey: sig.id,
@@ -98,10 +99,10 @@ function TransactionReview() {
         {riskScore === 87 ? <Box padding="32px">
           <img src="/simulation-risky.png" alt="XXX"/>
         </Box> : riskScore === 7 ? <Box padding="32px">
-            <img src="/simulation-safe.png" alt="XXX"/>
+          <img src="/simulation-safe.png" alt="XXX"/>
         </Box> : (
           <Text fontFamily={"monospace"} wordBreak="break-all" mb={8}>{JSON.stringify(pendingTransaction.decodedTx, null, 2)}</Text>
-          )}
+        )}
         <Container width="100%" display="flex" justifyContent="center">
           <Button
             colorScheme="whiteAlpha"

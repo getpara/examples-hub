@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer';
 global.Buffer = Buffer;
-import React, { useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import {
   Heading,
@@ -10,11 +10,10 @@ import {
   Text,
   Flex,
   ChakraProvider,
-  extendTheme,
-  Theme,
+  Box,
 } from '@chakra-ui/react';
 import { PublicKeyStatus } from '@usecapsule/user-management-client';
-import { newTheme } from './library/modal/theme';
+import { getPartnerTheme } from './theme';
 import {
   createCredential,
   parseCredentialCreationRes,
@@ -23,6 +22,10 @@ import { getPublicKeyFromSignature } from './library/cryptography/utils';
 import capsule from './capsule';
 import PermissionSelection from './PermissionSelection';
 import { ENV } from './definitions';
+import { userManagementClient } from './userManagementClient';
+import { Partner } from './types';
+import PoweredByCapsule from './assets/poweredByCapsule';
+import { validateColorInput } from './validation';
 
 export async function authCreation(
   userId: string,
@@ -45,17 +48,27 @@ export async function authCreation(
 
 function AuthCreation() {
   const [biometricDone, updateBiometricDone] = useState(false);
+  const [partner, setPartner] = useState<Partner | undefined>();
 
   const { biometricId: paramsBiometricId, userId: paramsUserId } = useParams();
   const [searchParams, _] = useSearchParams();
   const paramsEmail = decodeURIComponent(searchParams.get('email'));
   const paramsPartnerId = searchParams.get('partnerId');
+  const portalBackgroundColor = validateColorInput(searchParams.get('portalBackgroundColor')) ?
+    decodeURIComponent(searchParams.get('portalBackgroundColor')) :
+    undefined;
+  const portalPrimaryButtonColor = validateColorInput(searchParams.get('portalPrimaryButtonColor')) ?
+    decodeURIComponent(searchParams.get('portalPrimaryButtonColor')) :
+    undefined;
+  const portalTextColor = validateColorInput(searchParams.get('portalTextColor')) ?
+    decodeURIComponent(searchParams.get('portalTextColor')) :
+    undefined;
 
   const setUpBiometrics = useCallback(() => {
     authCreation(paramsUserId, paramsEmail, paramsBiometricId).then(() => {
       updateBiometricDone(true);
 
-      if (!paramsPartnerId) {
+      if (!paramsPartnerId || !partner?.policiesEnabled) {
         setTimeout(function () {
           window.close();
         }, 200);
@@ -69,10 +82,20 @@ function AuthCreation() {
     }, 200);
   };
 
-  return (
-    <ChakraProvider theme={newTheme}>
+  useEffect(() => {
+    async function getPartner() {
+      if (paramsPartnerId) {
+        const detailsRes = (await userManagementClient.getPartner(paramsPartnerId)).data;
+        setPartner(detailsRes.partner);
+      }
+    }
+    getPartner()
+  }, []);
+
+  return (paramsPartnerId && !partner) ? undefined : (
+    <ChakraProvider theme={getPartnerTheme(portalBackgroundColor, portalPrimaryButtonColor, portalTextColor)}>
       <Container color="white" maxW="ld" padding={10} height="100%">
-        {(biometricDone && paramsPartnerId) ? (
+        {(biometricDone && paramsPartnerId && partner?.policiesEnabled) ? (
           <PermissionSelection
             onDone={onPermissionsDone}
             userId={paramsUserId}
@@ -82,7 +105,7 @@ function AuthCreation() {
           <>
             <Flex alignItems="center" justifyContent="left" mb={12}>
               <Image
-                src="/wordmark_white.svg"
+                src={partner?.portalHeaderLogoUrl || '/wordmark_white.svg'}
                 alt="Logo"
                 width="50%"
                 maxWidth={300}
@@ -90,7 +113,10 @@ function AuthCreation() {
               />
             </Flex>
             <Heading size="xl" mb={8}>
-              Authentication Portal
+              {partner ?
+                `${partner.displayName} is using Capsule to create your wallet` :
+                'Authentication Portal'
+              }
             </Heading>
             <Text mb={8}>Authenticate with Capsule to create your wallet.</Text>
             <Text mb={8}>
@@ -116,6 +142,11 @@ function AuthCreation() {
           </>
         )}
       </Container>
+      {paramsPartnerId && <Box backgroundColor={portalBackgroundColor} height="62px" width="100%">
+        <Flex backgroundColor={portalBackgroundColor} h="57px" w="100%" justifyContent={'center'} alignItems={'center'}>
+          <PoweredByCapsule color={portalTextColor} w={50} h={20} />
+        </Flex>
+      </Box>}
     </ChakraProvider>
   );
 }

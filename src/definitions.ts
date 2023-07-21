@@ -18,21 +18,25 @@ export interface Ctx {
   useLocalFiles?: boolean;
 }
 
-export function getPortalBaseURL(ctx: Ctx) {
-  const { env } = ctx;
-  // if (location.hostname === "localhost" ) {
-  //   return "http://localhost:3003"
-  // }
+export function getPortalDomain(env: Environment) {
   switch (env) {
     case Environment.DEV:
-      return 'http://localhost:3003';
+      return 'localhost';
     case Environment.SANDBOX:
-      return 'https://app.sandbox.usecapsule.com';
+      return 'app.sandbox.usecapsule.com';
     case Environment.BETA:
-      return 'https://app.beta.usecapsule.com';
+      return 'app.beta.usecapsule.com';
     case Environment.PROD:
-      return 'https://app.usecapsule.com';
+      return 'app.usecapsule.com';
     default:
       throw new Error(`env: ${env} not supported`);
   }
+}
+
+export function getPortalBaseURL({ env }: { env: Environment }) {
+  const domain = getPortalDomain(env);
+  if (env === Environment.DEV) {
+    return `http://${domain}:3003`;
+  }
+  return `https://${domain}`;
 }

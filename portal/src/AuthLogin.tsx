@@ -1,7 +1,7 @@
 import { Buffer } from 'buffer';
 global.Buffer = Buffer;
-import React, { useState, useCallback } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Heading,
   Image,
@@ -10,6 +10,7 @@ import {
   Text,
   Flex,
   ChakraProvider,
+  Box,
 } from '@chakra-ui/react';
 
 import { generateSignature } from './library/cryptography/webAuth';
@@ -19,6 +20,12 @@ import {
 } from './library/cryptography/utils';
 import capsule from './capsule';
 import PermissionSelection from './PermissionSelection';
+import { getPartnerTheme } from './theme';
+import { userManagementClient } from './userManagementClient';
+import { Partner } from './types';
+import { ENV } from './definitions';
+import PoweredByCapsule from './assets/poweredByCapsule';
+import { validateColorInput } from './validation';
 
 export async function authLogin(
   email: string,
@@ -29,7 +36,7 @@ export async function authLogin(
   const { data } = await capsule.ctx.capsuleClient.getWebChallenge(
     encodeURIComponent(email),
   );
-  const sig = await generateSignature(data.challenge, data.allowedPublicKeys);
+  const sig = await generateSignature(ENV, data.challenge, data.allowedPublicKeys);
   // @ts-ignore
   const verifyRes = await capsule.ctx.capsuleClient.verifyWebChallenge({
     signature: sig.response,
@@ -73,18 +80,28 @@ export async function authLogin(
 function AuthLogin() {
   const [loginDone, updateLoginDone] = useState(false);
   const [userId, setUserId] = useState('');
+  const [partner, setPartner] = useState<Partner | undefined>();
 
   const [searchParams, _] = useSearchParams();
   const paramsEmail = decodeURIComponent(searchParams.get('email'));
   const encryptionKey = searchParams.get('encryptionKey');
   const sessionId = searchParams.get('sessionId');
   const paramsPartnerId = searchParams.get('partnerId');
+  const portalBackgroundColor = validateColorInput(searchParams.get('portalBackgroundColor')) ?
+    decodeURIComponent(searchParams.get('portalBackgroundColor')) :
+    undefined;
+  const portalPrimaryButtonColor = validateColorInput(searchParams.get('portalPrimaryButtonColor')) ?
+    decodeURIComponent(searchParams.get('portalPrimaryButtonColor')) :
+    undefined;
+  const portalTextColor = validateColorInput(searchParams.get('portalTextColor')) ?
+    decodeURIComponent(searchParams.get('portalTextColor')) :
+    undefined;
 
   const login = useCallback(() => {
     authLogin(paramsEmail, sessionId, encryptionKey).then((userId: string) => {
       updateLoginDone(true);
       setUserId(userId);
-      if (!paramsPartnerId) {
+      if (!paramsPartnerId || !partner?.policiesEnabled) {
         setTimeout(function () {
           window.close();
         }, 200);
@@ -99,20 +116,30 @@ function AuthLogin() {
     }, 200);
   };
 
-  return (
-    <ChakraProvider>
+  useEffect(() => {
+    async function getPartner() {
+      if (paramsPartnerId) {
+        const detailsRes = (await userManagementClient.getPartner(paramsPartnerId)).data;
+        setPartner(detailsRes.partner);
+      }
+    }
+    getPartner()
+  }, []);
+
+  return (paramsPartnerId && !partner) ? undefined : (
+    <ChakraProvider theme={getPartnerTheme(portalBackgroundColor, portalPrimaryButtonColor, portalTextColor)}>
       <Container color="white" maxW="ld" padding={10}>
         {/* if first time logging into app, then need to accept scopes */}
         <Flex alignItems="center" justifyContent="left" mb={12}>
           <Image
-            src="/wordmark_white.svg"
+            src={partner?.portalHeaderLogoUrl || '/wordmark_white.svg'}
             alt="Logo"
             width="50%"
             maxWidth={300}
             marginRight={2}
           />
         </Flex>
-        {loginDone && paramsPartnerId && (
+        {loginDone && paramsPartnerId && partner?.policiesEnabled && (
           <PermissionSelection
             onDone={onPermissionsDone}
             userId={userId}
@@ -146,11 +173,16 @@ function AuthLogin() {
         </Container>
 
         {loginDone ? (
-          <Text color="green" size="lg">
+          <Text color={portalTextColor || "green"} size="lg">
             Login Complete. Redirecting....
           </Text>
         ) : null}
       </Container>
+      {paramsPartnerId && <Box backgroundColor={portalBackgroundColor} height="62px" width="100%">
+        <Flex backgroundColor={portalBackgroundColor} h="57px" w="100%" justifyContent={'center'} alignItems={'center'}>
+          <PoweredByCapsule color={portalTextColor} w={50} h={20} />
+        </Flex>
+      </Box>}
     </ChakraProvider>
   );
 }

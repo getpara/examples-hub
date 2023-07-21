@@ -2,7 +2,7 @@ import base64url from 'base64url';
 import * as cbor from 'cbor-web';
 import forge from 'node-forge';
 
-import { Environment } from '../definitions';
+import { Environment, getPortalDomain } from '../definitions';
 
 const ES256_ALGORITHM = -7;
 const RS256_ALGORITHM = -257;
@@ -143,6 +143,7 @@ export async function createCredential(env: Environment, userId: string, email: 
         userVerification: 'required' as any,
       },
       rp: {
+        id: getPortalDomain(env),
         name: 'Capsule',
       },
       user: {
@@ -171,7 +172,7 @@ export async function createCredential(env: Environment, userId: string, email: 
   }
 }
 
-export async function generateSignature(challenge: string, allowedPublicKeys: string[]) {
+export async function generateSignature(env: Environment, challenge: string, allowedPublicKeys: string[]) {
   const getCredentialDefaultArgs = {
     publicKey: {
       timeout: 60000,
@@ -181,6 +182,7 @@ export async function generateSignature(challenge: string, allowedPublicKeys: st
         type: 'public-key',
       })),
       userVerification: 'required',
+      rpId: getPortalDomain(env),
     },
   } as CredentialRequestOptions;
 
