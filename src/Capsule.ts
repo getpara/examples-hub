@@ -10,7 +10,7 @@ import {
   getPublicKeyHex,
 } from './cryptography/utils';
 import { generateBlumPrimes, keygen } from './wallet/keygen';
-import { sendTransaction, signMessage } from './wallet/signing';
+import { sendTransaction, signTransaction, signMessage } from './wallet/signing';
 import { Ctx, getPortalBaseURL } from './definitions';
 import { Environment } from './definitions';
 import { initClient } from './external/capsuleClient';
@@ -31,6 +31,7 @@ export interface Wallet {
   id: string;
   signer: string;
   address?: string;
+  publicKey?: string;
 }
 
 export interface ConstructorOpts {
@@ -305,9 +306,10 @@ export class Capsule {
   private async populateWalletAddresses(): Promise<void> {
     const res = await this.ctx.capsuleClient.getWallets(this.userId);
     const wallets = res.data.wallets;
-    wallets.forEach((wallet: { id: string; address?: string }) => {
+    wallets.forEach((wallet: { id: string; address?: string; publicKey?: string }) => {
       if (this.wallets[wallet.id]) {
         this.wallets[wallet.id].address = wallet.address;
+        this.wallets[wallet.id].publicKey = wallet.publicKey;
       }
     });
     await this.setWallets(this.wallets);
@@ -486,6 +488,31 @@ export class Capsule {
       walletId,
       this.wallets[walletId].signer,
       messageBase64,
+    );
+    if ((res as DeniedSignatureRes).pendingTransactionId) {
+      return {
+        ...res,
+        transactionReviewUrl: this.getTransactionReviewUrl(
+          (res as DeniedSignatureRes).pendingTransactionId,
+        ),
+      };
+    }
+
+    return res as SuccessfulSignatureRes;
+  }
+
+  async signTransaction(
+    walletId: string,
+    rlpEncodedTxBase64: string,
+    chainId: string,
+  ): Promise<FullSignatureRes> {
+    const res = await signTransaction(
+      this.ctx,
+      this.userId,
+      walletId,
+      this.wallets[walletId].signer,
+      rlpEncodedTxBase64,
+      chainId,
     );
     if ((res as DeniedSignatureRes).pendingTransactionId) {
       return {

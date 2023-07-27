@@ -3,6 +3,31 @@ import { Ctx } from '../definitions';
 import { SignatureRes } from '../types/walletTypes';
 import { setupWorker } from '../workers/workerWrapper';
 
+export async function signTransaction(
+  ctx: Ctx,
+  userId: string,
+  walletId: string,
+  share: string,
+  tx: string,
+  chainId: string,
+): Promise<SignatureRes> {
+  return await new Promise(async (resolve) => {
+    const worker = await setupWorker(ctx, async (sendTransactionRes) => {
+      resolve(sendTransactionRes);
+      worker.terminate();
+    });
+    worker.postMessage({
+      env: ctx.env,
+      apiKey: ctx.apiKey,
+      params: { share, walletId, userId, tx, chainId },
+      functionType: 'SIGN_TRANSACTION',
+      offloadMPCComputationURL: ctx.offloadMPCComputationURL,
+      disableWorkers: ctx.disableWorkers,
+    });
+  });
+}
+
+
 export async function sendTransaction(
   ctx: Ctx,
   userId: string,

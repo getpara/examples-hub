@@ -13,6 +13,9 @@ import Capsule, { Environment, DeniedSignatureResWithUrl } from './library';
 import Web3 from 'web3';
 import { FeeMarketEIP1559Transaction } from '@ethereumjs/tx';
 import {CapsuleButton, CapsuleModal} from './library/modal/CapsuleModal';
+import { ethers } from 'ethers';
+import { CapsuleEthersSigner } from './library';
+import { TransactionReviewError } from './library/errors';
 
 // sample transaction params
 const DEFAULT_TO_ADDRESS = '0x42c9a72c9dfcc92cae0de9510160cea2da27af91';
@@ -23,6 +26,8 @@ const DEFAULT_MAX_FEE_PER_GAS = '3';
 const DEFAULT_NONCE = '0';
 const API_KEY_WITH_PERMISSIONS = 'fdba16e45ba41e80185eb2c0195e89d4';
 const API_KEY_WITH_BRANDING = '2f938ac0c48ef356050a79bd66042a23';
+
+const ALCHEMY_PROVIDER = 'https://eth-sepolia.g.alchemy.com/v2/KfxK8ZFXw9mTUuJ7jt751xGJCa3r8noZ';
 // goerli chain id
 const DEFAULT_CHAIN_ID = '11155111';
 const DEFAULT_CONTRACT_ABI = [
@@ -63,6 +68,24 @@ const web3 = new Web3();
 // const DEFAULT_DEPLOY_CONTRACT_BYTECODE = '0x608060405234801561001057600080fd5b50610150806100206000396000f3fe608060405234801561001057600080fd5b50600436106100365760003560e01c80632e64cec11461003b5780636057361d14610059575b600080fd5b610043610075565b60405161005091906100a1565b60405180910390f35b610073600480360381019061006e91906100ed565b61007e565b005b60008054905090565b8060008190555050565b6000819050919050565b61009b81610088565b82525050565b60006020820190506100b66000830184610092565b92915050565b600080fd5b6100ca81610088565b81146100d557600080fd5b50565b6000813590506100e7816100c1565b92915050565b600060208284031215610103576101026100bc565b5b6000610111848285016100d8565b9150509291505056fea2646970667358221220322c78243e61b783558509c9cc22cb8493dde6925aa5e89a08cdf6e22f279ef164736f6c63430008120033';
 // below is address of existing smart contract on sepolia
 // const DEFAULT_CONTRACT_ADDRESS = '0xc08c00e1aa97a18583dc1a72a7e9fb9ce56cfef5'
+
+async function sendEthersTransaction(): Promise<void> {
+  const tx = {
+    from: Object.values(capsule.getWallets())[0]?.address,
+    to: DEFAULT_TO_ADDRESS,
+    value: 1010000000,
+    gasLimit: 21000,
+    maxPriorityFeePerGas: 1000000000,
+    maxFeePerGas: 3000000000,
+    nonce: 0,
+    chainId: DEFAULT_CHAIN_ID,
+    type: 2,
+  };
+  const provider = new ethers.JsonRpcProvider(ALCHEMY_PROVIDER, 'sepolia')
+  const ethersSigner = new CapsuleEthersSigner(capsule, provider);
+  const res = await ethersSigner.sendTransaction(tx);
+  console.log('send ethers tx response:\n', res);
+}
 
 async function createTransaction(
   toAddress: string,

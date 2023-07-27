@@ -37,6 +37,10 @@ async function executeMessage(ctx: Ctx, message: Message, callCustomFunction: Fu
       const keygenRes = await walletUtils.keygen(ctx, userId, secretKey, callCustomFunction);
       return keygenRes;
     }
+    case 'SIGN_TRANSACTION': {
+      const { share, walletId, userId, tx, chainId } = params;
+      return walletUtils.signTransaction(ctx, share, walletId, userId, tx, chainId);
+    }
     case 'SEND_TRANSACTION': {
       const { share, walletId, userId, tx, chainId } = params;
       return walletUtils.sendTransaction(ctx, share, walletId, userId, tx, chainId);

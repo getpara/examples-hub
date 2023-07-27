@@ -136,6 +136,39 @@ export async function signMessage(
   );
 }
 
+export async function signTransaction(
+  ctx: Ctx,
+  share: string,
+  walletId: string,
+  userId: string,
+  tx: string,
+  chainId: string,
+): Promise<SignatureRes> {
+  const { data: { protocolId, pendingTransactionId } } = await ctx.capsuleClient.signTransaction(
+    userId,
+    walletId,
+    { transaction: tx, chainId }
+  );
+  if (pendingTransactionId) {
+    console.log('send transaction denied');
+    return { pendingTransactionId };
+  }
+
+  if (ctx.offloadMPCComputationURL) {
+    return sendTransactionRequest(ctx, userId, walletId, protocolId, tx, share, chainId);
+  }
+
+  const serverUrl = getServerUrl(ctx, userId);
+  return new Promise((resolve, reject) =>
+    global.sendTransaction(share, serverUrl, tx, chainId, protocolId, (err, result) => {
+      if (err) {
+        reject(err);
+      }
+      resolve({ signature: result });
+    })
+  );
+}
+
 export async function sendTransaction(
   ctx: Ctx,
   share: string,

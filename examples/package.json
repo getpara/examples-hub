@@ -13,6 +13,7 @@
     "crypto-browserify": "3.12.0",
     "ethereumjs-tx": "2.1.2",
     "ethereumjs-util": "7.1.5",
+    "ethers": "6.6.4",
     "framer-motion": "10.9.2",
     "path": "0.12.7",
     "react": "18.2.0",
@@ -25,11 +26,12 @@
     "stream-browserify": "3.0.0",
     "typescript": "4.9.5",
     "web3": "1.9.0",
-    "webpack": "5.76.3"
+    "webpack": "5.88.2"
   },
   "scripts": {
     "start": "PORT=3002 craco start",
     "build": "craco build",
+    "serve-build": "PORT=3002 serve -s build",
     "deploy-sandbox": "cd .. && yarn && cd examples && yarn build && aws s3 sync build/ s3://capsule-web-playground --acl public-read"
   },
   "devDependencies": {
@@ -37,8 +39,8 @@
     "@types/react": "18.0.31",
     "@types/react-dom": "18.0.11",
     "ts-loader": "9.4.2",
-    "webpack-cli": "5.0.1",
-    "webpack-dev-server": "4.13.1"
+    "webpack-cli": "5.1.4",
+    "webpack-dev-server": "4.15.1"
   },
   "browserslist": [
     "chrome > 52",

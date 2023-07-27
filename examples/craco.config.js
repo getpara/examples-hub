@@ -1,4 +1,13 @@
 module.exports = {
+  babel: {
+    plugins: [ // some plugins needed for ethers providers to work
+      ['@babel/plugin-proposal-class-properties', { loose: true }],
+      ['@babel/plugin-proposal-private-methods', { loose: true }],
+      ['@babel/plugin-transform-classes', {
+        "loose": false
+      }]
+    ],
+  },
   webpack: {
     configure: webpackConfig => {
 
