@@ -9,13 +9,16 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import QRCode from 'react-qr-code';
+import { http } from 'viem'
+import { sepolia } from 'viem/chains';
+
 import Capsule, { Environment, DeniedSignatureResWithUrl } from './library';
 import Web3 from 'web3';
 import { FeeMarketEIP1559Transaction } from '@ethereumjs/tx';
 import {CapsuleButton, CapsuleModal} from './library/modal/CapsuleModal';
 import { ethers } from 'ethers';
 import { CapsuleEthersSigner } from './library';
-import { TransactionReviewError } from './library/errors';
+import { createCapsuleViemClient } from './library';
 
 // sample transaction params
 const DEFAULT_TO_ADDRESS = '0x42c9a72c9dfcc92cae0de9510160cea2da27af91';
@@ -27,7 +30,7 @@ const DEFAULT_NONCE = '0';
 const API_KEY_WITH_PERMISSIONS = 'fdba16e45ba41e80185eb2c0195e89d4';
 const API_KEY_WITH_BRANDING = '2f938ac0c48ef356050a79bd66042a23';
 
-const ALCHEMY_PROVIDER = 'https://eth-sepolia.g.alchemy.com/v2/KfxK8ZFXw9mTUuJ7jt751xGJCa3r8noZ';
+const ALCHEMY_SEPOLIA_PROVIDER = 'https://eth-sepolia.g.alchemy.com/v2/KfxK8ZFXw9mTUuJ7jt751xGJCa3r8noZ';
 // goerli chain id
 const DEFAULT_CHAIN_ID = '11155111';
 const DEFAULT_CONTRACT_ABI = [
@@ -69,6 +72,24 @@ const web3 = new Web3();
 // below is address of existing smart contract on sepolia
 // const DEFAULT_CONTRACT_ADDRESS = '0xc08c00e1aa97a18583dc1a72a7e9fb9ce56cfef5'
 
+async function sendViemTransaction(): Promise<void> {
+  const viemClient = createCapsuleViemClient(capsule, {
+    chain: sepolia,
+    transport: http(ALCHEMY_SEPOLIA_PROVIDER),
+  });
+  console.log(await viemClient.sendTransaction({
+    value: BigInt(1010000000000),
+    to: DEFAULT_TO_ADDRESS,
+    chain: sepolia,
+    gas: BigInt(21000),
+    maxPriorityFeePerGas: BigInt(1000000000),
+    maxFeePerGas: BigInt(3000000000),
+    account: viemClient.account,
+    nonce: 0,
+    type: 'eip1559',
+  }));
+}
+
 async function sendEthersTransaction(): Promise<void> {
   const tx = {
     from: Object.values(capsule.getWallets())[0]?.address,
@@ -81,7 +102,7 @@ async function sendEthersTransaction(): Promise<void> {
     chainId: DEFAULT_CHAIN_ID,
     type: 2,
   };
-  const provider = new ethers.JsonRpcProvider(ALCHEMY_PROVIDER, 'sepolia')
+  const provider = new ethers.JsonRpcProvider(ALCHEMY_SEPOLIA_PROVIDER, 'sepolia')
   const ethersSigner = new CapsuleEthersSigner(capsule, provider);
   const res = await ethersSigner.sendTransaction(tx);
   console.log('send ethers tx response:\n', res);

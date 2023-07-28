@@ -14,7 +14,7 @@ export function hexStringToBase64(hexString: string): string {
 
 export function hexToSignature(hexSig: string): Signature {
   return {
-    r: `0x${hexSig.slice(0, 66)}`,
+    r: `0x${hexSig.slice(2, 66)}`,
     s: `0x${hexSig.slice(66, 130)}`,
     v: BigInt(hexSig.slice(130, 132)),
   };

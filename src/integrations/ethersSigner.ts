@@ -79,8 +79,8 @@ export class CapsuleEthersSigner extends ethers.AbstractSigner {
   async signTransaction(tx: ethers.TransactionRequest): Promise<string> {
     const txObj = await this.validateTx(tx);
     txObj.signature = {
-      r: "0x0000000000000000000000000000000000000000000000000000000000000000",
-      s: "0x0000000000000000000000000000000000000000000000000000000000000000",
+      r: "0x0",
+      s: "0x0",
       v: 0,
     };
 

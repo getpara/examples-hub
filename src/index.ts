@@ -5,5 +5,6 @@ import { CapsuleModal as Modal } from './modal/CapsuleModal';
 export default Capsule;
 export { Modal };
 export { CapsuleEthersSigner } from './integrations/ethersSigner';
+export { createCapsuleViemClient } from './integrations/viemWalletClient';
 
 global.Buffer = global.Buffer || require('buffer').Buffer;
