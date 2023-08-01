@@ -22,6 +22,7 @@ import {
   SuccessfulSignatureRes,
   DeniedSignatureRes,
 } from './types/walletTypes';
+import * as transmissionUtils from './transmission/transmissionUtils';
 
 // amount of time in ms that a web auth session lasts
 const BIOMETRIC_VERIFICATION_TIME_MS = 30 * 60 * 1000;
@@ -65,15 +66,15 @@ function biometricVerifiedRecently(ctx: Ctx, verifiedAt: number): boolean {
 }
 
 export class Capsule {
-  private ctx: Ctx;
+  ctx: Ctx;
 
   private email?: string;
   private userId?: string;
-  private loginEncryptionKeyPair?: pki.rsa.KeyPair;
+  loginEncryptionKeyPair?: pki.rsa.KeyPair;
   private wallets: Record<string, Wallet>;
-  private portalBackgroundColor?: string;
-  private portalPrimaryButtonColor?: string;
-  private portalTextColor?: string;
+  portalBackgroundColor?: string;
+  portalPrimaryButtonColor?: string;
+  portalTextColor?: string;
 
   private localStorageGetItem = async (key: string): Promise<string | null> => {
     return localStorage.getItem(key);
@@ -239,7 +240,7 @@ export class Capsule {
     await this.localStorageSetItem(LOCAL_STORAGE_WALLETS, JSON.stringify(wallets));
   }
 
-  private async setLoginEncryptionKeyPair(keyPair: pki.rsa.KeyPair): Promise<void> {
+  async setLoginEncryptionKeyPair(keyPair: pki.rsa.KeyPair): Promise<void> {
     this.loginEncryptionKeyPair = keyPair;
     await this.sessionStorageSetItem(
       SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR,
@@ -265,37 +266,56 @@ export class Capsule {
     return res.data.partner.portalUrl;
   }
 
+  async getPortalURL(partnerId?: string): Promise<string> {
+    return (partnerId && await this.getPartnerURL(partnerId)) || getPortalBaseURL(this.ctx);
+  }
+
   private async getWebAuthURLForCreate(
     webAuthId: string,
     partnerId?: string,
+    isForNewDevice?: boolean,
   ): Promise<string> {
     const partnerIdQueryParam = partnerId ? `&partnerId=${partnerId}` : '';
     const portalBackgroundColorQueryParam = this.portalBackgroundColor ? `&portalBackgroundColor=${encodeURIComponent(this.portalBackgroundColor)}` : '';
     const portalPrimaryButtonColorQueryParam = this.portalPrimaryButtonColor ? `&portalPrimaryButtonColor=${encodeURIComponent(this.portalPrimaryButtonColor)}` : '';
     const portalTextColorQueryParam = this.portalTextColor ? `&portalTextColor=${encodeURIComponent(this.portalTextColor)}` : '';
+    const isForNewDeviceQueryParam = isForNewDevice ? `&isForNewDevice=${isForNewDevice}` : '';
+
     return `${(partnerId && await this.getPartnerURL(partnerId)) || getPortalBaseURL(this.ctx)}/web/users/${
       this.userId
     }/biometrics/${webAuthId}?email=${encodeURIComponent(
       this.email,
-    )}${partnerIdQueryParam}${portalBackgroundColorQueryParam}${portalPrimaryButtonColorQueryParam}${portalTextColorQueryParam}`;
+    )}${partnerIdQueryParam}${portalBackgroundColorQueryParam}${portalPrimaryButtonColorQueryParam}${portalTextColorQueryParam}${isForNewDeviceQueryParam}`;
   }
 
   private getShortUrl(compressedUrl: string): string {
     return `${getPortalBaseURL(this.ctx)}/short/${compressedUrl}`;
   }
 
-  private async getWebAuthURLForLogin(
+  async shortenLoginLink(link: string): Promise<string> {
+    const url = await transmissionUtils.upload(link, this)
+    return this.getShortUrl(url);
+  }
+
+  async getWebAuthURLForLogin(
     sessionId: string,
     loginEncryptionPublicKey: string,
     partnerId?: string,
+    newDeviceSessionId?: string,
+    newDeviceEncryptionKey?: string,
   ): Promise<string> {
     const partnerIdQueryParam = partnerId ? `&partnerId=${partnerId}` : '';
     const portalBackgroundColorQueryParam = this.portalBackgroundColor ? `&portalBackgroundColor=${encodeURIComponent(this.portalBackgroundColor)}` : '';
     const portalPrimaryButtonColorQueryParam = this.portalPrimaryButtonColor ? `&portalPrimaryButtonColor=${encodeURIComponent(this.portalPrimaryButtonColor)}` : '';
     const portalTextColorQueryParam = this.portalTextColor ? `&portalTextColor=${encodeURIComponent(this.portalTextColor)}` : '';
+    const newDeviceSessionIdQueryParam = newDeviceSessionId ? `&newDeviceSessionId=${newDeviceSessionId}` : '';
+    const newDeviceEncryptionKeyQueryParam = newDeviceEncryptionKey ? `&newDeviceEncryptionKey=${newDeviceEncryptionKey}` : '';
+
     return `${(partnerId && await this.getPartnerURL(partnerId)) || getPortalBaseURL(this.ctx)}/web/biometrics/login?email=${encodeURIComponent(
       this.email,
-    )}&sessionId=${sessionId}&encryptionKey=${loginEncryptionPublicKey}${partnerIdQueryParam}${portalBackgroundColorQueryParam}${portalPrimaryButtonColorQueryParam}${portalTextColorQueryParam}`;
+    )}&sessionId=${sessionId}&encryptionKey=${loginEncryptionPublicKey}${partnerIdQueryParam}${portalBackgroundColorQueryParam}${portalPrimaryButtonColorQueryParam}${
+      portalTextColorQueryParam
+    }${newDeviceSessionIdQueryParam}${newDeviceEncryptionKeyQueryParam}`;
   }
 
   async fetchWallets(): Promise<any[]> {
@@ -331,7 +351,7 @@ export class Capsule {
   // returns web auth url for creating a new credential
   async verifyEmail(verificationCode: string): Promise<string> {
     await this.ctx.capsuleClient.verifyEmail(this.userId, { verificationCode });
-    return this.getSetUpBiometricsURL();
+    return this.getSetUpBiometricsURL(false);
   }
 
   async resendVerificationCode(): Promise<void> {
@@ -339,13 +359,13 @@ export class Capsule {
   }
 
   // returns web auth url for creating a new credential
-  async getSetUpBiometricsURL(): Promise<string> {
+  async getSetUpBiometricsURL(isForNewDevice: boolean): Promise<string> {
     const res = await this.ctx.capsuleClient.addSessionPublicKey(this.userId, {
       status: PublicKeyStatus.PENDING,
       type: PublicKeyType.WEB,
     });
 
-    return this.getWebAuthURLForCreate(res.data.id, res.data.partnerId);
+    return this.getWebAuthURLForCreate(res.data.id, res.data.partnerId, isForNewDevice);
   }
 
   // TODO: consider changing this to just hit a new endpoint that returns
@@ -405,9 +425,12 @@ export class Capsule {
     await this.setUserId(res.data.userId);
   }
 
-  async getTransmissionKeyShares(): Promise<any> {
+  async getTransmissionKeyShares(isForNewDevice?: boolean): Promise<any> {
     const res = await this.ctx.capsuleClient.touchSession();
-    return this.ctx.capsuleClient.getTransmissionKeyshares(this.userId, res.data.sessionLookupId);
+    const sessionLookupId = isForNewDevice ?
+      `${res.data.sessionLookupId}-new-device` :
+      res.data.sessionLookupId;
+    return this.ctx.capsuleClient.getTransmissionKeyshares(this.userId, sessionLookupId);
   }
 
   async setupAfterLogin(temporaryShares?: any[]): Promise<void> {

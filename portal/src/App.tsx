@@ -281,7 +281,7 @@ export default function App() {
                   const userShare = await recoverUserShare(recoveryShare);
                   console.log(userShare);
                   setUserShare(userShare);
-                  const link = await capsule.getSetUpBiometricsURL();
+                  const link = await capsule.getSetUpBiometricsURL(false);
                   setWebAuthURLForCreate(link);
                   onOpenSetUpBiometricsModal();
                 }}

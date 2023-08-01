@@ -164,11 +164,14 @@ export async function createCredential(env: Environment, userId: string, email: 
   };
 
   const credential = await navigator.credentials.create(createCredentialDefaultArgs);
+  const algorithm = ((credential as PublicKeyCredential).response as AuthenticatorAttestationResponse).getPublicKeyAlgorithm ?
+    ((credential as PublicKeyCredential).response as AuthenticatorAttestationResponse).getPublicKeyAlgorithm() :
+    ES256_ALGORITHM;
 
   return {
     creds: publicKeyCredentialToJSON(credential),
     userHandle,
-    algorithm: ((credential as PublicKeyCredential).response as AuthenticatorAttestationResponse).getPublicKeyAlgorithm(),
+    algorithm,
   }
 }
 
