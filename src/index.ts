@@ -6,5 +6,6 @@ export default Capsule;
 export { Modal };
 export { CapsuleEthersSigner } from './integrations/ethersSigner';
 export { createCapsuleViemClient } from './integrations/viemWalletClient';
+export { CapsuleProtoSigner, CapsuleAminoSigner } from './integrations/cosmos/cosmosSigners';
 
 global.Buffer = global.Buffer || require('buffer').Buffer;

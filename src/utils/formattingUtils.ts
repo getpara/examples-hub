@@ -19,3 +19,10 @@ export function hexToSignature(hexSig: string): Signature {
     v: BigInt(hexSig.slice(130, 132)),
   };
 }
+
+export function hexToUint8Array(hex: string): Uint8Array {
+  if (hex.startsWith('0x')) {
+    hex = hex.slice(2);
+  }
+  return new Uint8Array(Buffer.from(hex, 'hex'));
+}

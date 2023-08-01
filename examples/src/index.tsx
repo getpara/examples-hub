@@ -9,14 +9,16 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import QRCode from 'react-qr-code';
+import Web3 from 'web3';
 import { http } from 'viem'
 import { sepolia } from 'viem/chains';
+import { SigningStargateClient } from '@cosmjs/stargate';
+import { ethers } from 'ethers';
 
 import Capsule, { Environment, DeniedSignatureResWithUrl } from './library';
-import Web3 from 'web3';
 import { FeeMarketEIP1559Transaction } from '@ethereumjs/tx';
 import {CapsuleButton, CapsuleModal} from './library/modal/CapsuleModal';
-import { ethers } from 'ethers';
+import { CapsuleProtoSigner } from './library';
 import { CapsuleEthersSigner } from './library';
 import { createCapsuleViemClient } from './library';
 
@@ -63,6 +65,8 @@ const DEFAULT_CONTRACT_ABI = [
 ];
 const DEFAULT_SMART_CONTRACT_FUNCTION = 'store';
 const DEFAULT_SMART_CONTRACT_ARGS = ['808'];
+const COSMOS_TESTNET_RPC = 'rpc.sentry-01.theta-testnet.polypore.xyz';
+const COSMOS_DEFAULT_TO_ADDRESS = 'cosmos1f3px9t4juk43cwufj7f9s64z3wj7xvyc0rexg6';
 const web3 = new Web3();
 
 // use below to call "view" smart contract function
@@ -71,6 +75,33 @@ const web3 = new Web3();
 // const DEFAULT_DEPLOY_CONTRACT_BYTECODE = '0x608060405234801561001057600080fd5b50610150806100206000396000f3fe608060405234801561001057600080fd5b50600436106100365760003560e01c80632e64cec11461003b5780636057361d14610059575b600080fd5b610043610075565b60405161005091906100a1565b60405180910390f35b610073600480360381019061006e91906100ed565b61007e565b005b60008054905090565b8060008190555050565b6000819050919050565b61009b81610088565b82525050565b60006020820190506100b66000830184610092565b92915050565b600080fd5b6100ca81610088565b81146100d557600080fd5b50565b6000813590506100e7816100c1565b92915050565b600060208284031215610103576101026100bc565b5b6000610111848285016100d8565b9150509291505056fea2646970667358221220322c78243e61b783558509c9cc22cb8493dde6925aa5e89a08cdf6e22f279ef164736f6c63430008120033';
 // below is address of existing smart contract on sepolia
 // const DEFAULT_CONTRACT_ADDRESS = '0xc08c00e1aa97a18583dc1a72a7e9fb9ce56cfef5'
+
+async function sendCosmosTx(): Promise<void> {
+  const protoSigner = new CapsuleProtoSigner(capsule);
+  const client = await SigningStargateClient.connectWithSigner(COSMOS_TESTNET_RPC, protoSigner);
+
+  console.log(await client.getAccount(protoSigner.address));
+  console.log(await client.getAllBalances(protoSigner.address))
+  const fromAddress = protoSigner.address;
+
+  console.log(
+    await client.sendTokens(
+      fromAddress,
+      COSMOS_DEFAULT_TO_ADDRESS,
+      [{
+        denom: 'uatom',
+        amount: '9500',
+      }],
+      {
+        amount: [{
+          amount: '500',
+          denom: 'uatom',
+        }],
+        gas: '200000',
+      },
+    ),
+  );
+}
 
 async function sendViemTransaction(): Promise<void> {
   const viemClient = createCapsuleViemClient(capsule, {
