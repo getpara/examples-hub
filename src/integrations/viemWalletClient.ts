@@ -49,10 +49,10 @@ function createCapsuleAccount(capsule: Capsule): LocalAccount {
       });
       const res = await capsule.signTransaction(currentWallet.id, hexStringToBase64(serializedTx.substring(2)), `${transaction.chainId}`);
       const signature = (res as SuccessfulSignatureRes).signature;
-      return serializer(
-        transaction,
-        hexToSignature(`0x${signature}`),
-      );
+      const formattedSig = hexToSignature(`0x${signature}`);
+      formattedSig.v += BigInt(27);
+
+      return serializer(transaction, formattedSig);
     },
     signTypedData: async <
       TTypedData extends TypedData | { [key: string]: unknown },

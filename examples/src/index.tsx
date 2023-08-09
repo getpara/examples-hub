@@ -103,20 +103,20 @@ async function sendCosmosTx(): Promise<void> {
   );
 }
 
-async function sendViemTransaction(): Promise<void> {
+async function sendViemTransaction(nonce = 0): Promise<void> {
   const viemClient = createCapsuleViemClient(capsule, {
     chain: sepolia,
     transport: http(ALCHEMY_SEPOLIA_PROVIDER),
   });
   console.log(await viemClient.sendTransaction({
-    value: BigInt(1010000000000),
+    value: BigInt(101000000000),
     to: DEFAULT_TO_ADDRESS,
     chain: sepolia,
     gas: BigInt(21000),
     maxPriorityFeePerGas: BigInt(1000000000),
     maxFeePerGas: BigInt(3000000000),
     account: viemClient.account,
-    nonce: 0,
+    nonce,
     type: 'eip1559',
   }));
 }
