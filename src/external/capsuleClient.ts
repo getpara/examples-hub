@@ -17,10 +17,18 @@ export function getBaseUrl(env: Environment): string {
   }
 }
 
-export function initClient(env: Environment, apiKey?: string, useFetchAdapter?: boolean): Client {
+export function initClient(
+  env: Environment,
+  apiKey?: string,
+  useFetchAdapter?: boolean,
+  retrieveSessionCookie?: () => string,
+  persistSessionCookie?: (cookie: string) => void,
+): Client {
   return new Client({
     userManagementHost: getBaseUrl(env),
     apiKey: apiKey,
     opts: { useFetchAdapter },
+    retrieveSessionCookie,
+    persistSessionCookie,
   });
 }

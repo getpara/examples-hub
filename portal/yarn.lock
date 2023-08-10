@@ -3559,10 +3559,10 @@
     "@typescript-eslint/types" "5.57.0"
     eslint-visitor-keys "^3.3.0"
 
-"@usecapsule/user-management-client@0.6.0":
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/@usecapsule/user-management-client/-/user-management-client-0.6.0.tgz#11ab20a73bafa0d18c951790dfa54f4f90115df8"
-  integrity sha512-L7wpu22jnMD17021MzQT76nQRU79e14PoduPmNA7nmiJCUKGJAx7+Q46CqcXu1mFB/vPLbynC6zRwHKqzAqv0g==
+"@usecapsule/user-management-client@0.13.0":
+  version "0.13.0"
+  resolved "https://registry.yarnpkg.com/@usecapsule/user-management-client/-/user-management-client-0.13.0.tgz#ba585ad08544dbb4eed3268afc16135651b21618"
+  integrity sha512-IqT6yWmktDjwyUaBdAbX8tWmfL9BTjTH+rfFBJFBrqozhojPzkMG1XBzswBwmT5Hmdi3xKIbZbHPM2z60U8HyQ==
   dependencies:
     axios "^0.27.2"
 

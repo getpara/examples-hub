@@ -57,6 +57,7 @@ const LOCAL_STORAGE_USER_ID = `${PREFIX}userId`;
 const LOCAL_STORAGE_WALLETS = `${PREFIX}wallets`;
 const SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR = `${PREFIX}loginEncryptionKeyPair`;
 const SESSION_STORAGE_PAILLIER_SECRET_KEY = `${PREFIX}paillierSecretKey`;
+const SESSION_STORAGE_SESSION_COOKIE = `${PREFIX}sessionCookie`;
 
 function biometricVerifiedRecently(ctx: Ctx, verifiedAt: number): boolean {
   if (ctx.env !== Environment.PROD) {
@@ -75,6 +76,7 @@ export class Capsule {
   portalBackgroundColor?: string;
   portalPrimaryButtonColor?: string;
   portalTextColor?: string;
+  private sessionCookie?: string;
 
   private localStorageGetItem = async (key: string): Promise<string | null> => {
     return localStorage.getItem(key);
@@ -91,6 +93,14 @@ export class Capsule {
   private sessionStorageRemoveItem = async (key: string): Promise<void> => {
     return sessionStorage.removeItem(key);
   };
+  private retrieveSessionCookie = (): string | undefined => {
+    return this.sessionCookie;
+  };
+  private persistSessionCookie = (cookie: string): void => {
+    this.sessionCookie = cookie;
+    this.sessionStorageSetItem(SESSION_STORAGE_SESSION_COOKIE, cookie);
+  };
+
   // remove all local storage and session storage prefixed for capsule
   clearStorage = async (keepSecretKey?: boolean): Promise<void> => {
     for (let i = 0; i < localStorage.length; i++) {
@@ -149,7 +159,7 @@ export class Capsule {
     this.ctx = {
       env,
       apiKey,
-      capsuleClient: initClient(env, apiKey, opts.disableWorkers),
+      capsuleClient: initClient(env, apiKey, opts.disableWorkers, this.retrieveSessionCookie, this.persistSessionCookie),
       disableWorkers: opts.disableWorkers,
       offloadMPCComputationURL: opts.offloadMPCComputationURL,
       useLocalFiles: opts.useLocalFiles,
@@ -173,6 +183,7 @@ export class Capsule {
     this.wallets = JSON.parse(
       localStorage.getItem(LOCAL_STORAGE_WALLETS) || '{}',
     );
+    this.sessionCookie = sessionStorage.getItem(SESSION_STORAGE_SESSION_COOKIE) || undefined;
 
     this.portalBackgroundColor = opts.portalBackgroundColor;
     this.portalPrimaryButtonColor = opts.portalPrimaryButtonColor;
@@ -195,6 +206,8 @@ export class Capsule {
     this.wallets = JSON.parse(
       await this.localStorageGetItem(LOCAL_STORAGE_WALLETS) || '{}',
     );
+    this.sessionCookie = await this.sessionStorageGetItem(SESSION_STORAGE_SESSION_COOKIE) || undefined;
+
     if (
       (await this.sessionStorageGetItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR)) &&
       (await this.sessionStorageGetItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR)) !==
@@ -480,6 +493,7 @@ export class Capsule {
       secretKey,
       skipDistribute,
       customFunction,
+      this.retrieveSessionCookie(),
     );
     this.wallets[walletId] = {
       id: walletId,
@@ -511,6 +525,7 @@ export class Capsule {
       walletId,
       this.wallets[walletId].signer,
       messageBase64,
+      this.retrieveSessionCookie(),
     );
     if ((res as DeniedSignatureRes).pendingTransactionId) {
       return {
@@ -536,6 +551,7 @@ export class Capsule {
       this.wallets[walletId].signer,
       rlpEncodedTxBase64,
       chainId,
+      this.retrieveSessionCookie(),
     );
     if ((res as DeniedSignatureRes).pendingTransactionId) {
       return {
@@ -562,6 +578,7 @@ export class Capsule {
       this.wallets[walletId].signer,
       rlpEncodedTxBase64,
       chainId,
+      this.retrieveSessionCookie(),
     );
     if ((res as DeniedSignatureRes).pendingTransactionId) {
       return {

@@ -20,6 +20,7 @@ export function keygen(
   secretKey: string | null,
   skipDistribute = false,
   customFunction: (params?: any) => void,
+  sessionCookie?: string,
 ): Promise<{
   signer: string;
   walletId: string;
@@ -61,6 +62,7 @@ export function keygen(
       functionType: 'KEYGEN',
       offloadMPCComputationURL: ctx.offloadMPCComputationURL,
       disableWorkers: ctx.disableWorkers,
+      sessionCookie,
     });
   });
 }

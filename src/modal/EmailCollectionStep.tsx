@@ -97,8 +97,8 @@ export function EmailCollectionStep({
             }
 
             await capsule.createUser(email);
-            setIsCreateAccountType(true);
             setCurrentStep(ModalStep.VERIFICATION_CODE);
+            setIsCreateAccountType(true);
           }}
         >
           Continue
