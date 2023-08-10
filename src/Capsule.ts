@@ -168,6 +168,10 @@ export class Capsule {
       this.ctx.mpcComputationClient = mpcComputationClient.initClient(opts.offloadMPCComputationURL, opts.disableWorkers);
     }
 
+    this.portalBackgroundColor = opts.portalBackgroundColor;
+    this.portalPrimaryButtonColor = opts.portalPrimaryButtonColor;
+    this.portalTextColor = opts.portalTextColor;
+
     if (opts.useStorageOverrides) {
       this.localStorageGetItem = opts.localStorageGetItemOverride;
       this.localStorageSetItem = opts.localStorageSetItemOverride;
@@ -184,10 +188,6 @@ export class Capsule {
       localStorage.getItem(LOCAL_STORAGE_WALLETS) || '{}',
     );
     this.sessionCookie = sessionStorage.getItem(SESSION_STORAGE_SESSION_COOKIE) || undefined;
-
-    this.portalBackgroundColor = opts.portalBackgroundColor;
-    this.portalPrimaryButtonColor = opts.portalPrimaryButtonColor;
-    this.portalTextColor = opts.portalTextColor;
 
     if (
       sessionStorage.getItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR) &&
