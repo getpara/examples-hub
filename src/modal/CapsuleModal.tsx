@@ -46,6 +46,7 @@ const themeResolve: Record<string, Theme> = {
   light: lightTheme,
 } as const;
 
+const POLLING_INTERVAL_MS = 2000;
 const STORAGE_PREFIX = '@CAPSULE/';
 
 export const CapsuleModal = ({
@@ -93,8 +94,8 @@ export const CapsuleModal = ({
     useState<[Wallet, string]>(null);
   const [recoveryShare, setRecoveryShare] = useState<string>(null);
 
-  const createAccountInterval = useRef<number>();
-  const loginInterval = useRef<number>();
+  const createAccountTimeout = useRef<number>();
+  const loginTimeout = useRef<number>();
 
   const [percentKeygenDone, setPercentKeygenDone] = useState(
     paillierGenDone ? 25 : 0,
@@ -177,55 +178,71 @@ export const CapsuleModal = ({
     distributeShare();
   }, [isFullyLoggedIn, walletCreated, createWalletRes]);
 
+  async function awaitWalletCreationTransition(): Promise<void> {
+    try {
+      if (await capsule.isSessionActive()) {
+        setIsFullyLoggedIn(true);
+        setWebAuthURLForCreate('');
+        setCurrentStep(ModalStep.AWAITING_WALLET_CREATION);
+        return;
+      }
+    } catch (err) {
+      // want to continue polling on error and still set timeout
+      console.error(err);
+    }
+    createAccountTimeout.current = window.setTimeout(awaitWalletCreationTransition, POLLING_INTERVAL_MS);
+  }
+
   // wait for biometric to be added to move on to next step
   useEffect(() => {
     if (webAuthURLForCreate) {
-      createAccountInterval.current = window.setInterval(async () => {
-        if (await capsule.isSessionActive()) {
-          clearInterval(createAccountInterval.current);
-          setIsFullyLoggedIn(true);
-          setWebAuthURLForCreate('');
-          setCurrentStep(ModalStep.AWAITING_WALLET_CREATION);
-        }
-      }, 2000);
-      return () => clearInterval(createAccountInterval.current);
+      createAccountTimeout.current = window.setTimeout(awaitWalletCreationTransition, POLLING_INTERVAL_MS);
     }
+    return () => clearTimeout(createAccountTimeout.current);
   }, [webAuthURLForCreate]);
+
+  async function awaitLoginTransition(): Promise<void> {
+    try {
+      const isActive = await capsule.isSessionActive();
+      if (!isActive) {
+        loginTimeout.current = window.setTimeout(awaitLoginTransition, POLLING_INTERVAL_MS);
+        return;
+      }
+      await capsule.userSetupAfterLogin();
+
+      const fetchedWallets = (await capsule.fetchWallets()).filter(
+        wallet => !!wallet.address,
+      );
+      const tempSharesRes = await capsule.getTransmissionKeyShares();
+      // need this check for the case where user has logged in but temp encrypted shares
+      // haven't been sent to the backend yet
+      if (
+        tempSharesRes.data.temporaryShares.length === fetchedWallets.length
+      ) {
+        await capsule.setupAfterLogin(tempSharesRes.data.temporaryShares);
+        setIsFullyLoggedIn(true);
+        setWebAuthURLForLogin('');
+
+        if (Object.values(capsule.getWallets()).length === 0) {
+          setCurrentStep(ModalStep.AWAITING_WALLET_CREATION_AFTER_LOGIN);
+          return;
+        }
+        setCurrentStep(ModalStep.LOGIN_DONE);
+        return;
+      }
+    } catch (err) {
+      // want to continue polling on error and still set timeout
+      console.error(err);
+    }
+    loginTimeout.current = window.setTimeout(awaitLoginTransition, POLLING_INTERVAL_MS);
+  }
 
   // wait for login auth to do post login setup
   useEffect(() => {
     if (webAuthURLForLogin) {
-      loginInterval.current = window.setInterval(async () => {
-        const isActive = await capsule.isSessionActive();
-        if (!isActive) {
-          return;
-        }
-        await capsule.userSetupAfterLogin();
-
-        const fetchedWallets = (await capsule.fetchWallets()).filter(
-          wallet => !!wallet.address,
-        );
-        const tempSharesRes = await capsule.getTransmissionKeyShares();
-        // need this check for the case where user has logged in but temp encrypted shares
-        // haven't been sent to the backend yet
-        if (
-          tempSharesRes.data.temporaryShares.length === fetchedWallets.length
-        ) {
-          clearInterval(loginInterval.current);
-          await capsule.setupAfterLogin(tempSharesRes.data.temporaryShares);
-          setIsFullyLoggedIn(true);
-          setWebAuthURLForLogin('');
-
-          if (Object.values(capsule.getWallets()).length === 0) {
-            setCurrentStep(ModalStep.AWAITING_WALLET_CREATION_AFTER_LOGIN);
-            return;
-          }
-          setCurrentStep(ModalStep.LOGIN_DONE);
-          return;
-        }
-      }, 2000);
-      return () => clearInterval(loginInterval.current);
+      loginTimeout.current = window.setTimeout(awaitLoginTransition, POLLING_INTERVAL_MS);
     }
+    return () => clearTimeout(loginTimeout.current);
   }, [webAuthURLForLogin]);
 
   return (
