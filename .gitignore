@@ -5,3 +5,4 @@ yarn-error.log
 build
 .DS_Store
 mpcWorker-bundle.js
+.vscode
