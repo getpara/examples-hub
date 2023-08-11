@@ -241,16 +241,13 @@ function AuthLogin() {
     return (paramsPartnerId && !partner) ? undefined : (urlForNewDeviceLogin && (
       <ChakraProvider theme={getPartnerTheme(portalBackgroundColor, portalPrimaryButtonColor, portalTextColor)}>
         <Container color="white" maxW="ld" padding={10}>
-          <Flex alignItems="center" justifyContent="left" mb={12}>
+          <Flex alignItems="center" justifyContent="left" mb="10%">
             <Image
               src={partner?.portalHeaderLogoUrl || '/wordmark_white.svg'}
               alt="Logo"
-              width="50%"
-              maxWidth={300}
-              marginRight={2}
             />
           </Flex>
-          <Heading size="xl" mb={8}>
+          <Heading fontSize="4vh" mb="10%">
             Add Device
           </Heading>
           <Text mb={8}>We see you've already set up Capsule on another device</Text>
@@ -302,23 +299,23 @@ function AuthLogin() {
             isLogin
           ></PermissionSelection>
         )}
-        <Heading size="xl" mb={8}>
+        <Heading fontSize="4vh" mb="10%">
           {newDeviceSessionLookupId ? 'Login to Authenticate New Device' : 'Login Portal'}
         </Heading>
-        <Text mb={8}>
+        <Text fontSize="2.5vh" mb="10%">
           {newDeviceSessionLookupId ?
             'It looks like you\'re trying to add Capsule to a new device.' :
             'Authenticate with Capsule to create your wallet.'}
         </Text>
-        {!newDeviceSessionLookupId && <Text mb={8}>
+        {!newDeviceSessionLookupId && <Text fontSize="2.5vh" mb="10%">
           If you've previously logged in on a different device, or there is an error finding your key on this device,
           you should select <strong>Add This Device</strong> below.
         </Text>}
-        {newDeviceSessionLookupId ? <Text mb={8}>
+        {newDeviceSessionLookupId ? <Text fontSize="2.5vh" mb="10%">
           If you would like to proceed with this action, please complete login below.
           Otherwise, please close this window and disregard this message.
         </Text> :
-        <Text mb={8}>
+        <Text fontSize="2.5vh" mb="10%">
           We're using your device to safely store your wallet for use across
           web3. Don't worry, Capsule never collects or stores this information,
           it is only used to save your wallet to your device.
@@ -328,30 +325,34 @@ function AuthLogin() {
           </a>
         </Text>}
 
-        <Container width="100%" display="flex" justifyContent="center">
+        <Container width="100%" display="flex" justifyContent="center" mb="5%">
           <Button
             colorScheme="green"
             onClick={login}
-            size="lg"
+            p="2.5vh"
+            fontSize="2.5vh"
+            maxWidth="50%"
             alignSelf={'center'}
           >
-            Login
+            {loginDone ? 'Success!' : 'Login'}
           </Button>
         </Container>
         {!newDeviceSessionLookupId && <Container width="100%" display="flex" justifyContent="center" padding={3}>
           <Button
-            onClick={addThisDevice}
-            size="lg"
-            alignSelf={'center'}
             style={{ backgroundColor: "rgba(0, 0, 0, 0)" }}
+            onClick={addThisDevice}
+            p="2.5vh"
+            fontSize="2.5vh"
+            maxWidth="50%"
+            alignSelf={'center'}
           >
-            Add This Device
+            <u>Add This Device</u>
           </Button>
         </Container>}
 
         {loginDone ? (
           <Text color={portalTextColor || "green"} size="lg">
-            Login Complete. Redirecting... you can close this window if it does not automatically close
+            Login Complete. You can close this window if it does not automatically redirect...
           </Text>
         ) : null}
       </Container>

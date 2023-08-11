@@ -139,26 +139,25 @@ function AuthCreation() {
             ></PermissionSelection>
           ) : (
             <>
-              <Flex alignItems="center" justifyContent="left" mb={12}>
+              <Flex alignItems="center" justifyContent="left" mb="10%">
                 <Image
                   src={partner?.portalHeaderLogoUrl || '/wordmark_white.svg'}
                   alt="Logo"
-                  width="50%"
-                  maxWidth={300}
-                  marginRight={2}
                 />
               </Flex>
-              <Heading size="xl" mb={8}>
+              <Heading fontSize="4vh" mb="10%">
                 Finish Adding Device
               </Heading>
-              <Text mb={8}>You successfully authenticated with Capsule on another device.</Text>
-              <Text mb={8}>Finally, please finish adding this device.</Text>
+              <Text fontSize="2.5vh" mb="10%">You successfully authenticated with Capsule on another device.</Text>
+              <Text fontSize="2.5vh" mb="10%">Finally, please finish adding this device.</Text>
 
               <Container width="100%" display="flex" justifyContent="center">
                 <Button
                   colorScheme="green"
                   onClick={setUpBiometrics}
-                  size="lg"
+                  p="2.5vh"
+                  fontSize="2.5vh"
+                  maxWidth="50%"
                   alignSelf={'center'}
                 >
                   Complete Setup
@@ -169,7 +168,7 @@ function AuthCreation() {
         </Container>
         {isDone ? (
           <Text color={portalTextColor || "green"} size="lg">
-            Authentication creation complete. Redirecting... you can close this window if it does not automatically close
+            Authentication creation complete. You can close this window if it does not automatically redirect...
           </Text>
         ) : undefined}
         {paramsPartnerId && <Box backgroundColor={portalBackgroundColor} height="62px" width="100%">
@@ -183,7 +182,7 @@ function AuthCreation() {
 
   return (paramsPartnerId && !partner) ? undefined : (
     <ChakraProvider theme={getPartnerTheme(portalBackgroundColor, portalPrimaryButtonColor, portalTextColor)}>
-      <Container color="white" maxW="ld" padding={10} height="100%">
+      <Container color="white" maxW="ld" padding="10%" height="100%">
         {(biometricDone && paramsPartnerId && partner?.policiesEnabled) ? (
           <PermissionSelection
             onDone={onPermissionsDone}
@@ -192,7 +191,7 @@ function AuthCreation() {
           ></PermissionSelection>
         ) : (
           <>
-            <Flex alignItems="center" justifyContent="left" mb={12}>
+            <Flex alignItems="center" justifyContent="left" mb="10%">
               <Image
                 src={partner?.portalHeaderLogoUrl || '/wordmark_white.svg'}
                 alt="Logo"
@@ -201,14 +200,14 @@ function AuthCreation() {
                 marginRight={2}
               />
             </Flex>
-            <Heading size="xl" mb={8}>
+            <Heading fontSize="4vh" mb="10%">
               {partner ?
                 `${partner.displayName} is using Capsule to create your wallet` :
                 'Authentication Portal'
               }
             </Heading>
-            <Text mb={8}>Authenticate with Capsule to create your wallet.</Text>
-            <Text mb={8}>
+            <Text fontSize="2.5vh" mb="10%">Authenticate with Capsule to create your wallet.</Text>
+            <Text fontSize="2.5vh" mb="20%">
               We're using your device to safely store your wallet for use across
               web3. Don't worry, Capsule never collects or stores this
               information, it is only used to save your wallet to your device.
@@ -222,10 +221,12 @@ function AuthCreation() {
               <Button
                 colorScheme="green"
                 onClick={setUpBiometrics}
-                size="lg"
+                p="2.5vh"
+                fontSize="2.5vh"
+                maxWidth="50%"
                 alignSelf={'center'}
               >
-                Set up
+                {isDone ? 'Success!' : 'Set Up'}
               </Button>
             </Container>
           </>
@@ -233,14 +234,14 @@ function AuthCreation() {
       </Container>
       {isDone ? (
         <Text color={portalTextColor || "green"} size="lg">
-          Authentication creation complete. Redirecting... you can close this window if it does not automatically close
+          Authentication creation complete. You can close this window if it does not automatically redirect...
         </Text>
       ) : undefined}
-      {paramsPartnerId && <Box backgroundColor={portalBackgroundColor} height="62px" width="100%">
-        <Flex backgroundColor={portalBackgroundColor} h="57px" w="100%" justifyContent={'center'} alignItems={'center'}>
+      <Box backgroundColor={portalBackgroundColor}  width="100%">
+        <Flex backgroundColor={portalBackgroundColor} w="100%" justifyContent={'center'} alignItems={'center'}>
           <PoweredByCapsule color={portalTextColor} w={50} h={20} />
         </Flex>
-      </Box>}
+      </Box>
     </ChakraProvider>
   );
 }
