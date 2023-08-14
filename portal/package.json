@@ -34,7 +34,7 @@
     "build": "craco build",
     "check-wasm-file-exists": "test -f ./public/static/js/main.wasm || (echo 'public/static/js/main.wasm file does not exist!'; exit 1)",
     "check-mpc-worker-file-exists": "test -f ./public/static/js/mpcWorker-bundle.js || (echo 'public/static/js/mpcWorker-bundle.js file does not exist!'; exit 1)",
-    "deploy-s3": "cd .. && yarn && yarn build && yarn build-webpack-mpcWorker && cd portal && yarn check-wasm-file-exists && yarn check-mpc-worker-file-exists && craco build && aws s3 sync build/ s3://capsule-$REACT_APP_ENV-web-portal --acl public-read --profile $REACT_APP_ENV",
+    "deploy-s3": "yarn && cd .. && yarn && yarn build && yarn build-webpack-mpcWorker && cd portal && yarn check-wasm-file-exists && yarn check-mpc-worker-file-exists && craco build && aws s3 sync build/ s3://capsule-$REACT_APP_ENV-web-portal --acl public-read --profile $REACT_APP_ENV",
     "deploy-sandbox": "REACT_APP_ENV=sandbox yarn deploy-s3",
     "deploy-beta": "REACT_APP_ENV=beta yarn deploy-s3",
     "deploy-prod": "REACT_APP_ENV=prod yarn deploy-s3"

@@ -18,11 +18,6 @@ export async function distributeNewShare(
       if (!key.publicKey) {
         return;
       }
-      // TODO add some sort of support/check to work for mobile biometrics
-      // if (key.biometricType !== 'WEB') {
-      //   // TODO: also encrypt with biometric public key from mobile and persist in backend
-      //   throw new Error('only support type WEB biometrics for web wallets');
-      // }
 
       const { encryptedMessageHex, encryptedKeyHex } =
         encryptWithDerivedPublicKey(key.sigDerivedPublicKey, userShare);
