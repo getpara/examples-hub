@@ -37,8 +37,12 @@ export function EmailCollectionStep({
   }
   return (
     <>
+      {/* 
+      // @ts-ignore */}
       <VStack alignItems="center" display="flex" flex={1}>
         <WalletCreation />
+        {/* 
+        // @ts-ignore */}
         <Text textColor="brand.text" fontSize="ml">
           Create Wallet for <b>{appName}</b>.
         </Text>
@@ -62,6 +66,8 @@ export function EmailCollectionStep({
         </HStack>
 
         <Spacer />
+        {/* 
+        // @ts-ignore */}
         <Input
           placeholder="Email"
           type="email"
@@ -78,6 +84,8 @@ export function EmailCollectionStep({
           value={email || ''}
         />
         <Box flex={1} height="40px" />
+        {/* 
+        // @ts-ignore */}
         <Button
           width="100%"
           onClick={async () => {

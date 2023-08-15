@@ -249,11 +249,15 @@ export const CapsuleModal = ({
     <ChakraProvider theme={resolvedTheme}>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
+        {/* 
+          // @ts-ignore */}
         <ModalContent
           backgroundColor={'brand.background'}
           width="356px"
           height="632px"
         >
+        {/* 
+        // @ts-ignore */}
           <ModalBody padding={0} display="flex" flexDirection="column">
             <Header step={ModalStepNumber[currentStep]} onClose={onClose} />
             <VStack
@@ -383,6 +387,8 @@ export function CapsuleButton({
             {truncateEthAddress(address)}
           </Text>
         ) : null}
+        {/* 
+          // @ts-ignore */}
         <Tooltip
           isDisabled={!!(isSessionActive && address)}
           label={<Helper />}

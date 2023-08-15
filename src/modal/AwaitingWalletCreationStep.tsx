@@ -25,6 +25,8 @@ export function AwaitingWalletCreationStep({
       <Text fontSize="l" position="absolute">
         Creating Wallet
       </Text>
+      {/* 
+      // @ts-ignore */}
       <Flex flex={1} justifyContent="center" alignItems="center">
         <CircularProgress
           size="60px"

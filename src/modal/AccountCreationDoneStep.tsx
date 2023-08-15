@@ -58,10 +58,7 @@ export function AccountCreationDoneStep({
   }, [defaultAsset, capsule, onClose, rampNetworkApiKey]);
 
   const handleToggle = () => setShow(!show);
-  const { onCopy, setValue, hasCopied } = useClipboard('placeholder');
-  useEffect(() => {
-    setValue(recoveryShare);
-  });
+  const { onCopy, hasCopied } = useClipboard(recoveryShare);
 
   const handleDownload = () => {
     const element = document.createElement('a');
@@ -101,6 +98,8 @@ export function AccountCreationDoneStep({
       </Text>
       <Box h="38px" w="100%" display="flex" flexDirection="row">
         <Box position="relative" flex={1} width="100%">
+          {/* 
+          // @ts-ignore */}
           <LinkOverlay w="100%" href={getMailtoLink(email, recoveryShare)}>
             <Button w="100%" h="38px">
               <Box position="absolute" left="10px">

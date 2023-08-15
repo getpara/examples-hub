@@ -1,12 +1,12 @@
 {
   "name": "@usecapsule/web-sdk",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "dependencies": {
     "@celo/utils": "3.2.0",
-    "@chakra-ui/react": "2.8.0",
+    "@chakra-ui/react": "1.8.9",
     "@cosmjs/amino": "0.31.0",
     "@cosmjs/crypto": "0.31.0",
     "@cosmjs/encoding": "0.31.0",
@@ -68,5 +68,8 @@
     "src",
     "package.json",
     "yarn.lock"
-  ]
+  ],
+  "resolutions": {
+    "@chakra-ui/react/@chakra-ui/toast": "file:./src/stubs/toastStub"
+  }
 }
