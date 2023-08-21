@@ -13,13 +13,24 @@ import {
   Hex,
   SerializeTransactionFn,
 } from 'viem';
+import * as allViemChains from 'viem/chains';
 
-import { Capsule } from '../Capsule';
-import { SuccessfulSignatureRes } from '../types';
-import { hexStringToBase64, hexToSignature } from '../utils/formattingUtils';
+import { Capsule, Wallet } from '../../Capsule';
+import { SuccessfulSignatureRes } from '../../types';
+import { hexStringToBase64, hexToSignature } from '../../utils/formattingUtils';
 
-function createCapsuleAccount(capsule: Capsule): LocalAccount {
-  const currentWallet = Object.values(capsule.getWallets())[0];
+interface ViemClientOpts {
+  noAccount?: boolean;
+}
+
+export function createCapsuleAccount(capsule: Capsule, walletAddress?: Hex): LocalAccount {
+  let currentWallet: Wallet;
+  if (walletAddress) {
+    currentWallet = Object.values(capsule.getWallets()).find(wallet => wallet.address.toLowerCase() === walletAddress.toLowerCase());
+  } else {
+    currentWallet = Object.values(capsule.getWallets())[0];
+  }
+
   return {
     address: currentWallet.address as Address,
     publicKey: currentWallet.publicKey as Hex || '0x',
@@ -29,7 +40,7 @@ function createCapsuleAccount(capsule: Capsule): LocalAccount {
       const hashedMessage = hashMessage(message);
       const res = await capsule.signMessage(currentWallet.id, hexStringToBase64(hashedMessage));
       const signature = (res as SuccessfulSignatureRes).signature;
-     return `0x${signature}`;
+      return `0x${signature}`;
     },
     signTransaction: async <TTransactionSerializable extends TransactionSerializable>(
       transaction: TTransactionSerializable,
@@ -64,9 +75,20 @@ function createCapsuleAccount(capsule: Capsule): LocalAccount {
   };
 }
 
-export function createCapsuleViemClient(capsule: Capsule, params: WalletClientConfig): WalletClient {
+export function getViemChain(chainId: string) {
+  const chainIdNum = Number(chainId);
+  for (const chain of Object.values(allViemChains)) {
+    if (chain.id === chainIdNum) {
+      return chain;
+    }
+  }
+
+  throw new Error(`chain with id ${chainId} not found`);
+}
+
+export function createCapsuleViemClient(capsule: Capsule, params: WalletClientConfig, opts?: ViemClientOpts): WalletClient {
   return createWalletClient({
-    account: createCapsuleAccount(capsule),
+    account: opts?.noAccount ? undefined : createCapsuleAccount(capsule),
     ...params,
   });
 }

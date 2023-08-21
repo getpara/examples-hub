@@ -26,3 +26,14 @@ export function hexToUint8Array(hex: string): Uint8Array {
   }
   return new Uint8Array(Buffer.from(hex, 'hex'));
 }
+
+export function hexToDecimal(hex: string): string {
+  if (hex.startsWith('0x')) {
+    hex = hex.slice(2);
+  }
+  return `${parseInt(hex, 16)}`;
+}
+
+export function decimalToHex(decimal: string): Hex {
+  return `0x${parseInt(decimal).toString(16)}`;
+}

@@ -1,9 +1,9 @@
 import { ethers } from 'ethers';
 
-import { Capsule } from '../Capsule';
-import { TransactionReviewError } from '../errors';
-import { DeniedSignatureResWithUrl, SuccessfulSignatureRes } from '../types/walletTypes';
-import { hexStringToBase64 } from '../utils/formattingUtils';
+import { Capsule } from '../../Capsule';
+import { TransactionReviewError } from '../../errors';
+import { DeniedSignatureResWithUrl, SuccessfulSignatureRes } from '../../types/walletTypes';
+import { hexStringToBase64 } from '../../utils/formattingUtils';
 
 export class CapsuleEthersSigner extends ethers.AbstractSigner {
   private capsule: Capsule;
