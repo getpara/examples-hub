@@ -13,7 +13,7 @@ import {
   Hex,
   SerializeTransactionFn,
 } from 'viem';
-import * as allViemChains from 'viem/chains';
+import * as viemChains from 'viem/chains';
 
 import { Capsule, Wallet } from '../../Capsule';
 import { SuccessfulSignatureRes } from '../../types';
@@ -75,9 +75,9 @@ export function createCapsuleAccount(capsule: Capsule, walletAddress?: Hex): Loc
   };
 }
 
-export function getViemChain(chainId: string) {
+export function getViemChain(chainId: string): viemChains.Chain {
   const chainIdNum = Number(chainId);
-  for (const chain of Object.values(allViemChains)) {
+  for (const chain of Object.values(viemChains)) {
     if (chain.id === chainIdNum) {
       return chain;
     }
