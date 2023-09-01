@@ -153,6 +153,15 @@ export class Capsule {
     };
   }
 
+  private requireApiKeyForProd() {
+    if (!this.ctx.apiKey && this.ctx.env === Environment.PROD) {
+      throw new Error(
+          `in order to create a wallet or user with Capsule, you 
+          must provide an API key to the capsule instance`
+      );
+    }
+  }
+
   // TODO: consider using sessionStorage instead of localStorage
   constructor(env: Environment, apiKey?: string, opts?: ConstructorOpts) {
     if (!opts) opts = {};
@@ -354,6 +363,7 @@ export class Capsule {
   }
 
   async createUser(email: string): Promise<void> {
+    this.requireApiKeyForProd();
     await this.setEmail(email);
     const { userId } = await this.ctx.capsuleClient.createUser({
       email: this.email!,
@@ -484,6 +494,7 @@ export class Capsule {
     skipDistribute = false,
     customFunction: (params?: any) => void,
   ): Promise<[Wallet, string | null]> {
+    this.requireApiKeyForProd();
     const secretKey = await this.sessionStorageGetItem(
       SESSION_STORAGE_PAILLIER_SECRET_KEY,
     );
