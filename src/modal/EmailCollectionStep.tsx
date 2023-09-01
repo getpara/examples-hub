@@ -59,7 +59,7 @@ export function EmailCollectionStep({
               Enter email
             </Text>
             <Text textColor="brand.content" fontSize="s">
-              This wallet can be used across websites. Visit usecapsule.com to
+              This wallet can be used across websites. Visit <a href='https://usecapsule.com' target='_blank' rel='noreferrer'><u>usecapsule.com</u></a> to
               view the list.
             </Text>
           </Box>

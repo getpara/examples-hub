@@ -211,7 +211,7 @@ function AuthCreation() {
               We're using your device to safely store your wallet for use across
               web3. Don't worry, Capsule never collects or stores this
               information, it is only used to save your wallet to your device.
-              <a>
+              <a href="https://docs.usecapsule.com/" target='_blank' rel='noreferrer'>
                 {' '}
                 <u>Learn More</u>
               </a>
