@@ -23,12 +23,13 @@ import { Capsule } from '../../Capsule';
 import { getViemChain, createCapsuleViemClient, createCapsuleAccount } from './viemWalletClient';
 import { decimalToHex, hexToDecimal } from '../../utils/formattingUtils';
 import { renderModal } from './connectorModal';
+import { CoreCapsule } from '../../CoreCapsule';
 
 const STORAGE_CHAIN_ID_KEY = '@CAPSULE/chainId';
 const TEN_MINUTES_MS = 600000;
 
 interface CapsuleEIP1193ProviderOpts {
-  capsule: Capsule;
+  capsule: Capsule | CoreCapsule;
   chainId: string; // base-10 chain id number as a string
   chains: Chain[];
   disableModal?: boolean;
@@ -57,7 +58,7 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
   private walletClient: WalletClient;
   private chainTransportSubscribe?: WebSocketTransportSubscribeFn;
   private chains: Record<Hex, AddEthereumChainParameter>;
-  private capsule: Capsule;
+  private capsule: Capsule | CoreCapsule;
   private disableModal: boolean;
   private appName: string;
   private storage: Pick<Storage, 'setItem' | 'getItem'>;
@@ -65,7 +66,7 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
   constructor(opts: CapsuleEIP1193ProviderOpts) {
     super();
 
-    this.storage = sessionStorage || opts.storageOverride;
+    this.storage = opts.storageOverride || sessionStorage;
     const chainId = this.getStorageChainId() || opts.chainId;
 
     this.capsule = opts.capsule;

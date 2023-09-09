@@ -4,18 +4,19 @@ import { WindowProvider } from '@wagmi/connectors';
 
 import { Capsule } from '../../Capsule';
 import { CapsuleEIP1193Provider } from './CapsuleEIP1193Provider';
+import { CoreCapsule } from '../../CoreCapsule';
 
 interface CapsuleConnectorOpts {
   chains: Chain[];
   options: InjectedConnectorOptions;
-  capsule: Capsule;
+  capsule: Capsule | CoreCapsule;
   disableModal?: boolean;
   appName: string;
   storageOverride?: Pick<Storage, 'setItem' | 'getItem'>;
 }
 
 export class CapsuleConnector extends InjectedConnector {
-  private capsule: Capsule;
+  private capsule: Capsule | CoreCapsule;
 
   constructor({ chains, options, capsule, disableModal, appName, storageOverride }: CapsuleConnectorOpts) {
     if (chains.length === 0) {

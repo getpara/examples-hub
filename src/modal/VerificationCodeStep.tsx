@@ -12,6 +12,7 @@ import {
 import { Capsule } from '../Capsule';
 import Console from './assets/console';
 import VerifyCode from './assets/verifyCode';
+import { CoreCapsule } from '../CoreCapsule';
 
 export function VerificationCodeStep({
   setWebAuthURLForCreate,
@@ -19,7 +20,7 @@ export function VerificationCodeStep({
   currentStep,
   capsule,
 }: {
-  capsule: Capsule;
+  capsule: Capsule | CoreCapsule;
   setCurrentStep: (newValue: ModalStep) => void;
   currentStep: ModalStep;
   setWebAuthURLForCreate: (newValue: string) => void;

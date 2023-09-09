@@ -6,6 +6,7 @@ import { Capsule } from '../Capsule';
 import { upload } from '../transmission/transmissionUtils';
 import { openPopup } from './utils';
 import Identity from './assets/Identity';
+import { CoreCapsule } from '../CoreCapsule';
 
 const SHORTENING_AVAILABLE = true;
 
@@ -16,7 +17,7 @@ export function BiometricLoginStep({
 }: {
   currentStep: ModalStep;
   webAuthURLForLogin: string;
-  capsule: Capsule;
+  capsule: Capsule | CoreCapsule;
 }) {
   const {
     colors: {
@@ -31,7 +32,7 @@ export function BiometricLoginStep({
       setShortLoginLink(null);
     }
     async function shortenUrl() {
-      const url = await upload(webAuthURLForLogin, capsule);
+      const url = await upload(webAuthURLForLogin, capsule.ctx.capsuleClient);
       // @ts-ignore
       setShortLoginLink(capsule.getShortUrl(url));
     }

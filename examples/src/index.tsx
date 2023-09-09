@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSessionStorage } from 'react-use';
 import ReactDOM from 'react-dom/client';
 import {
   Button,
@@ -43,8 +44,9 @@ import {
   createCapsuleViemClient,
   CapsuleEIP1193Provider,
   CapsuleConnector,
+  CapsuleWeb,
 } from './library';
-import { useSessionStorage } from 'react-use';
+import { CoreCapsule } from './library/CoreCapsule';
 import { ConstructorOpts } from './library/Capsule';
 
 // sample transaction params
@@ -398,14 +400,18 @@ function getCapsuleOpts(env: Environment): ConstructorOpts {
       throw new Error(`invalid environment: ${env}`);
   }
 }
-const apiKey = undefined;
 
-let capsule = new Capsule(Environment.SANDBOX, apiKey, getCapsuleOpts(Environment.SANDBOX));
+let capsule: Capsule | CoreCapsule = undefined;
 
 function App() {
   const [selectedView, setSelectedView] = useSessionStorage('@EXAMPLE-CAPSULE/selectedView', 'OLD_VIEW');
   const [selectedEnv, setSelectedEnv] = useSessionStorage('@EXAMPLE-CAPSULE/selectedEnv', Environment.SANDBOX);
-  const [selectedApiKey, setSelectedApiKey] = useSessionStorage('@EXAMPLE-CAPSULE/selectedApiKey', apiKey);
+  const [selectedApiKey, setSelectedApiKey] = useSessionStorage('@EXAMPLE-CAPSULE/selectedApiKey', undefined);
+  const [selectedCapsuleClass, setSelectedCapsuleClass] = useSessionStorage('@EXAMPLE-CAPSULE/selectedCapsuleClass', 'CAPSULE');
+
+  capsule = selectedCapsuleClass === 'CAPSULE_WEB' ?
+    new CapsuleWeb(selectedEnv, selectedApiKey, getCapsuleOpts(selectedEnv)):
+    new Capsule(selectedEnv, selectedApiKey, getCapsuleOpts(selectedEnv));
 
   const [email, setEmail] = useState(capsule.getEmail());
   const [verificationCode, setVerificationCode] = useState('');
@@ -432,7 +438,6 @@ function App() {
     const isSessionActive = await capsule.isFullyLoggedIn();
     setIsSessionActive(isSessionActive);
   }
-  capsule = new Capsule(selectedEnv, selectedApiKey, getCapsuleOpts(selectedEnv));
 
   return (
     <ChakraProvider>
@@ -460,6 +465,13 @@ function App() {
           <Input placeholder="api key" onChange={(e) => {
             setSelectedApiKey(e.target.value)
           }} value={selectedApiKey || ''}/>
+        </HStack>
+        <HStack paddingBottom={5}>
+          <Text width={'15%'}><strong>Select Capsule Class:</strong></Text>
+          <Select defaultValue={selectedCapsuleClass} onChange={e => setSelectedCapsuleClass(e.target.value)}>
+            <option value={'CAPSULE'}>Capsule</option>
+            <option value={'CAPSULE_WEB'}>Capsule Web (new sdk refactored class)</option>
+          </Select>
         </HStack>
         {selectedView === 'WAGMI' && (
           <VStack align="left" spacing={5}>

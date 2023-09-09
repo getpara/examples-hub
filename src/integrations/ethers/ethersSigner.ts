@@ -1,15 +1,16 @@
 import { ethers } from 'ethers';
 
 import { Capsule } from '../../Capsule';
+import { CoreCapsule } from '../../CoreCapsule';
 import { TransactionReviewError } from '../../errors';
 import { DeniedSignatureResWithUrl, SuccessfulSignatureRes } from '../../types/walletTypes';
 import { hexStringToBase64 } from '../../utils/formattingUtils';
 
 export class CapsuleEthersSigner extends ethers.AbstractSigner {
-  private capsule: Capsule;
+  private capsule: Capsule | CoreCapsule;
   private currentWalletId: string;
 
-  constructor(capsule: Capsule, provider?: null | ethers.Provider) {
+  constructor(capsule: Capsule | CoreCapsule, provider?: null | ethers.Provider) {
     super(provider);
 
     this.capsule = capsule;

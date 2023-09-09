@@ -7,13 +7,14 @@ import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { Capsule } from '../../Capsule';
 import { SuccessfulSignatureRes } from '../../types';
 import { hexToSignature, hexToUint8Array } from '../../utils/formattingUtils';
+import { CoreCapsule } from '../../CoreCapsule';
 
 class CapsuleCosmosSigner {
   readonly prefix: string;
-  readonly capsule: Capsule;
+  readonly capsule: Capsule | CoreCapsule;
   private _currentWalletId?: string;
 
-  constructor(capsule: Capsule, prefix = 'cosmos', currentWalletId?: string) {
+  constructor(capsule: Capsule | CoreCapsule, prefix = 'cosmos', currentWalletId?: string) {
     this.capsule = capsule;
     this.prefix = prefix;
     this._currentWalletId = currentWalletId;

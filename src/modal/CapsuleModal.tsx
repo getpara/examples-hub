@@ -29,9 +29,10 @@ import CapsuleSmall from './assets/capsuleSmall';
 import { Header } from './Header';
 import { Footer } from './Footer';
 import { truncateEthAddress } from './utils';
+import { CoreCapsule } from '../CoreCapsule';
 
 interface CapsuleModalProps {
-  capsule: Capsule;
+  capsule: Capsule | CoreCapsule;
   isOpen: boolean;
   onClose: () => void;
   theme?: 'dark' | 'light' | any;
@@ -179,6 +180,14 @@ export const CapsuleModal = ({
   }, [isFullyLoggedIn, walletCreated, createWalletRes]);
 
   async function awaitWalletCreationTransition(): Promise<void> {
+    if (capsule instanceof CoreCapsule) {
+      await capsule.waitForAccountCreation();
+
+      setIsFullyLoggedIn(true);
+      setWebAuthURLForCreate('');
+      setCurrentStep(ModalStep.AWAITING_WALLET_CREATION);
+      return;
+    }
     try {
       if (await capsule.isSessionActive()) {
         setIsFullyLoggedIn(true);
@@ -202,6 +211,19 @@ export const CapsuleModal = ({
   }, [webAuthURLForCreate]);
 
   async function awaitLoginTransition(): Promise<void> {
+    if (capsule instanceof CoreCapsule) {
+      const { needsWallet } = await capsule.waitForLoginAndSetup();
+
+      setIsFullyLoggedIn(true);
+      setWebAuthURLForLogin('');
+
+      if (needsWallet) {
+        setCurrentStep(ModalStep.AWAITING_WALLET_CREATION_AFTER_LOGIN);
+      } else {
+        setCurrentStep(ModalStep.LOGIN_DONE);
+      }
+      return
+    }
     try {
       const isActive = await capsule.isSessionActive();
       if (!isActive) {
@@ -349,7 +371,7 @@ export function CapsuleButton({
   capsule,
   appName,
 }: {
-  capsule: Capsule;
+  capsule: Capsule | CoreCapsule;
   appName: string;
 }) {
   const [modalIsOpen, setModalIsOpen] = useState(false);

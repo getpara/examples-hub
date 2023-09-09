@@ -1,10 +1,11 @@
 import ReactDOMClient from 'react-dom/client'
 
 import { Capsule } from '../../Capsule';
+import { CoreCapsule } from '../../CoreCapsule';
 import { CapsuleModal } from '../../modal/CapsuleModal';
 import { newTheme } from '../../modal/theme';
 
-export function renderModal(capsule: Capsule, appName: string, onCloseArg: () => void): void {
+export function renderModal(capsule: Capsule | CoreCapsule, appName: string, onCloseArg: () => void): void {
   const container = document.createElement('div');
   const root = ReactDOMClient.createRoot(container);
   const onClose = () => {

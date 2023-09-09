@@ -16,6 +16,7 @@ import {
 import * as viemChains from 'viem/chains';
 
 import { Capsule, Wallet } from '../../Capsule';
+import { CoreCapsule } from '../../CoreCapsule';
 import { SuccessfulSignatureRes } from '../../types';
 import { hexStringToBase64, hexToSignature } from '../../utils/formattingUtils';
 
@@ -23,7 +24,7 @@ interface ViemClientOpts {
   noAccount?: boolean;
 }
 
-export function createCapsuleAccount(capsule: Capsule, walletAddress?: Hex): LocalAccount {
+export function createCapsuleAccount(capsule: Capsule | CoreCapsule, walletAddress?: Hex): LocalAccount {
   let currentWallet: Wallet;
   if (walletAddress) {
     currentWallet = Object.values(capsule.getWallets()).find(wallet => wallet.address.toLowerCase() === walletAddress.toLowerCase());
@@ -87,7 +88,7 @@ export function getViemChain(chainId: string): viemChains.Chain {
   throw new Error(`chain with id ${chainId} not found`);
 }
 
-export function createCapsuleViemClient(capsule: Capsule, params: WalletClientConfig, opts?: ViemClientOpts): WalletClient {
+export function createCapsuleViemClient(capsule: Capsule | CoreCapsule, params: WalletClientConfig, opts?: ViemClientOpts): WalletClient {
   return createWalletClient({
     account: opts?.noAccount ? undefined : createCapsuleAccount(capsule),
     ...params,

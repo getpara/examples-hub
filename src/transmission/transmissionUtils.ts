@@ -4,8 +4,9 @@ import { Encrypt as ECIESEncrypt } from '@celo/utils/lib/ecies';
 import { Capsule } from '../Capsule';
 import { Buffer } from 'buffer';
 import { ECIESDecrypt } from '../shares/KeyContainer';
+import Client from '@usecapsule/user-management-client';
 
-export async function upload(message: string, capsule: Capsule) {
+export async function upload(message: string, userManagementClient: Client) {
   const secret = randomBytes(32).toString('hex');
   const ec = new EC('secp256k1');
   const privKey = ec.keyFromPrivate(Buffer.from(secret, 'hex'));
@@ -15,20 +16,20 @@ export async function upload(message: string, capsule: Capsule) {
     ec.keyFromPublic(publicKey).getPublic(false, 'hex'),
     'hex',
   ).subarray(1);
-  const data = ECIESEncrypt(pubkey, Buffer.from(message, 'ucs2')).toString(
+  const data = ECIESEncrypt(Buffer.from(pubkey), Buffer.from(message, 'ucs2')).toString(
     'base64',
   );
 
   const {
     data: { id },
   // @ts-ignore
-  } = await capsule.ctx.capsuleClient.tempTrasmissionInit(data);
+  } = await userManagementClient.tempTrasmissionInit(data);
 
-  return id + '|' + secret;
+  return encodeURIComponent(id + '|' + secret);
 }
 
-export async function retrieve(message: string, capsule: Capsule) {
-  const [id, secret] = message.split('|');
+export async function retrieve(uriEncodedMessage: string, capsule: Capsule) {
+  const [id, secret] = decodeURIComponent(uriEncodedMessage).split('|');
   // @ts-ignore
   const response = await capsule.ctx.capsuleClient.tempTrasmission(
     id as string,

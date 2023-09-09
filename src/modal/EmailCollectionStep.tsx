@@ -12,6 +12,7 @@ import {
 import React from 'react';
 import Plus from './assets/plus';
 import WalletCreation from './assets/walletCreation';
+import { CoreCapsule } from '../CoreCapsule';
 
 export function EmailCollectionStep({
   setEmail,
@@ -28,7 +29,7 @@ export function EmailCollectionStep({
   setEmail: (newValue: string) => void;
   email: string;
   appName: string;
-  capsule: Capsule;
+  capsule: Capsule | CoreCapsule;
   setIsCreateAccountType: (isCreateAccountType: boolean) => void;
   currentStep: ModalStep;
 }) {

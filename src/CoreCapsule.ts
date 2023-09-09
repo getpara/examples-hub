@@ -9,20 +9,18 @@ import {
   getAsymmetricKeyPair,
   getPublicKeyHex,
 } from './cryptography/utils';
-import { generateBlumPrimes, keygen } from './wallet/keygen';
-import { sendTransaction, signTransaction, signMessage } from './wallet/signing';
 import { Ctx, getPortalBaseURL } from './definitions';
 import { Environment } from './definitions';
 import { initClient } from './external/capsuleClient';
 import * as mpcComputationClient from './external/mpcComputationClient';
 import { distributeNewShare } from './shares/shareDistribution';
-import { openPopup } from './modal/utils';
 import {
   FullSignatureRes,
   SuccessfulSignatureRes,
   DeniedSignatureRes,
 } from './types/walletTypes';
 import * as transmissionUtils from './transmission/transmissionUtils';
+import { PlatformUtils } from './PlatformUtils';
 
 // amount of time in ms that a web auth session lasts
 const BIOMETRIC_VERIFICATION_TIME_MS = 30 * 60 * 1000;
@@ -58,6 +56,7 @@ const LOCAL_STORAGE_WALLETS = `${PREFIX}wallets`;
 const SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR = `${PREFIX}loginEncryptionKeyPair`;
 const SESSION_STORAGE_PAILLIER_SECRET_KEY = `${PREFIX}paillierSecretKey`;
 const SESSION_STORAGE_SESSION_COOKIE = `${PREFIX}sessionCookie`;
+const POLLING_INTERVAL_MS = 2000;
 
 function biometricVerifiedRecently(ctx: Ctx, verifiedAt: number): boolean {
   if (ctx.env !== Environment.PROD) {
@@ -66,7 +65,7 @@ function biometricVerifiedRecently(ctx: Ctx, verifiedAt: number): boolean {
   return Date.now() - verifiedAt <= BIOMETRIC_VERIFICATION_TIME_MS;
 }
 
-export class Capsule {
+export abstract class CoreCapsule {
   ctx: Ctx;
 
   private email?: string;
@@ -78,20 +77,22 @@ export class Capsule {
   portalTextColor?: string;
   private sessionCookie?: string;
 
-  private localStorageGetItem = async (key: string): Promise<string | null> => {
-    return localStorage.getItem(key);
+  private platformUtils: PlatformUtils;
+
+  private localStorageGetItem = (key: string): Promise<string | null> | string | null => {
+    return this.platformUtils.localStorage.get(key);
   };
-  private localStorageSetItem = async (key: string, value: string): Promise<void> => {
-    return localStorage.setItem(key, value);
+  private localStorageSetItem = (key: string, value: string): Promise<void> | void => {
+    return this.platformUtils.localStorage.set(key, value);
   };
-  private sessionStorageGetItem = async (key: string): Promise<string | null> => {
-    return sessionStorage.getItem(key);
+  private sessionStorageGetItem = (key: string): Promise<string | null> | string | null => {
+    return this.platformUtils.sessionStorage.get(key);
   };
-  private sessionStorageSetItem = async (key: string, value: string): Promise<void> => {
-    return sessionStorage.setItem(key, value);
+  private sessionStorageSetItem = (key: string, value: string): Promise<void> | void => {
+    return this.platformUtils.sessionStorage.set(key, value);
   };
-  private sessionStorageRemoveItem = async (key: string): Promise<void> => {
-    return sessionStorage.removeItem(key);
+  private sessionStorageRemoveItem = (key: string): Promise<void> | void => {
+    return this.platformUtils.sessionStorage.removeItem(key);
   };
   private retrieveSessionCookie = (): string | undefined => {
     return this.sessionCookie;
@@ -103,26 +104,19 @@ export class Capsule {
 
   // remove all local storage and session storage prefixed for capsule
   clearStorage = async (keepSecretKey?: boolean): Promise<void> => {
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-
-      if (key && key.startsWith(PREFIX)) {
-        localStorage.removeItem(key);
-        i--;
-      }
+    let savedSecretKey: string | null = null;
+    if (keepSecretKey) {
+      savedSecretKey = await this.sessionStorageGetItem(SESSION_STORAGE_PAILLIER_SECRET_KEY);
     }
-    for (let j = 0; j < sessionStorage.length; j++) {
-      const key = sessionStorage.key(j);
 
-      // paillier secret key may be generated before this is called on account creation
-      if (
-        key &&
-        key.startsWith(PREFIX) &&
-        !(keepSecretKey && key === SESSION_STORAGE_PAILLIER_SECRET_KEY)
-      ) {
-        sessionStorage.removeItem(key);
-        j--;
-      }
+    this.platformUtils.localStorage.clear(PREFIX);
+    this.platformUtils.sessionStorage.clear(PREFIX);
+    if (this.platformUtils.secureStorage) {
+      this.platformUtils.secureStorage.clear(PREFIX);
+    }
+
+    if (savedSecretKey) {
+      await this.sessionStorageSetItem(SESSION_STORAGE_PAILLIER_SECRET_KEY, savedSecretKey);
     }
   }
 
@@ -153,14 +147,7 @@ export class Capsule {
     };
   }
 
-  private requireApiKeyForProd() {
-    if (!this.ctx.apiKey && this.ctx.env === Environment.PROD) {
-      throw new Error(
-          `in order to create a wallet or user with Capsule, you 
-          must provide an API key to the capsule instance`
-      );
-    }
-  }
+  protected abstract getPlatformUtils(): PlatformUtils;
 
   // TODO: consider using sessionStorage instead of localStorage
   constructor(env: Environment, apiKey?: string, opts?: ConstructorOpts) {
@@ -181,6 +168,8 @@ export class Capsule {
     this.portalPrimaryButtonColor = opts.portalPrimaryButtonColor;
     this.portalTextColor = opts.portalTextColor;
 
+    this.platformUtils = this.getPlatformUtils();
+
     if (opts.useStorageOverrides) {
       this.localStorageGetItem = opts.localStorageGetItemOverride;
       this.localStorageSetItem = opts.localStorageSetItemOverride;
@@ -191,40 +180,39 @@ export class Capsule {
       return;
     }
 
-    this.email = localStorage.getItem(LOCAL_STORAGE_EMAIL) || undefined;
-    this.userId = localStorage.getItem(LOCAL_STORAGE_USER_ID) || undefined;
-    this.wallets = JSON.parse(
-      localStorage.getItem(LOCAL_STORAGE_WALLETS) || '{}',
-    );
-    this.sessionCookie = sessionStorage.getItem(SESSION_STORAGE_SESSION_COOKIE) || undefined;
+    if (!this.platformUtils.isSyncStorage) {
+      return;
+    }
 
-    if (
-      sessionStorage.getItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR) &&
-      sessionStorage.getItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR) !==
-        'undefined'
-    ) {
-      this.loginEncryptionKeyPair = this.convertEncryptionKeyPair(JSON.parse(
-        sessionStorage.getItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR),
-      ));
+    this.email = this.localStorageGetItem(LOCAL_STORAGE_EMAIL) as string || undefined;
+    this.userId = this.localStorageGetItem(LOCAL_STORAGE_USER_ID) as string || undefined;
+    this.sessionCookie = this.sessionStorageGetItem(SESSION_STORAGE_SESSION_COOKIE) as string || undefined;
+
+    const stringWallets = this.platformUtils.secureStorage ?
+      this.platformUtils.secureStorage.get(LOCAL_STORAGE_WALLETS) :
+      this.localStorageGetItem(LOCAL_STORAGE_WALLETS);
+    this.wallets = JSON.parse(stringWallets as string || '{}');
+
+    const loginEncryptionKey = this.sessionStorageGetItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR) as string | null;
+    if (loginEncryptionKey && loginEncryptionKey !== 'undefined') {
+      this.loginEncryptionKeyPair = this.convertEncryptionKeyPair(JSON.parse(loginEncryptionKey));
     }
   }
 
+  // init only needs to be called for storage that is async
   async init(): Promise<void> {
     this.email = await this.localStorageGetItem(LOCAL_STORAGE_EMAIL) || undefined;
     this.userId = await this.localStorageGetItem(LOCAL_STORAGE_USER_ID) || undefined;
-    this.wallets = JSON.parse(
-      await this.localStorageGetItem(LOCAL_STORAGE_WALLETS) || '{}',
-    );
     this.sessionCookie = await this.sessionStorageGetItem(SESSION_STORAGE_SESSION_COOKIE) || undefined;
 
-    if (
-      (await this.sessionStorageGetItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR)) &&
-      (await this.sessionStorageGetItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR)) !==
-        'undefined'
-    ) {
-      this.loginEncryptionKeyPair = this.convertEncryptionKeyPair(JSON.parse(
-        await this.sessionStorageGetItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR),
-      ));
+    const stringWallets = this.platformUtils.secureStorage ?
+      await this.platformUtils.secureStorage.get(LOCAL_STORAGE_WALLETS) :
+      await this.localStorageGetItem(LOCAL_STORAGE_WALLETS);
+    this.wallets = JSON.parse(stringWallets || '{}');
+
+    const loginEncryptionKey = await this.sessionStorageGetItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR);
+    if (loginEncryptionKey && loginEncryptionKey !== 'undefined') {
+      this.loginEncryptionKeyPair = this.convertEncryptionKeyPair(JSON.parse(loginEncryptionKey));
     }
   }
 
@@ -232,6 +220,10 @@ export class Capsule {
     if (this.ctx.offloadMPCComputationURL) {
       return;
     }
+    if (!this.platformUtils.generateBlumPrimes) {
+      throw new Error('generateBlumPrimes is not implemented');
+    }
+
     const paillierKey = await this.sessionStorageGetItem(
       SESSION_STORAGE_PAILLIER_SECRET_KEY,
     );
@@ -239,7 +231,7 @@ export class Capsule {
       return;
     }
 
-    const { p, q } = await generateBlumPrimes(this.ctx);
+    const { p, q } = await this.platformUtils.generateBlumPrimes(this.ctx);
     const base64Enc = Buffer.from(
       JSON.stringify({ pBase64: p, qBase64: q }),
       'utf-8',
@@ -259,6 +251,10 @@ export class Capsule {
 
   async setWallets(wallets: Record<string, Wallet>): Promise<void> {
     this.wallets = wallets;
+    if (this.platformUtils.secureStorage) {
+      await this.platformUtils.secureStorage.set(LOCAL_STORAGE_WALLETS, JSON.stringify(wallets));
+      return;
+    }
     await this.localStorageSetItem(LOCAL_STORAGE_WALLETS, JSON.stringify(wallets));
   }
 
@@ -363,10 +359,9 @@ export class Capsule {
   }
 
   async createUser(email: string): Promise<void> {
-    this.requireApiKeyForProd();
     await this.setEmail(email);
     const { userId } = await this.ctx.capsuleClient.createUser({
-      email: this.email!,
+      email: this.email,
     });
     await this.setUserId(userId);
   }
@@ -409,7 +404,7 @@ export class Capsule {
   }
 
   // returns web auth url for logging in
-  async initiateUserLogin(email: string): Promise<string> {
+  async initiateUserLogin(email: string, useShortURL?: boolean): Promise<string> {
     await this.setEmail(email);
     const res = await this.ctx.capsuleClient.touchSession(true);
     if (!this.loginEncryptionKeyPair) {
@@ -417,11 +412,61 @@ export class Capsule {
       await this.setLoginEncryptionKeyPair(keyPair);
     }
 
-    return this.getWebAuthURLForLogin(
+    const webAuthLoginURL = await this.getWebAuthURLForLogin(
       res.data.sessionId,
       getPublicKeyHex(this.loginEncryptionKeyPair),
       res.data.partnerId,
     );
+    if (!useShortURL) {
+      return webAuthLoginURL;
+    }
+
+    return this.shortenLoginLink(webAuthLoginURL);
+  }
+
+  async waitForAccountCreation(): Promise<void> {
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      try {
+        await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS));
+
+        if (await this.isSessionActive()) {
+          return;
+        }
+      } catch (err) {
+        // want to continue polling on error
+        console.error(err);
+      }
+    }
+  }
+
+  async waitForLoginAndSetup(): Promise<{ needsWallet: boolean }> {
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      try {
+        await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS));
+        if (!(await this.isSessionActive())) {
+          continue;
+        }
+        await this.userSetupAfterLogin();
+
+        const fetchedWallets = (await this.fetchWallets()).filter(
+          wallet => !!wallet.address,
+        );
+        const tempSharesRes = await this.getTransmissionKeyShares();
+        // need this check for the case where user has logged in but temp encrypted shares
+        // haven't been sent to the backend yet
+        if (
+          tempSharesRes.data.temporaryShares.length === fetchedWallets.length
+        ) {
+          await this.setupAfterLogin(tempSharesRes.data.temporaryShares);
+          return { needsWallet: Object.values(this.getWallets()).length === 0 };
+        }
+      } catch (err) {
+        // want to continue polling on error
+        console.error(err);
+      }
+    }
   }
 
   async refreshSession(shouldOpenPopup: boolean): Promise<string> {
@@ -437,7 +482,7 @@ export class Capsule {
     );
 
     if (shouldOpenPopup) {
-      openPopup(link);
+      this.platformUtils.openPopup(link);
     }
 
     return link;
@@ -494,15 +539,13 @@ export class Capsule {
     skipDistribute = false,
     customFunction: (params?: any) => void,
   ): Promise<[Wallet, string | null]> {
-    this.requireApiKeyForProd();
     const secretKey = await this.sessionStorageGetItem(
       SESSION_STORAGE_PAILLIER_SECRET_KEY,
     );
-    const { signer, walletId, recoveryShare } = await keygen(
+    const { signer, walletId } = await this.platformUtils.keygen(
       this.ctx,
       this.userId,
       secretKey,
-      skipDistribute,
       customFunction,
       this.retrieveSessionCookie(),
     );
@@ -511,6 +554,15 @@ export class Capsule {
       signer,
     };
     await this.populateWalletAddresses();
+    let recoveryShare: string | null = null;
+    if (!skipDistribute) {
+      recoveryShare = await distributeNewShare(
+        this.ctx,
+        this.userId,
+        walletId,
+        signer,
+      );
+    }
 
     await this.setWallets(this.wallets);
     return [this.wallets[walletId], recoveryShare];
@@ -530,7 +582,7 @@ export class Capsule {
     walletId: string,
     messageBase64: string,
   ): Promise<FullSignatureRes> {
-    const res = await signMessage(
+    const res = await this.platformUtils.signMessage(
       this.ctx,
       this.userId,
       walletId,
@@ -555,7 +607,7 @@ export class Capsule {
     rlpEncodedTxBase64: string,
     chainId: string,
   ): Promise<FullSignatureRes> {
-    const res = await signTransaction(
+    const res = await this.platformUtils.signTransaction(
       this.ctx,
       this.userId,
       walletId,
@@ -582,7 +634,7 @@ export class Capsule {
     rlpEncodedTxBase64: string,
     chainId: string,
   ): Promise<FullSignatureRes> {
-    const res = await sendTransaction(
+    const res = await this.platformUtils.sendTransaction(
       this.ctx,
       this.userId,
       walletId,
@@ -610,6 +662,7 @@ export class Capsule {
     this.loginEncryptionKeyPair = undefined;
     this.email = undefined;
     this.userId = undefined;
+    this.sessionCookie = undefined;
   }
 
   // remove sensitive data when logging this class

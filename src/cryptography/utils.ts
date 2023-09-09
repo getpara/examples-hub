@@ -42,13 +42,13 @@ export async function getAsymmetricKeyPair(
 
   const options: forge.pki.rsa.GenerateKeyPairOptions = {
     bits: 2048,
-    // only using 1 web worker as more makes the call non-deterministic
-    // -1 uses optimal amount of web workers
     e: 65537,
     prng,
   };
   if (!ctx.disableWorkers) {
     options.workLoad = 100;
+    // only using 1 web worker as more makes the call non-deterministic
+    // -1 uses optimal amount of web workers
     options.workers = seedValue ? 1 : -1;
 
     const workerRes = await fetch(`${getPortalBaseURL(ctx)}/static/js/prime.worker.min.js`);
