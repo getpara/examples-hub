@@ -201,9 +201,14 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
         return this.accountFromAddress(fromAddress).signTransaction(formatTransaction(params[0]));
       }
       case 'eth_signTypedData_v4': {
-        const fromAddress = params[0].from;
+        const fromAddress = params[0];
+        let typedMessage = params[1];
+
+        if (typeof typedMessage === 'string') {
+          typedMessage = JSON.parse(typedMessage);
+        }
         return this.walletClient.signTypedData({
-          ...params[0],
+          ...typedMessage,
           account: this.accountFromAddress(fromAddress),
         });
       }

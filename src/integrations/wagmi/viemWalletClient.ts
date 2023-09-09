@@ -69,7 +69,8 @@ export function createCapsuleAccount(capsule: Capsule, walletAddress?: Hex): Loc
       TTypedData extends TypedData | { [key: string]: unknown },
       TPrimaryType extends string = string,
     >(typedData: TypedDataDefinition<TTypedData, TPrimaryType>) => {
-      const signature = await capsule.signMessage(currentWallet.id, hexStringToBase64(hashTypedData(typedData)));
+      const res = await capsule.signMessage(currentWallet.id, hexStringToBase64(hashTypedData(typedData)));
+      const signature = (res as SuccessfulSignatureRes).signature;
       return `0x${signature}`;
     },
   };
