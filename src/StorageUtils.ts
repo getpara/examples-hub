@@ -1,3 +1,10 @@
+/*
+ * Base class for storage.
+ *
+ * This class will eventually not be exported.
+ * Clients of this library should not use it.
+ * @internal
+ */
 export interface StorageUtils {
     /**
      * Retrieves a stored value.
