@@ -66,6 +66,12 @@ function biometricVerifiedRecently(ctx: Ctx, verifiedAt: number): boolean {
   return Date.now() - verifiedAt <= BIOMETRIC_VERIFICATION_TIME_MS;
 }
 
+/**
+ * Main entry point class.
+ *
+ * Deprecated. Use `CapsuleWeb` instead.
+ * @internal
+ **/
 export class Capsule {
   ctx: Ctx;
 
@@ -156,7 +162,7 @@ export class Capsule {
   private requireApiKeyForProd() {
     if (!this.ctx.apiKey && this.ctx.env === Environment.PROD) {
       throw new Error(
-          `in order to create a wallet or user with Capsule, you 
+          `in order to create a wallet or user with Capsule, you
           must provide an API key to the capsule instance`
       );
     }

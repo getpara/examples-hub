@@ -2,6 +2,10 @@ import { StorageUtils } from './StorageUtils';
 
 /**
  * Implements `StorageUtils` using `sessionStorage`.
+ *
+ * This class will eventually not be exported and should not be used
+ * by consumers of the library.
+ * @internal
  */
 export class SessionStorage implements StorageUtils {
   get = (key: string): string | null => {
