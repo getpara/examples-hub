@@ -1,5 +1,5 @@
 # Deploys static content to GitHub Pages for documentation
-name: Deploy documentation to Pages
+name: Deploy
 
 on:
   # Runs on pushes targeting the default branch
@@ -45,7 +45,7 @@ jobs:
         uses: actions/configure-pages@v3
       - uses: actions/setup-node@v1
         with:
-          node-version: v16.x
+          node-version: v18
       - name: Set workflow variables
         id: sets-yarn-cache-dir
         run: |
@@ -62,6 +62,17 @@ jobs:
           yarn add file:./user-management-client;
           yarn add typedoc;
           yarn
+      - name: Setup deploy key
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_KEY }}
+      - name: Release to NPM
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_PUBLISH_KEY }}
+          GITHUB_TOKEN: ${{ secrets.DEPLOY_KEY }}
+        run: |
+          npm install --save-dev --legacy-peer-deps @semantic-release/changelog @semantic-release/git;
+          npx semantic-release
       - name: Generate docs
         run: |
           ./node_modules/typedoc/bin/typedoc --out docs src/index.ts --skipErrorChecking --excludeInternal
