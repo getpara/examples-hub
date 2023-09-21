@@ -10,3 +10,5 @@ export const truncateEthAddress = (address: string) => {
   if (!match) return address;
   return `${match[1]}…${match[2]}`;
 };
+
+export const STORAGE_PREFIX = '@CAPSULE/';

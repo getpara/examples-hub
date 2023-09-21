@@ -1,6 +1,8 @@
 import Client from '@usecapsule/user-management-client';
 import { AxiosInstance } from 'axios';
 
+export const is2FAEnabled = false;
+
 export enum Environment {
   DEV = 'DEV',
   SANDBOX = 'SANDBOX',

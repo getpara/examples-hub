@@ -28,6 +28,15 @@ import * as transmissionUtils from './transmission/transmissionUtils';
 const BIOMETRIC_VERIFICATION_TIME_MS = 30 * 60 * 1000;
 const DEV_BIOMETRIC_VERIFICATION_TIME_MS = 60 * 60 * 1000;
 
+// Make sure to keep this in sync with capsule-org/src/entities/recoveryAttemptEntity.ts
+export enum RecoveryStatus {
+  INITIATED = 'INITIATED',
+  READY = 'READY',
+  EXPIRED = 'EXPIRED',
+  FINISHED = 'FINISHED',
+  CANCELLED = 'CANCELLED',
+}
+
 export interface Wallet {
   id: string;
   signer: string;
@@ -381,6 +390,45 @@ export class Capsule {
   async verifyEmail(verificationCode: string): Promise<string> {
     await this.ctx.capsuleClient.verifyEmail(this.userId, { verificationCode });
     return this.getSetUpBiometricsURL(false);
+  }
+
+  async verify2FA(email: string, verificationCode: string): Promise<{
+    address?: string;
+    initiatedAt?: Date;
+    status?: RecoveryStatus;
+    userId: string;
+    walletId: string;
+  }> {
+    const res = await this.ctx.capsuleClient.verify2FA(email, verificationCode);
+    return {
+      address: res.data.address,
+      initiatedAt: res.data.initiatedAt,
+      status: res.data.status,
+      userId: res.data.userId,
+      walletId: res.data.walletId,
+    }
+  }
+
+  async setup2FA(): Promise<{
+    uri?: string
+  }> {
+    const res = await this.ctx.capsuleClient.setup2FA(this.userId);
+    return {
+      uri: res.data.uri,
+    }
+  }
+
+  async enable2FA(verificationCode: string): Promise<void> {
+    await this.ctx.capsuleClient.enable2FA(this.userId, verificationCode);
+  }
+
+  async check2FAStatus(): Promise<{
+    isSetup: boolean
+  }> {
+    const res = await this.ctx.capsuleClient.check2FAStatus(this.userId);
+    return {
+      isSetup: res.data.isSetup
+    }
   }
 
   async resendVerificationCode(): Promise<void> {

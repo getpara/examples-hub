@@ -1,0 +1,62 @@
+@font-face {
+    font-family: 'Hanken Grotesk';
+    src: url('../public/HankenGrotesk-VariableFont_wght.ttf') format('truetype');
+}
+
+
+.App {
+    /* Add a fallback font */
+    text-align: left;
+    color: white;
+    margin-top: 150px;
+    margin-left: 150px;
+}
+
+.App h1 {
+    font-weight: 400;
+    font-size: 32px;
+    line-height: 70px;
+}
+
+.App h2 {
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 60px;
+}
+
+.App p {
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 40px;
+}
+
+.App ol {
+    line-height: 25px;
+}
+
+.App li {
+    font-size: 16px;
+    font-weight: 300;
+}
+
+.App p strong {
+    font-weight: 700;
+}
+
+.indent {
+    margin-left: 30px;
+}
+
+.button-container {
+    display: flex;
+    justify-content: flex-start;
+    gap: 20px;
+    margin-top: 50px;
+}
+
+.App h1,
+.App p,
+.App strong,
+.App li {
+    font-family: 'Hanken Grotesk', sans-serif;
+}

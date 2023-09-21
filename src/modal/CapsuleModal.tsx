@@ -29,6 +29,10 @@ import CapsuleSmall from './assets/capsuleSmall';
 import { Header } from './Header';
 import { Footer } from './Footer';
 import { truncateEthAddress } from './utils';
+import { Setup2FA } from './Setup2FA';
+import { Done2FAStep } from './Done2FAStep';
+import Lost2FA from './Lost2FA';
+import Verify2FA from './Verify2FA';
 import { CoreCapsule } from '../CoreCapsule';
 
 interface CapsuleModalProps {
@@ -278,7 +282,7 @@ export const CapsuleModal = ({
           width="356px"
           height="632px"
         >
-        {/* 
+          {/* 
         // @ts-ignore */}
           <ModalBody padding={0} display="flex" flexDirection="column">
             <Header step={ModalStepNumber[currentStep]} onClose={onClose} />
@@ -326,8 +330,29 @@ export const CapsuleModal = ({
                 capsule={capsule}
                 onClose={onClose}
                 rampNetworkApiKey={rampNetworkApiKey}
+                setCurrentStep={setCurrentStep}
               />
-              <LoginDoneStep currentStep={currentStep} onClose={onClose} />
+              {currentStep === ModalStep.LOGIN_DONE && <LoginDoneStep
+                setCurrentStep={setCurrentStep}
+                onClose={onClose}
+                capsule={capsule as Capsule}
+              />}
+              {currentStep === ModalStep.SETUP_2FA && <Setup2FA
+                email={email}
+                setCurrentStep={setCurrentStep}
+                capsule={capsule as Capsule}
+              />}
+              {currentStep === ModalStep.DONE_2FA && <Done2FAStep
+                onClose={onClose}
+              />}
+              {currentStep === ModalStep.LOST_2FA && <Lost2FA
+                onClose={onClose}
+              />}
+              {currentStep === ModalStep.VERIFY_2FA && <Verify2FA
+                email={email}
+                setCurrentStep={setCurrentStep}
+                capsule={capsule as Capsule}
+              />}
             </VStack>
             <Footer />
           </ModalBody>

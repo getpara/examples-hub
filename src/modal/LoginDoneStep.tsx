@@ -1,19 +1,21 @@
 import { ModalStep } from './steps';
 import { Box, Button, Text } from '@chakra-ui/react';
-import React from 'react';
 import WalletSuccess from './assets/walletSuccess';
-import Copy from './assets/copy';
+import { Capsule } from '../Capsule';
+import useCheck2FAStatus from '../utils/useCheck2FAStatus';
+import { is2FAEnabled } from '../definitions';
 
 export function LoginDoneStep({
-  currentStep,
   onClose,
+  setCurrentStep,
+  capsule,
 }: {
-  currentStep: ModalStep;
   onClose: () => void;
+  setCurrentStep: (newValue: ModalStep) => void;
+  capsule: Capsule;
 }) {
-  if (currentStep !== ModalStep.LOGIN_DONE) {
-    return null;
-  }
+
+  const is2FASetup = useCheck2FAStatus(capsule);
   return (
     <Box
       flexDirection="column"
@@ -31,6 +33,20 @@ export function LoginDoneStep({
         <Text textAlign="center" marginTop="4px" w="90%" fontSize="s">
           Your wallet has been successfully logged in!
         </Text>
+        {!is2FASetup && is2FAEnabled && (
+          <Text
+            textAlign="center"
+            marginTop="20px"
+            w="90%"
+            as="b"
+            fontSize="s"
+            _hover={{ textDecoration: 'underline' }}
+            cursor="pointer"
+            onClick={() => setCurrentStep(ModalStep.SETUP_2FA)}
+          >
+            Optional: Setup 2FA
+          </Text>
+        )}
       </Box>
       <Button w="100%" h="44px" onClick={onClose}>
         Close
