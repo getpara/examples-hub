@@ -1,6 +1,6 @@
-import { InjectedConnector, InjectedConnectorOptions } from '@wagmi/connectors/injected';
-import { Chain } from '@wagmi/chains';
-import { WindowProvider } from '@wagmi/connectors';
+import { Chain, WindowProvider } from 'wagmi';
+import { InjectedConnector } from 'wagmi/connectors/injected';
+import { InjectedConnectorOptions } from '@wagmi/connectors/injected';
 
 import { Capsule } from '../../Capsule';
 import { CapsuleEIP1193Provider } from './CapsuleEIP1193Provider';
