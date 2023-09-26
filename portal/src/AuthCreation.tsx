@@ -89,13 +89,13 @@ function AuthCreation() {
   const paramsPartnerId = searchParams.get('partnerId');
   const portalBackgroundColor = validateColorInput(searchParams.get('portalBackgroundColor')) ?
     decodeURIComponent(searchParams.get('portalBackgroundColor')) :
-    undefined;
+    'white';
   const portalPrimaryButtonColor = validateColorInput(searchParams.get('portalPrimaryButtonColor')) ?
     decodeURIComponent(searchParams.get('portalPrimaryButtonColor')) :
     undefined;
   const portalTextColor = validateColorInput(searchParams.get('portalTextColor')) ?
     decodeURIComponent(searchParams.get('portalTextColor')) :
-    undefined;
+    'black';
   const isForNewDevice = searchParams.get('isForNewDevice') === 'true';
   const [isFire, setIsFire] = useState(false);
 
@@ -146,7 +146,7 @@ function AuthCreation() {
             <>
               <Flex alignItems="center" justifyContent="left" mb="10%">
                 <Image
-                  src={partner?.portalHeaderLogoUrl || '/wordmark_white.svg'}
+                  src={partner?.portalHeaderLogoUrl || '/wordmark_black.svg'}
                   alt="Logo"
                 />
               </Flex>
@@ -197,45 +197,51 @@ function AuthCreation() {
           ></PermissionSelection>
         ) : (
           <>
-            <Flex alignItems="center" justifyContent="left" mb="10%">
+            <Flex alignItems="center" justifyContent="center" mb="10%">
               <Image
-                src={partner?.portalHeaderLogoUrl || '/wordmark_white.svg'}
+                src={partner?.portalHeaderLogoUrl || '/wordmark_black.svg'}
                 alt="Logo"
                 width="50%"
                 maxWidth={300}
                 marginRight={2}
               />
             </Flex>
-            <Heading fontFamily={isFire && "ClashDisplay"} fontSize="4vh" mb="10%">
-              {partner ?
-                `${partner.displayName} is using Capsule to create your wallet` :
-                'Authentication Portal'
-              }
-            </Heading>
-            <Text fontFamily={isFire && "Manrope"} fontSize="2.5vh" mb="10%">Authenticate with Capsule to create your wallet.</Text>
-            <Text fontFamily={isFire && "Manrope"} fontSize="2.5vh" mb="20%">
-              We're using your device to safely store your wallet for use across
-              web3. Don't worry, Capsule never collects or stores this
-              information, it is only used to save your wallet to your device.
-              <a href="https://docs.usecapsule.com/" target='_blank' rel='noreferrer'>
-                {' '}
-                <u>Learn More</u>
-              </a>
-            </Text>
+            <Box>
+              <Heading fontFamily={isFire && "ClashDisplay"} textAlign='center' fontSize="4vh" mb="10%">
+                <Text fontWeight={500} fontSize='8vh'>
+                  Set up passkey
+                </Text>
+              </Heading>
+              <Text fontFamily={isFire && "Manrope"} textAlign='center' fontSize="2.5vh" mb="5%">
+                {
+                partner ? 
+                <><strong>{partner.displayName}</strong> is using Capsule to create your wallet. 
+                To continue, you will need to set up a Capsule passkey for <strong>{paramsEmail}</strong></> 
+                : <>Authenticate with Capsule to create your wallet. To continue, you will need to set up a Capsule passkey for <strong>{paramsEmail}</strong></>
+                }
+              </Text>
+              <Text fontFamily={isFire && "Manrope"} textAlign='center' fontSize="2.5vh" mb="20%">
+                This passkey will let you access your wallet from many different applications.
+                <a href="https://docs.usecapsule.com/" target='_blank' rel='noreferrer'>
+                  {' '}
+                  <u>Learn More</u>
+                </a>
+              </Text>
 
-            <Container width="100%" display="flex" justifyContent="center">
-              <Button
-                colorScheme="green"
-                onClick={setUpBiometrics}
-                p="2.5vh"
-                fontSize="2.5vh"
-                maxWidth="50%"
-                alignSelf={'center'}
-                fontFamily={isFire && "Manrope"}
-              >
-                {isDone ? 'Success!' : 'Set Up'}
-              </Button>
-            </Container>
+              <Container width="100%" display="flex" justifyContent="center">
+                <Button
+                  bg="black"
+                  onClick={setUpBiometrics}
+                  p="2.5vh"
+                  fontSize="3vh"
+                  alignSelf={'center'}
+                  height='9vh'
+                  fontFamily={isFire && "Manrope"}
+                >
+                  {isDone ? 'Success!' : 'Set Up'}
+                </Button>
+              </Container>
+            </Box>
           </>
         )}
       </Container>

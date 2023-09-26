@@ -32,7 +32,6 @@ import { ENV } from './definitions';
 import PoweredByCapsule from './assets/poweredByCapsule';
 import { validateColorInput } from './validation';
 import Copy from './assets/copy';
-import './fonts/fire/fire.css';
 
 // anticipating that we will need to add more steps to the add device flow so using enum
 // instead of just a boolean for this
@@ -132,13 +131,13 @@ function AuthLogin() {
   const paramsPartnerId = searchParams.get('partnerId');
   const portalBackgroundColor = validateColorInput(searchParams.get('portalBackgroundColor')) ?
     decodeURIComponent(searchParams.get('portalBackgroundColor')) :
-    undefined;
+    'white';
   const portalPrimaryButtonColor = validateColorInput(searchParams.get('portalPrimaryButtonColor')) ?
     decodeURIComponent(searchParams.get('portalPrimaryButtonColor')) :
     undefined;
   const portalTextColor = validateColorInput(searchParams.get('portalTextColor')) ?
     decodeURIComponent(searchParams.get('portalTextColor')) :
-    undefined;
+    'black';
   const [isFire, setIsFire] = useState(false);
 
   const login = useCallback(() => {
@@ -246,17 +245,17 @@ function AuthLogin() {
     return (paramsPartnerId && !partner) ? undefined : (urlForNewDeviceLogin && (
       <ChakraProvider theme={getPartnerTheme(portalBackgroundColor, portalPrimaryButtonColor, portalTextColor)}>
         <Container color="white" maxW="ld" padding={10}>
-          <Flex alignItems="center" justifyContent="left" mb="10%">
+          <Flex alignItems="center" justifyContent="center" mb="10%">
             <Image
-              src={partner?.portalHeaderLogoUrl || '/wordmark_white.svg'}
+              src={partner?.portalHeaderLogoUrl || '/wordmark_black.svg'}
               alt="Logo"
             />
           </Flex>
-          <Heading fontFamily={isFire && "ClashDisplay"} fontSize="4vh" mb="10%">
+          <Heading fontFamily={isFire && "ClashDisplay"} textAlign='center' fontSize="4vh" mb="10%">
             Add Device
           </Heading>
-          <Text fontFamily={isFire && "Manrope"} mb={8}>We see you've already set up Capsule on another device</Text>
-          <Text fontFamily={isFire && "Manrope"} mb={8}>Please log in to Capsule on your other device by scanning this QR code</Text>
+          <Text fontFamily={isFire && "Manrope"} textAlign='center' mb={8}>We see you've already set up Capsule on another device</Text>
+          <Text fontFamily={isFire && "Manrope"} textAlign='center' mb={8}>Please log in to Capsule on your other device by scanning this QR code</Text>
 
           <Flex justifyContent="center">
             <QRCode value={urlForNewDeviceLogin}/>
@@ -269,7 +268,7 @@ function AuthLogin() {
             </Button>
             {hasCopied ? ' Link Copied!' : undefined}
           </Text>
-          <Text fontFamily={isFire && "Manrope"}>
+          <Text fontFamily={isFire && "Manrope"} textAlign='center'>
             If you are unable to log in to any existing devices, you will need to recover your account.{' '}
             <Link href={basePortalURL} textDecoration="underline">Recover My Account</Link>
           </Text>
@@ -287,9 +286,9 @@ function AuthLogin() {
     <ChakraProvider theme={getPartnerTheme(portalBackgroundColor, portalPrimaryButtonColor, portalTextColor)}>
       <Container color="white" maxW="ld" padding={10}>
         {/* if first time logging into app, then need to accept scopes */}
-        <Flex alignItems="center" justifyContent="left" mb={12}>
+        <Flex alignItems="center" justifyContent="center" mb={12}>
           <Image
-            src={partner?.portalHeaderLogoUrl || '/wordmark_white.svg'}
+            src={partner?.portalHeaderLogoUrl || '/wordmark_black.svg'}
             alt="Logo"
             width="50%"
             maxWidth={300}
@@ -304,42 +303,34 @@ function AuthLogin() {
             isLogin
           ></PermissionSelection>
         )}
-        <Heading fontFamily={isFire && "ClashDisplay"} fontSize="4vh" mb="10%">
-          {newDeviceSessionLookupId ? 'Login to Authenticate New Device' : 'Login Portal'}
+        <Heading fontFamily={isFire && "ClashDisplay"} textAlign='center' fontSize="8vh" mb="10%">
+          {newDeviceSessionLookupId ? 'Login to Authenticate New Device' : 'Login'}
         </Heading>
-        <Text fontFamily={isFire && "Manrope"} fontSize="2.5vh" mb="10%">
+        <Text fontFamily={isFire && "Manrope"} textAlign='center' fontSize="2.5vh" mb="10%">
           {newDeviceSessionLookupId ?
             'It looks like you\'re trying to add Capsule to a new device.' :
             'Authenticate with Capsule to create your wallet.'}
         </Text>
-        {!newDeviceSessionLookupId && <Text fontFamily={isFire && "Manrope"} fontSize="2.5vh" mb="10%">
+        {!newDeviceSessionLookupId && <Text fontFamily={isFire && "Manrope"} textAlign='center' fontSize="2.5vh" mb="10%">
           If you've previously logged in on a different device, or there is an error finding your key on this device,
           you should select <strong>Add This Device</strong> below.
-        </Text>}
-        {newDeviceSessionLookupId ? <Text fontFamily={isFire && "Manrope"} fontSize="2.5vh" mb="10%">
-          If you would like to proceed with this action, please complete login below.
-          Otherwise, please close this window and disregard this message.
-        </Text> :
-        <Text fontFamily={isFire && "Manrope"} fontSize="2.5vh" mb="10%">
-          We're using your device to safely store your wallet for use across
-          web3. Don't worry, Capsule never collects or stores this information,
-          it is only used to save your wallet to your device.
           <a href="https://docs.usecapsule.com/" target='_blank' rel='noreferrer'>
             {' '}
             <u>Learn More</u>
           </a>
         </Text>}
-
         <Container width="100%" display="flex" justifyContent="center" mb="5%">
-          <Button
-            colorScheme="green"
-            onClick={login}
-            p="2.5vh"
-            fontSize="2.5vh"
-            maxWidth="50%"
-            alignSelf={'center'}
-            fontFamily={isFire && "Manrope"}
-          >
+        <Button
+          bg="black"
+          onClick={login}
+          p="2.5vh"
+          fontSize="2.5vh"
+          width="42.5vh"
+          alignSelf={'center'}
+          height='9vh'
+          top='-2vh'
+          fontFamily={isFire && "Manrope"}
+        >
             {loginDone ? 'Success!' : 'Login'}
           </Button>
         </Container>
@@ -351,9 +342,8 @@ function AuthLogin() {
             fontSize="2.5vh"
             maxWidth="50%"
             alignSelf={'center'}
-            fontFamily={isFire && "Manrope"}
           >
-            <u>Add This Device</u>
+            <Text fontFamily={isFire && "Manrope"} as='u'>Add This Device</Text>
           </Button>
         </Container>}
 
