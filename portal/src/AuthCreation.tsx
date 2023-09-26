@@ -26,6 +26,7 @@ import { userManagementClient } from './userManagementClient';
 import { Partner } from './types';
 import PoweredByCapsule from './assets/poweredByCapsule';
 import { validateColorInput } from './validation';
+import './fonts/fire/fire.css';
 
 export async function authCreation(
   userId: string,
@@ -96,6 +97,7 @@ function AuthCreation() {
     decodeURIComponent(searchParams.get('portalTextColor')) :
     undefined;
   const isForNewDevice = searchParams.get('isForNewDevice') === 'true';
+  const [isFire, setIsFire] = useState(false);
 
   const setUpBiometrics = useCallback(() => {
     authCreation(paramsUserId, paramsEmail, paramsBiometricId, isForNewDevice).then(() => {
@@ -122,6 +124,9 @@ function AuthCreation() {
       if (paramsPartnerId) {
         const detailsRes = (await userManagementClient.getPartner(paramsPartnerId)).data;
         setPartner(detailsRes.partner);
+        if (detailsRes.partner.name === 'fire') {
+          setIsFire(true);
+        }
       }
     }
     getPartner()
@@ -145,11 +150,11 @@ function AuthCreation() {
                   alt="Logo"
                 />
               </Flex>
-              <Heading fontSize="4vh" mb="10%">
+              <Heading fontFamily={isFire && "ClashDisplay"} fontSize="4vh" mb="10%">
                 Finish Adding Device
               </Heading>
-              <Text fontSize="2.5vh" mb="10%">You successfully authenticated with Capsule on another device.</Text>
-              <Text fontSize="2.5vh" mb="10%">Finally, please finish adding this device.</Text>
+              <Text fontFamily={isFire && "Manrope"} fontSize="2.5vh" mb="10%">You successfully authenticated with Capsule on another device.</Text>
+              <Text fontFamily={isFire && "Manrope"} fontSize="2.5vh" mb="10%">Finally, please finish adding this device.</Text>
 
               <Container width="100%" display="flex" justifyContent="center">
                 <Button
@@ -159,6 +164,7 @@ function AuthCreation() {
                   fontSize="2.5vh"
                   maxWidth="50%"
                   alignSelf={'center'}
+                  fontFamily={isFire && "Manrope"}
                 >
                   Complete Setup
                 </Button>
@@ -167,7 +173,7 @@ function AuthCreation() {
           )}
         </Container>
         {isDone ? (
-          <Text color={portalTextColor || "green"} size="lg">
+          <Text fontFamily={isFire && "Manrope"} color={portalTextColor || "green"} size="lg">
             Authentication creation complete. You can close this window if it does not automatically redirect...
           </Text>
         ) : undefined}
@@ -200,14 +206,14 @@ function AuthCreation() {
                 marginRight={2}
               />
             </Flex>
-            <Heading fontSize="4vh" mb="10%">
+            <Heading fontFamily={isFire && "ClashDisplay"} fontSize="4vh" mb="10%">
               {partner ?
                 `${partner.displayName} is using Capsule to create your wallet` :
                 'Authentication Portal'
               }
             </Heading>
-            <Text fontSize="2.5vh" mb="10%">Authenticate with Capsule to create your wallet.</Text>
-            <Text fontSize="2.5vh" mb="20%">
+            <Text fontFamily={isFire && "Manrope"} fontSize="2.5vh" mb="10%">Authenticate with Capsule to create your wallet.</Text>
+            <Text fontFamily={isFire && "Manrope"} fontSize="2.5vh" mb="20%">
               We're using your device to safely store your wallet for use across
               web3. Don't worry, Capsule never collects or stores this
               information, it is only used to save your wallet to your device.
@@ -225,6 +231,7 @@ function AuthCreation() {
                 fontSize="2.5vh"
                 maxWidth="50%"
                 alignSelf={'center'}
+                fontFamily={isFire && "Manrope"}
               >
                 {isDone ? 'Success!' : 'Set Up'}
               </Button>
@@ -233,7 +240,7 @@ function AuthCreation() {
         )}
       </Container>
       {isDone ? (
-        <Text color={portalTextColor || "green"} size="lg">
+        <Text fontFamily={isFire && "Manrope"} color={portalTextColor || "green"} size="lg">
           Authentication creation complete. You can close this window if it does not automatically redirect...
         </Text>
       ) : undefined}

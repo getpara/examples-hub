@@ -32,6 +32,7 @@ import { ENV } from './definitions';
 import PoweredByCapsule from './assets/poweredByCapsule';
 import { validateColorInput } from './validation';
 import Copy from './assets/copy';
+import './fonts/fire/fire.css';
 
 // anticipating that we will need to add more steps to the add device flow so using enum
 // instead of just a boolean for this
@@ -138,6 +139,7 @@ function AuthLogin() {
   const portalTextColor = validateColorInput(searchParams.get('portalTextColor')) ?
     decodeURIComponent(searchParams.get('portalTextColor')) :
     undefined;
+  const [isFire, setIsFire] = useState(false);
 
   const login = useCallback(() => {
     authLogin(paramsEmail, sessionId, encryptionKey, newDeviceSessionLookupId, newDeviceEncryptionKey).then((userId: string) => {
@@ -169,6 +171,9 @@ function AuthLogin() {
       if (paramsPartnerId) {
         const detailsRes = (await userManagementClient.getPartner(paramsPartnerId)).data;
         setPartner(detailsRes.partner);
+        if (detailsRes.partner.name === 'fire') {
+          setIsFire(true);
+        }
       }
     }
     getPartner();
@@ -247,16 +252,16 @@ function AuthLogin() {
               alt="Logo"
             />
           </Flex>
-          <Heading fontSize="4vh" mb="10%">
+          <Heading fontFamily={isFire && "ClashDisplay"} fontSize="4vh" mb="10%">
             Add Device
           </Heading>
-          <Text mb={8}>We see you've already set up Capsule on another device</Text>
-          <Text mb={8}>Please log in to Capsule on your other device by scanning this QR code</Text>
+          <Text fontFamily={isFire && "Manrope"} mb={8}>We see you've already set up Capsule on another device</Text>
+          <Text fontFamily={isFire && "Manrope"} mb={8}>Please log in to Capsule on your other device by scanning this QR code</Text>
 
           <Flex justifyContent="center">
             <QRCode value={urlForNewDeviceLogin}/>
           </Flex>
-          <Text align="center" marginTop={3} mb={8}>Or copy <Link isExternal href={urlForNewDeviceLogin} textDecoration="underline">this link</Link>
+          <Text fontFamily={isFire && "Manrope"} align="center" marginTop={3} mb={8}>Or copy <Link isExternal href={urlForNewDeviceLogin} textDecoration="underline">this link</Link>
             <Button marginLeft={2} h="38px" onClick={onCopy} size="sm">
               <Box position="absolute">
                 <Copy />
@@ -264,7 +269,7 @@ function AuthLogin() {
             </Button>
             {hasCopied ? ' Link Copied!' : undefined}
           </Text>
-          <Text>
+          <Text fontFamily={isFire && "Manrope"}>
             If you are unable to log in to any existing devices, you will need to recover your account.{' '}
             <Link href={basePortalURL} textDecoration="underline">Recover My Account</Link>
           </Text>
@@ -299,23 +304,23 @@ function AuthLogin() {
             isLogin
           ></PermissionSelection>
         )}
-        <Heading fontSize="4vh" mb="10%">
+        <Heading fontFamily={isFire && "ClashDisplay"} fontSize="4vh" mb="10%">
           {newDeviceSessionLookupId ? 'Login to Authenticate New Device' : 'Login Portal'}
         </Heading>
-        <Text fontSize="2.5vh" mb="10%">
+        <Text fontFamily={isFire && "Manrope"} fontSize="2.5vh" mb="10%">
           {newDeviceSessionLookupId ?
             'It looks like you\'re trying to add Capsule to a new device.' :
             'Authenticate with Capsule to create your wallet.'}
         </Text>
-        {!newDeviceSessionLookupId && <Text fontSize="2.5vh" mb="10%">
+        {!newDeviceSessionLookupId && <Text fontFamily={isFire && "Manrope"} fontSize="2.5vh" mb="10%">
           If you've previously logged in on a different device, or there is an error finding your key on this device,
           you should select <strong>Add This Device</strong> below.
         </Text>}
-        {newDeviceSessionLookupId ? <Text fontSize="2.5vh" mb="10%">
+        {newDeviceSessionLookupId ? <Text fontFamily={isFire && "Manrope"} fontSize="2.5vh" mb="10%">
           If you would like to proceed with this action, please complete login below.
           Otherwise, please close this window and disregard this message.
         </Text> :
-        <Text fontSize="2.5vh" mb="10%">
+        <Text fontFamily={isFire && "Manrope"} fontSize="2.5vh" mb="10%">
           We're using your device to safely store your wallet for use across
           web3. Don't worry, Capsule never collects or stores this information,
           it is only used to save your wallet to your device.
@@ -333,6 +338,7 @@ function AuthLogin() {
             fontSize="2.5vh"
             maxWidth="50%"
             alignSelf={'center'}
+            fontFamily={isFire && "Manrope"}
           >
             {loginDone ? 'Success!' : 'Login'}
           </Button>
@@ -345,13 +351,14 @@ function AuthLogin() {
             fontSize="2.5vh"
             maxWidth="50%"
             alignSelf={'center'}
+            fontFamily={isFire && "Manrope"}
           >
             <u>Add This Device</u>
           </Button>
         </Container>}
 
         {loginDone ? (
-          <Text color={portalTextColor || "green"} size="lg">
+          <Text fontFamily={isFire && "Manrope"} color={portalTextColor || "green"} size="lg">
             Login Complete. You can close this window if it does not automatically redirect...
           </Text>
         ) : null}
