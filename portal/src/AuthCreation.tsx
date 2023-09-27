@@ -98,10 +98,13 @@ function AuthCreation() {
     'white';
   const portalPrimaryButtonColor = validateColorInput(searchParams.get('portalPrimaryButtonColor')) ?
     decodeURIComponent(searchParams.get('portalPrimaryButtonColor')) :
-    undefined;
+    'black';
   const portalTextColor = validateColorInput(searchParams.get('portalTextColor')) ?
     decodeURIComponent(searchParams.get('portalTextColor')) :
     'black';
+  const portalPrimaryButtonTextColor = validateColorInput(searchParams.get('portalPrimaryButtonTextColor')) ?
+    decodeURIComponent(searchParams.get('portalPrimaryButtonTextColor')) :
+    'white';
   const isForNewDevice = searchParams.get('isForNewDevice') === 'true';
   const [isFire, setIsFire] = useState(false);
 
@@ -194,7 +197,7 @@ function AuthCreation() {
 
   return (paramsPartnerId && !partner) ? undefined : (
     <ChakraProvider theme={getPartnerTheme(portalBackgroundColor, portalPrimaryButtonColor, portalTextColor)}>
-      <Container color="white" maxW="ld" padding="10%" height="100%">
+      <Container textColor={portalTextColor} color={portalBackgroundColor} maxW="ld" padding="10%" height="100%">
         {(biometricDone && paramsPartnerId && partner?.policiesEnabled) ? (
           <PermissionSelection
             onDone={onPermissionsDone}
@@ -236,7 +239,7 @@ function AuthCreation() {
 
               <Container width="100%" display="flex" justifyContent="center">
                 <Button
-                  bg="black"
+                  bg={portalPrimaryButtonColor}
                   onClick={setUpBiometrics}
                   p="2.5vh"
                   fontSize="3vh"
@@ -244,7 +247,7 @@ function AuthCreation() {
                   height='9vh'
                   fontFamily={isFire && "Manrope"}
                 >
-                  {isDone ? 'Success!' : 'Set Up'}
+                  <Text color={portalPrimaryButtonTextColor}>{isDone ? 'Success!' : 'Set Up'}</Text>
                 </Button>
               </Container>
             </Box>

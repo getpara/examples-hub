@@ -58,6 +58,7 @@ export interface ConstructorOpts {
   portalBackgroundColor?: string; // please use hex color codes
   portalPrimaryButtonColor?: string; // please use hex color codes
   portalTextColor?: string; // please use hex color codes
+  portalPrimaryButtonTextColor?: string; // please use hex color codes
 }
 
 const PREFIX = '@CAPSULE/';
@@ -91,6 +92,7 @@ export class Capsule {
   portalBackgroundColor?: string;
   portalPrimaryButtonColor?: string;
   portalTextColor?: string;
+  portalPrimaryButtonTextColor?: string;
   private sessionCookie?: string;
 
   private localStorageGetItem = async (key: string): Promise<string | null> => {
@@ -195,6 +197,7 @@ export class Capsule {
     this.portalBackgroundColor = opts.portalBackgroundColor;
     this.portalPrimaryButtonColor = opts.portalPrimaryButtonColor;
     this.portalTextColor = opts.portalTextColor;
+    this.portalPrimaryButtonTextColor = opts.portalPrimaryButtonTextColor;
 
     if (opts.useStorageOverrides) {
       this.localStorageGetItem = opts.localStorageGetItemOverride;
@@ -316,13 +319,14 @@ export class Capsule {
     const portalBackgroundColorQueryParam = this.portalBackgroundColor ? `&portalBackgroundColor=${encodeURIComponent(this.portalBackgroundColor)}` : '';
     const portalPrimaryButtonColorQueryParam = this.portalPrimaryButtonColor ? `&portalPrimaryButtonColor=${encodeURIComponent(this.portalPrimaryButtonColor)}` : '';
     const portalTextColorQueryParam = this.portalTextColor ? `&portalTextColor=${encodeURIComponent(this.portalTextColor)}` : '';
+    const portalPrimaryButtonTextColorQueryParam = this.portalPrimaryButtonTextColor ? `&portalPrimaryButtonTextColor=${encodeURIComponent(this.portalPrimaryButtonTextColor)}` : '';
     const isForNewDeviceQueryParam = isForNewDevice ? `&isForNewDevice=${isForNewDevice}` : '';
 
     return `${(partnerId && await this.getPartnerURL(partnerId)) || getPortalBaseURL(this.ctx)}/web/users/${
       this.userId
     }/biometrics/${webAuthId}?email=${encodeURIComponent(
       this.email,
-    )}${partnerIdQueryParam}${portalBackgroundColorQueryParam}${portalPrimaryButtonColorQueryParam}${portalTextColorQueryParam}${isForNewDeviceQueryParam}`;
+    )}${partnerIdQueryParam}${portalBackgroundColorQueryParam}${portalPrimaryButtonColorQueryParam}${portalTextColorQueryParam}${isForNewDeviceQueryParam}${portalPrimaryButtonTextColorQueryParam}`;
   }
 
   private getShortUrl(compressedUrl: string): string {
@@ -345,6 +349,7 @@ export class Capsule {
     const portalBackgroundColorQueryParam = this.portalBackgroundColor ? `&portalBackgroundColor=${encodeURIComponent(this.portalBackgroundColor)}` : '';
     const portalPrimaryButtonColorQueryParam = this.portalPrimaryButtonColor ? `&portalPrimaryButtonColor=${encodeURIComponent(this.portalPrimaryButtonColor)}` : '';
     const portalTextColorQueryParam = this.portalTextColor ? `&portalTextColor=${encodeURIComponent(this.portalTextColor)}` : '';
+    const portalPrimaryButtonTextColorQueryParam = this.portalPrimaryButtonTextColor ? `&portalPrimaryButtonTextColor=${encodeURIComponent(this.portalPrimaryButtonTextColor)}` : '';
     const newDeviceSessionIdQueryParam = newDeviceSessionId ? `&newDeviceSessionId=${newDeviceSessionId}` : '';
     const newDeviceEncryptionKeyQueryParam = newDeviceEncryptionKey ? `&newDeviceEncryptionKey=${newDeviceEncryptionKey}` : '';
 
@@ -352,7 +357,7 @@ export class Capsule {
       this.email,
     )}&sessionId=${sessionId}&encryptionKey=${loginEncryptionPublicKey}${partnerIdQueryParam}${portalBackgroundColorQueryParam}${portalPrimaryButtonColorQueryParam}${
       portalTextColorQueryParam
-    }${newDeviceSessionIdQueryParam}${newDeviceEncryptionKeyQueryParam}`;
+    }${newDeviceSessionIdQueryParam}${newDeviceEncryptionKeyQueryParam}${portalPrimaryButtonTextColorQueryParam}`;
   }
 
   async fetchWallets(): Promise<any[]> {

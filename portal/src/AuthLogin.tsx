@@ -140,10 +140,13 @@ function AuthLogin() {
     'white';
   const portalPrimaryButtonColor = validateColorInput(searchParams.get('portalPrimaryButtonColor')) ?
     decodeURIComponent(searchParams.get('portalPrimaryButtonColor')) :
-    undefined;
+    'black';
   const portalTextColor = validateColorInput(searchParams.get('portalTextColor')) ?
     decodeURIComponent(searchParams.get('portalTextColor')) :
     'black';
+  const portalPrimaryButtonTextColor = validateColorInput(searchParams.get('portalPrimaryButtonTextColor')) ?
+    decodeURIComponent(searchParams.get('portalPrimaryButtonTextColor')) :
+    'white';
   const [isFire, setIsFire] = useState(false);
 
   const login = useCallback(() => {
@@ -250,7 +253,7 @@ function AuthLogin() {
   if (addDeviceFlowStep === AddDeviceFlowStep.PERFORM_EXISTING_LOGIN) {
     return (paramsPartnerId && !partner) ? undefined : (urlForNewDeviceLogin && (
       <ChakraProvider theme={getPartnerTheme(portalBackgroundColor, portalPrimaryButtonColor, portalTextColor)}>
-        <Container color="white" maxW="ld" padding={10}>
+        <Container textColor={portalTextColor} color={portalBackgroundColor} maxW="ld" padding={10}>
           <Flex alignItems="center" justifyContent="center" mb="10%">
             <Image
               src={partner?.portalHeaderLogoUrl || '/wordmark_black.svg'}
@@ -292,7 +295,7 @@ function AuthLogin() {
     <ChakraProvider theme={getPartnerTheme(portalBackgroundColor, portalPrimaryButtonColor, portalTextColor)}>
       <Container color="white" maxW="ld" padding={10}>
         {/* if first time logging into app, then need to accept scopes */}
-        <Flex alignItems="center" justifyContent="center" mb={12}>
+        <Flex alignItems="center" justifyContent="center" mb={4}>
           <Image
             src={partner?.portalHeaderLogoUrl || '/wordmark_black.svg'}
             alt="Logo"
@@ -309,15 +312,15 @@ function AuthLogin() {
             isLogin
           ></PermissionSelection>
         )}
-        <Heading fontFamily={isFire && "ClashDisplay"} textAlign='center' fontSize="8vh" mb="10%">
+        <Heading fontFamily={isFire && "ClashDisplay"} textAlign='center' fontSize="8vh" mb="6%">
           {newDeviceSessionLookupId ? 'Login to Authenticate New Device' : 'Login'}
         </Heading>
-        <Text fontFamily={isFire && "Manrope"} textAlign='center' fontSize="2.5vh" mb="10%">
+        <Text fontFamily={isFire && "Manrope"} textAlign='center' fontSize="2.5vh" mb="8%">
           {newDeviceSessionLookupId ?
             'It looks like you\'re trying to add Capsule to a new device.' :
-            'Authenticate with Capsule to create your wallet.'}
+            <>Log in {paramsPartnerId && `to ${partner.displayName}`} with your Capsule passkey for <strong>{paramsEmail}</strong></>}
         </Text>
-        {!newDeviceSessionLookupId && <Text fontFamily={isFire && "Manrope"} textAlign='center' fontSize="2.5vh" mb="10%">
+        {!newDeviceSessionLookupId && <Text fontFamily={isFire && "Manrope"} textAlign='center' fontSize="2.5vh" mb="8%">
           If you've previously logged in on a different device, or there is an error finding your key on this device,
           you should select <strong>Add This Device</strong> below.
           <a href="https://docs.usecapsule.com/" target='_blank' rel='noreferrer'>
@@ -325,45 +328,58 @@ function AuthLogin() {
             <u>Learn More</u>
           </a>
         </Text>}
-        <Container width="100%" display="flex" justifyContent="center" mb="5%">
+        <Container width="100%" display="flex" justifyContent="center">
         <Button
-          bg="black"
+          bg={portalPrimaryButtonColor}
           onClick={login}
           p="2.5vh"
           fontSize="2.5vh"
           width="42.5vh"
           alignSelf={'center'}
           height='9vh'
-          top='-2vh'
           fontFamily={isFire && "Manrope"}
         >
-            {loginDone ? 'Success!' : 'Login'}
+            <Text color={portalPrimaryButtonTextColor}>{loginDone ? 'Success!' : 'Login'}</Text>
           </Button>
         </Container>
-        {!newDeviceSessionLookupId && <Container width="100%" display="flex" justifyContent="center" padding={3}>
-          <Button
-            style={{ backgroundColor: "rgba(0, 0, 0, 0)" }}
-            onClick={addThisDevice}
-            p="2.5vh"
-            fontSize="2.5vh"
-            maxWidth="50%"
-            alignSelf={'center'}
+        {!newDeviceSessionLookupId && (
+          <Container
+            width="100%"
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            justifyContent="center"
+            padding={3}
           >
-            <Text fontFamily={isFire && "Manrope"} as='u'>Add This Device</Text>
-          </Button>
-        </Container>}
-
-        {loginDone ? (
-          <Text fontFamily={isFire && "Manrope"} color={portalTextColor || "green"} size="lg">
-            Login Complete. You can close this window if it does not automatically redirect...
-          </Text>
-        ) : null}
+            <Button
+              style={{ backgroundColor: "rgba(0, 0, 0, 0)" }}
+              onClick={addThisDevice}
+              p="2.5vh"
+              fontSize="2.5vh"
+              maxWidth="50%"
+              alignSelf={'center'}
+            >
+              <Text color={portalTextColor} fontFamily={isFire && "Manrope"} as='u'>Add This Device</Text>
+            </Button>
+            {loginDone && (
+              <Text fontFamily={isFire && "Manrope"} color={portalTextColor || "green"} size="lg">
+                Login Complete. You can close this window if it does not automatically redirect...
+              </Text>
+            )}
+            {paramsPartnerId && <Box backgroundColor={portalBackgroundColor} height="62px" width="100%">
+              <Flex
+                backgroundColor={portalBackgroundColor}
+                h="57px"
+                w="100%"
+                justifyContent="center"
+                alignItems="center"
+              >
+                <PoweredByCapsule color={portalTextColor} w={50} h={20} />
+              </Flex>
+            </Box>}
+          </Container>
+        )}
       </Container>
-      {paramsPartnerId && <Box backgroundColor={portalBackgroundColor} height="62px" width="100%">
-        <Flex backgroundColor={portalBackgroundColor} h="57px" w="100%" justifyContent={'center'} alignItems={'center'}>
-          <PoweredByCapsule color={portalTextColor} w={50} h={20} />
-        </Flex>
-      </Box>}
     </ChakraProvider>
   );
 }
