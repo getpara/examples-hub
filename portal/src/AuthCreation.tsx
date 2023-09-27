@@ -87,8 +87,14 @@ function AuthCreation() {
   const [searchParams, _] = useSearchParams();
   const paramsEmail = decodeURIComponent(searchParams.get('email'));
   const paramsPartnerId = searchParams.get('partnerId');
-  const portalBackgroundColor = validateColorInput(searchParams.get('portalBackgroundColor')) ?
-    decodeURIComponent(searchParams.get('portalBackgroundColor')) :
+
+  // TODO: revert this once partners are passing in valid colors
+  let decodedBackgroundColor = searchParams.get('portalBackgroundColor');
+  if (!!decodedBackgroundColor && decodedBackgroundColor.startsWith('##')) {
+    decodedBackgroundColor = decodedBackgroundColor.replace('##', '#');
+  }
+  const portalBackgroundColor = validateColorInput(decodedBackgroundColor) ?
+    decodedBackgroundColor :
     'white';
   const portalPrimaryButtonColor = validateColorInput(searchParams.get('portalPrimaryButtonColor')) ?
     decodeURIComponent(searchParams.get('portalPrimaryButtonColor')) :
