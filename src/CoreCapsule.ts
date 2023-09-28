@@ -66,6 +66,7 @@ const SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR = `${PREFIX}loginEncryptionKeyPa
 const SESSION_STORAGE_PAILLIER_SECRET_KEY = `${PREFIX}paillierSecretKey`;
 const SESSION_STORAGE_SESSION_COOKIE = `${PREFIX}sessionCookie`;
 const POLLING_INTERVAL_MS = 2000;
+const SHORT_POLLING_INTERVAL_MS = 1000;
 
 function biometricVerifiedRecently(ctx: Ctx, verifiedAt: number): boolean {
   if (ctx.env !== Environment.PROD) {
@@ -583,6 +584,28 @@ export abstract class CoreCapsule {
     return recoveryShare;
   }
 
+  private async waitForWalletAddress(walletId: string): Promise<void> {
+    let maxPolls = 0;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      try {
+        if (maxPolls === 10) {
+          throw new Error('timed out waiting for wallet address');
+        }
+        ++maxPolls;
+        const res = await this.ctx.capsuleClient.getWallets(this.userId);
+        const wallet = res.data.wallets.find((w) => w.id === walletId);
+        if (wallet && wallet.address) {
+          return;
+        }
+        await new Promise(resolve => setTimeout(resolve, SHORT_POLLING_INTERVAL_MS));
+      } catch (err) {
+        // want to continue polling on error
+        console.error(err);
+      }
+    }
+  }
+
   async createWallet(
     skipDistribute = false,
     customFunction: (params?: any) => void,
@@ -597,11 +620,14 @@ export abstract class CoreCapsule {
       customFunction,
       this.retrieveSessionCookie(),
     );
+
     this.wallets[walletId] = {
       id: walletId,
       signer,
     };
+    await this.waitForWalletAddress(walletId);
     await this.populateWalletAddresses();
+
     let recoveryShare: string | null = null;
     if (!skipDistribute) {
       recoveryShare = await distributeNewShare(
