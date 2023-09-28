@@ -30,10 +30,10 @@ import { Header } from './Header';
 import { Footer } from './Footer';
 import { truncateEthAddress } from './utils';
 import { Setup2FA } from './Setup2FA';
-import { Done2FAStep } from './Done2FAStep';
-import Lost2FA from './Lost2FA';
-import Verify2FA from './Verify2FA';
 import { CoreCapsule } from '../CoreCapsule';
+import { RecoverySecretStep } from './RecoverySecretStep';
+import './css/modal.css'
+import FlowContext from './FlowContext';
 
 interface CapsuleModalProps {
   capsule: Capsule | CoreCapsule;
@@ -106,6 +106,18 @@ export const CapsuleModal = ({
     paillierGenDone ? 25 : 0,
   );
 
+  const [isLogin, setIsLogin] = useState(false);
+
+  const is2FASetup = async () => {
+    try {
+      const { isSetup } = await capsule.check2FAStatus();
+      return isSetup;
+    } catch (error) {
+      console.error('An error occurred while checking 2FA:', error);
+      return false; 
+    }
+  };
+
   useEffect(() => {
     if (!isOpen && [ModalStep.LOGIN_DONE, ModalStep.ACCOUNT_CREATION_DONE].includes(currentStep)) {
       setCurrentStep(ModalStep.EMAIL_COLLECTION);
@@ -175,9 +187,13 @@ export const CapsuleModal = ({
       setRecoveryShare(result);
       setDistributeDone(true);
       if (currentStep === ModalStep.AWAITING_WALLET_CREATION_AFTER_LOGIN) {
-        setCurrentStep(ModalStep.LOGIN_DONE);
+        if (await is2FASetup()) {
+          setCurrentStep(ModalStep.LOGIN_DONE);
+        } else {
+          setCurrentStep(ModalStep.SETUP_2FA);
+        }
       } else {
-        setCurrentStep(ModalStep.ACCOUNT_CREATION_DONE);
+        setCurrentStep(ModalStep.SECRET);
       }
     }
     distributeShare();
@@ -224,7 +240,11 @@ export const CapsuleModal = ({
       if (needsWallet) {
         setCurrentStep(ModalStep.AWAITING_WALLET_CREATION_AFTER_LOGIN);
       } else {
-        setCurrentStep(ModalStep.LOGIN_DONE);
+        if (await is2FASetup()) {
+          setCurrentStep(ModalStep.LOGIN_DONE);
+        } else {
+          setCurrentStep(ModalStep.SETUP_2FA);
+        }
       }
       return
     }
@@ -253,7 +273,11 @@ export const CapsuleModal = ({
           setCurrentStep(ModalStep.AWAITING_WALLET_CREATION_AFTER_LOGIN);
           return;
         }
-        setCurrentStep(ModalStep.LOGIN_DONE);
+        if (await is2FASetup()) {
+          setCurrentStep(ModalStep.LOGIN_DONE);
+        } else {
+          setCurrentStep(ModalStep.SETUP_2FA);
+        }
         return;
       }
     } catch (err) {
@@ -272,93 +296,88 @@ export const CapsuleModal = ({
   }, [webAuthURLForLogin]);
 
   return (
-    <ChakraProvider theme={resolvedTheme}>
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        {/* 
-          // @ts-ignore */}
-        <ModalContent
-          backgroundColor={'brand.background'}
-          width="356px"
-          height="632px"
-        >
+    <FlowContext.Provider value={{ isLogin, setIsLogin }}>
+      <ChakraProvider theme={resolvedTheme}>
+        <Modal isOpen={isOpen} onClose={onClose}>
+          <ModalOverlay />
           {/* 
-        // @ts-ignore */}
-          <ModalBody padding={0} display="flex" flexDirection="column">
-            <Header step={ModalStepNumber[currentStep]} onClose={onClose} />
-            <VStack
-              alignItems="center"
-              display="flex"
-              flex={1}
-              margin="22px 22px 0px"
-            >
-              <EmailCollectionStep
-                setWebAuthURLForLogin={setWebAuthURLForLogin}
-                setCurrentStep={setCurrentStep}
-                setEmail={setEmail}
-                email={email}
-                capsule={capsule}
-                setIsCreateAccountType={setIsCreateAccountType}
-                currentStep={currentStep}
-                appName={appName}
-              />
-              <VerificationCodeStep
-                setCurrentStep={setCurrentStep}
-                currentStep={currentStep}
-                setWebAuthURLForCreate={setWebAuthURLForCreate}
-                capsule={capsule}
-              />
-              <BiometricCreationStep
-                currentStep={currentStep}
-                webAuthURLForCreate={webAuthURLForCreate}
-              />
-              <BiometricLoginStep
-                capsule={capsule}
-                currentStep={currentStep}
-                webAuthURLForLogin={webAuthURLForLogin}
-              />
-              <AwaitingWalletCreationStep
-                currentStep={currentStep}
-                percentKeygenDone={percentKeygenDone}
-              />
-              <AccountCreationDoneStep
-                currentStep={currentStep}
-                recoveryShare={recoveryShare}
-                email={email}
-                defaultAsset={onRampCurrency}
-                onRampAvailable={onRampAvailable}
-                capsule={capsule}
-                onClose={onClose}
-                rampNetworkApiKey={rampNetworkApiKey}
-                setCurrentStep={setCurrentStep}
-              />
-              {currentStep === ModalStep.LOGIN_DONE && <LoginDoneStep
-                setCurrentStep={setCurrentStep}
-                onClose={onClose}
-                capsule={capsule as Capsule}
-              />}
-              {currentStep === ModalStep.SETUP_2FA && <Setup2FA
-                email={email}
-                setCurrentStep={setCurrentStep}
-                capsule={capsule as Capsule}
-              />}
-              {currentStep === ModalStep.DONE_2FA && <Done2FAStep
-                onClose={onClose}
-              />}
-              {currentStep === ModalStep.LOST_2FA && <Lost2FA
-                onClose={onClose}
-              />}
-              {currentStep === ModalStep.VERIFY_2FA && <Verify2FA
-                email={email}
-                setCurrentStep={setCurrentStep}
-                capsule={capsule as Capsule}
-              />}
-            </VStack>
-            <Footer />
-          </ModalBody>
-        </ModalContent>
-      </Modal>
-    </ChakraProvider>
+            // @ts-ignore */}
+          <ModalContent
+            backgroundColor={'brand.background'}
+            width="356px"
+            height="632px"
+          >
+            {/* 
+          // @ts-ignore */}
+            <ModalBody padding={0} display="flex" flexDirection="column">
+              <Header step={ModalStepNumber[currentStep]} onClose={onClose} />
+              <VStack
+                alignItems="center"
+                display="flex"
+                flex={1}
+                margin="22px 22px 0px"
+                className='font-hanken'
+              >
+                <EmailCollectionStep
+                  setWebAuthURLForLogin={setWebAuthURLForLogin}
+                  setCurrentStep={setCurrentStep}
+                  setEmail={setEmail}
+                  email={email}
+                  capsule={capsule}
+                  setIsCreateAccountType={setIsCreateAccountType}
+                  currentStep={currentStep}
+                  appName={appName}
+                />
+                <VerificationCodeStep
+                  setCurrentStep={setCurrentStep}
+                  currentStep={currentStep}
+                  setWebAuthURLForCreate={setWebAuthURLForCreate}
+                  capsule={capsule}
+                  email={email}
+                />
+                <BiometricCreationStep
+                  currentStep={currentStep}
+                  webAuthURLForCreate={webAuthURLForCreate}
+                />
+                <BiometricLoginStep
+                  capsule={capsule}
+                  currentStep={currentStep}
+                  webAuthURLForLogin={webAuthURLForLogin}
+                />
+                <AwaitingWalletCreationStep
+                  currentStep={currentStep}
+                  percentKeygenDone={percentKeygenDone}
+                />
+                <AccountCreationDoneStep
+                  currentStep={currentStep}
+                  appName={appName}
+                  onClose={onClose}
+                  capsule={capsule}
+                  rampNetworkApiKey={rampNetworkApiKey}
+                  defaultAsset={onRampCurrency}
+                  onRampAvailable={onRampAvailable}
+                />
+                <RecoverySecretStep 
+                  recoveryShare={recoveryShare}
+                  currentStep={currentStep}
+                  email={email}
+                  setCurrentStep={setCurrentStep}
+                />
+                {currentStep === ModalStep.LOGIN_DONE && <LoginDoneStep
+                  onClose={onClose}
+                  appName={appName}
+                />}
+                {currentStep === ModalStep.SETUP_2FA && <Setup2FA
+                  setCurrentStep={setCurrentStep}
+                  capsule={capsule as Capsule}
+                />}
+              </VStack>
+              <Footer />
+            </ModalBody>
+          </ModalContent>
+        </Modal>
+      </ChakraProvider>
+    </FlowContext.Provider>
   );
 };
 

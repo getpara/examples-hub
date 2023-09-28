@@ -1,56 +1,35 @@
-import { ModalStep } from './steps';
-import { Box, Button, Text } from '@chakra-ui/react';
+import { Box, Button, Spacer, Text, VStack } from '@chakra-ui/react';
 import WalletSuccess from './assets/walletSuccess';
-import { Capsule } from '../Capsule';
-import useCheck2FAStatus from '../utils/useCheck2FAStatus';
-import { is2FAEnabled } from '../definitions';
 
 export function LoginDoneStep({
   onClose,
-  setCurrentStep,
-  capsule,
+  appName,
 }: {
   onClose: () => void;
-  setCurrentStep: (newValue: ModalStep) => void;
-  capsule: Capsule;
+  appName: string;
 }) {
 
-  const is2FASetup = useCheck2FAStatus(capsule);
   return (
-    <Box
-      flexDirection="column"
-      display="flex"
-      justifyContent="space-between"
-      flex={1}
-      alignItems="space-between"
-    >
-      <Box display="flex" flexDirection="column" flex={1} alignItems="center">
-        <Text fontSize="l">Wallet logged in!</Text>
-        <WalletSuccess />
-        <Text textAlign="center" fontSize="l" marginTop="22px">
-          Success!
-        </Text>
-        <Text textAlign="center" marginTop="4px" w="90%" fontSize="s">
-          Your wallet has been successfully logged in!
-        </Text>
-        {!is2FASetup && is2FAEnabled && (
-          <Text
-            textAlign="center"
-            marginTop="20px"
-            w="90%"
-            as="b"
-            fontSize="s"
-            _hover={{ textDecoration: 'underline' }}
-            cursor="pointer"
-            onClick={() => setCurrentStep(ModalStep.SETUP_2FA)}
-          >
-            Optional: Setup 2FA
-          </Text>
-        )}
+    <VStack flex={1}>
+      <Spacer />
+      <Box position='relative' top='-28px'>
+        <Text fontSize="l">Wallet Login Complete!</Text>
+        <Box marginTop="18px">
+          <WalletSuccess />
+        </Box>
       </Box>
-      <Button w="100%" h="44px" onClick={onClose}>
-        Close
-      </Button>
-    </Box>
+      <Spacer />
+      <Box position='relative' top='-28px' width='274px'>
+        <Button
+          onClick={onClose}
+          textColor="brand.text" 
+          bg="#212327" 
+          width='100%'
+          _hover={{bg: 'rgba(255, 255, 255, 0.5)'}}
+        >
+          Continue to {appName}
+        </Button>
+      </Box>
+    </VStack>
   );
 }

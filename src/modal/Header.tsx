@@ -12,6 +12,7 @@ export function Header({
 }) {
   return (
     <Box height="62px" width="100%">
+      {/* @ts-ignore */}
       <Flex h="57px" w="100%" justifyContent={'center'} alignItems={'center'}>
         <CapsuleSmall w={19} h={32} />
         <Box
@@ -30,7 +31,7 @@ export function Header({
         justifyContent="space-between"
       >
         <Box
-          w="87px"
+          w="70px"
           h="5px"
           borderRadius="8px"
           backgroundColor={
@@ -38,7 +39,7 @@ export function Header({
           }
         />
         <Box
-          w="87px"
+          w="70px"
           h="5px"
           borderRadius="8px"
           backgroundColor={
@@ -46,7 +47,7 @@ export function Header({
           }
         />
         <Box
-          w="87px"
+          w="70px"
           h="5px"
           borderRadius="8px"
           backgroundColor={
@@ -54,11 +55,19 @@ export function Header({
           }
         />
         <Box
-          w="87px"
+          w="70px"
           h="5px"
           borderRadius="8px"
           backgroundColor={
             step >= 4 ? 'brand.content' : 'brand.contentSecondary'
+          }
+        />
+        <Box
+          w="70px"
+          h="5px"
+          borderRadius="8px"
+          backgroundColor={
+            step >= 5 ? 'brand.content' : 'brand.contentSecondary'
           }
         />
       </Flex>

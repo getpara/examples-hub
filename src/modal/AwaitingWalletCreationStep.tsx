@@ -7,6 +7,7 @@ import {
   Progress,
   Text,
   VStack,
+  Spacer
 } from '@chakra-ui/react';
 import React from 'react';
 
@@ -21,21 +22,19 @@ export function AwaitingWalletCreationStep({
     return null;
   }
   return (
-    <>
-      <Text fontSize="l" position="absolute">
-        Creating Wallet
+    <VStack justifyContent="center" alignItems="center" flex={1}>
+      <Text marginTop='100px' fontSize="22px">
+        Creating wallet...
       </Text>
-      {/* 
-      // @ts-ignore */}
-      <Flex flex={1} justifyContent="center" alignItems="center">
-        <CircularProgress
-          size="60px"
-          thickness="10px"
-          color={'brand.content'}
-          trackColor={'brand.contentSecondary'}
-          value={percentKeygenDone}
-        />
-      </Flex>
-    </>
+      <CircularProgress
+        top='8px'
+        size="60px"
+        thickness="10px"
+        color={'brand.content'}
+        trackColor={'brand.contentSecondary'}
+        value={percentKeygenDone}
+      />
+      <Spacer />
+    </VStack>
   );
 }

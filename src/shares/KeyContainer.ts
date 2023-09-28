@@ -85,10 +85,14 @@ export class KeyContainer {
   }
 
   static import(serializedContainer: string): KeyContainer {
-    return Object.assign(
-      new KeyContainer('', '', ''),
-      JSON.parse(serializedContainer)
-    );
+    try {
+        const parsedObject = JSON.parse(serializedContainer);
+        return Object.assign(new KeyContainer('', '', ''), parsedObject);
+    } catch (e) {
+        const container = new KeyContainer('', '', '');
+        container.backupDecryptionKey = serializedContainer;
+        return container;
+    }
   }
 
   getPublicDecryptionKey(): Buffer {

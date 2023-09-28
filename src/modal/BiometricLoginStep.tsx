@@ -1,12 +1,12 @@
 import { ModalStep } from './steps';
-import { Box, HStack, Spacer, Text, useTheme, VStack } from '@chakra-ui/react';
+import { Box, Icon, Text, useTheme, VStack, Button } from '@chakra-ui/react';
 import QRCode from 'react-qr-code';
 import React, { useEffect, useState } from 'react';
 import { Capsule } from '../Capsule';
 import { upload } from '../transmission/transmissionUtils';
 import { openPopup } from './utils';
-import Identity from './assets/Identity';
 import { CoreCapsule } from '../CoreCapsule';
+import { ExternalLinkIcon } from '@chakra-ui/icons';
 
 const SHORTENING_AVAILABLE = true;
 
@@ -49,40 +49,35 @@ export function BiometricLoginStep({
 
   return (
     <VStack flex={1} alignItems="center">
-      <Text fontSize="l">Finish login</Text>
-      <Text textColor="brand.text" fontSize="s" width="90%" textAlign="center">
-        Scan or click this QR code to login from the same device you used.
-      </Text>
-      <Spacer />
+      <Text position='relative' top='-4px' fontSize="22px">Finish login</Text>
       <Box
         cursor="pointer"
         backgroundColor="brand.dimmed"
         borderRadius="12px"
         padding="12px"
         onClick={() => openPopup(shortLoginLink)}
+        width='188px'
+        height='188px'
       >
         <QRCode
           fgColor={fgColor}
           bgColor={bgColor}
-          size={200}
+          size={165}
           value={shortLoginLink}
         />
       </Box>
-      <Spacer />
-      <HStack alignItems="start">
-        <Box marginTop="6px">
-          <Identity />
-        </Box>
-        <Box>
-          <Text textColor="brand.content" fontSize="m">
-            Verify Identity
-          </Text>
-          <Text textColor="brand.content" fontSize="s">
-            Follow the modal prompts that appear to ask you to verify.
-          </Text>
-        </Box>
-      </HStack>
-      <Spacer />
+      <Box width="274px">
+        <Text
+          marginTop='20px'
+          fontSize='20px'
+          textAlign='center'
+        >
+          Click or scan this QR Code to login from the same device you used.
+        </Text>
+        <Button marginTop='68px' w="100%" onClick={() => openPopup(shortLoginLink)}>
+          Use passkey <Icon as={ExternalLinkIcon} marginLeft="2" />
+        </Button>
+      </Box>
     </VStack>
   );
 }

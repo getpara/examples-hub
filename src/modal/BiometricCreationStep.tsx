@@ -2,8 +2,7 @@ import { ModalStep } from './steps';
 import {
   Box,
   Button,
-  HStack,
-  Spacer,
+  Icon,
   Text,
   useTheme,
   VStack,
@@ -11,9 +10,8 @@ import {
 import QRCode from 'react-qr-code';
 import React from 'react';
 import { openPopup } from './utils';
-import VerifyCode from './assets/verifyCode';
-import Identity from './assets/Identity';
-import Plus from './assets/plus';
+import { ExternalLinkIcon } from "@chakra-ui/icons";
+import './css/modal.css';
 
 export function BiometricCreationStep({
   currentStep,
@@ -33,43 +31,36 @@ export function BiometricCreationStep({
   }
   return (
     <VStack flex={1} alignItems="center">
-      <Text fontSize="l">Finish setup</Text>
-      <Text textColor="brand.text" fontSize="s" width="90%" textAlign="center">
-        Scan or click this QR code to allow for easier login.
-      </Text>
-      <Spacer />
+      <Text position='relative' top='-4px' fontSize="22px">Finish setup</Text>
       <Box
         cursor="pointer"
         backgroundColor="brand.dimmed"
         borderRadius="12px"
-        padding="18px"
+        padding="12px"
         onClick={() => openPopup(webAuthURLForCreate)}
+        width='188px'
+        height='188px'
       >
         <QRCode
           fgColor={fgColor}
           bgColor={bgColor}
-          size={180}
+          size={165}
           value={webAuthURLForCreate}
         />
       </Box>
-      <Spacer />
-      <HStack alignItems="start">
-        <Box marginTop="6px">
-          <Identity />
-        </Box>
-        <Box>
-          <Text textColor="brand.content" fontSize="m">
-            Verify Identity
-          </Text>
-          <Text textColor="brand.content" fontSize="s">
-            Follow the modal prompts that appear to ask you to verify.
-          </Text>
-        </Box>
-      </HStack>
-      <Spacer />
-      <Button w="100%" onClick={() => openPopup(webAuthURLForCreate)}>
-        Continue
-      </Button>
+      <Box width="274px">
+        <Text
+          marginTop='20px'
+          fontSize='20px'
+          textAlign='center'
+        >
+          Click or scan this QR Code for easier login. 
+          Follow the prompts asking you to verify.
+        </Text>
+        <Button marginTop='68px' w="100%" onClick={() => openPopup(webAuthURLForCreate)}>
+          Set up passkey <Icon as={ExternalLinkIcon} marginLeft="2" />
+        </Button>
+      </Box>
     </VStack>
   );
 }

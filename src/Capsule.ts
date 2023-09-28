@@ -430,6 +430,9 @@ export class Capsule {
   async check2FAStatus(): Promise<{
     isSetup: boolean
   }> {
+    if (!this.userId) {
+      return { isSetup: false }
+    }
     const res = await this.ctx.capsuleClient.check2FAStatus(this.userId);
     return {
       isSetup: res.data.isSetup
