@@ -119,12 +119,9 @@ export function parseCredentialCreationRes(creds: any, algorithm: number): {
 }
 
 // generate a random 16 byte user handle
-function generateUserHandle(env: Environment) {
-  // constant user handle for non-prod to not create many creds
+function generateUserHandle() {
   const userHandle = new Uint8Array(16)
-  if (env === Environment.PROD) {
-    window.crypto.getRandomValues(userHandle)
-  }
+  window.crypto.getRandomValues(userHandle)
   return userHandle
 }
 
@@ -133,7 +130,7 @@ export async function createCredential(env: Environment, userId: string, email: 
   userHandle: Uint8Array,
   algorithm: number,
 }> {
-  const userHandle = generateUserHandle(env)
+  const userHandle = generateUserHandle()
   const createCredentialDefaultArgs = {
     publicKey: {
       authenticatorSelection: {
