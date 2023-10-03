@@ -31,6 +31,10 @@ export function BiometricLoginStep({
     if (currentStep !== ModalStep.BIOMETRIC_LOGIN) {
       setShortLoginLink(null);
     }
+    if (!webAuthURLForLogin) {
+      return;
+    }
+
     async function shortenUrl() {
       const url = await upload(webAuthURLForLogin, capsule.ctx.capsuleClient);
       // @ts-ignore
@@ -43,7 +47,7 @@ export function BiometricLoginStep({
     }
   }, [webAuthURLForLogin]);
 
-  if (currentStep !== ModalStep.BIOMETRIC_LOGIN) {
+  if (currentStep !== ModalStep.BIOMETRIC_LOGIN || !shortLoginLink) {
     return null;
   }
 
