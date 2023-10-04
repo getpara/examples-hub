@@ -205,6 +205,7 @@ function AuthLogin() {
 
         if (temporaryShares.length === fetchedWallets.length) {
           const authCreationURL = await capsule.getSetUpBiometricsURL(true);
+          setAddDeviceFlowStep(null);
           window.location.href = authCreationURL;
           return;
         }
@@ -221,7 +222,10 @@ function AuthLogin() {
       capsule.portalTextColor = portalTextColor;
   
       await capsule.setEmail(paramsEmail);
-      const touchRes = await userManagementClient.touchSession();
+      let touchRes = await userManagementClient.touchSession();
+      if (!touchRes.data.sessionLookupId) {
+        touchRes = await userManagementClient.touchSession(true);
+      }
       if (!capsule.loginEncryptionKeyPair) {
         const keyPair = await getAsymmetricKeyPair(capsule.ctx);
         await capsule.setLoginEncryptionKeyPair(keyPair);

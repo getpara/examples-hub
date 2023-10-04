@@ -1,5 +1,6 @@
 import Client from '@usecapsule/user-management-client';
 import { Environment } from './library';
+import capsule from './capsule';
 
 export function getBaseUrl(env: Environment): string {
   switch (env) {
@@ -20,4 +21,6 @@ export const userManagementClient = new Client({
   userManagementHost: getBaseUrl(
     process.env.REACT_APP_ENV.toUpperCase() as Environment,
   ),
+  retrieveSessionCookie: capsule.retrieveSessionCookie,
+  persistSessionCookie: capsule.persistSessionCookie,
 });
