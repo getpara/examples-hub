@@ -174,18 +174,19 @@ function AuthCreation() {
                   maxWidth="50%"
                   alignSelf={'center'}
                   fontFamily={isFire && "Manrope"}
+                  textColor="white"
                 >
                   Complete Setup
                 </Button>
               </Container>
             </>
           )}
+          {isDone ? (
+            <Text marginTop={4} fontSize="12px" fontFamily={isFire && "Manrope"} color={portalTextColor || "black"} size="lg">
+              Authentication creation complete. You can close this window if it does not automatically redirect...
+            </Text>
+          ) : undefined}
         </Container>
-        {isDone ? (
-          <Text fontFamily={isFire && "Manrope"} color={portalTextColor || "green"} size="lg">
-            Authentication creation complete. You can close this window if it does not automatically redirect...
-          </Text>
-        ) : undefined}
         {paramsPartnerId && <Box backgroundColor={portalBackgroundColor} height="62px" width="100%">
           <Flex backgroundColor={portalBackgroundColor} h="57px" w="100%" justifyContent={'center'} alignItems={'center'}>
             <PoweredByCapsule color={portalTextColor} w={50} h={20} />
@@ -253,12 +254,12 @@ function AuthCreation() {
             </Box>
           </>
         )}
+        {isDone ? (
+          <Text marginTop={4} fontSize="12px" fontFamily={isFire && "Manrope"} color={portalTextColor || "black"} size="lg">
+            Authentication creation complete. You can close this window if it does not automatically redirect...
+          </Text>
+        ) : undefined}
       </Container>
-      {isDone ? (
-        <Text fontFamily={isFire && "Manrope"} color={portalTextColor || "green"} size="lg">
-          Authentication creation complete. You can close this window if it does not automatically redirect...
-        </Text>
-      ) : undefined}
       <Box backgroundColor={portalBackgroundColor}  width="100%">
         <Flex backgroundColor={portalBackgroundColor} w="100%" justifyContent={'center'} alignItems={'center'}>
           <PoweredByCapsule color={portalTextColor} w={50} h={20} />
