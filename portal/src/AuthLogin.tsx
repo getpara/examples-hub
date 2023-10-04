@@ -129,14 +129,9 @@ function AuthLogin() {
   const newDeviceEncryptionKey = searchParams.get('newDeviceEncryptionKey') || undefined;
 
   const paramsPartnerId = searchParams.get('partnerId');
-  let decodedBackgroundColor = searchParams.get('portalBackgroundColor');
-  if (!!decodedBackgroundColor && decodedBackgroundColor.startsWith('##')) {
-    decodedBackgroundColor = decodedBackgroundColor.replace('##', '#');
-  }
 
-  // TODO: revert this once partners are passing in valid colors
-  const portalBackgroundColor = validateColorInput(decodedBackgroundColor) ?
-    decodedBackgroundColor :
+  const portalBackgroundColor = validateColorInput(searchParams.get('portalBackgroundColor')) ?
+    searchParams.get('portalBackgroundColor') :
     'white';
   const portalPrimaryButtonColor = validateColorInput(searchParams.get('portalPrimaryButtonColor')) ?
     decodeURIComponent(searchParams.get('portalPrimaryButtonColor')) :
