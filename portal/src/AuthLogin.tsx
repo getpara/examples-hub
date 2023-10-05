@@ -322,7 +322,7 @@ function AuthLogin() {
         {!newDeviceSessionLookupId && <Text fontFamily={isFire && "Manrope"} textAlign='center' fontSize="2.5vh" mb="8%">
           If you've previously logged in on a different device, or there is an error finding your key on this device,
           you should select <strong>Add This Device</strong> below.
-          <a href="https://docs.usecapsule.com/" target='_blank' rel='noreferrer'>
+          <a href="https://docs.usecapsule.com/users/faq" target='_blank' rel='noreferrer'>
             {' '}
             <u>Learn More</u>
           </a>

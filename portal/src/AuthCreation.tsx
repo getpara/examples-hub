@@ -227,7 +227,7 @@ function AuthCreation() {
               </Text>
               <Text fontFamily={isFire && "Manrope"} textAlign='center' fontSize="2.5vh" mb="20%">
                 This passkey will let you access your wallet from many different applications.
-                <a href="https://docs.usecapsule.com/" target='_blank' rel='noreferrer'>
+                <a href="https://docs.usecapsule.com/users/faq" target='_blank' rel='noreferrer'>
                   {' '}
                   <u>Learn More</u>
                 </a>
