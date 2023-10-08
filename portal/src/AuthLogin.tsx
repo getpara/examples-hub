@@ -53,6 +53,9 @@ export async function authLogin(
     encodeURIComponent(email),
   );
   const sig = await generateSignature(ENV, data.challenge, data.allowedPublicKeys);
+  const userHandle = sig.response.userHandle;
+  delete sig.response.userHandle;
+
   // @ts-ignore
   const verifyRes = await capsule.ctx.capsuleClient.verifyWebChallenge({
     signature: sig.response,
@@ -73,7 +76,7 @@ export async function authLogin(
   const decryptedShares = await getDerivedPrivateKeyAndDecrypt(
     // @ts-ignore
     capsule.ctx,
-    sig.response.userHandle,
+    userHandle,
     encryptedSharesRes.data.keyShares,
   );
   const tempShareOpts = decryptedShares.flatMap((share) => {
