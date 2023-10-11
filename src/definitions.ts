@@ -23,6 +23,7 @@ export interface Ctx {
   offloadMPCComputationURL?: string;
   mpcComputationClient?: AxiosInstance;
   useLocalFiles?: boolean;
+  useDKLS?: boolean;
 }
 
 export function getPortalDomain(env: Environment) {

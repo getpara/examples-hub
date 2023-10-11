@@ -16,6 +16,7 @@ interface Message {
   functionType: string;
   params: Record<string, any>;
   sessionCookie?: string;
+  useDKLS?: boolean;
 }
 
 /* eslint-disable no-restricted-globals */
@@ -54,9 +55,6 @@ async function executeMessage(ctx: Ctx, message: Message, callCustomFunction: Fu
       const { share, walletId, userId } = params;
       return walletUtils.refresh(ctx, share, walletId, userId);
     }
-    case 'BLUM_PRIME': {
-      return walletUtils.generateBlumPrime();
-    }
     default: {
       throw new Error(`functionType: ${functionType} not supported`);
     }
@@ -64,7 +62,7 @@ async function executeMessage(ctx: Ctx, message: Message, callCustomFunction: Fu
 }
 
 export async function handleMessage(e: { data: Message }, postMessage: (message: any) => void, useFetchAdapter?: boolean): Promise<boolean> {
-  const { env, apiKey, offloadMPCComputationURL, disableWorkers, sessionCookie } = e.data;
+  const { env, apiKey, offloadMPCComputationURL, disableWorkers, sessionCookie, useDKLS } = e.data;
   if (!env) {
     // this means a message we didn't send was received and we want to ignore it
     return true;
@@ -75,9 +73,10 @@ export async function handleMessage(e: { data: Message }, postMessage: (message:
     capsuleClient: initClient(env, apiKey, useFetchAdapter, () => sessionCookie),
     offloadMPCComputationURL: offloadMPCComputationURL,
     mpcComputationClient: offloadMPCComputationURL ? mpcComputationClient.initClient(offloadMPCComputationURL, !!disableWorkers) : undefined,
+    useDKLS,
   };
 
-  if (!ctx.offloadMPCComputationURL) {
+  if (!ctx.offloadMPCComputationURL || ctx.useDKLS) {
     await loadWasm(ctx);
   }
 

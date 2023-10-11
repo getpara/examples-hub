@@ -1,14 +1,12 @@
+import { SignatureScheme } from '@usecapsule/user-management-client';
 import { Ctx } from '../definitions';
-import { getBaseUrl } from '../external/capsuleClient';
+import { getBaseMPCNetworkUrl } from '../external/capsuleClient';
 import { SignatureRes } from '../types/walletTypes';
 
-const configBase = (serverUrl: string, walletId: string, id: string) =>
+const configCGGMPBase = (serverUrl: string, walletId: string, id: string) =>
   `{"ServerUrl":"${serverUrl}", "WalletId": "${walletId}", "Id":"${id}", "Ids":["USER","CAPSULE"], "Threshold":1}`;
-
-function getServerUrl(ctx: Ctx, userId: string) {
-  const baseUrl = getBaseUrl(ctx.env);
-  return `${baseUrl}users/${userId}/mpc-network`;
-}
+const configDKLSBase = (walletId: string, id: string) =>
+  `{"walletId": "${walletId}", "id":"${id}", "otherId":"CAPSULE", "isReceiver": false}`;
 
 async function keygenRequest(
   ctx: Ctx,
@@ -68,20 +66,25 @@ export async function keygen(
 ): Promise<{ signer: string; walletId: string }> {
   const { walletId, protocolId } = await ctx.capsuleClient.createWallet(
     userId,
-    { useTwoSigners: true }
+    { useTwoSigners: true, scheme: ctx.useDKLS ? SignatureScheme.DKLS : SignatureScheme.CGGMP }
   );
 
-  if (ctx.offloadMPCComputationURL) {
+  if (ctx.offloadMPCComputationURL && !ctx.useDKLS) {
     return {
       signer: (await keygenRequest(ctx, userId, walletId, protocolId)).signer,
       walletId,
     };
   }
 
-  const serverUrl = getServerUrl(ctx, userId);
-  const signerConfigUser = configBase(serverUrl, walletId, 'USER');
+  const serverUrl = getBaseMPCNetworkUrl(ctx.env, true);
+  const signerConfigUser = ctx.useDKLS ?
+    configDKLSBase(walletId, 'USER') :
+    configCGGMPBase(serverUrl, walletId, 'USER');
+  const createAccountFn = ctx.useDKLS ?
+    global.dklsCreateAccount :
+    global.createAccountV2;
   const newSigner = (await new Promise((resolve, reject) =>
-    global.createAccountV2(
+    createAccountFn(
       signerConfigUser,
       serverUrl,
       protocolId,
@@ -115,13 +118,16 @@ export async function signMessage(
     return { pendingTransactionId };
   }
 
-  if (ctx.offloadMPCComputationURL) {
+  if (ctx.offloadMPCComputationURL && !ctx.useDKLS) {
     return signMessageRequest(ctx, userId, walletId, protocolId, message, share);
   }
 
-  const serverUrl = getServerUrl(ctx, userId);
+  const serverUrl = getBaseMPCNetworkUrl(ctx.env, true);
+  const signMessageFn = ctx.useDKLS ?
+    global.dklsSignMessage :
+    global.signMessage;
   return new Promise((resolve, reject) =>
-    global.signMessage(
+    signMessageFn(
       share,
       serverUrl,
       message,
@@ -154,13 +160,16 @@ export async function signTransaction(
     return { pendingTransactionId };
   }
 
-  if (ctx.offloadMPCComputationURL) {
+  if (ctx.offloadMPCComputationURL && !ctx.useDKLS) {
     return sendTransactionRequest(ctx, userId, walletId, protocolId, tx, share, chainId);
   }
 
-  const serverUrl = getServerUrl(ctx, userId);
+  const serverUrl = getBaseMPCNetworkUrl(ctx.env, true);
+  const signTransactionFn = ctx.useDKLS ?
+    global.dklsSendTransaction :
+    global.sendTransaction;
   return new Promise((resolve, reject) =>
-    global.sendTransaction(share, serverUrl, tx, chainId, protocolId, (err, result) => {
+    signTransactionFn(share, serverUrl, tx, chainId, protocolId, (err, result) => {
       if (err) {
         reject(err);
       }
@@ -187,13 +196,16 @@ export async function sendTransaction(
     return { pendingTransactionId };
   }
 
-  if (ctx.offloadMPCComputationURL) {
+  if (ctx.offloadMPCComputationURL && !ctx.useDKLS) {
     return sendTransactionRequest(ctx, userId, walletId, protocolId, tx, share, chainId);
   }
 
-  const serverUrl = getServerUrl(ctx, userId);
+  const serverUrl = getBaseMPCNetworkUrl(ctx.env, true);
+  const sendTransactionFn = ctx.useDKLS ?
+    global.dklsSendTransaction :
+    global.sendTransaction;
   return new Promise((resolve, reject) =>
-    global.sendTransaction(share, serverUrl, tx, chainId, protocolId, (err, result) => {
+    sendTransactionFn(share, serverUrl, tx, chainId, protocolId, (err, result) => {
       if (err) {
         reject(err);
       }
@@ -211,28 +223,16 @@ export async function refresh(
   const {
     data: { protocolId },
   } = await ctx.capsuleClient.refreshKeys(userId, walletId);
-  const serverUrl = getServerUrl(ctx, userId);
+  const serverUrl = getBaseMPCNetworkUrl(ctx.env, true);
+  const refreshFn = ctx.useDKLS ?
+    global.dklsRefresh :
+    global.refresh;
   return new Promise((resolve, reject) =>
-    global.refresh(share, serverUrl, protocolId, (err, result) => {
+    refreshFn(share, serverUrl, protocolId, (err, result) => {
       if (err) {
         reject(err);
       }
       resolve(result);
     })
   );
-}
-
-export async function generateBlumPrime(): Promise<string> {
-  // secret key is base64 of json of p and q values
-  const blumPrime = (await new Promise((resolve, reject) =>
-    global.generateBlumPrime(
-      (err, result) => {
-        if (err) {
-          reject(err);
-        }
-        resolve(result);
-      }
-    )
-  )) as string;
-  return blumPrime;
 }

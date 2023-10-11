@@ -4,7 +4,6 @@ import { LocalStorage } from './LocalStorage';
 import { SessionStorage } from './SessionStorage';
 import { keygen } from './wallet/keygen';
 import { signMessage, sendTransaction, signTransaction } from './wallet/signing';
-import { generateBlumPrimes } from './wallet/keygen';
 import { PlatformUtils } from './PlatformUtils';
 
 export class WebUtils implements PlatformUtils {
@@ -28,8 +27,9 @@ export class WebUtils implements PlatformUtils {
     share: string,
     message: string,
     sessionCookie: string,
+    isDKLS?: boolean,
   ): Promise<SignatureRes> {
-    return signMessage(ctx, userId, walletId, share, message, sessionCookie);
+    return signMessage(ctx, userId, walletId, share, message, sessionCookie, isDKLS);
   }
 
   signTransaction(
@@ -37,10 +37,12 @@ export class WebUtils implements PlatformUtils {
     userId: string,
     walletId: string,
     share: string,
-    message: string,
+    tx: string,
+    chainId: string,
     sessionCookie: string,
+    isDKLS?: boolean,
   ): Promise<SignatureRes> {
-    return signTransaction(ctx, userId, walletId, share, message, sessionCookie);
+    return signTransaction(ctx, userId, walletId, share, tx, chainId, sessionCookie, isDKLS);
   }
 
   sendTransaction(
@@ -51,8 +53,9 @@ export class WebUtils implements PlatformUtils {
     tx: string,
     chainId: string,
     sessionCookie: string,
+    isDKLS?: boolean,
   ): Promise<SignatureRes> {
-    return sendTransaction(ctx, userId, walletId, share, tx, chainId, sessionCookie);
+    return sendTransaction(ctx, userId, walletId, share, tx, chainId, sessionCookie, isDKLS);
   }
 
   signHash(_address: string, _hash: string): Promise<{
@@ -61,10 +64,6 @@ export class WebUtils implements PlatformUtils {
     s: Buffer;
   }> {
     throw new Error('not implemented');
-  }
-
-  generateBlumPrimes = async (ctx: Ctx): Promise<{ p: string; q: string; }> => {
-    return await generateBlumPrimes(ctx);
   }
 
   localStorage = new LocalStorage();

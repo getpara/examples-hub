@@ -21,6 +21,7 @@ export interface PlatformUtils {
     share: string,
     message: string,
     sessionCookie: string,
+    isDKLS?: boolean,
   ): Promise<SignatureRes>,
 
   signTransaction(
@@ -31,6 +32,7 @@ export interface PlatformUtils {
     tx: string,
     chainId: string,
     sessionCookie: string,
+    isDKLS?: boolean,
   ): Promise<SignatureRes>,
 
   sendTransaction(
@@ -41,6 +43,7 @@ export interface PlatformUtils {
     tx: string,
     chainId: string,
     sessionCookie: string,
+    isDKLS?: boolean,
   ): Promise<SignatureRes>,
 
   // TODO probably not needed as signMessage should do the same
@@ -49,8 +52,6 @@ export interface PlatformUtils {
     r: Buffer;
     s: Buffer;
   }>;
-
-  generateBlumPrimes(ctx: Ctx): Promise<{p: string; q: string}>,
 
   localStorage: StorageUtils,
 

@@ -66,7 +66,6 @@ export const CapsuleModal = ({
 }: CapsuleModalProps) => {
   const resolvedTheme = typeof theme === 'string' ? themeResolve[theme] : theme;
   const [email, setEmail] = useState(capsule.getEmail());
-  const [paillierGenDone, setPaillierGenDone] = useState(false);
   const [walletCreated, setWalletCreated] = useState(false);
   const [walletCreationInProgress, setWalletCreationInProgress] = useState(false);
   const [webAuthURLForLogin, setWebAuthURLForLoginState] = useState(sessionStorage.getItem(`${STORAGE_PREFIX}webAuthURLForLogin`) || '');
@@ -102,9 +101,7 @@ export const CapsuleModal = ({
   const createAccountTimeout = useRef<number>();
   const loginTimeout = useRef<number>();
 
-  const [percentKeygenDone, setPercentKeygenDone] = useState(
-    paillierGenDone ? 25 : 0,
-  );
+  const [percentKeygenDone, setPercentKeygenDone] = useState(0);
 
   const [isLogin, setIsLogin] = useState(false);
 
@@ -128,7 +125,7 @@ export const CapsuleModal = ({
       setWebAuthURLForLogin('');
       setWebAuthURLForCreate('');
       setWalletCreated(false);
-      setPercentKeygenDone(paillierGenDone ? 25 : 0);
+      setPercentKeygenDone(0);
       setCreateWalletRes(null);
       setRecoveryShare(null);
     }
@@ -139,23 +136,12 @@ export const CapsuleModal = ({
     setPercentKeygenDone((percentKeygenDone) => percentKeygenDone + 15);
   }
 
-  // generate paillier secret key ahead of time
-  useEffect(() => {
-    // TODO probably we should invalidate it after using...
-    async function genPaillierKey() {
-      await capsule.generatePaillierKey();
-      setPaillierGenDone(true);
-      setPercentKeygenDone(25);
-    }
-    genPaillierKey();
-  }, []);
 
   // generate wallet once we know it's account creation
   useEffect(() => {
     if (
       (!isCreateAccountType && currentStep !== ModalStep.AWAITING_WALLET_CREATION_AFTER_LOGIN) ||
       walletCreated ||
-      !paillierGenDone ||
       walletCreationInProgress
     ) {
       return;
@@ -171,7 +157,7 @@ export const CapsuleModal = ({
       setWalletCreationInProgress(false);
     }
     genWallet();
-  }, [paillierGenDone, isCreateAccountType, currentStep]);
+  }, [isCreateAccountType, currentStep]);
 
   // distribute share once we know keygen is done
   useEffect(() => {

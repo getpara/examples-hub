@@ -11,6 +11,7 @@ export async function signTransaction(
   tx: string,
   chainId: string,
   sessionCookie?: string,
+  isDKLS?: boolean,
 ): Promise<SignatureRes> {
   return await new Promise(async (resolve) => {
     const worker = await setupWorker(ctx, async (sendTransactionRes) => {
@@ -25,6 +26,7 @@ export async function signTransaction(
       offloadMPCComputationURL: ctx.offloadMPCComputationURL,
       disableWorkers: ctx.disableWorkers,
       sessionCookie,
+      useDKLS: isDKLS,
     });
   });
 }
@@ -38,6 +40,7 @@ export async function sendTransaction(
   tx: string,
   chainId: string,
   sessionCookie?: string,
+  isDKLS?: boolean,
 ): Promise<SignatureRes> {
   return await new Promise(async (resolve) => {
     const worker = await setupWorker(ctx, async (sendTransactionRes) => {
@@ -52,6 +55,7 @@ export async function sendTransaction(
       offloadMPCComputationURL: ctx.offloadMPCComputationURL,
       disableWorkers: ctx.disableWorkers,
       sessionCookie,
+      useDKLS: isDKLS,
     });
   });
 }
@@ -63,6 +67,7 @@ export async function signMessage(
   share: string,
   message: string,
   sessionCookie?: string,
+  isDKLS?: boolean,
 ): Promise<SignatureRes> {
   return await new Promise(async (resolve) => {
     const worker = await setupWorker(ctx, async (signMessageRes) => {
@@ -71,11 +76,13 @@ export async function signMessage(
     });
     worker.postMessage({
       env: ctx.env,
+      apiKey: ctx.apiKey,
       params: { share, walletId, userId, message },
       functionType: 'SIGN_MESSAGE',
       offloadMPCComputationURL: ctx.offloadMPCComputationURL,
       disableWorkers: ctx.disableWorkers,
       sessionCookie,
+      useDKLS: isDKLS,
     });
   });
 }

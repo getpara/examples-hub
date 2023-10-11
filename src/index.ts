@@ -1,9 +1,9 @@
 import { Capsule } from './Capsule';
-export { Environment } from './definitions';
-export * from './types';
 import { CapsuleModal as Modal } from './modal/CapsuleModal';
 import { CapsuleButton as Button } from './modal/CapsuleModal'
 
+export { Environment } from './definitions';
+export * from './types';
 export { Modal };
 export { Button };
 export { CapsuleEthersSigner } from './integrations/ethers/ethersSigner';

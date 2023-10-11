@@ -378,6 +378,7 @@ function getCapsuleOpts(env: Environment): ConstructorOpts {
   switch (env) {
     case Environment.DEV:
       return {
+        // useLocalFiles: true,
         offloadMPCComputationURL: 'http://localhost:9009',
       };
     case Environment.SANDBOX:
@@ -486,7 +487,7 @@ function App() {
               setEmail(e.target.value)
             }} value={email || ''}/>
             <Button colorScheme="teal" onClick={async () => {
-              capsule.clearStorage(true);
+              capsule.clearStorage();
               await capsule.createUser(email);
             }}>Create Account</Button>
 

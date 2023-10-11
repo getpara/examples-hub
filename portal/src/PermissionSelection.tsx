@@ -206,11 +206,11 @@ function PermissionSelection({
     <Box height="100%">
       <VStack alignItems="center" color="white" maxW="ld">
         <Text fontSize="m" textAlign="center">
-          <b>{partner.name}</b> is requesting access to perform the following
+          <b>{partner.displayName}</b> is requesting access to perform the following
           operation on your wallet
         </Text>
         <Text mb={8} fontSize="xs" textAlign="center">
-          Please only proceed if you trust {partner.name}.
+          Please only proceed if you trust {partner.displayName}.
         </Text>
         <Box height="60px" alignItems="center" display="flex">
           <CapsuleBox />

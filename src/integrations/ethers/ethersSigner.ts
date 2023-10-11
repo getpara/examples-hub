@@ -51,6 +51,9 @@ export class CapsuleEthersSigner extends ethers.AbstractSigner {
     const base64HashedMessage = hexStringToBase64(hashedMessage);
     const res = await this.capsule.signMessage(this.getCurrentWalletId(), base64HashedMessage);
 
+    if ((res as DeniedSignatureResWithUrl).transactionReviewUrl) {
+      throw new TransactionReviewError((res as DeniedSignatureResWithUrl).transactionReviewUrl);
+    }
     const signature = (res as SuccessfulSignatureRes).signature;
     return `0x${signature}`;
   }
@@ -90,10 +93,10 @@ export class CapsuleEthersSigner extends ethers.AbstractSigner {
       hexStringToBase64(txObj.serialized),
       `${txObj.chainId}`,
     );
+
     if ((res as DeniedSignatureResWithUrl).transactionReviewUrl) {
       throw new TransactionReviewError((res as DeniedSignatureResWithUrl).transactionReviewUrl);
     }
-
     const signature = (res as SuccessfulSignatureRes).signature;
     const btx = ethers.Transaction.from(<ethers.TransactionLike<string>>tx);
     btx.signature = `0x${signature}`;
@@ -119,6 +122,10 @@ export class CapsuleEthersSigner extends ethers.AbstractSigner {
       this.getCurrentWalletId(),
       hexStringToBase64(ethers.TypedDataEncoder.hash(populated.domain, types, populated.value)),
     );
+
+    if ((res as DeniedSignatureResWithUrl).transactionReviewUrl) {
+      throw new TransactionReviewError((res as DeniedSignatureResWithUrl).transactionReviewUrl);
+    }
     const signature = (res as SuccessfulSignatureRes).signature;
     return `0x${signature}`;
   }

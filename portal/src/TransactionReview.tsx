@@ -23,7 +23,7 @@ function TransactionReview() {
   const riskScore = searchParams.get('risk_temp') === null ? undefined : Number(searchParams.get('risk_temp'));
   const [pendingTransaction, setPendingTransaction] = useState(null);
 
-  const partnerName = pendingTransaction?.partner?.name
+  const partnerName = pendingTransaction?.partner?.displayName
   async function onClickAccept() {
     const { data } = await userManagementClient.getWebChallenge(
       encodeURIComponent(email),

@@ -63,7 +63,7 @@ const RecoveryEmailCollectionStep: React.FC = () => {
                     if (!inputEmail) {
                         throw new Error('email is required');
                     }
-                    capsule.clearStorage(true);
+                    capsule.clearStorage();
 
                     const userExists = await capsule.checkIfUserExists(inputEmail);
                     if (userExists) {

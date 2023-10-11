@@ -9,7 +9,7 @@ import {
   getAsymmetricKeyPair,
   getPublicKeyHex,
 } from './cryptography/utils';
-import { generateBlumPrimes, keygen } from './wallet/keygen';
+import { keygen } from './wallet/keygen';
 import { sendTransaction, signTransaction, signMessage } from './wallet/signing';
 import { Ctx, getPortalBaseURL } from './definitions';
 import { Environment } from './definitions';
@@ -28,6 +28,10 @@ import * as transmissionUtils from './transmission/transmissionUtils';
 const BIOMETRIC_VERIFICATION_TIME_MS = 30 * 60 * 1000;
 const DEV_BIOMETRIC_VERIFICATION_TIME_MS = 60 * 60 * 1000;
 
+enum WalletScheme {
+  CGGMP = 'CGGMP',
+  DKLS = 'DKLS',
+}
 // Make sure to keep this in sync with capsule-org/src/entities/recoveryAttemptEntity.ts
 export enum RecoveryStatus {
   INITIATED = 'INITIATED',
@@ -42,6 +46,7 @@ export interface Wallet {
   signer: string;
   address?: string;
   publicKey?: string;
+  scheme?: WalletScheme;
 }
 
 export interface ConstructorOpts {
@@ -59,6 +64,7 @@ export interface ConstructorOpts {
   portalPrimaryButtonColor?: string; // please use hex color codes
   portalTextColor?: string; // please use hex color codes
   portalPrimaryButtonTextColor?: string; // please use hex color codes
+  useDKLSForCreation?: boolean;
 }
 
 const PREFIX = '@CAPSULE/';
@@ -66,7 +72,6 @@ const LOCAL_STORAGE_EMAIL = `${PREFIX}e-mail`;
 const LOCAL_STORAGE_USER_ID = `${PREFIX}userId`;
 const LOCAL_STORAGE_WALLETS = `${PREFIX}wallets`;
 const SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR = `${PREFIX}loginEncryptionKeyPair`;
-const SESSION_STORAGE_PAILLIER_SECRET_KEY = `${PREFIX}paillierSecretKey`;
 const SESSION_STORAGE_SESSION_COOKIE = `${PREFIX}sessionCookie`;
 
 function biometricVerifiedRecently(ctx: Ctx, verifiedAt: number): boolean {
@@ -119,7 +124,7 @@ export class Capsule {
   };
 
   // remove all local storage and session storage prefixed for capsule
-  clearStorage = async (keepSecretKey?: boolean): Promise<void> => {
+  clearStorage = async (): Promise<void> => {
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
 
@@ -131,12 +136,7 @@ export class Capsule {
     for (let j = 0; j < sessionStorage.length; j++) {
       const key = sessionStorage.key(j);
 
-      // paillier secret key may be generated before this is called on account creation
-      if (
-        key &&
-        key.startsWith(PREFIX) &&
-        !(keepSecretKey && key === SESSION_STORAGE_PAILLIER_SECRET_KEY)
-      ) {
+      if (key && key.startsWith(PREFIX)) {
         sessionStorage.removeItem(key);
         j--;
       }
@@ -182,6 +182,7 @@ export class Capsule {
   // TODO: consider using sessionStorage instead of localStorage
   constructor(env: Environment, apiKey?: string, opts?: ConstructorOpts) {
     if (!opts) opts = {};
+
     this.ctx = {
       env,
       apiKey,
@@ -189,6 +190,7 @@ export class Capsule {
       disableWorkers: opts.disableWorkers,
       offloadMPCComputationURL: opts.offloadMPCComputationURL,
       useLocalFiles: opts.useLocalFiles,
+      useDKLS: opts.useDKLSForCreation || !opts.offloadMPCComputationURL,
     };
     if (opts.offloadMPCComputationURL) {
       this.ctx.mpcComputationClient = mpcComputationClient.initClient(opts.offloadMPCComputationURL, opts.disableWorkers);
@@ -247,22 +249,7 @@ export class Capsule {
   }
 
   async generatePaillierKey(): Promise<void> {
-    if (this.ctx.offloadMPCComputationURL) {
-      return;
-    }
-    const paillierKey = await this.sessionStorageGetItem(
-      SESSION_STORAGE_PAILLIER_SECRET_KEY,
-    );
-    if (paillierKey) {
-      return;
-    }
-
-    const { p, q } = await generateBlumPrimes(this.ctx);
-    const base64Enc = Buffer.from(
-      JSON.stringify({ pBase64: p, qBase64: q }),
-      'utf-8',
-    ).toString('base64');
-    await this.sessionStorageSetItem(SESSION_STORAGE_PAILLIER_SECRET_KEY, base64Enc);
+    return;
   }
 
   async setEmail(email: string): Promise<void> {
@@ -368,10 +355,11 @@ export class Capsule {
   private async populateWalletAddresses(): Promise<void> {
     const res = await this.ctx.capsuleClient.getWallets(this.userId);
     const wallets = res.data.wallets;
-    wallets.forEach((wallet: { id: string; address?: string; publicKey?: string }) => {
+    wallets.forEach((wallet: { id: string; address?: string; publicKey?: string; scheme?: WalletScheme }) => {
       if (this.wallets[wallet.id]) {
         this.wallets[wallet.id].address = wallet.address;
         this.wallets[wallet.id].publicKey = wallet.publicKey;
+        this.wallets[wallet.id].scheme = wallet.scheme;
       }
     });
     await this.setWallets(this.wallets);
@@ -557,13 +545,10 @@ export class Capsule {
     customFunction: (params?: any) => void,
   ): Promise<[Wallet, string | null]> {
     this.requireApiKeyForProd();
-    const secretKey = await this.sessionStorageGetItem(
-      SESSION_STORAGE_PAILLIER_SECRET_KEY,
-    );
     const { signer, walletId, recoveryShare } = await keygen(
       this.ctx,
       this.userId,
-      secretKey,
+      null,
       skipDistribute,
       customFunction,
       this.retrieveSessionCookie(),
@@ -592,6 +577,7 @@ export class Capsule {
     walletId: string,
     messageBase64: string,
   ): Promise<FullSignatureRes> {
+    const wallet = this.wallets[walletId];
     const res = await signMessage(
       this.ctx,
       this.userId,
@@ -599,8 +585,12 @@ export class Capsule {
       this.wallets[walletId].signer,
       messageBase64,
       this.retrieveSessionCookie(),
+      wallet.scheme === WalletScheme.DKLS,
     );
     if ((res as DeniedSignatureRes).pendingTransactionId) {
+      console.log(this.getTransactionReviewUrl(
+        (res as DeniedSignatureRes).pendingTransactionId,
+      ));
       return {
         ...res,
         transactionReviewUrl: this.getTransactionReviewUrl(
@@ -617,6 +607,7 @@ export class Capsule {
     rlpEncodedTxBase64: string,
     chainId: string,
   ): Promise<FullSignatureRes> {
+    const wallet = this.wallets[walletId];
     const res = await signTransaction(
       this.ctx,
       this.userId,
@@ -625,8 +616,12 @@ export class Capsule {
       rlpEncodedTxBase64,
       chainId,
       this.retrieveSessionCookie(),
+      wallet.scheme === WalletScheme.DKLS,
     );
     if ((res as DeniedSignatureRes).pendingTransactionId) {
+      console.log(this.getTransactionReviewUrl(
+        (res as DeniedSignatureRes).pendingTransactionId,
+      ));
       return {
         ...res,
         transactionReviewUrl: this.getTransactionReviewUrl(
@@ -644,6 +639,7 @@ export class Capsule {
     rlpEncodedTxBase64: string,
     chainId: string,
   ): Promise<FullSignatureRes> {
+    const wallet = this.wallets[walletId];
     const res = await sendTransaction(
       this.ctx,
       this.userId,
@@ -652,8 +648,13 @@ export class Capsule {
       rlpEncodedTxBase64,
       chainId,
       this.retrieveSessionCookie(),
+      wallet.scheme === WalletScheme.DKLS,
     );
+    
     if ((res as DeniedSignatureRes).pendingTransactionId) {
+      console.log(this.getTransactionReviewUrl(
+        (res as DeniedSignatureRes).pendingTransactionId,
+      ));
       return {
         ...res,
         transactionReviewUrl: this.getTransactionReviewUrl(
@@ -661,7 +662,6 @@ export class Capsule {
         ),
       };
     }
-
     return res as SuccessfulSignatureRes;
   }
 

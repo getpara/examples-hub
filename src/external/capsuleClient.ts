@@ -17,6 +17,22 @@ export function getBaseUrl(env: Environment): string {
   }
 }
 
+export function getBaseMPCNetworkUrl(env: Environment, useWebsocket?: boolean): string {
+  const prefix = useWebsocket ? 'ws' : 'http';
+  switch (env) {
+    case Environment.DEV:
+      return `${prefix}://localhost:3000`;
+    case Environment.SANDBOX:
+      return `${prefix}s://mpc-network.sandbox.usecapsule.com`;
+    case Environment.BETA:
+      return `${prefix}s://mpc-network.beta.usecapsule.com`;
+    case Environment.PROD:
+      return `${prefix}s://mpc-network.prod.usecapsule.com`;
+    default:
+      throw new Error(`unsupported env: ${env}`);
+  }
+}
+
 export function initClient(
   env: Environment,
   apiKey?: string,
