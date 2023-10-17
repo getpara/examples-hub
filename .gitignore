@@ -1,7 +1,7 @@
 **/node_modules
 main.wasm
 yarn-error.log
-/dist
+**/dist
 build
 .DS_Store
 mpcWorker-bundle.js

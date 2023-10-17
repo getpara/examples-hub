@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "sourceMap": true,
+    "declaration": true,
+    "target": "es6",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": false,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx"
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "examples"
+  ],
+  "include": [
+    "**/*.ts", "**/*.tsx",
+  ]
+}
