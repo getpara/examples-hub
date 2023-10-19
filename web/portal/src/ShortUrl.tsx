@@ -7,8 +7,7 @@ export default function ShortUrl() {
   const { shortenedUrl } = useParams();
   useEffect(() => {
     async function navigate() {
-      // @ts-ignore
-      const message = await retrieve(shortenedUrl, capsule);
+      const message = await retrieve(shortenedUrl!, capsule.ctx.capsuleClient);
       location.href = message;
     }
     navigate();

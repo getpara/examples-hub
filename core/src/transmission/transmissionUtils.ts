@@ -21,7 +21,6 @@ export async function upload(message: string, userManagementClient: Client) {
 
   const {
     data: { id },
-  // @ts-ignore
   } = await userManagementClient.tempTrasmissionInit(data);
 
   return encodeURIComponent(id + '|' + secret);
@@ -29,7 +28,6 @@ export async function upload(message: string, userManagementClient: Client) {
 
 export async function retrieve(uriEncodedMessage: string, userManagementClient: Client) {
   const [id, secret] = decodeURIComponent(uriEncodedMessage).split('|');
-  // @ts-ignore
   const response = await userManagementClient.tempTrasmission(
     id as string,
   );

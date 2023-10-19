@@ -374,28 +374,28 @@ async function createTransaction(
   return tx.serialize().toString('base64');
 }
 
-function getCapsuleOpts(env: Environment): ConstructorOpts {
+function getCapsuleOpts(env: Environment, useDKLS: boolean): ConstructorOpts {
   switch (env) {
     case Environment.DEV:
       return {
         // useLocalFiles: true,
-        offloadMPCComputationURL: 'http://localhost:9009',
+        offloadMPCComputationURL: useDKLS ? undefined : 'http://localhost:9009',
       };
     case Environment.SANDBOX:
       return {
         // useLocalFiles: true,
-        offloadMPCComputationURL: 'https://partner-mpc-computation.sandbox.usecapsule.com',
+        offloadMPCComputationURL: useDKLS ? undefined : 'https://partner-mpc-computation.sandbox.usecapsule.com',
         // portalBackgroundColor: '#df092d',
         // portalPrimaryButtonColor: '#322e47',
         // portalTextColor: '#ffffff',
       };
     case Environment.BETA:
       return {
-        offloadMPCComputationURL: 'https://partner-mpc-computation.beta.usecapsule.com',
+        offloadMPCComputationURL: useDKLS ? undefined : 'https://partner-mpc-computation.beta.usecapsule.com',
       };
     case Environment.PROD:
       return {
-        offloadMPCComputationURL: 'https://partner-mpc-computation.prod.usecapsule.com',
+        offloadMPCComputationURL: useDKLS ? undefined : 'https://partner-mpc-computation.prod.usecapsule.com',
       };
     default:
       throw new Error(`invalid environment: ${env}`);
@@ -409,10 +409,11 @@ function App() {
   const [selectedEnv, setSelectedEnv] = useSessionStorage('@EXAMPLE-CAPSULE/selectedEnv', Environment.SANDBOX);
   const [selectedApiKey, setSelectedApiKey] = useSessionStorage('@EXAMPLE-CAPSULE/selectedApiKey', undefined);
   const [selectedCapsuleClass, setSelectedCapsuleClass] = useSessionStorage('@EXAMPLE-CAPSULE/selectedCapsuleClass', 'CAPSULE');
+  const [useDKLS, setUseDKLS] = useSessionStorage('@EXAMPLE-CAPSULE/useDKLS', false);
 
   capsule = selectedCapsuleClass === 'CAPSULE_WEB' ?
-    new CapsuleWeb(selectedEnv, selectedApiKey, getCapsuleOpts(selectedEnv)):
-    new Capsule(selectedEnv, selectedApiKey, getCapsuleOpts(selectedEnv));
+    new CapsuleWeb(selectedEnv, selectedApiKey, getCapsuleOpts(selectedEnv, useDKLS)):
+    new Capsule(selectedEnv, selectedApiKey, getCapsuleOpts(selectedEnv, useDKLS));
 
   const [email, setEmail] = useState(capsule.getEmail());
   const [verificationCode, setVerificationCode] = useState('');
@@ -472,6 +473,13 @@ function App() {
           <Select defaultValue={selectedCapsuleClass} onChange={e => setSelectedCapsuleClass(e.target.value)}>
             <option value={'CAPSULE'}>Capsule</option>
             <option value={'CAPSULE_WEB'}>Capsule Web (new sdk refactored class)</option>
+          </Select>
+        </HStack>
+        <HStack paddingBottom={5}>
+          <Text width={'15%'}><strong>Use DKLS:</strong></Text>
+          <Select defaultValue={`${!!useDKLS}`} onChange={e => setUseDKLS(e.target.value === 'true')}>
+            <option value={'true'}>true</option>
+            <option value={'false'}>false</option>
           </Select>
         </HStack>
         {selectedView === 'WAGMI' && (
