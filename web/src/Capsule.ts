@@ -170,8 +170,8 @@ export class Capsule {
     };
   }
 
-  private requireApiKeyForProd() {
-    if (!this.ctx.apiKey && this.ctx.env === Environment.PROD) {
+  private requireApiKey() {
+    if (!this.ctx.apiKey) {
       throw new Error(
           `in order to create a wallet or user with Capsule, you
           must provide an API key to the capsule instance`
@@ -371,7 +371,7 @@ export class Capsule {
   }
 
   async createUser(email: string): Promise<void> {
-    this.requireApiKeyForProd();
+    this.requireApiKey();
     await this.setEmail(email);
     const { userId } = await this.ctx.capsuleClient.createUser({
       email: this.email!,
@@ -544,7 +544,7 @@ export class Capsule {
     skipDistribute = false,
     customFunction: (params?: any) => void,
   ): Promise<[Wallet, string | null]> {
-    this.requireApiKeyForProd();
+    this.requireApiKey();
     const { signer, walletId, recoveryShare } = await keygen(
       this.ctx,
       this.userId,
