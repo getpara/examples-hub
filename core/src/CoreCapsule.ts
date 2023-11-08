@@ -92,6 +92,7 @@ export abstract class CoreCapsule {
   portalPrimaryButtonColor?: string;
   portalTextColor?: string;
   private sessionCookie?: string;
+  private disableProviderModal?: boolean;
 
   private platformUtils: PlatformUtils;
 
@@ -177,6 +178,7 @@ export abstract class CoreCapsule {
     this.portalTextColor = opts.portalTextColor;
 
     this.platformUtils = this.getPlatformUtils();
+    this.disableProviderModal = this.platformUtils.disableProviderModal;
 
     if (opts.useStorageOverrides) {
       this.localStorageGetItem = opts.localStorageGetItemOverride;
@@ -706,6 +708,32 @@ export abstract class CoreCapsule {
     }
 
     return res as SuccessfulSignatureRes;
+  }
+
+  isProviderModalDisabled(): boolean {
+    return !!this.disableProviderModal;
+  }
+
+  exportSession(): string {
+    const sessionInfo = {
+      email: this.email,
+      userId: this.userId,
+      wallets: this.wallets,
+      sessionCookie: this.sessionCookie,
+    };
+    return Buffer.from(JSON.stringify(sessionInfo)).toString('base64');
+  }
+
+  importSession(serializedInstanceBase64: string): void {
+    const serializedInstance = Buffer.from(
+      serializedInstanceBase64,
+      'base64',
+    ).toString('utf8');
+    const sessionInfo = JSON.parse(serializedInstance);
+    this.email = sessionInfo.email;
+    this.userId = sessionInfo.userId;
+    this.wallets = sessionInfo.wallets;
+    this.sessionCookie = sessionInfo.sessionCookie;
   }
 
   async logout(): Promise<void> {

@@ -10,5 +10,9 @@ export { initClient } from './external/capsuleClient';
 export * as mpcComputationClient from './external/mpcComputationClient';
 export { getBaseUrl } from './external/capsuleClient';
 export type { SignatureRes } from './types/walletTypes';
+export { CapsuleEthersSigner } from './integrations/ethers/ethersSigner';
+export { CapsuleEIP1193Provider } from './integrations/wagmi/CapsuleEIP1193Provider';
+export { createCapsuleViemClient } from './integrations/wagmi/viemWalletClient';
+export { CapsuleProtoSigner, CapsuleAminoSigner } from './integrations/cosmos/cosmosSigners';
 export default CoreCapsule;
 

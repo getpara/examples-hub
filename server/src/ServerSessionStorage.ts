@@ -14,7 +14,7 @@ export class ServerSessionStorage implements StorageUtils {
   };
   removeItem = (key: string): void => {
     delete this.sessionStorage[key];
-  }
+  };
   clear = (prefix: string): void => {
     const keys = Object.keys(this.sessionStorage);
     for (let key in keys) {
@@ -22,5 +22,5 @@ export class ServerSessionStorage implements StorageUtils {
         this.removeItem(key);
       }
     }
-  }
+  };
 }

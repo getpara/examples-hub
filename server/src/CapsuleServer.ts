@@ -1,5 +1,5 @@
-import CoreCapsule from './core'
-import { ServerUtils } from './ServerUtils'
+import CoreCapsule from './core';
+import { ServerUtils } from './ServerUtils';
 
 export class Capsule extends CoreCapsule {
   protected getPlatformUtils() {

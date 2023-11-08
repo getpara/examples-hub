@@ -2,7 +2,11 @@ import { Ctx, SignatureRes, PlatformUtils } from './core';
 import { ServerLocalStorage } from './ServerLocalStorage';
 import { ServerSessionStorage } from './ServerSessionStorage';
 import { keygen } from './wallet/keygen';
-import { signMessage, sendTransaction, signTransaction } from './wallet/signing';
+import {
+  signMessage,
+  sendTransaction,
+  signTransaction,
+} from './wallet/signing';
 
 export class ServerUtils implements PlatformUtils {
   keygen(
@@ -27,7 +31,15 @@ export class ServerUtils implements PlatformUtils {
     sessionCookie: string,
     isDKLS?: boolean,
   ): Promise<SignatureRes> {
-    return signMessage(ctx, userId, walletId, share, message, sessionCookie, isDKLS);
+    return signMessage(
+      ctx,
+      userId,
+      walletId,
+      share,
+      message,
+      sessionCookie,
+      isDKLS,
+    );
   }
 
   signTransaction(
@@ -40,7 +52,16 @@ export class ServerUtils implements PlatformUtils {
     sessionCookie: string,
     isDKLS?: boolean,
   ): Promise<SignatureRes> {
-    return signTransaction(ctx, userId, walletId, share, message, chainId, sessionCookie, isDKLS);
+    return signTransaction(
+      ctx,
+      userId,
+      walletId,
+      share,
+      message,
+      chainId,
+      sessionCookie,
+      isDKLS,
+    );
   }
 
   sendTransaction(
@@ -53,10 +74,22 @@ export class ServerUtils implements PlatformUtils {
     sessionCookie: string,
     isDKLS?: boolean,
   ): Promise<SignatureRes> {
-    return sendTransaction(ctx, userId, walletId, share, tx, chainId, sessionCookie, isDKLS);
+    return sendTransaction(
+      ctx,
+      userId,
+      walletId,
+      share,
+      tx,
+      chainId,
+      sessionCookie,
+      isDKLS,
+    );
   }
 
-  signHash(_address: string, _hash: string): Promise<{
+  signHash(
+    _address: string,
+    _hash: string,
+  ): Promise<{
     v: number;
     r: Buffer;
     s: Buffer;
@@ -64,9 +97,9 @@ export class ServerUtils implements PlatformUtils {
     throw new Error('not implemented');
   }
 
-  generateBlumPrimes = async (ctx: Ctx): Promise<{ p: string; q: string; }> => {
+  generateBlumPrimes = async (ctx: Ctx): Promise<{ p: string; q: string }> => {
     throw new Error('not implemented');
-  }
+  };
 
   localStorage = new ServerLocalStorage();
 
@@ -75,6 +108,8 @@ export class ServerUtils implements PlatformUtils {
   secureStorage = undefined;
 
   isSyncStorage = true;
+
+  disableProviderModal = true;
 
   openPopup(popupUrl: string): void {
     throw new Error('not implemented');

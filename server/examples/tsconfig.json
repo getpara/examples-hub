@@ -7,7 +7,7 @@
     "module": "CommonJS",
     "rootDir": "./src",
     "moduleResolution": "node",
-    "allowJs": false,
+    "allowJs": true,
     "outDir": "./dist",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
@@ -15,7 +15,8 @@
     "noImplicitAny": false,
     "strictPropertyInitialization": false,
     "noUnusedLocals": false,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "noEmit": false
   },
   "include": [
     "src/"

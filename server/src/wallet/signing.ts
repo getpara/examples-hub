@@ -14,7 +14,6 @@ export async function signTransaction(
   return await new Promise(async (resolve) => {
     const worker = await setupWorker(async (sendTransactionRes) => {
       resolve(sendTransactionRes);
-      worker.terminate();
     });
     worker.postMessage({
       env: ctx.env,
@@ -29,7 +28,6 @@ export async function signTransaction(
   });
 }
 
-
 export async function sendTransaction(
   ctx: Ctx,
   userId: string,
@@ -43,7 +41,6 @@ export async function sendTransaction(
   return await new Promise(async (resolve) => {
     const worker = await setupWorker(async (sendTransactionRes) => {
       resolve(sendTransactionRes);
-      worker.terminate();
     });
     worker.postMessage({
       env: ctx.env,

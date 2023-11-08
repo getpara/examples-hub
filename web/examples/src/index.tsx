@@ -437,8 +437,11 @@ function App() {
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
   async function checkIsSessionActive() {
-    const isSessionActive = await capsule.isFullyLoggedIn();
-    setIsSessionActive(isSessionActive);
+    const isFullyLoggedIn = await capsule.isFullyLoggedIn();
+    setIsSessionActive(isFullyLoggedIn);
+    if (isFullyLoggedIn && capsule instanceof CoreCapsule) {
+      console.log(`exported session:\n${(capsule as CoreCapsule).exportSession()}`)
+    }
   }
 
   return (

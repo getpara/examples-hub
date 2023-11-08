@@ -14,7 +14,7 @@ export class ServerLocalStorage implements StorageUtils {
   };
   removeItem = (key: string): void => {
     delete this.localStorage[key];
-  }
+  };
   clear = (prefix: string): void => {
     const keys = Object.keys(this.localStorage);
     for (let key in keys) {
@@ -22,5 +22,5 @@ export class ServerLocalStorage implements StorageUtils {
         this.removeItem(key);
       }
     }
-  }
+  };
 }

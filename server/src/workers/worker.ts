@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { parentPort } from 'worker_threads';
-import * as walletUtils from './walletUtils';
 import { Ctx, Environment, getPortalBaseURL, initClient, mpcComputationClient } from '../core';
+import * as walletUtils from './walletUtils';
 
 interface Message {
   env: Environment;
@@ -14,19 +14,12 @@ interface Message {
   useDKLS?: boolean;
 }
 
-parentPort.on('message', async (messageData: Message | 'SHUTDOWN') => {
-  if (messageData === 'SHUTDOWN') {
-    // TODO: revisit to see if we can improve this
-    setTimeout(() => {
-      parentPort.close()
-    }, 3000);
-    return;
-  }
+parentPort.on('message', async (messageData: Message) => {
   await handleMessage({ data: messageData });
 });
 
 async function loadWasm(ctx: Ctx): Promise<void> {
-  require('../wasm/wasm_exec');
+  await import('../wasm/wasm_exec');
   global.WebSocket = require('ws');
 
   const goWasm = new global.Go();

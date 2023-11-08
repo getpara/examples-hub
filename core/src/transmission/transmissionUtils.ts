@@ -2,8 +2,8 @@ import { randomBytes } from 'crypto';
 import { ec as EC } from 'elliptic';
 import { Encrypt as ECIESEncrypt } from '@celo/utils/lib/ecies';
 import { Buffer } from 'buffer';
-import { ECIESDecrypt } from '../shares/KeyContainer';
 import Client from '@usecapsule/user-management-client';
+import { ECIESDecrypt } from '../shares/KeyContainer';
 
 export async function upload(message: string, userManagementClient: Client) {
   const secret = randomBytes(32).toString('hex');

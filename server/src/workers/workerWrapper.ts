@@ -13,18 +13,14 @@ export async function setupWorker(resFunction: (arg: any) => Promise<void>, cust
       customFunction(message.params);
       return;
     }
+
     await resFunction(message);
-    worker.postMessage('SHUTDOWN');
+    await worker.terminate();
   };
 
   worker.on('message', onmessage);
   worker.on('error', (err) => {
     throw err;
-  });
-  worker.on('exit', (code) => {
-    if (code !== 0) {
-      console.error(new Error(`worker stopped with exit code: ${code}`));
-    }
   });
   return worker;
 }

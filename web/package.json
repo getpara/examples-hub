@@ -72,8 +72,7 @@
     "!examples",
     "dist",
     "src",
-    "package.json",
-    "yarn.lock"
+    "package.json"
   ],
   "resolutions": {
     "@chakra-ui/react/@chakra-ui/toast": "file:./src/stubs/toastStub"

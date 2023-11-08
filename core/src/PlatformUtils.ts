@@ -12,7 +12,7 @@ export interface PlatformUtils {
   ): Promise<{
     signer: string;
     walletId: string;
-  }>,
+  }>;
 
   signMessage(
     ctx: Ctx,
@@ -22,7 +22,7 @@ export interface PlatformUtils {
     message: string,
     sessionCookie: string,
     isDKLS?: boolean,
-  ): Promise<SignatureRes>,
+  ): Promise<SignatureRes>;
 
   signTransaction(
     ctx: Ctx,
@@ -33,7 +33,7 @@ export interface PlatformUtils {
     chainId: string,
     sessionCookie: string,
     isDKLS?: boolean,
-  ): Promise<SignatureRes>,
+  ): Promise<SignatureRes>;
 
   sendTransaction(
     ctx: Ctx,
@@ -44,7 +44,7 @@ export interface PlatformUtils {
     chainId: string,
     sessionCookie: string,
     isDKLS?: boolean,
-  ): Promise<SignatureRes>,
+  ): Promise<SignatureRes>;
 
   // TODO probably not needed as signMessage should do the same
   signHash(address: string, hash: string): Promise<{
@@ -53,13 +53,15 @@ export interface PlatformUtils {
     s: Buffer;
   }>;
 
-  localStorage: StorageUtils,
+  localStorage: StorageUtils;
 
-  sessionStorage: StorageUtils,
+  sessionStorage: StorageUtils;
 
-  secureStorage?: StorageUtils,
+  secureStorage?: StorageUtils;
 
   isSyncStorage?: boolean;
 
-  openPopup(popupUrl: string): void,
+  disableProviderModal?: boolean;
+
+  openPopup(popupUrl: string): void;
 }

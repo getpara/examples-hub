@@ -1,6 +1,6 @@
-import { setupWorker } from '../workers/workerWrapper';
 import { distributeNewShare, Ctx } from '../core';
 import { waitUntilTrue } from '../core/utils/pollingUtils';
+import { setupWorker } from '../workers/workerWrapper';
 
 async function isKeygenComplete(
   ctx: Ctx,

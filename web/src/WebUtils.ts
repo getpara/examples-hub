@@ -74,6 +74,8 @@ export class WebUtils implements PlatformUtils {
 
   isSyncStorage = true;
 
+  disableProviderModal = false;
+
   openPopup(popupUrl: string): void {
     window.open(popupUrl, 'popup', 'popup=true,width=400,height=500');
   }
