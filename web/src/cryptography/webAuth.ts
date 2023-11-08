@@ -8,7 +8,6 @@ const ES256_ALGORITHM = -7;
 const RS256_ALGORITHM = -257;
 
 function publicKeyCredentialToJSON(
-  // eslint-disable-next-line @typescript-eslint/ban-types
   pubKeyCred: ArrayBuffer | Array<string> | Object
 ) {
   if (pubKeyCred instanceof ArrayBuffer) {

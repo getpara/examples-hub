@@ -13,5 +13,4 @@ export const truncateEthAddress = (address: string) => {
 
 export const STORAGE_PREFIX = '@CAPSULE/';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-export const emptyFunction = () => { };
+export const emptyFunction = () => {};

@@ -1,5 +1,0 @@
-node_modules
-dist
-wasm_exec.js
-webpack.config.js
-craco.config.js

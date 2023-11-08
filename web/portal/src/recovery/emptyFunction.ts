@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-const emptyFunction = () => { };
+const emptyFunction = () => {};
 
 export default emptyFunction;

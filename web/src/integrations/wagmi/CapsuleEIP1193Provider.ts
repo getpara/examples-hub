@@ -16,7 +16,6 @@ import {
   formatTransaction,
 } from 'viem';
 import { EventEmitter } from 'eventemitter3';
-import { RpcResponse } from 'viem/dist/types/utils/rpc';
 import { Chain } from '@wagmi/chains';
 
 import { Capsule } from '../../Capsule';
@@ -38,13 +37,13 @@ interface CapsuleEIP1193ProviderOpts {
 }
 
 type WebSocketTransportSubscribeParameters = {
-  onData: (data: RpcResponse) => void;
+  onData: (data: unknown) => void;
   onError?: (error: unknown) => void;
 }
 
 type WebSocketTransportSubscribeReturnType = {
   subscriptionId: Hash;
-  unsubscribe: () => Promise<RpcResponse<boolean>>;
+  unsubscribe: () => Promise<unknown>;
 }
 
 type WebSocketTransportSubscribeFn = (
