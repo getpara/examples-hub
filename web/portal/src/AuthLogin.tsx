@@ -16,6 +16,7 @@ import {
 } from '@chakra-ui/react';
 import QRCode from 'react-qr-code';
 
+import BetaBanner from './BetaBanner';
 import { generateSignature } from './library/cryptography/webAuth';
 import {
   encryptWithDerivedPublicKey,
@@ -256,6 +257,7 @@ function AuthLogin() {
     return (paramsPartnerId && !partner) ? undefined : (urlForNewDeviceLogin && (
       <ChakraProvider theme={getPartnerTheme(portalBackgroundColor, portalPrimaryButtonColor, portalTextColor)}>
         <Container textColor={portalTextColor} color={portalBackgroundColor} maxW="ld" padding={10}>
+          <BetaBanner />
           <Flex alignItems="center" justifyContent="center" mb="10%">
             <Image
               src={partner?.portalHeaderLogoUrl || '/wordmark_black.svg'}
@@ -296,6 +298,7 @@ function AuthLogin() {
   return (paramsPartnerId && !partner) ? undefined : (
     <ChakraProvider theme={getPartnerTheme(portalBackgroundColor, portalPrimaryButtonColor, portalTextColor)}>
       <Container color="white" maxW="ld" padding={10}>
+        <BetaBanner />
         {/* if first time logging into app, then need to accept scopes */}
         <Flex alignItems="center" justifyContent="center" mb={4}>
           <Image

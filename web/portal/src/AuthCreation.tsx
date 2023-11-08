@@ -12,6 +12,8 @@ import {
   ChakraProvider,
   Box,
 } from '@chakra-ui/react';
+import BetaBanner from './BetaBanner';
+
 import { EncryptorType, KeyType, PublicKeyStatus } from '@usecapsule/user-management-client';
 import { getPartnerTheme } from './theme';
 import {
@@ -140,6 +142,7 @@ function AuthCreation() {
     return (paramsPartnerId && !partner) ? undefined : (
       <ChakraProvider theme={getPartnerTheme(portalBackgroundColor, portalPrimaryButtonColor, portalTextColor)}>
         <Container color="white" maxW="ld" padding={10} height="100%">
+          <BetaBanner />
           {(biometricDone && paramsPartnerId && partner?.policiesEnabled) ? (
             <PermissionSelection
               onDone={onPermissionsDone}
@@ -194,6 +197,7 @@ function AuthCreation() {
   return (paramsPartnerId && !partner) ? undefined : (
     <ChakraProvider theme={getPartnerTheme(portalBackgroundColor, portalPrimaryButtonColor, portalTextColor)}>
       <Container textColor={portalTextColor} color={portalBackgroundColor} maxW="ld" padding="10%" height="100%">
+        <BetaBanner />
         {(biometricDone && paramsPartnerId && partner?.policiesEnabled) ? (
           <PermissionSelection
             onDone={onPermissionsDone}
