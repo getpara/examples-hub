@@ -86,12 +86,28 @@ export abstract class CoreCapsule {
 
   private email?: string;
   private userId?: string;
-  loginEncryptionKeyPair?: pki.rsa.KeyPair;
   private wallets?: Record<string, Wallet>;
-  portalBackgroundColor?: string;
-  portalPrimaryButtonColor?: string;
-  portalTextColor?: string;
   private sessionCookie?: string;
+
+  /**
+   * Encryption key pair generated from loginEncryptionKey.
+   */
+  loginEncryptionKeyPair?: pki.rsa.KeyPair;
+
+  /**
+   * Hex color to use in the portal for the background color.
+   */
+  portalBackgroundColor?: string;
+
+  /**
+   * Hex color to use in the portal for the primary button.
+   */
+  portalPrimaryButtonColor?: string;
+
+  /**
+   * Hex text color to use in the portal.
+   */
+  portalTextColor?: string;
   private disableProviderModal?: boolean;
 
   private platformUtils: PlatformUtils;
@@ -119,7 +135,9 @@ export abstract class CoreCapsule {
     this.sessionStorageSetItem(SESSION_STORAGE_SESSION_COOKIE, cookie);
   };
 
-  // remove all local storage and session storage prefixed for capsule
+  /**
+   * Remove all local storage and prefixed session storage.
+   */
   clearStorage = async (): Promise<void> => {
     this.platformUtils.localStorage.clear(PREFIX);
     this.platformUtils.sessionStorage.clear(PREFIX);
@@ -157,8 +175,15 @@ export abstract class CoreCapsule {
 
   protected abstract getPlatformUtils(): PlatformUtils;
 
-  // TODO: consider using sessionStorage instead of localStorage
+  /**
+   * Constructs a new `CoreCapsule` instance.
+   * @param env - `Environment` to use.
+   * @param apiKey - API key to use.
+   * @param opts - Additional constructor options; see `ConstructorOpts`.
+   * @returns - A new CoreCapsule instance.
+   */
   constructor(env: Environment, apiKey?: string, opts?: ConstructorOpts) {
+    // TODO: consider using sessionStorage instead of localStorage
     if (!opts) opts = {};
     this.ctx = {
       env,
@@ -209,7 +234,11 @@ export abstract class CoreCapsule {
     }
   }
 
-  // init only needs to be called for storage that is async
+  /**
+   * Initialize storage relating to a `CoreCapsule` instance.
+   *
+   * Init only needs to be called for storage that is async.
+   */
   async init(): Promise<void> {
     this.email = await this.localStorageGetItem(LOCAL_STORAGE_EMAIL) || undefined;
     this.userId = await this.localStorageGetItem(LOCAL_STORAGE_USER_ID) || undefined;
@@ -226,16 +255,28 @@ export abstract class CoreCapsule {
     }
   }
 
+  /**
+   * Sets the email associated with the `CoreCapsule` instance.
+   * @param email - Email to set.
+   */
   async setEmail(email: string): Promise<void> {
     this.email = email;
     await this.localStorageSetItem(LOCAL_STORAGE_EMAIL, email);
   }
 
+  /**
+   * Sets the user id associated with the `CoreCapsule` instance.
+   * @param userId - User id to set.
+   */
   async setUserId(userId: string): Promise<void> {
     this.userId = userId;
     await this.localStorageSetItem(LOCAL_STORAGE_USER_ID, userId);
   }
 
+  /**
+   * Sets the wallets associated with the `CoreCapsule` instance.
+   * @param wallets - Wallets to set.
+   */
   async setWallets(wallets: Record<string, Wallet>): Promise<void> {
     this.wallets = wallets;
     if (this.platformUtils.secureStorage) {
@@ -245,6 +286,10 @@ export abstract class CoreCapsule {
     await this.localStorageSetItem(LOCAL_STORAGE_WALLETS, JSON.stringify(wallets));
   }
 
+  /**
+   * Sets the login encryption key pair associated with the `CoreCapsule` instance.
+   * @param keyPair - Encryption key pair generated from loginEncryptionKey.
+   */
   async setLoginEncryptionKeyPair(keyPair: pki.rsa.KeyPair): Promise<void> {
     this.loginEncryptionKeyPair = keyPair;
     await this.sessionStorageSetItem(
@@ -258,10 +303,18 @@ export abstract class CoreCapsule {
     await this.sessionStorageRemoveItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR);
   }
 
+  /**
+   * Gets the email associated with the `CoreCapsule` instance.
+   * @returns - email associated with the `CoreCapsule` instance.
+   */
   getEmail(): string | undefined {
     return this.email;
   }
 
+  /**
+   * Gets the wallets associated with the `CoreCapsule` instance.
+   * @returns - wallets associated with the `CoreCapsule` instance.
+   */
   getWallets(): Record<string, Wallet> {
     return this.wallets;
   }
@@ -271,6 +324,11 @@ export abstract class CoreCapsule {
     return res.data.partner.portalUrl;
   }
 
+  /**
+   * URL of the portal, which can be associated with a partner id
+   * @param partnerId - id of the partner to get the portal URL for
+   * @returns - portal URL
+   */
   async getPortalURL(partnerId?: string): Promise<string> {
     return (partnerId && await this.getPartnerURL(partnerId)) || getPortalBaseURL(this.ctx);
   }
@@ -302,6 +360,16 @@ export abstract class CoreCapsule {
     return this.getShortUrl(url);
   }
 
+  /**
+   * Generates a URL that can be used to perform web auth
+   * for creating a new credential.
+   * @param sessionId - id of the session to use for web auth
+   * @param loginEncryptionPublicKey - public key to use for encrypting the login encryption key
+   * @param partnerId - id of the partner to get the portal URL for
+   * @param newDeviceSessionId - id of the session to use for web auth for a new device
+   * @param newDeviceEncryptionKey - public key to use for encrypting the login encryption key for a new device
+   * @returns - web auth url
+   */
   async getWebAuthURLForLogin(
     sessionId: string,
     loginEncryptionPublicKey: string,
@@ -323,6 +391,10 @@ export abstract class CoreCapsule {
     }${newDeviceSessionIdQueryParam}${newDeviceEncryptionKeyQueryParam}`;
   }
 
+  /**
+   * Fetches the wallets associated with the user.
+   * @returns - wallets that were fetched.
+   */
   async fetchWallets(): Promise<any[]> {
     const res = await this.ctx.capsuleClient.getWallets(this.userId);
     return res.data.wallets;
@@ -341,11 +413,19 @@ export abstract class CoreCapsule {
     await this.setWallets(this.wallets);
   }
 
+  /**
+   * Checks if a user exists.
+   * @returns - true if user exists, false otherwise.
+   */
   async checkIfUserExists(email: string): Promise<boolean> {
     const res = await this.ctx.capsuleClient.checkUserExists(email);
     return res.data.exists;
   }
 
+  /**
+   * Creates a new user.
+   * @param email - email to use for creating the user.
+   */
   async createUser(email: string): Promise<void> {
     await this.setEmail(email);
     const { userId } = await this.ctx.capsuleClient.createUser({
@@ -354,12 +434,22 @@ export abstract class CoreCapsule {
     await this.setUserId(userId);
   }
 
-  // returns web auth url for creating a new credential
+  /**
+   * Passes the email code obtained from the user for verification.
+   * @param verificationCode
+   * @returns - web auth url for creating a new credential
+   */
   async verifyEmail(verificationCode: string): Promise<string> {
     await this.ctx.capsuleClient.verifyEmail(this.userId, { verificationCode });
     return this.getSetUpBiometricsURL(false);
   }
 
+  /**
+   * Performs 2FA verification.
+   * @param email - email to use for performing a 2FA verification.
+   * @param verificationCode - verification code to received via 2FA.
+   * @returns { address, initiatedAt, status, userId, walletId }
+   */
   async verify2FA(email: string, verificationCode: string): Promise<{
     address?: string;
     initiatedAt?: Date;
@@ -377,6 +467,10 @@ export abstract class CoreCapsule {
     }
   }
 
+  /**
+   * Sets up 2FA.
+   * @returns uri - uri to use for setting up 2FA
+   * */
   async setup2FA(): Promise<{
     uri?: string
   }> {
@@ -386,10 +480,18 @@ export abstract class CoreCapsule {
     }
   }
 
+  /**
+   * Enables 2FA.
+   * @param verificationCode - verification code received via 2FA.
+   */
   async enable2FA(verificationCode: string): Promise<void> {
     await this.ctx.capsuleClient.enable2FA(this.userId, verificationCode);
   }
 
+  /**
+   * Determines if 2FA has been set up.
+   * @returns { isSetup } - true if 2FA is setup, false otherwise
+   */
   async check2FAStatus(): Promise<{
     isSetup: boolean
   }> {
@@ -423,6 +525,11 @@ export abstract class CoreCapsule {
     );
   }
 
+  /**
+   * Checks if a session is active and a wallet exists.
+   *
+   * @returns - true if session is active and a wallet exists.
+   **/
   async isFullyLoggedIn(): Promise<boolean> {
     const isSessionActive = await this.isSessionActive();
     const walletAddress = this.getWallets()?.[Object.keys(this.getWallets())[0]]?.address;
@@ -430,7 +537,12 @@ export abstract class CoreCapsule {
     return isSessionActive && !!walletAddress;
   }
 
-  // returns web auth url for logging in
+  /**
+   * Initiates a login.
+   * @param email - the email to login with
+   * @param useShortURL - whether to shorten the link
+   * @returns - web auth url for logging in
+   **/
   async initiateUserLogin(email: string, useShortURL?: boolean): Promise<string> {
     await this.setEmail(email);
     const res = await this.ctx.capsuleClient.touchSession(true);
@@ -451,6 +563,9 @@ export abstract class CoreCapsule {
     return this.shortenLoginLink(webAuthLoginURL);
   }
 
+  /**
+   * Waits for the session to be active.
+   **/
   async waitForAccountCreation(): Promise<void> {
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -467,6 +582,10 @@ export abstract class CoreCapsule {
     }
   }
 
+  /**
+   * Waits for the session to be active and sets up the user.
+   * @returns { needsWallet } - whether a wallet needs to be created
+   **/
   async waitForLoginAndSetup(): Promise<{ needsWallet: boolean }> {
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -496,6 +615,13 @@ export abstract class CoreCapsule {
     }
   }
 
+  /**
+   * Updates the session with the user management server, possibly
+   * opening a popup to refresh the session.
+   *
+   * @param shouldOpenPopup - true if you want to open the popup automatically
+   * @returns - web auth url for refreshing session
+   **/
   async refreshSession(shouldOpenPopup: boolean): Promise<string> {
     const res = await this.ctx.capsuleClient.touchSession(true);
     if (!this.loginEncryptionKeyPair) {
@@ -515,11 +641,21 @@ export abstract class CoreCapsule {
     return link;
   }
 
+  /**
+   * Call this method after login to ensure that the user ID is set
+   * internally.
+   **/
   async userSetupAfterLogin(): Promise<void> {
     const res = await this.ctx.capsuleClient.touchSession();
     await this.setUserId(res.data.userId);
   }
 
+  /**
+   * Get transmission shares associated with session.
+   *
+   * @param isForNewDevice - true if this device is registering.
+   * @returns - transmission keyshares.
+   **/
   async getTransmissionKeyShares(isForNewDevice?: boolean): Promise<any> {
     const res = await this.ctx.capsuleClient.touchSession();
     const sessionLookupId = isForNewDevice ?
@@ -528,6 +664,11 @@ export abstract class CoreCapsule {
     return this.ctx.capsuleClient.getTransmissionKeyshares(this.userId, sessionLookupId);
   }
 
+  /**
+   * Call this method after login to perform setup.
+   *
+   * @param temporaryShares - optional temporary shares to use for decryption.
+   **/
   async setupAfterLogin(temporaryShares?: any[]): Promise<void> {
     if (!temporaryShares) {
       temporaryShares = (await this.getTransmissionKeyShares()).data.temporaryShares;
@@ -549,6 +690,13 @@ export abstract class CoreCapsule {
     await this.ctx.capsuleClient.touchSession(true);
   }
 
+  /**
+   * Distributes a new wallet recovery share.
+   *
+   * @param walletId - the wallet to distribute the recovery share for.
+   * @param userShare - the user share generate the recovery share from.
+   * @returns - recovery share.
+   **/
   async distributeNewWalletShare(
     walletId: string,
     userShare: string,
@@ -585,6 +733,13 @@ export abstract class CoreCapsule {
     throw new Error('timed out waiting for wallet address');
   }
 
+  /**
+   * Creates a new wallet.
+   *
+   * @param skipDistribute - if true, recovery share will not be distributed.
+   * @param customFunction - method called when createWallet is done.
+   * @returns [wallet, recoveryShare]
+   **/
   async createWallet(
     skipDistribute = false,
     customFunction: (params?: any) => void,
@@ -625,8 +780,14 @@ export abstract class CoreCapsule {
     )}`;
   }
 
-  // pass in base64 encoding of exact message that should be signed
-  // if you want to sign the keccak256 hash of a message, hash the message first and then pass in the base64 encoded hash
+  /**
+   * Signs a message.
+   *
+   * If you want to sign the keccak256 hash of a message, hash the
+   * message first and then pass in the base64 encoded hash.
+   * @param walletId - id of the wallet to sign with.
+   * @param messageBase64 - base64 encoding of exact message that should be signed
+   **/
   async signMessage(
     walletId: string,
     messageBase64: string,
@@ -653,6 +814,12 @@ export abstract class CoreCapsule {
     return res as SuccessfulSignatureRes;
   }
 
+  /**
+   * Signs a transaction.
+   * @param walletId - id of the wallet to sign the transaction from.
+   * @param rlpEncodedTxBase64 - rlp encoded tx as base64 string
+   * @param chainId - chain id of the chain the transaction is being sent on.
+   **/
   async signTransaction(
     walletId: string,
     rlpEncodedTxBase64: string,
@@ -681,7 +848,12 @@ export abstract class CoreCapsule {
     return res as SuccessfulSignatureRes;
   }
 
-  // pass in rlp encoded tx as base64 string
+  /**
+   * Sends a transaction.
+   * @param walletId - id of the wallet to send the transaction from.
+   * @param rlpEncodedTxBase64 - rlp encoded tx as base64 string
+   * @param chainId - chain id of the chain the transaction is being sent on.
+   **/
   async sendTransaction(
     walletId: string,
     rlpEncodedTxBase64: string,
@@ -736,6 +908,9 @@ export abstract class CoreCapsule {
     this.persistSessionCookie(sessionInfo.sessionCookie);
   }
 
+  /**
+   * Logs the user out.
+   **/
   async logout(): Promise<void> {
     await this.ctx.capsuleClient.logout();
     await this.clearStorage();
@@ -746,8 +921,11 @@ export abstract class CoreCapsule {
     this.sessionCookie = undefined;
   }
 
-  // remove sensitive data when logging this class
-  // doesn't work for all types of logging
+  /**
+   * Converts to a string, removing sensitive data when logging this class.
+   *
+   * Doesn't work for all types of logging.
+   **/
   toString(): string {
     const redactedWallets = Object.keys(this.wallets).reduce(
       (acc, walletId) => ({
