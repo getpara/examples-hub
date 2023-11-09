@@ -724,16 +724,16 @@ export abstract class CoreCapsule {
     return Buffer.from(JSON.stringify(sessionInfo)).toString('base64');
   }
 
-  importSession(serializedInstanceBase64: string): void {
+  async importSession(serializedInstanceBase64: string): Promise<void> {
     const serializedInstance = Buffer.from(
       serializedInstanceBase64,
       'base64',
     ).toString('utf8');
     const sessionInfo = JSON.parse(serializedInstance);
-    this.email = sessionInfo.email;
-    this.userId = sessionInfo.userId;
-    this.wallets = sessionInfo.wallets;
-    this.sessionCookie = sessionInfo.sessionCookie;
+    await this.setEmail(sessionInfo.email);
+    await this.setUserId(sessionInfo.userId);
+    await this.setWallets(sessionInfo.wallets);
+    this.persistSessionCookie(sessionInfo.sessionCookie);
   }
 
   async logout(): Promise<void> {

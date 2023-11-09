@@ -54,6 +54,7 @@ export function keygen(
     }, customFunction);
     worker.postMessage({
       env: ctx.env,
+      apiKey: ctx.apiKey,
       params: { userId, secretKey },
       functionType: 'KEYGEN',
       offloadMPCComputationURL: ctx.offloadMPCComputationURL,

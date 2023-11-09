@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-const globalThis = global;
-globalThis.crypto = require('crypto');
-const self = globalThis;
-const crypto = globalThis.crypto;
+const globalThisCopy = global;
+globalThisCopy.crypto = require('crypto');
+const self = globalThisCopy;
+const crypto = globalThisCopy.crypto;
 
 (() => {
   const enosys = () => {
@@ -14,9 +14,9 @@ const crypto = globalThis.crypto;
     return err;
   };
 
-  if (!globalThis.fs) {
+  if (!globalThisCopy.fs) {
     let outputBuf = '';
-    globalThis.fs = {
+    globalThisCopy.fs = {
       constants: { O_WRONLY: -1, O_RDWR: -1, O_CREAT: -1, O_TRUNC: -1, O_APPEND: -1, O_EXCL: -1 }, // unused
       writeSync(fd, buf) {
         outputBuf += decoder.decode(buf);
@@ -107,8 +107,8 @@ const crypto = globalThis.crypto;
     };
   }
 
-  if (!globalThis.process) {
-    globalThis.process = {
+  if (!globalThisCopy.process) {
+    globalThisCopy.process = {
       getuid() {
         return -1;
       },
@@ -138,26 +138,26 @@ const crypto = globalThis.crypto;
     };
   }
 
-  if (!globalThis.crypto) {
-    throw new Error('globalThis.crypto is not available, polyfill required (crypto.getRandomValues only)');
+  if (!globalThisCopy.crypto) {
+    throw new Error('globalThisCopy.crypto is not available, polyfill required (crypto.getRandomValues only)');
   }
 
-  if (!globalThis.performance) {
-    throw new Error('globalThis.performance is not available, polyfill required (performance.now only)');
+  if (!globalThisCopy.performance) {
+    throw new Error('globalThisCopy.performance is not available, polyfill required (performance.now only)');
   }
 
-  if (!globalThis.TextEncoder) {
-    throw new Error('globalThis.TextEncoder is not available, polyfill required');
+  if (!globalThisCopy.TextEncoder) {
+    throw new Error('globalThisCopy.TextEncoder is not available, polyfill required');
   }
 
-  if (!globalThis.TextDecoder) {
-    throw new Error('globalThis.TextDecoder is not available, polyfill required');
+  if (!globalThisCopy.TextDecoder) {
+    throw new Error('globalThisCopy.TextDecoder is not available, polyfill required');
   }
 
   const encoder = new TextEncoder('utf-8');
   const decoder = new TextDecoder('utf-8');
 
-  globalThis.Go = class {
+  globalThisCopy.Go = class {
     constructor() {
       this.argv = ['js'];
       this.env = {};
@@ -538,7 +538,7 @@ const crypto = globalThis.crypto;
         null,
         true,
         false,
-        globalThis,
+        globalThisCopy,
         this,
       ];
       this._goRefCounts = new Array(this._values.length).fill(Infinity); // number of references that Go has to a JS value, indexed by reference id
@@ -548,7 +548,7 @@ const crypto = globalThis.crypto;
         [null, 2],
         [true, 3],
         [false, 4],
-        [globalThis, 5],
+        [globalThisCopy, 5],
         [this, 6],
       ]);
       this._idPool = []; // unused ids that have been garbage collected
@@ -626,5 +626,5 @@ const crypto = globalThis.crypto;
 })();
 
 module.exports = {
-  globalThis,
+  globalThisCopy,
 }

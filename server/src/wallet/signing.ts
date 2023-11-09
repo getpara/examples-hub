@@ -70,6 +70,7 @@ export async function signMessage(
     });
     worker.postMessage({
       env: ctx.env,
+      apiKey: ctx.apiKey,
       params: { share, walletId, userId, message },
       functionType: 'SIGN_MESSAGE',
       offloadMPCComputationURL: ctx.offloadMPCComputationURL,

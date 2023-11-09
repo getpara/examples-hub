@@ -24,8 +24,7 @@ interface Params {
   email?: string;
 }
 
-const capsule = new CapsuleServer(Environment.SANDBOX);
-
+const capsule = new CapsuleServer(Environment.SANDBOX, '2f938ac0c48ef356050a79bd66042a23');
 async function errorMiddleware(err: Error, _req: Request, res: Response, _next: NextFunction): Promise<void> {
   console.error(err);
   res.sendStatus(500);
@@ -70,7 +69,7 @@ async function createUserAndWallet(params: Params) {
 
 async function signMessageWithImport(serializedInstance: string): Promise<void> {
   console.log('importing session');
-  capsule.importSession(serializedInstance);
+  await capsule.importSession(serializedInstance);
   // @ts-ignore
   console.log(`address: ${Object.values(capsule.getWallets())[0].address}`)
   
