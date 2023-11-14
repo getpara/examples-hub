@@ -44,7 +44,7 @@ import {
   createCapsuleViemClient,
   CapsuleEIP1193Provider,
   CapsuleConnector,
-  CapsuleWeb,
+  CapsuleDeprecated,
 } from './library';
 import { CoreCapsule } from './library/core/CoreCapsule';
 import { ConstructorOpts } from './library/Capsule';
@@ -402,7 +402,7 @@ function getCapsuleOpts(env: Environment, useDKLS: boolean): ConstructorOpts {
   }
 }
 
-let capsule: Capsule | CoreCapsule = undefined;
+let capsule: Capsule | CapsuleDeprecated = undefined;
 
 function App() {
   const [selectedView, setSelectedView] = useSessionStorage('@EXAMPLE-CAPSULE/selectedView', 'OLD_VIEW');
@@ -411,9 +411,9 @@ function App() {
   const [selectedCapsuleClass, setSelectedCapsuleClass] = useSessionStorage('@EXAMPLE-CAPSULE/selectedCapsuleClass', 'CAPSULE');
   const [useDKLS, setUseDKLS] = useSessionStorage('@EXAMPLE-CAPSULE/useDKLS', false);
 
-  capsule = selectedCapsuleClass === 'CAPSULE_WEB' ?
-    new CapsuleWeb(selectedEnv, selectedApiKey, getCapsuleOpts(selectedEnv, useDKLS)):
-    new Capsule(selectedEnv, selectedApiKey, getCapsuleOpts(selectedEnv, useDKLS));
+  capsule = selectedCapsuleClass === 'CAPSULE' ?
+    new Capsule(selectedEnv, selectedApiKey, getCapsuleOpts(selectedEnv, useDKLS)):
+    new CapsuleDeprecated(selectedEnv, selectedApiKey, getCapsuleOpts(selectedEnv, useDKLS));
 
   const [email, setEmail] = useState(capsule.getEmail());
   const [verificationCode, setVerificationCode] = useState('');
@@ -475,7 +475,7 @@ function App() {
           <Text width={'15%'}><strong>Select Capsule Class:</strong></Text>
           <Select defaultValue={selectedCapsuleClass} onChange={e => setSelectedCapsuleClass(e.target.value)}>
             <option value={'CAPSULE'}>Capsule</option>
-            <option value={'CAPSULE_WEB'}>Capsule Web (new sdk refactored class)</option>
+            <option value={'CAPSULE_DEPRECATED'}>Capsule Deprecated (old class not using core)</option>
           </Select>
         </HStack>
         <HStack paddingBottom={5}>

@@ -133,10 +133,10 @@ export abstract class CoreCapsule {
   private sessionStorageRemoveItem = (key: string): Promise<void> | void => {
     return this.platformUtils.sessionStorage.removeItem(key);
   };
-  private retrieveSessionCookie = (): string | undefined => {
+  retrieveSessionCookie = (): string | undefined => {
     return this.sessionCookie;
   };
-  private persistSessionCookie = (cookie: string): void => {
+  persistSessionCookie = (cookie: string): void => {
     this.sessionCookie = cookie;
     this.sessionStorageSetItem(SESSION_STORAGE_SESSION_COOKIE, cookie);
   };
