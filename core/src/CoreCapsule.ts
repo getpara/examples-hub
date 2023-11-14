@@ -62,6 +62,7 @@ export interface ConstructorOpts {
   portalBackgroundColor?: string; // please use hex color codes
   portalPrimaryButtonColor?: string; // please use hex color codes
   portalTextColor?: string; // please use hex color codes
+  portalPrimaryButtonTextColor?: string; // please use hex color codes
   useDKLSForCreation?: boolean;
 }
 
@@ -108,6 +109,11 @@ export abstract class CoreCapsule {
    * Hex text color to use in the portal.
    */
   portalTextColor?: string;
+
+  /**
+   * Hex color to use in the portal for the primary button text.
+   */
+  portalPrimaryButtonTextColor?: string;
   private disableProviderModal?: boolean;
 
   private platformUtils: PlatformUtils;
@@ -173,6 +179,15 @@ export abstract class CoreCapsule {
     };
   }
 
+  private requireApiKey() {
+    if (!this.ctx.apiKey) {
+      throw new Error(
+        `in order to create a wallet or user with Capsule, you
+        must provide an API key to the capsule instance`
+      );
+    }
+  }
+
   protected abstract getPlatformUtils(): PlatformUtils;
 
   /**
@@ -201,6 +216,7 @@ export abstract class CoreCapsule {
     this.portalBackgroundColor = opts.portalBackgroundColor;
     this.portalPrimaryButtonColor = opts.portalPrimaryButtonColor;
     this.portalTextColor = opts.portalTextColor;
+    this.portalPrimaryButtonTextColor = opts.portalPrimaryButtonTextColor;
 
     this.platformUtils = this.getPlatformUtils();
     this.disableProviderModal = this.platformUtils.disableProviderModal;
@@ -342,13 +358,14 @@ export abstract class CoreCapsule {
     const portalBackgroundColorQueryParam = this.portalBackgroundColor ? `&portalBackgroundColor=${encodeURIComponent(this.portalBackgroundColor)}` : '';
     const portalPrimaryButtonColorQueryParam = this.portalPrimaryButtonColor ? `&portalPrimaryButtonColor=${encodeURIComponent(this.portalPrimaryButtonColor)}` : '';
     const portalTextColorQueryParam = this.portalTextColor ? `&portalTextColor=${encodeURIComponent(this.portalTextColor)}` : '';
+    const portalPrimaryButtonTextColorQueryParam = this.portalPrimaryButtonTextColor ? `&portalPrimaryButtonTextColor=${encodeURIComponent(this.portalPrimaryButtonTextColor)}` : '';
     const isForNewDeviceQueryParam = isForNewDevice ? `&isForNewDevice=${isForNewDevice}` : '';
 
     return `${(partnerId && await this.getPartnerURL(partnerId)) || getPortalBaseURL(this.ctx)}/web/users/${
       this.userId
     }/biometrics/${webAuthId}?email=${encodeURIComponent(
       this.email,
-    )}${partnerIdQueryParam}${portalBackgroundColorQueryParam}${portalPrimaryButtonColorQueryParam}${portalTextColorQueryParam}${isForNewDeviceQueryParam}`;
+    )}${partnerIdQueryParam}${portalBackgroundColorQueryParam}${portalPrimaryButtonColorQueryParam}${portalTextColorQueryParam}${isForNewDeviceQueryParam}${portalPrimaryButtonTextColorQueryParam}`;
   }
 
   private getShortUrl(compressedUrl: string): string {
@@ -381,6 +398,7 @@ export abstract class CoreCapsule {
     const portalBackgroundColorQueryParam = this.portalBackgroundColor ? `&portalBackgroundColor=${encodeURIComponent(this.portalBackgroundColor)}` : '';
     const portalPrimaryButtonColorQueryParam = this.portalPrimaryButtonColor ? `&portalPrimaryButtonColor=${encodeURIComponent(this.portalPrimaryButtonColor)}` : '';
     const portalTextColorQueryParam = this.portalTextColor ? `&portalTextColor=${encodeURIComponent(this.portalTextColor)}` : '';
+    const portalPrimaryButtonTextColorQueryParam = this.portalPrimaryButtonTextColor ? `&portalPrimaryButtonTextColor=${encodeURIComponent(this.portalPrimaryButtonTextColor)}` : '';
     const newDeviceSessionIdQueryParam = newDeviceSessionId ? `&newDeviceSessionId=${newDeviceSessionId}` : '';
     const newDeviceEncryptionKeyQueryParam = newDeviceEncryptionKey ? `&newDeviceEncryptionKey=${newDeviceEncryptionKey}` : '';
 
@@ -388,7 +406,7 @@ export abstract class CoreCapsule {
       this.email,
     )}&sessionId=${sessionId}&encryptionKey=${loginEncryptionPublicKey}${partnerIdQueryParam}${portalBackgroundColorQueryParam}${portalPrimaryButtonColorQueryParam}${
       portalTextColorQueryParam
-    }${newDeviceSessionIdQueryParam}${newDeviceEncryptionKeyQueryParam}`;
+    }${newDeviceSessionIdQueryParam}${newDeviceEncryptionKeyQueryParam}${portalPrimaryButtonTextColorQueryParam}`;
   }
 
   /**
@@ -427,6 +445,7 @@ export abstract class CoreCapsule {
    * @param email - email to use for creating the user.
    */
   async createUser(email: string): Promise<void> {
+    this.requireApiKey();
     await this.setEmail(email);
     const { userId } = await this.ctx.capsuleClient.createUser({
       email: this.email,
@@ -495,6 +514,9 @@ export abstract class CoreCapsule {
   async check2FAStatus(): Promise<{
     isSetup: boolean
   }> {
+    if (!this.userId) {
+      return { isSetup: false }
+    }
     const res = await this.ctx.capsuleClient.check2FAStatus(this.userId);
     return {
       isSetup: res.data.isSetup
@@ -744,6 +766,7 @@ export abstract class CoreCapsule {
     skipDistribute = false,
     customFunction: (params?: any) => void,
   ): Promise<[Wallet, string | null]> {
+    this.requireApiKey();
     const { signer, walletId } = await this.platformUtils.keygen(
       this.ctx,
       this.userId,
