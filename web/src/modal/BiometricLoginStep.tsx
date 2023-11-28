@@ -1,12 +1,12 @@
 import { ModalStep } from './steps';
-import { Box, Icon, Text, useTheme, VStack, Button } from '@chakra-ui/react';
+import { Box, Icon, Text, useTheme, VStack } from '@chakra-ui/react';
 import QRCode from 'react-qr-code';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Capsule } from '../Capsule';
 import { upload } from '../core/transmission/transmissionUtils';
 import { openPopup } from './utils';
 import { CoreCapsule } from '../core/CoreCapsule';
-import { ExternalLinkIcon } from '@chakra-ui/icons';
+import CustomButton from '../components/CustomButton';
 
 const SHORTENING_AVAILABLE = true;
 
@@ -78,9 +78,11 @@ export function BiometricLoginStep({
         >
           Click or scan this QR Code to login from the same device you used.
         </Text>
-        <Button marginTop='68px' w="100%" onClick={() => openPopup(shortLoginLink)}>
-          Use passkey <Icon as={ExternalLinkIcon} marginLeft="2" />
-        </Button>
+        <CustomButton 
+          openPopup={openPopup}
+          webAuthURL={shortLoginLink}
+          text="Use passkey"
+        />
       </Box>
     </VStack>
   );

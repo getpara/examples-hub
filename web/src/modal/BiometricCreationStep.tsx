@@ -1,7 +1,6 @@
 import { ModalStep } from './steps';
 import {
   Box,
-  Button,
   Icon,
   Text,
   useTheme,
@@ -12,6 +11,7 @@ import React from 'react';
 import { openPopup } from './utils';
 import { ExternalLinkIcon } from "@chakra-ui/icons";
 import './css/modal.css';
+import CustomButton from '../components/CustomButton';
 
 export function BiometricCreationStep({
   currentStep,
@@ -57,9 +57,11 @@ export function BiometricCreationStep({
           Click or scan this QR Code for easier login. 
           Follow the prompts asking you to verify.
         </Text>
-        <Button marginTop='68px' w="100%" onClick={() => openPopup(webAuthURLForCreate)}>
-          Set up passkey <Icon as={ExternalLinkIcon} marginLeft="2" />
-        </Button>
+        <CustomButton 
+          openPopup={openPopup}
+          webAuthURL={webAuthURLForCreate}
+          text="Set up passkey"
+        />
       </Box>
     </VStack>
   );
