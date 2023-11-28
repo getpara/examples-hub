@@ -246,7 +246,7 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
         return [];
       }
       case 'wallet_switchEthereumChain': {
-        if (!this.chains[params[0]]) {
+        if (!this.chains[params[0].chainId]) {
           throw new ProviderRpcError(
             new Error(`chainId: ${params[0]} not connected`),
             { code: 4901, shortMessage: 'chainId not connected' },
