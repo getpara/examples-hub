@@ -169,7 +169,7 @@ function AuthCreation() {
                   onClick={setUpBiometrics}
                   p="2.5vh"
                   fontSize="2.5vh"
-                  maxWidth="50%"
+                  maxWidth="100%"
                   alignSelf={'center'}
                   fontFamily={isFire && "Manrope"}
                   textColor="white"

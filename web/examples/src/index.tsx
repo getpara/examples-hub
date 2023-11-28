@@ -407,7 +407,7 @@ let capsule: Capsule | CapsuleDeprecated = undefined;
 function App() {
   const [selectedView, setSelectedView] = useSessionStorage('@EXAMPLE-CAPSULE/selectedView', 'OLD_VIEW');
   const [selectedEnv, setSelectedEnv] = useSessionStorage('@EXAMPLE-CAPSULE/selectedEnv', Environment.SANDBOX);
-  const [selectedApiKey, setSelectedApiKey] = useSessionStorage('@EXAMPLE-CAPSULE/selectedApiKey', undefined);
+  const [selectedApiKey, setSelectedApiKey] = useSessionStorage('@EXAMPLE-CAPSULE/selectedApiKey', API_KEY_WITH_BRANDING);
   const [selectedCapsuleClass, setSelectedCapsuleClass] = useSessionStorage('@EXAMPLE-CAPSULE/selectedCapsuleClass', 'CAPSULE');
   const [useDKLS, setUseDKLS] = useSessionStorage('@EXAMPLE-CAPSULE/useDKLS', false);
 
