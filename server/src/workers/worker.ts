@@ -30,13 +30,13 @@ async function loadWasm(ctx: Ctx): Promise<void> {
   goWasm.run(webAssemblySource.instance);
 }
 
-async function executeMessage(ctx: Ctx, message: Message, callCustomFunction: Function): Promise<any> {
+async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
   const { functionType, params } = message;
 
   switch (functionType) {
     case 'KEYGEN': {
       const { userId, secretKey } = params;
-      return walletUtils.keygen(ctx, userId, secretKey, callCustomFunction);
+      return walletUtils.keygen(ctx, userId, secretKey);
     }
     case 'SIGN_TRANSACTION': {
       const { share, walletId, userId, tx, chainId } = params;
@@ -75,15 +75,6 @@ async function handleMessage(e: { data: Message }): Promise<void> {
     await loadWasm(ctx);
   }
 
-  function callCustomFunction(params: any): void {
-    const msg = {
-      functionType: 'CUSTOM',
-      params,
-    };
-    parentPort.postMessage(msg);
-    return;
-  }
-
-  const result = await executeMessage(ctx, e.data, callCustomFunction);
+  const result = await executeMessage(ctx, e.data);
   parentPort.postMessage(result);
 }

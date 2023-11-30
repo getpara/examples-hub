@@ -6,10 +6,10 @@ export interface SyncWorker {
   terminate: () => void;
 }
 
-export async function setupWorker(ctx: Ctx, resFunction: (arg: any) => void, customFunction?: (params?: any) => void): Promise<Worker | SyncWorker> {
+export async function setupWorker(ctx: Ctx, resFunction: (arg: any) => void): Promise<Worker | SyncWorker> {
   const onmessage = (event) => {
-    if (event.data.functionType === 'CUSTOM' && customFunction) {
-      customFunction(event.data.params);
+    if (event.data.functionType === 'CUSTOM') {
+      // safe to remove this block once this code is live in prod!
       return;
     }
     resFunction(event.data);

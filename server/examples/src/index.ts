@@ -48,7 +48,7 @@ async function createUserAndWallet(params: Params) {
     status: PublicKeyStatus.COMPLETE,
   });
   // ~~~~~~~
-  await capsule.createWallet(false, () => {});
+  await capsule.createWallet(false);
   // @ts-ignore
   const walletAddress = Object.values(capsule.getWallets())[0].address;
   console.log(`address: ${walletAddress}`)

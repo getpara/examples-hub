@@ -13,13 +13,12 @@ export class ServerUtils implements PlatformUtils {
     ctx: Ctx,
     userId: string,
     secretKey: string | null,
-    customFunction: (params?: any) => void,
     sessionCookie: string,
   ): Promise<{
     signer: string;
     walletId: string;
   }> {
-    return keygen(ctx, userId, secretKey, true, customFunction, sessionCookie);
+    return keygen(ctx, userId, secretKey, true, sessionCookie);
   }
 
   signMessage(

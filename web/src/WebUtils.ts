@@ -11,13 +11,12 @@ export class WebUtils implements PlatformUtils {
     ctx: Ctx,
     userId: string,
     secretKey: string | null, // should be acceptable as null in RN as we don't pre-gen them
-    customFunction: (params?: any) => void,
     sessionCookie: string,
   ): Promise<{
     signer: string;
     walletId: string;
   }> {
-    return keygen(ctx, userId, secretKey, true, customFunction, sessionCookie);
+    return keygen(ctx, userId, secretKey, true, sessionCookie);
   }
 
   signMessage(

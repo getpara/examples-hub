@@ -19,7 +19,6 @@ export function keygen(
   userId: string,
   secretKey: string | null,
   skipDistribute = false,
-  customFunction: (params?: any) => void,
   sessionCookie?: string,
 ): Promise<{
   signer: string;
@@ -55,7 +54,7 @@ export function keygen(
         recoveryShare,
       });
       worker.terminate();
-    }, customFunction);
+    });
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,

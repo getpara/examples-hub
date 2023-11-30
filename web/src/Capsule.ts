@@ -542,7 +542,7 @@ export class Capsule {
 
   async createWallet(
     skipDistribute = false,
-    customFunction: (params?: any) => void,
+    customFunction?: (params?: any) => void,
   ): Promise<[Wallet, string | null]> {
     this.requireApiKey();
     const { signer, walletId, recoveryShare } = await keygen(
@@ -550,7 +550,6 @@ export class Capsule {
       this.userId,
       null,
       skipDistribute,
-      customFunction,
       this.retrieveSessionCookie(),
     );
     this.wallets[walletId] = {

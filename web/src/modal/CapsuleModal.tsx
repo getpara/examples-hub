@@ -101,8 +101,6 @@ export const CapsuleModal = ({
   const createAccountTimeout = useRef<number>();
   const loginTimeout = useRef<number>();
 
-  const [percentKeygenDone, setPercentKeygenDone] = useState(0);
-
   const [isLogin, setIsLogin] = useState(false);
 
   const is2FASetup = async () => {
@@ -125,17 +123,10 @@ export const CapsuleModal = ({
       setWebAuthURLForLogin('');
       setWebAuthURLForCreate('');
       setWalletCreated(false);
-      setPercentKeygenDone(0);
       setCreateWalletRes(null);
       setRecoveryShare(null);
     }
   }, [isOpen]);
-
-  // function should be called a total of 5 times
-  function keygenStatusFunction() {
-    setPercentKeygenDone((percentKeygenDone) => percentKeygenDone + 15);
-  }
-
 
   // generate wallet once we know it's account creation
   useEffect(() => {
@@ -148,10 +139,7 @@ export const CapsuleModal = ({
     }
     async function genWallet() {
       setWalletCreationInProgress(true);
-      const createWalletRes = await capsule.createWallet(
-        true,
-        keygenStatusFunction,
-      );
+      const createWalletRes = await capsule.createWallet(true);
       setCreateWalletRes(createWalletRes);
       setWalletCreated(true);
       setWalletCreationInProgress(false);
@@ -332,7 +320,6 @@ export const CapsuleModal = ({
                 />
                 <AwaitingWalletCreationStep
                   currentStep={currentStep}
-                  percentKeygenDone={percentKeygenDone}
                 />
                 <AccountCreationDoneStep
                   currentStep={currentStep}

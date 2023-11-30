@@ -7,7 +7,6 @@ export interface PlatformUtils {
     ctx: Ctx,
     userId: string,
     secretKey: string | null, // should be acceptable as null in RN as we don't pre-gen them
-    customFunction: (params?: any) => void,
     sessionCookie: string,
   ): Promise<{
     signer: string;

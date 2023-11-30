@@ -61,7 +61,6 @@ export async function keygen(
   ctx: Ctx,
   userId: string,
   secretKey: string | null,
-  callCustomFunction: Function,
 ): Promise<{ signer: string; walletId: string }> {
   const { walletId, protocolId } = await ctx.capsuleClient.createWallet(
     userId,
@@ -88,7 +87,7 @@ export async function keygen(
       serverUrl,
       protocolId,
       secretKey,
-      callCustomFunction,
+      () => {}, // no-op for deprecated callback to update progress percentage
       (err, result) => {
         if (err) {
           reject(err);

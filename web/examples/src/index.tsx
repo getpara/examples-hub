@@ -516,8 +516,7 @@ function App() {
             <Text>{isSessionActive ? 'Fully Logged In!' : 'Log In Pending...'}</Text>
 
             <Button colorScheme="teal" onClick={async () => {
-              // eslint-disable-next-line
-              await capsule.createWallet(false, () => {});
+              await capsule.createWallet(false);
             }}>Create Wallet</Button>
             <Text>Wallet Address: <strong>{capsule.getWallets()?.[Object.keys(capsule.getWallets())[0]]?.address}</strong></Text>
 

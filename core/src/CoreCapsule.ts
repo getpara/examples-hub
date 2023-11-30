@@ -759,19 +759,18 @@ export abstract class CoreCapsule {
    * Creates a new wallet.
    *
    * @param skipDistribute - if true, recovery share will not be distributed.
-   * @param customFunction - method called when createWallet is done.
+   * @param [customFunction] - {deprecated} method called when createWallet is done.
    * @returns [wallet, recoveryShare]
    **/
   async createWallet(
     skipDistribute = false,
-    customFunction: (params?: any) => void,
+    customFunction?: (params?: any) => void,
   ): Promise<[Wallet, string | null]> {
     this.requireApiKey();
     const { signer, walletId } = await this.platformUtils.keygen(
       this.ctx,
       this.userId,
       null,
-      customFunction,
       this.retrieveSessionCookie(),
     );
     this.wallets[walletId] = {
