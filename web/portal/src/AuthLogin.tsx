@@ -13,6 +13,7 @@ import {
   Box,
   useClipboard,
   Link,
+  Spinner,
 } from '@chakra-ui/react';
 import QRCode from 'react-qr-code';
 
@@ -113,6 +114,7 @@ export async function authLogin(
 
 function AuthLogin() {
   const [loginDone, updateLoginDone] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [userId, setUserId] = useState('');
   const [partner, setPartner] = useState<Partner | undefined>();
   const [urlForNewDeviceLogin, setUrlForNewDeviceLogin] = useState<string>('');
@@ -147,9 +149,11 @@ function AuthLogin() {
     decodeURIComponent(searchParams.get('portalPrimaryButtonTextColor')) :
     'white';
   const [isFire, setIsFire] = useState(false);
+  const buttonText = loginDone ? 'Success!' : 'Login'
 
-  const login = useCallback(() => {
-    authLogin(paramsEmail, sessionId, encryptionKey, newDeviceSessionLookupId, newDeviceEncryptionKey).then((userId: string) => {
+  const login = useCallback(async () => {
+    setIsLoggingIn(true);
+    await authLogin(paramsEmail, sessionId, encryptionKey, newDeviceSessionLookupId, newDeviceEncryptionKey).then((userId: string) => {
       updateLoginDone(true);
       setUserId(userId);
       if (!paramsPartnerId || !partner?.policiesEnabled) {
@@ -157,7 +161,10 @@ function AuthLogin() {
           window.close();
         }, 200);
       }
+    }).catch(e => {
+      console.error(e);
     });
+    setIsLoggingIn(false);
   }, [paramsEmail, sessionId, encryptionKey, newDeviceSessionLookupId, newDeviceEncryptionKey]);
 
   const addThisDevice = () => {
@@ -344,7 +351,9 @@ function AuthLogin() {
           height='9vh'
           fontFamily={isFire && "Manrope"}
         >
-            <Text color={portalPrimaryButtonTextColor}>{loginDone ? 'Success!' : 'Login'}</Text>
+          {isLoggingIn
+            ? <Spinner as="span" color={portalPrimaryButtonTextColor} />
+            : <Text color={portalPrimaryButtonTextColor}>{buttonText}</Text>}
           </Button>
         </Container>
         {!newDeviceSessionLookupId && (

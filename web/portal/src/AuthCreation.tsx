@@ -11,6 +11,7 @@ import {
   Flex,
   ChakraProvider,
   Box,
+  Spinner,
 } from '@chakra-ui/react';
 import BetaBanner from './BetaBanner';
 
@@ -84,6 +85,7 @@ function AuthCreation() {
   const [biometricDone, updateBiometricDone] = useState(false);
   const [isDone, setIsDone] = useState(false);
   const [partner, setPartner] = useState<Partner | undefined>();
+  const [isAwaitingBiometrics, setIsAwaitingBiometrics] = useState(false);
 
   const { biometricId: paramsBiometricId, userId: paramsUserId } = useParams();
   const [searchParams, _] = useSearchParams();
@@ -104,9 +106,11 @@ function AuthCreation() {
     'white';
   const isForNewDevice = searchParams.get('isForNewDevice') === 'true';
   const [isFire, setIsFire] = useState(false);
+  const buttonText = isDone ? 'Success!' : 'Set Up';
 
-  const setUpBiometrics = useCallback(() => {
-    authCreation(paramsUserId, paramsEmail, paramsBiometricId, isForNewDevice).then(() => {
+  const setUpBiometrics = useCallback(async () => {
+    setIsAwaitingBiometrics(true);
+    await authCreation(paramsUserId, paramsEmail, paramsBiometricId, isForNewDevice).then(() => {
       updateBiometricDone(true);
 
       if (!paramsPartnerId || !partner?.policiesEnabled) {
@@ -115,7 +119,10 @@ function AuthCreation() {
           window.close();
         }, 200);
       }
+    }).catch(e => {
+      console.error(e);
     });
+    setIsAwaitingBiometrics(false);
   }, [biometricDone, paramsBiometricId, paramsEmail, paramsUserId]);
 
   const onPermissionsDone = () => {
@@ -243,11 +250,14 @@ function AuthCreation() {
                   onClick={setUpBiometrics}
                   p="2.5vh"
                   fontSize="3vh"
+                  w="25vw"
                   alignSelf={'center'}
                   height='9vh'
                   fontFamily={isFire && "Manrope"}
                 >
-                  <Text color={portalPrimaryButtonTextColor}>{isDone ? 'Success!' : 'Set Up'}</Text>
+                  {isAwaitingBiometrics
+                    ? <Spinner as="span" color={portalPrimaryButtonTextColor} />
+                    : <Text color={portalPrimaryButtonTextColor}>{buttonText}</Text>}
                 </Button>
               </Container>
             </Box>
