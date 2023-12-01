@@ -20,6 +20,7 @@ export function AwaitingWalletCreationStep({
       <Text marginTop='100px' fontSize="22px">
         Creating wallet...
       </Text>
+      { /* @ts-ignore */ }
       <Spinner mt="8px" height="60px" width="60px" color="brand.content" />
       <Spacer />
     </VStack>
