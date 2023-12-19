@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { ReactNode, useEffect, useRef, useState } from 'react';
 
 import {
   Box,
   Button,
+  ButtonProps,
   ChakraProvider,
   Flex,
   HStack,
@@ -44,6 +45,8 @@ interface CapsuleModalProps {
   onRampAvailable?: boolean;
   rampNetworkApiKey?: string;
   appName: string;
+  createWalletOverride?: (capsule: Capsule | CoreCapsule) => Promise<string>;
+  loginTransitionOverride?: (capsule: Capsule | CoreCapsule) => Promise<void>;
 }
 
 const themeResolve: Record<string, Theme> = {
@@ -63,6 +66,8 @@ export const CapsuleModal = ({
   onRampCurrency = 'ARBITRUM_ETH',
   rampNetworkApiKey = '7t45dxm7yhho7fr9u4b9k8nv9gvczansfu8zt9pm', // staging
   onRampAvailable = false,
+  createWalletOverride,
+  loginTransitionOverride,
 }: CapsuleModalProps) => {
   const resolvedTheme = typeof theme === 'string' ? themeResolve[theme] : theme;
   const [email, setEmail] = useState(capsule.getEmail());
@@ -133,14 +138,28 @@ export const CapsuleModal = ({
     if (
       (!isCreateAccountType && currentStep !== ModalStep.AWAITING_WALLET_CREATION_AFTER_LOGIN) ||
       walletCreated ||
-      walletCreationInProgress
+      walletCreationInProgress ||
+      (createWalletOverride && ModalStep.AWAITING_WALLET_CREATION !== currentStep)
     ) {
       return;
     }
     async function genWallet() {
       setWalletCreationInProgress(true);
-      const createWalletRes = await capsule.createWallet(true);
-      setCreateWalletRes(createWalletRes);
+      if (!createWalletOverride) {
+        const newWalletRes = await capsule.createWallet(true);
+        setCreateWalletRes(newWalletRes);
+      } else {
+        const recoveryFromOverride = await createWalletOverride(capsule);
+        const fetchedWallets = (await capsule.fetchWallets()).filter(
+          wallet => !!wallet.address,
+        );
+        const newWallets: Record<string, Wallet> = {};
+        for (const wallet of fetchedWallets) {
+          newWallets[wallet.id] = { id: wallet.id, address: wallet.address, scheme: wallet.scheme, signer: '' };
+        }
+        capsule.setWallets(newWallets);
+        setRecoveryShare(recoveryFromOverride);
+      }
       setWalletCreated(true);
       setWalletCreationInProgress(false);
     }
@@ -154,12 +173,15 @@ export const CapsuleModal = ({
     }
 
     async function distributeShare() {
-      const result = await capsule.distributeNewWalletShare(
-        createWalletRes[0].id,
-        createWalletRes[0].signer,
-      );
-      setRecoveryShare(result);
+      if (!createWalletOverride) {
+        const result = await capsule.distributeNewWalletShare(
+          createWalletRes[0].id,
+          createWalletRes[0].signer,
+        );
+        setRecoveryShare(result);
+      }
       setDistributeDone(true);
+
       if (currentStep === ModalStep.AWAITING_WALLET_CREATION_AFTER_LOGIN) {
         if (await is2FASetup()) {
           setCurrentStep(ModalStep.LOGIN_DONE);
@@ -264,6 +286,23 @@ export const CapsuleModal = ({
   // wait for login auth to do post login setup
   useEffect(() => {
     if (webAuthURLForLogin) {
+      if (loginTransitionOverride) {
+        // eslint-disable-next-line
+        async function loginOverride() {
+          await loginTransitionOverride(capsule);
+
+          setIsFullyLoggedIn(true);
+          setWebAuthURLForLogin('');
+
+          if (await is2FASetup()) {
+            setCurrentStep(ModalStep.LOGIN_DONE);
+          } else {
+            setCurrentStep(ModalStep.SETUP_2FA);
+          }
+        };
+        loginOverride();
+        return;
+      }
       loginTimeout.current = window.setTimeout(awaitLoginTransition, POLLING_INTERVAL_MS);
     }
     return () => clearTimeout(loginTimeout.current);
@@ -387,10 +426,29 @@ function Helper() {
 export function CapsuleButton({
   capsule,
   appName,
+  overrides,
 }: {
   capsule: Capsule | CoreCapsule;
   appName: string;
+  overrides?: {
+    createWalletOverride?: (capsule: Capsule | CoreCapsule) => Promise<string>;
+    loginTransitionOverride?: (capsule: Capsule | CoreCapsule) => Promise<void>;
+    onClickOverride?: React.MouseEventHandler<HTMLButtonElement> | undefined;
+    preserveOnClickFunctionality?: boolean;
+    displayOverride?: ReactNode;
+    onCloseOverride?: () => void;
+    buttonProps?: ButtonProps | undefined;
+  };
 }) {
+  const {
+    createWalletOverride,
+    loginTransitionOverride,
+    onClickOverride,
+    preserveOnClickFunctionality,
+    displayOverride,
+    onCloseOverride,
+    buttonProps,
+  } = overrides || {};
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [address, setAddress] = useState(
     Object.values(capsule.getWallets())?.[0]?.address,
@@ -415,13 +473,18 @@ export function CapsuleButton({
             setAddress(newAddress);
             setIsSessionActive(true);
           }
+          if (onCloseOverride) {
+            onCloseOverride();
+          }
           setModalIsOpen(false);
         }}
         theme={newTheme}
         capsule={capsule}
+        createWalletOverride={createWalletOverride}
+        loginTransitionOverride={loginTransitionOverride}
       />
       <HStack>
-        {(isSessionActive && address) ? (
+        {(isSessionActive && address && !displayOverride) ? (
           <Text textColor={'brand.addressColor'}>
             {truncateEthAddress(address)}
           </Text>
@@ -439,7 +502,13 @@ export function CapsuleButton({
             height={'50px'}
             backgroundColor={'brand.background'}
             color={'white'}
-            onClick={() => {
+            onClick={async (e) => {
+              if (onClickOverride) {
+                onClickOverride(e);
+                if (!preserveOnClickFunctionality) {
+                  return;
+                }
+              }
               if (isSessionActive && address) {
                 capsule.logout().then(() => {
                   setAddress(undefined);
@@ -449,11 +518,18 @@ export function CapsuleButton({
                 setModalIsOpen(true);
               }
             }}
+            {...buttonProps}
           >
-            <Text size="18px" marginRight="9px">
-              {(isSessionActive && address) ? 'Logout' : 'Connect'}
-            </Text>
-            <CapsuleSmall />
+            {
+              displayOverride || (
+                <>
+                  <Text size="18px" marginRight="9px">
+                    {(isSessionActive && address) ? 'Logout' : 'Connect'}
+                  </Text>
+                  <CapsuleSmall />
+                </>
+              )
+            }
           </Button>
         </Tooltip>
       </HStack>

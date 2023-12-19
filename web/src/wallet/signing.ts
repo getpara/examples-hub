@@ -27,6 +27,8 @@ export async function signTransaction(
       disableWorkers: ctx.disableWorkers,
       sessionCookie,
       useDKLS: isDKLS,
+      disableWebSockets: ctx.disableWebSockets,
+      wasmOverride: ctx.wasmOverride,
     });
   });
 }
@@ -56,6 +58,8 @@ export async function sendTransaction(
       disableWorkers: ctx.disableWorkers,
       sessionCookie,
       useDKLS: isDKLS,
+      disableWebSockets: ctx.disableWebSockets,
+      wasmOverride: ctx.wasmOverride,
     });
   });
 }
@@ -83,6 +87,8 @@ export async function signMessage(
       disableWorkers: ctx.disableWorkers,
       sessionCookie,
       useDKLS: isDKLS,
+      disableWebSockets: ctx.disableWebSockets,
+      wasmOverride: ctx.wasmOverride,
     });
   });
 }

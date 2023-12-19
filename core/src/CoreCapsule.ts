@@ -64,16 +64,20 @@ export interface ConstructorOpts {
   portalTextColor?: string; // please use hex color codes
   portalPrimaryButtonTextColor?: string; // please use hex color codes
   useDKLSForCreation?: boolean;
+  disableWebSockets?: boolean;
+  wasmOverride?: ArrayBuffer;
 }
 
 const PREFIX = '@CAPSULE/';
 const LOCAL_STORAGE_EMAIL = `${PREFIX}e-mail`;
 const LOCAL_STORAGE_USER_ID = `${PREFIX}userId`;
 const LOCAL_STORAGE_WALLETS = `${PREFIX}wallets`;
+const LOCAL_STORAGE_SESSION_COOKIE = `${PREFIX}sessionCookie`;
 const SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR = `${PREFIX}loginEncryptionKeyPair`;
-const SESSION_STORAGE_SESSION_COOKIE = `${PREFIX}sessionCookie`;
 const POLLING_INTERVAL_MS = 2000;
 const SHORT_POLLING_INTERVAL_MS = 1000;
+
+const EMPTY_FUNCTION = () => {};
 
 function biometricVerifiedRecently(ctx: Ctx, verifiedAt: number): boolean {
   if (ctx.env !== Environment.PROD) {
@@ -138,7 +142,7 @@ export abstract class CoreCapsule {
   };
   persistSessionCookie = (cookie: string): void => {
     this.sessionCookie = cookie;
-    this.sessionStorageSetItem(SESSION_STORAGE_SESSION_COOKIE, cookie);
+    this.localStorageSetItem(LOCAL_STORAGE_SESSION_COOKIE, cookie);
   };
 
   /**
@@ -200,18 +204,6 @@ export abstract class CoreCapsule {
   constructor(env: Environment, apiKey?: string, opts?: ConstructorOpts) {
     // TODO: consider using sessionStorage instead of localStorage
     if (!opts) opts = {};
-    this.ctx = {
-      env,
-      apiKey,
-      capsuleClient: initClient(env, apiKey, opts.disableWorkers, this.retrieveSessionCookie, this.persistSessionCookie),
-      disableWorkers: opts.disableWorkers,
-      offloadMPCComputationURL: opts.offloadMPCComputationURL,
-      useLocalFiles: opts.useLocalFiles,
-      useDKLS: opts.useDKLSForCreation || !opts.offloadMPCComputationURL,
-    };
-    if (opts.offloadMPCComputationURL) {
-      this.ctx.mpcComputationClient = mpcComputationClient.initClient(opts.offloadMPCComputationURL, opts.disableWorkers);
-    }
 
     this.portalBackgroundColor = opts.portalBackgroundColor;
     this.portalPrimaryButtonColor = opts.portalPrimaryButtonColor;
@@ -228,16 +220,31 @@ export abstract class CoreCapsule {
       this.sessionStorageSetItem = opts.sessionStorageSetItemOverride;
       this.sessionStorageRemoveItem = opts.sessionStorageRemoveItemOverride;
       this.clearStorage = opts.clearStorageOverride;
-      return;
+    }
+  
+    this.ctx = {
+      env,
+      apiKey,
+      capsuleClient: initClient(env, apiKey, opts.disableWorkers, this.retrieveSessionCookie, this.persistSessionCookie),
+      disableWorkers: opts.disableWorkers,
+      offloadMPCComputationURL: opts.offloadMPCComputationURL,
+      useLocalFiles: opts.useLocalFiles,
+      useDKLS: opts.useDKLSForCreation || !opts.offloadMPCComputationURL,
+      disableWebSockets: !!opts.disableWebSockets,
+      wasmOverride: opts.wasmOverride,
+    };
+    if (opts.offloadMPCComputationURL) {
+      this.ctx.mpcComputationClient = mpcComputationClient.initClient(opts.offloadMPCComputationURL, opts.disableWorkers);
     }
 
-    if (!this.platformUtils.isSyncStorage) {
+    if (!this.platformUtils.isSyncStorage || opts.useStorageOverrides) {
       return;
     }
 
     this.email = this.localStorageGetItem(LOCAL_STORAGE_EMAIL) as string || undefined;
     this.userId = this.localStorageGetItem(LOCAL_STORAGE_USER_ID) as string || undefined;
-    this.sessionCookie = this.sessionStorageGetItem(SESSION_STORAGE_SESSION_COOKIE) as string || undefined;
+    // TODO: remove sessionStorageGetItem call once new version is being consumed
+    this.sessionCookie = this.localStorageGetItem(LOCAL_STORAGE_SESSION_COOKIE) as string || this.sessionStorageGetItem(LOCAL_STORAGE_SESSION_COOKIE) as string || undefined;
 
     const stringWallets = this.platformUtils.secureStorage ?
       this.platformUtils.secureStorage.get(LOCAL_STORAGE_WALLETS) :
@@ -258,7 +265,8 @@ export abstract class CoreCapsule {
   async init(): Promise<void> {
     this.email = await this.localStorageGetItem(LOCAL_STORAGE_EMAIL) || undefined;
     this.userId = await this.localStorageGetItem(LOCAL_STORAGE_USER_ID) || undefined;
-    this.sessionCookie = await this.sessionStorageGetItem(SESSION_STORAGE_SESSION_COOKIE) || undefined;
+    // TODO: remove sessionStorageGetItem call once new version is being consumed
+    this.sessionCookie = await this.localStorageGetItem(LOCAL_STORAGE_SESSION_COOKIE) || await this.sessionStorageGetItem(LOCAL_STORAGE_SESSION_COOKIE) || undefined;
 
     const stringWallets = this.platformUtils.secureStorage ?
       await this.platformUtils.secureStorage.get(LOCAL_STORAGE_WALLETS) :
@@ -317,6 +325,14 @@ export abstract class CoreCapsule {
   private async deleteLoginEncryptionKeyPair(): Promise<void> {
     this.loginEncryptionKeyPair = undefined;
     await this.sessionStorageRemoveItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR);
+  }
+
+  /**
+   * Gets the userId associated with the `CoreCapsule` instance.
+   * @returns - userId associated with the `CoreCapsule` instance.
+   */
+  getUserId(): string | undefined {
+    return this.userId;
   }
 
   /**

@@ -10,7 +10,7 @@ import UserContext from '../../contexts/UserContext';
 import WalletContext from '../../contexts/WalletContext';
 
 async function recoverUserShare(userId: string, walletId: string, serializedRecoveryShare: string): Promise<string> {
-    const recoveryPrivateKeyContainer = KeyContainer.import(
+    const recoveryPrivateKeyContainer = KeyContainer.buildFrom(
         serializedRecoveryShare,
     );
 

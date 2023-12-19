@@ -4,8 +4,8 @@ import { getBaseMPCNetworkUrl } from '../core/external/capsuleClient';
 
 const configCGGMPBase = (serverUrl: string, walletId: string, id: string) =>
   `{"ServerUrl":"${serverUrl}", "WalletId": "${walletId}", "Id":"${id}", "Ids":["USER","CAPSULE"], "Threshold":1}`;
-const configDKLSBase = (walletId: string, id: string) =>
-  `{"walletId": "${walletId}", "id":"${id}", "otherId":"CAPSULE", "isReceiver": false}`;
+const configDKLSBase = (walletId: string, id: string, disableWebSockets: boolean) =>
+  `{"walletId": "${walletId}", "id":"${id}", "otherId":"CAPSULE", "isReceiver": false, "disableWebSockets": ${disableWebSockets}}`;
 
 async function keygenRequest(
   ctx: Ctx,
@@ -74,9 +74,9 @@ export async function keygen(
     };
   }
 
-  const serverUrl = getBaseMPCNetworkUrl(ctx.env, true);
+  const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
   const signerConfigUser = ctx.useDKLS ?
-    configDKLSBase(walletId, 'USER') :
+    configDKLSBase(walletId, 'USER', ctx.disableWebSockets) :
     configCGGMPBase(serverUrl, walletId, 'USER');
   const createAccountFn = ctx.useDKLS ?
     global.dklsCreateAccount :
@@ -120,7 +120,7 @@ export async function signMessage(
     return signMessageRequest(ctx, userId, walletId, protocolId, message, share);
   }
 
-  const serverUrl = getBaseMPCNetworkUrl(ctx.env, true);
+  const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
   const signMessageFn = ctx.useDKLS ?
     global.dklsSignMessage :
     global.signMessage;
@@ -162,7 +162,7 @@ export async function signTransaction(
     return sendTransactionRequest(ctx, userId, walletId, protocolId, tx, share, chainId);
   }
 
-  const serverUrl = getBaseMPCNetworkUrl(ctx.env, true);
+  const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
   const signTransactionFn = ctx.useDKLS ?
     global.dklsSendTransaction :
     global.sendTransaction;
@@ -198,7 +198,7 @@ export async function sendTransaction(
     return sendTransactionRequest(ctx, userId, walletId, protocolId, tx, share, chainId);
   }
 
-  const serverUrl = getBaseMPCNetworkUrl(ctx.env, true);
+  const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
   const sendTransactionFn = ctx.useDKLS ?
     global.dklsSendTransaction :
     global.sendTransaction;
@@ -221,7 +221,7 @@ export async function refresh(
   const {
     data: { protocolId },
   } = await ctx.capsuleClient.refreshKeys(userId, walletId);
-  const serverUrl = getBaseMPCNetworkUrl(ctx.env, true);
+  const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
   const refreshFn = ctx.useDKLS ?
     global.dklsRefresh :
     global.refresh;

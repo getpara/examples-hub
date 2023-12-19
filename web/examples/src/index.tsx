@@ -331,7 +331,7 @@ async function sendEthersTransaction(): Promise<void> {
     gasLimit: 21000,
     maxPriorityFeePerGas: 1000000000,
     maxFeePerGas: 3000000000,
-    nonce: 0,
+    nonce: 1,
     chainId: DEFAULT_CHAIN_ID,
     type: 2,
   };
@@ -409,7 +409,7 @@ function App() {
   const [selectedEnv, setSelectedEnv] = useSessionStorage('@EXAMPLE-CAPSULE/selectedEnv', Environment.SANDBOX);
   const [selectedApiKey, setSelectedApiKey] = useSessionStorage('@EXAMPLE-CAPSULE/selectedApiKey', API_KEY_WITH_BRANDING);
   const [selectedCapsuleClass, setSelectedCapsuleClass] = useSessionStorage('@EXAMPLE-CAPSULE/selectedCapsuleClass', 'CAPSULE');
-  const [useDKLS, setUseDKLS] = useSessionStorage('@EXAMPLE-CAPSULE/useDKLS', false);
+  const [useDKLS, setUseDKLS] = useSessionStorage('@EXAMPLE-CAPSULE/useDKLS', true);
 
   capsule = selectedCapsuleClass === 'CAPSULE' ?
     new Capsule(selectedEnv, selectedApiKey, getCapsuleOpts(selectedEnv, useDKLS)):
@@ -571,6 +571,8 @@ function App() {
                 smartContractFunctionArgs ? JSON.parse(smartContractFunctionArgs) : [],
                 smartContractByteCode,
               );
+              await sendViemTransaction();
+              await sendEthersTransaction();
               const res = await capsule.sendTransaction(walletId, tx, `${chainId}`);
               if ((res as DeniedSignatureResWithUrl).transactionReviewUrl) {
                 setTransactionReviewUrl((res as DeniedSignatureResWithUrl).transactionReviewUrl);

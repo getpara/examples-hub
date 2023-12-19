@@ -64,6 +64,8 @@ export function keygen(
       disableWorkers: ctx.disableWorkers,
       sessionCookie,
       useDKLS: ctx.useDKLS,
+      disableWebSockets: ctx.disableWebSockets,
+      wasmOverride: ctx.wasmOverride,
     });
   });
 }

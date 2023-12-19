@@ -17,14 +17,25 @@ interface Message {
   params: Record<string, any>;
   sessionCookie?: string;
   useDKLS?: boolean;
+  disableWebSockets?: boolean;
+  wasmOverride?: ArrayBuffer;
 }
 
 /* eslint-disable no-restricted-globals */
-async function loadWasm(ctx: Ctx) {
+async function loadWasm(ctx: Ctx, wasmOverride?: ArrayBuffer) {
   // @ts-ignore
   const goWasm = new self.Go();
-  const newRes = await WebAssembly.instantiateStreaming(
-    fetch(`${getPortalBaseURL(ctx)}/static/js/main.wasm`),
+  let wasmArrayBuffer = wasmOverride;
+  if (!wasmArrayBuffer) {
+    const fetchedWasm = await fetch(
+      `${getPortalBaseURL(ctx)}/static/js/main.wasm`,
+      { mode: 'cors' },
+    );
+    wasmArrayBuffer = await fetchedWasm.arrayBuffer();
+  }
+
+  const newRes = await WebAssembly.instantiate(
+    wasmArrayBuffer,
     goWasm.importObject
   );
   goWasm.run(newRes.instance);
@@ -62,7 +73,7 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
 }
 
 export async function handleMessage(e: { data: Message }, postMessage: (message: any) => void, useFetchAdapter?: boolean): Promise<boolean> {
-  const { env, apiKey, offloadMPCComputationURL, disableWorkers, sessionCookie, useDKLS } = e.data;
+  const { env, apiKey, offloadMPCComputationURL, disableWorkers, sessionCookie, useDKLS, disableWebSockets, wasmOverride } = e.data;
   if (!env) {
     // this means a message we didn't send was received and we want to ignore it
     return true;
@@ -74,10 +85,12 @@ export async function handleMessage(e: { data: Message }, postMessage: (message:
     offloadMPCComputationURL: offloadMPCComputationURL,
     mpcComputationClient: offloadMPCComputationURL ? mpcComputationClient.initClient(offloadMPCComputationURL, !!disableWorkers) : undefined,
     useDKLS,
+    disableWebSockets: !!disableWebSockets,
+    wasmOverride,
   };
 
   if (!ctx.offloadMPCComputationURL || ctx.useDKLS) {
-    await loadWasm(ctx);
+    await loadWasm(ctx, wasmOverride);
   }
 
   const result = await executeMessage(ctx, e.data);

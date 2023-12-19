@@ -191,6 +191,7 @@ export class Capsule {
       offloadMPCComputationURL: opts.offloadMPCComputationURL,
       useLocalFiles: opts.useLocalFiles,
       useDKLS: opts.useDKLSForCreation || !opts.offloadMPCComputationURL,
+      disableWebSockets: false,
     };
     if (opts.offloadMPCComputationURL) {
       this.ctx.mpcComputationClient = mpcComputationClient.initClient(opts.offloadMPCComputationURL, opts.disableWorkers);

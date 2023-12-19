@@ -27,6 +27,8 @@ export interface Ctx {
   mpcComputationClient?: AxiosInstance;
   useLocalFiles?: boolean;
   useDKLS?: boolean;
+  disableWebSockets: boolean;
+  wasmOverride?: ArrayBuffer;
 }
 
 export function getPortalDomain(env: Environment) {

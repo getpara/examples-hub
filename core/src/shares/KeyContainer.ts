@@ -22,7 +22,7 @@ export class KeyContainer {
     ).toString('hex');
   }
 
-  static import(serializedContainer: string): KeyContainer {
+  static buildFrom(serializedContainer: string): KeyContainer {
     try {
         const parsedObject = JSON.parse(serializedContainer);
         return Object.assign(new KeyContainer('', '', ''), parsedObject);

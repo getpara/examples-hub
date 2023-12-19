@@ -12,6 +12,7 @@ interface Message {
   params: Record<string, any>;
   sessionCookie?: string;
   useDKLS?: boolean;
+  disableWebSockets?: boolean;
 }
 
 parentPort.on('message', async (messageData: Message) => {
@@ -61,7 +62,7 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
 }
 
 async function handleMessage(e: { data: Message }): Promise<void> {
-  const { env, apiKey, offloadMPCComputationURL, disableWorkers, sessionCookie, useDKLS } = e.data;
+  const { env, apiKey, offloadMPCComputationURL, disableWorkers, sessionCookie, useDKLS, disableWebSockets } = e.data;
   const ctx = {
     env,
     apiKey,
@@ -69,6 +70,7 @@ async function handleMessage(e: { data: Message }): Promise<void> {
     offloadMPCComputationURL: offloadMPCComputationURL,
     mpcComputationClient: offloadMPCComputationURL ? mpcComputationClient.initClient(offloadMPCComputationURL, !!disableWorkers) : undefined,
     useDKLS,
+    disableWebSockets: !!disableWebSockets,
   };
 
   if (!ctx.offloadMPCComputationURL || ctx.useDKLS) {
