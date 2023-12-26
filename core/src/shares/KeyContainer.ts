@@ -2,7 +2,7 @@ import {
   Encrypt as ECIESEncrypt,
   Decrypt as ECIESDecrypt,
 } from '@celo/utils/lib/ecies';
-import * as eutil from 'ethereumjs-util';
+import * as eutil from '@ethereumjs/util';
 import * as forge from 'node-forge';
 
 export class KeyContainer {
