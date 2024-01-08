@@ -489,50 +489,41 @@ export function CapsuleButton({
             {truncateEthAddress(address)}
           </Text>
         ) : null}
-        {/* 
-          // @ts-ignore */}
-        <Tooltip
-          isDisabled={!!(isSessionActive && address)}
-          label={<Helper />}
+        <Button
+          width={'163px'}
+          height={'50px'}
           backgroundColor={'brand.background'}
-          borderRadius="4px"
-        >
-          <Button
-            width={'163px'}
-            height={'50px'}
-            backgroundColor={'brand.background'}
-            color={'white'}
-            onClick={async (e) => {
-              if (onClickOverride) {
-                onClickOverride(e);
-                if (!preserveOnClickFunctionality) {
-                  return;
-                }
+          color={'white'}
+          onClick={async (e) => {
+            if (onClickOverride) {
+              onClickOverride(e);
+              if (!preserveOnClickFunctionality) {
+                return;
               }
-              if (isSessionActive && address) {
-                capsule.logout().then(() => {
-                  setAddress(undefined);
-                  setIsSessionActive(false);
-                });
-              } else {
-                setModalIsOpen(true);
-              }
-            }}
-            {...buttonProps}
-          >
-            {
-              displayOverride || (
-                <>
-                  <Text size="18px" marginRight="9px">
-                    {(isSessionActive && address) ? 'Logout' : 'Connect'}
-                  </Text>
-                  <CapsuleSmall />
-                </>
-              )
             }
-          </Button>
-        </Tooltip>
-      </HStack>
+            if (isSessionActive && address) {
+              capsule.logout().then(() => {
+                setAddress(undefined);
+                setIsSessionActive(false);
+              });
+            } else {
+              setModalIsOpen(true);
+            }
+          }}
+          {...buttonProps}
+        >
+          {
+            displayOverride || (
+              <>
+                <Text size="18px" marginRight="9px">
+                  {(isSessionActive && address) ? 'Logout' : 'Connect'}
+                </Text>
+                <CapsuleSmall />
+              </>
+            )
+          }
+        </Button>
+    </HStack>
     </ChakraProvider>
   );
 }
