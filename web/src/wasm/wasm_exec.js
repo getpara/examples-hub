@@ -78,7 +78,7 @@
 	}
 
 	if (!globalThis.performance) {
-		throw new Error("globalThis.performance is not available, polyfill required (performance.now only)");
+		globalThis.performance = Date;
 	}
 
 	if (!globalThis.TextEncoder) {

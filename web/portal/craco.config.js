@@ -1,6 +1,10 @@
 module.exports = {
   webpack: {
-    configure: webpackConfig => {
+    configure: (webpackConfig, { env }) => {
+      if (env === 'production') {
+        // disable source maps in production
+        webpackConfig.devtool = false;
+      }
 
       // ts-loader is required to reference external typescript projects/files (non-transpiled)
       webpackConfig.module.rules.push({

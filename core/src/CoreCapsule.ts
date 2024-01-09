@@ -624,7 +624,7 @@ export abstract class CoreCapsule {
    * Waits for the session to be active and sets up the user.
    * @returns { needsWallet } - whether a wallet needs to be created
    **/
-  async waitForLoginAndSetup(): Promise<{ needsWallet: boolean }> {
+  async waitForLoginAndSetup(skipSessionRefresh?: boolean): Promise<{ needsWallet: boolean }> {
     // eslint-disable-next-line no-constant-condition
     while (true) {
       try {
@@ -643,7 +643,7 @@ export abstract class CoreCapsule {
         if (
           tempSharesRes.data.temporaryShares.length === fetchedWallets.length
         ) {
-          await this.setupAfterLogin(tempSharesRes.data.temporaryShares);
+          await this.setupAfterLogin(tempSharesRes.data.temporaryShares, skipSessionRefresh);
           return { needsWallet: Object.values(this.getWallets()).length === 0 };
         }
       } catch (err) {
@@ -707,7 +707,7 @@ export abstract class CoreCapsule {
    *
    * @param temporaryShares - optional temporary shares to use for decryption.
    **/
-  async setupAfterLogin(temporaryShares?: any[]): Promise<void> {
+  async setupAfterLogin(temporaryShares?: any[], skipSessionRefresh?: boolean): Promise<void> {
     if (!temporaryShares) {
       temporaryShares = (await this.getTransmissionKeyShares()).data.temporaryShares;
     }
@@ -725,7 +725,7 @@ export abstract class CoreCapsule {
 
     await this.deleteLoginEncryptionKeyPair();
     await this.populateWalletAddresses();
-    await this.ctx.capsuleClient.touchSession(true);
+    await this.ctx.capsuleClient.touchSession(!skipSessionRefresh);
   }
 
   /**
