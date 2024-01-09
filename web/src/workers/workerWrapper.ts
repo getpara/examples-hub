@@ -19,7 +19,7 @@ export async function setupWorker(ctx: Ctx, resFunction: (arg: any) => void): Pr
     const syncWorker: SyncWorker = {
       postMessage: function(message) {
         (async function() {
-          await handleMessage({ data: message }, data => onmessage({ data }));
+          await handleMessage({ data: message }, data => onmessage({ data }), ctx.disableWorkers);
         })();
       },
       terminate: () => { return; },

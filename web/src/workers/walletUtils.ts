@@ -125,6 +125,12 @@ export async function signMessage(
   const signMessageFn = ctx.useDKLS ?
     global.dklsSignMessage :
     global.signMessage;
+
+  const parsedShare = JSON.parse(share);
+  if (!parsedShare.disableWebSockets !== !ctx.disableWebSockets) {
+    parsedShare.disableWebSockets = ctx.disableWebSockets;
+  }
+  share = JSON.stringify(parsedShare);
   return new Promise((resolve, reject) =>
     signMessageFn(
       share,
@@ -167,6 +173,12 @@ export async function signTransaction(
   const signTransactionFn = ctx.useDKLS ?
     global.dklsSendTransaction :
     global.sendTransaction;
+
+  const parsedShare = JSON.parse(share);
+  if (!parsedShare.disableWebSockets !== !ctx.disableWebSockets) {
+    parsedShare.disableWebSockets = ctx.disableWebSockets;
+  }
+  share = JSON.stringify(parsedShare);
   return new Promise((resolve, reject) =>
     signTransactionFn(share, serverUrl, tx, chainId, protocolId, (err, result) => {
       if (err) {
@@ -203,6 +215,12 @@ export async function sendTransaction(
   const sendTransactionFn = ctx.useDKLS ?
     global.dklsSendTransaction :
     global.sendTransaction;
+
+  const parsedShare = JSON.parse(share);
+  if (!parsedShare.disableWebSockets !== !ctx.disableWebSockets) {
+    parsedShare.disableWebSockets = ctx.disableWebSockets;
+  }
+  share = JSON.stringify(parsedShare);
   return new Promise((resolve, reject) =>
     sendTransactionFn(share, serverUrl, tx, chainId, protocolId, (err, result) => {
       if (err) {
@@ -226,6 +244,12 @@ export async function refresh(
   const refreshFn = ctx.useDKLS ?
     global.dklsRefresh :
     global.refresh;
+
+  const parsedShare = JSON.parse(share);
+  if (!parsedShare.disableWebSockets !== !ctx.disableWebSockets) {
+    parsedShare.disableWebSockets = ctx.disableWebSockets;
+  }
+  share = JSON.stringify(parsedShare);
   return new Promise((resolve, reject) =>
     refreshFn(share, serverUrl, protocolId, (err, result) => {
       if (err) {
