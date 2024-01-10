@@ -9,7 +9,6 @@ import {
 import QRCode from 'react-qr-code';
 import React from 'react';
 import { openPopup } from './utils';
-import { ExternalLinkIcon } from "@chakra-ui/icons";
 import './css/modal.css';
 import CustomButton from '../components/CustomButton';
 

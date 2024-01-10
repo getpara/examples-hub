@@ -1,4 +1,4 @@
-import ReactDOMClient from 'react-dom/client'
+import ReactDOM from 'react-dom';
 
 import { Capsule } from '../../Capsule';
 import { CoreCapsule } from '../../core/CoreCapsule';
@@ -7,14 +7,15 @@ import { newTheme } from '../../modal/theme';
 
 export function renderModal(capsule: Capsule | CoreCapsule, appName: string, onCloseArg: () => void): void {
   const container = document.createElement('div');
-  const root = ReactDOMClient.createRoot(container);
+  document.body.appendChild(container); // Add the container to the DOM
+
   const onClose = () => {
-    root.unmount();
-    container.remove();
+    ReactDOM.unmountComponentAtNode(container); // Unmount the component
+    container.remove(); // Remove the container from the DOM
     onCloseArg();
   };
 
-  root.render(
+  ReactDOM.render(
     <CapsuleModal
       onClose={onClose}
       capsule={capsule}
@@ -22,5 +23,6 @@ export function renderModal(capsule: Capsule | CoreCapsule, appName: string, onC
       appName={appName}
       theme={newTheme}
     />,
+    container
   );
 }

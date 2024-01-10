@@ -14,10 +14,9 @@ import {
   Link,
 } from '@chakra-ui/react';
 import React from 'react';
-import './css/modal.css'
-import { CopyIcon, ChevronDownIcon, EmailIcon, DownloadIcon, CheckIcon } from '@chakra-ui/icons';
-import { lighten } from 'polished'
-import { getMailtoLink } from '../utils/emailUtils'
+import './css/modal.css';
+import { lighten } from 'polished';
+import { getMailtoLink } from '../utils/emailUtils';
 
 export function RecoverySecretStep({
   currentStep,
@@ -93,22 +92,42 @@ export function RecoverySecretStep({
             top="50%"
             transform="translateY(-50%)" 
             onClick={onCopy} 
-            leftIcon={hasCopied ? <CheckIcon /> : <CopyIcon />} 
             bg={LIGHT_GRAY} 
             _hover={{ bg: HOVER_COLOR, textColor: '#000000' }}
             textColor='brand.text'
-            height="75%" 
+            height="75%"
           >
+            <div style={{ marginRight: '8px' }}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="icon"
+              >
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v1"></path>
+              </svg>
+            </div>
             {hasCopied ? 'Copied!' : 'Copy'}
           </Button>
         </Box>
         <Menu>
-          {/* @ts-ignore */}
+          { /* @ts-ignore */ }
           <MenuButton 
             textColor="brand.text"
             bg={LIGHT_GRAY} 
             as={Button} 
-            rightIcon={<ChevronDownIcon />}
+            rightIcon={
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 32 32" fill="none">
+                <path d="M26 12L16 22L6 12" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            }
             width='274px'
             marginTop='12px'
             _hover={{ bg: HOVER_COLOR, textColor: 'black' }}
@@ -129,7 +148,12 @@ export function RecoverySecretStep({
                 justifyContent="center"
               >
                 <Flex alignItems="center">
-                  <EmailIcon mr={2} />
+                  <div style={{ marginRight: '8px' }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 32 32" fill="white">
+                      <path d="M4 7H28V24C28 24.2652 27.8946 24.5196 27.7071 24.7071C27.5196 24.8946 27.2652 25 27 25H5C4.73478 25 4.48043 24.8946 4.29289 24.7071C4.10536 24.5196 4 24.2652 4 24V7Z" stroke="#A0A0A0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M28 7L16 18L4 7" stroke="#A0A0A0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
                   Email
                 </Flex>
               </MenuItem>
@@ -141,7 +165,13 @@ export function RecoverySecretStep({
               onClick={handleDownload}
             >
               <Flex alignItems="center">
-                <DownloadIcon mr={2} />
+                <div style={{ marginRight: '8px' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 32 32" fill="none">
+                    <path d="M16 4V23" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M7 14L16 23L25 14" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M5 27H27" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
                 Download
               </Flex>
             </MenuItem>
