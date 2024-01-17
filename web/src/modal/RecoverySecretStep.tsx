@@ -96,6 +96,7 @@ export function RecoverySecretStep({
             _hover={{ bg: HOVER_COLOR, textColor: '#000000' }}
             textColor='brand.text'
             height="75%"
+            zIndex={10}
           >
             <div style={{ marginRight: '8px' }}>
               <svg
