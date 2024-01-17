@@ -33,7 +33,7 @@ import { Partner } from './types';
 import { ENV } from './definitions';
 import PoweredByCapsule from './assets/poweredByCapsule';
 import { validateColorInput } from './validation';
-import Copy from './assets/copy';
+import CopyButton from './assets/CopyButton/CopyButton';
 
 // anticipating that we will need to add more steps to the add device flow so using enum
 // instead of just a boolean for this
@@ -54,7 +54,11 @@ export async function authLogin(
   const { data } = await capsule.ctx.capsuleClient.getWebChallenge(
     encodeURIComponent(email),
   );
-  const sig = await generateSignature(ENV, data.challenge, data.allowedPublicKeys);
+  const sig = await generateSignature(
+    ENV,
+    data.challenge,
+    data.allowedPublicKeys,
+  );
   const userHandle = sig.response.userHandle;
   delete sig.response.userHandle;
 
@@ -84,12 +88,14 @@ export async function authLogin(
   const tempShareOpts = decryptedShares.flatMap((share) => {
     const { encryptedMessageHex, encryptedKeyHex } =
       encryptWithDerivedPublicKey(encryptionKey, share.signer);
-    const opts = [{
-      walletId: share.walletId,
-      encryptedShare: encryptedMessageHex,
-      encryptedKey: encryptedKeyHex,
-      sessionLookupId,
-    }];
+    const opts = [
+      {
+        walletId: share.walletId,
+        encryptedShare: encryptedMessageHex,
+        encryptedKey: encryptedKeyHex,
+        sessionLookupId,
+      },
+    ];
 
     if (newDeviceSessionLookupId) {
       const { encryptedMessageHex: newMessageHex, encryptedKeyHex: newKeyHex } =
@@ -119,8 +125,12 @@ function AuthLogin() {
   const [partner, setPartner] = useState<Partner | undefined>();
   const [urlForNewDeviceLogin, setUrlForNewDeviceLogin] = useState<string>('');
   const [basePortalURL, setBasePortalURL] = useState<string | undefined>();
-  const [addDeviceFlowStep, setAddDeviceFlowStepState] = useState<string | undefined>(
-    sessionStorage.getItem(SESSION_STORAGE_ADD_DEVICE_FLOW_STEP) as AddDeviceFlowStep | undefined,
+  const [addDeviceFlowStep, setAddDeviceFlowStepState] = useState<
+    string | undefined
+  >(
+    sessionStorage.getItem(SESSION_STORAGE_ADD_DEVICE_FLOW_STEP) as
+      | AddDeviceFlowStep
+      | undefined,
   );
   function setAddDeviceFlowStep(step: AddDeviceFlowStep) {
     setAddDeviceFlowStepState(step);
@@ -131,41 +141,65 @@ function AuthLogin() {
   const paramsEmail = decodeURIComponent(searchParams.get('email'));
   const encryptionKey = searchParams.get('encryptionKey');
   const sessionId = searchParams.get('sessionId');
-  const newDeviceSessionLookupId = searchParams.get('newDeviceSessionId') || undefined;
-  const newDeviceEncryptionKey = searchParams.get('newDeviceEncryptionKey') || undefined;
+  const newDeviceSessionLookupId =
+    searchParams.get('newDeviceSessionId') || undefined;
+  const newDeviceEncryptionKey =
+    searchParams.get('newDeviceEncryptionKey') || undefined;
 
   const paramsPartnerId = searchParams.get('partnerId');
 
-  const portalBackgroundColor = validateColorInput(searchParams.get('portalBackgroundColor')) ?
-    searchParams.get('portalBackgroundColor') :
-    'white';
-  const portalPrimaryButtonColor = validateColorInput(searchParams.get('portalPrimaryButtonColor')) ?
-    decodeURIComponent(searchParams.get('portalPrimaryButtonColor')) :
-    'black';
-  const portalTextColor = validateColorInput(searchParams.get('portalTextColor')) ?
-    decodeURIComponent(searchParams.get('portalTextColor')) :
-    'black';
-  const portalPrimaryButtonTextColor = validateColorInput(searchParams.get('portalPrimaryButtonTextColor')) ?
-    decodeURIComponent(searchParams.get('portalPrimaryButtonTextColor')) :
-    'white';
+  const portalBackgroundColor = validateColorInput(
+    searchParams.get('portalBackgroundColor'),
+  )
+    ? searchParams.get('portalBackgroundColor')
+    : 'white';
+  const portalPrimaryButtonColor = validateColorInput(
+    searchParams.get('portalPrimaryButtonColor'),
+  )
+    ? decodeURIComponent(searchParams.get('portalPrimaryButtonColor'))
+    : 'black';
+  const portalTextColor = validateColorInput(
+    searchParams.get('portalTextColor'),
+  )
+    ? decodeURIComponent(searchParams.get('portalTextColor'))
+    : 'black';
+  const portalPrimaryButtonTextColor = validateColorInput(
+    searchParams.get('portalPrimaryButtonTextColor'),
+  )
+    ? decodeURIComponent(searchParams.get('portalPrimaryButtonTextColor'))
+    : 'white';
   const [isFire, setIsFire] = useState(false);
-  const buttonText = loginDone ? 'Success!' : 'Login'
+  const buttonText = loginDone ? 'Success!' : 'Login';
 
   const login = useCallback(async () => {
     setIsLoggingIn(true);
-    await authLogin(paramsEmail, sessionId, encryptionKey, newDeviceSessionLookupId, newDeviceEncryptionKey).then((userId: string) => {
-      updateLoginDone(true);
-      setUserId(userId);
-      if (!paramsPartnerId || !partner?.policiesEnabled) {
-        setTimeout(function () {
-          window.close();
-        }, 200);
-      }
-    }).catch(e => {
-      console.error(e);
-    });
+    await authLogin(
+      paramsEmail,
+      sessionId,
+      encryptionKey,
+      newDeviceSessionLookupId,
+      newDeviceEncryptionKey,
+    )
+      .then((userId: string) => {
+        updateLoginDone(true);
+        setUserId(userId);
+        if (!paramsPartnerId || !partner?.policiesEnabled) {
+          setTimeout(function () {
+            window.close();
+          }, 200);
+        }
+      })
+      .catch((e) => {
+        console.error(e);
+      });
     setIsLoggingIn(false);
-  }, [paramsEmail, sessionId, encryptionKey, newDeviceSessionLookupId, newDeviceEncryptionKey]);
+  }, [
+    paramsEmail,
+    sessionId,
+    encryptionKey,
+    newDeviceSessionLookupId,
+    newDeviceEncryptionKey,
+  ]);
 
   const addThisDevice = () => {
     setAddDeviceFlowStep(AddDeviceFlowStep.PERFORM_EXISTING_LOGIN);
@@ -183,7 +217,9 @@ function AuthLogin() {
   useEffect(() => {
     async function getPartner() {
       if (paramsPartnerId) {
-        const detailsRes = (await userManagementClient.getPartner(paramsPartnerId)).data;
+        const detailsRes = (
+          await userManagementClient.getPartner(paramsPartnerId)
+        ).data;
         setPartner(detailsRes.partner);
         if (detailsRes.partner.name === 'fire') {
           setIsFire(true);
@@ -205,9 +241,10 @@ function AuthLogin() {
         const touchRes = await userManagementClient.touchSession();
         await capsule.setUserId(touchRes.data.userId);
         const fetchedWallets = (await capsule.fetchWallets()).filter(
-          wallet => !!wallet.address,
+          (wallet) => !!wallet.address,
         );
-        const temporaryShares = (await capsule.getTransmissionKeyShares(true)).data.temporaryShares;
+        const temporaryShares = (await capsule.getTransmissionKeyShares(true))
+          .data.temporaryShares;
 
         if (temporaryShares.length === fetchedWallets.length) {
           const authCreationURL = await capsule.getSetUpBiometricsURL(true);
@@ -226,7 +263,7 @@ function AuthLogin() {
       capsule.portalBackgroundColor = portalBackgroundColor;
       capsule.portalPrimaryButtonColor = portalPrimaryButtonColor;
       capsule.portalTextColor = portalTextColor;
-  
+
       await capsule.setEmail(paramsEmail);
       let touchRes = await userManagementClient.touchSession();
       if (!touchRes.data.sessionLookupId) {
@@ -253,7 +290,10 @@ function AuthLogin() {
       setBasePortalURL(portalURL);
     }
 
-    if (!newDeviceSessionLookupId && (addDeviceFlowStep === AddDeviceFlowStep.PERFORM_EXISTING_LOGIN)) {
+    if (
+      !newDeviceSessionLookupId &&
+      addDeviceFlowStep === AddDeviceFlowStep.PERFORM_EXISTING_LOGIN
+    ) {
       getPortalURL();
       getWebAuthURLForAddDevice();
       window.setTimeout(getTemporaryShares, 2000);
@@ -261,49 +301,107 @@ function AuthLogin() {
   }, [addDeviceFlowStep]);
 
   if (addDeviceFlowStep === AddDeviceFlowStep.PERFORM_EXISTING_LOGIN) {
-    return (paramsPartnerId && !partner) ? undefined : (urlForNewDeviceLogin && (
-      <ChakraProvider theme={getPartnerTheme(portalBackgroundColor, portalPrimaryButtonColor, portalTextColor)}>
-        <Container textColor={portalTextColor} color={portalBackgroundColor} maxW="ld" padding={10}>
-          <BetaBanner />
-          <Flex alignItems="center" justifyContent="center" mb="10%">
-            <Image
-              src={partner?.portalHeaderLogoUrl || '/wordmark_black.svg'}
-              alt="Logo"
-            />
-          </Flex>
-          <Heading fontFamily={isFire && "ClashDisplay"} textAlign='center' fontSize="4vh" mb="10%">
-            Add Device
-          </Heading>
-          <Text fontFamily={isFire && "Manrope"} textAlign='center' mb={8}>We see you've already set up Capsule on another device</Text>
-          <Text fontFamily={isFire && "Manrope"} textAlign='center' mb={8}>Please log in to Capsule on your other device by scanning this QR code</Text>
+    return paramsPartnerId && !partner
+      ? undefined
+      : urlForNewDeviceLogin && (
+          <ChakraProvider
+            theme={getPartnerTheme(
+              portalBackgroundColor,
+              portalPrimaryButtonColor,
+              portalTextColor,
+            )}
+          >
+            <Container
+              textColor={portalTextColor}
+              color={portalBackgroundColor}
+              maxW="ld"
+              padding={10}
+            >
+              <BetaBanner />
+              <Flex alignItems="center" justifyContent="center" mb="10%">
+                <Image
+                  src={partner?.portalHeaderLogoUrl || '/wordmark_black.svg'}
+                  alt="Logo"
+                />
+              </Flex>
+              <Heading
+                fontFamily={isFire && 'ClashDisplay'}
+                textAlign="center"
+                fontSize="4xl"
+                mb="10%"
+              >
+                Add Device
+              </Heading>
+              <Text
+                fontFamily={isFire && 'Manrope'}
+                textAlign="center"
+                mb={8}
+                fontSize="md"
+              >
+                We see you've already set up Capsule on another device
+              </Text>
+              <Text
+                fontFamily={isFire && 'Manrope'}
+                textAlign="center"
+                mb={8}
+                fontSize="md"
+              >
+                Please log in to Capsule on your other device by scanning this
+                QR code or copying the link and sending it to your device with
+                Capsule Set Up
+              </Text>
 
-          <Flex justifyContent="center">
-            <QRCode value={urlForNewDeviceLogin}/>
-          </Flex>
-          <Text fontFamily={isFire && "Manrope"} align="center" marginTop={3} mb={8}>Or copy <Link isExternal href={urlForNewDeviceLogin} textDecoration="underline">this link</Link>
-            <Button marginLeft={2} h="38px" onClick={onCopy} size="sm">
-              <Box position="absolute">
-                <Copy />
+              <Flex justifyContent="center">
+                <QRCode value={urlForNewDeviceLogin} />
+              </Flex>
+              <Flex mt={3} mb={8} justifyContent="center">
+                <CopyButton
+                  onCopy={onCopy}
+                  copyStatus={hasCopied ? 'Copied' : 'Copy'}
+                  copyButtonDisabled={hasCopied}
+                />
+              </Flex>
+              <Text
+                fontFamily={isFire && 'Manrope'}
+                textAlign="center"
+                fontSize="md"
+              >
+                If you are unable to log in to any existing devices, you will
+                need to recover your account.{' '}
+                <Link href={basePortalURL} textDecoration="underline">
+                  Recover My Account
+                </Link>
+              </Text>
+            </Container>
+            {paramsPartnerId && (
+              <Box
+                backgroundColor={portalBackgroundColor}
+                height="62px"
+                width="100%"
+              >
+                <Flex
+                  backgroundColor={portalBackgroundColor}
+                  h="57px"
+                  w="100%"
+                  justifyContent={'center'}
+                  alignItems={'center'}
+                >
+                  <PoweredByCapsule color={portalTextColor} w={50} h={20} />
+                </Flex>
               </Box>
-            </Button>
-            {hasCopied ? ' Link Copied!' : undefined}
-          </Text>
-          <Text fontFamily={isFire && "Manrope"} textAlign='center'>
-            If you are unable to log in to any existing devices, you will need to recover your account.{' '}
-            <Link href={basePortalURL} textDecoration="underline">Recover My Account</Link>
-          </Text>
-        </Container>
-        {paramsPartnerId && <Box backgroundColor={portalBackgroundColor} height="62px" width="100%">
-          <Flex backgroundColor={portalBackgroundColor} h="57px" w="100%" justifyContent={'center'} alignItems={'center'}>
-            <PoweredByCapsule color={portalTextColor} w={50} h={20} />
-          </Flex>
-        </Box>}
-      </ChakraProvider>
-    ));
+            )}
+          </ChakraProvider>
+        );
   }
 
-  return (paramsPartnerId && !partner) ? undefined : (
-    <ChakraProvider theme={getPartnerTheme(portalBackgroundColor, portalPrimaryButtonColor, portalTextColor)}>
+  return paramsPartnerId && !partner ? undefined : (
+    <ChakraProvider
+      theme={getPartnerTheme(
+        portalBackgroundColor,
+        portalPrimaryButtonColor,
+        portalTextColor,
+      )}
+    >
       <Container color="white" maxW="ld" padding={10}>
         <BetaBanner />
         {/* if first time logging into app, then need to accept scopes */}
@@ -324,36 +422,67 @@ function AuthLogin() {
             isLogin
           ></PermissionSelection>
         )}
-        <Heading fontFamily={isFire && "ClashDisplay"} textAlign='center' fontSize="8vh" mb="6%">
-          {newDeviceSessionLookupId ? 'Login to Authenticate New Device' : 'Login'}
-        </Heading>
-        <Text fontFamily={isFire && "Manrope"} textAlign='center' fontSize="2.5vh" mb="8%">
-          {newDeviceSessionLookupId ?
-            'It looks like you\'re trying to add Capsule to a new device.' :
-            <>Log in {paramsPartnerId && `to ${partner.displayName}`} with your Capsule passkey for <strong>{paramsEmail}</strong></>}
-        </Text>
-        {!newDeviceSessionLookupId && <Text fontFamily={isFire && "Manrope"} textAlign='center' fontSize="2.5vh" mb="8%">
-          If you've previously logged in on a different device, or there is an error finding your key on this device,
-          you should select <strong>Add This Device</strong> below.
-          <a href="https://docs.usecapsule.com/users/faq" target='_blank' rel='noreferrer'>
-            {' '}
-            <u>Learn More</u>
-          </a>
-        </Text>}
-        <Container width="100%" display="flex" justifyContent="center">
-        <Button
-          bg={portalPrimaryButtonColor}
-          onClick={login}
-          p="2.5vh"
-          fontSize="2.5vh"
-          width="42.5vh"
-          alignSelf={'center'}
-          height='9vh'
-          fontFamily={isFire && "Manrope"}
+        <Heading
+          fontFamily={isFire && 'ClashDisplay'}
+          textAlign="center"
+          fontSize="4xl"
+          mb="6%"
         >
-          {isLoggingIn
-            ? <Spinner as="span" color={portalPrimaryButtonTextColor} />
-            : <Text color={portalPrimaryButtonTextColor}>{buttonText}</Text>}
+          {newDeviceSessionLookupId
+            ? 'Login to Authenticate New Device'
+            : 'Login'}
+        </Heading>
+        <Text
+          fontFamily={isFire && 'Manrope'}
+          textAlign="center"
+          fontSize="md"
+          mb="8%"
+        >
+          {newDeviceSessionLookupId ? (
+            "It looks like you're trying to add Capsule to a new device."
+          ) : (
+            <>
+              Log in {paramsPartnerId && `to ${partner.displayName}`} with your
+              Capsule passkey for <strong>{paramsEmail}</strong>
+            </>
+          )}
+        </Text>
+        {!newDeviceSessionLookupId && (
+          <Text
+            fontFamily={isFire && 'Manrope'}
+            textAlign="center"
+            fontSize="md"
+            mb="8%"
+          >
+            If you've previously logged in on a different device, or there is an
+            error finding your key on this device, you should select{' '}
+            <strong>Add This Device</strong> below.
+            <a
+              href="https://docs.usecapsule.com/users/faq"
+              target="_blank"
+              rel="noreferrer"
+            >
+              {' '}
+              <u>Learn More</u>
+            </a>
+          </Text>
+        )}
+        <Container width="100%" display="flex" justifyContent="center">
+          <Button
+            bg={portalPrimaryButtonColor}
+            onClick={login}
+            p="2.5vh"
+            fontSize="md"
+            width="42.5vh"
+            alignSelf={'center'}
+            height="9vh"
+            fontFamily={isFire && 'Manrope'}
+          >
+            {isLoggingIn ? (
+              <Spinner as="span" color={portalPrimaryButtonTextColor} />
+            ) : (
+              <Text color={portalPrimaryButtonTextColor}>{buttonText}</Text>
+            )}
           </Button>
         </Container>
         {!newDeviceSessionLookupId && (
@@ -366,31 +495,48 @@ function AuthLogin() {
             padding={3}
           >
             <Button
-              style={{ backgroundColor: "rgba(0, 0, 0, 0)" }}
+              style={{ backgroundColor: 'rgba(0, 0, 0, 0)' }}
               onClick={addThisDevice}
               p="2.5vh"
-              fontSize="2.5vh"
+              fontSize="md"
               maxWidth="50%"
               alignSelf={'center'}
             >
-              <Text color={portalTextColor} fontFamily={isFire && "Manrope"} as='u'>Add This Device</Text>
+              <Text
+                color={portalTextColor}
+                fontFamily={isFire && 'Manrope'}
+                as="u"
+              >
+                Add This Device
+              </Text>
             </Button>
             {loginDone && (
-              <Text fontFamily={isFire && "Manrope"} color={portalTextColor || "green"} size="lg">
-                Login Complete. You can close this window if it does not automatically redirect...
+              <Text
+                fontFamily={isFire && 'Manrope'}
+                color={portalTextColor || 'green'}
+                fontSize="md"
+              >
+                Login Complete. You can close this window if it does not
+                automatically redirect...
               </Text>
             )}
-            {paramsPartnerId && <Box backgroundColor={portalBackgroundColor} height="62px" width="100%">
-              <Flex
+            {paramsPartnerId && (
+              <Box
                 backgroundColor={portalBackgroundColor}
-                h="57px"
-                w="100%"
-                justifyContent="center"
-                alignItems="center"
+                height="62px"
+                width="100%"
               >
-                <PoweredByCapsule color={portalTextColor} w={50} h={20} />
-              </Flex>
-            </Box>}
+                <Flex
+                  backgroundColor={portalBackgroundColor}
+                  h="57px"
+                  w="100%"
+                  justifyContent="center"
+                  alignItems="center"
+                >
+                  <PoweredByCapsule color={portalTextColor} w={50} h={20} />
+                </Flex>
+              </Box>
+            )}
           </Container>
         )}
       </Container>
