@@ -23,9 +23,13 @@ async function recoverUserShare(userId: string, walletId: string, serializedReco
 
 type RecoverWalletWithSecretStepProps = {
     setWebAuthURLForCreate: (webAuthURLForCreate: string | null) => void;
+    setUserShare: (userShare: string | null) => void;
 }
 
-const RecoverWalletWithSecretStep: React.FC<RecoverWalletWithSecretStepProps> = ({ setWebAuthURLForCreate }) => {
+const RecoverWalletWithSecretStep: React.FC<RecoverWalletWithSecretStepProps> = ({
+    setWebAuthURLForCreate,
+    setUserShare,
+}) => {
 
     const { setCurrentRecoveryStep } = useContext(RecoveryStepContext);
     const { email } = useContext(EmailContext);
@@ -84,7 +88,8 @@ const RecoverWalletWithSecretStep: React.FC<RecoverWalletWithSecretStepProps> = 
                 width="100%"
                 onClick={async () => {
                     try {
-                        await recoverUserShare(userId, walletId, secret);
+                        const userShare = await recoverUserShare(userId, walletId, secret);
+                        setUserShare(userShare);
                         setIncorrectCode(false);
                         await capsule.setEmail(email);
                         await capsule.setUserId(userId);

@@ -3,9 +3,13 @@ import React, { useState, useEffect, useContext } from 'react';
 import { RecoveryStatus } from '../../../library/Capsule';
 import RecoverWalletButton from './RecoverWalletButton';
 import { RecoveryAttemptContext } from '../../contexts/RecoveryAttemptContext';
+import { ENV } from '../../../definitions';
+import { Environment } from '../../../library';
 
-const RECOVERY_INITIATED_HOURS = 48;
-const RECOVERY_READY_HOURS = 72;
+const RECOVERY_INITIATED_MINUTES = 48 * 60;
+const RECOVERY_INITIATED_MINUTES_NOT_PROD = 10;
+const RECOVERY_READY_MINUTES = 72 * 60;
+const RECOVERY_READY_MINUTES_NOT_PROD = 60;
 const SECONDS_IN_HOUR = 3600;
 const SECONDS_IN_MINUTE = 60;
 
@@ -18,16 +22,22 @@ interface TimeRemaining {
 
 const getTimeRemaining = (status: RecoveryStatus, initiatedAt: Date): TimeRemaining => {
   const now = new Date();
-  let targetTime;
+  let targetTime: Date;
 
   switch (status) {
     case RecoveryStatus.INITIATED:
       targetTime = new Date(initiatedAt);
-      targetTime.setHours(targetTime.getHours() + RECOVERY_INITIATED_HOURS);
+      targetTime.setMinutes(ENV === Environment.PROD ?
+        targetTime.getMinutes() + RECOVERY_INITIATED_MINUTES :
+        targetTime.getMinutes() + RECOVERY_INITIATED_MINUTES_NOT_PROD,
+      );
       break;
     case RecoveryStatus.READY:
       targetTime = new Date(initiatedAt);
-      targetTime.setHours(targetTime.getHours() + RECOVERY_READY_HOURS);
+      targetTime.setMinutes(ENV === Environment.PROD ?
+        targetTime.getMinutes() + RECOVERY_READY_MINUTES :
+        targetTime.getMinutes() + RECOVERY_READY_MINUTES_NOT_PROD,
+      );
       break;
     case RecoveryStatus.EXPIRED:
       return { hours: 0, minutes: 0, seconds: 0, message: 'Time Expired' };

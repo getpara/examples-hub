@@ -34,6 +34,9 @@ export async function sendRecoveryForShare(
       : [userBackupKeyShareOpts]),
   ]);
 
-  await ctx.capsuleClient.distributeCapsuleShare(userId, walletId, ctx.useDKLS);
+  if (!ignoreRedistributingBackupEncryptedShare) {
+    await ctx.capsuleClient.distributeCapsuleShare(userId, walletId, ctx.useDKLS);
+  }
+
   return JSON.stringify(recoveryPrivateKeyContainer);
 }

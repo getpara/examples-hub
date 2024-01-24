@@ -28,7 +28,7 @@ export class KeyContainer {
         return Object.assign(new KeyContainer('', '', ''), parsedObject);
     } catch (e) {
         const container = new KeyContainer('', '', '');
-        container.backupDecryptionKey = serializedContainer;
+        container.backupDecryptionKey = serializedContainer.split('|')[0];
         return container;
     }
   }
