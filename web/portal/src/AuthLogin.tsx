@@ -327,7 +327,7 @@ function AuthLogin() {
               <Heading
                 fontFamily={isFire && 'ClashDisplay'}
                 textAlign="center"
-                fontSize="4xl"
+                fontSize="4vh"
                 mb="10%"
               >
                 Add Device
@@ -336,7 +336,6 @@ function AuthLogin() {
                 fontFamily={isFire && 'Manrope'}
                 textAlign="center"
                 mb={8}
-                fontSize="md"
               >
                 We see you've already set up Capsule on another device
               </Text>
@@ -344,7 +343,6 @@ function AuthLogin() {
                 fontFamily={isFire && 'Manrope'}
                 textAlign="center"
                 mb={8}
-                fontSize="md"
               >
                 Please log in to Capsule on your other device by scanning this
                 QR code or copying the link and sending it to your device with
@@ -364,7 +362,6 @@ function AuthLogin() {
               <Text
                 fontFamily={isFire && 'Manrope'}
                 textAlign="center"
-                fontSize="md"
               >
                 If you are unable to log in to any existing devices, you will
                 need to recover your account.{' '}
@@ -425,7 +422,7 @@ function AuthLogin() {
         <Heading
           fontFamily={isFire && 'ClashDisplay'}
           textAlign="center"
-          fontSize="4xl"
+          fontSize="8vh"
           mb="6%"
         >
           {newDeviceSessionLookupId
@@ -435,7 +432,7 @@ function AuthLogin() {
         <Text
           fontFamily={isFire && 'Manrope'}
           textAlign="center"
-          fontSize="md"
+          fontSize="2.5vh"
           mb="8%"
         >
           {newDeviceSessionLookupId ? (
@@ -451,7 +448,7 @@ function AuthLogin() {
           <Text
             fontFamily={isFire && 'Manrope'}
             textAlign="center"
-            fontSize="md"
+            fontSize="2.5vh"
             mb="8%"
           >
             If you've previously logged in on a different device, or there is an
@@ -472,7 +469,7 @@ function AuthLogin() {
             bg={portalPrimaryButtonColor}
             onClick={login}
             p="2.5vh"
-            fontSize="md"
+            fontSize="2.5vh"
             width="42.5vh"
             alignSelf={'center'}
             height="9vh"
@@ -498,7 +495,7 @@ function AuthLogin() {
               style={{ backgroundColor: 'rgba(0, 0, 0, 0)' }}
               onClick={addThisDevice}
               p="2.5vh"
-              fontSize="md"
+              fontSize="2.5vh"
               maxWidth="50%"
               alignSelf={'center'}
             >
@@ -514,7 +511,7 @@ function AuthLogin() {
               <Text
                 fontFamily={isFire && 'Manrope'}
                 color={portalTextColor || 'green'}
-                fontSize="md"
+                size="lg"
               >
                 Login Complete. You can close this window if it does not
                 automatically redirect...

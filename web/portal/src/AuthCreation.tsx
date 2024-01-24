@@ -164,18 +164,18 @@ function AuthCreation() {
                   alt="Logo"
                 />
               </Flex>
-              <Heading fontFamily={isFire && "ClashDisplay"} fontSize="4xl" mb="10%">
+              <Heading fontFamily={isFire && "ClashDisplay"} fontSize="4vh" mb="10%">
                 Finish Adding Device
               </Heading>
-              <Text fontFamily={isFire && "Manrope"} fontSize="md" mb="10%">You successfully authenticated with Capsule on another device.</Text>
-              <Text fontFamily={isFire && "Manrope"} fontSize="md" mb="10%">Finally, please finish adding this device.</Text>
+              <Text fontFamily={isFire && "Manrope"} fontSize="2.5vh" mb="10%">You successfully authenticated with Capsule on another device.</Text>
+              <Text fontFamily={isFire && "Manrope"} fontSize="2.5vh" mb="10%">Finally, please finish adding this device.</Text>
 
               <Container width="100%" display="flex" justifyContent="center">
                 <Button
                   colorScheme="green"
                   onClick={setUpBiometrics}
                   p="2.5vh"
-                  fontSize="2xl"
+                  fontSize="2.5vh"
                   maxWidth="100%"
                   alignSelf={'center'}
                   fontFamily={isFire && "Manrope"}
@@ -223,12 +223,12 @@ function AuthCreation() {
               />
             </Flex>
             <Box>
-              <Heading fontFamily={isFire && "ClashDisplay"} textAlign='center' mb="10%">
-                <Text fontWeight={500} fontSize='4xl'>
+              <Heading fontFamily={isFire && "ClashDisplay"} textAlign='center' mb="10%" fontSize="4vh">
+                <Text fontWeight={500} fontSize='8vh'>
                   Set up passkey
                 </Text>
               </Heading>
-              <Text fontFamily={isFire && "Manrope"} textAlign='center' fontSize="md" mb="5%">
+              <Text fontFamily={isFire && "Manrope"} textAlign='center' fontSize="2.5vh" mb="5%">
                 {
                 partner ? 
                 <><strong>{partner.displayName}</strong> is using Capsule to create your wallet. 
@@ -236,7 +236,7 @@ function AuthCreation() {
                 : <>Authenticate with Capsule to create your wallet. To continue, you will need to set up a Capsule passkey for <strong>{paramsEmail}</strong></>
                 }
               </Text>
-              <Text fontFamily={isFire && "Manrope"} textAlign='center' fontSize="md" mb="20%">
+              <Text fontFamily={isFire && "Manrope"} textAlign='center' fontSize="2.5vh" mb="20%">
                 This passkey will let you access your wallet from many different applications.
                 <a href="https://docs.usecapsule.com/users/faq" target='_blank' rel='noreferrer'>
                   {' '}
@@ -249,7 +249,7 @@ function AuthCreation() {
                   bg={portalPrimaryButtonColor}
                   onClick={setUpBiometrics}
                   p="2.5vh"
-                  fontSize="2xl"
+                  fontSize="3vh"
                   w="25vw"
                   alignSelf={'center'}
                   height='9vh'
