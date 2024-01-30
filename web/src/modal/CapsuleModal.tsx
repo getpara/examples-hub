@@ -47,6 +47,7 @@ interface CapsuleModalProps {
   appName: string;
   createWalletOverride?: (capsule: Capsule | CoreCapsule) => Promise<string>;
   loginTransitionOverride?: (capsule: Capsule | CoreCapsule) => Promise<void>;
+  currentStepOverride?: string | undefined;
 }
 
 const themeResolve: Record<string, Theme> = {
@@ -68,6 +69,7 @@ export const CapsuleModal = ({
   onRampAvailable = false,
   createWalletOverride,
   loginTransitionOverride,
+  currentStepOverride,
 }: CapsuleModalProps) => {
   const resolvedTheme = typeof theme === 'string' ? themeResolve[theme] : theme;
   const [email, setEmail] = useState(capsule.getEmail());
@@ -107,6 +109,12 @@ export const CapsuleModal = ({
   const loginTimeout = useRef<number>();
 
   const [isLogin, setIsLogin] = useState(false);
+
+  useEffect(() => {
+    if (currentStepOverride) {
+      setCurrentStep(currentStepOverride as ModalStep);
+    }
+  }, [currentStepOverride]);
 
   const is2FASetup = async () => {
     try {
@@ -438,6 +446,9 @@ export function CapsuleButton({
     displayOverride?: ReactNode;
     onCloseOverride?: () => void;
     buttonProps?: ButtonProps | undefined;
+    modalIsOpenOverride?: boolean | undefined;
+    setModalIsOpenOverride?: ((isOpen: boolean) => void) | undefined;
+    currentStepOverride?: string | undefined;
   };
 }) {
   const {
@@ -448,6 +459,9 @@ export function CapsuleButton({
     displayOverride,
     onCloseOverride,
     buttonProps,
+    modalIsOpenOverride,
+    setModalIsOpenOverride,
+    currentStepOverride,
   } = overrides || {};
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [address, setAddress] = useState(
@@ -466,7 +480,7 @@ export function CapsuleButton({
     <ChakraProvider theme={newTheme}>
       <CapsuleModal
         appName={appName}
-        isOpen={modalIsOpen}
+        isOpen={modalIsOpenOverride ?? modalIsOpen}
         onClose={async () => {
           if (await capsule.isSessionActive()) {
             const newAddress = Object.values(capsule.getWallets())?.[0]?.address;
@@ -476,12 +490,13 @@ export function CapsuleButton({
           if (onCloseOverride) {
             onCloseOverride();
           }
-          setModalIsOpen(false);
+          setModalIsOpenOverride ? setModalIsOpenOverride(false) : setModalIsOpen(false);
         }}
         theme={newTheme}
         capsule={capsule}
         createWalletOverride={createWalletOverride}
         loginTransitionOverride={loginTransitionOverride}
+        currentStepOverride={currentStepOverride}
       />
       <HStack>
         {(isSessionActive && address && !displayOverride) ? (
@@ -507,7 +522,7 @@ export function CapsuleButton({
                 setIsSessionActive(false);
               });
             } else {
-              setModalIsOpen(true);
+              setModalIsOpenOverride ? setModalIsOpenOverride(true) : setModalIsOpen(true);
             }
           }}
           {...buttonProps}
