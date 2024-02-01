@@ -509,6 +509,9 @@ export function CapsuleButton({
           height={'50px'}
           backgroundColor={'brand.background'}
           color={'white'}
+          _hover={{
+            backgroundColor: 'rgba(0, 0, 0, 0.5)'
+          }}
           onClick={async (e) => {
             if (onClickOverride) {
               onClickOverride(e);
