@@ -22,12 +22,14 @@ export function RecoverySecretStep({
   currentStep,
   recoveryShare,
   email,
-  setCurrentStep
+  setCurrentStep,
+  twoFactorAuthEnabled
 }: {
   currentStep: ModalStep;
   recoveryShare: string;
   email: string;
   setCurrentStep: (newValue: ModalStep) => void;
+  twoFactorAuthEnabled?: boolean;
 }) {
 
   const LIGHT_GRAY = '#212327';
@@ -190,7 +192,7 @@ export function RecoverySecretStep({
           </Link>
           .
         </Text>
-        <Button onClick={() => setCurrentStep(ModalStep.SETUP_2FA)} marginTop='44px' width='100%'>
+        <Button onClick={() => setCurrentStep(!twoFactorAuthEnabled ? ModalStep.LOGIN_DONE : ModalStep.SETUP_2FA)} marginTop='44px' width='100%'>
           <Text 
             fontWeight={500}
             lineHeight='28px'

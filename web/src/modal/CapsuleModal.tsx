@@ -48,6 +48,7 @@ interface CapsuleModalProps {
   createWalletOverride?: (capsule: Capsule | CoreCapsule) => Promise<string>;
   loginTransitionOverride?: (capsule: Capsule | CoreCapsule) => Promise<void>;
   currentStepOverride?: string | undefined;
+  twoFactorAuthEnabled?: boolean;
 }
 
 const themeResolve: Record<string, Theme> = {
@@ -70,6 +71,7 @@ export const CapsuleModal = ({
   createWalletOverride,
   loginTransitionOverride,
   currentStepOverride,
+  twoFactorAuthEnabled = true
 }: CapsuleModalProps) => {
   const resolvedTheme = typeof theme === 'string' ? themeResolve[theme] : theme;
   const [email, setEmail] = useState(capsule.getEmail());
@@ -117,6 +119,9 @@ export const CapsuleModal = ({
   }, [currentStepOverride]);
 
   const is2FASetup = async () => {
+    if(!twoFactorAuthEnabled){
+      return true
+    }
     try {
       const { isSetup } = await capsule.check2FAStatus();
       return isSetup;
@@ -382,6 +387,7 @@ export const CapsuleModal = ({
                   currentStep={currentStep}
                   email={email}
                   setCurrentStep={setCurrentStep}
+                  twoFactorAuthEnabled={twoFactorAuthEnabled}
                 />
                 {currentStep === ModalStep.LOGIN_DONE && <LoginDoneStep
                   onClose={onClose}
@@ -434,10 +440,12 @@ function Helper() {
 export function CapsuleButton({
   capsule,
   appName,
+  twoFactorAuthEnabled,
   overrides,
 }: {
   capsule: Capsule | CoreCapsule;
   appName: string;
+  twoFactorAuthEnabled?: boolean;
   overrides?: {
     createWalletOverride?: (capsule: Capsule | CoreCapsule) => Promise<string>;
     loginTransitionOverride?: (capsule: Capsule | CoreCapsule) => Promise<void>;
@@ -461,7 +469,7 @@ export function CapsuleButton({
     buttonProps,
     modalIsOpenOverride,
     setModalIsOpenOverride,
-    currentStepOverride,
+    currentStepOverride
   } = overrides || {};
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [address, setAddress] = useState(
@@ -497,6 +505,7 @@ export function CapsuleButton({
         createWalletOverride={createWalletOverride}
         loginTransitionOverride={loginTransitionOverride}
         currentStepOverride={currentStepOverride}
+        twoFactorAuthEnabled={twoFactorAuthEnabled}
       />
       <HStack>
         {(isSessionActive && address && !displayOverride) ? (
