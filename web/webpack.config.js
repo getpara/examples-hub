@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 
 module.exports = {
   entry: {
@@ -14,5 +15,10 @@ module.exports = {
   optimization: {
     minimize: true,
   },
+  plugins: [
+    new webpack.EnvironmentPlugin({
+      'DISABLE_WASM_FETCH': 'false',
+    }),
+  ],
   mode: 'production'
 };

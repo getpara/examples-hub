@@ -27,6 +27,10 @@ async function loadWasm(ctx: Ctx, wasmOverride?: ArrayBuffer) {
   const goWasm = new self.Go();
   let wasmArrayBuffer = wasmOverride;
   if (!wasmArrayBuffer) {
+    if (process.env.DISABLE_WASM_FETCH === 'true') {
+      throw new Error('fetching wasm file is disabled');
+    }
+
     const fetchedWasm = await fetch(
       `${getPortalBaseURL(ctx)}/static/js/main.wasm`,
       { mode: 'cors' },
