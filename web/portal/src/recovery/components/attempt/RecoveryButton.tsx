@@ -21,6 +21,7 @@ const RecoveryButton: React.FC = () => {
             height={'50px'}
             backgroundColor={'brand.background'}
             color={'white'}
+            display='flex'
             onClick={async () => {
                 if (address) {
                     setEmail(null);

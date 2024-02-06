@@ -21,6 +21,7 @@ const RecoverWalletButton: React.FC = () => {
                 height={'50px'}
                 backgroundColor={'brand.background'}
                 color={'white'}
+                display='flex'
                 onClick={() => setModalIsOpen(true)}
             >
                 <RecoveryWalletModal onClose={() => {
