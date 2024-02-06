@@ -1,20 +1,22 @@
 import { Box, Flex } from '@chakra-ui/react';
-import CapsuleSmall from './assets/capsuleSmall';
+import HeaderLogo from './assets/headerLogo';
 import React from 'react';
 import Exit from './assets/exit';
 
 export function Header({
   step = 0,
+  logoUrl,
   onClose,
 }: {
   step?: number;
+  logoUrl?: string;
   onClose: () => void;
 }) {
   return (
     <Box height="62px" width="100%">
       {/* @ts-ignore */}
       <Flex h="57px" w="100%" justifyContent={'center'} alignItems={'center'}>
-        <CapsuleSmall w={19} h={32} />
+        <HeaderLogo h={32} url={logoUrl}/>
         <Box
           cursor="pointer"
           onClick={onClose}
@@ -35,7 +37,7 @@ export function Header({
           h="5px"
           borderRadius="8px"
           backgroundColor={
-            step >= 1 ? 'brand.content' : 'brand.contentSecondary'
+            step >= 1 ? 'brand.button' : 'brand.contentSecondary'
           }
         />
         <Box
@@ -43,7 +45,7 @@ export function Header({
           h="5px"
           borderRadius="8px"
           backgroundColor={
-            step >= 2 ? 'brand.content' : 'brand.contentSecondary'
+            step >= 2 ? 'brand.button' : 'brand.contentSecondary'
           }
         />
         <Box
@@ -51,7 +53,7 @@ export function Header({
           h="5px"
           borderRadius="8px"
           backgroundColor={
-            step >= 3 ? 'brand.content' : 'brand.contentSecondary'
+            step >= 3 ? 'brand.button' : 'brand.contentSecondary'
           }
         />
         <Box
@@ -59,7 +61,7 @@ export function Header({
           h="5px"
           borderRadius="8px"
           backgroundColor={
-            step >= 4 ? 'brand.content' : 'brand.contentSecondary'
+            step >= 4 ? 'brand.button' : 'brand.contentSecondary'
           }
         />
         <Box
@@ -67,7 +69,7 @@ export function Header({
           h="5px"
           borderRadius="8px"
           backgroundColor={
-            step >= 5 ? 'brand.content' : 'brand.contentSecondary'
+            step >= 5 ? 'brand.button' : 'brand.contentSecondary'
           }
         />
       </Flex>

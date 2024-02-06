@@ -9,10 +9,8 @@ const CustomButton = ({ openPopup, webAuthURL, text }) => {
     alignItems: 'center',
     justifyContent: 'center',
     padding: '10px 15px',
-    backgroundColor: 'white',
-    color: 'black',
-    border: 'none',
-    borderRadius: '4px',
+    border: `2px solid`,
+    borderRadius: '5px',
     cursor: 'pointer',
   };
 

@@ -19,11 +19,6 @@ export function BiometricLoginStep({
   webAuthURLForLogin: string;
   capsule: Capsule | CoreCapsule;
 }) {
-  const {
-    colors: {
-      brand: { dimmed: bgColor, background: fgColor },
-    },
-  } = useTheme();
 
   const [shortLoginLink, setShortLoginLink] = useState<string>(webAuthURLForLogin);
 
@@ -56,7 +51,7 @@ export function BiometricLoginStep({
       <Text position='relative' top='-4px' fontSize="22px">Finish login</Text>
       <Box
         cursor="pointer"
-        backgroundColor="brand.dimmed"
+        backgroundColor="brand.button"
         borderRadius="12px"
         padding="12px"
         onClick={() => openPopup(shortLoginLink)}
@@ -64,8 +59,7 @@ export function BiometricLoginStep({
         height='188px'
       >
         <QRCode
-          fgColor={fgColor}
-          bgColor={bgColor}
+          fgColor='brand.text'
           size={165}
           value={shortLoginLink}
         />

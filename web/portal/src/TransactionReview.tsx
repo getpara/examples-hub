@@ -13,7 +13,7 @@ import { generateSignature } from './library/cryptography/webAuth';
 import CapsuleBox from "./assets/CapsuleBox";
 import PoweredByCapsule from "./assets/poweredByCapsule";
 import ScatteredDivider from "./assets/scatteredDivider";
-import {newTheme} from "./library/modal/theme";
+import {darkTheme} from "./library/modal/theme";
 import { ENV } from './definitions';
 
 function TransactionReview() {
@@ -65,7 +65,7 @@ function TransactionReview() {
     return <div></div>;
   }
   return (
-    <ChakraProvider theme={newTheme}>
+    <ChakraProvider theme={darkTheme}>
       <Box height="100%" padding="32px" paddingBottom="0px" marginBottom="-46px">
         <VStack alignItems="center" color="white" maxW="ld">
           <Text fontSize="m" textAlign="center">

@@ -7,6 +7,7 @@ import {
   MenuItem,
   MenuButton,
   Text,
+  HStack,
   VStack,
   useClipboard,
   MenuList,
@@ -33,7 +34,6 @@ export function RecoverySecretStep({
 }) {
 
   const LIGHT_GRAY = '#212327';
-  const HOVER_COLOR = '#f1fff1';
   const backupDecryptionKey = JSON.parse(recoveryShare || '{}').backupDecryptionKey;
 
   const { onCopy, hasCopied } = useClipboard(backupDecryptionKey);
@@ -76,12 +76,9 @@ export function RecoverySecretStep({
           Recovery secret
         </Text>
         <Box position="relative" width="fit-content" marginTop='4px'>
-          <Input 
+          <Input
+            value={backupDecryptionKey}
             textColor="brand.text"
-            value={backupDecryptionKey} 
-            borderColor='brand.frameColor'
-            border="1px solid rgba(255, 255, 255, 0.1)"
-            background="rgba(255, 255, 255, 0.05)"
             paddingRight="115px"
             whiteSpace="nowrap"
             overflow="hidden"
@@ -93,14 +90,13 @@ export function RecoverySecretStep({
             right="6px"
             top="50%"
             transform="translateY(-50%)" 
-            onClick={onCopy} 
-            bg={LIGHT_GRAY} 
-            _hover={{ bg: HOVER_COLOR, textColor: '#000000' }}
+            backgroundColor='brand.secondaryButtonBg'
             textColor='brand.text'
+            onClick={onCopy} 
             height="75%"
             zIndex={10}
           >
-            <div style={{ marginRight: '8px' }}>
+            <div style={{ marginRight: '8px', display:'inline-block' }}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
@@ -124,31 +120,29 @@ export function RecoverySecretStep({
           { /* @ts-ignore */ }
           <MenuButton 
             textColor="brand.text"
-            bg={LIGHT_GRAY} 
+            backgroundColor={'brand.secondaryButtonBg'}
             as={Button} 
             rightIcon={
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 32 32" fill="none">
-                <path d="M26 12L16 22L6 12" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M26 12L16 22L6 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             }
             width='274px'
             marginTop='12px'
-            _hover={{ bg: HOVER_COLOR, textColor: 'black' }}
-            _expanded={{ bg: LIGHT_GRAY, textColor: 'brand.text'}}
           >
             More backup options
           </MenuButton>
           {/* @ts-ignore */}
           <MenuList 
             textColor="brand.text"
-            bg={LIGHT_GRAY} 
+            backgroundColor='brand.secondaryButtonBg'
             width='274px'
             border='none'
           >
             <Link href={getMailtoLink(email, backupDecryptionKey)} isExternal>
               <MenuItem 
-                _focus={{ bg: lighten(0.05, LIGHT_GRAY) }}
                 justifyContent="center"
+                backgroundColor='brand.secondaryButtonBg'
               >
                 <Flex alignItems="center">
                   <div style={{ marginRight: '8px' }}>
@@ -163,8 +157,8 @@ export function RecoverySecretStep({
             </Link>
             {/* @ts-ignore */}
             <MenuItem 
-              _focus={{ bg: lighten(0.05, LIGHT_GRAY) }}
               justifyContent="center"
+              backgroundColor='brand.secondaryButtonBg'
               onClick={handleDownload}
             >
               <Flex alignItems="center">
@@ -193,14 +187,7 @@ export function RecoverySecretStep({
           .
         </Text>
         <Button onClick={() => setCurrentStep(!twoFactorAuthEnabled ? ModalStep.LOGIN_DONE : ModalStep.SETUP_2FA)} marginTop='44px' width='100%'>
-          <Text 
-            fontWeight={500}
-            lineHeight='28px'
-            fontSize='16px'
-            color="black"
-          >
             I've saved my recovery secret
-          </Text>
         </Button>
       </Box>
     </VStack>

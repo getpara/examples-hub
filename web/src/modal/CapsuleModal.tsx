@@ -1,11 +1,9 @@
 import React, { ReactNode, useEffect, useRef, useState } from 'react';
 
 import {
-  Box,
   Button,
   ButtonProps,
   ChakraProvider,
-  Flex,
   HStack,
   Modal,
   ModalBody,
@@ -13,7 +11,6 @@ import {
   ModalOverlay,
   Text,
   Theme,
-  Tooltip,
   VStack,
 } from '@chakra-ui/react';
 import { ModalStep, ModalStepNumber } from './steps';
@@ -24,9 +21,8 @@ import { AccountCreationDoneStep } from './AccountCreationDoneStep';
 import { LoginDoneStep } from './LoginDoneStep';
 import { BiometricCreationStep } from './BiometricCreationStep';
 import { VerificationCodeStep } from './VerificationCodeStep';
-import { darkTheme, lightTheme, newTheme } from './theme';
+import { darkTheme, lightTheme } from './theme';
 import { Capsule, Wallet } from '../Capsule';
-import CapsuleSmall from './assets/capsuleSmall';
 import { Header } from './Header';
 import { Footer } from './Footer';
 import { truncateEthAddress } from './utils';
@@ -41,6 +37,8 @@ interface CapsuleModalProps {
   isOpen: boolean;
   onClose: () => void;
   theme?: 'dark' | 'light' | any;
+  primaryColor?: string;
+  logoUrl?: string;
   onRampCurrency?: string;
   onRampAvailable?: boolean;
   rampNetworkApiKey?: string;
@@ -49,6 +47,12 @@ interface CapsuleModalProps {
   loginTransitionOverride?: (capsule: Capsule | CoreCapsule) => Promise<void>;
   currentStepOverride?: string | undefined;
   twoFactorAuthEnabled?: boolean;
+}
+
+function loadTheme(themeProp: 'dark' | 'light' | any, primaryColor: string | any) {
+  const resolvedTheme = typeof themeProp === 'string' ? themeResolve[themeProp] : themeProp;
+  resolvedTheme.colors.brand.button = primaryColor || resolvedTheme?.colors?.brand?.button;
+  return resolvedTheme
 }
 
 const themeResolve: Record<string, Theme> = {
@@ -63,7 +67,9 @@ export const CapsuleModal = ({
   capsule,
   isOpen,
   onClose,
-  theme = 'dark',
+  theme = 'light',
+  primaryColor,
+  logoUrl,
   appName,
   onRampCurrency = 'ARBITRUM_ETH',
   rampNetworkApiKey = '7t45dxm7yhho7fr9u4b9k8nv9gvczansfu8zt9pm', // staging
@@ -73,7 +79,7 @@ export const CapsuleModal = ({
   currentStepOverride,
   twoFactorAuthEnabled = true
 }: CapsuleModalProps) => {
-  const resolvedTheme = typeof theme === 'string' ? themeResolve[theme] : theme;
+  const resolvedTheme = loadTheme(theme, primaryColor);
   const [email, setEmail] = useState(capsule.getEmail());
   const [walletCreated, setWalletCreated] = useState(false);
   const [walletCreationInProgress, setWalletCreationInProgress] = useState(false);
@@ -336,7 +342,7 @@ export const CapsuleModal = ({
             {/* 
           // @ts-ignore */}
             <ModalBody padding={0} display="flex" flexDirection="column">
-              <Header step={ModalStepNumber[currentStep]} onClose={onClose} />
+              <Header step={ModalStepNumber[currentStep]} onClose={onClose} logoUrl={logoUrl} />
               <VStack
                 alignItems="center"
                 display="flex"
@@ -407,44 +413,20 @@ export const CapsuleModal = ({
   );
 };
 
-function Helper() {
-  return (
-    <Box
-      w="300px"
-      h="158px"
-      backgroundColor="brand.background"
-      padding="18px"
-      display={'flex'}
-      flexDirection={'column'}
-    >
-      <Text fontSize="18px" color="brand.content">
-        What is Connect?
-      </Text>
-      <HStack flex={1}>
-        <Box width="60px">
-          <CapsuleSmall w={27} h={48} />
-        </Box>
-        <Flex flexDirection="column" alignItems="left" justifyContent="center">
-          <Text fontSize="xs" color="brand.content">
-            A New Way to Log In
-          </Text>
-          <Text fontSize="xs" color="brand.dimmed2">
-            Get started and create a wallet or log in, powered by Capsule.
-          </Text>
-        </Flex>
-      </HStack>
-    </Box>
-  );
-}
-
 export function CapsuleButton({
   capsule,
   appName,
+  theme = 'dark',
+  primaryColor,
+  logoUrl,
   twoFactorAuthEnabled,
   overrides,
 }: {
   capsule: Capsule | CoreCapsule;
   appName: string;
+  theme?: 'dark' | 'light' | any;
+  primaryColor?: string;
+  logoUrl?: string;
   twoFactorAuthEnabled?: boolean;
   overrides?: {
     createWalletOverride?: (capsule: Capsule | CoreCapsule) => Promise<string>;
@@ -476,6 +458,7 @@ export function CapsuleButton({
     Object.values(capsule.getWallets())?.[0]?.address,
   );
   const [isSessionActive, setIsSessionActive] = useState(false);
+  const resolvedTheme = loadTheme(theme, primaryColor);
 
   useEffect(() => {
     async function checkSession() {
@@ -485,10 +468,12 @@ export function CapsuleButton({
   }, []);
 
   return (
-    <ChakraProvider theme={newTheme}>
+    <ChakraProvider theme={resolvedTheme}>
       <CapsuleModal
         appName={appName}
         isOpen={modalIsOpenOverride ?? modalIsOpen}
+        primaryColor={primaryColor}
+        logoUrl={logoUrl}
         onClose={async () => {
           if (await capsule.isSessionActive()) {
             const newAddress = Object.values(capsule.getWallets())?.[0]?.address;
@@ -500,7 +485,7 @@ export function CapsuleButton({
           }
           setModalIsOpenOverride ? setModalIsOpenOverride(false) : setModalIsOpen(false);
         }}
-        theme={newTheme}
+        theme={theme}
         capsule={capsule}
         createWalletOverride={createWalletOverride}
         loginTransitionOverride={loginTransitionOverride}
@@ -509,18 +494,15 @@ export function CapsuleButton({
       />
       <HStack>
         {(isSessionActive && address && !displayOverride) ? (
-          <Text textColor={'brand.addressColor'}>
+          <Text textColor={'brand.text'}>
             {truncateEthAddress(address)}
           </Text>
         ) : null}
         <Button
           width={'163px'}
           height={'50px'}
-          backgroundColor={'brand.background'}
-          color={'white'}
-          _hover={{
-            backgroundColor: 'rgba(0, 0, 0, 0.5)'
-          }}
+          backgroundColor={'brand.button'}
+          color={'brand.buttonText'}
           onClick={async (e) => {
             if (onClickOverride) {
               onClickOverride(e);
@@ -542,10 +524,7 @@ export function CapsuleButton({
           {
             displayOverride || (
               <>
-                <Text size="18px" marginRight="9px">
-                  {(isSessionActive && address) ? 'Logout' : 'Connect'}
-                </Text>
-                <CapsuleSmall />
+                {(isSessionActive && address) ? 'Logout' : 'Connect'}
               </>
             )
           }

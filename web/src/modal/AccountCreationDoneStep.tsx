@@ -55,7 +55,7 @@ export function AccountCreationDoneStep({
     <VStack flex={1}>
       <Spacer />
       <Box position='relative' top='-28px'>
-        <Text fontSize="l">Wallet Setup Complete!</Text>
+        <Text textColor="brand.text" fontSize="22px">Wallet Setup Complete!</Text>
         <Box marginTop="18px">
           <WalletSuccess />
         </Box>
@@ -64,10 +64,7 @@ export function AccountCreationDoneStep({
       <Box position='relative' top='-28px' width='274px'>
         <Button
           onClick={onClose}
-          textColor="brand.text"
-          bg="#212327"
           width='100%'
-          _hover={{bg: 'rgba(255, 255, 255, 0.5)'}}
         >
           Continue to {appName}
         </Button>

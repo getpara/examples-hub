@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { Capsule } from '../../Capsule';
 import { CoreCapsule } from '../../core/CoreCapsule';
 import { CapsuleModal } from '../../modal/CapsuleModal';
-import { newTheme } from '../../modal/theme';
+import { darkTheme } from '../../modal/theme';
 
 export function renderModal(capsule: Capsule | CoreCapsule, appName: string, onCloseArg: () => void): void {
   const container = document.createElement('div');
@@ -21,7 +21,7 @@ export function renderModal(capsule: Capsule | CoreCapsule, appName: string, onC
       capsule={capsule}
       isOpen={true}
       appName={appName}
-      theme={newTheme}
+      theme={darkTheme}
     />,
     container
   );
