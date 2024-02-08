@@ -43,6 +43,7 @@ const OAuthLayout = ({
   const componentWidths = calculateComponentWidth(oAuthMethods.length)
   return (
     <>
+    {/* @ts-ignore */}
       <Text
         alignSelf="start"
         fontSize="12px"
@@ -52,6 +53,7 @@ const OAuthLayout = ({
       >
         Social Login
       </Text>
+      {/* @ts-ignore */}
       <Flex width='100%' gap='4' marginTop='4px'>
         {oAuthMethods.includes(OAuthMethod.GOOGLE) && <GoogleAuthComponent 
           setEmail={setEmail}

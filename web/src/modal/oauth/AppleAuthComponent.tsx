@@ -3,7 +3,9 @@ import appleLogo from '../public/apple-logo.png';
 
 const AppleAuthComponent = ({width} : {width: number;}) => {
     return (
+        // @ts-ignore
         <Tooltip placement='top' label="Coming Soon!" shouldWrapChildren={true}>
+            {/* @ts-ignore */}
             <Button
                 color="white"
                 bg="black"
@@ -19,6 +21,7 @@ const AppleAuthComponent = ({width} : {width: number;}) => {
                 isDisabled={true}
                 _hover={{ cursor: 'not-allowed' }}
             >
+                {/* @ts-ignore */}
                 <Image width={10} height={10} src={appleLogo} alt="Apple Logo" />
             </Button>
         </Tooltip>
