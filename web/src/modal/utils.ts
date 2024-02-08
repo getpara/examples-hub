@@ -1,5 +1,10 @@
 export function openPopup(popupUrl) {
-  window.open(popupUrl, 'popup', 'popup=true,width=400,height=500');
+  const width = 600, height = 600;
+  const left = (window.innerWidth - width) / 2;
+  const top = (window.innerHeight - height) / 2;
+
+  const windowFeatures = `toolbar=no, menubar=no, width=${width}, height=${height}, top=${top}, left=${left}`;
+  window.open(popupUrl, 'GoogleAuthPopup', windowFeatures);
 }
 
 // Captures 0x + 4 characters, then the last 4 characters.

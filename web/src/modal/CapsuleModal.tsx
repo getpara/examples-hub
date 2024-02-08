@@ -31,6 +31,7 @@ import { CoreCapsule } from '../core/CoreCapsule';
 import { RecoverySecretStep } from './RecoverySecretStep';
 import './css/modal.css'
 import FlowContext from './FlowContext';
+import { OAuthMethod } from './oauth/oAuthMethods';
 
 interface CapsuleModalProps {
   capsule: Capsule | CoreCapsule;
@@ -45,6 +46,7 @@ interface CapsuleModalProps {
   appName: string;
   createWalletOverride?: (capsule: Capsule | CoreCapsule) => Promise<string>;
   loginTransitionOverride?: (capsule: Capsule | CoreCapsule) => Promise<void>;
+  oAuthMethods?: OAuthMethod[];
   currentStepOverride?: string | undefined;
   twoFactorAuthEnabled?: boolean;
 }
@@ -76,6 +78,7 @@ export const CapsuleModal = ({
   onRampAvailable = false,
   createWalletOverride,
   loginTransitionOverride,
+  oAuthMethods,
   currentStepOverride,
   twoFactorAuthEnabled = true
 }: CapsuleModalProps) => {
@@ -352,13 +355,15 @@ export const CapsuleModal = ({
               >
                 <EmailCollectionStep
                   setWebAuthURLForLogin={setWebAuthURLForLogin}
+                  setWebAuthURLForCreate={setWebAuthURLForCreate}
                   setCurrentStep={setCurrentStep}
+                  currentStep={currentStep}
                   setEmail={setEmail}
                   email={email}
                   capsule={capsule}
                   setIsCreateAccountType={setIsCreateAccountType}
-                  currentStep={currentStep}
                   appName={appName}
+                  oAuthMethods={oAuthMethods}
                 />
                 <VerificationCodeStep
                   setCurrentStep={setCurrentStep}
@@ -416,6 +421,7 @@ export const CapsuleModal = ({
 export function CapsuleButton({
   capsule,
   appName,
+  oAuthMethods,
   theme = 'dark',
   primaryColor,
   logoUrl,
@@ -424,6 +430,7 @@ export function CapsuleButton({
 }: {
   capsule: Capsule | CoreCapsule;
   appName: string;
+  oAuthMethods?: OAuthMethod[];
   theme?: 'dark' | 'light' | any;
   primaryColor?: string;
   logoUrl?: string;
@@ -489,6 +496,7 @@ export function CapsuleButton({
         capsule={capsule}
         createWalletOverride={createWalletOverride}
         loginTransitionOverride={loginTransitionOverride}
+        oAuthMethods={oAuthMethods}
         currentStepOverride={currentStepOverride}
         twoFactorAuthEnabled={twoFactorAuthEnabled}
       />

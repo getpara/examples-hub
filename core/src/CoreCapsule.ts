@@ -11,7 +11,7 @@ import {
 } from './cryptography/utils';
 import { Ctx, getPortalBaseURL } from './definitions';
 import { Environment } from './definitions';
-import { initClient } from './external/capsuleClient';
+import { getBaseUrl, initClient } from './external/capsuleClient';
 import * as mpcComputationClient from './external/mpcComputationClient';
 import { distributeNewShare } from './shares/shareDistribution';
 import {
@@ -615,6 +615,36 @@ export abstract class CoreCapsule {
         }
       } catch (err) {
         // want to continue polling on error
+        console.error(err);
+      }
+    }
+  }
+
+  async getGoogleOAuthURL(): Promise<string> {
+    const res = await this.ctx.capsuleClient.touchSession(true);
+    return `${getBaseUrl(this.ctx.env)}auth/google?sessionLookupId=${encodeURIComponent(res.data.sessionLookupId)}`;
+  }
+
+  async waitForGoogleOAuth(): Promise<{
+    email: string,
+    userExists: boolean,
+  }> {
+    while (true) {
+      try {
+        await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS));
+
+        const res = await this.ctx.capsuleClient.touchSession();
+        if (res.data.userId) {
+          const { userId, email } = res.data;
+          await this.setUserId(userId);
+          await this.setEmail(email);
+          const userExists = await this.checkIfUserExists(email);
+          return {
+            userExists,
+            email,
+          }
+        }
+      } catch (err) {
         console.error(err);
       }
     }

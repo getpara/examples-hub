@@ -2016,12 +2016,12 @@
     "@typescript-eslint/types" "5.57.0"
     eslint-visitor-keys "^3.3.0"
 
-"@usecapsule/user-management-client@0.18.0":
-  version "0.18.0"
-  resolved "https://registry.yarnpkg.com/@usecapsule/user-management-client/-/user-management-client-0.18.0.tgz#2198eb04a5fc89f9134903877bd36f4c6291a198"
-  integrity sha512-Zyy1OD0CwLgd9LrY/agjugLZOGhBzrKF3aBKbSkHZMKtVSRWnsvSf6j1MqFTBj10k119EuF8e97LtdcNghkDog==
+"@usecapsule/user-management-client@0.21.0":
+  version "0.21.0"
+  resolved "https://registry.yarnpkg.com/@usecapsule/user-management-client/-/user-management-client-0.21.0.tgz#c8d2d141addcdba106def8a659aaf8c60031c610"
+  integrity sha512-POJ5IjakGwOnczmc4OOGg0Dr789zymd2W1Apy5pkrRTWfiHh+hE9CRiXwatzlSGNnQCsxBHciyFnw0YOafKApg==
   dependencies:
-    axios "^0.27.2"
+    axios "^1.6.3"
 
 "@wagmi/chains@1.6.0":
   version "1.6.0"
@@ -2880,14 +2880,6 @@ available-typed-arrays@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/available-typed-arrays/-/available-typed-arrays-1.0.5.tgz#92f95616501069d07d10edb2fc37d3e1c65123b7"
   integrity sha512-DMD0KiN46eipeziST1LPP/STfDU0sufISXmjSgvVsoU2tqxctQeASejWcfNtxYKqETM1UxQ8sp2OrSBWpHY6sw==
-
-axios@^0.27.2:
-  version "0.27.2"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-0.27.2.tgz#207658cc8621606e586c85db4b41a750e756d972"
-  integrity sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ==
-  dependencies:
-    follow-redirects "^1.14.9"
-    form-data "^4.0.0"
 
 axios@^1.6.3:
   version "1.6.3"
@@ -3900,11 +3892,6 @@ focus-lock@^0.9.1:
   integrity sha512-YtHxjX7a0IC0ZACL5wsX8QdncXofWpGPNoVMuI/nZUrPGp6LmNI6+D5j0pPj+v8Kw5EpweA+T5yImK0rnWf7oQ==
   dependencies:
     tslib "^2.0.3"
-
-follow-redirects@^1.14.9:
-  version "1.15.4"
-  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.4.tgz#cdc7d308bf6493126b17ea2191ea0ccf3e535adf"
-  integrity sha512-Cr4D/5wlrb0z9dgERpUL3LrmPKVDsETIJhaCMeDfuFYcqa5bldGV6wBsAN6X/vxlXQtFBMrXdXxdL8CbDTGniw==
 
 follow-redirects@^1.15.0:
   version "1.15.3"

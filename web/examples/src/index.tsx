@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSessionStorage } from 'react-use';
 import ReactDOM from 'react-dom/client';
 import {
@@ -35,7 +35,7 @@ import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
 import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
 
-import Capsule, { Environment, DeniedSignatureResWithUrl } from './library';
+import Capsule, { Environment, DeniedSignatureResWithUrl, OAuthMethod } from './library';
 import { FeeMarketEIP1559Transaction } from '@ethereumjs/tx';
 import {CapsuleButton} from './library/modal/CapsuleModal';
 import {
@@ -57,7 +57,7 @@ const DEFAULT_MAX_PRIORITY_FEE_PER_GAS = '1';
 const DEFAULT_MAX_FEE_PER_GAS = '3';
 const DEFAULT_NONCE = '0';
 const API_KEY_WITH_PERMISSIONS = 'fdba16e45ba41e80185eb2c0195e89d4';
-const API_KEY_WITH_BRANDING = '2f938ac0c48ef356050a79bd66042a23';
+const API_KEY_WITH_BRANDING = '8ee2d015fbc6062a6e30bdc472f2946c';
 
 const ALCHEMY_SEPOLIA_PROVIDER = 'https://eth-sepolia.g.alchemy.com/v2/KfxK8ZFXw9mTUuJ7jt751xGJCa3r8noZ';
 const WSS_ALCHEMY_SEPOLIA_PROVIDER = 'wss://eth-sepolia.g.alchemy.com/v2/HfT9dMNs3W0h1vJmiPZQ_APaFjPo-BF9';
@@ -418,6 +418,8 @@ function App() {
     new CapsuleDeprecated(selectedEnv, selectedApiKey, getCapsuleOpts(selectedEnv, useDKLS));
 
   const [email, setEmail] = useState(capsule.getEmail());
+  const [deletedEmail, setDeletedEmail] = useState('');
+  const [emailPendingDeletion, setEmailPendingDeletion] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [webAuthURLForCreate, setWebAuthURLForCreate] = useState('');
   const [webAuthURLForLogin, setWebAuthURLForLogin] = useState('');
@@ -435,6 +437,9 @@ function App() {
   const [smartContractAbi, setSmartContractAbi] = useState(JSON.stringify(DEFAULT_CONTRACT_ABI));
   const [smartContractByteCode, setSmartContractByteCode] = useState('');
   const [transactionReviewUrl, setTransactionReviewUrl] = useState('');
+  const [capsuleKey, setCapsuleKey] = useState(0);
+  const [deleteButtonDisabled, setDeleteButtonDisabled] = useState(false);
+  const [secondsToDelete, setSecondsToDelete] = useState(4);
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
@@ -445,6 +450,55 @@ function App() {
       console.log(`exported session:\n${(capsule as CoreCapsule).exportSession()}`)
     }
   }
+
+  useEffect(() => {
+    checkIsSessionActive();
+  }, [])
+
+  const handleOnClose = async () => {
+    if (await capsule.isFullyLoggedIn()) {
+      setIsSessionActive(true);
+    }
+  }
+
+  const handleOnClick = async () => {
+    if (await capsule.isFullyLoggedIn()) {
+      setIsSessionActive(false);
+    }
+  }
+
+  const handleDeleteClick = async () => {
+    setDeleteButtonDisabled(true);
+    if (!(await capsule.isFullyLoggedIn())) {
+      throw new Error('Need to be fully loggedIn to delete user.')
+    }
+    const res = await capsule.ctx.capsuleClient.deleteSelf(
+      (capsule as CoreCapsule).getUserId(),
+    );
+    
+    await capsule.logout();
+
+    const userEmail = res.data.email;
+    setEmailPendingDeletion(userEmail);
+
+    for (let i = secondsToDelete; i > 0; i--) {
+      setTimeout(() => {
+        setSecondsToDelete(i - 1);
+        if (i - 1 === 0) {
+          setCapsuleKey(prevKey => prevKey + 1);
+          setIsSessionActive(false);
+          setDeletedEmail('');
+          setDeleteButtonDisabled(false);
+          setSecondsToDelete(4);
+        }
+      }, (secondsToDelete - i) * 1000);
+    }
+
+    setTimeout(() => {
+      setDeletedEmail(emailPendingDeletion);
+      setEmailPendingDeletion('');
+    }, secondsToDelete * 1000);
+  };
 
   return (
     <ChakraProvider>
@@ -503,7 +557,33 @@ function App() {
         {selectedView === 'OLD_VIEW' && (
           <VStack align="left" spacing={5}>
             <Button colorScheme="green" onClick={()=>{setModalIsOpen(true)}}>Open Modal</Button>
-            <CapsuleButton capsule={capsule} theme={selectedTheme} primaryColor={primaryColor} appName="Example"/>
+            <HStack>
+              <CapsuleButton 
+                key={capsuleKey}
+                overrides={{
+                  onCloseOverride: handleOnClose,
+                  onClickOverride: handleOnClick,
+                  preserveOnClickFunctionality: true
+                }}
+                capsule={capsule} 
+                theme={selectedTheme}
+                primaryColor={primaryColor}
+                appName="Example" 
+                oAuthMethods={[OAuthMethod.GOOGLE]}
+              />
+              {isSessionActive && <><Button 
+                colorScheme="red" 
+                variant="solid"
+                disabled={deleteButtonDisabled}
+                onClick={handleDeleteClick}
+              >
+                Delete User
+              </Button>
+              {!deletedEmail && secondsToDelete > 0 && deleteButtonDisabled && emailPendingDeletion && (
+                <Text>{emailPendingDeletion} will be deleted in {secondsToDelete}...</Text>
+              )}</>
+              }
+            </HStack>
             <Input placeholder="e-mail" onChange={(e) => {
               setEmail(e.target.value)
             }} value={email || ''}/>

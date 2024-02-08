@@ -8,7 +8,7 @@
     "@cosmjs/amino": "^0.31.3",
     "@cosmjs/encoding": "^0.31.3",
     "@cosmjs/proto-signing": "^0.31.3",
-    "@usecapsule/user-management-client": "^0.19.0",
+    "@usecapsule/user-management-client": "0.21.0",
     "@wagmi/chains": "^1.8.0",
     "assert": "^2.1.0",
     "base64url": "^3.0.1",

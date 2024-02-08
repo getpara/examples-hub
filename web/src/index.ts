@@ -6,6 +6,7 @@ import { CapsuleModal as Modal } from './modal/CapsuleModal';
 import { CapsuleButton as Button } from './modal/CapsuleModal'
 
 export { Environment } from './core/definitions';
+export { OAuthMethod } from './modal/oauth/oAuthMethods'
 export * from './core/types';
 export { Modal };
 export { Button };
