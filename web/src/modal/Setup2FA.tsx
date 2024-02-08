@@ -87,7 +87,7 @@ export function Setup2FA({
           <VStack width="100%">
             <Box
               cursor="pointer"
-              backgroundColor="brand.button"
+              backgroundColor="brand.dimmed"
               borderRadius="12px"
               padding="12px"
               width="188px"
@@ -96,7 +96,8 @@ export function Setup2FA({
               onClick={onCopy}
             >
               <QRCode
-                fgColor='brand.text'
+                fgColor={fgColor}
+                bgColor={bgColor}
                 size={165}
                 value={qrCodeValue}
               />
@@ -149,10 +150,10 @@ export function Setup2FA({
               isInvalid={incorrectCode}
               borderColor="brand.frameColor"
               textColor="brand.text"
-              background="brand.inputBackground"
-              border="brand.inputBorder"
-              focusBorderColor="brand.text"
+              background="rgba(255, 255, 255, 0.05)"
+              border="1px solid rgba(255, 255, 255, 0.1)"
               borderRadius="5px"
+              focusBorderColor="brand.text"
               placeholder="Enter code"
               onChange={async (e) => {
                 setVerificationCode(e.target.value);

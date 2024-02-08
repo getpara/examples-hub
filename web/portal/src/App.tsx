@@ -1,7 +1,7 @@
 import { Box, ChakraProvider, HStack, Text, VStack } from '@chakra-ui/react';
 import React from 'react';
 import './App.css';
-import { darkTheme } from './library/modal/theme';
+import { newTheme } from './library/modal/theme';
 import { truncateEthAddress } from './library/modal/utils';
 import EmailContext from './recovery/contexts/EmailContext';
 import RecoveryButton from './recovery/components/attempt/RecoveryButton';
@@ -35,7 +35,7 @@ const App: React.FC = () => {
   const [initiatedAt, setInitiatedAt] = useInitiatedAtState(null);
 
   return (
-    <ChakraProvider theme={darkTheme}>
+    <ChakraProvider theme={newTheme}>
       <div className="App">
         <h1>Recovery Portal</h1>
         <p>Welcome to the Capsule Recovery Portal</p>

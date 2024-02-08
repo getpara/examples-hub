@@ -19,6 +19,11 @@ export function BiometricCreationStep({
   currentStep: ModalStep;
   webAuthURLForCreate: string;
 }) {
+  const {
+    colors: {
+      brand: { dimmed: bgColor, background: fgColor },
+    },
+  } = useTheme();
 
   if (currentStep !== ModalStep.BIOMETRIC_CREATION) {
     return null;
@@ -28,7 +33,7 @@ export function BiometricCreationStep({
       <Text position='relative' top='-4px' fontSize="22px">Finish setup</Text>
       <Box
         cursor="pointer"
-        backgroundColor="brand.button"
+        backgroundColor="brand.dimmed"
         borderRadius="12px"
         padding="12px"
         onClick={() => openPopup(webAuthURLForCreate)}
@@ -36,7 +41,8 @@ export function BiometricCreationStep({
         height='188px'
       >
         <QRCode
-          fgColor='brand.text'
+          fgColor={fgColor}
+          bgColor={bgColor}
           size={165}
           value={webAuthURLForCreate}
         />
@@ -50,7 +56,7 @@ export function BiometricCreationStep({
           Click or scan this QR Code for easier login. 
           Follow the prompts asking you to verify.
         </Text>
-        <CustomButton
+        <CustomButton 
           openPopup={openPopup}
           webAuthURL={webAuthURLForCreate}
           text="Set up passkey"

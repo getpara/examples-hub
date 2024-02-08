@@ -410,8 +410,6 @@ function App() {
   const [selectedApiKey, setSelectedApiKey] = useSessionStorage('@EXAMPLE-CAPSULE/selectedApiKey', API_KEY_WITH_BRANDING);
   const [selectedCapsuleClass, setSelectedCapsuleClass] = useSessionStorage('@EXAMPLE-CAPSULE/selectedCapsuleClass', 'CAPSULE');
   const [useDKLS, setUseDKLS] = useSessionStorage('@EXAMPLE-CAPSULE/useDKLS', true);
-  const [selectedTheme, setSelectedTheme] = useSessionStorage('@EXAMPLE-CAPSULE/selectedTheme','light');
-  const [primaryColor, setPrimaryColor] = useSessionStorage('@EXAMPLE-CAPSULE/primaryColor','');
 
   capsule = selectedCapsuleClass === 'CAPSULE' ?
     new Capsule(selectedEnv, selectedApiKey, getCapsuleOpts(selectedEnv, useDKLS)):
@@ -541,14 +539,6 @@ function App() {
             <option value={'false'}>false</option>
           </Select>
         </HStack>
-        <HStack paddingBottom={5}>
-          <Text width={'15%'}><strong>Theme</strong></Text>
-          <Select defaultValue={selectedTheme} onChange={e => setSelectedTheme(e.target.value)}>
-            <option value={'light'}>Light</option>
-            <option value={'dark'}>Dark</option>
-          </Select>
-          <Input placeholder="Primary Color" onChange={e => setPrimaryColor(e.target.value)} value={primaryColor || ''}/>
-        </HStack>
         {selectedView === 'WAGMI' && (
           <VStack align="left" spacing={5}>
             <WagmiComponent />
@@ -565,9 +555,7 @@ function App() {
                   onClickOverride: handleOnClick,
                   preserveOnClickFunctionality: true
                 }}
-                capsule={capsule} 
-                theme={selectedTheme}
-                primaryColor={primaryColor}
+                capsule={capsule}
                 appName="Example" 
                 oAuthMethods={[OAuthMethod.GOOGLE]}
               />
