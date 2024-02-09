@@ -620,6 +620,12 @@ export abstract class CoreCapsule {
     }
   }
 
+  async waitForPasskeyAndCreateWallet(): Promise<string> {
+    await this.waitForAccountCreation();
+    const [,recovery] = await this.createWallet();
+    return recovery;
+  }
+
   async getGoogleOAuthURL(): Promise<string> {
     const res = await this.ctx.capsuleClient.touchSession(true);
     return `${getBaseUrl(this.ctx.env)}auth/google?sessionLookupId=${encodeURIComponent(res.data.sessionLookupId)}`;
