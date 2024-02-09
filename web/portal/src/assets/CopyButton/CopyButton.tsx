@@ -5,18 +5,26 @@ interface CopyButtonProps {
   onCopy: () => void;
   copyStatus: string;
   copyButtonDisabled: boolean;
+  backgroundColor?: string;
+  textColor?: string;
 }
 
 const CopyButton: React.FC<CopyButtonProps> = ({
   onCopy,
   copyStatus,
   copyButtonDisabled,
+  backgroundColor,
+  textColor,
 }) => {
   return (
     <button
       disabled={copyButtonDisabled}
       className="copy-button"
       onClick={onCopy}
+      style={{
+        backgroundColor,
+        color: textColor ?? undefined,
+      }}
     >
       <span role="img" aria-label="clipboard">
         <svg
