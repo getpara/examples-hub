@@ -39,8 +39,6 @@
   },
   "scripts": {
     "build": "rm -rf dist && tsc --outDir dist --noEmit false && yarn post-build",
-    "minify": "find dist -type f -name '*.js' -exec bash -c 'uglifyjs \"$0\" --compress --mangle --output \"${0}\"' {} \\;",
-    "build-minify": "yarn build && yarn minify",
     "post-build": "./scripts/post-build.sh",
     "build-webpack-mpcWorker": "npx webpack && mv ./dist/mpcWorker-bundle.js ./portal/public/static/js/mpcWorker-bundle.js"
   },
@@ -55,7 +53,6 @@
     "ts-loader": "^9.4.2",
     "tslint": "6.1.3",
     "typescript": "5.1.6",
-    "uglify-js": "^3.17.4",
     "webpack": "5.76.3",
     "webpack-cli": "5.0.1"
   },
