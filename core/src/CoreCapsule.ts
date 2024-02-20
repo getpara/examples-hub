@@ -21,6 +21,7 @@ import {
 } from './types/walletTypes';
 import * as transmissionUtils from './transmission/transmissionUtils';
 import { PlatformUtils } from './PlatformUtils';
+import { OAuthMethod } from '../modal/oauth/oAuthMethods';
 
 // amount of time in ms that a web auth session lasts
 const BIOMETRIC_VERIFICATION_TIME_MS = 30 * 60 * 1000;
@@ -626,12 +627,12 @@ export abstract class CoreCapsule {
     return recovery;
   }
 
-  async getGoogleOAuthURL(): Promise<string> {
+  async getOAuthURL(oAuthMethod: OAuthMethod): Promise<string> {
     const res = await this.ctx.capsuleClient.touchSession(true);
-    return `${getBaseUrl(this.ctx.env)}auth/google?sessionLookupId=${encodeURIComponent(res.data.sessionLookupId)}`;
+    return `${getBaseUrl(this.ctx.env)}auth/${oAuthMethod.toLowerCase()}?sessionLookupId=${encodeURIComponent(res.data.sessionLookupId)}`;
   }
 
-  async waitForGoogleOAuth(): Promise<{
+  async waitForOAuth(): Promise<{
     email: string,
     userExists: boolean,
   }> {
