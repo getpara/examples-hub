@@ -60,6 +60,7 @@ const RecoveryWalletModal: React.FC<RecoveryWalletModalProps> = ({ isOpen, onClo
                     walletId,
                     userShare,
                     true,
+                    {}
                 );
                 setUserShare(null);
             }

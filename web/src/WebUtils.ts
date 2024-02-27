@@ -5,6 +5,7 @@ import { SessionStorage } from './SessionStorage';
 import { keygen } from './wallet/keygen';
 import { signMessage, sendTransaction, signTransaction } from './wallet/signing';
 import { PlatformUtils } from './core/PlatformUtils';
+import { BackupKitEmailProps } from '@usecapsule/user-management-client';
 
 export class WebUtils implements PlatformUtils {
   keygen (
@@ -12,11 +13,12 @@ export class WebUtils implements PlatformUtils {
     userId: string,
     secretKey: string | null, // should be acceptable as null in RN as we don't pre-gen them
     sessionCookie: string,
+    emailProps: BackupKitEmailProps = {}
   ): Promise<{
     signer: string;
     walletId: string;
   }> {
-    return keygen(ctx, userId, secretKey, true, sessionCookie);
+    return keygen(ctx, userId, secretKey, true, sessionCookie, emailProps);
   }
 
   signMessage(

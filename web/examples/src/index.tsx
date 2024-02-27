@@ -411,9 +411,19 @@ function App() {
   const [selectedCapsuleClass, setSelectedCapsuleClass] = useSessionStorage('@EXAMPLE-CAPSULE/selectedCapsuleClass', 'CAPSULE');
   const [useDKLS, setUseDKLS] = useSessionStorage('@EXAMPLE-CAPSULE/useDKLS', true);
 
-  capsule = selectedCapsuleClass === 'CAPSULE' ?
-    new Capsule(selectedEnv, selectedApiKey, getCapsuleOpts(selectedEnv, useDKLS)):
-    new CapsuleDeprecated(selectedEnv, selectedApiKey, getCapsuleOpts(selectedEnv, useDKLS));
+  capsule =
+    selectedCapsuleClass === 'CAPSULE'
+      ? new Capsule(selectedEnv, selectedApiKey, {
+          ...getCapsuleOpts(selectedEnv, useDKLS),
+          xUrl: 'https://twitter.com/usecapsule',
+          linkedinUrl: 'https://www.linkedin.com/company/usecapsule',
+          supportUrl: 'mailto:support@usecapsule.com'
+        })
+      : new CapsuleDeprecated(
+          selectedEnv,
+          selectedApiKey,
+          getCapsuleOpts(selectedEnv, useDKLS),
+        );
 
   const [email, setEmail] = useState(capsule.getEmail());
   const [deletedEmail, setDeletedEmail] = useState('');

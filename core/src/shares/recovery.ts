@@ -1,4 +1,5 @@
 import {
+  BackupKitEmailProps,
   encryptedKeyshare,
   EncryptorType,
   KeyType,
@@ -14,6 +15,7 @@ export async function sendRecoveryForShare(
   otherEncryptedShares: encryptedKeyshare[],
   userSigner: string,
   ignoreRedistributingBackupEncryptedShare = false,
+  emailProps: BackupKitEmailProps
 ): Promise<string> {
   const recoveryPrivateKeyContainer = new KeyContainer(
     walletId,
@@ -35,7 +37,7 @@ export async function sendRecoveryForShare(
   ]);
 
   if (!ignoreRedistributingBackupEncryptedShare) {
-    await ctx.capsuleClient.distributeCapsuleShare(userId, walletId, ctx.useDKLS);
+    await ctx.capsuleClient.distributeCapsuleShare({userId, walletId, useDKLS: ctx.useDKLS, ...emailProps});
   }
 
   return JSON.stringify(recoveryPrivateKeyContainer);

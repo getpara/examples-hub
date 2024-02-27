@@ -3689,10 +3689,10 @@
   resolved "https://registry.yarnpkg.com/@ungap/structured-clone/-/structured-clone-1.2.0.tgz#756641adb587851b5ccb3e095daf27ae581c8406"
   integrity sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==
 
-"@usecapsule/user-management-client@0.21.0":
-  version "0.21.0"
-  resolved "https://registry.yarnpkg.com/@usecapsule/user-management-client/-/user-management-client-0.21.0.tgz#c8d2d141addcdba106def8a659aaf8c60031c610"
-  integrity sha512-POJ5IjakGwOnczmc4OOGg0Dr789zymd2W1Apy5pkrRTWfiHh+hE9CRiXwatzlSGNnQCsxBHciyFnw0YOafKApg==
+"@usecapsule/user-management-client@^0.24.0":
+  version "0.24.0"
+  resolved "https://registry.yarnpkg.com/@usecapsule/user-management-client/-/user-management-client-0.24.0.tgz#4061ec53162a2bd11276557bf72ddbfd680c9673"
+  integrity sha512-0Pp0lxHd9RkC7kUTHrIaQ3Ny7DE43PBeZba4rgZCrC+0kYX+VtQSD8/QBtHQeeWF0Rg2Pbe43SMFf4jmjhLYcg==
   dependencies:
     axios "^1.6.3"
 

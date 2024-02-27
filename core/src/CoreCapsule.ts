@@ -1,6 +1,9 @@
 import {
+  BackupKitEmailProps,
+  EmailTheme,
   PublicKeyStatus,
   PublicKeyType,
+  VerificationEmailProps,
 } from '@usecapsule/user-management-client';
 import { pki, jsbn } from 'node-forge';
 
@@ -67,6 +70,13 @@ export interface ConstructorOpts {
   useDKLSForCreation?: boolean;
   disableWebSockets?: boolean;
   wasmOverride?: ArrayBuffer;
+  emailTheme?: EmailTheme;
+  emailPrimaryColor?: string
+  linkedinUrl?: string
+  githubUrl?: string
+  xUrl?: string
+  supportUrl?: string
+  homepageUrl?: string
 }
 
 const PREFIX = '@CAPSULE/';
@@ -94,6 +104,44 @@ export abstract class CoreCapsule {
   private userId?: string;
   private wallets?: Record<string, Wallet>;
   private sessionCookie?: string;
+
+
+  /**
+   * Base theme for the emails sent from this Capsule instance.
+   * @default - dark
+   */
+  emailTheme?: EmailTheme;
+
+  /**
+   * Hex color to use as the primary color in the emails.
+   * @default - #FE452B
+   */
+  emailPrimaryColor?: string;
+
+  /**
+   * Linkedin URL to link to in the emails. Should be a secure URL string starting with https://www.linkedin.com/company/.
+   */
+  linkedinUrl?: string;
+
+  /**
+   * Github URL to link to in the emails. Should be a secure URL string starting with https://github.com/.
+   */
+  githubUrl?: string;
+
+  /**
+   * X (Twitter) URL to link to in the emails. Should be a secure URL string starting with https://twitter.com/.
+   */
+  xUrl?: string;
+
+  /**
+   * Support URL to link to in the emails. This can be a secure https URL or a mailto: string. Will default to using the stored application URL is nothing is provided here.
+   */
+  supportUrl?: string;
+
+  /**
+   * URL for your home landing page. Should be a secure URL string starting with https://.
+   */
+  homepageUrl?: string;
 
   /**
    * Encryption key pair generated from loginEncryptionKey.
@@ -206,6 +254,14 @@ export abstract class CoreCapsule {
     // TODO: consider using sessionStorage instead of localStorage
     if (!opts) opts = {};
 
+    this.emailPrimaryColor = opts.emailPrimaryColor;
+    this.emailTheme = opts.emailTheme;
+    this.homepageUrl = opts.homepageUrl;
+    this.supportUrl = opts.supportUrl;
+    this.xUrl = opts.xUrl;
+    this.githubUrl = opts.githubUrl;
+    this.linkedinUrl = opts.linkedinUrl;
+
     this.portalBackgroundColor = opts.portalBackgroundColor;
     this.portalPrimaryButtonColor = opts.portalPrimaryButtonColor;
     this.portalTextColor = opts.portalTextColor;
@@ -256,6 +312,30 @@ export abstract class CoreCapsule {
     if (loginEncryptionKey && loginEncryptionKey !== 'undefined') {
       this.loginEncryptionKeyPair = this.convertEncryptionKeyPair(JSON.parse(loginEncryptionKey));
     }
+  }
+
+  private getVerificationEmailProps(): VerificationEmailProps {
+    return {
+      brandColor: this.emailPrimaryColor,
+      theme: this.emailTheme,
+      supportUrl: this.supportUrl,
+      homepageUrl: this.homepageUrl,
+      xUrl: this.xUrl,
+      githubUrl: this.githubUrl,
+      linkedinUrl: this.linkedinUrl,
+    };
+  }
+
+  private getBackupKitEmailProps(): BackupKitEmailProps {
+    return {
+      brandColor: this.emailPrimaryColor,
+      theme: this.emailTheme,
+      homepageUrl: this.homepageUrl,
+      xUrl: this.xUrl,
+      linkedinUrl: this.linkedinUrl,
+      githubUrl: this.githubUrl,
+      supportUrl: this.supportUrl,
+    };
   }
 
   /**
@@ -466,6 +546,7 @@ export abstract class CoreCapsule {
     await this.setEmail(email);
     const { userId } = await this.ctx.capsuleClient.createUser({
       email: this.email,
+      ...this.getVerificationEmailProps()
     });
     await this.setUserId(userId);
   }
@@ -541,7 +622,10 @@ export abstract class CoreCapsule {
   }
 
   async resendVerificationCode(): Promise<void> {
-    await this.ctx.capsuleClient.resendVerificationCode(this.userId);
+    await this.ctx.capsuleClient.resendVerificationCode({
+      userId: this.userId,
+      ...this.getVerificationEmailProps()
+    });
   }
 
   // returns web auth url for creating a new credential
@@ -781,6 +865,8 @@ export abstract class CoreCapsule {
       this.userId,
       walletId,
       userShare,
+      false,
+      this.getBackupKitEmailProps()
     );
     return recoveryShare;
   }
@@ -825,6 +911,7 @@ export abstract class CoreCapsule {
       this.userId,
       null,
       this.retrieveSessionCookie(),
+      this.getBackupKitEmailProps()
     );
     this.wallets[walletId] = {
       id: walletId,
@@ -840,6 +927,8 @@ export abstract class CoreCapsule {
         this.userId,
         walletId,
         signer,
+        false,
+        this.getBackupKitEmailProps()
       );
     }
 

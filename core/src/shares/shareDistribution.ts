@@ -1,4 +1,4 @@
-import { EncryptorType, KeyType } from '@usecapsule/user-management-client';
+import { BackupKitEmailProps, EncryptorType, KeyType } from '@usecapsule/user-management-client';
 
 import { encryptWithDerivedPublicKey } from '../cryptography/utils';
 import { sendRecoveryForShare } from './recovery';
@@ -11,6 +11,7 @@ export async function distributeNewShare(
   walletId: string,
   userShare: string,
   ignoreRedistributingBackupEncryptedShare = false,
+  emailProps: BackupKitEmailProps
 ): Promise<string> {
   const publicKeysRes = await ctx.capsuleClient.getSessionPublicKeys(userId);
   const biometricEncryptedShares = publicKeysRes.data.keys
@@ -37,5 +38,6 @@ export async function distributeNewShare(
     biometricEncryptedShares,
     userShare,
     ignoreRedistributingBackupEncryptedShare,
+    emailProps
   );
 }

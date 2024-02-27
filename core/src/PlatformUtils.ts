@@ -1,3 +1,4 @@
+import { BackupKitEmailProps } from '@usecapsule/user-management-client';
 import { Ctx } from './definitions';
 import { SignatureRes } from './types/walletTypes';
 import { StorageUtils } from './StorageUtils';
@@ -8,6 +9,7 @@ export interface PlatformUtils {
     userId: string,
     secretKey: string | null, // should be acceptable as null in RN as we don't pre-gen them
     sessionCookie: string,
+    emailProps?: BackupKitEmailProps
   ): Promise<{
     signer: string;
     walletId: string;

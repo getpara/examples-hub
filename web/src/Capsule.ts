@@ -429,7 +429,7 @@ export class Capsule {
   }
 
   async resendVerificationCode(): Promise<void> {
-    await this.ctx.capsuleClient.resendVerificationCode(this.userId);
+    await this.ctx.capsuleClient.resendVerificationCode({userId: this.userId});
   }
 
   // returns web auth url for creating a new credential
@@ -537,6 +537,8 @@ export class Capsule {
       this.userId,
       walletId,
       userShare,
+      false,
+      {}
     );
     return recoveryShare;
   }

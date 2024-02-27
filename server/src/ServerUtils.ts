@@ -1,3 +1,4 @@
+import { BackupKitEmailProps } from '@usecapsule/user-management-client';
 import { Ctx, SignatureRes, PlatformUtils } from './core';
 import { ServerLocalStorage } from './ServerLocalStorage';
 import { ServerSessionStorage } from './ServerSessionStorage';
@@ -14,11 +15,12 @@ export class ServerUtils implements PlatformUtils {
     userId: string,
     secretKey: string | null,
     sessionCookie: string,
+    emailProps?: BackupKitEmailProps
   ): Promise<{
     signer: string;
     walletId: string;
   }> {
-    return keygen(ctx, userId, secretKey, true, sessionCookie);
+    return keygen(ctx, userId, secretKey, true, sessionCookie, emailProps);
   }
 
   signMessage(

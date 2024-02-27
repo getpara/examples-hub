@@ -3,6 +3,7 @@ import { setupWorker } from '../workers/workerWrapper';
 import { distributeNewShare } from '../core/shares/shareDistribution';
 import { Ctx } from '../core/definitions';
 import { waitUntilTrue } from '../core/utils/pollingUtils';
+import { BackupKitEmailProps } from '@usecapsule/user-management-client';
 
 async function isKeygenComplete(
   ctx: Ctx,
@@ -20,6 +21,7 @@ export function keygen(
   secretKey: string | null,
   skipDistribute = false,
   sessionCookie?: string,
+  emailProps: BackupKitEmailProps = {}
 ): Promise<{
   signer: string;
   walletId: string;
@@ -47,6 +49,8 @@ export function keygen(
         userId,
         res.walletId,
         res.signer,
+        false, 
+        emailProps
       );
       resolve({
         signer: res.signer,
