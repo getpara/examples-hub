@@ -2,7 +2,7 @@ import { Ctx } from './core/definitions';
 import { SignatureRes } from './core/types/walletTypes';
 import { LocalStorage } from './LocalStorage';
 import { SessionStorage } from './SessionStorage';
-import { keygen } from './wallet/keygen';
+import { keygen, preKeygen } from './wallet/keygen';
 import { signMessage, sendTransaction, signTransaction } from './wallet/signing';
 import { PlatformUtils } from './core/PlatformUtils';
 import { BackupKitEmailProps } from '@usecapsule/user-management-client';
@@ -19,6 +19,19 @@ export class WebUtils implements PlatformUtils {
     walletId: string;
   }> {
     return keygen(ctx, userId, secretKey, true, sessionCookie, emailProps);
+  }
+
+  preKeygen (
+    ctx: Ctx,
+    partnerId: string,
+    email: string,
+    secretKey: string | null, // should be acceptable as null in RN as we don't pre-gen them
+    sessionCookie: string,
+    ): Promise<{
+    signer: string;
+    walletId: string;
+  }> {
+    return preKeygen(ctx, email, secretKey, false, partnerId, sessionCookie);
   }
 
   signMessage(

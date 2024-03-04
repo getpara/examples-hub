@@ -13,7 +13,7 @@
     "@emotion/react": "^11.10.8",
     "@emotion/styled": "^11.10.8",
     "@ramp-network/ramp-instant-sdk": "^4.0.2",
-    "@usecapsule/user-management-client": "0.24.0",
+    "@usecapsule/user-management-client": "0.25.0",
     "@wagmi/chains": "^1.8.0",
     "@wagmi/connectors": "^3.0.0",
     "assert": "^2.1.0",

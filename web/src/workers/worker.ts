@@ -70,6 +70,11 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
       const { share, walletId, userId } = params;
       return walletUtils.refresh(ctx, share, walletId, userId);
     }
+    case 'PREKEYGEN': {
+      const { partnerId, secretKey, email } = params;
+      const keygenRes = await walletUtils.prekeygen(ctx, partnerId, email, secretKey);
+      return keygenRes;
+    }
     default: {
       throw new Error(`functionType: ${functionType} not supported`);
     }

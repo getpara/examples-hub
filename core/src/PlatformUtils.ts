@@ -15,6 +15,17 @@ export interface PlatformUtils {
     walletId: string;
   }>;
 
+  preKeygen (
+    ctx: Ctx,
+    partnerId: string,
+    email: string,
+    secretKey: string | null, // should be acceptable as null in RN as we don't pre-gen them
+    sessionCookie: string,
+    ): Promise<{
+    signer: string;
+    walletId: string;
+  }>;
+
   signMessage(
     ctx: Ctx,
     userId: string,

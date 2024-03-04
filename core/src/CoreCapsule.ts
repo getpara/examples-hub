@@ -528,6 +528,19 @@ export abstract class CoreCapsule {
     await this.setWallets(this.wallets);
   }
 
+  private async populatePregenWalletAddresses(email: string): Promise<void> {
+    const res = await this.ctx.capsuleClient.getPregenWallets(email);
+    const wallets = res.wallets;
+    wallets.forEach((wallet: { id: string; address?: string; publicKey?: string; scheme?: WalletScheme | string }) => {
+      if (this.wallets[wallet.id]) {
+        this.wallets[wallet.id].address = wallet.address;
+        this.wallets[wallet.id].publicKey = wallet.publicKey;
+        this.wallets[wallet.id].scheme = wallet.scheme as WalletScheme;
+      }
+    });
+    await this.setWallets(this.wallets);
+  }
+
   /**
    * Checks if a user exists.
    * @returns - true if user exists, false otherwise.
@@ -895,6 +908,38 @@ export abstract class CoreCapsule {
   }
 
   /**
+   * Waits for a pregen wallet address to be created.
+   *
+   * @param email - the email of the user the pregen wallet is associated with.
+   * @param walletId - the wallet id
+   * @returns - recovery share.
+   **/
+  private async waitForPregenWalletAddress(email: string, walletId: string): Promise<void> {
+    let maxPolls = 0;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      try {
+        if (maxPolls === 10) {
+          break;
+        }
+        ++maxPolls;
+        const res = await this.ctx.capsuleClient.getPregenWallets(email);
+
+        const wallet = res.wallets.find((w) => w.id === walletId);
+        if (wallet && wallet.address) {
+          return;
+        }
+        await new Promise(resolve => setTimeout(resolve, SHORT_POLLING_INTERVAL_MS));
+      } catch (err) {
+
+        // want to continue polling on error
+        console.error(err);
+      }
+    }
+    throw new Error('timed out waiting for wallet address');
+  }
+
+  /**
    * Creates a new wallet.
    *
    * @param skipDistribute - if true, recovery share will not be distributed.
@@ -934,6 +979,33 @@ export abstract class CoreCapsule {
 
     await this.setWallets(this.wallets);
     return [this.wallets[walletId], recoveryShare];
+  }
+
+  /**
+   * Creates a new pregenerated wallet.
+   *
+   * @param partnerId - string
+   * @param email - string 
+   * @returns [wallet, recoveryShare]
+   **/
+  async createWalletPreGen(partnerId: string, email: string): Promise<[Wallet, string ]> {
+    this.requireApiKey();
+    const { signer, walletId } = await this.platformUtils.prekeygen(
+      this.ctx,
+      partnerId,
+      email,
+      null,
+      this.retrieveSessionCookie(),
+    );
+    this.wallets[walletId] = {
+      id: walletId,
+      signer,
+    };
+
+    await this.waitForPregenWalletAddress(email, walletId);
+    await this.populatePregenWalletAddresses(email);
+   
+    return [this.wallets[walletId], 'null'];
   }
 
   private getTransactionReviewUrl(transactionId: string): string {

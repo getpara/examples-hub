@@ -426,6 +426,7 @@ function App() {
         );
 
   const [email, setEmail] = useState(capsule.getEmail());
+  const [pregenEmail, setPregenEmail] = useState('');
   const [deletedEmail, setDeletedEmail] = useState('');
   const [emailPendingDeletion, setEmailPendingDeletion] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
@@ -589,6 +590,18 @@ function App() {
               capsule.clearStorage();
               await capsule.createUser(email);
             }}>Create Account</Button>
+
+          <Input placeholder="pregen-e-mail" onChange={(e) => {
+              setPregenEmail(e.target.value)
+            }} value={pregenEmail || ''}/>
+            <Button colorScheme="teal" onClick={async () => {
+              capsule.clearStorage();
+              // @ts-ignore
+              const res = await capsule.ctx.capsuleClient.touchSession();
+              const partnerId = res.data.partnerId;
+               // @ts-ignore
+              await capsule.createWalletPreGen(partnerId, pregenEmail);
+            }}>Create Pregen Wallet</Button>
 
             <Input placeholder="verification-code" onChange={(e) => setVerificationCode(e.target.value)} value={verificationCode}/>
             <Button colorScheme="teal" onClick={async () => {
