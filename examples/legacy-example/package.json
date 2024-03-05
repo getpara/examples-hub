@@ -1,0 +1,60 @@
+{
+  "name": "capsule-legacy-example",
+  "version": "0.6.0",
+  "main": "src/index.tsx",
+  "private": true,
+  "dependencies": {
+    "@chakra-ui/react": "2.5.4",
+    "@cosmjs/stargate": "0.31.0",
+    "@emotion/react": "11.10.6",
+    "@emotion/styled": "11.10.6",
+    "@ethereumjs/common": "3.1.1",
+    "@ethereumjs/tx": "4.1.1",
+    "@usecapsule/core-sdk": "0.5.0",
+    "@usecapsule/ethers-v6-integration": "0.4.0",
+    "@usecapsule/react-sdk": "0.4.0",
+    "@usecapsule/web-sdk": "0.4.0",
+    "@usecapsule/viem-v1-integration": "0.4.0",
+    "@usecapsule/wagmi-v1-integration": "0.4.0",
+    "crypto-browserify": "3.12.0",
+    "ethereumjs-tx": "2.1.2",
+    "ethers": "6.6.4",
+    "framer-motion": "10.9.2",
+    "path": "0.12.7",
+    "react": "18.2.0",
+    "react-circular-progressbar": "2.1.0",
+    "react-dom": "18.2.0",
+    "react-qr-code": "2.0.11",
+    "react-scripts": "5.0.1",
+    "react-use": "17.4.0",
+    "serve": "14.2.0",
+    "stream-browserify": "3.0.0",
+    "use-debounce": "9.0.4",
+    "viem": "1.4.2",
+    "wagmi": "^1.3.11",
+    "web3": "1.9.0",
+    "webpack": "5.88.2"
+  },
+  "scripts": {
+    "start": "PORT=3002 craco start",
+    "build": "craco build",
+    "serve-build": "PORT=3002 serve -s build",
+    "deploy-sandbox": "cd .. && yarn && cd examples && yarn build && aws s3 sync build/ s3://capsule-web-playground --acl public-read"
+  },
+  "devDependencies": {
+    "@craco/craco": "7.1.0",
+    "ts-loader": "9.4.2",
+    "typescript": "5.1.6",
+    "webpack-cli": "5.1.4",
+    "webpack-dev-server": "4.15.1"
+  },
+  "browserslist": [
+    "chrome > 52",
+    "opera > 39",
+    "edge > 14",
+    "firefox > 52",
+    "safari > 10.1",
+    "not dead",
+    "not op_mini all"
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "name": "@usecapsule/web-sdk",
+  "version": "0.4.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "sideEffects": [
+    "wasm_exec.js"
+  ],
+  "dependencies": {
+    "@usecapsule/core-sdk": "0.5.0",
+    "@usecapsule/user-management-client": "^0.25.0",
+    "assert": "^2.1.0",
+    "base64url": "3.0.1",
+    "buffer": "6.0.3",
+    "cbor-web": "8.1.0",
+    "node-forge": "1.3.1"
+  },
+  "scripts": {
+    "build-webpack-mpcWorker": "npx webpack && mv ./dist/mpcWorker-bundle.js ../../sites/portal/public/static/js/mpcWorker-bundle.js",
+    "build": "rm -rf dist && tsc && yarn post-build && yarn build-webpack-mpcWorker",
+    "post-build": "./scripts/post-build.sh"
+  },
+  "devDependencies": {
+    "@types/node-forge": "1.3.1",
+    "crypto-browserify": "3.12.0",
+    "stream-browserify": "3.0.0",
+    "typescript": "5.1.6",
+    "webpack": "5.76.3",
+    "webpack-cli": "5.0.1"
+  },
+  "files": [
+    "dist",
+    "package.json"
+  ]
+}

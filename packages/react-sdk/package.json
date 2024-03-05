@@ -1,0 +1,40 @@
+{
+  "name": "@usecapsule/react-sdk",
+  "version": "0.4.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "sideEffects": [
+    "*.css"
+  ],
+  "dependencies": {
+    "@chakra-ui/react": "1.8.9",
+    "@emotion/react": "^11.10.8",
+    "@emotion/styled": "^11.10.8",
+    "@ramp-network/ramp-instant-sdk": "^4.0.2",
+    "@usecapsule/web-sdk": "0.4.0",
+    "framer-motion": "^11.0.5",
+    "polished": "^4.2.2",
+    "react-qr-code": "2.0.11"
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc && yarn post-build",
+    "post-build": "./scripts/post-build.sh"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.237",
+    "@types/react": "^18.0.31",
+    "@types/react-dom": "^18.2.7",
+    "typescript": "^4.9.5"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-dom": "*"
+  },
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "resolutions": {
+    "@chakra-ui/react/@chakra-ui/toast": "file:./packages/react-sdk/src/stubs/toastStub"
+  }
+}

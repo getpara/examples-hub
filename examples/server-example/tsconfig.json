@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "target": "es6",
+    "outDir": "./dist",
+    "module": "commonjs",
+    "lib": [
+      "dom",
+      "esnext",
+      "es6"
+    ],
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

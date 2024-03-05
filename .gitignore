@@ -8,3 +8,4 @@ mpcWorker-bundle.js
 .vscode/*
 .vscode
 *.wasm
+.nx/cache

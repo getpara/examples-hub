@@ -1,0 +1,21 @@
+{
+  "$schema": "node_modules/lerna/schemas/lerna-schema.json",
+  "packages": [
+    "sites/*",
+    "packages/*",
+    "examples/*"
+  ],
+  "version": "independent",
+  "npmClient": "yarn",
+  "command": {
+    "publish": {
+      "exact": true,
+      "ignoreChanges": [
+        "sites/**",
+        "examples/**",
+        "README.md"
+      ],
+      "noPrivate": true
+    }
+  }
+}

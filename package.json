@@ -1,0 +1,22 @@
+{
+  "name": "root",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "sites/*",
+    "examples/*"
+  ],
+  "dependencies": {},
+  "scripts": {
+    "setup-worker": "lerna run setup-worker --scope=capsule-portal",
+    "build": "lerna run build --parallel",
+    "start": "lerna run start --scope=capsule-legacy-example --scope=capsule-portal",
+    "start-server": "lerna run start --scope=capsule-server-example",
+    "lerna-version": "lerna version",
+    "lerna-publish": "lerna publish from-package --no-private"
+  },
+  "devDependencies": {
+    "lerna": "^8.1.2"
+  },
+  "version": "0.0.0"
+}

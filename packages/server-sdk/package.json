@@ -1,0 +1,24 @@
+{
+  "name": "@usecapsule/server-sdk",
+  "version": "0.9.0",
+  "main": "dist/index.js",
+  "sideEffects": [
+    "wasm_exec.js"
+  ],
+  "dependencies": {
+    "@usecapsule/core-sdk": "0.5.0",
+    "@usecapsule/user-management-client": "^0.25.0",
+    "ws": "^8.14.2"
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.5.7",
+    "typescript": "5.1.6"
+  },
+  "files": [
+    "dist",
+    "package.json"
+  ]
+}
