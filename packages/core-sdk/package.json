@@ -1,6 +1,6 @@
 {
   "name": "@usecapsule/core-sdk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/types/index.d.ts",
@@ -33,5 +33,6 @@
       "require": "./dist/cjs/index.js",
       "types": "./dist/types/index.d.ts"
     }
-  }
+  },
+  "gitHead": "86be3bd943673f87685b87b6e87fc33366be04e7"
 }

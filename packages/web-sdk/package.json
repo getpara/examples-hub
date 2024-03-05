@@ -1,13 +1,13 @@
 {
   "name": "@usecapsule/web-sdk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "sideEffects": [
     "wasm_exec.js"
   ],
   "dependencies": {
-    "@usecapsule/core-sdk": "1.0.0",
+    "@usecapsule/core-sdk": "1.0.1",
     "@usecapsule/user-management-client": "^0.25.0",
     "assert": "^2.1.0",
     "base64url": "3.0.1",
@@ -31,5 +31,6 @@
   "files": [
     "dist",
     "package.json"
-  ]
+  ],
+  "gitHead": "10ecce9873131e6a1b114fb0642a94bb02040bef"
 }

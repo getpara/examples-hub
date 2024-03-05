@@ -1,6 +1,6 @@
 {
   "name": "@usecapsule/cosmjs-v0-integration",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "sideEffects": false,
@@ -8,7 +8,7 @@
     "@cosmjs/amino": "^0.31.3",
     "@cosmjs/encoding": "^0.31.3",
     "@cosmjs/proto-signing": "^0.31.3",
-    "@usecapsule/core-sdk": "1.0.0"
+    "@usecapsule/core-sdk": "1.0.1"
   },
   "scripts": {
     "build": "rm -rf dist && tsc"
@@ -20,5 +20,6 @@
   "files": [
     "dist",
     "package.json"
-  ]
+  ],
+  "gitHead": "86be3bd943673f87685b87b6e87fc33366be04e7"
 }
