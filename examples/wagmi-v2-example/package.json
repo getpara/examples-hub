@@ -1,0 +1,53 @@
+{
+  "name": "wagmi-v2-example",
+  "version": "0.8.0",
+  "main": "src/index.tsx",
+  "private": true,
+  "dependencies": {
+    "@chakra-ui/react": "2.5.4",
+    "@emotion/react": "11.10.6",
+    "@emotion/styled": "11.10.6",
+    "@ethereumjs/common": "3.1.1",
+    "@tanstack/react-query": "^5.24.1",
+    "@usecapsule/core-sdk": "1.0.1",
+    "@usecapsule/react-sdk": "1.0.1",
+    "@usecapsule/web-sdk": "1.0.1",
+    "@usecapsule/wagmi-v2-integration": "1.0.1",
+    "crypto-browserify": "3.12.0",
+    "framer-motion": "10.9.2",
+    "path": "0.12.7",
+    "react": "18.2.0",
+    "react-circular-progressbar": "2.1.0",
+    "react-dom": "18.2.0",
+    "react-scripts": "5.0.1",
+    "react-use": "17.4.0",
+    "serve": "14.2.0",
+    "stream-browserify": "3.0.0",
+    "use-debounce": "9.0.4",
+    "viem": "^2.7.16",
+    "wagmi": "^2.5.7",
+    "webpack": "5.88.2"
+  },
+  "scripts": {
+    "start": "PORT=3002 craco start",
+    "build": "craco build",
+    "serve-build": "PORT=3002 serve -s build",
+    "deploy-sandbox": "cd .. && yarn && cd examples && yarn build && aws s3 sync build/ s3://capsule-web-playground --acl public-read"
+  },
+  "devDependencies": {
+    "@craco/craco": "7.1.0",
+    "ts-loader": "9.4.2",
+    "typescript": "5.1.6",
+    "webpack-cli": "5.1.4",
+    "webpack-dev-server": "4.15.1"
+  },
+  "browserslist": [
+    "chrome > 52",
+    "opera > 39",
+    "edge > 14",
+    "firefox > 52",
+    "safari > 10.1",
+    "not dead",
+    "not op_mini all"
+  ]
+}
