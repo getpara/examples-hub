@@ -1,13 +1,13 @@
 {
   "name": "capsule-portal",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "main": "src/index.tsx",
   "private": true,
   "dependencies": {
     "@chakra-ui/icons": "^2.0.18",
     "@chakra-ui/react": "1.8.9",
-    "@usecapsule/react-sdk": "1.0.1",
-    "@usecapsule/user-management-client": "^0.25.0",
+    "@usecapsule/react-sdk": "1.1.0",
+    "@usecapsule/user-management-client": "1.0.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-qr-code": "2.0.11",
