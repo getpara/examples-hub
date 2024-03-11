@@ -1,5 +1,5 @@
-/* eslint-disable */
-global.Buffer = global.Buffer || require('buffer').Buffer;
+import { Buffer as NodeBuffer } from 'buffer';
+global.Buffer = global.Buffer || NodeBuffer;
 
 import Client from '@usecapsule/user-management-client';
 import { AxiosInstance } from 'axios';

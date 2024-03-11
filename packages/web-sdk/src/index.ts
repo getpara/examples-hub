@@ -1,5 +1,5 @@
-/* eslint-disable */
-global.Buffer = global.Buffer || require('buffer').Buffer;
+import { Buffer as NodeBuffer } from 'buffer';
+global.Buffer = global.Buffer || NodeBuffer;
 
 export * from '@usecapsule/core-sdk';
 import { Capsule as CapsuleWeb } from './CapsuleWeb';
