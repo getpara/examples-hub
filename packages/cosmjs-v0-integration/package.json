@@ -1,6 +1,6 @@
 {
   "name": "@usecapsule/cosmjs-v0-integration",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "sideEffects": false,
@@ -8,7 +8,7 @@
     "@cosmjs/amino": "^0.31.3",
     "@cosmjs/encoding": "^0.31.3",
     "@cosmjs/proto-signing": "^0.31.3",
-    "@usecapsule/core-sdk": "1.2.0"
+    "@usecapsule/core-sdk": "1.2.1"
   },
   "scripts": {
     "build": "rm -rf dist && tsc"
