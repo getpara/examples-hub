@@ -12,6 +12,7 @@
     "build": "lerna run build --parallel",
     "start": "lerna run start --scope=capsule-legacy-example --scope=capsule-portal",
     "start-server": "lerna run start --scope=capsule-server-example",
+    "start-bridge": "lerna run start --scope=capsule-js-bridge",
     "lerna-version": "lerna version",
     "lerna-publish": "lerna publish from-package --no-private"
   },

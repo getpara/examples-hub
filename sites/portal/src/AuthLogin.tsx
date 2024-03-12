@@ -47,7 +47,7 @@ export async function authLogin(
   newDeviceEncryptionKey?: string,
 ): Promise<string> {
   // @ts-ignore
-  const { data } = await capsule.ctx.capsuleClient.getWebChallenge(
+  const data = await capsule.ctx.capsuleClient.getWebChallenge(
     encodeURIComponent(email),
   );
   const sig = await generateSignature(

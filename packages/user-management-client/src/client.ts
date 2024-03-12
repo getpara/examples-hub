@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestHeaders, AxiosResponseHeaders, InternalAxiosRequestConfig } from 'axios';
 import { AxiosRequestConfig } from 'axios';
+import queryString from 'query-string';
 
 export const USER_NOT_VERIFIED = 'user must verify biometrics'
 export const USER_NOT_AUTHENTICATED_ERROR = 'user must be authenticated'
@@ -55,6 +56,11 @@ export interface verifyEmailBody {
   verificationCode: string
 }
 
+export interface getWebChallengeRes {
+  challenge: string,
+  allowedPublicKeys?: string[],
+}
+
 export enum PublicKeyStatus {
   PENDING = 'PENDING',
   COMPLETE = 'COMPLETE',
@@ -87,7 +93,7 @@ interface MobileSignature {
 }
 
 interface verifyWebChallengeBody {
-  email: string
+  email?: string
   sessionLookupId?: string
   signature: WebSignature
   publicKey?: string
@@ -297,9 +303,17 @@ class Client {
   }
 
   // GET /biometrics/challenge?email&publicKey
-  getWebChallenge = async (email: string, publicKey?: string): Promise<any> => {
-    const res = await this.baseRequest.get<any>(`/biometrics/challenge?email=${email}${publicKey ? `&publicKey=${publicKey}` : ''}`);
-    return res;
+  getWebChallenge = async (email?: string, publicKey?: string): Promise<getWebChallengeRes> => {
+    const queryParams = {};
+    if (email) {
+      queryParams['email'] = email;
+    }
+    if (publicKey) {
+      queryParams['publicKey'] = publicKey;
+    }
+    const query = queryString.stringify(queryParams);
+    const res = await this.baseRequest.get<any>(`/biometrics/challenge${query === '' ? '' : `?${query}`}`);
+    return res.data;
   }
 
   // POST /touch

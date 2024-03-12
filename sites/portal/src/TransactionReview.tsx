@@ -29,7 +29,7 @@ function TransactionReview() {
 
   const partnerName = pendingTransaction?.partner?.displayName;
   async function onClickAccept() {
-    const { data } = await userManagementClient.getWebChallenge(
+    const data = await userManagementClient.getWebChallenge(
       encodeURIComponent(email),
     );
     const sig = await generateSignature(
