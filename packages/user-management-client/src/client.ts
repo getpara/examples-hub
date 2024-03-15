@@ -147,6 +147,11 @@ interface createPreGenWalletBody {
   email: string
 }
 
+interface claimPreGenWalletBody {
+  userId: string
+  walletId: string
+}
+
 interface signTransactionBody {
   transaction: string
   chainId: string
@@ -356,6 +361,11 @@ class Client {
   getPregenWallets = async (email: string): Promise<getWalletsRes> => {
     const res = await this.baseRequest.get<any>(`/wallets/pregen?email=${encodeURIComponent(email)}`);
     return res.data;
+  }
+
+  // POST /wallets/pregen/claim
+  claimPregenWallet = async (body?: claimPreGenWalletBody): Promise<void> => {
+    await this.baseRequest.post<walletEntity>(`/wallets/pregen/claim`, body);
   }
 
   // POST /users/:userId/wallets/:walletId/transactions/send

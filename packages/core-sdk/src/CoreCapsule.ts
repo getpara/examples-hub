@@ -987,7 +987,7 @@ export abstract class CoreCapsule {
    * @param email - string 
    * @returns [wallet, recoveryShare]
    **/
-  async createWalletPreGen(partnerId: string, email: string): Promise<[Wallet, string ]> {
+  async createWalletPreGen(partnerId: string, email: string): Promise<[Wallet, string]> {
     this.requireApiKey();
     const { signer, walletId } = await this.platformUtils.preKeygen(
       this.ctx,
@@ -1006,6 +1006,32 @@ export abstract class CoreCapsule {
    
     return [this.wallets[walletId], 'null'];
   }
+
+  /**
+   * Claims a pregenerated wallet.
+   *
+   * @param email string the email of the user claiming the wallet
+   * @returns [wallet, recoveryShare]
+   **/
+    async claimPregenWallet(email: string): Promise<[Wallet, string]> {
+      this.requireApiKey();
+      const userExist = await this.checkIfUserExists(email);
+      if(!userExist) {
+        throw new Error('user does not exist');
+      }
+      const partner = await this.ctx.capsuleClient.touchSession(true);
+      const partnerId = partner.data.partnerId;
+
+      const res = await this.ctx.capsuleClient.getPregenWallets(email);
+      const wallet = res.wallets.find((w) => w.email === email && w.partnerId === partnerId);
+      if (!wallet) {
+        throw new Error('wallet not found');
+      }
+    
+      await this.ctx.capsuleClient.claimPregenWallet({userId: this.userId, walletId: wallet.id});
+    
+      return [this.wallets[wallet.id], null];
+    }
 
   private getTransactionReviewUrl(transactionId: string): string {
     return `${getPortalBaseURL(this.ctx)}/web/users/${

@@ -416,6 +416,8 @@ function App() {
 
   const [email, setEmail] = useState(capsule.getEmail());
   const [pregenEmail, setPregenEmail] = useState('');
+  const [claimPregenEmail, setClaimPregenEmail] = useState('');
+  const [pregenUserShare, setPregenUserShare] = useState('');
   const [deletedEmail, setDeletedEmail] = useState('');
   const [emailPendingDeletion, setEmailPendingDeletion] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
@@ -584,6 +586,17 @@ function App() {
                // @ts-ignore
               await capsule.createWalletPreGen(partnerId, pregenEmail);
             }}>Create Pregen Wallet</Button>
+
+          <Input placeholder="claim-pregen-e-mail" onChange={(e) => {
+              setClaimPregenEmail(e.target.value)
+            }} value={claimPregenEmail || ''}/>
+          <Input placeholder="claim-pregen-user-share" onChange={(e) => {
+              setPregenUserShare(e.target.value)
+            }} value={pregenUserShare || ''}/>
+            <Button colorScheme="teal" onClick={async () => {
+              await capsule.setWallets(JSON.parse(pregenUserShare))
+              await capsule.claimPregenWallet(claimPregenEmail);
+            }}>Claim Pregen Wallet</Button>
 
             <Input placeholder="verification-code" onChange={(e) => setVerificationCode(e.target.value)} value={verificationCode}/>
             <Button colorScheme="teal" onClick={async () => {
