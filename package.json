@@ -4,7 +4,8 @@
   "workspaces": [
     "packages/*",
     "sites/*",
-    "examples/*"
+    "examples/*",
+    "workers/*"
   ],
   "dependencies": {},
   "scripts": {

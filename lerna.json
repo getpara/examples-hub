@@ -3,7 +3,8 @@
   "packages": [
     "sites/*",
     "packages/*",
-    "examples/*"
+    "examples/*",
+    "workers/*"
   ],
   "version": "independent",
   "npmClient": "yarn",
@@ -13,6 +14,7 @@
       "ignoreChanges": [
         "sites/**",
         "examples/**",
+        "workers/**",
         "README.md"
       ],
       "noPrivate": true

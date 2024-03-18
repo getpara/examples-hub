@@ -3,7 +3,7 @@ const webpack = require('webpack');
 
 module.exports = {
   entry: {
-    'mpcWorker': './dist/workers/worker.js',
+    'mpcWorker': './dist/worker.js',
   },
   output: {
     filename: '[name]-bundle.js', // This will be replaced with each entry point key

@@ -1,6 +1,6 @@
 // ANY CHANGES TO THIS FILE REQUIRE A REBUILD OF THE WORKER
 // FILE IN THE PORTAL!
-// run `yarn build-webpack` to rebuild the worker file
+// run `yarn build` to rebuild the worker file
 
 import '../wasm/wasm_exec.js';
 import * as walletUtils from './walletUtils';
@@ -12,7 +12,7 @@ import {
   mpcComputationClient,
 } from '@usecapsule/core-sdk';
 
-interface Message {
+export interface Message {
   env: Environment;
   apiKey?: string;
   offloadMPCComputationURL?: string;
@@ -110,11 +110,3 @@ export async function handleMessage(e: { data: Message }, postMessage: (message:
   postMessage(result);
   return false;
 }
-
-addEventListener('message', async (e: { data: Message }) => {
-  const skipClose = await handleMessage(e, self.postMessage);
-  if (skipClose) {
-    return;
-  }
-  self.close();
-});
