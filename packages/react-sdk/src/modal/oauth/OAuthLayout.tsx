@@ -96,7 +96,7 @@ const OAuthComponent = ({
         }} 
         onClick={handleAuthentication}
         // Will remove this as new methods are added
-        disabled={oAuthMethod === OAuthMethod.APPLE || oAuthMethod === OAuthMethod.X}  
+        disabled={oAuthMethod === OAuthMethod.X}  
       >
         <img src={logos[oAuthMethod]} width="25" height="25" />
       </button>
