@@ -320,6 +320,12 @@ function WagmiComponent(): JSX.Element {
   );
 }
 
+async function signEthersMessage(message: string): Promise<string> {
+  const provider = new ethers.JsonRpcProvider(ALCHEMY_SEPOLIA_PROVIDER, 'sepolia');
+  const ethersSigner = new CapsuleEthersSigner(capsule, provider);
+  return ethersSigner.signMessage(message);
+}
+
 async function sendEthersTransaction(): Promise<void> {
   const tx = {
     from: Object.values(capsule.getWallets())[0]?.address,
@@ -414,15 +420,11 @@ function App() {
     supportUrl: 'mailto:support@usecapsule.com'
   });
 
-  const [email, setEmail] = useState(capsule.getEmail());
   const [pregenEmail, setPregenEmail] = useState('');
   const [claimPregenEmail, setClaimPregenEmail] = useState('');
   const [pregenUserShare, setPregenUserShare] = useState('');
   const [deletedEmail, setDeletedEmail] = useState('');
   const [emailPendingDeletion, setEmailPendingDeletion] = useState('');
-  const [verificationCode, setVerificationCode] = useState('');
-  const [webAuthURLForCreate, setWebAuthURLForCreate] = useState('');
-  const [webAuthURLForLogin, setWebAuthURLForLogin] = useState('');
   const [isSessionActive, setIsSessionActive] = useState(false);
 
   const [txToAddress, setTxToAddress] = useState(DEFAULT_TO_ADDRESS);
@@ -440,6 +442,8 @@ function App() {
   const [capsuleKey, setCapsuleKey] = useState(0);
   const [deleteButtonDisabled, setDeleteButtonDisabled] = useState(false);
   const [secondsToDelete, setSecondsToDelete] = useState(4);
+  const [messageToSign, setMessageToSign] = useState('');
+  const [ethersSignature, setEthersSignature] = useState('');
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
@@ -567,13 +571,6 @@ function App() {
               )}</>
               }
             </HStack>
-            <Input placeholder="e-mail" onChange={(e) => {
-              setEmail(e.target.value)
-            }} value={email || ''}/>
-            <Button colorScheme="teal" onClick={async () => {
-              capsule.clearStorage();
-              await capsule.createUser(email);
-            }}>Create Account</Button>
 
           <Input placeholder="pregen-e-mail" onChange={(e) => {
               setPregenEmail(e.target.value)
@@ -598,36 +595,18 @@ function App() {
               await capsule.claimPregenWallet(claimPregenEmail);
             }}>Claim Pregen Wallet</Button>
 
-            <Input placeholder="verification-code" onChange={(e) => setVerificationCode(e.target.value)} value={verificationCode}/>
-            <Button colorScheme="teal" onClick={async () => {
-              setWebAuthURLForCreate(await capsule.verifyEmail(verificationCode));
-            }}>Verify Email</Button>
-            {
-              webAuthURLForCreate && !isSessionActive && <a href={webAuthURLForCreate} rel="noreferrer" target="_blank">
-                <QRCode value={webAuthURLForCreate}/>
-              </a>
-            }
-
             <Button colorScheme="teal" onClick={checkIsSessionActive}>Is Fully Logged In?</Button>
             <Text>{isSessionActive ? 'Fully Logged In!' : 'Log In Pending...'}</Text>
 
-            <Button colorScheme="teal" onClick={async () => {
-              await capsule.createWallet(false);
-            }}>Create Wallet</Button>
             <Text>Wallet Address: <strong>{capsule.getWallets()?.[Object.keys(capsule.getWallets())[0]]?.address}</strong></Text>
 
+            <Input placeholder="message-to-sign" onChange={(e) => {
+              setMessageToSign(e.target.value)
+            }} value={messageToSign || ''}/>
             <Button colorScheme="teal" onClick={async () => {
-              capsule.clearStorage();
-              setWebAuthURLForLogin(await capsule.initiateUserLogin(email));
-            }}>Login</Button>
-            {
-              webAuthURLForLogin && !isSessionActive && <a href={webAuthURLForLogin} rel="noreferrer" target="_blank">
-                <QRCode value={webAuthURLForLogin}/>
-              </a>
-            }
-            <Button colorScheme="teal" onClick={async () => {
-              await capsule.setupAfterLogin();
-            }}>Setup After Login</Button>
+              setEthersSignature(await signEthersMessage(messageToSign));
+            }}>Sign Message</Button>
+            <Text>Message Signature: <strong>{ethersSignature}</strong></Text>
 
             <Text>To Address:</Text>
             <Input name='To Address' onChange={(e) => setTxToAddress(e.target.value)} value={txToAddress}/>
@@ -667,8 +646,8 @@ function App() {
                 smartContractFunctionArgs ? JSON.parse(smartContractFunctionArgs) : [],
                 smartContractByteCode,
               );
-              await sendViemTransaction();
               await sendEthersTransaction();
+              await sendViemTransaction();
               const res = await capsule.sendTransaction(walletId, tx, `${chainId}`);
               if ((res as DeniedSignatureResWithUrl).transactionReviewUrl) {
                 setTransactionReviewUrl((res as DeniedSignatureResWithUrl).transactionReviewUrl);
