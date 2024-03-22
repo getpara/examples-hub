@@ -7,7 +7,7 @@
   "typings": "dist/types/index.d.ts",
   "sideEffects": false,
   "dependencies": {
-    "@usecapsule/core-sdk": "1.0.1",
+    "@usecapsule/core-sdk": "1.4.0",
     "viem": "^2.7.15"
   },
   "scripts": {

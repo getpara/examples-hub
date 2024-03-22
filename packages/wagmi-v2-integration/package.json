@@ -5,7 +5,7 @@
   "types": "dist/index.d.ts",
   "sideEffects": false,
   "dependencies": {
-    "@usecapsule/react-sdk": "1.0.1",
+    "@usecapsule/react-sdk": "1.4.0",
     "@usecapsule/viem-v2-integration": "1.1.0",
     "viem": "^2.7.15",
     "wagmi": "^2.5.7"
