@@ -49,6 +49,8 @@ export interface Wallet {
   address?: string;
   publicKey?: string;
   scheme?: WalletScheme;
+  userId?: string;
+  partnerId?: string;
 }
 
 export interface ConstructorOpts {
@@ -517,11 +519,13 @@ export abstract class CoreCapsule {
   private async populateWalletAddresses(): Promise<void> {
     const res = await this.ctx.capsuleClient.getWallets(this.userId);
     const wallets = res.data.wallets;
-    wallets.forEach((wallet: { id: string; address?: string; publicKey?: string; scheme?: WalletScheme }) => {
+    wallets.forEach((wallet: { id: string; address?: string; publicKey?: string; scheme?: WalletScheme, partnerId?: string, userId?: string }) => {
       if (this.wallets[wallet.id]) {
         this.wallets[wallet.id].address = wallet.address;
         this.wallets[wallet.id].publicKey = wallet.publicKey;
         this.wallets[wallet.id].scheme = wallet.scheme;
+        this.wallets[wallet.id].partnerId = wallet.partnerId;
+        this.wallets[wallet.id].userId = wallet.userId;
       }
     });
     await this.setWallets(this.wallets);
@@ -530,11 +534,13 @@ export abstract class CoreCapsule {
   private async populatePregenWalletAddresses(email: string): Promise<void> {
     const res = await this.ctx.capsuleClient.getPregenWallets(email);
     const wallets = res.wallets;
-    wallets.forEach((wallet: { id: string; address?: string; publicKey?: string; scheme?: WalletScheme | string }) => {
+    wallets.forEach((wallet: { id: string; address?: string; publicKey?: string; scheme?: WalletScheme | string, partnerId?: string, userId?: string }) => {
       if (this.wallets[wallet.id]) {
         this.wallets[wallet.id].address = wallet.address;
         this.wallets[wallet.id].publicKey = wallet.publicKey;
         this.wallets[wallet.id].scheme = wallet.scheme as WalletScheme;
+        this.wallets[wallet.id].partnerId = wallet.partnerId;
+        this.wallets[wallet.id].userId = wallet.userId;
       }
     });
     await this.setWallets(this.wallets);
@@ -719,8 +725,18 @@ export abstract class CoreCapsule {
 
   async waitForPasskeyAndCreateWallet(): Promise<string> {
     await this.waitForAccountCreation();
-    const [,recovery] = await this.createWallet();
-    return recovery;
+    // This function gets pregen wallets by email and partnerId
+    const res = await this.ctx.capsuleClient.getPregenWallets(this.email);
+    const wallet = res.wallets[0]
+
+    if(wallet) {
+      const [,recovery] = await this.claimPregenWallet(this.email);
+      return recovery
+    } else {
+      const [,recovery] = await this.createWallet();
+      return recovery;
+    }
+
   }
 
   async getOAuthURL(oAuthMethod: OAuthMethod): Promise<string> {
@@ -983,12 +999,13 @@ export abstract class CoreCapsule {
   /**
    * Creates a new pregenerated wallet.
    *
-   * @param partnerId - string
    * @param email - string 
    * @returns [wallet, recoveryShare]
    **/
-  async createWalletPreGen(partnerId: string, email: string): Promise<[Wallet, string]> {
+  async createWalletPreGen(email: string): Promise<[Wallet, string]> {
     this.requireApiKey();
+    const partner = await this.ctx.capsuleClient.touchSession();
+    const partnerId = partner.data.partnerId;
     const { signer, walletId } = await this.platformUtils.preKeygen(
       this.ctx,
       partnerId,
@@ -1013,26 +1030,64 @@ export abstract class CoreCapsule {
    * @param email string the email of the user claiming the wallet
    * @returns [wallet, recoveryShare]
    **/
-    async claimPregenWallet(email: string): Promise<[Wallet, string]> {
-      this.requireApiKey();
-      const userExist = await this.checkIfUserExists(email);
-      if(!userExist) {
-        throw new Error('user does not exist');
-      }
-      const partner = await this.ctx.capsuleClient.touchSession(true);
-      const partnerId = partner.data.partnerId;
-
-      const res = await this.ctx.capsuleClient.getPregenWallets(email);
-      const wallet = res.wallets.find((w) => w.email === email && w.partnerId === partnerId);
-      if (!wallet) {
-        throw new Error('wallet not found');
-      }
-    
-      await this.ctx.capsuleClient.claimPregenWallet({userId: this.userId, walletId: wallet.id});
-    
-      return [this.wallets[wallet.id], null];
+  async claimPregenWallet(email: string): Promise<[Wallet, string]> {
+    this.requireApiKey();
+    const userExist = await this.checkIfUserExists(email);
+    if(!userExist) {
+      throw new Error('user does not exist');
     }
 
+    // This function gets pregen wallets by email and partnerId
+    const res = await this.ctx.capsuleClient.getPregenWallets(email);
+    const wallet = res.wallets[0]
+    if (!wallet) {
+      throw new Error('wallet not found');
+    }
+  
+    await this.ctx.capsuleClient.claimPregenWallet({userId: this.userId, walletId: wallet.id});
+
+    const recoveryShare = await distributeNewShare(
+      this.ctx,
+      this.userId,
+      wallet.id,
+      this.wallets[wallet.id].signer,
+      false,
+      this.getBackupKitEmailProps()
+    );
+  
+    return [this.wallets[wallet.id], recoveryShare];
+  }
+
+  /**
+   * Returns a base64 encoded wallet
+   *
+   * @returns string base64 encoded wallet
+   **/
+  getUserShare(): string | null {
+    const wallet = Object.values(this.wallets)[0];
+
+    if (wallet) {
+      const walletJson = JSON.stringify(wallet);
+      const base64Wallet = Buffer.from(walletJson).toString('base64');
+      return base64Wallet;
+    } else {
+      return null;
+    }
+  }
+  
+  /**
+   * Sets a wallet from a base 64 encoded wallet
+   *
+   * @param base64Wallet
+   * @returns Promise<void>
+   **/
+  async setUserShare(base64Wallet: string): Promise<void> {
+    const walletJson = Buffer.from(base64Wallet, 'base64').toString();
+    const wallet = JSON.parse(walletJson) as Wallet;
+    this.wallets[wallet.id] = wallet;
+    await this.setWallets(this.wallets);
+  }
+  
   private getTransactionReviewUrl(transactionId: string): string {
     return `${getPortalBaseURL(this.ctx)}/web/users/${
       this.userId
@@ -1054,9 +1109,13 @@ export abstract class CoreCapsule {
     messageBase64: string,
   ): Promise<FullSignatureRes> {
     const wallet = this.wallets[walletId];
+    let signerId: string = this.userId;
+    if(wallet.partnerId && !wallet.userId) {
+      signerId = wallet.partnerId;
+    }
     const res = await this.platformUtils.signMessage(
       this.ctx,
-      this.userId,
+      signerId,
       walletId,
       this.wallets[walletId].signer,
       messageBase64,
@@ -1087,9 +1146,13 @@ export abstract class CoreCapsule {
     chainId: string,
   ): Promise<FullSignatureRes> {
     const wallet = this.wallets[walletId];
+    let signerId: string = this.userId;
+    if(wallet.partnerId && !wallet.userId) {
+      signerId = wallet.partnerId;
+    }
     const res = await this.platformUtils.signTransaction(
       this.ctx,
-      this.userId,
+      signerId,
       walletId,
       this.wallets[walletId].signer,
       rlpEncodedTxBase64,

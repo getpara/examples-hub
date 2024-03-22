@@ -421,7 +421,6 @@ function App() {
   });
 
   const [pregenEmail, setPregenEmail] = useState('');
-  const [claimPregenEmail, setClaimPregenEmail] = useState('');
   const [pregenUserShare, setPregenUserShare] = useState('');
   const [deletedEmail, setDeletedEmail] = useState('');
   const [emailPendingDeletion, setEmailPendingDeletion] = useState('');
@@ -572,33 +571,27 @@ function App() {
               }
             </HStack>
 
-          <Input placeholder="pregen-e-mail" onChange={(e) => {
+            <Input placeholder="pregen-e-mail" onChange={(e) => {
               setPregenEmail(e.target.value)
             }} value={pregenEmail || ''}/>
             <Button colorScheme="teal" onClick={async () => {
-              capsule.clearStorage();
-              // @ts-ignore
-              const res = await capsule.ctx.capsuleClient.touchSession();
-              const partnerId = res.data.partnerId;
-               // @ts-ignore
-              await capsule.createWalletPreGen(partnerId, pregenEmail);
+              await capsule.createWalletPreGen(pregenEmail);
             }}>Create Pregen Wallet</Button>
 
-          <Input placeholder="claim-pregen-e-mail" onChange={(e) => {
-              setClaimPregenEmail(e.target.value)
-            }} value={claimPregenEmail || ''}/>
-          <Input placeholder="claim-pregen-user-share" onChange={(e) => {
-              setPregenUserShare(e.target.value)
+            <Text>User Share: <strong>{capsule.getUserShare() || ''}</strong></Text>
+            <Input placeholder="claim-pregen-user-share" onChange={(e) => {
+              setPregenUserShare(e.target.value);
             }} value={pregenUserShare || ''}/>
             <Button colorScheme="teal" onClick={async () => {
-              await capsule.setWallets(JSON.parse(pregenUserShare))
-              await capsule.claimPregenWallet(claimPregenEmail);
+              await capsule.setUserShare(pregenUserShare)
+              console.log(await capsule.claimPregenWallet(pregenEmail));
             }}>Claim Pregen Wallet</Button>
 
             <Button colorScheme="teal" onClick={checkIsSessionActive}>Is Fully Logged In?</Button>
             <Text>{isSessionActive ? 'Fully Logged In!' : 'Log In Pending...'}</Text>
 
             <Text>Wallet Address: <strong>{capsule.getWallets()?.[Object.keys(capsule.getWallets())[0]]?.address}</strong></Text>
+            {/* <Text>{userShare}</Text> */}
 
             <Input placeholder="message-to-sign" onChange={(e) => {
               setMessageToSign(e.target.value)
