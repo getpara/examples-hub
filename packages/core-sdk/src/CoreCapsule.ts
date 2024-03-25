@@ -562,6 +562,7 @@ export abstract class CoreCapsule {
   async createUser(email: string): Promise<void> {
     this.requireApiKey();
     await this.setEmail(email);
+    await this.setWallets({});
     const { userId } = await this.ctx.capsuleClient.createUser({
       email: this.email,
       ...this.getVerificationEmailProps()
@@ -740,7 +741,8 @@ export abstract class CoreCapsule {
   }
 
   async getOAuthURL(oAuthMethod: OAuthMethod): Promise<string> {
-    const res = await this.ctx.capsuleClient.touchSession(true);
+    await this.logout();
+    const res = await this.ctx.capsuleClient.touchSession();
     return `${getBaseUrl(this.ctx.env)}auth/${oAuthMethod.toLowerCase()}?sessionLookupId=${encodeURIComponent(res.data.sessionLookupId)}`;
   }
 
@@ -861,6 +863,7 @@ export abstract class CoreCapsule {
       temporaryShares = (await this.getTransmissionKeyShares()).data.temporaryShares;
     }
 
+    await this.setWallets({});
     temporaryShares.forEach((share) => {
       this.wallets[share.walletId] = {
         id: share.walletId,

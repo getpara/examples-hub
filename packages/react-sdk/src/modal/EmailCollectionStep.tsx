@@ -106,7 +106,7 @@ export function EmailCollectionStep({
               if (!email) {
                 throw new Error('email is required');
               }
-              capsule.clearStorage();
+              await capsule.logout();
 
               const userExists = await capsule.checkIfUserExists(email);
               if (userExists) {

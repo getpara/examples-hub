@@ -1,7 +1,7 @@
 import { Flex, Text } from "@chakra-ui/react";
 import CapsuleWeb, { OAuthMethod } from "@usecapsule/web-sdk";
 import { ModalStep } from "../steps";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import FlowContext from "../FlowContext";
 import googleLogo from '../public/google-logo.svg';
 import discordLogo from '../public/discord-logo.png';
@@ -48,15 +48,19 @@ const OAuthComponent = ({
   setIsCreateAccountType: (isCreateAccountType: boolean) => void;
   oAuthMethod: OAuthMethod;
 }) => {
+  const [isClicked, setIsClicked] = useState(false);
   const { setIsLogin } = useContext(FlowContext);
   
   const handleAuthentication = async () => {
+    setIsClicked(true);
+    setTimeout(() => {
+      setIsClicked(false);
+    }, 1000);
     const width = 600, height = 600;
     const left = (window.innerWidth - width) / 2;
     const top = (window.innerHeight - height) / 2;
 
     const windowFeatures = `toolbar=no, menubar=no, width=${width}, height=${height}, top=${top}, left=${left}`;
-    capsule.clearStorage();
     const oAuthURL = await capsule.getOAuthURL(oAuthMethod);
     window.open(oAuthURL, `${oAuthMethod}AuthPopup`, windowFeatures);
     const { email, userExists } = await capsule.waitForOAuth();
@@ -81,7 +85,9 @@ const OAuthComponent = ({
   };
 
   return (
-    <div>
+    <div style= {{
+      opacity: isClicked ? 0.5 : 1,
+    }}>
       <button 
         style={{ 
           color: 'white', 
@@ -96,7 +102,7 @@ const OAuthComponent = ({
         }} 
         onClick={handleAuthentication}
         // Will remove this as new methods are added
-        disabled={oAuthMethod === OAuthMethod.X}  
+        disabled={isClicked || oAuthMethod === OAuthMethod.X}
       >
         <img src={logos[oAuthMethod]} width="25" height="25" />
       </button>
