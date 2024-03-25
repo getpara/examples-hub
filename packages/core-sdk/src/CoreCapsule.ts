@@ -742,7 +742,7 @@ export abstract class CoreCapsule {
 
   async getOAuthURL(oAuthMethod: OAuthMethod): Promise<string> {
     await this.logout();
-    const res = await this.ctx.capsuleClient.touchSession();
+    const res = await this.ctx.capsuleClient.touchSession(true);
     return `${getBaseUrl(this.ctx.env)}auth/${oAuthMethod.toLowerCase()}?sessionLookupId=${encodeURIComponent(res.data.sessionLookupId)}`;
   }
 
