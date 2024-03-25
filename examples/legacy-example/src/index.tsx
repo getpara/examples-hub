@@ -555,7 +555,7 @@ function App() {
                 }}
                 capsule={capsule}
                 appName="Example" 
-                oAuthMethods={[OAuthMethod.GOOGLE, OAuthMethod.DISCORD, OAuthMethod.APPLE]}
+                oAuthMethods={[OAuthMethod.GOOGLE, OAuthMethod.DISCORD, OAuthMethod.APPLE, OAuthMethod.FACEBOOK]}
               />
               {isSessionActive && <><Button 
                 colorScheme="red" 

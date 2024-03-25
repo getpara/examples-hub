@@ -7,12 +7,14 @@ import googleLogo from '../public/google-logo.svg';
 import discordLogo from '../public/discord-logo.png';
 import appleLogo from '../public/apple-logo.png';
 import xLogo from '../public/x-logo.png';
+import facebookLogo from '../public/facebook-logo.jpeg'
 
 const logos = {
   [OAuthMethod.GOOGLE]: googleLogo,
   [OAuthMethod.DISCORD]: discordLogo,
   [OAuthMethod.APPLE]: appleLogo,
   [OAuthMethod.X]: xLogo,
+  [OAuthMethod.FACEBOOK]: facebookLogo
 }
 
 const calculateComponentWidth = (numComponents: number): number => {

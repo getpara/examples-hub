@@ -36,6 +36,7 @@ export enum OAuthMethod {
   X = 'X',
   APPLE = 'APPLE',
   DISCORD = 'DISCORD',
+  FACEBOOK = 'FACEBOOK'
 }
 
 export function getPortalDomain(env: Environment) {
