@@ -1062,6 +1062,24 @@ export abstract class CoreCapsule {
   }
 
   /**
+   * Checks if Pregen Wallet exists for the email and partnerId
+   *
+   * @param email string the email of the user claiming the wallet
+   * @returns Promise<boolean>
+   **/
+    async hasPregenWallet(email: string): Promise<boolean> {
+      this.requireApiKey();
+
+      // This function gets pregen wallets by email and partnerId
+      const res = await this.ctx.capsuleClient.getPregenWallets(email);
+      const wallet = res.wallets[0]
+      if (!wallet) {
+       return false
+      }
+      return true
+    }
+
+  /**
    * Returns a base64 encoded wallet
    *
    * @returns string base64 encoded wallet
