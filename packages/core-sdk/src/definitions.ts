@@ -33,7 +33,7 @@ export interface Ctx {
 
 export enum OAuthMethod {
   GOOGLE = 'GOOGLE',
-  X = 'X',
+  TWITTER = 'TWITTER',
   APPLE = 'APPLE',
   DISCORD = 'DISCORD',
   FACEBOOK = 'FACEBOOK'

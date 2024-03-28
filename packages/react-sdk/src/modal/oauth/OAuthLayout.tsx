@@ -13,7 +13,7 @@ const logos = {
   [OAuthMethod.GOOGLE]: googleLogo,
   [OAuthMethod.DISCORD]: discordLogo,
   [OAuthMethod.APPLE]: appleLogo,
-  [OAuthMethod.X]: xLogo,
+  [OAuthMethod.TWITTER]: xLogo,
   [OAuthMethod.FACEBOOK]: facebookLogo
 }
 
@@ -21,8 +21,8 @@ const calculateComponentWidth = (numComponents: number): number => {
   const totalWidth = 274;
   const spaceBetweenComponents = 16;
 
-  if (numComponents < 1 || numComponents > 4) {
-      throw new Error("Number of components must be between 1 and 4");
+  if (numComponents < 1 || numComponents > 5) {
+      throw new Error("Number of components must be between 1 and 5");
   }
 
   const totalSpaceBetween = (numComponents - 1) * spaceBetweenComponents;
@@ -104,7 +104,7 @@ const OAuthComponent = ({
         }} 
         onClick={handleAuthentication}
         // Will remove this as new methods are added
-        disabled={isClicked || oAuthMethod === OAuthMethod.X}
+        disabled={isClicked}
       >
         <img src={logos[oAuthMethod]} width="25" height="25" />
       </button>
