@@ -2,20 +2,9 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "jsx": "react-jsx"
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "types/images.d.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+  "include": ["**/*.ts", "**/*.tsx", "types/images.d.ts"],
+  "exclude": ["node_modules", "dist", "example", "public"]
 }

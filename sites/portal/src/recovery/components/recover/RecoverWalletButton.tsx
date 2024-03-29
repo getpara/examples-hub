@@ -1,12 +1,13 @@
 import { Button, Text } from '@chakra-ui/react';
 import { useContext, useState } from 'react';
-import { CapsuleSmall, RecoveryStatus } from '@usecapsule/react-sdk';
+import { RecoveryStatus } from '@usecapsule/react-sdk';
 import RecoveryWalletModal from './RecoverWalletModal';
 import { RecoveryAttemptContext } from '../../contexts/RecoveryAttemptContext';
 import RecoveryStepContext from '../../contexts/RecoveryStepContext';
 import { ModalStep as RecoveryModalStep } from '../../steps/recoverySteps';
 import { ModalStep } from '../../steps/attemptSteps';
 import StepContext from '../../contexts/StepContext';
+import CapsuleSmall from '../../../assets/capsuleSmall';
 
 const RecoverWalletButton: React.FC = () => {
     const [modalIsOpen, setModalIsOpen] = useState(false);

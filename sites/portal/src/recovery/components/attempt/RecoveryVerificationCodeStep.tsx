@@ -1,12 +1,13 @@
 import { VStack, Spacer, HStack, Input, Button, Text, Box } from '@chakra-ui/react';
 import { useContext, useState } from 'react';
 import capsule from '../../../capsule';
-import { Console, VerifyCode } from '@usecapsule/react-sdk';
 import EmailContext from '../../contexts/EmailContext';
 import { RecoveryAttemptContext } from '../../contexts/RecoveryAttemptContext';
 import StepContext from '../../contexts/StepContext';
 import { ModalStep } from '../../steps/attemptSteps';
 import WalletContext from '../../contexts/WalletContext';
+import VerifyCode from '../../../assets/verifyCode';
+import Console from '../../../assets/console';
 
 type RecoveryVerificationCodeStepProps = {
     onClose: () => void,

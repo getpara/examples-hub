@@ -1,5 +1,6 @@
 import { Box, Flex } from '@chakra-ui/react';
-import { CapsuleSmall, Exit } from '@usecapsule/react-sdk';
+import CapsuleSmall from '../../../assets/capsuleSmall';
+import Exit from '../../../assets/exit';
 
 export function RecoveryHeader({
     step = 0,

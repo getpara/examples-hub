@@ -1,8 +1,12 @@
 import ReactDOM from 'react-dom';
 
-import CapsuleWeb, { CapsuleModal, newTheme } from '@usecapsule/react-sdk';
+import CapsuleWeb, { CapsuleModal } from '@usecapsule/react-sdk';
 
-export function renderModal(capsule: CapsuleWeb, appName: string, onCloseArg: () => void): void {
+export function renderModal(
+  capsule: CapsuleWeb,
+  appName: string,
+  onCloseArg: () => void,
+): void {
   const container = document.createElement('div');
   document.body.appendChild(container); // Add the container to the DOM
 
@@ -18,8 +22,7 @@ export function renderModal(capsule: CapsuleWeb, appName: string, onCloseArg: ()
       capsule={capsule}
       isOpen={true}
       appName={appName}
-      theme={newTheme}
     />,
-    container
+    container,
   );
 }

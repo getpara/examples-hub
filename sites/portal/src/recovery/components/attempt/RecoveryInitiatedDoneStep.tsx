@@ -1,5 +1,5 @@
 import { VStack, Spacer, Text, Button } from '@chakra-ui/react'
-import { WalletSuccess } from '@usecapsule/react-sdk'
+import WalletSuccess from '../../../assets/walletSuccess';
 
 type RecoveryInitiatedDoneStepProps = {
     onClose: () => void,

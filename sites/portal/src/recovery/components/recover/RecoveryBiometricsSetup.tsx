@@ -1,6 +1,6 @@
 import { Box, Text, Spacer, VStack, useTheme, HStack } from '@chakra-ui/react';
 import QRCode from 'react-qr-code';
-import { Identity } from '@usecapsule/react-sdk';
+import Identity from '../../../assets/identity';
 
 type RecoveryBiometricsSetupProps = {
     url: string;

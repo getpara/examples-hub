@@ -1,7 +1,7 @@
 import { Modal, ModalOverlay, ModalContent, ModalBody, VStack } from '@chakra-ui/react'
 import { useContext, useEffect, useRef, useState } from 'react';
 import capsule from '../../../capsule';
-import { Footer, distributeNewShare } from '@usecapsule/react-sdk'
+import { distributeNewShare } from '@usecapsule/react-sdk'
 import { RecoveryHeader } from '../header/RecoveryHeader'
 import RecoveryLost2FA from '../RecoveryLost2FAStep';
 import RecoveryStepContext from '../../contexts/RecoveryStepContext';
@@ -11,6 +11,7 @@ import RecoverWalletWithSecretStep from './RecoverWalletWithSecretStep';
 import RecoveryAwaitingFinishStep from './RecoveryAwaitingFinish';
 import RecoveryBiometricsSetup from './RecoveryBiometricsSetup';
 import RecoveryDoneStep from './RecoveryDoneStep';
+import { Footer } from '../Footer/Footer';
 
 type RecoveryWalletModalProps = {
     isOpen: boolean,

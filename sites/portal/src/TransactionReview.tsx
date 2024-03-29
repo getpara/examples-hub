@@ -11,11 +11,12 @@ import {
 } from '@chakra-ui/react';
 
 import { userManagementClient } from './userManagementClient';
-import { newTheme, Environment, generateSignature } from '@usecapsule/react-sdk';
+import { Environment, generateSignature } from '@usecapsule/react-sdk';
 import CapsuleBox from './assets/CapsuleBox';
 import ScatteredDivider from './assets/scatteredDivider';
 import { ENV } from './definitions';
 import { PortalModalWrapper } from './assets/modalComponents/PortalModalWrapper';
+import { newTheme } from './theme';
 
 function TransactionReview() {
   const { userId, pendingTransactionId } = useParams();

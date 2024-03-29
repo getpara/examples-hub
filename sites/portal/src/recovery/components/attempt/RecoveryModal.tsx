@@ -1,6 +1,5 @@
 import { Modal, ModalOverlay, ModalContent, ModalBody, VStack } from '@chakra-ui/react'
 import { useContext } from 'react'
-import { Footer } from '@usecapsule/react-sdk'
 import RecoveryEmailCollectionStep from './RecoveryEmailCollectionStep'
 import { RecoveryHeader } from '../header/RecoveryHeader'
 import RecoveryLost2FA from '../../components//RecoveryLost2FAStep'
@@ -10,6 +9,7 @@ import Recovery2FAStep from './Recovery2FAStep'
 import RecoveryAwaitingInitiationStep from './RecoveryAwaitingInitiationStep'
 import RecoveryInitiatedDoneStep from './RecoveryInitiatedDoneStep'
 import RecoveryVerificationCodeStep from './RecoveryVerificationCodeStep'
+import { Footer } from '../Footer/Footer'
 
 type RecoveryModalProps = {
     isOpen: boolean,

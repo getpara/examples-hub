@@ -1,5 +1,4 @@
 import { Box, Flex, Text, Button, Modal, ModalBody, ModalContent, ModalOverlay, Spacer, VStack } from '@chakra-ui/react';
-import { CapsuleSmall, Console, Exit, Footer } from '@usecapsule/react-sdk';
 import capsule from '../../../capsule';
 import { useContext } from 'react';
 import EmailContext from '../../contexts/EmailContext';
@@ -9,6 +8,10 @@ import RecoveryStepContext from '../../contexts/RecoveryStepContext';
 import WalletContext from '../../contexts/WalletContext';
 import StepContext from '../../contexts/StepContext';
 import { RecoveryAttemptContext } from '../../contexts/RecoveryAttemptContext';
+import { Footer } from '../Footer/Footer';
+import CapsuleSmall from '../../../assets/capsuleSmall';
+import Console from '../../../assets/console';
+import Exit from '../../../assets/exit';
 
 type RecoveryCancelModalProps = {
     isOpen: boolean,

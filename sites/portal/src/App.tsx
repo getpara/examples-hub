@@ -1,7 +1,7 @@
 import { Box, ChakraProvider, HStack, Text, VStack } from '@chakra-ui/react';
 import React from 'react';
 import './App.css';
-import { newTheme, truncateEthAddress, RecoveryStatus } from '@usecapsule/react-sdk';
+import { truncateEthAddress, RecoveryStatus } from '@usecapsule/react-sdk';
 import EmailContext from './recovery/contexts/EmailContext';
 import RecoveryButton from './recovery/components/attempt/RecoveryButton';
 import { RecoveryAttemptContext } from './recovery/contexts/RecoveryAttemptContext';
@@ -21,6 +21,7 @@ import useWalletIdState from './recovery/hooks/useWalletIdState';
 import useUserIdState from './recovery/hooks/useUserIdState';
 import useStatusState from './recovery/hooks/useStatusState';
 import useInitiatedAtState from './recovery/hooks/useInitiatedAtState';
+import { newTheme } from './theme';
 
 const App: React.FC = () => {
   const [email, setEmail] = useEmailState(null);

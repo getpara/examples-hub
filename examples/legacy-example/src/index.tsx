@@ -12,10 +12,10 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react';
-import { useDebounce } from 'use-debounce'
+import { useDebounce } from 'use-debounce';
 import QRCode from 'react-qr-code';
 import Web3 from 'web3';
-import { http, parseEther } from 'viem'
+import { http, parseEther } from 'viem';
 import { sepolia } from 'viem/chains';
 import { SigningStargateClient } from '@cosmjs/stargate';
 import { ethers } from 'ethers';
@@ -39,12 +39,19 @@ import { alchemyProvider } from 'wagmi/providers/alchemy';
 import Capsule from '@usecapsule/web-sdk';
 import { OAuthMethod } from '@usecapsule/react-sdk';
 import { FeeMarketEIP1559Transaction } from '@ethereumjs/tx';
-import {CapsuleButton} from '@usecapsule/react-sdk';
+import { CapsuleModal } from '@usecapsule/react-sdk';
 import { CapsuleProtoSigner } from '@usecapsule/cosmjs-v0-integration';
 import { CapsuleEthersSigner } from '@usecapsule/ethers-v6-integration';
 import { createCapsuleViemClient } from '@usecapsule/viem-v1-integration';
-import { CapsuleConnector, CapsuleEIP1193Provider } from '@usecapsule/wagmi-v1-integration';
-import CoreCapsule, { Environment, ConstructorOpts, DeniedSignatureResWithUrl } from '@usecapsule/core-sdk';
+import {
+  CapsuleConnector,
+  CapsuleEIP1193Provider,
+} from '@usecapsule/wagmi-v1-integration';
+import CoreCapsule, {
+  Environment,
+  ConstructorOpts,
+  DeniedSignatureResWithUrl,
+} from '@usecapsule/core-sdk';
 
 // sample transaction params
 const DEFAULT_TO_ADDRESS = '0x42c9a72c9dfcc92cae0de9510160cea2da27af91';
@@ -56,42 +63,45 @@ const DEFAULT_NONCE = '0';
 const API_KEY_WITH_PERMISSIONS = 'fdba16e45ba41e80185eb2c0195e89d4';
 const API_KEY_WITH_BRANDING = '8ee2d015fbc6062a6e30bdc472f2946c';
 
-const ALCHEMY_SEPOLIA_PROVIDER = 'https://eth-sepolia.g.alchemy.com/v2/KfxK8ZFXw9mTUuJ7jt751xGJCa3r8noZ';
-const WSS_ALCHEMY_SEPOLIA_PROVIDER = 'wss://eth-sepolia.g.alchemy.com/v2/HfT9dMNs3W0h1vJmiPZQ_APaFjPo-BF9';
+const ALCHEMY_SEPOLIA_PROVIDER =
+  'https://eth-sepolia.g.alchemy.com/v2/KfxK8ZFXw9mTUuJ7jt751xGJCa3r8noZ';
+const WSS_ALCHEMY_SEPOLIA_PROVIDER =
+  'wss://eth-sepolia.g.alchemy.com/v2/HfT9dMNs3W0h1vJmiPZQ_APaFjPo-BF9';
 // goerli chain id
 const DEFAULT_CHAIN_ID = '11155111';
 const DEFAULT_CONTRACT_ABI = [
   {
-    "inputs": [],
-    "name": "retrieve",
-    "outputs": [
+    inputs: [],
+    name: 'retrieve',
+    outputs: [
       {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
     ],
-    "stateMutability": "view",
-    "type": "function"
+    stateMutability: 'view',
+    type: 'function',
   },
   {
-    "inputs": [
+    inputs: [
       {
-        "internalType": "uint256",
-        "name": "num",
-        "type": "uint256"
-      }
+        internalType: 'uint256',
+        name: 'num',
+        type: 'uint256',
+      },
     ],
-    "name": "store",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  }
+    name: 'store',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
 ];
 const DEFAULT_SMART_CONTRACT_FUNCTION = 'store';
 const DEFAULT_SMART_CONTRACT_ARGS = ['808'];
 const COSMOS_TESTNET_RPC = 'rpc.sentry-01.theta-testnet.polypore.xyz';
-const COSMOS_DEFAULT_TO_ADDRESS = 'cosmos1f3px9t4juk43cwufj7f9s64z3wj7xvyc0rexg6';
+const COSMOS_DEFAULT_TO_ADDRESS =
+  'cosmos1f3px9t4juk43cwufj7f9s64z3wj7xvyc0rexg6';
 const web3 = new Web3();
 
 // use below to call "view" smart contract function
@@ -103,25 +113,32 @@ const web3 = new Web3();
 
 async function sendCosmosTx(): Promise<void> {
   const protoSigner = new CapsuleProtoSigner(capsule);
-  const client = await SigningStargateClient.connectWithSigner(COSMOS_TESTNET_RPC, protoSigner);
+  const client = await SigningStargateClient.connectWithSigner(
+    COSMOS_TESTNET_RPC,
+    protoSigner,
+  );
 
   console.log(await client.getAccount(protoSigner.address));
-  console.log(await client.getAllBalances(protoSigner.address))
+  console.log(await client.getAllBalances(protoSigner.address));
   const fromAddress = protoSigner.address;
 
   console.log(
     await client.sendTokens(
       fromAddress,
       COSMOS_DEFAULT_TO_ADDRESS,
-      [{
-        denom: 'uatom',
-        amount: '9500',
-      }],
-      {
-        amount: [{
-          amount: '500',
+      [
+        {
           denom: 'uatom',
-        }],
+          amount: '9500',
+        },
+      ],
+      {
+        amount: [
+          {
+            amount: '500',
+            denom: 'uatom',
+          },
+        ],
         gas: '200000',
       },
     ),
@@ -133,16 +150,18 @@ async function sendViemTransaction(nonce = 0): Promise<void> {
     chain: sepolia,
     transport: http(ALCHEMY_SEPOLIA_PROVIDER),
   });
-  console.log(await viemClient.sendTransaction({
-    value: BigInt(10100000000),
-    to: DEFAULT_TO_ADDRESS,
-    chain: sepolia,
-    gas: BigInt(21000),
-    maxPriorityFeePerGas: BigInt(1000000000),
-    maxFeePerGas: BigInt(3000000000),
-    account: viemClient.account,
-    nonce,
-  }));
+  console.log(
+    await viemClient.sendTransaction({
+      value: BigInt(10100000000),
+      to: DEFAULT_TO_ADDRESS,
+      chain: sepolia,
+      gas: BigInt(21000),
+      maxPriorityFeePerGas: BigInt(1000000000),
+      maxFeePerGas: BigInt(3000000000),
+      account: viemClient.account,
+      nonce,
+    }),
+  );
 }
 
 async function sendEIP1193ProviderTransaction(): Promise<void> {
@@ -156,7 +175,7 @@ async function sendEIP1193ProviderTransaction(): Promise<void> {
     method: 'eth_accounts',
     params: undefined,
   });
-  console.log(accounts)
+  console.log(accounts);
   const tx = {
     value: BigInt(190000000000),
     to: DEFAULT_TO_ADDRESS,
@@ -168,28 +187,40 @@ async function sendEIP1193ProviderTransaction(): Promise<void> {
     nonce: 0,
     type: 'eip1559',
   };
-  console.log(await eip1193Provider.request({
-    method: 'eth_sendTransaction',
-    params: [tx],
-  }));
+  console.log(
+    await eip1193Provider.request({
+      method: 'eth_sendTransaction',
+      params: [tx],
+    }),
+  );
 }
 
 function WagmiSignMessage(): JSX.Element {
   const [message, setMessage] = useState<string>('');
-  const [messageSignature, setMessageSignature] = useState<string | undefined>();
+  const [messageSignature, setMessageSignature] = useState<
+    string | undefined
+  >();
   const onSuccess = (data: string) => {
-    setMessageSignature(data)
+    setMessageSignature(data);
   };
   const { signMessageAsync } = useSignMessage({ onSuccess });
   return (
     <>
-      <Input placeholder="message to sign" onChange={(e) => {
-        setMessage(e.target.value);
-      }}/>
+      <Input
+        placeholder="message to sign"
+        onChange={(e) => {
+          setMessage(e.target.value);
+        }}
+      />
       {messageSignature && <Text>Message Signature: {messageSignature}</Text>}
-      <Button isDisabled={!message} onClick={async () => {
-        await signMessageAsync({ message });
-      }}>Sign Message</Button>
+      <Button
+        isDisabled={!message}
+        onClick={async () => {
+          await signMessageAsync({ message });
+        }}
+      >
+        Sign Message
+      </Button>
     </>
   );
 }
@@ -208,7 +239,11 @@ function WagmiSendTransaction(): JSX.Element {
     type: 'eip1559',
   });
 
-  const { data, sendTransaction, isLoading: isSendTxLoading } = useSendTransaction(config);
+  const {
+    data,
+    sendTransaction,
+    isLoading: isSendTxLoading,
+  } = useSendTransaction(config);
 
   const { isLoading: isWaitTxLoading, isSuccess } = useWaitForTransaction({
     hash: data?.hash,
@@ -218,19 +253,46 @@ function WagmiSendTransaction(): JSX.Element {
   return (
     <>
       <Text>To Address:</Text>
-      <Input value={toAddress} onChange={(e) => {
-        setToAddress(e.target.value);
-      }}/>
+      <Input
+        value={toAddress}
+        onChange={(e) => {
+          setToAddress(e.target.value);
+        }}
+      />
       <Text>Value in gwei:</Text>
-      <Input value={amount} onChange={(e) => {
-        setAmount(e.target.value);
-      }}/>
-      <Button isDisabled={isSendTxLoading || isWaitTxLoading || !sendTransaction || !toAddress || !amount} onClick={() => {
-        sendTransaction();
-      }}>{isSendTxLoading ? 'Sending Transaction...' : isWaitTxLoading ? 'Awaiting Confirmation...' : 'Send Transaction'}</Button>
+      <Input
+        value={amount}
+        onChange={(e) => {
+          setAmount(e.target.value);
+        }}
+      />
+      <Button
+        isDisabled={
+          isSendTxLoading ||
+          isWaitTxLoading ||
+          !sendTransaction ||
+          !toAddress ||
+          !amount
+        }
+        onClick={() => {
+          sendTransaction();
+        }}
+      >
+        {isSendTxLoading
+          ? 'Sending Transaction...'
+          : isWaitTxLoading
+          ? 'Awaiting Confirmation...'
+          : 'Send Transaction'}
+      </Button>
       {isSuccess && (
         <Text>
-          <a rel="noreferrer" target="_blank" href={`https://sepolia.etherscan.io/tx/${data?.hash}`}><u>Sepolia Scan Link</u></a>
+          <a
+            rel="noreferrer"
+            target="_blank"
+            href={`https://sepolia.etherscan.io/tx/${data?.hash}`}
+          >
+            <u>Sepolia Scan Link</u>
+          </a>
         </Text>
       )}
     </>
@@ -239,18 +301,25 @@ function WagmiSendTransaction(): JSX.Element {
 
 function WagmiProfileComponent(): JSX.Element {
   const { address, connector, isConnected } = useAccount();
-  const { connect, connectors, error, isLoading, pendingConnector } = useConnect();
+  const { connect, connectors, error, isLoading, pendingConnector } =
+    useConnect();
   const { disconnect } = useDisconnect();
 
   if (isConnected) {
     return (
-        <>
+      <>
         <VStack backgroundColor="blue.400" padding={6}>
           <Text color="white">Address is: {address}</Text>
           <Text color="white">Connected to {connector?.name}</Text>
-          <Button color="red.600" backgroundColor="white" onClick={() => {
-            disconnect();
-          }}>Disconnect</Button>
+          <Button
+            color="red.600"
+            backgroundColor="white"
+            onClick={() => {
+              disconnect();
+            }}
+          >
+            Disconnect
+          </Button>
         </VStack>
         <WagmiSignMessage />
         <WagmiSendTransaction />
@@ -275,7 +344,7 @@ function WagmiProfileComponent(): JSX.Element {
             ' (connecting)'}
         </Button>
       ))}
- 
+
       {error && <Text>{error.message}</Text>}
     </VStack>
   );
@@ -321,7 +390,10 @@ function WagmiComponent(): JSX.Element {
 }
 
 async function signEthersMessage(message: string): Promise<string> {
-  const provider = new ethers.JsonRpcProvider(ALCHEMY_SEPOLIA_PROVIDER, 'sepolia');
+  const provider = new ethers.JsonRpcProvider(
+    ALCHEMY_SEPOLIA_PROVIDER,
+    'sepolia',
+  );
   const ethersSigner = new CapsuleEthersSigner(capsule, provider);
   return ethersSigner.signMessage(message);
 }
@@ -338,7 +410,10 @@ async function sendEthersTransaction(): Promise<void> {
     chainId: DEFAULT_CHAIN_ID,
     type: 2,
   };
-  const provider = new ethers.JsonRpcProvider(ALCHEMY_SEPOLIA_PROVIDER, 'sepolia')
+  const provider = new ethers.JsonRpcProvider(
+    ALCHEMY_SEPOLIA_PROVIDER,
+    'sepolia',
+  );
   const ethersSigner = new CapsuleEthersSigner(capsule, provider);
   const res = await ethersSigner.sendTransaction(tx);
   console.log('send ethers tx response:\n', res);
@@ -360,14 +435,20 @@ async function createTransaction(
   let functionCallData: any;
   if (functionName && contractAbi) {
     const contract = new web3.eth.Contract(JSON.parse(contractAbi), toAddress);
-    functionCallData = contract.methods[functionName](...functionArgs).encodeABI();
+    functionCallData = contract.methods[functionName](
+      ...functionArgs,
+    ).encodeABI();
   }
 
   const tx = new FeeMarketEIP1559Transaction({
     to: !deployByteCode ? toAddress : undefined,
-    value: value ? web3.utils.toHex(web3.utils.toWei(value, 'gwei')) : undefined,
+    value: value
+      ? web3.utils.toHex(web3.utils.toWei(value, 'gwei'))
+      : undefined,
     gasLimit: web3.utils.toHex(Number(gasAmount)),
-    maxPriorityFeePerGas: web3.utils.toHex(web3.utils.toWei(maxPriorityFeePerGas, 'gwei')),
+    maxPriorityFeePerGas: web3.utils.toHex(
+      web3.utils.toWei(maxPriorityFeePerGas, 'gwei'),
+    ),
     maxFeePerGas: web3.utils.toHex(web3.utils.toWei(maxFeePerGas, 'gwei')),
     nonce: web3.utils.toHex(Number(nonce)),
     data: functionCallData || deployByteCode || undefined,
@@ -387,18 +468,24 @@ function getCapsuleOpts(env: Environment, useDKLS: boolean): ConstructorOpts {
     case Environment.SANDBOX:
       return {
         // useLocalFiles: true,
-        offloadMPCComputationURL: useDKLS ? undefined : 'https://partner-mpc-computation.sandbox.usecapsule.com',
+        offloadMPCComputationURL: useDKLS
+          ? undefined
+          : 'https://partner-mpc-computation.sandbox.usecapsule.com',
         // portalBackgroundColor: '#df092d',
         // portalPrimaryButtonColor: '#322e47',
         // portalTextColor: '#ffffff',
       };
     case Environment.BETA:
       return {
-        offloadMPCComputationURL: useDKLS ? undefined : 'https://partner-mpc-computation.beta.usecapsule.com',
+        offloadMPCComputationURL: useDKLS
+          ? undefined
+          : 'https://partner-mpc-computation.beta.usecapsule.com',
       };
     case Environment.PROD:
       return {
-        offloadMPCComputationURL: useDKLS ? undefined : 'https://partner-mpc-computation.prod.usecapsule.com',
+        offloadMPCComputationURL: useDKLS
+          ? undefined
+          : 'https://partner-mpc-computation.prod.usecapsule.com',
       };
     default:
       throw new Error(`invalid environment: ${env}`);
@@ -408,17 +495,33 @@ function getCapsuleOpts(env: Environment, useDKLS: boolean): ConstructorOpts {
 let capsule: Capsule = undefined;
 
 function App() {
-  const [selectedView, setSelectedView] = useSessionStorage('@EXAMPLE-CAPSULE/selectedView', 'OLD_VIEW');
-  const [selectedEnv, setSelectedEnv] = useSessionStorage('@EXAMPLE-CAPSULE/selectedEnv', Environment.SANDBOX);
-  const [selectedApiKey, setSelectedApiKey] = useSessionStorage('@EXAMPLE-CAPSULE/selectedApiKey', API_KEY_WITH_BRANDING);
-  const [useDKLS, setUseDKLS] = useSessionStorage('@EXAMPLE-CAPSULE/useDKLS', true);
+  const [selectedView, setSelectedView] = useSessionStorage(
+    '@EXAMPLE-CAPSULE/selectedView',
+    'OLD_VIEW',
+  );
+  const [selectedEnv, setSelectedEnv] = useSessionStorage(
+    '@EXAMPLE-CAPSULE/selectedEnv',
+    Environment.SANDBOX,
+  );
+  const [selectedApiKey, setSelectedApiKey] = useSessionStorage(
+    '@EXAMPLE-CAPSULE/selectedApiKey',
+    API_KEY_WITH_BRANDING,
+  );
+  const [useDKLS, setUseDKLS] = useSessionStorage(
+    '@EXAMPLE-CAPSULE/useDKLS',
+    true,
+  );
 
-  capsule = new Capsule(selectedEnv, selectedApiKey,{
-    ...getCapsuleOpts(selectedEnv, useDKLS),
-    xUrl: 'https://twitter.com/usecapsule',
-    linkedinUrl: 'https://www.linkedin.com/company/usecapsule',
-    supportUrl: 'mailto:support@usecapsule.com'
-  });
+  capsule = React.useMemo(
+    () =>
+      new Capsule(selectedEnv, selectedApiKey, {
+        ...getCapsuleOpts(selectedEnv, useDKLS),
+        xUrl: 'https://twitter.com/usecapsule',
+        linkedinUrl: 'https://www.linkedin.com/company/usecapsule',
+        supportUrl: 'mailto:support@usecapsule.com',
+      }),
+    [selectedEnv, useDKLS, selectedApiKey],
+  );
 
   const [pregenEmail, setPregenEmail] = useState('');
   const [pregenUserShare, setPregenUserShare] = useState('');
@@ -429,13 +532,19 @@ function App() {
   const [txToAddress, setTxToAddress] = useState(DEFAULT_TO_ADDRESS);
   const [txValue, setTxValue] = useState(DEFAULT_VALUE);
   const [txGasAmount, setTxGasAmount] = useState(DEFAULT_GAS_AMOUNT);
-  const [txMaxPriorityFeePerGas, setTxMaxPriorityFeePerGas] = useState(DEFAULT_MAX_PRIORITY_FEE_PER_GAS);
+  const [txMaxPriorityFeePerGas, setTxMaxPriorityFeePerGas] = useState(
+    DEFAULT_MAX_PRIORITY_FEE_PER_GAS,
+  );
   const [txMaxFeePerGas, setTxMaxFeePerGas] = useState(DEFAULT_MAX_FEE_PER_GAS);
   const [nonce, setNonce] = useState(DEFAULT_NONCE);
   const [chainId, setChainId] = useState(DEFAULT_CHAIN_ID);
-  const [smartContractFunctionName, setSmartContractFunctionName] = useState('');
-  const [smartContractFunctionArgs, setSmartContractFunctionArgs] = useState('');
-  const [smartContractAbi, setSmartContractAbi] = useState(JSON.stringify(DEFAULT_CONTRACT_ABI));
+  const [smartContractFunctionName, setSmartContractFunctionName] =
+    useState('');
+  const [smartContractFunctionArgs, setSmartContractFunctionArgs] =
+    useState('');
+  const [smartContractAbi, setSmartContractAbi] = useState(
+    JSON.stringify(DEFAULT_CONTRACT_ABI),
+  );
   const [smartContractByteCode, setSmartContractByteCode] = useState('');
   const [transactionReviewUrl, setTransactionReviewUrl] = useState('');
   const [capsuleKey, setCapsuleKey] = useState(0);
@@ -447,38 +556,33 @@ function App() {
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
   async function checkIsSessionActive() {
-    const isFullyLoggedIn = await capsule.isFullyLoggedIn();
+    const isFullyLoggedIn = await capsule.isSessionActive();
     setIsSessionActive(isFullyLoggedIn);
     if (isFullyLoggedIn && capsule instanceof CoreCapsule) {
-      console.log(`exported session:\n${(capsule as CoreCapsule).exportSession()}`)
+      console.log(
+        `exported session:\n${(capsule as CoreCapsule).exportSession()}`,
+      );
     }
   }
 
   useEffect(() => {
     checkIsSessionActive();
-  }, [])
+  }, []);
 
   const handleOnClose = async () => {
-    if (await capsule.isFullyLoggedIn()) {
-      setIsSessionActive(true);
-    }
-  }
-
-  const handleOnClick = async () => {
-    if (await capsule.isFullyLoggedIn()) {
-      setIsSessionActive(false);
-    }
-  }
+    setModalIsOpen(false);
+    await checkIsSessionActive();
+  };
 
   const handleDeleteClick = async () => {
     setDeleteButtonDisabled(true);
     if (!(await capsule.isFullyLoggedIn())) {
-      throw new Error('Need to be fully loggedIn to delete user.')
+      throw new Error('Need to be fully loggedIn to delete user.');
     }
     const res = await capsule.ctx.capsuleClient.deleteSelf(
       (capsule as CoreCapsule).getUserId(),
     );
-    
+
     await capsule.logout();
 
     const userEmail = res.data.email;
@@ -488,7 +592,7 @@ function App() {
       setTimeout(() => {
         setSecondsToDelete(i - 1);
         if (i - 1 === 0) {
-          setCapsuleKey(prevKey => prevKey + 1);
+          setCapsuleKey((prevKey) => prevKey + 1);
           setIsSessionActive(false);
           setDeletedEmail('');
           setDeleteButtonDisabled(false);
@@ -507,8 +611,13 @@ function App() {
     <ChakraProvider>
       <Container maxW="ld" padding={10}>
         <HStack paddingBottom={5}>
-          <Text width={'15%'}><strong>Select Environment:</strong></Text>
-          <Select defaultValue={selectedEnv} onChange={e => setSelectedEnv(e.target.value as Environment)}>
+          <Text width={'15%'}>
+            <strong>Select Environment:</strong>
+          </Text>
+          <Select
+            defaultValue={selectedEnv}
+            onChange={(e) => setSelectedEnv(e.target.value as Environment)}
+          >
             <option value={Environment.DEV}>Dev</option>
             <option value={Environment.SANDBOX}>Sandbox</option>
             <option value={Environment.BETA}>Beta</option>
@@ -516,8 +625,13 @@ function App() {
           </Select>
         </HStack>
         <HStack paddingBottom={5}>
-          <Text width={'15%'}><strong>Select Example View:</strong></Text>
-          <Select defaultValue={selectedView} onChange={e => setSelectedView(e.target.value)}>
+          <Text width={'15%'}>
+            <strong>Select Example View:</strong>
+          </Text>
+          <Select
+            defaultValue={selectedView}
+            onChange={(e) => setSelectedView(e.target.value)}
+          >
             <option value="OLD_VIEW">Old View</option>
             {/* <option value="ETHERS">Ethers</option>
             <option value="VIEM">Viem</option> */}
@@ -525,14 +639,25 @@ function App() {
           </Select>
         </HStack>
         <HStack paddingBottom={10}>
-        <Text width={'15%'}><strong>Set API Key:</strong></Text>
-          <Input placeholder="api key" onChange={(e) => {
-            setSelectedApiKey(e.target.value)
-          }} value={selectedApiKey || ''}/>
+          <Text width={'15%'}>
+            <strong>Set API Key:</strong>
+          </Text>
+          <Input
+            placeholder="api key"
+            onChange={(e) => {
+              setSelectedApiKey(e.target.value);
+            }}
+            value={selectedApiKey || ''}
+          />
         </HStack>
         <HStack paddingBottom={5}>
-          <Text width={'15%'}><strong>Use DKLS:</strong></Text>
-          <Select defaultValue={`${!!useDKLS}`} onChange={e => setUseDKLS(e.target.value === 'true')}>
+          <Text width={'15%'}>
+            <strong>Use DKLS:</strong>
+          </Text>
+          <Select
+            defaultValue={`${!!useDKLS}`}
+            onChange={(e) => setUseDKLS(e.target.value === 'true')}
+          >
             <option value={'true'}>true</option>
             <option value={'false'}>false</option>
           </Select>
@@ -544,120 +669,255 @@ function App() {
         )}
         {selectedView === 'OLD_VIEW' && (
           <VStack align="left" spacing={5}>
-            <Button colorScheme="green" onClick={()=>{setModalIsOpen(true)}}>Open Modal</Button>
             <HStack>
-              <CapsuleButton 
-                key={capsuleKey}
-                overrides={{
-                  onCloseOverride: handleOnClose,
-                  onClickOverride: handleOnClick,
-                  preserveOnClickFunctionality: true
+              <Button
+                colorScheme="green"
+                onClick={async () => {
+                  if (isSessionActive) {
+                    await capsule.logout();
+                    setIsSessionActive(false);
+                  } else {
+                    setModalIsOpen(true);
+                  }
                 }}
-                capsule={capsule}
-                appName="Example" 
-                oAuthMethods={[OAuthMethod.GOOGLE, OAuthMethod.FACEBOOK, OAuthMethod.APPLE, OAuthMethod.TWITTER, OAuthMethod.DISCORD]}
-              />
-              {isSessionActive && <><Button 
-                colorScheme="red" 
-                variant="solid"
-                disabled={deleteButtonDisabled}
-                onClick={handleDeleteClick}
               >
-                Delete User
+                {isSessionActive ? 'Log out' : 'Open Modal'}
               </Button>
-              {!deletedEmail && secondsToDelete > 0 && deleteButtonDisabled && emailPendingDeletion && (
-                <Text>{emailPendingDeletion} will be deleted in {secondsToDelete}...</Text>
-              )}</>
-              }
+              {isSessionActive && (
+                <>
+                  <Button
+                    colorScheme="red"
+                    variant="solid"
+                    disabled={deleteButtonDisabled}
+                    onClick={handleDeleteClick}
+                  >
+                    Delete User
+                  </Button>
+                  {!deletedEmail &&
+                    secondsToDelete > 0 &&
+                    deleteButtonDisabled &&
+                    emailPendingDeletion && (
+                      <Text>
+                        {emailPendingDeletion} will be deleted in{' '}
+                        {secondsToDelete}...
+                      </Text>
+                    )}
+                </>
+              )}
             </HStack>
 
-            <Input placeholder="pregen-e-mail" onChange={(e) => {
-              setPregenEmail(e.target.value)
-            }} value={pregenEmail || ''}/>
-            <Button colorScheme="teal" onClick={async () => {
-              await capsule.createWalletPreGen(pregenEmail);
-            }}>Create Pregen Wallet</Button>
+            <Input
+              placeholder="pregen-e-mail"
+              onChange={(e) => {
+                setPregenEmail(e.target.value);
+              }}
+              value={pregenEmail || ''}
+            />
+            <Button
+              colorScheme="teal"
+              onClick={async () => {
+                await capsule.createWalletPreGen(pregenEmail);
+              }}
+            >
+              Create Pregen Wallet
+            </Button>
 
-            <Text>User Share: <strong>{capsule.getUserShare() || ''}</strong></Text>
-            <Input placeholder="claim-pregen-user-share" onChange={(e) => {
-              setPregenUserShare(e.target.value);
-            }} value={pregenUserShare || ''}/>
-            <Button colorScheme="teal" onClick={async () => {
-              await capsule.setUserShare(pregenUserShare)
-              console.log(await capsule.claimPregenWallet(pregenEmail));
-            }}>Claim Pregen Wallet</Button>
+            <Text>
+              User Share: <strong>{capsule.getUserShare() || ''}</strong>
+            </Text>
+            <Input
+              placeholder="claim-pregen-user-share"
+              onChange={(e) => {
+                setPregenUserShare(e.target.value);
+              }}
+              value={pregenUserShare || ''}
+            />
+            <Button
+              colorScheme="teal"
+              onClick={async () => {
+                await capsule.setUserShare(pregenUserShare);
+                console.log(await capsule.claimPregenWallet(pregenEmail));
+              }}
+            >
+              Claim Pregen Wallet
+            </Button>
 
-            <Button colorScheme="teal" onClick={checkIsSessionActive}>Is Fully Logged In?</Button>
-            <Text>{isSessionActive ? 'Fully Logged In!' : 'Log In Pending...'}</Text>
+            <Button colorScheme="teal" onClick={checkIsSessionActive}>
+              Is Fully Logged In?
+            </Button>
+            <Text>
+              {isSessionActive ? 'Fully Logged In!' : 'Log In Pending...'}
+            </Text>
 
-            <Text>Wallet Address: <strong>{capsule.getWallets()?.[Object.keys(capsule.getWallets())[0]]?.address}</strong></Text>
+            <Text>
+              Wallet Address:{' '}
+              <strong>
+                {
+                  capsule.getWallets()?.[Object.keys(capsule.getWallets())[0]]
+                    ?.address
+                }
+              </strong>
+            </Text>
             {/* <Text>{userShare}</Text> */}
 
-            <Input placeholder="message-to-sign" onChange={(e) => {
-              setMessageToSign(e.target.value)
-            }} value={messageToSign || ''}/>
-            <Button colorScheme="teal" onClick={async () => {
-              setEthersSignature(await signEthersMessage(messageToSign));
-            }}>Sign Message</Button>
-            <Text>Message Signature: <strong>{ethersSignature}</strong></Text>
+            <Input
+              placeholder="message-to-sign"
+              onChange={(e) => {
+                setMessageToSign(e.target.value);
+              }}
+              value={messageToSign || ''}
+            />
+            <Button
+              colorScheme="teal"
+              onClick={async () => {
+                setEthersSignature(await signEthersMessage(messageToSign));
+              }}
+            >
+              Sign Message
+            </Button>
+            <Text>
+              Message Signature: <strong>{ethersSignature}</strong>
+            </Text>
 
             <Text>To Address:</Text>
-            <Input name='To Address' onChange={(e) => setTxToAddress(e.target.value)} value={txToAddress}/>
+            <Input
+              name="To Address"
+              onChange={(e) => setTxToAddress(e.target.value)}
+              value={txToAddress}
+            />
             <Text>Value (gwei):</Text>
-            <Input name='Value (gwei)' onChange={(e) => setTxValue(e.target.value)} value={txValue}/>
+            <Input
+              name="Value (gwei)"
+              onChange={(e) => setTxValue(e.target.value)}
+              value={txValue}
+            />
             <Text>Gas Amount:</Text>
-            <Input name='Gas Amount' onChange={(e) => setTxGasAmount(e.target.value)} value={txGasAmount}/>
+            <Input
+              name="Gas Amount"
+              onChange={(e) => setTxGasAmount(e.target.value)}
+              value={txGasAmount}
+            />
             <Text>Max Priority Fee Per Gas (gwei):</Text>
-            <Input name='Max Priority Fee Per Gas (gwei)' onChange={(e) => setTxMaxPriorityFeePerGas(e.target.value)} value={txMaxPriorityFeePerGas}/>
+            <Input
+              name="Max Priority Fee Per Gas (gwei)"
+              onChange={(e) => setTxMaxPriorityFeePerGas(e.target.value)}
+              value={txMaxPriorityFeePerGas}
+            />
             <Text>Max Fee Per Gas (gwei):</Text>
-            <Input name='Max Fee Per Gas (gwei)' onChange={(e) => setTxMaxFeePerGas(e.target.value)} value={txMaxFeePerGas}/>
+            <Input
+              name="Max Fee Per Gas (gwei)"
+              onChange={(e) => setTxMaxFeePerGas(e.target.value)}
+              value={txMaxFeePerGas}
+            />
             <Text>Nonce:</Text>
-            <Input name='Nonce' onChange={(e) => setNonce(e.target.value)} value={nonce}/>
+            <Input
+              name="Nonce"
+              onChange={(e) => setNonce(e.target.value)}
+              value={nonce}
+            />
             <Text>Chain ID:</Text>
-            <Input name='Chain ID' onChange={(e) => setChainId(e.target.value)} value={chainId}/>
+            <Input
+              name="Chain ID"
+              onChange={(e) => setChainId(e.target.value)}
+              value={chainId}
+            />
             <Text>Smart Contract ABI:</Text>
-            <Input name='Smart Contract ABI' onChange={(e) => setSmartContractAbi(e.target.value)} value={smartContractAbi}/>
+            <Input
+              name="Smart Contract ABI"
+              onChange={(e) => setSmartContractAbi(e.target.value)}
+              value={smartContractAbi}
+            />
             <Text>Smart Contract Function Name:</Text>
-            <Input name='Smart Contract Function Name' onChange={(e) => setSmartContractFunctionName(e.target.value)} value={smartContractFunctionName} placeholder={DEFAULT_SMART_CONTRACT_FUNCTION}/>
+            <Input
+              name="Smart Contract Function Name"
+              onChange={(e) => setSmartContractFunctionName(e.target.value)}
+              value={smartContractFunctionName}
+              placeholder={DEFAULT_SMART_CONTRACT_FUNCTION}
+            />
             <Text>Smart Contract Function Args:</Text>
-            <Input name='Smart Contract Function Args' onChange={(e) => setSmartContractFunctionArgs(e.target.value)} value={smartContractFunctionArgs} placeholder={JSON.stringify(DEFAULT_SMART_CONTRACT_ARGS)}/>
+            <Input
+              name="Smart Contract Function Args"
+              onChange={(e) => setSmartContractFunctionArgs(e.target.value)}
+              value={smartContractFunctionArgs}
+              placeholder={JSON.stringify(DEFAULT_SMART_CONTRACT_ARGS)}
+            />
             <Text>Smart Contract Byte Code:</Text>
-            <Input name='Smart Contract Byte Code' onChange={(e) => setSmartContractByteCode(e.target.value)} value={smartContractByteCode}/>
+            <Input
+              name="Smart Contract Byte Code"
+              onChange={(e) => setSmartContractByteCode(e.target.value)}
+              value={smartContractByteCode}
+            />
 
-            <Button colorScheme="teal" onClick={async () => {
-              const walletId = capsule.getWallets()?.[Object.keys(capsule.getWallets())[0]]?.id;
-              const tx = await createTransaction(
-                txToAddress,
-                txValue,
-                txGasAmount,
-                txMaxPriorityFeePerGas,
-                txMaxFeePerGas,
-                nonce,
-                chainId,
-                smartContractAbi,
-                smartContractFunctionName,
-                smartContractFunctionArgs ? JSON.parse(smartContractFunctionArgs) : [],
-                smartContractByteCode,
-              );
-              await sendEthersTransaction();
-              await sendViemTransaction();
-              const res = await capsule.sendTransaction(walletId, tx, `${chainId}`);
-              if ((res as DeniedSignatureResWithUrl).transactionReviewUrl) {
-                setTransactionReviewUrl((res as DeniedSignatureResWithUrl).transactionReviewUrl);
-              }
-            }}>Send Transaction</Button>
-            {transactionReviewUrl && <Text>Transaction Review URL is: {transactionReviewUrl}</Text>}
+            <Button
+              colorScheme="teal"
+              onClick={async () => {
+                const walletId =
+                  capsule.getWallets()?.[Object.keys(capsule.getWallets())[0]]
+                    ?.id;
+                const tx = await createTransaction(
+                  txToAddress,
+                  txValue,
+                  txGasAmount,
+                  txMaxPriorityFeePerGas,
+                  txMaxFeePerGas,
+                  nonce,
+                  chainId,
+                  smartContractAbi,
+                  smartContractFunctionName,
+                  smartContractFunctionArgs
+                    ? JSON.parse(smartContractFunctionArgs)
+                    : [],
+                  smartContractByteCode,
+                );
+                await sendEthersTransaction();
+                await sendViemTransaction();
+                const res = await capsule.sendTransaction(
+                  walletId,
+                  tx,
+                  `${chainId}`,
+                );
+                if ((res as DeniedSignatureResWithUrl).transactionReviewUrl) {
+                  setTransactionReviewUrl(
+                    (res as DeniedSignatureResWithUrl).transactionReviewUrl,
+                  );
+                }
+              }}
+            >
+              Send Transaction
+            </Button>
+            {transactionReviewUrl && (
+              <Text>Transaction Review URL is: {transactionReviewUrl}</Text>
+            )}
 
-            <Button colorScheme="red" onClick={async () => {
-              await capsule.logout();
-              capsule.clearStorage();
-            }}>Logout and Clear Storage</Button>
+            <Button
+              colorScheme="red"
+              onClick={async () => {
+                await capsule.logout();
+                capsule.clearStorage();
+              }}
+            >
+              Logout and Clear Storage
+            </Button>
           </VStack>
         )}
+        <CapsuleModal
+          isOpen={modalIsOpen}
+          capsule={capsule}
+          appName="Example"
+          onClose={handleOnClose}
+          oAuthMethods={[
+            OAuthMethod.GOOGLE,
+            OAuthMethod.FACEBOOK,
+            OAuthMethod.APPLE,
+            OAuthMethod.TWITTER,
+            OAuthMethod.DISCORD,
+          ]}
+          twoFactorAuthEnabled
+        />
       </Container>
     </ChakraProvider>
   );
-};
+}
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);

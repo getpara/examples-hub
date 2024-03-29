@@ -7,14 +7,13 @@
     "*.css"
   ],
   "dependencies": {
-    "@chakra-ui/react": "1.8.9",
-    "@emotion/react": "^11.10.8",
-    "@emotion/styled": "^11.10.8",
+    "@gsap/react": "^2.1.0",
     "@ramp-network/ramp-instant-sdk": "^4.0.2",
+    "@usecapsule/react-components": "^1.0.9",
     "@usecapsule/web-sdk": "1.5.0",
-    "framer-motion": "^11.0.5",
-    "polished": "^4.2.2",
-    "react-qr-code": "2.0.11"
+    "gsap": "^3.12.5",
+    "styled-components": "^6.1.8",
+    "zustand": "^4.5.2"
   },
   "scripts": {
     "build": "rm -rf dist && tsc && yarn post-build",
@@ -24,7 +23,7 @@
     "@types/chrome": "^0.0.237",
     "@types/react": "^18.0.31",
     "@types/react-dom": "^18.2.7",
-    "typescript": "^4.9.5"
+    "typescript": "^5.4.3"
   },
   "peerDependencies": {
     "react": "*",
@@ -35,7 +34,7 @@
     "package.json"
   ],
   "resolutions": {
-    "@chakra-ui/react/@chakra-ui/toast": "file:./packages/react-sdk/src/stubs/toastStub"
+    "styled-components": "^6"
   },
   "gitHead": "10ecce9873131e6a1b114fb0642a94bb02040bef"
 }

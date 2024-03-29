@@ -1,12 +1,13 @@
 import { VStack, Spacer, HStack, Input, Button, Box, Text } from '@chakra-ui/react';
 import { useContext, useState } from 'react';
-import { Console, VerifyCode } from '@usecapsule/react-sdk';
 import EmailContext from '../../contexts/EmailContext';
 import RecoveryStepContext from '../../contexts/RecoveryStepContext';
 import { ModalStep } from '../../steps/recoverySteps';
 import UserContext from '../../contexts/UserContext';
 import WalletContext from '../../contexts/WalletContext';
 import capsule from '../../../capsule';
+import VerifyCode from '../../../assets/verifyCode';
+import Console from '../../../assets/console';
 
 const RecoveryWallet2FAStep: React.FC = () => {
 

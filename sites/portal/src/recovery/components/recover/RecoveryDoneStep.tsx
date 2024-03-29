@@ -1,11 +1,12 @@
 import { VStack, Spacer, Text, Button } from '@chakra-ui/react'
 import { useContext } from 'react';
-import { RecoveryStatus, WalletSuccess } from '@usecapsule/react-sdk'
+import { RecoveryStatus } from '@usecapsule/react-sdk'
 import { ModalStep } from '../../steps/attemptSteps';
 import { ModalStep as RecoveryModalStep } from '../../steps/recoverySteps';
 import StepContext from '../../contexts/StepContext';
 import RecoveryStepContext from '../../contexts/RecoveryStepContext';
 import { RecoveryAttemptContext } from '../../contexts/RecoveryAttemptContext';
+import WalletSuccess from '../../../assets/walletSuccess';
 
 type RecoveryDoneStepProps = {
     onClose: () => void,

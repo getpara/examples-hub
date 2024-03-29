@@ -1,12 +1,13 @@
 import { VStack, Spacer, HStack, Button, Box, Text, Textarea } from '@chakra-ui/react';
 import { useContext, useState } from 'react';
 import capsule from '../../../capsule';
-import { KeyContainer, VerifyCode } from '@usecapsule/react-sdk';
+import { KeyContainer } from '@usecapsule/react-sdk';
 import EmailContext from '../../contexts/EmailContext';
 import RecoveryStepContext from '../../contexts/RecoveryStepContext';
 import { ModalStep } from '../../steps/recoverySteps';
 import UserContext from '../../contexts/UserContext';
 import WalletContext from '../../contexts/WalletContext';
+import VerifyCode from '../../../assets/verifyCode';
 
 async function recoverUserShare(userId: string, walletId: string, serializedRecoveryShare: string): Promise<string> {
     const recoveryPrivateKeyContainer = KeyContainer.buildFrom(

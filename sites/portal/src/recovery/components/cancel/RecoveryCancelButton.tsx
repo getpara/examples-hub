@@ -1,7 +1,7 @@
 import { Button, Text } from '@chakra-ui/react';
 import { useState } from 'react';
-import { CapsuleSmall } from '@usecapsule/react-sdk';
 import RecoveryCancelModal from './RecoveryCancelModal';
+import CapsuleSmall from '../../../assets/capsuleSmall';
 
 const RecoveryCancelButton: React.FC = () => {
     const [modalIsOpen, setModalIsOpen] = useState(false);

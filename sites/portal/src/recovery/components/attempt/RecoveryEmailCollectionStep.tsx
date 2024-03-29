@@ -1,10 +1,11 @@
 import { VStack, Spacer, HStack, Input, Button, Text, Box } from '@chakra-ui/react';
 import { useContext, useState } from 'react';
 import capsule from '../../../capsule';
-import { Plus, WalletCreation } from '@usecapsule/react-sdk';
 import EmailContext from '../../contexts/EmailContext';
 import StepContext from '../../contexts/StepContext';
 import { ModalStep } from '../../steps/attemptSteps';
+import Plus from '../../../assets/plus';
+import WalletCreation from '../../../assets/walletCreation';
 
 const RecoveryEmailCollectionStep: React.FC = () => {
 
