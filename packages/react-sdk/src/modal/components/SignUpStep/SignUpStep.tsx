@@ -15,12 +15,15 @@ import { OAuthMethod } from '@usecapsule/web-sdk';
 import { ModalStep } from '../../utils/steps';
 import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores';
 import { useThemeStore } from '../../stores/theme/useThemeStore';
+import { CapsuleBlack, CapsuleWhite } from '../Icons';
+import { Theme } from '../../types/theme';
 
 interface SignUpStepProps {
   oAuthMethods?: OAuthMethod[];
 }
 
 export const SignUpStep = ({ oAuthMethods }: SignUpStepProps) => {
+  const theme = useThemeStore((state) => state.theme);
   const logo = useThemeStore((state) => state.getLogo());
   const appName = useThemeStore((state) => state.appName);
   const capsule = useCapsuleStore((state) => state.capsule);
@@ -77,9 +80,14 @@ export const SignUpStep = ({ oAuthMethods }: SignUpStepProps) => {
 
   return (
     <>
-      {!showAllOAuth && (
-        <Logo src={logo} alt={`${appName ? `${appName} -` : ''}logo`} />
-      )}
+      {!showAllOAuth &&
+        (logo ? (
+          <Logo src={logo} alt={`${appName ? `${appName} -` : ''}logo`} />
+        ) : (
+          <LogoSvg>
+            {theme === Theme.dark ? <CapsuleWhite /> : <CapsuleBlack />}
+          </LogoSvg>
+        ))}
       {!!oAuthMethods?.length && (
         <>
           <OAuth methods={oAuthMethods} />
@@ -103,9 +111,23 @@ export const SignUpStep = ({ oAuthMethods }: SignUpStepProps) => {
 };
 
 const Logo = styled.img`
-  height: 48px;
+  height: 100px;
+  max-width: 260px;
   object-fit: contain;
   padding: 16px 0px;
-  margin: 32px 0px;
+  margin: 16px 0px;
   box-sizing: content-box;
+  align-self: center;
+`;
+
+const LogoSvg = styled.div`
+  height: 100px;
+  max-width: 260px;
+  padding: 16px 0px;
+  margin: 16px 0px;
+  align-self: center;
+
+  svg {
+    width: 100%;
+  }
 `;

@@ -1,8 +1,4 @@
-import {
-  CpslPill,
-  CpslSlideButton,
-  CpslTileButton,
-} from '@usecapsule/react-components';
+import { CpslSlideButton, CpslTileButton } from '@usecapsule/react-components';
 import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores';
 import { ModalStep } from '../../utils/steps';
 import { Heading, MainContainer, SecondaryText } from '../common';
@@ -69,7 +65,6 @@ export const RecoverySecretStep = ({
   return (
     <>
       <StyledMainContainer>
-        <CpslPill text="ONE LAST THING" />
         <Heading>Your Recovery Secret</Heading>
         <SecondaryText>
           Your Recovery Secret allows you to set up a new Passkey in the event

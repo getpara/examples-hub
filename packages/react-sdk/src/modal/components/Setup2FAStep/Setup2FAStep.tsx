@@ -3,7 +3,6 @@ import {
   CpslCodeInput,
   CpslIcon,
   CpslInput,
-  CpslPill,
   CpslQrCode,
   CpslSpinner,
 } from '@usecapsule/react-components';
@@ -97,7 +96,7 @@ export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
     if (code.length === 6 && /^\d+$/.test(code)) {
       try {
         await capsule.enable2FA(code);
-        handleSkip();
+        setStep(ModalStep.TWO_FACTOR_DONE);
       } catch (e) {
         setCodeError('Incorrect Code');
       }
@@ -113,9 +112,8 @@ export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
   return (
     <>
       <MainContainer>
-        <CpslPill text="OPTIONAL" />
         <Heading>
-          <span>Turn on 2-Factor Authentication</span>
+          <span>Turn on Two-Factor Authentication</span>
         </Heading>
         <SecondaryText>
           <span>

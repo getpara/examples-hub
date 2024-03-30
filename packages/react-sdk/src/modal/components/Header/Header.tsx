@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import { ModalStep } from '../../utils/steps';
 import { useModalStore } from '../../stores';
 import { useThemeStore } from '../../stores/theme/useThemeStore';
+import { Theme } from '../../types/theme';
+import { CapsuleBlack, CapsuleWhite } from '../Icons';
 
 interface HeaderProps {
   onClose: () => void;
@@ -10,6 +12,7 @@ interface HeaderProps {
 
 export const Header = ({ onClose }: HeaderProps) => {
   const logo = useThemeStore((state) => state.getLogo());
+  const theme = useThemeStore((state) => state.theme);
   const appName = useThemeStore((state) => state.appName);
   const currentStep = useModalStore((state) => state.step);
   const decrementStep = useModalStore((state) => state.decrementStep);
@@ -45,7 +48,15 @@ export const Header = ({ onClose }: HeaderProps) => {
             <span>Sign Up or Log In</span>
           </CenterText>
         ) : (
-          <Logo src={logo} alt={`${appName ? `${appName} -` : ''}logo`} />
+          <>
+            {logo ? (
+              <Logo src={logo} alt={`${appName ? `${appName} -` : ''}logo`} />
+            ) : (
+              <LogoSvg>
+                {theme === Theme.dark ? <CapsuleWhite /> : <CapsuleBlack />}
+              </LogoSvg>
+            )}
+          </>
         )}
       </CenterTextContainer>
       <HeaderButton variant="icon" onClick={onClose}>
@@ -95,4 +106,13 @@ const Logo = styled.img`
   height: 20px;
   object-fit: contain;
   box-sizing: content-box;
+`;
+
+const LogoSvg = styled.div`
+  height: 20px;
+  align-self: center;
+
+  svg {
+    height: 20px;
+  }
 `;

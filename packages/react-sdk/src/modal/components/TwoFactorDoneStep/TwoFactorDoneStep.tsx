@@ -18,7 +18,7 @@ export const TwoFactorDoneStep = ({ onClose }: TwoFactorDoneStepStep) => {
         <span>Success</span>
       </Heading>
       <SecondaryText>
-        Your 2-Factor Authentication has been successfully set up!
+        Your Two-Factor Authentication has been successfully set up!
       </SecondaryText>
       <CpslButton onClick={onClose}>
         <ButtonWithIconContainer>

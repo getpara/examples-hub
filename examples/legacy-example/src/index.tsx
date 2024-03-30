@@ -37,7 +37,7 @@ import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
 
 import Capsule from '@usecapsule/web-sdk';
-import { OAuthMethod } from '@usecapsule/react-sdk';
+import { OAuthMethod, Theme } from '@usecapsule/react-sdk';
 import { FeeMarketEIP1559Transaction } from '@ethereumjs/tx';
 import { CapsuleModal } from '@usecapsule/react-sdk';
 import { CapsuleProtoSigner } from '@usecapsule/cosmjs-v0-integration';
@@ -523,6 +523,10 @@ function App() {
     [selectedEnv, useDKLS, selectedApiKey],
   );
 
+  const [logo, setLogo] = useState('');
+  const [darkLogo, setDarkLogo] = useState('');
+  const [theme, setTheme] = useState(Theme.light);
+
   const [pregenEmail, setPregenEmail] = useState('');
   const [pregenUserShare, setPregenUserShare] = useState('');
   const [deletedEmail, setDeletedEmail] = useState('');
@@ -607,7 +611,12 @@ function App() {
     }, secondsToDelete * 1000);
   };
 
+  const handleThemeToggle = () => {
+    setTheme((curr) => (curr === Theme.dark ? Theme.light : Theme.dark));
+  };
+
   return (
+    <>
     <ChakraProvider>
       <Container maxW="ld" padding={10}>
         <HStack paddingBottom={5}>
@@ -669,6 +678,35 @@ function App() {
         )}
         {selectedView === 'OLD_VIEW' && (
           <VStack align="left" spacing={5}>
+            <HStack paddingBottom={10}>
+              <Text width={'15%'}>
+                <strong>Set Modal Logo:</strong>
+              </Text>
+              <Input
+                placeholder="Modal logo"
+                onChange={(e) => {
+                  setLogo(e.target.value);
+                }}
+                value={logo || ''}
+              />
+            </HStack>
+            <HStack paddingBottom={10}>
+              <Text width={'15%'}>
+                <strong>Set Modal Dark Logo:</strong>
+              </Text>
+              <Input
+                placeholder="Modal dark logo"
+                onChange={(e) => {
+                  setDarkLogo(e.target.value);
+                }}
+                value={darkLogo || ''}
+              />
+            </HStack>
+            <HStack paddingBottom={10}>
+              <Button onClick={handleThemeToggle}>
+                {`Toggle modal theme: ${theme}`}
+              </Button>
+            </HStack>
             <HStack>
               <Button
                 colorScheme="green"
@@ -900,22 +938,25 @@ function App() {
             </Button>
           </VStack>
         )}
-        <CapsuleModal
-          isOpen={modalIsOpen}
-          capsule={capsule}
-          appName="Example"
-          onClose={handleOnClose}
-          oAuthMethods={[
-            OAuthMethod.GOOGLE,
-            OAuthMethod.FACEBOOK,
-            OAuthMethod.APPLE,
-            OAuthMethod.TWITTER,
-            OAuthMethod.DISCORD,
-          ]}
-          twoFactorAuthEnabled
-        />
       </Container>
-    </ChakraProvider>
+      <CapsuleModal
+        isOpen={modalIsOpen}
+        capsule={capsule}
+        appName="Example"
+        onClose={handleOnClose}
+        oAuthMethods={[
+          OAuthMethod.GOOGLE,
+          OAuthMethod.FACEBOOK,
+          OAuthMethod.APPLE,
+          OAuthMethod.TWITTER,
+          OAuthMethod.DISCORD,
+        ]}
+        twoFactorAuthEnabled
+        theme={theme}
+        logo={logo !== '' ? logo : undefined}
+        logoDark={darkLogo !== '' ? darkLogo : logo !== '' ? logo : undefined}
+      />
+    </ChakraProvider></>
   );
 }
 

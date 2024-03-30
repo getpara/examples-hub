@@ -1,7 +1,6 @@
 import { StoreApi } from 'zustand';
 import { ThemeActions, ThemeStore } from './useThemeStore';
 import { Theme } from '../../types/theme';
-import { DEFAULTS } from '../../constants/defaults';
 
 export const getActions = (
   set: StoreApi<ThemeStore>['setState'],
@@ -14,7 +13,7 @@ export const getActions = (
     const theme = get().theme;
 
     return theme === Theme.dark
-      ? get().logoDark ?? DEFAULTS.DARK_LOGO
-      : get().logo ?? DEFAULTS.LIGHT_LOGO;
+      ? get().logoDark ?? get().logo ?? undefined
+      : get().logo ?? undefined;
   },
 });

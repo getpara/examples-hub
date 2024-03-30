@@ -14,6 +14,7 @@ import { WalletCreationDoneStep } from '../WalletCreationDoneStep/WalletCreation
 import { RecoverySecretStep } from '../RecoverySecretStep/RecoverySecretStep';
 import { TwoFactorDoneStep } from '../TwoFactorDoneStep/TwoFactorDoneStep';
 import { BiometricCreationStep } from '../BiometricCreationStep/BiometricCreationStep';
+import { AwaitingOAuthStep } from '../AwaitingOAuthStep/AwaitingOAuthStep';
 
 interface BodyProps {
   oAuthMethods?: OAuthMethod[];
@@ -84,6 +85,9 @@ export const Body = ({
         return (
           <BiometricCreationStep hasFinishedAnimation={hasFinishedAnimation} />
         );
+      }
+      case ModalStep.AWAITING_OAUTH: {
+        return <AwaitingOAuthStep />;
       }
     }
   };

@@ -39,10 +39,12 @@ export const OAuth = ({ methods }: OAuthProps) => {
   };
 
   const handleMethodClick = (method: OAuthMethod) => async () => {
+    setStep(ModalStep.AWAITING_OAUTH);
     const oAuthURL = await capsule.getOAuthURL(method);
     openPopup(oAuthURL, `${method}AuthPopup`);
     const { email, userExists } = await capsule.waitForOAuth();
     if (!email) {
+      setStep(ModalStep.SIGN_UP);
       throw new Error('email is required');
     }
 

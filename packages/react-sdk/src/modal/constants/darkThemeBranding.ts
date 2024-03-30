@@ -14,7 +14,7 @@ export const darkThemeBranding: Branding = {
         default: '#000000',
         hover: '#121212',
       },
-      border: '#121212',
+      border: '#1A1A1A',
     },
     input: {
       surface: {

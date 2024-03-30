@@ -1,6 +1,7 @@
 export enum ModalStep {
   SIGN_UP = 'SIGN_UP',
   SIGN_UP_ALL_OAUTH = 'SIGN_UP_ALL_OAUTH',
+  AWAITING_OAUTH = 'AWAITING_OAUTH',
   VERIFICATION_CODE = 'VERIFICATION_CODE',
   BIOMETRIC_CREATION = 'BIOMETRIC_CREATION',
   AWAITING_BIOMETRIC_CREATION = 'AWAITING_BIOMETRIC_CREATION',
@@ -19,6 +20,7 @@ export enum ModalStep {
 enum SignUpModalStep {
   SIGN_UP = 'SIGN_UP',
   SIGN_UP_ALL_OAUTH = 'SIGN_UP_ALL_OAUTH',
+  AWAITING_OAUTH = 'AWAITING_OAUTH',
   VERIFICATION_CODE = 'VERIFICATION_CODE',
   BIOMETRIC_CREATION = 'BIOMETRIC_CREATION',
   AWAITING_BIOMETRIC_CREATION = 'AWAITING_BIOMETRIC_CREATION',
@@ -33,6 +35,7 @@ enum SignUpModalStep {
 export const SignUpModalStepNumber: { [key in SignUpModalStep]: number } = {
   [SignUpModalStep.SIGN_UP]: 1,
   [SignUpModalStep.SIGN_UP_ALL_OAUTH]: 1,
+  [SignUpModalStep.AWAITING_OAUTH]: 1,
   [SignUpModalStep.VERIFICATION_CODE]: 2,
   [SignUpModalStep.BIOMETRIC_CREATION]: 3,
   [SignUpModalStep.AWAITING_BIOMETRIC_CREATION]: 3,
@@ -49,6 +52,7 @@ export const SignUpPreviousStep: {
 } = {
   [SignUpModalStep.SIGN_UP]: undefined,
   [SignUpModalStep.SIGN_UP_ALL_OAUTH]: ModalStep.SIGN_UP,
+  [SignUpModalStep.AWAITING_OAUTH]: ModalStep.SIGN_UP,
   [SignUpModalStep.VERIFICATION_CODE]: ModalStep.SIGN_UP,
   [SignUpModalStep.BIOMETRIC_CREATION]: ModalStep.SIGN_UP,
   [SignUpModalStep.AWAITING_BIOMETRIC_CREATION]: ModalStep.BIOMETRIC_CREATION,
@@ -63,6 +67,7 @@ export const SignUpPreviousStep: {
 enum LoginModalStep {
   SIGN_UP = 'SIGN_UP',
   SIGN_UP_ALL_OAUTH = 'SIGN_UP_ALL_OAUTH',
+  AWAITING_OAUTH = 'AWAITING_OAUTH',
   BIOMETRIC_LOGIN = 'BIOMETRIC_LOGIN',
   AWAITING_BIOMETRIC_LOGIN = 'AWAITING_BIOMETRIC_LOGIN',
   AWAITING_WALLET_CREATION_AFTER_LOGIN = 'AWAITING_WALLET_CREATION_AFTER_LOGIN',
@@ -77,6 +82,7 @@ enum LoginModalStep {
 export const LoginModalStepNumber: { [key in LoginModalStep]: number } = {
   [LoginModalStep.SIGN_UP]: 1,
   [LoginModalStep.SIGN_UP_ALL_OAUTH]: 1,
+  [LoginModalStep.AWAITING_OAUTH]: 1,
   [LoginModalStep.BIOMETRIC_LOGIN]: 2,
   [LoginModalStep.AWAITING_BIOMETRIC_LOGIN]: 2,
   [LoginModalStep.AWAITING_WALLET_CREATION_AFTER_LOGIN]: 3,
@@ -93,6 +99,7 @@ export const LoginPreviousStep: {
 } = {
   [LoginModalStep.SIGN_UP]: undefined,
   [LoginModalStep.SIGN_UP_ALL_OAUTH]: ModalStep.SIGN_UP,
+  [LoginModalStep.AWAITING_OAUTH]: ModalStep.SIGN_UP,
   [LoginModalStep.BIOMETRIC_LOGIN]: ModalStep.SIGN_UP,
   [LoginModalStep.AWAITING_BIOMETRIC_LOGIN]: ModalStep.BIOMETRIC_LOGIN,
   [LoginModalStep.AWAITING_WALLET_CREATION_AFTER_LOGIN]: undefined,
@@ -107,6 +114,7 @@ export const LoginPreviousStep: {
 export const NoIndicatorSteps = [
   ModalStep.SIGN_UP,
   ModalStep.SIGN_UP_ALL_OAUTH,
+  ModalStep.AWAITING_OAUTH,
   ModalStep.SETUP_2FA,
   ModalStep.LOGIN_DONE,
   ModalStep.TWO_FACTOR_DONE,

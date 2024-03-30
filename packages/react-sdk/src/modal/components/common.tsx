@@ -30,6 +30,7 @@ export const Heading: typeof CpslText = styled(CpslText)`
   font-size: 24px;
   line-height: 28px;
   font-weight: 500;
+  letter-spacing: 0.72px;
 `;
 
 export const Text: typeof CpslText = styled(CpslText)`
