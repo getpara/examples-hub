@@ -40,8 +40,14 @@ export const OAuth = ({ methods }: OAuthProps) => {
 
   const handleMethodClick = (method: OAuthMethod) => async () => {
     setStep(ModalStep.AWAITING_OAUTH);
-    const oAuthURL = await capsule.getOAuthURL(method);
-    openPopup(oAuthURL, `${method}AuthPopup`);
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    if (isSafari) {
+      const windowReference = window.open();
+      capsule.getOAuthURL(method).then(url => windowReference.location = url)
+    } else {
+      const oAuthURL = await capsule.getOAuthURL(method);
+      openPopup(oAuthURL, `${method}AuthPopup`);
+    }
     const { email, userExists } = await capsule.waitForOAuth();
     if (!email) {
       setStep(ModalStep.SIGN_UP);
