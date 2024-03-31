@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestHeaders, AxiosResponseHeaders, InternalAxiosRequestConfig } from 'axios';
 import { AxiosRequestConfig } from 'axios';
-import queryString from 'query-string';
+import qs from 'qs';
 
 export const USER_NOT_VERIFIED = 'user must verify biometrics'
 export const USER_NOT_AUTHENTICATED_ERROR = 'user must be authenticated'
@@ -316,7 +316,7 @@ class Client {
     if (publicKey) {
       queryParams['publicKey'] = publicKey;
     }
-    const query = queryString.stringify(queryParams);
+    const query = qs.stringify(queryParams);
     const res = await this.baseRequest.get<any>(`/biometrics/challenge${query === '' ? '' : `?${query}`}`);
     return res.data;
   }

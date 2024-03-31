@@ -2,7 +2,7 @@ import type { Ctx, SignatureRes, PlatformUtils } from '@usecapsule/core-sdk';
 import { BackupKitEmailProps } from '@usecapsule/user-management-client';
 import { ServerLocalStorage } from './ServerLocalStorage';
 import { ServerSessionStorage } from './ServerSessionStorage';
-import { keygen } from './wallet/keygen';
+import { keygen, preKeygen } from './wallet/keygen';
 import {
   signMessage,
   sendTransaction,
@@ -33,7 +33,7 @@ export class ServerUtils implements PlatformUtils {
     signer: string;
     walletId: string;
   }> {
-    throw new Error('not implemented');
+    return preKeygen(ctx, email, secretKey, false, partnerId, sessionCookie);
   }
 
   signMessage(

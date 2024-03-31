@@ -20,6 +20,7 @@ const ALCHEMY_SEPOLIA_PROVIDER = 'https://eth-sepolia.g.alchemy.com/v2/KfxK8ZFXw
 
 interface Params {
   email?: string;
+  isPregen?: boolean;
 }
 
 const capsule = new CapsuleServer(Environment.SANDBOX, '2f938ac0c48ef356050a79bd66042a23');
@@ -29,25 +30,30 @@ async function errorMiddleware(err: Error, _req: Request, res: Response, _next: 
 }
 
 async function createUserAndWallet(params: Params) {
-  const { email } = params;
+  const { email, isPregen } = params;
   await capsule.logout();
-  await capsule.createUser(email || `server-test${uuid.v4()}@test.usecapsule.com`);
-  const webAuthURL = await capsule.verifyEmail('123456');
-  // the steps between the `~~~~~~~` will happen in the portal and don't need to be manually performed
-  // ~~~~~~~
-  // @ts-ignore
-  const userId = capsule.userId;
-  const biometricIdRegex = /\/biometrics\/(.*?)\?email/;
-  const biometricId = webAuthURL.match(biometricIdRegex)[1]; 
-  await capsule.ctx.capsuleClient.patchSessionPublicKey(userId, biometricId, {
-    publicKey: SAMPLE_PUBLIC_KEY,
-    sigDerivedPublicKey: SAMPLE_SIG_DERIVED_PUBLIC_KEY,
-    cosePublicKey: SAMPLE_COSE_PUBLIC_KEY,
-    clientDataJSON: SAMPLE_CLIENT_DATA_JSON,
-    status: PublicKeyStatus.COMPLETE,
-  });
-  // ~~~~~~~
-  await capsule.createWallet(false);
+  if (isPregen) {
+    await capsule.createWalletPreGen(email);
+  } else {
+    await capsule.createUser(email || `server-test${uuid.v4()}@test.usecapsule.com`);
+    const webAuthURL = await capsule.verifyEmail('123456');
+    // the steps between the `~~~~~~~` will happen in the portal and don't need to be manually performed
+    // ~~~~~~~
+    // @ts-ignore
+    const userId = capsule.userId;
+    const biometricIdRegex = /\/biometrics\/(.*?)\?email/;
+    const biometricId = webAuthURL.match(biometricIdRegex)[1];
+    await capsule.ctx.capsuleClient.patchSessionPublicKey(userId, biometricId, {
+      publicKey: SAMPLE_PUBLIC_KEY,
+      sigDerivedPublicKey: SAMPLE_SIG_DERIVED_PUBLIC_KEY,
+      cosePublicKey: SAMPLE_COSE_PUBLIC_KEY,
+      clientDataJSON: SAMPLE_CLIENT_DATA_JSON,
+      status: PublicKeyStatus.COMPLETE,
+    });
+    // ~~~~~~~
+    await capsule.createWallet(false);
+  }
+
   // @ts-ignore
   const walletAddress = Object.values(capsule.getWallets())[0].address;
   console.log(`address: ${walletAddress}`)
@@ -97,11 +103,11 @@ app.get('/', async (req: Request, res: Response) => {
 
 app.post('/wallets', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { email, serializedInstance } = req.body;
+    const { email, serializedInstance, isPregen } = req.body;
     if (serializedInstance) {
       await signMessageWithImport(serializedInstance);
     } else {
-      await createUserAndWallet({ email });
+      await createUserAndWallet({ email, isPregen });
     }
     res.send('200');
   } catch (e) {
