@@ -1,4 +1,4 @@
-import { CpslIcon, CpslText } from '@usecapsule/react-components';
+import { CpslIcon, CpslInput, CpslText } from '@usecapsule/react-components';
 import styled from 'styled-components';
 
 export const SpinnerContainer = styled.div`
@@ -106,4 +106,8 @@ export const InfoBoxHeading: typeof CpslText = styled(CpslText)`
 export const InfoBoxText: typeof CpslText = styled(SecondaryText)`
   text-align: left;
   font-weight: 500;
+`;
+
+export const FilledDisabledInput: typeof CpslInput = styled(CpslInput)`
+  --container-border-color: var(--cpsl-color-input-border-placeholder);
 `;

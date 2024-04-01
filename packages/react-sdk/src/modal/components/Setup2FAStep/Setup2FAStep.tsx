@@ -2,7 +2,6 @@ import {
   CpslButton,
   CpslCodeInput,
   CpslIcon,
-  CpslInput,
   CpslQrCode,
   CpslSpinner,
 } from '@usecapsule/react-components';
@@ -14,6 +13,7 @@ import {
   MainContainer,
   QRContainer,
   ButtonWithIconContainer,
+  FilledDisabledInput,
 } from '../common';
 import { ModalStep } from '../../utils/steps';
 import {
@@ -144,11 +144,11 @@ export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
             <SecondaryText>
               <span>Or input the code manually</span>
             </SecondaryText>
-            <CpslInput disabled value={secret} noAutoDisable>
+            <FilledDisabledInput disabled value={secret} noAutoDisable>
               <CpslButton slot="end" variant="icon" onClick={handleCopy}>
                 <CpslIcon icon={copied ? 'check' : 'copy'} />
               </CpslButton>
-            </CpslInput>
+            </FilledDisabledInput>
             <CpslButton onClick={handleNext}>
               <ButtonWithIconContainer>
                 Continue
