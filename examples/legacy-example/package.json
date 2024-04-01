@@ -1,6 +1,6 @@
 {
   "name": "capsule-legacy-example",
-  "version": "0.16.1",
+  "version": "0.16.2",
   "main": "src/index.tsx",
   "private": true,
   "dependencies": {
@@ -12,10 +12,10 @@
     "@ethereumjs/tx": "4.1.1",
     "@usecapsule/core-sdk": "1.6.0",
     "@usecapsule/ethers-v6-integration": "1.6.0",
-    "@usecapsule/react-sdk": "2.1.1",
+    "@usecapsule/react-sdk": "2.1.2",
     "@usecapsule/viem-v1-integration": "1.6.0",
-    "@usecapsule/wagmi-v1-integration": "1.7.1",
-    "@usecapsule/web-sdk": "1.6.1",
+    "@usecapsule/wagmi-v1-integration": "1.7.2",
+    "@usecapsule/web-sdk": "1.6.2",
     "crypto-browserify": "3.12.0",
     "ethereumjs-tx": "2.1.2",
     "ethers": "6.6.4",
