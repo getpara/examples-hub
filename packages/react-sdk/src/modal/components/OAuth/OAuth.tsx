@@ -43,7 +43,7 @@ export const OAuth = ({ methods }: OAuthProps) => {
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     if (isSafari) {
       const windowReference = window.open();
-      capsule.getOAuthURL(method).then(url => windowReference.location = url)
+      await capsule.getOAuthURL(method).then(url => windowReference.location = url)
     } else {
       const oAuthURL = await capsule.getOAuthURL(method);
       openPopup(oAuthURL, `${method}AuthPopup`);
