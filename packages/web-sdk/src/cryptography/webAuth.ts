@@ -144,7 +144,7 @@ export async function createCredential(env: Environment, userId: string, email: 
       },
       user: {
         id: userHandle,
-        name: email + '-webauthn',
+        name: email,
         displayName: email,
       },
       pubKeyCredParams: [
