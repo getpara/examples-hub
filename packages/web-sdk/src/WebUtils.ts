@@ -89,6 +89,11 @@ export class WebUtils implements PlatformUtils {
   disableProviderModal = false;
 
   openPopup(popupUrl: string): void {
-    window.open(popupUrl, 'popup', 'popup=true,width=400,height=500');
+    const popupWindow = window.open(popupUrl, 'popup', 'popup=true,width=400,height=500');
+    if (!popupWindow) {
+      setTimeout(() => {
+        window.open(popupUrl, '_blank');
+      }, 0);
+    }
   }
 }

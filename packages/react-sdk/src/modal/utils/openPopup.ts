@@ -25,5 +25,10 @@ export function openPopup(popupUrl: string, target: string) {
   const windowFeatures = `toolbar=no, menubar=no, width=${popUpWidth}, 
     height=${popUpHeight}, top=${top}, left=${left}`;
 
-  window.open(popupUrl, target, windowFeatures);
+  const popupWindow = window.open(popupUrl, target, windowFeatures);
+  if (!popupWindow) {
+    setTimeout(() => {
+      window.open(popupUrl, '_blank');
+    }, 0);
+  }
 }
