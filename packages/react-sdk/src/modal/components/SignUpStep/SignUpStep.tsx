@@ -100,6 +100,7 @@ export const SignUpStep = ({ oAuthMethods }: SignUpStepProps) => {
         value={email}
         errorText={emailError}
         autofocus
+        inputMode="email"
       >
         <CpslIcon slot="start" icon="mail" />
         <CpslButton slot="end" onClick={handleSubmitEmail}>
