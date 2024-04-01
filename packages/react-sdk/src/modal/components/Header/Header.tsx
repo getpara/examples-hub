@@ -94,7 +94,7 @@ const BackButton = styled(HeaderButton)`
 const CenterTextContainer = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
 `;
 
 const CenterText = styled(CpslText)`
@@ -104,6 +104,7 @@ const CenterText = styled(CpslText)`
 
 const Logo = styled.img`
   height: 20px;
+  max-width: 60%;
   object-fit: contain;
   box-sizing: content-box;
 `;
