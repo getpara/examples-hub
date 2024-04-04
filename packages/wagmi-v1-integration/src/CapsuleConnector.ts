@@ -3,21 +3,20 @@ import { InjectedConnector } from 'wagmi/connectors/injected';
 import { InjectedConnectorOptions } from '@wagmi/connectors/injected';
 
 import { CapsuleEIP1193Provider } from './CapsuleEIP1193Provider';
-import CapsuleWeb from '@usecapsule/react-sdk';
+import CapsuleWeb, { CapsuleModalV2Props } from '@usecapsule/react-sdk';
 
-interface CapsuleConnectorOpts {
+interface CapsuleConnectorOpts extends CapsuleModalV2Props {
   chains: Chain[];
   options: InjectedConnectorOptions;
   capsule: CapsuleWeb;
   disableModal?: boolean;
-  appName: string;
   storageOverride?: Pick<Storage, 'setItem' | 'getItem'>;
 }
 
 export class CapsuleConnector extends InjectedConnector {
   private capsule: CapsuleWeb;
 
-  constructor({ chains, options, capsule, disableModal, appName, storageOverride }: CapsuleConnectorOpts) {
+  constructor({ chains, options, capsule, disableModal, storageOverride, ...modalProps }: CapsuleConnectorOpts) {
     if (chains.length === 0) {
       throw new Error('Must provide at least one chain');
     }
@@ -26,8 +25,8 @@ export class CapsuleConnector extends InjectedConnector {
       chainId: `${chains[0].id}`,
       chains,
       disableModal,
-      appName,
       storageOverride,
+      ...modalProps,
     });
 
     const optionsWithProvider = {

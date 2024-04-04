@@ -1,10 +1,10 @@
 import ReactDOM from 'react-dom';
 
-import CapsuleWeb, { CapsuleModal } from '@usecapsule/react-sdk';
+import CapsuleWeb, { CapsuleModal, CapsuleModalV2Props } from '@usecapsule/react-sdk';
 
 export function renderModal(
   capsule: CapsuleWeb,
-  appName: string,
+  modalProps: CapsuleModalV2Props,
   onCloseArg: () => void,
 ): void {
   const container = document.createElement('div');
@@ -21,7 +21,7 @@ export function renderModal(
       onClose={onClose}
       capsule={capsule}
       isOpen={true}
-      appName={appName}
+      {...modalProps}
     />,
     container,
   );

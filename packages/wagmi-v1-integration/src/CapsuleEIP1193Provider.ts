@@ -19,18 +19,17 @@ import { EventEmitter } from 'eventemitter3';
 import { Chain } from '@wagmi/chains';
 
 import { getViemChain, createCapsuleViemClient, createCapsuleAccount } from '@usecapsule/viem-v1-integration';
-import CapsuleWeb, { decimalToHex, hexToDecimal } from '@usecapsule/react-sdk';
+import CapsuleWeb, { decimalToHex, hexToDecimal, CapsuleModalV2Props } from '@usecapsule/react-sdk';
 import { renderModal } from './connectorModal';
 
 const STORAGE_CHAIN_ID_KEY = '@CAPSULE/chainId';
 const TEN_MINUTES_MS = 600000;
 
-interface CapsuleEIP1193ProviderOpts {
+interface CapsuleEIP1193ProviderOpts extends CapsuleModalV2Props {
   capsule: CapsuleWeb;
   chainId: string; // base-10 chain id number as a string
   chains: Chain[];
   disableModal?: boolean;
-  appName: string;
   storageOverride?: Pick<Storage, 'setItem' | 'getItem'>;
 }
 
@@ -57,8 +56,8 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
   private chains: Record<Hex, AddEthereumChainParameter>;
   private capsule: CapsuleWeb;
   private disableModal: boolean;
-  private appName: string;
   private storage: Pick<Storage, 'setItem' | 'getItem'>;
+  private modalProps: CapsuleModalV2Props;
 
   constructor(opts: CapsuleEIP1193ProviderOpts) {
     super();
@@ -67,7 +66,7 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
     const chainId = this.getStorageChainId() || opts.chainId;
 
     this.capsule = opts.capsule;
-    this.appName = opts.appName;
+    this.modalProps = { ...opts };
     this.disableModal = !!opts.disableModal;
     this.chains = this.wagmiChainsToAddEthereumChainParameters(opts.chains);
     this.setCurrentChain(decimalToHex(chainId));
@@ -88,12 +87,15 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
     return [...(chain.rpcUrls.default.webSocket || []), ...chain.rpcUrls.default.http];
   }
 
-  private wagmiChainsToAddEthereumChainParameters = (chains: Chain[]): Record<Hex, AddEthereumChainParameter> => {
-    return Object.fromEntries(chains.map((chain) => {
-      const hexChainId = decimalToHex(`${chain.id}`);
-      const viemChain = getViemChain(`${chain.id}`);
+  private wagmiChainToAddEthereumChainParameters = (
+    chain: Chain,
+  ): [Hex, AddEthereumChainParameter] => {
+    const hexChainId = decimalToHex(`${chain.id}`);
+    const viemChain = getViemChain(`${chain.id}`);
 
-      return [hexChainId, {
+    return [
+      hexChainId,
+      {
         chainId: hexChainId,
         chainName: viemChain.name,
         nativeCurrency: {
@@ -102,9 +104,17 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
           decimals: viemChain.nativeCurrency.decimals,
         },
         rpcUrls: this.getRpcUrlsFromViemChain(chain),
-      }];
-    }));
+      },
+    ];
   }
+
+  private wagmiChainsToAddEthereumChainParameters = (
+    chains: Chain[],
+  ): Record<Hex, AddEthereumChainParameter> => {
+    return Object.fromEntries(
+      chains.map(this.wagmiChainToAddEthereumChainParameters),
+    );
+  };
 
   private accountFromAddress = (address: Address): LocalAccount => {
     return createCapsuleAccount(this.capsule, address);
@@ -156,7 +166,7 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
 
         let isClosed = false;
         const onClose = () => { isClosed = true; };
-        renderModal(this.capsule, this.appName, onClose);
+        renderModal(this.capsule, this.modalProps, onClose);
         // check if capsule is fully logged in every 2 seconds for 10 minutes at most
         const now = Date.now();
         while ((Date.now() - now) < TEN_MINUTES_MS) {
@@ -245,10 +255,11 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
       }
       case 'wallet_switchEthereumChain': {
         if (!this.chains[params[0].chainId]) {
-          throw new ProviderRpcError(
-            new Error(`chainId: ${params[0]} not connected`),
-            { code: 4901, shortMessage: 'chainId not connected' },
-          );
+          const chain = getViemChain(hexToDecimal(params[0].chainId));
+          const [hexChainId, addEthereumChainParameter] = this.wagmiChainToAddEthereumChainParameters(chain);
+          this.chains[hexChainId] = addEthereumChainParameter;
+
+          this.setCurrentChain(params[0].chainId);
         }
         if (this.currentHexChainId !== params[0].chainId) {
           this.setCurrentChain(params[0].chainId);

@@ -2,10 +2,10 @@ import { Chain } from 'wagmi/chains';
 import { InjectedParameters, injected } from 'wagmi/connectors';
 
 import { CapsuleEIP1193Provider } from './CapsuleEIP1193Provider';
-import CapsuleWeb from '@usecapsule/react-sdk';
+import CapsuleWeb, { CapsuleModalV2Props } from '@usecapsule/react-sdk';
 import { createConnector } from 'wagmi';
 
-interface CapsuleConnectorOpts {
+interface CapsuleConnectorOpts extends CapsuleModalV2Props {
   chains: Chain[];
   options: InjectedParameters;
   capsule: CapsuleWeb;
@@ -18,9 +18,9 @@ export const capsuleConnector = ({
   capsule,
   chains,
   disableModal,
-  appName,
   storageOverride,
   options,
+  ...modalProps
 }: CapsuleConnectorOpts) => {
   return createConnector((config) => {
     const injectedObj = injected({
@@ -32,8 +32,8 @@ export const capsuleConnector = ({
           chainId: `${chains[0].id}`,
           chains,
           disableModal,
-          appName,
           storageOverride,
+          ...modalProps,
         }),
       },
       ...options,
