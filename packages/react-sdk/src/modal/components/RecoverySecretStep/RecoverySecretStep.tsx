@@ -5,25 +5,22 @@ import { Heading, MainContainer, SecondaryText } from '../common';
 import styled from 'styled-components';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
 import { getMailtoLink } from '../../utils/getMailtoLink';
+import { useState } from 'react';
 interface RecoverySecretStepProps {
   recoveryShare: string;
-  twoFactorAuthEnabled?: boolean;
-  onClose: () => void;
 }
 
 export const RecoverySecretStep = ({
   recoveryShare,
-  twoFactorAuthEnabled,
-  onClose,
 }: RecoverySecretStepProps) => {
   const setStep = useModalStore((state) => state.setStep);
-  const isLogin = useModalStore((state) => state.isLogin());
-  const capsule = useCapsuleStore((state) => state.capsule);
   const email = useUserInfoStore((state) => state.email);
   const [copied, copy] = useCopyToClipboard();
+  const [hasSavedSecret, setHasSavedSecret] = useState(false);
 
   const handleCopy = () => {
     copy(backupDecryptionKey);
+    setHasSavedSecret(true);
   };
 
   const backupDecryptionKey = JSON.parse(
@@ -31,22 +28,7 @@ export const RecoverySecretStep = ({
   ).backupDecryptionKey;
 
   const handleNext = async () => {
-    if (isLogin) {
-      if (!twoFactorAuthEnabled) {
-        setStep(ModalStep.LOGIN_DONE);
-        return;
-      }
-
-      const is2FAComplete = await capsule.check2FAStatus();
-
-      setStep(is2FAComplete ? ModalStep.LOGIN_DONE : ModalStep.SETUP_2FA);
-    } else {
-      if (twoFactorAuthEnabled) {
-        setStep(ModalStep.SETUP_2FA);
-      } else {
-        onClose();
-      }
-    }
+    setStep(ModalStep.WALLET_CREATION_DONE);
   };
 
   const handleDownload = () => {
@@ -56,10 +38,12 @@ export const RecoverySecretStep = ({
     element.download = 'recovery.txt';
     document.body.appendChild(element); // Required for this to work in FireFox
     element.click();
+    setHasSavedSecret(true);
   };
 
   const handleEmail = () => {
     window.open(getMailtoLink(email, backupDecryptionKey), '_self');
+    setHasSavedSecret(true);
   };
 
   return (
@@ -88,11 +72,18 @@ export const RecoverySecretStep = ({
       <CpslSlideButton
         startIcon="arrow"
         endIcon="check"
-        startText="I’ve Saved My Recovery Secret"
-        endText="OK! You’re Done!"
+        startText={
+          !hasSavedSecret
+            ? 'First, save your recovery secret.'
+            : 'I’ve Saved My Recovery Secret'
+        }
+        endText="OK! Great Job!"
         onCpslComplete={handleNext}
+        disabled={!hasSavedSecret}
       />
-      <SliderHelper>Slide to complete</SliderHelper>
+      <SliderHelper>
+        {!hasSavedSecret ? 'Choose an option above.' : 'Slide to complete'}
+      </SliderHelper>
     </>
   );
 };

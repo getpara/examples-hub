@@ -1,28 +1,43 @@
-import {
-  CpslButton,
-  CpslIcon,
-  CpslInfoBox,
-} from '@usecapsule/react-components';
+import { CpslButton, CpslIcon } from '@usecapsule/react-components';
 import {
   Heading,
   MainContainer,
-  InfoBoxContent,
-  InfoBoxHeader,
-  InfoBoxHeading,
-  InfoBoxText,
   Hero,
-  Text,
   ButtonWithIconContainer,
 } from '../common';
-import { useModalStore, useUserInfoStore } from '../../stores';
+import { useCapsuleStore, useModalStore } from '../../stores';
 import { ModalStep } from '../../utils/steps';
 
-export const WalletCreationDoneStep = () => {
-  const setStep = useModalStore((state) => state.setStep);
-  const email = useUserInfoStore((state) => state.email);
+interface WalletCreationDoneStepProps {
+  twoFactorAuthEnabled?: boolean;
+  onClose: () => void;
+}
 
-  const handleNext = () => {
-    setStep(ModalStep.SECRET);
+export const WalletCreationDoneStep = ({
+  twoFactorAuthEnabled,
+  onClose,
+}: WalletCreationDoneStepProps) => {
+  const setStep = useModalStore((state) => state.setStep);
+  const isLogin = useModalStore((state) => state.isLogin());
+  const capsule = useCapsuleStore((state) => state.capsule);
+
+  const handleNext = async () => {
+    if (isLogin) {
+      if (!twoFactorAuthEnabled) {
+        setStep(ModalStep.LOGIN_DONE);
+        return;
+      }
+
+      const is2FAComplete = await capsule.check2FAStatus();
+
+      setStep(is2FAComplete ? ModalStep.LOGIN_DONE : ModalStep.SETUP_2FA);
+    } else {
+      if (twoFactorAuthEnabled) {
+        setStep(ModalStep.SETUP_2FA);
+      } else {
+        onClose();
+      }
+    }
   };
 
   return (
@@ -33,29 +48,18 @@ export const WalletCreationDoneStep = () => {
           <span>Wallet Created!</span>
         </Heading>
       </MainContainer>
-      <CpslInfoBox>
-        <InfoBoxContent>
-          <InfoBoxHeader>
-            <CpslIcon icon="backupKit" />
-            <InfoBoxHeading>
-              <span>Backup Kit</span>
-            </InfoBoxHeading>
-          </InfoBoxHeader>
-          <InfoBoxText>
-            <span>
-              We emailed your backup kit to{'\n'}
-              <Text>
-                <span>{email}</span>
-              </Text>
-            </span>
-          </InfoBoxText>
-        </InfoBoxContent>
-      </CpslInfoBox>
       <CpslButton onClick={handleNext}>
-        <ButtonWithIconContainer>
-          Continue
-          <CpslIcon icon="arrowNarrow" />
-        </ButtonWithIconContainer>
+        {twoFactorAuthEnabled ? (
+          <ButtonWithIconContainer>
+            Continue
+            <CpslIcon icon="arrowNarrow" />
+          </ButtonWithIconContainer>
+        ) : (
+          <ButtonWithIconContainer>
+            <CpslIcon icon="check" />
+            Done
+          </ButtonWithIconContainer>
+        )}
       </CpslButton>
     </>
   );

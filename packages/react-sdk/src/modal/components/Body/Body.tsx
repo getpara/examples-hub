@@ -67,16 +67,15 @@ export const Body = ({
         return <AwaitingWalletCreationStep />;
       }
       case ModalStep.WALLET_CREATION_DONE: {
-        return <WalletCreationDoneStep />;
-      }
-      case ModalStep.SECRET: {
         return (
-          <RecoverySecretStep
-            recoveryShare={recoveryShare}
+          <WalletCreationDoneStep
             twoFactorAuthEnabled={twoFactorAuthEnabled}
             onClose={onClose}
           />
         );
+      }
+      case ModalStep.SECRET: {
+        return <RecoverySecretStep recoveryShare={recoveryShare} />;
       }
       case ModalStep.TWO_FACTOR_DONE: {
         return <TwoFactorDoneStep onClose={onClose} />;

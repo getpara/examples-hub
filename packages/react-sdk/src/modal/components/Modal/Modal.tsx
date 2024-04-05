@@ -152,7 +152,7 @@ export const Modal = ({
       }
       setDistributeDone(true);
 
-      setStep(ModalStep.WALLET_CREATION_DONE);
+      setStep(ModalStep.SECRET);
     }
     distributeShare();
   }, [isFullyLoggedIn, walletCreated, createWalletRes]);
