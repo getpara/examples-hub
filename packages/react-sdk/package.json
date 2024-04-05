@@ -1,6 +1,6 @@
 {
   "name": "@usecapsule/react-sdk",
-  "version": "2.1.2",
+  "version": "2.2.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "sideEffects": [
@@ -10,7 +10,7 @@
     "@gsap/react": "^2.1.0",
     "@ramp-network/ramp-instant-sdk": "^4.0.2",
     "@usecapsule/react-components": "1.0.12",
-    "@usecapsule/web-sdk": "1.6.2",
+    "@usecapsule/web-sdk": "1.7.0",
     "gsap": "^3.12.5",
     "styled-components": "^6.1.8",
     "zustand": "^4.5.2"
