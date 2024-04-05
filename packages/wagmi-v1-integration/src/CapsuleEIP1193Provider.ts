@@ -25,7 +25,7 @@ import { renderModal } from './connectorModal';
 const STORAGE_CHAIN_ID_KEY = '@CAPSULE/chainId';
 const TEN_MINUTES_MS = 600000;
 
-interface CapsuleEIP1193ProviderOpts extends CapsuleModalV2Props {
+interface CapsuleEIP1193ProviderOpts extends Partial<CapsuleModalV2Props> {
   capsule: CapsuleWeb;
   chainId: string; // base-10 chain id number as a string
   chains: Chain[];
@@ -57,7 +57,7 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
   private capsule: CapsuleWeb;
   private disableModal: boolean;
   private storage: Pick<Storage, 'setItem' | 'getItem'>;
-  private modalProps: CapsuleModalV2Props;
+  private modalProps: Partial<CapsuleModalV2Props>;
 
   constructor(opts: CapsuleEIP1193ProviderOpts) {
     super();

@@ -31,8 +31,7 @@
   "scripts": {
     "start": "PORT=3002 craco start",
     "build": "craco build",
-    "serve-build": "PORT=3002 serve -s build",
-    "deploy-sandbox": "cd .. && yarn && cd examples && yarn build && aws s3 sync build/ s3://capsule-web-playground --acl public-read"
+    "serve-build": "PORT=3002 serve -s build"
   },
   "devDependencies": {
     "@craco/craco": "7.1.0",

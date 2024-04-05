@@ -4,7 +4,7 @@ import CapsuleWeb, { CapsuleModal, CapsuleModalV2Props } from '@usecapsule/react
 
 export function renderModal(
   capsule: CapsuleWeb,
-  modalProps: CapsuleModalV2Props,
+  modalProps: Partial<CapsuleModalV2Props>,
   onCloseArg: () => void,
 ): void {
   const container = document.createElement('div');

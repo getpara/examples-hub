@@ -58,7 +58,7 @@ export function createCapsuleAccount(
     >(
       transaction: TTransactionSerializable,
       args?: {
-        serializer?: SerializeTransactionFn<TTransactionSerializable>;
+        serializer?: SerializeTransactionFn;
       },
     ) => {
       let { serializer } = args || {};
@@ -83,14 +83,14 @@ export function createCapsuleAccount(
       return serializer(transaction, formattedSig);
     },
     signTypedData: async <
-      TTypedData extends TypedData | Record<string, unknown>,
-      TPrimaryType extends keyof TTypedData | 'EIP712Domain',
+      const typedData extends TypedData | Record<string, unknown>,
+      primaryType extends keyof typedData | 'EIP712Domain' = keyof typedData,
     >(
-      typedData: TypedDataDefinition<TTypedData, TPrimaryType>,
+      typedDataDefinition: TypedDataDefinition<typedData, primaryType>,
     ) => {
       const res = await capsule.signMessage(
         currentWallet.id,
-        hexStringToBase64(hashTypedData(typedData)),
+        hexStringToBase64(hashTypedData(typedDataDefinition)),
       );
       const signature = (res as SuccessfulSignatureRes).signature;
       return `0x${signature}`;
@@ -102,7 +102,7 @@ export function getViemChain(chainId: string): viemChains.Chain {
   const chainIdNum = Number(chainId);
   for (const chain of Object.values(viemChains)) {
     if (chain.id === chainIdNum) {
-      return chain;
+      return chain as viemChains.Chain;
     }
   }
 

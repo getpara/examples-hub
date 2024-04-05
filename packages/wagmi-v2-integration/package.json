@@ -6,15 +6,19 @@
   "sideEffects": false,
   "dependencies": {
     "@usecapsule/react-sdk": "2.1.2",
-    "@usecapsule/viem-v2-integration": "1.4.0",
-    "viem": "^2.7.15",
-    "wagmi": "^2.5.7"
+    "@usecapsule/viem-v2-integration": "1.4.0"
   },
   "scripts": {
     "build": "rm -rf dist && tsc"
   },
   "devDependencies": {
-    "typescript": "5.1.6"
+    "typescript": "5.1.6",
+    "viem": "2.8.4",
+    "wagmi": "2.5.18"
+  },
+  "peerDependencies": {
+    "viem": "2.x",
+    "wagmi": "2.x"
   },
   "files": [
     "dist",
