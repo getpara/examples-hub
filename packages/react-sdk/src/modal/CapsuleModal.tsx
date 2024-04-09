@@ -54,6 +54,7 @@ export const CapsuleModal = ({
     } else if (
       currentStep === ModalStep.LOGIN_DONE ||
       currentStep === ModalStep.TWO_FACTOR_DONE ||
+      currentStep === ModalStep.SETUP_2FA ||
       currentStep === ModalStep.SECRET
     ) {
       setStep(ModalStep.SIGN_UP);

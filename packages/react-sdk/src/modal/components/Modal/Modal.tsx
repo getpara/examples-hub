@@ -200,6 +200,7 @@ export const Modal = ({
     if (
       currentStep === ModalStep.LOGIN_DONE ||
       currentStep === ModalStep.TWO_FACTOR_DONE ||
+      currentStep === ModalStep.SETUP_2FA ||
       currentStep === ModalStep.SECRET
     ) {
       // Using a timeout here so state is reset once modal animates out.
