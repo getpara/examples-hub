@@ -1,6 +1,6 @@
 {
   "name": "wagmi-v2-example",
-  "version": "0.14.2",
+  "version": "0.14.3",
   "main": "src/index.tsx",
   "private": true,
   "dependencies": {
@@ -11,7 +11,7 @@
     "@tanstack/react-query": "^5.24.1",
     "@usecapsule/core-sdk": "1.0.1",
     "@usecapsule/react-sdk": "1.0.1",
-    "@usecapsule/wagmi-v2-integration": "1.6.2",
+    "@usecapsule/wagmi-v2-integration": "1.6.3",
     "@usecapsule/web-sdk": "1.0.1",
     "crypto-browserify": "3.12.0",
     "framer-motion": "10.9.2",
