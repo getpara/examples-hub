@@ -1,11 +1,11 @@
 {
   "name": "@usecapsule/wagmi-v1-integration",
-  "version": "1.8.1",
+  "version": "1.8.2",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "sideEffects": false,
   "dependencies": {
-    "@usecapsule/react-sdk": "2.2.1",
+    "@usecapsule/react-sdk": "2.2.2",
     "@usecapsule/viem-v1-integration": "1.6.0",
     "wagmi": "^1.4.12"
   },
