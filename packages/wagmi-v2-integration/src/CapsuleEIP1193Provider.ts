@@ -61,6 +61,7 @@ export class CapsuleEIP1193Provider
   private walletClient: WalletClient;
   private chainTransportSubscribe?: WebSocketTransportSubscribeFn;
   private chains: Record<Hex, AddEthereumChainParameter>;
+  private viemChains: Record<Hex, Chain>;
   private capsule: CapsuleWeb;
   private disableModal: boolean;
   private storage: Pick<Storage, 'setItem' | 'getItem'>;
@@ -75,6 +76,10 @@ export class CapsuleEIP1193Provider
     this.capsule = opts.capsule;
     this.modalProps = { ...opts };
     this.disableModal = !!opts.disableModal;
+    this.viemChains = opts.chains.reduce((acc, curChain) => {
+      acc[decimalToHex(`${curChain.id}`)] = curChain;
+      return acc;
+    }, {});
     this.chains = this.wagmiChainsToAddEthereumChainParameters(opts.chains);
     this.setCurrentChain(decimalToHex(chainId));
 
@@ -101,18 +106,13 @@ export class CapsuleEIP1193Provider
     chain: Chain,
   ): [Hex, AddEthereumChainParameter] => {
     const hexChainId = decimalToHex(`${chain.id}`);
-    const viemChain = getViemChain(`${chain.id}`);
 
     return [
       hexChainId,
       {
         chainId: hexChainId,
-        chainName: viemChain.name,
-        nativeCurrency: {
-          name: viemChain.nativeCurrency.name,
-          symbol: viemChain.nativeCurrency.symbol,
-          decimals: viemChain.nativeCurrency.decimals,
-        },
+        chainName: chain.name,
+        nativeCurrency: chain.nativeCurrency,
         rpcUrls: this.getRpcUrlsFromViemChain(chain),
       },
     ];
@@ -134,7 +134,7 @@ export class CapsuleEIP1193Provider
     const chain = this.chains[chainId];
     this.setChainId(chainId);
 
-    const viemChain = getViemChain(hexToDecimal(chainId));
+    const viemChain = this.viemChains[chainId] || getViemChain(hexToDecimal(chainId));
     let transport: Transport;
     if (chain.rpcUrls[0].startsWith('ws')) {
       transport = webSocket(chain.rpcUrls[0]);
@@ -268,7 +268,7 @@ export class CapsuleEIP1193Provider
         if (!this.chains[params[0].chainId]) {
           this.chains[params[0].chainId] = params[0];
         }
-        return;
+        return null;
       }
       case 'wallet_getPermissions': {
         // capsule doesn't support this type of functionality for now
@@ -289,7 +289,7 @@ export class CapsuleEIP1193Provider
         if (this.currentHexChainId !== params[0].chainId) {
           this.setCurrentChain(params[0].chainId);
         }
-        return;
+        return null;
       }
       case 'wallet_watchAsset': {
         // capsule doesn't support this type of functionality for now
