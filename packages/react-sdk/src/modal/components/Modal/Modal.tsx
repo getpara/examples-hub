@@ -11,7 +11,7 @@ import { CapsuleModalV2Props } from '../../types/modalProps';
 import { DEFAULTS } from '../../constants/defaults';
 
 export const Modal = ({
-  twoFactorAuthEnabled = true,
+  twoFactorAuthEnabled = false,
   oAuthMethods,
   currentStepOverride,
   hasFinishedAnimation,
