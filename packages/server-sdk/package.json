@@ -1,6 +1,6 @@
 {
   "name": "@usecapsule/server-sdk",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "main": "dist/index.js",
   "sideEffects": [
     "wasm_exec.js"
