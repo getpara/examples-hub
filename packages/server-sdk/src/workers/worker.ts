@@ -3,6 +3,8 @@ import { parentPort } from 'worker_threads';
 import { Ctx, Environment, getPortalBaseURL, initClient, mpcComputationClient } from '@usecapsule/core-sdk';
 import * as walletUtils from './walletUtils';
 
+let rawWasm: any;
+
 interface Message {
   env: Environment;
   apiKey?: string;
@@ -13,19 +15,34 @@ interface Message {
   sessionCookie?: string;
   useDKLS?: boolean;
   disableWebSockets?: boolean;
+  workId: string;
 }
 
 parentPort.on('message', async (messageData: Message) => {
   await handleMessage({ data: messageData });
 });
 
+async function requestWasmWithRetries(ctx: Ctx, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await axios.get(`${getPortalBaseURL(ctx, true)}/static/js/main.wasm`, { responseType: 'arraybuffer' });
+    } catch (e) {
+      if (i === retries - 1) {
+        throw e;
+      }
+    }
+  }
+}
+
 async function loadWasm(ctx: Ctx): Promise<void> {
   await import('../wasm/wasm_exec.js');
   global.WebSocket = require('ws');
 
   const goWasm = new global.Go();
-  const wasmRes = await axios.get(`${getPortalBaseURL(ctx, true)}/static/js/main.wasm`, { responseType: 'arraybuffer' });
-  const wasmBuffer = new Uint8Array(wasmRes.data);
+  if (!rawWasm) {
+    rawWasm = (await requestWasmWithRetries(ctx)).data;
+  }
+  const wasmBuffer = new Uint8Array(rawWasm);
 
   const webAssemblySource = await WebAssembly.instantiate(wasmBuffer, goWasm.importObject);
   goWasm.run(webAssemblySource.instance);
@@ -67,7 +84,7 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
 }
 
 async function handleMessage(e: { data: Message }): Promise<void> {
-  const { env, apiKey, offloadMPCComputationURL, disableWorkers, sessionCookie, useDKLS, disableWebSockets } = e.data;
+  const { env, apiKey, offloadMPCComputationURL, disableWorkers, sessionCookie, useDKLS, disableWebSockets, workId } = e.data;
   const ctx = {
     env,
     apiKey,
@@ -83,5 +100,6 @@ async function handleMessage(e: { data: Message }): Promise<void> {
   }
 
   const result = await executeMessage(ctx, e.data);
+  result.workId = workId;
   parentPort.postMessage(result);
 }

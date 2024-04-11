@@ -1,3 +1,4 @@
+import * as uuid from 'uuid';
 import type { Ctx, SignatureRes } from '@usecapsule/core-sdk';
 import { setupWorker } from '../workers/workerWrapper';
 
@@ -12,9 +13,10 @@ export async function signTransaction(
   isDKLS?: boolean,
 ): Promise<SignatureRes> {
   return await new Promise(async (resolve) => {
+    const workId = uuid.v4();
     const worker = await setupWorker(async (sendTransactionRes) => {
       resolve(sendTransactionRes);
-    });
+    }, workId);
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,
@@ -26,6 +28,7 @@ export async function signTransaction(
       useDKLS: isDKLS,
       disableWebSockets: ctx.disableWebSockets,
       wasmOverride: ctx.wasmOverride,
+      workId,
     });
   });
 }
@@ -41,9 +44,10 @@ export async function sendTransaction(
   isDKLS?: boolean,
 ): Promise<SignatureRes> {
   return await new Promise(async (resolve) => {
+    const workId = uuid.v4();
     const worker = await setupWorker(async (sendTransactionRes) => {
       resolve(sendTransactionRes);
-    });
+    }, workId);
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,
@@ -55,6 +59,7 @@ export async function sendTransaction(
       useDKLS: isDKLS,
       disableWebSockets: ctx.disableWebSockets,
       wasmOverride: ctx.wasmOverride,
+      workId,
     });
   });
 }
@@ -69,9 +74,10 @@ export async function signMessage(
   isDKLS?: boolean,
 ): Promise<SignatureRes> {
   return await new Promise(async (resolve) => {
+    const workId = uuid.v4();
     const worker = await setupWorker(async (signMessageRes) => {
       resolve(signMessageRes);
-    });
+    }, workId);
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,
@@ -83,6 +89,7 @@ export async function signMessage(
       useDKLS: isDKLS,
       disableWebSockets: ctx.disableWebSockets,
       wasmOverride: ctx.wasmOverride,
+      workId,
     });
   });
 }

@@ -1,3 +1,4 @@
+import * as uuid from 'uuid';
 import { distributeNewShare, waitUntilTrue, Ctx } from '@usecapsule/core-sdk';
 import { setupWorker } from '../workers/workerWrapper';
 import { BackupKitEmailProps } from '@usecapsule/user-management-client';
@@ -35,6 +36,7 @@ export function keygen(
   recoveryShare: string | null;
 }> {
   return new Promise(async (resolve) => {
+    const workId = uuid.v4();
     const worker = await setupWorker(async (res) => {
       await waitUntilTrue(
         async () => isKeygenComplete(ctx, userId, res.walletId),
@@ -63,7 +65,7 @@ export function keygen(
         walletId: res.walletId,
         recoveryShare,
       });
-    });
+    }, workId);
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,
@@ -75,6 +77,7 @@ export function keygen(
       useDKLS: ctx.useDKLS,
       disableWebSockets: ctx.disableWebSockets,
       wasmOverride: ctx.wasmOverride,
+      workId,
     });
   });
 }
@@ -93,6 +96,7 @@ export function preKeygen(
   recoveryShare: string | null;
 }> {
   return new Promise(async (resolve) => {
+    const workId = uuid.v4();
     const worker = await setupWorker(async (res) => {
       await waitUntilTrue(
         async () => isPreKeygenComplete(ctx, email, res.walletId),
@@ -105,7 +109,7 @@ export function preKeygen(
         walletId: res.walletId,
         recoveryShare: null,
       });
-    });
+    }, workId);
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,
@@ -117,6 +121,7 @@ export function preKeygen(
       useDKLS: ctx.useDKLS,
       disableWebSockets: ctx.disableWebSockets,
       wasmOverride: ctx.wasmOverride,
+      workId,
     });
   });
 }

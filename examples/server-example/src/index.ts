@@ -23,13 +23,13 @@ interface Params {
   isPregen?: boolean;
 }
 
-const capsule = new CapsuleServer(Environment.SANDBOX, '2f938ac0c48ef356050a79bd66042a23');
 async function errorMiddleware(err: Error, _req: Request, res: Response, _next: NextFunction): Promise<void> {
   console.error(err);
   res.sendStatus(500);
 }
 
 async function createUserAndWallet(params: Params) {
+  const capsule = new CapsuleServer(Environment.SANDBOX, '2f938ac0c48ef356050a79bd66042a23');
   const { email, isPregen } = params;
   await capsule.logout();
   if (isPregen) {
@@ -58,28 +58,37 @@ async function createUserAndWallet(params: Params) {
   const walletAddress = Object.values(capsule.getWallets())[0].address;
   console.log(`address: ${walletAddress}`)
 
-  console.log(capsule.retrieveSessionCookie());
+  console.log(walletAddress, 'session', capsule.retrieveSessionCookie());
   const provider = new ethers.JsonRpcProvider(ALCHEMY_SEPOLIA_PROVIDER, 'sepolia')
   const ethersSigner = new CapsuleEthersSigner(capsule, provider);
   const viemClient = createCapsuleViemClient(capsule, {
     chain: sepolia,
     transport: http(ALCHEMY_SEPOLIA_PROVIDER),
   });
-  console.log(await ethersSigner.signMessage('hello-world'));
-  console.log(await ethersSigner.signMessage('hello-world2'));
-  console.log(await viemClient.signMessage({
-    message: 'hello-world3',
-    account: viemClient.account,
-  }));
-  console.log(await capsule.keepSessionAlive());
-  console.log(capsule.retrieveSessionCookie());
+
+  const [sign1, sign2, sign3] = [
+    ethersSigner.signMessage('hello-world'),
+    ethersSigner.signMessage('hello-world2'),
+    viemClient.signMessage({
+      message: 'hello-world3',
+      account: viemClient.account,
+    }),
+  ];
+
+  console.log('sign:', walletAddress, 'hello-world', await sign1);
+  console.log('sign:', walletAddress, 'hello-world2', await sign2);
+  console.log('sign:', walletAddress, 'hello-world3', await sign3);
+  console.log(walletAddress, 'keep session alive', await capsule.keepSessionAlive());
+  console.log(walletAddress, 'session', capsule.retrieveSessionCookie());
 }
 
 async function signMessageWithImport(serializedInstance: string): Promise<void> {
+  const capsule = new CapsuleServer(Environment.SANDBOX, '2f938ac0c48ef356050a79bd66042a23');
   console.log('importing session');
   await capsule.importSession(serializedInstance);
   // @ts-ignore
-  console.log(`address: ${Object.values(capsule.getWallets())[0].address}`)
+  const address = Object.values(capsule.getWallets())[0].address;
+  console.log(`address: ${address}`)
   
   const provider = new ethers.JsonRpcProvider(ALCHEMY_SEPOLIA_PROVIDER, 'sepolia')
   const ethersSigner = new CapsuleEthersSigner(capsule, provider);
@@ -87,11 +96,16 @@ async function signMessageWithImport(serializedInstance: string): Promise<void> 
     chain: sepolia,
     transport: http(ALCHEMY_SEPOLIA_PROVIDER),
   });
-  console.log(await ethersSigner.signMessage('hello-world'));
-  console.log(await ethersSigner.signMessage('hello-world2'));
-  console.log(await viemClient.signMessage({
-    message: 'hello-world3'
-  } as any));
+  const [sign1, sign2, sign3]= [
+    ethersSigner.signMessage('hello-world'),
+    ethersSigner.signMessage('hello-world2'),
+    viemClient.signMessage({
+      message: 'hello-world3'
+    } as any),
+  ];
+  console.log(address, 'hello-world', await sign1);
+  console.log(address, 'hello-world2', await sign2);
+  console.log(address, 'hello-world3', await sign3);
 }
 
 app.use(bodyParser.json({ limit: '1mb' }));
@@ -102,13 +116,17 @@ app.get('/', async (req: Request, res: Response) => {
 });
 
 app.post('/wallets', async (req: Request, res: Response, next: NextFunction) => {
+  const now = Date.now();
   try {
-    const { email, serializedInstance, isPregen } = req.body;
+    const { email, emails, serializedInstance, isPregen } = req.body;
     if (serializedInstance) {
       await signMessageWithImport(serializedInstance);
+    } else if (emails) {
+      await Promise.all(emails.map((e: string) => createUserAndWallet({ email: e, isPregen })));
     } else {
       await createUserAndWallet({ email, isPregen });
     }
+    console.log('time taken:', Date.now() - now);
     res.send('200');
   } catch (e) {
     next(e);
@@ -117,6 +135,7 @@ app.post('/wallets', async (req: Request, res: Response, next: NextFunction) => 
 
 app.post('/sign', async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const capsule = new CapsuleServer(Environment.SANDBOX, '2f938ac0c48ef356050a79bd66042a23');
     const { message } = req.body;
     const provider = new ethers.JsonRpcProvider(ALCHEMY_SEPOLIA_PROVIDER, 'sepolia')
     const ethersSigner = new CapsuleEthersSigner(capsule, provider);

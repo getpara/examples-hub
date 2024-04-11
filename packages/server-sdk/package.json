@@ -8,6 +8,7 @@
   "dependencies": {
     "@usecapsule/core-sdk": "1.6.0",
     "@usecapsule/user-management-client": "1.4.0",
+    "uuid": "^9.0.1",
     "ws": "^8.14.2"
   },
   "scripts": {
