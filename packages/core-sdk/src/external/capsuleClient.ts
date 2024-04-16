@@ -1,6 +1,6 @@
 import Client from '@usecapsule/user-management-client';
 
-import { Environment } from '../definitions';
+import { Environment } from '../definitions.js';
 
 export function getBaseUrl(env: Environment): string {
   switch (env) {

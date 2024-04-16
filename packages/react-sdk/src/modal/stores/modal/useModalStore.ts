@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { ModalStep } from '../../utils/steps';
-import { getActions } from './actions';
+import { ModalStep } from '../../utils/steps.js';
+import { getActions } from './actions.js';
 
 type Flow = 'login' | 'signUp';
 

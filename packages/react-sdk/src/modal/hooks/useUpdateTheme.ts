@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
-import { Branding } from '../types/branding';
-import { Theme } from '../types/theme';
-import { useThemeStore } from '../stores/theme/useThemeStore';
-import { getCssBorderRadii, getCssColors, mergeBranding } from '../utils/theme';
-import { darkThemeBranding } from '../constants/darkThemeBranding';
+import { Branding } from '../types/branding.js';
+import { Theme } from '../types/theme.js';
+import { useThemeStore } from '../stores/theme/useThemeStore.js';
+import { getCssBorderRadii, getCssColors, mergeBranding } from '../utils/theme.js';
+import { darkThemeBranding } from '../constants/darkThemeBranding.js';
 
 export const useUpdateTheme = ({
   theme,

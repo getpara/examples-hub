@@ -1,4 +1,4 @@
-import { Theme } from '../types/theme';
+import { Theme } from '../types/theme.js';
 
 export const DEFAULTS = {
   POLLING_INTERVAL_MS: 2000,

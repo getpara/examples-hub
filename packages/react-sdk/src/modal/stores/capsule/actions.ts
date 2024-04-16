@@ -1,5 +1,5 @@
 import { StoreApi } from 'zustand';
-import { CapsuleActions, CapsuleStore } from './useCapsuleStore';
+import { CapsuleActions, CapsuleStore } from './useCapsuleStore.js';
 
 export const getActions = (
   set: StoreApi<CapsuleStore>['setState'],

@@ -1,5 +1,5 @@
 import { Ctx, getPortalBaseURL } from '@usecapsule/core-sdk';
-import { handleMessage } from './worker';
+import { handleMessage } from './worker.js';
 
 export interface SyncWorker {
   postMessage: (message: any) => void;

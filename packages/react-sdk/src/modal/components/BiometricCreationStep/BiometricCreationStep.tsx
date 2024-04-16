@@ -7,8 +7,8 @@ import {
   CpslTabs,
 } from '@usecapsule/react-components';
 import { useEffect, useState } from 'react';
-import { useCapsuleStore, useModalStore } from '../../stores';
-import { ModalStep } from '../../utils/steps';
+import { useCapsuleStore, useModalStore } from '../../stores/index.js';
+import { ModalStep } from '../../utils/steps.js';
 import {
   Heading,
   SecondaryText,
@@ -18,15 +18,15 @@ import {
   Hero,
   CreationStepSubheading,
   FilledDisabledInput,
-} from '../common';
-import { openPopup } from '../../utils/openPopup';
+} from '../common.js';
+import { openPopup } from '../../utils/openPopup.js';
 import {
   CpslTabsCustomEvent,
   TabsChangedEventDetail,
 } from '@usecapsule/core-components';
 import styled from 'styled-components';
-import { isMobileBrowser } from '../../utils/isMobile';
-import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
+import { isMobileBrowser } from '../../utils/isMobile.js';
+import { useCopyToClipboard } from '../../hooks/useCopyToClipboard.js';
 
 const SHORTENING_AVAILABLE = true;
 

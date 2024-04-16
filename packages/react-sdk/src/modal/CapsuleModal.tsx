@@ -6,16 +6,16 @@ import {
 import '@usecapsule/react-components/css/capsule-core.css';
 import './css/modal.css';
 import styled from 'styled-components';
-import { Modal } from './components';
+import { Modal } from './components/index.js';
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { Theme } from './types/theme';
-import { useUpdateTheme } from './hooks/useUpdateTheme';
-import { useCapsuleStore, useModalStore, useUserInfoStore } from './stores';
-import { ModalStep } from './utils/steps';
-import { CapsuleModalV2Props } from './types/modalProps';
-import { DEFAULTS } from './constants/defaults';
+import { Theme } from './types/theme.js';
+import { useUpdateTheme } from './hooks/useUpdateTheme.js';
+import { useCapsuleStore, useModalStore, useUserInfoStore } from './stores/index.js';
+import { ModalStep } from './utils/steps.js';
+import { CapsuleModalV2Props } from './types/modalProps.js';
+import { DEFAULTS } from './constants/defaults.js';
 
 gsap.registerPlugin(useGSAP);
 defineCustomElements();

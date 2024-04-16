@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { parentPort } from 'worker_threads';
 import { Ctx, Environment, getPortalBaseURL, initClient, mpcComputationClient } from '@usecapsule/core-sdk';
-import * as walletUtils from './walletUtils';
+import * as walletUtils from './walletUtils.js';
 
 let rawWasm: any;
 

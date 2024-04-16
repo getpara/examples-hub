@@ -3,6 +3,9 @@
   "compilerOptions": {
     "declaration": false,
     "outDir": "./dist",
+    "lib": [
+      "dom"
+    ]
   },
   "include": [
     "**/*.ts"

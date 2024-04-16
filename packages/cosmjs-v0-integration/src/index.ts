@@ -1,1 +1,1 @@
-export * from './cosmosSigners';
+export * from './cosmosSigners.js';

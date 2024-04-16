@@ -1,8 +1,8 @@
 import { Ctx, PlatformUtils, SignatureRes } from '@usecapsule/core-sdk';
-import { LocalStorage } from './LocalStorage';
-import { SessionStorage } from './SessionStorage';
-import { keygen, preKeygen } from './wallet/keygen';
-import { signMessage, sendTransaction, signTransaction } from './wallet/signing';
+import { LocalStorage } from './LocalStorage.js';
+import { SessionStorage } from './SessionStorage.js';
+import { keygen, preKeygen } from './wallet/keygen.js';
+import { signMessage, sendTransaction, signTransaction } from './wallet/signing.js';
 import { BackupKitEmailProps } from '@usecapsule/user-management-client';
 
 export class WebUtils implements PlatformUtils {

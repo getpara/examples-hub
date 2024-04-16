@@ -1,10 +1,10 @@
 import { CpslSlideButton, CpslTileButton } from '@usecapsule/react-components';
-import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores';
-import { ModalStep } from '../../utils/steps';
-import { Heading, MainContainer, SecondaryText } from '../common';
+import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
+import { ModalStep } from '../../utils/steps.js';
+import { Heading, MainContainer, SecondaryText } from '../common.js';
 import styled from 'styled-components';
-import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
-import { getMailtoLink } from '../../utils/getMailtoLink';
+import { useCopyToClipboard } from '../../hooks/useCopyToClipboard.js';
+import { getMailtoLink } from '../../utils/getMailtoLink.js';
 import { useState } from 'react';
 interface RecoverySecretStepProps {
   recoveryShare: string;

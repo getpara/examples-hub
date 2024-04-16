@@ -1,6 +1,6 @@
 import CapsuleWeb, { OAuthMethod } from '@usecapsule/web-sdk';
-import { Theme } from './theme';
-import { Branding } from './branding';
+import { Theme } from './theme.js';
+import { Branding } from './branding.js';
 
 export interface CapsuleModalV2Props {
   /**

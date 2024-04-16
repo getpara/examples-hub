@@ -1,7 +1,7 @@
 import {
   Encrypt as ECIESEncrypt,
   Decrypt as ECIESDecrypt,
-} from '@celo/utils/lib/ecies';
+} from '@celo/utils/lib/ecies.js';
 import * as eutil from 'ethereumjs-util';
 import * as forge from 'node-forge';
 

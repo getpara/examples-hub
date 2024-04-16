@@ -5,8 +5,8 @@ import {
   KeyType,
 } from '@usecapsule/user-management-client';
 
-import { KeyContainer } from './KeyContainer';
-import { Ctx } from '../definitions';
+import { KeyContainer } from './KeyContainer.js';
+import { Ctx } from '../definitions.js';
 
 export async function sendRecoveryForShare(
   ctx: Ctx,

@@ -4,8 +4,8 @@ import {
   CreationStepSubheading,
   MainContainer,
   SpinnerContainer,
-} from '../common';
-import { useModalStore } from '../../stores';
+} from '../common.js';
+import { useModalStore } from '../../stores/index.js';
 
 export const AwaitingBiometricsStep = () => {
   const isLogin = useModalStore((state) => state.isLogin());

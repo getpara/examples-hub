@@ -4,7 +4,7 @@ import {
   HeroNoSpacing,
   SecondaryText,
   ButtonWithIconContainer,
-} from '../common';
+} from '../common.js';
 
 interface TwoFactorDoneStepStep {
   onClose: () => void;

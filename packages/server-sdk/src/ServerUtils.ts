@@ -1,13 +1,13 @@
 import type { Ctx, SignatureRes, PlatformUtils } from '@usecapsule/core-sdk';
 import { BackupKitEmailProps } from '@usecapsule/user-management-client';
-import { ServerLocalStorage } from './ServerLocalStorage';
-import { ServerSessionStorage } from './ServerSessionStorage';
-import { keygen, preKeygen } from './wallet/keygen';
+import { ServerLocalStorage } from './ServerLocalStorage.js';
+import { ServerSessionStorage } from './ServerSessionStorage.js';
+import { keygen, preKeygen } from './wallet/keygen.js';
 import {
   signMessage,
   sendTransaction,
   signTransaction,
-} from './wallet/signing';
+} from './wallet/signing.js';
 
 export class ServerUtils implements PlatformUtils {
   keygen(

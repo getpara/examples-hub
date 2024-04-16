@@ -1,7 +1,7 @@
 import { Chain } from 'wagmi/chains';
 import { InjectedParameters, injected } from 'wagmi/connectors';
 
-import { CapsuleEIP1193Provider } from './CapsuleEIP1193Provider';
+import { CapsuleEIP1193Provider } from './CapsuleEIP1193Provider.js';
 import CapsuleWeb, { CapsuleModalV2Props } from '@usecapsule/react-sdk';
 import { createConnector } from 'wagmi';
 

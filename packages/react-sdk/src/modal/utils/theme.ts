@@ -1,4 +1,4 @@
-import { Branding } from '../types/branding';
+import { Branding } from '../types/branding.js';
 
 const toKebabCase = (pascal: string) =>
   pascal.replace(/([a-z0–9])([A-Z])/g, '$1-$2').toLowerCase();

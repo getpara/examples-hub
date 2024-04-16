@@ -1,6 +1,6 @@
 import * as uuid from 'uuid';
 import { distributeNewShare, waitUntilTrue, Ctx } from '@usecapsule/core-sdk';
-import { setupWorker } from '../workers/workerWrapper';
+import { setupWorker } from '../workers/workerWrapper.js';
 import { BackupKitEmailProps } from '@usecapsule/user-management-client';
 
 async function isKeygenComplete(

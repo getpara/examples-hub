@@ -1,5 +1,5 @@
 import { IconType } from '@usecapsule/core-components';
-import { Theme } from '../../types/theme';
+import { Theme } from '../../types/theme.js';
 import { OAuthMethod } from '@usecapsule/web-sdk';
 
 // For icon compatibility with dark mode

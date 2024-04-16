@@ -1,1 +1,1 @@
-export * from './viemWalletClient';
+export * from './viemWalletClient.js';

@@ -20,7 +20,7 @@ import { Chain } from '@wagmi/chains';
 
 import { getViemChain, createCapsuleViemClient, createCapsuleAccount } from '@usecapsule/viem-v1-integration';
 import CapsuleWeb, { decimalToHex, hexToDecimal, CapsuleModalV2Props } from '@usecapsule/react-sdk';
-import { renderModal } from './connectorModal';
+import { renderModal } from './connectorModal.js';
 
 const STORAGE_CHAIN_ID_KEY = '@CAPSULE/chainId';
 const TEN_MINUTES_MS = 600000;

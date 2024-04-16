@@ -1,1 +1,1 @@
-export * from './ethersSigner';
+export * from './ethersSigner.js';

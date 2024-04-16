@@ -1,12 +1,12 @@
 import { CpslCodeInput } from '@usecapsule/react-components';
 import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { ModalStep } from '../../utils/steps';
+import { ModalStep } from '../../utils/steps.js';
 import {
   CodeChangeEventDetail,
   CpslCodeInputCustomEvent,
 } from '@usecapsule/core-components';
-import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores';
+import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
 import {
   ClickableText,
   Heading,
@@ -14,7 +14,7 @@ import {
   Text,
   SecondaryText,
   MainContainer,
-} from '../common';
+} from '../common.js';
 
 export const VerificationCodeStep = () => {
   const email = useUserInfoStore((state) => state.email);

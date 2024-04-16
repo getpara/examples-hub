@@ -10,13 +10,13 @@ import {
 } from '@usecapsule/core-components';
 import { useState } from 'react';
 import styled from 'styled-components';
-import { OAuth } from '../OAuth/OAuth';
+import { OAuth } from '../OAuth/OAuth.js';
 import { OAuthMethod } from '@usecapsule/web-sdk';
-import { ModalStep } from '../../utils/steps';
-import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores';
-import { useThemeStore } from '../../stores/theme/useThemeStore';
-import { CapsuleBlack, CapsuleWhite } from '../Icons';
-import { Theme } from '../../types/theme';
+import { ModalStep } from '../../utils/steps.js';
+import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
+import { useThemeStore } from '../../stores/theme/useThemeStore.js';
+import { CapsuleBlack, CapsuleWhite } from '../Icons.js';
+import { Theme } from '../../types/theme.js';
 
 interface SignUpStepProps {
   oAuthMethods?: OAuthMethod[];

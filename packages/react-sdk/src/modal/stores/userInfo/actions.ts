@@ -3,7 +3,7 @@ import {
   DEFAULT_USER_INFO_STATE,
   UserInfoActions,
   UserInfoStore,
-} from './useUserInfoStore';
+} from './useUserInfoStore.js';
 
 export const getActions = (
   set: StoreApi<UserInfoStore>['setState'],

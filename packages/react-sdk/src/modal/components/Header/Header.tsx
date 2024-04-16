@@ -1,10 +1,10 @@
 import { CpslButton, CpslIcon, CpslText } from '@usecapsule/react-components';
 import styled from 'styled-components';
-import { ModalStep } from '../../utils/steps';
-import { useModalStore } from '../../stores';
-import { useThemeStore } from '../../stores/theme/useThemeStore';
-import { Theme } from '../../types/theme';
-import { CapsuleBlack, CapsuleWhite } from '../Icons';
+import { ModalStep } from '../../utils/steps.js';
+import { useModalStore } from '../../stores/index.js';
+import { useThemeStore } from '../../stores/theme/useThemeStore.js';
+import { Theme } from '../../types/theme.js';
+import { CapsuleBlack, CapsuleWhite } from '../Icons.js';
 
 interface HeaderProps {
   onClose: () => void;

@@ -1,6 +1,6 @@
 import base64url from 'base64url'
 import forge from 'node-forge';
-import { Ctx, getPortalBaseURL } from '../definitions';
+import { Ctx, getPortalBaseURL } from '../definitions.js';
 
 interface EncryptedShare {
   walletId: string;

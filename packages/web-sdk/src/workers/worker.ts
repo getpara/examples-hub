@@ -3,7 +3,7 @@
 // run `yarn build` to rebuild the worker file
 
 import '../wasm/wasm_exec.js';
-import * as walletUtils from './walletUtils';
+import * as walletUtils from './walletUtils.js';
 import {
   Ctx,
   Environment,

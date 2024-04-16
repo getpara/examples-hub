@@ -1,6 +1,6 @@
 import { StoreApi } from 'zustand';
-import { ThemeActions, ThemeStore } from './useThemeStore';
-import { Theme } from '../../types/theme';
+import { ThemeActions, ThemeStore } from './useThemeStore.js';
+import { Theme } from '../../types/theme.js';
 
 export const getActions = (
   set: StoreApi<ThemeStore>['setState'],

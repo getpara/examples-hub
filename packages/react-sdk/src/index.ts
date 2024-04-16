@@ -1,4 +1,4 @@
-export * from './modal';
+export * from './modal/index.js';
 
 export * from '@usecapsule/web-sdk';
 

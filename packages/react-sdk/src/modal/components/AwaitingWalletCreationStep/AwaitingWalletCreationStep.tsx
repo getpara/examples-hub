@@ -12,7 +12,7 @@ import {
   InfoBoxHeader,
   InfoBoxHeading,
   InfoBoxText,
-} from '../common';
+} from '../common.js';
 import { useEffect, useRef, useState } from 'react';
 
 export const AwaitingWalletCreationStep = () => {

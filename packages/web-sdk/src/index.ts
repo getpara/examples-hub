@@ -1,11 +1,8 @@
-import { Buffer as NodeBuffer } from 'buffer';
-global.Buffer = global.Buffer || NodeBuffer;
-
 export * from '@usecapsule/core-sdk';
-import { Capsule as CapsuleWeb } from './CapsuleWeb';
+import { Capsule as CapsuleWeb } from './CapsuleWeb.js';
 import CoreCapsule from '@usecapsule/core-sdk';
 export type { StorageUtils } from '@usecapsule/core-sdk';
-export { createCredential, generateSignature, parseCredentialCreationRes } from './cryptography/webAuth';
+export { createCredential, generateSignature, parseCredentialCreationRes } from './cryptography/webAuth.js';
 
 export {
   CapsuleWeb,

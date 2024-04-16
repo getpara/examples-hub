@@ -1,11 +1,11 @@
 import { StoreApi } from 'zustand';
-import { DEFAULT_MODAL_STATE, ModalActions, ModalStore } from './useModalStore';
+import { DEFAULT_MODAL_STATE, ModalActions, ModalStore } from './useModalStore.js';
 import {
   LoginModalStepNumber,
   LoginPreviousStep,
   SignUpModalStepNumber,
   SignUpPreviousStep,
-} from '../../utils/steps';
+} from '../../utils/steps.js';
 
 export const getActions = (
   set: StoreApi<ModalStore>['setState'],

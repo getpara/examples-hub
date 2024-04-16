@@ -1,16 +1,16 @@
-export * from './definitions';
-export type { Ctx } from './definitions';
-export * from './types';
-export { distributeNewShare } from './shares/shareDistribution';
-export { KeyContainer } from './shares/KeyContainer';
-import { CoreCapsule, PREFIX as STORAGE_PREFIX } from './CoreCapsule';
-export { RecoveryStatus } from './CoreCapsule';
-export type { Wallet, ConstructorOpts } from './CoreCapsule';
-export type { PlatformUtils } from './PlatformUtils';
-export type { StorageUtils } from './StorageUtils';
-export { initClient } from './external/capsuleClient';
-export * as mpcComputationClient from './external/mpcComputationClient';
-export { getBaseUrl } from './external/capsuleClient';
+export * from './definitions.js';
+export type { Ctx } from './definitions.js';
+export * from './types/index.js';
+export { distributeNewShare } from './shares/shareDistribution.js';
+export { KeyContainer } from './shares/KeyContainer.js';
+import { CoreCapsule, PREFIX as STORAGE_PREFIX } from './CoreCapsule.js';
+export { RecoveryStatus } from './CoreCapsule.js';
+export type { Wallet, ConstructorOpts } from './CoreCapsule.js';
+export type { PlatformUtils } from './PlatformUtils.js';
+export type { StorageUtils } from './StorageUtils.js';
+export { initClient } from './external/capsuleClient.js';
+export * as mpcComputationClient from './external/mpcComputationClient.js';
+export { getBaseUrl } from './external/capsuleClient.js';
 export {
   decryptWithKeyPair,
   getAsymmetricKeyPair,
@@ -18,12 +18,12 @@ export {
   encryptWithDerivedPublicKey,
   getDerivedPrivateKeyAndDecrypt,
   getPublicKeyFromSignature,
-} from './cryptography/utils';
-export * from './external/capsuleClient';
-export * from './utils/pollingUtils';
-export * from './errors';
-export * from './utils/formattingUtils';
-export { retrieve as transmissionUtilsRetrieve } from './transmission/transmissionUtils';
+} from './cryptography/utils.js';
+export * from './external/capsuleClient.js';
+export * from './utils/pollingUtils.js';
+export * from './errors.js';
+export * from './utils/formattingUtils.js';
+export { retrieve as transmissionUtilsRetrieve } from './transmission/transmissionUtils.js';
 export {
   STORAGE_PREFIX,
 };

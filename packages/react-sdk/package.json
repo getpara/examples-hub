@@ -1,6 +1,7 @@
 {
   "name": "@usecapsule/react-sdk",
   "version": "2.3.1",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "sideEffects": [

@@ -1,5 +1,13 @@
 import { Buffer as NodeBuffer } from 'buffer';
-global.Buffer = global.Buffer || NodeBuffer;
+if (typeof global !== 'undefined') {
+  global.Buffer = global.Buffer || NodeBuffer;
+} else if (typeof window !== 'undefined') {
+  window.Buffer = window.Buffer || NodeBuffer;
+  window.global = window.global || window;
+} else {
+  self.Buffer = self.Buffer || NodeBuffer;
+  self.global = self.global || self;
+}
 
 import Client from '@usecapsule/user-management-client';
 import { AxiosInstance } from 'axios';

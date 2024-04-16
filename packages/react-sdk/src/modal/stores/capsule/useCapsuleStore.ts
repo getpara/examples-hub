@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { getActions } from './actions';
+import { getActions } from './actions.js';
 import CapsuleWeb from '@usecapsule/web-sdk';
 
 interface CapsuleState {

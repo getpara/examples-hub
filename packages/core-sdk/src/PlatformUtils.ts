@@ -1,7 +1,7 @@
 import { BackupKitEmailProps } from '@usecapsule/user-management-client';
-import { Ctx } from './definitions';
-import { SignatureRes } from './types/walletTypes';
-import { StorageUtils } from './StorageUtils';
+import { Ctx } from './definitions.js';
+import { SignatureRes } from './types/walletTypes.js';
+import { StorageUtils } from './StorageUtils.js';
 
 export interface PlatformUtils {
   keygen (

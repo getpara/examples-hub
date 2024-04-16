@@ -1,12 +1,12 @@
 import { CpslTileButton } from '@usecapsule/react-components';
 import { OAuthMethod } from '@usecapsule/web-sdk';
 import styled from 'styled-components';
-import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores';
-import { ModalStep } from '../../utils/steps';
-import { openPopup } from '../../utils/openPopup';
-import { oAuthLogos } from './config';
-import { useThemeStore } from '../../stores/theme/useThemeStore';
-import { Theme } from '../../types/theme';
+import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
+import { ModalStep } from '../../utils/steps.js';
+import { openPopup } from '../../utils/openPopup.js';
+import { oAuthLogos } from './config.js';
+import { useThemeStore } from '../../stores/theme/useThemeStore.js';
+import { Theme } from '../../types/theme.js';
 
 interface OAuthProps {
   methods: OAuthMethod[];

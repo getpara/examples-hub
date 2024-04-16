@@ -11,19 +11,19 @@ import {
   decryptWithKeyPair,
   getAsymmetricKeyPair,
   getPublicKeyHex,
-} from './cryptography/utils';
-import { Ctx, getPortalBaseURL } from './definitions';
-import { Environment, OAuthMethod } from './definitions';
-import { getBaseUrl, initClient } from './external/capsuleClient';
-import * as mpcComputationClient from './external/mpcComputationClient';
-import { distributeNewShare } from './shares/shareDistribution';
+} from './cryptography/utils.js';
+import { Ctx, getPortalBaseURL } from './definitions.js';
+import { Environment, OAuthMethod } from './definitions.js';
+import { getBaseUrl, initClient } from './external/capsuleClient.js';
+import * as mpcComputationClient from './external/mpcComputationClient.js';
+import { distributeNewShare } from './shares/shareDistribution.js';
 import {
   FullSignatureRes,
   SuccessfulSignatureRes,
   DeniedSignatureRes,
-} from './types/walletTypes';
-import * as transmissionUtils from './transmission/transmissionUtils';
-import { PlatformUtils } from './PlatformUtils';
+} from './types/walletTypes.js';
+import * as transmissionUtils from './transmission/transmissionUtils.js';
+import { PlatformUtils } from './PlatformUtils.js';
 
 // amount of time in ms that a web auth session lasts
 const BIOMETRIC_VERIFICATION_TIME_MS = 30 * 60 * 1000;

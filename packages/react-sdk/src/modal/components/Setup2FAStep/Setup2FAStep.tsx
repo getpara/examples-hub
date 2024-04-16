@@ -6,7 +6,7 @@ import {
   CpslSpinner,
 } from '@usecapsule/react-components';
 import { useEffect, useRef, useState } from 'react';
-import { useCapsuleStore, useModalStore } from '../../stores';
+import { useCapsuleStore, useModalStore } from '../../stores/index.js';
 import {
   Heading,
   SecondaryText,
@@ -14,14 +14,14 @@ import {
   QRContainer,
   ButtonWithIconContainer,
   FilledDisabledInput,
-} from '../common';
-import { ModalStep } from '../../utils/steps';
+} from '../common.js';
+import { ModalStep } from '../../utils/steps.js';
 import {
   CodeChangeEventDetail,
   CpslCodeInputCustomEvent,
 } from '@usecapsule/core-components';
 import styled from 'styled-components';
-import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
+import { useCopyToClipboard } from '../../hooks/useCopyToClipboard.js';
 
 interface Setup2FAStepProps {
   onClose: () => void;

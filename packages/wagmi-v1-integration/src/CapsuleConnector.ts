@@ -2,7 +2,7 @@ import { Chain, WindowProvider } from 'wagmi';
 import { InjectedConnector } from 'wagmi/connectors/injected';
 import { InjectedConnectorOptions } from '@wagmi/connectors/injected';
 
-import { CapsuleEIP1193Provider } from './CapsuleEIP1193Provider';
+import { CapsuleEIP1193Provider } from './CapsuleEIP1193Provider.js';
 import CapsuleWeb, { CapsuleModalV2Props } from '@usecapsule/react-sdk';
 
 interface CapsuleConnectorOpts extends Partial<CapsuleModalV2Props> {

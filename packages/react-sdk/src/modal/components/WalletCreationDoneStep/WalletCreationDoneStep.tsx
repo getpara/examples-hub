@@ -4,9 +4,9 @@ import {
   MainContainer,
   Hero,
   ButtonWithIconContainer,
-} from '../common';
-import { useCapsuleStore, useModalStore } from '../../stores';
-import { ModalStep } from '../../utils/steps';
+} from '../common.js';
+import { useCapsuleStore, useModalStore } from '../../stores/index.js';
+import { ModalStep } from '../../utils/steps.js';
 
 interface WalletCreationDoneStepProps {
   twoFactorAuthEnabled?: boolean;

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
-import { getActions } from './actions';
-import { Theme } from '../../types/theme';
-import { DEFAULTS } from '../../constants/defaults';
+import { getActions } from './actions.js';
+import { Theme } from '../../types/theme.js';
+import { DEFAULTS } from '../../constants/defaults.js';
 
 interface ThemeState {
   theme: Theme;

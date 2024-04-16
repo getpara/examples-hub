@@ -2,13 +2,13 @@ import { CpslModal } from '@usecapsule/react-components';
 
 import { useEffect, useRef, useState } from 'react';
 import { Wallet } from '@usecapsule/web-sdk';
-import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores';
-import { ModalStep } from '../../utils/steps';
-import { Header } from '../Header/Header';
-import { Body } from '../Body/Body';
-import { Footer } from '../Footer/Footer';
-import { CapsuleModalV2Props } from '../../types/modalProps';
-import { DEFAULTS } from '../../constants/defaults';
+import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
+import { ModalStep } from '../../utils/steps.js';
+import { Header } from '../Header/Header.js';
+import { Body } from '../Body/Body.js';
+import { Footer } from '../Footer/Footer.js';
+import { CapsuleModalV2Props } from '../../types/modalProps.js';
+import { DEFAULTS } from '../../constants/defaults.js';
 
 export const Modal = ({
   twoFactorAuthEnabled = false,

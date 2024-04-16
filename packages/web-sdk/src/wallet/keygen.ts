@@ -1,4 +1,4 @@
-import { setupWorker } from '../workers/workerWrapper';
+import { setupWorker } from '../workers/workerWrapper.js';
 
 import { Ctx, distributeNewShare, waitUntilTrue } from '@usecapsule/core-sdk';
 import { BackupKitEmailProps } from '@usecapsule/user-management-client';

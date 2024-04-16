@@ -1,20 +1,20 @@
 import styled from 'styled-components';
-import { ModalStep, NoIndicatorSteps } from '../../utils/steps';
-import { SignUpStep } from '../SignUpStep/SignUpStep';
+import { ModalStep, NoIndicatorSteps } from '../../utils/steps.js';
+import { SignUpStep } from '../SignUpStep/SignUpStep.js';
 import { CpslProgressIndicator } from '@usecapsule/react-components';
-import { VerificationCodeStep } from '../VerificationCodeStep/VerificationCodeStep';
-import { useModalStore } from '../../stores';
-import { BiometricLoginStep } from '../BiometricLoginStep/BiometricLoginStep';
-import { Setup2FAStep } from '../Setup2FAStep/Setup2FAStep';
-import { LoginDoneStep } from '../LoginDoneStep/LoginDoneStep';
+import { VerificationCodeStep } from '../VerificationCodeStep/VerificationCodeStep.js';
+import { useModalStore } from '../../stores/index.js';
+import { BiometricLoginStep } from '../BiometricLoginStep/BiometricLoginStep.js';
+import { Setup2FAStep } from '../Setup2FAStep/Setup2FAStep.js';
+import { LoginDoneStep } from '../LoginDoneStep/LoginDoneStep.js';
 import { OAuthMethod } from '@usecapsule/web-sdk';
-import { AwaitingBiometricsStep } from '../AwaitingBiometricsStep/AwaitingBiometricsStep';
-import { AwaitingWalletCreationStep } from '../AwaitingWalletCreationStep/AwaitingWalletCreationStep';
-import { WalletCreationDoneStep } from '../WalletCreationDoneStep/WalletCreationDoneStep';
-import { RecoverySecretStep } from '../RecoverySecretStep/RecoverySecretStep';
-import { TwoFactorDoneStep } from '../TwoFactorDoneStep/TwoFactorDoneStep';
-import { BiometricCreationStep } from '../BiometricCreationStep/BiometricCreationStep';
-import { AwaitingOAuthStep } from '../AwaitingOAuthStep/AwaitingOAuthStep';
+import { AwaitingBiometricsStep } from '../AwaitingBiometricsStep/AwaitingBiometricsStep.js';
+import { AwaitingWalletCreationStep } from '../AwaitingWalletCreationStep/AwaitingWalletCreationStep.js';
+import { WalletCreationDoneStep } from '../WalletCreationDoneStep/WalletCreationDoneStep.js';
+import { RecoverySecretStep } from '../RecoverySecretStep/RecoverySecretStep.js';
+import { TwoFactorDoneStep } from '../TwoFactorDoneStep/TwoFactorDoneStep.js';
+import { BiometricCreationStep } from '../BiometricCreationStep/BiometricCreationStep.js';
+import { AwaitingOAuthStep } from '../AwaitingOAuthStep/AwaitingOAuthStep.js';
 
 interface BodyProps {
   oAuthMethods?: OAuthMethod[];

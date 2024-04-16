@@ -4,7 +4,7 @@ import {
   CreationStepSubheading,
   MainContainer,
   SpinnerContainer,
-} from '../common';
+} from '../common.js';
 
 export const AwaitingOAuthStep = () => {
   return (

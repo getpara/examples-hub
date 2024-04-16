@@ -6,16 +6,16 @@ import {
   CpslSpinner,
 } from '@usecapsule/react-components';
 import { useEffect, useState } from 'react';
-import { useCapsuleStore, useModalStore } from '../../stores';
-import { ModalStep } from '../../utils/steps';
+import { useCapsuleStore, useModalStore } from '../../stores/index.js';
+import { ModalStep } from '../../utils/steps.js';
 import {
   Heading,
   SecondaryText,
   MainContainer,
   QRContainer,
   ButtonWithIconContainer,
-} from '../common';
-import { openPopup } from '../../utils/openPopup';
+} from '../common.js';
+import { openPopup } from '../../utils/openPopup.js';
 
 const SHORTENING_AVAILABLE = true;
 

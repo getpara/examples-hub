@@ -1,1 +1,1 @@
-export * from './walletTypes';
+export * from './walletTypes.js';

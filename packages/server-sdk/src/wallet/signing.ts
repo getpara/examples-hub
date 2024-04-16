@@ -1,6 +1,6 @@
 import * as uuid from 'uuid';
 import type { Ctx, SignatureRes } from '@usecapsule/core-sdk';
-import { setupWorker } from '../workers/workerWrapper';
+import { setupWorker } from '../workers/workerWrapper.js';
 
 export async function signTransaction(
   ctx: Ctx,

@@ -1,3 +1,3 @@
-export * from './modal/useModalStore';
-export * from './capsule/useCapsuleStore';
-export * from './userInfo/useUserInfoStore';
+export * from './modal/useModalStore.js';
+export * from './capsule/useCapsuleStore.js';
+export * from './userInfo/useUserInfoStore.js';

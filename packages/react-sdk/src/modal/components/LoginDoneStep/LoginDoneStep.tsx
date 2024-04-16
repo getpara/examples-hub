@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Heading, HeroNoSpacing } from '../common';
+import { Heading, HeroNoSpacing } from '../common.js';
 
 interface LoginDoneStep {
   onClose: () => void;
