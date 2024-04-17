@@ -2,15 +2,21 @@ import { Flex, CircularProgress, Text } from '@chakra-ui/react'
 import { useContext, useEffect, useState } from 'react';
 import StepContext from '../../contexts/StepContext';
 import { ModalStep } from '../../steps/attemptSteps';
+import TwoFactorContext from '../../contexts/TwoFactorContext';
 
 const RecoveryAwaitingInitiationStep: React.FC = () => {
 
     const [percentDone, setPercentDone] = useState(0);
     const { setCurrentStep } = useContext(StepContext);
+    const { is2FAFlow } = useContext(TwoFactorContext);
 
     useEffect(() => {
         if (percentDone >= 100) {
-            setCurrentStep(ModalStep.RECOVERY_INITIATED);
+            if (is2FAFlow) {
+                setCurrentStep(ModalStep.RECOVERY_READY);
+            } else {
+                setCurrentStep(ModalStep.RECOVERY_INITIATED);
+            }
             return;
         }
 

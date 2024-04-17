@@ -8,6 +8,7 @@ import { ModalStep } from '../../steps/attemptSteps';
 import WalletContext from '../../contexts/WalletContext';
 import capsule from '../../../capsule';
 import CapsuleSmall from '../../../assets/capsuleSmall';
+import TwoFactorContext from '../../contexts/TwoFactorContext';
 
 const RecoveryButton: React.FC = () => {
     const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -15,6 +16,7 @@ const RecoveryButton: React.FC = () => {
     const { setEmail } = useContext(EmailContext);
     const { setCurrentStep } = useContext(StepContext);
     const { setStatus, setInitiatedAt } = useContext(RecoveryAttemptContext);
+    const { setIs2FAFlow } = useContext(TwoFactorContext);
     return (
         <Button
             width={'180px'}
@@ -27,6 +29,7 @@ const RecoveryButton: React.FC = () => {
                     setAddress(null);
                     setStatus(null);
                     setInitiatedAt(null);
+                    setIs2FAFlow(true);
                     setCurrentStep(ModalStep.EMAIL_COLLECTION);
                     await capsule.logout();
                 } else {

@@ -4,6 +4,7 @@ import { Environment, RecoveryStatus } from '@usecapsule/react-sdk';
 import RecoverWalletButton from './RecoverWalletButton';
 import { RecoveryAttemptContext } from '../../contexts/RecoveryAttemptContext';
 import { ENV } from '../../../definitions';
+import TwoFactorContext from '../../contexts/TwoFactorContext';
 
 const RECOVERY_INITIATED_MINUTES = 48 * 60;
 const RECOVERY_INITIATED_MINUTES_NOT_PROD = 10;
@@ -55,6 +56,9 @@ const getTimeRemaining = (status: RecoveryStatus, initiatedAt: Date): TimeRemain
 };
 
 const RecoveryMessage = ({ status }) => {
+
+  const { is2FAFlow } = useContext(TwoFactorContext);
+
   switch (status as RecoveryStatus) {
     case RecoveryStatus.INITIATED:
       return (
@@ -71,7 +75,7 @@ const RecoveryMessage = ({ status }) => {
           <HStack>
             <ul className="indent">
               <li>Confirm Email</li>
-              <li>Enter a 2FA Code...</li>
+              {is2FAFlow && <li>Enter a 2FA Code...</li>}
             </ul>
             <Spacer />
             <RecoverWalletButton />

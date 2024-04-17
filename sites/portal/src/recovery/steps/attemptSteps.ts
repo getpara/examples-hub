@@ -4,6 +4,7 @@ export enum ModalStep {
     VERIFY_2FA = '2FA',
     RECOVERY_AWAITING = 'RECOVERY_AWAITING',
     RECOVERY_INITIATED = 'RECOVERY_INITIATED',
+    RECOVERY_READY = 'RECOVERY_READY',
     LOST_2FA = 'LOST_2FA',
 }
 
@@ -13,5 +14,6 @@ export const ModalStepNumber: { [key in ModalStep]: number } = {
     [ModalStep.VERIFY_2FA]: 3,
     [ModalStep.RECOVERY_AWAITING]: 4,
     [ModalStep.RECOVERY_INITIATED]: 4,
+    [ModalStep.RECOVERY_READY]: 4,
     [ModalStep.LOST_2FA]: 4,
 };

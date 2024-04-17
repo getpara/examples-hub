@@ -8,6 +8,7 @@ import WalletContext from '../../contexts/WalletContext';
 import capsule from '../../../capsule';
 import VerifyCode from '../../../assets/verifyCode';
 import Console from '../../../assets/console';
+import TwoFactorContext from '../../contexts/TwoFactorContext';
 
 const RecoveryWallet2FAStep: React.FC = () => {
 
@@ -17,6 +18,11 @@ const RecoveryWallet2FAStep: React.FC = () => {
     const { email } = useContext(EmailContext);
     const { setId: setWalletId } = useContext(WalletContext);
     const { setId: setUserId } = useContext(UserContext);
+    const { is2FAFlow } = useContext(TwoFactorContext);
+
+    if (!is2FAFlow) {
+        setCurrentRecoveryStep(ModalStep.SECRET);
+    }
 
     return (
         <VStack flex={1}>

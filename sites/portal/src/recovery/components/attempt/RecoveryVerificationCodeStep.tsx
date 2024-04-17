@@ -8,6 +8,8 @@ import { ModalStep } from '../../steps/attemptSteps';
 import WalletContext from '../../contexts/WalletContext';
 import VerifyCode from '../../../assets/verifyCode';
 import Console from '../../../assets/console';
+import UserContext from '../../contexts/UserContext';
+import TwoFactorContext from '../../contexts/TwoFactorContext';
 
 type RecoveryVerificationCodeStepProps = {
     onClose: () => void,
@@ -18,7 +20,9 @@ const RecoveryVerificationCodeStep: React.FC<RecoveryVerificationCodeStepProps> 
     const { setCurrentStep } = useContext(StepContext);
     const { email } = useContext(EmailContext);
     const { setAddress } = useContext(WalletContext);
+    const { setId: setUserId } = useContext(UserContext);
     const { setStatus, setInitiatedAt } = useContext(RecoveryAttemptContext);
+    const { setIs2FAFlow } = useContext(TwoFactorContext);
 
     const [verificationCode, setVerificationCode] = useState('');
     const [incorrectCode, setIncorrectCode] = useState(false);
@@ -84,11 +88,21 @@ const RecoveryVerificationCodeStep: React.FC<RecoveryVerificationCodeStepProps> 
                             const status = res.data.status;
                             const initiatedAt = res.data.initiatedAt as Date;
                             const address = res.data.address;
+                            const skip2FA = res.data.skip2FA;
+                            const userId = res.data.userId;
+                            setUserId(userId);
+                            await capsule.setUserId(userId);
                             if (status != null) {
                                 setAddress(address);
                                 setStatus(status);
                                 setInitiatedAt(initiatedAt);
-                                onClose();
+                                if (skip2FA) {
+                                    setIs2FAFlow(false);
+                                    setIncorrectCode(false);
+                                    setCurrentStep(ModalStep.RECOVERY_AWAITING);
+                                } else {
+                                    onClose();
+                                }
                             } else {
                                 setIncorrectCode(false);
                                 setCurrentStep(ModalStep.VERIFY_2FA);

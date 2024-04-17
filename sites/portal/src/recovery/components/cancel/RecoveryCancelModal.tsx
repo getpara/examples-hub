@@ -12,6 +12,7 @@ import { Footer } from '../Footer/Footer';
 import CapsuleSmall from '../../../assets/capsuleSmall';
 import Console from '../../../assets/console';
 import Exit from '../../../assets/exit';
+import TwoFactorContext from '../../contexts/TwoFactorContext';
 
 type RecoveryCancelModalProps = {
     isOpen: boolean,
@@ -25,6 +26,7 @@ const RecoveryCancelModal: React.FC<RecoveryCancelModalProps> = ({ isOpen, onClo
     const { setCurrentRecoveryStep } = useContext(RecoveryStepContext);
     const { setAddress } = useContext(WalletContext);
     const { setStatus, setInitiatedAt } = useContext(RecoveryAttemptContext);
+    const { setIs2FAFlow } = useContext(TwoFactorContext);
 
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
@@ -94,6 +96,7 @@ const RecoveryCancelModal: React.FC<RecoveryCancelModalProps> = ({ isOpen, onClo
                                 setEmail(null);
                                 setStatus(null);
                                 setInitiatedAt(null);
+                                setIs2FAFlow(true);
                                 onClose();
                             }}
                             backgroundColor="red.600"

@@ -10,6 +10,7 @@ import RecoveryAwaitingInitiationStep from './RecoveryAwaitingInitiationStep'
 import RecoveryInitiatedDoneStep from './RecoveryInitiatedDoneStep'
 import RecoveryVerificationCodeStep from './RecoveryVerificationCodeStep'
 import { Footer } from '../Footer/Footer'
+import RecoveryReadyDoneStep from './RecoveryReadyDoneStep'
 
 type RecoveryModalProps = {
     isOpen: boolean,
@@ -41,6 +42,7 @@ const RecoveryModal: React.FC<RecoveryModalProps> = ({ isOpen, onClose }) => {
                         {currentStep === ModalStep.VERIFY_2FA && <Recovery2FAStep />}
                         {currentStep === ModalStep.RECOVERY_AWAITING && <RecoveryAwaitingInitiationStep />}
                         {currentStep === ModalStep.RECOVERY_INITIATED && <RecoveryInitiatedDoneStep onClose={onClose} />}
+                        {currentStep === ModalStep.RECOVERY_READY && <RecoveryReadyDoneStep onClose={onClose} />}
                         {currentStep === ModalStep.LOST_2FA && <RecoveryLost2FA onClose={onClose} />}
                     </VStack>
                     <Footer />
