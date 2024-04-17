@@ -93,8 +93,8 @@ const RecoverWalletWithSecretStep: React.FC<RecoverWalletWithSecretStepProps> = 
                         setIncorrectCode(false);
                         await capsule.setEmail(email);
                         await capsule.setUserId(userId);
-                        const link = await capsule.getSetUpBiometricsURL(false);
-                        setWebAuthURLForCreate(link);
+                        const {webAuthCreateUrl} = await capsule.getSetUpBiometricsURL(false);
+                        setWebAuthURLForCreate(webAuthCreateUrl);
                         setCurrentRecoveryStep(ModalStep.BIOMETRIC);
                     } catch (error) {
                         setIncorrectCode(true);

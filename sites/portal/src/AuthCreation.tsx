@@ -12,9 +12,10 @@ import {
 import {
   createCredential,
   parseCredentialCreationRes,
-  decryptWithKeyPair,
+  decryptWithPrivateKey,
   encryptWithDerivedPublicKey,
   getPublicKeyFromSignature,
+  getPublicKeyHex,
 } from '@usecapsule/react-sdk';
 import capsule from './capsule';
 import PermissionSelection from './PermissionSelection';
@@ -50,7 +51,7 @@ export async function authCreation(
   biometricId: string,
   isForNewDevice: boolean,
 ): Promise<void> {
-  const { creds, userHandle, algorithm } = await createCredential(
+  const { creds, keyPair, algorithm } = await createCredential(
     ENV,
     userId,
     email,
@@ -60,7 +61,7 @@ export async function authCreation(
     algorithm,
   );
   // @ts-ignore
-  const publicKeyHex = await getPublicKeyFromSignature(capsule.ctx, userHandle);
+  const publicKeyHex = getPublicKeyHex(keyPair);
   // @ts-ignore
   await capsule.ctx.capsuleClient.patchSessionPublicKey(userId, biometricId, {
     publicKey: creds.id,
@@ -78,8 +79,8 @@ export async function authCreation(
     const temporaryShares = (await capsule.getTransmissionKeyShares(true)).data
       .temporaryShares;
     const biometricEncryptedKeyshares = temporaryShares.map((share) => {
-      const decryptedShare = decryptWithKeyPair(
-        capsule.loginEncryptionKeyPair,
+      const decryptedShare = decryptWithPrivateKey(
+        capsule.loginEncryptionKeyPair.privateKey,
         share.encryptedShare,
         share.encryptedKey,
       );

@@ -8,7 +8,7 @@ import {
 import { pki, jsbn } from 'node-forge';
 
 import {
-  decryptWithKeyPair,
+  decryptWithPrivateKey,
   getAsymmetricKeyPair,
   getPublicKeyHex,
 } from './cryptography/utils.js';
@@ -577,7 +577,17 @@ export abstract class CoreCapsule {
    */
   async verifyEmail(verificationCode: string): Promise<string> {
     await this.ctx.capsuleClient.verifyEmail(this.userId, { verificationCode });
-    return this.getSetUpBiometricsURL(false);
+    return (await this.getSetUpBiometricsURL(false)).webAuthCreateUrl;
+  }
+
+  /**
+   * Passes the email code obtained from the user for verification.
+   * @param verificationCode
+   * @returns - biometrics id for creating a new credential
+   */
+  async verifyEmailBiometricsId(verificationCode: string): Promise<string> {
+    await this.ctx.capsuleClient.verifyEmail(this.userId, { verificationCode });
+    return (await this.getSetUpBiometricsURL(false)).biometricsId;
   }
 
   /**
@@ -648,13 +658,16 @@ export abstract class CoreCapsule {
   }
 
   // returns web auth url for creating a new credential
-  async getSetUpBiometricsURL(isForNewDevice: boolean): Promise<string> {
+  async getSetUpBiometricsURL(isForNewDevice: boolean): Promise<{webAuthCreateUrl: string, biometricsId: string}> {
     const res = await this.ctx.capsuleClient.addSessionPublicKey(this.userId, {
       status: PublicKeyStatus.PENDING,
       type: PublicKeyType.WEB,
     });
 
-    return this.getWebAuthURLForCreate(res.data.id, res.data.partnerId, isForNewDevice);
+    return {
+      webAuthCreateUrl: await this.getWebAuthURLForCreate(res.data.id, res.data.partnerId, isForNewDevice),
+      biometricsId: res.data.id,
+    }
   }
 
   // TODO: consider changing this to just hit a new endpoint that returns
@@ -867,8 +880,8 @@ export abstract class CoreCapsule {
     temporaryShares.forEach((share) => {
       this.wallets[share.walletId] = {
         id: share.walletId,
-        signer: decryptWithKeyPair(
-          this.loginEncryptionKeyPair,
+        signer: decryptWithPrivateKey(
+          this.loginEncryptionKeyPair.privateKey,
           share.encryptedShare,
           share.encryptedKey,
         ),

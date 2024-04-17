@@ -12,7 +12,7 @@ export { initClient } from './external/capsuleClient.js';
 export * as mpcComputationClient from './external/mpcComputationClient.js';
 export { getBaseUrl } from './external/capsuleClient.js';
 export {
-  decryptWithKeyPair,
+  decryptWithPrivateKey,
   getAsymmetricKeyPair,
   getPublicKeyHex,
   encryptWithDerivedPublicKey,
