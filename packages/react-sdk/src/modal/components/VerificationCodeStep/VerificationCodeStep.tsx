@@ -69,8 +69,8 @@ export const VerificationCodeStep = () => {
   const handleSubmitCode = async () => {
     if (code.length === 6 && /^\d+$/.test(code)) {
       try {
-        const webAuthCreateUrl = await capsule.verifyEmail(code);
-        setWebAuthURLForCreate(webAuthCreateUrl);
+        const url = await capsule.verifyEmail(code);
+        setWebAuthURLForCreate(url);
         setStep(ModalStep.BIOMETRIC_CREATION);
       } catch (e) {
         if (e.message.includes('429')) {

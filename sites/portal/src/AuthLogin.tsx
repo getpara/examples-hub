@@ -244,9 +244,9 @@ function AuthLogin() {
           .data.temporaryShares;
 
         if (temporaryShares.length === fetchedWallets.length) {
-          const {webAuthCreateUrl} = await capsule.getSetUpBiometricsURL(true);
+          const authCreationURL = await capsule.getSetUpBiometricsURL(true);
           setAddDeviceFlowStep(null);
-          window.location.href = webAuthCreateUrl;
+          window.location.href = authCreationURL;
           return;
         }
 

@@ -36,13 +36,13 @@ async function createUserAndWallet(params: Params) {
     await capsule.createWalletPreGen(email);
   } else {
     await capsule.createUser(email || `server-test${uuid.v4()}@test.usecapsule.com`);
-    const webAuthCreateUrl = await capsule.verifyEmail('123456');
+    const webAuthURL = await capsule.verifyEmail('123456');
     // the steps between the `~~~~~~~` will happen in the portal and don't need to be manually performed
     // ~~~~~~~
     // @ts-ignore
     const userId = capsule.userId;
     const biometricIdRegex = /\/biometrics\/(.*?)\?email/;
-    const biometricId = webAuthCreateUrl.match(biometricIdRegex)[1];
+    const biometricId = webAuthURL.match(biometricIdRegex)[1];
     await capsule.ctx.capsuleClient.patchSessionPublicKey(userId, biometricId, {
       publicKey: SAMPLE_PUBLIC_KEY,
       sigDerivedPublicKey: SAMPLE_SIG_DERIVED_PUBLIC_KEY,

@@ -15,8 +15,6 @@ import { parseCredentialCreationRes } from '@usecapsule/web-sdk/dist/cryptograph
 import { getPublicKeyFromSignature, getDerivedPrivateKeyAndDecrypt } from '@usecapsule/core-sdk';
 import { PublicKeyStatus } from '@usecapsule/user-management-client';
 import { Wallet } from '@usecapsule/core-sdk';
-import forge from 'node-forge';
-import { getAsymmetricKeyPair } from '@usecapsule/web-sdk';
 
 
 const div = document.createElement('div');
@@ -100,16 +98,6 @@ async function invokeCapsuleMethod(methodName: string, args: any[]) {
       const desiredWallet = await login(capsule, args);
       window['flutter_inappwebview'].callHandler('asyncResult', desiredWallet);
       break;
-    case 'generateKeyPair':
-      const keyPair = await getAsymmetricKeyPair(capsule.ctx);
-      const pemPrivate = forge.pki.privateKeyToPem(keyPair.privateKey);
-      const pemPrivateHex = Buffer.from(pemPrivate, 'utf-8').toString('hex');
-
-      const pemPublic  = forge.pki.publicKeyToPem(keyPair.publicKey);
-      const pemPublicHex = Buffer.from(pemPublic, 'utf-8').toString('hex');
-
-      window['flutter_inappwebview'].callHandler('asyncResult', [pemPrivateHex, pemPublicHex]);
-      break;
     default:
       const result = capsule[methodName](...args);
       const resolvedResult = result instanceof Promise ? await result : result;
@@ -150,7 +138,7 @@ async function generatePasskey(capsule: CapsuleWeb, args: any[]) {
   const attestationObject = args[0];
   const clientDataJson = args[1];
   const credentialsId = args[2];
-  const publicKeyHex = args[3]
+  const userHandle = args[3] as Uint8Array;
   const biometricsId = args[4];
 
   const credentials = {
@@ -161,6 +149,7 @@ async function generatePasskey(capsule: CapsuleWeb, args: any[]) {
   }
 
   const { cosePublicKey, clientDataJSON} = parseCredentialCreationRes(credentials, -7);
+  const publicKeyHex = await getPublicKeyFromSignature(capsule.ctx, userHandle);
 
   await capsule.ctx.capsuleClient.patchSessionPublicKey(capsule.getUserId(), biometricsId, {
     publicKey: credentialsId,
@@ -195,33 +184,31 @@ async function login(capsule: CapsuleWeb, args: any[]) {
   const userId = args[0];
   const signatureId = args[1];
   const userHandle = args[2];
-
+  
   await capsule.setUserId(userId);
 
-  const encryptedSharesResult = await capsule.ctx.capsuleClient.getBiometricKeyshares(userId, signatureId);
-  try {
+  const encryptedSharesRes = await capsule.ctx.capsuleClient.getBiometricKeyshares(userId, signatureId);
+  const decryptedShares = await getDerivedPrivateKeyAndDecrypt(
+    capsule.ctx,
+    userHandle,
+    encryptedSharesRes.data.keyShares,
+  );
 
-    const decryptedShares = await getDerivedPrivateKeyAndDecrypt(capsule.ctx, userHandle, encryptedSharesResult.data.keyShares);
-    const walletsRes = await capsule.ctx.capsuleClient.getWallets(userId);
-    const desiredWallet = walletsRes.data.wallets[0];
-  
-    const walletsToInsert: { [id: string] : Wallet; } = {};
-    walletsToInsert[decryptedShares[0].walletId] = {
-      id: decryptedShares[0].walletId,
-      signer: decryptedShares[0].signer,
-      address: desiredWallet.address,
-      publicKey: desiredWallet.publicKey,
-      scheme: desiredWallet.scheme,
-    };
-  
-    await capsule.setWallets(walletsToInsert);
-  
-    return desiredWallet;
-  } catch (e) {
-    console.log('error');
-    console.log(e)
-    window['flutter_inappwebview'].callHandler('asyncResult', e);
-  }
+  const walletsRes = await capsule.ctx.capsuleClient.getWallets(userId);
+  const desiredWallet = walletsRes.data.wallets[0];
+
+  var walletsToInsert: { [id: string] : Wallet; } = {};
+  walletsToInsert[decryptedShares[0].walletId] = {
+    id: decryptedShares[0].walletId,
+    signer: decryptedShares[0].signer,
+    address: desiredWallet.address,
+    publicKey: desiredWallet.publicKey,
+    scheme: desiredWallet.scheme,
+  };
+
+  await capsule.setWallets(walletsToInsert);
+
+  return desiredWallet;
 }
 
 window['open'] = function(url?: string | URL, target?: string, features?: string) {

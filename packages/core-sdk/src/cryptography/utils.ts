@@ -30,8 +30,7 @@ function publicKeyHexToPem(publicKeyHex: string): string {
 
 export async function getAsymmetricKeyPair(
   ctx: Ctx,
-  seedValue?: string,
-  keypairCallback: boolean = true,
+  seedValue?: string
 ): Promise<forge.pki.rsa.KeyPair> {
   const prng = forge.random.createInstance();
   if (seedValue) {
@@ -57,18 +56,17 @@ export async function getAsymmetricKeyPair(
     options.workerScript = URL.createObjectURL(workerBlob);
   }
 
-  const keyPair = keypairCallback ? await new Promise<forge.pki.rsa.KeyPair>((resolve, reject) => {
-    rsa.generateKeyPair(options, (err, keyPair) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(keyPair);
+  return new Promise((resolve, reject) =>
+    rsa.generateKeyPair(
+      options,
+      (err, keypair) => {
+        if (err) {
+          reject(err)
+        }
+        resolve(keypair)
       }
-    });
-  }
-  ) : rsa.generateKeyPair(options);
-
-  return keyPair;
+    )
+  );
 }
 
 export async function getPublicKeyFromSignature(
@@ -98,13 +96,13 @@ export function symmetricKeyEncryptMessage(message: string): {
   return { key, encryptedMessageHex };
 }
 
-export function decryptWithPrivateKey(
-  privateKey: forge.pki.rsa.PrivateKey,
+export function decryptWithKeyPair(
+  keyPair: forge.pki.rsa.KeyPair,
   encryptedMessageHex: string,
   encryptedKeyHex: string
 ): string {
   const encryptedKey = Buffer.from(encryptedKeyHex, 'hex').toString('utf-8');
-  const key = privateKey.decrypt(encryptedKey, RSA_ENCRYPTION_SCHEME);
+  const key = keyPair.privateKey.decrypt(encryptedKey, RSA_ENCRYPTION_SCHEME);
 
   const decipher = forge.cipher.createDecipher('AES-CBC', key);
   // iv can be constant only because every key is only ever used to encrypt one message
@@ -117,19 +115,8 @@ export function decryptWithPrivateKey(
 }
 
 async function decryptWithDerivedPrivateKey(ctx: Ctx, seedValue: string, encryptedMessageHex: string, encryptedKeyHex: string): Promise<string> {
-  try {
-    const keyPair = await getAsymmetricKeyPair(ctx, seedValue);
-    return decryptWithPrivateKey(keyPair.privateKey, encryptedMessageHex, encryptedKeyHex);
-  } catch {}
-
-  try {
-    const keyPair = await getAsymmetricKeyPair(ctx, seedValue, false);
-    return decryptWithPrivateKey(keyPair.privateKey, encryptedMessageHex, encryptedKeyHex);
-  } catch {}
-
-  const privateKeyPem = Buffer.from(seedValue, 'hex').toString('utf-8');
-  const privateKey = forge.pki.privateKeyFromPem(privateKeyPem);
-  return decryptWithPrivateKey(privateKey, encryptedMessageHex, encryptedKeyHex);
+  const keyPair = await getAsymmetricKeyPair(ctx, seedValue);
+  return decryptWithKeyPair(keyPair, encryptedMessageHex, encryptedKeyHex);
 }
 
 export async function getDerivedPrivateKeyAndDecrypt(
@@ -137,17 +124,17 @@ export async function getDerivedPrivateKeyAndDecrypt(
   seedValue: string,
   encryptedShares: EncryptedShare[]
 ): Promise<{ walletId: string; signer: string }[]> {
-  const walletIdSignerPairs = [];
-  for (const share of encryptedShares) {
-    const signer = await decryptWithDerivedPrivateKey(
-      ctx,
-      seedValue,
-      share.encryptedShare,
-      share.encryptedKey
-    );
-    walletIdSignerPairs.push({ walletId: share.walletId, signer: signer });
-  }
-  return walletIdSignerPairs;
+  return Promise.all(
+    encryptedShares.map(async (share) => ({
+      walletId: share.walletId,
+      signer: await decryptWithDerivedPrivateKey(
+        ctx,
+        seedValue,
+        share.encryptedShare,
+        share.encryptedKey
+      ),
+    }))
+  );
 }
 
 export function encryptWithDerivedPublicKey(

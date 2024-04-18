@@ -14,31 +14,5 @@
           "2D:74:05:58:57:E5:B7:29:CC:52:64:E8:12:96:3C:C6:C6:F1:B1:85:54:C0:EA:1C:16:8A:D6:5D:AF:0E:A6:7E"]
         ]
       }
-    },
-    {
-      "relation" : [
-        "delegate_permission/common.handle_all_urls",
-        "delegate_permission/common.get_login_creds"
-      ],
-      "target" : {
-        "namespace" : "android_app",
-        "package_name" : "com.capsule.flutterExample",
-        "sha256_cert_fingerprints" : [
-          ["80:9A:F8:D6:C9:11:C6:C3:B8:D9:00:8D:C8:64:F9:2B:CA:1F:3E:75:8E:94:E8:78:F9:63:3A:EE:20:71:20:BD"]
-        ]
-      }
-    },
-    {
-      "relation" : [
-        "delegate_permission/common.handle_all_urls",
-        "delegate_permission/common.get_login_creds"
-      ],
-      "target" : {
-        "namespace" : "android_app",
-        "package_name" : "com.example.flutter_passkey_testing",
-        "sha256_cert_fingerprints" : [
-          ["F8:90:4E:9A:99:01:71:75:25:38:D5:36:16:2D:B3:65:EB:41:51:D4:53:9A:72:BC:4B:56:C5:16:43:62:E2:C0"]
-        ]
-      }
     }
   ]

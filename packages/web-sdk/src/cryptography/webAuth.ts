@@ -2,7 +2,7 @@ import base64url from 'base64url';
 import * as cbor from 'cbor-web';
 import forge from 'node-forge';
 
-import { Environment, getAsymmetricKeyPair, getPortalDomain } from '@usecapsule/core-sdk';
+import { Environment, getPortalDomain } from '@usecapsule/core-sdk';
 
 const ES256_ALGORITHM = -7;
 const RS256_ALGORITHM = -257;
@@ -126,14 +126,10 @@ function generateUserHandle() {
 
 export async function createCredential(env: Environment, userId: string, email: string): Promise<{
   creds: any,
-  keyPair: forge.pki.rsa.KeyPair,
+  userHandle: Uint8Array,
   algorithm: number,
 }> {
-  const keyPair = await getAsymmetricKeyPair(this.ctx);
-  const pemPrivate = forge.pki.privateKeyToPem(keyPair.privateKey);
-  const pemHex = Buffer.from(pemPrivate, 'utf-8').toString('hex');
-  const pemHexBuffer = new TextEncoder().encode(pemHex);
-
+  const userHandle = generateUserHandle()
   const createCredentialDefaultArgs = {
     publicKey: {
       authenticatorSelection: {
@@ -147,7 +143,7 @@ export async function createCredential(env: Environment, userId: string, email: 
         name: 'Capsule',
       },
       user: {
-        id: pemHexBuffer,
+        id: userHandle,
         name: email,
         displayName: email,
       },
@@ -170,7 +166,7 @@ export async function createCredential(env: Environment, userId: string, email: 
 
   return {
     creds: publicKeyCredentialToJSON(credential),
-    keyPair,
+    userHandle,
     algorithm,
   }
 }

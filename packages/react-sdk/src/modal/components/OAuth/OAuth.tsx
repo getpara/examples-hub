@@ -57,9 +57,9 @@ export const OAuth = ({ methods }: OAuthProps) => {
       setWebAuthURLForLogin(webAuthUrlForLogin);
       setStep(ModalStep.BIOMETRIC_LOGIN);
     } else {
-      const {webAuthCreateUrl} = await capsule.getSetUpBiometricsURL(false);
+      const webAuthURLForCreate = await capsule.getSetUpBiometricsURL(false);
       setFlow('signUp');
-      setWebAuthURLForCreate(webAuthCreateUrl);
+      setWebAuthURLForCreate(webAuthURLForCreate);
       setStep(ModalStep.BIOMETRIC_CREATION);
     }
   };
