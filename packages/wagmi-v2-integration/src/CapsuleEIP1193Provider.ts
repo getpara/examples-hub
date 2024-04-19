@@ -71,7 +71,6 @@ export class CapsuleEIP1193Provider
     super();
 
     this.storage = opts.storageOverride || sessionStorage;
-    const chainId = this.getStorageChainId() || opts.chainId;
 
     this.capsule = opts.capsule;
     this.modalProps = { ...opts };
@@ -81,7 +80,10 @@ export class CapsuleEIP1193Provider
       return acc;
     }, {});
     this.chains = this.wagmiChainsToAddEthereumChainParameters(opts.chains);
-    this.setCurrentChain(decimalToHex(chainId));
+
+    const defaultChainId = this.getStorageChainId() || opts.chainId;
+    const currentChainId = this.chains[decimalToHex(defaultChainId)] ? defaultChainId : `${opts.chains[0].id}`;
+    this.setCurrentChain(decimalToHex(currentChainId));
 
     this.emit('connect', { chainId: this.currentHexChainId });
   }
