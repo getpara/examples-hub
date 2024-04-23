@@ -1,12 +1,9 @@
 import { create } from 'zustand';
 import { getActions } from './actions.js';
-import { Theme } from '../../types/theme.js';
-import { DEFAULTS } from '../../constants/defaults.js';
 
 interface ThemeState {
-  theme: Theme;
+  isDark?: boolean;
   logo?: string;
-  logoDark?: string;
   appName?: string;
 }
 
@@ -18,9 +15,8 @@ export interface ThemeActions {
 export type ThemeStore = ThemeState & ThemeActions;
 
 const DEFAULT_THEME: ThemeState = {
-  theme: DEFAULTS.THEME,
+  isDark: false,
   logo: undefined,
-  logoDark: undefined,
   appName: undefined,
 };
 

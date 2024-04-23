@@ -24,6 +24,7 @@ import {
 } from './types/walletTypes.js';
 import * as transmissionUtils from './transmission/transmissionUtils.js';
 import { PlatformUtils } from './PlatformUtils.js';
+import { Theme } from './types/theme.js';
 
 // amount of time in ms that a web auth session lasts
 const BIOMETRIC_VERIFICATION_TIME_MS = 30 * 60 * 1000;
@@ -68,6 +69,7 @@ export interface ConstructorOpts {
   portalPrimaryButtonColor?: string; // please use hex color codes
   portalTextColor?: string; // please use hex color codes
   portalPrimaryButtonTextColor?: string; // please use hex color codes
+  portalTheme?: Theme;
   useDKLSForCreation?: boolean;
   disableWebSockets?: boolean;
   wasmOverride?: ArrayBuffer;
@@ -151,23 +153,33 @@ export abstract class CoreCapsule {
 
   /**
    * Hex color to use in the portal for the background color.
+   * @deprecated use portalTheme instead
    */
   portalBackgroundColor?: string;
 
   /**
    * Hex color to use in the portal for the primary button.
+   * @deprecated use portalTheme instead
    */
   portalPrimaryButtonColor?: string;
 
   /**
    * Hex text color to use in the portal.
+   * @deprecated use portalTheme instead
    */
   portalTextColor?: string;
 
   /**
    * Hex color to use in the portal for the primary button text.
+   * @deprecated use portalTheme instead
    */
   portalPrimaryButtonTextColor?: string;
+
+  /**
+   * Theme to use for the portal
+   */
+  portalTheme?: Theme;
+
   private disableProviderModal?: boolean;
 
   private platformUtils: PlatformUtils;
@@ -267,6 +279,7 @@ export abstract class CoreCapsule {
     this.portalPrimaryButtonColor = opts.portalPrimaryButtonColor;
     this.portalTextColor = opts.portalTextColor;
     this.portalPrimaryButtonTextColor = opts.portalPrimaryButtonTextColor;
+    this.portalTheme = opts.portalTheme;
 
     this.platformUtils = this.getPlatformUtils();
     this.disableProviderModal = this.platformUtils.disableProviderModal;
@@ -453,7 +466,9 @@ export abstract class CoreCapsule {
     isForNewDevice?: boolean,
   ): Promise<string> {
     const partnerIdQueryParam = partnerId ? `&partnerId=${partnerId}` : '';
-    const portalBackgroundColorQueryParam = this.portalBackgroundColor ? `&portalBackgroundColor=${encodeURIComponent(this.portalBackgroundColor)}` : '';
+    const portalBorderRadiusQueryParam = this.portalTheme?.borderRadius ? `&portalBorderRadius=${encodeURIComponent(this.portalTheme.borderRadius)}` : '';
+    const portalForegroundColorQueryParam = this.portalTheme?.foregroundColor ? `&portalForegroundColor=${encodeURIComponent(this.portalTheme.foregroundColor)}` : '';
+    const portalBackgroundColorQueryParam = this.portalBackgroundColor || this.portalTheme?.backgroundColor ? `&portalBackgroundColor=${encodeURIComponent(this.portalBackgroundColor ?? this.portalTheme.backgroundColor)}` : '';
     const portalPrimaryButtonColorQueryParam = this.portalPrimaryButtonColor ? `&portalPrimaryButtonColor=${encodeURIComponent(this.portalPrimaryButtonColor)}` : '';
     const portalTextColorQueryParam = this.portalTextColor ? `&portalTextColor=${encodeURIComponent(this.portalTextColor)}` : '';
     const portalPrimaryButtonTextColorQueryParam = this.portalPrimaryButtonTextColor ? `&portalPrimaryButtonTextColor=${encodeURIComponent(this.portalPrimaryButtonTextColor)}` : '';
@@ -463,7 +478,7 @@ export abstract class CoreCapsule {
       this.userId
     }/biometrics/${webAuthId}?email=${encodeURIComponent(
       this.email,
-    )}${partnerIdQueryParam}${portalBackgroundColorQueryParam}${portalPrimaryButtonColorQueryParam}${portalTextColorQueryParam}${isForNewDeviceQueryParam}${portalPrimaryButtonTextColorQueryParam}`;
+    )}${partnerIdQueryParam}${portalBorderRadiusQueryParam}${portalForegroundColorQueryParam}${portalBackgroundColorQueryParam}${portalPrimaryButtonColorQueryParam}${portalTextColorQueryParam}${isForNewDeviceQueryParam}${portalPrimaryButtonTextColorQueryParam}`;
   }
 
   private getShortUrl(compressedUrl: string): string {
@@ -493,7 +508,9 @@ export abstract class CoreCapsule {
     newDeviceEncryptionKey?: string,
   ): Promise<string> {
     const partnerIdQueryParam = partnerId ? `&partnerId=${partnerId}` : '';
-    const portalBackgroundColorQueryParam = this.portalBackgroundColor ? `&portalBackgroundColor=${encodeURIComponent(this.portalBackgroundColor)}` : '';
+    const portalBorderRadiusQueryParam = this.portalTheme?.borderRadius ? `&portalBorderRadius=${encodeURIComponent(this.portalTheme.borderRadius)}` : '';
+    const portalForegroundColorQueryParam = this.portalTheme?.foregroundColor ? `&portalForegroundColor=${encodeURIComponent(this.portalTheme.foregroundColor)}` : '';
+    const portalBackgroundColorQueryParam = this.portalBackgroundColor || this.portalTheme?.backgroundColor ? `&portalBackgroundColor=${encodeURIComponent(this.portalBackgroundColor ?? this.portalTheme.backgroundColor)}` : '';
     const portalPrimaryButtonColorQueryParam = this.portalPrimaryButtonColor ? `&portalPrimaryButtonColor=${encodeURIComponent(this.portalPrimaryButtonColor)}` : '';
     const portalTextColorQueryParam = this.portalTextColor ? `&portalTextColor=${encodeURIComponent(this.portalTextColor)}` : '';
     const portalPrimaryButtonTextColorQueryParam = this.portalPrimaryButtonTextColor ? `&portalPrimaryButtonTextColor=${encodeURIComponent(this.portalPrimaryButtonTextColor)}` : '';
@@ -504,7 +521,7 @@ export abstract class CoreCapsule {
       this.email,
     )}&sessionId=${sessionId}&encryptionKey=${loginEncryptionPublicKey}${partnerIdQueryParam}${portalBackgroundColorQueryParam}${portalPrimaryButtonColorQueryParam}${
       portalTextColorQueryParam
-    }${newDeviceSessionIdQueryParam}${newDeviceEncryptionKeyQueryParam}${portalPrimaryButtonTextColorQueryParam}`;
+    }${newDeviceSessionIdQueryParam}${portalBorderRadiusQueryParam}${portalForegroundColorQueryParam}${newDeviceEncryptionKeyQueryParam}${portalPrimaryButtonTextColorQueryParam}`;
   }
 
   /**

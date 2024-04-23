@@ -4,7 +4,7 @@ import RecoveryStepContext from '../../contexts/RecoveryStepContext';
 import { ModalStep } from '../../steps/recoverySteps';
 import UserContext from '../../contexts/UserContext';
 import WalletContext from '../../contexts/WalletContext';
-import capsule from '../../../capsule';
+import capsule from '../../../clients/capsule';
 
 const RecoveryAwaitingFinishStep: React.FC = () => {
 

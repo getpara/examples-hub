@@ -5,6 +5,7 @@ import {
   SecondaryText,
   ButtonWithIconContainer,
 } from '../common.js';
+import styled from 'styled-components';
 
 interface TwoFactorDoneStepStep {
   onClose: () => void;
@@ -22,10 +23,15 @@ export const TwoFactorDoneStep = ({ onClose }: TwoFactorDoneStepStep) => {
       </SecondaryText>
       <CpslButton onClick={onClose}>
         <ButtonWithIconContainer>
-          <CpslIcon icon="check" />
+          <CheckIcon icon="check" />
           Done
         </ButtonWithIconContainer>
       </CpslButton>
     </>
   );
 };
+
+const CheckIcon = styled(CpslIcon)`
+  --width: 20px;
+  --height: 20px;
+`;

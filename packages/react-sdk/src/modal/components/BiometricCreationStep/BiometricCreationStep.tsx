@@ -68,7 +68,7 @@ export const BiometricCreationStep = ({
   }, [webAuthURLForCreate]);
 
   const handlePasskeyClick = () => {
-    openPopup(shortLoginLink, 'CapsulePasskey');
+    openPopup(shortLoginLink, 'CapsulePasskey', 'CREATE_PASSKEY');
     setStep(ModalStep.AWAITING_BIOMETRIC_CREATION);
   };
 

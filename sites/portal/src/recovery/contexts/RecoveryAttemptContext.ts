@@ -1,5 +1,5 @@
 import { createContext } from 'react';
-import type { RecoveryStatus } from '@usecapsule/react-sdk';
+import type { RecoveryStatus } from '@usecapsule/web-sdk';
 import emptyFunction from '../emptyFunction';
 
 interface RecoveryAttemptContextType {
@@ -9,9 +9,11 @@ interface RecoveryAttemptContextType {
   setInitiatedAt: (initiatedAt: Date | null) => void;
 }
 
-export const RecoveryAttemptContext = createContext<RecoveryAttemptContextType>({
-  status: null,
-  setStatus: emptyFunction,
-  initiatedAt: null,
-  setInitiatedAt: emptyFunction,
-});
+export const RecoveryAttemptContext = createContext<RecoveryAttemptContextType>(
+  {
+    status: null,
+    setStatus: emptyFunction,
+    initiatedAt: null,
+    setInitiatedAt: emptyFunction,
+  },
+);

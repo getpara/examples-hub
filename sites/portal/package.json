@@ -4,14 +4,17 @@
   "main": "src/index.tsx",
   "private": true,
   "dependencies": {
-    "@chakra-ui/icons": "^2.0.18",
-    "@chakra-ui/react": "1.8.9",
-    "@usecapsule/react-sdk": "2.3.2",
+    "@chakra-ui/icons": "^2.1.1",
+    "@chakra-ui/react": "^2.8.2",
+    "@chakra-ui/system": "^2.6.2",
+    "@usecapsule/react-components": "^2.0.0",
     "@usecapsule/user-management-client": "1.4.1",
+    "@usecapsule/web-sdk": "^1.7.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-qr-code": "2.0.11",
-    "react-router-dom": "^6.10.0"
+    "react-router-dom": "^6.10.0",
+    "styled-components": "^6.1.8"
   },
   "scripts": {
     "start": "REACT_APP_ENV=dev PORT=3003 craco start",
@@ -31,10 +34,13 @@
     "semver": "^7.5.4",
     "stream-browserify": "3.0.0",
     "ts-loader": "^9.5.1",
-    "typescript": "4.9.5",
+    "typescript": "^5.4.4",
     "webpack": "5.76.3",
     "webpack-cli": "5.0.1",
     "webpack-dev-server": "4.13.1"
+  },
+  "resolutions": {
+    "styled-components": "^6"
   },
   "browserslist": {
     "production": [

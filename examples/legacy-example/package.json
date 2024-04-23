@@ -4,7 +4,7 @@
   "main": "src/index.tsx",
   "private": true,
   "dependencies": {
-    "@chakra-ui/react": "2.5.4",
+    "@chakra-ui/react": "^2.8.2",
     "@cosmjs/stargate": "0.31.0",
     "@emotion/react": "11.10.6",
     "@emotion/styled": "11.10.6",

@@ -26,6 +26,7 @@ export const BiometricLoginStep = () => {
   const capsule = useCapsuleStore((state) => state.capsule);
 
   const [shortLoginLink, setShortLoginLink] = useState<string>();
+  const [shortHelpLink, setShortHelpLink] = useState<string>();
 
   useEffect(() => {
     if (currentStep !== ModalStep.BIOMETRIC_LOGIN) {
@@ -38,6 +39,10 @@ export const BiometricLoginStep = () => {
     async function shortenUrl() {
       const shortUrl = await capsule.shortenLoginLink(webAuthURLForLogin);
       setShortLoginLink(shortUrl);
+      const shortHelpUrl = await capsule.shortenLoginLink(
+        `${webAuthURLForLogin}&skipAutoLogin=true`,
+      );
+      setShortHelpLink(shortHelpUrl);
     }
     if (SHORTENING_AVAILABLE) {
       shortenUrl();
@@ -47,7 +52,12 @@ export const BiometricLoginStep = () => {
   }, [webAuthURLForLogin]);
 
   const handlePasskeyClick = () => {
-    openPopup(shortLoginLink, 'CapsulePasskey');
+    openPopup(shortLoginLink, 'CapsulePasskey', 'LOGIN_PASSKEY');
+    setStep(ModalStep.AWAITING_BIOMETRIC_LOGIN);
+  };
+
+  const handleHelpClick = () => {
+    openPopup(shortHelpLink, 'CapsulePasskey', 'LOGIN_PASSKEY');
     setStep(ModalStep.AWAITING_BIOMETRIC_LOGIN);
   };
 
@@ -82,6 +92,9 @@ export const BiometricLoginStep = () => {
       <SecondaryText>
         <span>Scan with your phone’s camera</span>
       </SecondaryText>
+      <CpslButton onClick={handleHelpClick} variant="secondary">
+        I Need Help Logging In
+      </CpslButton>
     </>
   );
 };

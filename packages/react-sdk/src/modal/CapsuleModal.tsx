@@ -1,20 +1,23 @@
 import {
-  CpslOverlay,
+  CpslModal,
   defineCustomElements,
+  generateTheme,
 } from '@usecapsule/react-components';
 
 import '@usecapsule/react-components/css/capsule-core.css';
 import './css/modal.css';
-import styled from 'styled-components';
-import { Modal } from './components/index.js';
-import { useEffect, useRef, useState } from 'react';
+import { ModalContent } from './components/index.js';
+import { useEffect, useState } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { Theme } from './types/theme.js';
-import { useUpdateTheme } from './hooks/useUpdateTheme.js';
-import { useCapsuleStore, useModalStore, useUserInfoStore } from './stores/index.js';
+import {
+  useCapsuleStore,
+  useModalStore,
+  useUserInfoStore,
+  useThemeStore,
+} from './stores/index.js';
 import { ModalStep } from './utils/steps.js';
-import { CapsuleModalV2Props } from './types/modalProps.js';
+import { CapsuleModalProps } from './types/modalProps.js';
 import { DEFAULTS } from './constants/defaults.js';
 
 gsap.registerPlugin(useGSAP);
@@ -23,29 +26,23 @@ defineCustomElements();
 export const CapsuleModal = ({
   capsule,
   isOpen,
-  theme = Theme.light,
-  branding,
+  theme,
   appName,
   logo,
-  logoDark,
+  disableEmailLogin = false,
+  oAuthMethods,
+  onClose,
   ...rest
-}: CapsuleModalV2Props) => {
-  useUpdateTheme({
-    theme,
-    branding,
-    logo,
-    logoDark,
-    appName,
-  });
+}: CapsuleModalProps) => {
+  const updateThemeState = useThemeStore((state) => state.updateState);
   const currentStep = useModalStore((state) => state.step);
   const setStep = useModalStore((state) => state.setStep);
   const setCapsule = useCapsuleStore((state) => state.setCapsule);
   const setEmail = useUserInfoStore((state) => state.setEmail);
 
-  const containerRef = useRef<HTMLCpslOverlayElement>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
   const [isModalMounted, setIsModalMounted] = useState(false);
   const [hasFinishedAnimation, setHasFinishedAnimation] = useState(false);
+  const [modalExpanded, setModalExpanded] = useState(false);
 
   // This will run on mount and on isOpen change but won't cause a rerender unless step or email changes
   const initModal = async () => {
@@ -62,6 +59,17 @@ export const CapsuleModal = ({
 
     setEmail(capsule.getEmail());
   };
+
+  useEffect(() => {
+    updateThemeState({ logo, appName });
+  }, [logo, appName]);
+
+  useEffect(() => {
+    if (theme) {
+      const isDark = generateTheme(theme);
+      updateThemeState({ isDark });
+    }
+  }, [theme]);
 
   // Set Capsule instance & init on mount
   useEffect(() => {
@@ -86,63 +94,50 @@ export const CapsuleModal = ({
     }
   }, [isOpen]);
 
-  useGSAP(
-    () => {
-      if (isOpen) {
-        gsap
-          .timeline({
-            onStart: () => {
-              setIsModalMounted(true);
-            },
-            onComplete: () => {
-              setHasFinishedAnimation(true);
-            },
-          })
-          .to(wrapperRef.current, {
-            scale: 1,
-            duration: DEFAULTS.ANIMATION_DURATION,
-          });
-      } else {
-        gsap
-          .timeline({
-            onComplete: () => {
-              setIsModalMounted(false);
-              setHasFinishedAnimation(false);
-            },
-          })
-          .to(wrapperRef.current, {
-            scale: 0.8,
-            duration: DEFAULTS.ANIMATION_DURATION,
-          });
-      }
-    },
-    { scope: containerRef, dependencies: [isOpen] },
-  );
+  const handleModalEntering = () => {
+    setIsModalMounted(true);
+  };
+
+  const handleModalEntered = () => {
+    setHasFinishedAnimation(true);
+  };
+  const handleModalExited = () => {
+    setHasFinishedAnimation(false);
+    setIsModalMounted(false);
+  };
 
   if (!capsule) {
     return null;
   }
 
+  if (disableEmailLogin && !oAuthMethods?.length) {
+    console.error(
+      'At least one OAuth method must be provided if email login is disabled.',
+    );
+    return null;
+  }
+
   return (
-    <CpslOverlay
-      ref={containerRef}
-      transitionDuration={DEFAULTS.ANIMATION_DURATION}
+    <CpslModal
+      enterTransitionDuration={DEFAULTS.ANIMATION_DURATION}
+      exitTransitionDuration={DEFAULTS.ANIMATION_DURATION}
+      footerExpanded={modalExpanded}
       open={isOpen}
+      onCpslModalExited={handleModalExited}
+      onCpslModalEntered={handleModalEntered}
+      onCpslModalEntering={handleModalEntering}
+      onCpslModalRequestClose={onClose}
     >
-      <ModalWrapper ref={wrapperRef}>
-        {isModalMounted && (
-          <Modal hasFinishedAnimation={hasFinishedAnimation} {...rest} />
-        )}
-      </ModalWrapper>
-    </CpslOverlay>
+      {isModalMounted && (
+        <ModalContent
+          hasFinishedAnimation={hasFinishedAnimation}
+          oAuthMethods={oAuthMethods}
+          disableEmailLogin={disableEmailLogin}
+          setModalExpanded={setModalExpanded}
+          onClose={onClose}
+          {...rest}
+        />
+      )}
+    </CpslModal>
   );
 };
-
-const ModalWrapper = styled.div`
-  display: flex;
-  height: 100%;
-  width: 100%;
-  justify-content: center;
-  align-items: center;
-  scale: 0.8;
-`;

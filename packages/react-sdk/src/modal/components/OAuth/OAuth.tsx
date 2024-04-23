@@ -1,12 +1,16 @@
 import { CpslTileButton } from '@usecapsule/react-components';
 import { OAuthMethod } from '@usecapsule/web-sdk';
 import styled from 'styled-components';
-import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
+import {
+  useCapsuleStore,
+  useModalStore,
+  useUserInfoStore,
+} from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { openPopup } from '../../utils/openPopup.js';
 import { oAuthLogos } from './config.js';
 import { useThemeStore } from '../../stores/theme/useThemeStore.js';
-import { Theme } from '../../types/theme.js';
+import { Text } from '../common.js';
 
 interface OAuthProps {
   methods: OAuthMethod[];
@@ -15,7 +19,7 @@ interface OAuthProps {
 const HAS_MORE_LENGTH = 4;
 
 export const OAuth = ({ methods }: OAuthProps) => {
-  const theme = useThemeStore((state) => state.theme);
+  const isDark = useThemeStore((state) => state.isDark);
   const capsule = useCapsuleStore((state) => state.capsule);
   const setFlow = useModalStore((state) => state.setFlow);
   const setStep = useModalStore((state) => state.setStep);
@@ -42,7 +46,7 @@ export const OAuth = ({ methods }: OAuthProps) => {
     setStep(ModalStep.AWAITING_OAUTH);
 
     const oAuthURL = await capsule.getOAuthURL(method);
-    openPopup(oAuthURL, `${method}AuthPopup`);
+    openPopup(oAuthURL, `${method}AuthPopup`, 'OAUTH');
     const { email, userExists } = await capsule.waitForOAuth();
     if (!email) {
       setStep(ModalStep.SIGN_UP);
@@ -68,18 +72,20 @@ export const OAuth = ({ methods }: OAuthProps) => {
     <OAuthContainer>
       {methodsToShow.map((method) => (
         <StyledCpslTileButton
+          isDark={isDark}
           key={method}
-          icon={oAuthLogos[theme][method]}
+          icon={oAuthLogos[method]}
           onClick={handleMethodClick(method)}
         />
       ))}
       {!showAll && hasMore && (
-        <StyledCpslTileButton
-          icon={
-            theme === Theme.dark ? 'moreLoginOptionsDark' : 'moreLoginOptions'
-          }
+        <MoreButton
+          isDark={isDark}
+          icon="moreLoginOptions"
           onClick={handleShowAll}
-        />
+        >
+          <MoreText>MORE</MoreText>
+        </MoreButton>
       )}
     </OAuthContainer>
   );
@@ -92,9 +98,21 @@ const OAuthContainer = styled.div`
   flex-wrap: wrap;
 `;
 
-const StyledCpslTileButton = styled(CpslTileButton)`
+const StyledCpslTileButton = styled(CpslTileButton)<{ isDark: boolean }>`
   flex: 0 0 calc(25% - 4px);
 
   --button-width: 100%;
-  --button-icon-color: white;
+`;
+
+const MoreButton = styled(StyledCpslTileButton)`
+  &::part(icon) {
+    --height: 16px;
+    --width: 16px;
+  }
+`;
+
+const MoreText = styled(Text)`
+  font-size: 8px;
+  line-height: 8px;
+  letter-spacing: 1px;
 `;

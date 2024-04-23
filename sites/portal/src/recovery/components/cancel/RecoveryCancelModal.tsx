@@ -1,5 +1,5 @@
 import { Box, Flex, Text, Button, Modal, ModalBody, ModalContent, ModalOverlay, Spacer, VStack } from '@chakra-ui/react';
-import capsule from '../../../capsule';
+import capsule from '../../../clients/capsule';
 import { useContext } from 'react';
 import EmailContext from '../../contexts/EmailContext';
 import { ModalStep as RecoveryModalStep } from '../../steps/recoverySteps';

@@ -23,13 +23,17 @@ import {
   createCapsuleViemClient,
   createCapsuleAccount,
 } from '@usecapsule/viem-v2-integration';
-import CapsuleWeb, { decimalToHex, hexToDecimal, CapsuleModalV2Props } from '@usecapsule/react-sdk';
+import CapsuleWeb, {
+  decimalToHex,
+  hexToDecimal,
+  CapsuleModalProps,
+} from '@usecapsule/react-sdk';
 import { renderModal } from './connectorModal.js';
 
 const STORAGE_CHAIN_ID_KEY = '@CAPSULE/chainId';
 const TEN_MINUTES_MS = 600000;
 
-interface CapsuleEIP1193ProviderOpts extends Partial<CapsuleModalV2Props> {
+interface CapsuleEIP1193ProviderOpts extends Partial<CapsuleModalProps> {
   capsule: CapsuleWeb;
   chainId: string; // base-10 chain id number as a string
   chains: Chain[];
@@ -65,7 +69,7 @@ export class CapsuleEIP1193Provider
   private capsule: CapsuleWeb;
   private disableModal: boolean;
   private storage: Pick<Storage, 'setItem' | 'getItem'>;
-  private modalProps: Partial<CapsuleModalV2Props>;
+  private modalProps: Partial<CapsuleModalProps>;
 
   constructor(opts: CapsuleEIP1193ProviderOpts) {
     super();
@@ -118,7 +122,7 @@ export class CapsuleEIP1193Provider
         rpcUrls: this.getRpcUrlsFromViemChain(chain),
       },
     ];
-  }
+  };
 
   private wagmiChainsToAddEthereumChainParameters = (
     chains: Chain[],
@@ -136,7 +140,8 @@ export class CapsuleEIP1193Provider
     const chain = this.chains[chainId];
     this.setChainId(chainId);
 
-    const viemChain = this.viemChains[chainId] || getViemChain(hexToDecimal(chainId));
+    const viemChain =
+      this.viemChains[chainId] || getViemChain(hexToDecimal(chainId));
     let transport: Transport;
     if (chain.rpcUrls[0].startsWith('ws')) {
       transport = webSocket(chain.rpcUrls[0]);
@@ -283,7 +288,8 @@ export class CapsuleEIP1193Provider
       case 'wallet_switchEthereumChain': {
         if (!this.chains[params[0].chainId]) {
           const chain = getViemChain(hexToDecimal(params[0].chainId));
-          const [hexChainId, addEthereumChainParameter] = this.wagmiChainToAddEthereumChainParameters(chain);
+          const [hexChainId, addEthereumChainParameter] =
+            this.wagmiChainToAddEthereumChainParameters(chain);
           this.chains[hexChainId] = addEthereumChainParameter;
 
           this.setCurrentChain(params[0].chainId);

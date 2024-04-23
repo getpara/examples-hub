@@ -5,7 +5,7 @@ import RecoveryStepContext from '../../contexts/RecoveryStepContext';
 import { ModalStep } from '../../steps/recoverySteps';
 import UserContext from '../../contexts/UserContext';
 import WalletContext from '../../contexts/WalletContext';
-import capsule from '../../../capsule';
+import capsule from '../../../clients/capsule';
 import VerifyCode from '../../../assets/verifyCode';
 import Console from '../../../assets/console';
 import TwoFactorContext from '../../contexts/TwoFactorContext';

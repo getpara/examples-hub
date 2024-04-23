@@ -3,9 +3,9 @@ import { InjectedConnector } from 'wagmi/connectors/injected';
 import { InjectedConnectorOptions } from '@wagmi/connectors/injected';
 
 import { CapsuleEIP1193Provider } from './CapsuleEIP1193Provider.js';
-import CapsuleWeb, { CapsuleModalV2Props } from '@usecapsule/react-sdk';
+import CapsuleWeb, { CapsuleModalProps } from '@usecapsule/react-sdk';
 
-interface CapsuleConnectorOpts extends Partial<CapsuleModalV2Props> {
+interface CapsuleConnectorOpts extends Partial<CapsuleModalProps> {
   chains: Chain[];
   options: InjectedConnectorOptions;
   capsule: CapsuleWeb;
@@ -16,7 +16,14 @@ interface CapsuleConnectorOpts extends Partial<CapsuleModalV2Props> {
 export class CapsuleConnector extends InjectedConnector {
   private capsule: CapsuleWeb;
 
-  constructor({ chains, options, capsule, disableModal, storageOverride, ...modalProps }: CapsuleConnectorOpts) {
+  constructor({
+    chains,
+    options,
+    capsule,
+    disableModal,
+    storageOverride,
+    ...modalProps
+  }: CapsuleConnectorOpts) {
     if (chains.length === 0) {
       throw new Error('Must provide at least one chain');
     }

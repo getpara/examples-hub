@@ -1,6 +1,26 @@
-export function openPopup(popupUrl: string, target: string) {
-  const popUpWidth = 550,
-    popUpHeight = 675;
+export function openPopup(
+  popupUrl: string,
+  target: string,
+  type: 'OAUTH' | 'LOGIN_PASSKEY' | 'CREATE_PASSKEY',
+) {
+  const popUpWidth = 550;
+  let popUpHeight: number;
+
+  switch (type) {
+    case 'LOGIN_PASSKEY': {
+      popUpHeight = 798;
+      break;
+    }
+    case 'CREATE_PASSKEY': {
+      popUpHeight = 414;
+      break;
+    }
+    case 'OAUTH':
+    default: {
+      popUpHeight = 675;
+      break;
+    }
+  }
 
   // Fixes position when using multiple monitors
   const dualScreenLeft =

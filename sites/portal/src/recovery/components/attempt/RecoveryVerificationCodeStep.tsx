@@ -1,6 +1,6 @@
 import { VStack, Spacer, HStack, Input, Button, Text, Box } from '@chakra-ui/react';
 import { useContext, useState } from 'react';
-import capsule from '../../../capsule';
+import capsule from '../../../clients/capsule';
 import EmailContext from '../../contexts/EmailContext';
 import { RecoveryAttemptContext } from '../../contexts/RecoveryAttemptContext';
 import StepContext from '../../contexts/StepContext';

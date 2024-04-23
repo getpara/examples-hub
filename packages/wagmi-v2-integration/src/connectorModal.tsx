@@ -2,12 +2,12 @@ import ReactDOM from 'react-dom';
 
 import CapsuleWeb, {
   CapsuleModal,
-  CapsuleModalV2Props,
+  CapsuleModalProps,
 } from '@usecapsule/react-sdk';
 
 export function renderModal(
   capsule: CapsuleWeb,
-  modalProps: Partial<CapsuleModalV2Props>,
+  modalProps: Partial<CapsuleModalProps>,
   onCloseArg: () => void,
 ): void {
   const existingContainer = document.getElementById('capsule-modal');

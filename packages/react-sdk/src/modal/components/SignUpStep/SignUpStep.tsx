@@ -13,17 +13,24 @@ import styled from 'styled-components';
 import { OAuth } from '../OAuth/OAuth.js';
 import { OAuthMethod } from '@usecapsule/web-sdk';
 import { ModalStep } from '../../utils/steps.js';
-import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
+import {
+  useCapsuleStore,
+  useModalStore,
+  useUserInfoStore,
+} from '../../stores/index.js';
 import { useThemeStore } from '../../stores/theme/useThemeStore.js';
 import { CapsuleBlack, CapsuleWhite } from '../Icons.js';
-import { Theme } from '../../types/theme.js';
 
 interface SignUpStepProps {
   oAuthMethods?: OAuthMethod[];
+  disableEmailLogin: boolean;
 }
 
-export const SignUpStep = ({ oAuthMethods }: SignUpStepProps) => {
-  const theme = useThemeStore((state) => state.theme);
+export const SignUpStep = ({
+  oAuthMethods,
+  disableEmailLogin,
+}: SignUpStepProps) => {
+  const isDark = useThemeStore((state) => state.isDark);
   const logo = useThemeStore((state) => state.getLogo());
   const appName = useThemeStore((state) => state.appName);
   const capsule = useCapsuleStore((state) => state.capsule);
@@ -84,29 +91,29 @@ export const SignUpStep = ({ oAuthMethods }: SignUpStepProps) => {
         (logo ? (
           <Logo src={logo} alt={`${appName ? `${appName} -` : ''}logo`} />
         ) : (
-          <LogoSvg>
-            {theme === Theme.dark ? <CapsuleWhite /> : <CapsuleBlack />}
-          </LogoSvg>
+          <LogoSvg>{isDark ? <CapsuleWhite /> : <CapsuleBlack />}</LogoSvg>
         ))}
       {!!oAuthMethods?.length && (
         <>
           <OAuth methods={oAuthMethods} />
-          <CpslDivider>or</CpslDivider>
+          {!disableEmailLogin && <CpslDivider>or</CpslDivider>}
         </>
       )}
-      <CpslInput
-        placeholder="Enter your email"
-        onCpslInput={handleEmailInput}
-        value={email}
-        errorText={emailError}
-        autofocus
-        inputMode="email"
-      >
-        <CpslIcon slot="start" icon="mail" />
-        <CpslButton slot="end" onClick={handleSubmitEmail}>
-          <CpslIcon icon="arrow" />
-        </CpslButton>
-      </CpslInput>
+      {!disableEmailLogin && (
+        <CpslInput
+          placeholder="Enter your email"
+          onCpslInput={handleEmailInput}
+          value={email}
+          errorText={emailError}
+          autofocus
+          inputMode="email"
+        >
+          <CpslIcon slot="start" icon="mail" />
+          <CpslButton slot="end" onClick={handleSubmitEmail}>
+            <CpslIcon icon="arrow" />
+          </CpslButton>
+        </CpslInput>
+      )}
     </>
   );
 };

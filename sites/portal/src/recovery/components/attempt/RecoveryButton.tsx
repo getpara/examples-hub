@@ -6,7 +6,7 @@ import RecoveryModal from '../../components/attempt/RecoveryModal';
 import StepContext from '../../contexts/StepContext';
 import { ModalStep } from '../../steps/attemptSteps';
 import WalletContext from '../../contexts/WalletContext';
-import capsule from '../../../capsule';
+import capsule from '../../../clients/capsule';
 import CapsuleSmall from '../../../assets/capsuleSmall';
 import TwoFactorContext from '../../contexts/TwoFactorContext';
 

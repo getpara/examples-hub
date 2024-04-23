@@ -18,14 +18,22 @@ import {
 import { EventEmitter } from 'eventemitter3';
 import { Chain } from '@wagmi/chains';
 
-import { getViemChain, createCapsuleViemClient, createCapsuleAccount } from '@usecapsule/viem-v1-integration';
-import CapsuleWeb, { decimalToHex, hexToDecimal, CapsuleModalV2Props } from '@usecapsule/react-sdk';
+import {
+  getViemChain,
+  createCapsuleViemClient,
+  createCapsuleAccount,
+} from '@usecapsule/viem-v1-integration';
+import CapsuleWeb, {
+  decimalToHex,
+  hexToDecimal,
+  CapsuleModalProps,
+} from '@usecapsule/react-sdk';
 import { renderModal } from './connectorModal.js';
 
 const STORAGE_CHAIN_ID_KEY = '@CAPSULE/chainId';
 const TEN_MINUTES_MS = 600000;
 
-interface CapsuleEIP1193ProviderOpts extends Partial<CapsuleModalV2Props> {
+interface CapsuleEIP1193ProviderOpts extends Partial<CapsuleModalProps> {
   capsule: CapsuleWeb;
   chainId: string; // base-10 chain id number as a string
   chains: Chain[];
@@ -36,12 +44,12 @@ interface CapsuleEIP1193ProviderOpts extends Partial<CapsuleModalV2Props> {
 type WebSocketTransportSubscribeParameters = {
   onData: (data: unknown) => void;
   onError?: (error: unknown) => void;
-}
+};
 
 type WebSocketTransportSubscribeReturnType = {
   subscriptionId: Hash;
   unsubscribe: () => Promise<unknown>;
-}
+};
 
 type WebSocketTransportSubscribeFn = (
   args: WebSocketTransportSubscribeParameters & {
@@ -49,7 +57,10 @@ type WebSocketTransportSubscribeFn = (
   },
 ) => Promise<WebSocketTransportSubscribeReturnType>;
 
-export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provider {
+export class CapsuleEIP1193Provider
+  extends EventEmitter
+  implements EIP1193Provider
+{
   private currentHexChainId: Hex;
   private walletClient: WalletClient;
   private chainTransportSubscribe?: WebSocketTransportSubscribeFn;
@@ -57,7 +68,7 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
   private capsule: CapsuleWeb;
   private disableModal: boolean;
   private storage: Pick<Storage, 'setItem' | 'getItem'>;
-  private modalProps: Partial<CapsuleModalV2Props>;
+  private modalProps: Partial<CapsuleModalProps>;
 
   constructor(opts: CapsuleEIP1193ProviderOpts) {
     super();
@@ -84,8 +95,11 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
   }
 
   private getRpcUrlsFromViemChain = (chain: Chain): string[] => {
-    return [...(chain.rpcUrls.default.webSocket || []), ...chain.rpcUrls.default.http];
-  }
+    return [
+      ...(chain.rpcUrls.default.webSocket || []),
+      ...chain.rpcUrls.default.http,
+    ];
+  };
 
   private wagmiChainToAddEthereumChainParameters = (
     chain: Chain,
@@ -106,7 +120,7 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
         rpcUrls: this.getRpcUrlsFromViemChain(chain),
       },
     ];
-  }
+  };
 
   private wagmiChainsToAddEthereumChainParameters = (
     chains: Chain[],
@@ -118,7 +132,7 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
 
   private accountFromAddress = (address: Address): LocalAccount => {
     return createCapsuleAccount(this.capsule, address);
-  }
+  };
 
   private setCurrentChain = (chainId: Hex) => {
     const chain = this.chains[chainId];
@@ -128,34 +142,40 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
     let transport: Transport;
     if (chain.rpcUrls[0].startsWith('ws')) {
       transport = webSocket(chain.rpcUrls[0]);
-      this.chainTransportSubscribe = transport({ chain: viemChain }).value.subscribe;
+      this.chainTransportSubscribe = transport({
+        chain: viemChain,
+      }).value.subscribe;
     } else {
       transport = http(chain.rpcUrls[0]);
       this.chainTransportSubscribe = undefined;
     }
 
-    this.walletClient = createCapsuleViemClient(this.capsule, {
-      chain: viemChain,
-      transport,
-      // @ts-ignore
-    }, { noAccount: true }).extend(publicActions);
+    this.walletClient = createCapsuleViemClient(
+      this.capsule,
+      {
+        chain: viemChain,
+        transport,
+        // @ts-ignore
+      },
+      { noAccount: true },
+    ).extend(publicActions);
 
     this.emit('chainChanged', this.currentHexChainId);
-  }
+  };
 
-  request: EIP1193RequestFn<EIP1474Methods> = async(args): Promise<any> => {
+  request: EIP1193RequestFn<EIP1474Methods> = async (args): Promise<any> => {
     const { method, params } = args;
 
     switch (method) {
       case 'eth_accounts': {
-        return Object.values(this.capsule.getWallets()).map(w => w.address);
+        return Object.values(this.capsule.getWallets()).map((w) => w.address);
       }
       case 'eth_chainId': {
         return this.currentHexChainId;
       }
       case 'eth_requestAccounts': {
         if (await this.capsule.isFullyLoggedIn()) {
-          return Object.values(this.capsule.getWallets()).map(w => w.address);
+          return Object.values(this.capsule.getWallets()).map((w) => w.address);
         }
         if (this.disableModal) {
           throw new ProviderRpcError(
@@ -165,22 +185,26 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
         }
 
         let isClosed = false;
-        const onClose = () => { isClosed = true; };
+        const onClose = () => {
+          isClosed = true;
+        };
         renderModal(this.capsule, this.modalProps, onClose);
         // check if capsule is fully logged in every 2 seconds for 10 minutes at most
         const now = Date.now();
-        while ((Date.now() - now) < TEN_MINUTES_MS) {
-          await new Promise(resolve => setTimeout(resolve, 2000));
+        while (Date.now() - now < TEN_MINUTES_MS) {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
           if (await this.capsule.isFullyLoggedIn()) {
-            const addresses = Object.values(this.capsule.getWallets()).map(w => w.address);
+            const addresses = Object.values(this.capsule.getWallets()).map(
+              (w) => w.address,
+            );
             this.emit('accountsChanged', addresses);
             return addresses;
           }
           if (isClosed) {
-            throw new ProviderRpcError(
-              new Error('user closed modal'),
-              { code: 4001, shortMessage: 'user closed modal' },
-            );
+            throw new ProviderRpcError(new Error('user closed modal'), {
+              code: 4001,
+              shortMessage: 'user closed modal',
+            });
           }
         }
 
@@ -206,7 +230,9 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
       }
       case 'eth_signTransaction': {
         const fromAddress = params[0].from;
-        return this.accountFromAddress(fromAddress).signTransaction(formatTransaction(params[0]));
+        return this.accountFromAddress(fromAddress).signTransaction(
+          formatTransaction(params[0]),
+        );
       }
       case 'eth_signTypedData_v4': {
         const fromAddress = params[0];
@@ -224,7 +250,10 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
         if (!this.chainTransportSubscribe) {
           throw new ProviderRpcError(
             new Error('chain does not support subscriptions'),
-            { code: 4200, shortMessage: 'chain does not support subscriptions' },
+            {
+              code: 4200,
+              shortMessage: 'chain does not support subscriptions',
+            },
           );
         }
 
@@ -256,7 +285,8 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
       case 'wallet_switchEthereumChain': {
         if (!this.chains[params[0].chainId]) {
           const chain = getViemChain(hexToDecimal(params[0].chainId));
-          const [hexChainId, addEthereumChainParameter] = this.wagmiChainToAddEthereumChainParameters(chain);
+          const [hexChainId, addEthereumChainParameter] =
+            this.wagmiChainToAddEthereumChainParameters(chain);
           this.chains[hexChainId] = addEthereumChainParameter;
 
           this.setCurrentChain(params[0].chainId);
@@ -277,5 +307,5 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
         });
       }
     }
-  }
+  };
 }

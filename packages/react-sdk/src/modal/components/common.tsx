@@ -13,8 +13,9 @@ export const SpinnerContainer = styled.div`
 export const Hero: typeof CpslIcon = styled(CpslIcon)`
   box-sizing: content-box;
   align-self: center;
-  --height: 55px;
-  --width: 53px;
+  --height: 64px;
+  --width: 64px;
+  --icon-fill-color: var(--cpsl-color-foreground-0);
 
   padding: 16px 0px;
   margin: 4px 0px;

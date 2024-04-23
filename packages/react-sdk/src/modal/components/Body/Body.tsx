@@ -21,6 +21,7 @@ interface BodyProps {
   recoveryShare: string;
   twoFactorAuthEnabled?: boolean;
   hasFinishedAnimation: boolean;
+  disableEmailLogin: boolean;
   onClose: () => void;
 }
 
@@ -29,6 +30,7 @@ export const Body = ({
   recoveryShare,
   twoFactorAuthEnabled,
   hasFinishedAnimation,
+  disableEmailLogin,
   onClose,
 }: BodyProps) => {
   const currentStep = useModalStore((state) => state.step);
@@ -43,7 +45,12 @@ export const Body = ({
     switch (currentStep) {
       case ModalStep.SIGN_UP:
       case ModalStep.SIGN_UP_ALL_OAUTH: {
-        return <SignUpStep oAuthMethods={oAuthMethods} />;
+        return (
+          <SignUpStep
+            oAuthMethods={oAuthMethods}
+            disableEmailLogin={disableEmailLogin}
+          />
+        );
       }
       case ModalStep.VERIFICATION_CODE: {
         return <VerificationCodeStep />;
@@ -62,8 +69,7 @@ export const Body = ({
       case ModalStep.AWAITING_BIOMETRIC_CREATION: {
         return <AwaitingBiometricsStep />;
       }
-      case ModalStep.AWAITING_WALLET_CREATION:
-      case ModalStep.AWAITING_WALLET_CREATION_AFTER_LOGIN: {
+      case ModalStep.AWAITING_WALLET_CREATION: {
         return <AwaitingWalletCreationStep />;
       }
       case ModalStep.WALLET_CREATION_DONE: {

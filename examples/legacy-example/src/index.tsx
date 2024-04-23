@@ -512,20 +512,10 @@ function App() {
     true,
   );
 
-  capsule = React.useMemo(
-    () =>
-      new Capsule(selectedEnv, selectedApiKey, {
-        ...getCapsuleOpts(selectedEnv, useDKLS),
-        xUrl: 'https://twitter.com/usecapsule',
-        linkedinUrl: 'https://www.linkedin.com/company/usecapsule',
-        supportUrl: 'mailto:support@usecapsule.com',
-      }),
-    [selectedEnv, useDKLS, selectedApiKey],
-  );
-
   const [logo, setLogo] = useState('');
-  const [darkLogo, setDarkLogo] = useState('');
-  const [theme, setTheme] = useState(Theme.light);
+  const [foregroundColor, setForegroundColor] = useState('#FAFAFA');
+  const [backgroundColor, setBackgroundColor] = useState('#121212');
+  const [borderRadius, setBorderRadius] = useState('sm');
 
   const [pregenEmail, setPregenEmail] = useState('');
   const [pregenUserShare, setPregenUserShare] = useState('');
@@ -558,6 +548,18 @@ function App() {
   const [ethersSignature, setEthersSignature] = useState('');
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
+
+  capsule = React.useMemo(
+    () =>
+      new Capsule(selectedEnv, selectedApiKey, {
+        ...getCapsuleOpts(selectedEnv, useDKLS),
+        xUrl: 'https://twitter.com/usecapsule',
+        linkedinUrl: 'https://www.linkedin.com/company/usecapsule',
+        supportUrl: 'mailto:support@usecapsule.com',
+        portalTheme: { backgroundColor, foregroundColor },
+      }),
+    [selectedEnv, useDKLS, selectedApiKey, foregroundColor, backgroundColor],
+  );
 
   async function checkIsSessionActive() {
     const isFullyLoggedIn = await capsule.isSessionActive();
@@ -611,352 +613,378 @@ function App() {
     }, secondsToDelete * 1000);
   };
 
-  const handleThemeToggle = () => {
-    setTheme((curr) => (curr === Theme.dark ? Theme.light : Theme.dark));
-  };
-
   return (
     <>
-    <ChakraProvider>
-      <Container maxW="ld" padding={10}>
-        <HStack paddingBottom={5}>
-          <Text width={'15%'}>
-            <strong>Select Environment:</strong>
-          </Text>
-          <Select
-            defaultValue={selectedEnv}
-            onChange={(e) => setSelectedEnv(e.target.value as Environment)}
-          >
-            <option value={Environment.DEV}>Dev</option>
-            <option value={Environment.SANDBOX}>Sandbox</option>
-            <option value={Environment.BETA}>Beta</option>
-            <option value={Environment.PROD}>Prod</option>
-          </Select>
-        </HStack>
-        <HStack paddingBottom={5}>
-          <Text width={'15%'}>
-            <strong>Select Example View:</strong>
-          </Text>
-          <Select
-            defaultValue={selectedView}
-            onChange={(e) => setSelectedView(e.target.value)}
-          >
-            <option value="OLD_VIEW">Old View</option>
-            {/* <option value="ETHERS">Ethers</option>
+      <ChakraProvider>
+        <Container maxW="ld" padding={10}>
+          <HStack paddingBottom={5}>
+            <Text width={'15%'}>
+              <strong>Select Environment:</strong>
+            </Text>
+            <Select
+              defaultValue={selectedEnv}
+              onChange={(e) => setSelectedEnv(e.target.value as Environment)}
+            >
+              <option value={Environment.DEV}>Dev</option>
+              <option value={Environment.SANDBOX}>Sandbox</option>
+              <option value={Environment.BETA}>Beta</option>
+              <option value={Environment.PROD}>Prod</option>
+            </Select>
+          </HStack>
+          <HStack paddingBottom={5}>
+            <Text width={'15%'}>
+              <strong>Select Example View:</strong>
+            </Text>
+            <Select
+              defaultValue={selectedView}
+              onChange={(e) => setSelectedView(e.target.value)}
+            >
+              <option value="OLD_VIEW">Old View</option>
+              {/* <option value="ETHERS">Ethers</option>
             <option value="VIEM">Viem</option> */}
-            <option value="WAGMI">Wagmi View</option>
-          </Select>
-        </HStack>
-        <HStack paddingBottom={10}>
-          <Text width={'15%'}>
-            <strong>Set API Key:</strong>
-          </Text>
-          <Input
-            placeholder="api key"
-            onChange={(e) => {
-              setSelectedApiKey(e.target.value);
-            }}
-            value={selectedApiKey || ''}
-          />
-        </HStack>
-        <HStack paddingBottom={5}>
-          <Text width={'15%'}>
-            <strong>Use DKLS:</strong>
-          </Text>
-          <Select
-            defaultValue={`${!!useDKLS}`}
-            onChange={(e) => setUseDKLS(e.target.value === 'true')}
-          >
-            <option value={'true'}>true</option>
-            <option value={'false'}>false</option>
-          </Select>
-        </HStack>
-        {selectedView === 'WAGMI' && (
-          <VStack align="left" spacing={5}>
-            <WagmiComponent />
-          </VStack>
-        )}
-        {selectedView === 'OLD_VIEW' && (
-          <VStack align="left" spacing={5}>
-            <HStack paddingBottom={10}>
-              <Text width={'15%'}>
-                <strong>Set Modal Logo:</strong>
-              </Text>
+              <option value="WAGMI">Wagmi View</option>
+            </Select>
+          </HStack>
+          <HStack paddingBottom={10}>
+            <Text width={'15%'}>
+              <strong>Set API Key:</strong>
+            </Text>
+            <Input
+              placeholder="api key"
+              onChange={(e) => {
+                setSelectedApiKey(e.target.value);
+              }}
+              value={selectedApiKey || ''}
+            />
+          </HStack>
+          <HStack paddingBottom={10}>
+            <Text width={'15%'}>
+              <strong>Use DKLS:</strong>
+            </Text>
+            <Select
+              defaultValue={`${!!useDKLS}`}
+              onChange={(e) => setUseDKLS(e.target.value === 'true')}
+            >
+              <option value={'true'}>true</option>
+              <option value={'false'}>false</option>
+            </Select>
+          </HStack>
+          {selectedView === 'WAGMI' && (
+            <VStack align="left" spacing={5}>
+              <WagmiComponent />
+            </VStack>
+          )}
+          {selectedView === 'OLD_VIEW' && (
+            <VStack align="left" spacing={5}>
+              <HStack>
+                <Text width={'15%'}>
+                  <strong>Set Modal Logo:</strong>
+                </Text>
+                <Input
+                  placeholder="Modal logo"
+                  onChange={(e) => {
+                    setLogo(e.target.value);
+                  }}
+                  value={logo || ''}
+                />
+              </HStack>
+              <HStack>
+                <Text width={'15%'}>
+                  <strong>Set Modal Foreground:</strong>
+                </Text>
+                <Input
+                  placeholder="Modal foreground"
+                  onChange={(e) => {
+                    setForegroundColor(e.target.value);
+                  }}
+                  value={foregroundColor}
+                />
+              </HStack>
+              <HStack>
+                <Text width={'15%'}>
+                  <strong>Set Modal Background:</strong>
+                </Text>
+                <Input
+                  placeholder="Modal background"
+                  onChange={(e) => {
+                    setBackgroundColor(e.target.value);
+                  }}
+                  value={backgroundColor}
+                />
+              </HStack>
+
+              <HStack>
+                <Text width={'15%'}>
+                  <strong>Select Border Radius:</strong>
+                </Text>
+                <Select
+                  defaultValue={borderRadius}
+                  onChange={(e) =>
+                    setBorderRadius(e.target.value as Environment)
+                  }
+                >
+                  <option value="none">None</option>
+                  <option value="xs">XSmall</option>
+                  <option value="sm">Small</option>
+                  <option value="md">Medium</option>
+                  <option value="lg">Large</option>
+                  <option value="full">Full</option>
+                </Select>
+              </HStack>
+              <HStack>
+                <Button
+                  colorScheme="green"
+                  onClick={async () => {
+                    if (isSessionActive) {
+                      await capsule.logout();
+                      setIsSessionActive(false);
+                    } else {
+                      setModalIsOpen(true);
+                    }
+                  }}
+                >
+                  {isSessionActive ? 'Log out' : 'Open Modal'}
+                </Button>
+                {isSessionActive && (
+                  <>
+                    <Button
+                      colorScheme="red"
+                      variant="solid"
+                      disabled={deleteButtonDisabled}
+                      onClick={handleDeleteClick}
+                    >
+                      Delete User
+                    </Button>
+                    {!deletedEmail &&
+                      secondsToDelete > 0 &&
+                      deleteButtonDisabled &&
+                      emailPendingDeletion && (
+                        <Text>
+                          {emailPendingDeletion} will be deleted in{' '}
+                          {secondsToDelete}...
+                        </Text>
+                      )}
+                  </>
+                )}
+              </HStack>
+
               <Input
-                placeholder="Modal logo"
+                placeholder="pregen-e-mail"
                 onChange={(e) => {
-                  setLogo(e.target.value);
+                  setPregenEmail(e.target.value);
                 }}
-                value={logo || ''}
+                value={pregenEmail || ''}
               />
-            </HStack>
-            <HStack paddingBottom={10}>
-              <Text width={'15%'}>
-                <strong>Set Modal Dark Logo:</strong>
-              </Text>
-              <Input
-                placeholder="Modal dark logo"
-                onChange={(e) => {
-                  setDarkLogo(e.target.value);
-                }}
-                value={darkLogo || ''}
-              />
-            </HStack>
-            <HStack paddingBottom={10}>
-              <Button onClick={handleThemeToggle}>
-                {`Toggle modal theme: ${theme}`}
-              </Button>
-            </HStack>
-            <HStack>
               <Button
-                colorScheme="green"
+                colorScheme="teal"
                 onClick={async () => {
-                  if (isSessionActive) {
-                    await capsule.logout();
-                    setIsSessionActive(false);
-                  } else {
-                    setModalIsOpen(true);
+                  await capsule.createWalletPreGen(pregenEmail);
+                }}
+              >
+                Create Pregen Wallet
+              </Button>
+
+              <Text>
+                User Share: <strong>{capsule.getUserShare() || ''}</strong>
+              </Text>
+              <Input
+                placeholder="claim-pregen-user-share"
+                onChange={(e) => {
+                  setPregenUserShare(e.target.value);
+                }}
+                value={pregenUserShare || ''}
+              />
+              <Button
+                colorScheme="teal"
+                onClick={async () => {
+                  await capsule.setUserShare(pregenUserShare);
+                  console.log(await capsule.claimPregenWallet(pregenEmail));
+                }}
+              >
+                Claim Pregen Wallet
+              </Button>
+
+              <Button colorScheme="teal" onClick={checkIsSessionActive}>
+                Is Fully Logged In?
+              </Button>
+              <Text>
+                {isSessionActive ? 'Fully Logged In!' : 'Log In Pending...'}
+              </Text>
+
+              <Text>
+                Wallet Address:{' '}
+                <strong>
+                  {
+                    capsule.getWallets()?.[Object.keys(capsule.getWallets())[0]]
+                      ?.address
+                  }
+                </strong>
+              </Text>
+              {/* <Text>{userShare}</Text> */}
+
+              <Input
+                placeholder="message-to-sign"
+                onChange={(e) => {
+                  setMessageToSign(e.target.value);
+                }}
+                value={messageToSign || ''}
+              />
+              <Button
+                colorScheme="teal"
+                onClick={async () => {
+                  setEthersSignature(await signEthersMessage(messageToSign));
+                }}
+              >
+                Sign Message
+              </Button>
+              <Text>
+                Message Signature: <strong>{ethersSignature}</strong>
+              </Text>
+
+              <Text>To Address:</Text>
+              <Input
+                name="To Address"
+                onChange={(e) => setTxToAddress(e.target.value)}
+                value={txToAddress}
+              />
+              <Text>Value (gwei):</Text>
+              <Input
+                name="Value (gwei)"
+                onChange={(e) => setTxValue(e.target.value)}
+                value={txValue}
+              />
+              <Text>Gas Amount:</Text>
+              <Input
+                name="Gas Amount"
+                onChange={(e) => setTxGasAmount(e.target.value)}
+                value={txGasAmount}
+              />
+              <Text>Max Priority Fee Per Gas (gwei):</Text>
+              <Input
+                name="Max Priority Fee Per Gas (gwei)"
+                onChange={(e) => setTxMaxPriorityFeePerGas(e.target.value)}
+                value={txMaxPriorityFeePerGas}
+              />
+              <Text>Max Fee Per Gas (gwei):</Text>
+              <Input
+                name="Max Fee Per Gas (gwei)"
+                onChange={(e) => setTxMaxFeePerGas(e.target.value)}
+                value={txMaxFeePerGas}
+              />
+              <Text>Nonce:</Text>
+              <Input
+                name="Nonce"
+                onChange={(e) => setNonce(e.target.value)}
+                value={nonce}
+              />
+              <Text>Chain ID:</Text>
+              <Input
+                name="Chain ID"
+                onChange={(e) => setChainId(e.target.value)}
+                value={chainId}
+              />
+              <Text>Smart Contract ABI:</Text>
+              <Input
+                name="Smart Contract ABI"
+                onChange={(e) => setSmartContractAbi(e.target.value)}
+                value={smartContractAbi}
+              />
+              <Text>Smart Contract Function Name:</Text>
+              <Input
+                name="Smart Contract Function Name"
+                onChange={(e) => setSmartContractFunctionName(e.target.value)}
+                value={smartContractFunctionName}
+                placeholder={DEFAULT_SMART_CONTRACT_FUNCTION}
+              />
+              <Text>Smart Contract Function Args:</Text>
+              <Input
+                name="Smart Contract Function Args"
+                onChange={(e) => setSmartContractFunctionArgs(e.target.value)}
+                value={smartContractFunctionArgs}
+                placeholder={JSON.stringify(DEFAULT_SMART_CONTRACT_ARGS)}
+              />
+              <Text>Smart Contract Byte Code:</Text>
+              <Input
+                name="Smart Contract Byte Code"
+                onChange={(e) => setSmartContractByteCode(e.target.value)}
+                value={smartContractByteCode}
+              />
+
+              <Button
+                colorScheme="teal"
+                onClick={async () => {
+                  const walletId =
+                    capsule.getWallets()?.[Object.keys(capsule.getWallets())[0]]
+                      ?.id;
+                  const tx = await createTransaction(
+                    txToAddress,
+                    txValue,
+                    txGasAmount,
+                    txMaxPriorityFeePerGas,
+                    txMaxFeePerGas,
+                    nonce,
+                    chainId,
+                    smartContractAbi,
+                    smartContractFunctionName,
+                    smartContractFunctionArgs
+                      ? JSON.parse(smartContractFunctionArgs)
+                      : [],
+                    smartContractByteCode,
+                  );
+                  await sendEthersTransaction();
+                  await sendViemTransaction();
+                  const res = await capsule.sendTransaction(
+                    walletId,
+                    tx,
+                    `${chainId}`,
+                  );
+                  if ((res as DeniedSignatureResWithUrl).transactionReviewUrl) {
+                    setTransactionReviewUrl(
+                      (res as DeniedSignatureResWithUrl).transactionReviewUrl,
+                    );
                   }
                 }}
               >
-                {isSessionActive ? 'Log out' : 'Open Modal'}
+                Send Transaction
               </Button>
-              {isSessionActive && (
-                <>
-                  <Button
-                    colorScheme="red"
-                    variant="solid"
-                    disabled={deleteButtonDisabled}
-                    onClick={handleDeleteClick}
-                  >
-                    Delete User
-                  </Button>
-                  {!deletedEmail &&
-                    secondsToDelete > 0 &&
-                    deleteButtonDisabled &&
-                    emailPendingDeletion && (
-                      <Text>
-                        {emailPendingDeletion} will be deleted in{' '}
-                        {secondsToDelete}...
-                      </Text>
-                    )}
-                </>
+              {transactionReviewUrl && (
+                <Text>Transaction Review URL is: {transactionReviewUrl}</Text>
               )}
-            </HStack>
 
-            <Input
-              placeholder="pregen-e-mail"
-              onChange={(e) => {
-                setPregenEmail(e.target.value);
-              }}
-              value={pregenEmail || ''}
-            />
-            <Button
-              colorScheme="teal"
-              onClick={async () => {
-                await capsule.createWalletPreGen(pregenEmail);
-              }}
-            >
-              Create Pregen Wallet
-            </Button>
-
-            <Text>
-              User Share: <strong>{capsule.getUserShare() || ''}</strong>
-            </Text>
-            <Input
-              placeholder="claim-pregen-user-share"
-              onChange={(e) => {
-                setPregenUserShare(e.target.value);
-              }}
-              value={pregenUserShare || ''}
-            />
-            <Button
-              colorScheme="teal"
-              onClick={async () => {
-                await capsule.setUserShare(pregenUserShare);
-                console.log(await capsule.claimPregenWallet(pregenEmail));
-              }}
-            >
-              Claim Pregen Wallet
-            </Button>
-
-            <Button colorScheme="teal" onClick={checkIsSessionActive}>
-              Is Fully Logged In?
-            </Button>
-            <Text>
-              {isSessionActive ? 'Fully Logged In!' : 'Log In Pending...'}
-            </Text>
-
-            <Text>
-              Wallet Address:{' '}
-              <strong>
-                {
-                  capsule.getWallets()?.[Object.keys(capsule.getWallets())[0]]
-                    ?.address
-                }
-              </strong>
-            </Text>
-            {/* <Text>{userShare}</Text> */}
-
-            <Input
-              placeholder="message-to-sign"
-              onChange={(e) => {
-                setMessageToSign(e.target.value);
-              }}
-              value={messageToSign || ''}
-            />
-            <Button
-              colorScheme="teal"
-              onClick={async () => {
-                setEthersSignature(await signEthersMessage(messageToSign));
-              }}
-            >
-              Sign Message
-            </Button>
-            <Text>
-              Message Signature: <strong>{ethersSignature}</strong>
-            </Text>
-
-            <Text>To Address:</Text>
-            <Input
-              name="To Address"
-              onChange={(e) => setTxToAddress(e.target.value)}
-              value={txToAddress}
-            />
-            <Text>Value (gwei):</Text>
-            <Input
-              name="Value (gwei)"
-              onChange={(e) => setTxValue(e.target.value)}
-              value={txValue}
-            />
-            <Text>Gas Amount:</Text>
-            <Input
-              name="Gas Amount"
-              onChange={(e) => setTxGasAmount(e.target.value)}
-              value={txGasAmount}
-            />
-            <Text>Max Priority Fee Per Gas (gwei):</Text>
-            <Input
-              name="Max Priority Fee Per Gas (gwei)"
-              onChange={(e) => setTxMaxPriorityFeePerGas(e.target.value)}
-              value={txMaxPriorityFeePerGas}
-            />
-            <Text>Max Fee Per Gas (gwei):</Text>
-            <Input
-              name="Max Fee Per Gas (gwei)"
-              onChange={(e) => setTxMaxFeePerGas(e.target.value)}
-              value={txMaxFeePerGas}
-            />
-            <Text>Nonce:</Text>
-            <Input
-              name="Nonce"
-              onChange={(e) => setNonce(e.target.value)}
-              value={nonce}
-            />
-            <Text>Chain ID:</Text>
-            <Input
-              name="Chain ID"
-              onChange={(e) => setChainId(e.target.value)}
-              value={chainId}
-            />
-            <Text>Smart Contract ABI:</Text>
-            <Input
-              name="Smart Contract ABI"
-              onChange={(e) => setSmartContractAbi(e.target.value)}
-              value={smartContractAbi}
-            />
-            <Text>Smart Contract Function Name:</Text>
-            <Input
-              name="Smart Contract Function Name"
-              onChange={(e) => setSmartContractFunctionName(e.target.value)}
-              value={smartContractFunctionName}
-              placeholder={DEFAULT_SMART_CONTRACT_FUNCTION}
-            />
-            <Text>Smart Contract Function Args:</Text>
-            <Input
-              name="Smart Contract Function Args"
-              onChange={(e) => setSmartContractFunctionArgs(e.target.value)}
-              value={smartContractFunctionArgs}
-              placeholder={JSON.stringify(DEFAULT_SMART_CONTRACT_ARGS)}
-            />
-            <Text>Smart Contract Byte Code:</Text>
-            <Input
-              name="Smart Contract Byte Code"
-              onChange={(e) => setSmartContractByteCode(e.target.value)}
-              value={smartContractByteCode}
-            />
-
-            <Button
-              colorScheme="teal"
-              onClick={async () => {
-                const walletId =
-                  capsule.getWallets()?.[Object.keys(capsule.getWallets())[0]]
-                    ?.id;
-                const tx = await createTransaction(
-                  txToAddress,
-                  txValue,
-                  txGasAmount,
-                  txMaxPriorityFeePerGas,
-                  txMaxFeePerGas,
-                  nonce,
-                  chainId,
-                  smartContractAbi,
-                  smartContractFunctionName,
-                  smartContractFunctionArgs
-                    ? JSON.parse(smartContractFunctionArgs)
-                    : [],
-                  smartContractByteCode,
-                );
-                await sendEthersTransaction();
-                await sendViemTransaction();
-                const res = await capsule.sendTransaction(
-                  walletId,
-                  tx,
-                  `${chainId}`,
-                );
-                if ((res as DeniedSignatureResWithUrl).transactionReviewUrl) {
-                  setTransactionReviewUrl(
-                    (res as DeniedSignatureResWithUrl).transactionReviewUrl,
-                  );
-                }
-              }}
-            >
-              Send Transaction
-            </Button>
-            {transactionReviewUrl && (
-              <Text>Transaction Review URL is: {transactionReviewUrl}</Text>
-            )}
-
-            <Button
-              colorScheme="red"
-              onClick={async () => {
-                await capsule.logout();
-                capsule.clearStorage();
-              }}
-            >
-              Logout and Clear Storage
-            </Button>
-          </VStack>
-        )}
-      </Container>
-      <CapsuleModal
-        isOpen={modalIsOpen}
-        capsule={capsule}
-        appName="Example"
-        onClose={handleOnClose}
-        oAuthMethods={[
-          OAuthMethod.GOOGLE,
-          OAuthMethod.FACEBOOK,
-          OAuthMethod.APPLE,
-          OAuthMethod.TWITTER,
-          OAuthMethod.DISCORD,
-        ]}
-        twoFactorAuthEnabled
-        theme={theme}
-        logo={logo !== '' ? logo : undefined}
-        logoDark={darkLogo !== '' ? darkLogo : logo !== '' ? logo : undefined}
-      />
-    </ChakraProvider></>
+              <Button
+                colorScheme="red"
+                onClick={async () => {
+                  await capsule.logout();
+                  capsule.clearStorage();
+                }}
+              >
+                Logout and Clear Storage
+              </Button>
+            </VStack>
+          )}
+        </Container>
+        <CapsuleModal
+          isOpen={modalIsOpen}
+          capsule={capsule}
+          appName="Example"
+          onClose={handleOnClose}
+          oAuthMethods={[
+            OAuthMethod.GOOGLE,
+            OAuthMethod.FACEBOOK,
+            OAuthMethod.APPLE,
+            OAuthMethod.TWITTER,
+            OAuthMethod.DISCORD,
+          ]}
+          twoFactorAuthEnabled
+          theme={{
+            backgroundColor,
+            foregroundColor,
+            borderRadius,
+          }}
+          logo={logo !== '' ? logo : undefined}
+        />
+      </ChakraProvider>
+    </>
   );
 }
 

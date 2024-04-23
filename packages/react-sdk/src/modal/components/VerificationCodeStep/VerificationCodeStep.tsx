@@ -6,7 +6,11 @@ import {
   CodeChangeEventDetail,
   CpslCodeInputCustomEvent,
 } from '@usecapsule/core-components';
-import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
+import {
+  useCapsuleStore,
+  useModalStore,
+  useUserInfoStore,
+} from '../../stores/index.js';
 import {
   ClickableText,
   Heading,

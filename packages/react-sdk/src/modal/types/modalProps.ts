@@ -1,8 +1,7 @@
 import CapsuleWeb, { OAuthMethod } from '@usecapsule/web-sdk';
-import { Theme } from './theme.js';
-import { Branding } from './branding.js';
+import { Theme } from '@usecapsule/react-components';
 
-export interface CapsuleModalV2Props {
+export interface CapsuleModalProps {
   /**
    * Your CapsuleWeb instance.
    */
@@ -22,24 +21,19 @@ export interface CapsuleModalV2Props {
    */
   oAuthMethods?: OAuthMethod[];
   /**
-   * Theme to be used throughout the modal. Affects which default branding is used and what OAuth logos are used.
-   * Defaults to the light.
+   * Whether or not to allow for email login. If true, only OAuth login will be available.
+   * Defaults to `false`.
+   */
+  disableEmailLogin?: boolean;
+  /**
+   * Theming to be used throughout the modal.
    */
   theme?: Theme;
-  /**
-   * Branding to customize the modal.
-   * Defaults to the Capsule branding.
-   */
-  branding?: Branding;
   /**
    * Logo to be shown throughout the modal.
    * Defaults to the Capsule logo.
    */
   logo?: string;
-  /**
-   * Optional logo to be shown when the modal is in dark theme.
-   */
-  logoDark?: string;
   appName?: string;
   onRampCurrency?: string;
   onRampAvailable?: boolean;
