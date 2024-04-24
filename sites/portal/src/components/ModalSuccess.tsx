@@ -1,7 +1,5 @@
-import { ButtonIcon, Heading, Hero, Subheading } from './common';
-import { CpslButton } from '@usecapsule/react-components';
+import { Heading, Hero, Subheading } from './common';
 import { IconType } from '@usecapsule/core-components';
-import { useModalOutletContext } from '../hooks/useModalOutletContext';
 
 interface ModalSuccessProps {
   heading: string;
@@ -9,13 +7,7 @@ interface ModalSuccessProps {
   icon: IconType;
 }
 
-export const ModalSuccess = ({
-  heading,
-  subHeading,
-  icon,
-}: ModalSuccessProps) => {
-  const { partner } = useModalOutletContext();
-
+export const ModalSuccess = ({ heading, subHeading, icon }: ModalSuccessProps) => {
   return (
     <>
       <Hero icon={icon} />

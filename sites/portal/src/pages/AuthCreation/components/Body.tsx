@@ -12,11 +12,7 @@ interface BodyProps {
   onAddThisDeviceClick: () => void;
 }
 
-export const Body = ({
-  step,
-  isForNewDevice,
-  onAddThisDeviceClick,
-}: BodyProps) => {
+export const Body = ({ step, isForNewDevice, onAddThisDeviceClick }: BodyProps) => {
   const { partner } = useModalOutletContext();
 
   const Content = () => {

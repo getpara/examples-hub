@@ -1,10 +1,5 @@
 import { CpslSpinner } from '@usecapsule/react-components';
-import {
-  Heading,
-  CreationStepSubheading,
-  MainContainer,
-  SpinnerContainer,
-} from '../common.js';
+import { Heading, CreationStepSubheading, MainContainer, SpinnerContainer } from '../common.js';
 
 export const AwaitingOAuthStep = () => {
   return (

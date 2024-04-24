@@ -75,22 +75,11 @@ export const CapsuleBlack = () => (
 );
 
 export const ShieldCheck = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="14"
-    height="15"
-    viewBox="0 0 14 15"
-    fill="none"
-  >
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="15" viewBox="0 0 14 15" fill="none">
     <path
       d="M2.1875 6.77266V3.5625C2.1875 3.44647 2.23359 3.33519 2.31564 3.25314C2.39769 3.17109 2.50897 3.125 2.625 3.125H11.375C11.491 3.125 11.6023 3.17109 11.6844 3.25314C11.7664 3.33519 11.8125 3.44647 11.8125 3.5625V6.77266C11.8125 11.3664 7.91328 12.8867 7.13672 13.1438C7.0485 13.1764 6.9515 13.1764 6.86328 13.1438C6.08672 12.8867 2.1875 11.3664 2.1875 6.77266Z"
       fill="#34A853"
     />
-    <path
-      d="M9.40625 6.1875L6.19609 9.25L4.59375 7.71875"
-      stroke="#FAFAFA"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d="M9.40625 6.1875L6.19609 9.25L4.59375 7.71875" stroke="#FAFAFA" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );

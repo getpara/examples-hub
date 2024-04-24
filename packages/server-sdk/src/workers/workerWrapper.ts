@@ -7,10 +7,13 @@ const RELATIVE_WORKER_PATH = './worker.js';
 const absolutePath = path.join(__dirname, RELATIVE_WORKER_PATH);
 const workerURL = pathToFileURL(absolutePath);
 let worker: Worker | undefined;
-const resFunctionMap: Record<string, {
-  fn: (arg: any) => Promise<void>,
-  timeoutId: NodeJS.Timeout,
-}> = {};
+const resFunctionMap: Record<
+  string,
+  {
+    fn: (arg: any) => Promise<void>;
+    timeoutId: NodeJS.Timeout;
+  }
+> = {};
 
 function removeWorkId(workId: string, skipClearTimeout?: boolean) {
   const { timeoutId } = resFunctionMap[workId];
@@ -33,14 +36,14 @@ export async function setupWorker(resFunction: (arg: any) => Promise<void>, work
   if (!worker || !worker.threadId) {
     worker = new Worker(workerURL);
 
-    const onmessage = async (message: { functionType: string; params: any; workId: string; }) => {
+    const onmessage = async (message: { functionType: string; params: any; workId: string }) => {
       const { workId: messageWorkId } = message;
       delete message.workId;
 
       await resFunctionMap[messageWorkId].fn(message);
       removeWorkId(messageWorkId);
     };
-  
+
     worker.on('message', onmessage);
     worker.on('error', (err) => {
       throw err;
@@ -50,6 +53,5 @@ export async function setupWorker(resFunction: (arg: any) => Promise<void>, work
     });
   }
 
-  
   return worker;
 }

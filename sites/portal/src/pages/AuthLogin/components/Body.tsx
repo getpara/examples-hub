@@ -15,24 +15,13 @@ interface BodyProps {
   onAddDeviceClick: () => void;
 }
 
-export const Body = ({
-  addDeviceUrl,
-  step,
-  isAddingNewDevice,
-  onLoginClick,
-  onAddDeviceClick,
-}: BodyProps) => {
+export const Body = ({ addDeviceUrl, step, isAddingNewDevice, onLoginClick, onAddDeviceClick }: BodyProps) => {
   const { partner } = useModalOutletContext();
 
   const Content = () => {
     switch (step) {
       case AuthLoginStep.SELECT_FLOW: {
-        return (
-          <SelectFlowStep
-            onLoginClick={onLoginClick}
-            onAddDeviceClick={onAddDeviceClick}
-          />
-        );
+        return <SelectFlowStep onLoginClick={onLoginClick} onAddDeviceClick={onAddDeviceClick} />;
       }
       case AuthLoginStep.WAITING: {
         return <ModalLoading heading="Waiting for Passkey..." />;
@@ -40,11 +29,7 @@ export const Body = ({
       case AuthLoginStep.SUCCESS: {
         return (
           <ModalSuccess
-            heading={
-              isAddingNewDevice
-                ? 'Passkey Ready To Be Added'
-                : 'You’re Logged In!'
-            }
+            heading={isAddingNewDevice ? 'Passkey Ready To Be Added' : 'You’re Logged In!'}
             subHeading={
               isAddingNewDevice
                 ? 'You can now close this window and return to your other device to register the new Passkey.'

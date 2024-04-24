@@ -6,11 +6,7 @@ import {
   parseCredentialCreationRes,
 } from '@usecapsule/web-sdk';
 import { ENV } from '../constants';
-import {
-  EncryptorType,
-  KeyType,
-  PublicKeyStatus,
-} from '@usecapsule/user-management-client';
+import { EncryptorType, KeyType, PublicKeyStatus } from '@usecapsule/user-management-client';
 import capsule from '../clients/capsule';
 import { userManagementClient } from '../clients/userManagementClient';
 
@@ -20,15 +16,8 @@ export async function authCreation(
   biometricId: string,
   isForNewDevice: boolean,
 ): Promise<void> {
-  const { creds, userHandle, algorithm } = await createCredential(
-    ENV,
-    userId,
-    email,
-  );
-  const { cosePublicKey, clientDataJSON } = parseCredentialCreationRes(
-    creds,
-    algorithm,
-  );
+  const { creds, userHandle, algorithm } = await createCredential(ENV, userId, email);
+  const { cosePublicKey, clientDataJSON } = parseCredentialCreationRes(creds, algorithm);
   const publicKeyHex = await getPublicKeyFromSignature(capsule.ctx, userHandle);
   await capsule.ctx.capsuleClient.patchSessionPublicKey(userId, biometricId, {
     publicKey: creds.id,
@@ -43,16 +32,10 @@ export async function authCreation(
   // since we are redirecting to auth creation route from auth login route, the session initially
   // setup should still be available here
   if (isForNewDevice) {
-    const temporaryShares = (await capsule.getTransmissionKeyShares(true)).data
-      .temporaryShares;
+    const temporaryShares = (await capsule.getTransmissionKeyShares(true)).data.temporaryShares;
     const biometricEncryptedKeyshares = temporaryShares.map((share) => {
-      const decryptedShare = decryptWithKeyPair(
-        capsule.loginEncryptionKeyPair,
-        share.encryptedShare,
-        share.encryptedKey,
-      );
-      const { encryptedMessageHex, encryptedKeyHex } =
-        encryptWithDerivedPublicKey(publicKeyHex, decryptedShare);
+      const decryptedShare = decryptWithKeyPair(capsule.loginEncryptionKeyPair, share.encryptedShare, share.encryptedKey);
+      const { encryptedMessageHex, encryptedKeyHex } = encryptWithDerivedPublicKey(publicKeyHex, decryptedShare);
 
       return {
         walletId: share.walletId,
@@ -64,9 +47,6 @@ export async function authCreation(
       };
     });
 
-    await userManagementClient.uploadUserKeyShares(
-      userId,
-      biometricEncryptedKeyshares,
-    );
+    await userManagementClient.uploadUserKeyShares(userId, biometricEncryptedKeyshares);
   }
 }

@@ -6,12 +6,12 @@ import { signMessage, sendTransaction, signTransaction } from './wallet/signing.
 import { BackupKitEmailProps } from '@usecapsule/user-management-client';
 
 export class WebUtils implements PlatformUtils {
-  keygen (
+  keygen(
     ctx: Ctx,
     userId: string,
     secretKey: string | null, // should be acceptable as null in RN as we don't pre-gen them
     sessionCookie: string,
-    emailProps: BackupKitEmailProps = {}
+    emailProps: BackupKitEmailProps = {},
   ): Promise<{
     signer: string;
     walletId: string;
@@ -19,13 +19,13 @@ export class WebUtils implements PlatformUtils {
     return keygen(ctx, userId, secretKey, true, sessionCookie, emailProps);
   }
 
-  preKeygen (
+  preKeygen(
     ctx: Ctx,
     partnerId: string,
     email: string,
     secretKey: string | null, // should be acceptable as null in RN as we don't pre-gen them
     sessionCookie: string,
-    ): Promise<{
+  ): Promise<{
     signer: string;
     walletId: string;
   }> {
@@ -70,7 +70,10 @@ export class WebUtils implements PlatformUtils {
     return sendTransaction(ctx, userId, walletId, share, tx, chainId, sessionCookie, isDKLS);
   }
 
-  signHash(_address: string, _hash: string): Promise<{
+  signHash(
+    _address: string,
+    _hash: string,
+  ): Promise<{
     v: number;
     r: Buffer;
     s: Buffer;

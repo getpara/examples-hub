@@ -15,9 +15,7 @@ const SESSION_STORAGE_AUTH_LOGIN_STEP = '@CAPSULE/loginFlowStep';
 export const AuthLogin = () => {
   const [urlForNewDeviceLogin, setUrlForNewDeviceLogin] = useState<string>('');
   const [step, setStepState] = useState<AuthLoginStep>(
-    (sessionStorage.getItem(SESSION_STORAGE_AUTH_LOGIN_STEP) as
-      | AuthLoginStep
-      | undefined) ?? AuthLoginStep.SELECT_FLOW,
+    (sessionStorage.getItem(SESSION_STORAGE_AUTH_LOGIN_STEP) as AuthLoginStep | undefined) ?? AuthLoginStep.SELECT_FLOW,
   );
   function setStep(step: AuthLoginStep) {
     setStepState(step);
@@ -28,10 +26,8 @@ export const AuthLogin = () => {
   const paramsEmail = decodeURIComponent(searchParams.get('email'));
   const encryptionKey = searchParams.get('encryptionKey');
   const sessionId = searchParams.get('sessionId');
-  const newDeviceSessionLookupId =
-    searchParams.get('newDeviceSessionId') || undefined;
-  const newDeviceEncryptionKey =
-    searchParams.get('newDeviceEncryptionKey') || undefined;
+  const newDeviceSessionLookupId = searchParams.get('newDeviceSessionId') || undefined;
+  const newDeviceEncryptionKey = searchParams.get('newDeviceEncryptionKey') || undefined;
   const paramsPartnerId = searchParams.get('partnerId');
   const paramsSkipAutoLogin = searchParams.get('skipAutoLogin') === 'true';
 
@@ -44,36 +40,20 @@ export const AuthLogin = () => {
   const login = useCallback(async () => {
     setStep(AuthLoginStep.WAITING);
     try {
-      await authLogin(
-        paramsEmail,
-        sessionId,
-        encryptionKey,
-        newDeviceSessionLookupId,
-        newDeviceEncryptionKey,
-      );
+      await authLogin(paramsEmail, sessionId, encryptionKey, newDeviceSessionLookupId, newDeviceEncryptionKey);
 
       setStep(AuthLoginStep.SUCCESS);
       setTimeout(function () {
         window.close();
       }, REDIRECT_TIMEOUT);
     } catch (err) {
-      if (
-        err.message.includes(
-          'The operation either timed out or was not allowed',
-        )
-      ) {
+      if (err.message.includes('The operation either timed out or was not allowed')) {
         setStep(AuthLoginStep.SELECT_FLOW);
       } else {
         console.error('Error retrieving passkey: ', err);
       }
     }
-  }, [
-    paramsEmail,
-    sessionId,
-    encryptionKey,
-    newDeviceSessionLookupId,
-    newDeviceEncryptionKey,
-  ]);
+  }, [paramsEmail, sessionId, encryptionKey, newDeviceSessionLookupId, newDeviceEncryptionKey]);
 
   useEffect(() => {
     async function getTemporaryShares() {
@@ -85,11 +65,8 @@ export const AuthLogin = () => {
         }
         const touchRes = await userManagementClient.touchSession();
         await capsule.setUserId(touchRes.data.userId);
-        const fetchedWallets = (await capsule.fetchWallets()).filter(
-          (wallet) => !!wallet.address,
-        );
-        const temporaryShares = (await capsule.getTransmissionKeyShares(true))
-          .data.temporaryShares;
+        const fetchedWallets = (await capsule.fetchWallets()).filter((wallet) => !!wallet.address);
+        const temporaryShares = (await capsule.getTransmissionKeyShares(true)).data.temporaryShares;
 
         if (temporaryShares.length === fetchedWallets.length) {
           const authCreationURL = await capsule.getSetUpBiometricsURL(true);

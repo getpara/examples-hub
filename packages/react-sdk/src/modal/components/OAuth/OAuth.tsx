@@ -1,11 +1,7 @@
 import { CpslTileButton } from '@usecapsule/react-components';
 import { OAuthMethod } from '@usecapsule/web-sdk';
 import styled from 'styled-components';
-import {
-  useCapsuleStore,
-  useModalStore,
-  useUserInfoStore,
-} from '../../stores/index.js';
+import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { openPopup } from '../../utils/openPopup.js';
 import { oAuthLogos } from './config.js';
@@ -24,19 +20,12 @@ export const OAuth = ({ methods }: OAuthProps) => {
   const setFlow = useModalStore((state) => state.setFlow);
   const setStep = useModalStore((state) => state.setStep);
   const setEmail = useUserInfoStore((state) => state.setEmail);
-  const setWebAuthURLForLogin = useModalStore(
-    (state) => state.setWebAuthURLForLogin,
-  );
-  const setWebAuthURLForCreate = useModalStore(
-    (state) => state.setWebAuthURLForCreate,
-  );
-  const showAll = useModalStore(
-    (state) => state.step === ModalStep.SIGN_UP_ALL_OAUTH,
-  );
+  const setWebAuthURLForLogin = useModalStore((state) => state.setWebAuthURLForLogin);
+  const setWebAuthURLForCreate = useModalStore((state) => state.setWebAuthURLForCreate);
+  const showAll = useModalStore((state) => state.step === ModalStep.SIGN_UP_ALL_OAUTH);
   const hasMore = methods.length > HAS_MORE_LENGTH;
 
-  const methodsToShow =
-    showAll || !hasMore ? methods : methods.slice(0, HAS_MORE_LENGTH - 1);
+  const methodsToShow = showAll || !hasMore ? methods : methods.slice(0, HAS_MORE_LENGTH - 1);
 
   const handleShowAll = () => {
     setStep(ModalStep.SIGN_UP_ALL_OAUTH);
@@ -71,19 +60,10 @@ export const OAuth = ({ methods }: OAuthProps) => {
   return (
     <OAuthContainer>
       {methodsToShow.map((method) => (
-        <StyledCpslTileButton
-          isDark={isDark}
-          key={method}
-          icon={oAuthLogos[method]}
-          onClick={handleMethodClick(method)}
-        />
+        <StyledCpslTileButton isDark={isDark} key={method} icon={oAuthLogos[method]} onClick={handleMethodClick(method)} />
       ))}
       {!showAll && hasMore && (
-        <MoreButton
-          isDark={isDark}
-          icon="moreLoginOptions"
-          onClick={handleShowAll}
-        >
+        <MoreButton isDark={isDark} icon="moreLoginOptions" onClick={handleShowAll}>
           <MoreText>MORE</MoreText>
         </MoreButton>
       )}

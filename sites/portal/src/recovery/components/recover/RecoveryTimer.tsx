@@ -20,10 +20,7 @@ interface TimeRemaining {
   message?: string;
 }
 
-const getTimeRemaining = (
-  status: RecoveryStatus,
-  initiatedAt: Date,
-): TimeRemaining => {
+const getTimeRemaining = (status: RecoveryStatus, initiatedAt: Date): TimeRemaining => {
   const now = new Date();
   let targetTime: Date;
 
@@ -57,9 +54,7 @@ const getTimeRemaining = (
       return { hours: 0, minutes: 0, seconds: 0 };
   }
 
-  const totalSeconds = Math.floor(
-    (targetTime.getTime() - now.getTime()) / 1000,
-  );
+  const totalSeconds = Math.floor((targetTime.getTime() - now.getTime()) / 1000);
   return {
     hours: Math.floor(totalSeconds / SECONDS_IN_HOUR),
     minutes: Math.floor((totalSeconds % SECONDS_IN_HOUR) / SECONDS_IN_MINUTE),
@@ -68,7 +63,6 @@ const getTimeRemaining = (
 };
 
 const RecoveryMessage = ({ status }) => {
-
   const { is2FAFlow } = useContext(TwoFactorContext);
 
   switch (status as RecoveryStatus) {
@@ -98,10 +92,7 @@ const RecoveryMessage = ({ status }) => {
       return (
         <VStack flexGrow={1}>
           <h2>Recovery Status: Attempt Expired</h2>
-          <p>
-            Too much time elapsed from when the Recovery Attempt was initiated.
-            Please restart the recovery process
-          </p>
+          <p>Too much time elapsed from when the Recovery Attempt was initiated. Please restart the recovery process</p>
         </VStack>
       );
     case RecoveryStatus.FINISHED:
@@ -129,11 +120,7 @@ const RecoveryTimer: React.FC = () => {
       const remainingTime = getTimeRemaining(status, initiatedAt);
       setTimeRemaining(remainingTime);
 
-      if (
-        remainingTime.hours === 0 &&
-        remainingTime.minutes === 0 &&
-        remainingTime.seconds === 0
-      ) {
+      if (remainingTime.hours === 0 && remainingTime.minutes === 0 && remainingTime.seconds === 0) {
         switch (status) {
           case RecoveryStatus.INITIATED:
             setStatus(RecoveryStatus.READY);

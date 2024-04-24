@@ -1,23 +1,11 @@
-import {
-  CpslButton,
-  CpslDivider,
-  CpslIcon,
-  CpslInput,
-} from '@usecapsule/react-components';
-import {
-  CpslInputCustomEvent,
-  InputInputEventDetail,
-} from '@usecapsule/core-components';
+import { CpslButton, CpslDivider, CpslIcon, CpslInput } from '@usecapsule/react-components';
+import { CpslInputCustomEvent, InputInputEventDetail } from '@usecapsule/core-components';
 import { useState } from 'react';
 import styled from 'styled-components';
 import { OAuth } from '../OAuth/OAuth.js';
 import { OAuthMethod } from '@usecapsule/web-sdk';
 import { ModalStep } from '../../utils/steps.js';
-import {
-  useCapsuleStore,
-  useModalStore,
-  useUserInfoStore,
-} from '../../stores/index.js';
+import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { useThemeStore } from '../../stores/theme/useThemeStore.js';
 import { CapsuleBlack, CapsuleWhite } from '../Icons.js';
 
@@ -26,24 +14,17 @@ interface SignUpStepProps {
   disableEmailLogin: boolean;
 }
 
-export const SignUpStep = ({
-  oAuthMethods,
-  disableEmailLogin,
-}: SignUpStepProps) => {
+export const SignUpStep = ({ oAuthMethods, disableEmailLogin }: SignUpStepProps) => {
   const isDark = useThemeStore((state) => state.isDark);
   const logo = useThemeStore((state) => state.getLogo());
   const appName = useThemeStore((state) => state.appName);
   const capsule = useCapsuleStore((state) => state.capsule);
   const setFlow = useModalStore((state) => state.setFlow);
   const setStep = useModalStore((state) => state.setStep);
-  const showAllOAuth = useModalStore(
-    (state) => state.step === ModalStep.SIGN_UP_ALL_OAUTH,
-  );
+  const showAllOAuth = useModalStore((state) => state.step === ModalStep.SIGN_UP_ALL_OAUTH);
   const setEmail = useUserInfoStore((state) => state.setEmail);
   const email = useUserInfoStore((state) => state.email);
-  const setWebAuthURLForLogin = useModalStore(
-    (state) => state.setWebAuthURLForLogin,
-  );
+  const setWebAuthURLForLogin = useModalStore((state) => state.setWebAuthURLForLogin);
 
   const [emailError, setEmailError] = useState('');
 
@@ -78,9 +59,7 @@ export const SignUpStep = ({
     setStep(ModalStep.VERIFICATION_CODE);
   };
 
-  const handleEmailInput = (
-    ev: CpslInputCustomEvent<InputInputEventDetail>,
-  ) => {
+  const handleEmailInput = (ev: CpslInputCustomEvent<InputInputEventDetail>) => {
     setEmailError('');
     setEmail(ev.detail.value);
   };

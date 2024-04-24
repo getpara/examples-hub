@@ -5,9 +5,7 @@ import type { RecoveryStatus } from '@usecapsule/web-sdk';
 const useStatusState = (initialValue: RecoveryStatus | null) => {
   const [state, setState] = useState<RecoveryStatus | null>(() => {
     const storedValue = localStorage.getItem(`${STORAGE_PREFIX}status`);
-    return storedValue !== null
-      ? (storedValue as RecoveryStatus)
-      : initialValue;
+    return storedValue !== null ? (storedValue as RecoveryStatus) : initialValue;
   });
 
   const setStatus = (value: RecoveryStatus | null) => {

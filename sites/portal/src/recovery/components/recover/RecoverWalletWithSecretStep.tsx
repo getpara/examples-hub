@@ -1,12 +1,4 @@
-import {
-  VStack,
-  Spacer,
-  HStack,
-  Button,
-  Box,
-  Text,
-  Textarea,
-} from '@chakra-ui/react';
+import { VStack, Spacer, HStack, Button, Box, Text, Textarea } from '@chakra-ui/react';
 import { useContext, useState } from 'react';
 import capsule from '../../../clients/capsule';
 import { KeyContainer } from '@usecapsule/web-sdk';
@@ -17,19 +9,10 @@ import UserContext from '../../contexts/UserContext';
 import WalletContext from '../../contexts/WalletContext';
 import VerifyCode from '../../../assets/verifyCode';
 
-async function recoverUserShare(
-  userId: string,
-  walletId: string,
-  serializedRecoveryShare: string,
-): Promise<string> {
-  const recoveryPrivateKeyContainer = KeyContainer.buildFrom(
-    serializedRecoveryShare,
-  );
+async function recoverUserShare(userId: string, walletId: string, serializedRecoveryShare: string): Promise<string> {
+  const recoveryPrivateKeyContainer = KeyContainer.buildFrom(serializedRecoveryShare);
 
-  const res = await capsule.ctx.capsuleClient.recoverUserShare(
-    userId,
-    walletId,
-  );
+  const res = await capsule.ctx.capsuleClient.recoverUserShare(userId, walletId);
   return recoveryPrivateKeyContainer.decrypt(res.data.keyShare.encryptedShare);
 }
 
@@ -38,9 +21,10 @@ type RecoverWalletWithSecretStepProps = {
   setUserShare: (userShare: string | null) => void;
 };
 
-const RecoverWalletWithSecretStep: React.FC<
-  RecoverWalletWithSecretStepProps
-> = ({ setWebAuthURLForCreate, setUserShare }) => {
+const RecoverWalletWithSecretStep: React.FC<RecoverWalletWithSecretStepProps> = ({
+  setWebAuthURLForCreate,
+  setUserShare,
+}) => {
   const { setCurrentRecoveryStep } = useContext(RecoveryStepContext);
   const { email } = useContext(EmailContext);
   const { id: walletId } = useContext(WalletContext);
@@ -63,8 +47,8 @@ const RecoverWalletWithSecretStep: React.FC<
             Confirm Recovery Secret
           </Text>
           <Text textColor="brand.content" fontSize="s">
-            In onboarding you should have received an email titled "Capsule
-            Recovery". Find that text and paste it into the field below.
+            In onboarding you should have received an email titled "Capsule Recovery". Find that text and paste it into the
+            field below.
           </Text>
         </Box>
       </HStack>

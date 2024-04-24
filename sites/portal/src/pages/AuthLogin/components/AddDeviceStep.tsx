@@ -1,16 +1,6 @@
 import styled from 'styled-components';
-import {
-  FilledDisabledInput,
-  Heading,
-  Subheading,
-  Text,
-} from '../../../components/common';
-import {
-  CpslButton,
-  CpslIcon,
-  CpslQrCode,
-  CpslSpinner,
-} from '@usecapsule/react-components';
+import { FilledDisabledInput, Heading, Subheading, Text } from '../../../components/common';
+import { CpslButton, CpslIcon, CpslQrCode, CpslSpinner } from '@usecapsule/react-components';
 import { useCopyToClipboard } from '../../../hooks/useCopyToClipboard';
 
 interface AddDeviceStepProps {
@@ -31,8 +21,8 @@ export const AddDeviceStep = ({ addDeviceUrl }: AddDeviceStepProps) => {
       </StyledHeading>
       <LgWidthSubheading>
         <span>
-          To add a Passkey associated with this device, please scan this QR code
-          from a device that already has a registered Passkey.
+          To add a Passkey associated with this device, please scan this QR code from a device that already has a registered
+          Passkey.
         </span>
       </LgWidthSubheading>
       <QRContainer>
@@ -50,9 +40,7 @@ export const AddDeviceStep = ({ addDeviceUrl }: AddDeviceStepProps) => {
       {!!addDeviceUrl && (
         <>
           <SmWidthSubheading>
-            <span>
-              Or navigate to this link from the already registered device
-            </span>
+            <span>Or navigate to this link from the already registered device</span>
           </SmWidthSubheading>
           <FilledDisabledInput disabled value={addDeviceUrl} noAutoDisable>
             <CpslButton slot="end" variant="icon" onClick={handleCopy}>

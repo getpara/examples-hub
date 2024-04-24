@@ -1,10 +1,5 @@
 import { CpslButton, CpslIcon } from '@usecapsule/react-components';
-import {
-  Heading,
-  MainContainer,
-  Hero,
-  ButtonWithIconContainer,
-} from '../common.js';
+import { Heading, MainContainer, Hero, ButtonWithIconContainer } from '../common.js';
 import { useCapsuleStore, useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 
@@ -13,10 +8,7 @@ interface WalletCreationDoneStepProps {
   onClose: () => void;
 }
 
-export const WalletCreationDoneStep = ({
-  twoFactorAuthEnabled,
-  onClose,
-}: WalletCreationDoneStepProps) => {
+export const WalletCreationDoneStep = ({ twoFactorAuthEnabled, onClose }: WalletCreationDoneStepProps) => {
   const setStep = useModalStore((state) => state.setStep);
   const isLogin = useModalStore((state) => state.isLogin());
   const capsule = useCapsuleStore((state) => state.capsule);

@@ -1,29 +1,15 @@
 import React from 'react';
 
-export default function Exit({ w = 50, h = 20 }: { w?: number; h?: number }) {
+export default function Exit() {
   return (
-    <svg
-      width="28"
-      height="28"
-      viewBox="0 0 28 28"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect width="28" height="28" rx="14" fill="white" fillOpacity="0.06" />
       <path
         d="M9.34766 18.4277C9.76368 18.8378 10.4844 18.8203 10.8652 18.4394L14 15.3046L17.1231 18.4335C17.5273 18.8378 18.2246 18.8378 18.6348 18.4218C19.0508 18.0058 19.0566 17.3085 18.6523 16.9042L15.5293 13.7753L18.6523 10.6523C19.0566 10.248 19.0508 9.55072 18.6348 9.14057C18.2188 8.72455 17.5273 8.71869 17.1231 9.12299L14 12.246L10.8652 9.11713C10.4844 8.73627 9.76368 8.71869 9.34766 9.13471C8.9375 9.55072 8.94922 10.2656 9.33594 10.6464L12.4707 13.7753L9.33594 16.9101C8.94922 17.291 8.93164 18.0117 9.34766 18.4277Z"
         fill="#E0E8FF"
         fillOpacity="0.6"
       />
-      <rect
-        x="0.5"
-        y="0.5"
-        width="27"
-        height="27"
-        rx="13.5"
-        stroke="white"
-        strokeOpacity="0.04"
-      />
+      <rect x="0.5" y="0.5" width="27" height="27" rx="13.5" stroke="white" strokeOpacity="0.04" />
     </svg>
   );
 }

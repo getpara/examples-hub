@@ -1,10 +1,5 @@
 import { CpslButton, CpslIcon } from '@usecapsule/react-components';
-import {
-  Heading,
-  HeroNoSpacing,
-  SecondaryText,
-  ButtonWithIconContainer,
-} from '../common.js';
+import { Heading, HeroNoSpacing, SecondaryText, ButtonWithIconContainer } from '../common.js';
 import styled from 'styled-components';
 
 interface TwoFactorDoneStepStep {
@@ -18,9 +13,7 @@ export const TwoFactorDoneStep = ({ onClose }: TwoFactorDoneStepStep) => {
       <Heading>
         <span>Success</span>
       </Heading>
-      <SecondaryText>
-        Your Two-Factor Authentication has been successfully set up!
-      </SecondaryText>
+      <SecondaryText>Your Two-Factor Authentication has been successfully set up!</SecondaryText>
       <CpslButton onClick={onClose}>
         <ButtonWithIconContainer>
           <CheckIcon icon="check" />

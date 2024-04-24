@@ -84,13 +84,16 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
 }
 
 async function handleMessage(e: { data: Message }): Promise<void> {
-  const { env, apiKey, offloadMPCComputationURL, disableWorkers, sessionCookie, useDKLS, disableWebSockets, workId } = e.data;
+  const { env, apiKey, offloadMPCComputationURL, disableWorkers, sessionCookie, useDKLS, disableWebSockets, workId } =
+    e.data;
   const ctx = {
     env,
     apiKey,
     capsuleClient: initClient(env, apiKey, false, () => sessionCookie),
     offloadMPCComputationURL: offloadMPCComputationURL,
-    mpcComputationClient: offloadMPCComputationURL ? mpcComputationClient.initClient(offloadMPCComputationURL, !!disableWorkers) : undefined,
+    mpcComputationClient: offloadMPCComputationURL
+      ? mpcComputationClient.initClient(offloadMPCComputationURL, !!disableWorkers)
+      : undefined,
     useDKLS,
     disableWebSockets: !!disableWebSockets,
   };

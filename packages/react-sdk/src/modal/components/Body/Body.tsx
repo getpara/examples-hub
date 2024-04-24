@@ -38,19 +38,13 @@ export const Body = ({
   const totalSteps = useModalStore((state) => state.totalSteps());
   const isLogin = useModalStore((state) => state.isLogin());
 
-  const showProgressIndicator =
-    !isLogin && !NoIndicatorSteps.includes(currentStep);
+  const showProgressIndicator = !isLogin && !NoIndicatorSteps.includes(currentStep);
 
   const Content = () => {
     switch (currentStep) {
       case ModalStep.SIGN_UP:
       case ModalStep.SIGN_UP_ALL_OAUTH: {
-        return (
-          <SignUpStep
-            oAuthMethods={oAuthMethods}
-            disableEmailLogin={disableEmailLogin}
-          />
-        );
+        return <SignUpStep oAuthMethods={oAuthMethods} disableEmailLogin={disableEmailLogin} />;
       }
       case ModalStep.VERIFICATION_CODE: {
         return <VerificationCodeStep />;
@@ -73,12 +67,7 @@ export const Body = ({
         return <AwaitingWalletCreationStep />;
       }
       case ModalStep.WALLET_CREATION_DONE: {
-        return (
-          <WalletCreationDoneStep
-            twoFactorAuthEnabled={twoFactorAuthEnabled}
-            onClose={onClose}
-          />
-        );
+        return <WalletCreationDoneStep twoFactorAuthEnabled={twoFactorAuthEnabled} onClose={onClose} />;
       }
       case ModalStep.SECRET: {
         return <RecoverySecretStep recoveryShare={recoveryShare} />;
@@ -87,9 +76,7 @@ export const Body = ({
         return <TwoFactorDoneStep onClose={onClose} />;
       }
       case ModalStep.BIOMETRIC_CREATION: {
-        return (
-          <BiometricCreationStep hasFinishedAnimation={hasFinishedAnimation} />
-        );
+        return <BiometricCreationStep hasFinishedAnimation={hasFinishedAnimation} />;
       }
       case ModalStep.AWAITING_OAUTH: {
         return <AwaitingOAuthStep />;
@@ -99,12 +86,7 @@ export const Body = ({
 
   return (
     <BodyContainer slot="body">
-      {showProgressIndicator && (
-        <StyledCpslProgressIndicator
-          step={stepNumber - 1}
-          totalSteps={totalSteps}
-        />
-      )}
+      {showProgressIndicator && <StyledCpslProgressIndicator step={stepNumber - 1} totalSteps={totalSteps} />}
       {Content()}
     </BodyContainer>
   );

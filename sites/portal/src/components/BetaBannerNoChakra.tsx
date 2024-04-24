@@ -8,8 +8,7 @@ export const BetaBannerNoChakra = () => {
     ENV !== Environment.PROD && (
       <Alert>
         <StyledIcon icon="alertCircle" />
-        You're using Capsule in a development (non-production) environment:{' '}
-        {ENV}. Be wary of sharing sensitive information.
+        You're using Capsule in a development (non-production) environment: {ENV}. Be wary of sharing sensitive information.
       </Alert>
     )
   );

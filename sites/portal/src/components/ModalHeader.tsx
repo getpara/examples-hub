@@ -11,10 +11,7 @@ export const ModalHeader = () => {
     <Container slot="header" id="header">
       <InnerContainer>
         {partner.portalHeaderLogoUrl ? (
-          <Logo
-            src={partner.portalHeaderLogoUrl}
-            alt={`${partner.displayName ? `${partner.displayName} -` : ''}logo`}
-          />
+          <Logo src={partner.portalHeaderLogoUrl} alt={`${partner.displayName ? `${partner.displayName} -` : ''}logo`} />
         ) : (
           <LogoSvg>
             <CapsuleBlack />

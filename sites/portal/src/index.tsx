@@ -20,15 +20,9 @@ root.render(
     <Routes>
       <Route element={<Recovery />} path="/" />
       {/* Leaving this route above the /web wrapper for now to avoid dropping it in the ModalLayout. Can shift once designs for this are updated */}
-      <Route
-        element={<TransactionReview />}
-        path="/web/users/:userId/transaction-review/:pendingTransactionId"
-      />
+      <Route element={<TransactionReview />} path="/web/users/:userId/transaction-review/:pendingTransactionId" />
       <Route element={<ModalLayout />} path="/web">
-        <Route
-          element={<AuthCreation />}
-          path="users/:userId/biometrics/:biometricId"
-        />
+        <Route element={<AuthCreation />} path="users/:userId/biometrics/:biometricId" />
         <Route element={<AuthLogin />} path="biometrics/login" />
       </Route>
       <Route element={<ShortUrl />} path="/short/:shortenedUrl" />

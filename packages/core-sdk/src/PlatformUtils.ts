@@ -4,24 +4,24 @@ import { SignatureRes } from './types/walletTypes.js';
 import { StorageUtils } from './StorageUtils.js';
 
 export interface PlatformUtils {
-  keygen (
+  keygen(
     ctx: Ctx,
     userId: string,
     secretKey: string | null, // should be acceptable as null in RN as we don't pre-gen them
     sessionCookie: string,
-    emailProps?: BackupKitEmailProps
+    emailProps?: BackupKitEmailProps,
   ): Promise<{
     signer: string;
     walletId: string;
   }>;
 
-  preKeygen (
+  preKeygen(
     ctx: Ctx,
     partnerId: string,
     email: string,
     secretKey: string | null, // should be acceptable as null in RN as we don't pre-gen them
     sessionCookie: string,
-    ): Promise<{
+  ): Promise<{
     signer: string;
     walletId: string;
   }>;
@@ -59,7 +59,10 @@ export interface PlatformUtils {
   ): Promise<SignatureRes>;
 
   // TODO probably not needed as signMessage should do the same
-  signHash(address: string, hash: string): Promise<{
+  signHash(
+    address: string,
+    hash: string,
+  ): Promise<{
     v: number;
     r: Buffer;
     s: Buffer;

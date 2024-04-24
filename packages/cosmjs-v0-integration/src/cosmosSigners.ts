@@ -1,14 +1,18 @@
-import { AccountData, AminoSignResponse, encodeSecp256k1Signature, OfflineAminoSigner, rawSecp256k1PubkeyToRawAddress, serializeSignDoc, StdSignDoc } from '@cosmjs/amino';
+import {
+  AccountData,
+  AminoSignResponse,
+  encodeSecp256k1Signature,
+  OfflineAminoSigner,
+  rawSecp256k1PubkeyToRawAddress,
+  serializeSignDoc,
+  StdSignDoc,
+} from '@cosmjs/amino';
 import { toBech32 } from '@cosmjs/encoding';
 import { Secp256k1, Sha256, sha256, ExtendedSecp256k1Signature } from '@cosmjs/crypto';
 import { OfflineDirectSigner, makeSignBytes, DirectSignResponse } from '@cosmjs/proto-signing';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
-import CoreCapsule, {
-  SuccessfulSignatureRes,
-  hexToSignature,
-  hexToUint8Array,
-} from '@usecapsule/core-sdk';
+import CoreCapsule, { SuccessfulSignatureRes, hexToSignature, hexToUint8Array } from '@usecapsule/core-sdk';
 
 class CapsuleCosmosSigner {
   readonly prefix: string;

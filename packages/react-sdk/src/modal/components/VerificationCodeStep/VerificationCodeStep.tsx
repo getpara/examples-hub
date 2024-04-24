@@ -2,30 +2,14 @@ import { CpslCodeInput } from '@usecapsule/react-components';
 import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { ModalStep } from '../../utils/steps.js';
-import {
-  CodeChangeEventDetail,
-  CpslCodeInputCustomEvent,
-} from '@usecapsule/core-components';
-import {
-  useCapsuleStore,
-  useModalStore,
-  useUserInfoStore,
-} from '../../stores/index.js';
-import {
-  ClickableText,
-  Heading,
-  Hero,
-  Text,
-  SecondaryText,
-  MainContainer,
-} from '../common.js';
+import { CodeChangeEventDetail, CpslCodeInputCustomEvent } from '@usecapsule/core-components';
+import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
+import { ClickableText, Heading, Hero, Text, SecondaryText, MainContainer } from '../common.js';
 
 export const VerificationCodeStep = () => {
   const email = useUserInfoStore((state) => state.email);
   const setStep = useModalStore((state) => state.setStep);
-  const setWebAuthURLForCreate = useModalStore(
-    (state) => state.setWebAuthURLForCreate,
-  );
+  const setWebAuthURLForCreate = useModalStore((state) => state.setWebAuthURLForCreate);
   const capsule = useCapsuleStore((state) => state.capsule);
 
   const inputRef = useRef<HTMLCpslCodeInputElement>(null);
@@ -61,9 +45,7 @@ export const VerificationCodeStep = () => {
     }
   };
 
-  const handleCodeInput = (
-    e: CpslCodeInputCustomEvent<CodeChangeEventDetail>,
-  ) => {
+  const handleCodeInput = (e: CpslCodeInputCustomEvent<CodeChangeEventDetail>) => {
     if (codeError) {
       setCodeError('');
     }
@@ -78,9 +60,7 @@ export const VerificationCodeStep = () => {
         setStep(ModalStep.BIOMETRIC_CREATION);
       } catch (e) {
         if (e.message.includes('429')) {
-          setCodeError(
-            'Too many incorrect attempts. Please try again in 10 minutes.',
-          );
+          setCodeError('Too many incorrect attempts. Please try again in 10 minutes.');
         } else {
           setCodeError('Incorrect code.');
         }
@@ -118,10 +98,7 @@ export const VerificationCodeStep = () => {
         <span>
           Didn’t receive a code?{' '}
           <Text>
-            <ClickableText
-              style={{ cursor: resendDisabled ? 'default' : 'pointer' }}
-              onClick={handleResendClick}
-            >
+            <ClickableText style={{ cursor: resendDisabled ? 'default' : 'pointer' }} onClick={handleResendClick}>
               {resendStatus}
             </ClickableText>
           </Text>

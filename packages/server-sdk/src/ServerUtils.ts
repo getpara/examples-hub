@@ -3,11 +3,7 @@ import { BackupKitEmailProps } from '@usecapsule/user-management-client';
 import { ServerLocalStorage } from './ServerLocalStorage.js';
 import { ServerSessionStorage } from './ServerSessionStorage.js';
 import { keygen, preKeygen } from './wallet/keygen.js';
-import {
-  signMessage,
-  sendTransaction,
-  signTransaction,
-} from './wallet/signing.js';
+import { signMessage, sendTransaction, signTransaction } from './wallet/signing.js';
 
 export class ServerUtils implements PlatformUtils {
   keygen(
@@ -15,7 +11,7 @@ export class ServerUtils implements PlatformUtils {
     userId: string,
     secretKey: string | null,
     sessionCookie: string,
-    emailProps?: BackupKitEmailProps
+    emailProps?: BackupKitEmailProps,
   ): Promise<{
     signer: string;
     walletId: string;
@@ -23,13 +19,13 @@ export class ServerUtils implements PlatformUtils {
     return keygen(ctx, userId, secretKey, true, sessionCookie, emailProps);
   }
 
-  preKeygen (
+  preKeygen(
     ctx: Ctx,
     partnerId: string,
     email: string,
     secretKey: string | null, // should be acceptable as null in RN as we don't pre-gen them
     sessionCookie: string,
-    ): Promise<{
+  ): Promise<{
     signer: string;
     walletId: string;
   }> {
@@ -45,15 +41,7 @@ export class ServerUtils implements PlatformUtils {
     sessionCookie: string,
     isDKLS?: boolean,
   ): Promise<SignatureRes> {
-    return signMessage(
-      ctx,
-      userId,
-      walletId,
-      share,
-      message,
-      sessionCookie,
-      isDKLS,
-    );
+    return signMessage(ctx, userId, walletId, share, message, sessionCookie, isDKLS);
   }
 
   signTransaction(
@@ -66,16 +54,7 @@ export class ServerUtils implements PlatformUtils {
     sessionCookie: string,
     isDKLS?: boolean,
   ): Promise<SignatureRes> {
-    return signTransaction(
-      ctx,
-      userId,
-      walletId,
-      share,
-      message,
-      chainId,
-      sessionCookie,
-      isDKLS,
-    );
+    return signTransaction(ctx, userId, walletId, share, message, chainId, sessionCookie, isDKLS);
   }
 
   sendTransaction(
@@ -88,16 +67,7 @@ export class ServerUtils implements PlatformUtils {
     sessionCookie: string,
     isDKLS?: boolean,
   ): Promise<SignatureRes> {
-    return sendTransaction(
-      ctx,
-      userId,
-      walletId,
-      share,
-      tx,
-      chainId,
-      sessionCookie,
-      isDKLS,
-    );
+    return sendTransaction(ctx, userId, walletId, share, tx, chainId, sessionCookie, isDKLS);
   }
 
   signHash(
@@ -111,7 +81,7 @@ export class ServerUtils implements PlatformUtils {
     throw new Error('not implemented');
   }
 
-  generateBlumPrimes = async (ctx: Ctx): Promise<{ p: string; q: string }> => {
+  generateBlumPrimes = async (_ctx: Ctx): Promise<{ p: string; q: string }> => {
     throw new Error('not implemented');
   };
 
@@ -125,7 +95,7 @@ export class ServerUtils implements PlatformUtils {
 
   disableProviderModal = true;
 
-  openPopup(popupUrl: string): void {
+  openPopup(_popupUrl: string): void {
     throw new Error('not implemented');
   }
 }

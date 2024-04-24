@@ -1,9 +1,4 @@
-import {
-  BackupKitEmailProps,
-  encryptedKeyshare,
-  EncryptorType,
-  KeyType,
-} from '@usecapsule/user-management-client';
+import { BackupKitEmailProps, encryptedKeyshare, EncryptorType, KeyType } from '@usecapsule/user-management-client';
 
 import { KeyContainer } from './KeyContainer.js';
 import { Ctx } from '../definitions.js';
@@ -15,15 +10,14 @@ export async function sendRecoveryForShare(
   otherEncryptedShares: encryptedKeyshare[],
   userSigner: string,
   ignoreRedistributingBackupEncryptedShare = false,
-  emailProps: BackupKitEmailProps
+  emailProps: BackupKitEmailProps,
 ): Promise<string> {
   const recoveryPrivateKeyContainer = new KeyContainer(
     walletId,
     '',
     '', // TODO: add in if needed
   );
-  const encryptedUserBackup =
-    recoveryPrivateKeyContainer.encryptForSelf(userSigner);
+  const encryptedUserBackup = recoveryPrivateKeyContainer.encryptForSelf(userSigner);
   const userBackupKeyShareOpts = {
     encryptedShare: encryptedUserBackup,
     type: KeyType.USER,
@@ -31,13 +25,11 @@ export async function sendRecoveryForShare(
   };
   await ctx.capsuleClient.uploadKeyshares(userId, walletId, [
     ...otherEncryptedShares,
-    ...(ignoreRedistributingBackupEncryptedShare
-      ? []
-      : [userBackupKeyShareOpts]),
+    ...(ignoreRedistributingBackupEncryptedShare ? [] : [userBackupKeyShareOpts]),
   ]);
 
   if (!ignoreRedistributingBackupEncryptedShare) {
-    await ctx.capsuleClient.distributeCapsuleShare({userId, walletId, useDKLS: ctx.useDKLS, ...emailProps});
+    await ctx.capsuleClient.distributeCapsuleShare({ userId, walletId, useDKLS: ctx.useDKLS, ...emailProps });
   }
 
   return JSON.stringify(recoveryPrivateKeyContainer);

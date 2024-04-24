@@ -42,8 +42,8 @@ export const Footer = ({ expandModal }: FooterProps) => {
         <FooterContentContainer>
           <Heading>Your Capsule Wallet</Heading>
           <FooterSecondaryText>
-            Experience all that Web3 has to offer without any of the confusion.
-            You can use your Capsule wallet across all sorts of websites.
+            Experience all that Web3 has to offer without any of the confusion. You can use your Capsule wallet across all
+            sorts of websites.
             {'\n\n'}Visit Capsule Connect to learn even more.
           </FooterSecondaryText>
           <ConnectButton onClick={handleConnectClick}>

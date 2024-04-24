@@ -1,14 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import {
-  Button,
-  Container,
-  Text,
-  Box,
-  Flex,
-  Progress,
-  HStack,
-} from '@chakra-ui/react';
+import { Button, Container, Text, Box, Flex, Progress, HStack } from '@chakra-ui/react';
 
 import { userManagementClient } from '../../clients/userManagementClient';
 import { Environment, generateSignature } from '@usecapsule/web-sdk';
@@ -22,45 +14,26 @@ function TransactionReview() {
   const { userId, pendingTransactionId } = useParams();
   const [searchParams, _] = useSearchParams();
   const email = searchParams.get('email');
-  const riskScore =
-    searchParams.get('risk_temp') === null
-      ? undefined
-      : Number(searchParams.get('risk_temp'));
+  const riskScore = searchParams.get('risk_temp') === null ? undefined : Number(searchParams.get('risk_temp'));
   const [pendingTransaction, setPendingTransaction] = useState(null);
 
   const partnerName = pendingTransaction?.partner?.displayName;
   async function onClickAccept() {
-    const data = await userManagementClient.getWebChallenge(
-      encodeURIComponent(email),
-    );
-    const sig = await generateSignature(
-      ENV,
-      data.challenge,
-      data.allowedPublicKeys,
-    );
+    const data = await userManagementClient.getWebChallenge(encodeURIComponent(email));
+    const sig = await generateSignature(ENV, data.challenge, data.allowedPublicKeys);
     await userManagementClient.verifyWebChallenge({
       signature: sig.response,
       publicKey: sig.id,
       email,
     });
-    await userManagementClient.acceptPendingTransaction(
-      userId,
-      pendingTransactionId,
-    );
+    await userManagementClient.acceptPendingTransaction(userId, pendingTransactionId);
     setTimeout(function () {
       window.close();
     }, 200);
   }
 
   async function fetchPendingTransaction() {
-    setPendingTransaction(
-      (
-        await userManagementClient.getPendingTransaction(
-          userId,
-          pendingTransactionId,
-        )
-      ).data,
-    );
+    setPendingTransaction((await userManagementClient.getPendingTransaction(userId, pendingTransactionId)).data);
   }
 
   useEffect(() => {
@@ -69,8 +42,7 @@ function TransactionReview() {
 
   const label = riskScore < 20 ? 'Safe' : riskScore < 60 ? 'Moderate' : 'Risky';
   const color = riskScore < 20 ? 'green' : riskScore < 60 ? 'blue' : 'red';
-  const labelDolor =
-    riskScore < 20 ? '#40902a' : riskScore < 60 ? '#254589' : '#992727';
+  const labelDolor = riskScore < 20 ? '#40902a' : riskScore < 60 ? '#254589' : '#992727';
   if (!pendingTransaction) {
     return <div></div>;
   }
@@ -79,18 +51,12 @@ function TransactionReview() {
     <PortalModalWrapper theme={newTheme} paramsPartnerId={'true'}>
       <>
         <Text fontSize="md" textAlign="center">
-          <b>{partnerName}</b> is requesting access to perform the following
-          operation on your wallet
+          <b>{partnerName}</b> is requesting access to perform the following operation on your wallet
         </Text>
         <Text fontSize="sm" textAlign="center">
           Please only proceed if you trust {partnerName}.
         </Text>
-        <Box
-          height="60px"
-          alignItems="center"
-          display="flex"
-          justifyContent="center"
-        >
+        <Box height="60px" alignItems="center" display="flex" justifyContent="center">
           <CapsuleBox />
         </Box>
         {riskScore !== undefined && (
@@ -132,11 +98,7 @@ function TransactionReview() {
             <img src="/simulation-safe.png" alt="XXX" />
           </Box>
         ) : (
-          <Text
-            fontFamily={'monospace'}
-            wordBreak="break-all"
-            textAlign="center"
-          >
+          <Text fontFamily={'monospace'} wordBreak="break-all" textAlign="center">
             {JSON.stringify(pendingTransaction.decodedTx, null, 2)}
           </Text>
         )}
@@ -152,13 +114,7 @@ function TransactionReview() {
           >
             Deny
           </Button>
-          <Button
-            width="140px"
-            colorScheme="green"
-            onClick={onClickAccept}
-            size="md"
-            alignSelf={'center'}
-          >
+          <Button width="140px" colorScheme="green" onClick={onClickAccept} size="md" alignSelf={'center'}>
             Accept
           </Button>
         </Container>

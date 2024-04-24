@@ -9,3 +9,4 @@ mpcWorker-bundle.js
 .vscode
 *.wasm
 .nx/cache
+.eslintcache

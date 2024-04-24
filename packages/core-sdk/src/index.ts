@@ -24,9 +24,6 @@ export * from './utils/pollingUtils.js';
 export * from './errors.js';
 export * from './utils/formattingUtils.js';
 export { retrieve as transmissionUtilsRetrieve } from './transmission/transmissionUtils.js';
-export {
-  STORAGE_PREFIX,
-};
+export { STORAGE_PREFIX };
 
 export default CoreCapsule;
-

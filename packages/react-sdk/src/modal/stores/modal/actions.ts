@@ -1,16 +1,8 @@
 import { StoreApi } from 'zustand';
 import { DEFAULT_MODAL_STATE, ModalActions, ModalStore } from './useModalStore.js';
-import {
-  LoginModalStepNumber,
-  LoginPreviousStep,
-  SignUpModalStepNumber,
-  SignUpPreviousStep,
-} from '../../utils/steps.js';
+import { LoginModalStepNumber, LoginPreviousStep, SignUpModalStepNumber, SignUpPreviousStep } from '../../utils/steps.js';
 
-export const getActions = (
-  set: StoreApi<ModalStore>['setState'],
-  get: StoreApi<ModalStore>['getState'],
-): ModalActions => ({
+export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<ModalStore>['getState']): ModalActions => ({
   resetState: () => {
     set(DEFAULT_MODAL_STATE);
   },
@@ -20,9 +12,7 @@ export const getActions = (
   decrementStep: () => {
     const isLogin = get().flow === 'login';
     const currentStep = get().step;
-    const prevStep = isLogin
-      ? LoginPreviousStep[currentStep]
-      : SignUpPreviousStep[currentStep];
+    const prevStep = isLogin ? LoginPreviousStep[currentStep] : SignUpPreviousStep[currentStep];
 
     if (prevStep) {
       set({ step: prevStep });
@@ -31,9 +21,7 @@ export const getActions = (
   hasPreviousStep: () => {
     const isLogin = get().flow === 'login';
     const currentStep = get().step;
-    return !!(isLogin
-      ? LoginPreviousStep[currentStep]
-      : SignUpPreviousStep[currentStep]);
+    return !!(isLogin ? LoginPreviousStep[currentStep] : SignUpPreviousStep[currentStep]);
   },
   stepNumber: () => {
     const isLogin = get().flow === 'login';
@@ -43,9 +31,7 @@ export const getActions = (
   },
   totalSteps: () => {
     const isLogin = get().flow === 'login';
-    const stepNumbersValues = Object.values(
-      isLogin ? LoginModalStepNumber : SignUpModalStepNumber,
-    );
+    const stepNumbersValues = Object.values(isLogin ? LoginModalStepNumber : SignUpModalStepNumber);
     return stepNumbersValues[stepNumbersValues.length - 1];
   },
   setFlow: (flow) => {

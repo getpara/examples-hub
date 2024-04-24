@@ -11,41 +11,41 @@ import CapsuleSmall from '../../../assets/capsuleSmall';
 import TwoFactorContext from '../../contexts/TwoFactorContext';
 
 const RecoveryButton: React.FC = () => {
-    const [modalIsOpen, setModalIsOpen] = useState(false);
-    const { address, setAddress } = useContext(WalletContext);
-    const { setEmail } = useContext(EmailContext);
-    const { setCurrentStep } = useContext(StepContext);
-    const { setStatus, setInitiatedAt } = useContext(RecoveryAttemptContext);
-    const { setIs2FAFlow } = useContext(TwoFactorContext);
-    return (
-        <Button
-            width={'180px'}
-            height={'50px'}
-            backgroundColor={'brand.background'}
-            color={'white'}
-            onClick={async () => {
-                if (address) {
-                    setEmail(null);
-                    setAddress(null);
-                    setStatus(null);
-                    setInitiatedAt(null);
-                    setIs2FAFlow(true);
-                    setCurrentStep(ModalStep.EMAIL_COLLECTION);
-                    await capsule.logout();
-                } else {
-                    setModalIsOpen(true);
-                }
-            }}
-        >
-            <RecoveryModal onClose={() => setModalIsOpen(false)} isOpen={modalIsOpen} />
-            <HStack>
-                <Text size="18px" marginRight="9px">
-                    {address ? "Logout" : "Manage Recovery"}
-                </Text>
-            </HStack>
-            <CapsuleSmall />
-        </Button>
-    )
-}
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const { address, setAddress } = useContext(WalletContext);
+  const { setEmail } = useContext(EmailContext);
+  const { setCurrentStep } = useContext(StepContext);
+  const { setStatus, setInitiatedAt } = useContext(RecoveryAttemptContext);
+  const { setIs2FAFlow } = useContext(TwoFactorContext);
+  return (
+    <Button
+      width={'180px'}
+      height={'50px'}
+      backgroundColor={'brand.background'}
+      color={'white'}
+      onClick={async () => {
+        if (address) {
+          setEmail(null);
+          setAddress(null);
+          setStatus(null);
+          setInitiatedAt(null);
+          setIs2FAFlow(true);
+          setCurrentStep(ModalStep.EMAIL_COLLECTION);
+          await capsule.logout();
+        } else {
+          setModalIsOpen(true);
+        }
+      }}
+    >
+      <RecoveryModal onClose={() => setModalIsOpen(false)} isOpen={modalIsOpen} />
+      <HStack>
+        <Text size="18px" marginRight="9px">
+          {address ? 'Logout' : 'Manage Recovery'}
+        </Text>
+      </HStack>
+      <CapsuleSmall />
+    </Button>
+  );
+};
 
 export default RecoveryButton;

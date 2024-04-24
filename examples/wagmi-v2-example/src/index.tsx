@@ -2,16 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSessionStorage } from 'react-use';
 import ReactDOM from 'react-dom/client';
-import {
-  Button,
-  ChakraProvider,
-  Container,
-  HStack,
-  Input,
-  Select,
-  Text,
-  VStack,
-} from '@chakra-ui/react';
+import { Button, ChakraProvider, Container, HStack, Input, Select, Text, VStack } from '@chakra-ui/react';
 import { useDebounce } from 'use-debounce';
 import { parseEther } from 'viem';
 import { sepolia } from 'viem/chains';
@@ -31,10 +22,7 @@ import { coinbaseWallet, walletConnect } from 'wagmi/connectors';
 
 import Capsule from '@usecapsule/web-sdk';
 import { capsuleConnector } from '@usecapsule/wagmi-v2-integration';
-import CoreCapsule, {
-  Environment,
-  ConstructorOpts,
-} from '@usecapsule/core-sdk';
+import CoreCapsule, { Environment, ConstructorOpts } from '@usecapsule/core-sdk';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const queryClient = new QueryClient();
@@ -42,7 +30,6 @@ const queryClient = new QueryClient();
 // sample transaction params
 const DEFAULT_TO_ADDRESS = '0x42c9a72c9dfcc92cae0de9510160cea2da27af91';
 const DEFAULT_VALUE = '1000';
-const API_KEY_WITH_PERMISSIONS = 'fdba16e45ba41e80185eb2c0195e89d4';
 const API_KEY_WITH_BRANDING = '8ee2d015fbc6062a6e30bdc472f2946c';
 
 // goerli chain id
@@ -50,9 +37,7 @@ const DEFAULT_CHAIN_ID = '11155111';
 
 function WagmiSignMessage(): JSX.Element {
   const [message, setMessage] = useState<string>('');
-  const [messageSignature, setMessageSignature] = useState<
-    string | undefined
-  >();
+  const [messageSignature, setMessageSignature] = useState<string | undefined>();
   const onSuccess = (data: string) => {
     setMessageSignature(data);
   };
@@ -92,17 +77,12 @@ function WagmiSendTransaction(): JSX.Element {
     type: 'eip1559',
   });
 
-  const {
-    data: txHash,
-    sendTransaction,
-    isPending: isSendTxPending,
-  } = useSendTransaction();
+  const { data: txHash, sendTransaction, isPending: isSendTxPending } = useSendTransaction();
 
-  const { data: txReceipt, isLoading: isWaitTxLoading } =
-    useWaitForTransactionReceipt({
-      hash: txHash,
-      confirmations: 0,
-    });
+  const { data: txReceipt, isLoading: isWaitTxLoading } = useWaitForTransactionReceipt({
+    hash: txHash,
+    confirmations: 0,
+  });
 
   return (
     <>
@@ -121,13 +101,7 @@ function WagmiSendTransaction(): JSX.Element {
         }}
       />
       <Button
-        isDisabled={
-          isSendTxPending ||
-          isWaitTxLoading ||
-          !sendTransaction ||
-          !toAddress ||
-          !amount
-        }
+        isDisabled={isSendTxPending || isWaitTxLoading || !sendTransaction || !toAddress || !amount}
         onClick={() => {
           sendTransaction(config, {
             onError: (e) => {
@@ -136,19 +110,11 @@ function WagmiSendTransaction(): JSX.Element {
           });
         }}
       >
-        {isSendTxPending
-          ? 'Sending Transaction...'
-          : isWaitTxLoading
-          ? 'Awaiting Confirmation...'
-          : 'Send Transaction'}
+        {isSendTxPending ? 'Sending Transaction...' : isWaitTxLoading ? 'Awaiting Confirmation...' : 'Send Transaction'}
       </Button>
       {txReceipt && (
         <Text>
-          <a
-            rel="noreferrer"
-            target="_blank"
-            href={`https://sepolia.etherscan.io/tx/${txHash}`}
-          >
+          <a rel="noreferrer" target="_blank" href={`https://sepolia.etherscan.io/tx/${txHash}`}>
             <u>Sepolia Scan Link</u>
           </a>
         </Text>
@@ -248,24 +214,18 @@ function getCapsuleOpts(env: Environment, useDKLS: boolean): ConstructorOpts {
     case Environment.SANDBOX:
       return {
         // useLocalFiles: true,
-        offloadMPCComputationURL: useDKLS
-          ? undefined
-          : 'https://partner-mpc-computation.sandbox.usecapsule.com',
+        offloadMPCComputationURL: useDKLS ? undefined : 'https://partner-mpc-computation.sandbox.usecapsule.com',
         // portalBackgroundColor: '#df092d',
         // portalPrimaryButtonColor: '#322e47',
         // portalTextColor: '#ffffff',
       };
     case Environment.BETA:
       return {
-        offloadMPCComputationURL: useDKLS
-          ? undefined
-          : 'https://partner-mpc-computation.beta.usecapsule.com',
+        offloadMPCComputationURL: useDKLS ? undefined : 'https://partner-mpc-computation.beta.usecapsule.com',
       };
     case Environment.PROD:
       return {
-        offloadMPCComputationURL: useDKLS
-          ? undefined
-          : 'https://partner-mpc-computation.prod.usecapsule.com',
+        offloadMPCComputationURL: useDKLS ? undefined : 'https://partner-mpc-computation.prod.usecapsule.com',
       };
     default:
       throw new Error(`invalid environment: ${env}`);
@@ -275,34 +235,19 @@ function getCapsuleOpts(env: Environment, useDKLS: boolean): ConstructorOpts {
 let capsule: Capsule = undefined;
 
 function App() {
-  const [selectedEnv, setSelectedEnv] = useSessionStorage(
-    '@EXAMPLE-CAPSULE/selectedEnv',
-    Environment.SANDBOX,
-  );
-  const [selectedApiKey, setSelectedApiKey] = useSessionStorage(
-    '@EXAMPLE-CAPSULE/selectedApiKey',
-    API_KEY_WITH_BRANDING,
-  );
-  const [useDKLS, setUseDKLS] = useSessionStorage(
-    '@EXAMPLE-CAPSULE/useDKLS',
-    true,
-  );
+  const [selectedEnv, setSelectedEnv] = useSessionStorage('@EXAMPLE-CAPSULE/selectedEnv', Environment.SANDBOX);
+  const [selectedApiKey, setSelectedApiKey] = useSessionStorage('@EXAMPLE-CAPSULE/selectedApiKey', API_KEY_WITH_BRANDING);
+  const [useDKLS, setUseDKLS] = useSessionStorage('@EXAMPLE-CAPSULE/useDKLS', true);
 
-  capsule = new Capsule(
-    selectedEnv,
-    selectedApiKey,
-    getCapsuleOpts(selectedEnv, useDKLS),
-  );
+  capsule = new Capsule(selectedEnv, selectedApiKey, getCapsuleOpts(selectedEnv, useDKLS));
 
-  const [isSessionActive, setIsSessionActive] = useState(false);
+  const [_isSessionActive, setIsSessionActive] = useState(false);
 
   async function checkIsSessionActive() {
     const isFullyLoggedIn = await capsule.isFullyLoggedIn();
     setIsSessionActive(isFullyLoggedIn);
     if (isFullyLoggedIn && capsule instanceof CoreCapsule) {
-      console.log(
-        `exported session:\n${(capsule as CoreCapsule).exportSession()}`,
-      );
+      console.log(`exported session:\n${(capsule as CoreCapsule).exportSession()}`);
     }
   }
 
@@ -317,10 +262,7 @@ function App() {
           <Text width={'15%'}>
             <strong>Select Environment:</strong>
           </Text>
-          <Select
-            defaultValue={selectedEnv}
-            onChange={(e) => setSelectedEnv(e.target.value as Environment)}
-          >
+          <Select defaultValue={selectedEnv} onChange={(e) => setSelectedEnv(e.target.value as Environment)}>
             <option value={Environment.DEV}>Dev</option>
             <option value={Environment.SANDBOX}>Sandbox</option>
             <option value={Environment.BETA}>Beta</option>
@@ -343,10 +285,7 @@ function App() {
           <Text width={'15%'}>
             <strong>Use DKLS:</strong>
           </Text>
-          <Select
-            defaultValue={`${!!useDKLS}`}
-            onChange={(e) => setUseDKLS(e.target.value === 'true')}
-          >
+          <Select defaultValue={`${!!useDKLS}`} onChange={(e) => setUseDKLS(e.target.value === 'true')}>
             <option value={'true'}>true</option>
             <option value={'false'}>false</option>
           </Select>

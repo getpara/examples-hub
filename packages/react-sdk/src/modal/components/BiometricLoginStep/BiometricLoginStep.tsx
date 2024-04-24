@@ -1,20 +1,8 @@
-import {
-  CpslButton,
-  CpslDivider,
-  CpslIcon,
-  CpslQrCode,
-  CpslSpinner,
-} from '@usecapsule/react-components';
+import { CpslButton, CpslDivider, CpslIcon, CpslQrCode, CpslSpinner } from '@usecapsule/react-components';
 import { useEffect, useState } from 'react';
 import { useCapsuleStore, useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
-import {
-  Heading,
-  SecondaryText,
-  MainContainer,
-  QRContainer,
-  ButtonWithIconContainer,
-} from '../common.js';
+import { Heading, SecondaryText, MainContainer, QRContainer, ButtonWithIconContainer } from '../common.js';
 import { openPopup } from '../../utils/openPopup.js';
 
 const SHORTENING_AVAILABLE = true;
@@ -39,9 +27,7 @@ export const BiometricLoginStep = () => {
     async function shortenUrl() {
       const shortUrl = await capsule.shortenLoginLink(webAuthURLForLogin);
       setShortLoginLink(shortUrl);
-      const shortHelpUrl = await capsule.shortenLoginLink(
-        `${webAuthURLForLogin}&skipAutoLogin=true`,
-      );
+      const shortHelpUrl = await capsule.shortenLoginLink(`${webAuthURLForLogin}&skipAutoLogin=true`);
       setShortHelpLink(shortHelpUrl);
     }
     if (SHORTENING_AVAILABLE) {
@@ -69,9 +55,8 @@ export const BiometricLoginStep = () => {
         </Heading>
         <SecondaryText>
           <span>
-            If the Passkey you registered previously lives on this device, click
-            Login With Passkey.{'\n\n'}Otherwise, scan the QR code below with
-            another device that has your Passkey.
+            If the Passkey you registered previously lives on this device, click Login With Passkey.{'\n\n'}Otherwise, scan
+            the QR code below with another device that has your Passkey.
           </span>
         </SecondaryText>
       </MainContainer>
@@ -82,13 +67,7 @@ export const BiometricLoginStep = () => {
         </ButtonWithIconContainer>
       </CpslButton>
       <CpslDivider>or</CpslDivider>
-      <QRContainer>
-        {!shortLoginLink ? (
-          <CpslSpinner />
-        ) : (
-          <CpslQrCode url={shortLoginLink} />
-        )}
-      </QRContainer>
+      <QRContainer>{!shortLoginLink ? <CpslSpinner /> : <CpslQrCode url={shortLoginLink} />}</QRContainer>
       <SecondaryText>
         <span>Scan with your phone’s camera</span>
       </SecondaryText>

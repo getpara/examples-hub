@@ -16,14 +16,7 @@ interface CapsuleConnectorOpts extends Partial<CapsuleModalProps> {
 export class CapsuleConnector extends InjectedConnector {
   private capsule: CapsuleWeb;
 
-  constructor({
-    chains,
-    options,
-    capsule,
-    disableModal,
-    storageOverride,
-    ...modalProps
-  }: CapsuleConnectorOpts) {
+  constructor({ chains, options, capsule, disableModal, storageOverride, ...modalProps }: CapsuleConnectorOpts) {
     if (chains.length === 0) {
       throw new Error('Must provide at least one chain');
     }

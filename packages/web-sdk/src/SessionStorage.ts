@@ -16,7 +16,7 @@ export class SessionStorage implements StorageUtils {
   };
   removeItem = (key: string): void => {
     sessionStorage.removeItem(key);
-  }
+  };
   clear = (prefix: string): void => {
     for (let i = 0; i < sessionStorage.length; i++) {
       const key = sessionStorage.key(i);
@@ -25,5 +25,5 @@ export class SessionStorage implements StorageUtils {
         i--;
       }
     }
-  }
+  };
 }

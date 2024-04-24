@@ -15,21 +15,13 @@ import {
 } from 'viem';
 import * as viemChains from 'viem/chains';
 
-import CoreCapsule, {
-  hexStringToBase64,
-  hexToSignature,
-  Wallet,
-  SuccessfulSignatureRes,
-} from '@usecapsule/core-sdk';
+import CoreCapsule, { hexStringToBase64, hexToSignature, Wallet, SuccessfulSignatureRes } from '@usecapsule/core-sdk';
 
 interface ViemClientOpts {
   noAccount?: boolean;
 }
 
-export function createCapsuleAccount(
-  capsule: CoreCapsule,
-  walletAddress?: Hex,
-): LocalAccount {
+export function createCapsuleAccount(capsule: CoreCapsule, walletAddress?: Hex): LocalAccount {
   let currentWallet: Wallet;
   if (walletAddress) {
     currentWallet = Object.values(capsule.getWallets()).find(
@@ -46,16 +38,11 @@ export function createCapsuleAccount(
     type: 'local',
     signMessage: async ({ message }) => {
       const hashedMessage = hashMessage(message);
-      const res = await capsule.signMessage(
-        currentWallet.id,
-        hexStringToBase64(hashedMessage),
-      );
+      const res = await capsule.signMessage(currentWallet.id, hexStringToBase64(hashedMessage));
       const signature = (res as SuccessfulSignatureRes).signature;
       return `0x${signature}`;
     },
-    signTransaction: async <
-      TTransactionSerializable extends TransactionSerializable,
-    >(
+    signTransaction: async <TTransactionSerializable extends TransactionSerializable>(
       transaction: TTransactionSerializable,
       args?: {
         serializer?: SerializeTransactionFn;
@@ -88,10 +75,7 @@ export function createCapsuleAccount(
     >(
       typedDataDefinition: TypedDataDefinition<typedData, primaryType>,
     ) => {
-      const res = await capsule.signMessage(
-        currentWallet.id,
-        hexStringToBase64(hashTypedData(typedDataDefinition)),
-      );
+      const res = await capsule.signMessage(currentWallet.id, hexStringToBase64(hashTypedData(typedDataDefinition)));
       const signature = (res as SuccessfulSignatureRes).signature;
       return `0x${signature}`;
     },

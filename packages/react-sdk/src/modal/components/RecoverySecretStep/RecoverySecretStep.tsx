@@ -1,5 +1,5 @@
 import { CpslSlideButton, CpslTileButton } from '@usecapsule/react-components';
-import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
+import { useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { Heading, MainContainer, SecondaryText } from '../common.js';
 import styled from 'styled-components';
@@ -10,9 +10,7 @@ interface RecoverySecretStepProps {
   recoveryShare: string;
 }
 
-export const RecoverySecretStep = ({
-  recoveryShare,
-}: RecoverySecretStepProps) => {
+export const RecoverySecretStep = ({ recoveryShare }: RecoverySecretStepProps) => {
   const setStep = useModalStore((state) => state.setStep);
   const email = useUserInfoStore((state) => state.email);
   const [copied, copy] = useCopyToClipboard();
@@ -23,9 +21,7 @@ export const RecoverySecretStep = ({
     setHasSavedSecret(true);
   };
 
-  const backupDecryptionKey = JSON.parse(
-    recoveryShare || '{}',
-  ).backupDecryptionKey;
+  const backupDecryptionKey = JSON.parse(recoveryShare || '{}').backupDecryptionKey;
 
   const handleNext = async () => {
     setStep(ModalStep.WALLET_CREATION_DONE);
@@ -51,15 +47,11 @@ export const RecoverySecretStep = ({
       <StyledMainContainer>
         <Heading>Your Recovery Secret</Heading>
         <SecondaryText>
-          Your Recovery Secret allows you to set up a new Passkey in the event
-          you lose access to your current one.
+          Your Recovery Secret allows you to set up a new Passkey in the event you lose access to your current one.
         </SecondaryText>
       </StyledMainContainer>
       <ButtonContainer>
-        <StyledCpslTileButton
-          icon={copied ? 'check' : 'copy'}
-          onClick={handleCopy}
-        >
+        <StyledCpslTileButton icon={copied ? 'check' : 'copy'} onClick={handleCopy}>
           <TileButtonText>{copied ? 'COPIED!' : 'COPY'}</TileButtonText>
         </StyledCpslTileButton>
         <StyledCpslTileButton icon="downloadCloud" onClick={handleDownload}>
@@ -72,18 +64,12 @@ export const RecoverySecretStep = ({
       <CpslSlideButton
         startIcon="arrow"
         endIcon="check"
-        startText={
-          !hasSavedSecret
-            ? 'First, save your recovery secret.'
-            : 'I’ve Saved My Recovery Secret'
-        }
+        startText={!hasSavedSecret ? 'First, save your recovery secret.' : 'I’ve Saved My Recovery Secret'}
         endText="OK! Great Job!"
         onCpslComplete={handleNext}
         disabled={!hasSavedSecret}
       />
-      <SliderHelper>
-        {!hasSavedSecret ? 'Choose an option above.' : 'Slide to complete'}
-      </SliderHelper>
+      <SliderHelper>{!hasSavedSecret ? 'Choose an option above.' : 'Slide to complete'}</SliderHelper>
     </>
   );
 };

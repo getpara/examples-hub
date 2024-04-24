@@ -31,11 +31,8 @@ const paragraphStyle = {
 
 const Recovery: React.FC = () => {
   const [email, setEmail] = useEmailState(null);
-  const [currentStep, setCurrentStep] = useCurrentStepState(
-    ModalStep.EMAIL_COLLECTION,
-  );
-  const [currentRecoveryStep, setCurrentRecoveryStep] =
-    useCurrentRecoveryStepState(RecoveryModalStep.VERIFY_2FA);
+  const [currentStep, setCurrentStep] = useCurrentStepState(ModalStep.EMAIL_COLLECTION);
+  const [currentRecoveryStep, setCurrentRecoveryStep] = useCurrentRecoveryStepState(RecoveryModalStep.VERIFY_2FA);
   const [address, setAddress] = useAddressState(null);
   const [walletId, setWalletId] = useWalletIdState(null);
   const [userId, setUserId] = useUserIdState(null);
@@ -49,22 +46,24 @@ const Recovery: React.FC = () => {
         <h1>Recovery Portal</h1>
         <p>Welcome to the Capsule Recovery Portal</p>
         <p>Here you'll be able to regain access to your account</p>
-        {!address && <p>If you have already initiated the recovery process for your account, <strong>Log In</strong> to check the status</p>}
+        {!address && (
+          <p>
+            If you have already initiated the recovery process for your account, <strong>Log In</strong> to check the status
+          </p>
+        )}
         <p>The Recovery Process has 2 steps:</p>
         <div className="indent">
           <ol>
-            <li>Initiate a <strong>Recovery Attempt</strong>. To do this, you'll need to confirm your email</li>
+            <li>
+              Initiate a <strong>Recovery Attempt</strong>. To do this, you'll need to confirm your email
+            </li>
             <li>Enter your 2FA code if you had it set up for your Capsule Wallet, and begin to recover your wallet.</li>
           </ol>
         </div>
         <div className="button-container">
           <UserContext.Provider value={{ id: userId, setId: setUserId }}>
-            <RecoveryStepContext.Provider
-              value={{ currentRecoveryStep, setCurrentRecoveryStep }}
-            >
-              <RecoveryAttemptContext.Provider
-                value={{ status, setStatus, initiatedAt, setInitiatedAt }}
-              >
+            <RecoveryStepContext.Provider value={{ currentRecoveryStep, setCurrentRecoveryStep }}>
+              <RecoveryAttemptContext.Provider value={{ status, setStatus, initiatedAt, setInitiatedAt }}>
                 <StepContext.Provider value={{ currentStep, setCurrentStep }}>
                   <WalletContext.Provider
                     value={{
@@ -81,14 +80,21 @@ const Recovery: React.FC = () => {
                             <Box as="div" flexShrink={0}>
                               <RecoveryButton />
                             </Box>
-                            {address && <Text textColor={'brand.addressColor'}>
-                              {truncateEthAddress(address)}
-                            </Text>}
+                            {address && <Text textColor={'brand.addressColor'}>{truncateEthAddress(address)}</Text>}
                           </HStack>
                           <Box style={{ marginBottom: -40 }}>
-                            <p style={paragraphStyle}>Please note, if you don't have 2FA set up, there will be a <strong>48-hour</strong> waiting period, during which</p>
-                            <p style={paragraphStyle}>you may cancel the recovery attempt at any point. At the end of this waiting period, you will have <strong>24 hours</strong></p>
-                            <p style={paragraphStyle}>to come back and register your new device. If this time window is exceeded, you'll need to initiate another Recovery Attempt.</p>
+                            <p style={paragraphStyle}>
+                              Please note, if you don't have 2FA set up, there will be a <strong>48-hour</strong> waiting
+                              period, during which
+                            </p>
+                            <p style={paragraphStyle}>
+                              you may cancel the recovery attempt at any point. At the end of this waiting period, you will
+                              have <strong>24 hours</strong>
+                            </p>
+                            <p style={paragraphStyle}>
+                              to come back and register your new device. If this time window is exceeded, you'll need to
+                              initiate another Recovery Attempt.
+                            </p>
                           </Box>
                           {address && <RecoveryTimer />}
                           {address && status !== RecoveryStatus.FINISHED && <RecoveryCancelButton />}

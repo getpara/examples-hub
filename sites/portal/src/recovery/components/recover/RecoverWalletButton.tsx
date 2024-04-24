@@ -13,16 +13,10 @@ const RecoverWalletButton: React.FC = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const { setStatus } = useContext(RecoveryAttemptContext);
   const { setCurrentStep } = useContext(StepContext);
-  const { currentRecoveryStep, setCurrentRecoveryStep } =
-    useContext(RecoveryStepContext);
+  const { currentRecoveryStep, setCurrentRecoveryStep } = useContext(RecoveryStepContext);
 
   return (
-    <Button
-      height={'50px'}
-      backgroundColor={'brand.background'}
-      color={'white'}
-      onClick={() => setModalIsOpen(true)}
-    >
+    <Button height={'50px'} backgroundColor={'brand.background'} color={'white'} onClick={() => setModalIsOpen(true)}>
       <RecoveryWalletModal
         onClose={() => {
           if (currentRecoveryStep === RecoveryModalStep.FINISH) {

@@ -2,18 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { useSessionStorage } from 'react-use';
 import ReactDOM from 'react-dom/client';
-import {
-  Button,
-  ChakraProvider,
-  Container,
-  HStack,
-  Input,
-  Select,
-  Text,
-  VStack,
-} from '@chakra-ui/react';
+import { Button, ChakraProvider, Container, HStack, Input, Select, Text, VStack } from '@chakra-ui/react';
 import { useDebounce } from 'use-debounce';
-import QRCode from 'react-qr-code';
 import Web3 from 'web3';
 import { http, parseEther } from 'viem';
 import { sepolia } from 'viem/chains';
@@ -37,21 +27,14 @@ import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
 
 import Capsule from '@usecapsule/web-sdk';
-import { OAuthMethod, Theme } from '@usecapsule/react-sdk';
+import { OAuthMethod } from '@usecapsule/react-sdk';
 import { FeeMarketEIP1559Transaction } from '@ethereumjs/tx';
 import { CapsuleModal } from '@usecapsule/react-sdk';
 import { CapsuleProtoSigner } from '@usecapsule/cosmjs-v0-integration';
 import { CapsuleEthersSigner } from '@usecapsule/ethers-v6-integration';
 import { createCapsuleViemClient } from '@usecapsule/viem-v1-integration';
-import {
-  CapsuleConnector,
-  CapsuleEIP1193Provider,
-} from '@usecapsule/wagmi-v1-integration';
-import CoreCapsule, {
-  Environment,
-  ConstructorOpts,
-  DeniedSignatureResWithUrl,
-} from '@usecapsule/core-sdk';
+import { CapsuleConnector, CapsuleEIP1193Provider } from '@usecapsule/wagmi-v1-integration';
+import CoreCapsule, { Environment, ConstructorOpts, DeniedSignatureResWithUrl } from '@usecapsule/core-sdk';
 
 // sample transaction params
 const DEFAULT_TO_ADDRESS = '0x42c9a72c9dfcc92cae0de9510160cea2da27af91';
@@ -60,13 +43,9 @@ const DEFAULT_GAS_AMOUNT = '21000';
 const DEFAULT_MAX_PRIORITY_FEE_PER_GAS = '1';
 const DEFAULT_MAX_FEE_PER_GAS = '3';
 const DEFAULT_NONCE = '0';
-const API_KEY_WITH_PERMISSIONS = 'fdba16e45ba41e80185eb2c0195e89d4';
 const API_KEY_WITH_BRANDING = '8ee2d015fbc6062a6e30bdc472f2946c';
 
-const ALCHEMY_SEPOLIA_PROVIDER =
-  'https://eth-sepolia.g.alchemy.com/v2/KfxK8ZFXw9mTUuJ7jt751xGJCa3r8noZ';
-const WSS_ALCHEMY_SEPOLIA_PROVIDER =
-  'wss://eth-sepolia.g.alchemy.com/v2/HfT9dMNs3W0h1vJmiPZQ_APaFjPo-BF9';
+const ALCHEMY_SEPOLIA_PROVIDER = 'https://eth-sepolia.g.alchemy.com/v2/KfxK8ZFXw9mTUuJ7jt751xGJCa3r8noZ';
 // goerli chain id
 const DEFAULT_CHAIN_ID = '11155111';
 const DEFAULT_CONTRACT_ABI = [
@@ -100,8 +79,7 @@ const DEFAULT_CONTRACT_ABI = [
 const DEFAULT_SMART_CONTRACT_FUNCTION = 'store';
 const DEFAULT_SMART_CONTRACT_ARGS = ['808'];
 const COSMOS_TESTNET_RPC = 'rpc.sentry-01.theta-testnet.polypore.xyz';
-const COSMOS_DEFAULT_TO_ADDRESS =
-  'cosmos1f3px9t4juk43cwufj7f9s64z3wj7xvyc0rexg6';
+const COSMOS_DEFAULT_TO_ADDRESS = 'cosmos1f3px9t4juk43cwufj7f9s64z3wj7xvyc0rexg6';
 const web3 = new Web3();
 
 // use below to call "view" smart contract function
@@ -111,12 +89,9 @@ const web3 = new Web3();
 // below is address of existing smart contract on sepolia
 // const DEFAULT_CONTRACT_ADDRESS = '0xc08c00e1aa97a18583dc1a72a7e9fb9ce56cfef5'
 
-async function sendCosmosTx(): Promise<void> {
+async function _sendCosmosTx(): Promise<void> {
   const protoSigner = new CapsuleProtoSigner(capsule);
-  const client = await SigningStargateClient.connectWithSigner(
-    COSMOS_TESTNET_RPC,
-    protoSigner,
-  );
+  const client = await SigningStargateClient.connectWithSigner(COSMOS_TESTNET_RPC, protoSigner);
 
   console.log(await client.getAccount(protoSigner.address));
   console.log(await client.getAllBalances(protoSigner.address));
@@ -164,7 +139,7 @@ async function sendViemTransaction(nonce = 0): Promise<void> {
   );
 }
 
-async function sendEIP1193ProviderTransaction(): Promise<void> {
+async function _sendEIP1193ProviderTransaction(): Promise<void> {
   const eip1193Provider = new CapsuleEIP1193Provider({
     capsule,
     chainId: DEFAULT_CHAIN_ID,
@@ -197,9 +172,7 @@ async function sendEIP1193ProviderTransaction(): Promise<void> {
 
 function WagmiSignMessage(): JSX.Element {
   const [message, setMessage] = useState<string>('');
-  const [messageSignature, setMessageSignature] = useState<
-    string | undefined
-  >();
+  const [messageSignature, setMessageSignature] = useState<string | undefined>();
   const onSuccess = (data: string) => {
     setMessageSignature(data);
   };
@@ -239,11 +212,7 @@ function WagmiSendTransaction(): JSX.Element {
     type: 'eip1559',
   });
 
-  const {
-    data,
-    sendTransaction,
-    isLoading: isSendTxLoading,
-  } = useSendTransaction(config);
+  const { data, sendTransaction, isLoading: isSendTxLoading } = useSendTransaction(config);
 
   const { isLoading: isWaitTxLoading, isSuccess } = useWaitForTransaction({
     hash: data?.hash,
@@ -267,30 +236,16 @@ function WagmiSendTransaction(): JSX.Element {
         }}
       />
       <Button
-        isDisabled={
-          isSendTxLoading ||
-          isWaitTxLoading ||
-          !sendTransaction ||
-          !toAddress ||
-          !amount
-        }
+        isDisabled={isSendTxLoading || isWaitTxLoading || !sendTransaction || !toAddress || !amount}
         onClick={() => {
           sendTransaction();
         }}
       >
-        {isSendTxLoading
-          ? 'Sending Transaction...'
-          : isWaitTxLoading
-          ? 'Awaiting Confirmation...'
-          : 'Send Transaction'}
+        {isSendTxLoading ? 'Sending Transaction...' : isWaitTxLoading ? 'Awaiting Confirmation...' : 'Send Transaction'}
       </Button>
       {isSuccess && (
         <Text>
-          <a
-            rel="noreferrer"
-            target="_blank"
-            href={`https://sepolia.etherscan.io/tx/${data?.hash}`}
-          >
+          <a rel="noreferrer" target="_blank" href={`https://sepolia.etherscan.io/tx/${data?.hash}`}>
             <u>Sepolia Scan Link</u>
           </a>
         </Text>
@@ -301,8 +256,7 @@ function WagmiSendTransaction(): JSX.Element {
 
 function WagmiProfileComponent(): JSX.Element {
   const { address, connector, isConnected } = useAccount();
-  const { connect, connectors, error, isLoading, pendingConnector } =
-    useConnect();
+  const { connect, connectors, error, isLoading, pendingConnector } = useConnect();
   const { disconnect } = useDisconnect();
 
   if (isConnected) {
@@ -339,9 +293,7 @@ function WagmiProfileComponent(): JSX.Element {
         >
           {connector.name}
           {!connector.ready && ' (unsupported)'}
-          {isLoading &&
-            connector.id === pendingConnector?.id &&
-            ' (connecting)'}
+          {isLoading && connector.id === pendingConnector?.id && ' (connecting)'}
         </Button>
       ))}
 
@@ -390,10 +342,7 @@ function WagmiComponent(): JSX.Element {
 }
 
 async function signEthersMessage(message: string): Promise<string> {
-  const provider = new ethers.JsonRpcProvider(
-    ALCHEMY_SEPOLIA_PROVIDER,
-    'sepolia',
-  );
+  const provider = new ethers.JsonRpcProvider(ALCHEMY_SEPOLIA_PROVIDER, 'sepolia');
   const ethersSigner = new CapsuleEthersSigner(capsule, provider);
   return ethersSigner.signMessage(message);
 }
@@ -410,10 +359,7 @@ async function sendEthersTransaction(): Promise<void> {
     chainId: DEFAULT_CHAIN_ID,
     type: 2,
   };
-  const provider = new ethers.JsonRpcProvider(
-    ALCHEMY_SEPOLIA_PROVIDER,
-    'sepolia',
-  );
+  const provider = new ethers.JsonRpcProvider(ALCHEMY_SEPOLIA_PROVIDER, 'sepolia');
   const ethersSigner = new CapsuleEthersSigner(capsule, provider);
   const res = await ethersSigner.sendTransaction(tx);
   console.log('send ethers tx response:\n', res);
@@ -435,20 +381,14 @@ async function createTransaction(
   let functionCallData: any;
   if (functionName && contractAbi) {
     const contract = new web3.eth.Contract(JSON.parse(contractAbi), toAddress);
-    functionCallData = contract.methods[functionName](
-      ...functionArgs,
-    ).encodeABI();
+    functionCallData = contract.methods[functionName](...functionArgs).encodeABI();
   }
 
   const tx = new FeeMarketEIP1559Transaction({
     to: !deployByteCode ? toAddress : undefined,
-    value: value
-      ? web3.utils.toHex(web3.utils.toWei(value, 'gwei'))
-      : undefined,
+    value: value ? web3.utils.toHex(web3.utils.toWei(value, 'gwei')) : undefined,
     gasLimit: web3.utils.toHex(Number(gasAmount)),
-    maxPriorityFeePerGas: web3.utils.toHex(
-      web3.utils.toWei(maxPriorityFeePerGas, 'gwei'),
-    ),
+    maxPriorityFeePerGas: web3.utils.toHex(web3.utils.toWei(maxPriorityFeePerGas, 'gwei')),
     maxFeePerGas: web3.utils.toHex(web3.utils.toWei(maxFeePerGas, 'gwei')),
     nonce: web3.utils.toHex(Number(nonce)),
     data: functionCallData || deployByteCode || undefined,
@@ -468,24 +408,18 @@ function getCapsuleOpts(env: Environment, useDKLS: boolean): ConstructorOpts {
     case Environment.SANDBOX:
       return {
         // useLocalFiles: true,
-        offloadMPCComputationURL: useDKLS
-          ? undefined
-          : 'https://partner-mpc-computation.sandbox.usecapsule.com',
+        offloadMPCComputationURL: useDKLS ? undefined : 'https://partner-mpc-computation.sandbox.usecapsule.com',
         // portalBackgroundColor: '#df092d',
         // portalPrimaryButtonColor: '#322e47',
         // portalTextColor: '#ffffff',
       };
     case Environment.BETA:
       return {
-        offloadMPCComputationURL: useDKLS
-          ? undefined
-          : 'https://partner-mpc-computation.beta.usecapsule.com',
+        offloadMPCComputationURL: useDKLS ? undefined : 'https://partner-mpc-computation.beta.usecapsule.com',
       };
     case Environment.PROD:
       return {
-        offloadMPCComputationURL: useDKLS
-          ? undefined
-          : 'https://partner-mpc-computation.prod.usecapsule.com',
+        offloadMPCComputationURL: useDKLS ? undefined : 'https://partner-mpc-computation.prod.usecapsule.com',
       };
     default:
       throw new Error(`invalid environment: ${env}`);
@@ -495,22 +429,10 @@ function getCapsuleOpts(env: Environment, useDKLS: boolean): ConstructorOpts {
 let capsule: Capsule = undefined;
 
 function App() {
-  const [selectedView, setSelectedView] = useSessionStorage(
-    '@EXAMPLE-CAPSULE/selectedView',
-    'OLD_VIEW',
-  );
-  const [selectedEnv, setSelectedEnv] = useSessionStorage(
-    '@EXAMPLE-CAPSULE/selectedEnv',
-    Environment.SANDBOX,
-  );
-  const [selectedApiKey, setSelectedApiKey] = useSessionStorage(
-    '@EXAMPLE-CAPSULE/selectedApiKey',
-    API_KEY_WITH_BRANDING,
-  );
-  const [useDKLS, setUseDKLS] = useSessionStorage(
-    '@EXAMPLE-CAPSULE/useDKLS',
-    true,
-  );
+  const [selectedView, setSelectedView] = useSessionStorage('@EXAMPLE-CAPSULE/selectedView', 'OLD_VIEW');
+  const [selectedEnv, setSelectedEnv] = useSessionStorage('@EXAMPLE-CAPSULE/selectedEnv', Environment.SANDBOX);
+  const [selectedApiKey, setSelectedApiKey] = useSessionStorage('@EXAMPLE-CAPSULE/selectedApiKey', API_KEY_WITH_BRANDING);
+  const [useDKLS, setUseDKLS] = useSessionStorage('@EXAMPLE-CAPSULE/useDKLS', true);
 
   const [logo, setLogo] = useState('');
   const [foregroundColor, setForegroundColor] = useState('#FAFAFA');
@@ -526,22 +448,16 @@ function App() {
   const [txToAddress, setTxToAddress] = useState(DEFAULT_TO_ADDRESS);
   const [txValue, setTxValue] = useState(DEFAULT_VALUE);
   const [txGasAmount, setTxGasAmount] = useState(DEFAULT_GAS_AMOUNT);
-  const [txMaxPriorityFeePerGas, setTxMaxPriorityFeePerGas] = useState(
-    DEFAULT_MAX_PRIORITY_FEE_PER_GAS,
-  );
+  const [txMaxPriorityFeePerGas, setTxMaxPriorityFeePerGas] = useState(DEFAULT_MAX_PRIORITY_FEE_PER_GAS);
   const [txMaxFeePerGas, setTxMaxFeePerGas] = useState(DEFAULT_MAX_FEE_PER_GAS);
   const [nonce, setNonce] = useState(DEFAULT_NONCE);
   const [chainId, setChainId] = useState(DEFAULT_CHAIN_ID);
-  const [smartContractFunctionName, setSmartContractFunctionName] =
-    useState('');
-  const [smartContractFunctionArgs, setSmartContractFunctionArgs] =
-    useState('');
-  const [smartContractAbi, setSmartContractAbi] = useState(
-    JSON.stringify(DEFAULT_CONTRACT_ABI),
-  );
+  const [smartContractFunctionName, setSmartContractFunctionName] = useState('');
+  const [smartContractFunctionArgs, setSmartContractFunctionArgs] = useState('');
+  const [smartContractAbi, setSmartContractAbi] = useState(JSON.stringify(DEFAULT_CONTRACT_ABI));
   const [smartContractByteCode, setSmartContractByteCode] = useState('');
   const [transactionReviewUrl, setTransactionReviewUrl] = useState('');
-  const [capsuleKey, setCapsuleKey] = useState(0);
+  const [_capsuleKey, setCapsuleKey] = useState(0);
   const [deleteButtonDisabled, setDeleteButtonDisabled] = useState(false);
   const [secondsToDelete, setSecondsToDelete] = useState(4);
   const [messageToSign, setMessageToSign] = useState('');
@@ -565,9 +481,7 @@ function App() {
     const isFullyLoggedIn = await capsule.isSessionActive();
     setIsSessionActive(isFullyLoggedIn);
     if (isFullyLoggedIn && capsule instanceof CoreCapsule) {
-      console.log(
-        `exported session:\n${(capsule as CoreCapsule).exportSession()}`,
-      );
+      console.log(`exported session:\n${(capsule as CoreCapsule).exportSession()}`);
     }
   }
 
@@ -585,9 +499,7 @@ function App() {
     if (!(await capsule.isFullyLoggedIn())) {
       throw new Error('Need to be fully loggedIn to delete user.');
     }
-    const res = await capsule.ctx.capsuleClient.deleteSelf(
-      (capsule as CoreCapsule).getUserId(),
-    );
+    const res = await capsule.ctx.capsuleClient.deleteSelf((capsule as CoreCapsule).getUserId());
 
     await capsule.logout();
 
@@ -595,16 +507,19 @@ function App() {
     setEmailPendingDeletion(userEmail);
 
     for (let i = secondsToDelete; i > 0; i--) {
-      setTimeout(() => {
-        setSecondsToDelete(i - 1);
-        if (i - 1 === 0) {
-          setCapsuleKey((prevKey) => prevKey + 1);
-          setIsSessionActive(false);
-          setDeletedEmail('');
-          setDeleteButtonDisabled(false);
-          setSecondsToDelete(4);
-        }
-      }, (secondsToDelete - i) * 1000);
+      setTimeout(
+        () => {
+          setSecondsToDelete(i - 1);
+          if (i - 1 === 0) {
+            setCapsuleKey((prevKey) => prevKey + 1);
+            setIsSessionActive(false);
+            setDeletedEmail('');
+            setDeleteButtonDisabled(false);
+            setSecondsToDelete(4);
+          }
+        },
+        (secondsToDelete - i) * 1000,
+      );
     }
 
     setTimeout(() => {
@@ -621,10 +536,7 @@ function App() {
             <Text width={'15%'}>
               <strong>Select Environment:</strong>
             </Text>
-            <Select
-              defaultValue={selectedEnv}
-              onChange={(e) => setSelectedEnv(e.target.value as Environment)}
-            >
+            <Select defaultValue={selectedEnv} onChange={(e) => setSelectedEnv(e.target.value as Environment)}>
               <option value={Environment.DEV}>Dev</option>
               <option value={Environment.SANDBOX}>Sandbox</option>
               <option value={Environment.BETA}>Beta</option>
@@ -635,10 +547,7 @@ function App() {
             <Text width={'15%'}>
               <strong>Select Example View:</strong>
             </Text>
-            <Select
-              defaultValue={selectedView}
-              onChange={(e) => setSelectedView(e.target.value)}
-            >
+            <Select defaultValue={selectedView} onChange={(e) => setSelectedView(e.target.value)}>
               <option value="OLD_VIEW">Old View</option>
               {/* <option value="ETHERS">Ethers</option>
             <option value="VIEM">Viem</option> */}
@@ -661,10 +570,7 @@ function App() {
             <Text width={'15%'}>
               <strong>Use DKLS:</strong>
             </Text>
-            <Select
-              defaultValue={`${!!useDKLS}`}
-              onChange={(e) => setUseDKLS(e.target.value === 'true')}
-            >
+            <Select defaultValue={`${!!useDKLS}`} onChange={(e) => setUseDKLS(e.target.value === 'true')}>
               <option value={'true'}>true</option>
               <option value={'false'}>false</option>
             </Select>
@@ -717,12 +623,7 @@ function App() {
                 <Text width={'15%'}>
                   <strong>Select Border Radius:</strong>
                 </Text>
-                <Select
-                  defaultValue={borderRadius}
-                  onChange={(e) =>
-                    setBorderRadius(e.target.value as Environment)
-                  }
-                >
+                <Select defaultValue={borderRadius} onChange={(e) => setBorderRadius(e.target.value as Environment)}>
                   <option value="none">None</option>
                   <option value="xs">XSmall</option>
                   <option value="sm">Small</option>
@@ -747,23 +648,14 @@ function App() {
                 </Button>
                 {isSessionActive && (
                   <>
-                    <Button
-                      colorScheme="red"
-                      variant="solid"
-                      disabled={deleteButtonDisabled}
-                      onClick={handleDeleteClick}
-                    >
+                    <Button colorScheme="red" variant="solid" disabled={deleteButtonDisabled} onClick={handleDeleteClick}>
                       Delete User
                     </Button>
-                    {!deletedEmail &&
-                      secondsToDelete > 0 &&
-                      deleteButtonDisabled &&
-                      emailPendingDeletion && (
-                        <Text>
-                          {emailPendingDeletion} will be deleted in{' '}
-                          {secondsToDelete}...
-                        </Text>
-                      )}
+                    {!deletedEmail && secondsToDelete > 0 && deleteButtonDisabled && emailPendingDeletion && (
+                      <Text>
+                        {emailPendingDeletion} will be deleted in {secondsToDelete}...
+                      </Text>
+                    )}
                   </>
                 )}
               </HStack>
@@ -807,18 +699,10 @@ function App() {
               <Button colorScheme="teal" onClick={checkIsSessionActive}>
                 Is Fully Logged In?
               </Button>
-              <Text>
-                {isSessionActive ? 'Fully Logged In!' : 'Log In Pending...'}
-              </Text>
+              <Text>{isSessionActive ? 'Fully Logged In!' : 'Log In Pending...'}</Text>
 
               <Text>
-                Wallet Address:{' '}
-                <strong>
-                  {
-                    capsule.getWallets()?.[Object.keys(capsule.getWallets())[0]]
-                      ?.address
-                  }
-                </strong>
+                Wallet Address: <strong>{capsule.getWallets()?.[Object.keys(capsule.getWallets())[0]]?.address}</strong>
               </Text>
               {/* <Text>{userShare}</Text> */}
 
@@ -842,23 +726,11 @@ function App() {
               </Text>
 
               <Text>To Address:</Text>
-              <Input
-                name="To Address"
-                onChange={(e) => setTxToAddress(e.target.value)}
-                value={txToAddress}
-              />
+              <Input name="To Address" onChange={(e) => setTxToAddress(e.target.value)} value={txToAddress} />
               <Text>Value (gwei):</Text>
-              <Input
-                name="Value (gwei)"
-                onChange={(e) => setTxValue(e.target.value)}
-                value={txValue}
-              />
+              <Input name="Value (gwei)" onChange={(e) => setTxValue(e.target.value)} value={txValue} />
               <Text>Gas Amount:</Text>
-              <Input
-                name="Gas Amount"
-                onChange={(e) => setTxGasAmount(e.target.value)}
-                value={txGasAmount}
-              />
+              <Input name="Gas Amount" onChange={(e) => setTxGasAmount(e.target.value)} value={txGasAmount} />
               <Text>Max Priority Fee Per Gas (gwei):</Text>
               <Input
                 name="Max Priority Fee Per Gas (gwei)"
@@ -872,17 +744,9 @@ function App() {
                 value={txMaxFeePerGas}
               />
               <Text>Nonce:</Text>
-              <Input
-                name="Nonce"
-                onChange={(e) => setNonce(e.target.value)}
-                value={nonce}
-              />
+              <Input name="Nonce" onChange={(e) => setNonce(e.target.value)} value={nonce} />
               <Text>Chain ID:</Text>
-              <Input
-                name="Chain ID"
-                onChange={(e) => setChainId(e.target.value)}
-                value={chainId}
-              />
+              <Input name="Chain ID" onChange={(e) => setChainId(e.target.value)} value={chainId} />
               <Text>Smart Contract ABI:</Text>
               <Input
                 name="Smart Contract ABI"
@@ -913,9 +777,7 @@ function App() {
               <Button
                 colorScheme="teal"
                 onClick={async () => {
-                  const walletId =
-                    capsule.getWallets()?.[Object.keys(capsule.getWallets())[0]]
-                      ?.id;
+                  const walletId = capsule.getWallets()?.[Object.keys(capsule.getWallets())[0]]?.id;
                   const tx = await createTransaction(
                     txToAddress,
                     txValue,
@@ -926,30 +788,20 @@ function App() {
                     chainId,
                     smartContractAbi,
                     smartContractFunctionName,
-                    smartContractFunctionArgs
-                      ? JSON.parse(smartContractFunctionArgs)
-                      : [],
+                    smartContractFunctionArgs ? JSON.parse(smartContractFunctionArgs) : [],
                     smartContractByteCode,
                   );
                   await sendEthersTransaction();
                   await sendViemTransaction();
-                  const res = await capsule.sendTransaction(
-                    walletId,
-                    tx,
-                    `${chainId}`,
-                  );
+                  const res = await capsule.sendTransaction(walletId, tx, `${chainId}`);
                   if ((res as DeniedSignatureResWithUrl).transactionReviewUrl) {
-                    setTransactionReviewUrl(
-                      (res as DeniedSignatureResWithUrl).transactionReviewUrl,
-                    );
+                    setTransactionReviewUrl((res as DeniedSignatureResWithUrl).transactionReviewUrl);
                   }
                 }}
               >
                 Send Transaction
               </Button>
-              {transactionReviewUrl && (
-                <Text>Transaction Review URL is: {transactionReviewUrl}</Text>
-              )}
+              {transactionReviewUrl && <Text>Transaction Review URL is: {transactionReviewUrl}</Text>}
 
               <Button
                 colorScheme="red"

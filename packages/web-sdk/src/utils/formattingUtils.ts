@@ -3,7 +3,7 @@ export interface Signature {
   r: Hex;
   s: Hex;
   v: bigint;
-};
+}
 
 export function hexStringToBase64(hexString: string): string {
   if (hexString.substring(0, 2) === '0x') {

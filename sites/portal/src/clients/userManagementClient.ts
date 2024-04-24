@@ -18,9 +18,7 @@ export function getBaseUrl(env: Environment): string {
 }
 
 export const userManagementClient = new Client({
-  userManagementHost: getBaseUrl(
-    process.env.REACT_APP_ENV?.toUpperCase() as Environment,
-  ),
+  userManagementHost: getBaseUrl(process.env.REACT_APP_ENV?.toUpperCase() as Environment),
   retrieveSessionCookie: capsule.retrieveSessionCookie,
   persistSessionCookie: capsule.persistSessionCookie,
 });

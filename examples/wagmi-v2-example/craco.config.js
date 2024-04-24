@@ -1,15 +1,15 @@
 module.exports = {
   babel: {
-    plugins: [ // some plugins needed for ethers providers to work
+    plugins: [
+      // some plugins needed for ethers providers to work
       ['@babel/plugin-proposal-class-properties', { loose: true }],
       ['@babel/plugin-proposal-private-methods', { loose: true }],
       ['@babel/plugin-transform-classes', { loose: true }],
-      ['@babel/plugin-transform-private-property-in-object', { loose: true }]
+      ['@babel/plugin-transform-private-property-in-object', { loose: true }],
     ],
   },
   webpack: {
-    configure: webpackConfig => {
-
+    configure: (webpackConfig) => {
       // ts-loader is required to reference external typescript projects/files (non-transpiled)
       webpackConfig.module.rules.push({
         test: /\.tsx?$/,
@@ -18,18 +18,18 @@ module.exports = {
           transpileOnly: true,
           configFile: 'tsconfig.json',
         },
-      })
+      });
       webpackConfig.resolve.fallback = {
         // crypto and stream needed for @celo/utils
-        "crypto": require.resolve("crypto-browserify"),
-        "stream": require.resolve("stream-browserify"),
-        "url" : false,
-        "zlib": false,
-        "https": false,
-        "http": false,
-      }
+        crypto: require.resolve('crypto-browserify'),
+        stream: require.resolve('stream-browserify'),
+        url: false,
+        zlib: false,
+        https: false,
+        http: false,
+      };
 
       return webpackConfig;
     },
-  }
+  },
 };

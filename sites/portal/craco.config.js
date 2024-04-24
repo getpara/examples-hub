@@ -14,14 +14,14 @@ module.exports = {
           transpileOnly: true,
           configFile: 'tsconfig.json',
         },
-      })
+      });
       webpackConfig.resolve.fallback = {
         // crypto and stream needed for @celo/utils
-        "crypto": require.resolve("crypto-browserify"),
-        "stream": require.resolve("stream-browserify"),
-      }
+        crypto: require.resolve('crypto-browserify'),
+        stream: require.resolve('stream-browserify'),
+      };
 
       return webpackConfig;
     },
-  }
+  },
 };

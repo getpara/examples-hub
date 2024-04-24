@@ -1,10 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Wallet } from '@usecapsule/web-sdk';
-import {
-  useCapsuleStore,
-  useModalStore,
-  useUserInfoStore,
-} from '../../stores/index.js';
+import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { Header } from '../Header/Header.js';
 import { Body } from '../Body/Body.js';
@@ -30,18 +26,12 @@ export const ModalContent = ({
   const capsule = useCapsuleStore((state) => state.capsule);
   const currentStep = useModalStore((state) => state.step);
   const webAuthURLForLogin = useModalStore((state) => state.webAuthURLForLogin);
-  const webAuthURLForCreate = useModalStore(
-    (state) => state.webAuthURLForCreate,
-  );
+  const webAuthURLForCreate = useModalStore((state) => state.webAuthURLForCreate);
   const isFullyLoggedIn = useModalStore((state) => state.isFullyLoggedIn);
   const isLogin = useModalStore((state) => state.isLogin());
   const setStep = useModalStore((state) => state.setStep);
-  const setWebAuthURLForLogin = useModalStore(
-    (state) => state.setWebAuthURLForLogin,
-  );
-  const setWebAuthURLForCreate = useModalStore(
-    (state) => state.setWebAuthURLForCreate,
-  );
+  const setWebAuthURLForLogin = useModalStore((state) => state.setWebAuthURLForLogin);
+  const setWebAuthURLForCreate = useModalStore((state) => state.setWebAuthURLForCreate);
   const setIsFullyLoggedIn = useModalStore((state) => state.setIsFullyLoggedIn);
   const resetModalState = useModalStore((state) => state.resetState);
   const resetUserInfoState = useUserInfoStore((state) => state.resetState);
@@ -50,10 +40,8 @@ export const ModalContent = ({
   const createAccountTimeout = useRef<number>();
 
   const [walletCreated, setWalletCreated] = useState(false);
-  const [walletCreationInProgress, setWalletCreationInProgress] =
-    useState(false);
-  const [createWalletRes, setCreateWalletRes] =
-    useState<[Wallet, string]>(null);
+  const [walletCreationInProgress, setWalletCreationInProgress] = useState(false);
+  const [createWalletRes, setCreateWalletRes] = useState<[Wallet, string]>(null);
   const [recoveryShare, setRecoveryShare] = useState<string>(null);
   const [distributeDone, setDistributeDone] = useState(false);
 
@@ -103,11 +91,7 @@ export const ModalContent = ({
 
   // generate wallet once we know it's account creation
   useEffect(() => {
-    if (
-      currentStep !== ModalStep.AWAITING_WALLET_CREATION ||
-      walletCreated ||
-      walletCreationInProgress
-    ) {
+    if (currentStep !== ModalStep.AWAITING_WALLET_CREATION || walletCreated || walletCreationInProgress) {
       return;
     }
     async function genWallet() {
@@ -117,9 +101,7 @@ export const ModalContent = ({
         setCreateWalletRes(newWalletRes);
       } else {
         const recoveryFromOverride = await createWalletOverride(capsule);
-        const fetchedWallets = (await capsule.fetchWallets()).filter(
-          (wallet) => !!wallet.address,
-        );
+        const fetchedWallets = (await capsule.fetchWallets()).filter((wallet) => !!wallet.address);
         const newWallets: Record<string, Wallet> = {};
         for (const wallet of fetchedWallets) {
           newWallets[wallet.id] = {
@@ -146,10 +128,7 @@ export const ModalContent = ({
 
     async function distributeShare() {
       if (!createWalletOverride) {
-        const result = await capsule.distributeNewWalletShare(
-          createWalletRes[0].id,
-          createWalletRes[0].signer,
-        );
+        const result = await capsule.distributeNewWalletShare(createWalletRes[0].id, createWalletRes[0].signer);
         setRecoveryShare(result);
       }
       setDistributeDone(true);
@@ -162,10 +141,7 @@ export const ModalContent = ({
   // wait for biometric to be added to move on to next step
   useEffect(() => {
     if (webAuthURLForCreate) {
-      createAccountTimeout.current = window.setTimeout(
-        awaitWalletCreationTransition,
-        DEFAULTS.POLLING_INTERVAL_MS,
-      );
+      createAccountTimeout.current = window.setTimeout(awaitWalletCreationTransition, DEFAULTS.POLLING_INTERVAL_MS);
     }
     return () => clearTimeout(createAccountTimeout.current);
   }, [webAuthURLForCreate]);
@@ -174,7 +150,6 @@ export const ModalContent = ({
   useEffect(() => {
     if (webAuthURLForLogin) {
       if (loginTransitionOverride) {
-        // eslint-disable-next-line
         async function loginOverride() {
           await loginTransitionOverride(capsule);
 
@@ -190,10 +165,7 @@ export const ModalContent = ({
         loginOverride();
         return;
       }
-      loginTimeout.current = window.setTimeout(
-        awaitLoginTransition,
-        DEFAULTS.POLLING_INTERVAL_MS,
-      );
+      loginTimeout.current = window.setTimeout(awaitLoginTransition, DEFAULTS.POLLING_INTERVAL_MS);
     }
     return () => clearTimeout(loginTimeout.current);
   }, [webAuthURLForLogin]);

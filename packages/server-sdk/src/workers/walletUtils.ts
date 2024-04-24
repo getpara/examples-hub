@@ -7,12 +7,7 @@ const configCGGMPBase = (serverUrl: string, walletId: string, id: string) =>
 const configDKLSBase = (walletId: string, id: string, disableWebSockets: boolean) =>
   `{"walletId": "${walletId}", "id":"${id}", "otherId":"CAPSULE", "isReceiver": false, "disableWebSockets": ${disableWebSockets}}`;
 
-async function keygenRequest(
-  ctx: Ctx,
-  userId: string,
-  walletId: string,
-  protocolId: string,
-): Promise<{ signer: string }> {
+async function keygenRequest(ctx: Ctx, userId: string, walletId: string, protocolId: string): Promise<{ signer: string }> {
   const { data } = await ctx.mpcComputationClient!.post('/wallets', {
     userId,
     walletId,
@@ -62,10 +57,10 @@ export async function keygen(
   userId: string,
   secretKey: string | null,
 ): Promise<{ signer: string; walletId: string }> {
-  const { walletId, protocolId } = await ctx.capsuleClient.createWallet(
-    userId,
-    { useTwoSigners: true, scheme: ctx.useDKLS ? SignatureScheme.DKLS : SignatureScheme.CGGMP }
-  );
+  const { walletId, protocolId } = await ctx.capsuleClient.createWallet(userId, {
+    useTwoSigners: true,
+    scheme: ctx.useDKLS ? SignatureScheme.DKLS : SignatureScheme.CGGMP,
+  });
 
   if (ctx.offloadMPCComputationURL && !ctx.useDKLS) {
     return {
@@ -75,12 +70,10 @@ export async function keygen(
   }
 
   const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
-  const signerConfigUser = ctx.useDKLS ?
-    configDKLSBase(walletId, 'USER', ctx.disableWebSockets) :
-    configCGGMPBase(serverUrl, walletId, 'USER');
-  const createAccountFn = ctx.useDKLS ?
-    global.dklsCreateAccount :
-    global.createAccountV2;
+  const signerConfigUser = ctx.useDKLS
+    ? configDKLSBase(walletId, 'USER', ctx.disableWebSockets)
+    : configCGGMPBase(serverUrl, walletId, 'USER');
+  const createAccountFn = ctx.useDKLS ? global.dklsCreateAccount : global.createAccountV2;
   const newSigner = (await new Promise((resolve, reject) =>
     createAccountFn(
       signerConfigUser,
@@ -93,8 +86,8 @@ export async function keygen(
           reject(err);
         }
         resolve(result);
-      }
-    )
+      },
+    ),
   )) as string;
   return { signer: newSigner, walletId };
 }
@@ -105,7 +98,7 @@ export async function preKeygen(
   email: string,
   secretKey: string | null,
 ): Promise<{ signer: string; walletId: string }> {
-  const { walletId, protocolId } = await ctx.capsuleClient.createPregenWallet({email});
+  const { walletId, protocolId } = await ctx.capsuleClient.createPregenWallet({ email });
 
   if (ctx.offloadMPCComputationURL && !ctx.useDKLS) {
     return {
@@ -115,12 +108,10 @@ export async function preKeygen(
   }
 
   const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
-  const signerConfigUser = ctx.useDKLS ?
-    configDKLSBase(walletId, 'USER', ctx.disableWebSockets) :
-    configCGGMPBase(serverUrl, walletId, 'USER');
-  const createAccountFn = ctx.useDKLS ?
-    global.dklsCreateAccount :
-    global.createAccountV2;
+  const signerConfigUser = ctx.useDKLS
+    ? configDKLSBase(walletId, 'USER', ctx.disableWebSockets)
+    : configCGGMPBase(serverUrl, walletId, 'USER');
+  const createAccountFn = ctx.useDKLS ? global.dklsCreateAccount : global.createAccountV2;
   const newSigner = (await new Promise((resolve, reject) =>
     createAccountFn(
       signerConfigUser,
@@ -133,8 +124,8 @@ export async function preKeygen(
           reject(err);
         }
         resolve(result);
-      }
-    )
+      },
+    ),
   )) as string;
   return { signer: newSigner, walletId };
 }
@@ -144,15 +135,11 @@ export async function signMessage(
   share: string,
   walletId: string,
   userId: string,
-  message: string
+  message: string,
 ): Promise<SignatureRes> {
-  const { protocolId, pendingTransactionId } = await ctx.capsuleClient.preSignMessage(
-    userId,
-    walletId,
-    message
-  );
+  const { protocolId, pendingTransactionId } = await ctx.capsuleClient.preSignMessage(userId, walletId, message);
   if (pendingTransactionId) {
-    console.log('sign message denied');
+    console.error('sign message denied');
     return { pendingTransactionId };
   }
 
@@ -161,22 +148,14 @@ export async function signMessage(
   }
 
   const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
-  const signMessageFn = ctx.useDKLS ?
-    global.dklsSignMessage :
-    global.signMessage;
+  const signMessageFn = ctx.useDKLS ? global.dklsSignMessage : global.signMessage;
   return new Promise((resolve, reject) =>
-    signMessageFn(
-      share,
-      serverUrl,
-      message,
-      protocolId,
-      (err, result) => {
-        if (err) {
-          reject(err);
-        }
-        resolve({ signature: result });
+    signMessageFn(share, serverUrl, message, protocolId, (err, result) => {
+      if (err) {
+        reject(err);
       }
-    )
+      resolve({ signature: result });
+    }),
   );
 }
 
@@ -188,13 +167,11 @@ export async function signTransaction(
   tx: string,
   chainId: string,
 ): Promise<SignatureRes> {
-  const { data: { protocolId, pendingTransactionId } } = await ctx.capsuleClient.signTransaction(
-    userId,
-    walletId,
-    { transaction: tx, chainId }
-  );
+  const {
+    data: { protocolId, pendingTransactionId },
+  } = await ctx.capsuleClient.signTransaction(userId, walletId, { transaction: tx, chainId });
   if (pendingTransactionId) {
-    console.log('send transaction denied');
+    console.error('send transaction denied');
     return { pendingTransactionId };
   }
 
@@ -203,16 +180,14 @@ export async function signTransaction(
   }
 
   const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
-  const signTransactionFn = ctx.useDKLS ?
-    global.dklsSendTransaction :
-    global.sendTransaction;
+  const signTransactionFn = ctx.useDKLS ? global.dklsSendTransaction : global.sendTransaction;
   return new Promise((resolve, reject) =>
     signTransactionFn(share, serverUrl, tx, chainId, protocolId, (err, result) => {
       if (err) {
         reject(err);
       }
       resolve({ signature: result });
-    })
+    }),
   );
 }
 
@@ -224,13 +199,11 @@ export async function sendTransaction(
   tx: string,
   chainId: string,
 ): Promise<SignatureRes> {
-  const { data: { protocolId, pendingTransactionId } } = await ctx.capsuleClient.sendTransaction(
-    userId,
-    walletId,
-    { transaction: tx, chainId }
-  );
+  const {
+    data: { protocolId, pendingTransactionId },
+  } = await ctx.capsuleClient.sendTransaction(userId, walletId, { transaction: tx, chainId });
   if (pendingTransactionId) {
-    console.log('send transaction denied');
+    console.error('send transaction denied');
     return { pendingTransactionId };
   }
 
@@ -239,38 +212,29 @@ export async function sendTransaction(
   }
 
   const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
-  const sendTransactionFn = ctx.useDKLS ?
-    global.dklsSendTransaction :
-    global.sendTransaction;
+  const sendTransactionFn = ctx.useDKLS ? global.dklsSendTransaction : global.sendTransaction;
   return new Promise((resolve, reject) =>
     sendTransactionFn(share, serverUrl, tx, chainId, protocolId, (err, result) => {
       if (err) {
         reject(err);
       }
       resolve({ signature: result });
-    })
+    }),
   );
 }
 
-export async function refresh(
-  ctx: Ctx,
-  share: string,
-  walletId: string,
-  userId: string
-): Promise<string> {
+export async function refresh(ctx: Ctx, share: string, walletId: string, userId: string): Promise<string> {
   const {
     data: { protocolId },
   } = await ctx.capsuleClient.refreshKeys(userId, walletId);
   const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
-  const refreshFn = ctx.useDKLS ?
-    global.dklsRefresh :
-    global.refresh;
+  const refreshFn = ctx.useDKLS ? global.dklsRefresh : global.refresh;
   return new Promise((resolve, reject) =>
     refreshFn(share, serverUrl, protocolId, (err, result) => {
       if (err) {
         reject(err);
       }
       resolve(result);
-    })
+    }),
   );
 }

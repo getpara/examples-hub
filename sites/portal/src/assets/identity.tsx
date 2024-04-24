@@ -2,13 +2,7 @@ import React from 'react';
 
 export default function Identity() {
   return (
-    <svg
-      width="48"
-      height="48"
-      viewBox="0 0 48 48"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
       <g clipPath="url(#clip0_632_19536)">
         <path
           d="M0 16C0 10.3995 0 7.59921 1.08993 5.46009C2.04867 3.57847 3.57847 2.04867 5.46009 1.08993C7.59921 0 10.3995 0 16 0H32C37.6005 0 40.4008 0 42.5399 1.08993C44.4215 2.04867 45.9513 3.57847 46.9101 5.46009C48 7.59921 48 10.3995 48 16V32C48 37.6005 48 40.4008 46.9101 42.5399C45.9513 44.4215 44.4215 45.9513 42.5399 46.9101C40.4008 48 37.6005 48 32 48H16C10.3995 48 7.59921 48 5.46009 46.9101C3.57847 45.9513 2.04867 44.4215 1.08993 42.5399C0 40.4008 0 37.6005 0 32V16Z"
@@ -112,36 +106,16 @@ export default function Identity() {
           />
         </g>
       </g>
-      <rect
-        x="1"
-        y="1"
-        width="46"
-        height="46"
-        rx="4"
-        stroke="#FDFDFD"
-        strokeWidth="2"
-      />
+      <rect x="1" y="1" width="46" height="46" rx="4" stroke="#FDFDFD" strokeWidth="2" />
       <defs>
-        <linearGradient
-          id="paint0_linear_632_19536"
-          x1="24"
-          y1="0"
-          x2="24"
-          y2="48"
-          gradientUnits="userSpaceOnUse"
-        >
+        <linearGradient id="paint0_linear_632_19536" x1="24" y1="0" x2="24" y2="48" gradientUnits="userSpaceOnUse">
           <stop stopColor="#07080A" />
         </linearGradient>
         <clipPath id="clip0_632_19536">
           <rect width="48" height="48" rx="5" fill="white" />
         </clipPath>
         <clipPath id="clip1_632_19536">
-          <rect
-            width="28"
-            height="28"
-            fill="white"
-            transform="translate(10 10)"
-          />
+          <rect width="28" height="28" fill="white" transform="translate(10 10)" />
         </clipPath>
       </defs>
     </svg>

@@ -18,16 +18,8 @@ import {
 import { EventEmitter } from 'eventemitter3';
 import { Chain } from '@wagmi/chains';
 
-import {
-  getViemChain,
-  createCapsuleViemClient,
-  createCapsuleAccount,
-} from '@usecapsule/viem-v1-integration';
-import CapsuleWeb, {
-  decimalToHex,
-  hexToDecimal,
-  CapsuleModalProps,
-} from '@usecapsule/react-sdk';
+import { getViemChain, createCapsuleViemClient, createCapsuleAccount } from '@usecapsule/viem-v1-integration';
+import CapsuleWeb, { decimalToHex, hexToDecimal, CapsuleModalProps } from '@usecapsule/react-sdk';
 import { renderModal } from './connectorModal.js';
 
 const STORAGE_CHAIN_ID_KEY = '@CAPSULE/chainId';
@@ -57,10 +49,7 @@ type WebSocketTransportSubscribeFn = (
   },
 ) => Promise<WebSocketTransportSubscribeReturnType>;
 
-export class CapsuleEIP1193Provider
-  extends EventEmitter
-  implements EIP1193Provider
-{
+export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provider {
   private currentHexChainId: Hex;
   private walletClient: WalletClient;
   private chainTransportSubscribe?: WebSocketTransportSubscribeFn;
@@ -95,15 +84,10 @@ export class CapsuleEIP1193Provider
   }
 
   private getRpcUrlsFromViemChain = (chain: Chain): string[] => {
-    return [
-      ...(chain.rpcUrls.default.webSocket || []),
-      ...chain.rpcUrls.default.http,
-    ];
+    return [...(chain.rpcUrls.default.webSocket || []), ...chain.rpcUrls.default.http];
   };
 
-  private wagmiChainToAddEthereumChainParameters = (
-    chain: Chain,
-  ): [Hex, AddEthereumChainParameter] => {
+  private wagmiChainToAddEthereumChainParameters = (chain: Chain): [Hex, AddEthereumChainParameter] => {
     const hexChainId = decimalToHex(`${chain.id}`);
     const viemChain = getViemChain(`${chain.id}`);
 
@@ -122,12 +106,8 @@ export class CapsuleEIP1193Provider
     ];
   };
 
-  private wagmiChainsToAddEthereumChainParameters = (
-    chains: Chain[],
-  ): Record<Hex, AddEthereumChainParameter> => {
-    return Object.fromEntries(
-      chains.map(this.wagmiChainToAddEthereumChainParameters),
-    );
+  private wagmiChainsToAddEthereumChainParameters = (chains: Chain[]): Record<Hex, AddEthereumChainParameter> => {
+    return Object.fromEntries(chains.map(this.wagmiChainToAddEthereumChainParameters));
   };
 
   private accountFromAddress = (address: Address): LocalAccount => {
@@ -178,10 +158,10 @@ export class CapsuleEIP1193Provider
           return Object.values(this.capsule.getWallets()).map((w) => w.address);
         }
         if (this.disableModal) {
-          throw new ProviderRpcError(
-            new Error('the provider is disconnected'),
-            { code: 4900, shortMessage: 'the provider is disconnected' },
-          );
+          throw new ProviderRpcError(new Error('the provider is disconnected'), {
+            code: 4900,
+            shortMessage: 'the provider is disconnected',
+          });
         }
 
         let isClosed = false;
@@ -194,9 +174,7 @@ export class CapsuleEIP1193Provider
         while (Date.now() - now < TEN_MINUTES_MS) {
           await new Promise((resolve) => setTimeout(resolve, 2000));
           if (await this.capsule.isFullyLoggedIn()) {
-            const addresses = Object.values(this.capsule.getWallets()).map(
-              (w) => w.address,
-            );
+            const addresses = Object.values(this.capsule.getWallets()).map((w) => w.address);
             this.emit('accountsChanged', addresses);
             return addresses;
           }
@@ -208,10 +186,10 @@ export class CapsuleEIP1193Provider
           }
         }
 
-        throw new ProviderRpcError(
-          new Error('timed out waiting for user to log in'),
-          { code: 4001, shortMessage: 'timed out waiting for user to log in' },
-        );
+        throw new ProviderRpcError(new Error('timed out waiting for user to log in'), {
+          code: 4001,
+          shortMessage: 'timed out waiting for user to log in',
+        });
       }
       case 'eth_sendTransaction': {
         const fromAddress = params[0].from;
@@ -230,9 +208,7 @@ export class CapsuleEIP1193Provider
       }
       case 'eth_signTransaction': {
         const fromAddress = params[0].from;
-        return this.accountFromAddress(fromAddress).signTransaction(
-          formatTransaction(params[0]),
-        );
+        return this.accountFromAddress(fromAddress).signTransaction(formatTransaction(params[0]));
       }
       case 'eth_signTypedData_v4': {
         const fromAddress = params[0];
@@ -248,13 +224,10 @@ export class CapsuleEIP1193Provider
       }
       case 'eth_subscribe': {
         if (!this.chainTransportSubscribe) {
-          throw new ProviderRpcError(
-            new Error('chain does not support subscriptions'),
-            {
-              code: 4200,
-              shortMessage: 'chain does not support subscriptions',
-            },
-          );
+          throw new ProviderRpcError(new Error('chain does not support subscriptions'), {
+            code: 4200,
+            shortMessage: 'chain does not support subscriptions',
+          });
         }
 
         const res = await this.chainTransportSubscribe({
@@ -285,8 +258,7 @@ export class CapsuleEIP1193Provider
       case 'wallet_switchEthereumChain': {
         if (!this.chains[params[0].chainId]) {
           const chain = getViemChain(hexToDecimal(params[0].chainId));
-          const [hexChainId, addEthereumChainParameter] =
-            this.wagmiChainToAddEthereumChainParameters(chain);
+          const [hexChainId, addEthereumChainParameter] = this.wagmiChainToAddEthereumChainParameters(chain);
           this.chains[hexChainId] = addEthereumChainParameter;
 
           this.setCurrentChain(params[0].chainId);

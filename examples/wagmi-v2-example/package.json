@@ -29,8 +29,8 @@
     "webpack": "5.88.2"
   },
   "scripts": {
-    "start": "PORT=3002 craco start",
-    "build": "craco build",
+    "start": "DISABLE_ESLINT_PLUGIN=true PORT=3002 craco start",
+    "build": "DISABLE_ESLINT_PLUGIN=true craco build",
     "serve-build": "PORT=3002 serve -s build"
   },
   "devDependencies": {

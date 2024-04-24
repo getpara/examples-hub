@@ -1,12 +1,6 @@
 export default function CapsuleBox() {
   return (
-    <svg
-      width="44"
-      height="44"
-      viewBox="0 0 44 44"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M0 14.6667C0 9.53285 0 6.96594 0.999107 5.00509C1.87795 3.28027 3.28027 1.87795 5.00509 0.999107C6.96594 0 9.53285 0 14.6667 0H29.3333C34.4671 0 37.0341 0 38.9949 0.999107C40.7197 1.87795 42.1221 3.28027 43.0009 5.00509C44 6.96594 44 9.53285 44 14.6667V29.3333C44 34.4671 44 37.0341 43.0009 38.9949C42.1221 40.7197 40.7197 42.1221 38.9949 43.0009C37.0341 44 34.4671 44 29.3333 44H14.6667C9.53285 44 6.96594 44 5.00509 43.0009C3.28027 42.1221 1.87795 40.7197 0.999107 38.9949C0 37.0341 0 34.4671 0 29.3333V14.6667Z"
         fill="url(#paint0_linear_661_19194)"
@@ -24,25 +18,11 @@ export default function CapsuleBox() {
         fill="black"
       />
       <defs>
-        <linearGradient
-          id="paint0_linear_661_19194"
-          x1="22"
-          y1="0"
-          x2="22"
-          y2="44"
-          gradientUnits="userSpaceOnUse"
-        >
+        <linearGradient id="paint0_linear_661_19194" x1="22" y1="0" x2="22" y2="44" gradientUnits="userSpaceOnUse">
           <stop stop-color="#174299" />
           <stop offset="1" stop-color="#001E59" />
         </linearGradient>
-        <linearGradient
-          id="paint1_linear_661_19194"
-          x1="22"
-          y1="0"
-          x2="22"
-          y2="44"
-          gradientUnits="userSpaceOnUse"
-        >
+        <linearGradient id="paint1_linear_661_19194" x1="22" y1="0" x2="22" y2="44" gradientUnits="userSpaceOnUse">
           <stop stop-color="white" />
         </linearGradient>
       </defs>

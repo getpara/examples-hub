@@ -8,9 +8,7 @@ import { Modal } from '../../components/common';
 import { ModalHeader } from '../../components/ModalHeader';
 
 export const AuthCreation = () => {
-  const [step, setStep] = useState<AuthCreationStep>(
-    AuthCreationStep.SELECT_DEVICE,
-  );
+  const [step, setStep] = useState<AuthCreationStep>(AuthCreationStep.SELECT_DEVICE);
 
   const { biometricId: paramsBiometricId, userId: paramsUserId } = useParams();
   const [searchParams, _] = useSearchParams();
@@ -21,23 +19,14 @@ export const AuthCreation = () => {
   const setUpBiometrics = useCallback(async () => {
     setStep(AuthCreationStep.CREATING);
     try {
-      await authCreation(
-        paramsUserId,
-        paramsEmail,
-        paramsBiometricId,
-        isForNewDevice,
-      );
+      await authCreation(paramsUserId, paramsEmail, paramsBiometricId, isForNewDevice);
       setStep(AuthCreationStep.SUCCESS);
 
       setTimeout(function () {
         window.close();
       }, REDIRECT_TIMEOUT);
     } catch (err) {
-      if (
-        err.message.includes(
-          'The operation either timed out or was not allowed',
-        )
-      ) {
+      if (err.message.includes('The operation either timed out or was not allowed')) {
         setStep(AuthCreationStep.SELECT_DEVICE);
       } else {
         console.error('Error creating passkey: ', err);
@@ -56,11 +45,7 @@ export const AuthCreation = () => {
   return (
     <Modal noOverlay>
       <ModalHeader />
-      <Body
-        step={step}
-        isForNewDevice={isForNewDevice}
-        onAddThisDeviceClick={setUpBiometrics}
-      />
+      <Body step={step} isForNewDevice={isForNewDevice} onAddThisDeviceClick={setUpBiometrics} />
     </Modal>
   );
 };

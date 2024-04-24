@@ -3,7 +3,7 @@ export class TransactionReviewError extends Error {
 
   constructor(transactionReviewUrl: string) {
     super('transaction review error');
-    this.name = "TransactionReviewError";
+    this.name = 'TransactionReviewError';
     this.transactionReviewUrl = transactionReviewUrl;
   }
 }

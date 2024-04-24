@@ -17,8 +17,8 @@
     "styled-components": "^6.1.8"
   },
   "scripts": {
-    "start": "REACT_APP_ENV=dev PORT=3003 craco start",
-    "build": "craco build",
+    "start": "DISABLE_ESLINT_PLUGIN=true REACT_APP_ENV=dev PORT=3003 craco start",
+    "build": "DISABLE_ESLINT_PLUGIN=true craco build",
     "check-wasm-file-exists": "test -f ./public/static/js/main.wasm || (echo 'public/static/js/main.wasm file does not exist!'; exit 1)",
     "check-mpc-worker-file-exists": "test -f ./public/static/js/mpcWorker-bundle.js || (echo 'public/static/js/mpcWorker-bundle.js file does not exist!'; exit 1)",
     "deploy-s3": "yarn && yarn build && yarn check-wasm-file-exists && yarn check-mpc-worker-file-exists && aws s3 sync build/ s3://capsule-$REACT_APP_ENV-web-portal --acl public-read --profile $REACT_APP_ENV",

@@ -11,7 +11,7 @@ export async function distributeNewShare(
   walletId: string,
   userShare: string,
   ignoreRedistributingBackupEncryptedShare = false,
-  emailProps: BackupKitEmailProps
+  emailProps: BackupKitEmailProps,
 ): Promise<string> {
   const publicKeysRes = await ctx.capsuleClient.getSessionPublicKeys(userId);
   const biometricEncryptedShares = publicKeysRes.data.keys
@@ -20,8 +20,7 @@ export async function distributeNewShare(
         return;
       }
 
-      const { encryptedMessageHex, encryptedKeyHex } =
-        encryptWithDerivedPublicKey(key.sigDerivedPublicKey, userShare);
+      const { encryptedMessageHex, encryptedKeyHex } = encryptWithDerivedPublicKey(key.sigDerivedPublicKey, userShare);
       return {
         encryptedShare: encryptedMessageHex,
         encryptedKey: encryptedKeyHex,
@@ -38,6 +37,6 @@ export async function distributeNewShare(
     biometricEncryptedShares,
     userShare,
     ignoreRedistributingBackupEncryptedShare,
-    emailProps
+    emailProps,
   );
 }

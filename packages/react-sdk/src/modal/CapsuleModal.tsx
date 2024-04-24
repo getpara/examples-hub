@@ -1,8 +1,4 @@
-import {
-  CpslModal,
-  defineCustomElements,
-  generateTheme,
-} from '@usecapsule/react-components';
+import { CpslModal, defineCustomElements, generateTheme } from '@usecapsule/react-components';
 
 import '@usecapsule/react-components/css/capsule-core.css';
 import './css/modal.css';
@@ -10,12 +6,7 @@ import { ModalContent } from './components/index.js';
 import { useEffect, useState } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import {
-  useCapsuleStore,
-  useModalStore,
-  useUserInfoStore,
-  useThemeStore,
-} from './stores/index.js';
+import { useCapsuleStore, useModalStore, useUserInfoStore, useThemeStore } from './stores/index.js';
 import { ModalStep } from './utils/steps.js';
 import { CapsuleModalProps } from './types/modalProps.js';
 import { DEFAULTS } from './constants/defaults.js';
@@ -111,9 +102,7 @@ export const CapsuleModal = ({
   }
 
   if (disableEmailLogin && !oAuthMethods?.length) {
-    console.error(
-      'At least one OAuth method must be provided if email login is disabled.',
-    );
+    console.error('At least one OAuth method must be provided if email login is disabled.');
     return null;
   }
 

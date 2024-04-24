@@ -4,13 +4,7 @@
 
 import '../wasm/wasm_exec.js';
 import * as walletUtils from './walletUtils.js';
-import {
-  Ctx,
-  Environment,
-  getPortalBaseURL,
-  initClient,
-  mpcComputationClient,
-} from '@usecapsule/core-sdk';
+import { Ctx, Environment, getPortalBaseURL, initClient, mpcComputationClient } from '@usecapsule/core-sdk';
 
 export interface Message {
   env: Environment;
@@ -25,7 +19,6 @@ export interface Message {
   wasmOverride?: ArrayBuffer;
 }
 
-/* eslint-disable no-restricted-globals */
 async function loadWasm(ctx: Ctx, wasmOverride?: ArrayBuffer) {
   // @ts-ignore
   const goWasm = new self.Go();
@@ -35,17 +28,11 @@ async function loadWasm(ctx: Ctx, wasmOverride?: ArrayBuffer) {
       throw new Error('fetching wasm file is disabled');
     }
 
-    const fetchedWasm = await fetch(
-      `${getPortalBaseURL(ctx)}/static/js/main.wasm`,
-      { mode: 'cors' },
-    );
+    const fetchedWasm = await fetch(`${getPortalBaseURL(ctx)}/static/js/main.wasm`, { mode: 'cors' });
     wasmArrayBuffer = await fetchedWasm.arrayBuffer();
   }
 
-  const newRes = await WebAssembly.instantiate(
-    wasmArrayBuffer,
-    goWasm.importObject
-  );
+  const newRes = await WebAssembly.instantiate(wasmArrayBuffer, goWasm.importObject);
   goWasm.run(newRes.instance);
 }
 
@@ -85,8 +72,13 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
   }
 }
 
-export async function handleMessage(e: { data: Message }, postMessage: (message: any) => void, useFetchAdapter?: boolean): Promise<boolean> {
-  const { env, apiKey, offloadMPCComputationURL, disableWorkers, sessionCookie, useDKLS, disableWebSockets, wasmOverride } = e.data;
+export async function handleMessage(
+  e: { data: Message },
+  postMessage: (message: any) => void,
+  useFetchAdapter?: boolean,
+): Promise<boolean> {
+  const { env, apiKey, offloadMPCComputationURL, disableWorkers, sessionCookie, useDKLS, disableWebSockets, wasmOverride } =
+    e.data;
   if (!env) {
     // this means a message we didn't send was received and we want to ignore it
     return true;
@@ -96,7 +88,9 @@ export async function handleMessage(e: { data: Message }, postMessage: (message:
     apiKey,
     capsuleClient: initClient(env, apiKey, useFetchAdapter, () => sessionCookie),
     offloadMPCComputationURL: offloadMPCComputationURL,
-    mpcComputationClient: offloadMPCComputationURL ? mpcComputationClient.initClient(offloadMPCComputationURL, !!disableWorkers) : undefined,
+    mpcComputationClient: offloadMPCComputationURL
+      ? mpcComputationClient.initClient(offloadMPCComputationURL, !!disableWorkers)
+      : undefined,
     useDKLS,
     disableWebSockets: !!disableWebSockets,
     wasmOverride,

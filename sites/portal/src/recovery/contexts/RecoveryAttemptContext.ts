@@ -9,11 +9,9 @@ interface RecoveryAttemptContextType {
   setInitiatedAt: (initiatedAt: Date | null) => void;
 }
 
-export const RecoveryAttemptContext = createContext<RecoveryAttemptContextType>(
-  {
-    status: null,
-    setStatus: emptyFunction,
-    initiatedAt: null,
-    setInitiatedAt: emptyFunction,
-  },
-);
+export const RecoveryAttemptContext = createContext<RecoveryAttemptContextType>({
+  status: null,
+  setStatus: emptyFunction,
+  initiatedAt: null,
+  setInitiatedAt: emptyFunction,
+});

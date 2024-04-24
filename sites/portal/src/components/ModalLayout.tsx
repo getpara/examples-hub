@@ -19,29 +19,19 @@ export const ModalLayout = () => {
 
   // TODO: should we move this to the partner object and use the theme builder or keep for now to allow for overrides but deprecate?
   // THEMING
-  const portalForegroundColor = validateColorInput(
-    searchParams.get('portalForegroundColor'),
-  )
+  const portalForegroundColor = validateColorInput(searchParams.get('portalForegroundColor'))
     ? searchParams.get('portalForegroundColor')
     : '';
-  const portalBackgroundColor = validateColorInput(
-    searchParams.get('portalBackgroundColor'),
-  )
+  const portalBackgroundColor = validateColorInput(searchParams.get('portalBackgroundColor'))
     ? searchParams.get('portalBackgroundColor')
     : '';
-  const portalPrimaryButtonColor = validateColorInput(
-    searchParams.get('portalPrimaryButtonColor'),
-  )
+  const portalPrimaryButtonColor = validateColorInput(searchParams.get('portalPrimaryButtonColor'))
     ? decodeURIComponent(searchParams.get('portalPrimaryButtonColor'))
     : '';
-  const portalTextColor = validateColorInput(
-    searchParams.get('portalTextColor'),
-  )
+  const portalTextColor = validateColorInput(searchParams.get('portalTextColor'))
     ? decodeURIComponent(searchParams.get('portalTextColor'))
     : '';
-  const portalPrimaryButtonTextColor = validateColorInput(
-    searchParams.get('portalPrimaryButtonTextColor'),
-  )
+  const portalPrimaryButtonTextColor = validateColorInput(searchParams.get('portalPrimaryButtonTextColor'))
     ? decodeURIComponent(searchParams.get('portalPrimaryButtonTextColor'))
     : '';
   const portalBorderRadius = searchParams.get('portalPrimaryButtonTextColor');
@@ -92,9 +82,7 @@ export const ModalLayout = () => {
   useEffect(() => {
     async function getPartner() {
       if (paramsPartnerId) {
-        const detailsRes = (
-          await userManagementClient.getPartner(paramsPartnerId)
-        ).data;
+        const detailsRes = (await userManagementClient.getPartner(paramsPartnerId)).data;
         setPartner(detailsRes.partner);
       } else {
         setPartner(DEFAULT_PARTNER);

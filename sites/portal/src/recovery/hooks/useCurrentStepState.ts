@@ -3,10 +3,7 @@ import { ModalStep } from '../steps/attemptSteps';
 import { STORAGE_PREFIX } from '@usecapsule/web-sdk';
 
 const useCurrentStepState = (initialValue: ModalStep) => {
-  const [state, setState] = useState(
-    (sessionStorage.getItem(`${STORAGE_PREFIX}currentStep`) as ModalStep) ||
-      initialValue,
-  );
+  const [state, setState] = useState((sessionStorage.getItem(`${STORAGE_PREFIX}currentStep`) as ModalStep) || initialValue);
 
   const setCurrentStep = (value: ModalStep) => {
     setState(value);

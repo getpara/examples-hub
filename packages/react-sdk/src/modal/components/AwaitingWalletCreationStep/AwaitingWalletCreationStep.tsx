@@ -1,8 +1,4 @@
-import {
-  CpslIcon,
-  CpslInfoBox,
-  CpslSpinner,
-} from '@usecapsule/react-components';
+import { CpslIcon, CpslInfoBox, CpslSpinner } from '@usecapsule/react-components';
 import {
   Heading,
   CreationStepSubheading,
@@ -50,10 +46,7 @@ export const AwaitingWalletCreationStep = () => {
               </InfoBoxHeading>
             </InfoBoxHeader>
             <InfoBoxText>
-              <span>
-                Creating your wallet is taking a little longer than expected,
-                but we’re working on it!
-              </span>
+              <span>Creating your wallet is taking a little longer than expected, but we’re working on it!</span>
             </InfoBoxText>
           </InfoBoxContent>
         </CpslInfoBox>

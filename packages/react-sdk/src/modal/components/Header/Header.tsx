@@ -53,9 +53,7 @@ export const Header = ({ onClose, condenseModal }: HeaderProps) => {
               {logo ? (
                 <Logo src={logo} alt={`${appName ? `${appName} -` : ''}logo`} />
               ) : (
-                <LogoSvg>
-                  {isDark ? <CapsuleWhite /> : <CapsuleBlack />}
-                </LogoSvg>
+                <LogoSvg>{isDark ? <CapsuleWhite /> : <CapsuleBlack />}</LogoSvg>
               )}
             </>
           )}

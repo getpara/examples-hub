@@ -1,10 +1,4 @@
-import {
-  CpslButton,
-  CpslCodeInput,
-  CpslIcon,
-  CpslQrCode,
-  CpslSpinner,
-} from '@usecapsule/react-components';
+import { CpslButton, CpslCodeInput, CpslIcon, CpslQrCode, CpslSpinner } from '@usecapsule/react-components';
 import { useEffect, useRef, useState } from 'react';
 import { useCapsuleStore, useModalStore } from '../../stores/index.js';
 import {
@@ -16,10 +10,7 @@ import {
   FilledDisabledInput,
 } from '../common.js';
 import { ModalStep } from '../../utils/steps.js';
-import {
-  CodeChangeEventDetail,
-  CpslCodeInputCustomEvent,
-} from '@usecapsule/core-components';
+import { CodeChangeEventDetail, CpslCodeInputCustomEvent } from '@usecapsule/core-components';
 import styled from 'styled-components';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard.js';
 
@@ -31,9 +22,7 @@ export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
   const isLogin = useModalStore((state) => state.isLogin());
   const setStep = useModalStore((state) => state.setStep);
   const capsule = useCapsuleStore((state) => state.capsule);
-  const isVerifying = useModalStore(
-    (state) => state.step === ModalStep.VERIFY_2FA,
-  );
+  const isVerifying = useModalStore((state) => state.step === ModalStep.VERIFY_2FA);
   const [copied, copy] = useCopyToClipboard();
 
   const inputRef = useRef<HTMLCpslCodeInputElement>(null);
@@ -83,9 +72,7 @@ export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
     }
   };
 
-  const handleCodeInput = (
-    e: CpslCodeInputCustomEvent<CodeChangeEventDetail>,
-  ) => {
+  const handleCodeInput = (e: CpslCodeInputCustomEvent<CodeChangeEventDetail>) => {
     if (codeError) {
       setCodeError('');
     }
@@ -125,22 +112,10 @@ export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
       </MainContainer>
       <>
         {isVerifying ? (
-          <StyledCodeInput
-            ref={inputRef}
-            code={code}
-            onCpslInput={handleCodeInput}
-            errorText={codeError}
-            length={6}
-          />
+          <StyledCodeInput ref={inputRef} code={code} onCpslInput={handleCodeInput} errorText={codeError} length={6} />
         ) : (
           <>
-            <QRContainer>
-              {!qrCodeValue ? (
-                <CpslSpinner />
-              ) : (
-                <CpslQrCode url={qrCodeValue} />
-              )}
-            </QRContainer>
+            <QRContainer>{!qrCodeValue ? <CpslSpinner /> : <CpslQrCode url={qrCodeValue} />}</QRContainer>
             <SecondaryText>
               <span>Or input the code manually</span>
             </SecondaryText>

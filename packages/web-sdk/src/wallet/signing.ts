@@ -31,7 +31,6 @@ export async function signTransaction(
   });
 }
 
-
 export async function sendTransaction(
   ctx: Ctx,
   userId: string,

@@ -17,12 +17,14 @@ export async function setupWorker(ctx: Ctx, resFunction: (arg: any) => void): Pr
 
   if (ctx.disableWorkers) {
     const syncWorker: SyncWorker = {
-      postMessage: function(message) {
-        (async function() {
-          await handleMessage({ data: message }, data => onmessage({ data }), ctx.disableWorkers);
+      postMessage: function (message) {
+        (async function () {
+          await handleMessage({ data: message }, (data) => onmessage({ data }), ctx.disableWorkers);
         })();
       },
-      terminate: () => { return; },
+      terminate: () => {
+        return;
+      },
     };
 
     return syncWorker;

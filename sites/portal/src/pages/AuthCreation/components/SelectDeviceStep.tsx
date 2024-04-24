@@ -1,19 +1,12 @@
 import styled from 'styled-components';
-import {
-  Heading,
-  Subheading,
-  StyledStrong,
-  ButtonIcon,
-} from '../../../components/common';
+import { Heading, Subheading, StyledStrong, ButtonIcon } from '../../../components/common';
 import { CpslButton } from '@usecapsule/react-components';
 
 interface SelectDeviceStepProps {
   onAddThisDeviceClick: () => void;
 }
 
-export const SelectDeviceStep = ({
-  onAddThisDeviceClick,
-}: SelectDeviceStepProps) => {
+export const SelectDeviceStep = ({ onAddThisDeviceClick }: SelectDeviceStepProps) => {
   return (
     <>
       <StyledHeading>
@@ -21,8 +14,7 @@ export const SelectDeviceStep = ({
       </StyledHeading>
       <Subheading>
         <span>
-          Your Passkey will allow you to <StyledStrong>safely</StyledStrong>{' '}
-          reuse this wallet across the web.
+          Your Passkey will allow you to <StyledStrong>safely</StyledStrong> reuse this wallet across the web.
         </span>
       </Subheading>
       <ButtonContainer>

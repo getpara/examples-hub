@@ -7,9 +7,7 @@ import { Environment, getPortalDomain } from '@usecapsule/core-sdk';
 const ES256_ALGORITHM = -7;
 const RS256_ALGORITHM = -257;
 
-function publicKeyCredentialToJSON(
-  pubKeyCred: ArrayBuffer | Array<string> | Object
-) {
+function publicKeyCredentialToJSON(pubKeyCred: ArrayBuffer | Array<string> | Object) {
   if (pubKeyCred instanceof ArrayBuffer) {
     return base64url.encode(pubKeyCred as any);
   } else if (pubKeyCred instanceof Array) {
@@ -88,20 +86,21 @@ function COSERSAtoPKCS(COSEPublicKey: Buffer): Buffer {
   // Create a new public key object:
   const publicKey = forge.pki.setRsaPublicKey(
     new forge.jsbn.BigInteger(nForge.toHex(), 16),
-    new forge.jsbn.BigInteger(eForge.toHex(), 16)
+    new forge.jsbn.BigInteger(eForge.toHex(), 16),
   );
 
   // Export as a PKCS#1 public key buffer:
   return Buffer.from(forge.pki.publicKeyToPem(publicKey), 'utf-8');
 }
 
-export function parseCredentialCreationRes(creds: any, algorithm: number): {
+export function parseCredentialCreationRes(
+  creds: any,
+  algorithm: number,
+): {
   cosePublicKey: string;
   clientDataJSON: string;
 } {
-  const parsedAttestation = parseAttestationObject(
-    creds.response.attestationObject
-  );
+  const parsedAttestation = parseAttestationObject(creds.response.attestationObject);
   const { COSEPublicKey } = parseMakeCredAuthData(parsedAttestation.authData);
 
   if (algorithm === RS256_ALGORITHM) {
@@ -119,17 +118,21 @@ export function parseCredentialCreationRes(creds: any, algorithm: number): {
 
 // generate a random 16 byte user handle
 function generateUserHandle() {
-  const userHandle = new Uint8Array(16)
-  window.crypto.getRandomValues(userHandle)
-  return userHandle
+  const userHandle = new Uint8Array(16);
+  window.crypto.getRandomValues(userHandle);
+  return userHandle;
 }
 
-export async function createCredential(env: Environment, userId: string, email: string): Promise<{
-  creds: any,
-  userHandle: Uint8Array,
-  algorithm: number,
+export async function createCredential(
+  env: Environment,
+  userId: string,
+  email: string,
+): Promise<{
+  creds: any;
+  userHandle: Uint8Array;
+  algorithm: number;
 }> {
-  const userHandle = generateUserHandle()
+  const userHandle = generateUserHandle();
   const createCredentialDefaultArgs = {
     publicKey: {
       authenticatorSelection: {
@@ -160,15 +163,15 @@ export async function createCredential(env: Environment, userId: string, email: 
   };
 
   const credential = await navigator.credentials.create(createCredentialDefaultArgs);
-  const algorithm = ((credential as PublicKeyCredential).response as AuthenticatorAttestationResponse).getPublicKeyAlgorithm ?
-    ((credential as PublicKeyCredential).response as AuthenticatorAttestationResponse).getPublicKeyAlgorithm() :
-    ES256_ALGORITHM;
+  const algorithm = ((credential as PublicKeyCredential).response as AuthenticatorAttestationResponse).getPublicKeyAlgorithm
+    ? ((credential as PublicKeyCredential).response as AuthenticatorAttestationResponse).getPublicKeyAlgorithm()
+    : ES256_ALGORITHM;
 
   return {
     creds: publicKeyCredentialToJSON(credential),
     userHandle,
     algorithm,
-  }
+  };
 }
 
 export async function generateSignature(env: Environment, challenge: string, allowedPublicKeys: string[]) {

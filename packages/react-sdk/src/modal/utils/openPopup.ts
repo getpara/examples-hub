@@ -1,8 +1,4 @@
-export function openPopup(
-  popupUrl: string,
-  target: string,
-  type: 'OAUTH' | 'LOGIN_PASSKEY' | 'CREATE_PASSKEY',
-) {
+export function openPopup(popupUrl: string, target: string, type: 'OAUTH' | 'LOGIN_PASSKEY' | 'CREATE_PASSKEY') {
   const popUpWidth = 550;
   let popUpHeight: number;
 
@@ -23,21 +19,19 @@ export function openPopup(
   }
 
   // Fixes position when using multiple monitors
-  const dualScreenLeft =
-    window.screenLeft !== undefined ? window.screenLeft : window.screenX;
-  const dualScreenTop =
-    window.screenTop !== undefined ? window.screenTop : window.screenY;
+  const dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : window.screenX;
+  const dualScreenTop = window.screenTop !== undefined ? window.screenTop : window.screenY;
 
   const width = window.innerWidth
     ? window.innerWidth
     : document.documentElement.clientWidth
-    ? document.documentElement.clientWidth
-    : screen.width;
+      ? document.documentElement.clientWidth
+      : screen.width;
   const height = window.innerHeight
     ? window.innerHeight
     : document.documentElement.clientHeight
-    ? document.documentElement.clientHeight
-    : screen.height;
+      ? document.documentElement.clientHeight
+      : screen.height;
 
   const left = (width - popUpWidth) / 2 + dualScreenLeft;
   const top = (height - popUpHeight) / 2 + dualScreenTop;

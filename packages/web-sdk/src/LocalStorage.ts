@@ -12,7 +12,7 @@ export class LocalStorage implements StorageUtils {
   };
   removeItem = (key: string): void => {
     localStorage.removeItem(key);
-  }
+  };
   clear = (prefix: string): void => {
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
@@ -21,5 +21,5 @@ export class LocalStorage implements StorageUtils {
         i--;
       }
     }
-  }
+  };
 }

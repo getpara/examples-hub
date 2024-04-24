@@ -1,11 +1,5 @@
 import styled from 'styled-components';
-import {
-  Heading,
-  Subheading,
-  ButtonIcon,
-  Text,
-  Link,
-} from '../../../components/common';
+import { Heading, Subheading, ButtonIcon, Text, Link } from '../../../components/common';
 import { CpslButton, CpslIcon } from '@usecapsule/react-components';
 import { useModalOutletContext } from '../../../hooks/useModalOutletContext';
 import { useSearchParams } from 'react-router-dom';
@@ -17,10 +11,7 @@ interface SelectFlowStepProps {
   onAddDeviceClick: () => void;
 }
 
-export const SelectFlowStep = ({
-  onLoginClick,
-  onAddDeviceClick,
-}: SelectFlowStepProps) => {
+export const SelectFlowStep = ({ onLoginClick, onAddDeviceClick }: SelectFlowStepProps) => {
   const [searchParams] = useSearchParams();
   const paramsEmail = decodeURIComponent(searchParams.get('email'));
   const { partner } = useModalOutletContext();
@@ -46,10 +37,7 @@ export const SelectFlowStep = ({
         </Text>
       </EmailContainer>
       <Subheading>
-        <span>
-          Use your Passkey to login to your wallet and connect to{' '}
-          {partner.displayName}.
-        </span>
+        <span>Use your Passkey to login to your wallet and connect to {partner.displayName}.</span>
       </Subheading>
       <ButtonContainer>
         <CpslButton onClick={onLoginClick}>

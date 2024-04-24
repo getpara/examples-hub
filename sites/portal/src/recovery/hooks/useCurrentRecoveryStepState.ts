@@ -4,9 +4,7 @@ import { STORAGE_PREFIX } from '@usecapsule/web-sdk';
 
 const useCurrentRecoveryStepState = (initialValue: ModalStep) => {
   const [state, setState] = useState(
-    (sessionStorage.getItem(
-      `${STORAGE_PREFIX}currentRecoveryStep`,
-    ) as ModalStep) || initialValue,
+    (sessionStorage.getItem(`${STORAGE_PREFIX}currentRecoveryStep`) as ModalStep) || initialValue,
   );
 
   const setCurrentRecoveryStep = (value: ModalStep) => {

@@ -1,6 +1,5 @@
 export const isMobileBrowser = () => {
-  const agent =
-    navigator.userAgent || navigator.vendor || (window as any).opera;
+  const agent = navigator.userAgent || navigator.vendor || (window as any).opera;
 
   // Regex based on http://detectmobilebrowsers.com/
   return (

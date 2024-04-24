@@ -24,10 +24,7 @@ const useInitiatedAtState = (initialValue: Date | null) => {
     if (dateValue === null) {
       localStorage.removeItem(`${STORAGE_PREFIX}initiatedAt`);
     } else {
-      localStorage.setItem(
-        `${STORAGE_PREFIX}initiatedAt`,
-        dateValue.toISOString(),
-      );
+      localStorage.setItem(`${STORAGE_PREFIX}initiatedAt`, dateValue.toISOString());
     }
   };
 

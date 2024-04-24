@@ -20,9 +20,7 @@ export async function upload(message: string, userManagementClient: Client) {
   }
 
   const pubkey = Buffer.from(publicKeyUint8Array);
-  const data = ECIESEncrypt(pubkey, Buffer.from(message, 'ucs2')).toString(
-    'base64',
-  );
+  const data = ECIESEncrypt(pubkey, Buffer.from(message, 'ucs2')).toString('base64');
 
   const {
     data: { id },
@@ -33,13 +31,9 @@ export async function upload(message: string, userManagementClient: Client) {
 
 export async function retrieve(uriEncodedMessage: string, userManagementClient: Client) {
   const [id, secret] = decodeURIComponent(uriEncodedMessage).split('|');
-  const response = await userManagementClient.tempTrasmission(
-    id as string,
-  );
+  const response = await userManagementClient.tempTrasmission(id as string);
   const data = response.data.message;
   const buf = Buffer.from(data as string, 'base64');
-  const res = ECIESDecrypt(Buffer.from(secret as string, 'hex'), buf).toString(
-    'ucs2',
-  );
+  const res = ECIESDecrypt(Buffer.from(secret as string, 'hex'), buf).toString('ucs2');
   return res;
 }
