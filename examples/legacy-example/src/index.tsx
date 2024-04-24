@@ -78,7 +78,7 @@ const DEFAULT_CONTRACT_ABI = [
 ];
 const DEFAULT_SMART_CONTRACT_FUNCTION = 'store';
 const DEFAULT_SMART_CONTRACT_ARGS = ['808'];
-const COSMOS_TESTNET_RPC = 'rpc.sentry-01.theta-testnet.polypore.xyz';
+const COSMOS_TESTNET_RPC = 'wss://rpc.sentry-01.theta-testnet.polypore.xyz';
 const COSMOS_DEFAULT_TO_ADDRESS = 'cosmos1f3px9t4juk43cwufj7f9s64z3wj7xvyc0rexg6';
 const web3 = new Web3();
 
@@ -89,7 +89,7 @@ const web3 = new Web3();
 // below is address of existing smart contract on sepolia
 // const DEFAULT_CONTRACT_ADDRESS = '0xc08c00e1aa97a18583dc1a72a7e9fb9ce56cfef5'
 
-async function _sendCosmosTx(): Promise<void> {
+async function sendCosmosTx(): Promise<void> {
   const protoSigner = new CapsuleProtoSigner(capsule);
   const client = await SigningStargateClient.connectWithSigner(COSMOS_TESTNET_RPC, protoSigner);
 
@@ -104,13 +104,13 @@ async function _sendCosmosTx(): Promise<void> {
       [
         {
           denom: 'uatom',
-          amount: '9500',
+          amount: '808',
         },
       ],
       {
         amount: [
           {
-            amount: '500',
+            amount: '1000',
             denom: 'uatom',
           },
         ],
@@ -802,7 +802,14 @@ function App() {
                 Send Transaction
               </Button>
               {transactionReviewUrl && <Text>Transaction Review URL is: {transactionReviewUrl}</Text>}
-
+              <Button
+                colorScheme="teal"
+                onClick={async () => {
+                  await sendCosmosTx();
+                }}
+              >
+                Send Cosmos Transaction
+              </Button>
               <Button
                 colorScheme="red"
                 onClick={async () => {
