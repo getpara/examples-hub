@@ -29,9 +29,7 @@ export async function sendRecoveryForShare(
       walletId,
       ...share,
     })),
-    ...(ignoreRedistributingBackupEncryptedShare
-      ? []
-      : [{ walletId, ...userBackupKeyShareOpts }]),
+    ...(ignoreRedistributingBackupEncryptedShare ? [] : [{ walletId, ...userBackupKeyShareOpts }]),
   ]);
 
   if (!ignoreRedistributingBackupEncryptedShare) {

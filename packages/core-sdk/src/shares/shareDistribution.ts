@@ -11,7 +11,7 @@ export async function distributeNewShare(
   walletId: string,
   userShare: string,
   ignoreRedistributingBackupEncryptedShare = false,
-  emailProps: BackupKitEmailProps
+  emailProps: BackupKitEmailProps,
 ): Promise<string> {
   const publicKeysRes = await ctx.capsuleClient.getSessionPublicKeys(userId);
   const biometricEncryptedShares = publicKeysRes.data.keys

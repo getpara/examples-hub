@@ -40,14 +40,7 @@ export function keygen(
         return;
       }
 
-      const recoveryShare = await distributeNewShare(
-        ctx,
-        userId,
-        res.walletId,
-        res.signer,
-        false,
-        emailProps
-      );
+      const recoveryShare = await distributeNewShare(ctx, userId, res.walletId, res.signer, false, emailProps);
       resolve({
         signer: res.signer,
         walletId: res.walletId,

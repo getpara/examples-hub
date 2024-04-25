@@ -938,23 +938,8 @@ export abstract class CoreCapsule {
     }
 
     const recoveryShare = skipBiometricShareCreation
-      ? await sendRecoveryForShare(
-          this.ctx,
-          this.userId,
-          walletId,
-          [],
-          _userShare,
-          false,
-          this.getBackupKitEmailProps(),
-        )
-      : await distributeNewShare(
-          this.ctx,
-          this.userId,
-          walletId,
-          _userShare,
-          false,
-          this.getBackupKitEmailProps(),
-        );
+      ? await sendRecoveryForShare(this.ctx, this.userId, walletId, [], _userShare, false, this.getBackupKitEmailProps())
+      : await distributeNewShare(this.ctx, this.userId, walletId, _userShare, false, this.getBackupKitEmailProps());
     return recoveryShare;
   }
 
@@ -1043,7 +1028,7 @@ export abstract class CoreCapsule {
         walletId,
         signer,
         false,
-        this.getBackupKitEmailProps()
+        this.getBackupKitEmailProps(),
       );
     }
 
@@ -1107,7 +1092,7 @@ export abstract class CoreCapsule {
       wallet.id,
       this.wallets[wallet.id].signer,
       false,
-      this.getBackupKitEmailProps()
+      this.getBackupKitEmailProps(),
     );
 
     return [this.wallets[wallet.id], recoveryShare];

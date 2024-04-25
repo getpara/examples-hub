@@ -100,7 +100,7 @@ const RecoveryVerificationCodeStep: React.FC<RecoveryVerificationCodeStepProps> 
               setUserId(userId);
               await capsule.setUserId(userId);
               if (status != null) {
-                setWalletId(walletId)
+                setWalletId(walletId);
                 setAddress(address);
                 setStatus(status);
                 setInitiatedAt(initiatedAt);
