@@ -93,26 +93,16 @@ export async function keygen(
 
 export async function preKeygen(
   ctx: Ctx,
-  partnerId: string,
+  _partnerId: string | undefined,
   email: string,
   secretKey: string | null,
 ): Promise<{ signer: string; walletId: string }> {
   const { walletId, protocolId } = await ctx.capsuleClient.createPregenWallet({ email });
 
-  if (ctx.offloadMPCComputationURL && !ctx.useDKLS) {
-    return {
-      signer: (await keygenRequest(ctx, partnerId, walletId, protocolId)).signer,
-      walletId,
-    };
-  }
-
   const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
-  const signerConfigUser = ctx.useDKLS
-    ? configDKLSBase(walletId, 'USER', ctx.disableWebSockets)
-    : configCGGMPBase(serverUrl, walletId, 'USER');
-  const createAccountFn = ctx.useDKLS ? global.dklsCreateAccount : global.createAccountV2;
+  const signerConfigUser = configDKLSBase(walletId, 'USER', ctx.disableWebSockets);
   const newSigner = (await new Promise((resolve, reject) =>
-    createAccountFn(
+    global.dklsCreateAccount(
       signerConfigUser,
       serverUrl,
       protocolId,

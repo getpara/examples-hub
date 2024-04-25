@@ -1042,13 +1042,11 @@ export abstract class CoreCapsule {
    * @param email - string
    * @returns [wallet, recoveryShare]
    **/
-  async createWalletPreGen(email: string): Promise<[Wallet, string]> {
+  async createWalletPreGen(email: string): Promise<Wallet> {
     this.requireApiKey();
-    const partner = await this.ctx.capsuleClient.touchSession();
-    const partnerId = partner.data.partnerId;
     const { signer, walletId } = await this.platformUtils.preKeygen(
       this.ctx,
-      partnerId,
+      undefined,
       email,
       null,
       this.retrieveSessionCookie(),
@@ -1061,7 +1059,7 @@ export abstract class CoreCapsule {
     await this.waitForPregenWalletAddress(email, walletId);
     await this.populatePregenWalletAddresses(email);
 
-    return [this.wallets[walletId], 'null'];
+    return this.wallets[walletId];
   }
 
   /**
@@ -1096,6 +1094,19 @@ export abstract class CoreCapsule {
     );
 
     return [this.wallets[wallet.id], recoveryShare];
+  }
+
+  /**
+   * Updates a pregenerated wallet email.
+   *
+   * @param newEmail - string
+   * @param walletId - string
+   * @returns Promise<void>
+   **/
+  async updateWalletEmailPreGen(newEmail: string, walletId?: string): Promise<void> {
+    this.requireApiKey();
+    const currentWalletId = walletId || Object.keys(this.wallets)[0];
+    await this.ctx.capsuleClient.updatePregenWallet(currentWalletId, { email: newEmail });
   }
 
   /**

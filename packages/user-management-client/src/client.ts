@@ -138,6 +138,10 @@ interface createWalletBody {
   scheme: SignatureScheme;
 }
 
+interface updatePregenWalletBody {
+  email: string;
+}
+
 interface createWalletRes {
   protocolId: string;
   walletId: string;
@@ -391,10 +395,10 @@ class Client {
     return res;
   };
 
-  // PATCH /users/:userId/wallets/:walletId
-  updateWallet = async (userId: string, walletId: string): Promise<any> => {
-    const res = await this.baseRequest.post<any>(`/users/${userId}/wallets/${walletId}`);
-    return res;
+  // PATCH /wallets/pregen/:walletId
+  updatePregenWallet = async (walletId: string, body: updatePregenWalletBody): Promise<any> => {
+    const res = await this.baseRequest.patch<any>(`wallets/pregen/${walletId}`, body);
+    return res.data;
   };
 
   // GET /users/:userId/wallets

@@ -21,7 +21,7 @@ export class WebUtils implements PlatformUtils {
 
   preKeygen(
     ctx: Ctx,
-    partnerId: string,
+    partnerId: string | undefined,
     email: string,
     secretKey: string | null, // should be acceptable as null in RN as we don't pre-gen them
     sessionCookie: string,

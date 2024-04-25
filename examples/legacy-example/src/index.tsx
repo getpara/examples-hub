@@ -688,7 +688,14 @@ function App() {
               >
                 Create Pregen Wallet
               </Button>
-
+              <Button
+                colorScheme="teal"
+                onClick={async () => {
+                  await capsule.updateWalletEmailPreGen(pregenEmail);
+                }}
+              >
+                Edit Pregen Wallet Email
+              </Button>
               <Text>
                 User Share: <strong>{capsule.getUserShare() || ''}</strong>
               </Text>
