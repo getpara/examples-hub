@@ -49,6 +49,11 @@ type WebSocketTransportSubscribeFn = (
   },
 ) => Promise<WebSocketTransportSubscribeReturnType>;
 
+const serverSessionStorageStub = {
+  setItem: () => {},
+  getItem: () => null,
+};
+
 export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provider {
   private currentHexChainId: Hex;
   private walletClient: WalletClient;
@@ -63,7 +68,7 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
   constructor(opts: CapsuleEIP1193ProviderOpts) {
     super();
 
-    this.storage = opts.storageOverride || sessionStorage;
+    this.storage = opts.storageOverride || typeof window === 'undefined' ? serverSessionStorageStub : sessionStorage;
 
     this.capsule = opts.capsule;
     this.modalProps = { ...opts };

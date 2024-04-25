@@ -5,20 +5,29 @@ import { StorageUtils } from '@usecapsule/core-sdk';
  */
 export class LocalStorage implements StorageUtils {
   get = (key: string): string | null => {
-    return localStorage.getItem(key) || null;
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(key) || null;
+    }
+    return null;
   };
   set = (key: string, value: string): void => {
-    localStorage.setItem(key, value);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(key, value);
+    }
   };
   removeItem = (key: string): void => {
-    localStorage.removeItem(key);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(key);
+    }
   };
   clear = (prefix: string): void => {
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith(prefix)) {
-        localStorage.removeItem(key);
-        i--;
+    if (typeof window !== 'undefined') {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith(prefix)) {
+          localStorage.removeItem(key);
+          i--;
+        }
       }
     }
   };

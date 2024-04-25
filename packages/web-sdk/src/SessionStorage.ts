@@ -9,20 +9,29 @@ import { StorageUtils } from '@usecapsule/core-sdk';
  */
 export class SessionStorage implements StorageUtils {
   get = (key: string): string | null => {
-    return sessionStorage.getItem(key) || null;
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem(key) || null;
+    }
+    return null;
   };
   set = (key: string, value: string): void => {
-    sessionStorage.setItem(key, value);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(key, value);
+    }
   };
   removeItem = (key: string): void => {
-    sessionStorage.removeItem(key);
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem(key);
+    }
   };
   clear = (prefix: string): void => {
-    for (let i = 0; i < sessionStorage.length; i++) {
-      const key = sessionStorage.key(i);
-      if (key && key.startsWith(prefix)) {
-        sessionStorage.removeItem(key);
-        i--;
+    if (typeof window !== 'undefined') {
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i);
+        if (key && key.startsWith(prefix)) {
+          sessionStorage.removeItem(key);
+          i--;
+        }
       }
     }
   };

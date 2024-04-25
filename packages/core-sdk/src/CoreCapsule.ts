@@ -438,6 +438,10 @@ export abstract class CoreCapsule {
     return this.wallets;
   }
 
+  getAddress(walletId?: string): string | undefined {
+    return walletId ? this.wallets[walletId].address : Object.values(this.wallets)?.[0]?.address;
+  }
+
   private async getPartnerURL(partnerId: string): Promise<string | undefined> {
     const res = await this.ctx.capsuleClient.getPartner(partnerId);
     return res.data.partner.portalUrl;
