@@ -18,7 +18,7 @@ type RecoveryVerificationCodeStepProps = {
 const RecoveryVerificationCodeStep: React.FC<RecoveryVerificationCodeStepProps> = ({ onClose }) => {
   const { setCurrentStep } = useContext(StepContext);
   const { email } = useContext(EmailContext);
-  const { setAddress } = useContext(WalletContext);
+  const { setAddress, setId: setWalletId } = useContext(WalletContext);
   const { setId: setUserId } = useContext(UserContext);
   const { setStatus, setInitiatedAt } = useContext(RecoveryAttemptContext);
   const { setIs2FAFlow } = useContext(TwoFactorContext);
@@ -94,11 +94,13 @@ const RecoveryVerificationCodeStep: React.FC<RecoveryVerificationCodeStepProps> 
               const status = res.data.status;
               const initiatedAt = res.data.initiatedAt as Date;
               const address = res.data.address;
+              const walletId = res.data.walletId;
               const skip2FA = res.data.skip2FA;
               const userId = res.data.userId;
               setUserId(userId);
               await capsule.setUserId(userId);
               if (status != null) {
+                setWalletId(walletId)
                 setAddress(address);
                 setStatus(status);
                 setInitiatedAt(initiatedAt);

@@ -659,6 +659,27 @@ function App() {
                   </>
                 )}
               </HStack>
+              <Button
+                colorScheme="teal"
+                onClick={async () => {
+                  const fetchedWallet = (await capsule.fetchWallets()).filter(
+                    (wallet) => !!wallet.address,
+                  )[0];
+                  const newShare = await capsule.distributeNewWalletShare(
+                    fetchedWallet.id,
+                    undefined, 
+                    true
+                  );
+
+                  const backupDecryptionKey = JSON.parse(
+                    newShare || '{}',
+                  ).backupDecryptionKey;
+
+                  window.alert(`New Recovery Share!! ${backupDecryptionKey}`);
+                }}
+              >
+                Regen Recovery
+            </Button>
 
               <Input
                 placeholder="pregen-e-mail"

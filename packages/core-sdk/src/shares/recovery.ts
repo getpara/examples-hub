@@ -23,13 +23,24 @@ export async function sendRecoveryForShare(
     type: KeyType.USER,
     encryptor: EncryptorType.RECOVERY,
   };
-  await ctx.capsuleClient.uploadKeyshares(userId, walletId, [
-    ...otherEncryptedShares,
-    ...(ignoreRedistributingBackupEncryptedShare ? [] : [userBackupKeyShareOpts]),
+
+  await ctx.capsuleClient.uploadUserKeyShares(userId, [
+    ...otherEncryptedShares.map((share) => ({
+      walletId,
+      ...share,
+    })),
+    ...(ignoreRedistributingBackupEncryptedShare
+      ? []
+      : [{ walletId, ...userBackupKeyShareOpts }]),
   ]);
 
   if (!ignoreRedistributingBackupEncryptedShare) {
-    await ctx.capsuleClient.distributeCapsuleShare({ userId, walletId, useDKLS: ctx.useDKLS, ...emailProps });
+    await ctx.capsuleClient.distributeCapsuleShare({
+      userId,
+      walletId,
+      useDKLS: ctx.useDKLS,
+      ...emailProps,
+    });
   }
 
   return JSON.stringify(recoveryPrivateKeyContainer);

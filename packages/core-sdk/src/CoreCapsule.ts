@@ -17,6 +17,7 @@ import { FullSignatureRes, SuccessfulSignatureRes, DeniedSignatureRes } from './
 import * as transmissionUtils from './transmission/transmissionUtils.js';
 import { PlatformUtils } from './PlatformUtils.js';
 import { Theme } from './types/theme.js';
+import { sendRecoveryForShare } from './shares/recovery.js';
 
 // amount of time in ms that a web auth session lasts
 const BIOMETRIC_VERIFICATION_TIME_MS = 30 * 60 * 1000;
@@ -921,18 +922,39 @@ export abstract class CoreCapsule {
    * Distributes a new wallet recovery share.
    *
    * @param walletId - the wallet to distribute the recovery share for.
-   * @param userShare - the user share generate the recovery share from.
+   * @param userShare - optional user share generate the recovery share from. Defaults to the signer from the passed in walletId
+   * @param skipBiometricShareCreation - whether or not to skip biometric share creation. Used when regenerating recovery shares.
    * @returns - recovery share.
    **/
-  async distributeNewWalletShare(walletId: string, userShare: string): Promise<string> {
-    const recoveryShare = await distributeNewShare(
-      this.ctx,
-      this.userId,
-      walletId,
-      userShare,
-      false,
-      this.getBackupKitEmailProps(),
-    );
+  async distributeNewWalletShare(
+    walletId: string,
+    userShare?: string,
+    skipBiometricShareCreation?: boolean,
+  ): Promise<string> {
+    let _userShare = userShare;
+
+    if (!_userShare) {
+      _userShare = this.wallets[walletId].signer;
+    }
+
+    const recoveryShare = skipBiometricShareCreation
+      ? await sendRecoveryForShare(
+          this.ctx,
+          this.userId,
+          walletId,
+          [],
+          _userShare,
+          false,
+          this.getBackupKitEmailProps(),
+        )
+      : await distributeNewShare(
+          this.ctx,
+          this.userId,
+          walletId,
+          _userShare,
+          false,
+          this.getBackupKitEmailProps(),
+        );
     return recoveryShare;
   }
 
@@ -1021,7 +1043,7 @@ export abstract class CoreCapsule {
         walletId,
         signer,
         false,
-        this.getBackupKitEmailProps(),
+        this.getBackupKitEmailProps()
       );
     }
 
@@ -1085,7 +1107,7 @@ export abstract class CoreCapsule {
       wallet.id,
       this.wallets[wallet.id].signer,
       false,
-      this.getBackupKitEmailProps(),
+      this.getBackupKitEmailProps()
     );
 
     return [this.wallets[wallet.id], recoveryShare];
