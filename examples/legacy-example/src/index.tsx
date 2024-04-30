@@ -35,6 +35,7 @@ import { CapsuleEthersSigner } from '@usecapsule/ethers-v6-integration';
 import { createCapsuleViemClient } from '@usecapsule/viem-v1-integration';
 import { CapsuleConnector, CapsuleEIP1193Provider } from '@usecapsule/wagmi-v1-integration';
 import CoreCapsule, { Environment, ConstructorOpts, DeniedSignatureResWithUrl } from '@usecapsule/core-sdk';
+import { FONT_OPTIONS } from './constants';
 
 // sample transaction params
 const DEFAULT_TO_ADDRESS = '0x42c9a72c9dfcc92cae0de9510160cea2da27af91';
@@ -438,6 +439,7 @@ function App() {
   const [foregroundColor, setForegroundColor] = useState('#FAFAFA');
   const [backgroundColor, setBackgroundColor] = useState('#121212');
   const [borderRadius, setBorderRadius] = useState('sm');
+  const [font, setFont] = useState('inter');
 
   const [pregenEmail, setPregenEmail] = useState('');
   const [pregenUserShare, setPregenUserShare] = useState('');
@@ -618,7 +620,6 @@ function App() {
                   value={backgroundColor}
                 />
               </HStack>
-
               <HStack>
                 <Text width={'15%'}>
                   <strong>Select Border Radius:</strong>
@@ -630,6 +631,16 @@ function App() {
                   <option value="md">Medium</option>
                   <option value="lg">Large</option>
                   <option value="full">Full</option>
+                </Select>
+              </HStack>
+              <HStack>
+                <Text width={'15%'}>
+                  <strong>Select Font:</strong>
+                </Text>
+                <Select defaultValue={font} onChange={(e) => setFont(e.target.value)}>
+                  {FONT_OPTIONS.map((font) => (
+                    <option value={font}>{font === 'Inter' ? 'Inter (Capsule Default)' : font.replaceAll("'", '')}</option>
+                  ))}
                 </Select>
               </HStack>
               <HStack>
@@ -859,6 +870,7 @@ function App() {
             backgroundColor,
             foregroundColor,
             borderRadius,
+            font,
           }}
           logo={logo !== '' ? logo : undefined}
         />
