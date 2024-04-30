@@ -64,7 +64,7 @@ export const OAuth = ({ methods }: OAuthProps) => {
       ))}
       {!showAll && hasMore && (
         <MoreButton isDark={isDark} icon="moreLoginOptions" onClick={handleShowAll}>
-          <MoreText>MORE</MoreText>
+          <MoreText isDark={isDark}>MORE</MoreText>
         </MoreButton>
       )}
     </OAuthContainer>
@@ -81,6 +81,7 @@ const OAuthContainer = styled.div`
 const StyledCpslTileButton = styled(CpslTileButton)<{ isDark: boolean }>`
   flex: 0 0 calc(25% - 4px);
 
+  --button-icon-color: ${({ isDark }) => (isDark ? 'white' : 'black')};
   --button-width: 100%;
 `;
 
@@ -91,8 +92,9 @@ const MoreButton = styled(StyledCpslTileButton)`
   }
 `;
 
-const MoreText = styled(Text)`
+const MoreText = styled(Text)<{ isDark: boolean }>`
   font-size: 8px;
   line-height: 8px;
   letter-spacing: 1px;
+  color: ${({ isDark }) => (isDark ? 'white' : 'black')};
 `;
