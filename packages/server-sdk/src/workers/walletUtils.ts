@@ -238,3 +238,20 @@ export async function refresh(ctx: Ctx, share: string, walletId: string, userId:
     }),
   );
 }
+
+export async function getPrivateKey(ctx: Ctx, share: string, walletId: string, userId: string): Promise<string> {
+  const capsuleShare = await ctx.capsuleClient.getCapsuleShare(userId, walletId);
+  if (!capsuleShare) {
+    console.error('unable to retrieve Capsule share');
+    return '';
+  }
+
+  return new Promise((resolve, reject) =>
+    global.getPrivateKey(share, capsuleShare, (err, result) => {
+      if (err) {
+        reject(err);
+      }
+      resolve(result);
+    }),
+  );
+}

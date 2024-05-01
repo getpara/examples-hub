@@ -40,7 +40,14 @@ export const AuthLogin = () => {
   const login = useCallback(async () => {
     setStep(AuthLoginStep.WAITING);
     try {
-      await authLogin(paramsEmail, sessionId, encryptionKey, newDeviceSessionLookupId, newDeviceEncryptionKey);
+      await authLogin(
+        paramsPartnerId,
+        paramsEmail,
+        sessionId,
+        encryptionKey,
+        newDeviceSessionLookupId,
+        newDeviceEncryptionKey,
+      );
 
       setStep(AuthLoginStep.SUCCESS);
       setTimeout(function () {

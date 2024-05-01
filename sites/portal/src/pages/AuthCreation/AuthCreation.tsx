@@ -15,11 +15,12 @@ export const AuthCreation = () => {
   const paramsEmail = decodeURIComponent(searchParams.get('email'));
 
   const isForNewDevice = searchParams.get('isForNewDevice') === 'true';
+  const paramsPartnerId = searchParams.get('partnerId');
 
   const setUpBiometrics = useCallback(async () => {
     setStep(AuthCreationStep.CREATING);
     try {
-      await authCreation(paramsUserId, paramsEmail, paramsBiometricId, isForNewDevice);
+      await authCreation(paramsPartnerId, paramsUserId, paramsEmail, paramsBiometricId, isForNewDevice);
       setStep(AuthCreationStep.SUCCESS);
 
       setTimeout(function () {

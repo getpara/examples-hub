@@ -134,8 +134,9 @@ async function generatePasskey(capsule: CapsuleWeb, args: any[]) {
 
   const { cosePublicKey, clientDataJSON } = parseCredentialCreationRes(credentials, -7);
   const publicKeyHex = await getPublicKeyFromSignature(capsule.ctx, userHandle);
+  const session = await this.ctx.capsuleClient.touchSession();
 
-  await capsule.ctx.capsuleClient.patchSessionPublicKey(capsule.getUserId(), biometricsId, {
+  await capsule.ctx.capsuleClient.patchSessionPublicKey(session.data.partnerId, capsule.getUserId(), biometricsId, {
     publicKey: credentialsId,
     sigDerivedPublicKey: publicKeyHex,
     cosePublicKey,
@@ -156,7 +157,8 @@ async function verifyWebChallenge(capsule: CapsuleWeb, args: any[]) {
     signature: signature,
   };
 
-  const verifyWebChallengeResult = await capsule.ctx.capsuleClient.verifyWebChallenge({
+  const session = await this.ctx.capsuleClient.touchSession();
+  const verifyWebChallengeResult = await capsule.ctx.capsuleClient.verifyWebChallenge(session.data.partnerId, {
     publicKey: publicKeyId,
     signature: webSignature,
   });

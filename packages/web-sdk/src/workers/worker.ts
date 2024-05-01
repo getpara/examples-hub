@@ -66,6 +66,10 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
       const keygenRes = await walletUtils.preKeygen(ctx, partnerId, email, secretKey);
       return keygenRes;
     }
+    case 'GET_PRIVATE_KEY': {
+      const { share, walletId, userId } = params;
+      return await walletUtils.getPrivateKey(ctx, share, walletId, userId);
+    }
     default: {
       throw new Error(`functionType: ${functionType} not supported`);
     }

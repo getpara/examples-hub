@@ -45,7 +45,8 @@ async function createUserAndWallet(params: Params) {
     const userId = capsule.userId;
     const biometricIdRegex = /\/biometrics\/(.*?)\?email/;
     const biometricId = webAuthURL.match(biometricIdRegex)[1];
-    await capsule.ctx.capsuleClient.patchSessionPublicKey(userId, biometricId, {
+    const res = await capsule.ctx.capsuleClient.touchSession(false);
+    await capsule.ctx.capsuleClient.patchSessionPublicKey(res.data.partnerId, userId, biometricId, {
       publicKey: SAMPLE_PUBLIC_KEY,
       sigDerivedPublicKey: SAMPLE_SIG_DERIVED_PUBLIC_KEY,
       cosePublicKey: SAMPLE_COSE_PUBLIC_KEY,

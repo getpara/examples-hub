@@ -11,6 +11,7 @@ import capsule from '../clients/capsule';
 import { userManagementClient } from '../clients/userManagementClient';
 
 export async function authCreation(
+  partnerId: string,
   userId: string,
   email: string,
   biometricId: string,
@@ -19,7 +20,7 @@ export async function authCreation(
   const { creds, userHandle, algorithm } = await createCredential(ENV, userId, email);
   const { cosePublicKey, clientDataJSON } = parseCredentialCreationRes(creds, algorithm);
   const publicKeyHex = await getPublicKeyFromSignature(capsule.ctx, userHandle);
-  await capsule.ctx.capsuleClient.patchSessionPublicKey(userId, biometricId, {
+  await capsule.ctx.capsuleClient.patchSessionPublicKey(partnerId, userId, biometricId, {
     publicKey: creds.id,
     sigDerivedPublicKey: publicKeyHex,
     cosePublicKey,

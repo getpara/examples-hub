@@ -544,6 +544,33 @@ export abstract class CoreCapsule {
   }
 
   /**
+   * Gets the private key for the given wallet.
+   * @param walletId - (optional) id of the wallet to get the private key for. Will default to the first wallet if not provided.
+   * @returns - private key string.
+   */
+  async getPrivateKey(walletId?: string): Promise<string> {
+    const wallets = Object.values(this.wallets);
+    const wallet = walletId ? this.wallets[walletId] : wallets?.[0];
+
+    if (!wallet) {
+      throw new Error('wallet not found');
+    }
+
+    // We can only build the private key for DKLS wallets
+    if (wallet.scheme !== WalletScheme.DKLS) {
+      throw new Error('invalid wallet scheme');
+    }
+
+    return await this.platformUtils.getPrivateKey(
+      this.ctx,
+      this.userId,
+      wallet.id,
+      wallet.signer,
+      this.retrieveSessionCookie(),
+    );
+  }
+
+  /**
    * Fetches the wallets associated with the user.
    * @returns - wallets that were fetched.
    */

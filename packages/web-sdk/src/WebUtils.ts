@@ -4,8 +4,13 @@ import { SessionStorage } from './SessionStorage.js';
 import { keygen, preKeygen } from './wallet/keygen.js';
 import { signMessage, sendTransaction, signTransaction } from './wallet/signing.js';
 import { BackupKitEmailProps } from '@usecapsule/user-management-client';
+import { getPrivateKey } from './wallet/privateKey.js';
 
 export class WebUtils implements PlatformUtils {
+  getPrivateKey(ctx: Ctx, userId: string, walletId: string, share: string, sessionCookie: string): Promise<string> {
+    return getPrivateKey(ctx, userId, walletId, share, sessionCookie);
+  }
+
   keygen(
     ctx: Ctx,
     userId: string,

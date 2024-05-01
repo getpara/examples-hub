@@ -3,6 +3,7 @@ import { ENV } from '../constants';
 import capsule from '../clients/capsule';
 
 export async function authLogin(
+  partnerId: string,
   email: string,
   sessionLookupId: string,
   encryptionKey: string,
@@ -14,7 +15,7 @@ export async function authLogin(
   const userHandle = sig.response.userHandle;
   delete sig.response.userHandle;
 
-  const verifyRes = await capsule.ctx.capsuleClient.verifyWebChallenge({
+  const verifyRes = await capsule.ctx.capsuleClient.verifyWebChallenge(partnerId, {
     signature: sig.response,
     publicKey: sig.id,
     email,

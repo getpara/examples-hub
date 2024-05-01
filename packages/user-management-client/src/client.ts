@@ -61,6 +61,10 @@ export interface getWebChallengeRes {
   allowedPublicKeys?: string[];
 }
 
+export interface GetCapsuleShareRes {
+  share: string;
+}
+
 export enum PublicKeyStatus {
   PENDING = 'PENDING',
   COMPLETE = 'COMPLETE',
@@ -308,8 +312,17 @@ class Client {
   };
 
   // PATCH /users/:userId/biometrics/:biometricId
-  patchSessionPublicKey = async (userId: string, biometricId: string, body: sessionPublicKeyBody): Promise<any> => {
-    const res = await this.baseRequest.patch<any>(`/users/${userId}/biometrics/${biometricId}`, body);
+  patchSessionPublicKey = async (
+    partnerId: string,
+    userId: string,
+    biometricId: string,
+    body: sessionPublicKeyBody,
+  ): Promise<any> => {
+    const res = await this.baseRequest.patch<any>(`/users/${userId}/biometrics/${biometricId}`, body, {
+      headers: {
+        'X-Partner-ID': partnerId,
+      },
+    });
     return res;
   };
 
@@ -336,8 +349,12 @@ class Client {
   };
 
   // POST /biometrics/verify
-  verifyWebChallenge = async (body: verifyWebChallengeBody): Promise<any> => {
-    const res = await this.baseRequest.post<{}>(`/biometrics/verify`, body);
+  verifyWebChallenge = async (partnerId: string, body: verifyWebChallengeBody): Promise<any> => {
+    const res = await this.baseRequest.post<{}>(`/biometrics/verify`, body, {
+      headers: {
+        'X-Partner-ID': partnerId,
+      },
+    });
     return res;
   };
 
@@ -504,11 +521,17 @@ class Client {
     return res;
   }
 
-  // get /users/:userId/wallets/:walletId/capsule-share
-  async getCapsuleShare(userId: string, walletId: string) {
-    const res = await this.baseRequest.get<any>(`/users/${userId}/wallets/${walletId}/capsule-share`);
+  // GET /users/:userId/wallets/:walletId/capsule-share
+  getCapsuleShare = async (userId: string, walletId: string): Promise<string> => {
+    const res = await this.baseRequest.get<GetCapsuleShareRes>(`/users/${userId}/wallets/${walletId}/capsule-share`);
+    return res.data.share;
+  };
+
+  // GET /download-backup-kit/:userId
+  getBackupKit = async (userId: string): Promise<any> => {
+    const res = await this.baseRequest.get<Blob>(`/download-backup-kit/${userId}`, { responseType: 'blob' });
     return res;
-  }
+  };
 
   // POST '/users/:userId/resend-verification-code
   async resendVerificationCode({ userId, ...rest }: { userId: string } & VerificationEmailProps) {

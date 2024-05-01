@@ -4,6 +4,8 @@ import { SignatureRes } from './types/walletTypes.js';
 import { StorageUtils } from './StorageUtils.js';
 
 export interface PlatformUtils {
+  getPrivateKey(ctx: Ctx, userId: string, walletId: string, share: string, sessionCookie: string): Promise<string>;
+
   keygen(
     ctx: Ctx,
     userId: string,

@@ -18,10 +18,11 @@ function TransactionReview() {
   const [pendingTransaction, setPendingTransaction] = useState(null);
 
   const partnerName = pendingTransaction?.partner?.displayName;
+  const partnerId = pendingTransaction?.partner?.id;
   async function onClickAccept() {
     const data = await userManagementClient.getWebChallenge(encodeURIComponent(email));
     const sig = await generateSignature(ENV, data.challenge, data.allowedPublicKeys);
-    await userManagementClient.verifyWebChallenge({
+    await userManagementClient.verifyWebChallenge(partnerId, {
       signature: sig.response,
       publicKey: sig.id,
       email,
