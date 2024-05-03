@@ -36,6 +36,9 @@ export const ModalLayout = () => {
     : '';
   const portalBorderRadius = searchParams.get('portalPrimaryButtonTextColor');
 
+  const [partner, setPartner] = useState<Partner | undefined>();
+  const [isDark, setIsDark] = useState<boolean>(false);
+
   useEffect(() => {
     // If background is provided with no foreground we can assume its legacy and to use the custom palette
     const isLegacy = portalBackgroundColor && !portalForegroundColor;
@@ -49,7 +52,7 @@ export const ModalLayout = () => {
       borderRadius: portalBorderRadius as BorderRadius,
     };
 
-    generateTheme({
+    const isDarkTheme = generateTheme({
       ...(isLegacy
         ? {
             backgroundColor: portalBackgroundColor,
@@ -68,6 +71,7 @@ export const ModalLayout = () => {
             borderRadius: portalBorderRadius as BorderRadius,
           }),
     });
+    setIsDark(isDarkTheme);
   }, [
     portalForegroundColor,
     portalBackgroundColor,
@@ -76,8 +80,6 @@ export const ModalLayout = () => {
     portalPrimaryButtonTextColor,
     portalTextColor,
   ]);
-
-  const [partner, setPartner] = useState<Partner | undefined>();
 
   useEffect(() => {
     async function getPartner() {
@@ -97,7 +99,7 @@ export const ModalLayout = () => {
     <>
       <BetaBannerNoChakra />
       <OuterContainer>
-        <Outlet context={{ partner, homepageUrl }} />
+        <Outlet context={{ partner, homepageUrl, isDark }} />
       </OuterContainer>
     </>
   );

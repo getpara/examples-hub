@@ -1,11 +1,11 @@
 import styled from 'styled-components';
-import { CapsuleBlack, ShieldCheck } from './Icons';
+import { CapsuleBlack, CapsuleWhite, ShieldCheck } from './Icons';
 import { Text } from './common';
 import { useModalOutletContext } from '../hooks/useModalOutletContext';
 import { cleanUrl } from '../utils/cleanUrl';
 
 export const ModalHeader = () => {
-  const { partner, homepageUrl } = useModalOutletContext();
+  const { partner, homepageUrl, isDark } = useModalOutletContext();
 
   return (
     <Container slot="header" id="header">
@@ -13,9 +13,7 @@ export const ModalHeader = () => {
         {partner.portalHeaderLogoUrl ? (
           <Logo src={partner.portalHeaderLogoUrl} alt={`${partner.displayName ? `${partner.displayName} -` : ''}logo`} />
         ) : (
-          <LogoSvg>
-            <CapsuleBlack />
-          </LogoSvg>
+          <LogoSvg>{isDark ? <CapsuleWhite /> : <CapsuleBlack />}</LogoSvg>
         )}
       </InnerContainer>
       <InnerContainer>
