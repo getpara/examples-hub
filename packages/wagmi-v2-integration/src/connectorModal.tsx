@@ -12,11 +12,20 @@ export function renderModal(capsule: CapsuleWeb, modalProps: Partial<CapsuleModa
   }
 
   const onClose = () => {
-    render(false);
     onCloseArg();
+    render(false);
   };
 
-  const render = (isOpen: boolean) => {
+  const render = async (isOpen: boolean) => {
+    // Before opening, init modal in a closed state
+    if (isOpen) {
+      ReactDOM.render(<CapsuleModal onClose={onClose} capsule={capsule} isOpen={false} {...modalProps} />, container);
+
+      // Wait for initial closed modal to render before continuing.
+      // Using the callback from ReactDOM.render didn't seem to give enough time for this to happen
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+
     ReactDOM.render(<CapsuleModal onClose={onClose} capsule={capsule} isOpen={isOpen} {...modalProps} />, container);
   };
 

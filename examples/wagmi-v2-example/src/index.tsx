@@ -239,7 +239,10 @@ function App() {
   const [selectedApiKey, setSelectedApiKey] = useSessionStorage('@EXAMPLE-CAPSULE/selectedApiKey', API_KEY_WITH_BRANDING);
   const [useDKLS, setUseDKLS] = useSessionStorage('@EXAMPLE-CAPSULE/useDKLS', true);
 
-  capsule = new Capsule(selectedEnv, selectedApiKey, getCapsuleOpts(selectedEnv, useDKLS));
+  capsule = React.useMemo(
+    () => new Capsule(selectedEnv, selectedApiKey, getCapsuleOpts(selectedEnv, useDKLS)),
+    [selectedEnv, useDKLS, selectedApiKey],
+  );
 
   const [_isSessionActive, setIsSessionActive] = useState(false);
 
