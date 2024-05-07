@@ -41,6 +41,7 @@ export const capsuleConnector = ({
 
     return {
       ...injectedObj,
+      type: 'capsule',
       disconnect: async () => {
         await injectedObj.disconnect();
         capsule.logout();
