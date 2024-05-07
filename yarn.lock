@@ -5606,10 +5606,10 @@
   resolved "https://registry.yarnpkg.com/@ungap/structured-clone/-/structured-clone-1.2.0.tgz#756641adb587851b5ccb3e095daf27ae581c8406"
   integrity sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==
 
-"@usecapsule/core-components@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@usecapsule/core-components/-/core-components-2.0.0.tgz#964e09a3b74e5655309a60dc03ed20f0958a60aa"
-  integrity sha512-7OpdPFdB+PXqs3hZal8+RFuahkNIkWDIFFWm5EaHz3xjN57wslZ63EgV86RdlWumQMrRj+Ts9u1OybNv6T0nvQ==
+"@usecapsule/core-components@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@usecapsule/core-components/-/core-components-2.0.1.tgz#aa66ed081532b3503320e7868d92ca687df6e079"
+  integrity sha512-kQ6ACPaK1O0AFaZFQ9TqlYWCkeGT88w9sbEEotgXES2dnp66U4n4PoV7tTQXlpKFpYUG1G7oIWAjoeYkvb8PWA==
   dependencies:
     "@stencil/core" "^4.7.0"
     color2k "^2.0.3"
@@ -5617,12 +5617,12 @@
     lottie-web "^5.12.2"
     qr-code-styling "^1.6.0-rc.1"
 
-"@usecapsule/react-components@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@usecapsule/react-components/-/react-components-2.0.0.tgz#f2b36f8a4620fe40c08843bfdd9441df83e8a3d3"
-  integrity sha512-KB2lSbmgcnp0EMY1mSMNfE9a4y+nn0DJn4VV7OuILbE3dlzHPw7nhpc1F6waYSLJPAHajlDOk1HGwPHsNwZHyQ==
+"@usecapsule/react-components@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@usecapsule/react-components/-/react-components-2.0.1.tgz#57fb3d894cfe75fd16320be74a3a9636dec3ab15"
+  integrity sha512-f8gO4LfTUUiVsYPdggmDm8NOPvF10cDOgtrcvZQgYJlrhTn/scChaZ74Da+IyHyIcBiGMjJ1WsBwAeFCL8kq7A==
   dependencies:
-    "@usecapsule/core-components" "^2.0.0"
+    "@usecapsule/core-components" "^2.0.1"
 
 "@wagmi/chains@1.6.0":
   version "1.6.0"

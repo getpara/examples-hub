@@ -10,7 +10,7 @@
   "dependencies": {
     "@gsap/react": "^2.1.0",
     "@ramp-network/ramp-instant-sdk": "^4.0.2",
-    "@usecapsule/react-components": "^2.0.0",
+    "@usecapsule/react-components": "^2.0.1",
     "@usecapsule/web-sdk": "1.10.0",
     "gsap": "^3.12.5",
     "styled-components": "^6.1.8",
