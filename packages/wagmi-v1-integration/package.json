@@ -1,13 +1,13 @@
 {
   "name": "@usecapsule/wagmi-v1-integration",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "sideEffects": false,
   "dependencies": {
-    "@usecapsule/react-sdk": "3.2.0",
-    "@usecapsule/viem-v1-integration": "1.9.0",
+    "@usecapsule/react-sdk": "3.3.0",
+    "@usecapsule/viem-v1-integration": "1.10.0",
     "wagmi": "^1.4.12"
   },
   "scripts": {
