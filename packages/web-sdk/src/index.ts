@@ -6,5 +6,4 @@ export { createCredential, generateSignature, parseCredentialCreationRes } from 
 export { truncateEthAddress } from './utils/truncateEthAddress.js';
 
 export { CapsuleWeb, CoreCapsule };
-
 export default CapsuleWeb;
