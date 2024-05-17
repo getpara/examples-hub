@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { Heading, Subheading, StyledStrong, ButtonIcon } from '../../../components/common';
 import { CpslButton } from '@usecapsule/react-components';
 

@@ -16,6 +16,7 @@ interface CapsuleConnectorOpts extends Partial<CapsuleModalProps> {
   capsule: CapsuleWeb;
   disableModal?: boolean;
   appName: string;
+  idOverride?: string;
   storageOverride?: Pick<Storage, 'setItem' | 'getItem'>;
   iconOverride?: string;
   nameOverride?: string;
@@ -29,13 +30,14 @@ export const capsuleConnector = ({
   options,
   iconOverride,
   nameOverride,
+  idOverride,
   ...modalProps
 }: CapsuleConnectorOpts) => {
   return createConnector((config) => {
     const injectedObj = injected({
       target: {
         name: CAPSULE_NAME,
-        id: CAPSULE_ID,
+        id: idOverride ?? CAPSULE_ID,
         provider: new CapsuleEIP1193Provider({
           capsule,
           chainId: `${chains[0].id}`,
@@ -50,7 +52,7 @@ export const capsuleConnector = ({
 
     return {
       ...injectedObj,
-      type: CAPSULE_ID,
+      type: idOverride ?? CAPSULE_ID,
       name: nameOverride ?? CAPSULE_NAME,
       icon: iconOverride ?? CAPSULE_ICON,
       disconnect: async () => {

@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { ModalStep, NoIndicatorSteps } from '../../utils/steps.js';
 import { SignUpStep } from '../SignUpStep/SignUpStep.js';
 import { CpslProgressIndicator } from '@usecapsule/react-components';

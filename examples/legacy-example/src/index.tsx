@@ -36,6 +36,7 @@ import { createCapsuleViemClient } from '@usecapsule/viem-v1-integration';
 import { CapsuleConnector, CapsuleEIP1193Provider } from '@usecapsule/wagmi-v1-integration';
 import CoreCapsule, { Environment, ConstructorOpts, DeniedSignatureResWithUrl } from '@usecapsule/core-sdk';
 import { FONT_OPTIONS } from './constants';
+import '@usecapsule/react-sdk/styles.css';
 
 // sample transaction params
 const DEFAULT_TO_ADDRESS = '0x42c9a72c9dfcc92cae0de9510160cea2da27af91';

@@ -14,7 +14,7 @@ import {
 } from '../common.js';
 import { openPopup } from '../../utils/openPopup.js';
 import { CpslTabsCustomEvent, TabsChangedEventDetail } from '@usecapsule/core-components';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { isMobileBrowser } from '../../utils/isMobile.js';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard.js';
 

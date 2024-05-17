@@ -1,7 +1,7 @@
 import { CpslButton, CpslDivider, CpslIcon, CpslInput } from '@usecapsule/react-components';
 import { CpslInputCustomEvent, InputInputEventDetail } from '@usecapsule/core-components';
 import { useState } from 'react';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { OAuth } from '../OAuth/OAuth.js';
 import { OAuthMethod } from '@usecapsule/web-sdk';
 import { ModalStep } from '../../utils/steps.js';

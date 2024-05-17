@@ -1,5 +1,5 @@
 import { CpslIcon, CpslInput, CpslModal, CpslText } from '@usecapsule/react-components';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 export const Heading: typeof CpslText = styled(CpslText)`
   text-align: center;

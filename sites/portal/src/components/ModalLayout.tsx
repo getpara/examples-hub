@@ -2,7 +2,7 @@ import { Buffer } from 'buffer';
 global.Buffer = Buffer;
 import { useEffect, useState } from 'react';
 import { Outlet, useSearchParams } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { userManagementClient } from '../clients/userManagementClient';
 import { Partner } from '../types';
 import { DEFAULT_HOMEPAGE_URL, DEFAULT_PARTNER } from '../constants';

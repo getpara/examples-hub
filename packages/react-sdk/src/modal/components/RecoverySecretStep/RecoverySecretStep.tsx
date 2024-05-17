@@ -2,7 +2,7 @@ import { CpslSlideButton, CpslTileButton } from '@usecapsule/react-components';
 import { useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { Heading, MainContainer, SecondaryText } from '../common.js';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard.js';
 import { getMailtoLink } from '../../utils/getMailtoLink.js';
 import { useState } from 'react';

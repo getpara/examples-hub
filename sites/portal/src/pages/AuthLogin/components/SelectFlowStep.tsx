@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { Heading, Subheading, ButtonIcon, Text, Link } from '../../../components/common';
 import { CpslButton, CpslIcon } from '@usecapsule/react-components';
 import { useModalOutletContext } from '../../../hooks/useModalOutletContext';

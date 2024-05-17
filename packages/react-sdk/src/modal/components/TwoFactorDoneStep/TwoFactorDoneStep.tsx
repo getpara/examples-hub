@@ -1,6 +1,6 @@
 import { CpslButton, CpslIcon } from '@usecapsule/react-components';
 import { Heading, HeroNoSpacing, SecondaryText, ButtonWithIconContainer } from '../common.js';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 interface TwoFactorDoneStepStep {
   onClose: () => void;

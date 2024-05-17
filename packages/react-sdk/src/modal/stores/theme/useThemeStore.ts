@@ -5,6 +5,7 @@ interface ThemeState {
   isDark?: boolean;
   logo?: string;
   appName?: string;
+  bareModal?: boolean;
 }
 
 export interface ThemeActions {
@@ -18,6 +19,7 @@ const DEFAULT_THEME: ThemeState = {
   isDark: false,
   logo: undefined,
   appName: undefined,
+  bareModal: false,
 };
 
 export const useThemeStore = create<ThemeStore>((set, get) => ({

@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { CpslIcon } from '@usecapsule/react-components';
 import { Text } from './common';
 

@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { CapsuleBlack, CapsuleWhite, ShieldCheck } from './Icons';
 import { Text } from './common';
 import { useModalOutletContext } from '../hooks/useModalOutletContext';

@@ -1,6 +1,6 @@
 import { CpslCodeInput } from '@usecapsule/react-components';
 import { useEffect, useRef, useState } from 'react';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { ModalStep } from '../../utils/steps.js';
 import { CodeChangeEventDetail, CpslCodeInputCustomEvent } from '@usecapsule/core-components';
 import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';

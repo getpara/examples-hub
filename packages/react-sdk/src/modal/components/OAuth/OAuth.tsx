@@ -1,6 +1,6 @@
 import { CpslTileButton } from '@usecapsule/react-components';
 import { OAuthMethod } from '@usecapsule/web-sdk';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { openPopup } from '../../utils/openPopup.js';

@@ -164,18 +164,16 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
         if (await this.capsule.isFullyLoggedIn()) {
           return Object.values(this.capsule.getWallets()).map((w) => w.address);
         }
-        if (this.disableModal) {
-          throw new ProviderRpcError(new Error('the provider is disconnected'), {
-            code: 4900,
-            shortMessage: 'the provider is disconnected',
-          });
-        }
 
         let isClosed = false;
         const onClose = () => {
           isClosed = true;
         };
-        renderModal(this.capsule, this.modalProps, onClose);
+
+        if (!this.disableModal) {
+          renderModal(this.capsule, this.modalProps, onClose);
+        }
+
         // check if capsule is fully logged in every 2 seconds for 10 minutes at most
         const now = Date.now();
         while (Date.now() - now < TEN_MINUTES_MS) {

@@ -5,12 +5,19 @@ import { getActions } from './actions.js';
 
 type Flow = 'login' | 'signUp';
 
+export interface OnModalStepChangeValue {
+  previousStep: ModalStep;
+  currentStep: ModalStep;
+  canGoBack: boolean;
+}
+
 interface ModalState {
   step: ModalStep;
   flow: Flow | undefined;
   webAuthURLForLogin: string | undefined;
   webAuthURLForCreate: string | undefined;
   isFullyLoggedIn: boolean;
+  onModalStepChange: (value: OnModalStepChangeValue) => void | undefined;
 }
 
 export interface ModalActions {
@@ -22,9 +29,10 @@ export interface ModalActions {
   totalSteps: () => number;
   setFlow: (flow: Flow) => void;
   isLogin: () => boolean;
-  setWebAuthURLForLogin: (url: string) => void;
-  setWebAuthURLForCreate: (url: string) => void;
+  setWebAuthURLForLogin: (url?: string) => void;
+  setWebAuthURLForCreate: (url?: string) => void;
   setIsFullyLoggedIn: (isFullyLoggedIn: boolean) => void;
+  setOnModalStepChange: (fn: (value: OnModalStepChangeValue) => void) => void;
 }
 
 export type ModalStore = ModalState & ModalActions;
@@ -35,6 +43,7 @@ export const DEFAULT_MODAL_STATE: Omit<ModalState, 'step'> = {
   webAuthURLForLogin: undefined,
   webAuthURLForCreate: undefined,
   isFullyLoggedIn: false,
+  onModalStepChange: undefined,
 };
 
 export const useModalStore = create<ModalStore>()(

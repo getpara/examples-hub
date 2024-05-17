@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { FilledDisabledInput, Heading, Subheading, Text } from '../../../components/common';
 import { CpslButton, CpslIcon, CpslQrCode, CpslSpinner } from '@usecapsule/react-components';
 import { useCopyToClipboard } from '../../../hooks/useCopyToClipboard';

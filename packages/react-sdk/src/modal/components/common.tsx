@@ -1,5 +1,5 @@
 import { CpslIcon, CpslInput, CpslText } from '@usecapsule/react-components';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 export const SpinnerContainer = styled.div`
   display: flex;

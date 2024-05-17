@@ -1,9 +1,10 @@
 import { CpslButton, CpslIcon, CpslText } from '@usecapsule/react-components';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { ModalStep } from '../../utils/steps.js';
 import { useModalStore } from '../../stores/index.js';
 import { useThemeStore } from '../../stores/theme/useThemeStore.js';
 import { CapsuleBlack, CapsuleWhite } from '../Icons.js';
+import { useGoBack } from '../../hooks/useGoBack.js';
 
 interface HeaderProps {
   onClose: () => void;
@@ -13,22 +14,14 @@ interface HeaderProps {
 export const Header = ({ onClose, condenseModal }: HeaderProps) => {
   const logo = useThemeStore((state) => state.getLogo());
   const isDark = useThemeStore((state) => state.isDark);
+  const bareModal = useThemeStore((state) => state.bareModal);
   const appName = useThemeStore((state) => state.appName);
   const currentStep = useModalStore((state) => state.step);
-  const decrementStep = useModalStore((state) => state.decrementStep);
   const hasPreviousStep = useModalStore((state) => state.hasPreviousStep());
-  const resetState = useModalStore((state) => state.resetState);
+  const goBack = useGoBack();
 
   const handleBackClick = () => {
-    decrementStep();
-    switch (currentStep) {
-      case ModalStep.VERIFY_2FA:
-      case ModalStep.BIOMETRIC_CREATION:
-      case ModalStep.BIOMETRIC_LOGIN: {
-        resetState();
-        break;
-      }
-    }
+    goBack();
   };
 
   return (
@@ -58,9 +51,9 @@ export const Header = ({ onClose, condenseModal }: HeaderProps) => {
             </>
           )}
         </CenterTextContainer>
-        <HeaderButton variant="icon" onClick={onClose}>
+        <CloseButton bareModal={bareModal} variant="icon" onClick={onClose}>
           <CpslIcon icon="close" />
-        </HeaderButton>
+        </CloseButton>
       </Container>
       <Container slot="footerExpandedHeader" style={{ paddingBottom: 0 }}>
         <ExpandedContainer onClick={condenseModal}>
@@ -93,6 +86,11 @@ const HeaderButton = styled(CpslButton)`
     --height: 20px;
     --width: 20px;
   }
+`;
+
+const CloseButton = styled(HeaderButton)<{ bareModal?: boolean }>`
+  transform: rotate(180deg);
+  visibility: ${({ bareModal }) => (bareModal ? 'hidden' : 'visible')};
 `;
 
 const BackButton = styled(HeaderButton)`

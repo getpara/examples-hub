@@ -1,6 +1,6 @@
 import { ENV } from '../constants';
 import { Environment } from '@usecapsule/web-sdk';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { CpslIcon } from '@usecapsule/react-components';
 
 export const BetaBannerNoChakra = () => {

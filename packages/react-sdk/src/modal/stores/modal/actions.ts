@@ -6,16 +6,27 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
   resetState: () => {
     set(DEFAULT_MODAL_STATE);
   },
+  setOnModalStepChange: (onModalStepChange) => {
+    set({ onModalStepChange });
+  },
   setStep: (step) => {
+    const onModalStepChange = get().onModalStepChange;
+    const previousStep = get().step;
+
     set({ step });
+
+    onModalStepChange?.({ previousStep, currentStep: step, canGoBack: get().hasPreviousStep() });
   },
   decrementStep: () => {
+    const onModalStepChange = get().onModalStepChange;
     const isLogin = get().flow === 'login';
     const currentStep = get().step;
     const prevStep = isLogin ? LoginPreviousStep[currentStep] : SignUpPreviousStep[currentStep];
 
     if (prevStep) {
       set({ step: prevStep });
+
+      onModalStepChange?.({ previousStep: currentStep, currentStep: prevStep, canGoBack: get().hasPreviousStep() });
     }
   },
   hasPreviousStep: () => {

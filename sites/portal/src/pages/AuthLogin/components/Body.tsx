@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { AuthLoginStep } from '../../../constants';
 import { ModalFooter } from '../../../components/ModalFooter';
 import { SelectFlowStep } from './SelectFlowStep';
