@@ -105,8 +105,8 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     }, [onModalStepChange]);
 
     useEffect(() => {
-      updateThemeState({ logo, appName, bareModal });
-    }, [logo, appName, bareModal]);
+      updateThemeState({ logo, appName, oAuthLogoVariant: theme.oAuthLogoVariant ?? 'default' });
+    }, [logo, appName, theme.oAuthLogoVariant]);
 
     useEffect(() => {
       if (theme) {

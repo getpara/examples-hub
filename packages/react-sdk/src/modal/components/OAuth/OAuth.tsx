@@ -4,7 +4,7 @@ import { styled } from 'styled-components';
 import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { openPopup } from '../../utils/openPopup.js';
-import { oAuthLogos } from './config.js';
+import { brandedOAuthLogos, oAuthLogos } from './config.js';
 import { useThemeStore } from '../../stores/theme/useThemeStore.js';
 import { Text } from '../common.js';
 
@@ -15,6 +15,7 @@ interface OAuthProps {
 const HAS_MORE_LENGTH = 4;
 
 export const OAuth = ({ methods }: OAuthProps) => {
+  const oAuthLogoVariant = useThemeStore((state) => state.oAuthLogoVariant);
   const isDark = useThemeStore((state) => state.isDark);
   const capsule = useCapsuleStore((state) => state.capsule);
   const setFlow = useModalStore((state) => state.setFlow);
@@ -57,14 +58,22 @@ export const OAuth = ({ methods }: OAuthProps) => {
     }
   };
 
+  const useBrandedLogos = oAuthLogoVariant === 'default';
+  const useDarkLogos = useBrandedLogos ? isDark : oAuthLogoVariant !== 'dark';
+
   return (
     <OAuthContainer>
       {methodsToShow.map((method) => (
-        <StyledCpslTileButton isDark={isDark} key={method} icon={oAuthLogos[method]} onClick={handleMethodClick(method)} />
+        <StyledCpslTileButton
+          isDark={useDarkLogos}
+          key={method}
+          icon={useBrandedLogos ? brandedOAuthLogos[method] : oAuthLogos[method]}
+          onClick={handleMethodClick(method)}
+        />
       ))}
       {!showAll && hasMore && (
-        <MoreButton isDark={isDark} icon="moreLoginOptions" onClick={handleShowAll}>
-          <MoreText isDark={isDark}>MORE</MoreText>
+        <MoreButton isDark={useDarkLogos} icon="moreLoginOptions" onClick={handleShowAll}>
+          <MoreText isDark={useDarkLogos}>MORE</MoreText>
         </MoreButton>
       )}
     </OAuthContainer>

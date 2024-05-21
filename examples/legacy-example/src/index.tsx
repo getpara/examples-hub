@@ -441,6 +441,7 @@ function App() {
   const [backgroundColor, setBackgroundColor] = useState('#121212');
   const [borderRadius, setBorderRadius] = useState('sm');
   const [font, setFont] = useState('inter');
+  const [logoVariant, setLogoVariant] = useState('branded');
 
   const [pregenEmail, setPregenEmail] = useState('');
   const [pregenUserShare, setPregenUserShare] = useState('');
@@ -642,6 +643,16 @@ function App() {
                   {FONT_OPTIONS.map((font) => (
                     <option value={font}>{font === 'Inter' ? 'Inter (Capsule Default)' : font.replaceAll("'", '')}</option>
                   ))}
+                </Select>
+              </HStack>
+              <HStack>
+                <Text width={'15%'}>
+                  <strong>OAuth Logo Variant:</strong>
+                </Text>
+                <Select defaultValue={logoVariant} onChange={(e) => setLogoVariant(e.target.value)}>
+                  <option value="branded">Branded</option>
+                  <option value="dark">Dark</option>
+                  <option value="light">Light</option>
                 </Select>
               </HStack>
               <HStack>
@@ -872,6 +883,7 @@ function App() {
             foregroundColor,
             borderRadius,
             font,
+            oAuthLogoVariant: logoVariant,
           }}
           logo={logo !== '' ? logo : undefined}
         />

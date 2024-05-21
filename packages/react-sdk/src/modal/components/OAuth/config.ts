@@ -1,8 +1,14 @@
 import { IconType } from '@usecapsule/core-components';
 import { OAuthMethod } from '@usecapsule/web-sdk';
 
-// For icon compatibility with dark mode
-// ref https://www.figma.com/file/9ACi9SCFaEiVKoKoEXxCju/Capsule-Modal-v2?node-id=584%3A34197&mode=dev
+export const brandedOAuthLogos: { [key in OAuthMethod]: IconType } = {
+  GOOGLE: 'googleBrand',
+  TWITTER: 'twitter',
+  APPLE: 'apple',
+  DISCORD: 'discordBrand',
+  FACEBOOK: 'facebookBrand',
+};
+
 export const oAuthLogos: { [key in OAuthMethod]: IconType } = {
   GOOGLE: 'google',
   TWITTER: 'twitter',

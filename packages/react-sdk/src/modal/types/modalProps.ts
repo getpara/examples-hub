@@ -30,6 +30,12 @@ export type CapsuleModalHandle = {
   handleModalClose: () => void;
 };
 
+export type OAuthLogoVariantType = 'dark' | 'light' | 'default';
+
+type ModalTheme = Theme & {
+  oAuthLogoVariant?: OAuthLogoVariantType;
+};
+
 export interface CapsuleModalProps {
   /**
    * Your CapsuleWeb instance.
@@ -57,7 +63,7 @@ export interface CapsuleModalProps {
   /**
    * Theming to be used throughout the modal.
    */
-  theme?: Theme;
+  theme?: ModalTheme;
   /**
    * Logo to be shown throughout the modal.
    * Defaults to the Capsule logo.
