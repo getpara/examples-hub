@@ -1,19 +1,8 @@
-Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.
+Please go through the checklist if you're the PR author or reviewer and ensure that every item is satisfied.
 
-Fixes # (issue)
+## Pull Request Checklist
 
-## Type of change
-
-The commit type is used by semantic-release to determine the version to be released to NPM.
-Put the type of change in the PR title and the name of the commit that lands on main.
-Here are the available types:
-
-- [ ] feat: A new feature. Triggers a MINOR release
-- [ ] fix: A bug fix. Triggers a PATCH release
-- [ ] docs: Documentation only changes
-- [ ] style: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
-- [ ] refactor: A code change that neither fixes a bug nor adds a feature
-- [ ] perf: A code change that improves performance. Triggers a PATCH release
-- [ ] test: Adding missing or correcting existing tests
-- [ ] chore: Changes to the build process or auxiliary tools and libraries such as documentation generation
-- [ ] BREAKING CHANGE: Triggers a MAJOR release.
+- [ ] This PR does not depend on new backend changes and if it does, this PR will not be merged until the backend changes are deployed to production. Also, the relevant backend PR is linked in the description/comments.
+- [ ] A new NPM release with this PR will not break an existing integration for a partner or cause a degraded experience if an existing integration bumps to the new version without making any other code change. If a breaking change is needed, discuss with the rest of the team first on a plan.
+- [ ] If this PR requires docs changes, a PR for the docs repo is ready to be merged after this PR is. Also, the relevant docs PR is linked in the description/comments.
+- [ ] All the packages in this repo can be successfully built and the legacy-example still works with the changes in this PR.
