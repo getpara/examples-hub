@@ -32,7 +32,7 @@ export type CapsuleModalHandle = {
 
 export type OAuthLogoVariantType = 'dark' | 'light' | 'default';
 
-type ModalTheme = Theme & {
+export type CapsuleModalTheme = Theme & {
   oAuthLogoVariant?: OAuthLogoVariantType;
 };
 
@@ -63,7 +63,7 @@ export interface CapsuleModalProps {
   /**
    * Theming to be used throughout the modal.
    */
-  theme?: ModalTheme;
+  theme?: CapsuleModalTheme;
   /**
    * Logo to be shown throughout the modal.
    * Defaults to the Capsule logo.
