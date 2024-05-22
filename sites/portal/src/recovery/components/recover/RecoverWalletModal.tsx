@@ -12,6 +12,8 @@ import RecoveryAwaitingFinishStep from './RecoveryAwaitingFinish';
 import RecoveryBiometricsSetup from './RecoveryBiometricsSetup';
 import RecoveryDoneStep from './RecoveryDoneStep';
 import { Footer } from '../Footer/Footer';
+import { RecoveryAttemptContext } from '../../contexts/RecoveryAttemptContext';
+import TwoFactorContext from '../../contexts/TwoFactorContext';
 
 type RecoveryWalletModalProps = {
   isOpen: boolean;
@@ -23,6 +25,8 @@ const RecoveryWalletModal: React.FC<RecoveryWalletModalProps> = ({ isOpen, onClo
   const [webAuthURLForCreate, setWebAuthURLForCreate] = useState('');
   const [userShare, setUserShare] = useState('');
   const createAccountTimeout = useRef<number>();
+  const { twoFactorVerifiedInSession } = useContext(RecoveryAttemptContext);
+  const { is2FAFlow } = useContext(TwoFactorContext);
 
   async function awaitWalletRecoveryTransition(): Promise<void> {
     try {
@@ -57,6 +61,12 @@ const RecoveryWalletModal: React.FC<RecoveryWalletModalProps> = ({ isOpen, onClo
     }
     distribute();
   }, [userShare, currentRecoveryStep]);
+
+  useEffect(() => {
+    if (!is2FAFlow || twoFactorVerifiedInSession) {
+      setCurrentRecoveryStep(ModalStep.SECRET);
+    }
+  }, []);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>

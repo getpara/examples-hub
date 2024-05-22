@@ -9,6 +9,7 @@ import { authLogin } from '../../utils/authLogin';
 import capsule from '../../clients/capsule';
 import { userManagementClient } from '../../clients/userManagementClient';
 import { getAsymmetricKeyPair, getPublicKeyHex } from '@usecapsule/web-sdk';
+import { CountryCallingCode } from 'libphonenumber-js';
 
 const SESSION_STORAGE_AUTH_LOGIN_STEP = '@CAPSULE/loginFlowStep';
 
@@ -24,6 +25,8 @@ export const AuthLogin = () => {
 
   const [searchParams, _] = useSearchParams();
   const paramsEmail = decodeURIComponent(searchParams.get('email'));
+  const paramsPhone = decodeURIComponent(searchParams.get('phone'));
+  const paramsCountryCode = decodeURIComponent(searchParams.get('countryCode')) as CountryCallingCode;
   const encryptionKey = searchParams.get('encryptionKey');
   const sessionId = searchParams.get('sessionId');
   const newDeviceSessionLookupId = searchParams.get('newDeviceSessionId') || undefined;
@@ -43,6 +46,8 @@ export const AuthLogin = () => {
       await authLogin(
         paramsPartnerId,
         paramsEmail,
+        paramsPhone,
+        paramsCountryCode,
         sessionId,
         encryptionKey,
         newDeviceSessionLookupId,
@@ -60,7 +65,15 @@ export const AuthLogin = () => {
         console.error('Error retrieving passkey: ', err);
       }
     }
-  }, [paramsEmail, sessionId, encryptionKey, newDeviceSessionLookupId, newDeviceEncryptionKey]);
+  }, [
+    paramsEmail,
+    paramsPhone,
+    paramsCountryCode,
+    sessionId,
+    encryptionKey,
+    newDeviceSessionLookupId,
+    newDeviceEncryptionKey,
+  ]);
 
   useEffect(() => {
     async function getTemporaryShares() {
@@ -90,6 +103,7 @@ export const AuthLogin = () => {
     }
     async function getWebAuthURLForAddDevice() {
       await capsule.setEmail(paramsEmail);
+      await capsule.setPhoneNumber(paramsPhone, paramsCountryCode);
       let touchRes = await userManagementClient.touchSession();
       if (!touchRes.data.sessionLookupId) {
         touchRes = await userManagementClient.touchSession(true);
@@ -118,7 +132,7 @@ export const AuthLogin = () => {
 
   useEffect(() => {
     if (
-      paramsEmail &&
+      (paramsEmail || paramsPhone) &&
       sessionId &&
       encryptionKey &&
       !paramsSkipAutoLogin &&

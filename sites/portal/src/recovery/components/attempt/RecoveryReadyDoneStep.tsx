@@ -1,21 +1,21 @@
 import { VStack, Spacer, Text, Button } from '@chakra-ui/react';
 import WalletSuccess from '../../../assets/walletSuccess';
 
-type RecoveryReadyDoneStepProps = {
+type RecoveryReadyStepProps = {
   onClose: () => void;
 };
 
-const RecoveryReadyDoneStep: React.FC<RecoveryReadyDoneStepProps> = ({ onClose }) => {
+const RecoveryReadyStep: React.FC<RecoveryReadyStepProps> = ({ onClose }) => {
   return (
     <VStack flex={1}>
-      <Text fontSize="l">Wallet is ready to recover</Text>
+      <Text fontSize="l">Recovery Ready</Text>
       <WalletSuccess />
       <Text fontSize="md" paddingTop="8" align="center">
-        Please click the Recover Wallet button after closing this modal to begin the process.
+        You are ready to recover your wallet now! You have exactly 24 hours to execute this recovery
       </Text>
       <Text fontSize="md" align="center" paddingTop="4">
-        You can come back to this page at any point within the next 24 hours, or cancel this Recovery Attempt by visiting
-        your email.
+        You can come back to this page and recover at any point within the 24 hour period, or cancel this Recovery Attempt by
+        clicking the button at the bottom of the page.
       </Text>
       <Spacer />
       <Button width="100%" onClick={onClose}>
@@ -25,4 +25,4 @@ const RecoveryReadyDoneStep: React.FC<RecoveryReadyDoneStepProps> = ({ onClose }
   );
 };
 
-export default RecoveryReadyDoneStep;
+export default RecoveryReadyStep;

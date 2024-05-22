@@ -61,6 +61,11 @@ export interface CapsuleModalProps {
    */
   disableEmailLogin?: boolean;
   /**
+   * Whether or not to allow for phone login. If true, only OAuth login will be available.
+   * Defaults to `false`.
+   */
+  disablePhoneLogin?: boolean;
+  /**
    * Theming to be used throughout the modal.
    */
   theme?: CapsuleModalTheme;

@@ -1,31 +1,23 @@
 import { VStack, Spacer, HStack, Input, Button, Box, Text } from '@chakra-ui/react';
 import { useContext, useState } from 'react';
-import EmailContext from '../../contexts/EmailContext';
-import RecoveryStepContext from '../../contexts/RecoveryStepContext';
-import { ModalStep } from '../../steps/recoverySteps';
-import UserContext from '../../contexts/UserContext';
+import { RecoveryAttemptContext } from '../../contexts/RecoveryAttemptContext';
+import StepContext from '../../contexts/StepContext';
+import { ModalStep } from '../../steps/attemptSteps';
 import WalletContext from '../../contexts/WalletContext';
-import capsule from '../../../clients/capsule';
-import VerifyCode from '../../../assets/verifyCode';
 import Console from '../../../assets/console';
-import TwoFactorContext from '../../contexts/TwoFactorContext';
-import { RecoveryAttemptContext, RecoveryType } from '../../contexts/RecoveryAttemptContext';
+import VerifyCode from '../../../assets/verifyCode';
 import PhoneContext from '../../contexts/PhoneContext';
+import UserContext from '../../contexts/UserContext';
+import capsule from '../../../clients/capsule';
 
-const RecoveryWallet2FAStep: React.FC = () => {
+const Recovery2FAPhoneStep: React.FC = () => {
   const [verificationCode, setVerificationCode] = useState('');
   const [incorrectCode, setIncorrectCode] = useState(false);
-  const { setCurrentRecoveryStep } = useContext(RecoveryStepContext);
-  const { type } = useContext(RecoveryAttemptContext);
-  const { email } = useContext(EmailContext);
-  const { setId: setWalletId } = useContext(WalletContext);
+  const { setCurrentStep } = useContext(StepContext);
   const { phone, countryCode } = useContext(PhoneContext);
+  const { setAddress, setId: setWalletId } = useContext(WalletContext);
   const { setId: setUserId } = useContext(UserContext);
-  const { is2FAFlow } = useContext(TwoFactorContext);
-
-  if (!is2FAFlow) {
-    setCurrentRecoveryStep(ModalStep.SECRET);
-  }
+  const { setStatus, setInitiatedAt, setTwoFactorVerifiedInSession } = useContext(RecoveryAttemptContext);
 
   return (
     <VStack flex={1}>
@@ -83,16 +75,19 @@ const RecoveryWallet2FAStep: React.FC = () => {
         onClick={async () => {
           if (verificationCode.length === 6 && /^\d+$/.test(verificationCode)) {
             try {
-              let walletId, userId;
-              if (type === RecoveryType.PHONE) {
-                ({ walletId, userId } = await capsule.verify2FAForPhone(phone, countryCode, verificationCode));
-              } else {
-                ({ walletId, userId } = await capsule.verify2FA(email, verificationCode));
-              }
-              setWalletId(walletId);
-              setUserId(userId);
+              const { address, initiatedAt, status, userId, walletId } = await capsule.verify2FAForPhone(
+                phone,
+                countryCode,
+                verificationCode,
+              );
+              setAddress(address);
+              setInitiatedAt(initiatedAt);
+              setStatus(status);
               setIncorrectCode(false);
-              setCurrentRecoveryStep(ModalStep.SECRET);
+              setTwoFactorVerifiedInSession(true);
+              setUserId(userId);
+              setWalletId(walletId);
+              setCurrentStep(ModalStep.RECOVERY_AWAITING);
             } catch (error) {
               setIncorrectCode(true);
             }
@@ -103,11 +98,11 @@ const RecoveryWallet2FAStep: React.FC = () => {
       >
         Continue
       </Button>
-      <Button variant="link" onClick={() => setCurrentRecoveryStep(ModalStep.LOST_2FA)}>
+      <Button variant="link" onClick={() => setCurrentStep(ModalStep.LOST_2FA)}>
         <Text fontSize={11}>I lost access to my 2FA</Text>
       </Button>
     </VStack>
   );
 };
 
-export default RecoveryWallet2FAStep;
+export default Recovery2FAPhoneStep;

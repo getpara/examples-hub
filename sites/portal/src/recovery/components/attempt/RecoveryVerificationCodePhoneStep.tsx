@@ -1,28 +1,28 @@
 import { VStack, Spacer, HStack, Input, Button, Text, Box } from '@chakra-ui/react';
 import { useContext, useState } from 'react';
-import capsule from '../../../clients/capsule';
-import EmailContext from '../../contexts/EmailContext';
-import { RecoveryAttemptContext } from '../../contexts/RecoveryAttemptContext';
+import { RecoveryAttemptContext, RecoveryType } from '../../contexts/RecoveryAttemptContext';
 import StepContext from '../../contexts/StepContext';
 import { ModalStep } from '../../steps/attemptSteps';
 import WalletContext from '../../contexts/WalletContext';
 import VerifyCode from '../../../assets/verifyCode';
 import Console from '../../../assets/console';
+import PhoneContext from '../../contexts/PhoneContext';
 import UserContext from '../../contexts/UserContext';
 import TwoFactorContext from '../../contexts/TwoFactorContext';
+import capsule from '../../../clients/capsule';
 import { RecoveryStatus } from '@usecapsule/core-sdk';
 
-type RecoveryVerificationCodeStepProps = {
+type RecoveryVerificationCodePhoneStepProps = {
   onClose: () => void;
 };
 
-const RecoveryVerificationCodeStep: React.FC<RecoveryVerificationCodeStepProps> = ({ onClose }) => {
+const RecoveryVerificationCodePhoneStep: React.FC<RecoveryVerificationCodePhoneStepProps> = ({ onClose }) => {
   const { setCurrentStep } = useContext(StepContext);
-  const { email } = useContext(EmailContext);
+  const { phone, countryCode } = useContext(PhoneContext);
   const { setAddress, setId: setWalletId } = useContext(WalletContext);
-  const { setStatus, setInitiatedAt } = useContext(RecoveryAttemptContext);
-  const { setId: setUserId } = useContext(UserContext);
+  const { setStatus, setInitiatedAt, setType } = useContext(RecoveryAttemptContext);
   const { setIs2FAFlow } = useContext(TwoFactorContext);
+  const { setId: setUserId } = useContext(UserContext);
 
   const [verificationCode, setVerificationCode] = useState('');
   const [incorrectCode, setIncorrectCode] = useState(false);
@@ -32,7 +32,7 @@ const RecoveryVerificationCodeStep: React.FC<RecoveryVerificationCodeStepProps> 
   return (
     <VStack flex={1}>
       <Text textColor="brand.content" fontSize="l">
-        Verify Email
+        Verify Phone
       </Text>
       <Console />
 
@@ -43,10 +43,10 @@ const RecoveryVerificationCodeStep: React.FC<RecoveryVerificationCodeStepProps> 
         </Box>
         <Box>
           <Text textColor="brand.content" fontSize="m">
-            Verify email
+            Verify phone
           </Text>
           <Text textColor="brand.content" fontSize="s">
-            Enter the 6-digit authentication code that was sent to your email to verify your signup.
+            Enter the 6-digit authentication code that was sent to your phone to verify your signup.
           </Text>
         </Box>
       </HStack>
@@ -91,7 +91,7 @@ const RecoveryVerificationCodeStep: React.FC<RecoveryVerificationCodeStepProps> 
         onClick={async () => {
           if (verificationCode.length === 6 && /^\d+$/.test(verificationCode)) {
             try {
-              const res = await capsule.ctx.capsuleClient.verifyEmailForRecovery(email, verificationCode);
+              const res = await capsule.ctx.capsuleClient.verifyPhoneForRecovery(phone, countryCode, verificationCode);
               const status = res.data.status;
               const initiatedAt = res.data.initiatedAt as Date;
               const address = res.data.address;
@@ -103,6 +103,7 @@ const RecoveryVerificationCodeStep: React.FC<RecoveryVerificationCodeStepProps> 
                 setUserId(userId);
                 setWalletId(walletId);
               }
+              setType(RecoveryType.PHONE);
               if (status != null) {
                 setAddress(address);
                 setStatus(status);
@@ -114,7 +115,7 @@ const RecoveryVerificationCodeStep: React.FC<RecoveryVerificationCodeStepProps> 
                 }
               } else {
                 setIncorrectCode(false);
-                setCurrentStep(ModalStep.VERIFY_2FA);
+                setCurrentStep(ModalStep.VERIFY_2FA_PHONE);
               }
             } catch (e) {
               if (e.message.includes('429')) {
@@ -138,7 +139,7 @@ const RecoveryVerificationCodeStep: React.FC<RecoveryVerificationCodeStepProps> 
         onClick={async () => {
           setResendStatus('Code Resent!');
           setResendButtonDisabled(true);
-          await capsule.ctx.capsuleClient.initializeRecovery(email);
+          await capsule.ctx.capsuleClient.initializeRecoveryForPhone(phone, countryCode);
 
           setTimeout(() => {
             setResendStatus('Resend Code');
@@ -152,4 +153,4 @@ const RecoveryVerificationCodeStep: React.FC<RecoveryVerificationCodeStepProps> 
   );
 };
 
-export default RecoveryVerificationCodeStep;
+export default RecoveryVerificationCodePhoneStep;

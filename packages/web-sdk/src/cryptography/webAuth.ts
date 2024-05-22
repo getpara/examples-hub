@@ -126,7 +126,7 @@ function generateUserHandle() {
 export async function createCredential(
   env: Environment,
   userId: string,
-  email: string,
+  identifier: string,
 ): Promise<{
   creds: any;
   userHandle: Uint8Array;
@@ -147,8 +147,8 @@ export async function createCredential(
       },
       user: {
         id: userHandle,
-        name: email,
-        displayName: email,
+        name: identifier,
+        displayName: identifier,
       },
       pubKeyCredParams: [
         { type: 'public-key' as PublicKeyCredentialType, alg: ES256_ALGORITHM },

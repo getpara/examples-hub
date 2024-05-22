@@ -15,6 +15,7 @@ import { RecoverySecretStep } from '../RecoverySecretStep/RecoverySecretStep.js'
 import { TwoFactorDoneStep } from '../TwoFactorDoneStep/TwoFactorDoneStep.js';
 import { BiometricCreationStep } from '../BiometricCreationStep/BiometricCreationStep.js';
 import { AwaitingOAuthStep } from '../AwaitingOAuthStep/AwaitingOAuthStep.js';
+import { VerificationCodeStepForPhone } from '../VerificationCodeStep/VerificationCodeStepForPhone.js';
 
 interface BodyProps {
   oAuthMethods?: OAuthMethod[];
@@ -22,6 +23,7 @@ interface BodyProps {
   twoFactorAuthEnabled?: boolean;
   hasFinishedAnimation: boolean;
   disableEmailLogin: boolean;
+  disablePhoneLogin: boolean;
   onClose: () => void;
 }
 
@@ -31,6 +33,7 @@ export const Body = ({
   twoFactorAuthEnabled,
   hasFinishedAnimation,
   disableEmailLogin,
+  disablePhoneLogin,
   onClose,
 }: BodyProps) => {
   const currentStep = useModalStore((state) => state.step);
@@ -44,10 +47,19 @@ export const Body = ({
     switch (currentStep) {
       case ModalStep.SIGN_UP:
       case ModalStep.SIGN_UP_ALL_OAUTH: {
-        return <SignUpStep oAuthMethods={oAuthMethods} disableEmailLogin={disableEmailLogin} />;
+        return (
+          <SignUpStep
+            oAuthMethods={oAuthMethods}
+            disableEmailLogin={disableEmailLogin}
+            disablePhoneLogin={disablePhoneLogin}
+          />
+        );
       }
       case ModalStep.VERIFICATION_CODE: {
         return <VerificationCodeStep />;
+      }
+      case ModalStep.VERIFICATION_CODE_FOR_PHONE: {
+        return <VerificationCodeStepForPhone />;
       }
       case ModalStep.BIOMETRIC_LOGIN: {
         return <BiometricLoginStep />;

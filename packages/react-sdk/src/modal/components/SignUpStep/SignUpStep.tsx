@@ -1,20 +1,31 @@
-import { CpslButton, CpslDivider, CpslIcon, CpslInput } from '@usecapsule/react-components';
-import { CpslInputCustomEvent, InputInputEventDetail } from '@usecapsule/core-components';
 import { useState } from 'react';
-import { styled } from 'styled-components';
+import { CpslButton, CpslDivider, CpslDropdown, CpslIcon, CpslInput } from '@usecapsule/react-components';
+import {
+  CpslDropdownCustomEvent,
+  CpslInputCustomEvent,
+  DropdownInputEventDetail,
+  IconType,
+  InputInputEventDetail,
+} from '@usecapsule/core-components';
+import styled from 'styled-components';
 import { OAuth } from '../OAuth/OAuth.js';
 import { OAuthMethod } from '@usecapsule/web-sdk';
 import { ModalStep } from '../../utils/steps.js';
 import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { useThemeStore } from '../../stores/theme/useThemeStore.js';
 import { CapsuleBlack, CapsuleWhite } from '../Icons.js';
+import countryCodes from './countryCodes.js';
+import parsePhoneNumberFromString, { CountryCallingCode } from 'libphonenumber-js';
 
 interface SignUpStepProps {
   oAuthMethods?: OAuthMethod[];
   disableEmailLogin: boolean;
+  disablePhoneLogin: boolean;
 }
 
-export const SignUpStep = ({ oAuthMethods, disableEmailLogin }: SignUpStepProps) => {
+const DEFAULT_COUNTRY = { label: 'United States', value: '+1', selectedLabel: 'US', icon: 'US' as IconType };
+
+export const SignUpStep = ({ oAuthMethods, disableEmailLogin, disablePhoneLogin }: SignUpStepProps) => {
   const isDark = useThemeStore((state) => state.isDark);
   const logo = useThemeStore((state) => state.getLogo());
   const appName = useThemeStore((state) => state.appName);
@@ -24,9 +35,16 @@ export const SignUpStep = ({ oAuthMethods, disableEmailLogin }: SignUpStepProps)
   const showAllOAuth = useModalStore((state) => state.step === ModalStep.SIGN_UP_ALL_OAUTH);
   const setEmail = useUserInfoStore((state) => state.setEmail);
   const email = useUserInfoStore((state) => state.email);
+  const setPhone = useUserInfoStore((state) => state.setPhone);
+  const phone = useUserInfoStore((state) => state.phone);
+  const setCountryCode = useUserInfoStore((state) => state.setCountryCode);
+  const countryCode = useUserInfoStore((state) => state.countryCode);
   const setWebAuthURLForLogin = useModalStore((state) => state.setWebAuthURLForLogin);
 
   const [emailError, setEmailError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+
+  const [matchedCountryCode, setMatchedCountryCode] = useState<DropdownInputEventDetail>(DEFAULT_COUNTRY);
 
   const handleSubmitEmail = async () => {
     if (!email) {
@@ -59,9 +77,82 @@ export const SignUpStep = ({ oAuthMethods, disableEmailLogin }: SignUpStepProps)
     setStep(ModalStep.VERIFICATION_CODE);
   };
 
+  const handleSubmitPhone = async () => {
+    if (!phone) {
+      setPhoneError('Phone is required!');
+      return;
+    }
+
+    await capsule.logout();
+
+    let userExists = false;
+
+    try {
+      userExists = await capsule.checkIfUserExistsByPhone(phone, countryCode);
+    } catch (error) {
+      setPhoneError('Phone number is not valid!');
+      return;
+    }
+
+    if (userExists) {
+      const webAuthUrlForLogin = await capsule.initiateUserLoginForPhone(phone, countryCode);
+      setFlow('login');
+      setStep(ModalStep.BIOMETRIC_LOGIN);
+      setWebAuthURLForLogin(webAuthUrlForLogin);
+      return;
+    }
+
+    await capsule.createUserByPhone(phone, countryCode);
+    setFlow('signUp');
+    setStep(ModalStep.VERIFICATION_CODE_FOR_PHONE);
+  };
+
   const handleEmailInput = (ev: CpslInputCustomEvent<InputInputEventDetail>) => {
     setEmailError('');
     setEmail(ev.detail.value);
+  };
+
+  const handlePhoneInput = (ev: CpslInputCustomEvent<InputInputEventDetail>) => {
+    setPhoneError('');
+    if (!checkAndSetPhoneNumberFromStringDidChange(ev.detail.value)) {
+      setPhone(ev.detail.value);
+    }
+  };
+
+  const handleCountryCodeInput = (ev: CpslDropdownCustomEvent<DropdownInputEventDetail>) => {
+    const matchedCountryCode = countryCodes.find((code) => code.selectedLabel === ev.detail.selectedLabel);
+    setCountryCode(ev.detail.value as CountryCallingCode);
+    setMatchedCountryCode(matchedCountryCode);
+  };
+
+  // TODO: rename this function
+  const checkAndSetPhoneNumberFromStringDidChange = (inputPhone: string): boolean => {
+    const phoneNumber = parsePhoneNumberFromString(inputPhone);
+
+    if (phoneNumber) {
+      const countryCode = phoneNumber.country;
+      const nationalNumber = phoneNumber.formatNational();
+
+      const matchedCountryCode = countryCodes.find((code) => code.selectedLabel === countryCode);
+
+      if (matchedCountryCode) {
+        setCountryCode(matchedCountryCode.value as CountryCallingCode);
+        setPhone(nationalNumber);
+        setMatchedCountryCode(matchedCountryCode);
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  const handlePasteInput = (ev: CpslInputCustomEvent<ClipboardEvent>) => {
+    const clipboardEvent = ev.detail;
+    const paste = clipboardEvent.clipboardData?.getData('text');
+
+    if (paste) {
+      checkAndSetPhoneNumberFromStringDidChange(paste);
+    }
   };
 
   return (
@@ -89,6 +180,28 @@ export const SignUpStep = ({ oAuthMethods, disableEmailLogin }: SignUpStepProps)
         >
           <CpslIcon slot="start" icon="mail" />
           <CpslButton slot="end" onClick={handleSubmitEmail}>
+            <CpslIcon icon="arrow" />
+          </CpslButton>
+        </CpslInput>
+      )}
+      {!disablePhoneLogin && (
+        <CpslInput
+          placeholder="Enter phone number"
+          inputMode="tel"
+          autofocus
+          value={phone}
+          errorText={phoneError}
+          onCpslInput={handlePhoneInput}
+          onCpslPaste={handlePasteInput}
+        >
+          <CpslDropdown
+            hasCpslSearch={true}
+            selectedItem={matchedCountryCode}
+            onSelectedItemChange={handleCountryCodeInput}
+            slot="start"
+            items={countryCodes}
+          />
+          <CpslButton slot="end" onClick={handleSubmitPhone}>
             <CpslIcon icon="arrow" />
           </CpslButton>
         </CpslInput>

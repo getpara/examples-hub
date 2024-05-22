@@ -1,64 +1,49 @@
 import { HStack, Spacer, VStack } from '@chakra-ui/react';
 import React, { useState, useEffect, useContext } from 'react';
-import { Environment, RecoveryStatus } from '@usecapsule/web-sdk';
+import { RecoveryStatus } from '@usecapsule/web-sdk';
 import RecoverWalletButton from './RecoverWalletButton';
 import { RecoveryAttemptContext } from '../../contexts/RecoveryAttemptContext';
 import { ENV } from '../../../constants';
 import TwoFactorContext from '../../contexts/TwoFactorContext';
 
-const RECOVERY_INITIATED_MINUTES = 48 * 60;
-const RECOVERY_INITIATED_MINUTES_NOT_PROD = 10;
-const RECOVERY_READY_MINUTES = 72 * 60;
-const RECOVERY_READY_MINUTES_NOT_PROD = 60;
-const SECONDS_IN_HOUR = 3600;
-const SECONDS_IN_MINUTE = 60;
+const timeDurations = {
+  prod: { initiated: 48 * 60 * 60, ready: 72 * 60 * 60 },
+  notProd: { initiated: 10, ready: 60 * 60 },
+};
 
-interface TimeRemaining {
-  hours: number;
-  minutes: number;
-  seconds: number;
-  message?: string;
-}
+const calculateTargetTime = (initiatedAt: Date, status: RecoveryStatus, env: string): Date => {
+  const addSeconds =
+    env === 'prod'
+      ? status === RecoveryStatus.INITIATED
+        ? timeDurations.prod.initiated
+        : timeDurations.prod.ready
+      : status === RecoveryStatus.INITIATED
+        ? timeDurations.notProd.initiated
+        : timeDurations.notProd.ready;
 
-const getTimeRemaining = (status: RecoveryStatus, initiatedAt: Date): TimeRemaining => {
-  const now = new Date();
-  let targetTime: Date;
+  const targetTime = new Date(initiatedAt);
+  targetTime.setSeconds(targetTime.getSeconds() + addSeconds);
+  return targetTime;
+};
 
-  switch (status) {
-    case RecoveryStatus.INITIATED:
-      targetTime = new Date(initiatedAt);
-      targetTime.setMinutes(
-        ENV === Environment.PROD
-          ? targetTime.getMinutes() + RECOVERY_INITIATED_MINUTES
-          : targetTime.getMinutes() + RECOVERY_INITIATED_MINUTES_NOT_PROD,
-      );
-      break;
-    case RecoveryStatus.READY:
-      targetTime = new Date(initiatedAt);
-      targetTime.setMinutes(
-        ENV === Environment.PROD
-          ? targetTime.getMinutes() + RECOVERY_READY_MINUTES
-          : targetTime.getMinutes() + RECOVERY_READY_MINUTES_NOT_PROD,
-      );
-      break;
-    case RecoveryStatus.EXPIRED:
-      return { hours: 0, minutes: 0, seconds: 0, message: 'Time Expired' };
-    case RecoveryStatus.FINISHED:
-      return {
-        hours: 0,
-        minutes: 0,
-        seconds: 0,
-        message: 'Recovery was successful!',
-      };
-    default:
-      return { hours: 0, minutes: 0, seconds: 0 };
+const getTimeRemaining = (status: RecoveryStatus, initiatedAt: Date) => {
+  if ([RecoveryStatus.EXPIRED, RecoveryStatus.FINISHED].includes(status)) {
+    return {
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+      message: status === RecoveryStatus.EXPIRED ? 'Time Expired' : 'Recovery was successful!',
+    };
   }
+  const now = new Date();
+  const targetTime = calculateTargetTime(initiatedAt, status, ENV);
+  const totalSeconds = Math.max(0, Math.floor((targetTime.getTime() - now.getTime()) / 1000));
 
-  const totalSeconds = Math.floor((targetTime.getTime() - now.getTime()) / 1000);
   return {
-    hours: Math.floor(totalSeconds / SECONDS_IN_HOUR),
-    minutes: Math.floor((totalSeconds % SECONDS_IN_HOUR) / SECONDS_IN_MINUTE),
-    seconds: totalSeconds % SECONDS_IN_MINUTE,
+    hours: Math.floor(totalSeconds / 3600),
+    minutes: Math.floor((totalSeconds % 3600) / 60),
+    seconds: totalSeconds % 60,
+    message: '',
   };
 };
 
@@ -108,11 +93,7 @@ const RecoveryMessage = ({ status }) => {
 };
 
 const RecoveryTimer: React.FC = () => {
-  const [timeRemaining, setTimeRemaining] = useState<TimeRemaining>({
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-  });
+  const [timeRemaining, setTimeRemaining] = useState({ hours: 0, minutes: 0, seconds: 0, message: '' });
   const { status, setStatus, initiatedAt } = useContext(RecoveryAttemptContext);
 
   useEffect(() => {
@@ -121,15 +102,10 @@ const RecoveryTimer: React.FC = () => {
       setTimeRemaining(remainingTime);
 
       if (remainingTime.hours === 0 && remainingTime.minutes === 0 && remainingTime.seconds === 0) {
-        switch (status) {
-          case RecoveryStatus.INITIATED:
-            setStatus(RecoveryStatus.READY);
-            break;
-          case RecoveryStatus.READY:
-            setStatus(RecoveryStatus.EXPIRED);
-            break;
-          default:
-            return;
+        if (status === RecoveryStatus.INITIATED) {
+          setStatus(RecoveryStatus.READY);
+        } else if (status === RecoveryStatus.READY) {
+          setStatus(RecoveryStatus.EXPIRED);
         }
       }
     };

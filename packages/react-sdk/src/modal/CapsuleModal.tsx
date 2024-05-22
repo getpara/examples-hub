@@ -22,6 +22,7 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
       appName,
       logo,
       disableEmailLogin = false,
+      disablePhoneLogin = false,
       oAuthMethods,
       bareModal = false,
       className,
@@ -158,8 +159,8 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
       return null;
     }
 
-    if (disableEmailLogin && !oAuthMethods?.length) {
-      console.error('At least one OAuth method must be provided if email login is disabled.');
+    if (disableEmailLogin && disablePhoneLogin && !oAuthMethods?.length) {
+      console.error('At least one OAuth method must be provided if email and phone login are disabled.');
       return null;
     }
 
@@ -181,6 +182,7 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
             hasFinishedAnimation={hasFinishedAnimation}
             oAuthMethods={oAuthMethods}
             disableEmailLogin={disableEmailLogin}
+            disablePhoneLogin={disablePhoneLogin}
             setModalExpanded={setModalExpanded}
             onClose={onClose}
             {...rest}

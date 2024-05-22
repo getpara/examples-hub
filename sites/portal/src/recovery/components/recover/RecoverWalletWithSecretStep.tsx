@@ -8,6 +8,8 @@ import { ModalStep } from '../../steps/recoverySteps';
 import UserContext from '../../contexts/UserContext';
 import WalletContext from '../../contexts/WalletContext';
 import VerifyCode from '../../../assets/verifyCode';
+import { RecoveryAttemptContext, RecoveryType } from '../../contexts/RecoveryAttemptContext';
+import PhoneContext from '../../contexts/PhoneContext';
 
 async function recoverUserShare(userId: string, walletId: string, serializedRecoveryShare: string): Promise<string> {
   const recoveryPrivateKeyContainer = KeyContainer.buildFrom(serializedRecoveryShare);
@@ -26,6 +28,8 @@ const RecoverWalletWithSecretStep: React.FC<RecoverWalletWithSecretStepProps> = 
   setUserShare,
 }) => {
   const { setCurrentRecoveryStep } = useContext(RecoveryStepContext);
+  const { type } = useContext(RecoveryAttemptContext);
+  const { phone, countryCode } = useContext(PhoneContext);
   const { email } = useContext(EmailContext);
   const { id: walletId } = useContext(WalletContext);
   const { id: userId } = useContext(UserContext);
@@ -89,8 +93,14 @@ const RecoverWalletWithSecretStep: React.FC<RecoverWalletWithSecretStepProps> = 
             setUserShare(userShare);
             setIncorrectCode(false);
             await capsule.setEmail(email);
+            await capsule.setPhoneNumber(phone, countryCode);
             await capsule.setUserId(userId);
-            const link = await capsule.getSetUpBiometricsURL(false);
+            let link;
+            if (type === RecoveryType.PHONE) {
+              link = await capsule.getSetUpBiometricsURLForPhone(false);
+            } else {
+              link = await capsule.getSetUpBiometricsURL(false);
+            }
             setWebAuthURLForCreate(link);
             setCurrentRecoveryStep(ModalStep.BIOMETRIC);
           } catch (error) {

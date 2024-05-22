@@ -8,4 +8,10 @@ export const getActions = (set: StoreApi<UserInfoStore>['setState']): UserInfoAc
   setEmail: (email) => {
     set({ email });
   },
+  setPhone: (phone) => {
+    set({ phone });
+  },
+  setCountryCode: (countryCode) => {
+    set({ countryCode });
+  },
 });

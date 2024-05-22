@@ -18,6 +18,7 @@ import * as transmissionUtils from './transmission/transmissionUtils.js';
 import { PlatformUtils } from './PlatformUtils.js';
 import { Theme } from './types/theme.js';
 import { sendRecoveryForShare } from './shares/recovery.js';
+import { CountryCallingCode } from 'libphonenumber-js';
 
 // amount of time in ms that a web auth session lasts
 const BIOMETRIC_VERIFICATION_TIME_MS = 30 * 60 * 1000;
@@ -77,6 +78,8 @@ export interface ConstructorOpts {
 
 export const PREFIX = '@CAPSULE/';
 const LOCAL_STORAGE_EMAIL = `${PREFIX}e-mail`;
+const LOCAL_STORAGE_PHONE = `${PREFIX}phone`;
+const LOCAL_STORAGE_COUNTRY_CODE = `${PREFIX}countryCode`;
 const LOCAL_STORAGE_USER_ID = `${PREFIX}userId`;
 const LOCAL_STORAGE_WALLETS = `${PREFIX}wallets`;
 const LOCAL_STORAGE_SESSION_COOKIE = `${PREFIX}sessionCookie`;
@@ -95,6 +98,8 @@ export abstract class CoreCapsule {
   ctx: Ctx;
 
   private email?: string;
+  private phone?: string;
+  private countryCode?: CountryCallingCode;
   private userId?: string;
   private wallets?: Record<string, Wallet>;
   private sessionCookie?: string;
@@ -380,6 +385,18 @@ export abstract class CoreCapsule {
   }
 
   /**
+   * Sets the phone number associated with the `CoreCapsule` instance.
+   * @param phone - Phone number to set.
+   * @param countryCode - Country Code to set.
+   */
+  async setPhoneNumber(phone: string, countryCode: CountryCallingCode): Promise<void> {
+    this.phone = phone;
+    this.countryCode = countryCode;
+    await this.localStorageSetItem(LOCAL_STORAGE_PHONE, phone);
+    await this.localStorageSetItem(LOCAL_STORAGE_COUNTRY_CODE, countryCode);
+  }
+
+  /**
    * Sets the user id associated with the `CoreCapsule` instance.
    * @param userId - User id to set.
    */
@@ -487,6 +504,40 @@ export abstract class CoreCapsule {
     )}${partnerIdQueryParam}${portalBorderRadiusQueryParam}${portalForegroundColorQueryParam}${portalBackgroundColorQueryParam}${portalPrimaryButtonColorQueryParam}${portalTextColorQueryParam}${isForNewDeviceQueryParam}${portalPrimaryButtonTextColorQueryParam}`;
   }
 
+  private async getWebAuthURLForCreateForPhone(
+    webAuthId: string,
+    partnerId?: string,
+    isForNewDevice?: boolean,
+  ): Promise<string> {
+    const partnerIdQueryParam = partnerId ? `&partnerId=${partnerId}` : '';
+    const portalBorderRadiusQueryParam = this.portalTheme?.borderRadius
+      ? `&portalBorderRadius=${encodeURIComponent(this.portalTheme.borderRadius)}`
+      : '';
+    const portalForegroundColorQueryParam = this.portalTheme?.foregroundColor
+      ? `&portalForegroundColor=${encodeURIComponent(this.portalTheme.foregroundColor)}`
+      : '';
+    const portalBackgroundColorQueryParam =
+      this.portalBackgroundColor || this.portalTheme?.backgroundColor
+        ? `&portalBackgroundColor=${encodeURIComponent(this.portalBackgroundColor ?? this.portalTheme.backgroundColor)}`
+        : '';
+    const portalPrimaryButtonColorQueryParam = this.portalPrimaryButtonColor
+      ? `&portalPrimaryButtonColor=${encodeURIComponent(this.portalPrimaryButtonColor)}`
+      : '';
+    const portalTextColorQueryParam = this.portalTextColor
+      ? `&portalTextColor=${encodeURIComponent(this.portalTextColor)}`
+      : '';
+    const portalPrimaryButtonTextColorQueryParam = this.portalPrimaryButtonTextColor
+      ? `&portalPrimaryButtonTextColor=${encodeURIComponent(this.portalPrimaryButtonTextColor)}`
+      : '';
+    const isForNewDeviceQueryParam = isForNewDevice ? `&isForNewDevice=${isForNewDevice}` : '';
+
+    return `${(partnerId && (await this.getPartnerURL(partnerId))) || getPortalBaseURL(this.ctx)}/web/users/${
+      this.userId
+    }/biometrics/${webAuthId}?phone=${encodeURIComponent(
+      this.phone,
+    )}&countryCode=${encodeURIComponent(this.countryCode)}${portalBorderRadiusQueryParam}${portalForegroundColorQueryParam}${partnerIdQueryParam}${portalBackgroundColorQueryParam}${portalPrimaryButtonColorQueryParam}${portalTextColorQueryParam}${isForNewDeviceQueryParam}${portalPrimaryButtonTextColorQueryParam}`;
+  }
+
   private getShortUrl(compressedUrl: string): string {
     return `${getPortalBaseURL(this.ctx)}/short/${compressedUrl}`;
   }
@@ -541,6 +592,53 @@ export abstract class CoreCapsule {
     return `${(partnerId && (await this.getPartnerURL(partnerId))) || getPortalBaseURL(this.ctx)}/web/biometrics/login?email=${encodeURIComponent(
       this.email,
     )}&sessionId=${sessionId}&encryptionKey=${loginEncryptionPublicKey}${partnerIdQueryParam}${portalBackgroundColorQueryParam}${portalPrimaryButtonColorQueryParam}${portalTextColorQueryParam}${newDeviceSessionIdQueryParam}${portalBorderRadiusQueryParam}${portalForegroundColorQueryParam}${newDeviceEncryptionKeyQueryParam}${portalPrimaryButtonTextColorQueryParam}`;
+  }
+
+  /**
+   * Generates a URL that can be used to perform web auth for phone number
+   * for creating a new credential.
+   * @param sessionId - id of the session to use for web auth
+   * @param loginEncryptionPublicKey - public key to use for encrypting the login encryption key
+   * @param partnerId - id of the partner to get the portal URL for
+   * @param newDeviceSessionId - id of the session to use for web auth for a new device
+   * @param newDeviceEncryptionKey - public key to use for encrypting the login encryption key for a new device
+   * @returns - web auth url
+   */
+  async getWebAuthURLForLoginForPhone(
+    sessionId: string,
+    loginEncryptionPublicKey: string,
+    partnerId?: string,
+    newDeviceSessionId?: string,
+    newDeviceEncryptionKey?: string,
+  ): Promise<string> {
+    const partnerIdQueryParam = partnerId ? `&partnerId=${partnerId}` : '';
+    const portalBorderRadiusQueryParam = this.portalTheme?.borderRadius
+      ? `&portalBorderRadius=${encodeURIComponent(this.portalTheme.borderRadius)}`
+      : '';
+    const portalForegroundColorQueryParam = this.portalTheme?.foregroundColor
+      ? `&portalForegroundColor=${encodeURIComponent(this.portalTheme.foregroundColor)}`
+      : '';
+    const portalBackgroundColorQueryParam =
+      this.portalBackgroundColor || this.portalTheme?.backgroundColor
+        ? `&portalBackgroundColor=${encodeURIComponent(this.portalBackgroundColor ?? this.portalTheme.backgroundColor)}`
+        : '';
+    const portalPrimaryButtonColorQueryParam = this.portalPrimaryButtonColor
+      ? `&portalPrimaryButtonColor=${encodeURIComponent(this.portalPrimaryButtonColor)}`
+      : '';
+    const portalTextColorQueryParam = this.portalTextColor
+      ? `&portalTextColor=${encodeURIComponent(this.portalTextColor)}`
+      : '';
+    const portalPrimaryButtonTextColorQueryParam = this.portalPrimaryButtonTextColor
+      ? `&portalPrimaryButtonTextColor=${encodeURIComponent(this.portalPrimaryButtonTextColor)}`
+      : '';
+    const newDeviceSessionIdQueryParam = newDeviceSessionId ? `&newDeviceSessionId=${newDeviceSessionId}` : '';
+    const newDeviceEncryptionKeyQueryParam = newDeviceEncryptionKey
+      ? `&newDeviceEncryptionKey=${newDeviceEncryptionKey}`
+      : '';
+
+    return `${(partnerId && (await this.getPartnerURL(partnerId))) || getPortalBaseURL(this.ctx)}/web/biometrics/login?phone=${encodeURIComponent(
+      this.phone,
+    )}&countryCode=${encodeURIComponent(this.countryCode)}&sessionId=${sessionId}&encryptionKey=${loginEncryptionPublicKey}${partnerIdQueryParam}${portalBorderRadiusQueryParam}${portalForegroundColorQueryParam}${portalBackgroundColorQueryParam}${portalPrimaryButtonColorQueryParam}${portalTextColorQueryParam}${newDeviceSessionIdQueryParam}${newDeviceEncryptionKeyQueryParam}${portalPrimaryButtonTextColorQueryParam}`;
   }
 
   /**
@@ -632,7 +730,16 @@ export abstract class CoreCapsule {
    * @returns - true if user exists, false otherwise.
    */
   async checkIfUserExists(email: string): Promise<boolean> {
-    const res = await this.ctx.capsuleClient.checkUserExists(email);
+    const res = await this.ctx.capsuleClient.checkUserExists(email, null, null);
+    return res.data.exists;
+  }
+
+  /**
+   * Checks if a user exists by their phone number.
+   * @returns - true if user exists, false otherwise.
+   */
+  async checkIfUserExistsByPhone(phone: string, countryCode: CountryCallingCode): Promise<boolean> {
+    const res = await this.ctx.capsuleClient.checkUserExists(null, phone, countryCode);
     return res.data.exists;
   }
 
@@ -652,6 +759,22 @@ export abstract class CoreCapsule {
   }
 
   /**
+   * Creates a new user with a phone number.
+   * @param phone - phone number to use for creating the user.
+   * @param countryCode - country code to use for creating the user.
+   */
+  async createUserByPhone(phone: string, countryCode: CountryCallingCode): Promise<void> {
+    this.requireApiKey();
+    await this.setPhoneNumber(phone, countryCode);
+    await this.setWallets({});
+    const { userId } = await this.ctx.capsuleClient.createUser({
+      phone: this.phone,
+      countryCode: this.countryCode,
+    });
+    await this.setUserId(userId);
+  }
+
+  /**
    * Passes the email code obtained from the user for verification.
    * @param verificationCode
    * @returns - web auth url for creating a new credential
@@ -659,6 +782,16 @@ export abstract class CoreCapsule {
   async verifyEmail(verificationCode: string): Promise<string> {
     await this.ctx.capsuleClient.verifyEmail(this.userId, { verificationCode });
     return this.getSetUpBiometricsURL(false);
+  }
+
+  /**
+   * Passes the phone code obtained from the user for verification.
+   * @param verificationCode
+   * @returns - web auth url for creating a new credential
+   */
+  async verifyPhone(verificationCode: string): Promise<string> {
+    await this.ctx.capsuleClient.verifyPhone(this.userId, { verificationCode });
+    return this.getSetUpBiometricsURLForPhone(false);
   }
 
   /**
@@ -678,6 +811,33 @@ export abstract class CoreCapsule {
     walletId: string;
   }> {
     const res = await this.ctx.capsuleClient.verify2FA(email, verificationCode);
+    return {
+      address: res.data.address,
+      initiatedAt: res.data.initiatedAt,
+      status: res.data.status,
+      userId: res.data.userId,
+      walletId: res.data.walletId,
+    };
+  }
+
+  /**
+   * Performs 2FA verification.
+   * @param phone - phone to use for performing a 2FA verification.
+   * @param verificationCode - verification code to received via 2FA.
+   * @returns { address, initiatedAt, status, userId, walletId }
+   */
+  async verify2FAForPhone(
+    phone: string,
+    countryCode: CountryCallingCode,
+    verificationCode: string,
+  ): Promise<{
+    address?: string;
+    initiatedAt?: Date;
+    status?: RecoveryStatus;
+    userId: string;
+    walletId: string;
+  }> {
+    const res = await this.ctx.capsuleClient.verify2FAForPhone(phone, countryCode, verificationCode);
     return {
       address: res.data.address,
       initiatedAt: res.data.initiatedAt,
@@ -731,6 +891,12 @@ export abstract class CoreCapsule {
     });
   }
 
+  async resendVerificationCodeByPhone(): Promise<void> {
+    await this.ctx.capsuleClient.resendVerificationCodeByPhone({
+      userId: this.userId,
+    });
+  }
+
   // returns web auth url for creating a new credential
   async getSetUpBiometricsURL(isForNewDevice: boolean): Promise<string> {
     const res = await this.ctx.capsuleClient.addSessionPublicKey(this.userId, {
@@ -739,6 +905,16 @@ export abstract class CoreCapsule {
     });
 
     return this.getWebAuthURLForCreate(res.data.id, res.data.partnerId, isForNewDevice);
+  }
+
+  // returns web auth url for creating a new credential
+  async getSetUpBiometricsURLForPhone(isForNewDevice: boolean): Promise<string> {
+    const res = await this.ctx.capsuleClient.addSessionPublicKey(this.userId, {
+      status: PublicKeyStatus.PENDING,
+      type: PublicKeyType.WEB,
+    });
+
+    return this.getWebAuthURLForCreateForPhone(res.data.id, res.data.partnerId, isForNewDevice);
   }
 
   // TODO: consider changing this to just hit a new endpoint that returns
@@ -775,6 +951,33 @@ export abstract class CoreCapsule {
     }
 
     const webAuthLoginURL = await this.getWebAuthURLForLogin(
+      res.data.sessionId,
+      getPublicKeyHex(this.loginEncryptionKeyPair),
+      res.data.partnerId,
+    );
+    if (!useShortURL) {
+      return webAuthLoginURL;
+    }
+
+    return this.shortenLoginLink(webAuthLoginURL);
+  }
+
+  /**
+   * Initiates a login.
+   * @param phone - the phone number to login with
+   * @param countryCode
+   * @param useShortURL - whether to shorten the link
+   * @returns - web auth url for logging in
+   **/
+  async initiateUserLoginForPhone(phone: string, countryCode: CountryCallingCode, useShortURL?: boolean): Promise<string> {
+    await this.setPhoneNumber(phone, countryCode);
+    const res = await this.ctx.capsuleClient.touchSession(true);
+    if (!this.loginEncryptionKeyPair) {
+      const keyPair = await getAsymmetricKeyPair(this.ctx);
+      await this.setLoginEncryptionKeyPair(keyPair);
+    }
+
+    const webAuthLoginURL = await this.getWebAuthURLForLoginForPhone(
       res.data.sessionId,
       getPublicKeyHex(this.loginEncryptionKeyPair),
       res.data.partnerId,

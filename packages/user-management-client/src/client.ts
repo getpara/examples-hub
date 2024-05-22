@@ -47,12 +47,17 @@ export interface createUserBody {
   email: string;
 }
 
+export interface createUserBodyForPhone {
+  phone: string;
+  countryCode: string;
+}
+
 export interface createUserIdRes {
   protocolId: string;
   userId: string;
 }
 
-export interface verifyEmailBody {
+export interface verifyBody {
   verificationCode: string;
 }
 
@@ -98,6 +103,8 @@ interface MobileSignature {
 
 interface verifyWebChallengeBody {
   email?: string;
+  phone?: string;
+  countryCode?: string;
   sessionLookupId?: string;
   signature: WebSignature;
   publicKey?: string;
@@ -277,19 +284,28 @@ class Client {
     }
   }
 
-  createUser = async (body: createUserBody & VerificationEmailProps): Promise<createUserIdRes> => {
+  createUser = async (
+    body: (createUserBody | createUserBodyForPhone) & VerificationEmailProps,
+  ): Promise<createUserIdRes> => {
     const res = await this.baseRequest.post<createUserIdRes>(`/users`, body);
     return res.data;
   };
 
-  checkUserExists = async (email: string): Promise<any> => {
-    const res = await this.baseRequest.get<any>(`/users/exists?email=${encodeURIComponent(email)}`);
+  checkUserExists = async (email: string, phone: string, countryCode: string): Promise<any> => {
+    const res = await this.baseRequest.get<any>(
+      `/users/exists?email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}&countryCode=${encodeURIComponent(countryCode)}`,
+    );
     return res;
   };
 
   // POST /users/:userId/verify-email
-  verifyEmail = async (userId: string, body: verifyEmailBody): Promise<any> => {
+  verifyEmail = async (userId: string, body: verifyBody): Promise<any> => {
     const res = await this.baseRequest.post<any>(`/users/${userId}/verify-email`, body);
+    return res;
+  };
+
+  verifyPhone = async (userId: string, body: verifyBody): Promise<any> => {
+    const res = await this.baseRequest.post<any>(`/users/${userId}/verify-identifier`, body);
     return res;
   };
 
@@ -327,10 +343,21 @@ class Client {
   };
 
   // GET /biometrics/challenge?email&publicKey
-  getWebChallenge = async (email?: string, publicKey?: string): Promise<getWebChallengeRes> => {
+  getWebChallenge = async (
+    email?: string,
+    phone?: string,
+    countryCode?: string,
+    publicKey?: string,
+  ): Promise<getWebChallengeRes> => {
     const queryParams = {};
     if (email) {
       queryParams['email'] = email;
+    }
+    if (phone) {
+      queryParams['phone'] = phone;
+    }
+    if (countryCode) {
+      queryParams['countryCode'] = countryCode;
     }
     if (publicKey) {
       queryParams['publicKey'] = publicKey;
@@ -539,6 +566,12 @@ class Client {
     return res;
   }
 
+  // POST '/users/:userId/resend-verification-code-by-phone
+  async resendVerificationCodeByPhone({ userId, ...rest }: { userId: string } & VerificationEmailProps) {
+    const res = await this.baseRequest.post<any>(`/users/${userId}/resend-verification-code-by-phone`, rest);
+    return res;
+  }
+
   // POST recovery/cancel
   async cancelRecoveryAttempt(email: string) {
     const res = await this.baseRequest.post<any>(`recovery/cancel`, { email });
@@ -569,6 +602,12 @@ class Client {
     return res;
   }
 
+  // POST /recovery/init
+  async initializeRecoveryForPhone(phone: string, countryCode: string) {
+    const res = await this.baseRequest.post<any>(`/recovery/init`, { phone, countryCode });
+    return res;
+  }
+
   // POST /recovery/users/:userId/wallets/:walletId/finish
   async finalizeRecovery(userId: string, walletId: string) {
     const res = await this.baseRequest.post<any>(`/recovery/users/${userId}/wallets/${walletId}/finish`);
@@ -590,9 +629,23 @@ class Client {
     return res;
   }
 
+  // POST /recovery/verify-identifier
+  async verifyPhoneForRecovery(phone: string, countryCode: string, verificationCode: string) {
+    const body = { phone, countryCode, verificationCode };
+    const res = await this.baseRequest.post<any>(`/recovery/verify-identifier`, body);
+    return res;
+  }
+
   // POST /2fa/verify
   async verify2FA(email: string, verificationCode: string) {
     const body = { email, verificationCode };
+    const res = await this.baseRequest.post<any>('/2fa/verify', body);
+    return res;
+  }
+
+  // POST /2fa/phone/verify
+  async verify2FAForPhone(phone: string, countryCode: string, verificationCode: string) {
+    const body = { phone, countryCode, verificationCode };
     const res = await this.baseRequest.post<any>('/2fa/verify', body);
     return res;
   }

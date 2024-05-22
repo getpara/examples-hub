@@ -9,15 +9,29 @@ import { ENV } from '../constants';
 import { EncryptorType, KeyType, PublicKeyStatus } from '@usecapsule/user-management-client';
 import capsule from '../clients/capsule';
 import { userManagementClient } from '../clients/userManagementClient';
+import { CountryCallingCode } from 'libphonenumber-js';
 
 export async function authCreation(
   partnerId: string,
   userId: string,
   email: string,
+  phone: string,
+  countryCode: CountryCallingCode,
   biometricId: string,
   isForNewDevice: boolean,
 ): Promise<void> {
-  const { creds, userHandle, algorithm } = await createCredential(ENV, userId, email);
+  let identifier;
+
+  if (email !== 'null' && email !== undefined && email !== '') {
+    identifier = email;
+  } else if (phone !== 'null' && phone !== undefined && phone !== '') {
+    identifier = `${countryCode}${phone}`;
+  }
+  if (!identifier) {
+    throw new Error('either a phone number or email address must be provided.');
+  }
+
+  const { creds, userHandle, algorithm } = await createCredential(ENV, userId, identifier);
   const { cosePublicKey, clientDataJSON } = parseCredentialCreationRes(creds, algorithm);
   const publicKeyHex = await getPublicKeyFromSignature(capsule.ctx, userHandle);
   await capsule.ctx.capsuleClient.patchSessionPublicKey(partnerId, userId, biometricId, {

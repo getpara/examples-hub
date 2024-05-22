@@ -9,8 +9,10 @@ import Recovery2FAStep from './Recovery2FAStep';
 import RecoveryAwaitingInitiationStep from './RecoveryAwaitingInitiationStep';
 import RecoveryInitiatedDoneStep from './RecoveryInitiatedDoneStep';
 import RecoveryVerificationCodeStep from './RecoveryVerificationCodeStep';
+import RecoveryVerificationCodePhoneStep from './RecoveryVerificationCodePhoneStep';
 import { Footer } from '../Footer/Footer';
 import RecoveryReadyDoneStep from './RecoveryReadyDoneStep';
+import Recovery2FAPhoneStep from './Recovery2FAPhoneStep';
 
 type RecoveryModalProps = {
   isOpen: boolean;
@@ -29,7 +31,9 @@ const RecoveryModal: React.FC<RecoveryModalProps> = ({ isOpen, onClose }) => {
           <VStack alignItems="center" display="flex" flex={1} margin="22px 22px 0px">
             {currentStep === ModalStep.EMAIL_COLLECTION && <RecoveryEmailCollectionStep />}
             {currentStep === ModalStep.VERIFICATION_CODE && <RecoveryVerificationCodeStep onClose={onClose} />}
+            {currentStep === ModalStep.VERIFICATION_CODE_PHONE && <RecoveryVerificationCodePhoneStep onClose={onClose} />}
             {currentStep === ModalStep.VERIFY_2FA && <Recovery2FAStep />}
+            {currentStep === ModalStep.VERIFY_2FA_PHONE && <Recovery2FAPhoneStep />}
             {currentStep === ModalStep.RECOVERY_AWAITING && <RecoveryAwaitingInitiationStep />}
             {currentStep === ModalStep.RECOVERY_INITIATED && <RecoveryInitiatedDoneStep onClose={onClose} />}
             {currentStep === ModalStep.RECOVERY_READY && <RecoveryReadyDoneStep onClose={onClose} />}

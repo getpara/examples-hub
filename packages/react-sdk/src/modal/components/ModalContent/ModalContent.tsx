@@ -32,6 +32,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
       currentStepOverride,
       hasFinishedAnimation,
       disableEmailLogin,
+      disablePhoneLogin,
       onClose,
       loginTransitionOverride,
       createWalletOverride,
@@ -241,6 +242,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
           twoFactorAuthEnabled={twoFactorAuthEnabled}
           recoveryShare={recoveryShare}
           disableEmailLogin={disableEmailLogin}
+          disablePhoneLogin={disablePhoneLogin}
           onClose={handleClose}
         />
         <Footer expandModal={handleExpandModal} />

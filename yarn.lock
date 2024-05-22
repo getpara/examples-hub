@@ -5606,10 +5606,10 @@
   resolved "https://registry.yarnpkg.com/@ungap/structured-clone/-/structured-clone-1.2.0.tgz#756641adb587851b5ccb3e095daf27ae581c8406"
   integrity sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==
 
-"@usecapsule/core-components@^2.0.5":
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/@usecapsule/core-components/-/core-components-2.0.5.tgz#4c358e6d1cafe4c25d60ffa61ecf9006508a6833"
-  integrity sha512-PXWTsDF1tqAV1lR3LqdTZl6lYJQDKwaMyaqMn2rFqSa3o5lESoSzF0bfiTZ/D3UVb/P2CnZRdZLbKSRdNgAlPA==
+"@usecapsule/core-components@^2.0.8":
+  version "2.0.8"
+  resolved "https://registry.yarnpkg.com/@usecapsule/core-components/-/core-components-2.0.8.tgz#d023276ae3b96478f9d0d683f4b51bf787569d89"
+  integrity sha512-pnB4y5uK6zpWjHMQ4ztKmBTeJLdoFTAnNu7D5eAcL+x3hxNKC6JJEYKZCdGXFMb7Y+uIqEgFDf9s9ME9WFP2KQ==
   dependencies:
     "@stencil/core" "^4.7.0"
     color2k "^2.0.3"
@@ -5617,12 +5617,12 @@
     lottie-web "^5.12.2"
     qr-code-styling "^1.6.0-rc.1"
 
-"@usecapsule/react-components@2.0.5":
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/@usecapsule/react-components/-/react-components-2.0.5.tgz#1afd31c635cb07b2c5795533e56b4b181750bfef"
-  integrity sha512-wGDSu6fGvyNmF12uRcF4PrYV1WYOwvWz15VM0fV/Q8Wx6AySJqdrRHJuglYc3LNgtwaTHcNc5nltw7jzqxiIbA==
+"@usecapsule/react-components@^2.0.8":
+  version "2.0.8"
+  resolved "https://registry.yarnpkg.com/@usecapsule/react-components/-/react-components-2.0.8.tgz#238d4a16993a5b1d38c7a07c559398c95e57e8ef"
+  integrity sha512-aNFTI3+1aWUx8Rb13WyPSSOEelGeCfrojBhEHsC1Zfj6CVDzE0H/uuv6yowH9Z4+mp+MHM9DoWHmBI0j5MGl0Q==
   dependencies:
-    "@usecapsule/core-components" "^2.0.5"
+    "@usecapsule/core-components" "^2.0.8"
 
 "@wagmi/chains@1.6.0":
   version "1.6.0"
@@ -13738,6 +13738,11 @@ libnpmpublish@7.3.0:
     semver "^7.3.7"
     sigstore "^1.4.0"
     ssri "^10.0.1"
+
+libphonenumber-js@^1.11.1:
+  version "1.11.1"
+  resolved "https://registry.yarnpkg.com/libphonenumber-js/-/libphonenumber-js-1.11.1.tgz#2596683e1876bfee74082bb49339fe0a85ae34f9"
+  integrity sha512-Wze1LPwcnzvcKGcRHFGFECTaLzxOtujwpf924difr5zniyYv1C2PiW0419qDR7m8lKDxsImu5mwxFuXhXpjmvw==
 
 libsodium-sumo@^0.7.13:
   version "0.7.13"

@@ -1,27 +1,54 @@
 import { encryptWithDerivedPublicKey, generateSignature, getDerivedPrivateKeyAndDecrypt } from '@usecapsule/web-sdk';
 import { ENV } from '../constants';
 import capsule from '../clients/capsule';
+import { CountryCallingCode } from 'libphonenumber-js';
 
 export async function authLogin(
   partnerId: string,
   email: string,
+  phone: string,
+  countryCode: CountryCallingCode,
   sessionLookupId: string,
   encryptionKey: string,
   newDeviceSessionLookupId?: string,
   newDeviceEncryptionKey?: string,
 ): Promise<string> {
-  const data = await capsule.ctx.capsuleClient.getWebChallenge(encodeURIComponent(email));
+  let identifier;
+  let data;
+
+  if (email !== 'null' && email !== undefined && email !== '') {
+    identifier = email;
+    data = await capsule.ctx.capsuleClient.getWebChallenge(encodeURIComponent(email));
+  } else if (phone !== 'null' && phone !== undefined && phone !== '') {
+    identifier = `${countryCode}${phone}`;
+    data = await capsule.ctx.capsuleClient.getWebChallenge(null, encodeURIComponent(phone), encodeURIComponent(countryCode));
+  }
+  if (!identifier) {
+    throw new Error('either a phone number or email address must be provided.');
+  }
   const sig = await generateSignature(ENV, data.challenge, data.allowedPublicKeys);
   const userHandle = sig.response.userHandle;
   delete sig.response.userHandle;
 
-  const verifyRes = await capsule.ctx.capsuleClient.verifyWebChallenge(partnerId, {
-    signature: sig.response,
-    publicKey: sig.id,
-    email,
-    sessionLookupId,
-    newDeviceSessionLookupId,
-  });
+  let verifyRes = undefined;
+  if (email !== 'null' && email !== undefined && email !== '') {
+    verifyRes = await capsule.ctx.capsuleClient.verifyWebChallenge(partnerId, {
+      signature: sig.response,
+      publicKey: sig.id,
+      email: email,
+      sessionLookupId,
+      newDeviceSessionLookupId,
+    });
+  } else if (phone !== 'null' && phone !== undefined && phone !== '') {
+    verifyRes = await capsule.ctx.capsuleClient.verifyWebChallenge(partnerId, {
+      signature: sig.response,
+      publicKey: sig.id,
+      phone: phone,
+      countryCode: countryCode,
+      sessionLookupId,
+      newDeviceSessionLookupId,
+    });
+  }
   const userId = verifyRes.data.userId;
 
   const encryptedSharesRes = await capsule.ctx.capsuleClient.getBiometricKeyshares(userId, sig.id);
