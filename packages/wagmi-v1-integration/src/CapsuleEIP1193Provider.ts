@@ -25,7 +25,9 @@ import { renderModal } from './connectorModal.js';
 const STORAGE_CHAIN_ID_KEY = '@CAPSULE/chainId';
 const TEN_MINUTES_MS = 600000;
 
-interface CapsuleEIP1193ProviderOpts extends Partial<CapsuleModalProps> {
+export type CapsuleModalPropsForInit = Omit<CapsuleModalProps, 'isOpen' | 'capsule'>;
+
+interface CapsuleEIP1193ProviderOpts extends Partial<CapsuleModalPropsForInit> {
   capsule: CapsuleWeb;
   chainId: string; // base-10 chain id number as a string
   chains: Chain[];

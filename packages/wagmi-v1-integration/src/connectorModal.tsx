@@ -1,8 +1,9 @@
 import ReactDOM from 'react-dom';
 
-import CapsuleWeb, { CapsuleModal, CapsuleModalProps } from '@usecapsule/react-sdk';
+import CapsuleWeb, { CapsuleModal } from '@usecapsule/react-sdk';
+import { CapsuleModalPropsForInit } from './CapsuleEIP1193Provider';
 
-export function renderModal(capsule: CapsuleWeb, modalProps: Partial<CapsuleModalProps>, onCloseArg: () => void): void {
+export function renderModal(capsule: CapsuleWeb, modalProps: Partial<CapsuleModalPropsForInit>, onCloseArg: () => void): void {
   const existingContainer = document.getElementById('capsule-modal');
   const container = existingContainer ?? document.createElement('div');
   container.id = 'capsule-modal';
@@ -13,11 +14,12 @@ export function renderModal(capsule: CapsuleWeb, modalProps: Partial<CapsuleModa
 
   const onClose = () => {
     onCloseArg();
+    modalProps.onClose && modalProps.onClose();
     render(false);
   };
 
   const render = async (isOpen: boolean) => {
-    ReactDOM.render(<CapsuleModal onClose={onClose} capsule={capsule} isOpen={isOpen} {...modalProps} />, container);
+    ReactDOM.render(<CapsuleModal {...modalProps} onClose={onClose} capsule={capsule} isOpen={isOpen} />, container);
   };
 
   render(true);
