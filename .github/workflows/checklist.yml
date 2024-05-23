@@ -1,0 +1,33 @@
+name: Checklist Completion Check
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-checklist:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get PR description
+        id: get-pr-description
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const { data } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            return data.body;
+
+      - name: Check checklist completion
+        run: |
+          description=${{ steps.get-pr-description.outputs.result }}
+          if echo "${description}" | grep -q "\-\ \[\ \]"; then
+            echo "Not all checklist items are checked."
+            exit 1
+          else
+            echo "All checklist items are checked."
+          fi
