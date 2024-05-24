@@ -3,7 +3,11 @@ import ReactDOM from 'react-dom';
 import CapsuleWeb, { CapsuleModal } from '@usecapsule/react-sdk';
 import { CapsuleModalPropsForInit } from './CapsuleEIP1193Provider';
 
-export function renderModal(capsule: CapsuleWeb, modalProps: Partial<CapsuleModalPropsForInit>, onCloseArg: () => void): void {
+export function renderModal(
+  capsule: CapsuleWeb,
+  modalProps: Partial<CapsuleModalPropsForInit>,
+  onCloseArg: () => void,
+): void {
   const existingContainer = document.getElementById('capsule-modal');
   const container = existingContainer ?? document.createElement('div');
   container.id = 'capsule-modal';

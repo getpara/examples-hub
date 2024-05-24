@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { CpslButton, CpslDivider, CpslDropdown, CpslIcon, CpslInput } from '@usecapsule/react-components';
 import {
   CpslDropdownCustomEvent,
@@ -155,21 +155,21 @@ export const SignUpStep = ({ oAuthMethods, disableEmailLogin, disablePhoneLogin 
     }
   };
 
-  return (
-    <>
-      {!showAllOAuth &&
-        (logo ? (
-          <Logo src={logo} alt={`${appName ? `${appName} -` : ''}logo`} />
-        ) : (
-          <LogoSvg>{isDark ? <CapsuleWhite /> : <CapsuleBlack />}</LogoSvg>
-        ))}
-      {!!oAuthMethods?.length && (
+  const methodsToShow = (): ReactNode[] => {
+    const methods = [];
+    if (!!oAuthMethods?.length) {
+      methods.push(
         <>
           <OAuth methods={oAuthMethods} />
-          {!disableEmailLogin && <CpslDivider>or</CpslDivider>}
-        </>
-      )}
-      {!disableEmailLogin && (
+        </>,
+      );
+    }
+
+    if (!disableEmailLogin) {
+      if (methods.length > 0) {
+        methods.push(<CpslDivider>or</CpslDivider>);
+      }
+      methods.push(
         <CpslInput
           placeholder="Enter your email"
           onCpslInput={handleEmailInput}
@@ -182,9 +182,15 @@ export const SignUpStep = ({ oAuthMethods, disableEmailLogin, disablePhoneLogin 
           <CpslButton slot="end" onClick={handleSubmitEmail}>
             <CpslIcon icon="arrow" />
           </CpslButton>
-        </CpslInput>
-      )}
-      {!disablePhoneLogin && (
+        </CpslInput>,
+      );
+    }
+
+    if (!disablePhoneLogin) {
+      if (methods.length > 0) {
+        methods.push(<CpslDivider>or</CpslDivider>);
+      }
+      methods.push(
         <CpslInput
           placeholder="Enter phone number"
           inputMode="tel"
@@ -204,8 +210,22 @@ export const SignUpStep = ({ oAuthMethods, disableEmailLogin, disablePhoneLogin 
           <CpslButton slot="end" onClick={handleSubmitPhone}>
             <CpslIcon icon="arrow" />
           </CpslButton>
-        </CpslInput>
-      )}
+        </CpslInput>,
+      );
+    }
+
+    return methods;
+  };
+
+  return (
+    <>
+      {!showAllOAuth &&
+        (logo ? (
+          <Logo src={logo} alt={`${appName ? `${appName} -` : ''}logo`} />
+        ) : (
+          <LogoSvg>{isDark ? <CapsuleWhite /> : <CapsuleBlack />}</LogoSvg>
+        ))}
+      {methodsToShow()}
     </>
   );
 };
