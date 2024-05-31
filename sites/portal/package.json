@@ -1,6 +1,6 @@
 {
   "name": "capsule-portal",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "main": "src/index.tsx",
   "private": true,
   "dependencies": {
@@ -8,8 +8,8 @@
     "@chakra-ui/react": "^2.8.2",
     "@chakra-ui/system": "^2.6.2",
     "@usecapsule/react-components": "^2.0.9",
-    "@usecapsule/user-management-client": "1.7.0",
-    "@usecapsule/web-sdk": "1.12.0",
+    "@usecapsule/user-management-client": "1.8.0",
+    "@usecapsule/web-sdk": "1.13.0",
     "libphonenumber-js": "^1.11.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
