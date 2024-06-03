@@ -24,6 +24,7 @@ import Capsule from '@usecapsule/web-sdk';
 import { capsuleConnector } from '@usecapsule/wagmi-v2-integration';
 import CoreCapsule, { Environment, ConstructorOpts } from '@usecapsule/core-sdk';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import '@usecapsule/react-sdk/styles.css';
 
 const queryClient = new QueryClient();
 

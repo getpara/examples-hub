@@ -66,12 +66,14 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
   private disableModal: boolean;
   private storage: Pick<Storage, 'setItem' | 'getItem'>;
   private modalProps: Partial<CapsuleModalProps>;
+  private isModalClosed: boolean;
 
   constructor(opts: CapsuleEIP1193ProviderOpts) {
     super();
 
     this.storage = opts.storageOverride || typeof window === 'undefined' ? serverSessionStorageStub : sessionStorage;
 
+    this.isModalClosed = true;
     this.capsule = opts.capsule;
     this.modalProps = { ...opts };
     this.disableModal = !!opts.disableModal;
@@ -152,6 +154,10 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
     this.emit('chainChanged', this.currentHexChainId);
   };
 
+  closeModal = () => {
+    this.isModalClosed = true;
+  };
+
   request: EIP1193RequestFn<EIP1474Methods> = async (args): Promise<any> => {
     const { method, params } = args;
 
@@ -167,9 +173,9 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
           return Object.values(this.capsule.getWallets()).map((w) => w.address);
         }
 
-        let isClosed = false;
+        this.isModalClosed = false;
         const onClose = () => {
-          isClosed = true;
+          this.isModalClosed = true;
         };
 
         if (!this.disableModal) {
@@ -185,7 +191,7 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
             this.emit('accountsChanged', addresses);
             return addresses;
           }
-          if (isClosed) {
+          if (this.isModalClosed) {
             throw new ProviderRpcError(new Error('user closed modal'), {
               code: 4001,
               shortMessage: 'user closed modal',

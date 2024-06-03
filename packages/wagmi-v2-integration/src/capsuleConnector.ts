@@ -34,18 +34,20 @@ export const capsuleConnector = ({
   ...modalProps
 }: CapsuleConnectorOpts) => {
   return createConnector((config) => {
+    const eip1193Provider = new CapsuleEIP1193Provider({
+      capsule,
+      chainId: `${chains[0].id}`,
+      chains,
+      disableModal,
+      storageOverride,
+      ...modalProps,
+    });
+
     const injectedObj = injected({
       target: {
         name: CAPSULE_NAME,
         id: idOverride ?? CAPSULE_ID,
-        provider: new CapsuleEIP1193Provider({
-          capsule,
-          chainId: `${chains[0].id}`,
-          chains,
-          disableModal,
-          storageOverride,
-          ...modalProps,
-        }),
+        provider: eip1193Provider,
       },
       ...options,
     })(config);
@@ -56,6 +58,7 @@ export const capsuleConnector = ({
       name: nameOverride ?? CAPSULE_NAME,
       icon: iconOverride ?? CAPSULE_ICON,
       disconnect: async () => {
+        eip1193Provider.closeModal();
         await injectedObj.disconnect();
         capsule.logout();
       },
