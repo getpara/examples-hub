@@ -1,13 +1,13 @@
 {
   "name": "@usecapsule/ethers-v5-integration",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/types/index.d.ts",
   "typings": "dist/types/index.d.ts",
   "sideEffects": false,
   "dependencies": {
-    "@usecapsule/core-sdk": "1.11.1",
+    "@usecapsule/core-sdk": "1.11.2",
     "ethers": "5.7.2"
   },
   "scripts": {
