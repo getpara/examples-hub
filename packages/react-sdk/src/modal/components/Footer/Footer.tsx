@@ -1,7 +1,7 @@
 import { styled } from 'styled-components';
 import { CpslButton, CpslIcon } from '@usecapsule/react-components';
 import { ButtonWithIconContainer, Heading, SecondaryText } from '../common.js';
-import { CAPSULE_CONNECT } from '../../constants/contants.js';
+import { CAPSULE_CONNECT } from '../../constants/constants.js';
 import { useThemeStore } from '../../stores/index.js';
 
 interface FooterProps {

@@ -2,7 +2,19 @@
 import React, { useEffect, useState } from 'react';
 import { useSessionStorage } from 'react-use';
 import ReactDOM from 'react-dom/client';
-import { Button, ChakraProvider, Container, HStack, Input, Select, Text, VStack } from '@chakra-ui/react';
+import {
+  Button,
+  ChakraProvider,
+  Checkbox,
+  Container,
+  Flex,
+  HStack,
+  IconButton,
+  Input,
+  Select,
+  Text,
+  VStack,
+} from '@chakra-ui/react';
 import { useDebounce } from 'use-debounce';
 import Web3 from 'web3';
 import { http, parseEther } from 'viem';
@@ -27,16 +39,25 @@ import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
 
 import Capsule from '@usecapsule/web-sdk';
-import { OAuthMethod } from '@usecapsule/react-sdk';
+import { CapsuleModal, OAuthMethod, ON_RAMP_PROVIDERS } from '@usecapsule/react-sdk';
 import { FeeMarketEIP1559Transaction } from '@ethereumjs/tx';
-import { CapsuleModal } from '@usecapsule/react-sdk';
 import { CapsuleProtoSigner } from '@usecapsule/cosmjs-v0-integration';
 import { CapsuleEthersSigner } from '@usecapsule/ethers-v6-integration';
 import { createCapsuleViemClient } from '@usecapsule/viem-v1-integration';
 import { CapsuleConnector, CapsuleEIP1193Provider } from '@usecapsule/wagmi-v1-integration';
-import CoreCapsule, { Environment, ConstructorOpts, DeniedSignatureResWithUrl } from '@usecapsule/core-sdk';
+import CoreCapsule, {
+  Environment,
+  ConstructorOpts,
+  DeniedSignatureResWithUrl,
+  OnRampConfig,
+  OnRampAsset,
+  OnRampProvider,
+  getProvider,
+  OnRampProviderAssetMap,
+} from '@usecapsule/core-sdk';
 import { FONT_OPTIONS } from './constants';
 import '@usecapsule/react-sdk/styles.css';
+import { ArrowUpIcon, ArrowDownIcon, SmallCloseIcon, AddIcon } from '@chakra-ui/icons';
 
 // sample transaction params
 const DEFAULT_TO_ADDRESS = '0x42c9a72c9dfcc92cae0de9510160cea2da27af91';
@@ -80,6 +101,12 @@ const DEFAULT_CONTRACT_ABI = [
 ];
 const DEFAULT_SMART_CONTRACT_FUNCTION = 'store';
 const DEFAULT_SMART_CONTRACT_ARGS = ['808'];
+const DEFAULT_RAMP_HOST_API_KEY = '7t45dxm7yhho7fr9u4b9k8nv9gvczansfu8zt9pm';
+const DEFAULT_ONRAMP_CONFIG = {
+  testMode: true,
+  asset: OnRampAsset.ETHEREUM,
+  providers: [{ id: OnRampProvider.STRIPE }, { id: OnRampProvider.RAMP, hostApiKey: DEFAULT_RAMP_HOST_API_KEY }],
+};
 const COSMOS_TESTNET_RPC = 'wss://rpc.sentry-01.theta-testnet.polypore.xyz';
 const COSMOS_DEFAULT_TO_ADDRESS = 'cosmos1f3px9t4juk43cwufj7f9s64z3wj7xvyc0rexg6';
 const web3 = new Web3();
@@ -437,11 +464,14 @@ function App() {
   const [useDKLS, setUseDKLS] = useSessionStorage('@EXAMPLE-CAPSULE/useDKLS', true);
 
   const [logo, setLogo] = useState('');
+  const [useTheme, setUseTheme] = useState(false);
   const [foregroundColor, setForegroundColor] = useState('#FAFAFA');
   const [backgroundColor, setBackgroundColor] = useState('#121212');
   const [borderRadius, setBorderRadius] = useState('sm');
   const [font, setFont] = useState('inter');
   const [logoVariant, setLogoVariant] = useState('branded');
+
+  const [onRampConfig, setOnRampConfig] = useState<OnRampConfig | undefined>(DEFAULT_ONRAMP_CONFIG);
 
   const [pregenEmail, setPregenEmail] = useState('');
   const [pregenUserShare, setPregenUserShare] = useState('');
@@ -600,77 +630,245 @@ function App() {
               </HStack>
               <HStack>
                 <Text width={'15%'}>
-                  <strong>Set Modal Foreground:</strong>
+                  <strong>Custom Theme:</strong>
                 </Text>
-                <Input
-                  placeholder="Modal foreground"
-                  onChange={(e) => {
-                    setForegroundColor(e.target.value);
-                  }}
-                  value={foregroundColor}
+                <Checkbox isChecked={useTheme} onChange={(e) => setUseTheme(e.currentTarget.checked)} />
+              </HStack>
+              <VStack align="left" ml="40px" opacity={useTheme ? 1 : 0.8}>
+                <HStack>
+                  <Text width={'15%'}>
+                    <strong>Set Modal Foreground:</strong>
+                  </Text>
+                  <Input
+                    placeholder="Modal foreground"
+                    disabled={!useTheme}
+                    onChange={(e) => {
+                      setForegroundColor(e.target.value);
+                    }}
+                    value={foregroundColor}
+                  />
+                </HStack>
+                <HStack>
+                  <Text width={'15%'}>
+                    <strong>Set Modal Background:</strong>
+                  </Text>
+                  <Input
+                    placeholder="Modal background"
+                    disabled={!useTheme}
+                    onChange={(e) => {
+                      setBackgroundColor(e.target.value);
+                    }}
+                    value={backgroundColor}
+                  />
+                </HStack>
+                <HStack>
+                  <Text width={'15%'}>
+                    <strong>Select Border Radius:</strong>
+                  </Text>
+                  <Select
+                    disabled={!useTheme}
+                    defaultValue={borderRadius}
+                    onChange={(e) => setBorderRadius(e.target.value as Environment)}
+                  >
+                    <option value="none">None</option>
+                    <option value="xs">XSmall</option>
+                    <option value="sm">Small</option>
+                    <option value="md">Medium</option>
+                    <option value="lg">Large</option>
+                    <option value="full">Full</option>
+                  </Select>
+                </HStack>
+                <HStack>
+                  <Text width={'15%'}>
+                    <strong>Select Font:</strong>
+                  </Text>
+                  <Select disabled={!useTheme} defaultValue={font} onChange={(e) => setFont(e.target.value)}>
+                    {FONT_OPTIONS.map((font) => (
+                      <option value={font}>{font === 'Inter' ? 'Inter (Capsule Default)' : font.replaceAll("'", '')}</option>
+                    ))}
+                  </Select>
+                </HStack>
+                <HStack>
+                  <Text width={'15%'}>
+                    <strong>OAuth Logo Variant:</strong>
+                  </Text>
+                  <Select disabled={!useTheme} defaultValue={logoVariant} onChange={(e) => setLogoVariant(e.target.value)}>
+                    <option value="branded">Branded</option>
+                    <option value="dark">Dark</option>
+                    <option value="light">Light</option>
+                  </Select>
+                </HStack>
+              </VStack>
+              <HStack>
+                <Text width={'15%'}>
+                  <strong>On-Ramp Configuration:</strong>
+                </Text>
+                <Checkbox
+                  isChecked={!!onRampConfig}
+                  onChange={(e) => setOnRampConfig(e.currentTarget.checked ? DEFAULT_ONRAMP_CONFIG : undefined)}
                 />
               </HStack>
-              <HStack>
-                <Text width={'15%'}>
-                  <strong>Set Modal Background:</strong>
-                </Text>
-                <Input
-                  placeholder="Modal background"
-                  onChange={(e) => {
-                    setBackgroundColor(e.target.value);
-                  }}
-                  value={backgroundColor}
-                />
-              </HStack>
-              <HStack>
-                <Text width={'15%'}>
-                  <strong>Select Border Radius:</strong>
-                </Text>
-                <Select defaultValue={borderRadius} onChange={(e) => setBorderRadius(e.target.value as Environment)}>
-                  <option value="none">None</option>
-                  <option value="xs">XSmall</option>
-                  <option value="sm">Small</option>
-                  <option value="md">Medium</option>
-                  <option value="lg">Large</option>
-                  <option value="full">Full</option>
-                </Select>
-              </HStack>
-              <HStack>
-                <Text width={'15%'}>
-                  <strong>Select Font:</strong>
-                </Text>
-                <Select defaultValue={font} onChange={(e) => setFont(e.target.value)}>
-                  {FONT_OPTIONS.map((font) => (
-                    <option value={font}>{font === 'Inter' ? 'Inter (Capsule Default)' : font.replaceAll("'", '')}</option>
-                  ))}
-                </Select>
-              </HStack>
-              <HStack>
-                <Text width={'15%'}>
-                  <strong>OAuth Logo Variant:</strong>
-                </Text>
-                <Select defaultValue={logoVariant} onChange={(e) => setLogoVariant(e.target.value)}>
-                  <option value="branded">Branded</option>
-                  <option value="dark">Dark</option>
-                  <option value="light">Light</option>
-                </Select>
-              </HStack>
+              {!!onRampConfig && (
+                <VStack align="left" ml="40px" opacity={useTheme ? 1 : 0.8}>
+                  <HStack>
+                    <Text width={'15%'}>
+                      <strong>Test Mode:</strong>
+                    </Text>
+                    <Checkbox
+                      isChecked={onRampConfig.testMode}
+                      onChange={(e) => setOnRampConfig((prev) => ({ ...prev, testMode: e.currentTarget.checked }))}
+                    />
+                  </HStack>
+                  <HStack>
+                    <Text width={'15%'}>
+                      <strong>Destination Asset:</strong>
+                    </Text>
+                    <Select
+                      defaultValue={onRampConfig.asset}
+                      onChange={(e) => setOnRampConfig((prev) => ({ ...prev, asset: e.target.value as OnRampAsset }))}
+                    >
+                      <option value={OnRampAsset.ETHEREUM}>Ethereum</option>
+                      <option value={OnRampAsset.USDC}>USDC</option>
+                    </Select>
+                  </HStack>
+                  {onRampConfig?.providers && (
+                    <HStack alignItems="flex-start">
+                      <Text width={'15%'}>
+                        <strong>Providers:</strong>
+                      </Text>
+                      <VStack flexGrow={1} w="100%">
+                        {onRampConfig.providers.map((provider, index) => {
+                          const isRamp = getProvider(provider.id) === OnRampProvider.RAMP;
+
+                          return (
+                            <HStack
+                              w="100%"
+                              flexGrow={1}
+                              borderRadius="lg"
+                              bgColor="lightblue"
+                              bgOpacity="0.5"
+                              py={1}
+                              px={2}
+                            >
+                              <Text width="15%">{ON_RAMP_PROVIDERS[getProvider(provider.id)].name}</Text>
+                              <Flex flexGrow={1}>
+                                {isRamp && (
+                                  <Input
+                                    placeholder="Host API key"
+                                    onChange={(e) => {
+                                      setOnRampConfig((prev) => ({
+                                        ...prev,
+                                        providers: prev.providers.map((p) => ({
+                                          ...p,
+                                          ...(getProvider(p.id) === OnRampProvider.RAMP
+                                            ? { hostApiKey: e.currentTarget.value }
+                                            : {}),
+                                        })),
+                                      }));
+                                    }}
+                                    value={provider.hostApiKey as string}
+                                  />
+                                )}
+                              </Flex>
+                              <HStack>
+                                <IconButton
+                                  isDisabled={index === 0 || onRampConfig.providers.length === 1}
+                                  icon={<ArrowUpIcon />}
+                                  onClick={() => {
+                                    setOnRampConfig((prev) => ({
+                                      ...prev,
+                                      providers: [
+                                        ...prev.providers.slice(0, index - 1),
+                                        prev.providers[index],
+                                        prev.providers[index - 1],
+                                        ...prev.providers.slice(index + 1),
+                                      ],
+                                    }));
+                                  }}
+                                />
+                                <IconButton
+                                  isDisabled={
+                                    index === onRampConfig.providers.length - 1 || onRampConfig.providers.length === 1
+                                  }
+                                  icon={<ArrowDownIcon />}
+                                  onClick={() => {
+                                    setOnRampConfig((prev) => ({
+                                      ...prev,
+                                      providers: [
+                                        ...prev.providers.slice(0, index),
+                                        prev.providers[index + 1],
+                                        prev.providers[index],
+                                        ...prev.providers.slice(index + 2),
+                                      ],
+                                    }));
+                                  }}
+                                />
+                                <IconButton
+                                  isDisabled={onRampConfig.providers.length === 1}
+                                  icon={<SmallCloseIcon />}
+                                  onClick={() => {
+                                    setOnRampConfig((prev) => ({
+                                      ...prev,
+                                      providers: [...prev.providers.slice(0, index), ...prev.providers.slice(index + 1)],
+                                    }));
+                                  }}
+                                />
+                              </HStack>
+                            </HStack>
+                          );
+                        })}
+                        <HStack w="100%" alignItems="flex-start">
+                          {Object.keys(OnRampProviderAssetMap[0]).map((id: OnRampProvider) => {
+                            return onRampConfig.providers.find((p) => p.id === id) ? (
+                              <></>
+                            ) : (
+                              <Button
+                                colorScheme="teal"
+                                variant="ghost"
+                                onClick={() => {
+                                  setOnRampConfig((prev) => ({
+                                    ...prev,
+                                    providers: [
+                                      ...prev.providers,
+                                      {
+                                        id,
+                                        ...(id === OnRampProvider.RAMP ? { hostApiKey: DEFAULT_RAMP_HOST_API_KEY } : {}),
+                                      },
+                                    ],
+                                  }));
+                                }}
+                              >
+                                <AddIcon mr={3} />
+                                {ON_RAMP_PROVIDERS[id].name}
+                              </Button>
+                            );
+                          })}
+                        </HStack>
+                      </VStack>
+                    </HStack>
+                  )}
+                </VStack>
+              )}
               <HStack>
                 <Button
                   colorScheme="green"
-                  onClick={async () => {
-                    if (isSessionActive) {
-                      await capsule.logout();
-                      setIsSessionActive(false);
-                    } else {
-                      setModalIsOpen(true);
-                    }
+                  onClick={() => {
+                    setModalIsOpen(true);
                   }}
                 >
-                  {isSessionActive ? 'Log out' : 'Open Modal'}
+                  Open Modal
                 </Button>
                 {isSessionActive && (
                   <>
+                    <Button
+                      colorScheme="green"
+                      onClick={async () => {
+                        await capsule.logout();
+                        setIsSessionActive(false);
+                      }}
+                    >
+                      Log Out
+                    </Button>
                     <Button colorScheme="red" variant="solid" disabled={deleteButtonDisabled} onClick={handleDeleteClick}>
                       Delete User
                     </Button>
@@ -877,14 +1075,19 @@ function App() {
             OAuthMethod.TWITTER,
             OAuthMethod.DISCORD,
           ]}
+          onRampConfig={onRampConfig}
           twoFactorAuthEnabled
-          theme={{
-            backgroundColor,
-            foregroundColor,
-            borderRadius,
-            font,
-            oAuthLogoVariant: logoVariant,
-          }}
+          theme={
+            useTheme
+              ? {
+                  backgroundColor,
+                  foregroundColor,
+                  borderRadius,
+                  font,
+                  oAuthLogoVariant: logoVariant,
+                }
+              : undefined
+          }
           logo={logo !== '' ? logo : undefined}
         />
       </ChakraProvider>

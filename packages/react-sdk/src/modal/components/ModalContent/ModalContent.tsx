@@ -34,6 +34,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
       disableEmailLogin,
       disablePhoneLogin,
       onClose,
+      onRampConfig,
       loginTransitionOverride,
       createWalletOverride,
       setModalExpanded,
@@ -218,6 +219,15 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
           setCreateWalletRes(null);
           setRecoveryShare(null);
         }, 200);
+      } else if (
+        currentStep === ModalStep.ADD_FUNDS ||
+        currentStep === ModalStep.ADD_FUNDS_AWAITING ||
+        currentStep === ModalStep.ADD_FUNDS_SUCCESS ||
+        currentStep === ModalStep.ADD_FUNDS_FAILURE
+      ) {
+        setTimeout(() => {
+          setStep(ModalStep.LOGIN_DONE);
+        }, 200);
       }
       onClose();
     };
@@ -232,7 +242,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
 
     return (
       <>
-        {currentStep === ModalStep.WALLET_CREATION_DONE && (
+        {[ModalStep.WALLET_CREATION_DONE, ModalStep.ADD_FUNDS_SUCCESS].includes(currentStep) && (
           <CpslAnimation src="https://product-assets.sandbox.usecapsule.com/animations/confetti.json" />
         )}
         <Header onClose={handleClose} condenseModal={handleCondenseModal} />
@@ -244,6 +254,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
           disableEmailLogin={disableEmailLogin}
           disablePhoneLogin={disablePhoneLogin}
           onClose={handleClose}
+          onRampConfig={onRampConfig}
         />
         <Footer expandModal={handleExpandModal} />
       </>

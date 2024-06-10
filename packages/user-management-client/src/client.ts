@@ -209,6 +209,33 @@ export const KeyType = {
   RECOVERY: 'RECOVERY',
 } as const;
 
+enum OnRampProvider {
+  RAMP = 'RAMP',
+  STRIPE = 'STRIPE',
+}
+
+enum OnRampAsset {
+  ETHEREUM = 'ETHEREUM',
+  USDC = 'USDC',
+}
+
+export enum OnRampPurchaseStatus {
+  INITIATED = 'INITIATED',
+  FINISHED = 'FINISHED',
+  CANCELLED = 'CANCELLED',
+}
+export interface OnRampPurchase {
+  id: string;
+  userId: string;
+  status: OnRampPurchaseStatus;
+  provider: OnRampProvider;
+  providerKey: string | null;
+  fiatCurrency: string | null;
+  fiatQuantity: string | null;
+  asset: OnRampAsset;
+  assetQuantity: string;
+}
+
 const SESSION_COOKIE_HEADER_NAME = 'x-capsule-sid';
 
 class Client {
@@ -683,6 +710,37 @@ class Client {
 
   async getPolicyPermissions(userId: string, policyId: string) {
     const res = await this.baseRequest.get<any>(`/users/${userId}/policies/${policyId}/permissions`);
+    return res;
+  }
+
+  async createOnRampPurchase(
+    userId: string,
+    provider: OnRampProvider,
+    asset: OnRampAsset,
+    address: string,
+    testMode = false,
+  ) {
+    const res = await this.baseRequest.post<OnRampPurchase>(`/users/${userId}/purchases`, {
+      userId,
+      provider,
+      asset,
+      address,
+      testMode,
+    });
+    return res;
+  }
+
+  async updateOnRampPurchase(
+    userId: string,
+    purchaseId: string,
+    updates: Partial<Pick<OnRampPurchase, 'status' | 'fiatCurrency' | 'fiatQuantity' | 'providerKey'>>,
+  ) {
+    const res = await this.baseRequest.patch<OnRampPurchase>(`/users/${userId}/purchases/${purchaseId}`, updates);
+    return res;
+  }
+
+  async getOnRampPurchase(userId: string, purchaseId: string) {
+    const res = await this.baseRequest.get<OnRampPurchase>(`/users/${userId}/purchases/${purchaseId}`);
     return res;
   }
 
