@@ -1,5 +1,3 @@
-const webpack = require('webpack');
-
 module.exports = {
   babel: {
     plugins: [
@@ -25,18 +23,11 @@ module.exports = {
         // crypto and stream needed for @celo/utils
         crypto: require.resolve('crypto-browserify'),
         stream: require.resolve('stream-browserify'),
-        vm: require.resolve('vm-browserify'),
         url: false,
         zlib: false,
         https: false,
         http: false,
       };
-      webpackConfig.plugins = [
-        ...webpackConfig.plugins,
-        new webpack.ProvidePlugin({
-          process: 'process/browser',
-        }),
-      ];
 
       return webpackConfig;
     },

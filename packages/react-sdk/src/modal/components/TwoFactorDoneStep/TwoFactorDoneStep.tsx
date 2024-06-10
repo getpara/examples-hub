@@ -1,19 +1,12 @@
 import { CpslButton, CpslIcon } from '@usecapsule/react-components';
-import { Heading, HeroNoSpacing, SecondaryText, ButtonWithIconContainer, AddFundsButton } from '../common.js';
+import { Heading, HeroNoSpacing, SecondaryText, ButtonWithIconContainer } from '../common.js';
 import { styled } from 'styled-components';
-import { useOnClickAddFunds } from '../../hooks/useOnClickAddFunds.js';
-import { useModalStore } from '../../stores/index.js';
-import { validateOnRampConfig } from '../../utils/validateOnRampConfig.js';
 
 interface TwoFactorDoneStepStep {
   onClose: () => void;
 }
 
 export const TwoFactorDoneStep = ({ onClose }: TwoFactorDoneStepStep) => {
-  const onRampConfig = useModalStore((state) => state.onRampConfig);
-  const onClickAddFunds = useOnClickAddFunds(onRampConfig);
-  const isOnRampAvailable = validateOnRampConfig(onRampConfig);
-
   return (
     <>
       <HeroNoSpacing icon="heroWallet" />
@@ -27,7 +20,6 @@ export const TwoFactorDoneStep = ({ onClose }: TwoFactorDoneStepStep) => {
           Done
         </ButtonWithIconContainer>
       </CpslButton>
-      {isOnRampAvailable && <AddFundsButton onClick={onClickAddFunds} />}
     </>
   );
 };

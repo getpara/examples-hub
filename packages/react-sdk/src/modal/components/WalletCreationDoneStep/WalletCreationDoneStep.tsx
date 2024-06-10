@@ -1,9 +1,7 @@
 import { CpslButton, CpslIcon } from '@usecapsule/react-components';
-import { Heading, MainContainer, Hero, ButtonWithIconContainer, AddFundsButton } from '../common.js';
+import { Heading, MainContainer, Hero, ButtonWithIconContainer } from '../common.js';
 import { useCapsuleStore, useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
-import { useOnClickAddFunds } from '../../hooks/useOnClickAddFunds.js';
-import { validateOnRampConfig } from '../../utils/validateOnRampConfig.js';
 
 interface WalletCreationDoneStepProps {
   twoFactorAuthEnabled?: boolean;
@@ -14,11 +12,6 @@ export const WalletCreationDoneStep = ({ twoFactorAuthEnabled, onClose }: Wallet
   const setStep = useModalStore((state) => state.setStep);
   const isLogin = useModalStore((state) => state.isLogin());
   const capsule = useCapsuleStore((state) => state.capsule);
-  const onRampConfig = useModalStore((state) => state.onRampConfig);
-
-  const onClickAddFunds = useOnClickAddFunds(onRampConfig);
-
-  const isOnRampAvailable = validateOnRampConfig(onRampConfig);
 
   const handleNext = async () => {
     if (isLogin) {
@@ -60,7 +53,6 @@ export const WalletCreationDoneStep = ({ twoFactorAuthEnabled, onClose }: Wallet
           </ButtonWithIconContainer>
         )}
       </CpslButton>
-      {isOnRampAvailable && <AddFundsButton onClick={onClickAddFunds} />}
     </>
   );
 };

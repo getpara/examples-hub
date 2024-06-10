@@ -15,10 +15,6 @@ export enum ModalStep {
   SETUP_2FA = 'SETUP_2FA',
   VERIFY_2FA = 'VERIFY_2FA',
   TWO_FACTOR_DONE = 'TWO_FACTOR_DONE',
-  ADD_FUNDS = 'ADD_FUNDS',
-  ADD_FUNDS_AWAITING = 'ADD_FUNDS_AWAITING',
-  ADD_FUNDS_SUCCESS = 'ADD_FUNDS_SUCCESS',
-  ADD_FUNDS_FAILURE = 'ADD_FUNDS_FAILURE',
 }
 
 enum SignUpModalStep {
@@ -35,10 +31,6 @@ enum SignUpModalStep {
   SETUP_2FA = 'SETUP_2FA',
   VERIFY_2FA = 'VERIFY_2FA',
   TWO_FACTOR_DONE = 'TWO_FACTOR_DONE',
-  ADD_FUNDS = 'ADD_FUNDS',
-  ADD_FUNDS_AWAITING = 'ADD_FUNDS_AWAITING',
-  ADD_FUNDS_SUCCESS = 'ADD_FUNDS_SUCCESS',
-  ADD_FUNDS_FAILURE = 'ADD_FUNDS_FAILURE',
 }
 
 export const SignUpModalStepNumber: { [key in SignUpModalStep]: number } = {
@@ -55,10 +47,6 @@ export const SignUpModalStepNumber: { [key in SignUpModalStep]: number } = {
   [SignUpModalStep.SETUP_2FA]: 5,
   [SignUpModalStep.VERIFY_2FA]: 5,
   [SignUpModalStep.TWO_FACTOR_DONE]: 5,
-  [SignUpModalStep.ADD_FUNDS]: 6,
-  [SignUpModalStep.ADD_FUNDS_AWAITING]: 6,
-  [SignUpModalStep.ADD_FUNDS_SUCCESS]: 6,
-  [SignUpModalStep.ADD_FUNDS_FAILURE]: 6,
 };
 
 export const SignUpPreviousStep: {
@@ -77,10 +65,6 @@ export const SignUpPreviousStep: {
   [SignUpModalStep.SETUP_2FA]: ModalStep.SECRET,
   [SignUpModalStep.VERIFY_2FA]: ModalStep.SETUP_2FA,
   [SignUpModalStep.TWO_FACTOR_DONE]: undefined,
-  [SignUpModalStep.ADD_FUNDS]: undefined,
-  [SignUpModalStep.ADD_FUNDS_AWAITING]: ModalStep.ADD_FUNDS,
-  [SignUpModalStep.ADD_FUNDS_SUCCESS]: undefined,
-  [SignUpModalStep.ADD_FUNDS_FAILURE]: undefined,
 };
 
 enum LoginModalStep {
@@ -96,10 +80,6 @@ enum LoginModalStep {
   VERIFY_2FA = 'VERIFY_2FA',
   TWO_FACTOR_DONE = 'TWO_FACTOR_DONE',
   LOGIN_DONE = 'LOGIN_DONE',
-  ADD_FUNDS = 'ADD_FUNDS',
-  ADD_FUNDS_AWAITING = 'ADD_FUNDS_AWAITING',
-  ADD_FUNDS_SUCCESS = 'ADD_FUNDS_SUCCESS',
-  ADD_FUNDS_FAILURE = 'ADD_FUNDS_FAILURE',
 }
 
 export const LoginModalStepNumber: { [key in LoginModalStep]: number } = {
@@ -115,10 +95,6 @@ export const LoginModalStepNumber: { [key in LoginModalStep]: number } = {
   [LoginModalStep.VERIFY_2FA]: 4,
   [LoginModalStep.TWO_FACTOR_DONE]: 4,
   [LoginModalStep.LOGIN_DONE]: 4,
-  [LoginModalStep.ADD_FUNDS]: 5,
-  [LoginModalStep.ADD_FUNDS_AWAITING]: 5,
-  [LoginModalStep.ADD_FUNDS_SUCCESS]: 5,
-  [LoginModalStep.ADD_FUNDS_FAILURE]: 5,
 };
 
 export const LoginPreviousStep: {
@@ -136,10 +112,6 @@ export const LoginPreviousStep: {
   [LoginModalStep.VERIFY_2FA]: ModalStep.SETUP_2FA,
   [LoginModalStep.TWO_FACTOR_DONE]: undefined,
   [LoginModalStep.LOGIN_DONE]: undefined,
-  [LoginModalStep.ADD_FUNDS]: undefined,
-  [LoginModalStep.ADD_FUNDS_AWAITING]: ModalStep.ADD_FUNDS,
-  [LoginModalStep.ADD_FUNDS_SUCCESS]: undefined,
-  [LoginModalStep.ADD_FUNDS_FAILURE]: undefined,
 };
 
 export const NoIndicatorSteps = [
@@ -149,8 +121,4 @@ export const NoIndicatorSteps = [
   ModalStep.SETUP_2FA,
   ModalStep.LOGIN_DONE,
   ModalStep.TWO_FACTOR_DONE,
-  ModalStep.ADD_FUNDS,
-  ModalStep.ADD_FUNDS_AWAITING,
-  ModalStep.ADD_FUNDS_SUCCESS,
-  ModalStep.ADD_FUNDS_FAILURE,
 ];

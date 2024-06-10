@@ -26,7 +26,6 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
       oAuthMethods,
       bareModal = false,
       className,
-      onRampConfig,
       onModalStepChange,
       onExpandModalChange,
       onClose,
@@ -40,7 +39,6 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     const setWebAuthURLForCreate = useModalStore((state) => state.setWebAuthURLForCreate);
     const currentStep = useModalStore((state) => state.step);
     const setOnModalStepChange = useModalStore((state) => state.setOnModalStepChange);
-    const setOnRampConfig = useModalStore((state) => state.setOnRampConfig);
     const setStep = useModalStore((state) => state.setStep);
     const setCapsule = useCapsuleStore((state) => state.setCapsule);
     const setEmail = useUserInfoStore((state) => state.setEmail);
@@ -106,10 +104,6 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     useEffect(() => {
       setOnModalStepChange(onModalStepChange);
     }, [onModalStepChange]);
-
-    useEffect(() => {
-      setOnRampConfig(onRampConfig);
-    }, [onRampConfig]);
 
     useEffect(() => {
       updateThemeState({ logo, appName, oAuthLogoVariant: theme?.oAuthLogoVariant ?? 'default' });

@@ -1,13 +1,13 @@
 import { styled } from 'styled-components';
 import { ModalStep, NoIndicatorSteps } from '../../utils/steps.js';
 import { SignUpStep } from '../SignUpStep/SignUpStep.js';
-import { CpslAlert, CpslProgressIndicator } from '@usecapsule/react-components';
+import { CpslProgressIndicator } from '@usecapsule/react-components';
 import { VerificationCodeStep } from '../VerificationCodeStep/VerificationCodeStep.js';
-import { useModalStore, useThemeStore } from '../../stores/index.js';
+import { useModalStore } from '../../stores/index.js';
 import { BiometricLoginStep } from '../BiometricLoginStep/BiometricLoginStep.js';
 import { Setup2FAStep } from '../Setup2FAStep/Setup2FAStep.js';
 import { LoginDoneStep } from '../LoginDoneStep/LoginDoneStep.js';
-import { OAuthMethod, OnRampConfig } from '@usecapsule/web-sdk';
+import { OAuthMethod } from '@usecapsule/web-sdk';
 import { AwaitingBiometricsStep } from '../AwaitingBiometricsStep/AwaitingBiometricsStep.js';
 import { AwaitingWalletCreationStep } from '../AwaitingWalletCreationStep/AwaitingWalletCreationStep.js';
 import { WalletCreationDoneStep } from '../WalletCreationDoneStep/WalletCreationDoneStep.js';
@@ -15,9 +15,6 @@ import { RecoverySecretStep } from '../RecoverySecretStep/RecoverySecretStep.js'
 import { TwoFactorDoneStep } from '../TwoFactorDoneStep/TwoFactorDoneStep.js';
 import { BiometricCreationStep } from '../BiometricCreationStep/BiometricCreationStep.js';
 import { AwaitingOAuthStep } from '../AwaitingOAuthStep/AwaitingOAuthStep.js';
-import { AddFunds } from '../AddFunds/AddFunds.js';
-import { AddFundsAwaiting } from '../AddFundsAwaiting/AddFundsAwaiting.js';
-import { AddFundsDone } from '../AddFundsDone/AddFundsDone.js';
 import { VerificationCodeStepForPhone } from '../VerificationCodeStep/VerificationCodeStepForPhone.js';
 
 interface BodyProps {
@@ -28,7 +25,6 @@ interface BodyProps {
   disableEmailLogin: boolean;
   disablePhoneLogin: boolean;
   onClose: () => void;
-  onRampConfig?: OnRampConfig;
 }
 
 export const Body = ({
@@ -44,8 +40,6 @@ export const Body = ({
   const stepNumber = useModalStore((state) => state.stepNumber());
   const totalSteps = useModalStore((state) => state.totalSteps());
   const isLogin = useModalStore((state) => state.isLogin());
-  const onRampConfig = useModalStore((state) => state.onRampConfig);
-  const appName = useThemeStore((state) => state.appName);
 
   const showProgressIndicator = !isLogin && !NoIndicatorSteps.includes(currentStep);
 
@@ -99,38 +93,12 @@ export const Body = ({
       case ModalStep.AWAITING_OAUTH: {
         return <AwaitingOAuthStep />;
       }
-      case ModalStep.ADD_FUNDS: {
-        return <AddFunds />;
-      }
-      case ModalStep.ADD_FUNDS_AWAITING: {
-        return <AddFundsAwaiting />;
-      }
-      case ModalStep.ADD_FUNDS_SUCCESS: {
-        return <AddFundsDone isSuccess onClose={onClose} />;
-      }
-      case ModalStep.ADD_FUNDS_FAILURE: {
-        return <AddFundsDone onClose={onClose} />;
-      }
     }
   };
 
   return (
     <BodyContainer slot="body">
       {showProgressIndicator && <StyledCpslProgressIndicator step={stepNumber - 1} totalSteps={totalSteps} />}
-      {onRampConfig?.testMode &&
-        [
-          ModalStep.ADD_FUNDS,
-          ModalStep.ADD_FUNDS_AWAITING,
-          ModalStep.ADD_FUNDS_FAILURE,
-          ModalStep.ADD_FUNDS_SUCCESS,
-        ].includes(currentStep) && (
-          <CpslAlert>
-            <div>
-              This Capsule Modal is configured to run on-ramp services in <b>test mode</b> only, for development purposes. If
-              you are a user of {appName}, please contact support.
-            </div>
-          </CpslAlert>
-        )}
       {Content()}
     </BodyContainer>
   );

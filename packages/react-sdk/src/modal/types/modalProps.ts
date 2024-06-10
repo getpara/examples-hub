@@ -1,4 +1,4 @@
-import CapsuleWeb, { OAuthMethod, OnRampConfig } from '@usecapsule/web-sdk';
+import CapsuleWeb, { OAuthMethod } from '@usecapsule/web-sdk';
 import { Theme } from '@usecapsule/react-components';
 import { OnModalStepChangeValue } from '../stores/index.js';
 import { ModalStep } from '../utils/steps.js';
@@ -75,10 +75,9 @@ export interface CapsuleModalProps {
    */
   logo?: string;
   appName?: string;
-  /**
-   * Configure on-ramp providers to allow users to add funds upon signing up.
-   */
-  onRampConfig?: OnRampConfig;
+  onRampCurrency?: string;
+  onRampAvailable?: boolean;
+  rampNetworkApiKey?: string;
   currentStepOverride?: string | undefined;
   /**
    * Whether or not to display just the modal without the overlay component.

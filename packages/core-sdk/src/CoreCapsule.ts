@@ -8,15 +8,7 @@ import {
 import { pki, jsbn } from 'node-forge';
 
 import { decryptWithKeyPair, getAsymmetricKeyPair, getPublicKeyHex } from './cryptography/utils.js';
-import {
-  Ctx,
-  OnRampAssetProp,
-  OnRampProviderProp,
-  OnRampPurchase,
-  getAsset,
-  getPortalBaseURL,
-  getProvider,
-} from './definitions.js';
+import { Ctx, getPortalBaseURL } from './definitions.js';
 import { Environment, OAuthMethod } from './definitions.js';
 import { getBaseUrl, initClient } from './external/capsuleClient.js';
 import * as mpcComputationClient from './external/mpcComputationClient.js';
@@ -1496,62 +1488,6 @@ export abstract class CoreCapsule {
 
   isProviderModalDisabled(): boolean {
     return !!this.disableProviderModal;
-  }
-
-  /**
-   * Initiate a new on-ramp purchase through the Capsule modal.
-   *
-   * @param provider - one of `RAMP` or `STRIPE`.
-   * @param asset - the on-chain asset to purchase, one of `USDC` or `ETH`
-   * @param testMode - if `true`, the purchase involves test-net assets only
-   * @returns - the created purchase object
-   **/
-  async createOnRampPurchase(
-    provider: OnRampProviderProp,
-    asset: OnRampAssetProp,
-    testMode = false,
-  ): Promise<[OnRampPurchase, string]> {
-    const address = Object.values(this.wallets)[0].address;
-
-    const res = await this.ctx.capsuleClient.createOnRampPurchase(
-      this.getUserId(),
-      getProvider(provider),
-      getAsset(asset),
-      address,
-      testMode,
-    );
-
-    return [res.data, address];
-  }
-
-  /**
-   * Update an on-ramp purchase.
-   *
-   * @param purchaseId - the uuid of the desired purchase
-   * @param updates - the updates to apply, limited to `status`, `fiatCurrency`, `fiatQuantity`, `asset`', `assetQuantity`', and `providerKey``
-   * @returns - the updated purchase object
-   **/
-  async updateOnRampPurchase(
-    purchaseId: string,
-    updates: Partial<
-      Pick<OnRampPurchase, 'status' | 'fiatCurrency' | 'fiatQuantity' | 'asset' | 'assetQuantity' | 'providerKey'>
-    >,
-  ): Promise<OnRampPurchase> {
-    const res = await this.ctx.capsuleClient.updateOnRampPurchase(this.getUserId(), purchaseId, updates);
-
-    return res.data;
-  }
-
-  /**
-   * Retrieve a desired on-ramp purchase.
-   *
-   * @param purchaseId - the purchase ID to retrieve.
-   * @returns - the purchase object
-   **/
-  async getOnRampPurchase(purchaseId: string): Promise<OnRampPurchase> {
-    const res = await this.ctx.capsuleClient.getOnRampPurchase(this.getUserId(), purchaseId);
-
-    return res.data;
   }
 
   /**
