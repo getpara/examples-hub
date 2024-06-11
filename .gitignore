@@ -10,3 +10,9 @@ mpcWorker-bundle.js
 *.wasm
 .nx/cache
 .eslintcache
+.yarn
+.yarnrc
+**/.env
+**/.env.development
+**/.env.production
+.nx

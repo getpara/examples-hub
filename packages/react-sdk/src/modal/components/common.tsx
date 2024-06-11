@@ -1,5 +1,25 @@
-import { CpslIcon, CpslInput, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon, CpslInput, CpslText } from '@usecapsule/react-components';
 import { styled } from 'styled-components';
+
+export const AddFundsButton = ({ text = 'Add Funds', onClick }: { text?: string; onClick: () => void }) => {
+  return (
+    <CpslButton variant="secondary" onClick={onClick}>
+      <ButtonWithIconContainerInvert>
+        <AddFundsIcon icon="plusCircle" />
+        {text}
+      </ButtonWithIconContainerInvert>
+    </CpslButton>
+  );
+};
+
+const AddFundsIcon = styled(CpslIcon)`
+  margin-top: -1px;
+  margin-right: 2px;
+
+  cpsl-icon {
+    --icon-color: var(--cpsl-color-text-primary);
+  }
+`;
 
 export const SpinnerContainer = styled.div`
   display: flex;
@@ -78,6 +98,12 @@ export const ButtonWithIconContainer = styled.div`
 
   cpsl-icon {
     --icon-color: var(--cpsl-color-text-inverted);
+  }
+`;
+
+export const ButtonWithIconContainerInvert = styled(ButtonWithIconContainer)`
+  cpsl-icon {
+    --icon-color: var(--cpsl-color-text-primary);
   }
 `;
 
