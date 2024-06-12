@@ -8,7 +8,7 @@ import {
 } from '@usecapsule/user-management-client';
 import { pki, jsbn } from 'node-forge';
 
-import { decryptWithKeyPair, getAsymmetricKeyPair, getPublicKeyHex } from './cryptography/utils.js';
+import { decryptWithPrivateKey, getAsymmetricKeyPair, getPublicKeyHex } from './cryptography/utils.js';
 import { Ctx, OnRampAssetProp, OnRampProviderProp, getAsset, getPortalBaseURL, getProvider } from './definitions.js';
 import { Environment, OAuthMethod } from './definitions.js';
 import { getBaseUrl, initClient } from './external/capsuleClient.js';
@@ -1138,7 +1138,7 @@ export abstract class CoreCapsule {
     temporaryShares.forEach((share) => {
       this.wallets[share.walletId] = {
         id: share.walletId,
-        signer: decryptWithKeyPair(this.loginEncryptionKeyPair, share.encryptedShare, share.encryptedKey),
+        signer: decryptWithPrivateKey(this.loginEncryptionKeyPair.privateKey, share.encryptedShare, share.encryptedKey),
       };
     });
 

@@ -63,17 +63,13 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     const [recoveryShare, setRecoveryShare] = useState<string>(null);
     const [distributeDone, setDistributeDone] = useState(false);
 
-    useImperativeHandle(
-      ref,
-      () => {
-        return {
-          handleModalClose() {
-            handleClose();
-          },
-        };
-      },
-      [],
-    );
+    useImperativeHandle(ref, () => {
+      return {
+        handleModalClose() {
+          handleClose();
+        },
+      };
+    }, []);
 
     const is2FASetup = async () => {
       if (!twoFactorAuthEnabled) {

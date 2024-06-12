@@ -13,11 +13,17 @@ export * as mpcComputationClient from './external/mpcComputationClient.js';
 export { getBaseUrl } from './external/capsuleClient.js';
 export {
   decryptWithKeyPair,
+  decryptWithPrivateKey,
   getAsymmetricKeyPair,
   getPublicKeyHex,
   encryptWithDerivedPublicKey,
+  encodePrivateKeyToPemHex,
   getDerivedPrivateKeyAndDecrypt,
   getPublicKeyFromSignature,
+  getSHA256HashHex,
+  encryptPrivateKey,
+  decryptPrivateKey,
+  decryptPrivateKeyAndDecryptShare,
 } from './cryptography/utils.js';
 export * from './external/capsuleClient.js';
 export * from './utils/pollingUtils.js';

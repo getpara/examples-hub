@@ -1,9 +1,12 @@
 import {
   createCredential,
-  decryptWithKeyPair,
+  decryptWithPrivateKey,
   encryptWithDerivedPublicKey,
-  getPublicKeyFromSignature,
+  getAsymmetricKeyPair,
   parseCredentialCreationRes,
+  getPublicKeyHex,
+  encryptPrivateKey,
+  getSHA256HashHex,
 } from '@usecapsule/web-sdk';
 import { ENV } from '../constants';
 import { EncryptorType, KeyType, PublicKeyStatus } from '@usecapsule/user-management-client';
@@ -33,7 +36,12 @@ export async function authCreation(
 
   const { creds, userHandle, algorithm } = await createCredential(ENV, userId, identifier);
   const { cosePublicKey, clientDataJSON } = parseCredentialCreationRes(creds, algorithm);
-  const publicKeyHex = await getPublicKeyFromSignature(capsule.ctx, userHandle);
+  const keyPair = await getAsymmetricKeyPair(capsule.ctx);
+  const publicKeyHex = getPublicKeyHex(keyPair);
+
+  const encryptionKeyHash = getSHA256HashHex(userHandle);
+  const encryptedPrivateKeyHex = await encryptPrivateKey(keyPair, userHandle);
+
   await capsule.ctx.capsuleClient.patchSessionPublicKey(partnerId, userId, biometricId, {
     publicKey: creds.id,
     sigDerivedPublicKey: publicKeyHex,
@@ -42,6 +50,13 @@ export async function authCreation(
     status: PublicKeyStatus.COMPLETE,
   });
 
+  await capsule.ctx.capsuleClient.uploadEncryptedWalletPrivateKey(
+    userId,
+    encryptedPrivateKeyHex,
+    encryptionKeyHash,
+    creds.id,
+  );
+
   // this means we are adding additional biometrics to an existing account and need to encrypt
   // shares with new biometric
   // since we are redirecting to auth creation route from auth login route, the session initially
@@ -49,7 +64,11 @@ export async function authCreation(
   if (isForNewDevice) {
     const temporaryShares = (await capsule.getTransmissionKeyShares(true)).data.temporaryShares;
     const biometricEncryptedKeyshares = temporaryShares.map((share) => {
-      const decryptedShare = decryptWithKeyPair(capsule.loginEncryptionKeyPair, share.encryptedShare, share.encryptedKey);
+      const decryptedShare = decryptWithPrivateKey(
+        capsule.loginEncryptionKeyPair.privateKey,
+        share.encryptedShare,
+        share.encryptedKey,
+      );
       const { encryptedMessageHex, encryptedKeyHex } = encryptWithDerivedPublicKey(publicKeyHex, decryptedShare);
 
       return {

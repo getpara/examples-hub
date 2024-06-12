@@ -8,7 +8,15 @@ import {
   recoverTypedSignature,
 } from '@metamask/eth-sig-util';
 import { parseCredentialCreationRes } from '@usecapsule/web-sdk/dist/cryptography/webAuth';
-import { getPublicKeyFromSignature, getDerivedPrivateKeyAndDecrypt } from '@usecapsule/core-sdk';
+import {
+  getAsymmetricKeyPair,
+  getPublicKeyHex,
+  getSHA256HashHex,
+  encryptPrivateKey,
+  decryptPrivateKeyAndDecryptShare,
+  getDerivedPrivateKeyAndDecrypt,
+  getPublicKeyFromSignature,
+} from '@usecapsule/core-sdk';
 import { PublicKeyStatus } from '@usecapsule/user-management-client';
 import { Wallet } from '@usecapsule/core-sdk';
 
@@ -17,11 +25,14 @@ document.getElementsByTagName('body')[0].appendChild(div);
 div.innerHTML = "<center><h1 id='message'></h1></center>";
 document.getElementById('message').innerHTML = 'Errors will appear here';
 
+let platform;
+
 window.addEventListener('message', function (event) {
   const data = event.data;
   switch (data['messageType']) {
     case 'Capsule#init':
       initCapsule(data['arguments']['environment'], data['arguments']['apiKey']);
+      platform = data['arguments']['platform'] ?? 'flutter';
       break;
     case 'Capsule#invokeMethod':
       invokeCapsuleMethod(data['methodName'], data['arguments']);
@@ -32,6 +43,17 @@ window.addEventListener('message', function (event) {
       throw new Error('Unknown message type: ' + data['messageType']);
   }
 });
+
+function sendResponse(method: string, responseData: any) {
+  switch (platform) {
+    case 'flutter':
+      window['flutter_inappwebview'].callHandler('asyncResult', responseData);
+      break;
+    case 'ios':
+      window['webkit'].messageHandlers.callback.postMessage({ method: method, responseData: responseData });
+      break;
+  }
+}
 
 function initCapsule(environment: string, apiKey: string) {
   document.getElementById('message').innerHTML = 'Initializing Capsule';
@@ -52,7 +74,7 @@ async function invokeCapsuleMethod(methodName: string, args: any[]) {
   switch (methodName) {
     case 'createWallet':
       const [wallet, recoveryShare] = await capsule.createWallet(args[0], args[1]);
-      window['flutter_inappwebview'].callHandler('asyncResult', [
+      sendResponse('createWallet', [
         {
           wallet: { id: wallet.id, signer: wallet.signer, address: wallet.address, publicKey: wallet.publicKey },
           recoveryShare: recoveryShare,
@@ -62,11 +84,11 @@ async function invokeCapsuleMethod(methodName: string, args: any[]) {
     case 'getUserId':
       // @ts-ignore
       const userId = capsule.userId;
-      window['flutter_inappwebview'].callHandler('asyncResult', userId);
+      sendResponse('getUserId', userId);
       break;
     case 'signTypedData': {
       const signMessageResult = await signTypedData(capsule, args);
-      window['flutter_inappwebview'].callHandler('asyncResult', signMessageResult);
+      sendResponse('signTypedData', signMessageResult);
       break;
     }
     case 'recoverTypedSignature':
@@ -75,28 +97,39 @@ async function invokeCapsuleMethod(methodName: string, args: any[]) {
       const version = args[2];
       const prefixedSignature = signature.startsWith('0x') ? signature : `0x${signature}`;
       const address = recoverTypedSignature({ data, signature: prefixedSignature, version: version });
-      window['flutter_inappwebview'].callHandler('asyncResult', address);
+      sendResponse('recoverTypedSignature', address);
       break;
     case 'generatePasskey':
       await generatePasskey(capsule, args);
-      window['flutter_inappwebview'].callHandler('asyncResult');
+      sendResponse('generatePasskey', true);
+      break;
+    case 'generatePasskeyV2':
+      await generatePasskeyV2(capsule, args);
+      sendResponse('generatePasskeyV2', true);
       break;
     case 'getWebChallenge':
       const getWebChallengeResult = await capsule.ctx.capsuleClient.getWebChallenge('');
-      window['flutter_inappwebview'].callHandler('asyncResult', getWebChallengeResult);
+      sendResponse('getWebChallenge', getWebChallengeResult);
       break;
     case 'verifyWebChallenge':
       const verifyWebChallengeResult = await verifyWebChallenge(capsule, args);
-      window['flutter_inappwebview'].callHandler('asyncResult', verifyWebChallengeResult);
+      sendResponse(
+        'verifyWebChallenge',
+        platform === 'ios' ? verifyWebChallengeResult['data']['userId'] : verifyWebChallengeResult,
+      );
       break;
     case 'login':
       const desiredWallet = await login(capsule, args);
-      window['flutter_inappwebview'].callHandler('asyncResult', desiredWallet);
+      sendResponse('login', desiredWallet);
+      break;
+    case 'loginV2':
+      const desiredWallet2 = await loginV2(capsule, args);
+      sendResponse('loginV2', desiredWallet2);
       break;
     default:
       const result = capsule[methodName](...args);
       const resolvedResult = result instanceof Promise ? await result : result;
-      window['flutter_inappwebview'].callHandler('asyncResult', resolvedResult);
+      sendResponse(methodName, resolvedResult);
       break;
   }
 }
@@ -118,6 +151,9 @@ async function signTypedData(capsule: CapsuleWeb, args: any[]) {
   return signMessageResult;
 }
 
+// This is the legacy style of passkey generation. We have to support
+// this so we don't break apps that have not updated to the latest version
+// yet.
 async function generatePasskey(capsule: CapsuleWeb, args: any[]) {
   const attestationObject = args[0];
   const clientDataJson = args[1];
@@ -134,7 +170,7 @@ async function generatePasskey(capsule: CapsuleWeb, args: any[]) {
 
   const { cosePublicKey, clientDataJSON } = parseCredentialCreationRes(credentials, -7);
   const publicKeyHex = await getPublicKeyFromSignature(capsule.ctx, userHandle);
-  const session = await this.ctx.capsuleClient.touchSession();
+  const session = await capsule.ctx.capsuleClient.touchSession();
 
   await capsule.ctx.capsuleClient.patchSessionPublicKey(session.data.partnerId, capsule.getUserId(), biometricsId, {
     publicKey: credentialsId,
@@ -145,22 +181,64 @@ async function generatePasskey(capsule: CapsuleWeb, args: any[]) {
   });
 }
 
+// This is the new style of passkey generation using userHandleEncoded
+// instead of the UInt16Array of the userHandle. This also generates a
+// random keyPair and encrypts it using the userHandleEncoded instead of
+// generating it from the userHandle itself.
+async function generatePasskeyV2(capsule: CapsuleWeb, args: any[]) {
+  const attestationObject = args[0];
+  const clientDataJson = args[1];
+  const credentialsId = args[2] as string;
+  const userHandle = args[3] as string;
+  const biometricsId = args[4] as string;
+
+  const credentials = {
+    response: {
+      attestationObject: attestationObject,
+      clientDataJSON: clientDataJson,
+    },
+  };
+
+  const { cosePublicKey, clientDataJSON } = parseCredentialCreationRes(credentials, -7);
+  const keyPair = await getAsymmetricKeyPair(capsule.ctx);
+  const publicKeyHex = getPublicKeyHex(keyPair);
+
+  const encryptionKeyHash = getSHA256HashHex(userHandle);
+
+  const encryptedPrivateKeyHex = await encryptPrivateKey(keyPair, userHandle);
+
+  const session = await capsule.ctx.capsuleClient.touchSession();
+
+  await capsule.ctx.capsuleClient.patchSessionPublicKey(session.data.partnerId, capsule.getUserId(), biometricsId, {
+    publicKey: credentialsId,
+    sigDerivedPublicKey: publicKeyHex,
+    cosePublicKey,
+    clientDataJSON,
+    status: PublicKeyStatus.COMPLETE,
+  });
+
+  await capsule.ctx.capsuleClient.uploadEncryptedWalletPrivateKey(
+    capsule.getUserId(),
+    encryptedPrivateKeyHex,
+    encryptionKeyHash,
+    credentialsId,
+  );
+}
+
 async function verifyWebChallenge(capsule: CapsuleWeb, args: any[]) {
   const publicKeyId = args[0];
   const authenticatorData = args[1];
   const clientDataJSON = args[2];
   const signature = args[3];
 
-  const webSignature = {
-    clientDataJSON: clientDataJSON,
-    authenticatorData: authenticatorData,
-    signature: signature,
-  };
-
-  const session = await this.ctx.capsuleClient.touchSession();
+  const session = await capsule.ctx.capsuleClient.touchSession();
   const verifyWebChallengeResult = await capsule.ctx.capsuleClient.verifyWebChallenge(session.data.partnerId, {
     publicKey: publicKeyId,
-    signature: webSignature,
+    signature: {
+      clientDataJSON: clientDataJSON,
+      authenticatorData: authenticatorData,
+      signature: signature,
+    },
   });
 
   return verifyWebChallengeResult;
@@ -176,6 +254,52 @@ async function login(capsule: CapsuleWeb, args: any[]) {
   const encryptedSharesRes = await capsule.ctx.capsuleClient.getBiometricKeyshares(userId, signatureId);
   const decryptedShares = await getDerivedPrivateKeyAndDecrypt(capsule.ctx, userHandle, encryptedSharesRes.data.keyShares);
 
+  const walletsRes = await capsule.ctx.capsuleClient.getWallets(userId);
+  const desiredWallet = walletsRes.data.wallets[0];
+
+  var walletsToInsert: { [id: string]: Wallet } = {};
+  walletsToInsert[decryptedShares[0].walletId] = {
+    id: decryptedShares[0].walletId,
+    signer: decryptedShares[0].signer,
+    address: desiredWallet.address,
+    publicKey: desiredWallet.publicKey,
+    scheme: desiredWallet.scheme,
+  };
+
+  await capsule.setWallets(walletsToInsert);
+
+  return desiredWallet;
+}
+
+async function loginV2(capsule: CapsuleWeb, args: any[]) {
+  const userId = args[0];
+  const credentialsId = args[1];
+  const userHandle = args[2];
+
+  await capsule.setUserId(userId);
+
+  const encryptionKeyHash = getSHA256HashHex(userHandle);
+  const encryptedSharesRes = await capsule.ctx.capsuleClient.getBiometricKeyshares(userId, credentialsId);
+  const { encryptedPrivateKeys } = await capsule.ctx.capsuleClient.getEncryptedWalletPrivateKeys(userId, encryptionKeyHash);
+  let decryptedShares;
+  if (encryptedPrivateKeys.length === 0) {
+    // If this is successful, we can upgrade the user to the new method of passkey schema
+    decryptedShares = await getDerivedPrivateKeyAndDecrypt(capsule.ctx, userHandle, encryptedSharesRes.data.keyShares);
+    const keyPair = await getAsymmetricKeyPair(capsule.ctx, userHandle);
+    const encryptedPrivateKeyHex = await encryptPrivateKey(keyPair, userHandle);
+    await capsule.ctx.capsuleClient.uploadEncryptedWalletPrivateKey(
+      userId,
+      encryptedPrivateKeyHex,
+      encryptionKeyHash,
+      credentialsId,
+    );
+  } else {
+    decryptedShares = await decryptPrivateKeyAndDecryptShare(
+      userHandle,
+      encryptedSharesRes.data.keyShares,
+      encryptedPrivateKeys[0].encryptedPrivateKey,
+    );
+  }
   const walletsRes = await capsule.ctx.capsuleClient.getWallets(userId);
   const desiredWallet = walletsRes.data.wallets[0];
 

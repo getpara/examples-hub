@@ -10,8 +10,9 @@ interface EncryptedShare {
 
 const rsa = forge.pki.rsa;
 const RSA_ENCRYPTION_SCHEME = 'RSA-OAEP';
-// iv can be constant only because every key is only ever used to encrypt one message
+// ivs can be constant only because every key is only ever used to encrypt one message
 const CONSTANT_IV = '794241bc819a125a7b78ea313decc0bc';
+const CONSTANT_IV_AES = new Uint8Array([23, 66, 157, 146, 179, 158, 117, 120, 184, 73, 123, 81]);
 
 export function getSHA256HashHex(str: string): string {
   const md = forge.md.sha256.create();
@@ -24,8 +25,60 @@ export function getPublicKeyHex(keyPair: forge.pki.rsa.KeyPair): string {
   return Buffer.from(pem, 'utf-8').toString('hex');
 }
 
-function publicKeyHexToPem(publicKeyHex: string): string {
+export function publicKeyHexToPem(publicKeyHex: string): string {
   return Buffer.from(publicKeyHex, 'hex').toString('utf-8');
+}
+
+export function encodePrivateKeyToPemHex(keyPair: forge.pki.rsa.KeyPair): string {
+  const pem = forge.pki.privateKeyToPem(keyPair.privateKey);
+  return Buffer.from(pem, 'utf-8').toString('hex');
+}
+
+export function decodePrivateKeyPemHex(privateKeyPemHex: string): forge.pki.rsa.PrivateKey {
+  const pem = Buffer.from(privateKeyPemHex, 'hex').toString('utf-8');
+  return forge.pki.privateKeyFromPem(pem);
+}
+
+export async function encryptPrivateKey(keyPair: forge.pki.rsa.KeyPair, key: string): Promise<string> {
+  const privateKeyPemHex = encodePrivateKeyToPemHex(keyPair);
+  const cryptoKey = await window.crypto.subtle.importKey(
+    'raw',
+    Buffer.from(key, 'base64'),
+    {
+      name: 'AES-GCM',
+      length: 256,
+    },
+    true,
+    ['encrypt', 'decrypt'],
+  );
+  const encodedPlaintext = new TextEncoder().encode(privateKeyPemHex);
+  const ciphertext = await window.crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv: CONSTANT_IV_AES },
+    cryptoKey,
+    encodedPlaintext,
+  );
+  return Buffer.from(ciphertext).toString('base64');
+}
+
+export async function decryptPrivateKey(encryptedPrivateKeyPemHex: string, key: string): Promise<forge.pki.rsa.PrivateKey> {
+  const secretKey = await crypto.subtle.importKey(
+    'raw',
+    Buffer.from(key, 'base64'),
+    {
+      name: 'AES-GCM',
+      length: 256,
+    },
+    true,
+    ['encrypt', 'decrypt'],
+  );
+  const cleartext = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv: CONSTANT_IV_AES },
+    secretKey,
+    Buffer.from(encryptedPrivateKeyPemHex, 'base64'),
+  );
+  const privateKeyPemHex = new TextDecoder().decode(cleartext);
+  const privateKey = decodePrivateKeyPemHex(privateKeyPemHex);
+  return privateKey;
 }
 
 export async function getAsymmetricKeyPair(ctx: Ctx, seedValue?: string): Promise<forge.pki.rsa.KeyPair> {
@@ -86,6 +139,16 @@ export function symmetricKeyEncryptMessage(message: string): {
   return { key, encryptedMessageHex };
 }
 
+function decipherEncryptedMessageHex(key: string, encryptedMessageHex: string): string {
+  const decipher = forge.cipher.createDecipher('AES-CBC', key);
+  // iv can be constant only because every key is only ever used to encrypt one message
+  decipher.start({ iv: CONSTANT_IV });
+  decipher.update(forge.util.createBuffer(forge.util.hexToBytes(encryptedMessageHex)));
+  decipher.finish();
+  return decipher.output.toString();
+}
+
+// Deprecated in favor of decryptWithPrivateKey
 export function decryptWithKeyPair(
   keyPair: forge.pki.rsa.KeyPair,
   encryptedMessageHex: string,
@@ -94,12 +157,18 @@ export function decryptWithKeyPair(
   const encryptedKey = Buffer.from(encryptedKeyHex, 'hex').toString('utf-8');
   const key = keyPair.privateKey.decrypt(encryptedKey, RSA_ENCRYPTION_SCHEME);
 
-  const decipher = forge.cipher.createDecipher('AES-CBC', key);
-  // iv can be constant only because every key is only ever used to encrypt one message
-  decipher.start({ iv: CONSTANT_IV });
-  decipher.update(forge.util.createBuffer(forge.util.hexToBytes(encryptedMessageHex)));
-  decipher.finish();
-  return decipher.output.toString();
+  return decipherEncryptedMessageHex(key, encryptedMessageHex);
+}
+
+export function decryptWithPrivateKey(
+  privateKey: forge.pki.rsa.PrivateKey,
+  encryptedMessageHex: string,
+  encryptedKeyHex: string,
+): string {
+  const encryptedKey = Buffer.from(encryptedKeyHex, 'hex').toString('utf-8');
+  const key = privateKey.decrypt(encryptedKey, RSA_ENCRYPTION_SCHEME);
+
+  return decipherEncryptedMessageHex(key, encryptedMessageHex);
 }
 
 async function decryptWithDerivedPrivateKey(
@@ -109,7 +178,7 @@ async function decryptWithDerivedPrivateKey(
   encryptedKeyHex: string,
 ): Promise<string> {
   const keyPair = await getAsymmetricKeyPair(ctx, seedValue);
-  return decryptWithKeyPair(keyPair, encryptedMessageHex, encryptedKeyHex);
+  return decryptWithPrivateKey(keyPair.privateKey, encryptedMessageHex, encryptedKeyHex);
 }
 
 export async function getDerivedPrivateKeyAndDecrypt(
@@ -123,6 +192,18 @@ export async function getDerivedPrivateKeyAndDecrypt(
       signer: await decryptWithDerivedPrivateKey(ctx, seedValue, share.encryptedShare, share.encryptedKey),
     })),
   );
+}
+
+export async function decryptPrivateKeyAndDecryptShare(
+  encryptionKey: string,
+  encryptedShares: EncryptedShare[],
+  encryptedPrivateKey: string,
+): Promise<{ walletId: string; signer: string }[]> {
+  const privateKey = await decryptPrivateKey(encryptedPrivateKey, encryptionKey);
+  return encryptedShares.map((share) => ({
+    walletId: share.walletId,
+    signer: decryptWithPrivateKey(privateKey, share.encryptedShare, share.encryptedKey),
+  }));
 }
 
 export function encryptWithDerivedPublicKey(

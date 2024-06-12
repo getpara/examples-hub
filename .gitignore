@@ -16,3 +16,4 @@ mpcWorker-bundle.js
 **/.env.development
 **/.env.production
 .nx
+lerna-debug.log

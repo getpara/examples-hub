@@ -761,6 +761,22 @@ class Client {
     const res = await this.baseRequest.post<any>(`/users/${userId}/session/keep-alive`);
     return res.data;
   }
+
+  async uploadEncryptedWalletPrivateKey(
+    userId: string,
+    encryptedWalletPrivateKey: string,
+    encryptionKeyHash: string,
+    biometricPublicKey: string,
+  ) {
+    const body = { encryptedWalletPrivateKey, encryptionKeyHash, biometricPublicKey };
+    const res = await this.baseRequest.post<any>(`/users/${userId}/encrypted-wallet-private-keys`, body);
+    return res.data;
+  }
+
+  async getEncryptedWalletPrivateKeys(userId: string, encryptionKeyHash: string) {
+    const res = await this.baseRequest.get<any>(`/users/${userId}/encrypted-wallet-private-keys/${encryptionKeyHash}`);
+    return res.data;
+  }
 }
 
 export default Client;

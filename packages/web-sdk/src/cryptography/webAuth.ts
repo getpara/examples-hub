@@ -116,9 +116,10 @@ export function parseCredentialCreationRes(
   };
 }
 
-// generate a random 16 byte user handle
+// generate a random 32 byte user handle, which is the max for AES-GCM encryption
+// supported via window.crypto.subtle
 function generateUserHandle() {
-  const userHandle = new Uint8Array(16);
+  const userHandle = new Uint8Array(32);
   window.crypto.getRandomValues(userHandle);
   return userHandle;
 }
@@ -129,7 +130,7 @@ export async function createCredential(
   identifier: string,
 ): Promise<{
   creds: any;
-  userHandle: Uint8Array;
+  userHandle: string;
   algorithm: number;
 }> {
   const userHandle = generateUserHandle();
@@ -167,9 +168,11 @@ export async function createCredential(
     ? ((credential as PublicKeyCredential).response as AuthenticatorAttestationResponse).getPublicKeyAlgorithm()
     : ES256_ALGORITHM;
 
+  const userHandleEncoded = base64url.encode(Buffer.from(userHandle));
+
   return {
     creds: publicKeyCredentialToJSON(credential),
-    userHandle,
+    userHandle: userHandleEncoded,
     algorithm,
   };
 }
