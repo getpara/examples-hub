@@ -751,7 +751,6 @@ export abstract class CoreCapsule {
   async createUser(email: string): Promise<void> {
     this.requireApiKey();
     await this.setEmail(email);
-    await this.setWallets({});
     const { userId } = await this.ctx.capsuleClient.createUser({
       email: this.email,
       ...this.getVerificationEmailProps(),
@@ -767,7 +766,6 @@ export abstract class CoreCapsule {
   async createUserByPhone(phone: string, countryCode: CountryCallingCode): Promise<void> {
     this.requireApiKey();
     await this.setPhoneNumber(phone, countryCode);
-    await this.setWallets({});
     const { userId } = await this.ctx.capsuleClient.createUser({
       phone: this.phone,
       countryCode: this.countryCode,
