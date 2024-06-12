@@ -1321,7 +1321,7 @@ export abstract class CoreCapsule {
       false,
       this.getBackupKitEmailProps(),
     );
-
+    this.wallets[wallet.id].userId = this.userId;
     return [this.wallets[wallet.id], recoveryShare];
   }
 
