@@ -31,5 +31,6 @@ export * from './errors.js';
 export * from './utils/formattingUtils.js';
 export { retrieve as transmissionUtilsRetrieve } from './transmission/transmissionUtils.js';
 export { STORAGE_PREFIX };
+export { EmailTheme } from '@usecapsule/user-management-client';
 
 export default CoreCapsule;
