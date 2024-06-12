@@ -52,6 +52,7 @@ export enum OAuthMethod {
   APPLE = 'APPLE',
   DISCORD = 'DISCORD',
   FACEBOOK = 'FACEBOOK',
+  FARCASTER = 'FARCASTER',
 }
 
 export const OnRampProviderMap = {

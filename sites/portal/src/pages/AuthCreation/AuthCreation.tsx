@@ -16,6 +16,7 @@ export const AuthCreation = () => {
   const paramsEmail = decodeURIComponent(searchParams.get('email'));
   const paramsPhone = decodeURIComponent(searchParams.get('phone'));
   const paramsCountryCode = decodeURIComponent(searchParams.get('countryCode')) as CountryCallingCode;
+  const paramsFarcasterUsername = decodeURIComponent(searchParams.get('farcasterUsername'));
 
   const isForNewDevice = searchParams.get('isForNewDevice') === 'true';
   const paramsPartnerId = searchParams.get('partnerId');
@@ -29,6 +30,7 @@ export const AuthCreation = () => {
         paramsEmail,
         paramsPhone,
         paramsCountryCode,
+        paramsFarcasterUsername,
         paramsBiometricId,
         isForNewDevice,
       );
@@ -44,10 +46,10 @@ export const AuthCreation = () => {
         console.error('Error creating passkey: ', err);
       }
     }
-  }, [paramsBiometricId, paramsEmail, paramsPhone, paramsCountryCode, paramsUserId]);
+  }, [paramsBiometricId, paramsEmail, paramsPhone, paramsCountryCode, paramsFarcasterUsername, paramsUserId]);
 
   useEffect(() => {
-    if (paramsBiometricId && (paramsEmail || paramsPhone || paramsCountryCode) && paramsUserId) {
+    if (paramsBiometricId && (paramsEmail || paramsPhone || paramsCountryCode || paramsFarcasterUsername) && paramsUserId) {
       // In development this will trigger a 'request is already pending.' error due to duplicate renders caused by React.StrictMode.
       // See ref: https://legacy.reactjs.org/docs/strict-mode.html#detecting-unexpected-side-effects
       setUpBiometrics();

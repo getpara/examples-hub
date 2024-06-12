@@ -16,6 +16,7 @@ export async function authLogin(
   email: string,
   phone: string,
   countryCode: CountryCallingCode,
+  farcasterUsername: string,
   sessionLookupId: string,
   encryptionKey: string,
   newDeviceSessionLookupId?: string,
@@ -30,9 +31,12 @@ export async function authLogin(
   } else if (phone !== 'null' && phone !== undefined && phone !== '') {
     identifier = `${countryCode}${phone}`;
     data = await capsule.ctx.capsuleClient.getWebChallenge(null, encodeURIComponent(phone), encodeURIComponent(countryCode));
+  } else if (farcasterUsername !== 'null' && farcasterUsername !== undefined && farcasterUsername !== '') {
+    identifier = farcasterUsername;
+    data = await capsule.ctx.capsuleClient.getWebChallenge(null, null, null, encodeURIComponent(identifier));
   }
   if (!identifier) {
-    throw new Error('either a phone number or email address must be provided.');
+    throw new Error('either a phone number or email address or farcaster username must be provided.');
   }
   const sig = await generateSignature(ENV, data.challenge, data.allowedPublicKeys);
   const userHandle = sig.response.userHandle;
@@ -53,6 +57,14 @@ export async function authLogin(
       publicKey: sig.id,
       phone: phone,
       countryCode: countryCode,
+      sessionLookupId,
+      newDeviceSessionLookupId,
+    });
+  } else if (farcasterUsername !== 'null' && farcasterUsername !== undefined && farcasterUsername !== '') {
+    verifyRes = await capsule.ctx.capsuleClient.verifyWebChallenge(partnerId, {
+      signature: sig.response,
+      publicKey: sig.id,
+      farcasterUsername: identifier,
       sessionLookupId,
       newDeviceSessionLookupId,
     });

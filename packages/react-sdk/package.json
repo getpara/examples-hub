@@ -16,7 +16,7 @@
     "@ramp-network/ramp-instant-sdk": "^4.0.2",
     "@stripe/crypto": "^0.0.4",
     "@stripe/stripe-js": "^3.4.0",
-    "@usecapsule/react-components": "^2.0.9",
+    "@usecapsule/react-components": "^2.0.10",
     "@usecapsule/web-sdk": "1.15.0",
     "gsap": "^3.12.5",
     "libphonenumber-js": "^1.11.1",

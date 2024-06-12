@@ -20,6 +20,7 @@ export async function authCreation(
   email: string,
   phone: string,
   countryCode: CountryCallingCode,
+  farcasterUsername: string,
   biometricId: string,
   isForNewDevice: boolean,
 ): Promise<void> {
@@ -29,9 +30,11 @@ export async function authCreation(
     identifier = email;
   } else if (phone !== 'null' && phone !== undefined && phone !== '') {
     identifier = `${countryCode}${phone}`;
+  } else if (farcasterUsername !== 'null' && farcasterUsername !== undefined && farcasterUsername !== '') {
+    identifier = `${farcasterUsername}-farcaster`;
   }
   if (!identifier) {
-    throw new Error('either a phone number or email address must be provided.');
+    throw new Error('either a phone number or email address or farcaster username must be provided.');
   }
 
   const { creds, userHandle, algorithm } = await createCredential(ENV, userId, identifier);

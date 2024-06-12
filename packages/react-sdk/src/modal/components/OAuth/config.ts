@@ -7,6 +7,7 @@ export const brandedOAuthLogos: { [key in OAuthMethod]: IconType } = {
   APPLE: 'apple',
   DISCORD: 'discordBrand',
   FACEBOOK: 'facebookBrand',
+  FARCASTER: 'farcasterBrand',
 };
 
 export const oAuthLogos: { [key in OAuthMethod]: IconType } = {
@@ -15,4 +16,5 @@ export const oAuthLogos: { [key in OAuthMethod]: IconType } = {
   APPLE: 'apple',
   DISCORD: 'discord',
   FACEBOOK: 'facebook',
+  FARCASTER: 'farcaster',
 };

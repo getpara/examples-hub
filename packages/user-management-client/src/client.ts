@@ -105,6 +105,7 @@ interface verifyWebChallengeBody {
   email?: string;
   phone?: string;
   countryCode?: string;
+  farcasterUsername?: string;
   sessionLookupId?: string;
   signature: WebSignature;
   publicKey?: string;
@@ -375,6 +376,7 @@ class Client {
     email?: string,
     phone?: string,
     countryCode?: string,
+    farcasterUsername?: string,
     publicKey?: string,
   ): Promise<getWebChallengeRes> => {
     const queryParams = {};
@@ -386,6 +388,9 @@ class Client {
     }
     if (countryCode) {
       queryParams['countryCode'] = countryCode;
+    }
+    if (farcasterUsername) {
+      queryParams['farcasterUsername'] = farcasterUsername;
     }
     if (publicKey) {
       queryParams['publicKey'] = publicKey;
@@ -627,6 +632,18 @@ class Client {
   // POST /recovery/init
   async initializeRecovery(email: string) {
     const res = await this.baseRequest.post<any>(`/recovery/init`, { email });
+    return res;
+  }
+
+  // POST /auth/farcaster/init
+  async initializeFarcasterLogin() {
+    const res = await this.baseRequest.post<any>(`/auth/farcaster/init`);
+    return res;
+  }
+
+  // POST /auth/farcaster/status
+  async getFarcasterAuthStatus() {
+    const res = await this.baseRequest.post<any>(`/auth/farcaster/status`);
     return res;
   }
 

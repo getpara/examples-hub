@@ -19,6 +19,7 @@ import { AddFunds } from '../AddFunds/AddFunds.js';
 import { AddFundsAwaiting } from '../AddFundsAwaiting/AddFundsAwaiting.js';
 import { AddFundsDone } from '../AddFundsDone/AddFundsDone.js';
 import { VerificationCodeStepForPhone } from '../VerificationCodeStep/VerificationCodeStepForPhone.js';
+import FarcasterOAuthStep from '../OAuth/FarcasterOAuthStep.js';
 
 interface BodyProps {
   oAuthMethods?: OAuthMethod[];
@@ -98,6 +99,9 @@ export const Body = ({
       }
       case ModalStep.AWAITING_OAUTH: {
         return <AwaitingOAuthStep />;
+      }
+      case ModalStep.FARCASTER_OAUTH: {
+        return <FarcasterOAuthStep />;
       }
       case ModalStep.ADD_FUNDS: {
         return <AddFunds />;

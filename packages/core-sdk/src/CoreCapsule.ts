@@ -81,6 +81,7 @@ export const PREFIX = '@CAPSULE/';
 const LOCAL_STORAGE_EMAIL = `${PREFIX}e-mail`;
 const LOCAL_STORAGE_PHONE = `${PREFIX}phone`;
 const LOCAL_STORAGE_COUNTRY_CODE = `${PREFIX}countryCode`;
+const LOCAL_STORAGE_FARCASTER_USERNAME = `${PREFIX}farcasterUsername`;
 const LOCAL_STORAGE_USER_ID = `${PREFIX}userId`;
 const LOCAL_STORAGE_WALLETS = `${PREFIX}wallets`;
 const LOCAL_STORAGE_SESSION_COOKIE = `${PREFIX}sessionCookie`;
@@ -101,6 +102,7 @@ export abstract class CoreCapsule {
   private email?: string;
   private phone?: string;
   private countryCode?: CountryCallingCode;
+  private farcasterUsername?: string;
   private userId?: string;
   private wallets?: Record<string, Wallet>;
   private sessionCookie?: string;
@@ -398,6 +400,15 @@ export abstract class CoreCapsule {
   }
 
   /**
+   * Sets the farcaster username associated with the `CoreCapsule` instance.
+   * @param farcasterUsername - Farcaster Username to set.
+   */
+  async setFarcasterUsername(farcasterUsername: string): Promise<void> {
+    this.farcasterUsername = farcasterUsername;
+    await this.localStorageSetItem(LOCAL_STORAGE_FARCASTER_USERNAME, farcasterUsername);
+  }
+
+  /**
    * Sets the user id associated with the `CoreCapsule` instance.
    * @param userId - User id to set.
    */
@@ -475,7 +486,16 @@ export abstract class CoreCapsule {
     return (partnerId && (await this.getPartnerURL(partnerId))) || getPortalBaseURL(this.ctx);
   }
 
-  private async getWebAuthURLForCreate(webAuthId: string, partnerId?: string, isForNewDevice?: boolean): Promise<string> {
+  private async getCommonLoginQueryParams(newDeviceSessionId?: string, newDeviceEncryptionKey?: string): Promise<string> {
+    const newDeviceSessionIdQueryParam = newDeviceSessionId ? `&newDeviceSessionId=${newDeviceSessionId}` : '';
+    const newDeviceEncryptionKeyQueryParam = newDeviceEncryptionKey
+      ? `&newDeviceEncryptionKey=${newDeviceEncryptionKey}`
+      : '';
+
+    return `${newDeviceSessionIdQueryParam}${newDeviceEncryptionKeyQueryParam}`;
+  }
+
+  private async getCommonQueryParams(partnerId?: string, isForNewDevice?: boolean): Promise<string> {
     const partnerIdQueryParam = partnerId ? `&partnerId=${partnerId}` : '';
     const portalBorderRadiusQueryParam = this.portalTheme?.borderRadius
       ? `&portalBorderRadius=${encodeURIComponent(this.portalTheme.borderRadius)}`
@@ -498,45 +518,23 @@ export abstract class CoreCapsule {
       : '';
     const isForNewDeviceQueryParam = isForNewDevice ? `&isForNewDevice=${isForNewDevice}` : '';
 
-    return `${(partnerId && (await this.getPartnerURL(partnerId))) || getPortalBaseURL(this.ctx)}/web/users/${
-      this.userId
-    }/biometrics/${webAuthId}?email=${encodeURIComponent(
-      this.email,
-    )}${partnerIdQueryParam}${portalBorderRadiusQueryParam}${portalForegroundColorQueryParam}${portalBackgroundColorQueryParam}${portalPrimaryButtonColorQueryParam}${portalTextColorQueryParam}${isForNewDeviceQueryParam}${portalPrimaryButtonTextColorQueryParam}`;
+    return `${partnerIdQueryParam}${portalBorderRadiusQueryParam}${portalForegroundColorQueryParam}${portalBackgroundColorQueryParam}${portalPrimaryButtonColorQueryParam}${portalTextColorQueryParam}${portalPrimaryButtonTextColorQueryParam}${isForNewDeviceQueryParam}`;
   }
 
-  private async getWebAuthURLForCreateForPhone(
+  private async getWebAuthURLForCreate(
+    type: 'email' | 'phone' | 'farcaster',
     webAuthId: string,
     partnerId?: string,
     isForNewDevice?: boolean,
   ): Promise<string> {
-    const partnerIdQueryParam = partnerId ? `&partnerId=${partnerId}` : '';
-    const portalBorderRadiusQueryParam = this.portalTheme?.borderRadius
-      ? `&portalBorderRadius=${encodeURIComponent(this.portalTheme.borderRadius)}`
-      : '';
-    const portalForegroundColorQueryParam = this.portalTheme?.foregroundColor
-      ? `&portalForegroundColor=${encodeURIComponent(this.portalTheme.foregroundColor)}`
-      : '';
-    const portalBackgroundColorQueryParam =
-      this.portalBackgroundColor || this.portalTheme?.backgroundColor
-        ? `&portalBackgroundColor=${encodeURIComponent(this.portalBackgroundColor ?? this.portalTheme.backgroundColor)}`
-        : '';
-    const portalPrimaryButtonColorQueryParam = this.portalPrimaryButtonColor
-      ? `&portalPrimaryButtonColor=${encodeURIComponent(this.portalPrimaryButtonColor)}`
-      : '';
-    const portalTextColorQueryParam = this.portalTextColor
-      ? `&portalTextColor=${encodeURIComponent(this.portalTextColor)}`
-      : '';
-    const portalPrimaryButtonTextColorQueryParam = this.portalPrimaryButtonTextColor
-      ? `&portalPrimaryButtonTextColor=${encodeURIComponent(this.portalPrimaryButtonTextColor)}`
-      : '';
-    const isForNewDeviceQueryParam = isForNewDevice ? `&isForNewDevice=${isForNewDevice}` : '';
+    const commonQueryParams = await this.getCommonQueryParams(partnerId, isForNewDevice);
+    const userSpecificParams = {
+      email: `email=${encodeURIComponent(this.email)}`,
+      phone: `phone=${encodeURIComponent(this.phone)}&countryCode=${encodeURIComponent(this.countryCode)}`,
+      farcaster: `farcasterUsername=${encodeURIComponent(this.farcasterUsername)}`,
+    }[type];
 
-    return `${(partnerId && (await this.getPartnerURL(partnerId))) || getPortalBaseURL(this.ctx)}/web/users/${
-      this.userId
-    }/biometrics/${webAuthId}?phone=${encodeURIComponent(
-      this.phone,
-    )}&countryCode=${encodeURIComponent(this.countryCode)}${portalBorderRadiusQueryParam}${portalForegroundColorQueryParam}${partnerIdQueryParam}${portalBackgroundColorQueryParam}${portalPrimaryButtonColorQueryParam}${portalTextColorQueryParam}${isForNewDeviceQueryParam}${portalPrimaryButtonTextColorQueryParam}`;
+    return `${(partnerId && (await this.getPartnerURL(partnerId))) || getPortalBaseURL(this.ctx)}/web/users/${this.userId}/biometrics/${webAuthId}?${userSpecificParams}${commonQueryParams}`;
   }
 
   private getShortUrl(compressedUrl: string): string {
@@ -564,35 +562,17 @@ export abstract class CoreCapsule {
     partnerId?: string,
     newDeviceSessionId?: string,
     newDeviceEncryptionKey?: string,
+    type: 'email' | 'phone' | 'farcaster' = 'email',
   ): Promise<string> {
-    const partnerIdQueryParam = partnerId ? `&partnerId=${partnerId}` : '';
-    const portalBorderRadiusQueryParam = this.portalTheme?.borderRadius
-      ? `&portalBorderRadius=${encodeURIComponent(this.portalTheme.borderRadius)}`
-      : '';
-    const portalForegroundColorQueryParam = this.portalTheme?.foregroundColor
-      ? `&portalForegroundColor=${encodeURIComponent(this.portalTheme.foregroundColor)}`
-      : '';
-    const portalBackgroundColorQueryParam =
-      this.portalBackgroundColor || this.portalTheme?.backgroundColor
-        ? `&portalBackgroundColor=${encodeURIComponent(this.portalBackgroundColor ?? this.portalTheme.backgroundColor)}`
-        : '';
-    const portalPrimaryButtonColorQueryParam = this.portalPrimaryButtonColor
-      ? `&portalPrimaryButtonColor=${encodeURIComponent(this.portalPrimaryButtonColor)}`
-      : '';
-    const portalTextColorQueryParam = this.portalTextColor
-      ? `&portalTextColor=${encodeURIComponent(this.portalTextColor)}`
-      : '';
-    const portalPrimaryButtonTextColorQueryParam = this.portalPrimaryButtonTextColor
-      ? `&portalPrimaryButtonTextColor=${encodeURIComponent(this.portalPrimaryButtonTextColor)}`
-      : '';
-    const newDeviceSessionIdQueryParam = newDeviceSessionId ? `&newDeviceSessionId=${newDeviceSessionId}` : '';
-    const newDeviceEncryptionKeyQueryParam = newDeviceEncryptionKey
-      ? `&newDeviceEncryptionKey=${newDeviceEncryptionKey}`
-      : '';
+    const commonQueryParams = await this.getCommonQueryParams(partnerId);
+    const commonLoginQueryParams = await this.getCommonLoginQueryParams(newDeviceSessionId, newDeviceEncryptionKey);
 
-    return `${(partnerId && (await this.getPartnerURL(partnerId))) || getPortalBaseURL(this.ctx)}/web/biometrics/login?email=${encodeURIComponent(
-      this.email,
-    )}&sessionId=${sessionId}&encryptionKey=${loginEncryptionPublicKey}${partnerIdQueryParam}${portalBackgroundColorQueryParam}${portalPrimaryButtonColorQueryParam}${portalTextColorQueryParam}${newDeviceSessionIdQueryParam}${portalBorderRadiusQueryParam}${portalForegroundColorQueryParam}${newDeviceEncryptionKeyQueryParam}${portalPrimaryButtonTextColorQueryParam}`;
+    const userSpecificParams = {
+      email: `email=${encodeURIComponent(this.email)}`,
+      phone: `phone=${encodeURIComponent(this.phone)}&countryCode=${encodeURIComponent(this.countryCode)}`,
+      farcaster: `farcasterUsername=${encodeURIComponent(this.farcasterUsername)}`,
+    }[type];
+    return `${(partnerId && (await this.getPartnerURL(partnerId))) || getPortalBaseURL(this.ctx)}/web/biometrics/login?${userSpecificParams}&sessionId=${sessionId}&encryptionKey=${loginEncryptionPublicKey}${commonLoginQueryParams}${commonQueryParams}`;
   }
 
   /**
@@ -612,34 +592,12 @@ export abstract class CoreCapsule {
     newDeviceSessionId?: string,
     newDeviceEncryptionKey?: string,
   ): Promise<string> {
-    const partnerIdQueryParam = partnerId ? `&partnerId=${partnerId}` : '';
-    const portalBorderRadiusQueryParam = this.portalTheme?.borderRadius
-      ? `&portalBorderRadius=${encodeURIComponent(this.portalTheme.borderRadius)}`
-      : '';
-    const portalForegroundColorQueryParam = this.portalTheme?.foregroundColor
-      ? `&portalForegroundColor=${encodeURIComponent(this.portalTheme.foregroundColor)}`
-      : '';
-    const portalBackgroundColorQueryParam =
-      this.portalBackgroundColor || this.portalTheme?.backgroundColor
-        ? `&portalBackgroundColor=${encodeURIComponent(this.portalBackgroundColor ?? this.portalTheme.backgroundColor)}`
-        : '';
-    const portalPrimaryButtonColorQueryParam = this.portalPrimaryButtonColor
-      ? `&portalPrimaryButtonColor=${encodeURIComponent(this.portalPrimaryButtonColor)}`
-      : '';
-    const portalTextColorQueryParam = this.portalTextColor
-      ? `&portalTextColor=${encodeURIComponent(this.portalTextColor)}`
-      : '';
-    const portalPrimaryButtonTextColorQueryParam = this.portalPrimaryButtonTextColor
-      ? `&portalPrimaryButtonTextColor=${encodeURIComponent(this.portalPrimaryButtonTextColor)}`
-      : '';
-    const newDeviceSessionIdQueryParam = newDeviceSessionId ? `&newDeviceSessionId=${newDeviceSessionId}` : '';
-    const newDeviceEncryptionKeyQueryParam = newDeviceEncryptionKey
-      ? `&newDeviceEncryptionKey=${newDeviceEncryptionKey}`
-      : '';
+    const commonQueryParams = await this.getCommonQueryParams(partnerId);
+    const commonLoginQueryParams = await this.getCommonLoginQueryParams(newDeviceSessionId, newDeviceEncryptionKey);
 
     return `${(partnerId && (await this.getPartnerURL(partnerId))) || getPortalBaseURL(this.ctx)}/web/biometrics/login?phone=${encodeURIComponent(
       this.phone,
-    )}&countryCode=${encodeURIComponent(this.countryCode)}&sessionId=${sessionId}&encryptionKey=${loginEncryptionPublicKey}${partnerIdQueryParam}${portalBorderRadiusQueryParam}${portalForegroundColorQueryParam}${portalBackgroundColorQueryParam}${portalPrimaryButtonColorQueryParam}${portalTextColorQueryParam}${newDeviceSessionIdQueryParam}${newDeviceEncryptionKeyQueryParam}${portalPrimaryButtonTextColorQueryParam}`;
+    )}&countryCode=${encodeURIComponent(this.countryCode)}&sessionId=${sessionId}&encryptionKey=${loginEncryptionPublicKey}${commonLoginQueryParams}${commonQueryParams}`;
   }
 
   /**
@@ -897,13 +855,13 @@ export abstract class CoreCapsule {
   }
 
   // returns web auth url for creating a new credential
-  async getSetUpBiometricsURL(isForNewDevice: boolean): Promise<string> {
+  async getSetUpBiometricsURL(isForNewDevice: boolean, type: 'email' | 'phone' | 'farcaster' = 'email'): Promise<string> {
     const res = await this.ctx.capsuleClient.addSessionPublicKey(this.userId, {
       status: PublicKeyStatus.PENDING,
       type: PublicKeyType.WEB,
     });
 
-    return this.getWebAuthURLForCreate(res.data.id, res.data.partnerId, isForNewDevice);
+    return this.getWebAuthURLForCreate(type, res.data.id, res.data.partnerId, isForNewDevice);
   }
 
   // returns web auth url for creating a new credential
@@ -913,7 +871,7 @@ export abstract class CoreCapsule {
       type: PublicKeyType.WEB,
     });
 
-    return this.getWebAuthURLForCreateForPhone(res.data.id, res.data.partnerId, isForNewDevice);
+    return this.getWebAuthURLForCreate('phone', res.data.id, res.data.partnerId, isForNewDevice);
   }
 
   // TODO: consider changing this to just hit a new endpoint that returns
@@ -941,8 +899,19 @@ export abstract class CoreCapsule {
    * @param useShortURL - whether to shorten the link
    * @returns - web auth url for logging in
    **/
-  async initiateUserLogin(email: string, useShortURL?: boolean): Promise<string> {
-    await this.setEmail(email);
+  async initiateUserLogin(
+    identifier: string,
+    useShortURL?: boolean,
+    type: 'email' | 'phone' | 'farcaster' = 'email',
+    countryCode?: CountryCallingCode,
+  ): Promise<string> {
+    if (type === 'email') {
+      await this.setEmail(identifier);
+    } else if (type === 'phone') {
+      await this.setPhoneNumber(identifier, countryCode);
+    } else if (type === 'farcaster') {
+      await this.setFarcasterUsername(identifier);
+    }
     const res = await this.ctx.capsuleClient.touchSession(true);
     if (!this.loginEncryptionKeyPair) {
       const keyPair = await getAsymmetricKeyPair(this.ctx);
@@ -953,6 +922,9 @@ export abstract class CoreCapsule {
       res.data.sessionId,
       getPublicKeyHex(this.loginEncryptionKeyPair),
       res.data.partnerId,
+      undefined,
+      undefined,
+      type,
     );
     if (!useShortURL) {
       return webAuthLoginURL;
@@ -1018,6 +990,39 @@ export abstract class CoreCapsule {
     } else {
       const [, recovery] = await this.createWallet();
       return recovery;
+    }
+  }
+
+  async getFarcasterConnectURL(): Promise<string> {
+    await this.logout();
+    await this.ctx.capsuleClient.touchSession(true);
+    const {
+      data: { connect_uri },
+    } = await this.ctx.capsuleClient.initializeFarcasterLogin();
+    return connect_uri;
+  }
+
+  async waitForFarcasterStatus(): Promise<{
+    userExists: boolean;
+    username: string;
+  }> {
+    while (true) {
+      try {
+        await new Promise((resolve) => setTimeout(resolve, POLLING_INTERVAL_MS));
+
+        const res = await this.ctx.capsuleClient.getFarcasterAuthStatus();
+        if (res.data.state === 'completed') {
+          const { userId, userExists, username } = res.data;
+          await this.setUserId(userId);
+          await this.setFarcasterUsername(username);
+          return {
+            userExists,
+            username,
+          };
+        }
+      } catch (err) {
+        console.error(err);
+      }
     }
   }
 

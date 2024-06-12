@@ -1074,6 +1074,7 @@ function App() {
             OAuthMethod.APPLE,
             OAuthMethod.TWITTER,
             OAuthMethod.DISCORD,
+            OAuthMethod.FARCASTER,
           ]}
           onRampConfig={onRampConfig}
           twoFactorAuthEnabled

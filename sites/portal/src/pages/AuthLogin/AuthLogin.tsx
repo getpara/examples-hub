@@ -27,6 +27,7 @@ export const AuthLogin = () => {
   const paramsEmail = decodeURIComponent(searchParams.get('email'));
   const paramsPhone = decodeURIComponent(searchParams.get('phone'));
   const paramsCountryCode = decodeURIComponent(searchParams.get('countryCode')) as CountryCallingCode;
+  const paramsFarcasterUsername = decodeURIComponent(searchParams.get('farcasterUsername'));
   const encryptionKey = searchParams.get('encryptionKey');
   const sessionId = searchParams.get('sessionId');
   const newDeviceSessionLookupId = searchParams.get('newDeviceSessionId') || undefined;
@@ -48,6 +49,7 @@ export const AuthLogin = () => {
         paramsEmail,
         paramsPhone,
         paramsCountryCode,
+        paramsFarcasterUsername,
         sessionId,
         encryptionKey,
         newDeviceSessionLookupId,
@@ -69,6 +71,7 @@ export const AuthLogin = () => {
     paramsEmail,
     paramsPhone,
     paramsCountryCode,
+    paramsFarcasterUsername,
     sessionId,
     encryptionKey,
     newDeviceSessionLookupId,
@@ -104,6 +107,7 @@ export const AuthLogin = () => {
     async function getWebAuthURLForAddDevice() {
       await capsule.setEmail(paramsEmail);
       await capsule.setPhoneNumber(paramsPhone, paramsCountryCode);
+      await capsule.setFarcasterUsername(paramsFarcasterUsername);
       let touchRes = await userManagementClient.touchSession();
       if (!touchRes.data.sessionLookupId) {
         touchRes = await userManagementClient.touchSession(true);
@@ -132,7 +136,7 @@ export const AuthLogin = () => {
 
   useEffect(() => {
     if (
-      (paramsEmail || paramsPhone) &&
+      (paramsEmail || paramsPhone || paramsFarcasterUsername) &&
       sessionId &&
       encryptionKey &&
       !paramsSkipAutoLogin &&

@@ -33,6 +33,11 @@ export const OAuth = ({ methods }: OAuthProps) => {
   };
 
   const handleMethodClick = (method: OAuthMethod) => async () => {
+    if (method === OAuthMethod.FARCASTER) {
+      setStep(ModalStep.FARCASTER_OAUTH);
+      return;
+    }
+
     setStep(ModalStep.AWAITING_OAUTH);
 
     const oAuthURL = await capsule.getOAuthURL(method);
