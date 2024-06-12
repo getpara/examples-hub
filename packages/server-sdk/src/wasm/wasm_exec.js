@@ -5,7 +5,9 @@
 "use strict";
 
 const globalThisCopy = global;
-globalThisCopy.crypto = require('crypto');
+if (!globalThisCopy.crypto) {
+	globalThisCopy.crypto = require("crypto");
+}
 const crypto = globalThisCopy.crypto;
 
 (() => {
