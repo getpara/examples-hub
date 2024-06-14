@@ -1,3 +1,5 @@
+const webpack = require('webpack');
+
 module.exports = {
   babel: {
     plugins: [
@@ -28,6 +30,12 @@ module.exports = {
         https: false,
         http: false,
       };
+      webpackConfig.plugins = [
+        ...webpackConfig.plugins,
+        new webpack.ProvidePlugin({
+          process: 'process/browser',
+        }),
+      ];
 
       return webpackConfig;
     },
