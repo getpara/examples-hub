@@ -25,14 +25,21 @@ document.getElementsByTagName('body')[0].appendChild(div);
 div.innerHTML = "<center><h1 id='message'></h1></center>";
 document.getElementById('message').innerHTML = 'Errors will appear here';
 
-let platform;
+enum Platform {
+  flutter,
+  iOS,
+}
+
+let platform: Platform;
+let version;
 
 window.addEventListener('message', function (event) {
   const data = event.data;
   switch (data['messageType']) {
     case 'Capsule#init':
       initCapsule(data['arguments']['environment'], data['arguments']['apiKey']);
-      platform = data['arguments']['platform'] ?? 'flutter';
+      platform = Platform[data['arguments']['platform'] as keyof typeof Platform] ?? Platform.flutter;
+      version = data['arguments']['version'];
       break;
     case 'Capsule#invokeMethod':
       invokeCapsuleMethod(data['methodName'], data['arguments']);
@@ -44,13 +51,20 @@ window.addEventListener('message', function (event) {
   }
 });
 
-function sendResponse(method: string, responseData: any) {
+function sendResponse(method: string, responseData: any, error: Error | undefined = undefined) {
   switch (platform) {
-    case 'flutter':
-      window['flutter_inappwebview'].callHandler('asyncResult', responseData);
+    case Platform.flutter:
+      switch (version) {
+        case undefined:
+        case null:
+          window['flutter_inappwebview'].callHandler('asyncResult', responseData);
+          break;
+        default:
+          window['flutter_inappwebview'].callHandler('asyncResult', { responseData, error });
+      }
       break;
-    case 'ios':
-      window['webkit'].messageHandlers.callback.postMessage({ method: method, responseData: responseData });
+    case Platform.iOS:
+      window['webkit'].messageHandlers.callback.postMessage({ method, responseData, error });
       break;
   }
 }
@@ -70,67 +84,71 @@ function initCapsule(environment: string, apiKey: string) {
 }
 
 async function invokeCapsuleMethod(methodName: string, args: any[]) {
-  const capsule = window['capsule'] as CapsuleWeb;
-  switch (methodName) {
-    case 'createWallet':
-      const [wallet, recoveryShare] = await capsule.createWallet(args[0], args[1]);
-      sendResponse('createWallet', [
-        {
-          wallet: { id: wallet.id, signer: wallet.signer, address: wallet.address, publicKey: wallet.publicKey },
-          recoveryShare: recoveryShare,
-        },
-      ]);
-      break;
-    case 'getUserId':
-      // @ts-ignore
-      const userId = capsule.userId;
-      sendResponse('getUserId', userId);
-      break;
-    case 'signTypedData': {
-      const signMessageResult = await signTypedData(capsule, args);
-      sendResponse('signTypedData', signMessageResult);
-      break;
+  try {
+    const capsule = window['capsule'] as CapsuleWeb;
+    switch (methodName) {
+      case 'createWallet':
+        const [wallet, recoveryShare] = await capsule.createWallet(args[0], args[1]);
+        sendResponse('createWallet', [
+          {
+            wallet: { id: wallet.id, signer: wallet.signer, address: wallet.address, publicKey: wallet.publicKey },
+            recoveryShare: recoveryShare,
+          },
+        ]);
+        break;
+      case 'getUserId':
+        // @ts-ignore
+        const userId = capsule.userId;
+        sendResponse('getUserId', userId);
+        break;
+      case 'signTypedData': {
+        const signMessageResult = await signTypedData(capsule, args);
+        sendResponse('signTypedData', signMessageResult);
+        break;
+      }
+      case 'recoverTypedSignature':
+        const data = args[0];
+        const signature = args[1];
+        const version = args[2];
+        const prefixedSignature = signature.startsWith('0x') ? signature : `0x${signature}`;
+        const address = recoverTypedSignature({ data, signature: prefixedSignature, version: version });
+        sendResponse('recoverTypedSignature', address);
+        break;
+      case 'generatePasskey':
+        await generatePasskey(capsule, args);
+        sendResponse('generatePasskey', true);
+        break;
+      case 'generatePasskeyV2':
+        await generatePasskeyV2(capsule, args);
+        sendResponse('generatePasskeyV2', true);
+        break;
+      case 'getWebChallenge':
+        const getWebChallengeResult = await capsule.ctx.capsuleClient.getWebChallenge('');
+        sendResponse('getWebChallenge', getWebChallengeResult);
+        break;
+      case 'verifyWebChallenge':
+        const verifyWebChallengeResult = await verifyWebChallenge(capsule, args);
+        sendResponse(
+          'verifyWebChallenge',
+          platform === Platform.iOS ? verifyWebChallengeResult['data']['userId'] : verifyWebChallengeResult,
+        );
+        break;
+      case 'login':
+        const desiredWallet = await login(capsule, args);
+        sendResponse('login', desiredWallet);
+        break;
+      case 'loginV2':
+        const desiredWallet2 = await loginV2(capsule, args);
+        sendResponse('loginV2', desiredWallet2);
+        break;
+      default:
+        const result = capsule[methodName](...args);
+        const resolvedResult = result instanceof Promise ? await result : result;
+        sendResponse(methodName, resolvedResult);
+        break;
     }
-    case 'recoverTypedSignature':
-      const data = args[0];
-      const signature = args[1];
-      const version = args[2];
-      const prefixedSignature = signature.startsWith('0x') ? signature : `0x${signature}`;
-      const address = recoverTypedSignature({ data, signature: prefixedSignature, version: version });
-      sendResponse('recoverTypedSignature', address);
-      break;
-    case 'generatePasskey':
-      await generatePasskey(capsule, args);
-      sendResponse('generatePasskey', true);
-      break;
-    case 'generatePasskeyV2':
-      await generatePasskeyV2(capsule, args);
-      sendResponse('generatePasskeyV2', true);
-      break;
-    case 'getWebChallenge':
-      const getWebChallengeResult = await capsule.ctx.capsuleClient.getWebChallenge('');
-      sendResponse('getWebChallenge', getWebChallengeResult);
-      break;
-    case 'verifyWebChallenge':
-      const verifyWebChallengeResult = await verifyWebChallenge(capsule, args);
-      sendResponse(
-        'verifyWebChallenge',
-        platform === 'ios' ? verifyWebChallengeResult['data']['userId'] : verifyWebChallengeResult,
-      );
-      break;
-    case 'login':
-      const desiredWallet = await login(capsule, args);
-      sendResponse('login', desiredWallet);
-      break;
-    case 'loginV2':
-      const desiredWallet2 = await loginV2(capsule, args);
-      sendResponse('loginV2', desiredWallet2);
-      break;
-    default:
-      const result = capsule[methodName](...args);
-      const resolvedResult = result instanceof Promise ? await result : result;
-      sendResponse(methodName, resolvedResult);
-      break;
+  } catch (error) {
+    sendResponse(methodName, null, error.message);
   }
 }
 
