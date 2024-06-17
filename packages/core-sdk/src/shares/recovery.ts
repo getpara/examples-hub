@@ -12,24 +12,48 @@ export async function sendRecoveryForShare(
   ignoreRedistributingBackupEncryptedShare = false,
   emailProps: BackupKitEmailProps,
 ): Promise<string> {
-  const recoveryPrivateKeyContainer = new KeyContainer(
-    walletId,
-    '',
-    '', // TODO: add in if needed
-  );
-  const encryptedUserBackup = recoveryPrivateKeyContainer.encryptForSelf(userSigner);
-  const userBackupKeyShareOpts = {
-    encryptedShare: encryptedUserBackup,
-    type: KeyType.USER,
-    encryptor: EncryptorType.RECOVERY,
-  };
+  let userBackupKeyShareOptsArr: (encryptedKeyshare & {
+    walletId: string;
+  })[];
+  let recoveryPrivateKeyContainer: KeyContainer | undefined;
+  const { recoveryPublicKeys } = await ctx.capsuleClient.getRecoveryPublicKeys(userId);
+
+  if (!recoveryPublicKeys?.length) {
+    recoveryPrivateKeyContainer = new KeyContainer(walletId, '', '');
+    const { recoveryPublicKeys } = await ctx.capsuleClient.persistRecoveryPublicKeys(userId, [
+      recoveryPrivateKeyContainer.getPublicEncryptionKeyHex(),
+    ]);
+
+    const encryptedUserBackup = recoveryPrivateKeyContainer.encryptForSelf(userSigner);
+    userBackupKeyShareOptsArr = [
+      {
+        walletId,
+        encryptedShare: encryptedUserBackup,
+        type: KeyType.USER,
+        encryptor: EncryptorType.RECOVERY,
+        recoveryPublicKeyId: recoveryPublicKeys[0].id,
+      },
+    ];
+  } else {
+    userBackupKeyShareOptsArr = recoveryPublicKeys.map((recoveryPublicKey) => {
+      const { id: recoveryPublicKeyId, publicKey } = recoveryPublicKey;
+      const encryptedUserBackup = KeyContainer.encryptWithPublicKey(Buffer.from(publicKey, 'hex'), userSigner);
+      return {
+        walletId,
+        encryptedShare: encryptedUserBackup,
+        type: KeyType.USER,
+        encryptor: EncryptorType.RECOVERY,
+        recoveryPublicKeyId,
+      };
+    });
+  }
 
   await ctx.capsuleClient.uploadUserKeyShares(userId, [
     ...otherEncryptedShares.map((share) => ({
       walletId,
       ...share,
     })),
-    ...(ignoreRedistributingBackupEncryptedShare ? [] : [{ walletId, ...userBackupKeyShareOpts }]),
+    ...(ignoreRedistributingBackupEncryptedShare ? [] : userBackupKeyShareOptsArr),
   ]);
 
   if (!ignoreRedistributingBackupEncryptedShare) {
@@ -41,5 +65,5 @@ export async function sendRecoveryForShare(
     });
   }
 
-  return JSON.stringify(recoveryPrivateKeyContainer);
+  return recoveryPrivateKeyContainer ? JSON.stringify(recoveryPrivateKeyContainer) : '';
 }

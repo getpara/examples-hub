@@ -11,21 +11,25 @@ import VerifyCode from '../../../assets/verifyCode';
 import { RecoveryAttemptContext, RecoveryType } from '../../contexts/RecoveryAttemptContext';
 import PhoneContext from '../../contexts/PhoneContext';
 
-async function recoverUserShare(userId: string, walletId: string, serializedRecoveryShare: string): Promise<string> {
+async function recoverUserShares(userId: string, walletId: string, serializedRecoveryShare: string): Promise<string[]> {
   const recoveryPrivateKeyContainer = KeyContainer.buildFrom(serializedRecoveryShare);
 
-  const res = await capsule.ctx.capsuleClient.recoverUserShare(userId, walletId);
-  return recoveryPrivateKeyContainer.decrypt(res.data.keyShare.encryptedShare);
+  const res = await capsule.ctx.capsuleClient.recoverUserShares(userId, walletId);
+  const { keyShares, keyShare } = res.data;
+  if (!keyShares?.length) {
+    return [recoveryPrivateKeyContainer.decrypt(keyShare.encryptedShare)];
+  }
+  return keyShares.map((ks) => recoveryPrivateKeyContainer.decrypt(ks.encryptedShare));
 }
 
 type RecoverWalletWithSecretStepProps = {
   setWebAuthURLForCreate: (webAuthURLForCreate: string | null) => void;
-  setUserShare: (userShare: string | null) => void;
+  setUserShares: (userShares: string[] | null) => void;
 };
 
 const RecoverWalletWithSecretStep: React.FC<RecoverWalletWithSecretStepProps> = ({
   setWebAuthURLForCreate,
-  setUserShare,
+  setUserShares,
 }) => {
   const { setCurrentRecoveryStep } = useContext(RecoveryStepContext);
   const { type } = useContext(RecoveryAttemptContext);
@@ -89,8 +93,8 @@ const RecoverWalletWithSecretStep: React.FC<RecoverWalletWithSecretStepProps> = 
         width="100%"
         onClick={async () => {
           try {
-            const userShare = await recoverUserShare(userId, walletId, secret);
-            setUserShare(userShare);
+            const userShares = await recoverUserShares(userId, walletId, secret);
+            setUserShares(userShares);
             setIncorrectCode(false);
             await capsule.setEmail(email);
             await capsule.setPhoneNumber(phone, countryCode);

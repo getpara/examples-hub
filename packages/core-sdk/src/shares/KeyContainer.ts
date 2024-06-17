@@ -27,14 +27,27 @@ export class KeyContainer {
     }
   }
 
-  getPublicDecryptionKey(): Buffer {
+  getPublicEncryptionKey(): Buffer {
     return Buffer.from(eutil.privateToPublic(Buffer.from(this.backupDecryptionKey, 'hex')));
+  }
+
+  getPublicEncryptionKeyHex(): string {
+    return this.getPublicEncryptionKey().toString('hex');
   }
 
   encryptForSelf(backup: string): string {
     try {
-      const pubkey = this.getPublicDecryptionKey();
+      const pubkey = this.getPublicEncryptionKey();
       const data = ECIESEncrypt(pubkey, Buffer.from(backup, 'ucs2')).toString('base64');
+      return data;
+    } catch (error: any) {
+      throw Error('Error encrypting backup');
+    }
+  }
+
+  static encryptWithPublicKey(publicKey: Buffer, backup: string): string {
+    try {
+      const data = ECIESEncrypt(publicKey, Buffer.from(backup, 'ucs2')).toString('base64');
       return data;
     } catch (error: any) {
       throw Error('Error encrypting backup');

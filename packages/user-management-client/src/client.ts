@@ -197,6 +197,7 @@ export interface encryptedKeyshare {
   type: (typeof KeyType)[keyof typeof KeyType];
   biometricPublicKey?: string;
   encryptor: (typeof EncryptorType)[keyof typeof EncryptorType];
+  recoveryPublicKeyId?: string;
 }
 
 export enum EncryptorType {
@@ -660,7 +661,7 @@ class Client {
   }
 
   // GET /recovery/users/:userId/wallets/:walletId/key-shares
-  async recoverUserShare(userId: string, walletId: string) {
+  async recoverUserShares(userId: string, walletId: string) {
     const res = await this.baseRequest.get<any>(
       `/recovery/users/${userId}/wallets/${walletId}/key-shares?type=USER&encryptor=RECOVERY`,
     );
@@ -776,6 +777,19 @@ class Client {
 
   async keepSessionAlive(userId: string) {
     const res = await this.baseRequest.post<any>(`/users/${userId}/session/keep-alive`);
+    return res.data;
+  }
+
+  async persistRecoveryPublicKeys(
+    userId: string,
+    publicKeys: string[],
+  ): Promise<{ recoveryPublicKeys: { id: string; publicKey: string }[] }> {
+    const res = await this.baseRequest.post<any>(`/users/${userId}/recovery-public-keys`, { publicKeys });
+    return res.data;
+  }
+
+  async getRecoveryPublicKeys(userId: string): Promise<{ recoveryPublicKeys: { id: string; publicKey: string }[] }> {
+    const res = await this.baseRequest.get<any>(`/users/${userId}/recovery-public-keys`);
     return res.data;
   }
 

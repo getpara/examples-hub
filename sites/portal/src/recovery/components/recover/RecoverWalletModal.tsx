@@ -23,7 +23,7 @@ type RecoveryWalletModalProps = {
 const RecoveryWalletModal: React.FC<RecoveryWalletModalProps> = ({ isOpen, onClose }) => {
   const { currentRecoveryStep, setCurrentRecoveryStep } = useContext(RecoveryStepContext);
   const [webAuthURLForCreate, setWebAuthURLForCreate] = useState('');
-  const [userShare, setUserShare] = useState('');
+  const [userShares, setUserShares] = useState<string[]>(null);
   const createAccountTimeout = useRef<number>();
   const { twoFactorVerifiedInSession } = useContext(RecoveryAttemptContext);
   const { is2FAFlow } = useContext(TwoFactorContext);
@@ -52,15 +52,17 @@ const RecoveryWalletModal: React.FC<RecoveryWalletModalProps> = ({ isOpen, onClo
 
   useEffect(() => {
     async function distribute() {
-      if (userShare && currentRecoveryStep === ModalStep.AWAITING_FINISH) {
+      if (userShares && currentRecoveryStep === ModalStep.AWAITING_FINISH) {
         const fetchedWallets = (await capsule.fetchWallets()).filter((wallet) => !!wallet.address);
         const walletId = fetchedWallets[0].id;
-        await distributeNewShare(capsule.ctx, capsule.getUserId(), walletId, userShare, true, {});
-        setUserShare(null);
+        await Promise.all(
+          userShares.map((userShare) => distributeNewShare(capsule.ctx, capsule.getUserId(), walletId, userShare, true, {})),
+        );
+        setUserShares(null);
       }
     }
     distribute();
-  }, [userShare, currentRecoveryStep]);
+  }, [userShares, currentRecoveryStep]);
 
   useEffect(() => {
     if (!is2FAFlow || twoFactorVerifiedInSession) {
@@ -77,7 +79,7 @@ const RecoveryWalletModal: React.FC<RecoveryWalletModalProps> = ({ isOpen, onClo
           <VStack alignItems="center" display="flex" flex={1} margin="22px 22px 0px">
             {currentRecoveryStep === ModalStep.VERIFY_2FA && <RecoveryWallet2FAStep />}
             {currentRecoveryStep === ModalStep.SECRET && (
-              <RecoverWalletWithSecretStep setWebAuthURLForCreate={setWebAuthURLForCreate} setUserShare={setUserShare} />
+              <RecoverWalletWithSecretStep setWebAuthURLForCreate={setWebAuthURLForCreate} setUserShares={setUserShares} />
             )}
             {currentRecoveryStep === ModalStep.LOST_2FA && <RecoveryLost2FA onClose={onClose} />}
             {currentRecoveryStep === ModalStep.BIOMETRIC && <RecoveryBiometricsSetup url={webAuthURLForCreate} />}
