@@ -70,6 +70,33 @@ export interface PlatformUtils {
     s: Buffer;
   }>;
 
+  ed25519Keygen(
+    ctx: Ctx,
+    userId: string,
+    sessionCookie: string,
+    emailProps?: BackupKitEmailProps,
+  ): Promise<{
+    signer: string;
+    walletId: string;
+  }>;
+  ed25519Sign(
+    ctx: Ctx,
+    userId: string,
+    walletId: string,
+    share: string,
+    base64Bytes: string,
+    sessionCookie: string,
+  ): Promise<SignatureRes>;
+
+  ed25519PreKeygen(
+    ctx: Ctx,
+    email: string,
+    sessionCookie: string,
+  ): Promise<{
+    signer: string;
+    walletId: string;
+  }>;
+
   localStorage: StorageUtils;
 
   sessionStorage: StorageUtils;

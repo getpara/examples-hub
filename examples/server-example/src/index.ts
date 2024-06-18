@@ -5,6 +5,8 @@ import * as ethers from 'ethers';
 import { sepolia } from 'viem/chains';
 import { http } from 'viem';
 import { PublicKeyStatus } from '@usecapsule/user-management-client';
+import * as solana from '@solana/web3.js';
+import { CapsuleSolanaWeb3Signer } from '@usecapsule/solana-web3.js-v1-integration';
 
 import CapsuleServer, { Environment } from '@usecapsule/server-sdk';
 import { CapsuleEthersSigner } from '@usecapsule/ethers-v6-integration';
@@ -20,9 +22,13 @@ const SAMPLE_CLIENT_DATA_JSON =
   'eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiWlRSak4yTTNObVV0TURneFlpMDBaak01TFRnek9HVXRZV1k0WlRoak56a3lNakptIiwib3JpZ2luIjoiaHR0cHM6Ly9hcHAuc2FuZGJveC51c2VjYXBzdWxlLmNvbSJ9';
 const ALCHEMY_SEPOLIA_PROVIDER = 'https://eth-sepolia.g.alchemy.com/v2/KfxK8ZFXw9mTUuJ7jt751xGJCa3r8noZ';
 
+const SOLANA_RECIPIENT_PUBLIC_KEY = '4TUYF5Q6sCkBCjamQrTkNYJyxhyaCPiPnq9oVg6qXbTp';
+const SOLANA_DEVNET_RPC_ENDPOINT = 'https://api.devnet.solana.com';
+
 interface Params {
   email?: string;
   isPregen?: boolean;
+  useSolana?: boolean;
 }
 
 async function errorMiddleware(err: Error, _req: Request, res: Response, _next: NextFunction): Promise<void> {
@@ -32,10 +38,10 @@ async function errorMiddleware(err: Error, _req: Request, res: Response, _next: 
 
 async function createUserAndWallet(params: Params) {
   const capsule = new CapsuleServer(Environment.SANDBOX, '2f938ac0c48ef356050a79bd66042a23');
-  const { email, isPregen } = params;
+  const { email, isPregen, useSolana } = params;
   await capsule.logout();
   if (isPregen) {
-    await capsule.createWalletPreGen(email);
+    await capsule.createWalletPreGen(email, useSolana);
   } else {
     await capsule.createUser(email || `server-test${uuid.v4()}@test.usecapsule.com`);
     const webAuthURL = await capsule.verifyEmail('123456');
@@ -54,14 +60,39 @@ async function createUserAndWallet(params: Params) {
       status: PublicKeyStatus.COMPLETE,
     });
     // ~~~~~~~
-    await capsule.createWallet(false);
+    await capsule.createWalletPerType(false);
   }
 
-  // @ts-ignore
-  const walletAddress = Object.values(capsule.getWallets())[0].address;
+  const walletAddress = useSolana
+    ? // @ts-ignore
+      Object.values(capsule.getED25519Wallets())[0].address
+    : // @ts-ignore
+      Object.values(capsule.getWallets())[0].address;
   console.log(`address: ${walletAddress}`);
 
   console.log(walletAddress, 'session', capsule.retrieveSessionCookie());
+  if (useSolana) {
+    const connection = new solana.Connection(SOLANA_DEVNET_RPC_ENDPOINT, 'confirmed');
+    const solanaSigner = new CapsuleSolanaWeb3Signer(capsule, connection);
+    const tx = new solana.Transaction().add(
+      solana.SystemProgram.transfer({
+        fromPubkey: solanaSigner.sender,
+        toPubkey: new solana.PublicKey(SOLANA_RECIPIENT_PUBLIC_KEY),
+        lamports: 0.03003 * solana.LAMPORTS_PER_SOL, // Convert SOL to lamports
+      }),
+    );
+    tx.feePayer = solanaSigner.sender;
+
+    console.log(`${solanaSigner.address} has balance ${await connection.getBalance(solanaSigner.sender)}`);
+    console.log(`most recent block: ${await connection.getSlot()}`);
+
+    const signature = await solanaSigner.sendTransaction(tx, {
+      skipPreflight: false,
+      preflightCommitment: 'confirmed',
+    });
+    console.log(`solana signature: ${signature}`);
+    return;
+  }
   const provider = new ethers.JsonRpcProvider(ALCHEMY_SEPOLIA_PROVIDER, 'sepolia');
   const ethersSigner = new CapsuleEthersSigner(capsule, provider);
   const viemClient = createCapsuleViemClient(capsule, {
@@ -121,13 +152,21 @@ app.get('/', async (req: Request, res: Response) => {
 app.post('/wallets', async (req: Request, res: Response, next: NextFunction) => {
   const now = Date.now();
   try {
-    const { email, emails, serializedInstance, isPregen } = req.body;
+    const { email, emails, serializedInstance, isPregen, useSolana } = req.body;
     if (serializedInstance) {
       await signMessageWithImport(serializedInstance);
     } else if (emails) {
-      await Promise.all(emails.map((e: string) => createUserAndWallet({ email: e, isPregen })));
+      await Promise.all(
+        emails.map(async (e: string) => {
+          try {
+            await createUserAndWallet({ email: e, isPregen, useSolana });
+          } catch (error) {
+            console.error(error);
+          }
+        }),
+      );
     } else {
-      await createUserAndWallet({ email, isPregen });
+      await createUserAndWallet({ email, isPregen, useSolana });
     }
     console.log('time taken:', Date.now() - now);
     res.send('200');

@@ -81,6 +81,18 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
       const { share, walletId, userId } = params;
       return await walletUtils.getPrivateKey(ctx, share, walletId, userId);
     }
+    case 'ED25519_KEYGEN': {
+      const { userId } = params;
+      return walletUtils.ed25519Keygen(ctx, userId);
+    }
+    case 'ED25519_SIGN': {
+      const { share, walletId, userId, base64Bytes } = params;
+      return walletUtils.ed25519Sign(ctx, share, userId, walletId, base64Bytes);
+    }
+    case 'ED25519_PREKEYGEN': {
+      const { email } = params;
+      return walletUtils.ed25519PreKeygen(ctx, email);
+    }
     default: {
       throw new Error(`functionType: ${functionType} not supported`);
     }

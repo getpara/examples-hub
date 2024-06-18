@@ -59,7 +59,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
 
     const [walletCreated, setWalletCreated] = useState(false);
     const [walletCreationInProgress, setWalletCreationInProgress] = useState(false);
-    const [createWalletRes, setCreateWalletRes] = useState<[Wallet, string]>(null);
+    const [createWalletsRes, setCreateWalletsRes] = useState<{ wallets: Wallet[]; recoverySecret?: string }>(null);
     const [recoveryShare, setRecoveryShare] = useState<string>(null);
     const [distributeDone, setDistributeDone] = useState(false);
 
@@ -127,8 +127,8 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
       async function genWallet() {
         setWalletCreationInProgress(true);
         if (!createWalletOverride) {
-          const newWalletRes = await capsule.createWallet(true);
-          setCreateWalletRes(newWalletRes);
+          const newWalletsRes = await capsule.createWalletPerType(true);
+          setCreateWalletsRes(newWalletsRes);
         } else {
           const recoveryFromOverride = await createWalletOverride(capsule);
           const fetchedWallets = (await capsule.fetchWallets()).filter((wallet) => !!wallet.address);
@@ -158,7 +158,14 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
 
       async function distributeShare() {
         if (!createWalletOverride) {
-          const result = await capsule.distributeNewWalletShare(createWalletRes[0].id, createWalletRes[0].signer);
+          const result = await capsule.distributeNewWalletShare(
+            createWalletsRes.wallets[0].id,
+            createWalletsRes.wallets[0].signer,
+          );
+          for (let i = 1; i < createWalletsRes.wallets.length; i++) {
+            // don't need to save the recovery secret as it should be the same as the first one
+            await capsule.distributeNewWalletShare(createWalletsRes.wallets[i].id, createWalletsRes.wallets[i].signer);
+          }
           setRecoveryShare(result);
         }
         setDistributeDone(true);
@@ -166,7 +173,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
         setStep(ModalStep.SECRET);
       }
       distributeShare();
-    }, [isFullyLoggedIn, walletCreated, createWalletRes]);
+    }, [isFullyLoggedIn, walletCreated, createWalletsRes]);
 
     // wait for biometric to be added to move on to next step
     useEffect(() => {
@@ -216,7 +223,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
           resetUserInfoState();
           setDistributeDone(false);
           setWalletCreated(false);
-          setCreateWalletRes(null);
+          setCreateWalletsRes(null);
           setRecoveryShare(null);
         }, 200);
       } else if (

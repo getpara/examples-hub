@@ -93,3 +93,31 @@ export async function signMessage(
     });
   });
 }
+
+export async function ed25519Sign(
+  ctx: Ctx,
+  userId: string,
+  walletId: string,
+  share: string,
+  base64Bytes: string,
+  sessionCookie?: string,
+): Promise<SignatureRes> {
+  return await new Promise(async (resolve) => {
+    const workId = uuid.v4();
+    const worker = await setupWorker(async (signMessageRes) => {
+      resolve(signMessageRes);
+    }, workId);
+    worker.postMessage({
+      env: ctx.env,
+      apiKey: ctx.apiKey,
+      params: { share, walletId, userId, base64Bytes },
+      functionType: 'ED25519_SIGN',
+      offloadMPCComputationURL: ctx.offloadMPCComputationURL,
+      disableWorkers: ctx.disableWorkers,
+      sessionCookie,
+      disableWebSockets: ctx.disableWebSockets,
+      wasmOverride: ctx.wasmOverride,
+      workId,
+    });
+  });
+}

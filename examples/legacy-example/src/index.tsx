@@ -37,7 +37,7 @@ import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet';
 import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
 import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
-
+import * as solana from '@solana/web3.js';
 import Capsule from '@usecapsule/web-sdk';
 import { CapsuleModal, OAuthMethod, ON_RAMP_PROVIDERS } from '@usecapsule/react-sdk';
 import { FeeMarketEIP1559Transaction } from '@ethereumjs/tx';
@@ -55,6 +55,7 @@ import CoreCapsule, {
   getProvider,
   OnRampProviderAssetMap,
 } from '@usecapsule/core-sdk';
+import { CapsuleSolanaWeb3Signer } from '@usecapsule/solana-web3.js-v1-integration';
 import { FONT_OPTIONS } from './constants';
 import '@usecapsule/react-sdk/styles.css';
 import { ArrowUpIcon, ArrowDownIcon, SmallCloseIcon, AddIcon } from '@chakra-ui/icons';
@@ -147,6 +148,32 @@ async function sendCosmosTx(): Promise<void> {
       },
     ),
   );
+}
+
+const SOLANA_RECIPIENT_PUBLIC_KEY = '4TUYF5Q6sCkBCjamQrTkNYJyxhyaCPiPnq9oVg6qXbTp';
+const SOLANA_DEVNET_RPC_ENDPOINT = 'https://api.devnet.solana.com';
+
+async function sendSolanaTx(setSig: any): Promise<void> {
+  const connection = new solana.Connection(SOLANA_DEVNET_RPC_ENDPOINT, 'confirmed');
+  const solanaSigner = new CapsuleSolanaWeb3Signer(capsule, connection);
+  const tx = new solana.Transaction().add(
+    solana.SystemProgram.transfer({
+      fromPubkey: solanaSigner.sender,
+      toPubkey: new solana.PublicKey(SOLANA_RECIPIENT_PUBLIC_KEY),
+      lamports: 0.03003 * solana.LAMPORTS_PER_SOL, // Convert SOL to lamports
+    }),
+  );
+  tx.feePayer = solanaSigner.sender;
+
+  console.log(`${solanaSigner.address} has balance ${await connection.getBalance(solanaSigner.sender)}`);
+  console.log(`most recent block: ${await connection.getSlot()}`);
+
+  const rawTxRes = await solanaSigner.sendTransaction(tx, {
+    skipPreflight: false,
+    preflightCommitment: 'confirmed',
+  });
+  console.log(`solana signature: ${rawTxRes}`);
+  setSig(rawTxRes);
 }
 
 async function sendViemTransaction(nonce = 0): Promise<void> {
@@ -1050,6 +1077,17 @@ function App() {
                 }}
               >
                 Send Cosmos Transaction
+              </Button>
+              <Text>
+                Solana Signature: <strong>{ethersSignature}</strong>
+              </Text>
+              <Button
+                colorScheme="teal"
+                onClick={async () => {
+                  await sendSolanaTx(setEthersSignature);
+                }}
+              >
+                Send Solana Transaction
               </Button>
               <Button
                 colorScheme="red"

@@ -4,7 +4,7 @@ export * from './types/index.js';
 export { distributeNewShare } from './shares/shareDistribution.js';
 export { KeyContainer } from './shares/KeyContainer.js';
 import { CoreCapsule, PREFIX as STORAGE_PREFIX } from './CoreCapsule.js';
-export { RecoveryStatus } from './CoreCapsule.js';
+export { RecoveryStatus, WalletType } from './CoreCapsule.js';
 export type { Wallet, ConstructorOpts } from './CoreCapsule.js';
 export type { PlatformUtils } from './PlatformUtils.js';
 export type { StorageUtils } from './StorageUtils.js';

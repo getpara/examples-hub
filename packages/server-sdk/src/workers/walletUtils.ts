@@ -52,6 +52,58 @@ async function sendTransactionRequest(
   return data;
 }
 
+export async function ed25519Keygen(ctx: Ctx, userId: string): Promise<{ signer: string; walletId: string }> {
+  const { walletId, protocolId } = await ctx.capsuleClient.createWallet(userId, {
+    scheme: SignatureScheme.ED25519,
+  });
+  const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
+
+  const newSigner = (await new Promise((resolve, reject) =>
+    global.ed25519CreateAccount(serverUrl, walletId, protocolId, (err, result) => {
+      if (err) {
+        reject(err);
+      }
+      resolve(result);
+    }),
+  )) as string;
+  return { signer: newSigner, walletId };
+}
+
+export async function ed25519PreKeygen(ctx: Ctx, email: string): Promise<{ signer: string; walletId: string }> {
+  const { walletId, protocolId } = await ctx.capsuleClient.createPregenWallet({ email, scheme: SignatureScheme.ED25519 });
+
+  const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
+  const newSigner = (await new Promise((resolve, reject) =>
+    global.ed25519CreateAccount(serverUrl, walletId, protocolId, (err, result) => {
+      if (err) {
+        reject(err);
+      }
+      resolve(result);
+    }),
+  )) as string;
+  return { signer: newSigner, walletId };
+}
+
+export async function ed25519Sign(
+  ctx: Ctx,
+  share: string,
+  userId: string,
+  walletId: string,
+  base64Bytes: string,
+): Promise<{ signature: string }> {
+  const { protocolId } = await ctx.capsuleClient.preSignMessage(userId, walletId, base64Bytes, SignatureScheme.ED25519);
+
+  const base64Sig = (await new Promise((resolve, reject) =>
+    global.ed25519Sign(share, protocolId, base64Bytes, (err, result) => {
+      if (err) {
+        reject(err);
+      }
+      resolve(result);
+    }),
+  )) as string;
+  return { signature: base64Sig };
+}
+
 export async function keygen(
   ctx: Ctx,
   userId: string,

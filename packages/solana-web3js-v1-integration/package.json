@@ -1,0 +1,34 @@
+{
+  "name": "@usecapsule/solana-web3.js-v1-integration",
+  "version": "0.1.0",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/types/index.d.ts",
+  "typings": "dist/types/index.d.ts",
+  "sideEffects": false,
+  "dependencies": {
+    "@solana/web3.js": "^1.91.8",
+    "@usecapsule/core-sdk": "1.14.0"
+  },
+  "scripts": {
+    "build": "yarn build:cjs && yarn build:esm && yarn build:types",
+    "build:cjs": "rm -rf dist/cjs && tsc --module commonjs --outDir dist/cjs && printf '{\"type\":\"commonjs\"}' > dist/cjs/package.json",
+    "build:esm": "rm -rf dist/esm && tsc --module es6 --outDir dist/esm && printf '{\"type\":\"module\",\"sideEffects\":false}' > dist/esm/package.json",
+    "build:types": "rm -rf dist/types && tsc --module es6 --declarationDir dist/types --emitDeclarationOnly --declaration"
+  },
+  "devDependencies": {
+    "typescript": "5.1.6"
+  },
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/types/index.d.ts"
+    }
+  },
+  "gitHead": "86be3bd943673f87685b87b6e87fc33366be04e7"
+}

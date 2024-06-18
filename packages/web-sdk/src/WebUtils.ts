@@ -1,8 +1,8 @@
 import { Ctx, PlatformUtils, SignatureRes } from '@usecapsule/core-sdk';
 import { LocalStorage } from './LocalStorage.js';
 import { SessionStorage } from './SessionStorage.js';
-import { keygen, preKeygen } from './wallet/keygen.js';
-import { signMessage, sendTransaction, signTransaction } from './wallet/signing.js';
+import { keygen, preKeygen, ed25519Keygen, ed25519PreKeygen } from './wallet/keygen.js';
+import { signMessage, sendTransaction, signTransaction, ed25519Sign } from './wallet/signing.js';
 import { BackupKitEmailProps } from '@usecapsule/user-management-client';
 import { getPrivateKey } from './wallet/privateKey.js';
 
@@ -84,6 +84,40 @@ export class WebUtils implements PlatformUtils {
     s: Buffer;
   }> {
     throw new Error('not implemented');
+  }
+
+  ed25519Keygen(
+    ctx: Ctx,
+    userId: string,
+    sessionCookie: string,
+    emailProps?: BackupKitEmailProps,
+  ): Promise<{
+    signer: string;
+    walletId: string;
+  }> {
+    return ed25519Keygen(ctx, userId, sessionCookie, emailProps);
+  }
+
+  ed25519PreKeygen(
+    ctx: Ctx,
+    email: string,
+    sessionCookie: string,
+  ): Promise<{
+    signer: string;
+    walletId: string;
+  }> {
+    return ed25519PreKeygen(ctx, email, sessionCookie);
+  }
+
+  ed25519Sign(
+    ctx: Ctx,
+    userId: string,
+    walletId: string,
+    share: string,
+    base64Bytes: string,
+    sessionCookie: string,
+  ): Promise<SignatureRes> {
+    return ed25519Sign(ctx, userId, walletId, share, base64Bytes, sessionCookie);
   }
 
   localStorage = new LocalStorage();

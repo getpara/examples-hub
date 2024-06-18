@@ -124,6 +124,7 @@ interface verifySessionChallengeRes {
 export enum SignatureScheme {
   DKLS = 'DKLS',
   CGGMP = 'CGGMP',
+  ED25519 = 'ED25519',
 }
 
 interface walletEntity {
@@ -161,6 +162,7 @@ interface createWalletRes {
 
 interface createPreGenWalletBody {
   email: string;
+  scheme?: SignatureScheme;
 }
 
 interface claimPreGenWalletBody {
@@ -520,8 +522,8 @@ class Client {
     return res;
   };
 
-  preSignMessage = async (userId: string, walletId: string, tx: string): Promise<any> => {
-    const body = { message: tx };
+  preSignMessage = async (userId: string, walletId: string, message: string, scheme?: SignatureScheme): Promise<any> => {
+    const body = { message, scheme };
     const res = await this.baseRequest.post<any>(`/users/${userId}/wallets/${walletId}/messages/sign`, body);
     return res.data;
   };

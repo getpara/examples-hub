@@ -100,3 +100,68 @@ export function preKeygen(
     });
   });
 }
+
+export function ed25519Keygen(
+  ctx: Ctx,
+  userId: string,
+  sessionCookie?: string,
+  _emailProps: BackupKitEmailProps = {},
+): Promise<{
+  signer: string;
+  walletId: string;
+  recoveryShare: string | null;
+}> {
+  return new Promise(async (resolve) => {
+    const worker = await setupWorker(ctx, async (res) => {
+      await waitUntilTrue(async () => isKeygenComplete(ctx, userId, res.walletId), 15000, 1000);
+      resolve({
+        signer: res.signer,
+        walletId: res.walletId,
+        recoveryShare: null,
+      });
+      worker.terminate();
+    });
+    worker.postMessage({
+      env: ctx.env,
+      apiKey: ctx.apiKey,
+      params: { userId },
+      functionType: 'ED25519_KEYGEN',
+      disableWorkers: ctx.disableWorkers,
+      sessionCookie,
+      disableWebSockets: ctx.disableWebSockets,
+      wasmOverride: ctx.wasmOverride,
+    });
+  });
+}
+
+export function ed25519PreKeygen(
+  ctx: Ctx,
+  email: string,
+  sessionCookie?: string,
+): Promise<{
+  signer: string;
+  walletId: string;
+  recoveryShare: string | null;
+}> {
+  return new Promise(async (resolve) => {
+    const worker = await setupWorker(ctx, async (res) => {
+      await waitUntilTrue(async () => isPreKeygenComplete(ctx, email, res.walletId), 15000, 1000);
+      resolve({
+        signer: res.signer,
+        walletId: res.walletId,
+        recoveryShare: null,
+      });
+      worker.terminate();
+    });
+    worker.postMessage({
+      env: ctx.env,
+      apiKey: ctx.apiKey,
+      params: { email },
+      functionType: 'ED25519_PREKEYGEN',
+      disableWorkers: ctx.disableWorkers,
+      sessionCookie,
+      disableWebSockets: ctx.disableWebSockets,
+      wasmOverride: ctx.wasmOverride,
+    });
+  });
+}

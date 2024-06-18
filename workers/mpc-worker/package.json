@@ -3,7 +3,7 @@
   "version": "0.11.1",
   "private": true,
   "dependencies": {
-    "@usecapsule/web-sdk": "1.13.1"
+    "@usecapsule/web-sdk": "1.16.0"
   },
   "scripts": {
     "build": "rm -rf dist && tsc && npx webpack && mv ./dist/mpcWorker-bundle.js ../../sites/portal/public/static/js/mpcWorker-bundle.js"
