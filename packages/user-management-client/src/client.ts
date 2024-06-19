@@ -127,7 +127,7 @@ export enum SignatureScheme {
   ED25519 = 'ED25519',
 }
 
-interface walletEntity {
+export interface WalletEntity {
   address: string | null;
   createdAt: string;
   pregenIdentifier: string;
@@ -144,7 +144,7 @@ interface walletEntity {
 }
 
 interface getWalletsRes {
-  wallets: walletEntity[];
+  wallets: WalletEntity[];
 }
 
 interface createWalletBody {
@@ -458,7 +458,7 @@ class Client {
 
   // POST /wallets/pregen/claim
   claimPregenWallet = async (body?: claimPreGenWalletBody): Promise<void> => {
-    await this.baseRequest.post<walletEntity>(`/wallets/pregen/claim`, body);
+    await this.baseRequest.post<WalletEntity>(`/wallets/pregen/claim`, body);
   };
 
   // POST /users/:userId/wallets/:walletId/transactions/send

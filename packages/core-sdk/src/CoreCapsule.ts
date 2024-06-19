@@ -5,6 +5,7 @@ import {
   PublicKeyStatus,
   PublicKeyType,
   VerificationEmailProps,
+  WalletEntity,
 } from '@usecapsule/user-management-client';
 import { pki, jsbn } from 'node-forge';
 
@@ -1555,6 +1556,23 @@ export abstract class CoreCapsule {
       return false;
     }
     return true;
+  }
+
+  /**
+   * Get pregen wallets for the identifier
+   *
+   * @param {string} pregenIdentifier - the identifier of the user claiming the wallet
+   * @param {PregenIdentifierType} pregenIdentifierType - type of the identifier of the user claiming the wallet
+   * @returns {Promise<WalletEntity[]>} Promise of pregen wallets
+   **/
+  async getPregenWallets(
+    pregenIdentifier: string,
+    pregenIdentifierType: PregenIdentifierType = PregenIdentifierType.EMAIL,
+  ): Promise<WalletEntity[]> {
+    this.requireApiKey();
+
+    const res = await this.ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType);
+    return res.wallets;
   }
 
   /**
