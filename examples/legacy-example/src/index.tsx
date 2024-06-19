@@ -49,6 +49,7 @@ import CoreCapsule, {
   Environment,
   ConstructorOpts,
   DeniedSignatureResWithUrl,
+  PregenIdentifierType,
   OnRampConfig,
   OnRampAsset,
   OnRampProvider,
@@ -57,6 +58,7 @@ import CoreCapsule, {
 } from '@usecapsule/core-sdk';
 import { CapsuleSolanaWeb3Signer } from '@usecapsule/solana-web3.js-v1-integration';
 import { FONT_OPTIONS } from './constants';
+import parsePhoneNumberFromString from 'libphonenumber-js';
 import '@usecapsule/react-sdk/styles.css';
 import { ArrowUpIcon, ArrowDownIcon, SmallCloseIcon, AddIcon } from '@chakra-ui/icons';
 
@@ -501,6 +503,7 @@ function App() {
   const [onRampConfig, setOnRampConfig] = useState<OnRampConfig | undefined>(DEFAULT_ONRAMP_CONFIG);
 
   const [pregenEmail, setPregenEmail] = useState('');
+  const [pregenPhone, setPregenPhone] = useState('');
   const [pregenUserShare, setPregenUserShare] = useState('');
   const [deletedEmail, setDeletedEmail] = useState('');
   const [emailPendingDeletion, setEmailPendingDeletion] = useState('');
@@ -936,6 +939,23 @@ function App() {
               >
                 Create Pregen Wallet
               </Button>
+              <Input
+                placeholder="pregen-phone"
+                onChange={(e) => {
+                  setPregenPhone(e.target.value);
+                }}
+                value={pregenPhone || ''}
+              />
+              <Button
+                colorScheme="teal"
+                onClick={async () => {
+                  const parsedPhoneNumber = parsePhoneNumberFromString(pregenPhone);
+                  const formattedNumberForPregen = `+${parsedPhoneNumber.countryCallingCode}${parsedPhoneNumber.formatNational()}`;
+                  await capsule.createWalletPreGen(formattedNumberForPregen, PregenIdentifierType.PHONE);
+                }}
+              >
+                Create Pregen Wallet Through Phone Number
+              </Button>
               <Button
                 colorScheme="teal"
                 onClick={async () => {
@@ -962,6 +982,17 @@ function App() {
                 }}
               >
                 Claim Pregen Wallet
+              </Button>
+              <Button
+                colorScheme="teal"
+                onClick={async () => {
+                  await capsule.setUserShare(pregenUserShare);
+                  const parsedPhoneNumber = parsePhoneNumberFromString(pregenPhone);
+                  const formattedNumberForPregen = `+${parsedPhoneNumber.countryCallingCode}${parsedPhoneNumber.formatNational()}`;
+                  console.log(await capsule.claimPregenWallet(formattedNumberForPregen, PregenIdentifierType.PHONE));
+                }}
+              >
+                Claim Pregen Wallet For Phone
               </Button>
 
               <Button colorScheme="teal" onClick={checkIsSessionActive}>

@@ -4,7 +4,14 @@
 
 import '../wasm/wasm_exec.js';
 import * as walletUtils from './walletUtils.js';
-import { Ctx, Environment, getPortalBaseURL, initClient, mpcComputationClient } from '@usecapsule/core-sdk';
+import {
+  Ctx,
+  Environment,
+  PregenIdentifierType,
+  getPortalBaseURL,
+  initClient,
+  mpcComputationClient,
+} from '@usecapsule/core-sdk';
 
 export interface Message {
   env: Environment;
@@ -62,8 +69,14 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
       return walletUtils.refresh(ctx, share, walletId, userId);
     }
     case 'PREKEYGEN': {
-      const { partnerId, secretKey, email } = params;
-      const keygenRes = await walletUtils.preKeygen(ctx, partnerId, email, secretKey);
+      const { email, partnerId, secretKey } = params;
+      let { pregenIdentifier, pregenIdentifierType } = params;
+      if (email !== 'null' && email !== 'undefined' && email !== '' && email != null) {
+        pregenIdentifier = email;
+        pregenIdentifierType = PregenIdentifierType.EMAIL;
+      }
+
+      const keygenRes = await walletUtils.preKeygen(ctx, partnerId, pregenIdentifier, pregenIdentifierType, secretKey);
       return keygenRes;
     }
     case 'GET_PRIVATE_KEY': {
@@ -80,7 +93,12 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
     }
     case 'ED25519_PREKEYGEN': {
       const { email } = params;
-      return walletUtils.ed25519PreKeygen(ctx, email);
+      let { pregenIdentifier, pregenIdentifierType } = params;
+      if (email !== 'null' && email !== 'undefined' && email !== '' && email != null) {
+        pregenIdentifier = email;
+        pregenIdentifierType = PregenIdentifierType.EMAIL;
+      }
+      return walletUtils.ed25519PreKeygen(ctx, pregenIdentifier, pregenIdentifierType);
     }
     default: {
       throw new Error(`functionType: ${functionType} not supported`);

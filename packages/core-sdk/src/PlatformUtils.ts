@@ -2,6 +2,7 @@ import { BackupKitEmailProps } from '@usecapsule/user-management-client';
 import { Ctx } from './definitions.js';
 import { SignatureRes } from './types/walletTypes.js';
 import { StorageUtils } from './StorageUtils.js';
+import { PregenIdentifierType } from './CoreCapsule.js';
 
 export interface PlatformUtils {
   getPrivateKey(ctx: Ctx, userId: string, walletId: string, share: string, sessionCookie: string): Promise<string>;
@@ -20,7 +21,8 @@ export interface PlatformUtils {
   preKeygen(
     ctx: Ctx,
     partnerId: string,
-    email: string,
+    pregenIdentifier: string,
+    pregenIdentifierType: PregenIdentifierType,
     secretKey: string | null, // should be acceptable as null in RN as we don't pre-gen them
     sessionCookie: string,
   ): Promise<{
@@ -90,7 +92,8 @@ export interface PlatformUtils {
 
   ed25519PreKeygen(
     ctx: Ctx,
-    email: string,
+    pregenIdentifier: string,
+    pregenIdentifierType: PregenIdentifierType,
     sessionCookie: string,
   ): Promise<{
     signer: string;

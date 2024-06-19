@@ -22,6 +22,7 @@
     "ethereumjs-tx": "2.1.2",
     "ethers": "6.6.4",
     "framer-motion": "10.9.2",
+    "libphonenumber-js": "1.11.2",
     "path": "0.12.7",
     "react": "18.2.0",
     "react-circular-progressbar": "2.1.0",

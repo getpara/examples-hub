@@ -3,7 +3,7 @@ export type { Ctx } from './definitions.js';
 export * from './types/index.js';
 export { distributeNewShare } from './shares/shareDistribution.js';
 export { KeyContainer } from './shares/KeyContainer.js';
-import { CoreCapsule, PREFIX as STORAGE_PREFIX } from './CoreCapsule.js';
+import { CoreCapsule, PREFIX as STORAGE_PREFIX, PregenIdentifierType } from './CoreCapsule.js';
 export { RecoveryStatus, WalletType } from './CoreCapsule.js';
 export type { Wallet, ConstructorOpts } from './CoreCapsule.js';
 export type { PlatformUtils } from './PlatformUtils.js';
@@ -30,7 +30,7 @@ export * from './utils/pollingUtils.js';
 export * from './errors.js';
 export * from './utils/formattingUtils.js';
 export { retrieve as transmissionUtilsRetrieve } from './transmission/transmissionUtils.js';
-export { STORAGE_PREFIX };
+export { STORAGE_PREFIX, PregenIdentifierType };
 export { EmailTheme } from '@usecapsule/user-management-client';
 
 export default CoreCapsule;

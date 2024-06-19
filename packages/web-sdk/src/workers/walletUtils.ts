@@ -1,5 +1,6 @@
 import { SignatureScheme } from '@usecapsule/user-management-client';
 import { Ctx, getBaseMPCNetworkUrl, SignatureRes } from '@usecapsule/core-sdk';
+import { PregenIdentifierType } from '@usecapsule/core-sdk';
 
 const configCGGMPBase = (serverUrl: string, walletId: string, id: string) =>
   `{"ServerUrl":"${serverUrl}", "WalletId": "${walletId}", "Id":"${id}", "Ids":["USER","CAPSULE"], "Threshold":1}`;
@@ -68,8 +69,16 @@ export async function ed25519Keygen(ctx: Ctx, userId: string): Promise<{ signer:
   return { signer: newSigner, walletId };
 }
 
-export async function ed25519PreKeygen(ctx: Ctx, email: string): Promise<{ signer: string; walletId: string }> {
-  const { walletId, protocolId } = await ctx.capsuleClient.createPregenWallet({ email, scheme: SignatureScheme.ED25519 });
+export async function ed25519PreKeygen(
+  ctx: Ctx,
+  pregenIdentifier: string,
+  pregenIdentifierType: PregenIdentifierType,
+): Promise<{ signer: string; walletId: string }> {
+  const { walletId, protocolId } = await ctx.capsuleClient.createPregenWallet({
+    pregenIdentifier,
+    pregenIdentifierType,
+    scheme: SignatureScheme.ED25519,
+  });
 
   const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
   const newSigner = (await new Promise((resolve, reject) =>
@@ -146,10 +155,11 @@ export async function keygen(
 export async function preKeygen(
   ctx: Ctx,
   _partnerId: string | undefined,
-  email: string,
+  pregenIdentifier: string,
+  pregenIdentifierType: PregenIdentifierType,
   secretKey: string | null,
 ): Promise<{ signer: string; walletId: string }> {
-  const { walletId, protocolId } = await ctx.capsuleClient.createPregenWallet({ email });
+  const { walletId, protocolId } = await ctx.capsuleClient.createPregenWallet({ pregenIdentifier, pregenIdentifierType });
 
   const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
   const signerConfigUser = configDKLSBase(walletId, 'USER', ctx.disableWebSockets);

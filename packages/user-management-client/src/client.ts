@@ -130,7 +130,8 @@ export enum SignatureScheme {
 interface walletEntity {
   address: string | null;
   createdAt: string;
-  email: string;
+  pregenIdentifier: string;
+  pregenIdentifierType: string;
   id: string;
   keyGenComplete: boolean;
   name: string | null;
@@ -152,7 +153,8 @@ interface createWalletBody {
 }
 
 interface updatePregenWalletBody {
-  email: string;
+  pregenIdentifier: string;
+  pregenIdentifierType: string;
 }
 
 interface createWalletRes {
@@ -161,7 +163,8 @@ interface createWalletRes {
 }
 
 interface createPreGenWalletBody {
-  email: string;
+  pregenIdentifier: string;
+  pregenIdentifierType: string;
   scheme?: SignatureScheme;
 }
 
@@ -445,9 +448,11 @@ class Client {
     return res.data;
   };
 
-  // GET /wallets/pregen?email={email}
-  getPregenWallets = async (email: string): Promise<getWalletsRes> => {
-    const res = await this.baseRequest.get<any>(`/wallets/pregen?email=${encodeURIComponent(email)}`);
+  // GET /wallets/pregen?pregenIdentifier={pregenIdentifier}&pregenIdentifierType={pregenIdentifierType}
+  getPregenWallets = async (pregenIdentifier: string, pregenIdentifierType: string): Promise<getWalletsRes> => {
+    const res = await this.baseRequest.get<any>(
+      `/wallets/pregen?pregenIdentifier=${encodeURIComponent(pregenIdentifier)}&pregenIdentifierType=${encodeURIComponent(pregenIdentifierType)}`,
+    );
     return res.data;
   };
 

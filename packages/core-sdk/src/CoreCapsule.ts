@@ -19,7 +19,7 @@ import * as transmissionUtils from './transmission/transmissionUtils.js';
 import { PlatformUtils } from './PlatformUtils.js';
 import { Theme } from './types/theme.js';
 import { sendRecoveryForShare } from './shares/recovery.js';
-import { CountryCallingCode } from 'libphonenumber-js';
+import parsePhoneNumberFromString, { CountryCallingCode } from 'libphonenumber-js';
 
 // amount of time in ms that a web auth session lasts
 const BIOMETRIC_VERIFICATION_TIME_MS = 30 * 60 * 1000;
@@ -43,6 +43,12 @@ export enum RecoveryStatus {
   EXPIRED = 'EXPIRED',
   FINISHED = 'FINISHED',
   CANCELLED = 'CANCELLED',
+}
+
+// Keep this consistent with user-management code entities/walletEntity.ts
+export enum PregenIdentifierType {
+  EMAIL = 'EMAIL',
+  PHONE = 'PHONE',
 }
 
 export interface Wallet {
@@ -704,8 +710,11 @@ export abstract class CoreCapsule {
     await this.setEd25519Wallets(this.ed25519Wallets);
   }
 
-  private async populatePregenWalletAddresses(email: string): Promise<void> {
-    const res = await this.ctx.capsuleClient.getPregenWallets(email);
+  private async populatePregenWalletAddresses(
+    pregenIdentifier: string,
+    pregenIdentifierType: PregenIdentifierType,
+  ): Promise<void> {
+    const res = await this.ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType);
     const wallets = res.wallets;
     wallets.forEach(
       (wallet: {
@@ -1033,12 +1042,22 @@ export abstract class CoreCapsule {
 
   async waitForPasskeyAndCreateWallet(): Promise<string> {
     await this.waitForAccountCreation();
-    // This function gets pregen wallets by email and partnerId
-    const res = await this.ctx.capsuleClient.getPregenWallets(this.email);
+    // This function gets pregen wallets by an identifier and partnerId
+    let pregenIdentifier: string;
+    let pregenIdentifierType: PregenIdentifierType;
+    if (this.email != null) {
+      pregenIdentifier = this.email;
+      pregenIdentifierType = PregenIdentifierType.EMAIL;
+    } else {
+      pregenIdentifier = parsePhoneNumberFromString(`${this.countryCode}${this.phone}`).formatInternational();
+      pregenIdentifierType = PregenIdentifierType.PHONE;
+    }
+
+    const res = await this.ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType);
     const wallet = res.wallets[0];
 
     if (wallet) {
-      const [, recovery] = await this.claimPregenWallet(this.email);
+      const [, recovery] = await this.claimPregenWallet(pregenIdentifier, pregenIdentifierType);
       return recovery;
     } else {
       const { recoverySecret } = await this.createWalletPerType();
@@ -1265,11 +1284,16 @@ export abstract class CoreCapsule {
   /**
    * Waits for a pregen wallet address to be created.
    *
-   * @param email - the email of the user the pregen wallet is associated with.
+   * @param pregenIdentifier - the identifier of the user the pregen wallet is associated with.
    * @param walletId - the wallet id
+   * @param pregenIdentifierType - the identifier type of the user the pregen wallet is associated with.
    * @returns - recovery share.
    **/
-  private async waitForPregenWalletAddress(email: string, walletId: string): Promise<void> {
+  private async waitForPregenWalletAddress(
+    pregenIdentifier: string,
+    pregenIdentifierType: PregenIdentifierType = PregenIdentifierType.EMAIL,
+    walletId: string,
+  ): Promise<void> {
     let maxPolls = 0;
 
     while (true) {
@@ -1278,7 +1302,7 @@ export abstract class CoreCapsule {
           break;
         }
         ++maxPolls;
-        const res = await this.ctx.capsuleClient.getPregenWallets(email);
+        const res = await this.ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType);
 
         const wallet = res.wallets.find((w) => w.id === walletId);
         if (wallet && wallet.address) {
@@ -1384,16 +1408,22 @@ export abstract class CoreCapsule {
   /**
    * Creates a new pregenerated wallet.
    *
-   * @param email - string
+   * @param pregenIdentifier - string
+   * @param pregenIdentifierType - PregenIdentifierType
    * @returns [wallet, recoveryShare]
    **/
-  async createWalletPreGen(email: string, useSolana?: boolean): Promise<Wallet> {
+  async createWalletPreGen(
+    pregenIdentifier: string,
+    useSolana?: boolean,
+    pregenIdentifierType: PregenIdentifierType = PregenIdentifierType.EMAIL,
+  ): Promise<Wallet> {
     this.requireApiKey();
     let walletId: string;
     if (useSolana) {
       const { signer, walletId: newWalletId } = await this.platformUtils.ed25519PreKeygen(
         this.ctx,
-        email,
+        pregenIdentifier,
+        pregenIdentifierType,
         this.retrieveSessionCookie(),
       );
       walletId = newWalletId;
@@ -1406,20 +1436,21 @@ export abstract class CoreCapsule {
       const { signer, walletId: newWalletId } = await this.platformUtils.preKeygen(
         this.ctx,
         undefined,
-        email,
+        pregenIdentifier,
+        pregenIdentifierType,
         null,
         this.retrieveSessionCookie(),
       );
-      walletId = newWalletId;
 
+      walletId = newWalletId;
       this.wallets[walletId] = {
         id: walletId,
         signer,
       };
     }
 
-    await this.waitForPregenWalletAddress(email, walletId);
-    await this.populatePregenWalletAddresses(email);
+    await this.waitForPregenWalletAddress(pregenIdentifier, pregenIdentifierType, walletId);
+    await this.populatePregenWalletAddresses(pregenIdentifier, pregenIdentifierType);
 
     return useSolana ? this.ed25519Wallets[walletId] : this.wallets[walletId];
   }
@@ -1427,18 +1458,32 @@ export abstract class CoreCapsule {
   /**
    * Claims a pregenerated wallet.
    *
-   * @param email string the email of the user claiming the wallet
+   * @param pregenIdentifier string the identifier of the user claiming the wallet
+   * @param pregenIdentifierType type of the identifier of the user claiming the wallet
    * @returns [wallet, recoveryShare]
    **/
-  async claimPregenWallet(email: string): Promise<[Wallet, string]> {
+  async claimPregenWallet(
+    pregenIdentifier: string,
+    pregenIdentifierType: PregenIdentifierType = PregenIdentifierType.EMAIL,
+  ): Promise<[Wallet, string]> {
     this.requireApiKey();
-    const userExist = await this.checkIfUserExists(email);
-    if (!userExist) {
-      throw new Error('user does not exist');
+    if (pregenIdentifierType === PregenIdentifierType.EMAIL) {
+      const userExist = await this.checkIfUserExists(pregenIdentifier);
+      if (!userExist) {
+        throw new Error('user does not exist');
+      }
+    } else {
+      const phoneNumber = parsePhoneNumberFromString(pregenIdentifier);
+      const number = phoneNumber.formatNational();
+      const countryCallingCode = `+${phoneNumber.countryCallingCode}`;
+      const userExist = await this.checkIfUserExistsByPhone(number, countryCallingCode as CountryCallingCode);
+      if (!userExist) {
+        throw new Error('user does not exist');
+      }
     }
 
     // This function gets pregen wallets by email and partnerId
-    const res = await this.ctx.capsuleClient.getPregenWallets(email);
+    const res = await this.ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType);
     const wallet = res.wallets[0];
     if (!wallet) {
       throw new Error('wallet not found');
@@ -1471,29 +1516,40 @@ export abstract class CoreCapsule {
   }
 
   /**
-   * Updates a pregenerated wallet email.
+   * Updates a pregenerated wallet identifier.
    *
-   * @param newEmail - string
+   * @param newIdentifier - string
    * @param walletId - string
    * @returns Promise<void>
    **/
-  async updateWalletEmailPreGen(newEmail: string, walletId?: string): Promise<void> {
+  async updateWalletIdentifierPreGen(
+    newIdentifier: string,
+    walletId?: string,
+    type: PregenIdentifierType = PregenIdentifierType.EMAIL,
+  ): Promise<void> {
     this.requireApiKey();
     const currentWalletId = walletId || Object.keys(this.wallets)[0];
-    await this.ctx.capsuleClient.updatePregenWallet(currentWalletId, { email: newEmail });
+    await this.ctx.capsuleClient.updatePregenWallet(currentWalletId, {
+      pregenIdentifier: newIdentifier,
+      pregenIdentifierType: type,
+    });
   }
 
   /**
-   * Checks if Pregen Wallet exists for the email and partnerId
+   * Checks if Pregen Wallet exists for the identifier and partnerId
    *
-   * @param email string the email of the user claiming the wallet
+   * @param pregenIdentifier string the identifier of the user claiming the wallet
+   * @param pregenIdentifierType type of the string of the identifier of the user claiming the wallet
    * @returns Promise<boolean>
    **/
-  async hasPregenWallet(email: string): Promise<boolean> {
+  async hasPregenWallet(
+    pregenIdentifier: string,
+    pregenIdentifierType: PregenIdentifierType = PregenIdentifierType.EMAIL,
+  ): Promise<boolean> {
     this.requireApiKey();
 
-    // This function gets pregen wallets by email and partnerId
-    const res = await this.ctx.capsuleClient.getPregenWallets(email);
+    // This function gets pregen wallets by identifier and partnerId
+    const res = await this.ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType);
     const wallet = res.wallets[0];
     if (!wallet) {
       return false;

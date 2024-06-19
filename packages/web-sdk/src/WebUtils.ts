@@ -5,6 +5,7 @@ import { keygen, preKeygen, ed25519Keygen, ed25519PreKeygen } from './wallet/key
 import { signMessage, sendTransaction, signTransaction, ed25519Sign } from './wallet/signing.js';
 import { BackupKitEmailProps } from '@usecapsule/user-management-client';
 import { getPrivateKey } from './wallet/privateKey.js';
+import { PregenIdentifierType } from '@usecapsule/core-sdk';
 
 export class WebUtils implements PlatformUtils {
   getPrivateKey(ctx: Ctx, userId: string, walletId: string, share: string, sessionCookie: string): Promise<string> {
@@ -27,14 +28,15 @@ export class WebUtils implements PlatformUtils {
   preKeygen(
     ctx: Ctx,
     partnerId: string | undefined,
-    email: string,
+    pregenIdentifier: string,
+    pregenIdentifierType: PregenIdentifierType,
     secretKey: string | null, // should be acceptable as null in RN as we don't pre-gen them
     sessionCookie: string,
   ): Promise<{
     signer: string;
     walletId: string;
   }> {
-    return preKeygen(ctx, email, secretKey, false, partnerId, sessionCookie);
+    return preKeygen(ctx, pregenIdentifier, pregenIdentifierType, secretKey, false, partnerId, sessionCookie);
   }
 
   signMessage(
@@ -100,13 +102,14 @@ export class WebUtils implements PlatformUtils {
 
   ed25519PreKeygen(
     ctx: Ctx,
-    email: string,
+    pregenIdentifier: string,
+    pregenIdentifierType: PregenIdentifierType,
     sessionCookie: string,
   ): Promise<{
     signer: string;
     walletId: string;
   }> {
-    return ed25519PreKeygen(ctx, email, sessionCookie);
+    return ed25519PreKeygen(ctx, pregenIdentifier, pregenIdentifierType, sessionCookie);
   }
 
   ed25519Sign(

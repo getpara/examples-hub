@@ -1,4 +1,4 @@
-import type { Ctx, SignatureRes, PlatformUtils } from '@usecapsule/core-sdk';
+import type { Ctx, SignatureRes, PlatformUtils, PregenIdentifierType } from '@usecapsule/core-sdk';
 import { BackupKitEmailProps } from '@usecapsule/user-management-client';
 import { ServerLocalStorage } from './ServerLocalStorage.js';
 import { ServerSessionStorage } from './ServerSessionStorage.js';
@@ -27,14 +27,15 @@ export class ServerUtils implements PlatformUtils {
   preKeygen(
     ctx: Ctx,
     partnerId: string,
-    email: string,
+    pregenIdentifier: string,
+    pregenIdentifierType: PregenIdentifierType,
     secretKey: string | null, // should be acceptable as null in RN as we don't pre-gen them
     sessionCookie: string,
   ): Promise<{
     signer: string;
     walletId: string;
   }> {
-    return preKeygen(ctx, email, secretKey, false, partnerId, sessionCookie);
+    return preKeygen(ctx, pregenIdentifier, pregenIdentifierType, secretKey, false, partnerId, sessionCookie);
   }
 
   signMessage(
@@ -100,13 +101,14 @@ export class ServerUtils implements PlatformUtils {
 
   ed25519PreKeygen(
     ctx: Ctx,
-    email: string,
+    pregenIdentifier: string,
+    pregenIdentifierType: PregenIdentifierType,
     sessionCookie: string,
   ): Promise<{
     signer: string;
     walletId: string;
   }> {
-    return ed25519PreKeygen(ctx, email, sessionCookie);
+    return ed25519PreKeygen(ctx, pregenIdentifier, pregenIdentifierType, sessionCookie);
   }
 
   ed25519Sign(
