@@ -20,12 +20,7 @@ export const Footer = ({ expandModal }: FooterProps) => {
       <FooterContainer slot="footer">
         <FooterContentContainer>
           <CondensedText>
-            <span>
-              Use this account across the web.{' '}
-              <ClickableText onClick={expandModal}>
-                <span>Learn More.</span>
-              </ClickableText>
-            </span>
+            Use this account across the web. <ClickableText onClick={expandModal}>Learn More.</ClickableText>
           </CondensedText>
           <PoweredByContainer>
             <CondensedText>
@@ -84,7 +79,7 @@ const CondensedText = styled(SecondaryText)`
   text-align: center;
   font-size: 12px;
   line-height: 18px;
-  white-space: pre-line;
+  display: inline-block;
 `;
 
 const FooterSecondaryText = styled(SecondaryText)`
@@ -94,6 +89,7 @@ const FooterSecondaryText = styled(SecondaryText)`
 const ClickableText = styled(CondensedText)`
   color: var(--cpsl-color-text-primary);
   cursor: pointer;
+  display: inline-block;
 `;
 
 const CapsuleLogo = styled(CpslIcon)`

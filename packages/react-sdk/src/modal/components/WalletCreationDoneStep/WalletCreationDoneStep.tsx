@@ -47,7 +47,7 @@ export const WalletCreationDoneStep = ({ twoFactorAuthEnabled, onClose }: Wallet
           <span>Wallet Created!</span>
         </Heading>
       </MainContainer>
-      <CpslButton onClick={handleNext}>
+      <CpslButton fullWidth onClick={handleNext}>
         {twoFactorAuthEnabled ? (
           <ButtonWithIconContainer>
             Continue

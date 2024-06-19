@@ -34,7 +34,9 @@ export const AddFundsDone = ({ isSuccess, onClose }: AddFundsDoneProps) => {
           </SecondaryText>
         ) : null,
         <>
-          <CpslButton onClick={onClose}>Done</CpslButton>
+          <CpslButton fullWidth onClick={onClose}>
+            Done
+          </CpslButton>
           <AddFundsButton onClick={onClickAddFunds} text="Add More Funds" />
         </>,
       ]
@@ -43,6 +45,7 @@ export const AddFundsDone = ({ isSuccess, onClose }: AddFundsDoneProps) => {
         <FailureHeading>Something Went Wrong</FailureHeading>,
         <SecondaryText>No funds were added to your wallet.</SecondaryText>,
         <CpslButton
+          fullWidth
           onClick={() => {
             setStep(ModalStep.ADD_FUNDS);
           }}

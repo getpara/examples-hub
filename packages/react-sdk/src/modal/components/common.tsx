@@ -3,7 +3,7 @@ import { styled } from 'styled-components';
 
 export const AddFundsButton = ({ text = 'Add Funds', onClick }: { text?: string; onClick: () => void }) => {
   return (
-    <CpslButton variant="secondary" onClick={onClick}>
+    <CpslButton variant="secondary" fullWidth onClick={onClick}>
       <ButtonWithIconContainerInvert>
         <AddFundsIcon icon="plusCircle" />
         {text}

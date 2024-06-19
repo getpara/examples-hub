@@ -120,17 +120,17 @@ export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
               <span>Or input the code manually</span>
             </SecondaryText>
             <FilledDisabledInput disabled value={secret} noAutoDisable>
-              <CpslButton slot="end" variant="icon" onClick={handleCopy}>
+              <CpslButton slot="end" variant="ghost" onClick={handleCopy}>
                 <CpslIcon icon={copied ? 'check' : 'copy'} />
               </CpslButton>
             </FilledDisabledInput>
-            <CpslButton onClick={handleNext}>
+            <CpslButton fullWidth onClick={handleNext}>
               <ButtonWithIconContainer>
                 Continue
                 <CpslIcon icon="arrowNarrow" />
               </ButtonWithIconContainer>
             </CpslButton>
-            <CpslButton onClick={handleSkip} variant="secondary">
+            <CpslButton fullWidth onClick={handleSkip} variant="secondary">
               Setup 2FA Later
             </CpslButton>
           </>

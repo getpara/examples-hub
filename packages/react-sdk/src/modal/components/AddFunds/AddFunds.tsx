@@ -25,7 +25,7 @@ const OnRamp = ({ config, index }: OnRampButtonProps) => {
   }, []);
 
   return (
-    <OnRampButton variant="secondary" onClick={onClick}>
+    <OnRampButton fullWidth variant="secondary" onClick={onClick}>
       <OnRampButtonContainer>
         <OnRampButtonUpper>
           <OnRampName>

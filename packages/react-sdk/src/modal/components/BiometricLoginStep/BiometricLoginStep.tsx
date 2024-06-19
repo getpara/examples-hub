@@ -60,7 +60,7 @@ export const BiometricLoginStep = () => {
           </span>
         </SecondaryText>
       </MainContainer>
-      <CpslButton onClick={handlePasskeyClick}>
+      <CpslButton fullWidth onClick={handlePasskeyClick}>
         <ButtonWithIconContainer>
           Login With Passkey On This Device
           <CpslIcon icon="key" />
@@ -71,7 +71,7 @@ export const BiometricLoginStep = () => {
       <SecondaryText>
         <span>Scan with your phone’s camera</span>
       </SecondaryText>
-      <CpslButton onClick={handleHelpClick} variant="secondary">
+      <CpslButton fullWidth onClick={handleHelpClick} variant="secondary">
         I Need Help Logging In
       </CpslButton>
     </>

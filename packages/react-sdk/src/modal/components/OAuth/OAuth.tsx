@@ -74,10 +74,11 @@ export const OAuth = ({ methods }: OAuthProps) => {
           key={method}
           icon={useBrandedLogos ? brandedOAuthLogos[method] : oAuthLogos[method]}
           onClick={handleMethodClick(method)}
+          hasFullRow={methodsToShow.length >= 4}
         />
       ))}
       {!showAll && hasMore && (
-        <MoreButton isDark={useDarkLogos} icon="moreLoginOptions" onClick={handleShowAll}>
+        <MoreButton isDark={useDarkLogos} icon="moreLoginOptions" onClick={handleShowAll} hasFullRow>
           <MoreText isDark={useDarkLogos}>MORE</MoreText>
         </MoreButton>
       )}
@@ -92,8 +93,8 @@ const OAuthContainer = styled.div`
   flex-wrap: wrap;
 `;
 
-const StyledCpslTileButton = styled(CpslTileButton)<{ isDark: boolean }>`
-  flex: 0 0 calc(25% - 4px);
+const StyledCpslTileButton = styled(CpslTileButton)<{ isDark: boolean; hasFullRow: boolean }>`
+  flex: ${({ hasFullRow }) => (hasFullRow ? '0 0 calc(25% - 4px)' : '1')};
 
   --button-icon-color: ${({ isDark }) => (isDark ? 'white' : 'black')};
   --button-width: 100%;

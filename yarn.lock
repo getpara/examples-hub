@@ -5719,6 +5719,18 @@
     lottie-web "^5.12.2"
     qr-code-styling "^1.6.0-rc.1"
 
+"@usecapsule/core-components@^3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@usecapsule/core-components/-/core-components-3.1.1.tgz#e6c1fa8f34646849301139cf766b9fddea116b9e"
+  integrity sha512-MXkj9vZfMCE91EyZ6YjXsv4RBRrKP/186RaA1vAmphHMRedwsYg26I5sXAPTEalfxXuwsbx3LBoEu+9qXxrJsQ==
+  dependencies:
+    "@stencil/core" "^4.7.0"
+    color-blend "^4.0.0"
+    color2k "^2.0.3"
+    gsap "^3.12.5"
+    lottie-web "^5.12.2"
+    qr-code-styling "^1.6.0-rc.1"
+
 "@usecapsule/core-sdk@1.11.1":
   version "1.11.1"
   resolved "https://registry.yarnpkg.com/@usecapsule/core-sdk/-/core-sdk-1.11.1.tgz#9078a7deb517d76afb9c2c1e20f8e7bbd4093502"
@@ -5744,6 +5756,13 @@
   integrity sha512-xXP+Upgl/fe2r5dDYXACpgcAxmUAH8VVYctwnr/spsIxr92oG5JNRaED/TeILK2MmMDHrDgT7DFbXrhq0KJ19g==
   dependencies:
     "@usecapsule/core-components" "^2.0.9"
+
+"@usecapsule/react-components@^3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@usecapsule/react-components/-/react-components-3.1.1.tgz#e16294bf4209dfe56873b7fe9a53843a6ad4b6f6"
+  integrity sha512-ycFD8xHWkZCI34gC4WhLPcjb4on+0PiYRysmncXqvgki04Gt5g7rQuLwo5u3SE74ZJCmHUiQXuZbG+A/eqkxPA==
+  dependencies:
+    "@usecapsule/core-components" "^3.1.1"
 
 "@usecapsule/react-sdk@3.7.1":
   version "3.7.1"
@@ -8508,6 +8527,11 @@ collect-v8-coverage@^1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/collect-v8-coverage/-/collect-v8-coverage-1.0.2.tgz#c0b29bcd33bcd0779a1344c2136051e6afd3d9e9"
   integrity sha512-lHl4d5/ONEbLlJvaJNtsF/Lz+WvB07u2ycqTYbdrq7UypDXailES4valYb2eWiJFxZlVmpGekfqoxQhzyFdT4Q==
+
+color-blend@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/color-blend/-/color-blend-4.0.0.tgz#e9950e9fa5d6e552ff8bb107c39f7e83a0c1a3bb"
+  integrity sha512-fYODTHhI/NG+B5GnzvuL3kiFrK/UnkUezWFTgEPBTY5V+kpyfAn95Vn9sJeeCX6omrCOdxnqCL3CvH+6sXtIbw==
 
 color-convert@^1.9.0:
   version "1.9.3"

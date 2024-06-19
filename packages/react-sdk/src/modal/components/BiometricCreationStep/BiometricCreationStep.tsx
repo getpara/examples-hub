@@ -88,7 +88,7 @@ export const BiometricCreationStep = ({ hasFinishedAnimation }: { hasFinishedAni
         </TabsContainer>
       )}
       {tab === 'desktop' || isMobile ? (
-        <CpslButton onClick={handlePasskeyClick}>
+        <CpslButton fullWidth onClick={handlePasskeyClick}>
           <ButtonWithIconContainer>
             Add Passkey On This Device
             <CpslIcon icon="key" />
@@ -108,7 +108,7 @@ export const BiometricCreationStep = ({ hasFinishedAnimation }: { hasFinishedAni
             <span>Or copy this link to a new device to set up a Passkey there.</span>
           </MobileSubHeading>
           <FilledDisabledInput disabled value={shortLoginLink} noAutoDisable>
-            <CpslButton slot="end" variant="icon" onClick={handleCopy}>
+            <CpslButton slot="end" variant="ghost" onClick={handleCopy}>
               <CpslIcon icon={copied ? 'check' : 'copy'} />
             </CpslButton>
           </FilledDisabledInput>

@@ -54,8 +54,15 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
   },
   totalSteps: () => {
     const isLogin = get().flow === 'login';
+    let numOfSkippedOptionalSteps = 0;
+
+    // If no on ramp config is provided, remove extra steps
+    if (!get().onRampConfig) {
+      numOfSkippedOptionalSteps++;
+    }
+
     const stepNumbersValues = Object.values(isLogin ? LoginModalStepNumber : SignUpModalStepNumber);
-    return stepNumbersValues[stepNumbersValues.length - 1];
+    return stepNumbersValues[stepNumbersValues.length - 1] - numOfSkippedOptionalSteps;
   },
   setFlow: (flow) => {
     set({ flow });

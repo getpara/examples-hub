@@ -51,32 +51,28 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     const [hasFinishedAnimation, setHasFinishedAnimation] = useState(false);
     const [modalExpanded, setModalExpanded] = useState(false);
 
-    useImperativeHandle(
-      ref,
-      () => {
-        return {
-          goBack() {
-            goBack();
-          },
-          canGoBack() {
-            return hasPreviousStep;
-          },
-          isModalExpanded() {
-            return modalExpanded;
-          },
-          toggleModalExpanded() {
-            setModalExpanded((curr) => !curr);
-          },
-          currentStep() {
-            return currentStep;
-          },
-          handleModalClose() {
-            modalContentRef?.current?.handleModalClose();
-          },
-        };
-      },
-      [hasPreviousStep, modalExpanded, currentStep],
-    );
+    useImperativeHandle(ref, () => {
+      return {
+        goBack() {
+          goBack();
+        },
+        canGoBack() {
+          return hasPreviousStep;
+        },
+        isModalExpanded() {
+          return modalExpanded;
+        },
+        toggleModalExpanded() {
+          setModalExpanded((curr) => !curr);
+        },
+        currentStep() {
+          return currentStep;
+        },
+        handleModalClose() {
+          modalContentRef?.current?.handleModalClose();
+        },
+      };
+    }, [hasPreviousStep, modalExpanded, currentStep]);
 
     // This will run on mount and on isOpen change but won't cause a rerender unless step or email changes
     const initModal = async () => {
@@ -112,8 +108,8 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     }, [onRampConfig]);
 
     useEffect(() => {
-      updateThemeState({ logo, appName, oAuthLogoVariant: theme?.oAuthLogoVariant ?? 'default' });
-    }, [logo, appName, theme?.oAuthLogoVariant]);
+      updateThemeState({ logo, appName, oAuthLogoVariant: theme?.oAuthLogoVariant ?? 'default', bareModal });
+    }, [logo, appName, theme?.oAuthLogoVariant, bareModal]);
 
     useEffect(() => {
       if (theme) {

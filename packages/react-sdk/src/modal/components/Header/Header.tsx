@@ -28,7 +28,7 @@ export const Header = ({ onClose, condenseModal }: HeaderProps) => {
     <>
       <Container slot="header" id="header">
         <BackButton
-          variant="icon"
+          variant="ghost"
           style={{
             visibility: hasPreviousStep ? 'visible' : 'hidden',
           }}
@@ -51,7 +51,7 @@ export const Header = ({ onClose, condenseModal }: HeaderProps) => {
             </>
           )}
         </CenterTextContainer>
-        <CloseButton bareModal={bareModal} variant="icon" onClick={onClose}>
+        <CloseButton bareModal={bareModal} variant="ghost" onClick={onClose}>
           <CpslIcon icon="close" />
         </CloseButton>
       </Container>

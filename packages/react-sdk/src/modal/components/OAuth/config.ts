@@ -1,4 +1,4 @@
-import { IconType } from '@usecapsule/core-components';
+import { IconType } from '@usecapsule/react-components';
 import { OAuthMethod } from '@usecapsule/web-sdk';
 
 export const brandedOAuthLogos: { [key in OAuthMethod]: IconType } = {
