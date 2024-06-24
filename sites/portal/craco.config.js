@@ -21,6 +21,7 @@ module.exports = {
         // crypto and stream needed for @celo/utils
         crypto: require.resolve('crypto-browserify'),
         stream: require.resolve('stream-browserify'),
+        vm: false,
       };
       webpackConfig.plugins = [
         ...webpackConfig.plugins,

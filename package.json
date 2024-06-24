@@ -7,7 +7,6 @@
     "examples/*",
     "workers/*"
   ],
-  "dependencies": {},
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "eslint --config .eslintrc.js --cache --fix"
@@ -22,7 +21,8 @@
     "start-bridge": "lerna run start --scope=capsule-js-bridge",
     "lerna-version": "lerna version",
     "lerna-publish": "lerna publish from-package --no-private",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test": "lerna run test"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^7.7.0",
@@ -34,7 +34,8 @@
     "husky": "^9.0.11",
     "lerna": "^8.1.2",
     "lint-staged": "^15.2.2",
-    "prettier": "^3.2.5"
+    "prettier": "^3.2.5",
+    "vitest": "^1.6.0"
   },
   "version": "0.0.0"
 }
