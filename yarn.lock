@@ -5940,10 +5940,10 @@
     lottie-web "^5.12.2"
     qr-code-styling "^1.6.0-rc.1"
 
-"@usecapsule/core-components@^3.1.1":
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/@usecapsule/core-components/-/core-components-3.1.1.tgz#e6c1fa8f34646849301139cf766b9fddea116b9e"
-  integrity sha512-MXkj9vZfMCE91EyZ6YjXsv4RBRrKP/186RaA1vAmphHMRedwsYg26I5sXAPTEalfxXuwsbx3LBoEu+9qXxrJsQ==
+"@usecapsule/core-components@^3.1.2":
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/@usecapsule/core-components/-/core-components-3.1.2.tgz#755aa37da8447cfd47bf0f5689da3b27befacffc"
+  integrity sha512-48FXDjYpdOnN9yO8BuCkN9sBfkmm0+5+FO1Xj7wI9OcblkBR2z039XxgnA0u3xvVPr/YvHLTwmBVg/YDzVG/kA==
   dependencies:
     "@stencil/core" "^4.7.0"
     color-blend "^4.0.0"
@@ -5978,12 +5978,12 @@
   dependencies:
     "@usecapsule/core-components" "^2.0.9"
 
-"@usecapsule/react-components@^3.1.1":
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/@usecapsule/react-components/-/react-components-3.1.1.tgz#e16294bf4209dfe56873b7fe9a53843a6ad4b6f6"
-  integrity sha512-ycFD8xHWkZCI34gC4WhLPcjb4on+0PiYRysmncXqvgki04Gt5g7rQuLwo5u3SE74ZJCmHUiQXuZbG+A/eqkxPA==
+"@usecapsule/react-components@^3.1.2":
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/@usecapsule/react-components/-/react-components-3.1.2.tgz#708fe5faf657d51bdc5384cb53990fb3a03b9e09"
+  integrity sha512-yblj1l9elYrgoo7fbfM7Q9CrRI+1Me2uJTZbpNaZENuF32ckctRIB6Jy/woHQkJ822+dfjdCqunIg1LSLFJYGQ==
   dependencies:
-    "@usecapsule/core-components" "^3.1.1"
+    "@usecapsule/core-components" "^3.1.2"
 
 "@usecapsule/react-sdk@3.7.1":
   version "3.7.1"
