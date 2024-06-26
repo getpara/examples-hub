@@ -127,7 +127,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
       async function genWallet() {
         setWalletCreationInProgress(true);
         if (!createWalletOverride) {
-          const newWalletsRes = await capsule.createWalletPerType(true);
+          const newWalletsRes = await capsule.createWalletPerMissingType(true);
           setCreateWalletsRes(newWalletsRes);
         } else {
           const recoveryFromOverride = await createWalletOverride(capsule);
@@ -157,8 +157,9 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
       }
 
       async function distributeShare() {
+        let recoverySecret: string;
         if (!createWalletOverride) {
-          const result = await capsule.distributeNewWalletShare(
+          recoverySecret = await capsule.distributeNewWalletShare(
             createWalletsRes.wallets[0].id,
             createWalletsRes.wallets[0].signer,
           );
@@ -166,11 +167,15 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
             // don't need to save the recovery secret as it should be the same as the first one
             await capsule.distributeNewWalletShare(createWalletsRes.wallets[i].id, createWalletsRes.wallets[i].signer);
           }
-          setRecoveryShare(result);
+          setRecoveryShare(recoverySecret);
         }
         setDistributeDone(true);
 
-        setStep(ModalStep.SECRET);
+        if (!recoverySecret) {
+          setStep(ModalStep.WALLET_CREATION_DONE);
+        } else {
+          setStep(ModalStep.SECRET);
+        }
       }
       distributeShare();
     }, [isFullyLoggedIn, walletCreated, createWalletsRes]);

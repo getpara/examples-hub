@@ -60,7 +60,7 @@ async function createUserAndWallet(params: Params) {
       status: PublicKeyStatus.COMPLETE,
     });
     // ~~~~~~~
-    await capsule.createWalletPerType(false);
+    await capsule.createWalletPerMissingType(false);
   }
 
   const walletAddress = useSolana

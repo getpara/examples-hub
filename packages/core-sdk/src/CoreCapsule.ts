@@ -951,9 +951,10 @@ export abstract class CoreCapsule {
    **/
   async isFullyLoggedIn(): Promise<boolean> {
     const isSessionActive = await this.isSessionActive();
-    const walletAddress = this.getWallets()?.[Object.keys(this.getWallets())[0]]?.address;
+    const evmWalletAddress = Object.values(this.getWallets())?.[0]?.address;
+    const solanaAddress = Object.values(this.getED25519Wallets())?.[0]?.address;
 
-    return isSessionActive && !!walletAddress;
+    return isSessionActive && !!(evmWalletAddress || solanaAddress);
   }
 
   /**
@@ -1061,7 +1062,7 @@ export abstract class CoreCapsule {
       const [, recovery] = await this.claimPregenWallet(pregenIdentifier, pregenIdentifierType);
       return recovery;
     } else {
-      const { recoverySecret } = await this.createWalletPerType();
+      const { recoverySecret } = await this.createWalletPerMissingType();
       return recoverySecret;
     }
   }
@@ -1149,10 +1150,11 @@ export abstract class CoreCapsule {
         // haven't been sent to the backend yet
         if (tempSharesRes.data.temporaryShares.length === fetchedWallets.length) {
           await this.setupAfterLogin(tempSharesRes.data.temporaryShares, skipSessionRefresh);
-          return {
-            needsWallet:
-              Object.values(this.getWallets()).length === 0 && Object.values(this.getED25519Wallets()).length === 0,
-          };
+
+          const needsEvm = Object.keys(this.wallets).length === 0 && this.supportedWalletTypes.includes(WalletType.EVM);
+          const needsSolana =
+            Object.keys(this.ed25519Wallets).length === 0 && this.supportedWalletTypes.includes(WalletType.SOLANA);
+          return { needsWallet: needsEvm || needsSolana };
         }
       } catch (err) {
         // want to continue polling on error
@@ -1318,10 +1320,10 @@ export abstract class CoreCapsule {
     throw new Error('timed out waiting for wallet address');
   }
 
-  async createWalletPerType(skipDistribute = false): Promise<{ wallets: Wallet[]; recoverySecret?: string }> {
+  async createWalletPerMissingType(skipDistribute = false): Promise<{ wallets: Wallet[]; recoverySecret?: string }> {
     const wallets: Wallet[] = [];
     let recoverySecret: string;
-    if (this.supportedWalletTypes.includes(WalletType.EVM)) {
+    if (Object.keys(this.wallets).length === 0 && this.supportedWalletTypes.includes(WalletType.EVM)) {
       const [evmWallet, evmSecret] = await this.createWallet(skipDistribute);
       wallets.push(evmWallet);
       if (evmSecret) {
@@ -1329,7 +1331,7 @@ export abstract class CoreCapsule {
       }
     }
 
-    if (this.supportedWalletTypes.includes(WalletType.SOLANA)) {
+    if (Object.keys(this.ed25519Wallets).length === 0 && this.supportedWalletTypes.includes(WalletType.SOLANA)) {
       const [ed25519Wallet, ed25519Secret] = await this.createWallet(skipDistribute, undefined, true);
       wallets.push(ed25519Wallet);
       if (ed25519Secret) {
