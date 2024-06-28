@@ -40,11 +40,11 @@ export const SelectFlowStep = ({ onLoginClick, onAddDeviceClick }: SelectFlowSte
         <span>Use your Passkey to login to your wallet and connect to {partner.displayName}.</span>
       </Subheading>
       <ButtonContainer>
-        <CpslButton onClick={onLoginClick}>
+        <CpslButton fullWidth onClick={onLoginClick}>
           Login With Passkey
           <ButtonIcon slot="end" icon="key" />
         </CpslButton>
-        <CpslButton variant="secondary" onClick={onAddDeviceClick}>
+        <CpslButton fullWidth variant="secondary" onClick={onAddDeviceClick}>
           <ButtonIcon slot="start" icon="plusCircle" />
           Add A Passkey From This Device
         </CpslButton>

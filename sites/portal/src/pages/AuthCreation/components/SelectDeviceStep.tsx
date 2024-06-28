@@ -18,7 +18,7 @@ export const SelectDeviceStep = ({ onAddThisDeviceClick }: SelectDeviceStepProps
         </span>
       </Subheading>
       <ButtonContainer>
-        <CpslButton onClick={onAddThisDeviceClick}>
+        <CpslButton fullWidth onClick={onAddThisDeviceClick}>
           Add Passkey On This Device
           <ButtonIcon slot="end" icon="key" />
         </CpslButton>

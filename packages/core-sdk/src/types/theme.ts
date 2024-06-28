@@ -4,4 +4,4 @@ export type Theme = {
   borderRadius?: BorderRadius;
 };
 
-type BorderRadius = 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'full';
+type BorderRadius = 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'full';

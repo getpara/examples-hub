@@ -5918,17 +5918,6 @@
   resolved "https://registry.yarnpkg.com/@ungap/structured-clone/-/structured-clone-1.2.0.tgz#756641adb587851b5ccb3e095daf27ae581c8406"
   integrity sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==
 
-"@usecapsule/core-components@^2.0.10":
-  version "2.0.10"
-  resolved "https://registry.yarnpkg.com/@usecapsule/core-components/-/core-components-2.0.10.tgz#13437e69b4df318d5578df81d75f59198fa5be18"
-  integrity sha512-csf76vHti8u0sFnRNu7CcgU//QrLheVssIuBplsDn6P8D7QUQP+5sN0gNbnVe22nGB8IheyyG8NZCqBmpAclzw==
-  dependencies:
-    "@stencil/core" "^4.7.0"
-    color2k "^2.0.3"
-    gsap "^3.12.5"
-    lottie-web "^5.12.2"
-    qr-code-styling "^1.6.0-rc.1"
-
 "@usecapsule/core-components@^2.0.9":
   version "2.0.9"
   resolved "https://registry.yarnpkg.com/@usecapsule/core-components/-/core-components-2.0.9.tgz#e61de457ccbe13ed5f2e4ea6672f6750460a8e5f"
@@ -5963,13 +5952,6 @@
     buffer "6.0.3"
     ethereumjs-util "7.1.5"
     node-forge "^1.3.1"
-
-"@usecapsule/react-components@^2.0.10":
-  version "2.0.10"
-  resolved "https://registry.yarnpkg.com/@usecapsule/react-components/-/react-components-2.0.10.tgz#ebd1ab3779fed8978d2c2ab796e8db29a787bc63"
-  integrity sha512-ZAePwP8R/PtSLaSRpcucwEsYyNmwkWbynuD+Admg6j+l/wJusII0L+J9rMsUce3SDoUvasxR1L3njFHFjWeYZw==
-  dependencies:
-    "@usecapsule/core-components" "^2.0.10"
 
 "@usecapsule/react-components@^2.0.9":
   version "2.0.9"

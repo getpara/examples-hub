@@ -43,7 +43,7 @@ export const AddDeviceStep = ({ addDeviceUrl }: AddDeviceStepProps) => {
             <span>Or navigate to this link from the already registered device</span>
           </SmWidthSubheading>
           <FilledDisabledInput disabled value={addDeviceUrl} noAutoDisable>
-            <CpslButton slot="end" variant="icon" onClick={handleCopy}>
+            <CpslButton slot="end" variant="ghost" onClick={handleCopy}>
               <CpslIcon icon={copied ? 'check' : 'copy'} />
             </CpslButton>
           </FilledDisabledInput>
