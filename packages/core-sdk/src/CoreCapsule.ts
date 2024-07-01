@@ -1059,7 +1059,7 @@ export abstract class CoreCapsule {
     const wallet = res.wallets[0];
 
     if (wallet) {
-      const [, recovery] = await this.claimPregenWallet(pregenIdentifier, pregenIdentifierType);
+      const recovery = await this.claimPregenWallets(pregenIdentifier, pregenIdentifierType);
       return recovery;
     } else {
       const { recoverySecret } = await this.createWalletPerMissingType();
@@ -1465,10 +1465,10 @@ export abstract class CoreCapsule {
    * @param pregenIdentifierType type of the identifier of the user claiming the wallet
    * @returns [wallet, recoveryShare]
    **/
-  async claimPregenWallet(
+  async claimPregenWallets(
     pregenIdentifier: string,
     pregenIdentifierType: PregenIdentifierType = PregenIdentifierType.EMAIL,
-  ): Promise<[Wallet, string]> {
+  ): Promise<string | undefined> {
     this.requireApiKey();
     if (pregenIdentifierType === PregenIdentifierType.EMAIL) {
       const userExist = await this.checkIfUserExists(pregenIdentifier);
@@ -1487,35 +1487,38 @@ export abstract class CoreCapsule {
 
     // This function gets pregen wallets by email and partnerId
     const res = await this.ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType);
-    const wallet = res.wallets[0];
-    if (!wallet) {
-      throw new Error('wallet not found');
+    if (res.wallets.length === 0) {
+      throw new Error('wallets not found');
     }
 
-    await this.ctx.capsuleClient.claimPregenWallet({ userId: this.userId, walletId: wallet.id });
+    let recoverySecret: string | undefined;
+    for (const wallet of res.wallets) {
+      await this.ctx.capsuleClient.claimPregenWallet({ userId: this.userId, walletId: wallet.id });
 
-    const signer =
-      wallet.scheme === WalletScheme.ED25519 ? this.ed25519Wallets[wallet.id].signer : this.wallets[wallet.id].signer;
-    const recoveryShare = await distributeNewShare(
-      this.ctx,
-      this.userId,
-      wallet.id,
-      signer,
-      false,
-      this.getBackupKitEmailProps(),
-    );
+      const signer =
+        wallet.scheme === WalletScheme.ED25519 ? this.ed25519Wallets[wallet.id].signer : this.wallets[wallet.id].signer;
+      const recoveryShare = await distributeNewShare(
+        this.ctx,
+        this.userId,
+        wallet.id,
+        signer,
+        false,
+        this.getBackupKitEmailProps(),
+      );
+      if (recoveryShare) {
+        recoverySecret = recoveryShare;
+      }
 
-    let claimedWallet: Wallet;
-    if (wallet.scheme === WalletScheme.ED25519) {
-      this.ed25519Wallets[wallet.id].userId = this.userId;
-      claimedWallet = this.ed25519Wallets[wallet.id];
-      await this.setEd25519Wallets(this.ed25519Wallets);
-    } else {
-      this.wallets[wallet.id].userId = this.userId;
-      claimedWallet = this.wallets[wallet.id];
-      await this.setWallets(this.wallets);
+      if (wallet.scheme === WalletScheme.ED25519) {
+        this.ed25519Wallets[wallet.id].userId = this.userId;
+        await this.setEd25519Wallets(this.ed25519Wallets);
+      } else {
+        this.wallets[wallet.id].userId = this.userId;
+        await this.setWallets(this.wallets);
+      }
     }
-    return [claimedWallet, recoveryShare];
+
+    return recoverySecret;
   }
 
   /**
@@ -1577,18 +1580,25 @@ export abstract class CoreCapsule {
     return res.wallets;
   }
 
+  private encodeWalletBase64(wallet: Wallet): string {
+    const walletJson = JSON.stringify(wallet);
+    const base64Wallet = Buffer.from(walletJson).toString('base64');
+    return base64Wallet;
+  }
+
   /**
    * Returns a base64 encoded wallet
    *
    * @returns string base64 encoded wallet
    **/
   getUserShare(): string | null {
-    const wallet = Object.values(this.wallets)[0] || Object.values(this.ed25519Wallets)[0];
+    const wallet = Object.values(this.wallets)[0];
+    const ed25519Wallet = Object.values(this.ed25519Wallets)[0];
 
-    if (wallet) {
-      const walletJson = JSON.stringify(wallet);
-      const base64Wallet = Buffer.from(walletJson).toString('base64');
-      return base64Wallet;
+    if (wallet && ed25519Wallet) {
+      return `${this.encodeWalletBase64(wallet)}-${this.encodeWalletBase64(ed25519Wallet)}`;
+    } else if (wallet || ed25519Wallet) {
+      return this.encodeWalletBase64(wallet || ed25519Wallet);
     } else {
       return null;
     }
@@ -1600,15 +1610,18 @@ export abstract class CoreCapsule {
    * @param base64Wallet
    * @returns Promise<void>
    **/
-  async setUserShare(base64Wallet: string): Promise<void> {
-    const walletJson = Buffer.from(base64Wallet, 'base64').toString();
-    const wallet = JSON.parse(walletJson) as Wallet;
-    if (wallet.scheme === WalletScheme.ED25519) {
-      this.ed25519Wallets[wallet.id] = wallet;
-      await this.setEd25519Wallets(this.ed25519Wallets);
-    } else {
-      this.wallets[wallet.id] = wallet;
-      await this.setWallets(this.wallets);
+  async setUserShare(base64Wallets: string): Promise<void> {
+    const base64WalletsSplit = base64Wallets.split('-');
+    for (const base64Wallet of base64WalletsSplit) {
+      const walletJson = Buffer.from(base64Wallet, 'base64').toString();
+      const wallet = JSON.parse(walletJson) as Wallet;
+      if (wallet.scheme === WalletScheme.ED25519) {
+        this.ed25519Wallets[wallet.id] = wallet;
+        await this.setEd25519Wallets(this.ed25519Wallets);
+      } else {
+        this.wallets[wallet.id] = wallet;
+        await this.setWallets(this.wallets);
+      }
     }
   }
 

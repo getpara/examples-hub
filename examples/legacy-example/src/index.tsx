@@ -978,7 +978,7 @@ function App() {
                 colorScheme="teal"
                 onClick={async () => {
                   await capsule.setUserShare(pregenUserShare);
-                  console.log(await capsule.claimPregenWallet(pregenEmail));
+                  console.log(await capsule.claimPregenWallets(pregenEmail));
                 }}
               >
                 Claim Pregen Wallet
@@ -989,7 +989,7 @@ function App() {
                   await capsule.setUserShare(pregenUserShare);
                   const parsedPhoneNumber = parsePhoneNumberFromString(pregenPhone);
                   const formattedNumberForPregen = `+${parsedPhoneNumber.countryCallingCode}${parsedPhoneNumber.formatNational()}`;
-                  console.log(await capsule.claimPregenWallet(formattedNumberForPregen, PregenIdentifierType.PHONE));
+                  console.log(await capsule.claimPregenWallets(formattedNumberForPregen, PregenIdentifierType.PHONE));
                 }}
               >
                 Claim Pregen Wallet For Phone
