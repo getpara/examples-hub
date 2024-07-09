@@ -1,7 +1,17 @@
 import { CpslButton, CpslIcon, CpslInput, CpslText } from '@usecapsule/react-components';
+import { useCallback } from 'react';
 import { styled } from 'styled-components';
+import { ModalStep } from '../utils/steps.js';
+import { useModalStore } from '../stores/index.js';
 
-export const AddFundsButton = ({ text = 'Add Funds', onClick }: { text?: string; onClick: () => void }) => {
+export const AddFundsButton = ({ text = 'Add Funds' }: { text?: string }) => {
+  const setStep = useModalStore((state) => state.setStep);
+  const onRampConfig = useModalStore((state) => state.onRampConfig);
+
+  const onClick = useCallback(() => {
+    setStep(ModalStep.ADD_FUNDS);
+  }, [onRampConfig]);
+
   return (
     <CpslButton variant="secondary" fullWidth onClick={onClick}>
       <ButtonWithIconContainerInvert>
@@ -73,14 +83,17 @@ export const ClickableText: typeof CpslText = styled(Text)`
   cursor: pointer;
 `;
 
-export const MainContainer = styled.div`
+export const FlexColumn = styled.div`
   align-self: center;
-  padding: 0px 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
   margin-bottom: 4px;
+`;
+
+export const MainContainer = styled(FlexColumn)`
+  padding: 0px 16px;
 `;
 
 export const QRContainer = styled.div`

@@ -9,6 +9,7 @@ import { ModalStep } from './utils/steps.js';
 import { CapsuleModalHandle, CapsuleModalProps } from './types/modalProps.js';
 import { DEFAULTS } from './constants/defaults.js';
 import { useGoBack } from './hooks/useGoBack.js';
+import { Network, getNetwork } from '@usecapsule/web-sdk';
 
 gsap.registerPlugin(useGSAP);
 defineCustomElements();
@@ -27,6 +28,7 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
       bareModal = false,
       className,
       onRampConfig,
+      networks = [Network.ETHEREUM],
       onModalStepChange,
       onExpandModalChange,
       onClose,
@@ -41,6 +43,7 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     const currentStep = useModalStore((state) => state.step);
     const setOnModalStepChange = useModalStore((state) => state.setOnModalStepChange);
     const setOnRampConfig = useModalStore((state) => state.setOnRampConfig);
+    const setNetworks = useModalStore((state) => state.setNetworks);
     const setStep = useModalStore((state) => state.setStep);
     const setCapsule = useCapsuleStore((state) => state.setCapsule);
     const setEmail = useUserInfoStore((state) => state.setEmail);
@@ -51,28 +54,32 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     const [hasFinishedAnimation, setHasFinishedAnimation] = useState(false);
     const [modalExpanded, setModalExpanded] = useState(false);
 
-    useImperativeHandle(ref, () => {
-      return {
-        goBack() {
-          goBack();
-        },
-        canGoBack() {
-          return hasPreviousStep;
-        },
-        isModalExpanded() {
-          return modalExpanded;
-        },
-        toggleModalExpanded() {
-          setModalExpanded((curr) => !curr);
-        },
-        currentStep() {
-          return currentStep;
-        },
-        handleModalClose() {
-          modalContentRef?.current?.handleModalClose();
-        },
-      };
-    }, [hasPreviousStep, modalExpanded, currentStep]);
+    useImperativeHandle(
+      ref,
+      () => {
+        return {
+          goBack() {
+            goBack();
+          },
+          canGoBack() {
+            return hasPreviousStep;
+          },
+          isModalExpanded() {
+            return modalExpanded;
+          },
+          toggleModalExpanded() {
+            setModalExpanded((curr) => !curr);
+          },
+          currentStep() {
+            return currentStep;
+          },
+          handleModalClose() {
+            modalContentRef?.current?.handleModalClose();
+          },
+        };
+      },
+      [hasPreviousStep, modalExpanded, currentStep],
+    );
 
     // This will run on mount and on isOpen change but won't cause a rerender unless step or email changes
     const initModal = async () => {
@@ -106,6 +113,10 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     useEffect(() => {
       setOnRampConfig(onRampConfig);
     }, [onRampConfig]);
+
+    useEffect(() => {
+      setNetworks(networks.map(getNetwork));
+    }, [networks]);
 
     useEffect(() => {
       updateThemeState({ logo, appName, oAuthLogoVariant: theme?.oAuthLogoVariant ?? 'default', bareModal });

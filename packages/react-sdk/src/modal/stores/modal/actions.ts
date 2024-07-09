@@ -1,12 +1,6 @@
 import { StoreApi } from 'zustand';
 import { DEFAULT_MODAL_STATE, ModalActions, ModalStore } from './useModalStore.js';
-import {
-  LoginModalStepNumber,
-  LoginPreviousStep,
-  ModalStep,
-  SignUpModalStepNumber,
-  SignUpPreviousStep,
-} from '../../utils/steps.js';
+import { LoginModalStepNumber, LoginPreviousStep, SignUpModalStepNumber, SignUpPreviousStep } from '../../utils/steps.js';
 
 export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<ModalStore>['getState']): ModalActions => ({
   resetState: () => {
@@ -25,15 +19,10 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
   },
   decrementStep: () => {
     const onModalStepChange = get().onModalStepChange;
-    const onRampConfig = get().onRampConfig;
     const isLogin = get().flow === 'login';
-    const isAutoOnRamp = onRampConfig?.providers.length === 1;
     const currentStep = get().step;
 
-    const prevStep =
-      isAutoOnRamp && currentStep === ModalStep.ADD_FUNDS_AWAITING
-        ? ModalStep.LOGIN_DONE
-        : (isLogin ? LoginPreviousStep : SignUpPreviousStep)[currentStep];
+    const prevStep = (isLogin ? LoginPreviousStep : SignUpPreviousStep)[currentStep];
 
     if (prevStep) {
       set({ step: prevStep });
@@ -82,10 +71,10 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
   setOnRampPurchase: (onRampPurchase) => {
     set((state) => ({ onRampPurchase: { ...(state.onRampPurchase || {}), ...onRampPurchase } }));
   },
-  setRampWidget: (rampWidget) => {
-    set({ rampWidget });
-  },
   setOnRampConfig: (onRampConfig) => {
     set({ onRampConfig });
+  },
+  setNetworks: (networks) => {
+    set({ networks });
   },
 });

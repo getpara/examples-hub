@@ -1,4 +1,4 @@
-import CapsuleWeb, { OAuthMethod, OnRampConfig } from '@usecapsule/web-sdk';
+import CapsuleWeb, { OAuthMethod, OnRampConfig, NetworkProp } from '@usecapsule/web-sdk';
 import { Theme } from '@usecapsule/react-components';
 import { OnModalStepChangeValue } from '../stores/index.js';
 import { ModalStep } from '../utils/steps.js';
@@ -79,6 +79,11 @@ export interface CapsuleModalProps {
    * Configure on-ramp providers to allow users to add funds upon signing up.
    */
   onRampConfig?: OnRampConfig;
+  /**
+   * Configures which EVM networks your app supports, an array of one or more of `["ETHEREUM", "ARBITRUM", "BASE", "OPTIMISM", and "POLYGON"]`.
+   * Defaults to `["ETHEREUM"]`.
+   */
+  networks?: NetworkProp[];
   currentStepOverride?: string | undefined;
   /**
    * Whether or not to display just the modal without the overlay component.

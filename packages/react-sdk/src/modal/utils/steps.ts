@@ -143,7 +143,7 @@ export const LoginPreviousStep: {
   [LoginModalStep.VERIFY_2FA]: ModalStep.SETUP_2FA,
   [LoginModalStep.TWO_FACTOR_DONE]: undefined,
   [LoginModalStep.LOGIN_DONE]: undefined,
-  [LoginModalStep.ADD_FUNDS]: undefined,
+  [LoginModalStep.ADD_FUNDS]: ModalStep.LOGIN_DONE,
   [LoginModalStep.ADD_FUNDS_AWAITING]: ModalStep.ADD_FUNDS,
   [LoginModalStep.ADD_FUNDS_SUCCESS]: undefined,
   [LoginModalStep.ADD_FUNDS_FAILURE]: undefined,

@@ -39,7 +39,14 @@ import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
 import * as solana from '@solana/web3.js';
 import Capsule from '@usecapsule/web-sdk';
-import { CapsuleModal, OAuthMethod, ON_RAMP_PROVIDERS } from '@usecapsule/react-sdk';
+import {
+  CapsuleModal,
+  OAuthMethod,
+  ON_RAMP_PROVIDERS,
+  NETWORKS,
+  validateOnRampConfig,
+  OnRampConfigError,
+} from '@usecapsule/react-sdk';
 import { FeeMarketEIP1559Transaction } from '@ethereumjs/tx';
 import { CapsuleProtoSigner } from '@usecapsule/cosmjs-v0-integration';
 import { CapsuleEthersSigner } from '@usecapsule/ethers-v6-integration';
@@ -54,13 +61,21 @@ import CoreCapsule, {
   OnRampAsset,
   OnRampProvider,
   getProvider,
+  getNetwork,
   OnRampProviderAssetMap,
+  Network,
 } from '@usecapsule/core-sdk';
 import { CapsuleSolanaWeb3Signer } from '@usecapsule/solana-web3.js-v1-integration';
 import { FONT_OPTIONS } from './constants';
 import parsePhoneNumberFromString from 'libphonenumber-js';
 import '@usecapsule/react-sdk/styles.css';
 import { ArrowUpIcon, ArrowDownIcon, SmallCloseIcon, AddIcon } from '@chakra-ui/icons';
+
+const ON_RAMP_ASSETS = {
+  [OnRampAsset.ETHEREUM]: 'Ethereum',
+  [OnRampAsset.USDC]: 'USDC',
+  [OnRampAsset.POLYGON]: 'Polygon',
+};
 
 // sample transaction params
 const DEFAULT_TO_ADDRESS = '0x42c9a72c9dfcc92cae0de9510160cea2da27af91';
@@ -107,9 +122,11 @@ const DEFAULT_SMART_CONTRACT_ARGS = ['808'];
 const DEFAULT_RAMP_HOST_API_KEY = '7t45dxm7yhho7fr9u4b9k8nv9gvczansfu8zt9pm';
 const DEFAULT_ONRAMP_CONFIG = {
   testMode: true,
+  network: Network.ETHEREUM,
   asset: OnRampAsset.ETHEREUM,
   providers: [{ id: OnRampProvider.STRIPE }, { id: OnRampProvider.RAMP, hostApiKey: DEFAULT_RAMP_HOST_API_KEY }],
 };
+const DEFAULT_NETWORKS = ['ETHEREUM', 'BASE'];
 const COSMOS_TESTNET_RPC = 'wss://rpc.sentry-01.theta-testnet.polypore.xyz';
 const COSMOS_DEFAULT_TO_ADDRESS = 'cosmos1f3px9t4juk43cwufj7f9s64z3wj7xvyc0rexg6';
 const web3 = new Web3();
@@ -501,6 +518,8 @@ function App() {
   const [logoVariant, setLogoVariant] = useState('branded');
 
   const [onRampConfig, setOnRampConfig] = useState<OnRampConfig | undefined>(DEFAULT_ONRAMP_CONFIG);
+  const [onRampConfigError, setOnRampConfigError] = useState<OnRampConfigError | undefined>();
+  const [networks, setNetworks] = useState<Network[]>(DEFAULT_NETWORKS);
 
   const [pregenEmail, setPregenEmail] = useState('');
   const [pregenPhone, setPregenPhone] = useState('');
@@ -552,6 +571,15 @@ function App() {
   useEffect(() => {
     checkIsSessionActive();
   }, []);
+
+  useEffect(() => {
+    try {
+      validateOnRampConfig(onRampConfig);
+      setOnRampConfigError(undefined);
+    } catch (e) {
+      setOnRampConfigError(e as OnRampConfigError);
+    }
+  }, [onRampConfig]);
 
   const handleOnClose = async () => {
     setModalIsOpen(false);
@@ -751,14 +779,32 @@ function App() {
                   </HStack>
                   <HStack>
                     <Text width={'15%'}>
+                      <strong>Destination Network:</strong>
+                    </Text>
+                    <Select
+                      defaultValue={onRampConfig.network}
+                      onChange={(e) => setOnRampConfig((prev) => ({ ...prev, network: e.target.value as OnRampAsset }))}
+                    >
+                      {Object.entries(NETWORKS).map(([id, name]) => (
+                        <option key={id} value={id}>
+                          {name}
+                        </option>
+                      ))}
+                    </Select>
+                  </HStack>
+                  <HStack>
+                    <Text width={'15%'}>
                       <strong>Destination Asset:</strong>
                     </Text>
                     <Select
                       defaultValue={onRampConfig.asset}
                       onChange={(e) => setOnRampConfig((prev) => ({ ...prev, asset: e.target.value as OnRampAsset }))}
                     >
-                      <option value={OnRampAsset.ETHEREUM}>Ethereum</option>
-                      <option value={OnRampAsset.USDC}>USDC</option>
+                      {Object.keys(OnRampAsset).map((id) => (
+                        <option value={id} key={id}>
+                          {ON_RAMP_ASSETS[id]}
+                        </option>
+                      ))}
                     </Select>
                   </HStack>
                   {onRampConfig?.providers && (
@@ -771,15 +817,7 @@ function App() {
                           const isRamp = getProvider(provider.id) === OnRampProvider.RAMP;
 
                           return (
-                            <HStack
-                              w="100%"
-                              flexGrow={1}
-                              borderRadius="lg"
-                              bgColor="lightblue"
-                              bgOpacity="0.5"
-                              py={1}
-                              px={2}
-                            >
+                            <HStack w="100%" flexGrow={1} borderRadius="lg" bgColor="lightblue" py={1} px={2}>
                               <Text width="15%">{ON_RAMP_PROVIDERS[getProvider(provider.id)].name}</Text>
                               <Flex flexGrow={1}>
                                 {isRamp && (
@@ -834,7 +872,6 @@ function App() {
                                   }}
                                 />
                                 <IconButton
-                                  isDisabled={onRampConfig.providers.length === 1}
                                   icon={<SmallCloseIcon />}
                                   onClick={() => {
                                     setOnRampConfig((prev) => ({
@@ -848,10 +885,8 @@ function App() {
                           );
                         })}
                         <HStack w="100%" alignItems="flex-start">
-                          {Object.keys(OnRampProviderAssetMap[0]).map((id: OnRampProvider) => {
-                            return onRampConfig.providers.find((p) => p.id === id) ? (
-                              <></>
-                            ) : (
+                          {Object.keys(OnRampProviderAssetMap).map((id: OnRampProvider) => {
+                            return (
                               <Button
                                 colorScheme="teal"
                                 variant="ghost"
@@ -877,8 +912,81 @@ function App() {
                       </VStack>
                     </HStack>
                   )}
+
+                  {onRampConfigError && (
+                    <HStack w="100%" borderRadius="lg" bgColor="rgba(255, 0, 0, 0.5)" py={1} px={2}>
+                      <span>{onRampConfigError.toString().split(': ').pop()}</span>
+                    </HStack>
+                  )}
                 </VStack>
               )}
+              <VStack align="left">
+                <HStack alignItems="flex-start">
+                  <Text width={'15%'}>
+                    <strong>Supported Networks:</strong>
+                  </Text>
+                  <VStack flexGrow={1} w="100%">
+                    {networks.map((network, index) => {
+                      return (
+                        <HStack w="100%" flexGrow={1} borderRadius="lg" bgColor="lightblue" py={1} px={2}>
+                          <Text width="15%">{NETWORKS[getNetwork(network)]}</Text>
+                          <HStack>
+                            <IconButton
+                              isDisabled={index === 0 || networks.length === 1}
+                              icon={<ArrowUpIcon />}
+                              onClick={() => {
+                                setNetworks((prev) => [
+                                  ...prev.slice(0, index - 1),
+                                  prev[index],
+                                  prev[index - 1],
+                                  ...prev.slice(index + 1),
+                                ]);
+                              }}
+                            />
+                            <IconButton
+                              isDisabled={index === networks.length - 1 || networks.length === 1}
+                              icon={<ArrowDownIcon />}
+                              onClick={() => {
+                                setNetworks((prev) => [
+                                  ...prev.slice(0, index),
+                                  prev[index + 1],
+                                  prev[index],
+                                  ...prev.slice(index + 2),
+                                ]);
+                              }}
+                            />
+                            <IconButton
+                              isDisabled={networks.length === 1}
+                              icon={<SmallCloseIcon />}
+                              onClick={() => {
+                                setNetworks((prev) => [...prev.slice(0, index), ...prev.slice(index + 1)]);
+                              }}
+                            />
+                          </HStack>
+                        </HStack>
+                      );
+                    })}
+                    <HStack w="100%" alignItems="flex-start">
+                      {Object.keys(Network).map((id) => {
+                        return networks.find((p) => p === id) ? (
+                          <></>
+                        ) : (
+                          <Button
+                            colorScheme="teal"
+                            variant="ghost"
+                            onClick={() => {
+                              setNetworks((prev) => [...prev, id]);
+                            }}
+                          >
+                            <AddIcon mr={3} />
+                            {NETWORKS[id]}
+                          </Button>
+                        );
+                      })}
+                    </HStack>
+                  </VStack>
+                </HStack>
+              </VStack>
               <HStack>
                 <Button
                   colorScheme="green"
@@ -1146,6 +1254,7 @@ function App() {
             OAuthMethod.FARCASTER,
           ]}
           onRampConfig={onRampConfig}
+          networks={networks}
           twoFactorAuthEnabled
           theme={
             useTheme

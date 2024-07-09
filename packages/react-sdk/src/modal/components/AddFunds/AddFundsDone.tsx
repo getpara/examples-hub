@@ -4,7 +4,6 @@ import { useModalStore } from '../../stores/index.js';
 import { useMemo } from 'react';
 import { CpslButton } from '@usecapsule/react-components';
 import { ModalStep } from '../../utils/steps.js';
-import { useOnClickAddFunds } from '../../hooks/useOnClickAddFunds.js';
 
 interface AddFundsDoneProps {
   isSuccess?: boolean;
@@ -14,8 +13,6 @@ interface AddFundsDoneProps {
 export const AddFundsDone = ({ isSuccess, onClose }: AddFundsDoneProps) => {
   const setStep = useModalStore((state) => state.setStep);
   const onRampPurchase = useModalStore((state) => state.onRampPurchase);
-  const onRampConfig = useModalStore((state) => state.onRampConfig);
-  const onClickAddFunds = useOnClickAddFunds(onRampConfig);
 
   const formatter = useMemo(() => {
     return new Intl.NumberFormat('en-US', {
@@ -37,7 +34,7 @@ export const AddFundsDone = ({ isSuccess, onClose }: AddFundsDoneProps) => {
           <CpslButton fullWidth onClick={onClose}>
             Done
           </CpslButton>
-          <AddFundsButton onClick={onClickAddFunds} text="Add More Funds" />
+          <AddFundsButton text="Add More Funds" />
         </>,
       ]
     : [

@@ -10,6 +10,7 @@ if (typeof global !== 'undefined') {
 }
 
 import Client, {
+  Network,
   OnRampAsset,
   OnRampProvider,
   OnRampPurchase,
@@ -17,7 +18,7 @@ import Client, {
 } from '@usecapsule/user-management-client';
 import { AxiosInstance } from 'axios';
 
-export { OnRampAsset, OnRampProvider, OnRampPurchaseStatus, type OnRampPurchase };
+export { Network, OnRampAsset, OnRampProvider, OnRampPurchaseStatus, type OnRampPurchase };
 
 export const is2FAEnabled = false;
 
@@ -55,6 +56,68 @@ export enum OAuthMethod {
   FARCASTER = 'FARCASTER',
 }
 
+export const NetworkMap = {
+  ethereum: Network.ETHEREUM,
+  ETHEREUM: Network.ETHEREUM,
+  arbitrum: Network.ARBITRUM,
+  ARBITRUM: Network.ARBITRUM,
+  base: Network.BASE,
+  BASE: Network.BASE,
+  optimism: Network.OPTIMISM,
+  OPTIMISM: Network.OPTIMISM,
+  POLYGON: Network.POLYGON,
+  polygon: Network.POLYGON,
+};
+
+export type NetworkProp = keyof typeof NetworkMap | Network;
+
+export const SupportedOnRamps: Record<Network, Partial<Record<OnRampAsset, Partial<Record<OnRampProvider, boolean>>>>> = {
+  [Network.ETHEREUM]: {
+    [OnRampAsset.ETHEREUM]: {
+      [OnRampProvider.RAMP]: true,
+      [OnRampProvider.STRIPE]: true,
+    },
+    [OnRampAsset.USDC]: {
+      [OnRampProvider.RAMP]: true,
+      [OnRampProvider.STRIPE]: true,
+    },
+  },
+  [Network.ARBITRUM]: {
+    [OnRampAsset.ETHEREUM]: {
+      [OnRampProvider.RAMP]: true,
+    },
+    [OnRampAsset.USDC]: {
+      [OnRampProvider.RAMP]: true,
+    },
+  },
+  [Network.BASE]: {
+    [OnRampAsset.ETHEREUM]: {
+      [OnRampProvider.RAMP]: true,
+    },
+    [OnRampAsset.USDC]: {
+      [OnRampProvider.RAMP]: true,
+    },
+  },
+  [Network.OPTIMISM]: {
+    [OnRampAsset.ETHEREUM]: {
+      [OnRampProvider.RAMP]: true,
+    },
+    [OnRampAsset.USDC]: {
+      [OnRampProvider.RAMP]: true,
+    },
+  },
+  [Network.POLYGON]: {
+    [OnRampAsset.POLYGON]: {
+      [OnRampProvider.RAMP]: true,
+      [OnRampProvider.STRIPE]: true,
+    },
+    [OnRampAsset.USDC]: {
+      [OnRampProvider.RAMP]: true,
+      [OnRampProvider.STRIPE]: true,
+    },
+  },
+};
+
 export const OnRampProviderMap = {
   STRIPE: OnRampProvider.STRIPE,
   stripe: OnRampProvider.STRIPE,
@@ -78,12 +141,12 @@ export const OnRampAssetMap = {
   ETH: OnRampAsset.ETHEREUM,
   ethereum: OnRampAsset.ETHEREUM,
   ETHEREUM: OnRampAsset.ETHEREUM,
-  // sol: OnRampAsset.SOLANA,
-  // SOL: OnRampAsset.SOLANA,
-  // solana: OnRampAsset.SOLANA,
-  // SOLANA: OnRampAsset.SOLANA,
   usdc: OnRampAsset.USDC,
   USDC: OnRampAsset.USDC,
+  polygon: OnRampAsset.POLYGON,
+  POLYGON: OnRampAsset.POLYGON,
+  matic: OnRampAsset.POLYGON,
+  MATIC: OnRampAsset.POLYGON,
 };
 
 export type OnRampAssetProp = keyof typeof OnRampAssetMap | OnRampAsset;
@@ -100,38 +163,43 @@ export type OnRampConfig = {
    */
   asset: OnRampAssetProp;
   /*
+   * The network on which to purchase the chosen asset. One of `['ETHEREUM', 'ARBITRUM', 'BASE', 'OPTIMISM', 'POLYGON']`. If the
+   * network and asset combination does not exist or is not supported by your chosen providers, modal instantiation will fail.
+   * Defaults to 'ETHEREUM'
+   */
+  network: NetworkProp;
+  /*
    * Array of objects in the form `{id: 'STRIPE' | 'RAMP'}`. If using `RAMP`, you must also provide your API key: `{ id: 'RAMP', hostApiKey: '...' }`
    */
   providers: OnRampConfigProvider[];
 };
 
-export const OnRampProviderAssetMap = [
-  // Production mode
-  {
-    [OnRampProvider.STRIPE]: {
-      [OnRampAsset.ETHEREUM]: 'eth',
-      // [OnRampAsset.SOLANA]: 'sol',
-      [OnRampAsset.USDC]: 'usdc',
-    },
-    [OnRampProvider.RAMP]: {
-      [OnRampAsset.ETHEREUM]: 'ETH_ETH',
-      // [OnRampAsset.SOLANA]: 'SOL_SOL',
-      [OnRampAsset.USDC]: 'ETH_USDC',
-    },
+export const OnRampProviderNetworkMap = {
+  [OnRampProvider.RAMP]: {
+    [Network.ETHEREUM]: 'ETH',
+    [Network.ARBITRUM]: 'ARBITRUM',
+    [Network.BASE]: 'BASE',
+    [Network.OPTIMISM]: 'OPTIMISM',
+    [Network.POLYGON]: 'MATIC',
   },
-  // Test mode
-  {
-    [OnRampProvider.STRIPE]: {
-      [OnRampAsset.ETHEREUM]: 'eth',
-      // [OnRampAsset.SOLANA]: 'sol',
-      [OnRampAsset.USDC]: 'usdc',
-    },
-    [OnRampProvider.RAMP]: {
-      [OnRampAsset.ETHEREUM]: 'SEPOLIA_ETH',
-      [OnRampAsset.USDC]: 'SEPOLIA_USDC',
-    },
+  [OnRampProvider.STRIPE]: {
+    [Network.ETHEREUM]: 'ethereum',
+    [Network.POLYGON]: 'polygon',
   },
-];
+};
+
+export const OnRampProviderAssetMap = {
+  [OnRampProvider.RAMP]: {
+    [OnRampAsset.ETHEREUM]: 'ETH',
+    [OnRampAsset.USDC]: 'USDC',
+    [OnRampAsset.POLYGON]: 'MATIC',
+  },
+  [OnRampProvider.STRIPE]: {
+    [OnRampAsset.ETHEREUM]: 'eth',
+    [OnRampAsset.USDC]: 'usdc',
+    [OnRampAsset.POLYGON]: 'matic',
+  },
+};
 
 export enum OnRampMethod {
   ACH = 'ACH',
@@ -148,16 +216,39 @@ export function getAsset(key: OnRampAssetProp): OnRampAsset {
   return OnRampAssetMap[key];
 }
 
-export function getProviderAsset(provider: OnRampProviderProp, asset: OnRampAssetProp, testMode = false): string {
-  return OnRampProviderAssetMap[Number(testMode)][getProvider(provider)][getAsset(asset)];
-}
+export const getProviderNetworkAndAssetCode = (
+  networkProp: NetworkProp,
+  assetProp: OnRampAssetProp,
+  providerProp: OnRampProviderProp,
+  testMode = false,
+): [string, string?] => {
+  const [network, asset, provider] = [getNetwork(networkProp), getAsset(assetProp), getProvider(providerProp)];
+  if (!SupportedOnRamps[network][asset][provider]) {
+    throw new Error(`Provider ${provider} does not support asset ${asset} on ${network}`);
+  }
 
-export function getProviderAssetInverse(provider: OnRampProviderProp, asset: string, testMode?: boolean): OnRampAsset {
-  const match = Object.entries(OnRampProviderAssetMap[Number(testMode)][getProvider(provider)]).find(
+  switch (provider) {
+    case OnRampProvider.RAMP:
+      if (testMode) {
+        return ['SEPOLIA_ETH'];
+      }
+
+      return [`${OnRampProviderNetworkMap[provider][network]}_${OnRampProviderAssetMap[provider][asset]}`];
+    default:
+      return [OnRampProviderNetworkMap[provider][network], OnRampProviderAssetMap[provider][asset]];
+  }
+};
+
+export function getProviderAssetInverse(provider: OnRampProviderProp, asset: string): OnRampAsset {
+  const match = Object.entries(OnRampProviderAssetMap[getProvider(provider)]).find(
     ([, theirAssetCode]) => asset === theirAssetCode,
   );
 
   return match ? (match[0] as OnRampAsset) : undefined;
+}
+
+export function getNetwork(networkProp: NetworkProp): Network {
+  return NetworkMap[networkProp];
 }
 
 export function getPortalDomain(env: Environment) {

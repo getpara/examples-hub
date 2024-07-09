@@ -33,6 +33,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
       hasFinishedAnimation,
       disableEmailLogin,
       disablePhoneLogin,
+      networks = ['ETHEREUM'],
       onClose,
       onRampConfig,
       loginTransitionOverride,
@@ -265,6 +266,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
           recoveryShare={recoveryShare}
           disableEmailLogin={disableEmailLogin}
           disablePhoneLogin={disablePhoneLogin}
+          networks={networks}
           onClose={handleClose}
           onRampConfig={onRampConfig}
         />

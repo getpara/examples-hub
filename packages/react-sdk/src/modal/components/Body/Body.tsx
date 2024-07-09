@@ -7,7 +7,7 @@ import { useModalStore, useThemeStore } from '../../stores/index.js';
 import { BiometricLoginStep } from '../BiometricLoginStep/BiometricLoginStep.js';
 import { Setup2FAStep } from '../Setup2FAStep/Setup2FAStep.js';
 import { LoginDoneStep } from '../LoginDoneStep/LoginDoneStep.js';
-import { OAuthMethod, OnRampConfig } from '@usecapsule/web-sdk';
+import { NetworkProp, OAuthMethod, OnRampConfig } from '@usecapsule/web-sdk';
 import { AwaitingBiometricsStep } from '../AwaitingBiometricsStep/AwaitingBiometricsStep.js';
 import { AwaitingWalletCreationStep } from '../AwaitingWalletCreationStep/AwaitingWalletCreationStep.js';
 import { WalletCreationDoneStep } from '../WalletCreationDoneStep/WalletCreationDoneStep.js';
@@ -15,9 +15,7 @@ import { RecoverySecretStep } from '../RecoverySecretStep/RecoverySecretStep.js'
 import { TwoFactorDoneStep } from '../TwoFactorDoneStep/TwoFactorDoneStep.js';
 import { BiometricCreationStep } from '../BiometricCreationStep/BiometricCreationStep.js';
 import { AwaitingOAuthStep } from '../AwaitingOAuthStep/AwaitingOAuthStep.js';
-import { AddFunds } from '../AddFunds/AddFunds.js';
-import { AddFundsAwaiting } from '../AddFundsAwaiting/AddFundsAwaiting.js';
-import { AddFundsDone } from '../AddFundsDone/AddFundsDone.js';
+import { AddFundsAwaiting, AddFundsDone, AddFunds } from '../AddFunds/index.js';
 import { VerificationCodeStepForPhone } from '../VerificationCodeStep/VerificationCodeStepForPhone.js';
 import FarcasterOAuthStep from '../OAuth/FarcasterOAuthStep.js';
 
@@ -28,6 +26,7 @@ interface BodyProps {
   hasFinishedAnimation: boolean;
   disableEmailLogin: boolean;
   disablePhoneLogin: boolean;
+  networks?: NetworkProp[];
   onClose: () => void;
   onRampConfig?: OnRampConfig;
 }
@@ -39,6 +38,7 @@ export const Body = ({
   hasFinishedAnimation,
   disableEmailLogin,
   disablePhoneLogin,
+  networks = ['ETHEREUM'],
   onClose,
 }: BodyProps) => {
   const currentStep = useModalStore((state) => state.step);
@@ -104,7 +104,7 @@ export const Body = ({
         return <FarcasterOAuthStep />;
       }
       case ModalStep.ADD_FUNDS: {
-        return <AddFunds />;
+        return <AddFunds hasFinishedAnimation={hasFinishedAnimation} networks={networks} />;
       }
       case ModalStep.ADD_FUNDS_AWAITING: {
         return <AddFundsAwaiting />;
@@ -129,7 +129,7 @@ export const Body = ({
           ModalStep.ADD_FUNDS_SUCCESS,
         ].includes(currentStep) && (
           <CpslAlert>
-            <div>
+            <div style={{ fontSize: '12px' }}>
               This Capsule Modal is configured to run on-ramp services in <b>test mode</b> only, for development purposes. If
               you are a user of {appName}, please contact support.
             </div>

@@ -216,6 +216,14 @@ export const KeyType = {
   RECOVERY: 'RECOVERY',
 } as const;
 
+export enum Network {
+  ETHEREUM = 'ETHEREUM',
+  ARBITRUM = 'ARBITRUM',
+  BASE = 'BASE',
+  OPTIMISM = 'OPTIMISM',
+  POLYGON = 'POLYGON',
+}
+
 export enum OnRampProvider {
   RAMP = 'RAMP',
   STRIPE = 'STRIPE',
@@ -224,6 +232,7 @@ export enum OnRampProvider {
 export enum OnRampAsset {
   ETHEREUM = 'ETHEREUM',
   USDC = 'USDC',
+  POLYGON = 'POLYGON',
 }
 
 export enum OnRampPurchaseStatus {
@@ -743,11 +752,13 @@ class Client {
     userId: string,
     walletId: string,
     provider: OnRampProvider,
+    network: Network,
     asset: OnRampAsset,
     testMode = false,
   ) {
     const res = await this.baseRequest.post<OnRampPurchase>(`/users/${userId}/wallets/${walletId}/purchases`, {
       provider,
+      network,
       asset,
       testMode,
     });

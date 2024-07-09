@@ -2,8 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { ModalStep } from '../../utils/steps.js';
 import { getActions } from './actions.js';
-import { OnRampConfig, OnRampPurchase } from '@usecapsule/web-sdk';
-import { RampInstantSDK } from '@ramp-network/ramp-instant-sdk';
+import { Network, OnRampConfig, OnRampPurchase } from '@usecapsule/web-sdk';
 
 type Flow = 'login' | 'signUp';
 
@@ -22,7 +21,7 @@ interface ModalState {
   onModalStepChange: (value: OnModalStepChangeValue) => void | undefined;
   onRampConfig: OnRampConfig | undefined;
   onRampPurchase: Partial<OnRampPurchase> | undefined;
-  rampWidget: RampInstantSDK | undefined;
+  networks: Network[];
 }
 
 export interface ModalActions {
@@ -40,7 +39,7 @@ export interface ModalActions {
   setOnModalStepChange: (fn: (value: OnModalStepChangeValue) => void) => void;
   setOnRampConfig: (_: OnRampConfig | undefined) => void;
   setOnRampPurchase: (_: Partial<OnRampPurchase> | undefined) => void;
-  setRampWidget: (_: RampInstantSDK | undefined) => void;
+  setNetworks: (_: Network[] | undefined) => void;
 }
 
 export type ModalStore = ModalState & ModalActions;
@@ -53,7 +52,7 @@ export const DEFAULT_MODAL_STATE: Omit<ModalState, 'step' | 'onRampConfig'> = {
   isFullyLoggedIn: false,
   onModalStepChange: undefined,
   onRampPurchase: undefined,
-  rampWidget: undefined,
+  networks: [Network.ETHEREUM],
 };
 
 export const useModalStore = create<ModalStore>()(
@@ -74,7 +73,7 @@ export const useModalStore = create<ModalStore>()(
         isFullyLoggedIn: state.isFullyLoggedIn,
         onRampConfig: state.onRampConfig,
         onRampPurchase: state.onRampPurchase,
-        rampWidget: state.rampWidget,
+        networks: state.networks,
       }),
     },
   ),

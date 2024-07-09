@@ -10,7 +10,16 @@ import {
 import { pki, jsbn } from 'node-forge';
 
 import { decryptWithPrivateKey, getAsymmetricKeyPair, getPublicKeyHex } from './cryptography/utils.js';
-import { Ctx, OnRampAssetProp, OnRampProviderProp, getAsset, getPortalBaseURL, getProvider } from './definitions.js';
+import {
+  Ctx,
+  NetworkProp,
+  OnRampAssetProp,
+  OnRampProviderProp,
+  getAsset,
+  getNetwork,
+  getPortalBaseURL,
+  getProvider,
+} from './definitions.js';
 import { Environment, OAuthMethod } from './definitions.js';
 import { getBaseUrl, initClient } from './external/capsuleClient.js';
 import * as mpcComputationClient from './external/mpcComputationClient.js';
@@ -1756,6 +1765,7 @@ export abstract class CoreCapsule {
    **/
   async createOnRampPurchase(
     provider: OnRampProviderProp,
+    network: NetworkProp,
     asset: OnRampAssetProp,
     testMode = false,
     walletId: string = Object.keys(this.wallets)[0],
@@ -1764,6 +1774,7 @@ export abstract class CoreCapsule {
       this.getUserId(),
       walletId,
       getProvider(provider),
+      getNetwork(network),
       getAsset(asset),
       testMode,
     );

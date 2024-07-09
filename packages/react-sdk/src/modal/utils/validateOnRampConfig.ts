@@ -1,9 +1,40 @@
-import { OnRampAssetMap, OnRampConfig, OnRampConfigProvider } from '@usecapsule/web-sdk';
+import { OnRampConfig, SupportedOnRamps, getAsset, getNetwork, getProvider } from '@usecapsule/web-sdk';
 
-function hasDuplicateProviders(arr: OnRampConfigProvider[]) {
-  return arr.reduce((res: boolean, obj, i) => {
-    return res || arr.findIndex(({ id }) => id === obj.id) !== i;
-  }, false);
+export class OnRampConfigError extends Error {
+  constructor(message) {
+    super(`On-ramp configuration error: ${message}.`);
+    this.name = 'OnRampConfigError';
+  }
+}
+
+function checkHasProviders({ providers }: OnRampConfig) {
+  if (!providers || providers.length < 1) {
+    throw new OnRampConfigError('No providers are configured');
+  }
+}
+
+function checkDuplicateProviders({ providers }: OnRampConfig) {
+  providers.forEach(({ id: providerProp }, index) => {
+    const provider = getProvider(providerProp);
+    if (providers.findIndex((p) => getProvider(p.id) === provider) !== index) {
+      throw new OnRampConfigError(`Provider ${provider} is configured more than once`);
+    }
+  });
+}
+
+function checkUnsupportedCombos({ network: networkProp, asset: assetProp, providers }: OnRampConfig) {
+  const [network, asset] = [getNetwork(networkProp), getAsset(assetProp)];
+  if (!SupportedOnRamps[network][asset]) {
+    throw new Error(`Asset ${asset} does not exist on network ${network}`);
+  }
+
+  providers.forEach(({ id: providerProp }) => {
+    const provider = getProvider(providerProp);
+
+    if (!SupportedOnRamps[network][asset][provider]) {
+      throw new OnRampConfigError(`Provider ${provider} does not support buying ${asset} on ${network}`);
+    }
+  });
 }
 
 export function validateOnRampConfig(obj?: OnRampConfig): obj is OnRampConfig {
@@ -11,14 +42,9 @@ export function validateOnRampConfig(obj?: OnRampConfig): obj is OnRampConfig {
     return false;
   }
 
-  if (
-    !Object.keys(OnRampAssetMap).includes(obj.asset) ||
-    !obj.providers ||
-    obj.providers.length < 1 ||
-    hasDuplicateProviders(obj.providers)
-  ) {
-    throw new Error('Invalid on-ramp configuration');
-  }
+  checkHasProviders(obj);
+  checkDuplicateProviders(obj);
+  checkUnsupportedCombos(obj);
 
   return true;
 }
