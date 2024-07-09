@@ -1,13 +1,13 @@
 {
   "name": "@usecapsule/server-sdk",
-  "version": "1.18.0",
+  "version": "1.19.0",
   "main": "dist/index.js",
   "sideEffects": [
     "wasm_exec.js"
   ],
   "dependencies": {
-    "@usecapsule/core-sdk": "1.18.0",
-    "@usecapsule/user-management-client": "1.15.0",
+    "@usecapsule/core-sdk": "1.19.0",
+    "@usecapsule/user-management-client": "1.16.0",
     "uuid": "^9.0.1",
     "ws": "^8.14.2"
   },

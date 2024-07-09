@@ -1,6 +1,6 @@
 {
   "name": "@usecapsule/react-sdk",
-  "version": "3.14.0",
+  "version": "3.15.0",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -17,7 +17,7 @@
     "@stripe/crypto": "^0.0.4",
     "@stripe/stripe-js": "^3.4.0",
     "@usecapsule/react-components": "^3.1.2",
-    "@usecapsule/web-sdk": "1.20.0",
+    "@usecapsule/web-sdk": "1.21.0",
     "gsap": "^3.12.5",
     "libphonenumber-js": "^1.11.1",
     "styled-components": "^6.1.8",
