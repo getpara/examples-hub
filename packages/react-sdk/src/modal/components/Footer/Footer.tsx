@@ -31,8 +31,8 @@ export const Footer = ({ expandModal }: FooterProps) => {
         </FooterContentContainer>
       </FooterContainer>
       <FooterContainer slot="footerExpandedFooter">
-        <CapsuleIconContainer isDark={isDark}>
-          <LargeCapsuleIcon isDark={isDark} icon="capsule" />
+        <CapsuleIconContainer $isDark={isDark}>
+          <LargeCapsuleIcon $isDark={isDark} icon="capsule" />
         </CapsuleIconContainer>
         <FooterContentContainer>
           <Heading>Your Capsule Wallet</Heading>
@@ -104,21 +104,21 @@ const CapsuleIcon = styled(CpslIcon)`
   --height: 20px;
 `;
 
-const LargeCapsuleIcon = styled(CpslIcon)<{ isDark: boolean }>`
+const LargeCapsuleIcon = styled(CpslIcon)<{ $isDark: boolean }>`
   --width: 23px;
   --height: 38px;
 
-  --icon-color: ${({ isDark }) => (isDark ? 'black' : 'white')};
+  --icon-color: ${({ $isDark }) => ($isDark ? 'black' : 'white')};
 `;
 
-const CapsuleIconContainer = styled.div<{ isDark: boolean }>`
+const CapsuleIconContainer = styled.div<{ $isDark: boolean }>`
   width: 80px;
   height: 80px;
   border-radius: 80px;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: ${({ isDark }) => (isDark ? 'white' : 'black')};
+  background-color: ${({ $isDark }) => ($isDark ? 'white' : 'black')};
 `;
 
 const ConnectButton = styled(CpslButton)`

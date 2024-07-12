@@ -158,19 +158,16 @@ export const SignUpStep = ({ oAuthMethods, disableEmailLogin, disablePhoneLogin 
   const methodsToShow = (): ReactNode[] => {
     const methods = [];
     if (!!oAuthMethods?.length) {
-      methods.push(
-        <>
-          <OAuth methods={oAuthMethods} />
-        </>,
-      );
+      methods.push(<OAuth key={'oAuth'} methods={oAuthMethods} />);
     }
 
     if (!disableEmailLogin) {
       if (methods.length > 0) {
-        methods.push(<CpslDivider>or</CpslDivider>);
+        methods.push(<CpslDivider key={'orEmail'}>or</CpslDivider>);
       }
       methods.push(
         <CpslInput
+          key={'email'}
           placeholder="Enter your email"
           onCpslInput={handleEmailInput}
           value={email}
@@ -188,10 +185,11 @@ export const SignUpStep = ({ oAuthMethods, disableEmailLogin, disablePhoneLogin 
 
     if (!disablePhoneLogin) {
       if (methods.length > 0) {
-        methods.push(<CpslDivider>or</CpslDivider>);
+        methods.push(<CpslDivider key={'orPhone'}>or</CpslDivider>);
       }
       methods.push(
         <CpslInput
+          key={'phone'}
           placeholder="Enter phone number"
           inputMode="tel"
           autofocus

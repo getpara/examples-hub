@@ -70,7 +70,7 @@ export const OAuth = ({ methods }: OAuthProps) => {
     <OAuthContainer>
       {methodsToShow.map((method) => (
         <StyledCpslTileButton
-          isDark={useDarkLogos}
+          $isDark={useDarkLogos}
           key={method}
           icon={useBrandedLogos ? brandedOAuthLogos[method] : oAuthLogos[method]}
           onClick={handleMethodClick(method)}
@@ -78,8 +78,8 @@ export const OAuth = ({ methods }: OAuthProps) => {
         />
       ))}
       {!showAll && hasMore && (
-        <MoreButton isDark={useDarkLogos} icon="moreLoginOptions" onClick={handleShowAll} hasFullRow>
-          <MoreText isDark={useDarkLogos}>MORE</MoreText>
+        <MoreButton $isDark={useDarkLogos} icon="moreLoginOptions" onClick={handleShowAll} hasFullRow>
+          <MoreText $isDark={useDarkLogos}>MORE</MoreText>
         </MoreButton>
       )}
     </OAuthContainer>
@@ -93,10 +93,10 @@ const OAuthContainer = styled.div`
   flex-wrap: wrap;
 `;
 
-const StyledCpslTileButton = styled(CpslTileButton)<{ isDark: boolean; hasFullRow: boolean }>`
+const StyledCpslTileButton = styled(CpslTileButton)<{ $isDark: boolean; hasFullRow: boolean }>`
   flex: ${({ hasFullRow }) => (hasFullRow ? '0 0 calc(25% - 4px)' : '1')};
 
-  --button-icon-color: ${({ isDark }) => (isDark ? 'white' : 'black')};
+  --button-icon-color: ${({ $isDark }) => ($isDark ? 'white' : 'black')};
   --button-width: 100%;
 `;
 
@@ -107,9 +107,9 @@ const MoreButton = styled(StyledCpslTileButton)`
   }
 `;
 
-const MoreText = styled(Text)<{ isDark: boolean }>`
+const MoreText = styled(Text)<{ $isDark: boolean }>`
   font-size: 8px;
   line-height: 8px;
   letter-spacing: 1px;
-  color: ${({ isDark }) => (isDark ? 'white' : 'black')};
+  color: ${({ $isDark }) => ($isDark ? 'white' : 'black')};
 `;
