@@ -65,9 +65,6 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
   setWebAuthURLForCreate: (url) => {
     set({ webAuthURLForCreate: url });
   },
-  setIsFullyLoggedIn: (isFullyLoggedIn) => {
-    set({ isFullyLoggedIn });
-  },
   setOnRampPurchase: (onRampPurchase) => {
     set((state) => ({ onRampPurchase: { ...(state.onRampPurchase || {}), ...onRampPurchase } }));
   },

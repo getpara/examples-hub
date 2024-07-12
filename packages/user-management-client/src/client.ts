@@ -1,4 +1,10 @@
-import axios, { AxiosInstance, AxiosRequestHeaders, AxiosResponseHeaders, InternalAxiosRequestConfig } from 'axios';
+import axios, {
+  AxiosInstance,
+  AxiosRequestHeaders,
+  AxiosResponse,
+  AxiosResponseHeaders,
+  InternalAxiosRequestConfig,
+} from 'axios';
 import { AxiosRequestConfig } from 'axios';
 import qs from 'qs';
 
@@ -496,8 +502,8 @@ class Client {
   };
 
   // GET /users/:userId/wallets
-  getWallets = async (userId: string): Promise<any> => {
-    const res = await this.baseRequest.get<any>(`/users/${userId}/wallets`);
+  getWallets = async (userId: string): Promise<AxiosResponse<getWalletsRes, any>> => {
+    const res = await this.baseRequest.get<getWalletsRes>(`/users/${userId}/wallets`);
     return res;
   };
 

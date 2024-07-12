@@ -19,6 +19,7 @@ import {
 } from '@usecapsule/core-sdk';
 import { PublicKeyStatus } from '@usecapsule/user-management-client';
 import { Wallet } from '@usecapsule/core-sdk';
+import { WalletScheme } from '@usecapsule/core-sdk/dist/types/CoreCapsule';
 
 const div = document.createElement('div');
 document.getElementsByTagName('body')[0].appendChild(div);
@@ -281,7 +282,7 @@ async function login(capsule: CapsuleWeb, args: any[]) {
     signer: decryptedShares[0].signer,
     address: desiredWallet.address,
     publicKey: desiredWallet.publicKey,
-    scheme: desiredWallet.scheme,
+    scheme: desiredWallet.scheme as WalletScheme,
   };
 
   await capsule.setWallets(walletsToInsert);
@@ -327,7 +328,7 @@ async function loginV2(capsule: CapsuleWeb, args: any[]) {
     signer: decryptedShares[0].signer,
     address: desiredWallet.address,
     publicKey: desiredWallet.publicKey,
-    scheme: desiredWallet.scheme,
+    scheme: desiredWallet.scheme as WalletScheme,
   };
 
   await capsule.setWallets(walletsToInsert);

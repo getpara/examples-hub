@@ -17,7 +17,6 @@ interface ModalState {
   flow: Flow | undefined;
   webAuthURLForLogin: string | undefined;
   webAuthURLForCreate: string | undefined;
-  isFullyLoggedIn: boolean;
   onModalStepChange: (value: OnModalStepChangeValue) => void | undefined;
   onRampConfig: OnRampConfig | undefined;
   onRampPurchase: Partial<OnRampPurchase> | undefined;
@@ -35,7 +34,6 @@ export interface ModalActions {
   isLogin: () => boolean;
   setWebAuthURLForLogin: (url?: string) => void;
   setWebAuthURLForCreate: (url?: string) => void;
-  setIsFullyLoggedIn: (isFullyLoggedIn: boolean) => void;
   setOnModalStepChange: (fn: (value: OnModalStepChangeValue) => void) => void;
   setOnRampConfig: (_: OnRampConfig | undefined) => void;
   setOnRampPurchase: (_: Partial<OnRampPurchase> | undefined) => void;
@@ -49,7 +47,6 @@ export const DEFAULT_MODAL_STATE: Omit<ModalState, 'step' | 'onRampConfig'> = {
   flow: undefined,
   webAuthURLForLogin: undefined,
   webAuthURLForCreate: undefined,
-  isFullyLoggedIn: false,
   onModalStepChange: undefined,
   onRampPurchase: undefined,
   networks: [Network.ETHEREUM],
@@ -70,7 +67,6 @@ export const useModalStore = create<ModalStore>()(
         step: state.step,
         webAuthURLForLogin: state.webAuthURLForLogin,
         webAuthURLForCreate: state.webAuthURLForCreate,
-        isFullyLoggedIn: state.isFullyLoggedIn,
         onRampConfig: state.onRampConfig,
         onRampPurchase: state.onRampPurchase,
         networks: state.networks,

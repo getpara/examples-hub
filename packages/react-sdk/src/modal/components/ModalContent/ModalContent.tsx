@@ -46,23 +46,18 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     const currentStep = useModalStore((state) => state.step);
     const webAuthURLForLogin = useModalStore((state) => state.webAuthURLForLogin);
     const webAuthURLForCreate = useModalStore((state) => state.webAuthURLForCreate);
-    const isFullyLoggedIn = useModalStore((state) => state.isFullyLoggedIn);
     const isLogin = useModalStore((state) => state.isLogin());
     const setStep = useModalStore((state) => state.setStep);
     const setWebAuthURLForLogin = useModalStore((state) => state.setWebAuthURLForLogin);
     const setWebAuthURLForCreate = useModalStore((state) => state.setWebAuthURLForCreate);
-    const setIsFullyLoggedIn = useModalStore((state) => state.setIsFullyLoggedIn);
     const resetModalState = useModalStore((state) => state.resetState);
     const resetUserInfoState = useUserInfoStore((state) => state.resetState);
 
     const loginTimeout = useRef<number>();
     const createAccountTimeout = useRef<number>();
 
-    const [walletCreated, setWalletCreated] = useState(false);
     const [walletCreationInProgress, setWalletCreationInProgress] = useState(false);
-    const [createWalletsRes, setCreateWalletsRes] = useState<{ wallets: Wallet[]; recoverySecret?: string }>(null);
     const [recoveryShare, setRecoveryShare] = useState<string>(null);
-    const [distributeDone, setDistributeDone] = useState(false);
 
     useImperativeHandle(
       ref,
@@ -92,7 +87,6 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     async function awaitLoginTransition(): Promise<void> {
       const { needsWallet } = await capsule.waitForLoginAndSetup();
 
-      setIsFullyLoggedIn(true);
       setWebAuthURLForLogin('');
 
       if (needsWallet) {
@@ -109,7 +103,6 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     async function awaitWalletCreationTransition(): Promise<void> {
       await capsule.waitForAccountCreation();
 
-      setIsFullyLoggedIn(true);
       setWebAuthURLForCreate('');
       setStep(ModalStep.AWAITING_WALLET_CREATION);
     }
@@ -120,18 +113,18 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
       }
     }, [currentStepOverride]);
 
-    // generate wallet once we know it's account creation
+    // generate/claim wallet once we know it's account creation
     useEffect(() => {
-      if (currentStep !== ModalStep.AWAITING_WALLET_CREATION || walletCreated || walletCreationInProgress) {
+      if (currentStep !== ModalStep.AWAITING_WALLET_CREATION || walletCreationInProgress) {
         return;
       }
       async function genWallet() {
         setWalletCreationInProgress(true);
+        let recoverySecret: string;
         if (!createWalletOverride) {
-          const newWalletsRes = await capsule.createWalletPerMissingType(true);
-          setCreateWalletsRes(newWalletsRes);
+          recoverySecret = await capsule.waitForPasskeyAndCreateWallet();
         } else {
-          const recoveryFromOverride = await createWalletOverride(capsule);
+          recoverySecret = await createWalletOverride(capsule);
           const fetchedWallets = (await capsule.fetchWallets()).filter((wallet) => !!wallet.address);
           const newWallets: Record<string, Wallet> = {};
           for (const wallet of fetchedWallets) {
@@ -143,43 +136,17 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
             };
           }
           capsule.setWallets(newWallets);
-          setRecoveryShare(recoveryFromOverride);
         }
-        setWalletCreated(true);
+        setRecoveryShare(recoverySecret);
         setWalletCreationInProgress(false);
-      }
-      genWallet();
-    }, [isLogin, currentStep]);
-
-    // distribute share once we know keygen is done
-    useEffect(() => {
-      if (distributeDone || !isFullyLoggedIn || !walletCreated) {
-        return;
-      }
-
-      async function distributeShare() {
-        let recoverySecret: string;
-        if (!createWalletOverride) {
-          recoverySecret = await capsule.distributeNewWalletShare(
-            createWalletsRes.wallets[0].id,
-            createWalletsRes.wallets[0].signer,
-          );
-          for (let i = 1; i < createWalletsRes.wallets.length; i++) {
-            // don't need to save the recovery secret as it should be the same as the first one
-            await capsule.distributeNewWalletShare(createWalletsRes.wallets[i].id, createWalletsRes.wallets[i].signer);
-          }
-          setRecoveryShare(recoverySecret);
-        }
-        setDistributeDone(true);
-
         if (!recoverySecret) {
           setStep(ModalStep.WALLET_CREATION_DONE);
         } else {
           setStep(ModalStep.SECRET);
         }
       }
-      distributeShare();
-    }, [isFullyLoggedIn, walletCreated, createWalletsRes]);
+      genWallet();
+    }, [isLogin, currentStep]);
 
     // wait for biometric to be added to move on to next step
     useEffect(() => {
@@ -196,7 +163,6 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
           async function loginOverride() {
             await loginTransitionOverride(capsule);
 
-            setIsFullyLoggedIn(true);
             setWebAuthURLForLogin('');
 
             if (await is2FASetup()) {
@@ -227,9 +193,6 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
         setTimeout(() => {
           resetModalState();
           resetUserInfoState();
-          setDistributeDone(false);
-          setWalletCreated(false);
-          setCreateWalletsRes(null);
           setRecoveryShare(null);
         }, 200);
       } else if (

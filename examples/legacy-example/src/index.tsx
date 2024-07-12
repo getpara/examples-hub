@@ -990,7 +990,10 @@ function App() {
               <HStack>
                 <Button
                   colorScheme="green"
-                  onClick={() => {
+                  onClick={async () => {
+                    if (pregenUserShare) {
+                      await capsule.setUserShare(pregenUserShare);
+                    }
                     setModalIsOpen(true);
                   }}
                 >

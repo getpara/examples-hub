@@ -35,7 +35,7 @@ import parsePhoneNumberFromString, { CountryCallingCode } from 'libphonenumber-j
 const BIOMETRIC_VERIFICATION_TIME_MS = 30 * 60 * 1000;
 const DEV_BIOMETRIC_VERIFICATION_TIME_MS = 60 * 60 * 1000;
 
-enum WalletScheme {
+export enum WalletScheme {
   CGGMP = 'CGGMP',
   DKLS = 'DKLS',
   ED25519 = 'ED25519',
@@ -61,6 +61,12 @@ export enum PregenIdentifierType {
   PHONE = 'PHONE',
 }
 
+// Keep this consistent with user-management code entities/walletEntity.ts
+export enum WalletType {
+  USER = 'USER',
+  PREGEN = 'PREGEN',
+}
+
 export interface Wallet {
   id: string;
   signer: string;
@@ -69,6 +75,7 @@ export interface Wallet {
   scheme?: WalletScheme;
   userId?: string;
   partnerId?: string;
+  type?: WalletType;
 }
 
 export interface ConstructorOpts {
@@ -690,32 +697,23 @@ export abstract class CoreCapsule {
   private async populateWalletAddresses(): Promise<void> {
     const res = await this.ctx.capsuleClient.getWallets(this.userId);
     const wallets = res.data.wallets;
-    wallets.forEach(
-      (wallet: {
-        id: string;
-        address?: string;
-        publicKey?: string;
-        scheme?: WalletScheme;
-        partnerId?: string;
-        userId?: string;
-      }) => {
-        if (wallet.scheme === WalletScheme.ED25519 && this.ed25519Wallets[wallet.id]) {
-          this.ed25519Wallets[wallet.id].address = wallet.address;
-          this.ed25519Wallets[wallet.id].publicKey = wallet.publicKey;
-          this.ed25519Wallets[wallet.id].scheme = wallet.scheme;
-          this.ed25519Wallets[wallet.id].partnerId = wallet.partnerId;
-          this.ed25519Wallets[wallet.id].userId = wallet.userId;
-          delete this.wallets[wallet.id];
-        } else if (this.wallets[wallet.id]) {
-          this.wallets[wallet.id].address = wallet.address;
-          this.wallets[wallet.id].publicKey = wallet.publicKey;
-          this.wallets[wallet.id].scheme = wallet.scheme;
-          this.wallets[wallet.id].partnerId = wallet.partnerId;
-          this.wallets[wallet.id].userId = wallet.userId;
-          delete this.ed25519Wallets[wallet.id];
-        }
-      },
-    );
+    wallets.forEach((wallet) => {
+      if (wallet.scheme === WalletScheme.ED25519 && this.ed25519Wallets[wallet.id]) {
+        this.ed25519Wallets[wallet.id].address = wallet.address;
+        this.ed25519Wallets[wallet.id].publicKey = wallet.publicKey;
+        this.ed25519Wallets[wallet.id].scheme = wallet.scheme;
+        this.ed25519Wallets[wallet.id].partnerId = wallet.partnerId;
+        this.ed25519Wallets[wallet.id].userId = wallet.userId;
+        delete this.wallets[wallet.id];
+      } else if (this.wallets[wallet.id]) {
+        this.wallets[wallet.id].address = wallet.address;
+        this.wallets[wallet.id].publicKey = wallet.publicKey;
+        this.wallets[wallet.id].scheme = wallet.scheme as WalletScheme;
+        this.wallets[wallet.id].partnerId = wallet.partnerId;
+        this.wallets[wallet.id].userId = wallet.userId;
+        delete this.ed25519Wallets[wallet.id];
+      }
+    });
     await this.setWallets(this.wallets);
     await this.setEd25519Wallets(this.ed25519Wallets);
   }
@@ -726,32 +724,25 @@ export abstract class CoreCapsule {
   ): Promise<void> {
     const res = await this.ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType);
     const wallets = res.wallets;
-    wallets.forEach(
-      (wallet: {
-        id: string;
-        address?: string;
-        publicKey?: string;
-        scheme?: WalletScheme | string;
-        partnerId?: string;
-        userId?: string;
-      }) => {
-        if (wallet.scheme === WalletScheme.ED25519 && this.ed25519Wallets[wallet.id]) {
-          this.ed25519Wallets[wallet.id].address = wallet.address;
-          this.ed25519Wallets[wallet.id].publicKey = wallet.publicKey;
-          this.ed25519Wallets[wallet.id].scheme = wallet.scheme;
-          this.ed25519Wallets[wallet.id].partnerId = wallet.partnerId;
-          this.ed25519Wallets[wallet.id].userId = wallet.userId;
-          delete this.wallets[wallet.id];
-        } else if (this.wallets[wallet.id]) {
-          this.wallets[wallet.id].address = wallet.address;
-          this.wallets[wallet.id].publicKey = wallet.publicKey;
-          this.wallets[wallet.id].scheme = wallet.scheme as WalletScheme;
-          this.wallets[wallet.id].partnerId = wallet.partnerId;
-          this.wallets[wallet.id].userId = wallet.userId;
-          delete this.ed25519Wallets[wallet.id];
-        }
-      },
-    );
+    wallets.forEach((wallet) => {
+      if (wallet.scheme === WalletScheme.ED25519 && this.ed25519Wallets[wallet.id]) {
+        this.ed25519Wallets[wallet.id].address = wallet.address;
+        this.ed25519Wallets[wallet.id].publicKey = wallet.publicKey;
+        this.ed25519Wallets[wallet.id].scheme = wallet.scheme;
+        this.ed25519Wallets[wallet.id].partnerId = wallet.partnerId;
+        this.ed25519Wallets[wallet.id].userId = wallet.userId;
+        this.ed25519Wallets[wallet.id].type = wallet.type as WalletType;
+        delete this.wallets[wallet.id];
+      } else if (this.wallets[wallet.id]) {
+        this.wallets[wallet.id].address = wallet.address;
+        this.wallets[wallet.id].publicKey = wallet.publicKey;
+        this.wallets[wallet.id].scheme = wallet.scheme as WalletScheme;
+        this.wallets[wallet.id].partnerId = wallet.partnerId;
+        this.wallets[wallet.id].userId = wallet.userId;
+        this.wallets[wallet.id].type = wallet.type as WalletType;
+        delete this.ed25519Wallets[wallet.id];
+      }
+    });
     await this.setWallets(this.wallets);
     await this.setEd25519Wallets(this.ed25519Wallets);
   }
@@ -1850,12 +1841,26 @@ export abstract class CoreCapsule {
 
   /**
    * Logs the user out.
+   *
+   * @param preservePregenWallets - preserves the stored pregen wallets in memory after the logout.
    **/
-  async logout(): Promise<void> {
+  async logout(preservePregenWallets?: boolean): Promise<void> {
     await this.ctx.capsuleClient.logout();
     await this.clearStorage();
-    this.wallets = {};
-    this.ed25519Wallets = {};
+
+    if (preservePregenWallets) {
+      const allWallets = { ...this.wallets, ...this.ed25519Wallets };
+      Object.entries(allWallets).forEach(([id, wallet]) => {
+        if (wallet.type !== WalletType.PREGEN) {
+          wallet.scheme === WalletScheme.ED25519 ? delete this.ed25519Wallets[id] : delete this.wallets[id];
+        }
+      });
+      await this.setWallets(this.wallets);
+      await this.setEd25519Wallets(this.ed25519Wallets);
+    } else {
+      this.wallets = {};
+      this.ed25519Wallets = {};
+    }
     this.loginEncryptionKeyPair = undefined;
     this.email = undefined;
     this.userId = undefined;

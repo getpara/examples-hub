@@ -61,7 +61,8 @@ export const SignUpStep = ({ oAuthMethods, disableEmailLogin, disablePhoneLogin 
       return;
     }
 
-    await capsule.logout();
+    // Logout to ensure cleared Capsule state but preserve pregen wallets
+    await capsule.logout(true);
 
     const userExists = await capsule.checkIfUserExists(email);
     if (userExists) {
@@ -83,7 +84,8 @@ export const SignUpStep = ({ oAuthMethods, disableEmailLogin, disablePhoneLogin 
       return;
     }
 
-    await capsule.logout();
+    // Logout to ensure cleared Capsule state but preserve pregen wallets
+    await capsule.logout(true);
 
     let userExists = false;
 
