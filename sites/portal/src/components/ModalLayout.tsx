@@ -35,6 +35,7 @@ export const ModalLayout = () => {
     ? decodeURIComponent(searchParams.get('portalPrimaryButtonTextColor'))
     : '';
   const portalBorderRadius = searchParams.get('portalPrimaryButtonTextColor');
+  const portalFont = searchParams.get('portalFont');
 
   const [partner, setPartner] = useState<Partner | undefined>();
   const [isDark, setIsDark] = useState<boolean>(false);
@@ -64,11 +65,13 @@ export const ModalLayout = () => {
                 inverted: portalPrimaryButtonTextColor,
               },
             },
+            font: portalFont,
           }
         : {
             backgroundColor: portalBackgroundColor,
             foregroundColor: portalForegroundColor,
             borderRadius: portalBorderRadius as BorderRadius,
+            font: portalFont,
           }),
     });
     setIsDark(isDarkTheme);
@@ -79,6 +82,7 @@ export const ModalLayout = () => {
     portalPrimaryButtonColor,
     portalPrimaryButtonTextColor,
     portalTextColor,
+    portalFont,
   ]);
 
   useEffect(() => {

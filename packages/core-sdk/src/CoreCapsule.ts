@@ -89,20 +89,70 @@ export interface ConstructorOpts {
   sessionStorageSetItemOverride?: (key: string, value: string) => Promise<void>;
   sessionStorageRemoveItemOverride?: (key: string) => Promise<void>;
   clearStorageOverride?: () => Promise<void>;
+  /**
+   * Hex color to use in the portal for the background color.
+   * @deprecated use portalTheme instead
+   */
   portalBackgroundColor?: string; // please use hex color codes
+  /**
+   * Hex color to use in the portal for the primary button.
+   * @deprecated use portalTheme instead
+   */
   portalPrimaryButtonColor?: string; // please use hex color codes
+  /**
+   * Hex text color to use in the portal.
+   * @deprecated use portalTheme instead
+   */
   portalTextColor?: string; // please use hex color codes
+  /**
+   * Hex color to use in the portal for the primary button text.
+   * @deprecated use portalTheme instead
+   */
   portalPrimaryButtonTextColor?: string; // please use hex color codes
+  /**
+   * Theme to use for the portal
+   * @deprecated configure theming through the developer portal
+   */
   portalTheme?: Theme;
   useDKLSForCreation?: boolean;
   disableWebSockets?: boolean;
   wasmOverride?: ArrayBuffer;
+  /**
+   * Base theme for the emails sent from this Capsule instance.
+   * @default - dark
+   * @deprecated configure theming through the developer portal
+   */
   emailTheme?: EmailTheme;
+  /**
+   * Hex color to use as the primary color in the emails.
+   * @default - #FE452B
+   * @deprecated configure theming through the developer portal
+   */
   emailPrimaryColor?: string;
+  /**
+   * Linkedin URL to link to in the emails. Should be a secure URL string starting with https://www.linkedin.com/company/.
+   * @deprecated configure this through the developer portal
+   */
   linkedinUrl?: string;
+  /**
+   * Github URL to link to in the emails. Should be a secure URL string starting with https://github.com/.
+   * @deprecated configure this through the developer portal
+   */
   githubUrl?: string;
+  /**
+   * X (Twitter) URL to link to in the emails. Should be a secure URL string starting with https://twitter.com/.
+   * @deprecated configure this through the developer portal
+   */
   xUrl?: string;
+  /**
+   * Support URL to link to in the emails. This can be a secure https URL or a mailto: string. Will default to using the stored application URL is nothing is provided here.
+   * @deprecated homepageUrl will be used for this, configure it through the developer portal
+   */
   supportUrl?: string;
+  /**
+   * URL for your home landing page. Should be a secure URL string starting with https://.
+   * @deprecated configure this through the developer portal
+   */
   homepageUrl?: string;
   supportedWalletTypes?: WalletType[];
 }
@@ -142,37 +192,44 @@ export abstract class CoreCapsule {
   /**
    * Base theme for the emails sent from this Capsule instance.
    * @default - dark
+   * @deprecated configure theming through the developer portal
    */
   emailTheme?: EmailTheme;
 
   /**
    * Hex color to use as the primary color in the emails.
    * @default - #FE452B
+   * @deprecated configure theming through the developer portal
    */
   emailPrimaryColor?: string;
 
   /**
    * Linkedin URL to link to in the emails. Should be a secure URL string starting with https://www.linkedin.com/company/.
+   * @deprecated configure this through the developer portal
    */
   linkedinUrl?: string;
 
   /**
    * Github URL to link to in the emails. Should be a secure URL string starting with https://github.com/.
+   * @deprecated configure this through the developer portal
    */
   githubUrl?: string;
 
   /**
    * X (Twitter) URL to link to in the emails. Should be a secure URL string starting with https://twitter.com/.
+   * @deprecated configure this through the developer portal
    */
   xUrl?: string;
 
   /**
    * Support URL to link to in the emails. This can be a secure https URL or a mailto: string. Will default to using the stored application URL is nothing is provided here.
+   * @deprecated homepageUrl will be used for this, configure it through the developer portal
    */
   supportUrl?: string;
 
   /**
    * URL for your home landing page. Should be a secure URL string starting with https://.
+   * @deprecated configure this through the developer portal
    */
   homepageUrl?: string;
 
@@ -207,6 +264,7 @@ export abstract class CoreCapsule {
 
   /**
    * Theme to use for the portal
+   * @deprecated configure theming through the developer portal
    */
   portalTheme?: Theme;
 
@@ -554,16 +612,20 @@ export abstract class CoreCapsule {
   }
 
   private async getCommonQueryParams(partnerId?: string, isForNewDevice?: boolean): Promise<string> {
+    const partner = (await this.ctx.capsuleClient.getPartner(partnerId)).data;
+
     const partnerIdQueryParam = partnerId ? `&partnerId=${partnerId}` : '';
+    const portalFontQueryParam = partner.font ? `&portalFont=${encodeURIComponent(partner.font)}` : '';
     const portalBorderRadiusQueryParam = this.portalTheme?.borderRadius
       ? `&portalBorderRadius=${encodeURIComponent(this.portalTheme.borderRadius)}`
       : '';
-    const portalForegroundColorQueryParam = this.portalTheme?.foregroundColor
-      ? `&portalForegroundColor=${encodeURIComponent(this.portalTheme.foregroundColor)}`
-      : '';
+    const portalForegroundColorQueryParam =
+      partner.foregroundColor || this.portalTheme?.foregroundColor
+        ? `&portalForegroundColor=${encodeURIComponent(partner.foregroundColor ?? this.portalTheme.foregroundColor)}`
+        : '';
     const portalBackgroundColorQueryParam =
-      this.portalBackgroundColor || this.portalTheme?.backgroundColor
-        ? `&portalBackgroundColor=${encodeURIComponent(this.portalBackgroundColor ?? this.portalTheme.backgroundColor)}`
+      partner.backgroundColor || this.portalBackgroundColor || this.portalTheme?.backgroundColor
+        ? `&portalBackgroundColor=${encodeURIComponent(partner.backgroundColor ?? this.portalBackgroundColor ?? this.portalTheme.backgroundColor)}`
         : '';
     const portalPrimaryButtonColorQueryParam = this.portalPrimaryButtonColor
       ? `&portalPrimaryButtonColor=${encodeURIComponent(this.portalPrimaryButtonColor)}`
@@ -576,7 +638,7 @@ export abstract class CoreCapsule {
       : '';
     const isForNewDeviceQueryParam = isForNewDevice ? `&isForNewDevice=${isForNewDevice}` : '';
 
-    return `${partnerIdQueryParam}${portalBorderRadiusQueryParam}${portalForegroundColorQueryParam}${portalBackgroundColorQueryParam}${portalPrimaryButtonColorQueryParam}${portalTextColorQueryParam}${portalPrimaryButtonTextColorQueryParam}${isForNewDeviceQueryParam}`;
+    return `${partnerIdQueryParam}${portalFontQueryParam}${portalBorderRadiusQueryParam}${portalForegroundColorQueryParam}${portalBackgroundColorQueryParam}${portalPrimaryButtonColorQueryParam}${portalTextColorQueryParam}${portalPrimaryButtonTextColorQueryParam}${isForNewDeviceQueryParam}`;
   }
 
   private async getWebAuthURLForCreate(
