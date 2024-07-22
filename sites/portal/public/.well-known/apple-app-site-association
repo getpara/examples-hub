@@ -1,5 +1,19 @@
 {
     "webcredentials": {
-        "apps": [ "FF9U73RS48.com.example.capsuleExample", "FF9U73RS48.com.capsule.flutterExample", "FF9U73RS48.com.capsule.reactNativeExample", "FF9U73RS48.com.capsule.swift-example", "T4H63UMVHC.app.hedgehog.ios", "N95HZS8XBQ.app.dreamos.capsuledemo", "99JJXS75CQ.org.partylabs.bank", "VUFM69789B.com.bbah.mine-ios", "AD9P7L7XTM.fit.moonwalk.mobile.app", "FF9U73RS48.com.usecapsule.rnexample", "FF9U73RS48.com.usecapsule.expoexample" ]
+        "apps": [ 
+            "FF9U73RS48.com.example.capsuleExample", 
+            "FF9U73RS48.com.capsule.flutterExample", 
+            "FF9U73RS48.com.capsule.reactNativeExample", 
+            "FF9U73RS48.com.capsule.swift-example", 
+            "T4H63UMVHC.app.hedgehog.ios", 
+            "N95HZS8XBQ.app.dreamos.capsuledemo", 
+            "99JJXS75CQ.org.partylabs.bank", 
+            "VUFM69789B.com.bbah.mine-ios", 
+            "AD9P7L7XTM.fit.moonwalk.mobile.app", 
+            "FF9U73RS48.com.usecapsule.rnexample", 
+            "FF9U73RS48.com.usecapsule.expoexample", 
+            "95TD4V97UV.com.kourtneychima.ritualsclub", 
+            "99JJXS75CQ.com.superdapp.blau" 
+            ]
     }
 }
