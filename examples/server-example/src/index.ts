@@ -10,7 +10,7 @@ import { CapsuleSolanaWeb3Signer } from '@usecapsule/solana-web3.js-v1-integrati
 
 import CapsuleServer, { Environment } from '@usecapsule/server-sdk';
 import { CapsuleEthersSigner } from '@usecapsule/ethers-v6-integration';
-import { createCapsuleViemClient } from '@usecapsule/viem-v1-integration';
+import { createCapsuleViemClient } from '@usecapsule/viem-v2-integration';
 const app: Express = express();
 const port = process.env.PORT || '7007';
 

@@ -7,7 +7,7 @@
   "typings": "dist/types/index.d.ts",
   "sideEffects": false,
   "dependencies": {
-    "@celo/utils": "^3.2.0",
+    "@celo/utils": "^6.0.1",
     "@usecapsule/user-management-client": "1.18.0",
     "base64url": "^3.0.1",
     "buffer": "6.0.3",
