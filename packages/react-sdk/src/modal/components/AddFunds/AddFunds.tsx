@@ -27,15 +27,15 @@ function list(networks: Network[]) {
   return networks.length === 1
     ? NETWORKS[networks[0]]
     : `${networks
-        .map((id) => NETWORKS[id])
+        .map(id => NETWORKS[id])
         .slice(0, -1)
         .join(', ')}${networks.length > 2 ? ',' : ''} and ${NETWORKS[networks[networks.length - 1]]}`;
 }
 
 const OnRamp = ({ config, index }: OnRampButtonProps) => {
-  const capsule = useCapsuleStore((state) => state.capsule);
-  const setStep = useModalStore((state) => state.setStep);
-  const setOnRampPurchase = useModalStore((state) => state.setOnRampPurchase);
+  const capsule = useCapsuleStore(state => state.capsule);
+  const setStep = useModalStore(state => state.setStep);
+  const setOnRampPurchase = useModalStore(state => state.setOnRampPurchase);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -69,7 +69,7 @@ const OnRamp = ({ config, index }: OnRampButtonProps) => {
           <OnRampStat>
             Fee: {feeUpper !== undefined ? `${feeLower.toFixed(2)}-${feeUpper.toFixed(2)}%` : `${feeLower.toFixed(2)}%`}
           </OnRampStat>
-          <OnRampStat>{methods.map((m) => m.toString()).join(', ')}</OnRampStat>
+          <OnRampStat>{methods.map(m => m.toString()).join(', ')}</OnRampStat>
           <OnRampStat>
             <CpslIcon icon="lightning" />
             Instant
@@ -82,10 +82,10 @@ const OnRamp = ({ config, index }: OnRampButtonProps) => {
 
 export const AddFunds = ({ hasFinishedAnimation }: { hasFinishedAnimation: boolean; networks: NetworkProp[] }) => {
   const [isCopied, copy] = useCopyToClipboard();
-  const appName = useThemeStore((state) => state.appName);
-  const capsule = useCapsuleStore((state) => state.capsule);
-  const onRampConfig = useModalStore((state) => state.onRampConfig);
-  const networks = useModalStore((state) => state.networks);
+  const appName = useThemeStore(state => state.appName);
+  const capsule = useCapsuleStore(state => state.capsule);
+  const onRampConfig = useModalStore(state => state.onRampConfig);
+  const networks = useModalStore(state => state.networks);
   const isOnRampConfigured = onRampConfig?.providers.length > 0;
 
   const [tab, setTab] = useState<'buy' | 'receive'>(isOnRampConfigured ? 'buy' : 'receive');

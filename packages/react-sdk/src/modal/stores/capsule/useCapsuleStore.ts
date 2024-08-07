@@ -12,7 +12,7 @@ export interface CapsuleActions {
 
 export type CapsuleStore = CapsuleState & CapsuleActions;
 
-export const useCapsuleStore = create<CapsuleStore>((set) => ({
+export const useCapsuleStore = create<CapsuleStore>(set => ({
   capsule: undefined,
   ...getActions(set),
 }));

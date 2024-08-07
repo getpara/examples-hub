@@ -10,8 +10,8 @@ export function initClient(baseURL: string, useAdapter: boolean): AxiosInstance 
         body: config.data,
         credentials: config.withCredentials ? 'include' : undefined,
       })
-        .then((response) =>
-          response.text().then((text) => ({
+        .then(response =>
+          response.text().then(text => ({
             data: text,
             status: response.status,
             statusText: response.statusText,

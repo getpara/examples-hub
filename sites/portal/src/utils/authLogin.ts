@@ -104,7 +104,7 @@ export async function authLogin(
     );
   }
 
-  const tempShareOpts = decryptedShares.flatMap((share) => {
+  const tempShareOpts = decryptedShares.flatMap(share => {
     const { encryptedMessageHex, encryptedKeyHex } = encryptWithDerivedPublicKey(encryptionKey, share.signer);
     const opts = [
       {

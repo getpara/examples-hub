@@ -163,14 +163,14 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
 
     switch (method) {
       case 'eth_accounts': {
-        return Object.values(this.capsule.getWallets()).map((w) => w.address);
+        return Object.values(this.capsule.getWallets()).map(w => w.address);
       }
       case 'eth_chainId': {
         return this.currentHexChainId;
       }
       case 'eth_requestAccounts': {
         if (await this.capsule.isFullyLoggedIn()) {
-          return Object.values(this.capsule.getWallets()).map((w) => w.address);
+          return Object.values(this.capsule.getWallets()).map(w => w.address);
         }
 
         this.isModalClosed = false;
@@ -185,9 +185,9 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
         // check if capsule is fully logged in every 2 seconds for 10 minutes at most
         const now = Date.now();
         while (Date.now() - now < TEN_MINUTES_MS) {
-          await new Promise((resolve) => setTimeout(resolve, 2000));
+          await new Promise(resolve => setTimeout(resolve, 2000));
           if (await this.capsule.isFullyLoggedIn()) {
-            const addresses = Object.values(this.capsule.getWallets()).map((w) => w.address);
+            const addresses = Object.values(this.capsule.getWallets()).map(w => w.address);
             this.emit('accountsChanged', addresses);
             return addresses;
           }
@@ -245,7 +245,7 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
 
         const res = await this.chainTransportSubscribe({
           params: params as ['newHeads'],
-          onData: (data) => {
+          onData: data => {
             this.emit('message', {
               type: 'eth_subscription',
               data,

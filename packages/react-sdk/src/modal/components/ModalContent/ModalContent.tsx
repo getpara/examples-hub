@@ -42,16 +42,16 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     },
     ref,
   ) => {
-    const capsule = useCapsuleStore((state) => state.capsule);
-    const currentStep = useModalStore((state) => state.step);
-    const webAuthURLForLogin = useModalStore((state) => state.webAuthURLForLogin);
-    const webAuthURLForCreate = useModalStore((state) => state.webAuthURLForCreate);
-    const isLogin = useModalStore((state) => state.isLogin());
-    const setStep = useModalStore((state) => state.setStep);
-    const setWebAuthURLForLogin = useModalStore((state) => state.setWebAuthURLForLogin);
-    const setWebAuthURLForCreate = useModalStore((state) => state.setWebAuthURLForCreate);
-    const resetModalState = useModalStore((state) => state.resetState);
-    const resetUserInfoState = useUserInfoStore((state) => state.resetState);
+    const capsule = useCapsuleStore(state => state.capsule);
+    const currentStep = useModalStore(state => state.step);
+    const webAuthURLForLogin = useModalStore(state => state.webAuthURLForLogin);
+    const webAuthURLForCreate = useModalStore(state => state.webAuthURLForCreate);
+    const isLogin = useModalStore(state => state.isLogin());
+    const setStep = useModalStore(state => state.setStep);
+    const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
+    const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
+    const resetModalState = useModalStore(state => state.resetState);
+    const resetUserInfoState = useUserInfoStore(state => state.resetState);
 
     const loginTimeout = useRef<number>();
     const createAccountTimeout = useRef<number>();
@@ -59,17 +59,13 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     const [walletCreationInProgress, setWalletCreationInProgress] = useState(false);
     const [recoveryShare, setRecoveryShare] = useState<string>(null);
 
-    useImperativeHandle(
-      ref,
-      () => {
-        return {
-          handleModalClose() {
-            handleClose();
-          },
-        };
-      },
-      [],
-    );
+    useImperativeHandle(ref, () => {
+      return {
+        handleModalClose() {
+          handleClose();
+        },
+      };
+    }, []);
 
     const is2FASetup = async () => {
       if (!twoFactorAuthEnabled) {
@@ -125,7 +121,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
           recoverySecret = await capsule.waitForPasskeyAndCreateWallet();
         } else {
           recoverySecret = await createWalletOverride(capsule);
-          const fetchedWallets = (await capsule.fetchWallets()).filter((wallet) => !!wallet.address);
+          const fetchedWallets = (await capsule.fetchWallets()).filter(wallet => !!wallet.address);
           const newWallets: Record<string, Wallet> = {};
           for (const wallet of fetchedWallets) {
             newWallets[wallet.id] = {

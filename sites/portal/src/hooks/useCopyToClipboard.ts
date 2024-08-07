@@ -11,7 +11,7 @@ export function useCopyToClipboard(): [boolean, CopyFn] {
     }, 3000);
   };
 
-  const copy: CopyFn = useCallback(async (text) => {
+  const copy: CopyFn = useCallback(async text => {
     if (!navigator?.clipboard) {
       console.warn('Clipboard not supported');
       return false;

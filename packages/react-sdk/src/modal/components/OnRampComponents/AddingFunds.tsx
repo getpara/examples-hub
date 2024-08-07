@@ -5,7 +5,7 @@ import { useModalStore } from '../../stores/index.js';
 import { CpslSpinner } from '@usecapsule/react-components';
 
 export const AddingFunds = () => {
-  const onRampPurchase = useModalStore((state) => state.onRampPurchase);
+  const onRampPurchase = useModalStore(state => state.onRampPurchase);
 
   return (
     <>

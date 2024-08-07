@@ -7,10 +7,10 @@ import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/i
 import { ClickableText, Heading, Hero, Text, SecondaryText, MainContainer } from '../common.js';
 
 export const VerificationCodeStep = () => {
-  const email = useUserInfoStore((state) => state.email);
-  const setStep = useModalStore((state) => state.setStep);
-  const setWebAuthURLForCreate = useModalStore((state) => state.setWebAuthURLForCreate);
-  const capsule = useCapsuleStore((state) => state.capsule);
+  const email = useUserInfoStore(state => state.email);
+  const setStep = useModalStore(state => state.setStep);
+  const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
+  const capsule = useCapsuleStore(state => state.capsule);
 
   const inputRef = useRef<HTMLCpslCodeInputElement>(null);
 

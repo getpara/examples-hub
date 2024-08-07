@@ -47,7 +47,7 @@ function WagmiSignMessage(): JSX.Element {
     <>
       <Input
         placeholder="message to sign"
-        onChange={(e) => {
+        onChange={e => {
           setMessage(e.target.value);
         }}
       />
@@ -90,14 +90,14 @@ function WagmiSendTransaction(): JSX.Element {
       <Text>To Address:</Text>
       <Input
         value={toAddress}
-        onChange={(e) => {
+        onChange={e => {
           setToAddress(e.target.value);
         }}
       />
       <Text>Value in gwei:</Text>
       <Input
         value={amount}
-        onChange={(e) => {
+        onChange={e => {
           setAmount(e.target.value);
         }}
       />
@@ -105,7 +105,7 @@ function WagmiSendTransaction(): JSX.Element {
         isDisabled={isSendTxPending || isWaitTxLoading || !sendTransaction || !toAddress || !amount}
         onClick={() => {
           sendTransaction(config, {
-            onError: (e) => {
+            onError: e => {
               console.log('Err', e);
             },
           });
@@ -140,7 +140,7 @@ function WagmiProfileComponent(): JSX.Element {
             backgroundColor="white"
             onClick={() => {
               disconnect(undefined, {
-                onError: (e) => {
+                onError: e => {
                   console.log('ERR', e);
                 },
               });
@@ -157,7 +157,7 @@ function WagmiProfileComponent(): JSX.Element {
 
   return (
     <VStack backgroundColor="blue.400" padding={6}>
-      {connectors.map((connector) => (
+      {connectors.map(connector => (
         <Button
           color="purple"
           backgroundColor="white"
@@ -266,7 +266,7 @@ function App() {
           <Text width={'15%'}>
             <strong>Select Environment:</strong>
           </Text>
-          <Select defaultValue={selectedEnv} onChange={(e) => setSelectedEnv(e.target.value as Environment)}>
+          <Select defaultValue={selectedEnv} onChange={e => setSelectedEnv(e.target.value as Environment)}>
             <option value={Environment.DEV}>Dev</option>
             <option value={Environment.SANDBOX}>Sandbox</option>
             <option value={Environment.BETA}>Beta</option>
@@ -279,7 +279,7 @@ function App() {
           </Text>
           <Input
             placeholder="api key"
-            onChange={(e) => {
+            onChange={e => {
               setSelectedApiKey(e.target.value);
             }}
             value={selectedApiKey || ''}
@@ -289,7 +289,7 @@ function App() {
           <Text width={'15%'}>
             <strong>Use DKLS:</strong>
           </Text>
-          <Select defaultValue={`${!!useDKLS}`} onChange={(e) => setUseDKLS(e.target.value === 'true')}>
+          <Select defaultValue={`${!!useDKLS}`} onChange={e => setUseDKLS(e.target.value === 'true')}>
             <option value={'true'}>true</option>
             <option value={'false'}>false</option>
           </Select>

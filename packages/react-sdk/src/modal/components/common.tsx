@@ -5,8 +5,8 @@ import { ModalStep } from '../utils/steps.js';
 import { useModalStore } from '../stores/index.js';
 
 export const AddFundsButton = ({ text = 'Add Funds' }: { text?: string }) => {
-  const setStep = useModalStore((state) => state.setStep);
-  const onRampConfig = useModalStore((state) => state.onRampConfig);
+  const setStep = useModalStore(state => state.setStep);
+  const onRampConfig = useModalStore(state => state.onRampConfig);
 
   const onClick = useCallback(() => {
     setStep(ModalStep.ADD_FUNDS);

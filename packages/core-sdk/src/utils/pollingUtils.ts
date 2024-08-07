@@ -8,7 +8,7 @@ export async function waitUntilTrue(
     if (await condition()) {
       return true;
     }
-    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    await new Promise(resolve => setTimeout(resolve, intervalMs));
   }
   return false;
 }

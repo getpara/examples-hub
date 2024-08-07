@@ -1,0 +1,95 @@
+@import '../../themes/capsule.globals';
+
+:host {
+  --input-width: 40px;
+  --input-height: 54px;
+
+  --input-border-radius: var(--cpsl-border-radius-input);
+  --input-border-color: var(--cpsl-color-input-border-placeholder);
+  --input-border-width: 1px;
+  --input-background-color: var(--cpsl-color-input-surface-default);
+  --input-border-error-color: var(--cpsl-color-input-border-error);
+
+  --input-font-size: #{dynamic-font-clamp(1, 20px, 1.5)};
+  --input-color: var(--cpsl-color-text-primary);
+
+  --helper-text-color: var(--cpsl-color-text-secondary);
+  --helper-text-error-color: var(--cpsl-color-text-error);
+  --helper-text-icon-color: var(--cpsl-color-text-secondary);
+  --helper-text-icon-error-color: var(--cpsl-color-text-error);
+  --helper-text-icon-size: 16px;
+  --helper-text-font-size: 12px;
+  --helper-text-margin-top: 6px;
+
+  display: block;
+  font-family: $font-family-base;
+}
+
+.code-container {
+  display: flex;
+  gap: 8px;
+}
+
+.code-input {
+  font-family: $font-family-base;
+  @include border-radius(var(--input-border-radius));
+  font-size: var(--input-font-size);
+
+  border-color: var(--input-border-color);
+  border-width: var(--input-border-width);
+  border-style: solid;
+
+  font-size: var(--input-font-size);
+  color: var(--input-color);
+
+  width: var(--input-width);
+  height: var(--input-height);
+  background: var(--input-background-color);
+
+  box-sizing: border-box;
+  text-align: center;
+  outline: none;
+
+  &:focus {
+    --input-border-color: var(--cpsl-color-input-border-active);
+  }
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+.code-input .error-container {
+  border-color: var(--input-border-error-color);
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+.helper-text-container {
+  flex-basis: 100%;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--helper-text-color);
+  font-size: var(--helper-text-font-size);
+
+  margin-top: var(--helper-text-margin-top);
+
+  cpsl-icon {
+    --height: var(--helper-text-icon-size);
+    --width: var(--helper-text-icon-size);
+    --icon-color: var(--helper-text-icon-color);
+  }
+}
+
+.error-text {
+  color: var(--helper-text-error-color);
+
+  cpsl-icon {
+    --icon-color: var(--helper-text-icon-error-color);
+  }
+}

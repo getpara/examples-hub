@@ -19,10 +19,10 @@ interface Setup2FAStepProps {
 }
 
 export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
-  const isLogin = useModalStore((state) => state.isLogin());
-  const setStep = useModalStore((state) => state.setStep);
-  const capsule = useCapsuleStore((state) => state.capsule);
-  const isVerifying = useModalStore((state) => state.step === ModalStep.VERIFY_2FA);
+  const isLogin = useModalStore(state => state.isLogin());
+  const setStep = useModalStore(state => state.setStep);
+  const capsule = useCapsuleStore(state => state.capsule);
+  const isVerifying = useModalStore(state => state.step === ModalStep.VERIFY_2FA);
   const [copied, copy] = useCopyToClipboard();
 
   const inputRef = useRef<HTMLCpslCodeInputElement>(null);

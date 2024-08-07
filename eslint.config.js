@@ -23,7 +23,7 @@ module.exports = [
       prettier: require('eslint-plugin-prettier'),
     },
     rules: Object.assign({}, prettierConfig.rules, {
-      eqeqeq: ['error', 'always', { null: 'ignore' }],
+      'eqeqeq': ['error', 'always', { null: 'ignore' }],
       'no-unused-vars': [
         'error',
         {
@@ -46,7 +46,7 @@ module.exports = [
   {
     name: 'TypeScript Specific Rules',
     files: ['**/*.ts', '**/*.tsx'],
-    ignores: ['**/dist/**', '**/build/**'],
+    ignores: ['**/dist/**', '**/build/**', '**/stencil-generated/**'],
     languageOptions: {
       ecmaVersion: 2015,
       sourceType: 'module',
@@ -60,11 +60,11 @@ module.exports = [
     },
     plugins: {
       '@typescript-eslint': tsPlugin,
-      react: reactPlugin,
-      prettier: require('eslint-plugin-prettier'),
+      'react': reactPlugin,
+      'prettier': require('eslint-plugin-prettier'),
     },
     rules: Object.assign({}, prettierConfig.rules, {
-      eqeqeq: ['error', 'always', { null: 'ignore' }],
+      'eqeqeq': ['error', 'always', { null: 'ignore' }],
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
@@ -92,8 +92,32 @@ module.exports = [
   {
     name: 'No max-len in assets directory',
     files: ['**/assets/**', '**/assets/**/*.*'],
+    ignores: ['**/dist/types/assets/**', '**/dist/types/assets/**/*.*'],
     rules: {
       'max-len': 'off',
     },
+  },
+  {
+    name: 'Override for core components directory',
+    files: ['packages/core-components/**/*.ts', 'packages/core-components/**/*.tsx'],
+    ignores: ['**/dist/**', '**/loader/**', '**/www/**', '**/stencil.config.ts'],
+    plugins: {
+      '@stencil-community': require('@stencil-community/eslint-plugin'),
+      'storybook': require('storybook'),
+      '@typescript-eslint': tsPlugin,
+    },
+    rules: Object.assign({}, prettierConfig.rules, {
+      '@stencil-community/required-prefix': ['error', ['cpsl']],
+      '@stencil-community/ban-default-true': 'error',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          vars: 'all',
+          args: 'after-used',
+          ignoreRestSiblings: false,
+          varsIgnorePattern: '(^_|h)',
+        },
+      ],
+    }),
   },
 ];

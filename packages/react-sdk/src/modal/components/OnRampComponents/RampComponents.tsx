@@ -11,11 +11,11 @@ import { useCapsuleStore, useModalStore, useThemeStore } from '../../stores/inde
 import { useGoBack } from '../../hooks/useGoBack.js';
 
 export const RampEmbed = ({ hostApiKey }: { hostApiKey: string }) => {
-  const appName = useThemeStore((state) => state.appName);
-  const onRampConfig = useModalStore((state) => state.onRampConfig);
-  const onRampPurchase = useModalStore((state) => state.onRampPurchase);
-  const setOnRampPurchase = useModalStore((state) => state.setOnRampPurchase);
-  const capsule = useCapsuleStore((state) => state.capsule);
+  const appName = useThemeStore(state => state.appName);
+  const onRampConfig = useModalStore(state => state.onRampConfig);
+  const onRampPurchase = useModalStore(state => state.onRampPurchase);
+  const setOnRampPurchase = useModalStore(state => state.setOnRampPurchase);
+  const capsule = useCapsuleStore(state => state.capsule);
   const goBack = useGoBack();
 
   useEffect(() => {
@@ -38,7 +38,7 @@ export const RampEmbed = ({ hostApiKey }: { hostApiKey: string }) => {
       url: onRampConfig?.testMode ? 'https://app.demo.ramp.network' : 'https://app.ramp.network',
       enabledFlows: ['ONRAMP'],
     })
-      .on('PURCHASE_CREATED' as unknown as '*', async (e) => {
+      .on('PURCHASE_CREATED' as unknown as '*', async e => {
         const p = (e as { payload: { purchase: RampInstantPurchase } }).payload.purchase;
 
         const updated = await capsule.updateOnRampPurchase(onRampPurchase.walletId, onRampPurchase.id, {

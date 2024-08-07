@@ -9,9 +9,9 @@ interface WalletCreationDoneStepProps {
 }
 
 export const WalletCreationDoneStep = ({ twoFactorAuthEnabled, onClose }: WalletCreationDoneStepProps) => {
-  const setStep = useModalStore((state) => state.setStep);
-  const isLogin = useModalStore((state) => state.isLogin());
-  const capsule = useCapsuleStore((state) => state.capsule);
+  const setStep = useModalStore(state => state.setStep);
+  const isLogin = useModalStore(state => state.isLogin());
+  const capsule = useCapsuleStore(state => state.capsule);
 
   const handleNext = async () => {
     if (isLogin) {

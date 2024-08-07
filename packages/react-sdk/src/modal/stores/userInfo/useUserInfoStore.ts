@@ -19,7 +19,7 @@ export type UserInfoStore = UserInfoState & UserInfoActions;
 
 export const DEFAULT_USER_INFO_STATE: UserInfoState = { email: '', phone: '', countryCode: '+1' as CountryCallingCode };
 
-export const useUserInfoStore = create<UserInfoStore>((set) => ({
+export const useUserInfoStore = create<UserInfoStore>(set => ({
   ...DEFAULT_USER_INFO_STATE,
   ...getActions(set),
 }));

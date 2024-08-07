@@ -1,0 +1,50 @@
+@import '../../themes/capsule.globals';
+
+:host {
+  --button-icon-color: var(--cpsl-color-text-primary);
+
+  --button-border-radius: var(--cpsl-border-radius-tile-button);
+
+  --button-background-color: var(--cpsl-color-tile-button-surface-default);
+  --button-border-color: var(--cpsl-color-tile-button-border);
+
+  --button-width: 72px;
+  --button-height: 56px;
+  --button-gap: 4px;
+}
+
+:host {
+  :hover {
+    --button-background-color: var(--cpsl-color-tile-button-surface-hover);
+  }
+  :active {
+    --button-background-color: var(--cpsl-color-tile-button-surface-pressed);
+  }
+}
+
+.button-native {
+  @include border-radius(var(--button-border-radius));
+  @include padding(var(--button-padding-top), var(--button-padding-end), var(--button-padding-bottom), var(--button-padding-start));
+
+  border: 1px solid transparent;
+  cursor: pointer;
+
+  background: var(--button-background-color);
+  border-color: var(--button-border-color);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--button-gap);
+
+  align-items: center;
+  justify-content: center;
+
+  width: var(--button-width);
+  height: var(--button-height);
+
+  box-shadow: var(--button-box-shadow);
+
+  cpsl-icon {
+    --icon-color: var(--button-icon-color);
+  }
+}

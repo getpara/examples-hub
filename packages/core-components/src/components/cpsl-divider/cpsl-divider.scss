@@ -1,0 +1,22 @@
+@import '../../themes/capsule.globals';
+
+:host {
+  --divider-height: 1px;
+  --divider-color: var(--cpsl-color-divider);
+
+  display: flex;
+  align-items: center;
+  height: 24px;
+  color: var(--cpsl-color-text-subtle);
+
+  font-family: $font-family-base;
+  font-size: #{dynamic-font-clamp(1, 14px, 1.5)};
+  font-weight: 600;
+  gap: 16px;
+}
+
+:host div {
+  flex: 1;
+  background: var(--divider-color);
+  height: var(--divider-height);
+}

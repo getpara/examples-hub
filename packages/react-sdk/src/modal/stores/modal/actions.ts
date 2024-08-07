@@ -6,10 +6,10 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
   resetState: () => {
     set(DEFAULT_MODAL_STATE);
   },
-  setOnModalStepChange: (onModalStepChange) => {
+  setOnModalStepChange: onModalStepChange => {
     set({ onModalStepChange });
   },
-  setStep: (step) => {
+  setStep: step => {
     const onModalStepChange = get().onModalStepChange;
     const previousStep = get().step;
 
@@ -53,25 +53,25 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
     const stepNumbersValues = Object.values(isLogin ? LoginModalStepNumber : SignUpModalStepNumber);
     return stepNumbersValues[stepNumbersValues.length - 1] - numOfSkippedOptionalSteps;
   },
-  setFlow: (flow) => {
+  setFlow: flow => {
     set({ flow });
   },
   isLogin: () => {
     return get().flow === 'login';
   },
-  setWebAuthURLForLogin: (url) => {
+  setWebAuthURLForLogin: url => {
     set({ webAuthURLForLogin: url });
   },
-  setWebAuthURLForCreate: (url) => {
+  setWebAuthURLForCreate: url => {
     set({ webAuthURLForCreate: url });
   },
-  setOnRampPurchase: (onRampPurchase) => {
-    set((state) => ({ onRampPurchase: { ...(state.onRampPurchase || {}), ...onRampPurchase } }));
+  setOnRampPurchase: onRampPurchase => {
+    set(state => ({ onRampPurchase: { ...(state.onRampPurchase || {}), ...onRampPurchase } }));
   },
-  setOnRampConfig: (onRampConfig) => {
+  setOnRampConfig: onRampConfig => {
     set({ onRampConfig });
   },
-  setNetworks: (networks) => {
+  setNetworks: networks => {
     set({ networks });
   },
 });

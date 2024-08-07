@@ -26,20 +26,20 @@ interface SignUpStepProps {
 const DEFAULT_COUNTRY = { label: 'United States', value: '+1', selectedLabel: 'US', icon: 'US' as IconType };
 
 export const SignUpStep = ({ oAuthMethods, disableEmailLogin, disablePhoneLogin }: SignUpStepProps) => {
-  const isDark = useThemeStore((state) => state.isDark);
-  const logo = useThemeStore((state) => state.getLogo());
-  const appName = useThemeStore((state) => state.appName);
-  const capsule = useCapsuleStore((state) => state.capsule);
-  const setFlow = useModalStore((state) => state.setFlow);
-  const setStep = useModalStore((state) => state.setStep);
-  const showAllOAuth = useModalStore((state) => state.step === ModalStep.SIGN_UP_ALL_OAUTH);
-  const setEmail = useUserInfoStore((state) => state.setEmail);
-  const email = useUserInfoStore((state) => state.email);
-  const setPhone = useUserInfoStore((state) => state.setPhone);
-  const phone = useUserInfoStore((state) => state.phone);
-  const setCountryCode = useUserInfoStore((state) => state.setCountryCode);
-  const countryCode = useUserInfoStore((state) => state.countryCode);
-  const setWebAuthURLForLogin = useModalStore((state) => state.setWebAuthURLForLogin);
+  const isDark = useThemeStore(state => state.isDark);
+  const logo = useThemeStore(state => state.getLogo());
+  const appName = useThemeStore(state => state.appName);
+  const capsule = useCapsuleStore(state => state.capsule);
+  const setFlow = useModalStore(state => state.setFlow);
+  const setStep = useModalStore(state => state.setStep);
+  const showAllOAuth = useModalStore(state => state.step === ModalStep.SIGN_UP_ALL_OAUTH);
+  const setEmail = useUserInfoStore(state => state.setEmail);
+  const email = useUserInfoStore(state => state.email);
+  const setPhone = useUserInfoStore(state => state.setPhone);
+  const phone = useUserInfoStore(state => state.phone);
+  const setCountryCode = useUserInfoStore(state => state.setCountryCode);
+  const countryCode = useUserInfoStore(state => state.countryCode);
+  const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
 
   const [emailError, setEmailError] = useState('');
   const [phoneError, setPhoneError] = useState('');
@@ -122,7 +122,7 @@ export const SignUpStep = ({ oAuthMethods, disableEmailLogin, disablePhoneLogin 
   };
 
   const handleCountryCodeInput = (ev: CpslDropdownCustomEvent<DropdownInputEventDetail>) => {
-    const matchedCountryCode = countryCodes.find((code) => code.selectedLabel === ev.detail.selectedLabel);
+    const matchedCountryCode = countryCodes.find(code => code.selectedLabel === ev.detail.selectedLabel);
     setCountryCode(ev.detail.value as CountryCallingCode);
     setMatchedCountryCode(matchedCountryCode);
   };
@@ -135,7 +135,7 @@ export const SignUpStep = ({ oAuthMethods, disableEmailLogin, disablePhoneLogin 
       const countryCode = phoneNumber.country;
       const nationalNumber = phoneNumber.formatNational();
 
-      const matchedCountryCode = countryCodes.find((code) => code.selectedLabel === countryCode);
+      const matchedCountryCode = countryCodes.find(code => code.selectedLabel === countryCode);
 
       if (matchedCountryCode) {
         setCountryCode(matchedCountryCode.value as CountryCallingCode);

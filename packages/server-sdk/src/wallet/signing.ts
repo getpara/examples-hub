@@ -12,9 +12,9 @@ export async function signTransaction(
   sessionCookie?: string,
   isDKLS?: boolean,
 ): Promise<SignatureRes> {
-  return await new Promise(async (resolve) => {
+  return await new Promise(async resolve => {
     const workId = uuid.v4();
-    const worker = await setupWorker(async (sendTransactionRes) => {
+    const worker = await setupWorker(async sendTransactionRes => {
       resolve(sendTransactionRes);
     }, workId);
     worker.postMessage({
@@ -43,9 +43,9 @@ export async function sendTransaction(
   sessionCookie?: string,
   isDKLS?: boolean,
 ): Promise<SignatureRes> {
-  return await new Promise(async (resolve) => {
+  return await new Promise(async resolve => {
     const workId = uuid.v4();
-    const worker = await setupWorker(async (sendTransactionRes) => {
+    const worker = await setupWorker(async sendTransactionRes => {
       resolve(sendTransactionRes);
     }, workId);
     worker.postMessage({
@@ -73,9 +73,9 @@ export async function signMessage(
   sessionCookie?: string,
   isDKLS?: boolean,
 ): Promise<SignatureRes> {
-  return await new Promise(async (resolve) => {
+  return await new Promise(async resolve => {
     const workId = uuid.v4();
-    const worker = await setupWorker(async (signMessageRes) => {
+    const worker = await setupWorker(async signMessageRes => {
       resolve(signMessageRes);
     }, workId);
     worker.postMessage({
@@ -102,9 +102,9 @@ export async function ed25519Sign(
   base64Bytes: string,
   sessionCookie?: string,
 ): Promise<SignatureRes> {
-  return await new Promise(async (resolve) => {
+  return await new Promise(async resolve => {
     const workId = uuid.v4();
-    const worker = await setupWorker(async (signMessageRes) => {
+    const worker = await setupWorker(async signMessageRes => {
       resolve(signMessageRes);
     }, workId);
     worker.postMessage({

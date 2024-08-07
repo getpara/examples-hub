@@ -1,0 +1,17 @@
+@import '../../themes/capsule.globals';
+@import '../cpsl-grid/cpsl-grid.mixins';
+
+// Grid Column
+// --------------------------------------------------
+
+/// @prop - The padding for the grid column
+$grid-column-padding: var(--cpsl-grid-column-padding, 0px) !default;
+
+/// @prop - The padding for the column at different breakpoints
+$grid-column-paddings: (
+  xs: var(--cpsl-grid-column-padding-xs, $grid-column-padding),
+  sm: var(--cpsl-grid-column-padding-sm, $grid-column-padding),
+  md: var(--cpsl-grid-column-padding-md, $grid-column-padding),
+  lg: var(--cpsl-grid-column-padding-lg, $grid-column-padding),
+  xl: var(--cpsl-grid-column-padding-xl, $grid-column-padding),
+) !default;

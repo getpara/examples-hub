@@ -11,8 +11,8 @@ interface RecoverySecretStepProps {
 }
 
 export const RecoverySecretStep = ({ recoveryShare }: RecoverySecretStepProps) => {
-  const setStep = useModalStore((state) => state.setStep);
-  const email = useUserInfoStore((state) => state.email);
+  const setStep = useModalStore(state => state.setStep);
+  const email = useUserInfoStore(state => state.email);
   const [copied, copy] = useCopyToClipboard();
   const [hasSavedSecret, setHasSavedSecret] = useState(false);
 

@@ -25,7 +25,7 @@ export function createCapsuleAccount(capsule: CoreCapsule, walletAddress?: Hex):
   let currentWallet: Wallet;
   if (walletAddress) {
     currentWallet = Object.values(capsule.getWallets()).find(
-      (wallet) => wallet.address.toLowerCase() === walletAddress.toLowerCase(),
+      wallet => wallet.address.toLowerCase() === walletAddress.toLowerCase(),
     );
   } else {
     currentWallet = Object.values(capsule.getWallets())[0];

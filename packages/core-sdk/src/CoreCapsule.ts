@@ -759,7 +759,7 @@ export abstract class CoreCapsule {
   private async populateWalletAddresses(): Promise<void> {
     const res = await this.ctx.capsuleClient.getWallets(this.userId);
     const wallets = res.data.wallets;
-    wallets.forEach((wallet) => {
+    wallets.forEach(wallet => {
       if (wallet.scheme === WalletScheme.ED25519 && this.ed25519Wallets[wallet.id]) {
         this.ed25519Wallets[wallet.id].address = wallet.address;
         this.ed25519Wallets[wallet.id].publicKey = wallet.publicKey;
@@ -786,7 +786,7 @@ export abstract class CoreCapsule {
   ): Promise<void> {
     const res = await this.ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType);
     const wallets = res.wallets;
-    wallets.forEach((wallet) => {
+    wallets.forEach(wallet => {
       if (wallet.scheme === WalletScheme.ED25519 && this.ed25519Wallets[wallet.id]) {
         this.ed25519Wallets[wallet.id].address = wallet.address;
         this.ed25519Wallets[wallet.id].publicKey = wallet.publicKey;
@@ -1092,7 +1092,7 @@ export abstract class CoreCapsule {
   async waitForAccountCreation(): Promise<void> {
     while (true) {
       try {
-        await new Promise((resolve) => setTimeout(resolve, POLLING_INTERVAL_MS));
+        await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS));
 
         if (await this.isSessionActive()) {
           return;
@@ -1144,7 +1144,7 @@ export abstract class CoreCapsule {
   }> {
     while (true) {
       try {
-        await new Promise((resolve) => setTimeout(resolve, POLLING_INTERVAL_MS));
+        await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS));
 
         const res = await this.ctx.capsuleClient.getFarcasterAuthStatus();
         if (res.data.state === 'completed') {
@@ -1174,7 +1174,7 @@ export abstract class CoreCapsule {
   }> {
     while (true) {
       try {
-        await new Promise((resolve) => setTimeout(resolve, POLLING_INTERVAL_MS));
+        await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS));
 
         const res = await this.ctx.capsuleClient.touchSession();
         if (res.data.userId) {
@@ -1200,13 +1200,13 @@ export abstract class CoreCapsule {
   async waitForLoginAndSetup(skipSessionRefresh?: boolean): Promise<{ needsWallet: boolean }> {
     while (true) {
       try {
-        await new Promise((resolve) => setTimeout(resolve, POLLING_INTERVAL_MS));
+        await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS));
         if (!(await this.isSessionActive())) {
           continue;
         }
         await this.userSetupAfterLogin();
 
-        const fetchedWallets = (await this.fetchWallets()).filter((wallet) => !!wallet.address);
+        const fetchedWallets = (await this.fetchWallets()).filter(wallet => !!wallet.address);
         const tempSharesRes = await this.getTransmissionKeyShares();
         // need this check for the case where user has logged in but temp encrypted shares
         // haven't been sent to the backend yet
@@ -1281,7 +1281,7 @@ export abstract class CoreCapsule {
 
     await this.setWallets({});
     await this.setEd25519Wallets({});
-    temporaryShares.forEach((share) => {
+    temporaryShares.forEach(share => {
       const signer = decryptWithPrivateKey(this.loginEncryptionKeyPair.privateKey, share.encryptedShare, share.encryptedKey);
       this.wallets[share.walletId] = {
         id: share.walletId,
@@ -1333,11 +1333,11 @@ export abstract class CoreCapsule {
         }
         ++maxPolls;
         const res = await this.ctx.capsuleClient.getWallets(this.userId);
-        const wallet = res.data.wallets.find((w) => w.id === walletId);
+        const wallet = res.data.wallets.find(w => w.id === walletId);
         if (wallet && wallet.address) {
           return;
         }
-        await new Promise((resolve) => setTimeout(resolve, SHORT_POLLING_INTERVAL_MS));
+        await new Promise(resolve => setTimeout(resolve, SHORT_POLLING_INTERVAL_MS));
       } catch (err) {
         // want to continue polling on error
         console.error(err);
@@ -1369,11 +1369,11 @@ export abstract class CoreCapsule {
         ++maxPolls;
         const res = await this.ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType);
 
-        const wallet = res.wallets.find((w) => w.id === walletId);
+        const wallet = res.wallets.find(w => w.id === walletId);
         if (wallet && wallet.address) {
           return;
         }
-        await new Promise((resolve) => setTimeout(resolve, SHORT_POLLING_INTERVAL_MS));
+        await new Promise(resolve => setTimeout(resolve, SHORT_POLLING_INTERVAL_MS));
       } catch (err) {
         // want to continue polling on error
         console.error(err);

@@ -12,12 +12,12 @@ interface HeaderProps {
 }
 
 export const Header = ({ onClose, condenseModal }: HeaderProps) => {
-  const logo = useThemeStore((state) => state.getLogo());
-  const isDark = useThemeStore((state) => state.isDark);
-  const bareModal = useThemeStore((state) => state.bareModal);
-  const appName = useThemeStore((state) => state.appName);
-  const currentStep = useModalStore((state) => state.step);
-  const hasPreviousStep = useModalStore((state) => state.hasPreviousStep());
+  const logo = useThemeStore(state => state.getLogo());
+  const isDark = useThemeStore(state => state.isDark);
+  const bareModal = useThemeStore(state => state.bareModal);
+  const appName = useThemeStore(state => state.appName);
+  const currentStep = useModalStore(state => state.step);
+  const hasPreviousStep = useModalStore(state => state.hasPreviousStep());
   const goBack = useGoBack();
 
   const handleBackClick = () => {

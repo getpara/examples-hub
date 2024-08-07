@@ -21,10 +21,10 @@ import { useCopyToClipboard } from '../../hooks/useCopyToClipboard.js';
 const SHORTENING_AVAILABLE = true;
 
 export const BiometricCreationStep = ({ hasFinishedAnimation }: { hasFinishedAnimation: boolean }) => {
-  const webAuthURLForCreate = useModalStore((state) => state.webAuthURLForCreate);
-  const currentStep = useModalStore((state) => state.step);
-  const setStep = useModalStore((state) => state.setStep);
-  const capsule = useCapsuleStore((state) => state.capsule);
+  const webAuthURLForCreate = useModalStore(state => state.webAuthURLForCreate);
+  const currentStep = useModalStore(state => state.step);
+  const setStep = useModalStore(state => state.setStep);
+  const capsule = useCapsuleStore(state => state.capsule);
   const [copied, copy] = useCopyToClipboard();
 
   const [tab, setTab] = useState<'desktop' | 'phone'>('desktop');

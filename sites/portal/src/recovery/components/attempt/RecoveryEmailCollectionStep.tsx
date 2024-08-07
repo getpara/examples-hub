@@ -40,7 +40,7 @@ const RecoveryEmailCollectionStep: React.FC = () => {
       const countryCode = phoneNumber.country;
       const nationalNumber = phoneNumber.formatNational();
 
-      const matchedCountryCode = countryCodes.find((code) => code.selectedLabel === countryCode);
+      const matchedCountryCode = countryCodes.find(code => code.selectedLabel === countryCode);
 
       if (matchedCountryCode) {
         setCountryCode(matchedCountryCode.value as CountryCallingCode);
@@ -56,7 +56,7 @@ const RecoveryEmailCollectionStep: React.FC = () => {
   };
 
   const handleCountryCodeInput = (ev: CpslDropdownCustomEvent<DropdownInputEventDetail>) => {
-    const matchedCountryCode = countryCodes.find((code) => code.selectedLabel === ev.detail.selectedLabel);
+    const matchedCountryCode = countryCodes.find(code => code.selectedLabel === ev.detail.selectedLabel);
     setInputCountryCode(ev.detail.value as CountryCallingCode);
     setMatchedCountryCode(matchedCountryCode);
   };
@@ -105,7 +105,7 @@ const RecoveryEmailCollectionStep: React.FC = () => {
       <HStack style={{ width: '300px', overflow: 'hidden' }}>
         <CpslInput
           placeholder="Enter your email"
-          onCpslInput={async (e) => {
+          onCpslInput={async e => {
             const em = e.target.value;
             setInputEmail(em);
           }}

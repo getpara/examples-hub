@@ -1,0 +1,33 @@
+:host {
+  --container-border-color: var(--cpsl-color-avatar-border);
+  --container-border-width: 1px;
+  --container-border-radius: var(--cpsl-border-radius-avatar);
+  --container-background-color: var(--cpsl-color-avatar-surface);
+  --container-padding: 4px;
+  --container-height: 40px;
+  --container-width: 40px;
+
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+span {
+  display: inline-block;
+  height: var(--container-height);
+  width: var(--container-width);
+  border: var(--container-border-width) solid var(--container-border-color);
+  border-radius: var(--container-border-radius);
+  padding: var(--container-padding);
+  background-color: var(--container-background-color);
+
+  &.round {
+    border-radius: 1000px;
+  }
+}
+
+img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}

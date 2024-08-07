@@ -37,49 +37,45 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     ref,
   ) => {
     const modalContentRef = useRef<ModalContentHandle>(null);
-    const updateThemeState = useThemeStore((state) => state.updateState);
-    const setWebAuthURLForLogin = useModalStore((state) => state.setWebAuthURLForLogin);
-    const setWebAuthURLForCreate = useModalStore((state) => state.setWebAuthURLForCreate);
-    const currentStep = useModalStore((state) => state.step);
-    const setOnModalStepChange = useModalStore((state) => state.setOnModalStepChange);
-    const setOnRampConfig = useModalStore((state) => state.setOnRampConfig);
-    const setNetworks = useModalStore((state) => state.setNetworks);
-    const setStep = useModalStore((state) => state.setStep);
-    const setCapsule = useCapsuleStore((state) => state.setCapsule);
-    const setEmail = useUserInfoStore((state) => state.setEmail);
-    const hasPreviousStep = useModalStore((state) => state.hasPreviousStep());
+    const updateThemeState = useThemeStore(state => state.updateState);
+    const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
+    const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
+    const currentStep = useModalStore(state => state.step);
+    const setOnModalStepChange = useModalStore(state => state.setOnModalStepChange);
+    const setOnRampConfig = useModalStore(state => state.setOnRampConfig);
+    const setNetworks = useModalStore(state => state.setNetworks);
+    const setStep = useModalStore(state => state.setStep);
+    const setCapsule = useCapsuleStore(state => state.setCapsule);
+    const setEmail = useUserInfoStore(state => state.setEmail);
+    const hasPreviousStep = useModalStore(state => state.hasPreviousStep());
     const goBack = useGoBack();
 
     const [isModalMounted, setIsModalMounted] = useState(false);
     const [hasFinishedAnimation, setHasFinishedAnimation] = useState(false);
     const [modalExpanded, setModalExpanded] = useState(false);
 
-    useImperativeHandle(
-      ref,
-      () => {
-        return {
-          goBack() {
-            goBack();
-          },
-          canGoBack() {
-            return hasPreviousStep;
-          },
-          isModalExpanded() {
-            return modalExpanded;
-          },
-          toggleModalExpanded() {
-            setModalExpanded((curr) => !curr);
-          },
-          currentStep() {
-            return currentStep;
-          },
-          handleModalClose() {
-            modalContentRef?.current?.handleModalClose();
-          },
-        };
-      },
-      [hasPreviousStep, modalExpanded, currentStep],
-    );
+    useImperativeHandle(ref, () => {
+      return {
+        goBack() {
+          goBack();
+        },
+        canGoBack() {
+          return hasPreviousStep;
+        },
+        isModalExpanded() {
+          return modalExpanded;
+        },
+        toggleModalExpanded() {
+          setModalExpanded(curr => !curr);
+        },
+        currentStep() {
+          return currentStep;
+        },
+        handleModalClose() {
+          modalContentRef?.current?.handleModalClose();
+        },
+      };
+    }, [hasPreviousStep, modalExpanded, currentStep]);
 
     // This will run on mount and on isOpen change but won't cause a rerender unless step or email changes
     const initModal = async () => {

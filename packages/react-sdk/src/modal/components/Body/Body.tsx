@@ -41,12 +41,12 @@ export const Body = ({
   networks = ['ETHEREUM'],
   onClose,
 }: BodyProps) => {
-  const currentStep = useModalStore((state) => state.step);
-  const stepNumber = useModalStore((state) => state.stepNumber());
-  const totalSteps = useModalStore((state) => state.totalSteps());
-  const isLogin = useModalStore((state) => state.isLogin());
-  const onRampConfig = useModalStore((state) => state.onRampConfig);
-  const appName = useThemeStore((state) => state.appName);
+  const currentStep = useModalStore(state => state.step);
+  const stepNumber = useModalStore(state => state.stepNumber());
+  const totalSteps = useModalStore(state => state.totalSteps());
+  const isLogin = useModalStore(state => state.isLogin());
+  const onRampConfig = useModalStore(state => state.onRampConfig);
+  const appName = useThemeStore(state => state.appName);
 
   const showProgressIndicator = !isLogin && !NoIndicatorSteps.includes(currentStep);
 

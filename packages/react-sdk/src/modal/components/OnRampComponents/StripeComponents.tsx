@@ -15,7 +15,7 @@ CryptoElementsContext.displayName = 'CryptoElementsContext';
 const useOnrampSessionListener = (type, session, callback) => {
   React.useEffect(() => {
     if (session && callback) {
-      const listener = (e) => callback(e.payload);
+      const listener = e => callback(e.payload);
       session.addEventListener(type, listener);
       return () => {
         session.removeEventListener(type, listener);
@@ -26,12 +26,12 @@ const useOnrampSessionListener = (type, session, callback) => {
 };
 
 export const StripeEmbed = () => {
-  const isDark = useThemeStore((state) => state.isDark);
-  const capsule = useCapsuleStore((state) => state.capsule);
-  const onRampConfig = useModalStore((state) => state.onRampConfig);
-  const onRampPurchase = useModalStore((state) => state.onRampPurchase);
+  const isDark = useThemeStore(state => state.isDark);
+  const capsule = useCapsuleStore(state => state.capsule);
+  const onRampConfig = useModalStore(state => state.onRampConfig);
+  const onRampPurchase = useModalStore(state => state.onRampPurchase);
 
-  const setOnRampPurchase = useModalStore((state) => state.setOnRampPurchase);
+  const setOnRampPurchase = useModalStore(state => state.setOnRampPurchase);
 
   const [isReady, setIsReady] = useState(false);
 

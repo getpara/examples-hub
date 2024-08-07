@@ -11,8 +11,8 @@ interface AddFundsDoneProps {
 }
 
 export const AddFundsDone = ({ isSuccess, onClose }: AddFundsDoneProps) => {
-  const setStep = useModalStore((state) => state.setStep);
-  const onRampPurchase = useModalStore((state) => state.onRampPurchase);
+  const setStep = useModalStore(state => state.setStep);
+  const onRampPurchase = useModalStore(state => state.onRampPurchase);
 
   const formatter = useMemo(() => {
     return new Intl.NumberFormat('en-US', {

@@ -21,7 +21,7 @@ import CapsuleBox from '../assets/CapsuleBox';
 const ScopeCheckbox = ({ scope, selectedScopeIds, onSelect, final = false }) => {
   const isChecked = selectedScopeIds.has(scope.id);
 
-  const handleCheckboxChange = (e) => {
+  const handleCheckboxChange = e => {
     const checked = e.target.checked;
     onSelect(scope, checked);
   };
@@ -72,7 +72,7 @@ const ScopeCheckbox = ({ scope, selectedScopeIds, onSelect, final = false }) => 
         </ContentWrapper>
       </HStack>
       <Panel borderWidth={0}>
-        {scope.childScopes?.map((childScope) =>
+        {scope.childScopes?.map(childScope =>
           childScope?.childScopes?.length > 0 ? (
             <Accordion allowMultiple key={childScope.id}>
               <ScopeCheckbox scope={childScope} onSelect={onSelect} selectedScopeIds={selectedScopeIds} />
@@ -86,7 +86,7 @@ const ScopeCheckbox = ({ scope, selectedScopeIds, onSelect, final = false }) => 
   );
 };
 
-const allPoliciesIds = (scopes) => {
+const allPoliciesIds = scopes => {
   let policies = [];
   for (const scope of scopes) {
     policies.push(scope.id);
@@ -120,7 +120,7 @@ const ScopeSelection = ({ scopes, userId, partnerId, onDone }) => {
 
   return (
     <Accordion allowMultiple>
-      {scopes.map((scope) => (
+      {scopes.map(scope => (
         <h2 key={scope.id}>
           <ScopeCheckbox
             final={!(scope.childScopes?.length > 0)}

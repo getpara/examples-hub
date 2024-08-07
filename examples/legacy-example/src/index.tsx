@@ -256,7 +256,7 @@ function WagmiSignMessage(): JSX.Element {
     <>
       <Input
         placeholder="message to sign"
-        onChange={(e) => {
+        onChange={e => {
           setMessage(e.target.value);
         }}
       />
@@ -299,14 +299,14 @@ function WagmiSendTransaction(): JSX.Element {
       <Text>To Address:</Text>
       <Input
         value={toAddress}
-        onChange={(e) => {
+        onChange={e => {
           setToAddress(e.target.value);
         }}
       />
       <Text>Value in gwei:</Text>
       <Input
         value={amount}
-        onChange={(e) => {
+        onChange={e => {
           setAmount(e.target.value);
         }}
       />
@@ -358,7 +358,7 @@ function WagmiProfileComponent(): JSX.Element {
 
   return (
     <VStack backgroundColor="blue.400" padding={6}>
-      {connectors.map((connector) => (
+      {connectors.map(connector => (
         <Button
           color="purple"
           backgroundColor="white"
@@ -603,7 +603,7 @@ function App() {
         () => {
           setSecondsToDelete(i - 1);
           if (i - 1 === 0) {
-            setCapsuleKey((prevKey) => prevKey + 1);
+            setCapsuleKey(prevKey => prevKey + 1);
             setIsSessionActive(false);
             setDeletedEmail('');
             setDeleteButtonDisabled(false);
@@ -628,7 +628,7 @@ function App() {
             <Text width={'15%'}>
               <strong>Select Environment:</strong>
             </Text>
-            <Select defaultValue={selectedEnv} onChange={(e) => setSelectedEnv(e.target.value as Environment)}>
+            <Select defaultValue={selectedEnv} onChange={e => setSelectedEnv(e.target.value as Environment)}>
               <option value={Environment.DEV}>Dev</option>
               <option value={Environment.SANDBOX}>Sandbox</option>
               <option value={Environment.BETA}>Beta</option>
@@ -639,7 +639,7 @@ function App() {
             <Text width={'15%'}>
               <strong>Select Example View:</strong>
             </Text>
-            <Select defaultValue={selectedView} onChange={(e) => setSelectedView(e.target.value)}>
+            <Select defaultValue={selectedView} onChange={e => setSelectedView(e.target.value)}>
               <option value="OLD_VIEW">Old View</option>
               {/* <option value="ETHERS">Ethers</option>
             <option value="VIEM">Viem</option> */}
@@ -652,7 +652,7 @@ function App() {
             </Text>
             <Input
               placeholder="api key"
-              onChange={(e) => {
+              onChange={e => {
                 setSelectedApiKey(e.target.value);
               }}
               value={selectedApiKey || ''}
@@ -662,7 +662,7 @@ function App() {
             <Text width={'15%'}>
               <strong>Use DKLS:</strong>
             </Text>
-            <Select defaultValue={`${!!useDKLS}`} onChange={(e) => setUseDKLS(e.target.value === 'true')}>
+            <Select defaultValue={`${!!useDKLS}`} onChange={e => setUseDKLS(e.target.value === 'true')}>
               <option value={'true'}>true</option>
               <option value={'false'}>false</option>
             </Select>
@@ -680,7 +680,7 @@ function App() {
                 </Text>
                 <Input
                   placeholder="Modal logo"
-                  onChange={(e) => {
+                  onChange={e => {
                     setLogo(e.target.value);
                   }}
                   value={logo || ''}
@@ -690,7 +690,7 @@ function App() {
                 <Text width={'15%'}>
                   <strong>Custom Theme:</strong>
                 </Text>
-                <Checkbox isChecked={useTheme} onChange={(e) => setUseTheme(e.currentTarget.checked)} />
+                <Checkbox isChecked={useTheme} onChange={e => setUseTheme(e.currentTarget.checked)} />
               </HStack>
               <VStack align="left" ml="40px" opacity={useTheme ? 1 : 0.8}>
                 <HStack>
@@ -700,7 +700,7 @@ function App() {
                   <Input
                     placeholder="Modal foreground"
                     disabled={!useTheme}
-                    onChange={(e) => {
+                    onChange={e => {
                       setForegroundColor(e.target.value);
                     }}
                     value={foregroundColor}
@@ -713,7 +713,7 @@ function App() {
                   <Input
                     placeholder="Modal background"
                     disabled={!useTheme}
-                    onChange={(e) => {
+                    onChange={e => {
                       setBackgroundColor(e.target.value);
                     }}
                     value={backgroundColor}
@@ -726,7 +726,7 @@ function App() {
                   <Select
                     disabled={!useTheme}
                     defaultValue={borderRadius}
-                    onChange={(e) => setBorderRadius(e.target.value as Environment)}
+                    onChange={e => setBorderRadius(e.target.value as Environment)}
                   >
                     <option value="none">None</option>
                     <option value="xs">XSmall</option>
@@ -740,8 +740,8 @@ function App() {
                   <Text width={'15%'}>
                     <strong>Select Font:</strong>
                   </Text>
-                  <Select disabled={!useTheme} defaultValue={font} onChange={(e) => setFont(e.target.value)}>
-                    {FONT_OPTIONS.map((font) => (
+                  <Select disabled={!useTheme} defaultValue={font} onChange={e => setFont(e.target.value)}>
+                    {FONT_OPTIONS.map(font => (
                       <option value={font}>{font === 'Inter' ? 'Inter (Capsule Default)' : font.replaceAll("'", '')}</option>
                     ))}
                   </Select>
@@ -750,7 +750,7 @@ function App() {
                   <Text width={'15%'}>
                     <strong>OAuth Logo Variant:</strong>
                   </Text>
-                  <Select disabled={!useTheme} defaultValue={logoVariant} onChange={(e) => setLogoVariant(e.target.value)}>
+                  <Select disabled={!useTheme} defaultValue={logoVariant} onChange={e => setLogoVariant(e.target.value)}>
                     <option value="branded">Branded</option>
                     <option value="dark">Dark</option>
                     <option value="light">Light</option>
@@ -763,7 +763,7 @@ function App() {
                 </Text>
                 <Checkbox
                   isChecked={!!onRampConfig}
-                  onChange={(e) => setOnRampConfig(e.currentTarget.checked ? DEFAULT_ONRAMP_CONFIG : undefined)}
+                  onChange={e => setOnRampConfig(e.currentTarget.checked ? DEFAULT_ONRAMP_CONFIG : undefined)}
                 />
               </HStack>
               {!!onRampConfig && (
@@ -774,7 +774,7 @@ function App() {
                     </Text>
                     <Checkbox
                       isChecked={onRampConfig.testMode}
-                      onChange={(e) => setOnRampConfig((prev) => ({ ...prev, testMode: e.currentTarget.checked }))}
+                      onChange={e => setOnRampConfig(prev => ({ ...prev, testMode: e.currentTarget.checked }))}
                     />
                   </HStack>
                   <HStack>
@@ -783,7 +783,7 @@ function App() {
                     </Text>
                     <Select
                       defaultValue={onRampConfig.network}
-                      onChange={(e) => setOnRampConfig((prev) => ({ ...prev, network: e.target.value as OnRampAsset }))}
+                      onChange={e => setOnRampConfig(prev => ({ ...prev, network: e.target.value as OnRampAsset }))}
                     >
                       {Object.entries(NETWORKS).map(([id, name]) => (
                         <option key={id} value={id}>
@@ -798,9 +798,9 @@ function App() {
                     </Text>
                     <Select
                       defaultValue={onRampConfig.asset}
-                      onChange={(e) => setOnRampConfig((prev) => ({ ...prev, asset: e.target.value as OnRampAsset }))}
+                      onChange={e => setOnRampConfig(prev => ({ ...prev, asset: e.target.value as OnRampAsset }))}
                     >
-                      {Object.keys(OnRampAsset).map((id) => (
+                      {Object.keys(OnRampAsset).map(id => (
                         <option value={id} key={id}>
                           {ON_RAMP_ASSETS[id]}
                         </option>
@@ -823,10 +823,10 @@ function App() {
                                 {isRamp && (
                                   <Input
                                     placeholder="Host API key"
-                                    onChange={(e) => {
-                                      setOnRampConfig((prev) => ({
+                                    onChange={e => {
+                                      setOnRampConfig(prev => ({
                                         ...prev,
-                                        providers: prev.providers.map((p) => ({
+                                        providers: prev.providers.map(p => ({
                                           ...p,
                                           ...(getProvider(p.id) === OnRampProvider.RAMP
                                             ? { hostApiKey: e.currentTarget.value }
@@ -843,7 +843,7 @@ function App() {
                                   isDisabled={index === 0 || onRampConfig.providers.length === 1}
                                   icon={<ArrowUpIcon />}
                                   onClick={() => {
-                                    setOnRampConfig((prev) => ({
+                                    setOnRampConfig(prev => ({
                                       ...prev,
                                       providers: [
                                         ...prev.providers.slice(0, index - 1),
@@ -860,7 +860,7 @@ function App() {
                                   }
                                   icon={<ArrowDownIcon />}
                                   onClick={() => {
-                                    setOnRampConfig((prev) => ({
+                                    setOnRampConfig(prev => ({
                                       ...prev,
                                       providers: [
                                         ...prev.providers.slice(0, index),
@@ -874,7 +874,7 @@ function App() {
                                 <IconButton
                                   icon={<SmallCloseIcon />}
                                   onClick={() => {
-                                    setOnRampConfig((prev) => ({
+                                    setOnRampConfig(prev => ({
                                       ...prev,
                                       providers: [...prev.providers.slice(0, index), ...prev.providers.slice(index + 1)],
                                     }));
@@ -891,7 +891,7 @@ function App() {
                                 colorScheme="teal"
                                 variant="ghost"
                                 onClick={() => {
-                                  setOnRampConfig((prev) => ({
+                                  setOnRampConfig(prev => ({
                                     ...prev,
                                     providers: [
                                       ...prev.providers,
@@ -935,7 +935,7 @@ function App() {
                               isDisabled={index === 0 || networks.length === 1}
                               icon={<ArrowUpIcon />}
                               onClick={() => {
-                                setNetworks((prev) => [
+                                setNetworks(prev => [
                                   ...prev.slice(0, index - 1),
                                   prev[index],
                                   prev[index - 1],
@@ -947,7 +947,7 @@ function App() {
                               isDisabled={index === networks.length - 1 || networks.length === 1}
                               icon={<ArrowDownIcon />}
                               onClick={() => {
-                                setNetworks((prev) => [
+                                setNetworks(prev => [
                                   ...prev.slice(0, index),
                                   prev[index + 1],
                                   prev[index],
@@ -959,7 +959,7 @@ function App() {
                               isDisabled={networks.length === 1}
                               icon={<SmallCloseIcon />}
                               onClick={() => {
-                                setNetworks((prev) => [...prev.slice(0, index), ...prev.slice(index + 1)]);
+                                setNetworks(prev => [...prev.slice(0, index), ...prev.slice(index + 1)]);
                               }}
                             />
                           </HStack>
@@ -967,15 +967,15 @@ function App() {
                       );
                     })}
                     <HStack w="100%" alignItems="flex-start">
-                      {Object.keys(Network).map((id) => {
-                        return networks.find((p) => p === id) ? (
+                      {Object.keys(Network).map(id => {
+                        return networks.find(p => p === id) ? (
                           <></>
                         ) : (
                           <Button
                             colorScheme="teal"
                             variant="ghost"
                             onClick={() => {
-                              setNetworks((prev) => [...prev, id]);
+                              setNetworks(prev => [...prev, id]);
                             }}
                           >
                             <AddIcon mr={3} />
@@ -1024,7 +1024,7 @@ function App() {
               <Button
                 colorScheme="teal"
                 onClick={async () => {
-                  const fetchedWallet = (await capsule.fetchWallets()).filter((wallet) => !!wallet.address)[0];
+                  const fetchedWallet = (await capsule.fetchWallets()).filter(wallet => !!wallet.address)[0];
                   const newShare = await capsule.distributeNewWalletShare(fetchedWallet.id, undefined, true);
 
                   const backupDecryptionKey = JSON.parse(newShare || '{}').backupDecryptionKey;
@@ -1037,7 +1037,7 @@ function App() {
 
               <Input
                 placeholder="pregen-e-mail"
-                onChange={(e) => {
+                onChange={e => {
                   setPregenEmail(e.target.value);
                 }}
                 value={pregenEmail || ''}
@@ -1052,7 +1052,7 @@ function App() {
               </Button>
               <Input
                 placeholder="pregen-phone"
-                onChange={(e) => {
+                onChange={e => {
                   setPregenPhone(e.target.value);
                 }}
                 value={pregenPhone || ''}
@@ -1080,7 +1080,7 @@ function App() {
               </Text>
               <Input
                 placeholder="claim-pregen-user-share"
-                onChange={(e) => {
+                onChange={e => {
                   setPregenUserShare(e.target.value);
                 }}
                 value={pregenUserShare || ''}
@@ -1118,7 +1118,7 @@ function App() {
 
               <Input
                 placeholder="message-to-sign"
-                onChange={(e) => {
+                onChange={e => {
                   setMessageToSign(e.target.value);
                 }}
                 value={messageToSign || ''}
@@ -1136,51 +1136,51 @@ function App() {
               </Text>
 
               <Text>To Address:</Text>
-              <Input name="To Address" onChange={(e) => setTxToAddress(e.target.value)} value={txToAddress} />
+              <Input name="To Address" onChange={e => setTxToAddress(e.target.value)} value={txToAddress} />
               <Text>Value (gwei):</Text>
-              <Input name="Value (gwei)" onChange={(e) => setTxValue(e.target.value)} value={txValue} />
+              <Input name="Value (gwei)" onChange={e => setTxValue(e.target.value)} value={txValue} />
               <Text>Gas Amount:</Text>
-              <Input name="Gas Amount" onChange={(e) => setTxGasAmount(e.target.value)} value={txGasAmount} />
+              <Input name="Gas Amount" onChange={e => setTxGasAmount(e.target.value)} value={txGasAmount} />
               <Text>Max Priority Fee Per Gas (gwei):</Text>
               <Input
                 name="Max Priority Fee Per Gas (gwei)"
-                onChange={(e) => setTxMaxPriorityFeePerGas(e.target.value)}
+                onChange={e => setTxMaxPriorityFeePerGas(e.target.value)}
                 value={txMaxPriorityFeePerGas}
               />
               <Text>Max Fee Per Gas (gwei):</Text>
               <Input
                 name="Max Fee Per Gas (gwei)"
-                onChange={(e) => setTxMaxFeePerGas(e.target.value)}
+                onChange={e => setTxMaxFeePerGas(e.target.value)}
                 value={txMaxFeePerGas}
               />
               <Text>Nonce:</Text>
-              <Input name="Nonce" onChange={(e) => setNonce(e.target.value)} value={nonce} />
+              <Input name="Nonce" onChange={e => setNonce(e.target.value)} value={nonce} />
               <Text>Chain ID:</Text>
-              <Input name="Chain ID" onChange={(e) => setChainId(e.target.value)} value={chainId} />
+              <Input name="Chain ID" onChange={e => setChainId(e.target.value)} value={chainId} />
               <Text>Smart Contract ABI:</Text>
               <Input
                 name="Smart Contract ABI"
-                onChange={(e) => setSmartContractAbi(e.target.value)}
+                onChange={e => setSmartContractAbi(e.target.value)}
                 value={smartContractAbi}
               />
               <Text>Smart Contract Function Name:</Text>
               <Input
                 name="Smart Contract Function Name"
-                onChange={(e) => setSmartContractFunctionName(e.target.value)}
+                onChange={e => setSmartContractFunctionName(e.target.value)}
                 value={smartContractFunctionName}
                 placeholder={DEFAULT_SMART_CONTRACT_FUNCTION}
               />
               <Text>Smart Contract Function Args:</Text>
               <Input
                 name="Smart Contract Function Args"
-                onChange={(e) => setSmartContractFunctionArgs(e.target.value)}
+                onChange={e => setSmartContractFunctionArgs(e.target.value)}
                 value={smartContractFunctionArgs}
                 placeholder={JSON.stringify(DEFAULT_SMART_CONTRACT_ARGS)}
               />
               <Text>Smart Contract Byte Code:</Text>
               <Input
                 name="Smart Contract Byte Code"
-                onChange={(e) => setSmartContractByteCode(e.target.value)}
+                onChange={e => setSmartContractByteCode(e.target.value)}
                 value={smartContractByteCode}
               />
 

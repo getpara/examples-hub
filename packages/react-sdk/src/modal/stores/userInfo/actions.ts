@@ -5,13 +5,13 @@ export const getActions = (set: StoreApi<UserInfoStore>['setState']): UserInfoAc
   resetState: () => {
     set(DEFAULT_USER_INFO_STATE);
   },
-  setEmail: (email) => {
+  setEmail: email => {
     set({ email });
   },
-  setPhone: (phone) => {
+  setPhone: phone => {
     set({ phone });
   },
-  setCountryCode: (countryCode) => {
+  setCountryCode: countryCode => {
     set({ countryCode });
   },
 });

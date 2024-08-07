@@ -4,7 +4,7 @@ import Capsule, { CapsuleModal, Environment, OAuthMethod } from '../../src';
 
 describe('CapsuleModal', () => {
   beforeAll(() => {
-    vi.mock('@usecapsule/user-management-client', async (importOriginal) => {
+    vi.mock('@usecapsule/user-management-client', async importOriginal => {
       const actual = await importOriginal();
 
       return {

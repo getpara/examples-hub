@@ -11,7 +11,7 @@ module.exports = {
     ],
   },
   webpack: {
-    configure: (webpackConfig) => {
+    configure: webpackConfig => {
       // ts-loader is required to reference external typescript projects/files (non-transpiled)
       webpackConfig.module.rules.push({
         test: /\.tsx?$/,

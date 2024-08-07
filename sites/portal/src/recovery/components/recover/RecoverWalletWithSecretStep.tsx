@@ -19,7 +19,7 @@ async function recoverUserShares(userId: string, walletId: string, serializedRec
   if (!keyShares?.length) {
     return [recoveryPrivateKeyContainer.decrypt(keyShare.encryptedShare)];
   }
-  return keyShares.map((ks) => recoveryPrivateKeyContainer.decrypt(ks.encryptedShare));
+  return keyShares.map(ks => recoveryPrivateKeyContainer.decrypt(ks.encryptedShare));
 }
 
 type RecoverWalletWithSecretStepProps = {
@@ -79,7 +79,7 @@ const RecoverWalletWithSecretStep: React.FC<RecoverWalletWithSecretStepProps> = 
         borderRadius="5px"
         focusBorderColor="brand.text"
         placeholder="Enter secret"
-        onChange={async (e) => {
+        onChange={async e => {
           setSecret(e.target.value);
         }}
       />

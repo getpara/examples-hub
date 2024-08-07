@@ -1,0 +1,41 @@
+// Gets the active color's css variable from a variation. Alpha is optional.
+// --------------------------------------------------------------------------------------------
+// Example usage:
+// current-color(base) => var(--cpsl-color-base)
+// current-color(contrast, 0.1) => rgba(var(--cpsl-color-contrast-rgb), 0.1)
+// --------------------------------------------------------------------------------------------
+@function current-color($variation, $alpha: null) {
+  @if $alpha == null {
+    @return var(--cpsl-color-#{$variation});
+  } @else {
+    @return rgba(var(--cpsl-color-#{$variation}-rgb), #{$alpha});
+  }
+}
+
+// Gets the specific color's css variable from the name and variation. Alpha/rgb are optional.
+// --------------------------------------------------------------------------------------------
+// Example usage:
+// cpsl-color(primary, base) => var(--cpsl-color-primary, #3880ff)
+// cpsl-color(secondary, contrast) => var(--cpsl-color-secondary-contrast)
+// cpsl-color(primary, base, 0.5) => rgba(var(--cpsl-color-primary-rgb, 56, 128, 255), 0.5)
+// --------------------------------------------------------------------------------------------
+@function cpsl-color($name, $variation, $alpha: null, $rgb: null) {
+  // $values: map-get($colors, $name);
+  // $value: map-get($values, $variation);
+  // $variable: --cpsl-color-#{$name}-#{$variation};
+
+  // @if ($variation == base) {
+  //   $variable: --cpsl-color-#{$name};
+  // }
+
+  // @if ($alpha) {
+  //   $value: color-to-rgb-list($value);
+  //   @return rgba(var(#{$variable}-rgb, $value), $alpha);
+  // }
+  // @if ($rgb) {
+  //   $value: color-to-rgb-list($value);
+  //   $variable: #{$variable}-rgb;
+  // }
+
+  @return var(#fff);
+}

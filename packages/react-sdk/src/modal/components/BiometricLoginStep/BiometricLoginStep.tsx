@@ -8,10 +8,10 @@ import { openPopup } from '../../utils/openPopup.js';
 const SHORTENING_AVAILABLE = true;
 
 export const BiometricLoginStep = () => {
-  const webAuthURLForLogin = useModalStore((state) => state.webAuthURLForLogin);
-  const currentStep = useModalStore((state) => state.step);
-  const setStep = useModalStore((state) => state.setStep);
-  const capsule = useCapsuleStore((state) => state.capsule);
+  const webAuthURLForLogin = useModalStore(state => state.webAuthURLForLogin);
+  const currentStep = useModalStore(state => state.step);
+  const setStep = useModalStore(state => state.setStep);
+  const capsule = useCapsuleStore(state => state.capsule);
 
   const [shortLoginLink, setShortLoginLink] = useState<string>();
   const [shortHelpLink, setShortHelpLink] = useState<string>();

@@ -6,7 +6,7 @@ import { BackupKitEmailProps } from '@usecapsule/user-management-client';
 
 async function isKeygenComplete(ctx: Ctx, userId: string, walletId: string): Promise<boolean> {
   const wallets = await ctx.capsuleClient.getWallets(userId);
-  const wallet = wallets.data.wallets.find((w) => w.id === walletId);
+  const wallet = wallets.data.wallets.find(w => w.id === walletId);
   return !!wallet.address;
 }
 
@@ -17,7 +17,7 @@ async function isPreKeygenComplete(
   walletId: string,
 ): Promise<boolean> {
   const wallets = await ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType);
-  const wallet = wallets.wallets.find((w) => w.id === walletId);
+  const wallet = wallets.wallets.find(w => w.id === walletId);
   return !!wallet.address;
 }
 
@@ -33,8 +33,8 @@ export function keygen(
   walletId: string;
   recoveryShare: string | null;
 }> {
-  return new Promise(async (resolve) => {
-    const worker = await setupWorker(ctx, async (res) => {
+  return new Promise(async resolve => {
+    const worker = await setupWorker(ctx, async res => {
       await waitUntilTrue(async () => isKeygenComplete(ctx, userId, res.walletId), 15000, 1000);
       if (skipDistribute) {
         resolve({
@@ -82,8 +82,8 @@ export function preKeygen(
   walletId: string;
   recoveryShare: string | null;
 }> {
-  return new Promise(async (resolve) => {
-    const worker = await setupWorker(ctx, async (res) => {
+  return new Promise(async resolve => {
+    const worker = await setupWorker(ctx, async res => {
       await waitUntilTrue(
         async () => isPreKeygenComplete(ctx, pregenIdentifier, pregenIdentifierType, res.walletId),
         15000,
@@ -127,8 +127,8 @@ export function ed25519Keygen(
   walletId: string;
   recoveryShare: string | null;
 }> {
-  return new Promise(async (resolve) => {
-    const worker = await setupWorker(ctx, async (res) => {
+  return new Promise(async resolve => {
+    const worker = await setupWorker(ctx, async res => {
       await waitUntilTrue(async () => isKeygenComplete(ctx, userId, res.walletId), 15000, 1000);
       resolve({
         signer: res.signer,
@@ -160,8 +160,8 @@ export function ed25519PreKeygen(
   walletId: string;
   recoveryShare: string | null;
 }> {
-  return new Promise(async (resolve) => {
-    const worker = await setupWorker(ctx, async (res) => {
+  return new Promise(async resolve => {
+    const worker = await setupWorker(ctx, async res => {
       await waitUntilTrue(
         async () => isPreKeygenComplete(ctx, pregenIdentifier, pregenIdentifierType, res.walletId),
         15000,

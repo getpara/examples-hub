@@ -1,0 +1,47 @@
+@use 'sass:map';
+@import '../../themes/capsule.globals';
+
+:host {
+  position: fixed;
+  display: block;
+
+  z-index: -1;
+  overflow: auto;
+}
+
+:host(.open) {
+  z-index: map.get($z-indices, 'popover');
+}
+
+.container {
+  visibility: hidden;
+}
+
+.open {
+  visibility: visible;
+  z-index: map.get($z-indices, 'popover');
+}
+
+:host(.transform-h-left) {
+  transform: translateX(0);
+}
+
+:host(.transform-h-center) {
+  transform: translateX(-50%);
+}
+
+:host(.transform-h-right) {
+  transform: translateX(-100%);
+}
+
+:host(.transform-v-top) {
+  transform: translateY(0);
+}
+
+:host(.transform-v-center) {
+  transform: translateY(-50%);
+}
+
+:host(.transform-v-bottom) {
+  transform: translateY(-100%);
+}

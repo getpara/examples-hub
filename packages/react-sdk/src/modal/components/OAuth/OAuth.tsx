@@ -15,15 +15,15 @@ interface OAuthProps {
 const HAS_MORE_LENGTH = 4;
 
 export const OAuth = ({ methods }: OAuthProps) => {
-  const oAuthLogoVariant = useThemeStore((state) => state.oAuthLogoVariant);
-  const isDark = useThemeStore((state) => state.isDark);
-  const capsule = useCapsuleStore((state) => state.capsule);
-  const setFlow = useModalStore((state) => state.setFlow);
-  const setStep = useModalStore((state) => state.setStep);
-  const setEmail = useUserInfoStore((state) => state.setEmail);
-  const setWebAuthURLForLogin = useModalStore((state) => state.setWebAuthURLForLogin);
-  const setWebAuthURLForCreate = useModalStore((state) => state.setWebAuthURLForCreate);
-  const showAll = useModalStore((state) => state.step === ModalStep.SIGN_UP_ALL_OAUTH);
+  const oAuthLogoVariant = useThemeStore(state => state.oAuthLogoVariant);
+  const isDark = useThemeStore(state => state.isDark);
+  const capsule = useCapsuleStore(state => state.capsule);
+  const setFlow = useModalStore(state => state.setFlow);
+  const setStep = useModalStore(state => state.setStep);
+  const setEmail = useUserInfoStore(state => state.setEmail);
+  const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
+  const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
+  const showAll = useModalStore(state => state.step === ModalStep.SIGN_UP_ALL_OAUTH);
   const hasMore = methods.length > HAS_MORE_LENGTH;
 
   const methodsToShow = showAll || !hasMore ? methods : methods.slice(0, HAS_MORE_LENGTH - 1);
@@ -68,7 +68,7 @@ export const OAuth = ({ methods }: OAuthProps) => {
 
   return (
     <OAuthContainer>
-      {methodsToShow.map((method) => (
+      {methodsToShow.map(method => (
         <StyledCpslTileButton
           $isDark={useDarkLogos}
           key={method}

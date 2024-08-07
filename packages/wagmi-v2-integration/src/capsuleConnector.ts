@@ -33,7 +33,7 @@ export const capsuleConnector = ({
   idOverride,
   ...modalProps
 }: CapsuleConnectorOpts) => {
-  return createConnector((config) => {
+  return createConnector(config => {
     const eip1193Provider = new CapsuleEIP1193Provider({
       capsule,
       chainId: `${chains[0].id}`,

@@ -63,7 +63,7 @@ export class CapsuleEthersV5Signer extends ethers.Signer {
   }
 
   async signTransaction(tx: ethers.providers.TransactionRequest): Promise<string> {
-    return resolveProperties(tx).then(async (tx) => {
+    return resolveProperties(tx).then(async tx => {
       if (tx.from != null) {
         if ((await this.getAddress()).toLowerCase() !== ethers.utils.getAddress(tx.from).toLowerCase()) {
           throw new Error('transaction from address mismatch');

@@ -182,7 +182,7 @@ export async function generateSignature(env: Environment, challenge: string, all
     publicKey: {
       timeout: 60000,
       challenge: Buffer.from(challenge, 'base64'),
-      allowCredentials: allowedPublicKeys.map((key) => ({
+      allowCredentials: allowedPublicKeys.map(key => ({
         id: base64url.toBuffer(key),
         type: 'public-key',
       })),

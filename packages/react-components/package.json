@@ -1,0 +1,34 @@
+{
+  "name": "@usecapsule/react-components",
+  "version": "3.1.3",
+  "description": "Capsule Core React Components",
+  "homepage": "https://github.com/capsule-org/component-library#readme",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/types/index.d.ts",
+  "sideEffects": false,
+  "directories": {
+    "lib": "lib"
+  },
+  "files": [
+    "dist/",
+    "css/"
+  ],
+  "scripts": {
+    "build": "npm run copy && npm run tsc",
+    "tsc": "tsc -p . --outDir ./dist",
+    "copy": "node scripts/copy.js"
+  },
+  "dependencies": {
+    "@usecapsule/core-components": "^3.1.3"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.64",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typescript": "^5.4.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

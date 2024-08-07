@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en" style="background-color: var(--cpsl-color-background-4); font-size: 16px">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+    <title>Capsule Components</title>
+
+    <script type="module" src="/build/capsule.esm.js"></script>
+    <script nomodule src="/build/capsule.js"></script>
+    <link rel="stylesheet" href="/css/capsule-core.css" />
+    <script src="/build/index.esm.js"></script>
+    <script type="module">
+      import { generateTheme } from '/build/index.esm.js';
+      let themeNum = 0;
+      const availableThemes = [
+        { backgroundColor: '#FFFFFF', foregroundColor: '#1a1a1a', customFontSizes: { heading2XL: '4rem' } },
+        { backgroundColor: '#1a1a1a', foregroundColor: '#FFFFFF', customBorderRadii: { primaryButton: '100px' } },
+        { backgroundColor: '#91F2A3', foregroundColor: '#202042' },
+        { backgroundColor: '#202042', foregroundColor: '#91F2A3' },
+      ];
+
+      function toggleTheme(ev) {
+        if (themeNum != availableThemes.length - 1) {
+          themeNum++;
+          generateTheme(availableThemes[themeNum]);
+        } else {
+          themeNum = 0;
+          generateTheme(availableThemes[0]);
+        }
+      }
+
+      function handleTabChange(ev) {
+        document.getElementById('tabs').setAttribute('selected-tab', ev.detail.tab);
+      }
+      function handleTab1Change(ev) {
+        document.getElementById('tabs-1').setAttribute('selected-tab', ev.detail.tab);
+      }
+      function handleTab2Change(ev) {
+        document.getElementById('tabs-2').setAttribute('selected-tab', ev.detail.tab);
+      }
+
+      function handleCodeChange(ev) {
+        document.getElementById('code-input').setAttribute('value', ev.detail.value);
+      }
+
+      function handleExpandFooter() {
+        document.getElementById('modal').setAttribute('footer-expanded', 'true');
+      }
+
+      function handleCondenseFooter() {
+        document.getElementById('modal').setAttribute('footer-expanded', 'false');
+      }
+
+      function handleOpenOverlay() {
+        document.getElementById('overlay').setAttribute('open', 'true');
+      }
+
+      function handleCloseOverlay() {
+        document.getElementById('overlay').setAttribute('open', 'false');
+      }
+
+      function openNav() {
+        document.getElementById('nav-drawer').setAttribute('open', true);
+      }
+
+      function closeNav() {
+        document.getElementById('nav-drawer').setAttribute('open', false);
+      }
+
+      function handleResize() {
+        if (window.innerWidth <= 800) {
+          document.getElementById('nav-drawer').setAttribute('open', false);
+          document.getElementById('nav-drawer').setAttribute('variant', 'temporary');
+          document.getElementById('nav-drawer').setAttribute('anchor', 'top');
+          document.getElementById('nav-drawer').setAttribute('anchor-position', '80');
+          document.getElementById('nav-drawer').setAttribute('size', 'auto');
+          document.getElementById('open-nav-container').style.display = 'block';
+          document.getElementById('close-nav').style.display = 'block';
+          document.getElementById('main').style.marginLeft = '0px';
+          document.getElementById('app-bar').style.marginLeft = '0px';
+          document.getElementById('cpsl-app-bar').setAttribute('z-index-override', '10010');
+        } else {
+          document.getElementById('nav-drawer').setAttribute('open', true);
+          document.getElementById('nav-drawer').setAttribute('variant', 'permanent');
+          document.getElementById('nav-drawer').setAttribute('anchor', 'left');
+          document.getElementById('nav-drawer').setAttribute('anchor-position', '0');
+          document.getElementById('nav-drawer').setAttribute('size', '312');
+          document.getElementById('open-nav-container').style.display = 'none';
+          document.getElementById('close-nav').style.display = 'none';
+          document.getElementById('main').style.marginLeft = '312px';
+          document.getElementById('app-bar').style.marginLeft = '312px';
+          document.getElementById('cpsl-app-bar').setAttribute('z-index-override', undefined);
+        }
+      }
+
+      window.addEventListener('DOMContentLoaded', event => {
+        generateTheme(availableThemes[0]);
+        handleResize();
+
+        addEventListener('resize', handleResize);
+
+        const navOpenEl = document.getElementById('open-nav');
+        if (navOpenEl) {
+          navOpenEl.addEventListener('click', openNav);
+        }
+
+        const navCloseEl = document.getElementById('close-nav');
+        if (navCloseEl) {
+          navCloseEl.addEventListener('click', closeNav);
+        }
+
+        const themeToggleEl = document.getElementById('toggle-theme');
+        if (themeToggleEl) {
+          themeToggleEl.addEventListener('click', toggleTheme);
+        }
+
+        const el = document.getElementById('tabs');
+        if (el) {
+          el.addEventListener('cpslTabsChanged', handleTabChange);
+        }
+        const el1 = document.getElementById('tabs-1');
+        if (el1) {
+          el1.addEventListener('cpslTabsChanged', handleTab1Change);
+        }
+        const el2 = document.getElementById('tabs-2');
+        if (el2) {
+          el2.addEventListener('cpslTabsChanged', handleTab2Change);
+        }
+
+        const codeInputEl = document.getElementById('code-input');
+        if (codeInputEl) {
+          codeInputEl.addEventListener('cpslInput', handleCodeChange);
+        }
+
+        const sliderEl = document.getElementById('slider');
+        if (sliderEl) {
+          sliderEl.addEventListener('cpslComplete', () => {
+            console.log('SLIDER COMPLETE');
+          });
+        }
+
+        const footerEl = document.getElementById('footer');
+        if (footerEl) {
+          footerEl.addEventListener('click', handleExpandFooter);
+        }
+
+        const expandedHeaderEl = document.getElementById('header');
+        if (expandedHeaderEl) {
+          expandedHeaderEl.addEventListener('click', handleCondenseFooter);
+        }
+
+        const overlayButtonEl = document.getElementById('open-overlay-btn');
+        if (overlayButtonEl) {
+          overlayButtonEl.addEventListener('click', handleOpenOverlay);
+        }
+
+        const closeButtonEl = document.getElementById('close-overlay-btn');
+        if (closeButtonEl) {
+          closeButtonEl.addEventListener('click', handleCloseOverlay);
+        }
+
+        const modalEl = document.getElementById('overlay');
+        if (modalEl) {
+          modalEl.addEventListener('cpslModalRequestClose', handleCloseOverlay);
+        }
+
+        const dropdown = document.querySelector('cpsl-dropdown');
+        if (dropdown) {
+          dropdown.items = [
+            {
+              label: 'United States',
+              value: '+1',
+              icon: `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+              <circle style="fill:#F0F0F0;" cx="256" cy="256" r="256"/>
+              <g>
+                <path style="fill:#D80027;" d="M244.87,256H512c0-23.106-3.08-45.49-8.819-66.783H244.87V256z"/>
+                <path style="fill:#D80027;" d="M244.87,122.435h229.556c-15.671-25.572-35.708-48.175-59.07-66.783H244.87V122.435z"/>
+                <path style="fill:#D80027;" d="M256,512c60.249,0,115.626-20.824,159.356-55.652H96.644C140.374,491.176,195.751,512,256,512z"/>
+                <path style="fill:#D80027;" d="M37.574,389.565h436.852c12.581-20.529,22.338-42.969,28.755-66.783H8.819   C15.236,346.596,24.993,369.036,37.574,389.565z"/>
+              </g>
+              <path style="fill:#0052B4;" d="M118.584,39.978h23.329l-21.7,15.765l8.289,25.509l-21.699-15.765L85.104,81.252l7.16-22.037  C73.158,75.13,56.412,93.776,42.612,114.552h7.475l-13.813,10.035c-2.152,3.59-4.216,7.237-6.194,10.938l6.596,20.301l-12.306-8.941  c-3.059,6.481-5.857,13.108-8.372,19.873l7.267,22.368h26.822l-21.7,15.765l8.289,25.509l-21.699-15.765l-12.998,9.444  C0.678,234.537,0,245.189,0,256h256c0-141.384,0-158.052,0-256C205.428,0,158.285,14.67,118.584,39.978z M128.502,230.4  l-21.699-15.765L85.104,230.4l8.289-25.509l-21.7-15.765h26.822l8.288-25.509l8.288,25.509h26.822l-21.7,15.765L128.502,230.4z   M120.213,130.317l8.289,25.509l-21.699-15.765l-21.699,15.765l8.289-25.509l-21.7-15.765h26.822l8.288-25.509l8.288,25.509h26.822  L120.213,130.317z M220.328,230.4l-21.699-15.765L176.93,230.4l8.289-25.509l-21.7-15.765h26.822l8.288-25.509l8.288,25.509h26.822  l-21.7,15.765L220.328,230.4z M212.039,130.317l8.289,25.509l-21.699-15.765l-21.699,15.765l8.289-25.509l-21.7-15.765h26.822  l8.288-25.509l8.288,25.509h26.822L212.039,130.317z M212.039,55.743l8.289,25.509l-21.699-15.765L176.93,81.252l8.289-25.509  l-21.7-15.765h26.822l8.288-25.509l8.288,25.509h26.822L212.039,55.743z"/>
+              <g>
+              </g>
+              <g>
+              </g>
+              <g>
+              </g>
+              <g>
+              </g>
+              <g>
+              </g>
+              <g>
+              </g>
+              <g>
+              </g>
+              <g>
+              </g>
+              <g>
+              </g>
+              <g>
+              </g>
+              <g>
+              </g>
+              <g>
+              </g>
+              <g>
+              </g>
+              <g>
+              </g>
+              <g>
+              </g>
+            </svg>`,
+              selectedLabel: 'US',
+            },
+            {
+              label: 'Indonesia',
+              value: '+62',
+              icon: `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Laag_1" x="0px" y="0px" width="50px" height="50px" viewBox="0 0 50 50" enable-background="new 0 0 50 50" xml:space="preserve">
+      <g id="Indonesia_1_">
+        <path id="circle50_250_" fill="#FFFFFF" d="M49.495,25c0,13.531-10.966,24.494-24.495,24.494C11.474,49.494,0.505,38.531,0.505,25   H49.495z"/>
+        <path id="circle50_249_" fill="#F40000" d="M0.505,25C0.505,11.471,11.471,0.505,25,0.505c13.529,0,24.495,10.966,24.495,24.495   H0.505z"/>
+      </g>
+      <g>
+        <g>
+          <g>
+            <g>
+              <defs>
+                <circle id="SVGID_1_" cx="25" cy="25" r="24.5"/>
+              </defs>
+              <clipPath id="SVGID_2_">
+                <use xlink:href="#SVGID_1_" overflow="visible"/>
+              </clipPath>
+              
+                <radialGradient id="circle50_2_" cx="750.7598" cy="1657.9609" r="27.4688" gradientTransform="matrix(1 0 0 1 -725.7598 -1632.9609)" gradientUnits="userSpaceOnUse">
+                <stop offset="0" style="stop-color:#000000;stop-opacity:0"/>
+                <stop offset="0.7576" style="stop-color:#000000;stop-opacity:0"/>
+                <stop offset="1" style="stop-color:#000000"/>
+              </radialGradient>
+              
+                <circle id="circle50_1_" opacity="0.4" clip-path="url(#SVGID_2_)" fill="url(#circle50_2_)" enable-background="new    " cx="25" cy="25" r="27.469"/>
+            </g>
+          </g>
+        </g>
+        <g>
+          <g>
+            <g>
+              <defs>
+                <circle id="SVGID_3_" cx="25" cy="25" r="24.5"/>
+              </defs>
+              <clipPath id="SVGID_4_">
+                <use xlink:href="#SVGID_3_" overflow="visible"/>
+              </clipPath>
+              
+                <radialGradient id="circle50_3_" cx="750.7598" cy="1657.9609" r="31.6777" gradientTransform="matrix(1 0 0 1 -725.7598 -1632.9609)" gradientUnits="userSpaceOnUse">
+                <stop offset="0" style="stop-color:#000000;stop-opacity:0"/>
+                <stop offset="0.5758" style="stop-color:#000000;stop-opacity:0"/>
+                <stop offset="1" style="stop-color:#000000"/>
+              </radialGradient>
+              
+                <circle id="circle50_7_" opacity="0.6" clip-path="url(#SVGID_4_)" fill="url(#circle50_3_)" enable-background="new    " cx="25" cy="25" r="31.678"/>
+            </g>
+          </g>
+        </g>
+      </g>
+      <linearGradient id="SVGID_5_" gradientUnits="userSpaceOnUse" x1="750.4824" y1="1663.666" x2="750.4824" y2="1635.6641" gradientTransform="matrix(1 0 0 1 -725.7598 -1632.9609)">
+        <stop offset="0.0727" style="stop-color:#FFFFFF;stop-opacity:0.05"/>
+        <stop offset="0.897" style="stop-color:#FFFFFF;stop-opacity:0.75"/>
+        <stop offset="1" style="stop-color:#FFFFFF;stop-opacity:0.75"/>
+      </linearGradient>
+      <ellipse fill="url(#SVGID_5_)" cx="24.723" cy="16.704" rx="17.306" ry="14.001"/>
+      </svg>`,
+              selectedLabel: 'ID',
+            },
+            {
+              label: 'India',
+              value: '+91',
+              selectedLabel: 'IN',
+              icon: `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="256" height="256" viewBox="0 0 256 256" xml:space="preserve">
+
+<defs>
+</defs>
+<g style="stroke: none; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: none; fill-rule: nonzero; opacity: 1;" transform="translate(1.4065934065934016 1.4065934065934016) scale(2.81 2.81)" >
+  <path d="M 2.571 30 l 84.859 0 C 81.254 12.534 64.611 0.015 45.034 0 l -0.068 0 C 25.389 0.015 8.745 12.534 2.571 30 z" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(255,153,51); fill-rule: nonzero; opacity: 1;" transform=" matrix(1 0 0 1 0 0) " stroke-linecap="round" />
+  <path d="M 87.429 60 L 2.571 60 C 8.75 77.476 25.408 90 45 90 S 81.25 77.476 87.429 60 z" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(18,136,7); fill-rule: nonzero; opacity: 1;" transform=" matrix(1 0 0 1 0 0) " stroke-linecap="round" />
+  <path d="M 87.429 60 C 89.088 55.307 90 50.261 90 45 c 0 -5.261 -0.911 -10.307 -2.571 -15 L 2.571 30 C 0.911 34.693 0 39.739 0 45 c 0 5.261 0.912 10.308 2.571 15 L 87.429 60 z" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(243,244,245); fill-rule: nonzero; opacity: 1;" transform=" matrix(1 0 0 1 0 0) " stroke-linecap="round" />
+  <path d="M 45 32.5 c -6.904 0 -12.5 5.596 -12.5 12.5 c 0 6.904 5.596 12.5 12.5 12.5 c 6.904 0 12.5 -5.596 12.5 -12.5 C 57.5 38.096 51.904 32.5 45 32.5 z M 54.885 40.315 c -0.271 0.12 -0.399 0.433 -0.285 0.709 c 0.114 0.275 0.426 0.407 0.702 0.3 c 0.099 0.277 0.186 0.559 0.263 0.846 l -6.436 1.336 l -2.048 0.821 c -0.036 -0.111 -0.081 -0.218 -0.134 -0.321 l 2.03 -0.868 l 5.495 -3.605 C 54.619 39.787 54.758 40.048 54.885 40.315 z M 51.217 36.003 c -0.173 0.239 -0.127 0.573 0.109 0.754 c 0.235 0.181 0.57 0.139 0.756 -0.089 c 0.225 0.191 0.444 0.39 0.653 0.599 c 0.209 0.209 0.407 0.428 0.599 0.653 c -0.228 0.186 -0.27 0.52 -0.089 0.756 c 0.181 0.236 0.515 0.282 0.754 0.109 c 0.168 0.242 0.325 0.492 0.473 0.748 l -5.87 2.956 l -1.767 1.324 c -0.063 -0.098 -0.135 -0.189 -0.213 -0.275 l 1.737 -1.365 l 4.375 -4.906 l -4.906 4.375 l -1.365 1.737 c -0.086 -0.078 -0.178 -0.149 -0.275 -0.213 l 1.324 -1.767 l 2.956 -5.87 C 50.724 35.677 50.974 35.835 51.217 36.003 z M 48.976 35.4 c 0.275 0.114 0.589 -0.014 0.709 -0.285 c 0.268 0.127 0.528 0.266 0.783 0.414 l -3.605 5.495 l -0.868 2.03 c -0.103 -0.053 -0.21 -0.098 -0.321 -0.134 l 0.821 -2.048 l 1.336 -6.436 c 0.287 0.076 0.569 0.164 0.846 0.263 C 48.57 34.974 48.701 35.286 48.976 35.4 z M 43.644 34.698 c 0.294 -0.039 0.501 -0.304 0.471 -0.597 c 0.292 -0.023 0.587 -0.039 0.885 -0.039 s 0.593 0.015 0.885 0.039 c -0.03 0.293 0.177 0.558 0.471 0.597 c 0.294 0.039 0.563 -0.165 0.61 -0.456 c 0.292 0.053 0.581 0.118 0.864 0.193 l -2.061 6.242 l -0.313 2.184 c -0.112 -0.024 -0.228 -0.037 -0.345 -0.043 l 0.263 -2.193 L 45 34.063 l -0.375 6.563 l 0.263 2.193 c -0.118 0.006 -0.233 0.019 -0.345 0.043 l -0.313 -2.184 l -2.061 -6.242 c 0.284 -0.075 0.572 -0.14 0.864 -0.193 C 43.08 34.533 43.349 34.737 43.644 34.698 z M 40.315 35.115 c 0.12 0.271 0.434 0.399 0.709 0.285 c 0.275 -0.114 0.407 -0.426 0.3 -0.702 c 0.277 -0.099 0.559 -0.186 0.846 -0.263 l 1.336 6.436 l 0.821 2.048 c -0.111 0.036 -0.218 0.081 -0.321 0.134 l -0.868 -2.03 l -3.605 -5.495 C 39.787 35.381 40.048 35.242 40.315 35.115 z M 36.003 38.783 c 0.239 0.173 0.573 0.127 0.754 -0.109 c 0.181 -0.235 0.139 -0.57 -0.089 -0.756 c 0.191 -0.225 0.39 -0.444 0.599 -0.653 c 0.209 -0.209 0.428 -0.407 0.653 -0.599 c 0.186 0.228 0.52 0.27 0.756 0.089 c 0.236 -0.181 0.282 -0.515 0.109 -0.754 c 0.242 -0.168 0.492 -0.325 0.748 -0.473 l 2.956 5.87 l 1.324 1.767 c -0.098 0.063 -0.189 0.135 -0.275 0.213 l -1.365 -1.737 l -4.906 -4.375 l 4.375 4.906 l 1.737 1.365 c -0.078 0.086 -0.149 0.178 -0.213 0.275 l -1.767 -1.324 l -5.87 -2.956 C 35.677 39.276 35.835 39.026 36.003 38.783 z M 35.118 49.684 c 0.269 -0.12 0.396 -0.433 0.282 -0.707 c -0.114 -0.275 -0.425 -0.406 -0.701 -0.3 c -0.197 -0.551 -0.351 -1.122 -0.458 -1.71 c 0.292 -0.046 0.496 -0.316 0.457 -0.61 c -0.039 -0.294 -0.305 -0.502 -0.599 -0.471 c -0.024 -0.292 -0.037 -0.587 -0.037 -0.885 c 0 -0.298 0.013 -0.593 0.037 -0.885 c 0.294 0.031 0.56 -0.177 0.599 -0.471 c 0.039 -0.295 -0.165 -0.564 -0.457 -0.61 c 0.107 -0.588 0.261 -1.159 0.458 -1.71 c 0.276 0.106 0.587 -0.026 0.701 -0.3 c 0.114 -0.274 -0.013 -0.587 -0.282 -0.707 c 0.127 -0.267 0.264 -0.53 0.411 -0.784 l 5.495 3.605 l 2.03 0.868 c -0.053 0.103 -0.098 0.21 -0.134 0.321 l -2.048 -0.821 l -6.436 -1.336 l 6.242 2.061 l 2.184 0.313 c -0.024 0.112 -0.037 0.228 -0.043 0.345 l -2.193 -0.263 L 34.063 45 l 6.563 0.375 l 2.193 -0.263 c 0.006 0.118 0.019 0.233 0.043 0.345 l -2.184 0.313 l -6.242 2.061 l 6.436 -1.336 l 2.048 -0.821 c 0.036 0.111 0.081 0.218 0.134 0.321 l -2.03 0.868 l -5.495 3.605 C 35.381 50.213 35.245 49.951 35.118 49.684 z M 38.783 53.997 c 0.173 -0.239 0.127 -0.573 -0.109 -0.754 c -0.235 -0.181 -0.57 -0.139 -0.756 0.089 c -0.225 -0.191 -0.444 -0.39 -0.653 -0.599 c -0.209 -0.209 -0.407 -0.428 -0.599 -0.653 c 0.228 -0.186 0.27 -0.52 0.089 -0.756 c -0.181 -0.236 -0.515 -0.282 -0.754 -0.109 c -0.168 -0.242 -0.325 -0.492 -0.473 -0.748 l 5.87 -2.956 l 1.767 -1.324 c 0.063 0.098 0.135 0.189 0.213 0.275 l -1.737 1.365 l -4.375 4.906 l 4.906 -4.375 l 1.365 -1.737 c 0.086 0.078 0.178 0.149 0.275 0.213 l -1.324 1.767 l -2.956 5.87 C 39.276 54.323 39.026 54.165 38.783 53.997 z M 46.356 55.302 c -0.294 0.039 -0.501 0.304 -0.471 0.597 c -0.292 0.023 -0.587 0.039 -0.885 0.039 c -0.298 0 -0.593 -0.015 -0.885 -0.039 c 0.03 -0.293 -0.177 -0.558 -0.471 -0.597 c -0.294 -0.039 -0.563 0.165 -0.61 0.456 c -0.588 -0.107 -1.159 -0.259 -1.71 -0.456 c 0.107 -0.276 -0.025 -0.589 -0.3 -0.702 c -0.275 -0.114 -0.589 0.014 -0.709 0.285 c -0.268 -0.127 -0.528 -0.266 -0.783 -0.414 l 3.605 -5.495 l 0.868 -2.03 c 0.103 0.053 0.21 0.098 0.321 0.134 l -0.821 2.048 l -1.336 6.436 l 2.061 -6.242 l 0.313 -2.184 c 0.112 0.024 0.228 0.037 0.345 0.043 l -0.263 2.193 L 45 55.938 l 0.375 -6.562 l -0.263 -2.193 c 0.118 -0.006 0.233 -0.019 0.345 -0.043 l 0.313 2.184 l 2.061 6.242 c -0.284 0.075 -0.572 0.14 -0.864 0.193 C 46.92 55.467 46.651 55.263 46.356 55.302 z M 49.685 54.885 c -0.12 -0.271 -0.434 -0.399 -0.709 -0.285 c -0.275 0.114 -0.407 0.426 -0.3 0.702 c -0.277 0.099 -0.559 0.186 -0.846 0.263 l -1.336 -6.436 l -0.821 -2.048 c 0.111 -0.036 0.218 -0.081 0.321 -0.134 l 0.868 2.03 l 3.605 5.495 C 50.213 54.619 49.952 54.758 49.685 54.885 z M 53.997 51.217 c -0.239 -0.173 -0.573 -0.127 -0.754 0.109 c -0.181 0.235 -0.139 0.57 0.089 0.756 c -0.191 0.225 -0.39 0.444 -0.599 0.653 c -0.209 0.209 -0.428 0.407 -0.653 0.599 c -0.186 -0.228 -0.52 -0.27 -0.756 -0.089 c -0.236 0.181 -0.282 0.515 -0.109 0.754 c -0.242 0.168 -0.492 0.325 -0.748 0.473 l -2.956 -5.87 l -1.324 -1.767 c 0.098 -0.063 0.189 -0.135 0.275 -0.213 l 1.365 1.737 l 4.906 4.375 l -4.375 -4.906 l -1.737 -1.365 c 0.078 -0.086 0.149 -0.178 0.213 -0.275 l 1.767 1.324 l 5.87 2.956 C 54.323 50.724 54.165 50.974 53.997 51.217 z M 54.6 48.976 c -0.114 0.275 0.014 0.589 0.285 0.709 c -0.127 0.268 -0.266 0.528 -0.414 0.783 l -5.495 -3.605 l -2.03 -0.868 c 0.053 -0.103 0.098 -0.21 0.134 -0.321 l 2.048 0.821 l 6.436 1.336 c -0.076 0.287 -0.164 0.569 -0.263 0.846 C 55.026 48.57 54.714 48.701 54.6 48.976 z M 55.302 46.356 c -0.039 0.294 0.165 0.563 0.456 0.61 c -0.053 0.292 -0.118 0.581 -0.193 0.864 l -6.242 -2.061 l -2.184 -0.313 c 0.024 -0.112 0.037 -0.228 0.043 -0.345 l 2.193 0.263 L 55.938 45 l -6.562 -0.375 l -2.193 0.263 c -0.006 -0.118 -0.019 -0.233 -0.043 -0.345 l 2.184 -0.313 l 6.242 -2.061 c 0.075 0.284 0.14 0.572 0.193 0.864 c -0.291 0.047 -0.495 0.316 -0.456 0.61 c 0.039 0.294 0.304 0.501 0.597 0.471 c 0.023 0.292 0.039 0.587 0.039 0.885 c 0 0.298 -0.015 0.593 -0.039 0.885 C 55.606 45.855 55.34 46.062 55.302 46.356 z" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(0,0,136); fill-rule: nonzero; opacity: 1;" transform=" matrix(1 0 0 1 0 0) " stroke-linecap="round" />
+</g>
+</svg>`,
+            },
+            {
+              label: 'Australia',
+              value: '+61',
+              icon: `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="256" height="256" viewBox="0 0 256 256" xml:space="preserve">
+
+<defs>
+</defs>
+<g style="stroke: none; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: none; fill-rule: nonzero; opacity: 1;" transform="translate(1.4065934065934016 1.4065934065934016) scale(2.81 2.81)" >
+  <circle cx="45" cy="45" r="45" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(0,0,102); fill-rule: nonzero; opacity: 1;" transform="  matrix(1 0 0 1 0 0) "/>
+  <path d="M 25.304 23.603 V 13.115 h -7.928 v 10.488 L 9.227 17.71 c -1.261 1.65 -2.407 3.391 -3.433 5.209 l 2.3 1.663 H 4.903 c -1.824 3.575 -3.193 7.42 -4.01 11.467 h 7.201 l -7.969 5.764 C 0.051 42.867 0 43.927 0 45 c 0 0.845 0.028 1.684 0.074 2.517 h 2.8 l 14.502 -10.488 v 10.488 h 7.928 V 37.029 l 14.502 10.488 h 5.318 v -3.846 L 34.586 36.05 h 10.538 V 24.583 H 34.587 l 10.538 -7.621 v -3.846 h -5.318 L 25.304 23.603 z" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(243,244,245); fill-rule: nonzero; opacity: 1;" transform=" matrix(1 0 0 1 0 0) " stroke-linecap="round" />
+  <path d="M 38.805 67.129 l -6.007 0.522 l 0.827 5.973 l -4.154 -4.371 l -4.154 4.371 l 0.828 -5.973 l -6.007 -0.522 l 5.185 -3.077 l -3.336 -5.022 l 5.638 2.135 l 1.847 -5.74 l 1.847 5.74 l 5.638 -2.135 l -3.336 5.022 M 64.506 72.634 l -1.45 -2.182 l 2.451 0.928 l 0.801 -2.494 l 0.802 2.494 l 2.45 -0.928 l -1.45 2.182 l 2.253 1.337 l -2.61 0.227 l 0.36 2.594 l -1.805 -1.898 l -1.805 1.898 l 0.36 -2.594 l -2.61 -0.227 M 64.506 33.816 l -1.45 -2.182 l 2.451 0.928 l 0.801 -2.494 l 0.802 2.493 l 2.45 -0.927 l -1.45 2.182 l 2.253 1.337 l -2.61 0.227 l 0.36 2.594 l -1.805 -1.898 l -1.805 1.898 l 0.36 -2.594 l -2.61 -0.227 M 49.949 49.586 l -1.45 -2.181 l 2.451 0.928 l 0.802 -2.494 l 0.802 2.494 l 2.451 -0.928 l -1.45 2.181 l 2.253 1.338 l -2.61 0.227 l 0.36 2.594 l -1.805 -1.898 l -1.805 1.898 l 0.36 -2.594 l -2.61 -0.227 M 77.449 45.704 l -1.453 -2.182 l 2.452 0.928 l 0.796 -2.494 l 0.806 2.494 l 2.446 -0.928 l -1.446 2.182 l 2.252 1.337 l -2.61 0.227 l 0.359 2.594 l -1.805 -1.898 l -1.805 1.898 l 0.359 -2.594 l -2.606 -0.227 M 72.131 57.141 l -1.427 0.884 l 0.401 -1.629 l -1.282 -1.082 l 1.674 -0.123 l 0.634 -1.554 l 0.634 1.554 l 1.674 0.123 l -1.282 1.082 l 0.401 1.629" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(243,244,245); fill-rule: nonzero; opacity: 1;" transform=" matrix(1 0 0 1 0 0) " stroke-linecap="round" />
+  <path d="M 23.719 13.115 h -4.757 v 13.761 H 3.811 c -0.973 2.208 -1.784 4.503 -2.395 6.88 h 17.546 v 13.761 h 4.757 V 33.756 h 21.406 v -6.88 H 23.719 V 13.115 z" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(204,0,0); fill-rule: nonzero; opacity: 1;" transform=" matrix(1 0 0 1 0 0) " stroke-linecap="round" />
+  <path d="M 13.412 36.05 L 0.019 45.736 c 0.01 0.596 0.023 1.191 0.055 1.781 h 1.028 L 16.958 36.05 H 13.412 z" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(204,0,0); fill-rule: nonzero; opacity: 1;" transform=" matrix(1 0 0 1 0 0) " stroke-linecap="round" />
+  <polygon points="29.27,36.05 45.13,47.52 45.13,47.52 45.13,44.95 32.81,36.05 " style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(204,0,0); fill-rule: nonzero; opacity: 1;" transform="  matrix(1 0 0 1 0 0) "/>
+  <polygon points="45.13,13.12 41.58,13.12 25.72,24.58 29.27,24.58 " style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(204,0,0); fill-rule: nonzero; opacity: 1;" transform="  matrix(1 0 0 1 0 0) "/>
+  <path d="M 7.422 20.25 c -0.382 0.579 -0.752 1.166 -1.107 1.763 l 3.552 2.569 h 3.545 L 7.422 20.25 z" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(204,0,0); fill-rule: nonzero; opacity: 1;" transform=" matrix(1 0 0 1 0 0) " stroke-linecap="round" />
+</g>
+</svg>`,
+              selectedLabel: 'AU',
+            },
+            {
+              label: 'Japan',
+              value: '+81',
+              icon: `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="256" height="256" viewBox="0 0 256 256" xml:space="preserve">
+
+<defs>
+</defs>
+<g style="stroke: none; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: none; fill-rule: nonzero; opacity: 1;" transform="translate(1.4065934065934016 1.4065934065934016) scale(2.81 2.81)" >
+  <circle cx="45" cy="45" r="45" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(243,244,245); fill-rule: nonzero; opacity: 1;" transform="  matrix(1 0 0 1 0 0) "/>
+  <circle cx="45" cy="45" r="17.5" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(211,0,0); fill-rule: nonzero; opacity: 1;" transform="  matrix(1 0 0 1 0 0) "/>
+</g>
+</svg>`,
+              selectedLabel: 'JP',
+            },
+          ];
+        }
+
+        dropdown.addEventListener('onSelection', event => {
+          console.log('Selected Country Code:', event.detail);
+        });
+        const submitEmailEl = document.getElementById('submit-email');
+        if (submitEmailEl) {
+          submitEmailEl.addEventListener('click', () => {
+            console.log('SUBMITTED!');
+          });
+        }
+        const pwVisEl = document.getElementById('pw-vis');
+        if (pwVisEl) {
+          pwVisEl.addEventListener('click', () => {
+            console.log('TOGGLE VIS!');
+          });
+        }
+
+        const paginationEl = document.getElementById('pagination');
+        if (paginationEl) {
+          paginationEl.addEventListener('cpslPaginationChanged', e => {
+            console.log('Page change', e.detail);
+          });
+        }
+      });
+    </script>
+    <style>
+      /* Example theme overrides */
+      :root {
+        /* --cpsl-color-text-primary: #fe452b; */
+      }
+      .navigation-container {
+        height: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: var(--cpsl-color-background-0);
+        border-right: 1px solid var(--cpsl-color-background-16);
+        box-sizing: border-box;
+        padding: 24px 0px;
+      }
+
+      .app-bar {
+        background-color: var(--cpsl-color-background-0);
+        margin-left: 312px;
+        transition: margin 0.15s ease-in-out;
+        padding: 0px 24px;
+        display: flex;
+        align-items: center;
+        flex: 1;
+      }
+    </style>
+  </head>
+  <body style="margin: 0px">
+    <cpsl-app-bar id="cpsl-app-bar" height="80">
+      <div id="app-bar" class="app-bar">
+        <cpsl-alert variant="warning">Scheduled Maintenance: 5/18/2024 from 2am-5am PST</cpsl-alert>
+      </div>
+    </cpsl-app-bar>
+    <cpsl-drawer id="nav-drawer" anchor="left" size="312" open="true" variant="permanent">
+      <div class="navigation-container">
+        <div>
+          <cpsl-button id="close-nav">Close Nav</cpsl-button>
+        </div>
+        <cpsl-nav-button-group selected-id="home">
+          <cpsl-button id="home">
+            <cpsl-icon icon="home" slot="start"></cpsl-icon>
+            Home
+          </cpsl-button>
+          <cpsl-button id="settings">
+            <cpsl-icon icon="settings" slot="start"></cpsl-icon>
+            Settings
+          </cpsl-button>
+          <cpsl-button id="soon" disabled="true">
+            <cpsl-icon icon="alertCircle" slot="start"></cpsl-icon>
+            Coming Soon!
+          </cpsl-button>
+        </cpsl-nav-button-group>
+      </div>
+    </cpsl-drawer>
+    <main id="main" style="min-width: 500px; margin-left: 312px; padding: 16px; transition: margin 0.15s ease-in-out; display: flex; flex-direction: column; gap: 8px">
+      <div id="open-nav-container">
+        <cpsl-button id="open-nav">Open Nav</cpsl-button>
+      </div>
+      <cpsl-text variant="heading2XL" weight="bold">Capsule Component Library</cpsl-text>
+      <div>
+        <cpsl-button id="toggle-theme" style="position: relative">Toggle Theme</cpsl-button>
+      </div>
+
+      <cpsl-card style="max-width: 25%">
+        <cpsl-text variant="headingXS">Utility Colors</cpsl-text>
+        <div style="display: flex; gap: 8px">
+          <div style="width: 125px; height: 125px; background-color: var(--cpsl-color-utility-red)"></div>
+          <div style="width: 125px; height: 125px; background-color: var(--cpsl-color-utility-yellow)"></div>
+          <div style="width: 125px; height: 125px; background-color: var(--cpsl-color-utility-green)"></div>
+        </div>
+      </cpsl-card>
+
+      <cpsl-card style="max-width: 25%">
+        <cpsl-text variant="headingXS">Table</cpsl-text>
+        <cpsl-table id="user-table">
+          <div slot="header"><cpsl-text>HEADER</cpsl-text></div>
+          <table class="cpsl-table" slot="content">
+            <thead>
+              <tr>
+                <th align="left">First Name</th>
+                <th align="left">Last Name</th>
+                <th align="left" colspan="2">Full Name</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Taylor</td>
+                <td>Bosch</td>
+                <td>Taylor Bosch</td>
+                <td>
+                  <cpsl-button disabled="true" variant="secondary" size="small">Edit</cpsl-button>
+                </td>
+              </tr>
+              <tr>
+                <td>Joe</td>
+                <td>Schmo</td>
+                <td>Joe Schmo</td>
+                <td>
+                  <cpsl-button variant="secondary" size="small">Edit</cpsl-button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div slot="footer"><cpsl-text>FOOTER</cpsl-text></div>
+        </cpsl-table>
+      </cpsl-card>
+
+      <cpsl-card style="max-width: 25%">
+        <cpsl-text variant="headingXS">OVERLAY</cpsl-text>
+        <cpsl-button id="open-overlay-btn" disabled="false" color="primary">Open Overlay</cpsl-button>
+        <cpsl-modal id="overlay">
+          <div slot="header" style="display: flex; justify-content: center">
+            <cpsl-text>NO FOOTER MODAL</cpsl-text>
+          </div>
+          <div id="overlay-modal-body" slot="body" style="display: flex; flex-direction: column; gap: 16px; margin-top: 16px">
+            <cpsl-text>BODY</cpsl-text>
+            <cpsl-text>MORE BODY CONTENT</cpsl-text>
+            <cpsl-text>MORE BODY CONTENT</cpsl-text>
+            <cpsl-text>MORE BODY CONTENT</cpsl-text>
+            <cpsl-button id="close-overlay-btn" disabled="false" color="primary">Close Overlay</cpsl-button>
+          </div>
+        </cpsl-modal>
+      </cpsl-card>
+
+      <cpsl-card style="max-width: 25%">
+        <cpsl-text variant="headingXS">MODAL</cpsl-text>
+        <cpsl-modal id="modal" no-overlay="true" open="true">
+          <cpsl-confetti style="--confetti-color-1: red; --confetti-color-2: blue; --confetti-color-3: green"></cpsl-confetti>
+          <div slot="header" style="display: flex; justify-content: center">
+            <cpsl-text>NO FOOTER MODAL</cpsl-text>
+          </div>
+          <div id="overlay-modal-body" slot="body" style="display: flex; flex-direction: column; gap: 16px; margin-top: 16px">
+            <cpsl-text>BODY</cpsl-text>
+            <cpsl-text>MORE BODY CONTENT</cpsl-text>
+            <cpsl-text>MORE BODY CONTENT</cpsl-text>
+            <cpsl-text>MORE BODY CONTENT</cpsl-text>
+            <cpsl-button id="close-overlay-btn" disabled="false" color="primary">Close Overlay</cpsl-button>
+          </div>
+        </cpsl-modal>
+      </cpsl-card>
+
+      <cpsl-card style="max-width: 25%">
+        <cpsl-text variant="headingXS">Divider</cpsl-text>
+        <cpsl-divider>OR</cpsl-divider>
+      </cpsl-card>
+
+      <cpsl-card style="max-width: 25%">
+        <cpsl-text variant="headingXS">Popover</cpsl-text>
+        <div style="display: flex; gap: 8px">
+          <div id="click-tt">Click</div>
+          <cpsl-popover trigger="click-tt" trigger-action="click"><div id="inner-tt" style="background-color: red">CLICKED</div></cpsl-popover>
+          <cpsl-popover trigger="inner-tt" trigger-action="hover"><div style="background-color: blue">INNER HOVERED</div></cpsl-popover>
+          <div id="hover-tt">Hover</div>
+          <cpsl-popover trigger="hover-tt" trigger-action="hover"><div style="background-color: red">HOVERED</div></cpsl-popover>
+        </div>
+      </cpsl-card>
+
+      <cpsl-card style="max-width: 25%">
+        <cpsl-text variant="headingXS">Select</cpsl-text>
+
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <cpsl-select id="select-1" placeholder="Select An Item" disabled="true" error-text="Some Error!" label="Select 1" show-optional-label="true">
+            <cpsl-select-item value="1" slot="items">
+              <div style="display: flex; gap: 8px; align-items: center">
+                <cpsl-icon icon="home"></cpsl-icon>
+                <cpsl-text>Item 1</cpsl-text>
+              </div>
+            </cpsl-select-item>
+            <cpsl-select-item value="2" slot="items">
+              <div style="display: flex; gap: 8px; align-items: center">
+                <div style="width: 10px; height: 10px; border-radius: 10px; background-color: var(--cpsl-color-utility-green)"></div>
+                <cpsl-text>Item 2</cpsl-text>
+              </div>
+            </cpsl-select-item>
+          </cpsl-select>
+
+          <cpsl-select id="select-2" placeholder="Select An Item" show-formatted-selected-item="true" label="Select 1" required dropdown-max-height="152">
+            <div slot="selected-item" id="selected-item"></div>
+            <cpsl-select-item value="1" slot="items">
+              <div style="display: flex; gap: 8px; align-items: center">
+                <div style="width: 10px; height: 10px; border-radius: 10px; background-color: var(--cpsl-color-utility-red)"></div>
+                <cpsl-text>Item 1</cpsl-text>
+              </div>
+            </cpsl-select-item>
+            <cpsl-select-item value="2" slot="items">
+              <div style="display: flex; gap: 8px; align-items: center">
+                <div style="width: 10px; height: 10px; border-radius: 10px; background-color: var(--cpsl-color-utility-green)"></div>
+                <cpsl-text>Item 2</cpsl-text>
+              </div>
+            </cpsl-select-item>
+            <cpsl-select-item value="3" slot="items">
+              <div style="display: flex; gap: 8px; align-items: center">
+                <div style="width: 10px; height: 10px; border-radius: 10px; background-color: var(--cpsl-color-utility-yellow)"></div>
+                <cpsl-text>Item 3</cpsl-text>
+              </div>
+            </cpsl-select-item>
+            <cpsl-select-item value="4" slot="items">
+              <div style="display: flex; gap: 8px; align-items: center">
+                <div style="width: 10px; height: 10px; border-radius: 10px; background-color: var(--cpsl-color-utility-green)"></div>
+                <cpsl-text>Item 4</cpsl-text>
+              </div>
+            </cpsl-select-item>
+            <cpsl-select-item value="5" slot="items">
+              <div style="display: flex; gap: 8px; align-items: center">
+                <div style="width: 10px; height: 10px; border-radius: 10px; background-color: var(--cpsl-color-utility-red)"></div>
+                <cpsl-text>Item 5</cpsl-text>
+              </div>
+            </cpsl-select-item>
+          </cpsl-select>
+          <script>
+            const selectEl = document.getElementById('select-1');
+            if (selectEl) {
+              selectEl.addEventListener('cpslSelectValueChange', v => {
+                selectEl.setAttribute('selected-value', v.detail);
+              });
+            }
+
+            const select2El = document.getElementById('select-2');
+            const selectedItemEl = document.getElementById('selected-item');
+            if (select2El) {
+              select2El.addEventListener('cpslSelectValueChange', v => {
+                const existingNode = document.getElementById('selected-item');
+                existingNode.innerHTML = `<div style="display: flex; gap: 8px; align-items: center;" ><cpsl-text>Formatted Item ${v.detail}</cpsl-text></div>`;
+
+                select2El.setAttribute('selected-value', v.detail);
+              });
+            }
+          </script>
+        </div>
+      </cpsl-card>
+
+      <cpsl-card style="max-width: 25%">
+        <cpsl-text variant="headingXS">Avatar</cpsl-text>
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <cpsl-avatar src="https://product-assets.sandbox.usecapsule.com/images/capsule-dark-logo.png"></cpsl-avatar>
+          <cpsl-avatar src="https://product-assets.sandbox.usecapsule.com/images/capsule-dark-logo.png" variant="round"></cpsl-avatar>
+        </div>
+      </cpsl-card>
+
+      <cpsl-card style="max-width: 25%">
+        <cpsl-text variant="headingXS">Switch</cpsl-text>
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <cpsl-switch id="switch" checked="true"></cpsl-switch>
+          <script>
+            const switchEl = document.getElementById('switch');
+            if (switchEl) {
+              switchEl.addEventListener('cpslSwitchChanged', e => {
+                switchEl.setAttribute('checked', e.detail);
+              });
+            }
+          </script>
+        </div>
+      </cpsl-card>
+
+      <cpsl-card style="max-width: 25%">
+        <cpsl-text variant="headingXS">Checkbox</cpsl-text>
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <cpsl-checkbox id="checkbox" checked="true"></cpsl-checkbox>
+          <script>
+            const checkboxEl = document.getElementById('checkbox');
+            if (checkboxEl) {
+              checkboxEl.addEventListener('cpslCheckboxChanged', e => {
+                checkboxEl.setAttribute('checked', e.detail);
+              });
+            }
+          </script>
+        </div>
+      </cpsl-card>
+
+      <cpsl-card style="max-width: 25%">
+        <cpsl-text variant="headingXS">Radio</cpsl-text>
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <cpsl-radio id="radio" checked="true"></cpsl-radio>
+          <cpsl-radio id="radio-1" checked="false"></cpsl-radio>
+          <script>
+            const radioEl = document.getElementById('radio');
+            const radio1El = document.getElementById('radio-1');
+            radioEl.addEventListener('cpslRadioChanged', e => {
+              radioEl.setAttribute('checked', e.detail);
+              radio1El.setAttribute('checked', !e.detail);
+            });
+            radio1El.addEventListener('cpslRadioChanged', e => {
+              radio1El.setAttribute('checked', e.detail);
+              radioEl.setAttribute('checked', !e.detail);
+            });
+          </script>
+        </div>
+      </cpsl-card>
+
+      <cpsl-card style="max-width: 25%">
+        <cpsl-text variant="headingXS">Buttons</cpsl-text>
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <cpsl-button full-width="true">Primary full width</cpsl-button>
+          <cpsl-button size="small">Primary Small</cpsl-button>
+          <cpsl-button disabled="true">Disabled</cpsl-button>
+          <cpsl-button variant="secondary">Secondary</cpsl-button>
+        </div>
+      </cpsl-card>
+
+      <cpsl-card style="max-width: 25%">
+        <cpsl-text variant="headingXS">Button Groups</cpsl-text>
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <cpsl-button-group selected-id="2">
+            <cpsl-button id="1"><cpsl-text variant="bodyS">1</cpsl-text></cpsl-button>
+            <cpsl-button id="2"><cpsl-text variant="bodyS">2</cpsl-text></cpsl-button>
+            <cpsl-button id="3"><cpsl-text variant="bodyS">3</cpsl-text></cpsl-button>
+          </cpsl-button-group>
+          <cpsl-pagination id="pagination" total-pages="40" visible-pages="2" />
+        </div>
+      </cpsl-card>
+
+      <cpsl-card style="max-width: 25%">
+        <cpsl-text variant="headingXS">Slider Button</cpsl-text>
+        <cpsl-slide-button id="slider" start-icon="arrow" end-icon="check" start-text="I’ve Saved My Recovery Secret" end-text="OK! You’re Done!"></cpsl-slide-button>
+      </cpsl-card>
+
+      <cpsl-card style="max-width: 25%">
+        <cpsl-text variant="headingXS">Alert</cpsl-text>
+        <cpsl-alert>THIS IS AN ERROR</cpsl-alert>
+      </cpsl-card>
+
+      <cpsl-card style="max-width: 25%">
+        <cpsl-text variant="headingXS">Pill</cpsl-text>
+        <cpsl-pill text="ONE LAST THING"></cpsl-pill>
+      </cpsl-card>
+
+      <cpsl-card style="max-width: 25%">
+        <cpsl-text variant="headingXS">QR Code</cpsl-text>
+        <cpsl-qr-code url="https://usecapsule.com"></cpsl-qr-code>
+      </cpsl-card>
+
+      <cpsl-card style="max-width: 25%">
+        <cpsl-text variant="headingXS">Input</cpsl-text>
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <cpsl-input
+            placeholder="Enter your email"
+            color="primary"
+            label="Email"
+            helper-text="Some helper text to help the user that is really long and will wrap to the next line if it needs to."
+          >
+            <cpsl-button slot="end" id="submit-email" variant="secondary">
+              <cpsl-icon icon="arrow"></cpsl-icon>
+            </cpsl-button>
+          </cpsl-input>
+          <cpsl-input placeholder="Enter your email" color="primary" label="Email" error-text="Some error text to show the user.">
+            <cpsl-icon slot="start" icon="mail"></cpsl-icon>
+            <cpsl-button slot="end">
+              <cpsl-icon icon="arrow"></cpsl-icon>
+            </cpsl-button>
+          </cpsl-input>
+          <cpsl-input placeholder="Password" label="Password" type="password" no-auto-disable="true">
+            <cpsl-button variant="ghost" slot="end" id="pw-vis">
+              <cpsl-icon icon="eye"></cpsl-icon>
+            </cpsl-button>
+          </cpsl-input>
+          <cpsl-input placeholder="Enter phone number" label="Phone Number" type="tel" no-auto-disable="true">
+            <cpsl-dropdown slot="start"></cpsl-dropdown>
+          </cpsl-input>
+        </div>
+      </cpsl-card>
+
+      <cpsl-card style="max-width: 25%">
+        <cpsl-text variant="headingXS">File Input</cpsl-text>
+        <cpsl-file-upload id="file-upload">
+          <div slot="left-content" style="display: flex; flex-direction: column; gap: 8px">
+            <cpsl-text variant="bodyS">Upload Image</cpsl-text>
+            <cpsl-text variant="bodyXS"
+              >Upload a JPG, PNG or GIF image smaller than 10 MB <br /><br />
+              Recommended size: 32px X 32px</cpsl-text
+            >
+          </div>
+        </cpsl-file-upload>
+        <script>
+          document.getElementById('file-upload').fileTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        </script>
+      </cpsl-card>
+
+      <cpsl-card style="max-width: 25%">
+        <cpsl-text variant="headingXS">Spinner</cpsl-text>
+        <div style="display: flex; justify-content: center">
+          <cpsl-spinner></cpsl-spinner>
+        </div>
+      </cpsl-card>
+
+      <cpsl-card style="max-width: 25%">
+        <cpsl-text variant="headingXS">Progress Indicator</cpsl-text>
+        <cpsl-progress-indicator total-steps="5" step="1"></cpsl-progress-indicator>
+      </cpsl-card>
+
+      <cpsl-card style="max-width: 25%">
+        <cpsl-text variant="headingXS">Code Input</cpsl-text>
+        <cpsl-code-input id="code-input" length="6" code="123456"></cpsl-code-input>
+      </cpsl-card>
+
+      <cpsl-card style="max-width: 25%">
+        <cpsl-text variant="headingXS">Tabs</cpsl-text>
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <div>
+            <cpsl-tabs id="tabs" selected-tab="1">
+              <cpsl-tab tab="1">Tab 1</cpsl-tab>
+              <cpsl-tab tab="2">Tab 2</cpsl-tab>
+              <cpsl-tab tab="3">Tab 3</cpsl-tab>
+            </cpsl-tabs>
+          </div>
+          <div>
+            <cpsl-tabs id="tabs-2" selected-tab="2" full-width="true">
+              <cpsl-tab tab="1">FW Tab 1</cpsl-tab>
+              <cpsl-tab tab="2">FW Tab 2</cpsl-tab>
+            </cpsl-tabs>
+          </div>
+          <div>
+            <cpsl-tabs id="tabs-1" selected-tab="1">
+              <cpsl-tab tab="1"
+                ><div style="display: flex; gap: 4px; align-items: center">
+                  <cpsl-icon style="--height: 16px; --width: 16px" icon="capsule"></cpsl-icon>TEXT WITH ICON
+                </div></cpsl-tab
+              >
+              <cpsl-tab tab="2">REALLLLLLLLLLLLLLLLLLY LONGGGGGGGGGGGGGGG TEXT</cpsl-tab>
+            </cpsl-tabs>
+          </div>
+        </div>
+      </cpsl-card>
+
+      <cpsl-card style="max-width: 25%">
+        <cpsl-text variant="headingXS">Tile Button</cpsl-text>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap">
+          <cpsl-tile-button icon="facebookBrand"></cpsl-tile-button>
+          <cpsl-tile-button icon="appleBrand"></cpsl-tile-button>
+          <cpsl-tile-button icon="googleBrand"></cpsl-tile-button>
+          <cpsl-tile-button icon="xBrand"></cpsl-tile-button>
+          <cpsl-tile-button icon="telegramBrand"></cpsl-tile-button>
+          <cpsl-tile-button icon="discordBrand"></cpsl-tile-button>
+          <cpsl-tile-button icon="facebook" icon-color="primary"></cpsl-tile-button>
+          <cpsl-tile-button icon="apple" icon-color="primary"></cpsl-tile-button>
+          <cpsl-tile-button icon="google" icon-color="primary"></cpsl-tile-button>
+          <cpsl-tile-button icon="x" icon-color="primary"></cpsl-tile-button>
+          <cpsl-tile-button icon="telegram" icon-color="primary"></cpsl-tile-button>
+          <cpsl-tile-button icon="discord" icon-color="primary"></cpsl-tile-button>
+        </div>
+      </cpsl-card>
+    </main>
+  </body>
+</html>

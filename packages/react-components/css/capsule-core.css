@@ -1,0 +1,283 @@
+/**
+ * Convert a font size to a dynamic font size.
+ * Fonts that participate in Dynamic Type should use
+ * dynamic font sizes.
+ * @param size - The initial font size including the unit (i.e. px or pt)
+ * @param unit (optional) - The unit to convert to. Use this if you want to
+ * convert to a unit other than $baselineUnit.
+ */
+/**
+ * Convert a font size to a dynamic font size but impose
+ * a maximum font size.
+ * @param size - The initial font size including the unit (i.e. px or pt)
+ * @param maxScale - The maximum scale of the font (i.e. 2.5 for a maximum 250% scale).
+ * @param unit (optional) - The unit to convert the initial font size to. Use this if you want to
+ * convert to a unit other than $baselineUnit.
+ */
+/**
+ * Convert a font size to a dynamic font size but impose
+ * a minimum font size.
+ * @param size - The initial font size including the unit (i.e. px or pt)
+ * @param minScale - The minimum scale of the font (i.e. 0.8 for a minimum 80% scale).
+ * @param unit (optional) - The unit to convert the initial font size to. Use this if you want to
+ * convert to a unit other than $baselineUnit.
+ */
+/**
+ * Convert a font size to a dynamic font size but impose
+ * maximum and minimum font sizes.
+ * @param size - The initial font size including the unit (i.e. px or pt)
+ * @param minScale - The minimum scale of the font (i.e. 0.8 for a minimum 80% scale).
+ * @param maxScale - The maximum scale of the font (i.e. 2.5 for a maximum 250% scale).
+ * @param unit (optional) - The unit to convert the initial font size to. Use this if you want to
+ * convert to a unit other than $baselineUnit.
+ */
+/**
+ * A heuristic that applies CSS to tablet
+ * viewports.
+ *
+ * Usage:
+ * @include tablet-viewport() {
+ *   :host {
+ *     background-color: green;
+ *   }
+ * }
+ */
+/**
+   * A heuristic that applies CSS to mobile
+   * viewports (i.e. phones, not tablets).
+   *
+   * Usage:
+   * @include mobile-viewport() {
+   *   :host {
+   *     background-color: blue;
+   *   }
+   * }
+   */
+html {
+  --cpsl-default-font: "Helvetica", sans-serif;
+  --cpsl-default-dynamic-font: -apple-system-body;
+  --cpsl-font-family: var(--cpsl-default-font);
+}
+
+div {
+  box-sizing: border-box;
+}
+
+body.backdrop-no-scroll {
+  overflow: hidden;
+}
+
+:root {
+  --cpsl-color-black: #000000;
+  --cpsl-color-white: #ffffff;
+  --cpsl-color-alpha-black-2: rgba(0, 0, 0, 0.0196078431);
+  --cpsl-color-alpha-black-4: rgba(0, 0, 0, 0.0392156863);
+  --cpsl-color-alpha-black-8: rgba(0, 0, 0, 0.0784313725);
+  --cpsl-color-alpha-black-10: rgba(0, 0, 0, 0.1019607843);
+  --cpsl-color-alpha-black-16: rgba(0, 0, 0, 0.1607843137);
+  --cpsl-color-alpha-black-24: rgba(0, 0, 0, 0.2392156863);
+  --cpsl-color-alpha-black-25: rgba(0, 0, 0, 0.2509803922);
+  --cpsl-color-alpha-black-32: rgba(0, 0, 0, 0.3215686275);
+  --cpsl-color-alpha-black-48: rgba(0, 0, 0, 0.4784313725);
+  --cpsl-color-alpha-black-50: rgba(0, 0, 0, 0.5019607843);
+  --cpsl-color-alpha-white-4: rgba(255, 255, 255, 0.0392156863);
+  --cpsl-color-alpha-white-25: rgba(255, 255, 255, 0.2509803922);
+  --cpsl-color-background-0: rgb(255, 255, 255);
+  --cpsl-color-background-4: rgb(240, 240, 240);
+  --cpsl-color-background-8: rgb(235, 235, 235);
+  --cpsl-color-background-16: rgb(214, 214, 214);
+  --cpsl-color-background-32: rgb(173, 173, 173);
+  --cpsl-color-background-48: rgb(133, 133, 133);
+  --cpsl-color-background-64: rgb(92, 92, 92);
+  --cpsl-color-background-80: rgb(51, 51, 51);
+  --cpsl-color-background-96: rgb(10, 10, 10);
+  --cpsl-color-foreground-0: rgb(20, 20, 20);
+  --cpsl-color-foreground-4: rgb(31, 31, 31);
+  --cpsl-color-foreground-8: rgb(42, 42, 42);
+  --cpsl-color-foreground-16: rgb(60, 60, 60);
+  --cpsl-color-foreground-32: rgb(97, 97, 97);
+  --cpsl-color-foreground-48: rgb(134, 134, 134);
+  --cpsl-color-foreground-64: rgb(171, 171, 171);
+  --cpsl-color-foreground-80: rgb(209, 209, 209);
+  --cpsl-color-foreground-96: rgb(246, 246, 246);
+  --cpsl-color-utility-red: rgb(240, 68, 56);
+  --cpsl-color-utility-red-light: rgb(251, 203, 199);
+  --cpsl-color-utility-yellow: rgb(251, 188, 4);
+  --cpsl-color-utility-yellow-light: rgb(254, 236, 185);
+  --cpsl-color-utility-green: rgb(52, 168, 83);
+  --cpsl-color-utility-green-light: rgb(198, 231, 207);
+  --cpsl-color-text-primary: var(--cpsl-color-foreground-0);
+  --cpsl-color-text-secondary: var(--cpsl-color-background-64);
+  --cpsl-color-text-tertiary: var(--cpsl-color-foreground-32);
+  --cpsl-color-text-subtle: var(--cpsl-color-background-64);
+  --cpsl-color-text-inverted: var(--cpsl-color-foreground-96);
+  --cpsl-color-text-disabled: var(--cpsl-color-foreground-48);
+  --cpsl-color-text-error: var(--cpsl-color-utility-red);
+  --cpsl-color-modal-surface-main: var(--cpsl-color-background-0);
+  --cpsl-color-modal-surface-footer: var(--cpsl-color-foreground-96);
+  --cpsl-color-modal-border: var(--cpsl-color-background-8);
+  --cpsl-color-input-surface-disabled: var(--cpsl-color-background-8);
+  --cpsl-color-input-surface-default: var(--cpsl-color-background-4);
+  --cpsl-color-input-surface-hover: var(--cpsl-color-background-16);
+  --cpsl-color-input-border-placeholder: var(--cpsl-color-background-4);
+  --cpsl-color-input-border-active: var(--cpsl-color-foreground-0);
+  --cpsl-color-input-border-error: var(--cpsl-color-utility-red);
+  --cpsl-color-select-surface-disabled: var(--cpsl-color-background-8);
+  --cpsl-color-select-surface-default: var(--cpsl-color-background-4);
+  --cpsl-color-select-surface-hover: var(--cpsl-color-background-0);
+  --cpsl-color-select-border-placeholder: var(--cpsl-color-background-4);
+  --cpsl-color-select-border-active: var(--cpsl-color-foreground-0);
+  --cpsl-color-select-border-error: var(--cpsl-color-utility-red);
+  --cpsl-color-select-dropdown-border: var(--cpsl-color-background-16);
+  --cpsl-color-file-surface-disabled: var(--cpsl-color-background-8);
+  --cpsl-color-file-surface-default: var(--cpsl-color-background-4);
+  --cpsl-color-file-surface-drag: var(--cpsl-color-background-16);
+  --cpsl-color-file-border-placeholder: var(--cpsl-color-background-4);
+  --cpsl-color-file-border-error: var(--cpsl-color-utility-red);
+  --cpsl-color-tile-button-surface-default: var(--cpsl-color-background-4);
+  --cpsl-color-tile-button-surface-hover: var(--cpsl-color-background-16);
+  --cpsl-color-tile-button-surface-pressed: var(--cpsl-color-background-16);
+  --cpsl-color-tile-button-border: var(--cpsl-color-background-4);
+  --cpsl-color-primary-button-text: var(--cpsl-color-text-inverted);
+  --cpsl-color-primary-button-surface-default: var(--cpsl-color-foreground-0);
+  --cpsl-color-primary-button-surface-hover: var(--cpsl-color-foreground-16);
+  --cpsl-color-primary-button-surface-pressed: var(--cpsl-color-foreground-16);
+  --cpsl-color-primary-button-surface-disabled: var(--cpsl-color-background-16);
+  --cpsl-color-primary-button-border-default: var(--cpsl-color-foreground-0);
+  --cpsl-color-primary-button-border-disabled: var(--cpsl-color-background-16);
+  --cpsl-color-primary-button-outline: var(--cpsl-color-foreground-32);
+  --cpsl-color-secondary-button-text: var(--cpsl-color-text-primary);
+  --cpsl-color-secondary-button-surface-default: transparent;
+  --cpsl-color-secondary-button-surface-hover: var(--cpsl-color-background-16);
+  --cpsl-color-secondary-button-surface-pressed: var(--cpsl-color-background-16);
+  --cpsl-color-secondary-button-surface-disabled: var(--cpsl-color-foreground-96);
+  --cpsl-color-secondary-button-border-default: var(--cpsl-color-background-32);
+  --cpsl-color-secondary-button-border-disabled: var(--cpsl-color-foreground-96);
+  --cpsl-color-secondary-button-outline: var(--cpsl-color-background-32);
+  --cpsl-color-destructive-button-text: var(--cpsl-color-text-error);
+  --cpsl-color-destructive-button-surface-default: transparent;
+  --cpsl-color-destructive-button-surface-hover: var(--cpsl-color-utility-red-light);
+  --cpsl-color-destructive-button-surface-pressed: var(--cpsl-color-utility-red-light);
+  --cpsl-color-destructive-button-surface-disabled: var(--cpsl-color-foreground-96);
+  --cpsl-color-destructive-button-border-default: var(--cpsl-color-utility-red);
+  --cpsl-color-destructive-button-border-disabled: var(--cpsl-color-foreground-96);
+  --cpsl-color-destructive-button-outline: var(--cpsl-color-background-32);
+  --cpsl-color-ghost-button-default: var(--cpsl-color-text-secondary);
+  --cpsl-color-ghost-button-disabled: var(--cpsl-color-text-secondary);
+  --cpsl-color-ghost-button-hover: var(--cpsl-color-text-primary);
+  --cpsl-color-divider: var(--cpsl-color-background-32);
+  --cpsl-color-spinner-path: var(--cpsl-color-background-32);
+  --cpsl-color-spinner-circle: var(--cpsl-color-foreground-0);
+  --cpsl-color-pill-text: var(--cpsl-color-text-secondary);
+  --cpsl-color-pill-container-background: var(--cpsl-color-background-0);
+  --cpsl-color-pill-container-border: var(--cpsl-color-background-8);
+  --cpsl-color-progressIndicator-active: var(--cpsl-color-foreground-0);
+  --cpsl-color-progressIndicator-next: var(--cpsl-color-background-32);
+  --cpsl-color-progressIndicator-previous: var(--cpsl-color-background-64);
+  --cpsl-color-qr-fill: var(--cpsl-color-black);
+  --cpsl-color-qr-background: var(--cpsl-color-white);
+  --cpsl-color-qr-border: var(--cpsl-color-background-32);
+  --cpsl-color-slideButton-slider-container-start-background: var(--cpsl-color-background-0);
+  --cpsl-color-slideButton-slider-container-end-background: var(--cpsl-color-foreground-0);
+  --cpsl-color-slideButton-slider-container-start-border: var(--cpsl-color-background-32);
+  --cpsl-color-slideButton-slider-container-end-border: var(--cpsl-color-foreground-32);
+  --cpsl-color-slideButton-slider-border: var(--cpsl-color-foreground-32);
+  --cpsl-color-slideButton-slider-background: var(--cpsl-color-foreground-0);
+  --cpsl-color-slideButton-slider-text: var(--cpsl-color-text-inverted);
+  --cpsl-color-slideButton-start-text: var(--cpsl-color-text-secondary);
+  --cpsl-color-slideButton-end-text: var(--cpsl-color-text-inverted);
+  --cpsl-color-tabs-border: var(--cpsl-color-background-32);
+  --cpsl-color-tabs-background: var(--cpsl-color-background-8);
+  --cpsl-color-tabs-slider-background: var(--cpsl-color-background-0);
+  --cpsl-color-alert-surface-error: #fee4e2;
+  --cpsl-color-alert-border-error: #f97066;
+  --cpsl-color-switch-surface-default: var(--cpsl-color-background-4);
+  --cpsl-color-switch-surface-checked: var(--cpsl-color-foreground-0);
+  --cpsl-color-switch-thumb-default: var(--cpsl-color-background-0);
+  --cpsl-color-switch-thumb-checked: var(--cpsl-color-background-0);
+  --cpsl-color-checkbox-surface-default: var(--cpsl-color-background-0);
+  --cpsl-color-checkbox-surface-checked: var(--cpsl-color-foreground-0);
+  --cpsl-color-checkbox-border-default: var(--cpsl-color-background-16);
+  --cpsl-color-checkbox-border-checked: var(--cpsl-color-foreground-0);
+  --cpsl-color-checkbox-icon: var(--cpsl-color-background-0);
+  --cpsl-color-radio-surface-default: var(--cpsl-color-background-0);
+  --cpsl-color-radio-surface-checked: var(--cpsl-color-background-0);
+  --cpsl-color-radio-border-default: var(--cpsl-color-background-16);
+  --cpsl-color-radio-border-checked: var(--cpsl-color-foreground-0);
+  --cpsl-color-avatar-surface: var(--cpsl-color-background-0);
+  --cpsl-color-avatar-border: var(--cpsl-color-foreground-96);
+  --cpsl-color-card-surface: var(--cpsl-color-background-0);
+  --cpsl-color-card-border: var(--cpsl-color-background-16);
+  --cpsl-border-radius-input: 12px;
+  --cpsl-border-radius-select: 12px;
+  --cpsl-border-radius-file: 12px;
+  --cpsl-border-radius-alert: 12px;
+  --cpsl-border-radius-tabs: 12px;
+  --cpsl-border-radius-primary-button: 12px;
+  --cpsl-border-radius-secondary-button: 12px;
+  --cpsl-border-radius-destructive-button: 12px;
+  --cpsl-border-radius-tile-button: 12px;
+  --cpsl-border-radius-modal: 24px;
+  --cpsl-border-radius-pill: 1000px;
+  --cpsl-border-radius-qr-code: 12px;
+  --cpsl-border-radius-info-box: 12px;
+  --cpsl-border-radius-table-container: 24px;
+  --cpsl-border-radius-switch: 1000px;
+  --cpsl-border-radius-checkbox: 4px;
+  --cpsl-border-radius-radio: 1000px;
+  --cpsl-border-radius-avatar: 12px;
+  --cpsl-border-radius-card: 24px;
+  --cpsl-border-radius-button-group: 12px;
+  --cpsl-font-size-body-2xs: clamp(8px, 0.625rem, 15px);
+  --cpsl-font-size-body-xs: clamp(9.6px, 0.75rem, 18px);
+  --cpsl-font-size-body-s: clamp(11.2px, 0.875rem, 21px);
+  --cpsl-font-size-body-m: clamp(12.8px, 1rem, 24px);
+  --cpsl-font-size-body-l: clamp(16px, 1.25rem, 30px);
+  --cpsl-font-size-body-xl: clamp(19.2px, 1.5rem, 36px);
+  --cpsl-font-size-heading-xs: clamp(19.2px, 1.5rem, 36px);
+  --cpsl-font-size-heading-s: clamp(25.6px, 2rem, 48px);
+  --cpsl-font-size-heading-m: clamp(32px, 2.5rem, 60px);
+  --cpsl-font-size-heading-l: clamp(44.8px, 3.5rem, 84px);
+  --cpsl-font-size-heading-xl: clamp(51.2px, 4rem, 96px);
+  --cpsl-font-size-heading-2xl: clamp(57.6px, 4.5rem, 108px);
+}
+
+.cpsl-table {
+  width: 100%;
+  border-spacing: 0;
+  border-collapse: separate;
+  font-family: var(--cpsl-font-family, inherit);
+}
+.cpsl-table th {
+  -webkit-padding-start: var(--table-header-padding-start);
+  padding-inline-start: var(--table-header-padding-start);
+  -webkit-padding-end: var(--table-header-padding-end);
+  padding-inline-end: var(--table-header-padding-end);
+  padding-top: var(--table-header-padding-top);
+  padding-bottom: var(--table-header-padding-bottom);
+  background: var(--table-header-background-color);
+  color: var(--cpsl-color-text-primary);
+  font-weight: 500;
+  font-size: var(--cpsl-font-size-body-xs);
+  border-bottom: var(--table-header-border-width) solid var(--table-header-border-color);
+}
+.cpsl-table td {
+  -webkit-padding-start: var(--table-content-padding-start);
+  padding-inline-start: var(--table-content-padding-start);
+  -webkit-padding-end: var(--table-content-padding-end);
+  padding-inline-end: var(--table-content-padding-end);
+  padding-top: var(--table-content-padding-top);
+  padding-bottom: var(--table-content-padding-bottom);
+  color: var(--cpsl-color-text-primary);
+  font-size: var(--cpsl-font-size-body-s);
+  border-bottom: var(--table-content-border-width) solid var(--table-content-border-color);
+}
+.cpsl-table tr:last-child td {
+  border-bottom: none;
+}
+.cpsl-table.sticky-header thead {
+  position: sticky;
+  top: 0;
+}
+
+/*# sourceMappingURL=capsule-core.css.map */

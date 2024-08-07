@@ -45,10 +45,10 @@ export async function setupWorker(resFunction: (arg: any) => Promise<void>, work
     };
 
     worker.on('message', onmessage);
-    worker.on('error', (err) => {
+    worker.on('error', err => {
       throw err;
     });
-    worker.on('exit', (code) => {
+    worker.on('exit', code => {
       console.error(`worker stopped with exit code ${code}`);
     });
   }

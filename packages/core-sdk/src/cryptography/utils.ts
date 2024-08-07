@@ -187,7 +187,7 @@ export async function getDerivedPrivateKeyAndDecrypt(
   encryptedShares: EncryptedShare[],
 ): Promise<{ walletId: string; signer: string }[]> {
   return Promise.all(
-    encryptedShares.map(async (share) => ({
+    encryptedShares.map(async share => ({
       walletId: share.walletId,
       signer: await decryptWithDerivedPrivateKey(ctx, seedValue, share.encryptedShare, share.encryptedKey),
     })),
@@ -200,7 +200,7 @@ export async function decryptPrivateKeyAndDecryptShare(
   encryptedPrivateKey: string,
 ): Promise<{ walletId: string; signer: string }[]> {
   const privateKey = await decryptPrivateKey(encryptedPrivateKey, encryptionKey);
-  return encryptedShares.map((share) => ({
+  return encryptedShares.map(share => ({
     walletId: share.walletId,
     signer: decryptWithPrivateKey(privateKey, share.encryptedShare, share.encryptedKey),
   }));

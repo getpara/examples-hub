@@ -53,10 +53,10 @@ const RecoveryWalletModal: React.FC<RecoveryWalletModalProps> = ({ isOpen, onClo
   useEffect(() => {
     async function distribute() {
       if (userShares && currentRecoveryStep === ModalStep.AWAITING_FINISH) {
-        const fetchedWallets = (await capsule.fetchWallets()).filter((wallet) => !!wallet.address);
+        const fetchedWallets = (await capsule.fetchWallets()).filter(wallet => !!wallet.address);
         const walletId = fetchedWallets[0].id;
         await Promise.all(
-          userShares.map((userShare) => distributeNewShare(capsule.ctx, capsule.getUserId(), walletId, userShare, true, {})),
+          userShares.map(userShare => distributeNewShare(capsule.ctx, capsule.getUserId(), walletId, userShare, true, {})),
         );
         setUserShares(null);
       }

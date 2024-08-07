@@ -1,0 +1,26 @@
+:host {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+
+  display: block;
+  pointer-events: none;
+}
+
+:host {
+  .background-16 {
+    path {
+      fill: var(--cpsl-color-background-16);
+    }
+  }
+  .background-48 {
+    path {
+      fill: var(--cpsl-color-background-48);
+    }
+  }
+  .background-80 {
+    path {
+      fill: var(--cpsl-color-background-80);
+    }
+  }
+}

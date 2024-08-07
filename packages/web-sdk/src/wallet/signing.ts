@@ -11,8 +11,8 @@ export async function signTransaction(
   sessionCookie?: string,
   isDKLS?: boolean,
 ): Promise<SignatureRes> {
-  return await new Promise(async (resolve) => {
-    const worker = await setupWorker(ctx, async (sendTransactionRes) => {
+  return await new Promise(async resolve => {
+    const worker = await setupWorker(ctx, async sendTransactionRes => {
       resolve(sendTransactionRes);
       worker.terminate();
     });
@@ -41,8 +41,8 @@ export async function sendTransaction(
   sessionCookie?: string,
   isDKLS?: boolean,
 ): Promise<SignatureRes> {
-  return await new Promise(async (resolve) => {
-    const worker = await setupWorker(ctx, async (sendTransactionRes) => {
+  return await new Promise(async resolve => {
+    const worker = await setupWorker(ctx, async sendTransactionRes => {
       resolve(sendTransactionRes);
       worker.terminate();
     });
@@ -70,8 +70,8 @@ export async function signMessage(
   sessionCookie?: string,
   isDKLS?: boolean,
 ): Promise<SignatureRes> {
-  return await new Promise(async (resolve) => {
-    const worker = await setupWorker(ctx, async (signMessageRes) => {
+  return await new Promise(async resolve => {
+    const worker = await setupWorker(ctx, async signMessageRes => {
       resolve(signMessageRes);
       worker.terminate();
     });
@@ -98,8 +98,8 @@ export async function ed25519Sign(
   base64Bytes: string,
   sessionCookie: string,
 ): Promise<SignatureRes> {
-  return await new Promise(async (resolve) => {
-    const worker = await setupWorker(ctx, async (signMessageRes) => {
+  return await new Promise(async resolve => {
+    const worker = await setupWorker(ctx, async signMessageRes => {
       resolve(signMessageRes);
       worker.terminate();
     });

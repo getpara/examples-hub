@@ -12,9 +12,9 @@ const STEPS = {
 };
 
 export const AddFundsAwaiting = () => {
-  const setStep = useModalStore((state) => state.setStep);
-  const onRampConfig = useModalStore((state) => state.onRampConfig);
-  const onRampPurchase = useModalStore((state) => state.onRampPurchase);
+  const setStep = useModalStore(state => state.setStep);
+  const onRampConfig = useModalStore(state => state.onRampConfig);
+  const onRampPurchase = useModalStore(state => state.onRampPurchase);
 
   const onRampEmbed = useMemo(() => {
     switch (onRampPurchase?.provider) {

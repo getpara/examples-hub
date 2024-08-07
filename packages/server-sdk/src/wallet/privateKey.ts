@@ -9,9 +9,9 @@ export async function getPrivateKey(
   share: string,
   sessionCookie?: string,
 ): Promise<string> {
-  return await new Promise(async (resolve) => {
+  return await new Promise(async resolve => {
     const workId = uuid.v4();
-    const worker = await setupWorker(async (res) => {
+    const worker = await setupWorker(async res => {
       resolve(res);
     }, workId);
     worker.postMessage({

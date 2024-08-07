@@ -88,7 +88,7 @@ export const AuthLogin = () => {
         }
         const touchRes = await userManagementClient.touchSession();
         await capsule.setUserId(touchRes.data.userId);
-        const fetchedWallets = (await capsule.fetchWallets()).filter((wallet) => !!wallet.address);
+        const fetchedWallets = (await capsule.fetchWallets()).filter(wallet => !!wallet.address);
         const temporaryShares = (await capsule.getTransmissionKeyShares(true)).data.temporaryShares;
 
         if (temporaryShares.length === fetchedWallets.length) {

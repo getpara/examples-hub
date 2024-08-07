@@ -26,7 +26,7 @@ const RecoveryAwaitingFinishStep: React.FC = () => {
     const increment = 5;
     const timeoutId = setTimeout(
       () => {
-        setPercentDone((oldPercentDone) => Math.min(100, oldPercentDone + increment));
+        setPercentDone(oldPercentDone => Math.min(100, oldPercentDone + increment));
       },
       2000 / (100 / increment),
     );

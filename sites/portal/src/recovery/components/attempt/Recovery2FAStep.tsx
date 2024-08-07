@@ -60,7 +60,7 @@ const Recovery2FAStep: React.FC = () => {
         borderRadius="5px"
         focusBorderColor="brand.text"
         placeholder="Enter code"
-        onChange={async (e) => {
+        onChange={async e => {
           setVerificationCode(e.target.value);
         }}
       />

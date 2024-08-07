@@ -1,0 +1,31 @@
+@import '../../themes/capsule.globals';
+
+:host {
+  --step-height: 3px;
+  --step-active-color: var(--cpsl-color-progressIndicator-active);
+  --step-next-color: var(--cpsl-color-progressIndicator-next);
+  --step-previous-color: var(--cpsl-color-progressIndicator-previous);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.step {
+  background: var(--step-next-color);
+
+  border-radius: var(--step-border-radius, calc(var(--step-height) * 2));
+  height: var(--step-height);
+  flex: 1;
+  transition: all 0.5s;
+}
+
+.previous {
+  background: var(--step-previous-color);
+}
+
+.active {
+  background: var(--step-active-color);
+  flex: 2;
+}

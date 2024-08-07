@@ -1,0 +1,26 @@
+:host {
+  --tab-color: var(--cpsl-color-text-primary);
+  padding-top: var(--tab-top-padding);
+  padding-bottom: var(--tab-bottom-padding);
+  padding-left: var(--tab-left-padding);
+  padding-right: var(--tab-right-padding);
+
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+
+  cursor: pointer;
+
+  z-index: 10;
+}
+
+.tab-container {
+  align-items: center;
+  overflow: hidden;
+  width: 100%;
+  text-overflow: ellipsis;
+  text-align: center;
+  white-space: nowrap;
+  font-weight: 500;
+  color: var(--tab-color);
+}

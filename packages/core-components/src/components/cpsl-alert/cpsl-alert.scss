@@ -1,0 +1,61 @@
+@import '../../themes/capsule.globals';
+
+:host {
+  --container-gap: 8px;
+
+  --container-padding-top: 14px;
+  --container-padding-bottom: 14px;
+  --container-padding-start: 16px;
+  --container-padding-end: 16px;
+
+  --container-font-size: var(--cpsl-font-size-body-m);
+
+  --container-border-width: 1px;
+  --container-border-radius: var(--cpsl-border-radius-alert);
+
+  --container-background-color: var(--cpsl-color-background-0);
+  --container-color: var(--cpsl-color-text-primary);
+  --container-icon-color: var(--container-color);
+
+  display: inline-block;
+  font-family: $font-family-base;
+}
+
+:host(.error) {
+  --container-border-color: var(--cpsl-color-utility-red);
+}
+
+:host(.warning) {
+  --container-border-color: var(--cpsl-color-utility-yellow);
+}
+
+:host(.success) {
+  --container-border-color: var(--cpsl-color-utility-green);
+}
+
+:host {
+  cpsl-icon {
+    --icon-color: var(--container-icon-color);
+    --height: 20px;
+    --width: 20px;
+  }
+}
+
+.alert-container {
+  @include border-radius(var(--container-border-radius));
+  @include padding(var(--container-padding-top), var(--container-padding-end), var(--container-padding-bottom), var(--container-padding-start));
+
+  font-size: var(--container-font-size);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--container-gap);
+
+  border-style: solid;
+  border-width: var(--container-border-width);
+  border-color: var(--container-border-color);
+
+  background-color: var(--container-background-color);
+  color: var(--container-color);
+}

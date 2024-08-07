@@ -3,7 +3,7 @@ import { Heading, CreationStepSubheading, MainContainer, SpinnerContainer } from
 import { useModalStore } from '../../stores/index.js';
 
 export const AwaitingBiometricsStep = () => {
-  const isLogin = useModalStore((state) => state.isLogin());
+  const isLogin = useModalStore(state => state.isLogin());
 
   return (
     <>

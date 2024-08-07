@@ -16,7 +16,7 @@ function checkHasProviders({ providers }: OnRampConfig) {
 function checkDuplicateProviders({ providers }: OnRampConfig) {
   providers.forEach(({ id: providerProp }, index) => {
     const provider = getProvider(providerProp);
-    if (providers.findIndex((p) => getProvider(p.id) === provider) !== index) {
+    if (providers.findIndex(p => getProvider(p.id) === provider) !== index) {
       throw new OnRampConfigError(`Provider ${provider} is configured more than once`);
     }
   });

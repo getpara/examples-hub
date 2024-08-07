@@ -35,7 +35,7 @@ export async function sendRecoveryForShare(
       },
     ];
   } else {
-    userBackupKeyShareOptsArr = recoveryPublicKeys.map((recoveryPublicKey) => {
+    userBackupKeyShareOptsArr = recoveryPublicKeys.map(recoveryPublicKey => {
       const { id: recoveryPublicKeyId, publicKey } = recoveryPublicKey;
       const encryptedUserBackup = KeyContainer.encryptWithPublicKey(Buffer.from(publicKey, 'hex'), userSigner);
       return {
@@ -49,7 +49,7 @@ export async function sendRecoveryForShare(
   }
 
   await ctx.capsuleClient.uploadUserKeyShares(userId, [
-    ...otherEncryptedShares.map((share) => ({
+    ...otherEncryptedShares.map(share => ({
       walletId,
       ...share,
     })),

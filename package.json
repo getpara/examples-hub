@@ -9,13 +9,13 @@
   ],
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "eslint --config .eslintrc.js --cache --fix"
+      "eslint --config eslint.config.js --cache --fix"
     ]
   },
   "scripts": {
     "setup-worker": "lerna run setup-worker --scope=capsule-portal && cd workers/mpc-worker && yarn build && cd ../..",
     "build": "lerna run build --parallel",
-    "lint": "eslint --config .eslintrc.js --fix './**/*.{js,jsx,ts,tsx}'",
+    "lint": "eslint --config eslint.config.js --fix './**/*.{js,jsx,ts,tsx}'",
     "start": "lerna run start --scope=capsule-legacy-example --scope=capsule-portal",
     "start-server": "lerna run start --scope=capsule-server-example",
     "start-bridge": "lerna run start --scope=capsule-js-bridge",
@@ -25,12 +25,14 @@
     "test": "lerna run test"
   },
   "devDependencies": {
+    "@stencil-community/eslint-plugin": "^0.8.0",
     "@typescript-eslint/eslint-plugin": "^7.16.1",
     "@typescript-eslint/parser": "^7.16.1",
     "eslint": "^9.0.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
     "eslint-plugin-react": "^7.34.1",
+    "eslint-plugin-storybook": "^0.8.0",
     "husky": "^9.0.11",
     "lerna": "^8.1.2",
     "lint-staged": "^15.2.2",

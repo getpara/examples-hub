@@ -1,0 +1,29 @@
+@import '../../themes/capsule.globals';
+
+:host {
+  --qr-color: var(--cpsl-color-qr-fill);
+  --qr-background-color: var(--cpsl-color-qr-background);
+  --qr-border-color: var(--cpsl-color-qr-border);
+  --qr-border-radius: var(--cpsl-border-radius-qr-code);
+  --qr-border-width: 1px;
+  --qr-box-shadow: 0px 1px 2px var(--cpsl-color-alpha-black-10);
+
+  display: inline-block;
+}
+
+.qr-container {
+  @include padding(var(--qr-padding-top), var(--qr-padding-end), var(--qr-padding-bottom), var(--qr-padding-start));
+
+  display: flex;
+
+  color: var(--qr-color);
+
+  border-style: solid;
+  border-width: var(--qr-border-width);
+  border-color: var(--qr-border-color);
+  border-radius: var(--qr-border-radius);
+
+  background: var(--qr-background-color);
+
+  box-shadow: var(--qr-box-shadow);
+}

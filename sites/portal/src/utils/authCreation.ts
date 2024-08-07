@@ -66,7 +66,7 @@ export async function authCreation(
   // setup should still be available here
   if (isForNewDevice) {
     const temporaryShares = (await capsule.getTransmissionKeyShares(true)).data.temporaryShares;
-    const biometricEncryptedKeyshares = temporaryShares.map((share) => {
+    const biometricEncryptedKeyshares = temporaryShares.map(share => {
       const decryptedShare = decryptWithPrivateKey(
         capsule.loginEncryptionKeyPair.privateKey,
         share.encryptedShare,

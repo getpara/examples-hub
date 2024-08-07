@@ -1,0 +1,49 @@
+@import '../../themes/capsule.globals';
+
+:host {
+  // CONTAINER
+  --container-height: 20px;
+  --container-width: 20px;
+  --container-border-radius: var(--cpsl-border-radius-radio);
+  --container-border-width-default: 2px;
+  --container-border-width-checked: 5px;
+  --container-background-color-default: var(--cpsl-color-radio-surface-default);
+  --container-border-color-default: var(--cpsl-color-radio-border-default);
+  --container-background-color-checked: var(--cpsl-color-radio-surface-checked);
+  --container-border-color-checked: var(--cpsl-color-radio-border-checked);
+
+  display: block;
+  position: relative;
+
+  height: var(--container-height);
+  width: var(--container-width);
+  cursor: pointer;
+}
+
+input {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  margin: 0px;
+  opacity: 0;
+}
+
+span.container {
+  display: inline-block;
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--container-border-radius);
+  border: var(--container-border-width-default) solid;
+  background: var(--container-background-color-default);
+  border-color: var(--container-border-color-default);
+
+  transition: all 0.15s ease-in-out;
+
+  &.checked {
+    background: var(--container-background-color-checked);
+    border-color: var(--container-border-color-checked);
+    border-width: var(--container-border-width-checked);
+  }
+}

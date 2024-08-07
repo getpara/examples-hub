@@ -17,3 +17,9 @@ mpcWorker-bundle.js
 **/.env.production
 .nx
 lerna-debug.log
+
+www/
+loader/
+core-components/css/
+.stencil/
+*storybook.log

@@ -25,8 +25,8 @@ const excludedCountries = [
 const generateCountryCodes = (): Array<{ label: string; value: string; selectedLabel: string; icon: IconType }> => {
   const countries = getCountries();
   const countryList = countries
-    .filter((country) => !excludedCountries.includes(country))
-    .map((country) => {
+    .filter(country => !excludedCountries.includes(country))
+    .map(country => {
       const countryCode = getCountryCallingCode(country);
       const countryName = new Intl.DisplayNames(['en'], { type: 'region' }).of(country);
       return {

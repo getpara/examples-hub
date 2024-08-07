@@ -9,7 +9,7 @@ interface FooterProps {
 }
 
 export const Footer = ({ expandModal }: FooterProps) => {
-  const isDark = useThemeStore((state) => state.isDark);
+  const isDark = useThemeStore(state => state.isDark);
 
   const handleConnectClick = () => {
     window.open(CAPSULE_CONNECT, '_blank');

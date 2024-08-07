@@ -109,5 +109,8 @@ jobs:
         env:
           NX_REJECT_UNKNOWN_LOCAL_CACHE: 0
 
+      - name: Configure puppeteer
+        run: npx puppeteer browsers install chrome
+
       - name: Run tests
         run: yarn test

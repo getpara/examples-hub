@@ -15,7 +15,7 @@ export async function distributeNewShare(
 ): Promise<string> {
   const publicKeysRes = await ctx.capsuleClient.getSessionPublicKeys(userId);
   const biometricEncryptedShares = publicKeysRes.data.keys
-    .map((key) => {
+    .map(key => {
       if (!key.publicKey) {
         return;
       }

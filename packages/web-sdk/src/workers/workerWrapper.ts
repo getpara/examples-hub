@@ -7,7 +7,7 @@ export interface SyncWorker {
 }
 
 export async function setupWorker(ctx: Ctx, resFunction: (arg: any) => void): Promise<Worker | SyncWorker> {
-  const onmessage = (event) => {
+  const onmessage = event => {
     if (event.data.functionType === 'CUSTOM') {
       // safe to remove this block once this code is live in prod!
       return;
@@ -19,7 +19,7 @@ export async function setupWorker(ctx: Ctx, resFunction: (arg: any) => void): Pr
     const syncWorker: SyncWorker = {
       postMessage: function (message) {
         (async function () {
-          await handleMessage({ data: message }, (data) => onmessage({ data }), ctx.disableWorkers);
+          await handleMessage({ data: message }, data => onmessage({ data }), ctx.disableWorkers);
         })();
       },
       terminate: () => {

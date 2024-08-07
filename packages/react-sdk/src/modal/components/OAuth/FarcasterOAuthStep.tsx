@@ -16,11 +16,11 @@ const CenteredContainer = styled.div`
 
 const FarcasterOAuthStep = () => {
   const [connectUri, setConnectUri] = useState('');
-  const setStep = useModalStore((state) => state.setStep);
-  const setWebAuthURLForCreate = useModalStore((state) => state.setWebAuthURLForCreate);
-  const setWebAuthURLForLogin = useModalStore((state) => state.setWebAuthURLForLogin);
-  const capsule = useCapsuleStore((state) => state.capsule);
-  const setFlow = useModalStore((state) => state.setFlow);
+  const setStep = useModalStore(state => state.setStep);
+  const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
+  const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
+  const capsule = useCapsuleStore(state => state.capsule);
+  const setFlow = useModalStore(state => state.setFlow);
 
   useEffect(() => {
     const initializeFarcaster = async () => {

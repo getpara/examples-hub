@@ -1,0 +1,163 @@
+@import '../../themes/capsule.globals';
+
+:host {
+  display: block;
+  position: relative;
+  font-family: Arial, sans-serif;
+
+  --input-color: var(--cpsl-color-text-primary);
+  --container-background-color: var(--cpsl-color-input-surface-default);
+  --container-border-color: var(--cpsl-color-input-border-active);
+  --scrollbar-color: var(--cpsl-color-text-subtle);
+  --divider-color: var(--cpsl-color-divider);
+  --input-placeholder-color: var(--cpsl-color-text-secondary);
+  --input-font-size: var(--cpsl-font-size-body-m);
+  --button-hover-color: var(--cpsl-color-tile-button-surface-hover);
+  font-family: $font-family-base;
+}
+
+.input-container {
+  position: relative;
+  width: 100%;
+}
+
+::slotted(cpsl-dropdown) {
+  position: absolute;
+  width: 100%;
+  top: 100%;
+  left: 0;
+  z-index: 2;
+}
+
+.dropdown-button {
+  display: flex;
+  width: 100%;
+  padding: 0 4px;
+  background: none;
+  border: none;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  color: var(--input-color);
+}
+
+.dropdown-button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-grow: 1;
+}
+
+.dropdown-button div {
+  margin-left: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.dropdown-options {
+  display: none;
+  position: fixed;
+  list-style: none;
+  padding: 0;
+  margin-top: 4px;
+  border: 1px solid var(--container-border-color);
+  border-radius: 8px;
+  z-index: 999999999999;
+  overflow-y: auto; /* Enable vertical scrolling */
+  max-height: 300px; /* Initial max height */
+  box-sizing: border-box; /* Includes padding and border in the height */
+  background-color: var(--container-background-color); /* Background color for the ul component */
+}
+
+.dropdown-options.open {
+  display: block;
+}
+
+.dropdown-options li {
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--cpsl-color-divider);
+  color: var(--input-color);
+  background: var(--container-background-color);
+  font-size: var(--input-font-size);
+}
+
+.dropdown-options li:hover {
+  background-color: var(--button-hover-color);
+}
+
+.dropdown-options li svg {
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+  padding: 0 8px;
+  vertical-align: middle; /* Ensure vertical alignment */
+}
+
+/* Custom Scrollbar Styles */
+.dropdown-options::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  background-color: transparent; /* Transparent scrollbar track color */
+}
+
+.dropdown-options::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-color);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+  height: 8px;
+}
+
+.dropdown-options::-webkit-scrollbar-track {
+  background: transparent; /* Transparent scrollbar track color */
+}
+
+.dropdown-value {
+  margin-left: 8px;
+  color: var(--cpsl-color-text-secondary);
+}
+
+.dropdown-button .chevron {
+  transition: transform 0.3s ease;
+}
+
+.dropdown-button .chevron.closed {
+  transform: rotate(180deg);
+}
+
+.search-bar {
+  padding: 0; /* Remove padding */
+  border-bottom: 1px solid var(--cpsl-color-divider);
+  position: sticky; /* Make the search bar sticky */
+  top: 0; /* Stick to the top of the container */
+  background: var(--container-background-color); /* Ensure background color matches the dropdown */
+  z-index: 1; /* Ensure it stays above other items */
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 8px; /* Add padding to match list item */
+  border: none; /* Remove inner border */
+  box-sizing: border-box;
+  font-size: var(--input-font-size);
+  color: var(--input-color);
+  background-color: var(--container-background-color);
+  border-radius: 0; /* Remove border radius for a flat look */
+}
+
+.search-bar input::placeholder {
+  color: var(--input-placeholder-color);
+}
+
+.search-bar input:focus {
+  outline: none;
+  border-color: transparent; /* Ensure no border on focus */
+}
