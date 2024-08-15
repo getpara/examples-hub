@@ -24,7 +24,7 @@ const App = () => {
       apiKey={apiKey}
       environment={ENV}
       options={{ supportedWalletTypes, useSessionStorage: true }}
-      onMount={(capsule) => capsule.clearStorage('local')}
+      onMount={capsule => capsule.clearStorage('local')}
     >
       <Routes>
         <Route element={<Recovery />} path="/" />

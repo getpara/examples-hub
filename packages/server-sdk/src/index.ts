@@ -1,4 +1,5 @@
-export { Environment } from '@usecapsule/core-sdk';
-export type { SignatureRes } from '@usecapsule/core-sdk';
+export * from '@usecapsule/core-sdk';
+export type { PlatformUtils, StorageUtils } from '@usecapsule/core-sdk';
 import { Capsule as CapsuleServer } from './CapsuleServer.js';
+
 export default CapsuleServer;

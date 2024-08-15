@@ -5,6 +5,7 @@ yarn-error.log
 build
 .DS_Store
 mpcWorker-bundle.js
+mpcWorkerServer-bundle.js
 .vscode/*
 .vscode
 *.wasm

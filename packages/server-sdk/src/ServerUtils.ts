@@ -122,10 +122,6 @@ export class ServerUtils implements PlatformUtils {
     return ed25519Sign(ctx, userId, walletId, share, base64Bytes, sessionCookie);
   }
 
-  generateBlumPrimes = async (_ctx: Ctx): Promise<{ p: string; q: string }> => {
-    throw new Error('not implemented');
-  };
-
   localStorage = new ServerLocalStorage();
 
   sessionStorage = new ServerSessionStorage();

@@ -7,7 +7,14 @@ module.exports = [
   {
     name: 'Base JavaScript and JSX Rules',
     files: ['**/*.js', '**/*.jsx'],
-    ignores: ['**/*.min.js', '**/mpcWorker-bundle.js', '**/wasm_exec.js', '**/dist/**', '**/build/**'],
+    ignores: [
+      '**/*.min.js',
+      '**/mpcWorker-bundle.js',
+      '**/mpcWorkerServer-bundle.js',
+      '**/wasm_exec.js',
+      '**/dist/**',
+      '**/build/**',
+    ],
     languageOptions: {
       ecmaVersion: 2015,
       sourceType: 'module',

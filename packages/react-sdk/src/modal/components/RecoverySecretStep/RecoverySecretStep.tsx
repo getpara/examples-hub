@@ -69,8 +69,8 @@ export const SaveRecoverySecret = ({
 };
 
 export const RecoverySecretStep = ({ recoveryShare }: RecoverySecretStepProps) => {
-  const setStep = useModalStore((state) => state.setStep);
-  const email = useUserInfoStore((state) => state.email);
+  const setStep = useModalStore(state => state.setStep);
+  const email = useUserInfoStore(state => state.email);
 
   const backupDecryptionKey = JSON.parse(recoveryShare || '{}').backupDecryptionKey;
 

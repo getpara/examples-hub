@@ -2,11 +2,11 @@ import { expect, describe, it } from 'vitest';
 
 import Capsule, { Environment, WalletType } from '../src';
 
-describe('CoreCapsule', () => {
+describe('ServerCapsule', () => {
   describe('constructor', () => {
-    it('creates a new instance of CoreCapsule with correct fields', () => {
+    it('creates a new instance of ServerCapsule with correct fields', () => {
       const apiKey = 'api-key-123';
-      const capsule = new Capsule(Environment.DEV, apiKey);
+      const capsule = new Capsule(Environment.DEV, apiKey, {});
 
       expect(capsule).toBeInstanceOf(Capsule);
       expect(capsule.ctx.env).toBe(Environment.DEV);

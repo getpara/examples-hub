@@ -14,9 +14,13 @@ export async function signTransaction(
 ): Promise<SignatureRes> {
   return await new Promise(async resolve => {
     const workId = uuid.v4();
-    const worker = await setupWorker(async sendTransactionRes => {
-      resolve(sendTransactionRes);
-    }, workId);
+    const worker = await setupWorker(
+      ctx,
+      async sendTransactionRes => {
+        resolve(sendTransactionRes);
+      },
+      workId,
+    );
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,
@@ -45,9 +49,13 @@ export async function sendTransaction(
 ): Promise<SignatureRes> {
   return await new Promise(async resolve => {
     const workId = uuid.v4();
-    const worker = await setupWorker(async sendTransactionRes => {
-      resolve(sendTransactionRes);
-    }, workId);
+    const worker = await setupWorker(
+      ctx,
+      async sendTransactionRes => {
+        resolve(sendTransactionRes);
+      },
+      workId,
+    );
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,
@@ -75,9 +83,13 @@ export async function signMessage(
 ): Promise<SignatureRes> {
   return await new Promise(async resolve => {
     const workId = uuid.v4();
-    const worker = await setupWorker(async signMessageRes => {
-      resolve(signMessageRes);
-    }, workId);
+    const worker = await setupWorker(
+      ctx,
+      async signMessageRes => {
+        resolve(signMessageRes);
+      },
+      workId,
+    );
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,
@@ -104,9 +116,13 @@ export async function ed25519Sign(
 ): Promise<SignatureRes> {
   return await new Promise(async resolve => {
     const workId = uuid.v4();
-    const worker = await setupWorker(async signMessageRes => {
-      resolve(signMessageRes);
-    }, workId);
+    const worker = await setupWorker(
+      ctx,
+      async signMessageRes => {
+        resolve(signMessageRes);
+      },
+      workId,
+    );
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,

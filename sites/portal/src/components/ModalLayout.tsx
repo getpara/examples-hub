@@ -52,7 +52,7 @@ export const ModalLayout = () => {
   });
 
   const toggleBranding = (newValue?: boolean) => {
-    setIsBranded((prev) => newValue ?? !prev);
+    setIsBranded(prev => newValue ?? !prev);
   };
 
   useEffect(() => {

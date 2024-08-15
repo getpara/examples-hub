@@ -1,5 +1,5 @@
 import * as uuid from 'uuid';
-import { distributeNewShare, waitUntilTrue, Ctx, PregenIdentifierType } from '@usecapsule/core-sdk';
+import { waitUntilTrue, Ctx, PregenIdentifierType } from '@usecapsule/core-sdk';
 import { setupWorker } from '../workers/workerWrapper.js';
 import { BackupKitEmailProps } from '@usecapsule/user-management-client';
 
@@ -26,7 +26,7 @@ export function keygen(
   secretKey: string | null,
   skipDistribute = false,
   sessionCookie?: string,
-  emailProps: BackupKitEmailProps = {},
+  _emailProps: BackupKitEmailProps = {},
 ): Promise<{
   signer: string;
   walletId: string;
@@ -34,24 +34,20 @@ export function keygen(
 }> {
   return new Promise(async resolve => {
     const workId = uuid.v4();
-    const worker = await setupWorker(async res => {
-      await waitUntilTrue(async () => isKeygenComplete(ctx, userId, res.walletId), 15000, 1000);
-      if (skipDistribute) {
-        resolve({
-          signer: res.signer,
-          walletId: res.walletId,
-          recoveryShare: null,
-        });
-        return;
-      }
-
-      const recoveryShare = await distributeNewShare(ctx, userId, res.walletId, res.signer, false, emailProps);
-      resolve({
-        signer: res.signer,
-        walletId: res.walletId,
-        recoveryShare,
-      });
-    }, workId);
+    const worker = await setupWorker(
+      ctx,
+      async res => {
+        await waitUntilTrue(async () => isKeygenComplete(ctx, userId, res.walletId), 15000, 1000);
+        if (skipDistribute) {
+          resolve({
+            signer: res.signer,
+            walletId: res.walletId,
+            recoveryShare: null,
+          });
+        }
+      },
+      workId,
+    );
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,
@@ -83,19 +79,23 @@ export function preKeygen(
 }> {
   return new Promise(async resolve => {
     const workId = uuid.v4();
-    const worker = await setupWorker(async res => {
-      await waitUntilTrue(
-        async () => isPreKeygenComplete(ctx, pregenIdentifier, pregenIdentifierType, res.walletId),
-        15000,
-        1000,
-      );
+    const worker = await setupWorker(
+      ctx,
+      async res => {
+        await waitUntilTrue(
+          async () => isPreKeygenComplete(ctx, pregenIdentifier, pregenIdentifierType, res.walletId),
+          15000,
+          1000,
+        );
 
-      resolve({
-        signer: res.signer,
-        walletId: res.walletId,
-        recoveryShare: null,
-      });
-    }, workId);
+        resolve({
+          signer: res.signer,
+          walletId: res.walletId,
+          recoveryShare: null,
+        });
+      },
+      workId,
+    );
     const email: string | undefined = undefined;
     const params = { pregenIdentifier, pregenIdentifierType, secretKey, partnerId, email };
     if (pregenIdentifierType === PregenIdentifierType.EMAIL) {
@@ -129,14 +129,18 @@ export function ed25519Keygen(
 }> {
   return new Promise(async resolve => {
     const workId = uuid.v4();
-    const worker = await setupWorker(async res => {
-      await waitUntilTrue(async () => isKeygenComplete(ctx, userId, res.walletId), 15000, 1000);
-      resolve({
-        signer: res.signer,
-        walletId: res.walletId,
-        recoveryShare: null,
-      });
-    }, workId);
+    const worker = await setupWorker(
+      ctx,
+      async res => {
+        await waitUntilTrue(async () => isKeygenComplete(ctx, userId, res.walletId), 15000, 1000);
+        resolve({
+          signer: res.signer,
+          walletId: res.walletId,
+          recoveryShare: null,
+        });
+      },
+      workId,
+    );
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,
@@ -163,18 +167,22 @@ export function ed25519PreKeygen(
 }> {
   return new Promise(async resolve => {
     const workId = uuid.v4();
-    const worker = await setupWorker(async res => {
-      await waitUntilTrue(
-        async () => isPreKeygenComplete(ctx, pregenIdentifier, pregenIdentifierType, res.walletId),
-        15000,
-        1000,
-      );
-      resolve({
-        signer: res.signer,
-        walletId: res.walletId,
-        recoveryShare: null,
-      });
-    }, workId);
+    const worker = await setupWorker(
+      ctx,
+      async res => {
+        await waitUntilTrue(
+          async () => isPreKeygenComplete(ctx, pregenIdentifier, pregenIdentifierType, res.walletId),
+          15000,
+          1000,
+        );
+        resolve({
+          signer: res.signer,
+          walletId: res.walletId,
+          recoveryShare: null,
+        });
+      },
+      workId,
+    );
     const email: string | undefined = undefined;
     const params = { pregenIdentifier, pregenIdentifierType, email };
     if (pregenIdentifierType === PregenIdentifierType.EMAIL) {

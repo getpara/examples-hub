@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { parentPort } from 'worker_threads';
 import {
   Ctx,
   Environment,
@@ -25,10 +24,6 @@ interface Message {
   disableWebSockets?: boolean;
   workId: string;
 }
-
-parentPort.on('message', async (messageData: Message) => {
-  await handleMessage({ data: messageData });
-});
 
 async function requestWasmWithRetries(ctx: Ctx, retries = 3) {
   for (let i = 0; i < retries; i++) {
@@ -118,7 +113,7 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
   }
 }
 
-async function handleMessage(e: { data: Message }): Promise<void> {
+export async function handleMessage(e: { data: Message }): Promise<any> {
   const { env, apiKey, offloadMPCComputationURL, disableWorkers, sessionCookie, useDKLS, disableWebSockets, workId } =
     e.data;
   const ctx = {
@@ -139,5 +134,5 @@ async function handleMessage(e: { data: Message }): Promise<void> {
 
   const result = await executeMessage(ctx, e.data);
   result.workId = workId;
-  parentPort.postMessage(result);
+  return result;
 }

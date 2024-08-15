@@ -11,9 +11,13 @@ export async function getPrivateKey(
 ): Promise<string> {
   return await new Promise(async resolve => {
     const workId = uuid.v4();
-    const worker = await setupWorker(async res => {
-      resolve(res);
-    }, workId);
+    const worker = await setupWorker(
+      ctx,
+      async res => {
+        resolve(res);
+      },
+      workId,
+    );
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,

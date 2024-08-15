@@ -2,14 +2,12 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "module": "commonjs",
     "lib": [
-      "dom",
-      "es6"
-    ],
+      "esnext"
+    ]
   },
   "include": [
-    "src/**/*.ts"
+    "**/*.ts"
   ],
   "exclude": [
     "node_modules",

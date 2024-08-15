@@ -12,7 +12,8 @@
     "ws": "^8.14.2"
   },
   "scripts": {
-    "build": "rm -rf dist && tsc"
+    "build": "rm -rf dist && tsc",
+    "test": "vitest run"
   },
   "devDependencies": {
     "@types/ws": "^8.5.7",

@@ -157,7 +157,7 @@ const THEMES = {
 // below is address of existing smart contract on sepolia
 // const DEFAULT_CONTRACT_ADDRESS = '0xc08c00e1aa97a18583dc1a72a7e9fb9ce56cfef5'
 
-async function sendCosmosTx(): Promise<void> {
+async function sendCosmosTx(capsule: Capsule): Promise<void> {
   const protoSigner = new CapsuleProtoSigner(capsule);
   const client = await SigningStargateClient.connectWithSigner(COSMOS_TESTNET_RPC, protoSigner);
 
@@ -191,7 +191,7 @@ async function sendCosmosTx(): Promise<void> {
 const SOLANA_RECIPIENT_PUBLIC_KEY = '4TUYF5Q6sCkBCjamQrTkNYJyxhyaCPiPnq9oVg6qXbTp';
 const SOLANA_DEVNET_RPC_ENDPOINT = 'https://api.devnet.solana.com';
 
-async function sendSolanaTx(setSig: any): Promise<void> {
+async function sendSolanaTx(capsule: Capsule, setSig: any): Promise<void> {
   const connection = new solana.Connection(SOLANA_DEVNET_RPC_ENDPOINT, 'confirmed');
   const solanaSigner = new CapsuleSolanaWeb3Signer(capsule, connection);
   const tx = new solana.Transaction().add(
@@ -404,7 +404,7 @@ function WagmiProfileComponent(): JSX.Element {
   );
 }
 
-function WagmiComponent(): JSX.Element {
+function WagmiComponent({ capsule }: { capsule: Capsule }): JSX.Element {
   const { chains, publicClient, webSocketPublicClient } = configureChains(
     [sepolia],
     [alchemyProvider({ apiKey: 'HfT9dMNs3W0h1vJmiPZQ_APaFjPo-BF9' })],
@@ -796,7 +796,7 @@ function App() {
           </HStack>
           {selectedView === 'WAGMI' && (
             <VStack align="left" spacing={5}>
-              <WagmiComponent />
+              <WagmiComponent capsule={capsule} />
             </VStack>
           )}
           {selectedView === 'OLD_VIEW' && (
@@ -1418,7 +1418,7 @@ function App() {
                     <Button
                       colorScheme="teal"
                       onClick={async () => {
-                        await sendCosmosTx();
+                        await sendCosmosTx(capsule);
                       }}
                     >
                       Send Cosmos Transaction
@@ -1429,7 +1429,7 @@ function App() {
                     <Button
                       colorScheme="teal"
                       onClick={async () => {
-                        await sendSolanaTx(setEthersSignature);
+                        await sendSolanaTx(capsule, setEthersSignature);
                       }}
                     >
                       Send Solana Transaction
