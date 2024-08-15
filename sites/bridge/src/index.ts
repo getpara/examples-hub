@@ -16,10 +16,10 @@ import {
   decryptPrivateKeyAndDecryptShare,
   getDerivedPrivateKeyAndDecrypt,
   getPublicKeyFromSignature,
+  Wallet,
+  WalletScheme,
 } from '@usecapsule/core-sdk';
 import { PublicKeyStatus } from '@usecapsule/user-management-client';
-import { Wallet } from '@usecapsule/core-sdk';
-import { WalletScheme } from '@usecapsule/core-sdk/dist/types/CoreCapsule';
 
 const div = document.createElement('div');
 document.getElementsByTagName('body')[0].appendChild(div);
@@ -158,7 +158,7 @@ async function signTypedData(capsule: CapsuleWeb, args: any[]) {
   const from: string = args[0];
   const data = args[1];
   const opts = args[2];
-  const currentWallet = Object.values(capsule.getWallets()).find(wallet => wallet.address === from);
+  const currentWallet = Object.values(capsule.wallets).find(wallet => wallet.address === from);
   const walletId = currentWallet!.id;
   const hashedTypedData =
     opts['version'] === SignTypedDataVersion.V1

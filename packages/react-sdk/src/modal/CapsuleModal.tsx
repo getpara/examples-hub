@@ -139,6 +139,10 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
       }
     }, []);
 
+    useEffect(() => {
+      setCapsule(capsule);
+    }, [capsule]);
+
     // Init modal with proper steps on isOpen change
     useEffect(() => {
       if (capsule) {

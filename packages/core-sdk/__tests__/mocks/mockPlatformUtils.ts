@@ -68,7 +68,7 @@ export class MockPlatformUtils implements PlatformUtils {
 
   sessionStorage = new MockSessionStorage();
 
-  secureStorage = null;
+  secureStorage = undefined;
 
   isSyncStorage = true;
 

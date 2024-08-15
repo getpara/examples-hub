@@ -7,6 +7,7 @@ import CoreCapsule, {
   DeniedSignatureResWithUrl,
   SuccessfulSignatureRes,
   TransactionReviewError,
+  NON_ED25519,
 } from '@usecapsule/core-sdk';
 import { defineReadOnly, keccak256, resolveProperties, serializeTransaction } from 'ethers/lib/utils';
 
@@ -14,25 +15,27 @@ export class CapsuleEthersV5Signer extends ethers.Signer {
   private capsule: CoreCapsule;
   private currentWalletId: string;
 
-  constructor(capsule: CoreCapsule, provider?: null | ethers.providers.Provider) {
+  constructor(capsule: CoreCapsule, provider?: null | ethers.providers.Provider, walletId?: string) {
     super();
+
+    this.currentWalletId = capsule.findWalletId(walletId, { scheme: NON_ED25519 });
     this.capsule = capsule;
     defineReadOnly(this, 'provider', provider);
   }
 
   setCurrentWalletId(walletId: string) {
-    if (!this.capsule.getWallets()[walletId]) {
+    if (!this.capsule.wallets[walletId]) {
       throw new Error(`no wallet exists with id ${walletId}`);
     }
     this.currentWalletId = walletId;
   }
 
   getCurrentWalletId(): string {
-    const id = this.currentWalletId || Object.values(this.capsule.getWallets())[0]?.id;
+    const id = this.currentWalletId;
     if (!id) {
       throw new Error(`no wallet available`);
     }
-    if (!this.capsule.getWallets()[id]) {
+    if (!this.capsule.wallets[id]) {
       throw new Error(`no wallet exists with id ${id}`);
     }
     return id;
@@ -43,11 +46,11 @@ export class CapsuleEthersV5Signer extends ethers.Signer {
     if (!walletId) {
       throw new Error('no wallet available');
     }
-    return this.capsule.getWallets()[walletId].address;
+    return this.capsule.wallets[walletId].address;
   }
 
   connect(provider: ethers.providers.Provider | null): CapsuleEthersV5Signer {
-    return new CapsuleEthersV5Signer(this.capsule, provider);
+    return new CapsuleEthersV5Signer(this.capsule, provider, this.currentWalletId);
   }
 
   async signMessage(message: string | Uint8Array): Promise<string> {

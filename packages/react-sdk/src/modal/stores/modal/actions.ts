@@ -74,4 +74,7 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
   setNetworks: networks => {
     set({ networks });
   },
+  setLoginWindow: loginWindow => {
+    set({ loginWindow });
+  },
 });

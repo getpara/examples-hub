@@ -17,10 +17,20 @@ module.exports = {
           configFile: 'tsconfig.json',
         },
       });
+
+      webpackConfig.module.rules.push({
+        test: /\.(png|svg|jpg|jpeg|gif)$/i,
+        type: 'asset/resource',
+      });
+
       webpackConfig.resolve.fallback = {
         // crypto and stream needed for @celo/utils
         crypto: require.resolve('crypto-browserify'),
         stream: require.resolve('stream-browserify'),
+        http: require.resolve('stream-http'),
+        https: require.resolve('stream-http'),
+        zlib: require.resolve('browserify-zlib'),
+        url: require.resolve('url/'),
         vm: false,
       };
       webpackConfig.plugins = [

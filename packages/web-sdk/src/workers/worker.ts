@@ -11,6 +11,7 @@ import {
   getPortalBaseURL,
   initClient,
   mpcComputationClient,
+  capsuleVersion,
 } from '@usecapsule/core-sdk';
 
 export interface Message {
@@ -120,7 +121,7 @@ export async function handleMessage(
   const ctx = {
     env,
     apiKey,
-    capsuleClient: initClient(env, apiKey, useFetchAdapter, () => sessionCookie),
+    capsuleClient: initClient(env, capsuleVersion, apiKey, useFetchAdapter, () => sessionCookie),
     offloadMPCComputationURL: offloadMPCComputationURL,
     mpcComputationClient: offloadMPCComputationURL
       ? mpcComputationClient.initClient(offloadMPCComputationURL, !!disableWorkers)

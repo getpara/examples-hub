@@ -5,22 +5,26 @@ import CoreCapsule, {
   DeniedSignatureResWithUrl,
   SuccessfulSignatureRes,
   TransactionReviewError,
+  WalletScheme,
+  WalletType,
 } from '@usecapsule/core-sdk';
 
 export class CapsuleSolanaWeb3Signer {
   private connection: solana.Connection;
   private capsule: CoreCapsule;
-  private currentWalletId?: string;
+  private currentWalletId: string;
 
   public address?: string;
   public sender?: solana.PublicKey;
 
-  constructor(capsule: CoreCapsule, connection: solana.Connection, currentWalletId?: string) {
+  constructor(capsule: CoreCapsule, connection: solana.Connection, walletId?: string) {
+    this.currentWalletId = capsule.findWalletId(walletId, {
+      scheme: [WalletScheme.ED25519],
+      type: [WalletType.SOLANA],
+    });
     this.connection = connection;
     this.capsule = capsule;
-    this.currentWalletId = currentWalletId || Object.values(this.capsule.getED25519Wallets())[0]?.id;
-
-    this.address = this.capsule.getED25519Wallets()[this.currentWalletId]?.address;
+    this.address = capsule.wallets[this.currentWalletId].address;
     this.sender = this.address ? new solana.PublicKey(bs58.decode(this.address)) : undefined;
   }
 

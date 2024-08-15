@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { AddingFunds } from './AddingFunds.js';
 import { RampInstantPurchase, RampInstantSDK } from '@ramp-network/ramp-instant-sdk';
 import {
@@ -18,9 +18,9 @@ export const RampEmbed = ({ hostApiKey }: { hostApiKey: string }) => {
   const capsule = useCapsuleStore(state => state.capsule);
   const goBack = useGoBack();
 
-  useEffect(() => {
-    const wallet = Object.values(capsule.getWallets())[0];
+  const [walletId] = useState(capsule.currentWalletIds[0]);
 
+  useEffect(() => {
     const defaultAsset = getProviderNetworkAndAssetCode(
       onRampConfig.network,
       onRampConfig.asset,
@@ -33,7 +33,7 @@ export const RampEmbed = ({ hostApiKey }: { hostApiKey: string }) => {
       defaultAsset,
       hostLogoUrl: `${getPortalBaseURL(capsule.ctx)}/wordmark_black.svg`,
       hostApiKey,
-      userAddress: wallet.address,
+      userAddress: capsule.getDisplayAddress(walletId),
       userEmailAddress: capsule.getEmail(),
       url: onRampConfig?.testMode ? 'https://app.demo.ramp.network' : 'https://app.ramp.network',
       enabledFlows: ['ONRAMP'],

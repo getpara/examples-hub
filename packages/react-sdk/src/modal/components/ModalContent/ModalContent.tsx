@@ -8,6 +8,7 @@ import { Footer } from '../Footer/Footer.js';
 import { CapsuleModalProps } from '../../types/modalProps.js';
 import { DEFAULTS } from '../../constants/defaults.js';
 import { CpslAnimation } from '@usecapsule/react-components';
+import { useGoBack } from '../../hooks/useGoBack.js';
 
 type ModalContentProps = Omit<
   CapsuleModalProps,
@@ -47,11 +48,14 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     const webAuthURLForLogin = useModalStore(state => state.webAuthURLForLogin);
     const webAuthURLForCreate = useModalStore(state => state.webAuthURLForCreate);
     const isLogin = useModalStore(state => state.isLogin());
+    const loginWindow = useModalStore(state => state.loginWindow);
     const setStep = useModalStore(state => state.setStep);
     const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
     const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
     const resetModalState = useModalStore(state => state.resetState);
+    const setLoginWindow = useModalStore(state => state.setLoginWindow);
     const resetUserInfoState = useUserInfoStore(state => state.resetState);
+    const goBack = useGoBack();
 
     const loginTimeout = useRef<number>();
     const createAccountTimeout = useRef<number>();
@@ -81,26 +85,37 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     };
 
     async function awaitLoginTransition(): Promise<void> {
-      const { needsWallet } = await capsule.waitForLoginAndSetup();
+      const { isComplete, isError, needsWallet } = await capsule.waitForLoginAndSetup(loginWindow);
 
-      setWebAuthURLForLogin('');
+      setLoginWindow(undefined);
 
-      if (needsWallet) {
-        setStep(ModalStep.AWAITING_WALLET_CREATION);
-      } else {
-        if (await is2FASetup()) {
-          setStep(ModalStep.LOGIN_DONE);
+      if (isError) {
+        goBack();
+        return;
+      }
+
+      if (isComplete) {
+        setWebAuthURLForLogin('');
+
+        if (needsWallet) {
+          setStep(ModalStep.AWAITING_WALLET_CREATION);
         } else {
-          setStep(ModalStep.SETUP_2FA);
+          if (await is2FASetup()) {
+            setStep(ModalStep.LOGIN_DONE);
+          } else {
+            setStep(ModalStep.SETUP_2FA);
+          }
         }
       }
     }
 
     async function awaitWalletCreationTransition(): Promise<void> {
-      await capsule.waitForAccountCreation();
+      const isComplete = await capsule.waitForAccountCreation();
 
-      setWebAuthURLForCreate('');
-      setStep(ModalStep.AWAITING_WALLET_CREATION);
+      if (isComplete) {
+        setWebAuthURLForCreate('');
+        setStep(ModalStep.AWAITING_WALLET_CREATION);
+      }
     }
 
     useEffect(() => {
@@ -116,11 +131,13 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
       }
       async function genWallet() {
         setWalletCreationInProgress(true);
-        let recoverySecret: string;
+        let recoverySecret: string, walletIds: string[];
         if (!createWalletOverride) {
-          recoverySecret = await capsule.waitForPasskeyAndCreateWallet();
+          const created = await capsule.waitForPasskeyAndCreateWallet();
+          recoverySecret = created.recoverySecret;
+          walletIds = created.walletIds;
         } else {
-          recoverySecret = await createWalletOverride(capsule);
+          const created = await createWalletOverride(capsule);
           const fetchedWallets = (await capsule.fetchWallets()).filter(wallet => !!wallet.address);
           const newWallets: Record<string, Wallet> = {};
           for (const wallet of fetchedWallets) {
@@ -132,7 +149,12 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
             };
           }
           capsule.setWallets(newWallets);
+          recoverySecret = created.recoverySecret;
+          walletIds = created.walletIds;
         }
+
+        await capsule.setCurrentWalletIds(walletIds);
+
         setRecoveryShare(recoverySecret);
         setWalletCreationInProgress(false);
         if (!recoverySecret) {
@@ -154,7 +176,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
 
     // wait for login auth to do post login setup
     useEffect(() => {
-      if (webAuthURLForLogin) {
+      if (webAuthURLForLogin && loginWindow) {
         if (loginTransitionOverride) {
           async function loginOverride() {
             await loginTransitionOverride(capsule);
@@ -172,8 +194,8 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
         }
         loginTimeout.current = window.setTimeout(awaitLoginTransition, DEFAULTS.POLLING_INTERVAL_MS);
       }
-      return () => clearTimeout(loginTimeout.current);
-    }, [webAuthURLForLogin]);
+      return () => window.clearTimeout(loginTimeout.current);
+    }, [webAuthURLForLogin, loginWindow]);
 
     const handleClose = () => {
       if (
@@ -200,9 +222,28 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
         setTimeout(() => {
           setStep(ModalStep.LOGIN_DONE);
         }, 200);
+      } else {
+        setStep(ModalStep.SIGN_UP);
       }
+      capsule.exitLoops();
       onClose();
     };
+
+    useEffect(() => {
+      if (![ModalStep.BIOMETRIC_CREATION, ModalStep.AWAITING_BIOMETRIC_CREATION].includes(currentStep)) {
+        capsule.exitAccountCreation();
+      }
+
+      if (![ModalStep.BIOMETRIC_LOGIN, ModalStep.AWAITING_BIOMETRIC_LOGIN].includes(currentStep)) {
+        capsule.exitLogin();
+      }
+    }, [currentStep]);
+
+    useEffect(() => {
+      return () => {
+        capsule.exitLoops();
+      };
+    }, []);
 
     const handleExpandModal = () => {
       setModalExpanded(true);

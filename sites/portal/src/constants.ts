@@ -6,6 +6,7 @@ export const ENV = process.env.REACT_APP_ENV
   : Environment.SANDBOX;
 
 export const DEFAULT_PARTNER: Partner = {
+  id: 'id',
   displayName: 'Capsule',
   policiesEnabled: false,
 };
@@ -24,6 +25,7 @@ export enum AuthLoginStep {
   SELECT_FLOW = 'SELECT_FLOW',
   WAITING = 'WAITING',
   ADD = 'ADD',
+  SELECT_WALLET = 'SELECT_WALLET',
   SUCCESS = 'SUCCESS',
 }
 

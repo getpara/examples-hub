@@ -7,14 +7,15 @@ import StepContext from '../../contexts/StepContext';
 import { ModalStep } from '../../steps/attemptSteps';
 import { ModalStep as RecoveryModalStep } from '../../steps/recoverySteps';
 import WalletContext from '../../contexts/WalletContext';
-import capsule from '../../../clients/capsule';
 import CapsuleSmall from '../../../assets/capsuleSmall';
 import TwoFactorContext from '../../contexts/TwoFactorContext';
 import UserContext from '../../contexts/UserContext';
 import PhoneContext from '../../contexts/PhoneContext';
 import RecoveryStepContext from '../../contexts/RecoveryStepContext';
+import { useCapsule } from '../../../components/CapsuleContext';
 
 const RecoveryButton: React.FC = () => {
+  const capsule = useCapsule();
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const { address, setAddress, setId: setWalletId } = useContext(WalletContext);
   const { setId: setUserId } = useContext(UserContext);

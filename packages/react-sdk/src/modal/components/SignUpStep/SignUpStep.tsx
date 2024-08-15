@@ -168,20 +168,28 @@ export const SignUpStep = ({ oAuthMethods, disableEmailLogin, disablePhoneLogin 
         methods.push(<CpslDivider key={'orEmail'}>or</CpslDivider>);
       }
       methods.push(
-        <CpslInput
-          key={'email'}
-          placeholder="Enter your email"
-          onCpslInput={handleEmailInput}
-          value={email}
-          errorText={emailError}
-          autofocus
-          inputMode="email"
+        <form
+          onSubmit={e => {
+            e.preventDefault();
+            handleSubmitEmail();
+          }}
         >
-          <CpslIcon slot="start" icon="mail" />
-          <CpslButton slot="end" onClick={handleSubmitEmail}>
-            <CpslIcon icon="arrow" />
-          </CpslButton>
-        </CpslInput>,
+          <CpslInput
+            key={'email'}
+            placeholder="Enter your email"
+            onCpslInput={handleEmailInput}
+            value={email}
+            errorText={emailError}
+            autofocus
+            inputMode="email"
+            onKeyDown={e => e.key === 'Enter' && handleSubmitEmail()}
+          >
+            <CpslIcon slot="start" icon="mail" />
+            <CpslButton slot="end" onClick={handleSubmitEmail}>
+              <CpslIcon icon="arrow" />
+            </CpslButton>
+          </CpslInput>
+        </form>,
       );
     }
 
@@ -190,27 +198,35 @@ export const SignUpStep = ({ oAuthMethods, disableEmailLogin, disablePhoneLogin 
         methods.push(<CpslDivider key={'orPhone'}>or</CpslDivider>);
       }
       methods.push(
-        <CpslInput
-          key={'phone'}
-          placeholder="Enter phone number"
-          inputMode="tel"
-          autofocus
-          value={phone}
-          errorText={phoneError}
-          onCpslInput={handlePhoneInput}
-          onCpslPaste={handlePasteInput}
+        <form
+          onSubmit={e => {
+            e.preventDefault();
+            handleSubmitPhone();
+          }}
         >
-          <CpslDropdown
-            hasCpslSearch={true}
-            selectedItem={matchedCountryCode}
-            onSelectedItemChange={handleCountryCodeInput}
-            slot="start"
-            items={countryCodes}
-          />
-          <CpslButton slot="end" onClick={handleSubmitPhone}>
-            <CpslIcon icon="arrow" />
-          </CpslButton>
-        </CpslInput>,
+          <CpslInput
+            key={'phone'}
+            placeholder="Enter phone number"
+            inputMode="tel"
+            autofocus
+            value={phone}
+            errorText={phoneError}
+            onCpslInput={handlePhoneInput}
+            onCpslPaste={handlePasteInput}
+            onKeyDown={e => e.key === 'Enter' && handleSubmitPhone()}
+          >
+            <CpslDropdown
+              hasCpslSearch={true}
+              selectedItem={matchedCountryCode}
+              onSelectedItemChange={handleCountryCodeInput}
+              slot="start"
+              items={countryCodes}
+            />
+            <CpslButton slot="end" onClick={handleSubmitPhone}>
+              <CpslIcon icon="arrow" />
+            </CpslButton>
+          </CpslInput>
+        </form>,
       );
     }
 

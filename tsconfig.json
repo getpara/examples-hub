@@ -16,5 +16,10 @@
     "esModuleInterop": true,
     "isolatedModules": true,
     "allowJs": true
+  },
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs"
+    }
   }
 }

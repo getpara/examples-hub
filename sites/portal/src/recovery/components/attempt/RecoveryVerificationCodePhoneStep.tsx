@@ -9,14 +9,15 @@ import Console from '../../../assets/console';
 import PhoneContext from '../../contexts/PhoneContext';
 import UserContext from '../../contexts/UserContext';
 import TwoFactorContext from '../../contexts/TwoFactorContext';
-import capsule from '../../../clients/capsule';
 import { RecoveryStatus } from '@usecapsule/core-sdk';
+import { useCapsule } from '../../../components/CapsuleContext';
 
 type RecoveryVerificationCodePhoneStepProps = {
   onClose: () => void;
 };
 
 const RecoveryVerificationCodePhoneStep: React.FC<RecoveryVerificationCodePhoneStepProps> = ({ onClose }) => {
+  const capsule = useCapsule();
   const { setCurrentStep } = useContext(StepContext);
   const { phone, countryCode } = useContext(PhoneContext);
   const { setAddress, setId: setWalletId } = useContext(WalletContext);

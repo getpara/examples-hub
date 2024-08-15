@@ -2,10 +2,13 @@ import {
   BackupKitEmailProps,
   EmailTheme,
   OnRampPurchase,
+  PartnerEntity,
   PublicKeyStatus,
   PublicKeyType,
   VerificationEmailProps,
   WalletEntity,
+  WalletType,
+  WalletScheme,
 } from '@usecapsule/user-management-client';
 import { pki, jsbn } from 'node-forge';
 
@@ -15,6 +18,7 @@ import {
   NetworkProp,
   OnRampAssetProp,
   OnRampProviderProp,
+  WalletSchemeMap,
   getAsset,
   getNetwork,
   getPortalBaseURL,
@@ -30,21 +34,52 @@ import { PlatformUtils } from './PlatformUtils.js';
 import { Theme } from './types/theme.js';
 import { sendRecoveryForShare } from './shares/recovery.js';
 import parsePhoneNumberFromString, { CountryCallingCode } from 'libphonenumber-js';
+import { getCosmosAddress, isCosmosWithPrefix } from './utils/formattingUtils.js';
 
 // amount of time in ms that a web auth session lasts
 const BIOMETRIC_VERIFICATION_TIME_MS = 30 * 60 * 1000;
 const DEV_BIOMETRIC_VERIFICATION_TIME_MS = 60 * 60 * 1000;
 
-export enum WalletScheme {
-  CGGMP = 'CGGMP',
-  DKLS = 'DKLS',
-  ED25519 = 'ED25519',
+// TODO: pull this from package.json
+const CORE_CAPSULE_VERSION = '1.21.0';
+
+function migrateWallet(obj: Record<string, unknown>) {
+  if (['USER', 'PREGEN'].includes(obj.type as string)) {
+    obj.isPregen = obj.type === 'PREGEN';
+    obj.type = obj.scheme === WalletScheme.ED25519 ? WalletType.SOLANA : WalletType.EVM;
+  }
+
+  return obj;
 }
 
-export enum WalletType {
-  EVM = 'EVM',
-  SOLANA = 'SOLANA',
-}
+type WalletFilters = {
+  /*
+   * Array of allowed `WalletType`s
+   */
+  type?: WalletType[];
+  /*
+   * Array of allowed `WalletScheme`s
+   */
+  scheme?: WalletScheme[];
+  /*
+   * If true, disallow unclaimed pre-generated wallets
+   */
+  forbidPregen?: boolean;
+};
+
+type EvmType = {
+  [WalletType.EVM]: true;
+};
+
+type SolanaType = {
+  [WalletType.SOLANA]: true;
+};
+
+type CosmosType = {
+  [WalletType.COSMOS]: { prefix: string };
+};
+
+export type SupportedWalletTypes = EvmType | SolanaType | CosmosType;
 
 // Make sure to keep this in sync with capsule-org/src/entities/recoveryAttemptEntity.ts
 export enum RecoveryStatus {
@@ -61,21 +96,25 @@ export enum PregenIdentifierType {
   PHONE = 'PHONE',
 }
 
-// Keep this consistent with user-management code entities/walletEntity.ts
-export enum WalletType {
-  USER = 'USER',
-  PREGEN = 'PREGEN',
-}
-
 export interface Wallet {
+  createdAt?: string;
   id: string;
+  name?: string;
   signer: string;
   address?: string;
+  addressSecondary?: string;
   publicKey?: string;
   scheme?: WalletScheme;
+  type?: WalletType;
+  isPregen?: boolean;
+  pregenIdentifier?: string;
+  pregenIdentifierType?: PregenIdentifierType;
   userId?: string;
   partnerId?: string;
-  type?: WalletType;
+  partner?: PartnerEntity;
+  lastUsedAt?: string;
+  lastUsedPartner?: PartnerEntity;
+  lastUsedPartnerId?: string;
 }
 
 export interface ConstructorOpts {
@@ -154,7 +193,14 @@ export interface ConstructorOpts {
    * @deprecated configure this through the developer portal
    */
   homepageUrl?: string;
-  supportedWalletTypes?: WalletType[];
+  /**
+   * Which type of wallet your application supports, in the form `{ [WalletType]: true }`. Currently allowed values for `WalletType` are `"EVM"`, `"SOLANA"`, or `"COSMOS"`.
+   */
+  supportedWalletTypes?: SupportedWalletTypes;
+  /**
+   * If `true`, the SDK will use the device's temporary session storage instead of saving user and wallet data to local storage.
+   */
+  useSessionStorage?: boolean;
 }
 
 export const PREFIX = '@CAPSULE/';
@@ -163,8 +209,9 @@ const LOCAL_STORAGE_PHONE = `${PREFIX}phone`;
 const LOCAL_STORAGE_COUNTRY_CODE = `${PREFIX}countryCode`;
 const LOCAL_STORAGE_FARCASTER_USERNAME = `${PREFIX}farcasterUsername`;
 const LOCAL_STORAGE_USER_ID = `${PREFIX}userId`;
-const LOCAL_STORAGE_WALLETS = `${PREFIX}wallets`;
 const LOCAL_STORAGE_ED25519_WALLETS = `${PREFIX}ed25519Wallets`;
+const LOCAL_STORAGE_WALLETS = `${PREFIX}wallets`;
+const LOCAL_STORAGE_CURRENT_WALLET_IDS = `${PREFIX}currentWalletIds`;
 const LOCAL_STORAGE_SESSION_COOKIE = `${PREFIX}sessionCookie`;
 const SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR = `${PREFIX}loginEncryptionKeyPair`;
 const POLLING_INTERVAL_MS = 2000;
@@ -177,7 +224,24 @@ function biometricVerifiedRecently(ctx: Ctx, verifiedAt: number): boolean {
   return Date.now() - verifiedAt <= BIOMETRIC_VERIFICATION_TIME_MS;
 }
 
+export function stringToPhoneNumber(str: string): string {
+  return parsePhoneNumberFromString(str)
+    ?.formatInternational()
+    .replace(/[^\d+]/g, '');
+}
+
+export function normalizePhoneNumber(countryCode: string, number: string): string | undefined {
+  return stringToPhoneNumber(`${countryCode[0] !== '+' ? '+' : ''}${countryCode}${number}`);
+}
+
+function toQueryString(obj: Record<string, string>) {
+  return Object.entries(obj)
+    .map(([key, value]) => (!!value ? `&${key}=${encodeURIComponent(value)}` : ''))
+    .join('');
+}
 export abstract class CoreCapsule {
+  static version?: string = CORE_CAPSULE_VERSION;
+
   ctx: Ctx;
 
   private email?: string;
@@ -185,9 +249,22 @@ export abstract class CoreCapsule {
   private countryCode?: CountryCallingCode;
   private farcasterUsername?: string;
   private userId?: string;
-  private wallets?: Record<string, Wallet>;
-  private ed25519Wallets?: Record<string, Wallet>;
   private sessionCookie?: string;
+
+  private isAwaitingAccountCreation = false;
+  private isAwaitingLogin = false;
+  private isAwaitingFarcaster = false;
+  private isAwaitingOAuth = false;
+
+  /**
+   * The ids of the currently active wallets. Any signer integrations will default to the first id in this list.
+   */
+  currentWalletIds?: string[];
+
+  /**
+   * Wallets associated with the `CoreCapsule` instance.
+   */
+  wallets?: Record<string, Wallet>;
 
   /**
    * Base theme for the emails sent from this Capsule instance.
@@ -270,7 +347,7 @@ export abstract class CoreCapsule {
 
   private disableProviderModal?: boolean;
 
-  private supportedWalletTypes: WalletType[];
+  readonly supportedWalletTypes: SupportedWalletTypes;
 
   private platformUtils: PlatformUtils;
 
@@ -292,18 +369,16 @@ export abstract class CoreCapsule {
   retrieveSessionCookie = (): string | undefined => {
     return this.sessionCookie;
   };
-  persistSessionCookie = (cookie: string): void => {
-    this.sessionCookie = cookie;
-    this.localStorageSetItem(LOCAL_STORAGE_SESSION_COOKIE, cookie);
-  };
+  persistSessionCookie: (cookie: string) => void;
 
   /**
    * Remove all local storage and prefixed session storage.
    */
-  clearStorage = async (): Promise<void> => {
-    this.platformUtils.localStorage.clear(PREFIX);
-    this.platformUtils.sessionStorage.clear(PREFIX);
-    if (this.platformUtils.secureStorage) {
+  clearStorage = async (type: 'local' | 'session' | 'secure' | 'all' = 'all'): Promise<void> => {
+    const isAll = type === 'all';
+    (isAll || type === 'local') && this.platformUtils.localStorage.clear(PREFIX);
+    (isAll || type === 'session') && this.platformUtils.sessionStorage.clear(PREFIX);
+    if ((isAll || type === 'secure') && this.platformUtils.secureStorage) {
       this.platformUtils.secureStorage.clear(PREFIX);
     }
   };
@@ -335,12 +410,104 @@ export abstract class CoreCapsule {
     };
   }
 
+  private isPortal(): boolean {
+    return typeof window !== 'undefined' && getPortalBaseURL(this.ctx).includes(window.location.host);
+  }
+
   private requireApiKey() {
     if (!this.ctx.apiKey) {
       throw new Error(
         `in order to create a wallet or user with Capsule, you
         must provide an API key to the capsule instance`,
       );
+    }
+  }
+
+  private isWalletSupported(wallet: WalletEntity | Wallet): boolean {
+    return Object.keys(this.supportedWalletTypes).some(
+      (walletType: WalletType) => !!WalletSchemeMap[wallet.scheme][walletType],
+    );
+  }
+
+  private isWalletOwned(wallet: Wallet): boolean {
+    return (
+      this.isWalletSupported(wallet) &&
+      !wallet.pregenIdentifier &&
+      !wallet.pregenIdentifierType &&
+      !!this.userId &&
+      wallet.userId === this.userId
+    );
+  }
+
+  private isPregenWalletUnclaimed(wallet: Wallet): boolean {
+    return this.isWalletSupported(wallet) && wallet.isPregen && !!wallet.pregenIdentifier && !!wallet.pregenIdentifierType;
+  }
+
+  private isPregenWalletClaimable(wallet: Wallet): boolean {
+    return (
+      this.isWalletSupported(wallet) &&
+      this.isPregenWalletUnclaimed(wallet) &&
+      ((wallet.pregenIdentifier === this.email && wallet.pregenIdentifierType === PregenIdentifierType.EMAIL) ||
+        (stringToPhoneNumber(wallet.pregenIdentifier) === this.getPhoneNumber() &&
+          wallet.pregenIdentifierType === PregenIdentifierType.PHONE))
+    );
+  }
+
+  private isWalletUsable(walletId: string, { type, scheme, forbidPregen }: WalletFilters = {}, throwError = false): boolean {
+    let error;
+
+    if (!this.wallets[walletId]) {
+      error = `wallet with id ${walletId} does not exist`;
+    } else {
+      const wallet = this.wallets[walletId];
+      const isUnclaimed = this.isPregenWalletUnclaimed(wallet);
+
+      if (!wallet.signer) {
+        error = `wallet with id ${wallet.id} does not have a signer`;
+      } else if (forbidPregen && isUnclaimed) {
+        error = `pre-generated wallet with id ${wallet.id} cannot be selected`;
+      } else if (!this.isWalletOwned(wallet) && !isUnclaimed) {
+        error = `wallet with id ${wallet.id} is not owned by the current user`;
+      } else if (!this.isWalletSupported(wallet)) {
+        error = `wallet with id ${wallet.id} and type ${wallet.type} is not supported, supported types are: ${Object.keys(this.supportedWalletTypes).join(', ')}`;
+      } else if (type && !type.includes(wallet.type)) {
+        error = `wallet with id ${wallet.id} and type ${wallet.type} cannot be selected`;
+      } else if (scheme && !scheme.includes(wallet.scheme)) {
+        error = `wallet with id ${wallet.id} and scheme ${wallet.scheme} cannot be selected`;
+      }
+    }
+
+    if (error) {
+      if (throwError) {
+        throw new Error(error);
+      }
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Returns the formatted address for the desired wallet ID, depending on your app settings.
+   * @param walletId - the ID of the wallet address to display.
+   * @returns - the wallet address.
+   */
+  getDisplayAddress(walletId: string): string {
+    const wallet = this.wallets[walletId];
+
+    if (!this.wallets[walletId]) {
+      throw new Error('wallet does not exist');
+    }
+
+    switch (wallet.type) {
+      case WalletType.SOLANA:
+        return wallet.address;
+      default:
+        if (isCosmosWithPrefix(this.supportedWalletTypes)) {
+          return wallet.addressSecondary ?? getCosmosAddress(wallet.publicKey, this.cosmosPrefix) ?? wallet.address;
+        }
+
+        return wallet.address;
     }
   }
 
@@ -373,7 +540,8 @@ export abstract class CoreCapsule {
 
     this.platformUtils = this.getPlatformUtils();
     this.disableProviderModal = this.platformUtils.disableProviderModal;
-    this.supportedWalletTypes = opts.supportedWalletTypes || [WalletType.EVM];
+    // Only one type per instance for now
+    this.supportedWalletTypes = opts.supportedWalletTypes ?? { [WalletType.EVM]: true };
 
     if (opts.useStorageOverrides) {
       this.localStorageGetItem = opts.localStorageGetItemOverride;
@@ -384,10 +552,27 @@ export abstract class CoreCapsule {
       this.clearStorage = opts.clearStorageOverride;
     }
 
+    if (opts.useSessionStorage) {
+      this.localStorageGetItem = this.sessionStorageGetItem;
+      this.localStorageSetItem = this.sessionStorageSetItem;
+    }
+
+    this.persistSessionCookie = (cookie: string) => {
+      this.sessionCookie = cookie;
+      (opts.useSessionStorage ? this.sessionStorageSetItem : this.localStorageSetItem)(LOCAL_STORAGE_SESSION_COOKIE, cookie);
+    };
+
     this.ctx = {
       env,
       apiKey,
-      capsuleClient: initClient(env, apiKey, opts.disableWorkers, this.retrieveSessionCookie, this.persistSessionCookie),
+      capsuleClient: initClient(
+        env,
+        CoreCapsule.version,
+        apiKey,
+        opts.disableWorkers,
+        this.retrieveSessionCookie,
+        this.persistSessionCookie,
+      ),
       disableWorkers: opts.disableWorkers,
       offloadMPCComputationURL: opts.offloadMPCComputationURL,
       useLocalFiles: opts.useLocalFiles,
@@ -404,7 +589,13 @@ export abstract class CoreCapsule {
     }
 
     this.email = (this.localStorageGetItem(LOCAL_STORAGE_EMAIL) as string) || undefined;
+    this.countryCode = (this.localStorageGetItem(LOCAL_STORAGE_COUNTRY_CODE) as CountryCallingCode) || undefined;
+    this.phone = (this.localStorageGetItem(LOCAL_STORAGE_PHONE) as string) || undefined;
     this.userId = (this.localStorageGetItem(LOCAL_STORAGE_USER_ID) as string) || undefined;
+
+    const _currentWalletIds = (this.localStorageGetItem(LOCAL_STORAGE_CURRENT_WALLET_IDS) as string) || undefined;
+    this.currentWalletIds = _currentWalletIds ? JSON.parse(_currentWalletIds) : undefined;
+
     // TODO: remove sessionStorageGetItem call once new version is being consumed
     this.sessionCookie =
       (this.localStorageGetItem(LOCAL_STORAGE_SESSION_COOKIE) as string) ||
@@ -414,12 +605,34 @@ export abstract class CoreCapsule {
     const stringWallets = this.platformUtils.secureStorage
       ? this.platformUtils.secureStorage.get(LOCAL_STORAGE_WALLETS)
       : this.localStorageGetItem(LOCAL_STORAGE_WALLETS);
-    this.wallets = JSON.parse((stringWallets as string) || '{}');
-
-    const stringED25519Wallets = this.platformUtils.secureStorage
+    const _wallets = JSON.parse((stringWallets as string) || '{}');
+    const stringEd25519Wallets = this.platformUtils.secureStorage
       ? this.platformUtils.secureStorage.get(LOCAL_STORAGE_ED25519_WALLETS)
       : this.localStorageGetItem(LOCAL_STORAGE_ED25519_WALLETS);
-    this.ed25519Wallets = JSON.parse((stringED25519Wallets as string) || '{}');
+    const _ed25519Wallets = JSON.parse((stringEd25519Wallets as string) || '{}');
+
+    this.setWallets({
+      ...Object.keys(_wallets).reduce((res, key) => {
+        return {
+          ...res,
+          [key]: migrateWallet(_wallets[key]),
+        };
+      }, {}),
+      ...Object.keys(_ed25519Wallets).reduce((res, key) => {
+        return {
+          ...res,
+          ...(!res[key] ? { [key]: migrateWallet(_ed25519Wallets[key]) } : {}),
+        };
+      }, {}),
+    });
+
+    // In case currentWalletIds was missing from storage
+    if (
+      Object.values(this.wallets).filter(w => this.isWalletOwned(w)).length > 0 &&
+      (!this.currentWalletIds || this.currentWalletIds.length === 0)
+    ) {
+      this.findWalletId(undefined, { forbidPregen: true });
+    }
 
     const loginEncryptionKey = this.sessionStorageGetItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR) as string | null;
     if (loginEncryptionKey && loginEncryptionKey !== 'undefined') {
@@ -470,10 +683,11 @@ export abstract class CoreCapsule {
       : await this.localStorageGetItem(LOCAL_STORAGE_WALLETS);
     this.wallets = JSON.parse(stringWallets || '{}');
 
-    const stringED25519Wallets = this.platformUtils.secureStorage
-      ? await this.platformUtils.secureStorage.get(LOCAL_STORAGE_ED25519_WALLETS)
-      : await this.localStorageGetItem(LOCAL_STORAGE_ED25519_WALLETS);
-    this.ed25519Wallets = JSON.parse(stringED25519Wallets || '{}');
+    const _currentWalletIds = this.platformUtils.secureStorage
+      ? await this.platformUtils.secureStorage.get(LOCAL_STORAGE_CURRENT_WALLET_IDS)
+      : await this.localStorageGetItem(LOCAL_STORAGE_CURRENT_WALLET_IDS);
+    const currentWalletIds = _currentWalletIds ? JSON.parse(_currentWalletIds) : undefined;
+    this.currentWalletIds = currentWalletIds;
 
     const loginEncryptionKey = await this.sessionStorageGetItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR);
     if (loginEncryptionKey && loginEncryptionKey !== 'undefined') {
@@ -533,15 +747,6 @@ export abstract class CoreCapsule {
     await this.localStorageSetItem(LOCAL_STORAGE_WALLETS, JSON.stringify(wallets));
   }
 
-  async setEd25519Wallets(wallets: Record<string, Wallet>): Promise<void> {
-    this.ed25519Wallets = wallets;
-    if (this.platformUtils.secureStorage) {
-      await this.platformUtils.secureStorage.set(LOCAL_STORAGE_ED25519_WALLETS, JSON.stringify(wallets));
-      return;
-    }
-    await this.localStorageSetItem(LOCAL_STORAGE_ED25519_WALLETS, JSON.stringify(wallets));
-  }
-
   /**
    * Sets the login encryption key pair associated with the `CoreCapsule` instance.
    * @param keyPair - Encryption key pair generated from loginEncryptionKey.
@@ -573,19 +778,58 @@ export abstract class CoreCapsule {
   }
 
   /**
-   * Gets the wallets associated with the `CoreCapsule` instance.
-   * @returns - wallets associated with the `CoreCapsule` instance.
+   * Gets the phone number associated with the `CoreCapsule` instance.
+   * @returns - phone number associated with the `CoreCapsule` instance.
    */
-  getWallets(): Record<string, Wallet> {
-    return this.wallets;
+  getPhoneNumber(): string | undefined {
+    if (!this.phone || !this.countryCode) {
+      return undefined;
+    }
+    return normalizePhoneNumber(this.countryCode, this.phone);
   }
 
-  getED25519Wallets(): Record<string, Wallet> {
-    return this.ed25519Wallets;
+  async setCurrentWalletIds(currentWalletIds: string[], sessionLookupId?: string): Promise<void> {
+    this.currentWalletIds = currentWalletIds;
+
+    if (sessionLookupId) {
+      await this.ctx.capsuleClient.setCurrentWalletIds(this.getUserId(), currentWalletIds, sessionLookupId);
+    } else {
+      await this.localStorageSetItem(LOCAL_STORAGE_CURRENT_WALLET_IDS, JSON.stringify(currentWalletIds));
+    }
   }
 
-  getAddress(walletId?: string): string | undefined {
-    return walletId ? this.wallets[walletId].address : Object.values(this.wallets)?.[0]?.address;
+  get cosmosPrefix(): string | undefined {
+    return isCosmosWithPrefix(this.supportedWalletTypes) ? this.supportedWalletTypes.COSMOS.prefix : 'cosmos';
+  }
+
+  /**
+   * Validates that a wallet ID is present on the instance, usable, and matches the desired filters.
+   * If no ID is passed, this will instead return the first valid, usable wallet ID that matches the filters.
+   * @param {string} [walletId] - the wallet ID to validate.
+   * @param {WalletFilters} [filter] - a `WalletFilters` object specifying allowed types, schemes, and whether to forbid unclaimed pregen wallets.
+   * @returns {string} - the wallet ID originally passed, or the one found.
+   */
+  findWalletId(walletId?: string, filter: WalletFilters = {}): string {
+    if (walletId) {
+      this.assertIsValidWalletId(walletId, filter);
+    } else {
+      for (const id of [...(this.currentWalletIds ?? []), ...Object.keys(this.wallets)]) {
+        if (this.isWalletUsable(id, filter)) {
+          walletId = id;
+          break;
+        }
+      }
+
+      if (!walletId) {
+        throw new Error(`no valid wallet id found`);
+      }
+    }
+
+    return walletId;
+  }
+
+  private assertIsValidWalletId(walletId: string, condition: WalletFilters = {}): void {
+    this.isWalletUsable(walletId, condition, true);
   }
 
   private async getPartnerURL(partnerId: string): Promise<string | undefined> {
@@ -595,50 +839,44 @@ export abstract class CoreCapsule {
 
   /**
    * URL of the portal, which can be associated with a partner id
-   * @param partnerId - id of the partner to get the portal URL for
+   * @param partnerId: string - id of the partner to get the portal URL for
    * @returns - portal URL
    */
   async getPortalURL(partnerId?: string): Promise<string> {
     return (partnerId && (await this.getPartnerURL(partnerId))) || getPortalBaseURL(this.ctx);
   }
 
-  private async getCommonLoginQueryParams(newDeviceSessionId?: string, newDeviceEncryptionKey?: string): Promise<string> {
-    const newDeviceSessionIdQueryParam = newDeviceSessionId ? `&newDeviceSessionId=${newDeviceSessionId}` : '';
-    const newDeviceEncryptionKeyQueryParam = newDeviceEncryptionKey
-      ? `&newDeviceEncryptionKey=${newDeviceEncryptionKey}`
-      : '';
-
-    return `${newDeviceSessionIdQueryParam}${newDeviceEncryptionKeyQueryParam}`;
+  private async getCommonLoginQueryParams(
+    partnerId?: string,
+    newDeviceSessionId?: string,
+    newDeviceEncryptionKey?: string,
+  ): Promise<string> {
+    return toQueryString({
+      newDeviceSessionId,
+      newDeviceEncryptionKey,
+      pregenWalletIds: Object.entries(this.wallets)
+        .filter(([_, wallet]) => this.isPregenWalletClaimable(wallet) && wallet.partnerId === partnerId)
+        .map(([id]) => id)
+        .join(','),
+    });
   }
 
   private async getCommonQueryParams(partnerId?: string, isForNewDevice?: boolean): Promise<string> {
     const partner = (await this.ctx.capsuleClient.getPartner(partnerId)).data;
 
-    const partnerIdQueryParam = partnerId ? `&partnerId=${partnerId}` : '';
-    const portalFontQueryParam = partner.font ? `&portalFont=${encodeURIComponent(partner.font)}` : '';
-    const portalBorderRadiusQueryParam = this.portalTheme?.borderRadius
-      ? `&portalBorderRadius=${encodeURIComponent(this.portalTheme.borderRadius)}`
-      : '';
-    const portalForegroundColorQueryParam =
-      partner.foregroundColor || this.portalTheme?.foregroundColor
-        ? `&portalForegroundColor=${encodeURIComponent(partner.foregroundColor ?? this.portalTheme.foregroundColor)}`
-        : '';
-    const portalBackgroundColorQueryParam =
-      partner.backgroundColor || this.portalBackgroundColor || this.portalTheme?.backgroundColor
-        ? `&portalBackgroundColor=${encodeURIComponent(partner.backgroundColor ?? this.portalBackgroundColor ?? this.portalTheme.backgroundColor)}`
-        : '';
-    const portalPrimaryButtonColorQueryParam = this.portalPrimaryButtonColor
-      ? `&portalPrimaryButtonColor=${encodeURIComponent(this.portalPrimaryButtonColor)}`
-      : '';
-    const portalTextColorQueryParam = this.portalTextColor
-      ? `&portalTextColor=${encodeURIComponent(this.portalTextColor)}`
-      : '';
-    const portalPrimaryButtonTextColorQueryParam = this.portalPrimaryButtonTextColor
-      ? `&portalPrimaryButtonTextColor=${encodeURIComponent(this.portalPrimaryButtonTextColor)}`
-      : '';
-    const isForNewDeviceQueryParam = isForNewDevice ? `&isForNewDevice=${isForNewDevice}` : '';
-
-    return `${partnerIdQueryParam}${portalFontQueryParam}${portalBorderRadiusQueryParam}${portalForegroundColorQueryParam}${portalBackgroundColorQueryParam}${portalPrimaryButtonColorQueryParam}${portalTextColorQueryParam}${portalPrimaryButtonTextColorQueryParam}${isForNewDeviceQueryParam}`;
+    return toQueryString({
+      apiKey: this.ctx.apiKey,
+      partnerId,
+      portalFont: partner.font,
+      portalBorderRadius: this.portalTheme?.borderRadius,
+      portalForegroundColor: partner.foregroundColor || this.portalTheme?.foregroundColor,
+      portalBackgroundColor: partner.backgroundColor || this.portalBackgroundColor || this.portalTheme?.backgroundColor,
+      portalPrimaryButtonColor: this.portalPrimaryButtonColor,
+      portalTextColor: this.portalTextColor,
+      portalPrimaryButtonTextColor: this.portalPrimaryButtonTextColor,
+      isForNewDevice: isForNewDevice ? isForNewDevice.toString() : undefined,
+      supportedWalletTypes: this.supportedWalletTypes ? JSON.stringify(this.supportedWalletTypes) : undefined,
+    });
   }
 
   private async getWebAuthURLForCreate(
@@ -685,7 +923,11 @@ export abstract class CoreCapsule {
     type: 'email' | 'phone' | 'farcaster' = 'email',
   ): Promise<string> {
     const commonQueryParams = await this.getCommonQueryParams(partnerId);
-    const commonLoginQueryParams = await this.getCommonLoginQueryParams(newDeviceSessionId, newDeviceEncryptionKey);
+    const commonLoginQueryParams = await this.getCommonLoginQueryParams(
+      partnerId,
+      newDeviceSessionId,
+      newDeviceEncryptionKey,
+    );
 
     const userSpecificParams = {
       email: `email=${encodeURIComponent(this.email)}`,
@@ -713,7 +955,11 @@ export abstract class CoreCapsule {
     newDeviceEncryptionKey?: string,
   ): Promise<string> {
     const commonQueryParams = await this.getCommonQueryParams(partnerId);
-    const commonLoginQueryParams = await this.getCommonLoginQueryParams(newDeviceSessionId, newDeviceEncryptionKey);
+    const commonLoginQueryParams = await this.getCommonLoginQueryParams(
+      partnerId,
+      newDeviceSessionId,
+      newDeviceEncryptionKey,
+    );
 
     return `${(partnerId && (await this.getPartnerURL(partnerId))) || getPortalBaseURL(this.ctx)}/web/biometrics/login?phone=${encodeURIComponent(
       this.phone,
@@ -752,32 +998,26 @@ export abstract class CoreCapsule {
    * @returns - wallets that were fetched.
    */
   async fetchWallets(): Promise<any[]> {
-    const res = await this.ctx.capsuleClient.getWallets(this.userId);
-    return res.data.wallets;
+    const res = await this.ctx.capsuleClient[this.isPortal() ? 'getAllWallets' : 'getWallets'](this.userId);
+
+    return res.data.wallets.filter(wallet => !!wallet.address && this.isWalletSupported(wallet));
   }
 
   private async populateWalletAddresses(): Promise<void> {
     const res = await this.ctx.capsuleClient.getWallets(this.userId);
     const wallets = res.data.wallets;
     wallets.forEach(wallet => {
-      if (wallet.scheme === WalletScheme.ED25519 && this.ed25519Wallets[wallet.id]) {
-        this.ed25519Wallets[wallet.id].address = wallet.address;
-        this.ed25519Wallets[wallet.id].publicKey = wallet.publicKey;
-        this.ed25519Wallets[wallet.id].scheme = wallet.scheme;
-        this.ed25519Wallets[wallet.id].partnerId = wallet.partnerId;
-        this.ed25519Wallets[wallet.id].userId = wallet.userId;
-        delete this.wallets[wallet.id];
-      } else if (this.wallets[wallet.id]) {
-        this.wallets[wallet.id].address = wallet.address;
-        this.wallets[wallet.id].publicKey = wallet.publicKey;
-        this.wallets[wallet.id].scheme = wallet.scheme as WalletScheme;
-        this.wallets[wallet.id].partnerId = wallet.partnerId;
-        this.wallets[wallet.id].userId = wallet.userId;
-        delete this.ed25519Wallets[wallet.id];
+      if (this.wallets[wallet.id]) {
+        this.wallets[wallet.id] = {
+          ...wallet,
+          scheme: wallet.scheme as WalletScheme,
+          type: wallet.type as WalletType,
+          pregenIdentifierType: wallet.pregenIdentifierType as PregenIdentifierType,
+          ...this.wallets[wallet.id],
+        };
       }
     });
     await this.setWallets(this.wallets);
-    await this.setEd25519Wallets(this.ed25519Wallets);
   }
 
   private async populatePregenWalletAddresses(
@@ -787,26 +1027,17 @@ export abstract class CoreCapsule {
     const res = await this.ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType);
     const wallets = res.wallets;
     wallets.forEach(wallet => {
-      if (wallet.scheme === WalletScheme.ED25519 && this.ed25519Wallets[wallet.id]) {
-        this.ed25519Wallets[wallet.id].address = wallet.address;
-        this.ed25519Wallets[wallet.id].publicKey = wallet.publicKey;
-        this.ed25519Wallets[wallet.id].scheme = wallet.scheme;
-        this.ed25519Wallets[wallet.id].partnerId = wallet.partnerId;
-        this.ed25519Wallets[wallet.id].userId = wallet.userId;
-        this.ed25519Wallets[wallet.id].type = wallet.type as WalletType;
-        delete this.wallets[wallet.id];
-      } else if (this.wallets[wallet.id]) {
-        this.wallets[wallet.id].address = wallet.address;
-        this.wallets[wallet.id].publicKey = wallet.publicKey;
-        this.wallets[wallet.id].scheme = wallet.scheme as WalletScheme;
-        this.wallets[wallet.id].partnerId = wallet.partnerId;
-        this.wallets[wallet.id].userId = wallet.userId;
-        this.wallets[wallet.id].type = wallet.type as WalletType;
-        delete this.ed25519Wallets[wallet.id];
+      if (this.wallets[wallet.id]) {
+        this.wallets[wallet.id] = {
+          ...wallet,
+          scheme: wallet.scheme as WalletScheme,
+          type: wallet.type as WalletType,
+          pregenIdentifierType: wallet.pregenIdentifierType as PregenIdentifierType,
+          ...this.wallets[wallet.id],
+        };
       }
     });
     await this.setWallets(this.wallets);
-    await this.setEd25519Wallets(this.ed25519Wallets);
   }
 
   /**
@@ -1013,10 +1244,13 @@ export abstract class CoreCapsule {
    **/
   async isFullyLoggedIn(): Promise<boolean> {
     const isSessionActive = await this.isSessionActive();
-    const evmWalletAddress = Object.values(this.getWallets())?.[0]?.address;
-    const solanaAddress = Object.values(this.getED25519Wallets())?.[0]?.address;
 
-    return isSessionActive && !!(evmWalletAddress || solanaAddress);
+    return (
+      isSessionActive &&
+      this.currentWalletIds &&
+      this.currentWalletIds.length > 0 &&
+      this.currentWalletIds.reduce((acc, id) => acc && !!this.wallets[id], true)
+    );
   }
 
   /**
@@ -1089,22 +1323,26 @@ export abstract class CoreCapsule {
   /**
    * Waits for the session to be active.
    **/
-  async waitForAccountCreation(): Promise<void> {
-    while (true) {
+  async waitForAccountCreation(): Promise<boolean> {
+    this.isAwaitingAccountCreation = true;
+    while (this.isAwaitingAccountCreation) {
       try {
         await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS));
 
         if (await this.isSessionActive()) {
-          return;
+          this.isAwaitingAccountCreation = false;
+          return true;
         }
       } catch (err) {
         // want to continue polling on error
         console.error(err);
       }
     }
+
+    return false;
   }
 
-  async waitForPasskeyAndCreateWallet(): Promise<string> {
+  async waitForPasskeyAndCreateWallet(): Promise<{ walletIds: string[]; recoverySecret?: string }> {
     await this.waitForAccountCreation();
     // This function gets pregen wallets by an identifier and partnerId
     let pregenIdentifier: string;
@@ -1113,20 +1351,24 @@ export abstract class CoreCapsule {
       pregenIdentifier = this.email;
       pregenIdentifierType = PregenIdentifierType.EMAIL;
     } else {
-      pregenIdentifier = parsePhoneNumberFromString(`${this.countryCode}${this.phone}`).formatInternational();
+      pregenIdentifier = this.getPhoneNumber();
       pregenIdentifierType = PregenIdentifierType.PHONE;
     }
 
-    const res = await this.ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType);
-    const wallet = res.wallets[0];
+    const pregenWallets = (
+      await this.ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType)
+    ).wallets.filter(w => this.isWalletSupported(w));
 
-    if (wallet) {
-      const recovery = await this.claimPregenWallets(pregenIdentifier, pregenIdentifierType);
-      return recovery;
+    let recoverySecret, walletIds;
+    if (pregenWallets.length > 0) {
+      recoverySecret = await this.claimPregenWallets(pregenIdentifier, pregenIdentifierType);
+      walletIds = pregenWallets.map(({ id }) => id);
     } else {
-      const { recoverySecret } = await this.createWalletPerMissingType();
-      return recoverySecret;
+      const created = await this.createWalletPerMissingType();
+      recoverySecret = created.recoverySecret;
+      walletIds = created.wallets.map(({ id }) => id);
     }
+    return { walletIds, recoverySecret };
   }
 
   async getFarcasterConnectURL(): Promise<string> {
@@ -1142,7 +1384,8 @@ export abstract class CoreCapsule {
     userExists: boolean;
     username: string;
   }> {
-    while (true) {
+    this.isAwaitingFarcaster = true;
+    while (this.isAwaitingFarcaster) {
       try {
         await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS));
 
@@ -1158,6 +1401,7 @@ export abstract class CoreCapsule {
         }
       } catch (err) {
         console.error(err);
+        this.isAwaitingFarcaster = false;
       }
     }
   }
@@ -1169,10 +1413,11 @@ export abstract class CoreCapsule {
   }
 
   async waitForOAuth(): Promise<{
-    email: string;
+    email?: string;
     userExists: boolean;
   }> {
-    while (true) {
+    this.isAwaitingOAuth = true;
+    while (this.isAwaitingOAuth) {
       try {
         await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS));
 
@@ -1191,38 +1436,66 @@ export abstract class CoreCapsule {
         console.error(err);
       }
     }
+    return { userExists: false };
   }
 
   /**
    * Waits for the session to be active and sets up the user.
    * @returns { needsWallet } - whether a wallet needs to be created
    **/
-  async waitForLoginAndSetup(skipSessionRefresh?: boolean): Promise<{ needsWallet: boolean }> {
-    while (true) {
+  async waitForLoginAndSetup(
+    loginWindow: Window,
+    skipSessionRefresh?: boolean,
+  ): Promise<{ isComplete: boolean; isError?: boolean; needsWallet?: boolean; partnerId?: string }> {
+    this.isAwaitingLogin = true;
+    while (this.isAwaitingLogin) {
       try {
         await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS));
+
         if (!(await this.isSessionActive())) {
+          if (loginWindow.closed) {
+            return { isComplete: false, isError: true };
+          }
           continue;
         }
-        await this.userSetupAfterLogin();
 
-        const fetchedWallets = (await this.fetchWallets()).filter(wallet => !!wallet.address);
+        const {
+          data: { partnerId },
+        } = await this.userSetupAfterLogin();
+        const fetchedWallets = await this.fetchWallets();
+
+        if (!this.currentWalletIds || this.currentWalletIds.length === 0) {
+          if (loginWindow.closed) {
+            return { isComplete: false, isError: true };
+          } else {
+            continue;
+          }
+        }
+
         const tempSharesRes = await this.getTransmissionKeyShares();
         // need this check for the case where user has logged in but temp encrypted shares
         // haven't been sent to the backend yet
         if (tempSharesRes.data.temporaryShares.length === fetchedWallets.length) {
           await this.setupAfterLogin(tempSharesRes.data.temporaryShares, skipSessionRefresh);
 
-          const needsEvm = Object.keys(this.wallets).length === 0 && this.supportedWalletTypes.includes(WalletType.EVM);
-          const needsSolana =
-            Object.keys(this.ed25519Wallets).length === 0 && this.supportedWalletTypes.includes(WalletType.SOLANA);
-          return { needsWallet: needsEvm || needsSolana };
+          for (const wallet of Object.values(this.wallets)) {
+            if (this.isPregenWalletClaimable(wallet)) {
+              await this.claimPregenWallets(wallet.pregenIdentifier, wallet.pregenIdentifierType);
+            }
+          }
+
+          return {
+            isComplete: true,
+            needsWallet: Object.values(this.wallets).length === 0,
+            partnerId,
+          };
         }
       } catch (err) {
         // want to continue polling on error
         console.error(err);
       }
     }
+    return { isComplete: false };
   }
 
   /**
@@ -1252,9 +1525,14 @@ export abstract class CoreCapsule {
    * Call this method after login to ensure that the user ID is set
    * internally.
    **/
-  async userSetupAfterLogin(): Promise<void> {
+  async userSetupAfterLogin(): Promise<{ data: { partnerId?: string; sessionLookupId: string } }> {
     const res = await this.ctx.capsuleClient.touchSession();
     await this.setUserId(res.data.userId);
+
+    if (res.data.currentWalletIds && res.data.currentWalletIds !== this.currentWalletIds)
+      await this.setCurrentWalletIds(res.data.currentWalletIds, this.isPortal() ? res.data.sessionLookupId : undefined);
+
+    return res;
   }
 
   /**
@@ -1279,15 +1557,9 @@ export abstract class CoreCapsule {
       temporaryShares = (await this.getTransmissionKeyShares()).data.temporaryShares;
     }
 
-    await this.setWallets({});
-    await this.setEd25519Wallets({});
     temporaryShares.forEach(share => {
       const signer = decryptWithPrivateKey(this.loginEncryptionKeyPair.privateKey, share.encryptedShare, share.encryptedKey);
       this.wallets[share.walletId] = {
-        id: share.walletId,
-        signer,
-      };
-      this.ed25519Wallets[share.walletId] = {
         id: share.walletId,
         signer,
       };
@@ -1385,19 +1657,14 @@ export abstract class CoreCapsule {
   async createWalletPerMissingType(skipDistribute = false): Promise<{ wallets: Wallet[]; recoverySecret?: string }> {
     const wallets: Wallet[] = [];
     let recoverySecret: string;
-    if (Object.keys(this.wallets).length === 0 && this.supportedWalletTypes.includes(WalletType.EVM)) {
-      const [evmWallet, evmSecret] = await this.createWallet(skipDistribute);
-      wallets.push(evmWallet);
-      if (evmSecret) {
-        recoverySecret = evmSecret;
-      }
-    }
 
-    if (Object.keys(this.ed25519Wallets).length === 0 && this.supportedWalletTypes.includes(WalletType.SOLANA)) {
-      const [ed25519Wallet, ed25519Secret] = await this.createWallet(skipDistribute, undefined, true);
-      wallets.push(ed25519Wallet);
-      if (ed25519Secret) {
-        recoverySecret = ed25519Secret;
+    for (const type of <WalletType[]>Object.keys(this.supportedWalletTypes)) {
+      if (!Object.values(this.wallets).some(w => !!WalletSchemeMap[w.scheme][type])) {
+        const [wallet, recoveryShare] = await this.createWallet(type, skipDistribute);
+        wallets.push(wallet);
+        if (recoveryShare) {
+          recoverySecret = recoveryShare;
+        }
       }
     }
     return { wallets, recoverySecret };
@@ -1411,46 +1678,46 @@ export abstract class CoreCapsule {
    * @returns [wallet, recoveryShare]
    **/
   async createWallet(
+    type: WalletType = <WalletType>Object.keys(this.supportedWalletTypes)[0],
     skipDistribute = false,
     _customFunction?: (params?: any) => void,
-    useED25519?: boolean,
   ): Promise<[Wallet, string | null]> {
     this.requireApiKey();
 
     let signer: string;
     let wallet: Wallet;
-    if (useED25519) {
-      const keygenRes = await this.platformUtils.ed25519Keygen(
-        this.ctx,
-        this.userId,
-        this.retrieveSessionCookie(),
-        this.getBackupKitEmailProps(),
-      );
-      const walletId = keygenRes.walletId;
-      signer = keygenRes.signer;
+    let keygenRes;
 
-      this.ed25519Wallets[walletId] = {
-        id: walletId,
-        signer,
-      };
-      wallet = this.ed25519Wallets[walletId];
-    } else {
-      const keygenRes = await this.platformUtils.keygen(
-        this.ctx,
-        this.userId,
-        null,
-        this.retrieveSessionCookie(),
-        this.getBackupKitEmailProps(),
-      );
-      const walletId = keygenRes.walletId;
-      signer = keygenRes.signer;
-
-      this.wallets[walletId] = {
-        id: walletId,
-        signer,
-      };
-      wallet = this.wallets[walletId];
+    switch (type) {
+      case WalletType.SOLANA: {
+        keygenRes = await this.platformUtils.ed25519Keygen(
+          this.ctx,
+          this.userId,
+          this.retrieveSessionCookie(),
+          this.getBackupKitEmailProps(),
+        );
+        break;
+      }
+      default: {
+        keygenRes = await this.platformUtils.keygen(
+          this.ctx,
+          this.userId,
+          null,
+          this.retrieveSessionCookie(),
+          this.getBackupKitEmailProps(),
+        );
+        break;
+      }
     }
+
+    const walletId = keygenRes.walletId;
+    signer = keygenRes.signer;
+
+    this.wallets[walletId] = {
+      id: walletId,
+      signer,
+    };
+    wallet = this.wallets[walletId];
 
     await this.waitForWalletAddress(wallet.id);
     await this.populateWalletAddresses();
@@ -1478,46 +1745,45 @@ export abstract class CoreCapsule {
    * @returns [wallet, recoveryShare]
    **/
   async createWalletPreGen(
+    type: WalletType = <WalletType>Object.keys(this.supportedWalletTypes)[0],
     pregenIdentifier: string,
-    useSolana?: boolean,
     pregenIdentifierType: PregenIdentifierType = PregenIdentifierType.EMAIL,
   ): Promise<Wallet> {
     this.requireApiKey();
-    let walletId: string;
-    if (useSolana) {
-      const { signer, walletId: newWalletId } = await this.platformUtils.ed25519PreKeygen(
-        this.ctx,
-        pregenIdentifier,
-        pregenIdentifierType,
-        this.retrieveSessionCookie(),
-      );
-      walletId = newWalletId;
 
-      this.ed25519Wallets[walletId] = {
-        id: walletId,
-        signer,
-      };
-    } else {
-      const { signer, walletId: newWalletId } = await this.platformUtils.preKeygen(
-        this.ctx,
-        undefined,
-        pregenIdentifier,
-        pregenIdentifierType,
-        null,
-        this.retrieveSessionCookie(),
-      );
-
-      walletId = newWalletId;
-      this.wallets[walletId] = {
-        id: walletId,
-        signer,
-      };
+    let keygenRes;
+    switch (type) {
+      case WalletType.SOLANA:
+        keygenRes = await this.platformUtils.ed25519PreKeygen(
+          this.ctx,
+          pregenIdentifier,
+          pregenIdentifierType,
+          this.retrieveSessionCookie(),
+        );
+        break;
+      default:
+        keygenRes = await this.platformUtils.preKeygen(
+          this.ctx,
+          undefined,
+          pregenIdentifier,
+          pregenIdentifierType,
+          null,
+          this.retrieveSessionCookie(),
+        );
+        break;
     }
+
+    const { signer, walletId } = keygenRes;
+
+    this.wallets[walletId] = {
+      id: walletId,
+      signer,
+    };
 
     await this.waitForPregenWalletAddress(pregenIdentifier, pregenIdentifierType, walletId);
     await this.populatePregenWalletAddresses(pregenIdentifier, pregenIdentifierType);
 
-    return useSolana ? this.ed25519Wallets[walletId] : this.wallets[walletId];
+    return this.wallets[walletId];
   }
 
   /**
@@ -1548,17 +1814,18 @@ export abstract class CoreCapsule {
     }
 
     // This function gets pregen wallets by email and partnerId
-    const res = await this.ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType);
-    if (res.wallets.length === 0) {
+    const pregenWallets = (
+      await this.ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType)
+    ).wallets.filter(w => this.isWalletSupported(w));
+    if (pregenWallets.length === 0) {
       throw new Error('wallets not found');
     }
 
     let recoverySecret: string | undefined;
-    for (const wallet of res.wallets) {
+    for (const wallet of pregenWallets) {
       await this.ctx.capsuleClient.claimPregenWallet({ userId: this.userId, walletId: wallet.id });
 
-      const signer =
-        wallet.scheme === WalletScheme.ED25519 ? this.ed25519Wallets[wallet.id].signer : this.wallets[wallet.id].signer;
+      const signer = this.wallets[wallet.id].signer;
       const recoveryShare = await distributeNewShare(
         this.ctx,
         this.userId,
@@ -1571,13 +1838,14 @@ export abstract class CoreCapsule {
         recoverySecret = recoveryShare;
       }
 
-      if (wallet.scheme === WalletScheme.ED25519) {
-        this.ed25519Wallets[wallet.id].userId = this.userId;
-        await this.setEd25519Wallets(this.ed25519Wallets);
-      } else {
-        this.wallets[wallet.id].userId = this.userId;
-        await this.setWallets(this.wallets);
-      }
+      this.wallets[wallet.id] = {
+        ...this.wallets[wallet.id],
+        userId: this.userId,
+        pregenIdentifier: undefined,
+        pregenIdentifierType: undefined,
+      };
+
+      await this.setWallets(this.wallets);
     }
 
     return recoverySecret;
@@ -1592,14 +1860,13 @@ export abstract class CoreCapsule {
    **/
   async updateWalletIdentifierPreGen(
     newIdentifier: string,
-    walletId?: string,
-    type: PregenIdentifierType = PregenIdentifierType.EMAIL,
+    walletId: string,
+    newType: PregenIdentifierType = PregenIdentifierType.EMAIL,
   ): Promise<void> {
     this.requireApiKey();
-    const currentWalletId = walletId || Object.keys(this.wallets)[0];
-    await this.ctx.capsuleClient.updatePregenWallet(currentWalletId, {
+    await this.ctx.capsuleClient.updatePregenWallet(walletId, {
       pregenIdentifier: newIdentifier,
-      pregenIdentifierType: type,
+      pregenIdentifierType: newType,
     });
   }
 
@@ -1635,11 +1902,12 @@ export abstract class CoreCapsule {
   async getPregenWallets(
     pregenIdentifier: string,
     pregenIdentifierType: PregenIdentifierType = PregenIdentifierType.EMAIL,
+    expand = false,
   ): Promise<WalletEntity[]> {
     this.requireApiKey();
 
-    const res = await this.ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType);
-    return res.wallets;
+    const res = await this.ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType, expand);
+    return res.wallets.filter(w => this.isWalletSupported(w));
   }
 
   private encodeWalletBase64(wallet: Wallet): string {
@@ -1654,16 +1922,13 @@ export abstract class CoreCapsule {
    * @returns string base64 encoded wallet
    **/
   getUserShare(): string | null {
-    const wallet = Object.values(this.wallets)[0];
-    const ed25519Wallet = Object.values(this.ed25519Wallets)[0];
-
-    if (wallet && ed25519Wallet) {
-      return `${this.encodeWalletBase64(wallet)}-${this.encodeWalletBase64(ed25519Wallet)}`;
-    } else if (wallet || ed25519Wallet) {
-      return this.encodeWalletBase64(wallet || ed25519Wallet);
-    } else {
+    if (Object.values(this.wallets).length === 0) {
       return null;
     }
+
+    return Object.values(this.wallets)
+      .map(wallet => this.encodeWalletBase64(wallet))
+      .join('-');
   }
 
   /**
@@ -1672,25 +1937,28 @@ export abstract class CoreCapsule {
    * @param base64Wallet
    * @returns Promise<void>
    **/
-  async setUserShare(base64Wallets: string): Promise<void> {
+  async setUserShare(base64Wallets: string | null): Promise<void> {
+    if (!base64Wallets) {
+      return;
+    }
+
     const base64WalletsSplit = base64Wallets.split('-');
     for (const base64Wallet of base64WalletsSplit) {
       const walletJson = Buffer.from(base64Wallet, 'base64').toString();
       const wallet = JSON.parse(walletJson) as Wallet;
-      if (wallet.scheme === WalletScheme.ED25519) {
-        this.ed25519Wallets[wallet.id] = wallet;
-        await this.setEd25519Wallets(this.ed25519Wallets);
-      } else {
-        this.wallets[wallet.id] = wallet;
-        await this.setWallets(this.wallets);
-      }
+
+      this.wallets[wallet.id] = wallet;
+      await this.setWallets(this.wallets);
     }
   }
 
-  private getTransactionReviewUrl(transactionId: string): string {
+  private async getTransactionReviewUrl(transactionId: string): Promise<string> {
+    const res = await this.ctx.capsuleClient.touchSession();
+    const commonQueryParams = await this.getCommonQueryParams(res.data.partnerId);
+
     return `${getPortalBaseURL(this.ctx)}/web/users/${
       this.userId
-    }/transaction-review/${transactionId}?email=${encodeURIComponent(this.email)}`;
+    }/transaction-review/${transactionId}?email=${encodeURIComponent(this.email)}${commonQueryParams}`;
   }
 
   /**
@@ -1702,46 +1970,47 @@ export abstract class CoreCapsule {
    * @param messageBase64 - base64 encoding of exact message that should be signed
    **/
   async signMessage(walletId: string, messageBase64: string): Promise<FullSignatureRes> {
-    const wallet = this.wallets[walletId] || this.ed25519Wallets[walletId];
+    this.assertIsValidWalletId(walletId);
+
+    const wallet = this.wallets[walletId];
     let signerId: string = this.userId;
     if (wallet.partnerId && !wallet.userId) {
       signerId = wallet.partnerId;
     }
-    if (wallet.scheme === WalletScheme.ED25519) {
-      const res = await this.platformUtils.ed25519Sign(
-        this.ctx,
-        signerId,
-        walletId,
-        wallet.signer,
-        messageBase64,
-        this.retrieveSessionCookie(),
-      );
-      if ((res as DeniedSignatureRes).pendingTransactionId) {
-        return {
-          ...res,
-          transactionReviewUrl: this.getTransactionReviewUrl((res as DeniedSignatureRes).pendingTransactionId),
-        };
-      }
 
-      return res as SuccessfulSignatureRes;
+    let signRes;
+    switch (wallet.scheme) {
+      case WalletScheme.ED25519:
+        signRes = await this.platformUtils.ed25519Sign(
+          this.ctx,
+          signerId,
+          walletId,
+          wallet.signer,
+          messageBase64,
+          this.retrieveSessionCookie(),
+        );
+        break;
+      default:
+        signRes = await this.platformUtils.signMessage(
+          this.ctx,
+          signerId,
+          walletId,
+          wallet.signer,
+          messageBase64,
+          this.retrieveSessionCookie(),
+          wallet.scheme === WalletScheme.DKLS,
+        );
+        break;
     }
-    const res = await this.platformUtils.signMessage(
-      this.ctx,
-      signerId,
-      walletId,
-      this.wallets[walletId].signer,
-      messageBase64,
-      this.retrieveSessionCookie(),
-      wallet.scheme === WalletScheme.DKLS,
-    );
-    if ((res as DeniedSignatureRes).pendingTransactionId) {
+
+    if ((signRes as DeniedSignatureRes).pendingTransactionId) {
       return {
-        ...res,
-        transactionReviewUrl: this.getTransactionReviewUrl((res as DeniedSignatureRes).pendingTransactionId),
+        ...signRes,
+        transactionReviewUrl: await this.getTransactionReviewUrl((signRes as DeniedSignatureRes).pendingTransactionId),
       };
     }
 
-    return res as SuccessfulSignatureRes;
+    return signRes as SuccessfulSignatureRes;
   }
 
   /**
@@ -1751,6 +2020,8 @@ export abstract class CoreCapsule {
    * @param chainId - chain id of the chain the transaction is being sent on.
    **/
   async signTransaction(walletId: string, rlpEncodedTxBase64: string, chainId: string): Promise<FullSignatureRes> {
+    this.assertIsValidWalletId(walletId);
+
     const wallet = this.wallets[walletId];
     let signerId: string = this.userId;
     if (wallet.partnerId && !wallet.userId) {
@@ -1769,7 +2040,7 @@ export abstract class CoreCapsule {
     if ((res as DeniedSignatureRes).pendingTransactionId) {
       return {
         ...res,
-        transactionReviewUrl: this.getTransactionReviewUrl((res as DeniedSignatureRes).pendingTransactionId),
+        transactionReviewUrl: await this.getTransactionReviewUrl((res as DeniedSignatureRes).pendingTransactionId),
       };
     }
 
@@ -1794,10 +2065,11 @@ export abstract class CoreCapsule {
       this.retrieveSessionCookie(),
       wallet.scheme === WalletScheme.DKLS,
     );
+
     if ((res as DeniedSignatureRes).pendingTransactionId) {
       return {
         ...res,
-        transactionReviewUrl: this.getTransactionReviewUrl((res as DeniedSignatureRes).pendingTransactionId),
+        transactionReviewUrl: await this.getTransactionReviewUrl((res as DeniedSignatureRes).pendingTransactionId),
       };
     }
 
@@ -1821,8 +2093,12 @@ export abstract class CoreCapsule {
     network: NetworkProp,
     asset: OnRampAssetProp,
     testMode = false,
-    walletId: string = Object.keys(this.wallets)[0],
+    walletId: string = this.currentWalletIds[0],
   ): Promise<OnRampPurchase> {
+    if (!walletId) {
+      return;
+    }
+
     const res = await this.ctx.capsuleClient.createOnRampPurchase(
       this.getUserId(),
       walletId,
@@ -1885,7 +2161,7 @@ export abstract class CoreCapsule {
       email: this.email,
       userId: this.userId,
       wallets: this.wallets,
-      ed25519Wallets: this.ed25519Wallets,
+      currentWalletIds: this.currentWalletIds,
       sessionCookie: this.sessionCookie,
     };
     return Buffer.from(JSON.stringify(sessionInfo)).toString('base64');
@@ -1897,8 +2173,31 @@ export abstract class CoreCapsule {
     await this.setEmail(sessionInfo.email);
     await this.setUserId(sessionInfo.userId);
     await this.setWallets(sessionInfo.wallets);
-    await this.setEd25519Wallets(sessionInfo.ed25519Wallets);
+    await this.setCurrentWalletIds(sessionInfo.currentWalletIds);
     this.persistSessionCookie(sessionInfo.sessionCookie);
+  }
+
+  exitAccountCreation() {
+    this.isAwaitingAccountCreation = false;
+  }
+
+  exitLogin() {
+    this.isAwaitingLogin = false;
+  }
+
+  exitFarcaster() {
+    this.isAwaitingFarcaster = false;
+  }
+
+  exitOAuth() {
+    this.isAwaitingOAuth = false;
+  }
+
+  exitLoops() {
+    this.exitAccountCreation();
+    this.exitLogin();
+    this.exitFarcaster();
+    this.exitOAuth();
   }
 
   /**
@@ -1911,20 +2210,20 @@ export abstract class CoreCapsule {
     await this.clearStorage();
 
     if (preservePregenWallets) {
-      const allWallets = { ...this.wallets, ...this.ed25519Wallets };
-      Object.entries(allWallets).forEach(([id, wallet]) => {
-        if (wallet.type !== WalletType.PREGEN) {
-          wallet.scheme === WalletScheme.ED25519 ? delete this.ed25519Wallets[id] : delete this.wallets[id];
+      Object.entries(this.wallets).forEach(([id, wallet]) => {
+        if (!wallet.pregenIdentifier) {
+          delete this.wallets[id];
         }
       });
       await this.setWallets(this.wallets);
-      await this.setEd25519Wallets(this.ed25519Wallets);
     } else {
       this.wallets = {};
-      this.ed25519Wallets = {};
     }
+    this.currentWalletIds = undefined;
     this.loginEncryptionKeyPair = undefined;
     this.email = undefined;
+    this.phone = undefined;
+    this.countryCode = undefined;
     this.userId = undefined;
     this.sessionCookie = undefined;
   }
@@ -1939,20 +2238,33 @@ export abstract class CoreCapsule {
       (acc, walletId) => ({
         ...acc,
         [walletId]: {
-          id: walletId,
-          address: this.wallets[walletId].address,
+          ...this.wallets[walletId],
           signer: this.wallets[walletId].signer ? '[REDACTED]' : undefined,
         },
       }),
       {},
     );
     const obj = {
+      supportedWalletTypes: this.supportedWalletTypes,
+      cosmosPrefix: this.cosmosPrefix,
       email: this.email,
+      phone: this.phone,
+      countryCode: this.countryCode,
       userId: this.userId,
+      currentWalletIds: this.currentWalletIds,
       wallets: redactedWallets,
       loginEncryptionKeyPair: this.loginEncryptionKeyPair ? '[REDACTED]' : undefined,
+      ctx: {
+        apiKey: this.ctx.apiKey,
+        disableWorkers: this.ctx.disableWorkers,
+        disableWebSockets: this.ctx.disableWebSockets,
+        env: this.ctx.env,
+        offloadMPCComputationURL: this.ctx.offloadMPCComputationURL,
+        useLocalFiles: this.ctx.useLocalFiles,
+        useDKLS: this.ctx.useDKLS,
+      },
     };
 
-    return `Capsule ${JSON.stringify(obj)}`;
+    return `Capsule ${JSON.stringify(obj, null, 2)}`;
   }
 }

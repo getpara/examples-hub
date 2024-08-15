@@ -1,4 +1,4 @@
-import { extendTheme, Theme } from '@chakra-ui/react';
+import { defineStyleConfig, extendTheme, Theme } from '@chakra-ui/react';
 
 export const lightColors = {
   background: '#dfdfe2',
@@ -62,6 +62,11 @@ export const themeFactory = (colors: typeof lightColors) =>
           borderRadius: '5px',
         },
       },
+      Tooltip: {
+        baseStyle: {
+          zIndex: 999,
+        },
+      },
     },
   }) as Theme;
 
@@ -104,6 +109,13 @@ const theme = extendTheme({
   initialColorMode: 'dark',
   useSystemColorMode: false,
   styles: {
+    components: {
+      Tooltip: defineStyleConfig({
+        baseStyle: {
+          zIndex: 999,
+        },
+      }),
+    },
     global: {
       // styles for the `body`
       body: {
@@ -174,6 +186,11 @@ export function getPartnerTheme(
             },
           }
         : {},
+      Tooltip: defineStyleConfig({
+        baseStyle: {
+          zIndex: 999,
+        },
+      }),
     },
     styles: {
       global: {

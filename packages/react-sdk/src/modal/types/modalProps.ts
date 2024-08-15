@@ -105,5 +105,5 @@ export interface CapsuleModalProps {
    */
   onClose: () => void;
   loginTransitionOverride?: (capsule: CapsuleWeb) => Promise<void>;
-  createWalletOverride?: (capsule: CapsuleWeb) => Promise<string>;
+  createWalletOverride?: (capsule: CapsuleWeb) => Promise<{ recoverySecret?: string; walletIds: string[] }>;
 }

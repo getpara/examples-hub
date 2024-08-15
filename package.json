@@ -14,6 +14,7 @@
   },
   "scripts": {
     "setup-worker": "lerna run setup-worker --scope=capsule-portal && cd workers/mpc-worker && yarn build && cd ../..",
+    "dev": "yarn build; concurrently \"yarn start\" \"lerna watch -- lerna run build --scope=capsule-legacy-example --scope=capsule-portal --include-dependents\"",
     "build": "lerna run build --parallel",
     "lint": "eslint --config eslint.config.js --fix './**/*.{js,jsx,ts,tsx}'",
     "start": "lerna run start --scope=capsule-legacy-example --scope=capsule-portal",
@@ -21,6 +22,7 @@
     "start-bridge": "lerna run start --scope=capsule-js-bridge",
     "lerna-version": "lerna version",
     "lerna-publish": "lerna publish from-package --no-private",
+    "lerna-publish-dev": "lerna publish preminor --preid dev --dist-tag dev",
     "prepare": "husky",
     "test": "lerna run test"
   },
@@ -38,6 +40,5 @@
     "lint-staged": "^15.2.2",
     "prettier": "^3.2.5",
     "vitest": "^1.6.0"
-  },
-  "version": "0.0.0"
+  }
 }

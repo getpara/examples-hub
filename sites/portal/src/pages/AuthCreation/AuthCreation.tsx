@@ -7,8 +7,10 @@ import { Body } from './components/Body';
 import { Modal } from '../../components/common';
 import { ModalHeader } from '../../components/ModalHeader';
 import { CountryCallingCode } from 'libphonenumber-js';
+import { useCapsule } from '../../components/CapsuleContext';
 
 export const AuthCreation = () => {
+  const capsule = useCapsule();
   const [step, setStep] = useState<AuthCreationStep>(AuthCreationStep.SELECT_DEVICE);
 
   const { biometricId: paramsBiometricId, userId: paramsUserId } = useParams();
@@ -25,6 +27,7 @@ export const AuthCreation = () => {
     setStep(AuthCreationStep.CREATING);
     try {
       await authCreation(
+        capsule,
         paramsPartnerId,
         paramsUserId,
         paramsEmail,
@@ -34,8 +37,8 @@ export const AuthCreation = () => {
         paramsBiometricId,
         isForNewDevice,
       );
-      setStep(AuthCreationStep.SUCCESS);
 
+      setStep(AuthCreationStep.SUCCESS);
       setTimeout(function () {
         window.close();
       }, REDIRECT_TIMEOUT);
@@ -59,7 +62,7 @@ export const AuthCreation = () => {
   return (
     <Modal noOverlay>
       <ModalHeader />
-      <Body step={step} isForNewDevice={isForNewDevice} onAddThisDeviceClick={setUpBiometrics} />
+      <Body step={step} isForNewDevice={isForNewDevice} userId={paramsUserId} onAddThisDeviceClick={setUpBiometrics} />
     </Modal>
   );
 };

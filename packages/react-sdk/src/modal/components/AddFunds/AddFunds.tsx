@@ -1,4 +1,4 @@
-import { Network, NetworkProp, OnRampConfig } from '@usecapsule/web-sdk';
+import { Network, NetworkProp, NON_ED25519, OnRampConfig } from '@usecapsule/web-sdk';
 import { CpslTabsCustomEvent, TabsChangedEventDetail } from '@usecapsule/core-components';
 import { FilledDisabledInput, FlexColumn, Heading, QRContainer, SecondaryText } from '../common.js';
 import styled from 'styled-components';
@@ -88,16 +88,17 @@ export const AddFunds = ({ hasFinishedAnimation }: { hasFinishedAnimation: boole
   const networks = useModalStore(state => state.networks);
   const isOnRampConfigured = onRampConfig?.providers.length > 0;
 
+  const [walletId] = useState(capsule.findWalletId(undefined, { scheme: NON_ED25519 }));
   const [tab, setTab] = useState<'buy' | 'receive'>(isOnRampConfigured ? 'buy' : 'receive');
   const [configError, setConfigError] = useState<OnRampConfigError | undefined>();
 
-  const wallet = Object.values(capsule.getWallets())[0];
+  const walletAddress = capsule.getDisplayAddress(walletId);
 
   const onSetTab = (event: CpslTabsCustomEvent<TabsChangedEventDetail>) => {
     setTab(event.detail.tab as TabType);
   };
   const onCopy = () => {
-    copy(wallet.address);
+    copy(walletAddress);
   };
 
   useEffect(() => {
@@ -157,12 +158,12 @@ export const AddFunds = ({ hasFinishedAnimation }: { hasFinishedAnimation: boole
               <span>Scan with your phone's camera</span>
             </SecondaryText>
             <QRContainer>
-              <CpslQrCode url={wallet.address} />
+              <CpslQrCode url={walletAddress} />
             </QRContainer>
             <SecondaryText>
               <span>Or copy your wallet address</span>
             </SecondaryText>
-            <AddressDisplay disabled value={wallet.address} noAutoDisable>
+            <AddressDisplay disabled value={walletAddress} noAutoDisable>
               <CpslButton slot="end" variant="ghost" onClick={onCopy}>
                 <CpslIcon icon={isCopied ? 'check' : 'copy'} />
               </CpslButton>

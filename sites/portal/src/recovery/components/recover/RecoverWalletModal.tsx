@@ -1,6 +1,5 @@
 import { Modal, ModalOverlay, ModalContent, ModalBody, VStack } from '@chakra-ui/react';
 import { useContext, useEffect, useRef, useState } from 'react';
-import capsule from '../../../clients/capsule';
 import { distributeNewShare } from '@usecapsule/web-sdk';
 import { RecoveryHeader } from '../header/RecoveryHeader';
 import RecoveryLost2FA from '../RecoveryLost2FAStep';
@@ -14,6 +13,7 @@ import RecoveryDoneStep from './RecoveryDoneStep';
 import { Footer } from '../Footer/Footer';
 import { RecoveryAttemptContext } from '../../contexts/RecoveryAttemptContext';
 import TwoFactorContext from '../../contexts/TwoFactorContext';
+import { useCapsule } from '../../../components/CapsuleContext';
 
 type RecoveryWalletModalProps = {
   isOpen: boolean;
@@ -21,6 +21,7 @@ type RecoveryWalletModalProps = {
 };
 
 const RecoveryWalletModal: React.FC<RecoveryWalletModalProps> = ({ isOpen, onClose }) => {
+  const capsule = useCapsule();
   const { currentRecoveryStep, setCurrentRecoveryStep } = useContext(RecoveryStepContext);
   const [webAuthURLForCreate, setWebAuthURLForCreate] = useState('');
   const [userShares, setUserShares] = useState<string[]>(null);
@@ -53,7 +54,7 @@ const RecoveryWalletModal: React.FC<RecoveryWalletModalProps> = ({ isOpen, onClo
   useEffect(() => {
     async function distribute() {
       if (userShares && currentRecoveryStep === ModalStep.AWAITING_FINISH) {
-        const fetchedWallets = (await capsule.fetchWallets()).filter(wallet => !!wallet.address);
+        const fetchedWallets = await capsule.fetchWallets();
         const walletId = fetchedWallets[0].id;
         await Promise.all(
           userShares.map(userShare => distributeNewShare(capsule.ctx, capsule.getUserId(), walletId, userShare, true, {})),

@@ -1,6 +1,5 @@
 import { VStack, Spacer, HStack, Input, Button, Text, Box } from '@chakra-ui/react';
 import { useContext, useState } from 'react';
-import capsule from '../../../clients/capsule';
 import EmailContext from '../../contexts/EmailContext';
 import { RecoveryAttemptContext } from '../../contexts/RecoveryAttemptContext';
 import StepContext from '../../contexts/StepContext';
@@ -11,12 +10,14 @@ import Console from '../../../assets/console';
 import UserContext from '../../contexts/UserContext';
 import TwoFactorContext from '../../contexts/TwoFactorContext';
 import { RecoveryStatus } from '@usecapsule/core-sdk';
+import { useCapsule } from '../../../components/CapsuleContext';
 
 type RecoveryVerificationCodeStepProps = {
   onClose: () => void;
 };
 
 const RecoveryVerificationCodeStep: React.FC<RecoveryVerificationCodeStepProps> = ({ onClose }) => {
+  const capsule = useCapsule();
   const { setCurrentStep } = useContext(StepContext);
   const { email } = useContext(EmailContext);
   const { setAddress, setId: setWalletId } = useContext(WalletContext);

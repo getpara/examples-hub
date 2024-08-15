@@ -35,6 +35,7 @@ export function getBaseMPCNetworkUrl(env: Environment, useWebsocket?: boolean): 
 
 export function initClient(
   env: Environment,
+  version?: string,
   apiKey?: string,
   useFetchAdapter?: boolean,
   retrieveSessionCookie?: () => string,
@@ -42,6 +43,7 @@ export function initClient(
 ): Client {
   return new Client({
     userManagementHost: getBaseUrl(env),
+    version,
     apiKey: apiKey,
     opts: { useFetchAdapter },
     retrieveSessionCookie,

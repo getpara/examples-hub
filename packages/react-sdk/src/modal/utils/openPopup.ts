@@ -1,4 +1,4 @@
-export function openPopup(popupUrl: string, target: string, type: 'OAUTH' | 'LOGIN_PASSKEY' | 'CREATE_PASSKEY') {
+export function openPopup(popupUrl: string, target: string, type: 'OAUTH' | 'LOGIN_PASSKEY' | 'CREATE_PASSKEY'): Window {
   const popUpWidth = 550;
   let popUpHeight: number;
 
@@ -8,12 +8,12 @@ export function openPopup(popupUrl: string, target: string, type: 'OAUTH' | 'LOG
       break;
     }
     case 'CREATE_PASSKEY': {
-      popUpHeight = 414;
+      popUpHeight = 464;
       break;
     }
     case 'OAUTH':
     default: {
-      popUpHeight = 675;
+      popUpHeight = 768;
       break;
     }
   }
@@ -39,10 +39,12 @@ export function openPopup(popupUrl: string, target: string, type: 'OAUTH' | 'LOG
   const windowFeatures = `toolbar=no, menubar=no, width=${popUpWidth}, 
     height=${popUpHeight}, top=${top}, left=${left}`;
 
-  const popupWindow = window.open(popupUrl, target, windowFeatures);
+  let popupWindow = window.open(popupUrl, target, windowFeatures);
   if (!popupWindow) {
     setTimeout(() => {
-      window.open(popupUrl, '_blank');
+      popupWindow = window.open(popupUrl, '_blank');
     }, 0);
   }
+
+  return popupWindow;
 }

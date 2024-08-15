@@ -1,8 +1,9 @@
 // @ts-nocheck
-import React, { useEffect, useState } from 'react';
-import { useSessionStorage } from 'react-use';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useLocalStorage } from 'usehooks-ts';
 import ReactDOM from 'react-dom/client';
 import {
+  Box,
   Button,
   ChakraProvider,
   Checkbox,
@@ -46,6 +47,7 @@ import {
   NETWORKS,
   validateOnRampConfig,
   OnRampConfigError,
+  openPopup,
 } from '@usecapsule/react-sdk';
 import { FeeMarketEIP1559Transaction } from '@ethereumjs/tx';
 import { CapsuleProtoSigner } from '@usecapsule/cosmjs-v0-integration';
@@ -63,13 +65,24 @@ import CoreCapsule, {
   getProvider,
   getNetwork,
   OnRampProviderAssetMap,
+  getBaseUrl,
+  TransactionReviewError,
   Network,
+  SupportedWalletTypes,
+  WalletType,
 } from '@usecapsule/core-sdk';
 import { CapsuleSolanaWeb3Signer } from '@usecapsule/solana-web3.js-v1-integration';
 import { FONT_OPTIONS } from './constants';
-import parsePhoneNumberFromString from 'libphonenumber-js';
 import '@usecapsule/react-sdk/styles.css';
 import { ArrowUpIcon, ArrowDownIcon, SmallCloseIcon, AddIcon } from '@chakra-ui/icons';
+import { stringToPhoneNumber } from '@usecapsule/core-sdk';
+
+interface Partner {
+  apiKey: string;
+  id: string;
+  name: string;
+  displayName: string;
+}
 
 const ON_RAMP_ASSETS = {
   [OnRampAsset.ETHEREUM]: 'Ethereum',
@@ -130,6 +143,12 @@ const DEFAULT_NETWORKS = ['ETHEREUM', 'BASE'];
 const COSMOS_TESTNET_RPC = 'wss://rpc.sentry-01.theta-testnet.polypore.xyz';
 const COSMOS_DEFAULT_TO_ADDRESS = 'cosmos1f3px9t4juk43cwufj7f9s64z3wj7xvyc0rexg6';
 const web3 = new Web3();
+
+const THEMES = {
+  devRed: ['www.red.com', 'https://i.imgur.com/7joBw13.png', '#ffffff', '#ff2222', 'none', 'dark'],
+  devBlue: ['www.blue.com', 'https://i.imgur.com/rIqjbim.png', '#222222', '#33bbff', 'lg', 'branded'],
+  devGreen: ['www.green.com', 'https://i.imgur.com/xQOZmn6.png', '#161616', '#2fdd86', 'sm', 'branded'],
+};
 
 // use below to call "view" smart contract function
 // const web3 = new Web3('https://eth-sepolia.g.alchemy.com/v2/demo');
@@ -195,7 +214,7 @@ async function sendSolanaTx(setSig: any): Promise<void> {
   setSig(rawTxRes);
 }
 
-async function sendViemTransaction(nonce = 0): Promise<void> {
+async function _sendViemTransaction(nonce = 0): Promise<void> {
   const viemClient = createCapsuleViemClient(capsule, {
     chain: sepolia,
     transport: http(ALCHEMY_SEPOLIA_PROVIDER),
@@ -264,7 +283,15 @@ function WagmiSignMessage(): JSX.Element {
       <Button
         isDisabled={!message}
         onClick={async () => {
-          await signMessageAsync({ message });
+          try {
+            await signMessageAsync({ message });
+          } catch (error) {
+            console.log(error);
+            // if ((res as DeniedSignatureResWithUrl).transactionReviewUrl) {
+            //   openPopup((res as DeniedSignatureResWithUrl).transactionReviewUrl, 'TransactionReview', 'REVIEW_TRANSACTION')
+            //   // setTransactionReviewUrl((res as DeniedSignatureResWithUrl).transactionReviewUrl);
+            // }
+          }
         }}
       >
         Sign Message
@@ -416,15 +443,13 @@ function WagmiComponent(): JSX.Element {
   );
 }
 
-async function signEthersMessage(message: string): Promise<string> {
-  const provider = new ethers.JsonRpcProvider(ALCHEMY_SEPOLIA_PROVIDER, 'sepolia');
-  const ethersSigner = new CapsuleEthersSigner(capsule, provider);
-  return ethersSigner.signMessage(message);
-}
-
-async function sendEthersTransaction(): Promise<void> {
+async function _sendEthersTransaction(): Promise<void> {
+  const currentWalletId = capsule.currentWalletIds?.[0];
+  if (!currentWalletId) {
+    return;
+  }
   const tx = {
-    from: Object.values(capsule.getWallets())[0]?.address,
+    from: capsule.wallets?.[currentWalletId]?.address,
     to: DEFAULT_TO_ADDRESS,
     value: 1010000000,
     gasLimit: 21000,
@@ -435,7 +460,7 @@ async function sendEthersTransaction(): Promise<void> {
     type: 2,
   };
   const provider = new ethers.JsonRpcProvider(ALCHEMY_SEPOLIA_PROVIDER, 'sepolia');
-  const ethersSigner = new CapsuleEthersSigner(capsule, provider);
+  const ethersSigner = new CapsuleEthersSigner(capsule, provider, currentWalletId);
   const res = await ethersSigner.sendTransaction(tx);
   console.log('send ethers tx response:\n', res);
 }
@@ -501,29 +526,38 @@ function getCapsuleOpts(env: Environment, useDKLS: boolean): ConstructorOpts {
   }
 }
 
-let capsule: Capsule = undefined;
-
 function App() {
-  const [selectedView, setSelectedView] = useSessionStorage('@EXAMPLE-CAPSULE/selectedView', 'OLD_VIEW');
-  const [selectedEnv, setSelectedEnv] = useSessionStorage('@EXAMPLE-CAPSULE/selectedEnv', Environment.SANDBOX);
-  const [selectedApiKey, setSelectedApiKey] = useSessionStorage('@EXAMPLE-CAPSULE/selectedApiKey', API_KEY_WITH_BRANDING);
-  const [useDKLS, setUseDKLS] = useSessionStorage('@EXAMPLE-CAPSULE/useDKLS', true);
+  const [selectedView, setSelectedView] = useLocalStorage('@EXAMPLE-CAPSULE/selectedView', 'OLD_VIEW');
+  const [selectedEnv, setSelectedEnv] = useLocalStorage('@EXAMPLE-CAPSULE/selectedEnv', Environment.SANDBOX);
+  const [selectedApiKey, setSelectedApiKey] = useLocalStorage('@EXAMPLE-CAPSULE/selectedApiKey', API_KEY_WITH_BRANDING);
+  const [useDKLS, setUseDKLS] = useLocalStorage('@EXAMPLE-CAPSULE/useDKLS', true);
+  const [partners, setPartners] = useLocalStorage<Partner[]>('@EXAMPLE-CAPSULE/partners', []);
+  const [homepageUrl, setHomepageUrl] = useLocalStorage('@EXAMPLE-CAPSULE/homepageUrl', 'www.capsule.com');
 
-  const [logo, setLogo] = useState('');
-  const [useTheme, setUseTheme] = useState(false);
-  const [foregroundColor, setForegroundColor] = useState('#FAFAFA');
-  const [backgroundColor, setBackgroundColor] = useState('#121212');
-  const [borderRadius, setBorderRadius] = useState('sm');
-  const [font, setFont] = useState('inter');
-  const [logoVariant, setLogoVariant] = useState('branded');
+  const [logo, setLogo] = useLocalStorage('@EXAMPLE-CAPSULE/logo', '');
+  const [useTheme, setUseTheme] = useLocalStorage('@EXAMPLE-CAPSULE/useTheme', false);
+  const [foregroundColor, setForegroundColor] = useLocalStorage('@EXAMPLE-CAPSULE/foregroundColor', '#FAFAFA');
+  const [backgroundColor, setBackgroundColor] = useLocalStorage('@EXAMPLE-CAPSULE/backgroundColor', '#121212');
+  const [borderRadius, setBorderRadius] = useLocalStorage('@EXAMPLE-CAPSULE/borderRadius', 'sm');
+  const [font, setFont] = useLocalStorage('@EXAMPLE-CAPSULE/font', 'inter');
+  const [logoVariant, setLogoVariant] = useLocalStorage('@EXAMPLE-CAPSULE/logoVariant', 'branded');
 
-  const [onRampConfig, setOnRampConfig] = useState<OnRampConfig | undefined>(DEFAULT_ONRAMP_CONFIG);
+  const [supportedWalletTypes, setSupportedWalletTypes] = useLocalStorage<SupportedWalletTypes>(
+    '@EXAMPLE-CAPSULE/supportedWalletTypes',
+    { EVM: true },
+  );
+  const [useOnRampConfig, setUseOnRampConfig] = useLocalStorage('@EXAMPLE-CAPSULE/useOnRampConfig', true);
+  const [onRampConfig, setOnRampConfig] = useLocalStorage<OnRampConfig | undefined>(
+    '@EXAMPLE-CAPSULE/onRampConfig',
+    DEFAULT_ONRAMP_CONFIG,
+  );
   const [onRampConfigError, setOnRampConfigError] = useState<OnRampConfigError | undefined>();
   const [networks, setNetworks] = useState<Network[]>(DEFAULT_NETWORKS);
 
   const [pregenEmail, setPregenEmail] = useState('');
   const [pregenPhone, setPregenPhone] = useState('');
-  const [pregenUserShare, setPregenUserShare] = useState('');
+  const [pregenUserShare, setPregenUserShare] = useLocalStorage<BorderRadius>('@EXAMPLE-CAPSULE/pregenUserShare', '');
+  const [pregenType, setPregenType] = useLocalStorage<WalletType>('@EXAMPLE-CAPSULE/pregenType', 'EVM');
   const [deletedEmail, setDeletedEmail] = useState('');
   const [emailPendingDeletion, setEmailPendingDeletion] = useState('');
   const [isSessionActive, setIsSessionActive] = useState(false);
@@ -539,7 +573,6 @@ function App() {
   const [smartContractFunctionArgs, setSmartContractFunctionArgs] = useState('');
   const [smartContractAbi, setSmartContractAbi] = useState(JSON.stringify(DEFAULT_CONTRACT_ABI));
   const [smartContractByteCode, setSmartContractByteCode] = useState('');
-  const [transactionReviewUrl, setTransactionReviewUrl] = useState('');
   const [_capsuleKey, setCapsuleKey] = useState(0);
   const [deleteButtonDisabled, setDeleteButtonDisabled] = useState(false);
   const [secondsToDelete, setSecondsToDelete] = useState(4);
@@ -548,17 +581,25 @@ function App() {
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
-  capsule = React.useMemo(
+  const capsule = React.useMemo(
     () =>
       new Capsule(selectedEnv, selectedApiKey, {
         ...getCapsuleOpts(selectedEnv, useDKLS),
+        homepageUrl,
         xUrl: 'https://twitter.com/usecapsule',
         linkedinUrl: 'https://www.linkedin.com/company/usecapsule',
         supportUrl: 'mailto:support@usecapsule.com',
-        portalTheme: { backgroundColor, foregroundColor },
+        portalTheme: useTheme ? { backgroundColor, foregroundColor } : undefined,
+        supportedWalletTypes,
       }),
-    [selectedEnv, useDKLS, selectedApiKey, foregroundColor, backgroundColor],
+    [selectedEnv, useDKLS, selectedApiKey, foregroundColor, backgroundColor, useTheme, homepageUrl, supportedWalletTypes],
   );
+
+  const [, setCapsuleToString] = useState(capsule.toString());
+
+  function updateToString() {
+    setCapsuleToString(capsule.toString());
+  }
 
   async function checkIsSessionActive() {
     const isFullyLoggedIn = await capsule.isSessionActive();
@@ -566,11 +607,32 @@ function App() {
     if (isFullyLoggedIn && capsule instanceof CoreCapsule) {
       console.log(`exported session:\n${(capsule as CoreCapsule).exportSession()}`);
     }
+
+    const [email, phone] = [capsule.getEmail(), capsule.getPhoneNumber()];
+
+    email && setPregenEmail(email);
+    phone && setPregenPhone(phone);
   }
 
   useEffect(() => {
     checkIsSessionActive();
   }, []);
+
+  useEffect(() => {
+    async function fetchPartners() {
+      return fetch(`${getBaseUrl(selectedEnv)}partners`);
+    }
+
+    if ([Environment.DEV, Environment.SANDBOX].includes(selectedEnv)) {
+      fetchPartners()
+        .then(res => res.json())
+        .then(json => {
+          setPartners(json);
+          if (!selectedApiKey) setSelectedApiKey(json[0].apiKey);
+        })
+        .catch(console.error);
+    }
+  }, [selectedEnv]);
 
   useEffect(() => {
     try {
@@ -580,6 +642,29 @@ function App() {
       setOnRampConfigError(e as OnRampConfigError);
     }
   }, [onRampConfig]);
+
+  useEffect(() => {
+    if (partners) {
+      const partner = partners.find(({ apiKey }) => selectedApiKey === apiKey);
+      if (partner && Object.keys(THEMES).includes(partner.name)) {
+        const [
+          themeHomepageUrl,
+          themeModalLogo,
+          themeBackgroundColor,
+          themeForegroundColor,
+          themeBorderRadius,
+          themeLogoVariant,
+        ] = THEMES[partner.name];
+        setUseTheme(true);
+        setLogo(themeModalLogo);
+        setHomepageUrl(themeHomepageUrl);
+        setForegroundColor(themeForegroundColor);
+        setBackgroundColor(themeBackgroundColor);
+        setBorderRadius(themeBorderRadius);
+        setLogoVariant(themeLogoVariant);
+      }
+    }
+  }, [selectedApiKey, partners]);
 
   const handleOnClose = async () => {
     setModalIsOpen(false);
@@ -620,6 +705,21 @@ function App() {
     }, secondsToDelete * 1000);
   };
 
+  const handleSignMessage = useCallback(async () => {
+    try {
+      const provider = new ethers.JsonRpcProvider(ALCHEMY_SEPOLIA_PROVIDER, 'sepolia');
+      const ethersSigner = new CapsuleEthersSigner(capsule, provider, capsule.currentWalletIds?.[0]);
+      const messageSignature = await ethersSigner.signMessage(messageToSign);
+      setEthersSignature(messageSignature);
+    } catch (error) {
+      console.error(error);
+      if (error instanceof TransactionReviewError) {
+        console.log(error.transactionReviewUrl);
+        openPopup(error.transactionReviewUrl, 'ReviewTransaction', 'REVIEW_TRANSACTION');
+      }
+    }
+  }, [capsule, messageToSign]);
+
   return (
     <>
       <ChakraProvider>
@@ -646,16 +746,43 @@ function App() {
               <option value="WAGMI">Wagmi View</option>
             </Select>
           </HStack>
+          {[Environment.DEV, Environment.SANDBOX].includes(selectedEnv) ? (
+            <HStack paddingBottom={10}>
+              <Text width={'15%'}>
+                <strong>Set Partner:</strong>
+              </Text>
+              <Select value={selectedApiKey} onChange={e => setSelectedApiKey(e.target.value)}>
+                {(partners || []).map(partner => (
+                  <option key={partner.id} value={partner.apiKey}>
+                    {partner.displayName} ({partner.apiKey})
+                  </option>
+                ))}
+              </Select>
+            </HStack>
+          ) : (
+            <HStack paddingBottom={10}>
+              <Text width={'15%'}>
+                <strong>Set API Key:</strong>
+              </Text>
+              <Input
+                placeholder="api key"
+                onChange={e => {
+                  setSelectedApiKey(e.target.value);
+                }}
+                value={selectedApiKey || ''}
+              />
+            </HStack>
+          )}
           <HStack paddingBottom={10}>
             <Text width={'15%'}>
-              <strong>Set API Key:</strong>
+              <strong>Set Homepage URL:</strong>
             </Text>
             <Input
               placeholder="api key"
               onChange={e => {
-                setSelectedApiKey(e.target.value);
+                setHomepageUrl(e.target.value);
               }}
-              value={selectedApiKey || ''}
+              value={homepageUrl || ''}
             />
           </HStack>
           <HStack paddingBottom={10}>
@@ -725,7 +852,7 @@ function App() {
                   </Text>
                   <Select
                     disabled={!useTheme}
-                    defaultValue={borderRadius}
+                    value={borderRadius}
                     onChange={e => setBorderRadius(e.target.value as Environment)}
                   >
                     <option value="none">None</option>
@@ -750,7 +877,7 @@ function App() {
                   <Text width={'15%'}>
                     <strong>OAuth Logo Variant:</strong>
                   </Text>
-                  <Select disabled={!useTheme} defaultValue={logoVariant} onChange={e => setLogoVariant(e.target.value)}>
+                  <Select disabled={!useTheme} value={logoVariant} onChange={e => setLogoVariant(e.target.value)}>
                     <option value="branded">Branded</option>
                     <option value="dark">Dark</option>
                     <option value="light">Light</option>
@@ -759,14 +886,40 @@ function App() {
               </VStack>
               <HStack>
                 <Text width={'15%'}>
+                  <strong>Supported Wallet Types:</strong>
+                </Text>
+                <HStack gap={12}>
+                  {['EVM', 'SOLANA', 'COSMOS'].map(walletType => (
+                    <HStack gap={2} cursor="pointer">
+                      <Checkbox
+                        name={walletType}
+                        id={`checkbox-${walletType}`}
+                        isChecked={!!supportedWalletTypes[walletType]}
+                        onChange={e => {
+                          if (e.currentTarget.checked) {
+                            setSupportedWalletTypes(prev => ({
+                              ...prev,
+                              [walletType]: walletType === 'COSMOS' ? { prefix: 'cosmos' } : true,
+                            }));
+                            setPregenType(walletType);
+                          } else {
+                            setSupportedWalletTypes(({ [walletType]: _, ...prev }) => prev);
+                            setPregenType('EVM');
+                          }
+                        }}
+                      />
+                      <label htmlFor={`checkbox-${walletType}`}>{walletType}</label>
+                    </HStack>
+                  ))}
+                </HStack>
+              </HStack>
+              <HStack>
+                <Text width={'15%'}>
                   <strong>On-Ramp Configuration:</strong>
                 </Text>
-                <Checkbox
-                  isChecked={!!onRampConfig}
-                  onChange={e => setOnRampConfig(e.currentTarget.checked ? DEFAULT_ONRAMP_CONFIG : undefined)}
-                />
+                <Checkbox isChecked={useOnRampConfig} onChange={e => setUseOnRampConfig(e.currentTarget.checked)} />
               </HStack>
-              {!!onRampConfig && (
+              {useOnRampConfig && (
                 <VStack align="left" ml="40px" opacity={useTheme ? 1 : 0.8}>
                   <HStack>
                     <Text width={'15%'}>
@@ -990,10 +1143,7 @@ function App() {
               <HStack>
                 <Button
                   colorScheme="green"
-                  onClick={async () => {
-                    if (pregenUserShare) {
-                      await capsule.setUserShare(pregenUserShare);
-                    }
+                  onClick={() => {
                     setModalIsOpen(true);
                   }}
                 >
@@ -1004,7 +1154,7 @@ function App() {
                     <Button
                       colorScheme="green"
                       onClick={async () => {
-                        await capsule.logout();
+                        await capsule.logout(true);
                         setIsSessionActive(false);
                       }}
                     >
@@ -1021,232 +1171,295 @@ function App() {
                   </>
                 )}
               </HStack>
-              <Button
-                colorScheme="teal"
-                onClick={async () => {
-                  const fetchedWallet = (await capsule.fetchWallets()).filter(wallet => !!wallet.address)[0];
-                  const newShare = await capsule.distributeNewWalletShare(fetchedWallet.id, undefined, true);
+              <HStack alignItems="flex-start">
+                <VStack w={{ base: '100%', md: '500px' }} align="left">
+                  <>
+                    <Button
+                      colorScheme="teal"
+                      onClick={async () => {
+                        const fetchedWallet = (await capsule.fetchWallets())[0];
+                        const newShare = await capsule.distributeNewWalletShare(fetchedWallet.id, undefined, true);
 
-                  const backupDecryptionKey = JSON.parse(newShare || '{}').backupDecryptionKey;
+                        const backupDecryptionKey = JSON.parse(newShare || '{}').backupDecryptionKey;
 
-                  window.alert(`New Recovery Share!! ${backupDecryptionKey}`);
-                }}
-              >
-                Regen Recovery
-              </Button>
+                        window.alert(`New Recovery Share!! ${backupDecryptionKey}`);
+                      }}
+                    >
+                      Regen Recovery
+                    </Button>
+                    <HStack>
+                      <Input
+                        placeholder="pregen-e-mail"
+                        onChange={e => {
+                          setPregenEmail(e.target.value);
+                        }}
+                        value={pregenEmail}
+                      />
+                      {Object.keys(supportedWalletTypes).length > 1 && (
+                        <select value={pregenType} onChange={e => setPregenType(e.currentTarget.value)}>
+                          {Object.keys(supportedWalletTypes).map(walletType => (
+                            <option key={walletType} value={walletType}>
+                              {walletType}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </HStack>
+                    <Button
+                      colorScheme="teal"
+                      onClick={async () => {
+                        await capsule.createWalletPreGen(pregenType, pregenEmail);
 
-              <Input
-                placeholder="pregen-e-mail"
-                onChange={e => {
-                  setPregenEmail(e.target.value);
-                }}
-                value={pregenEmail || ''}
-              />
-              <Button
-                colorScheme="teal"
-                onClick={async () => {
-                  await capsule.createWalletPreGen(pregenEmail);
-                }}
-              >
-                Create Pregen Wallet
-              </Button>
-              <Input
-                placeholder="pregen-phone"
-                onChange={e => {
-                  setPregenPhone(e.target.value);
-                }}
-                value={pregenPhone || ''}
-              />
-              <Button
-                colorScheme="teal"
-                onClick={async () => {
-                  const parsedPhoneNumber = parsePhoneNumberFromString(pregenPhone);
-                  const formattedNumberForPregen = `+${parsedPhoneNumber.countryCallingCode}${parsedPhoneNumber.formatNational()}`;
-                  await capsule.createWalletPreGen(formattedNumberForPregen, PregenIdentifierType.PHONE);
-                }}
-              >
-                Create Pregen Wallet Through Phone Number
-              </Button>
-              <Button
-                colorScheme="teal"
-                onClick={async () => {
-                  await capsule.updateWalletEmailPreGen(pregenEmail);
-                }}
-              >
-                Edit Pregen Wallet Email
-              </Button>
-              <Text>
-                User Share: <strong>{capsule.getUserShare() || ''}</strong>
-              </Text>
-              <Input
-                placeholder="claim-pregen-user-share"
-                onChange={e => {
-                  setPregenUserShare(e.target.value);
-                }}
-                value={pregenUserShare || ''}
-              />
-              <Button
-                colorScheme="teal"
-                onClick={async () => {
-                  await capsule.setUserShare(pregenUserShare);
-                  console.log(await capsule.claimPregenWallets(pregenEmail));
-                }}
-              >
-                Claim Pregen Wallet
-              </Button>
-              <Button
-                colorScheme="teal"
-                onClick={async () => {
-                  await capsule.setUserShare(pregenUserShare);
-                  const parsedPhoneNumber = parsePhoneNumberFromString(pregenPhone);
-                  const formattedNumberForPregen = `+${parsedPhoneNumber.countryCallingCode}${parsedPhoneNumber.formatNational()}`;
-                  console.log(await capsule.claimPregenWallets(formattedNumberForPregen, PregenIdentifierType.PHONE));
-                }}
-              >
-                Claim Pregen Wallet For Phone
-              </Button>
+                        updateToString();
+                      }}
+                    >
+                      Create Pregen Wallet
+                    </Button>
+                    <HStack>
+                      <Input
+                        placeholder="pregen-phone"
+                        onChange={e => {
+                          setPregenPhone(e.target.value);
+                        }}
+                        value={pregenPhone}
+                      />
+                      {Object.keys(supportedWalletTypes).length > 1 && (
+                        <select value={pregenType} onChange={e => setPregenType(e.currentTarget.value)}>
+                          {Object.keys(supportedWalletTypes).map(walletType => (
+                            <option key={walletType} value={walletType}>
+                              {walletType}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </HStack>
+                    <Button
+                      colorScheme="teal"
+                      onClick={async () => {
+                        const formattedNumber = stringToPhoneNumber(pregenPhone);
+                        await capsule.createWalletPreGen(pregenType, formattedNumber, PregenIdentifierType.PHONE);
+                        updateToString();
+                      }}
+                    >
+                      Create Pregen Wallet Through Phone Number
+                    </Button>
+                    <Button
+                      colorScheme="teal"
+                      onClick={async () => {
+                        await capsule.updateWalletEmailPreGen(pregenEmail);
 
-              <Button colorScheme="teal" onClick={checkIsSessionActive}>
-                Is Fully Logged In?
-              </Button>
-              <Text>{isSessionActive ? 'Fully Logged In!' : 'Log In Pending...'}</Text>
+                        updateToString();
+                      }}
+                    >
+                      Edit Pregen Wallet Email
+                    </Button>
+                    <HStack>
+                      <Text whiteSpace="nowrap">Stored User Share:</Text>
+                      <Box
+                        flexGrow={1}
+                        whiteSpace={'nowrap'}
+                        overflow={'hidden'}
+                        textOverflow={'ellipsis'}
+                        fontWeight={'bold'}
+                      >
+                        {pregenUserShare || 'none'}
+                      </Box>
+                    </HStack>
+                    <HStack w="100%">
+                      <Button
+                        flex={1}
+                        colorScheme="teal"
+                        onClick={() => {
+                          setPregenUserShare(capsule.getUserShare());
+                        }}
+                      >
+                        Save
+                      </Button>
+                      <Button
+                        flex={1}
+                        colorScheme="teal"
+                        disabled={}
+                        onClick={async () => {
+                          await capsule.setUserShare(pregenUserShare);
 
-              <Text>
-                Wallet Address: <strong>{capsule.getWallets()?.[Object.keys(capsule.getWallets())[0]]?.address}</strong>
-              </Text>
-              {/* <Text>{userShare}</Text> */}
+                          updateToString();
+                        }}
+                      >
+                        Restore
+                      </Button>
+                    </HStack>
 
-              <Input
-                placeholder="message-to-sign"
-                onChange={e => {
-                  setMessageToSign(e.target.value);
-                }}
-                value={messageToSign || ''}
-              />
-              <Button
-                colorScheme="teal"
-                onClick={async () => {
-                  setEthersSignature(await signEthersMessage(messageToSign));
-                }}
-              >
-                Sign Message
-              </Button>
-              <Text>
-                Message Signature: <strong>{ethersSignature}</strong>
-              </Text>
+                    <Button
+                      colorScheme="teal"
+                      onClick={async () => {
+                        await capsule.setUserShare(pregenUserShare);
+                        console.log(await capsule.claimPregenWallet(pregenEmail));
+                        updateToString();
+                      }}
+                    >
+                      Claim Pregen Wallet
+                    </Button>
+                    <Button
+                      colorScheme="teal"
+                      onClick={async () => {
+                        await capsule.setUserShare(pregenUserShare);
+                        const formattedNumber = stringToPhoneNumber(pregenPhone);
+                        console.log(await capsule.claimPregenWallets(formattedNumber, PregenIdentifierType.PHONE));
+                        updateToString();
+                      }}
+                    >
+                      Claim Pregen Wallet For Phone
+                    </Button>
 
-              <Text>To Address:</Text>
-              <Input name="To Address" onChange={e => setTxToAddress(e.target.value)} value={txToAddress} />
-              <Text>Value (gwei):</Text>
-              <Input name="Value (gwei)" onChange={e => setTxValue(e.target.value)} value={txValue} />
-              <Text>Gas Amount:</Text>
-              <Input name="Gas Amount" onChange={e => setTxGasAmount(e.target.value)} value={txGasAmount} />
-              <Text>Max Priority Fee Per Gas (gwei):</Text>
-              <Input
-                name="Max Priority Fee Per Gas (gwei)"
-                onChange={e => setTxMaxPriorityFeePerGas(e.target.value)}
-                value={txMaxPriorityFeePerGas}
-              />
-              <Text>Max Fee Per Gas (gwei):</Text>
-              <Input
-                name="Max Fee Per Gas (gwei)"
-                onChange={e => setTxMaxFeePerGas(e.target.value)}
-                value={txMaxFeePerGas}
-              />
-              <Text>Nonce:</Text>
-              <Input name="Nonce" onChange={e => setNonce(e.target.value)} value={nonce} />
-              <Text>Chain ID:</Text>
-              <Input name="Chain ID" onChange={e => setChainId(e.target.value)} value={chainId} />
-              <Text>Smart Contract ABI:</Text>
-              <Input
-                name="Smart Contract ABI"
-                onChange={e => setSmartContractAbi(e.target.value)}
-                value={smartContractAbi}
-              />
-              <Text>Smart Contract Function Name:</Text>
-              <Input
-                name="Smart Contract Function Name"
-                onChange={e => setSmartContractFunctionName(e.target.value)}
-                value={smartContractFunctionName}
-                placeholder={DEFAULT_SMART_CONTRACT_FUNCTION}
-              />
-              <Text>Smart Contract Function Args:</Text>
-              <Input
-                name="Smart Contract Function Args"
-                onChange={e => setSmartContractFunctionArgs(e.target.value)}
-                value={smartContractFunctionArgs}
-                placeholder={JSON.stringify(DEFAULT_SMART_CONTRACT_ARGS)}
-              />
-              <Text>Smart Contract Byte Code:</Text>
-              <Input
-                name="Smart Contract Byte Code"
-                onChange={e => setSmartContractByteCode(e.target.value)}
-                value={smartContractByteCode}
-              />
+                    <Button colorScheme="teal" onClick={checkIsSessionActive}>
+                      Is Fully Logged In?
+                    </Button>
+                    <Text>{isSessionActive ? 'Fully Logged In!' : 'Log In Pending...'}</Text>
 
-              <Button
-                colorScheme="teal"
-                onClick={async () => {
-                  const walletId = capsule.getWallets()?.[Object.keys(capsule.getWallets())[0]]?.id;
-                  const tx = await createTransaction(
-                    txToAddress,
-                    txValue,
-                    txGasAmount,
-                    txMaxPriorityFeePerGas,
-                    txMaxFeePerGas,
-                    nonce,
-                    chainId,
-                    smartContractAbi,
-                    smartContractFunctionName,
-                    smartContractFunctionArgs ? JSON.parse(smartContractFunctionArgs) : [],
-                    smartContractByteCode,
-                  );
-                  await sendEthersTransaction();
-                  await sendViemTransaction();
-                  const res = await capsule.sendTransaction(walletId, tx, `${chainId}`);
-                  if ((res as DeniedSignatureResWithUrl).transactionReviewUrl) {
-                    setTransactionReviewUrl((res as DeniedSignatureResWithUrl).transactionReviewUrl);
-                  }
-                }}
-              >
-                Send Transaction
-              </Button>
-              {transactionReviewUrl && <Text>Transaction Review URL is: {transactionReviewUrl}</Text>}
-              <Button
-                colorScheme="teal"
-                onClick={async () => {
-                  await sendCosmosTx();
-                }}
-              >
-                Send Cosmos Transaction
-              </Button>
-              <Text>
-                Solana Signature: <strong>{ethersSignature}</strong>
-              </Text>
-              <Button
-                colorScheme="teal"
-                onClick={async () => {
-                  await sendSolanaTx(setEthersSignature);
-                }}
-              >
-                Send Solana Transaction
-              </Button>
-              <Button
-                colorScheme="red"
-                onClick={async () => {
-                  await capsule.logout();
-                  capsule.clearStorage();
-                }}
-              >
-                Logout and Clear Storage
-              </Button>
+                    <Text>
+                      Wallet Address: <strong>{capsule.wallets[capsule.currentWalletIds?.[0]]?.address ?? 'none'}</strong>
+                    </Text>
+                    {/* <Text>{userShare}</Text> */}
+
+                    <Input
+                      placeholder="message-to-sign"
+                      onChange={e => {
+                        setMessageToSign(e.target.value);
+                      }}
+                      value={messageToSign || ''}
+                    />
+                    <Button colorScheme="teal" onClick={handleSignMessage}>
+                      Sign Message
+                    </Button>
+                    <Text>
+                      Message Signature: <strong>{ethersSignature}</strong>
+                    </Text>
+
+                    <Text>To Address:</Text>
+                    <Input name="To Address" onChange={e => setTxToAddress(e.target.value)} value={txToAddress} />
+                    <Text>Value (gwei):</Text>
+                    <Input name="Value (gwei)" onChange={e => setTxValue(e.target.value)} value={txValue} />
+                    <Text>Gas Amount:</Text>
+                    <Input name="Gas Amount" onChange={e => setTxGasAmount(e.target.value)} value={txGasAmount} />
+                    <Text>Max Priority Fee Per Gas (gwei):</Text>
+                    <Input
+                      name="Max Priority Fee Per Gas (gwei)"
+                      onChange={e => setTxMaxPriorityFeePerGas(e.target.value)}
+                      value={txMaxPriorityFeePerGas}
+                    />
+                    <Text>Max Fee Per Gas (gwei):</Text>
+                    <Input
+                      name="Max Fee Per Gas (gwei)"
+                      onChange={e => setTxMaxFeePerGas(e.target.value)}
+                      value={txMaxFeePerGas}
+                    />
+                    <Text>Nonce:</Text>
+                    <Input name="Nonce" onChange={e => setNonce(e.target.value)} value={nonce} />
+                    <Text>Chain ID:</Text>
+                    <Input name="Chain ID" onChange={e => setChainId(e.target.value)} value={chainId} />
+                    <Text>Smart Contract ABI:</Text>
+                    <Input
+                      name="Smart Contract ABI"
+                      onChange={e => setSmartContractAbi(e.target.value)}
+                      value={smartContractAbi}
+                    />
+                    <Text>Smart Contract Function Name:</Text>
+                    <Input
+                      name="Smart Contract Function Name"
+                      onChange={e => setSmartContractFunctionName(e.target.value)}
+                      value={smartContractFunctionName}
+                      placeholder={DEFAULT_SMART_CONTRACT_FUNCTION}
+                    />
+                    <Text>Smart Contract Function Args:</Text>
+                    <Input
+                      name="Smart Contract Function Args"
+                      onChange={e => setSmartContractFunctionArgs(e.target.value)}
+                      value={smartContractFunctionArgs}
+                      placeholder={JSON.stringify(DEFAULT_SMART_CONTRACT_ARGS)}
+                    />
+                    <Text>Smart Contract Byte Code:</Text>
+                    <Input
+                      name="Smart Contract Byte Code"
+                      onChange={e => setSmartContractByteCode(e.target.value)}
+                      value={smartContractByteCode}
+                    />
+
+                    <Button
+                      colorScheme="teal"
+                      onClick={async () => {
+                        const walletId = capsule.findWalletId(capsule.currentWalletIds[0], { scheme: ['DKLS'] });
+                        const tx = await createTransaction(
+                          txToAddress,
+                          txValue,
+                          txGasAmount,
+                          txMaxPriorityFeePerGas,
+                          txMaxFeePerGas,
+                          nonce,
+                          chainId,
+                          smartContractAbi,
+                          smartContractFunctionName,
+                          smartContractFunctionArgs ? JSON.parse(smartContractFunctionArgs) : [],
+                          smartContractByteCode,
+                        );
+                        const res = await capsule.sendTransaction(walletId, tx, `${chainId}`);
+                        if ((res as DeniedSignatureResWithUrl).transactionReviewUrl) {
+                          openPopup(
+                            (res as DeniedSignatureResWithUrl).transactionReviewUrl,
+                            'TransactionReview',
+                            'REVIEW_TRANSACTION',
+                          );
+                        }
+
+                        console.log(res);
+                      }}
+                    >
+                      Send Transaction
+                    </Button>
+                    <Button
+                      colorScheme="teal"
+                      onClick={async () => {
+                        await sendCosmosTx();
+                      }}
+                    >
+                      Send Cosmos Transaction
+                    </Button>
+                    <Text>
+                      Solana Signature: <strong>{ethersSignature}</strong>
+                    </Text>
+                    <Button
+                      colorScheme="teal"
+                      onClick={async () => {
+                        await sendSolanaTx(setEthersSignature);
+                      }}
+                    >
+                      Send Solana Transaction
+                    </Button>
+                    <Button
+                      colorScheme="red"
+                      onClick={async () => {
+                        await capsule.logout();
+                        await capsule.clearStorage();
+
+                        updateToString();
+                      }}
+                    >
+                      Logout and Clear Storage
+                    </Button>
+                  </>
+                </VStack>
+                <Box flexGrow={1} bg="#222" overflow="auto" maxH="100vh" position="sticky" top={0}>
+                  <Box color="white" fontFamily={'monospace'} whiteSpace={'pre'} p={6} fontSize="14px">
+                    {capsule.toString()}
+                  </Box>
+                </Box>
+              </HStack>
             </VStack>
           )}
         </Container>
         <CapsuleModal
           isOpen={modalIsOpen}
           capsule={capsule}
-          appName="Example"
+          appName={(partners || []).find(({ apiKey }) => apiKey === selectedApiKey)?.displayName || 'Example'}
           onClose={handleOnClose}
           oAuthMethods={[
             OAuthMethod.GOOGLE,
@@ -1256,7 +1469,7 @@ function App() {
             OAuthMethod.DISCORD,
             OAuthMethod.FARCASTER,
           ]}
-          onRampConfig={onRampConfig}
+          onRampConfig={useOnRampConfig ? onRampConfig : undefined}
           networks={networks}
           twoFactorAuthEnabled
           theme={

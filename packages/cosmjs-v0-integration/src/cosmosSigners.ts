@@ -12,32 +12,24 @@ import { Secp256k1, Sha256, sha256, ExtendedSecp256k1Signature } from '@cosmjs/c
 import { OfflineDirectSigner, makeSignBytes, DirectSignResponse } from '@cosmjs/proto-signing';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
-import CoreCapsule, { SuccessfulSignatureRes, hexToSignature, hexToUint8Array } from '@usecapsule/core-sdk';
+import CoreCapsule, { SuccessfulSignatureRes, NON_ED25519, hexToSignature, hexToUint8Array } from '@usecapsule/core-sdk';
 
 class CapsuleCosmosSigner {
   readonly prefix: string;
   readonly capsule: CoreCapsule;
-  private _currentWalletId?: string;
+  readonly currentWalletId: string;
 
-  constructor(capsule: CoreCapsule, prefix = 'cosmos', currentWalletId?: string) {
+  constructor(capsule: CoreCapsule, prefix = 'cosmos', walletId?: string) {
+    this.currentWalletId = capsule.findWalletId(walletId, { scheme: NON_ED25519 });
     this.capsule = capsule;
     this.prefix = prefix;
-    this._currentWalletId = currentWalletId;
   }
 
   get publicKey(): Uint8Array {
-    const wallet = this.capsule.getWallets()[this.currentWalletId];
+    const wallet = this.capsule.wallets[this.currentWalletId];
     const uncompressedPublicKey = hexToUint8Array(wallet.publicKey);
     const compressedPublicKey = Secp256k1.compressPubkey(uncompressedPublicKey);
     return compressedPublicKey;
-  }
-
-  set currentWalletId(walletId: string) {
-    this._currentWalletId = walletId;
-  }
-
-  get currentWalletId(): string {
-    return this._currentWalletId || Object.values(this.capsule.getWallets())[0]?.id;
   }
 
   get address(): string {

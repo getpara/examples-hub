@@ -1,6 +1,5 @@
 import { VStack, Spacer, HStack, Button, Box, Text, Textarea } from '@chakra-ui/react';
 import { useContext, useState } from 'react';
-import capsule from '../../../clients/capsule';
 import { KeyContainer } from '@usecapsule/web-sdk';
 import EmailContext from '../../contexts/EmailContext';
 import RecoveryStepContext from '../../contexts/RecoveryStepContext';
@@ -10,8 +9,10 @@ import WalletContext from '../../contexts/WalletContext';
 import VerifyCode from '../../../assets/verifyCode';
 import { RecoveryAttemptContext, RecoveryType } from '../../contexts/RecoveryAttemptContext';
 import PhoneContext from '../../contexts/PhoneContext';
+import { useCapsule } from '../../../components/CapsuleContext';
 
 async function recoverUserShares(userId: string, walletId: string, serializedRecoveryShare: string): Promise<string[]> {
+  const capsule = useCapsule();
   const recoveryPrivateKeyContainer = KeyContainer.buildFrom(serializedRecoveryShare);
 
   const res = await capsule.ctx.capsuleClient.recoverUserShares(userId, walletId);
@@ -31,6 +32,7 @@ const RecoverWalletWithSecretStep: React.FC<RecoverWalletWithSecretStepProps> = 
   setWebAuthURLForCreate,
   setUserShares,
 }) => {
+  const capsule = useCapsule();
   const { setCurrentRecoveryStep } = useContext(RecoveryStepContext);
   const { type } = useContext(RecoveryAttemptContext);
   const { phone, countryCode } = useContext(PhoneContext);

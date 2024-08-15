@@ -7,6 +7,7 @@ import {
   getPortalBaseURL,
   initClient,
   mpcComputationClient,
+  capsuleVersion,
 } from '@usecapsule/core-sdk';
 import * as walletUtils from './walletUtils.js';
 
@@ -123,7 +124,7 @@ async function handleMessage(e: { data: Message }): Promise<void> {
   const ctx = {
     env,
     apiKey,
-    capsuleClient: initClient(env, apiKey, false, () => sessionCookie),
+    capsuleClient: initClient(env, capsuleVersion, apiKey, false, () => sessionCookie),
     offloadMPCComputationURL: offloadMPCComputationURL,
     mpcComputationClient: offloadMPCComputationURL
       ? mpcComputationClient.initClient(offloadMPCComputationURL, !!disableWorkers)

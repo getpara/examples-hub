@@ -1,6 +1,11 @@
-import { SignatureScheme } from '@usecapsule/user-management-client';
-import { Ctx, getBaseMPCNetworkUrl, SignatureRes } from '@usecapsule/core-sdk';
-import { PregenIdentifierType } from '@usecapsule/core-sdk';
+import {
+  Ctx,
+  getBaseMPCNetworkUrl,
+  PregenIdentifierType,
+  SignatureRes,
+  WalletScheme,
+  WalletType,
+} from '@usecapsule/core-sdk';
 
 const configCGGMPBase = (serverUrl: string, walletId: string, id: string) =>
   `{"ServerUrl":"${serverUrl}", "WalletId": "${walletId}", "Id":"${id}", "Ids":["USER","CAPSULE"], "Threshold":1}`;
@@ -54,7 +59,8 @@ async function sendTransactionRequest(
 
 export async function ed25519Keygen(ctx: Ctx, userId: string): Promise<{ signer: string; walletId: string }> {
   const { walletId, protocolId } = await ctx.capsuleClient.createWallet(userId, {
-    scheme: SignatureScheme.ED25519,
+    scheme: WalletScheme.ED25519,
+    type: WalletType.SOLANA,
   });
   const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
 
@@ -74,10 +80,11 @@ export async function ed25519PreKeygen(
   pregenIdentifier: string,
   pregenIdentifierType: PregenIdentifierType,
 ): Promise<{ signer: string; walletId: string }> {
-  const { walletId, protocolId } = await ctx.capsuleClient.createPregenWallet({
+  const { walletId, protocolId } = await ctx.capsuleClient.createWalletPreGen({
     pregenIdentifier,
     pregenIdentifierType,
-    scheme: SignatureScheme.ED25519,
+    scheme: WalletScheme.ED25519,
+    type: WalletType.SOLANA,
   });
 
   const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
@@ -99,7 +106,7 @@ export async function ed25519Sign(
   walletId: string,
   base64Bytes: string,
 ): Promise<{ signature: string }> {
-  const { protocolId } = await ctx.capsuleClient.preSignMessage(userId, walletId, base64Bytes, SignatureScheme.ED25519);
+  const { protocolId } = await ctx.capsuleClient.preSignMessage(userId, walletId, base64Bytes, WalletScheme.ED25519);
 
   const base64Sig = (await new Promise((resolve, reject) =>
     global.ed25519Sign(share, protocolId, base64Bytes, (err, result) => {
@@ -116,10 +123,12 @@ export async function keygen(
   ctx: Ctx,
   userId: string,
   secretKey: string | null,
+  type: Exclude<WalletType, WalletType.SOLANA> = WalletType.EVM,
 ): Promise<{ signer: string; walletId: string }> {
   const { walletId, protocolId } = await ctx.capsuleClient.createWallet(userId, {
     useTwoSigners: true,
-    scheme: ctx.useDKLS ? SignatureScheme.DKLS : SignatureScheme.CGGMP,
+    scheme: ctx.useDKLS ? WalletScheme.DKLS : WalletScheme.CGGMP,
+    type,
   });
 
   if (ctx.offloadMPCComputationURL && !ctx.useDKLS) {
@@ -158,8 +167,13 @@ export async function preKeygen(
   pregenIdentifier: string,
   pregenIdentifierType: PregenIdentifierType,
   secretKey: string | null,
+  type: Exclude<WalletType, WalletType.SOLANA> = WalletType.EVM,
 ): Promise<{ signer: string; walletId: string }> {
-  const { walletId, protocolId } = await ctx.capsuleClient.createPregenWallet({ pregenIdentifier, pregenIdentifierType });
+  const { walletId, protocolId } = await ctx.capsuleClient.createWalletPreGen({
+    pregenIdentifier,
+    pregenIdentifierType,
+    type,
+  });
 
   const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
   const signerConfigUser = configDKLSBase(walletId, 'USER', ctx.disableWebSockets);

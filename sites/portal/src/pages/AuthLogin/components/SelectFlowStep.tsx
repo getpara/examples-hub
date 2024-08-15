@@ -4,7 +4,7 @@ import { CpslButton, CpslIcon } from '@usecapsule/react-components';
 import { useModalOutletContext } from '../../../hooks/useModalOutletContext';
 import { useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import capsule from '../../../clients/capsule';
+import { useCapsule } from '../../../components/CapsuleContext';
 
 interface SelectFlowStepProps {
   onLoginClick: () => void;
@@ -12,18 +12,19 @@ interface SelectFlowStepProps {
 }
 
 export const SelectFlowStep = ({ onLoginClick, onAddDeviceClick }: SelectFlowStepProps) => {
+  const capsule = useCapsule();
   const [searchParams] = useSearchParams();
   const paramsEmail = decodeURIComponent(searchParams.get('email'));
   const { partner } = useModalOutletContext();
   const [recoveryUrl, setRecoveryUrl] = useState<string | undefined>();
 
   const getPortalUrl = async () => {
-    setRecoveryUrl(await capsule.getPortalURL());
+    setRecoveryUrl(await capsule?.getPortalURL());
   };
 
   useEffect(() => {
     getPortalUrl();
-  }, []);
+  }, [capsule]);
 
   return (
     <>

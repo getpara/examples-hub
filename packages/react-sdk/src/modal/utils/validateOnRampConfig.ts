@@ -24,14 +24,14 @@ function checkDuplicateProviders({ providers }: OnRampConfig) {
 
 function checkUnsupportedCombos({ network: networkProp, asset: assetProp, providers }: OnRampConfig) {
   const [network, asset] = [getNetwork(networkProp), getAsset(assetProp)];
-  if (!SupportedOnRamps[network][asset]) {
+  if (!SupportedOnRamps[network]?.[asset]) {
     throw new Error(`Asset ${asset} does not exist on network ${network}`);
   }
 
   providers.forEach(({ id: providerProp }) => {
     const provider = getProvider(providerProp);
 
-    if (!SupportedOnRamps[network][asset][provider]) {
+    if (!SupportedOnRamps[network]?.[asset]?.[provider]) {
       throw new OnRampConfigError(`Provider ${provider} does not support buying ${asset} on ${network}`);
     }
   });

@@ -20,6 +20,9 @@ module.exports = {
       DISABLE_WASM_FETCH: 'false',
       NODE_DEBUG: 'false',
     }),
+    new webpack.ProvidePlugin({
+      process: 'process/browser',
+    }),
   ],
   resolve: {
     fallback: {

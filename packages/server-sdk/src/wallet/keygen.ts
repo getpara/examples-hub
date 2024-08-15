@@ -17,7 +17,7 @@ async function isPreKeygenComplete(
 ): Promise<boolean> {
   const wallets = await ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType);
   const wallet = wallets.wallets.find(w => w.id === walletId);
-  return !!wallet.address;
+  return !!wallet?.address;
 }
 
 export function keygen(

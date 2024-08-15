@@ -1,6 +1,5 @@
 import { VStack, Spacer, HStack, Text, Box } from '@chakra-ui/react';
 import { useContext, useState } from 'react';
-import capsule from '../../../clients/capsule';
 import EmailContext from '../../contexts/EmailContext';
 import StepContext from '../../contexts/StepContext';
 import { ModalStep } from '../../steps/attemptSteps';
@@ -17,10 +16,12 @@ import {
   CpslDropdownCustomEvent,
 } from '@usecapsule/core-components';
 import countryCodes from './countryCodes';
+import { useCapsule } from '../../../components/CapsuleContext';
 
 const DEFAULT_COUNTRY = { label: 'United States', value: '+1', selectedLabel: 'US', icon: 'US' as IconType };
 
 const RecoveryEmailCollectionStep: React.FC = () => {
+  const capsule = useCapsule();
   const { setCurrentStep } = useContext(StepContext);
   const { setEmail } = useContext(EmailContext);
   const { setPhone, setCountryCode } = useContext(PhoneContext);

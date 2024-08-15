@@ -6,6 +6,7 @@ import { ModalLoading } from '../../../components/ModalLoading';
 import { ModalSuccess } from '../../../components/ModalSuccess';
 import { useModalOutletContext } from '../../../hooks/useModalOutletContext';
 import { AddDeviceStep } from './AddDeviceStep';
+import { SelectWallet } from './SelectWallet';
 
 interface BodyProps {
   addDeviceUrl?: string;
@@ -13,9 +14,17 @@ interface BodyProps {
   isAddingNewDevice: boolean;
   onLoginClick: () => void;
   onAddDeviceClick: () => void;
+  sessionLookupId: string;
 }
 
-export const Body = ({ addDeviceUrl, step, isAddingNewDevice, onLoginClick, onAddDeviceClick }: BodyProps) => {
+export const Body = ({
+  addDeviceUrl,
+  step,
+  isAddingNewDevice,
+  onLoginClick,
+  onAddDeviceClick,
+  sessionLookupId,
+}: BodyProps) => {
   const { partner } = useModalOutletContext();
 
   const Content = () => {
@@ -25,6 +34,9 @@ export const Body = ({ addDeviceUrl, step, isAddingNewDevice, onLoginClick, onAd
       }
       case AuthLoginStep.WAITING: {
         return <ModalLoading heading="Waiting for Passkey..." />;
+      }
+      case AuthLoginStep.SELECT_WALLET: {
+        return <SelectWallet sessionLookupId={sessionLookupId} />;
       }
       case AuthLoginStep.SUCCESS: {
         return (
@@ -56,6 +68,7 @@ export const Body = ({ addDeviceUrl, step, isAddingNewDevice, onLoginClick, onAd
 const Container = styled.div`
   flex: 1;
   padding-top: 8px;
+  height: 100%;
 
   display: flex;
   align-items: center;
@@ -71,4 +84,5 @@ const InnerContainer = styled.div`
   justify-content: center;
   flex-direction: column;
   gap: 8px;
+  width: 100%;
 `;

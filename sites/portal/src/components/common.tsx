@@ -102,3 +102,12 @@ export const FilledDisabledInput: typeof CpslInput = styled(CpslInput)`
   --container-border-color: var(--cpsl-color-input-border-placeholder);
   width: 334px;
 `;
+
+export const capsuleBrandBorder = (width = '1px', radius = '16px') => `
+  border: ${width} solid transparent;
+  border-radius: ${radius};
+  background-image: linear-gradient(var(--cpsl-color-background-0), var(--cpsl-color-background-8)),
+    linear-gradient(to right, #fe5330, #9400db);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+`;

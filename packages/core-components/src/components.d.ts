@@ -768,7 +768,18 @@ export namespace Components {
         /**
           * The variant of text. Options are: `"body2XS"`, `"bodyXS", `"bodyS", `"bodyM", `"bodyL", `"bodyXL", `"headingXS", `"headingS", `"headingM", `"headingL", `"headingXL", `"heading2XL". Default is: `"bodyM"`.
          */
-        "variant"?: 'body2XS' | 'bodyXS' | 'bodyS' | 'bodyM' | 'bodyL' | 'bodyXL' | 'headingXS' | 'headingS' | 'headingM' | 'headingL' | 'headingXL' | 'heading2XL';
+        "variant"?: | 'body2XS'
+    | 'bodyXS'
+    | 'bodyS'
+    | 'bodyM'
+    | 'bodyL'
+    | 'bodyXL'
+    | 'headingXS'
+    | 'headingS'
+    | 'headingM'
+    | 'headingL'
+    | 'headingXL'
+    | 'heading2XL';
         /**
           * The weight of text. Options are: `"regular"`, `"medium", `"semiBold", `"bold". Default is: `"regular"`.
          */
@@ -2204,7 +2215,18 @@ declare namespace LocalJSX {
         /**
           * The variant of text. Options are: `"body2XS"`, `"bodyXS", `"bodyS", `"bodyM", `"bodyL", `"bodyXL", `"headingXS", `"headingS", `"headingM", `"headingL", `"headingXL", `"heading2XL". Default is: `"bodyM"`.
          */
-        "variant"?: 'body2XS' | 'bodyXS' | 'bodyS' | 'bodyM' | 'bodyL' | 'bodyXL' | 'headingXS' | 'headingS' | 'headingM' | 'headingL' | 'headingXL' | 'heading2XL';
+        "variant"?: | 'body2XS'
+    | 'bodyXS'
+    | 'bodyS'
+    | 'bodyM'
+    | 'bodyL'
+    | 'bodyXL'
+    | 'headingXS'
+    | 'headingS'
+    | 'headingM'
+    | 'headingL'
+    | 'headingXL'
+    | 'heading2XL';
         /**
           * The weight of text. Options are: `"regular"`, `"medium", `"semiBold", `"bold". Default is: `"regular"`.
          */

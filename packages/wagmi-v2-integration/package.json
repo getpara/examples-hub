@@ -26,5 +26,6 @@
   "files": [
     "dist",
     "package.json"
-  ]
+  ],
+  "gitHead": "e6e791d4e4f9afd94f2093d6045d686b85e5a682"
 }

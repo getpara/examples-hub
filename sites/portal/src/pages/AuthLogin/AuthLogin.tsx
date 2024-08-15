@@ -1,39 +1,33 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-
 import { AuthLoginStep, REDIRECT_TIMEOUT } from '../../constants';
 import { Body } from './components/Body';
 import { Modal } from '../../components/common';
 import { ModalHeader } from '../../components/ModalHeader';
-import { authLogin } from '../../utils/authLogin';
-import capsule from '../../clients/capsule';
-import { userManagementClient } from '../../clients/userManagementClient';
 import { getAsymmetricKeyPair, getPublicKeyHex } from '@usecapsule/web-sdk';
-import { CountryCallingCode } from 'libphonenumber-js';
+import { useAuthLoginStep } from '../../hooks/useLoginStep';
+import { useCapsule } from '../../components/CapsuleContext';
+import { LoginProvider, useLogin } from './components/LoginProvider';
+import { SelectWallet } from './components/SelectWallet';
+import { useModalOutletContext } from '../../hooks/useModalOutletContext';
 
-const SESSION_STORAGE_AUTH_LOGIN_STEP = '@CAPSULE/loginFlowStep';
-
-export const AuthLogin = () => {
+const AuthLoginBase = () => {
+  const capsule = useCapsule();
+  const { toggleBranding } = useModalOutletContext();
+  const {
+    fns: { authLogin, fetchWallets, authUpdateKeyShares },
+    params: {
+      sessionId,
+      partnerId,
+      encryptionKey,
+      phone,
+      email,
+      farcasterUsername,
+      newDeviceSessionLookupId,
+      skipAutoLogin,
+    },
+  } = useLogin();
   const [urlForNewDeviceLogin, setUrlForNewDeviceLogin] = useState<string>('');
-  const [step, setStepState] = useState<AuthLoginStep>(
-    (sessionStorage.getItem(SESSION_STORAGE_AUTH_LOGIN_STEP) as AuthLoginStep | undefined) ?? AuthLoginStep.SELECT_FLOW,
-  );
-  function setStep(step: AuthLoginStep) {
-    setStepState(step);
-    sessionStorage.setItem(SESSION_STORAGE_AUTH_LOGIN_STEP, step);
-  }
-
-  const [searchParams, _] = useSearchParams();
-  const paramsEmail = decodeURIComponent(searchParams.get('email'));
-  const paramsPhone = decodeURIComponent(searchParams.get('phone'));
-  const paramsCountryCode = decodeURIComponent(searchParams.get('countryCode')) as CountryCallingCode;
-  const paramsFarcasterUsername = decodeURIComponent(searchParams.get('farcasterUsername'));
-  const encryptionKey = searchParams.get('encryptionKey');
-  const sessionId = searchParams.get('sessionId');
-  const newDeviceSessionLookupId = searchParams.get('newDeviceSessionId') || undefined;
-  const newDeviceEncryptionKey = searchParams.get('newDeviceEncryptionKey') || undefined;
-  const paramsPartnerId = searchParams.get('partnerId');
-  const paramsSkipAutoLogin = searchParams.get('skipAutoLogin') === 'true';
+  const [step, setStep] = useAuthLoginStep();
 
   const isAddingNewDevice = !!newDeviceSessionLookupId;
 
@@ -44,22 +38,26 @@ export const AuthLogin = () => {
   const login = useCallback(async () => {
     setStep(AuthLoginStep.WAITING);
     try {
-      await authLogin(
-        paramsPartnerId,
-        paramsEmail,
-        paramsPhone,
-        paramsCountryCode,
-        paramsFarcasterUsername,
-        sessionId,
-        encryptionKey,
-        newDeviceSessionLookupId,
-        newDeviceEncryptionKey,
-      );
+      await capsule.ctx.capsuleClient.touchSession();
+      await authLogin();
 
-      setStep(AuthLoginStep.SUCCESS);
-      setTimeout(function () {
-        window.close();
-      }, REDIRECT_TIMEOUT);
+      await capsule.userSetupAfterLogin();
+
+      const { wallets, pregenWallets } = await fetchWallets();
+
+      const [isOnlyPregenWallet, isOnlyOwnedWallet] = [
+        wallets.length === 0 && pregenWallets.length === 1 && pregenWallets[0]?.partnerId === partnerId,
+        pregenWallets.length === 0 && wallets.length === 1 && wallets[0].partnerId === partnerId,
+      ];
+
+      const defaultWallet = isOnlyPregenWallet ? pregenWallets[0] : isOnlyOwnedWallet ? wallets[0] : undefined;
+
+      if (defaultWallet) {
+        await capsule.setCurrentWalletIds([defaultWallet.id], sessionId);
+        setStep(AuthLoginStep.SUCCESS);
+      } else {
+        setStep(AuthLoginStep.SELECT_WALLET);
+      }
     } catch (err) {
       if (err.message.includes('The operation either timed out or was not allowed')) {
         setStep(AuthLoginStep.SELECT_FLOW);
@@ -67,16 +65,23 @@ export const AuthLogin = () => {
         console.error('Error retrieving passkey: ', err);
       }
     }
-  }, [
-    paramsEmail,
-    paramsPhone,
-    paramsCountryCode,
-    paramsFarcasterUsername,
-    sessionId,
-    encryptionKey,
-    newDeviceSessionLookupId,
-    newDeviceEncryptionKey,
-  ]);
+  }, [capsule, authLogin]);
+
+  useEffect(() => {
+    async function finishLogin(shouldClose: boolean) {
+      await authUpdateKeyShares();
+
+      if (shouldClose) {
+        setTimeout(function () {
+          window.close();
+        }, REDIRECT_TIMEOUT);
+      }
+    }
+
+    if (step === AuthLoginStep.SUCCESS) {
+      finishLogin(true);
+    }
+  }, [capsule, authUpdateKeyShares, step]);
 
   useEffect(() => {
     async function getTemporaryShares() {
@@ -86,9 +91,9 @@ export const AuthLogin = () => {
           window.setTimeout(getTemporaryShares, 2000);
           return;
         }
-        const touchRes = await userManagementClient.touchSession();
+        const touchRes = await capsule.ctx.capsuleClient.touchSession();
         await capsule.setUserId(touchRes.data.userId);
-        const fetchedWallets = (await capsule.fetchWallets()).filter(wallet => !!wallet.address);
+        const fetchedWallets = await capsule.fetchWallets();
         const temporaryShares = (await capsule.getTransmissionKeyShares(true)).data.temporaryShares;
 
         if (temporaryShares.length === fetchedWallets.length) {
@@ -105,12 +110,9 @@ export const AuthLogin = () => {
       }
     }
     async function getWebAuthURLForAddDevice() {
-      await capsule.setEmail(paramsEmail);
-      await capsule.setPhoneNumber(paramsPhone, paramsCountryCode);
-      await capsule.setFarcasterUsername(paramsFarcasterUsername);
-      let touchRes = await userManagementClient.touchSession();
+      let touchRes = await capsule.ctx.capsuleClient.touchSession();
       if (!touchRes.data.sessionLookupId) {
-        touchRes = await userManagementClient.touchSession(true);
+        touchRes = await capsule.ctx.capsuleClient.touchSession(true);
       }
       if (!capsule.loginEncryptionKeyPair) {
         const keyPair = await getAsymmetricKeyPair(capsule.ctx);
@@ -120,7 +122,7 @@ export const AuthLogin = () => {
       const url = await capsule.getWebAuthURLForLogin(
         sessionId,
         encryptionKey,
-        paramsPartnerId,
+        partnerId,
         touchRes.data.sessionLookupId,
         getPublicKeyHex(capsule.loginEncryptionKeyPair),
       );
@@ -132,27 +134,40 @@ export const AuthLogin = () => {
       getWebAuthURLForAddDevice();
       window.setTimeout(getTemporaryShares, 2000);
     }
+  }, [capsule, step, sessionId, encryptionKey, partnerId]);
+
+  useEffect(() => {
+    if (step === AuthLoginStep.SELECT_WALLET) {
+      toggleBranding(false);
+    } else {
+      toggleBranding(true);
+    }
   }, [step]);
 
   useEffect(() => {
     if (
-      (paramsEmail || paramsPhone || paramsFarcasterUsername) &&
+      (email || phone || farcasterUsername) &&
       sessionId &&
       encryptionKey &&
-      !paramsSkipAutoLogin &&
-      (step === AuthLoginStep.SELECT_FLOW || step === AuthLoginStep.WAITING)
+      !skipAutoLogin &&
+      step === AuthLoginStep.SELECT_FLOW
     ) {
       // In development this will trigger a 'request is already pending.' error due to duplicate renders caused by React.StrictMode.
       // See ref: https://legacy.reactjs.org/docs/strict-mode.html#detecting-unexpected-side-effects
       login();
     }
-  }, []);
+  }, [login]);
+
+  if (step === AuthLoginStep.SELECT_WALLET) {
+    return <SelectWallet sessionLookupId={sessionId} />;
+  }
 
   return (
     <Modal noOverlay>
       <ModalHeader />
       <Body
         step={step}
+        sessionLookupId={sessionId}
         addDeviceUrl={urlForNewDeviceLogin}
         isAddingNewDevice={isAddingNewDevice}
         onLoginClick={login}
@@ -161,3 +176,9 @@ export const AuthLogin = () => {
     </Modal>
   );
 };
+
+export const AuthLogin = () => (
+  <LoginProvider>
+    <AuthLoginBase />
+  </LoginProvider>
+);

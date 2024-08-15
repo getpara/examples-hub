@@ -8,10 +8,11 @@ import { openPopup } from '../../utils/openPopup.js';
 const SHORTENING_AVAILABLE = true;
 
 export const BiometricLoginStep = () => {
-  const webAuthURLForLogin = useModalStore(state => state.webAuthURLForLogin);
-  const currentStep = useModalStore(state => state.step);
-  const setStep = useModalStore(state => state.setStep);
-  const capsule = useCapsuleStore(state => state.capsule);
+  const webAuthURLForLogin = useModalStore((state) => state.webAuthURLForLogin);
+  const currentStep = useModalStore((state) => state.step);
+  const setStep = useModalStore((state) => state.setStep);
+  const setLoginWindow = useModalStore((state) => state.setLoginWindow);
+  const capsule = useCapsuleStore((state) => state.capsule);
 
   const [shortLoginLink, setShortLoginLink] = useState<string>();
   const [shortHelpLink, setShortHelpLink] = useState<string>();
@@ -38,7 +39,9 @@ export const BiometricLoginStep = () => {
   }, [webAuthURLForLogin]);
 
   const handlePasskeyClick = () => {
-    openPopup(shortLoginLink, 'CapsulePasskey', 'LOGIN_PASSKEY');
+    const loginWindow = openPopup(shortLoginLink, 'CapsulePasskey', 'LOGIN_PASSKEY');
+
+    setLoginWindow(loginWindow);
     setStep(ModalStep.AWAITING_BIOMETRIC_LOGIN);
   };
 

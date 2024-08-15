@@ -18,6 +18,7 @@ interface ConfigOpts {
 
 type ClientConfig = {
   userManagementHost: string;
+  version?: string;
   apiKey?: string;
   opts?: ConfigOpts;
   retrieveSessionCookie?: () => string | undefined;
@@ -127,26 +128,46 @@ interface verifySessionChallengeRes {
   sessionChallenge: string;
 }
 
-export enum SignatureScheme {
+export enum WalletScheme {
   DKLS = 'DKLS',
   CGGMP = 'CGGMP',
   ED25519 = 'ED25519',
 }
 
+export enum WalletType {
+  EVM = 'EVM',
+  SOLANA = 'SOLANA',
+  COSMOS = 'COSMOS',
+}
+
+export const NON_ED25519 = [WalletScheme.DKLS, WalletScheme.CGGMP];
+
+export interface PartnerEntity {
+  id: string;
+  displayName: string;
+  logoUrl?: string;
+  portalHeaderLogoUrl?: string;
+  policiesEnabled: boolean;
+}
 export interface WalletEntity {
   address: string | null;
   createdAt: string;
+  isPregen?: boolean;
   pregenIdentifier: string;
   pregenIdentifierType: string;
   id: string;
   keyGenComplete: boolean;
   name: string | null;
   partnerId: string;
+  partner?: PartnerEntity;
   publicKey: string | null;
   scheme: string;
   type: string;
   updatedAt: string;
   userId: string | null;
+  lastUsedAt: string | null;
+  lastUsedPartnerId?: string;
+  lastUsedPartner?: PartnerEntity;
 }
 
 interface getWalletsRes {
@@ -155,7 +176,8 @@ interface getWalletsRes {
 
 interface createWalletBody {
   useTwoSigners?: boolean;
-  scheme: SignatureScheme;
+  scheme: WalletScheme;
+  type: WalletType;
 }
 
 interface updatePregenWalletBody {
@@ -168,10 +190,11 @@ interface createWalletRes {
   walletId: string;
 }
 
-interface createPreGenWalletBody {
+interface createWalletPreGenBody {
   pregenIdentifier: string;
   pregenIdentifierType: string;
-  scheme?: SignatureScheme;
+  scheme?: WalletScheme;
+  type: WalletType;
 }
 
 interface claimPreGenWalletBody {
@@ -260,10 +283,11 @@ export interface OnRampPurchase {
 }
 
 const SESSION_COOKIE_HEADER_NAME = 'x-capsule-sid';
+const VERSION_HEADER_NAME = 'x-capsule-version';
 
 class Client {
   private baseRequest: AxiosInstance;
-  constructor({ userManagementHost, apiKey, opts, retrieveSessionCookie, persistSessionCookie }: ClientConfig) {
+  constructor({ userManagementHost, apiKey, version, opts, retrieveSessionCookie, persistSessionCookie }: ClientConfig) {
     // TODO remove after this is not optional anymore
     const headers = apiKey ? { 'X-External-API-Key': apiKey } : undefined;
     const axiosConfig = {
@@ -282,6 +306,10 @@ class Client {
           const currentSessionCookie = retrieveSessionCookie();
           if (currentSessionCookie) {
             headers[SESSION_COOKIE_HEADER_NAME] = currentSessionCookie;
+          }
+
+          if (version) {
+            headers[VERSION_HEADER_NAME] = version;
           }
 
           return data;
@@ -458,15 +486,19 @@ class Client {
   };
 
   // POST /wallets/pregen
-  createPregenWallet = async (body?: createPreGenWalletBody): Promise<createWalletRes> => {
+  createWalletPreGen = async (body?: createWalletPreGenBody): Promise<createWalletRes> => {
     const res = await this.baseRequest.post<createWalletRes>(`/wallets/pregen`, body);
     return res.data;
   };
 
   // GET /wallets/pregen?pregenIdentifier={pregenIdentifier}&pregenIdentifierType={pregenIdentifierType}
-  getPregenWallets = async (pregenIdentifier: string, pregenIdentifierType: string): Promise<getWalletsRes> => {
+  getPregenWallets = async (
+    pregenIdentifier: string,
+    pregenIdentifierType: string,
+    expand = false,
+  ): Promise<getWalletsRes> => {
     const res = await this.baseRequest.get<any>(
-      `/wallets/pregen?pregenIdentifier=${encodeURIComponent(pregenIdentifier)}&pregenIdentifierType=${encodeURIComponent(pregenIdentifierType)}`,
+      `/wallets/pregen?pregenIdentifier=${encodeURIComponent(pregenIdentifier)}&pregenIdentifierType=${encodeURIComponent(pregenIdentifierType)}${expand ? '&expand=true' : ''}`,
     );
     return res.data;
   };
@@ -507,6 +539,18 @@ class Client {
     return res;
   };
 
+  // GET /users/:userId/all-wallets
+  getAllWallets = async (userId: string): Promise<AxiosResponse<getWalletsRes, any>> => {
+    const res = await this.baseRequest.get<getWalletsRes>(`/users/${userId}/all-wallets`);
+    return res;
+  };
+
+  // POST /users/:userId/wallets/set
+  setCurrentWalletIds = async (userId: string, walletIds: string[], sessionLookupId?: string): Promise<any> => {
+    const res = await this.baseRequest.post<any>(`/users/${userId}/wallets/set`, { walletIds, sessionLookupId });
+    return res;
+  };
+
   // POST /login
   login = async (props: { email: string } & VerificationEmailProps): Promise<any> => {
     const body = props;
@@ -542,7 +586,7 @@ class Client {
     return res;
   };
 
-  preSignMessage = async (userId: string, walletId: string, message: string, scheme?: SignatureScheme): Promise<any> => {
+  preSignMessage = async (userId: string, walletId: string, message: string, scheme?: WalletScheme): Promise<any> => {
     const body = { message, scheme };
     const res = await this.baseRequest.post<any>(`/users/${userId}/wallets/${walletId}/messages/sign`, body);
     return res.data;
@@ -734,8 +778,8 @@ class Client {
     return res;
   }
 
-  async acceptScopes(userId: string, body: AcceptScopesBody) {
-    const res = await this.baseRequest.post<any>(`/users/${userId}/scopes/accept`, body);
+  async acceptScopes(userId: string, walletId: string, body: AcceptScopesBody) {
+    const res = await this.baseRequest.post<any>(`/users/${userId}/wallets/${walletId}/scopes/accept`, body);
     return res;
   }
 
@@ -746,11 +790,6 @@ class Client {
 
   async acceptPendingTransaction(userId: string, pendingTransactionId: string) {
     const res = await this.baseRequest.post<any>(`/users/${userId}/pending-transactions/${pendingTransactionId}/accept`);
-    return res;
-  }
-
-  async getPolicyPermissions(userId: string, policyId: string) {
-    const res = await this.baseRequest.get<any>(`/users/${userId}/policies/${policyId}/permissions`);
     return res;
   }
 
@@ -832,6 +871,11 @@ class Client {
     const res = await this.baseRequest.get<any>(`/users/${userId}/encrypted-wallet-private-keys/${encryptionKeyHash}`);
     return res.data;
   }
+
+  async getEthToUsdConversionRate() {
+    const res = await this.baseRequest.get<any>('/ethToUsdConversionRate');
+    return res.data;
+  }
 }
 
 export default Client;
@@ -847,5 +891,4 @@ export default Client;
 // POST /users/:userId/wallets/:walletId/key
 // GET /users/:userId/wallets/:walletId/key
 // GET /users/:userId/configurations
-// POST /users/:userId/permissions
 // GET /

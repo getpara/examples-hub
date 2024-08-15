@@ -8,6 +8,9 @@
   "sideEffects": false,
   "dependencies": {
     "@celo/utils": "^6.0.1",
+    "@cosmjs/amino": "^0.32.4",
+    "@cosmjs/crypto": "^0.32.4",
+    "@cosmjs/encoding": "^0.32.4",
     "@usecapsule/user-management-client": "1.18.0",
     "base64url": "^3.0.1",
     "buffer": "6.0.3",
@@ -36,5 +39,5 @@
       "types": "./dist/types/index.d.ts"
     }
   },
-  "gitHead": "86be3bd943673f87685b87b6e87fc33366be04e7"
+  "gitHead": "e6e791d4e4f9afd94f2093d6045d686b85e5a682"
 }

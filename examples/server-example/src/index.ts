@@ -4,7 +4,7 @@ import * as uuid from 'uuid';
 import * as ethers from 'ethers';
 import { sepolia } from 'viem/chains';
 import { http } from 'viem';
-import { PublicKeyStatus } from '@usecapsule/user-management-client';
+import { NON_ED25519, PublicKeyStatus, WalletType } from '@usecapsule/user-management-client';
 import * as solana from '@solana/web3.js';
 import { CapsuleSolanaWeb3Signer } from '@usecapsule/solana-web3.js-v1-integration';
 
@@ -37,11 +37,13 @@ async function errorMiddleware(err: Error, _req: Request, res: Response, _next: 
 }
 
 async function createUserAndWallet(params: Params) {
-  const capsule = new CapsuleServer(Environment.SANDBOX, '2f938ac0c48ef356050a79bd66042a23');
   const { email, isPregen, useSolana } = params;
+  const capsule = new CapsuleServer(Environment.SANDBOX, '2f938ac0c48ef356050a79bd66042a23', {
+    supportedWalletTypes: useSolana ? { SOLANA: true } : { EVM: true },
+  });
   await capsule.logout();
   if (isPregen) {
-    await capsule.createWalletPreGen(email, useSolana);
+    await capsule.createWalletPreGen(useSolana ? WalletType.SOLANA : WalletType.EVM, email);
   } else {
     await capsule.createUser(email || `server-test${uuid.v4()}@test.usecapsule.com`);
     const webAuthURL = await capsule.verifyEmail('123456');
@@ -63,11 +65,8 @@ async function createUserAndWallet(params: Params) {
     await capsule.createWalletPerMissingType(false);
   }
 
-  const walletAddress = useSolana
-    ? // @ts-ignore
-      Object.values(capsule.getED25519Wallets())[0].address
-    : // @ts-ignore
-      Object.values(capsule.getWallets())[0].address;
+  const walletId = capsule.findWalletId(capsule.currentWalletIds[0], { scheme: NON_ED25519 });
+  const walletAddress = capsule.wallets[walletId].address;
   console.log(`address: ${walletAddress}`);
 
   console.log(walletAddress, 'session', capsule.retrieveSessionCookie());
@@ -94,7 +93,7 @@ async function createUserAndWallet(params: Params) {
     return;
   }
   const provider = new ethers.JsonRpcProvider(ALCHEMY_SEPOLIA_PROVIDER, 'sepolia');
-  const ethersSigner = new CapsuleEthersSigner(capsule, provider);
+  const ethersSigner = new CapsuleEthersSigner(capsule, provider, walletId);
   const viemClient = createCapsuleViemClient(capsule, {
     chain: sepolia,
     transport: http(ALCHEMY_SEPOLIA_PROVIDER),
@@ -121,11 +120,12 @@ async function signMessageWithImport(serializedInstance: string): Promise<void> 
   console.log('importing session');
   await capsule.importSession(serializedInstance);
   // @ts-ignore
-  const address = Object.values(capsule.getWallets())[0].address;
+  const walletId = capsule.currentWalletIds[0];
+  const address = capsule.wallets[walletId].address;
   console.log(`address: ${address}`);
 
   const provider = new ethers.JsonRpcProvider(ALCHEMY_SEPOLIA_PROVIDER, 'sepolia');
-  const ethersSigner = new CapsuleEthersSigner(capsule, provider);
+  const ethersSigner = new CapsuleEthersSigner(capsule, provider, walletId);
   const viemClient = createCapsuleViemClient(capsule, {
     chain: sepolia,
     transport: http(ALCHEMY_SEPOLIA_PROVIDER),
@@ -180,7 +180,8 @@ app.post('/sign', async (req: Request, res: Response, next: NextFunction) => {
     const capsule = new CapsuleServer(Environment.SANDBOX, '2f938ac0c48ef356050a79bd66042a23');
     const { message } = req.body;
     const provider = new ethers.JsonRpcProvider(ALCHEMY_SEPOLIA_PROVIDER, 'sepolia');
-    const ethersSigner = new CapsuleEthersSigner(capsule, provider);
+    const walletId = capsule.currentWalletIds[0];
+    const ethersSigner = new CapsuleEthersSigner(capsule, provider, walletId);
     const viemClient = createCapsuleViemClient(capsule, {
       chain: sepolia,
       transport: http(ALCHEMY_SEPOLIA_PROVIDER),

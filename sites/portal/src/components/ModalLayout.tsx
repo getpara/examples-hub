@@ -3,15 +3,21 @@ global.Buffer = Buffer;
 import { useEffect, useState } from 'react';
 import { Outlet, useSearchParams } from 'react-router-dom';
 import { styled } from 'styled-components';
-import { userManagementClient } from '../clients/userManagementClient';
 import { Partner } from '../types';
 import { DEFAULT_HOMEPAGE_URL, DEFAULT_PARTNER } from '../constants';
 import { validateColorInput } from '../utils/validateColorInput';
 import { BorderRadius, generateTheme } from '@usecapsule/react-components';
-import capsule from '../clients/capsule';
 import { BetaBannerNoChakra } from './BetaBannerNoChakra';
+import { Theme } from '@usecapsule/web-sdk';
+import { useCapsule } from './CapsuleContext';
+
+const DEFAULT_THEME = {
+  foregroundColor: '#000',
+  backgroundColor: '#FFF',
+};
 
 export const ModalLayout = () => {
+  const capsule = useCapsule();
   const [searchParams] = useSearchParams();
   const paramsPartnerId = searchParams.get('partnerId');
   // TODO: Move this to the partner config
@@ -39,9 +45,17 @@ export const ModalLayout = () => {
 
   const [partner, setPartner] = useState<Partner | undefined>();
   const [isDark, setIsDark] = useState<boolean>(false);
+  const [isBranded, setIsBranded] = useState(true);
+  const [, setTheme] = useState<Theme | undefined>({
+    foregroundColor: portalForegroundColor ?? DEFAULT_THEME.foregroundColor,
+    backgroundColor: portalBackgroundColor ?? DEFAULT_THEME.backgroundColor,
+  });
+
+  const toggleBranding = (newValue?: boolean) => {
+    setIsBranded((prev) => newValue ?? !prev);
+  };
 
   useEffect(() => {
-    // If background is provided with no foreground we can assume its legacy and to use the custom palette
     const isLegacy = portalBackgroundColor && !portalForegroundColor;
 
     capsule.portalBackgroundColor = portalBackgroundColor;
@@ -50,14 +64,29 @@ export const ModalLayout = () => {
     capsule.portalTheme = {
       backgroundColor: portalBackgroundColor,
       foregroundColor: portalForegroundColor,
-      borderRadius: portalBorderRadius as BorderRadius,
+      borderRadius: portalBorderRadius as unknown as any,
     };
 
+    const newTheme = {
+      borderRadius: portalBorderRadius as BorderRadius,
+      ...(isBranded
+        ? {
+            foregroundColor: portalForegroundColor ?? DEFAULT_THEME.foregroundColor,
+            backgroundColor: portalBackgroundColor ?? DEFAULT_THEME.backgroundColor,
+          }
+        : {
+            foregroundColor: DEFAULT_THEME.foregroundColor,
+            backgroundColor: DEFAULT_THEME.backgroundColor,
+          }),
+    };
+
+    setTheme(newTheme as unknown as any);
+
     const isDarkTheme = generateTheme({
+      font: portalFont,
       ...(isLegacy
         ? {
-            backgroundColor: portalBackgroundColor,
-            foregroundColor: portalPrimaryButtonColor,
+            ...newTheme,
             customPalette: {
               text: {
                 primary: portalTextColor,
@@ -65,17 +94,12 @@ export const ModalLayout = () => {
                 inverted: portalPrimaryButtonTextColor,
               },
             },
-            font: portalFont,
           }
-        : {
-            backgroundColor: portalBackgroundColor,
-            foregroundColor: portalForegroundColor,
-            borderRadius: portalBorderRadius as BorderRadius,
-            font: portalFont,
-          }),
+        : newTheme),
     });
     setIsDark(isDarkTheme);
   }, [
+    isBranded,
     portalForegroundColor,
     portalBackgroundColor,
     portalBorderRadius,
@@ -88,7 +112,7 @@ export const ModalLayout = () => {
   useEffect(() => {
     async function getPartner() {
       if (paramsPartnerId) {
-        const detailsRes = (await userManagementClient.getPartner(paramsPartnerId)).data;
+        const detailsRes = (await capsule.ctx.capsuleClient.getPartner(paramsPartnerId)).data;
         setPartner(detailsRes.partner);
       } else {
         setPartner(DEFAULT_PARTNER);
@@ -102,18 +126,17 @@ export const ModalLayout = () => {
   return (
     <>
       <BetaBannerNoChakra />
-      <OuterContainer>
-        <Outlet context={{ partner, homepageUrl, isDark }} />
+      <OuterContainer isBranded={isBranded}>
+        <Outlet context={{ partner, homepageUrl, isDark, toggleBranding }} />
       </OuterContainer>
     </>
   );
 };
 
-const OuterContainer = styled.div`
-  background-color: var(--cpsl-color-modal-surface-footer);
+const OuterContainer = styled.div<{ isBranded?: boolean }>`
+  background-color: ${({ isBranded }) => (isBranded ? 'var(--cpsl-color-modal-surface-footer)' : 'white')};
 
   height: 100vh;
-  height: 100dvh;
   width: 100vw;
   width: 100dvw;
 

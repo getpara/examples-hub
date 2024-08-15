@@ -1,4 +1,4 @@
-import {
+import Capsule, {
   encryptWithDerivedPublicKey,
   generateSignature,
   decryptPrivateKeyAndDecryptShare,
@@ -7,21 +7,19 @@ import {
   encryptPrivateKey,
 } from '@usecapsule/web-sdk';
 import { ENV } from '../constants';
-import capsule from '../clients/capsule';
 import { getSHA256HashHex } from '@usecapsule/web-sdk';
 import { CountryCallingCode } from 'libphonenumber-js';
 
 export async function authLogin(
+  capsule: Capsule,
   partnerId: string,
   email: string,
   phone: string,
   countryCode: CountryCallingCode,
   farcasterUsername: string,
   sessionLookupId: string,
-  encryptionKey: string,
   newDeviceSessionLookupId?: string,
-  newDeviceEncryptionKey?: string,
-): Promise<string> {
+): Promise<[string, string, any]> {
   let identifier;
   let data;
 
@@ -38,23 +36,23 @@ export async function authLogin(
   if (!identifier) {
     throw new Error('either a phone number or email address or farcaster username must be provided.');
   }
-  const sig = await generateSignature(ENV, data.challenge, data.allowedPublicKeys);
-  const userHandle = sig.response.userHandle;
-  delete sig.response.userHandle;
+
+  const signature = await generateSignature(ENV, data.challenge, data.allowedPublicKeys);
+  const { userHandle, ...sigResponse } = signature.response;
 
   let verifyRes = undefined;
   if (email !== 'null' && email !== undefined && email !== '') {
     verifyRes = await capsule.ctx.capsuleClient.verifyWebChallenge(partnerId, {
-      signature: sig.response,
-      publicKey: sig.id,
+      signature: sigResponse,
+      publicKey: signature.id,
       email: email,
       sessionLookupId,
       newDeviceSessionLookupId,
     });
   } else if (phone !== 'null' && phone !== undefined && phone !== '') {
     verifyRes = await capsule.ctx.capsuleClient.verifyWebChallenge(partnerId, {
-      signature: sig.response,
-      publicKey: sig.id,
+      signature: sigResponse,
+      publicKey: signature.id,
       phone: phone,
       countryCode: countryCode,
       sessionLookupId,
@@ -62,17 +60,29 @@ export async function authLogin(
     });
   } else if (farcasterUsername !== 'null' && farcasterUsername !== undefined && farcasterUsername !== '') {
     verifyRes = await capsule.ctx.capsuleClient.verifyWebChallenge(partnerId, {
-      signature: sig.response,
-      publicKey: sig.id,
+      signature: sigResponse,
+      publicKey: signature.id,
       farcasterUsername: identifier,
       sessionLookupId,
       newDeviceSessionLookupId,
     });
   }
-  const userId = verifyRes.data.userId;
 
+  return [verifyRes.data.userId, userHandle, signature];
+}
+
+export async function authUpdateKeyShares(
+  capsule: Capsule,
+  sessionLookupId: string,
+  userId: string,
+  encryptionKey: string,
+  userHandle: string,
+  signature: any,
+  newDeviceSessionLookupId?: string,
+  newDeviceEncryptionKey?: string,
+) {
   const encryptionKeyHash = getSHA256HashHex(userHandle);
-  const encryptedSharesRes = await capsule.ctx.capsuleClient.getBiometricKeyshares(userId, sig.id);
+  const encryptedSharesRes = await capsule.ctx.capsuleClient.getBiometricKeyshares(userId, signature.id);
   const { encryptedPrivateKeys } = await capsule.ctx.capsuleClient.getEncryptedWalletPrivateKeys(userId, encryptionKeyHash);
   // keyShares undefined or empty array
   if (!encryptedSharesRes.data.keyShares?.length) {
@@ -84,7 +94,7 @@ export async function authLogin(
   // passkey was generated with a different platform (flutter, swift, etc.) and if that's the case,
   // then the user will have to login on the original platform to upgrade to the new style of
   // passkey storage which will enable cross platform use.
-  let decryptedShares;
+  let decryptedShares: any[];
   if (encryptedPrivateKeys.length === 0) {
     // If this is successful, we can upgrade the user to the new method of passkey schema
     decryptedShares = await getDerivedPrivateKeyAndDecrypt(capsule.ctx, userHandle, encryptedSharesRes.data.keyShares);
@@ -94,7 +104,7 @@ export async function authLogin(
       userId,
       encryptedPrivateKeyHex,
       encryptionKeyHash,
-      sig.id,
+      signature.id,
     );
   } else {
     decryptedShares = await decryptPrivateKeyAndDecryptShare(
@@ -104,32 +114,40 @@ export async function authLogin(
     );
   }
 
-  const tempShareOpts = decryptedShares.flatMap(share => {
-    const { encryptedMessageHex, encryptedKeyHex } = encryptWithDerivedPublicKey(encryptionKey, share.signer);
-    const opts = [
-      {
-        walletId: share.walletId,
-        encryptedShare: encryptedMessageHex,
-        encryptedKey: encryptedKeyHex,
-        sessionLookupId,
-      },
-    ];
+  // This gets only the decryptedShares that are associated with the
+  // currently selected walletIds
+  const tempShareOpts = decryptedShares
+    .filter(share => !capsule.currentWalletIds || capsule.currentWalletIds.includes(share.walletId))
+    .flatMap(share => {
+      const { encryptedMessageHex, encryptedKeyHex } = encryptWithDerivedPublicKey(encryptionKey, share.signer);
+      const opts = [
+        {
+          walletId: share.walletId,
+          encryptedShare: encryptedMessageHex,
+          encryptedKey: encryptedKeyHex,
+          sessionLookupId,
+        },
+      ];
 
-    if (newDeviceSessionLookupId) {
-      const { encryptedMessageHex: newMessageHex, encryptedKeyHex: newKeyHex } = encryptWithDerivedPublicKey(
-        newDeviceEncryptionKey,
-        share.signer,
-      );
-      opts.push({
-        walletId: share.walletId,
-        encryptedShare: newMessageHex,
-        encryptedKey: newKeyHex,
-        sessionLookupId: `${newDeviceSessionLookupId}-new-device`,
-      });
-    }
+      if (newDeviceSessionLookupId) {
+        const { encryptedMessageHex: newMessageHex, encryptedKeyHex: newKeyHex } = encryptWithDerivedPublicKey(
+          newDeviceEncryptionKey,
+          share.signer,
+        );
+        opts.push({
+          walletId: share.walletId,
+          encryptedShare: newMessageHex,
+          encryptedKey: newKeyHex,
+          sessionLookupId: `${newDeviceSessionLookupId}-new-device`,
+        });
+      }
 
-    return opts;
-  });
-  await capsule.ctx.capsuleClient.uploadTransmissionKeyshares(userId, tempShareOpts);
+      return opts;
+    });
+
+  if (tempShareOpts.length > 0) {
+    await capsule.ctx.capsuleClient.uploadTransmissionKeyshares(userId, tempShareOpts);
+  }
+
   return userId;
 }

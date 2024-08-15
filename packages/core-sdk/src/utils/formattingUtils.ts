@@ -1,3 +1,9 @@
+import { WalletType } from '@usecapsule/user-management-client';
+import { SupportedWalletTypes } from '../CoreCapsule';
+import { toBech32 } from '@cosmjs/encoding';
+import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
+import { Secp256k1 } from '@cosmjs/crypto';
+
 export type Hex = `0x${string}`;
 export interface Signature {
   r: Hex;
@@ -36,4 +42,19 @@ export function hexToDecimal(hex: string): string {
 
 export function decimalToHex(decimal: string): Hex {
   return `0x${parseInt(decimal).toString(16)}`;
+}
+
+export function isCosmosWithPrefix(
+  supportedWalletTypes: SupportedWalletTypes,
+): supportedWalletTypes is { [WalletType.COSMOS]: { prefix: string } } {
+  return !!(supportedWalletTypes as { [WalletType.COSMOS]: { prefix: string } })[WalletType.COSMOS]?.prefix;
+}
+
+export function getCosmosAddress(publicKey: string, prefix: string) {
+  const uncompressedPublicKey = new Uint8Array(
+    Buffer.from(publicKey.startsWith('0x') ? publicKey.slice(2) : publicKey, 'hex'),
+  );
+  const compressedPublicKey = Secp256k1.compressPubkey(uncompressedPublicKey);
+
+  return toBech32(prefix, rawSecp256k1PubkeyToRawAddress(compressedPublicKey));
 }

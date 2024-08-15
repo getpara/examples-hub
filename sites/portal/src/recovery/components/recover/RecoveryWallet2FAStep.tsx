@@ -5,14 +5,15 @@ import RecoveryStepContext from '../../contexts/RecoveryStepContext';
 import { ModalStep } from '../../steps/recoverySteps';
 import UserContext from '../../contexts/UserContext';
 import WalletContext from '../../contexts/WalletContext';
-import capsule from '../../../clients/capsule';
 import VerifyCode from '../../../assets/verifyCode';
 import Console from '../../../assets/console';
 import TwoFactorContext from '../../contexts/TwoFactorContext';
 import { RecoveryAttemptContext, RecoveryType } from '../../contexts/RecoveryAttemptContext';
 import PhoneContext from '../../contexts/PhoneContext';
+import { useCapsule } from '../../../components/CapsuleContext';
 
 const RecoveryWallet2FAStep: React.FC = () => {
+  const capsule = useCapsule();
   const [verificationCode, setVerificationCode] = useState('');
   const [incorrectCode, setIncorrectCode] = useState(false);
   const { setCurrentRecoveryStep } = useContext(RecoveryStepContext);

@@ -9,6 +9,7 @@ import { useModalOutletContext } from '../../../hooks/useModalOutletContext';
 interface BodyProps {
   step: AuthCreationStep;
   isForNewDevice: boolean;
+  userId: string | undefined;
   onAddThisDeviceClick: () => void;
 }
 
@@ -46,6 +47,7 @@ export const Body = ({ step, isForNewDevice, onAddThisDeviceClick }: BodyProps) 
 const Container = styled.div`
   flex: 1;
   padding-top: 8px;
+  height: 100%;
 
   display: flex;
   align-items: center;

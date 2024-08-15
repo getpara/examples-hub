@@ -5,52 +5,32 @@ import CoreCapsule, {
   DeniedSignatureResWithUrl,
   SuccessfulSignatureRes,
   hexStringToBase64,
+  NON_ED25519,
 } from '@usecapsule/core-sdk';
 
 export class CapsuleEthersSigner extends ethers.AbstractSigner {
   private capsule: CoreCapsule;
   private currentWalletId: string;
 
-  constructor(capsule: CoreCapsule, provider?: null | ethers.Provider) {
+  constructor(capsule: CoreCapsule, provider?: null | ethers.Provider, walletId?: string) {
     super(provider);
 
+    this.currentWalletId = capsule.findWalletId(walletId, { scheme: NON_ED25519 });
     this.capsule = capsule;
   }
 
-  setCurrentWalletId(walletId: string) {
-    if (!this.capsule.getWallets()[walletId]) {
-      throw new Error(`no wallet exists with id ${walletId}`);
-    }
-    this.currentWalletId = walletId;
-  }
-
-  getCurrentWalletId(): string {
-    const id = this.currentWalletId || Object.values(this.capsule.getWallets())[0]?.id;
-    if (!id) {
-      throw new Error(`no wallet available`);
-    }
-    if (!this.capsule.getWallets()[id]) {
-      throw new Error(`no wallet exists with id ${id}`);
-    }
-    return id;
-  }
-
   async getAddress(): Promise<string> {
-    const walletId = this.getCurrentWalletId();
-    if (!walletId) {
-      throw new Error('no wallet available');
-    }
-    return this.capsule.getWallets()[walletId].address;
+    return this.capsule.wallets[this.currentWalletId].address;
   }
 
   connect(provider: ethers.Provider | null): CapsuleEthersSigner {
-    return new CapsuleEthersSigner(this.capsule, provider);
+    return new CapsuleEthersSigner(this.capsule, provider, this.currentWalletId);
   }
 
   async signMessage(message: string | Uint8Array): Promise<string> {
     const hashedMessage = ethers.hashMessage(message);
     const base64HashedMessage = hexStringToBase64(hashedMessage);
-    const res = await this.capsule.signMessage(this.getCurrentWalletId(), base64HashedMessage);
+    const res = await this.capsule.signMessage(this.currentWalletId, base64HashedMessage);
 
     if ((res as DeniedSignatureResWithUrl).transactionReviewUrl) {
       throw new TransactionReviewError((res as DeniedSignatureResWithUrl).transactionReviewUrl);
@@ -94,7 +74,7 @@ export class CapsuleEthersSigner extends ethers.AbstractSigner {
     };
 
     const res = await this.capsule.signTransaction(
-      this.getCurrentWalletId(),
+      this.currentWalletId,
       hexStringToBase64(txObj.serialized),
       `${txObj.chainId}`,
     );
@@ -128,7 +108,7 @@ export class CapsuleEthersSigner extends ethers.AbstractSigner {
     });
 
     const res = await this.capsule.signMessage(
-      this.getCurrentWalletId(),
+      this.currentWalletId,
       hexStringToBase64(ethers.TypedDataEncoder.hash(populated.domain, types, populated.value)),
     );
 

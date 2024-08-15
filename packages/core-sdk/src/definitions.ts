@@ -15,6 +15,8 @@ import Client, {
   OnRampProvider,
   OnRampPurchase,
   OnRampPurchaseStatus,
+  WalletScheme,
+  WalletType,
 } from '@usecapsule/user-management-client';
 import { AxiosInstance } from 'axios';
 
@@ -215,6 +217,20 @@ export function getProvider(key: OnRampProviderProp): OnRampProvider {
 export function getAsset(key: OnRampAssetProp): OnRampAsset {
   return OnRampAssetMap[key];
 }
+
+export const WalletSchemeMap: Record<WalletScheme, Partial<Record<WalletType, true>>> = {
+  [WalletScheme.DKLS]: {
+    [WalletType.EVM]: true,
+    [WalletType.COSMOS]: true,
+  },
+  [WalletScheme.CGGMP]: {
+    [WalletType.EVM]: true,
+    [WalletType.COSMOS]: true,
+  },
+  [WalletScheme.ED25519]: {
+    [WalletType.SOLANA]: true,
+  },
+};
 
 export const getProviderNetworkAndAssetCode = (
   networkProp: NetworkProp,

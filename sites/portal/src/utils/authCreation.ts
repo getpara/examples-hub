@@ -1,4 +1,4 @@
-import {
+import Capsule, {
   createCredential,
   decryptWithPrivateKey,
   encryptWithDerivedPublicKey,
@@ -10,11 +10,10 @@ import {
 } from '@usecapsule/web-sdk';
 import { ENV } from '../constants';
 import { EncryptorType, KeyType, PublicKeyStatus } from '@usecapsule/user-management-client';
-import capsule from '../clients/capsule';
-import { userManagementClient } from '../clients/userManagementClient';
 import { CountryCallingCode } from 'libphonenumber-js';
 
 export async function authCreation(
+  capsule: Capsule,
   partnerId: string,
   userId: string,
   email: string,
@@ -84,6 +83,6 @@ export async function authCreation(
       };
     });
 
-    await userManagementClient.uploadUserKeyShares(userId, biometricEncryptedKeyshares);
+    await capsule.ctx.capsuleClient.uploadUserKeyShares(userId, biometricEncryptedKeyshares);
   }
 }

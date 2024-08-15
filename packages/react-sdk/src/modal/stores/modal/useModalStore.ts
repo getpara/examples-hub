@@ -21,6 +21,7 @@ interface ModalState {
   onRampConfig: OnRampConfig | undefined;
   onRampPurchase: Partial<OnRampPurchase> | undefined;
   networks: Network[];
+  loginWindow: Window | undefined;
 }
 
 export interface ModalActions {
@@ -38,6 +39,7 @@ export interface ModalActions {
   setOnRampConfig: (_: OnRampConfig | undefined) => void;
   setOnRampPurchase: (_: Partial<OnRampPurchase> | undefined) => void;
   setNetworks: (_: Network[] | undefined) => void;
+  setLoginWindow: (_: Window | undefined) => void;
 }
 
 export type ModalStore = ModalState & ModalActions;
@@ -50,6 +52,7 @@ export const DEFAULT_MODAL_STATE: Omit<ModalState, 'step' | 'onRampConfig'> = {
   onModalStepChange: undefined,
   onRampPurchase: undefined,
   networks: [Network.ETHEREUM],
+  loginWindow: undefined,
 };
 
 export const useModalStore = create<ModalStore>()(

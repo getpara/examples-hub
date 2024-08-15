@@ -10,36 +10,72 @@ interface RecoverySecretStepProps {
   recoveryShare: string;
 }
 
-export const RecoverySecretStep = ({ recoveryShare }: RecoverySecretStepProps) => {
-  const setStep = useModalStore(state => state.setStep);
-  const email = useUserInfoStore(state => state.email);
-  const [copied, copy] = useCopyToClipboard();
-  const [hasSavedSecret, setHasSavedSecret] = useState(false);
+export const SaveRecoverySecret = ({
+  email,
+  value,
+  onComplete,
+}: {
+  email: string;
+  value: string;
+  onComplete: () => void;
+}) => {
+  const [isSecretSaved, setIsSecretSaved] = useState(false);
+  const [isCopied, copy] = useCopyToClipboard();
 
-  const handleCopy = () => {
-    copy(backupDecryptionKey);
-    setHasSavedSecret(true);
+  const onCopy = () => {
+    copy(value);
+    setIsSecretSaved(true);
   };
 
-  const backupDecryptionKey = JSON.parse(recoveryShare || '{}').backupDecryptionKey;
-
-  const handleNext = async () => {
-    setStep(ModalStep.WALLET_CREATION_DONE);
-  };
-
-  const handleDownload = () => {
+  const onDownload = () => {
     const element = document.createElement('a');
-    const file = new Blob([backupDecryptionKey], { type: 'text/plain' });
+    const file = new Blob([value], { type: 'text/plain' });
     element.href = URL.createObjectURL(file);
     element.download = 'recovery.txt';
     document.body.appendChild(element); // Required for this to work in FireFox
     element.click();
-    setHasSavedSecret(true);
+    setIsSecretSaved(true);
   };
 
-  const handleEmail = () => {
-    window.open(getMailtoLink(email, backupDecryptionKey), '_self');
-    setHasSavedSecret(true);
+  const onEmail = () => {
+    window.open(getMailtoLink(email, value), '_self');
+    setIsSecretSaved(true);
+  };
+
+  return (
+    <>
+      <ButtonContainer>
+        <StyledCpslTileButton icon={isCopied ? 'check' : 'copy'} onClick={onCopy}>
+          <TileButtonText>{isCopied ? 'Copied!' : 'Copy'}</TileButtonText>
+        </StyledCpslTileButton>
+        <StyledCpslTileButton icon="downloadCloud" onClick={onDownload}>
+          <TileButtonText>Download</TileButtonText>
+        </StyledCpslTileButton>
+        <StyledCpslTileButton icon="mail" onClick={onEmail}>
+          <TileButtonText>Email</TileButtonText>
+        </StyledCpslTileButton>
+      </ButtonContainer>
+      <CpslSlideButton
+        startIcon="arrow"
+        endIcon="check"
+        startText={!isSecretSaved ? 'First, save your recovery secret.' : 'I’ve Saved My Recovery Secret'}
+        endText="OK! Great Job!"
+        onCpslComplete={onComplete}
+        disabled={!isSecretSaved}
+      />
+      <SliderHelper>{!isSecretSaved ? 'Choose an option above.' : 'Slide to complete'}</SliderHelper>
+    </>
+  );
+};
+
+export const RecoverySecretStep = ({ recoveryShare }: RecoverySecretStepProps) => {
+  const setStep = useModalStore((state) => state.setStep);
+  const email = useUserInfoStore((state) => state.email);
+
+  const backupDecryptionKey = JSON.parse(recoveryShare || '{}').backupDecryptionKey;
+
+  const onComplete = async () => {
+    setStep(ModalStep.WALLET_CREATION_DONE);
   };
 
   return (
@@ -50,26 +86,7 @@ export const RecoverySecretStep = ({ recoveryShare }: RecoverySecretStepProps) =
           Your Recovery Secret allows you to set up a new Passkey in the event you lose access to your current one.
         </SecondaryText>
       </StyledMainContainer>
-      <ButtonContainer>
-        <StyledCpslTileButton icon={copied ? 'check' : 'copy'} onClick={handleCopy}>
-          <TileButtonText>{copied ? 'COPIED!' : 'COPY'}</TileButtonText>
-        </StyledCpslTileButton>
-        <StyledCpslTileButton icon="downloadCloud" onClick={handleDownload}>
-          <TileButtonText>DOWNLOAD</TileButtonText>
-        </StyledCpslTileButton>
-        <StyledCpslTileButton icon="mail" onClick={handleEmail}>
-          <TileButtonText>EMAIL</TileButtonText>
-        </StyledCpslTileButton>
-      </ButtonContainer>
-      <CpslSlideButton
-        startIcon="arrow"
-        endIcon="check"
-        startText={!hasSavedSecret ? 'First, save your recovery secret.' : 'I’ve Saved My Recovery Secret'}
-        endText="OK! Great Job!"
-        onCpslComplete={handleNext}
-        disabled={!hasSavedSecret}
-      />
-      <SliderHelper>{!hasSavedSecret ? 'Choose an option above.' : 'Slide to complete'}</SliderHelper>
+      <SaveRecoverySecret email={email} value={backupDecryptionKey} onComplete={onComplete} />
     </>
   );
 };
@@ -89,6 +106,7 @@ const TileButtonText = styled(SecondaryText)`
   line-height: 100%;
   font-weight: 500;
   letter-spacing: 1px;
+  text-transform: uppercase;
 `;
 
 const ButtonContainer = styled.div`

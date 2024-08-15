@@ -7,10 +7,11 @@ import { ModalStep } from '../../steps/attemptSteps';
 import WalletContext from '../../contexts/WalletContext';
 import Console from '../../../assets/console';
 import VerifyCode from '../../../assets/verifyCode';
-import capsule from '../../../clients/capsule';
 import UserContext from '../../contexts/UserContext';
+import { useCapsule } from '../../../components/CapsuleContext';
 
 const Recovery2FAStep: React.FC = () => {
+  const capsule = useCapsule();
   const [verificationCode, setVerificationCode] = useState('');
   const [incorrectCode, setIncorrectCode] = useState(false);
   const { setCurrentStep } = useContext(StepContext);

@@ -8,9 +8,10 @@ import Console from '../../../assets/console';
 import VerifyCode from '../../../assets/verifyCode';
 import PhoneContext from '../../contexts/PhoneContext';
 import UserContext from '../../contexts/UserContext';
-import capsule from '../../../clients/capsule';
+import { useCapsule } from '../../../components/CapsuleContext';
 
 const Recovery2FAPhoneStep: React.FC = () => {
+  const capsule = useCapsule();
   const [verificationCode, setVerificationCode] = useState('');
   const [incorrectCode, setIncorrectCode] = useState(false);
   const { setCurrentStep } = useContext(StepContext);

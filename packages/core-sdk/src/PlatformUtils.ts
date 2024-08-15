@@ -1,4 +1,4 @@
-import { BackupKitEmailProps } from '@usecapsule/user-management-client';
+import { BackupKitEmailProps, WalletType } from '@usecapsule/user-management-client';
 import { Ctx } from './definitions.js';
 import { SignatureRes } from './types/walletTypes.js';
 import { StorageUtils } from './StorageUtils.js';
@@ -13,6 +13,7 @@ export interface PlatformUtils {
     secretKey: string | null, // should be acceptable as null in RN as we don't pre-gen them
     sessionCookie: string,
     emailProps?: BackupKitEmailProps,
+    type?: Exclude<WalletType, WalletType.SOLANA>,
   ): Promise<{
     signer: string;
     walletId: string;
@@ -25,6 +26,7 @@ export interface PlatformUtils {
     pregenIdentifierType: PregenIdentifierType,
     secretKey: string | null, // should be acceptable as null in RN as we don't pre-gen them
     sessionCookie: string,
+    type?: Exclude<WalletType, WalletType.SOLANA>,
   ): Promise<{
     signer: string;
     walletId: string;

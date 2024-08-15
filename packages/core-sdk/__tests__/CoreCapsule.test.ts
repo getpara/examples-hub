@@ -18,11 +18,10 @@ describe('CoreCapsule', () => {
       expect(capsule).toBeInstanceOf(CoreCapsule);
       expect(capsule.ctx.env).toBe(Environment.DEV);
       expect(capsule.ctx.apiKey).toBe(apiKey);
-      expect(capsule.getWallets()).toEqual({});
-      expect(capsule.getED25519Wallets()).toEqual({});
+      expect(capsule.wallets).toEqual({});
 
       // casting as any to access protected fields
-      expect((capsule as any).supportedWalletTypes).toEqual([WalletType.EVM]);
+      expect((capsule as any).supportedWalletTypes).toEqual({ [WalletType.EVM]: true });
     });
   });
 });
