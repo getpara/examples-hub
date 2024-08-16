@@ -1,0 +1,78 @@
+:host {
+  --identicon-background-red: linear-gradient(136deg, #FF4270 6.86%, #FF7C7C 93.78%);
+  --identicon-background-orange: linear-gradient(136deg, #F45532 6.86%, #FF9B63 93.78%);
+  --identicon-background-yellow: linear-gradient(136deg, #FFA756 6.86%, #FBFF47 93.78%);
+  --identicon-background-green: linear-gradient(136deg, #0CAE60 6.86%, #7BFFD0 93.78%);
+  --identicon-background-blue: linear-gradient(136deg, #476FFF 6.86%, #47C8FF 93.78%);
+  --identicon-background-purple: linear-gradient(136deg, #9747FF 6.86%, #DA47FF 93.78%);
+
+  display: block;
+  width: 62px;
+  height: 62px;
+  aspect-ratio: 1;
+  border-radius: 6px;
+  position: relative;
+  border: 1px solid var(--cpsl-color-background-8);
+
+  & > svg {
+    fill: rgba(255, 255, 255, 0.6);
+    position: absolute;
+    width: 35%;
+  }
+
+  & > svg.rotate90 {
+    transform: rotate(.25turn);
+  }
+
+  & > svg.rotate180 {
+    transform: rotate(.5turn);
+  }
+
+  & > svg.rotate270 {
+    transform: rotate(.75turn);
+  }
+
+  & > svg:nth-child(1) {
+    right: 50%;
+    bottom: 50%;
+  }
+
+  & > svg:nth-child(2) {
+    left: 50%;
+    bottom: 50%;
+  }
+
+  & > svg:nth-child(3) {
+    right: 50%;
+    top: 50%;
+  }
+
+  & > svg:nth-child(4) {
+    left: 50%;
+    top: 50%;
+  }
+}
+
+:host(.red) {
+  background: var(--identicon-background-red);
+}
+
+:host(.orange) {
+  background: var(--identicon-background-orange);
+}
+
+:host(.green) {
+  background: var(--identicon-background-green);
+}
+
+:host(.yellow) {
+  background: var(--identicon-background-yellow);
+}
+
+:host(.blue) {
+  background: var(--identicon-background-blue);
+}
+
+:host(.purple) {
+  background: var(--identicon-background-purple);
+}

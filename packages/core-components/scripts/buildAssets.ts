@@ -1,4 +1,5 @@
 const fs = require('fs');
+const fsPromises = require('fs').promises;
 
 function toCamelCase(text) {
   return text.replace(/-\w/g, clearAndUpper);
@@ -11,7 +12,7 @@ function toPascalCase(text) {
 function clearAndUpper(text) {
   return text.replace(/-/, '').toUpperCase();
 }
-const main = () => {
+const buildIconLibrary = () => {
   let files: string[] = fs.readdirSync('./src/assets/icons');
   let flagFiles = fs.readdirSync('./src/assets/icons/flags');
 
@@ -54,4 +55,40 @@ const main = () => {
   });
 };
 
+const buildImages = async () => {
+  const files: string[] = fs.readdirSync('./src/assets/images');
+
+  let objString = 'export const Images = {';
+
+  for (let i = 0; i < files.length; i++) {
+    const fileName = files[i];
+
+    if (!fileName.includes('png') && !fileName.includes('jpg') && !fileName.includes('jpeg')) {
+      continue;
+    }
+
+    const content = await fsPromises.readFile(`./src/assets/images/${fileName}`, { encoding: 'base64' });
+
+    const fileNameSplit = fileName.split('.');
+    const ext = fileNameSplit[1];
+    const fileNameNoExt = fileNameSplit[0];
+
+    const camelCaseFileName = toCamelCase(fileNameNoExt);
+
+    const dataUrl = `data:image/${ext};base64,${content}`;
+
+    objString += `${camelCaseFileName}: "${dataUrl}",`;
+  }
+
+  fs.writeFile('./src/assets/images/index.ts', `${objString}}`, 'utf8', err => {
+    if (err) {
+      console.error(err);
+    }
+  });
+};
+
+const main = () => {
+  buildIconLibrary();
+  buildImages();
+};
 main();

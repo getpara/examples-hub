@@ -1,0 +1,238 @@
+@import '../../themes/capsule.globals';
+
+:host {
+  position: relative;
+  top: 0;
+  right: 0;
+  left: 0;
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  clip-path: content-box;
+}
+
+:host > cpsl-text {
+  z-index: 1;
+}
+
+:host > .backgroundContainer {
+  position: relative;
+  top: 0;
+  right: 0;
+  left: 0;
+  width: 100%;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:host > .backgroundContainer > .background {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-25%);
+  left: 0;
+  right: 0;
+  z-index: 0;
+}
+
+:host > .backgroundContainer > .background > .ring {
+  position: absolute;
+  top: 45px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  flex-shrink: 0;
+  transition: box-shadow 0.3s;
+}
+
+:host(.connection) > .backgroundContainer > .background {
+  .ring1 {
+    box-shadow: 0px 0px 20px rgb(0, 0, 0, 0.07);
+  }
+
+  .ring2 {
+    box-shadow: 0px 0px 20px rgb(0, 0, 0, 0.05);
+  }
+
+  .ring3 {
+    box-shadow: 0px 0px 20px rgb(0, 0, 0, 0.04);
+  }
+}
+
+:host(.pending) > .backgroundContainer > .background {
+  .ring0 {
+    box-shadow: 0px 0px 20px rgb(0, 0, 0, 0.2);
+  }
+
+  .ring1 {
+    box-shadow: 0px 0px 20px rgb(0, 0, 0, 0.08);
+  }
+
+  .ring2 {
+    box-shadow: 0px 0px 20px rgb(0, 0, 0, 0.06);
+  }
+
+  .ring3 {
+    box-shadow: 0px 0px 20px rgb(0, 0, 0, 0.04);
+  }
+
+}
+
+:host(.failed) > .backgroundContainer > .background > {
+  .ring0 {
+    box-shadow: 0px 0px 20px rgba(240, 68, 56, 0.1);
+  }
+
+  .ring1 {
+    box-shadow: 0px 0px 20px rgba(240, 68, 56, 0.08);
+  }
+
+  .ring2 {
+    box-shadow: 0px 0px 20px rgba(240, 68, 56, 0.06);
+  }
+
+  .ring3 {
+    box-shadow: 0px 0px 20px rgba(240, 68, 56, 0.04);
+  }
+}
+
+:host(.approved) > .backgroundContainer > .background {
+  .ring1 {
+    box-shadow: 0px 0px 20px rgb(219, 0, 179, 0.1);
+  }
+
+  .ring2 {
+    box-shadow: 0px 0px 20px rgb(219, 0, 51, 0.1);
+  }
+
+  .ring3 {
+    box-shadow: 0px 0px 20px rgb(254, 83, 48, 0.1);
+  }
+}
+
+:host > .backgroundContainer > .background > .ring3 {
+  width: 480px;
+  height: 480px;
+  border-radius: 480px;
+}
+
+:host > .backgroundContainer > .background > .ring2 {
+  width: 360px;
+  height: 360px;
+  border-radius: 360px;
+}
+
+:host > .backgroundContainer > .background > .ring1 {
+  width: 240px;
+  height: 240px;
+  border-radius: 240px;
+}
+
+:host > .backgroundContainer > .background > .ring0 {
+  width: 120px;
+  height: 120px;
+  border-radius: 120px;
+}
+
+:host > .backgroundContainer > .background > .ringCenter.connection {
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  position: absolute;
+  top: 45px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 160px;
+  height: 160px;
+  border-radius: 160px;
+
+  & img {
+    width: 100%;
+    height: 100%;
+    animation: spin 2s linear infinite;
+  }
+}
+
+:host > .backgroundContainer > .background > .ringCenter.approved {
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  position: absolute;
+  top: 45px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 160px;
+  height: 160px;
+  border-radius: 160px;
+
+  & img {
+    width: 100%;
+    height: 100%;
+    animation: spin 2s linear infinite;
+  }
+}
+
+:host > .backgroundContainer > .background > .ringCenter.pending {
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  position: absolute;
+  top: 45px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 82px;
+  height: 82px;
+  border-radius: 82px;
+
+  & img {
+    width: 100%;
+    height: 100%;
+    animation: spin 2s linear infinite;
+  }
+}
+
+:host > .backgroundContainer > .background > .fadeOut {
+  position: absolute;
+  height: 200%;
+  right: 0;
+  bottom: -100%;
+  left: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 100%);
+}
+
+:host > .backgroundContainer > .children {
+  z-index: 1;
+}
+
+:host(.connection) > .backgroundContainer > .children > .connectDiagramContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+}

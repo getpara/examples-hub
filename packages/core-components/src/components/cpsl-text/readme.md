@@ -17,6 +17,7 @@
 ### Used by
 
  - [cpsl-file-upload](../cpsl-file-upload)
+ - [cpsl-hero](../cpsl-hero)
  - [cpsl-pagination](../cpsl-pagination)
  - [cpsl-select](../cpsl-select)
 
@@ -24,6 +25,7 @@
 ```mermaid
 graph TD;
   cpsl-file-upload --> cpsl-text
+  cpsl-hero --> cpsl-text
   cpsl-pagination --> cpsl-text
   cpsl-select --> cpsl-text
   style cpsl-text fill:#f9f,stroke:#333,stroke-width:4px

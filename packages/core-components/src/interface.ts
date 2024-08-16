@@ -1,4 +1,5 @@
 import { Icons } from './assets/icons';
+import { Images } from './assets/images';
 
 export type PredefinedColors =
   | 'primary'
@@ -90,6 +91,8 @@ export type Color = LiteralUnion<PredefinedColors, string>;
 export type CssClassMap = { [className: string]: boolean };
 
 export type IconType = keyof typeof Icons;
+
+export type ImageType = keyof typeof Images;
 
 export type Theme = {
   foregroundColor?: string;

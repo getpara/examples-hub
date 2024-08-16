@@ -332,6 +332,14 @@ export namespace Components {
          */
         "fixed": boolean;
     }
+    interface CpslHero {
+        "subtitle"?: string;
+        "title": string;
+        /**
+          * The variant of the button. Options are: `"default"`, `"loading", `"success". Default is: `"default"`.
+         */
+        "variant"?: 'connection' | 'pending' | 'approved' | 'failed';
+    }
     interface CpslIcon {
         /**
           * The name of the icon. If both `icon` and `src` are provided, `icon` will be used.
@@ -341,6 +349,13 @@ export namespace Components {
           * The external source of the icon. If both `icon` and `src` are provided, `icon` will be used.
          */
         "src"?: string;
+    }
+    interface CpslIdenticon {
+        "hash": string;
+        /**
+          * The size of the identicon. Default is: 40.
+         */
+        "size": number;
     }
     interface CpslInfoBox {
     }
@@ -999,11 +1014,23 @@ declare global {
         prototype: HTMLCpslGridElement;
         new (): HTMLCpslGridElement;
     };
+    interface HTMLCpslHeroElement extends Components.CpslHero, HTMLStencilElement {
+    }
+    var HTMLCpslHeroElement: {
+        prototype: HTMLCpslHeroElement;
+        new (): HTMLCpslHeroElement;
+    };
     interface HTMLCpslIconElement extends Components.CpslIcon, HTMLStencilElement {
     }
     var HTMLCpslIconElement: {
         prototype: HTMLCpslIconElement;
         new (): HTMLCpslIconElement;
+    };
+    interface HTMLCpslIdenticonElement extends Components.CpslIdenticon, HTMLStencilElement {
+    }
+    var HTMLCpslIdenticonElement: {
+        prototype: HTMLCpslIdenticonElement;
+        new (): HTMLCpslIdenticonElement;
     };
     interface HTMLCpslInfoBoxElement extends Components.CpslInfoBox, HTMLStencilElement {
     }
@@ -1306,7 +1333,9 @@ declare global {
         "cpsl-dropdown": HTMLCpslDropdownElement;
         "cpsl-file-upload": HTMLCpslFileUploadElement;
         "cpsl-grid": HTMLCpslGridElement;
+        "cpsl-hero": HTMLCpslHeroElement;
         "cpsl-icon": HTMLCpslIconElement;
+        "cpsl-identicon": HTMLCpslIdenticonElement;
         "cpsl-info-box": HTMLCpslInfoBoxElement;
         "cpsl-input": HTMLCpslInputElement;
         "cpsl-modal": HTMLCpslModalElement;
@@ -1675,6 +1704,14 @@ declare namespace LocalJSX {
          */
         "fixed"?: boolean;
     }
+    interface CpslHero {
+        "subtitle"?: string;
+        "title"?: string;
+        /**
+          * The variant of the button. Options are: `"default"`, `"loading", `"success". Default is: `"default"`.
+         */
+        "variant"?: 'connection' | 'pending' | 'approved' | 'failed';
+    }
     interface CpslIcon {
         /**
           * The name of the icon. If both `icon` and `src` are provided, `icon` will be used.
@@ -1684,6 +1721,13 @@ declare namespace LocalJSX {
           * The external source of the icon. If both `icon` and `src` are provided, `icon` will be used.
          */
         "src"?: string;
+    }
+    interface CpslIdenticon {
+        "hash"?: string;
+        /**
+          * The size of the identicon. Default is: 40.
+         */
+        "size"?: number;
     }
     interface CpslInfoBox {
     }
@@ -2258,7 +2302,9 @@ declare namespace LocalJSX {
         "cpsl-dropdown": CpslDropdown;
         "cpsl-file-upload": CpslFileUpload;
         "cpsl-grid": CpslGrid;
+        "cpsl-hero": CpslHero;
         "cpsl-icon": CpslIcon;
+        "cpsl-identicon": CpslIdenticon;
         "cpsl-info-box": CpslInfoBox;
         "cpsl-input": CpslInput;
         "cpsl-modal": CpslModal;
@@ -2303,7 +2349,9 @@ declare module "@stencil/core" {
             "cpsl-dropdown": LocalJSX.CpslDropdown & JSXBase.HTMLAttributes<HTMLCpslDropdownElement>;
             "cpsl-file-upload": LocalJSX.CpslFileUpload & JSXBase.HTMLAttributes<HTMLCpslFileUploadElement>;
             "cpsl-grid": LocalJSX.CpslGrid & JSXBase.HTMLAttributes<HTMLCpslGridElement>;
+            "cpsl-hero": LocalJSX.CpslHero & JSXBase.HTMLAttributes<HTMLCpslHeroElement>;
             "cpsl-icon": LocalJSX.CpslIcon & JSXBase.HTMLAttributes<HTMLCpslIconElement>;
+            "cpsl-identicon": LocalJSX.CpslIdenticon & JSXBase.HTMLAttributes<HTMLCpslIdenticonElement>;
             "cpsl-info-box": LocalJSX.CpslInfoBox & JSXBase.HTMLAttributes<HTMLCpslInfoBoxElement>;
             "cpsl-input": LocalJSX.CpslInput & JSXBase.HTMLAttributes<HTMLCpslInputElement>;
             "cpsl-modal": LocalJSX.CpslModal & JSXBase.HTMLAttributes<HTMLCpslModalElement>;

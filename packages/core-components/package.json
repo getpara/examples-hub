@@ -16,13 +16,13 @@
     "css/"
   ],
   "scripts": {
-    "build": "yarn build:icons && yarn build:css && stencil build",
-    "start": "yarn build:icons && yarn build:css && stencil build --dev --watch --serve",
+    "build": "yarn build:assets && yarn build:css && stencil build",
+    "start": "yarn build:assets && yarn build:css && stencil build --dev --watch --serve",
     "test": "stencil test --spec --e2e",
     "test.watch": "stencil test --spec --e2e --watchAll",
     "generate": "stencil generate",
     "build:css": "sass --embed-sources src/css:./css",
-    "build:icons": "ts-node -T ./scripts/buildIconLibrary.ts",
+    "build:assets": "ts-node -T ./scripts/buildAssets.ts",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
