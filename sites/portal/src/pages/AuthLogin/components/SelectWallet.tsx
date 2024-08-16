@@ -180,7 +180,7 @@ export const SelectWallet = ({ sessionLookupId }: { sessionLookupId: string }) =
 
     return [
       'select',
-      <ConnectDiagram left={capsuleIcon} right={<PartnerIcon partner={partner} />} />,
+      <ConnectDiagram left={capsuleIcon} right={<PartnerIcon partner={partner} fontSize="24px" />} />,
       `Connect to ${partner.displayName}`,
       <WalletsContainer>
         <Subheading isDark={isDark}>
@@ -288,8 +288,8 @@ export const SelectWallet = ({ sessionLookupId }: { sessionLookupId: string }) =
 
 const Root = styled.div`
   height: 100vh;
-  width: 520px;
-  min-width: 520px;
+  width: 456px;
+  max-width: 100vw;
   background-color: white;
 `;
 
@@ -325,8 +325,8 @@ const Wallets = styled(FlexColumn)`
 `;
 
 const Container = styled(FlexColumn)`
-  padding-left: 44px;
-  padding-right: 44px;
+  padding-left: 12px;
+  padding-right: 12px;
 `;
 
 const Heading = styled(CpslText)`
@@ -476,15 +476,23 @@ const WalletButtonLower = styled(WalletButtonUpper)`
     display: flex;
     align-items: center;
     color: #858585;
+    text-align: left;
+    white-space: nowrap;
 
     img {
       width: 16px;
       height: 16px;
     }
 
-    &:not(:last-child)::after {
-      content: '•';
-      margin: 0 6px;
+    &:not(:last-child) {
+      @media screen and (max-width: 432px) {
+        display: none;
+      }
+
+      &::after {
+        content: '•';
+        margin: 0 6px;
+      }
     }
   }
 `;

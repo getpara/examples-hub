@@ -13,6 +13,9 @@ export const PartnerIcon = ({
   fontSize?: string;
   margin?: string;
 }) => {
+  // const src = partner.logoUrl;
+  const src = undefined;
+
   return (
     <Tooltip
       bgColor="var(--cpsl-color-background-0)"
@@ -24,14 +27,14 @@ export const PartnerIcon = ({
       label={partner.displayName}
     >
       <Avatar
-        bg={partner.logoUrl ? 'var(--cpsl-color-background-8)' : getBackground(stringToBinaryAndColor(partner.id)[1])}
-        color={partner.logoUrl ? undefined : 'white'}
+        bg={src ? 'var(--cpsl-color-background-8)' : getBackground(stringToBinaryAndColor(partner.id)[1])}
+        color={src ? undefined : 'white'}
         w={size}
         h={size}
         m={margin}
         borderRadius={size}
         fontSize={fontSize}
-        src={partner.logoUrl}
+        src={src}
         name={partner.displayName}
       />
     </Tooltip>
