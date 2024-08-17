@@ -36,7 +36,11 @@ export class CapsuleSolanaWeb3Signer {
     return Buffer.from((res as SuccessfulSignatureRes).signature, 'base64');
   }
 
-  async signTransaction(transaction: solana.Transaction): Promise<solana.Transaction> {
+  async signTransaction<T extends solana.Transaction | solana.VersionedTransaction>(transaction: T): Promise<T> {
+    if (transaction instanceof solana.VersionedTransaction) {
+      return (await this.signVersionedTransaction(transaction)) as T;
+    }
+
     if (!transaction.recentBlockhash) {
       transaction.recentBlockhash = (await this.connection.getLatestBlockhash('finalized')).blockhash;
     }
@@ -44,10 +48,24 @@ export class CapsuleSolanaWeb3Signer {
     const bytesToSign = transaction.serializeMessage();
     const sigBytes = await this.signBytes(bytesToSign);
     transaction.addSignature(this.sender, sigBytes);
+    return transaction as T;
+  }
+
+  async signVersionedTransaction(transaction: solana.VersionedTransaction): Promise<solana.VersionedTransaction> {
+    if (!transaction.message.recentBlockhash) {
+      transaction.message.recentBlockhash = (await this.connection.getLatestBlockhash('finalized')).blockhash;
+    }
+
+    const messageBytes = transaction.message.serialize();
+    const sigBytes = await this.signBytes(Buffer.from(messageBytes));
+    transaction.addSignature(this.sender, sigBytes);
     return transaction;
   }
 
-  async sendTransaction(transaction: solana.Transaction, options?: solana.SendOptions): Promise<string> {
+  async sendTransaction(
+    transaction: solana.Transaction | solana.VersionedTransaction,
+    options?: solana.SendOptions,
+  ): Promise<string> {
     const signedTransaction = await this.signTransaction(transaction);
     return this.connection.sendRawTransaction(signedTransaction.serialize(), options);
   }
