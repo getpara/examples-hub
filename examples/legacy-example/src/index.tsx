@@ -39,7 +39,7 @@ import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
 import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
 import * as solana from '@solana/web3.js';
-import Capsule from '@usecapsule/web-sdk';
+import Capsule, { isCosmosWithPrefix } from '@usecapsule/web-sdk';
 import {
   CapsuleModal,
   OAuthMethod,
@@ -70,6 +70,7 @@ import CoreCapsule, {
   Network,
   SupportedWalletTypes,
   WalletType,
+  NON_ED25519,
 } from '@usecapsule/core-sdk';
 import { CapsuleSolanaWeb3Signer } from '@usecapsule/solana-web3.js-v1-integration';
 import { FONT_OPTIONS } from './constants';
@@ -561,7 +562,6 @@ function App() {
   const [deletedEmail, setDeletedEmail] = useState('');
   const [emailPendingDeletion, setEmailPendingDeletion] = useState('');
   const [isSessionActive, setIsSessionActive] = useState(false);
-
   const [txToAddress, setTxToAddress] = useState(DEFAULT_TO_ADDRESS);
   const [txValue, setTxValue] = useState(DEFAULT_VALUE);
   const [txGasAmount, setTxGasAmount] = useState(DEFAULT_GAS_AMOUNT);
@@ -904,7 +904,7 @@ function App() {
                             setPregenType(walletType);
                           } else {
                             setSupportedWalletTypes(({ [walletType]: _, ...prev }) => prev);
-                            setPregenType('EVM');
+                            setPregenType(Object.keys(supportedWalletTypes)[0] as WalletType);
                           }
                         }}
                       />
@@ -913,6 +913,20 @@ function App() {
                   ))}
                 </HStack>
               </HStack>
+              {supportedWalletTypes.COSMOS && (
+                <HStack>
+                  <Text width={'15%'}>
+                    <strong>Cosmos Prefix:</strong>
+                  </Text>
+                  <Input
+                    placeholder="None"
+                    onChange={e => {
+                      setSupportedWalletTypes({ COSMOS: e.target.value.length > 0 ? { prefix: e.target.value } : true });
+                    }}
+                    value={isCosmosWithPrefix(supportedWalletTypes) ? supportedWalletTypes.COSMOS.prefix : ''}
+                  />
+                </HStack>
+              )}
               <HStack>
                 <Text width={'15%'}>
                   <strong>On-Ramp Configuration:</strong>
@@ -1177,8 +1191,11 @@ function App() {
                     <Button
                       colorScheme="teal"
                       onClick={async () => {
-                        const fetchedWallet = (await capsule.fetchWallets())[0];
-                        const newShare = await capsule.distributeNewWalletShare(fetchedWallet.id, undefined, true);
+                        const newShare = await capsule.distributeNewWalletShare(
+                          capsule.currentWalletIds[0],
+                          undefined,
+                          true,
+                        );
 
                         const backupDecryptionKey = JSON.parse(newShare || '{}').backupDecryptionKey;
 
@@ -1387,7 +1404,7 @@ function App() {
                     <Button
                       colorScheme="teal"
                       onClick={async () => {
-                        const walletId = capsule.findWalletId(capsule.currentWalletIds[0], { scheme: ['DKLS'] });
+                        const walletId = capsule.findWalletId(capsule.currentWalletIds[0], { scheme: NON_ED25519 });
                         const tx = await createTransaction(
                           txToAddress,
                           txValue,

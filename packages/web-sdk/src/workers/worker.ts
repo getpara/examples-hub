@@ -12,11 +12,13 @@ import {
   initClient,
   mpcComputationClient,
   capsuleVersion,
+  WalletType,
 } from '@usecapsule/core-sdk';
 
 export interface Message {
   env: Environment;
   apiKey?: string;
+  cosmosPrefix?: string;
   offloadMPCComputationURL?: string;
   disableWorkers?: boolean;
   functionType: string;
@@ -49,8 +51,8 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
 
   switch (functionType) {
     case 'KEYGEN': {
-      const { userId, secretKey } = params;
-      const keygenRes = await walletUtils.keygen(ctx, userId, secretKey);
+      const { userId, secretKey, type = WalletType.EVM } = params;
+      const keygenRes = await walletUtils.keygen(ctx, userId, type, secretKey);
       return keygenRes;
     }
     case 'SIGN_TRANSACTION': {
@@ -70,14 +72,14 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
       return walletUtils.refresh(ctx, share, walletId, userId);
     }
     case 'PREKEYGEN': {
-      const { email, partnerId, secretKey } = params;
+      const { email, partnerId, secretKey, type = WalletType.EVM } = params;
       let { pregenIdentifier, pregenIdentifierType } = params;
       if (email !== 'null' && email !== 'undefined' && email !== '' && email != null) {
         pregenIdentifier = email;
         pregenIdentifierType = PregenIdentifierType.EMAIL;
       }
 
-      const keygenRes = await walletUtils.preKeygen(ctx, partnerId, pregenIdentifier, pregenIdentifierType, secretKey);
+      const keygenRes = await walletUtils.preKeygen(ctx, partnerId, pregenIdentifier, pregenIdentifierType, type, secretKey);
       return keygenRes;
     }
     case 'GET_PRIVATE_KEY': {
@@ -112,8 +114,17 @@ export async function handleMessage(
   postMessage: (message: any) => void,
   useFetchAdapter?: boolean,
 ): Promise<boolean> {
-  const { env, apiKey, offloadMPCComputationURL, disableWorkers, sessionCookie, useDKLS, disableWebSockets, wasmOverride } =
-    e.data;
+  const {
+    env,
+    apiKey,
+    cosmosPrefix = 'cosmos',
+    offloadMPCComputationURL,
+    disableWorkers,
+    sessionCookie,
+    useDKLS,
+    disableWebSockets,
+    wasmOverride,
+  } = e.data;
   if (!env) {
     // this means a message we didn't send was received and we want to ignore it
     return true;
@@ -121,6 +132,7 @@ export async function handleMessage(
   const ctx = {
     env,
     apiKey,
+    cosmosPrefix,
     capsuleClient: initClient(env, capsuleVersion, apiKey, useFetchAdapter, () => sessionCookie),
     offloadMPCComputationURL: offloadMPCComputationURL,
     mpcComputationClient: offloadMPCComputationURL

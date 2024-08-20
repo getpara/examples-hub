@@ -122,13 +122,14 @@ export async function ed25519Sign(
 export async function keygen(
   ctx: Ctx,
   userId: string,
+  type: Exclude<WalletType, WalletType.SOLANA>,
   secretKey: string | null,
-  type: Exclude<WalletType, WalletType.SOLANA> = WalletType.EVM,
 ): Promise<{ signer: string; walletId: string }> {
   const { walletId, protocolId } = await ctx.capsuleClient.createWallet(userId, {
     useTwoSigners: true,
     scheme: ctx.useDKLS ? WalletScheme.DKLS : WalletScheme.CGGMP,
     type,
+    cosmosPrefix: type === WalletType.COSMOS ? ctx.cosmosPrefix : undefined,
   });
 
   if (ctx.offloadMPCComputationURL && !ctx.useDKLS) {
@@ -166,13 +167,14 @@ export async function preKeygen(
   partnerId: string,
   pregenIdentifier: string,
   pregenIdentifierType: PregenIdentifierType,
+  type: Exclude<WalletType, WalletType.SOLANA>,
   secretKey: string | null,
-  type: Exclude<WalletType, WalletType.SOLANA> = WalletType.EVM,
 ): Promise<{ signer: string; walletId: string }> {
   const { walletId, protocolId } = await ctx.capsuleClient.createWalletPreGen({
     pregenIdentifier,
     pregenIdentifierType,
     type,
+    cosmosPrefix: type === WalletType.COSMOS ? ctx.cosmosPrefix : undefined,
   });
 
   if (ctx.offloadMPCComputationURL && !ctx.useDKLS) {

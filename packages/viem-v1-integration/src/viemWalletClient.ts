@@ -15,7 +15,13 @@ import {
 } from 'viem';
 import * as viemChains from 'viem/chains';
 
-import CoreCapsule, { hexStringToBase64, hexToSignature, Wallet, SuccessfulSignatureRes } from '@usecapsule/core-sdk';
+import CoreCapsule, {
+  hexStringToBase64,
+  hexToSignature,
+  Wallet,
+  SuccessfulSignatureRes,
+  NON_ED25519,
+} from '@usecapsule/core-sdk';
 
 interface ViemClientOpts {
   noAccount?: boolean;
@@ -28,7 +34,8 @@ export function createCapsuleAccount(capsule: CoreCapsule, walletAddress?: Hex):
       wallet => wallet.address.toLowerCase() === walletAddress.toLowerCase(),
     );
   } else {
-    currentWallet = Object.values(capsule.wallets)[0];
+    const walletId = capsule.findWalletId(undefined, { scheme: NON_ED25519 });
+    currentWallet = capsule.wallets[walletId];
   }
 
   return {

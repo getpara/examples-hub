@@ -122,7 +122,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
       : [capsule.getPhoneNumber(), PregenIdentifierType.PHONE];
 
     const _pregenWallets = capsule.ctx.apiKey
-      ? (await capsule.getPregenWallets(pregenIdentifier, pregenIdentifierType, true)).filter(
+      ? (await capsule.getPregenWallets(pregenIdentifier, pregenIdentifierType)).filter(
           wallet => params.pregenWalletIds[wallet.id],
         )
       : [];

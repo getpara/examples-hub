@@ -10,10 +10,10 @@ export interface PlatformUtils {
   keygen(
     ctx: Ctx,
     userId: string,
+    type: Exclude<WalletType, WalletType.SOLANA>,
     secretKey: string | null, // should be acceptable as null in RN as we don't pre-gen them
     sessionCookie: string,
     emailProps?: BackupKitEmailProps,
-    type?: Exclude<WalletType, WalletType.SOLANA>,
   ): Promise<{
     signer: string;
     walletId: string;
@@ -24,9 +24,9 @@ export interface PlatformUtils {
     partnerId: string,
     pregenIdentifier: string,
     pregenIdentifierType: PregenIdentifierType,
+    type: Exclude<WalletType, WalletType.SOLANA>,
     secretKey: string | null, // should be acceptable as null in RN as we don't pre-gen them
     sessionCookie: string,
-    type?: Exclude<WalletType, WalletType.SOLANA>,
   ): Promise<{
     signer: string;
     walletId: string;

@@ -47,6 +47,7 @@ export interface Ctx {
   useDKLS?: boolean;
   disableWebSockets: boolean;
   wasmOverride?: ArrayBuffer;
+  cosmosPrefix?: string;
 }
 
 export enum OAuthMethod {

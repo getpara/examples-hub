@@ -3,16 +3,21 @@ import {
   AminoSignResponse,
   encodeSecp256k1Signature,
   OfflineAminoSigner,
-  rawSecp256k1PubkeyToRawAddress,
   serializeSignDoc,
   StdSignDoc,
 } from '@cosmjs/amino';
-import { toBech32 } from '@cosmjs/encoding';
 import { Secp256k1, Sha256, sha256, ExtendedSecp256k1Signature } from '@cosmjs/crypto';
 import { OfflineDirectSigner, makeSignBytes, DirectSignResponse } from '@cosmjs/proto-signing';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
-import CoreCapsule, { SuccessfulSignatureRes, NON_ED25519, hexToSignature, hexToUint8Array } from '@usecapsule/core-sdk';
+import CoreCapsule, {
+  SuccessfulSignatureRes,
+  NON_ED25519,
+  hexToSignature,
+  hexToUint8Array,
+  Wallet,
+  getCosmosAddress,
+} from '@usecapsule/core-sdk';
 
 class CapsuleCosmosSigner {
   readonly prefix: string;
@@ -25,15 +30,23 @@ class CapsuleCosmosSigner {
     this.prefix = prefix;
   }
 
+  get currentWallet(): Wallet {
+    return (
+      this.capsule.wallets[this.currentWalletId] ??
+      (() => {
+        throw new Error(`no valid Capsule wallet found`);
+      })()
+    );
+  }
+
   get publicKey(): Uint8Array {
-    const wallet = this.capsule.wallets[this.currentWalletId];
-    const uncompressedPublicKey = hexToUint8Array(wallet.publicKey);
+    const uncompressedPublicKey = hexToUint8Array(this.currentWallet.publicKey);
     const compressedPublicKey = Secp256k1.compressPubkey(uncompressedPublicKey);
     return compressedPublicKey;
   }
 
   get address(): string {
-    return toBech32(this.prefix, rawSecp256k1PubkeyToRawAddress(this.publicKey));
+    return getCosmosAddress(this.currentWallet.publicKey, this.prefix);
   }
 
   async getAccounts(): Promise<readonly AccountData[]> {
@@ -55,7 +68,7 @@ export class CapsuleProtoSigner extends CapsuleCosmosSigner implements OfflineDi
     }
     const hashedMessage = sha256(signBytes);
 
-    const res = await this.capsule.signMessage(this.currentWalletId, Buffer.from(hashedMessage.buffer).toString('base64'));
+    const res = await this.capsule.signMessage(this.currentWallet.id, Buffer.from(hashedMessage.buffer).toString('base64'));
     const signature = hexToSignature(`0x${(res as SuccessfulSignatureRes).signature}`);
     const extendedSignature = new ExtendedSecp256k1Signature(
       hexToUint8Array(signature.r),
@@ -78,7 +91,7 @@ export class CapsuleAminoSigner extends CapsuleCosmosSigner implements OfflineAm
     }
     const hashedMessage = new Sha256(serializeSignDoc(signDoc)).digest();
 
-    const res = await this.capsule.signMessage(this.currentWalletId, Buffer.from(hashedMessage.buffer).toString('base64'));
+    const res = await this.capsule.signMessage(this.currentWallet.id, Buffer.from(hashedMessage.buffer).toString('base64'));
     const signature = hexToSignature(`0x${(res as SuccessfulSignatureRes).signature}`);
     const extendedSignature = new ExtendedSecp256k1Signature(
       hexToUint8Array(signature.r),

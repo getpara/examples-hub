@@ -7,6 +7,7 @@ import {
   initClient,
   mpcComputationClient,
   capsuleVersion,
+  WalletType,
 } from '@usecapsule/core-sdk';
 import * as walletUtils from './walletUtils.js';
 
@@ -15,6 +16,7 @@ let rawWasm: any;
 interface Message {
   env: Environment;
   apiKey?: string;
+  cosmosPrefix?: string;
   offloadMPCComputationURL?: string;
   disableWorkers?: boolean;
   functionType: string;
@@ -56,8 +58,8 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
 
   switch (functionType) {
     case 'KEYGEN': {
-      const { userId, secretKey } = params;
-      return walletUtils.keygen(ctx, userId, secretKey);
+      const { userId, secretKey, type = WalletType.EVM } = params;
+      return walletUtils.keygen(ctx, userId, type, secretKey);
     }
     case 'SIGN_TRANSACTION': {
       const { share, walletId, userId, tx, chainId } = params;
@@ -76,14 +78,14 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
       return walletUtils.refresh(ctx, share, walletId, userId);
     }
     case 'PREKEYGEN': {
-      const { email, partnerId, secretKey } = params;
+      const { email, partnerId, secretKey, type = WalletType.EVM } = params;
       let { pregenIdentifier, pregenIdentifierType } = params;
       if (email !== 'null' && email !== 'undefined' && email !== '' && email != null) {
         pregenIdentifier = email;
         pregenIdentifierType = PregenIdentifierType.EMAIL;
       }
 
-      const keygenRes = await walletUtils.preKeygen(ctx, partnerId, pregenIdentifier, pregenIdentifierType, secretKey);
+      const keygenRes = await walletUtils.preKeygen(ctx, partnerId, pregenIdentifier, pregenIdentifierType, type, secretKey);
       return keygenRes;
     }
     case 'GET_PRIVATE_KEY': {
@@ -114,8 +116,17 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
 }
 
 export async function handleMessage(e: { data: Message }): Promise<any> {
-  const { env, apiKey, offloadMPCComputationURL, disableWorkers, sessionCookie, useDKLS, disableWebSockets, workId } =
-    e.data;
+  const {
+    env,
+    apiKey,
+    cosmosPrefix = 'cosmos',
+    offloadMPCComputationURL,
+    disableWorkers,
+    sessionCookie,
+    useDKLS,
+    disableWebSockets,
+    workId,
+  } = e.data;
   const ctx = {
     env,
     apiKey,
@@ -126,6 +137,7 @@ export async function handleMessage(e: { data: Message }): Promise<any> {
       : undefined,
     useDKLS,
     disableWebSockets: !!disableWebSockets,
+    cosmosPrefix,
   };
 
   if (!ctx.offloadMPCComputationURL || ctx.useDKLS) {

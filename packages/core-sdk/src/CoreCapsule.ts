@@ -23,15 +23,15 @@ import {
   getNetwork,
   getPortalBaseURL,
   getProvider,
+  Environment,
+  OAuthMethod,
 } from './definitions.js';
-import { Environment, OAuthMethod } from './definitions.js';
 import { getBaseUrl, initClient } from './external/capsuleClient.js';
 import * as mpcComputationClient from './external/mpcComputationClient.js';
 import { distributeNewShare } from './shares/shareDistribution.js';
-import { FullSignatureRes, SuccessfulSignatureRes, DeniedSignatureRes } from './types/walletTypes.js';
+import { Theme, FullSignatureRes, SuccessfulSignatureRes, DeniedSignatureRes } from './types/index.js';
 import * as transmissionUtils from './transmission/transmissionUtils.js';
 import { PlatformUtils } from './PlatformUtils.js';
-import { Theme } from './types/theme.js';
 import { sendRecoveryForShare } from './shares/recovery.js';
 import parsePhoneNumberFromString, { CountryCallingCode } from 'libphonenumber-js';
 import { getCosmosAddress, isCosmosWithPrefix } from './utils/formattingUtils.js';
@@ -194,7 +194,9 @@ export interface ConstructorOpts {
    */
   homepageUrl?: string;
   /**
-   * Which type of wallet your application supports, in the form `{ [WalletType]: true }`. Currently allowed values for `WalletType` are `"EVM"`, `"SOLANA"`, or `"COSMOS"`.
+   * Which type of wallet your application supports, in the form `{ [WalletType]: true }`. Currently allowed values for `WalletType` are `'evm'`, `'solana'`, or `'cosmos'` (case insensitive).
+   *
+   * To specify which prefix to use for new Cosmos wallets, pass `{ cosmos: { prefix: 'your-prefix' } }`. Defaults to `'cosmos'`.
    */
   supportedWalletTypes?: SupportedWalletTypes;
   /**
@@ -257,7 +259,7 @@ export abstract class CoreCapsule {
   private isAwaitingOAuth = false;
 
   /**
-   * The ids of the currently active wallets. Any signer integrations will default to the first id in this list.
+   * The IDs of the currently active wallets. Any signer integrations will default to the first viable wallet ID in this list.
    */
   currentWalletIds?: string[];
 
@@ -373,6 +375,7 @@ export abstract class CoreCapsule {
 
   /**
    * Remove all local storage and prefixed session storage.
+   * @param {'local' | 'session' | 'secure' | 'all'} type - Type of storage to clear. Defaults to 'all'.
    */
   clearStorage = async (type: 'local' | 'session' | 'secure' | 'all' = 'all'): Promise<void> => {
     const isAll = type === 'all';
@@ -490,25 +493,34 @@ export abstract class CoreCapsule {
   /**
    * Returns the formatted address for the desired wallet ID, depending on your app settings.
    * @param walletId - the ID of the wallet address to display.
-   * @returns - the wallet address.
+   * @param options.truncate - whether to truncate the address.
+   * @returns - the formatted address string.
    */
-  getDisplayAddress(walletId: string): string {
+  getDisplayAddress(walletId: string, { truncate = false }: { truncate?: boolean } | undefined = {}): string {
     const wallet = this.wallets[walletId];
 
     if (!this.wallets[walletId]) {
       throw new Error('wallet does not exist');
     }
 
+    let str: string,
+      headLength = 6;
+
     switch (wallet.type) {
       case WalletType.SOLANA:
-        return wallet.address;
+        str = wallet.address;
+        break;
       default:
         if (isCosmosWithPrefix(this.supportedWalletTypes)) {
-          return wallet.addressSecondary ?? getCosmosAddress(wallet.publicKey, this.cosmosPrefix) ?? wallet.address;
+          headLength = this.cosmosPrefix.length + 4;
+          str = wallet.addressSecondary ?? getCosmosAddress(wallet.publicKey, this.cosmosPrefix) ?? wallet.address;
+        } else {
+          str = wallet.address;
         }
-
-        return wallet.address;
+        break;
     }
+
+    return truncate ? `${str.slice(0, headLength)}...${str.slice(-4)}` : str;
   }
 
   protected abstract getPlatformUtils(): PlatformUtils;
@@ -541,7 +553,15 @@ export abstract class CoreCapsule {
     this.platformUtils = this.getPlatformUtils();
     this.disableProviderModal = this.platformUtils.disableProviderModal;
     // Only one type per instance for now
-    this.supportedWalletTypes = opts.supportedWalletTypes ?? { [WalletType.EVM]: true };
+    this.supportedWalletTypes = opts.supportedWalletTypes
+      ? ((() => {
+          for (const key of Object.keys(opts.supportedWalletTypes)) {
+            this.assertIsValidWalletType(key, opts.supportedWalletTypes);
+          }
+
+          return opts.supportedWalletTypes;
+        })() as SupportedWalletTypes)
+      : { [WalletType.EVM]: true };
 
     if (opts.useStorageOverrides) {
       this.localStorageGetItem = opts.localStorageGetItemOverride;
@@ -579,6 +599,7 @@ export abstract class CoreCapsule {
       useDKLS: opts.useDKLSForCreation || !opts.offloadMPCComputationURL,
       disableWebSockets: !!opts.disableWebSockets,
       wasmOverride: opts.wasmOverride,
+      cosmosPrefix: this.cosmosPrefix,
     };
     if (opts.offloadMPCComputationURL) {
       this.ctx.mpcComputationClient = mpcComputationClient.initClient(opts.offloadMPCComputationURL, opts.disableWorkers);
@@ -798,16 +819,19 @@ export abstract class CoreCapsule {
     }
   }
 
-  get cosmosPrefix(): string | undefined {
+  /**
+   * The prefix for the instance's managed Cosmos wallets. Defaults to `'cosmos'`.
+   */
+  get cosmosPrefix(): string {
     return isCosmosWithPrefix(this.supportedWalletTypes) ? this.supportedWalletTypes.COSMOS.prefix : 'cosmos';
   }
 
   /**
    * Validates that a wallet ID is present on the instance, usable, and matches the desired filters.
    * If no ID is passed, this will instead return the first valid, usable wallet ID that matches the filters.
-   * @param {string} [walletId] - the wallet ID to validate.
-   * @param {WalletFilters} [filter] - a `WalletFilters` object specifying allowed types, schemes, and whether to forbid unclaimed pregen wallets.
-   * @returns {string} - the wallet ID originally passed, or the one found.
+   * @param {string} [walletId] the wallet ID to validate.
+   * @param {WalletFilters} [filter={}] a `WalletFilters` object specifying allowed types, schemes, and whether to forbid unclaimed pregen wallets.
+   * @returns {string} the wallet ID originally passed, or the one found.
    */
   findWalletId(walletId?: string, filter: WalletFilters = {}): string {
     if (walletId) {
@@ -830,6 +854,17 @@ export abstract class CoreCapsule {
 
   private assertIsValidWalletId(walletId: string, condition: WalletFilters = {}): void {
     this.isWalletUsable(walletId, condition, true);
+  }
+
+  private assertIsValidWalletType(
+    type: string,
+    supportedWalletTypes: SupportedWalletTypes = this.supportedWalletTypes,
+  ): WalletType {
+    if (!type || !Object.values(WalletType).includes(<WalletType>type) || !supportedWalletTypes[<WalletType>type]) {
+      throw new Error(`wallet type ${type} is not supported`);
+    }
+
+    return <WalletType>type;
   }
 
   private async getPartnerURL(partnerId: string): Promise<string | undefined> {
@@ -1678,17 +1713,18 @@ export abstract class CoreCapsule {
    * @returns [wallet, recoveryShare]
    **/
   async createWallet(
-    type: WalletType = <WalletType>Object.keys(this.supportedWalletTypes)[0],
+    _type: WalletType = <WalletType>Object.keys(this.supportedWalletTypes)[0],
     skipDistribute = false,
     _customFunction?: (params?: any) => void,
   ): Promise<[Wallet, string | null]> {
     this.requireApiKey();
+    const walletType = this.assertIsValidWalletType(_type);
 
     let signer: string;
     let wallet: Wallet;
     let keygenRes;
 
-    switch (type) {
+    switch (walletType) {
       case WalletType.SOLANA: {
         keygenRes = await this.platformUtils.ed25519Keygen(
           this.ctx,
@@ -1702,6 +1738,7 @@ export abstract class CoreCapsule {
         keygenRes = await this.platformUtils.keygen(
           this.ctx,
           this.userId,
+          walletType,
           null,
           this.retrieveSessionCookie(),
           this.getBackupKitEmailProps(),
@@ -1745,14 +1782,15 @@ export abstract class CoreCapsule {
    * @returns [wallet, recoveryShare]
    **/
   async createWalletPreGen(
-    type: WalletType = <WalletType>Object.keys(this.supportedWalletTypes)[0],
+    _type: WalletType = <WalletType>Object.keys(this.supportedWalletTypes)[0],
     pregenIdentifier: string,
     pregenIdentifierType: PregenIdentifierType = PregenIdentifierType.EMAIL,
   ): Promise<Wallet> {
     this.requireApiKey();
+    const walletType = this.assertIsValidWalletType(_type);
 
     let keygenRes;
-    switch (type) {
+    switch (walletType) {
       case WalletType.SOLANA:
         keygenRes = await this.platformUtils.ed25519PreKeygen(
           this.ctx,
@@ -1767,6 +1805,7 @@ export abstract class CoreCapsule {
           undefined,
           pregenIdentifier,
           pregenIdentifierType,
+          walletType,
           null,
           this.retrieveSessionCookie(),
         );
@@ -1902,11 +1941,10 @@ export abstract class CoreCapsule {
   async getPregenWallets(
     pregenIdentifier: string,
     pregenIdentifierType: PregenIdentifierType = PregenIdentifierType.EMAIL,
-    expand = false,
   ): Promise<WalletEntity[]> {
     this.requireApiKey();
 
-    const res = await this.ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType, expand);
+    const res = await this.ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType, this.isPortal());
     return res.wallets.filter(w => this.isWalletSupported(w));
   }
 
@@ -2262,6 +2300,7 @@ export abstract class CoreCapsule {
         offloadMPCComputationURL: this.ctx.offloadMPCComputationURL,
         useLocalFiles: this.ctx.useLocalFiles,
         useDKLS: this.ctx.useDKLS,
+        cosmosPrefix: this.ctx.cosmosPrefix,
       },
     };
 

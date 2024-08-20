@@ -2,7 +2,7 @@ import { setupWorker } from '../workers/workerWrapper.js';
 import { PregenIdentifierType } from '@usecapsule/core-sdk';
 
 import { Ctx, distributeNewShare, waitUntilTrue } from '@usecapsule/core-sdk';
-import { BackupKitEmailProps } from '@usecapsule/user-management-client';
+import { BackupKitEmailProps, WalletType } from '@usecapsule/user-management-client';
 
 async function isKeygenComplete(ctx: Ctx, userId: string, walletId: string): Promise<boolean> {
   const wallets = await ctx.capsuleClient.getWallets(userId);
@@ -24,6 +24,7 @@ async function isPreKeygenComplete(
 export function keygen(
   ctx: Ctx,
   userId: string,
+  type: Exclude<WalletType, WalletType.SOLANA>,
   secretKey: string | null,
   skipDistribute = false,
   sessionCookie?: string,
@@ -57,7 +58,8 @@ export function keygen(
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,
-      params: { userId, secretKey },
+      cosmosPrefix: ctx.cosmosPrefix,
+      params: { userId, secretKey, type },
       functionType: 'KEYGEN',
       offloadMPCComputationURL: ctx.offloadMPCComputationURL,
       disableWorkers: ctx.disableWorkers,
@@ -73,6 +75,7 @@ export function preKeygen(
   ctx: Ctx,
   pregenIdentifier: string,
   pregenIdentifierType: PregenIdentifierType,
+  type: Exclude<WalletType, WalletType.SOLANA>,
   secretKey: string | null,
   _skipDistribute = false,
   partnerId: string,
@@ -98,13 +101,14 @@ export function preKeygen(
       worker.terminate();
     });
     const email: string | undefined = undefined;
-    const params = { pregenIdentifier, pregenIdentifierType, secretKey, partnerId, email };
+    const params = { pregenIdentifier, pregenIdentifierType, type, secretKey, partnerId, email };
     if (pregenIdentifierType === PregenIdentifierType.EMAIL) {
       params.email = pregenIdentifier;
     }
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,
+      cosmosPrefix: ctx.cosmosPrefix,
       params: params,
       functionType: 'PREKEYGEN',
       offloadMPCComputationURL: ctx.offloadMPCComputationURL,
@@ -140,6 +144,7 @@ export function ed25519Keygen(
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,
+      cosmosPrefix: ctx.cosmosPrefix,
       params: { userId },
       functionType: 'ED25519_KEYGEN',
       disableWorkers: ctx.disableWorkers,
@@ -183,6 +188,7 @@ export function ed25519PreKeygen(
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,
+      cosmosPrefix: ctx.cosmosPrefix,
       params: params,
       functionType: 'ED25519_PREKEYGEN',
       disableWorkers: ctx.disableWorkers,

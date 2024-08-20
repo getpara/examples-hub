@@ -19,6 +19,7 @@ export async function signTransaction(
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,
+      cosmosPrefix: ctx.cosmosPrefix,
       params: { share, walletId, userId, tx, chainId },
       functionType: 'SIGN_TRANSACTION',
       offloadMPCComputationURL: ctx.offloadMPCComputationURL,
@@ -49,6 +50,7 @@ export async function sendTransaction(
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,
+      cosmosPrefix: ctx.cosmosPrefix,
       params: { share, walletId, userId, tx, chainId },
       functionType: 'SEND_TRANSACTION',
       offloadMPCComputationURL: ctx.offloadMPCComputationURL,
@@ -78,6 +80,7 @@ export async function signMessage(
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,
+      cosmosPrefix: ctx.cosmosPrefix,
       params: { share, walletId, userId, message },
       functionType: 'SIGN_MESSAGE',
       offloadMPCComputationURL: ctx.offloadMPCComputationURL,
@@ -106,6 +109,7 @@ export async function ed25519Sign(
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,
+      cosmosPrefix: ctx.cosmosPrefix,
       params: { share, walletId, userId, base64Bytes },
       functionType: 'ED25519_SIGN',
       disableWorkers: ctx.disableWorkers,

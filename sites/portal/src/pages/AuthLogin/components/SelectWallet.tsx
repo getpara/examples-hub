@@ -17,7 +17,10 @@ import { motion } from 'framer-motion';
 
 const GRADIENT = `linear-gradient(to right, #fe5330, #9400db)`;
 
-type Wallet = Pick<WalletType, 'id' | 'address' | 'name' | 'partner' | 'createdAt' | 'lastUsedAt' | 'lastUsedPartner'>;
+type Wallet = Pick<
+  WalletType,
+  'id' | 'type' | 'address' | 'name' | 'partner' | 'createdAt' | 'lastUsedAt' | 'lastUsedPartner'
+>;
 
 const successIcon = (
   <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -60,7 +63,7 @@ const WalletButton = ({
   isNew?: boolean;
 }) => {
   const capsule = useCapsule();
-  const address = capsule.getDisplayAddress(wallet.id);
+  const displayAddress = capsule.getDisplayAddress(wallet.id, { truncate: true });
 
   return (
     <WalletButtonRoot isClaimable={isClaimable} key={wallet.id} disabled={disabled} onClick={onClick}>
@@ -69,11 +72,7 @@ const WalletButton = ({
           <Identicon address={wallet.address} size="32px" />
           <WalletInfo>
             <WalletName>{wallet.name}</WalletName>
-            {address && (
-              <WalletAddress>
-                {address.slice(0, 6)}...{address.slice(-4)}
-              </WalletAddress>
-            )}
+            {displayAddress && <WalletAddress>{displayAddress}</WalletAddress>}
           </WalletInfo>
 
           {isMostRecent && <WalletTag>Most Recent</WalletTag>}

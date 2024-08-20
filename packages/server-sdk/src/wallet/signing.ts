@@ -24,6 +24,7 @@ export async function signTransaction(
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,
+      cosmosPrefix: ctx.cosmosPrefix,
       params: { share, walletId, userId, tx, chainId },
       functionType: 'SIGN_TRANSACTION',
       offloadMPCComputationURL: ctx.offloadMPCComputationURL,

@@ -21,6 +21,7 @@ export async function getPrivateKey(
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,
+      cosmosPrefix: ctx.cosmosPrefix,
       params: { share, walletId, userId },
       functionType: 'GET_PRIVATE_KEY',
       offloadMPCComputationURL: ctx.offloadMPCComputationURL,

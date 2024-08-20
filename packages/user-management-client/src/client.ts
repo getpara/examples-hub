@@ -162,7 +162,7 @@ export interface WalletEntity {
   partner?: PartnerEntity;
   publicKey: string | null;
   scheme: string;
-  type: string;
+  type: WalletType;
   updatedAt: string;
   userId: string | null;
   lastUsedAt: string | null;
@@ -178,6 +178,7 @@ interface createWalletBody {
   useTwoSigners?: boolean;
   scheme: WalletScheme;
   type: WalletType;
+  cosmosPrefix?: string;
 }
 
 interface updatePregenWalletBody {
@@ -195,6 +196,7 @@ interface createWalletPreGenBody {
   pregenIdentifierType: string;
   scheme?: WalletScheme;
   type: WalletType;
+  cosmosPrefix?: string;
 }
 
 interface claimPreGenWalletBody {
