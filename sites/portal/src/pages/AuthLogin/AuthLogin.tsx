@@ -45,15 +45,16 @@ const AuthLoginBase = () => {
 
       const { wallets, pregenWallets } = await fetchWallets();
 
-      const [isOnlyPregenWallet, isOnlyOwnedWallet] = [
+      const [isWithoutWallets, isOnlyPregenWallet, isOnlyOwnedWallet] = [
+        wallets.length === 0 && pregenWallets.length === 0,
         wallets.length === 0 && pregenWallets.length === 1 && pregenWallets[0]?.partnerId === partnerId,
         pregenWallets.length === 0 && wallets.length === 1 && wallets[0].partnerId === partnerId,
       ];
 
       const defaultWallet = isOnlyPregenWallet ? pregenWallets[0] : isOnlyOwnedWallet ? wallets[0] : undefined;
 
-      if (defaultWallet) {
-        await capsule.setCurrentWalletIds([defaultWallet.id], sessionId);
+      if (defaultWallet || (isWithoutWallets && !capsule.ctx.apiKey)) {
+        await capsule.setCurrentWalletIds(defaultWallet ? [defaultWallet.id] : [], sessionId, isWithoutWallets);
         setStep(AuthLoginStep.SUCCESS);
       } else {
         setStep(AuthLoginStep.SELECT_WALLET);
@@ -69,7 +70,7 @@ const AuthLoginBase = () => {
 
   useEffect(() => {
     async function finishLogin(shouldClose: boolean) {
-      await authUpdateKeyShares();
+      if (capsule.currentWalletIds?.length > 0) await authUpdateKeyShares();
 
       if (shouldClose) {
         setTimeout(function () {

@@ -548,8 +548,17 @@ class Client {
   };
 
   // POST /users/:userId/wallets/set
-  setCurrentWalletIds = async (userId: string, walletIds: string[], sessionLookupId?: string): Promise<any> => {
-    const res = await this.baseRequest.post<any>(`/users/${userId}/wallets/set`, { walletIds, sessionLookupId });
+  setCurrentWalletIds = async (
+    userId: string,
+    walletIds: string[],
+    needsWallet = false,
+    sessionLookupId?: string,
+  ): Promise<any> => {
+    const res = await this.baseRequest.post<any>(`/users/${userId}/wallets/set`, {
+      walletIds,
+      needsWallet,
+      sessionLookupId,
+    });
     return res;
   };
 

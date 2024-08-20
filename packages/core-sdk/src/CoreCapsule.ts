@@ -809,11 +809,11 @@ export abstract class CoreCapsule {
     return normalizePhoneNumber(this.countryCode, this.phone);
   }
 
-  async setCurrentWalletIds(currentWalletIds: string[], sessionLookupId?: string): Promise<void> {
+  async setCurrentWalletIds(currentWalletIds: string[], sessionLookupId?: string, needsWallet = false): Promise<void> {
     this.currentWalletIds = currentWalletIds;
 
     if (sessionLookupId) {
-      await this.ctx.capsuleClient.setCurrentWalletIds(this.getUserId(), currentWalletIds, sessionLookupId);
+      await this.ctx.capsuleClient.setCurrentWalletIds(this.getUserId(), currentWalletIds, needsWallet, sessionLookupId);
     } else {
       await this.localStorageSetItem(LOCAL_STORAGE_CURRENT_WALLET_IDS, JSON.stringify(currentWalletIds));
     }
@@ -1494,18 +1494,21 @@ export abstract class CoreCapsule {
           continue;
         }
 
-        const {
-          data: { partnerId },
-        } = await this.userSetupAfterLogin();
-        const fetchedWallets = await this.fetchWallets();
+        const postLoginData = await this.userSetupAfterLogin();
 
-        if (!this.currentWalletIds || this.currentWalletIds.length === 0) {
-          if (loginWindow.closed) {
-            return { isComplete: false, isError: true };
-          } else {
-            continue;
+        const needsWallet = postLoginData.data.needsWallet ?? false;
+
+        if (!needsWallet) {
+          if (!this.currentWalletIds || this.currentWalletIds.length === 0) {
+            if (loginWindow.closed) {
+              return { isComplete: false, isError: true };
+            } else {
+              continue;
+            }
           }
         }
+
+        const fetchedWallets = await this.fetchWallets();
 
         const tempSharesRes = await this.getTransmissionKeyShares();
         // need this check for the case where user has logged in but temp encrypted shares
@@ -1521,8 +1524,8 @@ export abstract class CoreCapsule {
 
           return {
             isComplete: true,
-            needsWallet: Object.values(this.wallets).length === 0,
-            partnerId,
+            needsWallet: needsWallet || Object.values(this.wallets).length === 0,
+            partnerId: postLoginData.data.partnerId,
           };
         }
       } catch (err) {
@@ -1560,7 +1563,7 @@ export abstract class CoreCapsule {
    * Call this method after login to ensure that the user ID is set
    * internally.
    **/
-  async userSetupAfterLogin(): Promise<{ data: { partnerId?: string; sessionLookupId: string } }> {
+  async userSetupAfterLogin(): Promise<{ data: { partnerId?: string; needsWallet?: boolean; sessionLookupId: string } }> {
     const res = await this.ctx.capsuleClient.touchSession();
     await this.setUserId(res.data.userId);
 
