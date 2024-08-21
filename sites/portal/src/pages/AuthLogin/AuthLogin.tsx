@@ -3,12 +3,26 @@ import { AuthLoginStep, REDIRECT_TIMEOUT } from '../../constants';
 import { Body } from './components/Body';
 import { Modal } from '../../components/common';
 import { ModalHeader } from '../../components/ModalHeader';
-import { getAsymmetricKeyPair, getPublicKeyHex } from '@usecapsule/web-sdk';
+import { getAsymmetricKeyPair, getPublicKeyHex, getSchemes } from '@usecapsule/web-sdk';
 import { useAuthLoginStep } from '../../hooks/useLoginStep';
 import { useCapsule } from '../../components/CapsuleContext';
 import { LoginProvider, useLogin } from './components/LoginProvider';
 import { SelectWallet } from './components/SelectWallet';
 import { useModalOutletContext } from '../../hooks/useModalOutletContext';
+import { WalletEntity, WalletScheme } from '@usecapsule/user-management-client';
+
+function isOnlyPartnerWallets(
+  considered: WalletEntity[],
+  notConsidered: WalletEntity[],
+  schemes: WalletScheme[],
+  partnerId: string,
+) {
+  return (
+    notConsidered.length === 0 &&
+    considered.length === schemes.length &&
+    schemes.every(s => considered.some(w => w.scheme === s && w.partnerId === partnerId))
+  );
+}
 
 const AuthLoginBase = () => {
   const capsule = useCapsule();
@@ -45,16 +59,22 @@ const AuthLoginBase = () => {
 
       const { wallets, pregenWallets } = await fetchWallets();
 
-      const [isWithoutWallets, isOnlyPregenWallet, isOnlyOwnedWallet] = [
+      const walletSchemes = getSchemes(capsule.supportedWalletTypes);
+
+      const [isWithoutWallets, isOnlyPartnerPregenWallets, isOnlyPartnerOwnedWallets] = [
         wallets.length === 0 && pregenWallets.length === 0,
-        wallets.length === 0 && pregenWallets.length === 1 && pregenWallets[0]?.partnerId === partnerId,
-        pregenWallets.length === 0 && wallets.length === 1 && wallets[0].partnerId === partnerId,
+        isOnlyPartnerWallets(pregenWallets, wallets, walletSchemes, partnerId),
+        isOnlyPartnerWallets(wallets, pregenWallets, walletSchemes, partnerId),
       ];
 
-      const defaultWallet = isOnlyPregenWallet ? pregenWallets[0] : isOnlyOwnedWallet ? wallets[0] : undefined;
+      const defaultWallets = isOnlyPartnerPregenWallets ? pregenWallets : isOnlyPartnerOwnedWallets ? wallets : undefined;
 
-      if (defaultWallet || (isWithoutWallets && !capsule.ctx.apiKey)) {
-        await capsule.setCurrentWalletIds(defaultWallet ? [defaultWallet.id] : [], sessionId, isWithoutWallets);
+      if (defaultWallets || (isWithoutWallets && !capsule.ctx.apiKey)) {
+        await capsule.setCurrentWalletIds(
+          defaultWallets ? defaultWallets.map(({ id }) => id) : [],
+          sessionId,
+          isWithoutWallets,
+        );
         setStep(AuthLoginStep.SUCCESS);
       } else {
         setStep(AuthLoginStep.SELECT_WALLET);

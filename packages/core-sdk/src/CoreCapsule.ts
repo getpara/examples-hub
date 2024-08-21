@@ -52,6 +52,15 @@ function migrateWallet(obj: Record<string, unknown>) {
   return obj;
 }
 
+export function getSchemes(supportedWalletTypes: SupportedWalletTypes): WalletScheme[] {
+  return <WalletScheme[]>Object.keys(WalletSchemeMap).filter(scheme => {
+    if (scheme === WalletScheme.CGGMP) {
+      return false;
+    }
+    return Object.keys(supportedWalletTypes).some(type => WalletSchemeMap[scheme][type]);
+  });
+}
+
 type WalletFilters = {
   /*
    * Array of allowed `WalletType`s
@@ -67,19 +76,11 @@ type WalletFilters = {
   forbidPregen?: boolean;
 };
 
-type EvmType = {
-  [WalletType.EVM]: true;
+export type SupportedWalletTypes = {
+  [WalletType.EVM]?: true;
+  [WalletType.SOLANA]?: true;
+  [WalletType.COSMOS]?: true | { prefix?: string };
 };
-
-type SolanaType = {
-  [WalletType.SOLANA]: true;
-};
-
-type CosmosType = {
-  [WalletType.COSMOS]: { prefix: string };
-};
-
-export type SupportedWalletTypes = EvmType | SolanaType | CosmosType;
 
 // Make sure to keep this in sync with capsule-org/src/entities/recoveryAttemptEntity.ts
 export enum RecoveryStatus {
@@ -513,7 +514,7 @@ export abstract class CoreCapsule {
       default:
         if (isCosmosWithPrefix(this.supportedWalletTypes)) {
           headLength = this.cosmosPrefix.length + 4;
-          str = wallet.addressSecondary ?? getCosmosAddress(wallet.publicKey, this.cosmosPrefix) ?? wallet.address;
+          str = getCosmosAddress(wallet.publicKey, this.cosmosPrefix);
         } else {
           str = wallet.address;
         }
@@ -1696,7 +1697,12 @@ export abstract class CoreCapsule {
     const wallets: Wallet[] = [];
     let recoverySecret: string;
 
-    for (const type of <WalletType[]>Object.keys(this.supportedWalletTypes)) {
+    const supportedWalletTypes = Object.assign({}, this.supportedWalletTypes);
+    if (supportedWalletTypes.EVM && supportedWalletTypes.COSMOS) {
+      delete supportedWalletTypes.EVM;
+    }
+
+    for (const type of <WalletType[]>Object.keys(supportedWalletTypes)) {
       if (!Object.values(this.wallets).some(w => !!WalletSchemeMap[w.scheme][type])) {
         const [wallet, recoveryShare] = await this.createWallet(type, skipDistribute);
         wallets.push(wallet);

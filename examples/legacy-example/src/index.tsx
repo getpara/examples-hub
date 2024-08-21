@@ -921,7 +921,10 @@ function App() {
                   <Input
                     placeholder="None"
                     onChange={e => {
-                      setSupportedWalletTypes({ COSMOS: e.target.value.length > 0 ? { prefix: e.target.value } : true });
+                      setSupportedWalletTypes(prev => ({
+                        ...prev,
+                        COSMOS: e.target.value.length > 0 ? { prefix: e.target.value } : true,
+                      }));
                     }}
                     value={isCosmosWithPrefix(supportedWalletTypes) ? supportedWalletTypes.COSMOS.prefix : ''}
                   />
