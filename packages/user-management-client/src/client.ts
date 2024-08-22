@@ -146,6 +146,7 @@ export interface PartnerEntity {
   id: string;
   displayName: string;
   logoUrl?: string;
+  iconUrl?: string;
   portalHeaderLogoUrl?: string;
   policiesEnabled: boolean;
 }
