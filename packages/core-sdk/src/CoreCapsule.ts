@@ -524,6 +524,14 @@ export abstract class CoreCapsule {
     return truncate ? `${str.slice(0, headLength)}...${str.slice(-4)}` : str;
   }
 
+  getWallets(): Record<string, Wallet> {
+    return this.wallets;
+  }
+
+  getAddress(walletId?: string): string | undefined {
+    return walletId ? this.wallets[walletId].address : Object.values(this.wallets)?.[0]?.address;
+  }
+
   protected abstract getPlatformUtils(): PlatformUtils;
 
   /**
