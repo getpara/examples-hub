@@ -2228,6 +2228,11 @@ export abstract class CoreCapsule {
     await this.setEmail(sessionInfo.email);
     await this.setUserId(sessionInfo.userId);
     await this.setWallets(sessionInfo.wallets);
+    for (const walletId of Object.keys(this.wallets)) {
+      if (!this.wallets[walletId].userId) {
+        this.wallets[walletId].userId = this.userId;
+      }
+    }
     await this.setCurrentWalletIds(sessionInfo.currentWalletIds);
     this.persistSessionCookie(sessionInfo.sessionCookie);
   }

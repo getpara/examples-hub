@@ -120,7 +120,7 @@ async function signMessageWithImport(serializedInstance: string): Promise<void> 
   console.log('importing session');
   await capsule.importSession(serializedInstance);
   // @ts-ignore
-  const walletId = capsule.currentWalletIds[0];
+  const walletId = capsule.currentWalletIds?.[0] || Object.values(capsule.wallets)[0].id;
   const address = capsule.wallets[walletId].address;
   console.log(`address: ${address}`);
 
