@@ -91,7 +91,7 @@ export class CpslDrawer {
           transitionTimingFunction: `${this.transitionFunction}`,
           [this.anchor]: this.open || this.variant === 'permanent' ? startingAnchor : this.closedAnchorPosition,
           opacity: this.closedAnchorPosition === undefined ? '0' : '1',
-          ...(Boolean(this.zIndexOverride) ? { zIndex: `${this.zIndexOverride}` } : {}),
+          ...(this.zIndexOverride ? { zIndex: `${this.zIndexOverride}` } : {}),
         }}
         class={{
           top: this.anchor === 'top',

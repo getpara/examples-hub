@@ -87,7 +87,7 @@ export class CpslModalV2 {
       <Host class={{ 'open': this.open, 'elevated': this.elevated, 'no-overlay': this.noOverlay }}>
         {!this.noOverlay && (
           <cpsl-overlay
-            zIndexOverride={Boolean(this.zIndexOverride) ? this.zIndexOverride : undefined}
+            zIndexOverride={this.zIndexOverride ? this.zIndexOverride : undefined}
             id="overlay"
             open={this.open}
             enterTransitionDuration={this.enterTransitionDuration}

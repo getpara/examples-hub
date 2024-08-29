@@ -150,7 +150,7 @@ export class CpslCodeInput {
         </div>
         {(this.errorText || this.helperText) && (
           <div class={{ 'helper-text-container': true, 'error-text': Boolean(this.errorText) }}>
-            <cpsl-icon icon={Boolean(this.errorText) ? 'alertCircle' : 'infoCircle'} />
+            <cpsl-icon icon={this.errorText ? 'alertCircle' : 'infoCircle'} />
             <span>{this.errorText ?? this.helperText}</span>
           </div>
         )}

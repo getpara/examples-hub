@@ -14,10 +14,10 @@ export const generatePalette = ({
   backgroundColor,
   customPalette,
 }: Pick<Theme, 'foregroundColor' | 'backgroundColor' | 'customPalette'>): Palette => {
-  if (!Boolean(foregroundColor) || !isColor(foregroundColor)) {
+  if (!foregroundColor || !isColor(foregroundColor)) {
     foregroundColor = DEFAULT_THEME.foregroundColor;
   }
-  if (!Boolean(backgroundColor) || !isColor(backgroundColor)) {
+  if (!backgroundColor || !isColor(backgroundColor)) {
     backgroundColor = DEFAULT_THEME.backgroundColor;
   }
 
@@ -81,7 +81,7 @@ export const generatePalette = ({
     mix(green, utilityLightMixColor, utilityLightMixValue),
   );
 
-  if (Boolean(customPalette)) {
+  if (customPalette) {
     const cssColorVars = getCssColors(customPalette);
     Object.entries(cssColorVars).forEach(([k, v]) => document.documentElement.style.setProperty(k, v));
   }

@@ -239,7 +239,7 @@ export function normalizePhoneNumber(countryCode: string, number: string): strin
 
 function toQueryString(obj: Record<string, string>) {
   return Object.entries(obj)
-    .map(([key, value]) => (!!value ? `&${key}=${encodeURIComponent(value)}` : ''))
+    .map(([key, value]) => (value ? `&${key}=${encodeURIComponent(value)}` : ''))
     .join('');
 }
 export abstract class CoreCapsule {

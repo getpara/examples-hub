@@ -31,7 +31,7 @@ export class CpslNavButtonGroup {
       this.selectItem();
     });
 
-    if (Boolean(this.otherSlots?.length)) {
+    if (this.otherSlots?.length) {
       console.error('cpsl-button is the only valid child of cpsl-nav-button-group');
       this.otherSlots.forEach(item => item.remove());
     }

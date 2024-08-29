@@ -20,7 +20,7 @@ export class CpslAlert {
   @Prop() variant?: 'error' | 'warning' | 'success' | 'custom' = 'error';
 
   private get iconType(): IconType | undefined {
-    if (Boolean(this.icon)) {
+    if (this.icon) {
       this.icon;
     }
 

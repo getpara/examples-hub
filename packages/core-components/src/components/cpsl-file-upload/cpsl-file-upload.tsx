@@ -131,7 +131,7 @@ export class CpslFileUpload {
 
     const input = this.inputEl;
 
-    if (Boolean(input.files.length)) {
+    if (input.files.length) {
       const file = input.files[0];
 
       if (this.isValidFile(file.type)) {
@@ -141,7 +141,7 @@ export class CpslFileUpload {
   };
 
   private isValidFile = (type: string) => {
-    if (Boolean(this.fileTypes?.length) ? !this.fileTypes.includes(type) : false) {
+    if (this.fileTypes?.length ? !this.fileTypes.includes(type) : false) {
       return false;
     }
 
@@ -153,7 +153,7 @@ export class CpslFileUpload {
     this.cpslFileChange.emit(file);
     this.uploadError = false;
     this.isUploading = true;
-    const uploadSuccess = Boolean(this.uploadFile) ? await this.uploadFile(file) : true;
+    const uploadSuccess = this.uploadFile ? await this.uploadFile(file) : true;
     if (!uploadSuccess) {
       this.uploadError = true;
       const input = this.inputEl;
@@ -203,11 +203,7 @@ export class CpslFileUpload {
     ) : error ? (
       <cpsl-icon icon="close" />
     ) : (
-      <img
-        class="sample-img"
-        src={Boolean(this.file) ? URL.createObjectURL(this.file) : this.externalSrc}
-        alt="Sample Image"
-      />
+      <img class="sample-img" src={this.file ? URL.createObjectURL(this.file) : this.externalSrc} alt="Sample Image" />
     );
 
     return (
@@ -250,7 +246,7 @@ export class CpslFileUpload {
             id={this.inputId}
             type="file"
             accept={this.fileTypes?.join(', ') ?? '*'}
-            files={Boolean(this.file) ? [this.file] : undefined}
+            files={this.file ? [this.file] : undefined}
             onDrop={this.handleDrop}
             onDragEnter={this.handleDragEnter}
             onDragLeave={this.handleDragLeave}

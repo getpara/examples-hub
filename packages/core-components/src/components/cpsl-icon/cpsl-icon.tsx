@@ -21,7 +21,7 @@ export class CpslIcon {
   render() {
     return (
       <Host part="icon" role="img">
-        {!Boolean(this.icon) ? <img src={this.src} /> : <div innerHTML={Icons[this.icon]} />}
+        {!this.icon ? <img src={this.src} /> : <div innerHTML={Icons[this.icon]} />}
       </Host>
     );
   }

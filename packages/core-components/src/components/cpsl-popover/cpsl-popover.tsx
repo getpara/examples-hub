@@ -133,7 +133,7 @@ export class CpslPopover {
   private configureTriggerInteraction = () => {
     const { trigger, triggerAction, destroyTriggerInteraction } = this;
 
-    if (Boolean(destroyTriggerInteraction)) {
+    if (destroyTriggerInteraction) {
       destroyTriggerInteraction();
     }
 
@@ -142,7 +142,7 @@ export class CpslPopover {
     }
 
     this.triggerEl = document.getElementById(trigger);
-    if (!Boolean(this.triggerEl)) {
+    if (!this.triggerEl) {
       console.error(`A trigger element with the ID "${trigger}" was not found in the DOM.`, this.el);
       return;
     }
@@ -206,7 +206,7 @@ export class CpslPopover {
 
   private setPosition = () => {
     const anchorEl = this.anchorEl ?? this.triggerEl;
-    if (Boolean(anchorEl)) {
+    if (anchorEl) {
       const windowWidth = window.innerWidth;
       const windowHeight = window.innerHeight;
       const elWidth = this.el.clientWidth;

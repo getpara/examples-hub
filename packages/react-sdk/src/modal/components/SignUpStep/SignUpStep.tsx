@@ -159,7 +159,7 @@ export const SignUpStep = ({ oAuthMethods, disableEmailLogin, disablePhoneLogin 
 
   const methodsToShow = (): ReactNode[] => {
     const methods = [];
-    if (!!oAuthMethods?.length) {
+    if (oAuthMethods?.length) {
       methods.push(<OAuth key={'oAuth'} methods={oAuthMethods} />);
     }
 

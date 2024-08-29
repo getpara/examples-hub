@@ -56,7 +56,7 @@ export class CpslOverlay {
 
   render() {
     return (
-      <Host style={Boolean(this.zIndexOverride) ? { zIndex: `${this.zIndexOverride}` } : {}}>
+      <Host style={this.zIndexOverride ? { zIndex: `${this.zIndexOverride}` } : {}}>
         <slot></slot>
       </Host>
     );

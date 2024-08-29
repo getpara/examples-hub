@@ -28,7 +28,7 @@ export class CpslAppBar {
         style={{
           // position: this.position,
           height: `${this.height}px`,
-          ...(Boolean(this.zIndexOverride) ? { zIndex: `${this.zIndexOverride}` } : {}),
+          ...(this.zIndexOverride ? { zIndex: `${this.zIndexOverride}` } : {}),
         }}
       >
         <div

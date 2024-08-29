@@ -156,7 +156,7 @@ export class CpslSelect {
       }
     });
 
-    if (!Boolean(this.selectedValue)) {
+    if (!this.selectedValue) {
       this.hasSelectedItem = false;
     }
   };
@@ -196,8 +196,8 @@ export class CpslSelect {
           {this.hasSelectedItem && this.showFormattedSelectedItem && <slot name="selected-item"></slot>}
           <div class="selected-container-content" id="selected-container-content">
             {(!this.hasSelectedItem || !this.showFormattedSelectedItem) && (
-              <cpsl-text class={{ 'selected-text': true, 'placeholder': !Boolean(this.selectedValue) }}>
-                {!Boolean(this.selectedValue)
+              <cpsl-text class={{ 'selected-text': true, 'placeholder': !this.selectedValue }}>
+                {!this.selectedValue
                   ? (this.placeholder ?? 'Select')
                   : (this.formatValue?.(this.selectedValue) ?? this.selectedValue)}
               </cpsl-text>

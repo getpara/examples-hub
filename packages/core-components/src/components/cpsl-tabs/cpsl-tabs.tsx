@@ -44,7 +44,7 @@ export class CpslTabs {
 
   @Watch('selectedTab')
   updateTab(newValue?: string, oldValue?: string) {
-    if (Boolean(newValue) && !Boolean(oldValue)) {
+    if (Boolean(newValue) && !oldValue) {
       this.selectedTabRect = getTab(this.tabs, this.selectedTab).getBoundingClientRect();
     }
   }

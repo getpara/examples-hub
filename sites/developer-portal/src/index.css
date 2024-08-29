@@ -1,0 +1,41 @@
+@font-face {
+  font-family: 'Inter';
+  src: url('./Inter-VariableFont_slnt,wght.ttf') format('truetype');
+}
+
+:root {
+  font-family: 'Inter', sans-serif;
+
+  background-color: var(--cpsl-color-background-4);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --cpsl-default-font: 'Inter', sans-serif;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  min-height: 100vh;
+
+  div {
+    box-sizing: border-box;
+  }
+}
+
+#root {
+  flex: 1;
+  overflow: auto;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.Toastify__toast-container {
+  z-index: 99999 !important;
+}

@@ -237,7 +237,7 @@ export class CpslInput {
 
   componentDidLoad() {
     this.initButtons();
-    if (Boolean(this.value)) {
+    if (this.value) {
       this.enableSlots();
     } else {
       this.disableSlots();
@@ -295,7 +295,7 @@ export class CpslInput {
 
   private onInput = (ev: InputEvent) => {
     const input = ev.target as HTMLInputElement | null;
-    if (Boolean(input)) {
+    if (input) {
       this.value = input.value || '';
       input.value === '' ? this.disableSlots() : this.enableSlots();
     }

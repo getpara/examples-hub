@@ -85,7 +85,7 @@ export const generateBorderRadii = ({
   document.documentElement.style.setProperty('--cpsl-border-radius-pill', `${isNone ? 0 : fullRadius}px`);
   document.documentElement.style.setProperty('--cpsl-border-radius-radio', `${fullRadius}px`);
 
-  if (Boolean(customBorderRadii)) {
+  if (customBorderRadii) {
     const cssBorderRadiiVars = getCssBorderRadii(customBorderRadii);
     Object.entries(cssBorderRadiiVars).forEach(([k, v]) => document.documentElement.style.setProperty(k, v));
   }

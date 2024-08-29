@@ -323,7 +323,7 @@ export class CpslModal {
   render() {
     if (this.noOverlay) {
       return (
-        <Host style={Boolean(this.zIndexOverride) ? { zIndex: `${this.zIndexOverride}` } : {}} class="no-overlay">
+        <Host style={this.zIndexOverride ? { zIndex: `${this.zIndexOverride}` } : {}} class="no-overlay">
           {this.Modal}
         </Host>
       );
@@ -331,11 +331,11 @@ export class CpslModal {
 
     return (
       <Host
-        style={Boolean(this.zIndexOverride) ? { zIndex: `${this.zIndexOverride}` } : {}}
+        style={this.zIndexOverride ? { zIndex: `${this.zIndexOverride}` } : {}}
         class={{ 'include-mobile-styling': true }}
       >
         <cpsl-overlay
-          zIndexOverride={Boolean(this.zIndexOverride) ? this.zIndexOverride : undefined}
+          zIndexOverride={this.zIndexOverride ? this.zIndexOverride : undefined}
           id="overlay"
           open={this.open}
           enterTransitionDuration={this.enterTransitionDuration}

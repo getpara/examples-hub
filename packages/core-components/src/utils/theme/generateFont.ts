@@ -16,7 +16,7 @@ const FONT_NAME_MAP = {
 };
 
 export const generateFont = ({ font, customFontSizes }: Pick<Theme, 'font' | 'customFontSizes'>) => {
-  if (Boolean(font)) {
+  if (font) {
     document.documentElement.style.setProperty('--cpsl-default-font', font);
   }
 

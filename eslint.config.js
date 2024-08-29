@@ -2,6 +2,9 @@ const reactPlugin = require('eslint-plugin-react');
 const tsPlugin = require('@typescript-eslint/eslint-plugin');
 const tsParser = require('@typescript-eslint/parser');
 const prettierConfig = require('eslint-config-prettier');
+const compat = require('@eslint/compat');
+const reactQuery = require('@tanstack/eslint-plugin-query');
+const reactHooks = require('eslint-plugin-react-hooks');
 
 module.exports = [
   {
@@ -126,5 +129,16 @@ module.exports = [
         },
       ],
     }),
+  },
+  {
+    name: 'Override for developer portal',
+    files: ['sites/developer-portal/**/*.ts', 'sites/developer-portal/**/*.tsx'],
+    ignores: ['**/dist/**'],
+
+    plugins: {
+      '@tanstack/query': reactQuery,
+      'react-hooks': compat.fixupPluginRules(reactHooks),
+    },
+    rules: Object.assign({}, reactHooks.configs.recommended.rules, reactQuery.configs.recommended.rules),
   },
 ];
