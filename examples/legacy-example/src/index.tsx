@@ -48,6 +48,8 @@ import {
   validateOnRampConfig,
   OnRampConfigError,
   openPopup,
+  ModalStep,
+  ModalStepProp,
 } from '@usecapsule/react-sdk';
 import { FeeMarketEIP1559Transaction } from '@ethereumjs/tx';
 import { CapsuleProtoSigner } from '@usecapsule/cosmjs-v0-integration';
@@ -580,6 +582,7 @@ function App() {
   const [ethersSignature, setEthersSignature] = useState('');
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [currentStepOverride, setCurrentStepOverride] = useState<ModalStepProp | undefined>(undefined);
 
   const capsule = React.useMemo(
     () =>
@@ -1158,6 +1161,26 @@ function App() {
                 </HStack>
               </VStack>
               <HStack>
+                <Text width={'15%'}>
+                  <strong>Current Step:</strong>
+                </Text>
+                <Checkbox
+                  isChecked={!!currentStepOverride}
+                  onChange={e => setCurrentStepOverride(e.currentTarget.checked ? 'SIGN_UP' : undefined)}
+                />
+                <Select
+                  isDisabled={!currentStepOverride}
+                  value={currentStepOverride}
+                  onChange={e => setCurrentStepOverride(e.target.value)}
+                >
+                  {Object.keys(ModalStep).map(step => (
+                    <option key={step} value={step}>
+                      {step}
+                    </option>
+                  ))}
+                </Select>
+              </HStack>
+              <HStack>
                 <Button
                   colorScheme="green"
                   onClick={() => {
@@ -1504,6 +1527,7 @@ function App() {
               : undefined
           }
           logo={logo !== '' ? logo : undefined}
+          currentStepOverride={currentStepOverride ?? undefined}
         />
       </ChakraProvider>
     </>

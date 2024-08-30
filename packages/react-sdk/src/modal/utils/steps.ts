@@ -22,6 +22,12 @@ export enum ModalStep {
   ADD_FUNDS_FAILURE = 'ADD_FUNDS_FAILURE',
 }
 
+export type ModalStepPropU = keyof typeof ModalStep | ModalStep;
+
+export type ModalStepPropL = Lowercase<ModalStepPropU>;
+
+export type ModalStepProp = ModalStepPropU | ModalStepPropL;
+
 enum SignUpModalStep {
   SIGN_UP = 'SIGN_UP',
   SIGN_UP_ALL_OAUTH = 'SIGN_UP_ALL_OAUTH',

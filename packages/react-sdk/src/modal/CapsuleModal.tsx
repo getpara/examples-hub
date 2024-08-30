@@ -29,6 +29,7 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
       className,
       onRampConfig,
       networks = [Network.ETHEREUM],
+      currentStepOverride,
       onModalStepChange,
       onExpandModalChange,
       onClose,
@@ -79,7 +80,9 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
 
     // This will run on mount and on isOpen change but won't cause a rerender unless step or email changes
     const initModal = async () => {
-      if (await capsule.isFullyLoggedIn()) {
+      if (currentStepOverride) {
+        setStep(ModalStep[currentStepOverride.toUpperCase()]);
+      } else if (await capsule.isFullyLoggedIn()) {
         setStep(ModalStep.LOGIN_DONE);
       } else if (
         currentStep === ModalStep.LOGIN_DONE ||

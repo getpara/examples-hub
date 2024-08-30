@@ -1,7 +1,7 @@
 import CapsuleWeb, { OAuthMethod, OnRampConfig, NetworkProp } from '@usecapsule/web-sdk';
 import { Theme } from '@usecapsule/react-components';
 import { OnModalStepChangeValue } from '../stores/index.js';
-import { ModalStep } from '../utils/steps.js';
+import { ModalStep, ModalStepProp } from '../utils/steps.js';
 
 export type CapsuleModalHandle = {
   /**
@@ -84,7 +84,7 @@ export interface CapsuleModalProps {
    * Defaults to `["ETHEREUM"]`.
    */
   networks?: NetworkProp[];
-  currentStepOverride?: string | undefined;
+  currentStepOverride?: ModalStepProp | undefined;
   /**
    * Whether or not to display just the modal without the overlay component.
    * Useful for rendering the modal inside a custom component

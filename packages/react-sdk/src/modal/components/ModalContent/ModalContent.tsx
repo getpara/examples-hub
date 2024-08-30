@@ -30,7 +30,6 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     {
       twoFactorAuthEnabled = false,
       oAuthMethods,
-      currentStepOverride,
       hasFinishedAnimation,
       disableEmailLogin,
       disablePhoneLogin,
@@ -117,12 +116,6 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
         setStep(ModalStep.AWAITING_WALLET_CREATION);
       }
     }
-
-    useEffect(() => {
-      if (currentStepOverride) {
-        setStep(currentStepOverride as ModalStep);
-      }
-    }, [currentStepOverride]);
 
     // generate/claim wallet once we know it's account creation
     useEffect(() => {
