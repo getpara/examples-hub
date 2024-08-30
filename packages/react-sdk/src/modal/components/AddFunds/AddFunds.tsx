@@ -1,4 +1,4 @@
-import { Network, NetworkProp, NON_ED25519, OnRampConfig } from '@usecapsule/web-sdk';
+import { EnabledFlow, Network, NetworkProp, NON_ED25519, OnRampConfig } from '@usecapsule/web-sdk';
 import { CpslTabsCustomEvent, TabsChangedEventDetail } from '@usecapsule/core-components';
 import { FilledDisabledInput, FlexColumn, Heading, QRContainer, SecondaryText } from '../common.js';
 import styled from 'styled-components';
@@ -16,12 +16,12 @@ interface OnRampButtonProps {
   isLoading?: boolean;
 }
 
-type TabType = 'buy' | 'receive';
+type Tab = EnabledFlow;
 
-const TABS: Record<TabType, ReactNode> = {
-  buy: 'Buy',
-  receive: 'Receive',
-};
+const TABS: [Tab, ReactNode][] = [
+  [EnabledFlow.BUY, 'Buy'],
+  [EnabledFlow.RECEIVE, 'Receive'],
+];
 
 function list(networks: Network[]) {
   return networks.length === 1
@@ -86,16 +86,20 @@ export const AddFunds = ({ hasFinishedAnimation }: { hasFinishedAnimation: boole
   const capsule = useCapsuleStore(state => state.capsule);
   const onRampConfig = useModalStore(state => state.onRampConfig);
   const networks = useModalStore(state => state.networks);
-  const isOnRampConfigured = onRampConfig?.providers.length > 0;
+
+  const isAllFlows = !onRampConfig.enabledFlows;
+  const tabs = TABS.filter(([tab]) => isAllFlows || onRampConfig.enabledFlows.some(prop => tab === EnabledFlow[prop]));
+  const isMultiFlow = isAllFlows || tabs.length > 1;
+  const defaultTab: Tab = tabs[0][0];
 
   const [walletId] = useState(capsule.findWalletId(undefined, { scheme: NON_ED25519 }));
-  const [tab, setTab] = useState<'buy' | 'receive'>(isOnRampConfigured ? 'buy' : 'receive');
+  const [tab, setTab] = useState<Tab>(defaultTab);
   const [configError, setConfigError] = useState<OnRampConfigError | undefined>();
 
   const walletAddress = capsule.getDisplayAddress(walletId);
 
   const onSetTab = (event: CpslTabsCustomEvent<TabsChangedEventDetail>) => {
-    setTab(event.detail.tab as TabType);
+    setTab(event.detail.tab as Tab);
   };
   const onCopy = () => {
     copy(walletAddress);
@@ -116,10 +120,10 @@ export const AddFunds = ({ hasFinishedAnimation }: { hasFinishedAnimation: boole
         <Heading style={{ marginBottom: '12px' }}>
           <span>Fund Your Wallet</span>
         </Heading>
-        {isOnRampConfigured && (
+        {isMultiFlow && (
           <TabsContainer>
             <CpslTabs selectedTab={hasFinishedAnimation ? tab : ''} onCpslTabsChanged={onSetTab} fullWidth>
-              {Object.entries(TABS).map(([tab, title]) => (
+              {tabs.map(([tab, title]) => (
                 <Tab key={tab} tab={tab}>
                   {title}
                 </Tab>
@@ -129,7 +133,7 @@ export const AddFunds = ({ hasFinishedAnimation }: { hasFinishedAnimation: boole
         )}
       </FlexColumn>
       <LowerContainer>
-        {tab === 'buy' ? (
+        {tab === EnabledFlow.BUY ? (
           configError ? (
             <CpslAlert>
               <div>

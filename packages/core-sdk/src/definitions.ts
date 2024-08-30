@@ -156,6 +156,13 @@ export type OnRampAssetProp = keyof typeof OnRampAssetMap | OnRampAsset;
 
 export type OnRampConfigProvider = RampConfig | StripeConfig;
 
+export enum EnabledFlow {
+  BUY = 'BUY',
+  RECEIVE = 'RECEIVE',
+}
+
+export type EnabledFlowProp = keyof typeof EnabledFlow | EnabledFlow;
+
 export type OnRampConfig = {
   /*
    * If true, uses testnet chains for any funds purchased and allows provider-specific test payment methods
@@ -171,6 +178,7 @@ export type OnRampConfig = {
    * Defaults to 'ETHEREUM'
    */
   network: NetworkProp;
+  enabledFlows?: EnabledFlowProp[];
   /*
    * Array of objects in the form `{id: 'STRIPE' | 'RAMP'}`. If using `RAMP`, you must also provide your API key: `{ id: 'RAMP', hostApiKey: '...' }`
    */

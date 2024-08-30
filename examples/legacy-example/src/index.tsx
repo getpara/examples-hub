@@ -73,12 +73,15 @@ import CoreCapsule, {
   SupportedWalletTypes,
   WalletType,
   NON_ED25519,
+  EnabledFlow,
+  EnabledFlowProp,
 } from '@usecapsule/core-sdk';
 import { CapsuleSolanaWeb3Signer } from '@usecapsule/solana-web3.js-v1-integration';
 import { FONT_OPTIONS } from './constants';
 import '@usecapsule/react-sdk/styles.css';
 import { ArrowUpIcon, ArrowDownIcon, SmallCloseIcon, AddIcon } from '@chakra-ui/icons';
 import { stringToPhoneNumber } from '@usecapsule/core-sdk';
+import { ArrayField } from './array';
 
 interface Partner {
   apiKey: string;
@@ -91,6 +94,11 @@ const ON_RAMP_ASSETS = {
   [OnRampAsset.ETHEREUM]: 'Ethereum',
   [OnRampAsset.USDC]: 'USDC',
   [OnRampAsset.POLYGON]: 'Polygon',
+};
+
+const ENABLED_FLOWS = {
+  BUY: 'Buy',
+  RECEIVE: 'Receive',
 };
 
 // sample transaction params
@@ -554,6 +562,7 @@ function App() {
     '@EXAMPLE-CAPSULE/onRampConfig',
     DEFAULT_ONRAMP_CONFIG,
   );
+  const [enabledFlows, setEnabledFlows] = useLocalStorage<EnabledFlow[]>(`@EXAMPLE-CAPSULE/enabledFlows`, []);
   const [onRampConfigError, setOnRampConfigError] = useState<OnRampConfigError | undefined>();
   const [networks, setNetworks] = useState<Network[]>(DEFAULT_NETWORKS);
 
@@ -948,6 +957,17 @@ function App() {
                     <Checkbox
                       isChecked={onRampConfig.testMode}
                       onChange={e => setOnRampConfig(prev => ({ ...prev, testMode: e.currentTarget.checked }))}
+                    />
+                  </HStack>
+                  <HStack>
+                    <Text width={'15%'}>
+                      <strong>Enabled Flows:</strong>
+                    </Text>
+                    <ArrayField<EnabledFlowProp>
+                      value={enabledFlows}
+                      onChange={setEnabledFlows}
+                      rowTitle={id => ENABLED_FLOWS[id]}
+                      remaining={Object.keys(ENABLED_FLOWS).filter(key => !enabledFlows.includes(key))}
                     />
                   </HStack>
                   <HStack>
@@ -1512,7 +1532,11 @@ function App() {
             OAuthMethod.DISCORD,
             OAuthMethod.FARCASTER,
           ]}
-          onRampConfig={useOnRampConfig ? onRampConfig : undefined}
+          onRampConfig={
+            useOnRampConfig
+              ? { ...onRampConfig, enabledFlows: enabledFlows.length > 0 ? enabledFlows : undefined }
+              : undefined
+          }
           networks={networks}
           twoFactorAuthEnabled
           theme={
