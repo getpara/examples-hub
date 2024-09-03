@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { getActions } from './actions.js';
-import { OAuthLogoVariantType } from '../../types/modalProps.js';
+import { AuthLayout, OAuthLogoVariantType, TAuthLayout } from '../../types/modalProps.js';
 
 interface ThemeState {
   isDark?: boolean;
@@ -8,11 +8,13 @@ interface ThemeState {
   appName?: string;
   bareModal?: boolean;
   oAuthLogoVariant?: OAuthLogoVariantType;
+  authLayout?: TAuthLayout[];
 }
 
 export interface ThemeActions {
   updateState: (state: Partial<ThemeState>) => void;
   getLogo: () => string | undefined;
+  setAuthLayout: (authLayout: TAuthLayout[]) => void;
 }
 
 export type ThemeStore = ThemeState & ThemeActions;
@@ -23,6 +25,7 @@ const DEFAULT_THEME: ThemeState = {
   appName: undefined,
   bareModal: false,
   oAuthLogoVariant: undefined,
+  authLayout: [AuthLayout.AUTH_FULL, AuthLayout.EXTERNAL_FULL],
 };
 
 export const useThemeStore = create<ThemeStore>((set, get) => ({

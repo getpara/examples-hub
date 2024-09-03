@@ -68,25 +68,13 @@ export class CpslTable {
           <div id="header-container" class={{ 'container-header': true, 'shown': Boolean(this.containerHeaderEl) }}>
             <slot name="header"></slot>
           </div>
-          <div
-            id="content-container"
-            class={{
-              'content': true,
-              'horizontal-scroll': this.hasHorizontalScroll,
-              'vertical-scroll': this.hasVerticalScroll,
-            }}
-            part="content"
-          >
+          <div id="content-container" class={{ 'content': true, 'horizontal-scroll': this.hasHorizontalScroll, 'vertical-scroll': this.hasVerticalScroll }} part="content">
             <slot name="content"></slot>
           </div>
           {this.headerEl && this.contentContainerEl && this.footerEl && (
             <div
               style={{ top: `${this.headerEl.clientHeight + 2}px`, height: `${this.contentContainerEl.clientHeight}px` }}
-              class={{
-                'overlay': true,
-                'horizontal-scroll': this.hasHorizontalScroll,
-                'vertical-scroll': this.hasVerticalScroll,
-              }}
+              class={{ 'overlay': true, 'horizontal-scroll': this.hasHorizontalScroll, 'vertical-scroll': this.hasVerticalScroll }}
             />
           )}
           <div id="footer-container" class={{ 'container-footer': true, 'shown': Boolean(this.containerFooterEl) }}>

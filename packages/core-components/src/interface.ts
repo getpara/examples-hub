@@ -1,16 +1,7 @@
 import { Icons } from './assets/icons';
 import { Images } from './assets/images';
 
-export type PredefinedColors =
-  | 'primary'
-  | 'secondary'
-  | 'tertiary'
-  | 'success'
-  | 'warning'
-  | 'danger'
-  | 'light'
-  | 'medium'
-  | 'dark';
+export type PredefinedColors = 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'light' | 'medium' | 'dark';
 
 // From: https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete
 export type AutocompleteTypes =
@@ -70,19 +61,7 @@ export type AutocompleteTypes =
   | 'url'
   | 'photo';
 
-export type TextFieldTypes =
-  | 'date'
-  | 'email'
-  | 'number'
-  | 'password'
-  | 'search'
-  | 'tel'
-  | 'text'
-  | 'url'
-  | 'time'
-  | 'week'
-  | 'month'
-  | 'datetime-local';
+export type TextFieldTypes = 'date' | 'email' | 'number' | 'password' | 'search' | 'tel' | 'text' | 'url' | 'time' | 'week' | 'month' | 'datetime-local';
 
 export type LiteralUnion<T extends U, U = string> = T | (U & Record<never, never>);
 
@@ -97,6 +76,11 @@ export type ImageType = keyof typeof Images;
 export type Theme = {
   foregroundColor?: string;
   backgroundColor?: string;
+  accentColor?: string;
+  darkForegroundColor?: string;
+  darkBackgroundColor?: string;
+  darkAccentColor?: string;
+  mode?: 'light' | 'dark';
   borderRadius?: BorderRadius;
   font?: string;
   customPalette?: CustomPalette;
@@ -330,6 +314,14 @@ export interface CustomPalette {
   card?: {
     surface?: string;
     border?: string;
+  };
+  iconGroup?: {
+    surface?: string;
+    border?: string;
+    icon?: {
+      default?: string;
+      disabled?: string;
+    };
   };
 }
 

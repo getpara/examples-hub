@@ -1,20 +1,5 @@
-import { CpslSpinner } from '@usecapsule/react-components';
-import { Heading, CreationStepSubheading, MainContainer, SpinnerContainer } from '../common.js';
+import { Waiting } from '../Waiting/Waiting.js';
 
 export const AwaitingOAuthStep = () => {
-  return (
-    <>
-      <SpinnerContainer>
-        <CpslSpinner />
-      </SpinnerContainer>
-      <MainContainer>
-        <Heading>
-          <span>Complete Login...</span>
-        </Heading>
-        <CreationStepSubheading>
-          <span>Follow the prompts presented by your browser.</span>
-        </CreationStepSubheading>
-      </MainContainer>
-    </>
-  );
+  return <Waiting heading="Complete Login" subheading="Follow the prompts presented by your browser." />;
 };

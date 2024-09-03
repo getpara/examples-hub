@@ -6,7 +6,7 @@ export type { Ctx } from './definitions.js';
 export * from './types/index.js';
 export { distributeNewShare } from './shares/shareDistribution.js';
 export { KeyContainer } from './shares/KeyContainer.js';
-export { RecoveryStatus, stringToPhoneNumber } from './CoreCapsule.js';
+export { RecoveryStatus, stringToPhoneNumber, ExternalWalletType } from './CoreCapsule.js';
 export type { Wallet, ConstructorOpts, SupportedWalletTypes } from './CoreCapsule.js';
 export type { PlatformUtils } from './PlatformUtils.js';
 export type { StorageUtils } from './StorageUtils.js';

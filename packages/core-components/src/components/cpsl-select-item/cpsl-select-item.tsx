@@ -29,8 +29,8 @@ export class CpslSelectItem {
   render() {
     return (
       <Host>
-        <div class="outer-container" onClick={this.handleItemClick}>
-          <div class={{ 'inner-container': true, 'selected': this.selected }}>
+        <div part="outer-container" class="outer-container" onClick={this.handleItemClick}>
+          <div part="inner-container" class={{ 'inner-container': true, 'selected': this.selected }}>
             <slot></slot>
           </div>
         </div>

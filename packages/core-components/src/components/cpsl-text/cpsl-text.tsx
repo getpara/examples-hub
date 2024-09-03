@@ -11,26 +11,14 @@ export class CpslText {
    * Options are: `"primary"`, `"secondary", `"tertiary", `"subtle", `"inverted", `"error".
    * Default is: `"primary"`.
    */
-  @Prop() color?: 'primary' | 'secondary' | 'tertiary' | 'subtle' | 'inverted' | 'error' = 'primary';
+  @Prop() color?: 'primary' | 'secondary' | 'tertiary' | 'subtle' | 'inverted' | 'error' | 'contrast' = 'primary';
 
   /**
    * The variant of text.
    * Options are: `"body2XS"`, `"bodyXS", `"bodyS", `"bodyM", `"bodyL", `"bodyXL", `"headingXS", `"headingS", `"headingM", `"headingL", `"headingXL", `"heading2XL".
    * Default is: `"bodyM"`.
    */
-  @Prop() variant?:
-    | 'body2XS'
-    | 'bodyXS'
-    | 'bodyS'
-    | 'bodyM'
-    | 'bodyL'
-    | 'bodyXL'
-    | 'headingXS'
-    | 'headingS'
-    | 'headingM'
-    | 'headingL'
-    | 'headingXL'
-    | 'heading2XL' = 'bodyM';
+  @Prop() variant?: 'body2XS' | 'bodyXS' | 'bodyS' | 'bodyM' | 'bodyL' | 'bodyXL' | 'headingXS' | 'headingS' | 'headingM' | 'headingL' | 'headingXL' | 'heading2XL' = 'bodyM';
 
   /**
    * The weight of text.
@@ -104,6 +92,7 @@ export class CpslText {
           'subtle': this.color === 'subtle',
           'inverted': this.color === 'inverted',
           'error': this.color === 'error',
+          'contrast': this.color === 'contrast',
           // WEIGHTS
           'medium': this.weight === 'medium',
           'semi-bold': this.weight === 'semiBold',

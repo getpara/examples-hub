@@ -34,6 +34,9 @@
   --helper-text-font-size: var(--cpsl-font-size-body-xs);
   --helper-text-margin-top: 0px;
 
+  --icon-height: 24px;
+  --icon-width: 24px;
+
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -145,12 +148,18 @@ input {
 
 .selected-container-content {
   flex: 1;
+
+  &.hidden {
+    display: none;
+  }
 }
 
 .chevron {
   transition: transform 0.3s ease;
   transform: rotate(180deg);
   --icon-color: var(--cpsl-color-text-disabled);
+  --height: var(--icon-height);
+  --width: var(--icon-width);
 
   &.open {
     transform: rotate(0deg);
@@ -188,4 +197,16 @@ input {
   overflow: auto;
 
   scrollbar-width: thin;
+
+  ::slotted(cpsl-input) {
+    padding: 8px;
+  }
+}
+
+.search-container {
+  position: sticky;
+  top: 0px;
+  padding: 8px;
+
+  background-color: var(--cpsl-color-select-surface-default);
 }

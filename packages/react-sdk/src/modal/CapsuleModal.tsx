@@ -1,17 +1,17 @@
-import { CpslModal, defineCustomElements, generateTheme } from '@usecapsule/react-components';
+import { CpslAuthModal, defineCustomElements, generateTheme } from '@usecapsule/react-components';
 
 import { ModalContent, ModalContentHandle } from './components/index.js';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { gsap } from 'gsap';
-import { useGSAP } from '@gsap/react';
 import { useCapsuleStore, useModalStore, useUserInfoStore, useThemeStore } from './stores/index.js';
 import { ModalStep } from './utils/steps.js';
-import { CapsuleModalHandle, CapsuleModalProps } from './types/modalProps.js';
+import { AuthLayout, CapsuleModalHandle, CapsuleModalProps } from './types/modalProps.js';
 import { DEFAULTS } from './constants/defaults.js';
 import { useGoBack } from './hooks/useGoBack.js';
 import { Network, getNetwork } from '@usecapsule/web-sdk';
+import { ExternalWalletsWrapper } from './components/ExternalWalletsWrapper/ExternalWalletsWrapper.js';
+import { CountryCallingCode } from 'libphonenumber-js';
+import { WalletProvider } from './providers/WalletContext.js';
 
-gsap.registerPlugin(useGSAP);
 defineCustomElements();
 
 export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
@@ -30,8 +30,9 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
       onRampConfig,
       networks = [Network.ETHEREUM],
       currentStepOverride,
+      externalWallets,
+      authLayout = [AuthLayout.AUTH_FULL, AuthLayout.EXTERNAL_FULL],
       onModalStepChange,
-      onExpandModalChange,
       onClose,
       ...rest
     }: CapsuleModalProps,
@@ -47,13 +48,20 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     const setNetworks = useModalStore(state => state.setNetworks);
     const setStep = useModalStore(state => state.setStep);
     const setCapsule = useCapsuleStore(state => state.setCapsule);
-    const setEmail = useUserInfoStore(state => state.setEmail);
+    const setIdentifier = useUserInfoStore(state => state.setIdentifier);
+    const setIdentifierType = useUserInfoStore(state => state.setIdentifierType);
+    const setCountryCode = useUserInfoStore(state => state.setCountryCode);
     const hasPreviousStep = useModalStore(state => state.hasPreviousStep());
+    const setFlow = useModalStore(state => state.setFlow);
+    const setIsFullyLoggedIn = useModalStore(state => state.setIsFullyLoggedIn);
     const goBack = useGoBack();
+    const setAuthLayout = useThemeStore(state => state.setAuthLayout);
+    const resetModalState = useModalStore(state => state.resetState);
+    const resetUserInfoState = useUserInfoStore(state => state.resetState);
+    const setRecoveryShare = useUserInfoStore(state => state.setRecoveryShare);
 
     const [isModalMounted, setIsModalMounted] = useState(false);
     const [hasFinishedAnimation, setHasFinishedAnimation] = useState(false);
-    const [modalExpanded, setModalExpanded] = useState(false);
 
     useImperativeHandle(ref, () => {
       return {
@@ -63,12 +71,6 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
         canGoBack() {
           return hasPreviousStep;
         },
-        isModalExpanded() {
-          return modalExpanded;
-        },
-        toggleModalExpanded() {
-          setModalExpanded(curr => !curr);
-        },
         currentStep() {
           return currentStep;
         },
@@ -76,34 +78,54 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
           modalContentRef?.current?.handleModalClose();
         },
       };
-    }, [hasPreviousStep, modalExpanded, currentStep]);
+    }, [hasPreviousStep, currentStep]);
 
     // This will run on mount and on isOpen change but won't cause a rerender unless step or email changes
     const initModal = async () => {
       if (currentStepOverride) {
         setStep(ModalStep[currentStepOverride.toUpperCase()]);
       } else if (await capsule.isFullyLoggedIn()) {
-        setStep(ModalStep.LOGIN_DONE);
-      } else if (
-        currentStep === ModalStep.LOGIN_DONE ||
-        currentStep === ModalStep.TWO_FACTOR_DONE ||
-        currentStep === ModalStep.SETUP_2FA ||
-        currentStep === ModalStep.SECRET ||
-        currentStep === ModalStep.BIOMETRIC_LOGIN ||
-        currentStep === ModalStep.BIOMETRIC_CREATION ||
-        currentStep === ModalStep.WALLET_CREATION_DONE
-      ) {
-        setStep(ModalStep.SIGN_UP);
-        setWebAuthURLForLogin();
-        setWebAuthURLForCreate();
+        setFlow('account');
+        setStep(ModalStep.ACCOUNT_MAIN);
+        setIsFullyLoggedIn(true);
+      } else {
+        if (
+          currentStep === ModalStep.ACCOUNT_MAIN ||
+          currentStep === ModalStep.LOGIN_DONE ||
+          currentStep === ModalStep.TWO_FACTOR_DONE ||
+          currentStep === ModalStep.SETUP_2FA ||
+          currentStep === ModalStep.SECRET ||
+          currentStep === ModalStep.BIOMETRIC_LOGIN ||
+          currentStep === ModalStep.BIOMETRIC_CREATION ||
+          currentStep === ModalStep.WALLET_CREATION_DONE ||
+          currentStep === ModalStep.EX_WALLET_SELECTED
+        ) {
+          setStep(ModalStep.AUTH_MAIN);
+          setFlow();
+          setWebAuthURLForLogin();
+          setWebAuthURLForCreate();
+        }
+
+        setIsFullyLoggedIn(false);
       }
 
-      setEmail(capsule.getEmail());
+      const email = capsule.getEmail();
+      if (email) {
+        setIdentifier(email);
+        setIdentifierType('email');
+      }
+
+      const { phone, countryCode } = capsule.getPhone();
+      if (phone) {
+        setIdentifier(phone);
+        setCountryCode(countryCode as CountryCallingCode);
+        setIdentifierType('phone');
+      }
     };
 
     useEffect(() => {
-      onExpandModalChange?.(modalExpanded);
-    }, [modalExpanded]);
+      setAuthLayout(authLayout);
+    }, [authLayout]);
 
     useEffect(() => {
       setOnModalStepChange(onModalStepChange);
@@ -123,8 +145,8 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
 
     useEffect(() => {
       if (theme) {
-        const isDark = generateTheme(theme);
-        updateThemeState({ isDark });
+        generateTheme(theme);
+        updateThemeState({ isDark: theme.mode === 'dark' });
       }
     }, [theme]);
 
@@ -148,14 +170,8 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
 
     // Init modal with proper steps on isOpen change
     useEffect(() => {
-      if (capsule) {
-        // If animating out, reset state after animation is done
-        setTimeout(
-          () => {
-            initModal();
-          },
-          isOpen ? 0 : DEFAULTS.ANIMATION_DURATION * 1000,
-        );
+      if (isOpen && capsule) {
+        initModal();
       }
     }, [isOpen]);
 
@@ -166,9 +182,36 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     const handleModalEntered = () => {
       setHasFinishedAnimation(true);
     };
-    const handleModalExited = () => {
+
+    const handleModalExited = async () => {
       setHasFinishedAnimation(false);
       setIsModalMounted(false);
+      if (
+        currentStep === ModalStep.LOGIN_DONE ||
+        currentStep === ModalStep.TWO_FACTOR_DONE ||
+        currentStep === ModalStep.SETUP_2FA ||
+        currentStep === ModalStep.SECRET ||
+        currentStep === ModalStep.BIOMETRIC_LOGIN ||
+        currentStep === ModalStep.BIOMETRIC_CREATION ||
+        currentStep === ModalStep.WALLET_CREATION_DONE ||
+        currentStep === ModalStep.EX_WALLET_SELECTED
+      ) {
+        resetModalState();
+        resetUserInfoState();
+        setRecoveryShare(null);
+      } else if (
+        currentStep === ModalStep.ADD_FUNDS ||
+        currentStep === ModalStep.ADD_FUNDS_AWAITING ||
+        currentStep === ModalStep.ADD_FUNDS_SUCCESS ||
+        currentStep === ModalStep.ADD_FUNDS_FAILURE
+      ) {
+        setStep(ModalStep.LOGIN_DONE);
+      }
+
+      if (capsule) {
+        initModal();
+        capsule.exitLoops();
+      }
     };
 
     if (!capsule) {
@@ -181,30 +224,33 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     }
 
     return (
-      <CpslModal
-        enterTransitionDuration={DEFAULTS.ANIMATION_DURATION}
-        exitTransitionDuration={DEFAULTS.ANIMATION_DURATION}
-        footerExpanded={modalExpanded}
-        open={isOpen}
-        onCpslModalExited={handleModalExited}
-        onCpslModalEntered={handleModalEntered}
-        onCpslModalEntering={handleModalEntering}
-        onCpslModalRequestClose={onClose}
-        noOverlay={bareModal}
-        className={className}
-      >
-        {isModalMounted && (
-          <ModalContent
-            hasFinishedAnimation={hasFinishedAnimation}
-            oAuthMethods={oAuthMethods}
-            disableEmailLogin={disableEmailLogin}
-            disablePhoneLogin={disablePhoneLogin}
-            setModalExpanded={setModalExpanded}
-            onClose={onClose}
-            {...rest}
-          />
-        )}
-      </CpslModal>
+      <ExternalWalletsWrapper wallets={externalWallets}>
+        <CpslAuthModal
+          enterTransitionDuration={DEFAULTS.ANIMATION_DURATION}
+          exitTransitionDuration={DEFAULTS.ANIMATION_DURATION}
+          open={isOpen}
+          onCpslModalExited={handleModalExited}
+          onCpslModalEntered={handleModalEntered}
+          onCpslModalEntering={handleModalEntering}
+          onCpslModalRequestClose={onClose}
+          noOverlay={bareModal}
+          className={className}
+          data-testid="modal"
+        >
+          {isModalMounted && (
+            <WalletProvider>
+              <ModalContent
+                hasFinishedAnimation={hasFinishedAnimation}
+                oAuthMethods={oAuthMethods}
+                disableEmailLogin={disableEmailLogin}
+                disablePhoneLogin={disablePhoneLogin}
+                onClose={onClose}
+                {...rest}
+              />
+            </WalletProvider>
+          )}
+        </CpslAuthModal>
+      </ExternalWalletsWrapper>
     );
   },
 );

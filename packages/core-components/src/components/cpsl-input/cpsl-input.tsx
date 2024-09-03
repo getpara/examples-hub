@@ -1,6 +1,9 @@
 import { Component, Host, Prop, h, Event, EventEmitter, State, Element, Watch } from '@stencil/core';
 import { AutocompleteTypes, IconType, TextFieldTypes } from '../../interface';
 import { InputChangeEventDetail, InputInputEventDetail } from './input-interface';
+import IMask from 'imask/esm/imask';
+import InputMask from 'imask/esm/controls/input';
+import 'imask/esm/masked/pattern';
 
 @Component({
   tag: 'cpsl-input',
@@ -18,6 +21,7 @@ export class CpslInput {
   private focusedValue?: string | number | null;
 
   @State() hasFocus = false;
+  @State() maskedInput?: InputMask;
 
   /**
    * Indicates whether and how the text value should be automatically capitalized as it is entered/edited by the user.
@@ -55,6 +59,11 @@ export class CpslInput {
   @Prop() disabled = false;
 
   /**
+   * If `true`, the input primary color will use the contrast value, not the primary text value.
+   */
+  @Prop() contrastText = false;
+
+  /**
    * A hint to the browser for which enter key to display.
    * Possible values: `"enter"`, `"done"`, `"go"`, `"next"`,
    * `"previous"`, `"search"`, and `"send"`.
@@ -66,6 +75,11 @@ export class CpslInput {
    * Error text to show below the input. If this is provided the input will enter an error state.
    */
   @Prop() errorText?: string;
+
+  /**
+   * Mask string to apply to the input.
+   */
+  @Prop() mask?: string;
 
   /**
    * Helper text to show below the input. If `"errorText"` is provided that will take precedence.
@@ -222,18 +236,38 @@ export class CpslInput {
     }
   }
 
-  /**
-   * Update the native input element when the value changes
-   */
-  // @Watch('value')
-  // protected valueChanged() {
-  //   const nativeInput = this.nativeInput;
-  //   const value = this.value;
-  //   if (nativeInput && nativeInput.value !== value) {
-  //     nativeInput.value = value;
-  //   }
-  //   Boolean(value) ? this.disableSlots() : this.enableSlots();
-  // }
+  @Watch('mask')
+  handleSetupMask() {
+    if (this.nativeInput) {
+      if (this.mask) {
+        if (this.maskedInput) {
+          this.maskedInput.updateOptions({
+            mask: this.mask as any,
+          });
+        } else {
+          this.maskedInput = IMask(this.nativeInput, {
+            mask: this.mask,
+            definitions: {
+              // <any single char>: <same type as mask (RegExp, Function, etc.)>
+              // defaults are '0', 'a', '*'
+              '#': /[\d]/,
+            },
+          });
+        }
+      } else {
+        this.maskedInput?.destroy();
+        this.nativeInput.value = this.value ?? '';
+        this.maskedInput = undefined;
+      }
+    }
+  }
+
+  @Watch('value')
+  handleValueChange() {
+    if (!this.value) {
+      this.nativeInput.value = this.value ?? '';
+    }
+  }
 
   componentDidLoad() {
     this.initButtons();
@@ -242,6 +276,8 @@ export class CpslInput {
     } else {
       this.disableSlots();
     }
+
+    this.handleSetupMask();
   }
 
   private disableSlots() {
@@ -275,7 +311,7 @@ export class CpslInput {
    * Emits a `cpslInput` event.
    */
   private emitInputChange(event?: Event) {
-    this.cpslInput.emit({ value: this.nativeInput.value, event });
+    this.cpslInput.emit({ value: this.value || '', event });
   }
 
   /**
@@ -295,8 +331,11 @@ export class CpslInput {
 
   private onInput = (ev: InputEvent) => {
     const input = ev.target as HTMLInputElement | null;
-    if (input) {
-      this.value = input.value || '';
+
+    this.maskedInput?._onInput(ev);
+
+    if (Boolean(input)) {
+      this.value = this.maskedInput?.unmaskedValue ?? (input.value || '');
       input.value === '' ? this.disableSlots() : this.enableSlots();
     }
 
@@ -335,10 +374,18 @@ export class CpslInput {
     const input = ev.target as HTMLInputElement;
     const pasteData = ev.clipboardData?.getData('text') || '';
 
-    // Manually set the value
-    input.value = input.value + pasteData;
-    this.value = this.value + pasteData;
-    pasteData === '' ? this.disableSlots() : this.enableSlots();
+    // Manually set the value & cursor position
+    const initialSelectionStart = input.selectionStart;
+    const newVal = `${input.value.slice(0, input.selectionStart)}${pasteData}${input.value.slice(input.selectionEnd, input.value.length)}`;
+    input.value = newVal;
+
+    // this.value = newVal;
+    input.selectionEnd = initialSelectionStart + pasteData.length;
+
+    this.maskedInput?._onInput({ ...(ev as any), target: input });
+    this.value = this.maskedInput?.unmaskedValue ?? (input.value || '');
+
+    this.value === '' ? this.disableSlots() : this.enableSlots();
 
     // Emit the cpslPaste event
     this.cpslPaste.emit(ev);
@@ -361,13 +408,7 @@ export class CpslInput {
 
   render() {
     return (
-      <Host
-        class={{
-          'disabled': this.disabled,
-          'focused': this.hasFocus,
-          'has-value': Boolean(this.focusedValue) || Boolean(this.value),
-        }}
-      >
+      <Host class={{ 'disabled': this.disabled, 'focused': this.hasFocus, 'has-value': Boolean(this.focusedValue) || Boolean(this.value), 'contrast-text': this.contrastText }}>
         {this.label && (
           <label class="label" htmlFor={this.inputId}>
             {this.label}
@@ -379,6 +420,7 @@ export class CpslInput {
           <slot name="start"></slot>
           <input
             class="native-input"
+            part="native-input"
             ref={input => (this.nativeInput = input)}
             id={this.inputId}
             disabled={this.disabled}
@@ -400,7 +442,7 @@ export class CpslInput {
             required={this.required}
             spellcheck={this.spellcheck}
             type={this.type}
-            value={this.value}
+            defaultValue={this.value ?? ''}
             onInput={this.onInput}
             onChange={this.onChange}
             onFocus={this.onFocus}

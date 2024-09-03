@@ -1,4 +1,4 @@
-import { MainContainer } from '../common.js';
+import { StepContainer } from '../common.js';
 import { OnRampProvider, RampConfig, getProvider } from '@usecapsule/web-sdk';
 import { useModalStore } from '../../stores/index.js';
 import { useEffect, useMemo } from 'react';
@@ -41,5 +41,5 @@ export const AddFundsAwaiting = () => {
     return () => clearTimeout(timeoutId);
   }, [onRampPurchase?.status]);
 
-  return <MainContainer>{onRampEmbed}</MainContainer>;
+  return <StepContainer $wide>{onRampEmbed}</StepContainer>;
 };

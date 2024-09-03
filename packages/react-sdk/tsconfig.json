@@ -3,7 +3,8 @@
   "compilerOptions": {
     "outDir": "./dist",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "module": "ESNext"
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "types/images.d.ts"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "types/images.d.ts", "src/wallets/window.d.ts"]
 }

@@ -1,0 +1,36 @@
+{
+  "name": "@usecapsule/evm-wallet-connectors",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./connectors": "./dist/wallets/connectors/index.js"
+  },
+  "dependencies": {
+    "@coinbase/wallet-sdk": "3.9.3",
+    "@usecapsule/web-sdk": "1.25.0"
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.31",
+    "@types/react-dom": "^18.2.7",
+    "typescript": "^5.4.3",
+    "viem": "2.19.1",
+    "wagmi": "2.12.5"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18",
+    "viem": "2.x",
+    "wagmi": "2.x"
+  },
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "gitHead": "10ecce9873131e6a1b114fb0642a94bb02040bef"
+}

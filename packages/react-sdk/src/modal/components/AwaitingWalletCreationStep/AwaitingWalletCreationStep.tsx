@@ -1,15 +1,7 @@
-import { CpslIcon, CpslInfoBox, CpslSpinner } from '@usecapsule/react-components';
-import {
-  Heading,
-  CreationStepSubheading,
-  MainContainer,
-  SpinnerContainer,
-  InfoBoxContent,
-  InfoBoxHeader,
-  InfoBoxHeading,
-  InfoBoxText,
-} from '../common.js';
+import { CpslIcon, CpslInfoBox, CpslText } from '@usecapsule/react-components';
+import { InfoBoxContent, InfoBoxHeader, StepContainer } from '../common.js';
 import { useEffect, useRef, useState } from 'react';
+import { Waiting } from '../Waiting/Waiting.js';
 
 export const AwaitingWalletCreationStep = () => {
   const [showInfoBox, setShowInfoBox] = useState(false);
@@ -24,33 +16,21 @@ export const AwaitingWalletCreationStep = () => {
   }, []);
 
   return (
-    <>
-      <SpinnerContainer>
-        <CpslSpinner />
-      </SpinnerContainer>
-      <MainContainer>
-        <Heading>
-          <span>Creating Wallet...</span>
-        </Heading>
-        <CreationStepSubheading>
-          <span>This typically only takes a second.</span>
-        </CreationStepSubheading>
-      </MainContainer>
+    <StepContainer $wide>
+      <Waiting heading="Creating Your Wallet" subheading="This should only take a couple of seconds." />
       {showInfoBox && (
         <CpslInfoBox>
           <InfoBoxContent>
             <InfoBoxHeader>
               <CpslIcon icon="clock" />
-              <InfoBoxHeading>
-                <span>Hang on</span>
-              </InfoBoxHeading>
+              <CpslText weight="medium">Hang on</CpslText>
             </InfoBoxHeader>
-            <InfoBoxText>
-              <span>Creating your wallet is taking a little longer than expected, but we’re working on it!</span>
-            </InfoBoxText>
+            <CpslText variant="bodyS" weight="medium" color="secondary">
+              Creating your wallet is taking a little longer than expected, but we’re working on it!
+            </CpslText>
           </InfoBoxContent>
         </CpslInfoBox>
       )}
-    </>
+    </StepContainer>
   );
 };

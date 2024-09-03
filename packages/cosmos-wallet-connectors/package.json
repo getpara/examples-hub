@@ -1,0 +1,33 @@
+{
+  "name": "@usecapsule/cosmos-wallet-connectors",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./connectors": "./dist/wallets/connectors/index.js"
+  },
+  "dependencies": {
+    "@usecapsule/web-sdk": "1.25.0"
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc"
+  },
+  "devDependencies": {
+    "@delphi-labs/shuttle-react": "3.28.0",
+    "@types/react": "^18.0.31",
+    "@types/react-dom": "^18.2.7",
+    "typescript": "^5.4.3"
+  },
+  "peerDependencies": {
+    "@delphi-labs/shuttle-react": "3.x.x",
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "gitHead": "10ecce9873131e6a1b114fb0642a94bb02040bef"
+}

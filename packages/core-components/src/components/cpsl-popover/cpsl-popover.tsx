@@ -87,12 +87,12 @@ export class CpslPopover {
   /**
    * Emitted when the popover opens.
    */
-  @Event() cpslOpen!: EventEmitter;
+  @Event() cpslOpen!: EventEmitter<void>;
 
   /**
    * Emitted when the popover closes.
    */
-  @Event() cpslClose!: EventEmitter;
+  @Event() cpslClose!: EventEmitter<void>;
 
   /**
    * Call to close the popover manually.
@@ -120,9 +120,11 @@ export class CpslPopover {
     if (this.open) {
       window.addEventListener('click', this.handleClickOutside);
       window.addEventListener('scroll', () => this.setPosition(), true);
+      window.addEventListener('resize', () => this.setPosition(), true);
     } else {
       window.removeEventListener('click', this.handleClickOutside);
-      window.addEventListener('scroll', () => this.setPosition());
+      window.removeEventListener('scroll', () => this.setPosition(), true);
+      window.removeEventListener('resize', () => this.setPosition(), true);
     }
   }
 
@@ -300,11 +302,7 @@ export class CpslPopover {
           'transform-v-center': this.transformOriginVertical === 'center',
           'transform-v-bottom': this.transformOriginVertical === 'bottom',
         }}
-        style={{
-          top: `${this.positionY}px`,
-          left: `${this.positionX}px`,
-          width: this.autoWidth ? 'auto' : `${this.triggerEl?.clientWidth}px`,
-        }}
+        style={{ top: `${this.positionY}px`, left: `${this.positionX}px`, width: !this.open ? '0px' : this.autoWidth ? 'auto' : `${this.triggerEl?.clientWidth}px` }}
       >
         <div id="container" class={{ container: true, open: this.open }}>
           <slot></slot>

@@ -14,7 +14,9 @@ import { pki, jsbn } from 'node-forge';
 
 import { decryptWithPrivateKey, getAsymmetricKeyPair, getPublicKeyHex } from './cryptography/utils.js';
 import {
+  CURRENT_WALLET_IDS_CHANGE_EVENT,
   Ctx,
+  EXTERNAL_WALLET_CHANGE_EVENT,
   NetworkProp,
   OnRampAssetProp,
   OnRampProviderProp,
@@ -97,6 +99,12 @@ export enum PregenIdentifierType {
   PHONE = 'PHONE',
 }
 
+export enum ExternalWalletType {
+  EVM = 'EVM',
+  SOLANA = 'SOLANA',
+  COSMOS = 'COSMOS',
+}
+
 export interface Wallet {
   createdAt?: string;
   id: string;
@@ -116,6 +124,11 @@ export interface Wallet {
   lastUsedAt?: string;
   lastUsedPartner?: PartnerEntity;
   lastUsedPartnerId?: string;
+}
+
+export interface ExternalWallet {
+  address: string;
+  type: ExternalWalletType;
 }
 
 export interface ConstructorOpts {
@@ -214,7 +227,9 @@ const LOCAL_STORAGE_FARCASTER_USERNAME = `${PREFIX}farcasterUsername`;
 const LOCAL_STORAGE_USER_ID = `${PREFIX}userId`;
 const LOCAL_STORAGE_ED25519_WALLETS = `${PREFIX}ed25519Wallets`;
 const LOCAL_STORAGE_WALLETS = `${PREFIX}wallets`;
+const LOCAL_STORAGE_EXTERNAL_WALLETS = `${PREFIX}externalWallets`;
 const LOCAL_STORAGE_CURRENT_WALLET_IDS = `${PREFIX}currentWalletIds`;
+const LOCAL_STORAGE_CURRENT_EXTERNAL_WALLET_ADDRESSES = `${PREFIX}currentExternalWalletAddresses`;
 const LOCAL_STORAGE_SESSION_COOKIE = `${PREFIX}sessionCookie`;
 const SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR = `${PREFIX}loginEncryptionKeyPair`;
 const POLLING_INTERVAL_MS = 2000;
@@ -268,6 +283,16 @@ export abstract class CoreCapsule {
    * Wallets associated with the `CoreCapsule` instance.
    */
   wallets?: Record<string, Wallet>;
+
+  /**
+   * The addresses of the currently active external wallets.
+   */
+  currentExternalWalletAddresses?: string[];
+
+  /**
+   * Wallets associated with the `CoreCapsule` instance.
+   */
+  externalWallets?: Record<string, ExternalWallet>;
 
   /**
    * Base theme for the emails sent from this Capsule instance.
@@ -668,6 +693,17 @@ export abstract class CoreCapsule {
     if (loginEncryptionKey && loginEncryptionKey !== 'undefined') {
       this.loginEncryptionKeyPair = this.convertEncryptionKeyPair(JSON.parse(loginEncryptionKey));
     }
+
+    const stringExternalWallets = this.localStorageGetItem(LOCAL_STORAGE_EXTERNAL_WALLETS);
+    const _externalWallets = JSON.parse((stringExternalWallets as string) || '{}');
+
+    this.setExternalWallets(_externalWallets);
+
+    const _currentExternalWalletAddresses =
+      (this.localStorageGetItem(LOCAL_STORAGE_CURRENT_EXTERNAL_WALLET_ADDRESSES) as string) || undefined;
+    this.currentExternalWalletAddresses = _currentExternalWalletAddresses
+      ? JSON.parse(_currentExternalWalletAddresses)
+      : undefined;
   }
 
   private getVerificationEmailProps(): VerificationEmailProps {
@@ -713,11 +749,18 @@ export abstract class CoreCapsule {
       : await this.localStorageGetItem(LOCAL_STORAGE_WALLETS);
     this.wallets = JSON.parse(stringWallets || '{}');
 
-    const _currentWalletIds = this.platformUtils.secureStorage
-      ? await this.platformUtils.secureStorage.get(LOCAL_STORAGE_CURRENT_WALLET_IDS)
-      : await this.localStorageGetItem(LOCAL_STORAGE_CURRENT_WALLET_IDS);
+    const _currentWalletIds = await this.localStorageGetItem(LOCAL_STORAGE_CURRENT_WALLET_IDS);
     const currentWalletIds = _currentWalletIds ? JSON.parse(_currentWalletIds) : undefined;
     this.currentWalletIds = currentWalletIds;
+
+    const stringExternalWallets = await this.localStorageGetItem(LOCAL_STORAGE_EXTERNAL_WALLETS);
+    this.externalWallets = JSON.parse(stringExternalWallets || '{}');
+
+    const _currentExternalWalletAddresses = await this.localStorageGetItem(LOCAL_STORAGE_CURRENT_EXTERNAL_WALLET_ADDRESSES);
+    const currentExternalWalletAddresses = _currentExternalWalletAddresses
+      ? JSON.parse(_currentExternalWalletAddresses)
+      : undefined;
+    this.currentExternalWalletAddresses = currentExternalWalletAddresses;
 
     const loginEncryptionKey = await this.sessionStorageGetItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR);
     if (loginEncryptionKey && loginEncryptionKey !== 'undefined') {
@@ -756,6 +799,20 @@ export abstract class CoreCapsule {
   }
 
   /**
+   * Sets the external wallet address and type associated with the `CoreCapsule` instance.
+   * @param externalAddress - External wallet address to set.
+   * @param externalType - Type of external wallet to set.
+   */
+  async setExternalWallet(externalAddress: string, externalType: ExternalWalletType): Promise<void> {
+    // Can change this to continue storing existing external wallets if/when we want to allow multiple connected external wallets
+    this.externalWallets = { [externalAddress]: { address: externalAddress, type: externalType } };
+    this.currentExternalWalletAddresses = [externalAddress];
+    this.setCurrentExternalWalletAddresses(this.currentExternalWalletAddresses);
+    this.setExternalWallets(this.externalWallets);
+    typeof window !== 'undefined' && window.dispatchEvent(new Event(EXTERNAL_WALLET_CHANGE_EVENT));
+  }
+
+  /**
    * Sets the user id associated with the `CoreCapsule` instance.
    * @param userId - User id to set.
    */
@@ -775,6 +832,24 @@ export abstract class CoreCapsule {
       return;
     }
     await this.localStorageSetItem(LOCAL_STORAGE_WALLETS, JSON.stringify(wallets));
+  }
+
+  /**
+   * Sets the external wallets associated with the `CoreCapsule` instance.
+   * @param externalWallets - External wallets to set.
+   */
+  async setExternalWallets(externalWallets: Record<string, ExternalWallet>): Promise<void> {
+    this.externalWallets = externalWallets;
+    await this.localStorageSetItem(LOCAL_STORAGE_EXTERNAL_WALLETS, JSON.stringify(externalWallets));
+  }
+
+  async setCurrentExternalWalletAddresses(currentExternalWalletAddresses: string[]): Promise<void> {
+    this.currentExternalWalletAddresses = currentExternalWalletAddresses;
+
+    await this.localStorageSetItem(
+      LOCAL_STORAGE_CURRENT_EXTERNAL_WALLET_ADDRESSES,
+      JSON.stringify(currentExternalWalletAddresses),
+    );
   }
 
   /**
@@ -808,8 +883,16 @@ export abstract class CoreCapsule {
   }
 
   /**
-   * Gets the phone number associated with the `CoreCapsule` instance.
-   * @returns - phone number associated with the `CoreCapsule` instance.
+   * Gets the phone object associated with the `CoreCapsule` instance.
+   * @returns - phone object with phone number and country code associated with the `CoreCapsule` instance.
+   */
+  getPhone(): { phone?: string; countryCode?: string } {
+    return { phone: this.phone, countryCode: this.countryCode };
+  }
+
+  /**
+   * Gets the formatted phone number associated with the `CoreCapsule` instance.
+   * @returns - formatted phone number associated with the `CoreCapsule` instance.
    */
   getPhoneNumber(): string | undefined {
     if (!this.phone || !this.countryCode) {
@@ -826,6 +909,7 @@ export abstract class CoreCapsule {
     } else {
       await this.localStorageSetItem(LOCAL_STORAGE_CURRENT_WALLET_IDS, JSON.stringify(currentWalletIds));
     }
+    typeof window !== 'undefined' && window.dispatchEvent(new Event(CURRENT_WALLET_IDS_CHANGE_EVENT));
   }
 
   /**
@@ -1041,14 +1125,16 @@ export abstract class CoreCapsule {
    * Fetches the wallets associated with the user.
    * @returns - wallets that were fetched.
    */
-  async fetchWallets(): Promise<any[]> {
-    const res = await this.ctx.capsuleClient[this.isPortal() ? 'getAllWallets' : 'getWallets'](this.userId);
+  async fetchWallets(): Promise<WalletEntity[]> {
+    const res = await (this.isPortal()
+      ? this.ctx.capsuleClient.getAllWallets(this.userId)
+      : this.ctx.capsuleClient.getWallets(this.userId, true));
 
     return res.data.wallets.filter(wallet => !!wallet.address && this.isWalletSupported(wallet));
   }
 
   private async populateWalletAddresses(): Promise<void> {
-    const res = await this.ctx.capsuleClient.getWallets(this.userId);
+    const res = await this.ctx.capsuleClient.getWallets(this.userId, true);
     const wallets = res.data.wallets;
     wallets.forEach(wallet => {
       if (this.wallets[wallet.id]) {
@@ -1129,6 +1215,34 @@ export abstract class CoreCapsule {
       countryCode: this.countryCode,
     });
     await this.setUserId(userId);
+  }
+
+  /**
+   * Logs in or creates a new user using an external wallet address.
+   * @param externalAddress - external wallet address to use for identification.
+   * @param type - type of external wallet to use for identification.
+   * @param externalWalletProvider - name of provider for the external wallet.
+   */
+  async externalWalletLogin(
+    externalAddress: string,
+    type: ExternalWalletType,
+    externalWalletProvider?: string,
+  ): Promise<void> {
+    this.requireApiKey();
+    const { userId } = await this.ctx.capsuleClient.externalWalletLogin({
+      externalAddress,
+      type,
+      externalWalletProvider,
+    });
+    await this.setExternalWallet(externalAddress, type);
+    await this.setUserId(userId);
+  }
+
+  /**
+   * Returns whether or not the user is connected with an external wallet.
+   */
+  isUsingExternalWallet(): boolean {
+    return !!Object.keys(this.externalWallets).length;
   }
 
   /**
@@ -1278,6 +1392,7 @@ export abstract class CoreCapsule {
   //   true/false if session is active
   async isSessionActive(): Promise<boolean> {
     const res = await this.ctx.capsuleClient.touchSession();
+
     return res.data.biometricVerifiedAt && biometricVerifiedRecently(this.ctx, res.data.biometricVerifiedAt);
   }
 
@@ -1287,6 +1402,10 @@ export abstract class CoreCapsule {
    * @returns - true if session is active and a wallet exists.
    **/
   async isFullyLoggedIn(): Promise<boolean> {
+    if (this.isUsingExternalWallet()) {
+      return true;
+    }
+
     const isSessionActive = await this.isSessionActive();
 
     return (
@@ -2138,30 +2257,42 @@ export abstract class CoreCapsule {
   /**
    * Initiate a new on-ramp purchase through the Capsule modal.
    *
-   * @param provider - one of `RAMP` or `STRIPE`.
-   * @param asset - the on-chain asset to purchase, one of `USDC` or `ETH`
-   * @param testMode - if `true`, the purchase involves test-net assets only
+   * @param {Object} config - The config to use to update the purchase
+   * @param {string} config.provider - one of `RAMP` or `STRIPE`.
+   * @param {string} config.asset - the on-chain asset to purchase, one of `USDC` or `ETH`
+   * @param {boolean} config.testMode - if `true`, the purchase involves test-net assets only
+   * @param {string} config.walletId - the uuid of the desired purchase's associated wallet
+   * @param {string} config.externalWalletAddress - the address of the desired purchase's external wallet
    * @returns - the created purchase object
    **/
-  async createOnRampPurchase(
-    provider: OnRampProviderProp,
-    network: NetworkProp,
-    asset: OnRampAssetProp,
+  async createOnRampPurchase({
+    provider,
+    network,
+    asset,
     testMode = false,
-    walletId: string = this.currentWalletIds[0],
-  ): Promise<OnRampPurchase> {
-    if (!walletId) {
+    walletId = this.currentWalletIds?.[0],
+    externalWalletAddress = this.currentExternalWalletAddresses?.[0],
+  }: {
+    provider: OnRampProviderProp;
+    network: NetworkProp;
+    asset: OnRampAssetProp;
+    testMode: boolean;
+    walletId?: string;
+    externalWalletAddress?: string;
+  }): Promise<OnRampPurchase> {
+    if (!walletId && !externalWalletAddress) {
       return;
     }
 
-    const res = await this.ctx.capsuleClient.createOnRampPurchase(
-      this.getUserId(),
+    const res = await this.ctx.capsuleClient.createOnRampPurchase({
+      userId: this.getUserId(),
       walletId,
-      getProvider(provider),
-      getNetwork(network),
-      getAsset(asset),
+      externalWalletAddress,
+      provider: getProvider(provider),
+      network: getNetwork(network),
+      asset: getAsset(asset),
       testMode,
-    );
+    });
 
     return res.data;
   }
@@ -2169,19 +2300,37 @@ export abstract class CoreCapsule {
   /**
    * Update an on-ramp purchase.
    *
-   * @param walletId - the uuid of the desired purchase's associated wallet
-   * @param purchaseId - the uuid of the desired purchase
-   * @param updates - the updates to apply, limited to `status`, `fiatCurrency`, `fiatQuantity`, `asset`', `assetQuantity`', and `providerKey``
+   * @param {Object} config - The config to use to update the purchase
+   * @param {string} config.walletId - the uuid of the desired purchase's associated wallet
+   * @param {string} config.externalWalletAddress - the address of the desired purchase's external wallet
+   * @param {string} config.purchaseId - the uuid of the desired purchase
+   * @param {Object} config.updates - the updates to apply, limited to `status`, `fiatCurrency`, `fiatQuantity`, `asset`, `assetQuantity`, and `providerKey`
    * @returns - the updated purchase object
    **/
-  async updateOnRampPurchase(
-    walletId: string,
-    purchaseId: string,
+  async updateOnRampPurchase({
+    walletId,
+    externalWalletAddress,
+    purchaseId,
+    updates,
+  }: {
+    walletId?: string;
+    externalWalletAddress?: string;
+    purchaseId: string;
     updates: Partial<
       Pick<OnRampPurchase, 'status' | 'fiatCurrency' | 'fiatQuantity' | 'asset' | 'assetQuantity' | 'providerKey'>
-    >,
-  ): Promise<OnRampPurchase> {
-    const res = await this.ctx.capsuleClient.updateOnRampPurchase(this.getUserId(), walletId, purchaseId, updates);
+    >;
+  }): Promise<OnRampPurchase> {
+    if (!walletId && !externalWalletAddress) {
+      return;
+    }
+
+    const res = await this.ctx.capsuleClient.updateOnRampPurchase({
+      userId: this.getUserId(),
+      walletId,
+      externalWalletAddress,
+      purchaseId,
+      updates,
+    });
 
     return res.data;
   }
@@ -2189,12 +2338,27 @@ export abstract class CoreCapsule {
   /**
    * Retrieve a desired on-ramp purchase.
    *
-   * @param walletId - the ID of the purchase's wallet.
-   * @param purchaseId - the purchase ID to retrieve.
+   * @param {Object} config - The config to use to update the purchase
+   * @param {string} config.walletId - the ID of the purchase's wallet.
+   * @param {string} config.externalWalletAddress - the address of the purchase's external wallet
+   * @param {string} config.purchaseId - the purchase ID to retrieve.
    * @returns - the purchase object
    **/
-  async getOnRampPurchase(walletId: string, purchaseId: string): Promise<OnRampPurchase> {
-    const res = await this.ctx.capsuleClient.getOnRampPurchase(this.getUserId(), walletId, purchaseId);
+  async getOnRampPurchase({
+    walletId,
+    externalWalletAddress,
+    purchaseId,
+  }: {
+    walletId?: string;
+    purchaseId: string;
+    externalWalletAddress?: string;
+  }): Promise<OnRampPurchase> {
+    const res = await this.ctx.capsuleClient.getOnRampPurchase({
+      userId: this.getUserId(),
+      walletId,
+      externalWalletAddress,
+      purchaseId,
+    });
 
     return res.data;
   }
@@ -2280,6 +2444,8 @@ export abstract class CoreCapsule {
       this.wallets = {};
     }
     this.currentWalletIds = undefined;
+    this.currentExternalWalletAddresses = undefined;
+    this.externalWallets = {};
     this.loginEncryptionKeyPair = undefined;
     this.email = undefined;
     this.phone = undefined;

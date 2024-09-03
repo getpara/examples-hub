@@ -43,9 +43,7 @@ export class CpslAlert {
 
   render() {
     return (
-      <Host
-        class={{ error: this.variant === 'error', warning: this.variant === 'warning', success: this.variant === 'success' }}
-      >
+      <Host class={{ error: this.variant === 'error', warning: this.variant === 'warning', success: this.variant === 'success' }}>
         <div class="alert-container">
           {this.iconType && <cpsl-icon icon={this.iconType} />}
           <slot></slot>

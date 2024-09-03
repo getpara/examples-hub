@@ -1,18 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { CpslQrCode, CpslSpinner, CpslText } from '@usecapsule/react-components';
-import styled from 'styled-components';
-import { QRContainer } from '../common.js';
+import { Heading, InnerStepContainer, QRContainer, StepContainer } from '../common.js';
 import { useCapsuleStore, useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
-
-const CenteredContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  gap: 20px;
-`;
 
 const FarcasterOAuthStep = () => {
   const [connectUri, setConnectUri] = useState('');
@@ -59,13 +49,17 @@ const FarcasterOAuthStep = () => {
   }, [connectUri]);
 
   return (
-    <CenteredContainer>
-      <CpslText variant="bodyL" weight="bold">
+    <StepContainer $wide>
+      <Heading variant="headingS" weight="bold">
         Sign in using Farcaster
-      </CpslText>
-      <CpslText>Scan the QR code with your phone's camera to proceed.</CpslText>
-      <QRContainer>{!connectUri ? <CpslSpinner /> : <CpslQrCode url={connectUri} />}</QRContainer>
-    </CenteredContainer>
+      </Heading>
+      <InnerStepContainer>
+        <CpslText variant="bodyS" color="secondary" weight="medium">
+          Scan the QR code with your phone's camera to proceed.
+        </CpslText>
+        <QRContainer>{!connectUri ? <CpslSpinner size={100} /> : <CpslQrCode url={connectUri} />}</QRContainer>
+      </InnerStepContainer>
+    </StepContainer>
   );
 };
 

@@ -100,9 +100,7 @@ export class CpslDrawer {
           right: this.anchor === 'right',
         }}
       >
-        {this.variant === 'temporary' && !this.noOverlay && (
-          <cpsl-overlay open={this.open} zIndexOverride={DEFAULT_Z_INDICES.modal + 1} />
-        )}
+        {this.variant === 'temporary' && !this.noOverlay && <cpsl-overlay open={this.open} zIndexOverride={DEFAULT_Z_INDICES.modal + 1} />}
         <div id="container" class="container" part="container">
           <slot></slot>
         </div>

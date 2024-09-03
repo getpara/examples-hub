@@ -6,35 +6,42 @@ import { COLOR_MIXES, DEFAULT_THEME, UTILITY_COLORS } from '../../constants';
 export type Palette = {
   foregroundColors: string[];
   backgroundColors: string[];
-  isDarkBackground: boolean;
+  accentColors: string[];
 };
 
 export const generatePalette = ({
   foregroundColor,
   backgroundColor,
+  accentColor,
+  isDarkTheme,
   customPalette,
-}: Pick<Theme, 'foregroundColor' | 'backgroundColor' | 'customPalette'>): Palette => {
+}: Pick<Theme, 'foregroundColor' | 'backgroundColor' | 'accentColor' | 'customPalette'> & { isDarkTheme: boolean }) => {
   if (!foregroundColor || !isColor(foregroundColor)) {
     foregroundColor = DEFAULT_THEME.foregroundColor;
   }
   if (!backgroundColor || !isColor(backgroundColor)) {
     backgroundColor = DEFAULT_THEME.backgroundColor;
   }
+  if (!Boolean(accentColor) || !isColor(accentColor)) {
+    accentColor = foregroundColor;
+  }
 
-  const isDarkBackground = !readableColorIsBlack(backgroundColor);
+  const isDarkAccent = Boolean(accentColor) ? !readableColorIsBlack(accentColor) : false;
 
   const palette: Palette = {
     foregroundColors: [],
     backgroundColors: [],
-    isDarkBackground,
+    accentColors: [],
   };
 
-  const backgroundMixColor = isDarkBackground ? '#FFFFFF' : '#000000';
-  const foregroundMixColor = isDarkBackground ? '#000000' : '#FFFFFF';
+  const backgroundMixColor = isDarkTheme ? '#FFFFFF' : '#000000';
+  const foregroundMixColor = isDarkTheme ? '#000000' : '#FFFFFF';
+  const accentMixColor = isDarkAccent ? '#FFFFFF' : '#000000';
 
   COLOR_MIXES.forEach(value => {
     palette.foregroundColors.push(mix(foregroundColor, foregroundMixColor, value));
     palette.backgroundColors.push(mix(backgroundColor, backgroundMixColor, value));
+    palette.accentColors.push(mix(accentColor, accentMixColor, value));
   });
 
   // BACKGROUND
@@ -59,6 +66,20 @@ export const generatePalette = ({
   document.documentElement.style.setProperty('--cpsl-color-foreground-80', palette.foregroundColors[7]);
   document.documentElement.style.setProperty('--cpsl-color-foreground-96', palette.foregroundColors[8]);
 
+  // ACCENT
+  document.documentElement.style.setProperty('--cpsl-color-accent-0', palette.accentColors[0]);
+  document.documentElement.style.setProperty('--cpsl-color-accent-4', palette.accentColors[1]);
+  document.documentElement.style.setProperty('--cpsl-color-accent-8', palette.accentColors[2]);
+  document.documentElement.style.setProperty('--cpsl-color-accent-16', palette.accentColors[3]);
+  document.documentElement.style.setProperty('--cpsl-color-accent-32', palette.accentColors[4]);
+  document.documentElement.style.setProperty('--cpsl-color-accent-48', palette.accentColors[5]);
+  document.documentElement.style.setProperty('--cpsl-color-accent-64', palette.accentColors[6]);
+  document.documentElement.style.setProperty('--cpsl-color-accent-80', palette.accentColors[7]);
+  document.documentElement.style.setProperty('--cpsl-color-accent-96', palette.accentColors[8]);
+
+  // CONTRAST
+  document.documentElement.style.setProperty('--cpsl-color-contrast', isDarkTheme ? '#FFFFFF' : '#000000');
+
   const utilityLightMixColor = '#FFFFFF';
   const utilityLightMixValue = 0.72;
   // UTILITY
@@ -68,23 +89,12 @@ export const generatePalette = ({
   document.documentElement.style.setProperty('--cpsl-color-utility-red', red);
   document.documentElement.style.setProperty('--cpsl-color-utility-yellow', yellow);
   document.documentElement.style.setProperty('--cpsl-color-utility-green', green);
-  document.documentElement.style.setProperty(
-    '--cpsl-color-utility-red-light',
-    mix(red, utilityLightMixColor, utilityLightMixValue),
-  );
-  document.documentElement.style.setProperty(
-    '--cpsl-color-utility-yellow-light',
-    mix(yellow, utilityLightMixColor, utilityLightMixValue),
-  );
-  document.documentElement.style.setProperty(
-    '--cpsl-color-utility-green-light',
-    mix(green, utilityLightMixColor, utilityLightMixValue),
-  );
+  document.documentElement.style.setProperty('--cpsl-color-utility-red-light', mix(red, utilityLightMixColor, utilityLightMixValue));
+  document.documentElement.style.setProperty('--cpsl-color-utility-yellow-light', mix(yellow, utilityLightMixColor, utilityLightMixValue));
+  document.documentElement.style.setProperty('--cpsl-color-utility-green-light', mix(green, utilityLightMixColor, utilityLightMixValue));
 
   if (customPalette) {
     const cssColorVars = getCssColors(customPalette);
     Object.entries(cssColorVars).forEach(([k, v]) => document.documentElement.style.setProperty(k, v));
   }
-
-  return palette;
 };

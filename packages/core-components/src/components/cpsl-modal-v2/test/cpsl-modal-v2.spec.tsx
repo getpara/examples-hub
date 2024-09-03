@@ -8,7 +8,7 @@ describe('cpsl-modal-v2', () => {
       html: `<cpsl-modal-v2></cpsl-modal-v2>`,
     });
     expect(page.root).toEqualHtml(`
-      <cpsl-modal-v2>
+     <cpsl-modal-v2>
         <mock:shadow-root>
           <cpsl-overlay entertransitionduration="0.15" exittransitionduration="0.15" id="overlay"></cpsl-overlay>
           <cpsl-card class="card" style="transition-duration: 0.15s;">

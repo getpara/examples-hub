@@ -25,8 +25,7 @@ export default meta;
 type Story = StoryFn<CpslButton & { content?: string }>;
 
 const Template: Story = args => `<cpsl-button variant="${args.variant}" size="${args.size}">${args.content}</cpsl-button>`;
-const TemplateWithIcon: Story = args =>
-  `<cpsl-button variant="${args.variant}" size="${args.size}"><cpsl-icon icon="home" slot="start"></cpsl-icon>${args.content}</cpsl-button>`;
+const TemplateWithIcon: Story = args => `<cpsl-button variant="${args.variant}" size="${args.size}"><cpsl-icon icon="home" slot="start"></cpsl-icon>${args.content}</cpsl-button>`;
 
 export const Primary: Story = Template.bind({});
 Primary.args = {

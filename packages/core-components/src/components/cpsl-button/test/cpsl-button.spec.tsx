@@ -8,7 +8,7 @@ describe('cpsl-button', () => {
       html: `<cpsl-button></cpsl-button>`,
     });
     expect(page.root).toEqualHtml(`
-      <cpsl-button class="medium primary" variant="primary">
+       <cpsl-button class="medium primary" variant="primary">
         <mock:shadow-root>
           <button class="button-native" part="button-native">
             <slot name="start"></slot>

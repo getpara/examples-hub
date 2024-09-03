@@ -14,7 +14,6 @@
   @include padding(var(--box-padding-top), var(--box-padding-end), var(--box-padding-bottom), var(--box-padding-start));
 
   display: flex;
-  background: var(--cpsl-color-background-secondary);
-  border: var(--box-border-width) solid var(--cpsl-color-input-border-placeholder);
+  background: var(--cpsl-color-background-4);
   border-radius: var(--box-border-radius);
 }

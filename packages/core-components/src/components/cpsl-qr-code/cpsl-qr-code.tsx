@@ -1,5 +1,5 @@
 import { Component, Host, h, Element, Prop } from '@stencil/core';
-import QRCodeStyling from 'qr-code-styling';
+import QrCodeWithLogo from 'qrcode-with-logos';
 
 @Component({
   tag: 'cpsl-qr-code',
@@ -23,45 +23,46 @@ export class CpslQrCode {
    * Size of the QR code in pixels.
    * Default is 250.
    */
-  @Prop() size?: number = 250;
+  @Prop() size?: number = 286;
 
   componentDidLoad() {
-    const container = this.el.shadowRoot.getElementById('qr-container');
-
-    container.innerHTML = '';
-
-    const qrCode = new QRCodeStyling({
-      type: 'svg',
-      data: this.url,
-      image: this.imageSrc,
-      height: this.size,
-      width: this.size,
-      qrOptions: { errorCorrectionLevel: 'L' },
-      backgroundOptions: {
-        color: 'transparent',
-      },
+    new QrCodeWithLogo({
+      content: this.url,
+      width: 1000,
+      image: this.imgEl,
+      logo: this.imageSrc
+        ? {
+            src: this.imageSrc,
+            borderRadius: 16,
+          }
+        : '',
       dotsOptions: {
-        type: 'dots',
-        color: 'currentColor',
+        type: 'dot',
       },
-      cornersSquareOptions: { type: 'extra-rounded' },
-      cornersDotOptions: { type: 'dot' },
-      imageOptions: {
-        crossOrigin: 'anonymous',
+      cornersOptions: {
+        type: 'rounded',
+        radius: {
+          inner: 8,
+          outer: 32,
+        },
+      },
+      nodeQrCodeOptions: {
+        margin: 0,
+        errorCorrectionLevel: 'M',
       },
     });
+  }
 
-    qrCode.append(container);
+  private get imgEl(): HTMLImageElement {
+    return this.el.shadowRoot.getElementById('qr-code') as HTMLImageElement;
   }
 
   render() {
     return (
       <Host>
-        <div
-          id="qr-container"
-          class="qr-container"
-          // style={{ height: `${this.size - 10 ?? 240}px`, width: `${this.size - 10 ?? 240}px` }}
-        />
+        <div id="qr-container" class="qr-container" style={{ width: `${this.size}px`, height: `${this.size}px` }}>
+          <img id="qr-code" class="qr-code" />
+        </div>
       </Host>
     );
   }

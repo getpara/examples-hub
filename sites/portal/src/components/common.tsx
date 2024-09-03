@@ -1,4 +1,4 @@
-import { CpslIcon, CpslInput, CpslModal, CpslText } from '@usecapsule/react-components';
+import { CpslIcon, CpslInput, CpslAuthModal, CpslText } from '@usecapsule/react-components';
 import { styled } from 'styled-components';
 
 export const Heading: typeof CpslText = styled(CpslText)`
@@ -51,7 +51,7 @@ export const Hero: typeof CpslIcon = styled(CpslIcon)`
   }
 `;
 
-export const Modal: typeof CpslModal = styled(CpslModal)`
+export const Modal: typeof CpslAuthModal = styled(CpslAuthModal)`
   @media (max-width: 550px) {
     --inner-container-padding-top: 40px;
     --inner-container-padding-bottom: 32px;

@@ -13,6 +13,14 @@
 | `value`    | `value`    | Value of the item.                   | `string`  | `undefined` |
 
 
+## Shadow Parts
+
+| Part                | Description |
+| ------------------- | ----------- |
+| `"inner-container"` |             |
+| `"outer-container"` |             |
+
+
 ----------------------------------------------
 
 *Built with [StencilJS](https://stenciljs.com/)*

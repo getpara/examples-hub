@@ -1,21 +1,31 @@
-import { AddFundsButton, Heading, HeroNoSpacing } from '../common.js';
-import { CpslButton } from '@usecapsule/react-components';
+import { useEffect } from 'react';
+import { Heading, StepContainer } from '../common.js';
+import { WalletCard } from '../WalletCard/WalletCard.js';
+import { useCapsuleStore } from '../../stores/index.js';
 
 interface LoginDoneStep {
   onClose: () => void;
 }
 
 export const LoginDoneStep = ({ onClose }: LoginDoneStep) => {
+  const capsule = useCapsuleStore(state => state.capsule);
+  const isExternalWallet = capsule.isUsingExternalWallet();
+
+  useEffect(() => {
+    setTimeout(() => {
+      onClose();
+    }, 800);
+  }, []);
+
   return (
-    <>
-      <HeroNoSpacing icon="heroWallet" />
-      <Heading style={{ marginBottom: '24px' }}>
-        <span>You’re Logged In!</span>
-      </Heading>
-      <CpslButton fullWidth onClick={onClose}>
-        Close
-      </CpslButton>
-      <AddFundsButton />
-    </>
+    <StepContainer>
+      {isExternalWallet ? (
+        <Heading variant="headingS" weight="bold">
+          You're logged in!
+        </Heading>
+      ) : (
+        <WalletCard />
+      )}
+    </StepContainer>
   );
 };

@@ -94,10 +94,7 @@ export class CpslModalV2 {
             exitTransitionDuration={this.exitTransitionDuration}
           />
         )}
-        <cpsl-card
-          class="card"
-          style={{ transitionDuration: this.open ? `${this.exitTransitionDuration}s` : `${this.enterTransitionDuration}s` }}
-        >
+        <cpsl-card class="card" style={{ transitionDuration: this.open ? `${this.exitTransitionDuration}s` : `${this.enterTransitionDuration}s` }}>
           <slot></slot>
         </cpsl-card>
       </Host>

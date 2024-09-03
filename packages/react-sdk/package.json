@@ -12,14 +12,13 @@
     "*.css"
   ],
   "dependencies": {
-    "@gsap/react": "^2.1.0",
     "@ramp-network/ramp-instant-sdk": "^4.0.2",
     "@stripe/crypto": "^0.0.4",
     "@stripe/stripe-js": "^3.4.0",
     "@usecapsule/react-components": "3.3.0",
     "@usecapsule/web-sdk": "1.25.0",
     "date-fns": "^3.6.0",
-    "gsap": "^3.12.5",
+    "framer-motion": "11.3.28",
     "libphonenumber-js": "^1.11.1",
     "styled-components": "^6.1.8",
     "zustand": "^4.5.2"
@@ -35,6 +34,7 @@
     "@types/chrome": "^0.0.237",
     "@types/react": "^18.0.31",
     "@types/react-dom": "^18.2.7",
+    "@usecapsule/evm-wallet-connectors": "0.1.0",
     "typescript": "^5.4.3"
   },
   "peerDependencies": {

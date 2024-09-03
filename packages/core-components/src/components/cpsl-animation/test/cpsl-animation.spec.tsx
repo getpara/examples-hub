@@ -10,7 +10,7 @@ describe('cpsl-animation', () => {
     expect(page.root).toEqualHtml(`
       <cpsl-animation>
         <mock:shadow-root>
-          <div class="animation-container" id="animation-container" part="animation-container"></div>
+         <div class="animation-container" id="animation-container" part="animation-container"></div>
         </mock:shadow-root>
       </cpsl-animation>
     `);

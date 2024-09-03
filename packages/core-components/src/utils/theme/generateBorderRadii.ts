@@ -1,10 +1,7 @@
 import { Theme } from '../../interface';
 import { getCssBorderRadii } from './utils';
 
-export const generateBorderRadii = ({
-  borderRadius,
-  customBorderRadii,
-}: Pick<Theme, 'borderRadius' | 'customBorderRadii'>) => {
+export const generateBorderRadii = ({ borderRadius, customBorderRadii }: Pick<Theme, 'borderRadius' | 'customBorderRadii'>) => {
   let mediumRadius: number,
     largeRadius: number,
     checkboxRadius: number = 4;
@@ -59,21 +56,13 @@ export const generateBorderRadii = ({
   document.documentElement.style.setProperty('--cpsl-border-radius-select', `${isFull ? fullRadius : mediumRadius}px`);
   document.documentElement.style.setProperty('--cpsl-border-radius-file', `${isFull ? fullRadius : mediumRadius}px`);
   document.documentElement.style.setProperty('--cpsl-border-radius-alert', `${isFull ? fullRadius : mediumRadius}px`);
-  document.documentElement.style.setProperty('--cpsl-border-radius-tabs', `${isFull ? fullRadius : mediumRadius}px`);
-  document.documentElement.style.setProperty(
-    '--cpsl-border-radius-primary-button',
-    `${isFull ? fullRadius : mediumRadius}px`,
-  );
-  document.documentElement.style.setProperty(
-    '--cpsl-border-radius-secondary-button',
-    `${isFull ? fullRadius : mediumRadius}px`,
-  );
-  document.documentElement.style.setProperty(
-    '--cpsl-border-radius-destructive-button',
-    `${isFull ? fullRadius : mediumRadius}px`,
-  );
+  document.documentElement.style.setProperty('--cpsl-border-radius-tabs', `${isNone ? 0 : fullRadius}px`);
+  document.documentElement.style.setProperty('--cpsl-border-radius-primary-button', `${isFull ? fullRadius : mediumRadius}px`);
+  document.documentElement.style.setProperty('--cpsl-border-radius-secondary-button', `${isFull ? fullRadius : mediumRadius}px`);
+  document.documentElement.style.setProperty('--cpsl-border-radius-tertiary-button', `${isFull ? fullRadius : mediumRadius}px`);
+  document.documentElement.style.setProperty('--cpsl-border-radius-destructive-button', `${isFull ? fullRadius : mediumRadius}px`);
   document.documentElement.style.setProperty('--cpsl-border-radius-tile-button', `${mediumRadius}px`);
-  document.documentElement.style.setProperty('--cpsl-border-radius-qr-code', `${mediumRadius}px`);
+  document.documentElement.style.setProperty('--cpsl-border-radius-qr-code', `${largeRadius}px`);
   document.documentElement.style.setProperty('--cpsl-border-radius-info-box', `${mediumRadius}px`);
   document.documentElement.style.setProperty('--cpsl-border-radius-table-container', `${mediumRadius}px`);
   document.documentElement.style.setProperty('--cpsl-border-radius-avatar', `${mediumRadius}px`);

@@ -11,7 +11,11 @@ describe('cpsl-tab', () => {
       <cpsl-tab>
         <mock:shadow-root>
           <div class="tab-container">
-            <slot></slot>
+            <slot name="start"></slot>
+            <div class="content">
+             <slot></slot>
+            </div>
+            <slot name="end"></slot>
           </div>
         </mock:shadow-root>
       </cpsl-tab>

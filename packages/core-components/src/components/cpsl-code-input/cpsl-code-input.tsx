@@ -12,6 +12,7 @@ export class CpslCodeInput {
   /**
    * Value of the code.
    */
+
   @Prop({ mutable: true }) code: string;
 
   /**
@@ -42,14 +43,18 @@ export class CpslCodeInput {
 
   private handleInput = (ind: number, ev: InputEvent) => {
     const inputElements = this.inputs;
+    // If getting an insertFromPaste remove the last element value since the value setting is handled in the paste event
+    if (ev.inputType === 'insertFromPaste') {
+      inputElements[Math.min(this.length - 1, ind)].value = '';
+      return;
+    }
     if (ev.inputType === 'insertText') {
       if (this.type === 'number' && isNaN(parseInt(ev.data))) {
         inputElements[ind].value = '';
         return;
       }
-      inputElements[Math.min(this.length - 1, ind + 1)].focus();
-
       const newCode = `${this.code ?? ''}${ev.data}`;
+      inputElements[Math.min(this.length - 1, newCode.length)].focus();
       this.cpslInput.emit({ value: newCode });
       this.code = newCode;
     }
@@ -102,7 +107,6 @@ export class CpslCodeInput {
     }, 0);
   };
 
-  // TODO: figure out why pasting a string populates the first input
   private handlePaste = (e: ClipboardEvent) => {
     const inputElements = this.inputs;
     const pastedCode = e.clipboardData.getData('text');
@@ -121,7 +125,7 @@ export class CpslCodeInput {
     inputElements.forEach((input, index) => {
       input.value = pastedCode.charAt(index);
     });
-    inputElements[this.length - 1].focus();
+    inputElements[Math.min(this.length - 1, pastedCode.length)].focus();
   };
 
   private get inputs() {
@@ -134,9 +138,8 @@ export class CpslCodeInput {
         <div class="code-container">
           {new Array(this.length).fill(0).map((_, i) => (
             <input
-              class={{ 'code-input': true, 'error': Boolean(this.errorText) }}
+              class={{ 'code-input': true, 'error': Boolean(this.errorText), 'has-value': this.code?.[i] !== undefined }}
               id={`code-input-${i}`}
-              maxLength={1}
               onKeyDown={ev => this.handleKeyDown(i, ev)}
               onInput={ev => this.handleInput(i, ev)}
               onFocus={() => this.handleFocus(i)}

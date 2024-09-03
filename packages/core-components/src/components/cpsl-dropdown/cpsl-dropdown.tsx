@@ -1,16 +1,4 @@
-import {
-  Component,
-  Host,
-  h,
-  Prop,
-  State,
-  Element,
-  ComponentInterface,
-  Watch,
-  Listen,
-  EventEmitter,
-  Event,
-} from '@stencil/core';
+import { Component, Host, h, Prop, State, Element, ComponentInterface, Watch, Listen, EventEmitter, Event } from '@stencil/core';
 import { Icons } from '../../assets/icons';
 import { DropdownInputEventDetail } from './dropdown-interface';
 

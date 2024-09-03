@@ -301,3 +301,6 @@ export function getPortalBaseURL({ env }: { env: Environment }, useLocalIp?: boo
   }
   return `https://${domain}`;
 }
+
+export const EXTERNAL_WALLET_CHANGE_EVENT = 'capsuleExternalWalletChange';
+export const CURRENT_WALLET_IDS_CHANGE_EVENT = 'capsuleCurrentWalletIdsChange';

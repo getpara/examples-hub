@@ -185,14 +185,8 @@ export class CpslSlideButton {
     return (
       <Host>
         <div id="slider-container" class="slider-container">
-          <div
-            id="start-slider-container-background"
-            class={{ 'start-slider-container-background': true, 'slider-container-background': true }}
-          />
-          <div
-            id="end-slider-container-background"
-            class={{ 'end-slider-container-background': true, 'slider-container-background': true }}
-          />
+          <div id="start-slider-container-background" class={{ 'start-slider-container-background': true, 'slider-container-background': true }} />
+          <div id="end-slider-container-background" class={{ 'end-slider-container-background': true, 'slider-container-background': true }} />
           <div id="slider" class={{ slider: true, disabled: this.disabled }}>
             <cpsl-icon id="start-icon" class={{ 'start-icon': true, 'icon': true }} icon={this.startIcon} />
             <cpsl-icon id="end-icon" class={{ 'end-icon': true, 'icon': true }} icon={this.endIcon} />

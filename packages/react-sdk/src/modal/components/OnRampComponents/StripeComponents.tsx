@@ -83,13 +83,18 @@ export const StripeEmbed = () => {
       switch (session.status) {
         case 'fulfillment_processing':
         case 'fulfillment_complete':
-          const updatedPurchase = await capsule.updateOnRampPurchase(onRampPurchase.walletId, onRampPurchase.id, {
-            status: OnRampPurchaseStatus.FINISHED,
-            fiatQuantity: session.quote.source_amount,
-            fiatCurrency: session.quote.source_currency.asset_code,
-            asset: getProviderAssetInverse(OnRampProvider.STRIPE, session.quote.destination_currency.asset_code),
-            assetQuantity: session.quote.destination_amount,
-            providerKey: null,
+          const updatedPurchase = await capsule.updateOnRampPurchase({
+            walletId: onRampPurchase.walletId,
+            externalWalletAddress: onRampPurchase.externalWalletAddress,
+            purchaseId: onRampPurchase.id,
+            updates: {
+              status: OnRampPurchaseStatus.FINISHED,
+              fiatQuantity: session.quote.source_amount,
+              fiatCurrency: session.quote.source_currency.asset_code,
+              asset: getProviderAssetInverse(OnRampProvider.STRIPE, session.quote.destination_currency.asset_code),
+              assetQuantity: session.quote.destination_amount,
+              providerKey: null,
+            },
           });
 
           setOnRampPurchase(updatedPurchase);
@@ -110,7 +115,7 @@ export const StripeEmbed = () => {
       <div style={{ display: isReady ? 'block' : 'none' }} ref={onrampElementRef}></div>
       {!isReady && (
         <SpinnerContainer style={{ width: '100%', height: '100%' }}>
-          <CpslSpinner />
+          <CpslSpinner size={100} />
         </SpinnerContainer>
       )}
     </div>

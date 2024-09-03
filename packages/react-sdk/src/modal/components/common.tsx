@@ -1,123 +1,18 @@
-import { CpslButton, CpslIcon, CpslInput, CpslText } from '@usecapsule/react-components';
-import { useCallback } from 'react';
+import { CpslInput, CpslText, CpslTileButton } from '@usecapsule/react-components';
 import { styled } from 'styled-components';
-import { ModalStep } from '../utils/steps.js';
-import { useModalStore } from '../stores/index.js';
-
-export const AddFundsButton = ({ text = 'Add Funds' }: { text?: string }) => {
-  const setStep = useModalStore(state => state.setStep);
-  const onRampConfig = useModalStore(state => state.onRampConfig);
-
-  const onClick = useCallback(() => {
-    setStep(ModalStep.ADD_FUNDS);
-  }, [onRampConfig]);
-
-  return (
-    <CpslButton variant="secondary" fullWidth onClick={onClick}>
-      <ButtonWithIconContainerInvert>
-        <AddFundsIcon icon="plusCircle" />
-        {text}
-      </ButtonWithIconContainerInvert>
-    </CpslButton>
-  );
-};
-
-const AddFundsIcon = styled(CpslIcon)`
-  margin-top: -1px;
-  margin-right: 2px;
-
-  cpsl-icon {
-    --icon-color: var(--cpsl-color-text-primary);
-  }
-`;
 
 export const SpinnerContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-
-  padding: 16px 0px;
-  margin: 4px 0px;
-`;
-
-export const Hero: typeof CpslIcon = styled(CpslIcon)`
-  box-sizing: content-box;
-  align-self: center;
-  --height: 64px;
-  --width: 64px;
-  --icon-fill-color: var(--cpsl-color-foreground-0);
-
-  padding: 16px 0px;
-  margin: 4px 0px;
-`;
-
-export const HeroNoSpacing: typeof CpslIcon = styled(Hero)`
-  padding: 0px;
-  margin: 0px;
-`;
-
-export const Heading: typeof CpslText = styled(CpslText)`
-  text-align: center;
-  font-size: 24px;
-  line-height: 28px;
-  font-weight: 500;
-  letter-spacing: 0.72px;
-`;
-
-export const Text: typeof CpslText = styled(CpslText)`
-  text-align: center;
-  font-size: 14px;
-  line-height: 20px;
-  white-space: pre-line;
-`;
-
-export const SecondaryText: typeof CpslText = styled(Text)`
-  color: var(--cpsl-color-text-secondary);
-`;
-
-export const CreationStepSubheading: typeof CpslText = styled(SecondaryText)`
-  max-width: 214px;
-`;
-
-export const ClickableText: typeof CpslText = styled(Text)`
-  cursor: pointer;
-`;
-
-export const FlexColumn = styled.div`
-  align-self: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
-`;
-
-export const MainContainer = styled(FlexColumn)`
-  padding: 0px 16px;
 `;
 
 export const QRContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 252px;
-`;
-
-export const ButtonWithIconContainer = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  height: 18px;
-
-  cpsl-icon {
-    --icon-color: var(--cpsl-color-text-inverted);
-  }
-`;
-
-export const ButtonWithIconContainerInvert = styled(ButtonWithIconContainer)`
-  cpsl-icon {
-    --icon-color: var(--cpsl-color-text-primary);
-  }
+  width: 286px;
+  height: 286px;
 `;
 
 export const InfoBoxContent = styled.div`
@@ -137,17 +32,36 @@ export const InfoBoxHeader = styled.div`
   }
 `;
 
-export const InfoBoxHeading: typeof CpslText = styled(CpslText)`
-  font-size: 16px;
-  line-height: 18px;
-  font-weight: 500;
-`;
-
-export const InfoBoxText: typeof CpslText = styled(SecondaryText)`
-  text-align: left;
-  font-weight: 500;
-`;
-
 export const FilledDisabledInput: typeof CpslInput = styled(CpslInput)`
   --container-border-color: var(--cpsl-color-input-border-placeholder);
+  --container-background-color: var(--cpsl-color-background-0);
+  --input-background-color: transparent;
+  --input-font-weight: 500;
+`;
+
+export const CenteredText: typeof CpslText = styled(CpslText)`
+  width: 100%;
+  text-align: center;
+`;
+
+export const InnerStepContainer = styled.div`
+  width: 100%;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+`;
+
+export const StepContainer = styled(InnerStepContainer)<{ $wide?: boolean }>`
+  gap: ${({ $wide }) => ($wide ? '32px' : '24px')};
+`;
+
+export const Heading: typeof CpslText = styled(CenteredText)``;
+
+export const StyledCpslTileButton: typeof CpslTileButton = styled(CpslTileButton)`
+  --button-width: 100%;
+  --button-height: 87px;
+  --button-icon-height: 32px;
+  --button-icon-width: 32px;
 `;

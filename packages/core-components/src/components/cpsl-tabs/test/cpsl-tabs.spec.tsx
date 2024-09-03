@@ -8,11 +8,11 @@ describe('cpsl-tabs', () => {
       html: `<cpsl-tabs></cpsl-tabs>`,
     });
     expect(page.root).toEqualHtml(`
-      <cpsl-tabs>
+       <cpsl-tabs>
         <mock:shadow-root>
           <div class="tabs-container">
             <slot></slot>
-            <div class="slider" style="width: 0px; left: 0px;"></div>
+            <div class="slider" style="width: -8px; left: 0px;"></div>
           </div>
         </mock:shadow-root>
       </cpsl-tabs>

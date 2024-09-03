@@ -19,15 +19,15 @@
 
 ### Used by
 
+ - [cpsl-auth-modal](../cpsl-auth-modal)
  - [cpsl-drawer](../cpsl-drawer)
- - [cpsl-modal](../cpsl-modal)
  - [cpsl-modal-v2](../cpsl-modal-v2)
 
 ### Graph
 ```mermaid
 graph TD;
+  cpsl-auth-modal --> cpsl-overlay
   cpsl-drawer --> cpsl-overlay
-  cpsl-modal --> cpsl-overlay
   cpsl-modal-v2 --> cpsl-overlay
   style cpsl-overlay fill:#f9f,stroke:#333,stroke-width:4px
 ```

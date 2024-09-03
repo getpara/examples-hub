@@ -3,9 +3,11 @@ import AngelListBrand from './angel-list-brand.svg';
 import AngelList from './angel-list.svg';
 import AppleBrand from './apple-brand.svg';
 import Apple from './apple.svg';
+import ArrowCircleBrokenDownLeft from './arrow-circle-broken-down-left.svg';
 import ArrowNarrow from './arrow-narrow.svg';
 import Arrow from './arrow.svg';
 import BackupKit from './backup-kit.svg';
+import Bank from './bank.svg';
 import Brush from './brush.svg';
 import CapsuleLogo from './capsule-logo.svg';
 import CapsuleRingsDark from './capsule-rings-dark.svg';
@@ -19,12 +21,15 @@ import Close from './close.svg';
 import ClubhouseBrand from './clubhouse-brand.svg';
 import Clubhouse from './clubhouse.svg';
 import Copy from './copy.svg';
+import CreditCard from './credit-card.svg';
 import Cube from './cube.svg';
 import DecentBrand from './decent-brand.svg';
 import Decent from './decent.svg';
 import DiscordBrand from './discord-brand.svg';
 import Discord from './discord.svg';
+import Dot from './dot.svg';
 import DownloadCloud from './download-cloud.svg';
+import Download from './download.svg';
 import DribbbleBrand from './dribbble-brand.svg';
 import Dribbble from './dribbble.svg';
 import Earth from './earth.svg';
@@ -39,10 +44,15 @@ import Figma from './figma.svg';
 import File from './file.svg';
 import GithubBrand from './github-brand.svg';
 import Github from './github.svg';
+import Globe from './globe.svg';
 import GoogleBrand from './google-brand.svg';
 import Google from './google.svg';
 import HelpCircle from './help-circle.svg';
+import HeroAlertCircle from './hero-alert-circle.svg';
+import HeroCheckmarkCapsule from './hero-checkmark-capsule.svg';
+import HeroCheckmark from './hero-checkmark.svg';
 import HeroEmail from './hero-email.svg';
+import HeroExternalConnection from './hero-external-connection.svg';
 import HeroLock from './hero-lock.svg';
 import HeroPasskey from './hero-passkey.svg';
 import HeroPhone from './hero-phone.svg';
@@ -55,26 +65,36 @@ import Instagram from './instagram.svg';
 import Key from './key.svg';
 import Lightning01 from './lightning-01.svg';
 import Lightning from './lightning.svg';
+import LinkExternal from './link-external.svg';
 import LinkedinBrand from './linkedin-brand.svg';
 import Linkedin from './linkedin.svg';
+import LogOut from './log-out.svg';
 import Mail from './mail.svg';
 import Menu from './menu.svg';
+import MoonpayBrand from './moonpay-brand.svg';
 import MoreLoginOptions from './more-login-options.svg';
 import Phone from './phone.svg';
 import PintrestBrand from './pintrest-brand.svg';
 import Pintrest from './pintrest.svg';
 import PlusCircle from './plus-circle.svg';
+import PuzzlePiece from './puzzle-piece.svg';
+import QrCode02 from './qr-code-02.svg';
+import QrCode from './qr-code.svg';
 import RampNetworkBrand from './ramp-network-brand.svg';
 import RampNetwork from './ramp-network.svg';
 import RedditBrand from './reddit-brand.svg';
 import Reddit from './reddit.svg';
 import Refresh from './refresh.svg';
+import Search from './search.svg';
+import Send from './send.svg';
 import Settings from './settings.svg';
+import Shield from './shield.svg';
 import SignalBrand from './signal-brand.svg';
 import Signal from './signal.svg';
 import SnapchatBrand from './snapchat-brand.svg';
 import Snapchat from './snapchat.svg';
 import Stars from './stars.svg';
+import StripeBrand from './stripe-brand.svg';
 import TelegramBrand from './telegram-brand.svg';
 import Telegram from './telegram.svg';
 import TikTokBrand from './tik-tok-brand.svg';
@@ -326,9 +346,11 @@ export const Icons = {
   angelList: AngelList,
   appleBrand: AppleBrand,
   apple: Apple,
+  arrowCircleBrokenDownLeft: ArrowCircleBrokenDownLeft,
   arrowNarrow: ArrowNarrow,
   arrow: Arrow,
   backupKit: BackupKit,
+  bank: Bank,
   brush: Brush,
   capsuleLogo: CapsuleLogo,
   capsuleRingsDark: CapsuleRingsDark,
@@ -342,12 +364,15 @@ export const Icons = {
   clubhouseBrand: ClubhouseBrand,
   clubhouse: Clubhouse,
   copy: Copy,
+  creditCard: CreditCard,
   cube: Cube,
   decentBrand: DecentBrand,
   decent: Decent,
   discordBrand: DiscordBrand,
   discord: Discord,
+  dot: Dot,
   downloadCloud: DownloadCloud,
+  download: Download,
   dribbbleBrand: DribbbleBrand,
   dribbble: Dribbble,
   earth: Earth,
@@ -362,10 +387,15 @@ export const Icons = {
   file: File,
   githubBrand: GithubBrand,
   github: Github,
+  globe: Globe,
   googleBrand: GoogleBrand,
   google: Google,
   helpCircle: HelpCircle,
+  heroAlertCircle: HeroAlertCircle,
+  heroCheckmarkCapsule: HeroCheckmarkCapsule,
+  heroCheckmark: HeroCheckmark,
   heroEmail: HeroEmail,
+  heroExternalConnection: HeroExternalConnection,
   heroLock: HeroLock,
   heroPasskey: HeroPasskey,
   heroPhone: HeroPhone,
@@ -378,26 +408,36 @@ export const Icons = {
   key: Key,
   lightning01: Lightning01,
   lightning: Lightning,
+  linkExternal: LinkExternal,
   linkedinBrand: LinkedinBrand,
   linkedin: Linkedin,
+  logOut: LogOut,
   mail: Mail,
   menu: Menu,
+  moonpayBrand: MoonpayBrand,
   moreLoginOptions: MoreLoginOptions,
   phone: Phone,
   pintrestBrand: PintrestBrand,
   pintrest: Pintrest,
   plusCircle: PlusCircle,
+  puzzlePiece: PuzzlePiece,
+  qrCode02: QrCode02,
+  qrCode: QrCode,
   rampNetworkBrand: RampNetworkBrand,
   rampNetwork: RampNetwork,
   redditBrand: RedditBrand,
   reddit: Reddit,
   refresh: Refresh,
+  search: Search,
+  send: Send,
   settings: Settings,
+  shield: Shield,
   signalBrand: SignalBrand,
   signal: Signal,
   snapchatBrand: SnapchatBrand,
   snapchat: Snapchat,
   stars: Stars,
+  stripeBrand: StripeBrand,
   telegramBrand: TelegramBrand,
   telegram: Telegram,
   tikTokBrand: TikTokBrand,

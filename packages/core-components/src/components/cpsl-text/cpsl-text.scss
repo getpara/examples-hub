@@ -8,6 +8,17 @@
   margin: 0px;
 
   display: block;
+
+  &::-moz-selection {
+    /* Code for Firefox */
+    color: var(--cpsl-color-text-inverted) !important;
+    background: var(--cpsl-color-background-64) !important;
+  }
+
+  &::selection {
+    color: var(--cpsl-color-text-inverted) !important;
+    background: var(--cpsl-color-background-64) !important;
+  }
 }
 
 :host p,
@@ -22,6 +33,9 @@ h6 {
   font-weight: inherit;
   font-size: inherit;
   letter-spacing: inherit;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-smooth: never;
 }
 
 :host(.primary) {
@@ -48,6 +62,10 @@ h6 {
   color: var(--cpsl-color-text-error);
 }
 
+:host(.contrast) {
+  color: var(--cpsl-color-text-contrast);
+}
+
 :host(.medium) {
   font-weight: 500;
 }
@@ -70,14 +88,17 @@ h6 {
 
 :host(.body-s) {
   font-size: var(--cpsl-font-size-body-s);
+  line-height: 142.857%;
 }
 
 :host(.body-m) {
   font-size: var(--cpsl-font-size-body-m);
+  line-height: 150%;
 }
 
 :host(.body-l) {
   font-size: var(--cpsl-font-size-body-l);
+  line-height: 140%;
 }
 
 :host(.body-xl) {

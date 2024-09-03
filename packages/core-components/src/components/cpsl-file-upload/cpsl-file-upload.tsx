@@ -230,14 +230,7 @@ export class CpslFileUpload {
           </label>
         )}
         <slot name="label"></slot>
-        <div
-          class={{
-            'container': true,
-            'error': Boolean(this.errorText),
-            'drag': this.dragOver,
-            'drag-error': this.dragError,
-          }}
-        >
+        <div class={{ 'container': true, 'error': Boolean(this.errorText), 'drag': this.dragOver, 'drag-error': this.dragError }}>
           <div class={{ 'label-container': true }}>
             <slot name="left-content"></slot>
           </div>

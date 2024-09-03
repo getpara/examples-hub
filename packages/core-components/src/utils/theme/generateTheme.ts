@@ -11,17 +11,28 @@ import { generatePalette } from './generatePalette';
 export const generateTheme = ({
   foregroundColor = DEFAULT_THEME.foregroundColor,
   backgroundColor = DEFAULT_THEME.backgroundColor,
+  accentColor,
+  darkForegroundColor,
+  darkBackgroundColor,
+  darkAccentColor,
+  mode = 'light',
   font,
   customPalette,
   borderRadius,
   customFontSizes,
   customBorderRadii,
-}: Theme): boolean => {
-  const palette = generatePalette({ foregroundColor, backgroundColor, customPalette });
+}: Theme) => {
+  const isDarkTheme = mode === 'dark';
+
+  generatePalette({
+    foregroundColor: isDarkTheme ? (darkForegroundColor ?? foregroundColor) : foregroundColor,
+    backgroundColor: isDarkTheme ? (darkBackgroundColor ?? backgroundColor) : backgroundColor,
+    accentColor: isDarkTheme ? (darkAccentColor ?? accentColor) : accentColor,
+    customPalette,
+    isDarkTheme,
+  });
 
   generateFont({ font, customFontSizes });
 
   generateBorderRadii({ borderRadius, customBorderRadii });
-
-  return palette.isDarkBackground;
 };

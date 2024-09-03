@@ -1,5 +1,9 @@
 :host {
-  --tab-color: var(--cpsl-color-text-primary);
+  --tab-color: var(--cpsl-color-text-secondary);
+  --tab-gap: 2px;
+  --tab-icon-height: 16px;
+  --tab-icon-width: 16px;
+
   padding-top: var(--tab-top-padding);
   padding-bottom: var(--tab-bottom-padding);
   padding-left: var(--tab-left-padding);
@@ -12,6 +16,22 @@
   cursor: pointer;
 
   z-index: 10;
+
+  ::slotted([slot='start']) {
+    --icon-color: var(--tab-color);
+    --height: var(--tab-icon-height);
+    --width: var(--tab-icon-width);
+  }
+
+  ::slotted([slot='end']) {
+    --icon-color: var(--tab-color);
+    --height: var(--tab-icon-height);
+    --width: var(--tab-icon-width);
+  }
+}
+
+:host(.selected) {
+  --tab-color: var(--cpsl-color-text-primary);
 }
 
 .tab-container {
@@ -23,4 +43,10 @@
   white-space: nowrap;
   font-weight: 500;
   color: var(--tab-color);
+  display: flex;
+  gap: var(--tab-gap);
+}
+
+.content {
+  flex: 1 1 auto;
 }

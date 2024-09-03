@@ -24,10 +24,10 @@
 
 ## Events
 
-| Event       | Description                      | Type               |
-| ----------- | -------------------------------- | ------------------ |
-| `cpslClose` | Emitted when the popover closes. | `CustomEvent<any>` |
-| `cpslOpen`  | Emitted when the popover opens.  | `CustomEvent<any>` |
+| Event       | Description                      | Type                |
+| ----------- | -------------------------------- | ------------------- |
+| `cpslClose` | Emitted when the popover closes. | `CustomEvent<void>` |
+| `cpslOpen`  | Emitted when the popover opens.  | `CustomEvent<void>` |
 
 
 ## Methods

@@ -1,3 +1,5 @@
+const webpack = require('webpack');
+
 module.exports = {
   babel: {
     plugins: [
@@ -19,6 +21,12 @@ module.exports = {
           configFile: 'tsconfig.json',
         },
       });
+      webpackConfig.module.rules.push({
+        test: /\.m?js/, // fix:issue: https://github.com/webpack/webpack/issues/11467
+        resolve: {
+          fullySpecified: false,
+        },
+      });
       webpackConfig.resolve.fallback = {
         // crypto and stream needed for @celo/utils
         crypto: require.resolve('crypto-browserify'),
@@ -29,6 +37,12 @@ module.exports = {
         https: false,
         http: false,
       };
+      webpackConfig.plugins = [
+        ...webpackConfig.plugins,
+        new webpack.ProvidePlugin({
+          process: 'process/browser',
+        }),
+      ];
 
       return webpackConfig;
     },

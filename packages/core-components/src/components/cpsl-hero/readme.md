@@ -7,22 +7,27 @@
 
 ## Properties
 
-| Property   | Attribute  | Description                                                                                           | Type                                                  | Default        |
-| ---------- | ---------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | -------------- |
-| `subtitle` | `subtitle` |                                                                                                       | `string`                                              | `undefined`    |
-| `title`    | `title`    |                                                                                                       | `string`                                              | `undefined`    |
-| `variant`  | `variant`  | The variant of the button. Options are: `"default"`, `"loading", `"success". Default is: `"default"`. | `"approved" \| "connection" \| "failed" \| "pending"` | `'connection'` |
+| Property           | Attribute            | Description                                                                                                                                                              | Type                                                                                                   | Default        |
+| ------------------ | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ | -------------- |
+| `height`           | `height`             | The height of the container. Default is: 180.                                                                                                                            | `number`                                                                                               | `undefined`    |
+| `hideFadeOut`      | `hide-fade-out`      | Hides the fade out components Default is: `false`.                                                                                                                       | `boolean`                                                                                              | `undefined`    |
+| `subtitle`         | `subtitle`           |                                                                                                                                                                          | `string`                                                                                               | `undefined`    |
+| `title`            | `title`              |                                                                                                                                                                          | `string`                                                                                               | `undefined`    |
+| `variant`          | `variant`            | The variant of the button. Options are: `"customContent"`, `"connection"`, `"externalWalletConnection"`, `"pending", `"approved", `"failed". Default is: `"connection"`. | `"approved" \| "connection" \| "customContent" \| "externalWalletConnection" \| "failed" \| "pending"` | `'connection'` |
+| `withDefaultTheme` | `with-default-theme` | Whether to use the Capsule custom theming or use the provided theme Default is: `false`.                                                                                 | `boolean`                                                                                              | `undefined`    |
 
 
 ## Dependencies
 
 ### Depends on
 
+- [cpsl-icon](../cpsl-icon)
 - [cpsl-text](../cpsl-text)
 
 ### Graph
 ```mermaid
 graph TD;
+  cpsl-hero --> cpsl-icon
   cpsl-hero --> cpsl-text
   style cpsl-hero fill:#f9f,stroke:#333,stroke-width:4px
 ```

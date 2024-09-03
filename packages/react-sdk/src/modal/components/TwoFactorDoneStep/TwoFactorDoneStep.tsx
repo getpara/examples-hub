@@ -1,6 +1,5 @@
-import { CpslButton, CpslIcon } from '@usecapsule/react-components';
-import { Heading, HeroNoSpacing, SecondaryText, ButtonWithIconContainer, AddFundsButton } from '../common.js';
-import { styled } from 'styled-components';
+import { CpslButton, CpslText } from '@usecapsule/react-components';
+import { Heading, StepContainer, InnerStepContainer } from '../common.js';
 
 interface TwoFactorDoneStepStep {
   onClose: () => void;
@@ -8,24 +7,18 @@ interface TwoFactorDoneStepStep {
 
 export const TwoFactorDoneStep = ({ onClose }: TwoFactorDoneStepStep) => {
   return (
-    <>
-      <HeroNoSpacing icon="heroWallet" />
-      <Heading>
-        <span>Success</span>
-      </Heading>
-      <SecondaryText>Your Two-Factor Authentication has been successfully set up!</SecondaryText>
+    <StepContainer>
+      <InnerStepContainer>
+        <Heading variant="headingXS" weight="semiBold">
+          Success
+        </Heading>
+        <CpslText variant="bodyS" color="secondary" weight="medium">
+          Your wallet is now protected by 2FA
+        </CpslText>
+      </InnerStepContainer>
       <CpslButton fullWidth onClick={onClose}>
-        <ButtonWithIconContainer>
-          <CheckIcon icon="check" />
-          Done
-        </ButtonWithIconContainer>
+        Done
       </CpslButton>
-      <AddFundsButton />
-    </>
+    </StepContainer>
   );
 };
-
-const CheckIcon = styled(CpslIcon)`
-  --width: 20px;
-  --height: 20px;
-`;

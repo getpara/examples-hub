@@ -2,6 +2,7 @@ import CapsuleWeb, { OAuthMethod, OnRampConfig, NetworkProp } from '@usecapsule/
 import { Theme } from '@usecapsule/react-components';
 import { OnModalStepChangeValue } from '../stores/index.js';
 import { ModalStep, ModalStepProp } from '../utils/steps.js';
+import { TExternalWallet } from './externalWallets.js';
 
 export type CapsuleModalHandle = {
   /**
@@ -12,14 +13,6 @@ export type CapsuleModalHandle = {
    * Returns if the modal can go back
    */
   canGoBack: () => boolean;
-  /**
-   * Returns if the modal is expanded
-   */
-  isModalExpanded: () => boolean;
-  /**
-   * Toggle the modal to expand or condense
-   */
-  toggleModalExpanded: () => void;
   /**
    * Returns if the modal is expanded
    */
@@ -36,6 +29,15 @@ export type CapsuleModalTheme = Theme & {
   oAuthLogoVariant?: OAuthLogoVariantType;
 };
 
+export enum AuthLayout {
+  AUTH_FULL = 'AUTH:FULL',
+  AUTH_CONDENSED = 'AUTH:CONDENSED',
+  EXTERNAL_FULL = 'EXTERNAL:FULL',
+  EXTERNAL_CONDENSED = 'EXTERNAL:CONDENSED',
+}
+
+export type TAuthLayout = `${AuthLayout}`;
+
 export interface CapsuleModalProps {
   /**
    * Your CapsuleWeb instance.
@@ -50,6 +52,11 @@ export interface CapsuleModalProps {
    * Defaults to `false`.
    */
   twoFactorAuthEnabled?: boolean;
+  /**
+   * Whether or not to show the wallet recovery to users.
+   * Defaults to `false`
+   */
+  recoverySecretStepEnabled?: boolean;
   /**
    * Which OAuth methods (if any) to show.
    * Defaults to `true`.
@@ -71,9 +78,11 @@ export interface CapsuleModalProps {
   theme?: CapsuleModalTheme;
   /**
    * Logo to be shown throughout the modal.
-   * Defaults to the Capsule logo.
    */
   logo?: string;
+  /**
+   * App name to be shown throughout the modal.
+   */
   appName?: string;
   /**
    * Configure on-ramp providers to allow users to add funds upon signing up.
@@ -93,13 +102,19 @@ export interface CapsuleModalProps {
   bareModal?: boolean;
   className?: string;
   /**
+   * Which external wallets to support.
+   */
+  externalWallets?: TExternalWallet[];
+  /**
+   * How the modal should order the components on the main auth screen.
+   * Only the first method of each type (auth or external) will be used.
+   * Default to [AuthLayout.AUTH_FULL, AuthLayout.EXTERNAL_FULL]
+   */
+  authLayout?: TAuthLayout[];
+  /**
    * Called when the modal step changes
    */
   onModalStepChange?: (value: OnModalStepChangeValue) => void;
-  /**
-   * Called when the modal is expanded or condensed
-   */
-  onExpandModalChange?: (isExpanded: boolean) => void;
   /**
    * Called when the modal is closed
    */

@@ -1,55 +1,55 @@
 import { styled } from 'styled-components';
-import { CpslButton, CpslIcon } from '@usecapsule/react-components';
-import { ButtonWithIconContainer, Heading, SecondaryText } from '../common.js';
-import { CAPSULE_CONNECT } from '../../constants/constants.js';
-import { useThemeStore } from '../../stores/index.js';
+import { CpslButton, CpslIcon, CpslText } from '@usecapsule/react-components';
+import { useModalStore } from '../../stores/index.js';
+import { CAPSULE_CONNECT, CAPSULE_TERMS_AND_CONDITIONS } from '../../constants/constants.js';
+import { useMemo } from 'react';
 
-interface FooterProps {
-  expandModal: () => void;
-}
+export const Footer = () => {
+  const isAccount = useModalStore(state => state.isAccount());
 
-export const Footer = ({ expandModal }: FooterProps) => {
-  const isDark = useThemeStore(state => state.isDark);
+  const Content = useMemo(() => {
+    if (isAccount) {
+      return (
+        <ConnectContainer>
+          <ConnectText variant="bodyS" color="secondary" weight="medium">
+            Access all your wallet’s features at{' '}
+            <a href={CAPSULE_CONNECT} target="blank">
+              <ClickableText variant="bodyS" weight="medium">
+                Capsule Connect
+              </ClickableText>
+            </a>
+          </ConnectText>
+          <CpslButton as="a" href={CAPSULE_CONNECT} target="blank" variant="ghost">
+            <RightChevron icon="chevronUp" />
+          </CpslButton>
+        </ConnectContainer>
+      );
+    }
 
-  const handleConnectClick = () => {
-    window.open(CAPSULE_CONNECT, '_blank');
-  };
+    return (
+      <>
+        <InlineText variant="body2XS" color="secondary" weight="medium">
+          By logging in you agree to our{' '}
+          <a href={CAPSULE_TERMS_AND_CONDITIONS} target="blank">
+            <ClickableText variant="body2XS" weight="medium">
+              Terms & Conditions
+            </ClickableText>
+          </a>
+        </InlineText>
+        <PoweredByContainer>
+          <InlineText variant="bodyS" color="secondary" weight="medium">
+            Powered by
+          </InlineText>
+          <CapsuleLogo icon="capsuleLogo" />
+        </PoweredByContainer>
+      </>
+    );
+  }, [isAccount]);
 
   return (
-    <>
-      <FooterContainer slot="footer">
-        <FooterContentContainer>
-          <CondensedText>
-            Use this account across the web. <ClickableText onClick={expandModal}>Learn More.</ClickableText>
-          </CondensedText>
-          <PoweredByContainer>
-            <CondensedText>
-              <span>Powered by</span>
-            </CondensedText>
-            <CapsuleLogo icon="capsuleLogo" />
-          </PoweredByContainer>
-        </FooterContentContainer>
-      </FooterContainer>
-      <FooterContainer slot="footerExpandedFooter">
-        <CapsuleIconContainer $isDark={isDark}>
-          <LargeCapsuleIcon $isDark={isDark} icon="capsule" />
-        </CapsuleIconContainer>
-        <FooterContentContainer>
-          <Heading>Your Capsule Wallet</Heading>
-          <FooterSecondaryText>
-            Experience all that Web3 has to offer without any of the confusion. You can use your Capsule wallet across all
-            sorts of websites.
-            {'\n\n'}Visit Capsule Connect to learn even more.
-          </FooterSecondaryText>
-          <ConnectButton onClick={handleConnectClick}>
-            <ButtonWithIconContainer>
-              <CapsuleIcon icon="capsule" />
-              Capsule Connect
-            </ButtonWithIconContainer>
-          </ConnectButton>
-        </FooterContentContainer>
-      </FooterContainer>
-    </>
+    <FooterContainer slot="footer">
+      <FooterContentContainer>{Content}</FooterContentContainer>
+    </FooterContainer>
   );
 };
 
@@ -58,7 +58,7 @@ const FooterContainer = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  padding: 0px 16px;
+  padding: 8px 0px;
 `;
 
 const FooterContentContainer = styled.div`
@@ -75,19 +75,31 @@ const PoweredByContainer = styled.div`
   justify-content: center;
 `;
 
-const CondensedText = styled(SecondaryText)`
+const ConnectContainer = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+`;
+
+const RightChevron = styled(CpslIcon)`
+  transform: rotate(90deg);
+
+  /* --icon-color: var(--cpsl-color-text-tertiary); */
+  --height: 24px;
+  --width: 24px;
+`;
+
+const InlineText = styled(CpslText)`
   text-align: center;
-  font-size: 12px;
-  line-height: 18px;
   display: inline-block;
 `;
 
-const FooterSecondaryText = styled(SecondaryText)`
-  max-width: 315px;
+const ConnectText = styled(InlineText)`
+  line-height: 20px;
 `;
 
-const ClickableText = styled(CondensedText)`
-  color: var(--cpsl-color-text-primary);
+const ClickableText = styled(InlineText)`
   cursor: pointer;
   display: inline-block;
 `;
@@ -95,32 +107,6 @@ const ClickableText = styled(CondensedText)`
 const CapsuleLogo = styled(CpslIcon)`
   display: inline-block;
   --icon-color: var(--cpsl-color-text-secondary);
-  --width: 65px;
+  --width: 85px;
   --height: auto;
-`;
-
-const CapsuleIcon = styled(CpslIcon)`
-  --width: 20px;
-  --height: 20px;
-`;
-
-const LargeCapsuleIcon = styled(CpslIcon)<{ $isDark: boolean }>`
-  --width: 23px;
-  --height: 38px;
-
-  --icon-color: ${({ $isDark }) => ($isDark ? 'black' : 'white')};
-`;
-
-const CapsuleIconContainer = styled.div<{ $isDark: boolean }>`
-  width: 80px;
-  height: 80px;
-  border-radius: 80px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: ${({ $isDark }) => ($isDark ? 'white' : 'black')};
-`;
-
-const ConnectButton = styled(CpslButton)`
-  margin-top: 12px;
 `;

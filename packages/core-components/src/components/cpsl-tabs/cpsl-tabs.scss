@@ -52,15 +52,11 @@
   top: calc(var(--tabs-border-width) * -1);
   bottom: calc(var(--tabs-border-width) * -1);
   left: -1px;
+  margin: 4px;
 
-  border-width: var(--tabs-border-width);
-  border-style: solid;
-  border-color: var(--tabs-border-color);
   border-radius: var(--tabs-border-radius);
 
   background: var(--slider-background-color);
-
-  box-shadow: -1px 0px 2px 0px var(--cpsl-color-alpha-black-10), 1px 0px 2px 0px var(--cpsl-color-alpha-black-10);
 }
 
 .loaded {

@@ -44,10 +44,10 @@ export class CpslButton {
 
   /**
    * The variant of the button.
-   * Options are: `"primary"`, `"secondary", `"icon", `"text"`.
+   * Options are: `"primary"`, `"secondary", `"tertiary", `"ghost"`, `"destructive"`.
    * Default is: `"primary"`.
    */
-  @Prop({ reflect: true }) variant?: 'primary' | 'secondary' | 'ghost' | 'destructive' = 'primary';
+  @Prop({ reflect: true }) variant?: 'primary' | 'secondary' | 'tertiary' | 'ghost' | 'destructive' = 'primary';
 
   render() {
     return (
@@ -56,6 +56,7 @@ export class CpslButton {
           // VARIANTS
           'primary': this.variant === 'primary',
           'secondary': this.variant === 'secondary',
+          'tertiary': this.variant === 'tertiary',
           'ghost': this.variant === 'ghost',
           'destructive': this.variant === 'destructive',
           // STATE

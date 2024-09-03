@@ -60,6 +60,7 @@ jobs:
         run: yarn build
         env:
           NX_REJECT_UNKNOWN_LOCAL_CACHE: 0
+          NODE_OPTIONS: '--max_old_space_size=4096'
 
   test:
     runs-on: ubuntu-latest

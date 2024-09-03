@@ -37,6 +37,7 @@ $colors: (
   foreground-64: rgba(171, 171, 171, 1),
   foreground-80: rgba(209, 209, 209, 1),
   foreground-96: rgba(246, 246, 246, 1),
+  contrast: rgba(0, 0, 0, 1),
   utility-red: rgba(240, 68, 56, 1),
   utility-red-light: rgba(251, 203, 199, 1),
   utility-yellow: rgba(251, 188, 4, 1),
@@ -45,12 +46,13 @@ $colors: (
   utility-green-light: rgba(198, 231, 207, 1),
   // TEXT
   text-primary: var(--cpsl-color-foreground-0),
-  text-secondary: var(--cpsl-color-background-64),
+  text-secondary: var(--cpsl-color-background-48),
   text-tertiary: var(--cpsl-color-foreground-32),
   text-subtle: var(--cpsl-color-background-64),
   text-inverted: var(--cpsl-color-foreground-96),
   text-disabled: var(--cpsl-color-foreground-48),
   text-error: var(--cpsl-color-utility-red),
+  text-contrast: var(--cpsl-color-contrast),
   // MODAL
   modal-surface-main: var(--cpsl-color-background-0),
   modal-surface-footer: var(--cpsl-color-foreground-96),
@@ -60,7 +62,7 @@ $colors: (
   input-surface-default: var(--cpsl-color-background-4),
   input-surface-hover: var(--cpsl-color-background-16),
   input-border-placeholder: var(--cpsl-color-background-4),
-  input-border-active: var(--cpsl-color-foreground-0),
+  input-border-active: var(--cpsl-color-accent-0, var(--cpsl-color-foreground-0)),
   input-border-error: var(--cpsl-color-utility-red),
   // SELECT
   select-surface-disabled: var(--cpsl-color-background-8),
@@ -77,10 +79,10 @@ $colors: (
   file-border-placeholder: var(--cpsl-color-background-4),
   file-border-error: var(--cpsl-color-utility-red),
   // TILE BUTTON
-  tile-button-surface-default: var(--cpsl-color-background-4),
+  tile-button-surface-default: var(--cpsl-color-background-8),
   tile-button-surface-hover: var(--cpsl-color-background-16),
   tile-button-surface-pressed: var(--cpsl-color-background-16),
-  tile-button-border: var(--cpsl-color-background-4),
+  tile-button-border: var(--cpsl-color-background-8),
   // PRIMARY BUTTON
   primary-button-text: var(--cpsl-color-text-inverted),
   primary-button-surface-default: var(--cpsl-color-foreground-0),
@@ -92,13 +94,22 @@ $colors: (
   primary-button-outline: var(--cpsl-color-foreground-32),
   // SECONDARY BUTTON
   secondary-button-text: var(--cpsl-color-text-primary),
-  secondary-button-surface-default: transparent,
+  secondary-button-surface-default: var(--cpsl-color-background-0),
   secondary-button-surface-hover: var(--cpsl-color-background-16),
   secondary-button-surface-pressed: var(--cpsl-color-background-16),
   secondary-button-surface-disabled: var(--cpsl-color-foreground-96),
   secondary-button-border-default: var(--cpsl-color-background-32),
   secondary-button-border-disabled: var(--cpsl-color-foreground-96),
   secondary-button-outline: var(--cpsl-color-background-32),
+  // TERTIARY BUTTON
+  tertiary-button-text: var(--cpsl-color-background-96),
+  tertiary-button-surface-default: var(--cpsl-color-background-8),
+  tertiary-button-surface-hover: var(--cpsl-color-background-16),
+  tertiary-button-surface-pressed: var(--cpsl-color-background-16),
+  tertiary-button-surface-disabled: var(--cpsl-color-background-8),
+  tertiary-button-border-default: var(--cpsl-color-background-8),
+  tertiary-button-border-disabled: var(--cpsl-color-background-8),
+  tertiary-button-outline: var(--cpsl-color-background-32),
   // DESTRUCTIVE BUTTON
   destructive-button-text: var(--cpsl-color-text-error),
   destructive-button-surface-default: transparent,
@@ -140,8 +151,8 @@ $colors: (
   slideButton-start-text: var(--cpsl-color-text-secondary),
   slideButton-end-text: var(--cpsl-color-text-inverted),
   // TABS
-  tabs-border: var(--cpsl-color-background-32),
-  tabs-background: var(--cpsl-color-background-8),
+  tabs-border: var(--cpsl-color-background-16),
+  tabs-background: var(--cpsl-color-background-4),
   tabs-slider-background: var(--cpsl-color-background-0),
   // ALERT
   alert-surface-error: #fee4e2,
@@ -168,6 +179,11 @@ $colors: (
   // CARD
   card-surface: var(--cpsl-color-background-0),
   card-border: var(--cpsl-color-background-16),
+  // ICON GROUP
+  iconGroup-surface: var(--cpsl-color-background-0),
+  iconGroup-border: var(--cpsl-color-background-16),
+  iconGroup-icon-disabled: var(--cpsl-color-text-disabled),
+  iconGroup-icon-default: var(--cpsl-color-text-primary),
 ) !default;
 
 $borderRadii: (
@@ -175,15 +191,16 @@ $borderRadii: (
   select: 12px,
   file: 12px,
   alert: 12px,
-  tabs: 12px,
+  tabs: 1000px,
   primary-button: 12px,
   secondary-button: 12px,
+  tertiary-button: 12px,
   destructive-button: 12px,
   tile-button: 12px,
   modal: 24px,
   pill: 1000px,
-  qr-code: 12px,
-  info-box: 12px,
+  qr-code: 20px,
+  info-box: 16px,
   table-container: 24px,
   switch: 1000px,
   checkbox: 4px,

@@ -4,6 +4,14 @@ import Capsule, { CapsuleModal, Environment, OAuthMethod } from '../../src';
 
 describe('CapsuleModal', () => {
   beforeAll(() => {
+    const ResizeObserverMock = vi.fn(() => ({
+      observe: vi.fn(),
+      unobserve: vi.fn(),
+      disconnect: vi.fn(),
+    }));
+
+    vi.stubGlobal('ResizeObserver', ResizeObserverMock);
+
     vi.mock('@usecapsule/user-management-client', async importOriginal => {
       const actual = await importOriginal();
 
@@ -36,11 +44,12 @@ describe('CapsuleModal', () => {
       />,
     );
 
+    expect(screen.getAllByTestId('modal')).toBeDefined();
+
     await waitFor(() => {
-      expect(screen.getByText('Sign Up or Log In')).toBeDefined();
+      expect(screen.getAllByTestId('modal-content')).toBeDefined();
+      expect(screen.getAllByTestId('main-auth-step-content')).toBeDefined();
     });
-    expect(screen.getByPlaceholderText('Enter your email')).toBeDefined();
-    expect(screen.getByPlaceholderText('Enter phone number')).toBeDefined();
   });
 
   // TODO: add data-testid as optional field to all components and reimpliment using data-testid selector

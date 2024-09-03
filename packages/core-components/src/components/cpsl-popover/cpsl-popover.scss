@@ -15,10 +15,12 @@
 
 .container {
   visibility: hidden;
+  height: 0px;
 }
 
 .open {
   visibility: visible;
+  height: auto;
   z-index: map.get($z-indices, 'popover');
 }
 

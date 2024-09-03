@@ -11,7 +11,7 @@ describe('cpsl-code-input', () => {
       <cpsl-code-input>
         <mock:shadow-root>
           <div class="code-container">
-            <input class="code-input" id="code-input-0" inputmode="numeric" max="9" maxlength="1" min="0">
+            <input class="code-input" id="code-input-0" inputmode="numeric" max="9" min="0">
           </div>
         </mock:shadow-root>
       </cpsl-code-input>

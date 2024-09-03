@@ -10,7 +10,7 @@
 
   --button-width: 72px;
   --button-height: 56px;
-  --button-gap: 4px;
+  --button-gap: 8px;
 }
 
 :host {
@@ -46,5 +46,7 @@
 
   cpsl-icon {
     --icon-color: var(--button-icon-color);
+    --height: var(--button-icon-height);
+    --width: var(--button-icon-width);
   }
 }

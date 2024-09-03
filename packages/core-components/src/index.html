@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html dir="ltr" lang="en" style="background-color: var(--cpsl-color-background-4); font-size: 16px">
   <head>
     <meta charset="utf-8" />
@@ -13,10 +13,10 @@
       import { generateTheme } from '/build/index.esm.js';
       let themeNum = 0;
       const availableThemes = [
-        { backgroundColor: '#FFFFFF', foregroundColor: '#1a1a1a', customFontSizes: { heading2XL: '4rem' } },
-        { backgroundColor: '#1a1a1a', foregroundColor: '#FFFFFF', customBorderRadii: { primaryButton: '100px' } },
+        { backgroundColor: '#FFFFFF', foregroundColor: '#1a1a1a', customFontSizes: { heading2XL: '4rem' }, accentColor: 'red' },
+        { backgroundColor: '#1a1a1a', foregroundColor: '#FFFFFF', customBorderRadii: { primaryButton: '100px' }, mode: 'dark' },
         { backgroundColor: '#91F2A3', foregroundColor: '#202042' },
-        { backgroundColor: '#202042', foregroundColor: '#91F2A3' },
+        { backgroundColor: '#202042', foregroundColor: '#91F2A3', mode: 'dark' },
       ];
 
       function toggleTheme(ev) {
@@ -52,11 +52,11 @@
       }
 
       function handleOpenOverlay() {
-        document.getElementById('overlay').setAttribute('open', 'true');
+        document.getElementById('overlay-v2').setAttribute('open', 'true');
       }
 
       function handleCloseOverlay() {
-        document.getElementById('overlay').setAttribute('open', 'false');
+        document.getElementById('overlay-v2').setAttribute('open', 'false');
       }
 
       function openNav() {
@@ -159,7 +159,7 @@
           closeButtonEl.addEventListener('click', handleCloseOverlay);
         }
 
-        const modalEl = document.getElementById('overlay');
+        const modalEl = document.getElementById('overlay-v2');
         if (modalEl) {
           modalEl.addEventListener('cpslModalRequestClose', handleCloseOverlay);
         }
@@ -413,6 +413,19 @@
       </div>
 
       <cpsl-card style="max-width: 25%">
+        <cpsl-text variant="headingXS">Icon Group</cpsl-text>
+        <div style="display: flex; justify-content: flex-end">
+          <cpsl-icon-group id="icon-group" disabled="false"></cpsl-icon-group>
+        </div>
+        <script>
+          const iconGroupEl = document.getElementById('icon-group');
+          if (iconGroupEl) {
+            iconGroupEl.icons = ['googleBrand', 'facebook', 'twitter'];
+          }
+        </script>
+      </cpsl-card>
+
+      <cpsl-card style="max-width: 25%">
         <cpsl-text variant="headingXS">Utility Colors</cpsl-text>
         <div style="display: flex; gap: 8px">
           <div style="width: 125px; height: 125px; background-color: var(--cpsl-color-utility-red)"></div>
@@ -459,23 +472,21 @@
       <cpsl-card style="max-width: 25%">
         <cpsl-text variant="headingXS">OVERLAY</cpsl-text>
         <cpsl-button id="open-overlay-btn" disabled="false" color="primary">Open Overlay</cpsl-button>
-        <cpsl-modal id="overlay">
-          <div slot="header" style="display: flex; justify-content: center">
-            <cpsl-text>NO FOOTER MODAL</cpsl-text>
-          </div>
-          <div id="overlay-modal-body" slot="body" style="display: flex; flex-direction: column; gap: 16px; margin-top: 16px">
+        <cpsl-auth-modal id="overlay-v2">
+          <div slot="body" id="overlay-modal-body" style="display: flex; flex-direction: column; gap: 16px">
             <cpsl-text>BODY</cpsl-text>
             <cpsl-text>MORE BODY CONTENT</cpsl-text>
             <cpsl-text>MORE BODY CONTENT</cpsl-text>
             <cpsl-text>MORE BODY CONTENT</cpsl-text>
             <cpsl-button id="close-overlay-btn" disabled="false" color="primary">Close Overlay</cpsl-button>
           </div>
-        </cpsl-modal>
+          <div slot="footer"><cpsl-text>Footer</cpsl-text></div>
+        </cpsl-auth-modal>
       </cpsl-card>
 
-      <cpsl-card style="max-width: 25%">
+      <cpsl-card style="max-width: 50%">
         <cpsl-text variant="headingXS">MODAL</cpsl-text>
-        <cpsl-modal id="modal" no-overlay="true" open="true">
+        <cpsl-auth-modal id="modal" no-overlay="true" open="true">
           <cpsl-confetti style="--confetti-color-1: red; --confetti-color-2: blue; --confetti-color-3: green"></cpsl-confetti>
           <div slot="header" style="display: flex; justify-content: center">
             <cpsl-text>NO FOOTER MODAL</cpsl-text>
@@ -487,7 +498,7 @@
             <cpsl-text>MORE BODY CONTENT</cpsl-text>
             <cpsl-button id="close-overlay-btn" disabled="false" color="primary">Close Overlay</cpsl-button>
           </div>
-        </cpsl-modal>
+        </cpsl-auth-modal>
       </cpsl-card>
 
       <cpsl-card style="max-width: 25%">
@@ -688,6 +699,7 @@
             color="primary"
             label="Email"
             helper-text="Some helper text to help the user that is really long and will wrap to the next line if it needs to."
+            contrast-text="true"
           >
             <cpsl-button slot="end" id="submit-email" variant="secondary">
               <cpsl-icon icon="arrow"></cpsl-icon>
@@ -761,11 +773,7 @@
           </div>
           <div>
             <cpsl-tabs id="tabs-1" selected-tab="1">
-              <cpsl-tab tab="1"
-                ><div style="display: flex; gap: 4px; align-items: center">
-                  <cpsl-icon style="--height: 16px; --width: 16px" icon="capsule"></cpsl-icon>TEXT WITH ICON
-                </div></cpsl-tab
-              >
+              <cpsl-tab tab="1"> <cpsl-icon slot="start" style="--height: 16px; --width: 16px" icon="capsule"></cpsl-icon>TEXT WITH ICON </cpsl-tab>
               <cpsl-tab tab="2">REALLLLLLLLLLLLLLLLLLY LONGGGGGGGGGGGGGGG TEXT</cpsl-tab>
             </cpsl-tabs>
           </div>

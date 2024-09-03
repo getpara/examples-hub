@@ -7,7 +7,10 @@
   --card-padding-start: 24px;
   --card-border-width: 1px;
   --card-border-color: var(--cpsl-color-card-border);
-  --card-border-radius: var(--cpsl-border-radius-card);
+  --card-border-radius-tl: var(--cpsl-border-radius-card);
+  --card-border-radius-tr: var(--cpsl-border-radius-card);
+  --card-border-radius-bl: var(--cpsl-border-radius-card);
+  --card-border-radius-br: var(--cpsl-border-radius-card);
   --card-background-color: var(--cpsl-color-card-surface);
 
   display: block;
@@ -21,6 +24,6 @@
   overflow: hidden;
 
   border: var(--card-border-width) solid var(--card-border-color);
-  border-radius: var(--card-border-radius);
+  border-radius: var(--card-border-radius-tl) var(--card-border-radius-tr) var(--card-border-radius-br) var(--card-border-radius-bl);
   background: var(--card-background-color);
 }

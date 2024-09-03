@@ -52,9 +52,13 @@ export class CpslTab {
 
   render() {
     return (
-      <Host onClick={this.onTabClicked}>
+      <Host class={{ selected: this.selected }} onClick={this.onTabClicked}>
         <div class={{ 'tab-container': true }}>
-          <slot></slot>
+          <slot name="start"></slot>
+          <div class="content">
+            <slot></slot>
+          </div>
+          <slot name="end"></slot>
         </div>
       </Host>
     );

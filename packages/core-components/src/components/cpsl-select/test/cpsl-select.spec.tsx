@@ -19,8 +19,8 @@ describe('cpsl-select', () => {
             <cpsl-icon class="chevron" icon="chevronUp"></cpsl-icon>
             <input id="cpsl-select-0" inputmode="none">
           </div>
-          <cpsl-popover trigger="cpsl-select-0-trigger">
-            <div class="dropdown">
+          <cpsl-popover part="popover" trigger="cpsl-select-0-trigger">
+            <div class="dropdown" part="dropdown">
               <div class="dropdown-inner" style="max-height: undefinedpx;">
                 <slot name="items"></slot>
               </div>

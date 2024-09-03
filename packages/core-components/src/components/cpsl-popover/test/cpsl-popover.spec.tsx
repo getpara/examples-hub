@@ -8,7 +8,7 @@ describe('cpsl-popover', () => {
       html: `<cpsl-popover></cpsl-popover>`,
     });
     expect(page.root).toEqualHtml(`
-      <cpsl-popover class="transform-h-left transform-v-top" style="top: undefinedpx; left: undefinedpx; width: auto;">
+      <cpsl-popover class="transform-h-left transform-v-top" style="top: undefinedpx; left: undefinedpx; width: 0px;">
         <mock:shadow-root>
           <div class="container" id="container">
             <slot></slot>

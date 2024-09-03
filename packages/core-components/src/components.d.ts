@@ -52,6 +52,28 @@ export namespace Components {
          */
         "zIndexOverride"?: number;
     }
+    interface CpslAuthModal {
+        /**
+          * Duration in seconds of the modal entering. Default is .15.
+         */
+        "enterTransitionDuration"?: number;
+        /**
+          * Duration in seconds of the modal exiting. Default is .15.
+         */
+        "exitTransitionDuration"?: number;
+        /**
+          * Whether or not to show the overlay. This will always show the modal, regardless of the value of `open`.
+         */
+        "noOverlay"?: boolean;
+        /**
+          * Whether or not to show the modal.
+         */
+        "open": boolean;
+        /**
+          * Override z-index.
+         */
+        "zIndexOverride"?: number;
+    }
     interface CpslAvatar {
         /**
           * The alternate text for the avatar image.
@@ -92,9 +114,9 @@ export namespace Components {
          */
         "target"?: string;
         /**
-          * The variant of the button. Options are: `"primary"`, `"secondary", `"icon", `"text"`. Default is: `"primary"`.
+          * The variant of the button. Options are: `"primary"`, `"secondary", `"tertiary", `"ghost"`, `"destructive"`. Default is: `"primary"`.
          */
-        "variant"?: 'primary' | 'secondary' | 'ghost' | 'destructive';
+        "variant"?: 'primary' | 'secondary' | 'tertiary' | 'ghost' | 'destructive';
     }
     interface CpslButtonGroup {
         /**
@@ -333,12 +355,24 @@ export namespace Components {
         "fixed": boolean;
     }
     interface CpslHero {
+        /**
+          * The height of the container. Default is: 180.
+         */
+        "height"?: number;
+        /**
+          * Hides the fade out components Default is: `false`.
+         */
+        "hideFadeOut"?: boolean;
         "subtitle"?: string;
         "title": string;
         /**
-          * The variant of the button. Options are: `"default"`, `"loading", `"success". Default is: `"default"`.
+          * The variant of the button. Options are: `"customContent"`, `"connection"`, `"externalWalletConnection"`, `"pending", `"approved", `"failed". Default is: `"connection"`.
          */
-        "variant"?: 'connection' | 'pending' | 'approved' | 'failed';
+        "variant"?: 'customContent' | 'connection' | 'externalWalletConnection' | 'pending' | 'approved' | 'failed';
+        /**
+          * Whether to use the Capsule custom theming or use the provided theme Default is: `false`.
+         */
+        "withDefaultTheme"?: boolean;
     }
     interface CpslIcon {
         /**
@@ -349,6 +383,20 @@ export namespace Components {
           * The external source of the icon. If both `icon` and `src` are provided, `icon` will be used.
          */
         "src"?: string;
+    }
+    interface CpslIconGroup {
+        /**
+          * If `true`, the user cannot interact with the input.
+         */
+        "disabled": boolean;
+        /**
+          * The direction the icons should expand from
+         */
+        "expandFrom": 'left' | 'right';
+        /**
+          * The name of the icons to display.
+         */
+        "icons": (IconType | string)[];
     }
     interface CpslIdenticon {
         "hash": string;
@@ -377,6 +425,10 @@ export namespace Components {
          */
         "autofocus": boolean;
         /**
+          * If `true`, the input primary color will use the contrast value, not the primary text value.
+         */
+        "contrastText": boolean;
+        /**
           * If `true`, the user cannot interact with the input.
          */
         "disabled": boolean;
@@ -400,6 +452,10 @@ export namespace Components {
           * The label for the input.
          */
         "label"?: string;
+        /**
+          * Mask string to apply to the input.
+         */
+        "mask"?: string;
         /**
           * The maximum value, which must not be less than its minimum (min attribute) value.
          */
@@ -472,36 +528,6 @@ export namespace Components {
           * The value of the controlled input.
          */
         "value"?: string;
-    }
-    interface CpslModal {
-        /**
-          * Duration in seconds of the modal entering. Default is .15.
-         */
-        "enterTransitionDuration"?: number;
-        /**
-          * Duration in seconds of the modal exiting. Default is .15.
-         */
-        "exitTransitionDuration"?: number;
-        /**
-          * Whether or not to show `footerExpandedFooter` and `footerExpandedHeader` slots.
-         */
-        "footerExpanded"?: boolean;
-        /**
-          * Duration in seconds of the footer expansion animation. Default is 0.15.
-         */
-        "footerTransitionDuration"?: number;
-        /**
-          * Whether or not to show the overlay. This will always show the modal, regardless of the value of `open`.
-         */
-        "noOverlay"?: boolean;
-        /**
-          * Whether or not to show the modal.
-         */
-        "open": boolean;
-        /**
-          * Override z-index.
-         */
-        "zIndexOverride"?: number;
     }
     interface CpslModalV2 {
         /**
@@ -657,6 +683,14 @@ export namespace Components {
     }
     interface CpslSelect {
         /**
+          * ID of element to anchor popover to.
+         */
+        "anchorElId"?: string;
+        /**
+          * If `true` the popover container will use the width of the content, else it will be set to the width of the trigger. Default is `false`
+         */
+        "autoWidth"?: boolean;
+        /**
           * If `true`, the user cannot interact with the input.
          */
         "disabled": boolean;
@@ -693,6 +727,10 @@ export namespace Components {
          */
         "required": boolean;
         /**
+          * Placeholder for the search field.
+         */
+        "searchPlaceholder"?: string;
+        /**
           * Value of the selected item.
          */
         "selectedValue"?: string;
@@ -704,6 +742,10 @@ export namespace Components {
           * If `true`, the label will display an "optional" tag.
          */
         "showOptionalLabel": boolean;
+        /**
+          * If `true`, the dropdown will contain a search field.
+         */
+        "showSearch": boolean;
     }
     interface CpslSelectItem {
         /**
@@ -779,22 +821,11 @@ export namespace Components {
         /**
           * The color of text. Options are: `"primary"`, `"secondary", `"tertiary", `"subtle", `"inverted", `"error". Default is: `"primary"`.
          */
-        "color"?: 'primary' | 'secondary' | 'tertiary' | 'subtle' | 'inverted' | 'error';
+        "color"?: 'primary' | 'secondary' | 'tertiary' | 'subtle' | 'inverted' | 'error' | 'contrast';
         /**
           * The variant of text. Options are: `"body2XS"`, `"bodyXS", `"bodyS", `"bodyM", `"bodyL", `"bodyXL", `"headingXS", `"headingS", `"headingM", `"headingL", `"headingXL", `"heading2XL". Default is: `"bodyM"`.
          */
-        "variant"?: | 'body2XS'
-    | 'bodyXS'
-    | 'bodyS'
-    | 'bodyM'
-    | 'bodyL'
-    | 'bodyXL'
-    | 'headingXS'
-    | 'headingS'
-    | 'headingM'
-    | 'headingL'
-    | 'headingXL'
-    | 'heading2XL';
+        "variant"?: 'body2XS' | 'bodyXS' | 'bodyS' | 'bodyM' | 'bodyL' | 'bodyXL' | 'headingXS' | 'headingS' | 'headingM' | 'headingL' | 'headingXL' | 'heading2XL';
         /**
           * The weight of text. Options are: `"regular"`, `"medium", `"semiBold", `"bold". Default is: `"regular"`.
          */
@@ -810,6 +841,10 @@ export namespace Components {
          */
         "src"?: string;
     }
+}
+export interface CpslAuthModalCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLCpslAuthModalElement;
 }
 export interface CpslCheckboxCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -830,10 +865,6 @@ export interface CpslFileUploadCustomEvent<T> extends CustomEvent<T> {
 export interface CpslInputCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLCpslInputElement;
-}
-export interface CpslModalCustomEvent<T> extends CustomEvent<T> {
-    detail: T;
-    target: HTMLCpslModalElement;
 }
 export interface CpslModalV2CustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -893,6 +924,27 @@ declare global {
     var HTMLCpslAppBarElement: {
         prototype: HTMLCpslAppBarElement;
         new (): HTMLCpslAppBarElement;
+    };
+    interface HTMLCpslAuthModalElementEventMap {
+        "cpslModalEntering": null;
+        "cpslModalEntered": null;
+        "cpslModalExiting": null;
+        "cpslModalExited": null;
+        "cpslModalRequestClose": null;
+    }
+    interface HTMLCpslAuthModalElement extends Components.CpslAuthModal, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLCpslAuthModalElementEventMap>(type: K, listener: (this: HTMLCpslAuthModalElement, ev: CpslAuthModalCustomEvent<HTMLCpslAuthModalElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLCpslAuthModalElementEventMap>(type: K, listener: (this: HTMLCpslAuthModalElement, ev: CpslAuthModalCustomEvent<HTMLCpslAuthModalElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLCpslAuthModalElement: {
+        prototype: HTMLCpslAuthModalElement;
+        new (): HTMLCpslAuthModalElement;
     };
     interface HTMLCpslAvatarElement extends Components.CpslAvatar, HTMLStencilElement {
     }
@@ -1026,6 +1078,12 @@ declare global {
         prototype: HTMLCpslIconElement;
         new (): HTMLCpslIconElement;
     };
+    interface HTMLCpslIconGroupElement extends Components.CpslIconGroup, HTMLStencilElement {
+    }
+    var HTMLCpslIconGroupElement: {
+        prototype: HTMLCpslIconGroupElement;
+        new (): HTMLCpslIconGroupElement;
+    };
     interface HTMLCpslIdenticonElement extends Components.CpslIdenticon, HTMLStencilElement {
     }
     var HTMLCpslIdenticonElement: {
@@ -1058,27 +1116,6 @@ declare global {
     var HTMLCpslInputElement: {
         prototype: HTMLCpslInputElement;
         new (): HTMLCpslInputElement;
-    };
-    interface HTMLCpslModalElementEventMap {
-        "cpslModalEntering": null;
-        "cpslModalEntered": null;
-        "cpslModalExiting": null;
-        "cpslModalExited": null;
-        "cpslModalRequestClose": null;
-    }
-    interface HTMLCpslModalElement extends Components.CpslModal, HTMLStencilElement {
-        addEventListener<K extends keyof HTMLCpslModalElementEventMap>(type: K, listener: (this: HTMLCpslModalElement, ev: CpslModalCustomEvent<HTMLCpslModalElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLCpslModalElementEventMap>(type: K, listener: (this: HTMLCpslModalElement, ev: CpslModalCustomEvent<HTMLCpslModalElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
-    }
-    var HTMLCpslModalElement: {
-        prototype: HTMLCpslModalElement;
-        new (): HTMLCpslModalElement;
     };
     interface HTMLCpslModalV2ElementEventMap {
         "cpslModalEntering": null;
@@ -1136,8 +1173,8 @@ declare global {
         new (): HTMLCpslPillElement;
     };
     interface HTMLCpslPopoverElementEventMap {
-        "cpslOpen": any;
-        "cpslClose": any;
+        "cpslOpen": void;
+        "cpslClose": void;
     }
     interface HTMLCpslPopoverElement extends Components.CpslPopover, HTMLStencilElement {
         addEventListener<K extends keyof HTMLCpslPopoverElementEventMap>(type: K, listener: (this: HTMLCpslPopoverElement, ev: CpslPopoverCustomEvent<HTMLCpslPopoverElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -1192,6 +1229,7 @@ declare global {
         "cpslBlur": FocusEvent;
         "cpslFocus": FocusEvent;
         "cpslSelectValueChange": string;
+        "cpslSearchChange": string;
     }
     interface HTMLCpslSelectElement extends Components.CpslSelect, HTMLStencilElement {
         addEventListener<K extends keyof HTMLCpslSelectElementEventMap>(type: K, listener: (this: HTMLCpslSelectElement, ev: CpslSelectCustomEvent<HTMLCpslSelectElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -1321,6 +1359,7 @@ declare global {
         "cpsl-alert": HTMLCpslAlertElement;
         "cpsl-animation": HTMLCpslAnimationElement;
         "cpsl-app-bar": HTMLCpslAppBarElement;
+        "cpsl-auth-modal": HTMLCpslAuthModalElement;
         "cpsl-avatar": HTMLCpslAvatarElement;
         "cpsl-button": HTMLCpslButtonElement;
         "cpsl-button-group": HTMLCpslButtonGroupElement;
@@ -1335,10 +1374,10 @@ declare global {
         "cpsl-grid": HTMLCpslGridElement;
         "cpsl-hero": HTMLCpslHeroElement;
         "cpsl-icon": HTMLCpslIconElement;
+        "cpsl-icon-group": HTMLCpslIconGroupElement;
         "cpsl-identicon": HTMLCpslIdenticonElement;
         "cpsl-info-box": HTMLCpslInfoBoxElement;
         "cpsl-input": HTMLCpslInputElement;
-        "cpsl-modal": HTMLCpslModalElement;
         "cpsl-modal-v2": HTMLCpslModalV2Element;
         "cpsl-nav-button-group": HTMLCpslNavButtonGroupElement;
         "cpsl-overlay": HTMLCpslOverlayElement;
@@ -1392,6 +1431,48 @@ declare namespace LocalJSX {
          */
         "zIndexOverride"?: number;
     }
+    interface CpslAuthModal {
+        /**
+          * Duration in seconds of the modal entering. Default is .15.
+         */
+        "enterTransitionDuration"?: number;
+        /**
+          * Duration in seconds of the modal exiting. Default is .15.
+         */
+        "exitTransitionDuration"?: number;
+        /**
+          * Whether or not to show the overlay. This will always show the modal, regardless of the value of `open`.
+         */
+        "noOverlay"?: boolean;
+        /**
+          * Emitted when enter animation finishes.
+         */
+        "onCpslModalEntered"?: (event: CpslAuthModalCustomEvent<null>) => void;
+        /**
+          * Emitted when enter animation starts.
+         */
+        "onCpslModalEntering"?: (event: CpslAuthModalCustomEvent<null>) => void;
+        /**
+          * Emitted when exit animation finishes.
+         */
+        "onCpslModalExited"?: (event: CpslAuthModalCustomEvent<null>) => void;
+        /**
+          * Emitted when exit animation starts.
+         */
+        "onCpslModalExiting"?: (event: CpslAuthModalCustomEvent<null>) => void;
+        /**
+          * Emitted when exit animation finishes.
+         */
+        "onCpslModalRequestClose"?: (event: CpslAuthModalCustomEvent<null>) => void;
+        /**
+          * Whether or not to show the modal.
+         */
+        "open"?: boolean;
+        /**
+          * Override z-index.
+         */
+        "zIndexOverride"?: number;
+    }
     interface CpslAvatar {
         /**
           * The alternate text for the avatar image.
@@ -1432,9 +1513,9 @@ declare namespace LocalJSX {
          */
         "target"?: string;
         /**
-          * The variant of the button. Options are: `"primary"`, `"secondary", `"icon", `"text"`. Default is: `"primary"`.
+          * The variant of the button. Options are: `"primary"`, `"secondary", `"tertiary", `"ghost"`, `"destructive"`. Default is: `"primary"`.
          */
-        "variant"?: 'primary' | 'secondary' | 'ghost' | 'destructive';
+        "variant"?: 'primary' | 'secondary' | 'tertiary' | 'ghost' | 'destructive';
     }
     interface CpslButtonGroup {
         /**
@@ -1705,12 +1786,24 @@ declare namespace LocalJSX {
         "fixed"?: boolean;
     }
     interface CpslHero {
+        /**
+          * The height of the container. Default is: 180.
+         */
+        "height"?: number;
+        /**
+          * Hides the fade out components Default is: `false`.
+         */
+        "hideFadeOut"?: boolean;
         "subtitle"?: string;
         "title"?: string;
         /**
-          * The variant of the button. Options are: `"default"`, `"loading", `"success". Default is: `"default"`.
+          * The variant of the button. Options are: `"customContent"`, `"connection"`, `"externalWalletConnection"`, `"pending", `"approved", `"failed". Default is: `"connection"`.
          */
-        "variant"?: 'connection' | 'pending' | 'approved' | 'failed';
+        "variant"?: 'customContent' | 'connection' | 'externalWalletConnection' | 'pending' | 'approved' | 'failed';
+        /**
+          * Whether to use the Capsule custom theming or use the provided theme Default is: `false`.
+         */
+        "withDefaultTheme"?: boolean;
     }
     interface CpslIcon {
         /**
@@ -1721,6 +1814,20 @@ declare namespace LocalJSX {
           * The external source of the icon. If both `icon` and `src` are provided, `icon` will be used.
          */
         "src"?: string;
+    }
+    interface CpslIconGroup {
+        /**
+          * If `true`, the user cannot interact with the input.
+         */
+        "disabled"?: boolean;
+        /**
+          * The direction the icons should expand from
+         */
+        "expandFrom"?: 'left' | 'right';
+        /**
+          * The name of the icons to display.
+         */
+        "icons"?: (IconType | string)[];
     }
     interface CpslIdenticon {
         "hash"?: string;
@@ -1749,6 +1856,10 @@ declare namespace LocalJSX {
          */
         "autofocus"?: boolean;
         /**
+          * If `true`, the input primary color will use the contrast value, not the primary text value.
+         */
+        "contrastText"?: boolean;
+        /**
           * If `true`, the user cannot interact with the input.
          */
         "disabled"?: boolean;
@@ -1772,6 +1883,10 @@ declare namespace LocalJSX {
           * The label for the input.
          */
         "label"?: string;
+        /**
+          * Mask string to apply to the input.
+         */
+        "mask"?: string;
         /**
           * The maximum value, which must not be less than its minimum (min attribute) value.
          */
@@ -1864,56 +1979,6 @@ declare namespace LocalJSX {
           * The value of the controlled input.
          */
         "value"?: string;
-    }
-    interface CpslModal {
-        /**
-          * Duration in seconds of the modal entering. Default is .15.
-         */
-        "enterTransitionDuration"?: number;
-        /**
-          * Duration in seconds of the modal exiting. Default is .15.
-         */
-        "exitTransitionDuration"?: number;
-        /**
-          * Whether or not to show `footerExpandedFooter` and `footerExpandedHeader` slots.
-         */
-        "footerExpanded"?: boolean;
-        /**
-          * Duration in seconds of the footer expansion animation. Default is 0.15.
-         */
-        "footerTransitionDuration"?: number;
-        /**
-          * Whether or not to show the overlay. This will always show the modal, regardless of the value of `open`.
-         */
-        "noOverlay"?: boolean;
-        /**
-          * Emitted when enter animation finishes.
-         */
-        "onCpslModalEntered"?: (event: CpslModalCustomEvent<null>) => void;
-        /**
-          * Emitted when enter animation starts.
-         */
-        "onCpslModalEntering"?: (event: CpslModalCustomEvent<null>) => void;
-        /**
-          * Emitted when exit animation finishes.
-         */
-        "onCpslModalExited"?: (event: CpslModalCustomEvent<null>) => void;
-        /**
-          * Emitted when exit animation starts.
-         */
-        "onCpslModalExiting"?: (event: CpslModalCustomEvent<null>) => void;
-        /**
-          * Emitted when exit animation finishes.
-         */
-        "onCpslModalRequestClose"?: (event: CpslModalCustomEvent<null>) => void;
-        /**
-          * Whether or not to show the modal.
-         */
-        "open"?: boolean;
-        /**
-          * Override z-index.
-         */
-        "zIndexOverride"?: number;
     }
     interface CpslModalV2 {
         /**
@@ -2029,11 +2094,11 @@ declare namespace LocalJSX {
         /**
           * Emitted when the popover closes.
          */
-        "onCpslClose"?: (event: CpslPopoverCustomEvent<any>) => void;
+        "onCpslClose"?: (event: CpslPopoverCustomEvent<void>) => void;
         /**
           * Emitted when the popover opens.
          */
-        "onCpslOpen"?: (event: CpslPopoverCustomEvent<any>) => void;
+        "onCpslOpen"?: (event: CpslPopoverCustomEvent<void>) => void;
         /**
           * Used internally to prevent select from blurring unintentionally.
          */
@@ -2097,6 +2162,14 @@ declare namespace LocalJSX {
     }
     interface CpslSelect {
         /**
+          * ID of element to anchor popover to.
+         */
+        "anchorElId"?: string;
+        /**
+          * If `true` the popover container will use the width of the content, else it will be set to the width of the trigger. Default is `false`
+         */
+        "autoWidth"?: boolean;
+        /**
           * If `true`, the user cannot interact with the input.
          */
         "disabled"?: boolean;
@@ -2133,6 +2206,10 @@ declare namespace LocalJSX {
          */
         "onCpslFocus"?: (event: CpslSelectCustomEvent<FocusEvent>) => void;
         /**
+          * Emitted when the search value changes.
+         */
+        "onCpslSearchChange"?: (event: CpslSelectCustomEvent<string>) => void;
+        /**
           * Emitted when the value changes.
          */
         "onCpslSelectValueChange"?: (event: CpslSelectCustomEvent<string>) => void;
@@ -2145,6 +2222,10 @@ declare namespace LocalJSX {
          */
         "required"?: boolean;
         /**
+          * Placeholder for the search field.
+         */
+        "searchPlaceholder"?: string;
+        /**
           * Value of the selected item.
          */
         "selectedValue"?: string;
@@ -2156,6 +2237,10 @@ declare namespace LocalJSX {
           * If `true`, the label will display an "optional" tag.
          */
         "showOptionalLabel"?: boolean;
+        /**
+          * If `true`, the dropdown will contain a search field.
+         */
+        "showSearch"?: boolean;
     }
     interface CpslSelectItem {
         /**
@@ -2255,22 +2340,11 @@ declare namespace LocalJSX {
         /**
           * The color of text. Options are: `"primary"`, `"secondary", `"tertiary", `"subtle", `"inverted", `"error". Default is: `"primary"`.
          */
-        "color"?: 'primary' | 'secondary' | 'tertiary' | 'subtle' | 'inverted' | 'error';
+        "color"?: 'primary' | 'secondary' | 'tertiary' | 'subtle' | 'inverted' | 'error' | 'contrast';
         /**
           * The variant of text. Options are: `"body2XS"`, `"bodyXS", `"bodyS", `"bodyM", `"bodyL", `"bodyXL", `"headingXS", `"headingS", `"headingM", `"headingL", `"headingXL", `"heading2XL". Default is: `"bodyM"`.
          */
-        "variant"?: | 'body2XS'
-    | 'bodyXS'
-    | 'bodyS'
-    | 'bodyM'
-    | 'bodyL'
-    | 'bodyXL'
-    | 'headingXS'
-    | 'headingS'
-    | 'headingM'
-    | 'headingL'
-    | 'headingXL'
-    | 'heading2XL';
+        "variant"?: 'body2XS' | 'bodyXS' | 'bodyS' | 'bodyM' | 'bodyL' | 'bodyXL' | 'headingXS' | 'headingS' | 'headingM' | 'headingL' | 'headingXL' | 'heading2XL';
         /**
           * The weight of text. Options are: `"regular"`, `"medium", `"semiBold", `"bold". Default is: `"regular"`.
          */
@@ -2290,6 +2364,7 @@ declare namespace LocalJSX {
         "cpsl-alert": CpslAlert;
         "cpsl-animation": CpslAnimation;
         "cpsl-app-bar": CpslAppBar;
+        "cpsl-auth-modal": CpslAuthModal;
         "cpsl-avatar": CpslAvatar;
         "cpsl-button": CpslButton;
         "cpsl-button-group": CpslButtonGroup;
@@ -2304,10 +2379,10 @@ declare namespace LocalJSX {
         "cpsl-grid": CpslGrid;
         "cpsl-hero": CpslHero;
         "cpsl-icon": CpslIcon;
+        "cpsl-icon-group": CpslIconGroup;
         "cpsl-identicon": CpslIdenticon;
         "cpsl-info-box": CpslInfoBox;
         "cpsl-input": CpslInput;
-        "cpsl-modal": CpslModal;
         "cpsl-modal-v2": CpslModalV2;
         "cpsl-nav-button-group": CpslNavButtonGroup;
         "cpsl-overlay": CpslOverlay;
@@ -2337,6 +2412,7 @@ declare module "@stencil/core" {
             "cpsl-alert": LocalJSX.CpslAlert & JSXBase.HTMLAttributes<HTMLCpslAlertElement>;
             "cpsl-animation": LocalJSX.CpslAnimation & JSXBase.HTMLAttributes<HTMLCpslAnimationElement>;
             "cpsl-app-bar": LocalJSX.CpslAppBar & JSXBase.HTMLAttributes<HTMLCpslAppBarElement>;
+            "cpsl-auth-modal": LocalJSX.CpslAuthModal & JSXBase.HTMLAttributes<HTMLCpslAuthModalElement>;
             "cpsl-avatar": LocalJSX.CpslAvatar & JSXBase.HTMLAttributes<HTMLCpslAvatarElement>;
             "cpsl-button": LocalJSX.CpslButton & JSXBase.HTMLAttributes<HTMLCpslButtonElement>;
             "cpsl-button-group": LocalJSX.CpslButtonGroup & JSXBase.HTMLAttributes<HTMLCpslButtonGroupElement>;
@@ -2351,10 +2427,10 @@ declare module "@stencil/core" {
             "cpsl-grid": LocalJSX.CpslGrid & JSXBase.HTMLAttributes<HTMLCpslGridElement>;
             "cpsl-hero": LocalJSX.CpslHero & JSXBase.HTMLAttributes<HTMLCpslHeroElement>;
             "cpsl-icon": LocalJSX.CpslIcon & JSXBase.HTMLAttributes<HTMLCpslIconElement>;
+            "cpsl-icon-group": LocalJSX.CpslIconGroup & JSXBase.HTMLAttributes<HTMLCpslIconGroupElement>;
             "cpsl-identicon": LocalJSX.CpslIdenticon & JSXBase.HTMLAttributes<HTMLCpslIdenticonElement>;
             "cpsl-info-box": LocalJSX.CpslInfoBox & JSXBase.HTMLAttributes<HTMLCpslInfoBoxElement>;
             "cpsl-input": LocalJSX.CpslInput & JSXBase.HTMLAttributes<HTMLCpslInputElement>;
-            "cpsl-modal": LocalJSX.CpslModal & JSXBase.HTMLAttributes<HTMLCpslModalElement>;
             "cpsl-modal-v2": LocalJSX.CpslModalV2 & JSXBase.HTMLAttributes<HTMLCpslModalV2Element>;
             "cpsl-nav-button-group": LocalJSX.CpslNavButtonGroup & JSXBase.HTMLAttributes<HTMLCpslNavButtonGroupElement>;
             "cpsl-overlay": LocalJSX.CpslOverlay & JSXBase.HTMLAttributes<HTMLCpslOverlayElement>;

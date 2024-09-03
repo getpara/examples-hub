@@ -1,18 +1,24 @@
-import { CpslButton, CpslDivider, CpslIcon, CpslQrCode, CpslSpinner } from '@usecapsule/react-components';
+import { CpslButton, CpslDivider, CpslIcon, CpslQrCode, CpslSpinner, CpslText } from '@usecapsule/react-components';
 import { useEffect, useState } from 'react';
-import { useCapsuleStore, useModalStore } from '../../stores/index.js';
+import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
-import { Heading, SecondaryText, MainContainer, QRContainer, ButtonWithIconContainer } from '../common.js';
+import { Heading, QRContainer, StepContainer, InnerStepContainer } from '../common.js';
 import { openPopup } from '../../utils/openPopup.js';
+import styled from 'styled-components';
+import { useCopyToClipboard } from '../../hooks/useCopyToClipboard.js';
+import { isMobile } from '@usecapsule/web-sdk';
 
 const SHORTENING_AVAILABLE = true;
 
 export const BiometricLoginStep = () => {
+  const [isCopied, copy] = useCopyToClipboard();
+
   const webAuthURLForLogin = useModalStore(state => state.webAuthURLForLogin);
   const currentStep = useModalStore(state => state.step);
   const setStep = useModalStore(state => state.setStep);
   const setLoginWindow = useModalStore(state => state.setLoginWindow);
   const capsule = useCapsuleStore(state => state.capsule);
+  const username = useUserInfoStore(state => state.getUsername());
 
   const [shortLoginLink, setShortLoginLink] = useState<string>();
   const [shortHelpLink, setShortHelpLink] = useState<string>();
@@ -50,33 +56,63 @@ export const BiometricLoginStep = () => {
     setStep(ModalStep.AWAITING_BIOMETRIC_LOGIN);
   };
 
+  const handleCopy = () => {
+    copy(shortLoginLink);
+  };
+
   return (
-    <>
-      <MainContainer>
-        <Heading>
-          <span>Login With Passkey</span>
+    <StepContainer $wide>
+      <InnerStepContainer>
+        <Heading variant="headingS" weight="bold">
+          Welcome back,
         </Heading>
-        <SecondaryText>
-          <span>
-            If the Passkey you registered previously lives on this device, click Login With Passkey.{'\n\n'}Otherwise, scan
-            the QR code below with another device that has your Passkey.
-          </span>
-        </SecondaryText>
+        <IdentifierContainer>
+          <IdentifierText variant="bodyS" weight="medium">
+            {username}
+          </IdentifierText>
+        </IdentifierContainer>
+      </InnerStepContainer>
+      <MainContainer>
+        <CpslButton fullWidth onClick={handlePasskeyClick}>
+          <CpslIcon slot="start" icon="key" />
+          Login with this device
+        </CpslButton>
+        <CpslDivider>or</CpslDivider>
+        <InnerStepContainer>
+          {!isMobile() && (
+            <>
+              <CpslText weight="semiBold">Scan with your mobile device</CpslText>
+              <QRContainer>{!shortLoginLink ? <CpslSpinner size={100} /> : <CpslQrCode url={shortLoginLink} />}</QRContainer>
+            </>
+          )}
+          <CpslButton size="small" variant="ghost" onClick={handleCopy}>
+            <CpslIcon slot="start" icon={isCopied ? 'check' : 'copy'} />
+            {isCopied ? 'Copied' : 'Copy Link'}
+          </CpslButton>
+        </InnerStepContainer>
+        <ClickableText variant="bodyXS" weight="medium" onClick={handleHelpClick}>
+          I’m having trouble logging in
+        </ClickableText>
       </MainContainer>
-      <CpslButton fullWidth onClick={handlePasskeyClick}>
-        <ButtonWithIconContainer>
-          Login With Passkey On This Device
-          <CpslIcon icon="key" />
-        </ButtonWithIconContainer>
-      </CpslButton>
-      <CpslDivider>or</CpslDivider>
-      <QRContainer>{!shortLoginLink ? <CpslSpinner /> : <CpslQrCode url={shortLoginLink} />}</QRContainer>
-      <SecondaryText>
-        <span>Scan with your phone’s camera</span>
-      </SecondaryText>
-      <CpslButton fullWidth onClick={handleHelpClick} variant="secondary">
-        I Need Help Logging In
-      </CpslButton>
-    </>
+    </StepContainer>
   );
 };
+
+const IdentifierContainer = styled.div`
+  padding: 8px 16px;
+  border-radius: 1000px;
+  background-color: var(--cpsl-color-background-4);
+`;
+
+const MainContainer = styled(InnerStepContainer)`
+  gap: 16px;
+`;
+
+const ClickableText = styled(CpslText)`
+  text-decoration: underline;
+  cursor: pointer;
+`;
+
+const IdentifierText = styled(CpslText)`
+  color: var(--cpsl-color-background-96);
+`;

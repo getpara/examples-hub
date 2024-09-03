@@ -10,8 +10,8 @@ describe('cpsl-select-item', () => {
     expect(page.root).toEqualHtml(`
       <cpsl-select-item>
         <mock:shadow-root>
-          <div class="outer-container">
-            <div class="inner-container">
+          <div class="outer-container" part="outer-container">
+            <div class="inner-container" part="inner-container">
               <slot></slot>
             </div>
           </div>

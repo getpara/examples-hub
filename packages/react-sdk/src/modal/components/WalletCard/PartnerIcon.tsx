@@ -1,0 +1,43 @@
+import styled from 'styled-components';
+import { CpslIcon, CpslText } from '@usecapsule/react-components';
+import { PartnerEntity } from '@usecapsule/user-management-client';
+
+interface PartnerIconProps {
+  partner: PartnerEntity;
+}
+
+export const PartnerIcon = ({ partner }: PartnerIconProps) => {
+  const { logoUrl, displayName, backgroundColor, foregroundColor } = partner;
+
+  if (logoUrl) {
+    return <Icon src={logoUrl} />;
+  }
+
+  return (
+    <Container $backgroundColor={backgroundColor}>
+      <Text variant="bodyXS" $color={foregroundColor}>
+        {displayName[0]}
+      </Text>
+    </Container>
+  );
+};
+
+const Container = styled.div<{ $backgroundColor?: string }>`
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: ${({ $backgroundColor }) => `${$backgroundColor ?? 'var(--cpsl-color-contrast)'}`};
+  border-radius: 100%;
+`;
+
+const Text = styled(CpslText)<{ $color?: string }>`
+  line-height: 100%;
+  color: ${({ $color }) => `${$color ?? 'var(--cpsl-color-foreground-0)'}`};
+`;
+
+const Icon = styled(CpslIcon)`
+  --height: 14px;
+  --width: 14px;
+`;

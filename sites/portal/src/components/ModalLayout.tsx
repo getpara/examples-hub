@@ -42,6 +42,7 @@ export const ModalLayout = () => {
     : '';
   const portalBorderRadius = searchParams.get('portalPrimaryButtonTextColor');
   const portalFont = searchParams.get('portalFont');
+  const portalThemeMode = searchParams.get('portalThemeMode');
 
   const [partner, setPartner] = useState<Partner | undefined>();
   const [isDark, setIsDark] = useState<boolean>(false);
@@ -82,7 +83,7 @@ export const ModalLayout = () => {
 
     setTheme(newTheme as unknown as any);
 
-    const isDarkTheme = generateTheme({
+    generateTheme({
       font: portalFont,
       ...(isLegacy
         ? {
@@ -97,7 +98,7 @@ export const ModalLayout = () => {
           }
         : newTheme),
     });
-    setIsDark(isDarkTheme);
+    setIsDark(portalThemeMode === 'dark');
   }, [
     isBranded,
     portalForegroundColor,
@@ -107,6 +108,7 @@ export const ModalLayout = () => {
     portalPrimaryButtonTextColor,
     portalTextColor,
     portalFont,
+    portalThemeMode,
   ]);
 
   useEffect(() => {

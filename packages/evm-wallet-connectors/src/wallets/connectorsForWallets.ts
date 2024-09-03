@@ -1,0 +1,114 @@
+import type { CreateConnectorFn } from 'wagmi';
+import { uniqueBy } from '../utils/uniqueBy.js';
+import type { WalletDetailsParams, WalletList } from '../types/Wallet.js';
+import type { CapsuleWalletConnectParameters, Wallet } from '../types/Wallet.js';
+import { computeWalletConnectMetaData } from '../utils/computeWalletConnectMetaData.js';
+import { omitUndefinedValues } from '../utils/omitUndefinedValues.js';
+
+export interface WalletListItem extends Wallet {
+  index: number;
+}
+
+export interface ConnectorsForWalletsParameters {
+  projectId: string;
+  appName: string;
+  appDescription?: string;
+  appUrl?: string;
+  appIcon?: string;
+  walletConnectParameters?: CapsuleWalletConnectParameters;
+}
+
+export const connectorsForWallets = (
+  walletList: WalletList,
+  { projectId, walletConnectParameters, appName, appDescription, appUrl, appIcon }: ConnectorsForWalletsParameters,
+): CreateConnectorFn[] => {
+  if (!walletList.length) {
+    throw new Error('No wallet list was provided');
+  }
+
+  let index = -1;
+
+  const connectors: CreateConnectorFn[] = [];
+  const wallets: WalletListItem[] = [];
+
+  const walletConnectMetaData = computeWalletConnectMetaData({
+    appName,
+    appDescription,
+    appUrl,
+    appIcon,
+  });
+
+  walletList.forEach(createWallet => {
+    index++;
+
+    const wallet = createWallet({
+      projectId,
+      appName,
+      appIcon,
+      // `option` is being used only for `walletConnectWallet` wallet
+      options: {
+        metadata: walletConnectMetaData,
+        ...walletConnectParameters,
+      },
+      // Every other wallet that supports walletConnect flow and is not
+      // `walletConnectWallet` wallet will have `walletConnectParameters` property
+      walletConnectParameters: {
+        metadata: walletConnectMetaData,
+        ...walletConnectParameters,
+      },
+    });
+
+    const walletListItem = {
+      ...wallet,
+      index,
+    };
+
+    wallets.push(walletListItem);
+  });
+
+  // Filtering out duplicated wallets in case there is any.
+  // We process the known visible wallets first so that the potentially
+  // hidden wallets have access to the complete list of resolved wallets
+  const walletListItems: WalletListItem[] = uniqueBy([...wallets], 'id');
+
+  for (const { createConnector, ...walletMeta } of walletListItems) {
+    const walletMetaData = (
+      // For now we should only use these as the additional parameters
+      additionalCapsuleParams?: Pick<
+        WalletDetailsParams['capsuleDetails'],
+        'isWalletConnectModalConnector' | 'showQrModal'
+      > & { id?: string; rdns?: string },
+    ) => {
+      return {
+        capsuleDetails: omitUndefinedValues({
+          ...walletMeta,
+          isCapsuleConnector: true,
+          // These additional params will be used in capsule react tree to
+          // merge `walletConnectWallet` and `walletConnect` connector from wagmi with
+          // showQrModal: true. This way we can let the user choose if they want to
+          // connect via QR code or open the official walletConnect modal instead
+          ...(additionalCapsuleParams ? additionalCapsuleParams : {}),
+        }),
+      };
+    };
+
+    const isWalletConnectConnector = walletMeta.id === 'walletConnect';
+
+    if (isWalletConnectConnector) {
+      connectors.push(
+        createConnector(
+          walletMetaData({
+            isWalletConnectModalConnector: true,
+            showQrModal: true,
+          }),
+        ),
+      );
+    }
+
+    if (createConnector) {
+      connectors.push(createConnector(walletMetaData()));
+    }
+  }
+
+  return connectors;
+};

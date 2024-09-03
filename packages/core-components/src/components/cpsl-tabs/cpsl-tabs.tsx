@@ -94,10 +94,7 @@ export class CpslTabs {
           <slot></slot>
           <div
             class={{ slider: true, loaded: this.loaded }}
-            style={{
-              width: `${selectedTabRect.width}px`,
-              left: `${selectedTabRect.x - tabsPosition.x - tabsBorderWidth * 2}px`,
-            }}
+            style={{ width: `${selectedTabRect.width - 8}px`, left: `${selectedTabRect.x - tabsPosition.x - tabsBorderWidth}px` }}
           />
         </div>
       </Host>

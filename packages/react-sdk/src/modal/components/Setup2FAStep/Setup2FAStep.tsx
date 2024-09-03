@@ -1,14 +1,15 @@
-import { CpslButton, CpslCodeInput, CpslIcon, CpslQrCode, CpslSpinner } from '@usecapsule/react-components';
+import {
+  CpslButton,
+  CpslCodeInput,
+  CpslDivider,
+  CpslIcon,
+  CpslQrCode,
+  CpslSpinner,
+  CpslText,
+} from '@usecapsule/react-components';
 import { useEffect, useRef, useState } from 'react';
 import { useCapsuleStore, useModalStore } from '../../stores/index.js';
-import {
-  Heading,
-  SecondaryText,
-  MainContainer,
-  QRContainer,
-  ButtonWithIconContainer,
-  FilledDisabledInput,
-} from '../common.js';
+import { Heading, QRContainer, FilledDisabledInput, StepContainer, InnerStepContainer } from '../common.js';
 import { ModalStep } from '../../utils/steps.js';
 import { CodeChangeEventDetail, CpslCodeInputCustomEvent } from '@usecapsule/core-components';
 import { styled } from 'styled-components';
@@ -30,6 +31,7 @@ export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
   const [qrCodeValue, setQrCodeValue] = useState(null);
   const [code, setCode] = useState('');
   const [codeError, setCodeError] = useState('');
+  const [isVerifyingCode, setIsVerifyingCode] = useState(false);
 
   const params = qrCodeValue ? new URL(qrCodeValue).searchParams : undefined;
   const secret = params?.get('secret');
@@ -76,10 +78,11 @@ export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
     if (codeError) {
       setCodeError('');
     }
-    setCode(e.detail.value);
+    setCode(e.detail.value.trim());
   };
 
   const handleSubmitCode = async () => {
+    setIsVerifyingCode(true);
     if (code.length === 6 && /^\d+$/.test(code)) {
       try {
         await capsule.enable2FA(code);
@@ -90,6 +93,7 @@ export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
     } else {
       setCodeError('Incorrect Code');
     }
+    setIsVerifyingCode(false);
   };
 
   const handleCopy = () => {
@@ -97,49 +101,80 @@ export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
   };
 
   return (
-    <>
-      <MainContainer>
-        <Heading>
-          <span>Turn on Two-Factor Authentication</span>
+    <StepContainer>
+      <InnerStepContainer>
+        <Heading variant="headingS" weight="bold">
+          Turn on Two-Factor authentication
         </Heading>
-        <SecondaryText>
-          <span>
-            {isVerifying
-              ? 'Enter the 6-digit code from your authentication app.'
-              : 'Scan the QR Code with your preferred authentication app.'}
-          </span>
-        </SecondaryText>
-      </MainContainer>
-      <>
+        {isVerifying && (
+          <CpslText variant="bodyS" color="secondary" weight="medium">
+            Please enter the code from your authenticator app.
+          </CpslText>
+        )}
+      </InnerStepContainer>
+      <InnerStepContainer>
         {isVerifying ? (
-          <StyledCodeInput ref={inputRef} code={code} onCpslInput={handleCodeInput} errorText={codeError} length={6} />
+          <>
+            {isVerifyingCode ? (
+              <CpslSpinner />
+            ) : (
+              <form
+                onSubmit={async e => {
+                  e.preventDefault();
+                  await handleSubmitCode();
+                }}
+              >
+                <StyledCodeInput
+                  ref={inputRef}
+                  code={code}
+                  onCpslInput={handleCodeInput}
+                  errorText={codeError}
+                  length={6}
+                  onKeyDown={async e => e.key === 'Enter' && (await handleSubmitCode())}
+                />
+              </form>
+            )}
+          </>
         ) : (
           <>
-            <QRContainer>{!qrCodeValue ? <CpslSpinner /> : <CpslQrCode url={qrCodeValue} />}</QRContainer>
-            <SecondaryText>
-              <span>Or input the code manually</span>
-            </SecondaryText>
+            <CpslText variant="bodyS" color="secondary" weight="medium">
+              Scan with your preferred authenticator app.
+            </CpslText>
+            <QRContainer>{!qrCodeValue ? <CpslSpinner size={100} /> : <CpslQrCode url={qrCodeValue} />}</QRContainer>
+          </>
+        )}
+      </InnerStepContainer>
+      {!isVerifying && (
+        <>
+          <InnerStepContainer>
+            <CpslDivider>or enter the code manually</CpslDivider>
+          </InnerStepContainer>
+          <InnerStepContainer>
             <FilledDisabledInput disabled value={secret} noAutoDisable>
               <CpslButton slot="end" variant="ghost" onClick={handleCopy}>
                 <CpslIcon icon={copied ? 'check' : 'copy'} />
               </CpslButton>
             </FilledDisabledInput>
+          </InnerStepContainer>
+          <InnerStepContainer>
             <CpslButton fullWidth onClick={handleNext}>
-              <ButtonWithIconContainer>
-                Continue
-                <CpslIcon icon="arrowNarrow" />
-              </ButtonWithIconContainer>
+              Continue
             </CpslButton>
-            <CpslButton fullWidth onClick={handleSkip} variant="secondary">
-              Setup 2FA Later
-            </CpslButton>
-          </>
-        )}
-      </>
-    </>
+            <SkipButton variant="ghost" onClick={handleSkip}>
+              Skip
+            </SkipButton>
+          </InnerStepContainer>
+        </>
+      )}
+    </StepContainer>
   );
 };
 
 const StyledCodeInput = styled(CpslCodeInput)`
   align-self: center;
+`;
+
+const SkipButton = styled(CpslButton)`
+  margin-top: 8px;
+  text-decoration: underline;
 `;

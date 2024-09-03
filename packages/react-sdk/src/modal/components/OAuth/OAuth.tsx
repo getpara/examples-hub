@@ -1,18 +1,18 @@
-import { CpslTileButton } from '@usecapsule/react-components';
 import { OAuthMethod } from '@usecapsule/web-sdk';
 import { styled } from 'styled-components';
 import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { openPopup } from '../../utils/openPopup.js';
-import { brandedOAuthLogos, oAuthLogos } from './config.js';
 import { useThemeStore } from '../../stores/theme/useThemeStore.js';
-import { Text } from '../common.js';
+import { getTileButtonFlex } from '../../utils/getTileButtonFlex.js';
+import { StyledCpslTileButton } from '../common.js';
+import { brandedOAuthLogos, oAuthLogos } from '../../constants/oAuthLogos.js';
 
 interface OAuthProps {
   methods: OAuthMethod[];
 }
 
-const HAS_MORE_LENGTH = 4;
+const HAS_MORE_LENGTH = 3;
 
 export const OAuth = ({ methods }: OAuthProps) => {
   const oAuthLogoVariant = useThemeStore(state => state.oAuthLogoVariant);
@@ -20,16 +20,17 @@ export const OAuth = ({ methods }: OAuthProps) => {
   const capsule = useCapsuleStore(state => state.capsule);
   const setFlow = useModalStore(state => state.setFlow);
   const setStep = useModalStore(state => state.setStep);
-  const setEmail = useUserInfoStore(state => state.setEmail);
+  const setIdentifier = useUserInfoStore(state => state.setIdentifier);
+  const setIdentifierType = useUserInfoStore(state => state.setIdentifierType);
   const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
   const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
-  const showAll = useModalStore(state => state.step === ModalStep.SIGN_UP_ALL_OAUTH);
+  const showAll = useModalStore(state => state.step === ModalStep.AUTH_MORE);
   const hasMore = methods.length > HAS_MORE_LENGTH;
 
   const methodsToShow = showAll || !hasMore ? methods : methods.slice(0, HAS_MORE_LENGTH - 1);
 
   const handleShowAll = () => {
-    setStep(ModalStep.SIGN_UP_ALL_OAUTH);
+    setStep(ModalStep.AUTH_MORE);
   };
 
   const handleMethodClick = (method: OAuthMethod) => async () => {
@@ -44,11 +45,12 @@ export const OAuth = ({ methods }: OAuthProps) => {
     openPopup(oAuthURL, `${method}AuthPopup`, 'OAUTH');
     const { email, userExists } = await capsule.waitForOAuth();
     if (!email) {
-      setStep(ModalStep.SIGN_UP);
+      setStep(ModalStep.AUTH_MAIN);
       throw new Error('email is required');
     }
 
-    setEmail(email);
+    setIdentifier(email);
+    setIdentifierType('email');
 
     if (userExists) {
       const webAuthUrlForLogin = await capsule.initiateUserLogin(email);
@@ -65,22 +67,28 @@ export const OAuth = ({ methods }: OAuthProps) => {
 
   const useBrandedLogos = oAuthLogoVariant === 'default';
   const useDarkLogos = useBrandedLogos ? isDark : oAuthLogoVariant !== 'dark';
+  const showMoreButton = !showAll && hasMore;
 
   return (
     <OAuthContainer>
-      {methodsToShow.map(method => (
-        <StyledCpslTileButton
+      {methodsToShow.map((method, index) => (
+        <OAuthButton
           $isDark={useDarkLogos}
           key={method}
           icon={useBrandedLogos ? brandedOAuthLogos[method] : oAuthLogos[method]}
           onClick={handleMethodClick(method)}
-          hasFullRow={methodsToShow.length >= 4}
+          $index={index}
+          $totalItems={showMoreButton ? HAS_MORE_LENGTH : methodsToShow.length}
         />
       ))}
-      {!showAll && hasMore && (
-        <MoreButton $isDark={useDarkLogos} icon="moreLoginOptions" onClick={handleShowAll} hasFullRow>
-          <MoreText $isDark={useDarkLogos}>MORE</MoreText>
-        </MoreButton>
+      {showMoreButton && (
+        <OAuthButton
+          $isDark={useDarkLogos}
+          icon="moreLoginOptions"
+          onClick={handleShowAll}
+          $index={HAS_MORE_LENGTH - 1}
+          $totalItems={HAS_MORE_LENGTH}
+        />
       )}
     </OAuthContainer>
   );
@@ -89,27 +97,12 @@ export const OAuth = ({ methods }: OAuthProps) => {
 const OAuthContainer = styled.div`
   display: flex;
   justify-content: center;
-  gap: 4px;
+  gap: 8px;
   flex-wrap: wrap;
 `;
 
-const StyledCpslTileButton = styled(CpslTileButton)<{ $isDark: boolean; hasFullRow: boolean }>`
-  flex: ${({ hasFullRow }) => (hasFullRow ? '0 0 calc(25% - 4px)' : '1')};
+const OAuthButton = styled(StyledCpslTileButton)<{ $isDark: boolean; $index: number; $totalItems: number }>`
+  flex: ${({ $index, $totalItems }) => getTileButtonFlex($index, $totalItems)};
 
   --button-icon-color: ${({ $isDark }) => ($isDark ? 'white' : 'black')};
-  --button-width: 100%;
-`;
-
-const MoreButton = styled(StyledCpslTileButton)`
-  &::part(icon) {
-    --height: 16px;
-    --width: 16px;
-  }
-`;
-
-const MoreText = styled(Text)<{ $isDark: boolean }>`
-  font-size: 8px;
-  line-height: 8px;
-  letter-spacing: 1px;
-  color: ${({ $isDark }) => ($isDark ? 'white' : 'black')};
 `;

@@ -26,19 +26,14 @@ const buildVars = (prev: string, obj: any): { [k: string]: string } => {
   return resp;
 };
 
-export const getCssColors = (customPalette: CustomPalette): { [k: string]: string } =>
-  buildVars('--cpsl-color', customPalette);
-export const getCssBorderRadii = (customBorderRadii: CustomBorderRadii): { [k: string]: string } =>
-  buildVars('--cpsl-border-radius', customBorderRadii);
+export const getCssColors = (customPalette: CustomPalette): { [k: string]: string } => buildVars('--cpsl-color', customPalette);
+export const getCssBorderRadii = (customBorderRadii: CustomBorderRadii): { [k: string]: string } => buildVars('--cpsl-border-radius', customBorderRadii);
 
 export const overlayMix = (baseColor: string, overlayColor: string) => {
   const baseRGBA = parseToRgba(baseColor);
   const overlayRGBA = parseToRgba(overlayColor);
 
-  const finalRGBA = overlay(
-    { r: baseRGBA[0], g: baseRGBA[1], b: baseRGBA[2], a: 0.1 },
-    { r: overlayRGBA[0], g: overlayRGBA[1], b: overlayRGBA[2], a: overlayRGBA[3] },
-  );
+  const finalRGBA = overlay({ r: baseRGBA[0], g: baseRGBA[1], b: baseRGBA[2], a: 0.1 }, { r: overlayRGBA[0], g: overlayRGBA[1], b: overlayRGBA[2], a: overlayRGBA[3] });
 
   return rgba(finalRGBA.r, finalRGBA.g, finalRGBA.b, finalRGBA.a);
 };

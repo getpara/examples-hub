@@ -8,7 +8,7 @@ describe('cpsl-switch', () => {
       html: `<cpsl-switch></cpsl-switch>`,
     });
     expect(page.root).toEqualHtml(`
-      <cpsl-switch>
+     <cpsl-switch>
         <mock:shadow-root>
           <input type="checkbox">
           <span class="container">

@@ -1,0 +1,54 @@
+{
+  "name": "capsule-external-wallet-example",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "rm -rf build && tsc && vite build",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "deploy-s3": "yarn && yarn build && aws s3 sync dist/ s3://$VITE_BUCKET_NAME --acl public-read --delete",
+    "deploy-sandbox": "VITE_ENV=sandbox VITE_BUCKET_NAME=capsule-rainbowkit-playground yarn deploy-s3"
+  },
+  "dependencies": {
+    "@delphi-labs/shuttle": "3.28.0",
+    "@delphi-labs/shuttle-react": "3.28.0",
+    "@noble/curves": "1.5.0",
+    "@solana/wallet-adapter-base": "^0.9.23",
+    "@solana/wallet-adapter-react": "^0.15.35",
+    "@solana/wallet-adapter-walletconnect": "^0.1.16",
+    "@solana/web3.js": "^1.95.1",
+    "@solana-mobile/wallet-adapter-mobile": "^2.1.3",
+    "@tanstack/react-query": "^5.24.1",
+    "@usecapsule/cosmos-wallet-connectors": "0.1.0",
+    "@usecapsule/evm-wallet-connectors": "0.1.0",
+    "@usecapsule/react-sdk": "3.19.0",
+    "@usecapsule/react-components": "3.3.0",
+    "@usecapsule/solana-wallet-connectors": "0.1.0",
+    "bs58": "6.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "styled-components": "^6.1.8",
+    "wagmi": "2.12.5",
+    "viem": "2.19.1",
+    "zustand": "^4.5.2"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^7.15.0",
+    "@typescript-eslint/parser": "^7.15.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-react-refresh": "^0.4.7",
+    "eslint-plugin-storybook": "^0.8.0",
+    "typescript": "^5.2.2",
+    "vite": "^5.3.4",
+    "vite-plugin-node-polyfills": "^0.22.0"
+  },
+  "resolutions": {
+    "styled-components": "^6"
+  }
+}

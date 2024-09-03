@@ -10,10 +10,21 @@ export class CpslSelect {
   private popoverEl!: HTMLCpslPopoverElement;
   private inputId = `cpsl-select-${inputIds++}`;
 
-  @State() anchorEl!: HTMLDivElement;
+  @State() anchorEl!: HTMLElement;
   @State() hasFocus = false;
   @State() popoverOpen = false;
   @State() hasSelectedItem = false;
+
+  /**
+   * ID of element to anchor popover to.
+   */
+  @Prop() anchorElId?: string;
+
+  /**
+   * If `true` the popover container will use the width of the content, else it will be set to the width of the trigger.
+   * Default is `false`
+   */
+  @Prop() autoWidth?: boolean = false;
 
   /**
    * If `true`, the user cannot interact with the input.
@@ -77,6 +88,16 @@ export class CpslSelect {
   @Prop() showOptionalLabel = false;
 
   /**
+   * If `true`, the dropdown will contain a search field.
+   */
+  @Prop() showSearch = false;
+
+  /**
+   * Placeholder for the search field.
+   */
+  @Prop() searchPlaceholder?: string;
+
+  /**
    * Emitted when the input loses focus.
    */
   @Event() cpslBlur!: EventEmitter<FocusEvent>;
@@ -90,6 +111,11 @@ export class CpslSelect {
    * Emitted when the value changes.
    */
   @Event() cpslSelectValueChange!: EventEmitter<string>;
+
+  /**
+   * Emitted when the search value changes.
+   */
+  @Event() cpslSearchChange!: EventEmitter<string>;
 
   @Watch('selectedValue')
   onValueChange() {
@@ -118,7 +144,7 @@ export class CpslSelect {
 
   componentDidLoad() {
     this.popoverEl = this.el.shadowRoot.querySelector(`cpsl-popover`) as HTMLCpslPopoverElement;
-    this.anchorEl = this.el.shadowRoot.getElementById('select-container') as HTMLDivElement;
+    this.anchorEl = this.anchorElId ? document.getElementById(this.anchorElId) : this.el.shadowRoot.getElementById('select-container');
 
     this.selectItem();
   }
@@ -177,10 +203,7 @@ export class CpslSelect {
 
   render() {
     return (
-      <Host
-        id={this.id}
-        class={{ 'disabled': this.disabled, 'focused': this.hasFocus, 'has-value': Boolean(this.selectedValue) }}
-      >
+      <Host id={this.id} class={{ 'disabled': this.disabled, 'focused': this.hasFocus, 'has-value': Boolean(this.selectedValue) }}>
         {this.label && (
           <label class="label" htmlFor={this.inputId}>
             {this.label}
@@ -188,25 +211,16 @@ export class CpslSelect {
             {!this.required && this.showOptionalLabel ? <span class="optional-label">(optional)</span> : ''}
           </label>
         )}
-        <div
-          id="select-container"
-          class={{ 'select-container': true, 'error-container': Boolean(this.errorText) }}
-          onMouseDown={this.handleClick}
-        >
+        <div id="select-container" class={{ 'select-container': true, 'error-container': Boolean(this.errorText) }} onMouseDown={this.handleClick}>
           {this.hasSelectedItem && this.showFormattedSelectedItem && <slot name="selected-item"></slot>}
-          <div class="selected-container-content" id="selected-container-content">
+          <div class={{ 'selected-container-content': true, 'hidden': this.showFormattedSelectedItem }} id="selected-container-content" style={{}}>
             {(!this.hasSelectedItem || !this.showFormattedSelectedItem) && (
               <cpsl-text class={{ 'selected-text': true, 'placeholder': !this.selectedValue }}>
-                {!this.selectedValue
-                  ? (this.placeholder ?? 'Select')
-                  : (this.formatValue?.(this.selectedValue) ?? this.selectedValue)}
+                {!this.selectedValue ? (this.placeholder ?? 'Select') : (this.formatValue?.(this.selectedValue) ?? this.selectedValue)}
               </cpsl-text>
             )}
           </div>
-          <cpsl-icon
-            class={{ 'chevron': true, 'open': this.popoverOpen, 'has-value': Boolean(this.selectedValue) }}
-            icon="chevronUp"
-          />
+          <cpsl-icon class={{ 'chevron': true, 'open': this.popoverOpen, 'has-value': Boolean(this.selectedValue) }} icon="chevronUp" />
           <input
             id={this.inputId}
             disabled={this.disabled}
@@ -223,14 +237,21 @@ export class CpslSelect {
             <span>{this.errorText ?? this.helperText}</span>
           </div>
         )}
-        <cpsl-popover
-          autoWidth={false}
-          trigger={this.id}
-          preventBlur={this.hasFocus}
-          disabled={this.disabled}
-          anchorEl={this.anchorEl}
-        >
-          <div class="dropdown">
+        <cpsl-popover part="popover" autoWidth={this.autoWidth} trigger={this.id} preventBlur={this.hasFocus} disabled={this.disabled} anchorEl={this.anchorEl}>
+          <div part="dropdown" class="dropdown">
+            {this.showSearch && (
+              <div class="search-container">
+                <cpsl-input
+                  onClick={e => e.stopPropagation()}
+                  placeholder={this.searchPlaceholder ?? 'Search'}
+                  value=""
+                  onCpslInput={e => {
+                    e.stopPropagation();
+                    this.cpslSearchChange.emit(e.detail.value);
+                  }}
+                />
+              </div>
+            )}
             <div class="dropdown-inner" style={{ maxHeight: `${this.dropdownMaxHeight}px` }}>
               <slot name="items"></slot>
             </div>

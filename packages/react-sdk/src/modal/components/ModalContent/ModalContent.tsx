@@ -1,8 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { Wallet } from '@usecapsule/web-sdk';
+import { Wallet, WalletScheme } from '@usecapsule/web-sdk';
 import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
-import { Header } from '../Header/Header.js';
 import { Body } from '../Body/Body.js';
 import { Footer } from '../Footer/Footer.js';
 import { CapsuleModalProps } from '../../types/modalProps.js';
@@ -15,7 +14,6 @@ type ModalContentProps = Omit<
   'capsule' | 'isOpen' | 'theme' | 'branding' | 'onModalStepChange' | 'onExpandModalChange'
 > & {
   hasFinishedAnimation: boolean;
-  setModalExpanded: (v: boolean) => void;
 };
 
 export type ModalContentHandle = {
@@ -29,16 +27,15 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
   (
     {
       twoFactorAuthEnabled = false,
+      recoverySecretStepEnabled = false,
       oAuthMethods,
       hasFinishedAnimation,
       disableEmailLogin,
       disablePhoneLogin,
-      networks = ['ETHEREUM'],
       onClose,
       onRampConfig,
       loginTransitionOverride,
       createWalletOverride,
-      setModalExpanded,
     },
     ref,
   ) => {
@@ -51,16 +48,14 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     const setStep = useModalStore(state => state.setStep);
     const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
     const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
-    const resetModalState = useModalStore(state => state.resetState);
     const setLoginWindow = useModalStore(state => state.setLoginWindow);
-    const resetUserInfoState = useUserInfoStore(state => state.resetState);
+    const setRecoveryShare = useUserInfoStore(state => state.setRecoveryShare);
     const goBack = useGoBack();
 
     const loginTimeout = useRef<number>();
     const createAccountTimeout = useRef<number>();
 
     const [walletCreationInProgress, setWalletCreationInProgress] = useState(false);
-    const [recoveryShare, setRecoveryShare] = useState<string>(null);
 
     useImperativeHandle(ref, () => {
       return {
@@ -137,7 +132,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
             newWallets[wallet.id] = {
               id: wallet.id,
               address: wallet.address,
-              scheme: wallet.scheme,
+              scheme: wallet.scheme as WalletScheme,
               signer: '',
             };
           }
@@ -145,12 +140,13 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
           recoverySecret = created.recoverySecret;
           walletIds = created.walletIds;
         }
-
         await capsule.setCurrentWalletIds(walletIds);
 
-        setRecoveryShare(recoverySecret);
+        if (recoverySecretStepEnabled) {
+          setRecoveryShare(recoverySecret);
+        }
         setWalletCreationInProgress(false);
-        if (!recoverySecret) {
+        if (!recoverySecret || !recoverySecretStepEnabled) {
           setStep(ModalStep.WALLET_CREATION_DONE);
         } else {
           setStep(ModalStep.SECRET);
@@ -191,34 +187,6 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     }, [webAuthURLForLogin, loginWindow]);
 
     const handleClose = () => {
-      if (
-        currentStep === ModalStep.LOGIN_DONE ||
-        currentStep === ModalStep.TWO_FACTOR_DONE ||
-        currentStep === ModalStep.SETUP_2FA ||
-        currentStep === ModalStep.SECRET ||
-        currentStep === ModalStep.BIOMETRIC_LOGIN ||
-        currentStep === ModalStep.BIOMETRIC_CREATION ||
-        currentStep === ModalStep.WALLET_CREATION_DONE
-      ) {
-        // Using a timeout here so state is reset once modal animates out.
-        setTimeout(() => {
-          resetModalState();
-          resetUserInfoState();
-          setRecoveryShare(null);
-        }, 200);
-      } else if (
-        currentStep === ModalStep.ADD_FUNDS ||
-        currentStep === ModalStep.ADD_FUNDS_AWAITING ||
-        currentStep === ModalStep.ADD_FUNDS_SUCCESS ||
-        currentStep === ModalStep.ADD_FUNDS_FAILURE
-      ) {
-        setTimeout(() => {
-          setStep(ModalStep.LOGIN_DONE);
-        }, 200);
-      } else {
-        setStep(ModalStep.SIGN_UP);
-      }
-      capsule.exitLoops();
       onClose();
     };
 
@@ -238,32 +206,22 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
       };
     }, []);
 
-    const handleExpandModal = () => {
-      setModalExpanded(true);
-    };
-
-    const handleCondenseModal = () => {
-      setModalExpanded(false);
-    };
-
     return (
       <>
         {[ModalStep.WALLET_CREATION_DONE, ModalStep.ADD_FUNDS_SUCCESS].includes(currentStep) && (
           <CpslAnimation src="https://product-assets.sandbox.usecapsule.com/animations/confetti.json" />
         )}
-        <Header onClose={handleClose} condenseModal={handleCondenseModal} />
         <Body
           hasFinishedAnimation={hasFinishedAnimation}
           oAuthMethods={oAuthMethods}
           twoFactorAuthEnabled={twoFactorAuthEnabled}
-          recoveryShare={recoveryShare}
           disableEmailLogin={disableEmailLogin}
           disablePhoneLogin={disablePhoneLogin}
-          networks={networks}
           onClose={handleClose}
           onRampConfig={onRampConfig}
+          recoverySecretStepEnabled={recoverySecretStepEnabled}
         />
-        <Footer expandModal={handleExpandModal} />
+        <Footer />
       </>
     );
   },

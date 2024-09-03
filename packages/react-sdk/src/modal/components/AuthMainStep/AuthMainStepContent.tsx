@@ -1,0 +1,126 @@
+import { ReactNode, useMemo } from 'react';
+import { CpslButton, CpslDivider, CpslIconGroup, IconType } from '@usecapsule/react-components';
+import styled from 'styled-components';
+import { OAuthMethod } from '@usecapsule/web-sdk';
+import { useExternalWallets } from '../../providers/ExternalWalletContext.js';
+import { ExternalWallets } from '../ExternalWallets/ExternalWallets.js';
+import { useModalStore, useThemeStore } from '../../stores/index.js';
+import { ModalStep } from '../../utils/steps.js';
+import { AuthLayout } from '../../types/modalProps.js';
+import { brandedOAuthLogos, oAuthLogos } from '../../constants/oAuthLogos.js';
+import { AuthOptions } from '../AuthOptions/AuthOptions.js';
+
+interface AuthMainStepContentProps {
+  oAuthMethods?: OAuthMethod[];
+  disableEmailLogin: boolean;
+  disablePhoneLogin: boolean;
+}
+
+export const AuthMainStepContent = ({ oAuthMethods, disableEmailLogin, disablePhoneLogin }: AuthMainStepContentProps) => {
+  const { wallets } = useExternalWallets();
+  const authLayout = useThemeStore(state => state.authLayout);
+  const setStep = useModalStore(state => state.setStep);
+  const oAuthLogoVariant = useThemeStore(state => state.oAuthLogoVariant);
+  const isDark = useThemeStore(state => state.isDark);
+
+  const useBrandedLogos = oAuthLogoVariant === 'default';
+  const useDarkLogos = useBrandedLogos ? isDark : oAuthLogoVariant !== 'dark';
+
+  const handleCondensedAuthClick = () => {
+    setStep(ModalStep.AUTH_MORE);
+  };
+
+  const handleCondensedExternalClick = () => {
+    setStep(ModalStep.EX_WALLET_MORE);
+  };
+
+  const Content = useMemo(() => {
+    const Methods: ReactNode[] = [];
+
+    authLayout.forEach(layout => {
+      if (Methods.length > 0) {
+        Methods.push(<CpslDivider key="or">or</CpslDivider>);
+      }
+      switch (layout) {
+        case AuthLayout.AUTH_FULL: {
+          Methods.push(
+            <AuthOptions
+              oAuthMethods={oAuthMethods}
+              disableEmailLogin={disableEmailLogin}
+              disablePhoneLogin={disablePhoneLogin}
+            />,
+          );
+
+          break;
+        }
+        case AuthLayout.AUTH_CONDENSED: {
+          const icons: IconType[] = [];
+
+          oAuthMethods?.forEach(method => icons.push(useBrandedLogos ? brandedOAuthLogos[method] : oAuthLogos[method]));
+
+          Methods.push(
+            <CondensedButton onClick={handleCondensedAuthClick} variant="tertiary" fullWidth key="authCondensed">
+              <IconGroupSpacer slot="start" icons={[]} $isDark={useDarkLogos} />
+              Sign Up or Login
+              <StyledIconGroup slot="end" icons={icons.splice(0, 3)} $isDark={useDarkLogos} />
+            </CondensedButton>,
+          );
+
+          break;
+        }
+        case AuthLayout.EXTERNAL_FULL: {
+          if (!!wallets.length) {
+            Methods.push(<ExternalWallets key="externalWallets" />);
+          }
+          break;
+        }
+        case AuthLayout.EXTERNAL_CONDENSED: {
+          const icons: string[] = [];
+
+          wallets?.forEach(wallet => icons.push(wallet.iconUrl));
+
+          Methods.push(
+            <CondensedButton onClick={handleCondensedExternalClick} variant="tertiary" fullWidth key="authCondensed">
+              <IconGroupSpacer slot="start" icons={[]} $isDark={useDarkLogos} />
+              Connect Wallet
+              <StyledIconGroup slot="end" icons={icons.splice(0, 3)} $isDark={useDarkLogos} />
+            </CondensedButton>,
+          );
+
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+    });
+
+    return <>{Methods}</>;
+  }, [oAuthMethods, disableEmailLogin, disablePhoneLogin, wallets]);
+
+  return <Container data-testid="main-auth-step-content">{Content}</Container>;
+};
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const StyledIconGroup = styled(CpslIconGroup)<{ $isDark: boolean }>`
+  --icon-item-color: ${({ $isDark }) => ($isDark ? 'white' : 'black')};
+  flex: 1;
+  justify-content: flex-end;
+`;
+
+const IconGroupSpacer = styled(StyledIconGroup)`
+  visibility: hidden;
+`;
+
+const CondensedButton = styled(CpslButton)`
+  --button-justify-content: space-between;
+
+  &::part(button-native) {
+    max-height: 50px;
+  }
+`;

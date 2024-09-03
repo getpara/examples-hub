@@ -59,6 +59,16 @@ export interface createUserBodyForPhone {
   countryCode: string;
 }
 
+export interface ExternalWalletLoginBody {
+  externalAddress: string;
+  type: 'EVM' | 'SOLANA' | 'COSMOS';
+  externalWalletProvider?: string;
+}
+
+export interface ExternalWalletLoginRes {
+  userId: string;
+}
+
 export interface createUserIdRes {
   protocolId: string;
   userId: string;
@@ -149,6 +159,8 @@ export interface PartnerEntity {
   iconUrl?: string;
   portalHeaderLogoUrl?: string;
   policiesEnabled: boolean;
+  backgroundColor?: string;
+  foregroundColor?: string;
 }
 export interface WalletEntity {
   address: string | null;
@@ -275,7 +287,8 @@ export enum OnRampPurchaseStatus {
 export interface OnRampPurchase {
   id: string;
   userId: string;
-  walletId: string;
+  walletId?: string | null;
+  externalWalletAddress?: string | null;
   status: OnRampPurchaseStatus;
   provider: OnRampProvider;
   providerKey?: string | null;
@@ -377,6 +390,11 @@ class Client {
       `/users/exists?email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}&countryCode=${encodeURIComponent(countryCode)}`,
     );
     return res;
+  };
+
+  externalWalletLogin = async (body: ExternalWalletLoginBody): Promise<ExternalWalletLoginRes> => {
+    const res = await this.baseRequest.post<createUserIdRes>(`/users/external-wallets/login`, body);
+    return res.data;
   };
 
   // POST /users/:userId/verify-email
@@ -537,8 +555,10 @@ class Client {
   };
 
   // GET /users/:userId/wallets
-  getWallets = async (userId: string): Promise<AxiosResponse<getWalletsRes, any>> => {
-    const res = await this.baseRequest.get<getWalletsRes>(`/users/${userId}/wallets`);
+  getWallets = async (userId: string, includePartnerData?: boolean): Promise<AxiosResponse<getWalletsRes, any>> => {
+    const res = await this.baseRequest.get<getWalletsRes>(
+      `/users/${userId}/wallets${includePartnerData ? `?includePartnerData=${encodeURIComponent(includePartnerData)}` : ''}`,
+    );
     return res;
   };
 
@@ -805,15 +825,26 @@ class Client {
     return res;
   }
 
-  async createOnRampPurchase(
-    userId: string,
-    walletId: string,
-    provider: OnRampProvider,
-    network: Network,
-    asset: OnRampAsset,
+  async createOnRampPurchase({
+    userId,
+    walletId,
+    externalWalletAddress,
+    provider,
+    network,
+    asset,
     testMode = false,
-  ) {
-    const res = await this.baseRequest.post<OnRampPurchase>(`/users/${userId}/wallets/${walletId}/purchases`, {
+  }: {
+    userId: string;
+    walletId?: string;
+    externalWalletAddress?: string;
+    provider: OnRampProvider;
+    network: Network;
+    asset: OnRampAsset;
+    testMode: boolean;
+  }) {
+    const walletString = walletId ? `wallets/${walletId}` : `external-wallets/${externalWalletAddress}`;
+
+    const res = await this.baseRequest.post<OnRampPurchase>(`/users/${userId}/${walletString}/purchases`, {
       provider,
       network,
       asset,
@@ -822,21 +853,42 @@ class Client {
     return res;
   }
 
-  async updateOnRampPurchase(
-    userId: string,
-    walletId: string,
-    purchaseId: string,
-    updates: Partial<Pick<OnRampPurchase, 'status' | 'fiatCurrency' | 'fiatQuantity' | 'providerKey'>>,
-  ) {
+  async updateOnRampPurchase({
+    userId,
+    walletId,
+    externalWalletAddress,
+    purchaseId,
+    updates,
+  }: {
+    userId: string;
+    walletId?: string;
+    externalWalletAddress?: string;
+    purchaseId: string;
+    updates: Partial<Pick<OnRampPurchase, 'status' | 'fiatCurrency' | 'fiatQuantity' | 'providerKey'>>;
+  }) {
+    const walletString = walletId ? `wallets/${walletId}` : `external-wallets/${externalWalletAddress}`;
+
     const res = await this.baseRequest.patch<OnRampPurchase>(
-      `/users/${userId}/wallets/${walletId}/purchases/${purchaseId}`,
+      `/users/${userId}/${walletString}/purchases/${purchaseId}`,
       updates,
     );
     return res;
   }
 
-  async getOnRampPurchase(userId: string, walletId: string, purchaseId: string) {
-    const res = await this.baseRequest.get<OnRampPurchase>(`/users/${userId}/wallets/${walletId}/purchases/${purchaseId}`);
+  async getOnRampPurchase({
+    userId,
+    walletId,
+    externalWalletAddress,
+    purchaseId,
+  }: {
+    userId: string;
+    walletId?: string;
+    externalWalletAddress?: string;
+    purchaseId: string;
+  }) {
+    const walletString = walletId ? `wallets/${walletId}` : `external-wallets/${externalWalletAddress}`;
+
+    const res = await this.baseRequest.get<OnRampPurchase>(`/users/${userId}/${walletString}/purchases/${purchaseId}`);
     return res;
   }
 

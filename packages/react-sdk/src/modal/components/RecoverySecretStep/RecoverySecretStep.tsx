@@ -1,21 +1,18 @@
-import { CpslSlideButton, CpslTileButton } from '@usecapsule/react-components';
+import { CpslButton, CpslText } from '@usecapsule/react-components';
 import { useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
-import { Heading, MainContainer, SecondaryText } from '../common.js';
+import { Heading, InnerStepContainer, StepContainer, StyledCpslTileButton } from '../common.js';
 import { styled } from 'styled-components';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard.js';
 import { getMailtoLink } from '../../utils/getMailtoLink.js';
 import { useState } from 'react';
-interface RecoverySecretStepProps {
-  recoveryShare: string;
-}
 
 export const SaveRecoverySecret = ({
   email,
   value,
   onComplete,
 }: {
-  email: string;
+  email?: string;
   value: string;
   onComplete: () => void;
 }) => {
@@ -44,33 +41,42 @@ export const SaveRecoverySecret = ({
 
   return (
     <>
-      <ButtonContainer>
-        <StyledCpslTileButton icon={isCopied ? 'check' : 'copy'} onClick={onCopy}>
-          <TileButtonText>{isCopied ? 'Copied!' : 'Copy'}</TileButtonText>
-        </StyledCpslTileButton>
-        <StyledCpslTileButton icon="downloadCloud" onClick={onDownload}>
-          <TileButtonText>Download</TileButtonText>
-        </StyledCpslTileButton>
-        <StyledCpslTileButton icon="mail" onClick={onEmail}>
-          <TileButtonText>Email</TileButtonText>
-        </StyledCpslTileButton>
-      </ButtonContainer>
-      <CpslSlideButton
-        startIcon="arrow"
-        endIcon="check"
-        startText={!isSecretSaved ? 'First, save your recovery secret.' : 'I’ve Saved My Recovery Secret'}
-        endText="OK! Great Job!"
-        onCpslComplete={onComplete}
-        disabled={!isSecretSaved}
-      />
-      <SliderHelper>{!isSecretSaved ? 'Choose an option above.' : 'Slide to complete'}</SliderHelper>
+      <InnerStepContainer>
+        <Heading variant="headingXS" weight="semiBold">
+          Save your Recovery Secret
+        </Heading>
+        <ButtonContainer>
+          <ActionButton icon="download" onClick={onDownload}>
+            <CpslText variant="bodyXS" color="secondary" weight="medium">
+              Download
+            </CpslText>
+          </ActionButton>
+          <ActionButton icon={isCopied ? 'check' : 'copy'} onClick={onCopy}>
+            <CpslText variant="bodyXS" color="secondary" weight="medium">
+              {isCopied ? 'Copied!' : 'Copy'}
+            </CpslText>
+          </ActionButton>
+          <ActionButton icon="send" onClick={onEmail}>
+            <CpslText variant="bodyXS" color="secondary" weight="medium">
+              Email
+            </CpslText>
+          </ActionButton>
+        </ButtonContainer>
+      </InnerStepContainer>
+      <InnerStepContainer>
+        <CpslButton fullWidth onClick={onComplete} disabled={!isSecretSaved}>
+          {!isSecretSaved ? 'Choose an option above to continue' : 'I’ve saved my recovery secret'}
+        </CpslButton>
+      </InnerStepContainer>
     </>
   );
 };
 
-export const RecoverySecretStep = ({ recoveryShare }: RecoverySecretStepProps) => {
+export const RecoverySecretStep = () => {
   const setStep = useModalStore(state => state.setStep);
-  const email = useUserInfoStore(state => state.email);
+  const identifier = useUserInfoStore(state => state.identifier);
+  const identifierType = useUserInfoStore(state => state.identifierType);
+  const recoveryShare = useUserInfoStore(state => state.recoveryShare);
 
   const backupDecryptionKey = JSON.parse(recoveryShare || '{}').backupDecryptionKey;
 
@@ -79,34 +85,32 @@ export const RecoverySecretStep = ({ recoveryShare }: RecoverySecretStepProps) =
   };
 
   return (
-    <>
-      <StyledMainContainer>
-        <Heading>Your Recovery Secret</Heading>
-        <SecondaryText>
-          Your Recovery Secret allows you to set up a new Passkey in the event you lose access to your current one.
-        </SecondaryText>
-      </StyledMainContainer>
-      <SaveRecoverySecret email={email} value={backupDecryptionKey} onComplete={onComplete} />
-    </>
+    <StepContainer>
+      <InnerStepContainer>
+        <Heading variant="headingS" weight="bold">
+          Don’t lose your wallet
+        </Heading>
+        <InlineText variant="bodyS" color="secondary" weight="medium">
+          Your{' '}
+          <InlineText variant="bodyS" weight="medium">
+            Recovery Secret
+          </InlineText>{' '}
+          ensures you will be able to regain access to your wallet if you lose your Passkey.
+        </InlineText>
+      </InnerStepContainer>
+      <SaveRecoverySecret
+        email={identifierType === 'email' ? identifier : undefined}
+        value={backupDecryptionKey}
+        onComplete={onComplete}
+      />
+    </StepContainer>
   );
 };
 
-const StyledMainContainer = styled(MainContainer)`
-  margin-top: 4px;
-  padding-top: 16px;
-  margin-bottom: 0px;
-`;
+const ActionButton = styled(StyledCpslTileButton)`
+  flex: 1;
 
-const StyledCpslTileButton = styled(CpslTileButton)`
-  --button-icon-color: var(--cpsl-color-text-secondary);
-`;
-
-const TileButtonText = styled(SecondaryText)`
-  font-size: 8px;
-  line-height: 100%;
-  font-weight: 500;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+  --button-icon-color: var(--cpsl-color-text-primary);
 `;
 
 const ButtonContainer = styled.div`
@@ -114,8 +118,10 @@ const ButtonContainer = styled.div`
   align-items: center;
   justify-content: center;
   gap: 8px;
+  width: 100%;
 `;
 
-const SliderHelper = styled(SecondaryText)`
-  margin-top: -8px;
+const InlineText = styled(CpslText)`
+  text-align: center;
+  display: inline-block;
 `;
