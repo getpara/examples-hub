@@ -6,7 +6,7 @@ import { UpdateApiKeyBody } from '../../../types/api';
 
 export type UpdateApiKeyEmail = Pick<
   UpdateApiKeyBody,
-  'twitterUrl' | 'linkedinUrl' | 'githubUrl' | 'emailImageLinkUrl' | 'emailWelcome' | 'emailBackupKit'
+  'twitterUrl' | 'linkedinUrl' | 'githubUrl' | 'emailImageLink' | 'emailWelcome' | 'emailBackupKit'
 >;
 
 export const useEmailConfigFormData = () => {
@@ -20,7 +20,7 @@ export const useEmailConfigFormData = () => {
       twitterUrl: apiKeyData?.twitterUrl ?? '',
       linkedinUrl: apiKeyData?.linkedinUrl ?? '',
       githubUrl: apiKeyData?.githubUrl ?? '',
-      emailImageLinkUrl: apiKeyData?.emailImageLinkUrl ?? '',
+      emailImageLink: apiKeyData?.emailImageLink ?? '',
       emailWelcome: apiKeyData?.emailWelcome,
       emailBackupKit: apiKeyData?.emailBackupKit,
     },

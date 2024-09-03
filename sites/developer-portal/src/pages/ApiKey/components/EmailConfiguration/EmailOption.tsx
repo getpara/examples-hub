@@ -93,7 +93,7 @@ export const EmailOption = () => {
                     onRemoveImage={handleRemoveImage}
                   />
                   <Controller
-                    name="emailImageLinkUrl"
+                    name="emailImageLink"
                     control={control}
                     rules={{
                       pattern: {

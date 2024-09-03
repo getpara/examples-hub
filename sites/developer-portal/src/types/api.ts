@@ -82,7 +82,7 @@ export type ApiKey = {
   portalUrl: string;
   logoUrl: string;
   emailImageUrl: string;
-  emailImageLinkUrl: string;
+  emailImageLink: string;
   emailBackupKit: boolean;
   emailWelcome: boolean;
   backgroundColor: string;
@@ -107,7 +107,7 @@ export type UpdateApiKeyBody = Nullable<
       | 'portalUrl'
       | 'logoUrl'
       | 'emailImageUrl'
-      | 'emailImageLinkUrl'
+      | 'emailImageLink'
       | 'emailBackupKit'
       | 'emailWelcome'
       | 'backgroundColor'
