@@ -188,7 +188,7 @@ export class CpslAuthModal {
   private get Modal() {
     return (
       <div class={{ 'modal-container': true, 'no-footer': !this.hasFooter }} part="modal-container" id="modal-container">
-        <cpsl-card id="modal-body-card" class={{ 'modal-body-card': true }} part="modal-body-card">
+        <cpsl-card id="modal-body-card" class={{ 'modal-body-card': true, 'body': true }} part="modal-body-card">
           <slot name="body"></slot>
           {this.isMobile && (
             <div class="mobile-footer">

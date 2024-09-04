@@ -29,7 +29,7 @@ export const AuthOptions = ({ oAuthMethods, disableEmailLogin, disablePhoneLogin
     }
 
     return <>{Methods}</>;
-  }, [showAllOAuth, oAuthMethods, disableEmailLogin, wallets]);
+  }, [showAllOAuth, oAuthMethods, disableEmailLogin, disablePhoneLogin, wallets]);
 
   return <Container>{Content}</Container>;
 };

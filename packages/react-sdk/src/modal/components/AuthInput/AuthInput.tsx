@@ -31,7 +31,7 @@ interface AuthInputProps {
 
 const DEFAULT_COUNTRY = { label: 'United States', value: '+1', selectedLabel: 'US', icon: 'US' as IconType };
 
-export const AuthInput = ({}: AuthInputProps) => {
+export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputProps) => {
   const inputRef = useRef<HTMLCpslInputElement>(null);
   const { dropdownMaxHeight, dropdownWidth } = useDropdownPosition(inputRef);
 
@@ -71,21 +71,25 @@ export const AuthInput = ({}: AuthInputProps) => {
   const handleIdentifierInput = (ev: CpslInputCustomEvent<InputInputEventDetail>) => {
     const newIdentifier = ev.detail.value;
 
-    const countryCodeInputMatch = countryCodes.find(cc => cc.value === newIdentifier);
-    if (countryCodeInputMatch) {
-      setCountryCode(countryCodeInputMatch.value as CountryCallingCode);
-      setMatchedCountryCode(countryCodeInputMatch);
-      setIdentifierType('phone');
+    if (!disablePhoneLogin) {
+      const countryCodeInputMatch = countryCodes.find(cc => cc.value === newIdentifier);
+      if (countryCodeInputMatch) {
+        setCountryCode(countryCodeInputMatch.value as CountryCallingCode);
+        setMatchedCountryCode(countryCodeInputMatch);
+        setIdentifierType('phone');
 
-      setIdentifier('');
-      return;
+        setIdentifier('');
+        return;
+      }
+
+      const isNewPhone = !isEmail && isPhone ? /\d+$/.test(newIdentifier) : /\d\d\d+$/.test(newIdentifier);
+      setIdentifierType(isNewPhone ? 'phone' : undefined);
     }
 
-    const isNewEmail = /\D.*$/.test(newIdentifier);
-    // If we already have the type set as phone we're only going to look for one digit
-    const isNewPhone = !isEmail && isPhone ? /\d+$/.test(newIdentifier) : /\d\d\d+$/.test(newIdentifier);
-
-    setIdentifierType(isNewEmail ? 'email' : isNewPhone ? 'phone' : undefined);
+    if (!disableEmailLogin) {
+      const isNewEmail = /\D.*$/.test(newIdentifier);
+      setIdentifierType(isNewEmail ? 'email' : undefined);
+    }
 
     setIdentifier(newIdentifier);
   };
@@ -160,6 +164,10 @@ export const AuthInput = ({}: AuthInputProps) => {
     setIsLoggingIn(false);
   };
 
+  if (disableEmailLogin && disablePhoneLogin) {
+    return null;
+  }
+
   return (
     <form
       onSubmit={async e => {
@@ -171,7 +179,13 @@ export const AuthInput = ({}: AuthInputProps) => {
         ref={inputRef}
         id="authInput"
         key={'email'}
-        placeholder={isEmail ? 'Enter email' : isPhone ? 'Enter phone' : 'Enter email or phone'}
+        placeholder={
+          isEmail || disablePhoneLogin
+            ? 'Enter email'
+            : isPhone || disableEmailLogin
+              ? 'Enter phone'
+              : 'Enter email or phone'
+        }
         onCpslInput={handleIdentifierInput}
         value={identifier}
         errorText={error}
@@ -185,8 +199,8 @@ export const AuthInput = ({}: AuthInputProps) => {
         disabled={isLoggingIn}
       >
         <IconContainer slot="start">
-          {(isUnknown || isEmail) && <CpslIcon icon="mail" />}
-          {isUnknown && <CpslIcon icon="phone" />}
+          {!disableEmailLogin && (isUnknown || isEmail) && <CpslIcon icon="mail" />}
+          {!disablePhoneLogin && isUnknown && <CpslIcon icon="phone" />}
           {isPhone && (
             <CountryCodeSelect
               selectedValue={matchedCountryCode.selectedLabel}

@@ -10,13 +10,13 @@ interface AuthMainStepProps {
   disablePhoneLogin: boolean;
 }
 
-export const AuthMainStep = ({ oAuthMethods, disableEmailLogin }: AuthMainStepProps) => {
+export const AuthMainStep = ({ oAuthMethods, disableEmailLogin, disablePhoneLogin }: AuthMainStepProps) => {
   const logo = useThemeStore(state => state.getLogo());
   const appName = useThemeStore(state => state.appName);
   const authLayout = useThemeStore(state => state.authLayout);
 
   const firstLayoutType = authLayout[0].split(':')[0];
-  const heading = firstLayoutType === 'auth' ? 'Sign Up or Login' : 'Connect Wallet';
+  const heading = firstLayoutType === 'AUTH' ? 'Sign Up or Login' : 'Connect Wallet';
 
   return (
     <>
@@ -26,7 +26,7 @@ export const AuthMainStep = ({ oAuthMethods, disableEmailLogin }: AuthMainStepPr
       </CenteredText>
       <AuthMainStepContent
         disableEmailLogin={disableEmailLogin}
-        disablePhoneLogin={disableEmailLogin}
+        disablePhoneLogin={disablePhoneLogin}
         oAuthMethods={oAuthMethods}
       />
     </>

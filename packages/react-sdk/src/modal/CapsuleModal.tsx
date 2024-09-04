@@ -124,8 +124,8 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     };
 
     useEffect(() => {
-      setAuthLayout(authLayout);
-    }, [authLayout]);
+      setAuthLayout(!externalWallets?.length ? authLayout.filter(l => !l.includes('EXTERNAL')) : authLayout);
+    }, [externalWallets, authLayout]);
 
     useEffect(() => {
       setOnModalStepChange(onModalStepChange);

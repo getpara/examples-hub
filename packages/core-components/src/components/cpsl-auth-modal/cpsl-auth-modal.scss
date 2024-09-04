@@ -96,8 +96,12 @@
   --card-padding-start: 16px;
   --card-padding-end: 16px;
   --card-border-width: 0px;
+}
 
-  box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.08);
+.body {
+  &::part(card-container) {
+    box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.08);
+  }
 }
 
 .no-opacity {
