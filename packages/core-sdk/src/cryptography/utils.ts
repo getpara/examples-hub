@@ -4,8 +4,10 @@ import { Ctx, getPortalBaseURL } from '../definitions.js';
 
 interface EncryptedShare {
   walletId: string;
+  walletScheme: string;
   encryptedShare: string;
   encryptedKey: string;
+  partnerId?: string;
 }
 
 const rsa = forge.pki.rsa;
@@ -185,10 +187,12 @@ export async function getDerivedPrivateKeyAndDecrypt(
   ctx: Ctx,
   seedValue: string,
   encryptedShares: EncryptedShare[],
-): Promise<{ walletId: string; signer: string }[]> {
+): Promise<{ walletId: string; walletScheme: string; signer: string; partnerId }[]> {
   return Promise.all(
     encryptedShares.map(async share => ({
       walletId: share.walletId,
+      walletScheme: share.walletScheme,
+      partnerId: share.partnerId,
       signer: await decryptWithDerivedPrivateKey(ctx, seedValue, share.encryptedShare, share.encryptedKey),
     })),
   );
@@ -198,10 +202,12 @@ export async function decryptPrivateKeyAndDecryptShare(
   encryptionKey: string,
   encryptedShares: EncryptedShare[],
   encryptedPrivateKey: string,
-): Promise<{ walletId: string; signer: string }[]> {
+): Promise<{ walletId: string; walletScheme: string; signer: string; partnerId: string }[]> {
   const privateKey = await decryptPrivateKey(encryptedPrivateKey, encryptionKey);
   return encryptedShares.map(share => ({
     walletId: share.walletId,
+    walletScheme: share.walletScheme,
+    partnerId: share.partnerId,
     signer: decryptWithPrivateKey(privateKey, share.encryptedShare, share.encryptedKey),
   }));
 }

@@ -10,6 +10,11 @@ async function isKeygenComplete(ctx: Ctx, userId: string, walletId: string): Pro
   return !!wallet.address;
 }
 
+async function isRefreshComplete(ctx: Ctx, userId: string, walletId: string, partnerId?: string): Promise<boolean> {
+  const { isDone } = await ctx.capsuleClient.isRefreshDone(userId, walletId, partnerId);
+  return isDone;
+}
+
 async function isPreKeygenComplete(
   ctx: Ctx,
   pregenIdentifier: string,
@@ -112,6 +117,40 @@ export function preKeygen(
       params: params,
       functionType: 'PREKEYGEN',
       offloadMPCComputationURL: ctx.offloadMPCComputationURL,
+      disableWorkers: ctx.disableWorkers,
+      sessionCookie,
+      useDKLS: ctx.useDKLS,
+      disableWebSockets: ctx.disableWebSockets,
+      wasmOverride: ctx.wasmOverride,
+    });
+  });
+}
+
+export function refresh(
+  ctx: Ctx,
+  sessionCookie: string,
+  userId: string,
+  walletId: string,
+  share: string,
+  oldPartnerId?: string,
+  newPartnerId?: string,
+): Promise<{
+  signer: string;
+}> {
+  return new Promise(async resolve => {
+    const worker = await setupWorker(ctx, async res => {
+      await waitUntilTrue(async () => isRefreshComplete(ctx, userId, walletId, newPartnerId), 15000, 1000);
+
+      resolve({
+        signer: res,
+      });
+      worker.terminate();
+    });
+    worker.postMessage({
+      env: ctx.env,
+      apiKey: ctx.apiKey,
+      params: { userId, walletId, share, oldPartnerId, newPartnerId },
+      functionType: 'REFRESH',
       disableWorkers: ctx.disableWorkers,
       sessionCookie,
       useDKLS: ctx.useDKLS,

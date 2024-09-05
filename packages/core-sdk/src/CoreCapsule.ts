@@ -1841,6 +1841,41 @@ export abstract class CoreCapsule {
     return { wallets, recoverySecret };
   }
 
+  async refreshShare({
+    walletId,
+    share,
+    oldPartnerId,
+    newPartnerId,
+    redistributeBackupEncryptedShares,
+  }: {
+    walletId: string;
+    share: string;
+    oldPartnerId?: string;
+    newPartnerId?: string;
+    redistributeBackupEncryptedShares?: boolean;
+    emailProps?: BackupKitEmailProps;
+  }): Promise<{ signer: string; recoverySecret?: string }> {
+    const { signer } = await this.platformUtils.refresh(
+      this.ctx,
+      this.retrieveSessionCookie(),
+      this.userId,
+      walletId,
+      share,
+      oldPartnerId,
+      newPartnerId,
+    );
+    const recoverySecret = await distributeNewShare(
+      this.ctx,
+      this.userId,
+      walletId,
+      signer,
+      !redistributeBackupEncryptedShares,
+      this.getBackupKitEmailProps(),
+      newPartnerId,
+    );
+    return { signer, recoverySecret };
+  }
+
   /**
    * Creates a new wallet.
    *
@@ -1996,25 +2031,24 @@ export abstract class CoreCapsule {
       throw new Error('wallets not found');
     }
 
-    let recoverySecret: string | undefined;
+    let newRecoverySecret: string | undefined;
     for (const wallet of pregenWallets) {
       await this.ctx.capsuleClient.claimPregenWallet({ userId: this.userId, walletId: wallet.id });
+      const { signer: newSigner, recoverySecret } = await this.refreshShare({
+        walletId: wallet.id,
+        share: this.wallets[wallet.id].signer,
+        oldPartnerId: wallet.partnerId,
+        newPartnerId: wallet.partnerId,
+        redistributeBackupEncryptedShares: true,
+      });
 
-      const signer = this.wallets[wallet.id].signer;
-      const recoveryShare = await distributeNewShare(
-        this.ctx,
-        this.userId,
-        wallet.id,
-        signer,
-        false,
-        this.getBackupKitEmailProps(),
-      );
-      if (recoveryShare) {
-        recoverySecret = recoveryShare;
+      if (recoverySecret) {
+        newRecoverySecret = recoverySecret;
       }
 
       this.wallets[wallet.id] = {
         ...this.wallets[wallet.id],
+        signer: newSigner,
         userId: this.userId,
         pregenIdentifier: undefined,
         pregenIdentifierType: undefined,
@@ -2023,7 +2057,7 @@ export abstract class CoreCapsule {
       await this.setWallets(this.wallets);
     }
 
-    return recoverySecret;
+    return newRecoverySecret;
   }
 
   /**

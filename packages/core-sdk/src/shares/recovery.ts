@@ -12,6 +12,17 @@ export async function sendRecoveryForShare(
   ignoreRedistributingBackupEncryptedShare = false,
   emailProps: BackupKitEmailProps,
 ): Promise<string> {
+  if (ignoreRedistributingBackupEncryptedShare) {
+    await ctx.capsuleClient.uploadUserKeyShares(
+      userId,
+      otherEncryptedShares.map(share => ({
+        walletId,
+        ...share,
+      })),
+    );
+    return '';
+  }
+
   let userBackupKeyShareOptsArr: (encryptedKeyshare & {
     walletId: string;
   })[];
@@ -56,14 +67,12 @@ export async function sendRecoveryForShare(
     ...(ignoreRedistributingBackupEncryptedShare ? [] : userBackupKeyShareOptsArr),
   ]);
 
-  if (!ignoreRedistributingBackupEncryptedShare) {
-    await ctx.capsuleClient.distributeCapsuleShare({
-      userId,
-      walletId,
-      useDKLS: ctx.useDKLS,
-      ...emailProps,
-    });
-  }
+  await ctx.capsuleClient.distributeCapsuleShare({
+    userId,
+    walletId,
+    useDKLS: ctx.useDKLS,
+    ...emailProps,
+  });
 
   return recoveryPrivateKeyContainer ? JSON.stringify(recoveryPrivateKeyContainer) : '';
 }

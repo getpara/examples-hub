@@ -68,8 +68,8 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
       return walletUtils.signMessage(ctx, share, walletId, userId, message);
     }
     case 'REFRESH': {
-      const { share, walletId, userId } = params;
-      return walletUtils.refresh(ctx, share, walletId, userId);
+      const { share, walletId, userId, oldPartnerId, newPartnerId } = params;
+      return walletUtils.refresh(ctx, share, walletId, userId, oldPartnerId, newPartnerId);
     }
     case 'PREKEYGEN': {
       const { email, partnerId, secretKey, type = WalletType.EVM } = params;

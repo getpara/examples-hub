@@ -247,6 +247,7 @@ export interface encryptedKeyshare {
   biometricPublicKey?: string;
   encryptor: (typeof EncryptorType)[keyof typeof EncryptorType];
   recoveryPublicKeyId?: string;
+  partnerId?: string;
 }
 
 export enum EncryptorType {
@@ -543,8 +544,9 @@ class Client {
   };
 
   // POST /users/:userId/wallets/:walletId/refresh
-  refreshKeys = async (userId: string, walletId: string): Promise<any> => {
-    const res = await this.baseRequest.post<any>(`/users/${userId}/wallets/${walletId}/refresh`);
+  refreshKeys = async (userId: string, walletId: string, oldPartnerId?: string, newPartnerId?: string): Promise<any> => {
+    const body = { oldPartnerId, newPartnerId };
+    const res = await this.baseRequest.post<any>(`/users/${userId}/wallets/${walletId}/refresh`, body);
     return res;
   };
 
@@ -638,7 +640,7 @@ class Client {
     return res;
   }
 
-  // POST /users/:userId/wallets/:walletId/key-shares
+  // POST /users/:userId/key-shares
   async uploadUserKeyShares(userId: string, encryptedKeyshares: (encryptedKeyshare & { walletId: string })[]): Promise<any> {
     const body = { keyShares: encryptedKeyshares };
     const res = await this.baseRequest.post<any>(`/users/${userId}/key-shares`, body);
@@ -659,8 +661,10 @@ class Client {
   }
 
   // GET /users/:userId/biometrics/key-shares
-  async getBiometricKeyshares(userId: string, biometricPublicKey: string): Promise<any> {
-    const res = await this.baseRequest.get<any>(`/users/${userId}/biometrics/key-shares?publicKey=${biometricPublicKey}`);
+  async getBiometricKeyshares(userId: string, biometricPublicKey: string, getAll?: boolean): Promise<any> {
+    const res = await this.baseRequest.get<any>(
+      `/users/${userId}/biometrics/key-shares?publicKey=${biometricPublicKey}&all=${!!getAll}`,
+    );
     return res;
   }
 
@@ -938,6 +942,13 @@ class Client {
 
   async getEthToUsdConversionRate() {
     const res = await this.baseRequest.get<any>('/ethToUsdConversionRate');
+    return res.data;
+  }
+
+  // GET /users/:userId/wallets/:walletId/refresh-done
+  async isRefreshDone(userId: string, walletId: string, partnerId?: string): Promise<{ isDone: true }> {
+    const partnerIdStr = partnerId ? `?partnerId=${partnerId}` : '';
+    const res = await this.baseRequest.get<any>(`/users/${userId}/wallets/${walletId}/refresh-done${partnerIdStr}`);
     return res.data;
   }
 }

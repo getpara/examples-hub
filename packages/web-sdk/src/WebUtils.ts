@@ -1,7 +1,7 @@
 import { Ctx, PlatformUtils, SignatureRes } from '@usecapsule/core-sdk';
 import { LocalStorage } from './LocalStorage.js';
 import { SessionStorage } from './SessionStorage.js';
-import { keygen, preKeygen, ed25519Keygen, ed25519PreKeygen } from './wallet/keygen.js';
+import { keygen, preKeygen, ed25519Keygen, ed25519PreKeygen, refresh } from './wallet/keygen.js';
 import { signMessage, sendTransaction, signTransaction, ed25519Sign } from './wallet/signing.js';
 import { BackupKitEmailProps, WalletType } from '@usecapsule/user-management-client';
 import { getPrivateKey } from './wallet/privateKey.js';
@@ -24,6 +24,20 @@ export class WebUtils implements PlatformUtils {
     walletId: string;
   }> {
     return keygen(ctx, userId, type, secretKey, true, sessionCookie, emailProps);
+  }
+
+  refresh(
+    ctx: Ctx,
+    sessionCookie: string,
+    userId: string,
+    walletId: string,
+    share: string,
+    oldPartnerId?: string,
+    newPartnerId?: string,
+  ): Promise<{
+    signer: string;
+  }> {
+    return refresh(ctx, sessionCookie, userId, walletId, share, oldPartnerId, newPartnerId);
   }
 
   preKeygen(

@@ -169,6 +169,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
       signature,
       params.newDeviceSessionLookupId,
       params.newDeviceEncryptionKey,
+      params.partnerId,
     );
   }, [
     capsule,

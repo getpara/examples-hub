@@ -19,6 +19,18 @@ export interface PlatformUtils {
     walletId: string;
   }>;
 
+  refresh(
+    ctx: Ctx,
+    sessionCookie: string,
+    userId: string,
+    walletId: string,
+    signer: string,
+    oldPartnerId?: string,
+    newPartnerId?: string,
+  ): Promise<{
+    signer: string;
+  }>;
+
   preKeygen(
     ctx: Ctx,
     partnerId: string,

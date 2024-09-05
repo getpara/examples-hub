@@ -12,6 +12,7 @@ export async function distributeNewShare(
   userShare: string,
   ignoreRedistributingBackupEncryptedShare = false,
   emailProps: BackupKitEmailProps,
+  partnerId?: string,
 ): Promise<string> {
   const publicKeysRes = await ctx.capsuleClient.getSessionPublicKeys(userId);
   const biometricEncryptedShares = publicKeysRes.data.keys
@@ -27,6 +28,7 @@ export async function distributeNewShare(
         type: KeyType.USER,
         encryptor: EncryptorType.BIOMETRICS,
         biometricPublicKey: key.sigDerivedPublicKey,
+        partnerId,
       };
     })
     .filter(Boolean);

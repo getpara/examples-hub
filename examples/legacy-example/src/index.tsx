@@ -1380,7 +1380,10 @@ function App() {
                     <Text>{isSessionActive ? 'Fully Logged In!' : 'Log In Pending...'}</Text>
 
                     <Text>
-                      Wallet Address: <strong>{capsule.wallets[capsule.currentWalletIds?.[0]]?.address ?? 'none'}</strong>
+                      Wallet Address:{' '}
+                      <strong>
+                        {capsule.wallets[capsule.currentWalletIds?.[0]]?.address ?? capsule.getAddress() ?? 'none'}
+                      </strong>
                     </Text>
                     {/* <Text>{userShare}</Text> */}
 

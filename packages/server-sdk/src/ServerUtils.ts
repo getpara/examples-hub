@@ -25,6 +25,20 @@ export class ServerUtils implements PlatformUtils {
     return keygen(ctx, userId, type, secretKey, true, sessionCookie, emailProps);
   }
 
+  refresh(
+    _ctx: Ctx,
+    _sessionCookie: string,
+    _userId: string,
+    _walletId: string,
+    _share: string,
+    _oldPartnerId?: string,
+    _newPartnerId?: string,
+  ): Promise<{
+    signer: string;
+  }> {
+    throw new Error('not implemented');
+  }
+
   preKeygen(
     ctx: Ctx,
     partnerId: string,

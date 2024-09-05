@@ -45,7 +45,7 @@ export const Body = ({
             subHeading={
               isAddingNewDevice
                 ? 'You can now close this window and return to your other device to register the new Passkey.'
-                : `If you are not automatically redirected, click here to return to ${partner.displayName}.`
+                : `If you are not automatically redirected, click here to return to ${partner.displayName}. Please do not close this page.`
             }
             icon={isAddingNewDevice ? 'heroPasskey' : 'heroWallet'}
           />

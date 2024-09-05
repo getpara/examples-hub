@@ -308,10 +308,17 @@ export async function sendTransaction(
   );
 }
 
-export async function refresh(ctx: Ctx, share: string, walletId: string, userId: string): Promise<string> {
+export async function refresh(
+  ctx: Ctx,
+  share: string,
+  walletId: string,
+  userId: string,
+  oldPartnerId?: string,
+  newPartnerId?: string,
+): Promise<string> {
   const {
     data: { protocolId },
-  } = await ctx.capsuleClient.refreshKeys(userId, walletId);
+  } = await ctx.capsuleClient.refreshKeys(userId, walletId, oldPartnerId, newPartnerId);
   const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
   const refreshFn = ctx.useDKLS ? global.dklsRefresh : global.refresh;
 
