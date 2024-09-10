@@ -2,9 +2,11 @@ import { MutationOptions, useMutation } from '@tanstack/react-query';
 import { useAppStore } from '../../../stores/app/useAppStore';
 import axios from 'axios';
 import { Environment } from '@usecapsule/react-sdk';
-import { getKeyLogoUploadUrl } from '../../../api/apiKeys/mutations';
+import { getKeyAssetUploadUrl } from '../../../api/apiKeys/mutations';
+import { PartnerAssetType } from '../../../types/api';
 
-export const useUploadKeyLogo = (
+export const useUploadKeyAsset = (
+  assetType: PartnerAssetType,
   options?: MutationOptions<string, Error, { keyId: string; file: File; env: string }, unknown>,
 ) => {
   const organizationId = useAppStore(state => state.getSelectedOrganization());
@@ -19,7 +21,8 @@ export const useUploadKeyLogo = (
 
       const postData = new FormData();
 
-      const { url, fields } = await getKeyLogoUploadUrl({
+      const { url, fields } = await getKeyAssetUploadUrl({
+        assetType,
         organizationId: organizationId ?? '',
         keyId: vars.keyId,
         env: vars.env,

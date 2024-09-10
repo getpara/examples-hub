@@ -79,8 +79,7 @@ export const EmailOption = () => {
               {showUpdatedEmailConfig && isSelected && isWelcomeOption && (
                 <>
                   <ImageUpload
-                    recommendedHeight={200}
-                    recommendedWidth={300}
+                    recommendedSize={{ height: 200, width: 300 }}
                     uploadImage={() => {
                       return Promise.resolve(true);
                     }}

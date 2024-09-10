@@ -2,9 +2,8 @@ import { CpslFileUpload, CpslText } from '@usecapsule/react-components';
 import { ReactNode } from 'react';
 import styled from 'styled-components';
 
-interface ImageUploadProps {
-  recommendedHeight: number;
-  recommendedWidth: number;
+export interface ImageUploadProps {
+  recommendedSize?: { width: number; height: number };
   label?: string;
   externalSrc?: string;
   externalFilename?: string;
@@ -14,8 +13,7 @@ interface ImageUploadProps {
 }
 
 export const ImageUpload = ({
-  recommendedHeight,
-  recommendedWidth,
+  recommendedSize,
   label,
   externalSrc,
   externalFilename,
@@ -36,8 +34,13 @@ export const ImageUpload = ({
       <LeftContainer slot="left-content">
         <CpslText variant="bodyS">Upload Image</CpslText>
         <CpslText variant="bodyXS" color="tertiary">
-          Upload a JPG, PNG or GIF image smaller than 5 MB <br />
-          <br /> Recommended size: {recommendedWidth}px X {recommendedHeight}px
+          Upload a JPG, PNG or GIF image smaller than 5 MB
+          {recommendedSize && (
+            <>
+              <br />
+              <br /> Recommended size: {recommendedSize.width}px X {recommendedSize.height}px
+            </>
+          )}
         </CpslText>
       </LeftContainer>
     </CpslFileUpload>

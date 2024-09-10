@@ -6,7 +6,7 @@ import { UpdateApiKeyBody } from '../../../types/api';
 
 export type UpdateApiKeyBranding = Pick<
   UpdateApiKeyBody,
-  'foregroundColor' | 'backgroundColor' | 'font' | 'logoUrl' | 'homepageUrl'
+  'foregroundColor' | 'backgroundColor' | 'font' | 'logoUrl' | 'iconUrl' | 'homepageUrl'
 >;
 
 export const useBrandingConfigFormData = () => {
@@ -22,6 +22,7 @@ export const useBrandingConfigFormData = () => {
       backgroundColor: apiKeyData?.backgroundColor ?? '',
       font: apiKeyData?.font ?? '',
       logoUrl: apiKeyData?.logoUrl ?? '',
+      iconUrl: apiKeyData?.iconUrl ?? '',
     },
   });
 

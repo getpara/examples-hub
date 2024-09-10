@@ -4,10 +4,10 @@ import { HomepageUrl } from './HomepageUrl';
 import { ForegroundColor } from './ForegroundColor';
 import { BackgroundColor } from './BackgroundColor';
 import { Font } from './Font';
-import { Logo } from './Logo';
 import { FormProvider } from 'react-hook-form';
 import { useBrandingConfigFormData } from '../../hooks/useBrandingConfigFormData';
 import { Save } from '../Save';
+import { Icon, Logo } from './AssetUpload';
 
 export const BrandingConfiguration = () => {
   const form = useBrandingConfigFormData();
@@ -24,6 +24,7 @@ export const BrandingConfiguration = () => {
         <ForegroundColor />
         <BackgroundColor />
         <Font />
+        <Icon />
         <Logo />
         <Save />
       </FormProvider>

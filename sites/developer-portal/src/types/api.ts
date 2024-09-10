@@ -81,6 +81,7 @@ export type ApiKey = {
   verifyUrl: string;
   portalUrl: string;
   logoUrl: string;
+  iconUrl: string;
   emailImageUrl: string;
   emailImageLink: string;
   emailBackupKit: boolean;
@@ -106,6 +107,7 @@ export type UpdateApiKeyBody = Nullable<
       | 'verifyUrl'
       | 'portalUrl'
       | 'logoUrl'
+      | 'iconUrl'
       | 'emailImageUrl'
       | 'emailImageLink'
       | 'emailBackupKit'
@@ -120,6 +122,11 @@ export type UpdateApiKeyBody = Nullable<
     >
   >
 >;
+
+export enum PartnerAssetType {
+  LOGOS = 'LOGOS',
+  ICONS = 'ICONS',
+}
 
 // *********************
 // API Key Users

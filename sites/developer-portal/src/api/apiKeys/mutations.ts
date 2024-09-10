@@ -1,5 +1,11 @@
 import { axiosClient } from '../../clients/axios';
-import { ApiKeyResponse, CreateApiKeyBody, LogoUploadUrlResponse, UpdateApiKeyBody } from '../../types/api';
+import {
+  ApiKeyResponse,
+  CreateApiKeyBody,
+  LogoUploadUrlResponse,
+  PartnerAssetType,
+  UpdateApiKeyBody,
+} from '../../types/api';
 
 export type CreateApiKeyVars = {
   organizationId: string;
@@ -47,16 +53,24 @@ export const rotateApiKey = async ({ organizationId, keyId, env }: RotateApiKeyV
 };
 
 export type GetLogoUploadUrlVars = {
+  assetType?: PartnerAssetType;
   organizationId: string;
   keyId: string;
   env: string;
   fileExt: string;
 };
-export const getKeyLogoUploadUrl = async ({ organizationId, keyId, env, fileExt }: GetLogoUploadUrlVars) => {
+export const getKeyAssetUploadUrl = async ({
+  assetType = PartnerAssetType.LOGOS,
+  organizationId,
+  keyId,
+  env,
+  fileExt,
+}: GetLogoUploadUrlVars) => {
   const endpoint = `/organizations/${organizationId}/${env}/keys/${keyId}/logo-upload-url`;
 
   return (
     await axiosClient.post<LogoUploadUrlResponse>(endpoint, {
+      assetType,
       fileExt,
     })
   ).data;
