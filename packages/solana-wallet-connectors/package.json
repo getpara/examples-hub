@@ -1,6 +1,6 @@
 {
   "name": "@usecapsule/solana-wallet-connectors",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -9,25 +9,25 @@
     "./connectors": "./dist/wallets/connectors/index.js"
   },
   "dependencies": {
-    "@usecapsule/web-sdk": "1.25.0"
+    "@usecapsule/web-sdk": "1.26.0"
   },
   "scripts": {
     "build": "rm -rf dist && tsc"
   },
   "devDependencies": {
+    "@solana-mobile/wallet-adapter-mobile": "2.1.3",
     "@solana/wallet-adapter-base": "0.9.23",
     "@solana/wallet-adapter-react": "0.15.35",
     "@solana/wallet-adapter-walletconnect": "0.1.16",
-    "@solana-mobile/wallet-adapter-mobile": "2.1.3",
     "@types/react": "^18.0.31",
     "@types/react-dom": "^18.2.7",
     "typescript": "^5.4.3"
   },
   "peerDependencies": {
+    "@solana-mobile/wallet-adapter-mobile": "2.1.x",
     "@solana/wallet-adapter-base": "0.9.x",
     "@solana/wallet-adapter-react": "0.15.x",
     "@solana/wallet-adapter-walletconnect": "0.1.x",
-    "@solana-mobile/wallet-adapter-mobile": "2.1.x",
     "react": ">=18",
     "react-dom": ">=18"
   },
