@@ -43,7 +43,7 @@ export function initClient(
 ): Client {
   return new Client({
     userManagementHost: getBaseUrl(env),
-    version,
+    version: env === Environment.DEV ? 'dev' : version,
     apiKey: apiKey,
     opts: { useFetchAdapter },
     retrieveSessionCookie,

@@ -44,8 +44,7 @@ import { getCosmosAddress, isCosmosWithPrefix } from './utils/formattingUtils.js
 const BIOMETRIC_VERIFICATION_TIME_MS = 30 * 60 * 1000;
 const DEV_BIOMETRIC_VERIFICATION_TIME_MS = 60 * 60 * 1000;
 
-// TODO: pull this from package.json
-const CORE_CAPSULE_VERSION = '1.21.0';
+const CORE_CAPSULE_VERSION = process.env.CORE_CAPSULE_VERSION;
 
 function migrateWallet(obj: Record<string, unknown>) {
   if (['USER', 'PREGEN'].includes(obj.type as string)) {
