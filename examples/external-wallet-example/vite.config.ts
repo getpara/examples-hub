@@ -9,7 +9,6 @@ export default defineConfig({
   resolve: {
     alias: {
       '@tanstack/react-query': path.resolve(__dirname, '../../node_modules/@tanstack/react-query'),
-      'wagmi': path.resolve(__dirname, './node_modules/wagmi'),
     },
   },
 });

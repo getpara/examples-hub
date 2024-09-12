@@ -10,7 +10,9 @@ import {
   WalletType,
   WalletScheme,
 } from '@usecapsule/user-management-client';
-import { pki, jsbn } from 'node-forge';
+import type { pki as pkiType, jsbn as jsbnType } from 'node-forge';
+import forge from 'node-forge';
+const { pki, jsbn } = forge;
 
 import { decryptWithPrivateKey, getAsymmetricKeyPair, getPublicKeyHex } from './cryptography/utils.js';
 import {
@@ -341,7 +343,7 @@ export abstract class CoreCapsule {
   /**
    * Encryption key pair generated from loginEncryptionKey.
    */
-  loginEncryptionKeyPair?: pki.rsa.KeyPair;
+  loginEncryptionKeyPair?: pkiType.rsa.KeyPair;
 
   /**
    * Hex color to use in the portal for the background color.
@@ -412,7 +414,7 @@ export abstract class CoreCapsule {
     }
   };
 
-  private convertBigInt(bigInt: Record<string, any>): jsbn.BigInteger {
+  private convertBigInt(bigInt: Record<string, any>): jsbnType.BigInteger {
     const convertedBigInt = new jsbn.BigInteger(null);
     convertedBigInt.data = bigInt.data;
     convertedBigInt.s = bigInt.s;
@@ -420,7 +422,7 @@ export abstract class CoreCapsule {
     return convertedBigInt;
   }
 
-  private convertEncryptionKeyPair(jsonKeyPair: Record<string, any>): pki.rsa.KeyPair {
+  private convertEncryptionKeyPair(jsonKeyPair: Record<string, any>): pkiType.rsa.KeyPair {
     return {
       privateKey: pki.setRsaPrivateKey(
         this.convertBigInt(jsonKeyPair.privateKey.n),
@@ -856,7 +858,7 @@ export abstract class CoreCapsule {
    * Sets the login encryption key pair associated with the `CoreCapsule` instance.
    * @param keyPair - Encryption key pair generated from loginEncryptionKey.
    */
-  async setLoginEncryptionKeyPair(keyPair: pki.rsa.KeyPair): Promise<void> {
+  async setLoginEncryptionKeyPair(keyPair: pkiType.rsa.KeyPair): Promise<void> {
     this.loginEncryptionKeyPair = keyPair;
     await this.sessionStorageSetItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR, JSON.stringify(keyPair));
   }

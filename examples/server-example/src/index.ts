@@ -65,7 +65,7 @@ async function createUserAndWallet(params: Params) {
     await capsule.createWalletPerMissingType(false);
   }
 
-  const walletId = capsule.findWalletId(capsule.currentWalletIds[0], { scheme: NON_ED25519 });
+  const walletId = capsule.findWalletId(capsule.currentWalletIds?.[0], { scheme: NON_ED25519 });
   const walletAddress = capsule.wallets[walletId].address;
   console.log(`address: ${walletAddress}`);
 
@@ -180,7 +180,7 @@ app.post('/sign', async (req: Request, res: Response, next: NextFunction) => {
     const capsule = new CapsuleServer(Environment.SANDBOX, '2f938ac0c48ef356050a79bd66042a23');
     const { message } = req.body;
     const provider = new ethers.JsonRpcProvider(ALCHEMY_SEPOLIA_PROVIDER, 'sepolia');
-    const walletId = capsule.currentWalletIds[0];
+    const walletId = capsule.currentWalletIds?.[0];
     const ethersSigner = new CapsuleEthersSigner(capsule, provider, walletId);
     const viemClient = createCapsuleViemClient(capsule, {
       chain: sepolia,

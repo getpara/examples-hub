@@ -19,8 +19,8 @@
     "@types/react": "^18.0.31",
     "@types/react-dom": "^18.2.7",
     "typescript": "^5.4.3",
-    "viem": "2.19.1",
-    "wagmi": "2.12.5"
+    "viem": "2.x",
+    "wagmi": "2.x"
   },
   "peerDependencies": {
     "react": ">=18",
