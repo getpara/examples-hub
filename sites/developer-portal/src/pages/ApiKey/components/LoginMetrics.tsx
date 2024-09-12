@@ -5,8 +5,8 @@ import { AnalyticsCard } from '../../../components/AnalyticsCard/AnalyticsCard';
 import { useOrganizationKeyUsersLoginMetrics } from '../../../hooks/api/queries/useOrganizationKeyUsersLoginMetrics';
 
 export const LoginMetrics = () => {
-  const { apiKey, env } = useParams();
-  const { data: loginAnalytics } = useOrganizationKeyUsersLoginMetrics(apiKey!, env!);
+  const { apiKey, env, projectId } = useParams();
+  const { data: loginAnalytics } = useOrganizationKeyUsersLoginMetrics(projectId ?? '', apiKey ?? '', env ?? '');
 
   return (
     <>

@@ -17,14 +17,20 @@ const PAGE_SIZE = 25;
 
 export const UsersTable = () => {
   const [page, setPage] = useState(0);
-  const { apiKey, env } = useParams();
-  const { data: apiKeyData } = useGetOrganizationKey(apiKey ?? '', env as Environment);
+  const { apiKey, env, projectId } = useParams();
+  const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
 
   const offset = page * PAGE_SIZE;
   const limit = PAGE_SIZE;
 
-  const { data: users, isLoading: isUsersLoading } = useOrganizationKeyUsersTableData(apiKey!, env!, offset, limit);
-  const { data: totalUsersRows } = useOrganizationKeyUsersTotalRows(apiKey!, env!, offset, limit);
+  const { data: users, isLoading: isUsersLoading } = useOrganizationKeyUsersTableData(
+    projectId ?? '',
+    apiKey ?? '',
+    env ?? '',
+    offset,
+    limit,
+  );
+  const { data: totalUsersRows } = useOrganizationKeyUsersTotalRows(projectId ?? '', apiKey ?? '', env ?? '', offset, limit);
 
   const [selectedUserId, setSelectedUserId] = useState('');
   const [selectedUserEmail, setSelectedUserEmail] = useState('');

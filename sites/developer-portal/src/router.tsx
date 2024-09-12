@@ -4,6 +4,7 @@ import { EarlyAccess, Home, Settings } from './pages';
 import { ApiKey } from './pages/ApiKey/ApiKey';
 import { Login } from './pages/Login/Login';
 import { RequestAccess } from './pages/RequestAccess/RequestAccess';
+import { Project } from './pages/Project/Project';
 
 export const router = createBrowserRouter([
   {
@@ -13,7 +14,14 @@ export const router = createBrowserRouter([
       { index: true, element: <Home /> },
       { path: 'settings', element: <Settings /> },
       { path: 'early-access', element: <EarlyAccess /> },
-      { path: '/key/:env/:apiKey', element: <ApiKey /> },
+      {
+        path: 'project/:projectId',
+        element: <Project />,
+      },
+      {
+        path: 'project/:projectId/key/:env/:apiKey',
+        element: <ApiKey />,
+      },
     ],
   },
   {

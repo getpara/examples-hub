@@ -8,6 +8,7 @@ import { Controller, useForm, useWatch } from 'react-hook-form';
 import { useCreateApiKey } from '../../../hooks/api/mutations/useCreateApiKey';
 import { ENV_VARS, IS_BETA, IS_PROD } from '../../../utils/constants';
 import { triggerToast } from '../../../utils/toasts';
+import { useParams } from 'react-router-dom';
 
 interface CreateKeyModalProps {
   open: boolean;
@@ -27,6 +28,7 @@ const DEFAULT_VALUES = {
 
 export const CreateKeyModal = ({ open, onClose }: CreateKeyModalProps) => {
   const { mutate: createKey } = useCreateApiKey();
+  const { projectId } = useParams();
 
   const {
     control,
@@ -43,9 +45,13 @@ export const CreateKeyModal = ({ open, onClose }: CreateKeyModalProps) => {
   });
 
   const handleCreateClick = () => {
-    if (environment) {
+    if (environment && projectId) {
       createKey(
-        { env: environment.toLowerCase(), data: { displayName: keyName } },
+        {
+          projectId,
+          env: environment.toLowerCase(),
+          data: { displayName: keyName },
+        },
         {
           onSuccess: () => {
             onClose();

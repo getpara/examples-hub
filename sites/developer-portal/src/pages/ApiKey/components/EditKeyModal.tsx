@@ -15,7 +15,7 @@ interface EditKeyModalProps {
 
 export const EditKeyModal = ({ open, name, onClose }: EditKeyModalProps) => {
   const navigate = useNavigate();
-  const { apiKey, env } = useParams();
+  const { apiKey, env, projectId } = useParams();
   const { mutate: saveChanges } = useUpdateApiKey();
   const { mutate: rotateKey } = useRotateKey();
   const { mutate: archiveKey } = useArchiveKey();
@@ -37,9 +37,9 @@ export const EditKeyModal = ({ open, name, onClose }: EditKeyModalProps) => {
   });
 
   const handleRefreshKey = () => {
-    if (apiKey && env) {
+    if (projectId && apiKey && env) {
       rotateKey(
-        { keyId: apiKey, env },
+        { projectId, keyId: apiKey, env },
         {
           onSuccess: () => {
             onClose();
@@ -62,9 +62,9 @@ export const EditKeyModal = ({ open, name, onClose }: EditKeyModalProps) => {
   };
 
   const handleArchiveKey = () => {
-    if (apiKey && env) {
+    if (projectId && apiKey && env) {
       archiveKey(
-        { keyId: apiKey, env },
+        { projectId, keyId: apiKey, env },
         {
           onSuccess: () => {
             onClose();
@@ -87,9 +87,9 @@ export const EditKeyModal = ({ open, name, onClose }: EditKeyModalProps) => {
   };
 
   const handleSaveClick = () => {
-    if (apiKey && env) {
+    if (projectId && apiKey && env) {
       saveChanges(
-        { keyId: apiKey, env, data: { displayName: keyName } },
+        { projectId, keyId: apiKey, env, data: { displayName: keyName } },
         {
           onSuccess: () => {
             onClose();

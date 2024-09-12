@@ -8,13 +8,13 @@ import { useGetOrganizationKey } from '../../../hooks/api/queries/useOrganizatio
 
 export const Header = () => {
   const navigate = useNavigate();
-  const { apiKey, env } = useParams();
-  const { data: apiKeyData } = useGetOrganizationKey(apiKey ?? '', env as Environment);
+  const { apiKey, env, projectId } = useParams();
+  const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const handleBackClick = () => {
-    navigate('/');
+    navigate(`/project/${projectId}`);
   };
 
   const handleEditClick = () => {

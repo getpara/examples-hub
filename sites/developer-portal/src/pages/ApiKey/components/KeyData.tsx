@@ -9,8 +9,8 @@ import { formatEnvName } from '../../../utils/apiKey';
 import { useGetOrganizationKey } from '../../../hooks/api/queries/useOrganizationKeys';
 
 export const KeyData = () => {
-  const { apiKey, env } = useParams();
-  const { data: apiKeyData } = useGetOrganizationKey(apiKey ?? '', env as Environment);
+  const { apiKey, env, projectId } = useParams();
+  const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
 
   const [isVisible, setIsVisible] = useState(false);
 

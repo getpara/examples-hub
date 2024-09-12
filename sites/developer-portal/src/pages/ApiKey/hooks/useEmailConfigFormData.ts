@@ -10,8 +10,8 @@ export type UpdateApiKeyEmail = Pick<
 >;
 
 export const useEmailConfigFormData = () => {
-  const { apiKey, env } = useParams();
-  const { data: apiKeyData } = useGetOrganizationKey(apiKey ?? '', env as Environment);
+  const { apiKey, env, projectId } = useParams();
+  const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
 
   const form = useForm<UpdateApiKeyEmail>({
     mode: 'onChange',

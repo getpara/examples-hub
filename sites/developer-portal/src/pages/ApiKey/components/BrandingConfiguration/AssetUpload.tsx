@@ -16,7 +16,7 @@ interface AssetUploadProps {
 }
 
 export const AssetUpload = ({ fieldName, assetType, label, recommendedSize }: AssetUploadProps) => {
-  const { apiKey, env } = useParams();
+  const { apiKey, env, projectId } = useParams();
   const { mutateAsync: uploadImage } = useUploadKeyAsset(assetType);
   const { getValues, setValue } = useFormContext<UpdateApiKeyBranding>();
 
@@ -26,7 +26,7 @@ export const AssetUpload = ({ fieldName, assetType, label, recommendedSize }: As
 
   const handleUploadImage = async (file: File) => {
     const url = await uploadImage(
-      { keyId: apiKey!, env: env!, file },
+      { projectId: projectId!, keyId: apiKey!, env: env!, file },
       {
         onError: () => {
           triggerToast({

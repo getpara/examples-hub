@@ -6,6 +6,7 @@ import { getApiKeyUsersTableData } from '../../../api/apiKeys/queries';
 export const ORGANIZATIONS_KEY_USERS_TABLE_DATA_QUERY_KEY = 'organizationKeyUsersTableData';
 
 export const useOrganizationKeyUsersTableDataQuery = <T>(
+  projectId: string,
   keyId: string,
   env: string,
   select: (data: ApiKeyUsersTableDataResponse) => T,
@@ -15,10 +16,10 @@ export const useOrganizationKeyUsersTableDataQuery = <T>(
   const selectedOrganizationId = useAppStore(state => state.getSelectedOrganization());
 
   return useQuery({
-    enabled: !!selectedOrganizationId,
-    queryKey: [ORGANIZATIONS_KEY_USERS_TABLE_DATA_QUERY_KEY, selectedOrganizationId, keyId, env, offset, limit],
+    enabled: !!selectedOrganizationId && !!projectId,
+    queryKey: [ORGANIZATIONS_KEY_USERS_TABLE_DATA_QUERY_KEY, selectedOrganizationId, projectId, keyId, env, offset, limit],
     queryFn: async () => {
-      const { data } = await getApiKeyUsersTableData(selectedOrganizationId ?? '', keyId, env, offset, limit);
+      const { data } = await getApiKeyUsersTableData(selectedOrganizationId ?? '', projectId, keyId, env, offset, limit);
 
       return data;
     },
@@ -26,8 +27,15 @@ export const useOrganizationKeyUsersTableDataQuery = <T>(
   });
 };
 
-export const useOrganizationKeyUsersTableData = (keyId: string, env: string, offset?: number, limit?: number) => {
+export const useOrganizationKeyUsersTableData = (
+  projectId: string,
+  keyId: string,
+  env: string,
+  offset?: number,
+  limit?: number,
+) => {
   return useOrganizationKeyUsersTableDataQuery(
+    projectId,
     keyId,
     env,
     data => {
@@ -38,8 +46,15 @@ export const useOrganizationKeyUsersTableData = (keyId: string, env: string, off
   );
 };
 
-export const useOrganizationKeyUsersTotalRows = (keyId: string, env: string, offset?: number, limit?: number) => {
+export const useOrganizationKeyUsersTotalRows = (
+  projectId: string,
+  keyId: string,
+  env: string,
+  offset?: number,
+  limit?: number,
+) => {
   return useOrganizationKeyUsersTableDataQuery(
+    projectId,
     keyId,
     env,
     data => {

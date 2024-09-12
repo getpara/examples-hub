@@ -7,11 +7,11 @@ import { PartnerAssetType } from '../../../types/api';
 
 export const useUploadKeyAsset = (
   assetType: PartnerAssetType,
-  options?: MutationOptions<string, Error, { keyId: string; file: File; env: string }, unknown>,
+  options?: MutationOptions<string, Error, { projectId: string; keyId: string; file: File; env: string }, unknown>,
 ) => {
   const organizationId = useAppStore(state => state.getSelectedOrganization());
 
-  return useMutation<string, Error, { keyId: string; file: File; env: string }, unknown>({
+  return useMutation<string, Error, { projectId: string; keyId: string; file: File; env: string }, unknown>({
     mutationFn: async vars => {
       const fileExt = vars.file.name.split('.').pop();
 
@@ -24,6 +24,7 @@ export const useUploadKeyAsset = (
       const { url, fields } = await getKeyAssetUploadUrl({
         assetType,
         organizationId: organizationId ?? '',
+        projectId: vars.projectId,
         keyId: vars.keyId,
         env: vars.env,
         fileExt,

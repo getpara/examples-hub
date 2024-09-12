@@ -6,6 +6,7 @@ import { getApiKeyUsersLoginMetrics } from '../../../api/apiKeys/queries';
 export const ORGANIZATIONS_KEY_USERS_LOGIN_METRICS_QUERY_KEY = 'useOrganizationKeyUsersLoginMetrics';
 
 export const useOrganizationKeyUsersLoginMetricsQuery = <T>(
+  projectId: string,
   keyId: string,
   env: string,
   select: (data: ApiKeyUsersLoginMetricsResponse) => T,
@@ -13,10 +14,10 @@ export const useOrganizationKeyUsersLoginMetricsQuery = <T>(
   const selectedOrganizationId = useAppStore(state => state.getSelectedOrganization());
 
   return useQuery({
-    enabled: !!selectedOrganizationId,
-    queryKey: [ORGANIZATIONS_KEY_USERS_LOGIN_METRICS_QUERY_KEY, selectedOrganizationId, keyId, env],
+    enabled: !!selectedOrganizationId && !!projectId,
+    queryKey: [ORGANIZATIONS_KEY_USERS_LOGIN_METRICS_QUERY_KEY, selectedOrganizationId, projectId, keyId, env],
     queryFn: async () => {
-      const { data } = await getApiKeyUsersLoginMetrics(selectedOrganizationId ?? '', keyId, env);
+      const { data } = await getApiKeyUsersLoginMetrics(selectedOrganizationId ?? '', projectId, keyId, env);
 
       return data;
     },
@@ -24,8 +25,8 @@ export const useOrganizationKeyUsersLoginMetricsQuery = <T>(
   });
 };
 
-export const useOrganizationKeyUsersLoginMetrics = (keyId: string, env: string) => {
-  return useOrganizationKeyUsersLoginMetricsQuery(keyId, env, data => {
+export const useOrganizationKeyUsersLoginMetrics = (projectId: string, keyId: string, env: string) => {
+  return useOrganizationKeyUsersLoginMetricsQuery(projectId, keyId, env, data => {
     return data.percentLoginsByMethod;
   });
 };

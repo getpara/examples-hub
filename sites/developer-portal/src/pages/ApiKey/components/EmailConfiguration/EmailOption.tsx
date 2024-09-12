@@ -15,8 +15,8 @@ import { useGetOrganizationKey } from '../../../../hooks/api/queries/useOrganiza
 import { Environment } from '../../../../types/environment';
 
 export const EmailOption = () => {
-  const { apiKey, env } = useParams();
-  const { data: apiKeyData } = useGetOrganizationKey(apiKey ?? '', env as Environment);
+  const { apiKey, env, projectId } = useParams();
+  const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
   const { control, setValue, getValues } = useFormContext<UpdateApiKeyEmail>();
   const showUpdatedEmailConfig = useUpdatedWelcomeEmailConfig();
 

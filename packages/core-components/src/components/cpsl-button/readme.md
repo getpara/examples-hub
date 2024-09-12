@@ -27,11 +27,13 @@
 
 ### Used by
 
+ - [cpsl-nav-button](../cpsl-nav-button)
  - [cpsl-pagination](../cpsl-pagination)
 
 ### Graph
 ```mermaid
 graph TD;
+  cpsl-nav-button --> cpsl-button
   cpsl-pagination --> cpsl-button
   style cpsl-button fill:#f9f,stroke:#333,stroke-width:4px
 ```

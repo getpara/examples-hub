@@ -366,9 +366,9 @@ export namespace Components {
         "subtitle"?: string;
         "title": string;
         /**
-          * The variant of the button. Options are: `"customContent"`, `"connection"`, `"externalWalletConnection"`, `"pending", `"approved", `"failed". Default is: `"connection"`.
+          * The variant of the button. Options are: `"customContent"`, `"connection"`, `"externalWalletConnection"`, `"pending", `"approved",`"add", `"failed". Default is: `"connection"`.
          */
-        "variant"?: 'customContent' | 'connection' | 'externalWalletConnection' | 'pending' | 'approved' | 'failed';
+        "variant"?: 'customContent' | 'connection' | 'externalWalletConnection' | 'pending' | 'approved' | 'add' | 'failed';
         /**
           * Whether to use the Capsule custom theming or use the provided theme Default is: `false`.
          */
@@ -555,11 +555,33 @@ export namespace Components {
          */
         "zIndexOverride"?: number;
     }
-    interface CpslNavButtonGroup {
+    interface CpslNavButton {
+        /**
+          * If the button is disabled. Default is: false.
+         */
+        "disabled"?: boolean;
+        /**
+          * Whether or not to use exact matching for the selected main route.
+         */
+        "exactMainRouteMatch"?: boolean;
+        /**
+          * Whether or not to use exact matching for the selected sub route.
+         */
+        "exactSubRouteMatch"?: boolean;
+        /**
+          * Path used to determine what button is selected
+         */
+        "path"?: string;
+        /**
+          * The route for the button.
+         */
+        "route": string;
         /**
           * The id of the selected button.
          */
-        "selectedId"?: string;
+        "subRoutes"?: { label: string; value: string }[];
+    }
+    interface CpslNavButtonGroup {
     }
     interface CpslOverlay {
         /**
@@ -870,6 +892,10 @@ export interface CpslModalV2CustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLCpslModalV2Element;
 }
+export interface CpslNavButtonCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLCpslNavButtonElement;
+}
 export interface CpslPaginationCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLCpslPaginationElement;
@@ -1137,6 +1163,24 @@ declare global {
         prototype: HTMLCpslModalV2Element;
         new (): HTMLCpslModalV2Element;
     };
+    interface HTMLCpslNavButtonElementEventMap {
+        "cpslNavButtonClick": string;
+        "cpslNavButtonSubRouteClick": string;
+    }
+    interface HTMLCpslNavButtonElement extends Components.CpslNavButton, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLCpslNavButtonElementEventMap>(type: K, listener: (this: HTMLCpslNavButtonElement, ev: CpslNavButtonCustomEvent<HTMLCpslNavButtonElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLCpslNavButtonElementEventMap>(type: K, listener: (this: HTMLCpslNavButtonElement, ev: CpslNavButtonCustomEvent<HTMLCpslNavButtonElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLCpslNavButtonElement: {
+        prototype: HTMLCpslNavButtonElement;
+        new (): HTMLCpslNavButtonElement;
+    };
     interface HTMLCpslNavButtonGroupElement extends Components.CpslNavButtonGroup, HTMLStencilElement {
     }
     var HTMLCpslNavButtonGroupElement: {
@@ -1379,6 +1423,7 @@ declare global {
         "cpsl-info-box": HTMLCpslInfoBoxElement;
         "cpsl-input": HTMLCpslInputElement;
         "cpsl-modal-v2": HTMLCpslModalV2Element;
+        "cpsl-nav-button": HTMLCpslNavButtonElement;
         "cpsl-nav-button-group": HTMLCpslNavButtonGroupElement;
         "cpsl-overlay": HTMLCpslOverlayElement;
         "cpsl-pagination": HTMLCpslPaginationElement;
@@ -1797,9 +1842,9 @@ declare namespace LocalJSX {
         "subtitle"?: string;
         "title"?: string;
         /**
-          * The variant of the button. Options are: `"customContent"`, `"connection"`, `"externalWalletConnection"`, `"pending", `"approved", `"failed". Default is: `"connection"`.
+          * The variant of the button. Options are: `"customContent"`, `"connection"`, `"externalWalletConnection"`, `"pending", `"approved",`"add", `"failed". Default is: `"connection"`.
          */
-        "variant"?: 'customContent' | 'connection' | 'externalWalletConnection' | 'pending' | 'approved' | 'failed';
+        "variant"?: 'customContent' | 'connection' | 'externalWalletConnection' | 'pending' | 'approved' | 'add' | 'failed';
         /**
           * Whether to use the Capsule custom theming or use the provided theme Default is: `false`.
          */
@@ -2022,11 +2067,41 @@ declare namespace LocalJSX {
          */
         "zIndexOverride"?: number;
     }
-    interface CpslNavButtonGroup {
+    interface CpslNavButton {
+        /**
+          * If the button is disabled. Default is: false.
+         */
+        "disabled"?: boolean;
+        /**
+          * Whether or not to use exact matching for the selected main route.
+         */
+        "exactMainRouteMatch"?: boolean;
+        /**
+          * Whether or not to use exact matching for the selected sub route.
+         */
+        "exactSubRouteMatch"?: boolean;
+        /**
+          * Called when the nav button is clicked.
+         */
+        "onCpslNavButtonClick"?: (event: CpslNavButtonCustomEvent<string>) => void;
+        /**
+          * Called when a nav button sub route is clicked.
+         */
+        "onCpslNavButtonSubRouteClick"?: (event: CpslNavButtonCustomEvent<string>) => void;
+        /**
+          * Path used to determine what button is selected
+         */
+        "path"?: string;
+        /**
+          * The route for the button.
+         */
+        "route"?: string;
         /**
           * The id of the selected button.
          */
-        "selectedId"?: string;
+        "subRoutes"?: { label: string; value: string }[];
+    }
+    interface CpslNavButtonGroup {
     }
     interface CpslOverlay {
         /**
@@ -2384,6 +2459,7 @@ declare namespace LocalJSX {
         "cpsl-info-box": CpslInfoBox;
         "cpsl-input": CpslInput;
         "cpsl-modal-v2": CpslModalV2;
+        "cpsl-nav-button": CpslNavButton;
         "cpsl-nav-button-group": CpslNavButtonGroup;
         "cpsl-overlay": CpslOverlay;
         "cpsl-pagination": CpslPagination;
@@ -2432,6 +2508,7 @@ declare module "@stencil/core" {
             "cpsl-info-box": LocalJSX.CpslInfoBox & JSXBase.HTMLAttributes<HTMLCpslInfoBoxElement>;
             "cpsl-input": LocalJSX.CpslInput & JSXBase.HTMLAttributes<HTMLCpslInputElement>;
             "cpsl-modal-v2": LocalJSX.CpslModalV2 & JSXBase.HTMLAttributes<HTMLCpslModalV2Element>;
+            "cpsl-nav-button": LocalJSX.CpslNavButton & JSXBase.HTMLAttributes<HTMLCpslNavButtonElement>;
             "cpsl-nav-button-group": LocalJSX.CpslNavButtonGroup & JSXBase.HTMLAttributes<HTMLCpslNavButtonGroupElement>;
             "cpsl-overlay": LocalJSX.CpslOverlay & JSXBase.HTMLAttributes<HTMLCpslOverlayElement>;
             "cpsl-pagination": LocalJSX.CpslPagination & JSXBase.HTMLAttributes<HTMLCpslPaginationElement>;

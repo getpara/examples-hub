@@ -9,15 +9,19 @@ import { triggerToast } from '../../utils/toasts';
 
 export const ApiKey = () => {
   const navigate = useNavigate();
-  const { apiKey, env } = useParams();
-  const { data: apiKeyData, isLoading: isApiKeyDataLoading } = useGetOrganizationKey(apiKey ?? '', env as Environment);
+  const { projectId, apiKey, env } = useParams();
+  const { data: apiKeyData, isLoading: isApiKeyDataLoading } = useGetOrganizationKey(
+    projectId ?? '',
+    apiKey ?? '',
+    env as Environment,
+  );
 
   if (!apiKey || !env) {
-    navigate('/');
+    navigate(`/project/${projectId}`);
   }
 
   if (!isApiKeyDataLoading && !apiKeyData) {
-    navigate('/');
+    navigate(`/project/${projectId}`);
     triggerToast({
       variant: 'error',
       title: 'Failed to Load Key',

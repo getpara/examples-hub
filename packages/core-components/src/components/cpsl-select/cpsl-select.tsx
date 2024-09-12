@@ -213,7 +213,7 @@ export class CpslSelect {
         )}
         <div id="select-container" class={{ 'select-container': true, 'error-container': Boolean(this.errorText) }} onMouseDown={this.handleClick}>
           {this.hasSelectedItem && this.showFormattedSelectedItem && <slot name="selected-item"></slot>}
-          <div class={{ 'selected-container-content': true, 'hidden': this.showFormattedSelectedItem }} id="selected-container-content" style={{}}>
+          <div class={{ 'selected-container-content': true, 'hidden': this.hasSelectedItem && this.showFormattedSelectedItem }} id="selected-container-content" style={{}}>
             {(!this.hasSelectedItem || !this.showFormattedSelectedItem) && (
               <cpsl-text class={{ 'selected-text': true, 'placeholder': !this.selectedValue }}>
                 {!this.selectedValue ? (this.placeholder ?? 'Select') : (this.formatValue?.(this.selectedValue) ?? this.selectedValue)}

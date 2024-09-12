@@ -7,8 +7,8 @@ import { UpdateApiKeyBody } from '../../../types/api';
 export type UpdateApiKeyPortal = Pick<UpdateApiKeyBody, 'portalUrl' | 'verifyUrl'>;
 
 export const usePortalConfigFormData = () => {
-  const { apiKey, env } = useParams();
-  const { data: apiKeyData } = useGetOrganizationKey(apiKey ?? '', env as Environment);
+  const { apiKey, env, projectId } = useParams();
+  const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
 
   const form = useForm<UpdateApiKeyPortal>({
     mode: 'onChange',

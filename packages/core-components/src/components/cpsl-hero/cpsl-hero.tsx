@@ -21,10 +21,10 @@ export class CpslHero {
 
   /**
    * The variant of the button.
-   * Options are: `"customContent"`, `"connection"`, `"externalWalletConnection"`, `"pending", `"approved", `"failed".
+   * Options are: `"customContent"`, `"connection"`, `"externalWalletConnection"`, `"pending", `"approved",`"add", `"failed".
    * Default is: `"connection"`.
    */
-  @Prop({ reflect: true }) variant?: 'customContent' | 'connection' | 'externalWalletConnection' | 'pending' | 'approved' | 'failed' = 'connection';
+  @Prop({ reflect: true }) variant?: 'customContent' | 'connection' | 'externalWalletConnection' | 'pending' | 'approved' | 'add' | 'failed' = 'connection';
 
   @Prop({ reflect: true }) title: string;
 
@@ -44,6 +44,7 @@ export class CpslHero {
           connection: this.variant === 'connection',
           pending: this.variant === 'pending' || this.variant === 'customContent',
           approved: this.variant === 'approved',
+          add: this.variant === 'add',
           failed: this.variant === 'failed',
           externalWalletConnection: this.variant === 'externalWalletConnection',
         }}
@@ -69,6 +70,11 @@ export class CpslHero {
                 <Fragment>
                   {!this.withDefaultTheme && <img class="approvedImage" src={Images.heroSuccess} />}
                   <cpsl-icon class="centerIcon" icon={this.withDefaultTheme ? 'heroCheckmark' : 'heroCheckmarkCapsule'} />
+                </Fragment>
+              )}
+              {this.variant === 'add' && (
+                <Fragment>
+                  <cpsl-icon class="centerIcon" icon={this.withDefaultTheme ? 'heroPlusCircle' : 'heroPlusCircleCapsule'} />
                 </Fragment>
               )}
               {this.variant === 'failed' && <cpsl-icon class="centerIcon" icon="heroAlertCircle" />}

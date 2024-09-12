@@ -30,6 +30,7 @@ export const CpslIdenticon = /*@__PURE__*/createReactComponent<JSX.CpslIdenticon
 export const CpslInfoBox = /*@__PURE__*/createReactComponent<JSX.CpslInfoBox, HTMLCpslInfoBoxElement>('cpsl-info-box');
 export const CpslInput = /*@__PURE__*/createReactComponent<JSX.CpslInput, HTMLCpslInputElement>('cpsl-input');
 export const CpslModalV2 = /*@__PURE__*/createReactComponent<JSX.CpslModalV2, HTMLCpslModalV2Element>('cpsl-modal-v2');
+export const CpslNavButton = /*@__PURE__*/createReactComponent<JSX.CpslNavButton, HTMLCpslNavButtonElement>('cpsl-nav-button');
 export const CpslNavButtonGroup = /*@__PURE__*/createReactComponent<JSX.CpslNavButtonGroup, HTMLCpslNavButtonGroupElement>('cpsl-nav-button-group');
 export const CpslOverlay = /*@__PURE__*/createReactComponent<JSX.CpslOverlay, HTMLCpslOverlayElement>('cpsl-overlay');
 export const CpslPagination = /*@__PURE__*/createReactComponent<JSX.CpslPagination, HTMLCpslPaginationElement>('cpsl-pagination');

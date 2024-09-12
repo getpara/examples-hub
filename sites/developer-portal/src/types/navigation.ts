@@ -5,4 +5,9 @@ export type NavRoute = {
   label: string;
   icon: IconType;
   comingSoon?: boolean;
+  exactMainRouteMatch?: boolean;
+  subRoutes?: {
+    value: string;
+    label: string;
+  }[];
 };

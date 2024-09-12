@@ -7,18 +7,18 @@ import { ENV_VARS } from '../../../utils/constants';
 
 export const ORGANIZATIONS_KEYS_QUERY_KEY = 'organizationKeys';
 
-export const useOrganizationKeysQuery = <T>(select: (data: ApiKey[]) => T) => {
+export const useOrganizationKeysQuery = <T>(projectId: string, select: (data: ApiKey[]) => T) => {
   const selectedOrganizationId = useAppStore(state => state.getSelectedOrganization());
 
   return useQuery({
-    enabled: !!selectedOrganizationId,
-    queryKey: [ORGANIZATIONS_KEYS_QUERY_KEY, , selectedOrganizationId],
+    enabled: !!selectedOrganizationId && !!projectId,
+    queryKey: [ORGANIZATIONS_KEYS_QUERY_KEY, selectedOrganizationId, projectId],
     queryFn: async () => {
-      if (!selectedOrganizationId) {
+      if (!selectedOrganizationId || !projectId) {
         return [];
       }
 
-      const { data } = await getApiKeys(selectedOrganizationId, ENV_VARS.environment);
+      const { data } = await getApiKeys(selectedOrganizationId, projectId, ENV_VARS.environment);
 
       return data.keys;
     },
@@ -26,14 +26,14 @@ export const useOrganizationKeysQuery = <T>(select: (data: ApiKey[]) => T) => {
   });
 };
 
-export const useGetAllOrganizationKeys = () => {
-  return useOrganizationKeysQuery(data => {
+export const useGetAllOrganizationKeys = (projectId: string) => {
+  return useOrganizationKeysQuery(projectId, data => {
     return data;
   });
 };
 
-export const useGetOrganizationKey = (id: string, env: Environment) => {
-  return useOrganizationKeysQuery(data => {
+export const useGetOrganizationKey = (projectId: string, id: string, env: Environment) => {
+  return useOrganizationKeysQuery(projectId, data => {
     return data.find(k => k.id === id && k.environment === env);
   });
 };

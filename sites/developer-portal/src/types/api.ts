@@ -45,6 +45,24 @@ export type LogoUploadUrlResponse = {
 };
 
 // *********************
+// Projects
+// *********************
+export type Project = {
+  id: string;
+  name: string;
+  description?: string;
+  iconUrl?: string;
+  framework?: string;
+  packageManager?: string;
+  archived?: boolean;
+};
+
+export type ProjectResponse = { project: Project };
+export type ProjectsResponse = { projects: Project[] };
+export type ProjectTotalUsersResponse = { totalUsers: number };
+export type UpdateProjectBody = Omit<Project, 'id' | 'archived'>;
+
+// *********************
 // Organization Members
 // *********************
 export type OrganizationMember = {

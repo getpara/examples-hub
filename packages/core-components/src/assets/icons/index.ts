@@ -42,6 +42,7 @@ import Farcaster from './farcaster.svg';
 import FigmaBrand from './figma-brand.svg';
 import Figma from './figma.svg';
 import File from './file.svg';
+import Folder from './folder.svg';
 import GithubBrand from './github-brand.svg';
 import Github from './github.svg';
 import Globe from './globe.svg';
@@ -56,6 +57,8 @@ import HeroExternalConnection from './hero-external-connection.svg';
 import HeroLock from './hero-lock.svg';
 import HeroPasskey from './hero-passkey.svg';
 import HeroPhone from './hero-phone.svg';
+import HeroPlusCircleCapsule from './hero-plus-circle-capsule.svg';
+import HeroPlusCircle from './hero-plus-circle.svg';
 import HeroWallet from './hero-wallet.svg';
 import Home from './home.svg';
 import Image from './image.svg';
@@ -385,6 +388,7 @@ export const Icons = {
   figmaBrand: FigmaBrand,
   figma: Figma,
   file: File,
+  folder: Folder,
   githubBrand: GithubBrand,
   github: Github,
   globe: Globe,
@@ -399,6 +403,8 @@ export const Icons = {
   heroLock: HeroLock,
   heroPasskey: HeroPasskey,
   heroPhone: HeroPhone,
+  heroPlusCircleCapsule: HeroPlusCircleCapsule,
+  heroPlusCircle: HeroPlusCircle,
   heroWallet: HeroWallet,
   home: Home,
   image: Image,

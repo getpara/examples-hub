@@ -5,6 +5,7 @@
   --ring-2-size: 360px;
   --ring-1-size: 240px;
   --ring-0-size: 120px;
+  --center-icon-size: 64px;
 
   --default-theme-ring-3-opacity: 0.05;
   --default-theme-ring-2-opacity: 0.1;
@@ -124,6 +125,24 @@
   }
 }
 
+:host(.add) > .backgroundContainer > .background {
+  .ring0 {
+    box-shadow: 0px 0px 20px rgba(240, 68, 56, 0.1);
+  }
+
+  .ring1 {
+    box-shadow: 0px 0px 20px rgb(219, 0, 179, 0.1);
+  }
+
+  .ring2 {
+    box-shadow: 0px 0px 20px rgb(219, 0, 51, 0.1);
+  }
+
+  .ring3 {
+    box-shadow: 0px 0px 20px rgb(254, 83, 48, 0.1);
+  }
+}
+
 :host(.failed) > .backgroundContainer > .background.defaultTheme > {
   .ring0 {
     box-shadow: 0px 0px 20px color-mix(in srgb, var(--cpsl-color-utility-red), transparent 90%);
@@ -143,6 +162,24 @@
 }
 
 :host(.approved) > .backgroundContainer > .background.defaultTheme {
+  .ring1 {
+    box-shadow: 0px 0px 20px var(--cpsl-color-accent-0, color-mix(in srgb, var(--cpsl-color-foreground-0), transparent 93%));
+  }
+
+  .ring2 {
+    box-shadow: 0px 0px 12px var(--cpsl-color-accent-0, color-mix(in srgb, var(--cpsl-color-foreground-0), transparent 95%));
+  }
+
+  .ring3 {
+    box-shadow: 0px 0px 12px var(--cpsl-color-accent-0, color-mix(in srgb, var(--cpsl-color-foreground-0), transparent 96%));
+  }
+}
+
+:host(.add) > .backgroundContainer > .background.defaultTheme {
+  .ring0 {
+    box-shadow: 0px 0px 20px var(--cpsl-color-accent-0, color-mix(in srgb, var(--cpsl-color-foreground-0), transparent 90%));
+  }
+
   .ring1 {
     box-shadow: 0px 0px 20px var(--cpsl-color-accent-0, color-mix(in srgb, var(--cpsl-color-foreground-0), transparent 93%));
   }
@@ -278,8 +315,8 @@
   position: absolute;
 
   --icon-color: var(--cpsl-color-accent-0, var(--cpsl-color-foreground-0));
-  --width: 64px;
-  --height: 64px;
+  --width: var(--center-icon-size);
+  --height: var(--center-icon-size);
 }
 
 .externalConnectionIcon {

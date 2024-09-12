@@ -6,7 +6,7 @@ import { CpslButton } from '@usecapsule/react-components';
 import styled from 'styled-components';
 
 export const Save = () => {
-  const { apiKey, env } = useParams();
+  const { apiKey, env, projectId } = useParams();
   const { mutate: updateKey, isPending } = useUpdateApiKey();
   const {
     formState: { isDirty, isValid },
@@ -17,13 +17,9 @@ export const Save = () => {
   const canSave = isDirty && isValid;
 
   const handleSave = () => {
-    if (apiKey && env && canSave) {
+    if (projectId && apiKey && env && canSave) {
       updateKey(
-        {
-          keyId: apiKey,
-          env,
-          data: getValues(),
-        },
+        { projectId, keyId: apiKey, env, data: getValues() },
         {
           onSuccess: () => {
             reset(getValues());

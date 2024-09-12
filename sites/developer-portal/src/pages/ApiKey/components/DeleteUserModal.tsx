@@ -13,16 +13,12 @@ interface DeleteUserModalProps {
 }
 
 export const DeleteUserModal = ({ open, userEmail, userId, onClose, onExited }: DeleteUserModalProps) => {
-  const { apiKey, env } = useParams();
+  const { apiKey, env, projectId } = useParams();
   const { mutate: deleteUser } = useDeleteUser();
 
   const handleDeleteClick = () => {
     deleteUser(
-      {
-        userId,
-        env: env!,
-        keyId: apiKey!,
-      },
+      { projectId: projectId!, userId, env: env!, keyId: apiKey! },
       {
         onSuccess: () => {
           onClose();
