@@ -23,7 +23,7 @@
     "start": "vite",
     "build": "rm -rf build && tsc && vite build",
     "preview": "vite preview",
-    "deploy-s3": "yarn && yarn build && aws s3 sync build/ s3://$VITE_BUCKET_NAME --acl public-read --profile $VITE_ENV --delete",
+    "deploy-s3": "yarn && yarn build && aws s3 sync build/ s3://$VITE_BUCKET_NAME --profile $VITE_ENV --delete",
     "deploy-sandbox": "VITE_ENV=sandbox VITE_BUCKET_NAME=capsule-sandbox-js-bridge yarn deploy-s3",
     "deploy-beta": "VITE_ENV=beta VITE_BUCKET_NAME=capsule-beta-js-bridge yarn deploy-s3",
     "deploy-prod": "VITE_ENV=prod VITE_BUCKET_NAME=capsule-prod-js-bridge yarn deploy-s3"

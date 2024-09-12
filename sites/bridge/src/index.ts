@@ -269,6 +269,12 @@ async function login(capsule: CapsuleWeb, args: any[]) {
   const userHandle = args[2];
 
   await capsule.setUserId(userId);
+  if (!capsule.getEmail()) {
+    const touchRes = await capsule.ctx.capsuleClient.touchSession();
+    if (touchRes.data.email) {
+      await capsule.setEmail(touchRes.data.email);
+    }
+  }
 
   const encryptedSharesRes = await capsule.ctx.capsuleClient.getBiometricKeyshares(userId, signatureId);
   const decryptedShares = await getDerivedPrivateKeyAndDecrypt(capsule.ctx, userHandle, encryptedSharesRes.data.keyShares);
@@ -296,6 +302,12 @@ async function loginV2(capsule: CapsuleWeb, args: any[]) {
   const userHandle = args[2];
 
   await capsule.setUserId(userId);
+  if (!capsule.getEmail()) {
+    const touchRes = await capsule.ctx.capsuleClient.touchSession();
+    if (touchRes.data.email) {
+      await capsule.setEmail(touchRes.data.email);
+    }
+  }
 
   const encryptionKeyHash = getSHA256HashHex(userHandle);
   const encryptedSharesRes = await capsule.ctx.capsuleClient.getBiometricKeyshares(userId, credentialsId);
