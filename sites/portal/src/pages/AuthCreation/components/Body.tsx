@@ -37,7 +37,7 @@ export const Body = ({ step, isForNewDevice, onAddThisDeviceClick }: BodyProps) 
   };
 
   return (
-    <Container slot="body">
+    <Container>
       <InnerContainer>{Content()}</InnerContainer>
       <ModalFooter />
     </Container>

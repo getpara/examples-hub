@@ -1,6 +1,8 @@
 export type Theme = {
   foregroundColor: string;
   backgroundColor: string;
+  accentColor?: string;
+  mode?: 'light' | 'dark';
   borderRadius?: BorderRadius;
 };
 

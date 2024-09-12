@@ -8,7 +8,7 @@ export const ModalHeader = () => {
   const { partner, homepageUrl, isDark } = useModalOutletContext();
 
   return (
-    <Container slot="header" id="header">
+    <Container id="header">
       <InnerContainer>
         {partner.portalHeaderLogoUrl ? (
           <Logo src={partner.portalHeaderLogoUrl} alt={`${partner.displayName ? `${partner.displayName} -` : ''}logo`} />

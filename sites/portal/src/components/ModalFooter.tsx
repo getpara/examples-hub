@@ -30,6 +30,7 @@ const FooterContentContainer = styled.div`
   gap: 8px;
   margin-top: 16px;
   padding-top: 8px;
+  padding-bottom: 24px;
 `;
 
 const PoweredByContainer = styled.div`

@@ -997,6 +997,8 @@ export abstract class CoreCapsule {
       partnerId,
       portalFont: partner.font,
       portalBorderRadius: this.portalTheme?.borderRadius,
+      portalThemeMode: this.portalTheme?.mode,
+      portalAccentColor: this.portalTheme?.accentColor,
       portalForegroundColor: partner.foregroundColor || this.portalTheme?.foregroundColor,
       portalBackgroundColor: partner.backgroundColor || this.portalBackgroundColor || this.portalTheme?.backgroundColor,
       portalPrimaryButtonColor: this.portalPrimaryButtonColor,

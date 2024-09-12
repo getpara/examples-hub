@@ -1,4 +1,4 @@
-import { CpslIcon, CpslInput, CpslAuthModal, CpslText } from '@usecapsule/react-components';
+import { CpslIcon, CpslInput, CpslText, CpslCard } from '@usecapsule/react-components';
 import { styled } from 'styled-components';
 
 export const Heading: typeof CpslText = styled(CpslText)`
@@ -51,51 +51,23 @@ export const Hero: typeof CpslIcon = styled(CpslIcon)`
   }
 `;
 
-export const Modal: typeof CpslAuthModal = styled(CpslAuthModal)`
-  @media (max-width: 550px) {
-    --inner-container-padding-top: 40px;
-    --inner-container-padding-bottom: 32px;
+export const Card = styled(CpslCard)`
+  width: 100%;
+  height: 100%;
+  overflow: auto;
 
-    height: 100vh;
-    height: 100dvh;
-    width: 100vw;
-    width: 100dvw;
-    max-width: none;
+  &::part(card-container) {
+    height: 100%;
+    border-radius: 0px;
+    padding-bottom: 0px;
     border: none;
   }
+`;
 
-  &::part(modal-container) {
-    width: 430px;
-
-    @media (max-width: 550px) {
-      /* background-color: var(--cpsl-color-modal-surface-main); */
-      height: 100vh;
-      height: 100dvh;
-      width: 100vw;
-      width: 100dvw;
-      max-width: none;
-      max-height: none;
-      border: none;
-      border-radius: 0px;
-      box-shadow: none;
-    }
-  }
-
-  &::part(modal-inner-container) {
-    @media (max-width: 550px) {
-      display: flex;
-      flex: 1;
-      border-radius: 0px;
-    }
-  }
-
-  &::part(modal-content) {
-    @media (max-width: 550px) {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-    }
-  }
+export const CardContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 `;
 
 export const FilledDisabledInput: typeof CpslInput = styled(CpslInput)`

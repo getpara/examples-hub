@@ -31,6 +31,11 @@ export const ModalLayout = () => {
   const portalBackgroundColor = validateColorInput(searchParams.get('portalBackgroundColor'))
     ? searchParams.get('portalBackgroundColor')
     : '';
+  const portalAccentColor = searchParams.get('portalAccentColor')
+    ? validateColorInput(searchParams.get('portalAccentColor'))
+      ? searchParams.get('portalAccentColor')
+      : undefined
+    : undefined;
   const portalPrimaryButtonColor = validateColorInput(searchParams.get('portalPrimaryButtonColor'))
     ? decodeURIComponent(searchParams.get('portalPrimaryButtonColor'))
     : '';
@@ -74,6 +79,9 @@ export const ModalLayout = () => {
         ? {
             foregroundColor: portalForegroundColor ?? DEFAULT_THEME.foregroundColor,
             backgroundColor: portalBackgroundColor ?? DEFAULT_THEME.backgroundColor,
+            mode:
+              portalThemeMode === 'dark' || portalThemeMode === 'light' ? (portalThemeMode as 'light' | 'dark') : undefined,
+            accentColor: portalAccentColor,
           }
         : {
             foregroundColor: DEFAULT_THEME.foregroundColor,
@@ -109,6 +117,7 @@ export const ModalLayout = () => {
     portalTextColor,
     portalFont,
     portalThemeMode,
+    portalAccentColor,
   ]);
 
   useEffect(() => {

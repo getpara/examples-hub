@@ -4,7 +4,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { authCreation } from '../../utils/authCreation';
 import { AuthCreationStep, REDIRECT_TIMEOUT } from '../../constants';
 import { Body } from './components/Body';
-import { Modal } from '../../components/common';
+import { Card, CardContent } from '../../components/common';
 import { ModalHeader } from '../../components/ModalHeader';
 import { CountryCallingCode } from 'libphonenumber-js';
 import { useCapsule } from '../../components/CapsuleContext';
@@ -60,9 +60,11 @@ export const AuthCreation = () => {
   }, []);
 
   return (
-    <Modal noOverlay>
-      <ModalHeader />
-      <Body step={step} isForNewDevice={isForNewDevice} userId={paramsUserId} onAddThisDeviceClick={setUpBiometrics} />
-    </Modal>
+    <Card>
+      <CardContent>
+        <ModalHeader />
+        <Body step={step} isForNewDevice={isForNewDevice} userId={paramsUserId} onAddThisDeviceClick={setUpBiometrics} />
+      </CardContent>
+    </Card>
   );
 };

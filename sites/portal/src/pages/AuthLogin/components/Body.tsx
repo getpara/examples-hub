@@ -58,7 +58,7 @@ export const Body = ({
   };
 
   return (
-    <Container slot="body">
+    <Container>
       <InnerContainer>{Content()}</InnerContainer>
       <ModalFooter />
     </Container>
@@ -67,14 +67,12 @@ export const Body = ({
 
 const Container = styled.div`
   flex: 1;
-  padding-top: 8px;
   height: 100%;
 
   display: flex;
   align-items: center;
   flex-direction: column;
   gap: 8px;
-  justify-content: space-between;
 `;
 
 const InnerContainer = styled.div`

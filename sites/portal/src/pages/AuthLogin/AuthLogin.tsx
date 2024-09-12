@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AuthLoginStep, REDIRECT_TIMEOUT } from '../../constants';
 import { Body } from './components/Body';
-import { Modal } from '../../components/common';
+import { Card, CardContent } from '../../components/common';
 import { ModalHeader } from '../../components/ModalHeader';
 import { getAsymmetricKeyPair, getPublicKeyHex, getSchemes } from '@usecapsule/web-sdk';
 import { useAuthLoginStep } from '../../hooks/useLoginStep';
@@ -184,17 +184,19 @@ const AuthLoginBase = () => {
   }
 
   return (
-    <Modal noOverlay>
-      <ModalHeader />
-      <Body
-        step={step}
-        sessionLookupId={sessionId}
-        addDeviceUrl={urlForNewDeviceLogin}
-        isAddingNewDevice={isAddingNewDevice}
-        onLoginClick={login}
-        onAddDeviceClick={addDevice}
-      />
-    </Modal>
+    <Card>
+      <CardContent>
+        <ModalHeader />
+        <Body
+          step={step}
+          sessionLookupId={sessionId}
+          addDeviceUrl={urlForNewDeviceLogin}
+          isAddingNewDevice={isAddingNewDevice}
+          onLoginClick={login}
+          onAddDeviceClick={addDevice}
+        />
+      </CardContent>
+    </Card>
   );
 };
 
