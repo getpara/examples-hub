@@ -150,6 +150,8 @@ export enum WalletType {
   COSMOS = 'COSMOS',
 }
 
+export type CurrentWalletIds = Partial<Record<WalletType, string[]>>;
+
 export const NON_ED25519 = [WalletScheme.DKLS, WalletScheme.CGGMP];
 
 export interface PartnerEntity {
@@ -267,6 +269,9 @@ export enum Network {
   BASE = 'BASE',
   OPTIMISM = 'OPTIMISM',
   POLYGON = 'POLYGON',
+  SOLANA = 'SOLANA',
+  COSMOS = 'COSMOS',
+  CELO = 'CELO',
 }
 
 export enum OnRampProvider {
@@ -573,7 +578,7 @@ class Client {
   // POST /users/:userId/wallets/set
   setCurrentWalletIds = async (
     userId: string,
-    walletIds: string[],
+    walletIds: CurrentWalletIds,
     needsWallet = false,
     sessionLookupId?: string,
   ): Promise<any> => {

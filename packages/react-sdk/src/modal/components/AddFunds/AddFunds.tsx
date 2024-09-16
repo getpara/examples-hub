@@ -6,20 +6,25 @@ import {
   CpslButton,
   CpslDivider,
   CpslIcon,
+  CpslIdenticon,
   CpslQrCode,
   CpslSpinner,
   CpslTab,
   CpslTabs,
   CpslText,
 } from '@usecapsule/react-components';
-import { useModalStore, useThemeStore } from '../../stores/index.js';
-import { ReactNode, useEffect, useState } from 'react';
+import { useCapsuleStore, useModalStore, useThemeStore } from '../../stores/index.js';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard.js';
 import { OnRampConfigError, validateOnRampConfig } from '../../utils/validateOnRampConfig.js';
 import { formatNetworkList } from '../../utils/stringFormatters.js';
 import { OnRampProviderButton } from '../OnRampComponents/OnRampProviderButton.js';
-import { useWallet } from '../../providers/WalletContext.js';
 import { isMobile } from '@usecapsule/web-sdk';
+import { useActiveWallet } from '../../hooks/useActiveWallet.js';
+
+interface AddFundsProps {
+  hasFinishedAnimation: boolean;
+}
 
 export type Tab = EnabledFlow;
 
@@ -28,35 +33,33 @@ const TABS: [Tab, ReactNode][] = [
   [EnabledFlow.RECEIVE, 'Receive'],
 ];
 
-interface AddFundsProps {
-  hasFinishedAnimation: boolean;
-}
-
 export const AddFunds = ({ hasFinishedAnimation }: AddFundsProps) => {
   const [isCopied, copy] = useCopyToClipboard();
+  const capsule = useCapsuleStore(state => state.capsule);
   const appName = useThemeStore(state => state.appName);
   const onRampConfig = useModalStore(state => state.onRampConfig);
+  const accountAddFundTab = useModalStore(state => state.accountAddFundTab);
   const networks = useModalStore(state => state.networks);
 
-  const isAccount = useModalStore(state => state.isAccount());
-  const accountAddFundTab = useModalStore(state => state.accountAddFundTab);
-  const { wallet } = useWallet();
+  const activeWallet = useActiveWallet();
 
   const isAllFlows = !onRampConfig.enabledFlows;
   const tabs = TABS.filter(([tab]) => isAllFlows || onRampConfig.enabledFlows.some(prop => tab === EnabledFlow[prop]));
   const isMultiFlow = isAllFlows || tabs.length > 1;
-  const defaultTab: Tab = tabs[0][0];
 
-  const [_tab, setTab] = useState<Tab>(defaultTab);
+  const [tab, setTab] = useState<Tab>(accountAddFundTab);
   const [configError, setConfigError] = useState<OnRampConfigError | undefined>();
 
-  const tab = isAccount ? accountAddFundTab : _tab;
+  const address = useMemo(
+    () => capsule.getDisplayAddress(activeWallet.id, { addressType: activeWallet.type }),
+    [capsule, activeWallet?.id, activeWallet?.type],
+  );
 
   const onSetTab = (event: CpslTabsCustomEvent<TabsChangedEventDetail>) => {
     setTab(event.detail.tab as Tab);
   };
   const onCopy = () => {
-    copy(wallet?.address);
+    copy(address);
   };
 
   useEffect(() => {
@@ -70,12 +73,12 @@ export const AddFunds = ({ hasFinishedAnimation }: AddFundsProps) => {
 
   return (
     <StepContainer>
-      {!isAccount && isMultiFlow && (
+      {isMultiFlow && (
         <InnerStepContainer>
           <CpslTabs selectedTab={hasFinishedAnimation ? tab : ''} onCpslTabsChanged={onSetTab}>
-            {Object.entries(tabs).map(([tab, title]) => (
+            {TABS.map(([tab, title]) => (
               <CpslTab key={tab} tab={tab}>
-                <CpslIcon slot="start" icon={tab === 'buy' ? 'creditCard' : 'qrCode'} />
+                <CpslIcon slot="start" icon={tab === EnabledFlow.BUY ? 'creditCard' : 'qrCode'} />
                 {title}
               </CpslTab>
             ))}
@@ -116,7 +119,13 @@ export const AddFunds = ({ hasFinishedAnimation }: AddFundsProps) => {
               <CpslText weight="semiBold" color="secondary">
                 Copy wallet address
               </CpslText>
-              <FilledDisabledInput disabled value={wallet?.address} noAutoDisable>
+              <FilledDisabledInput key={address} readonly value={address}>
+                <CpslIdenticon
+                  slot="start"
+                  variant="avatar"
+                  size="32px"
+                  hash={capsule.getIdenticonHash(activeWallet.id, activeWallet.type)}
+                />
                 <CpslButton slot="end" variant="ghost" onClick={onCopy}>
                   <CpslIcon icon={isCopied ? 'check' : 'copy'} />
                 </CpslButton>
@@ -130,7 +139,7 @@ export const AddFunds = ({ hasFinishedAnimation }: AddFundsProps) => {
                     Scan with your crypto wallet
                   </CpslText>
                   <QRContainer>
-                    {!wallet?.address ? <CpslSpinner size={100} /> : <CpslQrCode url={wallet?.address} />}
+                    {!address ? <CpslSpinner size={100} /> : <CpslQrCode key={address} url={address} />}
                   </QRContainer>
                 </InnerStepContainer>
               </>

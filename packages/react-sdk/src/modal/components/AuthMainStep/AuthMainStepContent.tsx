@@ -1,4 +1,4 @@
-import { ReactNode, useMemo } from 'react';
+import { Fragment, ReactNode, useMemo } from 'react';
 import { CpslButton, CpslDivider, CpslIconGroup, IconType } from '@usecapsule/react-components';
 import styled from 'styled-components';
 import { OAuthMethod } from '@usecapsule/web-sdk';
@@ -35,21 +35,19 @@ export const AuthMainStepContent = ({ oAuthMethods, disableEmailLogin, disablePh
   };
 
   const Content = useMemo(() => {
-    const Methods: ReactNode[] = [];
+    const methods: [ReactNode, string][] = [];
 
     authLayout.forEach(layout => {
-      if (Methods.length > 0) {
-        Methods.push(<CpslDivider key="or">or</CpslDivider>);
-      }
       switch (layout) {
         case AuthLayout.AUTH_FULL: {
-          Methods.push(
+          methods.push([
             <AuthOptions
               oAuthMethods={oAuthMethods}
               disableEmailLogin={disableEmailLogin}
               disablePhoneLogin={disablePhoneLogin}
             />,
-          );
+            layout,
+          ]);
 
           break;
         }
@@ -58,19 +56,20 @@ export const AuthMainStepContent = ({ oAuthMethods, disableEmailLogin, disablePh
 
           oAuthMethods?.forEach(method => icons.push(useBrandedLogos ? brandedOAuthLogos[method] : oAuthLogos[method]));
 
-          Methods.push(
+          methods.push([
             <CondensedButton onClick={handleCondensedAuthClick} variant="tertiary" fullWidth key="authCondensed">
               <IconGroupSpacer slot="start" icons={[]} $isDark={useDarkLogos} />
               Sign Up or Login
               <StyledIconGroup slot="end" icons={icons.splice(0, 3)} $isDark={useDarkLogos} />
             </CondensedButton>,
-          );
+            layout,
+          ]);
 
           break;
         }
         case AuthLayout.EXTERNAL_FULL: {
           if (!!wallets.length) {
-            Methods.push(<ExternalWallets key="externalWallets" />);
+            methods.push([<ExternalWallets key="externalWallets" />, layout]);
           }
           break;
         }
@@ -79,13 +78,14 @@ export const AuthMainStepContent = ({ oAuthMethods, disableEmailLogin, disablePh
 
           wallets?.forEach(wallet => icons.push(wallet.iconUrl));
 
-          Methods.push(
+          methods.push([
             <CondensedButton onClick={handleCondensedExternalClick} variant="tertiary" fullWidth key="authCondensed">
               <IconGroupSpacer slot="start" icons={[]} $isDark={useDarkLogos} />
               Connect Wallet
               <StyledIconGroup slot="end" icons={icons.splice(0, 3)} $isDark={useDarkLogos} />
             </CondensedButton>,
-          );
+            layout,
+          ]);
 
           break;
         }
@@ -95,7 +95,16 @@ export const AuthMainStepContent = ({ oAuthMethods, disableEmailLogin, disablePh
       }
     });
 
-    return <>{Methods}</>;
+    return (
+      <>
+        {methods.map(([reactNode, key], index) => (
+          <Fragment key={key}>
+            {reactNode}
+            {index < methods.length - 1 && <CpslDivider key="or">or</CpslDivider>}
+          </Fragment>
+        ))}
+      </>
+    );
   }, [oAuthMethods, disableEmailLogin, disablePhoneLogin, wallets]);
 
   return <Container data-testid="main-auth-step-content">{Content}</Container>;

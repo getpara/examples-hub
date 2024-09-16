@@ -341,6 +341,7 @@ async function loginV2(capsule: CapsuleWeb, args: any[]) {
     address: desiredWallet.address,
     publicKey: desiredWallet.publicKey,
     scheme: desiredWallet.scheme as WalletScheme,
+    isExternal: false,
   };
 
   await capsule.setWallets(walletsToInsert);

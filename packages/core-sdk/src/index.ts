@@ -1,13 +1,28 @@
-import { CoreCapsule, PREFIX as STORAGE_PREFIX, PregenIdentifierType, getSchemes } from './CoreCapsule.js';
+import {
+  CoreCapsule,
+  PREFIX as STORAGE_PREFIX,
+  PregenIdentifierType,
+  isWalletSupported,
+  isTypeOptional,
+  isTypeRequired,
+} from './CoreCapsule.js';
 
-export { WalletType, WalletScheme, NON_ED25519 } from '@usecapsule/user-management-client';
+export {
+  type CurrentWalletIds,
+  EmailTheme,
+  type PartnerEntity,
+  type WalletEntity,
+  WalletType,
+  WalletScheme,
+  NON_ED25519,
+} from '@usecapsule/user-management-client';
 export * from './definitions.js';
 export type { Ctx } from './definitions.js';
 export * from './types/index.js';
 export { distributeNewShare } from './shares/shareDistribution.js';
 export { KeyContainer } from './shares/KeyContainer.js';
-export { RecoveryStatus, stringToPhoneNumber, ExternalWalletType } from './CoreCapsule.js';
-export type { Wallet, ConstructorOpts, SupportedWalletTypes } from './CoreCapsule.js';
+export { RecoveryStatus, stringToPhoneNumber, entityToWallet } from './CoreCapsule.js';
+export type { Wallet, ConstructorOpts, SupportedWalletTypes, ExternalWalletType } from './CoreCapsule.js';
 export type { PlatformUtils } from './PlatformUtils.js';
 export type { StorageUtils } from './StorageUtils.js';
 export { initClient } from './external/capsuleClient.js';
@@ -32,8 +47,7 @@ export * from './utils/pollingUtils.js';
 export * from './errors.js';
 export * from './utils/formattingUtils.js';
 export { retrieve as transmissionUtilsRetrieve } from './transmission/transmissionUtils.js';
-export { STORAGE_PREFIX, PregenIdentifierType, getSchemes };
-export { EmailTheme } from '@usecapsule/user-management-client';
+export { STORAGE_PREFIX, PregenIdentifierType, isWalletSupported, isTypeOptional, isTypeRequired };
 
 export const capsuleVersion = CoreCapsule.version;
 export default CoreCapsule;

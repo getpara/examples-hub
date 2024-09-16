@@ -24,11 +24,10 @@ interface ViemClientOpts {
 export function createCapsuleAccount(capsule: CoreCapsule, walletAddress?: Hex): LocalAccount {
   let currentWallet: Wallet;
   if (walletAddress) {
-    currentWallet = Object.values(capsule.wallets).find(
-      wallet => wallet.address.toLowerCase() === walletAddress.toLowerCase(),
-    );
+    currentWallet = capsule.findWalletByAddress(walletAddress, { type: ['EVM'] });
   } else {
-    currentWallet = Object.values(capsule.wallets)[0];
+    const walletId = capsule.findWalletId(undefined, { type: ['EVM'] });
+    currentWallet = capsule.wallets[walletId];
   }
 
   return {

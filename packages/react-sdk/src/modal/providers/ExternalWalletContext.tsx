@@ -6,8 +6,7 @@ import { ModalStep } from '../utils/steps.js';
 import { TExternalWallet } from '../types/externalWallets';
 import { SolanaExternalWalletContextType } from './SolanaExternalWalletContextStub';
 import { CosmosExternalWalletContextType } from './CosmosExternalWalletContextStub';
-import { ExternalWalletType, isMobile, isMobileSafari } from '@usecapsule/web-sdk';
-import { formatWalletAddress } from '../utils/stringFormatters';
+import { WalletType, isMobile, isMobileSafari, truncateAddress } from '@usecapsule/web-sdk';
 
 export const defaultExternalWallet = {
   wallets: [],
@@ -128,17 +127,15 @@ export function ExternalWalletProvider({
   const chains: CommonChain[] = useMemo(() => {
     const walletType = capsule.externalWallets[capsule.currentExternalWalletAddresses?.[0] ?? '']?.type;
 
-    if (walletType) {
-      switch (walletType) {
-        case ExternalWalletType.COSMOS: {
-          return cosmosChains;
-        }
-        case ExternalWalletType.EVM: {
-          return evmChains;
-        }
-        default: {
-          return [];
-        }
+    switch (walletType) {
+      case WalletType.COSMOS: {
+        return cosmosChains;
+      }
+      case WalletType.EVM: {
+        return evmChains;
+      }
+      default: {
+        return [];
       }
     }
   }, [cosmosChains, evmChains, selectedExternalWalletId]);
@@ -146,17 +143,15 @@ export function ExternalWalletProvider({
   const chainId: string = useMemo(() => {
     const walletType = capsule.externalWallets[capsule.currentExternalWalletAddresses?.[0] ?? '']?.type;
 
-    if (walletType) {
-      switch (walletType) {
-        case ExternalWalletType.COSMOS: {
-          return cosmosChainId;
-        }
-        case ExternalWalletType.EVM: {
-          return evmChainId?.toString();
-        }
-        default: {
-          return undefined;
-        }
+    switch (walletType) {
+      case WalletType.COSMOS: {
+        return cosmosChainId;
+      }
+      case WalletType.EVM: {
+        return evmChainId?.toString();
+      }
+      default: {
+        return undefined;
       }
     }
   }, [cosmosChains, evmChains, selectedExternalWalletId]);
@@ -174,12 +169,12 @@ export function ExternalWalletProvider({
         setChainIdSwitchingTo(chainId);
 
         switch (walletType) {
-          case ExternalWalletType.COSMOS: {
+          case WalletType.COSMOS: {
             setStep(ModalStep.CHAIN_SWITCH);
             resp = await cosmosSwitchChain(chainId);
             break;
           }
-          case ExternalWalletType.EVM: {
+          case WalletType.EVM: {
             setStep(ModalStep.CHAIN_SWITCH);
             resp = await evmSwitchChain(parseInt(chainId));
             break;
@@ -235,8 +230,8 @@ export function ExternalWalletProvider({
     // Show the mobile screen if on mobile and the wallet is a mobile wallet or if on desktop and the wallet isn't installed
     showMobile: (isMobile() && wallet?.isMobile) || (!isMobile() && !wallet?.installed),
 
-    isSolanaMobileSafari: isMobileSafari() && wallet?.type === ExternalWalletType.SOLANA,
-    isCosmosMobileWallet: wallet?.type === ExternalWalletType.COSMOS && isUsingMobileConnector,
+    isSolanaMobileSafari: isMobileSafari() && wallet?.type === WalletType.SOLANA,
+    isCosmosMobileWallet: wallet?.type === WalletType.COSMOS && isUsingMobileConnector,
   };
 
   const username: string = useMemo(() => {
@@ -246,18 +241,20 @@ export function ExternalWalletProvider({
     if (storedExternalWallet) {
       const walletType = storedExternalWallet?.type;
       switch (walletType) {
-        case ExternalWalletType.EVM: {
+        case WalletType.EVM: {
           // If evmUsername is an EVM address, format it, else return it since it should be an ENS name
           username = evmUsername
             ? evmUsername.startsWith('0x')
-              ? formatWalletAddress(evmUsername)
+              ? truncateAddress(evmUsername, 'EVM')
               : evmUsername
             : undefined;
 
           break;
         }
         default: {
-          username = storedExternalWallet.address ? formatWalletAddress(storedExternalWallet.address) : undefined;
+          username = storedExternalWallet.address
+            ? truncateAddress(storedExternalWallet.address, storedExternalWallet.type)
+            : undefined;
           break;
         }
       }
@@ -270,7 +267,7 @@ export function ExternalWalletProvider({
 
     if (walletType) {
       switch (walletType) {
-        case ExternalWalletType.EVM: {
+        case WalletType.EVM: {
           return evmAvatar;
         }
         default: {

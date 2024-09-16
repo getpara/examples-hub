@@ -4,7 +4,7 @@ import { useCapsuleStore, useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import styled from 'styled-components';
 import { useBuyCryptoClick } from '../../hooks/useBuyCryptoClick.js';
-import { WalletCard } from '../WalletCard/WalletCard.js';
+import { WalletCard, WalletCards } from '../WalletCard/WalletCard.js';
 
 interface WalletCreationDoneStepProps {
   twoFactorAuthEnabled?: boolean;
@@ -47,7 +47,11 @@ export const WalletCreationDoneStep = ({
         Wallet Created
       </Heading>
       <InnerStepContainer>
-        <WalletCard />
+        <WalletCards>
+          {capsule.currentWalletIdsArray.map(([id, type]) => {
+            return <WalletCard id={id} type={type} />;
+          })}
+        </WalletCards>
         {!recoverySecretStepEnabled && (
           <CpslInfoBox>
             <InfoBoxContent>

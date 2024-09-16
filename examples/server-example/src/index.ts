@@ -4,7 +4,7 @@ import * as uuid from 'uuid';
 import * as ethers from 'ethers';
 import { sepolia } from 'viem/chains';
 import { http } from 'viem';
-import { NON_ED25519, PublicKeyStatus, WalletType } from '@usecapsule/user-management-client';
+import { PublicKeyStatus, WalletType } from '@usecapsule/user-management-client';
 import * as solana from '@solana/web3.js';
 import { CapsuleSolanaWeb3Signer } from '@usecapsule/solana-web3.js-v1-integration';
 
@@ -62,10 +62,10 @@ async function createUserAndWallet(params: Params) {
       status: PublicKeyStatus.COMPLETE,
     });
     // ~~~~~~~
-    await capsule.createWalletPerMissingType(false);
+    await capsule.createWalletPerType();
   }
 
-  const walletId = capsule.findWalletId(capsule.currentWalletIds?.[0], { scheme: NON_ED25519 });
+  const walletId = capsule.findWalletId(undefined, { type: ['EVM'] });
   const walletAddress = capsule.wallets[walletId].address;
   console.log(`address: ${walletAddress}`);
 
@@ -180,7 +180,7 @@ app.post('/sign', async (req: Request, res: Response, next: NextFunction) => {
     const capsule = new CapsuleServer(Environment.SANDBOX, '2f938ac0c48ef356050a79bd66042a23');
     const { message } = req.body;
     const provider = new ethers.JsonRpcProvider(ALCHEMY_SEPOLIA_PROVIDER, 'sepolia');
-    const walletId = capsule.currentWalletIds?.[0];
+    const walletId = capsule.findWalletId(undefined, { type: ['EVM'] });
     const ethersSigner = new CapsuleEthersSigner(capsule, provider, walletId);
     const viemClient = createCapsuleViemClient(capsule, {
       chain: sepolia,

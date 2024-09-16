@@ -36,7 +36,7 @@ export const ButtonIcon: typeof CpslIcon = styled(CpslIcon)`
   --width: 20px;
 `;
 
-export const Hero: typeof CpslIcon = styled(CpslIcon)`
+export const HeroIcon: typeof CpslIcon = styled(CpslIcon)`
   box-sizing: content-box;
   align-self: center;
   --height: 64px;

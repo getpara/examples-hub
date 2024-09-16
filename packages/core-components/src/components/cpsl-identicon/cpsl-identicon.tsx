@@ -1,4 +1,6 @@
 import { Component, Host, Prop, h } from '@stencil/core';
+import Prando from '../../lib/prando';
+import { Color, COLORS } from '../../utils/prand';
 
 const SingleArc = (rotation: number) => (
   <svg
@@ -55,63 +57,108 @@ const DoubleArc = (rotation: number) => (
   </svg>
 );
 
+const BASE_PATTERNS = [
+  [
+    [0, 0, 0, 0],
+    [0, 1, 3, 2],
+  ],
+  [
+    [1, 1, 0, 0],
+    [0, 1, 3, 2],
+  ],
+  [
+    [0, 1, 0, 1],
+    [0, 1, 3, 2],
+  ],
+  [
+    [0, 0, 1, 1],
+    [0, 1, 3, 2],
+  ],
+  [
+    [1, 0, 1, 0],
+    [0, 1, 3, 2],
+  ],
+  [
+    [1, 1, 1, 1],
+    [0, 1, 3, 2],
+  ],
+  [
+    [0, 0, 0, 0],
+    [2, 3, 1, 0],
+  ],
+  [
+    [1, 1, 1, 1],
+    [2, 3, 1, 0],
+  ],
+  [
+    [1, 1, 1, 1],
+    [0, 1, 2, 3],
+  ],
+];
+
 @Component({
   tag: 'cpsl-identicon',
   styleUrl: 'cpsl-identicon.scss',
   shadow: true,
 })
 export class CpslIdenticon {
-  @Prop() hash: string;
+  @Prop() hash?: string | undefined;
 
   /**
-   *  The size of the identicon.
-   *  Default is: 40.
+   *  The CSS width and height of the identicon.
+   *  Default is: 40px.
    */
-  @Prop() size: number = 40;
+  @Prop() size: string = '40px';
+
+  @Prop() variant: 'default' | 'avatar' = 'default';
 
   render() {
-    const [code, color] = stringToBinaryAndColor(this.hash);
-    const shapeA = ((code >> 2) & 1) !== 0;
-    const shapeB = ((code >> 3) & 1) !== 0;
-    const shapeC = ((code >> 4) & 1) !== 0;
-    const shapeD = ((code >> 5) & 1) !== 0;
-    const rotationA = (code >> 6) & 3;
-    const rotationB = (code >> 7) & 3;
-    const rotationC = (code >> 8) & 3;
-    const rotationD = (code >> 9) & 3;
-
-    const [shapes, rotations] = [
-      [shapeA, shapeB, shapeC, shapeD],
-      [rotationA, rotationB, rotationC, rotationD],
-    ];
+    let props;
+    const isEmpty = !this.hash;
+    if (!isEmpty) props = getIdenticonProps(this.hash);
 
     return (
       <Host
         class={{
-          red: color === 'red',
-          orange: color === 'orange',
-          yellow: color === 'yellow',
-          green: color === 'green',
-          blue: color === 'blue',
-          purple: color === 'purple',
+          red: props?.color === 'red',
+          orange: props?.color === 'orange',
+          yellow: props?.color === 'yellow',
+          green: props?.color === 'green',
+          blue: props?.color === 'blue',
+          purple: props?.color === 'purple',
+          empty: !props?.color && !this.hash,
+          avatar: this.variant === 'avatar',
+        }}
+        style={{
+          width: this.size,
+          height: this.size,
         }}
       >
-        {shapes.map((isDouble, index) => {
-          return isDouble ? DoubleArc(rotations[index]) : SingleArc(rotations[index]);
-        })}
+        {props?.shapes &&
+          props?.rotations &&
+          props.shapes.map((isDouble, index) => {
+            return isDouble ? DoubleArc(props.rotations[index]) : SingleArc(props.rotations[index]);
+          })}
       </Host>
     );
   }
 }
 
-type Color = 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple';
+const PRANDO_INTS = [COLORS.length, BASE_PATTERNS.length, 16];
 
-const COLORS: Color[] = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
+function getIdenticonProps(seed: string): { color: Color; shapes: boolean[]; rotations: number[] } {
+  const rng = new Prando(seed);
 
-function stringToBinaryAndColor(hash: string): [number, Color] {
-  const code = (hash.charCodeAt(0) << 24) | (hash.charCodeAt(1) << 16) | (hash.charCodeAt(2) << 8) | hash.charCodeAt(3);
+  const [iColor, iPattern, iDeviation] = PRANDO_INTS.map(len => rng.nextInt(0, len - 1));
 
-  const color = COLORS[Math.abs(code % 6)];
+  const deviationIndex = Math.floor(iDeviation / 4);
+  const [isDeviateShape, isDeviateFlip] = [iDeviation % 2 === 1, iDeviation % 4 >= 2];
 
-  return [code, color];
+  return {
+    color: COLORS[iColor],
+    shapes: BASE_PATTERNS[iPattern][0].map((s, i) => {
+      return i === deviationIndex ? (isDeviateShape ? (s === 1 ? false : true) : s === 1) : s === 1;
+    }),
+    rotations: BASE_PATTERNS[iPattern][1].map((r, i) => (i === deviationIndex ? (isDeviateFlip ? (r + 2) % 4 : r) : r)),
+  };
 }

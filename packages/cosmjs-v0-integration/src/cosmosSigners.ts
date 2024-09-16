@@ -12,7 +12,6 @@ import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
 import CoreCapsule, {
   SuccessfulSignatureRes,
-  NON_ED25519,
   hexToSignature,
   hexToUint8Array,
   Wallet,
@@ -25,7 +24,7 @@ class CapsuleCosmosSigner {
   readonly currentWalletId: string;
 
   constructor(capsule: CoreCapsule, prefix = 'cosmos', walletId?: string) {
-    this.currentWalletId = capsule.findWalletId(walletId, { scheme: NON_ED25519 });
+    this.currentWalletId = capsule.findWalletId(walletId, { type: ['COSMOS'] });
     this.capsule = capsule;
     this.prefix = prefix;
   }

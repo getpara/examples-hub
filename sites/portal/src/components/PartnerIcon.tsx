@@ -1,6 +1,6 @@
 import { Avatar, Tooltip } from '@chakra-ui/react';
+import { getPseudoRandomBackground } from '@usecapsule/core-components';
 import { Partner } from '../types';
-import { getBackground, stringToBinaryAndColor } from '../utils/identicon';
 
 export const PartnerIcon = ({
   partner,
@@ -24,7 +24,7 @@ export const PartnerIcon = ({
       label={partner.displayName}
     >
       <Avatar
-        bg={partner.iconUrl ? 'var(--cpsl-color-background-8)' : getBackground(stringToBinaryAndColor(partner.id)[1])}
+        bg={partner.iconUrl ? 'var(--cpsl-color-background-8)' : getPseudoRandomBackground(partner.id)}
         color={partner.iconUrl ? undefined : 'white'}
         w={size}
         h={size}
@@ -33,6 +33,7 @@ export const PartnerIcon = ({
         fontSize={fontSize}
         src={partner.iconUrl}
         name={partner.displayName}
+        cursor="pointer"
       />
     </Tooltip>
   );

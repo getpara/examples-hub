@@ -21,6 +21,7 @@ import Close from './close.svg';
 import ClubhouseBrand from './clubhouse-brand.svg';
 import Clubhouse from './clubhouse.svg';
 import Copy from './copy.svg';
+import Cosmos from './cosmos.svg';
 import CreditCard from './credit-card.svg';
 import Cube from './cube.svg';
 import DecentBrand from './decent-brand.svg';
@@ -33,6 +34,7 @@ import Download from './download.svg';
 import DribbbleBrand from './dribbble-brand.svg';
 import Dribbble from './dribbble.svg';
 import Earth from './earth.svg';
+import Ethereum from './ethereum.svg';
 import EyeOff from './eye-off.svg';
 import Eye from './eye.svg';
 import FacebookBrand from './facebook-brand.svg';
@@ -96,6 +98,7 @@ import SignalBrand from './signal-brand.svg';
 import Signal from './signal.svg';
 import SnapchatBrand from './snapchat-brand.svg';
 import Snapchat from './snapchat.svg';
+import Solana from './solana.svg';
 import Stars from './stars.svg';
 import StripeBrand from './stripe-brand.svg';
 import TelegramBrand from './telegram-brand.svg';
@@ -367,6 +370,7 @@ export const Icons = {
   clubhouseBrand: ClubhouseBrand,
   clubhouse: Clubhouse,
   copy: Copy,
+  cosmos: Cosmos,
   creditCard: CreditCard,
   cube: Cube,
   decentBrand: DecentBrand,
@@ -379,6 +383,7 @@ export const Icons = {
   dribbbleBrand: DribbbleBrand,
   dribbble: Dribbble,
   earth: Earth,
+  ethereum: Ethereum,
   eyeOff: EyeOff,
   eye: Eye,
   facebookBrand: FacebookBrand,
@@ -442,6 +447,7 @@ export const Icons = {
   signal: Signal,
   snapchatBrand: SnapchatBrand,
   snapchat: Snapchat,
+  solana: Solana,
   stars: Stars,
   stripeBrand: StripeBrand,
   telegramBrand: TelegramBrand,

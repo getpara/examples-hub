@@ -9,7 +9,7 @@ import {
 } from '@usecapsule/web-sdk';
 import { useCapsuleStore, useModalStore, useThemeStore } from '../../stores/index.js';
 import { useGoBack } from '../../hooks/useGoBack.js';
-import { useWallet } from '../../providers/WalletContext.js';
+import { useActiveWallet } from '../../hooks/useActiveWallet.js';
 
 export const RampEmbed = ({ hostApiKey }: { hostApiKey: string }) => {
   const appName = useThemeStore(state => state.appName);
@@ -18,7 +18,7 @@ export const RampEmbed = ({ hostApiKey }: { hostApiKey: string }) => {
   const setOnRampPurchase = useModalStore(state => state.setOnRampPurchase);
   const capsule = useCapsuleStore(state => state.capsule);
   const goBack = useGoBack();
-  const { wallet } = useWallet();
+  const activeWallet = useActiveWallet();
 
   useEffect(() => {
     const defaultAsset = getProviderNetworkAndAssetCode(
@@ -33,7 +33,7 @@ export const RampEmbed = ({ hostApiKey }: { hostApiKey: string }) => {
       defaultAsset,
       hostLogoUrl: `${getPortalBaseURL(capsule.ctx)}/wordmark_black.svg`,
       hostApiKey,
-      userAddress: wallet?.address,
+      userAddress: capsule.getDisplayAddress(activeWallet.id, { addressType: activeWallet.type }),
       userEmailAddress: capsule.getEmail(),
       url: onRampConfig?.testMode ? 'https://app.demo.ramp.network' : 'https://app.ramp.network',
       enabledFlows: ['ONRAMP'],

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import { Heading, StepContainer } from '../common.js';
-import { WalletCard } from '../WalletCard/WalletCard.js';
+import { StepContainer } from '../common.js';
+import { WalletCard, WalletCards } from '../WalletCard/WalletCard.js';
 import { useCapsuleStore } from '../../stores/index.js';
 
 interface LoginDoneStep {
@@ -9,7 +9,6 @@ interface LoginDoneStep {
 
 export const LoginDoneStep = ({ onClose }: LoginDoneStep) => {
   const capsule = useCapsuleStore(state => state.capsule);
-  const isExternalWallet = capsule.isUsingExternalWallet();
 
   useEffect(() => {
     setTimeout(() => {
@@ -19,13 +18,11 @@ export const LoginDoneStep = ({ onClose }: LoginDoneStep) => {
 
   return (
     <StepContainer>
-      {isExternalWallet ? (
-        <Heading variant="headingS" weight="bold">
-          You're logged in!
-        </Heading>
-      ) : (
-        <WalletCard />
-      )}
+      <WalletCards>
+        {capsule.currentWalletIdsArray.map(([id, type]) => {
+          return <WalletCard id={id} type={type} />;
+        })}
+      </WalletCards>
     </StepContainer>
   );
 };

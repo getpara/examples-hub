@@ -2,7 +2,7 @@ import { ReactNode, createContext, useEffect, useMemo, useState } from 'react';
 import { CommonChain, CommonWallet } from '../types/CommonTypes.js';
 import { useCapsuleCosmos } from './CapsuleCosmosContext.js';
 import { MobileConnectResponse, useShuttle } from '@delphi-labs/shuttle-react';
-import CapsuleWeb, { ExternalWalletType, isAndroid, isIOS, isMobile } from '@usecapsule/web-sdk';
+import CapsuleWeb, { isAndroid, isIOS, isMobile, WalletType } from '@usecapsule/web-sdk';
 
 export const defaultCosmosExternalWallet = {
   wallets: [],
@@ -68,7 +68,7 @@ export function CosmosExternalWalletProvider({ children, capsule, onSwitchWallet
 
   const login = async (address: string, providerName?: string) => {
     try {
-      await capsule.externalWalletLogin(address, ExternalWalletType.COSMOS, providerName);
+      await capsule.externalWalletLogin(address, WalletType.COSMOS, providerName);
     } catch (err) {
       await reset();
 
@@ -105,12 +105,8 @@ export function CosmosExternalWalletProvider({ children, capsule, onSwitchWallet
 
   useEffect(() => {
     const storedExternalWallet = capsule.externalWallets[capsule.currentExternalWalletAddresses?.[0] ?? ''];
-
     // If the user is using an external Cosmos wallet we want to watch for wallet changes and log them in to a different user when the wallet changes
-    if (
-      storedExternalWallet?.type === ExternalWalletType.COSMOS &&
-      storedExternalWallet?.address !== wallet?.account.address
-    ) {
+    if (storedExternalWallet?.type === WalletType.COSMOS && storedExternalWallet?.address !== wallet?.account.address) {
       switchWallet(wallet?.account.address);
     }
   }, [wallet]);
@@ -228,7 +224,7 @@ export function CosmosExternalWalletProvider({ children, capsule, onSwitchWallet
         connect: () => connect(wallet.extensionProvider?.id),
         connectMobile: () => connectMobile(wallet.mobileProvider?.id),
         getQrUri: getQrUri(mobileUrls[wallet.mobileProvider?.id]),
-        type: ExternalWalletType.COSMOS,
+        type: WalletType.COSMOS,
         ...wallet,
       } as CommonWallet;
     })

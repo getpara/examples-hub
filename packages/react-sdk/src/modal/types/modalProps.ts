@@ -1,4 +1,4 @@
-import CapsuleWeb, { OAuthMethod, OnRampConfig, NetworkProp } from '@usecapsule/web-sdk';
+import CapsuleWeb, { CurrentWalletIds, OAuthMethod, OnRampConfig, NetworkProp } from '@usecapsule/web-sdk';
 import { Theme } from '@usecapsule/react-components';
 import { OnModalStepChangeValue } from '../stores/index.js';
 import { ModalStep, ModalStepProp } from '../utils/steps.js';
@@ -120,5 +120,5 @@ export interface CapsuleModalProps {
    */
   onClose: () => void;
   loginTransitionOverride?: (capsule: CapsuleWeb) => Promise<void>;
-  createWalletOverride?: (capsule: CapsuleWeb) => Promise<{ recoverySecret?: string; walletIds: string[] }>;
+  createWalletOverride?: (capsule: CapsuleWeb) => Promise<{ recoverySecret?: string; walletIds: CurrentWalletIds }>;
 }

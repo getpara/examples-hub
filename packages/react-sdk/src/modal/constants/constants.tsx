@@ -46,6 +46,9 @@ export const NETWORKS: Record<Network, string> = {
   [Network.BASE]: 'Base',
   [Network.OPTIMISM]: 'Optimism',
   [Network.POLYGON]: 'Polygon',
+  [Network.SOLANA]: 'Solana',
+  [Network.COSMOS]: 'Cosmos',
+  [Network.CELO]: 'Celo',
 };
 
 export const MOBILE_SIZE = 480;

@@ -1,12 +1,12 @@
 import { CpslHero, CpslIcon, CpslIdenticon } from '@usecapsule/react-components';
 import styled from 'styled-components';
 import { ModalStep } from '../../utils/steps';
-import { useModalStore } from '../../stores';
+import { useCapsuleStore, useModalStore } from '../../stores';
 import { useExternalWallets } from '../../providers/ExternalWalletContext';
 import { NETWORK_NOT_SUPPORTED_ERROR } from '../../constants/constants';
 import { useEffect, useState } from 'react';
-import { useWallet } from '../../providers/WalletContext';
 import { isMobile } from '@usecapsule/web-sdk';
+import { useActiveWallet } from '../../hooks/useActiveWallet';
 
 type StepHeroConfig = {
   variant: 'externalWalletConnection' | 'approved' | 'failed' | 'customContent';
@@ -54,23 +54,17 @@ const getStepConfig = ({
 });
 
 export const Hero = () => {
+  const capsule = useCapsuleStore(state => state.capsule);
   const { wallet: connector, walletDisplayHelpers, avatar } = useExternalWallets();
   const step = useModalStore(state => state.step);
   const externalWalletError = useModalStore(state => state.externalWalletError);
-  const { wallet } = useWallet();
+  const activeWallet = useActiveWallet();
 
   const [currentStep, setCurrentStep] = useState(step);
-  const [walletAddress, setWalletAddress] = useState(wallet?.address);
 
   const stepConfig: StepHeroConfig | undefined = getStepConfig({
     externalWalletError,
   })[currentStep];
-
-  useEffect(() => {
-    if (wallet?.address && wallet.address !== walletAddress) {
-      setWalletAddress(wallet?.address);
-    }
-  }, [wallet?.address]);
 
   // Watching the step here to make the animation in/out of the hero look correct
   useEffect(() => {
@@ -114,8 +108,8 @@ export const Hero = () => {
             {isAccountStep &&
               (avatar ? (
                 <Avatar slot="image" src={avatar} />
-              ) : walletAddress ? (
-                <IconAvatar slot="image" hash={walletAddress} />
+              ) : activeWallet ? (
+                <IconAvatar slot="image" size="100%" hash={capsule.getIdenticonHash(activeWallet.id, activeWallet.type)} />
               ) : null)}
           </StyledHero>
         )}
@@ -151,8 +145,6 @@ const Avatar = styled.img`
 `;
 
 const IconAvatar = styled(CpslIdenticon)`
-  width: 100%;
-  height: 100%;
   border-radius: 1000px;
 `;
 

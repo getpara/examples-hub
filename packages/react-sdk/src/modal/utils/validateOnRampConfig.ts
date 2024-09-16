@@ -1,4 +1,4 @@
-import { OnRampConfig, SupportedOnRamps, getAsset, getNetwork, getProvider } from '@usecapsule/web-sdk';
+import { Network, OnRampAsset, OnRampConfig, OnRampProvider, SupportedOnRamps } from '@usecapsule/web-sdk';
 
 export class OnRampConfigError extends Error {
   constructor(message) {
@@ -15,21 +15,21 @@ function checkHasProviders({ providers }: OnRampConfig) {
 
 function checkDuplicateProviders({ providers }: OnRampConfig) {
   providers.forEach(({ id: providerProp }, index) => {
-    const provider = getProvider(providerProp);
-    if (providers.findIndex(p => getProvider(p.id) === provider) !== index) {
+    const provider = OnRampProvider[providerProp];
+    if (providers.findIndex(p => OnRampProvider[p.id] === provider) !== index) {
       throw new OnRampConfigError(`Provider ${provider} is configured more than once`);
     }
   });
 }
 
 function checkUnsupportedCombos({ network: networkProp, asset: assetProp, providers }: OnRampConfig) {
-  const [network, asset] = [getNetwork(networkProp), getAsset(assetProp)];
+  const [network, asset] = [Network[networkProp], OnRampAsset[assetProp]];
   if (!SupportedOnRamps[network]?.[asset]) {
     throw new Error(`Asset ${asset} does not exist on network ${network}`);
   }
 
   providers.forEach(({ id: providerProp }) => {
-    const provider = getProvider(providerProp);
+    const provider = OnRampProvider[providerProp];
 
     if (!SupportedOnRamps[network]?.[asset]?.[provider]) {
       throw new OnRampConfigError(`Provider ${provider} does not support buying ${asset} on ${network}`);

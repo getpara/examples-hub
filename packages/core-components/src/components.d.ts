@@ -389,11 +389,12 @@ export namespace Components {
         "icons": (IconType | string)[];
     }
     interface CpslIdenticon {
-        "hash": string;
+        "hash"?: string | undefined;
         /**
-          * The size of the identicon. Default is: 40.
+          * The CSS width and height of the identicon. Default is: 40px.
          */
-        "size": number;
+        "size": string;
+        "variant": 'default' | 'avatar';
     }
     interface CpslInfoBox {
     }
@@ -1852,11 +1853,12 @@ declare namespace LocalJSX {
         "icons"?: (IconType | string)[];
     }
     interface CpslIdenticon {
-        "hash"?: string;
+        "hash"?: string | undefined;
         /**
-          * The size of the identicon. Default is: 40.
+          * The CSS width and height of the identicon. Default is: 40px.
          */
-        "size"?: number;
+        "size"?: string;
+        "variant"?: 'default' | 'avatar';
     }
     interface CpslInfoBox {
     }

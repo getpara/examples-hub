@@ -7,7 +7,6 @@ import CoreCapsule, {
   DeniedSignatureResWithUrl,
   SuccessfulSignatureRes,
   TransactionReviewError,
-  NON_ED25519,
 } from '@usecapsule/core-sdk';
 import { defineReadOnly, keccak256, resolveProperties, serializeTransaction } from 'ethers/lib/utils';
 
@@ -18,7 +17,7 @@ export class CapsuleEthersV5Signer extends ethers.Signer {
   constructor(capsule: CoreCapsule, provider?: null | ethers.providers.Provider, walletId?: string) {
     super();
 
-    this.currentWalletId = capsule.findWalletId(walletId, { scheme: NON_ED25519 });
+    this.currentWalletId = capsule.findWalletId(walletId, { type: ['EVM'] });
     this.capsule = capsule;
     defineReadOnly(this, 'provider', provider);
   }

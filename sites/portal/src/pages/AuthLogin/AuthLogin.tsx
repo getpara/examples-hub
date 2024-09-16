@@ -1,31 +1,19 @@
 import { useCallback, useEffect, useState } from 'react';
-import { AuthLoginStep, REDIRECT_TIMEOUT } from '../../constants';
+import { AuthLoginStep } from '../../constants';
 import { Body } from './components/Body';
 import { Card, CardContent } from '../../components/common';
 import { ModalHeader } from '../../components/ModalHeader';
-import { getAsymmetricKeyPair, getPublicKeyHex, getSchemes } from '@usecapsule/web-sdk';
+import { getAsymmetricKeyPair, getPublicKeyHex } from '@usecapsule/web-sdk';
 import { useAuthLoginStep } from '../../hooks/useLoginStep';
 import { useCapsule } from '../../components/CapsuleContext';
 import { LoginProvider, useLogin } from './components/LoginProvider';
 import { SelectWallet } from './components/SelectWallet';
 import { useModalOutletContext } from '../../hooks/useModalOutletContext';
-import { WalletEntity, WalletScheme } from '@usecapsule/user-management-client';
-
-function isOnlyPartnerWallets(
-  considered: WalletEntity[],
-  notConsidered: WalletEntity[],
-  schemes: WalletScheme[],
-  partnerId: string,
-) {
-  return (
-    notConsidered.length === 0 &&
-    considered.length === schemes.length &&
-    schemes.every(s => considered.some(w => w.scheme === s && w.partnerId === partnerId))
-  );
-}
+import { useCloseWindow } from '../../hooks/useCloseWindow';
 
 const AuthLoginBase = () => {
   const capsule = useCapsule();
+  const closeWindow = useCloseWindow();
   const { toggleBranding } = useModalOutletContext();
   const {
     fns: { authLogin, fetchWallets, authUpdateKeyShares },
@@ -57,24 +45,24 @@ const AuthLoginBase = () => {
 
       await capsule.userSetupAfterLogin();
 
-      const { wallets, pregenWallets } = await fetchWallets();
+      const wallets = await fetchWallets();
 
-      const walletSchemes = getSchemes(capsule.supportedWalletTypes);
-
-      const [isWithoutWallets, isOnlyPartnerPregenWallets, isOnlyPartnerOwnedWallets] = [
-        wallets.length === 0 && pregenWallets.length === 0,
-        isOnlyPartnerWallets(pregenWallets, wallets, walletSchemes, partnerId),
-        isOnlyPartnerWallets(wallets, pregenWallets, walletSchemes, partnerId),
+      const [isWithoutWallets, isOnlyOwnedPartnerWallets] = [
+        Object.values(wallets).every(arr => arr.length === 0),
+        Object.keys(capsule.supportedWalletTypes).every(
+          s => wallets[s].length === 1 && wallets[s][0].partnerId === partnerId && !wallets[s][0].pregenIdentifier,
+        ),
       ];
 
-      const defaultWallets = isOnlyPartnerPregenWallets ? pregenWallets : isOnlyPartnerOwnedWallets ? wallets : undefined;
+      const defaultWalletIds = isOnlyOwnedPartnerWallets
+        ? Object.keys(capsule.supportedWalletTypes).reduce(
+            (acc, type) => ({ ...acc, [type]: wallets[type].map(({ id }) => id) }),
+            {},
+          )
+        : undefined;
 
-      if (defaultWallets || (isWithoutWallets && !capsule.ctx.apiKey)) {
-        await capsule.setCurrentWalletIds(
-          defaultWallets ? defaultWallets.map(({ id }) => id) : [],
-          sessionId,
-          isWithoutWallets,
-        );
+      if (!!defaultWalletIds || (isWithoutWallets && !capsule.ctx.apiKey)) {
+        await capsule.setCurrentWalletIds(defaultWalletIds ?? {}, sessionId, isWithoutWallets);
         setStep(AuthLoginStep.SUCCESS);
       } else {
         setStep(AuthLoginStep.SELECT_WALLET);
@@ -90,12 +78,10 @@ const AuthLoginBase = () => {
 
   useEffect(() => {
     async function finishLogin(shouldClose: boolean) {
-      if (capsule.currentWalletIds?.length > 0) await authUpdateKeyShares();
+      if (capsule.currentWalletIdsArray.length > 0) await authUpdateKeyShares();
 
       if (shouldClose) {
-        setTimeout(function () {
-          window.close();
-        }, REDIRECT_TIMEOUT);
+        closeWindow(true);
       }
     }
 

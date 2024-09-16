@@ -7,10 +7,11 @@
 
 ## Properties
 
-| Property | Attribute | Description                                | Type     | Default     |
-| -------- | --------- | ------------------------------------------ | -------- | ----------- |
-| `hash`   | `hash`    |                                            | `string` | `undefined` |
-| `size`   | `size`    | The size of the identicon. Default is: 40. | `number` | `40`        |
+| Property  | Attribute | Description                                                  | Type                    | Default     |
+| --------- | --------- | ------------------------------------------------------------ | ----------------------- | ----------- |
+| `hash`    | `hash`    |                                                              | `string`                | `undefined` |
+| `size`    | `size`    | The CSS width and height of the identicon. Default is: 40px. | `string`                | `'40px'`    |
+| `variant` | `variant` |                                                              | `"avatar" \| "default"` | `'default'` |
 
 
 ----------------------------------------------

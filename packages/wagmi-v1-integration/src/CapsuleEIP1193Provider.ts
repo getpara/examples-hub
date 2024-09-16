@@ -76,6 +76,10 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
     this.emit('connect', { chainId: this.currentHexChainId });
   }
 
+  private get accounts(): string[] {
+    return this.capsule.getWalletsByType('EVM').map(w => w.address);
+  }
+
   private getStorageChainId(): string | null {
     return this.storage.getItem(STORAGE_CHAIN_ID_KEY);
   }
@@ -150,14 +154,14 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
 
     switch (method) {
       case 'eth_accounts': {
-        return Object.values(this.capsule.wallets).map(w => w.address);
+        return this.accounts;
       }
       case 'eth_chainId': {
         return this.currentHexChainId;
       }
       case 'eth_requestAccounts': {
         if (await this.capsule.isFullyLoggedIn()) {
-          return Object.values(this.capsule.wallets).map(w => w.address);
+          return this.accounts;
         }
         if (this.disableModal) {
           throw new ProviderRpcError(new Error('the provider is disconnected'), {
@@ -176,7 +180,7 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
         while (Date.now() - now < TEN_MINUTES_MS) {
           await new Promise(resolve => setTimeout(resolve, 2000));
           if (await this.capsule.isFullyLoggedIn()) {
-            const addresses = Object.values(this.capsule.wallets).map(w => w.address);
+            const addresses = this.accounts;
             this.emit('accountsChanged', addresses);
             return addresses;
           }

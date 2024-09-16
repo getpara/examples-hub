@@ -3,7 +3,7 @@ import { type CpslIdenticon } from './cpsl-identicon';
 
 const meta: Meta<CpslIdenticon & { content?: string }> = {
   title: 'Components/CpslIdenticon',
-  args: { hash: 'wruvbwic8932nc4u3cr9394n3cibj3892438cr', size: 40 },
+  args: { hash: 'wruvbwic8932nc4u3cr9394n3cibj3892438cr', size: '40px' },
   argTypes: {
     hash: { control: 'text' },
     size: { control: 'number' },

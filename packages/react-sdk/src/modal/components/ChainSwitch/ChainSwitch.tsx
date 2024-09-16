@@ -8,7 +8,7 @@ import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
 import { ModalStep } from '../../utils/steps';
 import { routeMobileExternalWallet } from '../../utils/routeMobileExternalWallet';
 import { NETWORK_NOT_SUPPORTED_ERROR } from '../../constants/constants';
-import { ExternalWalletType } from '@usecapsule/web-sdk';
+import { WalletType } from '@usecapsule/web-sdk';
 
 export const ChainSwitch = () => {
   const [isCopied, copy] = useCopyToClipboard();
@@ -23,7 +23,7 @@ export const ChainSwitch = () => {
   }
 
   useEffect(() => {
-    if (wallet.type === ExternalWalletType.COSMOS) {
+    if (wallet.type === WalletType.COSMOS) {
       routeMobileExternalWallet(qrUri);
     }
   }, [qrUri]);

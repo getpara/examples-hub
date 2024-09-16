@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { Wallet, WalletScheme } from '@usecapsule/web-sdk';
+import { Wallet, CurrentWalletIds, entityToWallet } from '@usecapsule/web-sdk';
 import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { Body } from '../Body/Body.js';
@@ -118,7 +118,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
       }
       async function genWallet() {
         setWalletCreationInProgress(true);
-        let recoverySecret: string, walletIds: string[];
+        let recoverySecret: string, walletIds: CurrentWalletIds;
         if (!createWalletOverride) {
           const created = await capsule.waitForPasskeyAndCreateWallet();
           recoverySecret = created.recoverySecret;
@@ -129,9 +129,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
           const newWallets: Record<string, Wallet> = {};
           for (const wallet of fetchedWallets) {
             newWallets[wallet.id] = {
-              id: wallet.id,
-              address: wallet.address,
-              scheme: wallet.scheme as WalletScheme,
+              ...entityToWallet(wallet),
               signer: '',
             };
           }

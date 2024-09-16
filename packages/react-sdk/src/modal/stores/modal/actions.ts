@@ -61,4 +61,5 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
   setExternalWalletError: externalWalletError => set({ externalWalletError }),
   setIsUsingMobileConnector: isUsingMobileConnector => set({ isUsingMobileConnector }),
   setStepDirection: stepDirection => set({ stepDirection }),
+  setActiveWallet: activeWallet => set({ activeWallet }),
 });

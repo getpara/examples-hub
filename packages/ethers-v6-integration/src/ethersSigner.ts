@@ -5,7 +5,6 @@ import CoreCapsule, {
   DeniedSignatureResWithUrl,
   SuccessfulSignatureRes,
   hexStringToBase64,
-  NON_ED25519,
 } from '@usecapsule/core-sdk';
 
 export class CapsuleEthersSigner extends ethers.AbstractSigner {
@@ -15,7 +14,7 @@ export class CapsuleEthersSigner extends ethers.AbstractSigner {
   constructor(capsule: CoreCapsule, provider?: null | ethers.Provider, walletId?: string) {
     super(provider);
 
-    this.currentWalletId = capsule.findWalletId(walletId, { scheme: NON_ED25519 });
+    this.currentWalletId = capsule.findWalletId(walletId, { type: ['EVM'] });
     this.capsule = capsule;
   }
 

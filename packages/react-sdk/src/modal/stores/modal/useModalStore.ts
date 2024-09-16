@@ -2,10 +2,12 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { ModalStep } from '../../utils/steps.js';
 import { getActions } from './actions.js';
-import { Network, OnRampConfig, OnRampPurchase } from '@usecapsule/web-sdk';
+import { Network, OnRampConfig, OnRampPurchase, WalletType } from '@usecapsule/web-sdk';
 import { Tab as AddFundsTabType } from '../../components/AddFunds/AddFunds.js';
 
 type Flow = 'login' | 'signUp' | 'account';
+
+type ActiveWallet = [string | undefined, WalletType | undefined];
 
 export interface OnModalStepChangeValue {
   previousStep: ModalStep;
@@ -30,6 +32,7 @@ interface ModalState {
   isUsingMobileConnector?: boolean;
   isExternalWalletConnecting?: boolean;
   externalWalletError?: string[];
+  activeWallet: ActiveWallet | undefined;
 }
 
 export interface ModalActions {
@@ -54,6 +57,7 @@ export interface ModalActions {
   setIsExternalWalletConnecting: (isExternalWalletConnecting: boolean) => void;
   setExternalWalletError: (externalWalletError?: string[]) => void;
   setStepDirection: (stepDirection: 1 | -1) => void;
+  setActiveWallet: (_: ActiveWallet | undefined) => void;
 }
 
 export type ModalStore = ModalState & ModalActions;
@@ -72,6 +76,7 @@ export const DEFAULT_MODAL_STATE: Omit<ModalState, 'step' | 'onRampConfig'> = {
   accountAddFundTab: undefined,
   isExternalWalletConnecting: false,
   externalWalletError: undefined,
+  activeWallet: [undefined, undefined],
 };
 
 export const useModalStore = create<ModalStore>()(

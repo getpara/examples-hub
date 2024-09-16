@@ -3,8 +3,7 @@ import * as utils from '../../../utils/authLogin';
 import { useSearchParams } from 'react-router-dom';
 import { useCapsule } from '../../../components/CapsuleContext';
 import { CountryCallingCode } from 'libphonenumber-js';
-import { PregenIdentifierType } from '@usecapsule/core-sdk';
-import { WalletEntity } from '@usecapsule/user-management-client';
+import { entityToWallet, isWalletSupported, PregenIdentifierType, WalletEntity, WalletType } from '@usecapsule/core-sdk';
 import { formatISO } from 'date-fns';
 import { useCloseWindow } from '../../../hooks/useCloseWindow';
 
@@ -26,16 +25,17 @@ type LoginParams = {
   pregenWalletIds?: Record<string, true>;
 };
 
+export type Wallets = Partial<Record<WalletType, WalletEntity[]>>;
+
 type Login = {
   fns: {
     authLogin: () => Promise<void>;
     authUpdateKeyShares: () => Promise<void>;
-    fetchWallets: () => Promise<{ wallets: WalletEntity[]; pregenWallets: WalletEntity[] }>;
+    fetchWallets: () => Promise<Wallets>;
     finishLogin: (_?: boolean) => Promise<void>;
   };
   params: LoginParams;
-  wallets?: WalletEntity[];
-  pregenWallets?: WalletEntity[];
+  wallets?: Wallets;
 };
 
 const NO_DATE = formatISO(new Date(-8640000000000000));
@@ -83,8 +83,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
   }, [searchParams]);
 
   const [loginRes, setLoginRes] = useState<[string, string, any] | undefined>();
-  const [wallets, setWallets] = useState<WalletEntity[]>();
-  const [pregenWallets, setPregenWallets] = useState<WalletEntity[]>();
+  const [wallets, setWallets] = useState<Wallets>();
 
   const authLogin = useCallback(async (): Promise<void> => {
     const loginRes = await utils.authLogin(
@@ -112,7 +111,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
     params.newDeviceEncryptionKey,
   ]);
 
-  const fetchWallets = useCallback(async (): Promise<{ wallets: WalletEntity[]; pregenWallets: WalletEntity[] }> => {
+  const fetchWallets = useCallback(async (): Promise<Wallets> => {
     const _wallets = (await capsule.fetchWallets()).filter(({ pregenIdentifier }) => !pregenIdentifier);
 
     const email = capsule.getEmail();
@@ -127,18 +126,42 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
         )
       : [];
 
-    const wallets = _wallets
-      .sort((a, b) => ((b.createdAt || NO_DATE) > (a.createdAt || NO_DATE) ? -1 : 1))
-      .map((wallet, i) => ({ ...wallet, name: wallet.name || `Wallet${i === 0 ? '' : ` ${i + 1}`}` }))
-      .sort((a, b) => ((b.lastUsedAt || NO_DATE) < (a.lastUsedAt || NO_DATE) ? -1 : 1));
+    const partnerCount = [...new Set([..._wallets, ..._pregenWallets].map(wallet => wallet.partnerId))].reduce(
+      (obj, partnerId) => ({
+        ...obj,
+        [partnerId]: 0,
+      }),
+      {},
+    );
 
-    const pregenWallets = _pregenWallets.map(wallet => ({
-      ...wallet,
-      name: wallet.name || `${wallet.partner.displayName} Wallet`,
-    }));
+    const allWallets: WalletEntity[] = [..._wallets, ..._pregenWallets]
+      .sort((a, b) => ((b.createdAt || NO_DATE) > (a.createdAt || NO_DATE) ? -1 : 1))
+      .map(wallet => {
+        if (!!wallet.partnerId) {
+          partnerCount[wallet.partnerId] += 1;
+        }
+        return {
+          ...wallet,
+          name:
+            wallet.name ??
+            `${!!wallet.partner?.displayName ? `${wallet.partner.displayName} ` : ''} Wallet${!wallet.partnerId || partnerCount[wallet.partnerId] <= 1 ? '' : ` ${partnerCount[wallet.partnerId]}`}`,
+        };
+      });
+
+    const wallets = Object.keys(capsule.supportedWalletTypes).reduce(
+      (obj, type: WalletType) => ({
+        ...obj,
+        [type]: allWallets
+          .filter(wallet => isWalletSupported([type], entityToWallet(wallet)))
+          .sort((a, b) =>
+            (b.lastUsedAt ?? b.createdAt ?? NO_DATE) < (a.lastUsedAt ?? a.createdAt ?? NO_DATE) || !b.isPregen ? -1 : 1,
+          ),
+      }),
+      {},
+    );
 
     await capsule.setWallets(
-      [..._wallets, ..._pregenWallets].reduce(
+      allWallets.reduce(
         (obj, wallet) => ({
           ...obj,
           [wallet.id]: wallet,
@@ -148,9 +171,8 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
     );
 
     setWallets(wallets);
-    setPregenWallets(pregenWallets);
 
-    return { wallets, pregenWallets };
+    return wallets;
   }, [capsule, params.pregenWalletIds, params.phone, params.countryCode]);
 
   const authUpdateKeyShares = useCallback(async () => {
@@ -210,9 +232,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
   }, [capsule, params.email, params.phone, params.countryCode, params.farcasterUsername]);
 
   return (
-    <LoginContext.Provider
-      value={{ fns: { authLogin, authUpdateKeyShares, fetchWallets, finishLogin }, params, wallets, pregenWallets }}
-    >
+    <LoginContext.Provider value={{ fns: { authLogin, authUpdateKeyShares, fetchWallets, finishLogin }, params, wallets }}>
       {children}
     </LoginContext.Provider>
   );

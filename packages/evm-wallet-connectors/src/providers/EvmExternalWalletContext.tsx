@@ -4,7 +4,7 @@ import { WagmiConnectorInstance } from '../types/Wallet';
 import { CommonChain, CommonWallet } from '../types/CommonTypes';
 import { isEIP6963Connector } from '../utils/isEIP6963Connector';
 import { getWalletConnectUri } from '../utils/getWalletConnectUri';
-import CapsuleWeb, { ExternalWalletType, isMobile } from '@usecapsule/web-sdk';
+import CapsuleWeb, { isMobile, WalletType } from '@usecapsule/web-sdk';
 import { normalize } from 'viem/ens';
 
 export const defaultEvmExternalWallet = {
@@ -60,7 +60,7 @@ export function EvmExternalWalletProvider({ children, capsule, onSwitchWallet }:
     if (
       !isConnecting &&
       !isReconnecting &&
-      storedExternalWallet?.type === ExternalWalletType.EVM &&
+      storedExternalWallet?.type === WalletType.EVM &&
       storedExternalWallet?.address !== wagmiAddress
     ) {
       switchWallet(wagmiAddress);
@@ -105,7 +105,7 @@ export function EvmExternalWalletProvider({ children, capsule, onSwitchWallet }:
 
   const login = async (address: string, connectorName?: string) => {
     try {
-      await capsule.externalWalletLogin(address, ExternalWalletType.EVM, connectorName);
+      await capsule.externalWalletLogin(address, WalletType.EVM, connectorName);
     } catch (err) {
       await disconnectAsync();
       await capsule.logout(true);
@@ -241,7 +241,7 @@ export function EvmExternalWalletProvider({ children, capsule, onSwitchWallet }:
       ...connector,
       connect: () => connect(connector),
       connectMobile: () => connectMobile(connector),
-      type: ExternalWalletType.EVM,
+      type: WalletType.EVM,
       getQrUri: getQrUri(connector),
     } as CommonWallet;
   });

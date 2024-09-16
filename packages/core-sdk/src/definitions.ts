@@ -59,22 +59,27 @@ export enum OAuthMethod {
   FARCASTER = 'FARCASTER',
 }
 
-export const NetworkMap = {
-  ethereum: Network.ETHEREUM,
-  ETHEREUM: Network.ETHEREUM,
-  arbitrum: Network.ARBITRUM,
-  ARBITRUM: Network.ARBITRUM,
-  base: Network.BASE,
-  BASE: Network.BASE,
-  optimism: Network.OPTIMISM,
-  OPTIMISM: Network.OPTIMISM,
-  POLYGON: Network.POLYGON,
-  polygon: Network.POLYGON,
+export type NetworkProp = keyof typeof Network | Network;
+
+export type WalletTypeProp = keyof typeof WalletType | WalletType;
+
+export const WalletSchemeMap = {
+  DKLS: WalletScheme.DKLS,
+  CGGMP: WalletScheme.CGGMP,
+  ED25519: WalletScheme.ED25519,
 };
 
-export type NetworkProp = keyof typeof NetworkMap | Network;
+export type WalletSchemeProp = keyof typeof WalletScheme | WalletScheme;
 
-export const SupportedOnRamps: Record<Network, Partial<Record<OnRampAsset, Partial<Record<OnRampProvider, boolean>>>>> = {
+export type WalletFilters = {
+  type?: WalletTypeProp[];
+  scheme?: WalletSchemeProp[];
+  forbidPregen?: boolean;
+};
+
+export const SupportedOnRamps: Partial<
+  Record<Network, Partial<Record<OnRampAsset, Partial<Record<OnRampProvider, boolean>>>>>
+> = {
   [Network.ETHEREUM]: {
     [OnRampAsset.ETHEREUM]: {
       [OnRampProvider.RAMP]: true,
@@ -121,14 +126,7 @@ export const SupportedOnRamps: Record<Network, Partial<Record<OnRampAsset, Parti
   },
 };
 
-export const OnRampProviderMap = {
-  STRIPE: OnRampProvider.STRIPE,
-  stripe: OnRampProvider.STRIPE,
-  RAMP: OnRampProvider.RAMP,
-  ramp: OnRampProvider.RAMP,
-};
-
-export type OnRampProviderProp = keyof typeof OnRampProviderMap | OnRampProvider;
+export type OnRampProviderProp = keyof typeof OnRampProvider | OnRampProvider;
 
 export type RampConfig = {
   id: OnRampProviderProp;
@@ -139,20 +137,7 @@ export type StripeConfig = {
   id: OnRampProviderProp;
 };
 
-export const OnRampAssetMap = {
-  eth: OnRampAsset.ETHEREUM,
-  ETH: OnRampAsset.ETHEREUM,
-  ethereum: OnRampAsset.ETHEREUM,
-  ETHEREUM: OnRampAsset.ETHEREUM,
-  usdc: OnRampAsset.USDC,
-  USDC: OnRampAsset.USDC,
-  polygon: OnRampAsset.POLYGON,
-  POLYGON: OnRampAsset.POLYGON,
-  matic: OnRampAsset.POLYGON,
-  MATIC: OnRampAsset.POLYGON,
-};
-
-export type OnRampAssetProp = keyof typeof OnRampAssetMap | OnRampAsset;
+export type OnRampAssetProp = keyof typeof OnRampAsset | OnRampAsset;
 
 export type OnRampConfigProvider = RampConfig | StripeConfig;
 
@@ -219,15 +204,7 @@ export enum OnRampMethod {
   APPLE_PAY = 'Apple Pay',
 }
 
-export function getProvider(key: OnRampProviderProp): OnRampProvider {
-  return OnRampProviderMap[key];
-}
-
-export function getAsset(key: OnRampAssetProp): OnRampAsset {
-  return OnRampAssetMap[key];
-}
-
-export const WalletSchemeMap: Record<WalletScheme, Partial<Record<WalletType, true>>> = {
+export const WalletSchemeTypeMap: Record<WalletScheme, Partial<Record<WalletType, true>>> = {
   [WalletScheme.DKLS]: {
     [WalletType.EVM]: true,
     [WalletType.COSMOS]: true,
@@ -247,7 +224,7 @@ export const getProviderNetworkAndAssetCode = (
   providerProp: OnRampProviderProp,
   testMode = false,
 ): [string, string?] => {
-  const [network, asset, provider] = [getNetwork(networkProp), getAsset(assetProp), getProvider(providerProp)];
+  const [network, asset, provider] = [Network[networkProp], OnRampAsset[assetProp], OnRampProvider[providerProp]];
   if (!SupportedOnRamps[network][asset][provider]) {
     throw new Error(`Provider ${provider} does not support asset ${asset} on ${network}`);
   }
@@ -265,15 +242,11 @@ export const getProviderNetworkAndAssetCode = (
 };
 
 export function getProviderAssetInverse(provider: OnRampProviderProp, asset: string): OnRampAsset {
-  const match = Object.entries(OnRampProviderAssetMap[getProvider(provider)]).find(
+  const match = Object.entries(OnRampProviderAssetMap[OnRampProvider[provider]]).find(
     ([, theirAssetCode]) => asset === theirAssetCode,
   );
 
   return match ? (match[0] as OnRampAsset) : undefined;
-}
-
-export function getNetwork(networkProp: NetworkProp): Network {
-  return NetworkMap[networkProp];
 }
 
 export function getPortalDomain(env: Environment) {

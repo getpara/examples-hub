@@ -1,10 +1,11 @@
 import { WalletType } from '@usecapsule/user-management-client';
-import { SupportedWalletTypes } from '../CoreCapsule';
+import { SupportedWalletTypeConfig, SupportedWalletTypes } from '../CoreCapsule';
 import { toBech32 } from '@cosmjs/encoding';
 import { sha256 } from '@noble/hashes/sha256';
 import { ripemd160 } from '@noble/hashes/ripemd160';
 
 import elliptic from 'elliptic';
+import { WalletTypeProp } from '../definitions';
 
 const secp256k1 = new elliptic.ec('secp256k1');
 
@@ -50,7 +51,7 @@ export function decimalToHex(decimal: string): Hex {
 
 export function isCosmosWithPrefix(
   supportedWalletTypes: SupportedWalletTypes,
-): supportedWalletTypes is { [WalletType.COSMOS]: { prefix: string } } {
+): supportedWalletTypes is { [WalletType.COSMOS]: SupportedWalletTypeConfig & { prefix: string } } {
   return !!(supportedWalletTypes as { [WalletType.COSMOS]: { prefix: string } })[WalletType.COSMOS]?.prefix;
 }
 
@@ -79,4 +80,14 @@ export function getCosmosAddress(publicKey: string, prefix: string) {
   const compressedPublicKey = compressPubkey(uncompressedPublicKey);
 
   return toBech32(prefix, rawSecp256k1PubkeyToRawAddress(compressedPublicKey));
+}
+
+export function truncateAddress(
+  str: string,
+  addressType: WalletTypeProp,
+  { prefix = addressType === 'COSMOS' ? 'cosmos' : undefined }: { prefix?: string } = {},
+): string {
+  const headLength = (addressType === 'COSMOS' ? prefix.length : addressType === 'SOLANA' ? 0 : 2) + 4;
+
+  return `${str.slice(0, headLength)}...${str.slice(-4)}`;
 }

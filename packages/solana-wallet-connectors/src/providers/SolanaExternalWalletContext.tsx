@@ -3,7 +3,7 @@ import { CommonWallet } from '../types/CommonTypes';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Adapter, WalletReadyState } from '@solana/wallet-adapter-base';
 import { useCapsuleSolana } from './CapsuleSolanaProvider.js';
-import CapsuleWeb, { ExternalWalletType, isMobile } from '@usecapsule/web-sdk';
+import CapsuleWeb, { WalletType, isMobile } from '@usecapsule/web-sdk';
 
 export const defaultSolanaExternalWallet = {
   wallets: [],
@@ -32,7 +32,7 @@ export function SolanaExternalWalletProvider({ children, capsule, onSwitchWallet
 
   const login = async (address: string, providerName?: string) => {
     try {
-      await capsule.externalWalletLogin(address, ExternalWalletType.SOLANA, providerName);
+      await capsule.externalWalletLogin(address, WalletType.SOLANA, providerName);
     } catch (err) {
       await reset();
 
@@ -69,10 +69,7 @@ export function SolanaExternalWalletProvider({ children, capsule, onSwitchWallet
     const storedExternalWallet = capsule.externalWallets[capsule.currentExternalWalletAddresses?.[0] ?? ''];
 
     // If the user is using an external Solana wallet we want to watch for wallet changes and log them in to a different user when the wallet changes
-    if (
-      storedExternalWallet?.type === ExternalWalletType.SOLANA &&
-      storedExternalWallet?.address !== solanaAddress?.toString()
-    ) {
+    if (storedExternalWallet?.type === WalletType.SOLANA && storedExternalWallet?.address !== solanaAddress?.toString()) {
       switchWallet(solanaAddress?.toString());
     }
   }, [solanaAddress]);
@@ -130,7 +127,7 @@ export function SolanaExternalWalletProvider({ children, capsule, onSwitchWallet
       connect: () => connect(adapter),
       connectMobile: () => connect(adapter),
       getQrUri: () => '',
-      type: ExternalWalletType.SOLANA,
+      type: WalletType.SOLANA,
       installed:
         adapter && (adapter?.readyState === WalletReadyState.Installed || adapter?.readyState === WalletReadyState.Loadable),
       ...metaData,

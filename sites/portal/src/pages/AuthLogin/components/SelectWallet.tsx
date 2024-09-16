@@ -1,26 +1,50 @@
 import { styled } from 'styled-components';
 import { useModalOutletContext } from '../../../hooks/useModalOutletContext';
-import { CpslIcon, CpslText, CpslButton, CpslDivider } from '@usecapsule/react-components';
+import { CpslIcon, CpslText, CpslButton, IconType, CpslRadio, CpslIdenticon } from '@usecapsule/react-components';
 import { SaveRecoverySecret } from '@usecapsule/react-sdk';
-import { format, formatDistanceToNowStrict, parseISO } from 'date-fns';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { formatDistanceToNowStrict, parseISO } from 'date-fns';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AuthLoginStep } from '../../../constants';
 import { useAuthLoginStep } from '../../../hooks/useLoginStep';
-import { Wallet as WalletType } from '@usecapsule/web-sdk';
-import { Identicon } from '../../../components/Identicon';
+import {
+  isTypeOptional,
+  isTypeRequired,
+  Wallet,
+  WalletType,
+  CurrentWalletIds,
+  WalletEntity,
+  PartnerEntity,
+} from '@usecapsule/web-sdk';
 import { useCapsule } from '../../../components/CapsuleContext';
 import { useLogin } from './LoginProvider';
-import { PartnerIcon } from '../../../components/PartnerIcon';
-import { ConnectDiagram, capsuleIcon } from '../../../components/ConnectDiagram';
-import { LayoutWithHero } from '../../../components/Hero';
+import {
+  ConnectDiagram,
+  capsuleIcon,
+  HERO_HEIGHT,
+  LayoutWithHero,
+  PartnerIcon as PartnerIconRoot,
+} from '../../../components';
 import { motion } from 'framer-motion';
 
 const GRADIENT = `linear-gradient(to right, #fe5330, #9400db)`;
 
-type Wallet = Pick<
-  WalletType,
-  'id' | 'type' | 'address' | 'name' | 'partner' | 'createdAt' | 'lastUsedAt' | 'lastUsedPartner'
->;
+interface WalletButtonProps {
+  addressType: WalletType;
+  wallet: Wallet | WalletEntity;
+  disabled?: boolean;
+  onClick?: () => void;
+  isClaimable?: boolean;
+  isNew?: boolean;
+  isSelected?: boolean;
+}
+
+type NewWallets = Partial<Record<WalletType, Wallet[]>>;
+
+const WALLET_GROUPS: Record<WalletType, [string, IconType]> = {
+  [WalletType.EVM]: ['Ethereum', 'ethereum'],
+  [WalletType.SOLANA]: ['Solana', 'solana'],
+  [WalletType.COSMOS]: ['Cosmos', 'cosmos'],
+};
 
 const successIcon = (
   <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -47,54 +71,67 @@ const contentMotionProps = {
   transition: { duration: 0.25 },
 };
 
-const WalletButton = ({
-  wallet,
-  disabled,
-  onClick,
-  isClaimable,
-  isMostRecent,
-  isNew,
-}: {
-  wallet: Wallet;
-  disabled?: boolean;
-  onClick?: () => void;
-  isClaimable?: boolean;
-  isMostRecent?: boolean;
-  isNew?: boolean;
-}) => {
+const PartnerIconInline = ({ partner }: { partner: PartnerEntity }) => (
+  <PartnerIconRoot size="16px" fontSize="8px" margin="0 3px 0 4px" partner={partner} />
+);
+
+const WalletButton = ({ wallet, disabled, onClick, isClaimable, isNew, isSelected, addressType }: WalletButtonProps) => {
   const capsule = useCapsule();
-  const displayAddress = capsule.getDisplayAddress(wallet.id, { truncate: true });
+  const displayCreation = isNew || !capsule.ctx.apiKey || !wallet.lastUsedAt;
+
+  const timestamp = useMemo(() => {
+    return formatDistanceToNowStrict(parseISO(displayCreation ? wallet.createdAt : wallet.lastUsedAt), {
+      addSuffix: true,
+    });
+  }, [displayCreation, wallet.createdAt, wallet.lastUsedAt]);
 
   return (
-    <WalletButtonRoot isClaimable={isClaimable} key={wallet.id} disabled={disabled} onClick={onClick}>
+    <WalletButtonRoot
+      isClaimable={isClaimable}
+      isSelected={isSelected}
+      key={`${addressType}-${wallet.id}`}
+      disabled={disabled}
+      onClick={onClick}
+    >
       <WalletButtonContainer>
         <WalletButtonUpper>
-          <Identicon address={wallet.address} size="32px" />
+          <CpslIdenticon hash={capsule.getIdenticonHash(wallet.id, addressType)} size="48px" />
           <WalletInfo>
-            <WalletName>{wallet.name}</WalletName>
-            {displayAddress && <WalletAddress>{displayAddress}</WalletAddress>}
+            <WalletName>
+              {wallet.name}
+              {isClaimable && <WalletClaimable>Claimable</WalletClaimable>}
+            </WalletName>
+            {wallet.address && (
+              <WalletAddress>{capsule.getDisplayAddress(wallet.id, { addressType, truncate: true })}</WalletAddress>
+            )}
           </WalletInfo>
-
-          {isMostRecent && <WalletTag>Most Recent</WalletTag>}
-          {isClaimable && <WalletClaimable>Claimable</WalletClaimable>}
         </WalletButtonUpper>
         <WalletButtonLower>
-          {(wallet.createdAt || isNew) && (
-            <div>
-              {wallet.partner && <PartnerIcon size="16px" margin="0 4px 0 0" fontSize="8px" partner={wallet.partner} />}
-              <span>{isNew ? 'Just created' : `Created on ${format(parseISO(wallet.createdAt), 'P')}`}</span>
-            </div>
-          )}
-          {capsule.ctx.apiKey && wallet.lastUsedAt && (
-            <div>
-              {wallet.lastUsedPartner && (
-                <PartnerIcon size="16px" margin="0 4px 0 0" fontSize="8px" partner={wallet.lastUsedPartner} />
-              )}
-              <span>Last used {formatDistanceToNowStrict(parseISO(wallet.lastUsedAt), { addSuffix: true })}</span>
-            </div>
-          )}
+          <div>
+            {displayCreation && !!wallet.partner?.displayName ? (
+              isNew ? (
+                <>
+                  <PartnerIconInline partner={wallet.partner} />
+                  <span>Just created</span>
+                </>
+              ) : (
+                <>
+                  <span>Created on</span>
+                  <PartnerIconInline partner={wallet.partner} />
+                  <span>{wallet.partner.displayName}</span>
+                </>
+              )
+            ) : !!wallet.lastUsedPartner?.displayName ? (
+              <>
+                Last used on <PartnerIconInline partner={wallet.lastUsedPartner} />
+                {wallet.lastUsedPartner.displayName}
+              </>
+            ) : null}
+          </div>
+          {!isNew && <div>{timestamp}</div>}
         </WalletButtonLower>
       </WalletButtonContainer>
+      {!disabled && <CpslRadio checked={isSelected} />}
     </WalletButtonRoot>
   );
 };
@@ -105,60 +142,135 @@ export const SelectWallet = ({ sessionLookupId }: { sessionLookupId: string }) =
     fns: { finishLogin },
     params: { email },
     wallets,
-    pregenWallets,
   } = useLogin();
   const [, setStep] = useAuthLoginStep();
-  const { partner, isDark } = useModalOutletContext();
+  const { partner } = useModalOutletContext();
 
-  const [isCreatingWallet, setIsCreatingWallet] = useState(false);
-  const [newWallet, setNewWallet] = useState<Wallet | undefined>();
+  const [isAtBottom, setIsAtBottom] = useState(false);
+  const divRef = useRef(null);
+
+  const onScroll = () => {
+    const { scrollTop, scrollHeight, clientHeight } = divRef.current;
+    if (scrollTop + clientHeight >= scrollHeight - 60) {
+      setIsAtBottom(true);
+    } else {
+      setIsAtBottom(false);
+    }
+  };
+
+  const walletTypes = useMemo(() => {
+    return Object.entries(capsule.supportedWalletTypes)
+      .sort(a => (wallets[a[0]].some(w => w.isPregen) || isTypeRequired(a[1]) ? -1 : 1))
+      .map(([type]) => type as WalletType);
+  }, [wallets, capsule.supportedWalletTypes]);
+
+  const isOnlyOneType = walletTypes.length === 1;
+
+  const [selectedWalletIds, setSelectedWalletIds] = useState<CurrentWalletIds>(
+    walletTypes.reduce((acc, type) => {
+      return {
+        ...acc,
+        [type]: [],
+      };
+    }, {}),
+  );
+
+  const [isCreatingWallets, setIsCreatingWallets] = useState(false);
+  const [newWallets, setNewWallets] = useState<NewWallets>({});
   const [recoverySecret, setRecoverySecret] = useState<string | undefined>();
   const [isRecoverySecretSaved, setIsRecoverySecretSaved] = useState(false);
 
-  const onSelectWallet = useCallback(
-    async (walletId: string) => {
-      await capsule.setCurrentWalletIds([walletId], sessionLookupId);
-      setStep(AuthLoginStep.SUCCESS);
+  const isIncomplete = isOnlyOneType
+    ? selectedWalletIds[walletTypes[0]].length === 0
+    : walletTypes.reduce((acc, type: WalletType) => {
+        if (isTypeOptional(capsule.supportedWalletTypes[type])) {
+          return acc;
+        }
+
+        return acc || !selectedWalletIds[type][0];
+      }, false);
+
+  const walletCount = Object.values(selectedWalletIds).flat().length;
+
+  const onSubmit = useCallback(
+    async (walletIds: CurrentWalletIds) => {
+      const toCreate = Object.keys(walletIds).filter(type => walletIds[type][0] === 'CREATE_NEW') as WalletType[];
+      if (toCreate.length > 0) {
+        if (!capsule.ctx.apiKey) {
+          return;
+        }
+
+        setIsCreatingWallets(true);
+
+        let newRecoverySecret: string | undefined;
+
+        const created = await capsule.createWalletPerType(false, toCreate);
+
+        const createdIds: CurrentWalletIds = Object.entries(created.walletIds)
+          .filter(([type]) => walletIds[type][0] === 'CREATE_NEW')
+          .reduce((acc, [type, walletIds]) => ({ ...acc, [type]: walletIds }), {});
+
+        setNewWallets(
+          Object.entries(createdIds).reduce((acc, [type, walletIds]) => {
+            const wallets = walletIds.map(walletId => {
+              const wallet = Object.values(capsule.wallets).find(({ id }) => id === walletId);
+
+              return { ...wallet, partner, name: `${partner?.displayName ?? 'New'} Wallet` };
+            });
+
+            return { ...acc, [type]: wallets };
+          }, {}),
+        );
+
+        setIsCreatingWallets(false);
+
+        await capsule.setCurrentWalletIds({ ...walletIds, ...createdIds }, sessionLookupId);
+
+        if (created.recoverySecret) {
+          newRecoverySecret = JSON.parse(recoverySecret || '{}').backupDecryptionKey;
+
+          setRecoverySecret(newRecoverySecret);
+        }
+
+        finishLogin();
+      } else {
+        await capsule.setCurrentWalletIds(walletIds, sessionLookupId);
+        setStep(AuthLoginStep.SUCCESS);
+      }
     },
     [capsule],
   );
 
-  const onCreateWallet = useCallback(async () => {
-    if (!capsule.ctx.apiKey) {
-      return;
+  const [key, header, heading, subheading, content] = useMemo(() => {
+    const isMany = Object.values(selectedWalletIds).filter(([id]) => id === 'CREATE_NEW').length > 1;
+    if (isCreatingWallets) {
+      return ['creating', null, `Creating Wallet${isMany ? 's' : ''}...`, null, null];
     }
 
-    setIsCreatingWallet(true);
-
-    const [newWallet, recoverySecret] = await capsule.createWallet();
-
-    await capsule.setCurrentWalletIds([newWallet.id], sessionLookupId);
-
-    setIsCreatingWallet(false);
-    setNewWallet({ ...capsule.wallets[newWallet.id], name: `Wallet ${wallets.length + 1}`, partner });
-
-    let newRecoverySecret: string | undefined;
-    if (recoverySecret) {
-      newRecoverySecret = JSON.parse(recoverySecret || '{}').backupDecryptionKey;
-
-      setRecoverySecret(newRecoverySecret);
-    }
-
-    finishLogin();
-  }, [capsule, wallets, partner]);
-
-  const [key, header, heading, content] = useMemo(() => {
-    if (isCreatingWallet) {
-      return ['creating', null, 'Creating Wallet...', null];
-    }
-
-    if (newWallet) {
+    if (!!newWallets && Object.keys(newWallets).length > 0) {
       return [
         'success',
         <Success>{successIcon}</Success>,
-        'Wallet Created',
+        `Wallet${isMany ? 's' : ''} Created`,
+        null,
         <FlexColumn style={{ marginTop: '16px' }}>
-          <WalletButton wallet={newWallet} disabled isNew />
+          {Object.entries(newWallets).map(([walletType, wallets]) => {
+            return (
+              <>
+                {wallets.map(wallet =>
+                  wallet ? (
+                    <WalletButton
+                      addressType={walletType as WalletType}
+                      key={`${wallet.id}-${walletType}`}
+                      wallet={wallet}
+                      disabled
+                      isNew
+                    />
+                  ) : null,
+                )}
+              </>
+            );
+          })}
           {recoverySecret && (
             <RecoverySecretContainer>
               <RecoverySecretInstructions>
@@ -174,116 +286,152 @@ export const SelectWallet = ({ sessionLookupId }: { sessionLookupId: string }) =
       ];
     }
 
-    const isMostRecentFromApp = wallets[0]?.partner?.id === partner.id;
-    const isPregenAvailable = pregenWallets?.length > 0;
+    const pregenCount = Object.values(wallets).reduce(
+      (acc, arr) => acc + arr.filter(w => w.isPregen && !!w.pregenIdentifier).length,
+      0,
+    );
 
     return [
       'select',
-      <ConnectDiagram left={capsuleIcon} right={<PartnerIcon partner={partner} fontSize="24px" />} />,
+      <ConnectDiagram left={capsuleIcon} right={<PartnerIconRoot partner={partner} fontSize="24px" />} />,
       `Connect to ${partner.displayName}`,
+      pregenCount > 0 ? (
+        <>
+          {partner.displayName} has created {pregenCount > 1 ? 'wallets' : 'a wallet'} on your behalf.
+          <br />
+          You can now claim {pregenCount > 1 ? 'these wallets' : 'this wallet'}.
+        </>
+      ) : capsule.ctx.apiKey ? (
+        'Choose an existing wallet or create a new one.'
+      ) : (
+        'Choose an existing wallet.'
+      ),
       <WalletsContainer>
-        <Subheading isDark={isDark}>
-          <span>
-            {isPregenAvailable ? (
-              <>
-                {partner.displayName} has created a wallet on your behalf.
-                <br />
-                You can now claim this wallet.
-              </>
-            ) : isMostRecentFromApp ? (
-              'Welcome back! Continue with your previous wallet:'
-            ) : capsule.ctx.apiKey ? (
-              'Choose an existing wallet or create a new one.'
-            ) : (
-              'Choose an existing wallet.'
-            )}
-          </span>
-        </Subheading>
-
-        <Wallets>
-          {isPregenAvailable && (
-            <>
-              <WalletButton wallet={pregenWallets[0]} onClick={() => onSelectWallet(pregenWallets[0].id)} isClaimable />
-              <Divider key={'orUseAnotherWallet'}>or use another wallet</Divider>
-            </>
-          )}
-          {wallets[0] && (
-            <WalletButton
-              wallet={wallets[0]}
-              onClick={() => onSelectWallet(wallets[0].id)}
-              // isMostRecent={!isMostRecentFromApp || isPregenAvailable}
-              isMostRecent
-            />
-          )}
-          {isMostRecentFromApp && !isPregenAvailable && (
-            <Divider key={'orUseAnotherWallet'}>other available wallets</Divider>
-          )}
-          {wallets.slice(1).map(wallet => {
-            return <WalletButton key={wallet.id} wallet={wallet} onClick={() => onSelectWallet(wallet.id)} />;
-          })}
-          {capsule.ctx.apiKey && (
-            <ButtonRoot onClick={onCreateWallet}>
-              <CreateWalletContainer>
-                <CreateWalletIcon>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      d="M13 5C13 4.44772 12.5523 4 12 4C11.4477 4 11 4.44772 11 5V11H5C4.44772 11 4 11.4477 4 12C4 12.5523 4.44772 13 5 13H11V19C11 19.5523 11.4477 20 12 20C12.5523 20 13 19.5523 13 19V13H19C19.5523 13 20 12.5523 20 12C20 11.4477 19.5523 11 19 11H13V5Z"
-                      fill="var(--cpsl-color-background-0)"
+        <Wallets isAtBottom={isAtBottom} ref={divRef} onScroll={onScroll}>
+          {walletTypes.map((walletType: WalletType) => {
+            const isCreateNew = selectedWalletIds[walletType][0] === 'CREATE_NEW';
+            return (
+              <FlexColumn key={walletType}>
+                {isOnlyOneType ? null : (
+                  <WalletGroupHeading>
+                    <CpslIcon icon={WALLET_GROUPS[walletType][1]} />
+                    <span>{WALLET_GROUPS[walletType][0]} Wallets</span>
+                  </WalletGroupHeading>
+                )}
+                {wallets[walletType].map(wallet => {
+                  const isClaimable = wallet.isPregen && !!wallet.pregenIdentifier;
+                  return (
+                    <WalletButton
+                      key={wallet.id}
+                      addressType={walletType}
+                      wallet={wallet}
+                      onClick={() => {
+                        setSelectedWalletIds(prev => ({
+                          ...prev,
+                          [walletType]: prev[walletType][0] === wallet.id ? [] : [wallet.id],
+                        }));
+                      }}
+                      isClaimable={isClaimable}
+                      isSelected={selectedWalletIds[walletType][0] === wallet.id}
                     />
-                  </svg>
-                </CreateWalletIcon>
-                <CreateWalletText>Create New Wallet</CreateWalletText>
-                <CpslIcon icon="arrow" />
-              </CreateWalletContainer>
-            </ButtonRoot>
-          )}
+                  );
+                })}
+                {capsule.ctx.apiKey && (
+                  <ButtonRoot
+                    isSelected={isCreateNew}
+                    onClick={() => {
+                      if (!isCreateNew) {
+                        setSelectedWalletIds(prev => ({ ...prev, [walletType]: ['CREATE_NEW'] }));
+                      }
+                    }}
+                  >
+                    <CreateWalletContainer>
+                      <CreateWalletIcon>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path
+                            d="M13 5C13 4.44772 12.5523 4 12 4C11.4477 4 11 4.44772 11 5V11H5C4.44772 11 4 11.4477 4 12C4 12.5523 4.44772 13 5 13H11V19C11 19.5523 11.4477 20 12 20C12.5523 20 13 19.5523 13 19V13H19C19.5523 13 20 12.5523 20 12C20 11.4477 19.5523 11 19 11H13V5Z"
+                            fill="var(--cpsl-color-background-0)"
+                          />
+                        </svg>
+                      </CreateWalletIcon>
+                      <CreateWalletText>Create New Wallet</CreateWalletText>
+                      <CpslRadio checked={isCreateNew} />
+                    </CreateWalletContainer>
+                  </ButtonRoot>
+                )}
+              </FlexColumn>
+            );
+          })}
         </Wallets>
-
-        <Notice>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M2.42012 12.7132C2.28394 12.4975 2.21584 12.3897 2.17772 12.2234C2.14909 12.0985 2.14909 11.9015 2.17772 11.7766C2.21584 11.6103 2.28394 11.5025 2.42012 11.2868C3.54553 9.50484 6.8954 5 12.0004 5C17.1054 5 20.4553 9.50484 21.5807 11.2868C21.7169 11.5025 21.785 11.6103 21.8231 11.7766C21.8517 11.9015 21.8517 12.0985 21.8231 12.2234C21.785 12.3897 21.7169 12.4975 21.5807 12.7132C20.4553 14.4952 17.1054 19 12.0004 19C6.8954 19 3.54553 14.4952 2.42012 12.7132Z"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M12.0004 15C13.6573 15 15.0004 13.6569 15.0004 12C15.0004 10.3431 13.6573 9 12.0004 9C10.3435 9 9.0004 10.3431 9.0004 12C9.0004 13.6569 10.3435 15 12.0004 15Z"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <div>{partner.displayName} will be able to view the selected wallet's activity and balances.</div>
-        </Notice>
       </WalletsContainer>,
     ];
-  }, [isCreatingWallet, newWallet, partner, wallets, recoverySecret, isRecoverySecretSaved]);
+  }, [
+    isCreatingWallets,
+    newWallets,
+    selectedWalletIds,
+    partner,
+    wallets,
+    recoverySecret,
+    isRecoverySecretSaved,
+    isAtBottom,
+  ]);
+
+  const isCreated = Object.values(newWallets).length > 0;
 
   useEffect(() => {
     // Situation where user has wallets, but none of the supported type (EVM/SOLANA)
-    if (wallets.length === 0) {
-      onCreateWallet();
+    if (walletTypes.every(type => wallets[type].length === 0)) {
+      onSubmit(walletTypes.reduce((acc, type) => ({ ...acc, [type]: 'CREATE_NEW' }), {}));
     }
-  }, [wallets]);
+  }, [wallets, walletTypes]);
 
   return (
     <Root>
       <Container>
-        <LayoutWithHero hero={header} state={newWallet ? 'success' : 'loading'}>
+        <LayoutWithHero hero={header} state={!!newWallets && Object.keys(newWallets).length > 0 ? 'success' : 'loading'}>
           <FlexColumn key={key} {...contentMotionProps}>
-            <Heading>
-              <span>{heading}</span>
-            </Heading>
+            <PageHeading>
+              <Heading>{heading}</Heading>
+              {subheading && <Subheading>{subheading}</Subheading>}
+            </PageHeading>
             <FlexColumn>{content}</FlexColumn>
           </FlexColumn>
         </LayoutWithHero>
       </Container>
+      {!isCreatingWallets && !isCreated && (
+        <BottomSheet>
+          <CpslButton fullWidth onClick={() => onSubmit(selectedWalletIds)} disabled={isIncomplete}>
+            {walletCount > 1 ? `Connect ${walletCount} Wallets` : 'Connect Wallet'}
+            <CpslIcon icon="arrow" />
+          </CpslButton>
+          <Notice>{partner.displayName} will be able to view the selected wallets' activity and balances.</Notice>
+        </BottomSheet>
+      )}
     </Root>
   );
 };
+
+export function CreateWalletButton({ isSelected, onClick }: Pick<WalletButtonProps, 'isSelected' | 'onClick'>) {
+  return (
+    <ButtonRoot isSelected={isSelected} onClick={onClick}>
+      <CreateWalletContainer>
+        <CreateWalletIcon>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M13 5C13 4.44772 12.5523 4 12 4C11.4477 4 11 4.44772 11 5V11H5C4.44772 11 4 11.4477 4 12C4 12.5523 4.44772 13 5 13H11V19C11 19.5523 11.4477 20 12 20C12.5523 20 13 19.5523 13 19V13H19C19.5523 13 20 12.5523 20 12C20 11.4477 19.5523 11 19 11H13V5Z"
+              fill="var(--cpsl-color-background-0)"
+            />
+          </svg>
+        </CreateWalletIcon>
+        <CreateWalletText>Create New Wallet</CreateWalletText>
+        <CpslRadio checked={isSelected} />
+      </CreateWalletContainer>
+    </ButtonRoot>
+  );
+}
+
+const PAGE_HEADING_HEIGHT = 72;
+const BOTTOM_SHEET_HEIGHT = 156;
 
 const Root = styled.div`
   height: 100vh;
@@ -298,6 +446,7 @@ const FlexColumn = styled(motion.div)`
   align-items: center;
   gap: 8px;
   width: 100%;
+  flex: 1;
 `;
 
 const WalletsContainer = styled(FlexColumn)`
@@ -306,26 +455,27 @@ const WalletsContainer = styled(FlexColumn)`
   bottom: 0;
 `;
 
-const Divider = styled(CpslDivider)`
-  --divider-color: #d6d6d6;
-  --cpsl-color-text-subtle: #ababab;
-  width: 100%;
-  font-size: 14px;
-  font-weight: 500;
-  font-family: 'Inter', sans-serif;
-`;
-
-const Wallets = styled(FlexColumn)`
+const Wallets = styled(FlexColumn)<{ isAtBottom?: boolean }>`
   margin-top: 8px;
   position: relative;
   overflow-y: auto;
-  max-height: calc(100vh - 370px);
+  max-height: calc(100vh - ${BOTTOM_SHEET_HEIGHT}px - ${HERO_HEIGHT}px - ${PAGE_HEADING_HEIGHT}px - 32px);
   width: 100%;
+  gap: 32px;
+  mask-image: ${({ isAtBottom }) =>
+    isAtBottom ? 'none' : 'linear-gradient(to bottom, black calc(100% - 24px), transparent 100%)'};
 `;
 
 const Container = styled(FlexColumn)`
   padding-left: 12px;
   padding-right: 12px;
+  height: 100%;
+`;
+
+const PageHeading = styled(FlexColumn)`
+  min-height: 72px;
+  justify-content: flex-start;
+  flex: 0;
 `;
 
 const Heading = styled(CpslText)`
@@ -335,66 +485,90 @@ const Heading = styled(CpslText)`
   line-height: 1;
 `;
 
+const WalletGroupHeading = styled.div`
+  color: var(--Background-96, #0a0a0a);
+  font-size: var(--Typography-Text-L, 20px);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  gap: 8px;
+  position: sticky;
+  top: 0px;
+  background: white;
+  z-index: 1000;
+  padding: 0 0 4px 0;
+
+  --icon-width: 20px;
+  --icon-height: 20px;
+`;
+
 const Subheading = styled(CpslText)<{ isDark?: boolean }>`
   line-height: auto;
   text-align: center;
   color: #868686;
 `;
 
-const Notice = styled.div`
-  background-color: var(--cpsl-color-foreground-96);
-  color: var(--cpsl-color-foreground-8);
-  border-radius: 16px;
+const BottomSheet = styled.div`
+  width: 100vw;
+  padding: 32px calc(50vw - 218px);
   display: flex;
-  padding: 16px;
-  gap: 12px;
-  font-size: 12px;
-
-  & > svg {
-    flex-shrink: 0;
-  }
+  flex-direction: column;
+  gap: 8px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: ${BOTTOM_SHEET_HEIGHT}px;
+  border-radius: 24px 24px 0px 0px;
+  border: 1px solid #d6d6d6;
+  background: white;
+  box-shadow: 0px -8px 6px 0px rgba(0, 0, 0, 0.04);
 `;
 
-const ButtonRoot = styled.button`
+const Notice = styled.div`
+  font-size: 12px;
+  text-align: center;
+`;
+
+const ButtonRoot = styled.button<Pick<WalletButtonProps, 'isSelected'>>`
   padding: 24px;
   background-color: white;
   border-radius: 16px;
   border: 1px solid;
+  display: flex;
+  align-items: center;
   width: 100%;
-  border-color: #adadad;
+  border-color: ${({ isSelected }) => (isSelected ? 'black' : '#f0f0f0')};
   cursor: pointer;
   font-family: 'Inter', sans-serif;
+  box-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.04);
 
   &:hover {
-    background-color: #f5f5f5;
+    background-color: #fafafa;
   }
 
   &:active {
-    background-color: #cacaca;
+    background-color: #f0f0f0;
   }
 
   &:disabled {
+    cursor: default;
     background-color: white;
-    border-color: #d6d6d6;
+    border-color: #cdcdcd;
+
+    &:hover {
+      background-color: white;
+    }
   }
 `;
 
-// const ButtonRoot = styled(CpslButton)`
-//   --button-padding-top: 16px;
-//   --button-padding-left: 16px;
-//   --button-padding-right: 16px;
-//   --button-padding-bottom: 16px;
-//   --button-box-shadow: none;
-//   --cpsl-color-secondary-button-surface-default: #fff;
-//   --cpsl-color-secondary-button-border-default: #d6d6d6;
-//   --cpsl-color-secondary-button-surface-hover: #efefef;
-//   --cpsl-color-secondary-button-surface-pressed: #cacaca;
-//   --cpsl-color-secondary-button-surface-disabled: #fff;
-//   --cpsl-color-secondary-button-border-disabled: #d6d6d6;
-//   width: 100%;
-// `;
+const WalletButtonRoot = styled(ButtonRoot)<Pick<WalletButtonProps, 'isClaimable'>>`
+  height: 128px;
 
-const WalletButtonRoot = styled(ButtonRoot)<{ isClaimable?: boolean }>`
   ${({ isClaimable }) =>
     isClaimable
       ? `
@@ -405,12 +579,13 @@ const WalletButtonRoot = styled(ButtonRoot)<{ isClaimable?: boolean }>`
         background: linear-gradient(#f5f5f5, #f5f5f5) padding-box, ${GRADIENT} border-box;
       }
     `
-      : ''}
+      : ''};
 `;
 
 const WalletButtonContainer = styled.div`
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: 8px;
   width: 100%;
 `;
@@ -419,51 +594,51 @@ const WalletButtonUpper = styled.div`
   position: relative;
   display: flex;
   width: 100%;
-  gap: 4px;
+  gap: 8px;
   align-items: center;
   justify-content: start;
 `;
 
 const WalletInfo = styled.div`
   display: flex;
+  flex-direction: column;
   flex-grow: 1;
-  align-items: baseline;
+  align-items: flex-start;
+  justify-content: flex-start;
   gap: 4px;
-  position: relative;
-  top: 2px;
+  max-width: 60%;
 `;
 
 const WalletName = styled.div`
   color: black;
   text-align: left;
   font-size: 20px;
-  font-weight: 500;
+  font-weight: 600;
   overflow-x: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 45%;
 `;
 
 const WalletAddress = styled.div`
-  font-size: 14px;
+  font-size: 12px;
   color: #858585;
 `;
 
 const WalletTag = styled.div`
   border-radius: 4px;
   color: #141414;
-  border: 1px solid #d6d6d6;
   padding: 2px 4px;
+  font-weight: 500;
   font-size: 10px;
-  position: absolute;
-  right: 0;
-  bottom: 5px;
   line-height: 1;
+  display: inline-block;
+  margin-left: 8px;
+  position: relative;
+  top: -3px;
 `;
 
 const WalletClaimable = styled(WalletTag)`
   color: white;
-  border: 1px solid transparent;
   background: ${GRADIENT};
 `;
 

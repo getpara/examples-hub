@@ -18,9 +18,6 @@ export const formatPhoneNumber = (phone: string, countryCode: CountryCallingCode
   return parsed.formatNational();
 };
 
-export const formatWalletAddress = (address: string) =>
-  `${address.slice(0, 6)}...${address.slice(address.length - 4, address.length)}`;
-
 export const formatWalletCreatedDate = (date: string) => `${format(new Date(date), 'M/d/y')}`;
 
 export const camelToSnakeCase = (str: string) => str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);

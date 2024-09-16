@@ -98,13 +98,15 @@ export async function authUpdateKeyShares(
 
   // get all shares that are associated with this partnerId
   const sharesForPartnerToDecrypt = encryptedSharesRes.data.keyShares
-    .filter(share => !capsule.currentWalletIds || capsule.currentWalletIds.includes(share.walletId))
+    .filter(share => !capsule.currentWalletIds || capsule.currentWalletIdsUnique.includes(share.walletId))
     .filter(share => {
       return share.walletScheme !== WalletScheme.DKLS || share.partnerId === partnerId;
     });
 
   // get all walletIds that we'll need a share for
-  const allWalletIds = capsule.currentWalletIds || [...new Set([...sharesForPartnerToDecrypt.map(share => share.walletId)])];
+  const allWalletIds = capsule.currentWalletIdsUnique || [
+    ...new Set([...sharesForPartnerToDecrypt.map(share => share.walletId)]),
+  ];
   // find walletIds that don't have a share for this partner yet
   const walletIdsWithoutPartnerIdShare = allWalletIds.filter(walletId => {
     return !sharesForPartnerToDecrypt.some(share => share.walletId === walletId);

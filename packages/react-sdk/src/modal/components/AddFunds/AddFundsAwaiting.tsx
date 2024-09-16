@@ -1,5 +1,5 @@
 import { StepContainer } from '../common.js';
-import { OnRampProvider, RampConfig, getProvider } from '@usecapsule/web-sdk';
+import { OnRampProvider, RampConfig } from '@usecapsule/web-sdk';
 import { useModalStore } from '../../stores/index.js';
 import { useEffect, useMemo } from 'react';
 import { ModalStep } from '../../utils/steps.js';
@@ -21,9 +21,7 @@ export const AddFundsAwaiting = () => {
       case OnRampProvider.STRIPE:
         return <StripeEmbed />;
       case OnRampProvider.RAMP:
-        const rampConfig = onRampConfig.providers.find(
-          ({ id }) => getProvider(id) === OnRampProvider.RAMP,
-        ) as unknown as RampConfig;
+        const rampConfig = onRampConfig.providers.find(({ id }) => id === 'RAMP') as unknown as RampConfig;
 
         return <RampEmbed hostApiKey={rampConfig.hostApiKey} />;
     }

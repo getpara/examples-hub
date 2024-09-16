@@ -1,37 +1,48 @@
 import styled from 'styled-components';
-import { useCapsuleStore } from '../../stores/index.js';
+import { useCapsuleStore, useThemeStore } from '../../stores/index.js';
 import { CpslIdenticon, CpslText } from '@usecapsule/react-components';
-import { formatWalletAddress } from '../../utils/stringFormatters.js';
+import { truncateAddress, WalletType } from '@usecapsule/web-sdk';
 
-export const WalletCard = () => {
+interface Props {
+  id: string;
+  type: WalletType;
+}
+
+export const WalletCard = ({ id, type }: Props) => {
   const capsule = useCapsuleStore(state => state.capsule);
+  const appName = useThemeStore(state => state.appName);
 
-  const currentWalletId = capsule.currentWalletIds?.[0];
+  const wallet = capsule.findWallet(id, type);
 
-  if (!currentWalletId) {
+  if (!wallet) {
     return null;
   }
 
-  const currentWallet = capsule.wallets[currentWalletId];
-  const walletAddress = currentWallet.address;
-  const walletName = currentWallet.name;
+  const address = capsule.getDisplayAddress(wallet.id, { addressType: type });
 
   return (
     <Container>
       <InnerContainer>
-        <WalletIcon hash={walletAddress} />
+        <CpslIdenticon size="30px" hash={capsule.getIdenticonHash(wallet.id, type)} />
         <WalletNameContainer>
           <Address color="contrast" variant="bodyL" weight="semiBold">
-            {walletName}
+            {wallet.name ?? `${appName} Wallet`}
           </Address>
           <CpslText color="secondary" variant="bodyS" weight="medium">
-            {formatWalletAddress(walletAddress)}
+            {truncateAddress(address, type, { prefix: capsule.cosmosPrefix })}
           </CpslText>
         </WalletNameContainer>
       </InnerContainer>
     </Container>
   );
 };
+
+export const WalletCards = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+`;
 
 const Container = styled.div`
   width: 100%;
@@ -61,9 +72,4 @@ const WalletNameContainer = styled.div`
 
 const Address = styled(CpslText)`
   line-height: 100%;
-`;
-
-const WalletIcon = styled(CpslIdenticon)`
-  height: 30px;
-  width: 30px;
 `;

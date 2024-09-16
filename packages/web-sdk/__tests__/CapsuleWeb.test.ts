@@ -14,7 +14,7 @@ describe('CoreCapsule', () => {
       expect(capsule.wallets).toEqual({});
 
       // casting as any to access protected fields
-      expect((capsule as any).supportedWalletTypes).toEqual({ [WalletType.EVM]: true });
+      expect((capsule as any).supportedWalletTypes).toEqual({ [WalletType.EVM]: { optional: false } });
     });
   });
 });

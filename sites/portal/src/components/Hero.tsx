@@ -6,6 +6,8 @@ import Ring0LoadingSrc from '../assets/hero-loading.png';
 
 type State = 'default' | 'loading' | 'success';
 
+export const HERO_HEIGHT = 180;
+
 const positioning = `
     position: absolute;
     top: 45px;
@@ -41,10 +43,11 @@ const Container = styled.div`
   right: 0;
   left: 0;
   width: 100%;
-  height: 180px;
+  height: ${HERO_HEIGHT}px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 `;
 
 const Ring0 = styled.div<{ state: State }>`
@@ -98,6 +101,7 @@ const LayoutContainer = styled.div`
   justify-content: flex-start;
   gap: 8px;
   position: relative;
+  flex: 1;
 `;
 
 export function Hero({ children, state = 'default' }: PropsWithChildren<{ state?: State; top?: number }>) {

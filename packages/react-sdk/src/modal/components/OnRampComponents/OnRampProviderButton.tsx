@@ -5,6 +5,7 @@ import { ON_RAMP_PROVIDERS, OnRampProviderConfig } from '../../constants/constan
 import { ModalStep } from '../../utils/steps.js';
 import styled from 'styled-components';
 import { CpslButton, CpslIcon, CpslSpinner, CpslText } from '@usecapsule/react-components';
+import { useActiveWallet } from '../../hooks/useActiveWallet.js';
 
 interface OnRampButtonProps {
   config: OnRampConfig;
@@ -16,6 +17,7 @@ export const OnRampProviderButton = ({ config, index }: OnRampButtonProps) => {
   const capsule = useCapsuleStore(state => state.capsule);
   const setStep = useModalStore(state => state.setStep);
   const setOnRampPurchase = useModalStore(state => state.setOnRampPurchase);
+  const activeWallet = useActiveWallet();
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -44,6 +46,7 @@ export const OnRampProviderButton = ({ config, index }: OnRampButtonProps) => {
       network: config.network,
       asset: config.asset,
       testMode: config.testMode,
+      [activeWallet.isExternal ? 'externalWalletAddress' : 'walletId']: activeWallet.id,
     });
     setOnRampPurchase(newOnRampPurchase);
 

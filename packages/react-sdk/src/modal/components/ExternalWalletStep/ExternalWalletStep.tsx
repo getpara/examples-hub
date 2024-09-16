@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import { useExternalWallets } from '../../providers/ExternalWalletContext';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
 import { ModalStep } from '../../utils/steps';
-import { ExternalWalletType, isMobile } from '@usecapsule/web-sdk';
+import { isMobile, WalletType } from '@usecapsule/web-sdk';
 import { routeMobileExternalWallet } from '../../utils/routeMobileExternalWallet';
 
 export const ExternalWalletStep = () => {
@@ -14,10 +14,6 @@ export const ExternalWalletStep = () => {
   const externalWalletError = useModalStore(state => state.externalWalletError);
   const setStep = useModalStore(state => state.setStep);
   const { connectExternalWallet, wallet, qrUri, walletDisplayHelpers } = useExternalWallets();
-
-  if (!wallet) {
-    setStep(ModalStep.AUTH_MAIN);
-  }
 
   useEffect(() => {
     routeMobileExternalWallet(qrUri);
@@ -94,7 +90,7 @@ export const ExternalWalletStep = () => {
       if (isMobile()) {
         // Checking if the wallet is installed only for Solana wallets since Solana MWA doesn't work on IOS Safari
         // https://docs.solanamobile.com/web/developing-for-web#ios-web
-        const isInstalled = wallet.type !== ExternalWalletType.SOLANA || wallet.installed;
+        const isInstalled = wallet.type !== WalletType.SOLANA || wallet.installed;
         return (
           <>
             <InnerStepContainer>
@@ -143,6 +139,12 @@ export const ExternalWalletStep = () => {
       );
     }
   }, [wallet, walletDisplayHelpers, externalWalletError, qrUri]);
+
+  useEffect(() => {
+    if (!wallet) {
+      setStep(ModalStep.AUTH_MAIN);
+    }
+  }, [wallet]);
 
   if (!wallet) {
     return null;

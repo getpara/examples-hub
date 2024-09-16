@@ -7,10 +7,9 @@ import { ModalStep } from './utils/steps.js';
 import { AuthLayout, CapsuleModalHandle, CapsuleModalProps } from './types/modalProps.js';
 import { DEFAULTS } from './constants/defaults.js';
 import { useGoBack } from './hooks/useGoBack.js';
-import { Network, getNetwork } from '@usecapsule/web-sdk';
+import { CURRENT_WALLET_IDS_CHANGE_EVENT, EXTERNAL_WALLET_CHANGE_EVENT, Network } from '@usecapsule/web-sdk';
 import { ExternalWalletsWrapper } from './components/ExternalWalletsWrapper/ExternalWalletsWrapper.js';
 import { CountryCallingCode } from 'libphonenumber-js';
-import { WalletProvider } from './providers/WalletContext.js';
 
 defineCustomElements();
 
@@ -28,7 +27,7 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
       bareModal = false,
       className,
       onRampConfig,
-      networks = [Network.ETHEREUM],
+      networks,
       currentStepOverride,
       externalWallets,
       authLayout = [AuthLayout.AUTH_FULL, AuthLayout.EXTERNAL_FULL],
@@ -59,6 +58,7 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     const resetModalState = useModalStore(state => state.resetState);
     const resetUserInfoState = useUserInfoStore(state => state.resetState);
     const setRecoveryShare = useUserInfoStore(state => state.setRecoveryShare);
+    const [activeWallet, setActiveWallet] = useModalStore(state => [state.activeWallet, state.setActiveWallet]);
 
     const [isModalMounted, setIsModalMounted] = useState(false);
     const [hasFinishedAnimation, setHasFinishedAnimation] = useState(false);
@@ -124,7 +124,7 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     };
 
     useEffect(() => {
-      setAuthLayout(!externalWallets?.length ? authLayout.filter(l => !l.includes('EXTERNAL')) : authLayout);
+      setAuthLayout(authLayout && !externalWallets?.length ? authLayout.filter(l => !l.includes('EXTERNAL')) : authLayout);
     }, [externalWallets, authLayout]);
 
     useEffect(() => {
@@ -136,7 +136,7 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     }, [onRampConfig]);
 
     useEffect(() => {
-      setNetworks(networks.map(getNetwork));
+      setNetworks(networks ? networks.map(n => Network[n]) : undefined);
     }, [networks]);
 
     useEffect(() => {
@@ -164,16 +164,35 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
       }
     }, []);
 
-    useEffect(() => {
-      setCapsule(capsule);
-    }, [capsule]);
-
     // Init modal with proper steps on isOpen change
     useEffect(() => {
       if (isOpen && capsule) {
         initModal();
       }
     }, [isOpen]);
+
+    const updateActiveWallet = () => {
+      if (!activeWallet[0] || !capsule.findWallet(activeWallet[0])) {
+        const defaultWallet = capsule.findWallet(undefined, undefined, { forbidPregen: true });
+        defaultWallet && setActiveWallet([defaultWallet.id, defaultWallet.type]);
+      }
+    };
+
+    useEffect(() => {
+      setCapsule(capsule);
+
+      updateActiveWallet();
+    }, [capsule]);
+
+    useEffect(() => {
+      window.addEventListener(CURRENT_WALLET_IDS_CHANGE_EVENT, updateActiveWallet);
+      window.addEventListener(EXTERNAL_WALLET_CHANGE_EVENT, updateActiveWallet);
+
+      return () => {
+        window.removeEventListener(CURRENT_WALLET_IDS_CHANGE_EVENT, updateActiveWallet);
+        window.removeEventListener(EXTERNAL_WALLET_CHANGE_EVENT, updateActiveWallet);
+      };
+    }, []);
 
     const handleModalEntering = () => {
       setIsModalMounted(true);
@@ -194,7 +213,9 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
         currentStep === ModalStep.BIOMETRIC_LOGIN ||
         currentStep === ModalStep.BIOMETRIC_CREATION ||
         currentStep === ModalStep.WALLET_CREATION_DONE ||
-        currentStep === ModalStep.EX_WALLET_SELECTED
+        currentStep === ModalStep.EX_WALLET_SELECTED ||
+        currentStep === ModalStep.AWAITING_BIOMETRIC_CREATION ||
+        currentStep === ModalStep.AWAITING_BIOMETRIC_LOGIN
       ) {
         resetModalState();
         resetUserInfoState();
@@ -238,16 +259,14 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
           data-testid="modal"
         >
           {isModalMounted && (
-            <WalletProvider>
-              <ModalContent
-                hasFinishedAnimation={hasFinishedAnimation}
-                oAuthMethods={oAuthMethods}
-                disableEmailLogin={disableEmailLogin}
-                disablePhoneLogin={disablePhoneLogin}
-                onClose={onClose}
-                {...rest}
-              />
-            </WalletProvider>
+            <ModalContent
+              hasFinishedAnimation={hasFinishedAnimation}
+              oAuthMethods={oAuthMethods}
+              disableEmailLogin={disableEmailLogin}
+              disablePhoneLogin={disablePhoneLogin}
+              onClose={onClose}
+              {...rest}
+            />
           )}
         </CpslAuthModal>
       </ExternalWalletsWrapper>

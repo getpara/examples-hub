@@ -1,4 +1,4 @@
-import { Heading, Hero, Subheading } from './common';
+import { Heading, HeroIcon, Subheading } from './common';
 import { IconType } from '@usecapsule/core-components';
 
 interface ModalSuccessProps {
@@ -10,7 +10,7 @@ interface ModalSuccessProps {
 export const ModalSuccess = ({ heading, subHeading, icon }: ModalSuccessProps) => {
   return (
     <>
-      <Hero icon={icon} />
+      <HeroIcon icon={icon} />
       <Heading>
         <span>{heading}</span>
       </Heading>
