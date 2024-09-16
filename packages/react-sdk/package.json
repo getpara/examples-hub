@@ -15,7 +15,6 @@
     "@ramp-network/ramp-instant-sdk": "^4.0.2",
     "@stripe/crypto": "^0.0.4",
     "@stripe/stripe-js": "^3.4.0",
-    "@usecapsule/evm-wallet-connectors": "0.2.0",
     "@usecapsule/react-components": "3.4.0",
     "@usecapsule/web-sdk": "1.26.0",
     "date-fns": "^3.6.0",
@@ -35,6 +34,7 @@
     "@types/chrome": "^0.0.237",
     "@types/react": "^18.0.31",
     "@types/react-dom": "^18.2.7",
+    "@usecapsule/evm-wallet-connectors": "0.2.0",
     "typescript": "^5.4.3"
   },
   "peerDependencies": {

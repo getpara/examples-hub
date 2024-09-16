@@ -28,16 +28,6 @@ export namespace Components {
          */
         "variant"?: 'error' | 'warning' | 'success' | 'custom';
     }
-    interface CpslAnimation {
-        /**
-          * Will replay the animation
-         */
-        "replayAnimation": () => Promise<void>;
-        /**
-          * Source of the Lottie animation file.
-         */
-        "src": string;
-    }
     interface CpslAppBar {
         /**
           * Height of the app bar.
@@ -939,12 +929,6 @@ declare global {
         prototype: HTMLCpslAlertElement;
         new (): HTMLCpslAlertElement;
     };
-    interface HTMLCpslAnimationElement extends Components.CpslAnimation, HTMLStencilElement {
-    }
-    var HTMLCpslAnimationElement: {
-        prototype: HTMLCpslAnimationElement;
-        new (): HTMLCpslAnimationElement;
-    };
     interface HTMLCpslAppBarElement extends Components.CpslAppBar, HTMLStencilElement {
     }
     var HTMLCpslAppBarElement: {
@@ -1401,7 +1385,6 @@ declare global {
     };
     interface HTMLElementTagNameMap {
         "cpsl-alert": HTMLCpslAlertElement;
-        "cpsl-animation": HTMLCpslAnimationElement;
         "cpsl-app-bar": HTMLCpslAppBarElement;
         "cpsl-auth-modal": HTMLCpslAuthModalElement;
         "cpsl-avatar": HTMLCpslAvatarElement;
@@ -1455,12 +1438,6 @@ declare namespace LocalJSX {
           * The variant of alert. Options are: `"error"` | `"warning"` | `"success"` | `"custom"` Default is: `"error"`.
          */
         "variant"?: 'error' | 'warning' | 'success' | 'custom';
-    }
-    interface CpslAnimation {
-        /**
-          * Source of the Lottie animation file.
-         */
-        "src"?: string;
     }
     interface CpslAppBar {
         /**
@@ -2437,7 +2414,6 @@ declare namespace LocalJSX {
     }
     interface IntrinsicElements {
         "cpsl-alert": CpslAlert;
-        "cpsl-animation": CpslAnimation;
         "cpsl-app-bar": CpslAppBar;
         "cpsl-auth-modal": CpslAuthModal;
         "cpsl-avatar": CpslAvatar;
@@ -2486,7 +2462,6 @@ declare module "@stencil/core" {
     export namespace JSX {
         interface IntrinsicElements {
             "cpsl-alert": LocalJSX.CpslAlert & JSXBase.HTMLAttributes<HTMLCpslAlertElement>;
-            "cpsl-animation": LocalJSX.CpslAnimation & JSXBase.HTMLAttributes<HTMLCpslAnimationElement>;
             "cpsl-app-bar": LocalJSX.CpslAppBar & JSXBase.HTMLAttributes<HTMLCpslAppBarElement>;
             "cpsl-auth-modal": LocalJSX.CpslAuthModal & JSXBase.HTMLAttributes<HTMLCpslAuthModalElement>;
             "cpsl-avatar": LocalJSX.CpslAvatar & JSXBase.HTMLAttributes<HTMLCpslAvatarElement>;

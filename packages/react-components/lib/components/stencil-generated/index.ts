@@ -8,7 +8,6 @@ import type { JSX } from '@usecapsule/core-components';
 
 
 export const CpslAlert = /*@__PURE__*/createReactComponent<JSX.CpslAlert, HTMLCpslAlertElement>('cpsl-alert');
-export const CpslAnimation = /*@__PURE__*/createReactComponent<JSX.CpslAnimation, HTMLCpslAnimationElement>('cpsl-animation');
 export const CpslAppBar = /*@__PURE__*/createReactComponent<JSX.CpslAppBar, HTMLCpslAppBarElement>('cpsl-app-bar');
 export const CpslAuthModal = /*@__PURE__*/createReactComponent<JSX.CpslAuthModal, HTMLCpslAuthModalElement>('cpsl-auth-modal');
 export const CpslAvatar = /*@__PURE__*/createReactComponent<JSX.CpslAvatar, HTMLCpslAvatarElement>('cpsl-avatar');

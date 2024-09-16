@@ -6,7 +6,6 @@ import { Body } from '../Body/Body.js';
 import { Footer } from '../Footer/Footer.js';
 import { CapsuleModalProps } from '../../types/modalProps.js';
 import { DEFAULTS } from '../../constants/defaults.js';
-import { CpslAnimation } from '@usecapsule/react-components';
 import { useGoBack } from '../../hooks/useGoBack.js';
 
 type ModalContentProps = Omit<
@@ -208,9 +207,6 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
 
     return (
       <>
-        {[ModalStep.WALLET_CREATION_DONE, ModalStep.ADD_FUNDS_SUCCESS].includes(currentStep) && (
-          <CpslAnimation src="https://product-assets.sandbox.usecapsule.com/animations/confetti.json" />
-        )}
         <Body
           hasFinishedAnimation={hasFinishedAnimation}
           oAuthMethods={oAuthMethods}

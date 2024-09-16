@@ -1,8 +1,12 @@
 import { WalletType } from '@usecapsule/user-management-client';
 import { SupportedWalletTypes } from '../CoreCapsule';
 import { toBech32 } from '@cosmjs/encoding';
-import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
-import { Secp256k1 } from '@cosmjs/crypto';
+import { sha256 } from '@noble/hashes/sha256';
+import { ripemd160 } from '@noble/hashes/ripemd160';
+
+import elliptic from 'elliptic';
+
+const secp256k1 = new elliptic.ec('secp256k1');
 
 export type Hex = `0x${string}`;
 export interface Signature {
@@ -50,11 +54,29 @@ export function isCosmosWithPrefix(
   return !!(supportedWalletTypes as { [WalletType.COSMOS]: { prefix: string } })[WalletType.COSMOS]?.prefix;
 }
 
+function compressPubkey(pubkey: Uint8Array): Uint8Array {
+  switch (pubkey.length) {
+    case 33:
+      return pubkey;
+    case 65:
+      return Uint8Array.from(secp256k1.keyFromPublic(pubkey).getPublic(true, 'array'));
+    default:
+      throw new Error('Invalid pubkey length');
+  }
+}
+
+function rawSecp256k1PubkeyToRawAddress(pubkeyData: Uint8Array): Uint8Array {
+  if (pubkeyData.length !== 33) {
+    throw new Error(`Invalid Secp256k1 pubkey length (compressed): ${pubkeyData.length}`);
+  }
+  return ripemd160(sha256(pubkeyData));
+}
+
 export function getCosmosAddress(publicKey: string, prefix: string) {
   const uncompressedPublicKey = new Uint8Array(
     Buffer.from(publicKey.startsWith('0x') ? publicKey.slice(2) : publicKey, 'hex'),
   );
-  const compressedPublicKey = Secp256k1.compressPubkey(uncompressedPublicKey);
+  const compressedPublicKey = compressPubkey(uncompressedPublicKey);
 
   return toBech32(prefix, rawSecp256k1PubkeyToRawAddress(compressedPublicKey));
 }

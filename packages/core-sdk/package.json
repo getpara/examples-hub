@@ -8,9 +8,8 @@
   "sideEffects": false,
   "dependencies": {
     "@celo/utils": "^6.0.1",
-    "@cosmjs/amino": "^0.32.4",
-    "@cosmjs/crypto": "^0.32.4",
     "@cosmjs/encoding": "^0.32.4",
+    "@noble/hashes": "^1.5.0",
     "@usecapsule/user-management-client": "1.21.0",
     "base64url": "^3.0.1",
     "buffer": "6.0.3",
