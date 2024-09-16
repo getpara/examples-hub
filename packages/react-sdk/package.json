@@ -1,6 +1,6 @@
 {
   "name": "@usecapsule/react-sdk",
-  "version": "3.20.0",
+  "version": "3.20.1",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -15,8 +15,8 @@
     "@ramp-network/ramp-instant-sdk": "^4.0.2",
     "@stripe/crypto": "^0.0.4",
     "@stripe/stripe-js": "^3.4.0",
-    "@usecapsule/react-components": "3.4.0",
-    "@usecapsule/web-sdk": "1.26.0",
+    "@usecapsule/react-components": "3.4.1",
+    "@usecapsule/web-sdk": "1.26.1",
     "date-fns": "^3.6.0",
     "framer-motion": "11.3.28",
     "libphonenumber-js": "^1.11.1",
@@ -34,7 +34,7 @@
     "@types/chrome": "^0.0.237",
     "@types/react": "^18.0.31",
     "@types/react-dom": "^18.2.7",
-    "@usecapsule/evm-wallet-connectors": "0.2.0",
+    "@usecapsule/evm-wallet-connectors": "0.2.1",
     "typescript": "^5.4.3"
   },
   "peerDependencies": {

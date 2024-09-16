@@ -1,6 +1,6 @@
 {
   "name": "@usecapsule/solana-wallet-connectors",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -9,7 +9,7 @@
     "./connectors": "./dist/wallets/connectors/index.js"
   },
   "dependencies": {
-    "@usecapsule/web-sdk": "1.26.0"
+    "@usecapsule/web-sdk": "1.26.1"
   },
   "scripts": {
     "build": "rm -rf dist && tsc"
