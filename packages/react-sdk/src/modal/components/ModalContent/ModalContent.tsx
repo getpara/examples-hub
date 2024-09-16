@@ -164,7 +164,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
 
     // wait for login auth to do post login setup
     useEffect(() => {
-      if (webAuthURLForLogin && loginWindow) {
+      if (webAuthURLForLogin) {
         if (loginTransitionOverride) {
           async function loginOverride() {
             await loginTransitionOverride(capsule);
@@ -182,7 +182,10 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
         }
         loginTimeout.current = window.setTimeout(awaitLoginTransition, DEFAULTS.POLLING_INTERVAL_MS);
       }
-      return () => window.clearTimeout(loginTimeout.current);
+      return () => {
+        window.clearTimeout(loginTimeout.current);
+        capsule.exitLogin();
+      };
     }, [webAuthURLForLogin, loginWindow]);
 
     const handleClose = () => {

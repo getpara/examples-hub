@@ -1610,7 +1610,7 @@ export abstract class CoreCapsule {
    * @returns { needsWallet } - whether a wallet needs to be created
    **/
   async waitForLoginAndSetup(
-    loginWindow: Window,
+    loginWindow?: Window,
     skipSessionRefresh?: boolean,
   ): Promise<{ isComplete: boolean; isError?: boolean; needsWallet?: boolean; partnerId?: string }> {
     this.isAwaitingLogin = true;
@@ -1619,7 +1619,7 @@ export abstract class CoreCapsule {
         await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS));
 
         if (!(await this.isSessionActive())) {
-          if (loginWindow.closed) {
+          if (loginWindow?.closed) {
             return { isComplete: false, isError: true };
           }
           continue;
@@ -1631,7 +1631,7 @@ export abstract class CoreCapsule {
 
         if (!needsWallet) {
           if (!this.currentWalletIds || this.currentWalletIds.length === 0) {
-            if (loginWindow.closed) {
+            if (loginWindow?.closed) {
               return { isComplete: false, isError: true };
             } else {
               continue;

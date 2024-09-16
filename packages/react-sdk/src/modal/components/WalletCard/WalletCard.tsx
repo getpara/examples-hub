@@ -13,7 +13,6 @@ export const WalletCard = () => {
   }
 
   const currentWallet = capsule.wallets[currentWalletId];
-  currentWallet.partner.logoUrl;
   const walletAddress = currentWallet.address;
   const walletName = currentWallet.name;
 
