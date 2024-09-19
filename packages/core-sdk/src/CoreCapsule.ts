@@ -518,7 +518,10 @@ export abstract class CoreCapsule {
   }
 
   private isPregenWalletUnclaimed(wallet: Wallet): boolean {
-    return this.isWalletSupported(wallet) && wallet.isPregen && !!wallet.pregenIdentifier && !!wallet.pregenIdentifierType;
+    return (
+      this.isWalletSupported(wallet) &&
+      (!wallet.userId || (wallet.isPregen && !!wallet.pregenIdentifier && !!wallet.pregenIdentifierType))
+    );
   }
 
   private isPregenWalletClaimable(wallet: Wallet): boolean {
