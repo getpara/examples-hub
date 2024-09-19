@@ -54,6 +54,7 @@ export const Body = ({
   const stepDirection = useModalStore(state => state.stepDirection);
   const setStepDirection = useModalStore(state => state.setStepDirection);
   const appName = useThemeStore(state => state.appName);
+  const embeddedModal = useThemeStore(state => state.embeddedModal);
 
   const Content = () => {
     switch (currentStep) {
@@ -148,8 +149,12 @@ export const Body = ({
 
   return (
     <Container slot="body" data-testid="modal-content">
-      <Controls onClose={onClose} />
-      <Header />
+      {!embeddedModal && (
+        <>
+          <Controls onClose={onClose} />
+          <Header />
+        </>
+      )}
       <AnimatedWrapper>
         <AnimatePresence
           mode="popLayout"
@@ -169,7 +174,7 @@ export const Body = ({
             transition={BODY_TRANSITION}
           >
             <Hero />
-            <InnerContainer>
+            <InnerContainer $embeddedModal={embeddedModal}>
               {onRampConfig?.testMode &&
                 [
                   ModalStep.ADD_FUNDS,
@@ -209,16 +214,16 @@ const BodyContainer = styled(motion.div)`
   will-change: auto !important;
 `;
 
-const InnerContainer = styled.div`
+const InnerContainer = styled.div<{ $embeddedModal: boolean }>`
   z-index: 1;
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 24px;
-  padding: 72px 72px 32px;
+  padding: ${({ $embeddedModal }) => ($embeddedModal ? '12px 0px 0px' : '72px 72px 32px')};
 
   @media (max-width: ${MOBILE_SIZE}px) {
-    padding: 72px 16px 0px;
+    padding: ${({ $embeddedModal }) => ($embeddedModal ? '12px 0px 0px' : '72px 16px 0px')};
   }
 `;

@@ -10,10 +10,10 @@ export const getTileButtonFlex = (index: number, totalItems: number) => {
   }
 
   if (totalItems % 3 === 1) {
-    return index < 4 ? '0 0 calc(50% - 8px)' : `0 0 calc(33.333333% - ${gapOffset}px)`;
+    return index < 4 ? '0 0 calc(50% - 4px)' : `0 0 calc(33.333333% - ${gapOffset}px)`;
   }
 
   if (totalItems % 3 === 2) {
-    return index < 2 ? '0 0 calc(50% - 8px)' : `0 0 calc(33.333333% - ${gapOffset}px)`;
+    return index < 2 ? '0 0 calc(50% - 4px)' : `0 0 calc(33.333333% - ${gapOffset}px)`;
   }
 };

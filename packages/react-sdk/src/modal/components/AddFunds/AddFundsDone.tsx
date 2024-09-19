@@ -1,4 +1,4 @@
-import { Heading, InnerStepContainer, StepContainer } from '../common.js';
+import { Heading, HeroIcon, InnerStepContainer, StepContainer } from '../common.js';
 import { useModalStore } from '../../stores/index.js';
 import { useMemo } from 'react';
 import { CpslButton, CpslText } from '@usecapsule/react-components';
@@ -28,6 +28,7 @@ export const AddFundsDone = ({ isSuccess, onClose }: AddFundsDoneProps) => {
 
   return (
     <StepContainer>
+      <HeroIcon icon="checkCircleFilled" />
       <InnerStepContainer>
         <Heading variant="headingS" weight="bold">
           {heading}

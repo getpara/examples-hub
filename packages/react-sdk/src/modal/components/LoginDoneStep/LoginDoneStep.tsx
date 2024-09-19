@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { StepContainer } from '../common.js';
+import { Heading, HeroIcon, StepContainer } from '../common.js';
 import { ExternalWalletCard, WalletCard, WalletCards } from '../WalletCard/WalletCard.js';
 import { useCapsuleStore } from '../../stores/index.js';
 
@@ -13,11 +13,15 @@ export const LoginDoneStep = ({ onClose }: LoginDoneStep) => {
   useEffect(() => {
     setTimeout(() => {
       onClose();
-    }, 800);
+    }, 1600);
   }, []);
 
   return (
     <StepContainer>
+      <HeroIcon icon="checkCircleFilled" />
+      <Heading variant="headingS" weight="bold">
+        Connected
+      </Heading>
       <WalletCards>
         {capsule.isUsingExternalWallet() ? (
           <ExternalWalletCard address={capsule.currentExternalWalletAddresses?.[0]} />

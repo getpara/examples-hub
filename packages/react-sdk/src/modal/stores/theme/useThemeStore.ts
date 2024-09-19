@@ -7,6 +7,7 @@ interface ThemeState {
   logo?: string;
   appName?: string;
   bareModal?: boolean;
+  embeddedModal?: boolean;
   oAuthLogoVariant?: OAuthLogoVariantType;
   authLayout?: TAuthLayout[];
 }
@@ -24,6 +25,7 @@ const DEFAULT_THEME: ThemeState = {
   logo: undefined,
   appName: undefined,
   bareModal: false,
+  embeddedModal: false,
   oAuthLogoVariant: undefined,
   authLayout: [AuthLayout.AUTH_FULL, AuthLayout.EXTERNAL_FULL],
 };

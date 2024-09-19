@@ -100,6 +100,11 @@ export interface CapsuleModalProps {
    * Defaults to `false`
    */
   bareModal?: boolean;
+  /**
+   * Whether or not to use the embedded modal styling
+   * This is typically only used internally by Capsule and may result in unwanted styling!
+   */
+  embeddedModal?: boolean;
   className?: string;
   /**
    * Which external wallets to support.

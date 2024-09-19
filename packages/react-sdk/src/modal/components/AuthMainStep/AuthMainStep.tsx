@@ -14,6 +14,7 @@ export const AuthMainStep = ({ oAuthMethods, disableEmailLogin, disablePhoneLogi
   const logo = useThemeStore(state => state.getLogo());
   const appName = useThemeStore(state => state.appName);
   const authLayout = useThemeStore(state => state.authLayout);
+  const embeddedModal = useThemeStore(state => state.embeddedModal);
 
   const firstLayoutType = authLayout[0].split(':')[0];
   const heading = firstLayoutType === 'AUTH' ? 'Sign Up or Login' : 'Connect Wallet';
@@ -21,9 +22,11 @@ export const AuthMainStep = ({ oAuthMethods, disableEmailLogin, disablePhoneLogi
   return (
     <>
       {logo && <Logo src={logo} alt={`${appName ? `${appName} -` : ''}logo`} />}
-      <CenteredText variant={logo ? 'bodyM' : 'headingS'} weight="semiBold">
-        {heading}
-      </CenteredText>
+      {!embeddedModal && (
+        <CenteredText variant={logo ? 'bodyM' : 'headingS'} weight="semiBold">
+          {heading}
+        </CenteredText>
+      )}
       <AuthMainStepContent
         disableEmailLogin={disableEmailLogin}
         disablePhoneLogin={disablePhoneLogin}

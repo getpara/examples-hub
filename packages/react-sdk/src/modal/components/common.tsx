@@ -1,4 +1,4 @@
-import { CpslInput, CpslText, CpslTileButton } from '@usecapsule/react-components';
+import { CpslIcon, CpslInput, CpslText, CpslTileButton } from '@usecapsule/react-components';
 import { styled } from 'styled-components';
 
 export const SpinnerContainer = styled.div`
@@ -64,4 +64,10 @@ export const StyledCpslTileButton: typeof CpslTileButton = styled(CpslTileButton
   --button-height: 87px;
   --button-icon-height: 32px;
   --button-icon-width: 32px;
+`;
+
+export const HeroIcon = styled(CpslIcon)`
+  --height: 80px;
+  --width: 80px;
+  --icon-color: var(--cpsl-color-text-primary);
 `;

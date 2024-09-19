@@ -10,6 +10,7 @@ import { useGoBack } from './hooks/useGoBack.js';
 import { CURRENT_WALLET_IDS_CHANGE_EVENT, EXTERNAL_WALLET_CHANGE_EVENT, Network } from '@usecapsule/web-sdk';
 import { ExternalWalletsWrapper } from './components/ExternalWalletsWrapper/ExternalWalletsWrapper.js';
 import { CountryCallingCode } from 'libphonenumber-js';
+import styled from 'styled-components';
 
 defineCustomElements();
 
@@ -31,6 +32,7 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
       currentStepOverride,
       externalWallets,
       authLayout = [AuthLayout.AUTH_FULL, AuthLayout.EXTERNAL_FULL],
+      embeddedModal,
       onModalStepChange,
       onClose,
       ...rest
@@ -140,8 +142,8 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     }, [networks]);
 
     useEffect(() => {
-      updateThemeState({ logo, appName, oAuthLogoVariant: theme?.oAuthLogoVariant ?? 'default', bareModal });
-    }, [logo, appName, theme?.oAuthLogoVariant, bareModal]);
+      updateThemeState({ logo, appName, oAuthLogoVariant: theme?.oAuthLogoVariant ?? 'default', bareModal, embeddedModal });
+    }, [logo, appName, theme?.oAuthLogoVariant, bareModal, embeddedModal]);
 
     useEffect(() => {
       if (theme) {
@@ -246,7 +248,7 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
 
     return (
       <ExternalWalletsWrapper wallets={externalWallets}>
-        <CpslAuthModal
+        <StyledAuthModal
           enterTransitionDuration={DEFAULTS.ANIMATION_DURATION}
           exitTransitionDuration={DEFAULTS.ANIMATION_DURATION}
           open={isOpen}
@@ -257,6 +259,7 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
           noOverlay={bareModal}
           className={className}
           data-testid="modal"
+          $embeddedModal={embeddedModal}
         >
           {isModalMounted && (
             <ModalContent
@@ -268,8 +271,23 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
               {...rest}
             />
           )}
-        </CpslAuthModal>
+        </StyledAuthModal>
       </ExternalWalletsWrapper>
     );
   },
 );
+
+const StyledAuthModal = styled(CpslAuthModal)<{ $embeddedModal: boolean }>`
+  ${({ $embeddedModal }) =>
+    $embeddedModal &&
+    `
+    &::part(modal-body-card) {
+    --card-box-shadow: none;
+    --card-border-width: 0px;
+  };
+
+  &::part(modal-footer) {
+    --card-box-shadow: none;
+    --card-border-width: 0px;
+  };`}
+`;

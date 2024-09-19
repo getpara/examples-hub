@@ -1,5 +1,5 @@
 import { CpslButton, CpslIcon, CpslInfoBox, CpslText } from '@usecapsule/react-components';
-import { Heading, StepContainer, InnerStepContainer } from '../common.js';
+import { Heading, StepContainer, InnerStepContainer, HeroIcon } from '../common.js';
 import { useCapsuleStore, useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import styled from 'styled-components';
@@ -43,6 +43,7 @@ export const WalletCreationDoneStep = ({
 
   return (
     <StepContainer $wide>
+      <HeroIcon icon="checkCircleFilled" />
       <Heading variant="headingS" weight="bold">
         Wallet Created
       </Heading>

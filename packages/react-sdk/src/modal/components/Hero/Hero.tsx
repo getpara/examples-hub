@@ -20,25 +20,15 @@ const getStepConfig = ({
 }: {
   externalWalletError?: string[];
 }): Record<
-  | `${ModalStep.WALLET_CREATION_DONE}`
-  | `${ModalStep.EX_WALLET_SELECTED}`
-  | `${ModalStep.LOGIN_DONE}`
-  | `${ModalStep.TWO_FACTOR_DONE}`
-  | `${ModalStep.ADD_FUNDS_SUCCESS}`
-  | `${ModalStep.CHAIN_SWITCH}`
-  | `${ModalStep.ACCOUNT_MAIN}`,
+  `${ModalStep.EX_WALLET_SELECTED}` | `${ModalStep.CHAIN_SWITCH}` | `${ModalStep.ACCOUNT_MAIN}`,
   StepHeroConfig
 > => ({
-  [ModalStep.WALLET_CREATION_DONE]: { variant: 'approved', topOffset: 20, spacerHeight: 158 },
-  [ModalStep.LOGIN_DONE]: { variant: 'approved', topOffset: 20, spacerHeight: 158 },
   [ModalStep.EX_WALLET_SELECTED]: {
     variant: 'externalWalletConnection',
     topOffset: 40,
     spacerHeight: 158,
     hideFadeOut: true,
   },
-  [ModalStep.TWO_FACTOR_DONE]: { variant: 'approved', topOffset: 40, spacerHeight: 158 },
-  [ModalStep.ADD_FUNDS_SUCCESS]: { variant: 'approved', topOffset: 40, spacerHeight: 158 },
   [ModalStep.CHAIN_SWITCH]: {
     variant: externalWalletError?.[0]?.toLowerCase() === NETWORK_NOT_SUPPORTED_ERROR ? 'failed' : 'externalWalletConnection',
     topOffset: 20,

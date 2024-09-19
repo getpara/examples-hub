@@ -1,5 +1,5 @@
 import { CpslButton, CpslText } from '@usecapsule/react-components';
-import { Heading, StepContainer, InnerStepContainer } from '../common.js';
+import { Heading, StepContainer, InnerStepContainer, HeroIcon } from '../common.js';
 
 interface TwoFactorDoneStepStep {
   onClose: () => void;
@@ -8,6 +8,7 @@ interface TwoFactorDoneStepStep {
 export const TwoFactorDoneStep = ({ onClose }: TwoFactorDoneStepStep) => {
   return (
     <StepContainer>
+      <HeroIcon icon="checkCircleFilled" />
       <InnerStepContainer>
         <Heading variant="headingXS" weight="semiBold">
           Success

@@ -43,8 +43,8 @@ export const AddFunds = ({ hasFinishedAnimation }: AddFundsProps) => {
 
   const activeWallet = useActiveWallet();
 
-  const isAllFlows = !onRampConfig.enabledFlows;
-  const tabs = TABS.filter(([tab]) => isAllFlows || onRampConfig.enabledFlows.some(prop => tab === EnabledFlow[prop]));
+  const isAllFlows = !onRampConfig?.enabledFlows;
+  const tabs = TABS.filter(([tab]) => isAllFlows || onRampConfig?.enabledFlows.some(prop => tab === EnabledFlow[prop]));
   const isMultiFlow = isAllFlows || tabs.length > 1;
 
   const [tab, setTab] = useState<Tab>(accountAddFundTab);

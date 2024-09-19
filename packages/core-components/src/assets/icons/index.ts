@@ -13,6 +13,7 @@ import CapsuleLogo from './capsule-logo.svg';
 import CapsuleRingsDark from './capsule-rings-dark.svg';
 import CapsuleRings from './capsule-rings.svg';
 import Capsule from './capsule.svg';
+import CheckCircleFilled from './check-circle-filled.svg';
 import CheckCircle from './check-circle.svg';
 import Check from './check.svg';
 import ChevronUp from './chevron-up.svg';
@@ -362,6 +363,7 @@ export const Icons = {
   capsuleRingsDark: CapsuleRingsDark,
   capsuleRings: CapsuleRings,
   capsule: Capsule,
+  checkCircleFilled: CheckCircleFilled,
   checkCircle: CheckCircle,
   check: Check,
   chevronUp: ChevronUp,
