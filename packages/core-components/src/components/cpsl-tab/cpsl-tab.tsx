@@ -1,5 +1,5 @@
 import { Component, Host, Prop, h, Event, EventEmitter, Listen, Element } from '@stencil/core';
-import { TabClickEventDetail } from './tab-interface';
+import { TabClickEventDetail, TabSizeChangeEventDetail } from './tab-interface';
 import { TabsChangedEventDetail } from '../cpsl-tabs/tabs-interface';
 
 @Component({
@@ -27,6 +27,12 @@ export class CpslTab {
    */
   @Event() cpslTabButtonClick!: EventEmitter<TabClickEventDetail>;
 
+  /**
+   * Emitted when tab size changes
+   * @internal
+   */
+  @Event() cpslTabButtonSizeChange!: EventEmitter<TabSizeChangeEventDetail>;
+
   @Listen('cpslTabsChanged', { target: 'window' })
   onTabsChanged(ev: CustomEvent<TabsChangedEventDetail>) {
     this.setSelected(ev);
@@ -35,6 +41,14 @@ export class CpslTab {
   @Listen('cpslTabsInit', { target: 'window' })
   onTabsInit(ev: CustomEvent<TabsChangedEventDetail>) {
     this.setSelected(ev);
+  }
+
+  componentDidLoad() {
+    new MutationObserver(() => {
+      this.cpslTabButtonSizeChange.emit({ tab: this.tab });
+    }).observe(this.el, {
+      attributes: true,
+    });
   }
 
   private setSelected(ev: CustomEvent<TabsChangedEventDetail>) {

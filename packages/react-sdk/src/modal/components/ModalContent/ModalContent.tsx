@@ -11,9 +11,7 @@ import { useGoBack } from '../../hooks/useGoBack.js';
 type ModalContentProps = Omit<
   CapsuleModalProps,
   'capsule' | 'isOpen' | 'theme' | 'branding' | 'onModalStepChange' | 'onExpandModalChange'
-> & {
-  hasFinishedAnimation: boolean;
-};
+>;
 
 export type ModalContentHandle = {
   /**
@@ -28,7 +26,6 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
       twoFactorAuthEnabled = false,
       recoverySecretStepEnabled = false,
       oAuthMethods,
-      hasFinishedAnimation,
       disableEmailLogin,
       disablePhoneLogin,
       onClose,
@@ -209,7 +206,6 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     return (
       <>
         <Body
-          hasFinishedAnimation={hasFinishedAnimation}
           oAuthMethods={oAuthMethods}
           twoFactorAuthEnabled={twoFactorAuthEnabled}
           disableEmailLogin={disableEmailLogin}

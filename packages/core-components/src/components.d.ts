@@ -9,13 +9,13 @@ import { AutocompleteTypes, IconType, TextFieldTypes } from "./interface";
 import { CodeChangeEventDetail } from "./components/cpsl-code-input/code-change-interface";
 import { DropdownInputEventDetail } from "./components/cpsl-dropdown/dropdown-interface";
 import { InputChangeEventDetail, InputInputEventDetail } from "./components/cpsl-input/input-interface";
-import { TabClickEventDetail } from "./components/cpsl-tab/tab-interface";
+import { TabClickEventDetail, TabSizeChangeEventDetail } from "./components/cpsl-tab/tab-interface";
 import { TabsChangedEventDetail } from "./components/cpsl-tabs/tabs-interface";
 export { AutocompleteTypes, IconType, TextFieldTypes } from "./interface";
 export { CodeChangeEventDetail } from "./components/cpsl-code-input/code-change-interface";
 export { DropdownInputEventDetail } from "./components/cpsl-dropdown/dropdown-interface";
 export { InputChangeEventDetail, InputInputEventDetail } from "./components/cpsl-input/input-interface";
-export { TabClickEventDetail } from "./components/cpsl-tab/tab-interface";
+export { TabClickEventDetail, TabSizeChangeEventDetail } from "./components/cpsl-tab/tab-interface";
 export { TabsChangedEventDetail } from "./components/cpsl-tabs/tabs-interface";
 export namespace Components {
     interface CpslAlert {
@@ -1333,6 +1333,7 @@ declare global {
     };
     interface HTMLCpslTabElementEventMap {
         "cpslTabButtonClick": TabClickEventDetail;
+        "cpslTabButtonSizeChange": TabSizeChangeEventDetail;
     }
     interface HTMLCpslTabElement extends Components.CpslTab, HTMLStencilElement {
         addEventListener<K extends keyof HTMLCpslTabElementEventMap>(type: K, listener: (this: HTMLCpslTabElement, ev: CpslTabCustomEvent<HTMLCpslTabElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -2361,6 +2362,10 @@ declare namespace LocalJSX {
           * Emitted when tabs are clicked
          */
         "onCpslTabButtonClick"?: (event: CpslTabCustomEvent<TabClickEventDetail>) => void;
+        /**
+          * Emitted when tab size changes
+         */
+        "onCpslTabButtonSizeChange"?: (event: CpslTabCustomEvent<TabSizeChangeEventDetail>) => void;
         /**
           * The selected tab component
          */

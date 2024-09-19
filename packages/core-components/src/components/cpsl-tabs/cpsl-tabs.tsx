@@ -1,5 +1,5 @@
-import { Component, Host, Element, h, Event, Prop, EventEmitter, State, Watch } from '@stencil/core';
-import { TabClickEventDetail } from '../cpsl-tab/tab-interface';
+import { Component, Host, Element, h, Event, Prop, EventEmitter, State, Watch, Listen } from '@stencil/core';
+import { TabClickEventDetail, TabSizeChangeEventDetail } from '../cpsl-tab/tab-interface';
 import { TabsChangedEventDetail } from './tabs-interface';
 
 @Component({
@@ -46,6 +46,15 @@ export class CpslTabs {
   updateTab(newValue?: string, oldValue?: string) {
     if (Boolean(newValue) && !oldValue) {
       this.selectedTabRect = getTab(this.tabs, this.selectedTab).getBoundingClientRect();
+    }
+  }
+
+  @Listen('cpslTabButtonSizeChange', { target: 'window' })
+  onTabSizeChange(ev: CustomEvent<TabSizeChangeEventDetail>) {
+    const { tab } = ev.detail;
+
+    if (tab === this.selectedTab) {
+      this.selectedTabRect = getTab(this.tabs, tab).getBoundingClientRect();
     }
   }
 

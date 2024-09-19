@@ -33,7 +33,6 @@ interface BodyProps {
   oAuthMethods?: OAuthMethod[];
   twoFactorAuthEnabled?: boolean;
   recoverySecretStepEnabled?: boolean;
-  hasFinishedAnimation: boolean;
   disableEmailLogin: boolean;
   disablePhoneLogin: boolean;
   onClose: () => void;
@@ -44,7 +43,6 @@ export const Body = ({
   oAuthMethods,
   twoFactorAuthEnabled,
   recoverySecretStepEnabled,
-  hasFinishedAnimation,
   disableEmailLogin,
   disablePhoneLogin,
   onClose,
@@ -124,7 +122,7 @@ export const Body = ({
         return <FarcasterOAuthStep />;
       }
       case ModalStep.ADD_FUNDS: {
-        return <AddFunds hasFinishedAnimation={hasFinishedAnimation} />;
+        return <AddFunds />;
       }
       case ModalStep.ADD_FUNDS_AWAITING: {
         return <AddFundsAwaiting />;

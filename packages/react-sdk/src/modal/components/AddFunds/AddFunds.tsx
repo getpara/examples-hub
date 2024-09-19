@@ -22,10 +22,6 @@ import { OnRampProviderButton } from '../OnRampComponents/OnRampProviderButton.j
 import { isMobile } from '@usecapsule/web-sdk';
 import { useActiveWallet } from '../../hooks/useActiveWallet.js';
 
-interface AddFundsProps {
-  hasFinishedAnimation: boolean;
-}
-
 export type Tab = EnabledFlow;
 
 const TABS: [Tab, ReactNode][] = [
@@ -33,7 +29,7 @@ const TABS: [Tab, ReactNode][] = [
   [EnabledFlow.RECEIVE, 'Receive'],
 ];
 
-export const AddFunds = ({ hasFinishedAnimation }: AddFundsProps) => {
+export const AddFunds = () => {
   const [isCopied, copy] = useCopyToClipboard();
   const capsule = useCapsuleStore(state => state.capsule);
   const appName = useThemeStore(state => state.appName);
@@ -75,7 +71,7 @@ export const AddFunds = ({ hasFinishedAnimation }: AddFundsProps) => {
     <StepContainer>
       {isMultiFlow && (
         <InnerStepContainer>
-          <CpslTabs selectedTab={hasFinishedAnimation ? tab : ''} onCpslTabsChanged={onSetTab}>
+          <CpslTabs selectedTab={tab} onCpslTabsChanged={onSetTab}>
             {TABS.map(([tab, title]) => (
               <CpslTab key={tab} tab={tab}>
                 <CpslIcon slot="start" icon={tab === EnabledFlow.BUY ? 'creditCard' : 'qrCode'} />
@@ -144,12 +140,14 @@ export const AddFunds = ({ hasFinishedAnimation }: AddFundsProps) => {
                 </InnerStepContainer>
               </>
             )}
-            <InnerStepContainer>
-              <CenteredText weight="semiBold">{appName ?? 'This App'} Only Supports:</CenteredText>
-              <CenteredText weight="medium" color="secondary">
-                {formatNetworkList(networks)}
-              </CenteredText>
-            </InnerStepContainer>
+            {!!networks?.length && (
+              <InnerStepContainer>
+                <CenteredText weight="semiBold">{appName ?? 'This App'} Only Supports:</CenteredText>
+                <CenteredText weight="medium" color="secondary">
+                  {formatNetworkList(networks)}
+                </CenteredText>
+              </InnerStepContainer>
+            )}
           </>
         )}
       </>

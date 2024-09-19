@@ -63,7 +63,6 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     const [activeWallet, setActiveWallet] = useModalStore(state => [state.activeWallet, state.setActiveWallet]);
 
     const [isModalMounted, setIsModalMounted] = useState(false);
-    const [hasFinishedAnimation, setHasFinishedAnimation] = useState(false);
 
     useImperativeHandle(ref, () => {
       return {
@@ -200,12 +199,7 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
       setIsModalMounted(true);
     };
 
-    const handleModalEntered = () => {
-      setHasFinishedAnimation(true);
-    };
-
     const handleModalExited = async () => {
-      setHasFinishedAnimation(false);
       setIsModalMounted(false);
       if (
         currentStep === ModalStep.LOGIN_DONE ||
@@ -253,7 +247,6 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
           exitTransitionDuration={DEFAULTS.ANIMATION_DURATION}
           open={isOpen}
           onCpslModalExited={handleModalExited}
-          onCpslModalEntered={handleModalEntered}
           onCpslModalEntering={handleModalEntering}
           onCpslModalRequestClose={onClose}
           noOverlay={bareModal}
@@ -263,7 +256,6 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
         >
           {isModalMounted && (
             <ModalContent
-              hasFinishedAnimation={hasFinishedAnimation}
               oAuthMethods={oAuthMethods}
               disableEmailLogin={disableEmailLogin}
               disablePhoneLogin={disablePhoneLogin}

@@ -38,5 +38,6 @@ export const config: Config = {
   ],
   testing: {
     browserHeadless: 'new',
+    setupFilesAfterEnv: ['./jest.setup.ts'],
   },
 };
