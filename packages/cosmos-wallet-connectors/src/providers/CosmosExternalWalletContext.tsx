@@ -2,7 +2,7 @@ import { ReactNode, createContext, useEffect, useMemo, useState } from 'react';
 import { CommonChain, CommonWallet } from '../types/CommonTypes.js';
 import { useCapsuleCosmos } from './CapsuleCosmosContext.js';
 import { MobileConnectResponse, useShuttle } from '@delphi-labs/shuttle-react';
-import CapsuleWeb, { isAndroid, isIOS, isMobile, WalletType } from '@usecapsule/web-sdk';
+import CapsuleWeb, { isAndroid, isIOS, isMobile, WalletType } from '@usecapsule/react-sdk';
 
 export const defaultCosmosExternalWallet = {
   wallets: [],

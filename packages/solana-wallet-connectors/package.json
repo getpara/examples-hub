@@ -9,7 +9,7 @@
     "./connectors": "./dist/wallets/connectors/index.js"
   },
   "dependencies": {
-    "@usecapsule/web-sdk": "1.26.1"
+    "@usecapsule/react-sdk": "3.20.1"
   },
   "scripts": {
     "build": "rm -rf dist && tsc"

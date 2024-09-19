@@ -3,7 +3,7 @@ import { CommonWallet } from '../types/CommonTypes';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Adapter, WalletReadyState } from '@solana/wallet-adapter-base';
 import { useCapsuleSolana } from './CapsuleSolanaProvider.js';
-import CapsuleWeb, { WalletType, isMobile } from '@usecapsule/web-sdk';
+import CapsuleWeb, { WalletType, isMobile } from '@usecapsule/react-sdk';
 
 export const defaultSolanaExternalWallet = {
   wallets: [],

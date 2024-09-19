@@ -3,12 +3,29 @@ import { useCapsuleStore, useThemeStore } from '../../stores/index.js';
 import { CpslIdenticon, CpslText } from '@usecapsule/react-components';
 import { truncateAddress, WalletType } from '@usecapsule/web-sdk';
 
-interface Props {
+export const ExternalWalletCard = ({ address }: Pick<SharedWalletCardProps, 'address'>) => {
+  const capsule = useCapsuleStore(state => state.capsule);
+
+  const wallet = capsule.externalWallets[address];
+
+  if (!wallet) {
+    return null;
+  }
+
+  return (
+    <SharedWalletCard
+      address={truncateAddress(address, wallet.type)}
+      identiconHash={capsule.getIdenticonHash(wallet.id, wallet.type)}
+    />
+  );
+};
+
+interface WalletCardProps {
   id: string;
   type: WalletType;
 }
 
-export const WalletCard = ({ id, type }: Props) => {
+export const WalletCard = ({ id, type }: WalletCardProps) => {
   const capsule = useCapsuleStore(state => state.capsule);
   const appName = useThemeStore(state => state.appName);
 
@@ -21,15 +38,32 @@ export const WalletCard = ({ id, type }: Props) => {
   const address = capsule.getDisplayAddress(wallet.id, { addressType: type });
 
   return (
+    <SharedWalletCard
+      address={truncateAddress(address, type, { prefix: capsule.cosmosPrefix })}
+      name={wallet.name ?? `${appName} Wallet`}
+      identiconHash={capsule.getIdenticonHash(wallet.id, type)}
+    />
+  );
+};
+
+interface SharedWalletCardProps {
+  address: string;
+  name?: string;
+  identiconHash: string;
+}
+const SharedWalletCard = ({ address, name, identiconHash }: SharedWalletCardProps) => {
+  return (
     <Container>
       <InnerContainer>
-        <CpslIdenticon size="30px" hash={capsule.getIdenticonHash(wallet.id, type)} />
+        <CpslIdenticon size="30px" hash={identiconHash} />
         <WalletNameContainer>
-          <Address color="contrast" variant="bodyL" weight="semiBold">
-            {wallet.name ?? `${appName} Wallet`}
-          </Address>
+          {!!name && (
+            <Address color="contrast" variant="bodyL" weight="semiBold">
+              {name}
+            </Address>
+          )}
           <CpslText color="secondary" variant="bodyS" weight="medium">
-            {truncateAddress(address, type, { prefix: capsule.cosmosPrefix })}
+            {address}
           </CpslText>
         </WalletNameContainer>
       </InnerContainer>

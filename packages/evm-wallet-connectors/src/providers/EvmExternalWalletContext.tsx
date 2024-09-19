@@ -4,7 +4,7 @@ import { WagmiConnectorInstance } from '../types/Wallet';
 import { CommonChain, CommonWallet } from '../types/CommonTypes';
 import { isEIP6963Connector } from '../utils/isEIP6963Connector';
 import { getWalletConnectUri } from '../utils/getWalletConnectUri';
-import CapsuleWeb, { isMobile, WalletType } from '@usecapsule/web-sdk';
+import CapsuleWeb, { isMobile, WalletType } from '@usecapsule/react-sdk';
 import { normalize } from 'viem/ens';
 
 export const defaultEvmExternalWallet = {

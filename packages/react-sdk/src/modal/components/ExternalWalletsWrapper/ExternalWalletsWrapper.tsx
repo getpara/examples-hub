@@ -25,6 +25,7 @@ import {
   CosmosExternalWalletProviderProps,
 } from '../../providers/CosmosExternalWalletContextStub.js';
 import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
+import { useExternalWalletProviderStore } from '../../stores/externalWalletProvider/useExternalWalletProviderStore.js';
 
 interface ExternalWalletsWrapperProps extends PropsWithChildren {
   wallets?: TExternalWallet[];
@@ -34,6 +35,12 @@ export const ExternalWalletsWrapper = ({ children, wallets }: ExternalWalletsWra
   const capsule = useCapsuleStore(state => state.capsule);
   const resetModalState = useModalStore(state => state.resetState);
   const resetUserInfoState = useUserInfoStore(state => state.resetState);
+  const StoredEvmProvider = useExternalWalletProviderStore(state => state.EvmProvider);
+  const storedEvmContext = useExternalWalletProviderStore(state => state.evmContext);
+  // const StoredSolanaProvider = useExternalWalletProviderStore(state => state.SolanaProvider);
+  // const storedSolanaContext = useExternalWalletProviderStore(state => state.solanaContext);
+  // const StoredCosmosProvider = useExternalWalletProviderStore(state => state.CosmosProvider);
+  // const storedCosmosContext = useExternalWalletProviderStore(state => state.cosmosContext);
 
   // EVM
   const [EvmProvider, setEvmProvider] = useState<FC<EvmExternalWalletProviderProps> | null>(null);
@@ -49,15 +56,12 @@ export const ExternalWalletsWrapper = ({ children, wallets }: ExternalWalletsWra
 
   useEffect(() => {
     const loadProviders = async () => {
-      let hasEvmWallet = false;
       let newEvmContext: Context<EvmExternalWalletContextType>;
       let newEvmProvider: typeof EvmExternalWalletProvider;
 
-      // let hasSolanaWallet = false;
       let newSolanaContext: Context<SolanaExternalWalletContextType>;
       let newSolanaProvider: typeof SolanaExternalWalletProvider;
 
-      // let hasCosmosWallet = false;
       let newCosmosContext: Context<CosmosExternalWalletContextType>;
       let newCosmosProvider: typeof CosmosExternalWalletProvider;
 
@@ -76,38 +80,26 @@ export const ExternalWalletsWrapper = ({ children, wallets }: ExternalWalletsWra
 
           // Handle EVM Wallets
           if (wallet in EvmWallet) {
-            hasEvmWallet = true;
-
-            try {
-              const { EvmExternalWalletProvider, EvmExternalWalletContext } = await import(
-                '@usecapsule/evm-wallet-connectors'
-              );
-
-              newEvmContext = EvmExternalWalletContext;
-              newEvmProvider = EvmExternalWalletProvider;
-            } catch (e) {
+            if (!StoredEvmProvider || !storedEvmContext) {
               throw new Error('@usecapsule/evm-wallet-connectors is required to use an external EVM wallet.');
+            } else {
+              newEvmContext = storedEvmContext;
+              newEvmProvider = StoredEvmProvider;
             }
-          } else if (!hasEvmWallet) {
+          } else {
             newEvmContext = EvmExternalWalletContext;
             newEvmProvider = EvmExternalWalletProvider;
           }
 
           // Handle Solana Wallets
           // if (wallet in SolanaWallet) {
-          //   hasSolanaWallet = true;
-
-          //   try {
-          //     const { SolanaExternalWalletProvider, SolanaExternalWalletContext } = await import(
-          //       '@usecapsule/solana-wallet-connectors'
-          //     );
-
-          //     newSolanaContext = SolanaExternalWalletContext;
-          //     newSolanaProvider = SolanaExternalWalletProvider;
-          //   } catch (e) {
+          //   if (!StoredSolanaProvider || !storedSolanaContext) {
           //     throw new Error('@usecapsule/solana-wallet-connectors is required to use an external Solana wallet.');
+          //   } else {
+          //     newSolanaContext = storedSolanaContext;
+          //     newSolanaProvider = StoredSolanaProvider;
           //   }
-          // } else if (!hasSolanaWallet) {
+          // } else {
           //   newSolanaContext = SolanaExternalWalletContext;
           //   newSolanaProvider = SolanaExternalWalletProvider;
           // }
@@ -116,19 +108,13 @@ export const ExternalWalletsWrapper = ({ children, wallets }: ExternalWalletsWra
 
           // Handle Cosmos Wallets
           // if (wallet in CosmosWallet) {
-          //   hasCosmosWallet = true;
-
-          //   try {
-          //     const { CosmosExternalWalletProvider, CosmosExternalWalletContext } = await import(
-          //       '@usecapsule/cosmos-wallet-connectors'
-          //     );
-
-          //     newCosmosContext = CosmosExternalWalletContext;
-          //     newCosmosProvider = CosmosExternalWalletProvider;
-          //   } catch (e) {
+          //   if (!StoredCosmosProvider || !storedCosmosContext) {
           //     throw new Error('@usecapsule/cosmos-wallet-connectors is required to use an external Cosmos wallet.');
+          //   } else {
+          //     newCosmosContext = storedCosmosContext;
+          //     newCosmosProvider = StoredCosmosProvider;
           //   }
-          // } else if (!hasCosmosWallet) {
+          // } else {
           //   newCosmosContext = CosmosExternalWalletContext;
           //   newCosmosProvider = CosmosExternalWalletProvider;
           // }
@@ -148,7 +134,7 @@ export const ExternalWalletsWrapper = ({ children, wallets }: ExternalWalletsWra
     };
 
     loadProviders();
-  }, [wallets]);
+  }, [wallets, storedEvmContext, StoredEvmProvider]);
 
   const handleSwitchWallet = ({ address, error }: { address?: string; error?: string }) => {
     // If we error on switch wallets we logged out the Capsule instance so we need to reset the modal state

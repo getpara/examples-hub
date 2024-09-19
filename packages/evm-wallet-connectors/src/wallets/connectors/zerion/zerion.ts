@@ -1,4 +1,4 @@
-import { isIOS } from '@usecapsule/web-sdk';
+import { isIOS } from '@usecapsule/react-sdk';
 import { DefaultWalletOptions, Wallet } from '../../../types/Wallet';
 import { getInjectedConnector, hasInjectedProvider } from '../../../utils/getInjectedConnector.js';
 import { getWalletConnectConnector } from '../../../utils/getWalletConnectConnector';

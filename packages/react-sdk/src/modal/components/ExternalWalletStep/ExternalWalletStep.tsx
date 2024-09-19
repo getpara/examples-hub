@@ -17,8 +17,6 @@ export const ExternalWalletStep = () => {
 
   useEffect(() => {
     routeMobileExternalWallet(qrUri);
-
-    console.log('🚀 ~ ExternalWalletStep ~ qrUri:', qrUri);
   }, [qrUri]);
 
   const handleTryAgainClick = async () => {

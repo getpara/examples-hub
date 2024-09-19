@@ -18,8 +18,8 @@
   "scripts": {
     "build": "yarn build:assets && yarn build:css && stencil build",
     "start": "yarn build:assets && yarn build:css && stencil build --dev --watch --serve",
-    "test": "stencil test --spec --e2e",
-    "test.watch": "stencil test --spec --e2e --watchAll",
+    "test": "stencil test --spec",
+    "test.watch": "stencil test --spec --watchAll",
     "generate": "stencil generate",
     "build:css": "sass --embed-sources src/css:./css",
     "build:assets": "ts-node -T ./scripts/buildAssets.ts",

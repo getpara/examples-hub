@@ -1,4 +1,4 @@
-import { isAndroid, isIOS } from '@usecapsule/web-sdk';
+import { isAndroid, isIOS } from '@usecapsule/react-sdk';
 import { WindowProvider } from '../../../types/utils.js';
 import { DefaultWalletOptions, Wallet } from '../../../types/Wallet.js';
 import { getInjectedConnector, hasInjectedProvider } from '../../../utils/getInjectedConnector.js';

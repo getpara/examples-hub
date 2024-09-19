@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { StepContainer } from '../common.js';
-import { WalletCard, WalletCards } from '../WalletCard/WalletCard.js';
+import { ExternalWalletCard, WalletCard, WalletCards } from '../WalletCard/WalletCard.js';
 import { useCapsuleStore } from '../../stores/index.js';
 
 interface LoginDoneStep {
@@ -19,9 +19,13 @@ export const LoginDoneStep = ({ onClose }: LoginDoneStep) => {
   return (
     <StepContainer>
       <WalletCards>
-        {capsule.currentWalletIdsArray.map(([id, type]) => {
-          return <WalletCard id={id} type={type} />;
-        })}
+        {capsule.isUsingExternalWallet() ? (
+          <ExternalWalletCard address={capsule.currentExternalWalletAddresses?.[0]} />
+        ) : (
+          capsule.currentWalletIdsArray.map(([id, type]) => {
+            return <WalletCard key={id} id={id} type={type} />;
+          })
+        )}
       </WalletCards>
     </StepContainer>
   );
