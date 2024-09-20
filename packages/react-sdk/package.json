@@ -1,6 +1,6 @@
 {
   "name": "@usecapsule/react-sdk",
-  "version": "3.20.1",
+  "version": "4.0.0",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -15,8 +15,8 @@
     "@ramp-network/ramp-instant-sdk": "^4.0.2",
     "@stripe/crypto": "^0.0.4",
     "@stripe/stripe-js": "^3.4.0",
-    "@usecapsule/react-components": "3.4.1",
-    "@usecapsule/web-sdk": "1.26.1",
+    "@usecapsule/react-components": "3.5.0",
+    "@usecapsule/web-sdk": "2.0.0",
     "date-fns": "^3.6.0",
     "framer-motion": "11.3.28",
     "libphonenumber-js": "^1.11.1",
