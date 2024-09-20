@@ -33,6 +33,7 @@ interface ModalState {
   isExternalWalletConnecting?: boolean;
   externalWalletError?: string[];
   activeWallet: ActiveWallet | undefined;
+  farcasterConnectUri: string | undefined;
 }
 
 export interface ModalActions {
@@ -58,6 +59,7 @@ export interface ModalActions {
   setExternalWalletError: (externalWalletError?: string[]) => void;
   setStepDirection: (stepDirection: 1 | -1) => void;
   setActiveWallet: (_: ActiveWallet | undefined) => void;
+  setFarcasterConnectUri: (_: string | undefined) => void;
 }
 
 export type ModalStore = ModalState & ModalActions;
@@ -77,6 +79,7 @@ export const DEFAULT_MODAL_STATE: Omit<ModalState, 'step' | 'onRampConfig'> = {
   isExternalWalletConnecting: false,
   externalWalletError: undefined,
   activeWallet: [undefined, undefined],
+  farcasterConnectUri: undefined,
 };
 
 export const useModalStore = create<ModalStore>()(

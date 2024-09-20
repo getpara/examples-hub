@@ -7,6 +7,8 @@ import { useThemeStore } from '../../stores/theme/useThemeStore.js';
 import { getTileButtonFlex } from '../../utils/getTileButtonFlex.js';
 import { StyledCpslTileButton } from '../common.js';
 import { brandedOAuthLogos, oAuthLogos } from '../../constants/oAuthLogos.js';
+import { useEffect } from 'react';
+import { routeMobileExternalWallet } from '../../utils/routeMobileExternalWallet.js';
 
 interface OAuthProps {
   methods: OAuthMethod[];
@@ -24,7 +26,23 @@ export const OAuth = ({ methods }: OAuthProps) => {
   const setIdentifierType = useUserInfoStore(state => state.setIdentifierType);
   const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
   const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
+  const setFarcasterConnectUri = useModalStore(state => state.setFarcasterConnectUri);
+  const farcasterConnectUri = useModalStore(state => state.farcasterConnectUri);
   const showAll = useModalStore(state => state.step === ModalStep.AUTH_MORE);
+
+  useEffect(() => {
+    const initializeFarcaster = async () => {
+      if (!methods.includes(OAuthMethod.FARCASTER)) {
+        return;
+      }
+
+      const connectUri = await capsule.getFarcasterConnectURL();
+      setFarcasterConnectUri(connectUri);
+    };
+
+    initializeFarcaster();
+  }, []);
+
   const hasMore = methods.length > HAS_MORE_LENGTH;
 
   const methodsToShow = showAll || !hasMore ? methods : methods.slice(0, HAS_MORE_LENGTH - 1);
@@ -35,6 +53,11 @@ export const OAuth = ({ methods }: OAuthProps) => {
 
   const handleMethodClick = (method: OAuthMethod) => async () => {
     if (method === OAuthMethod.FARCASTER) {
+      if (!farcasterConnectUri) {
+        return;
+      }
+
+      routeMobileExternalWallet(farcasterConnectUri);
       setStep(ModalStep.FARCASTER_OAUTH);
       return;
     }

@@ -20,7 +20,10 @@ const getStepConfig = ({
 }: {
   externalWalletError?: string[];
 }): Record<
-  `${ModalStep.EX_WALLET_SELECTED}` | `${ModalStep.CHAIN_SWITCH}` | `${ModalStep.ACCOUNT_MAIN}`,
+  | `${ModalStep.EX_WALLET_SELECTED}`
+  | `${ModalStep.CHAIN_SWITCH}`
+  | `${ModalStep.ACCOUNT_MAIN}`
+  | `${ModalStep.FARCASTER_OAUTH}`,
   StepHeroConfig
 > => ({
   [ModalStep.EX_WALLET_SELECTED]: {
@@ -39,6 +42,12 @@ const getStepConfig = ({
     variant: 'customContent',
     topOffset: 0,
     spacerHeight: 104,
+    hideFadeOut: true,
+  },
+  [ModalStep.FARCASTER_OAUTH]: {
+    variant: 'externalWalletConnection',
+    topOffset: 40,
+    spacerHeight: 158,
     hideFadeOut: true,
   },
 });
@@ -75,6 +84,7 @@ export const Hero = () => {
   const isExternalStep = currentStep === ModalStep.EX_WALLET_SELECTED;
   const isChainSwitchStep = currentStep === ModalStep.CHAIN_SWITCH;
   const isAccountStep = currentStep === ModalStep.ACCOUNT_MAIN;
+  const isFarcasterStep = currentStep === ModalStep.FARCASTER_OAUTH;
 
   const { showExtension, isCosmosMobileWallet } = walletDisplayHelpers;
 
@@ -82,10 +92,12 @@ export const Hero = () => {
   // 1. On a step with no hero config
   // 2. On the external wallet step and not showing the extension connection screen
   // 3. On the network switch step on web for Cosmos mobile connectors
+  // 4. On the farcaster step on desktop
   const shouldHide =
     !stepConfig ||
     (!isMobile() && isExternalStep && !showExtension) ||
-    (!isMobile() && isChainSwitchStep && isCosmosMobileWallet);
+    (!isMobile() && isChainSwitchStep && isCosmosMobileWallet) ||
+    (!isMobile() && isFarcasterStep);
 
   const { variant, topOffset, spacerHeight, hideFadeOut } = stepConfig ?? {};
 
@@ -95,6 +107,7 @@ export const Hero = () => {
         {shouldHide ? null : (
           <StyledHero $isAccount={isAccountStep} hideFadeOut={hideFadeOut} variant={variant} height={480} withDefaultTheme>
             {(isExternalStep || isChainSwitchStep) && <WalletLogo slot="connectionLeft" src={connector?.iconUrl} />}
+            {isFarcasterStep && <WalletLogo slot="connectionLeft" icon="farcasterBrand" />}
             {isAccountStep &&
               (avatar ? (
                 <Avatar slot="image" src={avatar} />

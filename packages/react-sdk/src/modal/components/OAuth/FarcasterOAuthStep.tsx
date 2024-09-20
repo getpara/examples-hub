@@ -1,28 +1,21 @@
-import { useState, useEffect } from 'react';
-import { CpslQrCode, CpslSpinner, CpslText } from '@usecapsule/react-components';
-import { Heading, InnerStepContainer, QRContainer, StepContainer } from '../common.js';
+import { useEffect } from 'react';
+import { CpslButton, CpslIcon, CpslQrCode, CpslSpinner, CpslText } from '@usecapsule/react-components';
+import { CenteredText, Heading, InnerStepContainer, QRContainer, StepContainer } from '../common.js';
 import { useCapsuleStore, useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
+import { isMobile } from '@usecapsule/web-sdk';
 
 const FarcasterOAuthStep = () => {
-  const [connectUri, setConnectUri] = useState('');
   const setStep = useModalStore(state => state.setStep);
   const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
   const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
   const capsule = useCapsuleStore(state => state.capsule);
   const setFlow = useModalStore(state => state.setFlow);
+  const farcasterConnectUri = useModalStore(state => state.farcasterConnectUri);
+  const setFarcasterConnectUri = useModalStore(state => state.setFarcasterConnectUri);
 
   useEffect(() => {
-    const initializeFarcaster = async () => {
-      const connectUri = await capsule.getFarcasterConnectURL();
-      setConnectUri(connectUri);
-    };
-
-    initializeFarcaster();
-  }, []);
-
-  useEffect(() => {
-    if (connectUri) {
+    if (farcasterConnectUri) {
       const pollStatus = async () => {
         const { userExists, username } = await capsule.waitForFarcasterStatus();
 
@@ -43,22 +36,38 @@ const FarcasterOAuthStep = () => {
       pollStatus();
 
       return () => {
-        setConnectUri('');
+        setFarcasterConnectUri(undefined);
       };
     }
-  }, [connectUri]);
+  }, [farcasterConnectUri]);
 
   return (
     <StepContainer $wide>
-      <Heading variant="headingS" weight="bold">
-        Sign in using Farcaster
-      </Heading>
-      <InnerStepContainer>
-        <CpslText variant="bodyS" color="secondary" weight="medium">
-          Scan the QR code with your phone's camera to proceed.
-        </CpslText>
-        <QRContainer>{!connectUri ? <CpslSpinner size={100} /> : <CpslQrCode url={connectUri} />}</QRContainer>
-      </InnerStepContainer>
+      {isMobile() ? (
+        <InnerStepContainer>
+          <CpslText weight="medium" color="secondary">
+            {`Don’t have Farcaster`}
+          </CpslText>
+          <CpslButton as="a" href={'https://link.warpcast.com/download-qr'} target="_blank" variant="secondary">
+            <CpslIcon slot="start" icon="linkExternal" />
+            {`Get Farcaster`}
+          </CpslButton>
+        </InnerStepContainer>
+      ) : (
+        <>
+          <Heading variant="headingS" weight="bold">
+            Sign in using Farcaster
+          </Heading>
+          <InnerStepContainer>
+            <CenteredText variant="bodyS" color="secondary" weight="medium">
+              Scan the QR code with your phone's camera to proceed.
+            </CenteredText>
+            <QRContainer>
+              {!farcasterConnectUri ? <CpslSpinner size={100} /> : <CpslQrCode url={farcasterConnectUri} />}
+            </QRContainer>
+          </InnerStepContainer>
+        </>
+      )}
     </StepContainer>
   );
 };
