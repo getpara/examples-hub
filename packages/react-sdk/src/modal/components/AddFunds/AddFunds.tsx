@@ -102,9 +102,11 @@ export const AddFunds = () => {
                   Choose Provider
                 </Heading>
                 <InnerStepContainer>
-                  {onRampConfig.providers.map((provider, index) => {
-                    return <OnRampProviderButton config={onRampConfig} index={index} key={provider.id} />;
-                  })}
+                  {onRampConfig.providers
+                    .filter(provider => provider.id !== 'MOONPAY')
+                    .map((provider, index) => {
+                      return <OnRampProviderButton config={onRampConfig} index={index} key={provider.id} />;
+                    })}
                 </InnerStepContainer>
               </>
             )}

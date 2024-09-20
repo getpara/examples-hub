@@ -1,3 +1,4 @@
+import { Network, OnRampAsset, OnRampAssetInfo, OnRampProvider } from '@usecapsule/react-sdk';
 import { Environment } from './environment';
 
 type Nullable<T> = { [K in keyof T]: T[K] | null };
@@ -112,6 +113,12 @@ export type ApiKey = {
   githubUrl: string;
   homepageUrl: string;
   archived?: boolean;
+  isBuyEnabled: boolean;
+  isReceiveEnabled: boolean;
+  isWithdrawEnabled: boolean;
+  onRampProviders: OnRampProvider[];
+  onRampAssets?: Partial<Record<Network, true | OnRampAsset[]>>;
+  rampApiKey?: string;
 };
 
 export type ApiKeyResponse = { key: ApiKey };
@@ -137,6 +144,12 @@ export type UpdateApiKeyBody = Nullable<
       | 'linkedinUrl'
       | 'githubUrl'
       | 'homepageUrl'
+      | 'isBuyEnabled'
+      | 'isReceiveEnabled'
+      | 'isWithdrawEnabled'
+      | 'onRampProviders'
+      | 'onRampAssets'
+      | 'rampApiKey'
     >
   >
 >;
@@ -183,3 +196,5 @@ export type OrganizationUserMetricsResponse = {
     usersInTimeFrame: number;
   };
 };
+
+export type OnRampAllAssetsResponse = OnRampAssetInfo;

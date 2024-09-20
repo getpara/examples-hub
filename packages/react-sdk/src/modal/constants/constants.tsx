@@ -1,4 +1,4 @@
-import { Network, OnRampMethod, OnRampProvider } from '@usecapsule/core-sdk';
+import { Network, OnRampAsset, OnRampMethod, OnRampProvider } from '@usecapsule/core-sdk';
 import { CpslIcon } from '@usecapsule/react-components';
 import { Transition, Variants } from 'framer-motion';
 
@@ -32,12 +32,14 @@ export const ON_RAMP_PROVIDERS: Record<OnRampProvider, OnRampProviderConfig> = {
     icon: <CpslIcon icon="rampNetworkBrand" />,
     backgroundColors: ['#21BF73', '#3AE492'],
   },
-  // [OnRampProvider.DECENT]: {
-  //   name: 'Decent',
-  //   feeLower: 0,
-  //   methods: [OnRampMethod.ACH, OnRampMethod.DEBIT, OnRampMethod.CREDIT],
-  //   icon: <CpslIcon icon="decentBrand" />,
-  // },
+  [OnRampProvider.MOONPAY]: {
+    name: 'MoonPay',
+    feeLower: 1.0,
+    feeUpper: 4.5,
+    methods: [OnRampMethod.ACH, OnRampMethod.DEBIT, OnRampMethod.CREDIT],
+    icon: <CpslIcon icon="moonpayBrand" />,
+    backgroundColors: ['#7715F5', '#9647fd'],
+  },
 };
 
 export const NETWORKS: Record<Network, string> = {
@@ -49,6 +51,15 @@ export const NETWORKS: Record<Network, string> = {
   [Network.SOLANA]: 'Solana',
   [Network.COSMOS]: 'Cosmos',
   [Network.CELO]: 'Celo',
+};
+
+export const ON_RAMP_ASSETS: Record<OnRampAsset, [string, string]> = {
+  [OnRampAsset.ETHEREUM]: ['Ethereum', 'ETH'],
+  [OnRampAsset.USDC]: ['USDC', 'USDC'],
+  [OnRampAsset.POLYGON]: ['Polygon', 'MATIC'],
+  [OnRampAsset.SOLANA]: ['Solana', 'SOL'],
+  [OnRampAsset.ATOM]: ['Atom', 'ATOM'],
+  [OnRampAsset.CELO]: ['Celo', 'CELO'],
 };
 
 export const MOBILE_SIZE = 480;

@@ -277,18 +277,27 @@ export enum Network {
 export enum OnRampProvider {
   RAMP = 'RAMP',
   STRIPE = 'STRIPE',
+  MOONPAY = 'MOONPAY',
 }
 
 export enum OnRampAsset {
   ETHEREUM = 'ETHEREUM',
   USDC = 'USDC',
   POLYGON = 'POLYGON',
+  SOLANA = 'SOLANA',
+  CELO = 'CELO',
+  ATOM = 'ATOM',
 }
 
 export enum OnRampPurchaseStatus {
   INITIATED = 'INITIATED',
   FINISHED = 'FINISHED',
   CANCELLED = 'CANCELLED',
+}
+
+export enum OnRampPurchaseType {
+  BUY = 'BUY',
+  SELL = 'SELL',
 }
 export interface OnRampPurchase {
   id: string;

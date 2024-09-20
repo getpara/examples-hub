@@ -14,6 +14,7 @@ export {
   type WalletEntity,
   WalletType,
   WalletScheme,
+  OnRampPurchaseType,
   NON_ED25519,
 } from '@usecapsule/user-management-client';
 export * from './definitions.js';
