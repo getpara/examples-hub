@@ -1,4 +1,4 @@
-import { CpslDrawer } from '@usecapsule/react-components';
+import { CpslButton, CpslDrawer, CpslIcon } from '@usecapsule/react-components';
 import styled from 'styled-components';
 import { Navigation } from './Navigation';
 import { User } from '../../../components/User/User';
@@ -6,6 +6,7 @@ import { NavBarFooter } from './NavBarFooter';
 import { useIsMobile } from '../../../hooks/useIsMobile';
 import { APP_BAR_HEIGHT } from './AppBar';
 import { MOBILE_SIZE } from '../../../utils/constants';
+import { useLogout } from '../../../hooks/useLogout';
 
 export const EXPANDED_SIDEBAR_WIDTH = 312;
 
@@ -16,6 +17,7 @@ interface NavBarProps {
 
 export const NavBar = ({ isOpen, closeNav }: NavBarProps) => {
   const isMobile = useIsMobile();
+  const { logout } = useLogout();
 
   return (
     <Drawer
@@ -34,6 +36,12 @@ export const NavBar = ({ isOpen, closeNav }: NavBarProps) => {
           </UserContainer>
         )}
         <Navigation closeNav={closeNav} />
+        <BottomContainer>
+          <CpslButton fullWidth variant="secondary" onClick={logout}>
+            Log Out
+            <CpslIcon icon="logOut" />
+          </CpslButton>
+        </BottomContainer>
         {!isMobile && <NavBarFooter />}
       </Container>
     </Drawer>
@@ -44,6 +52,11 @@ const Drawer = styled(CpslDrawer)`
   @media (max-width: ${MOBILE_SIZE}px) {
     box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.05);
   }
+`;
+
+const BottomContainer = styled.div`
+  width: 100%;
+  padding: 0px 16px;
 `;
 
 const Container = styled.div`
