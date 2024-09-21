@@ -11,8 +11,11 @@ describe('cpsl-alert', () => {
       <cpsl-alert class="error">
         <mock:shadow-root>
           <div class="alert-container">
-            <cpsl-icon icon="alertCircle"></cpsl-icon>
-            <slot></slot>
+            <div class="title-container">
+              <cpsl-icon icon="alertCircle"></cpsl-icon>
+              <slot></slot>
+            </div>
+            <slot name="subtitle"></slot>
           </div>
         </mock:shadow-root>
       </cpsl-alert>

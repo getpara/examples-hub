@@ -19,9 +19,14 @@ export class CpslAlert {
    */
   @Prop() variant?: 'error' | 'warning' | 'success' | 'custom' = 'error';
 
+  /**
+   * Whether to show the alert with a filled background based on the variant
+   */
+  @Prop() filled?: boolean;
+
   private get iconType(): IconType | undefined {
     if (this.icon) {
-      this.icon;
+      return this.icon;
     }
 
     switch (this.variant) {
@@ -43,10 +48,13 @@ export class CpslAlert {
 
   render() {
     return (
-      <Host class={{ error: this.variant === 'error', warning: this.variant === 'warning', success: this.variant === 'success' }}>
+      <Host class={{ error: this.variant === 'error', warning: this.variant === 'warning', success: this.variant === 'success', filled: this.filled }}>
         <div class="alert-container">
-          {this.iconType && <cpsl-icon icon={this.iconType} />}
-          <slot></slot>
+          <div class="title-container">
+            {this.iconType && <cpsl-icon icon={this.iconType} />}
+            <slot></slot>
+          </div>
+          <slot name="subtitle"></slot>
         </div>
       </Host>
     );

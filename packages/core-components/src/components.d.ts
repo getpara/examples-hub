@@ -20,6 +20,10 @@ export { TabsChangedEventDetail } from "./components/cpsl-tabs/tabs-interface";
 export namespace Components {
     interface CpslAlert {
         /**
+          * Whether to show the alert with a filled background based on the variant
+         */
+        "filled"?: boolean;
+        /**
           * The name of the icon to show.
          */
         "icon"?: IconType;
@@ -1432,6 +1436,10 @@ declare global {
 }
 declare namespace LocalJSX {
     interface CpslAlert {
+        /**
+          * Whether to show the alert with a filled background based on the variant
+         */
+        "filled"?: boolean;
         /**
           * The name of the icon to show.
          */

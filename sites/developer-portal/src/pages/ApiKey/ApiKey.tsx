@@ -6,6 +6,7 @@ import { Environment } from '../../types/environment';
 import { useGetOrganizationKey } from '../../hooks/api/queries/useOrganizationKeys';
 import { Loader } from '../../components/Loader';
 import { triggerToast } from '../../utils/toasts';
+import { NonProdWarning } from './components/NonProdWarning';
 
 export const ApiKey = () => {
   const navigate = useNavigate();
@@ -36,6 +37,7 @@ export const ApiKey = () => {
   return (
     <>
       <Header />
+      <NonProdWarning />
       <KeyData />
       <MainContent />
     </>

@@ -1,4 +1,5 @@
 import AlertCircle from './alert-circle.svg';
+import AlertTriangle from './alert-triangle.svg';
 import AngelListBrand from './angel-list-brand.svg';
 import AngelList from './angel-list.svg';
 import AppleBrand from './apple-brand.svg';
@@ -349,6 +350,7 @@ import ZM from './flags/ZM.svg';
 import ZW from './flags/ZW.svg';
 export const Icons = {
   alertCircle: AlertCircle,
+  alertTriangle: AlertTriangle,
   angelListBrand: AngelListBrand,
   angelList: AngelList,
   appleBrand: AppleBrand,
