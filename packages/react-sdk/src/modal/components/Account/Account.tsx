@@ -20,9 +20,10 @@ export const Account = ({ onClose }: AccountProps) => {
 
   const [isDisconnecting, setIsDisconnecting] = useState(false);
 
-  const isAllFlows = !onRampConfig.enabledFlows;
-  const isBuyConfigured = onRampConfig.enabledFlows?.includes(EnabledFlow.BUY);
-  const isReceiveConfigured = onRampConfig.enabledFlows?.includes(EnabledFlow.RECEIVE);
+  const isOnRampConfigured = !!onRampConfig;
+  const isAllFlows = isOnRampConfigured && !onRampConfig.enabledFlows;
+  const isBuyConfigured = isOnRampConfigured && (isAllFlows || onRampConfig.enabledFlows.includes(EnabledFlow.BUY));
+  const isReceiveConfigured = isOnRampConfigured && (isAllFlows || onRampConfig.enabledFlows.includes(EnabledFlow.RECEIVE));
 
   const handleBuyClick = () => {
     setAccountAddFundTab(EnabledFlow.BUY);
@@ -46,14 +47,14 @@ export const Account = ({ onClose }: AccountProps) => {
     <StepContainer $wide>
       <InnerStepContainer>
         <ButtonContainer>
-          {(isAllFlows || isBuyConfigured) && (
+          {isBuyConfigured && (
             <OptionButton icon="creditCard" onClick={handleBuyClick}>
               <CpslText variant="bodyXS" color="secondary" weight="medium">
                 Buy Crypto
               </CpslText>
             </OptionButton>
           )}
-          {(isAllFlows || isReceiveConfigured) && (
+          {isReceiveConfigured && (
             <OptionButton icon="qrCode02" onClick={handleReceiveClick}>
               <CpslText variant="bodyXS" color="secondary" weight="medium">
                 Receive
