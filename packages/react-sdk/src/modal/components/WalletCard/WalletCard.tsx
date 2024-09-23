@@ -40,7 +40,7 @@ export const WalletCard = ({ id, type }: WalletCardProps) => {
   return (
     <SharedWalletCard
       address={truncateAddress(address, type, { prefix: capsule.cosmosPrefix })}
-      name={wallet.name ?? `${appName} Wallet`}
+      name={wallet.name ?? `${appName ? `${appName} ` : ''}Wallet`}
       identiconHash={capsule.getIdenticonHash(wallet.id, type)}
     />
   );
