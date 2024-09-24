@@ -7,6 +7,8 @@ import { useUploadKeyAsset } from '../../../../hooks/api/mutations/useUploadKeyA
 import { useFormContext } from 'react-hook-form';
 import { UpdateApiKeyBranding } from '../../hooks/useBrandingConfigFormData';
 import { PartnerAssetType } from '../../../../types/api';
+import { useGetOrganizationKey } from '../../../../hooks/api/queries/useOrganizationKeys';
+import { Environment } from '../../../../types/environment';
 
 interface AssetUploadProps {
   fieldName: keyof Pick<UpdateApiKeyBranding, 'iconUrl' | 'logoUrl'>;
@@ -17,6 +19,7 @@ interface AssetUploadProps {
 
 export const AssetUpload = ({ fieldName, assetType, label, recommendedSize }: AssetUploadProps) => {
   const { apiKey, env, projectId } = useParams();
+  const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
   const { mutateAsync: uploadImage } = useUploadKeyAsset(assetType);
   const { getValues, setValue } = useFormContext<UpdateApiKeyBranding>();
 
@@ -58,6 +61,7 @@ export const AssetUpload = ({ fieldName, assetType, label, recommendedSize }: As
         uploadImage={handleUploadImage}
         label={label}
         onRemoveImage={handleRemoveImage}
+        disabled={apiKeyData?.archived}
       />
     </InnerConfigurationCard>
   );

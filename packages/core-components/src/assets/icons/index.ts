@@ -37,6 +37,7 @@ import Download from './download.svg';
 import DribbbleBrand from './dribbble-brand.svg';
 import Dribbble from './dribbble.svg';
 import Earth from './earth.svg';
+import Edit02 from './edit-02.svg';
 import Ethereum from './ethereum.svg';
 import EyeOff from './eye-off.svg';
 import Eye from './eye.svg';
@@ -85,6 +86,7 @@ import Phone from './phone.svg';
 import PintrestBrand from './pintrest-brand.svg';
 import Pintrest from './pintrest.svg';
 import PlusCircle from './plus-circle.svg';
+import Plus from './plus.svg';
 import PuzzlePiece from './puzzle-piece.svg';
 import QrCode02 from './qr-code-02.svg';
 import QrCode from './qr-code.svg';
@@ -102,6 +104,7 @@ import Signal from './signal.svg';
 import SnapchatBrand from './snapchat-brand.svg';
 import Snapchat from './snapchat.svg';
 import Solana from './solana.svg';
+import Star04Filled from './star-04-filled.svg';
 import Stars from './stars.svg';
 import StripeBrand from './stripe-brand.svg';
 import TelegramBrand from './telegram-brand.svg';
@@ -391,6 +394,7 @@ export const Icons = {
   dribbbleBrand: DribbbleBrand,
   dribbble: Dribbble,
   earth: Earth,
+  edit02: Edit02,
   ethereum: Ethereum,
   eyeOff: EyeOff,
   eye: Eye,
@@ -439,6 +443,7 @@ export const Icons = {
   pintrestBrand: PintrestBrand,
   pintrest: Pintrest,
   plusCircle: PlusCircle,
+  plus: Plus,
   puzzlePiece: PuzzlePiece,
   qrCode02: QrCode02,
   qrCode: QrCode,
@@ -456,6 +461,7 @@ export const Icons = {
   snapchatBrand: SnapchatBrand,
   snapchat: Snapchat,
   solana: Solana,
+  star04Filled: Star04Filled,
   stars: Stars,
   stripeBrand: StripeBrand,
   telegramBrand: TelegramBrand,

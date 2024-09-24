@@ -9,6 +9,7 @@
 
 | Property            | Attribute             | Description                                                                                  | Type                               | Default     |
 | ------------------- | --------------------- | -------------------------------------------------------------------------------------------- | ---------------------------------- | ----------- |
+| `disabled`          | `disabled`            | If the input is disabled. Default is: false.                                                 | `boolean`                          | `false`     |
 | `errorText`         | `error-text`          | Error text to show below the input. If this is provided the input will enter an error state. | `string`                           | `undefined` |
 | `externalFilename`  | `external-filename`   | Filename for the external source of the selected file.                                       | `string`                           | `undefined` |
 | `externalSrc`       | `external-src`        | External source for the selected file.                                                       | `string`                           | `undefined` |

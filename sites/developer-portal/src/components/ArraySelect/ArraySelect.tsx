@@ -82,7 +82,7 @@ export function ArraySelect<T extends { toString: () => string }, const E = unde
           );
         })
       ) : (
-        <EmptyView isError={!!error}>{!!error ? error : emptyText}</EmptyView>
+        <EmptyView $isError={!!error}>{!!error ? error : emptyText}</EmptyView>
       )}
       {remaining && (
         <AddItemsContainer>
@@ -95,6 +95,7 @@ export function ArraySelect<T extends { toString: () => string }, const E = unde
                   onClick={() => {
                     onChange([...(Array.isArray(value) ? value : []), item]);
                   }}
+                  key={item.toString()}
                 >
                   <CpslIcon icon="plusCircle" />
                   {rowTitle(item)}
@@ -129,15 +130,15 @@ const Item = styled.div`
   }
 `;
 
-const EmptyView = styled.div<{ isError?: boolean }>`
+const EmptyView = styled.div<{ $isError?: boolean }>`
   padding: 0 12px;
   border-radius: 12px;
   display: flex;
   align-items: center;
   height: 44px;
   text-align: left;
-  border: ${({ isError }) => (isError ? '1px dashed red' : '1px dashed #ccc')};
-  color: ${({ isError }) => (isError ? 'red' : '#999')};
+  border: ${({ $isError }) => ($isError ? '1px dashed red' : '1px dashed #ccc')};
+  color: ${({ $isError }) => ($isError ? 'red' : '#999')};
 `;
 
 const AddItemsContainer = styled.div`

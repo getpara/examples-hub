@@ -4,9 +4,12 @@ import { useUpdateApiKey } from '../../../hooks/api/mutations/useUpdateApiKey';
 import { triggerToast } from '../../../utils/toasts';
 import { CpslButton } from '@usecapsule/react-components';
 import styled from 'styled-components';
+import { useGetOrganizationKey } from '../../../hooks/api/queries/useOrganizationKeys';
+import { Environment } from '../../../types/environment';
 
 export const Save = () => {
   const { apiKey, env, projectId } = useParams();
+  const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
   const { mutate: updateKey, isPending } = useUpdateApiKey();
   const {
     formState: { isDirty, isValid },
@@ -14,7 +17,7 @@ export const Save = () => {
     reset,
   } = useFormContext();
 
-  const canSave = isDirty && isValid;
+  const canSave = isDirty && isValid && !apiKeyData?.archived;
 
   const handleSave = () => {
     if (projectId && apiKey && env && canSave) {

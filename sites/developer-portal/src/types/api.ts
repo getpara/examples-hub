@@ -123,7 +123,6 @@ export type ApiKey = {
 
 export type ApiKeyResponse = { key: ApiKey };
 export type ApiKeysResponse = { keys: ApiKey[] };
-export type CreateApiKeyBody = Pick<ApiKey, 'displayName'>;
 export type UpdateApiKeyBody = Nullable<
   Partial<
     Pick<

@@ -3,13 +3,15 @@ import styled from 'styled-components';
 import { Modal } from '../../../components/Modal/Modal';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { triggerToast } from '../../../utils/toasts';
-import { useCreateProject } from '../../../hooks/api/mutations/useCreateProject';
 import { Framework } from '../../../types/framework';
 import { PackageManager } from '../../../types/packageManager';
 import { CpslSelectCustomEvent } from '@usecapsule/core-components';
 import { formatFrameworkName, formatPackageManagerName } from '../../../utils/project';
+import { useUpdateProject } from '../../../hooks/api/mutations/useUpdateProject';
+import { useParams } from 'react-router-dom';
+import { useGetProject } from '../../../hooks/api/queries/useProjects';
 
-interface CreateProjectModalProps {
+interface EditProjectModalProps {
   open: boolean;
   onClose: () => void;
 }
@@ -18,14 +20,16 @@ const FRAMEWORK_OPTIONS: Framework[] = [Framework.REACT, Framework.REACT_NATIVE,
 
 const PACKAGE_MANAGER_OPTIONS: PackageManager[] = [PackageManager.NPM, PackageManager.YARN, PackageManager.PNPM];
 
-const DEFAULT_VALUES = {
-  name: '',
-  framework: '',
-  packageManager: '',
-};
+export const EditProjectModal = ({ open, onClose }: EditProjectModalProps) => {
+  const { projectId } = useParams();
+  const { data: project } = useGetProject(projectId ?? '');
+  const { mutate: updateProject } = useUpdateProject();
 
-export const CreateProjectModal = ({ open, onClose }: CreateProjectModalProps) => {
-  const { mutate: createProject } = useCreateProject();
+  const DEFAULT_VALUES = {
+    name: project?.name ?? '',
+    framework: project?.framework ?? '',
+    packageManager: project?.packageManager ?? '',
+  };
 
   const {
     control,
@@ -41,9 +45,14 @@ export const CreateProjectModal = ({ open, onClose }: CreateProjectModalProps) =
     name: ['name', 'framework', 'packageManager'],
   });
 
-  const handleCreateClick = () => {
-    createProject(
+  const handleSaveClick = () => {
+    if (!projectId) {
+      return;
+    }
+
+    updateProject(
       {
+        projectId,
         data: { name, framework, packageManager },
       },
       {
@@ -51,13 +60,13 @@ export const CreateProjectModal = ({ open, onClose }: CreateProjectModalProps) =
           onClose();
           triggerToast({
             variant: 'success',
-            title: 'Project Created!',
+            title: 'Project Updated!',
           });
         },
         onError: () => {
           triggerToast({
             variant: 'error',
-            title: 'Failed to Create Project',
+            title: 'Failed to Update Project',
             body: 'Please try again. If the problem persists, contact Capsule support.',
           });
         },
@@ -70,7 +79,7 @@ export const CreateProjectModal = ({ open, onClose }: CreateProjectModalProps) =
   };
 
   return (
-    <Modal open={open} onClose={onClose} onExited={handleExited} title="New Project" subtitle="Give your new project a name">
+    <Modal open={open} onClose={onClose} onExited={handleExited} title="Edit Project">
       <>
         <Content>
           <Controller
@@ -158,8 +167,8 @@ export const CreateProjectModal = ({ open, onClose }: CreateProjectModalProps) =
             }}
           />
         </Content>
-        <CpslButton disabled={!isValid} fullWidth onClick={handleCreateClick}>
-          Next
+        <CpslButton disabled={!isValid} fullWidth onClick={handleSaveClick}>
+          Save
         </CpslButton>
       </>
     </Modal>

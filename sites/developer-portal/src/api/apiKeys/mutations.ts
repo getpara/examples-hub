@@ -1,22 +1,15 @@
 import { axiosClient } from '../../clients/axios';
-import {
-  ApiKeyResponse,
-  CreateApiKeyBody,
-  LogoUploadUrlResponse,
-  PartnerAssetType,
-  UpdateApiKeyBody,
-} from '../../types/api';
+import { ApiKeyResponse, LogoUploadUrlResponse, PartnerAssetType, UpdateApiKeyBody } from '../../types/api';
 
 export type CreateApiKeyVars = {
   organizationId: string;
   projectId: string;
   env: string;
-  data: CreateApiKeyBody;
 };
-export const createApiKey = async ({ organizationId, projectId, env, data }: CreateApiKeyVars) => {
+export const createApiKey = async ({ organizationId, projectId, env }: CreateApiKeyVars) => {
   const endpoint = `/organizations/${organizationId}/projects/${projectId}/${env}/keys/`;
 
-  return (await axiosClient.post<ApiKeyResponse>(endpoint, data)).data;
+  return (await axiosClient.post<ApiKeyResponse>(endpoint)).data;
 };
 
 export type UpdateApiKeyVars = {

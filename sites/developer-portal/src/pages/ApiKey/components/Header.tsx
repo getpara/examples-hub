@@ -31,7 +31,7 @@ export const Header = () => {
         <ArrowIcon slot="start" icon="arrowNarrow" />
         Back
       </BackButton>
-      <CpslButton variant="secondary" size="small" onClick={handleEditClick}>
+      <CpslButton variant="secondary" size="small" onClick={handleEditClick} disabled={apiKeyData?.archived}>
         Edit Key
       </CpslButton>
       <EditKeyModal name={apiKeyData?.displayName} open={isEditModalOpen} onClose={handleEditModalClose} />

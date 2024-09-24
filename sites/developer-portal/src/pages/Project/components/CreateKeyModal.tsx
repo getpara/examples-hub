@@ -1,4 +1,4 @@
-import { CpslButton, CpslInput, CpslSelect, CpslSelectItem, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslSelect, CpslSelectItem, CpslText } from '@usecapsule/react-components';
 import styled from 'styled-components';
 import { CpslSelectCustomEvent } from '@usecapsule/core-components';
 import { Environment } from '../../../types/environment';
@@ -22,7 +22,6 @@ const ENVIRONMENT_OPTIONS: Environment[] = IS_PROD
     : [ENV_VARS.environment as Environment];
 
 const DEFAULT_VALUES = {
-  keyName: '',
   environment: IS_PROD ? undefined : (ENV_VARS.environment as Environment),
 };
 
@@ -39,9 +38,9 @@ export const CreateKeyModal = ({ open, onClose }: CreateKeyModalProps) => {
     reValidateMode: 'onChange',
     defaultValues: DEFAULT_VALUES,
   });
-  const [keyName, environment] = useWatch({
+  const [environment] = useWatch({
     control,
-    name: ['keyName', 'environment'],
+    name: ['environment'],
   });
 
   const handleCreateClick = () => {
@@ -50,7 +49,6 @@ export const CreateKeyModal = ({ open, onClose }: CreateKeyModalProps) => {
         {
           projectId,
           env: environment.toLowerCase(),
-          data: { displayName: keyName },
         },
         {
           onSuccess: () => {
@@ -82,7 +80,7 @@ export const CreateKeyModal = ({ open, onClose }: CreateKeyModalProps) => {
       onClose={onClose}
       onExited={handleExited}
       title="Create API Key"
-      subtitle="Select the environment and name your key"
+      subtitle="Select the environment for your key"
     >
       <>
         <Content>
@@ -121,24 +119,6 @@ export const CreateKeyModal = ({ open, onClose }: CreateKeyModalProps) => {
                 </CpslSelect>
               );
             }}
-          />
-          <Controller
-            name="keyName"
-            control={control}
-            rules={{
-              required: 'Key name is required',
-            }}
-            render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
-              <CpslInput
-                placeholder="Name your key"
-                onCpslInput={e => {
-                  onChange(e.detail.value);
-                }}
-                onCpslBlur={onBlur}
-                value={value}
-                errorText={error?.message}
-              />
-            )}
           />
         </Content>
         <CpslButton disabled={!isValid} fullWidth onClick={handleCreateClick}>

@@ -10,6 +10,7 @@ export interface ImageUploadProps {
   uploadImage: (file: File) => Promise<boolean>;
   onRemoveImage: () => void;
   LabelComponent?: ReactNode;
+  disabled?: boolean;
 }
 
 export const ImageUpload = ({
@@ -20,6 +21,7 @@ export const ImageUpload = ({
   uploadImage,
   onRemoveImage,
   LabelComponent,
+  disabled,
 }: ImageUploadProps) => {
   return (
     <CpslFileUpload
@@ -29,6 +31,7 @@ export const ImageUpload = ({
       fileTypes={['image/jpg', 'image/jpeg', 'image/png', 'image/gif']}
       externalSrc={externalSrc}
       externalFilename={externalFilename}
+      disabled={disabled}
     >
       {LabelComponent}
       <LeftContainer slot="left-content">

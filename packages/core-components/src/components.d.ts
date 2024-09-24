@@ -306,6 +306,10 @@ export namespace Components {
     }
     interface CpslFileUpload {
         /**
+          * If the input is disabled. Default is: false.
+         */
+        "disabled"?: boolean;
+        /**
           * Error text to show below the input. If this is provided the input will enter an error state.
          */
         "errorText"?: string;
@@ -1758,6 +1762,10 @@ declare namespace LocalJSX {
         "width"?: string;
     }
     interface CpslFileUpload {
+        /**
+          * If the input is disabled. Default is: false.
+         */
+        "disabled"?: boolean;
         /**
           * Error text to show below the input. If this is provided the input will enter an error state.
          */

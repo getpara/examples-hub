@@ -8,7 +8,7 @@ interface ModalProps extends PropsWithChildren {
   open: boolean;
   title: string;
   titleColor?: string | 'gradient';
-  subtitle: string;
+  subtitle?: string;
   onClose: () => void;
   onExited?: () => void;
 }
@@ -32,9 +32,11 @@ export const Modal = ({ open, title, titleColor, subtitle, children, onClose, on
               <CpslIcon icon="close" />
             </CpslButton>
           </HeaderTitle>
-          <CpslText variant="bodyM" color="secondary">
-            {subtitle}
-          </CpslText>
+          {subtitle && (
+            <CpslText variant="bodyM" color="secondary">
+              {subtitle}
+            </CpslText>
+          )}
         </Header>
         {children}
       </InnerContainer>

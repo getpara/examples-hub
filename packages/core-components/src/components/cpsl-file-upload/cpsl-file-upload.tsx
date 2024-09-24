@@ -17,6 +17,12 @@ export class CpslFileUpload {
   @State() uploadError?: boolean;
 
   /**
+   * If the input is disabled.
+   * Default is: false.
+   */
+  @Prop({ reflect: true }) disabled?: boolean = false;
+
+  /**
    * Error text to show below the input. If this is provided the input will enter an error state.
    */
   @Prop() errorText?: string;
@@ -244,6 +250,7 @@ export class CpslFileUpload {
             onDragEnter={this.handleDragEnter}
             onDragLeave={this.handleDragLeave}
             onChange={this.handleInputChange}
+            disabled={this.disabled}
           />
         </div>
         {(this.errorText || this.helperText) && (
