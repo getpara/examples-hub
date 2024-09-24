@@ -420,6 +420,10 @@ export namespace Components {
          */
         "autofocus": boolean;
         /**
+          * If `true`, the input's entire contents will be selected on focus.
+         */
+        "autoselect": boolean;
+        /**
           * If `true`, the input primary color will use the contrast value, not the primary text value.
          */
         "contrastText": boolean;
@@ -1888,6 +1892,10 @@ declare namespace LocalJSX {
           * Sets the [`autofocus` attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/autofocus) on the native input element.  This may not be sufficient for the element to be focused on page load.
          */
         "autofocus"?: boolean;
+        /**
+          * If `true`, the input's entire contents will be selected on focus.
+         */
+        "autoselect"?: boolean;
         /**
           * If `true`, the input primary color will use the contrast value, not the primary text value.
          */

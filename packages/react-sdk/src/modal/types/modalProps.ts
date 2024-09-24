@@ -1,4 +1,9 @@
-import CapsuleWeb, { CurrentWalletIds, OAuthMethod, OnRampConfig, NetworkProp } from '@usecapsule/web-sdk';
+import CapsuleWeb, {
+  CurrentWalletIds,
+  OAuthMethod,
+  deprecated__NetworkProp,
+  deprecated__OnRampConfig,
+} from '@usecapsule/web-sdk';
 import { Theme } from '@usecapsule/react-components';
 import { OnModalStepChangeValue } from '../stores/index.js';
 import { ModalStep, ModalStepProp } from '../utils/steps.js';
@@ -86,13 +91,19 @@ export interface CapsuleModalProps {
   appName?: string;
   /**
    * Configure on-ramp providers to allow users to add funds upon signing up.
+   * @deprecated Configure on-ramps in the Capsule Developer Portal.
    */
-  onRampConfig?: OnRampConfig;
+  onRampConfig?: deprecated__OnRampConfig;
   /**
    * Configures which EVM networks your app supports, an array of one or more of `["ETHEREUM", "ARBITRUM", "BASE", "OPTIMISM", and "POLYGON"]`.
    * Defaults to `["ETHEREUM"]`.
+   * @deprecated Configure this setting in the Capsule Developer Portal.
    */
-  networks?: NetworkProp[];
+  networks?: deprecated__NetworkProp[];
+  /**
+   * Whether or not to run configured on-ramp providers in test mode.
+   */
+  onRampTestMode?: boolean;
   currentStepOverride?: ModalStepProp | undefined;
   /**
    * Whether or not to display just the modal without the overlay component.

@@ -60,15 +60,9 @@ export enum OAuthMethod {
   FARCASTER = 'FARCASTER',
 }
 
-export type NetworkProp = keyof typeof Network | Network;
+export type deprecated__NetworkProp = keyof typeof Network | Network;
 
 export type WalletTypeProp = keyof typeof WalletType | WalletType;
-
-export const WalletSchemeMap = {
-  DKLS: WalletScheme.DKLS,
-  CGGMP: WalletScheme.CGGMP,
-  ED25519: WalletScheme.ED25519,
-};
 
 export type WalletSchemeProp = keyof typeof WalletScheme | WalletScheme;
 
@@ -77,70 +71,20 @@ export type WalletFilters = {
   scheme?: WalletSchemeProp[];
   forbidPregen?: boolean;
 };
+export type deprecated__OnRampProviderProp = keyof typeof OnRampProvider | OnRampProvider;
 
-export const SupportedOnRamps: Partial<
-  Record<Network, Partial<Record<OnRampAsset, Partial<Record<OnRampProvider, boolean>>>>>
-> = {
-  [Network.ETHEREUM]: {
-    [OnRampAsset.ETHEREUM]: {
-      [OnRampProvider.RAMP]: true,
-      [OnRampProvider.STRIPE]: true,
-    },
-    [OnRampAsset.USDC]: {
-      [OnRampProvider.RAMP]: true,
-      [OnRampProvider.STRIPE]: true,
-    },
-  },
-  [Network.ARBITRUM]: {
-    [OnRampAsset.ETHEREUM]: {
-      [OnRampProvider.RAMP]: true,
-    },
-    [OnRampAsset.USDC]: {
-      [OnRampProvider.RAMP]: true,
-    },
-  },
-  [Network.BASE]: {
-    [OnRampAsset.ETHEREUM]: {
-      [OnRampProvider.RAMP]: true,
-    },
-    [OnRampAsset.USDC]: {
-      [OnRampProvider.RAMP]: true,
-    },
-  },
-  [Network.OPTIMISM]: {
-    [OnRampAsset.ETHEREUM]: {
-      [OnRampProvider.RAMP]: true,
-    },
-    [OnRampAsset.USDC]: {
-      [OnRampProvider.RAMP]: true,
-    },
-  },
-  [Network.POLYGON]: {
-    [OnRampAsset.POLYGON]: {
-      [OnRampProvider.RAMP]: true,
-      [OnRampProvider.STRIPE]: true,
-    },
-    [OnRampAsset.USDC]: {
-      [OnRampProvider.RAMP]: true,
-      [OnRampProvider.STRIPE]: true,
-    },
-  },
-};
-
-export type OnRampProviderProp = keyof typeof OnRampProvider | OnRampProvider;
-
-export type RampConfig = {
-  id: OnRampProviderProp;
+export type deprecated__RampConfig = {
+  id: deprecated__OnRampProviderProp;
   hostApiKey: string;
 };
 
-export type StripeConfig = {
-  id: OnRampProviderProp;
+export type deprecated__StripeConfig = {
+  id: deprecated__OnRampProviderProp;
 };
 
-export type OnRampAssetProp = keyof typeof OnRampAsset | OnRampAsset;
+export type deprecated__OnRampAssetProp = keyof typeof OnRampAsset | OnRampAsset;
 
-export type OnRampConfigProvider = RampConfig | StripeConfig;
+export type deprecated__OnRampConfigProvider = deprecated__RampConfig | deprecated__StripeConfig;
 
 export enum EnabledFlow {
   BUY = 'BUY',
@@ -148,9 +92,9 @@ export enum EnabledFlow {
   WITHDRAW = 'WITHDRAW',
 }
 
-export type EnabledFlowProp = keyof typeof EnabledFlow | EnabledFlow;
+export type deprecated__EnabledFlowProp = keyof typeof EnabledFlow | EnabledFlow;
 
-export type OnRampConfig = {
+export type deprecated__OnRampConfig = {
   /*
    * If true, uses testnet chains for any funds purchased and allows provider-specific test payment methods
    */
@@ -158,45 +102,18 @@ export type OnRampConfig = {
   /*
    * The on-chain asset to be purchased, passed to the chosen providers. Must be supported by the current user wallet.
    */
-  asset: OnRampAssetProp;
+  asset: deprecated__OnRampAssetProp;
   /*
    * The network on which to purchase the chosen asset. One of `['ETHEREUM', 'ARBITRUM', 'BASE', 'OPTIMISM', 'POLYGON']`. If the
    * network and asset combination does not exist or is not supported by your chosen providers, modal instantiation will fail.
    * Defaults to 'ETHEREUM'
    */
-  network: NetworkProp;
-  enabledFlows?: EnabledFlowProp[];
+  network: deprecated__NetworkProp;
+  enabledFlows?: deprecated__EnabledFlowProp[];
   /*
    * Array of objects in the form `{id: 'STRIPE' | 'RAMP'}`. If using `RAMP`, you must also provide your API key: `{ id: 'RAMP', hostApiKey: '...' }`
    */
-  providers: OnRampConfigProvider[];
-};
-
-export const OnRampProviderNetworkMap = {
-  [OnRampProvider.RAMP]: {
-    [Network.ETHEREUM]: 'ETH',
-    [Network.ARBITRUM]: 'ARBITRUM',
-    [Network.BASE]: 'BASE',
-    [Network.OPTIMISM]: 'OPTIMISM',
-    [Network.POLYGON]: 'MATIC',
-  },
-  [OnRampProvider.STRIPE]: {
-    [Network.ETHEREUM]: 'ethereum',
-    [Network.POLYGON]: 'polygon',
-  },
-};
-
-export const OnRampProviderAssetMap = {
-  [OnRampProvider.RAMP]: {
-    [OnRampAsset.ETHEREUM]: 'ETH',
-    [OnRampAsset.USDC]: 'USDC',
-    [OnRampAsset.POLYGON]: 'MATIC',
-  },
-  [OnRampProvider.STRIPE]: {
-    [OnRampAsset.ETHEREUM]: 'eth',
-    [OnRampAsset.USDC]: 'usdc',
-    [OnRampAsset.POLYGON]: 'matic',
-  },
+  providers: deprecated__OnRampConfigProvider[];
 };
 
 export enum OnRampMethod {
@@ -219,37 +136,6 @@ export const WalletSchemeTypeMap: Record<WalletScheme, Partial<Record<WalletType
     [WalletType.SOLANA]: true,
   },
 };
-
-export const getProviderNetworkAndAssetCode = (
-  networkProp: NetworkProp,
-  assetProp: OnRampAssetProp,
-  providerProp: OnRampProviderProp,
-  testMode = false,
-): [string, string?] => {
-  const [network, asset, provider] = [Network[networkProp], OnRampAsset[assetProp], OnRampProvider[providerProp]];
-  if (!SupportedOnRamps[network][asset][provider]) {
-    throw new Error(`Provider ${provider} does not support asset ${asset} on ${network}`);
-  }
-
-  switch (provider) {
-    case OnRampProvider.RAMP:
-      if (testMode) {
-        return ['SEPOLIA_ETH'];
-      }
-
-      return [`${OnRampProviderNetworkMap[provider][network]}_${OnRampProviderAssetMap[provider][asset]}`];
-    default:
-      return [OnRampProviderNetworkMap[provider][network], OnRampProviderAssetMap[provider][asset]];
-  }
-};
-
-export function getProviderAssetInverse(provider: OnRampProviderProp, asset: string): OnRampAsset {
-  const match = Object.entries(OnRampProviderAssetMap[OnRampProvider[provider]]).find(
-    ([, theirAssetCode]) => asset === theirAssetCode,
-  );
-
-  return match ? (match[0] as OnRampAsset) : undefined;
-}
 
 export function getPortalDomain(env: Environment) {
   switch (env) {
@@ -329,9 +215,9 @@ export function getOnRampAssets(
     network,
     allowed,
   }: {
-    walletType?: WalletTypeProp;
-    network?: NetworkProp;
-    allowed?: OnRampAssetProp[];
+    walletType?: WalletType;
+    network?: Network;
+    allowed?: OnRampAsset[];
   } = {},
 ): OnRampAsset[] {
   return [

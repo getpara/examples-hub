@@ -20,10 +20,7 @@ export const Account = ({ onClose }: AccountProps) => {
 
   const [isDisconnecting, setIsDisconnecting] = useState(false);
 
-  const isOnRampConfigured = !!onRampConfig;
-  const isAllFlows = isOnRampConfigured && !onRampConfig.enabledFlows;
-  const isBuyConfigured = isOnRampConfigured && (isAllFlows || onRampConfig.enabledFlows.includes(EnabledFlow.BUY));
-  const isReceiveConfigured = isOnRampConfigured && (isAllFlows || onRampConfig.enabledFlows.includes(EnabledFlow.RECEIVE));
+  const isOnRampLoaded = !!onRampConfig;
 
   const handleBuyClick = () => {
     setAccountAddFundTab(EnabledFlow.BUY);
@@ -47,19 +44,25 @@ export const Account = ({ onClose }: AccountProps) => {
     <StepContainer $wide>
       <InnerStepContainer>
         <ButtonContainer>
-          {isBuyConfigured && (
-            <OptionButton icon="creditCard" onClick={handleBuyClick}>
-              <CpslText variant="bodyXS" color="secondary" weight="medium">
-                Buy Crypto
-              </CpslText>
-            </OptionButton>
-          )}
-          {isReceiveConfigured && (
-            <OptionButton icon="qrCode02" onClick={handleReceiveClick}>
-              <CpslText variant="bodyXS" color="secondary" weight="medium">
-                Receive
-              </CpslText>
-            </OptionButton>
+          {isOnRampLoaded ? (
+            <>
+              {onRampConfig.isBuyEnabled && (
+                <OptionButton icon="creditCard" onClick={handleBuyClick}>
+                  <CpslText variant="bodyXS" color="secondary" weight="medium">
+                    Buy Crypto
+                  </CpslText>
+                </OptionButton>
+              )}
+              {onRampConfig.isReceiveEnabled && (
+                <OptionButton icon="qrCode02" onClick={handleReceiveClick}>
+                  <CpslText variant="bodyXS" color="secondary" weight="medium">
+                    Receive
+                  </CpslText>
+                </OptionButton>
+              )}
+            </>
+          ) : (
+            <CpslSpinner />
           )}
         </ButtonContainer>
         <DisconnectButton variant="destructive" fullWidth onClick={handleDisconnectClick} disabled={isDisconnecting}>
@@ -83,6 +86,7 @@ const ButtonContainer = styled.div`
   justify-content: center;
   gap: 8px;
   width: 100%;
+  height: 88px;
 `;
 
 const OptionButton = styled(StyledCpslTileButton)`

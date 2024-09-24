@@ -44,6 +44,7 @@ export const ON_RAMP_PROVIDERS: Record<OnRampProvider, OnRampProviderConfig> = {
 
 export const NETWORKS: Record<Network, string> = {
   [Network.ETHEREUM]: 'Ethereum',
+  [Network.SEPOLIA]: 'Sepolia',
   [Network.ARBITRUM]: 'Arbitrum',
   [Network.BASE]: 'Base',
   [Network.OPTIMISM]: 'Optimism',

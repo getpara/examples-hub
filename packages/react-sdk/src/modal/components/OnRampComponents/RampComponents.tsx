@@ -1,15 +1,9 @@
-import { useEffect } from 'react';
-import { AddingFunds } from './AddingFunds.js';
+import { useEffect, useRef } from 'react';
 import { RampInstantPurchase, RampInstantSDK } from '@ramp-network/ramp-instant-sdk';
-import {
-  OnRampProvider,
-  getPortalBaseURL,
-  getProviderAssetInverse,
-  getProviderNetworkAndAssetCode,
-} from '@usecapsule/web-sdk';
+import { Network, OnRampAsset, OnRampProvider, getPortalBaseURL } from '@usecapsule/web-sdk';
 import { useCapsuleStore, useModalStore, useThemeStore } from '../../stores/index.js';
 import { useGoBack } from '../../hooks/useGoBack.js';
-import { useActiveWallet } from '../../hooks/useActiveWallet.js';
+import { getCurrencyCodes, reverseCurrencyLookup } from '../../utils/onRamps.js';
 
 export const RampEmbed = ({ hostApiKey }: { hostApiKey: string }) => {
   const appName = useThemeStore(state => state.appName);
@@ -18,52 +12,65 @@ export const RampEmbed = ({ hostApiKey }: { hostApiKey: string }) => {
   const setOnRampPurchase = useModalStore(state => state.setOnRampPurchase);
   const capsule = useCapsuleStore(state => state.capsule);
   const goBack = useGoBack();
-  const activeWallet = useActiveWallet();
+  const swapAsset = onRampConfig.testMode
+    ? 'SEPOLIA_ETH'
+    : getCurrencyCodes(onRampConfig.assetInfo, {
+        provider: OnRampProvider.RAMP,
+        walletType: onRampPurchase.walletType,
+        allowedAssets: onRampConfig.allowedAssets,
+      }).join(',');
+
+  const isMounted = useRef(false);
 
   useEffect(() => {
-    const defaultAsset = getProviderNetworkAndAssetCode(
-      onRampConfig.network,
-      onRampConfig.asset,
-      OnRampProvider.RAMP,
-      onRampConfig.testMode,
-    )[0];
+    if (!isMounted.current) {
+      try {
+        const widget = new RampInstantSDK({
+          hostAppName: appName,
+          swapAsset,
+          hostLogoUrl: `${getPortalBaseURL(capsule.ctx)}/wordmark_black.svg`,
+          hostApiKey,
+          userAddress: onRampPurchase.address,
+          userEmailAddress: capsule.getEmail(),
+          url: onRampConfig?.testMode ? 'https://app.demo.ramp.network' : 'https://app.ramp.network',
+          enabledFlows: ['ONRAMP'],
+          variant: 'embedded-mobile',
+          containerNode: document.getElementById('ramp-container'),
+        })
+          .on('PURCHASE_CREATED' as unknown as '*', async e => {
+            const p = (e as { payload: { purchase: RampInstantPurchase } }).payload.purchase;
 
-    const widget = new RampInstantSDK({
-      hostAppName: appName,
-      defaultAsset,
-      hostLogoUrl: `${getPortalBaseURL(capsule.ctx)}/wordmark_black.svg`,
-      hostApiKey,
-      userAddress: capsule.getDisplayAddress(activeWallet.id, { addressType: activeWallet.type }),
-      userEmailAddress: capsule.getEmail(),
-      url: onRampConfig?.testMode ? 'https://app.demo.ramp.network' : 'https://app.ramp.network',
-      enabledFlows: ['ONRAMP'],
-    })
-      .on('PURCHASE_CREATED' as unknown as '*', async e => {
-        const p = (e as { payload: { purchase: RampInstantPurchase } }).payload.purchase;
+            const [network, asset] = onRampConfig.testMode
+              ? [Network.ETHEREUM, OnRampAsset.ETHEREUM]
+              : reverseCurrencyLookup(onRampConfig.assetInfo, OnRampProvider.RAMP, p.asset.symbol) || [];
 
-        const updated = await capsule.updateOnRampPurchase({
-          walletId: onRampPurchase.walletId,
-          externalWalletAddress: onRampPurchase.externalWalletAddress,
-          purchaseId: onRampPurchase.id,
-          updates: {
-            providerKey: p.id,
-            fiatQuantity: p.fiatValue,
-            fiatCurrency: p.fiatCurrency,
-            asset: getProviderAssetInverse(OnRampProvider.RAMP, p.asset.symbol),
-            assetQuantity: p.cryptoAmount,
-          },
-        });
+            const updated = await capsule.updateOnRampPurchase({
+              walletId: onRampPurchase.walletId,
+              externalWalletAddress: onRampPurchase.externalWalletAddress,
+              purchaseId: onRampPurchase.id,
+              updates: {
+                providerKey: p.id,
+                fiatQuantity: p.fiatValue,
+                fiatCurrency: p.fiatCurrency,
+                assetQuantity: p.cryptoAmount,
+                asset,
+                network,
+              },
+            });
 
-        setOnRampPurchase(updated);
-      })
-      .on('WIDGET_CLOSE' as unknown as '*', async () => {
-        goBack();
-      });
+            setOnRampPurchase(updated);
+          })
+          .on('WIDGET_CLOSE' as unknown as '*', async () => {
+            goBack();
+          });
 
-    widget.show();
-
-    widget.domNodes.overlay.style.zIndex = '2147483647';
+        widget.show();
+        isMounted.current = true;
+      } catch (e) {
+        console.error(e);
+      }
+    }
   }, []);
 
-  return <AddingFunds />;
+  return <div id="ramp-container" style={{ minWidth: '320px', width: '100%', height: '767px' }} />;
 };

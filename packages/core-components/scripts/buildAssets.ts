@@ -17,7 +17,7 @@ const buildIconLibrary = () => {
   let flagFiles = fs.readdirSync('./src/assets/icons/flags');
 
   let importString = '';
-  let objString = 'export const Icons = {';
+  let objString = `export const Icons = {`;
 
   for (const fileName of files) {
     if (!fileName.includes('.svg')) {
@@ -29,8 +29,8 @@ const buildIconLibrary = () => {
     const camelCaseFileName = toCamelCase(fileNameNoExt);
     const pascalCaseFileName = toPascalCase(fileNameNoExt);
 
-    importString += `import ${pascalCaseFileName} from './${fileName}';`;
-    objString += `${camelCaseFileName}: ${pascalCaseFileName},`;
+    importString += `import ${pascalCaseFileName} from './${fileName}';\n`;
+    objString += `\n  ${camelCaseFileName}: ${pascalCaseFileName},`;
   }
 
   for (const fileName of flagFiles) {
@@ -43,11 +43,11 @@ const buildIconLibrary = () => {
     const camelCaseFileName = toCamelCase(fileNameNoExt);
     const pascalCaseFileName = toPascalCase(fileNameNoExt);
 
-    importString += `import ${pascalCaseFileName} from './flags/${fileName}';`;
-    objString += `${camelCaseFileName}: ${pascalCaseFileName},`;
+    importString += `import ${pascalCaseFileName} from './flags/${fileName}';\n`;
+    objString += `\n  ${camelCaseFileName}: ${pascalCaseFileName},`;
   }
 
-  const codeStr = `${importString}\n${objString}}`;
+  const codeStr = `${importString}\n${objString}\n};\n`;
   fs.writeFile('./src/assets/icons/index.ts', codeStr, 'utf8', err => {
     if (err) {
       console.error(err);
@@ -58,7 +58,7 @@ const buildIconLibrary = () => {
 const buildImages = async () => {
   const files: string[] = fs.readdirSync('./src/assets/images');
 
-  let objString = 'export const Images = {';
+  let objString = 'export const Images = {\n';
 
   for (let i = 0; i < files.length; i++) {
     const fileName = files[i];
@@ -77,10 +77,10 @@ const buildImages = async () => {
 
     const dataUrl = `data:image/${ext};base64,${content}`;
 
-    objString += `${camelCaseFileName}: "${dataUrl}",`;
+    objString += `  ${camelCaseFileName}:\n    '${dataUrl}',\n`;
   }
 
-  fs.writeFile('./src/assets/images/index.ts', `${objString}}`, 'utf8', err => {
+  fs.writeFile('./src/assets/images/index.ts', `${objString}};\n`, 'utf8', err => {
     if (err) {
       console.error(err);
     }

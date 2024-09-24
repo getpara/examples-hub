@@ -1,14 +1,29 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { OnrampSession, OnrampSessionResult, StripeOnramp, loadStripeOnramp } from '@stripe/crypto';
 import { useCapsuleStore, useModalStore, useThemeStore } from '../../stores/index.js';
-import { OnRampProvider, OnRampPurchaseStatus, getProviderAssetInverse } from '@usecapsule/web-sdk';
+import { Network, OnRampAsset, OnRampProvider, OnRampPurchaseStatus } from '@usecapsule/web-sdk';
 import { CpslSpinner } from '@usecapsule/react-components';
 import { SpinnerContainer } from '../common.js';
+import styled from 'styled-components';
 
 export const STRIPE_PUBLISHABLE_KEY =
   'pk_live_51MvquNGrzDeP5yP9EgVSMBPQbrbg0oHDjPIIXypePd0jzOFjbadyfO7wBKLHhUtbKIUiEUVC3YYcTJyAmJ8xA7JE00T2UDfYKz';
 export const STRIPE_PUBLISHABLE_KEY_TEST =
   'pk_test_51MvquNGrzDeP5yP98WgPaAUgQ50I3OpfPhVfiLO47FBHepJnZRPO62IzZY2uxT5ovhSS10RwcTcnaVil1mcJOzIi00dHapODdS';
+
+const AssetCodes = {
+  eth: OnRampAsset.ETHEREUM,
+  matic: OnRampAsset.POLYGON,
+  sol: OnRampAsset.SOLANA,
+  usdc: OnRampAsset.USDC,
+};
+
+const NetworkCodes = {
+  base: Network.BASE,
+  ethereum: Network.ETHEREUM,
+  polygon: Network.POLYGON,
+  solana: Network.SOLANA,
+};
 
 const CryptoElementsContext = React.createContext(null);
 CryptoElementsContext.displayName = 'CryptoElementsContext';
@@ -91,7 +106,8 @@ export const StripeEmbed = () => {
               status: OnRampPurchaseStatus.FINISHED,
               fiatQuantity: session.quote.source_amount,
               fiatCurrency: session.quote.source_currency.asset_code,
-              asset: getProviderAssetInverse(OnRampProvider.STRIPE, session.quote.destination_currency.asset_code),
+              network: NetworkCodes[session.quote.destination_currency.currency_network],
+              asset: AssetCodes[session.quote.destination_currency.asset_code],
               assetQuantity: session.quote.destination_amount,
               providerKey: null,
             },
@@ -111,13 +127,32 @@ export const StripeEmbed = () => {
   useOnrampSessionListener('onramp_session_updated', session, onSessionChange);
 
   return (
-    <div style={{ minHeight: '480px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ display: isReady ? 'block' : 'none' }} ref={onrampElementRef}></div>
+    <OuterContainer>
+      <Container isReady={isReady} ref={onrampElementRef} />
       {!isReady && (
-        <SpinnerContainer style={{ width: '100%', height: '100%' }}>
+        <SpinnerContainer style={{ width: '100%', height: '100%', flex: 1 }}>
           <CpslSpinner size={100} />
         </SpinnerContainer>
       )}
-    </div>
+    </OuterContainer>
   );
 };
+
+const OuterContainer = styled.div`
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+`;
+
+const Container = styled.div<{ isReady: boolean }>`
+  height: 100%;
+  width: 100%;
+  display: ${({ isReady }) => (isReady ? 'block' : 'none')};
+
+  & > iframe {
+    height: 100%;
+  }
+`;

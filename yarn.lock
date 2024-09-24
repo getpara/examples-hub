@@ -5543,7 +5543,7 @@
     unbzip2-stream "1.4.3"
     yargs "17.7.2"
 
-"@ramp-network/ramp-instant-sdk@^4.0.2":
+"@ramp-network/ramp-instant-sdk@^4.0.5":
   version "4.0.5"
   resolved "https://registry.yarnpkg.com/@ramp-network/ramp-instant-sdk/-/ramp-instant-sdk-4.0.5.tgz#4477acfc04e3b18d40a47aecd2b716ae349cd9ca"
   integrity sha512-iQubpyGSy4wy/Pg7nZPclVOB+/edgAhmN1RUh9l+Ry+NbnUNu9e3c8x5o5hOHl//J1m0Roj+hKRt0qRVmWdNHA==

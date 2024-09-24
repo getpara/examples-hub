@@ -29,9 +29,6 @@ import {
   OAuthMethod,
   WalletFilters,
   WalletTypeProp,
-  NetworkProp,
-  OnRampAssetProp,
-  OnRampProviderProp,
 } from './definitions.js';
 import { getBaseUrl, initClient } from './external/capsuleClient.js';
 import * as mpcComputationClient from './external/mpcComputationClient.js';
@@ -42,10 +39,6 @@ import { PlatformUtils } from './PlatformUtils.js';
 import { sendRecoveryForShare } from './shares/recovery.js';
 import parsePhoneNumberFromString, { CountryCallingCode } from 'libphonenumber-js';
 import { getCosmosAddress, isCosmosWithPrefix, truncateAddress } from './utils/formattingUtils.js';
-
-// amount of time in ms that a web auth session lasts
-const BIOMETRIC_VERIFICATION_TIME_MS = 30 * 60 * 1000;
-const DEV_BIOMETRIC_VERIFICATION_TIME_MS = 60 * 60 * 1000;
 
 const CORE_CAPSULE_VERSION = process.env.CORE_CAPSULE_VERSION;
 
@@ -226,13 +219,6 @@ const LOCAL_STORAGE_SESSION_COOKIE = `${PREFIX}sessionCookie`;
 const SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR = `${PREFIX}loginEncryptionKeyPair`;
 const POLLING_INTERVAL_MS = 2000;
 const SHORT_POLLING_INTERVAL_MS = 1000;
-
-function biometricVerifiedRecently(ctx: Ctx, verifiedAt: number): boolean {
-  if (ctx.env !== Environment.PROD) {
-    return Date.now() - verifiedAt <= DEV_BIOMETRIC_VERIFICATION_TIME_MS;
-  }
-  return Date.now() - verifiedAt <= BIOMETRIC_VERIFICATION_TIME_MS;
-}
 
 export function stringToPhoneNumber(str: string): string {
   return parsePhoneNumberFromString(str)
@@ -925,10 +911,21 @@ export abstract class CoreCapsule {
    * @param externalAddress - External wallet address to set.
    * @param externalType - Type of external wallet to set.
    */
-  async setExternalWallet(externalAddress: string, externalType: ExternalWalletType): Promise<void> {
+  async setExternalWallet(
+    externalAddress: string,
+    externalType: ExternalWalletType,
+    externalWalletProvider?: string,
+  ): Promise<void> {
     // Can change this to continue storing existing external wallets if/when we want to allow multiple connected external wallets
     this.externalWallets = {
-      [externalAddress]: { id: externalAddress, address: externalAddress, type: externalType, isExternal: true, signer: '' },
+      [externalAddress]: {
+        id: externalAddress,
+        address: externalAddress,
+        type: externalType,
+        name: externalWalletProvider,
+        isExternal: true,
+        signer: '',
+      },
     };
     this.currentExternalWalletAddresses = [externalAddress];
     this.setCurrentExternalWalletAddresses(this.currentExternalWalletAddresses);
@@ -1236,17 +1233,17 @@ export abstract class CoreCapsule {
   }
 
   private async getCommonQueryParams(partnerId?: string, isForNewDevice?: boolean): Promise<string> {
-    const partner = (await this.ctx.capsuleClient.getPartner(partnerId)).data;
+    const partner = partnerId ? (await this.ctx.capsuleClient.getPartner(partnerId)).data : undefined;
 
     return toQueryString({
       apiKey: this.ctx.apiKey,
       partnerId,
-      portalFont: partner.font,
+      portalFont: partner?.font,
       portalBorderRadius: this.portalTheme?.borderRadius,
       portalThemeMode: this.portalTheme?.mode,
       portalAccentColor: this.portalTheme?.accentColor,
-      portalForegroundColor: partner.foregroundColor || this.portalTheme?.foregroundColor,
-      portalBackgroundColor: partner.backgroundColor || this.portalBackgroundColor || this.portalTheme?.backgroundColor,
+      portalForegroundColor: partner?.foregroundColor || this.portalTheme?.foregroundColor,
+      portalBackgroundColor: partner?.backgroundColor || this.portalBackgroundColor || this.portalTheme?.backgroundColor,
       portalPrimaryButtonColor: this.portalPrimaryButtonColor,
       portalTextColor: this.portalTextColor,
       portalPrimaryButtonTextColor: this.portalPrimaryButtonTextColor,
@@ -1476,7 +1473,7 @@ export abstract class CoreCapsule {
       type,
       externalWalletProvider,
     });
-    await this.setExternalWallet(externalAddress, type);
+    await this.setExternalWallet(externalAddress, type, externalWalletProvider);
     await this.setUserId(userId);
   }
 
@@ -1633,9 +1630,13 @@ export abstract class CoreCapsule {
   // TODO: consider changing this to just hit a new endpoint that returns
   //   true/false if session is active
   async isSessionActive(): Promise<boolean> {
+    if (this.isUsingExternalWallet()) {
+      return true;
+    }
+
     const res = await this.ctx.capsuleClient.touchSession();
 
-    return res.data.biometricVerifiedAt && biometricVerifiedRecently(this.ctx, res.data.biometricVerifiedAt);
+    return !!res.data.isAuthenticated;
   }
 
   /**
@@ -2345,7 +2346,6 @@ export abstract class CoreCapsule {
         newPartnerId: wallet.partnerId,
         redistributeBackupEncryptedShares: true,
       });
-
       if (recoverySecret) {
         newRecoverySecret = recoverySecret;
       }
@@ -2607,17 +2607,19 @@ export abstract class CoreCapsule {
    **/
   async createOnRampPurchase({
     provider,
-    network,
-    asset,
+    networks,
+    assets,
     testMode = false,
     walletId,
+    walletType,
     externalWalletAddress,
   }: {
-    provider: OnRampProviderProp;
-    network: NetworkProp;
-    asset: OnRampAssetProp;
+    provider: OnRampProvider;
+    networks: Network[] | 'all';
+    assets: OnRampAsset[] | 'all';
     testMode: boolean;
     walletId?: string;
+    walletType?: WalletType;
     externalWalletAddress?: string;
   }): Promise<OnRampPurchase> {
     if ((!walletId && !externalWalletAddress) || (!!walletId && !!externalWalletAddress)) {
@@ -2628,9 +2630,10 @@ export abstract class CoreCapsule {
       userId: this.getUserId(),
       walletId,
       externalWalletAddress,
-      provider: OnRampProvider[provider],
-      network: Network[network],
-      asset: OnRampAsset[asset],
+      walletType,
+      provider,
+      networks,
+      assets,
       testMode,
     });
 
@@ -2657,7 +2660,10 @@ export abstract class CoreCapsule {
     externalWalletAddress?: string;
     purchaseId: string;
     updates: Partial<
-      Pick<OnRampPurchase, 'status' | 'fiatCurrency' | 'fiatQuantity' | 'asset' | 'assetQuantity' | 'providerKey'>
+      Pick<
+        OnRampPurchase,
+        'status' | 'fiatCurrency' | 'fiatQuantity' | 'asset' | 'network' | 'assetQuantity' | 'providerKey'
+      >
     >;
   }): Promise<OnRampPurchase> {
     if (!walletId && !externalWalletAddress) {

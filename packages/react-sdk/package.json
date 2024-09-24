@@ -12,7 +12,7 @@
     "*.css"
   ],
   "dependencies": {
-    "@ramp-network/ramp-instant-sdk": "^4.0.2",
+    "@ramp-network/ramp-instant-sdk": "^4.0.5",
     "@stripe/crypto": "^0.0.4",
     "@stripe/stripe-js": "^3.4.0",
     "@usecapsule/react-components": "3.5.1",

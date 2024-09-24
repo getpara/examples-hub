@@ -15,6 +15,8 @@ export {
   WalletType,
   WalletScheme,
   OnRampPurchaseType,
+  type OnRampConfig,
+  type OnRampAllowedAssets,
   NON_ED25519,
 } from '@usecapsule/user-management-client';
 export * from './definitions.js';

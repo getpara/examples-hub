@@ -265,6 +265,7 @@ export const KeyType = {
 
 export enum Network {
   ETHEREUM = 'ETHEREUM',
+  SEPOLIA = 'SEPOLIA',
   ARBITRUM = 'ARBITRUM',
   BASE = 'BASE',
   OPTIMISM = 'OPTIMISM',
@@ -303,7 +304,9 @@ export interface OnRampPurchase {
   id: string;
   userId: string;
   walletId?: string | null;
+  walletType: WalletType;
   externalWalletAddress?: string | null;
+  address?: string | null;
   status: OnRampPurchaseStatus;
   provider: OnRampProvider;
   providerKey?: string | null;
@@ -311,7 +314,27 @@ export interface OnRampPurchase {
   fiatQuantity?: string | null;
   asset: OnRampAsset;
   assetQuantity?: string | null;
+  network?: Network | null;
 }
+
+type ProviderAssetInfo = [string, Partial<Record<OnRampPurchaseType, boolean>>];
+
+export type OnRampAssetInfo = Record<
+  WalletType,
+  Partial<Record<Network, Partial<Record<OnRampAsset, Partial<Record<OnRampProvider, ProviderAssetInfo>>>>>>
+>;
+
+export type OnRampAllowedAssets = Partial<Record<Network, true | OnRampAsset[]>>;
+
+export type OnRampConfig = {
+  isBuyEnabled: boolean;
+  isReceiveEnabled: boolean;
+  isWithdrawEnabled: boolean;
+  assetInfo: OnRampAssetInfo;
+  providers: OnRampProvider[];
+  allowedAssets?: OnRampAllowedAssets;
+  rampApiKey?: string;
+};
 
 const SESSION_COOKIE_HEADER_NAME = 'x-capsule-sid';
 const VERSION_HEADER_NAME = 'x-capsule-version';
@@ -843,31 +866,40 @@ class Client {
     return res;
   }
 
+  async getOnRampConfig() {
+    const res = await this.baseRequest.get<OnRampConfig>(`/on-ramp-config`);
+    return res.data;
+  }
+
   async createOnRampPurchase({
     userId,
     walletId,
     externalWalletAddress,
+    walletType,
     provider,
-    network,
-    asset,
+    networks,
+    assets,
     testMode = false,
   }: {
     userId: string;
     walletId?: string;
     externalWalletAddress?: string;
+    walletType: WalletType;
+    networks: Network[] | 'all';
+    assets: OnRampAsset[] | 'all';
     provider: OnRampProvider;
-    network: Network;
-    asset: OnRampAsset;
     testMode: boolean;
   }) {
     const walletString = walletId ? `wallets/${walletId}` : `external-wallets/${externalWalletAddress}`;
 
     const res = await this.baseRequest.post<OnRampPurchase>(`/users/${userId}/${walletString}/purchases`, {
       provider,
-      network,
-      asset,
+      walletType,
+      networks,
+      assets,
       testMode,
     });
+
     return res;
   }
 
@@ -882,7 +914,7 @@ class Client {
     walletId?: string;
     externalWalletAddress?: string;
     purchaseId: string;
-    updates: Partial<Pick<OnRampPurchase, 'status' | 'fiatCurrency' | 'fiatQuantity' | 'providerKey'>>;
+    updates: Partial<Pick<OnRampPurchase, 'asset' | 'network' | 'status' | 'fiatCurrency' | 'fiatQuantity' | 'providerKey'>>;
   }) {
     const walletString = walletId ? `wallets/${walletId}` : `external-wallets/${externalWalletAddress}`;
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import capsule from '../clients/capsule';
-import { CapsuleModal, EnabledFlow, Network, OnRampAsset, OnRampProvider } from '@usecapsule/react-sdk';
+import { CapsuleModal } from '@usecapsule/react-sdk';
 import { SolanaProfile } from './SolanaProfile';
 import { CpslButton } from '@usecapsule/react-components';
 import styled from 'styled-components';
@@ -8,8 +8,6 @@ import { EvmProfile } from './EvmProfile';
 import { CosmosProfile } from './CosmosProfile';
 import { ModalConfig } from './ModalConfig/ModalConfig';
 import { useModalStateStore } from '../stores/modalStateStore/useModalStateStore';
-
-const DEFAULT_RAMP_HOST_API_KEY = '7t45dxm7yhho7fr9u4b9k8nv9gvczansfu8zt9pm';
 
 export const Content = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -22,7 +20,6 @@ export const Content = () => {
   const accentColor = useModalStateStore(state => state.accentColor);
   const mode = useModalStateStore(state => state.mode);
   const logo = useModalStateStore(state => state.logo);
-
   const checkIsLoggedIn = async () => {
     const isLoggedIn = await capsule.isFullyLoggedIn();
     setIsLoggedIn(isLoggedIn);
@@ -67,13 +64,7 @@ export const Content = () => {
         }}
         logo={logo}
         appName="Capsule External Wallet Example"
-        onRampConfig={{
-          testMode: true,
-          network: Network.ETHEREUM,
-          asset: OnRampAsset.ETHEREUM,
-          providers: [{ id: OnRampProvider.STRIPE }, { id: OnRampProvider.RAMP, hostApiKey: DEFAULT_RAMP_HOST_API_KEY }],
-          enabledFlows: [EnabledFlow.BUY, EnabledFlow.RECEIVE],
-        }}
+        onRampTestMode={true}
       />
     </Container>
   );

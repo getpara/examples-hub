@@ -54,6 +54,11 @@ export class CpslInput {
   @Prop() autofocus = false;
 
   /**
+   * If `true`, the input's entire contents will be selected on focus.
+   */
+  @Prop() autoselect = false;
+
+  /**
    * If `true`, the user cannot interact with the input.
    */
   @Prop() disabled = false;
@@ -363,6 +368,8 @@ export class CpslInput {
   private onFocus = (ev: FocusEvent) => {
     this.hasFocus = true;
     this.focusedValue = this.value;
+
+    this.autoselect && (ev.target as HTMLInputElement).select();
 
     this.cpslFocus.emit(ev);
   };

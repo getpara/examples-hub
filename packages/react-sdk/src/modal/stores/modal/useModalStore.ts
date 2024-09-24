@@ -2,13 +2,14 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { ModalStep } from '../../utils/steps.js';
 import { getActions } from './actions.js';
-import { Network, OnRampConfig, OnRampPurchase, WalletType } from '@usecapsule/web-sdk';
+import { Network, OnRampConfig as OnRampConfigBase, OnRampPurchase, WalletType } from '@usecapsule/web-sdk';
 import { Tab as AddFundsTabType } from '../../components/AddFunds/AddFunds.js';
 
 type Flow = 'login' | 'signUp' | 'account';
 
 type ActiveWallet = [string | undefined, WalletType | undefined];
 
+export type OnRampConfig = OnRampConfigBase & { testMode?: boolean };
 export interface OnModalStepChangeValue {
   previousStep: ModalStep;
   currentStep: ModalStep;
@@ -98,7 +99,6 @@ export const useModalStore = create<ModalStore>()(
         step: state.step,
         webAuthURLForLogin: state.webAuthURLForLogin,
         webAuthURLForCreate: state.webAuthURLForCreate,
-        onRampConfig: state.onRampConfig,
         onRampPurchase: state.onRampPurchase,
         networks: state.networks,
         selectedExternalWalletId: state.selectedExternalWalletId,

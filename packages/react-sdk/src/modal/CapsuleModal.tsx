@@ -7,7 +7,7 @@ import { ModalStep } from './utils/steps.js';
 import { AuthLayout, CapsuleModalHandle, CapsuleModalProps } from './types/modalProps.js';
 import { DEFAULTS } from './constants/defaults.js';
 import { useGoBack } from './hooks/useGoBack.js';
-import { CURRENT_WALLET_IDS_CHANGE_EVENT, EXTERNAL_WALLET_CHANGE_EVENT, Network } from '@usecapsule/web-sdk';
+import { CURRENT_WALLET_IDS_CHANGE_EVENT, EXTERNAL_WALLET_CHANGE_EVENT } from '@usecapsule/web-sdk';
 import { ExternalWalletsWrapper } from './components/ExternalWalletsWrapper/ExternalWalletsWrapper.js';
 import { CountryCallingCode } from 'libphonenumber-js';
 import styled from 'styled-components';
@@ -27,8 +27,6 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
       oAuthMethods,
       bareModal = false,
       className,
-      onRampConfig,
-      networks,
       currentStepOverride,
       externalWallets,
       authLayout = [AuthLayout.AUTH_FULL, AuthLayout.EXTERNAL_FULL],
@@ -45,8 +43,6 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
     const currentStep = useModalStore(state => state.step);
     const setOnModalStepChange = useModalStore(state => state.setOnModalStepChange);
-    const setOnRampConfig = useModalStore(state => state.setOnRampConfig);
-    const setNetworks = useModalStore(state => state.setNetworks);
     const setStep = useModalStore(state => state.setStep);
     const setCapsule = useCapsuleStore(state => state.setCapsule);
     const setIdentifier = useUserInfoStore(state => state.setIdentifier);
@@ -131,14 +127,6 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     useEffect(() => {
       setOnModalStepChange(onModalStepChange);
     }, [onModalStepChange]);
-
-    useEffect(() => {
-      setOnRampConfig(onRampConfig);
-    }, [onRampConfig]);
-
-    useEffect(() => {
-      setNetworks(networks ? networks.map(n => Network[n]) : undefined);
-    }, [networks]);
 
     useEffect(() => {
       updateThemeState({ logo, appName, oAuthLogoVariant: theme?.oAuthLogoVariant ?? 'default', bareModal, embeddedModal });

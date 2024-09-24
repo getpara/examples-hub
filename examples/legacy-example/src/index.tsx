@@ -2,20 +2,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
 import ReactDOM from 'react-dom/client';
-import {
-  Box,
-  Button,
-  ChakraProvider,
-  Checkbox,
-  Container,
-  Flex,
-  HStack,
-  IconButton,
-  Input,
-  Select,
-  Text,
-  VStack,
-} from '@chakra-ui/react';
+import { Box, Button, ChakraProvider, Checkbox, Container, HStack, Input, Select, Text, VStack } from '@chakra-ui/react';
 import { useDebounce } from 'use-debounce';
 import Web3 from 'web3';
 import { http, parseEther } from 'viem';
@@ -40,18 +27,7 @@ import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
 import * as solana from '@solana/web3.js';
 import Capsule, { isCosmosWithPrefix } from '@usecapsule/web-sdk';
-import {
-  CapsuleModal,
-  OAuthMethod,
-  ON_RAMP_PROVIDERS,
-  NETWORKS,
-  validateOnRampConfig,
-  OnRampConfigError,
-  openPopup,
-  ModalStep,
-  ModalStepProp,
-  ExternalWallet,
-} from '@usecapsule/react-sdk';
+import { CapsuleModal, OAuthMethod, openPopup, ModalStep, ModalStepProp, ExternalWallet } from '@usecapsule/react-sdk';
 import { FeeMarketEIP1559Transaction } from '@ethereumjs/tx';
 import { CapsuleProtoSigner } from '@usecapsule/cosmjs-v0-integration';
 import { CapsuleEthersSigner } from '@usecapsule/ethers-v6-integration';
@@ -62,22 +38,14 @@ import CoreCapsule, {
   ConstructorOpts,
   DeniedSignatureResWithUrl,
   PregenIdentifierType,
-  OnRampConfig,
-  OnRampAsset,
-  OnRampProvider,
-  OnRampProviderAssetMap,
   getBaseUrl,
   TransactionReviewError,
-  Network,
   SupportedWalletTypes,
   WalletType,
-  EnabledFlow,
-  EnabledFlowProp,
 } from '@usecapsule/core-sdk';
 import { CapsuleSolanaWeb3Signer } from '@usecapsule/solana-web3.js-v1-integration';
 import { FONT_OPTIONS } from './constants';
 import '@usecapsule/react-sdk/styles.css';
-import { ArrowUpIcon, ArrowDownIcon, SmallCloseIcon, AddIcon } from '@chakra-ui/icons';
 import { stringToPhoneNumber } from '@usecapsule/core-sdk';
 import { ArrayField } from './array';
 
@@ -87,17 +55,6 @@ interface Partner {
   name: string;
   displayName: string;
 }
-
-const ON_RAMP_ASSETS = {
-  [OnRampAsset.ETHEREUM]: 'Ethereum',
-  [OnRampAsset.USDC]: 'USDC',
-  [OnRampAsset.POLYGON]: 'Polygon',
-};
-
-const ENABLED_FLOWS = {
-  BUY: 'Buy',
-  RECEIVE: 'Receive',
-};
 
 // sample transaction params
 const DEFAULT_TO_ADDRESS = '0x42c9a72c9dfcc92cae0de9510160cea2da27af91';
@@ -141,14 +98,6 @@ const DEFAULT_CONTRACT_ABI = [
 ];
 const DEFAULT_SMART_CONTRACT_FUNCTION = 'store';
 const DEFAULT_SMART_CONTRACT_ARGS = ['808'];
-const DEFAULT_RAMP_HOST_API_KEY = '7t45dxm7yhho7fr9u4b9k8nv9gvczansfu8zt9pm';
-const DEFAULT_ONRAMP_CONFIG = {
-  testMode: true,
-  network: Network.ETHEREUM,
-  asset: OnRampAsset.ETHEREUM,
-  providers: [{ id: OnRampProvider.STRIPE }, { id: OnRampProvider.RAMP, hostApiKey: DEFAULT_RAMP_HOST_API_KEY }],
-};
-const DEFAULT_NETWORKS = ['ETHEREUM', 'BASE'];
 const COSMOS_TESTNET_RPC = 'wss://rpc.sentry-01.theta-testnet.polypore.xyz';
 const COSMOS_DEFAULT_TO_ADDRESS = 'cosmos1f3px9t4juk43cwufj7f9s64z3wj7xvyc0rexg6';
 const web3 = new Web3();
@@ -561,14 +510,7 @@ function App() {
     { EVM: {} },
   );
   const [externalWallets, setExternalWallets] = useLocalStorage('@EXAMPLE-CAPSULE/externalWallets', []);
-  const [useOnRampConfig, setUseOnRampConfig] = useLocalStorage('@EXAMPLE-CAPSULE/useOnRampConfig', true);
-  const [onRampConfig, setOnRampConfig] = useLocalStorage<OnRampConfig | undefined>(
-    '@EXAMPLE-CAPSULE/onRampConfig',
-    DEFAULT_ONRAMP_CONFIG,
-  );
-  const [enabledFlows, setEnabledFlows] = useLocalStorage<EnabledFlow[]>(`@EXAMPLE-CAPSULE/enabledFlows`, []);
-  const [onRampConfigError, setOnRampConfigError] = useState<OnRampConfigError | undefined>();
-  const [networks, setNetworks] = useState<Network[]>(DEFAULT_NETWORKS);
+  const [onRampTestMode, setOnRampTestMode] = useLocalStorage('@EXAMPLE-CAPSULE/onRampTestMode', true);
 
   const [pregenEmail, setPregenEmail] = useState('');
   const [pregenPhone, setPregenPhone] = useState('');
@@ -677,15 +619,6 @@ function App() {
   }, [selectedEnv]);
 
   useEffect(() => {
-    try {
-      validateOnRampConfig(onRampConfig);
-      setOnRampConfigError(undefined);
-    } catch (e) {
-      setOnRampConfigError(e as OnRampConfigError);
-    }
-  }, [onRampConfig]);
-
-  useEffect(() => {
     if (partners) {
       const partner = partners.find(({ apiKey }) => selectedApiKey === apiKey);
       if (partner && Object.keys(THEMES).includes(partner.name)) {
@@ -706,6 +639,8 @@ function App() {
         setBackgroundColor(themeBackgroundColor);
         setBorderRadius(themeBorderRadius);
         setLogoVariant(themeLogoVariant);
+      } else {
+        setUseTheme(false);
       }
     }
   }, [selectedApiKey, partners]);
@@ -1025,7 +960,6 @@ function App() {
                   ))}
                 </VStack>
               </HStack>
-
               <HStack>
                 <Text width={'15%'}>
                   <strong>External Wallets:</strong>
@@ -1039,242 +973,10 @@ function App() {
               </HStack>
               <HStack>
                 <Text width={'15%'}>
-                  <strong>On-Ramp Configuration:</strong>
+                  <strong>On-Ramp Test Mode:</strong>
                 </Text>
-                <Checkbox isChecked={useOnRampConfig} onChange={e => setUseOnRampConfig(e.currentTarget.checked)} />
+                <Checkbox isChecked={onRampTestMode} onChange={e => setOnRampTestMode(e.currentTarget.checked)} />
               </HStack>
-              {useOnRampConfig && (
-                <VStack align="left" ml="40px" opacity={useTheme ? 1 : 0.8}>
-                  <HStack>
-                    <Text width={'15%'}>
-                      <strong>Test Mode:</strong>
-                    </Text>
-                    <Checkbox
-                      isChecked={onRampConfig.testMode}
-                      onChange={e => setOnRampConfig(prev => ({ ...prev, testMode: e.currentTarget.checked }))}
-                    />
-                  </HStack>
-                  <HStack>
-                    <Text width={'15%'}>
-                      <strong>Enabled Flows:</strong>
-                    </Text>
-                    <ArrayField<EnabledFlowProp>
-                      value={enabledFlows}
-                      onChange={setEnabledFlows}
-                      rowTitle={id => ENABLED_FLOWS[id]}
-                      remaining={Object.keys(ENABLED_FLOWS).filter(key => !enabledFlows.includes(key))}
-                    />
-                  </HStack>
-                  <HStack>
-                    <Text width={'15%'}>
-                      <strong>Destination Network:</strong>
-                    </Text>
-                    <Select
-                      defaultValue={onRampConfig.network}
-                      onChange={e => setOnRampConfig(prev => ({ ...prev, network: e.target.value as OnRampAsset }))}
-                    >
-                      {Object.entries(NETWORKS).map(([id, name]) => (
-                        <option key={id} value={id}>
-                          {name}
-                        </option>
-                      ))}
-                    </Select>
-                  </HStack>
-                  <HStack>
-                    <Text width={'15%'}>
-                      <strong>Destination Asset:</strong>
-                    </Text>
-                    <Select
-                      defaultValue={onRampConfig.asset}
-                      onChange={e => setOnRampConfig(prev => ({ ...prev, asset: e.target.value as OnRampAsset }))}
-                    >
-                      {Object.keys(OnRampAsset).map(id => (
-                        <option value={id} key={id}>
-                          {ON_RAMP_ASSETS[id]}
-                        </option>
-                      ))}
-                    </Select>
-                  </HStack>
-                  {onRampConfig?.providers && (
-                    <HStack alignItems="flex-start">
-                      <Text width={'15%'}>
-                        <strong>Providers:</strong>
-                      </Text>
-                      <VStack flexGrow={1} w="100%">
-                        {onRampConfig.providers.map((provider, index) => {
-                          const isRamp = OnRampProvider[provider.id] === OnRampProvider.RAMP;
-
-                          return (
-                            <HStack w="100%" flexGrow={1} borderRadius="lg" bgColor="lightblue" py={1} px={2}>
-                              <Text width="15%">{ON_RAMP_PROVIDERS[OnRampProvider[provider.id]].name}</Text>
-                              <Flex flexGrow={1}>
-                                {isRamp && (
-                                  <Input
-                                    placeholder="Host API key"
-                                    onChange={e => {
-                                      setOnRampConfig(prev => ({
-                                        ...prev,
-                                        providers: prev.providers.map(p => ({
-                                          ...p,
-                                          ...(OnRampProvider[p.id] === OnRampProvider.RAMP
-                                            ? { hostApiKey: e.currentTarget.value }
-                                            : {}),
-                                        })),
-                                      }));
-                                    }}
-                                    value={provider.hostApiKey as string}
-                                  />
-                                )}
-                              </Flex>
-                              <HStack>
-                                <IconButton
-                                  isDisabled={index === 0 || onRampConfig.providers.length === 1}
-                                  icon={<ArrowUpIcon />}
-                                  onClick={() => {
-                                    setOnRampConfig(prev => ({
-                                      ...prev,
-                                      providers: [
-                                        ...prev.providers.slice(0, index - 1),
-                                        prev.providers[index],
-                                        prev.providers[index - 1],
-                                        ...prev.providers.slice(index + 1),
-                                      ],
-                                    }));
-                                  }}
-                                />
-                                <IconButton
-                                  isDisabled={
-                                    index === onRampConfig.providers.length - 1 || onRampConfig.providers.length === 1
-                                  }
-                                  icon={<ArrowDownIcon />}
-                                  onClick={() => {
-                                    setOnRampConfig(prev => ({
-                                      ...prev,
-                                      providers: [
-                                        ...prev.providers.slice(0, index),
-                                        prev.providers[index + 1],
-                                        prev.providers[index],
-                                        ...prev.providers.slice(index + 2),
-                                      ],
-                                    }));
-                                  }}
-                                />
-                                <IconButton
-                                  icon={<SmallCloseIcon />}
-                                  onClick={() => {
-                                    setOnRampConfig(prev => ({
-                                      ...prev,
-                                      providers: [...prev.providers.slice(0, index), ...prev.providers.slice(index + 1)],
-                                    }));
-                                  }}
-                                />
-                              </HStack>
-                            </HStack>
-                          );
-                        })}
-                        <HStack w="100%" alignItems="flex-start">
-                          {Object.keys(OnRampProviderAssetMap).map((id: OnRampProvider) => {
-                            return (
-                              <Button
-                                colorScheme="teal"
-                                variant="ghost"
-                                onClick={() => {
-                                  setOnRampConfig(prev => ({
-                                    ...prev,
-                                    providers: [
-                                      ...prev.providers,
-                                      {
-                                        id,
-                                        ...(id === OnRampProvider.RAMP ? { hostApiKey: DEFAULT_RAMP_HOST_API_KEY } : {}),
-                                      },
-                                    ],
-                                  }));
-                                }}
-                              >
-                                <AddIcon mr={3} />
-                                {ON_RAMP_PROVIDERS[id].name}
-                              </Button>
-                            );
-                          })}
-                        </HStack>
-                      </VStack>
-                    </HStack>
-                  )}
-
-                  {onRampConfigError && (
-                    <HStack w="100%" borderRadius="lg" bgColor="rgba(255, 0, 0, 0.5)" py={1} px={2}>
-                      <span>{onRampConfigError.toString().split(': ').pop()}</span>
-                    </HStack>
-                  )}
-                </VStack>
-              )}
-              <VStack align="left">
-                <HStack alignItems="flex-start">
-                  <Text width={'15%'}>
-                    <strong>Supported Networks:</strong>
-                  </Text>
-                  <VStack flexGrow={1} w="100%">
-                    {networks.map((network, index) => {
-                      return (
-                        <HStack w="100%" flexGrow={1} borderRadius="lg" bgColor="lightblue" py={1} px={2}>
-                          <Text width="15%">{NETWORKS[Network[network]]}</Text>
-                          <HStack>
-                            <IconButton
-                              isDisabled={index === 0 || networks.length === 1}
-                              icon={<ArrowUpIcon />}
-                              onClick={() => {
-                                setNetworks(prev => [
-                                  ...prev.slice(0, index - 1),
-                                  prev[index],
-                                  prev[index - 1],
-                                  ...prev.slice(index + 1),
-                                ]);
-                              }}
-                            />
-                            <IconButton
-                              isDisabled={index === networks.length - 1 || networks.length === 1}
-                              icon={<ArrowDownIcon />}
-                              onClick={() => {
-                                setNetworks(prev => [
-                                  ...prev.slice(0, index),
-                                  prev[index + 1],
-                                  prev[index],
-                                  ...prev.slice(index + 2),
-                                ]);
-                              }}
-                            />
-                            <IconButton
-                              isDisabled={networks.length === 1}
-                              icon={<SmallCloseIcon />}
-                              onClick={() => {
-                                setNetworks(prev => [...prev.slice(0, index), ...prev.slice(index + 1)]);
-                              }}
-                            />
-                          </HStack>
-                        </HStack>
-                      );
-                    })}
-                    <HStack w="100%" alignItems="flex-start">
-                      {Object.keys(Network).map(id => {
-                        return networks.find(p => p === id) ? (
-                          <></>
-                        ) : (
-                          <Button
-                            colorScheme="teal"
-                            variant="ghost"
-                            onClick={() => {
-                              setNetworks(prev => [...prev, id]);
-                            }}
-                          >
-                            <AddIcon mr={3} />
-                            {NETWORKS[id]}
-                          </Button>
-                        );
-                      })}
-                    </HStack>
-                  </VStack>
-                </HStack>
-              </VStack>
               <HStack>
                 <Text width={'15%'}>
                   <strong>Current Step:</strong>
@@ -1690,12 +1392,7 @@ function App() {
             OAuthMethod.DISCORD,
             OAuthMethod.FARCASTER,
           ]}
-          onRampConfig={
-            useOnRampConfig
-              ? { ...onRampConfig, enabledFlows: enabledFlows.length > 0 ? enabledFlows : undefined }
-              : undefined
-          }
-          networks={networks}
+          onRampTestMode={onRampTestMode}
           twoFactorAuthEnabled
           theme={
             useTheme
@@ -1707,7 +1404,7 @@ function App() {
                   font,
                   oAuthLogoVariant: logoVariant,
                 }
-              : undefined
+              : {}
           }
           logo={logo !== '' ? logo : undefined}
           currentStepOverride={currentStepOverride ?? undefined}

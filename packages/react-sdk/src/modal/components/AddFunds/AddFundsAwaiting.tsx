@@ -1,10 +1,11 @@
 import { StepContainer } from '../common.js';
-import { OnRampProvider, RampConfig } from '@usecapsule/web-sdk';
+import { OnRampProvider } from '@usecapsule/web-sdk';
 import { useModalStore } from '../../stores/index.js';
 import { useEffect, useMemo } from 'react';
 import { ModalStep } from '../../utils/steps.js';
 import { StripeEmbed } from '../OnRampComponents/StripeComponents.js';
 import { RampEmbed } from '../OnRampComponents/RampComponents.js';
+import styled from 'styled-components';
 
 const STEPS = {
   CANCELLED: ModalStep.ADD_FUNDS_FAILURE,
@@ -21,9 +22,7 @@ export const AddFundsAwaiting = () => {
       case OnRampProvider.STRIPE:
         return <StripeEmbed />;
       case OnRampProvider.RAMP:
-        const rampConfig = onRampConfig.providers.find(({ id }) => id === 'RAMP') as unknown as RampConfig;
-
-        return <RampEmbed hostApiKey={rampConfig.hostApiKey} />;
+        return <RampEmbed hostApiKey={onRampConfig.rampApiKey} />;
     }
   }, [onRampPurchase?.provider]);
 
@@ -39,5 +38,9 @@ export const AddFundsAwaiting = () => {
     return () => clearTimeout(timeoutId);
   }, [onRampPurchase?.status]);
 
-  return <StepContainer $wide>{onRampEmbed}</StepContainer>;
+  return <Container $wide>{onRampEmbed}</Container>;
 };
+
+const Container = styled(StepContainer)`
+  flex: 1;
+`;

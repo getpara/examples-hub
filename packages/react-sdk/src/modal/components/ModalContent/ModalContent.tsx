@@ -1,5 +1,15 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { Wallet, CurrentWalletIds, entityToWallet } from '@usecapsule/web-sdk';
+import {
+  Wallet,
+  CurrentWalletIds,
+  entityToWallet,
+  OnRampProvider,
+  deprecated__StripeConfig,
+  deprecated__RampConfig,
+  OnRampAsset,
+  Network,
+  EnabledFlow,
+} from '@usecapsule/web-sdk';
 import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { Body } from '../Body/Body.js';
@@ -20,16 +30,40 @@ export type ModalContentHandle = {
   handleModalClose: () => void;
 };
 
+function isRampConfig(config: deprecated__StripeConfig | deprecated__RampConfig): config is deprecated__RampConfig {
+  return 'hostApiKey' in config;
+}
+
+const AssetNetworks = {
+  [OnRampAsset.SOLANA]: Network.SOLANA,
+  [OnRampAsset.ATOM]: Network.COSMOS,
+  [OnRampAsset.CELO]: Network.CELO,
+  [OnRampAsset.POLYGON]: Network.POLYGON,
+};
+
+const AssetMap = {
+  SOLANA: OnRampAsset.SOLANA,
+  SOL: OnRampAsset.SOLANA,
+  ATOM: OnRampAsset.ATOM,
+  CELO: OnRampAsset.CELO,
+  POLYGON: OnRampAsset.POLYGON,
+  MATIC: OnRampAsset.POLYGON,
+  USDC: OnRampAsset.USDC,
+  ETH: OnRampAsset.ETHEREUM,
+  ETHEREUM: OnRampAsset.ETHEREUM,
+};
+
 export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
   (
     {
+      onRampConfig: propsOnRampConfig,
       twoFactorAuthEnabled = false,
       recoverySecretStepEnabled = false,
       oAuthMethods,
       disableEmailLogin,
       disablePhoneLogin,
       onClose,
-      onRampConfig,
+      onRampTestMode,
       loginTransitionOverride,
       createWalletOverride,
     },
@@ -41,10 +75,12 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     const webAuthURLForCreate = useModalStore(state => state.webAuthURLForCreate);
     const isLogin = useModalStore(state => state.isLogin());
     const loginWindow = useModalStore(state => state.loginWindow);
+    const onRampConfig = useModalStore(state => state.onRampConfig);
     const setStep = useModalStore(state => state.setStep);
     const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
     const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
     const setLoginWindow = useModalStore(state => state.setLoginWindow);
+    const setOnRampConfig = useModalStore(state => state.setOnRampConfig);
     const setRecoveryShare = useUserInfoStore(state => state.setRecoveryShare);
     const goBack = useGoBack();
 
@@ -198,6 +234,39 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     }, [currentStep]);
 
     useEffect(() => {
+      if (!onRampConfig) {
+        capsule.ctx.capsuleClient
+          .getOnRampConfig()
+          .then(res => {
+            if (!!propsOnRampConfig) {
+              const { enabledFlows, network, asset, providers, testMode } = propsOnRampConfig;
+              const rampConfig = providers.find(config => isRampConfig(config));
+
+              setOnRampConfig({
+                isBuyEnabled: !enabledFlows || enabledFlows.some(str => EnabledFlow[str] === EnabledFlow.BUY),
+                isReceiveEnabled: !enabledFlows || enabledFlows.some(str => EnabledFlow[str] === EnabledFlow.RECEIVE),
+                isWithdrawEnabled: !enabledFlows || enabledFlows.some(str => EnabledFlow[str] === EnabledFlow.WITHDRAW),
+                allowedAssets: network
+                  ? { [Network[network]]: asset ? [AssetMap[asset]] : true }
+                  : asset
+                    ? { [AssetNetworks[AssetMap[asset]] ?? Network.ETHEREUM]: [AssetMap[asset]] }
+                    : res.allowedAssets,
+                assetInfo: res.assetInfo,
+                providers: providers.map(({ id }) => OnRampProvider[id]),
+                rampApiKey: rampConfig?.hostApiKey ?? res.rampApiKey,
+                testMode: testMode ?? onRampTestMode,
+              });
+
+              return;
+            }
+
+            setOnRampConfig({ ...res, testMode: onRampTestMode });
+          })
+          .catch();
+      }
+    }, []);
+
+    useEffect(() => {
       return () => {
         capsule.exitLoops();
       };
@@ -211,7 +280,6 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
           disableEmailLogin={disableEmailLogin}
           disablePhoneLogin={disablePhoneLogin}
           onClose={handleClose}
-          onRampConfig={onRampConfig}
           recoverySecretStepEnabled={recoverySecretStepEnabled}
         />
         <Footer />

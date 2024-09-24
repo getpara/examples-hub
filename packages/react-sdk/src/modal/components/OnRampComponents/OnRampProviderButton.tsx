@@ -1,28 +1,22 @@
 import { OnRampConfig, OnRampMethod } from '@usecapsule/web-sdk';
-import { useCapsuleStore, useModalStore } from '../../stores/index.js';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ON_RAMP_PROVIDERS, OnRampProviderConfig } from '../../constants/constants.js';
-import { ModalStep } from '../../utils/steps.js';
 import styled from 'styled-components';
 import { CpslButton, CpslIcon, CpslSpinner, CpslText } from '@usecapsule/react-components';
-import { useActiveWallet } from '../../hooks/useActiveWallet.js';
+import { motion } from 'framer-motion';
 
 interface OnRampButtonProps {
   config: OnRampConfig;
   index: number;
   isLoading?: boolean;
+  onClick: () => Promise<void>;
 }
 
-export const OnRampProviderButton = ({ config, index }: OnRampButtonProps) => {
-  const capsule = useCapsuleStore(state => state.capsule);
-  const setStep = useModalStore(state => state.setStep);
-  const setOnRampPurchase = useModalStore(state => state.setOnRampPurchase);
-  const activeWallet = useActiveWallet();
-
+export const OnRampProviderButton = ({ config, index, onClick: _onClick }: OnRampButtonProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const provider = config.providers[index];
-  const { feeLower, feeUpper, methods, name, icon, backgroundColors }: OnRampProviderConfig = ON_RAMP_PROVIDERS[provider.id];
+  const { feeLower, feeUpper, methods, name, icon, backgroundColors }: OnRampProviderConfig = ON_RAMP_PROVIDERS[provider];
 
   const feeString = `Fee ${feeLower}% - ${feeUpper}%`;
   const PaymentIcons = useMemo(() => {
@@ -41,21 +35,10 @@ export const OnRampProviderButton = ({ config, index }: OnRampButtonProps) => {
   const onClick = async () => {
     setIsLoading(true);
 
-    const newOnRampPurchase = await capsule.createOnRampPurchase({
-      provider: provider.id,
-      network: config.network,
-      asset: config.asset,
-      testMode: config.testMode,
-      [activeWallet.isExternal ? 'externalWalletAddress' : 'walletId']: activeWallet.id,
-    });
-    setOnRampPurchase(newOnRampPurchase);
+    await _onClick();
 
-    setStep(ModalStep.ADD_FUNDS_AWAITING);
+    setIsLoading(false);
   };
-
-  useEffect(() => {
-    setOnRampPurchase(undefined);
-  }, []);
 
   return (
     <StyledButton $gradientColors={backgroundColors} fullWidth onClick={onClick}>
@@ -84,6 +67,7 @@ export const OnRampProviderButton = ({ config, index }: OnRampButtonProps) => {
 };
 
 const StyledButton = styled(CpslButton)<{ $gradientColors: string[] }>`
+  width: 100%;
   --button-primary-background-color: ${({ $gradientColors }) =>
     `linear-gradient(90deg, ${$gradientColors[0]} 0%, ${$gradientColors[1]} 100%)`};
   --button-primary-hover-background-color: ${({ $gradientColors }) =>
@@ -92,9 +76,9 @@ const StyledButton = styled(CpslButton)<{ $gradientColors: string[] }>`
     `linear-gradient(90deg, ${$gradientColors[0]} 0%, ${$gradientColors[0]} 100%)`};
 `;
 
-const Container = styled.div<{ $backgroundColor: string }>`
+const Container = styled(motion.div)<{ $backgroundColor: string }>`
   display: flex;
-  gap: 4px;
+  gap: 8px;
   flex: 1;
   align-items: center;
 
