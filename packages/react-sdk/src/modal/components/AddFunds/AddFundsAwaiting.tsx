@@ -3,6 +3,7 @@ import { OnRampProvider } from '@usecapsule/web-sdk';
 import { useModalStore } from '../../stores/index.js';
 import { useEffect, useMemo } from 'react';
 import { ModalStep } from '../../utils/steps.js';
+import { MoonPayEmbed } from '../OnRampComponents/MoonPayComponents.js';
 import { StripeEmbed } from '../OnRampComponents/StripeComponents.js';
 import { RampEmbed } from '../OnRampComponents/RampComponents.js';
 import styled from 'styled-components';
@@ -21,6 +22,8 @@ export const AddFundsAwaiting = () => {
     switch (onRampPurchase?.provider) {
       case OnRampProvider.STRIPE:
         return <StripeEmbed />;
+      case OnRampProvider.MOONPAY:
+        return <MoonPayEmbed />;
       case OnRampProvider.RAMP:
         return <RampEmbed hostApiKey={onRampConfig.rampApiKey} />;
     }

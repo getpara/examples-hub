@@ -103,9 +103,6 @@ export const AddFunds = () => {
 
     const isProviderAllowed = onRampConfig.providers.reduce(
       (acc: Record<OnRampProvider, boolean>, id) => {
-        if (id === OnRampProvider.MOONPAY) {
-          return { ...acc, [id]: false };
-        }
         const hasMatch = toAssetInfoArray(onRampConfig.assetInfo).some(([type, network, asset, validProviders]) => {
           if (onRampConfig.testMode && network !== Network.ETHEREUM && asset !== OnRampAsset.ETHEREUM && id === 'RAMP') {
             return false;

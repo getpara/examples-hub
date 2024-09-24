@@ -4840,6 +4840,11 @@
     semver "^7.5.4"
     uuid "^9.0.1"
 
+"@moonpay/moonpay-react@^1.8.0":
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/@moonpay/moonpay-react/-/moonpay-react-1.8.0.tgz#b6fd30e07279f18737e926e375f16c3ee9fe4a13"
+  integrity sha512-Hi+Sq0ms0tFJ8EST/WYaLqL76Xc9KQ0KBs+KxpnQZM5Kc+wlc7s+mvuuSfZiA7SKDQU+cs4N90XWlw5i2sqa4Q==
+
 "@motionone/animation@^10.15.1", "@motionone/animation@^10.18.0":
   version "10.18.0"
   resolved "https://registry.yarnpkg.com/@motionone/animation/-/animation-10.18.0.tgz#868d00b447191816d5d5cf24b1cafa144017922b"

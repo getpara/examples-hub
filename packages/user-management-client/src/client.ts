@@ -942,6 +942,35 @@ class Client {
     return res;
   }
 
+  async signMoonPayUrl(
+    userId: string,
+    {
+      url,
+      type,
+      cosmosPrefix,
+      testMode,
+      walletId,
+      externalWalletAddress,
+    }: {
+      url: string;
+      type: WalletType;
+      cosmosPrefix: string;
+      testMode?: boolean;
+      walletId?: string;
+      externalWalletAddress?: string;
+    },
+  ) {
+    const walletString = walletId ? `wallets/${walletId}` : `external-wallets/${externalWalletAddress}`;
+
+    const res = await this.baseRequest.post<{ signature: string }>(`/users/${userId}/${walletString}/moonpay-sign`, {
+      url,
+      type,
+      cosmosPrefix,
+      testMode,
+    });
+    return res;
+  }
+
   async distributeCapsuleShare({
     userId,
     walletId,
