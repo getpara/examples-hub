@@ -3,7 +3,7 @@ import { PlanMetrics } from './PlanMetrics';
 import { Plans } from './Plans';
 import { FooterCard } from './FooterCard';
 
-export const BillingTab = () => {
+export const BillingContent = () => {
   return (
     <>
       <PlanMetrics />

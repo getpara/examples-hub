@@ -31,9 +31,14 @@ const NAV_ROUTES: NavRoute[] = [
     icon: 'lightning',
   },
   {
-    path: '/settings',
-    label: 'Settings',
-    icon: 'settings',
+    path: '/team',
+    label: 'Team',
+    icon: 'user',
+  },
+  {
+    path: '/billing',
+    label: 'Billing',
+    icon: 'creditCard02',
   },
 ];
 

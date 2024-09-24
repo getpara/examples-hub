@@ -8,7 +8,7 @@ export const Header = () => {
   return (
     <Container>
       <CpslText variant="bodyL" weight="semiBold">
-        Settings
+        Billing
       </CpslText>
       {/* TODO: Reenable this once audits are complete */}
       {/* <CpslButton
