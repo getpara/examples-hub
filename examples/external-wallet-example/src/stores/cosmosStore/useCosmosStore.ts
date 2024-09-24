@@ -23,7 +23,7 @@ export const useCosmosStore = create<CosmosStore>()(
     }),
     {
       version: 1,
-      name: '@CAPSULE/exWalExample/cosmosStore',
+      name: '@CAPSULE_EXAMPLE_APP/cosmosStore',
       storage: createJSONStorage(() => sessionStorage),
       partialize: state => ({
         selectedChainId: state.selectedChainId,

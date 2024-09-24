@@ -48,10 +48,10 @@ export function EvmExternalWalletProvider({ children, capsule, onSwitchWallet }:
   useEffect(() => {
     const storedExternalWallet = capsule.externalWallets[wagmiAddress ?? ''];
 
-    if (!isLocalConnecting && !!wagmiAddress && !storedExternalWallet) {
+    if (!isConnecting && !isReconnecting && !isLocalConnecting && !!wagmiAddress && !storedExternalWallet) {
       reset();
     }
-  }, []);
+  }, [isConnecting, isReconnecting]);
 
   useEffect(() => {
     const storedExternalWallet = capsule.externalWallets[capsule.currentExternalWalletAddresses?.[0] ?? ''];

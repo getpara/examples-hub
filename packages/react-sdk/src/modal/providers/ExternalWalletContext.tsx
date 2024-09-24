@@ -6,7 +6,7 @@ import { ModalStep } from '../utils/steps.js';
 import { TExternalWallet } from '../types/externalWallets';
 import { SolanaExternalWalletContextType } from './SolanaExternalWalletContextStub';
 import { CosmosExternalWalletContextType } from './CosmosExternalWalletContextStub';
-import { WalletType, isMobile, isMobileSafari, truncateAddress } from '@usecapsule/web-sdk';
+import { WalletType, isIOS, isIOSWebview, isMobile, truncateAddress } from '@usecapsule/web-sdk';
 
 export const defaultExternalWallet = {
   wallets: [],
@@ -18,7 +18,7 @@ export const defaultExternalWallet = {
   walletDisplayHelpers: {
     showExtension: false,
     showMobile: false,
-    isSolanaMobileSafari: false,
+    isSolanaMobileIOS: false,
     isCosmosMobileWallet: false,
   },
   username: undefined,
@@ -39,7 +39,7 @@ export const ExternalWalletContext = createContext<{
   walletDisplayHelpers: {
     showExtension: boolean;
     showMobile: boolean;
-    isSolanaMobileSafari: boolean;
+    isSolanaMobileIOS: boolean;
     isCosmosMobileWallet: boolean;
   };
   username?: string;
@@ -226,11 +226,13 @@ export function ExternalWalletProvider({
 
   const walletDisplayHelpers = {
     // Show the extension screen if on web and the wallet is an extension and installed or the wallet isn't a mobile wallet
-    showExtension: !isMobile() && ((wallet?.isExtension && wallet?.installed) || !wallet?.isMobile),
+    // Also show the extension connection if on desktop for a solana wallet (no walletConnect)
+    showExtension:
+      !isMobile() && ((wallet?.isExtension && wallet?.installed) || !wallet?.isMobile || wallet?.type === WalletType.SOLANA),
     // Show the mobile screen if on mobile and the wallet is a mobile wallet or if on desktop and the wallet isn't installed
     showMobile: (isMobile() && wallet?.isMobile) || (!isMobile() && !wallet?.installed),
 
-    isSolanaMobileSafari: isMobileSafari() && wallet?.type === WalletType.SOLANA,
+    isSolanaMobileIOS: isIOS() && isMobile() && !isIOSWebview() && wallet?.type === WalletType.SOLANA,
     isCosmosMobileWallet: wallet?.type === WalletType.COSMOS && isUsingMobileConnector,
   };
 

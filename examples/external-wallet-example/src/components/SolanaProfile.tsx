@@ -6,28 +6,28 @@ import { ed25519 } from '@noble/curves/ed25519';
 import bs58 from 'bs58';
 
 export const SolanaProfile = () => {
-  const { publicKey, signMessage } = useWallet();
+  const { signMessage, wallet } = useWallet();
 
   const [message, setMessage] = useState<string>('');
   const [messageSignature, setMessageSignature] = useState<string>();
   const [verified, setVerified] = useState<boolean>();
 
-  const address = publicKey?.toString();
+  const address = wallet?.adapter.publicKey?.toString();
 
   const handleSign = async () => {
     setMessageSignature(undefined);
     setVerified(false);
 
-    if (!signMessage || !publicKey) {
+    if (!signMessage || !wallet?.adapter.publicKey) {
       return;
     }
 
     const encodedMessage = new TextEncoder().encode(message);
 
-    const res = await signMessage?.(encodedMessage);
+    const res = await signMessage(encodedMessage);
 
     const decodedRes = bs58.encode(res);
-    const isVerfied = ed25519.verify(res, encodedMessage, publicKey.toBytes());
+    const isVerfied = ed25519.verify(res, encodedMessage, wallet.adapter.publicKey.toBytes());
 
     setVerified(isVerfied);
     setMessageSignature(decodedRes);

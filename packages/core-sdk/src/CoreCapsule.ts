@@ -1729,6 +1729,10 @@ export abstract class CoreCapsule {
    * Waits for the session to be active.
    **/
   async waitForAccountCreation(): Promise<boolean> {
+    // Remove external wallets if creating an account with Capsule
+    this.currentExternalWalletAddresses = undefined;
+    this.externalWallets = {};
+
     this.isAwaitingAccountCreation = true;
     while (this.isAwaitingAccountCreation) {
       try {
@@ -1861,6 +1865,10 @@ export abstract class CoreCapsule {
     loginWindow?: Window,
     skipSessionRefresh?: boolean,
   ): Promise<{ isComplete: boolean; isError?: boolean; needsWallet?: boolean; partnerId?: string }> {
+    // Remove external wallets if logging in with Capsule
+    this.currentExternalWalletAddresses = undefined;
+    this.externalWallets = {};
+
     this.isAwaitingLogin = true;
     while (this.isAwaitingLogin) {
       try {

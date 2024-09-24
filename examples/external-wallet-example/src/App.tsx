@@ -10,7 +10,7 @@ import { CapsuleCosmosProvider, keplrWallet, leapWallet } from '@usecapsule/cosm
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { sepolia, celo, mainnet, polygon } from 'wagmi/chains';
 import { Content } from './components/Content';
-import { CapsuleSolanaProvider, glowWallet, phantomWallet } from '@usecapsule/solana-wallet-connectors';
+import { backpackWallet, CapsuleSolanaProvider, glowWallet, phantomWallet } from '@usecapsule/solana-wallet-connectors';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { useMemo } from 'react';
 import { clusterApiUrl } from '@solana/web3.js';
@@ -77,7 +77,13 @@ export const App = () => {
             wallets: [metaMaskWallet, rainbowWallet, walletConnectWallet, zerionWallet, coinbaseWallet],
           }}
         >
-          <CapsuleSolanaProvider endpoint={endpoint} wallets={[glowWallet, phantomWallet]}>
+          <CapsuleSolanaProvider
+            endpoint={endpoint}
+            wallets={[glowWallet, phantomWallet, backpackWallet]}
+            chain={solanaNetwork}
+            // Refer to https://docs.solanamobile.com/reference/typescript/mobile-wallet-adapter#web3mobilewalletauthorize for how appIdentity fields work
+            appIdentity={{ name: 'Capsule Example', uri: `${location.protocol}//${location.host}` }}
+          >
             <Content />
           </CapsuleSolanaProvider>
         </CapsuleEvmProvider>

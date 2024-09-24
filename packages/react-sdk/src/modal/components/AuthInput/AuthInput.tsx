@@ -70,6 +70,8 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
 
   const handleIdentifierInput = (ev: CpslInputCustomEvent<InputInputEventDetail>) => {
     const newIdentifier = ev.detail.value;
+    let isNewPhone = false,
+      isNewEmail = false;
 
     if (!disablePhoneLogin) {
       const countryCodeInputMatch = countryCodes.find(cc => cc.value === newIdentifier);
@@ -82,15 +84,14 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
         return;
       }
 
-      const isNewPhone = !isEmail && isPhone ? /\d+$/.test(newIdentifier) : /\d\d\d+$/.test(newIdentifier);
-      setIdentifierType(isNewPhone ? 'phone' : undefined);
+      isNewPhone = !isEmail && isPhone ? /\d+$/.test(newIdentifier) : /\d\d\d+$/.test(newIdentifier);
     }
 
     if (!disableEmailLogin) {
-      const isNewEmail = /\D.*$/.test(newIdentifier);
-      setIdentifierType(isNewEmail ? 'email' : undefined);
+      isNewEmail = /\D.*$/.test(newIdentifier);
     }
 
+    setIdentifierType(isNewEmail ? 'email' : isNewPhone ? 'phone' : undefined);
     setIdentifier(newIdentifier);
   };
 

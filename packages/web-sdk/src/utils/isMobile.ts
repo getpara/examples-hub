@@ -13,6 +13,15 @@ export function isLargeIOS(): boolean {
   );
 }
 
+export function isTablet(): boolean {
+  return (
+    typeof navigator !== 'undefined' &&
+    /(ipad|tablet|(android(?!.*mobile))|(windows(?!.*phone)(.*touch))|kindle|playbook|silk|(puffin(?!.*(IP|AP|WP))))/.test(
+      navigator.userAgent,
+    )
+  );
+}
+
 export function isIOS(): boolean {
   return isSmallIOS() || isLargeIOS();
 }
@@ -22,7 +31,17 @@ export function isMobile(): boolean {
 }
 
 export function isSafari(): boolean {
-  return typeof navigator !== 'undefined' && /AppleWebKit/i.test(navigator.userAgent) && !/CriOS/i.test(navigator.userAgent);
+  return (
+    typeof navigator !== 'undefined' &&
+    /AppleWebKit/i.test(navigator.userAgent) &&
+    !/CriOS/i.test(navigator.userAgent) &&
+    !/Chrome/i.test(navigator.userAgent)
+  );
+}
+
+const isStandalone = typeof navigator !== 'undefined' && !(navigator as any).standalone;
+export function isIOSWebview(): boolean {
+  return typeof navigator !== 'undefined' && isIOS() && !isStandalone && !/safari/i.test(navigator.userAgent.toLowerCase());
 }
 
 export function isMobileSafari(): boolean {

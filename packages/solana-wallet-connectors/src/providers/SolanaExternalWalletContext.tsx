@@ -3,7 +3,7 @@ import { CommonWallet } from '../types/CommonTypes';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Adapter, WalletReadyState } from '@solana/wallet-adapter-base';
 import { useCapsuleSolana } from './CapsuleSolanaProvider.js';
-import CapsuleWeb, { WalletType, isMobile } from '@usecapsule/react-sdk';
+import CapsuleWeb, { WalletType } from '@usecapsule/web-sdk';
 
 export const defaultSolanaExternalWallet = {
   wallets: [],
@@ -22,7 +22,14 @@ interface SolanaExternalWalletProviderProps {
 }
 
 export function SolanaExternalWalletProvider({ children, capsule, onSwitchWallet }: SolanaExternalWalletProviderProps) {
-  const { wallets: adapters, select: selectWallet, disconnect: _disconnect, publicKey: solanaAddress, wallet } = useWallet();
+  const {
+    wallets: adapters,
+    select: selectWallet,
+    disconnect: _disconnect,
+    publicKey: solanaAddress,
+    wallet,
+    connecting,
+  } = useWallet();
   const { wallets: walletFns } = useCapsuleSolana();
 
   const reset = async () => {
@@ -69,10 +76,14 @@ export function SolanaExternalWalletProvider({ children, capsule, onSwitchWallet
     const storedExternalWallet = capsule.externalWallets[capsule.currentExternalWalletAddresses?.[0] ?? ''];
 
     // If the user is using an external Solana wallet we want to watch for wallet changes and log them in to a different user when the wallet changes
-    if (storedExternalWallet?.type === WalletType.SOLANA && storedExternalWallet?.address !== solanaAddress?.toString()) {
+    if (
+      !connecting &&
+      storedExternalWallet?.type === WalletType.SOLANA &&
+      storedExternalWallet?.address !== solanaAddress?.toString()
+    ) {
       switchWallet(solanaAddress?.toString());
     }
-  }, [solanaAddress]);
+  }, [solanaAddress, connecting]);
 
   const connect = async (adapter?: Adapter): Promise<{ address?: string; error?: string }> => {
     await _disconnect();
@@ -82,6 +93,9 @@ export function SolanaExternalWalletProvider({ children, capsule, onSwitchWallet
     }
 
     selectWallet(adapter.name);
+    // Using a timeout here to ensure the selectWallet function sets the wallet completely before connecting.
+    // Without this there was a race condition where connect wasn't correctly listening to the adapters connect event.
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     let address: string | undefined;
     let error: string | undefined;
@@ -103,6 +117,7 @@ export function SolanaExternalWalletProvider({ children, capsule, onSwitchWallet
     } catch (err) {
       switch (err.message) {
         case 'User aborted.':
+        case 'Approval Denied':
         case 'You canceled this request.': {
           error = 'Connection request rejected';
           break;
@@ -117,7 +132,7 @@ export function SolanaExternalWalletProvider({ children, capsule, onSwitchWallet
   };
 
   const getAdapter = (name: string) =>
-    adapters.find(a => a.adapter.name === (isMobile() ? 'Mobile Wallet Adapter' : name))?.adapter;
+    adapters.find(a => (a.adapter.name === 'Mobile Wallet Adapter' ? a : a.adapter.name === name ? a : false))?.adapter;
 
   const wallets = walletFns.map(walletFn => {
     const metaData = walletFn();
@@ -134,7 +149,12 @@ export function SolanaExternalWalletProvider({ children, capsule, onSwitchWallet
     } as CommonWallet;
   });
 
-  const disconnect = _disconnect;
+  const disconnect = async () => {
+    await _disconnect();
+    // The solana library seems to keep some state hanging around that will auto receonnect the same wallet if the window isn't refreshed and the wallet connector is selected again in the modal.
+    // Refreshing here after a disconnect fixes the issue.
+    typeof window !== undefined && window?.location.reload();
+  };
 
   return (
     <SolanaExternalWalletContext.Provider value={useMemo(() => ({ wallets, disconnect }), [wallets, disconnect])}>

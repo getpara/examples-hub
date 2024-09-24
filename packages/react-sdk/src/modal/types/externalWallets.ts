@@ -6,10 +6,11 @@ export enum EvmWallet {
   ZERION = 'ZERION',
 }
 
-// export enum SolanaWallet {
-//   PHANTOM = 'PHANTOM',
-//   GLOW = 'GLOW',
-// }
+export enum SolanaWallet {
+  PHANTOM = 'PHANTOM',
+  GLOW = 'GLOW',
+  BACKPACK = 'BACKPACK',
+}
 
 // export enum CosmosWallet {
 //   KEPLR = 'KEPLR',
@@ -18,7 +19,7 @@ export enum EvmWallet {
 
 export const ExternalWallet = {
   ...EvmWallet,
-  // ...SolanaWallet,
+  ...SolanaWallet,
   // ...CosmosWallet
 };
 

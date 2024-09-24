@@ -45,7 +45,7 @@ export const useModalStateStore = create<ModalStateStore>()(
     }),
     {
       version: 2,
-      name: '@CAPSULE/exWalExample/modalState',
+      name: '@CAPSULE_EXAMPLE_APP/modalState',
       storage: createJSONStorage(() => sessionStorage),
       partialize: state => ({
         oAuthMethods: state.oAuthMethods,

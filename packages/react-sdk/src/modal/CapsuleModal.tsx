@@ -11,6 +11,7 @@ import { CURRENT_WALLET_IDS_CHANGE_EVENT, EXTERNAL_WALLET_CHANGE_EVENT } from '@
 import { ExternalWalletsWrapper } from './components/ExternalWalletsWrapper/ExternalWalletsWrapper.js';
 import { CountryCallingCode } from 'libphonenumber-js';
 import styled from 'styled-components';
+import { useExternalWallets } from './providers/ExternalWalletContext.js';
 
 defineCustomElements();
 
@@ -57,6 +58,7 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     const resetUserInfoState = useUserInfoStore(state => state.resetState);
     const setRecoveryShare = useUserInfoStore(state => state.setRecoveryShare);
     const [activeWallet, setActiveWallet] = useModalStore(state => [state.activeWallet, state.setActiveWallet]);
+    const { disconnectExternalWallet } = useExternalWallets();
 
     const [isModalMounted, setIsModalMounted] = useState(false);
 
@@ -103,6 +105,8 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
           setWebAuthURLForCreate();
         }
 
+        // Disconnect external wallets if the user is not longer logged in
+        await disconnectExternalWallet();
         setIsFullyLoggedIn(false);
       }
 

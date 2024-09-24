@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import { useExternalWallets } from '../../providers/ExternalWalletContext';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
 import { ModalStep } from '../../utils/steps';
-import { isMobile, WalletType } from '@usecapsule/web-sdk';
+import { isMobile, isTablet, WalletType } from '@usecapsule/web-sdk';
 import { routeMobileExternalWallet } from '../../utils/routeMobileExternalWallet';
 
 export const ExternalWalletStep = () => {
@@ -40,12 +40,12 @@ export const ExternalWalletStep = () => {
       </InnerStepContainer>;
     }
 
-    const { showExtension, showMobile, isSolanaMobileSafari } = walletDisplayHelpers;
+    const { showExtension, showMobile, isSolanaMobileIOS } = walletDisplayHelpers;
 
     // Fallback to not supported text
-    if ((!showMobile && !showExtension) || isSolanaMobileSafari) {
-      const text = isSolanaMobileSafari
-        ? "Solana wallets aren't available on mobile safari browsers.\n\nPlease continue in another browser."
+    if ((!showMobile && !showExtension) || (isSolanaMobileIOS && !wallet.installed)) {
+      const text = isSolanaMobileIOS
+        ? "Solana wallets aren't available on mobile IOS browsers.\n\nPlease continue in the wallet app."
         : `${wallet.name} isn't supported on mobile devices.\n\nPlease choose another wallet or continue on desktop.`;
 
       return (
@@ -85,7 +85,8 @@ export const ExternalWalletStep = () => {
       );
     }
     if (showMobile) {
-      if (isMobile()) {
+      // If Solana wallet or if on a mobile and NOT on a table, show the connection screen. Else show the QR code.
+      if (wallet.type === WalletType.SOLANA || (isMobile() && !isTablet())) {
         // Checking if the wallet is installed only for Solana wallets since Solana MWA doesn't work on IOS Safari
         // https://docs.solanamobile.com/web/developing-for-web#ios-web
         const isInstalled = wallet.type !== WalletType.SOLANA || wallet.installed;
@@ -101,7 +102,7 @@ export const ExternalWalletStep = () => {
             {wallet.id !== 'walletConnect' && (
               <InnerStepContainer>
                 <CpslText weight="medium" color="secondary">
-                  {`Don’t have have ${wallet.name} Wallet`}
+                  {`Don’t have ${wallet.name}`}
                 </CpslText>
                 <CpslButton as="a" href={wallet.downloadUrl ?? ''} target="_blank" variant="secondary">
                   <CpslIcon slot="start" icon="linkExternal" />
@@ -126,7 +127,7 @@ export const ExternalWalletStep = () => {
           </InnerStepContainer>
           <InnerStepContainer>
             <CpslText weight="medium" color="secondary">
-              {`Don’t have have ${wallet.name} Wallet`}
+              {`Don’t have ${wallet.name}`}
             </CpslText>
             <CpslButton as="a" href={wallet.downloadUrl ?? ''} target="_blank" variant="secondary">
               <CpslIcon slot="start" icon="linkExternal" />
