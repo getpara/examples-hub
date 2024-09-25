@@ -486,6 +486,7 @@ class Client {
     countryCode?: string,
     farcasterUsername?: string,
     publicKey?: string,
+    userId?: string,
   ): Promise<getWebChallengeRes> => {
     const queryParams = {};
     if (email) {
@@ -502,6 +503,9 @@ class Client {
     }
     if (publicKey) {
       queryParams['publicKey'] = publicKey;
+    }
+    if (userId) {
+      queryParams['userId'] = userId;
     }
     const query = qs.stringify(queryParams);
     const res = await this.baseRequest.get<any>(`/biometrics/challenge${query === '' ? '' : `?${query}`}`);
@@ -856,8 +860,8 @@ class Client {
     return res;
   }
 
-  async getPendingTransaction(userId: string, pendingTransactionid: string) {
-    const res = await this.baseRequest.get<any>(`/users/${userId}/pending-transactions/${pendingTransactionid}`);
+  async getPendingTransaction(userId: string, pendingTransactionId: string) {
+    const res = await this.baseRequest.get<any>(`/users/${userId}/pending-transactions/${pendingTransactionId}`);
     return res;
   }
 
@@ -1015,8 +1019,20 @@ class Client {
     return res.data;
   }
 
-  async getEthToUsdConversionRate() {
-    const res = await this.baseRequest.get<any>('/ethToUsdConversionRate');
+  async getConversionRate(chainId: string, symbol: string, currency: string) {
+    const params = { symbol, currency };
+    const res = await this.baseRequest.get<any>(`/chains/${chainId}/conversion-rate`, { params });
+    return res.data;
+  }
+
+  async getGasEstimate(chainId: string, totalGasPrice: string) {
+    const params = { totalGasPrice };
+    const res = await this.baseRequest.get<any>(`chains/${chainId}/gas-estimate`, { params });
+    return res.data;
+  }
+
+  async getGasOracle(chainId: string) {
+    const res = await this.baseRequest.get<any>(`chains/${chainId}/gas-oracle`);
     return res.data;
   }
 
@@ -1024,6 +1040,11 @@ class Client {
   async isRefreshDone(userId: string, walletId: string, partnerId?: string): Promise<{ isDone: true }> {
     const partnerIdStr = partnerId ? `?partnerId=${partnerId}` : '';
     const res = await this.baseRequest.get<any>(`/users/${userId}/wallets/${walletId}/refresh-done${partnerIdStr}`);
+    return res.data;
+  }
+
+  async deletePendingTransaction(userId: string, pendingTransactionId: string) {
+    const res = await this.baseRequest.delete<any>(`/users/${userId}/pending-transactions/${pendingTransactionId}`);
     return res.data;
   }
 }

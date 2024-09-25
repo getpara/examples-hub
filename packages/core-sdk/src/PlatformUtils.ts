@@ -3,6 +3,7 @@ import { Ctx } from './definitions.js';
 import { SignatureRes } from './types/walletTypes.js';
 import { StorageUtils } from './StorageUtils.js';
 import { PregenIdentifierType } from './CoreCapsule.js';
+import { PopupType } from './types/popupTypes.js';
 
 export interface PlatformUtils {
   getPrivateKey(ctx: Ctx, userId: string, walletId: string, share: string, sessionCookie: string): Promise<string>;
@@ -124,5 +125,5 @@ export interface PlatformUtils {
 
   disableProviderModal?: boolean;
 
-  openPopup(popupUrl: string): void;
+  openPopup(popupUrl: string, opts?: { type: PopupType }): void;
 }

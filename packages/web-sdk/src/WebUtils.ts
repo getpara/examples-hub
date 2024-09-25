@@ -1,4 +1,5 @@
-import { Ctx, PlatformUtils, SignatureRes } from '@usecapsule/core-sdk';
+import { Ctx, PlatformUtils, SignatureRes, PopupType } from '@usecapsule/core-sdk';
+
 import { LocalStorage } from './LocalStorage.js';
 import { SessionStorage } from './SessionStorage.js';
 import { keygen, preKeygen, ed25519Keygen, ed25519PreKeygen, refresh } from './wallet/keygen.js';
@@ -149,12 +150,70 @@ export class WebUtils implements PlatformUtils {
 
   disableProviderModal = false;
 
-  openPopup(popupUrl: string): void {
-    const popupWindow = window.open(popupUrl, 'popup', 'popup=true,width=400,height=500');
-    if (!popupWindow) {
-      setTimeout(() => {
-        window.open(popupUrl, '_blank');
-      }, 0);
+  openPopup(popupUrl: string, opts: { type: PopupType }): void {
+    if (opts) {
+      const { type } = opts;
+      const popUpWidth = 550;
+      let popUpHeight: number;
+
+      switch (type) {
+        case PopupType.LOGIN_PASSKEY: {
+          popUpHeight = 798;
+          break;
+        }
+        case PopupType.CREATE_PASSKEY: {
+          popUpHeight = 464;
+          break;
+        }
+        case PopupType.SIGN_MESSAGE_REVIEW: {
+          popUpHeight = 585;
+          break;
+        }
+        case PopupType.SIGN_TRANSACTION_REVIEW: {
+          popUpHeight = 750;
+          break;
+        }
+        case PopupType.OAUTH:
+        default: {
+          popUpHeight = 768;
+          break;
+        }
+      }
+
+      // Fixes position when using multiple monitors
+      const dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : window.screenX;
+      const dualScreenTop = window.screenTop !== undefined ? window.screenTop : window.screenY;
+
+      const width = window.innerWidth
+        ? window.innerWidth
+        : document.documentElement.clientWidth
+          ? document.documentElement.clientWidth
+          : screen.width;
+      const height = window.innerHeight
+        ? window.innerHeight
+        : document.documentElement.clientHeight
+          ? document.documentElement.clientHeight
+          : screen.height;
+
+      const left = (width - popUpWidth) / 2 + dualScreenLeft;
+      const top = (height - popUpHeight) / 2 + dualScreenTop;
+
+      const windowFeatures = `toolbar=no, menubar=no, width=${popUpWidth}, 
+    height=${popUpHeight}, top=${top}, left=${left}`;
+
+      let popupWindow = window.open(popupUrl, type.toString(), windowFeatures);
+      if (!popupWindow) {
+        setTimeout(() => {
+          popupWindow = window.open(popupUrl, '_blank');
+        }, 0);
+      }
+    } else {
+      const popupWindow = window.open(popupUrl, 'popup', 'popup=true,width=400,height=500');
+      if (!popupWindow) {
+        setTimeout(() => {
+          window.open(popupUrl, '_blank');
+        }, 0);
+      }
     }
   }
 }

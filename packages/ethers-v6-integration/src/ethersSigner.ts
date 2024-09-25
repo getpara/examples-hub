@@ -1,11 +1,6 @@
 import { ethers } from 'ethers';
 
-import CoreCapsule, {
-  TransactionReviewError,
-  DeniedSignatureResWithUrl,
-  SuccessfulSignatureRes,
-  hexStringToBase64,
-} from '@usecapsule/core-sdk';
+import CoreCapsule, { SuccessfulSignatureRes, hexStringToBase64 } from '@usecapsule/core-sdk';
 
 export class CapsuleEthersSigner extends ethers.AbstractSigner {
   private capsule: CoreCapsule;
@@ -31,9 +26,6 @@ export class CapsuleEthersSigner extends ethers.AbstractSigner {
     const base64HashedMessage = hexStringToBase64(hashedMessage);
     const res = await this.capsule.signMessage(this.currentWalletId, base64HashedMessage);
 
-    if ((res as DeniedSignatureResWithUrl).transactionReviewUrl) {
-      throw new TransactionReviewError((res as DeniedSignatureResWithUrl).transactionReviewUrl);
-    }
     const signature = (res as SuccessfulSignatureRes).signature;
     return `0x${signature}`;
   }
@@ -78,9 +70,6 @@ export class CapsuleEthersSigner extends ethers.AbstractSigner {
       `${txObj.chainId}`,
     );
 
-    if ((res as DeniedSignatureResWithUrl).transactionReviewUrl) {
-      throw new TransactionReviewError((res as DeniedSignatureResWithUrl).transactionReviewUrl);
-    }
     const signature = (res as SuccessfulSignatureRes).signature;
     const btx = ethers.Transaction.from(<ethers.TransactionLike<string>>tx);
     btx.signature = `0x${signature}`;
@@ -111,9 +100,6 @@ export class CapsuleEthersSigner extends ethers.AbstractSigner {
       hexStringToBase64(ethers.TypedDataEncoder.hash(populated.domain, types, populated.value)),
     );
 
-    if ((res as DeniedSignatureResWithUrl).transactionReviewUrl) {
-      throw new TransactionReviewError((res as DeniedSignatureResWithUrl).transactionReviewUrl);
-    }
     const signature = (res as SuccessfulSignatureRes).signature;
     return `0x${signature}`;
   }

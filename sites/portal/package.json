@@ -11,6 +11,7 @@
     "@usecapsule/react-sdk": "4.0.1",
     "@usecapsule/user-management-client": "1.22.1",
     "@usecapsule/web-sdk": "2.0.1",
+    "axios": "^1.7.7",
     "framer-motion": "^11.2.13",
     "libphonenumber-js": "^1.11.1",
     "react": "18.2.0",

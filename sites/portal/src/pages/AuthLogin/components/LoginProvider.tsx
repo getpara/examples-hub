@@ -89,6 +89,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
     const loginRes = await utils.authLogin(
       capsule,
       params.partnerId,
+      undefined,
       params.email,
       params.phone,
       params.countryCode,

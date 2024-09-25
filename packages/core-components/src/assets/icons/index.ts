@@ -5,6 +5,7 @@ import AngelList from './angel-list.svg';
 import AppleBrand from './apple-brand.svg';
 import Apple from './apple.svg';
 import ArrowCircleBrokenDownLeft from './arrow-circle-broken-down-left.svg';
+import ArrowCircleDownFilled from './arrow-circle-down-filled.svg';
 import ArrowNarrow from './arrow-narrow.svg';
 import Arrow from './arrow.svg';
 import BackupKit from './backup-kit.svg';
@@ -17,6 +18,7 @@ import Capsule from './capsule.svg';
 import CheckCircleFilled from './check-circle-filled.svg';
 import CheckCircle from './check-circle.svg';
 import Check from './check.svg';
+import ChevronDown from './chevron-down.svg';
 import ChevronSelectorVertical from './chevron-selector-vertical.svg';
 import ChevronUp from './chevron-up.svg';
 import Clock from './clock.svg';
@@ -88,6 +90,7 @@ import PintrestBrand from './pintrest-brand.svg';
 import Pintrest from './pintrest.svg';
 import PlusCircle from './plus-circle.svg';
 import Plus from './plus.svg';
+import Polygon from './polygon.svg';
 import PuzzlePiece from './puzzle-piece.svg';
 import QrCode02 from './qr-code-02.svg';
 import QrCode from './qr-code.svg';
@@ -363,6 +366,7 @@ export const Icons = {
   appleBrand: AppleBrand,
   apple: Apple,
   arrowCircleBrokenDownLeft: ArrowCircleBrokenDownLeft,
+  arrowCircleDownFilled: ArrowCircleDownFilled,
   arrowNarrow: ArrowNarrow,
   arrow: Arrow,
   backupKit: BackupKit,
@@ -375,6 +379,7 @@ export const Icons = {
   checkCircleFilled: CheckCircleFilled,
   checkCircle: CheckCircle,
   check: Check,
+  chevronDown: ChevronDown,
   chevronSelectorVertical: ChevronSelectorVertical,
   chevronUp: ChevronUp,
   clock: Clock,
@@ -446,6 +451,7 @@ export const Icons = {
   pintrest: Pintrest,
   plusCircle: PlusCircle,
   plus: Plus,
+  polygon: Polygon,
   puzzlePiece: PuzzlePiece,
   qrCode02: QrCode02,
   qrCode: QrCode,

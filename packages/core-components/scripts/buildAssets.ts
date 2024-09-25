@@ -12,6 +12,7 @@ function toPascalCase(text) {
 function clearAndUpper(text) {
   return text.replace(/-/, '').toUpperCase();
 }
+
 const buildIconLibrary = () => {
   let files: string[] = fs.readdirSync('./src/assets/icons');
   let flagFiles = fs.readdirSync('./src/assets/icons/flags');

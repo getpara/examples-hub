@@ -14,6 +14,7 @@ import { WalletScheme } from '@usecapsule/user-management-client';
 export async function authLogin(
   capsule: Capsule,
   partnerId: string,
+  userId: string,
   email: string,
   phone: string,
   countryCode: CountryCallingCode,
@@ -24,7 +25,10 @@ export async function authLogin(
   let identifier;
   let data;
 
-  if (email !== 'null' && email !== undefined && email !== '') {
+  if (userId !== 'null' && userId !== undefined && userId !== '') {
+    identifier = userId;
+    data = await capsule.ctx.capsuleClient.getWebChallenge(null, null, null, null, null, userId);
+  } else if (email !== 'null' && email !== undefined && email !== '') {
     identifier = email;
     data = await capsule.ctx.capsuleClient.getWebChallenge(encodeURIComponent(email));
   } else if (phone !== 'null' && phone !== undefined && phone !== '') {

@@ -1,4 +1,8 @@
-export function openPopup(popupUrl: string, target: string, type: 'OAUTH' | 'LOGIN_PASSKEY' | 'CREATE_PASSKEY'): Window {
+export function openPopup(
+  popupUrl: string,
+  target: string,
+  type: 'OAUTH' | 'LOGIN_PASSKEY' | 'CREATE_PASSKEY' | 'TRANSACTION_REVIEW',
+): Window {
   const popUpWidth = 550;
   let popUpHeight: number;
 
@@ -9,6 +13,10 @@ export function openPopup(popupUrl: string, target: string, type: 'OAUTH' | 'LOG
     }
     case 'CREATE_PASSKEY': {
       popUpHeight = 464;
+      break;
+    }
+    case 'TRANSACTION_REVIEW': {
+      popUpHeight = 480;
       break;
     }
     case 'OAUTH':

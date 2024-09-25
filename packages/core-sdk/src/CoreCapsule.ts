@@ -33,12 +33,13 @@ import {
 import { getBaseUrl, initClient } from './external/capsuleClient.js';
 import * as mpcComputationClient from './external/mpcComputationClient.js';
 import { distributeNewShare } from './shares/shareDistribution.js';
-import { Theme, FullSignatureRes, SuccessfulSignatureRes, DeniedSignatureRes } from './types/index.js';
+import { Theme, FullSignatureRes, SuccessfulSignatureRes, DeniedSignatureRes, PopupType } from './types/index.js';
 import * as transmissionUtils from './transmission/transmissionUtils.js';
 import { PlatformUtils } from './PlatformUtils.js';
 import { sendRecoveryForShare } from './shares/recovery.js';
 import parsePhoneNumberFromString, { CountryCallingCode } from 'libphonenumber-js';
 import { getCosmosAddress, isCosmosWithPrefix, truncateAddress } from './utils/formattingUtils.js';
+import { TransactionReviewError } from './errors.js';
 
 const CORE_CAPSULE_VERSION = process.env.CORE_CAPSULE_VERSION;
 
@@ -2524,10 +2525,14 @@ export abstract class CoreCapsule {
     }
 
     if ((signRes as DeniedSignatureRes).pendingTransactionId) {
-      return {
-        ...signRes,
-        transactionReviewUrl: await this.getTransactionReviewUrl((signRes as DeniedSignatureRes).pendingTransactionId),
-      };
+      this.platformUtils.openPopup(
+        await this.getTransactionReviewUrl((signRes as DeniedSignatureRes).pendingTransactionId),
+        { type: PopupType.SIGN_MESSAGE_REVIEW },
+      );
+
+      throw new TransactionReviewError(
+        await this.getTransactionReviewUrl((signRes as DeniedSignatureRes).pendingTransactionId),
+      );
     }
 
     return signRes as SuccessfulSignatureRes;
@@ -2547,7 +2552,7 @@ export abstract class CoreCapsule {
     if (wallet.partnerId && !wallet.userId) {
       signerId = wallet.partnerId;
     }
-    const res = await this.platformUtils.signTransaction(
+    const signRes = await this.platformUtils.signTransaction(
       this.ctx,
       signerId,
       walletId,
@@ -2557,14 +2562,19 @@ export abstract class CoreCapsule {
       this.retrieveSessionCookie(),
       wallet.scheme === WalletScheme.DKLS,
     );
-    if ((res as DeniedSignatureRes).pendingTransactionId) {
-      return {
-        ...res,
-        transactionReviewUrl: await this.getTransactionReviewUrl((res as DeniedSignatureRes).pendingTransactionId),
-      };
+
+    if ((signRes as DeniedSignatureRes).pendingTransactionId) {
+      this.platformUtils.openPopup(
+        await this.getTransactionReviewUrl((signRes as DeniedSignatureRes).pendingTransactionId),
+        { type: PopupType.SIGN_TRANSACTION_REVIEW },
+      );
+
+      throw new TransactionReviewError(
+        await this.getTransactionReviewUrl((signRes as DeniedSignatureRes).pendingTransactionId),
+      );
     }
 
-    return res as SuccessfulSignatureRes;
+    return signRes as SuccessfulSignatureRes;
   }
 
   /**
@@ -2577,7 +2587,7 @@ export abstract class CoreCapsule {
     this.assertIsValidWalletId(walletId);
 
     const wallet = this.wallets[walletId];
-    const res = await this.platformUtils.sendTransaction(
+    const signRes = await this.platformUtils.sendTransaction(
       this.ctx,
       this.userId,
       walletId,
@@ -2588,14 +2598,18 @@ export abstract class CoreCapsule {
       wallet.scheme === WalletScheme.DKLS,
     );
 
-    if ((res as DeniedSignatureRes).pendingTransactionId) {
-      return {
-        ...res,
-        transactionReviewUrl: await this.getTransactionReviewUrl((res as DeniedSignatureRes).pendingTransactionId),
-      };
+    if ((signRes as DeniedSignatureRes).pendingTransactionId) {
+      this.platformUtils.openPopup(
+        await this.getTransactionReviewUrl((signRes as DeniedSignatureRes).pendingTransactionId),
+        { type: PopupType.SIGN_TRANSACTION_REVIEW },
+      );
+
+      throw new TransactionReviewError(
+        await this.getTransactionReviewUrl((signRes as DeniedSignatureRes).pendingTransactionId),
+      );
     }
 
-    return res as SuccessfulSignatureRes;
+    return signRes as SuccessfulSignatureRes;
   }
 
   isProviderModalDisabled(): boolean {

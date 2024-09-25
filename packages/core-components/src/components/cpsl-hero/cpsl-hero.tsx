@@ -101,11 +101,11 @@ export class CpslHero {
             )}
           </div>
         </div>
-        <cpsl-text variant="headingXS" color="primary" weight="medium">
+        <cpsl-text variant="headingXS" color="primary" weight="semiBold">
           {this.title}
         </cpsl-text>
         {this.subtitle && (
-          <cpsl-text variant="bodyM" color="secondary">
+          <cpsl-text variant="bodyS" weight="medium" color="secondary">
             {this.subtitle}
           </cpsl-text>
         )}

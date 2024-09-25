@@ -11,6 +11,7 @@ import { defineCustomElements } from '@usecapsule/react-components';
 import { CapsuleProvider } from './components/CapsuleContext';
 import Recovery from './pages/Recovery/Recovery';
 import { ENV } from './constants';
+import TransactionReview from './pages/TransactionReview/TransactionReview';
 
 defineCustomElements();
 
@@ -32,6 +33,7 @@ const App = () => {
         <Route element={<ModalLayout />} path="/web">
           <Route element={<AuthCreation />} path="users/:userId/biometrics/:biometricId" />
           <Route element={<AuthLogin />} path="biometrics/login" />
+          <Route element={<TransactionReview />} path="users/:userId/transaction-review/:pendingTransactionId" />
         </Route>
         <Route element={<ShortUrl />} path="/short/:shortenedUrl" />
       </Routes>
