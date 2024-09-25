@@ -48,7 +48,7 @@ export const DeleteUserModal = ({ open, userEmail, userId, onClose, onExited }: 
       subtitle="Are your sure you want to delete this user?"
     >
       <>
-        <CpslInput value={userEmail} disabled />
+        <CpslInput placeholder={userEmail} disabled />
         <CpslButton variant="destructive" fullWidth onClick={handleDeleteClick}>
           Delete User
         </CpslButton>

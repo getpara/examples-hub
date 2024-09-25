@@ -1,4 +1,5 @@
 import { Component, Host, Element, h, Prop, State, EventEmitter, Event, Watch, Listen } from '@stencil/core';
+import { IconType } from '../../interface';
 
 @Component({
   tag: 'cpsl-select',
@@ -58,9 +59,20 @@ export class CpslSelect {
   @Prop() id: string = `${this.inputId}-trigger`;
 
   /**
+   * The name of the icon to use for the end icon.
+   * Default: `chevronUp`
+   */
+  @Prop() icon?: IconType = 'chevronUp';
+
+  /**
    * The label for the input.
    */
   @Prop() label?: string;
+
+  /**
+   * Whether or not to show the rotation animation for the end icon.
+   */
+  @Prop() noIconAnimation?: boolean;
 
   /**
    * Placeholder to display if `selectedValue` is empty.
@@ -211,7 +223,7 @@ export class CpslSelect {
             {!this.required && this.showOptionalLabel ? <span class="optional-label">(optional)</span> : ''}
           </label>
         )}
-        <div id="select-container" class={{ 'select-container': true, 'error-container': Boolean(this.errorText) }} onMouseDown={this.handleClick}>
+        <div part="select-container" id="select-container" class={{ 'select-container': true, 'error-container': Boolean(this.errorText) }} onMouseDown={this.handleClick}>
           {this.hasSelectedItem && this.showFormattedSelectedItem && <slot name="selected-item"></slot>}
           <div class={{ 'selected-container-content': true, 'hidden': this.hasSelectedItem && this.showFormattedSelectedItem }} id="selected-container-content" style={{}}>
             {(!this.hasSelectedItem || !this.showFormattedSelectedItem) && (
@@ -220,7 +232,7 @@ export class CpslSelect {
               </cpsl-text>
             )}
           </div>
-          <cpsl-icon class={{ 'chevron': true, 'open': this.popoverOpen, 'has-value': Boolean(this.selectedValue) }} icon="chevronUp" />
+          <cpsl-icon part="icon" class={{ 'chevron': true, 'open': !this.noIconAnimation && this.popoverOpen, 'has-value': Boolean(this.selectedValue) }} icon={this.icon} />
           <input
             id={this.inputId}
             disabled={this.disabled}

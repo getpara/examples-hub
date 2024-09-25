@@ -5,8 +5,8 @@ import { CapsuleBlack } from '../../components/Icons';
 import { CpslText } from '@usecapsule/react-components';
 import { useIsLoggedIn } from '../../hooks/useIsLoggedIn';
 import { useGetOrganizationAccess } from '../../hooks/api/queries/useOrganizations';
-import { Loader } from '../../components/Loader';
 import { useEffect } from 'react';
+import { MainLoader } from '../../components/MainLoader';
 
 export const Layout = () => {
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ export const Layout = () => {
   }, [access?.hasAccess, isLoggedIn, navigate]);
 
   if (isLoadingLoggedIn || isLoadingOrgs) {
-    return <Loader />;
+    return <MainLoader />;
   }
 
   if (isLoggedIn && access?.hasAccess) {

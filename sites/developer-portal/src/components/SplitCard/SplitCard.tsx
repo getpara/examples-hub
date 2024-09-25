@@ -26,6 +26,8 @@ const Card = styled(BaseCard)<{
   $isSelected?: boolean;
   $isSelectable?: boolean;
 }>`
+  max-width: 1200px;
+
   ${({ $isSelected }) => ($isSelected ? '--card-border-color: var(--cpsl-color-input-border-active)' : '')};
 
   ${({ $isSelectable }) => ($isSelectable ? 'cursor: pointer' : '')};

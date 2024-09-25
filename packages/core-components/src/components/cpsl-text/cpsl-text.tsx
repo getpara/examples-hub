@@ -1,5 +1,7 @@
 import { Component, Host, Prop, h } from '@stencil/core';
 
+const TEXT_EL_PART = 'text-element';
+
 @Component({
   tag: 'cpsl-text',
   styleUrl: 'cpsl-text.scss',
@@ -31,49 +33,49 @@ export class CpslText {
     switch (this.variant) {
       case 'headingXS': {
         return (
-          <h6>
+          <h6 part={TEXT_EL_PART}>
             <slot></slot>
           </h6>
         );
       }
       case 'headingS': {
         return (
-          <h5>
+          <h5 part={TEXT_EL_PART}>
             <slot></slot>
           </h5>
         );
       }
       case 'headingM': {
         return (
-          <h4>
+          <h4 part={TEXT_EL_PART}>
             <slot></slot>
           </h4>
         );
       }
       case 'headingL': {
         return (
-          <h3>
+          <h3 part={TEXT_EL_PART}>
             <slot></slot>
           </h3>
         );
       }
       case 'headingXL': {
         return (
-          <h2>
+          <h2 part={TEXT_EL_PART}>
             <slot></slot>
           </h2>
         );
       }
       case 'heading2XL': {
         return (
-          <h1>
+          <h1 part={TEXT_EL_PART}>
             <slot></slot>
           </h1>
         );
       }
       default: {
         return (
-          <p>
+          <p part={TEXT_EL_PART}>
             <slot></slot>
           </p>
         );

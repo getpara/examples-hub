@@ -6,9 +6,10 @@ import { useIsMobile } from '../../hooks/useIsMobile';
 import { useEffect, useState } from 'react';
 import { MOBILE_SIZE } from '../../utils/constants';
 import { useIsLoggedIn } from '../../hooks/useIsLoggedIn';
-import { useGetOrganizationAccess } from '../../hooks/api/queries/useOrganizations';
+import { useGetAllOrganizationsWithAccess, useGetOrganizationAccess } from '../../hooks/api/queries/useOrganizations';
 import { useLogout } from '../../hooks/useLogout';
-import { Loader } from '../../components/Loader';
+import { useAppStore } from '../../stores/app/useAppStore';
+import { MainLoader } from '../../components/MainLoader';
 
 export const Layout = () => {
   const { logout } = useLogout();
@@ -17,19 +18,26 @@ export const Layout = () => {
   const [isNavExpanded, setIsNavExpanded] = useState(false);
   const { isLoggedIn, isLoading: isLoadingLoggedIn } = useIsLoggedIn();
   const { data: access, isLoading: isLoadingOrgs } = useGetOrganizationAccess();
+  const { data: orgsWithAccess } = useGetAllOrganizationsWithAccess();
+  const setSelectedOrganization = useAppStore(state => state.setSelectedOrganization);
 
   useEffect(() => {
     if (!isLoadingOrgs && !access?.hasAccess) {
-      navigate('/login/request-access', { replace: true });
+      if (!orgsWithAccess?.length) {
+        navigate('/login/request-access', { replace: true });
+      } else {
+        setSelectedOrganization(orgsWithAccess[0]!.id);
+        navigate('/', { replace: true });
+      }
     }
-  }, [access?.hasAccess, isLoadingOrgs, isLoggedIn, navigate]);
+  }, [access?.hasAccess, isLoadingOrgs, isLoggedIn, navigate, orgsWithAccess]);
 
   const closeNav = () => {
     setIsNavExpanded(false);
   };
 
   if (isLoadingLoggedIn || isLoadingOrgs) {
-    return <Loader />;
+    return <MainLoader />;
   }
 
   if (!isLoggedIn) {
@@ -46,11 +54,11 @@ export const Layout = () => {
       <AppBar setNavOpen={setIsNavExpanded} />
       <NavBar isOpen={isNavExpanded} closeNav={closeNav} />
       <Main $sidebarWidth={isMobile ? 0 : EXPANDED_SIDEBAR_WIDTH}>
-        <OuterContainer>
+        <div>
           <InnerContainer>
             <Outlet />
           </InnerContainer>
-        </OuterContainer>
+        </div>
       </Main>
     </>
   );
@@ -68,13 +76,6 @@ const Main = styled.main<{ $sidebarWidth: number }>`
     max-height: calc(100vh - ${APP_BAR_HEIGHT}px);
     padding: 0px 24px;
   }
-`;
-
-const OuterContainer = styled.div`
-  flex: 1;
-  max-width: 1200px;
-  margin-left: auto;
-  margin-right: auto;
 `;
 
 const InnerContainer = styled.div`

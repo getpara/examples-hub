@@ -17,6 +17,7 @@ import Capsule from './capsule.svg';
 import CheckCircleFilled from './check-circle-filled.svg';
 import CheckCircle from './check-circle.svg';
 import Check from './check.svg';
+import ChevronSelectorVertical from './chevron-selector-vertical.svg';
 import ChevronUp from './chevron-up.svg';
 import Clock from './clock.svg';
 import Close from './close.svg';
@@ -374,6 +375,7 @@ export const Icons = {
   checkCircleFilled: CheckCircleFilled,
   checkCircle: CheckCircle,
   check: Check,
+  chevronSelectorVertical: ChevronSelectorVertical,
   chevronUp: ChevronUp,
   clock: Clock,
   close: Close,

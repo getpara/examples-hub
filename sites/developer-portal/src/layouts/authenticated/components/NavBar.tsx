@@ -1,12 +1,13 @@
-import { CpslButton, CpslDrawer, CpslIcon } from '@usecapsule/react-components';
+import { CpslButton, CpslDrawer, CpslIcon, CpslText } from '@usecapsule/react-components';
 import styled from 'styled-components';
 import { Navigation } from './Navigation';
-import { User } from '../../../components/User/User';
 import { NavBarFooter } from './NavBarFooter';
 import { useIsMobile } from '../../../hooks/useIsMobile';
 import { APP_BAR_HEIGHT } from './AppBar';
 import { MOBILE_SIZE } from '../../../utils/constants';
 import { useLogout } from '../../../hooks/useLogout';
+import { useOrganizationMember } from '../../../hooks/api/queries/useOrganizationMember';
+import { Organizations } from './Organizations';
 
 export const EXPANDED_SIDEBAR_WIDTH = 312;
 
@@ -18,6 +19,9 @@ interface NavBarProps {
 export const NavBar = ({ isOpen, closeNav }: NavBarProps) => {
   const isMobile = useIsMobile();
   const { logout } = useLogout();
+  const { data: orgMember } = useOrganizationMember();
+
+  const userName = orgMember?.user?.name ?? orgMember?.user?.email ?? '';
 
   return (
     <Drawer
@@ -30,14 +34,13 @@ export const NavBar = ({ isOpen, closeNav }: NavBarProps) => {
       zIndexOverride={isMobile ? 9999 : undefined}
     >
       <Container>
-        {!isMobile && (
-          <UserContainer>
-            <User />
-          </UserContainer>
-        )}
+        <Organizations />
         <Navigation closeNav={closeNav} />
         <BottomContainer>
-          <CpslButton fullWidth variant="secondary" onClick={logout}>
+          <Username variant="bodyS" weight="medium">
+            {userName}
+          </Username>
+          <CpslButton size="small" fullWidth variant="secondary" onClick={logout}>
             Log Out
             <CpslIcon icon="logOut" />
           </CpslButton>
@@ -52,6 +55,11 @@ const Drawer = styled(CpslDrawer)`
   @media (max-width: ${MOBILE_SIZE}px) {
     box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.05);
   }
+`;
+
+const Username = styled(CpslText)`
+  width: 100%;
+  padding: 16px 0px;
 `;
 
 const BottomContainer = styled.div`
@@ -75,9 +83,4 @@ const Container = styled.div`
   @media (min-width: ${MOBILE_SIZE + 1}px) {
     padding: 0px 0px;
   }
-`;
-
-const UserContainer = styled.div`
-  width: 100%;
-  padding: 24px;
 `;

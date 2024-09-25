@@ -736,6 +736,10 @@ export namespace Components {
          */
         "helperText"?: string;
         /**
+          * The name of the icon to use for the end icon. Default: `chevronUp`
+         */
+        "icon"?: IconType;
+        /**
           * ID of the element, must be unique for the popover trigger.
          */
         "id": string;
@@ -743,6 +747,10 @@ export namespace Components {
           * The label for the input.
          */
         "label"?: string;
+        /**
+          * Whether or not to show the rotation animation for the end icon.
+         */
+        "noIconAnimation"?: boolean;
         /**
           * Placeholder to display if `selectedValue` is empty.
          */
@@ -2269,6 +2277,10 @@ declare namespace LocalJSX {
          */
         "helperText"?: string;
         /**
+          * The name of the icon to use for the end icon. Default: `chevronUp`
+         */
+        "icon"?: IconType;
+        /**
           * ID of the element, must be unique for the popover trigger.
          */
         "id"?: string;
@@ -2276,6 +2288,10 @@ declare namespace LocalJSX {
           * The label for the input.
          */
         "label"?: string;
+        /**
+          * Whether or not to show the rotation animation for the end icon.
+         */
+        "noIconAnimation"?: boolean;
         /**
           * Emitted when the input loses focus.
          */

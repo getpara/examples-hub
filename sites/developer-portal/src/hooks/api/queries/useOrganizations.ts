@@ -34,6 +34,12 @@ export const useGetAllOrganizations = (retry?: boolean) => {
   }, retry);
 };
 
+export const useGetAllOrganizationsWithAccess = (retry?: boolean) => {
+  return useOrganizationsQuery(data => {
+    return data.filter(d => d.hasDevPortalAccess);
+  }, retry);
+};
+
 export const useGetSelectedOrganization = () => {
   const selectedOrganizationId = useAppStore(state => state.getSelectedOrganization());
 

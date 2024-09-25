@@ -127,7 +127,7 @@ export function Table({
 const OuterContainer = styled.div<{ $noData: boolean }>`
   display: flex;
   min-height: ${({ $noData }) => ($noData ? '500px' : '0px')};
-  max-width: 100vw;
+  max-width: 1200px;
 
   @media (max-width: ${MOBILE_SIZE}px) {
     height: calc(100vh - ${APP_BAR_HEIGHT}px);
