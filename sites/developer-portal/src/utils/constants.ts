@@ -1,4 +1,6 @@
 import { Environment } from '../types/environment';
+import { Framework } from '../types/framework';
+import { PackageManager } from '../types/packageManager';
 
 export const ENV_VARS = {
   environment: import.meta.env.VITE_ENVIRONMENT as string,
@@ -18,13 +20,21 @@ export const BRAND_COLORS = {
 };
 
 export const DOCS_LINK = 'https://docs.usecapsule.com/';
+export const REACT_DOCS_LINK = 'https://docs.usecapsule.com/getting-started/initial-setup/web-modal-and-sdk-setup';
+export const WEB_DOCS_LINK = 'https://docs.usecapsule.com/getting-started/initial-setup/web-modal-and-sdk-setup';
+export const NODE_DOCS_LINK = 'https://docs.usecapsule.com/getting-started/initial-setup/server';
+export const REACT_NATIVE_DOCS_LINK = 'https://docs.usecapsule.com/getting-started/initial-setup/react-native';
+export const EXPO_DOCS_LINK = 'https://docs.usecapsule.com/getting-started/initial-setup/expo';
+export const FLUTTER_DOCS_LINK = 'https://docs.usecapsule.com/getting-started/initial-setup/flutter-setup';
+export const SWIFT_DOCS_LINK = 'https://docs.usecapsule.com/getting-started/initial-setup/swift-sdk-setup';
+
+export const NEXT_EXTRA_DOCS_LINK = 'https://docs.usecapsule.com/troubleshooting/nextjs';
+export const VITE_EXTRA_DOCS_LINK = 'https://docs.usecapsule.com/troubleshooting/react-vite';
 
 export const MOBILE_SIZE = 1000;
 
 export const IS_PROD = ENV_VARS.environment === Environment.PROD;
 export const IS_BETA = ENV_VARS.environment === Environment.BETA;
-// TODO: this can be removed when sample data is removed
-export const IS_DEMO = true;
 
 export const EMAIL_FONTS = [
   'Arial',
@@ -40,3 +50,20 @@ export const EMAIL_FONTS = [
 export const TWITTER_URL = 'https://twitter.com/usecapsule';
 export const LINKEDIN_URL = 'https://www.linkedin.com/company/usecapsule';
 export const SUPPORT_URL = 'mailto:support@usecapsule.com';
+
+export const FRAMEWORK_OPTIONS: Framework[] = [
+  Framework.REACT,
+  Framework.NEXT,
+  Framework.VITE,
+  Framework.VUE,
+  Framework.SVELTE,
+  Framework.REACT_NATIVE,
+  Framework.EXPO,
+  Framework.FLUTTER,
+  Framework.SWIFT,
+  Framework.NODE,
+  Framework.DENO,
+  Framework.BUN,
+];
+
+export const PACKAGE_MANAGER_OPTIONS: PackageManager[] = [PackageManager.NPM, PackageManager.YARN, PackageManager.PNPM];

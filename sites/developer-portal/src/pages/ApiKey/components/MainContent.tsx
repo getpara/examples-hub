@@ -4,8 +4,13 @@ import { MOBILE_SIZE } from '../../../utils/constants';
 import { ConfigurationTab } from './ConfigurationTab';
 import { UsersTab } from './UsersTab';
 import { Tabs } from '../../../components/Tabs/Tabs';
+import { SetupTab } from './SetupTab';
 
 const TABS = [
+  {
+    label: 'Setup',
+    value: 'setup',
+  },
   {
     label: 'Configuration',
     value: 'configuration',
@@ -24,6 +29,7 @@ export const MainContent = () => {
   };
 
   const Content: { [k: string]: ReactNode } = {
+    setup: <SetupTab />,
     configuration: <ConfigurationTab />,
     users: <UsersTab />,
   };

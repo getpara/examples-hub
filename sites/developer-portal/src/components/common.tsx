@@ -73,3 +73,7 @@ export const BaseCard = styled(CpslCard)`
 export const InlineText = styled(CpslText)`
   display: inline-block;
 `;
+
+export const CapitalizedText = styled(CpslText)`
+  text-transform: capitalize;
+`;

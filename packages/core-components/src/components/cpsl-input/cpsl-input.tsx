@@ -449,7 +449,7 @@ export class CpslInput {
             required={this.required}
             spellcheck={this.spellcheck}
             type={this.type}
-            defaultValue={this.value ?? ''}
+            value={this.value ?? ''}
             onInput={this.onInput}
             onChange={this.onChange}
             onFocus={this.onFocus}

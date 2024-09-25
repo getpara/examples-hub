@@ -7,16 +7,14 @@ import { useCreateProject } from '../../../hooks/api/mutations/useCreateProject'
 import { Framework } from '../../../types/framework';
 import { PackageManager } from '../../../types/packageManager';
 import { CpslSelectCustomEvent } from '@usecapsule/core-components';
-import { formatFrameworkName, formatPackageManagerName } from '../../../utils/project';
+import { FRAMEWORK_OPTIONS, PACKAGE_MANAGER_OPTIONS } from '../../../utils/constants';
+import { formatFrameworkName, frameworkHasPackageManager } from '../../../utils/framework';
+import { formatPackageManagerName } from '../../../utils/packageManager';
 
 interface CreateProjectModalProps {
   open: boolean;
   onClose: () => void;
 }
-
-const FRAMEWORK_OPTIONS: Framework[] = [Framework.REACT, Framework.REACT_NATIVE, Framework.VUE];
-
-const PACKAGE_MANAGER_OPTIONS: PackageManager[] = [PackageManager.NPM, PackageManager.YARN, PackageManager.PNPM];
 
 const DEFAULT_VALUES = {
   name: '',
@@ -111,52 +109,54 @@ export const CreateProjectModal = ({ open, onClose }: CreateProjectModalProps) =
                   errorText={error?.message}
                 >
                   {value && (
-                    <SelectItemContainer slot="selected-item">
-                      <EnvText>{formatFrameworkName(value as Framework)}</EnvText>
-                    </SelectItemContainer>
+                    <div slot="selected-item">
+                      <CpslText>{formatFrameworkName(value as Framework)}</CpslText>
+                    </div>
                   )}
                   {FRAMEWORK_OPTIONS.map(fw => (
                     <CpslSelectItem key={fw} slot="items" value={fw}>
-                      <SelectItemContainer>
-                        <EnvText>{formatFrameworkName(fw)}</EnvText>
-                      </SelectItemContainer>
+                      <div>
+                        <CpslText>{formatFrameworkName(fw)}</CpslText>
+                      </div>
                     </CpslSelectItem>
                   ))}
                 </CpslSelect>
               );
             }}
           />
-          <Controller
-            name="packageManager"
-            control={control}
-            render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => {
-              return (
-                <CpslSelect
-                  placeholder="Select Package Manager"
-                  onCpslSelectValueChange={(e: CpslSelectCustomEvent<string>) => {
-                    onChange(e.detail as PackageManager);
-                  }}
-                  onCpslBlur={onBlur}
-                  selectedValue={value}
-                  showFormattedSelectedItem
-                  errorText={error?.message}
-                >
-                  {value && (
-                    <SelectItemContainer slot="selected-item">
-                      <EnvText>{formatPackageManagerName(value as PackageManager)}</EnvText>
-                    </SelectItemContainer>
-                  )}
-                  {PACKAGE_MANAGER_OPTIONS.map(pm => (
-                    <CpslSelectItem key={pm} slot="items" value={pm}>
-                      <SelectItemContainer>
-                        <EnvText>{formatPackageManagerName(pm)}</EnvText>
-                      </SelectItemContainer>
-                    </CpslSelectItem>
-                  ))}
-                </CpslSelect>
-              );
-            }}
-          />
+          {frameworkHasPackageManager[(framework as Framework) ?? Framework.REACT] && (
+            <Controller
+              name="packageManager"
+              control={control}
+              render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => {
+                return (
+                  <CpslSelect
+                    placeholder="Select Package Manager"
+                    onCpslSelectValueChange={(e: CpslSelectCustomEvent<string>) => {
+                      onChange(e.detail as PackageManager);
+                    }}
+                    onCpslBlur={onBlur}
+                    selectedValue={value}
+                    showFormattedSelectedItem
+                    errorText={error?.message}
+                  >
+                    {value && (
+                      <div slot="selected-item">
+                        <CpslText>{formatPackageManagerName(value as PackageManager)}</CpslText>
+                      </div>
+                    )}
+                    {PACKAGE_MANAGER_OPTIONS.map(pm => (
+                      <CpslSelectItem key={pm} slot="items" value={pm}>
+                        <div>
+                          <CpslText>{formatPackageManagerName(pm)}</CpslText>
+                        </div>
+                      </CpslSelectItem>
+                    ))}
+                  </CpslSelect>
+                );
+              }}
+            />
+          )}
         </Content>
         <CpslButton disabled={!isValid} fullWidth onClick={handleCreateClick}>
           Next
@@ -170,16 +170,6 @@ const Content = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
-`;
-
-const SelectItemContainer = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`;
-
-const EnvText = styled(CpslText)`
-  text-transform: capitalize;
 `;
 
 const NameSubtitle = styled(CpslText)`

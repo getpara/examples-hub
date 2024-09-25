@@ -276,7 +276,11 @@ export class CpslPopover {
     if (!this.open && !this.disabled) {
       this.open = true;
       this.cpslOpen.emit();
-      this.setPosition();
+
+      // Using a small timeout here to ensure the popover is open before attempting to do position calculations
+      setTimeout(() => {
+        this.setPosition();
+      }, 40);
     }
   };
 

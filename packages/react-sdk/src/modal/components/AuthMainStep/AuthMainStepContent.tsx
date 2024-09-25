@@ -42,6 +42,7 @@ export const AuthMainStepContent = ({ oAuthMethods, disableEmailLogin, disablePh
         case AuthLayout.AUTH_FULL: {
           methods.push([
             <AuthOptions
+              key="authFull"
               oAuthMethods={oAuthMethods}
               disableEmailLogin={disableEmailLogin}
               disablePhoneLogin={disablePhoneLogin}

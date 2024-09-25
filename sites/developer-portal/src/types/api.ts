@@ -119,9 +119,25 @@ export type ApiKey = {
   onRampProviders: OnRampProvider[];
   onRampAssets?: Partial<Record<Network, true | OnRampAsset[]>>;
   rampApiKey?: string;
+  isUsed: boolean;
+  isInstalled: boolean;
 };
 
 export type ApiKeyResponse = { key: ApiKey };
+export type ApiKeySetupStatusResponse = {
+  isUsed: boolean;
+  isInstalled: boolean;
+  firstUser?: {
+    id: string;
+    userId: string;
+    user?: {
+      id: string;
+      email?: string;
+      phone?: { number: string; countryCode: string };
+      externalWallets?: { address: string }[];
+    };
+  };
+};
 export type ApiKeysResponse = { keys: ApiKey[] };
 export type UpdateApiKeyBody = Nullable<
   Partial<
@@ -149,6 +165,7 @@ export type UpdateApiKeyBody = Nullable<
       | 'onRampProviders'
       | 'onRampAssets'
       | 'rampApiKey'
+      | 'isInstalled'
     >
   >
 >;
