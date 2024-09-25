@@ -4,7 +4,7 @@ import styled from 'styled-components';
 export const MainLoader = () => {
   return (
     <Container>
-      <StyledSpinner />
+      <CpslSpinner />
     </Container>
   );
 };
@@ -15,8 +15,4 @@ const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-`;
-
-const StyledSpinner = styled(CpslSpinner)`
-  --background-color: var(--cpsl-color-background-4);
 `;

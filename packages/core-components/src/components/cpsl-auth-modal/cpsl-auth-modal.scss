@@ -49,6 +49,10 @@
   & .modal-body-card {
     --card-border-width: 1px;
   }
+
+  & .modal-container {
+    max-height: unset;
+  }
 }
 
 .modal-wrapper {

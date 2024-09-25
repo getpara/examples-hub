@@ -3,7 +3,7 @@ import { ReactElement } from 'react';
 import styled from 'styled-components';
 import { CpslPaginationCustomEvent } from '@usecapsule/core-components';
 import { MOBILE_SIZE } from '../../utils/constants';
-import { APP_BAR_HEIGHT } from '../../layouts/authenticated/components/AppBar';
+import { AUTH_APP_BAR_HEIGHT } from '../AppBar/AuthAppBar';
 
 export type TableData = {
   key: string;
@@ -130,7 +130,7 @@ const OuterContainer = styled.div<{ $noData: boolean }>`
   max-width: 1200px;
 
   @media (max-width: ${MOBILE_SIZE}px) {
-    height: calc(100vh - ${APP_BAR_HEIGHT}px);
+    height: calc(100vh - ${AUTH_APP_BAR_HEIGHT}px);
     margin-left: -16px;
     margin-right: -16px;
     margin-bottom: -16px;
@@ -138,7 +138,7 @@ const OuterContainer = styled.div<{ $noData: boolean }>`
     --container-border-width: 0px;
   }
   @media (min-width: ${MOBILE_SIZE + 1}px) {
-    max-height: calc(100vh - ${APP_BAR_HEIGHT}px);
+    max-height: calc(100vh - ${AUTH_APP_BAR_HEIGHT}px);
   }
 `;
 

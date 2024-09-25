@@ -1,8 +1,13 @@
 import { createBrowserRouter } from 'react-router-dom';
-import { AuthenticatedLayout, UnauthenticatedLayout } from './layouts';
-import { ApiKey, Billing, EarlyAccess, Home, Login, Project, RequestAccess, Team } from './pages';
+import { AuthenticatedLayout, OnboardingLayout, UnauthenticatedLayout } from './layouts';
+import { ApiKey, Billing, EarlyAccess, Home, Login, Onboarding, Project, Team } from './pages';
 
 export const router = createBrowserRouter([
+  {
+    path: '/onboarding',
+    element: <OnboardingLayout />,
+    children: [{ index: true, element: <Onboarding /> }],
+  },
   {
     path: '/',
     element: <AuthenticatedLayout />,
@@ -24,9 +29,6 @@ export const router = createBrowserRouter([
   {
     path: '/login',
     element: <UnauthenticatedLayout />,
-    children: [
-      { index: true, element: <Login /> },
-      { path: 'request-access', element: <RequestAccess /> },
-    ],
+    children: [{ index: true, element: <Login /> }],
   },
 ]);

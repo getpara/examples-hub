@@ -11,8 +11,12 @@ export const acceptOrganizationInvite = async ({ userId, organizationId }: Accep
   return (await axiosClient.post<boolean>(endpoint)).data;
 };
 
-export const requestOrganizationAccess = (userId: string) => {
+export type RequestOrganizationAccessVars = {
+  userId: string;
+  organizationName: string;
+};
+export const requestOrganizationAccess = async ({ userId, organizationName }: RequestOrganizationAccessVars) => {
   const endpoint = `/users/${userId}/organizations/request-dev-portal-access`;
 
-  return axiosClient.post<OrganizationResponse>(endpoint);
+  return (await axiosClient.post<OrganizationResponse>(endpoint, { organizationName })).data;
 };

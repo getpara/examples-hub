@@ -3,12 +3,12 @@ import { persist } from 'zustand/middleware';
 import { getActions } from './actions.js';
 
 interface AppState {
-  userSelectedOrganizationId: { [k: string]: string };
+  userSelectedOrganizationId: { [k: string]: string | undefined };
 }
 
 export interface AppActions {
   resetState: () => void;
-  setSelectedOrganization: (orgId: string) => void;
+  setSelectedOrganization: (orgId?: string) => void;
   getSelectedOrganization: () => string | undefined;
 }
 

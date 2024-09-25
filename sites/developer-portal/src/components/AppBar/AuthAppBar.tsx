@@ -1,20 +1,20 @@
 import { CpslAlert, CpslAppBar, CpslButton, CpslIcon } from '@usecapsule/react-components';
 import styled from 'styled-components';
-import { EXPANDED_SIDEBAR_WIDTH } from './NavBar';
-import { DOCS_LINK, MOBILE_SIZE } from '../../../utils/constants';
-import { useIsMobile } from '../../../hooks/useIsMobile';
-import { User } from '../../../components/User/User';
+import { DOCS_LINK, MOBILE_SIZE } from '../../utils/constants';
+import { useIsMobile } from '../../hooks/useIsMobile';
+import { User } from '../User/User';
 import { Dispatch, SetStateAction } from 'react';
-import { DocsButton } from '../../../components/DocsButton/DocsButton';
-import { useAppBanner } from '../../../hooks/configs/useAppBanner';
+import { DocsButton } from '../DocsButton/DocsButton';
+import { useAppBanner } from '../../hooks/configs/useAppBanner';
+import { EXPANDED_SIDEBAR_WIDTH } from '../../layouts/authenticated/components/NavBar';
 
-export const APP_BAR_HEIGHT = 80;
+export const AUTH_APP_BAR_HEIGHT = 80;
 
-interface AppBarProps {
+interface AuthAppBarProps {
   setNavOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-export const AppBar = ({ setNavOpen }: AppBarProps) => {
+export const AuthAppBar = ({ setNavOpen }: AuthAppBarProps) => {
   const isMobile = useIsMobile();
   const { bannerText } = useAppBanner();
 
@@ -23,7 +23,7 @@ export const AppBar = ({ setNavOpen }: AppBarProps) => {
   };
 
   return (
-    <CpslAppBar height={APP_BAR_HEIGHT}>
+    <CpslAppBar height={AUTH_APP_BAR_HEIGHT}>
       <Container $sidebarWidth={isMobile ? 0 : EXPANDED_SIDEBAR_WIDTH}>
         {isMobile ? (
           <>

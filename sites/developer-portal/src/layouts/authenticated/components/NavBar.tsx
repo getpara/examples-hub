@@ -3,11 +3,11 @@ import styled from 'styled-components';
 import { Navigation } from './Navigation';
 import { NavBarFooter } from './NavBarFooter';
 import { useIsMobile } from '../../../hooks/useIsMobile';
-import { APP_BAR_HEIGHT } from './AppBar';
 import { MOBILE_SIZE } from '../../../utils/constants';
 import { useLogout } from '../../../hooks/useLogout';
 import { useOrganizationMember } from '../../../hooks/api/queries/useOrganizationMember';
 import { Organizations } from './Organizations';
+import { AUTH_APP_BAR_HEIGHT } from '../../../components/AppBar/AuthAppBar';
 
 export const EXPANDED_SIDEBAR_WIDTH = 312;
 
@@ -29,7 +29,7 @@ export const NavBar = ({ isOpen, closeNav }: NavBarProps) => {
       anchor={isMobile ? 'top' : 'left'}
       open={isMobile ? isOpen : true}
       variant={isMobile ? 'temporary' : 'permanent'}
-      anchorPosition={isMobile ? APP_BAR_HEIGHT : 0}
+      anchorPosition={isMobile ? AUTH_APP_BAR_HEIGHT : 0}
       noOverlay
       zIndexOverride={isMobile ? 9999 : undefined}
     >
