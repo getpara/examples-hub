@@ -6,7 +6,6 @@ import { formatEnvName, getKeyColor } from '../../../utils/apiKey';
 import { Modal } from '../../../components/Modal/Modal';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { useCreateApiKey } from '../../../hooks/api/mutations/useCreateApiKey';
-import { ENV_VARS, IS_PROD } from '../../../utils/constants';
 import { triggerToast } from '../../../utils/toasts';
 import { useParams } from 'react-router-dom';
 import { HTTPS_URL_REGEX } from '../../../utils/regex';
@@ -18,7 +17,7 @@ interface CreateKeyModalProps {
 }
 
 const DEFAULT_VALUES = {
-  environment: IS_PROD ? undefined : (ENV_VARS.environment as Environment),
+  environment: '',
   homepageUrl: '',
 };
 

@@ -52,8 +52,8 @@ export const useGetAvailableKeyEnvs = (projectId: string) => {
 
         switch (ENV_VARS.environment as Environment) {
           case Environment.PROD: {
-            const hasProdKey = !!unArchivedKeys.find(d => d.environment === Environment.PROD);
-            const hasBetaKey = !!unArchivedKeys.find(d => d.environment === Environment.BETA);
+            const hasProdKey = !!unArchivedKeys.find(d => d.environment.toUpperCase() === Environment.PROD);
+            const hasBetaKey = !!unArchivedKeys.find(d => d.environment.toUpperCase() === Environment.BETA);
 
             if (!hasProdKey && canCreateProdKeys) {
               availableOptions.push(Environment.PROD);
@@ -64,8 +64,8 @@ export const useGetAvailableKeyEnvs = (projectId: string) => {
             break;
           }
           case Environment.BETA: {
-            const hasBetaKey = !!unArchivedKeys.find(d => d.environment === Environment.BETA);
-            const hasSandboxKey = !!unArchivedKeys.find(d => d.environment === Environment.SANDBOX);
+            const hasBetaKey = !!unArchivedKeys.find(d => d.environment.toUpperCase() === Environment.BETA);
+            const hasSandboxKey = !!unArchivedKeys.find(d => d.environment.toUpperCase() === Environment.SANDBOX);
 
             if (!hasBetaKey && canCreateProdKeys) {
               availableOptions.push(Environment.BETA);
