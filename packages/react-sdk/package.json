@@ -18,6 +18,7 @@
     "@stripe/stripe-js": "^3.4.0",
     "@usecapsule/react-components": "3.5.1",
     "@usecapsule/web-sdk": "2.0.1",
+    "detect-browser": "^5.3.0",
     "date-fns": "^3.6.0",
     "framer-motion": "11.3.28",
     "libphonenumber-js": "^1.11.1",

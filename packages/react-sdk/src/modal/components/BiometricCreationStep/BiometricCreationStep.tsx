@@ -1,9 +1,11 @@
-import { CpslButton, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon, CpslQrCode, CpslSpinner, CpslText } from '@usecapsule/react-components';
 import { useEffect, useState } from 'react';
 import { useCapsuleStore, useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
-import { InnerStepContainer, StepContainer, Heading } from '../common.js';
+import { InnerStepContainer, StepContainer, Heading, QRContainer } from '../common.js';
 import { openPopup } from '../../utils/openPopup.js';
+import { isPasskeySupported } from '../../utils/isPasskeySupported.js';
+import { useCopyToClipboard } from '../../hooks/useCopyToClipboard.js';
 
 const SHORTENING_AVAILABLE = true;
 
@@ -13,6 +15,8 @@ export const BiometricCreationStep = () => {
   const setStep = useModalStore(state => state.setStep);
   const capsule = useCapsuleStore(state => state.capsule);
   const [shortLoginLink, setShortLoginLink] = useState<string>();
+
+  const [isCopied, copy] = useCopyToClipboard();
 
   useEffect(() => {
     if (currentStep !== ModalStep.BIOMETRIC_LOGIN) {
@@ -38,6 +42,10 @@ export const BiometricCreationStep = () => {
     setStep(ModalStep.AWAITING_BIOMETRIC_CREATION);
   };
 
+  const handleCopy = () => {
+    copy(shortLoginLink);
+  };
+
   return (
     <StepContainer $wide>
       <InnerStepContainer>
@@ -48,9 +56,23 @@ export const BiometricCreationStep = () => {
           Your Passkey keeps your account safe.
         </CpslText>
       </InnerStepContainer>
-      <CpslButton fullWidth onClick={handlePasskeyClick}>
-        Create
-      </CpslButton>
+
+      <InnerStepContainer>
+        {isPasskeySupported() ? (
+          <CpslButton fullWidth onClick={handlePasskeyClick}>
+            Create
+          </CpslButton>
+        ) : (
+          <>
+            <CpslText weight="semiBold">Scan with your mobile device</CpslText>
+            <QRContainer>{!shortLoginLink ? <CpslSpinner size={100} /> : <CpslQrCode url={shortLoginLink} />}</QRContainer>
+            <CpslButton size="small" variant="ghost" onClick={handleCopy}>
+              <CpslIcon slot="start" icon={isCopied ? 'check' : 'copy'} />
+              {isCopied ? 'Copied' : 'Copy Link'}
+            </CpslButton>
+          </>
+        )}
+      </InnerStepContainer>
     </StepContainer>
   );
 };

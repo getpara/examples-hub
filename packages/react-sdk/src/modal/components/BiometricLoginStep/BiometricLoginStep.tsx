@@ -7,6 +7,7 @@ import { openPopup } from '../../utils/openPopup.js';
 import styled from 'styled-components';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard.js';
 import { isMobile } from '@usecapsule/web-sdk';
+import { isPasskeySupported } from '../../utils/isPasskeySupported.js';
 
 const SHORTENING_AVAILABLE = true;
 
@@ -73,11 +74,15 @@ export const BiometricLoginStep = () => {
         </IdentifierContainer>
       </InnerStepContainer>
       <MainContainer>
-        <CpslButton fullWidth onClick={handlePasskeyClick}>
-          <CpslIcon slot="start" icon="key" />
-          Login with this device
-        </CpslButton>
-        <CpslDivider>or</CpslDivider>
+        {isPasskeySupported() && (
+          <>
+            <CpslButton fullWidth onClick={handlePasskeyClick}>
+              <CpslIcon slot="start" icon="key" />
+              Login with this device
+            </CpslButton>
+            <CpslDivider>or</CpslDivider>
+          </>
+        )}
         <InnerStepContainer>
           {!isMobile() && (
             <>
