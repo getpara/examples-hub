@@ -8,7 +8,7 @@
     "build": "rm -rf dist && tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "deploy-sandbox": "yarn && VITE_ENVIRONMENT=SANDBOX VITE_CAPSULE_API_KEY=2f938ac0c48ef356050a79bd66042a23 yarn build && aws s3 sync dist/ s3://capsule-sandbox-dev-portal --delete",
+    "deploy-sandbox": "yarn && VITE_ENVIRONMENT=SANDBOX VITE_CAPSULE_API_KEY=8ee2d015fbc6062a6e30bdc472f2946c yarn build && aws s3 sync dist/ s3://capsule-sandbox-dev-portal --delete",
     "deploy-beta": "yarn && VITE_ENVIRONMENT=BETA VITE_CAPSULE_API_KEY=7383ac52df5657defa63fb89ba443b97 yarn build && aws s3 sync dist/ s3://capsule-beta-dev-portal --profile beta --delete",
     "deploy-prod": "yarn && VITE_ENVIRONMENT=PROD VITE_CAPSULE_API_KEY=36e481099ebcaad4beed4bed1ce98566 yarn build && aws s3 sync dist/ s3://capsule-prod-dev-portal --profile prod --delete"
   },
@@ -27,6 +27,7 @@
     "react-hook-form": "^7.51.5",
     "react-router-dom": "^6.23.1",
     "react-toastify": "^10.0.5",
+    "recharts": "^2.12.7",
     "statsig-react": "^2.0.0",
     "styled-components": "^6.1.8",
     "zustand": "^4.5.2"

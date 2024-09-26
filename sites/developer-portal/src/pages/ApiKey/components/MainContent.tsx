@@ -7,6 +7,7 @@ import { Tabs } from '../../../components/Tabs/Tabs';
 import { SetupTab } from './SetupTab';
 import { useGetApiKeySetupStatus } from '../../../hooks/api/queries/useApiKeySetupStatus';
 import { useParams } from 'react-router-dom';
+import { AnalyticsTab } from './AnalyticsTab';
 
 const TABS = [
   {
@@ -20,6 +21,10 @@ const TABS = [
   {
     label: 'Users',
     value: 'users',
+  },
+  {
+    label: 'Analytics',
+    value: 'analytics',
   },
 ];
 
@@ -44,6 +49,7 @@ export const MainContent = () => {
     setup: <SetupTab />,
     configuration: <ConfigurationTab />,
     users: <UsersTab />,
+    analytics: <AnalyticsTab />,
   };
 
   return (

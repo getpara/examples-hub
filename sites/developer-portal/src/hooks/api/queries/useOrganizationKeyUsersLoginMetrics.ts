@@ -3,7 +3,7 @@ import { ApiKeyUsersLoginMetricsResponse } from '../../../types/api';
 import { useAppStore } from '../../../stores/app/useAppStore';
 import { getApiKeyUsersLoginMetrics } from '../../../api/apiKeys/queries';
 
-export const ORGANIZATIONS_KEY_USERS_LOGIN_METRICS_QUERY_KEY = 'useOrganizationKeyUsersLoginMetrics';
+export const ORGANIZATIONS_KEY_USERS_LOGIN_METRICS_QUERY_KEY = 'organizationKeyUsersLoginMetrics';
 
 export const useOrganizationKeyUsersLoginMetricsQuery = <T>(
   projectId: string,

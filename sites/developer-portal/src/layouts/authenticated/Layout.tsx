@@ -33,12 +33,14 @@ export const Layout = () => {
 const Main = styled.main<{ $sidebarWidth: number }>`
   overflow: auto;
   margin-left: ${({ $sidebarWidth }) => `${$sidebarWidth}px`};
+  background-color: var(--cpsl-color-background-4);
 
   @media (max-width: ${MOBILE_SIZE}px) {
     height: calc(100vh - ${AUTH_APP_BAR_HEIGHT}px);
     padding: 0px;
   }
   @media (min-width: ${MOBILE_SIZE + 1}px) {
+    height: calc(100vh - ${AUTH_APP_BAR_HEIGHT}px);
     max-height: calc(100vh - ${AUTH_APP_BAR_HEIGHT}px);
     padding: 0px 24px;
   }

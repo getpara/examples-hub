@@ -7,7 +7,7 @@ export const useCanCreateProject = () => {
   const { data: projects } = useGetAllProjects();
 
   const canCreateProject =
-    !!organization && !!projects && getPlanPermissions(organization.activePlanSlug).maxProjects < projects.length;
+    !!organization && !!projects && getPlanPermissions(organization.activePlanSlug).maxProjects > projects.length;
 
   return { canCreateProject };
 };

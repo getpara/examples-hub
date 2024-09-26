@@ -1,7 +1,7 @@
 import { MutationOptions, useMutation } from '@tanstack/react-query';
 import { queryClient } from '../../../clients/queryClient';
 import { useAppStore } from '../../../stores/app/useAppStore';
-import { ChangePlanVars, upgradePlan } from '../../../api/oganizations/mutations';
+import { ChangePlanVars, upgradePlan } from '../../../api/organizations/mutations';
 import { ORGANIZATIONS_QUERY_KEY } from '../queries/useOrganizations';
 
 export const useUpgradePlan = (

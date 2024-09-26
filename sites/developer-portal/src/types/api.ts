@@ -215,3 +215,57 @@ export type OrganizationUserMetricsResponse = {
 };
 
 export type OnRampAllAssetsResponse = OnRampAssetInfo;
+
+// *********************
+// Organization Analytics
+// *********************
+export type OrganizationTotalUsersTSResponse = {
+  data: {
+    date: number;
+    newUsers: number;
+  }[];
+};
+
+export type OrganizationMonthlyActiveUsersTSResponse = {
+  data: {
+    date: number;
+    activeUsers: number;
+    previousMonthActiveUsers: number;
+    changeFromPreviousMonth: number;
+  }[];
+};
+
+export type OrganizationLoginMethodsTotalResponse = {
+  data: {
+    method: string;
+    percent: number;
+    count: number;
+  }[];
+};
+
+export type OrganizationLoginPlatformsTotalResponse = {
+  data: {
+    platform: string;
+    percent: number;
+    count: number;
+  }[];
+};
+
+// *********************
+// API Key Analytics
+// *********************
+export type ApiKeyTotalUsersTSResponse = {
+  data: {
+    date: number;
+    newUsers: number;
+  }[];
+};
+
+export type ApiKeyMonthlyActiveUsersTSResponse = {
+  data: {
+    date: number;
+    activeUsers: number;
+    previousMonthActiveUsers: number;
+    changeFromPreviousMonth: number;
+  }[];
+};

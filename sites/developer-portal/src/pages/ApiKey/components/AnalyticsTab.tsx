@@ -1,5 +1,3 @@
-import { LoginMethodsTotalChart } from './LoginMethodsTotalChart';
-import { LoginPlatformsTotalChart } from './LoginPlatformsTotalChart';
 import { MonthlyActiveUsersTSChart } from './MonthlyActiveUsersTSChart';
 import { TotalUsersTSChart } from './TotalUsersTSChart';
 
@@ -8,8 +6,6 @@ export const AnalyticsTab = () => {
     <>
       <TotalUsersTSChart />
       <MonthlyActiveUsersTSChart />
-      <LoginMethodsTotalChart />
-      <LoginPlatformsTotalChart />
     </>
   );
 };

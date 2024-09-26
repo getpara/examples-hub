@@ -19,7 +19,7 @@ export const Layout = () => {
   }, [access?.hasAccess, isLoggedIn, navigate]);
 
   if (isLoadingLoggedIn || isLoadingOrgs) {
-    return <MainLoader />;
+    return <MainLoader headerHeight={UNAUTH_APP_BAR_HEIGHT} />;
   }
 
   if (isLoggedIn && access?.hasAccess) {

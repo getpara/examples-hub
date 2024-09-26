@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { OrganizationUserMetricsResponse } from '../../../types/api';
 import { useAppStore } from '../../../stores/app/useAppStore';
-import { getOrganizationUserMetrics } from '../../../api/oganizations/queries';
+import { getOrganizationUserMetrics } from '../../../api/organizations/queries';
 
 export const ORGANIZATION_USER_METRICS_QUERY_KEY = 'organizationUserMetrics';
 

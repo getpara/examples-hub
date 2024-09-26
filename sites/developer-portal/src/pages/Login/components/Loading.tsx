@@ -6,6 +6,7 @@ import { useAcceptInvite } from '../../../hooks/api/mutations/useAcceptInvite';
 import { triggerToast } from '../../../utils/toasts';
 import { MainLoader } from '../../../components/MainLoader';
 import { useSetSelectedOrganizationWithNavigation } from '../../../hooks/useSetSelectedOrganizationWithNavigation';
+import { UNAUTH_APP_BAR_HEIGHT } from '../../../components/AppBar/UnAuthAppBar';
 
 interface LoadingProps {
   setIsLoading: (v: boolean) => void;
@@ -50,5 +51,5 @@ export const Loading = ({ setIsLoading }: LoadingProps) => {
     setIsLoading(false);
   };
 
-  return <MainLoader />;
+  return <MainLoader headerHeight={UNAUTH_APP_BAR_HEIGHT} />;
 };

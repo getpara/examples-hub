@@ -1,7 +1,7 @@
 import { MutationOptions, useMutation } from '@tanstack/react-query';
 import { queryClient } from '../../../clients/queryClient';
 import { useAppStore } from '../../../stores/app/useAppStore';
-import { cancelPlan } from '../../../api/oganizations/mutations';
+import { cancelPlan } from '../../../api/organizations/mutations';
 import { ORGANIZATIONS_QUERY_KEY } from '../queries/useOrganizations';
 
 export const useCancelPlan = (options?: MutationOptions<boolean, Error, null, unknown>) => {

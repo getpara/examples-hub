@@ -1,17 +1,17 @@
 import styled from 'styled-components';
 import { ReactNode, useState } from 'react';
 import { Tabs } from '../../components/Tabs/Tabs';
-// import { AnalyticsTab } from './components/AnalyticsTab';
+import { AnalyticsTab } from './components/AnalyticsTab';
 // import { UsersTab } from './components/UsersTab';
 import { ProjectsTab } from './components/ProjectsTab';
 import { CpslText } from '@usecapsule/react-components';
 import { useGetSelectedOrganization } from '../../hooks/api/queries/useOrganizations';
 
 const TABS = [
-  // {
-  //   label: 'Analytics',
-  //   value: 'analytics',
-  // },
+  {
+    label: 'Analytics',
+    value: 'analytics',
+  },
   {
     label: 'Projects',
     value: 'projects',
@@ -32,7 +32,7 @@ export const Home = () => {
   };
 
   const Content: { [k: string]: ReactNode } = {
-    // analytics: <AnalyticsTab />,
+    analytics: <AnalyticsTab />,
     projects: <ProjectsTab />,
     // users: <UsersTab />,
   };
@@ -43,7 +43,7 @@ export const Home = () => {
         {organization?.name}
       </CpslText>
       <Tabs tabs={TABS} selectedTab={selectedTab} onTabSelect={handleTabClick} />
-      {Content[selectedTab]}
+      <ContentContainer>{Content[selectedTab]}</ContentContainer>
     </Container>
   );
 };
@@ -52,4 +52,11 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
+`;
+
+const ContentContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 1200px;
 `;

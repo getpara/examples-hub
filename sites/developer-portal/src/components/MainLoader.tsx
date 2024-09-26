@@ -1,17 +1,21 @@
 import { CpslSpinner } from '@usecapsule/react-components';
 import styled from 'styled-components';
 
-export const MainLoader = () => {
+interface MainLoaderProps {
+  headerHeight: number;
+}
+
+export const MainLoader = ({ headerHeight }: MainLoaderProps) => {
   return (
-    <Container>
+    <Container $headerHeight={headerHeight}>
       <CpslSpinner />
     </Container>
   );
 };
 
-const Container = styled.div`
+const Container = styled.div<{ $headerHeight: number }>`
   width: 100%;
-  height: 100vh;
+  height: calc(100vh - ${({ $headerHeight }) => `${$headerHeight}px`});
   display: flex;
   justify-content: center;
   align-items: center;

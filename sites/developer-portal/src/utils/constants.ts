@@ -1,3 +1,4 @@
+import { startOfDay } from 'date-fns';
 import { Environment } from '../types/environment';
 import { Framework } from '../types/framework';
 import { PackageManager } from '../types/packageManager';
@@ -97,4 +98,17 @@ export const PLAN_PERMISSIONS: Record<PlanSlug, { canCreateProdKeys: boolean; ma
     canCreateProdKeys: true,
     maxProjects: Infinity,
   },
+};
+export const TODAY = startOfDay(new Date());
+
+export const LOGIN_METHOD_LABELS: Record<string, string> = {
+  EMAIL: 'Email',
+  PHONE: 'Phone',
+  EXTERNAL_WALLET: 'External Wallet',
+  GOOGLE: 'Google',
+  DISCORD: 'Discord',
+  APPLE: 'Apple',
+  FACEBOOK: 'Facebook',
+  TWITTER: 'Twitter',
+  FARCASTER: 'Farcaster',
 };

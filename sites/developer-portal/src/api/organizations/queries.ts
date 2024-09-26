@@ -1,0 +1,60 @@
+import { axiosClient } from '../../clients/axios';
+import {
+  OrganizationLoginMethodsTotalResponse,
+  OrganizationLoginPlatformsTotalResponse,
+  OrganizationMonthlyActiveUsersTSResponse,
+  OrganizationResponse,
+  OrganizationTotalUsersTSResponse,
+  OrganizationUserMetricsResponse,
+} from '../../types/api';
+
+export const getOrganization = async (organizationId: string) => {
+  const endpoint = `/organizations/${organizationId}/`;
+
+  return axiosClient.get<OrganizationResponse>(endpoint);
+};
+
+export const getOrganizationUserMetrics = async (organizationId: string, startDate?: Date, endDate?: Date) => {
+  const endpoint = `/organizations/${organizationId}/login-metrics`;
+
+  return axiosClient.get<OrganizationUserMetricsResponse>(endpoint, {
+    params: {
+      startDate,
+      endDate,
+    },
+  });
+};
+
+export const getOrganizationTotalUsersTS = async (organizationId: string, startDate?: Date, endDate?: Date) => {
+  const endpoint = `/organizations/${organizationId}/analytics/time-series/total-users`;
+
+  return axiosClient.get<OrganizationTotalUsersTSResponse>(endpoint, {
+    params: {
+      startDate,
+      endDate,
+    },
+  });
+};
+
+export const getOrganizationMonthlyActiveUsersTS = async (organizationId: string, startDate?: Date, endDate?: Date) => {
+  const endpoint = `/organizations/${organizationId}/analytics/time-series/monthly-active-users`;
+
+  return axiosClient.get<OrganizationMonthlyActiveUsersTSResponse>(endpoint, {
+    params: {
+      startDate,
+      endDate,
+    },
+  });
+};
+
+export const getOrganizationLoginMethodsTotal = async (organizationId: string) => {
+  const endpoint = `/organizations/${organizationId}/analytics/all-time/login-methods`;
+
+  return axiosClient.get<OrganizationLoginMethodsTotalResponse>(endpoint);
+};
+
+export const getOrganizationLoginPlatformsTotal = async (organizationId: string) => {
+  const endpoint = `/organizations/${organizationId}/analytics/all-time/login-platforms`;
+
+  return axiosClient.get<OrganizationLoginPlatformsTotalResponse>(endpoint);
+};

@@ -5,6 +5,7 @@ import { useLogout } from '../../hooks/useLogout';
 import { useOrganizationMember } from '../../hooks/api/queries/useOrganizationMember';
 import { MainLoader } from '../MainLoader';
 import { useSetSelectedOrganizationWithNavigation } from '../../hooks/useSetSelectedOrganizationWithNavigation';
+import { AUTH_APP_BAR_HEIGHT } from '../AppBar/AuthAppBar';
 
 interface AuthenticatedWrapperProps extends PropsWithChildren {
   requireOrgs?: boolean;
@@ -25,7 +26,7 @@ export const AuthenticatedWrapper = ({ requireOrgs, children }: AuthenticatedWra
   }, [isLoadingOrgs, orgsWithAccess, setSelectedOrganization]);
 
   if (isLoadingLoggedIn || isLoadingOrgs || isLoadingMember) {
-    return <MainLoader />;
+    return <MainLoader headerHeight={AUTH_APP_BAR_HEIGHT} />;
   }
 
   if (!isLoggedIn) {
