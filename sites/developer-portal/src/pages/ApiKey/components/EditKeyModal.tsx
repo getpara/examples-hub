@@ -102,7 +102,7 @@ export const EditKeyModal = ({ open, onClose }: EditKeyModalProps) => {
   return (
     <Modal open={open} onClose={onClose} title="Edit API Key" subtitle="Make changes to your API Key">
       <>
-        <CpslButton fullWidth onClick={handleRefreshKey} variant="secondary">
+        <CpslButton fullWidth onClick={handleRefreshKey} variant="secondary" disabled={apiKeyData?.archived}>
           <CpslIcon slot="start" icon="refresh" />
           Refresh API Key
         </CpslButton>

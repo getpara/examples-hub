@@ -6,6 +6,8 @@ import {
   OrganizationResponse,
   OrganizationTotalUsersTSResponse,
   OrganizationUserMetricsResponse,
+  OrganizationEnterprisePriceResponse,
+  OrganizationSubscriptionResponse,
 } from '../../types/api';
 
 export const getOrganization = async (organizationId: string) => {
@@ -57,4 +59,16 @@ export const getOrganizationLoginPlatformsTotal = async (organizationId: string)
   const endpoint = `/organizations/${organizationId}/analytics/all-time/login-platforms`;
 
   return axiosClient.get<OrganizationLoginPlatformsTotalResponse>(endpoint);
+};
+
+export const getOrganizationEnterprisePrice = async (organizationId: string) => {
+  const endpoint = `/organizations/${organizationId}/stripe/enterprise-price`;
+
+  return axiosClient.get<OrganizationEnterprisePriceResponse>(endpoint);
+};
+
+export const getOrganizationSubscription = async (organizationId: string) => {
+  const endpoint = `/organizations/${organizationId}/stripe/subscription`;
+
+  return axiosClient.get<OrganizationSubscriptionResponse>(endpoint);
 };

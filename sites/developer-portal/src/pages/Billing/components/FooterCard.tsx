@@ -1,22 +1,15 @@
 import styled from 'styled-components';
 import { BaseCard } from '../../../components/common';
 import { CpslButton, CpslText } from '@usecapsule/react-components';
-import { useState } from 'react';
-import { RequestCancelModal } from './RequestCancelModal';
-import { useGetSelectedOrganization } from '../../../hooks/api/queries/useOrganizations';
 import { SUPPORT_URL } from '../../../utils/constants';
+import {
+  useHasStripeSubscription,
+  useWillStripeSubscriptionCancel,
+} from '../../../hooks/api/queries/useOrganizationSubscription';
 
 export const FooterCard = () => {
-  const { data: org } = useGetSelectedOrganization();
-  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
-
-  const handleCancelClick = () => {
-    setIsCancelModalOpen(true);
-  };
-
-  const handleCloseCancelModal = () => {
-    setIsCancelModalOpen(false);
-  };
+  const { data: willSubscriptionCancel } = useWillStripeSubscriptionCancel();
+  const { data: hasSubscription } = useHasStripeSubscription();
 
   return (
     <>
@@ -30,14 +23,22 @@ export const FooterCard = () => {
               <CpslButton size="small" as="a" href={SUPPORT_URL}>
                 Get In Touch
               </CpslButton>
-              <CpslButton disabled={org?.hasRequestedCancel} variant="destructive" size="small" onClick={handleCancelClick}>
-                Cancel Plan
-              </CpslButton>
+              {hasSubscription && (
+                <CpslButton
+                  disabled={willSubscriptionCancel}
+                  variant="destructive"
+                  size="small"
+                  as="a"
+                  href="https://usecapsule.com/talk-to-us"
+                  target="_blank"
+                >
+                  Cancel Plan
+                </CpslButton>
+              )}
             </ButtonContainer>
           </InnerContainer>
         </BaseCard>
       </Container>
-      <RequestCancelModal open={isCancelModalOpen} onClose={handleCloseCancelModal} />
     </>
   );
 };

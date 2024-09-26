@@ -1,25 +1,28 @@
 import styled from 'styled-components';
 import { useEarlyAccess } from '../../../hooks/configs/useEarlyAccess';
 import { EarlyAccessItem } from './EarlyAccessItem';
-import { usePlans } from '../../../hooks/configs/usePlans';
+import { usePlanMetadata } from '../../../hooks/configs/usePlanMetadata';
 import { useState } from 'react';
 import { RequestedAccessModal } from './RequestedAccessModal';
-import { UpgradePlanModal } from '../../../components/UpgradePlanModal/UpgradePlanModal';
-import { useGetOrganizationEarlyAccess, useGetOrganizationPlan } from '../../../hooks/api/queries/useOrganizations';
+import { RequestEnterpriseModal } from '../../../components/RequestEnterpriseModal/RequestEnterpriseModal';
+import { useGetOrganizationEarlyAccess, useGetSelectedOrganization } from '../../../hooks/api/queries/useOrganizations';
 import { useRequestEarlyAccess } from '../../../hooks/api/mutations/useRequestEarlyAccess';
 import { triggerToast } from '../../../utils/toasts';
 import { CpslText } from '@usecapsule/react-components';
+import { useStripePlan } from '../../../hooks/useStripePlan';
+import { useGetOrganizationSubscription } from '../../../hooks/api/queries/useOrganizationSubscription';
 
 export const MainContent = () => {
   const { earlyAccessItems } = useEarlyAccess();
-  const { isLowerPlan, plansBySlug } = usePlans();
-  const { data: activePlan } = useGetOrganizationPlan();
+  const { isLowerPlan } = usePlanMetadata();
+  const { data: subscription } = useGetOrganizationSubscription();
   const { data: earlyAccess } = useGetOrganizationEarlyAccess();
   const { mutate: requestEarlyAccess } = useRequestEarlyAccess();
+  const { data: org } = useGetSelectedOrganization();
+  const { changePlan, isCreatingStripeSession } = useStripePlan();
 
   const [requestedSlug, setRequestedSlug] = useState('');
-  const [upgradePlanName, setUpgradePlanName] = useState('');
-  const [upgradePlanSlug, setUpgradePlanSlug] = useState('');
+  const [isRequestingEnterprise, setIsRequestingEnterprise] = useState(false);
 
   const handleRequestClick = (slug: string) => {
     requestEarlyAccess(
@@ -43,17 +46,16 @@ export const MainContent = () => {
     setRequestedSlug('');
   };
 
-  const handleUpgradeClick = (planSlug: string) => {
-    setUpgradePlanName(plansBySlug[planSlug].name);
-    setUpgradePlanSlug(planSlug);
+  const handleUpgradeClick = async (planSlug: string) => {
+    if (planSlug.toUpperCase() === 'ENTERPRISE' && !org?.enterpriseStripePriceId) {
+      setIsRequestingEnterprise(true);
+      return;
+    }
+    await changePlan(planSlug);
   };
 
   const handleCloseUpgradeModal = () => {
-    setUpgradePlanSlug('');
-  };
-
-  const handleUpgradeModalExited = () => {
-    setUpgradePlanName('');
+    setIsRequestingEnterprise(false);
   };
 
   return (
@@ -71,24 +73,19 @@ export const MainContent = () => {
               <EarlyAccessItem
                 key={item.slug}
                 {...item}
-                isHigherPlanRequired={!activePlan ? true : isLowerPlan(item.planSlug, activePlan.slug)}
+                isHigherPlanRequired={!subscription ? true : isLowerPlan(item.planSlug, subscription.plan.slug)}
                 hasAccess={earlyAccess?.granted?.includes(item.slug) ?? false}
                 requestedAccess={earlyAccess?.requested?.includes(item.slug) ?? false}
                 onRequestClick={handleRequestClick}
                 onUpgradeClick={handleUpgradeClick}
+                disabled={isCreatingStripeSession}
               />
             );
           })}
         </Container>
       )}
       <RequestedAccessModal open={!!requestedSlug} onClose={handleCloseRequestedAccessModal} />
-      <UpgradePlanModal
-        open={!!upgradePlanSlug}
-        planName={upgradePlanName}
-        planSlug={upgradePlanSlug}
-        onClose={handleCloseUpgradeModal}
-        onExited={handleUpgradeModalExited}
-      />
+      <RequestEnterpriseModal open={isRequestingEnterprise} onClose={handleCloseUpgradeModal} />
     </>
   );
 };

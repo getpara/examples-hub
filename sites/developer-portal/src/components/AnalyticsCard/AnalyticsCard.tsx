@@ -6,9 +6,10 @@ import { useIsMobile } from '../../hooks/useIsMobile';
 interface AnalyticsCardProps {
   title: string;
   subtitle: string;
+  subtitleColor?: 'tertiary' | 'error';
 }
 
-export const AnalyticsCard = ({ title, subtitle }: AnalyticsCardProps) => {
+export const AnalyticsCard = ({ title, subtitle, subtitleColor = 'tertiary' }: AnalyticsCardProps) => {
   const isMobile = useIsMobile();
 
   return (
@@ -16,7 +17,7 @@ export const AnalyticsCard = ({ title, subtitle }: AnalyticsCardProps) => {
       <CenterText variant={isMobile ? 'headingXS' : 'headingS'} weight="bold">
         {title}
       </CenterText>
-      <CenterText variant="bodyS" color="tertiary">
+      <CenterText variant="bodyS" color={subtitleColor}>
         {subtitle}
       </CenterText>
     </AnalyticContainer>

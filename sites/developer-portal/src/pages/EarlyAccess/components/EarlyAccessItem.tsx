@@ -9,6 +9,7 @@ interface EarlyAccessProps extends EarlyAccess {
   isHigherPlanRequired: boolean;
   hasAccess: boolean;
   requestedAccess: boolean;
+  disabled?: boolean;
   onRequestClick: (slug: string) => void;
   onUpgradeClick: (planSlug: string) => void;
 }
@@ -23,13 +24,14 @@ export const EarlyAccessItem = ({
   isHigherPlanRequired,
   hasAccess,
   requestedAccess,
+  disabled,
   onRequestClick,
   onUpgradeClick,
 }: EarlyAccessProps) => {
   const { data: org } = useGetSelectedOrganization();
 
   let RequestButtonContent = <>Request Access</>;
-  let buttonDisabled = false;
+  let buttonDisabled = disabled ?? false;
 
   if (requestedAccess) {
     RequestButtonContent = <>Access Requested</>;

@@ -1,5 +1,10 @@
 import { axiosClient } from '../../clients/axios';
-import { LogoUploadUrlResponse, UpdateOrganizationBody } from '../../types/api';
+import {
+  CreateCheckoutSessionResponse,
+  CreateCustomerPortalSessionResponse,
+  LogoUploadUrlResponse,
+  UpdateOrganizationBody,
+} from '../../types/api';
 
 export const updateOrganization = async (organizationId: string, body: UpdateOrganizationBody) => {
   const endpoint = `/organizations/${organizationId}/`;
@@ -42,4 +47,38 @@ export const getLogoUploadUrl = async ({ organizationId, fileExt }: GetLogoUploa
       fileExt,
     })
   ).data;
+};
+
+export type CreateCheckoutSessionVars = { organizationId: string; planSlug: string; successUrl: string };
+export const createCheckoutSession = async ({ organizationId, planSlug, successUrl }: CreateCheckoutSessionVars) => {
+  const endpoint = `/organizations/${organizationId}/stripe/checkout-session`;
+
+  return (
+    await axiosClient.post<CreateCheckoutSessionResponse>(endpoint, {
+      planSlug,
+      successUrl,
+    })
+  ).data;
+};
+
+export type CustomerPortalFlow =
+  | 'paymentMethodUpdate'
+  | 'subscriptionCancel'
+  | 'subscriptionUpdate'
+  | 'subscriptionUpdateConfirm';
+export type CreateCustomerPortalSessionVars = {
+  organizationId: string;
+  successUrl: string;
+  flow?: CustomerPortalFlow;
+  planSlug?: string;
+};
+export const createCustomerPortalSession = async ({
+  organizationId,
+  successUrl,
+  flow,
+  planSlug,
+}: CreateCustomerPortalSessionVars) => {
+  const endpoint = `/organizations/${organizationId}/stripe/customer-portal-session`;
+
+  return (await axiosClient.post<CreateCustomerPortalSessionResponse>(endpoint, { flow, planSlug, successUrl })).data;
 };

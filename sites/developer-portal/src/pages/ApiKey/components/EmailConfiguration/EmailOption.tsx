@@ -3,7 +3,7 @@ import { EMAIL_OPTIONS } from '../../config';
 import { InnerConfigurationCard } from '../InnerConfigurationCard';
 import { CpslIcon, CpslInput, CpslText } from '@usecapsule/react-components';
 import { ImageUpload } from '../../../../components/ImageUpload/ImageUpload';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { HTTPS_URL_REGEX } from '../../../../utils/regex';
 import { useUpdatedWelcomeEmailConfig } from '../../../../hooks/featureFlags/useUpdatedWelcomeEmailConfig';
 import { EmailOption as EmailOptionEnum, getEmailOption } from '../../utils/emailConfiguration';
@@ -17,12 +17,17 @@ import { Environment } from '../../../../types/environment';
 export const EmailOption = () => {
   const { apiKey, env, projectId } = useParams();
   const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
-  const { control, setValue, getValues } = useFormContext<UpdateApiKeyEmail>();
+  const { control, setValue } = useFormContext<UpdateApiKeyEmail>();
   const showUpdatedEmailConfig = useUpdatedWelcomeEmailConfig();
+
+  const [emailBackupKit, emailWelcome] = useWatch({
+    control,
+    name: ['emailBackupKit', 'emailWelcome'],
+  });
 
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
-  const selectedEmailOption = getEmailOption(getValues('emailBackupKit') ?? false, getValues('emailWelcome') ?? false);
+  const selectedEmailOption = getEmailOption(emailBackupKit ?? false, emailWelcome ?? false);
 
   const handleEmailOptionClick = (option: string) => () => {
     switch (option) {

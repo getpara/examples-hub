@@ -32,6 +32,8 @@ const BorderWrapper = styled.div`
   padding: 1px;
   background: ${LINEAR_GRADIENT};
   border-radius: var(--cpsl-border-radius-card);
+
+  max-width: 1200px;
 `;
 
 const Card = styled(BaseCard)`

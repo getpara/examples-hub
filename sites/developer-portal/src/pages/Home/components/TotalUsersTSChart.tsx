@@ -1,8 +1,7 @@
 import { CpslText } from '@usecapsule/react-components';
 import { useOrganizationTotalUsersTS } from '../../../hooks/api/queries/useOrganizationTotalUsersTS';
 import { AreaChart, Area, XAxis, YAxis, Tooltip } from 'recharts';
-import { differenceInCalendarDays, startOfDay } from 'date-fns';
-import { TODAY } from '../../../utils/constants';
+import { format } from 'date-fns';
 import { ContentType } from 'recharts/types/component/Tooltip';
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 import { TimeSeriesChartCard } from '../../../components/ChartCards/TimeSeriesChartCard';
@@ -35,10 +34,16 @@ export const TotalUsersTSChart = () => {
             dataKey="date"
             domain={[usersTS[0].date, usersTS[usersTS.length - 1].date]}
             type="number"
-            tickFormatter={date => `${differenceInCalendarDays(TODAY, startOfDay(new Date(date)))}`}
-            tickCount={6}
+            tickFormatter={date => `${format(new Date(date), 'MMM d')}`}
             tickLine={false}
             tickMargin={12}
+            ticks={[
+              usersTS[1].date,
+              usersTS[usersTS.length * 0.25].date,
+              usersTS[usersTS.length * 0.5].date,
+              usersTS[usersTS.length * 0.75].date,
+              usersTS[usersTS.length - 1].date,
+            ]}
             axisLine={{ stroke: '#E6E6E6' }}
             style={{ fontSize: 16, fill: '#666666' }}
             fontFamily="Inter"

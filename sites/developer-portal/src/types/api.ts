@@ -32,9 +32,12 @@ export type Organization = {
   requestedDevPortalAccess: boolean;
   logoUrl?: string;
   archived?: boolean;
+  suspended?: boolean;
+  suspendedReason?: string | null;
   hasRequestedUpgrade?: boolean;
   hasRequestedDowngrade?: boolean;
   hasRequestedCancel?: boolean;
+  enterpriseStripePriceId?: string | null;
 };
 
 export type OrganizationResponse = { organization: Organization };
@@ -43,6 +46,12 @@ export type UpdateOrganizationBody = Pick<Organization, 'name' | 'logoUrl'>;
 export type LogoUploadUrlResponse = {
   url: string;
   fields: Record<string, string>;
+};
+export type CreateCheckoutSessionResponse = {
+  sessionUrl?: string;
+};
+export type CreateCustomerPortalSessionResponse = {
+  sessionUrl?: string;
 };
 
 // *********************
@@ -269,3 +278,64 @@ export type ApiKeyMonthlyActiveUsersTSResponse = {
     changeFromPreviousMonth: number;
   }[];
 };
+// *********************
+// Organization Enterprise Price
+// *********************
+export type OrganizationEnterprisePriceResponse = {
+  price: number;
+};
+
+// *********************
+// Organization Subscription
+// *********************
+export type Subscription = {
+  plan: Plan;
+  periodStart?: number;
+  periodEnd?: number;
+  cancelAtPeriodEnd?: boolean;
+  price?: number;
+  trialStart?: number | null;
+  trialEnd?: number | null;
+  billing?: {
+    address?: {
+      city: string | null;
+      country: string | null;
+      line1: string | null;
+      line2: string | null;
+      postalCode: string | null;
+      state: string | null;
+    };
+    email: string | null;
+    name: string | null;
+    phone: string | null;
+    type: string;
+    card?: {
+      brand: string;
+      expMonth: number;
+      expYear: number;
+      last4: string;
+    };
+    bank?: {
+      name: string | null;
+      last4: string | null;
+    };
+  };
+};
+export type OrganizationSubscriptionResponse = {
+  subscription: Subscription;
+};
+
+// *********************
+// Plan
+// *********************
+export type Plan = {
+  slug: string;
+  price: number;
+  betaOnly: boolean;
+  maxUsers?: number;
+  maxMonthlyUsers?: number;
+  hasPregenAccess: boolean;
+  hasNativePasskeyAccess: boolean;
+};
+
+export type PlansResponse = { plans: Plan[] };

@@ -1,6 +1,6 @@
 import { BrandingConfiguration } from './BrandingConfiguration/BrandingConfiguration';
 import { EmailConfiguration } from './EmailConfiguration/EmailConfiguration';
-import { NativePasskeyConfiguration } from './NativePasskeyConfiguration';
+// import { NativePasskeyConfiguration } from './NativePasskeyConfiguration';
 import { OnRampFlowsConfiguration } from './OnRampFlowsConfiguration/OnRampFlowsConfiguration';
 import { OnRampAssetsConfiguration } from './OnRampAssetsConfiguration/OnRampAssetsConfiguration';
 import { OnRampProvidersConfiguration } from './OnRampProvidersConfiguration/OnRampProvidersConfiguration';
@@ -25,7 +25,8 @@ export const ConfigurationTab = () => {
         </>
       )}
       <PortalConfiguration />
-      <NativePasskeyConfiguration />
+      {/* TODO: Add this back once BE is complete */}
+      {/* <NativePasskeyConfiguration /> */}
     </>
   );
 };

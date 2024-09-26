@@ -1,4 +1,4 @@
-import { DOCS_LINK } from '../../../../utils/constants';
+import { BRANDING_DOCS_LINK } from '../../../../utils/constants';
 import { ConfigurationCard } from '../ConfigurationCard';
 import { HomepageUrl } from './HomepageUrl';
 import { ForegroundColor } from './ForegroundColor';
@@ -21,8 +21,7 @@ export const BrandingConfiguration = () => {
     <ConfigurationCard
       title="Branding"
       subtitle="These settings will be applied to Capsule Portal and Emails only. Customizing your Capsule Modal is done with the Capsule SDK."
-      // TODO: customize the docs link
-      docsLink={DOCS_LINK}
+      docsLink={BRANDING_DOCS_LINK}
       defaultOpen={!form.getValues('homepageUrl')}
     >
       <FormProvider {...form}>

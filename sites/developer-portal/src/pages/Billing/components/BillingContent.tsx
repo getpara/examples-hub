@@ -1,15 +1,13 @@
-import { CpslText } from '@usecapsule/react-components';
 import { PlanMetrics } from './PlanMetrics';
 import { Plans } from './Plans';
 import { FooterCard } from './FooterCard';
+import { PaymentMethod } from './PaymentMethod';
 
 export const BillingContent = () => {
   return (
     <>
       <PlanMetrics />
-      <CpslText variant="bodyL" weight="semiBold">
-        Plans
-      </CpslText>
+      <PaymentMethod />
       <Plans />
       <FooterCard />
     </>

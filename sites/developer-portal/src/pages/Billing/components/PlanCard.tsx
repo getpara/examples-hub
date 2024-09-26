@@ -1,31 +1,40 @@
 import styled from 'styled-components';
 import { SplitCard } from '../../../components/SplitCard/SplitCard';
-import { Plan } from '../../../types/plan';
 import { PlanCardLeft } from './PlanCardLeft';
 import { PlanCardRight } from './PlanCardRight';
+import { PlanMetadata } from '../../../types/planMetadata';
 
 interface PlanCardProps {
-  plan: Plan;
+  planMetadata: PlanMetadata;
   isActive?: boolean;
   isHigherPlanActive?: boolean;
+  enterprisePrice?: number;
   disabled?: boolean;
-  onUpgradeClick: (planName: string, planeSlug: string) => void;
+  onUpgradeClick: (planSlug: string) => void;
 }
 
-export const PlanCard = ({ plan, isActive, isHigherPlanActive, disabled, onUpgradeClick }: PlanCardProps) => {
+export const PlanCard = ({
+  planMetadata,
+  isActive,
+  isHigherPlanActive,
+  enterprisePrice,
+  disabled,
+  onUpgradeClick,
+}: PlanCardProps) => {
   return (
     <Container>
       <SplitCard
         LeftContent={
           <PlanCardLeft
-            {...plan}
+            {...planMetadata}
             isActive={isActive}
             isHigherPlanActive={isHigherPlanActive}
             disabled={disabled}
+            enterprisePrice={enterprisePrice}
             onUpgradeClick={onUpgradeClick}
           />
         }
-        RightContent={<PlanCardRight {...plan.includes} />}
+        RightContent={<PlanCardRight {...planMetadata.includes} />}
       />
     </Container>
   );

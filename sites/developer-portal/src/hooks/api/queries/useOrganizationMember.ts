@@ -31,3 +31,9 @@ export const useOrganizationMember = () => {
     return data;
   });
 };
+
+export const useIsOwner = () => {
+  return useOrganizationMemberQuery(data => {
+    return data?.owner;
+  });
+};

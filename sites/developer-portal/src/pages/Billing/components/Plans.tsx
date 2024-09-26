@@ -1,52 +1,54 @@
 import { useState } from 'react';
-import { usePlans } from '../../../hooks/configs/usePlans';
+import { usePlanMetadata } from '../../../hooks/configs/usePlanMetadata';
 import { PlanCard } from './PlanCard';
-import { UpgradePlanModal } from '../../../components/UpgradePlanModal/UpgradePlanModal';
-import { useGetOrganizationPlan, useGetSelectedOrganization } from '../../../hooks/api/queries/useOrganizations';
+import { RequestEnterpriseModal } from '../../../components/RequestEnterpriseModal/RequestEnterpriseModal';
+import { useGetSelectedOrganization } from '../../../hooks/api/queries/useOrganizations';
+import { useGetOrganizationEnterprisePrice } from '../../../hooks/api/queries/useOrganizationEnterprisePrice';
+import { CpslText } from '@usecapsule/react-components';
+import { useStripePlan } from '../../../hooks/useStripePlan';
+import { useGetOrganizationSubscription } from '../../../hooks/api/queries/useOrganizationSubscription';
 
 export const Plans = () => {
-  const { plans } = usePlans();
-  const { data: activePlan } = useGetOrganizationPlan();
+  const { planMeta } = usePlanMetadata();
+  const { data: subscription } = useGetOrganizationSubscription();
   const { data: org } = useGetSelectedOrganization();
+  const { data: enterprisePrice } = useGetOrganizationEnterprisePrice();
+  const { changePlan, isCreatingStripeSession } = useStripePlan();
 
-  const [selectedPlanName, setSelectedPlanName] = useState('');
-  const [selectedPlanSlug, setSelectedPlanSlug] = useState('');
+  const [isRequestingEnterprise, setIsRequestingEnterprise] = useState(false);
 
-  const activeSlug = activePlan?.slug;
-  const activeIndex = plans?.findIndex(p => p.slug === activeSlug);
+  const activeSlug = subscription?.plan.slug;
+  const activeIndex = planMeta?.findIndex(p => p.slug === activeSlug);
 
-  const handleUpgradeClick = (planName: string, planSlug: string) => {
-    setSelectedPlanName(planName);
-    setSelectedPlanSlug(planSlug);
+  const handleUpgradeClick = async (planSlug: string) => {
+    if (planSlug.toUpperCase() === 'ENTERPRISE' && !org?.enterpriseStripePriceId) {
+      setIsRequestingEnterprise(true);
+      return;
+    }
+    await changePlan(planSlug);
   };
 
   const handleCloseUpgradeModal = () => {
-    setSelectedPlanSlug('');
-  };
-
-  const handleUpgradeModalExited = () => {
-    setSelectedPlanName('');
+    setIsRequestingEnterprise(false);
   };
 
   return (
     <>
-      {plans?.map((plan, index) => (
+      <CpslText variant="bodyL" weight="semiBold">
+        Plans
+      </CpslText>
+      {planMeta?.map((planMetadata, index) => (
         <PlanCard
-          key={plan.slug}
-          plan={plan}
-          isActive={plan.slug === activeSlug}
+          key={planMetadata.slug}
+          planMetadata={planMetadata}
+          isActive={planMetadata.slug.toUpperCase() === activeSlug}
           isHigherPlanActive={index < activeIndex}
-          disabled={org?.hasRequestedUpgrade}
+          disabled={org?.hasRequestedUpgrade || isCreatingStripeSession}
           onUpgradeClick={handleUpgradeClick}
+          enterprisePrice={enterprisePrice}
         />
       ))}
-      <UpgradePlanModal
-        open={!!selectedPlanSlug}
-        planName={selectedPlanName}
-        planSlug={selectedPlanSlug}
-        onClose={handleCloseUpgradeModal}
-        onExited={handleUpgradeModalExited}
-      />
+      <RequestEnterpriseModal open={!!isRequestingEnterprise} onClose={handleCloseUpgradeModal} />
     </>
   );
 };

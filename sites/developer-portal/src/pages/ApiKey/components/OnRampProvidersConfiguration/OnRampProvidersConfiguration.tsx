@@ -1,7 +1,7 @@
 import { Controller } from 'react-hook-form';
 import { useOnRampConfigProvidersFormData } from '../../hooks/useOnRampConfigFormData';
 import { ON_RAMP_PROVIDERS, OnRampProvider } from '@usecapsule/react-sdk';
-import { DOCS_LINK } from '../../../../utils/constants';
+import { ON_RAMP_DOCS_LINK } from '../../../../utils/constants';
 import { ArraySelect } from '../../../../components/ArraySelect/ArraySelect.js';
 import { ConfigurationCard } from '../ConfigurationCard';
 import { FormProvider } from 'react-hook-form';
@@ -18,8 +18,7 @@ export const OnRampProvidersConfiguration = () => {
     <ConfigurationCard
       title="On-Ramp Providers"
       subtitle="Configure the on- and off-ramp providers to offer in your Capsule Modal."
-      // TODO: customize the docs link
-      docsLink={DOCS_LINK}
+      docsLink={ON_RAMP_DOCS_LINK}
     >
       <FormProvider {...form}>
         <Controller

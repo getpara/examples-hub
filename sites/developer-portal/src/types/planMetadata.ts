@@ -5,7 +5,7 @@ export type PlanIncludes = {
   comingSoon: string[];
 };
 
-export type Plan = {
+export type PlanMetadata = {
   name: string;
   slug: string;
   monthlyCost: number;

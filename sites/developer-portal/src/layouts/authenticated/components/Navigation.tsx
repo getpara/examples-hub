@@ -2,10 +2,11 @@ import { CpslIcon, CpslNavButton, CpslNavButtonGroup, CpslText } from '@usecapsu
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { NavRoute } from '../../../types/navigation';
-import { BRAND_COLORS } from '../../../utils/constants';
+import { BRAND_COLORS, MODAL_DESIGNER_LINK } from '../../../utils/constants';
 import { useEarlyAccess } from '../../../hooks/configs/useEarlyAccess';
 import { useGetAllProjects } from '../../../hooks/api/queries/useProjects';
 import { CpslNavButtonCustomEvent } from '@usecapsule/core-components';
+import { useIsOwner } from '../../../hooks/api/queries/useOrganizationMember';
 
 const NAV_ROUTES: NavRoute[] = [
   {
@@ -23,7 +24,6 @@ const NAV_ROUTES: NavRoute[] = [
     path: '/modal-designer',
     label: 'Modal Designer',
     icon: 'brush',
-    comingSoon: true,
   },
   {
     path: '/early-access',
@@ -51,10 +51,14 @@ export const Navigation = ({ closeNav }: NavigationProps) => {
   const navigate = useNavigate();
   const { earlyAccessItems } = useEarlyAccess();
   const { data: projects } = useGetAllProjects();
+  const { data: isOwner } = useIsOwner();
 
-  const filteredNavRoutes = !earlyAccessItems?.length
+  let filteredNavRoutes = !earlyAccessItems?.length
     ? NAV_ROUTES.filter(route => route.path !== '/early-access')
     : NAV_ROUTES;
+  filteredNavRoutes = !isOwner
+    ? filteredNavRoutes.filter(r => r.path !== '/team' && r.path !== '/billing')
+    : filteredNavRoutes;
 
   const completeNavRoutes = filteredNavRoutes.map(route =>
     route.path === '/project'
@@ -71,6 +75,12 @@ export const Navigation = ({ closeNav }: NavigationProps) => {
   const handleButtonClick = (event: CpslNavButtonCustomEvent<string>) => {
     const path = event.detail;
     let pathStr = path;
+
+    if (path === '/modal-designer') {
+      window.open(MODAL_DESIGNER_LINK, '_blank');
+      return;
+    }
+
     if (path === '/project') {
       if (projects?.length) {
         pathStr = `${pathStr}/${projects?.[0]?.id}`;

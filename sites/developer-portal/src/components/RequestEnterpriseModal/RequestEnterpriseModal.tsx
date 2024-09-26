@@ -5,19 +5,16 @@ import { GradientCTAButton } from '../GradientCTAButton/GradientCTAButton';
 import { useUpgradePlan } from '../../hooks/api/mutations/useUpgradePlan';
 import { triggerToast } from '../../utils/toasts';
 
-interface UpgradePlanModalProps {
+interface RequestEnterpriseModalProps {
   open: boolean;
-  planName: string;
-  planSlug: string;
   onClose: () => void;
-  onExited: () => void;
 }
 
-export const UpgradePlanModal = ({ open, planName, planSlug, onClose, onExited }: UpgradePlanModalProps) => {
+export const RequestEnterpriseModal = ({ open, onClose }: RequestEnterpriseModalProps) => {
   const { mutate: upgradePlan } = useUpgradePlan();
   const handleUpgradeClick = () => {
     upgradePlan(
-      { newPlanSlug: planSlug },
+      { newPlanSlug: 'ENTERPRISE' },
       {
         onSuccess: () => {
           triggerToast({
@@ -42,14 +39,13 @@ export const UpgradePlanModal = ({ open, planName, planSlug, onClose, onExited }
     <Modal
       open={open}
       onClose={onClose}
-      onExited={onExited}
-      title="Upgrade Plan"
-      subtitle="Request an upgrade to your plan. We will be in touch via email to confirm."
+      title="Upgrade to Enterprise"
+      subtitle="Request an upgrade to enterprise. We will be in touch to confirm."
       titleColor="gradient"
     >
       <>
         <UpgradeTextContainer>
-          <InlineText color="secondary">Upgrade to</InlineText> <InlineText weight="bold">{planName} Plan</InlineText>
+          <InlineText color="secondary">Upgrade to</InlineText> <InlineText weight="bold">Enterprise Plan</InlineText>
         </UpgradeTextContainer>
         <GradientCTAButton fullWidth onClick={handleUpgradeClick}>
           Upgrade
