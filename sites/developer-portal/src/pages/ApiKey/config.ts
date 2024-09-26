@@ -16,16 +16,17 @@ export const EMAIL_OPTIONS: {
     title: 'Welcome Email + Backup Kit',
     subtitle: 'For a preview of how this image will be used, please visit the docs.',
   },
-  {
-    value: EmailOption.BACKUP,
-    title: 'Backup Kit Only',
-    subtitle: 'To learn more about Backup Kit, please visit the docs.',
-  },
-  {
-    value: EmailOption.NONE,
-    title: 'No Email',
-    subtitle: 'The user will not receive the Welcome email or Backup Kit',
-  },
+  // Leaving these commented out in case we want to add back in the future
+  // {
+  //   value: EmailOption.BACKUP,
+  //   title: "Backup Kit Only",
+  //   subtitle: "To learn more about Backup Kit, please visit the docs.",
+  // },
+  // {
+  //   value: EmailOption.NONE,
+  //   title: "No Email",
+  //   subtitle: "The user will not receive the Welcome email or Backup Kit",
+  // },
 ];
 
 export const ENABLED_FLOW_OPTIONS: {

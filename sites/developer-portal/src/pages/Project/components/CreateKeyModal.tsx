@@ -1,4 +1,4 @@
-import { CpslButton, CpslSelect, CpslSelectItem, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslInput, CpslSelect, CpslSelectItem, CpslText } from '@usecapsule/react-components';
 import styled from 'styled-components';
 import { CpslSelectCustomEvent } from '@usecapsule/core-components';
 import { Environment } from '../../../types/environment';
@@ -6,28 +6,26 @@ import { formatEnvName, getKeyColor } from '../../../utils/apiKey';
 import { Modal } from '../../../components/Modal/Modal';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { useCreateApiKey } from '../../../hooks/api/mutations/useCreateApiKey';
-import { ENV_VARS, IS_BETA, IS_PROD } from '../../../utils/constants';
+import { ENV_VARS, IS_PROD } from '../../../utils/constants';
 import { triggerToast } from '../../../utils/toasts';
 import { useParams } from 'react-router-dom';
+import { HTTPS_URL_REGEX } from '../../../utils/regex';
+import { useGetAvailableKeyEnvs } from '../../../hooks/api/queries/useOrganizationKeys';
 
 interface CreateKeyModalProps {
   open: boolean;
   onClose: () => void;
 }
 
-const ENVIRONMENT_OPTIONS: Environment[] = IS_PROD
-  ? [Environment.PROD, Environment.BETA]
-  : IS_BETA
-    ? [Environment.BETA, Environment.SANDBOX]
-    : [ENV_VARS.environment as Environment];
-
 const DEFAULT_VALUES = {
   environment: IS_PROD ? undefined : (ENV_VARS.environment as Environment),
+  homepageUrl: '',
 };
 
 export const CreateKeyModal = ({ open, onClose }: CreateKeyModalProps) => {
   const { mutate: createKey } = useCreateApiKey();
   const { projectId } = useParams();
+  const { data: availableKeyEnvs } = useGetAvailableKeyEnvs(projectId ?? '');
 
   const {
     control,
@@ -38,9 +36,9 @@ export const CreateKeyModal = ({ open, onClose }: CreateKeyModalProps) => {
     reValidateMode: 'onChange',
     defaultValues: DEFAULT_VALUES,
   });
-  const [environment] = useWatch({
+  const [environment, homepageUrl] = useWatch({
     control,
-    name: ['environment'],
+    name: ['environment', 'homepageUrl'],
   });
 
   const handleCreateClick = () => {
@@ -49,6 +47,7 @@ export const CreateKeyModal = ({ open, onClose }: CreateKeyModalProps) => {
         {
           projectId,
           env: environment.toLowerCase(),
+          data: { homepageUrl },
         },
         {
           onSuccess: () => {
@@ -108,7 +107,7 @@ export const CreateKeyModal = ({ open, onClose }: CreateKeyModalProps) => {
                       <EnvText>{formatEnvName(value as Environment)}</EnvText>
                     </EnvItemContainer>
                   )}
-                  {ENVIRONMENT_OPTIONS.map(env => (
+                  {(availableKeyEnvs ?? []).map(env => (
                     <CpslSelectItem key={env} slot="items" value={env}>
                       <EnvItemContainer>
                         <EnvIcon $environment={env} />
@@ -119,6 +118,29 @@ export const CreateKeyModal = ({ open, onClose }: CreateKeyModalProps) => {
                 </CpslSelect>
               );
             }}
+          />
+          <Controller
+            name="homepageUrl"
+            control={control}
+            rules={{
+              required: 'Website URL is required',
+              pattern: {
+                value: HTTPS_URL_REGEX,
+                message: 'Must be a secure (https) url',
+              },
+            }}
+            render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+              <CpslInput
+                label="Website URL"
+                placeholder="https://www.yourwebsite.com"
+                onCpslInput={e => {
+                  onChange(e.detail.value);
+                }}
+                onCpslBlur={onBlur}
+                value={value}
+                errorText={error?.message}
+              />
+            )}
           />
         </Content>
         <CpslButton disabled={!isValid} fullWidth onClick={handleCreateClick}>

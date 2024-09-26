@@ -25,10 +25,13 @@ import Clock from './clock.svg';
 import Close from './close.svg';
 import ClubhouseBrand from './clubhouse-brand.svg';
 import Clubhouse from './clubhouse.svg';
+import Copy07 from './copy-07.svg';
 import Copy from './copy.svg';
 import Cosmos from './cosmos.svg';
 import CreditCard02 from './credit-card-02.svg';
 import CreditCard from './credit-card.svg';
+import Cube03 from './cube-03.svg';
+import CubeOutline from './cube-outline.svg';
 import Cube from './cube.svg';
 import DecentBrand from './decent-brand.svg';
 import Decent from './decent.svg';
@@ -386,10 +389,13 @@ export const Icons = {
   close: Close,
   clubhouseBrand: ClubhouseBrand,
   clubhouse: Clubhouse,
+  copy07: Copy07,
   copy: Copy,
   cosmos: Cosmos,
   creditCard02: CreditCard02,
   creditCard: CreditCard,
+  cube03: Cube03,
+  cubeOutline: CubeOutline,
   cube: Cube,
   decentBrand: DecentBrand,
   decent: Decent,

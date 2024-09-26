@@ -67,3 +67,34 @@ export const FRAMEWORK_OPTIONS: Framework[] = [
 ];
 
 export const PACKAGE_MANAGER_OPTIONS: PackageManager[] = [PackageManager.NPM, PackageManager.YARN, PackageManager.PNPM];
+
+export enum PlanSlug {
+  FREE = 'FREE',
+  STARTER = 'STARTER',
+  GROWTH = 'GROWTH',
+  SCALE = 'SCALE',
+  ENTERPRISE = 'ENTERPRISE',
+}
+
+export const PLAN_PERMISSIONS: Record<PlanSlug, { canCreateProdKeys: boolean; maxProjects: number }> = {
+  [PlanSlug.FREE]: {
+    canCreateProdKeys: false,
+    maxProjects: 1,
+  },
+  [PlanSlug.STARTER]: {
+    canCreateProdKeys: true,
+    maxProjects: 1,
+  },
+  [PlanSlug.GROWTH]: {
+    canCreateProdKeys: true,
+    maxProjects: 3,
+  },
+  [PlanSlug.SCALE]: {
+    canCreateProdKeys: true,
+    maxProjects: 5,
+  },
+  [PlanSlug.ENTERPRISE]: {
+    canCreateProdKeys: true,
+    maxProjects: Infinity,
+  },
+};

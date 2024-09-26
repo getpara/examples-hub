@@ -4,7 +4,7 @@ import { FormProvider } from 'react-hook-form';
 import { PortalUrl } from './PortalUrl';
 import { VerifyUrl } from './VerifyUrl';
 import { usePortalConfigFormData } from '../../hooks/usePortalConfigFormData';
-import { Save } from '../Save';
+import { ConfigurationActions } from '../ConfigurationActions';
 
 export const PortalConfiguration = () => {
   const form = usePortalConfigFormData();
@@ -19,7 +19,7 @@ export const PortalConfiguration = () => {
       <FormProvider {...form}>
         <PortalUrl />
         <VerifyUrl />
-        <Save />
+        <ConfigurationActions />
       </FormProvider>
     </ConfigurationCard>
   );

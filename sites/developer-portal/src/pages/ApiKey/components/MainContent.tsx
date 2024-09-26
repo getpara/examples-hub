@@ -1,10 +1,12 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { MOBILE_SIZE } from '../../../utils/constants';
 import { ConfigurationTab } from './ConfigurationTab';
 import { UsersTab } from './UsersTab';
 import { Tabs } from '../../../components/Tabs/Tabs';
 import { SetupTab } from './SetupTab';
+import { useGetApiKeySetupStatus } from '../../../hooks/api/queries/useApiKeySetupStatus';
+import { useParams } from 'react-router-dom';
 
 const TABS = [
   {
@@ -22,7 +24,17 @@ const TABS = [
 ];
 
 export const MainContent = () => {
+  const { apiKey, env, projectId } = useParams();
+  const { data: status } = useGetApiKeySetupStatus(projectId ?? '', apiKey ?? '', env ?? '');
+
   const [selectedTab, setSelectedTab] = useState(TABS[0].value);
+
+  useEffect(() => {
+    if (status?.firstUser && selectedTab === TABS[0].value) {
+      setSelectedTab(TABS[1].value);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
 
   const handleTabClick = (tab: string) => {
     setSelectedTab(tab);

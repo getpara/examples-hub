@@ -1,40 +1,29 @@
-import { CpslButton, CpslIcon, CpslInput } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon, CpslText } from '@usecapsule/react-components';
 import { Modal } from '../../../components/Modal/Modal';
 import { useUpdateApiKey } from '../../../hooks/api/mutations/useUpdateApiKey';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Controller, useForm, useWatch } from 'react-hook-form';
 import { useRotateKey } from '../../../hooks/api/mutations/useRotateKey';
 import { useArchiveKey } from '../../../hooks/api/mutations/useArchiveKey';
 import { triggerToast } from '../../../utils/toasts';
+import { useGetAvailableKeyEnvs, useGetOrganizationKey } from '../../../hooks/api/queries/useOrganizationKeys';
+import { Environment } from '../../../types/environment';
+import { formatEnvName } from '../../../utils/apiKey';
 
 interface EditKeyModalProps {
   open: boolean;
-  name?: string;
   onClose: () => void;
 }
 
-export const EditKeyModal = ({ open, name, onClose }: EditKeyModalProps) => {
+export const EditKeyModal = ({ open, onClose }: EditKeyModalProps) => {
   const navigate = useNavigate();
   const { apiKey, env, projectId } = useParams();
-  const { mutate: saveChanges } = useUpdateApiKey();
+  const { mutate: unArchiveKey } = useUpdateApiKey();
   const { mutate: rotateKey } = useRotateKey();
   const { mutate: archiveKey } = useArchiveKey();
+  const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
+  const { data: availableEnvs } = useGetAvailableKeyEnvs(projectId ?? '');
 
-  const {
-    control,
-    formState: { isDirty, isValid },
-  } = useForm({
-    mode: 'onChange',
-    reValidateMode: 'onChange',
-    defaultValues: {
-      keyName: name ?? '',
-    },
-  });
-
-  const keyName = useWatch({
-    control,
-    name: 'keyName',
-  });
+  const canUnarchive = availableEnvs?.includes(apiKeyData?.environment.toUpperCase() as Environment);
 
   const handleRefreshKey = () => {
     if (projectId && apiKey && env) {
@@ -86,10 +75,10 @@ export const EditKeyModal = ({ open, name, onClose }: EditKeyModalProps) => {
     }
   };
 
-  const handleSaveClick = () => {
-    if (projectId && apiKey && env) {
-      saveChanges(
-        { projectId, keyId: apiKey, env, data: { displayName: keyName } },
+  const handleUnArchiveKey = () => {
+    if (canUnarchive && projectId && apiKey && env) {
+      unArchiveKey(
+        { projectId, keyId: apiKey, env, data: { archived: false } },
         {
           onSuccess: () => {
             onClose();
@@ -113,35 +102,24 @@ export const EditKeyModal = ({ open, name, onClose }: EditKeyModalProps) => {
   return (
     <Modal open={open} onClose={onClose} title="Edit API Key" subtitle="Make changes to your API Key">
       <>
-        <Controller
-          name="keyName"
-          control={control}
-          rules={{
-            required: 'Key name is required',
-          }}
-          render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
-            <CpslInput
-              placeholder="Key Name"
-              onCpslInput={e => {
-                onChange(e.detail.value);
-              }}
-              onCpslBlur={onBlur}
-              value={value}
-              errorText={error?.message}
-            />
-          )}
-        />
-        <CpslButton disabled={!isDirty || !isValid} fullWidth onClick={handleSaveClick}>
-          Save Changes
-        </CpslButton>
         <CpslButton fullWidth onClick={handleRefreshKey} variant="secondary">
           <CpslIcon slot="start" icon="refresh" />
           Refresh API Key
         </CpslButton>
-        <CpslButton fullWidth onClick={handleArchiveKey} variant="secondary">
-          <CpslIcon slot="start" icon="cube" />
-          Archive API Key
+        <CpslButton
+          fullWidth
+          onClick={apiKeyData?.archived ? handleUnArchiveKey : handleArchiveKey}
+          variant="secondary"
+          disabled={apiKeyData?.archived && !canUnarchive}
+        >
+          <CpslIcon slot="start" icon={apiKeyData?.archived ? 'cubeOutline' : 'cube03'} />
+          {apiKeyData?.archived ? 'Unarchive' : 'Archive'} API Key
         </CpslButton>
+        {apiKeyData?.archived && !canUnarchive && (
+          <CpslText color="error">
+            Please archive your current {formatEnvName(apiKeyData?.environment)} key to unarchive this key.
+          </CpslText>
+        )}
       </>
     </Modal>
   );

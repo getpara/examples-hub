@@ -7,6 +7,7 @@ import { Environment } from '../../../types/environment';
 import { useParams } from 'react-router-dom';
 import { formatEnvName } from '../../../utils/apiKey';
 import { useGetOrganizationKey } from '../../../hooks/api/queries/useOrganizationKeys';
+import { ArchiveLabel } from '../../../components/ArchiveLabel/ArchiveLabel';
 
 export const KeyData = () => {
   const { apiKey, env, projectId } = useParams();
@@ -20,9 +21,12 @@ export const KeyData = () => {
 
   return (
     <Container>
-      <CpslText variant="headingS" weight="semiBold">
-        {apiKeyData?.displayName}
-      </CpslText>
+      <NameContainer>
+        <CpslText variant="headingS" weight="semiBold">
+          {apiKeyData?.displayName}
+        </CpslText>
+        {apiKeyData?.archived && <ArchiveLabel />}
+      </NameContainer>
       <InnerContainer>
         <DisabledInput
           label="API Key"
@@ -67,4 +71,10 @@ const InnerContainer = styled.div`
 const DisabledInput = styled(CpslInput)`
   width: 375px;
   --input-color: var(--cpsl-color-text-primary);
+`;
+
+const NameContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
 `;

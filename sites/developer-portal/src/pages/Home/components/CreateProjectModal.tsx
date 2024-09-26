@@ -7,9 +7,13 @@ import { useCreateProject } from '../../../hooks/api/mutations/useCreateProject'
 import { Framework } from '../../../types/framework';
 import { PackageManager } from '../../../types/packageManager';
 import { CpslSelectCustomEvent } from '@usecapsule/core-components';
-import { FRAMEWORK_OPTIONS, PACKAGE_MANAGER_OPTIONS } from '../../../utils/constants';
+import { ENV_VARS, FRAMEWORK_OPTIONS, IS_BETA, IS_PROD, PACKAGE_MANAGER_OPTIONS } from '../../../utils/constants';
 import { formatFrameworkName, frameworkHasPackageManager } from '../../../utils/framework';
 import { formatPackageManagerName } from '../../../utils/packageManager';
+import { HTTPS_URL_REGEX } from '../../../utils/regex';
+import { useCreateApiKey } from '../../../hooks/api/mutations/useCreateApiKey';
+import { Environment } from '../../../types/environment';
+import { useCanCreateProject } from '../../../hooks/permissions/useCanCreateProject';
 
 interface CreateProjectModalProps {
   open: boolean;
@@ -20,10 +24,13 @@ const DEFAULT_VALUES = {
   name: '',
   framework: '',
   packageManager: '',
+  homepageUrl: '',
 };
 
 export const CreateProjectModal = ({ open, onClose }: CreateProjectModalProps) => {
-  const { mutate: createProject } = useCreateProject();
+  const { canCreateProject } = useCanCreateProject();
+  const { mutateAsync: createProject } = useCreateProject();
+  const { mutateAsync: createApiKey } = useCreateApiKey();
 
   const {
     control,
@@ -34,38 +41,62 @@ export const CreateProjectModal = ({ open, onClose }: CreateProjectModalProps) =
     reValidateMode: 'onChange',
     defaultValues: DEFAULT_VALUES,
   });
-  const [name, framework, packageManager] = useWatch({
+  const [name, framework, packageManager, homepageUrl] = useWatch({
     control,
-    name: ['name', 'framework', 'packageManager'],
+    name: ['name', 'framework', 'packageManager', 'homepageUrl'],
   });
 
-  const handleCreateClick = () => {
-    createProject(
-      {
-        data: { name, framework, packageManager },
-      },
-      {
-        onSuccess: () => {
-          onClose();
-          triggerToast({
-            variant: 'success',
-            title: 'Project Created!',
-          });
+  const handleCreateClick = async () => {
+    try {
+      const newProject = await createProject(
+        {
+          data: { name, framework, packageManager },
         },
-        onError: () => {
-          triggerToast({
-            variant: 'error',
-            title: 'Failed to Create Project',
-            body: 'Please try again. If the problem persists, contact Capsule support.',
-          });
+        {
+          onError: () => {
+            triggerToast({
+              variant: 'error',
+              title: 'Failed to Create Project',
+              body: 'Please try again. If the problem persists, contact Capsule support.',
+            });
+          },
         },
-      },
-    );
+      );
+
+      if (newProject) {
+        await createApiKey(
+          {
+            projectId: newProject.project.id,
+            env: IS_PROD ? Environment.BETA : IS_BETA ? Environment.SANDBOX : (ENV_VARS.environment as Environment),
+            data: { homepageUrl },
+          },
+          {
+            onError: () => {
+              triggerToast({
+                variant: 'error',
+                title: 'Failed to Create Key',
+                body: 'Please try again. If the problem persists, contact Capsule support.',
+              });
+            },
+          },
+        );
+      }
+    } finally {
+      onClose();
+      triggerToast({
+        variant: 'success',
+        title: 'Project Created!',
+      });
+    }
   };
 
   const handleExited = () => {
     reset(DEFAULT_VALUES);
   };
+
+  if (!canCreateProject) {
+    return null;
+  }
 
   return (
     <Modal open={open} onClose={onClose} onExited={handleExited} title="New Project" subtitle="Give your new project a name">
@@ -87,12 +118,10 @@ export const CreateProjectModal = ({ open, onClose }: CreateProjectModalProps) =
                 onCpslBlur={onBlur}
                 value={value}
                 errorText={error?.message}
+                helperText="This name will be user facing"
               />
             )}
           />
-          <NameSubtitle variant="bodyXS" color="secondary" weight="medium">
-            This name will be user facing
-          </NameSubtitle>
           <Controller
             name="framework"
             control={control}
@@ -157,9 +186,32 @@ export const CreateProjectModal = ({ open, onClose }: CreateProjectModalProps) =
               }}
             />
           )}
+          <Controller
+            name="homepageUrl"
+            control={control}
+            rules={{
+              required: 'Website URL is required',
+              pattern: {
+                value: HTTPS_URL_REGEX,
+                message: 'Must be a secure (https) url',
+              },
+            }}
+            render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+              <CpslInput
+                label="Website URL"
+                placeholder="https://www.yourwebsite.com"
+                onCpslInput={e => {
+                  onChange(e.detail.value);
+                }}
+                onCpslBlur={onBlur}
+                value={value}
+                errorText={error?.message}
+              />
+            )}
+          />
         </Content>
         <CpslButton disabled={!isValid} fullWidth onClick={handleCreateClick}>
-          Next
+          Create
         </CpslButton>
       </>
     </Modal>
@@ -170,8 +222,4 @@ const Content = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
-`;
-
-const NameSubtitle = styled(CpslText)`
-  margin-top: -4px;
 `;

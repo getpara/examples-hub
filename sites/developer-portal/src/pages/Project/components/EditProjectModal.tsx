@@ -96,12 +96,10 @@ export const EditProjectModal = ({ open, onClose }: EditProjectModalProps) => {
                 onCpslBlur={onBlur}
                 value={value}
                 errorText={error?.message}
+                helperText="This name will be user facing"
               />
             )}
           />
-          <NameSubtitle variant="bodyXS" color="secondary" weight="medium">
-            This name will be user facing
-          </NameSubtitle>
           <Controller
             name="framework"
             control={control}
@@ -179,8 +177,4 @@ const Content = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
-`;
-
-const NameSubtitle = styled(CpslText)`
-  margin-top: -4px;
 `;

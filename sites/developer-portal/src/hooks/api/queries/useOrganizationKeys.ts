@@ -4,6 +4,8 @@ import { useAppStore } from '../../../stores/app/useAppStore';
 import { getApiKeys } from '../../../api/apiKeys/queries';
 import { Environment } from '../../../types/environment';
 import { ENV_VARS } from '../../../utils/constants';
+import { useCanCreateProdKeys } from '../../permissions/useCanCreateProdKeys';
+import { useCallback } from 'react';
 
 export const ORGANIZATIONS_KEYS_QUERY_KEY = 'organizationKeys';
 
@@ -36,4 +38,56 @@ export const useGetOrganizationKey = (projectId: string, id: string, env: Enviro
   return useOrganizationKeysQuery(projectId, data => {
     return data.find(k => k.id === id && k.environment === env);
   });
+};
+
+export const useGetAvailableKeyEnvs = (projectId: string) => {
+  const { canCreateProdKeys } = useCanCreateProdKeys();
+
+  return useOrganizationKeysQuery(
+    projectId,
+    useCallback(
+      data => {
+        const unArchivedKeys = data.filter(d => !d.archived);
+        const availableOptions: Environment[] = [];
+
+        switch (ENV_VARS.environment as Environment) {
+          case Environment.PROD: {
+            const hasProdKey = !!unArchivedKeys.find(d => d.environment === Environment.PROD);
+            const hasBetaKey = !!unArchivedKeys.find(d => d.environment === Environment.BETA);
+
+            if (!hasProdKey && canCreateProdKeys) {
+              availableOptions.push(Environment.PROD);
+            }
+            if (!hasBetaKey) {
+              availableOptions.push(Environment.BETA);
+            }
+            break;
+          }
+          case Environment.BETA: {
+            const hasBetaKey = !!unArchivedKeys.find(d => d.environment === Environment.BETA);
+            const hasSandboxKey = !!unArchivedKeys.find(d => d.environment === Environment.SANDBOX);
+
+            if (!hasBetaKey && canCreateProdKeys) {
+              availableOptions.push(Environment.BETA);
+            }
+            if (!hasSandboxKey) {
+              availableOptions.push(Environment.SANDBOX);
+            }
+            break;
+          }
+          default: {
+            const hasKey = !!unArchivedKeys.length;
+
+            if (!hasKey) {
+              availableOptions.push(ENV_VARS.environment as Environment);
+            }
+            break;
+          }
+        }
+
+        return availableOptions;
+      },
+      [canCreateProdKeys],
+    ),
+  );
 };

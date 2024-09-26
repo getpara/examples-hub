@@ -3,15 +3,24 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { EditKeyModal } from './EditKeyModal';
+import { CopyTo } from './CopyTo';
+import { useKeyDataForm } from '../hooks/useKeyFormData';
+import { FormProvider } from 'react-hook-form';
+import { useGetAvailableKeyEnvs } from '../../../hooks/api/queries/useOrganizationKeys';
+import { IS_PROD } from '../../../utils/constants';
 import { Environment } from '../../../types/environment';
-import { useGetOrganizationKey } from '../../../hooks/api/queries/useOrganizationKeys';
+import { CreateProductionKeyButton } from './CreateProductionKeyButton';
+import { CreateProductionKeyModal } from './CreateProductionKeyModal';
+import { NonProdWarning } from './NonProdWarning';
 
 export const Header = () => {
   const navigate = useNavigate();
-  const { apiKey, env, projectId } = useParams();
-  const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
+  const { projectId } = useParams();
+  const form = useKeyDataForm();
+  const { data: availableKeyEnvs } = useGetAvailableKeyEnvs(projectId ?? '');
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isCreateProdKeyModalOpen, setIsCreateProdKeyModalOpen] = useState(false);
 
   const handleBackClick = () => {
     navigate(`/project/${projectId}`);
@@ -25,17 +34,35 @@ export const Header = () => {
     setIsEditModalOpen(false);
   };
 
+  const handleCreateProdKeyClick = () => {
+    setIsCreateProdKeyModalOpen(true);
+  };
+
+  const handleCreateProdKeyModalClose = () => {
+    setIsCreateProdKeyModalOpen(false);
+  };
+
+  // If the user can't create a prod/beta key that means they have a prod/beta key available to copy configs to
+  const showCopyTo = availableKeyEnvs?.includes(IS_PROD ? Environment.PROD : Environment.BETA);
+
   return (
-    <Container>
-      <BackButton variant="ghost" onClick={handleBackClick}>
-        <ArrowIcon slot="start" icon="arrowNarrow" />
-        Back
-      </BackButton>
-      <CpslButton variant="secondary" size="small" onClick={handleEditClick} disabled={apiKeyData?.archived}>
-        Edit Key
-      </CpslButton>
-      <EditKeyModal name={apiKeyData?.displayName} open={isEditModalOpen} onClose={handleEditModalClose} />
-    </Container>
+    <FormProvider {...form}>
+      <Container>
+        <BackButton variant="ghost" onClick={handleBackClick}>
+          <ArrowIcon slot="start" icon="arrowNarrow" />
+          Back
+        </BackButton>
+        <ActionContainer>
+          <CpslButton variant="secondary" size="small" onClick={handleEditClick}>
+            Edit Key
+          </CpslButton>
+          {!showCopyTo ? <CopyTo isInHeader /> : <CreateProductionKeyButton onClick={handleCreateProdKeyClick} />}
+        </ActionContainer>
+        <EditKeyModal open={isEditModalOpen} onClose={handleEditModalClose} />
+        <CreateProductionKeyModal open={isCreateProdKeyModalOpen} onClose={handleCreateProdKeyModalClose} />
+      </Container>
+      <NonProdWarning onCreateProdKeyClick={handleCreateProdKeyClick} />
+    </FormProvider>
   );
 };
 
@@ -51,4 +78,9 @@ const ArrowIcon = styled(CpslIcon)`
 
 const BackButton = styled(CpslButton)`
   --button-gap: 4px;
+`;
+
+const ActionContainer = styled.div`
+  display: flex;
+  gap: 8px;
 `;

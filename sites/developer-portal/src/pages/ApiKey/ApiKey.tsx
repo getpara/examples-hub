@@ -6,7 +6,7 @@ import { Environment } from '../../types/environment';
 import { useGetOrganizationKey } from '../../hooks/api/queries/useOrganizationKeys';
 import { Loader } from '../../components/Loader';
 import { triggerToast } from '../../utils/toasts';
-import { NonProdWarning } from './components/NonProdWarning';
+import { useGetApiKeySetupStatus } from '../../hooks/api/queries/useApiKeySetupStatus';
 
 export const ApiKey = () => {
   const navigate = useNavigate();
@@ -16,6 +16,7 @@ export const ApiKey = () => {
     apiKey ?? '',
     env as Environment,
   );
+  const { isLoading: isStatusLoading } = useGetApiKeySetupStatus(projectId ?? '', apiKey ?? '', env ?? '');
 
   if (!apiKey || !env) {
     navigate(`/project/${projectId}`);
@@ -30,14 +31,13 @@ export const ApiKey = () => {
     return null;
   }
 
-  if (isApiKeyDataLoading) {
+  if (isApiKeyDataLoading || isStatusLoading) {
     return <Loader />;
   }
 
   return (
     <>
       <Header />
-      <NonProdWarning />
       <KeyData />
       <MainContent />
     </>

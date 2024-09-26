@@ -5,7 +5,8 @@ import { useEmailConfigFormData } from '../../hooks/useEmailConfigFormData';
 import { EmailOption } from './EmailOption';
 import { TwitterUrl } from './TwitterUrl';
 import { LinkedinUrl } from './LinkedinUrl';
-import { Save } from '../Save';
+import { ConfigurationActions } from '../ConfigurationActions';
+import { GithubUrl } from './GithubUrl';
 
 export const EmailConfiguration = () => {
   const form = useEmailConfigFormData();
@@ -21,7 +22,8 @@ export const EmailConfiguration = () => {
         <EmailOption />
         <TwitterUrl />
         <LinkedinUrl />
-        <Save />
+        <GithubUrl />
+        <ConfigurationActions />
       </FormProvider>
     </ConfigurationCard>
   );

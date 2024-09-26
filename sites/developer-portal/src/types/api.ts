@@ -165,6 +165,7 @@ export type UpdateApiKeyBody = Nullable<
       | 'onRampProviders'
       | 'onRampAssets'
       | 'rampApiKey'
+      | 'archived'
       | 'isInstalled'
     >
   >

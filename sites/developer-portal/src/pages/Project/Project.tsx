@@ -1,4 +1,4 @@
-import { CpslButton, CpslIcon, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon } from '@usecapsule/react-components';
 import styled from 'styled-components';
 import { useCallback, useMemo, useState } from 'react';
 import { Table, TableData } from '../../components/Table/Table';
@@ -8,10 +8,10 @@ import { useIsMobile } from '../../hooks/useIsMobile';
 import { formatDate } from '../../utils/formatDate';
 import { useNavigate, useParams } from 'react-router-dom';
 import { MOBILE_SIZE } from '../../utils/constants';
-import { useGetAllOrganizationKeys } from '../../hooks/api/queries/useOrganizationKeys';
+import { useGetAllOrganizationKeys, useGetAvailableKeyEnvs } from '../../hooks/api/queries/useOrganizationKeys';
 import { useGetProject } from '../../hooks/api/queries/useProjects';
 import { triggerToast } from '../../utils/toasts';
-import { EditProjectModal } from './components/EditProjectModal';
+import { Header } from './components/Header';
 
 const PAGE_SIZE = 6;
 
@@ -21,8 +21,8 @@ export const Project = () => {
   const isMobile = useIsMobile();
   const { data: apiKeys } = useGetAllOrganizationKeys(projectId ?? '');
   const { data: project, isLoading: isProjectLoading } = useGetProject(projectId ?? '');
+  const { data: availableKeyEnvs } = useGetAvailableKeyEnvs(projectId ?? '');
   const [modalOpen, setModalOpen] = useState(false);
-  const [editProjectModalOpen, setEditProjectModalOpen] = useState(false);
   const [page, setPage] = useState(0);
 
   const handlePageChange = (page: number) => {
@@ -37,19 +37,14 @@ export const Project = () => {
   );
 
   const formattedData: TableData[] = useMemo(() => {
-    let archiveCount = 0;
     return (
       apiKeys?.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE).map(d => {
-        if (d.archived) {
-          archiveCount++;
-        }
-
         return {
           key: d.id,
           data: [
             {
               key: 'environment',
-              value: <EnvironmentCell environment={d.environment} archiveIndex={archiveCount} />,
+              value: <EnvironmentCell environment={d.environment} archived={d.archived} />,
             },
             {
               key: 'createdAt',
@@ -78,14 +73,6 @@ export const Project = () => {
     setModalOpen(false);
   };
 
-  const handleEditClick = () => {
-    setEditProjectModalOpen(true);
-  };
-
-  const handleCloseEditProjectModal = () => {
-    setEditProjectModalOpen(false);
-  };
-
   if (!projectId) {
     navigate('/');
   }
@@ -101,15 +88,7 @@ export const Project = () => {
 
   return (
     <Container>
-      <HeaderContainer>
-        <CpslText variant="headingS" weight="semiBold">
-          {project?.name}
-        </CpslText>
-        <CpslButton variant="secondary" size="small" onClick={handleEditClick}>
-          <CpslIcon slot="start" icon="edit02" />
-          Edit Project
-        </CpslButton>
-      </HeaderContainer>
+      <Header />
       <Table
         page={page}
         title="API Keys"
@@ -119,7 +98,7 @@ export const Project = () => {
         onPageChange={handlePageChange}
         headers={[{ headerName: 'Environment' }, { headerName: 'Date Created', colSpan: 2 }]}
         ActionButton={
-          <CpslButton onClick={handleCreateClick} size={isMobile ? 'small' : 'medium'}>
+          <CpslButton onClick={handleCreateClick} size={isMobile ? 'small' : 'medium'} disabled={!availableKeyEnvs?.length}>
             <CpslIcon slot="start" icon="plus" />
             Create
           </CpslButton>
@@ -133,8 +112,7 @@ export const Project = () => {
           </CpslButton>
         }
       />
-      <CreateKeyModal open={modalOpen} onClose={handleCloseModal} />
-      {!!project && <EditProjectModal open={editProjectModalOpen} onClose={handleCloseEditProjectModal} />}
+      {!!availableKeyEnvs?.length && <CreateKeyModal open={modalOpen} onClose={handleCloseModal} />}
     </Container>
   );
 };
@@ -149,11 +127,4 @@ const Container = styled.div`
   @media (max-width: ${MOBILE_SIZE}px) {
     margin-top: -16px;
   }
-`;
-
-const HeaderContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
 `;

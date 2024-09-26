@@ -280,7 +280,7 @@ export class CpslPopover {
       // Using a small timeout here to ensure the popover is open before attempting to do position calculations
       setTimeout(() => {
         this.setPosition();
-      }, 40);
+      }, 20);
     }
   };
 

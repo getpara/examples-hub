@@ -5,11 +5,12 @@ export type CreateApiKeyVars = {
   organizationId: string;
   projectId: string;
   env: string;
+  data: Pick<UpdateApiKeyBody, 'homepageUrl'>;
 };
-export const createApiKey = async ({ organizationId, projectId, env }: CreateApiKeyVars) => {
+export const createApiKey = async ({ organizationId, projectId, env, data }: CreateApiKeyVars) => {
   const endpoint = `/organizations/${organizationId}/projects/${projectId}/${env}/keys/`;
 
-  return (await axiosClient.post<ApiKeyResponse>(endpoint)).data;
+  return (await axiosClient.post<ApiKeyResponse>(endpoint, data)).data;
 };
 
 export type UpdateApiKeyVars = {

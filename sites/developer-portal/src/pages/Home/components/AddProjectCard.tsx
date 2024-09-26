@@ -1,5 +1,6 @@
 import { CpslButton, CpslCard, CpslHero, CpslIcon } from '@usecapsule/react-components';
 import styled from 'styled-components';
+import { useCanCreateProject } from '../../../hooks/permissions/useCanCreateProject';
 
 interface AddProjectCardProps {
   isFirstProject: boolean;
@@ -7,6 +8,12 @@ interface AddProjectCardProps {
 }
 
 export const AddProjectCard = ({ isFirstProject, onClick }: AddProjectCardProps) => {
+  const { canCreateProject } = useCanCreateProject();
+
+  if (!canCreateProject) {
+    return null;
+  }
+
   return (
     <StyledCard>
       <HeroContainer>

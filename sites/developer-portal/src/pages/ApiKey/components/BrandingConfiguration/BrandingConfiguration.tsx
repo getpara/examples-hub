@@ -6,11 +6,16 @@ import { BackgroundColor } from './BackgroundColor';
 import { Font } from './Font';
 import { FormProvider } from 'react-hook-form';
 import { useBrandingConfigFormData } from '../../hooks/useBrandingConfigFormData';
-import { Save } from '../Save';
 import { Icon, Logo } from './AssetUpload';
+import { useEffect } from 'react';
+import { ConfigurationActions } from '../ConfigurationActions';
 
 export const BrandingConfiguration = () => {
   const form = useBrandingConfigFormData();
+
+  useEffect(() => {
+    form.trigger();
+  }, []);
 
   return (
     <ConfigurationCard
@@ -18,6 +23,7 @@ export const BrandingConfiguration = () => {
       subtitle="These settings will be applied to Capsule Portal and Emails only. Customizing your Capsule Modal is done with the Capsule SDK."
       // TODO: customize the docs link
       docsLink={DOCS_LINK}
+      defaultOpen={!form.getValues('homepageUrl')}
     >
       <FormProvider {...form}>
         <HomepageUrl />
@@ -26,7 +32,7 @@ export const BrandingConfiguration = () => {
         <Font />
         <Icon />
         <Logo />
-        <Save />
+        <ConfigurationActions />
       </FormProvider>
     </ConfigurationCard>
   );

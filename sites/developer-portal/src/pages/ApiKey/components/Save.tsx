@@ -45,12 +45,13 @@ export const Save = () => {
 
   return (
     <SaveButton fullWidth disabled={!canSave || isPending} onClick={handleSave}>
-      Save
+      {!isDirty ? 'No Unsaved Changes' : 'Save'}
     </SaveButton>
   );
 };
 
 const SaveButton = styled(CpslButton)`
-  align-self: flex-end;
-  width: 140px;
+  &::part(button-native) {
+    min-width: 140px;
+  }
 `;
