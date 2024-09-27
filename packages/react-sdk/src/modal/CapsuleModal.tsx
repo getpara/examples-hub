@@ -227,7 +227,7 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
       return null;
     }
 
-    if (disableEmailLogin && disablePhoneLogin && !oAuthMethods?.length) {
+    if (disableEmailLogin && disablePhoneLogin && !oAuthMethods?.length && !externalWallets?.length) {
       console.error('At least one OAuth method must be provided if email and phone login are disabled.');
       return null;
     }

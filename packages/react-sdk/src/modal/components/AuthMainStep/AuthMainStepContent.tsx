@@ -101,7 +101,7 @@ export const AuthMainStepContent = ({ oAuthMethods, disableEmailLogin, disablePh
         {methods.map(([reactNode, key], index) => (
           <Fragment key={key}>
             {reactNode}
-            {index < methods.length - 1 && <CpslDivider key="or">or</CpslDivider>}
+            {methods.length > 1 && index < methods.length - 1 && <CpslDivider key="or">or</CpslDivider>}
           </Fragment>
         ))}
       </>
