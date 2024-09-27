@@ -48,7 +48,9 @@ export const ProjectStatusCard = () => {
 };
 
 const StepText = styled(CpslText)<{ $isComplete?: boolean }>`
-  color: ${({ $isComplete }) => ($isComplete ? 'var(--cpsl-color-utility-green)' : 'var(--cpsl-color-utility-yellow)')};
+  &::part(text-element) {
+    color: ${({ $isComplete }) => ($isComplete ? 'var(--cpsl-color-utility-green)' : 'var(--cpsl-color-utility-yellow)')};
+  }
 `;
 
 const RightContainer = styled(SplitCardInnerContainer)`

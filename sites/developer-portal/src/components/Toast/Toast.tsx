@@ -49,10 +49,12 @@ const Icon = styled(CpslIcon)<{ $variant: Variant }>`
 `;
 
 const Title = styled(CpslText)<{ $variant: Variant }>`
-  color: ${({ $variant }) =>
-    $variant === 'success'
-      ? 'var(--cpsl-color-utility-green)'
-      : $variant === 'error'
-        ? 'var(--cpsl-color-utility-red)'
-        : 'var(--cpsl-color-utility-yellow)'};
+  &::part(text-element) {
+    color: ${({ $variant }) =>
+      $variant === 'success'
+        ? 'var(--cpsl-color-utility-green)'
+        : $variant === 'error'
+          ? 'var(--cpsl-color-utility-red)'
+          : 'var(--cpsl-color-utility-yellow)'};
+  }
 `;

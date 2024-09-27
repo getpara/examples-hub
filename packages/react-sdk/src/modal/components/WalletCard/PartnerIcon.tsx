@@ -33,8 +33,10 @@ const Container = styled.div<{ $backgroundColor?: string }>`
 `;
 
 const Text = styled(CpslText)<{ $color?: string }>`
-  line-height: 100%;
-  color: ${({ $color }) => `${$color ?? 'var(--cpsl-color-foreground-0)'}`};
+  &::part(text-element) {
+    line-height: 100%;
+    color: ${({ $color }) => `${$color ?? 'var(--cpsl-color-foreground-0)'}`};
+  }
 `;
 
 const Icon = styled(CpslIcon)`

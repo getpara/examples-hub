@@ -507,9 +507,11 @@ const WalletGroupHeading = styled.div`
 `;
 
 const Subheading = styled(CpslText)<{ isDark?: boolean }>`
-  line-height: auto;
   text-align: center;
-  color: #868686;
+  &::part(text-element) {
+    line-height: auto;
+    color: #868686;
+  }
 `;
 
 const BottomSheet = styled.div`

@@ -50,7 +50,9 @@ export const GradientButton = styled(CpslButton)`
 export const GradientText = styled(CpslText)`
   background: ${LINEAR_GRADIENT};
   background-clip: text;
-  color: transparent;
+  &::part(text-element) {
+    color: transparent;
+  }
 `;
 
 export const EnvIcon = styled.span<{ $environment: Environment }>`

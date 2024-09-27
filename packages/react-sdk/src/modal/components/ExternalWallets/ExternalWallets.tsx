@@ -151,7 +151,9 @@ const WalletButtonInnerContainer = styled.div`
     --icon-color: var(--cpsl-color-contrast);
   }
   cpsl-text {
-    color: var(--cpsl-color-contrast);
+    &::part(text-element) {
+      color: var(--cpsl-color-contrast);
+    }
   }
 `;
 
@@ -163,8 +165,10 @@ const Badge = styled.div<{ $variant: 'installed' | 'mobile'; $show: boolean }>`
   border-color: ${({ $variant }) =>
     $variant === 'installed' ? 'var(--cpsl-color-utility-green)' : 'var(--cpsl-color-text-primary)'};
   cpsl-text {
-    color: ${({ $variant }) =>
-      $variant === 'installed' ? 'var(--cpsl-color-utility-green)' : 'var(--cpsl-color-text-primary)'};
+    &::part(text-element) {
+      color: ${({ $variant }) =>
+        $variant === 'installed' ? 'var(--cpsl-color-utility-green)' : 'var(--cpsl-color-text-primary)'};
+    }
   }
 `;
 

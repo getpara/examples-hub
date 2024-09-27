@@ -1,9 +1,8 @@
 import { StepContainer } from '../common.js';
 import { OnRampProvider } from '@usecapsule/web-sdk';
 import { useModalStore } from '../../stores/index.js';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ModalStep } from '../../utils/steps.js';
-import { MoonPayEmbed } from '../OnRampComponents/MoonPayComponents.js';
 import { StripeEmbed } from '../OnRampComponents/StripeComponents.js';
 import { RampEmbed } from '../OnRampComponents/RampComponents.js';
 import styled from 'styled-components';
@@ -18,12 +17,23 @@ export const AddFundsAwaiting = () => {
   const onRampConfig = useModalStore(state => state.onRampConfig);
   const onRampPurchase = useModalStore(state => state.onRampPurchase);
 
+  const [MoonPayEmbed, setMoonPayEmbed] = useState(null);
+
+  useEffect(() => {
+    const loadMoonPay = async () => {
+      const MPComponent = await import('../OnRampComponents/MoonPayComponents.js');
+      setMoonPayEmbed(MPComponent.MoonPayEmbed);
+    };
+
+    loadMoonPay();
+  }, []);
+
   const onRampEmbed = useMemo(() => {
     switch (onRampPurchase?.provider) {
       case OnRampProvider.STRIPE:
         return <StripeEmbed />;
       case OnRampProvider.MOONPAY:
-        return <MoonPayEmbed />;
+        return typeof window === 'undefined' ? null : <MoonPayEmbed />;
       case OnRampProvider.RAMP:
         return <RampEmbed hostApiKey={onRampConfig.rampApiKey} />;
     }

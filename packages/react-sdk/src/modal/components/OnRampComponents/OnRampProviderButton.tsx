@@ -1,5 +1,5 @@
-import { OnRampConfig, OnRampMethod } from '@usecapsule/web-sdk';
-import { useMemo, useState } from 'react';
+import { OnRampConfig } from '@usecapsule/web-sdk';
+import { useState } from 'react';
 import { ON_RAMP_PROVIDERS, OnRampProviderConfig } from '../../constants/constants.js';
 import styled from 'styled-components';
 import { CpslButton, CpslIcon, CpslSpinner, CpslText } from '@usecapsule/react-components';
@@ -16,21 +16,9 @@ export const OnRampProviderButton = ({ config, index, onClick: _onClick }: OnRam
   const [isLoading, setIsLoading] = useState(false);
 
   const provider = config.providers[index];
-  const { feeLower, feeUpper, methods, name, icon, backgroundColors }: OnRampProviderConfig = ON_RAMP_PROVIDERS[provider];
+  const { feeLower, feeUpper, name, icon, backgroundColors }: OnRampProviderConfig = ON_RAMP_PROVIDERS[provider];
 
   const feeString = `Fee ${feeLower}% - ${feeUpper}%`;
-  const PaymentIcons = useMemo(() => {
-    const Icons: JSX.Element[] = [];
-
-    if (methods.includes(OnRampMethod.DEBIT) || methods.includes(OnRampMethod.CREDIT)) {
-      Icons.push(<StyledIcon key="creditCard" icon="creditCard" />);
-    }
-    if (methods.includes(OnRampMethod.ACH)) {
-      Icons.push(<StyledIcon key="bank" icon="bank" />);
-    }
-
-    return Icons;
-  }, []);
 
   const onClick = async () => {
     setIsLoading(true);
@@ -52,12 +40,6 @@ export const OnRampProviderButton = ({ config, index, onClick: _onClick }: OnRam
             <Text variant="bodyXS" weight="medium">
               {feeString}
             </Text>
-            <ProviderInfoIconContainer>
-              <Text variant="bodyXS" weight="medium">
-                Accepts
-              </Text>
-              {PaymentIcons}
-            </ProviderInfoIconContainer>
           </ProviderInfoInnerContainer>
         </ProviderInfoContainer>
         {isLoading ? <CpslSpinner size={16} /> : <Chevron icon="chevronUp" />}
@@ -111,19 +93,9 @@ const IconContainer = styled.span`
 `;
 
 const Text = styled(CpslText)`
-  color: #fff;
-`;
-
-const ProviderInfoIconContainer = styled.div`
-  align-items: center;
-  display: flex;
-  gap: 2px;
-`;
-
-const StyledIcon = styled(CpslIcon)`
-  --height: 16px;
-  --width: 16px;
-  --icon-color: #fff;
+  &::part(text-element) {
+    color: #fff;
+  }
 `;
 
 const Chevron = styled(CpslIcon)`

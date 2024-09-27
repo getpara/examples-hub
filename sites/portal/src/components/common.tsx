@@ -10,11 +10,13 @@ export const Heading: typeof CpslText = styled(CpslText)`
 `;
 
 export const Text: typeof CpslText = styled(CpslText)`
-  color: var(--cpsl-color-text-secondary);
   text-align: center;
   font-size: 16px;
   line-height: 24px;
   white-space: pre-line;
+  &::part(text-element) {
+    color: var(--cpsl-color-text-secondary);
+  }
 `;
 
 export const Link = styled.a`

@@ -54,7 +54,9 @@ const IncludesContainer = styled.div`
 `;
 
 const ComingSoonText = styled(CpslText)`
-  color: ${BRAND_COLORS.primary};
+  &::part(text-element) {
+    color: ${BRAND_COLORS.primary};
+  }
 `;
 
 const CheckIcon = styled(CpslIcon)`

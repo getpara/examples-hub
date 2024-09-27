@@ -48,7 +48,9 @@ const FooterText = styled(Text)`
 `;
 
 const ClickableText = styled(FooterText)`
-  color: var(--cpsl-color-text-primary);
+  &::part(text-element) {
+    color: var(--cpsl-color-text-primary);
+  }
   cursor: pointer;
 `;
 

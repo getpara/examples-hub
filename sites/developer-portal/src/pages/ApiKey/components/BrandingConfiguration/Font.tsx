@@ -47,5 +47,7 @@ const FontItem = styled(CpslSelectItem)<{ $fontFamily: string }>`
 `;
 
 const FontSelected = styled(CpslText)<{ $fontFamily: string }>`
-  font-family: ${({ $fontFamily }) => $fontFamily};
+  &::part(text-element) {
+    font-family: ${({ $fontFamily }) => $fontFamily};
+  }
 `;

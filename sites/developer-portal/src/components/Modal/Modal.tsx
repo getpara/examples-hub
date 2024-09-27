@@ -72,5 +72,7 @@ const HeaderTitle = styled.div`
 `;
 
 const TitleText = styled(CpslText)<{ $color?: string }>`
-  ${({ $color }) => $color && `color: ${$color}`};
+  &::part(text-element) {
+    ${({ $color }) => $color && `color: ${$color}`};
+  }
 `;

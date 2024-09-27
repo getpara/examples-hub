@@ -159,9 +159,11 @@ const TransactionDetailsSeparator = styled.div`
 `;
 
 const RawTransactionText = styled(CpslText)`
-  font-family: monospace;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+  &::part(text-element) {
+    font-family: monospace;
+  }
 `;
 
 export default TransactionReviewBody;

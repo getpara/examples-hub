@@ -93,11 +93,15 @@ const InfoBoxContent = styled.div`
 
 const InlineText = styled(CpslText)`
   display: inline-block;
-  color: var(--cpsl-color-background-96);
+  &::part(text-element) {
+    color: var(--cpsl-color-background-96);
+  }
 `;
 
 const ClickableText = styled(InlineText)`
   cursor: pointer;
   text-decoration: underline;
-  color: var(--cpsl-color-text-primary);
+  &::part(text-element) {
+    color: var(--cpsl-color-text-primary);
+  }
 `;

@@ -8,9 +8,9 @@ describe('cpsl-text', () => {
       html: `<cpsl-text></cpsl-text>`,
     });
     expect(page.root).toEqualHtml(`
-      <cpsl-text class="body-m primary">
+      <cpsl-text>
         <mock:shadow-root>
-          <p part="text-element">
+          <p class="body-m primary" part="text-element">
             <slot></slot>
           </p>
         </mock:shadow-root>

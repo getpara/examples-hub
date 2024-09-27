@@ -142,5 +142,7 @@ const ImageContainer = styled.div`
 
 const ImageText = styled(CpslText)`
   position: absolute;
-  color: #ffffff;
+  &::part(text-element) {
+    color: #ffffff;
+  }
 `;

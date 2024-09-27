@@ -53,7 +53,7 @@ export const AddFunds = () => {
   const capsule = useCapsuleStore(state => state.capsule);
   const appName = useThemeStore(state => state.appName);
   const onRampConfig = useModalStore(state => state.onRampConfig);
-  const tab = useModalStore(state => state.accountAddFundTab);
+  const storedTab = useModalStore(state => state.accountAddFundTab);
   const setTab = useModalStore(state => state.setAccountAddFundTab);
   const setStep = useModalStore(state => state.setStep);
   const setOnRampPurchase = useModalStore(state => state.setOnRampPurchase);
@@ -64,8 +64,11 @@ export const AddFunds = () => {
   const tabs = TABS.filter(([, key]) => !!onRampConfig[key]);
   const isMultiFlow = tabs.length > 1;
 
+  const tab = storedTab ?? tabs[0][0];
+
   const address = useMemo(
-    () => capsule.getDisplayAddress(activeWallet.id, { addressType: activeWallet.type }),
+    () =>
+      activeWallet ? capsule.getDisplayAddress(activeWallet.id, { addressType: activeWallet.type, truncate: true }) : '',
     [capsule, activeWallet?.id, activeWallet?.type],
   );
 
@@ -209,13 +212,9 @@ export const AddFunds = () => {
         ) : (
           <>
             <InnerStepContainer>
-              <CpslText weight="semiBold" color="secondary">
-                Copy wallet address
-              </CpslText>
-              <FilledDisabledInput autoselect key={address} readonly value={address}>
+              <FilledDisabledInput noAutoDisable key={address} readonly placeholder={address}>
                 <CpslIdenticon
                   slot="start"
-                  variant="avatar"
                   size="32px"
                   hash={capsule.getIdenticonHash(activeWallet.id, activeWallet.type)}
                 />
@@ -228,12 +227,12 @@ export const AddFunds = () => {
               <>
                 <CpslDivider>or</CpslDivider>
                 <InnerStepContainer>
-                  <CpslText weight="semiBold" color="secondary">
-                    Scan with your crypto wallet
-                  </CpslText>
                   <QRContainer>
                     {!address ? <CpslSpinner size={100} /> : <CpslQrCode key={address} url={address} />}
                   </QRContainer>
+                  <CpslText weight="semiBold" color="secondary">
+                    Scan with your crypto wallet
+                  </CpslText>
                 </InnerStepContainer>
               </>
             )}

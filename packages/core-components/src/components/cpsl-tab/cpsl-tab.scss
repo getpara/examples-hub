@@ -4,11 +4,6 @@
   --tab-icon-height: 16px;
   --tab-icon-width: 16px;
 
-  padding-top: var(--tab-top-padding);
-  padding-bottom: var(--tab-bottom-padding);
-  padding-left: var(--tab-left-padding);
-  padding-right: var(--tab-right-padding);
-
   display: flex;
   flex: 1 1 auto;
   align-items: center;
@@ -45,6 +40,11 @@
   color: var(--tab-color);
   display: flex;
   gap: var(--tab-gap);
+
+  padding-top: var(--tab-top-padding);
+  padding-bottom: var(--tab-bottom-padding);
+  padding-left: var(--tab-left-padding);
+  padding-right: var(--tab-right-padding);
 }
 
 .content {

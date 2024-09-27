@@ -119,5 +119,7 @@ const ClickableText = styled(CpslText)`
 `;
 
 const IdentifierText = styled(CpslText)`
-  color: var(--cpsl-color-background-96);
+  &::part(text-element) {
+    color: var(--cpsl-color-background-96);
+  }
 `;

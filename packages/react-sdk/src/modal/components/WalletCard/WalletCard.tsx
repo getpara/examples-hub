@@ -105,5 +105,7 @@ const WalletNameContainer = styled.div`
 `;
 
 const Address = styled(CpslText)`
-  line-height: 100%;
+  &::part(text-element) {
+    line-height: 100%;
+  }
 `;
