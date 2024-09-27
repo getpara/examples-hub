@@ -80,6 +80,7 @@ export async function authCreation(
         type: KeyType.USER,
         encryptor: EncryptorType.BIOMETRICS,
         biometricPublicKey: publicKeyHex,
+        partnerId: share.partnerId,
       };
     });
 

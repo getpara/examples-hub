@@ -180,32 +180,40 @@ export async function authUpdateKeyShares(
 
   // This gets only the decryptedShares that are associated with the
   // currently selected walletIds
-  const tempShareOpts = decryptedSharesForApp.flatMap(share => {
+  const tempShareOpts = decryptedSharesForApp.map(share => {
     const { encryptedMessageHex, encryptedKeyHex } = encryptWithDerivedPublicKey(encryptionKey, share.signer);
-    const opts = [
-      {
-        walletId: share.walletId,
-        encryptedShare: encryptedMessageHex,
-        encryptedKey: encryptedKeyHex,
-        sessionLookupId,
-      },
-    ];
+    return {
+      walletId: share.walletId,
+      encryptedShare: encryptedMessageHex,
+      encryptedKey: encryptedKeyHex,
+      sessionLookupId,
+      partnerId: share.partnerId,
+    };
+  });
 
-    if (newDeviceSessionLookupId) {
+  if (newDeviceSessionLookupId) {
+    // need to fetch and decrypt all shares for the new device
+    // can't use response above as a refreshed share may have been added here so we must fetch again
+    const newEncryptedSharesRes = await capsule.ctx.capsuleClient.getBiometricKeyshares(userId, signature.id, true);
+    const allDecryptedShares = await decryptPrivateKeyAndDecryptShare(
+      userHandle,
+      newEncryptedSharesRes.data.keyShares,
+      encryptedPrivateKeys[0].encryptedPrivateKey,
+    );
+    allDecryptedShares.forEach(share => {
       const { encryptedMessageHex: newMessageHex, encryptedKeyHex: newKeyHex } = encryptWithDerivedPublicKey(
         newDeviceEncryptionKey,
         share.signer,
       );
-      opts.push({
+      tempShareOpts.push({
         walletId: share.walletId,
         encryptedShare: newMessageHex,
         encryptedKey: newKeyHex,
         sessionLookupId: `${newDeviceSessionLookupId}-new-device`,
+        partnerId: share.partnerId,
       });
-    }
-
-    return opts;
-  });
+    });
+  }
 
   if (tempShareOpts.length > 0) {
     await capsule.ctx.capsuleClient.uploadTransmissionKeyshares(userId, tempShareOpts);

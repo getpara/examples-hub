@@ -68,11 +68,8 @@ const AuthLoginBase = () => {
         setStep(AuthLoginStep.SELECT_WALLET);
       }
     } catch (err) {
-      if (err.message.includes('The operation either timed out or was not allowed')) {
-        setStep(AuthLoginStep.SELECT_FLOW);
-      } else {
-        console.error('Error retrieving passkey: ', err);
-      }
+      setStep(AuthLoginStep.SELECT_FLOW);
+      console.error('Error retrieving passkey: ', err);
     }
   }, [capsule, authLogin]);
 
@@ -103,7 +100,7 @@ const AuthLoginBase = () => {
         const fetchedWallets = await capsule.fetchWallets();
         const temporaryShares = (await capsule.getTransmissionKeyShares(true)).data.temporaryShares;
 
-        if (temporaryShares.length === fetchedWallets.length) {
+        if (temporaryShares.length >= fetchedWallets.length) {
           const authCreationURL = await capsule.getSetUpBiometricsURL(true);
           setStep(AuthLoginStep.SELECT_FLOW);
           window.location.href = authCreationURL;

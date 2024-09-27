@@ -44,7 +44,7 @@ export const Body = ({
             heading={isAddingNewDevice ? 'Passkey Ready To Be Added' : 'You’re Logged In!'}
             subHeading={
               isAddingNewDevice
-                ? 'You can now close this window and return to your other device to register the new Passkey.'
+                ? 'Return to your other device to register the new Passkey before closing this window.'
                 : `If you are not automatically redirected, click here to return to ${partner.displayName}. Please do not close this page.`
             }
             icon={isAddingNewDevice ? 'heroPasskey' : 'heroWallet'}
