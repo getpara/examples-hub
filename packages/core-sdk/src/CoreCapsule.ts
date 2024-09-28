@@ -544,7 +544,7 @@ export abstract class CoreCapsule {
       } else if (
         types &&
         (!getEquivalentTypes(types).includes(wallet.type) ||
-          (isOwned && !types.some(type => this.currentWalletIds[type].includes(walletId))))
+          (isOwned && !types.some(type => (this.currentWalletIds[type] ?? []).includes(walletId))))
       ) {
         error = `wallet with id ${wallet.id} and type ${wallet.type} cannot be selected`;
       } else if (schemes && !schemes.includes(wallet.scheme)) {
