@@ -1,6 +1,6 @@
 {
   "name": "@usecapsule/react-components",
-  "version": "3.5.1",
+  "version": "3.6.0",
   "description": "Capsule Core React Components",
   "homepage": "https://github.com/capsule-org/component-library#readme",
   "main": "dist/index.js",
@@ -20,7 +20,7 @@
     "copy": "node scripts/copy.js"
   },
   "dependencies": {
-    "@usecapsule/core-components": "3.5.1"
+    "@usecapsule/core-components": "3.6.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.64",

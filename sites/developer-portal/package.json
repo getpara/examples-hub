@@ -1,7 +1,7 @@
 {
   "name": "developer-portal",
   "private": true,
-  "version": "0.2.1",
+  "version": "0.3.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -15,8 +15,8 @@
   "dependencies": {
     "@tanstack/react-query": "^5.40.1",
     "@typeform/embed-react": "^4.1.0",
-    "@usecapsule/react-components": "3.5.1",
-    "@usecapsule/react-sdk": "4.0.1",
+    "@usecapsule/react-components": "3.6.0",
+    "@usecapsule/react-sdk": "4.1.0",
     "axios": "^1.7.2",
     "date-fns": "^3.6.0",
     "framer-motion": "^11.3.31",
