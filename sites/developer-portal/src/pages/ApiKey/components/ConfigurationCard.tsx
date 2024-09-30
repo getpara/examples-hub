@@ -12,7 +12,7 @@ interface ConfigurationCardProps extends PropsWithChildren {
   defaultOpen?: boolean;
 }
 
-export const ConfigurationCard = ({ title, subtitle, docsLink, defaultOpen, children }: ConfigurationCardProps) => {
+export const ConfigurationCard = ({ title, subtitle, docsLink, defaultOpen = true, children }: ConfigurationCardProps) => {
   const [height, setHeight] = useState<0 | 'auto'>(defaultOpen ? 'auto' : 0);
 
   const handleVisibleClick = () => {
