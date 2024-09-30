@@ -27,7 +27,7 @@ const CustomTooltip: ContentType<ValueType, NameType> = ({ active, payload }) =>
 export const MonthlyActiveUsersTSChart = () => {
   const { data: mauTS } = useOrganizationMonthlyActiveUsersTS();
 
-  if (!mauTS) {
+  if (!mauTS?.length) {
     return null;
   }
 

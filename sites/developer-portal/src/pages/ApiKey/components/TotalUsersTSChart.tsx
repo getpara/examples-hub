@@ -20,7 +20,7 @@ export const TotalUsersTSChart = () => {
   const { apiKey, env, projectId } = useParams();
   const { data: usersTS } = useApiKeyTotalUsersTS(projectId!, apiKey!, env!);
 
-  if (!usersTS) {
+  if (!usersTS?.length) {
     return null;
   }
 
@@ -34,18 +34,22 @@ export const TotalUsersTSChart = () => {
           <Area type="monotone" dataKey="newUsers" stroke="var(--cpsl-color-foreground-0)" fill="#C0C0C0" />
           <XAxis
             dataKey="date"
-            domain={[usersTS[0].date, usersTS[usersTS.length - 1].date]}
+            domain={[usersTS[0]?.date, usersTS[usersTS.length - 1]?.date]}
             type="number"
             tickFormatter={date => `${format(new Date(date), 'MMM d')}`}
             tickLine={false}
             tickMargin={12}
-            ticks={[
-              usersTS[1].date,
-              usersTS[usersTS.length * 0.25].date,
-              usersTS[usersTS.length * 0.5].date,
-              usersTS[usersTS.length * 0.75].date,
-              usersTS[usersTS.length - 1].date,
-            ]}
+            ticks={
+              usersTS.length > 1
+                ? [
+                    usersTS[1]?.date,
+                    ...(usersTS.length >= 6 ? [usersTS[Math.round(usersTS.length * 0.25)]?.date] : []),
+                    ...(usersTS.length >= 3 ? [usersTS[Math.round(usersTS.length * 0.5)]?.date] : []),
+                    ...(usersTS.length >= 6 ? [usersTS[Math.round(usersTS.length * 0.75)]?.date] : []),
+                    usersTS[usersTS.length - 1]?.date,
+                  ]
+                : [usersTS[0]?.date]
+            }
             axisLine={{ stroke: '#E6E6E6' }}
             style={{ fontSize: 16, fill: '#666666' }}
             fontFamily="Inter"

@@ -29,7 +29,7 @@ export const MonthlyActiveUsersTSChart = () => {
   const { apiKey, env, projectId } = useParams();
   const { data: mauTS } = useApiKeyMonthlyActiveUsersTS(projectId!, apiKey!, env!);
 
-  if (!mauTS) {
+  if (!mauTS?.length) {
     return null;
   }
 
