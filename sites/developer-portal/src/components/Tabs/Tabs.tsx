@@ -21,7 +21,9 @@ export const Tabs = ({ tabs, selectedTab, onTabSelect }: TabsProps) => {
     <TabContainer>
       {tabs.map(tab => (
         <Tab $selected={selectedTab === tab.value} key={tab.value} variant="ghost" onClick={handleTabClick(tab.value)}>
-          <CpslText variant="headingXS">{tab.label}</CpslText>
+          <CpslText variant="headingXS" weight="medium">
+            {tab.label}
+          </CpslText>
         </Tab>
       ))}
     </TabContainer>

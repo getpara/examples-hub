@@ -31,31 +31,35 @@ h6 {
   }
 
   &.primary {
-    color: var(--cpsl-color-text-primary);
+    color: var(--color-override, var(--cpsl-color-text-primary));
   }
 
   &.secondary {
-    color: var(--cpsl-color-text-secondary);
+    color: var(--color-override, var(--cpsl-color-text-secondary));
   }
 
   &.tertiary {
-    color: var(--cpsl-color-text-tertiary);
+    color: var(--color-override, var(--cpsl-color-text-tertiary));
   }
 
   &.subtle {
-    color: var(--cpsl-color-text-subtle);
+    color: var(--color-override, var(--cpsl-color-text-subtle));
   }
 
   &.inverted {
-    color: var(--cpsl-color-text-inverted);
+    color: var(--color-override, var(--cpsl-color-text-inverted));
   }
 
   &.error {
-    color: var(--cpsl-color-text-error);
+    color: var(--color-override, var(--cpsl-color-text-error));
   }
 
   &.contrast {
-    color: var(--cpsl-color-text-contrast);
+    color: var(--color-override, var(--cpsl-color-text-contrast));
+  }
+
+  &.regular {
+    font-weight: 400;
   }
 
   &.medium {

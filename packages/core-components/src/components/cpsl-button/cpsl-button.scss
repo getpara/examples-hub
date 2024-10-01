@@ -474,9 +474,7 @@
 
 :host {
   ::slotted(cpsl-text) {
-    &::part(text-element) {
-      color: var(--button-color);
-    }
+    --color-override: var(--button-color);
   }
   ::slotted(cpsl-icon-group) {
     --container-border-color: var(--button-background-color);
