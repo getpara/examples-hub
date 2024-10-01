@@ -99,6 +99,9 @@ export type UpdateOrganizationMemberBody = Pick<OrganizationMember, 'owner' | 'p
 // *********************
 // API Keys
 // *********************
+
+export type OnRampAssets = Partial<Record<Network, true | OnRampAsset[]>>;
+
 export type ApiKey = {
   id: string;
   apiKey: string;
@@ -126,8 +129,11 @@ export type ApiKey = {
   isReceiveEnabled: boolean;
   isWithdrawEnabled: boolean;
   onRampProviders: OnRampProvider[];
-  onRampAssets?: Partial<Record<Network, true | OnRampAsset[]>>;
+  onRampAssets?: OnRampAssets;
   rampApiKey?: string;
+  defaultOnRampAsset?: OnRampAsset;
+  defaultOnRampNetwork?: Network;
+  defaultBuyAmount?: string;
   isUsed: boolean;
   isInstalled: boolean;
 };
@@ -174,6 +180,9 @@ export type UpdateApiKeyBody = Nullable<
       | 'onRampProviders'
       | 'onRampAssets'
       | 'rampApiKey'
+      | 'defaultOnRampAsset'
+      | 'defaultOnRampNetwork'
+      | 'defaultBuyAmount'
       | 'archived'
       | 'isInstalled'
     >

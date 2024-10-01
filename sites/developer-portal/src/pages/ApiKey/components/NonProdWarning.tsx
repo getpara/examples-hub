@@ -16,7 +16,11 @@ export const NonProdWarning = ({ onCreateProdKeyClick }: NonProdWarningProps) =>
   const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
   const { data: availableKeyEnvs } = useGetAvailableKeyEnvs(projectId ?? '');
 
-  if (!apiKeyData || (apiKeyData.environment as Environment) === Environment.PROD || apiKeyData.environment.toString() === 'PRODUCTION') {
+  if (
+    !apiKeyData ||
+    (apiKeyData.environment as Environment) === Environment.PROD ||
+    apiKeyData.environment.toString() === 'PRODUCTION'
+  ) {
     return null;
   }
 

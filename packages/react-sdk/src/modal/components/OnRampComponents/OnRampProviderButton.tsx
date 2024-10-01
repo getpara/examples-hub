@@ -31,7 +31,9 @@ export const OnRampProviderButton = ({ config, index, onClick: _onClick }: OnRam
   return (
     <StyledButton $gradientColors={backgroundColors} fullWidth onClick={onClick}>
       <Container $backgroundColor={backgroundColors[1]}>
-        <IconContainer>{icon}</IconContainer>
+        <IconContainer>
+          <CpslIcon icon={icon} />
+        </IconContainer>
         <ProviderInfoContainer>
           <Text variant="bodyL" weight="medium">
             {name}

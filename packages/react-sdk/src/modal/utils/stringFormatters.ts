@@ -5,11 +5,11 @@ import { format } from 'date-fns';
 
 export const formatNetworkList = (networks: Network[]) => {
   return networks.length === 1
-    ? NETWORKS[networks[0]]
+    ? NETWORKS[networks[0]].name
     : `${networks
-        .map(id => NETWORKS[id])
+        .map(id => NETWORKS[id].name)
         .slice(0, -1)
-        .join(', ')}${networks.length > 2 ? ',' : ''} and ${NETWORKS[networks[networks.length - 1]]}`;
+        .join(', ')}${networks.length > 2 ? ',' : ''} and ${NETWORKS[networks[networks.length - 1]].name}`;
 };
 
 export const formatPhoneNumber = (phone: string, countryCode: CountryCallingCode) => {

@@ -5,6 +5,8 @@ import { useCapsuleStore, useModalStore, useThemeStore } from '../../stores/inde
 import { useGoBack } from '../../hooks/useGoBack.js';
 import { getCurrencyCodes, reverseCurrencyLookup } from '../../utils/onRamps.js';
 
+const TEST_MODE_FORBIDDEN = ['ETH_ETH', 'ETH_USDC'];
+
 export const RampEmbed = ({ hostApiKey }: { hostApiKey: string }) => {
   const appName = useThemeStore(state => state.appName);
   const onRampConfig = useModalStore(state => state.onRampConfig);
@@ -12,13 +14,10 @@ export const RampEmbed = ({ hostApiKey }: { hostApiKey: string }) => {
   const setOnRampPurchase = useModalStore(state => state.setOnRampPurchase);
   const capsule = useCapsuleStore(state => state.capsule);
   const goBack = useGoBack();
-  const swapAsset = onRampConfig.testMode
-    ? 'SEPOLIA_ETH'
-    : getCurrencyCodes(onRampConfig.assetInfo, {
-        provider: OnRampProvider.RAMP,
-        walletType: onRampPurchase.walletType,
-        allowedAssets: onRampConfig.allowedAssets,
-      }).join(',');
+  const { currencyCodes } = getCurrencyCodes(onRampConfig, {
+    provider: OnRampProvider.RAMP,
+    walletType: onRampPurchase.walletType,
+  });
 
   const isMounted = useRef(false);
 
@@ -27,7 +26,9 @@ export const RampEmbed = ({ hostApiKey }: { hostApiKey: string }) => {
       try {
         const widget = new RampInstantSDK({
           hostAppName: appName,
-          swapAsset,
+          swapAsset: currencyCodes.filter(code => !onRampConfig.testMode || !TEST_MODE_FORBIDDEN.includes(code)).join(','),
+          fiatValue: onRampPurchase.fiatQuantity,
+          fiatCurrency: onRampPurchase.fiatCurrency,
           hostLogoUrl: `${getPortalBaseURL(capsule.ctx)}/wordmark_black.svg`,
           hostApiKey,
           userAddress: onRampPurchase.address,
@@ -44,7 +45,8 @@ export const RampEmbed = ({ hostApiKey }: { hostApiKey: string }) => {
               ? [Network.ETHEREUM, OnRampAsset.ETHEREUM]
               : reverseCurrencyLookup(onRampConfig.assetInfo, OnRampProvider.RAMP, p.asset.symbol) || [];
 
-            const updated = await capsule.updateOnRampPurchase({
+            const updated = await capsule.ctx.capsuleClient.updateOnRampPurchase({
+              userId: capsule.getUserId(),
               walletId: onRampPurchase.walletId,
               externalWalletAddress: onRampPurchase.externalWalletAddress,
               purchaseId: onRampPurchase.id,

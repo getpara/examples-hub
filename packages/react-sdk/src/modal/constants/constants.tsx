@@ -1,5 +1,5 @@
 import { Network, OnRampAsset, OnRampMethod, OnRampProvider } from '@usecapsule/core-sdk';
-import { CpslIcon } from '@usecapsule/react-components';
+import { IconType } from '@usecapsule/react-components';
 import { Transition, Variants } from 'framer-motion';
 
 export const CAPSULE_CONNECT = 'https://connect.usecapsule.com/';
@@ -11,7 +11,7 @@ export interface OnRampProviderConfig {
   feeLower: number;
   feeUpper?: number;
   methods: OnRampMethod[];
-  icon: JSX.Element;
+  icon: IconType;
   backgroundColors: string[];
 }
 
@@ -21,7 +21,7 @@ export const ON_RAMP_PROVIDERS: Record<OnRampProvider, OnRampProviderConfig> = {
     feeLower: 0.99,
     feeUpper: 4.49,
     methods: [OnRampMethod.ACH, OnRampMethod.DEBIT, OnRampMethod.CREDIT],
-    icon: <CpslIcon icon="stripeBrand" />,
+    icon: 'stripeBrand',
     backgroundColors: ['#6772E5', '#808AF4'],
   },
   [OnRampProvider.RAMP]: {
@@ -29,7 +29,7 @@ export const ON_RAMP_PROVIDERS: Record<OnRampProvider, OnRampProviderConfig> = {
     feeLower: 0.99,
     feeUpper: 4.49,
     methods: [OnRampMethod.ACH, OnRampMethod.DEBIT, OnRampMethod.CREDIT],
-    icon: <CpslIcon icon="rampNetworkBrand" />,
+    icon: 'rampNetworkBrand',
     backgroundColors: ['#21BF73', '#3AE492'],
   },
   [OnRampProvider.MOONPAY]: {
@@ -37,30 +37,30 @@ export const ON_RAMP_PROVIDERS: Record<OnRampProvider, OnRampProviderConfig> = {
     feeLower: 1.0,
     feeUpper: 4.5,
     methods: [OnRampMethod.ACH, OnRampMethod.DEBIT, OnRampMethod.CREDIT],
-    icon: <CpslIcon icon="moonpayBrand" />,
+    icon: 'moonpayBrand',
     backgroundColors: ['#7715F5', '#9647fd'],
   },
 };
 
-export const NETWORKS: Record<Network, string> = {
-  [Network.ETHEREUM]: 'Ethereum',
-  [Network.SEPOLIA]: 'Sepolia',
-  [Network.ARBITRUM]: 'Arbitrum',
-  [Network.BASE]: 'Base',
-  [Network.OPTIMISM]: 'Optimism',
-  [Network.POLYGON]: 'Polygon',
-  [Network.SOLANA]: 'Solana',
-  [Network.COSMOS]: 'Cosmos',
-  [Network.CELO]: 'Celo',
+export const NETWORKS: Record<Network, { name: string; icon: IconType }> = {
+  [Network.ETHEREUM]: { name: 'Ethereum', icon: 'ethereum' },
+  [Network.SEPOLIA]: { name: 'Sepolia', icon: 'ethereum' },
+  [Network.ARBITRUM]: { name: 'Arbitrum', icon: 'arbitrumBrand' },
+  [Network.BASE]: { name: 'Base', icon: 'baseBrand' },
+  [Network.OPTIMISM]: { name: 'Optimism', icon: 'optimismBrand' },
+  [Network.POLYGON]: { name: 'Polygon', icon: 'polygonBrand' },
+  [Network.SOLANA]: { name: 'Solana', icon: 'solana' },
+  [Network.COSMOS]: { name: 'Cosmos', icon: 'cosmos' },
+  [Network.CELO]: { name: 'Celo', icon: 'celoBrand' },
 };
 
-export const ON_RAMP_ASSETS: Record<OnRampAsset, [string, string]> = {
-  [OnRampAsset.ETHEREUM]: ['Ethereum', 'ETH'],
-  [OnRampAsset.USDC]: ['USDC', 'USDC'],
-  [OnRampAsset.POLYGON]: ['Polygon', 'MATIC'],
-  [OnRampAsset.SOLANA]: ['Solana', 'SOL'],
-  [OnRampAsset.ATOM]: ['Atom', 'ATOM'],
-  [OnRampAsset.CELO]: ['Celo', 'CELO'],
+export const ON_RAMP_ASSETS: Record<OnRampAsset, { name: string; code: string; icon: IconType }> = {
+  [OnRampAsset.ETHEREUM]: { name: 'Ethereum', code: 'ETH', icon: 'ethereum' },
+  [OnRampAsset.USDC]: { name: 'USDC', code: 'USDC', icon: 'usdcBrand' },
+  [OnRampAsset.POLYGON]: { name: 'Polygon', code: 'MATIC', icon: 'polygonBrand' },
+  [OnRampAsset.SOLANA]: { name: 'Solana', code: 'SOL', icon: 'solana' },
+  [OnRampAsset.ATOM]: { name: 'Atom', code: 'ATOM', icon: 'cosmos' },
+  [OnRampAsset.CELO]: { name: 'Celo', code: 'CELO', icon: 'celoBrand' },
 };
 
 export const MOBILE_SIZE = 480;

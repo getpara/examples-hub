@@ -334,6 +334,9 @@ export type OnRampConfig = {
   providers: OnRampProvider[];
   allowedAssets?: OnRampAllowedAssets;
   rampApiKey?: string;
+  defaultOnRampAsset?: OnRampAsset;
+  defaultOnRampNetwork?: Network;
+  defaultBuyAmount?: [string, string];
 };
 
 const SESSION_COOKIE_HEADER_NAME = 'x-capsule-sid';
@@ -883,6 +886,9 @@ class Client {
     provider,
     networks,
     assets,
+    defaultNetwork,
+    defaultAsset,
+    fiatAmount,
     testMode = false,
   }: {
     userId: string;
@@ -891,9 +897,12 @@ class Client {
     walletType: WalletType;
     networks: Network[] | 'all';
     assets: OnRampAsset[] | 'all';
+    defaultNetwork?: Network;
+    defaultAsset?: OnRampAsset;
+    fiatAmount?: string;
     provider: OnRampProvider;
     testMode: boolean;
-  }) {
+  }): Promise<OnRampPurchase> {
     const walletString = walletId ? `wallets/${walletId}` : `external-wallets/${externalWalletAddress}`;
 
     const res = await this.baseRequest.post<OnRampPurchase>(`/users/${userId}/${walletString}/purchases`, {
@@ -901,10 +910,13 @@ class Client {
       walletType,
       networks,
       assets,
+      defaultAsset,
+      defaultNetwork,
+      fiatAmount,
       testMode,
     });
 
-    return res;
+    return res.data;
   }
 
   async updateOnRampPurchase({
@@ -918,15 +930,20 @@ class Client {
     walletId?: string;
     externalWalletAddress?: string;
     purchaseId: string;
-    updates: Partial<Pick<OnRampPurchase, 'asset' | 'network' | 'status' | 'fiatCurrency' | 'fiatQuantity' | 'providerKey'>>;
-  }) {
+    updates: Partial<
+      Pick<
+        OnRampPurchase,
+        'asset' | 'network' | 'status' | 'assetQuantity' | 'fiatCurrency' | 'fiatQuantity' | 'providerKey'
+      >
+    >;
+  }): Promise<OnRampPurchase> {
     const walletString = walletId ? `wallets/${walletId}` : `external-wallets/${externalWalletAddress}`;
 
     const res = await this.baseRequest.patch<OnRampPurchase>(
       `/users/${userId}/${walletString}/purchases/${purchaseId}`,
       updates,
     );
-    return res;
+    return res.data;
   }
 
   async getOnRampPurchase({

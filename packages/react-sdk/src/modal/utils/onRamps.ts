@@ -2,40 +2,46 @@ import {
   OnRampAsset,
   OnRampAssetInfo,
   OnRampProvider,
-  WalletType,
   Network,
-  OnRampAllowedAssets,
   getOnRampNetworks,
   getOnRampAssets,
   toAssetInfoArray,
+  ProviderAssetInfo,
+  OnRampConfig,
+  WalletType,
 } from '@usecapsule/web-sdk';
 
 export function getCurrencyCodes(
-  data: OnRampAssetInfo,
-  {
-    provider,
-    walletType,
-    allowedAssets,
-  }: {
-    provider: OnRampProvider;
-    walletType: WalletType;
-    allowedAssets: OnRampAllowedAssets;
-  },
-): string[] {
-  return getOnRampNetworks(data, {
+  { assetInfo, allowedAssets, defaultOnRampNetwork, defaultOnRampAsset }: OnRampConfig,
+  { provider, walletType }: { provider: OnRampProvider; walletType: WalletType },
+): { currencyCodes: string[]; defaultCurrencyCode?: string } {
+  let defaultCurrencyCode: string | undefined;
+
+  const currencyCodes = getOnRampNetworks(assetInfo, {
     walletType,
     allowed: allowedAssets ? (Object.keys(allowedAssets) as Network[]) : undefined,
   })
+    .sort((a, b) => (a === defaultOnRampNetwork ? -1 : b === defaultOnRampNetwork ? 1 : 0))
     .reduce((acc: (string | undefined)[], network) => {
       const allowed = Array.isArray(allowedAssets?.[network]) ? allowedAssets[network] : undefined;
       return [
         ...acc,
-        ...getOnRampAssets(data, { walletType, network, allowed }).map(
-          asset => data[walletType]?.[network]?.[asset]?.[provider]?.[0],
-        ),
+        ...getOnRampAssets(assetInfo, { walletType, network, allowed })
+          .sort((a, b) => (a === defaultOnRampAsset ? -1 : b === defaultOnRampAsset ? 1 : 0))
+          .map(asset => {
+            if (network === defaultOnRampNetwork && asset === defaultOnRampAsset) {
+              defaultCurrencyCode = assetInfo[walletType]?.[network]?.[asset]?.[provider][0];
+            }
+
+            return assetInfo[walletType]?.[network]?.[asset]?.[provider];
+          })
+          .filter((entry): entry is ProviderAssetInfo => !!entry)
+          .map(([code]) => code),
       ];
     }, [])
     .filter((code): code is string => !!code);
+
+  return { currencyCodes, defaultCurrencyCode };
 }
 
 export function reverseCurrencyLookup(

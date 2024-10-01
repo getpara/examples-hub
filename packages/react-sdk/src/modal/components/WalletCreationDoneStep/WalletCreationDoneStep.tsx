@@ -19,8 +19,11 @@ export const WalletCreationDoneStep = ({
 }: WalletCreationDoneStepProps) => {
   const setStep = useModalStore(state => state.setStep);
   const isLogin = useModalStore(state => state.isLogin());
+  const onRampConfig = useModalStore(state => state.onRampConfig);
   const capsule = useCapsuleStore(state => state.capsule);
   const onBuyCryptoClick = useBuyCryptoClick();
+
+  const isOnRampConfigured = onRampConfig?.isBuyEnabled || onRampConfig?.isReceiveEnabled || onRampConfig?.isWithdrawEnabled;
 
   const handleNext = async () => {
     if (isLogin) {
@@ -71,9 +74,11 @@ export const WalletCreationDoneStep = ({
         )}
       </InnerStepContainer>
       <InnerStepContainer>
-        <CpslButton fullWidth onClick={onBuyCryptoClick}>
-          Buy Crypto
-        </CpslButton>
+        {isOnRampConfigured && (
+          <CpslButton fullWidth onClick={onBuyCryptoClick}>
+            {onRampConfig.isBuyEnabled ? 'Buy Crypto' : 'Add Funds'}
+          </CpslButton>
+        )}
         <CpslButton variant="secondary" fullWidth onClick={handleNext}>
           {twoFactorAuthEnabled ? 'Continue' : 'Done'}
         </CpslButton>

@@ -166,7 +166,7 @@ export function getPortalBaseURL({ env }: { env: Environment }, useLocalIp?: boo
 export const EXTERNAL_WALLET_CHANGE_EVENT = 'capsuleExternalWalletChange';
 export const CURRENT_WALLET_IDS_CHANGE_EVENT = 'capsuleCurrentWalletIdsChange';
 
-type ProviderAssetInfo = [string, Partial<Record<OnRampPurchaseType, boolean>>];
+export type ProviderAssetInfo = [string, Partial<Record<OnRampPurchaseType, boolean>>];
 
 export type OnRampAssetInfo = Record<
   WalletType,

@@ -24,8 +24,14 @@ export const Save = () => {
 
   const handleSave = () => {
     if (orgValid && projectId && apiKey && env && canSave) {
+      const values = getValues();
+
+      if (values.onRampAssets && Object.keys(values.onRampAssets).length === 0) {
+        values.onRampAssets = null;
+      }
+
       updateKey(
-        { projectId, keyId: apiKey, env, data: getValues() },
+        { projectId, keyId: apiKey, env, data: values },
         {
           onSuccess: () => {
             reset(getValues());

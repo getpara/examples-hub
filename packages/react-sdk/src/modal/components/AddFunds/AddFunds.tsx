@@ -106,10 +106,6 @@ export const AddFunds = () => {
     const isProviderAllowed = onRampConfig.providers.reduce(
       (acc: Record<OnRampProvider, boolean>, id) => {
         const hasMatch = toAssetInfoArray(onRampConfig.assetInfo).some(([type, network, asset, validProviders]) => {
-          if (onRampConfig.testMode && network !== Network.ETHEREUM && asset !== OnRampAsset.ETHEREUM && id === 'RAMP') {
-            return false;
-          }
-
           return (
             type === activeWallet.type &&
             allowedNetworks.includes(network) &&
@@ -188,16 +184,20 @@ export const AddFunds = () => {
                         onClick={async () => {
                           if (!activeWallet?.type) return;
 
-                          const newOnRampPurchase = await capsule.createOnRampPurchase({
+                          const newOnRampPurchase = await capsule.ctx.capsuleClient.createOnRampPurchase({
+                            userId: capsule.getUserId(),
+                            [activeWallet.isExternal ? 'externalWalletAddress' : 'walletId']: activeWallet.id,
+                            walletType: activeWallet.type,
                             provider: id,
                             networks: allowedNetworks,
                             assets: allowedAssets,
+                            defaultNetwork: onRampConfig.defaultOnRampNetwork,
+                            defaultAsset: onRampConfig.defaultOnRampAsset,
+                            fiatAmount: onRampConfig.defaultBuyAmount?.[0],
                             testMode: onRampConfig.testMode,
-                            walletType: activeWallet.type,
-                            [activeWallet.isExternal ? 'externalWalletAddress' : 'walletId']: activeWallet.id,
                           });
 
-                          setOnRampPurchase(newOnRampPurchase);
+                          setOnRampPurchase({ ...newOnRampPurchase, fiatCurrency: 'USD' });
 
                           setStep(ModalStep.ADD_FUNDS_AWAITING);
                         }}

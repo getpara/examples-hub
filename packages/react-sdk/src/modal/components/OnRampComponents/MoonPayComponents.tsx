@@ -36,12 +36,11 @@ export const MoonPayEmbed = () => {
     [onRampPurchase.walletId, onRampPurchase.walletType, capsule.cosmosPrefix, onRampConfig.testMode, capsule],
   );
 
-  const currencyCodes = useMemo(
+  const { currencyCodes, defaultCurrencyCode } = useMemo(
     () =>
-      getCurrencyCodes(onRampConfig.assetInfo, {
+      getCurrencyCodes(onRampConfig, {
         provider: OnRampProvider.MOONPAY,
         walletType: onRampPurchase.walletType,
-        allowedAssets: onRampConfig?.allowedAssets,
       }),
     [onRampPurchase.walletType, onRampConfig.assetInfo, onRampConfig?.allowedAssets],
   );
@@ -54,7 +53,8 @@ export const MoonPayEmbed = () => {
           OnRampProvider.MOONPAY,
           payload.quoteCurrency.code,
         );
-        const updated = await capsule.updateOnRampPurchase({
+        const updated = await capsule.ctx.capsuleClient.updateOnRampPurchase({
+          userId: capsule.getUserId(),
           walletId: onRampPurchase.walletId,
           purchaseId: onRampPurchase.id,
           externalWalletAddress: onRampPurchase.externalWalletAddress,
@@ -80,10 +80,10 @@ export const MoonPayEmbed = () => {
     return (
       <MoonPayBuyWidget
         variant="embedded"
-        baseCurrencyCode="usd"
-        baseCurrencyAmount="30"
+        baseCurrencyCode={onRampPurchase.fiatCurrency}
+        baseCurrencyAmount={onRampPurchase.fiatQuantity}
         showOnlyCurrencies={currencyCodes.join(',')}
-        defaultCurrencyCode={currencyCodes[0]}
+        defaultCurrencyCode={defaultCurrencyCode}
         walletAddresses={JSON.stringify({ [addressKeys[onRampPurchase.walletType]]: onRampPurchase.address })}
         visible
         theme={isDark ? 'dark' : 'light'}

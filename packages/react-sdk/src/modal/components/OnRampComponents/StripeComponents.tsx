@@ -98,7 +98,8 @@ export const StripeEmbed = () => {
       switch (session.status) {
         case 'fulfillment_processing':
         case 'fulfillment_complete':
-          const updatedPurchase = await capsule.updateOnRampPurchase({
+          const updatedPurchase = await capsule.ctx.capsuleClient.updateOnRampPurchase({
+            userId: capsule.getUserId(),
             walletId: onRampPurchase.walletId,
             externalWalletAddress: onRampPurchase.externalWalletAddress,
             purchaseId: onRampPurchase.id,

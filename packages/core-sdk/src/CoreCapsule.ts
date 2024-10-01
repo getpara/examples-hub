@@ -2,7 +2,6 @@ import {
   BackupKitEmailProps,
   CurrentWalletIds,
   EmailTheme,
-  OnRampPurchase,
   PartnerEntity,
   PublicKeyStatus,
   PublicKeyType,
@@ -10,9 +9,6 @@ import {
   WalletEntity,
   WalletType,
   WalletScheme,
-  OnRampProvider,
-  Network,
-  OnRampAsset,
 } from '@usecapsule/user-management-client';
 import type { pki as pkiType, jsbn as jsbnType } from 'node-forge';
 import forge from 'node-forge';
@@ -2614,121 +2610,6 @@ export abstract class CoreCapsule {
 
   isProviderModalDisabled(): boolean {
     return !!this.disableProviderModal;
-  }
-
-  /**
-   * Initiate a new on-ramp purchase through the Capsule modal.
-   *
-   * @param {Object} config - The config to use to update the purchase
-   * @param {string} config.provider - one of `RAMP` or `STRIPE`.
-   * @param {string} config.asset - the on-chain asset to purchase, one of `USDC` or `ETH`
-   * @param {boolean} config.testMode - if `true`, the purchase involves test-net assets only
-   * @param {string} config.walletId - the uuid of the desired purchase's associated wallet
-   * @param {string} config.externalWalletAddress - the address of the desired purchase's external wallet
-   * @returns - the created purchase object
-   **/
-  async createOnRampPurchase({
-    provider,
-    networks,
-    assets,
-    testMode = false,
-    walletId,
-    walletType,
-    externalWalletAddress,
-  }: {
-    provider: OnRampProvider;
-    networks: Network[] | 'all';
-    assets: OnRampAsset[] | 'all';
-    testMode: boolean;
-    walletId?: string;
-    walletType?: WalletType;
-    externalWalletAddress?: string;
-  }): Promise<OnRampPurchase> {
-    if ((!walletId && !externalWalletAddress) || (!!walletId && !!externalWalletAddress)) {
-      return;
-    }
-
-    const res = await this.ctx.capsuleClient.createOnRampPurchase({
-      userId: this.getUserId(),
-      walletId,
-      externalWalletAddress,
-      walletType,
-      provider,
-      networks,
-      assets,
-      testMode,
-    });
-
-    return res.data;
-  }
-
-  /**
-   * Update an on-ramp purchase.
-   *
-   * @param {Object} config - The config to use to update the purchase
-   * @param {string} config.walletId - the uuid of the desired purchase's associated wallet
-   * @param {string} config.externalWalletAddress - the address of the desired purchase's external wallet
-   * @param {string} config.purchaseId - the uuid of the desired purchase
-   * @param {Object} config.updates - the updates to apply, limited to `status`, `fiatCurrency`, `fiatQuantity`, `asset`, `assetQuantity`, and `providerKey`
-   * @returns - the updated purchase object
-   **/
-  async updateOnRampPurchase({
-    walletId,
-    externalWalletAddress,
-    purchaseId,
-    updates,
-  }: {
-    walletId?: string;
-    externalWalletAddress?: string;
-    purchaseId: string;
-    updates: Partial<
-      Pick<
-        OnRampPurchase,
-        'status' | 'fiatCurrency' | 'fiatQuantity' | 'asset' | 'network' | 'assetQuantity' | 'providerKey'
-      >
-    >;
-  }): Promise<OnRampPurchase> {
-    if (!walletId && !externalWalletAddress) {
-      return;
-    }
-
-    const res = await this.ctx.capsuleClient.updateOnRampPurchase({
-      userId: this.getUserId(),
-      walletId,
-      externalWalletAddress,
-      purchaseId,
-      updates,
-    });
-
-    return res.data;
-  }
-
-  /**
-   * Retrieve a desired on-ramp purchase.
-   *
-   * @param {Object} config - The config to use to update the purchase
-   * @param {string} config.walletId - the ID of the purchase's wallet.
-   * @param {string} config.externalWalletAddress - the address of the purchase's external wallet
-   * @param {string} config.purchaseId - the purchase ID to retrieve.
-   * @returns - the purchase object
-   **/
-  async getOnRampPurchase({
-    walletId,
-    externalWalletAddress,
-    purchaseId,
-  }: {
-    walletId?: string;
-    purchaseId: string;
-    externalWalletAddress?: string;
-  }): Promise<OnRampPurchase> {
-    const res = await this.ctx.capsuleClient.getOnRampPurchase({
-      userId: this.getUserId(),
-      walletId,
-      externalWalletAddress,
-      purchaseId,
-    });
-
-    return res.data;
   }
 
   /**

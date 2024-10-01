@@ -4,17 +4,20 @@ import AngelListBrand from './angel-list-brand.svg';
 import AngelList from './angel-list.svg';
 import AppleBrand from './apple-brand.svg';
 import Apple from './apple.svg';
+import ArbitrumBrand from './arbitrum-brand.svg';
 import ArrowCircleBrokenDownLeft from './arrow-circle-broken-down-left.svg';
 import ArrowCircleDownFilled from './arrow-circle-down-filled.svg';
 import ArrowNarrow from './arrow-narrow.svg';
 import Arrow from './arrow.svg';
 import BackupKit from './backup-kit.svg';
 import Bank from './bank.svg';
+import BaseBrand from './base-brand.svg';
 import Brush from './brush.svg';
 import CapsuleLogo from './capsule-logo.svg';
 import CapsuleRingsDark from './capsule-rings-dark.svg';
 import CapsuleRings from './capsule-rings.svg';
 import Capsule from './capsule.svg';
+import CeloBrand from './celo-brand.svg';
 import CheckCircleFilled from './check-circle-filled.svg';
 import CheckCircle from './check-circle.svg';
 import Check from './check.svg';
@@ -33,11 +36,13 @@ import CreditCard from './credit-card.svg';
 import Cube03 from './cube-03.svg';
 import CubeOutline from './cube-outline.svg';
 import Cube from './cube.svg';
+import CurrencyDollar from './currency-dollar.svg';
 import DecentBrand from './decent-brand.svg';
 import Decent from './decent.svg';
 import DiscordBrand from './discord-brand.svg';
 import Discord from './discord.svg';
 import Dot from './dot.svg';
+import Dots from './dots.svg';
 import DownloadCloud from './download-cloud.svg';
 import Download from './download.svg';
 import DribbbleBrand from './dribbble-brand.svg';
@@ -88,11 +93,13 @@ import Mail from './mail.svg';
 import Menu from './menu.svg';
 import MoonpayBrand from './moonpay-brand.svg';
 import MoreLoginOptions from './more-login-options.svg';
+import OptimismBrand from './optimism-brand.svg';
 import Phone from './phone.svg';
 import PintrestBrand from './pintrest-brand.svg';
 import Pintrest from './pintrest.svg';
 import PlusCircle from './plus-circle.svg';
 import Plus from './plus.svg';
+import PolygonBrand from './polygon-brand.svg';
 import Polygon from './polygon.svg';
 import PuzzlePiece from './puzzle-piece.svg';
 import QrCode02 from './qr-code-02.svg';
@@ -108,6 +115,7 @@ import Settings from './settings.svg';
 import Shield from './shield.svg';
 import SignalBrand from './signal-brand.svg';
 import Signal from './signal.svg';
+import Sliders from './sliders.svg';
 import SnapchatBrand from './snapchat-brand.svg';
 import Snapchat from './snapchat.svg';
 import Solana from './solana.svg';
@@ -118,10 +126,12 @@ import TelegramBrand from './telegram-brand.svg';
 import Telegram from './telegram.svg';
 import TikTokBrand from './tik-tok-brand.svg';
 import TikTok from './tik-tok.svg';
+import Trash from './trash.svg';
 import TumblrBrand from './tumblr-brand.svg';
 import Tumblr from './tumblr.svg';
 import TwitterBrand from './twitter-brand.svg';
 import Twitter from './twitter.svg';
+import UsdcBrand from './usdc-brand.svg';
 import User from './user.svg';
 import Wallet from './wallet.svg';
 import X from './x.svg';
@@ -368,17 +378,20 @@ export const Icons = {
   angelList: AngelList,
   appleBrand: AppleBrand,
   apple: Apple,
+  arbitrumBrand: ArbitrumBrand,
   arrowCircleBrokenDownLeft: ArrowCircleBrokenDownLeft,
   arrowCircleDownFilled: ArrowCircleDownFilled,
   arrowNarrow: ArrowNarrow,
   arrow: Arrow,
   backupKit: BackupKit,
   bank: Bank,
+  baseBrand: BaseBrand,
   brush: Brush,
   capsuleLogo: CapsuleLogo,
   capsuleRingsDark: CapsuleRingsDark,
   capsuleRings: CapsuleRings,
   capsule: Capsule,
+  celoBrand: CeloBrand,
   checkCircleFilled: CheckCircleFilled,
   checkCircle: CheckCircle,
   check: Check,
@@ -397,11 +410,13 @@ export const Icons = {
   cube03: Cube03,
   cubeOutline: CubeOutline,
   cube: Cube,
+  currencyDollar: CurrencyDollar,
   decentBrand: DecentBrand,
   decent: Decent,
   discordBrand: DiscordBrand,
   discord: Discord,
   dot: Dot,
+  dots: Dots,
   downloadCloud: DownloadCloud,
   download: Download,
   dribbbleBrand: DribbbleBrand,
@@ -452,11 +467,13 @@ export const Icons = {
   menu: Menu,
   moonpayBrand: MoonpayBrand,
   moreLoginOptions: MoreLoginOptions,
+  optimismBrand: OptimismBrand,
   phone: Phone,
   pintrestBrand: PintrestBrand,
   pintrest: Pintrest,
   plusCircle: PlusCircle,
   plus: Plus,
+  polygonBrand: PolygonBrand,
   polygon: Polygon,
   puzzlePiece: PuzzlePiece,
   qrCode02: QrCode02,
@@ -472,6 +489,7 @@ export const Icons = {
   shield: Shield,
   signalBrand: SignalBrand,
   signal: Signal,
+  sliders: Sliders,
   snapchatBrand: SnapchatBrand,
   snapchat: Snapchat,
   solana: Solana,
@@ -482,10 +500,12 @@ export const Icons = {
   telegram: Telegram,
   tikTokBrand: TikTokBrand,
   tikTok: TikTok,
+  trash: Trash,
   tumblrBrand: TumblrBrand,
   tumblr: Tumblr,
   twitterBrand: TwitterBrand,
   twitter: Twitter,
+  usdcBrand: UsdcBrand,
   user: User,
   wallet: Wallet,
   x: X,

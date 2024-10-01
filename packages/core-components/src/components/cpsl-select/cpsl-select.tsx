@@ -188,15 +188,12 @@ export class CpslSelect {
     items.forEach(item => {
       if (item.value === this.selectedValue) {
         item.setAttribute('selected', 'true');
-        this.hasSelectedItem = true;
       } else {
         item.setAttribute('selected', 'false');
       }
     });
 
-    if (!this.selectedValue) {
-      this.hasSelectedItem = false;
-    }
+    this.hasSelectedItem = !!this.selectedValue;
   };
 
   private handleClickOutside = (event: MouseEvent) => {

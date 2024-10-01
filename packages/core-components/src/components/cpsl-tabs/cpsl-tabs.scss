@@ -16,6 +16,7 @@
   --slider-background-color: var(--cpsl-color-tabs-slider-background);
 
   display: inline-block;
+  width: fit-content;
   max-width: 100%;
   font-family: $font-family-base;
 }
