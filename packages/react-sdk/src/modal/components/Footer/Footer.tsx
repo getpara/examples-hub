@@ -3,9 +3,13 @@ import { CpslButton, CpslIcon, CpslText } from '@usecapsule/react-components';
 import { useModalStore } from '../../stores/index.js';
 import { CAPSULE_CONNECT, CAPSULE_TERMS_AND_CONDITIONS } from '../../constants/constants.js';
 import { useMemo } from 'react';
+import { getStepHasFooter } from '../../utils/steps.js';
 
 export const Footer = () => {
   const isAccount = useModalStore(state => state.isAccount());
+  const currentStep = useModalStore(state => state.step);
+
+  const showFooter = isAccount || getStepHasFooter(currentStep);
 
   const Content = useMemo(() => {
     if (isAccount) {
@@ -45,6 +49,10 @@ export const Footer = () => {
       </>
     );
   }, [isAccount]);
+
+  if (!showFooter) {
+    return null;
+  }
 
   return (
     <FooterContainer slot="footer">

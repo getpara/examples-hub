@@ -107,6 +107,7 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
 
         // Disconnect external wallets if the user is not longer logged in
         await disconnectExternalWallet();
+        setActiveWallet([undefined, undefined]);
         setIsFullyLoggedIn(false);
       }
 

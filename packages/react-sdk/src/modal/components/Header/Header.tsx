@@ -23,7 +23,9 @@ export const Header = () => {
         slot="header"
         id="header"
       >
-        <CenteredText weight="semiBold">{title}</CenteredText>
+        <CenteredText weight="semiBold" color="secondary">
+          {title}
+        </CenteredText>
       </Container>
     </AnimatePresence>
   );

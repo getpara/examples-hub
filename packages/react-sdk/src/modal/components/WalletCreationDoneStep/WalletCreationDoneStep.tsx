@@ -1,27 +1,20 @@
-import { CpslButton, CpslIcon, CpslInfoBox, CpslText } from '@usecapsule/react-components';
-import { Heading, StepContainer, InnerStepContainer, HeroIcon } from '../common.js';
+import { CpslButton } from '@usecapsule/react-components';
+import { StepContainer, InnerStepContainer } from '../common.js';
 import { useCapsuleStore, useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
-import styled from 'styled-components';
-import { useBuyCryptoClick } from '../../hooks/useBuyCryptoClick.js';
 import { WalletCard, WalletCards } from '../WalletCard/WalletCard.js';
+import styled from 'styled-components';
 
 interface WalletCreationDoneStepProps {
   twoFactorAuthEnabled?: boolean;
-  recoverySecretStepEnabled?: boolean;
   onClose: () => void;
 }
 
-export const WalletCreationDoneStep = ({
-  twoFactorAuthEnabled,
-  recoverySecretStepEnabled,
-  onClose,
-}: WalletCreationDoneStepProps) => {
+export const WalletCreationDoneStep = ({ twoFactorAuthEnabled, onClose }: WalletCreationDoneStepProps) => {
   const setStep = useModalStore(state => state.setStep);
   const isLogin = useModalStore(state => state.isLogin());
   const onRampConfig = useModalStore(state => state.onRampConfig);
   const capsule = useCapsuleStore(state => state.capsule);
-  const onBuyCryptoClick = useBuyCryptoClick();
 
   const isOnRampConfigured = onRampConfig?.isBuyEnabled || onRampConfig?.isReceiveEnabled || onRampConfig?.isWithdrawEnabled;
 
@@ -46,40 +39,15 @@ export const WalletCreationDoneStep = ({
 
   return (
     <StepContainer $wide>
-      <HeroIcon icon="checkCircleFilled" />
-      <Heading variant="headingS" weight="bold">
-        Wallet Created
-      </Heading>
-      <InnerStepContainer>
+      <CardContainer>
         <WalletCards>
           {capsule.currentWalletIdsArray.map(([id, type]) => {
-            return <WalletCard id={id} type={type} />;
+            return <WalletCard key={id} id={id} type={type} showAddFunds={isOnRampConfigured} />;
           })}
         </WalletCards>
-        {!recoverySecretStepEnabled && (
-          <CpslInfoBox>
-            <InfoBoxContent>
-              <CpslIcon icon="shield" />
-              <InlineText variant="bodyXS" weight="medium">
-                Don’t lose your wallet.{' '}
-                <a href="https://connect.usecapsule.com" target="blank">
-                  <ClickableText color="primary" variant="bodyXS" weight="medium">
-                    Visit Capsule Connect
-                  </ClickableText>
-                </a>{' '}
-                to set up your Recovery Secret.
-              </InlineText>
-            </InfoBoxContent>
-          </CpslInfoBox>
-        )}
-      </InnerStepContainer>
+      </CardContainer>
       <InnerStepContainer>
-        {isOnRampConfigured && (
-          <CpslButton fullWidth onClick={onBuyCryptoClick}>
-            {onRampConfig.isBuyEnabled ? 'Buy Crypto' : 'Add Funds'}
-          </CpslButton>
-        )}
-        <CpslButton variant="secondary" fullWidth onClick={handleNext}>
+        <CpslButton fullWidth onClick={handleNext}>
           {twoFactorAuthEnabled ? 'Continue' : 'Done'}
         </CpslButton>
       </InnerStepContainer>
@@ -87,26 +55,7 @@ export const WalletCreationDoneStep = ({
   );
 };
 
-const InfoBoxContent = styled.div`
-  display: flex;
-  gap: 8px;
-
-  cpsl-icon {
-    --icon-color: var(--cpsl-color-foreground-0);
-  }
-`;
-
-const InlineText = styled(CpslText)`
-  display: inline-block;
-  &::part(text-element) {
-    color: var(--cpsl-color-background-96);
-  }
-`;
-
-const ClickableText = styled(InlineText)`
-  cursor: pointer;
-  text-decoration: underline;
-  &::part(text-element) {
-    color: var(--cpsl-color-text-primary);
-  }
+const CardContainer = styled(InnerStepContainer)`
+  min-height: 196px;
+  justify-content: center;
 `;

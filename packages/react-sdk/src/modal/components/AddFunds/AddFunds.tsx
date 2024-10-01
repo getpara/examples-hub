@@ -79,7 +79,7 @@ export const AddFunds = () => {
   };
 
   const [allowedNetworks, allowedAssets, isProviderAllowed] = useMemo(() => {
-    if (!onRampConfig) {
+    if (!onRampConfig || !activeWallet) {
       return [[], [], {}];
     }
 
@@ -123,7 +123,7 @@ export const AddFunds = () => {
     );
 
     return [allowedNetworks, [...new Set(Object.values(allowedAssetsLookup).flat())], isProviderAllowed];
-  }, [activeWallet?.type, onRampConfig.assetInfo, onRampConfig.allowedAssets, chainId]);
+  }, [activeWallet?.type, activeWallet?.isExternal, onRampConfig.assetInfo, onRampConfig.allowedAssets, chainId]);
 
   useEffect(() => {
     setOnRampPurchase(undefined);
@@ -133,7 +133,7 @@ export const AddFunds = () => {
     setOnRampPurchase(undefined);
   }, []);
 
-  if (!onRampConfig) {
+  if (!onRampConfig || !activeWallet) {
     return (
       <SpinnerContainer>
         <CpslSpinner />

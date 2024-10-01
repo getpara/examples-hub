@@ -280,7 +280,6 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
           disableEmailLogin={disableEmailLogin}
           disablePhoneLogin={disablePhoneLogin}
           onClose={handleClose}
-          recoverySecretStepEnabled={recoverySecretStepEnabled}
         />
         <Footer />
       </>

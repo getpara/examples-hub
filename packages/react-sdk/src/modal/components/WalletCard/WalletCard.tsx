@@ -1,9 +1,10 @@
 import styled from 'styled-components';
-import { useCapsuleStore, useThemeStore } from '../../stores/index.js';
-import { CpslIdenticon, CpslText } from '@usecapsule/react-components';
+import { useCapsuleStore, useModalStore, useThemeStore } from '../../stores/index.js';
+import { CpslButton, CpslIdenticon, CpslText } from '@usecapsule/react-components';
 import { truncateAddress, WalletType } from '@usecapsule/web-sdk';
+import { useBuyCryptoClick } from '../../hooks/useBuyCryptoClick.js';
 
-export const ExternalWalletCard = ({ address }: Pick<SharedWalletCardProps, 'address'>) => {
+export const ExternalWalletCard = ({ address, showAddFunds }: Pick<SharedWalletCardProps, 'address' | 'showAddFunds'>) => {
   const capsule = useCapsuleStore(state => state.capsule);
 
   const wallet = capsule.externalWallets[address];
@@ -16,6 +17,7 @@ export const ExternalWalletCard = ({ address }: Pick<SharedWalletCardProps, 'add
     <SharedWalletCard
       address={truncateAddress(address, wallet.type)}
       identiconHash={capsule.getIdenticonHash(wallet.id, wallet.type)}
+      showAddFunds={showAddFunds}
     />
   );
 };
@@ -23,9 +25,10 @@ export const ExternalWalletCard = ({ address }: Pick<SharedWalletCardProps, 'add
 interface WalletCardProps {
   id: string;
   type: WalletType;
+  showAddFunds?: boolean;
 }
 
-export const WalletCard = ({ id, type }: WalletCardProps) => {
+export const WalletCard = ({ id, type, showAddFunds }: WalletCardProps) => {
   const capsule = useCapsuleStore(state => state.capsule);
   const appName = useThemeStore(state => state.appName);
 
@@ -39,34 +42,57 @@ export const WalletCard = ({ id, type }: WalletCardProps) => {
 
   return (
     <SharedWalletCard
+      id={wallet.id}
+      type={wallet.type}
       address={truncateAddress(address, type, { prefix: capsule.cosmosPrefix })}
       name={wallet.name ?? `${appName ? `${appName} ` : ''}Wallet`}
       identiconHash={capsule.getIdenticonHash(wallet.id, type)}
+      showAddFunds={showAddFunds}
     />
   );
 };
 
 interface SharedWalletCardProps {
   address: string;
+  id?: string;
+  type?: WalletType;
   name?: string;
   identiconHash: string;
+  showAddFunds?: boolean;
 }
-const SharedWalletCard = ({ address, name, identiconHash }: SharedWalletCardProps) => {
+const SharedWalletCard = ({ address, name, identiconHash, showAddFunds, id, type }: SharedWalletCardProps) => {
+  const setActiveWallet = useModalStore(state => state.setActiveWallet);
+  const onBuyCryptoClick = useBuyCryptoClick();
+
+  const handleAddFundsClick = () => {
+    if (id && type) {
+      setActiveWallet([id, type]);
+      onBuyCryptoClick();
+    }
+  };
+
   return (
     <Container>
       <InnerContainer>
-        <CpslIdenticon size="30px" hash={identiconHash} />
+        <CpslIdenticon size="48px" hash={identiconHash} />
         <WalletNameContainer>
           {!!name && (
-            <Address color="contrast" variant="bodyL" weight="semiBold">
+            <Name color="contrast" variant="bodyL" weight="semiBold">
               {name}
-            </Address>
+            </Name>
           )}
-          <CpslText color="secondary" variant="bodyS" weight="medium">
+          <Name color="secondary" variant="bodyS" weight="medium">
             {address}
-          </CpslText>
+          </Name>
         </WalletNameContainer>
       </InnerContainer>
+      {showAddFunds && (
+        <AddFundsButton onClick={handleAddFundsClick}>
+          <CpslText variant="bodyXS" color="contrast" weight="medium">
+            Add Funds
+          </CpslText>
+        </AddFundsButton>
+      )}
     </Container>
   );
 };
@@ -82,30 +108,47 @@ const Container = styled.div`
   width: 100%;
   padding: 24px;
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  background-color: var(--cpsl-color-background-0);
-  border: 1px solid var(--cpsl-color-background-32);
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  background-color: var(--cpsl-color-background-8);
   border-radius: 16px;
 `;
 
 const InnerContainer = styled.div`
   display: flex;
   justify-content: flex-start;
-  gap: 8px;
+  gap: 4px;
   align-items: center;
+  overflow: hidden;
 `;
 
 const WalletNameContainer = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   align-items: flex-start;
+  justify-content: center;
+  overflow: hidden;
 `;
 
-const Address = styled(CpslText)`
+const Name = styled(CpslText)`
+  width: 100%;
   &::part(text-element) {
     line-height: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
   }
+`;
+
+const AddFundsButton = styled(CpslButton)`
+  --button-primary-background-color: var(--cpsl-color-card-surface);
+  --button-primary-hover-background-color: var(--cpsl-color-background-4);
+  --button-padding-start: 8px;
+  --button-padding-end: 8px;
+  --button-padding-top: 8px;
+  --button-padding-bottom: 8px;
+  --button-border-radius: 8px;
 `;

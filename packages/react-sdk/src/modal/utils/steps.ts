@@ -91,7 +91,7 @@ export const SignUpPreviousStep: {
   [SignUpModalStep.SETUP_2FA]: ModalStep.SECRET,
   [SignUpModalStep.VERIFY_2FA]: ModalStep.SETUP_2FA,
   [SignUpModalStep.TWO_FACTOR_DONE]: undefined,
-  [SignUpModalStep.ADD_FUNDS]: undefined,
+  [SignUpModalStep.ADD_FUNDS]: ModalStep.WALLET_CREATION_DONE,
   [SignUpModalStep.ADD_FUNDS_AWAITING]: ModalStep.ADD_FUNDS,
   [SignUpModalStep.ADD_FUNDS_SUCCESS]: undefined,
   [SignUpModalStep.ADD_FUNDS_FAILURE]: undefined,
@@ -141,4 +141,19 @@ export const LoginPreviousStep: {
   [LoginModalStep.ADD_FUNDS_AWAITING]: ModalStep.ADD_FUNDS,
   [LoginModalStep.ADD_FUNDS_SUCCESS]: undefined,
   [LoginModalStep.ADD_FUNDS_FAILURE]: undefined,
+};
+
+export const getStepHasFooter = (step: ModalStep): boolean => {
+  switch (step) {
+    case ModalStep.AUTH_MAIN:
+    case ModalStep.AUTH_MORE:
+    case ModalStep.EX_WALLET_MORE:
+    case ModalStep.EX_WALLET_SELECTED:
+    case ModalStep.VERIFICATIONS: {
+      return true;
+    }
+    default: {
+      return false;
+    }
+  }
 };

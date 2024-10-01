@@ -33,20 +33,12 @@ import { useEffect, useState } from 'react';
 interface BodyProps {
   oAuthMethods?: OAuthMethod[];
   twoFactorAuthEnabled?: boolean;
-  recoverySecretStepEnabled?: boolean;
   disableEmailLogin: boolean;
   disablePhoneLogin: boolean;
   onClose: () => void;
 }
 
-export const Body = ({
-  oAuthMethods,
-  twoFactorAuthEnabled,
-  recoverySecretStepEnabled,
-  disableEmailLogin,
-  disablePhoneLogin,
-  onClose,
-}: BodyProps) => {
+export const Body = ({ oAuthMethods, twoFactorAuthEnabled, disableEmailLogin, disablePhoneLogin, onClose }: BodyProps) => {
   const currentStep = useModalStore(state => state.step);
   const onRampConfig = useModalStore(state => state.onRampConfig);
   const stepDirection = useModalStore(state => state.stepDirection);
@@ -101,13 +93,7 @@ export const Body = ({
         return <AwaitingWalletCreationStep />;
       }
       case ModalStep.WALLET_CREATION_DONE: {
-        return (
-          <WalletCreationDoneStep
-            twoFactorAuthEnabled={twoFactorAuthEnabled}
-            recoverySecretStepEnabled={recoverySecretStepEnabled}
-            onClose={onClose}
-          />
-        );
+        return <WalletCreationDoneStep twoFactorAuthEnabled={twoFactorAuthEnabled} onClose={onClose} />;
       }
       case ModalStep.SECRET: {
         return <RecoverySecretStep />;

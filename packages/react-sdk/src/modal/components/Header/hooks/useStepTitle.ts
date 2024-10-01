@@ -19,7 +19,7 @@ export const useStepTitle = () => {
       [ModalStep.BIOMETRIC_CREATION]: 'Sign Up',
       [ModalStep.AWAITING_BIOMETRIC_CREATION]: 'Sign Up',
       [ModalStep.AWAITING_WALLET_CREATION]: isLogin ? 'Login' : 'Sign Up',
-      [ModalStep.WALLET_CREATION_DONE]: isLogin ? 'Login' : 'Sign Up',
+      [ModalStep.WALLET_CREATION_DONE]: 'Wallet Created',
       [ModalStep.SECRET]: isLogin ? 'Login' : 'Sign Up',
       [ModalStep.BIOMETRIC_LOGIN]: 'Login',
       [ModalStep.AWAITING_BIOMETRIC_LOGIN]: 'Login',
