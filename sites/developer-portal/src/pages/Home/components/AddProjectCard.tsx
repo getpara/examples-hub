@@ -1,6 +1,6 @@
 import { CpslButton, CpslCard, CpslHero, CpslIcon } from '@usecapsule/react-components';
 import styled from 'styled-components';
-import { useCanCreateProject } from '../../../hooks/permissions/useCanCreateProject';
+import { useCanCreateProject } from '../../../hooks/subscriptionGating/useCanCreateProject';
 
 interface AddProjectCardProps {
   isFirstProject: boolean;

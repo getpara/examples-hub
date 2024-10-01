@@ -16,6 +16,12 @@ export const usePlansQuery = <T>(select: (data: Plan[]) => T) => {
   });
 };
 
+export const usePlans = () => {
+  return usePlansQuery(data => {
+    data;
+  });
+};
+
 export const usePlan = (slug: string) => {
   return usePlansQuery(data => {
     return (data.find(d => d.slug === slug)?.price ?? 0) / 100;

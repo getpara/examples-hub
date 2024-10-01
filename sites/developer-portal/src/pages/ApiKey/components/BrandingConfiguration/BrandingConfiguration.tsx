@@ -7,15 +7,10 @@ import { Font } from './Font';
 import { FormProvider } from 'react-hook-form';
 import { useBrandingConfigFormData } from '../../hooks/useBrandingConfigFormData';
 import { Icon, Logo } from './AssetUpload';
-import { useEffect } from 'react';
 import { ConfigurationActions } from '../ConfigurationActions';
 
 export const BrandingConfiguration = () => {
   const form = useBrandingConfigFormData();
-
-  useEffect(() => {
-    form.trigger();
-  }, []);
 
   return (
     <ConfigurationCard

@@ -8,10 +8,13 @@ import { Environment } from '../../../types/environment';
 import { UpdateApiKeyBody } from '../../../types/api';
 import { useCreateApiKey } from '../../../hooks/api/mutations/useCreateApiKey';
 import { IS_PROD } from '../../../utils/constants';
-import { useCanCreateProdKeys } from '../../../hooks/permissions/useCanCreateProdKeys';
 import { GradientCTAButton } from '../../../components/GradientCTAButton/GradientCTAButton';
 import styled from 'styled-components';
 import { HTTPS_URL_REGEX } from '../../../utils/regex';
+import { useGetOrganizationSubscriptionPlan } from '../../../hooks/api/queries/useOrganizationSubscription';
+import { AxiosError } from 'axios';
+import { formatEnvName } from '../../../utils/apiKey';
+import { useGetSelectedOrganizationIsValid } from '../../../hooks/api/queries/useOrganizations';
 
 interface CopyToModalProps {
   open: boolean;
@@ -22,7 +25,8 @@ export const CreateProductionKeyModal = ({ open, onClose }: CopyToModalProps) =>
   const { projectId } = useParams();
   const { data: availableKeyEnvs } = useGetAvailableKeyEnvs(projectId ?? '');
   const { mutate: createApiKey, isPending } = useCreateApiKey();
-  const { canCreateProdKeys } = useCanCreateProdKeys();
+  const { data: plan } = useGetOrganizationSubscriptionPlan();
+  const { data: orgValid } = useGetSelectedOrganizationIsValid();
   const navigate = useNavigate();
 
   const {
@@ -35,7 +39,7 @@ export const CreateProductionKeyModal = ({ open, onClose }: CopyToModalProps) =>
   const isVisible = availableKeyEnvs?.includes(IS_PROD ? Environment.PROD : Environment.BETA);
 
   const handleConfirmClick = () => {
-    if (isVisible && canCopy && projectId) {
+    if (orgValid && isVisible && canCopy && projectId) {
       createApiKey(
         {
           projectId,
@@ -51,11 +55,17 @@ export const CreateProductionKeyModal = ({ open, onClose }: CopyToModalProps) =>
               title: 'Key Created!',
             });
           },
-          onError: () => {
+          onError: err => {
+            let body = 'Please try again. If the problem persists, contact Capsule support.';
+
+            if ((err as AxiosError).response?.data === 'max keys created for the current project') {
+              body = `You've reached the max number of ${formatEnvName(IS_PROD ? Environment.PROD : Environment.BETA)} API keys allowed on this project. Archive another key or create another project to add more API keys.`;
+            }
+
             triggerToast({
               variant: 'error',
               title: 'Failed to Create Key',
-              body: 'Please try again. If the problem persists, contact Capsule support.',
+              body,
             });
           },
         },
@@ -84,7 +94,7 @@ export const CreateProductionKeyModal = ({ open, onClose }: CopyToModalProps) =>
       subtitle={`This will create a ${IS_PROD ? 'Production' : 'Beta'} API key with all the settings of the current ${IS_PROD ? 'Beta' : 'Sandbox'} API Key.`}
     >
       <>
-        {canCreateProdKeys ? (
+        {plan?.canCreateProdKeys ? (
           <>
             <Controller
               name="homepageUrl"
@@ -109,7 +119,7 @@ export const CreateProductionKeyModal = ({ open, onClose }: CopyToModalProps) =>
                 />
               )}
             />
-            <CpslButton disabled={!canCopy || isPending} fullWidth onClick={handleConfirmClick}>
+            <CpslButton disabled={!canCopy || isPending || !orgValid} fullWidth onClick={handleConfirmClick}>
               Create
             </CpslButton>
           </>
@@ -127,7 +137,7 @@ export const CreateProductionKeyModal = ({ open, onClose }: CopyToModalProps) =>
 };
 
 const StyledAlert = styled(CpslAlert)`
-  --container-justify-content: flex-start;
+  --container-align-items: flex-start;
 
   --title-container-align-items: flex-start;
 `;

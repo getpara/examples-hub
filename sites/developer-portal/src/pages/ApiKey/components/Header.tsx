@@ -12,12 +12,14 @@ import { Environment } from '../../../types/environment';
 import { CreateProductionKeyButton } from './CreateProductionKeyButton';
 import { CreateProductionKeyModal } from './CreateProductionKeyModal';
 import { NonProdWarning } from './NonProdWarning';
+import { useGetSelectedOrganizationIsValid } from '../../../hooks/api/queries/useOrganizations';
 
 export const Header = () => {
   const navigate = useNavigate();
   const { projectId } = useParams();
   const form = useKeyDataForm();
   const { data: availableKeyEnvs } = useGetAvailableKeyEnvs(projectId ?? '');
+  const { data: orgValid } = useGetSelectedOrganizationIsValid();
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreateProdKeyModalOpen, setIsCreateProdKeyModalOpen] = useState(false);
@@ -27,7 +29,9 @@ export const Header = () => {
   };
 
   const handleEditClick = () => {
-    setIsEditModalOpen(true);
+    if (orgValid) {
+      setIsEditModalOpen(true);
+    }
   };
 
   const handleEditModalClose = () => {
@@ -35,7 +39,9 @@ export const Header = () => {
   };
 
   const handleCreateProdKeyClick = () => {
-    setIsCreateProdKeyModalOpen(true);
+    if (orgValid) {
+      setIsCreateProdKeyModalOpen(true);
+    }
   };
 
   const handleCreateProdKeyModalClose = () => {
@@ -53,7 +59,7 @@ export const Header = () => {
           Back
         </BackButton>
         <ActionContainer>
-          <CpslButton variant="secondary" size="small" onClick={handleEditClick}>
+          <CpslButton variant="secondary" size="small" onClick={handleEditClick} disabled={!orgValid}>
             Edit Key
           </CpslButton>
           {!showCopyTo ? <CopyTo isInHeader /> : <CreateProductionKeyButton onClick={handleCreateProdKeyClick} />}

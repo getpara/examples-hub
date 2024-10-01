@@ -4,20 +4,34 @@ import { DocsButton } from '../../../components/DocsButton/DocsButton';
 import { SplitCard, SplitCardInnerContainer } from '../../../components/SplitCard/SplitCard';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import { LearnMoreButton } from '../../../components/LearnMoreButton/LearnMoreButton';
 
 interface ConfigurationCardProps extends PropsWithChildren {
   title: string;
-  subtitle: string;
+  subtitle?: string;
   docsLink: string;
   defaultOpen?: boolean;
+  disableCollapse?: boolean;
+  buttonVariant?: 'docs' | 'learnMore';
 }
 
-export const ConfigurationCard = ({ title, subtitle, docsLink, defaultOpen = true, children }: ConfigurationCardProps) => {
-  const [height, setHeight] = useState<0 | 'auto'>(defaultOpen ? 'auto' : 0);
+
+export const ConfigurationCard = ({
+  title,
+  subtitle,
+  docsLink,
+  disableCollapse,
+  buttonVariant = 'docs',
+  defaultOpen = true,
+  children,
+}: ConfigurationCardProps) => {
+  const [height, setHeight] = useState<0 | 'auto'>(defaultOpen || disableCollapse ? 'auto' : 0);
 
   const handleVisibleClick = () => {
     setHeight(curr => (curr === 'auto' ? 0 : 'auto'));
   };
+
+  const Button = buttonVariant === 'docs' ? DocsButton : LearnMoreButton;
 
   return (
     <SplitCard
@@ -26,17 +40,21 @@ export const ConfigurationCard = ({ title, subtitle, docsLink, defaultOpen = tru
           <Header variant="bodyL" weight="semiBold">
             {title}
           </Header>
-          <CpslText variant="bodyS" color="secondary">
-            {subtitle}
-          </CpslText>
-          <DocsButton link={docsLink} size="small" />
+          {subtitle && (
+            <CpslText variant="bodyS" color="secondary">
+              {subtitle}
+            </CpslText>
+          )}
+          <Button link={docsLink} size="small" />
         </SplitCardInnerContainer>
       }
       RightContent={
         <SplitCardInnerContainer>
-          <ExpandButton variant="ghost" onClick={handleVisibleClick}>
-            <Chevron icon="chevronUp" $isOpen={height === 'auto'} />
-          </ExpandButton>
+          {!disableCollapse && (
+            <ExpandButton variant="ghost" onClick={handleVisibleClick}>
+              <Chevron icon="chevronUp" $isOpen={height === 'auto'} />
+            </ExpandButton>
+          )}
           <motion.div animate={{ height }} transition={{ duration: 0.25 }} style={{ height, overflow: 'hidden' }}>
             <SplitCardInnerContainer>{children}</SplitCardInnerContainer>
           </motion.div>

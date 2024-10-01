@@ -45,7 +45,7 @@ export const NonProdWarning = ({ onCreateProdKeyClick }: NonProdWarningProps) =>
 };
 
 const StyledAlert = styled(CpslAlert)`
-  --container-justify-content: flex-start;
+  --container-align-items: flex-start;
 
   --title-container-gap: 16px;
 `;

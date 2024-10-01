@@ -8,6 +8,7 @@ import { RemoveMemberModal } from './RemoveMemberModal';
 import { AddMemberModal } from './AddMemberModal';
 import { useGetAllOrganizationMembers } from '../../../hooks/api/queries/useOrganizationMembers';
 import { Loader } from '../../../components/Loader';
+import { useGetSelectedOrganizationIsValid } from '../../../hooks/api/queries/useOrganizations';
 
 const PAGE_SIZE = 10;
 
@@ -15,6 +16,7 @@ export const MembersTable = () => {
   const [page, setPage] = useState(0);
   const isMobile = useIsMobile();
   const { data: members, isLoading: isMembersLoading } = useGetAllOrganizationMembers();
+  const { data: orgValid } = useGetSelectedOrganizationIsValid();
 
   const [selectedMemberId, setSelectedMemberId] = useState('');
   const [selectedMemberEmail, setSelectedMemberEmail] = useState('');
@@ -69,7 +71,7 @@ export const MembersTable = () => {
                     variant="destructive"
                     size="small"
                     onClick={handleRemoveMemberClick(d.id, d.user?.email ?? d.pendingEmail)}
-                    disabled={d.owner}
+                    disabled={d.owner || !orgValid}
                   >
                     Remove
                   </CpslButton>
@@ -79,7 +81,7 @@ export const MembersTable = () => {
             ],
           }) as TableData,
       ) ?? [],
-    [members],
+    [members, orgValid],
   );
 
   const handlePageChange = (page: number) => {
@@ -101,7 +103,7 @@ export const MembersTable = () => {
         onPageChange={handlePageChange}
         headers={[{ headerName: 'Name' }, { headerName: 'Email' }, { headerName: 'Date Joined', colSpan: 2 }]}
         ActionButton={
-          <GradientButton onClick={handleCreateClick} size={isMobile ? 'small' : 'medium'}>
+          <GradientButton onClick={handleCreateClick} size={isMobile ? 'small' : 'medium'} disabled={!orgValid}>
             <CpslIcon slot="start" icon="plusCircle" />
             Invite Member
           </GradientButton>

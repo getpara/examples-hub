@@ -52,6 +52,20 @@ export const useGetSelectedOrganization = () => {
   );
 };
 
+export const useGetSelectedOrganizationIsValid = () => {
+  const selectedOrganizationId = useAppStore(state => state.getSelectedOrganization());
+
+  return useOrganizationsQuery(
+    useCallback(
+      data => {
+        const org = data.find(o => o.id === selectedOrganizationId);
+        return !org?.suspended && !org?.archived;
+      },
+      [selectedOrganizationId],
+    ),
+  );
+};
+
 export const useGetOrganizationEarlyAccess = () => {
   const selectedOrganizationId = useAppStore(state => state.getSelectedOrganization());
 

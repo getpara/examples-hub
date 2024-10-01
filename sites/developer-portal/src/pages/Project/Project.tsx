@@ -12,6 +12,7 @@ import { useGetAllOrganizationKeys, useGetAvailableKeyEnvs } from '../../hooks/a
 import { useGetProject } from '../../hooks/api/queries/useProjects';
 import { triggerToast } from '../../utils/toasts';
 import { Header } from './components/Header';
+import { useGetSelectedOrganizationIsValid } from '../../hooks/api/queries/useOrganizations';
 
 const PAGE_SIZE = 6;
 
@@ -24,6 +25,7 @@ export const Project = () => {
   const { data: availableKeyEnvs } = useGetAvailableKeyEnvs(projectId ?? '');
   const [modalOpen, setModalOpen] = useState(false);
   const [page, setPage] = useState(0);
+  const { data: orgValid } = useGetSelectedOrganizationIsValid();
 
   const handlePageChange = (page: number) => {
     setPage(page);
@@ -98,7 +100,11 @@ export const Project = () => {
         onPageChange={handlePageChange}
         headers={[{ headerName: 'Environment' }, { headerName: 'Date Created', colSpan: 2 }]}
         ActionButton={
-          <CpslButton onClick={handleCreateClick} size={isMobile ? 'small' : 'medium'} disabled={!availableKeyEnvs?.length}>
+          <CpslButton
+            onClick={handleCreateClick}
+            size={isMobile ? 'small' : 'medium'}
+            disabled={!availableKeyEnvs?.length || !orgValid}
+          >
             <CpslIcon slot="start" icon="plus" />
             Create
           </CpslButton>
@@ -106,7 +112,7 @@ export const Project = () => {
         noContentTitle="No Keys Yet"
         noContentSubtitle="Get started using Capsule by creating a new Beta API Key"
         NoContentActionButton={
-          <CpslButton onClick={handleCreateClick}>
+          <CpslButton onClick={handleCreateClick} disabled={!orgValid}>
             <CpslIcon slot="start" icon="plus" />
             Create API Key
           </CpslButton>

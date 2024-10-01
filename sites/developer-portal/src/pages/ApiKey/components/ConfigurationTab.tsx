@@ -1,6 +1,5 @@
 import { BrandingConfiguration } from './BrandingConfiguration/BrandingConfiguration';
 import { EmailConfiguration } from './EmailConfiguration/EmailConfiguration';
-// import { NativePasskeyConfiguration } from './NativePasskeyConfiguration';
 import { OnRampFlowsConfiguration } from './OnRampFlowsConfiguration/OnRampFlowsConfiguration';
 import { OnRampAssetsConfiguration } from './OnRampAssetsConfiguration/OnRampAssetsConfiguration';
 import { OnRampProvidersConfiguration } from './OnRampProvidersConfiguration/OnRampProvidersConfiguration';
@@ -8,6 +7,8 @@ import { PortalConfiguration } from './PortalConfiguration/PortalConfiguration';
 import { useParams } from 'react-router-dom';
 import { useGetOrganizationKey } from '../../../hooks/api/queries/useOrganizationKeys';
 import { Environment } from '../../../types/environment';
+import { PregenConfiguration } from './PregenConfiguration/PregenConfiguration';
+import { NativePasskeyConfiguration } from './NativePasskeyConfiguration/NativePasskeyConfiguration';
 
 export const ConfigurationTab = () => {
   const { apiKey, env, projectId } = useParams();
@@ -17,6 +18,9 @@ export const ConfigurationTab = () => {
     <>
       <BrandingConfiguration />
       <EmailConfiguration />
+      <PortalConfiguration />
+      <NativePasskeyConfiguration />
+      <PregenConfiguration />
       <OnRampFlowsConfiguration />
       {(apiKeyData?.isBuyEnabled || apiKeyData?.isWithdrawEnabled) && (
         <>
@@ -24,9 +28,6 @@ export const ConfigurationTab = () => {
           <OnRampAssetsConfiguration />
         </>
       )}
-      <PortalConfiguration />
-      {/* TODO: Add this back once BE is complete */}
-      {/* <NativePasskeyConfiguration /> */}
     </>
   );
 };

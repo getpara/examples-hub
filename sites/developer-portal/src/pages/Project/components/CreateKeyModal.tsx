@@ -10,6 +10,8 @@ import { triggerToast } from '../../../utils/toasts';
 import { useParams } from 'react-router-dom';
 import { HTTPS_URL_REGEX } from '../../../utils/regex';
 import { useGetAvailableKeyEnvs } from '../../../hooks/api/queries/useOrganizationKeys';
+import { AxiosError } from 'axios';
+import { useGetSelectedOrganizationIsValid } from '../../../hooks/api/queries/useOrganizations';
 
 interface CreateKeyModalProps {
   open: boolean;
@@ -25,6 +27,7 @@ export const CreateKeyModal = ({ open, onClose }: CreateKeyModalProps) => {
   const { mutate: createKey } = useCreateApiKey();
   const { projectId } = useParams();
   const { data: availableKeyEnvs } = useGetAvailableKeyEnvs(projectId ?? '');
+  const { data: orgValid } = useGetSelectedOrganizationIsValid();
 
   const {
     control,
@@ -41,7 +44,7 @@ export const CreateKeyModal = ({ open, onClose }: CreateKeyModalProps) => {
   });
 
   const handleCreateClick = () => {
-    if (environment && projectId) {
+    if (orgValid && environment && projectId) {
       createKey(
         {
           projectId,
@@ -56,11 +59,17 @@ export const CreateKeyModal = ({ open, onClose }: CreateKeyModalProps) => {
               title: 'Key Created!',
             });
           },
-          onError: () => {
+          onError: err => {
+            let body = 'Please try again. If the problem persists, contact Capsule support.';
+
+            if ((err as AxiosError).response?.data === 'max keys created for the current project') {
+              body = `You've reached the max number of ${formatEnvName(environment as Environment)} API keys allowed on this project. Archive another key or create another project to add more API keys.`;
+            }
+
             triggerToast({
               variant: 'error',
               title: 'Failed to Create Key',
-              body: 'Please try again. If the problem persists, contact Capsule support.',
+              body,
             });
           },
         },
@@ -142,7 +151,7 @@ export const CreateKeyModal = ({ open, onClose }: CreateKeyModalProps) => {
             )}
           />
         </Content>
-        <CpslButton disabled={!isValid} fullWidth onClick={handleCreateClick}>
+        <CpslButton disabled={!isValid || !orgValid} fullWidth onClick={handleCreateClick}>
           Create API Key
         </CpslButton>
       </>

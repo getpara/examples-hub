@@ -2,6 +2,7 @@ import { CpslButton, CpslInput } from '@usecapsule/react-components';
 import { Modal } from '../../../components/Modal/Modal';
 import { useRemoveMember } from '../../../hooks/api/mutations/useRemoveMember';
 import { triggerToast } from '../../../utils/toasts';
+import { useGetSelectedOrganizationIsValid } from '../../../hooks/api/queries/useOrganizations';
 
 interface RemoveMemberModalProps {
   open: boolean;
@@ -13,27 +14,30 @@ interface RemoveMemberModalProps {
 
 export const RemoveMemberModal = ({ open, memberEmail, memberId, onClose, onExited }: RemoveMemberModalProps) => {
   const { mutate: removeMember } = useRemoveMember();
+  const { data: orgValid } = useGetSelectedOrganizationIsValid();
 
   const handleRemoveClick = () => {
-    removeMember(
-      { memberId },
-      {
-        onSuccess: () => {
-          onClose();
-          triggerToast({
-            variant: 'success',
-            title: 'Member Removed!',
-          });
+    if (orgValid) {
+      removeMember(
+        { memberId },
+        {
+          onSuccess: () => {
+            onClose();
+            triggerToast({
+              variant: 'success',
+              title: 'Member Removed!',
+            });
+          },
+          onError: () => {
+            triggerToast({
+              variant: 'error',
+              title: 'Failed to Remove Member',
+              body: 'Please try again. If the problem persists, contact Capsule support.',
+            });
+          },
         },
-        onError: () => {
-          triggerToast({
-            variant: 'error',
-            title: 'Failed to Remove Member',
-            body: 'Please try again. If the problem persists, contact Capsule support.',
-          });
-        },
-      },
-    );
+      );
+    }
   };
 
   return (
@@ -47,7 +51,7 @@ export const RemoveMemberModal = ({ open, memberEmail, memberId, onClose, onExit
     >
       <>
         <CpslInput value={memberEmail} disabled />
-        <CpslButton variant="destructive" fullWidth onClick={handleRemoveClick}>
+        <CpslButton variant="destructive" fullWidth onClick={handleRemoveClick} disabled={!orgValid}>
           Remove Member
         </CpslButton>
       </>

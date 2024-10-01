@@ -12,6 +12,7 @@ import { useGetProject } from '../../../hooks/api/queries/useProjects';
 import { formatFrameworkName, frameworkHasPackageManager } from '../../../utils/framework';
 import { FRAMEWORK_OPTIONS, PACKAGE_MANAGER_OPTIONS } from '../../../utils/constants';
 import { formatPackageManagerName } from '../../../utils/packageManager';
+import { useGetSelectedOrganizationIsValid } from '../../../hooks/api/queries/useOrganizations';
 
 interface EditProjectModalProps {
   open: boolean;
@@ -22,6 +23,7 @@ export const EditProjectModal = ({ open, onClose }: EditProjectModalProps) => {
   const { projectId } = useParams();
   const { data: project } = useGetProject(projectId ?? '');
   const { mutate: updateProject } = useUpdateProject();
+  const { data: orgValid } = useGetSelectedOrganizationIsValid();
 
   const DEFAULT_VALUES = {
     name: project?.name ?? '',
@@ -44,7 +46,7 @@ export const EditProjectModal = ({ open, onClose }: EditProjectModalProps) => {
   });
 
   const handleSaveClick = () => {
-    if (!projectId) {
+    if (!projectId || !orgValid) {
       return;
     }
 
@@ -165,7 +167,7 @@ export const EditProjectModal = ({ open, onClose }: EditProjectModalProps) => {
             />
           )}
         </Content>
-        <CpslButton disabled={!isValid} fullWidth onClick={handleSaveClick}>
+        <CpslButton disabled={!isValid || !orgValid} fullWidth onClick={handleSaveClick}>
           Save
         </CpslButton>
       </>

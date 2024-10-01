@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { CopyToModal } from './CopyToModal';
 import { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { useGetSelectedOrganizationIsValid } from '../../../hooks/api/queries/useOrganizations';
 
 interface CopyToProps {
   isInHeader?: boolean;
@@ -10,6 +11,7 @@ interface CopyToProps {
 
 export const CopyTo = ({ isInHeader }: CopyToProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { data: orgValid } = useGetSelectedOrganizationIsValid();
 
   const {
     formState: { isValid },
@@ -28,7 +30,7 @@ export const CopyTo = ({ isInHeader }: CopyToProps) => {
       <CopyButton
         size={isInHeader ? 'small' : 'medium'}
         fullWidth={!isInHeader}
-        disabled={!isValid}
+        disabled={!isValid || !orgValid}
         variant="secondary"
         onClick={handleClick}
       >

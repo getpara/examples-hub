@@ -31,7 +31,8 @@ export const HomepageUrl = () => {
             }}
             onCpslBlur={onBlur}
             value={value ?? ''}
-            errorText={error?.message}
+            // Manually adding the error for no value here since the initial form validation trigger doesn't always seem to work
+            errorText={!value ? 'Website URL is required.' : error?.message}
           />
         )}
       />

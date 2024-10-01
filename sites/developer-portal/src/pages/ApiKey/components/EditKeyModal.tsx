@@ -1,13 +1,14 @@
 import { CpslButton, CpslIcon, CpslText } from '@usecapsule/react-components';
 import { Modal } from '../../../components/Modal/Modal';
 import { useUpdateApiKey } from '../../../hooks/api/mutations/useUpdateApiKey';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useRotateKey } from '../../../hooks/api/mutations/useRotateKey';
 import { useArchiveKey } from '../../../hooks/api/mutations/useArchiveKey';
 import { triggerToast } from '../../../utils/toasts';
 import { useGetAvailableKeyEnvs, useGetOrganizationKey } from '../../../hooks/api/queries/useOrganizationKeys';
 import { Environment } from '../../../types/environment';
 import { formatEnvName } from '../../../utils/apiKey';
+import { useGetSelectedOrganizationIsValid } from '../../../hooks/api/queries/useOrganizations';
 
 interface EditKeyModalProps {
   open: boolean;
@@ -15,13 +16,13 @@ interface EditKeyModalProps {
 }
 
 export const EditKeyModal = ({ open, onClose }: EditKeyModalProps) => {
-  const navigate = useNavigate();
   const { apiKey, env, projectId } = useParams();
   const { mutate: unArchiveKey } = useUpdateApiKey();
   const { mutate: rotateKey } = useRotateKey();
   const { mutate: archiveKey } = useArchiveKey();
   const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
   const { data: availableEnvs } = useGetAvailableKeyEnvs(projectId ?? '');
+  const { data: orgValid } = useGetSelectedOrganizationIsValid();
 
   const canUnarchive = availableEnvs?.includes(apiKeyData?.environment.toUpperCase() as Environment);
 
@@ -57,7 +58,6 @@ export const EditKeyModal = ({ open, onClose }: EditKeyModalProps) => {
         {
           onSuccess: () => {
             onClose();
-            navigate('/');
             triggerToast({
               variant: 'success',
               title: 'Key Archived!',
@@ -98,6 +98,10 @@ export const EditKeyModal = ({ open, onClose }: EditKeyModalProps) => {
       );
     }
   };
+
+  if (!orgValid) {
+    return null;
+  }
 
   return (
     <Modal open={open} onClose={onClose} title="Edit API Key" subtitle="Make changes to your API Key">

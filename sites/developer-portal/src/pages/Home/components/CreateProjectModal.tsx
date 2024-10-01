@@ -13,7 +13,8 @@ import { formatPackageManagerName } from '../../../utils/packageManager';
 import { HTTPS_URL_REGEX } from '../../../utils/regex';
 import { useCreateApiKey } from '../../../hooks/api/mutations/useCreateApiKey';
 import { Environment } from '../../../types/environment';
-import { useCanCreateProject } from '../../../hooks/permissions/useCanCreateProject';
+import { useCanCreateProject } from '../../../hooks/subscriptionGating/useCanCreateProject';
+import { AxiosError } from 'axios';
 
 interface CreateProjectModalProps {
   open: boolean;
@@ -47,46 +48,55 @@ export const CreateProjectModal = ({ open, onClose }: CreateProjectModalProps) =
   });
 
   const handleCreateClick = async () => {
-    try {
-      const newProject = await createProject(
-        {
-          data: { name, framework, packageManager },
-        },
-        {
-          onError: () => {
-            triggerToast({
-              variant: 'error',
-              title: 'Failed to Create Project',
-              body: 'Please try again. If the problem persists, contact Capsule support.',
-            });
+    if (canCreateProject) {
+      try {
+        const newProject = await createProject(
+          {
+            data: { name, framework, packageManager },
           },
-        },
-      );
+          {
+            onError: err => {
+              let body = 'Please try again. If the problem persists, contact Capsule support.';
 
-      if (newProject) {
-        await createApiKey(
-          {
-            projectId: newProject.project.id,
-            env: IS_PROD ? Environment.BETA : IS_BETA ? Environment.SANDBOX : (ENV_VARS.environment as Environment),
-            data: { homepageUrl },
-          },
-          {
-            onError: () => {
+              if ((err as AxiosError).response?.data === 'max projects created for the current plan') {
+                body =
+                  "You've reached the max number of projects allowed on your current plan level. Upgrade to add more projects.";
+              }
+
               triggerToast({
                 variant: 'error',
-                title: 'Failed to Create Key',
-                body: 'Please try again. If the problem persists, contact Capsule support.',
+                title: 'Failed to Create Project',
+                body,
               });
             },
           },
         );
+
+        if (newProject) {
+          await createApiKey(
+            {
+              projectId: newProject.project.id,
+              env: IS_PROD ? Environment.BETA : IS_BETA ? Environment.SANDBOX : (ENV_VARS.environment as Environment),
+              data: { homepageUrl },
+            },
+            {
+              onError: () => {
+                triggerToast({
+                  variant: 'error',
+                  title: 'Failed to Create Key',
+                  body: 'Please try again. If the problem persists, contact Capsule support.',
+                });
+              },
+            },
+          );
+        }
+        triggerToast({
+          variant: 'success',
+          title: 'Project Created!',
+        });
+      } finally {
+        onClose();
       }
-    } finally {
-      onClose();
-      triggerToast({
-        variant: 'success',
-        title: 'Project Created!',
-      });
     }
   };
 

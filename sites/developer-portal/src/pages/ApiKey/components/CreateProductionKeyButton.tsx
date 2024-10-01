@@ -5,6 +5,7 @@ import { useGetAvailableKeyEnvs } from '../../../hooks/api/queries/useOrganizati
 import { useParams } from 'react-router-dom';
 import { IS_PROD } from '../../../utils/constants';
 import { Environment } from '../../../types/environment';
+import { useGetSelectedOrganizationIsValid } from '../../../hooks/api/queries/useOrganizations';
 
 interface CreateProductionKeyProps {
   onClick: () => void;
@@ -13,6 +14,7 @@ interface CreateProductionKeyProps {
 export const CreateProductionKeyButton = ({ onClick }: CreateProductionKeyProps) => {
   const { projectId } = useParams();
   const { data: availableKeyEnvs } = useGetAvailableKeyEnvs(projectId ?? '');
+  const { data: orgValid } = useGetSelectedOrganizationIsValid();
 
   const {
     formState: { isValid },
@@ -26,7 +28,7 @@ export const CreateProductionKeyButton = ({ onClick }: CreateProductionKeyProps)
 
   return (
     <>
-      <CopyButton size="small" disabled={!isValid} onClick={onClick}>
+      <CopyButton size="small" disabled={!isValid || !orgValid} onClick={onClick}>
         Create {IS_PROD ? 'Production' : 'Beta'} Key
       </CopyButton>
     </>

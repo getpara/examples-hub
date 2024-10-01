@@ -288,14 +288,27 @@ export type OrganizationEnterprisePriceResponse = {
 // *********************
 // Organization Subscription
 // *********************
+
+export type SubscriptionStatus =
+  | 'incomplete'
+  | 'incompleteExpired'
+  | 'trialing'
+  | 'active'
+  | 'pastDue'
+  | 'canceled'
+  | 'unpaid'
+  | 'paused';
+
 export type Subscription = {
-  plan: Plan;
+  // Not including price on the plan since it's included in the subscription
+  plan: Omit<Plan, 'price'>;
   periodStart?: number;
   periodEnd?: number;
-  cancelAtPeriodEnd?: boolean;
   price?: number;
   trialStart?: number | null;
   trialEnd?: number | null;
+  cancelAtPeriodEnd?: boolean;
+  status: SubscriptionStatus;
   billing?: {
     address?: {
       city: string | null;
@@ -321,6 +334,7 @@ export type Subscription = {
     };
   };
 };
+
 export type OrganizationSubscriptionResponse = {
   subscription: Subscription;
 };
@@ -331,11 +345,12 @@ export type OrganizationSubscriptionResponse = {
 export type Plan = {
   slug: string;
   price: number;
-  betaOnly: boolean;
-  maxUsers?: number;
-  maxMonthlyUsers?: number;
-  hasPregenAccess: boolean;
-  hasNativePasskeyAccess: boolean;
+  maxProjects: number;
+  maxProdMAUs: number;
+  maxBetaUsers: number;
+  canCreateProdKeys: boolean;
+  canPregen: boolean;
+  canUseNativePasskeys: boolean;
 };
 
 export type PlansResponse = { plans: Plan[] };

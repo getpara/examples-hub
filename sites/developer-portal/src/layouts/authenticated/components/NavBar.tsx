@@ -8,6 +8,7 @@ import { useLogout } from '../../../hooks/useLogout';
 import { useOrganizationMember } from '../../../hooks/api/queries/useOrganizationMember';
 import { Organizations } from './Organizations';
 import { AUTH_APP_BAR_HEIGHT } from '../../../components/AppBar/AuthAppBar';
+import { AccountWarning } from './AccountWarning';
 
 export const EXPANDED_SIDEBAR_WIDTH = 312;
 
@@ -37,6 +38,7 @@ export const NavBar = ({ isOpen, closeNav }: NavBarProps) => {
         <Organizations />
         <Navigation closeNav={closeNav} />
         <BottomContainer>
+          <AccountWarning />
           <Username variant="bodyS" weight="medium">
             {userName}
           </Username>

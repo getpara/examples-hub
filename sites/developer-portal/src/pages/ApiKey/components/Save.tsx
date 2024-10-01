@@ -6,11 +6,14 @@ import { CpslButton } from '@usecapsule/react-components';
 import styled from 'styled-components';
 import { useGetOrganizationKey } from '../../../hooks/api/queries/useOrganizationKeys';
 import { Environment } from '../../../types/environment';
+import { useGetSelectedOrganizationIsValid } from '../../../hooks/api/queries/useOrganizations';
 
 export const Save = () => {
   const { apiKey, env, projectId } = useParams();
   const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
   const { mutate: updateKey, isPending } = useUpdateApiKey();
+  const { data: orgValid } = useGetSelectedOrganizationIsValid();
+
   const {
     formState: { isDirty, isValid },
     getValues,
@@ -20,7 +23,7 @@ export const Save = () => {
   const canSave = isDirty && isValid && !apiKeyData?.archived;
 
   const handleSave = () => {
-    if (projectId && apiKey && env && canSave) {
+    if (orgValid && projectId && apiKey && env && canSave) {
       updateKey(
         { projectId, keyId: apiKey, env, data: getValues() },
         {
@@ -34,7 +37,7 @@ export const Save = () => {
           onError: () => {
             triggerToast({
               variant: 'error',
-              title: 'Failed to Save Branding Config',
+              title: 'Failed to Save Config',
               body: 'Please correct any errors. If the problem persists, contact Capsule support.',
             });
           },
@@ -44,7 +47,7 @@ export const Save = () => {
   };
 
   return (
-    <SaveButton fullWidth disabled={!canSave || isPending} onClick={handleSave}>
+    <SaveButton fullWidth disabled={!canSave || isPending || !orgValid} onClick={handleSave}>
       {!isDirty ? 'No Unsaved Changes' : 'Save'}
     </SaveButton>
   );

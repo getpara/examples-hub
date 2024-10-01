@@ -21,6 +21,7 @@ export const BRAND_COLORS = {
 };
 
 export const DOCS_LINK = 'https://docs.usecapsule.com/';
+export const PREGEN_DOCS_LINK = 'https://docs.usecapsule.com/integration-guides/wallet-pregeneration';
 export const BRANDING_DOCS_LINK = 'https://docs.usecapsule.com/customize-capsule/required-customization';
 export const ON_RAMP_DOCS_LINK = 'https://docs.usecapsule.com/customize-capsule/fiat-onramps';
 export const REACT_DOCS_LINK = 'https://docs.usecapsule.com/getting-started/initial-setup/web-modal-and-sdk-setup';
@@ -53,6 +54,7 @@ export const EMAIL_FONTS = [
 export const TWITTER_URL = 'https://twitter.com/usecapsule';
 export const LINKEDIN_URL = 'https://www.linkedin.com/company/usecapsule';
 export const SUPPORT_URL = 'mailto:support@usecapsule.com';
+export const SCHEDULE_MEETING_LINK = 'https://usecapsule.com/talk-to-us';
 export const MODAL_DESIGNER_LINK = 'https://demo.usecapsule.com';
 
 export const FRAMEWORK_OPTIONS: Framework[] = [

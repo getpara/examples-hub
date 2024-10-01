@@ -4,8 +4,8 @@ import { useAppStore } from '../../../stores/app/useAppStore';
 import { getApiKeys } from '../../../api/apiKeys/queries';
 import { Environment } from '../../../types/environment';
 import { ENV_VARS } from '../../../utils/constants';
-import { useCanCreateProdKeys } from '../../permissions/useCanCreateProdKeys';
 import { useCallback } from 'react';
+import { useGetOrganizationSubscriptionPlan } from './useOrganizationSubscription';
 
 export const ORGANIZATIONS_KEYS_QUERY_KEY = 'organizationKeys';
 
@@ -41,7 +41,7 @@ export const useGetOrganizationKey = (projectId: string, id: string, env: Enviro
 };
 
 export const useGetAvailableKeyEnvs = (projectId: string) => {
-  const { canCreateProdKeys } = useCanCreateProdKeys();
+  const { data: plan } = useGetOrganizationSubscriptionPlan();
 
   return useOrganizationKeysQuery(
     projectId,
@@ -55,7 +55,7 @@ export const useGetAvailableKeyEnvs = (projectId: string) => {
             const hasProdKey = !!unArchivedKeys.find(d => d.environment.toUpperCase() === Environment.PROD);
             const hasBetaKey = !!unArchivedKeys.find(d => d.environment.toUpperCase() === Environment.BETA);
 
-            if (!hasProdKey && canCreateProdKeys) {
+            if (!hasProdKey && plan?.canCreateProdKeys) {
               availableOptions.push(Environment.PROD);
             }
             if (!hasBetaKey) {
@@ -67,7 +67,7 @@ export const useGetAvailableKeyEnvs = (projectId: string) => {
             const hasBetaKey = !!unArchivedKeys.find(d => d.environment.toUpperCase() === Environment.BETA);
             const hasSandboxKey = !!unArchivedKeys.find(d => d.environment.toUpperCase() === Environment.SANDBOX);
 
-            if (!hasBetaKey && canCreateProdKeys) {
+            if (!hasBetaKey && plan?.canCreateProdKeys) {
               availableOptions.push(Environment.BETA);
             }
             if (!hasSandboxKey) {
@@ -87,7 +87,7 @@ export const useGetAvailableKeyEnvs = (projectId: string) => {
 
         return availableOptions;
       },
-      [canCreateProdKeys],
+      [plan],
     ),
   );
 };

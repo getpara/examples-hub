@@ -4,6 +4,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { EMAIL_REGEX } from '../../../utils/regex';
 import { useInviteMember } from '../../../hooks/api/mutations/useInviteMember';
 import { triggerToast } from '../../../utils/toasts';
+import { useGetSelectedOrganizationIsValid } from '../../../hooks/api/queries/useOrganizations';
 
 interface AddMemberModalProps {
   open: boolean;
@@ -12,6 +13,7 @@ interface AddMemberModalProps {
 
 export const AddMemberModal = ({ open, onClose }: AddMemberModalProps) => {
   const { mutate: inviteMember } = useInviteMember();
+  const { data: orgValid } = useGetSelectedOrganizationIsValid();
 
   const {
     control,
@@ -27,25 +29,27 @@ export const AddMemberModal = ({ open, onClose }: AddMemberModalProps) => {
   });
 
   const handleInviteClick = () => {
-    inviteMember(
-      { email: getValues('email') },
-      {
-        onSuccess: () => {
-          onClose();
-          triggerToast({
-            variant: 'success',
-            title: 'Member Invited!',
-          });
+    if (orgValid) {
+      inviteMember(
+        { email: getValues('email') },
+        {
+          onSuccess: () => {
+            onClose();
+            triggerToast({
+              variant: 'success',
+              title: 'Member Invited!',
+            });
+          },
+          onError: () => {
+            triggerToast({
+              variant: 'error',
+              title: 'Failed to Invite Member',
+              body: 'Please try again. If the problem persists, contact Capsule support.',
+            });
+          },
         },
-        onError: () => {
-          triggerToast({
-            variant: 'error',
-            title: 'Failed to Invite Member',
-            body: 'Please try again. If the problem persists, contact Capsule support.',
-          });
-        },
-      },
-    );
+      );
+    }
   };
 
   const handleModalExited = () => {
@@ -84,7 +88,7 @@ export const AddMemberModal = ({ open, onClose }: AddMemberModalProps) => {
             />
           )}
         />
-        <CpslButton disabled={!isValid} fullWidth onClick={handleInviteClick}>
+        <CpslButton disabled={!isValid || !orgValid} fullWidth onClick={handleInviteClick}>
           Send Invite
         </CpslButton>
       </>

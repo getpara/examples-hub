@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { BaseCard } from '../../../components/common';
 import { CpslButton, CpslText } from '@usecapsule/react-components';
-import { SUPPORT_URL } from '../../../utils/constants';
+import { SCHEDULE_MEETING_LINK, SUPPORT_URL } from '../../../utils/constants';
 import {
   useHasStripeSubscription,
   useWillStripeSubscriptionCancel,
@@ -29,7 +29,7 @@ export const FooterCard = () => {
                   variant="destructive"
                   size="small"
                   as="a"
-                  href="https://usecapsule.com/talk-to-us"
+                  href={SCHEDULE_MEETING_LINK}
                   target="_blank"
                 >
                   Cancel Plan

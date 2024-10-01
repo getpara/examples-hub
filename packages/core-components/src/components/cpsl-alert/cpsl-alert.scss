@@ -68,6 +68,7 @@
   font-size: var(--container-font-size);
 
   display: flex;
+  flex-direction: column;
   align-items: var(--container-align-items);
   justify-content: var(--container-justify-content);
   gap: var(--container-gap);

@@ -6,6 +6,8 @@ import { useOrganizationMember } from '../../hooks/api/queries/useOrganizationMe
 import { MainLoader } from '../MainLoader';
 import { useSetSelectedOrganizationWithNavigation } from '../../hooks/useSetSelectedOrganizationWithNavigation';
 import { AUTH_APP_BAR_HEIGHT } from '../AppBar/AuthAppBar';
+import { useGetOrganizationSubscription } from '../../hooks/api/queries/useOrganizationSubscription';
+import { usePlans } from '../../hooks/api/queries/usePlans';
 
 interface AuthenticatedWrapperProps extends PropsWithChildren {
   requireOrgs?: boolean;
@@ -15,6 +17,8 @@ export const AuthenticatedWrapper = ({ requireOrgs, children }: AuthenticatedWra
   const { logout } = useLogout();
   const { isLoggedIn, isLoading: isLoadingLoggedIn } = useIsLoggedIn();
   const { data: orgsWithAccess, isLoading: isLoadingOrgs } = useGetAllOrganizationsWithAccess();
+  const { isLoading: isLoadingSubscription } = useGetOrganizationSubscription();
+  const { isLoading: isLoadingPlans } = usePlans();
   const { isLoading: isLoadingMember } = useOrganizationMember();
   const { setSelectedOrganization } = useSetSelectedOrganizationWithNavigation(false);
 
@@ -25,7 +29,7 @@ export const AuthenticatedWrapper = ({ requireOrgs, children }: AuthenticatedWra
     }
   }, [isLoadingOrgs, orgsWithAccess, setSelectedOrganization]);
 
-  if (isLoadingLoggedIn || isLoadingOrgs || isLoadingMember) {
+  if (isLoadingLoggedIn || isLoadingOrgs || isLoadingMember || isLoadingSubscription || isLoadingPlans) {
     return <MainLoader headerHeight={AUTH_APP_BAR_HEIGHT} />;
   }
 

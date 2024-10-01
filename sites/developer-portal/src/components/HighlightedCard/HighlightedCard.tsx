@@ -5,7 +5,7 @@ import { BaseCard, LINEAR_GRADIENT } from '../common';
 
 interface HighlightedCardProps extends PropsWithChildren {
   title: string;
-  subtitle: string;
+  subtitle?: string;
 }
 
 export const HighlightedCard = ({ title, subtitle, children }: HighlightedCardProps) => {
@@ -16,9 +16,11 @@ export const HighlightedCard = ({ title, subtitle, children }: HighlightedCardPr
           <CpslText variant="bodyL" weight="semiBold">
             {title}
           </CpslText>
-          <CpslText variant="bodyS" color="secondary">
-            {subtitle}
-          </CpslText>
+          {subtitle && (
+            <CpslText variant="bodyS" color="secondary">
+              {subtitle}
+            </CpslText>
+          )}
           {children}
         </Container>
       </Card>
