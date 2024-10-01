@@ -108,3 +108,5 @@ export const MoonPayEmbed = () => {
     </div>
   );
 };
+
+export default MoonPayEmbed;

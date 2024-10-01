@@ -67,8 +67,7 @@ export const AddFunds = () => {
   const tab = storedTab ?? tabs[0][0];
 
   const address = useMemo(
-    () =>
-      activeWallet ? capsule.getDisplayAddress(activeWallet.id, { addressType: activeWallet.type, truncate: true }) : '',
+    () => (activeWallet ? capsule.getDisplayAddress(activeWallet.id, { addressType: activeWallet.type }) : ''),
     [capsule, activeWallet?.id, activeWallet?.type],
   );
 
