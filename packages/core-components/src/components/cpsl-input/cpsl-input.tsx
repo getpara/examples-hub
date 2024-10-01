@@ -1,9 +1,7 @@
 import { Component, Host, Prop, h, Event, EventEmitter, State, Element, Watch } from '@stencil/core';
 import { AutocompleteTypes, IconType, TextFieldTypes } from '../../interface';
 import { InputChangeEventDetail, InputInputEventDetail } from './input-interface';
-import IMask from 'imask/esm/imask';
-import InputMask from 'imask/esm/controls/input';
-import 'imask/esm/masked/pattern';
+import Inputmask from 'inputmask';
 
 @Component({
   tag: 'cpsl-input',
@@ -21,7 +19,6 @@ export class CpslInput {
   private focusedValue?: string | number | null;
 
   @State() hasFocus = false;
-  @State() maskedInput?: InputMask;
 
   /**
    * Indicates whether and how the text value should be automatically capitalized as it is entered/edited by the user.
@@ -245,24 +242,13 @@ export class CpslInput {
   handleSetupMask() {
     if (this.nativeInput) {
       if (this.mask) {
-        if (this.maskedInput) {
-          this.maskedInput.updateOptions({
-            mask: this.mask as any,
-          });
-        } else {
-          this.maskedInput = IMask(this.nativeInput, {
-            mask: this.mask,
-            definitions: {
-              // <any single char>: <same type as mask (RegExp, Function, etc.)>
-              // defaults are '0', 'a', '*'
-              '#': /[\d]/,
-            },
-          });
-        }
+        Inputmask({ mask: this.mask, showMaskOnHover: false }).mask(this.nativeInput);
+        (this.nativeInput as any).inputmask.shadowRoot = this.el.shadowRoot;
       } else {
-        this.maskedInput?.destroy();
+        if ((this.nativeInput as any).inputmask) {
+          (this.nativeInput as any).inputmask.remove();
+        }
         this.nativeInput.value = this.value ?? '';
-        this.maskedInput = undefined;
       }
     }
   }
@@ -337,10 +323,11 @@ export class CpslInput {
   private onInput = (ev: InputEvent) => {
     const input = ev.target as HTMLInputElement | null;
 
-    this.maskedInput?._onInput(ev);
+    let _value = input.value || '';
+    if ((input as any).inputmask) _value = (input as any).inputmask.unmaskedvalue();
 
     if (Boolean(input)) {
-      this.value = this.maskedInput?.unmaskedValue ?? (input.value || '');
+      this.value = _value;
       input.value === '' ? this.disableSlots() : this.enableSlots();
     }
 
@@ -389,8 +376,10 @@ export class CpslInput {
     // this.value = newVal;
     input.selectionEnd = initialSelectionStart + pasteData.length;
 
-    this.maskedInput?._onInput({ ...(ev as any), target: input });
-    this.value = this.maskedInput?.unmaskedValue ?? (input.value || '');
+    let _value = input.value || '';
+    if ((input as any).inputmask) _value = (input as any).inputmask.unmaskedvalue();
+
+    this.value = _value;
 
     this.value === '' ? this.disableSlots() : this.enableSlots();
 

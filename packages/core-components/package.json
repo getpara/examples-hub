@@ -31,7 +31,7 @@
     "color-blend": "^4.0.0",
     "color2k": "^2.0.3",
     "gsap": "^3.12.5",
-    "imask": "7.6.1",
+    "inputmask": "5.0.9",
     "qrcode-with-logos": "1.1.1"
   },
   "devDependencies": {
