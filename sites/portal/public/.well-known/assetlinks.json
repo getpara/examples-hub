@@ -6,6 +6,19 @@
       ],
       "target" : {
         "namespace" : "android_app",
+        "package_name" : "com.scriptscrypt.gopilot",
+        "sha256_cert_fingerprints" : [
+          "41:96:64:FB:B1:4C:18:15:96:C2:86:E3:D2:FB:81:09:B6:CF:D9:FA:50:0A:10:22:C6:1D:63:6D:4D:DF:9E:C0"
+        ]
+      }
+    },
+    {
+      "relation" : [
+        "delegate_permission/common.handle_all_urls",
+        "delegate_permission/common.get_login_creds"
+      ],
+      "target" : {
+        "namespace" : "android_app",
         "package_name" : "app.hedgehog.android",
         "sha256_cert_fingerprints" : [
           "63:F4:46:E1:40:23:07:12:11:E2:43:80:56:85:98:EE:CF:65:9B:EC:03:2B:C2:E7:20:65:95:7F:C6:C9:27:E5", 
