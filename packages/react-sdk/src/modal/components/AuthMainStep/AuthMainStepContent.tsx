@@ -106,7 +106,7 @@ export const AuthMainStepContent = ({ oAuthMethods, disableEmailLogin, disablePh
         ))}
       </>
     );
-  }, [oAuthMethods, disableEmailLogin, disablePhoneLogin, wallets]);
+  }, [oAuthMethods, disableEmailLogin, disablePhoneLogin, wallets, authLayout]);
 
   return <Container data-testid="main-auth-step-content">{Content}</Container>;
 };

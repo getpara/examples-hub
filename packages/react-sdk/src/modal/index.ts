@@ -6,5 +6,5 @@ export * from './utils/openPopup.js';
 export { ON_RAMP_PROVIDERS, ON_RAMP_ASSETS, NETWORKS } from './constants/constants.js';
 export { SaveRecoverySecret } from './components/RecoverySecretStep/RecoverySecretStep.js';
 export * from './utils/validateOnRampConfig.js';
-export { ExternalWallet } from './types/externalWallets.js';
+export * from './types/externalWallets.js';
 export { useExternalWalletProviderStore } from './stores/externalWalletProvider/useExternalWalletProviderStore.js';

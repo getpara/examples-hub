@@ -271,6 +271,11 @@ const CountryCodeSelect = styled(CpslSelect)<{ $width: number }>`
       top: unset !important;
       bottom: 16px;
     }
+
+    cpsl-auth-modal.force-mobile-media & {
+      top: unset !important;
+      bottom: 16px;
+    }
   }
 `;
 
