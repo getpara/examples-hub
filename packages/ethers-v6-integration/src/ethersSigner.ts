@@ -5,12 +5,22 @@ import CoreCapsule, { SuccessfulSignatureRes, hexStringToBase64 } from '@usecaps
 export class CapsuleEthersSigner extends ethers.AbstractSigner {
   private capsule: CoreCapsule;
   private currentWalletId: string;
+  private messageSigningTimeoutMs?: number;
 
-  constructor(capsule: CoreCapsule, provider?: null | ethers.Provider, walletId?: string) {
+  /**
+   * Signs a message.
+   *
+   * @param capsule - the CoreCapsule instance
+   * @param provider - the ethers provider to use. If not present, will use the default ethers.Provider.
+   * @param walletId - optional wallet ID to use. If not present, will use the first wallet found.
+   * @param messageSigningTimeoutMs - optional timeout in milliseconds. If not present, defaults to 30 seconds.
+   **/
+  constructor(capsule: CoreCapsule, provider?: null | ethers.Provider, walletId?: string, messageSigningTimeoutMs?: number) {
     super(provider);
 
     this.currentWalletId = capsule.findWalletId(walletId, { type: ['EVM'] });
     this.capsule = capsule;
+    this.messageSigningTimeoutMs = messageSigningTimeoutMs;
   }
 
   async getAddress(): Promise<string> {
@@ -21,10 +31,15 @@ export class CapsuleEthersSigner extends ethers.AbstractSigner {
     return new CapsuleEthersSigner(this.capsule, provider, this.currentWalletId);
   }
 
+  /**
+   * Signs a message.
+   *
+   * @param message - the message to be signed
+   **/
   async signMessage(message: string | Uint8Array): Promise<string> {
     const hashedMessage = ethers.hashMessage(message);
     const base64HashedMessage = hexStringToBase64(hashedMessage);
-    const res = await this.capsule.signMessage(this.currentWalletId, base64HashedMessage);
+    const res = await this.capsule.signMessage(this.currentWalletId, base64HashedMessage, this.messageSigningTimeoutMs);
 
     const signature = (res as SuccessfulSignatureRes).signature;
     return `0x${signature}`;

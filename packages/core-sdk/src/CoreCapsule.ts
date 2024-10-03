@@ -2485,8 +2485,9 @@ export abstract class CoreCapsule {
    * message first and then pass in the base64 encoded hash.
    * @param walletId - id of the wallet to sign with.
    * @param messageBase64 - base64 encoding of exact message that should be signed
+   * @param timeout - optional timeout in milliseconds. If not present, defaults to 30 seconds.
    **/
-  async signMessage(walletId: string, messageBase64: string): Promise<FullSignatureRes> {
+  async signMessage(walletId: string, messageBase64: string, timeoutMs: number = 30000): Promise<FullSignatureRes> {
     this.assertIsValidWalletId(walletId);
 
     const wallet = this.wallets[walletId];
@@ -2495,13 +2496,53 @@ export abstract class CoreCapsule {
       signerId = wallet.partnerId;
     }
 
+    let signRes = await this.signMessageInner(wallet, signerId, messageBase64);
+
+    let timeStart = Date.now();
+    if ((signRes as DeniedSignatureRes).pendingTransactionId) {
+      this.platformUtils.openPopup(
+        await this.getTransactionReviewUrl((signRes as DeniedSignatureRes).pendingTransactionId),
+        { type: PopupType.SIGN_MESSAGE_REVIEW },
+      );
+    } else {
+      return signRes as SuccessfulSignatureRes;
+    }
+
+    await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS));
+    while (true) {
+      if (Date.now() - timeStart > timeoutMs) {
+        break;
+      }
+
+      await this.ctx.capsuleClient.getPendingTransaction(this.userId, signRes.pendingTransactionId);
+
+      signRes = await this.signMessageInner(wallet, signerId, messageBase64);
+
+      if ((signRes as DeniedSignatureRes).pendingTransactionId) {
+        await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS));
+      } else {
+        break;
+      }
+    }
+
+    if ((signRes as DeniedSignatureRes).pendingTransactionId) {
+      throw new TransactionReviewError(
+        await this.getTransactionReviewUrl((signRes as DeniedSignatureRes).pendingTransactionId),
+      );
+    }
+
+    return signRes as SuccessfulSignatureRes;
+  }
+
+  private async signMessageInner(wallet: Wallet, signerId: string, messageBase64: string) {
     let signRes;
+
     switch (wallet.scheme) {
       case WalletScheme.ED25519:
         signRes = await this.platformUtils.ed25519Sign(
           this.ctx,
           signerId,
-          walletId,
+          wallet.id,
           wallet.signer,
           messageBase64,
           this.retrieveSessionCookie(),
@@ -2511,7 +2552,7 @@ export abstract class CoreCapsule {
         signRes = await this.platformUtils.signMessage(
           this.ctx,
           signerId,
-          walletId,
+          wallet.id,
           wallet.signer,
           messageBase64,
           this.retrieveSessionCookie(),
@@ -2520,18 +2561,7 @@ export abstract class CoreCapsule {
         break;
     }
 
-    if ((signRes as DeniedSignatureRes).pendingTransactionId) {
-      this.platformUtils.openPopup(
-        await this.getTransactionReviewUrl((signRes as DeniedSignatureRes).pendingTransactionId),
-        { type: PopupType.SIGN_MESSAGE_REVIEW },
-      );
-
-      throw new TransactionReviewError(
-        await this.getTransactionReviewUrl((signRes as DeniedSignatureRes).pendingTransactionId),
-      );
-    }
-
-    return signRes as SuccessfulSignatureRes;
+    return signRes;
   }
 
   /**

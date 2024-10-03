@@ -22,11 +22,21 @@ class CapsuleCosmosSigner {
   readonly prefix: string;
   readonly capsule: CoreCapsule;
   readonly currentWalletId: string;
+  readonly messageSigningTimeoutMs?: number;
 
-  constructor(capsule: CoreCapsule, prefix = 'cosmos', walletId?: string) {
+  /**
+   * Signs a message.
+   *
+   * @param capsule - the CoreCapsule instance
+   * @param prefix - the cosmos address prefix, defaults to 'cosmos'
+   * @param walletId - optional wallet ID to use. If not present, will use the first wallet found.
+   * @param messageSigningTimeoutMs - optional timeout in milliseconds. If not present, defaults to 30 seconds.
+   **/
+  constructor(capsule: CoreCapsule, prefix = 'cosmos', walletId?: string, messageSigningTimeoutMs?: number) {
     this.currentWalletId = capsule.findWalletId(walletId, { type: ['COSMOS'] });
     this.capsule = capsule;
     this.prefix = prefix;
+    this.messageSigningTimeoutMs = messageSigningTimeoutMs;
   }
 
   get currentWallet(): Wallet {
@@ -67,7 +77,11 @@ export class CapsuleProtoSigner extends CapsuleCosmosSigner implements OfflineDi
     }
     const hashedMessage = sha256(signBytes);
 
-    const res = await this.capsule.signMessage(this.currentWallet.id, Buffer.from(hashedMessage.buffer).toString('base64'));
+    const res = await this.capsule.signMessage(
+      this.currentWallet.id,
+      Buffer.from(hashedMessage.buffer).toString('base64'),
+      this.messageSigningTimeoutMs,
+    );
     const signature = hexToSignature(`0x${(res as SuccessfulSignatureRes).signature}`);
     const extendedSignature = new ExtendedSecp256k1Signature(
       hexToUint8Array(signature.r),
