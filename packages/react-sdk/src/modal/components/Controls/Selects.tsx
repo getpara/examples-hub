@@ -224,10 +224,6 @@ const StyledSelect = styled(CpslSelect)<{ $width: number; $top?: number }>`
       top: ${({ $top }) => ($top ? `${$top}px` : '0px')};
       bottom: 16px;
     }
-    cpsl-auth-modal.force-mobile-media & {
-      top: ${({ $top }) => ($top ? `${$top}px` : '0px')};
-      bottom: 16px;
-    }
   }
 
   &::part(icon) {

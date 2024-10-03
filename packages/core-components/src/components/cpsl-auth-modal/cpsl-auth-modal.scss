@@ -43,29 +43,6 @@
   }
 }
 
-:host(.force-mobile-media) {
-  .modal-wrapper {
-    scale: none;
-    top: 100%;
-    left: 0;
-    height: unset;
-    opacity: 1;
-  }
-
-  .modal-container {
-    width: 100%;
-    max-width: none;
-
-    border-bottom-left-radius: 0px;
-    border-bottom-right-radius: 0px;
-  }
-
-  .modal-body-card {
-    --card-border-radius-bl: 0px;
-    --card-border-radius-br: 0px;
-  }
-}
-
 :host(.no-overlay) {
   z-index: map.get($z-indices, 'modal-no-overlay');
 

@@ -224,10 +224,6 @@ const InnerContainer = styled.div<{ $embeddedModal: boolean; step: ModalStep }>`
   @media (max-width: ${MOBILE_SIZE}px) {
     padding: ${({ $embeddedModal }) => ($embeddedModal ? '12px 0px 0px' : '72px 16px 0px')};
   }
-
-  cpsl-auth-modal.force-mobile-media & {
-    padding: 72px 16px 0px;
-  }
 `;
 
 const TestModeAlert = styled(CpslAlert)`
