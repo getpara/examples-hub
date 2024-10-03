@@ -2631,6 +2631,8 @@ export abstract class CoreCapsule {
       wallets: this.wallets,
       currentWalletIds: this.currentWalletIds,
       sessionCookie: this.sessionCookie,
+      phone: this.phone,
+      countryCode: this.countryCode,
     };
     return Buffer.from(JSON.stringify(sessionInfo)).toString('base64');
   }
@@ -2648,6 +2650,7 @@ export abstract class CoreCapsule {
     }
     await this.setCurrentWalletIds(sessionInfo.currentWalletIds);
     this.persistSessionCookie(sessionInfo.sessionCookie);
+    await this.setPhoneNumber(sessionInfo.phone, sessionInfo.countryCode);
   }
 
   exitAccountCreation() {
