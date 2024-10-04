@@ -13,9 +13,11 @@ export class CpslPopover {
   @Element() el!: HTMLCpslPopoverElement;
 
   @State() open = false;
-  private triggerClicked = false;
   @State() positionX?: number;
   @State() positionY?: number;
+
+  private startedInside = false;
+  private startedWhenMounted = false;
 
   /**
    * ID for the element that the popover anchors to.
@@ -118,10 +120,14 @@ export class CpslPopover {
   @Watch('open')
   onOpenChange() {
     if (this.open) {
+      window.addEventListener('mousedown', this.validateEventStart);
+      window.addEventListener('touchstart', this.validateEventStart);
       window.addEventListener('click', this.handleClickOutside);
       window.addEventListener('scroll', () => this.setPosition(), true);
       window.addEventListener('resize', () => this.setPosition(), true);
     } else {
+      window.removeEventListener('mousedown', this.validateEventStart);
+      window.removeEventListener('touchstart', this.validateEventStart);
       window.removeEventListener('click', this.handleClickOutside);
       window.removeEventListener('scroll', () => this.setPosition(), true);
       window.removeEventListener('resize', () => this.setPosition(), true);
@@ -195,6 +201,15 @@ export class CpslPopover {
               this.present();
             },
           },
+          {
+            eventName: 'touchstart',
+            callback: e => {
+              if (this.preventBlur) {
+                e.preventDefault();
+              }
+              this.present();
+            },
+          },
         ];
         break;
     }
@@ -261,12 +276,20 @@ export class CpslPopover {
     }
   };
 
+  private validateEventStart = event => {
+    this.startedWhenMounted = !!this.triggerEl;
+    this.startedInside = this.triggerEl.contains(event.target);
+    this.present();
+  };
+
   private handleClickOutside = (event: MouseEvent) => {
-    if (!this.triggerClicked && this.triggerEl.contains(event.target as Node)) {
-      this.triggerClicked = true;
-      return;
-    }
-    if (this.open && !this.el.contains(event.target as Node)) {
+    // Do nothing if `mousedown` or `touchstart` started inside ref element
+    if (this.startedInside || !this.startedWhenMounted) return;
+
+    // Do nothing if clicking ref's element or descendent elements
+    if (!this.triggerEl || this.triggerEl.contains(event.target as Node)) return;
+
+    if (this.open) {
       event.preventDefault();
       this.close();
     }
@@ -286,7 +309,7 @@ export class CpslPopover {
 
   private close = () => {
     this.open = false;
-    this.triggerClicked = false;
+    this.startedInside = false;
     this.cpslClose.emit();
   };
 

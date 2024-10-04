@@ -1,18 +1,25 @@
-import styled from 'styled-components';
-import { InlineText } from '../../../../components/common';
-import { PREGEN_DOCS_LINK } from '../../../../utils/constants';
 import { ConfigurationCard } from '../ConfigurationCard';
-import { InnerConfigurationCard } from '../InnerConfigurationCard';
 import { useGetOrganizationSubscriptionPlan } from '../../../../hooks/api/queries/useOrganizationSubscription';
 import { HighlightedCard } from '../../../../components/HighlightedCard/HighlightedCard';
 import { GradientCTAButton } from '../../../../components/GradientCTAButton/GradientCTAButton';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { FormProvider } from 'react-hook-form';
+import { useNativePasskeyConfigFormData } from '../../hooks/useNativePasskeyConfigFormData';
+import { ConfigurationActions } from '../ConfigurationActions';
+import { TeamId } from './TeamId.tsx';
+import { BundleIdentifier } from './BundleIdentifier';
+import { getFrameworkNativePasskeyDocsLink } from '../../../../utils/framework.ts';
+import { useGetProject } from '../../../../hooks/api/queries/useProjects.ts';
+import { Framework } from '../../../../types/framework.ts';
 
 const TITLE = 'Native Passkey Configuration';
 
 export const NativePasskeyConfiguration = () => {
+  const { projectId } = useParams();
+  const form = useNativePasskeyConfigFormData();
   const navigate = useNavigate();
   const { data: plan } = useGetOrganizationSubscriptionPlan();
+  const { data: project } = useGetProject(projectId ?? '');
 
   const handleUpgradeClick = () => {
     navigate('/billing');
@@ -29,16 +36,15 @@ export const NativePasskeyConfiguration = () => {
   }
 
   return (
-    <ConfigurationCard title={TITLE} docsLink={PREGEN_DOCS_LINK} disableCollapse buttonVariant="learnMore">
-      <InnerConfigurationCard>
-        <InlineText weight="medium">
-          Status: <SuccessText weight="medium">Active</SuccessText>
-        </InlineText>
-      </InnerConfigurationCard>
+    <ConfigurationCard
+      title={TITLE}
+      docsLink={getFrameworkNativePasskeyDocsLink((project?.framework as Framework) ?? Framework.REACT_NATIVE)}
+    >
+      <FormProvider {...form}>
+        <TeamId />
+        <BundleIdentifier />
+        <ConfigurationActions />
+      </FormProvider>
     </ConfigurationCard>
   );
 };
-
-const SuccessText = styled(InlineText)`
-  color: var(--cpsl-color-utility-green);
-`;

@@ -7,6 +7,8 @@
 
   z-index: -1;
   overflow: auto;
+
+  transform: var(--th,) var(--tv,);
 }
 
 :host(.open) {
@@ -25,25 +27,25 @@
 }
 
 :host(.transform-h-left) {
-  transform: translateX(0);
+  --th: translateX(0);
 }
 
 :host(.transform-h-center) {
-  transform: translateX(-50%);
+  --th: translateX(-50%);
 }
 
 :host(.transform-h-right) {
-  transform: translateX(-100%);
+  --th: translateX(-100%);
 }
 
 :host(.transform-v-top) {
-  transform: translateY(0);
+  --tv: translateY(0);
 }
 
 :host(.transform-v-center) {
-  transform: translateY(-50%);
+  --tv: translateY(-50%);
 }
 
 :host(.transform-v-bottom) {
-  transform: translateY(-100%);
+  --tv: translateY(-100%);
 }

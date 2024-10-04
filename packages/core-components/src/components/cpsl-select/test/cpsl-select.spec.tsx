@@ -18,14 +18,14 @@ describe('cpsl-select', () => {
             </div>
             <cpsl-icon class="chevron" icon="chevronUp" part="icon"></cpsl-icon>
             <input id="cpsl-select-0" inputmode="none">
-          </div>
-          <cpsl-popover part="popover" trigger="cpsl-select-0-trigger">
-            <div class="dropdown" part="dropdown">
-              <div class="dropdown-inner" style="max-height: undefinedpx;">
-                <slot name="items"></slot>
+            <cpsl-popover part="popover" trigger="cpsl-select-0-trigger">
+              <div class="dropdown" part="dropdown">
+                <div class="dropdown-inner" style="max-height: undefinedpx;">
+                  <slot name="items"></slot>
+                </div>
               </div>
-            </div>
-          </cpsl-popover>
+            </cpsl-popover>
+          </div>
         </mock:shadow-root>
       </cpsl-select>
     `);

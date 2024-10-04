@@ -1,27 +1,25 @@
 import { CpslInput } from '@usecapsule/react-components';
 import { InnerConfigurationCard } from '../InnerConfigurationCard';
 import { Controller, useFormContext } from 'react-hook-form';
-import { HTTPS_URL_REGEX } from '../../../../utils/regex';
-import { UpdateApiKeyPortal } from '../../hooks/usePortalConfigFormData';
+import { UpdateNativePasskey } from '../../hooks/useNativePasskeyConfigFormData';
 
-export const PortalUrl = () => {
-  const { control } = useFormContext<UpdateApiKeyPortal>();
+export const TeamId = () => {
+  const { control } = useFormContext<UpdateNativePasskey>();
 
   return (
     <InnerConfigurationCard>
       <Controller
-        name="portalUrl"
+        name="teamId"
         control={control}
         rules={{
-          pattern: {
-            value: HTTPS_URL_REGEX,
-            message: 'Must be a secure (https) url.',
-          },
+          required: 'Team ID is required.',
+          maxLength: { value: 10, message: 'Team ID must be 10 characters.' },
+          minLength: { value: 10, message: 'Team ID must be 10 characters.' },
         }}
         render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
           <CpslInput
-            label="Portal URL"
-            placeholder="Enter Portal URL"
+            label="Team ID"
+            placeholder="e.g. A1B2C34DE5"
             onCpslInput={e => {
               onChange(e.detail.value);
             }}

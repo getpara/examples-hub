@@ -129,7 +129,7 @@ export const EmailOption = () => {
       })}
       {showUpdatedEmailConfig && (
         <WelcomeImageModal
-          imageSrc={apiKeyData?.emailImageUrl}
+          imageSrc={apiKeyData?.emailImageUrl ?? undefined}
           displayName={apiKeyData?.displayName}
           open={isPreviewModalOpen}
           onClose={handlePreviewModalClose}

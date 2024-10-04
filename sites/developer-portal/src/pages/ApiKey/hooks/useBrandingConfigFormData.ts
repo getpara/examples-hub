@@ -2,11 +2,11 @@ import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { useGetOrganizationKey } from '../../../hooks/api/queries/useOrganizationKeys';
 import { Environment } from '../../../types/environment';
-import { UpdateApiKeyBody } from '../../../types/api';
+import { ThemeMode, UpdateApiKeyBody } from '../../../types/api';
 
 export type UpdateApiKeyBranding = Pick<
   UpdateApiKeyBody,
-  'foregroundColor' | 'backgroundColor' | 'font' | 'logoUrl' | 'iconUrl' | 'homepageUrl'
+  'foregroundColor' | 'backgroundColor' | 'font' | 'logoUrl' | 'iconUrl' | 'homepageUrl' | 'accentColor' | 'themeMode'
 >;
 
 export const useBrandingConfigFormData = () => {
@@ -20,6 +20,8 @@ export const useBrandingConfigFormData = () => {
       homepageUrl: apiKeyData?.homepageUrl ?? '',
       foregroundColor: apiKeyData?.foregroundColor ?? '',
       backgroundColor: apiKeyData?.backgroundColor ?? '',
+      accentColor: apiKeyData?.accentColor ?? '',
+      themeMode: apiKeyData?.themeMode ?? ThemeMode.LIGHT,
       font: apiKeyData?.font ?? '',
       logoUrl: apiKeyData?.logoUrl ?? '',
       iconUrl: apiKeyData?.iconUrl ?? '',

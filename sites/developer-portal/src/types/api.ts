@@ -101,6 +101,10 @@ export type UpdateOrganizationMemberBody = Pick<OrganizationMember, 'owner' | 'p
 // *********************
 
 export type OnRampAssets = Partial<Record<Network, true | OnRampAsset[]>>;
+export enum ThemeMode {
+  LIGHT = 'LIGHT',
+  DARK = 'DARK',
+}
 
 export type ApiKey = {
   id: string;
@@ -109,21 +113,21 @@ export type ApiKey = {
   displayName: string;
   environment: Environment;
   createdAt: Date;
-  verifyUrl: string;
-  portalUrl: string;
-  logoUrl: string;
-  iconUrl: string;
-  emailImageUrl: string;
-  emailImageLink: string;
+  verifyUrl: string | null;
+  portalUrl: string | null;
+  logoUrl: string | null;
+  iconUrl: string | null;
+  emailImageUrl: string | null;
+  emailImageLink: string | null;
   emailBackupKit: boolean;
   emailWelcome: boolean;
-  backgroundColor: string;
-  foregroundColor: string;
-  font: string;
-  twitterUrl: string;
-  linkedinUrl: string;
-  githubUrl: string;
-  homepageUrl: string;
+  backgroundColor: string | null;
+  foregroundColor: string | null;
+  font: string | null;
+  twitterUrl: string | null;
+  linkedinUrl: string | null;
+  githubUrl: string | null;
+  homepageUrl: string | null;
   archived?: boolean;
   isBuyEnabled: boolean;
   isReceiveEnabled: boolean;
@@ -136,6 +140,10 @@ export type ApiKey = {
   defaultBuyAmount?: string;
   isUsed: boolean;
   isInstalled: boolean;
+  teamId: string | null;
+  bundleIdentifier: string | null;
+  accentColor: string | null;
+  themeMode: ThemeMode | null;
 };
 
 export type ApiKeyResponse = { key: ApiKey };
@@ -185,6 +193,10 @@ export type UpdateApiKeyBody = Nullable<
       | 'defaultBuyAmount'
       | 'archived'
       | 'isInstalled'
+      | 'teamId'
+      | 'bundleIdentifier'
+      | 'accentColor'
+      | 'themeMode'
     >
   >
 >;

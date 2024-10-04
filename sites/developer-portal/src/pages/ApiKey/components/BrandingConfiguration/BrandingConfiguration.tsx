@@ -8,6 +8,8 @@ import { FormProvider } from 'react-hook-form';
 import { useBrandingConfigFormData } from '../../hooks/useBrandingConfigFormData';
 import { Icon, Logo } from './AssetUpload';
 import { ConfigurationActions } from '../ConfigurationActions';
+import { AccentColor } from './AccentColor';
+import { ThemeMode } from './ThemeMode';
 
 export const BrandingConfiguration = () => {
   const form = useBrandingConfigFormData();
@@ -23,6 +25,8 @@ export const BrandingConfiguration = () => {
         <HomepageUrl />
         <ForegroundColor />
         <BackgroundColor />
+        <AccentColor />
+        <ThemeMode />
         <Font />
         <Icon />
         <Logo />

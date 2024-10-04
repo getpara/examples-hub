@@ -3,6 +3,7 @@ import { InnerConfigurationCard } from '../InnerConfigurationCard';
 import { Controller, useFormContext } from 'react-hook-form';
 import { HEX_COLOR_REGEX } from '../../../../utils/regex';
 import { UpdateApiKeyBranding } from '../../hooks/useBrandingConfigFormData';
+import { ColorPickerPopover } from '../../../../components/ColorPickerPopover/ColorPickerPopover';
 
 export const ForegroundColor = () => {
   const { control } = useFormContext<UpdateApiKeyBranding>();
@@ -13,7 +14,14 @@ export const ForegroundColor = () => {
         name="foregroundColor"
         control={control}
         rules={{
-          maxLength: 7,
+          maxLength: {
+            value: 9,
+            message: 'Must be a valid hex color value.',
+          },
+          minLength: {
+            value: 4,
+            message: 'Must be a valid hex color value.',
+          },
           pattern: {
             value: HEX_COLOR_REGEX,
             message: 'Must be a valid hex color value.',
@@ -32,8 +40,11 @@ export const ForegroundColor = () => {
             onCpslBlur={onBlur}
             value={value ?? ''}
             errorText={error?.message}
-            maxlength={7}
-          />
+            maxlength={9}
+            minlength={4}
+          >
+            <ColorPickerPopover id="foregroundColor" color={value ?? undefined} onChange={onChange} />
+          </CpslInput>
         )}
       />
     </InnerConfigurationCard>

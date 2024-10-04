@@ -1,7 +1,6 @@
 import { DOCS_LINK } from '../../../../utils/constants';
 import { ConfigurationCard } from '../ConfigurationCard';
 import { FormProvider } from 'react-hook-form';
-import { PortalUrl } from './PortalUrl';
 import { VerifyUrl } from './VerifyUrl';
 import { usePortalConfigFormData } from '../../hooks/usePortalConfigFormData';
 import { ConfigurationActions } from '../ConfigurationActions';
@@ -17,7 +16,6 @@ export const PortalConfiguration = () => {
       docsLink={DOCS_LINK}
     >
       <FormProvider {...form}>
-        <PortalUrl />
         <VerifyUrl />
         <ConfigurationActions />
       </FormProvider>

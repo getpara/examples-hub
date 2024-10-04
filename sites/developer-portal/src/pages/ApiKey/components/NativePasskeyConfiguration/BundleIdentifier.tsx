@@ -1,27 +1,28 @@
 import { CpslInput } from '@usecapsule/react-components';
 import { InnerConfigurationCard } from '../InnerConfigurationCard';
 import { Controller, useFormContext } from 'react-hook-form';
-import { HTTPS_URL_REGEX } from '../../../../utils/regex';
-import { UpdateApiKeyPortal } from '../../hooks/usePortalConfigFormData';
+import { UpdateNativePasskey } from '../../hooks/useNativePasskeyConfigFormData';
+import { APPLE_BUNDLE_IDENTIFIER_REGEX } from '../../../../utils/regex';
 
-export const VerifyUrl = () => {
-  const { control } = useFormContext<UpdateApiKeyPortal>();
+export const BundleIdentifier = () => {
+  const { control } = useFormContext<UpdateNativePasskey>();
 
   return (
     <InnerConfigurationCard>
       <Controller
-        name="verifyUrl"
+        name="bundleIdentifier"
         control={control}
         rules={{
+          required: 'Bundle identifier is required.',
           pattern: {
-            value: HTTPS_URL_REGEX,
-            message: 'Must be a secure (https) url.',
+            value: APPLE_BUNDLE_IDENTIFIER_REGEX,
+            message: 'Must be a valid Apple bundle identifier.',
           },
         }}
         render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
           <CpslInput
-            label="Verification URL"
-            placeholder="Enter Verification URL"
+            label="Bundle Identifier"
+            placeholder="e.g. com.yourdomain.yourapp"
             onCpslInput={e => {
               onChange(e.detail.value);
             }}
@@ -31,7 +32,6 @@ export const VerifyUrl = () => {
             onCpslBlur={onBlur}
             value={value ?? ''}
             errorText={error?.message}
-            helperText="The redirect URL back to your app shown in verification code emails."
           />
         )}
       />

@@ -240,32 +240,32 @@ export class CpslSelect {
             onKeyPress={this.handleEnterPress}
             inputmode="none"
           />
+          <cpsl-popover part="popover" autoWidth={this.autoWidth} trigger={this.id} preventBlur={this.hasFocus} disabled={this.disabled} anchorEl={this.anchorEl}>
+            <div part="dropdown" class="dropdown">
+              {this.showSearch && (
+                <div class="search-container">
+                  <cpsl-input
+                    onClick={e => e.stopPropagation()}
+                    placeholder={this.searchPlaceholder ?? 'Search'}
+                    value=""
+                    onCpslInput={e => {
+                      e.stopPropagation();
+                      this.cpslSearchChange.emit(e.detail.value);
+                    }}
+                  />
+                </div>
+              )}
+              <div class="dropdown-inner" style={{ maxHeight: `${this.dropdownMaxHeight}px` }}>
+                <slot name="items"></slot>
+              </div>
+            </div>
+          </cpsl-popover>
         </div>
         {(this.errorText || this.helperText) && (
           <div class={{ 'helper-text-container': true, 'error-text': Boolean(this.errorText) }}>
             <span>{this.errorText ?? this.helperText}</span>
           </div>
         )}
-        <cpsl-popover part="popover" autoWidth={this.autoWidth} trigger={this.id} preventBlur={this.hasFocus} disabled={this.disabled} anchorEl={this.anchorEl}>
-          <div part="dropdown" class="dropdown">
-            {this.showSearch && (
-              <div class="search-container">
-                <cpsl-input
-                  onClick={e => e.stopPropagation()}
-                  placeholder={this.searchPlaceholder ?? 'Search'}
-                  value=""
-                  onCpslInput={e => {
-                    e.stopPropagation();
-                    this.cpslSearchChange.emit(e.detail.value);
-                  }}
-                />
-              </div>
-            )}
-            <div class="dropdown-inner" style={{ maxHeight: `${this.dropdownMaxHeight}px` }}>
-              <slot name="items"></slot>
-            </div>
-          </div>
-        </cpsl-popover>
       </Host>
     );
   }

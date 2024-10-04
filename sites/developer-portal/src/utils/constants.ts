@@ -31,6 +31,11 @@ export const REACT_NATIVE_DOCS_LINK = 'https://docs.usecapsule.com/getting-start
 export const EXPO_DOCS_LINK = 'https://docs.usecapsule.com/getting-started/initial-setup/expo';
 export const FLUTTER_DOCS_LINK = 'https://docs.usecapsule.com/getting-started/initial-setup/flutter-setup';
 export const SWIFT_DOCS_LINK = 'https://docs.usecapsule.com/getting-started/initial-setup/swift-sdk-setup';
+export const REACT_NATIVE_SETUP_DOCS_LINK =
+  'https://docs.usecapsule.com/getting-started/initial-setup/react-native#project-setup';
+export const EXPO_SETUP_DOCS_LINK = 'https://docs.usecapsule.com/getting-started/initial-setup/expo#project-setup';
+export const FLUTTER_SETUP_DOCS_LINK =
+  'https://docs.usecapsule.com/getting-started/initial-setup/flutter-setup#project-setup';
 
 export const NEXT_EXTRA_DOCS_LINK = 'https://docs.usecapsule.com/troubleshooting/nextjs';
 export const VITE_EXTRA_DOCS_LINK = 'https://docs.usecapsule.com/troubleshooting/react-vite';
@@ -50,6 +55,8 @@ export const EMAIL_FONTS = [
   'Times New Roman',
   'Trebuchet MS',
 ];
+
+export const THEME_MODES = ['Light', 'Dark'];
 
 export const TWITTER_URL = 'https://twitter.com/usecapsule';
 export const LINKEDIN_URL = 'https://www.linkedin.com/company/usecapsule';
