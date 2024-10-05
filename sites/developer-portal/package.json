@@ -13,6 +13,7 @@
     "deploy-prod": "yarn && VITE_ENVIRONMENT=PROD VITE_CAPSULE_API_KEY=36e481099ebcaad4beed4bed1ce98566 yarn build && aws s3 sync dist/ s3://capsule-prod-dev-portal --profile prod --delete"
   },
   "dependencies": {
+    "@sentry/react": "8.33.0",
     "@tanstack/react-query": "^5.40.1",
     "@typeform/embed-react": "^4.1.0",
     "@usecapsule/react-components": "3.6.0",
