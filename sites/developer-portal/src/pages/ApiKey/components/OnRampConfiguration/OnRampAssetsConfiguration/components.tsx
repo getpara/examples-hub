@@ -1,4 +1,13 @@
-import { Network, NETWORKS, ON_RAMP_ASSETS, OnRampAsset, getOnRampAssets, OnRampAssetInfo } from '@usecapsule/react-sdk';
+import {
+  Network,
+  OnRampAsset,
+  getOnRampAssets,
+  OnRampAssetInfo,
+  getNetworkName,
+  getNetworkIcon,
+  getAssetName,
+  getAssetIcon,
+} from '@usecapsule/react-sdk';
 import { InnerSelect, OptionDisplay } from '../common.js';
 import {
   CpslButton,
@@ -75,12 +84,14 @@ export function NetworkAssetSelector({
               placeholder="Add a network"
               style={{ flex: 1 }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', width: '100%' }} slot="selected-item">
-                <OptionDisplay {...NETWORKS[network as Network]} />
-              </div>
+              {!!network && (
+                <div style={{ display: 'flex', alignItems: 'center', width: '100%' }} slot="selected-item">
+                  <OptionDisplay name={getNetworkName(network)} icon={getNetworkIcon(network)} />
+                </div>
+              )}
               {networkOptions.map((n: Network) => (
                 <CpslSelectItem key={n} value={n} slot="items">
-                  <OptionDisplay name={NETWORKS[n].name} icon={NETWORKS[n].icon} />
+                  <OptionDisplay name={getNetworkName(n)} icon={getNetworkIcon(n)} />
                 </CpslSelectItem>
               ))}
             </InnerSelect>
@@ -134,15 +145,11 @@ export function NetworkAssetSelector({
                           showFormattedSelectedItem
                         >
                           {asset && (
-                            <OptionDisplay
-                              name={ON_RAMP_ASSETS[asset].code}
-                              icon={ON_RAMP_ASSETS[asset].icon}
-                              slot="selected-item"
-                            />
+                            <OptionDisplay name={getAssetName(asset)} icon={getAssetIcon(asset)} slot="selected-item" />
                           )}
                           {assetOptions.map((a: OnRampAsset) => (
                             <CpslSelectItem key={a} value={a} slot="items">
-                              <OptionDisplay name={ON_RAMP_ASSETS[a].code} icon={ON_RAMP_ASSETS[a].icon} />
+                              <OptionDisplay name={getAssetName(a)} icon={getAssetIcon(a)} />
                             </CpslSelectItem>
                           ))}
                         </InnerSelect>
@@ -163,7 +170,7 @@ export function NetworkAssetSelector({
                   >
                     {assetOptions.map((a: OnRampAsset) => (
                       <CpslSelectItem key={a} value={a} slot="items">
-                        <OptionDisplay name={ON_RAMP_ASSETS[a].code} icon={ON_RAMP_ASSETS[a].icon} />
+                        <OptionDisplay name={getAssetName(a)} icon={getAssetIcon(a)} />
                       </CpslSelectItem>
                     ))}
                   </InnerSelect>

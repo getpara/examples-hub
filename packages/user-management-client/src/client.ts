@@ -284,10 +284,14 @@ export enum OnRampProvider {
 export enum OnRampAsset {
   ETHEREUM = 'ETHEREUM',
   USDC = 'USDC',
+  TETHER = 'TETHER',
   POLYGON = 'POLYGON',
   SOLANA = 'SOLANA',
-  CELO = 'CELO',
   ATOM = 'ATOM',
+  CELO = 'CELO',
+  CUSD = 'CUSD',
+  CEUR = 'CEUR',
+  CREAL = 'CREAL',
 }
 
 export enum OnRampPurchaseStatus {

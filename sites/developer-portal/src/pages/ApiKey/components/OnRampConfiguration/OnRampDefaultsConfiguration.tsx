@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useOnRampAllAssets } from '../../../../hooks/api/queries/useOnRampAssets';
-import { Network, NETWORKS, ON_RAMP_ASSETS, OnRampAsset, toAssetInfoArray } from '@usecapsule/react-sdk';
+import { getAssetIcon, getAssetName, getNetworkName, Network, OnRampAsset, toAssetInfoArray } from '@usecapsule/react-sdk';
 import { GreenSwitch, OptionDisplay, SectionCard } from './common';
 import { CpslIcon, CpslInput, CpslSelect, CpslSelectItem } from '@usecapsule/react-components';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
@@ -8,7 +8,7 @@ import { OnRampAssets } from '../../../../types/api';
 import { useOnRampConfigFormData } from '../../hooks/useOnRampConfigFormData';
 
 function getComboName(network: Network, asset: OnRampAsset): string {
-  return `${ON_RAMP_ASSETS[asset].code}${[OnRampAsset.USDC, OnRampAsset.ETHEREUM, OnRampAsset.POLYGON].includes(asset) ? ` (${NETWORKS[network].name})` : ''}`;
+  return `${getAssetName(asset)}${[OnRampAsset.USDC, OnRampAsset.ETHEREUM, OnRampAsset.POLYGON].includes(asset) ? ` (${getNetworkName(network)})` : ''}`;
 }
 
 function getComboId(network: Network, asset: OnRampAsset): string {
@@ -118,7 +118,7 @@ export function OnRampDefaultsConfiguration() {
                               {defaultOnRampAsset && defaultOnRampNetwork && (
                                 <OptionDisplay
                                   name={getComboName(defaultOnRampNetwork, defaultOnRampAsset)}
-                                  icon={ON_RAMP_ASSETS[defaultOnRampAsset as OnRampAsset].icon}
+                                  icon={getAssetIcon(defaultOnRampAsset)}
                                   slot="selected-item"
                                 />
                               )}
@@ -133,7 +133,7 @@ export function OnRampDefaultsConfiguration() {
                                   value={getComboId(network, asset)}
                                   slot="items"
                                 >
-                                  <OptionDisplay name={getComboName(network, asset)} icon={ON_RAMP_ASSETS[asset].icon} />
+                                  <OptionDisplay name={getComboName(network, asset)} icon={getAssetIcon(asset)} />
                                 </CpslSelectItem>
                               ))}
                             </CpslSelect>

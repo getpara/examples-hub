@@ -61,7 +61,27 @@ export const ON_RAMP_ASSETS: Record<OnRampAsset, { name: string; code: string; i
   [OnRampAsset.SOLANA]: { name: 'Solana', code: 'SOL', icon: 'solana' },
   [OnRampAsset.ATOM]: { name: 'Atom', code: 'ATOM', icon: 'cosmos' },
   [OnRampAsset.CELO]: { name: 'Celo', code: 'CELO', icon: 'celoBrand' },
+  [OnRampAsset.TETHER]: { name: 'Tether', code: 'USDT', icon: 'tetherBrand' },
+  [OnRampAsset.CUSD]: { name: 'Celo Dollar', code: 'CUSD', icon: 'celoBrand' },
+  [OnRampAsset.CEUR]: { name: 'Celo Euro', code: 'CEUR', icon: 'celoBrand' },
+  [OnRampAsset.CREAL]: { name: 'Celo Real', code: 'CREAL', icon: 'celoBrand' },
 };
+
+export function getNetworkName(str: Network | string) {
+  return NETWORKS[str as Network]?.name ?? `${str[0]}${str.slice(1).toLowerCase()}`;
+}
+
+export function getNetworkIcon(str: Network | string): IconType {
+  return NETWORKS[str as Network]?.icon ?? 'globe';
+}
+
+export function getAssetName(str: OnRampAsset | string) {
+  return ON_RAMP_ASSETS[str as OnRampAsset]?.code ?? str;
+}
+
+export function getAssetIcon(str: OnRampAsset | string) {
+  return ON_RAMP_ASSETS[str as OnRampAsset]?.icon ?? 'emptyCircle';
+}
 
 export const MOBILE_SIZE = 480;
 

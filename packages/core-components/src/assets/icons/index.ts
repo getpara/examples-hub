@@ -49,6 +49,7 @@ import DribbbleBrand from './dribbble-brand.svg';
 import Dribbble from './dribbble.svg';
 import Earth from './earth.svg';
 import Edit02 from './edit-02.svg';
+import EmptyCircle from './empty-circle.svg';
 import Ethereum from './ethereum.svg';
 import EyeOff from './eye-off.svg';
 import Eye from './eye.svg';
@@ -124,6 +125,7 @@ import Stars from './stars.svg';
 import StripeBrand from './stripe-brand.svg';
 import TelegramBrand from './telegram-brand.svg';
 import Telegram from './telegram.svg';
+import TetherBrand from './tether-brand.svg';
 import TikTokBrand from './tik-tok-brand.svg';
 import TikTok from './tik-tok.svg';
 import Trash from './trash.svg';
@@ -423,6 +425,7 @@ export const Icons = {
   dribbble: Dribbble,
   earth: Earth,
   edit02: Edit02,
+  emptyCircle: EmptyCircle,
   ethereum: Ethereum,
   eyeOff: EyeOff,
   eye: Eye,
@@ -498,6 +501,7 @@ export const Icons = {
   stripeBrand: StripeBrand,
   telegramBrand: TelegramBrand,
   telegram: Telegram,
+  tetherBrand: TetherBrand,
   tikTokBrand: TikTokBrand,
   tikTok: TikTok,
   trash: Trash,
