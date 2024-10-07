@@ -146,6 +146,7 @@ const Name = styled(CpslText)`
 const AddFundsButton = styled(CpslButton)`
   --button-primary-background-color: var(--cpsl-color-card-surface);
   --button-primary-hover-background-color: var(--cpsl-color-background-4);
+  --button-color: var(--cpsl-color-text-contrast);
   --button-padding-start: 8px;
   --button-padding-end: 8px;
   --button-padding-top: 8px;
