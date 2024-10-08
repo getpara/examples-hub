@@ -144,6 +144,8 @@ export type ApiKey = {
   bundleIdentifier: string | null;
   accentColor: string | null;
   themeMode: ThemeMode | null;
+  transactionPopupsEnabled: boolean;
+  origins: string[] | null;
 };
 
 export type ApiKeyResponse = { key: ApiKey };
@@ -165,7 +167,7 @@ export type ApiKeysResponse = { keys: ApiKey[] };
 export type UpdateApiKeyBody = Nullable<
   Partial<
     Pick<
-      ApiKey,
+      ApiKey & { origins: string },
       | 'displayName'
       | 'verifyUrl'
       | 'portalUrl'
@@ -197,6 +199,8 @@ export type UpdateApiKeyBody = Nullable<
       | 'bundleIdentifier'
       | 'accentColor'
       | 'themeMode'
+      | 'transactionPopupsEnabled'
+      | 'origins'
     >
   >
 >;

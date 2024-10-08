@@ -30,6 +30,11 @@ export const Save = () => {
         values.onRampAssets = null;
       }
 
+      if ('origins' in values) {
+        values.origins = (values.origins as string)?.split(',').map(o => o.trim()) ?? [];
+        console.log('🚀 ~ handleSave ~ values.origins:', values.origins);
+      }
+
       updateKey(
         { projectId, keyId: apiKey, env, data: values },
         {

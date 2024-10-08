@@ -408,6 +408,10 @@ export namespace Components {
     }
     interface CpslInput {
         /**
+          * The tag for the input. Options are: `"input"`, `"textarea". Default is: `"input"`.
+         */
+        "as"?: 'input' | 'textarea';
+        /**
           * Indicates whether and how the text value should be automatically capitalized as it is entered/edited by the user. Available options: `"off"`, `"none"`, `"on"`, `"sentences"`, `"words"`, `"characters"`.
          */
         "autocapitalize": string;
@@ -503,6 +507,10 @@ export namespace Components {
           * If `true`, the user must fill in a value before submitting a form.
          */
         "required": boolean;
+        /**
+          * Number of rows for the textarea
+         */
+        "rows": number;
         /**
           * If `true`, the label will display an "optional" tag.
          */
@@ -1893,6 +1901,10 @@ declare namespace LocalJSX {
     }
     interface CpslInput {
         /**
+          * The tag for the input. Options are: `"input"`, `"textarea". Default is: `"input"`.
+         */
+        "as"?: 'input' | 'textarea';
+        /**
           * Indicates whether and how the text value should be automatically capitalized as it is entered/edited by the user. Available options: `"off"`, `"none"`, `"on"`, `"sentences"`, `"words"`, `"characters"`.
          */
         "autocapitalize"?: string;
@@ -2008,6 +2020,10 @@ declare namespace LocalJSX {
           * If `true`, the user must fill in a value before submitting a form.
          */
         "required"?: boolean;
+        /**
+          * Number of rows for the textarea
+         */
+        "rows"?: number;
         /**
           * If `true`, the label will display an "optional" tag.
          */

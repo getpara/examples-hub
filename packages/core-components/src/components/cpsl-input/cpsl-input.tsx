@@ -21,6 +21,13 @@ export class CpslInput {
   @State() hasFocus = false;
 
   /**
+   * The tag for the input.
+   * Options are: `"input"`, `"textarea".
+   * Default is: `"input"`.
+   */
+  @Prop() as?: 'input' | 'textarea' = 'input';
+
+  /**
    * Indicates whether and how the text value should be automatically capitalized as it is entered/edited by the user.
    * Available options: `"off"`, `"none"`, `"on"`, `"sentences"`, `"words"`, `"characters"`.
    */
@@ -152,6 +159,11 @@ export class CpslInput {
    * If `true`, the user must fill in a value before submitting a form.
    */
   @Prop() required = false;
+
+  /**
+   * Number of rows for the textarea
+   */
+  @Prop() rows: number = 5;
 
   /**
    * If `true`, the label will display an "optional" tag.
@@ -412,11 +424,11 @@ export class CpslInput {
             {!this.required && this.showOptionalLabel ? <span class="optional-label">(optional)</span> : ''}
           </label>
         )}
-        <div class={{ 'input-container': true, 'error-container': Boolean(this.errorText) }}>
+        <div class={{ 'input-container': true, 'error-container': Boolean(this.errorText), 'textarea': this.as === 'textarea' }}>
           <slot name="start"></slot>
-          <input
-            class="native-input"
+          <this.as
             part="native-input"
+            class={{ 'native-input': true }}
             ref={input => (this.nativeInput = input)}
             id={this.inputId}
             disabled={this.disabled}
@@ -439,6 +451,7 @@ export class CpslInput {
             spellcheck={this.spellcheck}
             type={this.type}
             value={this.value ?? ''}
+            rows={this.rows}
             onInput={this.onInput}
             onChange={this.onChange}
             onFocus={this.onFocus}

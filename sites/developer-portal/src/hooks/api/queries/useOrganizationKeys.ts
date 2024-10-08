@@ -30,7 +30,7 @@ export const useOrganizationKeysQuery = <T>(projectId: string, select: (data: Ap
 
 export const useGetAllOrganizationKeys = (projectId: string) => {
   return useOrganizationKeysQuery(projectId, data => {
-    return data;
+    return data.sort((a, b) => (a.archived && b.archived ? 0 : a.archived ? 1 : -1));
   });
 };
 

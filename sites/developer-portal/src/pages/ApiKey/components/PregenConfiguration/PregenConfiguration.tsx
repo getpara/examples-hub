@@ -48,5 +48,5 @@ export const PregenConfiguration = () => {
 };
 
 const SuccessText = styled(InlineText)`
-  color: var(--cpsl-color-utility-green);
+  --color-override: var(--cpsl-color-utility-green);
 `;

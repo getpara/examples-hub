@@ -8,6 +8,7 @@ import { Environment } from '../../../types/environment';
 import { OnRampConfiguration } from './OnRampConfiguration';
 import { PregenConfiguration } from './PregenConfiguration/PregenConfiguration';
 import { NativePasskeyConfiguration } from './NativePasskeyConfiguration/NativePasskeyConfiguration';
+import { PopupConfiguration } from './PopupConfiguration/PopupConfiguration';
 
 export const ConfigurationTab = () => {
   const { apiKey, env, projectId } = useParams();
@@ -20,6 +21,7 @@ export const ConfigurationTab = () => {
       <PortalConfiguration />
       <NativePasskeyConfiguration />
       <PregenConfiguration />
+      <PopupConfiguration />
       <OnRampFlowsConfiguration />
       {(apiKeyData?.isBuyEnabled || apiKeyData?.isWithdrawEnabled) && <OnRampConfiguration />}
       <PortalConfiguration />

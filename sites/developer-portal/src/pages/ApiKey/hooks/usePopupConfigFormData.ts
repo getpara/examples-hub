@@ -4,18 +4,17 @@ import { useGetOrganizationKey } from '../../../hooks/api/queries/useOrganizatio
 import { Environment } from '../../../types/environment';
 import { UpdateApiKeyBody } from '../../../types/api';
 
-export type UpdateApiKeyPortal = Pick<UpdateApiKeyBody, 'origins' | 'verifyUrl'>;
+export type UpdatePopup = Pick<UpdateApiKeyBody, 'transactionPopupsEnabled'>;
 
-export const usePortalConfigFormData = () => {
+export const usePopupConfigFormData = () => {
   const { apiKey, env, projectId } = useParams();
   const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
 
-  const form = useForm<UpdateApiKeyPortal>({
+  const form = useForm<UpdatePopup>({
     mode: 'onChange',
     reValidateMode: 'onChange',
     defaultValues: {
-      origins: apiKeyData?.origins?.join(',\n') ?? '',
-      verifyUrl: apiKeyData?.verifyUrl ?? '',
+      transactionPopupsEnabled: apiKeyData?.transactionPopupsEnabled ?? false,
     },
   });
 
