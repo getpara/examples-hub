@@ -148,7 +148,7 @@ export class ServerUtils implements PlatformUtils {
 
   disableProviderModal = true;
 
-  openPopup(_popupUrl: string): void {
+  openPopup(_popupUrl: string): Window {
     throw new Error('not implemented');
   }
 }

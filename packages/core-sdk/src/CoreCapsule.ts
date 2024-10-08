@@ -2502,10 +2502,10 @@ export abstract class CoreCapsule {
     }
 
     let signRes = await this.signMessageInner(wallet, signerId, messageBase64, cosmosSignDocBase64);
-
+    let popupWindow: Window;
     let timeStart = Date.now();
     if ((signRes as DeniedSignatureRes).pendingTransactionId) {
-      this.platformUtils.openPopup(
+      popupWindow = this.platformUtils.openPopup(
         await this.getTransactionReviewUrl((signRes as DeniedSignatureRes).pendingTransactionId),
         { type: cosmosSignDocBase64 ? PopupType.SIGN_TRANSACTION_REVIEW : PopupType.SIGN_MESSAGE_REVIEW },
       );
@@ -2535,6 +2535,7 @@ export abstract class CoreCapsule {
     }
 
     if ((signRes as DeniedSignatureRes).pendingTransactionId) {
+      popupWindow.close();
       throw new TransactionReviewTimeout(
         await this.getTransactionReviewUrl((signRes as DeniedSignatureRes).pendingTransactionId),
         (signRes as DeniedSignatureRes).pendingTransactionId,
@@ -2606,8 +2607,9 @@ export abstract class CoreCapsule {
     );
 
     let timeStart = Date.now();
+    let popupWindow: Window;
     if ((signRes as DeniedSignatureRes).pendingTransactionId) {
-      this.platformUtils.openPopup(
+      popupWindow = this.platformUtils.openPopup(
         await this.getTransactionReviewUrl((signRes as DeniedSignatureRes).pendingTransactionId),
         { type: PopupType.SIGN_TRANSACTION_REVIEW },
       );
@@ -2646,6 +2648,14 @@ export abstract class CoreCapsule {
       } else {
         break;
       }
+    }
+
+    if ((signRes as DeniedSignatureRes).pendingTransactionId) {
+      popupWindow.close();
+      throw new TransactionReviewTimeout(
+        await this.getTransactionReviewUrl((signRes as DeniedSignatureRes).pendingTransactionId),
+        (signRes as DeniedSignatureRes).pendingTransactionId,
+      );
     }
 
     return signRes as SuccessfulSignatureRes;

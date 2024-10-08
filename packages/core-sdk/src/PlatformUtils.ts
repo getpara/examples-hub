@@ -126,5 +126,5 @@ export interface PlatformUtils {
 
   disableProviderModal?: boolean;
 
-  openPopup(popupUrl: string, opts?: { type: PopupType }): void;
+  openPopup(popupUrl: string, opts?: { type: PopupType }): Window;
 }

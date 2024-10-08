@@ -151,7 +151,7 @@ export class WebUtils implements PlatformUtils {
 
   disableProviderModal = false;
 
-  openPopup(popupUrl: string, opts: { type: PopupType }): void {
+  openPopup(popupUrl: string, opts: { type: PopupType }): Window {
     if (opts) {
       const { type } = opts;
       const popUpWidth = 550;
@@ -208,6 +208,8 @@ export class WebUtils implements PlatformUtils {
           popupWindow = window.open(popupUrl, '_blank');
         }, 0);
       }
+
+      return popupWindow;
     } else {
       const popupWindow = window.open(popupUrl, 'popup', 'popup=true,width=400,height=500');
       if (!popupWindow) {
@@ -215,6 +217,8 @@ export class WebUtils implements PlatformUtils {
           window.open(popupUrl, '_blank');
         }, 0);
       }
+
+      return popupWindow;
     }
   }
 }
