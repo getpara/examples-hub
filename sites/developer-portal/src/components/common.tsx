@@ -79,3 +79,7 @@ export const InlineText = styled(CpslText)`
 export const CapitalizedText = styled(CpslText)`
   text-transform: capitalize;
 `;
+
+export const CenteredText = styled(CpslText)`
+  text-align: center;
+`;

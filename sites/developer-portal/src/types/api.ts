@@ -43,6 +43,7 @@ export type Organization = {
 export type OrganizationResponse = { organization: Organization };
 export type OrganizationsResponse = { organizations: Organization[] };
 export type UpdateOrganizationBody = Pick<Organization, 'name' | 'logoUrl'>;
+export type CreateOrganizationBody = { organizationName: string };
 export type LogoUploadUrlResponse = {
   url: string;
   fields: Record<string, string>;

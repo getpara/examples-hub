@@ -1,5 +1,5 @@
 import { axiosClient } from '../../clients/axios';
-import { OrganizationResponse } from '../../types/api';
+import { OrganizationResponse, CreateOrganizationBody } from '../../types/api';
 
 export type AcceptInviteVars = {
   userId: string;
@@ -19,4 +19,14 @@ export const requestOrganizationAccess = async ({ userId, organizationName }: Re
   const endpoint = `/users/${userId}/organizations/request-dev-portal-access`;
 
   return (await axiosClient.post<OrganizationResponse>(endpoint, { organizationName })).data;
+};
+
+export type CreateOrganizationVars = {
+  userId: string;
+  data: Partial<CreateOrganizationBody>;
+};
+export const createOrganization = async ({ userId, data }: CreateOrganizationVars) => {
+  const endpoint = `/users/${userId}/organizations`;
+
+  return (await axiosClient.post<OrganizationResponse>(endpoint, data)).data;
 };

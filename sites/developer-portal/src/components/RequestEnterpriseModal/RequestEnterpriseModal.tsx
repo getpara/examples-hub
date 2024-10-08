@@ -4,17 +4,19 @@ import styled from 'styled-components';
 import { GradientCTAButton } from '../GradientCTAButton/GradientCTAButton';
 import { useUpgradePlan } from '../../hooks/api/mutations/useUpgradePlan';
 import { triggerToast } from '../../utils/toasts';
+import { ENTERPRISE_PLAN_SLUG } from '../../utils/constants';
 
 interface RequestEnterpriseModalProps {
   open: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-export const RequestEnterpriseModal = ({ open, onClose }: RequestEnterpriseModalProps) => {
+export const RequestEnterpriseModal = ({ open, onClose, onSuccess }: RequestEnterpriseModalProps) => {
   const { mutate: upgradePlan } = useUpgradePlan();
   const handleUpgradeClick = () => {
     upgradePlan(
-      { newPlanSlug: 'ENTERPRISE' },
+      { newPlanSlug: ENTERPRISE_PLAN_SLUG },
       {
         onSuccess: () => {
           triggerToast({
@@ -23,6 +25,7 @@ export const RequestEnterpriseModal = ({ open, onClose }: RequestEnterpriseModal
             body: 'We will be in touch!',
           });
           onClose();
+          onSuccess?.();
         },
         onError: () => {
           triggerToast({

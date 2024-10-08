@@ -133,5 +133,6 @@ export const LOGIN_METHOD_LABELS: Record<string, string> = {
   FARCASTER: 'Farcaster',
   PREGEN: 'Pregen',
 };
+export const MOST_POPULAR_PLAN_SLUG = PlanSlug.GROWTH;
 export const ENTERPRISE_PLAN_SLUG = PlanSlug.ENTERPRISE;
 export const FREE_PLAN_SLUG = PlanSlug.FREE;

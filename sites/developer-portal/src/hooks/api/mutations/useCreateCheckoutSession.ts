@@ -7,7 +7,10 @@ export const useCreateCheckoutSession = (
   options?: MutationOptions<
     CreateCheckoutSessionResponse,
     Error,
-    Omit<CreateCheckoutSessionVars, 'organizationId' | 'successUrl'>,
+    {
+      orgIdOverride?: string;
+      successUrlOverride?: string;
+    } & Omit<CreateCheckoutSessionVars, 'organizationId' | 'successUrl'>,
     unknown
   >,
 ) => {
@@ -16,10 +19,18 @@ export const useCreateCheckoutSession = (
   return useMutation<
     CreateCheckoutSessionResponse,
     Error,
-    Omit<CreateCheckoutSessionVars, 'organizationId' | 'successUrl'>,
+    {
+      orgIdOverride?: string;
+      successUrlOverride?: string;
+    } & Omit<CreateCheckoutSessionVars, 'organizationId' | 'successUrl'>,
     unknown
   >({
-    mutationFn: vars => createCheckoutSession({ ...vars, successUrl: location.href, organizationId: organizationId ?? '' }),
+    mutationFn: vars =>
+      createCheckoutSession({
+        ...vars,
+        successUrl: vars.successUrlOverride ?? location.href,
+        organizationId: vars.orgIdOverride ?? organizationId ?? '',
+      }),
     ...options,
   });
 };

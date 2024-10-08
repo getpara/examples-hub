@@ -1,8 +1,9 @@
 import { capsule } from '../../../clients/capsule';
 import { OnboardingStep, useOnboardingStore } from '../../../stores/onboarding/useOnboardingStore';
 import styled from 'styled-components';
-import { CpslButton, CpslIcon, CpslInput, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon, CpslInput } from '@usecapsule/react-components';
 import { CpslInputCustomEvent, InputInputEventDetail } from '@usecapsule/core-components';
+import { CenteredText } from '../../../components/common';
 
 interface OrgNameProps {
   orgName: string;
@@ -17,9 +18,8 @@ export const OrgName = ({ orgName, setOrgName }: OrgNameProps) => {
     setOrgName(event.detail.value ?? '');
   };
 
-  const handleSubmit = () => {
-    // Safe non null assertion here since userId is checked for in the parent component
-    setStep(userId!, OnboardingStep.REQUEST_ACCESS);
+  const handleNextClick = () => {
+    setStep(userId!, OnboardingStep.PLAN_SELECT);
   };
 
   return (
@@ -35,7 +35,7 @@ export const OrgName = ({ orgName, setOrgName }: OrgNameProps) => {
             value={orgName}
             onCpslInput={handleNameChange}
           />
-          <CpslButton onClick={handleSubmit} fullWidth>
+          <CpslButton onClick={handleNextClick} fullWidth disabled={!orgName}>
             Next
             <CpslIcon slot="end" icon="arrowNarrow" />
           </CpslButton>
@@ -64,8 +64,4 @@ const InputContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
-`;
-
-const CenteredText = styled(CpslText)`
-  text-align: center;
 `;

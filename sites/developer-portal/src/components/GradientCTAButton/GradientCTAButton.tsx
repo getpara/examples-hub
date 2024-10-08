@@ -3,13 +3,16 @@ import { GradientButton } from '../common';
 import { CpslIcon } from '@usecapsule/react-components';
 import { Components } from '@usecapsule/core-components';
 
-export const GradientCTAButton = ({
-  children,
-  ...rest
-}: PropsWithChildren & HTMLAttributes<HTMLCpslButtonElement> & Components.CpslButton) => {
+type GradientCTAButtonProps = {
+  noIcon?: boolean;
+} & PropsWithChildren &
+  HTMLAttributes<HTMLCpslButtonElement> &
+  Components.CpslButton;
+
+export const GradientCTAButton = ({ children, noIcon, ...rest }: GradientCTAButtonProps) => {
   return (
     <GradientButton {...rest} variant="primary">
-      <CpslIcon slot="start" icon="stars" />
+      {!noIcon && <CpslIcon slot="start" icon="stars" />}
       {children}
     </GradientButton>
   );

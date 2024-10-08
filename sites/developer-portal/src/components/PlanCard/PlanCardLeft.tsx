@@ -1,21 +1,25 @@
 import styled from 'styled-components';
 import { CpslButton, CpslText } from '@usecapsule/react-components';
-import { InlineText } from '../../../components/common';
-import { GradientCTAButton } from '../../../components/GradientCTAButton/GradientCTAButton';
-import { usePlan } from '../../../hooks/api/queries/usePlans';
+import { InlineText } from '../../components/common';
+import { GradientCTAButton } from '../../components/GradientCTAButton/GradientCTAButton';
+import { usePlan } from '../../hooks/api/queries/usePlans';
 import {
   useGetOrganizationSubscription,
   useHasStripeSubscription,
   useWillStripeSubscriptionCancel,
-} from '../../../hooks/api/queries/useOrganizationSubscription';
-import { useStripePlan } from '../../../hooks/useStripePlan';
-import { PlanMetadata } from '../../../types/planMetadata';
+} from '../../hooks/api/queries/useOrganizationSubscription';
+import { useStripePlan } from '../../hooks/useStripePlan';
+import { PlanMetadata } from '../../types/planMetadata';
+import { ENTERPRISE_PLAN_SLUG, MOST_POPULAR_PLAN_SLUG } from '../../utils/constants';
+import { PlanCardType } from './PlanCard';
+import { GradientBadge } from '../GradientBadge/GradientBadge';
 
 interface PlanCardLeftProps extends Pick<PlanMetadata, 'name' | 'allowanceString' | 'footnote' | 'monthlyCost' | 'slug'> {
   isActive?: boolean;
   isHigherPlanActive?: boolean;
   disabled?: boolean;
   enterprisePrice?: number;
+  type?: PlanCardType;
   onUpgradeClick: (planSlug: string) => void;
 }
 
@@ -28,6 +32,7 @@ export const PlanCardLeft = ({
   slug,
   disabled,
   enterprisePrice,
+  type,
   onUpgradeClick,
 }: PlanCardLeftProps) => {
   const { data: subscription } = useGetOrganizationSubscription();
@@ -35,9 +40,11 @@ export const PlanCardLeft = ({
   const { data: hasStripeSubscription } = useHasStripeSubscription();
   const { createCustomerPortalSession } = useStripePlan();
 
+  const isBillingType = type === 'billing';
+  const isMostPopular = slug === MOST_POPULAR_PLAN_SLUG;
   const isSubscribed = subscription?.plan.slug.toUpperCase() === slug;
 
-  const isEnterprise = slug.toUpperCase() === 'ENTERPRISE';
+  const isEnterprise = slug.toUpperCase() === ENTERPRISE_PLAN_SLUG;
   const { data: planPrice, isLoading: isPriceLoading } = usePlan(slug);
   // If this is the plan the org is subscribed to, show the price they are paying
   // Else if its the enterprise option show their enterprise price if applicable or set to 0 to show the "Ask Us" CTA
@@ -57,12 +64,17 @@ export const PlanCardLeft = ({
     createCustomerPortalSession({});
   };
 
+  const CTAButton = isBillingType || isMostPopular ? GradientCTAButton : CpslButton;
+
   return (
     <Container>
       <TopContainer>
-        <CpslText variant="bodyL" weight="semiBold">
-          {name}
-        </CpslText>
+        <NameContainer>
+          <CpslText variant="bodyL" weight="semiBold">
+            {name}
+          </CpslText>
+          {!isBillingType && isMostPopular && <GradientBadge text="Most Popular" icon="star04Filled" />}
+        </NameContainer>
         {isEnterprise && !enterprisePrice ? (
           <CpslText variant="headingS" weight="bold">
             Ask Us!
@@ -96,9 +108,9 @@ export const PlanCardLeft = ({
             )}
           </>
         ) : (
-          <GradientCTAButton disabled={disabled} onClick={handleUpgradePlanClick}>
-            Upgrade
-          </GradientCTAButton>
+          <CTAButton noIcon={!isBillingType} disabled={disabled} onClick={handleUpgradePlanClick}>
+            {isBillingType ? 'Upgrade' : 'Choose'}
+          </CTAButton>
         )}
       </TopContainer>
       {footnote && (
@@ -137,4 +149,10 @@ const CurrentPlanContainer = styled.div<{ $willCancel?: boolean }>`
   border: 1px solid;
   border-color: ${({ $willCancel }) => ($willCancel ? 'var(--cpsl-color-utility-red)' : 'var(--cpsl-color-background-4)')};
   border-radius: 4px;
+`;
+
+const NameContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
 `;

@@ -5,8 +5,7 @@ import { getActions } from './actions.js';
 export enum OnboardingStep {
   FORM = 'FORM',
   ORG_NAME = 'ORG_NAME',
-  REQUEST_ACCESS = 'REQUEST_ACCESS',
-  // PLAN_SELECT = 'PLAN_SELECT',
+  PLAN_SELECT = 'PLAN_SELECT',
 }
 
 interface OnboardingState {

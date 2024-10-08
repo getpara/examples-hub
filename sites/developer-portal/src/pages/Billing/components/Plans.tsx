@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { usePlanMetadata } from '../../../hooks/configs/usePlanMetadata';
-import { PlanCard } from './PlanCard';
 import { RequestEnterpriseModal } from '../../../components/RequestEnterpriseModal/RequestEnterpriseModal';
 import { useGetSelectedOrganization } from '../../../hooks/api/queries/useOrganizations';
 import { useGetOrganizationEnterprisePrice } from '../../../hooks/api/queries/useOrganizationEnterprisePrice';
 import { CpslText } from '@usecapsule/react-components';
 import { useStripePlan } from '../../../hooks/useStripePlan';
 import { useGetOrganizationSubscription } from '../../../hooks/api/queries/useOrganizationSubscription';
+import { PlanCard } from '../../../components/PlanCard/PlanCard';
 
 export const Plans = () => {
   const { planMeta } = usePlanMetadata();

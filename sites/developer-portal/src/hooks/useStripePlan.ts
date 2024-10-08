@@ -49,7 +49,7 @@ export const useStripePlan = () => {
     );
   };
 
-  const changePlan = async (planSlug: string) => {
+  const changePlan = async (planSlug: string, orgIdOverride?: string, successUrlOverride?: string) => {
     if (isSubscriptionLoading || isSubscriptionError) {
       return;
     }
@@ -57,7 +57,7 @@ export const useStripePlan = () => {
     setIsCreatingStripeSession(true);
     if (!hasSubscription) {
       await createCheckoutSession(
-        { planSlug },
+        { planSlug, orgIdOverride, successUrlOverride },
         {
           onSuccess: data => {
             if (data.sessionUrl) {

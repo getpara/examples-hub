@@ -1,8 +1,11 @@
 import styled from 'styled-components';
-import { SplitCard } from '../../../components/SplitCard/SplitCard';
+import { SplitCard } from '../../components/SplitCard/SplitCard';
 import { PlanCardLeft } from './PlanCardLeft';
 import { PlanCardRight } from './PlanCardRight';
-import { PlanMetadata } from '../../../types/planMetadata';
+import { PlanMetadata } from '../../types/planMetadata';
+import { MOBILE_SIZE, MOST_POPULAR_PLAN_SLUG } from '../../utils/constants';
+
+export type PlanCardType = 'billing' | 'onboarding';
 
 interface PlanCardProps {
   planMetadata: PlanMetadata;
@@ -10,6 +13,7 @@ interface PlanCardProps {
   isHigherPlanActive?: boolean;
   enterprisePrice?: number;
   disabled?: boolean;
+  type?: PlanCardType;
   onUpgradeClick: (planSlug: string) => void;
 }
 
@@ -19,11 +23,16 @@ export const PlanCard = ({
   isHigherPlanActive,
   enterprisePrice,
   disabled,
+  type = 'billing',
   onUpgradeClick,
 }: PlanCardProps) => {
+  const isOnboardingType = type === 'onboarding';
+  const isMostPopular = planMetadata.slug === MOST_POPULAR_PLAN_SLUG;
+
   return (
     <Container>
       <SplitCard
+        highlighted={isOnboardingType && isMostPopular}
         LeftContent={
           <PlanCardLeft
             {...planMetadata}
@@ -31,6 +40,7 @@ export const PlanCard = ({
             isHigherPlanActive={isHigherPlanActive}
             disabled={disabled}
             enterprisePrice={enterprisePrice}
+            type={type}
             onUpgradeClick={onUpgradeClick}
           />
         }
@@ -41,5 +51,9 @@ export const PlanCard = ({
 };
 
 const Container = styled.div`
-  max-width: 840px;
+  @media (min-width: ${MOBILE_SIZE + 1}px) {
+    width: 848px;
+  }
+
+  max-width: 848px;
 `;

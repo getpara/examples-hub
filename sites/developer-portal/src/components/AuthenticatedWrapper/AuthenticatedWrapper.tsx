@@ -24,10 +24,12 @@ export const AuthenticatedWrapper = ({ requireOrgs, children }: AuthenticatedWra
 
   useEffect(() => {
     if (!isLoadingOrgs) {
+      console.log('🚀 ~ useEffect ~ isLoadingOrgs:', isLoadingOrgs);
       // Set org (if available) and navigate to proper page
       setSelectedOrganization();
     }
-  }, [isLoadingOrgs, orgsWithAccess, setSelectedOrganization]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoadingOrgs]);
 
   if (isLoadingLoggedIn || isLoadingOrgs || isLoadingMember || isLoadingSubscription || isLoadingPlans) {
     return <MainLoader headerHeight={AUTH_APP_BAR_HEIGHT} />;
