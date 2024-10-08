@@ -18,7 +18,6 @@ export const ConfigurationTab = () => {
     <>
       <BrandingConfiguration />
       <EmailConfiguration />
-      <PortalConfiguration />
       <NativePasskeyConfiguration />
       <PregenConfiguration />
       <PopupConfiguration />
