@@ -64,8 +64,8 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
       return walletUtils.sendTransaction(ctx, share, walletId, userId, tx, chainId);
     }
     case 'SIGN_MESSAGE': {
-      const { share, walletId, userId, message } = params;
-      return walletUtils.signMessage(ctx, share, walletId, userId, message);
+      const { share, walletId, userId, message, cosmosSignDoc } = params;
+      return walletUtils.signMessage(ctx, share, walletId, userId, message, cosmosSignDoc);
     }
     case 'REFRESH': {
       const { share, walletId, userId, oldPartnerId, newPartnerId } = params;

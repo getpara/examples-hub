@@ -40,6 +40,8 @@ import CoreCapsule, {
   getBaseUrl,
   SupportedWalletTypes,
   WalletType,
+  TransactionReviewDenied,
+  TransactionReviewTimeout,
 } from '@usecapsule/core-sdk';
 import { CapsuleSolanaWeb3Signer } from '@usecapsule/solana-web3.js-v1-integration';
 import { FONT_OPTIONS } from './constants';
@@ -141,6 +143,14 @@ async function sendCosmosTx(capsule: Capsule): Promise<void> {
       },
     );
   } catch (error) {
+    if (error instanceof TransactionReviewDenied) {
+      console.log('Transaction review has been denied by the user');
+    }
+
+    if (error instanceof TransactionReviewTimeout) {
+      console.log('Transaction review has timed out');
+    }
+
     console.error(error);
   }
 }

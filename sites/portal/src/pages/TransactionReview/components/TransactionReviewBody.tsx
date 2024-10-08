@@ -4,15 +4,19 @@ import { CpslButton, CpslIcon, CpslText } from '@usecapsule/react-components';
 import styled from 'styled-components';
 import { TransactionType } from '../TransactionReview';
 
+export interface TransactionCoin {
+  value: number;
+  units: string;
+  conversionRate?: number;
+  icon?: JSX.Element;
+}
+
 export interface TransactionReviewBodyProps {
-  transactionValue: string;
-  transactionUnits?: string;
-  transactionUnitsIcon?: JSX.Element;
+  coins: TransactionCoin[];
   fromWalletName: string;
   fromWalletAddress: string;
   toWalletAddress: string;
   transactionType: TransactionType;
-  conversionRate?: number;
   rawTransaction: any;
 }
 
@@ -32,18 +36,17 @@ function rawTransactionFormatted(rawTransaction: any): string {
 }
 
 function priceInUsdFormatted(conversionRate: number, value: number): string {
-  return formatter.format(conversionRate * value);
+  const usdValue = conversionRate * value;
+
+  return usdValue < 0.01 ? '< $0.01' : formatter.format(usdValue);
 }
 
 function TransactionReviewBody({
-  transactionValue,
-  transactionUnits,
-  transactionUnitsIcon,
+  coins,
   fromWalletName,
   fromWalletAddress,
   toWalletAddress,
   transactionType,
-  conversionRate,
   rawTransaction,
 }: TransactionReviewBodyProps) {
   const [viewFullTransaction, setViewFullTransaction] = useState(false);
@@ -61,39 +64,61 @@ function TransactionReviewBody({
       paddingTop={24}
       paddingBottom={24}
     >
-      <Flex direction="column" paddingLeft={24} paddingRight={24}>
-        <CpslText variant="bodyS" color="secondary">
-          You Send
-        </CpslText>
-        <Flex gap={5} width={'100%'}>
-          <CpslText variant="bodyXL">{fromWalletName}</CpslText>
-          <Spacer />
-          <Flex align="center" gap={0}>
-            {transactionUnitsIcon && transactionUnitsIcon}
-            <CpslText variant="bodyXL">
-              {transactionValue} {transactionUnits}
+      <Flex direction="column" paddingLeft={24} paddingRight={24} gap={20}>
+        <Flex direction="column">
+          <CpslText variant="bodyS" color="secondary">
+            You Send
+          </CpslText>
+          <Flex gap={5} width={'100%'}>
+            <CpslText variant="bodyXL">{fromWalletName}</CpslText>
+            <Spacer />
+            <Flex align="center" gap={0}>
+              {coins[0].icon && coins[0].icon}
+              <CpslText variant="bodyXL">
+                {coins[0].value} {coins[0].units}
+              </CpslText>
+            </Flex>
+          </Flex>
+          <Flex gap={6} align="center">
+            <CpslText variant="bodyS" color="secondary" weight="regular">
+              {walletAddressFormatted(fromWalletAddress)}
+            </CpslText>
+            <CpslButton
+              variant="ghost"
+              size="small"
+              onClick={async () => {
+                navigator.clipboard.writeText(fromWalletAddress);
+              }}
+            >
+              <CpslIcon slot="start" icon="copy" />
+            </CpslButton>
+            <Spacer />
+            <CpslText variant="bodyS" color="secondary" weight="regular">
+              {coins[0].conversionRate ? priceInUsdFormatted(coins[0].conversionRate, coins[0].value) : '...'}
             </CpslText>
           </Flex>
         </Flex>
-        <Flex gap={6} align="center">
-          <CpslText variant="bodyS" color="secondary" weight="regular">
-            {walletAddressFormatted(fromWalletAddress)}
-          </CpslText>
-          <CpslButton
-            variant="ghost"
-            size="small"
-            onClick={async () => {
-              navigator.clipboard.writeText(fromWalletAddress);
-            }}
-          >
-            <CpslIcon slot="start" icon="copy" />
-          </CpslButton>
-          <Spacer />
-          <CpslText variant="bodyS" color="secondary" weight="regular">
-            {conversionRate ? priceInUsdFormatted(conversionRate, parseFloat(transactionValue)) : '...'}
-          </CpslText>
-        </Flex>
+        {coins.length > 1 &&
+          coins.slice(1).map((coin, index) => (
+            <Flex key={`coin-${index}`} direction="column">
+              <Flex align="center">
+                <Spacer />
+                <PlusIcon icon="plus" />
+                {coin.icon && coin.icon}
+                <CpslText variant="bodyXL">
+                  {coin.value} {coin.units}
+                </CpslText>
+              </Flex>
+              <Flex align="center">
+                <Spacer />
+                <CpslText variant="bodyS" color="secondary" weight="regular">
+                  {coin.conversionRate ? priceInUsdFormatted(coin.conversionRate, coin.value) : '...'}
+                </CpslText>
+              </Flex>
+            </Flex>
+          ))}
       </Flex>
+
       <Flex width="100%" align="center">
         <TransactionDetailsSeparator />
         <CpslIcon icon="arrowCircleDownFilled" />
@@ -148,6 +173,11 @@ function TransactionReviewBody({
     </Flex>
   );
 }
+
+const PlusIcon = styled(CpslIcon)`
+  --height: 16px;
+  --width: 16px;
+`;
 
 const TransactionDetailsSeparator = styled.div`
   height: 1px;

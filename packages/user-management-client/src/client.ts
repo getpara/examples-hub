@@ -668,8 +668,14 @@ class Client {
     return res;
   };
 
-  preSignMessage = async (userId: string, walletId: string, message: string, scheme?: WalletScheme): Promise<any> => {
-    const body = { message, scheme };
+  preSignMessage = async (
+    userId: string,
+    walletId: string,
+    message: string,
+    scheme?: WalletScheme,
+    cosmosSignDoc?: string,
+  ): Promise<any> => {
+    const body = { message, scheme, cosmosSignDoc };
     const res = await this.baseRequest.post<any>(`/users/${userId}/wallets/${walletId}/messages/sign`, body);
     return res.data;
   };

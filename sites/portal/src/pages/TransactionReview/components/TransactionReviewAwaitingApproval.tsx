@@ -1,43 +1,36 @@
 import { Box, Flex } from '@chakra-ui/react';
 import { CpslButton, CpslIcon } from '@usecapsule/react-components';
 import { Partner } from '../../../types';
-import { TransactionReviewState, TransactionType } from '../TransactionReview';
-import TransactionReviewBody from './TransactionReviewBody';
+import TransactionReviewBody, { TransactionCoin } from './TransactionReviewBody';
 import TransactionReviewFee from './TransactionReviewFee';
 import { CpslHero, CpslIdenticon } from '@usecapsule/react-components';
 import { PartnerIcon } from '../../../components/PartnerIcon';
+import { TransactionType } from '../TransactionReview';
 
 export interface TransactionReviewAwaitingApprovalProps {
   partner: Partner;
-  transactionValue: string;
-  transactionUnits?: string;
-  transactionUnitsIcon?: JSX.Element;
+  coins: TransactionCoin[];
   fromWalletName: string;
   fromWalletAddress: string;
   toWalletAddress: string;
   transactionType: TransactionType;
-  conversionRate: number;
   rawTransaction: any;
-  transactionState: TransactionReviewState;
   estimatedFee: string;
   estimatedTime: string;
   network: string;
   networkIcon?: JSX.Element;
-  chainId: number;
+  chainId: string;
   confirmTransaction();
   rejectTransaction();
 }
 
 function TransactionReviewAwaitingApproval({
   partner,
-  transactionValue,
-  transactionUnits,
-  transactionUnitsIcon,
+  coins,
   fromWalletName,
   fromWalletAddress,
   toWalletAddress,
   transactionType,
-  conversionRate,
   rawTransaction,
   estimatedFee,
   estimatedTime,
@@ -62,14 +55,11 @@ function TransactionReviewAwaitingApproval({
             </div>
           </CpslHero>
           <TransactionReviewBody
-            transactionValue={transactionValue}
-            transactionUnits={transactionUnits}
-            transactionUnitsIcon={transactionUnitsIcon}
+            coins={coins}
             fromWalletName={fromWalletName}
             fromWalletAddress={fromWalletAddress}
             toWalletAddress={toWalletAddress}
             transactionType={transactionType}
-            conversionRate={conversionRate}
             rawTransaction={rawTransaction}
           />
 

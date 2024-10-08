@@ -64,8 +64,9 @@ export class WebUtils implements PlatformUtils {
     message: string,
     sessionCookie: string,
     isDKLS?: boolean,
+    cosmosSignDoc?: string,
   ): Promise<SignatureRes> {
-    return signMessage(ctx, userId, walletId, share, message, sessionCookie, isDKLS);
+    return signMessage(ctx, userId, walletId, share, message, sessionCookie, isDKLS, cosmosSignDoc);
   }
 
   signTransaction(

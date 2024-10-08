@@ -71,6 +71,7 @@ export async function signMessage(
   message: string,
   sessionCookie?: string,
   isDKLS?: boolean,
+  cosmosSignDoc?: string,
 ): Promise<SignatureRes> {
   return await new Promise(async resolve => {
     const worker = await setupWorker(ctx, async signMessageRes => {
@@ -81,7 +82,7 @@ export async function signMessage(
       env: ctx.env,
       apiKey: ctx.apiKey,
       cosmosPrefix: ctx.cosmosPrefix,
-      params: { share, walletId, userId, message },
+      params: { share, walletId, userId, message, cosmosSignDoc },
       functionType: 'SIGN_MESSAGE',
       offloadMPCComputationURL: ctx.offloadMPCComputationURL,
       disableWorkers: ctx.disableWorkers,

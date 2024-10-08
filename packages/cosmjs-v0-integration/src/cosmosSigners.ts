@@ -75,12 +75,17 @@ export class CapsuleProtoSigner extends CapsuleCosmosSigner implements OfflineDi
     if (address !== this.address) {
       throw new Error(`Address ${address} not found in wallet`);
     }
+
     const hashedMessage = sha256(signBytes);
+    const signDocJson = SignDoc.toJSON(signDoc);
+    const signDocJsonStringified = JSON.stringify(signDocJson);
+    const signDocJsonStringEncoded = btoa(signDocJsonStringified);
 
     const res = await this.capsule.signMessage(
       this.currentWallet.id,
       Buffer.from(hashedMessage.buffer).toString('base64'),
       this.messageSigningTimeoutMs,
+      signDocJsonStringEncoded,
     );
     const signature = hexToSignature(`0x${(res as SuccessfulSignatureRes).signature}`);
     const extendedSignature = new ExtendedSecp256k1Signature(

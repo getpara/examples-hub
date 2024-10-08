@@ -53,6 +53,7 @@ export interface PlatformUtils {
     message: string,
     sessionCookie: string,
     isDKLS?: boolean,
+    cosmosSignDoc?: string,
   ): Promise<SignatureRes>;
 
   signTransaction(

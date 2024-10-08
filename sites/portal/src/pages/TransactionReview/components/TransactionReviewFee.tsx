@@ -6,7 +6,7 @@ export interface TransactionReviewFeeProps {
   network: string;
   networkIcon?: JSX.Element;
   time: string;
-  chainId: number;
+  chainId: string;
 }
 
 function TransactionReviewFee({ estimatedFee, network, networkIcon, time, chainId }: TransactionReviewFeeProps) {

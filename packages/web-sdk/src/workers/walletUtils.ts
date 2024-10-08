@@ -203,8 +203,15 @@ export async function signMessage(
   walletId: string,
   userId: string,
   message: string,
+  cosmosSignDoc?: string,
 ): Promise<SignatureRes> {
-  const { protocolId, pendingTransactionId } = await ctx.capsuleClient.preSignMessage(userId, walletId, message);
+  const { protocolId, pendingTransactionId } = await ctx.capsuleClient.preSignMessage(
+    userId,
+    walletId,
+    message,
+    null,
+    cosmosSignDoc,
+  );
   if (pendingTransactionId) {
     console.error('sign message denied');
     return { pendingTransactionId };

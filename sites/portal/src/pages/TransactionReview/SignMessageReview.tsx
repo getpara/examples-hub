@@ -1,7 +1,7 @@
 import { Box, Flex, Spacer } from '@chakra-ui/react';
 import { CpslButton, CpslHero, CpslIcon, CpslIdenticon } from '@usecapsule/react-components';
-import { Partner } from '../../../types';
-import { PartnerIcon } from '../../../components/PartnerIcon';
+import { Partner } from '../../types';
+import { PartnerIcon } from '../../components/PartnerIcon';
 import styled from 'styled-components';
 
 export interface SignMessageReviewProps {
