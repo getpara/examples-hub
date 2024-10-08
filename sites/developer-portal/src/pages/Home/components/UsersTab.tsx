@@ -1,3 +1,5 @@
+import { UsersTable } from './UsersTable';
+
 export const UsersTab = () => {
-  return <div>USERS</div>;
+  return <UsersTable />;
 };

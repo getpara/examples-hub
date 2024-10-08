@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { ApiKeyUsersTableDataResponse } from '../../../types/api';
+import { UsersTableDataResponse } from '../../../types/api';
 import { useAppStore } from '../../../stores/app/useAppStore';
 import { getApiKeyUsersTableData } from '../../../api/apiKeys/queries';
 
@@ -9,7 +9,7 @@ export const useOrganizationKeyUsersTableDataQuery = <T>(
   projectId: string,
   keyId: string,
   env: string,
-  select: (data: ApiKeyUsersTableDataResponse) => T,
+  select: (data: UsersTableDataResponse) => T,
   offset?: number,
   limit?: number,
 ) => {

@@ -5,8 +5,8 @@ import {
   ApiKeySetupStatusResponse,
   ApiKeyTotalUsersTSResponse,
   ApiKeyUsersLoginMetricsResponse,
-  ApiKeyUsersTableDataResponse,
   ApiKeysResponse,
+  UsersTableDataResponse,
 } from '../../types/api';
 
 export const getApiKeys = async (organizationId: string, projectId: string, env: string) => {
@@ -29,9 +29,9 @@ export const getApiKeyUsersTableData = async (
   offset?: number,
   limit?: number,
 ) => {
-  const endpoint = `/organizations/${organizationId}/projects/${projectId}/${env}/keys/${keyId}/logins/table-data`;
+  const endpoint = `/organizations/${organizationId}/projects/${projectId}/${env}/keys/${keyId}/analytics/users-table-data`;
 
-  return axiosClient.get<ApiKeyUsersTableDataResponse>(endpoint, {
+  return axiosClient.get<UsersTableDataResponse>(endpoint, {
     params: {
       offset,
       limit,
@@ -40,7 +40,7 @@ export const getApiKeyUsersTableData = async (
 };
 
 export const getApiKeyUsersLoginMetrics = async (organizationId: string, projectId: string, keyId: string, env: string) => {
-  const endpoint = `/organizations/${organizationId}/projects/${projectId}/${env}/keys/${keyId}/logins/login-metrics`;
+  const endpoint = `/organizations/${organizationId}/projects/${projectId}/${env}/keys/${keyId}/analytics/login-metrics`;
 
   return axiosClient.get<ApiKeyUsersLoginMetricsResponse>(endpoint);
 };

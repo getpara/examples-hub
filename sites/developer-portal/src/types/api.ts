@@ -207,23 +207,26 @@ export enum PartnerAssetType {
 }
 
 // *********************
-// API Key Users
+// Users
 // *********************
-export type ApiKeyUsersTableData = {
-  userId: string;
+export type UsersTableData = {
+  id: string;
+  userId: string | null;
   email: string | null;
   farcasterUsername: string | null;
   phoneNumber: string | null;
   firstCreated: Date;
   lastSeen: Date;
   totalLogins: number;
-  walletAddresses: string[];
+  walletAddresses: string[] | null;
+  externalWalletAddress: string | null;
+  pregenIdentifier: string | null;
   lastMethod: string;
   totalRecords: number;
 };
 
-export type ApiKeyUsersTableDataResponse = {
-  tableData: ApiKeyUsersTableData[];
+export type UsersTableDataResponse = {
+  tableData: UsersTableData[];
   totalRows: number;
 };
 
@@ -279,6 +282,11 @@ export type OrganizationLoginPlatformsTotalResponse = {
     percent: number;
     count: number;
   }[];
+};
+
+export type OrganizationTotalUserCountResponse = {
+  count: number;
+  lowerEnvCount: number;
 };
 
 // *********************

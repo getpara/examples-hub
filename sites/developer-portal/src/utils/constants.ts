@@ -131,6 +131,7 @@ export const LOGIN_METHOD_LABELS: Record<string, string> = {
   FACEBOOK: 'Facebook',
   TWITTER: 'Twitter',
   FARCASTER: 'Farcaster',
+  PREGEN: 'Pregen',
 };
 export const ENTERPRISE_PLAN_SLUG = PlanSlug.ENTERPRISE;
 export const FREE_PLAN_SLUG = PlanSlug.FREE;

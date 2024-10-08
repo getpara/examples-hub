@@ -6,6 +6,8 @@ import { useGetAvailableKeyEnvs, useGetOrganizationKey } from '../../../hooks/ap
 import { Environment } from '../../../types/environment';
 import { formatEnvName } from '../../../utils/apiKey';
 import { IS_BETA, IS_PROD } from '../../../utils/constants';
+import { useOrganizationTotalUserCount } from '../../../hooks/api/queries/useOrganizationTotalUserCount';
+import { useGetOrganizationSubscription } from '../../../hooks/api/queries/useOrganizationSubscription';
 
 interface NonProdWarningProps {
   onCreateProdKeyClick: () => void;
@@ -15,6 +17,11 @@ export const NonProdWarning = ({ onCreateProdKeyClick }: NonProdWarningProps) =>
   const { apiKey, env, projectId } = useParams();
   const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
   const { data: availableKeyEnvs } = useGetAvailableKeyEnvs(projectId ?? '');
+  const { data: totalUsers } = useOrganizationTotalUserCount();
+  const { data: subscription } = useGetOrganizationSubscription();
+
+  const activePlan = subscription?.plan;
+  const maxBetaUsers = activePlan?.maxBetaUsers ?? 0;
 
   if (
     !apiKeyData ||
@@ -26,7 +33,6 @@ export const NonProdWarning = ({ onCreateProdKeyClick }: NonProdWarningProps) =>
 
   const canCreateProdKey = availableKeyEnvs?.includes(IS_PROD ? Environment.PROD : Environment.BETA);
 
-  // TODO: add beta user count here once BE restrictions are in place
   return (
     <StyledAlert variant="warning" icon="alertTriangle" filled>
       <InlineText>
@@ -42,6 +48,10 @@ export const NonProdWarning = ({ onCreateProdKeyClick }: NonProdWarningProps) =>
             </ClickableText>
             .
           </>
+        )}
+        {((IS_PROD && apiKeyData.environment === Environment.BETA) ||
+          (IS_BETA && apiKeyData.environment === Environment.SANDBOX)) && (
+          <InlineText>{` You have used ${totalUsers?.lowerEnvCount}/${maxBetaUsers} ${IS_PROD ? 'BETA' : 'SANDBOX'} test users.`}</InlineText>
         )}
       </InlineText>
     </StyledAlert>

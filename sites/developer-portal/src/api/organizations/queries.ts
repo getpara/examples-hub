@@ -8,6 +8,8 @@ import {
   OrganizationUserMetricsResponse,
   OrganizationEnterprisePriceResponse,
   OrganizationSubscriptionResponse,
+  OrganizationTotalUserCountResponse,
+  UsersTableDataResponse,
 } from '../../types/api';
 
 export const getOrganization = async (organizationId: string) => {
@@ -71,4 +73,27 @@ export const getOrganizationSubscription = async (organizationId: string) => {
   const endpoint = `/organizations/${organizationId}/stripe/subscription`;
 
   return axiosClient.get<OrganizationSubscriptionResponse>(endpoint);
+};
+
+export const getOrganizationTotalUserCount = async (organizationId: string) => {
+  const endpoint = `/organizations/${organizationId}/analytics/all-time/user-count`;
+
+  return axiosClient.get<OrganizationTotalUserCountResponse>(endpoint);
+};
+
+export const getOrganizationUsersTableData = async (
+  organizationId: string,
+  env: string,
+  offset?: number,
+  limit?: number,
+) => {
+  const endpoint = `/organizations/${organizationId}/analytics/users-table-data`;
+
+  return axiosClient.get<UsersTableDataResponse>(endpoint, {
+    params: {
+      offset,
+      limit,
+      env,
+    },
+  });
 };

@@ -9,7 +9,8 @@ import {
   useWillStripeSubscriptionCancel,
 } from '../../../hooks/api/queries/useOrganizationSubscription';
 import { usePlanMetadata } from '../../../hooks/configs/usePlanMetadata';
-import { PLAN_PERMISSIONS, PlanSlug } from '../../../utils/constants';
+import { ENTERPRISE_PLAN_SLUG, FREE_PLAN_SLUG } from '../../../utils/constants';
+import { useOrganizationTotalUserCount } from '../../../hooks/api/queries/useOrganizationTotalUserCount';
 
 export const PlanMetrics = () => {
   const { planMetaBySlug } = usePlanMetadata();
@@ -17,15 +18,15 @@ export const PlanMetrics = () => {
   const { data: willSubscriptionCancel } = useWillStripeSubscriptionCancel();
   const { data: hasStripeSubscription } = useHasStripeSubscription();
   const { data: userMetrics } = useOrganizationUserMetrics(startOfMonth(new Date()), endOfDay(new Date()));
+  const { data: totalUsers } = useOrganizationTotalUserCount();
 
   const activePlan = subscription?.plan;
   const planMetadata = planMetaBySlug[activePlan?.slug ?? ''];
-  const planPermissions = PLAN_PERMISSIONS[(activePlan?.slug as PlanSlug) ?? PlanSlug.FREE];
-  const isTotalUserPlan = typeof planPermissions?.maxUsers === 'number';
-  const isMauPlan = typeof planPermissions?.maxMonthlyUsers === 'number';
+  const isFreePlan = activePlan?.slug === FREE_PLAN_SLUG;
+  const isEnterprisePlan = activePlan?.slug === ENTERPRISE_PLAN_SLUG;
 
-  const monthlyUsersString = `${userMetrics?.usersInTimeFrame ?? 0}${isMauPlan ? `/${truncateNumber(planPermissions?.maxMonthlyUsers ?? 0)}` : ''}`;
-  const totalUsersString = `${userMetrics?.totalUsers ?? 0}${isTotalUserPlan ? `/${planPermissions?.maxUsers}` : ''}`;
+  const monthlyUsersString = `${userMetrics?.usersInTimeFrame ?? 0}${isEnterprisePlan ? `/${truncateNumber(activePlan?.maxProdMAUs ?? 0)}` : ''}`;
+  const totalUsersString = `${(isFreePlan ? totalUsers?.lowerEnvCount : totalUsers?.count) ?? '-'}${isFreePlan ? `/${activePlan?.maxBetaUsers}` : ''}`;
   const activePlanName = planMetadata?.name ?? '';
   const activePlanPrice = `Current Plan${hasStripeSubscription ? `: $${(subscription?.price ?? 0) / 100}/mo` : ''}`;
   const daysRemaining = subscription?.periodEnd
@@ -36,8 +37,8 @@ export const PlanMetrics = () => {
     <>
       <Container>
         <AnalyticsCard title={activePlanName} subtitle={activePlanPrice} />
-        {!isTotalUserPlan && <AnalyticsCard title={monthlyUsersString} subtitle="Users this month" />}
-        <AnalyticsCard title={totalUsersString} subtitle={isTotalUserPlan ? 'Users' : 'Total Users'} />
+        {!isFreePlan && <AnalyticsCard title={monthlyUsersString} subtitle="Users this month" />}
+        <AnalyticsCard title={totalUsersString} subtitle={isFreePlan ? 'Users' : 'Total Users'} />
         {daysRemaining && (
           <AnalyticsCard
             title={daysRemaining}
