@@ -91,7 +91,6 @@ export const UsersTable = () => {
         { headerName: 'Address' },
       ]}
       noContentTitle="No Users Yet"
-      noContentSubtitle="Some Subtitle"
     />
   );
 };

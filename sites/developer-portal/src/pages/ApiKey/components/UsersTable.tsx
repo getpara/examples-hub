@@ -142,7 +142,6 @@ export const UsersTable = () => {
           { headerName: 'Address', colSpan: !isProdKey ? 2 : 1 },
         ]}
         noContentTitle="No Users Yet"
-        noContentSubtitle="Some Subtitle"
       />
       <DeleteUserModal
         open={!!selectedUserId}
