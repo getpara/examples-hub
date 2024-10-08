@@ -213,7 +213,6 @@ export async function signMessage(
     cosmosSignDoc,
   );
   if (pendingTransactionId) {
-    console.error('sign message denied');
     return { pendingTransactionId };
   }
 
@@ -251,7 +250,6 @@ export async function signTransaction(
     data: { protocolId, pendingTransactionId },
   } = await ctx.capsuleClient.signTransaction(userId, walletId, { transaction: tx, chainId });
   if (pendingTransactionId) {
-    console.error('send transaction denied');
     return { pendingTransactionId };
   }
 
@@ -289,7 +287,6 @@ export async function sendTransaction(
     data: { protocolId, pendingTransactionId },
   } = await ctx.capsuleClient.sendTransaction(userId, walletId, { transaction: tx, chainId });
   if (pendingTransactionId) {
-    console.error('send transaction denied');
     return { pendingTransactionId };
   }
 

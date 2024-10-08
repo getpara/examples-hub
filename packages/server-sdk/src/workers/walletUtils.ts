@@ -216,7 +216,6 @@ export async function signMessage(
 ): Promise<SignatureRes> {
   const { protocolId, pendingTransactionId } = await ctx.capsuleClient.preSignMessage(userId, walletId, message);
   if (pendingTransactionId) {
-    console.error('sign message denied');
     return { pendingTransactionId };
   }
 
@@ -248,7 +247,6 @@ export async function signTransaction(
     data: { protocolId, pendingTransactionId },
   } = await ctx.capsuleClient.signTransaction(userId, walletId, { transaction: tx, chainId });
   if (pendingTransactionId) {
-    console.error('send transaction denied');
     return { pendingTransactionId };
   }
 
@@ -280,7 +278,6 @@ export async function sendTransaction(
     data: { protocolId, pendingTransactionId },
   } = await ctx.capsuleClient.sendTransaction(userId, walletId, { transaction: tx, chainId });
   if (pendingTransactionId) {
-    console.error('send transaction denied');
     return { pendingTransactionId };
   }
 
