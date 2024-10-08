@@ -21,8 +21,7 @@ export const Onboarding = () => {
 
   // If no step is set, start at the form
   if (!currentStep) {
-    // setStep(userId, OnboardingStep.FORM);
-    setStep(userId, OnboardingStep.ORG_NAME);
+    setStep(userId, OnboardingStep.FORM);
     return null;
   }
 
