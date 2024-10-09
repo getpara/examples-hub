@@ -30,6 +30,30 @@ export enum TransactionType {
   MintNFT = 'Mint NFT',
 }
 
+export function iconForChainId(chainId: string): JSX.Element {
+  switch (chainId.toLowerCase()) {
+    case '1':
+      return <NetworkIcon icon="ethereum" />;
+    case 'theta-testnet-001':
+      return <NetworkIcon icon="cosmos" />;
+    default:
+      return null;
+  }
+}
+
+export function iconForCurrency(currency: string): JSX.Element {
+  switch (currency.toLowerCase()) {
+    case 'eth':
+      return <CurrencyIcon icon="ethereum" />;
+    case 'pol':
+      return <CurrencyIcon icon="polygon" />;
+    case 'uatom':
+      return <CurrencyIcon icon="cosmos" />;
+    default:
+      return null;
+  }
+}
+
 function TransactionReview() {
   const capsule = useCapsule();
   const { userId, pendingTransactionId } = useParams();
@@ -185,7 +209,7 @@ function TransactionReview() {
 
 export default TransactionReview;
 
-const TransactionReviewContainer = styled.div`
+export const TransactionReviewContainer = styled.div`
   body {
     background-color: white !important;
   }

@@ -7,10 +7,11 @@ import { MsgSend } from 'cosmjs-types/cosmos/bank/v1beta1/tx';
 
 import { Wallet } from '@usecapsule/web-sdk';
 import { Partner } from '../../types';
-import { TransactionType } from './TransactionReview';
+import { iconForChainId, iconForCurrency, TransactionReviewContainer, TransactionType } from './TransactionReview';
 import { TransactionCoin } from './components/TransactionReviewBody';
 import { fetchConversionRate } from '../../utils/transactionReview';
 import { Coin } from 'cosmjs-types/cosmos/base/v1beta1/coin';
+import { CpslSpinner } from '@usecapsule/react-components';
 
 enum CosmosTransactionReviewState {
   Loading,
@@ -33,6 +34,7 @@ async function transactionCoinFromCosmosCoin(coin: Coin, conversionRate: number)
     value: Number(coin.amount),
     units: coin.denom,
     conversionRate,
+    icon: iconForCurrency(coin.denom),
   };
 }
 
@@ -94,9 +96,12 @@ function CosmosTransactionReview({
 
   switch (txReviewState) {
     case CosmosTransactionReviewState.Loading:
-      return <div>Loading...</div>;
     case CosmosTransactionReviewState.Error:
-      return <div>Error</div>;
+      return (
+        <TransactionReviewContainer>
+          <CpslSpinner />
+        </TransactionReviewContainer>
+      );
   }
 
   return (
@@ -111,7 +116,7 @@ function CosmosTransactionReview({
       estimatedFee={feeConversionRate ? formatEstimatedCosmosFee(feeConversionRate, fee) : formatCosmosFee(fee)}
       estimatedTime={null}
       network={'Cosmos'}
-      networkIcon={null}
+      networkIcon={iconForChainId(signDoc.chainId)}
       chainId={signDoc.chainId}
       confirmTransaction={confirmTransaction}
       rejectTransaction={rejectTransaction}

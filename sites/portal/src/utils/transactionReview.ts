@@ -11,5 +11,6 @@ export async function fetchChainData(chainId: number) {
 
 export async function fetchConversionRate(capsule: Capsule, chainId: string, symbol: string) {
   const res = await capsule.ctx.capsuleClient.getConversionRate(chainId, symbol, 'USD');
+
   return res.conversionRate;
 }

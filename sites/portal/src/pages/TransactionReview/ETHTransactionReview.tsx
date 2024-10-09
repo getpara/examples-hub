@@ -7,8 +7,9 @@ import { useCapsule } from '../../components/CapsuleContext';
 
 import { Partner } from '../../types';
 import { Wallet } from '@usecapsule/web-sdk';
-import { CurrencyIcon, NetworkIcon, TransactionType } from './TransactionReview';
+import { iconForChainId, iconForCurrency, TransactionReviewContainer, TransactionType } from './TransactionReview';
 import { fetchChainData } from '../../utils/transactionReview';
+import { CpslSpinner } from '@usecapsule/react-components';
 
 enum ETHTransactionReviewState {
   Loading,
@@ -46,26 +47,6 @@ function formatEstimatedTime(estimatedTimeInSeconds: number) {
   }
 
   return 'Less than 2 seconds';
-}
-
-function iconForChainId(chainId: number) {
-  switch (chainId) {
-    case 1:
-      return <NetworkIcon icon="ethereum" />;
-    default:
-      return null;
-  }
-}
-
-function iconForCurrency(currency: string) {
-  switch (currency) {
-    case 'ETH':
-      return <CurrencyIcon icon="ethereum" />;
-    case 'POL':
-      return <CurrencyIcon icon="polygon" />;
-    default:
-      return null;
-  }
 }
 
 export interface ETHTransactionReviewProps {
@@ -164,9 +145,12 @@ function ETHTransactionReview({
 
   switch (txReviewState) {
     case ETHTransactionReviewState.Loading:
-      return <div>Loading...</div>;
     case ETHTransactionReviewState.Error:
-      return <div>There was an error</div>;
+      return (
+        <TransactionReviewContainer>
+          <CpslSpinner />
+        </TransactionReviewContainer>
+      );
   }
 
   return (
@@ -188,7 +172,7 @@ function ETHTransactionReview({
       estimatedFee={conversionRate ? formatEstimatedFee(conversionRate, feeMarketTransaction) : null}
       estimatedTime={gasEstimate ? formatEstimatedTime(gasEstimate) : null}
       network={chainData?.name}
-      networkIcon={iconForChainId(Number(feeMarketTransaction.chainId))}
+      networkIcon={iconForChainId(feeMarketTransaction.chainId.toString())}
       chainId={feeMarketTransaction.chainId.toString()}
       confirmTransaction={confirmTransaction}
       rejectTransaction={rejectTransaction}
