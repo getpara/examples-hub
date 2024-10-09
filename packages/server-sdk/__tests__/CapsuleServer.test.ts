@@ -1,6 +1,6 @@
 import { expect, describe, it } from 'vitest';
 
-import Capsule, { Environment, WalletType } from '../src';
+import Capsule, { Environment } from '../src';
 
 describe('ServerCapsule', () => {
   describe('constructor', () => {
@@ -12,9 +12,6 @@ describe('ServerCapsule', () => {
       expect(capsule.ctx.env).toBe(Environment.DEV);
       expect(capsule.ctx.apiKey).toBe(apiKey);
       expect(capsule.wallets).toEqual({});
-
-      // casting as any to access protected fields
-      expect((capsule as any).supportedWalletTypes).toEqual({ [WalletType.EVM]: { optional: false } });
     });
   });
 });

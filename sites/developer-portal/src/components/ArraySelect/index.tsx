@@ -3,10 +3,11 @@ import styled from 'styled-components';
 import { Reorder } from 'framer-motion';
 import { Row } from './components.js';
 
-export function ArraySelect<T extends { toString: () => string }, const E = undefined>({
+export function ArraySelect<T extends string, const E = undefined>({
   value,
   onChange,
   isOrderable = false,
+  keyFn = _ => _,
   ifEmpty: E,
   rowTitle,
   rowAdd,
@@ -17,6 +18,7 @@ export function ArraySelect<T extends { toString: () => string }, const E = unde
   includeAdded?: boolean;
   isOrderable?: boolean;
   ifEmpty: E;
+  keyFn?: (_: T) => string;
   emptyText?: string;
   error?: string;
   onChange: (_: T[] | E) => void;
@@ -26,16 +28,17 @@ export function ArraySelect<T extends { toString: () => string }, const E = unde
   rowAdd?: () => ReactNode;
 }>) {
   const isPopulated = value && value !== E && Array.isArray(value) && value.length > 0;
+  const RowAdd = rowAdd?.() || null;
   const Content = isPopulated ? (
     <>
       {value.map(item => {
         return (
-          <Row key={item.toString()} value={item} title={rowTitle?.(item)} isOrderable={isOrderable}>
+          <Row key={keyFn(item)} value={keyFn(item)} title={rowTitle?.(item)} isOrderable={isOrderable}>
             {rowChild?.(item)}
           </Row>
         );
       })}
-      {rowAdd && <Row isOrderable={isOrderable}>{rowAdd()}</Row>}
+      {RowAdd ? <Row isOrderable={isOrderable}>{RowAdd}</Row> : null}
     </>
   ) : null;
 

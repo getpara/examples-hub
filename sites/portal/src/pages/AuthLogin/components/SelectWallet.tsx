@@ -3,17 +3,16 @@ import { useModalOutletContext } from '../../../hooks/useModalOutletContext';
 import { CpslIcon, CpslText, CpslButton, IconType, CpslRadio, CpslIdenticon } from '@usecapsule/react-components';
 import { SaveRecoverySecret } from '@usecapsule/react-sdk';
 import { formatDistanceToNowStrict, parseISO } from 'date-fns';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AuthLoginStep } from '../../../constants';
 import { useAuthLoginStep } from '../../../hooks/useLoginStep';
 import {
-  isTypeOptional,
-  isTypeRequired,
   Wallet,
   WalletType,
   CurrentWalletIds,
   WalletEntity,
   PartnerEntity,
+  SupportedWalletTypes,
 } from '@usecapsule/web-sdk';
 import { useCapsule } from '../../../components/CapsuleContext';
 import { useLogin } from './LoginProvider';
@@ -158,16 +157,14 @@ export const SelectWallet = ({ sessionLookupId }: { sessionLookupId: string }) =
     }
   };
 
-  const walletTypes = useMemo(() => {
-    return Object.entries(capsule.supportedWalletTypes)
-      .sort(a => (wallets[a[0]].some(w => w.isPregen) || isTypeRequired(a[1]) ? -1 : 1))
-      .map(([type]) => type as WalletType);
+  const selectWalletTypes = useMemo<SupportedWalletTypes>(() => {
+    return capsule.supportedWalletTypes.sort(({ type }) => (wallets[type].some(w => w.isPregen) ? -1 : 0));
   }, [wallets, capsule.supportedWalletTypes]);
 
-  const isOnlyOneType = walletTypes.length === 1;
+  const isOnlyOneType = selectWalletTypes.length === 1;
 
   const [selectedWalletIds, setSelectedWalletIds] = useState<CurrentWalletIds>(
-    walletTypes.reduce((acc, type) => {
+    selectWalletTypes.reduce((acc, { type }) => {
       return {
         ...acc,
         [type]: [],
@@ -181,9 +178,9 @@ export const SelectWallet = ({ sessionLookupId }: { sessionLookupId: string }) =
   const [isRecoverySecretSaved, setIsRecoverySecretSaved] = useState(false);
 
   const isIncomplete = isOnlyOneType
-    ? selectedWalletIds[walletTypes[0]].length === 0
-    : walletTypes.reduce((acc, type: WalletType) => {
-        if (isTypeOptional(capsule.supportedWalletTypes[type])) {
+    ? selectedWalletIds[selectWalletTypes[0].type].length === 0
+    : selectWalletTypes.reduce((acc, { type, optional }) => {
+        if (optional) {
           return acc;
         }
 
@@ -308,7 +305,7 @@ export const SelectWallet = ({ sessionLookupId }: { sessionLookupId: string }) =
       ),
       <WalletsContainer>
         <Wallets isAtBottom={isAtBottom} ref={divRef} onScroll={onScroll}>
-          {walletTypes.map((walletType: WalletType) => {
+          {selectWalletTypes.map(({ type: walletType }) => {
             const isCreateNew = selectedWalletIds[walletType][0] === 'CREATE_NEW';
             return (
               <FlexColumn key={walletType}>
@@ -380,10 +377,10 @@ export const SelectWallet = ({ sessionLookupId }: { sessionLookupId: string }) =
 
   useEffect(() => {
     // Situation where user has wallets, but none of the supported type (EVM/SOLANA)
-    if (walletTypes.every(type => wallets[type].length === 0)) {
-      onSubmit(walletTypes.reduce((acc, type) => ({ ...acc, [type]: 'CREATE_NEW' }), {}));
+    if (selectWalletTypes.every(({ type }) => wallets[type].length === 0)) {
+      onSubmit(selectWalletTypes.reduce((acc, { type }) => ({ ...acc, [type]: 'CREATE_NEW' }), {}));
     }
-  }, [wallets, walletTypes]);
+  }, [wallets, selectWalletTypes]);
 
   return (
     <Root>

@@ -40,7 +40,7 @@ const AuthLoginBase = () => {
   const login = useCallback(async () => {
     setStep(AuthLoginStep.WAITING);
     try {
-      await capsule.ctx.capsuleClient.touchSession();
+      await capsule.touchSession();
       await authLogin();
 
       await capsule.userSetupAfterLogin();
@@ -49,16 +49,14 @@ const AuthLoginBase = () => {
 
       const [isWithoutWallets, isOnlyOwnedPartnerWallets] = [
         Object.values(wallets).every(arr => arr.length === 0),
-        Object.keys(capsule.supportedWalletTypes).every(
-          s => wallets[s].length === 1 && wallets[s][0].partnerId === partnerId && !wallets[s][0].pregenIdentifier,
+        capsule.supportedWalletTypes.every(
+          ({ type }) =>
+            wallets[type].length === 1 && wallets[type][0].partnerId === partnerId && !wallets[type][0].pregenIdentifier,
         ),
       ];
 
       const defaultWalletIds = isOnlyOwnedPartnerWallets
-        ? Object.keys(capsule.supportedWalletTypes).reduce(
-            (acc, type) => ({ ...acc, [type]: wallets[type].map(({ id }) => id) }),
-            {},
-          )
+        ? capsule.supportedWalletTypes.reduce((acc, { type }) => ({ ...acc, [type]: wallets[type].map(({ id }) => id) }), {})
         : undefined;
 
       if (!!defaultWalletIds || (isWithoutWallets && !capsule.ctx.apiKey)) {
@@ -95,7 +93,7 @@ const AuthLoginBase = () => {
           window.setTimeout(getTemporaryShares, 2000);
           return;
         }
-        const touchRes = await capsule.ctx.capsuleClient.touchSession();
+        const touchRes = await capsule.touchSession();
         await capsule.setUserId(touchRes.data.userId);
         const fetchedWallets = await capsule.fetchWallets();
         const temporaryShares = (await capsule.getTransmissionKeyShares(true)).data.temporaryShares;
@@ -114,9 +112,9 @@ const AuthLoginBase = () => {
       }
     }
     async function getWebAuthURLForAddDevice() {
-      let touchRes = await capsule.ctx.capsuleClient.touchSession();
+      let touchRes = await capsule.touchSession();
       if (!touchRes.data.sessionLookupId) {
-        touchRes = await capsule.ctx.capsuleClient.touchSession(true);
+        touchRes = await capsule.touchSession(true);
       }
       if (!capsule.loginEncryptionKeyPair) {
         const keyPair = await getAsymmetricKeyPair(capsule.ctx);

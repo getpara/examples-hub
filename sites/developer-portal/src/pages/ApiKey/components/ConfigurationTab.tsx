@@ -8,6 +8,7 @@ import { Environment } from '../../../types/environment';
 import { OnRampConfiguration } from './OnRampConfiguration';
 import { PregenConfiguration } from './PregenConfiguration/PregenConfiguration';
 import { NativePasskeyConfiguration } from './NativePasskeyConfiguration/NativePasskeyConfiguration';
+import { SupportedWalletTypesConfiguration } from './SupportedWalletTypesConfiguration';
 import { PopupConfiguration } from './PopupConfiguration/PopupConfiguration';
 
 export const ConfigurationTab = () => {
@@ -21,6 +22,7 @@ export const ConfigurationTab = () => {
       <NativePasskeyConfiguration />
       <PregenConfiguration />
       <PopupConfiguration />
+      <SupportedWalletTypesConfiguration />
       <OnRampFlowsConfiguration />
       {(apiKeyData?.isBuyEnabled || apiKeyData?.isWithdrawEnabled) && <OnRampConfiguration />}
       <PortalConfiguration />

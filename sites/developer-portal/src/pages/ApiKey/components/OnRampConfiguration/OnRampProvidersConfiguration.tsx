@@ -1,9 +1,9 @@
 import { Controller } from 'react-hook-form';
 import { ON_RAMP_PROVIDERS, OnRampProvider } from '@usecapsule/react-sdk';
 import { ArraySelect } from '../../../../components/ArraySelect/index.js';
-import { CpslIcon, CpslRow, CpslText } from '@usecapsule/react-components';
-import styled from 'styled-components';
-import { GreenSwitch, InnerInput, SectionCard } from './common.js';
+import { CpslRow, CpslText } from '@usecapsule/react-components';
+import { BrandIcon, InnerInput } from './common.js';
+import { SectionCard, GreenSwitch } from '../common.js';
 
 export const OnRampProvidersConfiguration = () => {
   return (
@@ -93,8 +93,3 @@ export const OnRampProvidersConfiguration = () => {
     </SectionCard>
   );
 };
-
-const BrandIcon = styled(CpslIcon)`
-  --width: 20px;
-  --height: 20px;
-`;

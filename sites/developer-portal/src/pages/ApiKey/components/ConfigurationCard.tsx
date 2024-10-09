@@ -1,5 +1,5 @@
 import { CpslButton, CpslIcon, CpslText } from '@usecapsule/react-components';
-import { PropsWithChildren, useState } from 'react';
+import { PropsWithChildren, ReactNode, useState } from 'react';
 import { DocsButton } from '../../../components/DocsButton/DocsButton';
 import { SplitCard, SplitCardInnerContainer } from '../../../components/SplitCard/SplitCard';
 import styled from 'styled-components';
@@ -8,7 +8,7 @@ import { LearnMoreButton } from '../../../components/LearnMoreButton/LearnMoreBu
 
 interface ConfigurationCardProps extends PropsWithChildren {
   title: string;
-  subtitle?: string;
+  subtitle?: ReactNode;
   docsLink: string;
   defaultOpen?: boolean;
   disableCollapse?: boolean;

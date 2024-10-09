@@ -1,4 +1,4 @@
-import {
+import Client, {
   BackupKitEmailProps,
   CurrentWalletIds,
   EmailTheme,
@@ -34,7 +34,7 @@ import * as transmissionUtils from './transmission/transmissionUtils.js';
 import { PlatformUtils } from './PlatformUtils.js';
 import { sendRecoveryForShare } from './shares/recovery.js';
 import parsePhoneNumberFromString, { CountryCallingCode } from 'libphonenumber-js';
-import { getCosmosAddress, isCosmosWithPrefix, truncateAddress } from './utils/formattingUtils.js';
+import { getCosmosAddress, truncateAddress } from './utils/formattingUtils.js';
 import { TransactionReviewDenied, TransactionReviewError, TransactionReviewTimeout } from './errors.js';
 
 const CORE_CAPSULE_VERSION = process.env.CORE_CAPSULE_VERSION;
@@ -64,17 +64,13 @@ export type SupportedWalletTypeConfig = {
   optional?: boolean;
 };
 
-export type SupportedWalletTypesOpt = {
+export type deprecated__SupportedWalletTypesOpt = {
   [WalletType.EVM]?: boolean | SupportedWalletTypeConfig;
   [WalletType.SOLANA]?: boolean | SupportedWalletTypeConfig;
   [WalletType.COSMOS]?: boolean | (SupportedWalletTypeConfig & { prefix?: string });
 };
 
-export type SupportedWalletTypes = {
-  [WalletType.EVM]?: SupportedWalletTypeConfig;
-  [WalletType.SOLANA]?: SupportedWalletTypeConfig;
-  [WalletType.COSMOS]?: SupportedWalletTypeConfig & { prefix?: string };
-};
+export type SupportedWalletTypes = { type: WalletType; optional?: boolean }[];
 
 // Make sure to keep this in sync with capsule-org/src/entities/recoveryAttemptEntity.ts
 export enum RecoveryStatus {
@@ -193,8 +189,9 @@ export interface ConstructorOpts {
    * Which type of wallet your application supports, in the form `{ [WalletType]: true }`. Currently allowed values for `WalletType` are `'EVM'`, `'SOLANA'`, or `'COSMOS'`.
    *
    * To specify which prefix to use for new Cosmos wallets, pass `{ COSMOS: { prefix: 'your-prefix' } }`. Defaults to `'cosmos'`.
+   * @deprecated Configure your app's supported wallet types in the Capsule Developer Portal.
    */
-  supportedWalletTypes?: SupportedWalletTypesOpt;
+  supportedWalletTypes?: deprecated__SupportedWalletTypesOpt;
   /**
    * If `true`, the SDK will use the device's temporary session storage instead of saving user and wallet data to local storage.
    */
@@ -233,10 +230,8 @@ function toQueryString(obj: Record<string, string>) {
     .join('');
 }
 
-export function isWalletSupported(types: SupportedWalletTypes | WalletType[], wallet: Omit<Wallet, 'signer'>): boolean {
-  return (Array.isArray(types) ? types : Object.keys(types)).some(
-    (walletType: WalletType) => !!WalletSchemeTypeMap[wallet.scheme][walletType],
-  );
+export function isWalletSupported(types: WalletType[], wallet: Omit<Wallet, 'signer'>): boolean {
+  return types.some((walletType: WalletType) => !!WalletSchemeTypeMap[wallet.scheme][walletType]);
 }
 
 function getSchemes(types: WalletTypeProp[] | SupportedWalletTypes): WalletScheme[] {
@@ -262,12 +257,8 @@ export function getEquivalentTypes(types: WalletTypeProp[] | WalletTypeProp): Wa
   return getWalletTypes(getSchemes((Array.isArray(types) ? types : [types]).map(t => WalletType[t])));
 }
 
-export function isTypeRequired(value: undefined | boolean | SupportedWalletTypeConfig): value is true | { optional: false } {
-  return !!value && (value === true || !value.optional);
-}
-
-export function isTypeOptional(value: undefined | boolean | SupportedWalletTypeConfig): value is { optional: true } {
-  return !value || (value !== true && value.optional === true);
+export function isCosmosRequired(supportedWalletTypes: SupportedWalletTypes): boolean {
+  return supportedWalletTypes.some(({ type, optional }) => type === WalletType.COSMOS && !optional);
 }
 export abstract class CoreCapsule {
   static version?: string = CORE_CAPSULE_VERSION;
@@ -292,10 +283,10 @@ export abstract class CoreCapsule {
   currentWalletIds: CurrentWalletIds = {};
 
   get currentWalletIdsArray(): [string, WalletType][] {
-    return Object.entries(this.currentWalletIds).reduce((acc, [type, ids]) => {
+    return this.supportedWalletTypes.reduce((acc, { type }) => {
       return [
         ...acc,
-        ...ids.map(id => {
+        ...(this.currentWalletIds[type] ?? []).map(id => {
           return [id, type];
         }),
       ];
@@ -409,7 +400,17 @@ export abstract class CoreCapsule {
 
   private disableProviderModal?: boolean;
 
-  readonly supportedWalletTypes: SupportedWalletTypes;
+  #supportedWalletTypes: SupportedWalletTypes | undefined = undefined;
+
+  get supportedWalletTypes(): SupportedWalletTypes {
+    return this.#supportedWalletTypes ?? [];
+  }
+
+  get isWalletTypeEnabled(): Partial<Record<WalletType, boolean>> {
+    return this.supportedWalletTypes.reduce((acc, { type }) => {
+      return { ...acc, [type]: true };
+    }, {});
+  }
 
   private platformUtils: PlatformUtils;
 
@@ -487,7 +488,7 @@ export abstract class CoreCapsule {
   }
 
   private isWalletSupported(wallet: Omit<Wallet, 'signer'>): boolean {
-    return isWalletSupported(this.supportedWalletTypes, wallet);
+    return isWalletSupported(this.supportedWalletTypes.map(({ type }) => type) ?? [], wallet);
   }
 
   private isWalletOwned(wallet: Wallet): boolean {
@@ -536,7 +537,7 @@ export abstract class CoreCapsule {
       } else if (!isOwned && !isUnclaimed) {
         error = `wallet with id ${wallet.id} is not owned by the current user`;
       } else if (!this.isWalletSupported(wallet)) {
-        error = `wallet with id ${wallet.id} and type ${wallet.type} is not supported, supported types are: ${Object.keys(this.supportedWalletTypes).join(', ')}`;
+        error = `wallet with id ${wallet.id} and type ${wallet.type} is not supported, supported types are: ${this.supportedWalletTypes.map(({ type }) => type).join(', ')}`;
       } else if (
         types &&
         (!getEquivalentTypes(types).includes(wallet.type) ||
@@ -586,7 +587,7 @@ export abstract class CoreCapsule {
 
     switch (wallet.type) {
       case WalletType.COSMOS:
-        str = getCosmosAddress(wallet.publicKey!, this.cosmosPrefix);
+        str = getCosmosAddress(wallet.publicKey!, this.cosmosPrefix ?? 'cosmos');
         break;
       default:
         str = wallet.address;
@@ -651,35 +652,6 @@ export abstract class CoreCapsule {
 
     this.platformUtils = this.getPlatformUtils();
     this.disableProviderModal = this.platformUtils.disableProviderModal;
-    // Only one type per instance for now
-    this.supportedWalletTypes = opts.supportedWalletTypes
-      ? ((() => {
-          for (const key of Object.keys(opts.supportedWalletTypes)) {
-            this.assertIsValidWalletType(key, opts.supportedWalletTypes);
-          }
-
-          if (Object.values(opts.supportedWalletTypes).every(config => isTypeOptional(config))) {
-            throw new Error('at least one wallet type must be non-optional');
-          }
-
-          return Object.entries(opts.supportedWalletTypes).reduce((acc, [key, value]) => {
-            if (!value) {
-              return acc;
-            }
-
-            return {
-              ...acc,
-              [key]:
-                value === true
-                  ? { optional: false }
-                  : {
-                      ...value,
-                      optional: value.optional ?? false,
-                    },
-            };
-          }, {});
-        })() as SupportedWalletTypes)
-      : { [WalletType.EVM]: { optional: false } };
 
     if (opts.useStorageOverrides) {
       this.localStorageGetItem = opts.localStorageGetItemOverride;
@@ -758,6 +730,37 @@ export abstract class CoreCapsule {
 
     this.setWallets(wallets);
 
+    // Support legacy supportedWalletTypes
+    try {
+      this.#supportedWalletTypes = opts.supportedWalletTypes
+        ? ((() => {
+            if (
+              Object.values(opts.supportedWalletTypes).every(
+                config => !!config && typeof config === 'object' && config.optional,
+              )
+            ) {
+              throw new Error('at least one wallet type must be non-optional');
+            }
+
+            if (
+              !Object.keys(opts.supportedWalletTypes).every(type => Object.values(WalletType).includes(<WalletType>type))
+            ) {
+              throw new Error('unsupported wallet type');
+            }
+
+            return Object.entries(opts.supportedWalletTypes).reduce((acc, [key, value]) => {
+              if (!value) {
+                return acc;
+              }
+
+              return [...acc, { type: key, optional: value === true ? true : (value.optional ?? false) }];
+            }, []);
+          })() as SupportedWalletTypes)
+        : undefined;
+    } catch (e) {
+      this.#supportedWalletTypes = undefined;
+    }
+
     // TODO: Improve not great check
     const _currentWalletIds = (this.localStorageGetItem(LOCAL_STORAGE_CURRENT_WALLET_IDS) as string) ?? undefined;
     const currentWalletIds = [undefined, null, 'undefined'].includes(_currentWalletIds)
@@ -766,13 +769,13 @@ export abstract class CoreCapsule {
           const fromJson = JSON.parse(_currentWalletIds);
 
           return Array.isArray(fromJson)
-            ? Object.keys(this.supportedWalletTypes).reduce((acc: CurrentWalletIds, type: WalletType) => {
+            ? Object.keys(WalletType).reduce((acc: CurrentWalletIds, type: WalletType) => {
                 const wallet = Object.values(this.wallets).find(
                   w => fromJson.includes(w.id) && WalletSchemeTypeMap[w.scheme][type],
                 );
                 return {
                   ...acc,
-                  ...(wallet ? { [type]: [wallet.id] } : {}),
+                  ...(wallet && !acc[type] ? { [type]: [wallet.id] } : {}),
                 };
               }, {})
             : fromJson;
@@ -809,6 +812,30 @@ export abstract class CoreCapsule {
     this.currentExternalWalletAddresses = _currentExternalWalletAddresses
       ? JSON.parse(_currentExternalWalletAddresses)
       : undefined;
+  }
+
+  async touchSession(regenerate = false): Promise<Awaited<ReturnType<Client['touchSession']>>> {
+    const res = await this.ctx.capsuleClient.touchSession(regenerate);
+
+    this.setSupportedWalletTypes(res.data.supportedWalletTypes, res.data.cosmosPrefix);
+
+    return res;
+  }
+
+  private setSupportedWalletTypes(supportedWalletTypes?: SupportedWalletTypes, cosmosPrefix?: string): void {
+    if (supportedWalletTypes && !this.#supportedWalletTypes) {
+      this.#supportedWalletTypes = supportedWalletTypes;
+
+      Object.keys(this.currentWalletIds).forEach((type: WalletType) => {
+        if (!this.#supportedWalletTypes?.some(({ type: supportedType }) => supportedType === type)) {
+          delete this.currentWalletIds[type];
+        }
+      });
+    }
+
+    if (cosmosPrefix && !this.cosmosPrefix) {
+      this.cosmosPrefix = cosmosPrefix;
+    }
   }
 
   private getVerificationEmailProps(): VerificationEmailProps {
@@ -871,6 +898,8 @@ export abstract class CoreCapsule {
     if (loginEncryptionKey && loginEncryptionKey !== 'undefined') {
       this.loginEncryptionKeyPair = this.convertEncryptionKeyPair(JSON.parse(loginEncryptionKey));
     }
+
+    await this.touchSession();
   }
 
   /**
@@ -1042,9 +1071,7 @@ export abstract class CoreCapsule {
   /**
    * The prefix for the instance's managed Cosmos wallets. Defaults to `'cosmos'`.
    */
-  get cosmosPrefix(): string {
-    return isCosmosWithPrefix(this.supportedWalletTypes) ? this.supportedWalletTypes.COSMOS.prefix : 'cosmos';
-  }
+  cosmosPrefix?: string;
 
   /**
    * Validates that a wallet ID is present on the instance, usable, and matches the desired filters.
@@ -1170,32 +1197,49 @@ export abstract class CoreCapsule {
     this.isWalletUsable(walletId, condition, true);
   }
 
-  private assertIsValidWalletType(
-    type: string,
-    supportedWalletTypes: SupportedWalletTypes | SupportedWalletTypesOpt = this.supportedWalletTypes,
-  ): WalletType {
-    if (!type || !Object.values(WalletType).includes(<WalletType>type) || !supportedWalletTypes[<WalletType>type]) {
+  private async assertIsValidWalletType(type: string, walletTypes?: WalletType[]): Promise<WalletType> {
+    if (!this.#supportedWalletTypes) {
+      await this.touchSession();
+    }
+
+    if (
+      !type ||
+      !Object.values(WalletType).includes(<WalletType>type) ||
+      !(walletTypes ?? this.supportedWalletTypes.map(({ type }) => type)).includes(<WalletType>type)
+    ) {
       throw new Error(`wallet type ${type} is not supported`);
     }
 
     return <WalletType>type;
   }
 
-  private getMissingTypes(): WalletType[] {
+  private async getMissingTypes(): Promise<WalletType[]> {
+    if (!this.#supportedWalletTypes) {
+      await this.touchSession();
+    }
+
     return <WalletType[]>(
-      Object.keys(this.supportedWalletTypes).filter(t =>
-        Object.values(this.wallets).every(w => !WalletSchemeTypeMap[w.scheme][t]),
-      )
+      this.supportedWalletTypes
+        .filter(
+          ({ type: t, optional }) => !optional && Object.values(this.wallets).every(w => !WalletSchemeTypeMap[w.scheme][t]),
+        )
+        .map(({ type }) => type)
     );
   }
 
-  private getTypesToCreate(types: WalletType[] = this.getMissingTypes()): WalletType[] {
-    return getSchemes(types).map(scheme => {
+  private async getTypesToCreate(types?: WalletType[]): Promise<WalletType[]> {
+    if (!this.#supportedWalletTypes) {
+      await this.touchSession();
+    }
+
+    return getSchemes(types ?? (await this.getMissingTypes())).map(scheme => {
       switch (scheme) {
         case WalletScheme.ED25519:
           return WalletType.SOLANA;
         default:
-          return isTypeRequired(this.supportedWalletTypes.COSMOS) ? WalletType.COSMOS : WalletType.EVM;
+          return this.supportedWalletTypes.some(({ type, optional }) => type === WalletType.COSMOS && !optional)
+            ? WalletType.COSMOS
+            : WalletType.EVM;
       }
     });
   }
@@ -1245,7 +1289,6 @@ export abstract class CoreCapsule {
       portalTextColor: this.portalTextColor,
       portalPrimaryButtonTextColor: this.portalPrimaryButtonTextColor,
       isForNewDevice: isForNewDevice ? isForNewDevice.toString() : undefined,
-      supportedWalletTypes: this.supportedWalletTypes ? JSON.stringify(this.supportedWalletTypes) : undefined,
     });
   }
 
@@ -1631,7 +1674,7 @@ export abstract class CoreCapsule {
       return true;
     }
 
-    const res = await this.ctx.capsuleClient.touchSession();
+    const res = await this.touchSession();
 
     return !!res.data.isAuthenticated;
   }
@@ -1674,7 +1717,7 @@ export abstract class CoreCapsule {
     } else if (type === 'farcaster') {
       await this.setFarcasterUsername(identifier);
     }
-    const res = await this.ctx.capsuleClient.touchSession(true);
+    const res = await this.touchSession(true);
     if (!this.loginEncryptionKeyPair) {
       const keyPair = await getAsymmetricKeyPair(this.ctx);
       await this.setLoginEncryptionKeyPair(keyPair);
@@ -1704,7 +1747,7 @@ export abstract class CoreCapsule {
    **/
   async initiateUserLoginForPhone(phone: string, countryCode: CountryCallingCode, useShortURL?: boolean): Promise<string> {
     await this.setPhoneNumber(phone, countryCode);
-    const res = await this.ctx.capsuleClient.touchSession(true);
+    const res = await this.touchSession(true);
     if (!this.loginEncryptionKeyPair) {
       const keyPair = await getAsymmetricKeyPair(this.ctx);
       await this.setLoginEncryptionKeyPair(keyPair);
@@ -1726,6 +1769,8 @@ export abstract class CoreCapsule {
    * Waits for the session to be active.
    **/
   async waitForAccountCreation(): Promise<boolean> {
+    await this.touchSession();
+
     // Remove external wallets if creating an account with Capsule
     this.currentExternalWalletAddresses = undefined;
     this.externalWallets = {};
@@ -1770,7 +1815,7 @@ export abstract class CoreCapsule {
 
     if (pregenWallets.length > 0) {
       recoverySecret = await this.claimPregenWallets(pregenIdentifier, pregenIdentifierType);
-      walletIds = Object.keys(this.supportedWalletTypes).reduce((acc: CurrentWalletIds, type) => {
+      walletIds = this.supportedWalletTypes.reduce((acc: CurrentWalletIds, { type }) => {
         return {
           ...acc,
           [type]: [pregenWallets.find(w => !!WalletSchemeTypeMap[w.scheme][type])?.id],
@@ -1788,7 +1833,7 @@ export abstract class CoreCapsule {
 
   async getFarcasterConnectURL(): Promise<string> {
     await this.logout();
-    await this.ctx.capsuleClient.touchSession(true);
+    await this.touchSession(true);
     const {
       data: { connect_uri },
     } = await this.ctx.capsuleClient.initializeFarcasterLogin();
@@ -1823,7 +1868,7 @@ export abstract class CoreCapsule {
 
   async getOAuthURL(oAuthMethod: OAuthMethod): Promise<string> {
     await this.logout();
-    const res = await this.ctx.capsuleClient.touchSession(true);
+    const res = await this.touchSession(true);
     return `${getBaseUrl(this.ctx.env)}auth/${oAuthMethod.toLowerCase()}?sessionLookupId=${encodeURIComponent(res.data.sessionLookupId)}`;
   }
 
@@ -1836,7 +1881,7 @@ export abstract class CoreCapsule {
       try {
         await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS));
 
-        const res = await this.ctx.capsuleClient.touchSession();
+        const res = await this.touchSession();
         if (res.data.userId) {
           const { userId, email } = res.data;
           await this.setUserId(userId);
@@ -1933,7 +1978,7 @@ export abstract class CoreCapsule {
    * @returns - web auth url for refreshing session
    **/
   async refreshSession(shouldOpenPopup: boolean): Promise<string> {
-    const res = await this.ctx.capsuleClient.touchSession(true);
+    const res = await this.touchSession(true);
     if (!this.loginEncryptionKeyPair) {
       const keyPair = await getAsymmetricKeyPair(this.ctx);
       await this.setLoginEncryptionKeyPair(keyPair);
@@ -1953,7 +1998,7 @@ export abstract class CoreCapsule {
    * internally.
    **/
   async userSetupAfterLogin(): Promise<{ data: { partnerId?: string; needsWallet?: boolean; sessionLookupId: string } }> {
-    const res = await this.ctx.capsuleClient.touchSession();
+    const res = await this.touchSession();
     await this.setUserId(res.data.userId);
 
     if (res.data.currentWalletIds && res.data.currentWalletIds !== this.currentWalletIds)
@@ -1969,7 +2014,7 @@ export abstract class CoreCapsule {
    * @returns - transmission keyshares.
    **/
   async getTransmissionKeyShares(isForNewDevice?: boolean): Promise<any> {
-    const res = await this.ctx.capsuleClient.touchSession();
+    const res = await this.touchSession();
     const sessionLookupId = isForNewDevice ? `${res.data.sessionLookupId}-new-device` : res.data.sessionLookupId;
     return this.ctx.capsuleClient.getTransmissionKeyshares(this.userId, sessionLookupId);
   }
@@ -1994,7 +2039,7 @@ export abstract class CoreCapsule {
 
     await this.deleteLoginEncryptionKeyPair();
     await this.populateWalletAddresses();
-    await this.ctx.capsuleClient.touchSession(!skipSessionRefresh);
+    await this.touchSession(!skipSessionRefresh);
   }
 
   /**
@@ -2103,18 +2148,18 @@ export abstract class CoreCapsule {
    **/
   async createWalletPerType(
     skipDistribute = false,
-    types: WalletType[] = this.getMissingTypes(),
+    types?: WalletType[],
   ): Promise<{ wallets: Wallet[]; walletIds: CurrentWalletIds; recoverySecret?: string }> {
     const wallets: Wallet[] = [];
     const walletIds: CurrentWalletIds = {};
     let recoverySecret: string;
 
-    for (const type of this.getTypesToCreate(types)) {
+    for (const type of await this.getTypesToCreate(types)) {
       const [wallet, recoveryShare] = await this.createWallet(type, skipDistribute);
       wallets.push(wallet);
 
       getEquivalentTypes(type)
-        .filter(t => !!this.supportedWalletTypes[t])
+        .filter(t => !!this.isWalletTypeEnabled[t])
         .forEach(t => {
           walletIds[t] = [wallet.id];
         });
@@ -2170,12 +2215,14 @@ export abstract class CoreCapsule {
    * @returns [wallet, recoveryShare]
    **/
   async createWallet(
-    _type: WalletType = <WalletType>Object.keys(this.supportedWalletTypes)[0],
+    _type?: WalletType,
     skipDistribute = false,
     _customFunction?: (params?: any) => void,
   ): Promise<[Wallet, string | null]> {
     this.requireApiKey();
-    const walletType = this.assertIsValidWalletType(_type);
+    const walletType = await this.assertIsValidWalletType(
+      _type ?? this.supportedWalletTypes.find(({ optional }) => !optional)?.type,
+    );
 
     let signer: string;
     let wallet: Wallet;
@@ -2239,12 +2286,14 @@ export abstract class CoreCapsule {
    * @returns [wallet, recoveryShare]
    **/
   async createWalletPreGen(
-    _type: WalletType = <WalletType>Object.keys(this.supportedWalletTypes)[0],
+    _type: WalletType = this.supportedWalletTypes.find(({ optional }) => !optional)?.type,
     pregenIdentifier: string,
     pregenIdentifierType: PregenIdentifierType = PregenIdentifierType.EMAIL,
   ): Promise<Wallet> {
     this.requireApiKey();
-    const walletType = this.assertIsValidWalletType(_type);
+    const walletType = await this.assertIsValidWalletType(
+      _type ?? this.supportedWalletTypes.find(({ optional }) => !optional)?.type,
+    );
 
     let keygenRes;
     switch (walletType) {
@@ -2285,7 +2334,7 @@ export abstract class CoreCapsule {
   /**
    * Creates new pregenerated wallets for each desired type.
    * If no types are provided, this method will create one for each of the non-optional types
-   * specified in the instance's `supportedWalletTypes` object that are not already present.
+   * specified in the instance's `supportedWalletTypes` array that are not already present.
    *
    * @param {string} pregenIdentifier the identifier to associate each wallet with.
    * @param {PregenIdentifierType} pregenIdentifierType - either `'EMAIL'` or `'PHONE'`.
@@ -2295,10 +2344,10 @@ export abstract class CoreCapsule {
   async createPregenWalletPerType(
     pregenIdentifier: string,
     pregenIdentifierType: PregenIdentifierType = PregenIdentifierType.EMAIL,
-    types = this.getMissingTypes(),
+    types?: WalletType[],
   ): Promise<Wallet[]> {
     const wallets = [];
-    for (const type of this.getTypesToCreate(types)) {
+    for (const type of await this.getTypesToCreate(types)) {
       const wallet = await this.createWalletPreGen(type, pregenIdentifier, pregenIdentifierType);
 
       wallets.push(wallet);
@@ -2470,7 +2519,7 @@ export abstract class CoreCapsule {
   }
 
   private async getTransactionReviewUrl(transactionId: string): Promise<string> {
-    const res = await this.ctx.capsuleClient.touchSession();
+    const res = await this.touchSession();
     const commonQueryParams = await this.getCommonQueryParams(res.data.partnerId);
 
     return `${getPortalBaseURL(this.ctx)}/web/users/${

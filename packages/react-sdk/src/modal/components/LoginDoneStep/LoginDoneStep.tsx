@@ -27,7 +27,7 @@ export const LoginDoneStep = ({ onClose }: LoginDoneStep) => {
           <ExternalWalletCard address={capsule.currentExternalWalletAddresses?.[0]} />
         ) : (
           capsule.currentWalletIdsArray.map(([id, type]) => {
-            return <WalletCard key={id} id={id} type={type} />;
+            return <WalletCard key={`${id}-${type}`} id={id} type={type} />;
           })
         )}
       </WalletCards>

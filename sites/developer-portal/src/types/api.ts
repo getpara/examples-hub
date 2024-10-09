@@ -1,4 +1,4 @@
-import { Network, OnRampAsset, OnRampAssetInfo, OnRampProvider } from '@usecapsule/react-sdk';
+import { Network, OnRampAsset, OnRampAssetInfo, OnRampProvider, SupportedWalletTypes } from '@usecapsule/react-sdk';
 import { Environment } from './environment';
 
 type Nullable<T> = { [K in keyof T]: T[K] | null };
@@ -147,6 +147,8 @@ export type ApiKey = {
   themeMode: ThemeMode | null;
   transactionPopupsEnabled: boolean;
   origins: string[] | null;
+  supportedWalletTypes: SupportedWalletTypes;
+  cosmosPrefix: string;
 };
 
 export type ApiKeyResponse = { key: ApiKey };
@@ -202,6 +204,8 @@ export type UpdateApiKeyBody = Nullable<
       | 'themeMode'
       | 'transactionPopupsEnabled'
       | 'origins'
+      | 'supportedWalletTypes'
+      | 'cosmosPrefix'
     >
   >
 >;

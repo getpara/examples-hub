@@ -9,7 +9,10 @@ axios.create = vi.fn(() => {
     patch: vi.fn((...args) => {
       throw new Error(`axios.patch unexpected API call: ${args}`);
     }),
-    post: vi.fn((...args) => {
+    post: vi.fn(async (...args) => {
+      if (args[0].includes('/touch')) {
+        return { data: { supportedWalletTypes: [{ type: 'EVM' }], cosmosPrefix: 'cosmos' } };
+      }
       throw new Error(`axios.post unexpected API call: ${args}`);
     }),
     delete: vi.fn((...args) => {

@@ -1,6 +1,6 @@
 import { describe, vi, afterEach, expect, it } from 'vitest';
 
-import CoreCapsule, { Environment, WalletType } from '../../src';
+import CoreCapsule, { Environment } from '../../src';
 import { API_KEY, EXTERNAL_WALLET, STORED_EXTERNAL_WALLET } from '../constants';
 import { MockCapsule } from '../mocks/mockCoreCapsule';
 import { mockExternalWalletLogin } from '../mocks/mockUserManagementClient';
@@ -22,7 +22,7 @@ describe('CoreCapsule', () => {
       expect(capsule.currentExternalWalletAddresses).toBeUndefined();
 
       // casting as any to access protected fields
-      expect((capsule as any).supportedWalletTypes).toEqual({ [WalletType.EVM]: { optional: false } });
+      expect((capsule as any).supportedWalletTypes).toEqual([]);
     });
   });
   describe('external wallets', () => {

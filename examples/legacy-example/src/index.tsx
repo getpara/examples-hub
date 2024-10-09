@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
 import ReactDOM from 'react-dom/client';
 import { Box, Button, ChakraProvider, Checkbox, Container, HStack, Input, Select, Text, VStack } from '@chakra-ui/react';
@@ -26,7 +26,7 @@ import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
 import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
 import * as solana from '@solana/web3.js';
-import Capsule, { isCosmosWithPrefix } from '@usecapsule/web-sdk';
+import Capsule from '@usecapsule/web-sdk';
 import { CapsuleModal, OAuthMethod, ModalStep, ModalStepProp, ExternalWallet } from '@usecapsule/react-sdk';
 import { FeeMarketEIP1559Transaction } from '@ethereumjs/tx';
 import { CapsuleProtoSigner } from '@usecapsule/cosmjs-v0-integration';
@@ -38,7 +38,6 @@ import CoreCapsule, {
   ConstructorOpts,
   PregenIdentifierType,
   getBaseUrl,
-  SupportedWalletTypes,
   WalletType,
   TransactionReviewDenied,
   TransactionReviewTimeout,
@@ -418,7 +417,7 @@ function WagmiComponent({ capsule }: { capsule: Capsule }): JSX.Element {
 
 async function sendEthersTransaction(capsule: Capsule, tx: any): Promise<void> {
   console.log('sending ethers tx:\n', tx);
-  const currentWalletId = capsule.currentWalletIds?.EVM?.[0];
+  const currentWalletId = capsule?.currentWalletIds?.EVM?.[0];
   if (!currentWalletId) {
     return;
   }
@@ -436,7 +435,7 @@ async function sendEthersTransaction(capsule: Capsule, tx: any): Promise<void> {
 
 async function sendEthersMintNFTTransaction(capsule: Capsule, tx: any): Promise<void> {
   console.log('sending ethers tx:\n', tx);
-  const currentWalletId = capsule.currentWalletIds?.EVM?.[0];
+  const currentWalletId = capsule?.currentWalletIds?.EVM?.[0];
   if (!currentWalletId) {
     return;
   }
@@ -531,10 +530,6 @@ function App() {
   const [font, setFont] = useLocalStorage('@EXAMPLE-CAPSULE/font', 'inter');
   const [logoVariant, setLogoVariant] = useLocalStorage('@EXAMPLE-CAPSULE/logoVariant', 'branded');
 
-  const [supportedWalletTypes, setSupportedWalletTypes] = useLocalStorage<SupportedWalletTypes>(
-    '@EXAMPLE-CAPSULE/supportedWalletTypes',
-    { EVM: {} },
-  );
   const [externalWallets, setExternalWallets] = useLocalStorage('@EXAMPLE-CAPSULE/externalWallets', []);
   const [onRampTestMode, setOnRampTestMode] = useLocalStorage('@EXAMPLE-CAPSULE/onRampTestMode', true);
 
@@ -566,36 +561,41 @@ function App() {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [currentStepOverride, setCurrentStepOverride] = useState<ModalStepProp | undefined>(undefined);
 
+  const [capsule, setCapsule] = useState<Capsule | undefined>();
   const [capsuleError, setCapsuleError] = useState<Error | undefined>();
 
-  const capsule = useMemo<Capsule | undefined>(() => {
-    let capsule;
-    try {
-      capsule = new Capsule(selectedEnv, selectedApiKey, {
-        ...getCapsuleOpts(selectedEnv, useDKLS),
-        homepageUrl,
-        xUrl: 'https://twitter.com/usecapsule',
-        linkedinUrl: 'https://www.linkedin.com/company/usecapsule',
-        supportUrl: 'mailto:support@usecapsule.com',
-        portalTheme: useTheme ? { backgroundColor, foregroundColor } : undefined,
-        supportedWalletTypes: Object.keys(supportedWalletTypes).length > 0 ? supportedWalletTypes : undefined,
-      });
-      setCapsuleError(undefined);
-    } catch (e) {
-      console.error(e);
+  useEffect(() => {
+    async function create() {
+      try {
+        const _capsule = new Capsule(selectedEnv, selectedApiKey, {
+          ...getCapsuleOpts(selectedEnv, useDKLS),
+          homepageUrl,
+          xUrl: 'https://twitter.com/usecapsule',
+          linkedinUrl: 'https://www.linkedin.com/company/usecapsule',
+          supportUrl: 'mailto:support@usecapsule.com',
+          portalTheme: useTheme ? { backgroundColor, foregroundColor } : undefined,
+        });
+        await _capsule.touchSession();
+        setCapsuleError(undefined);
+        return _capsule;
+      } catch (e) {
+        console.error(e);
 
-      setCapsuleError(e);
+        setCapsuleError(e);
+        throw new Error(e);
+      }
     }
-    return capsule;
-  }, [selectedEnv, useDKLS, selectedApiKey, foregroundColor, backgroundColor, useTheme, homepageUrl, supportedWalletTypes]);
 
-  const isMultiWallet = Object.values(supportedWalletTypes).length > 1;
+    create().then(setCapsule);
+  }, [selectedEnv, useDKLS, selectedApiKey, foregroundColor, backgroundColor, useTheme, homepageUrl]);
+
+  const isMultiWallet = Object.values(capsule?.supportedWalletTypes ?? []).length > 1;
 
   const [[walletType, walletId], setWallet] = useState<[WalletType | undefined, string | undefined]>(
     (() => {
       try {
         if (capsule) {
-          const walletId = capsule.findWalletId();
+          const walletId = capsule?.findWalletId();
           return [capsule.wallets[walletId]?.type, walletId];
         }
         return [undefined, undefined];
@@ -608,8 +608,12 @@ function App() {
   const [, setCapsuleToString] = useState(capsule?.toString());
 
   function updateToString() {
-    setCapsuleToString(capsule.toString());
+    setCapsuleToString(capsule?.toString());
   }
+
+  useEffect(() => {
+    updateToString();
+  }, [capsule?.supportedWalletTypes, capsule?.cosmosPrefix]);
 
   async function checkIsSessionActive() {
     const isFullyLoggedIn = await capsule?.isSessionActive();
@@ -626,7 +630,7 @@ function App() {
 
   useEffect(() => {
     checkIsSessionActive();
-  }, []);
+  }, [capsule]);
 
   useEffect(() => {
     async function fetchPartners() {
@@ -678,12 +682,12 @@ function App() {
 
   const handleDeleteClick = async () => {
     setDeleteButtonDisabled(true);
-    if (!(await capsule.isFullyLoggedIn())) {
+    if (!(await capsule?.isFullyLoggedIn())) {
       throw new Error('Need to be fully loggedIn to delete user.');
     }
-    const res = await capsule.ctx.capsuleClient.deleteSelf((capsule as CoreCapsule).getUserId());
+    const res = await capsule?.ctx.capsuleClient.deleteSelf((capsule as CoreCapsule).getUserId());
 
-    await capsule.logout();
+    await capsule?.logout();
 
     const userEmail = res.data.email;
     setEmailPendingDeletion(userEmail);
@@ -714,7 +718,7 @@ function App() {
     console.log('handle sign message');
     try {
       const provider = new ethers.JsonRpcProvider(ALCHEMY_SEPOLIA_PROVIDER, 'sepolia');
-      const ethersSigner = new CapsuleEthersSigner(capsule, provider, capsule.findWalletId(walletId, { type: ['EVM'] }));
+      const ethersSigner = new CapsuleEthersSigner(capsule, provider, capsule?.findWalletId(walletId, { type: ['EVM'] }));
       console.log('signing message..');
       const messageSignature = await ethersSigner.signMessage(messageToSign);
       console.log('message signature:', messageSignature);
@@ -917,74 +921,6 @@ function App() {
                   </Select>
                 </HStack>
               </VStack>
-              <HStack verticalAlign={'top'}>
-                <Text width={'15%'}>
-                  <strong>Supported Wallet Types:</strong>
-                </Text>
-                <VStack alignItems="flex-start">
-                  {['EVM', 'SOLANA', 'COSMOS'].map(walletType => (
-                    <HStack h="2rem" cursor="pointer" alignItems="center">
-                      <HStack w="8rem">
-                        <Checkbox
-                          name={walletType}
-                          id={`checkbox-${walletType}`}
-                          isChecked={!!supportedWalletTypes[walletType]}
-                          onChange={e => {
-                            if (e.currentTarget.checked) {
-                              setSupportedWalletTypes(prev => ({
-                                ...(prev ?? {}),
-                                [walletType]: {},
-                              }));
-                            } else {
-                              setSupportedWalletTypes(({ [walletType]: _, ...prev }) => prev);
-                              pregenType === walletType && setPregenType('missing');
-                            }
-                          }}
-                        />
-                        <label htmlFor={`checkbox-${walletType}`}>{walletType}</label>
-                      </HStack>
-
-                      {!!supportedWalletTypes[walletType] && (
-                        <>
-                          <HStack w="8rem">
-                            <Checkbox
-                              name="Optional?"
-                              id={`checkbox-${walletType}-optional`}
-                              isDisabled={!isMultiWallet}
-                              isChecked={!!supportedWalletTypes[walletType]?.optional}
-                              onChange={e => {
-                                setSupportedWalletTypes(prev => ({
-                                  ...prev,
-                                  [walletType]: {
-                                    ...(prev[walletType] || {}),
-                                    optional: e.currentTarget.checked ? true : false,
-                                  },
-                                }));
-                              }}
-                            />
-                            <label htmlFor={`checkbox-${walletType}-optional`}>Optional?</label>
-                          </HStack>
-                          {walletType === 'COSMOS' && (
-                            <HStack>
-                              <Text>Prefix:</Text>
-                              <Input
-                                placeholder="cosmos"
-                                onChange={e => {
-                                  setSupportedWalletTypes(prev => ({
-                                    ...prev,
-                                    COSMOS: e.target.value.length > 0 ? { ...prev.COSMOS, prefix: e.target.value } : {},
-                                  }));
-                                }}
-                                value={isCosmosWithPrefix(supportedWalletTypes) ? supportedWalletTypes.COSMOS.prefix : ''}
-                              />
-                            </HStack>
-                          )}
-                        </>
-                      )}
-                    </HStack>
-                  ))}
-                </VStack>
-              </HStack>
               <HStack>
                 <Text width={'15%'}>
                   <strong>External Wallets:</strong>
@@ -1037,7 +973,7 @@ function App() {
                     <Button
                       colorScheme="green"
                       onClick={async () => {
-                        await capsule.logout(true);
+                        await capsule?.logout(true);
                         setIsSessionActive(false);
                       }}
                     >
@@ -1060,8 +996,8 @@ function App() {
                     <Button
                       colorScheme="teal"
                       onClick={async () => {
-                        const newShare = await capsule.distributeNewWalletShare(
-                          capsule.findWalletId(walletId),
+                        const newShare = await capsule?.distributeNewWalletShare(
+                          capsule?.findWalletId(walletId),
                           undefined,
                           true,
                         );
@@ -1081,14 +1017,14 @@ function App() {
                         }}
                         value={pregenEmail}
                       />
-                      {Object.keys(supportedWalletTypes).length > 1 && (
+                      {capsule?.supportedWalletTypes.length > 1 && (
                         <select value={pregenType} onChange={e => setPregenType(e.currentTarget.value)}>
                           <option key="missing" value="missing">
                             MISSING
                           </option>
-                          {Object.keys(supportedWalletTypes).map(walletType => (
-                            <option key={walletType} value={walletType}>
-                              {walletType}
+                          {capsule?.supportedWalletTypes.map(({ type }) => (
+                            <option key={type} value={type}>
+                              {type}
                             </option>
                           ))}
                         </select>
@@ -1097,7 +1033,7 @@ function App() {
                     <Button
                       colorScheme="teal"
                       onClick={async () => {
-                        await capsule.createPregenWalletPerType(
+                        await capsule?.createPregenWalletPerType(
                           pregenEmail,
                           PregenIdentifierType.EMAIL,
                           pregenType === 'missing' ? undefined : [pregenType],
@@ -1116,14 +1052,14 @@ function App() {
                         }}
                         value={pregenPhone}
                       />
-                      {Object.keys(supportedWalletTypes).length > 1 && (
+                      {capsule?.supportedWalletTypes.length > 1 && (
                         <select value={pregenType} onChange={e => setPregenType(e.currentTarget.value)}>
                           <option key="missing" value="missing">
                             MISSING
                           </option>
-                          {Object.keys(supportedWalletTypes).map(walletType => (
-                            <option key={walletType} value={walletType}>
-                              {walletType}
+                          {capsule?.supportedWalletTypes.map(({ type }) => (
+                            <option key={type} value={type}>
+                              {type}
                             </option>
                           ))}
                         </select>
@@ -1134,7 +1070,7 @@ function App() {
                       onClick={async () => {
                         const formattedNumber = stringToPhoneNumber(pregenPhone);
 
-                        await capsule.createPregenWalletsPerType(
+                        await capsule?.createPregenWalletsPerType(
                           formattedNumber,
                           PregenIdentifierType.PHONE,
                           pregenType === 'missing' ? undefined : [pregenType],
@@ -1147,7 +1083,7 @@ function App() {
                     <Button
                       colorScheme="teal"
                       onClick={async () => {
-                        await capsule.updateWalletEmailPreGen(pregenEmail);
+                        await capsule?.updateWalletEmailPreGen(pregenEmail);
 
                         updateToString();
                       }}
@@ -1171,7 +1107,7 @@ function App() {
                         flex={1}
                         colorScheme="teal"
                         onClick={() => {
-                          setPregenUserShare(capsule.getUserShare());
+                          setPregenUserShare(capsule?.getUserShare());
                         }}
                       >
                         Save
@@ -1181,7 +1117,7 @@ function App() {
                         colorScheme="teal"
                         disabled={}
                         onClick={async () => {
-                          await capsule.setUserShare(pregenUserShare);
+                          await capsule?.setUserShare(pregenUserShare);
 
                           updateToString();
                         }}
@@ -1193,8 +1129,8 @@ function App() {
                     <Button
                       colorScheme="teal"
                       onClick={async () => {
-                        await capsule.setUserShare(pregenUserShare);
-                        console.log(await capsule.claimPregenWallet(pregenEmail));
+                        await capsule?.setUserShare(pregenUserShare);
+                        console.log(await capsule?.claimPregenWallet(pregenEmail));
                         updateToString();
                       }}
                     >
@@ -1203,9 +1139,9 @@ function App() {
                     <Button
                       colorScheme="teal"
                       onClick={async () => {
-                        await capsule.setUserShare(pregenUserShare);
+                        await capsule?.setUserShare(pregenUserShare);
                         const formattedNumber = stringToPhoneNumber(pregenPhone);
-                        console.log(await capsule.claimPregenWallets(formattedNumber, PregenIdentifierType.PHONE));
+                        console.log(await capsule?.claimPregenWallets(formattedNumber, PregenIdentifierType.PHONE));
                         updateToString();
                       }}
                     >
@@ -1258,7 +1194,7 @@ function App() {
                       >
                         {(() => {
                           try {
-                            return capsule.getDisplayAddress(walletId, { addressType: walletType });
+                            return capsule?.getDisplayAddress(walletId, { addressType: walletType });
                           } catch (e) {
                             return 'none';
                           }
@@ -1333,9 +1269,9 @@ function App() {
                       colorScheme="teal"
                       isDisabled={!isEvm}
                       onClick={async () => {
-                        const currentWalletId = capsule.currentWalletIds?.[0];
+                        const currentWalletId = capsule?.currentWalletIds?.[0];
                         const tx = {
-                          from: capsule.wallets?.[currentWalletId]?.address,
+                          from: capsule?.wallets?.[currentWalletId]?.address,
                           to: txToAddress,
                           value: web3.utils.toWei(txValue, 'gwei'),
                           gasLimit: txGasAmount,
@@ -1379,9 +1315,9 @@ function App() {
                     <Button
                       colorScheme={'teal'}
                       onClick={async () => {
-                        const currentWalletId = capsule.currentWalletIds?.[0];
+                        const currentWalletId = capsule?.currentWalletIds?.[0];
                         const tx = await createTransaction(
-                          capsule.wallets?.[currentWalletId]?.address,
+                          capsule?.wallets?.[currentWalletId]?.address,
                           MINTER_CONTRACT_ADDRESS,
                           MINT_PRICE,
                           '140000',
@@ -1403,8 +1339,8 @@ function App() {
                     <Button
                       colorScheme="red"
                       onClick={async () => {
-                        await capsule.logout();
-                        await capsule.clearStorage();
+                        await capsule?.logout();
+                        await capsule?.clearStorage();
 
                         updateToString();
                       }}
@@ -1422,36 +1358,38 @@ function App() {
             </VStack>
           )}
         </Container>
-        <CapsuleModal
-          isOpen={modalIsOpen}
-          capsule={capsule}
-          appName={(partners || []).find(({ apiKey }) => apiKey === selectedApiKey)?.displayName || 'Example'}
-          onClose={handleOnClose}
-          oAuthMethods={[
-            OAuthMethod.GOOGLE,
-            OAuthMethod.FACEBOOK,
-            OAuthMethod.APPLE,
-            OAuthMethod.TWITTER,
-            OAuthMethod.DISCORD,
-            OAuthMethod.FARCASTER,
-          ]}
-          onRampTestMode={onRampTestMode}
-          twoFactorAuthEnabled
-          theme={
-            useTheme
-              ? {
-                  mode: isDarkTheme ? 'dark' : 'light',
-                  backgroundColor,
-                  foregroundColor,
-                  borderRadius,
-                  font,
-                  oAuthLogoVariant: logoVariant,
-                }
-              : {}
-          }
-          logo={logo !== '' ? logo : undefined}
-          currentStepOverride={currentStepOverride ?? undefined}
-        />
+        {capsule && (
+          <CapsuleModal
+            isOpen={modalIsOpen}
+            capsule={capsule}
+            appName={(partners || []).find(({ apiKey }) => apiKey === selectedApiKey)?.displayName || 'Example'}
+            onClose={handleOnClose}
+            oAuthMethods={[
+              OAuthMethod.GOOGLE,
+              OAuthMethod.FACEBOOK,
+              OAuthMethod.APPLE,
+              OAuthMethod.TWITTER,
+              OAuthMethod.DISCORD,
+              OAuthMethod.FARCASTER,
+            ]}
+            onRampTestMode={onRampTestMode}
+            twoFactorAuthEnabled
+            theme={
+              useTheme
+                ? {
+                    mode: isDarkTheme ? 'dark' : 'light',
+                    backgroundColor,
+                    foregroundColor,
+                    borderRadius,
+                    font,
+                    oAuthLogoVariant: logoVariant,
+                  }
+                : {}
+            }
+            logo={logo !== '' ? logo : undefined}
+            currentStepOverride={currentStepOverride ?? undefined}
+          />
+        )}
       </ChakraProvider>
     </>
   );
@@ -2134,4 +2072,5 @@ const MINTER_CONTRACT_ABI = [
 ];
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
+
 root.render(<App />);

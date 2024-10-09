@@ -96,7 +96,7 @@ function TransactionReview() {
   }
 
   async function performSetup() {
-    const res = await capsule.ctx.capsuleClient.touchSession();
+    const res = await capsule.touchSession();
     const partnerId = res.data.partnerId;
 
     let pendingTransaction, partner, decodedTx, txData;

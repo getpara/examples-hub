@@ -35,7 +35,6 @@ export const CapsuleContext = createContext<Capsule>(undefined as unknown as Cap
  *   environment="DEV"
  *   apiKey="my-api-key"
  *   options={{
- *     supportedWalletTypes: { SOLANA: true },
  *     useSessionStorage: true,
  *   }}
  * >

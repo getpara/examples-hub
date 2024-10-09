@@ -2,15 +2,20 @@ import { Controller } from 'react-hook-form';
 import { Network, OnRampAsset, getOnRampNetworks } from '@usecapsule/react-sdk';
 import { ArraySelect } from '../../../../../components/ArraySelect/index.js';
 import { useOnRampAllAssets } from '../../../../../hooks/api/queries/useOnRampAssets.js';
-import { SectionCard } from '../common.js';
+import { SectionCard } from '../../common.js';
 import { CpslIcon, CpslSelect as _CpslSelect, CpslTab, CpslTabs } from '@usecapsule/react-components';
 import { CpslTabsCustomEvent, TabsChangedEventDetail } from '@usecapsule/core-components';
 import { useOnRampConfigFormData } from '../../../hooks/useOnRampConfigFormData.js';
 import { useState } from 'react';
 import _ from 'lodash';
 import { NetworkAssetSelector, TABS, WatchTab } from './components.js';
+import { useGetOrganizationKey } from '../../../../../hooks/api/queries/useOrganizationKeys.js';
+import { useParams } from 'react-router-dom';
+import { Environment } from '../../../../../types/environment.js';
 
 export const OnRampAssetsConfiguration = () => {
+  const { apiKey, env, projectId } = useParams();
+  const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
   const { data: allAssets, isLoading } = useOnRampAllAssets();
   const form = useOnRampConfigFormData();
 
@@ -20,8 +25,7 @@ export const OnRampAssetsConfiguration = () => {
   return (
     <SectionCard
       title="On-Ramp Assets"
-      subtitle="Configure which assets you want to offer in your modal. The configured providers will limit users to purchasing or selling these assets only.
-"
+      subtitle="Configure which assets you want to offer in your modal. The configured providers will limit users to purchasing or selling these assets only."
       // TODO: customize the docs link
     >
       {allAssets && !isLoading && (
@@ -118,16 +122,28 @@ export const OnRampAssetsConfiguration = () => {
                       );
                     }}
                     rowAdd={() => {
-                      return (
+                      const networkOptions = Object.values(Network).filter(
+                        n =>
+                          n !== Network.SEPOLIA &&
+                          (!value || !value[n]) &&
+                          apiKeyData?.supportedWalletTypes.some(({ type }) => !!allAssets[type]?.[n]),
+                      );
+
+                      return networkOptions.length > 0 ? (
                         <NetworkAssetSelector
                           assetInfo={allAssets}
                           onChangeNetwork={network => {
                             if (!network) return;
                             onChange({ ...value, [network]: true });
                           }}
-                          networkOptions={Object.values(Network).filter(n => n !== Network.SEPOLIA && (!value || !value[n]))}
+                          networkOptions={Object.values(Network).filter(
+                            n =>
+                              n !== Network.SEPOLIA &&
+                              (!value || !value[n]) &&
+                              apiKeyData?.supportedWalletTypes.some(({ type }) => !!allAssets[type]?.[n]),
+                          )}
                         />
-                      );
+                      ) : undefined;
                     }}
                   />
                 )}

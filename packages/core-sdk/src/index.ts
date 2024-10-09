@@ -1,11 +1,4 @@
-import {
-  CoreCapsule,
-  PREFIX as STORAGE_PREFIX,
-  PregenIdentifierType,
-  isWalletSupported,
-  isTypeOptional,
-  isTypeRequired,
-} from './CoreCapsule.js';
+import { CoreCapsule, PREFIX as STORAGE_PREFIX, PregenIdentifierType, isWalletSupported } from './CoreCapsule.js';
 
 export {
   type CurrentWalletIds,
@@ -50,7 +43,7 @@ export * from './utils/pollingUtils.js';
 export * from './errors.js';
 export * from './utils/formattingUtils.js';
 export { retrieve as transmissionUtilsRetrieve } from './transmission/transmissionUtils.js';
-export { STORAGE_PREFIX, PregenIdentifierType, isWalletSupported, isTypeOptional, isTypeRequired };
+export { STORAGE_PREFIX, PregenIdentifierType, isWalletSupported };
 
 export const capsuleVersion = CoreCapsule.version;
 export default CoreCapsule;

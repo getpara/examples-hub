@@ -1,5 +1,3 @@
-import { WalletType } from '@usecapsule/user-management-client';
-import { SupportedWalletTypeConfig, SupportedWalletTypes } from '../CoreCapsule';
 import { toBech32 } from '@cosmjs/encoding';
 import { sha256 } from '@noble/hashes/sha256';
 import { ripemd160 } from '@noble/hashes/ripemd160';
@@ -47,12 +45,6 @@ export function hexToDecimal(hex: string): string {
 
 export function decimalToHex(decimal: string): Hex {
   return `0x${parseInt(decimal).toString(16)}`;
-}
-
-export function isCosmosWithPrefix(
-  supportedWalletTypes: SupportedWalletTypes,
-): supportedWalletTypes is { [WalletType.COSMOS]: SupportedWalletTypeConfig & { prefix: string } } {
-  return !!(supportedWalletTypes as { [WalletType.COSMOS]: { prefix: string } })[WalletType.COSMOS]?.prefix;
 }
 
 function compressPubkey(pubkey: Uint8Array): Uint8Array {

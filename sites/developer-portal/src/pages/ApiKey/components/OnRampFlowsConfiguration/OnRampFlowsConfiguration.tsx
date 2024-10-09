@@ -8,7 +8,7 @@ import { EnabledFlow } from '@usecapsule/react-sdk';
 import { DOCS_LINK } from '../../../../utils/constants';
 import { ConfigurationCard } from '../ConfigurationCard';
 import { FormProvider } from 'react-hook-form';
-import { Save } from '../Save';
+import { ConfigurationActions } from '../ConfigurationActions';
 
 const lookup = {
   [EnabledFlow.BUY]: 'isBuyEnabled',
@@ -45,7 +45,7 @@ export const OnRampFlowsConfiguration = () => {
             />
           );
         })}
-        <Save />
+        <ConfigurationActions />
       </FormProvider>
     </ConfigurationCard>
   );

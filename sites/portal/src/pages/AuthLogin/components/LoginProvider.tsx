@@ -113,6 +113,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
   ]);
 
   const fetchWallets = useCallback(async (): Promise<Wallets> => {
+    await capsule.touchSession();
     const _wallets = (await capsule.fetchWallets()).filter(({ pregenIdentifier }) => !pregenIdentifier);
 
     const email = capsule.getEmail();
@@ -149,8 +150,8 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
         };
       });
 
-    const wallets = Object.keys(capsule.supportedWalletTypes).reduce(
-      (obj, type: WalletType) => ({
+    const wallets = capsule.supportedWalletTypes.reduce(
+      (obj, { type }) => ({
         ...obj,
         [type]: allWallets
           .filter(wallet => isWalletSupported([type], entityToWallet(wallet)))

@@ -18,13 +18,12 @@ defineCustomElements();
 const App = () => {
   const [searchParams] = useSearchParams();
   const apiKey = searchParams.get('apiKey') || undefined;
-  const supportedWalletTypes = JSON.parse(decodeURIComponent(searchParams.get('supportedWalletTypes')) || `{ "EVM": true }`);
 
   return (
     <CapsuleProvider
       apiKey={apiKey}
       environment={ENV}
-      options={{ supportedWalletTypes, useSessionStorage: true }}
+      options={{ useSessionStorage: true }}
       onMount={capsule => capsule.clearStorage('local')}
     >
       <Routes>

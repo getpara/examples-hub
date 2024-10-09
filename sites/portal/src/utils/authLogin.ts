@@ -96,7 +96,7 @@ export async function authUpdateKeyShares(
   }
 
   if (!partnerId) {
-    const touchRes = await capsule.ctx.capsuleClient.touchSession();
+    const touchRes = await capsule.touchSession();
     partnerId = touchRes.data.partnerId;
   }
 

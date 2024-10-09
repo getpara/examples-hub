@@ -3,7 +3,7 @@ import { CpslIcon, CpslRow } from '@usecapsule/react-components';
 import { Reorder, useDragControls } from 'framer-motion';
 import styled from 'styled-components';
 
-export function Row<T extends { toString: () => string }>({
+export function Row<T>({
   children,
   isOrderable = false,
   value,
@@ -48,6 +48,7 @@ export function Row<T extends { toString: () => string }>({
       value={value?.toString()}
       dragListener={false}
       dragControls={controls}
+      layout="position"
     >
       {Content}
     </Reorder.Item>
