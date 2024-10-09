@@ -44,6 +44,8 @@ class MockSessionStorage implements StorageUtils {
 }
 
 export class MockPlatformUtils implements PlatformUtils {
+  refresh = vi.fn().mockReturnValue({});
+
   getPrivateKey = vi.fn().mockReturnValue('getPrivateKey');
 
   keygen = vi.fn().mockReturnValue({});
