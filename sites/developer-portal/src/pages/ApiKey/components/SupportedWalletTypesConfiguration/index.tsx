@@ -142,22 +142,26 @@ export const SupportedWalletTypesConfiguration = () => {
                                 (supportedWalletTypes as SupportedWalletTypes).find(entry => entry.type === type)
                                   ?.optional ?? false;
 
+                              const onClick = (isChecked: boolean) => {
+                                const newValue = (supportedWalletTypes as SupportedWalletTypes).map(entry =>
+                                  entry.type === type ? { ...entry, optional: isChecked } : entry,
+                                );
+
+                                setSupportedWalletTypes(newValue);
+                              };
+
                               return (
                                 <Controls>
                                   {isMulti && (
-                                    <Required>
+                                    <Required isOptional={isOptional} onClick={() => onClick(!isOptional)}>
                                       <CpslText style={{ flex: '1 1', fontSize: '14px' }} variant="bodyM">
-                                        {isOptional ? 'Optional' : 'Required'}
+                                        Required
                                       </CpslText>
                                       <GreenSwitch
                                         checked={!isOptional}
                                         onClick={e => {
-                                          const isChecked = e.currentTarget.checked;
-                                          const newValue = (supportedWalletTypes as SupportedWalletTypes).map(entry =>
-                                            entry.type === type ? { ...entry, optional: isChecked } : entry,
-                                          );
-
-                                          setSupportedWalletTypes(newValue);
+                                          e.stopPropagation();
+                                          onClick(e.currentTarget.checked);
                                         }}
                                       />
                                     </Required>
@@ -202,12 +206,14 @@ export const SupportedWalletTypesConfiguration = () => {
   );
 };
 
-const Required = styled(CpslRow)`
+const Required = styled(CpslRow)<{ isOptional?: boolean }>`
+  cursor: pointer;
   align-items: center;
   flex: 1;
   border: 1px solid #bbb;
   border-radius: 12px;
   padding: 8px 12px;
+  --color-override: ${({ isOptional }) => (isOptional ? '#bbb' : 'auto')};
 `;
 
 const Row = styled(CpslRow)`
