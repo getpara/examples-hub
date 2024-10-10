@@ -6,6 +6,20 @@
       ],
       "target" : {
         "namespace" : "android_app",
+        "package_name" : "app.decharge.c2e",
+        "sha256_cert_fingerprints" : [
+          "FA:C6:17:45:DC:09:03:78:6F:B9:ED:E6:2A:96:2B:39:9F:73:48:F0:BB:6F:89:9B:83:32:66:75:91:03:3B:9C",
+          "95:8E:55:14:B5:0B:68:89:01:28:17:95:BB:A3:EF:2A:CE:19:FA:E7:74:2D:83:AD:22:14:3A:13:B7:8A:55:D1"
+        ]
+      }
+    },
+    {
+      "relation" : [
+        "delegate_permission/common.handle_all_urls",
+        "delegate_permission/common.get_login_creds"
+      ],
+      "target" : {
+        "namespace" : "android_app",
         "package_name" : "com.scriptscrypt.gopilot",
         "sha256_cert_fingerprints" : [
           "41:96:64:FB:B1:4C:18:15:96:C2:86:E3:D2:FB:81:09:B6:CF:D9:FA:50:0A:10:22:C6:1D:63:6D:4D:DF:9E:C0"
