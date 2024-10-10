@@ -1,6 +1,6 @@
 import { PropsWithChildren, createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import * as utils from '../../../utils/authLogin';
-import { useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { useCapsule } from '../../../components/CapsuleContext';
 import { CountryCallingCode } from 'libphonenumber-js';
 import { entityToWallet, isWalletSupported, PregenIdentifierType, WalletEntity, WalletType } from '@usecapsule/core-sdk';
@@ -14,6 +14,7 @@ const NOOP = () => {
 type LoginParams = {
   email?: string;
   phone?: string;
+  userId?: string;
   countryCode?: CountryCallingCode;
   farcasterUsername?: string;
   encryptionKey?: string;
@@ -48,6 +49,7 @@ export const LoginContext = createContext<Login>({
 export const LoginProvider = ({ children }: PropsWithChildren) => {
   const capsule = useCapsule();
   const [searchParams] = useSearchParams();
+  const { userId } = useParams();
   const closeWindow = useCloseWindow();
 
   const params: LoginParams = useMemo(() => {
@@ -69,6 +71,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
     return {
       email: paramsEmail,
       phone: paramsPhone,
+      userId: userId ?? undefined,
       countryCode: paramsCountryCode,
       farcasterUsername: paramsFarcasterUsername,
       encryptionKey: paramsEncryptionKey,
@@ -82,7 +85,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
     };
   }, [searchParams]);
 
-  const [loginRes, setLoginRes] = useState<[string, string, any] | undefined>();
+  const [loginRes, setLoginRes] = useState<Awaited<ReturnType<typeof utils.authLogin>> | undefined>();
   const [wallets, setWallets] = useState<Wallets>();
 
   const authLogin = useCallback(async (): Promise<void> => {
@@ -182,7 +185,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
       return;
     }
 
-    const [userId, userHandle, signature] = loginRes;
+    const { userId, userHandle, signature } = loginRes;
 
     await utils.authUpdateKeyShares(
       capsule,

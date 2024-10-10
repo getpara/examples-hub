@@ -6,6 +6,7 @@ import {
   OnRampAsset,
   OnRampConfig,
   OnRampProvider,
+  OnRampPurchaseType,
   toAssetInfoArray,
   WalletType,
 } from '@usecapsule/web-sdk';
@@ -31,15 +32,21 @@ import { useActiveWallet } from '../../hooks/useActiveWallet.js';
 import { ModalStep } from '../../utils/steps.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useExternalWallets } from '../../providers/ExternalWalletContext.js';
-import { getNetworkFromChainId, getNetworkOrMainNetEquivalent } from '../../utils/onRamps.js';
+import { getNetworkFromChainId, getNetworkOrMainNetEquivalent } from '@usecapsule/react-common';
 import { formatNetworkList } from '../../utils/stringFormatters.js';
 import styled from 'styled-components';
 
 export type Tab = EnabledFlow;
 
-const TABS: [Tab, keyof Pick<OnRampConfig, 'isBuyEnabled' | 'isReceiveEnabled'>, IconType, ReactNode][] = [
+const TABS: [
+  Tab,
+  keyof Pick<OnRampConfig, 'isBuyEnabled' | 'isReceiveEnabled' | 'isWithdrawEnabled'>,
+  IconType,
+  ReactNode,
+][] = [
   [EnabledFlow.BUY, 'isBuyEnabled', 'creditCard', 'Buy'],
   [EnabledFlow.RECEIVE, 'isReceiveEnabled', 'qrCode', 'Receive'],
+  [EnabledFlow.WITHDRAW, 'isWithdrawEnabled', 'arrowCircleBrokenDownLeft', 'Withdraw'],
 ];
 
 const GENERIC_WALLET = {
@@ -82,6 +89,7 @@ export const AddFunds = () => {
     if (!onRampConfig || !activeWallet) {
       return [[], [], {}];
     }
+    const action = tab === EnabledFlow.BUY ? OnRampPurchaseType.BUY : OnRampPurchaseType.SELL;
 
     const detectedNetwork = getNetworkFromChainId(chainId);
     const isExternal = activeWallet.isExternal && !!detectedNetwork;
@@ -110,7 +118,7 @@ export const AddFunds = () => {
             type === activeWallet.type &&
             allowedNetworks.includes(network) &&
             (!allowedAssetsLookup[network] || allowedAssetsLookup[network].includes(asset)) &&
-            !!validProviders[id]
+            !!validProviders[id]?.[1]?.[action]
           );
         });
 
@@ -123,7 +131,7 @@ export const AddFunds = () => {
     );
 
     return [allowedNetworks, [...new Set(Object.values(allowedAssetsLookup).flat())], isProviderAllowed];
-  }, [activeWallet?.type, activeWallet?.isExternal, onRampConfig.assetInfo, onRampConfig.allowedAssets, chainId]);
+  }, [activeWallet?.type, activeWallet?.isExternal, tab, onRampConfig.assetInfo, onRampConfig.allowedAssets, chainId]);
 
   useEffect(() => {
     setOnRampPurchase(undefined);
@@ -141,6 +149,10 @@ export const AddFunds = () => {
     );
   }
 
+  useEffect(() => {
+    setOnRampPurchase(undefined);
+  }, []);
+
   return (
     <StepContainer>
       {isMultiFlow && (
@@ -156,7 +168,7 @@ export const AddFunds = () => {
         </InnerStepContainer>
       )}
       <>
-        {tab === EnabledFlow.BUY ? (
+        {[EnabledFlow.BUY, EnabledFlow.WITHDRAW].includes(tab) ? (
           <>
             <Heading variant="headingS" weight="bold">
               Choose Provider
@@ -184,22 +196,28 @@ export const AddFunds = () => {
                         onClick={async () => {
                           if (!activeWallet?.type) return;
 
-                          const newOnRampPurchase = await capsule.ctx.capsuleClient.createOnRampPurchase({
-                            userId: capsule.getUserId(),
-                            [activeWallet.isExternal ? 'externalWalletAddress' : 'walletId']: activeWallet.id,
-                            walletType: activeWallet.type,
-                            provider: id,
-                            networks: allowedNetworks,
-                            assets: allowedAssets,
-                            defaultNetwork: onRampConfig.defaultOnRampNetwork,
-                            defaultAsset: onRampConfig.defaultOnRampAsset,
-                            fiatAmount: onRampConfig.defaultBuyAmount?.[0],
-                            testMode: onRampConfig.testMode,
+                          const isPopup = id === OnRampProvider.MOONPAY;
+
+                          const { onRampPurchase: newOnRampPurchase } = await capsule.initiateOnRampTransaction({
+                            walletId: activeWallet.isExternal ? undefined : activeWallet.id,
+                            externalWalletAddress: activeWallet.isExternal ? activeWallet.id : undefined,
+                            shouldOpenPopup: isPopup,
+                            params: {
+                              type: tab === EnabledFlow.BUY ? OnRampPurchaseType.BUY : OnRampPurchaseType.SELL,
+                              walletType: activeWallet.type,
+                              provider: id,
+                              networks: allowedNetworks,
+                              assets: allowedAssets,
+                              defaultNetwork: onRampConfig.defaultOnRampNetwork,
+                              defaultAsset: onRampConfig.defaultOnRampAsset,
+                              fiatQuantity: onRampConfig.defaultBuyAmount?.[0],
+                              testMode: onRampConfig.testMode,
+                            },
                           });
 
-                          setOnRampPurchase({ ...newOnRampPurchase, fiatCurrency: 'USD' });
+                          setOnRampPurchase({ ...newOnRampPurchase, fiat: 'USD' });
 
-                          setStep(ModalStep.ADD_FUNDS_AWAITING);
+                          !isPopup && setStep(ModalStep.ADD_FUNDS_AWAITING);
                         }}
                       />
                     </motion.div>
@@ -259,6 +277,7 @@ const SpinnerContainer = styled(StepContainer)`
 
 const $InnerStepContainer = styled(InnerStepContainer)`
   position: relative;
+  min-height: 270px;
 `;
 
 const NoProviders = styled(CpslText)<{ isHidden?: boolean }>`

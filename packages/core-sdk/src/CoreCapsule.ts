@@ -9,7 +9,12 @@ import Client, {
   WalletEntity,
   WalletType,
   WalletScheme,
+  WalletParams,
+  OnRampPurchaseCreateParams,
+  OnRampPurchase,
+  extractWalletRef,
 } from '@usecapsule/user-management-client';
+import qs from 'qs';
 import type { pki as pkiType, jsbn as jsbnType } from 'node-forge';
 import forge from 'node-forge';
 const { pki, jsbn } = forge;
@@ -1003,7 +1008,11 @@ export abstract class CoreCapsule {
    * Sets the login encryption key pair associated with the `CoreCapsule` instance.
    * @param keyPair - Encryption key pair generated from loginEncryptionKey.
    */
-  async setLoginEncryptionKeyPair(keyPair: pkiType.rsa.KeyPair): Promise<void> {
+  async setLoginEncryptionKeyPair(keyPair?: pkiType.rsa.KeyPair): Promise<void> {
+    if (!keyPair) {
+      keyPair = await getAsymmetricKeyPair(this.ctx);
+    }
+
     this.loginEncryptionKeyPair = keyPair;
     await this.sessionStorageSetItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR, JSON.stringify(keyPair));
   }
@@ -1055,6 +1064,7 @@ export abstract class CoreCapsule {
   ): Promise<void> {
     this.currentWalletIds = currentWalletIds;
 
+    await this.localStorageSetItem(LOCAL_STORAGE_CURRENT_WALLET_IDS, JSON.stringify(currentWalletIds));
     if (sessionLookupId) {
       await this.ctx.capsuleClient.setCurrentWalletIds(
         this.getUserId(),
@@ -1062,8 +1072,6 @@ export abstract class CoreCapsule {
         needsWallet,
         sessionLookupId,
       );
-    } else {
-      await this.localStorageSetItem(LOCAL_STORAGE_CURRENT_WALLET_IDS, JSON.stringify(currentWalletIds));
     }
     typeof window !== 'undefined' && window.dispatchEvent(new Event(CURRENT_WALLET_IDS_CHANGE_EVENT));
   }
@@ -1274,7 +1282,7 @@ export abstract class CoreCapsule {
   }
 
   private async getCommonQueryParams(partnerId?: string, isForNewDevice?: boolean): Promise<string> {
-    const partner = partnerId ? (await this.ctx.capsuleClient.getPartner(partnerId)).data : undefined;
+    const partner: PartnerEntity = partnerId ? (await this.ctx.capsuleClient.getPartner(partnerId)).data : undefined;
 
     return toQueryString({
       apiKey: this.ctx.apiKey,
@@ -1719,8 +1727,7 @@ export abstract class CoreCapsule {
     }
     const res = await this.touchSession(true);
     if (!this.loginEncryptionKeyPair) {
-      const keyPair = await getAsymmetricKeyPair(this.ctx);
-      await this.setLoginEncryptionKeyPair(keyPair);
+      await this.setLoginEncryptionKeyPair();
     }
 
     const webAuthLoginURL = await this.getWebAuthURLForLogin(
@@ -1749,8 +1756,7 @@ export abstract class CoreCapsule {
     await this.setPhoneNumber(phone, countryCode);
     const res = await this.touchSession(true);
     if (!this.loginEncryptionKeyPair) {
-      const keyPair = await getAsymmetricKeyPair(this.ctx);
-      await this.setLoginEncryptionKeyPair(keyPair);
+      await this.setLoginEncryptionKeyPair();
     }
 
     const webAuthLoginURL = await this.getWebAuthURLForLoginForPhone(
@@ -1980,8 +1986,7 @@ export abstract class CoreCapsule {
   async refreshSession(shouldOpenPopup: boolean): Promise<string> {
     const res = await this.touchSession(true);
     if (!this.loginEncryptionKeyPair) {
-      const keyPair = await getAsymmetricKeyPair(this.ctx);
-      await this.setLoginEncryptionKeyPair(keyPair);
+      await this.setLoginEncryptionKeyPair();
     }
 
     const link = await this.getWebAuthURLForLogin(res.data.sessionId, getPublicKeyHex(this.loginEncryptionKeyPair));
@@ -2527,6 +2532,26 @@ export abstract class CoreCapsule {
     }/transaction-review/${transactionId}?email=${encodeURIComponent(this.email)}${commonQueryParams}`;
   }
 
+  private async getOnRampTransactionUrl({
+    purchaseId,
+    ...walletParams
+  }: { purchaseId: string } & WalletParams): Promise<string> {
+    const res = await this.ctx.capsuleClient.touchSession();
+    const commonQueryParams = await this.getCommonQueryParams(res.data.partnerId);
+    const [key, identifier] = extractWalletRef(walletParams);
+
+    const params = qs.stringify(
+      {
+        [key]: identifier,
+        currentWalletIds: JSON.stringify(this.currentWalletIds),
+        sessionId: res.data.sessionId,
+      },
+      { addQueryPrefix: true },
+    );
+
+    return `${getPortalBaseURL(this.ctx)}/web/users/${this.userId}/on-ramp-transaction/${purchaseId}${params}${commonQueryParams}`;
+  }
+
   /**
    * Signs a message.
    *
@@ -2747,6 +2772,42 @@ export abstract class CoreCapsule {
 
   isProviderModalDisabled(): boolean {
     return !!this.disableProviderModal;
+  }
+
+  /**
+   * Starts a on-ramp or off-ramp transaction and returns the Capsule Portal link for the user to finalize and complete it.
+   * @param {Object} options - the options for the transaction.
+   * @param {OnRampPurchaseCreateParams} options.params - the transaction settings.
+   * @param {boolean} options.shouldOpenPopup - if `true`, a popup window with the link will be opened.
+   * @param {string} options.walletId - the wallet ID to use for the transaction, where funds will be sent or withdrawn.
+   * @param {string} options.externalWalletAddress - the external wallet address to send funds to or withdraw funds from, if using an external wallet.
+   **/
+  async initiateOnRampTransaction(
+    options: WalletParams & { params: OnRampPurchaseCreateParams; shouldOpenPopup?: boolean },
+  ): Promise<{
+    onRampPurchase: OnRampPurchase;
+    portalUrl: string;
+  }> {
+    const { params, shouldOpenPopup, ...walletParams } = options;
+
+    const onRampPurchase = await this.ctx.capsuleClient.createOnRampPurchase({
+      userId: this.userId,
+      params: {
+        ...params,
+        address:
+          walletParams.externalWalletAddress ??
+          this.getDisplayAddress(walletParams.walletId, { addressType: params.walletType }),
+      },
+      ...walletParams,
+    });
+
+    const portalUrl = await this.getOnRampTransactionUrl({ purchaseId: onRampPurchase.id, ...walletParams });
+
+    if (shouldOpenPopup) {
+      this.platformUtils.openPopup(portalUrl, { type: PopupType.ON_RAMP_TRANSACTION });
+    }
+
+    return { onRampPurchase, portalUrl };
   }
 
   /**

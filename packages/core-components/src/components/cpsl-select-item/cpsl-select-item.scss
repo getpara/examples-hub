@@ -16,11 +16,17 @@
 
   display: block;
   font-family: $font-family-base;
+  color: var(--cpsl-color-text-primary);
   cursor: pointer;
 }
 
 .inner-container {
-  @include padding(var(--container-padding-top), var(--container-padding-end), var(--container-padding-bottom), var(--container-padding-start));
+  @include padding(
+    var(--container-padding-top),
+    var(--container-padding-end),
+    var(--container-padding-bottom),
+    var(--container-padding-start)
+  );
 
   background-color: var(--container-background-color);
 
@@ -31,7 +37,12 @@
 }
 
 .outer-container {
-  @include padding(var(--outer-container-padding-top), var(--outer-container-padding-end), var(--outer-container-padding-bottom), var(--outer-container-padding-start));
+  @include padding(
+    var(--outer-container-padding-top),
+    var(--outer-container-padding-end),
+    var(--outer-container-padding-bottom),
+    var(--outer-container-padding-start)
+  );
 
   background-color: var(--container-background-color);
 

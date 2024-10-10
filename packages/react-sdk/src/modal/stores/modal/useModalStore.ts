@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { ModalStep } from '../../utils/steps.js';
 import { getActions } from './actions.js';
-import { Network, OnRampConfig as OnRampConfigBase, OnRampPurchase, WalletType } from '@usecapsule/web-sdk';
+import { OnRampConfig as OnRampConfigBase, OnRampPurchase, WalletType } from '@usecapsule/web-sdk';
 import { Tab as AddFundsTabType } from '../../components/AddFunds/AddFunds.js';
 
 type Flow = 'login' | 'signUp' | 'account';
@@ -25,7 +25,6 @@ interface ModalState {
   onModalStepChange: (value: OnModalStepChangeValue) => void | undefined;
   onRampConfig: OnRampConfig | undefined;
   onRampPurchase: Partial<OnRampPurchase> | undefined;
-  networks: Network[];
   loginWindow: Window | undefined;
   isFullyLoggedIn: boolean;
   accountAddFundTab?: AddFundsTabType;
@@ -50,7 +49,6 @@ export interface ModalActions {
   setOnModalStepChange: (fn: (value: OnModalStepChangeValue) => void) => void;
   setOnRampConfig: (_: OnRampConfig | undefined) => void;
   setOnRampPurchase: (_: Partial<OnRampPurchase> | undefined) => void;
-  setNetworks: (_: Network[] | undefined) => void;
   setLoginWindow: (_: Window | undefined) => void;
   setIsFullyLoggedIn: (isFullyLoggedIn: boolean) => void;
   setAccountAddFundTab: (accountAddFundTab: AddFundsTabType) => void;
@@ -73,7 +71,6 @@ export const DEFAULT_MODAL_STATE: Omit<ModalState, 'step' | 'onRampConfig'> = {
   webAuthURLForCreate: undefined,
   onModalStepChange: undefined,
   onRampPurchase: undefined,
-  networks: [Network.ETHEREUM],
   loginWindow: undefined,
   isFullyLoggedIn: false,
   accountAddFundTab: undefined,
@@ -88,6 +85,7 @@ export const useModalStore = create<ModalStore>()(
     (set, get) => ({
       step: ModalStep.AUTH_MAIN,
       onRampConfig: undefined,
+      activeWallet: undefined,
       ...DEFAULT_MODAL_STATE,
       ...getActions(set, get),
     }),
@@ -100,7 +98,6 @@ export const useModalStore = create<ModalStore>()(
         webAuthURLForLogin: state.webAuthURLForLogin,
         webAuthURLForCreate: state.webAuthURLForCreate,
         onRampPurchase: state.onRampPurchase,
-        networks: state.networks,
         selectedExternalWalletId: state.selectedExternalWalletId,
         isUsingMobileConnector: state.isUsingMobileConnector,
       }),

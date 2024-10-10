@@ -7,6 +7,7 @@ import axios, {
 } from 'axios';
 import { AxiosRequestConfig } from 'axios';
 import qs from 'qs';
+import { extractWalletRef, WalletParams } from './types.js';
 
 export const USER_NOT_VERIFIED = 'user must verify biometrics';
 export const USER_NOT_AUTHENTICATED_ERROR = 'user must be authenticated';
@@ -163,6 +164,9 @@ export interface PartnerEntity {
   policiesEnabled: boolean;
   backgroundColor?: string;
   foregroundColor?: string;
+  accentColor?: string;
+  font?: string;
+  themeMode?: 'light' | 'dark';
 }
 export interface WalletEntity {
   address: string | null;
@@ -307,19 +311,30 @@ export enum OnRampPurchaseType {
 export interface OnRampPurchase {
   id: string;
   userId: string;
+  type?: OnRampPurchaseType;
   walletId?: string | null;
-  walletType: WalletType;
+  walletType?: WalletType;
   externalWalletAddress?: string | null;
   address?: string | null;
-  status: OnRampPurchaseStatus;
-  provider: OnRampProvider;
+  status?: OnRampPurchaseStatus;
+  provider?: OnRampProvider;
   providerKey?: string | null;
-  fiatCurrency?: string | null;
+  fiat?: string | null;
   fiatQuantity?: string | null;
-  asset: OnRampAsset;
+  asset?: OnRampAsset;
   assetQuantity?: string | null;
   network?: Network | null;
+  testMode?: boolean;
 }
+
+export type OnRampPurchaseCreateParams = Omit<OnRampPurchase, 'id' | 'userId'> & {
+  networks?: Network[] | 'all';
+  assets?: OnRampAsset[] | 'all';
+  defaultNetwork?: Network;
+  defaultAsset?: OnRampAsset;
+};
+
+export type OnRampPurchaseUpdateParams = Omit<OnRampPurchase, 'id' | 'userId'>;
 
 type ProviderAssetInfo = [string, Partial<Record<OnRampPurchaseType, boolean>>];
 
@@ -890,39 +905,38 @@ class Client {
 
   async createOnRampPurchase({
     userId,
-    walletId,
-    externalWalletAddress,
-    walletType,
-    provider,
-    networks,
-    assets,
-    defaultNetwork,
-    defaultAsset,
-    fiatAmount,
-    testMode = false,
+    params: {
+      type,
+      walletType,
+      address,
+      provider,
+      networks,
+      assets,
+      defaultNetwork,
+      defaultAsset,
+      fiat,
+      fiatQuantity,
+      testMode = false,
+    },
+    ...params
   }: {
     userId: string;
-    walletId?: string;
-    externalWalletAddress?: string;
-    walletType: WalletType;
-    networks: Network[] | 'all';
-    assets: OnRampAsset[] | 'all';
-    defaultNetwork?: Network;
-    defaultAsset?: OnRampAsset;
-    fiatAmount?: string;
-    provider: OnRampProvider;
-    testMode: boolean;
-  }): Promise<OnRampPurchase> {
-    const walletString = walletId ? `wallets/${walletId}` : `external-wallets/${externalWalletAddress}`;
+    params: OnRampPurchaseCreateParams;
+  } & WalletParams): Promise<OnRampPurchase> {
+    const [key, identifier] = extractWalletRef(params);
+    const walletString = key === 'walletId' ? `wallets/${identifier}` : `external-wallets/${identifier}`;
 
     const res = await this.baseRequest.post<OnRampPurchase>(`/users/${userId}/${walletString}/purchases`, {
+      type,
       provider,
       walletType,
+      address,
       networks,
       assets,
       defaultAsset,
       defaultNetwork,
-      fiatAmount,
+      fiat,
+      fiatQuantity,
       testMode,
     });
 
@@ -931,23 +945,16 @@ class Client {
 
   async updateOnRampPurchase({
     userId,
-    walletId,
-    externalWalletAddress,
     purchaseId,
     updates,
+    ...params
   }: {
     userId: string;
-    walletId?: string;
-    externalWalletAddress?: string;
     purchaseId: string;
-    updates: Partial<
-      Pick<
-        OnRampPurchase,
-        'asset' | 'network' | 'status' | 'assetQuantity' | 'fiatCurrency' | 'fiatQuantity' | 'providerKey'
-      >
-    >;
-  }): Promise<OnRampPurchase> {
-    const walletString = walletId ? `wallets/${walletId}` : `external-wallets/${externalWalletAddress}`;
+    updates: OnRampPurchaseUpdateParams;
+  } & WalletParams): Promise<OnRampPurchase> {
+    const [key, identifier] = extractWalletRef(params);
+    const walletString = key === 'walletId' ? `wallets/${identifier}` : `external-wallets/${identifier}`;
 
     const res = await this.baseRequest.patch<OnRampPurchase>(
       `/users/${userId}/${walletString}/purchases/${purchaseId}`,
@@ -958,16 +965,14 @@ class Client {
 
   async getOnRampPurchase({
     userId,
-    walletId,
-    externalWalletAddress,
     purchaseId,
+    ...params
   }: {
     userId: string;
-    walletId?: string;
-    externalWalletAddress?: string;
     purchaseId: string;
-  }) {
-    const walletString = walletId ? `wallets/${walletId}` : `external-wallets/${externalWalletAddress}`;
+  } & WalletParams) {
+    const [key, identifier] = extractWalletRef(params);
+    const walletString = key === 'walletId' ? `wallets/${identifier}` : `external-wallets/${identifier}`;
 
     const res = await this.baseRequest.get<OnRampPurchase>(`/users/${userId}/${walletString}/purchases/${purchaseId}`);
     return res;
@@ -1000,6 +1005,68 @@ class Client {
       testMode,
     });
     return res;
+  }
+
+  async generateOffRampTx<ReturnType = { tx: string; asset: OnRampAsset; network: Network }>(
+    userId: string,
+    {
+      provider,
+      chainId,
+      contractAddress,
+      testMode,
+      walletId,
+      walletType,
+      destinationAddress,
+      assetQuantity,
+    }: {
+      provider: OnRampProvider;
+      chainId: string;
+      contractAddress?: string;
+      testMode?: boolean;
+      walletId: string;
+      walletType: WalletType;
+      destinationAddress: string;
+      assetQuantity: string | number;
+    },
+  ): Promise<ReturnType> {
+    const res = await this.baseRequest.post<ReturnType>(`/users/${userId}/wallets/${walletId}/offramp-generate`, {
+      provider,
+      testMode,
+      chainId,
+      contractAddress,
+      walletId,
+      walletType,
+      destinationAddress,
+      assetQuantity,
+    });
+
+    return res.data;
+  }
+
+  async sendOffRampTx<ReturnType = { txHash: string }>(
+    userId: string,
+    {
+      tx,
+      signature,
+      network,
+      walletId,
+      walletType,
+    }: {
+      tx: string;
+      signature: string;
+      network: Network;
+      walletId: string;
+      walletType: WalletType;
+    },
+  ): Promise<ReturnType> {
+    const res = await this.baseRequest.post<ReturnType>(`/users/${userId}/wallets/${walletId}/offramp-send`, {
+      tx,
+      signature,
+      network,
+      walletType,
+    });
+
+    return res.data;
   }
 
   async distributeCapsuleShare({

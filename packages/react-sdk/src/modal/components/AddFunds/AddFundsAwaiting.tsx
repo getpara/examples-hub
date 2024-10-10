@@ -1,11 +1,11 @@
 import { StepContainer } from '../common.js';
-import { OnRampProvider } from '@usecapsule/web-sdk';
-import { useModalStore } from '../../stores/index.js';
+import { OnRampProvider, OnRampPurchase } from '@usecapsule/web-sdk';
+import { useCapsuleStore, useModalStore, useThemeStore } from '../../stores/index.js';
 import { lazy, useEffect, useMemo, useState } from 'react';
 import { ModalStep } from '../../utils/steps.js';
-import { StripeEmbed } from '../OnRampComponents/StripeComponents.js';
-import { RampEmbed } from '../OnRampComponents/RampComponents.js';
+import { RampEmbed, StripeEmbed } from '@usecapsule/react-common';
 import styled from 'styled-components';
+import { useGoBack } from '../../hooks/useGoBack.js';
 
 const STEPS = {
   CANCELLED: ModalStep.ADD_FUNDS_FAILURE,
@@ -14,25 +14,44 @@ const STEPS = {
 
 export const AddFundsAwaiting = () => {
   const setStep = useModalStore(state => state.setStep);
+  const goBack = useGoBack();
   const onRampConfig = useModalStore(state => state.onRampConfig);
   const onRampPurchase = useModalStore(state => state.onRampPurchase);
+  const setOnRampPurchase = useModalStore(state => state.setOnRampPurchase);
+  const capsule = useCapsuleStore(state => state.capsule);
+  const appName = useThemeStore(state => state.appName);
+  const isDark = useThemeStore(state => state.isDark);
 
   const [MoonPayEmbed, setMoonPayEmbed] = useState(null);
 
+  const props = {
+    capsule,
+    appName,
+    onRampConfig,
+    onRampPurchase: onRampPurchase as OnRampPurchase,
+    isDark,
+    isEmbedded: true,
+    setOnRampPurchase,
+    onClose: goBack,
+  };
+
   useEffect(() => {
-    const _MoonPayEmbed = lazy(() => import(`../OnRampComponents/MoonPayComponents.js`));
+    const _MoonPayEmbed = lazy(() => import(`./MoonPayEmbed.js`));
 
     setMoonPayEmbed(_MoonPayEmbed);
   }, []);
 
   const onRampEmbed = useMemo(() => {
+    if (!onRampPurchase.id) {
+      return null;
+    }
     switch (onRampPurchase?.provider) {
       case OnRampProvider.STRIPE:
-        return <StripeEmbed />;
+        return <StripeEmbed {...props} />;
       case OnRampProvider.MOONPAY:
-        return !MoonPayEmbed || typeof window === 'undefined' ? null : <MoonPayEmbed />;
+        return !MoonPayEmbed || typeof window === 'undefined' ? null : <MoonPayEmbed {...props} />;
       case OnRampProvider.RAMP:
-        return <RampEmbed hostApiKey={onRampConfig.rampApiKey} />;
+        return <RampEmbed apiKey={onRampConfig.rampApiKey} {...props} />;
     }
   }, [onRampPurchase?.provider, MoonPayEmbed]);
 

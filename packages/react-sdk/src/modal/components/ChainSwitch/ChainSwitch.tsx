@@ -17,16 +17,18 @@ export const ChainSwitch = () => {
   const setStepDirection = useModalStore(state => state.setStepDirection);
   const { switchChain, wallet, qrUri, chainIdSwitchingTo, walletDisplayHelpers } = useExternalWallets();
 
-  if (!wallet) {
-    setStepDirection(-1);
-    setStep(ModalStep.ACCOUNT_MAIN);
-  }
-
   useEffect(() => {
-    if (wallet.type === WalletType.COSMOS) {
+    if (wallet?.type === WalletType.COSMOS) {
       routeMobileExternalWallet(qrUri);
     }
-  }, [qrUri]);
+  }, [qrUri, wallet]);
+
+  useEffect(() => {
+    if (!wallet) {
+      setStepDirection(-1);
+      setStep(ModalStep.ACCOUNT_MAIN);
+    }
+  }, [wallet]);
 
   const handleTryAgainClick = async () => {
     if (chainIdSwitchingTo) {

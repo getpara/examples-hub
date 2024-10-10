@@ -1,21 +1,30 @@
 import { useEffect, useRef } from 'react';
 import { RampInstantPurchase, RampInstantSDK } from '@ramp-network/ramp-instant-sdk';
 import { Network, OnRampAsset, OnRampProvider, getPortalBaseURL } from '@usecapsule/web-sdk';
-import { useCapsuleStore, useModalStore, useThemeStore } from '../../stores/index.js';
-import { useGoBack } from '../../hooks/useGoBack.js';
-import { getCurrencyCodes, reverseCurrencyLookup } from '../../utils/onRamps.js';
+import {
+  getChainId,
+  getContractAddressFromAsset,
+  getCurrencyCodes,
+  reverseCurrencyLookup,
+  offRampSend,
+} from '../utils/index.js';
+import { Props } from '../types/index.js';
 
 const TEST_MODE_FORBIDDEN = ['ETH_ETH', 'ETH_USDC'];
 
-export const RampEmbed = ({ hostApiKey }: { hostApiKey: string }) => {
-  const appName = useThemeStore(state => state.appName);
-  const onRampConfig = useModalStore(state => state.onRampConfig);
-  const onRampPurchase = useModalStore(state => state.onRampPurchase);
-  const setOnRampPurchase = useModalStore(state => state.setOnRampPurchase);
-  const capsule = useCapsuleStore(state => state.capsule);
-  const goBack = useGoBack();
+export const RampEmbed = ({
+  capsule,
+  appName,
+  onRampConfig,
+  onRampPurchase,
+  isEmbedded,
+  apiKey,
+  onClose,
+  setOnRampPurchase,
+}: Props & { apiKey: string }) => {
   const { currencyCodes } = getCurrencyCodes(onRampConfig, {
     provider: OnRampProvider.RAMP,
+    purchaseType: onRampPurchase.type,
     walletType: onRampPurchase.walletType,
   });
 
@@ -26,22 +35,23 @@ export const RampEmbed = ({ hostApiKey }: { hostApiKey: string }) => {
       try {
         const widget = new RampInstantSDK({
           hostAppName: appName,
-          swapAsset: currencyCodes.filter(code => !onRampConfig.testMode || !TEST_MODE_FORBIDDEN.includes(code)).join(','),
+          swapAsset: currencyCodes.filter(code => !onRampPurchase.testMode || !TEST_MODE_FORBIDDEN.includes(code)).join(','),
           fiatValue: onRampPurchase.fiatQuantity,
-          fiatCurrency: onRampPurchase.fiatCurrency,
+          fiatCurrency: onRampPurchase.fiat,
           hostLogoUrl: `${getPortalBaseURL(capsule.ctx)}/wordmark_black.svg`,
-          hostApiKey,
+          hostApiKey: apiKey,
           userAddress: onRampPurchase.address,
           userEmailAddress: capsule.getEmail(),
-          url: onRampConfig?.testMode ? 'https://app.demo.ramp.network' : 'https://app.ramp.network',
-          enabledFlows: ['ONRAMP'],
+          url: onRampPurchase?.testMode ? 'https://app.demo.ramp.network' : 'https://app.ramp.network',
+          enabledFlows: [onRampPurchase.type === 'BUY' ? 'ONRAMP' : 'OFFRAMP'],
+          useSendCryptoCallback: true,
           variant: 'embedded-mobile',
           containerNode: document.getElementById('ramp-container'),
         })
           .on('PURCHASE_CREATED' as unknown as '*', async e => {
             const p = (e as { payload: { purchase: RampInstantPurchase } }).payload.purchase;
 
-            const [network, asset] = onRampConfig.testMode
+            const [network, asset] = onRampPurchase.testMode
               ? [Network.ETHEREUM, OnRampAsset.ETHEREUM]
               : reverseCurrencyLookup(onRampConfig.assetInfo, OnRampProvider.RAMP, p.asset.symbol) || [];
 
@@ -53,7 +63,7 @@ export const RampEmbed = ({ hostApiKey }: { hostApiKey: string }) => {
               updates: {
                 providerKey: p.id,
                 fiatQuantity: p.fiatValue,
-                fiatCurrency: p.fiatCurrency,
+                fiat: p.fiatCurrency,
                 assetQuantity: p.cryptoAmount,
                 asset,
                 network,
@@ -63,7 +73,29 @@ export const RampEmbed = ({ hostApiKey }: { hostApiKey: string }) => {
             setOnRampPurchase(updated);
           })
           .on('WIDGET_CLOSE' as unknown as '*', async () => {
-            goBack();
+            onClose?.();
+
+            if (!isEmbedded) {
+              setTimeout(() => {
+                window.close();
+              }, 5000);
+            }
+          })
+          .onSendCrypto(async (assetInfo, amount, address) => {
+            try {
+              const [network, asset] = reverseCurrencyLookup(onRampConfig.assetInfo, OnRampProvider.RAMP, assetInfo.symbol);
+              const txHash = await offRampSend(capsule, onRampPurchase, setOnRampPurchase, {
+                assetQuantity: amount,
+                destinationAddress: address,
+                contractAddress: getContractAddressFromAsset(network, asset),
+                chainId: getChainId(network),
+                testMode: onRampPurchase.testMode,
+              });
+
+              return { txHash };
+            } catch (e) {
+              console.error(e);
+            }
           });
 
         widget.show();

@@ -12,11 +12,8 @@
     "*.css"
   ],
   "dependencies": {
-    "@moonpay/moonpay-react": "^1.8.0",
-    "@ramp-network/ramp-instant-sdk": "^4.0.5",
-    "@stripe/crypto": "^0.0.4",
-    "@stripe/stripe-js": "^3.4.0",
     "@usecapsule/react-components": "3.8.0",
+    "@usecapsule/react-common": "1.0.0",
     "@usecapsule/web-sdk": "2.3.0",
     "date-fns": "^3.6.0",
     "detect-browser": "^5.3.0",

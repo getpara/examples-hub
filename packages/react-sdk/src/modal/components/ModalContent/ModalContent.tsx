@@ -267,6 +267,12 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     }, []);
 
     useEffect(() => {
+      if (!!onRampConfig) {
+        setOnRampConfig({ ...onRampConfig, testMode: onRampTestMode });
+      }
+    }, [onRampTestMode]);
+
+    useEffect(() => {
       return () => {
         capsule.exitLoops();
       };

@@ -38,6 +38,10 @@ interface BodyProps {
   onClose: () => void;
 }
 
+const MIN_HEIGHT = {
+  [ModalStep.ADD_FUNDS_AWAITING]: '680px',
+};
+
 export const Body = ({ oAuthMethods, twoFactorAuthEnabled, disableEmailLogin, disablePhoneLogin, onClose }: BodyProps) => {
   const currentStep = useModalStore(state => state.step);
   const onRampConfig = useModalStore(state => state.onRampConfig);
@@ -177,7 +181,7 @@ export const Body = ({ oAuthMethods, twoFactorAuthEnabled, disableEmailLogin, di
                   ModalStep.ADD_FUNDS_SUCCESS,
                 ].includes(currentStep) &&
                 isTestModeAlert &&
-                accountAddFundTab === EnabledFlow.BUY && (
+                accountAddFundTab !== EnabledFlow.RECEIVE && (
                   <TestModeAlert>
                     <div style={{ fontSize: '14px' }}>
                       This Capsule Modal is configured to run on-ramp services in <b>test mode</b> only, for development
@@ -220,6 +224,8 @@ const InnerContainer = styled.div<{ $embeddedModal: boolean; step: ModalStep }>`
   justify-content: flex-start;
   gap: 24px;
   padding: ${({ $embeddedModal }) => ($embeddedModal ? '12px 0px 0px' : '72px 72px 32px')};
+  min-height: ${({ step }) => MIN_HEIGHT[step] ?? 'auto'};
+  height: ${({ step }) => MIN_HEIGHT[step] ?? 'auto'};
 
   @media (max-width: ${MOBILE_SIZE}px) {
     padding: ${({ $embeddedModal }) => ($embeddedModal ? '12px 0px 0px' : '72px 16px 0px')};

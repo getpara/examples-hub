@@ -21,7 +21,7 @@ export async function authLogin(
   farcasterUsername: string,
   sessionLookupId: string,
   newDeviceSessionLookupId?: string,
-): Promise<[string, string, any]> {
+): Promise<{ userId: string; userHandle: string; signature: any }> {
   let identifier;
   let data;
 
@@ -73,7 +73,7 @@ export async function authLogin(
     });
   }
 
-  return [verifyRes.data.userId, userHandle, signature];
+  return { userId: verifyRes.data.userId, userHandle, signature };
 }
 
 export async function authUpdateKeyShares(

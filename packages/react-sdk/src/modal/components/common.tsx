@@ -46,6 +46,7 @@ export const CenteredText: typeof CpslText = styled(CpslText)`
 
 export const InnerStepContainer = styled.div`
   width: 100%;
+  height: 100%;
   align-self: center;
   display: flex;
   flex-direction: column;

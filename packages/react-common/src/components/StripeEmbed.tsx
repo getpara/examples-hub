@@ -1,15 +1,15 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { OnrampSession, OnrampSessionResult, StripeOnramp, loadStripeOnramp } from '@stripe/crypto';
-import { useCapsuleStore, useModalStore, useThemeStore } from '../../stores/index.js';
 import { Network, OnRampAsset, OnRampProvider, OnRampPurchaseStatus } from '@usecapsule/web-sdk';
 import { CpslSpinner } from '@usecapsule/react-components';
-import { SpinnerContainer } from '../common.js';
+import { SpinnerContainer } from './common.js';
 import styled from 'styled-components';
+import { Props } from '../types/index.js';
 
 export const STRIPE_PUBLISHABLE_KEY =
   'pk_live_51MvquNGrzDeP5yP9EgVSMBPQbrbg0oHDjPIIXypePd0jzOFjbadyfO7wBKLHhUtbKIUiEUVC3YYcTJyAmJ8xA7JE00T2UDfYKz';
 export const STRIPE_PUBLISHABLE_KEY_TEST =
-  'pk_test_51MvquNGrzDeP5yP98WgPaAUgQ50I3OpfPhVfiLO47FBHepJnZRPO62IzZY2uxT5ovhSS10RwcTcnaVil1mcJOzIi00dHapODdS';
+  'pk_test_51Q2z5k2epVn9Kq0ZSbUzuetKb4azH6E6UPcvWmjRxvHmxLAJbIK0pwDbPQo63W9OyDng337ntNu3ZXx3AJ7MhFmR00XgfRmPgP';
 
 const AssetCodes = {
   eth: OnRampAsset.ETHEREUM,
@@ -40,14 +40,7 @@ const useOnrampSessionListener = (type, session, callback) => {
   }, [session, callback, type]);
 };
 
-export const StripeEmbed = () => {
-  const isDark = useThemeStore(state => state.isDark);
-  const capsule = useCapsuleStore(state => state.capsule);
-  const onRampConfig = useModalStore(state => state.onRampConfig);
-  const onRampPurchase = useModalStore(state => state.onRampPurchase);
-
-  const setOnRampPurchase = useModalStore(state => state.setOnRampPurchase);
-
+export const StripeEmbed = ({ capsule, isDark, isEmbedded, onRampPurchase, setOnRampPurchase }: Props) => {
   const [isReady, setIsReady] = useState(false);
 
   const isStripeEmbed = useMemo(() => onRampPurchase.provider === OnRampProvider.STRIPE, [onRampPurchase]);
@@ -82,7 +75,7 @@ export const StripeEmbed = () => {
   }, [clientSecret, stripeOnRamp]);
 
   useEffect(() => {
-    loadStripeOnramp(onRampConfig?.testMode ? STRIPE_PUBLISHABLE_KEY_TEST : STRIPE_PUBLISHABLE_KEY).then(setStripeOnRamp);
+    loadStripeOnramp(onRampPurchase?.testMode ? STRIPE_PUBLISHABLE_KEY_TEST : STRIPE_PUBLISHABLE_KEY).then(setStripeOnRamp);
   }, []);
 
   const onReady = useCallback(() => {
@@ -106,7 +99,7 @@ export const StripeEmbed = () => {
             updates: {
               status: OnRampPurchaseStatus.FINISHED,
               fiatQuantity: session.quote.source_amount,
-              fiatCurrency: session.quote.source_currency.asset_code,
+              fiat: session.quote.source_currency.asset_code,
               network: NetworkCodes[session.quote.destination_currency.currency_network],
               asset: AssetCodes[session.quote.destination_currency.asset_code],
               assetQuantity: session.quote.destination_amount,
@@ -115,6 +108,11 @@ export const StripeEmbed = () => {
           });
 
           setOnRampPurchase(updatedPurchase);
+          if (!isEmbedded) {
+            setTimeout(() => {
+              window.close();
+            }, 5000);
+          }
           break;
 
         default:

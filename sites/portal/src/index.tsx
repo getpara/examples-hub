@@ -12,6 +12,7 @@ import { CapsuleProvider } from './components/CapsuleContext';
 import Recovery from './pages/Recovery/Recovery';
 import { ENV } from './constants';
 import TransactionReview from './pages/TransactionReview/TransactionReview';
+import { OnRampTransaction } from './pages/OnRampTransaction';
 
 defineCustomElements();
 
@@ -33,6 +34,7 @@ const App = () => {
           <Route element={<AuthCreation />} path="users/:userId/biometrics/:biometricId" />
           <Route element={<AuthLogin />} path="biometrics/login" />
           <Route element={<TransactionReview />} path="users/:userId/transaction-review/:pendingTransactionId" />
+          <Route element={<OnRampTransaction />} path="users/:userId/on-ramp-transaction/:purchaseId" />
         </Route>
         <Route element={<ShortUrl />} path="/short/:shortenedUrl" />
       </Routes>

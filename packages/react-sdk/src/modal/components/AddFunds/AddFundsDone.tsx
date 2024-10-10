@@ -16,9 +16,9 @@ export const AddFundsDone = ({ isSuccess, onClose }: AddFundsDoneProps) => {
   const formatter = useMemo(() => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: onRampPurchase?.fiatCurrency || 'USD',
+      currency: onRampPurchase?.fiat || 'USD',
     });
-  }, [onRampPurchase?.fiatCurrency]);
+  }, [onRampPurchase?.fiat]);
 
   const heading = isSuccess ? 'Transaction Successful' : 'Something Went Wrong';
   const text = isSuccess

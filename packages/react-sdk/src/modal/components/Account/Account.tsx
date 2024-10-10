@@ -32,6 +32,11 @@ export const Account = ({ onClose }: AccountProps) => {
     onBuyCryptoClick();
   };
 
+  const handleSellClick = () => {
+    setAccountAddFundTab(EnabledFlow.WITHDRAW);
+    onBuyCryptoClick();
+  };
+
   const handleDisconnectClick = async () => {
     setIsDisconnecting(true);
     await capsule.logout();
@@ -57,6 +62,13 @@ export const Account = ({ onClose }: AccountProps) => {
                 <OptionButton icon="qrCode02" onClick={handleReceiveClick}>
                   <CpslText variant="bodyXS" color="secondary" weight="medium">
                     Receive
+                  </CpslText>
+                </OptionButton>
+              )}
+              {onRampConfig.isWithdrawEnabled && (
+                <OptionButton icon="arrowCircleBrokenDownLeft" onClick={handleSellClick}>
+                  <CpslText variant="bodyXS" color="secondary" weight="medium">
+                    Withdraw
                   </CpslText>
                 </OptionButton>
               )}

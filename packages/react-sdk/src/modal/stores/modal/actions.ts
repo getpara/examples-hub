@@ -53,7 +53,6 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
   setOnRampPurchase: onRampPurchase =>
     set(state => ({ onRampPurchase: { ...(state.onRampPurchase || {}), ...onRampPurchase } })),
   setOnRampConfig: onRampConfig => set({ onRampConfig }),
-  setNetworks: networks => set({ networks }),
   setIsFullyLoggedIn: isFullyLoggedIn => set({ isFullyLoggedIn }),
   setAccountAddFundTab: accountAddFundTab => set({ accountAddFundTab }),
   setSelectedExternalWalletId: selectedExternalWalletId => set({ selectedExternalWalletId }),
