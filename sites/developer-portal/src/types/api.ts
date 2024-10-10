@@ -221,6 +221,7 @@ export enum PartnerAssetType {
 export type UsersTableData = {
   id: string;
   userId: string | null;
+  pregenWalletId: string | null;
   email: string | null;
   farcasterUsername: string | null;
   phoneNumber: string | null;

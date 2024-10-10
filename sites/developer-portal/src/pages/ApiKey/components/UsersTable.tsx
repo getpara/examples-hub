@@ -36,8 +36,8 @@ export const UsersTable = () => {
   const [selectedUserId, setSelectedUserId] = useState('');
   const [selectedUserEmail, setSelectedUserEmail] = useState('');
 
-  const handleDeleteUserClick = (userId: string, userEmail: string) => () => {
-    setSelectedUserId(userId);
+  const handleDeleteUserClick = (id: string, userEmail: string) => () => {
+    setSelectedUserId(id);
     setSelectedUserEmail(userEmail);
   };
 
@@ -63,7 +63,7 @@ export const UsersTable = () => {
           data: [
             {
               key: 'userId',
-              value: d.userId,
+              value: d.userId ?? d.pregenWalletId,
             },
             {
               key: 'identifier',
@@ -93,18 +93,25 @@ export const UsersTable = () => {
               ? [
                   {
                     key: 'delete',
-                    value: d.userId ? (
-                      <CpslButton
-                        variant="secondary"
-                        size="small"
-                        onClick={handleDeleteUserClick(
-                          d.userId,
-                          d.email ?? d.phoneNumber ?? d.farcasterUsername ?? d.userId,
-                        )}
-                      >
-                        Delete
-                      </CpslButton>
-                    ) : null,
+                    value:
+                      d.userId || d.pregenWalletId ? (
+                        <CpslButton
+                          variant="secondary"
+                          size="small"
+                          onClick={handleDeleteUserClick(
+                            (d.userId ?? d.pregenWalletId)!,
+                            d.email ??
+                              d.phoneNumber ??
+                              d.farcasterUsername ??
+                              d.userId ??
+                              d.pregenIdentifier ??
+                              d.pregenWalletId ??
+                              d.id,
+                          )}
+                        >
+                          Delete
+                        </CpslButton>
+                      ) : null,
                     fitWidth: true,
                   },
                 ]
@@ -148,6 +155,7 @@ export const UsersTable = () => {
         onClose={handleCloseDeleteUserModal}
         onExited={handleDeleteUserModalExited}
         userId={selectedUserId}
+        walletId={selectedUserId}
         userEmail={selectedUserEmail}
       />
     </>

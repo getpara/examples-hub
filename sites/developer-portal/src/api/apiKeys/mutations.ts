@@ -88,3 +88,16 @@ export const deleteApiKeyUser = async ({ organizationId, projectId, keyId, env, 
 
   return !!(await axiosClient.delete<boolean>(endpoint)).data;
 };
+
+export type DeletePregenWalletVars = {
+  organizationId: string;
+  projectId: string;
+  keyId: string;
+  env: string;
+  walletId: string;
+};
+export const deletePregenWallet = async ({ organizationId, projectId, keyId, env, walletId }: DeletePregenWalletVars) => {
+  const endpoint = `/organizations/${organizationId}/projects/${projectId}/${env}/keys/${keyId}/pregen/${walletId}`;
+
+  return !!(await axiosClient.delete<boolean>(endpoint)).data;
+};
