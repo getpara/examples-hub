@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 
 import { useCapsule } from '../../components/CapsuleContext';
 import { authLogin } from '../../utils/authLogin';
@@ -57,6 +57,10 @@ export function iconForCurrency(currency: string): JSX.Element {
 function TransactionReview() {
   const capsule = useCapsule();
   const { userId, pendingTransactionId } = useParams();
+
+  const [searchParams] = useSearchParams();
+  const timeoutMs = searchParams.get('timeoutMs');
+
   const { toggleBranding } = useModalOutletContext();
 
   const [partner, setPartner] = useState(null);
@@ -102,6 +106,13 @@ function TransactionReview() {
     let pendingTransaction, partner, decodedTx, txData;
 
     let retriesLeft = MAX_AUTH_RETRIES;
+
+    // Close the window after the timeout
+    if (!!timeoutMs && !isNaN(parseInt(timeoutMs))) {
+      setTimeout(() => {
+        window.close();
+      }, parseInt(timeoutMs));
+    }
 
     while (retriesLeft > 0) {
       try {
