@@ -1,9 +1,9 @@
 {
   "name": "capsule-mpc-worker-server",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "private": true,
   "dependencies": {
-    "@usecapsule/server-sdk": "2.3.0"
+    "@usecapsule/server-sdk": "2.3.1"
   },
   "scripts": {
     "build": "rm -rf dist && tsc && npx webpack && mv ./dist/mpcWorkerServer-bundle.js ../../sites/portal/public/static/js/mpcWorkerServer-bundle.js"
