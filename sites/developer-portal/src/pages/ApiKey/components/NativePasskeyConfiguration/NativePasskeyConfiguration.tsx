@@ -11,6 +11,10 @@ import { BundleIdentifier } from './BundleIdentifier';
 import { getFrameworkNativePasskeyDocsLink } from '../../../../utils/framework.ts';
 import { useGetProject } from '../../../../hooks/api/queries/useProjects.ts';
 import { Framework } from '../../../../types/framework.ts';
+import { InnerConfigurationCard } from '../InnerConfigurationCard.tsx';
+import { AndroidPackageName } from './AndroidPackageName.tsx';
+import { AndroidSha256CertFingerprints } from './AndroidSha256CertFingerprints.tsx';
+import { CpslText } from '@usecapsule/react-components';
 
 const TITLE = 'Native Passkey Configuration';
 
@@ -41,8 +45,16 @@ export const NativePasskeyConfiguration = () => {
       docsLink={getFrameworkNativePasskeyDocsLink((project?.framework as Framework) ?? Framework.REACT_NATIVE)}
     >
       <FormProvider {...form}>
-        <TeamId />
-        <BundleIdentifier />
+        <InnerConfigurationCard wideGap>
+          <CpslText weight="semiBold">IOS</CpslText>
+          <TeamId />
+          <BundleIdentifier />
+        </InnerConfigurationCard>
+        <InnerConfigurationCard wideGap>
+          <CpslText weight="semiBold">Android</CpslText>
+          <AndroidPackageName />
+          <AndroidSha256CertFingerprints />
+        </InnerConfigurationCard>
         <ConfigurationActions />
       </FormProvider>
     </ConfigurationCard>

@@ -7,6 +7,7 @@ import styled from 'styled-components';
 import { useGetOrganizationKey } from '../../../hooks/api/queries/useOrganizationKeys';
 import { Environment } from '../../../types/environment';
 import { useGetSelectedOrganizationIsValid } from '../../../hooks/api/queries/useOrganizations';
+import { UpdateApiKeyBody, UpdateApiKeyFormData } from '../../../types/api';
 
 export const Save = () => {
   const { apiKey, env, projectId } = useParams();
@@ -18,25 +19,30 @@ export const Save = () => {
     formState: { isDirty, isValid },
     getValues,
     reset,
-  } = useFormContext();
+  } = useFormContext<Partial<UpdateApiKeyFormData>>();
 
   const canSave = isDirty && isValid && !apiKeyData?.archived;
 
   const handleSave = () => {
     if (orgValid && projectId && apiKey && env && canSave) {
       const values = getValues();
+      const formattedValues: UpdateApiKeyBody = values as UpdateApiKeyBody;
 
       if (values.onRampAssets && Object.keys(values.onRampAssets).length === 0) {
-        values.onRampAssets = null;
+        formattedValues.onRampAssets = null;
       }
 
       if ('origins' in values) {
-        values.origins = (values.origins as string)?.split(',').map(o => o.trim()) ?? [];
-        console.log('🚀 ~ handleSave ~ values.origins:', values.origins);
+        formattedValues.origins = values.origins?.split(',').map(o => o.trim()) ?? [];
+      }
+
+      if ('androidSha256CertFingerprints' in values) {
+        formattedValues.androidSha256CertFingerprints =
+          values.androidSha256CertFingerprints?.split(',').map(o => o.trim()) ?? [];
       }
 
       updateKey(
-        { projectId, keyId: apiKey, env, data: values },
+        { projectId, keyId: apiKey, env, data: formattedValues },
         {
           onSuccess: () => {
             reset(getValues());

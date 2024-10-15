@@ -2,9 +2,9 @@ import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { useGetOrganizationKey } from '../../../hooks/api/queries/useOrganizationKeys';
 import { Environment } from '../../../types/environment';
-import { UpdateApiKeyBody } from '../../../types/api';
+import { UpdateApiKeyFormData } from '../../../types/api';
 
-export type UpdatePopup = Pick<UpdateApiKeyBody, 'transactionPopupsEnabled'>;
+export type UpdatePopup = Pick<UpdateApiKeyFormData, 'transactionPopupsEnabled'>;
 
 export const usePopupConfigFormData = () => {
   const { apiKey, env, projectId } = useParams();

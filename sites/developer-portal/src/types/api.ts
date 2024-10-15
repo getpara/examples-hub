@@ -149,6 +149,8 @@ export type ApiKey = {
   origins: string[] | null;
   supportedWalletTypes: SupportedWalletTypes;
   cosmosPrefix: string;
+  androidSha256CertFingerprints: string[] | null;
+  androidPackageName: string | null;
 };
 
 export type ApiKeyResponse = { key: ApiKey };
@@ -170,7 +172,7 @@ export type ApiKeysResponse = { keys: ApiKey[] };
 export type UpdateApiKeyBody = Nullable<
   Partial<
     Pick<
-      ApiKey & { origins: string },
+      ApiKey,
       | 'displayName'
       | 'verifyUrl'
       | 'portalUrl'
@@ -206,9 +208,16 @@ export type UpdateApiKeyBody = Nullable<
       | 'origins'
       | 'supportedWalletTypes'
       | 'cosmosPrefix'
+      | 'androidSha256CertFingerprints'
+      | 'androidPackageName'
     >
   >
 >;
+// Overriding string[] types here to allow for textfield inputs in the forms. Data will be formatted back before submit.
+export type UpdateApiKeyFormData = Partial<Omit<UpdateApiKeyBody, 'origins' | 'androidSha256CertFingerprints'>> & {
+  androidSha256CertFingerprints: string | null;
+  origins: string | null;
+};
 
 export enum PartnerAssetType {
   LOGOS = 'LOGOS',

@@ -1,22 +1,25 @@
 import { CpslInput } from '@usecapsule/react-components';
 import { Controller, useFormContext } from 'react-hook-form';
 import { UpdateNativePasskey } from '../../hooks/useNativePasskeyConfigFormData';
+import { ANDROID_PACKAGE_NAME_REGEX } from '../../../../utils/regex';
 
-export const TeamId = () => {
+export const AndroidPackageName = () => {
   const { control } = useFormContext<UpdateNativePasskey>();
 
   return (
     <Controller
-      name="teamId"
+      name="androidPackageName"
       control={control}
       rules={{
-        maxLength: { value: 10, message: 'Team ID must be 10 characters.' },
-        minLength: { value: 10, message: 'Team ID must be 10 characters.' },
+        pattern: {
+          value: ANDROID_PACKAGE_NAME_REGEX,
+          message: 'Must be a valid Android package name.',
+        },
       }}
       render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
         <CpslInput
-          label="Team ID"
-          placeholder="e.g. A1B2C34DE5"
+          label="Package Name"
+          placeholder="Enter package name"
           onCpslInput={e => {
             onChange(e.detail.value);
           }}

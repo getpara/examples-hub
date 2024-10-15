@@ -1,22 +1,28 @@
 import { CpslInput } from '@usecapsule/react-components';
 import { Controller, useFormContext } from 'react-hook-form';
 import { UpdateNativePasskey } from '../../hooks/useNativePasskeyConfigFormData';
+import { SHA256_FINGERPRINT_REGEX } from '../../../../utils/regex';
 
-export const TeamId = () => {
+export const AndroidSha256CertFingerprints = () => {
   const { control } = useFormContext<UpdateNativePasskey>();
 
   return (
     <Controller
-      name="teamId"
+      name="androidSha256CertFingerprints"
       control={control}
       rules={{
-        maxLength: { value: 10, message: 'Team ID must be 10 characters.' },
-        minLength: { value: 10, message: 'Team ID must be 10 characters.' },
+        validate: value =>
+          !value ||
+          value
+            ?.split(',')
+            .map(v => v.trim())
+            .every(v => SHA256_FINGERPRINT_REGEX.test(v)) ||
+          'Must contain only valid SHA-256 fingerprints.',
       }}
       render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
         <CpslInput
-          label="Team ID"
-          placeholder="e.g. A1B2C34DE5"
+          label="SHA-256 Cert Fingerprints"
+          placeholder="Paste fingerprints here"
           onCpslInput={e => {
             onChange(e.detail.value);
           }}
@@ -26,6 +32,8 @@ export const TeamId = () => {
           onCpslBlur={onBlur}
           value={value ?? ''}
           errorText={error?.message}
+          helperText="Separate each fingerprint by a comma."
+          as="textarea"
         />
       )}
     />

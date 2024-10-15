@@ -2,9 +2,9 @@ import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { useGetOrganizationKey } from '../../../hooks/api/queries/useOrganizationKeys';
 import { Environment } from '../../../types/environment';
-import { UpdateApiKeyBody } from '../../../types/api';
+import { UpdateApiKeyFormData } from '../../../types/api';
 
-export type UpdateApiKeyData = UpdateApiKeyBody;
+export type UpdateApiKeyData = UpdateApiKeyFormData;
 
 export const useKeyDataForm = () => {
   const { projectId, apiKey, env } = useParams();

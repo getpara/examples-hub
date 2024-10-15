@@ -6,10 +6,17 @@ import { SplitCard, SplitCardInnerContainer } from '../../../components/SplitCar
 interface ConfigurationContentCardProps extends PropsWithChildren {
   isSelectable?: boolean;
   isSelected?: boolean;
+  wideGap?: boolean;
   onSelect?: () => void;
 }
 
-export const InnerConfigurationCard = ({ isSelectable, isSelected, onSelect, children }: ConfigurationContentCardProps) => {
+export const InnerConfigurationCard = ({
+  isSelectable,
+  isSelected,
+  wideGap,
+  onSelect,
+  children,
+}: ConfigurationContentCardProps) => {
   return (
     <SplitCard
       isSelected={isSelected}
@@ -22,10 +29,14 @@ export const InnerConfigurationCard = ({ isSelectable, isSelected, onSelect, chi
           </RadioContainer>
         ) : undefined
       }
-      RightContent={<SplitCardInnerContainer>{children}</SplitCardInnerContainer>}
+      RightContent={<StyledSplitCardInnerContainer $wideGap={wideGap}>{children}</StyledSplitCardInnerContainer>}
     />
   );
 };
+
+const StyledSplitCardInnerContainer = styled(SplitCardInnerContainer)<{ $wideGap?: boolean }>`
+  gap: ${({ $wideGap }) => ($wideGap ? '16px' : '8px')};
+`;
 
 const RadioContainer = styled(SplitCardInnerContainer)`
   flex: 0;

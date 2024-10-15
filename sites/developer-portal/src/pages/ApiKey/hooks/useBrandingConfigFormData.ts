@@ -2,10 +2,10 @@ import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { useGetOrganizationKey } from '../../../hooks/api/queries/useOrganizationKeys';
 import { Environment } from '../../../types/environment';
-import { ThemeMode, UpdateApiKeyBody } from '../../../types/api';
+import { ThemeMode, UpdateApiKeyFormData } from '../../../types/api';
 
 export type UpdateApiKeyBranding = Pick<
-  UpdateApiKeyBody,
+  UpdateApiKeyFormData,
   'foregroundColor' | 'backgroundColor' | 'font' | 'logoUrl' | 'iconUrl' | 'homepageUrl' | 'accentColor' | 'themeMode'
 >;
 

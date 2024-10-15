@@ -2,9 +2,12 @@ import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { useGetOrganizationKey } from '../../../hooks/api/queries/useOrganizationKeys';
 import { Environment } from '../../../types/environment';
-import { UpdateApiKeyBody } from '../../../types/api';
+import { UpdateApiKeyFormData } from '../../../types/api';
 
-export type UpdateNativePasskey = Pick<UpdateApiKeyBody, 'teamId' | 'bundleIdentifier'>;
+export type UpdateNativePasskey = Pick<
+  UpdateApiKeyFormData,
+  'teamId' | 'bundleIdentifier' | 'androidPackageName' | 'androidSha256CertFingerprints'
+>;
 
 export const useNativePasskeyConfigFormData = () => {
   const { apiKey, env, projectId } = useParams();
@@ -16,6 +19,8 @@ export const useNativePasskeyConfigFormData = () => {
     defaultValues: {
       teamId: apiKeyData?.teamId ?? '',
       bundleIdentifier: apiKeyData?.bundleIdentifier ?? '',
+      androidPackageName: apiKeyData?.androidPackageName ?? '',
+      androidSha256CertFingerprints: apiKeyData?.androidSha256CertFingerprints?.join(',\n') ?? '',
     },
   });
 
