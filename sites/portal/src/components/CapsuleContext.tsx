@@ -1,5 +1,6 @@
 import { PropsWithChildren, createContext, useContext, useEffect, useMemo } from 'react';
 import Capsule, { ConstructorOpts as CapsuleConstructorOpts, Environment as CapsuleEnvironment } from '@usecapsule/web-sdk';
+import { useSearchParams } from 'react-router-dom';
 
 interface CapsuleProviderProps extends PropsWithChildren {
   apiKey?: string;
@@ -51,11 +52,20 @@ export const CapsuleContext = createContext<Capsule>(undefined as unknown as Cap
  * }
  */
 export const CapsuleProvider = (props: CapsuleProviderProps) => {
+  const [searchParams] = useSearchParams();
   const { apiKey, environment, options, onMount, children } = props;
+  const paramsSupportedWalletTypes = searchParams.get('supportedWalletTypes');
 
   const capsule = useMemo(
-    () => props.capsule ?? new Capsule(environment, apiKey, options),
-    [apiKey, environment, options, props.capsule],
+    () =>
+      props.capsule ??
+      new Capsule(environment, apiKey, {
+        ...options,
+        ...(paramsSupportedWalletTypes
+          ? { supportedWalletTypes: JSON.parse(decodeURIComponent(paramsSupportedWalletTypes)) }
+          : {}),
+      }),
+    [apiKey, environment, options, props.capsule, paramsSupportedWalletTypes],
   );
 
   useEffect(() => {

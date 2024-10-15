@@ -407,6 +407,8 @@ export abstract class CoreCapsule {
 
   #supportedWalletTypes: SupportedWalletTypes | undefined = undefined;
 
+  #supportedWalletTypesOpt: deprecated__SupportedWalletTypesOpt | undefined = undefined;
+
   get supportedWalletTypes(): SupportedWalletTypes {
     return this.#supportedWalletTypes ?? [];
   }
@@ -753,12 +755,22 @@ export abstract class CoreCapsule {
               throw new Error('unsupported wallet type');
             }
 
+            this.#supportedWalletTypesOpt = opts.supportedWalletTypes;
+
             return Object.entries(opts.supportedWalletTypes).reduce((acc, [key, value]) => {
               if (!value) {
                 return acc;
               }
 
-              return [...acc, { type: key, optional: value === true ? true : (value.optional ?? false) }];
+              if (
+                key === WalletType.COSMOS &&
+                typeof value === 'object' &&
+                !!(value as Partial<{ prefix?: string }>).prefix
+              ) {
+                this.cosmosPrefix = (value as Partial<{ prefix?: string }>).prefix;
+              }
+
+              return [...acc, { type: key, optional: value === true ? false : (value.optional ?? false) }];
             }, []);
           })() as SupportedWalletTypes)
         : undefined;
@@ -1299,6 +1311,7 @@ export abstract class CoreCapsule {
       portalTextColor: this.portalTextColor,
       portalPrimaryButtonTextColor: this.portalPrimaryButtonTextColor,
       isForNewDevice: isForNewDevice ? isForNewDevice.toString() : undefined,
+      supportedWalletTypes: this.#supportedWalletTypesOpt ? JSON.stringify(this.#supportedWalletTypesOpt) : undefined,
     });
   }
 
