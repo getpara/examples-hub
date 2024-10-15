@@ -1,8 +1,25 @@
 import { WalletType } from '@usecapsule/user-management-client';
 
 export const USER_ID = 'ef3bf91c-fc1e-4d18-afe2-f2654c9531e5';
+export const USER_EMAIL = 'test@test.com';
+export const USER_PHONE = '5555555555';
+export const USER_COUNTRY_CODE = '1';
+
+export const VERIFICATION_CODE = '123456';
+
+export const SESSION_ID = 'ef3bf91c-fc1e-4d18-afe2-f2654c9531c3';
 
 export const API_KEY = 'api-key-123';
+export const PARTNER = {
+  id: 'ef3bf91c-fc1e-4d18-afe2-f2654c9531b4',
+  portalUrl: 'https://test.com',
+  apiKey: API_KEY,
+  font: 'roboto',
+  themeMode: 'light',
+  accentColor: 'blue',
+  foregroundColor: 'black',
+  backgroundColor: 'white',
+};
 
 export const EXTERNAL_WALLET = {
   address: '0x1aD2B053b8c6b1592cB645DEfadf105F34d8C6e1',

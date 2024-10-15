@@ -229,7 +229,7 @@ export function normalizePhoneNumber(countryCode: string, number: string): strin
   return stringToPhoneNumber(`${countryCode[0] !== '+' ? '+' : ''}${countryCode}${number}`);
 }
 
-function toQueryString(obj: Record<string, string>) {
+export function toQueryString(obj: Record<string, string>) {
   return Object.entries(obj)
     .map(([key, value]) => (value ? `&${key}=${encodeURIComponent(value)}` : ''))
     .join('');
@@ -1282,7 +1282,9 @@ export abstract class CoreCapsule {
   }
 
   private async getCommonQueryParams(partnerId?: string, isForNewDevice?: boolean): Promise<string> {
-    const partner: PartnerEntity = partnerId ? (await this.ctx.capsuleClient.getPartner(partnerId)).data : undefined;
+    const partner: PartnerEntity = partnerId
+      ? (await this.ctx.capsuleClient.getPartner(partnerId)).data?.partner
+      : undefined;
 
     return toQueryString({
       apiKey: this.ctx.apiKey,
