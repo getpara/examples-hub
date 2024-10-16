@@ -41,6 +41,7 @@ window.addEventListener('message', function (event) {
       initCapsule(data['arguments']['environment'], data['arguments']['apiKey']);
       platform = Platform[data['arguments']['platform'] as keyof typeof Platform] ?? Platform.flutter;
       version = data['arguments']['version'];
+      sendResponse('Capsule#init', true);
       break;
     case 'Capsule#invokeMethod':
       invokeCapsuleMethod(data['methodName'], data['arguments']);
