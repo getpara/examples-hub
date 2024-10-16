@@ -99,23 +99,20 @@ export function parseCredentialCreationRes(
 ): {
   cosePublicKey: string;
   clientDataJSON: string;
-  aaguid: string;
 } {
   const parsedAttestation = parseAttestationObject(creds.response.attestationObject);
-  const { COSEPublicKey, aaguid } = parseMakeCredAuthData(parsedAttestation.authData);
+  const { COSEPublicKey } = parseMakeCredAuthData(parsedAttestation.authData);
 
   if (algorithm === RS256_ALGORITHM) {
     return {
       cosePublicKey: base64url.encode(COSERSAtoPKCS(COSEPublicKey)),
       clientDataJSON: creds.response.clientDataJSON,
-      aaguid: aaguid.toString('hex'),
     };
   }
 
   return {
     cosePublicKey: base64url.encode(COSEECDSAtoPKCS(COSEPublicKey)),
     clientDataJSON: creds.response.clientDataJSON,
-    aaguid: aaguid.toString('hex'),
   };
 }
 

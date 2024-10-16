@@ -37,7 +37,7 @@ export async function authCreation(
   }
 
   const { creds, userHandle, algorithm } = await createCredential(ENV, userId, identifier);
-  const { cosePublicKey, clientDataJSON, aaguid } = parseCredentialCreationRes(creds, algorithm);
+  const { cosePublicKey, clientDataJSON } = parseCredentialCreationRes(creds, algorithm);
   const keyPair = await getAsymmetricKeyPair(capsule.ctx);
   const publicKeyHex = getPublicKeyHex(keyPair);
 
@@ -50,7 +50,6 @@ export async function authCreation(
     cosePublicKey,
     clientDataJSON,
     status: PublicKeyStatus.COMPLETE,
-    aaguid,
   });
 
   await capsule.ctx.capsuleClient.uploadEncryptedWalletPrivateKey(
