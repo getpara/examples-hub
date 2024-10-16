@@ -56,9 +56,7 @@ export const Navigation = ({ closeNav }: NavigationProps) => {
   let filteredNavRoutes = !earlyAccessItems?.length
     ? NAV_ROUTES.filter(route => route.path !== '/early-access')
     : NAV_ROUTES;
-  filteredNavRoutes = !isOwner
-    ? filteredNavRoutes.filter(r => r.path !== '/team' && r.path !== '/billing')
-    : filteredNavRoutes;
+  filteredNavRoutes = !isOwner ? filteredNavRoutes.filter(r => r.path !== '/billing') : filteredNavRoutes;
 
   const completeNavRoutes = filteredNavRoutes.map(route =>
     route.path === '/project'

@@ -9,6 +9,7 @@ import { AddMemberModal } from './AddMemberModal';
 import { useGetAllOrganizationMembers } from '../../../hooks/api/queries/useOrganizationMembers';
 import { Loader } from '../../../components/Loader';
 import { useGetSelectedOrganizationIsValid } from '../../../hooks/api/queries/useOrganizations';
+import { useIsOwner } from '../../../hooks/api/queries/useOrganizationMember';
 
 const PAGE_SIZE = 10;
 
@@ -17,14 +18,17 @@ export const MembersTable = () => {
   const isMobile = useIsMobile();
   const { data: members, isLoading: isMembersLoading } = useGetAllOrganizationMembers();
   const { data: orgValid } = useGetSelectedOrganizationIsValid();
+  const { data: isOwner } = useIsOwner();
 
   const [selectedMemberId, setSelectedMemberId] = useState('');
   const [selectedMemberEmail, setSelectedMemberEmail] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const handleRemoveMemberClick = (MemberId: string, MemberEmail: string) => () => {
-    setSelectedMemberId(MemberId);
-    setSelectedMemberEmail(MemberEmail);
+    if (isOwner) {
+      setSelectedMemberId(MemberId);
+      setSelectedMemberEmail(MemberEmail);
+    }
   };
 
   const handleCloseRemoveMemberModal = () => {
@@ -36,7 +40,9 @@ export const MembersTable = () => {
   };
 
   const handleCreateClick = () => {
-    setIsAddModalOpen(true);
+    if (isOwner) {
+      setIsAddModalOpen(true);
+    }
   };
 
   const handleCloseAddMemberModal = () => {
@@ -66,7 +72,7 @@ export const MembersTable = () => {
               },
               {
                 key: 'delete',
-                value: (
+                value: isOwner ? (
                   <CpslButton
                     variant="destructive"
                     size="small"
@@ -75,13 +81,13 @@ export const MembersTable = () => {
                   >
                     Remove
                   </CpslButton>
-                ),
+                ) : null,
                 fitWidth: true,
               },
             ],
           }) as TableData,
       ) ?? [],
-    [members, orgValid],
+    [isOwner, members, orgValid],
   );
 
   const handlePageChange = (page: number) => {
@@ -103,10 +109,12 @@ export const MembersTable = () => {
         onPageChange={handlePageChange}
         headers={[{ headerName: 'Name' }, { headerName: 'Email' }, { headerName: 'Date Joined', colSpan: 2 }]}
         ActionButton={
-          <GradientButton onClick={handleCreateClick} size={isMobile ? 'small' : 'medium'} disabled={!orgValid}>
-            <CpslIcon slot="start" icon="plusCircle" />
-            Invite Member
-          </GradientButton>
+          isOwner ? (
+            <GradientButton onClick={handleCreateClick} size={isMobile ? 'small' : 'medium'} disabled={!orgValid}>
+              <CpslIcon slot="start" icon="plusCircle" />
+              Invite Member
+            </GradientButton>
+          ) : undefined
         }
         noContentTitle="No Members Yet"
       />
