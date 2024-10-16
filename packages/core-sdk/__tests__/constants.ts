@@ -4,10 +4,15 @@ export const USER_ID = 'ef3bf91c-fc1e-4d18-afe2-f2654c9531e5';
 export const USER_EMAIL = 'test@test.com';
 export const USER_PHONE = '5555555555';
 export const USER_COUNTRY_CODE = '1';
+export const USER_FARCASTER_USERNAME = 'TestFarcaster';
 
 export const VERIFICATION_CODE = '123456';
 
 export const SESSION_ID = 'ef3bf91c-fc1e-4d18-afe2-f2654c9531c3';
+export const SESSION_LOOKUP_ID = 'ef3bf91c-fc1e-4d18-afe2-f2654c9531c5';
+export const TEMP_TRANSMISSION_INIT_ID = 'ef3bf91c-fc1e-4d18-afe2-f2654c9531t1';
+
+export const FARCASTER_CONNECT_URI = 'https://test.com/test-farcaster-connect';
 
 export const API_KEY = 'api-key-123';
 export const PARTNER = {
@@ -35,3 +40,5 @@ export const STORED_EXTERNAL_WALLET = {
   isExternal: true,
   signer: '',
 };
+
+export const LOGIN_ERROR = 'Login Error';

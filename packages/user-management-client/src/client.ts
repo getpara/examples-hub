@@ -105,6 +105,7 @@ interface sessionPublicKeyBody {
   type?: PublicKeyType;
   cosePublicKey?: string;
   clientDataJSON?: string;
+  aaguid?: string;
 }
 
 interface WebSignature {

@@ -1,6 +1,6 @@
 import { describe, vi, afterEach, expect, it } from 'vitest';
 
-import CoreCapsule, { Environment } from '../../src';
+import CoreCapsule, { Environment, getPublicKeyHex, OAuthMethod } from '../../src';
 import {
   API_KEY,
   EXTERNAL_WALLET,
@@ -12,6 +12,11 @@ import {
   USER_ID,
   USER_PHONE,
   VERIFICATION_CODE,
+  TEMP_TRANSMISSION_INIT_ID,
+  FARCASTER_CONNECT_URI,
+  USER_FARCASTER_USERNAME,
+  SESSION_LOOKUP_ID,
+  LOGIN_ERROR,
 } from '../constants';
 import { MockCapsule } from '../mocks/mockCoreCapsule';
 import {
@@ -19,12 +24,14 @@ import {
   mockCheckUserExists,
   mockCreateUser,
   mockExternalWalletLogin,
+  mockGetFarcasterAuthStatus,
   mockVerifyEmail,
   mockVerifyPhone,
 } from '../mocks/mockUserManagementClient';
 import { CountryCallingCode } from 'libphonenumber-js';
 import { PublicKeyStatus, PublicKeyType } from '@usecapsule/user-management-client';
 import { toQueryString } from '../../src/CoreCapsule';
+import { getWorkerContent } from '../utils';
 
 describe('CoreCapsule', () => {
   afterEach(() => {
@@ -66,7 +73,6 @@ describe('CoreCapsule', () => {
       expect(isSessionActive).toBeTruthy();
     });
     it('log in fails', async () => {
-      const LOGIN_ERROR = 'Login Error';
       const capsule = new MockCapsule(Environment.DEV, API_KEY);
 
       const { address, type, provider } = EXTERNAL_WALLET;
@@ -272,6 +278,165 @@ describe('CoreCapsule', () => {
         });
         expect(capsule.getPhoneNumber()).toBeUndefined();
         expect(capsule.getUserId()).toBeUndefined();
+      });
+    });
+  });
+  describe('login', { timeout: 20000 }, () => {
+    describe('email', () => {
+      it('initiates login', async () => {
+        const capsule = new MockCapsule(Environment.DEV, API_KEY);
+
+        const workerFileContent = await getWorkerContent();
+
+        global.fetch = vi.fn(() =>
+          Promise.resolve({
+            text: () => Promise.resolve(workerFileContent),
+          } as Response),
+        );
+
+        const loginLink = await capsule.initiateUserLogin(USER_EMAIL);
+
+        expect(loginLink).toEqual(
+          `https://test.com/web/biometrics/login?email=${encodeURIComponent(USER_EMAIL)}&sessionId=${SESSION_ID}&encryptionKey=${getPublicKeyHex(capsule.loginEncryptionKeyPair!)}${toQueryString(
+            {
+              pregenWalletIds: '',
+            },
+          )}${toQueryString({
+            apiKey: PARTNER.apiKey,
+            partnerId: PARTNER.id,
+            portalFont: PARTNER.font,
+            portalThemeMode: PARTNER.themeMode,
+            portalAccentColor: PARTNER.accentColor,
+            portalForegroundColor: PARTNER.foregroundColor,
+            portalBackgroundColor: PARTNER.backgroundColor,
+          })}`,
+        );
+      });
+      it('initiates login - short url', async () => {
+        const capsule = new MockCapsule(Environment.DEV, API_KEY);
+
+        const workerFileContent = await getWorkerContent();
+
+        global.fetch = vi.fn(() =>
+          Promise.resolve({
+            text: () => Promise.resolve(workerFileContent),
+          } as Response),
+        );
+
+        const loginLink = await capsule.initiateUserLogin(USER_EMAIL, true);
+
+        expect(loginLink).toContain(`http://localhost:3003/short/${TEMP_TRANSMISSION_INIT_ID}`);
+      });
+    });
+    describe('phone', () => {
+      it('initiates login', async () => {
+        const capsule = new MockCapsule(Environment.DEV, API_KEY);
+
+        const workerFileContent = await getWorkerContent();
+
+        global.fetch = vi.fn(() =>
+          Promise.resolve({
+            text: () => Promise.resolve(workerFileContent),
+          } as Response),
+        );
+
+        const loginLink = await capsule.initiateUserLogin(
+          USER_PHONE,
+          false,
+          'phone',
+          USER_COUNTRY_CODE as CountryCallingCode,
+        );
+
+        expect(loginLink).toEqual(
+          `https://test.com/web/biometrics/login?phone=${encodeURIComponent(USER_PHONE)}&countryCode=${encodeURIComponent(USER_COUNTRY_CODE)}&sessionId=${SESSION_ID}&encryptionKey=${getPublicKeyHex(capsule.loginEncryptionKeyPair!)}${toQueryString(
+            {
+              pregenWalletIds: '',
+            },
+          )}${toQueryString({
+            apiKey: PARTNER.apiKey,
+            partnerId: PARTNER.id,
+            portalFont: PARTNER.font,
+            portalThemeMode: PARTNER.themeMode,
+            portalAccentColor: PARTNER.accentColor,
+            portalForegroundColor: PARTNER.foregroundColor,
+            portalBackgroundColor: PARTNER.backgroundColor,
+          })}`,
+        );
+      });
+      it('initiates login - phone only method', async () => {
+        const capsule = new MockCapsule(Environment.DEV, API_KEY);
+
+        const workerFileContent = await getWorkerContent();
+
+        global.fetch = vi.fn(() =>
+          Promise.resolve({
+            text: () => Promise.resolve(workerFileContent),
+          } as Response),
+        );
+
+        const loginLink = await capsule.initiateUserLoginForPhone(USER_PHONE, USER_COUNTRY_CODE as CountryCallingCode);
+
+        expect(loginLink).toEqual(
+          `https://test.com/web/biometrics/login?phone=${encodeURIComponent(USER_PHONE)}&countryCode=${encodeURIComponent(USER_COUNTRY_CODE)}&sessionId=${SESSION_ID}&encryptionKey=${getPublicKeyHex(capsule.loginEncryptionKeyPair!)}${toQueryString(
+            {
+              pregenWalletIds: '',
+            },
+          )}${toQueryString({
+            apiKey: PARTNER.apiKey,
+            partnerId: PARTNER.id,
+            portalFont: PARTNER.font,
+            portalThemeMode: PARTNER.themeMode,
+            portalAccentColor: PARTNER.accentColor,
+            portalForegroundColor: PARTNER.foregroundColor,
+            portalBackgroundColor: PARTNER.backgroundColor,
+          })}`,
+        );
+      });
+    });
+    describe('farcaster', () => {
+      it('get connect url', async () => {
+        const capsule = new MockCapsule(Environment.DEV, API_KEY);
+
+        const uri = await capsule.getFarcasterConnectURL();
+
+        expect(uri).toEqual(FARCASTER_CONNECT_URI);
+      });
+      it('logs in user', async () => {
+        const capsule = new MockCapsule(Environment.DEV, API_KEY);
+
+        const { userExists, username } = await capsule.waitForFarcasterStatus();
+
+        expect(userExists).toBeTruthy();
+        expect(username).toEqual(USER_FARCASTER_USERNAME);
+        expect(capsule.getUserId()).toEqual(USER_ID);
+      });
+      it('wait for login fails', async () => {
+        mockGetFarcasterAuthStatus.mockRejectedValueOnce(LOGIN_ERROR);
+
+        const capsule = new MockCapsule(Environment.DEV, API_KEY);
+
+        const waitResp = await capsule.waitForFarcasterStatus();
+
+        await expect(waitResp).toBeUndefined();
+      });
+    });
+    describe('oauth', () => {
+      it('get url', async () => {
+        const capsule = new MockCapsule(Environment.DEV, API_KEY);
+
+        const uri = await capsule.getOAuthURL(OAuthMethod.GOOGLE);
+
+        expect(uri).toEqual(`http://localhost:8080/auth/google?sessionLookupId=${encodeURIComponent(SESSION_LOOKUP_ID)}`);
+      });
+      it('logs in user', async () => {
+        const capsule = new MockCapsule(Environment.DEV, API_KEY);
+
+        const { email, userExists } = await capsule.waitForOAuth();
+
+        expect(userExists).toBeTruthy();
+        expect(email).toEqual(USER_EMAIL);
+        expect(capsule.getUserId()).toEqual(USER_ID);
+        expect(capsule.getEmail()).toEqual(USER_EMAIL);
       });
     });
   });
