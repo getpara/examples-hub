@@ -6,6 +6,8 @@ import { useIsMobile } from '../../hooks/useIsMobile';
 import { useState } from 'react';
 import { MOBILE_SIZE } from '../../utils/constants';
 import { AuthenticatedWrapper } from '../../components/AuthenticatedWrapper/AuthenticatedWrapper';
+import { ErrorBoundary as SentryErrorBoundary } from '@sentry/react';
+import { ErrorBoundary } from '../../components/ErrorBoundary/ErrorBoundary';
 
 export const Layout = () => {
   const isMobile = useIsMobile();
@@ -18,14 +20,37 @@ export const Layout = () => {
   return (
     <AuthenticatedWrapper requireOrgs>
       <AuthAppBar setNavOpen={setIsNavExpanded} />
-      <NavBar isOpen={isNavExpanded} closeNav={closeNav} />
-      <Main $sidebarWidth={isMobile ? 0 : EXPANDED_SIDEBAR_WIDTH}>
-        <div>
-          <InnerContainer>
-            <Outlet />
-          </InnerContainer>
-        </div>
-      </Main>
+      <SentryErrorBoundary
+        fallback={({ error, resetError }) => (
+          <ErrorBoundary
+            onResetError={resetError}
+            variant="error"
+            containerType="authenticated"
+            errorMessage={(error as Error)?.message}
+          />
+        )}
+      >
+        <NavBar isOpen={isNavExpanded} closeNav={closeNav} />
+        <Main $sidebarWidth={isMobile ? 0 : EXPANDED_SIDEBAR_WIDTH}>
+          <div>
+            <InnerContainer>
+              <SentryErrorBoundary
+                fallback={({ error, resetError }) => (
+                  <ErrorBoundary
+                    onResetError={resetError}
+                    variant="error"
+                    errorWithNav
+                    containerType="authenticated"
+                    errorMessage={(error as Error)?.message}
+                  />
+                )}
+              >
+                <Outlet />
+              </SentryErrorBoundary>
+            </InnerContainer>
+          </div>
+        </Main>
+      </SentryErrorBoundary>
     </AuthenticatedWrapper>
   );
 };

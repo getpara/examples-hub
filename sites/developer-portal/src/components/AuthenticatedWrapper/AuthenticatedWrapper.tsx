@@ -24,7 +24,6 @@ export const AuthenticatedWrapper = ({ requireOrgs, children }: AuthenticatedWra
 
   useEffect(() => {
     if (!isLoadingOrgs) {
-      console.log('🚀 ~ useEffect ~ isLoadingOrgs:', isLoadingOrgs);
       // Set org (if available) and navigate to proper page
       setSelectedOrganization();
     }

@@ -8,6 +8,7 @@ export const Login = () => {
 
   return <Container>{isLoading ? <Loading setIsLoading={setIsLoading} /> : <Main setIsLoading={setIsLoading} />}</Container>;
 };
+
 const Container = styled.div`
   flex: 1;
   display: flex;

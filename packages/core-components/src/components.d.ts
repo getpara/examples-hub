@@ -28,6 +28,10 @@ export namespace Components {
          */
         "icon"?: IconType;
         /**
+          * Hides the icon.
+         */
+        "noIcon"?: boolean;
+        /**
           * The variant of alert. Options are: `"error"` | `"warning"` | `"success"` | `"custom"` Default is: `"error"`.
          */
         "variant"?: 'error' | 'warning' | 'success' | 'custom';
@@ -1468,6 +1472,10 @@ declare namespace LocalJSX {
           * The name of the icon to show.
          */
         "icon"?: IconType;
+        /**
+          * Hides the icon.
+         */
+        "noIcon"?: boolean;
         /**
           * The variant of alert. Options are: `"error"` | `"warning"` | `"success"` | `"custom"` Default is: `"error"`.
          */

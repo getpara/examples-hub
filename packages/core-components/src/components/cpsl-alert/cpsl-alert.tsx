@@ -13,6 +13,11 @@ export class CpslAlert {
   @Prop() icon?: IconType;
 
   /**
+   * Hides the icon.
+   */
+  @Prop() noIcon?: boolean;
+
+  /**
    * The variant of alert.
    * Options are: `"error"` | `"warning"` | `"success"` | `"custom"`
    * Default is: `"error"`.
@@ -51,7 +56,7 @@ export class CpslAlert {
       <Host class={{ error: this.variant === 'error', warning: this.variant === 'warning', success: this.variant === 'success', filled: this.filled }}>
         <div class="alert-container">
           <div class="title-container">
-            {this.iconType && <cpsl-icon icon={this.iconType} />}
+            {!this.noIcon && this.iconType && <cpsl-icon icon={this.iconType} />}
             <slot></slot>
           </div>
           <slot name="subtitle"></slot>

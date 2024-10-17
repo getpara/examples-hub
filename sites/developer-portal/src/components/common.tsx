@@ -83,3 +83,8 @@ export const CapitalizedText = styled(CpslText)`
 export const CenteredText = styled(CpslText)`
   text-align: center;
 `;
+
+export const ClickableText = styled(CpslText)`
+  text-decoration: underline;
+  cursor: pointer;
+`;

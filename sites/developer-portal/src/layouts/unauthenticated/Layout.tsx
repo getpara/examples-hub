@@ -6,6 +6,8 @@ import { useGetOrganizationAccess } from '../../hooks/api/queries/useOrganizatio
 import { useEffect } from 'react';
 import { UNAUTH_APP_BAR_HEIGHT, UnAuthAppBar } from '../../components/AppBar/UnAuthAppBar';
 import { MainLoader } from '../../components/MainLoader';
+import { ErrorBoundary as SentryErrorBoundary } from '@sentry/react';
+import { ErrorBoundary } from '../../components/ErrorBoundary/ErrorBoundary';
 
 export const Layout = () => {
   const navigate = useNavigate();
@@ -30,7 +32,18 @@ export const Layout = () => {
     <>
       <UnAuthAppBar />
       <UnAuthMain>
-        <Outlet />
+        <SentryErrorBoundary
+          fallback={({ error, resetError }) => (
+            <ErrorBoundary
+              onResetError={resetError}
+              variant="error"
+              containerType="unauthenticated"
+              errorMessage={(error as Error)?.message}
+            />
+          )}
+        >
+          <Outlet />
+        </SentryErrorBoundary>
       </UnAuthMain>
     </>
   );
