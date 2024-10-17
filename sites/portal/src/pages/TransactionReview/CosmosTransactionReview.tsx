@@ -29,7 +29,7 @@ function formatCosmosFee(fee: Fee) {
   return `${fee.amount[0].amount} ${fee.amount[0].denom}`;
 }
 
-async function transactionCoinFromCosmosCoin(coin: Coin, conversionRate: number): Promise<TransactionCoin> {
+async function transactionCoinFromCosmosCoin(coin: Coin, conversionRate?: number): Promise<TransactionCoin> {
   return {
     value: Number(coin.amount),
     units: coin.denom,
@@ -78,13 +78,23 @@ function CosmosTransactionReview({
 
     let txCoins: TransactionCoin[] = [];
     for (const amount of msgSend.amount) {
-      const conversionRate = await fetchConversionRate(capsule, cosmosSignDoc.chainId, amount.denom);
+      let conversionRate;
+      try {
+        conversionRate = await fetchConversionRate(capsule, cosmosSignDoc.chainId, amount.denom);
+      } catch (e) {
+        console.error(e);
+      }
       txCoins.push(await transactionCoinFromCosmosCoin(amount, conversionRate));
     }
     setCoins(txCoins);
 
-    const feeConversionRate = await fetchConversionRate(capsule, cosmosSignDoc.chainId, authInfo.fee.amount[0].denom);
-    setFeeConversionRate(feeConversionRate);
+    try {
+      const feeConversionRate = await fetchConversionRate(capsule, cosmosSignDoc.chainId, authInfo.fee.amount[0].denom);
+      setFeeConversionRate(feeConversionRate);
+    } catch (e) {
+      console.error(e);
+    }
+
     setFee(authInfo.fee);
 
     setTxReviewState(CosmosTransactionReviewState.Ready);
