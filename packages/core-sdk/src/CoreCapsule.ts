@@ -495,7 +495,7 @@ export abstract class CoreCapsule {
   }
 
   private isWalletSupported(wallet: Omit<Wallet, 'signer'>): boolean {
-    return isWalletSupported(this.supportedWalletTypes.map(({ type }) => type) ?? [], wallet);
+    return !this.#supportedWalletTypes || isWalletSupported(this.supportedWalletTypes.map(({ type }) => type) ?? [], wallet);
   }
 
   private isWalletOwned(wallet: Wallet): boolean {
