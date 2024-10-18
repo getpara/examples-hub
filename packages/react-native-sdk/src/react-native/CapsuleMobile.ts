@@ -20,7 +20,7 @@ import {
   PasskeyRegistrationRequest,
   PasskeyAuthenticationRequest,
 } from '@usecapsule/react-native-passkey/lib/typescript/Passkey';
-import { PublicKeyStatus } from '@usecapsule/user-management-client';
+import { PublicKeyStatus, WalletScheme } from '@usecapsule/user-management-client';
 import { setEnv } from '../config';
 import base64url from 'base64url';
 import { webcrypto } from 'crypto';
@@ -186,7 +186,7 @@ export class CapsuleMobile extends CoreCapsule {
    * @returns {Promise<Wallet[]>} An array of user wallets.
    * @throws {Error} If neither email nor both phone and countryCode are provided.
    */
-  async login(email?: string, phone?: string, countryCode?: CountryCallingCode): Promise<Wallet[]> {
+  async login(email?: string, phone?: string, countryCode?: CountryCallingCode): Promise<void> {
     const { challenge, allowedPublicKeys } = await this.ctx.capsuleClient.getWebChallenge(email, phone, countryCode);
 
     const requestJson: PasskeyAuthenticationRequest = {
@@ -244,31 +244,17 @@ export class CapsuleMobile extends CoreCapsule {
     const desiredWallets = walletsRes.data.wallets;
 
     const walletsToInsert: { [id: string]: Wallet } = {};
-    const ed25519WalletsToInsert: { [id: string]: Wallet } = {};
     for (let desiredWallet of desiredWallets) {
       const decryptedShare = decryptedShares.find(share => share.walletId === desiredWallet.id)!;
-      if (desiredWallet.scheme === 'ED25519') {
-        ed25519WalletsToInsert[decryptedShare.walletId] = {
-          id: decryptedShare.walletId,
-          signer: decryptedShare.signer,
-          address: desiredWallet.address,
-          publicKey: desiredWallet.publicKey,
-          scheme: desiredWallet.scheme,
-        };
-      } else {
-        walletsToInsert[decryptedShare.walletId] = {
-          id: decryptedShare.walletId,
-          signer: decryptedShare.signer,
-          address: desiredWallet.address,
-          publicKey: desiredWallet.publicKey,
-          scheme: desiredWallet.scheme,
-        };
-      }
+      walletsToInsert[decryptedShare.walletId] = {
+        id: decryptedShare.walletId,
+        signer: decryptedShare.signer,
+        address: desiredWallet.address || undefined,
+        publicKey: desiredWallet.publicKey || undefined,
+        scheme: desiredWallet.scheme as WalletScheme,
+      };
     }
 
     await this.setWallets(walletsToInsert);
-    await this.setEd25519Wallets(ed25519WalletsToInsert); //will be removed on core capsule 1.22.0 but still needed for mobile
-
-    return desiredWallets; // wrong return type as WalletEntity is missing 'signer' field which Wallet has so can't do as Wallet[]
   }
 }

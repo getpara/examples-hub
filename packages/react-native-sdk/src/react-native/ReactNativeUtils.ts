@@ -3,7 +3,7 @@
 import { PlatformUtils, PregenIdentifierType } from '@usecapsule/web-sdk';
 import { Ctx } from '@usecapsule/web-sdk';
 import { SignatureRes } from '@usecapsule/web-sdk';
-import { BackupKitEmailProps, KeyType, SignatureScheme } from '@usecapsule/user-management-client';
+import { BackupKitEmailProps, KeyType, WalletScheme, WalletType } from '@usecapsule/user-management-client';
 import { NativeModules } from 'react-native';
 
 import { AsyncStorage } from '../AsyncStorage';
@@ -71,13 +71,15 @@ export class ReactNativeUtils implements PlatformUtils {
   async keygen(
     ctx: Ctx,
     userId: string,
+    type: Exclude<WalletType, WalletType.SOLANA>,
     _secretKey: string | null,
     _sessionCookie: string,
     _emailProps?: BackupKitEmailProps | undefined,
   ): Promise<{ signer: string; walletId: string }> {
     const { walletId, protocolId } = await ctx.capsuleClient.createWallet(userId, {
+      type,
       useTwoSigners: true,
-      scheme: ctx.useDKLS ? SignatureScheme.DKLS : SignatureScheme.CGGMP,
+      scheme: ctx.useDKLS ? WalletScheme.DKLS : WalletScheme.CGGMP,
     });
 
     if (ctx.mpcComputationClient && !ctx.useDKLS) {
@@ -88,6 +90,20 @@ export class ReactNativeUtils implements PlatformUtils {
     const createAccountFn = !ctx.useDKLS ? CapsuleSignerModule.createAccount : CapsuleSignerModule.dklsCreateAccount;
     const signer = await createAccountFn(walletId, protocolId, KeyType.USER, userId);
     return { signer, walletId };
+  }
+
+  refresh(
+    _ctx: Ctx,
+    _sessionCookie: string,
+    _userId: string,
+    _walletId: string,
+    _share: string,
+    _oldPartnerId?: string,
+    _newPartnerId?: string,
+  ): Promise<{
+    signer: string;
+  }> {
+    throw new Error('Method not implemented.');
   }
 
   preKeygen(
@@ -104,7 +120,7 @@ export class ReactNativeUtils implements PlatformUtils {
     throw new Error('Method not implemented.');
   }
 
-  openPopup(_popupUrl: string): void {
+  openPopup(_popupUrl: string): any {
     throw new Error('Method not implemented.');
   }
 
@@ -206,7 +222,8 @@ export class ReactNativeUtils implements PlatformUtils {
     walletId: string;
   }> {
     const { walletId, protocolId } = await ctx.capsuleClient.createWallet(userId, {
-      scheme: SignatureScheme.ED25519,
+      scheme: WalletScheme.ED25519,
+      type: WalletType.SOLANA,
     });
 
     const signer = await CapsuleSignerModule.ed25519CreateAccount(walletId, protocolId);
@@ -222,10 +239,11 @@ export class ReactNativeUtils implements PlatformUtils {
     signer: string;
     walletId: string;
   }> {
-    const { walletId, protocolId } = await ctx.capsuleClient.createPregenWallet({
+    const { walletId, protocolId } = await ctx.capsuleClient.createWalletPreGen({
       pregenIdentifier,
       pregenIdentifierType,
-      scheme: SignatureScheme.ED25519,
+      scheme: WalletScheme.ED25519,
+      type: WalletType.SOLANA,
     });
 
     const signer = await CapsuleSignerModule.ed25519CreateAccount(walletId, protocolId);
@@ -240,7 +258,7 @@ export class ReactNativeUtils implements PlatformUtils {
     base64Bytes: string,
     _sessionCookie: string,
   ): Promise<SignatureRes> {
-    const { protocolId } = await ctx.capsuleClient.preSignMessage(userId, walletId, base64Bytes, SignatureScheme.ED25519);
+    const { protocolId } = await ctx.capsuleClient.preSignMessage(userId, walletId, base64Bytes, WalletScheme.ED25519);
 
     const base64Sig = await CapsuleSignerModule.ed25519Sign(protocolId, share, base64Bytes);
     return { signature: base64Sig };
