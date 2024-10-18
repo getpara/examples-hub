@@ -25,8 +25,8 @@ export const NonProdWarning = ({ onCreateProdKeyClick }: NonProdWarningProps) =>
 
   if (
     !apiKeyData ||
-    (apiKeyData.environment as Environment) === Environment.PROD ||
-    apiKeyData.environment.toString() === 'PRODUCTION'
+    (apiKeyData.environment.toUpperCase() as Environment) === Environment.PROD ||
+    apiKeyData.environment.toString().toUpperCase() === 'PRODUCTION'
   ) {
     return null;
   }

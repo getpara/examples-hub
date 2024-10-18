@@ -73,7 +73,7 @@ export const DeleteUserModal = ({ open, userEmail, userId, walletId, onClose, on
       onExited={onExited}
       title={`Delete ${walletId ? 'Pregen Wallet' : 'User'}`}
       titleColor="var(--cpsl-color-text-error)"
-      subtitle="Are your sure you want to delete this user?"
+      subtitle={`Are you sure you want to delete this ${walletId ? 'pregen wallet' : 'user'}?`}
     >
       <>
         <CpslInput placeholder={userEmail} disabled />

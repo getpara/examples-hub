@@ -47,7 +47,7 @@ export const RemoveMemberModal = ({ open, memberEmail, memberId, onClose, onExit
       onExited={onExited}
       title="Remove Member"
       titleColor="var(--cpsl-color-text-error)"
-      subtitle="Are your sure you want to remove this member?"
+      subtitle="Are you sure you want to remove this member?"
     >
       <>
         <CpslInput value={memberEmail} disabled />

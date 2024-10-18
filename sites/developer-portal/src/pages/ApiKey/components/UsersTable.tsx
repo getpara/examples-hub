@@ -34,6 +34,7 @@ export const UsersTable = () => {
   const { data: totalUsersRows } = useOrganizationKeyUsersTotalRows(projectId ?? '', apiKey ?? '', env ?? '', offset, limit);
 
   const [selectedUserId, setSelectedUserId] = useState('');
+  const [selectedWalletId, setSelectedWalletId] = useState('');
   const [selectedUserEmail, setSelectedUserEmail] = useState('');
 
   const handleDeleteUserClick = (id: string, userEmail: string) => () => {
@@ -41,15 +42,21 @@ export const UsersTable = () => {
     setSelectedUserEmail(userEmail);
   };
 
+  const handleDeleteWalletClick = (id: string, pregenIdentifier: string) => () => {
+    setSelectedWalletId(id);
+    setSelectedUserEmail(pregenIdentifier);
+  };
+
   const handleCloseDeleteUserModal = () => {
     setSelectedUserId('');
+    setSelectedWalletId('');
   };
 
   const handleDeleteUserModalExited = () => {
     setSelectedUserEmail('');
   };
 
-  const isProdKey = apiKeyData?.environment === Environment.PROD;
+  const isProdKey = apiKeyData?.environment.toUpperCase() === Environment.PROD;
 
   const totalPages = Math.ceil((totalUsersRows ?? 0) / PAGE_SIZE);
 
@@ -98,16 +105,20 @@ export const UsersTable = () => {
                         <CpslButton
                           variant="secondary"
                           size="small"
-                          onClick={handleDeleteUserClick(
-                            (d.userId ?? d.pregenWalletId)!,
-                            d.email ??
-                              d.phoneNumber ??
-                              d.farcasterUsername ??
-                              d.userId ??
-                              d.pregenIdentifier ??
-                              d.pregenWalletId ??
-                              d.id,
-                          )}
+                          onClick={
+                            d.pregenWalletId
+                              ? handleDeleteWalletClick(d.pregenWalletId, d.pregenIdentifier ?? d.id)
+                              : handleDeleteUserClick(
+                                  d.userId!,
+                                  d.email ??
+                                    d.phoneNumber ??
+                                    d.farcasterUsername ??
+                                    d.userId ??
+                                    d.pregenIdentifier ??
+                                    d.pregenWalletId ??
+                                    d.id,
+                                )
+                          }
                         >
                           Delete
                         </CpslButton>
@@ -151,11 +162,11 @@ export const UsersTable = () => {
         noContentTitle="No Users Yet"
       />
       <DeleteUserModal
-        open={!!selectedUserId}
+        open={!!selectedUserId || !!selectedWalletId}
         onClose={handleCloseDeleteUserModal}
         onExited={handleDeleteUserModalExited}
         userId={selectedUserId}
-        walletId={selectedUserId}
+        walletId={selectedWalletId}
         userEmail={selectedUserEmail}
       />
     </>
