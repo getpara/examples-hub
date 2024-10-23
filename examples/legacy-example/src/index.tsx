@@ -535,7 +535,7 @@ function App() {
 
   const [pregenEmail, setPregenEmail] = useState('');
   const [pregenPhone, setPregenPhone] = useState('');
-  const [pregenUserShare, setPregenUserShare] = useLocalStorage<BorderRadius>('@EXAMPLE-CAPSULE/pregenUserShare', '');
+  const [pregenUserShare, setPregenUserShare] = useLocalStorage<string>('@EXAMPLE-CAPSULE/pregenUserShare', '');
   const [pregenType, setPregenType] = useLocalStorage<WalletType | 'missing'>('@EXAMPLE-CAPSULE/pregenType', 'missing');
   const [deletedEmail, setDeletedEmail] = useState('');
   const [emailPendingDeletion, setEmailPendingDeletion] = useState('');
@@ -1172,7 +1172,7 @@ function App() {
                           </>
                         ))}
                         {Object.values(capsule?.wallets)
-                          .filter(w => w.isPregen && !!w.pregenIdentifier)
+                          .filter(w => !w.userId || (w.isPregen && !!w.pregenIdentifier))
                           .map(w => {
                             return (
                               <option key={w.id} value={`${w.type}~${w.id}`}>

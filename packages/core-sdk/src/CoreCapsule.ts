@@ -53,13 +53,17 @@ export function entityToWallet(w: WalletEntity): Omit<Wallet, 'signer'> {
   };
 }
 
-function migrateWallet(obj: Record<string, unknown>) {
+function migrateWallet(obj: Record<string, unknown>): Wallet {
   if (['USER', 'PREGEN'].includes(obj.type as string)) {
     obj.isPregen = obj.type === 'PREGEN';
     obj.type = obj.scheme === WalletScheme.ED25519 ? WalletType.SOLANA : WalletType.EVM;
   }
 
-  return obj;
+  if (!!obj.scheme && !obj.type) {
+    obj.type = obj.scheme === WalletScheme.ED25519 ? WalletType.SOLANA : WalletType.EVM;
+  }
+
+  return obj as unknown as Wallet;
 }
 export type EmbeddedWalletType = Exclude<WalletType, never>;
 
@@ -2531,7 +2535,7 @@ export abstract class CoreCapsule {
     const base64WalletsSplit = base64Wallets.split('-');
     for (const base64Wallet of base64WalletsSplit) {
       const walletJson = Buffer.from(base64Wallet, 'base64').toString();
-      const wallet = JSON.parse(walletJson) as Wallet;
+      const wallet = migrateWallet(JSON.parse(walletJson));
 
       this.wallets[wallet.id] = wallet;
       await this.setWallets(this.wallets);
