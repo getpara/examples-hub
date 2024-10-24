@@ -1857,7 +1857,7 @@ export abstract class CoreCapsule {
   }
 
   async getFarcasterConnectURL(): Promise<string> {
-    await this.logout();
+    await this.logout(true);
     await this.touchSession(true);
     const {
       data: { connect_uri },
@@ -1892,7 +1892,7 @@ export abstract class CoreCapsule {
   }
 
   async getOAuthURL(oAuthMethod: OAuthMethod): Promise<string> {
-    await this.logout();
+    await this.logout(true);
     const res = await this.touchSession(true);
     return `${getBaseUrl(this.ctx.env)}auth/${oAuthMethod.toLowerCase()}?sessionLookupId=${encodeURIComponent(res.data.sessionLookupId)}`;
   }
