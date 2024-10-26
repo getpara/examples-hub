@@ -1,10 +1,11 @@
-import { CpslButton, CpslIcon } from '@usecapsule/react-components';
+import { CpslIcon } from '@usecapsule/react-components';
 import { styled } from 'styled-components';
 import { useModalStore } from '../../stores/index.js';
 import { useThemeStore } from '../../stores/theme/useThemeStore.js';
 import { useGoBack } from '../../hooks/useGoBack.js';
 import { AccountSelect, ChainSelect } from './Selects.js';
 import { ModalStep } from '../../utils/steps.js';
+import { HeaderButton } from '@usecapsule/react-common';
 
 interface ControlsProps {
   onClose: () => void;
@@ -69,26 +70,11 @@ const MiddleContainer = styled.div`
   gap: 4px;
 `;
 
-const StyledButton = styled(CpslButton)`
-  flex: 0;
-  --button-padding-top: 2px;
-  --button-padding-bottom: 2px;
-  --button-padding-start: 2px;
-  --button-padding-end: 2px;
-  --button-border-radius: 1000px;
-  --button-background-color: var(--cpsl-color-background-4);
-
-  cpsl-icon {
-    --height: 20px;
-    --width: 20px;
-  }
-`;
-
-const CloseButton = styled(StyledButton)<{ bareModal?: boolean }>`
+const CloseButton = styled(HeaderButton)<{ bareModal?: boolean }>`
   transform: rotate(180deg);
   visibility: ${({ bareModal }) => (bareModal ? 'hidden' : 'visible')};
 `;
 
-const BackButton = styled(StyledButton)`
+const BackButton = styled(HeaderButton)`
   transform: rotate(180deg);
 `;

@@ -6,6 +6,7 @@ import { CountryCallingCode } from 'libphonenumber-js';
 import { entityToWallet, isWalletSupported, PregenIdentifierType, WalletEntity, WalletType } from '@usecapsule/core-sdk';
 import { formatISO } from 'date-fns';
 import { useCloseWindow } from '../../../hooks/useCloseWindow';
+import { BiometricLocationHint } from '@usecapsule/user-management-client';
 
 const NOOP = () => {
   throw new Error();
@@ -23,6 +24,7 @@ type LoginParams = {
   newDeviceSessionLookupId?: string;
   newDeviceEncryptionKey?: string;
   skipAutoLogin?: boolean;
+  isForKnownDeviceLogin?: boolean;
   pregenWalletIds?: Record<string, true>;
 };
 
@@ -37,6 +39,7 @@ type Login = {
   };
   params: LoginParams;
   wallets?: Wallets;
+  biometricLocationHints?: BiometricLocationHint[];
 };
 
 const NO_DATE = formatISO(new Date(-8640000000000000));
@@ -67,6 +70,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
     const paramsNewDeviceEncryptionKey = searchParams.get('newDeviceEncryptionKey') || undefined;
     const paramsPartnerId = searchParams.get('partnerId');
     const paramsPregenWalletIds = searchParams.get('pregenWalletIds');
+    const paramsIsForKnownDeviceLogin = searchParams.get('isForKnownDeviceLogin');
 
     return {
       email: paramsEmail,
@@ -82,11 +86,13 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
       pregenWalletIds: paramsPregenWalletIds
         ? paramsPregenWalletIds.split(',').reduce((obj, id) => ({ ...obj, [id]: true }), {})
         : {},
+      isForKnownDeviceLogin: paramsIsForKnownDeviceLogin === 'true',
     };
   }, [searchParams]);
 
   const [loginRes, setLoginRes] = useState<Awaited<ReturnType<typeof utils.authLogin>> | undefined>();
   const [wallets, setWallets] = useState<Wallets>();
+  const [biometricLocationHints, setBiometricLocationHints] = useState<BiometricLocationHint[]>([]);
 
   const authLogin = useCallback(async (): Promise<void> => {
     const loginRes = await utils.authLogin(
@@ -231,13 +237,23 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
       if (params.farcasterUsername) {
         await capsule.setFarcasterUsername(params.farcasterUsername);
       }
+
+      const hints = await capsule.getUserBiometricLocationHints();
+      setBiometricLocationHints(hints);
     }
 
     setUserDetails();
   }, [capsule, params.email, params.phone, params.countryCode, params.farcasterUsername]);
 
   return (
-    <LoginContext.Provider value={{ fns: { authLogin, authUpdateKeyShares, fetchWallets, finishLogin }, params, wallets }}>
+    <LoginContext.Provider
+      value={{
+        fns: { authLogin, authUpdateKeyShares, fetchWallets, finishLogin },
+        params,
+        wallets,
+        biometricLocationHints,
+      }}
+    >
       {children}
     </LoginContext.Provider>
   );

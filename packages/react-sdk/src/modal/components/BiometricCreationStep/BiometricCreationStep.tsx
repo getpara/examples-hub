@@ -5,7 +5,7 @@ import { ModalStep } from '../../utils/steps.js';
 import { InnerStepContainer, StepContainer, Heading, QRContainer } from '../common.js';
 import { openPopup } from '../../utils/openPopup.js';
 import { isPasskeySupported } from '../../utils/isPasskeySupported.js';
-import { useCopyToClipboard } from '../../hooks/useCopyToClipboard.js';
+import { useCopyToClipboard } from '@usecapsule/react-common';
 
 const SHORTENING_AVAILABLE = true;
 

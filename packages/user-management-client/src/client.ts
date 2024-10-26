@@ -359,6 +359,15 @@ export type OnRampConfig = {
   defaultBuyAmount?: [string, string];
 };
 
+export type BiometricLocationHint = { useragent?: string; aaguid?: string };
+
+interface BiometricLocationHintParams {
+  email?: string;
+  phone?: string;
+  countryCode?: string;
+  farcasterUsername?: string;
+}
+
 const SESSION_COOKIE_HEADER_NAME = 'x-capsule-sid';
 const VERSION_HEADER_NAME = 'x-capsule-version';
 
@@ -479,6 +488,12 @@ class Client {
   getSessionPublicKeys = async (userId: string): Promise<any> => {
     const res = await this.baseRequest.get<any>(`/users/${userId}/biometrics/keys`);
     return res;
+  };
+
+  // GET /biometrics/location-hints
+  getBiometricLocationHints = async (params: BiometricLocationHintParams): Promise<BiometricLocationHint[]> => {
+    const res = await this.baseRequest.get<{ hints: BiometricLocationHint[] }>(`/biometrics/location-hints`, { params });
+    return res.data.hints;
   };
 
   // GET /users/:userId/biometrics/:biometricId

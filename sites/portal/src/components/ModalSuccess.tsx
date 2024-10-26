@@ -1,22 +1,31 @@
-import { Heading, HeroIcon, Subheading } from './common';
-import { IconType } from '@usecapsule/core-components';
+import styled from 'styled-components';
+import { HeroIcon, InnerContainer } from './common';
+import { CenteredText } from '@usecapsule/react-common';
 
 interface ModalSuccessProps {
   heading: string;
   subHeading: string;
-  icon: IconType;
 }
 
-export const ModalSuccess = ({ heading, subHeading, icon }: ModalSuccessProps) => {
+export const ModalSuccess = ({ heading, subHeading }: ModalSuccessProps) => {
   return (
-    <>
-      <HeroIcon icon={icon} />
-      <Heading>
-        <span>{heading}</span>
-      </Heading>
-      <Subheading>
-        <span>{subHeading}</span>
-      </Subheading>
-    </>
+    <InnerContainer>
+      <HeroIcon icon="checkCircleFilled" />
+      <TextContainer>
+        <CenteredText weight="bold" variant="headingS">
+          {heading}
+        </CenteredText>
+        <CenteredText weight="medium" variant="bodyS" color="secondary">
+          {subHeading}
+        </CenteredText>
+      </TextContainer>
+    </InnerContainer>
   );
 };
+
+const TextContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+`;

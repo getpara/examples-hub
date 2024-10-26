@@ -24,6 +24,7 @@ export const OAuth = ({ methods }: OAuthProps) => {
   const setStep = useModalStore(state => state.setStep);
   const setIdentifier = useUserInfoStore(state => state.setIdentifier);
   const setIdentifierType = useUserInfoStore(state => state.setIdentifierType);
+  const setBiometricLocationHints = useModalStore(state => state.setBiometricLocationHints);
   const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
   const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
   const setFarcasterConnectUri = useModalStore(state => state.setFarcasterConnectUri);
@@ -77,8 +78,10 @@ export const OAuth = ({ methods }: OAuthProps) => {
 
     if (userExists) {
       const webAuthUrlForLogin = await capsule.initiateUserLogin(email);
+      const biometricLocationHints = await capsule.getUserBiometricLocationHints();
       setFlow('login');
       setWebAuthURLForLogin(webAuthUrlForLogin);
+      setBiometricLocationHints(biometricLocationHints);
       setStep(ModalStep.BIOMETRIC_LOGIN);
     } else {
       const webAuthURLForCreate = await capsule.getSetUpBiometricsURL(false);

@@ -25,14 +25,13 @@ import {
 } from '@usecapsule/react-components';
 import { useCapsuleStore, useModalStore, useThemeStore } from '../../stores/index.js';
 import { ReactNode, useEffect, useMemo } from 'react';
-import { useCopyToClipboard } from '../../hooks/useCopyToClipboard.js';
 import { OnRampProviderButton } from '../OnRampComponents/OnRampProviderButton.js';
 import { isMobile } from '@usecapsule/web-sdk';
 import { useActiveWallet } from '../../hooks/useActiveWallet.js';
 import { ModalStep } from '../../utils/steps.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useExternalWallets } from '../../providers/ExternalWalletContext.js';
-import { getNetworkFromChainId, getNetworkOrMainNetEquivalent } from '@usecapsule/react-common';
+import { getNetworkFromChainId, getNetworkOrMainNetEquivalent, useCopyToClipboard } from '@usecapsule/react-common';
 import { formatNetworkList } from '../../utils/stringFormatters.js';
 import styled from 'styled-components';
 

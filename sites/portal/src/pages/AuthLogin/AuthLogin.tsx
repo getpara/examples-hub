@@ -26,15 +26,42 @@ const AuthLoginBase = () => {
       farcasterUsername,
       newDeviceSessionLookupId,
       skipAutoLogin,
+      isForKnownDeviceLogin,
     },
+    biometricLocationHints,
   } = useLogin();
   const [urlForNewDeviceLogin, setUrlForNewDeviceLogin] = useState<string>('');
   const [step, setStep] = useAuthLoginStep();
 
-  const isAddingNewDevice = !!newDeviceSessionLookupId;
+  const isAddingNewDevice = !!newDeviceSessionLookupId && !isForKnownDeviceLogin;
 
-  const addDevice = () => {
-    setStep(AuthLoginStep.ADD);
+  const handleLoginFromOtherDevice = async () => {
+    await postLogin();
+  };
+
+  const postLogin = async () => {
+    await capsule.userSetupAfterLogin();
+
+    const wallets = await fetchWallets();
+
+    const [isWithoutWallets, isOnlyOwnedPartnerWallets] = [
+      Object.values(wallets).every(arr => arr.length === 0),
+      capsule.supportedWalletTypes.every(
+        ({ type }) =>
+          wallets[type].length === 1 && wallets[type][0].partnerId === partnerId && !wallets[type][0].pregenIdentifier,
+      ),
+    ];
+
+    const defaultWalletIds = isOnlyOwnedPartnerWallets
+      ? capsule.supportedWalletTypes.reduce((acc, { type }) => ({ ...acc, [type]: wallets[type].map(({ id }) => id) }), {})
+      : undefined;
+
+    if (!!defaultWalletIds || (isWithoutWallets && !capsule.ctx.apiKey)) {
+      await capsule.setCurrentWalletIds(defaultWalletIds ?? {}, sessionId, isWithoutWallets);
+      setStep(AuthLoginStep.SUCCESS);
+    } else {
+      setStep(AuthLoginStep.SELECT_WALLET);
+    }
   };
 
   const login = useCallback(async () => {
@@ -43,30 +70,14 @@ const AuthLoginBase = () => {
       await capsule.touchSession();
       await authLogin();
 
-      await capsule.userSetupAfterLogin();
-
-      const wallets = await fetchWallets();
-
-      const [isWithoutWallets, isOnlyOwnedPartnerWallets] = [
-        Object.values(wallets).every(arr => arr.length === 0),
-        capsule.supportedWalletTypes.every(
-          ({ type }) =>
-            wallets[type].length === 1 && wallets[type][0].partnerId === partnerId && !wallets[type][0].pregenIdentifier,
-        ),
-      ];
-
-      const defaultWalletIds = isOnlyOwnedPartnerWallets
-        ? capsule.supportedWalletTypes.reduce((acc, { type }) => ({ ...acc, [type]: wallets[type].map(({ id }) => id) }), {})
-        : undefined;
-
-      if (!!defaultWalletIds || (isWithoutWallets && !capsule.ctx.apiKey)) {
-        await capsule.setCurrentWalletIds(defaultWalletIds ?? {}, sessionId, isWithoutWallets);
-        setStep(AuthLoginStep.SUCCESS);
-      } else {
-        setStep(AuthLoginStep.SELECT_WALLET);
-      }
+      await postLogin();
     } catch (err) {
-      setStep(AuthLoginStep.SELECT_FLOW);
+      if (err.message?.toLowerCase().includes('the document is not focused')) {
+        setStep(AuthLoginStep.MANUAL_LOGIN);
+        return;
+      }
+      await getWebAuthURLForAddDevice(true);
+      setStep(AuthLoginStep.LOGIN_FAILED);
       console.error('Error retrieving passkey: ', err);
     }
   }, [capsule, authLogin]);
@@ -85,6 +96,30 @@ const AuthLoginBase = () => {
     }
   }, [capsule, authUpdateKeyShares, step]);
 
+  async function getWebAuthURLForAddDevice(isForKnownDeviceLogin?: boolean) {
+    let touchRes = await capsule.touchSession();
+    if (!touchRes.data.sessionLookupId) {
+      touchRes = await capsule.touchSession(true);
+    }
+    if (!capsule.loginEncryptionKeyPair) {
+      const keyPair = await getAsymmetricKeyPair(capsule.ctx);
+      await capsule.setLoginEncryptionKeyPair(keyPair);
+    }
+
+    const url = await capsule.getWebAuthURLForLogin(
+      sessionId,
+      encryptionKey,
+      partnerId,
+      touchRes.data.sessionLookupId,
+      getPublicKeyHex(capsule.loginEncryptionKeyPair),
+      undefined,
+      isForKnownDeviceLogin,
+    );
+    const shortUrl = await capsule.shortenLoginLink(url);
+    setUrlForNewDeviceLogin(shortUrl);
+  }
+
+  // TODO: This will change when the new add device flow is added (This shouldn't get hit at all until then)
   useEffect(() => {
     async function getTemporaryShares() {
       try {
@@ -100,7 +135,7 @@ const AuthLoginBase = () => {
 
         if (temporaryShares.length >= fetchedWallets.length) {
           const authCreationURL = await capsule.getSetUpBiometricsURL(true);
-          setStep(AuthLoginStep.SELECT_FLOW);
+          setStep(AuthLoginStep.MANUAL_LOGIN);
           window.location.href = authCreationURL;
           return;
         }
@@ -110,26 +145,6 @@ const AuthLoginBase = () => {
         console.error(e);
         window.setTimeout(getTemporaryShares, 2000);
       }
-    }
-    async function getWebAuthURLForAddDevice() {
-      let touchRes = await capsule.touchSession();
-      if (!touchRes.data.sessionLookupId) {
-        touchRes = await capsule.touchSession(true);
-      }
-      if (!capsule.loginEncryptionKeyPair) {
-        const keyPair = await getAsymmetricKeyPair(capsule.ctx);
-        await capsule.setLoginEncryptionKeyPair(keyPair);
-      }
-
-      const url = await capsule.getWebAuthURLForLogin(
-        sessionId,
-        encryptionKey,
-        partnerId,
-        touchRes.data.sessionLookupId,
-        getPublicKeyHex(capsule.loginEncryptionKeyPair),
-      );
-      const shortUrl = await capsule.shortenLoginLink(url);
-      setUrlForNewDeviceLogin(shortUrl);
     }
 
     if (!newDeviceSessionLookupId && step === AuthLoginStep.ADD) {
@@ -152,7 +167,7 @@ const AuthLoginBase = () => {
       sessionId &&
       encryptionKey &&
       !skipAutoLogin &&
-      step === AuthLoginStep.SELECT_FLOW
+      step === AuthLoginStep.MANUAL_LOGIN
     ) {
       // In development this will trigger a 'request is already pending.' error due to duplicate renders caused by React.StrictMode.
       // See ref: https://legacy.reactjs.org/docs/strict-mode.html#detecting-unexpected-side-effects
@@ -167,14 +182,16 @@ const AuthLoginBase = () => {
   return (
     <Card>
       <CardContent>
-        <ModalHeader />
+        {step !== AuthLoginStep.LOGIN_FAILED_TROUBLESHOOTING && <ModalHeader />}
         <Body
           step={step}
           sessionLookupId={sessionId}
           addDeviceUrl={urlForNewDeviceLogin}
           isAddingNewDevice={isAddingNewDevice}
           onLoginClick={login}
-          onAddDeviceClick={addDevice}
+          onLoginFromAnotherDevice={handleLoginFromOtherDevice}
+          setStep={setStep}
+          biometricLocationHints={biometricLocationHints}
         />
       </CardContent>
     </Card>

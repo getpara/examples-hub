@@ -1,7 +1,7 @@
 import { StoreApi } from 'zustand';
 import { DEFAULT_USER_INFO_STATE, UserInfoActions, UserInfoStore } from './useUserInfoStore.js';
-import { formatPhoneNumber } from '../../utils/stringFormatters.js';
 import { CountryCallingCode } from 'libphonenumber-js';
+import { formatPhoneNumber } from '@usecapsule/react-common';
 
 export const getActions = (
   set: StoreApi<UserInfoStore>['setState'],

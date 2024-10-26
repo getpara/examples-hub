@@ -1,6 +1,6 @@
 import { styled } from 'styled-components';
 import { AuthCreationStep } from '../../../constants';
-import { SelectDeviceStep } from './SelectDeviceStep';
+import { ManualCreationStep } from './ManualCreationStep';
 import { ModalFooter } from '../../../components/ModalFooter';
 import { ModalLoading } from '../../../components/ModalLoading';
 import { ModalSuccess } from '../../../components/ModalSuccess';
@@ -8,18 +8,17 @@ import { useModalOutletContext } from '../../../hooks/useModalOutletContext';
 
 interface BodyProps {
   step: AuthCreationStep;
-  isForNewDevice: boolean;
   userId: string | undefined;
-  onAddThisDeviceClick: () => void;
+  onCreateClick: () => void;
 }
 
-export const Body = ({ step, isForNewDevice, onAddThisDeviceClick }: BodyProps) => {
+export const Body = ({ step, onCreateClick }: BodyProps) => {
   const { partner } = useModalOutletContext();
 
   const Content = () => {
     switch (step) {
-      case AuthCreationStep.SELECT_DEVICE: {
-        return <SelectDeviceStep onAddThisDeviceClick={onAddThisDeviceClick} />;
+      case AuthCreationStep.MANUAL_CREATION: {
+        return <ManualCreationStep onCreateClick={onCreateClick} />;
       }
       case AuthCreationStep.CREATING: {
         return <ModalLoading heading="Creating Passkey..." />;
@@ -29,7 +28,6 @@ export const Body = ({ step, isForNewDevice, onAddThisDeviceClick }: BodyProps) 
           <ModalSuccess
             heading="Passkey Registered!"
             subHeading={`You can now close this window and return to ${partner.displayName}.`}
-            icon={isForNewDevice ? 'heroPasskey' : 'heroWallet'}
           />
         );
       }

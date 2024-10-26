@@ -3,7 +3,7 @@ import { useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { Heading, InnerStepContainer, StepContainer, StyledCpslTileButton } from '../common.js';
 import { styled } from 'styled-components';
-import { useCopyToClipboard } from '../../hooks/useCopyToClipboard.js';
+import { useCopyToClipboard } from '@usecapsule/react-common';
 import { getMailtoLink } from '../../utils/getMailtoLink.js';
 import { useState } from 'react';
 

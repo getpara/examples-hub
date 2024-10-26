@@ -37,6 +37,11 @@ export const FilledDisabledInput: typeof CpslInput = styled(CpslInput)`
   --container-background-color: var(--cpsl-color-background-0);
   --input-background-color: transparent;
   --input-font-weight: 500;
+  --input-color: var(--cpsl-color-text-secondary);
+`;
+
+export const FullWidthFilledDisabledInput: typeof CpslInput = styled(FilledDisabledInput)`
+  width: 100%;
 `;
 
 export const CenteredText: typeof CpslText = styled(CpslText)`

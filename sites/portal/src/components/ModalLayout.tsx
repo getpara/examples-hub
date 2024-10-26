@@ -80,7 +80,9 @@ export const ModalLayout = () => {
             foregroundColor: portalForegroundColor ?? DEFAULT_THEME.foregroundColor,
             backgroundColor: portalBackgroundColor ?? DEFAULT_THEME.backgroundColor,
             mode:
-              portalThemeMode === 'dark' || portalThemeMode === 'light' ? (portalThemeMode as 'light' | 'dark') : undefined,
+              portalThemeMode.toLowerCase() === 'dark' || portalThemeMode.toLowerCase() === 'light'
+                ? (portalThemeMode.toLowerCase() as 'light' | 'dark')
+                : undefined,
             accentColor: portalAccentColor,
           }
         : {

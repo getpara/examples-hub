@@ -45,6 +45,7 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
   const setFlow = useModalStore(state => state.setFlow);
   const setStep = useModalStore(state => state.setStep);
   const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
+  const setBiometricLocationHints = useModalStore(state => state.setBiometricLocationHints);
 
   const [matchedCountryCode, setMatchedCountryCode] = useState<DropdownInputEventDetail>(DEFAULT_COUNTRY);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -120,9 +121,11 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
       const userExists = await capsule.checkIfUserExists(identifier);
       if (userExists) {
         const webAuthUrlForLogin = await capsule.initiateUserLogin(identifier);
+        const biometricLocationHints = await capsule.getUserBiometricLocationHints();
         setFlow('login');
         setStep(ModalStep.BIOMETRIC_LOGIN);
         setWebAuthURLForLogin(webAuthUrlForLogin);
+        setBiometricLocationHints(biometricLocationHints);
         return;
       }
 
@@ -146,9 +149,11 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
 
       if (userExists) {
         const webAuthUrlForLogin = await capsule.initiateUserLoginForPhone(identifier, countryCode);
+        const biometricLocationHints = await capsule.getUserBiometricLocationHints();
         setFlow('login');
         setStep(ModalStep.BIOMETRIC_LOGIN);
         setWebAuthURLForLogin(webAuthUrlForLogin);
+        setBiometricLocationHints(biometricLocationHints);
         return;
       }
 

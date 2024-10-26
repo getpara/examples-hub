@@ -39,18 +39,9 @@ export const ButtonIcon: typeof CpslIcon = styled(CpslIcon)`
 `;
 
 export const HeroIcon: typeof CpslIcon = styled(CpslIcon)`
-  box-sizing: content-box;
-  align-self: center;
-  --height: 64px;
-  --width: 64px;
-
-  padding: 8px 0px;
-  margin: 16px 0px;
-
-  @media (max-width: 550px) {
-    margin-top: 0px;
-    padding-top: 0px;
-  }
+  --height: 80px;
+  --width: 80px;
+  --icon-color: var(--cpsl-color-text-primary);
 `;
 
 export const Card = styled(CpslCard)`
@@ -59,6 +50,8 @@ export const Card = styled(CpslCard)`
   overflow: auto;
 
   &::part(card-container) {
+    --card-padding-start: 0px;
+    --card-padding-end: 0px;
     height: 100%;
     border-radius: 0px;
     padding-bottom: 0px;
@@ -84,4 +77,20 @@ export const capsuleBrandBorder = (width = '1px', radius = '16px') => `
     linear-gradient(to right, #fe5330, #9400db);
   background-origin: border-box;
   background-clip: padding-box, border-box;
+`;
+
+export const InnerContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+`;
+
+export const FlexStartInnerContainer = styled(InnerContainer)`
+  margin-top: 24px;
+  justify-content: flex-start;
+  height: 100%;
+  max-width: 382px;
+  width: 100%;
 `;

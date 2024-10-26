@@ -42,6 +42,7 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     const updateThemeState = useThemeStore(state => state.updateState);
     const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
     const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
+    const setBiometricLocationHints = useModalStore(state => state.setBiometricLocationHints);
     const currentStep = useModalStore(state => state.step);
     const setOnModalStepChange = useModalStore(state => state.setOnModalStepChange);
     const setStep = useModalStore(state => state.setStep);
@@ -103,6 +104,7 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
           setFlow();
           setWebAuthURLForLogin();
           setWebAuthURLForCreate();
+          setBiometricLocationHints();
         }
 
         // Disconnect external wallets if the user is not longer logged in

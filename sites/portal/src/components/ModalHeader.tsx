@@ -1,11 +1,9 @@
 import { styled } from 'styled-components';
-import { CapsuleBlack, CapsuleWhite, ShieldCheck } from './Icons';
-import { Text } from './common';
+import { CapsuleBlack, CapsuleWhite } from './Icons';
 import { useModalOutletContext } from '../hooks/useModalOutletContext';
-import { cleanUrl } from '../utils/cleanUrl';
 
 export const ModalHeader = () => {
-  const { partner, homepageUrl, isDark } = useModalOutletContext();
+  const { partner, isDark } = useModalOutletContext();
 
   return (
     <Container id="header">
@@ -15,12 +13,6 @@ export const ModalHeader = () => {
         ) : (
           <LogoSvg>{isDark ? <CapsuleWhite /> : <CapsuleBlack />}</LogoSvg>
         )}
-      </InnerContainer>
-      <InnerContainer>
-        <ShieldCheck />
-        <URLText>
-          <span>{cleanUrl(homepageUrl)}</span>
-        </URLText>
       </InnerContainer>
     </Container>
   );
@@ -41,22 +33,17 @@ const InnerContainer = styled.div`
 `;
 
 const Logo = styled.img`
-  height: 48px;
+  height: 25px;
   max-width: 60%;
   object-fit: contain;
   box-sizing: content-box;
 `;
 
 const LogoSvg = styled.div`
-  height: 48px;
+  height: 25px;
   align-self: center;
 
   svg {
-    height: 48px;
+    height: 25px;
   }
-`;
-
-const URLText = styled(Text)`
-  font-weight: 500;
-  letter-spacing: 0.48px;
 `;

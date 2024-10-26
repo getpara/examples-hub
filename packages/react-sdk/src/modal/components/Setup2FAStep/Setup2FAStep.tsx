@@ -13,7 +13,7 @@ import { Heading, QRContainer, FilledDisabledInput, StepContainer, InnerStepCont
 import { ModalStep } from '../../utils/steps.js';
 import { CodeChangeEventDetail, CpslCodeInputCustomEvent } from '@usecapsule/core-components';
 import { styled } from 'styled-components';
-import { useCopyToClipboard } from '../../hooks/useCopyToClipboard.js';
+import { useCopyToClipboard } from '@usecapsule/react-common';
 
 interface Setup2FAStepProps {
   onClose: () => void;

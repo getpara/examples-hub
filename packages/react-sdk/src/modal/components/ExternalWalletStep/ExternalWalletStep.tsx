@@ -4,7 +4,7 @@ import { useEffect, useMemo } from 'react';
 import { useModalStore } from '../../stores';
 import styled from 'styled-components';
 import { useExternalWallets } from '../../providers/ExternalWalletContext';
-import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
+import { useCopyToClipboard } from '@usecapsule/react-common';
 import { ModalStep } from '../../utils/steps';
 import { isMobile, isTablet, WalletType } from '@usecapsule/web-sdk';
 import { routeMobileExternalWallet } from '../../utils/routeMobileExternalWallet';

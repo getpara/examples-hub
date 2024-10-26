@@ -4,6 +4,7 @@ import { ModalStep } from '../../utils/steps.js';
 import { getActions } from './actions.js';
 import { OnRampConfig as OnRampConfigBase, OnRampPurchase, WalletType } from '@usecapsule/web-sdk';
 import { Tab as AddFundsTabType } from '../../components/AddFunds/AddFunds.js';
+import { BiometricLocationHint } from '@usecapsule/user-management-client';
 
 type Flow = 'login' | 'signUp' | 'account';
 
@@ -34,6 +35,7 @@ interface ModalState {
   externalWalletError?: string[];
   activeWallet: ActiveWallet | undefined;
   farcasterConnectUri: string | undefined;
+  biometricLocationHints: BiometricLocationHint[] | undefined;
 }
 
 export interface ModalActions {
@@ -59,6 +61,7 @@ export interface ModalActions {
   setStepDirection: (stepDirection: 1 | -1) => void;
   setActiveWallet: (_: ActiveWallet | undefined) => void;
   setFarcasterConnectUri: (_: string | undefined) => void;
+  setBiometricLocationHints: (_?: BiometricLocationHint[]) => void;
 }
 
 export type ModalStore = ModalState & ModalActions;
@@ -78,6 +81,7 @@ export const DEFAULT_MODAL_STATE: Omit<ModalState, 'step' | 'onRampConfig'> = {
   externalWalletError: undefined,
   activeWallet: [undefined, undefined],
   farcasterConnectUri: undefined,
+  biometricLocationHints: undefined,
 };
 
 export const useModalStore = create<ModalStore>()(
@@ -97,6 +101,7 @@ export const useModalStore = create<ModalStore>()(
         step: state.step,
         webAuthURLForLogin: state.webAuthURLForLogin,
         webAuthURLForCreate: state.webAuthURLForCreate,
+        biometricLocationHints: state.biometricLocationHints,
         onRampPurchase: state.onRampPurchase,
         selectedExternalWalletId: state.selectedExternalWalletId,
         isUsingMobileConnector: state.isUsingMobileConnector,

@@ -698,6 +698,10 @@ export namespace Components {
     }
     interface CpslQrCode {
         /**
+          * The name of the icon. If both `icon` and `src` are provided, `icon` will be used.
+         */
+        "icon"?: IconType;
+        /**
           * Source for the center image of the QR code.
          */
         "imageSrc"?: string;
@@ -2246,6 +2250,10 @@ declare namespace LocalJSX {
         "totalSteps"?: number;
     }
     interface CpslQrCode {
+        /**
+          * The name of the icon. If both `icon` and `src` are provided, `icon` will be used.
+         */
+        "icon"?: IconType;
         /**
           * Source for the center image of the QR code.
          */

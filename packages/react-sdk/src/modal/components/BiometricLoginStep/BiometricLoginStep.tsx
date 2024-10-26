@@ -1,28 +1,28 @@
-import { CpslButton, CpslDivider, CpslIcon, CpslQrCode, CpslSpinner, CpslText } from '@usecapsule/react-components';
-import { useEffect, useState } from 'react';
+import { CpslButton, CpslDivider, CpslIcon } from '@usecapsule/react-components';
+import { useEffect, useMemo, useState } from 'react';
 import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
-import { Heading, QRContainer, StepContainer, InnerStepContainer } from '../common.js';
+import { Heading, StepContainer, InnerStepContainer } from '../common.js';
 import { openPopup } from '../../utils/openPopup.js';
 import styled from 'styled-components';
-import { useCopyToClipboard } from '../../hooks/useCopyToClipboard.js';
-import { isMobile } from '@usecapsule/web-sdk';
 import { isPasskeySupported } from '../../utils/isPasskeySupported.js';
+import { formatBiometricHints, KnownDevices, UserIdentifier } from '@usecapsule/react-common';
 
 const SHORTENING_AVAILABLE = true;
 
 export const BiometricLoginStep = () => {
-  const [isCopied, copy] = useCopyToClipboard();
-
   const webAuthURLForLogin = useModalStore(state => state.webAuthURLForLogin);
   const currentStep = useModalStore(state => state.step);
   const setStep = useModalStore(state => state.setStep);
   const setLoginWindow = useModalStore(state => state.setLoginWindow);
+  const biometricLocationHints = useModalStore(state => state.biometricLocationHints);
   const capsule = useCapsuleStore(state => state.capsule);
   const username = useUserInfoStore(state => state.getUsername());
 
   const [shortLoginLink, setShortLoginLink] = useState<string>();
-  const [shortHelpLink, setShortHelpLink] = useState<string>();
+
+  const passkeysSupported = isPasskeySupported();
+  const formattedHints = useMemo(() => formatBiometricHints(biometricLocationHints), [biometricLocationHints]);
 
   useEffect(() => {
     if (currentStep !== ModalStep.BIOMETRIC_LOGIN) {
@@ -35,8 +35,6 @@ export const BiometricLoginStep = () => {
     async function shortenUrl() {
       const shortUrl = await capsule.shortenLoginLink(webAuthURLForLogin);
       setShortLoginLink(shortUrl);
-      const shortHelpUrl = await capsule.shortenLoginLink(`${webAuthURLForLogin}&skipAutoLogin=true`);
-      setShortHelpLink(shortHelpUrl);
     }
     if (SHORTENING_AVAILABLE) {
       shortenUrl();
@@ -52,74 +50,38 @@ export const BiometricLoginStep = () => {
     setStep(ModalStep.AWAITING_BIOMETRIC_LOGIN);
   };
 
-  const handleHelpClick = () => {
-    openPopup(shortHelpLink, 'CapsulePasskey', 'LOGIN_PASSKEY');
-    setStep(ModalStep.AWAITING_BIOMETRIC_LOGIN);
-  };
-
-  const handleCopy = () => {
-    copy(shortLoginLink);
-  };
-
   return (
     <StepContainer $wide>
       <InnerStepContainer>
-        <Heading variant="headingS" weight="bold">
-          Welcome back,
-        </Heading>
-        <IdentifierContainer>
-          <IdentifierText variant="bodyS" weight="medium">
-            {username}
-          </IdentifierText>
-        </IdentifierContainer>
+        {passkeysSupported && formattedHints.isOnKnownDevice && (
+          <Heading variant="headingS" weight="bold">
+            Welcome back,
+          </Heading>
+        )}
+        <UserIdentifier identifier={username} />
       </InnerStepContainer>
       <MainContainer>
-        {isPasskeySupported() && (
+        {!formattedHints.isOnKnownDevice && <KnownDevices hints={formattedHints} link={shortLoginLink} />}
+        {passkeysSupported && (
           <>
+            {!formattedHints.isOnKnownDevice && <CpslDivider>or</CpslDivider>}
             <CpslButton fullWidth onClick={handlePasskeyClick}>
-              <CpslIcon slot="start" icon="key" />
-              Login with this device
+              {formattedHints.isOnKnownDevice ? (
+                <>
+                  <CpslIcon slot="start" icon="key" />
+                  Login with passkey
+                </>
+              ) : (
+                'Continue anyway'
+              )}
             </CpslButton>
-            <CpslDivider>or</CpslDivider>
           </>
         )}
-        <InnerStepContainer>
-          {!isMobile() && (
-            <>
-              <CpslText weight="semiBold">Scan with your mobile device</CpslText>
-              <QRContainer>{!shortLoginLink ? <CpslSpinner size={100} /> : <CpslQrCode url={shortLoginLink} />}</QRContainer>
-            </>
-          )}
-          <CpslButton size="small" variant="ghost" onClick={handleCopy}>
-            <CpslIcon slot="start" icon={isCopied ? 'check' : 'copy'} />
-            {isCopied ? 'Copied' : 'Copy Link'}
-          </CpslButton>
-        </InnerStepContainer>
-        <ClickableText variant="bodyXS" weight="medium" onClick={handleHelpClick}>
-          I’m having trouble logging in
-        </ClickableText>
       </MainContainer>
     </StepContainer>
   );
 };
 
-const IdentifierContainer = styled.div`
-  padding: 8px 16px;
-  border-radius: 1000px;
-  background-color: var(--cpsl-color-background-4);
-`;
-
 const MainContainer = styled(InnerStepContainer)`
   gap: 16px;
-`;
-
-const ClickableText = styled(CpslText)`
-  text-decoration: underline;
-  cursor: pointer;
-`;
-
-const IdentifierText = styled(CpslText)`
-  &::part(text-element) {
-    color: var(--cpsl-color-background-96);
-  }
 `;

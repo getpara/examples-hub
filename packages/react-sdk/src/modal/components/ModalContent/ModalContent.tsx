@@ -77,6 +77,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     const loginWindow = useModalStore(state => state.loginWindow);
     const onRampConfig = useModalStore(state => state.onRampConfig);
     const setStep = useModalStore(state => state.setStep);
+    const setBiometricLocationHints = useModalStore(state => state.setBiometricLocationHints);
     const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
     const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
     const setLoginWindow = useModalStore(state => state.setLoginWindow);
@@ -121,7 +122,8 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
       }
 
       if (isComplete) {
-        setWebAuthURLForLogin('');
+        setWebAuthURLForLogin();
+        setBiometricLocationHints();
 
         if (needsWallet) {
           setStep(ModalStep.AWAITING_WALLET_CREATION);
@@ -200,7 +202,8 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
           async function loginOverride() {
             await loginTransitionOverride(capsule);
 
-            setWebAuthURLForLogin('');
+            setWebAuthURLForLogin();
+            setBiometricLocationHints();
 
             if (await is2FASetup()) {
               setStep(ModalStep.LOGIN_DONE);

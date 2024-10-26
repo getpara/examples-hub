@@ -11,7 +11,7 @@ import { useCapsule } from '../../components/CapsuleContext';
 
 export const AuthCreation = () => {
   const capsule = useCapsule();
-  const [step, setStep] = useState<AuthCreationStep>(AuthCreationStep.SELECT_DEVICE);
+  const [step, setStep] = useState<AuthCreationStep>(AuthCreationStep.MANUAL_CREATION);
 
   const { biometricId: paramsBiometricId, userId: paramsUserId } = useParams();
   const [searchParams, _] = useSearchParams();
@@ -43,8 +43,11 @@ export const AuthCreation = () => {
         window.close();
       }, REDIRECT_TIMEOUT);
     } catch (err) {
-      if (err.message.includes('The operation either timed out or was not allowed')) {
-        setStep(AuthCreationStep.SELECT_DEVICE);
+      if (
+        err.message?.toLowerCase().includes('the operation either timed out or was not allowed') ||
+        err.message?.toLowerCase().includes('the document is not focused')
+      ) {
+        setStep(AuthCreationStep.MANUAL_CREATION);
       } else {
         console.error('Error creating passkey: ', err);
       }
@@ -63,7 +66,7 @@ export const AuthCreation = () => {
     <Card>
       <CardContent>
         <ModalHeader />
-        <Body step={step} isForNewDevice={isForNewDevice} userId={paramsUserId} onAddThisDeviceClick={setUpBiometrics} />
+        <Body step={step} userId={paramsUserId} onCreateClick={setUpBiometrics} />
       </CardContent>
     </Card>
   );

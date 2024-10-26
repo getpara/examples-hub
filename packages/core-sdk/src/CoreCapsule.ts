@@ -13,6 +13,7 @@ import Client, {
   OnRampPurchaseCreateParams,
   OnRampPurchase,
   extractWalletRef,
+  BiometricLocationHint,
 } from '@usecapsule/user-management-client';
 import qs from 'qs';
 import type { pki as pkiType, jsbn as jsbnType } from 'node-forge';
@@ -1286,6 +1287,7 @@ export abstract class CoreCapsule {
     partnerId?: string,
     newDeviceSessionId?: string,
     newDeviceEncryptionKey?: string,
+    isForKnownDeviceLogin?: boolean,
   ): Promise<string> {
     return toQueryString({
       newDeviceSessionId,
@@ -1294,6 +1296,7 @@ export abstract class CoreCapsule {
         .filter(([_, wallet]) => this.isPregenWalletClaimable(wallet) && wallet.partnerId === partnerId)
         .map(([id]) => id)
         .join(','),
+      isForKnownDeviceLogin: isForKnownDeviceLogin ? isForKnownDeviceLogin.toString() : undefined,
     });
   }
 
@@ -1361,12 +1364,14 @@ export abstract class CoreCapsule {
     newDeviceSessionId?: string,
     newDeviceEncryptionKey?: string,
     type: 'email' | 'phone' | 'farcaster' = 'email',
+    isForKnownDeviceLogin?: boolean,
   ): Promise<string> {
     const commonQueryParams = await this.getCommonQueryParams(partnerId);
     const commonLoginQueryParams = await this.getCommonLoginQueryParams(
       partnerId,
       newDeviceSessionId,
       newDeviceEncryptionKey,
+      isForKnownDeviceLogin,
     );
 
     const userSpecificParams = {
@@ -1723,6 +1728,22 @@ export abstract class CoreCapsule {
       this.currentWalletIdsArray.length > 0 &&
       this.currentWalletIdsArray.reduce((acc, [id]) => acc && !!this.wallets[id], true)
     );
+  }
+
+  /**
+   * Get hints associated with the users stored biometrics.
+   * @returns Array containing useragents and AAGuids for stored biometrics
+   */
+  async getUserBiometricLocationHints(): Promise<BiometricLocationHint[]> {
+    if (!this.email && !this.phone && !this.farcasterUsername) {
+      throw new Error('one of email, phone or farcaster username are required to get biometric location hints');
+    }
+    return await this.ctx.capsuleClient.getBiometricLocationHints({
+      email: this.email,
+      phone: this.phone,
+      countryCode: this.countryCode,
+      farcasterUsername: this.farcasterUsername,
+    });
   }
 
   /**

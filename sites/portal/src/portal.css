@@ -1,8 +1,3 @@
-@font-face {
-  font-family: 'Inter';
-  src: url('../public/Inter-VariableFont_slnt,wght.ttf') format('truetype');
-}
-
 html {
   font-family: 'Inter', sans-serif;
   --cpsl-default-font: 'Inter', sans-serif;

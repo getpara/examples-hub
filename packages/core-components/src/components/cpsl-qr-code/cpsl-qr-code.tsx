@@ -1,5 +1,7 @@
 import { Component, Host, h, Element, Prop } from '@stencil/core';
 import QrCodeWithLogo from 'qrcode-with-logos';
+import { IconType } from '../../interface';
+import { Icons } from '../../assets/icons';
 
 @Component({
   tag: 'cpsl-qr-code',
@@ -25,15 +27,23 @@ export class CpslQrCode {
    */
   @Prop() size?: number = 286;
 
+  /**
+   * The name of the icon. If both `icon` and `src` are provided, `icon` will be used.
+   */
+  @Prop() icon?: IconType;
+
   componentDidLoad() {
+    const imageSrc = this.icon && typeof window !== undefined ? `data:image/svg+xml;base64,${window?.btoa(Icons[this.icon])}` : this.imageSrc;
+
     new QrCodeWithLogo({
       content: this.url,
       width: 1000,
       image: this.imgEl,
-      logo: this.imageSrc
+      logo: imageSrc
         ? {
-            src: this.imageSrc,
+            src: imageSrc,
             borderRadius: 16,
+            borderWidth: -20,
           }
         : '',
       dotsOptions: {
@@ -48,7 +58,7 @@ export class CpslQrCode {
       },
       nodeQrCodeOptions: {
         margin: 0,
-        errorCorrectionLevel: 'M',
+        errorCorrectionLevel: 'H',
       },
     });
   }

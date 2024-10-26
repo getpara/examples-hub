@@ -1,36 +1,45 @@
 import { styled } from 'styled-components';
-import { CpslIcon } from '@usecapsule/react-components';
-import { Text } from './common';
+import { CpslIcon, CpslText } from '@usecapsule/react-components';
+import { AuthLoginStep } from '../constants';
 
-export const ModalFooter = () => {
+interface ModalFooterProps {
+  step?: AuthLoginStep;
+  setStep?: (step: AuthLoginStep) => void;
+}
+
+export const ModalFooter = ({ step, setStep }: ModalFooterProps) => {
+  const handleTroubleshootingClick = () => {
+    setStep?.(AuthLoginStep.LOGIN_FAILED_TROUBLESHOOTING);
+  };
+
   return (
     <FooterContentContainer>
-      <FooterText>
-        <span>
-          Use this account across the web.{' '}
-          <ClickableText>
-            <span>Learn More.</span>
-          </ClickableText>
-        </span>
-      </FooterText>
       <PoweredByContainer>
-        <FooterText>
-          <span>Powered by</span>
+        <FooterText color="secondary" variant="bodyXS">
+          Powered by
         </FooterText>
         <CapsuleLogo icon="capsuleLogo" />
       </PoweredByContainer>
+      {step === AuthLoginStep.LOGIN_FAILED && (
+        <ClickableText variant="bodyS" color="contrast" weight="medium" onClick={handleTroubleshootingClick}>
+          Troubleshooting
+        </ClickableText>
+      )}
     </FooterContentContainer>
   );
 };
 
 const FooterContentContainer = styled.div`
+  width: 100%;
   display: flex;
-  flex-direction: column;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
-  margin-top: 16px;
-  padding-top: 8px;
-  padding-bottom: 24px;
+  padding-top: 16px;
+  padding-bottom: 20px;
+  padding-left: 50px;
+  padding-right: 50px;
+  border-top: 1px solid var(--cpsl-color-background-4);
 `;
 
 const PoweredByContainer = styled.div`
@@ -40,18 +49,9 @@ const PoweredByContainer = styled.div`
   justify-content: center;
 `;
 
-const FooterText = styled(Text)`
+const FooterText = styled(CpslText)`
   text-align: center;
-  font-size: 12px;
-  line-height: 18px;
   white-space: pre-line;
-`;
-
-const ClickableText = styled(FooterText)`
-  &::part(text-element) {
-    color: var(--cpsl-color-text-primary);
-  }
-  cursor: pointer;
 `;
 
 const CapsuleLogo = styled(CpslIcon)`
@@ -59,4 +59,9 @@ const CapsuleLogo = styled(CpslIcon)`
   --icon-color: var(--cpsl-color-text-secondary);
   --width: 65px;
   --height: auto;
+`;
+
+const ClickableText = styled(CpslText)`
+  cursor: pointer;
+  text-decoration: underline;
 `;

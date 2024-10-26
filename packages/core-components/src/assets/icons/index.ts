@@ -13,6 +13,7 @@ import BackupKit from './backup-kit.svg';
 import Bank from './bank.svg';
 import BaseBrand from './base-brand.svg';
 import Brush from './brush.svg';
+import CapsuleBlackBg from './capsule-black-bg.svg';
 import CapsuleLogo from './capsule-logo.svg';
 import CapsuleRingsDark from './capsule-rings-dark.svg';
 import CapsuleRings from './capsule-rings.svg';
@@ -39,6 +40,7 @@ import Cube from './cube.svg';
 import CurrencyDollar from './currency-dollar.svg';
 import DecentBrand from './decent-brand.svg';
 import Decent from './decent.svg';
+import Dell from './dell.svg';
 import DiscordBrand from './discord-brand.svg';
 import Discord from './discord.svg';
 import Dot from './dot.svg';
@@ -79,21 +81,27 @@ import HeroPlusCircleCapsule from './hero-plus-circle-capsule.svg';
 import HeroPlusCircle from './hero-plus-circle.svg';
 import HeroWallet from './hero-wallet.svg';
 import Home from './home.svg';
+import Hp from './hp.svg';
 import Image from './image.svg';
 import InfoCircle from './info-circle.svg';
 import InstagramBrand from './instagram-brand.svg';
 import Instagram from './instagram.svg';
 import Key from './key.svg';
+import Laptop from './laptop.svg';
+import Lenovo from './lenovo.svg';
+import Lg from './lg.svg';
 import Lightning01 from './lightning-01.svg';
 import Lightning from './lightning.svg';
 import LinkExternal from './link-external.svg';
 import LinkedinBrand from './linkedin-brand.svg';
 import Linkedin from './linkedin.svg';
+import LockKeyholeCircle from './lock-keyhole-circle.svg';
 import LogOut from './log-out.svg';
 import Mail from './mail.svg';
 import Menu from './menu.svg';
 import MoonpayBrand from './moonpay-brand.svg';
 import MoreLoginOptions from './more-login-options.svg';
+import Motorola from './motorola.svg';
 import OptimismBrand from './optimism-brand.svg';
 import Phone from './phone.svg';
 import PintrestBrand from './pintrest-brand.svg';
@@ -110,6 +118,7 @@ import RampNetwork from './ramp-network.svg';
 import RedditBrand from './reddit-brand.svg';
 import Reddit from './reddit.svg';
 import Refresh from './refresh.svg';
+import Samsung from './samsung.svg';
 import Search from './search.svg';
 import Send from './send.svg';
 import Settings from './settings.svg';
@@ -134,6 +143,7 @@ import Tumblr from './tumblr.svg';
 import TwitterBrand from './twitter-brand.svg';
 import Twitter from './twitter.svg';
 import UsdcBrand from './usdc-brand.svg';
+import UserCircle from './user-circle.svg';
 import User from './user.svg';
 import Wallet from './wallet.svg';
 import X from './x.svg';
@@ -389,6 +399,7 @@ export const Icons = {
   bank: Bank,
   baseBrand: BaseBrand,
   brush: Brush,
+  capsuleBlackBg: CapsuleBlackBg,
   capsuleLogo: CapsuleLogo,
   capsuleRingsDark: CapsuleRingsDark,
   capsuleRings: CapsuleRings,
@@ -415,6 +426,7 @@ export const Icons = {
   currencyDollar: CurrencyDollar,
   decentBrand: DecentBrand,
   decent: Decent,
+  dell: Dell,
   discordBrand: DiscordBrand,
   discord: Discord,
   dot: Dot,
@@ -455,21 +467,27 @@ export const Icons = {
   heroPlusCircle: HeroPlusCircle,
   heroWallet: HeroWallet,
   home: Home,
+  hp: Hp,
   image: Image,
   infoCircle: InfoCircle,
   instagramBrand: InstagramBrand,
   instagram: Instagram,
   key: Key,
+  laptop: Laptop,
+  lenovo: Lenovo,
+  lg: Lg,
   lightning01: Lightning01,
   lightning: Lightning,
   linkExternal: LinkExternal,
   linkedinBrand: LinkedinBrand,
   linkedin: Linkedin,
+  lockKeyholeCircle: LockKeyholeCircle,
   logOut: LogOut,
   mail: Mail,
   menu: Menu,
   moonpayBrand: MoonpayBrand,
   moreLoginOptions: MoreLoginOptions,
+  motorola: Motorola,
   optimismBrand: OptimismBrand,
   phone: Phone,
   pintrestBrand: PintrestBrand,
@@ -486,6 +504,7 @@ export const Icons = {
   redditBrand: RedditBrand,
   reddit: Reddit,
   refresh: Refresh,
+  samsung: Samsung,
   search: Search,
   send: Send,
   settings: Settings,
@@ -510,6 +529,7 @@ export const Icons = {
   twitterBrand: TwitterBrand,
   twitter: Twitter,
   usdcBrand: UsdcBrand,
+  userCircle: UserCircle,
   user: User,
   wallet: Wallet,
   x: X,
