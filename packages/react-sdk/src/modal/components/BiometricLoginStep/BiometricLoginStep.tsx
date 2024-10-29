@@ -53,7 +53,7 @@ export const BiometricLoginStep = () => {
   return (
     <StepContainer $wide>
       <InnerStepContainer>
-        {passkeysSupported && formattedHints.isOnKnownDevice && (
+        {(!biometricLocationHints?.length || (passkeysSupported && formattedHints.isOnKnownDevice)) && (
           <Heading variant="headingS" weight="bold">
             Welcome back,
           </Heading>
@@ -61,12 +61,14 @@ export const BiometricLoginStep = () => {
         <UserIdentifier identifier={username} />
       </InnerStepContainer>
       <MainContainer>
-        {!formattedHints.isOnKnownDevice && <KnownDevices hints={formattedHints} link={shortLoginLink} />}
+        {((biometricLocationHints?.length && !formattedHints.isOnKnownDevice) || !passkeysSupported) && (
+          <KnownDevices hints={formattedHints} link={shortLoginLink} />
+        )}
         {passkeysSupported && (
           <>
-            {!formattedHints.isOnKnownDevice && <CpslDivider>or</CpslDivider>}
+            {biometricLocationHints?.length && !formattedHints.isOnKnownDevice && <CpslDivider>or</CpslDivider>}
             <CpslButton fullWidth onClick={handlePasskeyClick}>
-              {formattedHints.isOnKnownDevice ? (
+              {!biometricLocationHints?.length || formattedHints.isOnKnownDevice ? (
                 <>
                   <CpslIcon slot="start" icon="key" />
                   Login with passkey
