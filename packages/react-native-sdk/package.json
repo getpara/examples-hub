@@ -1,6 +1,6 @@
 {
   "name": "@usecapsule/react-native-wallet",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Capsule Wallet for React Native",
   "author": "Capsule Team <hello@usecapsule.com> (https://usecapsule.com)",
   "homepage": "https://usecapsule.com",
@@ -26,7 +26,7 @@
     "@react-native-async-storage/async-storage": "^1.15.14",
     "@usecapsule/core-sdk": "2.3.0",
     "@usecapsule/react-native-passkey": "2.2.0",
-    "@usecapsule/user-management-client": "1.26.0",
+    "@usecapsule/user-management-client": "1.26.1",
     "@usecapsule/web-sdk": "2.3.0",
     "node-forge": "1.3.1",
     "react-native-get-random-values": "^1.11.0",
