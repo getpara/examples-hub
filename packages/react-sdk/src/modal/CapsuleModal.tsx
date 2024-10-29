@@ -62,6 +62,7 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     const { disconnectExternalWallet } = useExternalWallets();
 
     const [isModalMounted, setIsModalMounted] = useState(false);
+    const [isInit, setIsInit] = useState(false);
 
     useImperativeHandle(ref, () => {
       return {
@@ -125,6 +126,7 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
         setCountryCode(countryCode as CountryCallingCode);
         setIdentifierType('phone');
       }
+      setIsInit(true);
     };
 
     useEffect(() => {
@@ -221,9 +223,11 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
       }
 
       if (capsule) {
-        initModal();
+        await initModal();
         capsule.exitLoops();
       }
+
+      setIsInit(false);
     };
 
     if (!capsule) {
@@ -249,7 +253,7 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
           data-testid="modal"
           $embeddedModal={embeddedModal}
         >
-          {isModalMounted && (
+          {isModalMounted && isInit && (
             <ModalContent
               oAuthMethods={oAuthMethods}
               disableEmailLogin={disableEmailLogin}

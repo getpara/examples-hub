@@ -1,9 +1,9 @@
 import { OnRampProvider, OnRampPurchaseStatus, WalletType } from '@usecapsule/web-sdk';
-import { MoonPayBuyWidget, MoonPaySellWidget, MoonPayProvider } from '@moonpay/moonpay-react';
-import { useCallback, useMemo } from 'react';
+import { lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import { getCurrencyCodes, reverseCurrencyLookup, offRampSend } from '../utils';
 import styled from 'styled-components';
 import { Props } from '../types';
+import type { MoonPayBuyWidget, MoonPaySellWidget } from '@moonpay/moonpay-react';
 
 const MOONPAY_PUBLISHABLE_KEY = 'pk_live_EQva4LydtNDE0Rwd9X7SG9w58wqOzbux';
 const MOONPAY_PUBLISHABLE_KEY_TEST = 'pk_test_HYobzemmTBXxcSStVA4dSED6jT';
@@ -14,6 +14,26 @@ const addressKeys = {
 };
 
 export const MoonPayEmbed = ({ capsule, isDark, isEmbedded, onRampConfig, onRampPurchase, setOnRampPurchase }: Props) => {
+  const [LazyMoonPayBuyWidget, setLazyMoonPayBuyWidget] = useState(null);
+  const [LazyMoonPaySellWidget, setLazyMoonPaySellWidget] = useState(null);
+  const [LazyMoonPayProvider, setLazyMoonPayProvider] = useState(null);
+
+  useEffect(() => {
+    const _LazyMoonPayBuyWidget = lazy(() =>
+      import('@moonpay/moonpay-react').then(mod => ({ default: mod.MoonPayBuyWidget })),
+    );
+    const _LazyMoonPaySellWidget = lazy(() =>
+      import('@moonpay/moonpay-react').then(mod => ({ default: mod.MoonPaySellWidget })),
+    );
+    const _LazyMoonPayProvider = lazy(() =>
+      import('@moonpay/moonpay-react').then(mod => ({ default: mod.MoonPayProvider })),
+    );
+
+    setLazyMoonPayBuyWidget(_LazyMoonPayBuyWidget);
+    setLazyMoonPaySellWidget(_LazyMoonPaySellWidget);
+    setLazyMoonPayProvider(_LazyMoonPayProvider);
+  }, []);
+
   const apiKey = onRampPurchase.testMode ? MOONPAY_PUBLISHABLE_KEY_TEST : MOONPAY_PUBLISHABLE_KEY;
 
   const onUrlSignatureRequested = useCallback(
@@ -107,8 +127,12 @@ export const MoonPayEmbed = ({ capsule, isDark, isEmbedded, onRampConfig, onRamp
   );
 
   const embed = useMemo(() => {
+    if (!LazyMoonPayBuyWidget || !LazyMoonPaySellWidget) {
+      return null;
+    }
+
     return onRampPurchase.type === 'BUY' ? (
-      <MoonPayBuyWidget
+      <LazyMoonPayBuyWidget
         variant="embedded"
         baseCurrencyCode={onRampPurchase.fiat}
         baseCurrencyAmount={onRampPurchase.fiatQuantity}
@@ -128,7 +152,7 @@ export const MoonPayEmbed = ({ capsule, isDark, isEmbedded, onRampConfig, onRamp
         onUrlSignatureRequested={onUrlSignatureRequested}
       />
     ) : (
-      <MoonPaySellWidget
+      <LazyMoonPaySellWidget
         variant="embedded"
         refundWalletAddresses={JSON.stringify({ [addressKeys[onRampPurchase.walletType]]: onRampPurchase.address })}
         visible
@@ -157,13 +181,19 @@ export const MoonPayEmbed = ({ capsule, isDark, isEmbedded, onRampConfig, onRamp
     onTransactionCompleted,
     onUrlSignatureRequested,
     isDark,
+    LazyMoonPayBuyWidget,
+    LazyMoonPaySellWidget,
   ]);
+
+  if (!LazyMoonPayProvider) {
+    return null;
+  }
 
   return (
     <Container isEmbedded={isEmbedded}>
-      <MoonPayProvider apiKey={apiKey} debug={onRampPurchase.testMode}>
+      <LazyMoonPayProvider apiKey={apiKey} debug={onRampPurchase.testMode}>
         {embed}
-      </MoonPayProvider>
+      </LazyMoonPayProvider>
     </Container>
   );
 };
