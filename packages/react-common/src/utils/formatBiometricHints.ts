@@ -37,14 +37,8 @@ export const formatBiometricHints = (hints: BiometricLocationHint[]): BiometricH
     let isMobile = false,
       isKnownDevice = false,
       passwordManager: string | undefined,
-      parsedUA: UAParser.IResult | undefined;
-
-    if (hint.aaguid) {
-      const formattedAaguid = formatStringToUUID(hint.aaguid);
-      if (formattedAaguid) {
-        passwordManager = aaguidMetadata[formattedAaguid]?.name;
-      }
-    }
+      parsedUA: UAParser.IResult | undefined,
+      key = '';
 
     if (hint.useragent) {
       parsedUA = new UAParser(hint.useragent).getResult();
@@ -65,9 +59,18 @@ export const formatBiometricHints = (hints: BiometricLocationHint[]): BiometricH
           isKnownDevice = true;
         }
       }
+
+      key = `${parsedUA?.browser.name}-${parsedUA?.device.type}-${parsedUA?.device.vendor}-${parsedUA?.device.model}`;
     }
 
-    const key = `${parsedUA.browser.name}-${parsedUA.device.type}-${parsedUA.device.vendor}-${parsedUA.device.model}-${passwordManager}`;
+    if (hint.aaguid) {
+      const formattedAaguid = formatStringToUUID(hint.aaguid);
+      if (formattedAaguid) {
+        passwordManager = aaguidMetadata[formattedAaguid]?.name;
+      }
+
+      key = `${key}${key ? '-' : ''}${passwordManager}`;
+    }
 
     formattedHintsByKey[key] = { passwordManager, isMobile, isKnownDevice, key, ...parsedUA };
   });
