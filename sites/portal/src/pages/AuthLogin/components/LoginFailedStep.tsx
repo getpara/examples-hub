@@ -2,7 +2,7 @@ import { styled } from 'styled-components';
 import { CpslButton, CpslDivider, CpslIcon, CpslText } from '@usecapsule/react-components';
 import { useEffect, useMemo, useRef } from 'react';
 import { BiometricLocationHint } from '@usecapsule/user-management-client';
-import { InnerContainer, useCapsule } from '../../../components';
+import { FlexStartInnerContainer, useCapsule } from '../../../components';
 import { KNOWN_DEVICE_LOGIN_POLLING_INTERVAL } from '../../../constants';
 import { formatBiometricHints, getBrowserName, KnownDevices } from '@usecapsule/react-common';
 
@@ -43,7 +43,7 @@ export const LoginFailedStep = ({
   const formattedHints = useMemo(() => formatBiometricHints(biometricLocationHints), [biometricLocationHints]);
 
   return (
-    <InnerContainer>
+    <FlexStartInnerContainer>
       <CpslText weight="bold" variant="headingS">
         Login Failed
       </CpslText>
@@ -66,7 +66,7 @@ export const LoginFailedStep = ({
       </CpslButton>
       <CpslDivider>or</CpslDivider>
       <KnownDevices hints={formattedHints} link={urlForKnownDeviceLogin} showCurrentDevice />
-    </InnerContainer>
+    </FlexStartInnerContainer>
   );
 };
 

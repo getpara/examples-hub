@@ -1,6 +1,7 @@
 import { CpslButton, CpslIcon, CpslQrCode, CpslSpinner, CpslText, IconType } from '@usecapsule/react-components';
 import styled from 'styled-components';
 import { useCopyToClipboard } from '../hooks';
+import { isMobile } from '@usecapsule/web-sdk';
 
 interface QRCodeProps {
   link?: string;
@@ -10,32 +11,43 @@ interface QRCodeProps {
   spinnerSize?: number;
 }
 
-export const QRCode = ({ link, imageSrc, icon, qrSize = 202, spinnerSize = 80 }: QRCodeProps) => {
+export const QRCode = ({ link, imageSrc, icon, qrSize = 202, spinnerSize = 60 }: QRCodeProps) => {
   const [isCopied, copy] = useCopyToClipboard();
+
+  const isMobileScreen = isMobile();
 
   const handleCopy = () => {
     copy(link);
   };
 
   return (
-    <QRContainer>
+    <QRContainer $isMobile={isMobileScreen}>
+      {isMobileScreen && (
+        <MobileCopyButton fullWidth onClick={handleCopy}>
+          <CopyIcon slot="start" icon={isCopied ? 'check' : 'copy'} />
+          <CpslText variant="bodyS">{isCopied ? 'Copied' : 'Copy Link Instead'}</CpslText>
+        </MobileCopyButton>
+      )}
       {!link ? (
-        <CpslSpinner size={spinnerSize} />
+        <LoadingContainer $size={qrSize}>
+          <CpslSpinner size={spinnerSize} />
+        </LoadingContainer>
       ) : (
         <StyledQRCode url={link} size={qrSize} icon={icon} imageSrc={imageSrc} />
       )}
-      <CopyButton size="small" onClick={handleCopy}>
-        <CopyIcon slot="start" icon={isCopied ? 'check' : 'copy'} />
-        <CpslText variant="body2XS">{isCopied ? 'Copied' : 'Copy Link Instead'}</CpslText>
-      </CopyButton>
+      {!isMobileScreen && (
+        <CopyButton size="small" onClick={handleCopy}>
+          <CopyIcon slot="start" icon={isCopied ? 'check' : 'copy'} />
+          <CpslText variant="body2XS">{isCopied ? 'Copied' : 'Copy Link Instead'}</CpslText>
+        </CopyButton>
+      )}
     </QRContainer>
   );
 };
 
-const QRContainer = styled.div`
+const QRContainer = styled.div<{ $isMobile: boolean }>`
   display: flex;
   flex-direction: column;
-  gap: 8px;
   justify-content: center;
   align-items: center;
   border: 1px solid;
@@ -43,7 +55,8 @@ const QRContainer = styled.div`
   border-radius: 16px;
   background-color: white;
   overflow: hidden;
-  padding-bottom: 16px;
+  padding-bottom: ${({ $isMobile }) => ($isMobile ? '0px' : '16px')};
+  padding-top: ${({ $isMobile }) => ($isMobile ? '16px' : '0px')};
 `;
 
 const StyledQRCode = styled(CpslQrCode)`
@@ -69,8 +82,23 @@ const CopyButton = styled(CpslButton)`
   --button-border-radius: 1000px;
 `;
 
+const MobileCopyButton = styled(CopyButton)`
+  --button-padding-top: 4px;
+  --button-padding-bottom: 4px;
+
+  padding: 0px 12px;
+`;
+
 const CopyIcon = styled(CpslIcon)`
   --width: 16px;
   --height: 16px;
   --icon-color: var(--cpsl-color-text-contrast);
+`;
+
+const LoadingContainer = styled.div<{ $size: number }>`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: ${({ $size }) => `${$size}px`};
+  width: ${({ $size }) => `${$size}px`};
 `;

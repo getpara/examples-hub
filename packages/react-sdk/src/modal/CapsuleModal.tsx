@@ -253,7 +253,8 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
           data-testid="modal"
           $embeddedModal={embeddedModal}
         >
-          {isModalMounted && isInit && (
+          {/* wait to show the modal content until initialized only when using embedded modal for rainbowkit to avoid unexpected modal closures */}
+          {isModalMounted && ((isInit && embeddedModal) || !embeddedModal) && (
             <ModalContent
               oAuthMethods={oAuthMethods}
               disableEmailLogin={disableEmailLogin}

@@ -22,7 +22,7 @@ export const FilledDisabledInput: typeof CpslInput = styled(CpslInput)`
   --container-background-color: var(--cpsl-color-background-0);
   --input-background-color: transparent;
   --input-font-weight: 500;
-  --input-color: var(--cpsl-color-text-secondary);
+  --input-color: var(--cpsl-color-text-secondary) !important;
 `;
 
 export const FullWidthFilledDisabledInput: typeof CpslInput = styled(FilledDisabledInput)`

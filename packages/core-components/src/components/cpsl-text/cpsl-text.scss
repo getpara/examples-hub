@@ -10,6 +10,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-smooth: never;
+  font-synthesis: none;
 }
 
 :host(.primary) {
@@ -362,6 +363,7 @@ h6 {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-smooth: never;
+  font-synthesis: none;
 
   &::-moz-selection {
     /* Code for Firefox */
