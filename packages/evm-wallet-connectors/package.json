@@ -1,6 +1,6 @@
 {
   "name": "@usecapsule/evm-wallet-connectors",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@coinbase/wallet-sdk": "3.9.3",
-    "@usecapsule/react-sdk": "4.4.1"
+    "@usecapsule/react-sdk": "4.4.2"
   },
   "scripts": {
     "build": "rm -rf dist && tsc"
