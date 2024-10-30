@@ -30,7 +30,7 @@ interface Message {
 async function requestWasmWithRetries(ctx: Ctx, retries = 3) {
   for (let i = 0; i < retries; i++) {
     try {
-      return await axios.get(`${getPortalBaseURL(ctx, true)}/static/js/main.wasm`, { responseType: 'arraybuffer' });
+      return await axios.get(`${getPortalBaseURL(ctx, true, true)}/static/js/main.wasm`, { responseType: 'arraybuffer' });
     } catch (e) {
       if (i === retries - 1) {
         throw e;

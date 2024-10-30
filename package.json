@@ -20,14 +20,17 @@
     "start": "lerna run start --scope=capsule-legacy-example --scope=capsule-portal",
     "start-server": "lerna run start --scope=capsule-server-example",
     "start-bridge": "lerna run start --scope=capsule-js-bridge",
+    "start-e2e": "lerna run start-e2e  --scope=capsule-legacy-example --scope=capsule-portal",
     "lerna-version": "lerna version",
     "lerna-publish": "lerna publish from-package --no-private",
     "lerna-publish-dev": "lerna publish preminor --preid dev --dist-tag dev",
     "prepare": "husky",
-    "test": "lerna run test"
+    "test": "lerna run test",
+    "e2e": "playwright test --headed"
   },
   "devDependencies": {
     "@eslint/compat": "^1.1.1",
+    "@playwright/test": "1.42.1",
     "@stencil-community/eslint-plugin": "^0.8.0",
     "@tanstack/eslint-plugin-query": "^5.52.0",
     "@typescript-eslint/eslint-plugin": "^7.16.1",

@@ -49,6 +49,7 @@ export interface Ctx {
   disableWebSockets: boolean;
   wasmOverride?: ArrayBuffer;
   cosmosPrefix?: string;
+  isE2E?: boolean;
 }
 
 export enum OAuthMethod {
@@ -137,7 +138,10 @@ export const WalletSchemeTypeMap: Record<WalletScheme, Partial<Record<WalletType
   },
 };
 
-export function getPortalDomain(env: Environment) {
+export function getPortalDomain(env: Environment, isE2E?: boolean) {
+  if (isE2E) {
+    return `localhost`;
+  }
   switch (env) {
     case Environment.DEV:
       return 'localhost';
@@ -152,7 +156,17 @@ export function getPortalDomain(env: Environment) {
   }
 }
 
-export function getPortalBaseURL({ env }: { env: Environment }, useLocalIp?: boolean) {
+export function getPortalBaseURL(
+  { env, isE2E }: { env: Environment; isE2E?: boolean },
+  useLocalIp?: boolean,
+  isForWasm?: boolean,
+) {
+  if (isE2E) {
+    if (isForWasm) {
+      return `https://app.sandbox.usecapsule.com`;
+    }
+    return `http://localhost:3003`;
+  }
   const domain = getPortalDomain(env);
   if (env === Environment.DEV) {
     if (useLocalIp) {

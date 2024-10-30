@@ -36,7 +36,7 @@ export async function authCreation(
     throw new Error('either a phone number or email address or farcaster username must be provided.');
   }
 
-  const { creds, userHandle, algorithm } = await createCredential(ENV, userId, identifier);
+  const { creds, userHandle, algorithm } = await createCredential(ENV, userId, identifier, capsule.ctx.isE2E);
   const { cosePublicKey, clientDataJSON, aaguid } = parseCredentialCreationRes(creds, algorithm);
   const keyPair = await getAsymmetricKeyPair(capsule.ctx);
   const publicKeyHex = getPublicKeyHex(keyPair);

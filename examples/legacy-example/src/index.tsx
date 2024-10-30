@@ -575,6 +575,7 @@ function App() {
           supportUrl: 'mailto:support@usecapsule.com',
           portalTheme: useTheme ? { backgroundColor, foregroundColor } : undefined,
         });
+        _capsule.ctx.isE2E = process?.env?.REACT_APP_IS_E2E === 'true';
         await _capsule.touchSession();
         setCapsuleError(undefined);
         return _capsule;

@@ -24,6 +24,7 @@
   },
   "scripts": {
     "start": "DISABLE_ESLINT_PLUGIN=true REACT_APP_ENV=dev PORT=3003 craco start",
+    "start-e2e": "DISABLE_ESLINT_PLUGIN=true REACT_APP_IS_E2E=true REACT_APP_ENV=sandbox PORT=3003 craco start",
     "build": "rm -rf build && DISABLE_ESLINT_PLUGIN=true craco build",
     "check-wasm-file-exists": "test -f ./public/static/js/main.wasm || (echo 'public/static/js/main.wasm file does not exist!'; exit 1)",
     "check-mpc-worker-file-exists": "test -f ./public/static/js/mpcWorker-bundle.js || (echo 'public/static/js/mpcWorker-bundle.js file does not exist!'; exit 1)",

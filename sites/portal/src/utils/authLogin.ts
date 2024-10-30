@@ -42,7 +42,7 @@ export async function authLogin(
     throw new Error('either a phone number or email address or farcaster username must be provided.');
   }
 
-  const signature = await generateSignature(ENV, data.challenge, data.allowedPublicKeys);
+  const signature = await generateSignature(ENV, data.challenge, data.allowedPublicKeys, capsule.ctx.isE2E);
   const { userHandle, ...sigResponse } = signature.response;
 
   let verifyRes = undefined;

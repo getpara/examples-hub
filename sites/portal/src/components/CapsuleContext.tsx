@@ -67,6 +67,7 @@ export const CapsuleProvider = (props: CapsuleProviderProps) => {
       }),
     [apiKey, environment, options, props.capsule, paramsSupportedWalletTypes],
   );
+  capsule.ctx.isE2E = process?.env?.REACT_APP_IS_E2E === 'true';
 
   useEffect(() => {
     onMount?.(capsule);

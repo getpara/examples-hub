@@ -131,6 +131,7 @@ export async function createCredential(
   env: Environment,
   userId: string,
   identifier: string,
+  isE2E?: boolean,
 ): Promise<{
   creds: any;
   userHandle: string;
@@ -146,7 +147,7 @@ export async function createCredential(
         userVerification: 'required' as any,
       },
       rp: {
-        id: getPortalDomain(env),
+        id: getPortalDomain(env, isE2E),
         name: 'Capsule',
       },
       user: {
@@ -180,7 +181,7 @@ export async function createCredential(
   };
 }
 
-export async function generateSignature(env: Environment, challenge: string, allowedPublicKeys: string[]) {
+export async function generateSignature(env: Environment, challenge: string, allowedPublicKeys: string[], isE2E?: boolean) {
   const getCredentialDefaultArgs = {
     publicKey: {
       timeout: 60000,
@@ -190,7 +191,7 @@ export async function generateSignature(env: Environment, challenge: string, all
         type: 'public-key',
       })),
       userVerification: 'required',
-      rpId: getPortalDomain(env),
+      rpId: getPortalDomain(env, isE2E),
     },
   } as CredentialRequestOptions;
 
