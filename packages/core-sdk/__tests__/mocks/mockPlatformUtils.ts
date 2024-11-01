@@ -1,5 +1,11 @@
 import { vi } from 'vitest';
 import { PlatformUtils, StorageUtils } from '../../src';
+import {
+  PREGEN_WALLET_EMAIL_KEYGEN_RES,
+  SOLANA_PREGEN_WALLET_KEYGEN_RES,
+  SOLANA_WALLET_KEYGEN_RES,
+  WALLET_KEYGEN_RES,
+} from '../constants';
 
 class MockLocalStorage implements StorageUtils {
   private localStorage = {};
@@ -43,14 +49,17 @@ class MockSessionStorage implements StorageUtils {
   };
 }
 
+export const mockKeygen = vi.fn().mockReturnValue(WALLET_KEYGEN_RES);
+export const mockPreKeygen = vi.fn().mockReturnValue(PREGEN_WALLET_EMAIL_KEYGEN_RES);
+
 export class MockPlatformUtils implements PlatformUtils {
-  refresh = vi.fn().mockReturnValue({});
+  refresh = vi.fn().mockReturnValue({ signer: 'test-refresh-signer' });
 
   getPrivateKey = vi.fn().mockReturnValue('getPrivateKey');
 
-  keygen = vi.fn().mockReturnValue({});
+  keygen = mockKeygen;
 
-  preKeygen = vi.fn().mockReturnValue({});
+  preKeygen = mockPreKeygen;
 
   signMessage = vi.fn().mockReturnValue({});
 
@@ -60,9 +69,9 @@ export class MockPlatformUtils implements PlatformUtils {
 
   signHash = vi.fn().mockReturnValue({});
 
-  ed25519Keygen = vi.fn().mockReturnValue({});
+  ed25519Keygen = vi.fn().mockReturnValue(SOLANA_WALLET_KEYGEN_RES);
 
-  ed25519PreKeygen = vi.fn().mockReturnValue({});
+  ed25519PreKeygen = vi.fn().mockReturnValue(SOLANA_PREGEN_WALLET_KEYGEN_RES);
 
   ed25519Sign = vi.fn().mockReturnValue({});
 

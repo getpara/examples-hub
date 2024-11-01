@@ -1,4 +1,4 @@
-import { describe, vi, afterEach, expect, it } from 'vitest';
+import { describe, vi, afterEach, expect, it, beforeAll } from 'vitest';
 
 import CoreCapsule, { Environment, getPublicKeyHex, OAuthMethod } from '../../src';
 import {
@@ -17,21 +17,37 @@ import {
   USER_FARCASTER_USERNAME,
   SESSION_LOOKUP_ID,
   LOGIN_ERROR,
+  WALLET,
+  PREGEN_WALLETS_EMAIL,
+  PREGEN_WALLET_EMAIL,
+  SOLANA_WALLET,
+  SOLANA_PREGEN_WALLET_EMAIL,
+  WALLETS,
+  SHARES,
+  PREGEN_WALLETS_PHONE,
+  PREGEN_WALLET_PHONE_KEYGEN_RES,
+  PREGEN_WALLET_PHONE,
 } from '../constants';
 import { MockCapsule } from '../mocks/mockCoreCapsule';
 import {
   mockAddSessionPublicKey,
   mockCheckUserExists,
   mockCreateUser,
+  mockDistributeCapsuleShare,
   mockExternalWalletLogin,
   mockGetFarcasterAuthStatus,
+  mockGetPregenWallets,
+  mockGetTransmissionKeyshares,
+  mockGetWallets,
+  mockUpdatePregenWallet,
   mockVerifyEmail,
   mockVerifyPhone,
 } from '../mocks/mockUserManagementClient';
 import { CountryCallingCode } from 'libphonenumber-js';
-import { PublicKeyStatus, PublicKeyType } from '@usecapsule/user-management-client';
-import { toQueryString } from '../../src/CoreCapsule';
+import { PublicKeyStatus, PublicKeyType, WalletType } from '@usecapsule/user-management-client';
+import { PregenIdentifierType, toQueryString } from '../../src/CoreCapsule';
 import { getWorkerContent } from '../utils';
+import { mockPreKeygen } from '../mocks/mockPlatformUtils';
 
 describe('CoreCapsule', () => {
   afterEach(() => {
@@ -281,7 +297,7 @@ describe('CoreCapsule', () => {
       });
     });
   });
-  describe('login', { timeout: 20000 }, () => {
+  describe('login', { timeout: 25000 }, () => {
     describe('email', () => {
       it('initiates login', async () => {
         const capsule = new MockCapsule(Environment.DEV, API_KEY);
@@ -437,6 +453,294 @@ describe('CoreCapsule', () => {
         expect(email).toEqual(USER_EMAIL);
         expect(capsule.getUserId()).toEqual(USER_ID);
         expect(capsule.getEmail()).toEqual(USER_EMAIL);
+      });
+    });
+    describe('post login', () => {
+      it('waitForLoginAndSetup - has wallet', async () => {
+        const capsule = new MockCapsule(Environment.DEV, API_KEY);
+
+        const workerFileContent = await getWorkerContent();
+
+        global.fetch = vi.fn(() =>
+          Promise.resolve({
+            text: () => Promise.resolve(workerFileContent),
+          } as Response),
+        );
+
+        await capsule.initiateUserLogin(USER_EMAIL);
+        const resp = await capsule.waitForLoginAndSetup();
+
+        const isFullyLoggedIn = await capsule.isFullyLoggedIn();
+
+        expect(isFullyLoggedIn).toBeTruthy();
+        expect(resp.needsWallet).toBeFalsy();
+        expect(resp.isComplete).toBeTruthy();
+        expect(capsule.getUserId()).toEqual(USER_ID);
+        expect(capsule.getEmail()).toEqual(USER_EMAIL);
+      });
+      it('waitForLoginAndSetup - with pregen', async () => {
+        const capsule = new MockCapsule(Environment.DEV, API_KEY);
+
+        mockGetPregenWallets.mockResolvedValue({ wallets: PREGEN_WALLETS_EMAIL });
+        mockGetWallets.mockResolvedValue({ data: { wallets: [] } });
+        mockGetTransmissionKeyshares.mockResolvedValue({ data: { temporaryShares: [] } });
+
+        const pregenWallets = await capsule.createPregenWalletPerType(USER_EMAIL, PregenIdentifierType.EMAIL, [
+          WalletType.EVM,
+          WalletType.SOLANA,
+        ]);
+
+        const walletsToSet = {};
+
+        pregenWallets.forEach(w => (walletsToSet[w.id] = w));
+
+        await capsule.setWallets(walletsToSet);
+
+        const workerFileContent = await getWorkerContent();
+
+        global.fetch = vi.fn(() =>
+          Promise.resolve({
+            text: () => Promise.resolve(workerFileContent),
+          } as Response),
+        );
+
+        await capsule.initiateUserLogin(USER_EMAIL);
+        const resp = await capsule.waitForLoginAndSetup();
+
+        expect(resp.needsWallet).toBeFalsy();
+        expect(resp.isComplete).toBeTruthy();
+        expect(capsule.getUserId()).toEqual(USER_ID);
+        expect(capsule.getEmail()).toEqual(USER_EMAIL);
+
+        const wallets = capsule.wallets;
+
+        expect(wallets[PREGEN_WALLET_EMAIL.id]).toBeDefined();
+        expect(wallets[PREGEN_WALLET_EMAIL.id].pregenIdentifier).toBeUndefined();
+        expect(wallets[SOLANA_PREGEN_WALLET_EMAIL.id]).toBeDefined();
+        expect(wallets[SOLANA_PREGEN_WALLET_EMAIL.id].pregenIdentifier).toBeUndefined();
+        expect(mockDistributeCapsuleShare).toBeCalled();
+
+        mockGetPregenWallets.mockResolvedValue({ wallets: [] });
+        mockGetWallets.mockResolvedValue({ data: { wallets: WALLETS } });
+        mockGetTransmissionKeyshares.mockResolvedValue({
+          data: {
+            temporaryShares: SHARES,
+          },
+        });
+      });
+    });
+  });
+  describe('wallets', { timeout: 25000 }, () => {
+    describe('new user', () => {
+      describe('email', () => {
+        let capsule: MockCapsule | undefined;
+
+        beforeAll(async () => {
+          capsule = new MockCapsule(Environment.DEV, API_KEY);
+        });
+
+        it('waitForPasskeyAndCreateWallet - no pregen', async () => {
+          await capsule.createUser(USER_EMAIL);
+
+          const created = await capsule.waitForPasskeyAndCreateWallet();
+          await capsule.setCurrentWalletIds(created.walletIds);
+
+          expect(created.walletIds.EVM).toEqual([WALLET.id]);
+          expect(created.walletIds.SOLANA).toEqual([SOLANA_WALLET.id]);
+          expect(created.walletIds.COSMOS).toBeUndefined();
+          expect(mockDistributeCapsuleShare).toBeCalled();
+        });
+        it('waitForPasskeyAndCreateWallet - pregen', async () => {
+          mockGetPregenWallets.mockResolvedValue({ wallets: PREGEN_WALLETS_EMAIL });
+
+          const pregenWallets = await capsule.createPregenWalletPerType(USER_EMAIL, PregenIdentifierType.EMAIL, [
+            WalletType.EVM,
+            WalletType.SOLANA,
+          ]);
+
+          const walletsToSet = {};
+
+          pregenWallets.forEach(w => (walletsToSet[w.id] = w));
+
+          await capsule.setWallets(walletsToSet);
+
+          await capsule.createUser(USER_EMAIL);
+
+          const created = await capsule.waitForPasskeyAndCreateWallet();
+          await capsule.setCurrentWalletIds(created.walletIds);
+
+          expect(pregenWallets.length).toBe(2);
+          expect(created.walletIds.EVM).toEqual([PREGEN_WALLET_EMAIL.id]);
+          expect(created.walletIds.SOLANA).toEqual([SOLANA_PREGEN_WALLET_EMAIL.id]);
+          expect(created.walletIds.COSMOS).toBeUndefined();
+
+          mockGetPregenWallets.mockResolvedValue({ wallets: [] });
+          expect(mockDistributeCapsuleShare).toBeCalled();
+        });
+      });
+      describe('phone', () => {
+        let capsule: MockCapsule | undefined;
+
+        beforeAll(async () => {
+          capsule = new MockCapsule(Environment.DEV, API_KEY);
+        });
+
+        it('waitForPasskeyAndCreateWallet - no pregen', async () => {
+          await capsule.createUserByPhone(USER_PHONE, USER_COUNTRY_CODE as CountryCallingCode);
+
+          const created = await capsule.waitForPasskeyAndCreateWallet();
+          await capsule.setCurrentWalletIds(created.walletIds);
+
+          expect(created.walletIds.EVM).toEqual([WALLET.id]);
+          expect(created.walletIds.SOLANA).toEqual([SOLANA_WALLET.id]);
+          expect(created.walletIds.COSMOS).toBeUndefined();
+          expect(mockDistributeCapsuleShare).toBeCalled();
+        });
+        it('waitForPasskeyAndCreateWallet - pregen', async () => {
+          mockGetPregenWallets.mockResolvedValue({ wallets: PREGEN_WALLETS_PHONE });
+          mockPreKeygen.mockResolvedValueOnce(PREGEN_WALLET_PHONE_KEYGEN_RES);
+
+          const pregenWallets = await capsule.createPregenWalletPerType(
+            `${USER_COUNTRY_CODE}${USER_PHONE}`,
+            PregenIdentifierType.PHONE,
+            [WalletType.EVM],
+          );
+
+          const walletsToSet = {};
+
+          pregenWallets.forEach(w => (walletsToSet[w.id] = w));
+
+          await capsule.setWallets(walletsToSet);
+
+          await capsule.createUserByPhone(USER_PHONE, USER_COUNTRY_CODE as CountryCallingCode);
+
+          const created = await capsule.waitForPasskeyAndCreateWallet();
+          await capsule.setCurrentWalletIds(created.walletIds);
+
+          expect(pregenWallets.length).toBe(1);
+          expect(created.walletIds.EVM).toEqual([PREGEN_WALLET_PHONE.id]);
+          expect(created.walletIds.SOLANA).toEqual([SOLANA_WALLET.id]);
+          expect(created.walletIds.COSMOS).toBeUndefined();
+
+          mockGetPregenWallets.mockResolvedValue({ wallets: [] });
+          expect(mockDistributeCapsuleShare).toBeCalled();
+        });
+      });
+    });
+    describe('helpers and utils', () => {
+      let capsule: MockCapsule | undefined;
+
+      beforeAll(async () => {
+        capsule = new MockCapsule(Environment.DEV, API_KEY);
+
+        await capsule.createUser(USER_EMAIL);
+
+        const created = await capsule.waitForPasskeyAndCreateWallet();
+        await capsule.setCurrentWalletIds(created.walletIds);
+      });
+
+      it('current wallets', async () => {
+        const currentWalletIds = capsule.currentWalletIdsArray;
+        expect(currentWalletIds[0][0]).toEqual(WALLET.id);
+        expect(currentWalletIds[0][1]).toEqual(WalletType.EVM);
+        expect(currentWalletIds[1][0]).toEqual(SOLANA_WALLET.id);
+        expect(currentWalletIds[1][1]).toEqual(WalletType.SOLANA);
+
+        const availableWallets = capsule.availableWallets;
+        expect(availableWallets.length).toEqual(2);
+        expect(availableWallets[0].id).toEqual(WALLET.id);
+        expect(availableWallets[1].id).toEqual(SOLANA_WALLET.id);
+
+        const wallets = capsule.getWallets();
+        expect(wallets[WALLET.id]).toBeDefined();
+        expect(wallets[SOLANA_WALLET.id]).toBeDefined();
+
+        const walletsByType = capsule.getWalletsByType(WalletType.EVM);
+        expect(walletsByType.length).toEqual(1);
+        expect(walletsByType[0]).toBeDefined();
+        expect(walletsByType[0].id).toEqual(WALLET.id);
+      });
+      it('find wallets by id', async () => {
+        const wallet = capsule.findWallet(SOLANA_WALLET.id);
+        expect(wallet).toBeDefined();
+        expect(wallet.id).toEqual(SOLANA_WALLET.id);
+
+        const walletNoId = capsule.findWallet();
+        expect(walletNoId).toBeDefined();
+        expect(walletNoId.id).toEqual(WALLET.id);
+
+        const invalidWallet = capsule.findWallet('notAnId');
+        expect(invalidWallet).toBeUndefined();
+
+        const invalidWalletWithFilters = capsule.findWallet(SOLANA_WALLET.id, undefined, { type: [WalletType.EVM] });
+        expect(invalidWalletWithFilters).toBeUndefined();
+
+        const walletWithTypeOverride = capsule.findWallet(SOLANA_WALLET.id, WalletType.EVM);
+        expect(walletWithTypeOverride).toBeDefined();
+        expect(walletWithTypeOverride.type).toEqual(WalletType.EVM);
+      });
+      it('find wallets by address', async () => {
+        const wallet = capsule.findWalletByAddress(SOLANA_WALLET.address);
+        expect(wallet).toBeDefined();
+        expect(wallet.id).toEqual(SOLANA_WALLET.id);
+
+        expect(() => capsule.findWalletByAddress('notAnAddress')).toThrowError('wallet with address notAnAddress not found');
+        expect(() => capsule.findWalletByAddress(SOLANA_WALLET.address, { type: [WalletType.EVM] })).toThrowError(
+          `wallet with id ${SOLANA_WALLET.id} and type ${SOLANA_WALLET.type} cannot be selected`,
+        );
+      });
+      it('random wallet utils', async () => {
+        const isMultiWallet = capsule.isMultiWallet;
+        expect(isMultiWallet).toBeTruthy();
+
+        const walletAddress = capsule.getAddress(SOLANA_WALLET.id);
+        expect(walletAddress).toEqual(SOLANA_WALLET.address);
+
+        const privateKey = await capsule.getPrivateKey(WALLET.id);
+        expect(privateKey).toEqual('getPrivateKey');
+
+        const privateKeyNoId = await capsule.getPrivateKey();
+        expect(privateKeyNoId).toEqual('getPrivateKey');
+
+        await expect(capsule.getPrivateKey(SOLANA_WALLET.id)).rejects.toThrowError('invalid wallet scheme');
+      });
+      it('pregen utils', async () => {
+        await capsule.updateWalletIdentifierPreGen('test email', PREGEN_WALLET_EMAIL.id, PregenIdentifierType.EMAIL);
+        expect(mockUpdatePregenWallet).toBeCalledWith(PREGEN_WALLET_EMAIL.id, {
+          pregenIdentifier: 'test email',
+          pregenIdentifierType: PregenIdentifierType.EMAIL,
+        });
+
+        const hasPregenFalsy = await capsule.hasPregenWallet(USER_EMAIL, PregenIdentifierType.EMAIL);
+        expect(mockGetPregenWallets).toBeCalledWith(USER_EMAIL, PregenIdentifierType.EMAIL);
+        expect(hasPregenFalsy).toBeFalsy();
+
+        const pregenNoWallets = await capsule.getPregenWallets(USER_EMAIL, PregenIdentifierType.EMAIL);
+        expect(mockGetPregenWallets).toBeCalledWith(USER_EMAIL, PregenIdentifierType.EMAIL);
+        expect(pregenNoWallets.length).toEqual(0);
+
+        mockGetPregenWallets.mockResolvedValue({ wallets: PREGEN_WALLETS_EMAIL });
+        const hasPregen = await capsule.hasPregenWallet(USER_EMAIL, PregenIdentifierType.EMAIL);
+        expect(mockGetPregenWallets).toBeCalledWith(USER_EMAIL, PregenIdentifierType.EMAIL);
+        expect(hasPregen).toBeTruthy();
+
+        const pregenWallets = await capsule.getPregenWallets(USER_EMAIL, PregenIdentifierType.EMAIL);
+        expect(mockGetPregenWallets).toBeCalledWith(USER_EMAIL, PregenIdentifierType.EMAIL);
+        expect(pregenWallets.length).toEqual(2);
+
+        const encodedWallets = Object.values(capsule.wallets)
+          .map(wallet => Buffer.from(JSON.stringify(wallet)).toString('base64'))
+          .join('-');
+        const userShare = capsule.getUserShare();
+        expect(userShare).toEqual(encodedWallets);
+
+        // Reset wallets to test setting user share
+        await capsule.setWallets({});
+        expect(Object.keys(capsule.wallets).length).toEqual(0);
+        await capsule.setUserShare(userShare);
+        expect(Object.keys(capsule.wallets).length).toEqual(2);
+        expect(capsule.wallets[WALLET.id]).toBeDefined;
+        expect(capsule.wallets[SOLANA_WALLET.id]).toBeDefined;
       });
     });
   });

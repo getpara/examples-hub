@@ -1855,7 +1855,6 @@ export abstract class CoreCapsule {
     const pregenWallets = (
       await this.ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType)
     ).wallets.filter(w => this.isWalletSupported(entityToWallet(w)));
-
     let recoverySecret: string | undefined,
       walletIds: CurrentWalletIds = {};
 

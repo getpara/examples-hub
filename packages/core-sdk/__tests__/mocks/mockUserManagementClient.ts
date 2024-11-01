@@ -2,13 +2,20 @@ import { vi } from 'vitest';
 import {
   FARCASTER_CONNECT_URI,
   PARTNER,
+  RECOVERY_PUBLIC_KEYS,
   SESSION_ID,
   SESSION_LOOKUP_ID,
+  SESSION_PUBLIC_KEYS,
+  SHARES,
+  SOLANA_WALLET,
   TEMP_TRANSMISSION_INIT_ID,
   USER_EMAIL,
   USER_FARCASTER_USERNAME,
   USER_ID,
+  WALLET,
+  WALLETS,
 } from '../constants';
+import { WalletType } from '@usecapsule/user-management-client';
 
 export const mockExternalWalletLogin = vi.fn().mockResolvedValue({ userId: USER_ID });
 export const mockCreateUser = vi.fn().mockResolvedValue({ userId: USER_ID });
@@ -25,6 +32,11 @@ export const mockTouchSession = vi.fn().mockResolvedValue({
     sessionLookupId: SESSION_LOOKUP_ID,
     userId: USER_ID,
     email: USER_EMAIL,
+    isAuthenticated: true,
+    supportedWalletTypes: PARTNER.supportedWalletTypes,
+    cosmosPrefix: PARTNER.cosmosPrefix,
+    currentWalletIds: { [WalletType.EVM]: [WALLET.id], [WalletType.SOLANA]: [SOLANA_WALLET.id] },
+    needsWallet: false,
   },
 });
 export const mockTempTrasmissionInit = vi.fn().mockResolvedValue({ data: { id: TEMP_TRANSMISSION_INIT_ID } });
@@ -34,6 +46,19 @@ export const mockInitializeFarcasterLogin = vi.fn().mockResolvedValue({
 export const mockGetFarcasterAuthStatus = vi.fn().mockResolvedValue({
   data: { userId: USER_ID, userExists: true, username: USER_FARCASTER_USERNAME, state: 'completed' },
 });
+export const mockGetPregenWallets = vi.fn().mockResolvedValue({ wallets: [] });
+export const mockGetWallets = vi.fn().mockResolvedValue({ data: { wallets: WALLETS } });
+export const mockGetSessionPublicKeys = vi.fn().mockResolvedValue({ data: { keys: SESSION_PUBLIC_KEYS } });
+export const mockUploadUserKeyShares = vi.fn().mockResolvedValue({});
+export const mockDistributeCapsuleShare = vi.fn().mockResolvedValue({});
+export const mockGetRecoveryPublicKeys = vi.fn().mockResolvedValue({ recoveryPublicKeys: RECOVERY_PUBLIC_KEYS });
+export const mockClaimPregenWallet = vi.fn().mockResolvedValue({});
+export const mockGetTransmissionKeyshares = vi.fn().mockResolvedValue({
+  data: {
+    temporaryShares: SHARES,
+  },
+});
+export const mockUpdatePregenWallet = vi.fn().mockResolvedValue({});
 
 vi.mock('@usecapsule/user-management-client', async importOriginal => {
   const actual = await importOriginal();
@@ -53,6 +78,15 @@ vi.mock('@usecapsule/user-management-client', async importOriginal => {
       tempTrasmissionInit: mockTempTrasmissionInit,
       initializeFarcasterLogin: mockInitializeFarcasterLogin,
       getFarcasterAuthStatus: mockGetFarcasterAuthStatus,
+      getPregenWallets: mockGetPregenWallets,
+      getWallets: mockGetWallets,
+      getSessionPublicKeys: mockGetSessionPublicKeys,
+      uploadUserKeyShares: mockUploadUserKeyShares,
+      distributeCapsuleShare: mockDistributeCapsuleShare,
+      getRecoveryPublicKeys: mockGetRecoveryPublicKeys,
+      claimPregenWallet: mockClaimPregenWallet,
+      getTransmissionKeyshares: mockGetTransmissionKeyshares,
+      updatePregenWallet: mockUpdatePregenWallet,
     })),
   };
 });
