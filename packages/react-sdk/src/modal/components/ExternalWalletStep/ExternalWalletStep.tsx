@@ -101,13 +101,15 @@ export const ExternalWalletStep = () => {
             </InnerStepContainer>
             {wallet.id !== 'walletConnect' && (
               <InnerStepContainer>
-                <CpslText weight="medium" color="secondary">
-                  {`Don’t have ${wallet.name}`}
-                </CpslText>
-                <CpslButton as="a" href={wallet.downloadUrl ?? ''} target="_blank" variant="secondary">
-                  <CpslIcon slot="start" icon="linkExternal" />
-                  {`Get ${wallet.name}`}
+                <CpslButton as="a" href={qrUri ?? ''} target="_blank" fullWidth>
+                  Connect Wallet
                 </CpslButton>
+                <Link href={wallet.downloadUrl ?? ''} target="_blank">
+                  <ExternalButton>
+                    <ExternalText weight="medium">{`Get ${wallet.name}`}</ExternalText>
+                    <ExternalIcon icon="linkExternal" />
+                  </ExternalButton>
+                </Link>
               </InnerStepContainer>
             )}
           </>
@@ -126,13 +128,12 @@ export const ExternalWalletStep = () => {
             </CpslButton>
           </InnerStepContainer>
           <InnerStepContainer>
-            <CpslText weight="medium" color="secondary">
-              {`Don’t have ${wallet.name}`}
-            </CpslText>
-            <CpslButton as="a" href={wallet.downloadUrl ?? ''} target="_blank" variant="secondary">
-              <CpslIcon slot="start" icon="linkExternal" />
-              {`Get ${wallet.name}`}
-            </CpslButton>
+            <Link href={wallet.downloadUrl ?? ''} target="_blank">
+              <ExternalButton>
+                <ExternalText weight="medium">{`Get ${wallet.name}`}</ExternalText>
+                <ExternalIcon icon="linkExternal" />
+              </ExternalButton>
+            </Link>
           </InnerStepContainer>
         </>
       );
@@ -172,4 +173,28 @@ const ErrorIcon = styled(CpslIcon)`
 
 const Text = styled(CenteredText)`
   white-space: pre-line;
+`;
+
+const ExternalButton = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  cursor: pointer;
+  margin-top: 8px;
+  text-decoration: none;
+`;
+
+const ExternalIcon = styled(CpslIcon)`
+  --height: 20px;
+  --width: 20px;
+`;
+
+const ExternalText = styled(CpslText)`
+  text-decoration: none;
+`;
+
+const Link = styled.a`
+  text-decoration: none;
 `;

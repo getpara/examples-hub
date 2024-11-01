@@ -1,4 +1,4 @@
-import { isAndroid, isIOS } from '@usecapsule/react-sdk';
+import { isAndroid, isIOS, isTelegram } from '@usecapsule/react-sdk';
 import { WindowProvider } from '../../../types/utils.js';
 import { DefaultWalletOptions, Wallet } from '../../../types/Wallet.js';
 import { getInjectedConnector, hasInjectedProvider } from '../../../utils/getInjectedConnector.js';
@@ -58,10 +58,12 @@ export const metaMaskWallet = ({ projectId, walletConnectParameters }: MetaMaskW
 
   const getUri = (uri: string) => {
     return isAndroid()
-      ? uri
+      ? `metamask://wc?uri=${encodeURIComponent(uri)}`
       : isIOS()
-        ? // currently broken in MetaMask v6.5.0 https://github.com/MetaMask/metamask-mobile/issues/6457
-          `metamask://wc?uri=${encodeURIComponent(uri)}`
+        ? !isTelegram()
+          ? // currently broken in MetaMask v6.5.0 https://github.com/MetaMask/metamask-mobile/issues/6457
+            `metamask://wc?uri=${encodeURIComponent(uri)}`
+          : `https://metamask.app.link/wc?uri=${encodeURIComponent(uri)}`
         : `https://metamask.app.link/wc?uri=${encodeURIComponent(uri)}`;
   };
 

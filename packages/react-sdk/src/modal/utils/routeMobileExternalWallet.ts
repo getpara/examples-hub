@@ -1,10 +1,10 @@
-import { isMobile } from '@usecapsule/web-sdk';
+import { isAndroid, isMobile, isTelegram } from '@usecapsule/web-sdk';
 
 export const routeMobileExternalWallet = (qrUri?: string) => {
   if (isMobile()) {
     if (!qrUri) return;
 
-    if (qrUri.startsWith('http')) {
+    if (!isTelegram() && qrUri.startsWith('http')) {
       // Workaround for https://github.com/rainbow-me/rainbowkit/issues/524.
       // Using 'window.open' causes issues on iOS in non-Safari browsers and
       // WebViews where a blank tab is left behind after connecting.
@@ -20,7 +20,15 @@ export const routeMobileExternalWallet = (qrUri?: string) => {
       link.rel = 'noreferrer noopener';
       link.click();
     } else {
-      window.location.href = qrUri;
+      let href = qrUri;
+
+      if (isTelegram()) {
+        if (isAndroid()) {
+          href = encodeURI(qrUri);
+        }
+      }
+
+      window.open(href, isTelegram() ? '_blank' : '_self', 'noreferrer noopener');
     }
   }
 };

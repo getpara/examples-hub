@@ -47,3 +47,12 @@ export function isIOSWebview(): boolean {
 export function isMobileSafari(): boolean {
   return isMobile() && isSafari();
 }
+
+export function isTelegram() {
+  return (
+    typeof window !== 'undefined' &&
+    (Boolean((window as any).TelegramWebviewProxy) ||
+      Boolean((window as any).Telegram) ||
+      Boolean((window as any).TelegramWebviewProxyProto))
+  );
+}

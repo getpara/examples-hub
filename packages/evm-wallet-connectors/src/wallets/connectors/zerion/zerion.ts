@@ -1,4 +1,4 @@
-import { isIOS } from '@usecapsule/react-sdk';
+import { isIOS, isTelegram } from '@usecapsule/react-sdk';
 import { DefaultWalletOptions, Wallet } from '../../../types/Wallet';
 import { getInjectedConnector, hasInjectedProvider } from '../../../utils/getInjectedConnector.js';
 import { getWalletConnectConnector } from '../../../utils/getWalletConnectConnector';
@@ -13,7 +13,9 @@ export const zerionWallet = ({ projectId, walletConnectParameters }: ZerionWalle
   });
 
   const getUri = (uri: string) => {
-    return isIOS() ? `zerion://wc?uri=${encodeURIComponent(uri)}` : uri;
+    return isTelegram() && isIOS()
+      ? `https://app.zerion.io/wc?uri=${encodeURIComponent(uri)}`
+      : `zerion://wc?uri=${encodeURIComponent(uri)}`;
   };
 
   return {
