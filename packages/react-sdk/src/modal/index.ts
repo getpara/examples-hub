@@ -14,5 +14,5 @@ export {
 } from './constants/constants.js';
 export { SaveRecoverySecret } from './components/RecoverySecretStep/RecoverySecretStep.js';
 export * from './utils/validateOnRampConfig.js';
-export { ExternalWallet } from './types/externalWallets.js';
+export * from './types/externalWallets.js';
 export { useExternalWalletProviderStore } from './stores/externalWalletProvider/useExternalWalletProviderStore.js';

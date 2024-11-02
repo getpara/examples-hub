@@ -1,0 +1,57 @@
+{
+  "name": "modal-builder",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "rm -rf dist && tsc && vite build",
+    "deploy-prod": "VITE_CAPSULE_API_KEY=533efae5f7427d73cf9c1cc7e32b627b VITE_WALLET_CONNECT_PROJECT_ID=dc87c564a371d823d3795ae407391656 yarn && yarn build && aws s3 sync dist/ s3://capsule-prod-demo-site --profile prod --delete",
+    "deploy-sandbox": "VITE_CAPSULE_API_KEY=9f96227082046e39bcaa5f996ba7b4bb VITE_WALLET_CONNECT_PROJECT_ID=dc87c564a371d823d3795ae407391656 yarn && yarn build && aws s3 sync dist/ s3://capsule-sandbox-demo-site --profile sandbox --delete",
+    "dev": "vite --host",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "sort-imports": "eslint --fix src/**/*.{ts,tsx}"
+  },
+  "resolutions": {
+    "styled-components": "5"
+  },
+  "dependencies": {
+    "@delphi-labs/shuttle": "3.28.0",
+    "@dnd-kit/core": "6.1.0",
+    "@dnd-kit/sortable": "8.0.0",
+    "@dnd-kit/utilities": "3.2.2",
+    "@floating-ui/react": "0.26.24",
+    "@radix-ui/react-switch": "1.1.0",
+    "@solana/wallet-adapter-base": "0.9.23",
+    "@solana/web3.js": "1.95.2",
+    "@tanstack/react-query": "5.40.1",
+    "@usecapsule/evm-wallet-connectors": "1.4.4",
+    "@usecapsule/react-components": "3.9.4",
+    "@usecapsule/react-sdk": "4.4.4",
+    "@usecapsule/solana-wallet-connectors": "1.4.4",
+    "imask": "7.6.1",
+    "jotai": "2.10.0",
+    "lodash.merge": "4.6.2",
+    "loglevel": "1.9.2",
+    "qs": "6.13.0",
+    "react": "18.2.0",
+    "react-colorful": "5.6.1",
+    "react-dom": "18.2.0",
+    "react-error-boundary": "4.0.13",
+    "react-router-dom": "6.24.1",
+    "shiki": "1.17.7",
+    "styled-components": "6.1.8"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.9.0",
+    "@types/lodash.merge": "4.6.9",
+    "@types/react": "18.2.66",
+    "@types/react-dom": "18.2.22",
+    "@types/styled-components": "5.1.34",
+    "@vitejs/plugin-react": "4.2.1",
+    "eslint": "8.57.0",
+    "typescript": "5.5.3",
+    "vite": "5.2.0",
+    "vite-plugin-node-polyfills": "0.22.0"
+  }
+}

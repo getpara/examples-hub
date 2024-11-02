@@ -1,5 +1,6 @@
 import AlertCircle from './alert-circle.svg';
 import AlertTriangle from './alert-triangle.svg';
+import AlignVerticalCenter from './align-vertical-center.svg';
 import AngelListBrand from './angel-list-brand.svg';
 import AngelList from './angel-list.svg';
 import AppleBrand from './apple-brand.svg';
@@ -9,6 +10,7 @@ import ArrowCircleBrokenDownLeft from './arrow-circle-broken-down-left.svg';
 import ArrowCircleDownFilled from './arrow-circle-down-filled.svg';
 import ArrowNarrow from './arrow-narrow.svg';
 import Arrow from './arrow.svg';
+import Asterisk from './asterisk.svg';
 import BackupKit from './backup-kit.svg';
 import Bank from './bank.svg';
 import BaseBrand from './base-brand.svg';
@@ -21,14 +23,17 @@ import Capsule from './capsule.svg';
 import CeloBrand from './celo-brand.svg';
 import CheckCircleFilled from './check-circle-filled.svg';
 import CheckCircle from './check-circle.svg';
+import CheckSquare from './check-square.svg';
 import Check from './check.svg';
 import ChevronDown from './chevron-down.svg';
+import ChevronRight from './chevron-right.svg';
 import ChevronSelectorVertical from './chevron-selector-vertical.svg';
 import ChevronUp from './chevron-up.svg';
 import Clock from './clock.svg';
 import Close from './close.svg';
 import ClubhouseBrand from './clubhouse-brand.svg';
 import Clubhouse from './clubhouse.svg';
+import Code from './code.svg';
 import Copy07 from './copy-07.svg';
 import Copy from './copy.svg';
 import Cosmos from './cosmos.svg';
@@ -68,6 +73,7 @@ import Github from './github.svg';
 import Globe from './globe.svg';
 import GoogleBrand from './google-brand.svg';
 import Google from './google.svg';
+import GridDots from './grid-dots.svg';
 import HelpCircle from './help-circle.svg';
 import HeroAlertCircle from './hero-alert-circle.svg';
 import HeroCheckmarkCapsule from './hero-checkmark-capsule.svg';
@@ -99,10 +105,12 @@ import LockKeyholeCircle from './lock-keyhole-circle.svg';
 import LogOut from './log-out.svg';
 import Mail from './mail.svg';
 import Menu from './menu.svg';
+import Monitor from './monitor.svg';
 import MoonpayBrand from './moonpay-brand.svg';
 import MoreLoginOptions from './more-login-options.svg';
 import Motorola from './motorola.svg';
 import OptimismBrand from './optimism-brand.svg';
+import Passcode from './passcode.svg';
 import Phone from './phone.svg';
 import PintrestBrand from './pintrest-brand.svg';
 import Pintrest from './pintrest.svg';
@@ -122,6 +130,7 @@ import Samsung from './samsung.svg';
 import Search from './search.svg';
 import Send from './send.svg';
 import Settings from './settings.svg';
+import Share from './share.svg';
 import Shield from './shield.svg';
 import SignalBrand from './signal-brand.svg';
 import Signal from './signal.svg';
@@ -129,8 +138,10 @@ import Sliders from './sliders.svg';
 import SnapchatBrand from './snapchat-brand.svg';
 import Snapchat from './snapchat.svg';
 import Solana from './solana.svg';
+import SpacingHeight from './spacing-height.svg';
 import Star04Filled from './star-04-filled.svg';
 import Stars from './stars.svg';
+import StopSquare from './stop-square.svg';
 import StripeBrand from './stripe-brand.svg';
 import TelegramBrand from './telegram-brand.svg';
 import Telegram from './telegram.svg';
@@ -386,6 +397,7 @@ import ZW from './flags/ZW.svg';
 export const Icons = {
   alertCircle: AlertCircle,
   alertTriangle: AlertTriangle,
+  alignVerticalCenter: AlignVerticalCenter,
   angelListBrand: AngelListBrand,
   angelList: AngelList,
   appleBrand: AppleBrand,
@@ -395,6 +407,7 @@ export const Icons = {
   arrowCircleDownFilled: ArrowCircleDownFilled,
   arrowNarrow: ArrowNarrow,
   arrow: Arrow,
+  asterisk: Asterisk,
   backupKit: BackupKit,
   bank: Bank,
   baseBrand: BaseBrand,
@@ -407,14 +420,17 @@ export const Icons = {
   celoBrand: CeloBrand,
   checkCircleFilled: CheckCircleFilled,
   checkCircle: CheckCircle,
+  checkSquare: CheckSquare,
   check: Check,
   chevronDown: ChevronDown,
+  chevronRight: ChevronRight,
   chevronSelectorVertical: ChevronSelectorVertical,
   chevronUp: ChevronUp,
   clock: Clock,
   close: Close,
   clubhouseBrand: ClubhouseBrand,
   clubhouse: Clubhouse,
+  code: Code,
   copy07: Copy07,
   copy: Copy,
   cosmos: Cosmos,
@@ -454,6 +470,7 @@ export const Icons = {
   globe: Globe,
   googleBrand: GoogleBrand,
   google: Google,
+  gridDots: GridDots,
   helpCircle: HelpCircle,
   heroAlertCircle: HeroAlertCircle,
   heroCheckmarkCapsule: HeroCheckmarkCapsule,
@@ -485,10 +502,12 @@ export const Icons = {
   logOut: LogOut,
   mail: Mail,
   menu: Menu,
+  monitor: Monitor,
   moonpayBrand: MoonpayBrand,
   moreLoginOptions: MoreLoginOptions,
   motorola: Motorola,
   optimismBrand: OptimismBrand,
+  passcode: Passcode,
   phone: Phone,
   pintrestBrand: PintrestBrand,
   pintrest: Pintrest,
@@ -508,6 +527,7 @@ export const Icons = {
   search: Search,
   send: Send,
   settings: Settings,
+  share: Share,
   shield: Shield,
   signalBrand: SignalBrand,
   signal: Signal,
@@ -515,8 +535,10 @@ export const Icons = {
   snapchatBrand: SnapchatBrand,
   snapchat: Snapchat,
   solana: Solana,
+  spacingHeight: SpacingHeight,
   star04Filled: Star04Filled,
   stars: Stars,
+  stopSquare: StopSquare,
   stripeBrand: StripeBrand,
   telegramBrand: TelegramBrand,
   telegram: Telegram,
