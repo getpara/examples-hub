@@ -180,3 +180,12 @@ export const SHARES = [
     encryptedKey: '',
   },
 ];
+
+export const TWOFA_URI = 'test2FAURI';
+export const TWOFA_VERIFY_RESP = {
+  address: WALLET.address,
+  walletId: WALLET.id,
+  userId: USER_ID,
+  status: 'INITIATED',
+  initiatedAt: '2024-10-22T00:00:00.000Z',
+};

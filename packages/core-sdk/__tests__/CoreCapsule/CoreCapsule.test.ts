@@ -27,19 +27,25 @@ import {
   PREGEN_WALLETS_PHONE,
   PREGEN_WALLET_PHONE_KEYGEN_RES,
   PREGEN_WALLET_PHONE,
+  TWOFA_URI,
+  TWOFA_VERIFY_RESP,
 } from '../constants';
 import { MockCapsule } from '../mocks/mockCoreCapsule';
 import {
   mockAddSessionPublicKey,
+  mockCheck2FAStatus,
   mockCheckUserExists,
   mockCreateUser,
   mockDistributeCapsuleShare,
+  mockEnable2FA,
   mockExternalWalletLogin,
   mockGetFarcasterAuthStatus,
   mockGetPregenWallets,
   mockGetTransmissionKeyshares,
   mockGetWallets,
   mockUpdatePregenWallet,
+  mockVerify2FA,
+  mockVerify2FAForPhone,
   mockVerifyEmail,
   mockVerifyPhone,
 } from '../mocks/mockUserManagementClient';
@@ -741,6 +747,72 @@ describe('CoreCapsule', () => {
         expect(Object.keys(capsule.wallets).length).toEqual(2);
         expect(capsule.wallets[WALLET.id]).toBeDefined;
         expect(capsule.wallets[SOLANA_WALLET.id]).toBeDefined;
+      });
+    });
+  });
+  describe('2FA', () => {
+    let capsule: MockCapsule | undefined;
+
+    beforeAll(async () => {
+      capsule = new MockCapsule(Environment.DEV, API_KEY);
+
+      await capsule.setUserId(USER_ID);
+    });
+    describe('check, setup & enable', () => {
+      it('check - pass', async () => {
+        const { isSetup } = await capsule.check2FAStatus();
+
+        expect(isSetup).toBeTruthy();
+      });
+      it('check - fail no user id', async () => {
+        await capsule.logout();
+
+        const { isSetup } = await capsule.check2FAStatus();
+
+        await capsule.setUserId(USER_ID);
+
+        expect(isSetup).toBeFalsy();
+      });
+      it('check - fail api', async () => {
+        mockCheck2FAStatus.mockResolvedValueOnce({ data: { isSetup: false } });
+
+        const { isSetup } = await capsule.check2FAStatus();
+
+        expect(isSetup).toBeFalsy();
+      });
+      it('setup', async () => {
+        const { uri } = await capsule.setup2FA();
+
+        expect(uri).toEqual(TWOFA_URI);
+      });
+      it('enable - pass', async () => {
+        await expect(capsule.enable2FA('123456')).resolves.not.toThrowError();
+      });
+      it('enable - pass', async () => {
+        mockEnable2FA.mockRejectedValueOnce('invalid');
+        await expect(capsule.enable2FA('123456')).rejects.toThrowError();
+      });
+    });
+    describe('verify', () => {
+      it('email', async () => {
+        const resp = await capsule.verify2FA(USER_EMAIL, '123456');
+
+        expect(resp).toEqual(TWOFA_VERIFY_RESP);
+      });
+      it('email - fail', async () => {
+        mockVerify2FA.mockRejectedValueOnce('invalid');
+        await expect(capsule.verify2FA(USER_EMAIL, '123456')).rejects.toThrowError();
+      });
+      it('phone', async () => {
+        const resp = await capsule.verify2FAForPhone(USER_PHONE, USER_COUNTRY_CODE as CountryCallingCode, '123456');
+
+        expect(resp).toEqual(TWOFA_VERIFY_RESP);
+      });
+      it('email - fail', async () => {
+        mockVerify2FAForPhone.mockRejectedValueOnce('invalid');
+        await expect(
+          capsule.verify2FAForPhone(USER_PHONE, USER_COUNTRY_CODE as CountryCallingCode, '123456'),
+        ).rejects.toThrowError();
       });
     });
   });

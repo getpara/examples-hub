@@ -9,6 +9,8 @@ import {
   SHARES,
   SOLANA_WALLET,
   TEMP_TRANSMISSION_INIT_ID,
+  TWOFA_URI,
+  TWOFA_VERIFY_RESP,
   USER_EMAIL,
   USER_FARCASTER_USERNAME,
   USER_ID,
@@ -59,6 +61,11 @@ export const mockGetTransmissionKeyshares = vi.fn().mockResolvedValue({
   },
 });
 export const mockUpdatePregenWallet = vi.fn().mockResolvedValue({});
+export const mockSetup2FA = vi.fn().mockResolvedValue({ data: { uri: TWOFA_URI } });
+export const mockCheck2FAStatus = vi.fn().mockResolvedValue({ data: { isSetup: true } });
+export const mockEnable2FA = vi.fn().mockResolvedValue({});
+export const mockVerify2FA = vi.fn().mockResolvedValue({ data: TWOFA_VERIFY_RESP });
+export const mockVerify2FAForPhone = vi.fn().mockResolvedValue({ data: TWOFA_VERIFY_RESP });
 
 vi.mock('@usecapsule/user-management-client', async importOriginal => {
   const actual = await importOriginal();
@@ -87,6 +94,11 @@ vi.mock('@usecapsule/user-management-client', async importOriginal => {
       claimPregenWallet: mockClaimPregenWallet,
       getTransmissionKeyshares: mockGetTransmissionKeyshares,
       updatePregenWallet: mockUpdatePregenWallet,
+      setup2FA: mockSetup2FA,
+      check2FAStatus: mockCheck2FAStatus,
+      enable2FA: mockEnable2FA,
+      verify2FA: mockVerify2FA,
+      verify2FAForPhone: mockVerify2FAForPhone,
     })),
   };
 });
