@@ -20,15 +20,15 @@ export const routeMobileExternalWallet = (qrUri?: string) => {
       link.rel = 'noreferrer noopener';
       link.click();
     } else {
-      let href = qrUri;
-
       if (isTelegram()) {
+        let href = qrUri;
         if (isAndroid()) {
           href = encodeURI(qrUri);
         }
+        window.open(href, '_blank', 'noreferrer noopener');
+      } else {
+        window.location.href = qrUri;
       }
-
-      window.open(href, isTelegram() ? '_blank' : '_self', 'noreferrer noopener');
     }
   }
 };

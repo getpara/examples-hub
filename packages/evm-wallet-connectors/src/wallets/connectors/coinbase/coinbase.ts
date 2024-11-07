@@ -2,6 +2,7 @@ import { createConnector } from 'wagmi';
 import { coinbaseWallet as coinbaseWagmiWallet } from 'wagmi/connectors';
 import { Wallet, WalletDetailsParams } from '../../../types/Wallet.js';
 import { icon } from './coinbaseIcon.js';
+import { hasInjectedProvider } from '../../../utils/getInjectedConnector.js';
 
 export interface CoinbaseWalletOptions {
   appName: string;
@@ -9,6 +10,7 @@ export interface CoinbaseWalletOptions {
 }
 
 export const coinbaseWallet = ({ appName, appIcon }: CoinbaseWalletOptions): Wallet => {
+  const isCoinbaseInjected = hasInjectedProvider({ flag: 'isCoinbaseWallet' });
   const getUri = (uri: string) => uri;
 
   return {
@@ -19,7 +21,7 @@ export const coinbaseWallet = ({ appName, appIcon }: CoinbaseWalletOptions): Wal
     // Note that we never resolve `installed` to `false` because the
     // Coinbase Wallet SDK falls back to other connection methods if
     // the injected connector isn't available
-    installed: true,
+    installed: isCoinbaseInjected,
     isExtension: true,
     isMobile: true,
     downloadUrl: 'https://www.coinbase.com/wallet/downloads',
@@ -30,6 +32,7 @@ export const coinbaseWallet = ({ appName, appIcon }: CoinbaseWalletOptions): Wal
           version: '4',
           appName,
           appLogoUrl: appIcon,
+          preference: 'eoaOnly',
         })(config),
         ...walletDetails,
       })),

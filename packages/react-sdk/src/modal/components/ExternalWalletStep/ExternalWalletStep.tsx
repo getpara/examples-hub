@@ -101,7 +101,7 @@ export const ExternalWalletStep = () => {
             </InnerStepContainer>
             {wallet.id !== 'walletConnect' && (
               <InnerStepContainer>
-                <CpslButton as="a" href={qrUri ?? ''} target="_blank" fullWidth>
+                <CpslButton onClick={() => routeMobileExternalWallet(qrUri)} fullWidth>
                   Connect Wallet
                 </CpslButton>
                 <Link href={wallet.downloadUrl ?? ''} target="_blank">
