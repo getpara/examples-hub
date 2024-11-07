@@ -1,5 +1,5 @@
-import CoreCapsule from '../../src';
-import { MockPlatformUtils } from './mockPlatformUtils';
+import CoreCapsule from '../../src/index.js';
+import { MockPlatformUtils } from './mockPlatformUtils.js';
 
 export class MockCapsule extends CoreCapsule {
   protected getPlatformUtils() {

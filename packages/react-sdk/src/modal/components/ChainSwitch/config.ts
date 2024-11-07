@@ -1,4 +1,4 @@
-import { Tab } from '../../types/commonTypes';
+import { Tab } from '../../types/commonTypes.js';
 
 export enum TabValue {
   extension = 'extension',

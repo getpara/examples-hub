@@ -1,8 +1,8 @@
 import { ReactNode, createContext, useContext, useEffect, useMemo } from 'react';
 import { Network, ShuttleProvider, WalletExtensionProvider, WalletMobileProvider } from '@delphi-labs/shuttle-react';
-import { WalletList, WalletWithProviders } from '../types/Wallet';
+import { WalletList, WalletWithProviders } from '../types/Wallet.js';
 import { useExternalWalletProviderStore } from '@usecapsule/react-sdk';
-import { CosmosExternalWalletContext, CosmosExternalWalletProvider } from './CosmosExternalWalletContext';
+import { CosmosExternalWalletContext, CosmosExternalWalletProvider } from './CosmosExternalWalletContext.js';
 
 export const CapsuleCosmosContext = createContext<{
   selectedChainId?: string;

@@ -14,14 +14,14 @@ import {
   getSHA256HashHex,
   parseCredentialCreationRes,
 } from '@usecapsule/web-sdk';
-import { ReactNativeUtils } from './ReactNativeUtils';
+import { ReactNativeUtils } from './ReactNativeUtils.js';
 import { Passkey, PasskeyRegistrationResult, PasskeyAuthenticationResult } from '@usecapsule/react-native-passkey';
 import {
   PasskeyRegistrationRequest,
   PasskeyAuthenticationRequest,
 } from '@usecapsule/react-native-passkey/lib/typescript/Passkey';
 import { PublicKeyStatus, WalletScheme } from '@usecapsule/user-management-client';
-import { setEnv } from '../config';
+import { setEnv } from '../config.js';
 import base64url from 'base64url';
 import { webcrypto } from 'crypto';
 import { CountryCallingCode } from 'libphonenumber-js';

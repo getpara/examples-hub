@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useCapsuleStore, useModalStore } from '../stores';
+import { useCapsuleStore, useModalStore } from '../stores/index.js';
 
 export function useActiveWallet() {
   const capsule = useCapsuleStore(state => state.capsule);

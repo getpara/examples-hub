@@ -5,8 +5,28 @@ const prettierConfig = require('eslint-config-prettier');
 const compat = require('@eslint/compat');
 const reactQuery = require('@tanstack/eslint-plugin-query');
 const reactHooks = require('eslint-plugin-react-hooks');
+const importPlugin = require('eslint-plugin-import');
 
 module.exports = [
+  {
+    name: 'Ensure all JavaScript imports have a .js extension',
+    plugins: {
+      import: importPlugin,
+    },
+    files: ['packages/**/src/**/*.{ts,tsx,js,jsx}'],
+    ignores: ['packages/core-components/**/*.{ts,tsx}'],
+    rules: {
+      'import/extensions': [
+        'error',
+        'ignorePackages',
+        {
+          js: 'always',
+          ts: 'never',
+          tsx: 'never',
+        },
+      ],
+    },
+  },
   {
     name: 'Base JavaScript and JSX Rules',
     files: ['**/*.js', '**/*.jsx'],

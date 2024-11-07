@@ -1,4 +1,4 @@
-import { Wallet } from '../../../types/Wallet';
+import { Wallet } from '../../../types/Wallet.js';
 import { icon } from './glowIcon.js';
 
 export const glowWallet = (): Wallet => {

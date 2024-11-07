@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom';
 
 import CapsuleWeb, { CapsuleModal } from '@usecapsule/react-sdk';
-import { CapsuleModalPropsForInit } from './CapsuleEIP1193Provider';
+import { CapsuleModalPropsForInit } from './CapsuleEIP1193Provider.js';
 
 export function renderModal(
   capsule: CapsuleWeb,

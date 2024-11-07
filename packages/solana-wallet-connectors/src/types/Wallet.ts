@@ -1,4 +1,4 @@
-import { WalletMetadata } from './CommonTypes';
+import { WalletMetadata } from './CommonTypes.js';
 
 export type Wallet = {
   getUri?: (uri: string) => string;

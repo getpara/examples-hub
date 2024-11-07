@@ -1,11 +1,11 @@
 import { vi } from 'vitest';
-import { PlatformUtils, StorageUtils } from '../../src';
+import { PlatformUtils, StorageUtils } from '../../src/index.js';
 import {
   PREGEN_WALLET_EMAIL_KEYGEN_RES,
   SOLANA_PREGEN_WALLET_KEYGEN_RES,
   SOLANA_WALLET_KEYGEN_RES,
   WALLET_KEYGEN_RES,
-} from '../constants';
+} from '../constants.js';
 
 class MockLocalStorage implements StorageUtils {
   private localStorage = {};

@@ -1,8 +1,8 @@
 import { OnRampProvider, OnRampPurchaseStatus, WalletType } from '@usecapsule/web-sdk';
 import { lazy, useCallback, useEffect, useMemo, useState } from 'react';
-import { getCurrencyCodes, reverseCurrencyLookup, offRampSend } from '../utils';
+import { getCurrencyCodes, reverseCurrencyLookup, offRampSend } from '../utils/index.js';
 import styled from 'styled-components';
-import { Props } from '../types';
+import { Props } from '../types/index.js';
 import type { MoonPayBuyWidget, MoonPaySellWidget } from '@moonpay/moonpay-react';
 
 const MOONPAY_PUBLISHABLE_KEY = 'pk_live_EQva4LydtNDE0Rwd9X7SG9w58wqOzbux';

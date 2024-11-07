@@ -1,4 +1,4 @@
-import { WalletMetadata } from './CommonTypes';
+import { WalletMetadata } from './CommonTypes.js';
 import { Network, WalletExtensionProvider, WalletMobileProvider } from '@delphi-labs/shuttle-react';
 
 export type WalletList = (({ networks }: { networks: Network[] }) => WalletWithProviders)[];

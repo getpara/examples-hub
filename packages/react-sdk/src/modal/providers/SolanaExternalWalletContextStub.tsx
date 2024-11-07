@@ -1,5 +1,5 @@
 import { ReactNode, createContext, useMemo } from 'react';
-import { CommonWallet } from '../types/commonTypes';
+import { CommonWallet } from '../types/commonTypes.js';
 import CapsuleWeb from '@usecapsule/web-sdk';
 
 export const defaultSolanaExternalWallet = {

@@ -1,8 +1,8 @@
 import { expect, describe, it, vi, beforeEach } from 'vitest';
 import * as uuid from 'uuid';
 
-import { Environment } from '../../src';
-import { setupWorker } from '../../src/workers/workerWrapper';
+import { Environment } from '../../src/index.js';
+import { setupWorker } from '../../src/workers/workerWrapper.js';
 
 const MOCK_WORKER_CODE = `
   const { parentPort } = require('worker_threads');

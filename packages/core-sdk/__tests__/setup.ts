@@ -1,2 +1,2 @@
-import './mocks/mockUserManagementClient';
-import './mocks/mockCryptographyUtils';
+import './mocks/mockUserManagementClient.js';
+import './mocks/mockCryptographyUtils.js';

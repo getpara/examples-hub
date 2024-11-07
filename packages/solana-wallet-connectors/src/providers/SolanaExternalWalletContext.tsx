@@ -1,5 +1,5 @@
 import { ReactNode, createContext, useEffect, useMemo } from 'react';
-import { CommonWallet } from '../types/CommonTypes';
+import { CommonWallet } from '../types/CommonTypes.js';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Adapter, WalletReadyState } from '@solana/wallet-adapter-base';
 import { useCapsuleSolana } from './CapsuleSolanaProvider.js';

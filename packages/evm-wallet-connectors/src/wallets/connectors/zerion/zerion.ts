@@ -1,7 +1,7 @@
 import { isIOS, isTelegram } from '@usecapsule/react-sdk';
-import { DefaultWalletOptions, Wallet } from '../../../types/Wallet';
+import { DefaultWalletOptions, Wallet } from '../../../types/Wallet.js';
 import { getInjectedConnector, hasInjectedProvider } from '../../../utils/getInjectedConnector.js';
-import { getWalletConnectConnector } from '../../../utils/getWalletConnectConnector';
+import { getWalletConnectConnector } from '../../../utils/getWalletConnectConnector.js';
 import { icon } from './zerionIcon.js';
 
 export type ZerionWalletOptions = DefaultWalletOptions;

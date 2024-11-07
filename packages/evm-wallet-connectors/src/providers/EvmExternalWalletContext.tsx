@@ -1,9 +1,9 @@
 import { ReactNode, createContext, useEffect, useMemo, useState } from 'react';
 import { useAccount, useSwitchChain, useConnect, useDisconnect, useEnsName, useEnsAvatar } from 'wagmi';
-import { WagmiConnectorInstance } from '../types/Wallet';
-import { CommonChain, CommonWallet } from '../types/CommonTypes';
-import { isEIP6963Connector } from '../utils/isEIP6963Connector';
-import { getWalletConnectUri } from '../utils/getWalletConnectUri';
+import { WagmiConnectorInstance } from '../types/Wallet.js';
+import { CommonChain, CommonWallet } from '../types/CommonTypes.js';
+import { isEIP6963Connector } from '../utils/isEIP6963Connector.js';
+import { getWalletConnectUri } from '../utils/getWalletConnectUri.js';
 import CapsuleWeb, { isMobile, WalletType } from '@usecapsule/react-sdk';
 import { normalize } from 'viem/ens';
 

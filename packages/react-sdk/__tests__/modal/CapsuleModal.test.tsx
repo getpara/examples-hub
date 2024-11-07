@@ -1,6 +1,6 @@
 import { beforeAll, afterAll, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import Capsule, { CapsuleModal, Environment, OAuthMethod, OnRampConfig } from '../../src';
+import Capsule, { CapsuleModal, Environment, OAuthMethod, OnRampConfig } from '../../src/index.js';
 import { OnRampAssetInfo } from '@usecapsule/user-management-client';
 
 describe('CapsuleModal', () => {

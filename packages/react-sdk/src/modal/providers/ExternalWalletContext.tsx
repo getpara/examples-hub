@@ -1,11 +1,11 @@
 import { Context, ReactNode, createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { CommonChain, CommonWallet } from '../types/commonTypes';
-import { EvmExternalWalletContextType } from './EvmExternalWalletContextStub';
+import { CommonChain, CommonWallet } from '../types/commonTypes.js';
+import { EvmExternalWalletContextType } from './EvmExternalWalletContextStub.js';
 import { useCapsuleStore, useModalStore } from '../stores/index.js';
 import { ModalStep } from '../utils/steps.js';
-import { TExternalWallet } from '../types/externalWallets';
-import { SolanaExternalWalletContextType } from './SolanaExternalWalletContextStub';
-import { CosmosExternalWalletContextType } from './CosmosExternalWalletContextStub';
+import { TExternalWallet } from '../types/externalWallets.js';
+import { SolanaExternalWalletContextType } from './SolanaExternalWalletContextStub.js';
+import { CosmosExternalWalletContextType } from './CosmosExternalWalletContextStub.js';
 import { WalletType, isIOS, isIOSWebview, isMobile, truncateAddress } from '@usecapsule/web-sdk';
 
 export const defaultExternalWallet = {

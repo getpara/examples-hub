@@ -6,8 +6,8 @@ import { SignatureRes } from '@usecapsule/web-sdk';
 import { BackupKitEmailProps, KeyType, WalletScheme, WalletType } from '@usecapsule/user-management-client';
 import { NativeModules } from 'react-native';
 
-import { AsyncStorage } from '../AsyncStorage';
-import { KeychainStorage } from '../KeychainStorage';
+import { AsyncStorage } from '../AsyncStorage.js';
+import { KeychainStorage } from '../KeychainStorage.js';
 
 const { CapsuleSignerModule } = NativeModules;
 

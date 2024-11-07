@@ -1,12 +1,12 @@
 import { CpslHero, CpslIcon, CpslIdenticon } from '@usecapsule/react-components';
 import styled from 'styled-components';
-import { ModalStep } from '../../utils/steps';
-import { useCapsuleStore, useModalStore } from '../../stores';
-import { useExternalWallets } from '../../providers/ExternalWalletContext';
-import { NETWORK_NOT_SUPPORTED_ERROR } from '../../constants/constants';
+import { ModalStep } from '../../utils/steps.js';
+import { useCapsuleStore, useModalStore } from '../../stores/index.js';
+import { useExternalWallets } from '../../providers/ExternalWalletContext.js';
+import { NETWORK_NOT_SUPPORTED_ERROR } from '../../constants/constants.js';
 import { useEffect, useState } from 'react';
 import { isMobile } from '@usecapsule/web-sdk';
-import { useActiveWallet } from '../../hooks/useActiveWallet';
+import { useActiveWallet } from '../../hooks/useActiveWallet.js';
 
 type StepHeroConfig = {
   variant: 'externalWalletConnection' | 'approved' | 'failed' | 'customContent';

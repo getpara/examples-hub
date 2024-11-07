@@ -1,11 +1,11 @@
 import styled from 'styled-components';
-import { useExternalWallets } from '../../providers/ExternalWalletContext';
-import { StyledCpslTileButton } from '../common';
+import { useExternalWallets } from '../../providers/ExternalWalletContext.js';
+import { StyledCpslTileButton } from '../common.js';
 import { CpslButton, CpslIcon, CpslInput, CpslText } from '@usecapsule/react-components';
-import { useModalStore } from '../../stores';
-import { ModalStep } from '../../utils/steps';
+import { useModalStore } from '../../stores/index.js';
+import { ModalStep } from '../../utils/steps.js';
 import { useState } from 'react';
-import { CommonWallet } from '../../types/commonTypes';
+import type { CommonWallet } from '../../types/commonTypes.js';
 
 const HAS_MORE_LENGTH = 3;
 

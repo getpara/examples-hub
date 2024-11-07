@@ -1,5 +1,5 @@
 import { ReactNode, createContext, useMemo } from 'react';
-import { CommonChain, CommonWallet } from '../types/commonTypes';
+import { CommonChain, CommonWallet } from '../types/commonTypes.js';
 import CapsuleWeb from '@usecapsule/web-sdk';
 
 export const defaultCosmosExternalWallet = {

@@ -1,13 +1,13 @@
 import { CpslButton, CpslIcon, CpslQrCode, CpslSpinner, CpslText } from '@usecapsule/react-components';
-import { CenteredText, InnerStepContainer, QRContainer, StepContainer } from '../common';
+import { CenteredText, InnerStepContainer, QRContainer, StepContainer } from '../common.js';
 import { useEffect, useMemo } from 'react';
-import { useModalStore } from '../../stores';
+import { useModalStore } from '../../stores/index.js';
 import styled from 'styled-components';
-import { useExternalWallets } from '../../providers/ExternalWalletContext';
+import { useExternalWallets } from '../../providers/ExternalWalletContext.js';
 import { useCopyToClipboard } from '@usecapsule/react-common';
-import { ModalStep } from '../../utils/steps';
-import { routeMobileExternalWallet } from '../../utils/routeMobileExternalWallet';
-import { NETWORK_NOT_SUPPORTED_ERROR } from '../../constants/constants';
+import { ModalStep } from '../../utils/steps.js';
+import { routeMobileExternalWallet } from '../../utils/routeMobileExternalWallet.js';
+import { NETWORK_NOT_SUPPORTED_ERROR } from '../../constants/constants.js';
 import { WalletType } from '@usecapsule/web-sdk';
 
 export const ChainSwitch = () => {

@@ -4,7 +4,7 @@ import { TextEncoder, TextDecoder } from 'text-encoding';
 import forge from 'node-forge';
 import modPow from 'react-native-modpow';
 export { Environment, WalletType } from '@usecapsule/web-sdk';
-export { CapsuleMobile } from './react-native/CapsuleMobile';
+export { CapsuleMobile } from './react-native/CapsuleMobile.js';
 
 export function shim() {
   forge.jsbn.BigInteger.prototype.modPow = function nativeModPow(e, m) {

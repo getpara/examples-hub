@@ -1,6 +1,6 @@
 import { expect, describe, it } from 'vitest';
 
-import Capsule, { Environment } from '../src';
+import Capsule, { Environment } from '../src/index.js';
 
 describe('CoreCapsule', () => {
   describe('constructor', () => {

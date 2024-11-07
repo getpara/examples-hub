@@ -1,4 +1,4 @@
-import { CapsuleWalletConnectParameters } from '../types/Wallet';
+import { CapsuleWalletConnectParameters } from '../types/Wallet.js';
 
 interface ComputeMetaDataParameters {
   appName: string;

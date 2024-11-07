@@ -1,8 +1,8 @@
 import { ReactNode, createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { ConnectionProvider, WalletProvider as SolanaWalletProvider } from '@solana/wallet-adapter-react';
-import { WalletList } from '../types/Wallet';
+import { WalletList } from '../types/Wallet.js';
 import { useExternalWalletProviderStore } from '@usecapsule/react-sdk';
-import { SolanaExternalWalletContext, SolanaExternalWalletProvider } from './SolanaExternalWalletContext';
+import { SolanaExternalWalletContext, SolanaExternalWalletProvider } from './SolanaExternalWalletContext.js';
 import {
   createDefaultAddressSelector,
   createDefaultAuthorizationResultCache,

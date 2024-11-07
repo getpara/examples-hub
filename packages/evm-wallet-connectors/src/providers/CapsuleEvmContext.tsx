@@ -1,10 +1,10 @@
 import { ReactNode, useEffect } from 'react';
 import { createConfig, CreateConfigParameters, WagmiProvider, WagmiProviderProps } from 'wagmi';
-import { WalletList } from '../types/Wallet';
+import { WalletList } from '../types/Wallet.js';
 import { connectorsForWallets } from '../wallets/connectorsForWallets.js';
 import { Chain, http, Transport } from 'viem';
-import { computeWalletConnectMetaData } from '../utils/computeWalletConnectMetaData';
-import { EvmExternalWalletContext, EvmExternalWalletProvider } from './EvmExternalWalletContext';
+import { computeWalletConnectMetaData } from '../utils/computeWalletConnectMetaData.js';
+import { EvmExternalWalletContext, EvmExternalWalletProvider } from './EvmExternalWalletContext.js';
 import { useExternalWalletProviderStore } from '@usecapsule/react-sdk';
 
 interface GetDefaultConfigParameters<

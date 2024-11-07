@@ -1,9 +1,9 @@
 import { CpslButton, CpslIcon, CpslText } from '@usecapsule/react-components';
 import styled from 'styled-components';
-import { CenteredColumnContainer, FullWidthFilledDisabledInput, CenteredText } from './common';
-import { QRCode } from './QRCode';
-import { BiometricHints, getDeviceLogo, getDeviceModelName } from '../utils';
-import { useCopyToClipboard } from '../hooks';
+import { CenteredColumnContainer, FullWidthFilledDisabledInput, CenteredText } from './common.js';
+import { QRCode } from './QRCode.js';
+import { BiometricHints, getDeviceLogo, getDeviceModelName } from '../utils/index.js';
+import { useCopyToClipboard } from '../hooks/index.js';
 
 interface KnownDevicesProps {
   hints: BiometricHints;

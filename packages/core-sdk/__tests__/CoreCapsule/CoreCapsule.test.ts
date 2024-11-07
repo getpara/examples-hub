@@ -1,6 +1,6 @@
 import { describe, vi, afterEach, expect, it, beforeAll } from 'vitest';
 
-import CoreCapsule, { Environment, getPublicKeyHex, OAuthMethod } from '../../src';
+import CoreCapsule, { Environment, getPublicKeyHex, OAuthMethod } from '../../src/index.js';
 import {
   API_KEY,
   EXTERNAL_WALLET,
@@ -30,7 +30,7 @@ import {
   TWOFA_URI,
   TWOFA_VERIFY_RESP,
 } from '../constants';
-import { MockCapsule } from '../mocks/mockCoreCapsule';
+import { MockCapsule } from '../mocks/mockCoreCapsule.js';
 import {
   mockAddSessionPublicKey,
   mockCheck2FAStatus,
@@ -51,9 +51,9 @@ import {
 } from '../mocks/mockUserManagementClient';
 import { CountryCallingCode } from 'libphonenumber-js';
 import { PublicKeyStatus, PublicKeyType, WalletType } from '@usecapsule/user-management-client';
-import { PregenIdentifierType, toQueryString } from '../../src/CoreCapsule';
-import { getWorkerContent } from '../utils';
-import { mockPreKeygen } from '../mocks/mockPlatformUtils';
+import { PregenIdentifierType, toQueryString } from '../../src/CoreCapsule.js';
+import { getWorkerContent } from '../utils.js';
+import { mockPreKeygen } from '../mocks/mockPlatformUtils.js';
 
 describe('CoreCapsule', () => {
   afterEach(() => {
