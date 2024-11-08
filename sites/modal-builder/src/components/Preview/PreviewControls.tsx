@@ -32,7 +32,7 @@ export const PreviewControls: React.FC<PreviewControlsProps> = () => {
   };
 
   return (
-    <ButtonGroup mounted={mounted}>
+    <ButtonGroup $mounted={mounted}>
       <StyledButton variant="ghost" size="medium" $active={view === 'desktop'} onClick={handleDesktopView}>
         <CpslIcon icon="monitor" />
       </StyledButton>
@@ -46,17 +46,17 @@ export const PreviewControls: React.FC<PreviewControlsProps> = () => {
   );
 };
 
-const ButtonGroup = styled.div<{ mounted: boolean }>`
+const ButtonGroup = styled.div<{ $mounted: boolean }>`
   display: flex;
   flex-direction: row;
   justify-content: center;
   border-radius: 9999px;
-  padding: ${({ mounted }) => (mounted ? '0.75rem 1.5rem;' : '0;')};
+  padding: ${({ $mounted }) => ($mounted ? '0.75rem 1.5rem;' : '0;')};
   gap: 1.5rem;
   background-color: #ffffff;
   overflow: hidden;
   transition: all 0.3s ease-out;
-  width: ${({ mounted }) => (mounted ? 'auto' : 0)};
+  width: ${({ $mounted }) => ($mounted ? 'auto' : 0)};
 `;
 
 const StyledButton = styled(Button)<{ $active: boolean }>`

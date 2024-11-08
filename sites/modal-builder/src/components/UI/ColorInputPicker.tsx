@@ -15,16 +15,16 @@ const validateColor = (value: string) => {
   return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(value) || value === '';
 };
 
-export const ColorInputPicker: React.FC<ColorInputPickerProps> = ({ color: colorProp, onColorChange, label, name }) => {
-  const [inputValue, setInputValue] = useState(colorProp);
-  const [isValidColor, setIsValidColor] = useState(validateColor(colorProp || ''));
+export const ColorInputPicker: React.FC<ColorInputPickerProps> = ({ color: colorProp = '', onColorChange, label, name }) => {
+  const [inputValue, setInputValue] = useState<string>('');
+  const [isValidColor, setIsValidColor] = useState(validateColor(colorProp));
   const [isHexPickerOpen, setIsHexPickerOpen] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     logDebug('ColorInputPicker', colorProp);
-    setInputValue(colorProp || '');
-    setIsValidColor(validateColor(colorProp || ''));
+    setInputValue(colorProp);
+    setIsValidColor(validateColor(colorProp));
   }, [colorProp]);
 
   useEffect(() => {
@@ -76,13 +76,13 @@ export const ColorInputPicker: React.FC<ColorInputPickerProps> = ({ color: color
         />
         <div style={{ position: 'relative' }} ref={pickerRef}>
           <ColorButton
-            $bgColor={isValidColor ? (inputValue ? inputValue : '#000000') : '#000000'}
+            $bgColor={isValidColor ? inputValue || '#000000' : '#000000'}
             onClick={togglePicker}
             aria-label="Open color picker"
           />
           {isHexPickerOpen && (
             <PopoverContent>
-              <HexColorPicker color={isValidColor ? inputValue : '#000000'} onChange={handleColorChange} />
+              <HexColorPicker color={isValidColor ? inputValue || '#000000' : '#000000'} onChange={handleColorChange} />
             </PopoverContent>
           )}
         </div>
