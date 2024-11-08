@@ -10,13 +10,14 @@ import { LoginProvider, useLogin } from './components/LoginProvider';
 import { SelectWallet } from './components/SelectWallet';
 import { useModalOutletContext } from '../../hooks/useModalOutletContext';
 import { useCloseWindow } from '../../hooks/useCloseWindow';
+import { AuthMethod } from '@usecapsule/web-sdk';
 
-const AuthLoginBase = () => {
+const AuthLoginBase = ({ authMethod }) => {
   const capsule = useCapsule();
   const closeWindow = useCloseWindow();
   const { toggleBranding } = useModalOutletContext();
   const {
-    fns: { authLogin, fetchWallets, authUpdateKeyShares },
+    fns: { authLogin, authLoginWithPassword, fetchWallets, authUpdateKeyShares },
     params: {
       sessionId,
       partnerId,
@@ -32,6 +33,7 @@ const AuthLoginBase = () => {
   } = useLogin();
   const [urlForNewDeviceLogin, setUrlForNewDeviceLogin] = useState<string>('');
   const [step, setStep] = useAuthLoginStep();
+  const [loginWithPasswordError, setLoginWithPasswordError] = useState<string | undefined>();
 
   const isAddingNewDevice = !!newDeviceSessionLookupId && !isForKnownDeviceLogin;
 
@@ -64,8 +66,25 @@ const AuthLoginBase = () => {
     }
   };
 
+  const loginWithPassword = async (password: string) => {
+    try {
+      setLoginWithPasswordError(undefined);
+      await capsule.touchSession();
+      await authLoginWithPassword(password);
+
+      await postLogin();
+    } catch (err) {
+      setLoginWithPasswordError('Password is incorrect');
+    }
+  };
+
   const login = useCallback(async () => {
-    setStep(AuthLoginStep.WAITING);
+    setStep(authMethod === AuthMethod.PASSWORD ? AuthLoginStep.ENTER_PASSWORD : AuthLoginStep.WAITING);
+
+    if (authMethod === AuthMethod.PASSWORD) {
+      return;
+    }
+
     try {
       await capsule.touchSession();
       await authLogin();
@@ -80,7 +99,7 @@ const AuthLoginBase = () => {
       setStep(AuthLoginStep.LOGIN_FAILED);
       console.error('Error retrieving passkey: ', err);
     }
-  }, [capsule, authLogin]);
+  }, [capsule, authLogin, authMethod]);
 
   useEffect(() => {
     async function finishLogin(shouldClose: boolean) {
@@ -189,17 +208,19 @@ const AuthLoginBase = () => {
           addDeviceUrl={urlForNewDeviceLogin}
           isAddingNewDevice={isAddingNewDevice}
           onLoginClick={login}
+          onLoginWithPasswordClick={loginWithPassword}
           onLoginFromAnotherDevice={handleLoginFromOtherDevice}
           setStep={setStep}
           biometricLocationHints={biometricLocationHints}
+          loginWithPasswordError={loginWithPasswordError}
         />
       </CardContent>
     </Card>
   );
 };
 
-export const AuthLogin = () => (
+export const AuthLogin = ({ authMethod }: { authMethod: AuthMethod }) => (
   <LoginProvider>
-    <AuthLoginBase />
+    <AuthLoginBase authMethod={authMethod} />
   </LoginProvider>
 );

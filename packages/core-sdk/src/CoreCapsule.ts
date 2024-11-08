@@ -13,6 +13,7 @@ import Client, {
   OnRampPurchaseCreateParams,
   OnRampPurchase,
   extractWalletRef,
+  PasswordStatus,
   BiometricLocationHint,
 } from '@usecapsule/user-management-client';
 import qs from 'qs';
@@ -42,6 +43,7 @@ import { sendRecoveryForShare } from './shares/recovery.js';
 import parsePhoneNumberFromString, { CountryCallingCode } from 'libphonenumber-js';
 import { getCosmosAddress, truncateAddress } from './utils/formattingUtils.js';
 import { TransactionReviewDenied, TransactionReviewError, TransactionReviewTimeout } from './errors.js';
+import { AuthMethod } from './types/authMethods.js';
 
 const CORE_CAPSULE_VERSION = process.env.CORE_CAPSULE_VERSION;
 
@@ -1338,6 +1340,22 @@ export abstract class CoreCapsule {
     return `${(partnerId && (await this.getPartnerURL(partnerId))) || getPortalBaseURL(this.ctx)}/web/users/${this.userId}/biometrics/${webAuthId}?${userSpecificParams}${commonQueryParams}`;
   }
 
+  private async getPasswordURLForCreate(
+    type: 'email' | 'phone' | 'farcaster',
+    passwordId: string,
+    partnerId?: string,
+    isForNewDevice?: boolean,
+  ): Promise<string> {
+    const commonQueryParams = await this.getCommonQueryParams(partnerId, isForNewDevice);
+    const userSpecificParams = {
+      email: `email=${encodeURIComponent(this.email)}`,
+      phone: `phone=${encodeURIComponent(this.phone)}&countryCode=${encodeURIComponent(this.countryCode)}`,
+      farcaster: `farcasterUsername=${encodeURIComponent(this.farcasterUsername)}`,
+    }[type];
+
+    return `${(partnerId && (await this.getPartnerURL(partnerId))) || getPortalBaseURL(this.ctx)}/web/users/${this.userId}/passwords/${passwordId}?${userSpecificParams}${commonQueryParams}`;
+  }
+
   private getShortUrl(compressedUrl: string): string {
     return `${getPortalBaseURL(this.ctx)}/short/${compressedUrl}`;
   }
@@ -1380,6 +1398,29 @@ export abstract class CoreCapsule {
       farcaster: `farcasterUsername=${encodeURIComponent(this.farcasterUsername)}`,
     }[type];
     return `${(partnerId && (await this.getPartnerURL(partnerId))) || getPortalBaseURL(this.ctx)}/web/biometrics/login?${userSpecificParams}&sessionId=${sessionId}&encryptionKey=${loginEncryptionPublicKey}${commonLoginQueryParams}${commonQueryParams}`;
+  }
+
+  async getPasswordURLForLogin(
+    sessionId: string,
+    loginEncryptionPublicKey: string,
+    partnerId?: string,
+    newDeviceSessionId?: string,
+    newDeviceEncryptionKey?: string,
+    type: 'email' | 'phone' | 'farcaster' = 'email',
+  ): Promise<string> {
+    const commonQueryParams = await this.getCommonQueryParams(partnerId);
+    const commonLoginQueryParams = await this.getCommonLoginQueryParams(
+      partnerId,
+      newDeviceSessionId,
+      newDeviceEncryptionKey,
+    );
+
+    const userSpecificParams = {
+      email: `email=${encodeURIComponent(this.email)}`,
+      phone: `phone=${encodeURIComponent(this.phone)}&countryCode=${encodeURIComponent(this.countryCode)}`,
+      farcaster: `farcasterUsername=${encodeURIComponent(this.farcasterUsername)}`,
+    }[type];
+    return `${(partnerId && (await this.getPartnerURL(partnerId))) || getPortalBaseURL(this.ctx)}/web/passwords/login?${userSpecificParams}&sessionId=${sessionId}&encryptionKey=${loginEncryptionPublicKey}${commonLoginQueryParams}${commonQueryParams}`;
   }
 
   /**
@@ -1699,6 +1740,14 @@ export abstract class CoreCapsule {
     return this.getWebAuthURLForCreate('phone', res.data.id, res.data.partnerId, isForNewDevice);
   }
 
+  async getSetupPasswordURL(isForNewDevice: boolean, type: 'email' | 'phone' | 'farcaster' = 'email'): Promise<string> {
+    const res = await this.ctx.capsuleClient.addSessionPasswordPublicKey(this.userId, {
+      status: PasswordStatus.PENDING,
+    });
+
+    return this.getPasswordURLForCreate(type, res.data.id, res.data.partnerId, isForNewDevice);
+  }
+
   // TODO: consider changing this to just hit a new endpoint that returns
   //   true/false if session is active
   async isSessionActive(): Promise<boolean> {
@@ -1728,6 +1777,38 @@ export abstract class CoreCapsule {
       this.currentWalletIdsArray.length > 0 &&
       this.currentWalletIdsArray.reduce((acc, [id]) => acc && !!this.wallets[id], true)
     );
+  }
+
+  async supportedAuthMethods(
+    identifier: string,
+    type: 'email' | 'phone' | 'farcaster' | 'userId' = 'email',
+    countryCode?: string,
+  ): Promise<Set<AuthMethod>> {
+    const userId = type === 'userId' ? identifier : undefined;
+    const email = type === 'email' ? identifier : undefined;
+    const phone = type === 'phone' ? identifier : undefined;
+    const farcasterUsername = type === 'farcaster' ? identifier : undefined;
+
+    const { supportedAuthMethods } = await this.ctx.capsuleClient.getSupportedAuthMethods(
+      userId,
+      email,
+      phone,
+      countryCode,
+      farcasterUsername,
+    );
+
+    const authMethods = new Set<AuthMethod>();
+    for (const type of supportedAuthMethods) {
+      switch (type) {
+        case 'PASSWORD':
+          authMethods.add(AuthMethod.PASSWORD);
+          break;
+        case 'BIOMETRIC':
+          authMethods.add(AuthMethod.PASSKEY);
+          break;
+      }
+    }
+    return authMethods;
   }
 
   /**
@@ -1783,6 +1864,32 @@ export abstract class CoreCapsule {
     }
 
     return this.shortenLoginLink(webAuthLoginURL);
+  }
+
+  /**
+   * Initiates a login.
+   * @param email - the email to login with
+   * @returns - a set of supported auth methods for the user
+   **/
+  async initiateUserLoginV2(
+    identifier: string,
+    type: 'email' | 'phone' | 'farcaster' = 'email',
+    countryCode?: CountryCallingCode,
+  ): Promise<Set<AuthMethod>> {
+    if (type === 'email') {
+      await this.setEmail(identifier);
+    } else if (type === 'phone') {
+      await this.setPhoneNumber(identifier, countryCode);
+    } else if (type === 'farcaster') {
+      await this.setFarcasterUsername(identifier);
+    }
+
+    await this.touchSession(true);
+    if (!this.loginEncryptionKeyPair) {
+      await this.setLoginEncryptionKeyPair();
+    }
+
+    return await this.supportedAuthMethods(identifier, type, countryCode);
   }
 
   /**
@@ -2937,6 +3044,21 @@ export abstract class CoreCapsule {
     this.countryCode = undefined;
     this.userId = undefined;
     this.sessionCookie = undefined;
+  }
+
+  async getSupportedCreateAuthMethods(): Promise<Set<AuthMethod>> {
+    const res = await this.ctx.capsuleClient.touchSession();
+    const partnerId = res.data.partnerId;
+
+    const partnerRes = await this.ctx.capsuleClient.getPartner(partnerId);
+
+    let supportedAuthMethods = new Set<AuthMethod>();
+
+    for (const authMethod of partnerRes.data.partner.supportedAuthMethods) {
+      supportedAuthMethods.add(AuthMethod[authMethod]);
+    }
+
+    return supportedAuthMethods;
   }
 
   /**

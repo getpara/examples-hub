@@ -9,6 +9,7 @@ import {
   OnRampAsset,
   Network,
   EnabledFlow,
+  AuthMethod,
 } from '@usecapsule/web-sdk';
 import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
@@ -73,6 +74,9 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     const currentStep = useModalStore(state => state.step);
     const webAuthURLForLogin = useModalStore(state => state.webAuthURLForLogin);
     const webAuthURLForCreate = useModalStore(state => state.webAuthURLForCreate);
+    const passwordUrlForCreate = useModalStore(state => state.passwordUrlForCreate);
+    const passwordUrlForLogin = useModalStore(state => state.passwordUrlForLogin);
+    const supportedAuthMethods = useModalStore(state => state.supportedAuthMethods);
     const isLogin = useModalStore(state => state.isLogin());
     const loginWindow = useModalStore(state => state.loginWindow);
     const onRampConfig = useModalStore(state => state.onRampConfig);
@@ -80,6 +84,9 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     const setBiometricLocationHints = useModalStore(state => state.setBiometricLocationHints);
     const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
     const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
+    const setPasswordUrlForCreate = useModalStore(state => state.setPasswordUrlForCreate);
+    const setPasswordUrlForLogin = useModalStore(state => state.setPasswordUrlForLogin);
+    const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
     const setLoginWindow = useModalStore(state => state.setLoginWindow);
     const setOnRampConfig = useModalStore(state => state.setOnRampConfig);
     const setRecoveryShare = useUserInfoStore(state => state.setRecoveryShare);
@@ -122,7 +129,9 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
       }
 
       if (isComplete) {
-        setWebAuthURLForLogin();
+        setWebAuthURLForLogin('');
+        setPasswordUrlForLogin('');
+        setSupportedAuthMethods(new Set<AuthMethod>());
         setBiometricLocationHints();
 
         if (needsWallet) {
@@ -142,6 +151,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
 
       if (isComplete) {
         setWebAuthURLForCreate('');
+        setPasswordUrlForCreate('');
         setStep(ModalStep.AWAITING_WALLET_CREATION);
       }
     }
@@ -189,20 +199,21 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
 
     // wait for biometric to be added to move on to next step
     useEffect(() => {
-      if (webAuthURLForCreate) {
+      if (webAuthURLForCreate || passwordUrlForCreate) {
         createAccountTimeout.current = window.setTimeout(awaitWalletCreationTransition, DEFAULTS.POLLING_INTERVAL_MS);
       }
       return () => clearTimeout(createAccountTimeout.current);
-    }, [webAuthURLForCreate]);
+    }, [webAuthURLForCreate, passwordUrlForCreate]);
 
     // wait for login auth to do post login setup
     useEffect(() => {
-      if (webAuthURLForLogin) {
+      if (webAuthURLForLogin || passwordUrlForLogin || supportedAuthMethods) {
         if (loginTransitionOverride) {
           async function loginOverride() {
             await loginTransitionOverride(capsule);
 
-            setWebAuthURLForLogin();
+            setWebAuthURLForLogin('');
+            setPasswordUrlForLogin('');
             setBiometricLocationHints();
 
             if (await is2FASetup()) {
@@ -220,7 +231,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
         window.clearTimeout(loginTimeout.current);
         capsule.exitLogin();
       };
-    }, [webAuthURLForLogin, loginWindow]);
+    }, [webAuthURLForLogin, passwordUrlForLogin, loginWindow, supportedAuthMethods]);
 
     const handleClose = () => {
       onClose();

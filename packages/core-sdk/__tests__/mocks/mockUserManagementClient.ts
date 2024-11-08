@@ -66,6 +66,7 @@ export const mockCheck2FAStatus = vi.fn().mockResolvedValue({ data: { isSetup: t
 export const mockEnable2FA = vi.fn().mockResolvedValue({});
 export const mockVerify2FA = vi.fn().mockResolvedValue({ data: TWOFA_VERIFY_RESP });
 export const mockVerify2FAForPhone = vi.fn().mockResolvedValue({ data: TWOFA_VERIFY_RESP });
+export const mockGetPasswords = vi.fn().mockResolvedValue([]);
 
 vi.mock('@usecapsule/user-management-client', async importOriginal => {
   const actual = await importOriginal();
@@ -99,6 +100,7 @@ vi.mock('@usecapsule/user-management-client', async importOriginal => {
       enable2FA: mockEnable2FA,
       verify2FA: mockVerify2FA,
       verify2FAForPhone: mockVerify2FAForPhone,
+      getPasswords: mockGetPasswords,
     })),
   };
 });

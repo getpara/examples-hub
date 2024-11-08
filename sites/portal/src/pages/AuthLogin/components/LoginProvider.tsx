@@ -33,6 +33,7 @@ export type Wallets = Partial<Record<WalletType, WalletEntity[]>>;
 type Login = {
   fns: {
     authLogin: () => Promise<void>;
+    authLoginWithPassword: (password: string) => Promise<void>;
     authUpdateKeyShares: () => Promise<void>;
     fetchWallets: () => Promise<Wallets>;
     finishLogin: (_?: boolean) => Promise<void>;
@@ -45,7 +46,7 @@ type Login = {
 const NO_DATE = formatISO(new Date(-8640000000000000));
 
 export const LoginContext = createContext<Login>({
-  fns: { authLogin: NOOP, authUpdateKeyShares: NOOP, fetchWallets: NOOP, finishLogin: NOOP },
+  fns: { authLogin: NOOP, authLoginWithPassword: NOOP, authUpdateKeyShares: NOOP, fetchWallets: NOOP, finishLogin: NOOP },
   params: {},
 });
 
@@ -121,6 +122,37 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
     params.newDeviceEncryptionKey,
   ]);
 
+  const authLoginWithPassword = useCallback(
+    async (password: string): Promise<void> => {
+      const loginRes = await utils.authLoginWithPassword(
+        capsule,
+        password,
+        params.partnerId,
+        params.userId,
+        params.email,
+        params.phone,
+        params.countryCode,
+        params.farcasterUsername,
+        params.sessionId,
+        params.newDeviceSessionLookupId,
+      );
+
+      setLoginRes(loginRes);
+    },
+    [
+      capsule,
+      params.partnerId,
+      params.email,
+      params.phone,
+      params.countryCode,
+      params.farcasterUsername,
+      params.sessionId,
+      params.encryptionKey,
+      params.newDeviceSessionLookupId,
+      params.newDeviceEncryptionKey,
+    ],
+  );
+
   const fetchWallets = useCallback(async (): Promise<Wallets> => {
     await capsule.touchSession();
     const _wallets = (await capsule.fetchWallets()).filter(({ pregenIdentifier }) => !pregenIdentifier);
@@ -191,7 +223,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
       return;
     }
 
-    const { userId, userHandle, signature } = loginRes;
+    const { userId, userHandle, signature, passwordId } = loginRes;
 
     await utils.authUpdateKeyShares(
       capsule,
@@ -199,10 +231,11 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
       userId,
       params.encryptionKey,
       userHandle,
-      signature,
+      passwordId ? undefined : signature,
       params.newDeviceSessionLookupId,
       params.newDeviceEncryptionKey,
       params.partnerId,
+      passwordId,
     );
   }, [
     capsule,
@@ -248,7 +281,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
   return (
     <LoginContext.Provider
       value={{
-        fns: { authLogin, authUpdateKeyShares, fetchWallets, finishLogin },
+        fns: { authLogin, authLoginWithPassword, authUpdateKeyShares, fetchWallets, finishLogin },
         params,
         wallets,
         biometricLocationHints,
@@ -260,5 +293,3 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
 };
 
 export const useLogin = () => useContext(LoginContext);
-
-// export const useLoginParams = () => useContext(LoginParamsContext);

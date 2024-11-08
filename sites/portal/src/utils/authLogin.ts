@@ -6,10 +6,12 @@ import Capsule, {
   getDerivedPrivateKeyAndDecrypt,
   encryptPrivateKey,
   getSHA256HashHex,
+  decryptPrivateKeyWithPassword,
 } from '@usecapsule/web-sdk';
 import { ENV } from '../constants';
 import { CountryCallingCode } from 'libphonenumber-js';
 import { WalletScheme } from '@usecapsule/user-management-client';
+import forge from 'node-forge';
 
 export async function authLogin(
   capsule: Capsule,
@@ -21,7 +23,7 @@ export async function authLogin(
   farcasterUsername: string,
   sessionLookupId: string,
   newDeviceSessionLookupId?: string,
-): Promise<{ userId: string; userHandle: string; signature: any }> {
+): Promise<{ userId: string; userHandle: string; signature: any; publicKey?: string; passwordId?: string }> {
   let identifier;
   let data;
 
@@ -76,22 +78,130 @@ export async function authLogin(
   return { userId: verifyRes.data.userId, userHandle, signature };
 }
 
+export async function authLoginWithPassword(
+  capsule: Capsule,
+  password: string,
+  partnerId: string,
+  userId: string,
+  email: string,
+  phone: string,
+  countryCode: CountryCallingCode,
+  farcasterUsername: string,
+  sessionLookupId: string,
+  newDeviceSessionLookupId?: string,
+) {
+  let identifier;
+  let passwordEntity;
+  let challenge;
+  let encryptedWalletPrivateKey;
+
+  if (userId !== 'null' && userId !== undefined && userId !== '') {
+    identifier = userId;
+    passwordEntity = (await capsule.ctx.capsuleClient.getPasswords(userId))[0];
+    encryptedWalletPrivateKey = (await capsule.ctx.capsuleClient.getEncryptedWalletPrivateKey(passwordEntity.id)).data
+      .encryptedWalletPrivateKey;
+    challenge = (await capsule.ctx.capsuleClient.getWebChallenge(null, null, null, null, null, userId)).challenge;
+  } else if (email !== 'null' && email !== undefined && email !== '') {
+    identifier = email;
+    passwordEntity = (await capsule.ctx.capsuleClient.getPasswords(null, encodeURIComponent(email)))[0];
+    encryptedWalletPrivateKey = (await capsule.ctx.capsuleClient.getEncryptedWalletPrivateKey(passwordEntity.id)).data
+      .encryptedWalletPrivateKey;
+    challenge = (await capsule.ctx.capsuleClient.getWebChallenge(encodeURIComponent(email))).challenge;
+  } else if (phone !== 'null' && phone !== undefined && phone !== '') {
+    identifier = `${countryCode}${phone}`;
+    passwordEntity = (
+      await capsule.ctx.capsuleClient.getPasswords(null, null, encodeURIComponent(phone), encodeURIComponent(countryCode))
+    )[0];
+    encryptedWalletPrivateKey = (await capsule.ctx.capsuleClient.getEncryptedWalletPrivateKey(passwordEntity.id)).data
+      .encryptedWalletPrivateKey;
+    challenge = (
+      await capsule.ctx.capsuleClient.getWebChallenge(null, encodeURIComponent(phone), encodeURIComponent(countryCode))
+    ).challenge;
+  } else if (farcasterUsername !== 'null' && farcasterUsername !== undefined && farcasterUsername !== '') {
+    identifier = farcasterUsername;
+    passwordEntity = (
+      await capsule.ctx.capsuleClient.getPasswords(null, null, null, null, encodeURIComponent(identifier))
+    )[0];
+    encryptedWalletPrivateKey = (await capsule.ctx.capsuleClient.getEncryptedWalletPrivateKey(passwordEntity.id)).data
+      .encryptedWalletPrivateKey;
+    challenge = (await capsule.ctx.capsuleClient.getWebChallenge(null, null, null, encodeURIComponent(identifier)))
+      .challenge;
+  }
+  if (!identifier) {
+    throw new Error('either a phone number or email address or farcaster username must be provided.');
+  }
+
+  const { salt } = passwordEntity;
+  const saltedPassword = salt + password;
+  const userHandle = getSHA256HashHex(saltedPassword);
+
+  const privateKey = await decryptPrivateKeyWithPassword(encryptedWalletPrivateKey.encryptedPrivateKey, userHandle);
+
+  const md = forge.md.sha512.create();
+  md.update(challenge, 'utf8');
+  const signature = privateKey.sign(md);
+
+  let verifyRes = undefined;
+  if (email !== 'null' && email !== undefined && email !== '') {
+    verifyRes = await capsule.ctx.capsuleClient.verifyPasswordChallenge(partnerId, {
+      signature,
+      publicKey: passwordEntity.sigDerivedPublicKey,
+      email: email,
+      sessionLookupId,
+      newDeviceSessionLookupId,
+    });
+  } else if (phone !== 'null' && phone !== undefined && phone !== '') {
+    verifyRes = await capsule.ctx.capsuleClient.verifyPasswordChallenge(partnerId, {
+      signature,
+      publicKey: passwordEntity.sigDerivedPublicKey,
+      phone: phone,
+      countryCode: countryCode,
+      sessionLookupId,
+      newDeviceSessionLookupId,
+    });
+  } else if (farcasterUsername !== 'null' && farcasterUsername !== undefined && farcasterUsername !== '') {
+    verifyRes = await capsule.ctx.capsuleClient.verifyPasswordChallenge(partnerId, {
+      signature,
+      publicKey: passwordEntity.sigDerivedPublicKey,
+      farcasterUsername: identifier,
+      sessionLookupId,
+      newDeviceSessionLookupId,
+    });
+  }
+
+  return {
+    userId: verifyRes.data.userId,
+    userHandle,
+    signature,
+    publicKey: passwordEntity.sigDerivedPublicKey,
+    passwordId: passwordEntity.id,
+  };
+}
+
 export async function authUpdateKeyShares(
   capsule: Capsule,
   sessionLookupId: string,
   userId: string,
   encryptionKey: string,
   userHandle: string,
-  signature: any,
+  signature?: any,
   newDeviceSessionLookupId?: string,
   newDeviceEncryptionKey?: string,
   partnerId?: string,
+  passwordId?: string,
 ) {
   const encryptionKeyHash = getSHA256HashHex(userHandle);
-  const encryptedSharesRes = await capsule.ctx.capsuleClient.getBiometricKeyshares(userId, signature.id, true);
+  let encryptedShares = [];
+
+  if (signature) {
+    const encryptedSharesRes = await capsule.ctx.capsuleClient.getBiometricKeyshares(userId, signature.id, true);
+    encryptedShares = encryptedSharesRes.data.keyShares;
+  } else if (passwordId) {
+    const encryptedSharesRes = await capsule.ctx.capsuleClient.getPasswordKeyshares(userId, passwordId, true);
+    encryptedShares = encryptedSharesRes.data.keyShares;
+  }
   const { encryptedPrivateKeys } = await capsule.ctx.capsuleClient.getEncryptedWalletPrivateKeys(userId, encryptionKeyHash);
-  // keyShares undefined or empty array
-  if (!encryptedSharesRes.data.keyShares?.length) {
+  if (!encryptedShares.length) {
     return;
   }
 
@@ -101,7 +211,7 @@ export async function authUpdateKeyShares(
   }
 
   // get all shares that are associated with this partnerId
-  const sharesForPartnerToDecrypt = encryptedSharesRes.data.keyShares
+  const sharesForPartnerToDecrypt = encryptedShares
     .filter(share => !capsule.currentWalletIds || capsule.currentWalletIdsUnique.includes(share.walletId))
     .filter(share => {
       return share.walletScheme !== WalletScheme.DKLS || share.partnerId === partnerId;
@@ -111,17 +221,17 @@ export async function authUpdateKeyShares(
   const allWalletIds = capsule.currentWalletIdsUnique || [
     ...new Set([...sharesForPartnerToDecrypt.map(share => share.walletId)]),
   ];
+
   // find walletIds that don't have a share for this partner yet
   const walletIdsWithoutPartnerIdShare = allWalletIds.filter(walletId => {
     return !sharesForPartnerToDecrypt.some(share => share.walletId === walletId);
   });
-
   // if there are some walletIds that are needed for the partner but don't have
   // a share associated with the partner yet, we must refresh and create a share
   // for the partner
   const sharesStillNeededForPartnerToDecrypt = walletIdsWithoutPartnerIdShare.map(walletId =>
     // just find some share for walletId so we can refresh it
-    encryptedSharesRes.data.keyShares.find(share => share.walletId === walletId),
+    encryptedShares.find(share => share.walletId === walletId),
   );
 
   const allSharesToDecrypt = [...sharesForPartnerToDecrypt, ...sharesStillNeededForPartnerToDecrypt];

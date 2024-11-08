@@ -50,6 +50,9 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
   isAccount: () => get().flow === 'account',
   setWebAuthURLForLogin: url => set({ webAuthURLForLogin: url }),
   setWebAuthURLForCreate: url => set({ webAuthURLForCreate: url }),
+  setPasswordUrlForCreate: url => set({ passwordUrlForCreate: url }),
+  setPasswordUrlForLogin: url => set({ passwordUrlForLogin: url }),
+  setSupportedAuthMethods: supportedAuthMethods => set({ supportedAuthMethods }),
   setOnRampPurchase: onRampPurchase =>
     set(state => ({ onRampPurchase: { ...(state.onRampPurchase || {}), ...onRampPurchase } })),
   setOnRampConfig: onRampConfig => set({ onRampConfig }),

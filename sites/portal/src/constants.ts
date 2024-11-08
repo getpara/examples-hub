@@ -24,6 +24,7 @@ export enum AuthCreationStep {
 export enum AuthLoginStep {
   MANUAL_LOGIN = 'MANUAL_LOGIN',
   WAITING = 'WAITING',
+  ENTER_PASSWORD = 'ENTER_PASSWORD',
   ADD = 'ADD',
   SELECT_WALLET = 'SELECT_WALLET',
   SUCCESS = 'SUCCESS',

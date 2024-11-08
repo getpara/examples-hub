@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 
 import { useCapsule } from '../../components/CapsuleContext';
-import { authLogin } from '../../utils/authLogin';
+import { authLogin, authLoginWithPassword } from '../../utils/authLogin';
 import SignMessageReview from './SignMessageReview';
 import { useModalOutletContext } from '../../hooks/useModalOutletContext';
 
@@ -10,12 +10,15 @@ import styled from 'styled-components';
 import ETHTransactionReview from './ETHTransactionReview';
 import CosmosTransactionReview from './CosmosTransactionReview';
 import { CpslIcon, CpslSpinner } from '@usecapsule/react-components';
+import { AuthMethod } from '@usecapsule/web-sdk';
+import { EnterPasswordStep } from '../AuthLogin/components/EnterPasswordStep';
 
 const MAX_AUTH_RETRIES = 5;
 
 export enum TransactionReviewState {
   Loading,
   Error,
+  PasswordLogin,
   AwaitingSignMessageApproval,
   AwaitingSignETHTransactionApproval,
   AwaitingSignCosmosMessageApproval,
@@ -70,6 +73,7 @@ function TransactionReview() {
   const [transactionReviewState, setTransactionReviewState] = useState(TransactionReviewState.Loading);
   const [wallet, setWallet] = useState(null);
   const [message, setMessage] = useState(null);
+  const [loginWithPasswordError, setLoginWithPasswordError] = useState<string | undefined>();
 
   async function handleConfirmTransaction() {
     let retriesLeft = MAX_AUTH_RETRIES;
@@ -114,55 +118,105 @@ function TransactionReview() {
       }, parseInt(timeoutMs));
     }
 
-    while (retriesLeft > 0) {
-      try {
-        ({ pendingTransaction, partner, decodedTx, txData } = (
-          await capsule.ctx.capsuleClient.getPendingTransaction(userId, pendingTransactionId)
-        ).data);
+    const supportedAuthMethods = await capsule.supportedAuthMethods(userId, 'userId');
 
-        setPartner(partner);
-        setDecodedTx(decodedTx);
-        setTxData(txData);
-        setPendingTransaction(pendingTransaction);
-        break;
-      } catch (e) {
-        console.error(e);
+    if (supportedAuthMethods.has(AuthMethod.PASSWORD)) {
+      setTransactionReviewState(TransactionReviewState.PasswordLogin);
+    } else if (supportedAuthMethods.has(AuthMethod.PASSKEY)) {
+      while (retriesLeft > 0) {
+        try {
+          ({ pendingTransaction, partner, decodedTx, txData } = (
+            await capsule.ctx.capsuleClient.getPendingTransaction(userId, pendingTransactionId)
+          ).data);
 
-        if (e.response?.status === 401) {
-          await authLogin(capsule, partnerId, userId, null, null, null, null, null);
-          capsule.userSetupAfterLogin();
-          capsule.setupAfterLogin();
+          setPartner(partner);
+          setDecodedTx(decodedTx);
+          setTxData(txData);
+          setPendingTransaction(pendingTransaction);
+          break;
+        } catch (e) {
+          console.error(e);
+
+          if (e.response?.status === 401) {
+            await authLogin(capsule, partnerId, userId, null, null, null, null, null);
+          }
+
+          setTransactionReviewState(TransactionReviewState.Error);
+          retriesLeft--;
         }
 
-        setTransactionReviewState(TransactionReviewState.Error);
-        retriesLeft--;
+        if (retriesLeft === 0) {
+          setTransactionReviewState(TransactionReviewState.Error);
+          return;
+        }
       }
 
-      if (retriesLeft === 0) {
-        setTransactionReviewState(TransactionReviewState.Error);
+      await capsule.userSetupAfterLogin();
+      await capsule.setupAfterLogin();
+
+      const walletId = pendingTransaction.walletId;
+      let { wallets } = (await capsule.ctx.capsuleClient.getWallets(userId)).data;
+      const wallet = wallets.find(w => w.id === walletId);
+      setWallet(wallet);
+
+      if (pendingTransaction?.cosmosSignDocBase64) {
+        setTransactionReviewState(TransactionReviewState.AwaitingSignCosmosMessageApproval);
+        setMessage(pendingTransaction.messageBase64);
         return;
       }
+
+      if (pendingTransaction?.messageBase64) {
+        setTransactionReviewState(TransactionReviewState.AwaitingSignMessageApproval);
+        setMessage(pendingTransaction.messageBase64);
+        return;
+      }
+
+      setTransactionReviewState(TransactionReviewState.AwaitingSignETHTransactionApproval);
     }
-
-    const walletId = pendingTransaction.walletId;
-    let { wallets } = (await capsule.ctx.capsuleClient.getWallets(userId)).data;
-    const wallet = wallets.find(w => w.id === walletId);
-    setWallet(wallet);
-
-    if (pendingTransaction?.cosmosSignDocBase64) {
-      setTransactionReviewState(TransactionReviewState.AwaitingSignCosmosMessageApproval);
-      setMessage(pendingTransaction.messageBase64);
-      return;
-    }
-
-    if (pendingTransaction?.messageBase64) {
-      setTransactionReviewState(TransactionReviewState.AwaitingSignMessageApproval);
-      setMessage(pendingTransaction.messageBase64);
-      return;
-    }
-
-    setTransactionReviewState(TransactionReviewState.AwaitingSignETHTransactionApproval);
   }
+
+  const loginWithPassword = async (password: string) => {
+    const res = await capsule.touchSession();
+    const partnerId = res.data.partnerId;
+    try {
+      setLoginWithPasswordError(undefined);
+      await capsule.touchSession();
+      await authLoginWithPassword(capsule, password, partnerId, userId, null, null, null, null, null);
+
+      await capsule.userSetupAfterLogin();
+      await capsule.setupAfterLogin();
+
+      const { pendingTransaction, partner, decodedTx, txData } = (
+        await capsule.ctx.capsuleClient.getPendingTransaction(userId, pendingTransactionId)
+      ).data;
+
+      const walletId = pendingTransaction.walletId;
+      let { wallets } = (await capsule.ctx.capsuleClient.getWallets(userId)).data;
+      const wallet = wallets.find(w => w.id === walletId);
+      setWallet(wallet);
+
+      setPartner(partner);
+      setDecodedTx(decodedTx);
+      setTxData(txData);
+      setPendingTransaction(pendingTransaction);
+
+      if (pendingTransaction?.cosmosSignDocBase64) {
+        setTransactionReviewState(TransactionReviewState.AwaitingSignCosmosMessageApproval);
+        setMessage(pendingTransaction.messageBase64);
+        return;
+      }
+
+      if (pendingTransaction?.messageBase64) {
+        setTransactionReviewState(TransactionReviewState.AwaitingSignMessageApproval);
+        setMessage(pendingTransaction.messageBase64);
+        return;
+      }
+
+      setTransactionReviewState(TransactionReviewState.AwaitingSignETHTransactionApproval);
+    } catch (err) {
+      setLoginWithPasswordError('Password is incorrect');
+    }
+  };
 
   useEffect(() => {
     toggleBranding(false);
@@ -177,6 +231,8 @@ function TransactionReview() {
           <CpslSpinner />
         </TransactionReviewContainer>
       );
+    case TransactionReviewState.PasswordLogin:
+      return <EnterPasswordStep error={loginWithPasswordError} onLoginClick={loginWithPassword} />;
     case TransactionReviewState.AwaitingSignMessageApproval:
       return (
         <TransactionReviewContainer>

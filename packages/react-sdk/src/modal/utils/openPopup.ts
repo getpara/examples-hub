@@ -1,14 +1,22 @@
 export function openPopup(
   popupUrl: string,
   target: string,
-  type: 'OAUTH' | 'LOGIN_PASSKEY' | 'CREATE_PASSKEY' | 'TRANSACTION_REVIEW',
+  type: 'OAUTH' | 'LOGIN_PASSKEY' | 'CREATE_PASSKEY' | 'TRANSACTION_REVIEW' | 'CREATE_PASSWORD' | 'LOGIN_PASSWORD',
 ): Window {
-  const popUpWidth = 550;
+  const popUpWidth = 560;
   let popUpHeight: number;
 
   switch (type) {
+    case 'LOGIN_PASSWORD': {
+      popUpHeight = 460;
+      break;
+    }
     case 'LOGIN_PASSKEY': {
       popUpHeight = 798;
+      break;
+    }
+    case 'CREATE_PASSWORD': {
+      popUpHeight = 400;
       break;
     }
     case 'CREATE_PASSKEY': {

@@ -23,6 +23,7 @@ import { EMAIL_REGEX, MOBILE_SIZE } from '../../constants/constants.js';
 import { useDropdownPosition } from './hooks/useDropdownPosition.js';
 import { ModalStep } from '../../utils/steps.js';
 import { defaultPhoneMask, phoneMasks } from './phoneMasks.js';
+import { AuthMethod } from '@usecapsule/web-sdk';
 
 interface AuthInputProps {
   disableEmailLogin?: boolean;
@@ -45,6 +46,7 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
   const setFlow = useModalStore(state => state.setFlow);
   const setStep = useModalStore(state => state.setStep);
   const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
+  const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
   const setBiometricLocationHints = useModalStore(state => state.setBiometricLocationHints);
 
   const [matchedCountryCode, setMatchedCountryCode] = useState<DropdownInputEventDetail>(DEFAULT_COUNTRY);
@@ -120,11 +122,14 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
 
       const userExists = await capsule.checkIfUserExists(identifier);
       if (userExists) {
-        const webAuthUrlForLogin = await capsule.initiateUserLogin(identifier);
-        const biometricLocationHints = await capsule.getUserBiometricLocationHints();
+        const supportedAuthMethods = await capsule.initiateUserLoginV2(identifier, 'email');
+        const biometricLocationHints = supportedAuthMethods.has(AuthMethod.PASSKEY)
+          ? await capsule.getUserBiometricLocationHints()
+          : [];
+
         setFlow('login');
         setStep(ModalStep.BIOMETRIC_LOGIN);
-        setWebAuthURLForLogin(webAuthUrlForLogin);
+        setSupportedAuthMethods(supportedAuthMethods);
         setBiometricLocationHints(biometricLocationHints);
         return;
       }

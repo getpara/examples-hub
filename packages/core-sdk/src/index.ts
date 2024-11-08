@@ -37,6 +37,10 @@ export {
   encryptPrivateKey,
   decryptPrivateKey,
   decryptPrivateKeyAndDecryptShare,
+  hashPasswordWithSalt,
+  encryptPrivateKeyWithPassword,
+  decryptPrivateKeyWithPassword,
+  publicKeyFromHex,
 } from './cryptography/utils.js';
 export * from './external/capsuleClient.js';
 export * from './utils/pollingUtils.js';

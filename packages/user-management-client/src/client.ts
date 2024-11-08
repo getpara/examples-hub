@@ -131,6 +131,18 @@ interface verifyWebChallengeBody {
   newDeviceSessionLookupId?: string;
 }
 
+interface verifyPasswordChallengeBody {
+  userId?: string;
+  email?: string;
+  phone?: string;
+  countryCode?: string;
+  farcasterUsername?: string;
+  sessionLookupId?: string;
+  signature: string;
+  publicKey?: string;
+  newDeviceSessionLookupId?: string;
+}
+
 interface verifySessionChallengeBody {
   signature: MobileSignature | WebSignature;
   publicKey?: string;
@@ -192,6 +204,14 @@ export interface WalletEntity {
 
 interface getWalletsRes {
   wallets: WalletEntity[];
+}
+
+export interface PasswordEntity {
+  id: string;
+  userId: string;
+  status: PasswordStatus;
+  sigDerivedPublicKey: string;
+  salt: string;
 }
 
 interface createWalletBody {
@@ -261,6 +281,7 @@ export enum EncryptorType {
   USER = 'USER',
   RECOVERY = 'RECOVERY',
   BIOMETRICS = 'BIOMETRICS',
+  PASSWORD = 'PASSWORD',
 }
 
 export const KeyType = {
@@ -358,6 +379,17 @@ export type OnRampConfig = {
   defaultOnRampNetwork?: Network;
   defaultBuyAmount?: [string, string];
 };
+
+export enum PasswordStatus {
+  PENDING = 'PENDING',
+  COMPLETE = 'COMPLETE',
+}
+
+interface sessionPasswordBody {
+  status?: PasswordStatus;
+  sigDerivedPublicKey?: string;
+  salt?: string;
+}
 
 export type BiometricLocationHint = { useragent?: string; aaguid?: string };
 
@@ -545,6 +577,7 @@ class Client {
     if (userId) {
       queryParams['userId'] = userId;
     }
+
     const query = qs.stringify(queryParams);
     const res = await this.baseRequest.get<any>(`/biometrics/challenge${query === '' ? '' : `?${query}`}`);
     return res.data;
@@ -749,6 +782,14 @@ class Client {
   async getBiometricKeyshares(userId: string, biometricPublicKey: string, getAll?: boolean): Promise<any> {
     const res = await this.baseRequest.get<any>(
       `/users/${userId}/biometrics/key-shares?publicKey=${biometricPublicKey}&all=${!!getAll}`,
+    );
+    return res;
+  }
+
+  // GET /users/:userId/key-shares
+  async getPasswordKeyshares(userId: string, passwordId: string, getAll?: boolean): Promise<any> {
+    const res = await this.baseRequest.get<any>(
+      `/users/${userId}/passwords/key-shares?passwordId=${passwordId}&all=${!!getAll}`,
     );
     return res;
   }
@@ -1117,9 +1158,10 @@ class Client {
     userId: string,
     encryptedWalletPrivateKey: string,
     encryptionKeyHash: string,
-    biometricPublicKey: string,
+    biometricPublicKey?: string,
+    passwordId?: string,
   ) {
-    const body = { encryptedWalletPrivateKey, encryptionKeyHash, biometricPublicKey };
+    const body = { encryptedWalletPrivateKey, encryptionKeyHash, biometricPublicKey, passwordId };
     const res = await this.baseRequest.post<any>(`/users/${userId}/encrypted-wallet-private-keys`, body);
     return res.data;
   }
@@ -1156,6 +1198,86 @@ class Client {
   async deletePendingTransaction(userId: string, pendingTransactionId: string) {
     const res = await this.baseRequest.delete<any>(`/users/${userId}/pending-transactions/${pendingTransactionId}`);
     return res.data;
+  }
+
+  // POST /users/:userId/passwords/key
+  async addSessionPasswordPublicKey(userId: string, body: sessionPasswordBody): Promise<any> {
+    const res = await this.baseRequest.post<any>(`/users/${userId}/passwords/key`, body);
+    return res;
+  }
+
+  // PATCH /users/:userId/biometrics/:biometricId
+  patchSessionPassword = async (
+    partnerId: string,
+    userId: string,
+    passwordId: string,
+    body: sessionPasswordBody,
+  ): Promise<any> => {
+    const res = await this.baseRequest.patch<any>(`/users/${userId}/passwords/${passwordId}`, body, {
+      headers: {
+        'X-Partner-ID': partnerId,
+      },
+    });
+    return res;
+  };
+
+  async getSupportedAuthMethods(
+    userId: string,
+    email: string,
+    phone: string,
+    countryCode: string,
+    farcasterUsername: string,
+  ) {
+    const res = await this.baseRequest.get<any>(
+      `/users/supported-auth-methods?userId=${userId}&email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}&countryCode=${encodeURIComponent(countryCode)}&farcasterUsername=${encodeURIComponent(farcasterUsername)}`,
+    );
+    return res.data;
+  }
+
+  async getPasswords(
+    userId?: string,
+    email?: string,
+    phone?: string,
+    countryCode?: string,
+    farcasterUsername?: string,
+  ): Promise<PasswordEntity[]> {
+    const queryParams = {};
+    if (userId) {
+      queryParams['userId'] = userId;
+    }
+    if (email) {
+      queryParams['email'] = email;
+    }
+    if (phone) {
+      queryParams['phone'] = phone;
+    }
+    if (countryCode) {
+      queryParams['countryCode'] = countryCode;
+    }
+    if (farcasterUsername) {
+      queryParams['farcasterUsername'] = farcasterUsername;
+    }
+    const query = qs.stringify(queryParams);
+    const res = await this.baseRequest.get<any>(`/users/passwords${query === '' ? '' : `?${query}`}`);
+    return res.data.passwords;
+  }
+
+  // POST /passwords/verify
+  async verifyPasswordChallenge(partnerId: string, body: verifyPasswordChallengeBody): Promise<any> {
+    const res = await this.baseRequest.post<{}>(`/passwords/verify`, body, {
+      headers: {
+        'X-Partner-ID': partnerId,
+      },
+    });
+    return res;
+  }
+
+  async getEncryptedWalletPrivateKey(passwordId: string): Promise<any> {
+    const queryParams = {};
+    queryParams['passwordId'] = passwordId;
+    const query = qs.stringify(queryParams);
+    const res = await this.baseRequest.get<any>(`/encrypted-wallet-private-keys?${query}`);
+    return res;
   }
 }
 

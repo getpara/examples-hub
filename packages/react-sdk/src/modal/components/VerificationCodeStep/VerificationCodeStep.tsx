@@ -5,12 +5,14 @@ import { ModalStep } from '../../utils/steps.js';
 import { CodeChangeEventDetail, CpslCodeInputCustomEvent } from '@usecapsule/core-components';
 import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { Heading, InnerStepContainer, StepContainer } from '../common.js';
+import { AuthMethod } from '@usecapsule/core-sdk';
 
 export const VerificationCodeStep = () => {
   const identifierType = useUserInfoStore(state => state.identifierType);
   const username = useUserInfoStore(state => state.getUsername());
   const setStep = useModalStore(state => state.setStep);
   const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
+  const setPasswordUrlForCreate = useModalStore(state => state.setPasswordUrlForCreate);
   const capsule = useCapsuleStore(state => state.capsule);
 
   const inputRef = useRef<HTMLCpslCodeInputElement>(null);
@@ -60,9 +62,16 @@ export const VerificationCodeStep = () => {
     setIsVerifying(true);
     if (code.length === 6 && /^\d+$/.test(code)) {
       try {
-        const url = isEmail ? await capsule.verifyEmail(code) : await capsule.verifyPhone(code);
-        setWebAuthURLForCreate(url);
-        setStep(ModalStep.BIOMETRIC_CREATION);
+        if ((await capsule.getSupportedCreateAuthMethods()).has(AuthMethod.PASSWORD)) {
+          isEmail ? await capsule.verifyEmail(code) : await capsule.verifyPhone(code);
+          const url = await capsule.getSetupPasswordURL(false);
+          setPasswordUrlForCreate(url);
+          setStep(ModalStep.PASSWORD_CREATION);
+        } else {
+          const url = isEmail ? await capsule.verifyEmail(code) : await capsule.verifyPhone(code);
+          setWebAuthURLForCreate(url);
+          setStep(ModalStep.BIOMETRIC_CREATION);
+        }
       } catch (e) {
         if (e.message.includes('429')) {
           setCodeError('Too many incorrect attempts. Please try again in 10 minutes.');

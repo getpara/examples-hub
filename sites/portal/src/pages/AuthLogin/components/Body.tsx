@@ -7,6 +7,7 @@ import { ModalSuccess } from '../../../components/ModalSuccess';
 import { useModalOutletContext } from '../../../hooks/useModalOutletContext';
 import { AddDeviceStep } from './AddDeviceStep';
 import { SelectWallet } from './SelectWallet';
+import { EnterPasswordStep } from './EnterPasswordStep';
 import { BiometricLocationHint } from '@usecapsule/user-management-client';
 import { LoginFailedStep } from './LoginFailedStep';
 import { LoginFailedTroubleshootingStep } from './LoginFailedTroubleshootingStep';
@@ -16,10 +17,12 @@ interface BodyProps {
   step: AuthLoginStep;
   isAddingNewDevice: boolean;
   onLoginClick: () => void;
+  onLoginWithPasswordClick: (password: string) => void;
   onLoginFromAnotherDevice: () => Promise<void>;
   setStep: (step: AuthLoginStep) => void;
   sessionLookupId: string;
   biometricLocationHints: BiometricLocationHint[];
+  loginWithPasswordError?: string;
 }
 
 export const Body = ({
@@ -27,10 +30,12 @@ export const Body = ({
   step,
   isAddingNewDevice,
   onLoginClick,
+  onLoginWithPasswordClick,
   onLoginFromAnotherDevice,
   setStep,
   sessionLookupId,
   biometricLocationHints,
+  loginWithPasswordError,
 }: BodyProps) => {
   const { partner } = useModalOutletContext();
 
@@ -54,6 +59,9 @@ export const Body = ({
       }
       case AuthLoginStep.WAITING: {
         return <ModalLoading heading="Waiting for Passkey..." />;
+      }
+      case AuthLoginStep.ENTER_PASSWORD: {
+        return <EnterPasswordStep error={loginWithPasswordError} onLoginClick={onLoginWithPasswordClick} />;
       }
       case AuthLoginStep.SELECT_WALLET: {
         return <SelectWallet sessionLookupId={sessionLookupId} />;

@@ -13,6 +13,8 @@ import Recovery from './pages/Recovery/Recovery';
 import { ENV } from './constants';
 import TransactionReview from './pages/TransactionReview/TransactionReview';
 import { OnRampTransaction } from './pages/OnRampTransaction';
+import { PasswordCreation } from './pages/PasswordCreation/PasswordCreation';
+import { AuthMethod } from '@usecapsule/web-sdk';
 
 defineCustomElements();
 
@@ -32,7 +34,9 @@ const App = () => {
         {/* Leaving this route above the /web wrapper for now to avoid dropping it in the ModalLayout. Can shift once designs for this are updated */}
         <Route element={<ModalLayout />} path="/web">
           <Route element={<AuthCreation />} path="users/:userId/biometrics/:biometricId" />
-          <Route element={<AuthLogin />} path="biometrics/login" />
+          <Route element={<AuthLogin authMethod={AuthMethod.PASSKEY} />} path="biometrics/login" />
+          <Route element={<AuthLogin authMethod={AuthMethod.PASSWORD} />} path="passwords/login" />
+          <Route element={<PasswordCreation />} path="users/:userId/passwords/:passwordId" />
           <Route element={<TransactionReview />} path="users/:userId/transaction-review/:pendingTransactionId" />
           <Route element={<OnRampTransaction />} path="users/:userId/on-ramp-transaction/:purchaseId" />
         </Route>

@@ -29,6 +29,8 @@ import { ChainSwitch } from '../ChainSwitch/ChainSwitch.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Controls } from '../Controls/Controls.js';
 import { useEffect, useState } from 'react';
+import { AwaitingPasswordStep } from '../AwaitingPasswordStep/AwaitingPasswordStep.js';
+import { PasswordCreationStep } from '../PasswordCreationStep/PasswordCreationStep.js';
 
 interface BodyProps {
   oAuthMethods?: OAuthMethod[];
@@ -93,6 +95,10 @@ export const Body = ({ oAuthMethods, twoFactorAuthEnabled, disableEmailLogin, di
       case ModalStep.AWAITING_BIOMETRIC_CREATION: {
         return <AwaitingBiometricsStep />;
       }
+      case ModalStep.AWAITING_PASSWORD_LOGIN:
+      case ModalStep.AWAITING_PASSWORD_CREATION: {
+        return <AwaitingPasswordStep />;
+      }
       case ModalStep.AWAITING_WALLET_CREATION: {
         return <AwaitingWalletCreationStep />;
       }
@@ -107,6 +113,9 @@ export const Body = ({ oAuthMethods, twoFactorAuthEnabled, disableEmailLogin, di
       }
       case ModalStep.BIOMETRIC_CREATION: {
         return <BiometricCreationStep />;
+      }
+      case ModalStep.PASSWORD_CREATION: {
+        return <PasswordCreationStep />;
       }
       case ModalStep.AWAITING_OAUTH: {
         return <AwaitingOAuthStep />;

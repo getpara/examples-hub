@@ -32,11 +32,28 @@ export async function distributeNewShare(
       };
     })
     .filter(Boolean);
+
+  const passwords = await ctx.capsuleClient.getPasswords(userId);
+  const passwordEncryptedShares = passwords
+    .map(password => {
+      const { encryptedMessageHex, encryptedKeyHex } = encryptWithDerivedPublicKey(password.sigDerivedPublicKey, userShare);
+      return {
+        encryptedShare: encryptedMessageHex,
+        encryptedKey: encryptedKeyHex,
+        type: KeyType.USER,
+        encryptor: EncryptorType.PASSWORD,
+        passwordId: password.id,
+        partnerId,
+      };
+    })
+    .filter(Boolean);
+
+  const allEncryptedShares = [...biometricEncryptedShares, ...passwordEncryptedShares];
   return await sendRecoveryForShare(
     ctx,
     userId,
     walletId,
-    biometricEncryptedShares,
+    allEncryptedShares,
     userShare,
     ignoreRedistributingBackupEncryptedShare,
     emailProps,

@@ -27,6 +27,11 @@ export function getPublicKeyHex(keyPair: forge.pki.rsa.KeyPair): string {
   return Buffer.from(pem, 'utf-8').toString('hex');
 }
 
+export function publicKeyFromHex(publicKeyHex: string): forge.pki.rsa.PublicKey {
+  const pem = publicKeyHexToPem(publicKeyHex);
+  return forge.pki.publicKeyFromPem(pem);
+}
+
 export function publicKeyHexToPem(publicKeyHex: string): string {
   return Buffer.from(publicKeyHex, 'hex').toString('utf-8');
 }
@@ -203,7 +208,20 @@ export async function decryptPrivateKeyAndDecryptShare(
   encryptedShares: EncryptedShare[],
   encryptedPrivateKey: string,
 ): Promise<{ walletId: string; walletScheme: string; signer: string; partnerId: string }[]> {
-  const privateKey = await decryptPrivateKey(encryptedPrivateKey, encryptionKey);
+  let privateKey;
+
+  try {
+    privateKey = await decryptPrivateKey(encryptedPrivateKey, encryptionKey);
+  } catch (e) {}
+
+  try {
+    privateKey = await decryptPrivateKeyWithPassword(encryptedPrivateKey, encryptionKey);
+  } catch (e) {}
+
+  if (!privateKey) {
+    throw new Error('Could not decrypt private key');
+  }
+
   return encryptedShares.map(share => ({
     walletId: share.walletId,
     walletScheme: share.walletScheme,
@@ -227,4 +245,68 @@ export function encryptWithDerivedPublicKey(
   const encryptedKeyHex = Buffer.from(encryptedKey, 'utf-8').toString('hex');
 
   return { encryptedMessageHex, encryptedKeyHex };
+}
+
+export function hashPasswordWithSalt(password: string): { salt: string; hash: string } {
+  const salt = generateSalt();
+  const saltedPassword = salt + password;
+  const hash = getSHA256HashHex(saltedPassword);
+  return { salt, hash };
+}
+
+function generateSalt(length: number = 16): string {
+  return forge.util.bytesToHex(forge.random.getBytesSync(length));
+}
+
+async function deriveCryptoKeyFromPassword(hashedPassword: string): Promise<CryptoKey> {
+  const keyBuffer = Buffer.from(hashedPassword, 'hex');
+  return await window.crypto.subtle.importKey(
+    'raw',
+    keyBuffer,
+    {
+      name: 'AES-GCM',
+      length: 256,
+    },
+    true,
+    ['encrypt', 'decrypt'],
+  );
+}
+
+export async function encryptPrivateKeyWithPassword(
+  keyPair: forge.pki.rsa.KeyPair,
+  hashedPassword: string,
+): Promise<string> {
+  const cryptoKey = await deriveCryptoKeyFromPassword(hashedPassword);
+  const privateKeyPemHex = encodePrivateKeyToPemHex(keyPair);
+  const encodedPlaintext = new TextEncoder().encode(privateKeyPemHex);
+  const ciphertext = await window.crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv: CONSTANT_IV_AES },
+    cryptoKey,
+    encodedPlaintext,
+  );
+  return Buffer.from(ciphertext).toString('base64');
+}
+
+export async function decryptPrivateKeyWithPassword(
+  encryptedPrivateKeyPemHex: string,
+  hashedPassword: string,
+): Promise<forge.pki.rsa.PrivateKey> {
+  const secretKey = await crypto.subtle.importKey(
+    'raw',
+    Buffer.from(hashedPassword, 'hex'),
+    {
+      name: 'AES-GCM',
+      length: 256,
+    },
+    true,
+    ['encrypt', 'decrypt'],
+  );
+  const cleartext = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv: CONSTANT_IV_AES },
+    secretKey,
+    Buffer.from(encryptedPrivateKeyPemHex, 'base64'),
+  );
+  const privateKeyPemHex = new TextDecoder().decode(cleartext);
+  const privateKey = decodePrivateKeyPemHex(privateKeyPemHex);
+  return privateKey;
 }
