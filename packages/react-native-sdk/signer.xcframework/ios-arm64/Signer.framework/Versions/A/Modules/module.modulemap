@@ -1,8 +1,0 @@
-framework module "Signer" {
-	header "ref.h"
-    header "Signer.objc.h"
-    header "Universe.objc.h"
-    header "Signer.h"
-
-    export *
-}
