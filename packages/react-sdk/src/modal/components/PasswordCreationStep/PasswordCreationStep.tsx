@@ -64,5 +64,6 @@ const Container = styled.div<{ isReady: boolean }>`
   & > iframe {
     height: 360px;
     width: 100%;
+    border: none;
   }
 `;

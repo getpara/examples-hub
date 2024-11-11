@@ -62,7 +62,15 @@ export const VerificationCodeStep = () => {
     setIsVerifying(true);
     if (code.length === 6 && /^\d+$/.test(code)) {
       try {
-        if ((await capsule.getSupportedCreateAuthMethods()).has(AuthMethod.PASSWORD)) {
+        const supportedCreateAuthMethods = await capsule.getSupportedCreateAuthMethods();
+
+        if (supportedCreateAuthMethods.has(AuthMethod.PASSWORD) && supportedCreateAuthMethods.has(AuthMethod.PASSKEY)) {
+          const webAuthUrl = isEmail ? await capsule.verifyEmail(code) : await capsule.verifyPhone(code);
+          const passwordAuthUrl = await capsule.getSetupPasswordURL(false);
+          setWebAuthURLForCreate(webAuthUrl);
+          setPasswordUrlForCreate(passwordAuthUrl);
+          setStep(ModalStep.BIOMETRIC_CREATION);
+        } else if ((await capsule.getSupportedCreateAuthMethods()).has(AuthMethod.PASSWORD)) {
           isEmail ? await capsule.verifyEmail(code) : await capsule.verifyPhone(code);
           const url = await capsule.getSetupPasswordURL(false);
           setPasswordUrlForCreate(url);
