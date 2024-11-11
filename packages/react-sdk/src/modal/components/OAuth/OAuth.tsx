@@ -9,6 +9,7 @@ import { StyledCpslTileButton } from '../common.js';
 import { brandedOAuthLogos, oAuthLogos } from '../../constants/oAuthLogos.js';
 import { useEffect } from 'react';
 import { routeMobileExternalWallet } from '../../utils/routeMobileExternalWallet.js';
+import { useGoBack } from '../../hooks/useGoBack.js';
 
 interface OAuthProps {
   methods: OAuthMethod[];
@@ -17,11 +18,14 @@ interface OAuthProps {
 const HAS_MORE_LENGTH = 3;
 
 export const OAuth = ({ methods }: OAuthProps) => {
+  const goBack = useGoBack();
   const oAuthLogoVariant = useThemeStore(state => state.oAuthLogoVariant);
   const isDark = useThemeStore(state => state.isDark);
   const capsule = useCapsuleStore(state => state.capsule);
+  const popupWindow = useModalStore(state => state.popupWindow);
   const setFlow = useModalStore(state => state.setFlow);
   const setStep = useModalStore(state => state.setStep);
+  const setPopupWindow = useModalStore(state => state.setPopupWindow);
   const setIdentifier = useUserInfoStore(state => state.setIdentifier);
   const setIdentifierType = useUserInfoStore(state => state.setIdentifierType);
   const setBiometricLocationHints = useModalStore(state => state.setBiometricLocationHints);
@@ -53,6 +57,10 @@ export const OAuth = ({ methods }: OAuthProps) => {
   };
 
   const handleMethodClick = (method: OAuthMethod) => async () => {
+    if (!!popupWindow) {
+      return;
+    }
+
     if (method === OAuthMethod.FARCASTER) {
       if (!farcasterConnectUri) {
         return;
@@ -66,8 +74,19 @@ export const OAuth = ({ methods }: OAuthProps) => {
     setStep(ModalStep.AWAITING_OAUTH);
 
     const oAuthURL = await capsule.getOAuthURL(method);
-    openPopup(oAuthURL, `${method}AuthPopup`, 'OAUTH');
-    const { email, userExists } = await capsule.waitForOAuth();
+    const oAuthWindow = openPopup(oAuthURL, `${method}AuthPopup`, 'OAUTH');
+
+    setPopupWindow(oAuthWindow);
+
+    const { email, isError, userExists } = await capsule.waitForOAuth(oAuthWindow);
+
+    setPopupWindow(undefined);
+
+    if (isError) {
+      goBack();
+      return;
+    }
+
     if (!email) {
       setStep(ModalStep.AUTH_MAIN);
       throw new Error('email is required');
@@ -89,6 +108,7 @@ export const OAuth = ({ methods }: OAuthProps) => {
       setWebAuthURLForCreate(webAuthURLForCreate);
       setStep(ModalStep.BIOMETRIC_CREATION);
     }
+    setPopupWindow(undefined);
   };
 
   const useBrandedLogos = oAuthLogoVariant === 'default';

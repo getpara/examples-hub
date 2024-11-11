@@ -30,7 +30,7 @@ interface ModalState {
   onModalStepChange: (value: OnModalStepChangeValue) => void | undefined;
   onRampConfig: OnRampConfig | undefined;
   onRampPurchase: Partial<OnRampPurchase> | undefined;
-  loginWindow: Window | undefined;
+  popupWindow: Window | undefined;
   isFullyLoggedIn: boolean;
   accountAddFundTab?: AddFundsTabType;
   selectedExternalWalletId?: string;
@@ -58,7 +58,7 @@ export interface ModalActions {
   setOnModalStepChange: (fn: (value: OnModalStepChangeValue) => void) => void;
   setOnRampConfig: (_: OnRampConfig | undefined) => void;
   setOnRampPurchase: (_: Partial<OnRampPurchase> | undefined) => void;
-  setLoginWindow: (_: Window | undefined) => void;
+  setPopupWindow: (_: Window | undefined) => void;
   setIsFullyLoggedIn: (isFullyLoggedIn: boolean) => void;
   setAccountAddFundTab: (accountAddFundTab: AddFundsTabType) => void;
   setSelectedExternalWalletId: (id?: string) => void;
@@ -84,7 +84,7 @@ export const DEFAULT_MODAL_STATE: Omit<ModalState, 'step' | 'onRampConfig'> = {
   supportedAuthMethods: new Set<AuthMethod>(),
   onModalStepChange: undefined,
   onRampPurchase: undefined,
-  loginWindow: undefined,
+  popupWindow: undefined,
   isFullyLoggedIn: false,
   accountAddFundTab: undefined,
   isExternalWalletConnecting: false,

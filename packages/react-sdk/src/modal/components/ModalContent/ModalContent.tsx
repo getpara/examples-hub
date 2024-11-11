@@ -78,16 +78,16 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     const passwordUrlForLogin = useModalStore(state => state.passwordUrlForLogin);
     const supportedAuthMethods = useModalStore(state => state.supportedAuthMethods);
     const isLogin = useModalStore(state => state.isLogin());
-    const loginWindow = useModalStore(state => state.loginWindow);
+    const popupWindow = useModalStore(state => state.popupWindow);
     const onRampConfig = useModalStore(state => state.onRampConfig);
     const setStep = useModalStore(state => state.setStep);
     const setBiometricLocationHints = useModalStore(state => state.setBiometricLocationHints);
     const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
     const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
+    const setPopupWindow = useModalStore(state => state.setPopupWindow);
     const setPasswordUrlForCreate = useModalStore(state => state.setPasswordUrlForCreate);
     const setPasswordUrlForLogin = useModalStore(state => state.setPasswordUrlForLogin);
     const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
-    const setLoginWindow = useModalStore(state => state.setLoginWindow);
     const setOnRampConfig = useModalStore(state => state.setOnRampConfig);
     const setRecoveryShare = useUserInfoStore(state => state.setRecoveryShare);
     const goBack = useGoBack();
@@ -119,9 +119,9 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     };
 
     async function awaitLoginTransition(): Promise<void> {
-      const { isComplete, isError, needsWallet } = await capsule.waitForLoginAndSetup(loginWindow);
+      const { isComplete, isError, needsWallet } = await capsule.waitForLoginAndSetup(popupWindow);
 
-      setLoginWindow(undefined);
+      setPopupWindow(undefined);
 
       if (isError) {
         goBack();
@@ -231,7 +231,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
         window.clearTimeout(loginTimeout.current);
         capsule.exitLogin();
       };
-    }, [webAuthURLForLogin, passwordUrlForLogin, loginWindow, supportedAuthMethods]);
+    }, [webAuthURLForLogin, passwordUrlForLogin, popupWindow, supportedAuthMethods]);
 
     const handleClose = () => {
       onClose();
@@ -244,6 +244,10 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
 
       if (![ModalStep.BIOMETRIC_LOGIN, ModalStep.AWAITING_BIOMETRIC_LOGIN].includes(currentStep)) {
         capsule.exitLogin();
+      }
+
+      if (![ModalStep.AWAITING_OAUTH, ModalStep.FARCASTER_OAUTH].includes(currentStep)) {
+        capsule.exitOAuth();
       }
     }, [currentStep]);
 

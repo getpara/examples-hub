@@ -2033,25 +2033,33 @@ export abstract class CoreCapsule {
     return `${getBaseUrl(this.ctx.env)}auth/${oAuthMethod.toLowerCase()}?sessionLookupId=${encodeURIComponent(res.data.sessionLookupId)}`;
   }
 
-  async waitForOAuth(): Promise<{
+  async waitForOAuth(oAuthWindow?: Window): Promise<{
     email?: string;
+    isError?: boolean;
     userExists: boolean;
   }> {
     this.isAwaitingOAuth = true;
     while (this.isAwaitingOAuth) {
       try {
+        if (oAuthWindow?.closed) {
+          return { isError: true, userExists: false };
+        }
+
         await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS));
 
-        const res = await this.touchSession();
-        if (res.data.userId) {
-          const { userId, email } = res.data;
-          await this.setUserId(userId);
-          await this.setEmail(email);
-          const userExists = await this.checkIfUserExists(email);
-          return {
-            userExists,
-            email,
-          };
+        if (this.isAwaitingOAuth) {
+          const res = await this.touchSession();
+          if (res.data.userId) {
+            const { userId, email } = res.data;
+            await this.setUserId(userId);
+            await this.setEmail(email);
+            const userExists = await this.checkIfUserExists(email);
+            this.isAwaitingOAuth = false;
+            return {
+              userExists,
+              email,
+            };
+          }
         }
       } catch (err) {
         console.error(err);

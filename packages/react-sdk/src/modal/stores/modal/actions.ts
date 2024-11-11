@@ -42,8 +42,8 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
         ? LoginPreviousStep[currentStep]
         : SignUpPreviousStep[currentStep]);
   },
-  setLoginWindow: loginWindow => {
-    set({ loginWindow });
+  setPopupWindow: popupWindow => {
+    set({ popupWindow });
   },
   setFlow: flow => set({ flow }),
   isLogin: () => get().flow === 'login',

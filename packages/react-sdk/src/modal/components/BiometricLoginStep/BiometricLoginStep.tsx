@@ -10,9 +10,10 @@ import { isPasskeySupported } from '../../utils/isPasskeySupported.js';
 import { formatBiometricHints, KnownDevices, UserIdentifier } from '@usecapsule/react-common';
 
 export const BiometricLoginStep = () => {
+  const popupWindow = useModalStore(state => state.popupWindow);
   const supportedAuthMethods = useModalStore(state => state.supportedAuthMethods);
   const setStep = useModalStore(state => state.setStep);
-  const setLoginWindow = useModalStore(state => state.setLoginWindow);
+  const setPopupWindow = useModalStore(state => state.setPopupWindow);
   const biometricLocationHints = useModalStore(state => state.biometricLocationHints);
   const capsule = useCapsuleStore(state => state.capsule);
   const username = useUserInfoStore(state => state.getUsername());
@@ -56,15 +57,19 @@ export const BiometricLoginStep = () => {
   }, [supportedAuthMethods]);
 
   const handlePasskeyClick = () => {
+    if (!!popupWindow) {
+      return;
+    }
+
     const loginWindow = openPopup(webAuthURLForLogin, 'CapsulePasskey', 'LOGIN_PASSKEY');
 
-    setLoginWindow(loginWindow);
+    setPopupWindow(loginWindow);
     setStep(ModalStep.AWAITING_BIOMETRIC_LOGIN);
   };
 
   const handlePasswordClick = () => {
     const loginWindow = openPopup(passwordAuthUrlForLogin, 'CapsulePassword', 'LOGIN_PASSWORD');
-    setLoginWindow(loginWindow);
+    setPopupWindow(loginWindow);
     setStep(ModalStep.AWAITING_PASSWORD_LOGIN);
   };
 
