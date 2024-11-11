@@ -3,11 +3,12 @@ import { useEffect, useRef, useState } from 'react';
 import { styled } from 'styled-components';
 import { ModalStep } from '../../utils/steps.js';
 import { CodeChangeEventDetail, CpslCodeInputCustomEvent } from '@usecapsule/core-components';
-import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
+import { useCapsuleStore, useModalStore, useThemeStore, useUserInfoStore } from '../../stores/index.js';
 import { Heading, InnerStepContainer, StepContainer } from '../common.js';
 import { AuthMethod } from '@usecapsule/core-sdk';
 
 export const VerificationCodeStep = () => {
+  const theme = useThemeStore(state => state.theme);
   const identifierType = useUserInfoStore(state => state.identifierType);
   const username = useUserInfoStore(state => state.getUsername());
   const setStep = useModalStore(state => state.setStep);
@@ -66,13 +67,13 @@ export const VerificationCodeStep = () => {
 
         if (supportedCreateAuthMethods.has(AuthMethod.PASSWORD) && supportedCreateAuthMethods.has(AuthMethod.PASSKEY)) {
           const webAuthUrl = isEmail ? await capsule.verifyEmail(code) : await capsule.verifyPhone(code);
-          const passwordAuthUrl = await capsule.getSetupPasswordURL(false);
+          const passwordAuthUrl = await capsule.getSetupPasswordURL(false, undefined, theme);
           setWebAuthURLForCreate(webAuthUrl);
           setPasswordUrlForCreate(passwordAuthUrl);
           setStep(ModalStep.BIOMETRIC_CREATION);
         } else if ((await capsule.getSupportedCreateAuthMethods()).has(AuthMethod.PASSWORD)) {
           isEmail ? await capsule.verifyEmail(code) : await capsule.verifyPhone(code);
-          const url = await capsule.getSetupPasswordURL(false);
+          const url = await capsule.getSetupPasswordURL(false, undefined, theme);
           setPasswordUrlForCreate(url);
           setStep(ModalStep.PASSWORD_CREATION);
         } else {

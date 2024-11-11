@@ -1302,7 +1302,7 @@ export abstract class CoreCapsule {
     });
   }
 
-  private async getCommonQueryParams(partnerId?: string, isForNewDevice?: boolean): Promise<string> {
+  private async getCommonQueryParams(partnerId?: string, isForNewDevice?: boolean, theme?: Theme): Promise<string> {
     const partner: PartnerEntity = partnerId
       ? (await this.ctx.capsuleClient.getPartner(partnerId)).data?.partner
       : undefined;
@@ -1310,12 +1310,16 @@ export abstract class CoreCapsule {
     return toQueryString({
       apiKey: this.ctx.apiKey,
       partnerId,
-      portalFont: partner?.font,
-      portalBorderRadius: this.portalTheme?.borderRadius,
-      portalThemeMode: partner?.themeMode || this.portalTheme?.mode,
-      portalAccentColor: partner?.accentColor || this.portalTheme?.accentColor,
-      portalForegroundColor: partner?.foregroundColor || this.portalTheme?.foregroundColor,
-      portalBackgroundColor: partner?.backgroundColor || this.portalBackgroundColor || this.portalTheme?.backgroundColor,
+      portalFont: theme?.font || partner?.font || this.portalTheme?.font,
+      portalBorderRadius: theme?.borderRadius || this.portalTheme?.borderRadius,
+      portalThemeMode: theme?.mode || partner?.themeMode || this.portalTheme?.mode,
+      portalAccentColor: theme?.accentColor || partner?.accentColor || this.portalTheme?.accentColor,
+      portalForegroundColor: theme?.foregroundColor || partner?.foregroundColor || this.portalTheme?.foregroundColor,
+      portalBackgroundColor:
+        theme?.backgroundColor ||
+        partner?.backgroundColor ||
+        this.portalBackgroundColor ||
+        this.portalTheme?.backgroundColor,
       portalPrimaryButtonColor: this.portalPrimaryButtonColor,
       portalTextColor: this.portalTextColor,
       portalPrimaryButtonTextColor: this.portalPrimaryButtonTextColor,
@@ -1345,8 +1349,9 @@ export abstract class CoreCapsule {
     passwordId: string,
     partnerId?: string,
     isForNewDevice?: boolean,
+    themeOverride?: Theme,
   ): Promise<string> {
-    const commonQueryParams = await this.getCommonQueryParams(partnerId, isForNewDevice);
+    const commonQueryParams = await this.getCommonQueryParams(partnerId, isForNewDevice, themeOverride);
     const userSpecificParams = {
       email: `email=${encodeURIComponent(this.email)}`,
       phone: `phone=${encodeURIComponent(this.phone)}&countryCode=${encodeURIComponent(this.countryCode)}`,
@@ -1740,12 +1745,16 @@ export abstract class CoreCapsule {
     return this.getWebAuthURLForCreate('phone', res.data.id, res.data.partnerId, isForNewDevice);
   }
 
-  async getSetupPasswordURL(isForNewDevice: boolean, type: 'email' | 'phone' | 'farcaster' = 'email'): Promise<string> {
+  async getSetupPasswordURL(
+    isForNewDevice: boolean,
+    type: 'email' | 'phone' | 'farcaster' = 'email',
+    themeOverride?: Theme,
+  ): Promise<string> {
     const res = await this.ctx.capsuleClient.addSessionPasswordPublicKey(this.userId, {
       status: PasswordStatus.PENDING,
     });
 
-    return this.getPasswordURLForCreate(type, res.data.id, res.data.partnerId, isForNewDevice);
+    return this.getPasswordURLForCreate(type, res.data.id, res.data.partnerId, isForNewDevice, themeOverride);
   }
 
   // TODO: consider changing this to just hit a new endpoint that returns

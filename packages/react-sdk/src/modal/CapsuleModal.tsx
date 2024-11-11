@@ -144,7 +144,7 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     useEffect(() => {
       if (theme) {
         generateTheme(theme);
-        updateThemeState({ isDark: theme.mode === 'dark' });
+        updateThemeState({ isDark: theme.mode === 'dark', theme: theme });
       }
     }, [theme]);
 
