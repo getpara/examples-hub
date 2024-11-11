@@ -1,6 +1,6 @@
 {
   "name": "@usecapsule/server-sdk",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/types/index.d.ts",
@@ -9,8 +9,8 @@
     "wasm_exec.js"
   ],
   "dependencies": {
-    "@usecapsule/core-sdk": "2.5.0",
-    "@usecapsule/user-management-client": "1.27.0",
+    "@usecapsule/core-sdk": "2.6.0",
+    "@usecapsule/user-management-client": "1.28.0",
     "uuid": "^9.0.1",
     "ws": "^8.14.2"
   },

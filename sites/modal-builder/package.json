@@ -1,6 +1,6 @@
 {
   "name": "modal-builder",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -25,10 +25,10 @@
     "@solana/wallet-adapter-base": "0.9.23",
     "@solana/web3.js": "1.95.2",
     "@tanstack/react-query": "^5.24.1",
-    "@usecapsule/evm-wallet-connectors": "1.5.0",
-    "@usecapsule/react-components": "3.10.0",
-    "@usecapsule/react-sdk": "4.5.0",
-    "@usecapsule/solana-wallet-connectors": "1.5.0",
+    "@usecapsule/evm-wallet-connectors": "1.6.0",
+    "@usecapsule/react-components": "3.11.0",
+    "@usecapsule/react-sdk": "4.6.0",
+    "@usecapsule/solana-wallet-connectors": "1.6.0",
     "imask": "7.6.1",
     "jotai": "2.10.0",
     "lodash.merge": "4.6.2",
