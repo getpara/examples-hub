@@ -36,6 +36,10 @@ export async function distributeNewShare(
   const passwords = await ctx.capsuleClient.getPasswords(userId);
   const passwordEncryptedShares = passwords
     .map(password => {
+      if (password.status === 'PENDING') {
+        return;
+      }
+
       const { encryptedMessageHex, encryptedKeyHex } = encryptWithDerivedPublicKey(password.sigDerivedPublicKey, userShare);
       return {
         encryptedShare: encryptedMessageHex,
