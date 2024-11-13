@@ -76,7 +76,6 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     const webAuthURLForCreate = useModalStore(state => state.webAuthURLForCreate);
     const passwordUrlForCreate = useModalStore(state => state.passwordUrlForCreate);
     const passwordUrlForLogin = useModalStore(state => state.passwordUrlForLogin);
-    const supportedAuthMethods = useModalStore(state => state.supportedAuthMethods);
     const isLogin = useModalStore(state => state.isLogin());
     const popupWindow = useModalStore(state => state.popupWindow);
     const onRampConfig = useModalStore(state => state.onRampConfig);
@@ -207,7 +206,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
 
     // wait for login auth to do post login setup
     useEffect(() => {
-      if (webAuthURLForLogin || passwordUrlForLogin || supportedAuthMethods) {
+      if (webAuthURLForLogin || passwordUrlForLogin) {
         if (loginTransitionOverride) {
           async function loginOverride() {
             await loginTransitionOverride(capsule);
@@ -231,7 +230,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
         window.clearTimeout(loginTimeout.current);
         capsule.exitLogin();
       };
-    }, [webAuthURLForLogin, passwordUrlForLogin, popupWindow, supportedAuthMethods]);
+    }, [webAuthURLForLogin, passwordUrlForLogin, popupWindow]);
 
     const handleClose = () => {
       onClose();

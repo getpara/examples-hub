@@ -1,5 +1,5 @@
 import { CpslButton, CpslDivider, CpslIcon } from '@usecapsule/react-components';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { Heading, StepContainer, InnerStepContainer } from '../common.js';
@@ -12,13 +12,15 @@ import { formatBiometricHints, KnownDevices, UserIdentifier } from '@usecapsule/
 export const BiometricLoginStep = () => {
   const popupWindow = useModalStore(state => state.popupWindow);
   const supportedAuthMethods = useModalStore(state => state.supportedAuthMethods);
+  const passwordUrlForLogin = useModalStore(state => state.passwordUrlForLogin);
+  const webAuthURLForLogin = useModalStore(state => state.webAuthURLForLogin);
   const setStep = useModalStore(state => state.setStep);
   const setPopupWindow = useModalStore(state => state.setPopupWindow);
   const biometricLocationHints = useModalStore(state => state.biometricLocationHints);
   const capsule = useCapsuleStore(state => state.capsule);
   const username = useUserInfoStore(state => state.getUsername());
-  const [webAuthURLForLogin, setWebAuthURLForLogin] = useState<string>();
-  const [passwordAuthUrlForLogin, setPasswordAuthUrlForLogin] = useState<string>();
+  const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
+  const setPasswordUrlForLogin = useModalStore(state => state.setPasswordUrlForLogin);
   const passkeysSupported = isPasskeySupported();
   const formattedHints = useMemo(() => formatBiometricHints(biometricLocationHints), [biometricLocationHints]);
   const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
@@ -56,7 +58,7 @@ export const BiometricLoginStep = () => {
       const shortWebAuthLoginLink = webAuthUrlForLogin ? await capsule.shortenLoginLink(webAuthUrlForLogin) : undefined;
 
       setWebAuthURLForLogin(shortWebAuthLoginLink);
-      setPasswordAuthUrlForLogin(passwordAuthUrlForLogin);
+      setPasswordUrlForLogin(passwordAuthUrlForLogin);
     }
 
     setLinks();
@@ -74,7 +76,7 @@ export const BiometricLoginStep = () => {
   };
 
   const handlePasswordClick = () => {
-    const loginWindow = openPopup(passwordAuthUrlForLogin, 'CapsulePassword', 'LOGIN_PASSWORD');
+    const loginWindow = openPopup(passwordUrlForLogin, 'CapsulePassword', 'LOGIN_PASSWORD');
     setPopupWindow(loginWindow);
     setStep(ModalStep.AWAITING_PASSWORD_LOGIN);
   };
@@ -98,7 +100,7 @@ export const BiometricLoginStep = () => {
         <UserIdentifier identifier={username} />
       </InnerStepContainer>
       <MainContainer>
-        {supportedAuthMethods.has(AuthMethod.PASSWORD) && passwordAuthUrlForLogin && (
+        {supportedAuthMethods.has(AuthMethod.PASSWORD) && passwordUrlForLogin && (
           <PasswordOnly handlePasswordClick={handlePasswordClick} />
         )}
 
