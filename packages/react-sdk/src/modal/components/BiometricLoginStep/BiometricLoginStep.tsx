@@ -28,32 +28,36 @@ export const BiometricLoginStep = () => {
   useEffect(() => {
     async function setLinks() {
       if (!supportedAuthMethods?.size && capsule.getUserId()) {
-        const supportedAuthMethods = await capsule.supportedAuthMethods(capsule.getUserId(), 'userId');
-        setSupportedAuthMethods(supportedAuthMethods);
+        const fetchedSupportedAuthMethods = await capsule.supportedAuthMethods(capsule.getUserId(), 'userId');
+        if (fetchedSupportedAuthMethods?.size) {
+          setSupportedAuthMethods(fetchedSupportedAuthMethods);
+        }
         return;
       }
       const res = await capsule.touchSession();
-      const webAuthUrlForLogin = supportedAuthMethods.has(AuthMethod.PASSKEY)
-        ? await capsule.getWebAuthURLForLogin(
-            res.data.sessionId,
-            getPublicKeyHex(capsule.loginEncryptionKeyPair),
-            res.data.partnerId,
-            undefined,
-            undefined,
-            'email',
-          )
-        : undefined;
+      const webAuthUrlForLogin =
+        supportedAuthMethods?.has && supportedAuthMethods.has(AuthMethod.PASSKEY)
+          ? await capsule.getWebAuthURLForLogin(
+              res.data.sessionId,
+              getPublicKeyHex(capsule.loginEncryptionKeyPair),
+              res.data.partnerId,
+              undefined,
+              undefined,
+              'email',
+            )
+          : undefined;
 
-      const passwordAuthUrlForLogin = supportedAuthMethods.has(AuthMethod.PASSWORD)
-        ? await capsule.getPasswordURLForLogin(
-            res.data.sessionId,
-            getPublicKeyHex(capsule.loginEncryptionKeyPair),
-            res.data.partnerId,
-            undefined,
-            undefined,
-            'email',
-          )
-        : undefined;
+      const passwordAuthUrlForLogin =
+        supportedAuthMethods?.has && supportedAuthMethods.has(AuthMethod.PASSWORD)
+          ? await capsule.getPasswordURLForLogin(
+              res.data.sessionId,
+              getPublicKeyHex(capsule.loginEncryptionKeyPair),
+              res.data.partnerId,
+              undefined,
+              undefined,
+              'email',
+            )
+          : undefined;
 
       const shortWebAuthLoginLink = webAuthUrlForLogin ? await capsule.shortenLoginLink(webAuthUrlForLogin) : undefined;
 
@@ -85,7 +89,7 @@ export const BiometricLoginStep = () => {
     return (
       !biometricLocationHints ||
       (passkeysSupported && formattedHints.isOnKnownDevice) ||
-      supportedAuthMethods.has(AuthMethod.PASSWORD)
+      (supportedAuthMethods?.has && supportedAuthMethods.has(AuthMethod.PASSWORD))
     );
   }
 
@@ -100,11 +104,11 @@ export const BiometricLoginStep = () => {
         <UserIdentifier identifier={username} />
       </InnerStepContainer>
       <MainContainer>
-        {supportedAuthMethods.has(AuthMethod.PASSWORD) && passwordUrlForLogin && (
+        {supportedAuthMethods?.has && supportedAuthMethods.has(AuthMethod.PASSWORD) && passwordUrlForLogin && (
           <PasswordOnly handlePasswordClick={handlePasswordClick} />
         )}
 
-        {supportedAuthMethods.has(AuthMethod.PASSKEY) && webAuthURLForLogin && (
+        {supportedAuthMethods?.has && supportedAuthMethods.has(AuthMethod.PASSKEY) && webAuthURLForLogin && (
           <BiometricOnly
             handlePasskeyClick={handlePasskeyClick}
             formattedHints={formattedHints}
