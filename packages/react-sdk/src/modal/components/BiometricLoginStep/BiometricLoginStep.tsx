@@ -21,9 +21,15 @@ export const BiometricLoginStep = () => {
   const [passwordAuthUrlForLogin, setPasswordAuthUrlForLogin] = useState<string>();
   const passkeysSupported = isPasskeySupported();
   const formattedHints = useMemo(() => formatBiometricHints(biometricLocationHints), [biometricLocationHints]);
+  const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
 
   useEffect(() => {
     async function setLinks() {
+      if (!supportedAuthMethods?.size && capsule.getUserId()) {
+        const supportedAuthMethods = await capsule.supportedAuthMethods(capsule.getUserId(), 'userId');
+        setSupportedAuthMethods(supportedAuthMethods);
+        return;
+      }
       const res = await capsule.touchSession();
       const webAuthUrlForLogin = supportedAuthMethods.has(AuthMethod.PASSKEY)
         ? await capsule.getWebAuthURLForLogin(

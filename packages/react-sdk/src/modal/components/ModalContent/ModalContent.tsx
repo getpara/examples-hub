@@ -225,7 +225,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
           loginOverride();
           return;
         }
-        loginTimeout.current = window.setTimeout(awaitLoginTransition, DEFAULTS.POLLING_INTERVAL_MS);
+        loginTimeout.current = window.setTimeout(awaitLoginTransition, DEFAULTS.LOGGIN_POLLING_DELAY_MS);
       }
       return () => {
         window.clearTimeout(loginTimeout.current);
