@@ -1,5 +1,5 @@
 import { Box, ChakraProvider, HStack, Text, VStack } from '@chakra-ui/react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import './recovery.css';
 import { truncateEthAddress, RecoveryStatus } from '@usecapsule/web-sdk';
 import EmailContext from '../../recovery/contexts/EmailContext';
@@ -50,6 +50,10 @@ const Recovery: React.FC = () => {
   const [is2FAFlow, setIs2FAFlow] = use2FAState(null as boolean);
   const [type, setType] = useRecoveryTypeState(null as RecoveryType);
   const [twoFactorVerifiedInSession, setTwoFactorVerifiedInSession] = useTwoFactorVerifiedState(null as boolean);
+
+  useEffect(() => {
+    document.body.style.backgroundColor = 'black';
+  }, []);
 
   return (
     <ChakraProvider theme={newTheme}>

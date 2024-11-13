@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { Card, CardContent } from '../../components/common';
 import { CpslButton, CpslIcon, CpslInput, CpslText } from '@usecapsule/react-components';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CpslInputCustomEvent, InputInputEventDetail } from '@usecapsule/core-components';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { passwordCreation } from '../../utils/passwordCreation';
@@ -40,6 +40,10 @@ export const PasswordCreation = () => {
   const passwordHasNoSpaces = !/\s/.test(password);
 
   const passwordValid = passwordMatches && passwordLength && passwordHasNoSpaces;
+
+  useEffect(() => {
+    document.body.style.backgroundColor = 'transparent';
+  }, []);
 
   function passwordHelperText() {
     if (!passwordLength && !passwordHasNoSpaces) {
