@@ -34,6 +34,13 @@ export const BiometricLoginStep = () => {
         }
         return;
       }
+
+      if (!capsule.isEmail && !capsule.isPhone && !capsule.isFarcaster) {
+        return;
+      }
+
+      const authType = capsule.isEmail ? 'email' : capsule.isPhone ? 'phone' : 'farcaster';
+
       const res = await capsule.touchSession();
       const webAuthUrlForLogin =
         supportedAuthMethods?.has && supportedAuthMethods.has(AuthMethod.PASSKEY)
@@ -43,7 +50,7 @@ export const BiometricLoginStep = () => {
               res.data.partnerId,
               undefined,
               undefined,
-              'email',
+              authType,
             )
           : undefined;
 
@@ -55,7 +62,7 @@ export const BiometricLoginStep = () => {
               res.data.partnerId,
               undefined,
               undefined,
-              'email',
+              authType,
             )
           : undefined;
 

@@ -289,6 +289,18 @@ export abstract class CoreCapsule {
   private isAwaitingFarcaster = false;
   private isAwaitingOAuth = false;
 
+  get isEmail(): boolean {
+    return !!this.email && !this.phone && !this.farcasterUsername;
+  }
+
+  get isPhone(): boolean {
+    return !!this.phone && !this.email && !this.farcasterUsername;
+  }
+
+  get isFarcaster(): boolean {
+    return !!this.farcasterUsername && !this.email && !this.phone;
+  }
+
   /**
    * The IDs of the currently active wallets, for each supported wallet type. Any signer integrations will default to the first viable wallet ID in this dictionary.
    */

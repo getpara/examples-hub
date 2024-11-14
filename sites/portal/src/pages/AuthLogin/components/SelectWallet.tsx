@@ -378,7 +378,7 @@ export const SelectWallet = ({ sessionLookupId }: { sessionLookupId: string }) =
   useEffect(() => {
     // Situation where user has wallets, but none of the supported type (EVM/SOLANA)
     if (selectWalletTypes.every(({ type }) => wallets[type].length === 0)) {
-      onSubmit(selectWalletTypes.reduce((acc, { type }) => ({ ...acc, [type]: 'CREATE_NEW' }), {}));
+      onSubmit(selectWalletTypes.reduce((acc, { type }) => ({ ...acc, [type]: ['CREATE_NEW'] }), {}));
     }
   }, [wallets, selectWalletTypes]);
 

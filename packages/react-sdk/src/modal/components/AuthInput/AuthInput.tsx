@@ -45,7 +45,6 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
   const setIdentifierType = useUserInfoStore(state => state.setIdentifierType);
   const setFlow = useModalStore(state => state.setFlow);
   const setStep = useModalStore(state => state.setStep);
-  const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
   const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
   const setBiometricLocationHints = useModalStore(state => state.setBiometricLocationHints);
 
@@ -153,11 +152,14 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
       }
 
       if (userExists) {
-        const webAuthUrlForLogin = await capsule.initiateUserLoginForPhone(identifier, countryCode);
-        const biometricLocationHints = await capsule.getUserBiometricLocationHints();
+        const supportedAuthMethods = await capsule.initiateUserLoginV2(identifier, 'phone', countryCode);
+        const biometricLocationHints = supportedAuthMethods.has(AuthMethod.PASSKEY)
+          ? await capsule.getUserBiometricLocationHints()
+          : [];
+
         setFlow('login');
         setStep(ModalStep.BIOMETRIC_LOGIN);
-        setWebAuthURLForLogin(webAuthUrlForLogin);
+        setSupportedAuthMethods(supportedAuthMethods);
         setBiometricLocationHints(biometricLocationHints);
         return;
       }
