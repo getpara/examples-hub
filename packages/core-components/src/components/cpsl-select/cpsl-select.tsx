@@ -110,6 +110,28 @@ export class CpslSelect {
   @Prop() searchPlaceholder?: string;
 
   /**
+   * The color of the selected item or placeholder text.
+   * Options are: `"primary"`, `"secondary", `"tertiary", `"subtle", `"inverted", `"error".
+   * Default is: `"primary"`.
+   */
+  @Prop() selectedItemColor?: 'primary' | 'secondary' | 'tertiary' | 'subtle' | 'inverted' | 'error' | 'contrast' = 'primary';
+
+  /**
+   * The variant of the selected item or placeholder text.
+   * Options are: `"body2XS"`, `"bodyXS", `"bodyS", `"bodyM", `"bodyL", `"bodyXL", `"headingXS", `"headingS", `"headingM", `"headingL", `"headingXL", `"heading2XL".
+   * Default is: `"bodyM"`.
+   */
+  @Prop() selectedItemVariant?: 'body2XS' | 'bodyXS' | 'bodyS' | 'bodyM' | 'bodyL' | 'bodyXL' | 'headingXS' | 'headingS' | 'headingM' | 'headingL' | 'headingXL' | 'heading2XL' =
+    'bodyM';
+
+  /**
+   * The weight of the selected item or placeholder text.
+   * Options are: `"regular"`, `"medium", `"semiBold", `"bold".
+   * Default is: `"regular"`.
+   */
+  @Prop() selectedItemWeight?: 'regular' | 'medium' | 'semiBold' | 'bold' = 'regular';
+
+  /**
    * Emitted when the input loses focus.
    */
   @Event() cpslBlur!: EventEmitter<FocusEvent>;
@@ -224,7 +246,13 @@ export class CpslSelect {
           {this.hasSelectedItem && this.showFormattedSelectedItem && <slot name="selected-item"></slot>}
           <div class={{ 'selected-container-content': true, 'hidden': this.hasSelectedItem && this.showFormattedSelectedItem }} id="selected-container-content" style={{}}>
             {(!this.hasSelectedItem || !this.showFormattedSelectedItem) && (
-              <cpsl-text class={{ 'selected-text': true, 'placeholder': !this.selectedValue }}>
+              <cpsl-text
+                class={{ 'selected-text': true, 'placeholder': !this.selectedValue }}
+                part="selected-text"
+                color={this.selectedItemColor}
+                variant={this.selectedItemVariant}
+                weight={this.selectedItemWeight}
+              >
                 {!this.selectedValue ? (this.placeholder ?? 'Select') : (this.formatValue?.(this.selectedValue) ?? this.selectedValue)}
               </cpsl-text>
             )}

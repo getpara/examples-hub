@@ -89,7 +89,7 @@ export function EvmExternalWalletProvider({ children, capsule, onSwitchWallet }:
       } else {
         switch (e.name) {
           case 'UserRejectedRequestError': {
-            error = ['Connection request rejected'];
+            error = ['Change request rejected'];
             break;
           }
           default: {

@@ -58,6 +58,7 @@ export const ChainSelect = () => {
           // Adding 16 for the top padding + 1 for the border
           $top={mobileAnchor + 16 + 1}
           autoWidth
+          selectedItemVariant="bodyXS"
         >
           {chainIdToUse && (
             <ChainName variant="bodyXS" color="contrast" slot="selected-item">
@@ -99,7 +100,7 @@ export const AccountSelect = () => {
 
   const ActiveWalletNode = activeWallet ? (
     <FlexRow slot="selected-item">
-      <CpslIdenticon variant="avatar" size="20px" hash={capsule.getIdenticonHash(activeWallet.id, activeWallet.type)} />
+      <CpslIdenticon variant="avatar" size="14px" hash={capsule.getIdenticonHash(activeWallet.id, activeWallet.type)} />
       <WalletName variant="bodyXS" color="contrast">
         {getName(capsule, activeWallet)}
       </WalletName>
@@ -133,6 +134,7 @@ export const AccountSelect = () => {
             // Adding 16 for the top padding + 1 for the border
             $top={mobileAnchor + 16 + 1}
             autoWidth
+            selectedItemVariant="bodyXS"
           >
             {activeWallet && ActiveWalletNode}
             {capsule.availableWallets.map(({ address, name: _name, id, type, isExternal }) => {
@@ -189,7 +191,6 @@ const WalletName = styled(CpslText)`
 `;
 
 const SelectContainer = styled.div`
-  height: 24px;
   position: relative;
   display: flex;
   align-items: center;
@@ -200,7 +201,14 @@ const SelectContainer = styled.div`
 `;
 
 const ChainName = styled(CpslText)`
+  max-width: 150px;
   text-transform: capitalize;
+
+  &::part(text-element) {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
 `;
 
 const StyledSelect = styled(CpslSelect)<{ $width: number; $top?: number }>`
@@ -213,6 +221,10 @@ const StyledSelect = styled(CpslSelect)<{ $width: number; $top?: number }>`
   --container-gap: 2px;
   --icon-width: 16px;
   --icon-height: 16px;
+
+  &::part(selected-text) {
+    white-space: nowrap;
+  }
 
   &::part(dropdown) {
     min-width: ${({ $width }) => `${$width - 2}px`};

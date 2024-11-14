@@ -780,6 +780,18 @@ export namespace Components {
          */
         "searchPlaceholder"?: string;
         /**
+          * The color of the selected item or placeholder text. Options are: `"primary"`, `"secondary", `"tertiary", `"subtle", `"inverted", `"error". Default is: `"primary"`.
+         */
+        "selectedItemColor"?: 'primary' | 'secondary' | 'tertiary' | 'subtle' | 'inverted' | 'error' | 'contrast';
+        /**
+          * The variant of the selected item or placeholder text. Options are: `"body2XS"`, `"bodyXS", `"bodyS", `"bodyM", `"bodyL", `"bodyXL", `"headingXS", `"headingS", `"headingM", `"headingL", `"headingXL", `"heading2XL". Default is: `"bodyM"`.
+         */
+        "selectedItemVariant"?: 'body2XS' | 'bodyXS' | 'bodyS' | 'bodyM' | 'bodyL' | 'bodyXL' | 'headingXS' | 'headingS' | 'headingM' | 'headingL' | 'headingXL' | 'heading2XL';
+        /**
+          * The weight of the selected item or placeholder text. Options are: `"regular"`, `"medium", `"semiBold", `"bold". Default is: `"regular"`.
+         */
+        "selectedItemWeight"?: 'regular' | 'medium' | 'semiBold' | 'bold';
+        /**
           * Value of the selected item.
          */
         "selectedValue"?: string;
@@ -2352,6 +2364,18 @@ declare namespace LocalJSX {
           * Placeholder for the search field.
          */
         "searchPlaceholder"?: string;
+        /**
+          * The color of the selected item or placeholder text. Options are: `"primary"`, `"secondary", `"tertiary", `"subtle", `"inverted", `"error". Default is: `"primary"`.
+         */
+        "selectedItemColor"?: 'primary' | 'secondary' | 'tertiary' | 'subtle' | 'inverted' | 'error' | 'contrast';
+        /**
+          * The variant of the selected item or placeholder text. Options are: `"body2XS"`, `"bodyXS", `"bodyS", `"bodyM", `"bodyL", `"bodyXL", `"headingXS", `"headingS", `"headingM", `"headingL", `"headingXL", `"heading2XL". Default is: `"bodyM"`.
+         */
+        "selectedItemVariant"?: 'body2XS' | 'bodyXS' | 'bodyS' | 'bodyM' | 'bodyL' | 'bodyXL' | 'headingXS' | 'headingS' | 'headingM' | 'headingL' | 'headingXL' | 'heading2XL';
+        /**
+          * The weight of the selected item or placeholder text. Options are: `"regular"`, `"medium", `"semiBold", `"bold". Default is: `"regular"`.
+         */
+        "selectedItemWeight"?: 'regular' | 'medium' | 'semiBold' | 'bold';
         /**
           * Value of the selected item.
          */

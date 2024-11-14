@@ -12,7 +12,7 @@ describe('cpsl-select', () => {
         <mock:shadow-root>
           <div class="select-container" id="select-container" part="select-container">
             <div class="selected-container-content" id="selected-container-content">
-            <cpsl-text class="placeholder selected-text">
+            <cpsl-text class="placeholder selected-text" color="primary" part="selected-text" variant="bodyM" weight="regular">
                 Select
               </cpsl-text>
             </div>
