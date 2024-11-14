@@ -6,9 +6,9 @@ import styled from 'styled-components';
 import { UpdatePopup } from '../../hooks/usePopupConfigFormData';
 
 export const Popup = () => {
-  const { control, getValues } = useFormContext<UpdatePopup>();
+  const { control, watch } = useFormContext<UpdatePopup>();
 
-  const isChecked = getValues('transactionPopupsEnabled');
+  const isChecked = watch('transactionPopupsEnabled');
 
   return (
     <InnerConfigurationCard>

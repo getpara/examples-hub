@@ -151,6 +151,7 @@ export type ApiKey = {
   cosmosPrefix: string;
   androidSha256CertFingerprints: string[] | null;
   androidPackageName: string | null;
+  supportedAuthMethods: string[] | null;
 };
 
 export type ApiKeyResponse = { key: ApiKey };
@@ -210,6 +211,7 @@ export type UpdateApiKeyBody = Nullable<
       | 'cosmosPrefix'
       | 'androidSha256CertFingerprints'
       | 'androidPackageName'
+      | 'supportedAuthMethods'
     >
   >
 >;

@@ -22,6 +22,7 @@
     "start-server": "lerna run start --scope=capsule-server-example",
     "start-bridge": "lerna run start --scope=capsule-js-bridge",
     "start-demo": "lerna run dev --scope=modal-builder",
+    "start-dev-portal": "lerna run dev --scope=developer-portal",
     "start-e2e": "lerna run start-e2e  --scope=capsule-legacy-example --scope=capsule-portal",
     "lerna-version": "lerna version",
     "lerna-publish": "lerna publish from-package --no-private",

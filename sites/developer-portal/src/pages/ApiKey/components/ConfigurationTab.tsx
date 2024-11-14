@@ -10,6 +10,7 @@ import { PregenConfiguration } from './PregenConfiguration/PregenConfiguration';
 import { NativePasskeyConfiguration } from './NativePasskeyConfiguration/NativePasskeyConfiguration';
 import { SupportedWalletTypesConfiguration } from './SupportedWalletTypesConfiguration';
 import { PopupConfiguration } from './PopupConfiguration/PopupConfiguration';
+import { SupportedAuthMethodsConfiguration } from './SupportedAuthMethodsConfiguration/SupportedAuthMethodsConfiguration';
 
 export const ConfigurationTab = () => {
   const { apiKey, env, projectId } = useParams();
@@ -22,6 +23,7 @@ export const ConfigurationTab = () => {
       <NativePasskeyConfiguration />
       <PregenConfiguration />
       <PopupConfiguration />
+      <SupportedAuthMethodsConfiguration />
       <SupportedWalletTypesConfiguration />
       <OnRampFlowsConfiguration />
       {(apiKeyData?.isBuyEnabled || apiKeyData?.isWithdrawEnabled) && <OnRampConfiguration />}
