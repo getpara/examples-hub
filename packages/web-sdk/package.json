@@ -1,6 +1,6 @@
 {
   "name": "@usecapsule/web-sdk",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -8,8 +8,8 @@
     "wasm_exec.js"
   ],
   "dependencies": {
-    "@usecapsule/core-sdk": "2.7.0",
-    "@usecapsule/user-management-client": "1.29.0",
+    "@usecapsule/core-sdk": "2.8.0",
+    "@usecapsule/user-management-client": "1.30.0",
     "assert": "^2.1.0",
     "base64url": "3.0.1",
     "buffer": "6.0.3",

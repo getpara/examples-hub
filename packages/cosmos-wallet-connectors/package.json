@@ -1,6 +1,6 @@
 {
   "name": "@usecapsule/cosmos-wallet-connectors",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -9,7 +9,7 @@
     "./connectors": "./dist/wallets/connectors/index.js"
   },
   "dependencies": {
-    "@usecapsule/react-sdk": "4.7.0"
+    "@usecapsule/react-sdk": "4.8.0"
   },
   "scripts": {
     "build": "rm -rf dist && tsc"
