@@ -721,41 +721,6 @@ export abstract class CoreCapsule {
       this.ctx.mpcComputationClient = mpcComputationClient.initClient(opts.offloadMPCComputationURL, opts.disableWorkers);
     }
 
-    if (!this.platformUtils.isSyncStorage || opts.useStorageOverrides) {
-      return;
-    }
-
-    this.email = (this.localStorageGetItem(LOCAL_STORAGE_EMAIL) as string) || undefined;
-    this.countryCode = (this.localStorageGetItem(LOCAL_STORAGE_COUNTRY_CODE) as CountryCallingCode) || undefined;
-    this.phone = (this.localStorageGetItem(LOCAL_STORAGE_PHONE) as string) || undefined;
-    this.userId = (this.localStorageGetItem(LOCAL_STORAGE_USER_ID) as string) || undefined;
-
-    const stringWallets = this.platformUtils.secureStorage
-      ? this.platformUtils.secureStorage.get(LOCAL_STORAGE_WALLETS)
-      : this.localStorageGetItem(LOCAL_STORAGE_WALLETS);
-    const _wallets = JSON.parse((stringWallets as string) || '{}');
-    const stringEd25519Wallets = this.platformUtils.secureStorage
-      ? this.platformUtils.secureStorage.get(LOCAL_STORAGE_ED25519_WALLETS)
-      : this.localStorageGetItem(LOCAL_STORAGE_ED25519_WALLETS);
-    const _ed25519Wallets = JSON.parse((stringEd25519Wallets as string) || '{}');
-
-    const wallets = {
-      ...Object.keys(_wallets).reduce((res, key) => {
-        return {
-          ...res,
-          [key]: migrateWallet(_wallets[key]),
-        };
-      }, {}),
-      ...Object.keys(_ed25519Wallets).reduce((res, key) => {
-        return {
-          ...res,
-          ...(!res[key] ? { [key]: migrateWallet(_ed25519Wallets[key]) } : {}),
-        };
-      }, {}),
-    };
-
-    this.setWallets(wallets);
-
     // Support legacy supportedWalletTypes
     try {
       this.#supportedWalletTypes = opts.supportedWalletTypes
@@ -796,6 +761,41 @@ export abstract class CoreCapsule {
     } catch (e) {
       this.#supportedWalletTypes = undefined;
     }
+
+    if (!this.platformUtils.isSyncStorage || opts.useStorageOverrides) {
+      return;
+    }
+
+    this.email = (this.localStorageGetItem(LOCAL_STORAGE_EMAIL) as string) || undefined;
+    this.countryCode = (this.localStorageGetItem(LOCAL_STORAGE_COUNTRY_CODE) as CountryCallingCode) || undefined;
+    this.phone = (this.localStorageGetItem(LOCAL_STORAGE_PHONE) as string) || undefined;
+    this.userId = (this.localStorageGetItem(LOCAL_STORAGE_USER_ID) as string) || undefined;
+
+    const stringWallets = this.platformUtils.secureStorage
+      ? this.platformUtils.secureStorage.get(LOCAL_STORAGE_WALLETS)
+      : this.localStorageGetItem(LOCAL_STORAGE_WALLETS);
+    const _wallets = JSON.parse((stringWallets as string) || '{}');
+    const stringEd25519Wallets = this.platformUtils.secureStorage
+      ? this.platformUtils.secureStorage.get(LOCAL_STORAGE_ED25519_WALLETS)
+      : this.localStorageGetItem(LOCAL_STORAGE_ED25519_WALLETS);
+    const _ed25519Wallets = JSON.parse((stringEd25519Wallets as string) || '{}');
+
+    const wallets = {
+      ...Object.keys(_wallets).reduce((res, key) => {
+        return {
+          ...res,
+          [key]: migrateWallet(_wallets[key]),
+        };
+      }, {}),
+      ...Object.keys(_ed25519Wallets).reduce((res, key) => {
+        return {
+          ...res,
+          ...(!res[key] ? { [key]: migrateWallet(_ed25519Wallets[key]) } : {}),
+        };
+      }, {}),
+    };
+
+    this.setWallets(wallets);
 
     // TODO: Improve not great check
     const _currentWalletIds = (this.localStorageGetItem(LOCAL_STORAGE_CURRENT_WALLET_IDS) as string) ?? undefined;
@@ -904,36 +904,90 @@ export abstract class CoreCapsule {
    * Init only needs to be called for storage that is async.
    */
   async init(): Promise<void> {
-    this.email = (await this.localStorageGetItem(LOCAL_STORAGE_EMAIL)) || undefined;
-    this.userId = (await this.localStorageGetItem(LOCAL_STORAGE_USER_ID)) || undefined;
-    // TODO: remove sessionStorageGetItem call once new version is being consumed
-    this.sessionCookie =
-      (await this.localStorageGetItem(LOCAL_STORAGE_SESSION_COOKIE)) ||
-      (await this.sessionStorageGetItem(LOCAL_STORAGE_SESSION_COOKIE)) ||
-      undefined;
+    this.email = ((await this.localStorageGetItem(LOCAL_STORAGE_EMAIL)) as string) || undefined;
+    this.countryCode = ((await this.localStorageGetItem(LOCAL_STORAGE_COUNTRY_CODE)) as CountryCallingCode) || undefined;
+    this.phone = ((await this.localStorageGetItem(LOCAL_STORAGE_PHONE)) as string) || undefined;
+    this.userId = ((await this.localStorageGetItem(LOCAL_STORAGE_USER_ID)) as string) || undefined;
 
     const stringWallets = this.platformUtils.secureStorage
       ? await this.platformUtils.secureStorage.get(LOCAL_STORAGE_WALLETS)
       : await this.localStorageGetItem(LOCAL_STORAGE_WALLETS);
-    this.wallets = JSON.parse(stringWallets || '{}');
+    const _wallets = JSON.parse((stringWallets as string) || '{}');
+    const stringEd25519Wallets = this.platformUtils.secureStorage
+      ? await this.platformUtils.secureStorage.get(LOCAL_STORAGE_ED25519_WALLETS)
+      : await this.localStorageGetItem(LOCAL_STORAGE_ED25519_WALLETS);
+    const _ed25519Wallets = JSON.parse((stringEd25519Wallets as string) || '{}');
 
-    const _currentWalletIds = await this.localStorageGetItem(LOCAL_STORAGE_CURRENT_WALLET_IDS);
-    const currentWalletIds = _currentWalletIds ? JSON.parse(_currentWalletIds) : undefined;
-    this.currentWalletIds = currentWalletIds;
+    const wallets = {
+      ...Object.keys(_wallets).reduce((res, key) => {
+        return {
+          ...res,
+          [key]: migrateWallet(_wallets[key]),
+        };
+      }, {}),
+      ...Object.keys(_ed25519Wallets).reduce((res, key) => {
+        return {
+          ...res,
+          ...(!res[key] ? { [key]: migrateWallet(_ed25519Wallets[key]) } : {}),
+        };
+      }, {}),
+    };
 
-    const stringExternalWallets = await this.localStorageGetItem(LOCAL_STORAGE_EXTERNAL_WALLETS);
-    this.externalWallets = JSON.parse(stringExternalWallets || '{}');
+    await this.setWallets(wallets);
 
-    const _currentExternalWalletAddresses = await this.localStorageGetItem(LOCAL_STORAGE_CURRENT_EXTERNAL_WALLET_ADDRESSES);
-    const currentExternalWalletAddresses = _currentExternalWalletAddresses
-      ? JSON.parse(_currentExternalWalletAddresses)
-      : undefined;
-    this.currentExternalWalletAddresses = currentExternalWalletAddresses;
+    // TODO: Improve not great check
+    const _currentWalletIds = ((await this.localStorageGetItem(LOCAL_STORAGE_CURRENT_WALLET_IDS)) as string) ?? undefined;
+    const currentWalletIds = [undefined, null, 'undefined', 'null'].includes(_currentWalletIds)
+      ? {}
+      : (() => {
+          const fromJson = JSON.parse(_currentWalletIds);
 
-    const loginEncryptionKey = await this.sessionStorageGetItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR);
+          return Array.isArray(fromJson)
+            ? Object.keys(WalletType).reduce((acc: CurrentWalletIds, type: WalletType) => {
+                const wallet = Object.values(this.wallets).find(
+                  w => fromJson.includes(w.id) && WalletSchemeTypeMap[w.scheme][type],
+                );
+                return {
+                  ...acc,
+                  ...(wallet && !acc[type] ? { [type]: [wallet.id] } : {}),
+                };
+              }, {})
+            : fromJson;
+        })();
+
+    await this.setCurrentWalletIds(currentWalletIds);
+
+    // TODO: remove sessionStorageGetItem call once new version is being consumed
+    this.sessionCookie =
+      ((await this.localStorageGetItem(LOCAL_STORAGE_SESSION_COOKIE)) as string) ||
+      ((await this.sessionStorageGetItem(LOCAL_STORAGE_SESSION_COOKIE)) as string) ||
+      undefined;
+
+    // In case currentWalletIds was missing from storage
+    if (
+      Object.values(this.wallets).filter(w => this.isWalletOwned(w)).length > 0 &&
+      this.currentWalletIdsArray.length === 0
+    ) {
+      this.findWalletId(undefined, { forbidPregen: true });
+    }
+
+    const loginEncryptionKey = (await this.sessionStorageGetItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR)) as
+      | string
+      | null;
     if (loginEncryptionKey && loginEncryptionKey !== 'undefined') {
       this.loginEncryptionKeyPair = this.convertEncryptionKeyPair(JSON.parse(loginEncryptionKey));
     }
+
+    const stringExternalWallets = await this.localStorageGetItem(LOCAL_STORAGE_EXTERNAL_WALLETS);
+    const _externalWallets = JSON.parse((stringExternalWallets as string) || '{}');
+
+    await this.setExternalWallets(_externalWallets);
+
+    const _currentExternalWalletAddresses =
+      ((await this.localStorageGetItem(LOCAL_STORAGE_CURRENT_EXTERNAL_WALLET_ADDRESSES)) as string) || undefined;
+    this.currentExternalWalletAddresses = _currentExternalWalletAddresses
+      ? JSON.parse(_currentExternalWalletAddresses)
+      : undefined;
 
     await this.touchSession();
   }
