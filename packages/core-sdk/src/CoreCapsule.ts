@@ -1046,7 +1046,7 @@ export abstract class CoreCapsule {
     this.currentExternalWalletAddresses = [externalAddress];
     this.setCurrentExternalWalletAddresses(this.currentExternalWalletAddresses);
     this.setExternalWallets(this.externalWallets);
-    typeof window !== 'undefined' && window.dispatchEvent(new Event(EXTERNAL_WALLET_CHANGE_EVENT));
+    typeof window !== 'undefined' && !!window.dispatchEvent && window.dispatchEvent(new Event(EXTERNAL_WALLET_CHANGE_EVENT));
   }
 
   /**
@@ -1158,7 +1158,9 @@ export abstract class CoreCapsule {
         sessionLookupId,
       );
     }
-    typeof window !== 'undefined' && window.dispatchEvent(new Event(CURRENT_WALLET_IDS_CHANGE_EVENT));
+    typeof window !== 'undefined' &&
+      !!window.dispatchEvent &&
+      window.dispatchEvent(new Event(CURRENT_WALLET_IDS_CHANGE_EVENT));
   }
 
   /**
