@@ -15,11 +15,13 @@ import {
   parseCredentialCreationRes,
 } from '@usecapsule/web-sdk';
 import { ReactNativeUtils } from './ReactNativeUtils.js';
-import { Passkey, PasskeyRegistrationResult, PasskeyAuthenticationResult } from '@usecapsule/react-native-passkey';
 import {
-  PasskeyRegistrationRequest,
-  PasskeyAuthenticationRequest,
-} from '@usecapsule/react-native-passkey/lib/typescript/Passkey';
+  Passkey,
+  PasskeyCreateRequest,
+  PasskeyCreateResult,
+  PasskeyGetRequest,
+  PasskeyGetResult,
+} from 'react-native-passkey';
 import { PublicKeyStatus, WalletScheme } from '@usecapsule/user-management-client';
 import { setEnv } from '../config.js';
 import base64url from 'base64url';
@@ -120,7 +122,7 @@ export class CapsuleMobile extends CoreCapsule {
 
     const displayIdentifier = identifierType === 'email' ? identifier : `${countryCode}${identifier}`;
 
-    const requestJson: PasskeyRegistrationRequest = {
+    const requestJson: PasskeyCreateRequest = {
       authenticatorSelection: {
         authenticatorAttachment: 'platform' as any,
         requireResidentKey: true,
@@ -151,9 +153,16 @@ export class CapsuleMobile extends CoreCapsule {
       challenge: base64url.encode('somechallenge'),
     };
 
-    const result: PasskeyRegistrationResult = await Passkey.register(requestJson);
+    const result: PasskeyCreateResult = await Passkey.create(requestJson);
+    let resultJson;
 
-    const { cosePublicKey, clientDataJSON } = parseCredentialCreationRes(result, ES256_ALGORITHM);
+    if (typeof result === 'string') {
+      resultJson = JSON.parse(result);
+    } else {
+      resultJson = result;
+    }
+
+    const { cosePublicKey, clientDataJSON } = parseCredentialCreationRes(resultJson, ES256_ALGORITHM);
 
     const keyPair = await getAsymmetricKeyPair(this.ctx);
     const publicKeyHex = getPublicKeyHex(keyPair);
@@ -163,7 +172,7 @@ export class CapsuleMobile extends CoreCapsule {
 
     const session = await this.ctx.capsuleClient.touchSession();
     await this.ctx.capsuleClient.patchSessionPublicKey(session.data.partnerId, this.getUserId()!, biometricsId, {
-      publicKey: result.id,
+      publicKey: resultJson.id,
       sigDerivedPublicKey: publicKeyHex,
       cosePublicKey,
       clientDataJSON,
@@ -174,7 +183,7 @@ export class CapsuleMobile extends CoreCapsule {
       this.getUserId()!,
       encryptedPrivateKeyHex,
       encryptionKeyHash,
-      result.id,
+      resultJson.id,
     );
   }
 
@@ -189,22 +198,30 @@ export class CapsuleMobile extends CoreCapsule {
   async login(email?: string, phone?: string, countryCode?: CountryCallingCode): Promise<void> {
     const { challenge, allowedPublicKeys } = await this.ctx.capsuleClient.getWebChallenge(email, phone, countryCode);
 
-    const requestJson: PasskeyAuthenticationRequest = {
+    const requestJson: PasskeyGetRequest = {
       challenge,
       timeout: 60000,
       rpId: this.relyingPartyId,
       allowCredentials: allowedPublicKeys?.[0] ? [{ type: 'public-key', id: allowedPublicKeys[0] }] : [],
     };
 
-    const result: PasskeyAuthenticationResult = await Passkey.authenticate(requestJson);
+    const result: PasskeyGetResult = await Passkey.get(requestJson);
+
+    let resultJson;
+
+    if (typeof result === 'string') {
+      resultJson = JSON.parse(result);
+    } else {
+      resultJson = result;
+    }
 
     const session = await this.ctx.capsuleClient.touchSession();
     const verifyWebChallengeResult = await this.ctx.capsuleClient.verifyWebChallenge(session.data.partnerId, {
-      publicKey: result.id,
+      publicKey: resultJson.id,
       signature: {
-        clientDataJSON: result.response.clientDataJSON,
-        authenticatorData: result.response.authenticatorData,
-        signature: result.response.signature,
+        clientDataJSON: resultJson.response.clientDataJSON,
+        authenticatorData: resultJson.response.authenticatorData,
+        signature: resultJson.response.signature,
       },
     });
 
@@ -212,29 +229,29 @@ export class CapsuleMobile extends CoreCapsule {
 
     await this.setUserId(userId);
 
-    const encryptedSharesResult = await this.ctx.capsuleClient.getBiometricKeyshares(userId, result.id);
+    const encryptedSharesResult = await this.ctx.capsuleClient.getBiometricKeyshares(userId, resultJson.id);
 
-    const encryptionKeyHash = getSHA256HashHex(result.response.userHandle);
+    const encryptionKeyHash = getSHA256HashHex(resultJson.response.userHandle);
     const { encryptedPrivateKeys } = await this.ctx.capsuleClient.getEncryptedWalletPrivateKeys(userId, encryptionKeyHash);
 
     let decryptedShares;
     if (encryptedPrivateKeys.length === 0) {
       decryptedShares = await getDerivedPrivateKeyAndDecrypt(
         this.ctx,
-        result.response.userHandle,
+        resultJson.response.userHandle,
         encryptedSharesResult.data.keyShares,
       );
-      const keyPair = await getAsymmetricKeyPair(this.ctx, result.response.userHandle);
-      const encryptedPrivateKeyHex = await encryptPrivateKey(keyPair, result.response.userHandle);
+      const keyPair = await getAsymmetricKeyPair(this.ctx, resultJson.response.userHandle);
+      const encryptedPrivateKeyHex = await encryptPrivateKey(keyPair, resultJson.response.userHandle);
       await this.ctx.capsuleClient.uploadEncryptedWalletPrivateKey(
         userId,
         encryptedPrivateKeyHex,
         encryptionKeyHash,
-        result.id,
+        resultJson.id,
       );
     } else {
       decryptedShares = await decryptPrivateKeyAndDecryptShare(
-        result.response.userHandle,
+        resultJson.response.userHandle,
         encryptedSharesResult.data.keyShares,
         encryptedPrivateKeys[0].encryptedPrivateKey,
       );

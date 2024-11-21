@@ -8958,11 +8958,6 @@
   resolved "https://registry.yarnpkg.com/@ungap/structured-clone/-/structured-clone-1.2.0.tgz#756641adb587851b5ccb3e095daf27ae581c8406"
   integrity sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==
 
-"@usecapsule/react-native-passkey@2.2.0":
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/@usecapsule/react-native-passkey/-/react-native-passkey-2.2.0.tgz#f03dda1032b178464b5fd4370ea227a396438074"
-  integrity sha512-kMdhTqKOgLYKiyl8tsqe/9kB1XtQRNxoWZXQvqCfITniluyF2qTTS5+i+yLwCmMiK7QGpENR46xvsXrdh6pQ3A==
-
 "@vitejs/plugin-react-swc@^3.7.0":
   version "3.7.0"
   resolved "https://registry.yarnpkg.com/@vitejs/plugin-react-swc/-/plugin-react-swc-3.7.0.tgz#e456c0a6d7f562268e1d231af9ac46b86ef47d88"
@@ -21714,6 +21709,11 @@ react-native-modpow@1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/react-native-modpow/-/react-native-modpow-1.1.0.tgz#14867fc678daeb74ce678df15a8abc5955115e5c"
   integrity sha512-pEXAecjrp06UG2B1gy+yNuU7laoe7gjMWT63bfsH/V9lIHrwQLqQKTz073AgJsWWVBArVVC0wRI2jjqiTCf61w==
+
+react-native-passkey@3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/react-native-passkey/-/react-native-passkey-3.0.0.tgz#f81255bca91c0b64b4dc940df9b4f5b53d4131c2"
+  integrity sha512-U26Jaz8BeN+LxB9a5rwJiDHIYNBj7sobfnlQnkfyuqylKnSHxzThOnYcJq3WGCSzTYNI5DT0xUtArQkc482fkQ==
 
 react-native-webview@^11.26.0:
   version "11.26.1"
