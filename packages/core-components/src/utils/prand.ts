@@ -1,4 +1,4 @@
-import Prando from '../lib/prando';
+import Prando from '../lib/prando.js';
 
 export type Color = 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple';
 

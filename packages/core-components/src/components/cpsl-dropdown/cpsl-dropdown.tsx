@@ -1,6 +1,6 @@
 import { Component, Host, h, Prop, State, Element, ComponentInterface, Watch, Listen, EventEmitter, Event } from '@stencil/core';
-import { Icons } from '../../assets/icons';
-import { DropdownInputEventDetail } from './dropdown-interface';
+import { Icons } from '../../assets/icons/index.js';
+import { DropdownInputEventDetail } from './dropdown-interface.js';
 
 @Component({
   tag: 'cpsl-dropdown',

@@ -1,5 +1,5 @@
 // import { newSpecPage } from '@stencil/core/testing';
-// import { CpslButtonGroup } from '../cpsl-button-group';
+// import { CpslButtonGroup } from '../cpsl-button-group.js';
 
 describe('cpsl-button-group', () => {
   it('stub', async () => {

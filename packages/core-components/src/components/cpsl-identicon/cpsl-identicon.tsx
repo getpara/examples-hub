@@ -1,6 +1,6 @@
 import { Component, Host, Prop, h } from '@stencil/core';
-import Prando from '../../lib/prando';
-import { Color, COLORS } from '../../utils/prand';
+import Prando from '../../lib/prando.js';
+import { Color, COLORS } from '../../utils/prand.js';
 
 const SingleArc = (rotation: number) => (
   <svg

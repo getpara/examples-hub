@@ -1,5 +1,5 @@
 import { newSpecPage } from '@stencil/core/testing';
-import { CpslCheckbox } from '../cpsl-checkbox';
+import { CpslCheckbox } from '../cpsl-checkbox.js';
 
 describe('cpsl-checkbox', () => {
   it('renders', async () => {

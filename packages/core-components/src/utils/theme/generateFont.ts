@@ -1,4 +1,4 @@
-import { Theme } from '../../interface';
+import { Theme } from '../../interface.js';
 
 const FONT_NAME_MAP = {
   body2XS: 'body-2xs',

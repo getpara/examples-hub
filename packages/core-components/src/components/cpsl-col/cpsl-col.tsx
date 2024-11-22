@@ -1,5 +1,5 @@
 import { Component, Host, Listen, Prop, forceUpdate, h } from '@stencil/core';
-import { matchBreakpoint } from '../../utils/media';
+import { matchBreakpoint } from '../../utils/media.js';
 
 const win = typeof (window as any) !== 'undefined' ? (window as any) : undefined;
 const SUPPORTS_VARS = win && !!(win.CSS && win.CSS.supports && win.CSS.supports('--a: 0'));

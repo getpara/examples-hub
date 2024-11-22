@@ -1,5 +1,5 @@
 // import { newSpecPage } from '@stencil/core/testing';
-// import { CpslNavButtonGroup } from '../cpsl-nav-button-group';
+// import { CpslNavButtonGroup } from '../cpsl-nav-button-group.js';
 
 describe('cpsl-nav-button-group', () => {
   it('stub', async () => {

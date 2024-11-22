@@ -1,5 +1,5 @@
 import { newSpecPage } from '@stencil/core/testing';
-import { CpslInfoBox } from '../cpsl-info-box';
+import { CpslInfoBox } from '../cpsl-info-box.js';
 
 describe('cpsl-info-box', () => {
   it('renders', async () => {

@@ -1,5 +1,5 @@
 import type { Meta, StoryFn } from '@storybook/html';
-import { type CpslIdenticon } from './cpsl-identicon';
+import { type CpslIdenticon } from './cpsl-identicon.js';
 
 const meta: Meta<CpslIdenticon & { content?: string }> = {
   title: 'Components/CpslIdenticon',

@@ -1,4 +1,4 @@
-import { IconType } from '../../interface';
+import { IconType } from '../../interface.js';
 
 export interface DropdownInputEventDetail {
   icon: IconType;

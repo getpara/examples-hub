@@ -1,5 +1,5 @@
 import { Component, Host, Prop, h, Element, EventEmitter, Event } from '@stencil/core';
-import { IconType } from '../../interface';
+import { IconType } from '../../interface.js';
 
 @Component({
   tag: 'cpsl-slide-button',

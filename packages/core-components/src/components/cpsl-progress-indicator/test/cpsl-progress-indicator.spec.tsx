@@ -1,5 +1,5 @@
 import { newSpecPage } from '@stencil/core/testing';
-import { CpslProgressIndicator } from '../cpsl-progress-indicator';
+import { CpslProgressIndicator } from '../cpsl-progress-indicator.js';
 
 describe('cpsl-progress-indicator', () => {
   it('renders', async () => {

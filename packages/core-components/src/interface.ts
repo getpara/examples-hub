@@ -1,5 +1,5 @@
-import { Icons } from './assets/icons';
-import { Images } from './assets/images';
+import { Icons } from './assets/icons/index.js';
+import { Images } from './assets/images/index.js';
 
 export type PredefinedColors = 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'light' | 'medium' | 'dark';
 

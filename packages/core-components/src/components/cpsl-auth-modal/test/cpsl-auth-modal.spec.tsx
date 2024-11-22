@@ -1,5 +1,5 @@
 // import { newSpecPage } from '@stencil/core/testing';
-// import { CpslAuthModal } from '../cpsl-auth-modal';
+// import { CpslAuthModal } from '../cpsl-auth-modal.js';
 
 describe('cpsl-auth-modal', () => {
   it('stub', async () => {

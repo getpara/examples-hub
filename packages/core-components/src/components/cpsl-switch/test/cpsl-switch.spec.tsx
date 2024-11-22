@@ -1,5 +1,5 @@
 import { newSpecPage } from '@stencil/core/testing';
-import { CpslSwitch } from '../cpsl-switch';
+import { CpslSwitch } from '../cpsl-switch.js';
 
 describe('cpsl-switch', () => {
   it('renders', async () => {

@@ -1,5 +1,5 @@
 import { Component, Fragment, Host, Prop, h } from '@stencil/core';
-import { Images } from '../../assets/images';
+import { Images } from '../../assets/images/index.js';
 
 @Component({
   tag: 'cpsl-hero',

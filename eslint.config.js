@@ -14,7 +14,6 @@ module.exports = [
       import: importPlugin,
     },
     files: ['packages/**/src/**/*.{ts,tsx,js,jsx}'],
-    ignores: ['packages/core-components/**/*.{ts,tsx}'],
     rules: {
       'import/extensions': [
         'error',
@@ -37,6 +36,8 @@ module.exports = [
       '**/wasm_exec.js',
       '**/dist/**',
       '**/build/**',
+      '**/fixExtensions.js',
+      '**/appendLoaderExports.ts',
     ],
     languageOptions: {
       ecmaVersion: 2015,

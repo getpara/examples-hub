@@ -1,5 +1,5 @@
 import { newSpecPage } from '@stencil/core/testing';
-import { CpslModalV2 } from '../cpsl-modal-v2';
+import { CpslModalV2 } from '../cpsl-modal-v2.js';
 
 describe('cpsl-modal-v2', () => {
   it('renders', async () => {

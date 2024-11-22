@@ -1,5 +1,5 @@
 import { newSpecPage } from '@stencil/core/testing';
-import { CpslTileButton } from '../cpsl-tile-button';
+import { CpslTileButton } from '../cpsl-tile-button.js';
 
 describe('cpsl-tile-button', () => {
   it('renders', async () => {

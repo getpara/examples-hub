@@ -5,6 +5,13 @@
   "main": "dist/index.cjs.js",
   "module": "dist/index.js",
   "types": "dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs.js",
+      "types": "./dist/types/index.d.ts"
+    }
+  },
   "sideEffects": [
     "*.css",
     "*.scss"
@@ -16,13 +23,14 @@
     "css/"
   ],
   "scripts": {
-    "build": "yarn build:assets && yarn build:css && stencil build",
+    "build": "yarn build:assets && yarn build:css && stencil build && yarn appendLoaderExports",
     "start": "yarn build:assets && yarn build:css && stencil build --dev --watch --serve",
-    "test": "stencil test --spec",
-    "test.watch": "stencil test --spec --watchAll",
+    "test": "stencil test --spec --clearCache",
+    "test.watch": "stencil test --spec --watchAll --clearCache",
     "generate": "stencil generate",
     "build:css": "sass --embed-sources src/css:./css",
     "build:assets": "ts-node -T ./scripts/buildAssets.ts",
+    "appendLoaderExports": "ts-node -T ./scripts/appendLoaderExports.ts",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },

@@ -1,5 +1,5 @@
 import { newSpecPage } from '@stencil/core/testing';
-import { CpslSlideButton } from '../cpsl-slide-button';
+import { CpslSlideButton } from '../cpsl-slide-button.js';
 
 describe('cpsl-slide-button', () => {
   it('renders', async () => {

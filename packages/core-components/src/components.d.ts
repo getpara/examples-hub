@@ -5,18 +5,18 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { AutocompleteTypes, IconType, TextFieldTypes } from "./interface";
-import { CodeChangeEventDetail } from "./components/cpsl-code-input/code-change-interface";
-import { DropdownInputEventDetail } from "./components/cpsl-dropdown/dropdown-interface";
-import { InputChangeEventDetail, InputInputEventDetail } from "./components/cpsl-input/input-interface";
-import { TabClickEventDetail, TabSizeChangeEventDetail } from "./components/cpsl-tab/tab-interface";
-import { TabsChangedEventDetail } from "./components/cpsl-tabs/tabs-interface";
-export { AutocompleteTypes, IconType, TextFieldTypes } from "./interface";
-export { CodeChangeEventDetail } from "./components/cpsl-code-input/code-change-interface";
-export { DropdownInputEventDetail } from "./components/cpsl-dropdown/dropdown-interface";
-export { InputChangeEventDetail, InputInputEventDetail } from "./components/cpsl-input/input-interface";
-export { TabClickEventDetail, TabSizeChangeEventDetail } from "./components/cpsl-tab/tab-interface";
-export { TabsChangedEventDetail } from "./components/cpsl-tabs/tabs-interface";
+import { AutocompleteTypes, IconType, TextFieldTypes } from "./interface.js";
+import { CodeChangeEventDetail } from "./components/cpsl-code-input/code-change-interface.js";
+import { DropdownInputEventDetail } from "./components/cpsl-dropdown/dropdown-interface.js";
+import { InputChangeEventDetail, InputInputEventDetail } from "./components/cpsl-input/input-interface.js";
+import { TabClickEventDetail, TabSizeChangeEventDetail } from "./components/cpsl-tab/tab-interface.js";
+import { TabsChangedEventDetail } from "./components/cpsl-tabs/tabs-interface.js";
+export { AutocompleteTypes, IconType, TextFieldTypes } from "./interface.js";
+export { CodeChangeEventDetail } from "./components/cpsl-code-input/code-change-interface.js";
+export { DropdownInputEventDetail } from "./components/cpsl-dropdown/dropdown-interface.js";
+export { InputChangeEventDetail, InputInputEventDetail } from "./components/cpsl-input/input-interface.js";
+export { TabClickEventDetail, TabSizeChangeEventDetail } from "./components/cpsl-tab/tab-interface.js";
+export { TabsChangedEventDetail } from "./components/cpsl-tabs/tabs-interface.js";
 export namespace Components {
     interface CpslAlert {
         /**

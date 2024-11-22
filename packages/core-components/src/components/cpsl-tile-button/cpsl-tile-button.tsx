@@ -1,5 +1,5 @@
 import { Component, Host, h, Prop } from '@stencil/core';
-import { IconType } from '../../interface';
+import { IconType } from '../../interface.js';
 
 @Component({
   tag: 'cpsl-tile-button',

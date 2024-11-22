@@ -1,5 +1,5 @@
 import { newSpecPage } from '@stencil/core/testing';
-import { CpslFileUpload } from '../cpsl-file-upload';
+import { CpslFileUpload } from '../cpsl-file-upload.js';
 
 describe('cpsl-file-upload', () => {
   it('renders', async () => {

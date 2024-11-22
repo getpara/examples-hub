@@ -1,5 +1,5 @@
 import { newSpecPage } from '@stencil/core/testing';
-import { CpslAppBar } from '../cpsl-app-bar';
+import { CpslAppBar } from '../cpsl-app-bar.js';
 
 describe('cpsl-app-bar', () => {
   it('renders', async () => {

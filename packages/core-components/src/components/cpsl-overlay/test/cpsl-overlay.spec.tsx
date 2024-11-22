@@ -1,5 +1,5 @@
 import { newSpecPage } from '@stencil/core/testing';
-import { CpslOverlay } from '../cpsl-overlay';
+import { CpslOverlay } from '../cpsl-overlay.js';
 
 describe('cpsl-overlay', () => {
   it('renders', async () => {

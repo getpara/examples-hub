@@ -1,7 +1,7 @@
 import { Component, Host, h, Element, Prop } from '@stencil/core';
 import QrCodeWithLogo from 'qrcode-with-logos';
-import { IconType } from '../../interface';
-import { Icons } from '../../assets/icons';
+import { IconType } from '../../interface.js';
+import { Icons } from '../../assets/icons/index.js';
 
 @Component({
   tag: 'cpsl-qr-code',

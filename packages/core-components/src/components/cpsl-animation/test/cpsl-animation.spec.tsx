@@ -1,5 +1,5 @@
 // import { newSpecPage } from '@stencil/core/testing';
-// import { CpslAnimation } from '../cpsl-animation';
+// import { CpslAnimation } from '../cpsl-animation.js';
 
 describe('cpsl-animation', () => {
   it('stub', async () => {

@@ -1,5 +1,5 @@
 import { newSpecPage } from '@stencil/core/testing';
-import { CpslAvatar } from '../cpsl-avatar';
+import { CpslAvatar } from '../cpsl-avatar.js';
 
 describe('cpsl-avatar', () => {
   it('renders', async () => {

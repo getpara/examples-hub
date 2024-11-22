@@ -1,5 +1,5 @@
 // import { newSpecPage } from '@stencil/core/testing';
-// import { CpslTable } from '../cpsl-table';
+// import { CpslTable } from '../cpsl-table.js';
 
 describe('cpsl-table', () => {
   it('stub', async () => {

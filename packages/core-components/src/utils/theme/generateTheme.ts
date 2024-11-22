@@ -1,8 +1,8 @@
-import { DEFAULT_THEME } from '../../constants';
-import { Theme } from '../../interface';
-import { generateBorderRadii } from './generateBorderRadii';
-import { generateFont } from './generateFont';
-import { generatePalette } from './generatePalette';
+import { DEFAULT_THEME } from '../../constants.js';
+import { Theme } from '../../interface.js';
+import { generateBorderRadii } from './generateBorderRadii.js';
+import { generateFont } from './generateFont.js';
+import { generatePalette } from './generatePalette.js';
 
 /**
  * Generates css theme variables.

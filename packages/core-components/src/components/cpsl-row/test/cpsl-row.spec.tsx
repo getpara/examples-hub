@@ -1,5 +1,5 @@
 import { newSpecPage } from '@stencil/core/testing';
-import { CpslRow } from '../cpsl-row';
+import { CpslRow } from '../cpsl-row.js';
 
 describe('cpsl-row', () => {
   it('renders', async () => {

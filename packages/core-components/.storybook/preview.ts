@@ -1,4 +1,4 @@
-import { defineCustomElements } from '../dist/loader';
+import { defineCustomElements } from '../dist/loader/index.js';
 import { generateTheme } from '../src/utils/theme/generateTheme';
 import '../css/capsule-core.css';
 

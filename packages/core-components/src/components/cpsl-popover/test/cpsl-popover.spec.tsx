@@ -1,5 +1,5 @@
 import { newSpecPage } from '@stencil/core/testing';
-import { CpslPopover } from '../cpsl-popover';
+import { CpslPopover } from '../cpsl-popover.js';
 
 describe('cpsl-popover', () => {
   it('renders', async () => {

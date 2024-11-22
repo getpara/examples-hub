@@ -1,5 +1,5 @@
 import { Component, Host, Prop, State, Watch, Element, h, Method, Event, EventEmitter } from '@stencil/core';
-import { InteractionCallback } from '../../interface';
+import { InteractionCallback } from '../../interface.js';
 
 @Component({
   tag: 'cpsl-popover',

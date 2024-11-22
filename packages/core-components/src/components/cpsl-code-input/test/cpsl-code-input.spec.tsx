@@ -1,5 +1,5 @@
 import { newSpecPage } from '@stencil/core/testing';
-import { CpslCodeInput } from '../cpsl-code-input';
+import { CpslCodeInput } from '../cpsl-code-input.js';
 
 describe('cpsl-code-input', () => {
   it('renders', async () => {

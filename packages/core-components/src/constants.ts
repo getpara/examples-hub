@@ -1,4 +1,4 @@
-import { Theme } from './interface';
+import { Theme } from './interface.js';
 
 export const MOBILE_SIZE = 480;
 

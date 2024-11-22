@@ -1,5 +1,5 @@
 import { Component, Host, h, Prop, Element, Event, EventEmitter } from '@stencil/core';
-import { CodeChangeEventDetail } from './code-change-interface';
+import { CodeChangeEventDetail } from './code-change-interface.js';
 
 @Component({
   tag: 'cpsl-code-input',

@@ -1,5 +1,5 @@
 import { newSpecPage } from '@stencil/core/testing';
-import { CpslHero } from '../cpsl-hero';
+import { CpslHero } from '../cpsl-hero.js';
 
 // not testing this now since it is rather complicated. Will address in a future PR
 // when we overhaul the testing strategy.

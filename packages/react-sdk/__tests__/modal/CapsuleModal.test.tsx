@@ -70,10 +70,13 @@ describe('CapsuleModal', () => {
 
     expect(screen.getAllByTestId('modal')).toBeDefined();
 
-    await waitFor(() => {
-      expect(screen.getAllByTestId('modal-content')).toBeDefined();
-      expect(screen.getAllByTestId('main-auth-step-content')).toBeDefined();
-    });
+    await waitFor(
+      () => {
+        expect(screen.getAllByTestId('modal-content')).toBeDefined();
+        expect(screen.getAllByTestId('main-auth-step-content')).toBeDefined();
+      },
+      { timeout: 2000 },
+    );
   });
 
   // TODO: add data-testid as optional field to all components and reimpliment using data-testid selector

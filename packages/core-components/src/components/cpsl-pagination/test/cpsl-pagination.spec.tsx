@@ -1,5 +1,5 @@
 import { newSpecPage } from '@stencil/core/testing';
-import { CpslPagination } from '../cpsl-pagination';
+import { CpslPagination } from '../cpsl-pagination.js';
 
 describe('cpsl-pagination', () => {
   it('renders', async () => {

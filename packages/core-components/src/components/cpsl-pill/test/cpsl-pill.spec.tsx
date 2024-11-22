@@ -1,5 +1,5 @@
 import { newSpecPage } from '@stencil/core/testing';
-import { CpslPill } from '../cpsl-pill';
+import { CpslPill } from '../cpsl-pill.js';
 
 describe('cpsl-pill', () => {
   it('renders', async () => {

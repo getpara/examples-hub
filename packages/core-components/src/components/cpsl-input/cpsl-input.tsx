@@ -1,6 +1,6 @@
 import { Component, Host, Prop, h, Event, EventEmitter, State, Element, Watch } from '@stencil/core';
-import { AutocompleteTypes, IconType, TextFieldTypes } from '../../interface';
-import { InputChangeEventDetail, InputInputEventDetail } from './input-interface';
+import { AutocompleteTypes, IconType, TextFieldTypes } from '../../interface.js';
+import { InputChangeEventDetail, InputInputEventDetail } from './input-interface.js';
 import Inputmask from 'inputmask';
 
 @Component({

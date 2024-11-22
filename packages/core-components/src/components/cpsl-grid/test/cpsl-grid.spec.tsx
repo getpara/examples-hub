@@ -1,5 +1,5 @@
 import { newSpecPage } from '@stencil/core/testing';
-import { CpslGrid } from '../cpsl-grid';
+import { CpslGrid } from '../cpsl-grid.js';
 
 describe('cpsl-grid', () => {
   it('renders', async () => {

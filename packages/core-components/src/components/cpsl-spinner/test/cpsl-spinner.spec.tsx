@@ -1,5 +1,5 @@
 import { newSpecPage } from '@stencil/core/testing';
-import { CpslSpinner } from '../cpsl-spinner';
+import { CpslSpinner } from '../cpsl-spinner.js';
 
 describe('cpsl-spinner', () => {
   it('renders', async () => {

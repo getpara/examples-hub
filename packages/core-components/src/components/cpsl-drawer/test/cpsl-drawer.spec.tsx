@@ -1,5 +1,5 @@
 import { newSpecPage } from '@stencil/core/testing';
-import { CpslDrawer } from '../cpsl-drawer';
+import { CpslDrawer } from '../cpsl-drawer.js';
 
 describe('cpsl-drawer', () => {
   it('renders', async () => {

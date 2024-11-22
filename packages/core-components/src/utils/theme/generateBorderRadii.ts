@@ -1,5 +1,5 @@
-import { Theme } from '../../interface';
-import { getCssBorderRadii } from './utils';
+import { Theme } from '../../interface.js';
+import { getCssBorderRadii } from './utils.js';
 
 export const generateBorderRadii = ({ borderRadius, customBorderRadii }: Pick<Theme, 'borderRadius' | 'customBorderRadii'>) => {
   let mediumRadius: number,

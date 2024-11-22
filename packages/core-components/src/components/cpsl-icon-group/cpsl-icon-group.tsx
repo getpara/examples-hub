@@ -1,6 +1,6 @@
 import { Component, Host, Prop, h, Element, State } from '@stencil/core';
-import { IconType } from '../../interface';
-import { Icons } from '../../assets/icons';
+import { IconType } from '../../interface.js';
+import { Icons } from '../../assets/icons/index.js';
 
 function isOfTypeIconType(key: string): key is IconType {
   return Object.keys(Icons).includes(key);

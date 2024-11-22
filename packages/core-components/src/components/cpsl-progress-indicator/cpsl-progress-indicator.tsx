@@ -1,5 +1,5 @@
 import { Component, Host, Prop, h } from '@stencil/core';
-import { Step } from './progress-indicator-interface';
+import { Step } from './progress-indicator-interface.js';
 
 @Component({
   tag: 'cpsl-progress-indicator',

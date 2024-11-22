@@ -1,5 +1,5 @@
 import { newSpecPage } from '@stencil/core/testing';
-import { CpslRadio } from '../cpsl-radio';
+import { CpslRadio } from '../cpsl-radio.js';
 
 describe('cpsl-radio', () => {
   it('renders', async () => {

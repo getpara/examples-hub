@@ -1,6 +1,6 @@
 import { Component, Host, Prop, h, Event, EventEmitter, Listen, Element } from '@stencil/core';
-import { TabClickEventDetail, TabSizeChangeEventDetail } from './tab-interface';
-import { TabsChangedEventDetail } from '../cpsl-tabs/tabs-interface';
+import { TabClickEventDetail, TabSizeChangeEventDetail } from './tab-interface.js';
+import { TabsChangedEventDetail } from '../cpsl-tabs/tabs-interface.js';
 
 @Component({
   tag: 'cpsl-tab',

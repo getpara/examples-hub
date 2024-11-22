@@ -1,5 +1,5 @@
 import { newSpecPage } from '@stencil/core/testing';
-import { CpslTabs } from '../cpsl-tabs';
+import { CpslTabs } from '../cpsl-tabs.js';
 
 describe('cpsl-tabs', () => {
   it('renders', async () => {

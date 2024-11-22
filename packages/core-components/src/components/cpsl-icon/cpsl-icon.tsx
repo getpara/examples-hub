@@ -1,6 +1,6 @@
 import { Component, Host, h, Prop } from '@stencil/core';
-import { IconType } from '../../interface';
-import { Icons } from '../../assets/icons';
+import { IconType } from '../../interface.js';
+import { Icons } from '../../assets/icons/index.js';
 
 @Component({
   tag: 'cpsl-icon',

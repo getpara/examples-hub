@@ -1,5 +1,5 @@
 import { Component, Host, Prop, Element, h, State } from '@stencil/core';
-import { DEFAULT_Z_INDICES } from '../../constants';
+import { DEFAULT_Z_INDICES } from '../../constants.js';
 
 @Component({
   tag: 'cpsl-drawer',

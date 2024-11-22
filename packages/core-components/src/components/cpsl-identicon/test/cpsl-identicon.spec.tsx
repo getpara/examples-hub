@@ -1,5 +1,5 @@
 import { newSpecPage } from '@stencil/core/testing';
-import { CpslIdenticon } from '../cpsl-identicon';
+import { CpslIdenticon } from '../cpsl-identicon.js';
 
 describe('cpsl-identicon', () => {
   it('renders', async () => {

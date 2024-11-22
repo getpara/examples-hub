@@ -1,5 +1,5 @@
 import { parseToRgba, rgba } from 'color2k';
-import { CustomBorderRadii, CustomPalette } from '../../interface';
+import { CustomBorderRadii, CustomPalette } from '../../interface.js';
 import { overlay } from 'color-blend';
 
 export const isColor = strColor => {

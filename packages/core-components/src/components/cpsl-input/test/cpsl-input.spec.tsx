@@ -1,5 +1,5 @@
 // import { newSpecPage } from '@stencil/core/testing';
-// import { CpslInput } from '../cpsl-input';
+// import { CpslInput } from '../cpsl-input.js';
 
 describe('cpsl-input', () => {
   it('stub', async () => {

@@ -1,5 +1,5 @@
 import type { Meta, StoryFn } from '@storybook/html';
-import { type CpslHero } from './cpsl-hero';
+import { type CpslHero } from './cpsl-hero.js';
 
 const meta: Meta<CpslHero & { content?: string }> = {
   title: 'Components/CpslHero',

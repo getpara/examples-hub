@@ -1,5 +1,5 @@
 // import { newSpecPage } from '@stencil/core/testing';
-// import { CpslIconGroup } from '../cpsl-icon-group';
+// import { CpslIconGroup } from '../cpsl-icon-group.js';
 
 describe('cpsl-icon-group', () => {
   it('stub', async () => {

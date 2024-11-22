@@ -1,5 +1,5 @@
 // import { newSpecPage } from '@stencil/core/testing';
-// import { CpslQrCode } from '../cpsl-qr-code';
+// import { CpslQrCode } from '../cpsl-qr-code.js';
 
 describe('cpsl-qr-code', () => {
   it('stub', async () => {

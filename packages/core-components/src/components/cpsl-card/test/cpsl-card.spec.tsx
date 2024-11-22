@@ -1,5 +1,5 @@
 import { newSpecPage } from '@stencil/core/testing';
-import { CpslCard } from '../cpsl-card';
+import { CpslCard } from '../cpsl-card.js';
 
 describe('cpsl-card', () => {
   it('renders', async () => {

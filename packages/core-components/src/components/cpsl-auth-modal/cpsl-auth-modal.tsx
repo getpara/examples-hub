@@ -1,6 +1,6 @@
 import { Component, Element, Host, Prop, State, Watch, h, Event, EventEmitter } from '@stencil/core';
 import gsap from 'gsap';
-import { MOBILE_SIZE } from '../../constants';
+import { MOBILE_SIZE } from '../../constants.js';
 
 const mm = gsap.matchMedia();
 @Component({

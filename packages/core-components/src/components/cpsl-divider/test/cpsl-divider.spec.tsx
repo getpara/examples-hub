@@ -1,5 +1,5 @@
 import { newSpecPage } from '@stencil/core/testing';
-import { CpslDivider } from '../cpsl-divider';
+import { CpslDivider } from '../cpsl-divider.js';
 
 describe('cpsl-divider', () => {
   it('renders', async () => {

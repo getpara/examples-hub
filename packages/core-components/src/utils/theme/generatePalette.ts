@@ -1,7 +1,7 @@
 import { mix, readableColorIsBlack } from 'color2k';
-import { Theme } from '../../interface';
-import { getCssColors, isColor, overlayMix } from './utils';
-import { COLOR_MIXES, DEFAULT_THEME, UTILITY_COLORS } from '../../constants';
+import { Theme } from '../../interface.js';
+import { getCssColors, isColor, overlayMix } from './utils.js';
+import { COLOR_MIXES, DEFAULT_THEME, UTILITY_COLORS } from '../../constants.js';
 
 export type Palette = {
   foregroundColors: string[];

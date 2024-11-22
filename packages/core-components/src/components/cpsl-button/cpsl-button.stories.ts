@@ -1,5 +1,5 @@
 import type { Meta, StoryFn } from '@storybook/html';
-import { type CpslButton } from './cpsl-button';
+import { type CpslButton } from './cpsl-button.js';
 
 const meta: Meta<CpslButton & { content?: string }> = {
   title: 'Components/CpslButton',

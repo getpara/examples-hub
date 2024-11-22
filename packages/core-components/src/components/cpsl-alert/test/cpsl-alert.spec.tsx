@@ -1,5 +1,5 @@
 import { newSpecPage } from '@stencil/core/testing';
-import { CpslAlert } from '../cpsl-alert';
+import { CpslAlert } from '../cpsl-alert.js';
 
 describe('cpsl-alert', () => {
   it('renders', async () => {

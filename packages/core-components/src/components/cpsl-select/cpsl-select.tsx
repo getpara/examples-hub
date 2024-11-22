@@ -1,5 +1,5 @@
 import { Component, Host, Element, h, Prop, State, EventEmitter, Event, Watch, Listen } from '@stencil/core';
-import { IconType } from '../../interface';
+import { IconType } from '../../interface.js';
 
 @Component({
   tag: 'cpsl-select',

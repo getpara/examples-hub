@@ -1,5 +1,5 @@
 // import { newSpecPage } from '@stencil/core/testing';
-// import { CpslDropdown } from '../cpsl-dropdown';
+// import { CpslDropdown } from '../cpsl-dropdown.js';
 
 describe('cpsl-dropdown', () => {
   it('stub', async () => {

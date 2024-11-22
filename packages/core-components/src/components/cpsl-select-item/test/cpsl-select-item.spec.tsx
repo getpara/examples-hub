@@ -1,5 +1,5 @@
 import { newSpecPage } from '@stencil/core/testing';
-import { CpslSelectItem } from '../cpsl-select-item';
+import { CpslSelectItem } from '../cpsl-select-item.js';
 
 describe('cpsl-select-item', () => {
   it('renders', async () => {
