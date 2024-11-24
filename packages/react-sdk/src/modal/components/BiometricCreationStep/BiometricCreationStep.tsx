@@ -3,17 +3,21 @@ import { useEffect, useState } from 'react';
 import { useCapsuleStore, useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { InnerStepContainer, StepContainer, Heading, QRContainer } from '../common.js';
-import { openPopup } from '../../utils/openPopup.js';
 import { isPasskeySupported } from '../../utils/isPasskeySupported.js';
 import { useCopyToClipboard } from '@usecapsule/react-common';
 
 const SHORTENING_AVAILABLE = true;
 
-export const BiometricCreationStep = () => {
+export const BiometricCreationStep = ({
+  handlePasswordClick,
+  handlePasskeyClick,
+}: {
+  handlePasswordClick: () => Promise<void>;
+  handlePasskeyClick: () => Promise<void>;
+}) => {
   const webAuthURLForCreate = useModalStore(state => state.webAuthURLForCreate);
   const passwordUrlForCreate = useModalStore(state => state.passwordUrlForCreate);
   const currentStep = useModalStore(state => state.step);
-  const setStep = useModalStore(state => state.setStep);
   const capsule = useCapsuleStore(state => state.capsule);
   const [shortLoginLink, setShortLoginLink] = useState<string>();
 
@@ -37,15 +41,6 @@ export const BiometricCreationStep = () => {
       setShortLoginLink(webAuthURLForCreate);
     }
   }, [webAuthURLForCreate]);
-
-  const handlePasskeyClick = () => {
-    openPopup(shortLoginLink, 'CapsulePasskey', 'CREATE_PASSKEY');
-    setStep(ModalStep.AWAITING_BIOMETRIC_CREATION);
-  };
-
-  const handlePasswordClick = () => {
-    setStep(ModalStep.PASSWORD_CREATION);
-  };
 
   const handleCopy = () => {
     copy(shortLoginLink);

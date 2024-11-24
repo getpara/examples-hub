@@ -18,6 +18,7 @@ import { Footer } from '../Footer/Footer.js';
 import { CapsuleModalProps } from '../../types/modalProps.js';
 import { DEFAULTS } from '../../constants/defaults.js';
 import { useGoBack } from '../../hooks/useGoBack.js';
+import { openPopup } from '../../utils/openPopup.js';
 
 type ModalContentProps = Omit<
   CapsuleModalProps,
@@ -74,7 +75,6 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     const currentStep = useModalStore(state => state.step);
     const webAuthURLForLogin = useModalStore(state => state.webAuthURLForLogin);
     const webAuthURLForCreate = useModalStore(state => state.webAuthURLForCreate);
-    const passwordUrlForCreate = useModalStore(state => state.passwordUrlForCreate);
     const passwordUrlForLogin = useModalStore(state => state.passwordUrlForLogin);
     const isLogin = useModalStore(state => state.isLogin());
     const popupWindow = useModalStore(state => state.popupWindow);
@@ -196,13 +196,18 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
       genWallet();
     }, [isLogin, currentStep]);
 
-    // wait for biometric to be added to move on to next step
-    useEffect(() => {
-      if (webAuthURLForCreate || passwordUrlForCreate) {
-        createAccountTimeout.current = window.setTimeout(awaitWalletCreationTransition, DEFAULTS.POLLING_INTERVAL_MS);
-      }
-      return () => clearTimeout(createAccountTimeout.current);
-    }, [webAuthURLForCreate, passwordUrlForCreate]);
+    async function createAccountWithPassword() {
+      clearTimeout(createAccountTimeout.current);
+      createAccountTimeout.current = window.setTimeout(awaitWalletCreationTransition, DEFAULTS.POLLING_INTERVAL_MS);
+      setStep(ModalStep.PASSWORD_CREATION);
+    }
+
+    async function createAccountWithPasskey() {
+      clearTimeout(createAccountTimeout.current);
+      createAccountTimeout.current = window.setTimeout(awaitWalletCreationTransition, DEFAULTS.POLLING_INTERVAL_MS);
+      openPopup(webAuthURLForCreate, 'CapsulePasskey', 'CREATE_PASSKEY');
+      setStep(ModalStep.AWAITING_BIOMETRIC_CREATION);
+    }
 
     // wait for login auth to do post login setup
     useEffect(() => {
@@ -303,6 +308,8 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
           disableEmailLogin={disableEmailLogin}
           disablePhoneLogin={disablePhoneLogin}
           onClose={handleClose}
+          createAccountWithPasskey={createAccountWithPasskey}
+          createAccountWithPassword={createAccountWithPassword}
         />
         <Footer />
       </>

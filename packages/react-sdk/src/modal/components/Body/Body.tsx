@@ -38,13 +38,23 @@ interface BodyProps {
   disableEmailLogin: boolean;
   disablePhoneLogin: boolean;
   onClose: () => void;
+  createAccountWithPasskey: () => Promise<void>;
+  createAccountWithPassword: () => Promise<void>;
 }
 
 const MIN_HEIGHT = {
   [ModalStep.ADD_FUNDS_AWAITING]: '680px',
 };
 
-export const Body = ({ oAuthMethods, twoFactorAuthEnabled, disableEmailLogin, disablePhoneLogin, onClose }: BodyProps) => {
+export const Body = ({
+  oAuthMethods,
+  twoFactorAuthEnabled,
+  disableEmailLogin,
+  disablePhoneLogin,
+  onClose,
+  createAccountWithPasskey,
+  createAccountWithPassword,
+}: BodyProps) => {
   const currentStep = useModalStore(state => state.step);
   const onRampConfig = useModalStore(state => state.onRampConfig);
   const stepDirection = useModalStore(state => state.stepDirection);
@@ -112,7 +122,12 @@ export const Body = ({ oAuthMethods, twoFactorAuthEnabled, disableEmailLogin, di
         return <TwoFactorDoneStep onClose={onClose} />;
       }
       case ModalStep.BIOMETRIC_CREATION: {
-        return <BiometricCreationStep />;
+        return (
+          <BiometricCreationStep
+            handlePasswordClick={createAccountWithPassword}
+            handlePasskeyClick={createAccountWithPasskey}
+          />
+        );
       }
       case ModalStep.PASSWORD_CREATION: {
         return <PasswordCreationStep />;
