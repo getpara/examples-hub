@@ -1,4 +1,4 @@
-import type { Ctx, SignatureRes, PlatformUtils, PregenIdentifierType, WalletType } from '@usecapsule/core-sdk';
+import type { Ctx, SignatureRes, PlatformUtils, TPregenIdentifierType, WalletType } from '@usecapsule/core-sdk';
 import { BackupKitEmailProps } from '@usecapsule/user-management-client';
 import { ServerLocalStorage } from './ServerLocalStorage.js';
 import { ServerSessionStorage } from './ServerSessionStorage.js';
@@ -43,7 +43,7 @@ export class ServerUtils implements PlatformUtils {
     ctx: Ctx,
     partnerId: string,
     pregenIdentifier: string,
-    pregenIdentifierType: PregenIdentifierType,
+    pregenIdentifierType: TPregenIdentifierType,
     type: Exclude<WalletType, WalletType.SOLANA>,
     secretKey: string | null, // should be acceptable as null in RN as we don't pre-gen them
     sessionCookie: string,
@@ -118,7 +118,7 @@ export class ServerUtils implements PlatformUtils {
   ed25519PreKeygen(
     ctx: Ctx,
     pregenIdentifier: string,
-    pregenIdentifierType: PregenIdentifierType,
+    pregenIdentifierType: TPregenIdentifierType,
     sessionCookie: string,
   ): Promise<{
     signer: string;

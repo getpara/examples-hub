@@ -1,7 +1,5 @@
 import { setupWorker } from '../workers/workerWrapper.js';
-import { PregenIdentifierType } from '@usecapsule/core-sdk';
-
-import { Ctx, distributeNewShare, waitUntilTrue } from '@usecapsule/core-sdk';
+import { Ctx, distributeNewShare, waitUntilTrue, TPregenIdentifierType } from '@usecapsule/core-sdk';
 import { BackupKitEmailProps, WalletType } from '@usecapsule/user-management-client';
 
 async function isKeygenComplete(ctx: Ctx, userId: string, walletId: string): Promise<boolean> {
@@ -18,10 +16,10 @@ async function isRefreshComplete(ctx: Ctx, userId: string, walletId: string, par
 async function isPreKeygenComplete(
   ctx: Ctx,
   pregenIdentifier: string,
-  pregenIdentifierType: PregenIdentifierType,
+  pregenIdentifierType: TPregenIdentifierType,
   walletId: string,
 ): Promise<boolean> {
-  const wallets = await ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType);
+  const wallets = await ctx.capsuleClient.getPregenWallets({ [pregenIdentifierType]: [pregenIdentifier] });
   const wallet = wallets.wallets.find(w => w.id === walletId);
   return !!wallet.address;
 }
@@ -79,7 +77,7 @@ export function keygen(
 export function preKeygen(
   ctx: Ctx,
   pregenIdentifier: string,
-  pregenIdentifierType: PregenIdentifierType,
+  pregenIdentifierType: TPregenIdentifierType,
   type: Exclude<WalletType, WalletType.SOLANA>,
   secretKey: string | null,
   _skipDistribute = false,
@@ -107,7 +105,7 @@ export function preKeygen(
     });
     const email: string | undefined = undefined;
     const params = { pregenIdentifier, pregenIdentifierType, type, secretKey, partnerId, email };
-    if (pregenIdentifierType === PregenIdentifierType.EMAIL) {
+    if (pregenIdentifierType === 'EMAIL') {
       params.email = pregenIdentifier;
     }
     worker.postMessage({
@@ -197,7 +195,7 @@ export function ed25519Keygen(
 export function ed25519PreKeygen(
   ctx: Ctx,
   pregenIdentifier: string,
-  pregenIdentifierType: PregenIdentifierType,
+  pregenIdentifierType: TPregenIdentifierType,
   sessionCookie?: string,
 ): Promise<{
   signer: string;
@@ -221,7 +219,7 @@ export function ed25519PreKeygen(
 
     const email: string | undefined = undefined;
     const params = { pregenIdentifier, pregenIdentifierType, email };
-    if (pregenIdentifierType === PregenIdentifierType.EMAIL) {
+    if (pregenIdentifierType === 'EMAIL') {
       params.email = pregenIdentifier;
     }
     worker.postMessage({

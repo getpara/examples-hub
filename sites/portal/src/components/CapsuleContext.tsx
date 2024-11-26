@@ -1,16 +1,17 @@
 import { PropsWithChildren, createContext, useContext, useEffect, useMemo } from 'react';
-import Capsule, { ConstructorOpts as CapsuleConstructorOpts, Environment as CapsuleEnvironment } from '@usecapsule/web-sdk';
+import { ConstructorOpts as CapsuleConstructorOpts, Environment as CapsuleEnvironment } from '@usecapsule/web-sdk';
 import { useSearchParams } from 'react-router-dom';
+import { CapsulePortal } from '../classes/CapsulePortal';
 
 interface CapsuleProviderProps extends PropsWithChildren {
   apiKey?: string;
-  capsule?: Capsule;
+  capsule?: CapsulePortal;
   environment: CapsuleEnvironment;
   options?: CapsuleConstructorOpts;
-  onMount?: (capsule: Capsule) => void;
+  onMount?: (capsule: CapsulePortal) => void;
 }
 
-export const CapsuleContext = createContext<Capsule>(undefined as unknown as Capsule);
+export const CapsuleContext = createContext<CapsulePortal>(undefined as unknown as CapsulePortal);
 
 /**
  * A React Context provider that provides a `Capsule` instance to its children. You can either provide a `Capsule` instance
@@ -59,7 +60,7 @@ export const CapsuleProvider = (props: CapsuleProviderProps) => {
   const capsule = useMemo(
     () =>
       props.capsule ??
-      new Capsule(environment, apiKey, {
+      new CapsulePortal(environment, apiKey, {
         ...options,
         ...(paramsSupportedWalletTypes
           ? { supportedWalletTypes: JSON.parse(decodeURIComponent(paramsSupportedWalletTypes)) }
