@@ -2,6 +2,7 @@ import axios from 'axios';
 import {
   Ctx,
   Environment,
+  PregenIdentifierType,
   getPortalBaseURL,
   initClient,
   mpcComputationClient,
@@ -81,7 +82,7 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
       let { pregenIdentifier, pregenIdentifierType } = params;
       if (email !== 'null' && email !== 'undefined' && email !== '' && email != null) {
         pregenIdentifier = email;
-        pregenIdentifierType = 'EMAIL';
+        pregenIdentifierType = PregenIdentifierType.EMAIL;
       }
 
       const keygenRes = await walletUtils.preKeygen(ctx, partnerId, pregenIdentifier, pregenIdentifierType, type, secretKey);
@@ -104,7 +105,7 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
       let { pregenIdentifier, pregenIdentifierType } = params;
       if (email !== 'null' && email !== 'undefined' && email !== '' && email != null) {
         pregenIdentifier = email;
-        pregenIdentifierType = 'EMAIL';
+        pregenIdentifierType = PregenIdentifierType.EMAIL;
       }
       return walletUtils.ed25519PreKeygen(ctx, pregenIdentifier, pregenIdentifierType);
     }

@@ -54,9 +54,7 @@ export const mockGetSessionPublicKeys = vi.fn().mockResolvedValue({ data: { keys
 export const mockUploadUserKeyShares = vi.fn().mockResolvedValue({});
 export const mockDistributeCapsuleShare = vi.fn().mockResolvedValue({});
 export const mockGetRecoveryPublicKeys = vi.fn().mockResolvedValue({ recoveryPublicKeys: RECOVERY_PUBLIC_KEYS });
-export const mockClaimPregenWallets = vi
-  .fn()
-  .mockImplementation(({ walletIds }: { walletIds: string[]; userId: string }) => ({ walletIds }));
+export const mockClaimPregenWallet = vi.fn().mockResolvedValue({});
 export const mockGetTransmissionKeyshares = vi.fn().mockResolvedValue({
   data: {
     temporaryShares: SHARES,
@@ -94,7 +92,7 @@ vi.mock('@usecapsule/user-management-client', async importOriginal => {
       uploadUserKeyShares: mockUploadUserKeyShares,
       distributeCapsuleShare: mockDistributeCapsuleShare,
       getRecoveryPublicKeys: mockGetRecoveryPublicKeys,
-      claimPregenWallets: mockClaimPregenWallets,
+      claimPregenWallet: mockClaimPregenWallet,
       getTransmissionKeyshares: mockGetTransmissionKeyshares,
       updatePregenWallet: mockUpdatePregenWallet,
       setup2FA: mockSetup2FA,

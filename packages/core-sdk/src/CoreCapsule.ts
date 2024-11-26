@@ -10,11 +10,8 @@ import Client, {
   WalletType,
   WalletScheme,
   WalletParams,
-  OAuthMethod,
   OnRampPurchaseCreateParams,
   OnRampPurchase,
-  TPregenIdentifierType,
-  PregenIds,
   extractWalletRef,
   PasswordStatus,
   BiometricLocationHint,
@@ -32,6 +29,7 @@ import {
   WalletSchemeTypeMap,
   getPortalBaseURL,
   Environment,
+  OAuthMethod,
   WalletFilters,
   WalletTypeProp,
 } from './definitions.js';
@@ -49,25 +47,12 @@ import { AuthMethod } from './types/authMethods.js';
 
 const CORE_CAPSULE_VERSION = process.env.CORE_CAPSULE_VERSION;
 
-function isPregenIdentifierMatch(a: string, b: string, type: TPregenIdentifierType): boolean {
-  switch (type) {
-    case 'EMAIL':
-      return a.toLowerCase() === b.toLowerCase();
-    case 'PHONE':
-      return stringToPhoneNumber(a) === stringToPhoneNumber(b);
-    case 'CUSTOM_ID':
-      return a === b;
-    default:
-      return a.replace(/^@/g, '').toLowerCase() === b.replace(/^@/g, '').toLowerCase();
-  }
-}
-
 export function entityToWallet(w: WalletEntity): Omit<Wallet, 'signer'> {
   return {
     ...w,
     scheme: w.scheme as WalletScheme,
     type: w.type as WalletType,
-    pregenIdentifierType: w.pregenIdentifierType as TPregenIdentifierType,
+    pregenIdentifierType: w.pregenIdentifierType as PregenIdentifierType,
   };
 }
 
@@ -108,7 +93,7 @@ export enum RecoveryStatus {
   CANCELLED = 'CANCELLED',
 }
 
-/** @deprecated */
+// Keep this consistent with user-management code entities/walletEntity.ts
 export enum PregenIdentifierType {
   EMAIL = 'EMAIL',
   PHONE = 'PHONE',
@@ -126,7 +111,7 @@ export interface Wallet {
   type?: EmbeddedWalletType | ExternalWalletType;
   isPregen?: boolean;
   pregenIdentifier?: string;
-  pregenIdentifierType?: TPregenIdentifierType;
+  pregenIdentifierType?: PregenIdentifierType;
   userId?: string;
   partnerId?: string;
   partner?: PartnerEntity;
@@ -292,9 +277,9 @@ export abstract class CoreCapsule {
 
   ctx: Ctx;
 
-  protected email?: string;
-  protected phone?: string;
-  protected countryCode?: CountryCallingCode;
+  private email?: string;
+  private phone?: string;
+  private countryCode?: CountryCallingCode;
   private farcasterUsername?: string;
   private userId?: string;
   private sessionCookie?: string;
@@ -350,28 +335,6 @@ export abstract class CoreCapsule {
    * Wallets associated with the `CoreCapsule` instance.
    */
   externalWallets: Record<string, Wallet>;
-
-  /**
-   * A map of pre-generated wallet identifiers that can be claimed in the current instance.
-   */
-  get pregenIds(): PregenIds {
-    return {
-      ...Object.values(this.wallets)
-        .filter(wallet => !this.userId || this.isPregenWalletClaimable(wallet))
-        .reduce((acc, wallet) => {
-          if ((acc[wallet.pregenIdentifierType] ?? []).includes(wallet.pregenIdentifier)) {
-            return acc;
-          }
-
-          return {
-            ...acc,
-            [wallet.pregenIdentifierType]: [
-              ...new Set([...(acc[wallet.pregenIdentifierType] ?? []), wallet.pregenIdentifier]),
-            ],
-          };
-        }, {}),
-    };
-  }
 
   /**
    * Whether the instance has multiple wallets connected.
@@ -537,7 +500,7 @@ export abstract class CoreCapsule {
     };
   }
 
-  private get isPortal(): boolean {
+  private isPortal(): boolean {
     return typeof window !== 'undefined' && getPortalBaseURL(this.ctx).includes(window.location.host);
   }
 
@@ -575,12 +538,9 @@ export abstract class CoreCapsule {
     return (
       this.isWalletSupported(wallet) &&
       this.isPregenWalletUnclaimed(wallet) &&
-      (!['EMAIL', 'PHONE'].includes(wallet.pregenIdentifierType) ||
-        isPregenIdentifierMatch(
-          wallet.pregenIdentifierType === 'EMAIL' ? this.email : this.getPhoneNumber(),
-          wallet.pregenIdentifier,
-          wallet.pregenIdentifierType,
-        ))
+      ((wallet.pregenIdentifier === this.email && wallet.pregenIdentifierType === PregenIdentifierType.EMAIL) ||
+        (stringToPhoneNumber(wallet.pregenIdentifier) === this.getPhoneNumber() &&
+          wallet.pregenIdentifierType === PregenIdentifierType.PHONE))
     );
   }
 
@@ -1250,11 +1210,11 @@ export abstract class CoreCapsule {
 
     let wallet;
 
-    Object.entries(this.currentWalletIds).forEach(([type, walletIds]) => {
-      const pregenWalletIds = Object.keys(this.wallets).filter(
+    Object.entries(this.currentWalletIds).forEach(([type, ids]) => {
+      const pregenIds = Object.keys(this.wallets).filter(
         id => this.wallets[id].type === type && this.isPregenWalletClaimable(this.wallets[id]),
       );
-      [...walletIds, ...pregenWalletIds].forEach(id => {
+      [...ids, ...pregenIds].forEach(id => {
         if (address.toLowerCase() === this.getDisplayAddress(id, { addressType: <WalletType>type }).toLowerCase()) {
           wallet = this.wallets[id];
         }
@@ -1395,11 +1355,18 @@ export abstract class CoreCapsule {
     return (partnerId && (await this.getPartnerURL(partnerId))) || getPortalBaseURL(this.ctx);
   }
 
-  private getCommonLoginQueryParams(newDeviceSessionId?: string, newDeviceEncryptionKey?: string): string {
+  private async getCommonLoginQueryParams(
+    partnerId?: string,
+    newDeviceSessionId?: string,
+    newDeviceEncryptionKey?: string,
+  ): Promise<string> {
     return toQueryString({
       newDeviceSessionId,
       newDeviceEncryptionKey,
-      pregenIds: JSON.stringify(this.pregenIds),
+      pregenWalletIds: Object.entries(this.wallets)
+        .filter(([_, wallet]) => this.isPregenWalletClaimable(wallet) && wallet.partnerId === partnerId)
+        .map(([id]) => id)
+        .join(','),
     });
   }
 
@@ -1490,7 +1457,11 @@ export abstract class CoreCapsule {
     type: 'email' | 'phone' | 'farcaster' = 'email',
   ): Promise<string> {
     const commonQueryParams = await this.getCommonQueryParams(partnerId);
-    const commonLoginQueryParams = this.getCommonLoginQueryParams(newDeviceSessionId, newDeviceEncryptionKey);
+    const commonLoginQueryParams = await this.getCommonLoginQueryParams(
+      partnerId,
+      newDeviceSessionId,
+      newDeviceEncryptionKey,
+    );
 
     const userSpecificParams = {
       email: `email=${encodeURIComponent(this.email)}`,
@@ -1509,7 +1480,11 @@ export abstract class CoreCapsule {
     type: 'email' | 'phone' | 'farcaster' = 'email',
   ): Promise<string> {
     const commonQueryParams = await this.getCommonQueryParams(partnerId);
-    const commonLoginQueryParams = this.getCommonLoginQueryParams(newDeviceSessionId, newDeviceEncryptionKey);
+    const commonLoginQueryParams = await this.getCommonLoginQueryParams(
+      partnerId,
+      newDeviceSessionId,
+      newDeviceEncryptionKey,
+    );
 
     const userSpecificParams = {
       email: `email=${encodeURIComponent(this.email)}`,
@@ -1537,7 +1512,11 @@ export abstract class CoreCapsule {
     newDeviceEncryptionKey?: string,
   ): Promise<string> {
     const commonQueryParams = await this.getCommonQueryParams(partnerId);
-    const commonLoginQueryParams = this.getCommonLoginQueryParams(newDeviceSessionId, newDeviceEncryptionKey);
+    const commonLoginQueryParams = await this.getCommonLoginQueryParams(
+      partnerId,
+      newDeviceSessionId,
+      newDeviceEncryptionKey,
+    );
 
     return `${(partnerId && (await this.getPartnerURL(partnerId))) || getPortalBaseURL(this.ctx)}/web/biometrics/login?phone=${encodeURIComponent(
       this.phone,
@@ -1576,7 +1555,7 @@ export abstract class CoreCapsule {
    * @returns - wallets that were fetched.
    */
   async fetchWallets(): Promise<WalletEntity[]> {
-    const res = await (this.isPortal
+    const res = await (this.isPortal()
       ? this.ctx.capsuleClient.getAllWallets(this.userId)
       : this.ctx.capsuleClient.getWallets(this.userId, true));
 
@@ -1597,10 +1576,13 @@ export abstract class CoreCapsule {
     await this.setWallets(this.wallets);
   }
 
-  private async populatePregenWalletAddresses(): Promise<void> {
-    const res = await this.getPregenWallets();
-
-    res.forEach(entity => {
+  private async populatePregenWalletAddresses(
+    pregenIdentifier: string,
+    pregenIdentifierType: PregenIdentifierType,
+  ): Promise<void> {
+    const res = await this.ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType);
+    const wallets = res.wallets;
+    wallets.forEach(entity => {
       if (this.wallets[entity.id]) {
         this.wallets[entity.id] = {
           ...entityToWallet(entity),
@@ -2041,14 +2023,25 @@ export abstract class CoreCapsule {
 
   async waitForPasskeyAndCreateWallet(): Promise<{ walletIds: CurrentWalletIds; recoverySecret?: string }> {
     await this.waitForAccountCreation();
+    // This function gets pregen wallets by an identifier and partnerId
+    let pregenIdentifier: string;
+    let pregenIdentifierType: PregenIdentifierType;
+    if (this.email != null) {
+      pregenIdentifier = this.email;
+      pregenIdentifierType = PregenIdentifierType.EMAIL;
+    } else {
+      pregenIdentifier = this.getPhoneNumber();
+      pregenIdentifierType = PregenIdentifierType.PHONE;
+    }
 
-    const pregenWallets = await this.getPregenWallets();
-
+    const pregenWallets = (
+      await this.ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType)
+    ).wallets.filter(w => this.isWalletSupported(entityToWallet(w)));
     let recoverySecret: string | undefined,
       walletIds: CurrentWalletIds = {};
 
     if (pregenWallets.length > 0) {
-      recoverySecret = await this.claimPregenWallets();
+      recoverySecret = await this.claimPregenWallets(pregenIdentifier, pregenIdentifierType);
       walletIds = this.supportedWalletTypes.reduce((acc: CurrentWalletIds, { type }) => {
         return {
           ...acc,
@@ -2103,13 +2096,7 @@ export abstract class CoreCapsule {
   async getOAuthURL(oAuthMethod: OAuthMethod): Promise<string> {
     await this.logout(true);
     const res = await this.touchSession(true);
-
-    const url = new URL(`auth/${oAuthMethod.toLowerCase()}`, getBaseUrl(this.ctx.env));
-
-    url.searchParams.append('sessionLookupId', res.data.sessionLookupId);
-    url.searchParams.append('apiKey', this.ctx.apiKey);
-
-    return url.toString();
+    return `${getBaseUrl(this.ctx.env)}auth/${oAuthMethod.toLowerCase()}?sessionLookupId=${encodeURIComponent(res.data.sessionLookupId)}`;
   }
 
   async waitForOAuth(oAuthWindow?: Window): Promise<{
@@ -2193,7 +2180,16 @@ export abstract class CoreCapsule {
         if (tempSharesRes.data.temporaryShares.length === fetchedWallets.length) {
           await this.setupAfterLogin(tempSharesRes.data.temporaryShares, skipSessionRefresh);
 
-          await this.claimPregenWallets();
+          const pregenIds = Object.values(this.wallets).reduce((acc, wallet) => {
+            if (this.isPregenWalletClaimable(wallet)) {
+              acc[wallet.pregenIdentifier] = wallet.pregenIdentifierType;
+            }
+            return acc;
+          }, {});
+
+          for (const [pregenIdentifier, pregenIdentifierType] of Object.entries(pregenIds)) {
+            await this.claimPregenWallets(pregenIdentifier, <PregenIdentifierType>pregenIdentifierType);
+          }
 
           return {
             isComplete: true,
@@ -2240,7 +2236,7 @@ export abstract class CoreCapsule {
     await this.setUserId(res.data.userId);
 
     if (res.data.currentWalletIds && res.data.currentWalletIds !== this.currentWalletIds)
-      await this.setCurrentWalletIds(res.data.currentWalletIds, this.isPortal ? res.data.sessionLookupId : undefined);
+      await this.setCurrentWalletIds(res.data.currentWalletIds, this.isPortal() ? res.data.sessionLookupId : undefined);
 
     return res;
   }
@@ -2336,7 +2332,11 @@ export abstract class CoreCapsule {
    * @param pregenIdentifierType - the identifier type of the user the pregen wallet is associated with.
    * @returns - recovery share.
    **/
-  private async waitForPregenWalletAddress(walletId: string): Promise<void> {
+  private async waitForPregenWalletAddress(
+    pregenIdentifier: string,
+    pregenIdentifierType: PregenIdentifierType = PregenIdentifierType.EMAIL,
+    walletId: string,
+  ): Promise<void> {
     let maxPolls = 0;
 
     while (true) {
@@ -2345,9 +2345,9 @@ export abstract class CoreCapsule {
           break;
         }
         ++maxPolls;
-        const res = await this.getPregenWallets();
+        const res = await this.ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType);
 
-        const wallet = res.find(w => w.id === walletId);
+        const wallet = res.wallets.find(w => w.id === walletId);
         if (wallet && wallet.address) {
           return;
         }
@@ -2491,8 +2491,6 @@ export abstract class CoreCapsule {
     this.wallets[walletId] = {
       id: walletId,
       signer,
-      scheme: walletType === WalletType.SOLANA ? WalletScheme.ED25519 : WalletScheme.DKLS,
-      type: walletType,
     };
     wallet = this.wallets[walletId];
 
@@ -2518,13 +2516,13 @@ export abstract class CoreCapsule {
    * Creates a new pregenerated wallet.
    *
    * @param pregenIdentifier - string
-   * @param pregenIdentifierType - TPregenIdentifierType
+   * @param pregenIdentifierType - PregenIdentifierType
    * @returns [wallet, recoveryShare]
    **/
   async createWalletPreGen(
     _type: WalletType = this.supportedWalletTypes.find(({ optional }) => !optional)?.type,
     pregenIdentifier: string,
-    pregenIdentifierType: TPregenIdentifierType = 'EMAIL',
+    pregenIdentifierType: PregenIdentifierType = PregenIdentifierType.EMAIL,
   ): Promise<Wallet> {
     this.requireApiKey();
     const walletType = await this.assertIsValidWalletType(
@@ -2559,15 +2557,10 @@ export abstract class CoreCapsule {
     this.wallets[walletId] = {
       id: walletId,
       signer,
-      scheme: walletType === WalletType.SOLANA ? WalletScheme.ED25519 : WalletScheme.DKLS,
-      type: walletType,
-      isPregen: true,
-      pregenIdentifier,
-      pregenIdentifierType,
     };
 
-    await this.waitForPregenWalletAddress(walletId);
-    await this.populatePregenWalletAddresses();
+    await this.waitForPregenWalletAddress(pregenIdentifier, pregenIdentifierType, walletId);
+    await this.populatePregenWalletAddresses(pregenIdentifier, pregenIdentifierType);
 
     return this.wallets[walletId];
   }
@@ -2578,13 +2571,13 @@ export abstract class CoreCapsule {
    * specified in the instance's `supportedWalletTypes` array that are not already present.
    *
    * @param {string} pregenIdentifier the identifier to associate each wallet with.
-   * @param {TPregenIdentifierType} pregenIdentifierType - either `'EMAIL'` or `'PHONE'`.
+   * @param {PregenIdentifierType} pregenIdentifierType - either `'EMAIL'` or `'PHONE'`.
    * @param {WalletType[]} [types] the wallet types to create. Defaults to any types the instance supports that are not already present.
    * @returns an array containing the created wallets.
    **/
   async createPregenWalletPerType(
     pregenIdentifier: string,
-    pregenIdentifierType: TPregenIdentifierType = 'EMAIL',
+    pregenIdentifierType: PregenIdentifierType = PregenIdentifierType.EMAIL,
     types?: WalletType[],
   ): Promise<Wallet[]> {
     const wallets = [];
@@ -2604,69 +2597,57 @@ export abstract class CoreCapsule {
    * @returns [wallet, recoveryShare]
    **/
   async claimPregenWallets(
-    pregenIdentifier?: string,
-    pregenIdentifierType: TPregenIdentifierType = !!pregenIdentifier ? 'EMAIL' : undefined,
+    pregenIdentifier: string,
+    pregenIdentifierType: PregenIdentifierType = PregenIdentifierType.EMAIL,
   ): Promise<string | undefined> {
     this.requireApiKey();
+    if (pregenIdentifierType === PregenIdentifierType.EMAIL) {
+      const userExist = await this.checkIfUserExists(pregenIdentifier);
+      if (!userExist) {
+        throw new Error('user does not exist');
+      }
+    } else {
+      const phoneNumber = parsePhoneNumberFromString(pregenIdentifier);
+      const number = phoneNumber.formatNational();
+      const countryCallingCode = `+${phoneNumber.countryCallingCode}`;
+      const userExist = await this.checkIfUserExistsByPhone(number, countryCallingCode as CountryCallingCode);
+      if (!userExist) {
+        throw new Error('user does not exist');
+      }
+    }
 
-    const pregenWallets =
-      pregenIdentifier && pregenIdentifierType
-        ? await this.getPregenWallets(pregenIdentifier, pregenIdentifierType)
-        : await this.getPregenWallets();
-
+    // This function gets pregen wallets by email and partnerId
+    const pregenWallets = (
+      await this.ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType)
+    ).wallets.filter(w => this.isWalletSupported(entityToWallet(w)));
     if (pregenWallets.length === 0) {
-      return undefined;
+      throw new Error('wallets not found');
     }
 
     let newRecoverySecret: string | undefined;
-
-    const { walletIds } = await this.ctx.capsuleClient.claimPregenWallets({
-      userId: this.userId,
-      walletIds: pregenWallets.map(w => w.id),
-    });
-
-    for (const walletId of walletIds) {
-      const wallet = this.wallets[walletId];
-      let refreshedShare;
-
-      if (wallet.scheme === WalletScheme.ED25519) {
-        const distributeRes = await distributeNewShare(
-          this.ctx,
-          this.userId,
-          wallet.id,
-          this.wallets[wallet.id].signer,
-          false,
-          this.getBackupKitEmailProps(),
-          wallet.partnerId,
-        );
-
-        if (distributeRes.length > 0) {
-          newRecoverySecret = distributeRes;
-        }
-      } else {
-        refreshedShare = await this.refreshShare({
-          walletId: wallet.id,
-          share: this.wallets[wallet.id].signer,
-          oldPartnerId: wallet.partnerId,
-          newPartnerId: wallet.partnerId,
-          redistributeBackupEncryptedShares: true,
-        });
-
-        if (refreshedShare.recoverySecret) {
-          newRecoverySecret = refreshedShare.recoverySecret;
-        }
+    for (const wallet of pregenWallets) {
+      await this.ctx.capsuleClient.claimPregenWallet({ userId: this.userId, walletId: wallet.id });
+      const { signer: newSigner, recoverySecret } = await this.refreshShare({
+        walletId: wallet.id,
+        share: this.wallets[wallet.id].signer,
+        oldPartnerId: wallet.partnerId,
+        newPartnerId: wallet.partnerId,
+        redistributeBackupEncryptedShares: true,
+      });
+      if (recoverySecret) {
+        newRecoverySecret = recoverySecret;
       }
 
       this.wallets[wallet.id] = {
         ...this.wallets[wallet.id],
-        signer: refreshedShare?.signer ?? wallet.signer,
+        signer: newSigner,
         userId: this.userId,
         pregenIdentifier: undefined,
         pregenIdentifierType: undefined,
       };
-    }
 
-    await this.setWallets(this.wallets);
+      await this.setWallets(this.wallets);
+    }
 
     return newRecoverySecret;
   }
@@ -2681,24 +2662,13 @@ export abstract class CoreCapsule {
   async updateWalletIdentifierPreGen(
     newIdentifier: string,
     walletId: string,
-    newType: TPregenIdentifierType = 'EMAIL',
+    newType: PregenIdentifierType = PregenIdentifierType.EMAIL,
   ): Promise<void> {
     this.requireApiKey();
-
     await this.ctx.capsuleClient.updatePregenWallet(walletId, {
       pregenIdentifier: newIdentifier,
       pregenIdentifierType: newType,
     });
-
-    if (!!this.wallets[walletId]) {
-      this.wallets[walletId] = {
-        ...this.wallets[walletId],
-        pregenIdentifier: newIdentifier,
-        pregenIdentifierType: newType,
-      };
-
-      await this.setWallets(this.wallets);
-    }
   }
 
   /**
@@ -2708,12 +2678,15 @@ export abstract class CoreCapsule {
    * @param pregenIdentifierType type of the string of the identifier of the user claiming the wallet
    * @returns Promise<boolean>
    **/
-  async hasPregenWallet(pregenIdentifier: string, pregenIdentifierType: TPregenIdentifierType = 'EMAIL'): Promise<boolean> {
+  async hasPregenWallet(
+    pregenIdentifier: string,
+    pregenIdentifierType: PregenIdentifierType = PregenIdentifierType.EMAIL,
+  ): Promise<boolean> {
     this.requireApiKey();
 
     // This function gets pregen wallets by identifier and partnerId
-    const res = await this.getPregenWallets(pregenIdentifier, pregenIdentifierType);
-    const wallet = res.find(w => w.pregenIdentifier === pregenIdentifier && w.pregenIdentifierType === pregenIdentifierType);
+    const res = await this.ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType);
+    const wallet = res.wallets[0];
     if (!wallet) {
       return false;
     }
@@ -2724,18 +2697,16 @@ export abstract class CoreCapsule {
    * Get pregen wallets for the identifier
    *
    * @param {string} pregenIdentifier - the identifier of the user claiming the wallet
-   * @param {TPregenIdentifierType} pregenIdentifierType - type of the identifier of the user claiming the wallet
+   * @param {PregenIdentifierType} pregenIdentifierType - type of the identifier of the user claiming the wallet
    * @returns {Promise<WalletEntity[]>} Promise of pregen wallets
    **/
   async getPregenWallets(
-    pregenIdentifier?: string | undefined,
-    pregenIdentifierType: TPregenIdentifierType = !!pregenIdentifier ? 'EMAIL' : undefined,
+    pregenIdentifier: string,
+    pregenIdentifierType: PregenIdentifierType = PregenIdentifierType.EMAIL,
   ): Promise<WalletEntity[]> {
     this.requireApiKey();
-    const res = await this.ctx.capsuleClient.getPregenWallets(
-      pregenIdentifier && pregenIdentifierType ? { [pregenIdentifierType]: [pregenIdentifier] } : this.pregenIds,
-      this.isPortal,
-    );
+
+    const res = await this.ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType, this.isPortal());
     return res.wallets.filter(w => this.isWalletSupported(entityToWallet(w)));
   }
 
@@ -3196,7 +3167,6 @@ export abstract class CoreCapsule {
       phone: this.phone,
       countryCode: this.countryCode,
       userId: this.userId,
-      pregenIds: this.pregenIds,
       currentWalletIds: this.currentWalletIds,
       wallets: redactedWallets,
       loginEncryptionKeyPair: this.loginEncryptionKeyPair ? '[REDACTED]' : undefined,

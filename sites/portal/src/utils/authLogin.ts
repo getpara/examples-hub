@@ -229,12 +229,10 @@ export async function authUpdateKeyShares(
   // if there are some walletIds that are needed for the partner but don't have
   // a share associated with the partner yet, we must refresh and create a share
   // for the partner
-  const sharesStillNeededForPartnerToDecrypt = walletIdsWithoutPartnerIdShare
-    .map(walletId =>
-      // just find some share for walletId so we can refresh it
-      encryptedShares.find(share => share.walletId === walletId),
-    )
-    .filter(share => !!share);
+  const sharesStillNeededForPartnerToDecrypt = walletIdsWithoutPartnerIdShare.map(walletId =>
+    // just find some share for walletId so we can refresh it
+    encryptedShares.find(share => share.walletId === walletId),
+  );
 
   const allSharesToDecrypt = [...sharesForPartnerToDecrypt, ...sharesStillNeededForPartnerToDecrypt];
 

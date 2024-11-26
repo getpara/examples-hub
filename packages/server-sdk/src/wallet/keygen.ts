@@ -1,5 +1,5 @@
 import * as uuid from 'uuid';
-import { waitUntilTrue, Ctx, TPregenIdentifierType } from '@usecapsule/core-sdk';
+import { waitUntilTrue, Ctx, PregenIdentifierType } from '@usecapsule/core-sdk';
 import { setupWorker } from '../workers/workerWrapper.js';
 import { BackupKitEmailProps, WalletType } from '@usecapsule/user-management-client';
 
@@ -12,10 +12,10 @@ async function isKeygenComplete(ctx: Ctx, userId: string, walletId: string): Pro
 async function isPreKeygenComplete(
   ctx: Ctx,
   pregenIdentifier: string,
-  pregenIdentifierType: TPregenIdentifierType,
+  pregenIdentifierType: PregenIdentifierType,
   walletId: string,
 ): Promise<boolean> {
-  const wallets = await ctx.capsuleClient.getPregenWallets({ [pregenIdentifierType]: [pregenIdentifier] });
+  const wallets = await ctx.capsuleClient.getPregenWallets(pregenIdentifier, pregenIdentifierType);
   const wallet = wallets.wallets.find(w => w.id === walletId);
   return !!wallet?.address;
 }
@@ -69,7 +69,7 @@ export function keygen(
 export function preKeygen(
   ctx: Ctx,
   pregenIdentifier: string,
-  pregenIdentifierType: TPregenIdentifierType,
+  pregenIdentifierType: PregenIdentifierType,
   type: WalletType,
   secretKey: string | null,
   _skipDistribute = false,
@@ -101,7 +101,7 @@ export function preKeygen(
     );
     const email: string | undefined = undefined;
     const params = { pregenIdentifier, pregenIdentifierType, secretKey, partnerId, email, type };
-    if (pregenIdentifierType === 'EMAIL') {
+    if (pregenIdentifierType === PregenIdentifierType.EMAIL) {
       params.email = pregenIdentifier;
     }
     worker.postMessage({
@@ -163,7 +163,7 @@ export function ed25519Keygen(
 export function ed25519PreKeygen(
   ctx: Ctx,
   pregenIdentifier: string,
-  pregenIdentifierType: TPregenIdentifierType,
+  pregenIdentifierType: PregenIdentifierType,
   sessionCookie?: string,
 ): Promise<{
   signer: string;
@@ -190,7 +190,7 @@ export function ed25519PreKeygen(
     );
     const email: string | undefined = undefined;
     const params = { pregenIdentifier, pregenIdentifierType, email };
-    if (pregenIdentifierType === 'EMAIL') {
+    if (pregenIdentifierType === PregenIdentifierType.EMAIL) {
       params.email = pregenIdentifier;
     }
     worker.postMessage({

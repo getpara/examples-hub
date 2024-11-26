@@ -52,6 +52,15 @@ export interface Ctx {
   isE2E?: boolean;
 }
 
+export enum OAuthMethod {
+  GOOGLE = 'GOOGLE',
+  TWITTER = 'TWITTER',
+  APPLE = 'APPLE',
+  DISCORD = 'DISCORD',
+  FACEBOOK = 'FACEBOOK',
+  FARCASTER = 'FARCASTER',
+}
+
 export type deprecated__NetworkProp = keyof typeof Network | Network;
 
 export type WalletTypeProp = keyof typeof WalletType | WalletType;

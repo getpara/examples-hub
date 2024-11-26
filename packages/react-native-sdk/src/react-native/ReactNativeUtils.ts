@@ -1,6 +1,6 @@
 // Copyright (c) Capsule Labs Inc. All rights reserved.
 
-import { PlatformUtils, TPregenIdentifierType } from '@usecapsule/web-sdk';
+import { PlatformUtils, PregenIdentifierType } from '@usecapsule/web-sdk';
 import { Ctx } from '@usecapsule/web-sdk';
 import { SignatureRes } from '@usecapsule/web-sdk';
 import { BackupKitEmailProps, KeyType, WalletScheme, WalletType } from '@usecapsule/user-management-client';
@@ -233,7 +233,7 @@ export class ReactNativeUtils implements PlatformUtils {
   async ed25519PreKeygen(
     ctx: Ctx,
     pregenIdentifier: string,
-    pregenIdentifierType: TPregenIdentifierType,
+    pregenIdentifierType: PregenIdentifierType,
     _sessionCookie: string,
   ): Promise<{
     signer: string;

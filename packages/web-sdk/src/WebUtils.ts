@@ -6,7 +6,7 @@ import { keygen, preKeygen, ed25519Keygen, ed25519PreKeygen, refresh } from './w
 import { signMessage, sendTransaction, signTransaction, ed25519Sign } from './wallet/signing.js';
 import { BackupKitEmailProps, WalletType } from '@usecapsule/user-management-client';
 import { getPrivateKey } from './wallet/privateKey.js';
-import { TPregenIdentifierType } from '@usecapsule/core-sdk';
+import { PregenIdentifierType } from '@usecapsule/core-sdk';
 
 export class WebUtils implements PlatformUtils {
   getPrivateKey(ctx: Ctx, userId: string, walletId: string, share: string, sessionCookie: string): Promise<string> {
@@ -45,7 +45,7 @@ export class WebUtils implements PlatformUtils {
     ctx: Ctx,
     partnerId: string | undefined,
     pregenIdentifier: string,
-    pregenIdentifierType: TPregenIdentifierType,
+    pregenIdentifierType: PregenIdentifierType,
     type: Exclude<WalletType, WalletType.SOLANA>,
     secretKey: string | null, // should be acceptable as null in RN as we don't pre-gen them
     sessionCookie: string,
@@ -121,7 +121,7 @@ export class WebUtils implements PlatformUtils {
   ed25519PreKeygen(
     ctx: Ctx,
     pregenIdentifier: string,
-    pregenIdentifierType: TPregenIdentifierType,
+    pregenIdentifierType: PregenIdentifierType,
     sessionCookie: string,
   ): Promise<{
     signer: string;

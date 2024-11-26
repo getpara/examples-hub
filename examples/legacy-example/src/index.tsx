@@ -36,16 +36,16 @@ import { CapsuleConnector, CapsuleEIP1193Provider } from '@usecapsule/wagmi-v1-i
 import CoreCapsule, {
   Environment,
   ConstructorOpts,
+  PregenIdentifierType,
   getBaseUrl,
   WalletType,
-  TPregenIdentifierType,
-  PREGEN_IDENTIFIER_TYPES,
   TransactionReviewDenied,
   TransactionReviewTimeout,
 } from '@usecapsule/core-sdk';
 import { CapsuleSolanaWeb3Signer } from '@usecapsule/solana-web3.js-v1-integration';
 import { FONT_OPTIONS } from './constants';
 import '@usecapsule/react-sdk/styles.css';
+import { stringToPhoneNumber } from '@usecapsule/core-sdk';
 import { ArrayField } from './array';
 
 interface Partner {
@@ -104,14 +104,6 @@ const THEMES = {
   devRed: ['www.red.com', 'https://i.imgur.com/7joBw13.png', false, '#ffffff', '#ff2222', 'none', 'dark'],
   devBlue: ['www.blue.com', 'https://i.imgur.com/rIqjbim.png', true, '#222222', '#33bbff', 'lg', 'branded'],
   devGreen: ['www.green.com', 'https://i.imgur.com/xQOZmn6.png', true, '#161616', '#2fdd86', 'sm', 'branded'],
-};
-
-const PLACEHOLDERS = {
-  EMAIL: 'email@website.com',
-  PHONE: '+10000000000',
-  CUSTOM_ID: 'custom-id',
-  DISCORD: 'discord_username',
-  TWITTER: 'twitter_username',
 };
 
 // use below to call "view" smart contract function
@@ -541,17 +533,10 @@ function App() {
   const [externalWallets, setExternalWallets] = useLocalStorage('@EXAMPLE-CAPSULE/externalWallets', []);
   const [onRampTestMode, setOnRampTestMode] = useLocalStorage('@EXAMPLE-CAPSULE/onRampTestMode', true);
 
-  const [pregenIdentifier, setPregenIdentifier] = useState('');
-  const [pregenIdentifierType, setPregenIdentifierType] = useState<TPregenIdentifierType>('EMAIL');
-  const [pregenWalletType, setPregenWalletType] = useLocalStorage<WalletType | 'missing'>(
-    '@EXAMPLE-CAPSULE/pregenWalletType',
-    'missing',
-  );
-
-  const [updatePregenIdentifier, setUpdatePregenIdentifier] = useState('');
-  const [updatePregenIdentifierType, setUpdatePregenIdentifierType] = useState<TPregenIdentifierType>('EMAIL');
-
+  const [pregenEmail, setPregenEmail] = useState('');
+  const [pregenPhone, setPregenPhone] = useState('');
   const [pregenUserShare, setPregenUserShare] = useLocalStorage<string>('@EXAMPLE-CAPSULE/pregenUserShare', '');
+  const [pregenType, setPregenType] = useLocalStorage<WalletType | 'missing'>('@EXAMPLE-CAPSULE/pregenType', 'missing');
   const [deletedEmail, setDeletedEmail] = useState('');
   const [emailPendingDeletion, setEmailPendingDeletion] = useState('');
   const [isSessionActive, setIsSessionActive] = useState(false);
@@ -607,16 +592,16 @@ function App() {
 
   const isMultiWallet = Object.values(capsule?.supportedWalletTypes ?? []).length > 1;
 
-  const [[walletType, walletId, isPregen], setWallet] = useState<[WalletType | undefined, string | undefined]>(
+  const [[walletType, walletId], setWallet] = useState<[WalletType | undefined, string | undefined]>(
     (() => {
       try {
         if (capsule) {
           const walletId = capsule?.findWalletId();
-          return [capsule.wallets[walletId]?.type, walletId, !!capsule.wallets[walletId]?.pregenIdentifier];
+          return [capsule.wallets[walletId]?.type, walletId];
         }
-        return [undefined, undefined, false];
+        return [undefined, undefined];
       } catch (e) {
-        return [undefined, undefined, false];
+        return [undefined, undefined];
       }
     })(),
   );
@@ -640,8 +625,8 @@ function App() {
 
     const [email, phone] = [capsule?.getEmail(), capsule?.getPhoneNumber()];
 
-    pregenIdentifierType === 'EMAIL' && !!email && setPregenIdentifier(email);
-    pregenIdentifierType === 'PHONE' && !!phone && setPregenIdentifier(phone);
+    email && setPregenEmail(email);
+    phone && setPregenPhone(phone);
   }
 
   useEffect(() => {
@@ -1026,44 +1011,85 @@ function App() {
                       Regen Recovery
                     </Button>
                     <HStack>
-                      <select value={pregenIdentifierType} onChange={e => setPregenIdentifierType(e.currentTarget.value)}>
-                        {PREGEN_IDENTIFIER_TYPES.map(type => (
-                          <option key={type} value={type}>
-                            {type}
-                          </option>
-                        ))}
-                      </select>
                       <Input
-                        placeholder={PLACEHOLDERS[pregenIdentifierType]}
+                        placeholder="pregen-e-mail"
                         onChange={e => {
-                          setPregenIdentifier(e.target.value);
+                          setPregenEmail(e.target.value);
                         }}
-                        value={pregenIdentifier}
+                        value={pregenEmail}
                       />
-                      <select value={pregenWalletType} onChange={e => setPregenWalletType(e.currentTarget.value)}>
-                        <option key="missing" value="missing">
-                          MISSING
-                        </option>
-                        {capsule?.supportedWalletTypes.map(({ type }) => (
-                          <option key={type} value={type}>
-                            {type}
+                      {capsule?.supportedWalletTypes.length > 1 && (
+                        <select value={pregenType} onChange={e => setPregenType(e.currentTarget.value)}>
+                          <option key="missing" value="missing">
+                            MISSING
                           </option>
-                        ))}
-                      </select>
+                          {capsule?.supportedWalletTypes.map(({ type }) => (
+                            <option key={type} value={type}>
+                              {type}
+                            </option>
+                          ))}
+                        </select>
+                      )}
                     </HStack>
                     <Button
                       colorScheme="teal"
                       onClick={async () => {
                         await capsule?.createPregenWalletPerType(
-                          pregenIdentifier,
-                          pregenIdentifierType,
-                          pregenWalletType === 'missing' ? undefined : [pregenWalletType],
+                          pregenEmail,
+                          PregenIdentifierType.EMAIL,
+                          pregenType === 'missing' ? undefined : [pregenType],
                         );
 
                         updateToString();
                       }}
                     >
-                      Create Pregen Wallet{isMultiWallet && pregenWalletType === 'missing' ? 's' : ''}
+                      Create Pregen Wallet{isMultiWallet && pregenType === 'missing' ? 's' : ''} Through Email
+                    </Button>
+                    <HStack>
+                      <Input
+                        placeholder="pregen-phone"
+                        onChange={e => {
+                          setPregenPhone(e.target.value);
+                        }}
+                        value={pregenPhone}
+                      />
+                      {capsule?.supportedWalletTypes.length > 1 && (
+                        <select value={pregenType} onChange={e => setPregenType(e.currentTarget.value)}>
+                          <option key="missing" value="missing">
+                            MISSING
+                          </option>
+                          {capsule?.supportedWalletTypes.map(({ type }) => (
+                            <option key={type} value={type}>
+                              {type}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </HStack>
+                    <Button
+                      colorScheme="teal"
+                      onClick={async () => {
+                        const formattedNumber = stringToPhoneNumber(pregenPhone);
+
+                        await capsule?.createPregenWalletsPerType(
+                          formattedNumber,
+                          PregenIdentifierType.PHONE,
+                          pregenType === 'missing' ? undefined : [pregenType],
+                        );
+                        updateToString();
+                      }}
+                    >
+                      Create Pregen Wallet{isMultiWallet && pregenType === 'missing' ? 's' : ''} Through Phone Number
+                    </Button>
+                    <Button
+                      colorScheme="teal"
+                      onClick={async () => {
+                        await capsule?.updateWalletEmailPreGen(pregenEmail);
+
+                        updateToString();
+                      }}
+                    >
+                      Edit Pregen Wallet Email
                     </Button>
                     <HStack>
                       <Text whiteSpace="nowrap">Stored User Share:</Text>
@@ -1103,13 +1129,24 @@ function App() {
 
                     <Button
                       colorScheme="teal"
-                      isDisabled={!isSessionActive || Object.values(capsule?.pregenIds || []).flat().length === 0}
                       onClick={async () => {
-                        console.log(await capsule?.claimPregenWallets());
+                        await capsule?.setUserShare(pregenUserShare);
+                        console.log(await capsule?.claimPregenWallet(pregenEmail));
                         updateToString();
                       }}
                     >
-                      Claim Pregen Wallets
+                      Claim Pregen Wallet
+                    </Button>
+                    <Button
+                      colorScheme="teal"
+                      onClick={async () => {
+                        await capsule?.setUserShare(pregenUserShare);
+                        const formattedNumber = stringToPhoneNumber(pregenPhone);
+                        console.log(await capsule?.claimPregenWallets(formattedNumber, PregenIdentifierType.PHONE));
+                        updateToString();
+                      }}
+                    >
+                      Claim Pregen Wallet For Phone
                     </Button>
 
                     <Button colorScheme="teal" onClick={checkIsSessionActive}>
@@ -1166,43 +1203,6 @@ function App() {
                       </Box>
                     </HStack>
 
-                    {!!walletId && isPregen && (
-                      <>
-                        <HStack>
-                          <select
-                            value={updatePregenIdentifierType}
-                            onChange={e => setUpdatePregenIdentifierType(e.currentTarget.value)}
-                          >
-                            {PREGEN_IDENTIFIER_TYPES.map(type => (
-                              <option key={type} value={type}>
-                                {type}
-                              </option>
-                            ))}
-                          </select>
-                          <Input
-                            placeholder="pregen-e-mail"
-                            onChange={e => {
-                              setUpdatePregenIdentifier(e.target.value);
-                            }}
-                            value={updatePregenIdentifier}
-                          />
-                        </HStack>
-                        <Button
-                          colorScheme="teal"
-                          onClick={async () => {
-                            await capsule?.updateWalletIdentifierPreGen(
-                              updatePregenIdentifier,
-                              walletId,
-                              updatePregenIdentifierType,
-                            );
-
-                            updateToString();
-                          }}
-                        >
-                          Create Pregen Wallet{isMultiWallet && pregenWalletType === 'missing' ? 's' : ''}
-                        </Button>
-                      </>
-                    )}
                     <Input
                       placeholder="message-to-sign"
                       onChange={e => {

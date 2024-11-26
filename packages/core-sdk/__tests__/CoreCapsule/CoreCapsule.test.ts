@@ -318,20 +318,21 @@ describe('CoreCapsule', () => {
 
         const loginLink = await capsule.initiateUserLogin(USER_EMAIL);
 
-        const url = new URL(loginLink);
-
-        expect(url.origin).toEqual('https://test.com');
-        expect(url.pathname).toEqual('/web/biometrics/login');
-        expect(url.searchParams.get('email')).toEqual(USER_EMAIL);
-        expect(url.searchParams.get('sessionId')).toEqual(SESSION_ID);
-        expect(url.searchParams.get('encryptionKey')).toEqual(getPublicKeyHex(capsule.loginEncryptionKeyPair!));
-        expect(url.searchParams.get('apiKey')).toEqual(PARTNER.apiKey);
-        expect(url.searchParams.get('partnerId')).toEqual(PARTNER.id);
-        expect(url.searchParams.get('portalFont')).toEqual(PARTNER.font);
-        expect(url.searchParams.get('portalThemeMode')).toEqual(PARTNER.themeMode);
-        expect(url.searchParams.get('portalAccentColor')).toEqual(PARTNER.accentColor);
-        expect(url.searchParams.get('portalForegroundColor')).toEqual(PARTNER.foregroundColor);
-        expect(url.searchParams.get('portalBackgroundColor')).toEqual(PARTNER.backgroundColor);
+        expect(loginLink).toEqual(
+          `https://test.com/web/biometrics/login?email=${encodeURIComponent(USER_EMAIL)}&sessionId=${SESSION_ID}&encryptionKey=${getPublicKeyHex(capsule.loginEncryptionKeyPair!)}${toQueryString(
+            {
+              pregenWalletIds: '',
+            },
+          )}${toQueryString({
+            apiKey: PARTNER.apiKey,
+            partnerId: PARTNER.id,
+            portalFont: PARTNER.font,
+            portalThemeMode: PARTNER.themeMode,
+            portalAccentColor: PARTNER.accentColor,
+            portalForegroundColor: PARTNER.foregroundColor,
+            portalBackgroundColor: PARTNER.backgroundColor,
+          })}`,
+        );
       });
       it('initiates login - short url', async () => {
         const capsule = new MockCapsule(Environment.DEV, API_KEY);
@@ -346,9 +347,7 @@ describe('CoreCapsule', () => {
 
         const loginLink = await capsule.initiateUserLogin(USER_EMAIL, true);
 
-        const url = new URL(loginLink);
-        expect(url.origin).toEqual('http://localhost:3003');
-        expect(url.pathname).toContain(`/short/${TEMP_TRANSMISSION_INIT_ID}`);
+        expect(loginLink).toContain(`http://localhost:3003/short/${TEMP_TRANSMISSION_INIT_ID}`);
       });
     });
     describe('phone', () => {
@@ -370,21 +369,21 @@ describe('CoreCapsule', () => {
           USER_COUNTRY_CODE as CountryCallingCode,
         );
 
-        const url = new URL(loginLink);
-
-        expect(url.origin).toEqual('https://test.com');
-        expect(url.pathname).toEqual('/web/biometrics/login');
-        expect(url.searchParams.get('phone')).toEqual(USER_PHONE);
-        expect(url.searchParams.get('countryCode')).toEqual(USER_COUNTRY_CODE);
-        expect(url.searchParams.get('sessionId')).toEqual(SESSION_ID);
-        expect(url.searchParams.get('encryptionKey')).toEqual(getPublicKeyHex(capsule.loginEncryptionKeyPair!));
-        expect(url.searchParams.get('apiKey')).toEqual(PARTNER.apiKey);
-        expect(url.searchParams.get('partnerId')).toEqual(PARTNER.id);
-        expect(url.searchParams.get('portalFont')).toEqual(PARTNER.font);
-        expect(url.searchParams.get('portalThemeMode')).toEqual(PARTNER.themeMode);
-        expect(url.searchParams.get('portalAccentColor')).toEqual(PARTNER.accentColor);
-        expect(url.searchParams.get('portalForegroundColor')).toEqual(PARTNER.foregroundColor);
-        expect(url.searchParams.get('portalBackgroundColor')).toEqual(PARTNER.backgroundColor);
+        expect(loginLink).toEqual(
+          `https://test.com/web/biometrics/login?phone=${encodeURIComponent(USER_PHONE)}&countryCode=${encodeURIComponent(USER_COUNTRY_CODE)}&sessionId=${SESSION_ID}&encryptionKey=${getPublicKeyHex(capsule.loginEncryptionKeyPair!)}${toQueryString(
+            {
+              pregenWalletIds: '',
+            },
+          )}${toQueryString({
+            apiKey: PARTNER.apiKey,
+            partnerId: PARTNER.id,
+            portalFont: PARTNER.font,
+            portalThemeMode: PARTNER.themeMode,
+            portalAccentColor: PARTNER.accentColor,
+            portalForegroundColor: PARTNER.foregroundColor,
+            portalBackgroundColor: PARTNER.backgroundColor,
+          })}`,
+        );
       });
       it('initiates login - phone only method', async () => {
         const capsule = new MockCapsule(Environment.DEV, API_KEY);
@@ -399,21 +398,21 @@ describe('CoreCapsule', () => {
 
         const loginLink = await capsule.initiateUserLoginForPhone(USER_PHONE, USER_COUNTRY_CODE as CountryCallingCode);
 
-        const url = new URL(loginLink);
-
-        expect(url.origin).toEqual('https://test.com');
-        expect(url.pathname).toEqual('/web/biometrics/login');
-        expect(url.searchParams.get('phone')).toEqual(USER_PHONE);
-        expect(url.searchParams.get('countryCode')).toEqual(USER_COUNTRY_CODE);
-        expect(url.searchParams.get('sessionId')).toEqual(SESSION_ID);
-        expect(url.searchParams.get('encryptionKey')).toEqual(getPublicKeyHex(capsule.loginEncryptionKeyPair!));
-        expect(url.searchParams.get('apiKey')).toEqual(PARTNER.apiKey);
-        expect(url.searchParams.get('partnerId')).toEqual(PARTNER.id);
-        expect(url.searchParams.get('portalFont')).toEqual(PARTNER.font);
-        expect(url.searchParams.get('portalThemeMode')).toEqual(PARTNER.themeMode);
-        expect(url.searchParams.get('portalAccentColor')).toEqual(PARTNER.accentColor);
-        expect(url.searchParams.get('portalForegroundColor')).toEqual(PARTNER.foregroundColor);
-        expect(url.searchParams.get('portalBackgroundColor')).toEqual(PARTNER.backgroundColor);
+        expect(loginLink).toEqual(
+          `https://test.com/web/biometrics/login?phone=${encodeURIComponent(USER_PHONE)}&countryCode=${encodeURIComponent(USER_COUNTRY_CODE)}&sessionId=${SESSION_ID}&encryptionKey=${getPublicKeyHex(capsule.loginEncryptionKeyPair!)}${toQueryString(
+            {
+              pregenWalletIds: '',
+            },
+          )}${toQueryString({
+            apiKey: PARTNER.apiKey,
+            partnerId: PARTNER.id,
+            portalFont: PARTNER.font,
+            portalThemeMode: PARTNER.themeMode,
+            portalAccentColor: PARTNER.accentColor,
+            portalForegroundColor: PARTNER.foregroundColor,
+            portalBackgroundColor: PARTNER.backgroundColor,
+          })}`,
+        );
       });
     });
     describe('farcaster', () => {
@@ -447,14 +446,9 @@ describe('CoreCapsule', () => {
       it('get url', async () => {
         const capsule = new MockCapsule(Environment.DEV, API_KEY);
 
-        const oAuthUri = await capsule.getOAuthURL(OAuthMethod.GOOGLE);
+        const uri = await capsule.getOAuthURL(OAuthMethod.GOOGLE);
 
-        const url = new URL(oAuthUri);
-
-        expect(url.origin).toEqual('http://localhost:8080');
-        expect(url.pathname).toEqual('/auth/google');
-        expect(url.searchParams.get('sessionLookupId')).toEqual(SESSION_LOOKUP_ID);
-        expect(url.searchParams.get('apiKey')).toEqual(PARTNER.apiKey);
+        expect(uri).toEqual(`http://localhost:8080/auth/google?sessionLookupId=${encodeURIComponent(SESSION_LOOKUP_ID)}`);
       });
       it('logs in user', async () => {
         const capsule = new MockCapsule(Environment.DEV, API_KEY);
@@ -717,36 +711,27 @@ describe('CoreCapsule', () => {
         await expect(capsule.getPrivateKey(SOLANA_WALLET.id)).rejects.toThrowError('invalid wallet scheme');
       });
       it('pregen utils', async () => {
-        capsule.wallets[WALLET.id] = {
-          ...capsule.wallets[WALLET.id],
-          isPregen: true,
-          pregenIdentifierType: 'EMAIL',
-          pregenIdentifier: USER_EMAIL,
-        };
-
-        await capsule.updateWalletIdentifierPreGen('test email', WALLET.id, PregenIdentifierType.EMAIL);
-        expect(mockUpdatePregenWallet).toBeCalledWith(WALLET.id, {
+        await capsule.updateWalletIdentifierPreGen('test email', PREGEN_WALLET_EMAIL.id, PregenIdentifierType.EMAIL);
+        expect(mockUpdatePregenWallet).toBeCalledWith(PREGEN_WALLET_EMAIL.id, {
           pregenIdentifier: 'test email',
           pregenIdentifierType: PregenIdentifierType.EMAIL,
         });
-        expect(capsule.wallets[WALLET.id].pregenIdentifier).toEqual('test email');
-        expect(capsule.wallets[WALLET.id].pregenIdentifierType).toEqual(PregenIdentifierType.EMAIL);
 
         const hasPregenFalsy = await capsule.hasPregenWallet(USER_EMAIL, PregenIdentifierType.EMAIL);
-        expect(mockGetPregenWallets).toBeCalledWith({ EMAIL: [USER_EMAIL] }, false);
+        expect(mockGetPregenWallets).toBeCalledWith(USER_EMAIL, PregenIdentifierType.EMAIL);
         expect(hasPregenFalsy).toBeFalsy();
 
         const pregenNoWallets = await capsule.getPregenWallets(USER_EMAIL, PregenIdentifierType.EMAIL);
-        expect(mockGetPregenWallets).toBeCalledWith({ EMAIL: [USER_EMAIL] }, false);
+        expect(mockGetPregenWallets).toBeCalledWith(USER_EMAIL, PregenIdentifierType.EMAIL);
         expect(pregenNoWallets.length).toEqual(0);
 
         mockGetPregenWallets.mockResolvedValue({ wallets: PREGEN_WALLETS_EMAIL });
         const hasPregen = await capsule.hasPregenWallet(USER_EMAIL, PregenIdentifierType.EMAIL);
-        expect(mockGetPregenWallets).toBeCalledWith({ EMAIL: [USER_EMAIL] }, false);
+        expect(mockGetPregenWallets).toBeCalledWith(USER_EMAIL, PregenIdentifierType.EMAIL);
         expect(hasPregen).toBeTruthy();
 
         const pregenWallets = await capsule.getPregenWallets(USER_EMAIL, PregenIdentifierType.EMAIL);
-        expect(mockGetPregenWallets).toBeCalledWith({ EMAIL: [USER_EMAIL] }, false);
+        expect(mockGetPregenWallets).toBeCalledWith(USER_EMAIL, PregenIdentifierType.EMAIL);
         expect(pregenWallets.length).toEqual(2);
 
         const encodedWallets = Object.values(capsule.wallets)
