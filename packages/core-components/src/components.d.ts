@@ -460,6 +460,10 @@ export namespace Components {
          */
         "inputmode"?: 'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search';
         /**
+          * Whether the input is for a phone number.
+         */
+        "isPhone"?: boolean;
+        /**
           * The label for the input.
          */
         "label"?: string;
@@ -1972,6 +1976,10 @@ declare namespace LocalJSX {
           * A hint to the browser for which keyboard to display. Possible values: `"none"`, `"text"`, `"tel"`, `"url"`, `"email"`, `"numeric"`, `"decimal"`, and `"search"`.
          */
         "inputmode"?: 'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search';
+        /**
+          * Whether the input is for a phone number.
+         */
+        "isPhone"?: boolean;
         /**
           * The label for the input.
          */

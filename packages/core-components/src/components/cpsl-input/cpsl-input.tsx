@@ -91,6 +91,11 @@ export class CpslInput {
   @Prop() mask?: string;
 
   /**
+   * Whether the input is for a phone number.
+   */
+  @Prop() isPhone?: boolean;
+
+  /**
    * Helper text to show below the input. If `"errorText"` is provided that will take precedence.
    */
   @Prop() helperText?: string;
@@ -254,8 +259,13 @@ export class CpslInput {
   handleSetupMask() {
     if (this.nativeInput) {
       if (this.mask) {
+        const [oldValue, oldCursorPosition] = [this.value, this.nativeInput.selectionEnd];
         Inputmask({ mask: this.mask, showMaskOnHover: false }).mask(this.nativeInput);
         (this.nativeInput as any).inputmask.shadowRoot = this.el.shadowRoot;
+        if (oldCursorPosition === oldValue.length && this.isPhone) {
+          const firstUnderscore = this.nativeInput.value.indexOf('_');
+          this.nativeInput.setSelectionRange(firstUnderscore, firstUnderscore);
+        }
       } else {
         if ((this.nativeInput as any).inputmask) {
           (this.nativeInput as any).inputmask.remove();

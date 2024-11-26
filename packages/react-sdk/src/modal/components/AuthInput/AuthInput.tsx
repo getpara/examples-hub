@@ -206,6 +206,7 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
         inputMode="email"
         onKeyDown={async e => e.key === 'Enter' && handleSubmit()}
         contrastText
+        isPhone={isPhone}
         mask={identifierType === 'phone' ? (phoneMasks[matchedCountryCode.selectedLabel] ?? defaultPhoneMask) : undefined}
         enterkeyhint="go"
         noAutoDisable
