@@ -5,37 +5,41 @@ import { ManualLoginStep } from './ManualLoginStep';
 import { ModalLoading } from '../../../components/ModalLoading';
 import { ModalSuccess } from '../../../components/ModalSuccess';
 import { useModalOutletContext } from '../../../hooks/useModalOutletContext';
-import { AddDeviceStep } from './AddDeviceStep';
 import { SelectWallet } from './SelectWallet';
 import { EnterPasswordStep } from './EnterPasswordStep';
 import { BiometricLocationHint } from '@usecapsule/user-management-client';
 import { LoginFailedStep } from './LoginFailedStep';
 import { LoginFailedTroubleshootingStep } from './LoginFailedTroubleshootingStep';
+import { SuccessFromKnownDeviceStep } from './SuccessFromKnownDeviceStep';
 
 interface BodyProps {
   addDeviceUrl?: string;
   step: AuthLoginStep;
-  isAddingNewDevice: boolean;
   onLoginClick: () => void;
   onLoginWithPasswordClick: (password: string) => void;
   onLoginFromAnotherDevice: () => Promise<void>;
   setStep: (step: AuthLoginStep) => void;
+  onAddPasskeyClick: () => void;
   sessionLookupId: string;
   biometricLocationHints: BiometricLocationHint[];
   loginWithPasswordError?: string;
+  isKnownDeviceLogin: boolean;
+  isAddingDevice: boolean;
 }
 
 export const Body = ({
   addDeviceUrl,
   step,
-  isAddingNewDevice,
   onLoginClick,
   onLoginWithPasswordClick,
   onLoginFromAnotherDevice,
   setStep,
+  onAddPasskeyClick,
   sessionLookupId,
   biometricLocationHints,
   loginWithPasswordError,
+  isKnownDeviceLogin,
+  isAddingDevice,
 }: BodyProps) => {
   const { partner } = useModalOutletContext();
 
@@ -58,7 +62,7 @@ export const Body = ({
         return <ManualLoginStep onLoginClick={onLoginClick} />;
       }
       case AuthLoginStep.WAITING: {
-        return <ModalLoading heading="Waiting for Passkey..." />;
+        return <ModalLoading heading={isAddingDevice ? 'Creating Passkey...' : 'Waiting for Passkey...'} />;
       }
       case AuthLoginStep.ENTER_PASSWORD: {
         return <EnterPasswordStep error={loginWithPasswordError} onLoginClick={onLoginWithPasswordClick} />;
@@ -69,17 +73,17 @@ export const Body = ({
       case AuthLoginStep.SUCCESS: {
         return (
           <ModalSuccess
-            heading={isAddingNewDevice ? 'Passkey Ready To Be Added' : 'You’re Logged In!'}
+            heading="You’re Logged In!"
             subHeading={
-              isAddingNewDevice
-                ? 'Return to your other device to register the new Passkey before closing this window.'
-                : `If you are not automatically redirected, click here to return to ${partner.displayName}. Please do not close this page.`
+              isKnownDeviceLogin
+                ? 'You can close this window and return to your other device.'
+                : `If you are not automatically redirected, you can close this window and return to ${partner.displayName}.`
             }
           />
         );
       }
-      case AuthLoginStep.ADD: {
-        return <AddDeviceStep addDeviceUrl={addDeviceUrl} />;
+      case AuthLoginStep.SUCCESS_FROM_KNOWN_DEVICE: {
+        return <SuccessFromKnownDeviceStep onAddPasskeyClick={onAddPasskeyClick} />;
       }
     }
   };

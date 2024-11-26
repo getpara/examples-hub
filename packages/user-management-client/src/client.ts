@@ -688,11 +688,13 @@ class Client {
     walletIds: CurrentWalletIds,
     needsWallet = false,
     sessionLookupId?: string,
+    newDeviceSessionLookupId?: string,
   ): Promise<any> => {
     const res = await this.baseRequest.post<any>(`/users/${userId}/wallets/set`, {
       walletIds,
       needsWallet,
       sessionLookupId,
+      newDeviceSessionLookupId,
     });
     return res;
   };

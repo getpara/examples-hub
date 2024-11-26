@@ -1146,6 +1146,7 @@ export abstract class CoreCapsule {
     currentWalletIds: CurrentWalletIds,
     sessionLookupId?: string,
     needsWallet = false,
+    newDeviceSessionLookupId?: string,
   ): Promise<void> {
     this.currentWalletIds = currentWalletIds;
 
@@ -1156,6 +1157,7 @@ export abstract class CoreCapsule {
         this.currentWalletIds,
         needsWallet,
         sessionLookupId,
+        newDeviceSessionLookupId,
       );
     }
     typeof window !== 'undefined' &&
@@ -1357,7 +1359,6 @@ export abstract class CoreCapsule {
     partnerId?: string,
     newDeviceSessionId?: string,
     newDeviceEncryptionKey?: string,
-    isForKnownDeviceLogin?: boolean,
   ): Promise<string> {
     return toQueryString({
       newDeviceSessionId,
@@ -1366,7 +1367,6 @@ export abstract class CoreCapsule {
         .filter(([_, wallet]) => this.isPregenWalletClaimable(wallet) && wallet.partnerId === partnerId)
         .map(([id]) => id)
         .join(','),
-      isForKnownDeviceLogin: isForKnownDeviceLogin ? isForKnownDeviceLogin.toString() : undefined,
     });
   }
 
@@ -1455,14 +1455,12 @@ export abstract class CoreCapsule {
     newDeviceSessionId?: string,
     newDeviceEncryptionKey?: string,
     type: 'email' | 'phone' | 'farcaster' = 'email',
-    isForKnownDeviceLogin?: boolean,
   ): Promise<string> {
     const commonQueryParams = await this.getCommonQueryParams(partnerId);
     const commonLoginQueryParams = await this.getCommonLoginQueryParams(
       partnerId,
       newDeviceSessionId,
       newDeviceEncryptionKey,
-      isForKnownDeviceLogin,
     );
 
     const userSpecificParams = {

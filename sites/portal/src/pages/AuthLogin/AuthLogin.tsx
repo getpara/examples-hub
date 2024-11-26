@@ -6,7 +6,7 @@ import { ModalHeader } from '../../components/ModalHeader';
 import { getAsymmetricKeyPair, getPublicKeyHex } from '@usecapsule/web-sdk';
 import { useAuthLoginStep } from '../../hooks/useLoginStep';
 import { useCapsule } from '../../components/CapsuleContext';
-import { LoginProvider, useLogin } from './components/LoginProvider';
+import { LoginProvider, LoginRes, useLogin } from './components/LoginProvider';
 import { SelectWallet } from './components/SelectWallet';
 import { useModalOutletContext } from '../../hooks/useModalOutletContext';
 import { useCloseWindow } from '../../hooks/useCloseWindow';
@@ -27,22 +27,27 @@ const AuthLoginBase = ({ authMethod }) => {
       farcasterUsername,
       newDeviceSessionLookupId,
       skipAutoLogin,
-      isForKnownDeviceLogin,
     },
     biometricLocationHints,
   } = useLogin();
   const [urlForNewDeviceLogin, setUrlForNewDeviceLogin] = useState<string>('');
   const [step, setStep] = useAuthLoginStep();
   const [loginWithPasswordError, setLoginWithPasswordError] = useState<string | undefined>();
+  const [isAddingDevice, setIsAddingDevice] = useState(false);
 
-  const isAddingNewDevice = !!newDeviceSessionLookupId && !isForKnownDeviceLogin;
+  const isKnownDeviceLogin = !!newDeviceSessionLookupId;
 
   const handleLoginFromOtherDevice = async () => {
-    await postLogin();
+    await postLogin({ fromKnownDevice: true });
   };
 
-  const postLogin = async () => {
+  const postLogin = async ({ fromKnownDevice, loginRes }: { fromKnownDevice?: boolean; loginRes?: LoginRes }) => {
     await capsule.userSetupAfterLogin();
+
+    if (fromKnownDevice) {
+      setStep(AuthLoginStep.SUCCESS_FROM_KNOWN_DEVICE);
+      return;
+    }
 
     const wallets = await fetchWallets();
 
@@ -59,8 +64,11 @@ const AuthLoginBase = ({ authMethod }) => {
       : undefined;
 
     if (!!defaultWalletIds || (isWithoutWallets && !capsule.ctx.apiKey)) {
-      await capsule.setCurrentWalletIds(defaultWalletIds ?? {}, sessionId, isWithoutWallets);
-      setStep(AuthLoginStep.SUCCESS);
+      await capsule.setCurrentWalletIds(defaultWalletIds ?? {}, sessionId, isWithoutWallets, newDeviceSessionLookupId);
+      if (capsule.currentWalletIdsArray.length > 0) {
+        await authUpdateKeyShares(loginRes);
+      }
+      setStep(fromKnownDevice ? AuthLoginStep.SUCCESS_FROM_KNOWN_DEVICE : AuthLoginStep.SUCCESS);
     } else {
       setStep(AuthLoginStep.SELECT_WALLET);
     }
@@ -72,7 +80,7 @@ const AuthLoginBase = ({ authMethod }) => {
       await capsule.touchSession();
       await authLoginWithPassword(password);
 
-      await postLogin();
+      await postLogin({});
     } catch (err) {
       setLoginWithPasswordError('Password is incorrect');
     }
@@ -87,35 +95,21 @@ const AuthLoginBase = ({ authMethod }) => {
 
     try {
       await capsule.touchSession();
-      await authLogin();
+      const loginRes = await authLogin();
 
-      await postLogin();
+      await postLogin({ loginRes });
     } catch (err) {
       if (err.message?.toLowerCase().includes('the document is not focused')) {
         setStep(AuthLoginStep.MANUAL_LOGIN);
         return;
       }
-      await getWebAuthURLForAddDevice(true);
+      await getWebAuthURLForKnownDeviceLogin();
       setStep(AuthLoginStep.LOGIN_FAILED);
       console.error('Error retrieving passkey: ', err);
     }
   }, [capsule, authLogin, authMethod]);
 
-  useEffect(() => {
-    async function finishLogin(shouldClose: boolean) {
-      if (capsule.currentWalletIdsArray.length > 0) await authUpdateKeyShares();
-
-      if (shouldClose) {
-        closeWindow(true);
-      }
-    }
-
-    if (step === AuthLoginStep.SUCCESS) {
-      finishLogin(true);
-    }
-  }, [capsule, authUpdateKeyShares, step]);
-
-  async function getWebAuthURLForAddDevice(isForKnownDeviceLogin?: boolean) {
+  async function getWebAuthURLForKnownDeviceLogin() {
     let touchRes = await capsule.touchSession();
     if (!touchRes.data.sessionLookupId) {
       touchRes = await capsule.touchSession(true);
@@ -132,45 +126,16 @@ const AuthLoginBase = ({ authMethod }) => {
       touchRes.data.sessionLookupId,
       getPublicKeyHex(capsule.loginEncryptionKeyPair),
       undefined,
-      isForKnownDeviceLogin,
     );
     const shortUrl = await capsule.shortenLoginLink(url);
     setUrlForNewDeviceLogin(shortUrl);
   }
 
-  // TODO: This will change when the new add device flow is added (This shouldn't get hit at all until then)
   useEffect(() => {
-    async function getTemporaryShares() {
-      try {
-        const isActive = await capsule.isSessionActive();
-        if (!isActive) {
-          window.setTimeout(getTemporaryShares, 2000);
-          return;
-        }
-        const touchRes = await capsule.touchSession();
-        await capsule.setUserId(touchRes.data.userId);
-        const fetchedWallets = await capsule.fetchWallets();
-        const temporaryShares = (await capsule.getTransmissionKeyShares(true)).data.temporaryShares;
-
-        if (temporaryShares.length >= fetchedWallets.length) {
-          const authCreationURL = await capsule.getSetUpBiometricsURL(true);
-          setStep(AuthLoginStep.MANUAL_LOGIN);
-          window.location.href = authCreationURL;
-          return;
-        }
-
-        window.setTimeout(getTemporaryShares, 2000);
-      } catch (e) {
-        console.error(e);
-        window.setTimeout(getTemporaryShares, 2000);
-      }
+    if (step === AuthLoginStep.SUCCESS) {
+      closeWindow(true);
     }
-
-    if (!newDeviceSessionLookupId && step === AuthLoginStep.ADD) {
-      getWebAuthURLForAddDevice();
-      window.setTimeout(getTemporaryShares, 2000);
-    }
-  }, [capsule, step, sessionId, encryptionKey, partnerId]);
+  }, [step]);
 
   useEffect(() => {
     if (step === AuthLoginStep.SELECT_WALLET) {
@@ -194,6 +159,38 @@ const AuthLoginBase = ({ authMethod }) => {
     }
   }, [login]);
 
+  const handleAddPasskeyClick = async () => {
+    setIsAddingDevice(true);
+    setStep(AuthLoginStep.WAITING);
+
+    const reset = () => {
+      setStep(AuthLoginStep.SUCCESS_FROM_KNOWN_DEVICE);
+      setIsAddingDevice(false);
+    };
+
+    try {
+      const isActive = await capsule.isSessionActive();
+      if (!isActive) {
+        reset();
+        return;
+      }
+      const touchRes = await capsule.touchSession();
+      await capsule.setUserId(touchRes.data.userId);
+      const fetchedWallets = await capsule.fetchWallets();
+      const temporaryShares = (await capsule.getTransmissionKeyShares(true)).data.temporaryShares;
+
+      if (temporaryShares.length >= fetchedWallets.length) {
+        const authCreationURL = await capsule.getSetUpBiometricsURL(true);
+        window.location.href = authCreationURL;
+      } else {
+        reset();
+      }
+    } catch (err) {
+      console.error('Error adding passkey.', err);
+      reset();
+    }
+  };
+
   if (step === AuthLoginStep.SELECT_WALLET) {
     return <SelectWallet sessionLookupId={sessionId} />;
   }
@@ -206,13 +203,15 @@ const AuthLoginBase = ({ authMethod }) => {
           step={step}
           sessionLookupId={sessionId}
           addDeviceUrl={urlForNewDeviceLogin}
-          isAddingNewDevice={isAddingNewDevice}
           onLoginClick={login}
           onLoginWithPasswordClick={loginWithPassword}
           onLoginFromAnotherDevice={handleLoginFromOtherDevice}
           setStep={setStep}
+          onAddPasskeyClick={handleAddPasskeyClick}
           biometricLocationHints={biometricLocationHints}
           loginWithPasswordError={loginWithPasswordError}
+          isKnownDeviceLogin={isKnownDeviceLogin}
+          isAddingDevice={isAddingDevice}
         />
       </CardContent>
     </Card>

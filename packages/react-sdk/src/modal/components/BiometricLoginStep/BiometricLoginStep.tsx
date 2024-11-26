@@ -94,7 +94,7 @@ export const BiometricLoginStep = () => {
 
   function shouldShowWelcomeBack() {
     return (
-      !biometricLocationHints ||
+      !biometricLocationHints?.length ||
       (passkeysSupported && formattedHints.isOnKnownDevice) ||
       (supportedAuthMethods?.has && supportedAuthMethods.has(AuthMethod.PASSWORD))
     );
@@ -146,12 +146,12 @@ const BiometricOnly = ({
 }) => {
   return (
     <>
-      {((biometricLocationHints?.length && !formattedHints.isOnKnownDevice) || !passkeysSupported) && (
+      {((!!biometricLocationHints?.length && !formattedHints.isOnKnownDevice) || !passkeysSupported) && (
         <KnownDevices hints={formattedHints} link={shortLoginLink} />
       )}
       {passkeysSupported && (
         <>
-          {biometricLocationHints?.length && !formattedHints.isOnKnownDevice && <CpslDivider>or</CpslDivider>}
+          {!!biometricLocationHints?.length && !formattedHints.isOnKnownDevice && <CpslDivider>or</CpslDivider>}
           <CpslButton fullWidth onClick={handlePasskeyClick}>
             {!biometricLocationHints?.length || formattedHints.isOnKnownDevice ? (
               <>

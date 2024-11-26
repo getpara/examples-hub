@@ -24,8 +24,13 @@ export const LoginFailedStep = ({
   const capsule = useCapsule();
 
   const sessionListener = async (): Promise<void> => {
-    const isActive = await capsule.isSessionActive();
-    if (!isActive) {
+    const touchRes = await capsule.touchSession();
+    const isAuthenticated = touchRes.data.isAuthenticated;
+    const hasSetWallets = touchRes.data.currentWalletIds !== undefined;
+    const needsWallet = touchRes.data.needsWallet !== undefined;
+    // Treat session as setup if authenticated and wallets are selected &/or the user needs a wallet
+    const isSessionSetup = isAuthenticated && (hasSetWallets || needsWallet);
+    if (!isSessionSetup) {
       loginTimeout.current = window.setTimeout(sessionListener, KNOWN_DEVICE_LOGIN_POLLING_INTERVAL);
       return;
     }

@@ -138,8 +138,8 @@ const WalletButton = ({ wallet, disabled, onClick, isClaimable, isNew, isSelecte
 export const SelectWallet = ({ sessionLookupId }: { sessionLookupId: string }) => {
   const capsule = useCapsule();
   const {
-    fns: { finishLogin },
-    params: { email },
+    fns: { finishLogin, authUpdateKeyShares },
+    params: { email, newDeviceSessionLookupId },
     wallets,
   } = useLogin();
   const [, setStep] = useAuthLoginStep();
@@ -221,7 +221,7 @@ export const SelectWallet = ({ sessionLookupId }: { sessionLookupId: string }) =
 
         setIsCreatingWallets(false);
 
-        await capsule.setCurrentWalletIds({ ...walletIds, ...createdIds }, sessionLookupId);
+        await capsule.setCurrentWalletIds({ ...walletIds, ...createdIds }, sessionLookupId, false, newDeviceSessionLookupId);
 
         if (created.recoverySecret) {
           newRecoverySecret = JSON.parse(recoverySecret || '{}').backupDecryptionKey;
@@ -231,7 +231,8 @@ export const SelectWallet = ({ sessionLookupId }: { sessionLookupId: string }) =
 
         finishLogin();
       } else {
-        await capsule.setCurrentWalletIds(walletIds, sessionLookupId);
+        await capsule.setCurrentWalletIds(walletIds, sessionLookupId, false, newDeviceSessionLookupId);
+        await authUpdateKeyShares();
         setStep(AuthLoginStep.SUCCESS);
       }
     },

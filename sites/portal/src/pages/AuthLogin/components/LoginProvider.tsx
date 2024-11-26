@@ -24,17 +24,18 @@ type LoginParams = {
   newDeviceSessionLookupId?: string;
   newDeviceEncryptionKey?: string;
   skipAutoLogin?: boolean;
-  isForKnownDeviceLogin?: boolean;
   pregenWalletIds?: Record<string, true>;
 };
 
 export type Wallets = Partial<Record<WalletType, WalletEntity[]>>;
 
+export type LoginRes = Awaited<ReturnType<typeof utils.authLogin>>;
+
 type Login = {
   fns: {
-    authLogin: () => Promise<void>;
+    authLogin: () => Promise<Awaited<ReturnType<typeof utils.authLogin>>>;
     authLoginWithPassword: (password: string) => Promise<void>;
-    authUpdateKeyShares: () => Promise<void>;
+    authUpdateKeyShares: (_?: LoginRes) => Promise<void>;
     fetchWallets: () => Promise<Wallets>;
     finishLogin: (_?: boolean) => Promise<void>;
   };
@@ -71,7 +72,6 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
     const paramsNewDeviceEncryptionKey = searchParams.get('newDeviceEncryptionKey') || undefined;
     const paramsPartnerId = searchParams.get('partnerId');
     const paramsPregenWalletIds = searchParams.get('pregenWalletIds');
-    const paramsIsForKnownDeviceLogin = searchParams.get('isForKnownDeviceLogin');
 
     return {
       email: paramsEmail,
@@ -87,7 +87,6 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
       pregenWalletIds: paramsPregenWalletIds
         ? paramsPregenWalletIds.split(',').reduce((obj, id) => ({ ...obj, [id]: true }), {})
         : {},
-      isForKnownDeviceLogin: paramsIsForKnownDeviceLogin === 'true',
     };
   }, [searchParams]);
 
@@ -95,7 +94,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
   const [wallets, setWallets] = useState<Wallets>();
   const [biometricLocationHints, setBiometricLocationHints] = useState<BiometricLocationHint[]>([]);
 
-  const authLogin = useCallback(async (): Promise<void> => {
+  const authLogin = useCallback(async (): Promise<Awaited<ReturnType<typeof utils.authLogin>>> => {
     const loginRes = await utils.authLogin(
       capsule,
       params.partnerId,
@@ -109,6 +108,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
     );
 
     setLoginRes(loginRes);
+    return loginRes;
   }, [
     capsule,
     params.partnerId,
@@ -218,33 +218,38 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
     return wallets;
   }, [capsule, params.pregenWalletIds, params.phone, params.countryCode]);
 
-  const authUpdateKeyShares = useCallback(async () => {
-    if (!loginRes) {
-      return;
-    }
+  const authUpdateKeyShares = useCallback(
+    async (loginResParam?: LoginRes) => {
+      const _loginRes = loginResParam ?? loginRes;
 
-    const { userId, userHandle, signature, passwordId } = loginRes;
+      if (!_loginRes) {
+        return;
+      }
 
-    await utils.authUpdateKeyShares(
+      const { userId, userHandle, signature, passwordId } = _loginRes;
+
+      await utils.authUpdateKeyShares(
+        capsule,
+        params.sessionId,
+        userId,
+        params.encryptionKey,
+        userHandle,
+        passwordId ? undefined : signature,
+        params.newDeviceSessionLookupId,
+        params.newDeviceEncryptionKey,
+        params.partnerId,
+        passwordId,
+      );
+    },
+    [
       capsule,
       params.sessionId,
-      userId,
       params.encryptionKey,
-      userHandle,
-      passwordId ? undefined : signature,
       params.newDeviceSessionLookupId,
       params.newDeviceEncryptionKey,
-      params.partnerId,
-      passwordId,
-    );
-  }, [
-    capsule,
-    params.sessionId,
-    params.encryptionKey,
-    params.newDeviceSessionLookupId,
-    params.newDeviceEncryptionKey,
-    loginRes,
-  ]);
+      loginRes,
+    ],
+  );
 
   const finishLogin = useCallback(
     async (shouldClose = false) => {
