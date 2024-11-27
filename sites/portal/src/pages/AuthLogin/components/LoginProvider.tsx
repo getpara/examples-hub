@@ -3,7 +3,7 @@ import * as utils from '../../../utils/authLogin';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useCapsule } from '../../../components/CapsuleContext';
 import { CountryCallingCode } from 'libphonenumber-js';
-import { entityToWallet, isWalletSupported, PregenIdentifierType, WalletEntity, WalletType } from '@usecapsule/core-sdk';
+import { entityToWallet, isWalletSupported, PregenIds, WalletEntity, WalletType } from '@usecapsule/core-sdk';
 import { formatISO } from 'date-fns';
 import { useCloseWindow } from '../../../hooks/useCloseWindow';
 import { BiometricLocationHint } from '@usecapsule/user-management-client';
@@ -24,7 +24,7 @@ type LoginParams = {
   newDeviceSessionLookupId?: string;
   newDeviceEncryptionKey?: string;
   skipAutoLogin?: boolean;
-  pregenWalletIds?: Record<string, true>;
+  pregenIds?: PregenIds;
 };
 
 export type Wallets = Partial<Record<WalletType, WalletEntity[]>>;
@@ -71,7 +71,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
     const paramsNewDeviceSessionLookupId = searchParams.get('newDeviceSessionId') || undefined;
     const paramsNewDeviceEncryptionKey = searchParams.get('newDeviceEncryptionKey') || undefined;
     const paramsPartnerId = searchParams.get('partnerId');
-    const paramsPregenWalletIds = searchParams.get('pregenWalletIds');
+    const paramsPregenIds = searchParams.get('pregenIds');
 
     return {
       email: paramsEmail,
@@ -84,9 +84,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
       partnerId: paramsPartnerId,
       newDeviceSessionLookupId: paramsNewDeviceSessionLookupId,
       newDeviceEncryptionKey: paramsNewDeviceEncryptionKey,
-      pregenWalletIds: paramsPregenWalletIds
-        ? paramsPregenWalletIds.split(',').reduce((obj, id) => ({ ...obj, [id]: true }), {})
-        : {},
+      pregenIds: paramsPregenIds ? JSON.parse(decodeURIComponent(paramsPregenIds)) : {},
     };
   }, [searchParams]);
 
@@ -157,17 +155,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
     await capsule.touchSession();
     const _wallets = (await capsule.fetchWallets()).filter(({ pregenIdentifier }) => !pregenIdentifier);
 
-    const email = capsule.getEmail();
-
-    const [pregenIdentifier, pregenIdentifierType] = email
-      ? [email, PregenIdentifierType.EMAIL]
-      : [capsule.getPhoneNumber(), PregenIdentifierType.PHONE];
-
-    const _pregenWallets = capsule.ctx.apiKey
-      ? (await capsule.getPregenWallets(pregenIdentifier, pregenIdentifierType)).filter(
-          wallet => params.pregenWalletIds[wallet.id],
-        )
-      : [];
+    const _pregenWallets = capsule.ctx.apiKey ? await capsule.getPregenWallets() : [];
 
     const partnerCount = [...new Set([..._wallets, ..._pregenWallets].map(wallet => wallet.partnerId))].reduce(
       (obj, partnerId) => ({
@@ -216,7 +204,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
     setWallets(wallets);
 
     return wallets;
-  }, [capsule, params.pregenWalletIds, params.phone, params.countryCode]);
+  }, [capsule, capsule.pregenIds]);
 
   const authUpdateKeyShares = useCallback(
     async (loginResParam?: LoginRes) => {
@@ -276,12 +264,16 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
         await capsule.setFarcasterUsername(params.farcasterUsername);
       }
 
+      if (params.pregenIds) {
+        capsule.pregenIds = params.pregenIds;
+      }
+
       const hints = await capsule.getUserBiometricLocationHints();
       setBiometricLocationHints(hints);
     }
 
     setUserDetails();
-  }, [capsule, params.email, params.phone, params.countryCode, params.farcasterUsername]);
+  }, [capsule, params.pregenIds, params.email, params.phone, params.countryCode, params.farcasterUsername]);
 
   return (
     <LoginContext.Provider

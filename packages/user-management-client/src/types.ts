@@ -19,3 +19,18 @@ export function extractWalletRef(params: WalletParams): [WalletRef, string] {
 
   throw new Error('invalid wallet params');
 }
+
+export enum OAuthMethod {
+  GOOGLE = 'GOOGLE',
+  TWITTER = 'TWITTER',
+  APPLE = 'APPLE',
+  DISCORD = 'DISCORD',
+  FACEBOOK = 'FACEBOOK',
+  FARCASTER = 'FARCASTER',
+}
+
+export const PREGEN_IDENTIFIER_TYPES = ['EMAIL', 'PHONE', 'CUSTOM_ID', OAuthMethod.DISCORD, OAuthMethod.TWITTER] as const;
+
+export type TPregenIdentifierType = (typeof PREGEN_IDENTIFIER_TYPES)[number];
+
+export type PregenIds = Partial<Record<TPregenIdentifierType, string[]>>;

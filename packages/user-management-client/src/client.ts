@@ -7,7 +7,7 @@ import axios, {
 } from 'axios';
 import { AxiosRequestConfig } from 'axios';
 import qs from 'qs';
-import { extractWalletRef, WalletParams } from './types.js';
+import { extractWalletRef, TPregenIdentifierType, PregenIds, WalletParams } from './types.js';
 
 export const USER_NOT_VERIFIED = 'user must verify biometrics';
 export const USER_NOT_AUTHENTICATED_ERROR = 'user must be authenticated';
@@ -186,7 +186,7 @@ export interface WalletEntity {
   createdAt: string;
   isPregen?: boolean;
   pregenIdentifier: string;
-  pregenIdentifierType: string;
+  pregenIdentifierType: TPregenIdentifierType;
   id: string;
   keyGenComplete: boolean;
   name: string | null;
@@ -202,7 +202,7 @@ export interface WalletEntity {
   lastUsedPartner?: PartnerEntity;
 }
 
-interface getWalletsRes {
+interface GetWalletsRes {
   wallets: WalletEntity[];
 }
 
@@ -223,7 +223,7 @@ interface createWalletBody {
 
 interface updatePregenWalletBody {
   pregenIdentifier: string;
-  pregenIdentifierType: string;
+  pregenIdentifierType: TPregenIdentifierType;
 }
 
 interface createWalletRes {
@@ -233,15 +233,15 @@ interface createWalletRes {
 
 interface createWalletPreGenBody {
   pregenIdentifier: string;
-  pregenIdentifierType: string;
+  pregenIdentifierType: TPregenIdentifierType;
   scheme?: WalletScheme;
   type: WalletType;
   cosmosPrefix?: string;
 }
 
-interface claimPreGenWalletBody {
+interface claimPreGenWalletsBody {
   userId: string;
-  walletId: string;
+  walletIds: string[];
 }
 
 interface signTransactionBody {
@@ -626,20 +626,20 @@ class Client {
   };
 
   // GET /wallets/pregen?pregenIdentifier={pregenIdentifier}&pregenIdentifierType={pregenIdentifierType}
-  getPregenWallets = async (
-    pregenIdentifier: string,
-    pregenIdentifierType: string,
+  getPregenWallets = async <ReturnType = { wallets: WalletEntity[] }>(
+    pregenIds: PregenIds,
     expand = false,
-  ): Promise<getWalletsRes> => {
-    const res = await this.baseRequest.get<any>(
-      `/wallets/pregen?pregenIdentifier=${encodeURIComponent(pregenIdentifier)}&pregenIdentifierType=${encodeURIComponent(pregenIdentifierType)}${expand ? '&expand=true' : ''}`,
-    );
+  ): Promise<ReturnType> => {
+    const res = await this.baseRequest.get<ReturnType>('/wallets/pregen', { params: { ids: pregenIds, expand } });
+
     return res.data;
   };
 
   // POST /wallets/pregen/claim
-  claimPregenWallet = async (body?: claimPreGenWalletBody): Promise<void> => {
-    await this.baseRequest.post<WalletEntity>(`/wallets/pregen/claim`, body);
+  claimPregenWallets = async <ReturnType = { walletIds?: string[] }>(body?: claimPreGenWalletsBody): Promise<ReturnType> => {
+    const res = await this.baseRequest.post<ReturnType>(`/wallets/pregen/claim`, body);
+
+    return res.data;
   };
 
   // POST /users/:userId/wallets/:walletId/transactions/send
@@ -669,16 +669,16 @@ class Client {
   };
 
   // GET /users/:userId/wallets
-  getWallets = async (userId: string, includePartnerData?: boolean): Promise<AxiosResponse<getWalletsRes, any>> => {
-    const res = await this.baseRequest.get<getWalletsRes>(
+  getWallets = async (userId: string, includePartnerData?: boolean): Promise<AxiosResponse<GetWalletsRes, any>> => {
+    const res = await this.baseRequest.get<GetWalletsRes>(
       `/users/${userId}/wallets${includePartnerData ? `?includePartnerData=${encodeURIComponent(includePartnerData)}` : ''}`,
     );
     return res;
   };
 
   // GET /users/:userId/all-wallets
-  getAllWallets = async (userId: string): Promise<AxiosResponse<getWalletsRes, any>> => {
-    const res = await this.baseRequest.get<getWalletsRes>(`/users/${userId}/all-wallets`);
+  getAllWallets = async (userId: string): Promise<AxiosResponse<GetWalletsRes, any>> => {
+    const res = await this.baseRequest.get<GetWalletsRes>(`/users/${userId}/all-wallets`);
     return res;
   };
 

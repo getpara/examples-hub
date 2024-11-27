@@ -1,8 +1,7 @@
-import { BackupKitEmailProps, WalletType } from '@usecapsule/user-management-client';
+import { BackupKitEmailProps, TPregenIdentifierType, WalletType } from '@usecapsule/user-management-client';
 import { Ctx } from './definitions.js';
 import { SignatureRes } from './types/walletTypes.js';
 import { StorageUtils } from './StorageUtils.js';
-import { PregenIdentifierType } from './CoreCapsule.js';
 import { PopupType } from './types/popupTypes.js';
 
 export interface PlatformUtils {
@@ -36,7 +35,7 @@ export interface PlatformUtils {
     ctx: Ctx,
     partnerId: string,
     pregenIdentifier: string,
-    pregenIdentifierType: PregenIdentifierType,
+    pregenIdentifierType: TPregenIdentifierType,
     type: Exclude<WalletType, WalletType.SOLANA>,
     secretKey: string | null, // should be acceptable as null in RN as we don't pre-gen them
     sessionCookie: string,
@@ -109,7 +108,7 @@ export interface PlatformUtils {
   ed25519PreKeygen(
     ctx: Ctx,
     pregenIdentifier: string,
-    pregenIdentifierType: PregenIdentifierType,
+    pregenIdentifierType: TPregenIdentifierType,
     sessionCookie: string,
   ): Promise<{
     signer: string;

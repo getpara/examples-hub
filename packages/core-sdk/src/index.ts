@@ -10,7 +10,11 @@ export {
   OnRampPurchaseType,
   type OnRampConfig,
   type OnRampAllowedAssets,
+  OAuthMethod,
+  type TPregenIdentifierType,
+  type PregenIds,
   NON_ED25519,
+  PREGEN_IDENTIFIER_TYPES,
 } from '@usecapsule/user-management-client';
 export * from './definitions.js';
 export type { Ctx } from './definitions.js';

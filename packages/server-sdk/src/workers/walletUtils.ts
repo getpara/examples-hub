@@ -1,7 +1,7 @@
 import {
   getBaseMPCNetworkUrl,
   Ctx,
-  PregenIdentifierType,
+  TPregenIdentifierType,
   SignatureRes,
   WalletScheme,
   WalletType,
@@ -78,7 +78,7 @@ export async function ed25519Keygen(ctx: Ctx, userId: string): Promise<{ signer:
 export async function ed25519PreKeygen(
   ctx: Ctx,
   pregenIdentifier: string,
-  pregenIdentifierType: PregenIdentifierType,
+  pregenIdentifierType: TPregenIdentifierType,
 ): Promise<{ signer: string; walletId: string }> {
   const { walletId, protocolId } = await ctx.capsuleClient.createWalletPreGen({
     pregenIdentifier,
@@ -166,7 +166,7 @@ export async function preKeygen(
   ctx: Ctx,
   partnerId: string,
   pregenIdentifier: string,
-  pregenIdentifierType: PregenIdentifierType,
+  pregenIdentifierType: TPregenIdentifierType,
   type: Exclude<WalletType, WalletType.SOLANA>,
   secretKey: string | null,
 ): Promise<{ signer: string; walletId: string }> {
