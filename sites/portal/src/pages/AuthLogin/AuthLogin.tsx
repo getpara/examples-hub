@@ -78,9 +78,9 @@ const AuthLoginBase = ({ authMethod }) => {
     try {
       setLoginWithPasswordError(undefined);
       await capsule.touchSession();
-      await authLoginWithPassword(password);
+      const loginRes = await authLoginWithPassword(password);
 
-      await postLogin({});
+      await postLogin({ loginRes });
     } catch (err) {
       setLoginWithPasswordError('Password is incorrect');
     }
@@ -95,6 +95,7 @@ const AuthLoginBase = ({ authMethod }) => {
 
     try {
       await capsule.touchSession();
+
       const loginRes = await authLogin();
 
       await postLogin({ loginRes });
