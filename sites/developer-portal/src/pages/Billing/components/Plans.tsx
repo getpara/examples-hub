@@ -4,9 +4,11 @@ import { RequestEnterpriseModal } from '../../../components/RequestEnterpriseMod
 import { useGetSelectedOrganization } from '../../../hooks/api/queries/useOrganizations';
 import { useGetOrganizationEnterprisePrice } from '../../../hooks/api/queries/useOrganizationEnterprisePrice';
 import { CpslText } from '@usecapsule/react-components';
-import { useStripePlan } from '../../../hooks/useStripePlan';
 import { useGetOrganizationSubscription } from '../../../hooks/api/queries/useOrganizationSubscription';
 import { PlanCard } from '../../../components/PlanCard/PlanCard';
+import { UpgradeModal } from './UpgradeModal';
+import { useStripePlan } from '../../../hooks/useStripePlan';
+import { FREE_PLAN_SLUG } from '../../../utils/constants';
 
 export const Plans = () => {
   const { planMeta } = usePlanMetadata();
@@ -16,6 +18,7 @@ export const Plans = () => {
   const { changePlan, isCreatingStripeSession } = useStripePlan();
 
   const [isRequestingEnterprise, setIsRequestingEnterprise] = useState(false);
+  const [upgradingPlanSlug, setUpgradingPlanSlug] = useState<string>();
 
   const activeSlug = subscription?.plan.slug;
   const activeIndex = planMeta?.findIndex(p => p.slug === activeSlug);
@@ -25,11 +28,19 @@ export const Plans = () => {
       setIsRequestingEnterprise(true);
       return;
     }
-    await changePlan(planSlug);
+    if (activeSlug !== FREE_PLAN_SLUG) {
+      setUpgradingPlanSlug(planSlug);
+    } else {
+      await changePlan(planSlug);
+    }
+  };
+
+  const handleCloseEnterpriseModal = () => {
+    setIsRequestingEnterprise(false);
   };
 
   const handleCloseUpgradeModal = () => {
-    setIsRequestingEnterprise(false);
+    setUpgradingPlanSlug(undefined);
   };
 
   return (
@@ -48,7 +59,8 @@ export const Plans = () => {
           enterprisePrice={enterprisePrice}
         />
       ))}
-      <RequestEnterpriseModal open={!!isRequestingEnterprise} onClose={handleCloseUpgradeModal} />
+      <RequestEnterpriseModal open={!!isRequestingEnterprise} onClose={handleCloseEnterpriseModal} />
+      <UpgradeModal open={!!upgradingPlanSlug} planSlug={upgradingPlanSlug ?? ''} onClose={handleCloseUpgradeModal} />
     </>
   );
 };

@@ -355,6 +355,10 @@ export type Subscription = {
   periodStart?: number;
   periodEnd?: number;
   price?: number;
+  isTieredPrice?: boolean;
+  tiers?: { flatPrice?: number; unitPrice?: number; upTo?: number }[];
+  billingPeriodStart?: number | null;
+  billingPeriodEnd?: number | null;
   trialStart?: number | null;
   trialEnd?: number | null;
   cancelAtPeriodEnd?: boolean;
@@ -395,6 +399,8 @@ export type OrganizationSubscriptionResponse = {
 export type Plan = {
   slug: string;
   price: number;
+  isTieredPrice: boolean;
+  tiers?: { flatPrice?: number; unitPrice?: number; upTo?: number }[];
   maxProjects: number;
   maxProdMAUs: number;
   maxBetaUsers: number;

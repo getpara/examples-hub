@@ -24,6 +24,6 @@ export const usePlans = () => {
 
 export const usePlan = (slug: string) => {
   return usePlansQuery(data => {
-    return (data.find(d => d.slug === slug)?.price ?? 0) / 100;
+    return data.find(d => d.slug === slug);
   });
 };

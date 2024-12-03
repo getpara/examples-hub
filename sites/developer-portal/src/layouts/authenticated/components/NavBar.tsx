@@ -1,7 +1,6 @@
 import { CpslButton, CpslDrawer, CpslIcon, CpslText } from '@usecapsule/react-components';
 import styled from 'styled-components';
 import { Navigation } from './Navigation';
-import { NavBarFooter } from './NavBarFooter';
 import { useIsMobile } from '../../../hooks/useIsMobile';
 import { MOBILE_SIZE } from '../../../utils/constants';
 import { useLogout } from '../../../hooks/useLogout';
@@ -9,6 +8,7 @@ import { useOrganizationMember } from '../../../hooks/api/queries/useOrganizatio
 import { Organizations } from './Organizations';
 import { AUTH_APP_BAR_HEIGHT } from '../../../components/AppBar/AuthAppBar';
 import { AccountWarning } from './AccountWarning';
+import { PlanUsage } from './PlanUsage';
 
 export const EXPANDED_SIDEBAR_WIDTH = 312;
 
@@ -46,8 +46,8 @@ export const NavBar = ({ isOpen, closeNav }: NavBarProps) => {
             Log Out
             <CpslIcon icon="logOut" />
           </CpslButton>
+          <PlanUsage />
         </BottomContainer>
-        {!isMobile && <NavBarFooter />}
       </Container>
     </Drawer>
   );
@@ -67,6 +67,7 @@ const Username = styled(CpslText)`
 const BottomContainer = styled.div`
   width: 100%;
   padding: 0px 16px;
+  padding-bottom: 16px;
 `;
 
 const Container = styled.div`

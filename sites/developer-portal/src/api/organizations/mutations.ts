@@ -82,3 +82,10 @@ export const createCustomerPortalSession = async ({
 
   return (await axiosClient.post<CreateCustomerPortalSessionResponse>(endpoint, { flow, planSlug, successUrl })).data;
 };
+
+export type UpgradeSubscriptionVars = { organizationId: string; planSlug: string };
+export const upgradeSubscription = async ({ organizationId, planSlug }: UpgradeSubscriptionVars) => {
+  const endpoint = `/organizations/${organizationId}/stripe/subscription/upgrade`;
+
+  return (await axiosClient.post<{ success: boolean }>(endpoint, { planSlug })).data;
+};

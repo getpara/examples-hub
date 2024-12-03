@@ -13,7 +13,7 @@ export const useOrganizationUserMetricsQuery = <T>(
   const selectedOrganizationId = useAppStore(state => state.getSelectedOrganization());
 
   return useQuery({
-    enabled: !!selectedOrganizationId,
+    enabled: !!selectedOrganizationId && !!startDate && !!endDate,
     queryKey: [ORGANIZATION_USER_METRICS_QUERY_KEY, selectedOrganizationId, startDate, endDate],
     queryFn: async () => {
       const { data } = await getOrganizationUserMetrics(selectedOrganizationId ?? '', startDate, endDate);

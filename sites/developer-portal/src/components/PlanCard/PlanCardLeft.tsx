@@ -39,22 +39,26 @@ export const PlanCardLeft = ({
   const { data: willSubscriptionCancel } = useWillStripeSubscriptionCancel();
   const { data: hasStripeSubscription } = useHasStripeSubscription();
   const { createCustomerPortalSession } = useStripePlan();
+  const { data: plan, isLoading: isPriceLoading } = usePlan(slug);
 
   const isBillingType = type === 'billing';
   const isMostPopular = slug === MOST_POPULAR_PLAN_SLUG;
   const isSubscribed = subscription?.plan.slug.toUpperCase() === slug;
 
   const isEnterprise = slug.toUpperCase() === ENTERPRISE_PLAN_SLUG;
-  const { data: planPrice, isLoading: isPriceLoading } = usePlan(slug);
+
+  const isTieredPrice = (isSubscribed ? subscription : plan)?.isTieredPrice;
+  const tiers = (isSubscribed ? subscription : plan)?.tiers;
+  const planPrice = (isTieredPrice ? (tiers?.[0].flatPrice ?? 0) : ((isSubscribed ? subscription : plan)?.price ?? 0)) / 100;
+  const tierUnitPrice = (tiers?.[1]?.unitPrice ?? 0) / 100;
   // If this is the plan the org is subscribed to, show the price they are paying
   // Else if its the enterprise option show their enterprise price if applicable or set to 0 to show the "Ask Us" CTA
   // Default to the default plan price from Stripe
-  const monthlyCostString =
-    subscription && isSubscribed
-      ? (subscription.price ?? 0) / 100
-      : isEnterprise
-        ? (enterprisePrice ?? 0)
-        : (planPrice ?? 0);
+  const monthlyCostString = isSubscribed ? planPrice : isEnterprise ? (enterprisePrice ?? 0) : planPrice;
+  const allowanceStringWithTier = isTieredPrice ? `0-${(tiers?.[0].upTo ?? 0).toLocaleString()} Users/mo*` : allowanceString;
+  const footnoteWithTier = isTieredPrice
+    ? `*Additional users above the limit are charged at $${tierUnitPrice} per user.`
+    : footnote;
 
   const handleUpgradePlanClick = () => {
     onUpgradeClick(slug);
@@ -90,7 +94,7 @@ export const PlanCardLeft = ({
               </InlineText>
             </span>
             <CpslText variant="bodyS" color="tertiary">
-              {allowanceString}
+              {allowanceStringWithTier}
             </CpslText>
           </>
         )}
@@ -113,10 +117,10 @@ export const PlanCardLeft = ({
           </CTAButton>
         )}
       </TopContainer>
-      {footnote && (
+      {footnoteWithTier && (
         <BottomContainer>
           <CpslText variant="body2XS" color="tertiary" weight="medium">
-            {footnote}
+            {footnoteWithTier}
           </CpslText>
         </BottomContainer>
       )}
