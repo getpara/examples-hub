@@ -1,5 +1,6 @@
 import { WalletType } from '@usecapsule/user-management-client';
 
+export const UUID = 'ef3bf91c-fc1e-4d18-afe2-f2654c9531e5';
 export const USER_ID = 'ef3bf91c-fc1e-4d18-afe2-f2654c9531e5';
 export const USER_EMAIL = 'test@test.com';
 export const USER_PHONE = '5555555555';
@@ -188,4 +189,14 @@ export const TWOFA_VERIFY_RESP = {
   userId: USER_ID,
   status: 'INITIATED',
   initiatedAt: '2024-10-22T00:00:00.000Z',
+};
+
+export const TRANSACTION_ID = UUID;
+export const PURCHASE_ID = UUID;
+export const TIMEOUT_MS = 15000;
+
+export const WALLET_ID = UUID;
+export const CURRENT_WALLET_IDS = {
+  [WalletType.EVM]: [WALLET.id],
+  [WalletType.SOLANA]: [SOLANA_WALLET.id],
 };

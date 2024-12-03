@@ -19,7 +19,6 @@ import Client, {
   PasswordStatus,
   BiometricLocationHint,
 } from '@usecapsule/user-management-client';
-import qs from 'qs';
 import type { pki as pkiType, jsbn as jsbnType } from 'node-forge';
 import forge from 'node-forge';
 const { pki, jsbn } = forge;
@@ -225,6 +224,8 @@ export interface ConstructorOpts {
   useSessionStorage?: boolean;
 }
 
+type AuthType = 'email' | 'phone' | 'farcaster';
+
 export const PREFIX = '@CAPSULE/';
 const LOCAL_STORAGE_EMAIL = `${PREFIX}e-mail`;
 const LOCAL_STORAGE_PHONE = `${PREFIX}phone`;
@@ -249,12 +250,6 @@ export function stringToPhoneNumber(str: string): string {
 
 export function normalizePhoneNumber(countryCode: string, number: string): string | undefined {
   return stringToPhoneNumber(`${countryCode[0] !== '+' ? '+' : ''}${countryCode}${number}`);
-}
-
-export function toQueryString(obj: Record<string, string>) {
-  return Object.entries(obj)
-    .map(([key, value]) => (value ? `&${key}=${encodeURIComponent(value)}` : ''))
-    .join('');
 }
 
 export function isWalletSupported(types: WalletType[], wallet: Omit<Wallet, 'signer'>): boolean {
@@ -286,6 +281,24 @@ export function getEquivalentTypes(types: WalletTypeProp[] | WalletTypeProp): Wa
 
 export function isCosmosRequired(supportedWalletTypes: SupportedWalletTypes): boolean {
   return supportedWalletTypes.some(({ type, optional }) => type === WalletType.COSMOS && !optional);
+}
+
+function constructUrl({
+  base,
+  path,
+  params = {},
+}: {
+  base: string;
+  path: string;
+  params?: Record<string, string | undefined | null>;
+}): string {
+  const url = new URL(path, base);
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (!!value && value !== 'undefined' && value !== 'null') url.searchParams.set(key, value.toString());
+  });
+
+  return url.toString();
 }
 export abstract class CoreCapsule {
   static version?: string = CORE_CAPSULE_VERSION;
@@ -690,6 +703,104 @@ export abstract class CoreCapsule {
   }
 
   protected abstract getPlatformUtils(): PlatformUtils;
+
+  private async constructPortalUrl(
+    type: 'createAuth' | 'createPassword' | 'loginAuth' | 'loginPassword' | 'txReview' | 'onRamp',
+    opts: {
+      params?: Record<string, string | undefined | null>;
+      authType?: AuthType;
+      isForNewDevice?: boolean;
+      loginEncryptionPublicKey?: string;
+      newDeviceSessionId?: string;
+      newDeviceEncryptionKey?: string;
+      partnerId?: string;
+      sessionId?: string;
+      theme?: Theme;
+      pathId?: string;
+    } = {},
+  ) {
+    const base = type === 'onRamp' ? getPortalBaseURL(this.ctx) : await this.getPortalURL(opts.partnerId);
+
+    let path: string;
+    switch (type) {
+      case 'createPassword': {
+        path = `/web/users/${this.userId}/passwords/${opts.pathId}`;
+        break;
+      }
+      case 'createAuth': {
+        path = `/web/users/${this.userId}/biometrics/${opts.pathId}`;
+        break;
+      }
+      case 'loginPassword': {
+        path = '/web/passwords/login';
+        break;
+      }
+      case 'loginAuth': {
+        path = '/web/biometrics/login';
+        break;
+      }
+      case 'txReview': {
+        path = `/web/users/${this.userId}/transaction-review/${opts.pathId}`;
+        break;
+      }
+      case 'onRamp': {
+        path = `/web/users/${this.userId}/on-ramp-transaction/${opts.pathId}`;
+        break;
+      }
+      default: {
+        throw new Error(`invalid URL type ${type}`);
+      }
+    }
+
+    const [isCreate, isLogin, isOnRamp] = [
+      ['createAuth', 'createPassword'].includes(type),
+      ['loginAuth', 'loginPassword'].includes(type),
+      type === 'onRamp',
+    ];
+
+    const partner: PartnerEntity = opts.partnerId
+      ? (await this.ctx.capsuleClient.getPartner(opts.partnerId)).data?.partner
+      : undefined;
+
+    const params: Record<string, string | undefined | null> = {
+      apiKey: this.ctx.apiKey,
+      partnerId: opts.partnerId,
+      portalFont: opts.theme?.font || partner?.font || this.portalTheme?.font,
+      portalBorderRadius: opts.theme?.borderRadius || this.portalTheme?.borderRadius,
+      portalThemeMode: opts.theme?.mode || partner?.themeMode || this.portalTheme?.mode,
+      portalAccentColor: opts.theme?.accentColor || partner?.accentColor || this.portalTheme?.accentColor,
+      portalForegroundColor: opts.theme?.foregroundColor || partner?.foregroundColor || this.portalTheme?.foregroundColor,
+      portalBackgroundColor:
+        opts.theme?.backgroundColor ||
+        partner?.backgroundColor ||
+        this.portalBackgroundColor ||
+        this.portalTheme?.backgroundColor,
+      portalPrimaryButtonColor: this.portalPrimaryButtonColor,
+      portalTextColor: this.portalTextColor,
+      portalPrimaryButtonTextColor: this.portalPrimaryButtonTextColor,
+      isForNewDevice: opts.isForNewDevice ? opts.isForNewDevice.toString() : undefined,
+      supportedWalletTypes: this.#supportedWalletTypesOpt ? JSON.stringify(this.#supportedWalletTypesOpt) : undefined,
+      ...(isCreate || isLogin
+        ? {
+            ...(opts.authType === 'email' ? { email: this.email } : {}),
+            ...(opts.authType === 'phone' ? { phone: this.phone, countryCode: this.countryCode } : {}),
+            ...(opts.authType === 'farcaster' ? { farcasterUsername: this.farcasterUsername } : {}),
+          }
+        : {}),
+      ...(isLogin || isOnRamp ? { sessionId: opts.sessionId } : {}),
+      ...(isLogin
+        ? {
+            encryptionKey: opts.loginEncryptionPublicKey,
+            newDeviceSessionId: opts.newDeviceSessionId,
+            newDeviceEncryptionKey: opts.newDeviceEncryptionKey,
+            pregenIds: JSON.stringify(this.pregenIds),
+          }
+        : {}),
+      ...(opts.params || {}),
+    };
+
+    return constructUrl({ base, path, params });
+  }
 
   /**
    * Constructs a new `CoreCapsule` instance.
@@ -1395,75 +1506,36 @@ export abstract class CoreCapsule {
     return (partnerId && (await this.getPartnerURL(partnerId))) || getPortalBaseURL(this.ctx);
   }
 
-  private getCommonLoginQueryParams(newDeviceSessionId?: string, newDeviceEncryptionKey?: string): string {
-    return toQueryString({
-      newDeviceSessionId,
-      newDeviceEncryptionKey,
-      pregenIds: JSON.stringify(this.pregenIds),
-    });
-  }
-
-  private async getCommonQueryParams(partnerId?: string, isForNewDevice?: boolean, theme?: Theme): Promise<string> {
-    const partner: PartnerEntity = partnerId
-      ? (await this.ctx.capsuleClient.getPartner(partnerId)).data?.partner
-      : undefined;
-
-    return toQueryString({
-      apiKey: this.ctx.apiKey,
-      partnerId,
-      portalFont: theme?.font || partner?.font || this.portalTheme?.font,
-      portalBorderRadius: theme?.borderRadius || this.portalTheme?.borderRadius,
-      portalThemeMode: theme?.mode || partner?.themeMode || this.portalTheme?.mode,
-      portalAccentColor: theme?.accentColor || partner?.accentColor || this.portalTheme?.accentColor,
-      portalForegroundColor: theme?.foregroundColor || partner?.foregroundColor || this.portalTheme?.foregroundColor,
-      portalBackgroundColor:
-        theme?.backgroundColor ||
-        partner?.backgroundColor ||
-        this.portalBackgroundColor ||
-        this.portalTheme?.backgroundColor,
-      portalPrimaryButtonColor: this.portalPrimaryButtonColor,
-      portalTextColor: this.portalTextColor,
-      portalPrimaryButtonTextColor: this.portalPrimaryButtonTextColor,
-      isForNewDevice: isForNewDevice ? isForNewDevice.toString() : undefined,
-      supportedWalletTypes: this.#supportedWalletTypesOpt ? JSON.stringify(this.#supportedWalletTypesOpt) : undefined,
-    });
-  }
-
   private async getWebAuthURLForCreate(
-    type: 'email' | 'phone' | 'farcaster',
+    authType: AuthType,
     webAuthId: string,
     partnerId?: string,
     isForNewDevice?: boolean,
   ): Promise<string> {
-    const commonQueryParams = await this.getCommonQueryParams(partnerId, isForNewDevice);
-    const userSpecificParams = {
-      email: `email=${encodeURIComponent(this.email)}`,
-      phone: `phone=${encodeURIComponent(this.phone)}&countryCode=${encodeURIComponent(this.countryCode)}`,
-      farcaster: `farcasterUsername=${encodeURIComponent(this.farcasterUsername)}`,
-    }[type];
-
-    return `${(partnerId && (await this.getPartnerURL(partnerId))) || getPortalBaseURL(this.ctx)}/web/users/${this.userId}/biometrics/${webAuthId}?${userSpecificParams}${commonQueryParams}`;
+    return this.constructPortalUrl('createAuth', { authType, isForNewDevice, partnerId, pathId: webAuthId });
   }
 
   private async getPasswordURLForCreate(
-    type: 'email' | 'phone' | 'farcaster',
+    authType: AuthType,
     passwordId: string,
     partnerId?: string,
     isForNewDevice?: boolean,
-    themeOverride?: Theme,
+    theme?: Theme,
   ): Promise<string> {
-    const commonQueryParams = await this.getCommonQueryParams(partnerId, isForNewDevice, themeOverride);
-    const userSpecificParams = {
-      email: `email=${encodeURIComponent(this.email)}`,
-      phone: `phone=${encodeURIComponent(this.phone)}&countryCode=${encodeURIComponent(this.countryCode)}`,
-      farcaster: `farcasterUsername=${encodeURIComponent(this.farcasterUsername)}`,
-    }[type];
-
-    return `${(partnerId && (await this.getPartnerURL(partnerId))) || getPortalBaseURL(this.ctx)}/web/users/${this.userId}/passwords/${passwordId}?${userSpecificParams}${commonQueryParams}`;
+    return this.constructPortalUrl('createPassword', {
+      authType,
+      pathId: passwordId,
+      partnerId,
+      isForNewDevice,
+      theme,
+    });
   }
 
   private getShortUrl(compressedUrl: string): string {
-    return `${getPortalBaseURL(this.ctx)}/short/${compressedUrl}`;
+    return constructUrl({
+      base: getPortalBaseURL(this.ctx),
+      path: `/short/${compressedUrl}`,
+    });
   }
 
   async shortenLoginLink(link: string): Promise<string> {
@@ -1487,17 +1559,16 @@ export abstract class CoreCapsule {
     partnerId?: string,
     newDeviceSessionId?: string,
     newDeviceEncryptionKey?: string,
-    type: 'email' | 'phone' | 'farcaster' = 'email',
+    authType: AuthType = 'email',
   ): Promise<string> {
-    const commonQueryParams = await this.getCommonQueryParams(partnerId);
-    const commonLoginQueryParams = this.getCommonLoginQueryParams(newDeviceSessionId, newDeviceEncryptionKey);
-
-    const userSpecificParams = {
-      email: `email=${encodeURIComponent(this.email)}`,
-      phone: `phone=${encodeURIComponent(this.phone)}&countryCode=${encodeURIComponent(this.countryCode)}`,
-      farcaster: `farcasterUsername=${encodeURIComponent(this.farcasterUsername)}`,
-    }[type];
-    return `${(partnerId && (await this.getPartnerURL(partnerId))) || getPortalBaseURL(this.ctx)}/web/biometrics/login?${userSpecificParams}&sessionId=${sessionId}&encryptionKey=${loginEncryptionPublicKey}${commonLoginQueryParams}${commonQueryParams}`;
+    return this.constructPortalUrl('loginAuth', {
+      authType,
+      loginEncryptionPublicKey,
+      sessionId,
+      newDeviceSessionId,
+      newDeviceEncryptionKey,
+      partnerId,
+    });
   }
 
   async getPasswordURLForLogin(
@@ -1506,17 +1577,16 @@ export abstract class CoreCapsule {
     partnerId?: string,
     newDeviceSessionId?: string,
     newDeviceEncryptionKey?: string,
-    type: 'email' | 'phone' | 'farcaster' = 'email',
+    authType: AuthType = 'email',
   ): Promise<string> {
-    const commonQueryParams = await this.getCommonQueryParams(partnerId);
-    const commonLoginQueryParams = this.getCommonLoginQueryParams(newDeviceSessionId, newDeviceEncryptionKey);
-
-    const userSpecificParams = {
-      email: `email=${encodeURIComponent(this.email)}`,
-      phone: `phone=${encodeURIComponent(this.phone)}&countryCode=${encodeURIComponent(this.countryCode)}`,
-      farcaster: `farcasterUsername=${encodeURIComponent(this.farcasterUsername)}`,
-    }[type];
-    return `${(partnerId && (await this.getPartnerURL(partnerId))) || getPortalBaseURL(this.ctx)}/web/passwords/login?${userSpecificParams}&sessionId=${sessionId}&encryptionKey=${loginEncryptionPublicKey}${commonLoginQueryParams}${commonQueryParams}`;
+    return this.constructPortalUrl('loginPassword', {
+      authType,
+      loginEncryptionPublicKey,
+      sessionId,
+      newDeviceSessionId,
+      newDeviceEncryptionKey,
+      partnerId,
+    });
   }
 
   /**
@@ -1536,12 +1606,14 @@ export abstract class CoreCapsule {
     newDeviceSessionId?: string,
     newDeviceEncryptionKey?: string,
   ): Promise<string> {
-    const commonQueryParams = await this.getCommonQueryParams(partnerId);
-    const commonLoginQueryParams = this.getCommonLoginQueryParams(newDeviceSessionId, newDeviceEncryptionKey);
-
-    return `${(partnerId && (await this.getPartnerURL(partnerId))) || getPortalBaseURL(this.ctx)}/web/biometrics/login?phone=${encodeURIComponent(
-      this.phone,
-    )}&countryCode=${encodeURIComponent(this.countryCode)}&sessionId=${sessionId}&encryptionKey=${loginEncryptionPublicKey}${commonLoginQueryParams}${commonQueryParams}`;
+    return this.constructPortalUrl('loginAuth', {
+      authType: 'phone',
+      loginEncryptionPublicKey,
+      sessionId,
+      newDeviceSessionId,
+      newDeviceEncryptionKey,
+      partnerId,
+    });
   }
 
   /**
@@ -1874,13 +1946,13 @@ export abstract class CoreCapsule {
 
   async supportedAuthMethods(
     identifier: string,
-    type: 'email' | 'phone' | 'farcaster' | 'userId' = 'email',
+    authType: AuthType | 'userId' = 'email',
     countryCode?: string,
   ): Promise<Set<AuthMethod>> {
-    const userId = type === 'userId' ? identifier : undefined;
-    const email = type === 'email' ? identifier : undefined;
-    const phone = type === 'phone' ? identifier : undefined;
-    const farcasterUsername = type === 'farcaster' ? identifier : undefined;
+    const userId = authType === 'userId' ? identifier : undefined;
+    const email = authType === 'email' ? identifier : undefined;
+    const phone = authType === 'phone' ? identifier : undefined;
+    const farcasterUsername = authType === 'farcaster' ? identifier : undefined;
 
     const { supportedAuthMethods } = await this.ctx.capsuleClient.getSupportedAuthMethods(
       userId,
@@ -2104,12 +2176,14 @@ export abstract class CoreCapsule {
     await this.logout(true);
     const res = await this.touchSession(true);
 
-    const url = new URL(`auth/${oAuthMethod.toLowerCase()}`, getBaseUrl(this.ctx.env));
-
-    url.searchParams.append('sessionLookupId', res.data.sessionLookupId);
-    url.searchParams.append('apiKey', this.ctx.apiKey);
-
-    return url.toString();
+    return constructUrl({
+      base: getBaseUrl(this.ctx.env),
+      path: `/auth/${oAuthMethod.toLowerCase()}`,
+      params: {
+        apiKey: this.ctx.apiKey,
+        sessionLookupId: res.data.sessionLookupId,
+      },
+    });
   }
 
   async waitForOAuth(oAuthWindow?: Window): Promise<{
@@ -2783,31 +2857,33 @@ export abstract class CoreCapsule {
 
   private async getTransactionReviewUrl(transactionId: string, timeoutMs?: number): Promise<string> {
     const res = await this.touchSession();
-    const commonQueryParams = await this.getCommonQueryParams(res.data.partnerId);
 
-    return `${getPortalBaseURL(this.ctx)}/web/users/${
-      this.userId
-    }/transaction-review/${transactionId}?email=${encodeURIComponent(this.email)}${commonQueryParams}${timeoutMs ? `&timeoutMs=${timeoutMs}` : ''}`;
+    return this.constructPortalUrl('txReview', {
+      partnerId: res.data.partnerId,
+      pathId: transactionId,
+      params: {
+        email: this.email,
+        timeoutMs: timeoutMs?.toString(),
+      },
+    });
   }
 
   private async getOnRampTransactionUrl({
     purchaseId,
     ...walletParams
   }: { purchaseId: string } & WalletParams): Promise<string> {
-    const res = await this.ctx.capsuleClient.touchSession();
-    const commonQueryParams = await this.getCommonQueryParams(res.data.partnerId);
+    const res = await this.touchSession();
     const [key, identifier] = extractWalletRef(walletParams);
 
-    const params = qs.stringify(
-      {
+    return this.constructPortalUrl('onRamp', {
+      partnerId: res.data.partnerId,
+      pathId: purchaseId,
+      sessionId: res.data.sessionId,
+      params: {
         [key]: identifier,
         currentWalletIds: JSON.stringify(this.currentWalletIds),
-        sessionId: res.data.sessionId,
       },
-      { addQueryPrefix: true },
-    );
-
-    return `${getPortalBaseURL(this.ctx)}/web/users/${this.userId}/on-ramp-transaction/${purchaseId}${params}${commonQueryParams}`;
+    });
   }
 
   /**
@@ -3159,7 +3235,7 @@ export abstract class CoreCapsule {
   }
 
   async getSupportedCreateAuthMethods(): Promise<Set<AuthMethod>> {
-    const res = await this.ctx.capsuleClient.touchSession();
+    const res = await this.touchSession();
     const partnerId = res.data.partnerId;
 
     const partnerRes = await this.ctx.capsuleClient.getPartner(partnerId);

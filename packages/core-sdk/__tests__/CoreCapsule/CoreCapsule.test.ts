@@ -1,6 +1,6 @@
 import { describe, vi, afterEach, expect, it, beforeAll } from 'vitest';
 
-import CoreCapsule, { Environment, getPublicKeyHex, OAuthMethod } from '../../src/index.js';
+import CoreCapsule, { Environment, getBaseUrl, getPortalBaseURL, getPublicKeyHex, OAuthMethod } from '../../src/index.js';
 import {
   API_KEY,
   EXTERNAL_WALLET,
@@ -29,6 +29,10 @@ import {
   PREGEN_WALLET_PHONE,
   TWOFA_URI,
   TWOFA_VERIFY_RESP,
+  TRANSACTION_ID,
+  TIMEOUT_MS,
+  PURCHASE_ID,
+  CURRENT_WALLET_IDS,
 } from '../constants';
 import { MockCapsule } from '../mocks/mockCoreCapsule.js';
 import {
@@ -51,9 +55,34 @@ import {
 } from '../mocks/mockUserManagementClient';
 import { CountryCallingCode } from 'libphonenumber-js';
 import { PublicKeyStatus, PublicKeyType, WalletType } from '@usecapsule/user-management-client';
-import { PregenIdentifierType, toQueryString } from '../../src/CoreCapsule.js';
+import { PregenIdentifierType } from '../../src/CoreCapsule.js';
 import { getWorkerContent } from '../utils.js';
 import { mockPreKeygen } from '../mocks/mockPlatformUtils.js';
+
+const COMMON_SEARCH_PARAMS = {
+  partnerId: PARTNER.id,
+  portalAccentColor: PARTNER.accentColor,
+  portalBackgroundColor: PARTNER.backgroundColor,
+  portalFont: PARTNER.font,
+  portalForegroundColor: PARTNER.foregroundColor,
+  portalThemeMode: PARTNER.themeMode,
+};
+
+function searchParamsToObject(url: URL): Record<string, string> {
+  const obj: Record<string, string> = {};
+
+  for (const [key, value] of url.searchParams.entries()) {
+    obj[key] = value;
+  }
+
+  return obj;
+}
+
+function expectSearchParams(url: URL, expected: Record<string, string>): void {
+  const searchParams = searchParamsToObject(url);
+
+  expect(searchParams).toEqual(expected);
+}
 
 describe('CoreCapsule', () => {
   afterEach(() => {
@@ -185,26 +214,23 @@ describe('CoreCapsule', () => {
 
         await capsule.createUser(USER_EMAIL);
 
-        const setupUrl = await capsule.verifyEmail(VERIFICATION_CODE);
+        const verifyRes = await capsule.verifyEmail(VERIFICATION_CODE);
 
         expect(mockVerifyEmail).toBeCalledWith(USER_ID, { verificationCode: VERIFICATION_CODE });
         expect(mockAddSessionPublicKey).toBeCalledWith(USER_ID, {
           status: PublicKeyStatus.PENDING,
           type: PublicKeyType.WEB,
         });
-        expect(setupUrl).toEqual(
-          `https://test.com/web/users/${USER_ID}/biometrics/${SESSION_ID}?email=${encodeURIComponent(USER_EMAIL)}${toQueryString(
-            {
-              apiKey: PARTNER.apiKey,
-              partnerId: PARTNER.id,
-              portalFont: PARTNER.font,
-              portalThemeMode: PARTNER.themeMode,
-              portalAccentColor: PARTNER.accentColor,
-              portalForegroundColor: PARTNER.foregroundColor,
-              portalBackgroundColor: PARTNER.backgroundColor,
-            },
-          )}`,
-        );
+
+        const url = new URL(verifyRes);
+
+        expect(url.origin).toEqual(PARTNER.portalUrl);
+        expect(url.pathname).toEqual(`/web/users/${USER_ID}/biometrics/${SESSION_ID}`);
+        expectSearchParams(url, {
+          ...COMMON_SEARCH_PARAMS,
+          apiKey: PARTNER.apiKey,
+          email: USER_EMAIL,
+        });
       });
       it('logs out and clears user data', async () => {
         const capsule = new MockCapsule(Environment.DEV, API_KEY);
@@ -259,26 +285,24 @@ describe('CoreCapsule', () => {
 
         await capsule.createUserByPhone(USER_PHONE, USER_COUNTRY_CODE as CountryCallingCode);
 
-        const setupUrl = await capsule.verifyPhone(VERIFICATION_CODE);
+        const verifyRes = await capsule.verifyPhone(VERIFICATION_CODE);
 
         expect(mockVerifyPhone).toBeCalledWith(USER_ID, { verificationCode: VERIFICATION_CODE });
         expect(mockAddSessionPublicKey).toBeCalledWith(USER_ID, {
           status: PublicKeyStatus.PENDING,
           type: PublicKeyType.WEB,
         });
-        expect(setupUrl).toEqual(
-          `https://test.com/web/users/${USER_ID}/biometrics/${SESSION_ID}?phone=${encodeURIComponent(USER_PHONE)}&countryCode=${encodeURIComponent(USER_COUNTRY_CODE)}${toQueryString(
-            {
-              apiKey: PARTNER.apiKey,
-              partnerId: PARTNER.id,
-              portalFont: PARTNER.font,
-              portalThemeMode: PARTNER.themeMode,
-              portalAccentColor: PARTNER.accentColor,
-              portalForegroundColor: PARTNER.foregroundColor,
-              portalBackgroundColor: PARTNER.backgroundColor,
-            },
-          )}`,
-        );
+
+        const url = new URL(verifyRes);
+
+        expect(url.origin).toEqual(PARTNER.portalUrl);
+        expect(url.pathname).toEqual(`/web/users/${USER_ID}/biometrics/${SESSION_ID}`);
+        expectSearchParams(url, {
+          ...COMMON_SEARCH_PARAMS,
+          apiKey: PARTNER.apiKey,
+          countryCode: USER_COUNTRY_CODE,
+          phone: USER_PHONE,
+        });
       });
       it('logs out and clears user data', async () => {
         const capsule = new MockCapsule(Environment.DEV, API_KEY);
@@ -316,22 +340,20 @@ describe('CoreCapsule', () => {
           } as Response),
         );
 
-        const loginLink = await capsule.initiateUserLogin(USER_EMAIL);
+        const loginRes = await capsule.initiateUserLogin(USER_EMAIL);
 
-        const url = new URL(loginLink);
+        const url = new URL(loginRes);
 
-        expect(url.origin).toEqual('https://test.com');
+        expect(url.origin).toEqual(PARTNER.portalUrl);
         expect(url.pathname).toEqual('/web/biometrics/login');
-        expect(url.searchParams.get('email')).toEqual(USER_EMAIL);
-        expect(url.searchParams.get('sessionId')).toEqual(SESSION_ID);
-        expect(url.searchParams.get('encryptionKey')).toEqual(getPublicKeyHex(capsule.loginEncryptionKeyPair!));
-        expect(url.searchParams.get('apiKey')).toEqual(PARTNER.apiKey);
-        expect(url.searchParams.get('partnerId')).toEqual(PARTNER.id);
-        expect(url.searchParams.get('portalFont')).toEqual(PARTNER.font);
-        expect(url.searchParams.get('portalThemeMode')).toEqual(PARTNER.themeMode);
-        expect(url.searchParams.get('portalAccentColor')).toEqual(PARTNER.accentColor);
-        expect(url.searchParams.get('portalForegroundColor')).toEqual(PARTNER.foregroundColor);
-        expect(url.searchParams.get('portalBackgroundColor')).toEqual(PARTNER.backgroundColor);
+        expectSearchParams(url, {
+          ...COMMON_SEARCH_PARAMS,
+          apiKey: PARTNER.apiKey,
+          email: USER_EMAIL,
+          encryptionKey: getPublicKeyHex(capsule.loginEncryptionKeyPair!),
+          sessionId: SESSION_ID,
+          pregenIds: '{}',
+        });
       });
       it('initiates login - short url', async () => {
         const capsule = new MockCapsule(Environment.DEV, API_KEY);
@@ -363,28 +385,26 @@ describe('CoreCapsule', () => {
           } as Response),
         );
 
-        const loginLink = await capsule.initiateUserLogin(
+        const loginRes = await capsule.initiateUserLogin(
           USER_PHONE,
           false,
           'phone',
           USER_COUNTRY_CODE as CountryCallingCode,
         );
 
-        const url = new URL(loginLink);
+        const url = new URL(loginRes);
 
-        expect(url.origin).toEqual('https://test.com');
+        expect(url.origin).toEqual(PARTNER.portalUrl);
         expect(url.pathname).toEqual('/web/biometrics/login');
-        expect(url.searchParams.get('phone')).toEqual(USER_PHONE);
-        expect(url.searchParams.get('countryCode')).toEqual(USER_COUNTRY_CODE);
-        expect(url.searchParams.get('sessionId')).toEqual(SESSION_ID);
-        expect(url.searchParams.get('encryptionKey')).toEqual(getPublicKeyHex(capsule.loginEncryptionKeyPair!));
-        expect(url.searchParams.get('apiKey')).toEqual(PARTNER.apiKey);
-        expect(url.searchParams.get('partnerId')).toEqual(PARTNER.id);
-        expect(url.searchParams.get('portalFont')).toEqual(PARTNER.font);
-        expect(url.searchParams.get('portalThemeMode')).toEqual(PARTNER.themeMode);
-        expect(url.searchParams.get('portalAccentColor')).toEqual(PARTNER.accentColor);
-        expect(url.searchParams.get('portalForegroundColor')).toEqual(PARTNER.foregroundColor);
-        expect(url.searchParams.get('portalBackgroundColor')).toEqual(PARTNER.backgroundColor);
+        expectSearchParams(url, {
+          ...COMMON_SEARCH_PARAMS,
+          apiKey: PARTNER.apiKey,
+          countryCode: USER_COUNTRY_CODE,
+          encryptionKey: getPublicKeyHex(capsule.loginEncryptionKeyPair!),
+          phone: USER_PHONE,
+          sessionId: SESSION_ID,
+          pregenIds: '{}',
+        });
       });
       it('initiates login - phone only method', async () => {
         const capsule = new MockCapsule(Environment.DEV, API_KEY);
@@ -397,23 +417,21 @@ describe('CoreCapsule', () => {
           } as Response),
         );
 
-        const loginLink = await capsule.initiateUserLoginForPhone(USER_PHONE, USER_COUNTRY_CODE as CountryCallingCode);
+        const loginRes = await capsule.initiateUserLoginForPhone(USER_PHONE, USER_COUNTRY_CODE as CountryCallingCode);
 
-        const url = new URL(loginLink);
+        const url = new URL(loginRes);
 
-        expect(url.origin).toEqual('https://test.com');
+        expect(url.origin).toEqual(PARTNER.portalUrl);
         expect(url.pathname).toEqual('/web/biometrics/login');
-        expect(url.searchParams.get('phone')).toEqual(USER_PHONE);
-        expect(url.searchParams.get('countryCode')).toEqual(USER_COUNTRY_CODE);
-        expect(url.searchParams.get('sessionId')).toEqual(SESSION_ID);
-        expect(url.searchParams.get('encryptionKey')).toEqual(getPublicKeyHex(capsule.loginEncryptionKeyPair!));
-        expect(url.searchParams.get('apiKey')).toEqual(PARTNER.apiKey);
-        expect(url.searchParams.get('partnerId')).toEqual(PARTNER.id);
-        expect(url.searchParams.get('portalFont')).toEqual(PARTNER.font);
-        expect(url.searchParams.get('portalThemeMode')).toEqual(PARTNER.themeMode);
-        expect(url.searchParams.get('portalAccentColor')).toEqual(PARTNER.accentColor);
-        expect(url.searchParams.get('portalForegroundColor')).toEqual(PARTNER.foregroundColor);
-        expect(url.searchParams.get('portalBackgroundColor')).toEqual(PARTNER.backgroundColor);
+        expectSearchParams(url, {
+          ...COMMON_SEARCH_PARAMS,
+          apiKey: PARTNER.apiKey,
+          countryCode: USER_COUNTRY_CODE,
+          encryptionKey: getPublicKeyHex(capsule.loginEncryptionKeyPair!),
+          phone: USER_PHONE,
+          sessionId: SESSION_ID,
+          pregenIds: '{}',
+        });
       });
     });
     describe('farcaster', () => {
@@ -447,14 +465,16 @@ describe('CoreCapsule', () => {
       it('get url', async () => {
         const capsule = new MockCapsule(Environment.DEV, API_KEY);
 
-        const oAuthUri = await capsule.getOAuthURL(OAuthMethod.GOOGLE);
+        const uri = await capsule.getOAuthURL(OAuthMethod.GOOGLE);
 
-        const url = new URL(oAuthUri);
+        const url = new URL(uri);
 
-        expect(url.origin).toEqual('http://localhost:8080');
+        expect(`${url.origin}/`).toEqual(getBaseUrl(capsule.ctx.env));
         expect(url.pathname).toEqual('/auth/google');
-        expect(url.searchParams.get('sessionLookupId')).toEqual(SESSION_LOOKUP_ID);
-        expect(url.searchParams.get('apiKey')).toEqual(PARTNER.apiKey);
+        expectSearchParams(url, {
+          apiKey: API_KEY,
+          sessionLookupId: SESSION_LOOKUP_ID,
+        });
       });
       it('logs in user', async () => {
         const capsule = new MockCapsule(Environment.DEV, API_KEY);
@@ -542,10 +562,68 @@ describe('CoreCapsule', () => {
       });
     });
   });
+  describe('transaction review', () => {
+    let capsule: MockCapsule;
+
+    beforeAll(async () => {
+      capsule = new MockCapsule(Environment.DEV, API_KEY);
+    });
+
+    it('getTransactionReviewUrl', async () => {
+      await capsule.setUserId(USER_ID);
+      await capsule.setEmail(USER_EMAIL);
+      const transactionReviewRes: string = await (capsule as unknown as any).getTransactionReviewUrl(
+        TRANSACTION_ID,
+        TIMEOUT_MS,
+      );
+
+      const url = new URL(transactionReviewRes);
+      expect(url.origin).toEqual(PARTNER.portalUrl);
+      expect(url.pathname).toEqual(`/web/users/${USER_ID}/transaction-review/${TRANSACTION_ID}`);
+      expectSearchParams(url, {
+        apiKey: PARTNER.apiKey,
+        email: USER_EMAIL,
+        partnerId: PARTNER.id,
+        portalAccentColor: PARTNER.accentColor,
+        portalBackgroundColor: PARTNER.backgroundColor,
+        portalFont: PARTNER.font,
+        portalForegroundColor: PARTNER.foregroundColor,
+        portalThemeMode: PARTNER.themeMode,
+        timeoutMs: TIMEOUT_MS.toString(),
+      });
+    });
+  });
+  describe('on-ramp transactions', () => {
+    let capsule: MockCapsule;
+
+    beforeAll(async () => {
+      capsule = new MockCapsule(Environment.DEV, API_KEY);
+    });
+
+    it('getOnRampTransactionUrl', async () => {
+      await capsule.setUserId(USER_ID);
+      await capsule.setCurrentWalletIds(CURRENT_WALLET_IDS);
+      const transactionReviewRes: string = await (capsule as unknown as any).getOnRampTransactionUrl({
+        purchaseId: PURCHASE_ID,
+        walletId: WALLET.id,
+      });
+
+      const url = new URL(transactionReviewRes);
+      expect(url.origin).toEqual(getPortalBaseURL(capsule.ctx));
+      expect(url.pathname).toEqual(`/web/users/${USER_ID}/on-ramp-transaction/${PURCHASE_ID}`);
+      expectSearchParams(url, {
+        ...COMMON_SEARCH_PARAMS,
+        apiKey: API_KEY,
+        currentWalletIds: JSON.stringify(CURRENT_WALLET_IDS),
+        sessionId: SESSION_ID,
+        walletId: WALLET.id,
+      });
+    });
+  });
   describe('wallets', { timeout: 25000 }, () => {
     describe('new user', () => {
       describe('email', () => {
-        let capsule: MockCapsule | undefined;
+        let capsule: MockCapsule;
 
         beforeAll(async () => {
           capsule = new MockCapsule(Environment.DEV, API_KEY);
@@ -591,7 +669,7 @@ describe('CoreCapsule', () => {
         });
       });
       describe('phone', () => {
-        let capsule: MockCapsule | undefined;
+        let capsule: MockCapsule;
 
         beforeAll(async () => {
           capsule = new MockCapsule(Environment.DEV, API_KEY);
@@ -640,7 +718,7 @@ describe('CoreCapsule', () => {
       });
     });
     describe('helpers and utils', () => {
-      let capsule: MockCapsule | undefined;
+      let capsule: MockCapsule;
 
       beforeAll(async () => {
         capsule = new MockCapsule(Environment.DEV, API_KEY);
@@ -675,11 +753,11 @@ describe('CoreCapsule', () => {
       it('find wallets by id', async () => {
         const wallet = capsule.findWallet(SOLANA_WALLET.id);
         expect(wallet).toBeDefined();
-        expect(wallet.id).toEqual(SOLANA_WALLET.id);
+        expect(wallet?.id).toEqual(SOLANA_WALLET.id);
 
         const walletNoId = capsule.findWallet();
         expect(walletNoId).toBeDefined();
-        expect(walletNoId.id).toEqual(WALLET.id);
+        expect(walletNoId?.id).toEqual(WALLET.id);
 
         const invalidWallet = capsule.findWallet('notAnId');
         expect(invalidWallet).toBeUndefined();
@@ -689,7 +767,7 @@ describe('CoreCapsule', () => {
 
         const walletWithTypeOverride = capsule.findWallet(SOLANA_WALLET.id, WalletType.EVM);
         expect(walletWithTypeOverride).toBeDefined();
-        expect(walletWithTypeOverride.type).toEqual(WalletType.EVM);
+        expect(walletWithTypeOverride?.type).toEqual(WalletType.EVM);
       });
       it('find wallets by address', async () => {
         const wallet = capsule.findWalletByAddress(SOLANA_WALLET.address);
@@ -766,7 +844,7 @@ describe('CoreCapsule', () => {
     });
   });
   describe('2FA', () => {
-    let capsule: MockCapsule | undefined;
+    let capsule: MockCapsule;
 
     beforeAll(async () => {
       capsule = new MockCapsule(Environment.DEV, API_KEY);
