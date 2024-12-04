@@ -272,6 +272,7 @@ export class CapsuleMobile extends CoreCapsule {
         address: desiredWallet.address || undefined,
         publicKey: desiredWallet.publicKey || undefined,
         scheme: desiredWallet.scheme as WalletScheme,
+        type: desiredWallet.type || undefined,
       };
     }
 

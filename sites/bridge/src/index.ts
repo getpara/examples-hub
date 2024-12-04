@@ -281,20 +281,25 @@ async function login(capsule: CapsuleWeb, args: any[]) {
   const decryptedShares = await getDerivedPrivateKeyAndDecrypt(capsule.ctx, userHandle, encryptedSharesRes.data.keyShares);
 
   const walletsRes = await capsule.ctx.capsuleClient.getWallets(userId);
-  const desiredWallet = walletsRes.data.wallets[0];
+  const desiredWallets = walletsRes.data.wallets;
 
   var walletsToInsert: { [id: string]: Wallet } = {};
-  walletsToInsert[decryptedShares[0].walletId] = {
-    id: decryptedShares[0].walletId,
-    signer: decryptedShares[0].signer,
-    address: desiredWallet.address,
-    publicKey: desiredWallet.publicKey,
-    scheme: desiredWallet.scheme as WalletScheme,
-  };
+  for (let desiredWallet of desiredWallets) {
+    const decryptedShare = decryptedShares.find(share => share.walletId === desiredWallet.id);
+    if (decryptedShare) {
+      walletsToInsert[decryptedShare.walletId] = {
+        id: decryptedShare.walletId,
+        signer: decryptedShare.signer,
+        address: desiredWallet.address,
+        publicKey: desiredWallet.publicKey,
+        scheme: desiredWallet.scheme as WalletScheme,
+      };
+    }
+    await capsule.setWallets(walletsToInsert);
 
-  await capsule.setWallets(walletsToInsert);
-
-  return desiredWallet;
+    // Return first wallet for backwards compatibility
+    return desiredWallets[0];
+  }
 }
 
 async function loginV2(capsule: CapsuleWeb, args: any[]) {
@@ -333,21 +338,28 @@ async function loginV2(capsule: CapsuleWeb, args: any[]) {
     );
   }
   const walletsRes = await capsule.ctx.capsuleClient.getWallets(userId);
-  const desiredWallet = walletsRes.data.wallets[0];
+  const desiredWallets = walletsRes.data.wallets;
 
   var walletsToInsert: { [id: string]: Wallet } = {};
-  walletsToInsert[decryptedShares[0].walletId] = {
-    id: decryptedShares[0].walletId,
-    signer: decryptedShares[0].signer,
-    address: desiredWallet.address,
-    publicKey: desiredWallet.publicKey,
-    scheme: desiredWallet.scheme as WalletScheme,
-    isExternal: false,
-  };
+  for (let desiredWallet of desiredWallets) {
+    const decryptedShare = decryptedShares.find(share => share.walletId === desiredWallet.id);
+    if (decryptedShare) {
+      walletsToInsert[decryptedShare.walletId] = {
+        id: decryptedShare.walletId,
+        signer: decryptedShare.signer,
+        address: desiredWallet.address,
+        publicKey: desiredWallet.publicKey,
+        scheme: desiredWallet.scheme as WalletScheme,
+        type: desiredWallet.type || undefined,
+        isExternal: false,
+      };
+    }
+  }
 
   await capsule.setWallets(walletsToInsert);
 
-  return desiredWallet;
+  // Return first wallet for backwards compatibility
+  return desiredWallets[0];
 }
 
 window['open'] = function (url?: string | URL, target?: string, features?: string) {
