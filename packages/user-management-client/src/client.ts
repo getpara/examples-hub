@@ -7,7 +7,16 @@ import axios, {
 } from 'axios';
 import { AxiosRequestConfig } from 'axios';
 import qs from 'qs';
-import { extractWalletRef, TPregenIdentifierType, PregenIds, WalletParams } from './types.js';
+import {
+  $Auth,
+  Auth,
+  AuthParams,
+  extractWalletRef,
+  PregenIds,
+  TPregenIdentifierType,
+  WalletParams,
+  WithAuth,
+} from './types.js';
 
 export const USER_NOT_VERIFIED = 'user must verify biometrics';
 export const USER_NOT_AUTHENTICATED_ERROR = 'user must be authenticated';
@@ -120,28 +129,21 @@ interface MobileSignature {
   recoveryParam: number;
 }
 
-interface verifyWebChallengeBody {
-  email?: string;
-  phone?: string;
-  countryCode?: string;
-  farcasterUsername?: string;
+type verifyWebChallengeBody = {
+  auth?: Auth;
   sessionLookupId?: string;
   signature: WebSignature;
   publicKey?: string;
   newDeviceSessionLookupId?: string;
-}
+};
 
-interface verifyPasswordChallengeBody {
+type verifyPasswordChallengeBody = {
   userId?: string;
-  email?: string;
-  phone?: string;
-  countryCode?: string;
-  farcasterUsername?: string;
   sessionLookupId?: string;
   signature: string;
   publicKey?: string;
   newDeviceSessionLookupId?: string;
-}
+} & WithAuth;
 
 interface verifySessionChallengeBody {
   signature: MobileSignature | WebSignature;
@@ -393,12 +395,7 @@ interface sessionPasswordBody {
 
 export type BiometricLocationHint = { useragent?: string; aaguid?: string };
 
-interface BiometricLocationHintParams {
-  email?: string;
-  phone?: string;
-  countryCode?: string;
-  farcasterUsername?: string;
-}
+type BiometricLocationHintParams = AuthParams;
 
 const SESSION_COOKIE_HEADER_NAME = 'x-capsule-sid';
 const VERSION_HEADER_NAME = 'x-capsule-version';
@@ -487,10 +484,10 @@ class Client {
     return res.data;
   };
 
-  checkUserExists = async (email: string, phone: string, countryCode: string): Promise<any> => {
-    const res = await this.baseRequest.get<any>(
-      `/users/exists?email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}&countryCode=${encodeURIComponent(countryCode)}`,
-    );
+  checkUserExists = async ({ auth }: { auth: $Auth<'email' | 'phone'> }): Promise<any> => {
+    const res = await this.baseRequest.get<any>('/users/exists', {
+      params: { ...auth },
+    });
     return res;
   };
 
@@ -550,36 +547,19 @@ class Client {
   };
 
   // GET /biometrics/challenge?email&publicKey
-  getWebChallenge = async (
-    email?: string,
-    phone?: string,
-    countryCode?: string,
-    farcasterUsername?: string,
-    publicKey?: string,
-    userId?: string,
-  ): Promise<getWebChallengeRes> => {
-    const queryParams = {};
-    if (email) {
-      queryParams['email'] = email;
-    }
-    if (phone) {
-      queryParams['phone'] = phone;
-    }
-    if (countryCode) {
-      queryParams['countryCode'] = countryCode;
-    }
-    if (farcasterUsername) {
-      queryParams['farcasterUsername'] = farcasterUsername;
-    }
-    if (publicKey) {
-      queryParams['publicKey'] = publicKey;
-    }
-    if (userId) {
-      queryParams['userId'] = userId;
-    }
+  getWebChallenge = async ({
+    auth,
+    publicKey,
+    userId,
+  }: {
+    auth?: Auth;
+    publicKey?: string;
+    userId?: string;
+  }): Promise<getWebChallengeRes> => {
+    const res = await this.baseRequest.get<any>('/biometrics/challenge', {
+      params: { publicKey, userId, ...(auth || {}) },
+    });
 
-    const query = qs.stringify(queryParams);
-    const res = await this.baseRequest.get<any>(`/biometrics/challenge${query === '' ? '' : `?${query}`}`);
     return res.data;
   };
 
@@ -592,12 +572,16 @@ class Client {
   };
 
   // POST /biometrics/verify
-  verifyWebChallenge = async (partnerId: string, body: verifyWebChallengeBody): Promise<any> => {
-    const res = await this.baseRequest.post<{}>(`/biometrics/verify`, body, {
-      headers: {
-        'X-Partner-ID': partnerId,
+  verifyWebChallenge = async (partnerId: string, { auth, ...body }: verifyWebChallengeBody): Promise<any> => {
+    const res = await this.baseRequest.post<{}>(
+      `/biometrics/verify`,
+      { ...body, ...(auth || {}) },
+      {
+        headers: {
+          'X-Partner-ID': partnerId,
+        },
       },
-    });
+    );
     return res;
   };
 
@@ -1224,53 +1208,34 @@ class Client {
   };
 
   async getSupportedAuthMethods(
-    userId: string,
-    email: string,
-    phone: string,
-    countryCode: string,
-    farcasterUsername: string,
+    params: {
+      userId?: string;
+    } & WithAuth,
   ) {
-    const res = await this.baseRequest.get<any>(
-      `/users/supported-auth-methods?userId=${userId}&email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}&countryCode=${encodeURIComponent(countryCode)}&farcasterUsername=${encodeURIComponent(farcasterUsername)}`,
-    );
+    const res = await this.baseRequest.get<any>('/users/supported-auth-methods', {
+      params: { userId: params.userId, ...params.auth },
+    });
     return res.data;
   }
 
-  async getPasswords(
-    userId?: string,
-    email?: string,
-    phone?: string,
-    countryCode?: string,
-    farcasterUsername?: string,
-  ): Promise<PasswordEntity[]> {
-    const queryParams = {};
-    if (userId) {
-      queryParams['userId'] = userId;
-    }
-    if (email) {
-      queryParams['email'] = email;
-    }
-    if (phone) {
-      queryParams['phone'] = phone;
-    }
-    if (countryCode) {
-      queryParams['countryCode'] = countryCode;
-    }
-    if (farcasterUsername) {
-      queryParams['farcasterUsername'] = farcasterUsername;
-    }
-    const query = qs.stringify(queryParams);
-    const res = await this.baseRequest.get<any>(`/users/passwords${query === '' ? '' : `?${query}`}`);
+  async getPasswords({ userId, auth }: { userId?: string; auth?: Auth }): Promise<PasswordEntity[]> {
+    const res = await this.baseRequest.get<any>('/users/passwords', {
+      params: { userId, ...(auth || {}) },
+    });
     return res.data.passwords;
   }
 
   // POST /passwords/verify
-  async verifyPasswordChallenge(partnerId: string, body: verifyPasswordChallengeBody): Promise<any> {
-    const res = await this.baseRequest.post<{}>(`/passwords/verify`, body, {
-      headers: {
-        'X-Partner-ID': partnerId,
+  async verifyPasswordChallenge(partnerId: string, { auth, ...body }: verifyPasswordChallengeBody): Promise<any> {
+    const res = await this.baseRequest.post<{}>(
+      `/passwords/verify`,
+      { ...body, ...(auth || {}) },
+      {
+        headers: {
+          'X-Partner-ID': partnerId,
+        },
       },
-    });
+    );
     return res;
   }
 

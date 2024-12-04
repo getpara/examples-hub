@@ -118,7 +118,6 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
 
       // Logout to ensure cleared Capsule state but preserve pregen wallets
       await capsule.logout(true);
-
       const userExists = await capsule.checkIfUserExists(identifier);
       if (userExists) {
         const supportedAuthMethods = await capsule.initiateUserLoginV2(identifier, 'email');

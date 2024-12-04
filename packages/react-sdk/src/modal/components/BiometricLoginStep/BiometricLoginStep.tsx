@@ -142,18 +142,19 @@ const BiometricOnly = ({
   formattedHints,
   shortLoginLink,
   passkeysSupported,
-  biometricLocationHints,
+  biometricLocationHints = [],
 }) => {
+  const [hasHints, isOnKnownDevice] = [biometricLocationHints.length > 0, formattedHints.isOnKnownDevice];
   return (
     <>
-      {((!!biometricLocationHints?.length && !formattedHints.isOnKnownDevice) || !passkeysSupported) && (
+      {((hasHints && !isOnKnownDevice) || !passkeysSupported) && (
         <KnownDevices hints={formattedHints} link={shortLoginLink} />
       )}
       {passkeysSupported && (
         <>
-          {!!biometricLocationHints?.length && !formattedHints.isOnKnownDevice && <CpslDivider>or</CpslDivider>}
+          {hasHints && !isOnKnownDevice && <CpslDivider>or</CpslDivider>}
           <CpslButton fullWidth onClick={handlePasskeyClick}>
-            {!biometricLocationHints?.length || formattedHints.isOnKnownDevice ? (
+            {!hasHints || isOnKnownDevice ? (
               <>
                 <CpslIcon slot="start" icon="key" />
                 Login with passkey

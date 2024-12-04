@@ -9,31 +9,33 @@ import Capsule, {
   getSHA256HashHex,
 } from '@usecapsule/web-sdk';
 import { ENV } from '../constants';
-import { EncryptorType, KeyType, PublicKeyStatus } from '@usecapsule/user-management-client';
-import { CountryCallingCode } from 'libphonenumber-js';
+import { AuthParams, EncryptorType, extractAuthInfo, KeyType, PublicKeyStatus } from '@usecapsule/user-management-client';
+
+export type AuthCreationParams = AuthParams & {
+  biometricId: string;
+  partnerId: string;
+  isForNewDevice: boolean;
+  userId: string;
+};
 
 export async function authCreation(
   capsule: Capsule,
-  partnerId: string,
-  userId: string,
-  email: string,
-  phone: string,
-  countryCode: CountryCallingCode,
-  farcasterUsername: string,
-  biometricId: string,
-  isForNewDevice: boolean,
+  { biometricId, isForNewDevice, partnerId, userId, ...authParams }: AuthCreationParams,
 ): Promise<void> {
   let identifier;
 
-  if (email !== 'null' && email !== undefined && email !== '') {
-    identifier = email;
-  } else if (phone !== 'null' && phone !== undefined && phone !== '') {
-    identifier = `${countryCode}${phone}`;
-  } else if (farcasterUsername !== 'null' && farcasterUsername !== undefined && farcasterUsername !== '') {
-    identifier = `${farcasterUsername}-farcaster`;
-  }
-  if (!identifier) {
-    throw new Error('either a phone number or email address or farcaster username must be provided.');
+  const { auth, authType, identifier: _identifier } = extractAuthInfo(authParams);
+
+  switch (authType) {
+    case 'phone':
+      identifier = `${auth.countryCode}${_identifier}`;
+      break;
+    case 'farcasterUsername':
+      identifier = `${_identifier}-farcaster`;
+      break;
+    default:
+      identifier = _identifier;
+      break;
   }
 
   const { creds, userHandle, algorithm } = await createCredential(ENV, userId, identifier, capsule.ctx.isE2E);

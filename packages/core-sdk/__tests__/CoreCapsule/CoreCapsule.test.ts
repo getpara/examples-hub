@@ -187,7 +187,7 @@ describe('CoreCapsule', () => {
 
         const userExists = await capsule.checkIfUserExists(USER_EMAIL);
 
-        expect(mockCheckUserExists).toBeCalledWith(USER_EMAIL, null, null);
+        expect(mockCheckUserExists).toBeCalledWith({ auth: { email: USER_EMAIL } });
         expect(userExists).toBeTruthy();
 
         await capsule.createUser(USER_EMAIL);
@@ -206,7 +206,7 @@ describe('CoreCapsule', () => {
 
         const userExists = await capsule.checkIfUserExists(USER_EMAIL);
 
-        expect(mockCheckUserExists).toBeCalledWith(USER_EMAIL, null, null);
+        expect(mockCheckUserExists).toBeCalledWith({ auth: { email: USER_EMAIL } });
         expect(userExists).toBeFalsy();
       });
       it('verify', async () => {
@@ -252,7 +252,7 @@ describe('CoreCapsule', () => {
 
         const userExists = await capsule.checkIfUserExistsByPhone(USER_PHONE, USER_COUNTRY_CODE as CountryCallingCode);
 
-        expect(mockCheckUserExists).toBeCalledWith(null, USER_PHONE, USER_COUNTRY_CODE);
+        expect(mockCheckUserExists).toBeCalledWith({ auth: { phone: USER_PHONE, countryCode: USER_COUNTRY_CODE } });
         expect(userExists).toBeTruthy();
 
         await capsule.createUserByPhone(USER_PHONE, USER_COUNTRY_CODE as CountryCallingCode);
@@ -270,14 +270,14 @@ describe('CoreCapsule', () => {
         expect(capsule.getUserId()).toEqual(USER_ID);
       });
 
-      it("user doesn't exists", async () => {
+      it("user doesn't", async () => {
         const capsule = new MockCapsule(Environment.DEV, API_KEY);
 
         mockCheckUserExists.mockResolvedValueOnce({ data: { exists: false } });
 
         const userExists = await capsule.checkIfUserExistsByPhone(USER_PHONE, USER_COUNTRY_CODE as CountryCallingCode);
 
-        expect(mockCheckUserExists).toBeCalledWith(null, USER_PHONE, USER_COUNTRY_CODE);
+        expect(mockCheckUserExists).toBeCalledWith({ auth: { phone: USER_PHONE, countryCode: USER_COUNTRY_CODE } });
         expect(userExists).toBeFalsy();
       });
       it('verify', async () => {

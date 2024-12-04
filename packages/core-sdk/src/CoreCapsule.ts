@@ -1688,7 +1688,7 @@ export abstract class CoreCapsule {
    * @returns - true if user exists, false otherwise.
    */
   async checkIfUserExists(email: string): Promise<boolean> {
-    const res = await this.ctx.capsuleClient.checkUserExists(email, null, null);
+    const res = await this.ctx.capsuleClient.checkUserExists({ auth: { email } });
     return res.data.exists;
   }
 
@@ -1697,7 +1697,7 @@ export abstract class CoreCapsule {
    * @returns - true if user exists, false otherwise.
    */
   async checkIfUserExistsByPhone(phone: string, countryCode: CountryCallingCode): Promise<boolean> {
-    const res = await this.ctx.capsuleClient.checkUserExists(null, phone, countryCode);
+    const res = await this.ctx.capsuleClient.checkUserExists({ auth: { phone, countryCode } });
     return res.data.exists;
   }
 
@@ -1954,13 +1954,10 @@ export abstract class CoreCapsule {
     const phone = authType === 'phone' ? identifier : undefined;
     const farcasterUsername = authType === 'farcaster' ? identifier : undefined;
 
-    const { supportedAuthMethods } = await this.ctx.capsuleClient.getSupportedAuthMethods(
+    const { supportedAuthMethods } = await this.ctx.capsuleClient.getSupportedAuthMethods({
       userId,
-      email,
-      phone,
-      countryCode,
-      farcasterUsername,
-    );
+      auth: { email, phone, countryCode, farcasterUsername },
+    });
 
     const authMethods = new Set<AuthMethod>();
     for (const type of supportedAuthMethods) {

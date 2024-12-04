@@ -1,30 +1,16 @@
-import { PropsWithChildren, createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { PropsWithChildren, createContext, useCallback, useContext, useEffect, useState } from 'react';
 import * as utils from '../../../utils/authLogin';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { AuthLoginParams } from '../../../utils/authLogin';
 import { useCapsule } from '../../../components/CapsuleContext';
 import { CountryCallingCode } from 'libphonenumber-js';
-import { entityToWallet, isWalletSupported, PregenIds, WalletEntity, WalletType } from '@usecapsule/core-sdk';
+import { entityToWallet, isWalletSupported, WalletEntity, WalletType } from '@usecapsule/core-sdk';
 import { formatISO } from 'date-fns';
 import { useCloseWindow } from '../../../hooks/useCloseWindow';
 import { BiometricLocationHint } from '@usecapsule/user-management-client';
+import { useExtractedParams } from '../../../hooks/useExtractedParams';
 
 const NOOP = () => {
   throw new Error();
-};
-
-type LoginParams = {
-  email?: string;
-  phone?: string;
-  userId?: string;
-  countryCode?: CountryCallingCode;
-  farcasterUsername?: string;
-  encryptionKey?: string;
-  sessionId?: string;
-  partnerId?: string;
-  newDeviceSessionLookupId?: string;
-  newDeviceEncryptionKey?: string;
-  skipAutoLogin?: boolean;
-  pregenIds?: PregenIds;
 };
 
 export type Wallets = Partial<Record<WalletType, WalletEntity[]>>;
@@ -39,7 +25,7 @@ type Login = {
     fetchWallets: () => Promise<Wallets>;
     finishLogin: (_?: boolean) => Promise<void>;
   };
-  params: LoginParams;
+  params: AuthLoginParams;
   wallets?: Wallets;
   biometricLocationHints?: BiometricLocationHint[];
 };
@@ -48,108 +34,39 @@ const NO_DATE = formatISO(new Date(-8640000000000000));
 
 export const LoginContext = createContext<Login>({
   fns: { authLogin: NOOP, authLoginWithPassword: NOOP, authUpdateKeyShares: NOOP, fetchWallets: NOOP, finishLogin: NOOP },
-  params: {},
+  params: {} as unknown as utils.AuthLoginParams,
 });
 
 export const LoginProvider = ({ children }: PropsWithChildren) => {
   const capsule = useCapsule();
-  const [searchParams] = useSearchParams();
-  const { userId } = useParams();
   const closeWindow = useCloseWindow();
 
-  const params: LoginParams = useMemo(() => {
-    const paramsEmail = searchParams.get('email') ? decodeURIComponent(searchParams.get('email')) : undefined;
-    const paramsPhone = searchParams.get('phone') ? decodeURIComponent(searchParams.get('phone')) : undefined;
-    const paramsCountryCode = searchParams.get('countryCode')
-      ? (decodeURIComponent(searchParams.get('countryCode')) as CountryCallingCode)
-      : undefined;
-    const paramsFarcasterUsername = searchParams.get('farcasterUsername')
-      ? decodeURIComponent(searchParams.get('farcasterUsername'))
-      : undefined;
-    const paramsEncryptionKey = searchParams.get('encryptionKey');
-    const paramsSessionId = searchParams.get('sessionId');
-    const paramsNewDeviceSessionLookupId = searchParams.get('newDeviceSessionId') || undefined;
-    const paramsNewDeviceEncryptionKey = searchParams.get('newDeviceEncryptionKey') || undefined;
-    const paramsPartnerId = searchParams.get('partnerId');
-    const paramsPregenIds = searchParams.get('pregenIds');
-
-    return {
-      email: paramsEmail,
-      phone: paramsPhone,
-      userId: userId ?? undefined,
-      countryCode: paramsCountryCode,
-      farcasterUsername: paramsFarcasterUsername,
-      encryptionKey: paramsEncryptionKey,
-      sessionId: paramsSessionId,
-      partnerId: paramsPartnerId,
-      newDeviceSessionLookupId: paramsNewDeviceSessionLookupId,
-      newDeviceEncryptionKey: paramsNewDeviceEncryptionKey,
-      pregenIds: paramsPregenIds ? JSON.parse(decodeURIComponent(paramsPregenIds)) : {},
-    };
-  }, [searchParams]);
+  const params = useExtractedParams<AuthLoginParams>();
 
   const [loginRes, setLoginRes] = useState<Awaited<ReturnType<typeof utils.authLogin>> | undefined>();
   const [wallets, setWallets] = useState<Wallets>();
   const [biometricLocationHints, setBiometricLocationHints] = useState<BiometricLocationHint[]>([]);
 
-  const authLogin = useCallback(async (): Promise<Awaited<ReturnType<typeof utils.authLogin>>> => {
-    const loginRes = await utils.authLogin(
-      capsule,
-      params.partnerId,
-      undefined,
-      params.email,
-      params.phone,
-      params.countryCode,
-      params.farcasterUsername,
-      params.sessionId,
-      params.newDeviceSessionLookupId,
-    );
+  const authLogin = useCallback(async (): ReturnType<typeof utils.authLogin> => {
+    const loginRes = await utils.authLogin(capsule, params);
 
     setLoginRes(loginRes);
+
     return loginRes;
-  }, [
-    capsule,
-    params.partnerId,
-    params.email,
-    params.phone,
-    params.countryCode,
-    params.farcasterUsername,
-    params.sessionId,
-    params.encryptionKey,
-    params.newDeviceSessionLookupId,
-    params.newDeviceEncryptionKey,
-  ]);
+  }, [capsule, params]);
 
   const authLoginWithPassword = useCallback(
     async (password: string): Promise<Awaited<ReturnType<typeof utils.authLoginWithPassword>>> => {
-      const loginRes = await utils.authLoginWithPassword(
-        capsule,
+      const loginRes = await utils.authLoginWithPassword(capsule, {
         password,
-        params.partnerId,
-        params.userId,
-        params.email,
-        params.phone,
-        params.countryCode,
-        params.farcasterUsername,
-        params.sessionId,
-        params.newDeviceSessionLookupId,
-      );
+        userId: params.userId,
+        ...params,
+      });
 
       setLoginRes(loginRes);
       return loginRes;
     },
-    [
-      capsule,
-      params.partnerId,
-      params.email,
-      params.phone,
-      params.countryCode,
-      params.farcasterUsername,
-      params.sessionId,
-      params.encryptionKey,
-      params.newDeviceSessionLookupId,
-      params.newDeviceEncryptionKey,
-    ],
+    [capsule, params],
   );
 
   const fetchWallets = useCallback(async (): Promise<Wallets> => {
@@ -205,7 +122,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
     setWallets(wallets);
 
     return wallets;
-  }, [capsule, capsule.pregenIds]);
+  }, [capsule, params]);
 
   const authUpdateKeyShares = useCallback(
     async (loginResParam?: LoginRes) => {
@@ -217,27 +134,16 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
 
       const { userId, userHandle, signature, passwordId } = _loginRes;
 
-      await utils.authUpdateKeyShares(
-        capsule,
-        params.sessionId,
-        userId,
-        params.encryptionKey,
+      await utils.authUpdateKeyShares(capsule, {
+        ...params,
+        encryptionKey: params.encryptionKey,
         userHandle,
-        passwordId ? undefined : signature,
-        params.newDeviceSessionLookupId,
-        params.newDeviceEncryptionKey,
-        params.partnerId,
+        signature,
         passwordId,
-      );
+        userId,
+      });
     },
-    [
-      capsule,
-      params.sessionId,
-      params.encryptionKey,
-      params.newDeviceSessionLookupId,
-      params.newDeviceEncryptionKey,
-      loginRes,
-    ],
+    [capsule, params, loginRes],
   );
 
   const finishLogin = useCallback(
@@ -258,7 +164,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
       }
 
       if (params.phone && params.countryCode) {
-        await capsule.setPhoneNumber(params.phone, params.countryCode);
+        await capsule.setPhoneNumber(params.phone, params.countryCode as CountryCallingCode);
       }
 
       if (params.farcasterUsername) {
@@ -274,7 +180,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
     }
 
     setUserDetails();
-  }, [capsule, params.pregenIds, params.email, params.phone, params.countryCode, params.farcasterUsername]);
+  }, [capsule, params]);
 
   return (
     <LoginContext.Provider

@@ -22,7 +22,7 @@ import {
   PasskeyGetRequest,
   PasskeyGetResult,
 } from 'react-native-passkey';
-import { PublicKeyStatus, WalletScheme } from '@usecapsule/user-management-client';
+import { extractAuth, PublicKeyStatus, WalletScheme } from '@usecapsule/user-management-client';
 import { setEnv } from '../config.js';
 import base64url from 'base64url';
 import { webcrypto } from 'crypto';
@@ -196,7 +196,10 @@ export class CapsuleMobile extends CoreCapsule {
    * @throws {Error} If neither email nor both phone and countryCode are provided.
    */
   async login(email?: string, phone?: string, countryCode?: CountryCallingCode): Promise<void> {
-    const { challenge, allowedPublicKeys } = await this.ctx.capsuleClient.getWebChallenge(email, phone, countryCode);
+    const auth = extractAuth({ email, phone, countryCode });
+    const { challenge, allowedPublicKeys } = await this.ctx.capsuleClient.getWebChallenge({
+      auth,
+    });
 
     const requestJson: PasskeyGetRequest = {
       challenge,

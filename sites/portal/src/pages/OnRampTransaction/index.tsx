@@ -34,19 +34,18 @@ export function OnRampTransaction() {
 
   async function login(sessionId: string, partnerId: string) {
     await capsule.setLoginEncryptionKeyPair();
-    const { userHandle, signature } = await authLogin(capsule, partnerId, userId, null, null, null, null, sessionId);
+    const { userHandle, signature } = await authLogin(capsule, { partnerId, userId, sessionId });
 
     await capsule.userSetupAfterLogin();
     await capsule.setCurrentWalletIds(paramsCurrentWalletIds);
 
-    await authUpdateKeyShares(
-      capsule,
+    await authUpdateKeyShares(capsule, {
       sessionId,
       userId,
-      getPublicKeyHex(capsule.loginEncryptionKeyPair),
+      encryptionKey: getPublicKeyHex(capsule.loginEncryptionKeyPair),
       userHandle,
       signature,
-    );
+    });
 
     const temporaryShares = await capsule.getTransmissionKeyShares();
     await capsule.setupAfterLogin(temporaryShares.data.temporaryShares);

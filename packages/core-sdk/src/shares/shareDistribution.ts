@@ -33,7 +33,7 @@ export async function distributeNewShare(
     })
     .filter(Boolean);
 
-  const passwords = await ctx.capsuleClient.getPasswords(userId);
+  const passwords = await ctx.capsuleClient.getPasswords({ userId });
   const passwordEncryptedShares = passwords
     .map(password => {
       if (password.status === 'PENDING') {

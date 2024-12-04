@@ -1,18 +1,17 @@
 import { formatPhoneNumber } from '@usecapsule/react-common';
 import { CountryCallingCode } from 'libphonenumber-js';
-import { useSearchParams } from 'react-router-dom';
+import { useExtractedParams } from './useExtractedParams';
+import { AuthParams, extractAuthInfo } from '@usecapsule/user-management-client';
 
 export const useUsername = () => {
-  const [searchParams] = useSearchParams();
+  const params = useExtractedParams<AuthParams>();
 
-  const paramsEmail = searchParams.get('email') ? decodeURIComponent(searchParams.get('email')) : undefined;
-  const paramsPhone = searchParams.get('phone') ? decodeURIComponent(searchParams.get('phone')) : undefined;
-  const paramsCountryCode = searchParams.get('countryCode')
-    ? (decodeURIComponent(searchParams.get('countryCode')) as CountryCallingCode)
-    : undefined;
-  const paramsFarcasterUsername = searchParams.get('farcasterUsername')
-    ? decodeURIComponent(searchParams.get('farcasterUsername'))
-    : undefined;
+  const { auth, authType, identifier } = extractAuthInfo(params);
 
-  return paramsEmail ?? (paramsPhone ? formatPhoneNumber(paramsPhone, paramsCountryCode) : (paramsFarcasterUsername ?? ''));
+  switch (authType) {
+    case 'phone':
+      return formatPhoneNumber(identifier, auth.countryCode as CountryCallingCode);
+    default:
+      return identifier;
+  }
 };

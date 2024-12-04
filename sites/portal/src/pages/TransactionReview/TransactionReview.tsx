@@ -84,7 +84,7 @@ function TransactionReview() {
         break;
       } catch (e) {
         console.error(e);
-        await authLogin(capsule, partner.id, userId, null, null, null, null, null);
+        await authLogin(capsule, { partnerId: partner.id, userId });
       }
 
       retriesLeft--;
@@ -138,7 +138,7 @@ function TransactionReview() {
           console.error(e);
 
           if (e.response?.status === 401) {
-            await authLogin(capsule, partnerId, userId, null, null, null, null, null);
+            await authLogin(capsule, { partnerId, userId });
           }
 
           setTransactionReviewState(TransactionReviewState.Error);
@@ -181,7 +181,7 @@ function TransactionReview() {
     try {
       setLoginWithPasswordError(undefined);
       await capsule.touchSession();
-      await authLoginWithPassword(capsule, password, partnerId, userId, null, null, null, null, null);
+      await authLoginWithPassword(capsule, { password, partnerId, userId });
 
       await capsule.userSetupAfterLogin();
       await capsule.setupAfterLogin();

@@ -1,42 +1,23 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
 
-import { authCreation } from '../../utils/authCreation';
+import { authCreation, AuthCreationParams } from '../../utils/authCreation';
 import { AuthCreationStep, REDIRECT_TIMEOUT } from '../../constants';
 import { Body } from './components/Body';
 import { Card, CardContent } from '../../components/common';
 import { ModalHeader } from '../../components/ModalHeader';
-import { CountryCallingCode } from 'libphonenumber-js';
 import { useCapsule } from '../../components/CapsuleContext';
+import { useExtractedParams } from '../../hooks/useExtractedParams';
 
 export const AuthCreation = () => {
   const capsule = useCapsule();
   const [step, setStep] = useState<AuthCreationStep>(AuthCreationStep.MANUAL_CREATION);
 
-  const { biometricId: paramsBiometricId, userId: paramsUserId } = useParams();
-  const [searchParams, _] = useSearchParams();
-  const paramsEmail = decodeURIComponent(searchParams.get('email'));
-  const paramsPhone = decodeURIComponent(searchParams.get('phone'));
-  const paramsCountryCode = decodeURIComponent(searchParams.get('countryCode')) as CountryCallingCode;
-  const paramsFarcasterUsername = decodeURIComponent(searchParams.get('farcasterUsername'));
-
-  const isForNewDevice = searchParams.get('isForNewDevice') === 'true';
-  const paramsPartnerId = searchParams.get('partnerId');
+  const params = useExtractedParams<AuthCreationParams>();
 
   const setUpBiometrics = useCallback(async () => {
     setStep(AuthCreationStep.CREATING);
     try {
-      await authCreation(
-        capsule,
-        paramsPartnerId,
-        paramsUserId,
-        paramsEmail,
-        paramsPhone,
-        paramsCountryCode,
-        paramsFarcasterUsername,
-        paramsBiometricId,
-        isForNewDevice,
-      );
+      await authCreation(capsule, params);
 
       setStep(AuthCreationStep.SUCCESS);
       setTimeout(function () {
@@ -52,10 +33,10 @@ export const AuthCreation = () => {
         console.error('Error creating passkey: ', err);
       }
     }
-  }, [paramsBiometricId, paramsEmail, paramsPhone, paramsCountryCode, paramsFarcasterUsername, paramsUserId]);
+  }, [params]);
 
   useEffect(() => {
-    if (paramsBiometricId && (paramsEmail || paramsPhone || paramsCountryCode || paramsFarcasterUsername) && paramsUserId) {
+    if (params.biometricId && (params.email || params.phone || params.farcasterUsername) && params.userId) {
       // In development this will trigger a 'request is already pending.' error due to duplicate renders caused by React.StrictMode.
       // See ref: https://legacy.reactjs.org/docs/strict-mode.html#detecting-unexpected-side-effects
       setUpBiometrics();
@@ -66,7 +47,7 @@ export const AuthCreation = () => {
     <Card>
       <CardContent>
         <ModalHeader />
-        <Body step={step} userId={paramsUserId} onCreateClick={setUpBiometrics} />
+        <Body step={step} userId={params.userId} onCreateClick={setUpBiometrics} />
       </CardContent>
     </Card>
   );
