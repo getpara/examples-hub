@@ -1,10 +1,10 @@
-import { ReactNode, useMemo } from 'react';
+import { ReactNode, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { OAuth } from '../OAuth/OAuth.js';
 import { OAuthMethod } from '@usecapsule/web-sdk';
 import { AuthInput } from '../AuthInput/AuthInput.js';
 import { useExternalWallets } from '../../providers/ExternalWalletContext.js';
-import { useModalStore } from '../../stores/index.js';
+import { useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 
 interface AuthOptionsProps {
@@ -16,6 +16,9 @@ interface AuthOptionsProps {
 export const AuthOptions = ({ oAuthMethods, disableEmailLogin, disablePhoneLogin }: AuthOptionsProps) => {
   const { wallets } = useExternalWallets();
   const showAllOAuth = useModalStore(state => state.step === ModalStep.AUTH_MORE);
+  const identifierType = useUserInfoStore(state => state.identifierType);
+  const setIdentifierType = useUserInfoStore(state => state.setIdentifierType);
+  const setIdentifier = useUserInfoStore(state => state.setIdentifier);
 
   const Content = useMemo(() => {
     const Methods: ReactNode[] = [];
@@ -30,6 +33,13 @@ export const AuthOptions = ({ oAuthMethods, disableEmailLogin, disablePhoneLogin
 
     return <>{Methods}</>;
   }, [showAllOAuth, oAuthMethods, disableEmailLogin, disablePhoneLogin, wallets]);
+
+  useEffect(() => {
+    if (identifierType === 'farcaster') {
+      setIdentifierType(undefined);
+      setIdentifier('');
+    }
+  }, [identifierType]);
 
   return <Container>{Content}</Container>;
 };

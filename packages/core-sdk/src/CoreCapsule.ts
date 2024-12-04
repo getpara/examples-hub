@@ -1293,6 +1293,14 @@ export abstract class CoreCapsule {
     return normalizePhoneNumber(this.countryCode, this.phone);
   }
 
+  /**
+   * Gets the farcaster username associated with the `CoreCapsule` instance.
+   * @returns - farcaster username associated with the `CoreCapsule` instance.
+   */
+  getFarcasterUsername(): string | undefined {
+    return this.farcasterUsername;
+  }
+
   async setCurrentWalletIds(
     currentWalletIds: CurrentWalletIds,
     sessionLookupId?: string,
@@ -3268,6 +3276,7 @@ export abstract class CoreCapsule {
       email: this.email,
       phone: this.phone,
       countryCode: this.countryCode,
+      farcasterUsername: this.farcasterUsername,
       userId: this.userId,
       pregenIds: this.pregenIds,
       currentWalletIds: this.currentWalletIds,

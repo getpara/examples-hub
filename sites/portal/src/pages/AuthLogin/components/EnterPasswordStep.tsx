@@ -1,10 +1,11 @@
 import { styled } from 'styled-components';
 import { Text, Link } from '../../../components/common';
 import { CpslButton, CpslIcon, CpslInput, CpslText } from '@usecapsule/react-components';
-import { useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useCapsule } from '../../../components/CapsuleContext';
 import { CpslInputCustomEvent, InputInputEventDetail } from '@usecapsule/core-components';
+import { UserIdentifier } from '@usecapsule/react-common';
+import { useUsername } from '../../../hooks/useUsername';
 
 interface EnterPasswordStepProps {
   error: string | undefined;
@@ -13,11 +14,10 @@ interface EnterPasswordStepProps {
 
 export const EnterPasswordStep = ({ error, onLoginClick }: EnterPasswordStepProps) => {
   const capsule = useCapsule();
-  const [searchParams] = useSearchParams();
-  const paramsEmail = decodeURIComponent(searchParams.get('email'));
   const [recoveryUrl, setRecoveryUrl] = useState<string | undefined>();
   const [password, setPassword] = useState<string>('');
   const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
+  const username = useUsername();
 
   const handlePasswordInput = (ev: CpslInputCustomEvent<InputInputEventDetail>) => {
     setPassword(ev.detail.value);
@@ -34,12 +34,7 @@ export const EnterPasswordStep = ({ error, onLoginClick }: EnterPasswordStepProp
   return (
     <Container>
       <CpslText variant="headingS">Login</CpslText>
-      <EmailContainer>
-        <EmailIcon icon="wallet" />
-        <Text>
-          <span>{paramsEmail}</span>
-        </Text>
-      </EmailContainer>
+      <UserIdentifier identifier={username} />
       <ButtonContainer>
         <CpslInput
           placeholder="Enter a password"
@@ -90,23 +85,6 @@ const ButtonContainer = styled.div`
   flex-direction: column;
   gap: 8px;
   width: 100%;
-`;
-
-const EmailContainer = styled.div`
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  justify-content: center;
-
-  padding: 2px 16px;
-  border-radius: 1000px;
-  border: 1px solid var(--cpsl-color-input-border-placeholder);
-`;
-
-const EmailIcon = styled(CpslIcon)`
-  --height: 16px;
-  --width: 16px;
-  --icon-color: var(--cpsl-color-text-secondary);
 `;
 
 const ErrorIcon = styled(CpslIcon)`

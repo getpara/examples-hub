@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { getActions } from './actions.js';
 import { CountryCallingCode } from 'libphonenumber-js';
 
-type IdentifierType = 'email' | 'phone';
+type IdentifierType = 'email' | 'phone' | 'farcaster';
 
 interface UserInfoState {
   identifier: string;

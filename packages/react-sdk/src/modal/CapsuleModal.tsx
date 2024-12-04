@@ -126,6 +126,12 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
         setCountryCode(countryCode as CountryCallingCode);
         setIdentifierType('phone');
       }
+
+      if (capsule.isFarcaster) {
+        setIdentifier(capsule.getFarcasterUsername());
+        setIdentifierType('farcaster');
+      }
+
       setIsInit(true);
     };
 
