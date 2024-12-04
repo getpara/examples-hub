@@ -7,7 +7,7 @@
   "typings": "dist/types/index.d.ts",
   "sideEffects": false,
   "dependencies": {
-    "@solana/web3.js": "^1.95.2",
+    "@solana/web3.js": "^1.95.8",
     "@usecapsule/core-sdk": "2.11.0"
   },
   "scripts": {
