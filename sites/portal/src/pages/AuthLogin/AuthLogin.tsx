@@ -4,7 +4,6 @@ import { Body } from './components/Body';
 import { Card, CardContent } from '../../components/common';
 import { ModalHeader } from '../../components/ModalHeader';
 import { getAsymmetricKeyPair, getPublicKeyHex } from '@usecapsule/web-sdk';
-import { useAuthLoginStep } from '../../hooks/useLoginStep';
 import { useCapsule } from '../../components/CapsuleContext';
 import { LoginProvider, LoginRes, useLogin } from './components/LoginProvider';
 import { SelectWallet } from './components/SelectWallet';
@@ -31,7 +30,7 @@ const AuthLoginBase = ({ authMethod }) => {
     biometricLocationHints,
   } = useLogin();
   const [urlForNewDeviceLogin, setUrlForNewDeviceLogin] = useState<string>('');
-  const [step, setStep] = useAuthLoginStep();
+  const [step, setStep] = useState(AuthLoginStep.MANUAL_LOGIN);
   const [loginWithPasswordError, setLoginWithPasswordError] = useState<string | undefined>();
   const [isAddingDevice, setIsAddingDevice] = useState(false);
 
@@ -193,7 +192,14 @@ const AuthLoginBase = ({ authMethod }) => {
   };
 
   if (step === AuthLoginStep.SELECT_WALLET) {
-    return <SelectWallet sessionLookupId={sessionId} />;
+    return (
+      <SelectWallet
+        sessionLookupId={sessionId}
+        onSuccess={() => {
+          setStep(AuthLoginStep.SUCCESS);
+        }}
+      />
+    );
   }
 
   return (

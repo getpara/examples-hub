@@ -83,7 +83,8 @@ export async function authLoginWithPassword(
   }
 
   const passwordEntity = (await capsule.ctx.capsuleClient.getPasswords({ userId, auth }))[0];
-  const encryptedWalletPrivateKey = (await capsule.ctx.capsuleClient.getEncryptedWalletPrivateKey(passwordEntity.id)).data;
+  const encryptedWalletPrivateKey = (await capsule.ctx.capsuleClient.getEncryptedWalletPrivateKey(passwordEntity.id)).data
+    .encryptedWalletPrivateKey;
   const challenge = (await capsule.ctx.capsuleClient.getWebChallenge({ userId, auth })).challenge;
 
   const { salt } = passwordEntity;
@@ -129,12 +130,11 @@ export async function authUpdateKeyShares(
 ) {
   const encryptionKeyHash = getSHA256HashHex(userHandle);
   let encryptedShares = [];
-
-  if (signature) {
-    const encryptedSharesRes = await capsule.ctx.capsuleClient.getBiometricKeyshares(userId, signature.id, true);
-    encryptedShares = encryptedSharesRes.data.keyShares;
-  } else if (passwordId) {
+  if (passwordId) {
     const encryptedSharesRes = await capsule.ctx.capsuleClient.getPasswordKeyshares(userId, passwordId, true);
+    encryptedShares = encryptedSharesRes.data.keyShares;
+  } else if (signature) {
+    const encryptedSharesRes = await capsule.ctx.capsuleClient.getBiometricKeyshares(userId, signature.id, true);
     encryptedShares = encryptedSharesRes.data.keyShares;
   }
   const { encryptedPrivateKeys } = await capsule.ctx.capsuleClient.getEncryptedWalletPrivateKeys(userId, encryptionKeyHash);

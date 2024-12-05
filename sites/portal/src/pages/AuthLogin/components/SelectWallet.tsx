@@ -4,8 +4,6 @@ import { CpslIcon, CpslText, CpslButton, IconType, CpslRadio, CpslIdenticon } fr
 import { SaveRecoverySecret } from '@usecapsule/react-sdk';
 import { formatDistanceToNowStrict, parseISO } from 'date-fns';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AuthLoginStep } from '../../../constants';
-import { useAuthLoginStep } from '../../../hooks/useLoginStep';
 import {
   Wallet,
   WalletType,
@@ -135,14 +133,13 @@ const WalletButton = ({ wallet, disabled, onClick, isClaimable, isNew, isSelecte
   );
 };
 
-export const SelectWallet = ({ sessionLookupId }: { sessionLookupId: string }) => {
+export const SelectWallet = ({ onSuccess, sessionLookupId }: { onSuccess: () => void; sessionLookupId: string }) => {
   const capsule = useCapsule();
   const {
     fns: { finishLogin, authUpdateKeyShares },
     params: { email, newDeviceSessionLookupId },
     wallets,
   } = useLogin();
-  const [, setStep] = useAuthLoginStep();
   const { partner } = useModalOutletContext();
 
   const [isAtBottom, setIsAtBottom] = useState(false);
@@ -233,10 +230,10 @@ export const SelectWallet = ({ sessionLookupId }: { sessionLookupId: string }) =
       } else {
         await capsule.setCurrentWalletIds(walletIds, sessionLookupId, false, newDeviceSessionLookupId);
         await authUpdateKeyShares();
-        setStep(AuthLoginStep.SUCCESS);
+        onSuccess();
       }
     },
-    [capsule],
+    [capsule, onSuccess],
   );
 
   const [key, header, heading, subheading, content] = useMemo(() => {

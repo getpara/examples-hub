@@ -5,7 +5,6 @@ import { ManualLoginStep } from './ManualLoginStep';
 import { ModalLoading } from '../../../components/ModalLoading';
 import { ModalSuccess } from '../../../components/ModalSuccess';
 import { useModalOutletContext } from '../../../hooks/useModalOutletContext';
-import { SelectWallet } from './SelectWallet';
 import { EnterPasswordStep } from './EnterPasswordStep';
 import { BiometricLocationHint } from '@usecapsule/user-management-client';
 import { LoginFailedStep } from './LoginFailedStep';
@@ -35,7 +34,6 @@ export const Body = ({
   onLoginFromAnotherDevice,
   setStep,
   onAddPasskeyClick,
-  sessionLookupId,
   biometricLocationHints,
   loginWithPasswordError,
   isKnownDeviceLogin,
@@ -66,9 +64,6 @@ export const Body = ({
       }
       case AuthLoginStep.ENTER_PASSWORD: {
         return <EnterPasswordStep error={loginWithPasswordError} onLoginClick={onLoginWithPasswordClick} />;
-      }
-      case AuthLoginStep.SELECT_WALLET: {
-        return <SelectWallet sessionLookupId={sessionLookupId} />;
       }
       case AuthLoginStep.SUCCESS: {
         return (
