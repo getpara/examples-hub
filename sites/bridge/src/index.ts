@@ -246,14 +246,14 @@ async function generatePasskeyV2(capsule: CapsuleWeb, args: any[]) {
 }
 
 async function verifyWebChallenge(capsule: CapsuleWeb, args: any[]) {
-  const publicKeyId = args[0];
+  const publicKey = args[0];
   const authenticatorData = args[1];
   const clientDataJSON = args[2];
   const signature = args[3];
 
   const session = await capsule.ctx.capsuleClient.touchSession();
   const verifyWebChallengeResult = await capsule.ctx.capsuleClient.verifyWebChallenge(session.data.partnerId, {
-    publicKey: publicKeyId,
+    publicKey,
     signature: {
       clientDataJSON: clientDataJSON,
       authenticatorData: authenticatorData,

@@ -18,6 +18,7 @@ import Client, {
   extractWalletRef,
   PasswordStatus,
   BiometricLocationHint,
+  extractAuth,
 } from '@usecapsule/user-management-client';
 import type { pki as pkiType, jsbn as jsbnType } from 'node-forge';
 import forge from 'node-forge';
@@ -1696,7 +1697,7 @@ export abstract class CoreCapsule {
    * @returns - true if user exists, false otherwise.
    */
   async checkIfUserExists(email: string): Promise<boolean> {
-    const res = await this.ctx.capsuleClient.checkUserExists({ auth: { email } });
+    const res = await this.ctx.capsuleClient.checkUserExists({ email });
     return res.data.exists;
   }
 
@@ -1705,7 +1706,7 @@ export abstract class CoreCapsule {
    * @returns - true if user exists, false otherwise.
    */
   async checkIfUserExistsByPhone(phone: string, countryCode: CountryCallingCode): Promise<boolean> {
-    const res = await this.ctx.capsuleClient.checkUserExists({ auth: { phone, countryCode } });
+    const res = await this.ctx.capsuleClient.checkUserExists({ phone, countryCode });
     return res.data.exists;
   }
 
@@ -1962,10 +1963,9 @@ export abstract class CoreCapsule {
     const phone = authType === 'phone' ? identifier : undefined;
     const farcasterUsername = authType === 'farcaster' ? identifier : undefined;
 
-    const { supportedAuthMethods } = await this.ctx.capsuleClient.getSupportedAuthMethods({
-      userId,
-      auth: { email, phone, countryCode, farcasterUsername },
-    });
+    const auth = extractAuth({ email, phone, countryCode, farcasterUsername, userId }, { allowUserId: true });
+
+    const { supportedAuthMethods } = await this.ctx.capsuleClient.getSupportedAuthMethods(auth);
 
     const authMethods = new Set<AuthMethod>();
     for (const type of supportedAuthMethods) {

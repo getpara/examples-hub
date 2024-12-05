@@ -20,11 +20,15 @@ export function extractWalletRef(params: WalletParams): [WalletRef, string] {
   throw new Error('invalid wallet params');
 }
 
-export type AuthType = 'email' | 'phone' | 'farcasterUsername';
+export type AuthType = 'email' | 'phone' | 'farcasterUsername' | 'userId';
 
-export type ExtractAuth = ExtractAuthT<'email'> | ExtractAuthT<'phone'> | ExtractAuthT<'farcasterUsername'>;
+export type ExtractAuth =
+  | $ExtractAuth<'email'>
+  | $ExtractAuth<'phone'>
+  | $ExtractAuth<'farcasterUsername'>
+  | $ExtractAuth<'userId'>;
 
-export type ExtractAuthT<T extends AuthType> = {
+export type $ExtractAuth<T extends AuthType> = {
   auth: $Auth<T>;
   authType: T;
   identifier: string;
@@ -35,19 +39,18 @@ export type AuthParams = Record<string, any> & {
   phone?: string;
   countryCode?: string;
   farcasterUsername?: string;
+  userId?: string;
 };
 
 export type $Auth<T extends AuthType> = T extends 'email'
   ? { email: string }
   : T extends 'phone'
     ? { phone: string; countryCode: string }
-    : { farcasterUsername: string };
+    : T extends 'farcasterUsername'
+      ? { farcasterUsername: string }
+      : { userId: string };
 
-export type Auth = $Auth<'email'> | $Auth<'phone'> | $Auth<'farcasterUsername'>;
-
-export type WithAuth = {
-  auth: Auth;
-};
+export type Auth = $Auth<'email'> | $Auth<'phone'> | $Auth<'farcasterUsername'> | $Auth<'userId'>;
 
 export function isEmail(params: AuthParams): params is $Auth<'email'> {
   return !!params.email && !params.phone && !params.countryCode && !params.farcasterUsername;
@@ -61,7 +64,11 @@ export function isFarcaster(params: AuthParams): params is $Auth<'farcasterUsern
   return !!params.farcasterUsername && !params.email && !params.phone && !params.countryCode;
 }
 
-export function extractAuthInfo(obj: AuthParams): ExtractAuth {
+export function isUserId(params: AuthParams): params is { userId: string } {
+  return !!params.userId;
+}
+
+export function extractAuthInfo(obj: AuthParams, { allowUserId }: { allowUserId?: boolean } = {}): ExtractAuth {
   switch (true) {
     case isEmail(obj):
       return { auth: { email: obj.email }, authType: 'email', identifier: obj.email };
@@ -77,13 +84,15 @@ export function extractAuthInfo(obj: AuthParams): ExtractAuth {
         authType: 'farcasterUsername',
         identifier: obj.farcasterUsername,
       };
+    case isUserId(obj) && allowUserId:
+      return { auth: { userId: obj.userId }, authType: 'userId', identifier: obj.userId };
     default:
       throw new Error('invalid auth object');
   }
 }
 
-export function extractAuth(obj: AuthParams): Auth {
-  return extractAuthInfo(obj).auth;
+export function extractAuth(obj: AuthParams, opts: Parameters<typeof extractAuthInfo>[1] = {}): Auth {
+  return extractAuthInfo(obj, opts).auth;
 }
 
 export enum OAuthMethod {

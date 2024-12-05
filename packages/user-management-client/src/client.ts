@@ -7,16 +7,7 @@ import axios, {
 } from 'axios';
 import { AxiosRequestConfig } from 'axios';
 import qs from 'qs';
-import {
-  $Auth,
-  Auth,
-  AuthParams,
-  extractWalletRef,
-  PregenIds,
-  TPregenIdentifierType,
-  WalletParams,
-  WithAuth,
-} from './types.js';
+import { $Auth, Auth, AuthParams, extractWalletRef, PregenIds, TPregenIdentifierType, WalletParams } from './types.js';
 
 export const USER_NOT_VERIFIED = 'user must verify biometrics';
 export const USER_NOT_AUTHENTICATED_ERROR = 'user must be authenticated';
@@ -130,20 +121,18 @@ interface MobileSignature {
 }
 
 type verifyWebChallengeBody = {
-  auth?: Auth;
   sessionLookupId?: string;
   signature: WebSignature;
-  publicKey?: string;
+  publicKey: string;
   newDeviceSessionLookupId?: string;
 };
 
 type verifyPasswordChallengeBody = {
-  userId?: string;
   sessionLookupId?: string;
   signature: string;
-  publicKey?: string;
+  publicKey: string;
   newDeviceSessionLookupId?: string;
-} & WithAuth;
+};
 
 interface verifySessionChallengeBody {
   signature: MobileSignature | WebSignature;
@@ -484,7 +473,7 @@ class Client {
     return res.data;
   };
 
-  checkUserExists = async ({ auth }: { auth: $Auth<'email' | 'phone'> }): Promise<any> => {
+  checkUserExists = async (auth: $Auth<'email' | 'phone'>): Promise<any> => {
     const res = await this.baseRequest.get<any>('/users/exists', {
       params: { ...auth },
     });
@@ -547,17 +536,9 @@ class Client {
   };
 
   // GET /biometrics/challenge?email&publicKey
-  getWebChallenge = async ({
-    auth,
-    publicKey,
-    userId,
-  }: {
-    auth?: Auth;
-    publicKey?: string;
-    userId?: string;
-  }): Promise<getWebChallengeRes> => {
+  getWebChallenge = async (auth: Auth): Promise<getWebChallengeRes> => {
     const res = await this.baseRequest.get<any>('/biometrics/challenge', {
-      params: { publicKey, userId, ...(auth || {}) },
+      params: { ...auth },
     });
 
     return res.data;
@@ -572,16 +553,12 @@ class Client {
   };
 
   // POST /biometrics/verify
-  verifyWebChallenge = async (partnerId: string, { auth, ...body }: verifyWebChallengeBody): Promise<any> => {
-    const res = await this.baseRequest.post<{}>(
-      `/biometrics/verify`,
-      { ...body, ...(auth || {}) },
-      {
-        headers: {
-          'X-Partner-ID': partnerId,
-        },
+  verifyWebChallenge = async (partnerId: string, body: verifyWebChallengeBody): Promise<any> => {
+    const res = await this.baseRequest.post<{}>(`/biometrics/verify`, body, {
+      headers: {
+        'X-Partner-ID': partnerId,
       },
-    );
+    });
     return res;
   };
 
@@ -1207,35 +1184,27 @@ class Client {
     return res;
   };
 
-  async getSupportedAuthMethods(
-    params: {
-      userId?: string;
-    } & WithAuth,
-  ) {
+  async getSupportedAuthMethods(auth: Auth) {
     const res = await this.baseRequest.get<any>('/users/supported-auth-methods', {
-      params: { userId: params.userId, ...params.auth },
+      params: { ...auth },
     });
     return res.data;
   }
 
-  async getPasswords({ userId, auth }: { userId?: string; auth?: Auth }): Promise<PasswordEntity[]> {
+  async getPasswords(auth: Auth): Promise<PasswordEntity[]> {
     const res = await this.baseRequest.get<any>('/users/passwords', {
-      params: { userId, ...(auth || {}) },
+      params: { ...auth },
     });
     return res.data.passwords;
   }
 
   // POST /passwords/verify
-  async verifyPasswordChallenge(partnerId: string, { auth, ...body }: verifyPasswordChallengeBody): Promise<any> {
-    const res = await this.baseRequest.post<{}>(
-      `/passwords/verify`,
-      { ...body, ...(auth || {}) },
-      {
-        headers: {
-          'X-Partner-ID': partnerId,
-        },
+  async verifyPasswordChallenge(partnerId: string, body: verifyPasswordChallengeBody): Promise<any> {
+    const res = await this.baseRequest.post<{}>(`/passwords/verify`, body, {
+      headers: {
+        'X-Partner-ID': partnerId,
       },
-    );
+    });
     return res;
   }
 

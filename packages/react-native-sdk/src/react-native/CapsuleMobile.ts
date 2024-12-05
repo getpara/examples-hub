@@ -197,9 +197,7 @@ export class CapsuleMobile extends CoreCapsule {
    */
   async login(email?: string, phone?: string, countryCode?: CountryCallingCode): Promise<void> {
     const auth = extractAuth({ email, phone, countryCode });
-    const { challenge, allowedPublicKeys } = await this.ctx.capsuleClient.getWebChallenge({
-      auth,
-    });
+    const { challenge, allowedPublicKeys } = await this.ctx.capsuleClient.getWebChallenge(auth);
 
     const requestJson: PasskeyGetRequest = {
       challenge,
@@ -219,8 +217,9 @@ export class CapsuleMobile extends CoreCapsule {
     }
 
     const session = await this.ctx.capsuleClient.touchSession();
+    const publicKey = resultJson.id;
     const verifyWebChallengeResult = await this.ctx.capsuleClient.verifyWebChallenge(session.data.partnerId, {
-      publicKey: resultJson.id,
+      publicKey,
       signature: {
         clientDataJSON: resultJson.response.clientDataJSON,
         authenticatorData: resultJson.response.authenticatorData,

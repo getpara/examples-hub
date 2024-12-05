@@ -46,7 +46,7 @@ export function getCurrencyCodes(
     }, [])
     .filter((code): code is string => !!code);
 
-  return { currencyCodes, defaultCurrencyCode };
+  return { currencyCodes, defaultCurrencyCode: defaultCurrencyCode || currencyCodes[0] };
 }
 
 export function reverseCurrencyLookup(

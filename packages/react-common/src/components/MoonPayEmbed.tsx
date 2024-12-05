@@ -176,6 +176,7 @@ export const MoonPayEmbed = ({ capsule, isDark, isEmbedded, onRampConfig, onRamp
     onRampPurchase.address,
     onRampPurchase.walletId,
     onRampPurchase.walletType,
+    defaultCurrencyCode,
     currencyCodes,
     onInitiateDeposit,
     onTransactionCompleted,
