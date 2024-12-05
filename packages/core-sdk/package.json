@@ -24,8 +24,7 @@
     "build:cjs": "rm -rf dist/cjs && tsc --module commonjs --outDir dist/cjs && printf '{\"type\":\"commonjs\"}' > dist/cjs/package.json",
     "build:esm": "rm -rf dist/esm && tsc --module es6 --outDir dist/esm && printf '{\"type\":\"module\",\"sideEffects\":false}' > dist/esm/package.json",
     "build:types": "rm -rf dist/types && tsc --module es6 --declarationDir dist/types --emitDeclarationOnly --declaration",
-    "test": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test": "vitest run --coverage"
   },
   "devDependencies": {
     "typescript": "5.1.6"

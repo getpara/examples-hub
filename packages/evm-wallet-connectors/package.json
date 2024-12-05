@@ -13,7 +13,8 @@
     "@usecapsule/react-sdk": "4.11.0"
   },
   "scripts": {
-    "build": "rm -rf dist && tsc"
+    "build": "rm -rf dist && tsc",
+    "test": "vitest run --coverage"
   },
   "devDependencies": {
     "@types/react": "^18.0.31",

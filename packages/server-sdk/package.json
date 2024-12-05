@@ -19,7 +19,7 @@
     "build:cjs": "rm -rf dist/cjs && tsc --module commonjs --outDir dist/cjs && printf '{\"type\":\"commonjs\"}' > dist/cjs/package.json",
     "build:esm": "rm -rf dist/esm && tsc --module es2020 --outDir dist/esm && printf '{\"type\":\"module\",\"sideEffects\":[\"wasm_exec.js\"]}' > dist/esm/package.json",
     "build:types": "rm -rf dist/types && tsc --module es2020 --declarationDir dist/types --emitDeclarationOnly --declaration",
-    "test": "vitest run"
+    "test": "vitest run --coverage"
   },
   "devDependencies": {
     "@types/ws": "^8.5.7",

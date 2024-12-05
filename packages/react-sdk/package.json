@@ -25,7 +25,7 @@
   "scripts": {
     "build": "rm -rf dist && tsc && yarn post-build",
     "post-build": "./scripts/post-build.sh",
-    "test": "vitest --config ./vitest.config.js run"
+    "test": "vitest run --coverage"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.1.0",

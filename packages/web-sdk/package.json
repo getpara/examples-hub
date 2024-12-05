@@ -20,7 +20,7 @@
   "scripts": {
     "build": "rm -rf dist && tsc && yarn post-build",
     "post-build": "./scripts/post-build.sh",
-    "test": "vitest run"
+    "test": "vitest run --coverage"
   },
   "devDependencies": {
     "@types/node-forge": "1.3.1",
