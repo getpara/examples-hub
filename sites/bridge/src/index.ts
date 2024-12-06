@@ -125,7 +125,7 @@ async function invokeCapsuleMethod(methodName: string, args: any[]) {
         sendResponse('generatePasskeyV2', true);
         break;
       case 'getWebChallenge':
-        const getWebChallengeResult = await capsule.ctx.capsuleClient.getWebChallenge(args[0] ?? { auth: { email: '' } });
+        const getWebChallengeResult = await capsule.ctx.capsuleClient.getWebChallenge(args[0] ?? { email: '' });
         sendResponse('getWebChallenge', getWebChallengeResult);
         break;
       case 'verifyWebChallenge':
