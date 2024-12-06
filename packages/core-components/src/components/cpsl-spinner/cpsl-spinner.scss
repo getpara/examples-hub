@@ -1,10 +1,15 @@
 @import '../../themes/capsule.globals';
 
 :host {
+  --width: 54px;
+  --height: 54px;
   --bar-width: 12px;
+  --inner-width: calc(var(--width) / 2 - var(--bar-width));
   --bar-color: var(--cpsl-color-foreground-0);
   --background-color: var(--cpsl-color-background-0);
 
+  width: var(--width);
+  height: var(--height);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -35,35 +40,49 @@
       -webkit-transform: rotate(360deg);
     }
   }
-}
 
-.loader {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1;
-  background: conic-gradient(transparent, transparent 12%, var(--bar-color));
-  border-radius: 50%;
-  margin: auto;
-  animation: spin 0.8s cubic-bezier(0.3, 0.5, 0.5, 0.5) infinite;
-
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    border-radius: inherit;
-  }
-
-  &::before {
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    background: linear-gradient(to left, var(--bar-color) 50%, transparent 50%);
-    width: var(--bar-width);
+  .loader {
+    position: relative;
+    width: 100%;
     aspect-ratio: 1;
-  }
+    opacity: 1;
+    background: conic-gradient(transparent, transparent 12%, var(--bar-color));
+    border-radius: 50%;
+    margin: auto;
+    animation:
+      spin 0.8s cubic-bezier(0.3, 0.5, 0.5, 0.5) infinite,
+      opacity 0.2s;
+    mask-image: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0) var(--inner-width), black var(--inner-width));
 
-  &::after {
-    inset: var(--bar-width);
-    background: var(--background-color);
+    &::before {
+      content: '';
+      position: absolute;
+      border-radius: inherit;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(to left, var(--bar-color) 50%, transparent 50%);
+      width: var(--bar-width);
+      aspect-ratio: 1;
+      animation: opacity 0.2s;
+    }
+
+    &.error {
+      background: var(--cpsl-color-utility-red);
+      animation: opacity 0.2s;
+
+      &::before {
+        opacity: 0;
+      }
+    }
+
+    &.inactive {
+      opacity: 0;
+      animation: none;
+
+      &::before {
+        opacity: 0;
+      }
+    }
   }
 }

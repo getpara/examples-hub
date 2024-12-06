@@ -14,13 +14,18 @@ export class CpslIcon {
   @Prop() src?: string;
 
   /**
+   * The CSS size of the icon.
+   */
+  @Prop() size?: string;
+
+  /**
    * The name of the icon. If both `icon` and `src` are provided, `icon` will be used.
    */
   @Prop() icon?: IconType;
 
   render() {
     return (
-      <Host part="icon" role="img">
+      <Host part="icon" role="img" style={this.size ? { width: this.size, height: this.size } : {}}>
         {!this.icon ? <img src={this.src} /> : <div innerHTML={Icons[this.icon]} />}
       </Host>
     );

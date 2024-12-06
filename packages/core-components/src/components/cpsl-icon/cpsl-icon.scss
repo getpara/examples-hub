@@ -6,9 +6,9 @@
   --height: 24px;
   --width: 24px;
 
-  --icon-color: var(--cpsl-color-text-primary);
-  --icon-fill-color: var(--cpsl-color-text-primary);
-  --icon-stroke-color: var(--cpsl-color-text-primary);
+  --icon-color: currentColor;
+  --icon-fill-color: currentColor;
+  --icon-stroke-color: currentColor;
 
   width: var(--width);
   height: var(--height);
@@ -26,15 +26,15 @@
 :host div {
   display: flex;
 
-  width: var(--width);
-  height: var(--height);
+  width: 100%;
+  height: 100%;
 
   color: var(--icon-color);
 }
 
 :host svg {
-  width: var(--width);
-  height: var(--height);
+  width: 100%;
+  height: 100%;
 
   & .background-16 {
     fill: var(--cpsl-color-background-16);
@@ -54,8 +54,8 @@
 }
 
 :host img {
-  width: var(--width);
-  height: var(--height);
+  width: 100%;
+  height: 100%;
 
   object-fit: contain;
 }
