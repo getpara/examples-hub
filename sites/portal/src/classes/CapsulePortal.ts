@@ -5,16 +5,19 @@ export class CapsulePortal extends CapsuleWeb {
   #pregenIds: PregenIds;
 
   get pregenIds(): PregenIds {
-    return Object.entries(super.pregenIds).reduce(
-      (acc, [pregenIdentifierType, pregenIdentifiers]) => {
+    return Object.keys({ ...super.pregenIds, ...this.#pregenIds }).reduce(
+      (acc, pregenIdentifierType) => {
         return {
           ...acc,
-          [pregenIdentifierType]: [...new Set([...pregenIdentifiers, ...(this.#pregenIds[pregenIdentifierType] ?? [])])],
+          [pregenIdentifierType]: [
+            ...new Set([...(super.pregenIds[pregenIdentifierType] || []), ...(this.#pregenIds[pregenIdentifierType] || [])]),
+          ],
         };
       },
       {
         ...(this.getEmail() ? { EMAIL: [this.getEmail()] } : {}),
         ...(this.getPhoneNumber() ? { PHONE: [this.getPhoneNumber()] } : {}),
+        ...(this.getFarcasterUsername() ? { FARCASTER: [this.getFarcasterUsername()] } : {}),
       },
     );
   }
