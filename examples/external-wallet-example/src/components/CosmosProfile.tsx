@@ -1,38 +1,34 @@
 import { CpslButton, CpslInput, CpslText } from '@usecapsule/react-components';
-import { useShuttle } from '@delphi-labs/shuttle-react';
 import { ProfileInnerContainer, Card, OverflowText } from './common';
 import { useState } from 'react';
+import { getWallet, useAccount, useActiveWalletType } from '@usecapsule/graz';
 import { useCosmosStore } from '../stores/cosmosStore/useCosmosStore';
+import { useCapsuleCosmos } from '../../../../packages/cosmos-wallet-connectors/dist/providers/CapsuleCosmosContext';
 
 export const CosmosProfile = () => {
+  const { multiChain, chains } = useCapsuleCosmos();
   const selectedCosmosChainId = useCosmosStore(state => state.selectedChainId);
-  const { getWallets, signArbitrary, verifyArbitrary } = useShuttle();
-  const wallet = getWallets({ chainId: selectedCosmosChainId })[0];
+  const { data: account } = useAccount({ multiChain, chains });
+  const { walletType } = useActiveWalletType();
 
   const [message, setMessage] = useState<string>('');
   const [messageSignature, setMessageSignature] = useState<string>();
   const [verified, setVerified] = useState<boolean>();
 
-  const address = wallet?.account?.address;
+  const address = multiChain ? (account as any)?.[selectedCosmosChainId]?.bech32Address : account?.bech32Address;
 
   const handleSign = async () => {
+    const wallet = getWallet(walletType);
     setMessageSignature(undefined);
     setVerified(undefined);
 
-    const bytes = Buffer.from(message, 'utf-8');
-    const res = await signArbitrary({
-      wallet,
-      data: bytes,
-    });
+    if (!wallet.signArbitrary) {
+      return;
+    }
 
-    const verified = await verifyArbitrary({
-      wallet,
-      data: bytes,
-      signResult: res,
-    });
+    const resp = await wallet.signArbitrary(selectedCosmosChainId, address, message);
 
-    setMessageSignature(res.response.signature);
-    setVerified(verified);
+    setMessageSignature(resp.signature);
     setMessage('');
   };
 

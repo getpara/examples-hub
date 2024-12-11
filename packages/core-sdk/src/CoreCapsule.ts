@@ -1183,12 +1183,13 @@ export abstract class CoreCapsule {
     externalAddress: string,
     externalType: ExternalWalletType,
     externalWalletProvider?: string,
+    bech32Address?: string,
   ): Promise<void> {
     // Can change this to continue storing existing external wallets if/when we want to allow multiple connected external wallets
     this.externalWallets = {
       [externalAddress]: {
         id: externalAddress,
-        address: externalAddress,
+        address: bech32Address ?? externalAddress,
         type: externalType,
         name: externalWalletProvider,
         isExternal: true,
@@ -1749,6 +1750,7 @@ export abstract class CoreCapsule {
     externalAddress: string,
     type: ExternalWalletType,
     externalWalletProvider?: string,
+    bech32Address?: string,
   ): Promise<void> {
     this.requireApiKey();
     const { userId } = await this.ctx.capsuleClient.externalWalletLogin({
@@ -1756,7 +1758,7 @@ export abstract class CoreCapsule {
       type,
       externalWalletProvider,
     });
-    await this.setExternalWallet(externalAddress, type, externalWalletProvider);
+    await this.setExternalWallet(externalAddress, type, externalWalletProvider, bech32Address);
     await this.setUserId(userId);
   }
 

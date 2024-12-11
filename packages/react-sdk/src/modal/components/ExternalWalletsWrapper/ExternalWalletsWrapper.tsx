@@ -6,12 +6,7 @@ import {
   EvmExternalWalletContextType,
   EvmExternalWalletProviderProps,
 } from '../../providers/EvmExternalWalletContextStub.js';
-import {
-  // CosmosWallet,
-  EvmWallet,
-  TExternalWallet,
-  SolanaWallet,
-} from '../../types/externalWallets.js';
+import { CosmosWallet, EvmWallet, TExternalWallet, SolanaWallet } from '../../types/externalWallets.js';
 import {
   SolanaExternalWalletContext,
   SolanaExternalWalletContextType,
@@ -39,8 +34,8 @@ export const ExternalWalletsWrapper = ({ children, wallets }: ExternalWalletsWra
   const storedEvmContext = useExternalWalletProviderStore(state => state.evmContext);
   const StoredSolanaProvider = useExternalWalletProviderStore(state => state.SolanaProvider);
   const storedSolanaContext = useExternalWalletProviderStore(state => state.solanaContext);
-  // const StoredCosmosProvider = useExternalWalletProviderStore(state => state.CosmosProvider);
-  // const storedCosmosContext = useExternalWalletProviderStore(state => state.cosmosContext);
+  const StoredCosmosProvider = useExternalWalletProviderStore(state => state.CosmosProvider);
+  const storedCosmosContext = useExternalWalletProviderStore(state => state.cosmosContext);
 
   // EVM
   const [EvmProvider, setEvmProvider] = useState<FC<EvmExternalWalletProviderProps> | null>(null);
@@ -99,16 +94,14 @@ export const ExternalWalletsWrapper = ({ children, wallets }: ExternalWalletsWra
           }
 
           // Handle Cosmos Wallets
-          // if (wallet in CosmosWallet) {
-          //   if (!StoredCosmosProvider || !storedCosmosContext) {
-          //     throw new Error('@usecapsule/cosmos-wallet-connectors is required to use an external Cosmos wallet.');
-          //   } else {
-          //     newCosmosContext = storedCosmosContext;
-          //     newCosmosProvider = StoredCosmosProvider;
-          //   }
-          // }
-          newCosmosContext = CosmosExternalWalletContext;
-          newCosmosProvider = CosmosExternalWalletProvider;
+          if (wallet in CosmosWallet) {
+            if (!StoredCosmosProvider || !storedCosmosContext) {
+              throw new Error('@usecapsule/cosmos-wallet-connectors is required to use an external Cosmos wallet.');
+            } else {
+              newCosmosContext = storedCosmosContext;
+              newCosmosProvider = StoredCosmosProvider;
+            }
+          }
         }
       }
 
@@ -123,7 +116,15 @@ export const ExternalWalletsWrapper = ({ children, wallets }: ExternalWalletsWra
     };
 
     loadProviders();
-  }, [wallets, storedEvmContext, StoredEvmProvider, storedSolanaContext, StoredSolanaProvider]);
+  }, [
+    wallets,
+    storedEvmContext,
+    StoredEvmProvider,
+    storedSolanaContext,
+    StoredSolanaProvider,
+    storedCosmosContext,
+    StoredCosmosProvider,
+  ]);
 
   const handleSwitchWallet = ({ address, error }: { address?: string; error?: string }) => {
     // If we error on switch wallets we logged out the Capsule instance so we need to reset the modal state

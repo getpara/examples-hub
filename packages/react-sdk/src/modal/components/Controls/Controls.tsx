@@ -18,7 +18,7 @@ export const Controls = ({ onClose }: ControlsProps) => {
   const isFullyLoggedIn = useModalStore(state => state.isFullyLoggedIn);
   const goBack = useGoBack();
 
-  const shouldShowSelects = [ModalStep.ACCOUNT_MAIN, ModalStep.CHAIN_SWITCH, ModalStep.ADD_FUNDS].includes(step);
+  const shouldShowSelects = [ModalStep.ACCOUNT_MAIN, ModalStep.CHAIN_SWITCH].includes(step);
 
   const handleBackClick = () => {
     goBack();

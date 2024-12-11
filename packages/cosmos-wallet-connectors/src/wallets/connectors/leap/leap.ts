@@ -1,18 +1,17 @@
-import { LeapCosmosExtensionProvider, LeapCosmosMobileProvider, Network } from '@delphi-labs/shuttle-react';
 import { icon } from './leapIcon.js';
-import { hasInstalledExtension } from '../../../utils/hasInstalledProvider.js';
-import { WalletWithProviders } from '../../../types/Wallet.js';
+import { WalletWithType } from '../../../types/Wallet.js';
+import { WalletType } from '@usecapsule/graz';
+import { isMobile } from '@usecapsule/react-sdk';
 
-export const leapWallet = ({ networks }: { networks: Network[] }): WalletWithProviders => {
+export const leapWallet = (): WalletWithType => {
   return {
     id: 'leap',
     name: 'Leap',
-    installed: hasInstalledExtension('leap'),
     iconUrl: icon,
     isExtension: true,
-    isMobile: true,
+    isMobile: isMobile() && true,
     downloadUrl: 'https://www.leapwallet.io/download',
-    extensionProvider: new LeapCosmosExtensionProvider({ networks }),
-    mobileProvider: new LeapCosmosMobileProvider({ networks }),
+    grazType: WalletType.LEAP,
+    grazMobileType: WalletType.WC_LEAP_MOBILE,
   };
 };

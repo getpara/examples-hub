@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { useAtom } from 'jotai';
 import { useHydrateAtoms } from 'jotai/utils';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { sepolia } from 'wagmi/chains';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { clusterApiUrl } from '@solana/web3.js';
@@ -14,6 +13,8 @@ import {
   zerionWallet,
 } from '@usecapsule/evm-wallet-connectors';
 import { backpackWallet, CapsuleSolanaProvider, glowWallet, phantomWallet } from '@usecapsule/solana-wallet-connectors';
+import { CapsuleCosmosProvider, leapWallet, keplrWallet } from '@usecapsule/cosmos-wallet-connectors';
+import { cosmoshubtestnet } from '@usecapsule/graz/chains';
 
 import { WALLET_CONNECT_PROJECT_ID } from './constants';
 import { ModalDesigner } from './components/ModalDesigner';
@@ -26,7 +27,6 @@ import { defineCustomElements } from '@usecapsule/react-components';
 import '@usecapsule/react-components/css/capsule-core.css';
 import './index.css';
 
-const queryClient = new QueryClient();
 defineCustomElements();
 const solanaNetwork = WalletAdapterNetwork.Devnet;
 
@@ -42,7 +42,13 @@ const App = () => {
   return (
     <BrowserRouter>
       <JotaiProvider>
-        <QueryClientProvider client={queryClient}>
+        <CapsuleCosmosProvider
+          selectedChainId={cosmoshubtestnet.chainId}
+          chains={[cosmoshubtestnet]}
+          onSwitchChain={() => {}}
+          wallets={[leapWallet, keplrWallet]}
+          walletConnect={{ options: { projectId: WALLET_CONNECT_PROJECT_ID, name: 'Capsule Modal Builder' } }}
+        >
           <CapsuleEvmProvider
             config={{
               projectId: WALLET_CONNECT_PROJECT_ID,
@@ -60,7 +66,7 @@ const App = () => {
               <ModalDesigner />
             </CapsuleSolanaProvider>
           </CapsuleEvmProvider>
-        </QueryClientProvider>
+        </CapsuleCosmosProvider>
       </JotaiProvider>
     </BrowserRouter>
   );

@@ -85,7 +85,7 @@ export const ChainSwitch = () => {
             )}
           </>
         )}
-        {externalWalletError?.[0].toLowerCase() !== NETWORK_NOT_SUPPORTED_ERROR && (
+        {externalWalletError?.[0]?.toLowerCase() !== NETWORK_NOT_SUPPORTED_ERROR && (
           <CpslButton variant="secondary" onClick={handleTryAgainClick}>
             <CpslIcon slot="start" icon="refresh" />
             Try Again

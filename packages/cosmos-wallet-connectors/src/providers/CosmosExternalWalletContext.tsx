@@ -1,8 +1,16 @@
 import { ReactNode, createContext, useEffect, useMemo, useState } from 'react';
 import { CommonChain, CommonWallet } from '../types/CommonTypes.js';
 import { useCapsuleCosmos } from './CapsuleCosmosContext.js';
-import { MobileConnectResponse, useShuttle } from '@delphi-labs/shuttle-react';
-import CapsuleWeb, { isAndroid, isIOS, isMobile, WalletType } from '@usecapsule/react-sdk';
+import CapsuleWeb, { WalletType } from '@usecapsule/react-sdk';
+import {
+  checkWallet,
+  WalletType as GrazWalletType,
+  useAccount,
+  useActiveChainIds,
+  useActiveWalletType,
+  useConnect,
+  useDisconnect,
+} from '@usecapsule/graz';
 
 export const defaultCosmosExternalWallet = {
   wallets: [],
@@ -27,48 +35,58 @@ interface CosmosExternalWalletProviderProps {
 }
 
 export function CosmosExternalWalletProvider({ children, capsule, onSwitchWallet }: CosmosExternalWalletProviderProps) {
-  const { connect: connectAsync, mobileConnect, disconnect: _disconnect, getWallets } = useShuttle();
-  const { selectedChainId, wallets: incompleteWallets, chains, onSwitchChain } = useCapsuleCosmos();
-  const [mobileUrls, setMobileUrls] = useState<Record<string, MobileConnectResponse>>({});
+  const { selectedChainId, wallets: incompleteWallets, chains, multiChain, onSwitchChain } = useCapsuleCosmos();
+  const {
+    data: account,
+    isConnecting,
+    isReconnecting,
+  } = useAccount({
+    chainId: multiChain ? chains.map(c => c.chainId) : selectedChainId,
+    multiChain,
+  });
+  const activeChainIds = useActiveChainIds();
+  const { connectAsync } = useConnect();
+  const { disconnectAsync } = useDisconnect();
+  const { walletType } = useActiveWalletType();
   const [isLocalConnecting, setIsLocalConnecting] = useState(false);
 
-  const wallet = getWallets({ chainId: selectedChainId })?.[0];
+  const bufferAddress = multiChain ? account?.[selectedChainId]?.address.toString() : account?.address.toString();
+  const address = multiChain ? account?.[selectedChainId]?.bech32Address : account?.bech32Address;
 
   const reset = async () => {
-    _disconnect();
+    await disconnectAsync();
     await capsule.logout(true);
   };
 
   const switchChain = async (chainId: string) => {
     let error: string[];
 
-    const newWallet = getWallets({ providerId: wallet.providerId, chainId: chainId })[0];
+    const hasActiveChain = activeChainIds.includes(chainId);
 
-    if (!newWallet) {
+    if (!hasActiveChain) {
       setIsLocalConnecting(true);
-      let changeResp: { address?: string; error?: string };
+      let changeResp: { address?: string; bufferAddress?: string; error?: string };
 
-      const isMobileProvider = !!incompleteWallets.find(w => w.mobileProvider.id === wallet.providerId);
-
-      if (isMobileProvider) {
-        changeResp = await connectMobile(wallet.providerId, chainId);
-      } else {
-        changeResp = await connect(wallet.providerId, chainId);
-      }
+      changeResp = await connect(walletType, chainId);
       // Calling onSwitchWallet here so the modal correctly processes any error from the reconnection.
       onSwitchWallet(changeResp);
 
       setIsLocalConnecting(false);
-      error = [changeResp?.error];
+
+      if (changeResp.error) {
+        error = [changeResp?.error];
+      }
     }
 
-    onSwitchChain(chainId);
+    if (!error) {
+      onSwitchChain(chainId);
+    }
     return { error };
   };
 
-  const login = async (address: string, providerName?: string) => {
+  const login = async (bufferAddress: string, address: string, providerName?: string) => {
     try {
-      await capsule.externalWalletLogin(address, WalletType.COSMOS, providerName);
+      await capsule.externalWalletLogin(bufferAddress, WalletType.COSMOS, providerName, address);
     } catch (err) {
       await reset();
 
@@ -76,156 +94,98 @@ export function CosmosExternalWalletProvider({ children, capsule, onSwitchWallet
     }
   };
 
-  const switchWallet = async (address?: string) => {
-    let error: string;
-
-    // If we're calling switch wallet with no address, treat it as if the user disconnected the wallet from the app and logout to reset the Capsule instance.
-    if (!address) {
-      await reset();
-    } else {
-      try {
-        await login(address, getProviderName(wallet.providerId));
-      } catch (err) {
-        error = err;
-      }
-    }
-
-    onSwitchWallet({ address, error });
-  };
-
-  // Watching for state where Shuttle has a wallet stored but Capsule doesn't.
-  // In this case we want to disconnect and logout.
   useEffect(() => {
-    const storedExternalWallet = capsule.externalWallets[wallet.account.address];
+    const storedExternalWallet = capsule.externalWallets[bufferAddress ?? ''];
 
-    if (!isLocalConnecting && !!wallet && !storedExternalWallet) {
+    if (
+      !isConnecting &&
+      !isReconnecting &&
+      !isLocalConnecting &&
+      address &&
+      storedExternalWallet &&
+      storedExternalWallet.address !== address
+    ) {
+      capsule.setExternalWallet(bufferAddress, WalletType.COSMOS, getProviderName(walletType), address);
+    }
+  }, [isConnecting, isReconnecting, address]);
+
+  useEffect(() => {
+    const storedExternalWallet = capsule.externalWallets[bufferAddress ?? ''];
+
+    if (!isConnecting && !isReconnecting && !isLocalConnecting && !!bufferAddress && !storedExternalWallet) {
       reset();
     }
-  }, []);
+  }, [isConnecting, isReconnecting]);
 
-  useEffect(() => {
-    const storedExternalWallet = capsule.externalWallets[capsule.currentExternalWalletAddresses?.[0] ?? ''];
-    // If the user is using an external Cosmos wallet we want to watch for wallet changes and log them in to a different user when the wallet changes
-    if (storedExternalWallet?.type === WalletType.COSMOS && storedExternalWallet?.address !== wallet?.account.address) {
-      switchWallet(wallet?.account.address);
-    }
-  }, [wallet]);
-
-  const connect = async (providerId?: string, chainId?: string): Promise<{ address?: string; error?: string }> => {
+  const connect = async (
+    walletType: GrazWalletType,
+    chainId?: string | string[],
+  ): Promise<{ address?: string; bufferAddress?: string; error?: string }> => {
     setIsLocalConnecting(true);
 
     // chainID is passed in when switching chains, in that case we can skip disconnecting
     if (!chainId) {
-      _disconnect();
+      await disconnectAsync();
+    }
+
+    const _chainId = chainId ?? (multiChain ? chains.map(c => c.chainId) : selectedChainId);
+
+    if (!_chainId) {
+      console.error('Chain id not provided.');
+      return;
     }
 
     let address: string | undefined;
+    let bufferAddress: string | undefined;
     let error: string | undefined;
 
     // The logic in the modal should prevent this from happening, logging for edge cases.
-    if (!providerId) {
-      console.error('Extension provider ID not provided.');
+    if (!walletType) {
+      console.error('Graz wallet type not provided.');
+      return;
     } else {
       try {
-        const connectedWallet = await connectAsync({
-          extensionProviderId: providerId,
-          chainId: chainId ?? selectedChainId,
-        });
+        const connectedWallet = await connectAsync({ walletType, chainId: _chainId });
 
-        address = connectedWallet.account.address;
+        const firstChain = typeof _chainId === 'string' ? _chainId : _chainId[0];
 
-        if (address) {
+        address = connectedWallet.accounts[firstChain].bech32Address;
+        bufferAddress = connectedWallet.accounts[firstChain].address.toString();
+
+        if (connectedWallet.accounts[firstChain]) {
           try {
-            await login(address, getProviderName(providerId));
+            await login(bufferAddress, address, getProviderName(walletType));
           } catch (err) {
+            bufferAddress = undefined;
             address = undefined;
             error = err;
           }
         }
       } catch (err) {
-        error = 'An unknown error occurred.';
+        if (err.message === 'No wallet exists') {
+          error = err.message;
+        } else {
+          error = 'An unknown error occurred.';
+        }
       }
     }
 
     setIsLocalConnecting(false);
-    return { address, error };
+    return { address, bufferAddress, error };
   };
 
-  const connectMobile = async (providerId: string, chainId?: string): Promise<{ address?: string; error?: string }> => {
-    // The logic in the modal should prevent this from happening, logging for edge cases.
-    if (!providerId) {
-      console.error('Mobile provider ID not provided.');
-      return;
-    }
-
-    setIsLocalConnecting(true);
-
-    // chainID is passed in when switching chains, in that case we can skip disconnecting
-    if (!chainId) {
-      _disconnect();
-    }
-
-    return new Promise(async resolve => {
-      const urls = await mobileConnect({
-        mobileProviderId: providerId,
-        chainId: chainId ?? selectedChainId,
-        callback: async walletConnection => {
-          setMobileUrls({});
-          if (walletConnection.account.address) {
-            try {
-              await login(walletConnection.account.address, getProviderName(providerId));
-            } catch (err) {
-              resolve({ error: err });
-            } finally {
-              setIsLocalConnecting(false);
-            }
-            resolve({ address: walletConnection.account.address });
-          } else {
-            setIsLocalConnecting(false);
-            resolve({ error: 'An unknown error occurred.' });
-          }
-        },
-      });
-
-      setMobileUrls(curr => ({ ...curr, [providerId]: urls }));
-    });
-  };
-
-  const getQrUri = (providerUrls: MobileConnectResponse) => async () => {
-    if (providerUrls) {
-      if (isMobile()) {
-        if (isAndroid()) {
-          return providerUrls.androidUrl;
-        } else if (isIOS()) {
-          return providerUrls.iosUrl;
-        } else {
-          return providerUrls.qrCodeUrl;
-        }
-      } else {
-        return providerUrls.qrCodeUrl;
-      }
-    }
-  };
-
-  const getProviderName = (providerId: string) =>
-    incompleteWallets.find(w => w.mobileProvider.id === providerId || w.extensionProvider.id === providerId)?.name;
+  const getProviderName = (walletType: GrazWalletType) =>
+    incompleteWallets.find(w => w.grazType === walletType || w.grazMobileType === walletType)?.name;
 
   const wallets = incompleteWallets
     .map(wallet => {
-      if (!wallet.mobileProvider && !wallet.extensionProvider) {
-        console.warn(
-          `One of extensionProvider or mobileProvider must be provided, ${wallet.name} will not be added to the wallet list.`,
-        );
-
-        return undefined;
-      }
-
       return {
-        connect: () => connect(wallet.extensionProvider?.id),
-        connectMobile: () => connectMobile(wallet.mobileProvider?.id),
-        getQrUri: getQrUri(mobileUrls[wallet.mobileProvider?.id]),
+        connect: () => connect(wallet.grazType),
+        connectMobile: () => connect(wallet.grazMobileType),
+        getQrUri: () => '',
         type: WalletType.COSMOS,
         ...wallet,
+        installed: checkWallet(wallet.grazType),
       } as CommonWallet;
     })
     .filter(w => !!w);
@@ -233,17 +193,15 @@ export function CosmosExternalWalletProvider({ children, capsule, onSwitchWallet
   const formattedChains: CommonChain[] = chains.map(c => {
     return {
       id: c.chainId,
-      name: c.name,
+      name: c.chainName,
     };
   });
-
-  const disconnect = async () => _disconnect();
 
   return (
     <CosmosExternalWalletContext.Provider
       value={useMemo(
-        () => ({ wallets, chains: formattedChains, chainId: selectedChainId, disconnect, switchChain }),
-        [wallets, formattedChains, selectedChainId, disconnect, switchChain],
+        () => ({ wallets, chains: formattedChains, chainId: selectedChainId, disconnect: disconnectAsync, switchChain }),
+        [wallets, formattedChains, selectedChainId, disconnectAsync, switchChain],
       )}
     >
       {children}

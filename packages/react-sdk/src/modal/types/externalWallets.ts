@@ -12,15 +12,15 @@ export enum SolanaWallet {
   BACKPACK = 'BACKPACK',
 }
 
-// export enum CosmosWallet {
-//   KEPLR = 'KEPLR',
-//   LEAP = 'LEAP',
-// }
+export enum CosmosWallet {
+  KEPLR = 'KEPLR',
+  LEAP = 'LEAP',
+}
 
 export const ExternalWallet = {
   ...EvmWallet,
   ...SolanaWallet,
-  // ...CosmosWallet
+  ...CosmosWallet,
 };
 
 export type TExternalWallet = keyof typeof ExternalWallet;

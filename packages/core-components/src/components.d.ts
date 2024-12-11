@@ -382,6 +382,10 @@ export namespace Components {
          */
         "icon"?: IconType;
         /**
+          * The CSS size of the icon.
+         */
+        "size"?: string;
+        /**
           * The external source of the icon. If both `icon` and `src` are provided, `icon` will be used.
          */
         "src"?: string;
@@ -846,6 +850,10 @@ export namespace Components {
     }
     interface CpslSpinner {
         /**
+          * Width of the spinner arc in pixels. Default is 6.5.
+         */
+        "barWidth"?: number;
+        /**
           * Size of the spinner in pixels. Default is 50.
          */
         "size"?: number;
@@ -853,6 +861,10 @@ export namespace Components {
           * Rotation speed of the spinner in seconds. Default is 1.
          */
         "speed"?: number;
+        /**
+          * Variant of the spinner Default is 'default'.
+         */
+        "variant"?: 'default' | 'inactive' | 'error';
     }
     interface CpslSwitch {
         /**
@@ -1899,6 +1911,10 @@ declare namespace LocalJSX {
          */
         "icon"?: IconType;
         /**
+          * The CSS size of the icon.
+         */
+        "size"?: string;
+        /**
           * The external source of the icon. If both `icon` and `src` are provided, `icon` will be used.
          */
         "src"?: string;
@@ -2443,6 +2459,10 @@ declare namespace LocalJSX {
     }
     interface CpslSpinner {
         /**
+          * Width of the spinner arc in pixels. Default is 6.5.
+         */
+        "barWidth"?: number;
+        /**
           * Size of the spinner in pixels. Default is 50.
          */
         "size"?: number;
@@ -2450,6 +2470,10 @@ declare namespace LocalJSX {
           * Rotation speed of the spinner in seconds. Default is 1.
          */
         "speed"?: number;
+        /**
+          * Variant of the spinner Default is 'default'.
+         */
+        "variant"?: 'default' | 'inactive' | 'error';
     }
     interface CpslSwitch {
         /**

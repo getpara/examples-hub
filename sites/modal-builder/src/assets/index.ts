@@ -24,3 +24,5 @@ export { default as MoonPayIcon } from './moonpay.svg';
 export { default as GlowIcon } from './glow.svg';
 export { default as BackpackIcon } from './backpack.svg';
 export { default as CapsuleLogo } from './capsule-logo.svg';
+export { default as LeapIcon } from './leap.svg';
+export { default as KeplrIcon } from './keplr.svg';

@@ -1,3 +1,4 @@
+import { cosmoshub } from '@usecapsule/graz/chains';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
@@ -12,7 +13,7 @@ export interface CosmosActions {
 export type CosmosStore = CosmosState & CosmosActions;
 
 const DEFAULT_STATE: CosmosState = {
-  selectedChainId: 'mars-1',
+  selectedChainId: cosmoshub.chainId,
 };
 
 export const useCosmosStore = create<CosmosStore>()(
@@ -22,7 +23,7 @@ export const useCosmosStore = create<CosmosStore>()(
       updateState: state => set(state),
     }),
     {
-      version: 1,
+      version: 2,
       name: '@CAPSULE_EXAMPLE_APP/cosmosStore',
       storage: createJSONStorage(() => sessionStorage),
       partialize: state => ({

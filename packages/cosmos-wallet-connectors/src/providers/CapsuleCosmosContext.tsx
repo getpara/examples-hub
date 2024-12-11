@@ -1,22 +1,35 @@
 import { ReactNode, createContext, useContext, useEffect, useMemo } from 'react';
-import { Network, ShuttleProvider, WalletExtensionProvider, WalletMobileProvider } from '@delphi-labs/shuttle-react';
-import { WalletList, WalletWithProviders } from '../types/Wallet.js';
+import { WalletList, WalletWithType } from '../types/Wallet.js';
 import { useExternalWalletProviderStore } from '@usecapsule/react-sdk';
 import { CosmosExternalWalletContext, CosmosExternalWalletProvider } from './CosmosExternalWalletContext.js';
+import { ChainInfo } from '@keplr-wallet/types';
+import { ConfigureGrazArgs, GrazProvider } from '@usecapsule/graz';
 
 export const CapsuleCosmosContext = createContext<{
   selectedChainId?: string;
-  wallets: WalletWithProviders[];
-  chains: Network[];
+  wallets: WalletWithType[];
+  chains: ChainInfo[];
+  multiChain?: boolean;
   onSwitchChain: (chainId: string) => void;
 }>({ wallets: [], chains: [], onSwitchChain: () => {} });
 
-interface CapsuleCosmosProviderProps {
+interface CapsuleCosmosProviderProps extends Omit<ConfigureGrazArgs, 'chains'> {
   children: ReactNode;
-  selectedChainId?: string;
   wallets: WalletList;
-  chains: Network[];
-  walletConnectProjectId: string;
+  chains: ChainInfo[];
+  /**
+   * If true, the initial connection request will request to connect to all passed in chains.
+   * If false, the initial connection request will only request for the selectedChainId.
+   * Note: this will not affect the chain that's shown in the Capsule modal. Even if multiple chains are connected the modal will only display what's passed in via `selectedChainId`
+   */
+  multiChain?: boolean;
+  /**
+   * Selected chain to display in the Capsule modal.
+   */
+  selectedChainId?: string;
+  /**
+   * Called with the newly selected chainId when a the chain value is changed in the Capsule modal.
+   */
   onSwitchChain: (chainId: string) => void;
 }
 
@@ -25,8 +38,9 @@ export function CapsuleCosmosProvider({
   wallets,
   chains,
   selectedChainId,
-  walletConnectProjectId,
+  multiChain,
   onSwitchChain,
+  ...grazOpts
 }: CapsuleCosmosProviderProps) {
   const updateExternalWalletProviderState = useExternalWalletProviderStore(state => state.updateState);
   const CosmosProvider = useExternalWalletProviderStore(state => state.CosmosProvider);
@@ -41,20 +55,16 @@ export function CapsuleCosmosProvider({
     }
   }, []);
 
-  const extensionProviders: WalletExtensionProvider[] = [];
-  const mobileExtensionProviders: WalletMobileProvider[] = [];
-  const walletsWithProviders: WalletWithProviders[] = [];
+  const walletsWithType: WalletWithType[] = [];
 
   wallets.forEach(w => {
-    const wallet = w({ networks: chains });
-    walletsWithProviders.push(wallet);
-    if (wallet.extensionProvider) extensionProviders.push(wallet.extensionProvider);
-    if (wallet.mobileProvider) mobileExtensionProviders.push(wallet.mobileProvider);
+    const wallet = w();
+    walletsWithType.push(wallet);
   });
 
   const value = useMemo(
-    () => ({ selectedChainId, wallets: walletsWithProviders, chains, onSwitchChain }),
-    [selectedChainId, walletsWithProviders, chains, onSwitchChain],
+    () => ({ selectedChainId, wallets: walletsWithType, chains, multiChain, onSwitchChain }),
+    [selectedChainId, walletsWithType, chains, multiChain, onSwitchChain],
   );
 
   if (!cosmosContext || !CosmosProvider) {
@@ -62,15 +72,9 @@ export function CapsuleCosmosProvider({
   }
 
   return (
-    <ShuttleProvider
-      extensionProviders={extensionProviders}
-      mobileProviders={mobileExtensionProviders}
-      persistent
-      persistentKey="capsuleCosmosExternal"
-      walletConnectProjectId={walletConnectProjectId}
-    >
+    <GrazProvider grazOptions={{ chains, autoReconnect: true, ...grazOpts }}>
       <CapsuleCosmosContext.Provider value={value}>{children}</CapsuleCosmosContext.Provider>
-    </ShuttleProvider>
+    </GrazProvider>
   );
 }
 

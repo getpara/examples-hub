@@ -20,6 +20,8 @@ import {
   PhantomIcon,
   GlowIcon,
   BackpackIcon,
+  LeapIcon,
+  KeplrIcon,
 } from '../assets';
 import {
   AuthMethod,
@@ -55,6 +57,8 @@ export const EXTERNAL_WALLET_CONFIGS: Record<CustomExternalWallet, DraggableItem
   [ExternalWallet.PHANTOM]: { logo: PhantomIcon, label: 'Phantom' },
   [ExternalWallet.GLOW]: { logo: GlowIcon, label: 'Glow' },
   [ExternalWallet.BACKPACK]: { logo: BackpackIcon, label: 'Backpack' },
+  [ExternalWallet.LEAP]: { logo: LeapIcon, label: 'Leap' },
+  [ExternalWallet.KEPLR]: { logo: KeplrIcon, label: 'Keplr' },
 };
 
 export const ONRAMPS_CONFIGS: Record<OnRampProvider, DraggableItemHeaderConfig> = {

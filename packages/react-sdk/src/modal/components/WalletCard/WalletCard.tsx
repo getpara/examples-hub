@@ -15,7 +15,7 @@ export const ExternalWalletCard = ({ address, showAddFunds }: Pick<SharedWalletC
 
   return (
     <SharedWalletCard
-      address={truncateAddress(address, wallet.type)}
+      address={truncateAddress(wallet.address, wallet.type)}
       identiconHash={capsule.getIdenticonHash(wallet.id, wallet.type)}
       showAddFunds={showAddFunds}
     />

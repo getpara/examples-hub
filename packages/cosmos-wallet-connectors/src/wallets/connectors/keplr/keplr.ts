@@ -1,18 +1,17 @@
-import { KeplrExtensionProvider, KeplrMobileProvider, Network } from '@delphi-labs/shuttle-react';
 import { icon } from './keplrIcon.js';
-import { hasInstalledExtension } from '../../../utils/hasInstalledProvider.js';
-import { WalletWithProviders } from '../../../types/Wallet.js';
+import { WalletWithType } from '../../../types/Wallet.js';
+import { WalletType } from '@usecapsule/graz';
+import { isMobile } from '@usecapsule/react-sdk';
 
-export const keplrWallet = ({ networks }: { networks: Network[] }): WalletWithProviders => {
+export const keplrWallet = (): WalletWithType => {
   return {
     id: 'keplr',
     name: 'Keplr',
-    installed: hasInstalledExtension('keplr'),
     iconUrl: icon,
     isExtension: true,
-    isMobile: true,
+    isMobile: isMobile() && true,
     downloadUrl: 'https://www.keplr.app/get',
-    extensionProvider: new KeplrExtensionProvider({ networks }),
-    mobileProvider: new KeplrMobileProvider({ networks }),
+    grazType: WalletType.KEPLR,
+    grazMobileType: WalletType.WC_KEPLR_MOBILE,
   };
 };

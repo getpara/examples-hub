@@ -1,9 +1,9 @@
+import { WalletType } from '@usecapsule/graz';
 import { WalletMetadata } from './CommonTypes.js';
-import { Network, WalletExtensionProvider, WalletMobileProvider } from '@delphi-labs/shuttle-react';
 
-export type WalletList = (({ networks }: { networks: Network[] }) => WalletWithProviders)[];
+export type WalletList = (() => WalletWithType)[];
 
-export type WalletWithProviders = {
-  extensionProvider?: WalletExtensionProvider;
-  mobileProvider?: WalletMobileProvider;
+export type WalletWithType = {
+  grazType: WalletType;
+  grazMobileType?: WalletType;
 } & WalletMetadata;

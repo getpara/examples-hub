@@ -10,7 +10,8 @@
     "dev": "vite --host",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "sort-imports": "eslint --fix src/**/*.{ts,tsx}"
+    "sort-imports": "eslint --fix src/**/*.{ts,tsx}",
+    "postinstall": "yarn graz -g"
   },
   "resolutions": {
     "styled-components": "5"
@@ -25,6 +26,7 @@
     "@solana/wallet-adapter-base": "0.9.23",
     "@solana/web3.js": "1.95.8",
     "@tanstack/react-query": "^5.24.1",
+    "@usecapsule/cosmos-wallet-connectors": "1.11.0",
     "@usecapsule/evm-wallet-connectors": "1.11.0",
     "@usecapsule/react-components": "3.16.0",
     "@usecapsule/react-sdk": "4.11.0",
