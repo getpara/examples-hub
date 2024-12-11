@@ -19,7 +19,7 @@ const RecoveryWallet2FAStep: React.FC = () => {
   const { setCurrentRecoveryStep } = useContext(RecoveryStepContext);
   const { type } = useContext(RecoveryAttemptContext);
   const { email } = useContext(EmailContext);
-  const { setId: setWalletId } = useContext(WalletContext);
+  const { setWallets } = useContext(WalletContext);
   const { phone, countryCode } = useContext(PhoneContext);
   const { setId: setUserId } = useContext(UserContext);
   const { is2FAFlow } = useContext(TwoFactorContext);
@@ -84,13 +84,13 @@ const RecoveryWallet2FAStep: React.FC = () => {
         onClick={async () => {
           if (verificationCode.length === 6 && /^\d+$/.test(verificationCode)) {
             try {
-              let walletId, userId;
+              let wallets, userId;
               if (type === RecoveryType.PHONE) {
-                ({ walletId, userId } = await capsule.verify2FAForPhone(phone, countryCode, verificationCode));
+                ({ wallets, userId } = await capsule.verify2FAForPhone(phone, countryCode, verificationCode));
               } else {
-                ({ walletId, userId } = await capsule.verify2FA(email, verificationCode));
+                ({ wallets, userId } = await capsule.verify2FA(email, verificationCode));
               }
-              setWalletId(walletId);
+              setWallets(wallets);
               setUserId(userId);
               setIncorrectCode(false);
               setCurrentRecoveryStep(ModalStep.SECRET);

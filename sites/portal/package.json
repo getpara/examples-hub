@@ -23,19 +23,21 @@
     "usehooks-ts": "^3.1.0"
   },
   "scripts": {
-    "start": "DISABLE_ESLINT_PLUGIN=true REACT_APP_ENV=dev PORT=3003 craco start",
-    "start-e2e": "DISABLE_ESLINT_PLUGIN=true REACT_APP_IS_E2E=true REACT_APP_ENV=sandbox PORT=3003 craco start",
-    "build": "rm -rf build && DISABLE_ESLINT_PLUGIN=true craco build",
+    "dev": "VITE_CAPSULE_CONNECT_PARTNER_ID=2c58a7f9-c505-4482-86d1-5a69ef68bb26 DISABLE_ESLINT_PLUGIN=true VITE_ENVIRONMENT=dev vite --port 3003",
+    "start": "VITE_CAPSULE_CONNECT_PARTNER_ID=2c58a7f9-c505-4482-86d1-5a69ef68bb26 DISABLE_ESLINT_PLUGIN=true VITE_ENVIRONMENT=dev vite --port 3003",
+    "build": "rm -rf dist && tsc && vite build",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "start-e2e": "DISABLE_ESLINT_PLUGIN=true VITE_IS_E2E=true VITE_ENVIRONMENT=sandbox  vite --port 3003",
     "check-wasm-file-exists": "test -f ./public/static/js/main.wasm || (echo 'public/static/js/main.wasm file does not exist!'; exit 1)",
     "check-mpc-worker-file-exists": "test -f ./public/static/js/mpcWorker-bundle.js || (echo 'public/static/js/mpcWorker-bundle.js file does not exist!'; exit 1)",
-    "deploy-s3": "yarn && yarn build && yarn check-wasm-file-exists && yarn check-mpc-worker-file-exists && aws s3 sync build/ s3://capsule-$REACT_APP_ENV-web-portal --profile $REACT_APP_ENV",
-    "deploy-sandbox": "REACT_APP_ENV=sandbox yarn deploy-s3",
-    "deploy-beta": "REACT_APP_ENV=beta yarn deploy-s3",
-    "deploy-prod": "REACT_APP_ENV=prod yarn deploy-s3",
+    "deploy-s3": "yarn && yarn build && yarn check-wasm-file-exists && yarn check-mpc-worker-file-exists && aws s3 sync build/ s3://capsule-$VITE_ENVIRONMENT-web-portal --profile $VITE_ENVIRONMENT",
+    "deploy-sandbox": "VITE_CAPSULE_CONNECT_PARTNER_ID=4bdd84d3-7606-406f-8321-19721cac17a1 VITE_ENVIRONMENT=sandbox yarn deploy-s3",
+    "deploy-beta": "VITE_CAPSULE_CONNECT_PARTNER_ID=4bdd84d3-7606-406f-8321-19721cac17a1 VITE_ENVIRONMENT=beta yarn deploy-s3",
+    "deploy-prod": "VITE_CAPSULE_CONNECT_PARTNER_ID=1106a19e-0a78-4a26-b414-d6538b6a2064 VITE_ENVIRONMENT=prod yarn deploy-s3",
     "setup-worker": "cd ../../../go-sdk && GOOS=js GOARCH=wasm go build -o ../web-sdk/sites/portal/public/static/js/main.wasm wasm/main.go && cd ../web-sdk/packages/web-sdk && yarn && yarn build && cd ../../sites/portal"
   },
   "devDependencies": {
-    "@craco/craco": "^7.1.0",
     "browserify-zlib": "^0.2.0",
     "cosmjs-types": "0.9.0",
     "crypto-browserify": "^3.12.0",
@@ -46,6 +48,8 @@
     "ts-loader": "^9.5.1",
     "typescript": "^5.4.4",
     "url": "^0.11.3",
+    "vite": "^5.3.5",
+    "vite-plugin-node-polyfills": "^0.22.0",
     "webpack": "5.76.3",
     "webpack-cli": "5.0.1",
     "webpack-dev-server": "4.13.1"

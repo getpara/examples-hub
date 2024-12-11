@@ -28,6 +28,7 @@ type Login = {
   params: AuthLoginParams;
   wallets?: Wallets;
   biometricLocationHints?: BiometricLocationHint[];
+  sessionOrigin?: string;
 };
 
 const NO_DATE = formatISO(new Date(-8640000000000000));
@@ -46,6 +47,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
   const [loginRes, setLoginRes] = useState<Awaited<ReturnType<typeof utils.authLogin>> | undefined>();
   const [wallets, setWallets] = useState<Wallets>();
   const [biometricLocationHints, setBiometricLocationHints] = useState<BiometricLocationHint[]>([]);
+  const [sessionOrigin, setSessionOrigin] = useState<string>();
 
   const authLogin = useCallback(async (): ReturnType<typeof utils.authLogin> => {
     const loginRes = await utils.authLogin(capsule, params);
@@ -158,6 +160,17 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
   );
 
   useEffect(() => {
+    const loadSessionOrigin = async () => {
+      if (params.sessionId) {
+        const { origin } = await capsule.ctx.capsuleClient.sessionOrigin(params.sessionId);
+        setSessionOrigin(origin);
+      }
+    };
+
+    loadSessionOrigin();
+  }, [params.sessionId]);
+
+  useEffect(() => {
     async function setUserDetails() {
       if (!capsule.getEmail() && params.email) {
         await capsule.setEmail(params.email);
@@ -189,6 +202,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
         params,
         wallets,
         biometricLocationHints,
+        sessionOrigin,
       }}
     >
       {children}

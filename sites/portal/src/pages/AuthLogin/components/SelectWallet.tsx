@@ -4,6 +4,7 @@ import { CpslIcon, CpslText, CpslButton, IconType, CpslRadio, CpslIdenticon } fr
 import { SaveRecoverySecret } from '@usecapsule/react-sdk';
 import { formatDistanceToNowStrict, parseISO } from 'date-fns';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { CAPSULE_CONNECT_DOMAINS } from '../../../constants';
 import {
   Wallet,
   WalletType,
@@ -139,10 +140,12 @@ export const SelectWallet = ({ onSuccess, sessionLookupId }: { onSuccess: () => 
     fns: { finishLogin, authUpdateKeyShares },
     params: { email, newDeviceSessionLookupId },
     wallets,
+    sessionOrigin,
   } = useLogin();
   const { partner } = useModalOutletContext();
 
   const [isAtBottom, setIsAtBottom] = useState(false);
+  const [isSettingUp, setIsSettingUp] = useState(true);
   const divRef = useRef(null);
 
   const onScroll = () => {
@@ -374,11 +377,27 @@ export const SelectWallet = ({ onSuccess, sessionLookupId }: { onSuccess: () => 
   const isCreated = Object.values(newWallets).length > 0;
 
   useEffect(() => {
-    // Situation where user has wallets, but none of the supported type (EVM/SOLANA)
-    if (selectWalletTypes.every(({ type }) => wallets[type].length === 0)) {
-      onSubmit(selectWalletTypes.reduce((acc, { type }) => ({ ...acc, [type]: ['CREATE_NEW'] }), {}));
-    }
+    const setup = async () => {
+      // Situation where user has wallets, but none of the supported type (EVM/SOLANA)
+      if (selectWalletTypes.every(({ type }) => wallets[type].length === 0)) {
+        await onSubmit(selectWalletTypes.reduce((acc, { type }) => ({ ...acc, [type]: ['CREATE_NEW'] }), {}));
+      }
+      // If coming from Capsule connect load all wallets
+      if (
+        partner.id === import.meta.env.VITE_CAPSULE_CONNECT_PARTNER_ID &&
+        CAPSULE_CONNECT_DOMAINS().includes(sessionOrigin)
+      ) {
+        await onSubmit(selectWalletTypes.reduce((acc, { type }) => ({ ...acc, [type]: wallets[type].map(w => w.id) }), {}));
+      }
+      setIsSettingUp(false);
+    };
+
+    setup();
   }, [wallets, selectWalletTypes]);
+
+  if (isSettingUp) {
+    return null;
+  }
 
   return (
     <Root>

@@ -16,7 +16,7 @@ const Recovery2FAStep: React.FC = () => {
   const [incorrectCode, setIncorrectCode] = useState(false);
   const { setCurrentStep } = useContext(StepContext);
   const { email } = useContext(EmailContext);
-  const { setAddress, setId: setWalletId } = useContext(WalletContext);
+  const { setWallets } = useContext(WalletContext);
   const { setId: setUserId } = useContext(UserContext);
   const { setStatus, setInitiatedAt, setTwoFactorVerifiedInSession } = useContext(RecoveryAttemptContext);
 
@@ -76,14 +76,13 @@ const Recovery2FAStep: React.FC = () => {
         onClick={async () => {
           if (verificationCode.length === 6 && /^\d+$/.test(verificationCode)) {
             try {
-              const { address, initiatedAt, status, userId, walletId } = await capsule.verify2FA(email, verificationCode);
-              setAddress(address);
+              const { initiatedAt, status, userId, wallets } = await capsule.verify2FA(email, verificationCode);
+              setWallets(wallets);
               setInitiatedAt(initiatedAt);
               setStatus(status);
               setIncorrectCode(false);
               setTwoFactorVerifiedInSession(true);
               setUserId(userId);
-              setWalletId(walletId);
               setCurrentStep(ModalStep.RECOVERY_AWAITING);
             } catch (error) {
               setIncorrectCode(true);

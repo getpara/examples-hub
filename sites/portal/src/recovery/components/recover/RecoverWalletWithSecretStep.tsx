@@ -11,21 +11,9 @@ import { RecoveryAttemptContext, RecoveryType } from '../../contexts/RecoveryAtt
 import PhoneContext from '../../contexts/PhoneContext';
 import { useCapsule } from '../../../components/CapsuleContext';
 
-async function recoverUserShares(userId: string, walletId: string, serializedRecoveryShare: string): Promise<string[]> {
-  const capsule = useCapsule();
-  const recoveryPrivateKeyContainer = KeyContainer.buildFrom(serializedRecoveryShare);
-
-  const res = await capsule.ctx.capsuleClient.recoverUserShares(userId, walletId);
-  const { keyShares, keyShare } = res.data;
-  if (!keyShares?.length) {
-    return [recoveryPrivateKeyContainer.decrypt(keyShare.encryptedShare)];
-  }
-  return keyShares.map(ks => recoveryPrivateKeyContainer.decrypt(ks.encryptedShare));
-}
-
 type RecoverWalletWithSecretStepProps = {
   setWebAuthURLForCreate: (webAuthURLForCreate: string | null) => void;
-  setUserShares: (userShares: string[] | null) => void;
+  setUserShares: (userShares: { walletId: string; decryptedShare: string }[] | null) => void;
 };
 
 const RecoverWalletWithSecretStep: React.FC<RecoverWalletWithSecretStepProps> = ({
@@ -37,10 +25,38 @@ const RecoverWalletWithSecretStep: React.FC<RecoverWalletWithSecretStepProps> = 
   const { type } = useContext(RecoveryAttemptContext);
   const { phone, countryCode } = useContext(PhoneContext);
   const { email } = useContext(EmailContext);
-  const { id: walletId } = useContext(WalletContext);
+  const { wallets } = useContext(WalletContext);
   const { id: userId } = useContext(UserContext);
   const [secret, setSecret] = useState('');
   const [incorrectCode, setIncorrectCode] = useState(false);
+
+  async function recoverUserShares(): Promise<{ walletId: string; decryptedShare: string }[]> {
+    const recoveryPrivateKeyContainer = KeyContainer.buildFrom(secret);
+
+    // Get all the users fully generated wallets
+    const allCompleteUserWallets = wallets.filter(wallet => !!wallet.address);
+
+    const recoveryUserSharesPromises = allCompleteUserWallets.map(wal =>
+      capsule.ctx.capsuleClient.recoverUserShares(userId, wal.id),
+    );
+    const recoveryUserShares = await Promise.all(recoveryUserSharesPromises);
+
+    const keyShares = recoveryUserShares
+      .map(us => (!!us.data.keyShares?.length ? us.data.keyShares : us.data.keyShare))
+      .flat();
+
+    return keyShares
+      .map(ks => {
+        // Ignoring shares with an error here these error should be old shares with a different recovery secret
+        try {
+          const decryptedShare = recoveryPrivateKeyContainer.decrypt(ks.encryptedShare);
+          return { walletId: ks.walletId, decryptedShare };
+        } catch (e) {
+          return undefined;
+        }
+      })
+      .filter(ks => !!ks);
+  }
 
   return (
     <VStack flex={1}>
@@ -95,7 +111,11 @@ const RecoverWalletWithSecretStep: React.FC<RecoverWalletWithSecretStepProps> = 
         width="100%"
         onClick={async () => {
           try {
-            const userShares = await recoverUserShares(userId, walletId, secret);
+            const userShares = await recoverUserShares();
+            if (!userShares?.length) {
+              setIncorrectCode(true);
+              return;
+            }
             setUserShares(userShares);
             setIncorrectCode(false);
             await capsule.setEmail(email);

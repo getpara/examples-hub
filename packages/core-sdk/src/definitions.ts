@@ -168,6 +168,32 @@ export function getPortalBaseURL(
   return `https://${domain}`;
 }
 
+export function getCapsuleConnectDomain(env: Environment) {
+  switch (env) {
+    case Environment.DEV:
+      return 'localhost';
+    case Environment.SANDBOX:
+      return 'connect.sandbox.usecapsule.com';
+    case Environment.BETA:
+      return 'connect.beta.usecapsule.com';
+    case Environment.PROD:
+      return 'connect.usecapsule.com';
+    default:
+      throw new Error(`env: ${env} not supported`);
+  }
+}
+
+export function getCapsuleConnectBaseURL({ env }: { env: Environment }, useLocalIp?: boolean) {
+  const domain = getCapsuleConnectDomain(env);
+  if (env === Environment.DEV) {
+    if (useLocalIp) {
+      return `http://127.0.0.1:3008`;
+    }
+    return `http://${domain}:3008`;
+  }
+  return `https://${domain}`;
+}
+
 export const EXTERNAL_WALLET_CHANGE_EVENT = 'capsuleExternalWalletChange';
 export const CURRENT_WALLET_IDS_CHANGE_EVENT = 'capsuleCurrentWalletIdsChange';
 

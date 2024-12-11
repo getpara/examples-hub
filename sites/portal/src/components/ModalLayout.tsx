@@ -19,7 +19,6 @@ const DEFAULT_THEME = {
 export const ModalLayout = () => {
   const capsule = useCapsule();
   const [searchParams] = useSearchParams();
-  const paramsPartnerId = searchParams.get('partnerId');
   // TODO: Move this to the partner config
   const homepageUrl = searchParams.get('homepageUrl') ?? DEFAULT_HOMEPAGE_URL;
 
@@ -124,8 +123,9 @@ export const ModalLayout = () => {
 
   useEffect(() => {
     async function getPartner() {
-      if (paramsPartnerId) {
-        const detailsRes = (await capsule.ctx.capsuleClient.getPartner(paramsPartnerId)).data;
+      const touchRes = await capsule.touchSession();
+      if (touchRes.data.partnerId) {
+        const detailsRes = (await capsule.ctx.capsuleClient.getPartner(touchRes.data.partnerId)).data;
         setPartner(detailsRes.partner);
       } else {
         setPartner(DEFAULT_PARTNER);

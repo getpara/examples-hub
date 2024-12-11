@@ -11,12 +11,15 @@ const RecoveryAwaitingFinishStep: React.FC = () => {
   const [percentDone, setPercentDone] = useState(0);
   const { setCurrentRecoveryStep } = useContext(RecoveryStepContext);
   const { id: userId } = useContext(UserContext);
-  const { id: walletId } = useContext(WalletContext);
+  const { wallets } = useContext(WalletContext);
 
   useEffect(() => {
     const finishRecovery = async () => {
       setCurrentRecoveryStep(ModalStep.FINISH);
-      await capsule.ctx.capsuleClient.finalizeRecovery(userId, walletId);
+
+      const finalizePromises = wallets.map(w => capsule.ctx.capsuleClient.finalizeRecovery(userId, w.id));
+
+      await Promise.all(finalizePromises);
     };
 
     if (percentDone >= 100) {

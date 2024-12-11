@@ -20,7 +20,7 @@ const RecoveryVerificationCodePhoneStep: React.FC<RecoveryVerificationCodePhoneS
   const capsule = useCapsule();
   const { setCurrentStep } = useContext(StepContext);
   const { phone, countryCode } = useContext(PhoneContext);
-  const { setAddress, setId: setWalletId } = useContext(WalletContext);
+  const { setWallets } = useContext(WalletContext);
   const { setStatus, setInitiatedAt, setType } = useContext(RecoveryAttemptContext);
   const { setIs2FAFlow } = useContext(TwoFactorContext);
   const { setId: setUserId } = useContext(UserContext);
@@ -95,18 +95,17 @@ const RecoveryVerificationCodePhoneStep: React.FC<RecoveryVerificationCodePhoneS
               const res = await capsule.ctx.capsuleClient.verifyPhoneForRecovery(phone, countryCode, verificationCode);
               const status = res.data.status;
               const initiatedAt = res.data.initiatedAt as Date;
-              const address = res.data.address;
               const skip2FA = res.data.skip2FA as boolean;
               const userId = res.data.userId;
-              const walletId = res.data.walletId;
+              const wallets = res.data.wallets;
               setIs2FAFlow(!skip2FA);
               if (skip2FA) {
                 setUserId(userId);
-                setWalletId(walletId);
+                setWallets(wallets);
               }
               setType(RecoveryType.PHONE);
               if (status != null) {
-                setAddress(address);
+                setWallets(wallets);
                 setStatus(status);
                 setInitiatedAt(initiatedAt);
                 if (status === RecoveryStatus.INITIATED) {

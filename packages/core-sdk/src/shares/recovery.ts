@@ -11,6 +11,7 @@ export async function sendRecoveryForShare(
   userSigner: string,
   ignoreRedistributingBackupEncryptedShare = false,
   emailProps: BackupKitEmailProps,
+  forceRefresh = false,
 ): Promise<string> {
   if (ignoreRedistributingBackupEncryptedShare) {
     await ctx.capsuleClient.uploadUserKeyShares(
@@ -29,7 +30,7 @@ export async function sendRecoveryForShare(
   let recoveryPrivateKeyContainer: KeyContainer | undefined;
   const { recoveryPublicKeys } = await ctx.capsuleClient.getRecoveryPublicKeys(userId);
 
-  if (!recoveryPublicKeys?.length) {
+  if (forceRefresh || !recoveryPublicKeys?.length) {
     recoveryPrivateKeyContainer = new KeyContainer(walletId, '', '');
     const { recoveryPublicKeys } = await ctx.capsuleClient.persistRecoveryPublicKeys(userId, [
       recoveryPrivateKeyContainer.getPublicEncryptionKeyHex(),

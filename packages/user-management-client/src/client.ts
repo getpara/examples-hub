@@ -552,6 +552,12 @@ class Client {
     return res;
   };
 
+  // GET /session/origin
+  sessionOrigin = async (sessionLookupId: string): Promise<{ origin?: string }> => {
+    const res = await this.baseRequest.get<{ origin?: string }>(`/sessions/${sessionLookupId}/origin`);
+    return res.data;
+  };
+
   // POST /biometrics/verify
   verifyWebChallenge = async (partnerId: string, body: verifyWebChallengeBody): Promise<any> => {
     const res = await this.baseRequest.post<{}>(`/biometrics/verify`, body, {
@@ -853,9 +859,10 @@ class Client {
 
   // GET /recovery/users/:userId/wallets/:walletId/key-shares
   async recoverUserShares(userId: string, walletId: string) {
-    const res = await this.baseRequest.get<any>(
-      `/recovery/users/${userId}/wallets/${walletId}/key-shares?type=USER&encryptor=RECOVERY`,
-    );
+    const res = await this.baseRequest.get<{
+      keyShare: { encryptedShare: string; encryptedKey?: string; type: string; walletId: string };
+      keyShares: { encryptedShare: string; encryptedKey?: string; type: string; walletId: string }[];
+    }>(`/recovery/users/${userId}/wallets/${walletId}/key-shares?type=USER&encryptor=RECOVERY`);
     return res;
   }
 

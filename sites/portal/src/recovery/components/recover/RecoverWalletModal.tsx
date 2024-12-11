@@ -24,7 +24,7 @@ const RecoveryWalletModal: React.FC<RecoveryWalletModalProps> = ({ isOpen, onClo
   const capsule = useCapsule();
   const { currentRecoveryStep, setCurrentRecoveryStep } = useContext(RecoveryStepContext);
   const [webAuthURLForCreate, setWebAuthURLForCreate] = useState('');
-  const [userShares, setUserShares] = useState<string[]>(null);
+  const [userShares, setUserShares] = useState<{ walletId: string; decryptedShare: string }[]>(null);
   const createAccountTimeout = useRef<number>();
   const { twoFactorVerifiedInSession } = useContext(RecoveryAttemptContext);
   const { is2FAFlow } = useContext(TwoFactorContext);
@@ -54,10 +54,10 @@ const RecoveryWalletModal: React.FC<RecoveryWalletModalProps> = ({ isOpen, onClo
   useEffect(() => {
     async function distribute() {
       if (userShares && currentRecoveryStep === ModalStep.AWAITING_FINISH) {
-        const fetchedWallets = await capsule.fetchWallets();
-        const walletId = fetchedWallets[0].id;
         await Promise.all(
-          userShares.map(userShare => distributeNewShare(capsule.ctx, capsule.getUserId(), walletId, userShare, true, {})),
+          userShares.map(userShare =>
+            distributeNewShare(capsule.ctx, capsule.getUserId(), userShare.walletId, userShare.decryptedShare, true, {}),
+          ),
         );
         setUserShares(null);
       }

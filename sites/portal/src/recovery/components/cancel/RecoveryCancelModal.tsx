@@ -24,7 +24,7 @@ const RecoveryCancelModal: React.FC<RecoveryCancelModalProps> = ({ isOpen, onClo
   const { email, setEmail } = useContext(EmailContext);
   const { setCurrentStep } = useContext(StepContext);
   const { setCurrentRecoveryStep } = useContext(RecoveryStepContext);
-  const { setAddress } = useContext(WalletContext);
+  const { setWallets } = useContext(WalletContext);
   const { setStatus, setInitiatedAt } = useContext(RecoveryAttemptContext);
   const { setIs2FAFlow } = useContext(TwoFactorContext);
 
@@ -59,7 +59,7 @@ const RecoveryCancelModal: React.FC<RecoveryCancelModalProps> = ({ isOpen, onClo
               onClick={async () => {
                 setCurrentStep(ModalStep.EMAIL_COLLECTION);
                 setCurrentRecoveryStep(RecoveryModalStep.VERIFY_2FA);
-                setAddress(null);
+                setWallets(null);
                 await capsule.ctx.capsuleClient.cancelRecoveryAttempt(email);
                 setEmail(null);
                 setStatus(null);

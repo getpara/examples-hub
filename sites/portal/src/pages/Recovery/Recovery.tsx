@@ -17,8 +17,7 @@ import RecoveryStepContext from '../../recovery/contexts/RecoveryStepContext';
 import useCurrentRecoveryStepState from '../../recovery/hooks/useCurrentRecoveryStepState';
 import UserContext from '../../recovery/contexts/UserContext';
 import useEmailState from '../../recovery/hooks/useEmailState';
-import useAddressState from '../../recovery/hooks/useAddressState';
-import useWalletIdState from '../../recovery/hooks/useWalletIdState';
+import useWalletsState from '../../recovery/hooks/useWalletsState';
 import useUserIdState from '../../recovery/hooks/useUserIdState';
 import useStatusState from '../../recovery/hooks/useStatusState';
 import useInitiatedAtState from '../../recovery/hooks/useInitiatedAtState';
@@ -42,8 +41,7 @@ const Recovery: React.FC = () => {
   const [countryCode, setCountryCode] = useCountryCodeState(null as CountryCallingCode);
   const [currentStep, setCurrentStep] = useCurrentStepState(ModalStep.EMAIL_COLLECTION);
   const [currentRecoveryStep, setCurrentRecoveryStep] = useCurrentRecoveryStepState(RecoveryModalStep.VERIFY_2FA);
-  const [address, setAddress] = useAddressState(null);
-  const [walletId, setWalletId] = useWalletIdState(null);
+  const [wallets, setWallets] = useWalletsState(null);
   const [userId, setUserId] = useUserIdState(null);
   const [status, setStatus] = useStatusState(null as RecoveryStatus);
   const [initiatedAt, setInitiatedAt] = useInitiatedAtState(null);
@@ -61,7 +59,7 @@ const Recovery: React.FC = () => {
         <h1>Recovery Portal</h1>
         <p>Welcome to the Capsule Recovery Portal</p>
         <p>Here you'll be able to regain access to your account</p>
-        {!address && (
+        {!wallets?.length && (
           <p>
             If you have already initiated the recovery process for your account, <strong>Log In</strong> to check the status
           </p>
@@ -94,10 +92,8 @@ const Recovery: React.FC = () => {
                   <StepContext.Provider value={{ currentStep, setCurrentStep }}>
                     <WalletContext.Provider
                       value={{
-                        address,
-                        setAddress,
-                        id: walletId,
-                        setId: setWalletId,
+                        wallets,
+                        setWallets,
                       }}
                     >
                       <EmailContext.Provider value={{ email, setEmail }}>
@@ -107,7 +103,11 @@ const Recovery: React.FC = () => {
                               <Box as="div" flexShrink={0}>
                                 <RecoveryButton />
                               </Box>
-                              {address && <Text textColor={'brand.addressColor'}>{truncateEthAddress(address)}</Text>}
+                              {!!wallets?.length && (
+                                <Text
+                                  textColor={'brand.addressColor'}
+                                >{`${truncateEthAddress(wallets[0].address)}${wallets?.length > 1 ? ` + ${wallets?.length - 1} more` : ''}`}</Text>
+                              )}
                             </HStack>
                             <Box style={{ marginBottom: -40 }}>
                               <p style={paragraphStyle}>
@@ -123,8 +123,8 @@ const Recovery: React.FC = () => {
                                 initiate another Recovery Attempt.
                               </p>
                             </Box>
-                            {address && <RecoveryTimer />}
-                            {address && status !== RecoveryStatus.FINISHED && <RecoveryCancelButton />}
+                            {!!wallets?.length && <RecoveryTimer />}
+                            {!!wallets?.length && status !== RecoveryStatus.FINISHED && <RecoveryCancelButton />}
                           </VStack>
                         </TwoFactorContext.Provider>
                       </EmailContext.Provider>

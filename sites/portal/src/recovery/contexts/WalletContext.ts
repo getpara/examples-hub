@@ -1,18 +1,15 @@
 import React from 'react';
 import emptyFunction from '../emptyFunction';
+import { Wallet } from '@usecapsule/web-sdk';
 
 interface WalletContextType {
-  address: string | null;
-  setAddress: (address: string | null) => void;
-  id: string | null;
-  setId: (id: string | null) => void;
+  wallets: Pick<Wallet, 'address' | 'id'>[] | null;
+  setWallets: (wallets: Pick<Wallet, 'address' | 'id'>[] | null) => void;
 }
 
 const WalletContext = React.createContext<WalletContextType>({
-  address: null,
-  setAddress: emptyFunction,
-  id: null,
-  setId: emptyFunction,
+  wallets: null,
+  setWallets: emptyFunction,
 });
 
 export default WalletContext;

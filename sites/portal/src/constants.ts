@@ -1,8 +1,8 @@
 import { Environment } from '@usecapsule/web-sdk';
 import { Partner } from './types';
 
-export const ENV = process.env.REACT_APP_ENV
-  ? (process.env.REACT_APP_ENV.toUpperCase() as Environment)
+export const ENV = import.meta.env.VITE_ENVIRONMENT
+  ? (import.meta.env.VITE_ENVIRONMENT.toUpperCase() as Environment)
   : Environment.SANDBOX;
 
 export const DEFAULT_PARTNER: Partner = {
@@ -36,3 +36,18 @@ export enum AuthLoginStep {
 export const REDIRECT_TIMEOUT = 1000;
 
 export const KNOWN_DEVICE_LOGIN_POLLING_INTERVAL = 2000;
+
+export function CAPSULE_CONNECT_DOMAINS() {
+  switch (ENV) {
+    case Environment.DEV:
+      return ['http://localhost:3008'];
+    case Environment.SANDBOX:
+      return ['connect.sandbox.usecapsule.com'];
+    case Environment.BETA:
+      return ['connect.beta.usecapsule.com'];
+    case Environment.PROD:
+      return ['connect.usecapsule.com'];
+    default:
+      throw new Error(`env: ${ENV} not supported`);
+  }
+}

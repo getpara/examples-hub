@@ -17,7 +17,7 @@ import { useCapsule } from '../../../components/CapsuleContext';
 const RecoveryButton: React.FC = () => {
   const capsule = useCapsule();
   const [modalIsOpen, setModalIsOpen] = useState(false);
-  const { address, setAddress, setId: setWalletId } = useContext(WalletContext);
+  const { wallets, setWallets } = useContext(WalletContext);
   const { setId: setUserId } = useContext(UserContext);
   const { setEmail } = useContext(EmailContext);
   const { setPhone } = useContext(PhoneContext);
@@ -32,15 +32,14 @@ const RecoveryButton: React.FC = () => {
       backgroundColor={'brand.background'}
       color={'white'}
       onClick={async () => {
-        if (address) {
+        if (!!wallets?.length) {
           setEmail(null);
           setPhone(null);
-          setAddress(null);
+          setWallets(null);
           setStatus(null);
           setInitiatedAt(null);
           setType(null);
           setTwoFactorVerifiedInSession(null);
-          setWalletId(null);
           setUserId(null);
           setIs2FAFlow(null);
           setCurrentStep(ModalStep.EMAIL_COLLECTION);
@@ -54,7 +53,7 @@ const RecoveryButton: React.FC = () => {
       <RecoveryModal onClose={() => setModalIsOpen(false)} isOpen={modalIsOpen} />
       <HStack>
         <Text size="18px" marginRight="9px">
-          {address ? 'Logout' : 'Manage Recovery'}
+          {!!wallets?.length ? 'Logout' : 'Manage Recovery'}
         </Text>
       </HStack>
       <CapsuleSmall />

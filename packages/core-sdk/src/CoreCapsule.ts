@@ -34,6 +34,7 @@ import {
   Environment,
   WalletFilters,
   WalletTypeProp,
+  getCapsuleConnectBaseURL,
 } from './definitions.js';
 import { getBaseUrl, initClient } from './external/capsuleClient.js';
 import * as mpcComputationClient from './external/mpcComputationClient.js';
@@ -553,6 +554,10 @@ export abstract class CoreCapsule {
 
   private get isPortal(): boolean {
     return typeof window !== 'undefined' && getPortalBaseURL(this.ctx).includes(window.location.host);
+  }
+
+  private isCapsuleConnect(): boolean {
+    return typeof window !== 'undefined' && getCapsuleConnectBaseURL(this.ctx).includes(window.location.host);
   }
 
   private requireApiKey() {
@@ -1658,11 +1663,15 @@ export abstract class CoreCapsule {
    * @returns - wallets that were fetched.
    */
   async fetchWallets(): Promise<WalletEntity[]> {
-    const res = await (this.isPortal
+    const res = await (this.isPortal || this.isCapsuleConnect()
       ? this.ctx.capsuleClient.getAllWallets(this.userId)
       : this.ctx.capsuleClient.getWallets(this.userId, true));
 
-    return res.data.wallets.filter(wallet => !!wallet.address && this.isWalletSupported(entityToWallet(wallet)));
+    return res.data.wallets.filter(
+      wallet =>
+        !!wallet.address &&
+        (this.isCapsuleConnect() || (!this.isCapsuleConnect() && this.isWalletSupported(entityToWallet(wallet)))),
+    );
   }
 
   private async populateWalletAddresses(): Promise<void> {
@@ -1799,19 +1808,17 @@ export abstract class CoreCapsule {
     email: string,
     verificationCode: string,
   ): Promise<{
-    address?: string;
     initiatedAt?: Date;
     status?: RecoveryStatus;
     userId: string;
-    walletId: string;
+    wallets: Pick<Wallet, 'address' | 'id'>[];
   }> {
     const res = await this.ctx.capsuleClient.verify2FA(email, verificationCode);
     return {
-      address: res.data.address,
       initiatedAt: res.data.initiatedAt,
       status: res.data.status,
       userId: res.data.userId,
-      walletId: res.data.walletId,
+      wallets: res.data.wallets,
     };
   }
 
@@ -1826,19 +1833,17 @@ export abstract class CoreCapsule {
     countryCode: CountryCallingCode,
     verificationCode: string,
   ): Promise<{
-    address?: string;
     initiatedAt?: Date;
     status?: RecoveryStatus;
     userId: string;
-    walletId: string;
+    wallets: Pick<Wallet, 'address' | 'id'>[];
   }> {
     const res = await this.ctx.capsuleClient.verify2FAForPhone(phone, countryCode, verificationCode);
     return {
-      address: res.data.address,
       initiatedAt: res.data.initiatedAt,
       status: res.data.status,
       userId: res.data.userId,
-      walletId: res.data.walletId,
+      wallets: res.data.wallets,
     };
   }
 
@@ -2367,12 +2372,14 @@ export abstract class CoreCapsule {
    * @param walletId - the wallet to distribute the recovery share for.
    * @param userShare - optional user share generate the recovery share from. Defaults to the signer from the passed in walletId
    * @param skipBiometricShareCreation - whether or not to skip biometric share creation. Used when regenerating recovery shares.
+   * @param forceRefreshRecovery - whether or not to force recovery secret regeneration. Used when regenerating recovery shares.
    * @returns - recovery share.
    **/
   async distributeNewWalletShare(
     walletId: string,
     userShare?: string,
     skipBiometricShareCreation?: boolean,
+    forceRefreshRecovery?: boolean,
   ): Promise<string> {
     let _userShare = userShare;
 
@@ -2381,7 +2388,16 @@ export abstract class CoreCapsule {
     }
 
     const recoveryShare = skipBiometricShareCreation
-      ? await sendRecoveryForShare(this.ctx, this.userId, walletId, [], _userShare, false, this.getBackupKitEmailProps())
+      ? await sendRecoveryForShare(
+          this.ctx,
+          this.userId,
+          walletId,
+          [],
+          _userShare,
+          false,
+          this.getBackupKitEmailProps(),
+          forceRefreshRecovery,
+        )
       : await distributeNewShare(this.ctx, this.userId, walletId, _userShare, false, this.getBackupKitEmailProps());
     return recoveryShare;
   }
