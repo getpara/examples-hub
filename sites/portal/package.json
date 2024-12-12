@@ -31,7 +31,7 @@
     "start-e2e": "DISABLE_ESLINT_PLUGIN=true VITE_IS_E2E=true VITE_ENVIRONMENT=sandbox  vite --port 3003",
     "check-wasm-file-exists": "test -f ./public/static/js/main.wasm || (echo 'public/static/js/main.wasm file does not exist!'; exit 1)",
     "check-mpc-worker-file-exists": "test -f ./public/static/js/mpcWorker-bundle.js || (echo 'public/static/js/mpcWorker-bundle.js file does not exist!'; exit 1)",
-    "deploy-s3": "yarn && yarn build && yarn check-wasm-file-exists && yarn check-mpc-worker-file-exists && aws s3 sync build/ s3://capsule-$VITE_ENVIRONMENT-web-portal --profile $VITE_ENVIRONMENT",
+    "deploy-s3": "yarn && yarn build && yarn check-wasm-file-exists && yarn check-mpc-worker-file-exists && aws s3 sync dist/ s3://capsule-$VITE_ENVIRONMENT-web-portal --profile $VITE_ENVIRONMENT",
     "deploy-sandbox": "VITE_CAPSULE_CONNECT_PARTNER_ID=4bdd84d3-7606-406f-8321-19721cac17a1 VITE_ENVIRONMENT=sandbox yarn deploy-s3",
     "deploy-beta": "VITE_CAPSULE_CONNECT_PARTNER_ID=4bdd84d3-7606-406f-8321-19721cac17a1 VITE_ENVIRONMENT=beta yarn deploy-s3",
     "deploy-prod": "VITE_CAPSULE_CONNECT_PARTNER_ID=1106a19e-0a78-4a26-b414-d6538b6a2064 VITE_ENVIRONMENT=prod yarn deploy-s3",
