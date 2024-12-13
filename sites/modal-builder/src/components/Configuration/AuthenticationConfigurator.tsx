@@ -185,26 +185,28 @@ export const AuthenticationConfigurator: React.FC = () => {
           defaultSelectedIndex={authenticationConfig.authLayout?.includes(AuthLayout.AUTH_FULL) ? 0 : 1}
         />
         <DraggableArea onOrderChange={handleOAuthMethodsReorder}>
-          {authMethodsOrder.map(id => (
-            <DraggableItem key={id} id={id} backgroundColor="#ffffff" padding="0.5rem 0.75rem">
-              <DraggableHeader
-                id={id}
-                logo={AUTH_METHOD_CONFIGS[id].logo}
-                label={AUTH_METHOD_CONFIGS[id].label}
-                isEnabled={
-                  id === 'email-auth'
-                    ? !authenticationConfig.disableEmailLogin
-                    : id === 'phone-auth'
-                      ? !authenticationConfig.disablePhoneLogin
-                      : authenticationConfig.oAuthMethods!.includes(id)
-                }
-                onToggle={() => toggleAuthMethod(id)}
-                accordion={false}
-                isExpanded={false}
-                disabled={!authenticationConfig.isWeb2AuthEnabled}
-              />
-            </DraggableItem>
-          ))}
+          {authMethodsOrder
+            .filter(id => AUTH_METHOD_CONFIGS[id] !== undefined)
+            .map(id => (
+              <DraggableItem key={id} id={id} backgroundColor="#ffffff" padding="0.5rem 0.75rem">
+                <DraggableHeader
+                  id={id}
+                  logo={AUTH_METHOD_CONFIGS[id]!.logo}
+                  label={AUTH_METHOD_CONFIGS[id]!.label}
+                  isEnabled={
+                    id === 'email-auth'
+                      ? !authenticationConfig.disableEmailLogin
+                      : id === 'phone-auth'
+                        ? !authenticationConfig.disablePhoneLogin
+                        : authenticationConfig.oAuthMethods!.includes(id)
+                  }
+                  onToggle={() => toggleAuthMethod(id)}
+                  accordion={false}
+                  isExpanded={false}
+                  disabled={!authenticationConfig.isWeb2AuthEnabled}
+                />
+              </DraggableItem>
+            ))}
         </DraggableArea>
       </DraggableBody>
     </DraggableItem>
@@ -230,20 +232,22 @@ export const AuthenticationConfigurator: React.FC = () => {
           defaultSelectedIndex={0}
         />
         <DraggableArea onOrderChange={handleExternalWalletsReorder}>
-          {filteredExternalWallets(externalWalletsOrder).map(wallet => (
-            <DraggableItem key={wallet} id={wallet} backgroundColor="#ffffff" padding="0.5rem 0.75rem">
-              <DraggableHeader
-                id={wallet}
-                logo={EXTERNAL_WALLET_CONFIGS[wallet].logo}
-                label={EXTERNAL_WALLET_CONFIGS[wallet].label}
-                isEnabled={authenticationConfig.externalWallets!.includes(wallet)}
-                onToggle={() => toggleExternalWallet(wallet)}
-                accordion={false}
-                isExpanded={false}
-                disabled={!authenticationConfig.isWeb3AuthEnabled}
-              />
-            </DraggableItem>
-          ))}
+          {filteredExternalWallets(externalWalletsOrder)
+            .filter(wallet => EXTERNAL_WALLET_CONFIGS[wallet] !== undefined)
+            .map(wallet => (
+              <DraggableItem key={wallet} id={wallet} backgroundColor="#ffffff" padding="0.5rem 0.75rem">
+                <DraggableHeader
+                  id={wallet}
+                  logo={EXTERNAL_WALLET_CONFIGS[wallet]!.logo}
+                  label={EXTERNAL_WALLET_CONFIGS[wallet]!.label}
+                  isEnabled={authenticationConfig.externalWallets!.includes(wallet)}
+                  onToggle={() => toggleExternalWallet(wallet)}
+                  accordion={false}
+                  isExpanded={false}
+                  disabled={!authenticationConfig.isWeb3AuthEnabled}
+                />
+              </DraggableItem>
+            ))}
         </DraggableArea>
       </DraggableBody>
     </DraggableItem>

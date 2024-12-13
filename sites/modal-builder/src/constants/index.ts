@@ -37,7 +37,7 @@ export const ALL_EXTERNAL_WALLETS: CustomExternalWallet[] = Object.keys(External
 
 export const AUTH_SECTION_IDS = ['web2', 'web3'] as const;
 
-export const AUTH_METHOD_CONFIGS: Record<AuthMethod, DraggableItemHeaderConfig> = {
+export const AUTH_METHOD_CONFIGS: Partial<Record<AuthMethod, DraggableItemHeaderConfig>> = {
   'email-auth': { logo: MailIcon, label: 'Email' },
   'phone-auth': { logo: PhoneIcon, label: 'Phone' },
   [OAuthMethod.GOOGLE]: { logo: GoogleIcon, label: 'Google' },
@@ -48,7 +48,7 @@ export const AUTH_METHOD_CONFIGS: Record<AuthMethod, DraggableItemHeaderConfig> 
   [OAuthMethod.APPLE]: { logo: AppleIcon, label: 'Apple' },
 };
 
-export const EXTERNAL_WALLET_CONFIGS: Record<CustomExternalWallet, DraggableItemHeaderConfig> = {
+export const EXTERNAL_WALLET_CONFIGS: Partial<Record<CustomExternalWallet, DraggableItemHeaderConfig>> = {
   [ExternalWallet.METAMASK]: { logo: MetaMaskIcon, label: 'MetaMask' },
   [ExternalWallet.RAINBOW]: { logo: RainbowIcon, label: 'Rainbow' },
   [ExternalWallet.COINBASE]: { logo: CoinbaseIcon, label: 'Coinbase' },

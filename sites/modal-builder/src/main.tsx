@@ -26,9 +26,12 @@ import { defineCustomElements } from '@usecapsule/react-components';
 
 import '@usecapsule/react-components/css/capsule-core.css';
 import './index.css';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 defineCustomElements();
 const solanaNetwork = WalletAdapterNetwork.Devnet;
+
+const queryClient = new QueryClient();
 
 const App = () => {
   useHydrateAtoms([[initializeAppAtom, null]]);
@@ -42,31 +45,33 @@ const App = () => {
   return (
     <BrowserRouter>
       <JotaiProvider>
-        <CapsuleCosmosProvider
-          selectedChainId={cosmoshubtestnet.chainId}
-          chains={[cosmoshubtestnet]}
-          onSwitchChain={() => {}}
-          wallets={[leapWallet, keplrWallet]}
-          walletConnect={{ options: { projectId: WALLET_CONNECT_PROJECT_ID, name: 'Capsule Modal Builder' } }}
-        >
-          <CapsuleEvmProvider
-            config={{
-              projectId: WALLET_CONNECT_PROJECT_ID,
-              appName: 'Capsule Modal Builder',
-              chains: [sepolia],
-              wallets: [metaMaskWallet, rainbowWallet, walletConnectWallet, zerionWallet, coinbaseWallet],
-            }}
+        <QueryClientProvider client={queryClient}>
+          <CapsuleCosmosProvider
+            selectedChainId={cosmoshubtestnet.chainId}
+            chains={[cosmoshubtestnet]}
+            onSwitchChain={() => {}}
+            wallets={[leapWallet, keplrWallet]}
+            walletConnect={{ options: { projectId: WALLET_CONNECT_PROJECT_ID, name: 'Capsule Modal Builder' } }}
           >
-            <CapsuleSolanaProvider
-              endpoint={endpoint}
-              wallets={[glowWallet, phantomWallet, backpackWallet]}
-              chain={solanaNetwork}
-              appIdentity={{ name: 'Capsule Example', uri: `${location.protocol}//${location.host}` }}
+            <CapsuleEvmProvider
+              config={{
+                projectId: WALLET_CONNECT_PROJECT_ID,
+                appName: 'Capsule Modal Builder',
+                chains: [sepolia],
+                wallets: [metaMaskWallet, rainbowWallet, walletConnectWallet, zerionWallet, coinbaseWallet],
+              }}
             >
-              <ModalDesigner />
-            </CapsuleSolanaProvider>
-          </CapsuleEvmProvider>
-        </CapsuleCosmosProvider>
+              <CapsuleSolanaProvider
+                endpoint={endpoint}
+                wallets={[glowWallet, phantomWallet, backpackWallet]}
+                chain={solanaNetwork}
+                appIdentity={{ name: 'Capsule Example', uri: `${location.protocol}//${location.host}` }}
+              >
+                <ModalDesigner />
+              </CapsuleSolanaProvider>
+            </CapsuleEvmProvider>
+          </CapsuleCosmosProvider>
+        </QueryClientProvider>
       </JotaiProvider>
     </BrowserRouter>
   );
