@@ -3199,7 +3199,19 @@ export abstract class CoreCapsule {
         this.wallets[walletId].userId = this.userId;
       }
     }
-    await this.setCurrentWalletIds(sessionInfo.currentWalletIds);
+    if (Object.keys(sessionInfo.currentWalletIds).length !== 0) {
+      await this.setCurrentWalletIds(sessionInfo.currentWalletIds);
+    } else {
+      const currentWalletIds = {};
+      for (const walletId of Object.keys(sessionInfo.wallets)) {
+        currentWalletIds[sessionInfo.wallets[walletId].type] = [
+          ...(currentWalletIds[sessionInfo.wallets[walletId].type] ?? []),
+          walletId,
+        ];
+      }
+      await this.setCurrentWalletIds(currentWalletIds);
+    }
+
     this.persistSessionCookie(sessionInfo.sessionCookie);
     await this.setPhoneNumber(sessionInfo.phone, sessionInfo.countryCode);
   }
