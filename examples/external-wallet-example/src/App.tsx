@@ -5,6 +5,7 @@ import {
   rainbowWallet,
   walletConnectWallet,
   zerionWallet,
+  rabbyWallet,
 } from '@usecapsule/evm-wallet-connectors';
 import { CapsuleCosmosProvider, keplrWallet, leapWallet } from '@usecapsule/cosmos-wallet-connectors';
 import { sepolia, celo, mainnet, polygon } from 'wagmi/chains';
@@ -49,7 +50,7 @@ export const App = () => {
           projectId: 'dc87c564a371d823d3795ae407391656',
           appName: 'Capsule Example',
           chains: [mainnet, polygon, sepolia, celo],
-          wallets: [metaMaskWallet, rainbowWallet, walletConnectWallet, zerionWallet, coinbaseWallet],
+          wallets: [metaMaskWallet, rainbowWallet, walletConnectWallet, zerionWallet, coinbaseWallet, rabbyWallet],
         }}
       >
         <CapsuleSolanaProvider

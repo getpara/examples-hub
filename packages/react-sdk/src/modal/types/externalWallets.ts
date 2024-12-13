@@ -4,6 +4,7 @@ export enum EvmWallet {
   COINBASE = 'COINBASE',
   WALLETCONNECT = 'WALLETCONNECT',
   ZERION = 'ZERION',
+  RABBY = 'RABBY',
 }
 
 export enum SolanaWallet {
