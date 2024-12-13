@@ -17,6 +17,11 @@ export class CpslAvatar {
   @Prop() src: string;
 
   /**
+   * The CSS width and height of the icon.
+   */
+  @Prop() size?: string;
+
+  /**
    * The variant of the avatar.
    * Options are: `"round"`, `"square".
    * Default is: `"square"`.
@@ -26,7 +31,17 @@ export class CpslAvatar {
   render() {
     return (
       <Host>
-        <span class={{ round: this.variant === 'round' }}>
+        <span
+          class={{ round: this.variant === 'round' }}
+          style={
+            this.size
+              ? {
+                  width: this.size,
+                  height: this.size,
+                }
+              : {}
+          }
+        >
           <img src={this.src} alt={this.alt ?? 'avatar'} />
         </span>
       </Host>

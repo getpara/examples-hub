@@ -1,32 +1,31 @@
 import { create } from 'zustand';
 import { getActions } from './actions.js';
-import { CountryCallingCode } from 'libphonenumber-js';
+import { Auth } from '@usecapsule/user-management-client';
+import { ModalAuthInfo } from '@usecapsule/react-common';
 
-type IdentifierType = 'email' | 'phone' | 'farcaster';
+type SetAuthInfo = Auth & Partial<Pick<ModalAuthInfo, 'pfpUrl' | 'displayName'>>;
 
-interface UserInfoState {
-  identifier: string;
-  identifierType?: IdentifierType;
-  countryCode: CountryCallingCode;
+type UserInfoState = {
+  auth: Auth | null;
+  pfpUrl: string | null;
+  displayName: string | null;
   recoveryShare: string | null;
-}
+};
 
 export interface UserInfoActions {
   resetState: () => void;
-  setIdentifier: (identifier: string) => void;
-  setIdentifierType: (identifierType?: IdentifierType) => void;
-  setCountryCode: (countryCode: CountryCallingCode) => void;
-  getUsername: () => string;
+  setAuthInfo: (auth: SetAuthInfo) => void;
+  getAuthInfo: () => ModalAuthInfo | null;
   setRecoveryShare: (recoveryShare: string | null) => void;
 }
 
 export type UserInfoStore = UserInfoState & UserInfoActions;
 
 export const DEFAULT_USER_INFO_STATE: UserInfoState = {
-  identifier: '',
-  identifierType: undefined,
-  countryCode: '+1' as CountryCallingCode,
+  auth: null,
   recoveryShare: null,
+  pfpUrl: null,
+  displayName: null,
 };
 
 export const useUserInfoStore = create<UserInfoStore>((set, get) => ({

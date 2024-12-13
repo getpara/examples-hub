@@ -18,7 +18,7 @@ export const BiometricLoginStep = () => {
   const setPopupWindow = useModalStore(state => state.setPopupWindow);
   const biometricLocationHints = useModalStore(state => state.biometricLocationHints);
   const capsule = useCapsuleStore(state => state.capsule);
-  const username = useUserInfoStore(state => state.getUsername());
+  const authInfo = useUserInfoStore(state => state.getAuthInfo());
   const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
   const setPasswordUrlForLogin = useModalStore(state => state.setPasswordUrlForLogin);
   const passkeysSupported = isPasskeySupported();
@@ -51,6 +51,8 @@ export const BiometricLoginStep = () => {
               undefined,
               undefined,
               authType,
+              authInfo.displayName,
+              authInfo.pfpUrl,
             )
           : undefined;
 
@@ -63,6 +65,8 @@ export const BiometricLoginStep = () => {
               undefined,
               undefined,
               authType,
+              authInfo.displayName,
+              authInfo.pfpUrl,
             )
           : undefined;
 
@@ -108,7 +112,7 @@ export const BiometricLoginStep = () => {
             Welcome back,
           </Heading>
         )}
-        <UserIdentifier identifier={username} />
+        <UserIdentifier {...authInfo} />
       </InnerStepContainer>
       <MainContainer>
         {supportedAuthMethods?.has && supportedAuthMethods.has(AuthMethod.PASSWORD) && passwordUrlForLogin && (

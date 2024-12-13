@@ -24,6 +24,7 @@ import { useDropdownPosition } from './hooks/useDropdownPosition.js';
 import { ModalStep } from '../../utils/steps.js';
 import { defaultPhoneMask, phoneMasks } from './phoneMasks.js';
 import { AuthMethod } from '@usecapsule/web-sdk';
+import { AuthType } from '@usecapsule/user-management-client';
 
 interface AuthInputProps {
   disableEmailLogin?: boolean;
@@ -37,16 +38,31 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
   const { dropdownMaxHeight, dropdownWidth } = useDropdownPosition(inputRef);
 
   const capsule = useCapsuleStore(state => state.capsule);
-  const setCountryCode = useUserInfoStore(state => state.setCountryCode);
-  const setIdentifier = useUserInfoStore(state => state.setIdentifier);
-  const identifier = useUserInfoStore(state => state.identifier);
-  const identifierType = useUserInfoStore(state => state.identifierType);
-  const countryCode = useUserInfoStore(state => state.countryCode);
-  const setIdentifierType = useUserInfoStore(state => state.setIdentifierType);
+  const setAuthInfo = useUserInfoStore(state => state.setAuthInfo);
+  const authInfo = useUserInfoStore(state => state.getAuthInfo());
   const setFlow = useModalStore(state => state.setFlow);
   const setStep = useModalStore(state => state.setStep);
   const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
   const setBiometricLocationHints = useModalStore(state => state.setBiometricLocationHints);
+
+  const [countryCode, setCountryCode] = useState<CountryCallingCode>(
+    (authInfo?.authType === 'phone' ? authInfo.auth.countryCode : '+1') as CountryCallingCode,
+  );
+  const [identifier, setIdentifier] = useState(
+    (() => {
+      if (!authInfo || authInfo.authType === 'farcasterUsername') {
+        return '';
+      }
+      if (authInfo.authType !== 'phone') {
+        return authInfo.identifier;
+      }
+
+      return authInfo.auth.phone;
+    })(),
+  );
+  const [identifierType, setIdentifierType] = useState<Extract<AuthType, 'email' | 'phone'> | undefined>(
+    authInfo && (authInfo.authType === 'email' || authInfo.authType === 'phone') ? authInfo.authType : undefined,
+  );
 
   const [matchedCountryCode, setMatchedCountryCode] = useState<DropdownInputEventDetail>(DEFAULT_COUNTRY);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -118,6 +134,8 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
 
       // Logout to ensure cleared Capsule state but preserve pregen wallets
       await capsule.logout(true);
+
+      setAuthInfo({ email: identifier });
       const userExists = await capsule.checkIfUserExists(identifier);
       if (userExists) {
         const supportedAuthMethods = await capsule.initiateUserLoginV2(identifier, 'email');
@@ -149,6 +167,8 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
         setError('Please enter a valid phone number!');
         return;
       }
+
+      setAuthInfo({ phone: identifier, countryCode });
 
       if (userExists) {
         const supportedAuthMethods = await capsule.initiateUserLoginV2(identifier, 'phone', countryCode);
@@ -210,10 +230,11 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
         enterkeyhint="go"
         noAutoDisable
         disabled={isLoggingIn}
+        data-testid="auth-input"
       >
         <IconContainer slot="start">
-          {!disableEmailLogin && (isUnknown || isEmail) && <CpslIcon icon="mail" />}
-          {!disablePhoneLogin && isUnknown && <CpslIcon icon="phone" />}
+          {!disableEmailLogin && (isUnknown || isEmail) && <CpslIcon aria-label="email" icon="mail" />}
+          {!disablePhoneLogin && isUnknown && <CpslIcon aria-label="phone" icon="phone" />}
           {isPhone && (
             <CountryCodeSelect
               selectedValue={matchedCountryCode.selectedLabel}
@@ -226,6 +247,7 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
               showSearch
               searchPlaceholder="Search Countries"
               onCpslSearchChange={handleSearchInput}
+              data-testid="country-code-select"
             >
               {matchedCountryCode && (
                 <SelectedItem slot="selected-item">

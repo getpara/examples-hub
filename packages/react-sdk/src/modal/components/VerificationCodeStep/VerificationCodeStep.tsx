@@ -9,8 +9,7 @@ import { AuthMethod } from '@usecapsule/core-sdk';
 
 export const VerificationCodeStep = () => {
   const theme = useThemeStore(state => state.theme);
-  const identifierType = useUserInfoStore(state => state.identifierType);
-  const username = useUserInfoStore(state => state.getUsername());
+  const authInfo = useUserInfoStore(state => state.getAuthInfo());
   const setStep = useModalStore(state => state.setStep);
   const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
   const setPasswordUrlForCreate = useModalStore(state => state.setPasswordUrlForCreate);
@@ -24,7 +23,7 @@ export const VerificationCodeStep = () => {
   const [resendDisabled, setResendDisabled] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
 
-  const isEmail = identifierType === 'email';
+  const isEmail = authInfo?.authType === 'email';
 
   useEffect(() => {
     // Using a small timeout here to ensure the input is mounted before attempting focus
@@ -101,7 +100,7 @@ export const VerificationCodeStep = () => {
           Verify {isEmail ? 'Email' : 'Phone Number'}
         </Heading>
         <InlineText variant="bodyS" color="secondary">
-          Please enter the code we sent to <InlineText variant="bodyS">{username}</InlineText>
+          Please enter the code we sent to <InlineText variant="bodyS">{authInfo!.identifier}</InlineText>
         </InlineText>
       </InnerStepContainer>
       <InnerStepContainer>

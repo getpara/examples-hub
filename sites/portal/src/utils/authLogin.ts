@@ -22,6 +22,8 @@ export type AuthLoginParams = {
   partnerId?: string;
   userId?: string;
   pregenIds?: PregenIds;
+  displayName?: string;
+  pfpUrl?: string;
 } & AuthParams;
 
 export type AuthLoginPasswordParams = AuthLoginParams & {

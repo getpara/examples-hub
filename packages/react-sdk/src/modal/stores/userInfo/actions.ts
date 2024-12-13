@@ -1,7 +1,6 @@
 import { StoreApi } from 'zustand';
 import { DEFAULT_USER_INFO_STATE, UserInfoActions, UserInfoStore } from './useUserInfoStore.js';
-import { CountryCallingCode } from 'libphonenumber-js';
-import { formatPhoneNumber } from '@usecapsule/react-common';
+import { extractAuthInfo } from '@usecapsule/user-management-client';
 
 export const getActions = (
   set: StoreApi<UserInfoStore>['setState'],
@@ -10,30 +9,11 @@ export const getActions = (
   resetState: () => {
     set(DEFAULT_USER_INFO_STATE);
   },
-  setIdentifier: identifier => {
-    set({ identifier });
+  setAuthInfo: ({ pfpUrl, displayName, ...auth }) => {
+    set({ auth, pfpUrl: pfpUrl || null, displayName: displayName || null });
   },
-  setIdentifierType: identifierType => {
-    set({ identifierType });
-  },
-  setCountryCode: countryCode => {
-    set({ countryCode });
-  },
-  getUsername: () => {
-    const identifierType = get().identifierType;
-    const identifier = get().identifier;
-
-    let username = identifier;
-
-    const isPhone = identifierType === 'phone';
-
-    if (isPhone) {
-      const countryCode = (get().countryCode?.split('+')[1] ?? '1') as CountryCallingCode;
-
-      username = identifier.length > 2 ? formatPhoneNumber(identifier, countryCode) : '';
-    }
-
-    return username;
+  getAuthInfo: () => {
+    return get().auth ? { ...extractAuthInfo(get().auth), pfpUrl: get().pfpUrl, displayName: get().displayName } : null;
   },
   setRecoveryShare: recoveryShare => {
     set({ recoveryShare });

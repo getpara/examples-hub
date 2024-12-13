@@ -74,8 +74,7 @@ export const SaveRecoverySecret = ({
 
 export const RecoverySecretStep = () => {
   const setStep = useModalStore(state => state.setStep);
-  const identifier = useUserInfoStore(state => state.identifier);
-  const identifierType = useUserInfoStore(state => state.identifierType);
+  const authInfo = useUserInfoStore(state => state.getAuthInfo());
   const recoveryShare = useUserInfoStore(state => state.recoveryShare);
 
   const backupDecryptionKey = JSON.parse(recoveryShare || '{}').backupDecryptionKey;
@@ -99,7 +98,7 @@ export const RecoverySecretStep = () => {
         </InlineText>
       </InnerStepContainer>
       <SaveRecoverySecret
-        email={identifierType === 'email' ? identifier : undefined}
+        email={authInfo?.authType === 'email' ? authInfo.identifier : undefined}
         value={backupDecryptionKey}
         onComplete={onComplete}
       />

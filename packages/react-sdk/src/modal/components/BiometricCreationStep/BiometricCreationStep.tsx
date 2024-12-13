@@ -17,11 +17,10 @@ export const BiometricCreationStep = ({
 }) => {
   const webAuthURLForCreate = useModalStore(state => state.webAuthURLForCreate);
   const passwordUrlForCreate = useModalStore(state => state.passwordUrlForCreate);
-  const username = useUserInfoStore(state => state.getUsername());
+  const authInfo = useUserInfoStore(state => state.getAuthInfo());
   const currentStep = useModalStore(state => state.step);
   const capsule = useCapsuleStore(state => state.capsule);
   const [shortLoginLink, setShortLoginLink] = useState<string>();
-
   const [isCopied, copy] = useCopyToClipboard();
 
   useEffect(() => {
@@ -55,7 +54,7 @@ export const BiometricCreationStep = ({
         <Heading variant="headingS" weight="bold">
           {isBoth ? 'Secure Your Account' : 'Create Passkey'}
         </Heading>
-        <UserIdentifier identifier={username} />
+        <UserIdentifier {...authInfo} />
         <CpslText variant="bodyS" color="secondary" weight="medium">
           {isBoth ? 'Choose a password or set up a passkey' : 'Your Passkey keeps your account safe.'}
         </CpslText>

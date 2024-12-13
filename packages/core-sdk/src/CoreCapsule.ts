@@ -18,7 +18,6 @@ import Client, {
   extractWalletRef,
   PasswordStatus,
   BiometricLocationHint,
-  extractAuth,
 } from '@usecapsule/user-management-client';
 import type { pki as pkiType, jsbn as jsbnType } from 'node-forge';
 import forge from 'node-forge';
@@ -723,6 +722,8 @@ export abstract class CoreCapsule {
       sessionId?: string;
       theme?: Theme;
       pathId?: string;
+      displayName?: string;
+      pfpUrl?: string;
     } = {},
   ) {
     const base = type === 'onRamp' ? getPortalBaseURL(this.ctx) : await this.getPortalURL(opts.partnerId);
@@ -800,6 +801,8 @@ export abstract class CoreCapsule {
             newDeviceSessionId: opts.newDeviceSessionId,
             newDeviceEncryptionKey: opts.newDeviceEncryptionKey,
             pregenIds: JSON.stringify(this.pregenIds),
+            displayName: opts.displayName,
+            pfpUrl: opts.pfpUrl,
           }
         : {}),
       ...(opts.params || {}),
@@ -1575,6 +1578,8 @@ export abstract class CoreCapsule {
     newDeviceSessionId?: string,
     newDeviceEncryptionKey?: string,
     authType: AuthType = 'email',
+    displayName?: string,
+    pfpUrl?: string,
   ): Promise<string> {
     return this.constructPortalUrl('loginAuth', {
       authType,
@@ -1583,6 +1588,8 @@ export abstract class CoreCapsule {
       newDeviceSessionId,
       newDeviceEncryptionKey,
       partnerId,
+      displayName,
+      pfpUrl,
     });
   }
 
@@ -1593,6 +1600,8 @@ export abstract class CoreCapsule {
     newDeviceSessionId?: string,
     newDeviceEncryptionKey?: string,
     authType: AuthType = 'email',
+    displayName?: string,
+    pfpUrl?: string,
   ): Promise<string> {
     return this.constructPortalUrl('loginPassword', {
       authType,
@@ -1601,6 +1610,8 @@ export abstract class CoreCapsule {
       newDeviceSessionId,
       newDeviceEncryptionKey,
       partnerId,
+      displayName,
+      pfpUrl,
     });
   }
 
@@ -1720,7 +1731,7 @@ export abstract class CoreCapsule {
     return res.data.exists;
   }
 
-  /**
+  /*
    * Creates a new user.
    * @param email - email to use for creating the user.
    */
@@ -1965,12 +1976,21 @@ export abstract class CoreCapsule {
     authType: AuthType | 'userId' = 'email',
     countryCode?: string,
   ): Promise<Set<AuthMethod>> {
-    const userId = authType === 'userId' ? identifier : undefined;
-    const email = authType === 'email' ? identifier : undefined;
-    const phone = authType === 'phone' ? identifier : undefined;
-    const farcasterUsername = authType === 'farcaster' ? identifier : undefined;
-
-    const auth = extractAuth({ email, phone, countryCode, farcasterUsername, userId }, { allowUserId: true });
+    let auth;
+    switch (authType) {
+      case 'email':
+        auth = { email: identifier };
+        break;
+      case 'phone':
+        auth = { phone: identifier, countryCode };
+        break;
+      case 'farcaster':
+        auth = { farcasterUsername: identifier };
+        break;
+      case 'userId':
+        auth = { userId: identifier };
+        break;
+    }
 
     const { supportedAuthMethods } = await this.ctx.capsuleClient.getSupportedAuthMethods(auth);
 
@@ -2161,6 +2181,7 @@ export abstract class CoreCapsule {
   async waitForFarcasterStatus(): Promise<{
     userExists: boolean;
     username: string;
+    pfpUrl?: string | null;
   }> {
     this.isAwaitingFarcaster = true;
     while (this.isAwaitingFarcaster) {
@@ -2169,12 +2190,13 @@ export abstract class CoreCapsule {
 
         const res = await this.ctx.capsuleClient.getFarcasterAuthStatus();
         if (res.data.state === 'completed') {
-          const { userId, userExists, username } = res.data;
+          const { userId, userExists, username, pfpUrl } = res.data;
           await this.setUserId(userId);
           await this.setFarcasterUsername(username);
           return {
             userExists,
             username,
+            pfpUrl,
           };
         }
       } catch (err) {

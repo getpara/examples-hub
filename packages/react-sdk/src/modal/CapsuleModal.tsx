@@ -47,9 +47,7 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     const setOnModalStepChange = useModalStore(state => state.setOnModalStepChange);
     const setStep = useModalStore(state => state.setStep);
     const setCapsule = useCapsuleStore(state => state.setCapsule);
-    const setIdentifier = useUserInfoStore(state => state.setIdentifier);
-    const setIdentifierType = useUserInfoStore(state => state.setIdentifierType);
-    const setCountryCode = useUserInfoStore(state => state.setCountryCode);
+    const setAuthInfo = useUserInfoStore(state => state.setAuthInfo);
     const hasPreviousStep = useModalStore(state => state.hasPreviousStep());
     const setFlow = useModalStore(state => state.setFlow);
     const setIsFullyLoggedIn = useModalStore(state => state.setIsFullyLoggedIn);
@@ -114,22 +112,21 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
         setIsFullyLoggedIn(false);
       }
 
-      const email = capsule.getEmail();
-      if (email) {
-        setIdentifier(email);
-        setIdentifierType('email');
-      }
+      switch (true) {
+        case capsule.isEmail:
+          setAuthInfo({ email: capsule.getEmail() });
+          break;
 
-      const { phone, countryCode } = capsule.getPhone();
-      if (phone) {
-        setIdentifier(phone);
-        setCountryCode(countryCode as CountryCallingCode);
-        setIdentifierType('phone');
-      }
+        case capsule.isPhone:
+          {
+            const { phone, countryCode } = capsule.getPhone();
+            setAuthInfo({ phone, countryCode: countryCode as CountryCallingCode });
+          }
+          break;
 
-      if (capsule.isFarcaster) {
-        setIdentifier(capsule.getFarcasterUsername());
-        setIdentifierType('farcaster');
+        case capsule.isFarcaster:
+          setAuthInfo({ farcasterUsername: capsule.getFarcasterUsername() });
+          break;
       }
 
       setIsInit(true);

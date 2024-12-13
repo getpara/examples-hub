@@ -1,21 +1,21 @@
 import { FlexStartInnerContainer } from '../../../components/common';
 import { CpslButton, CpslText } from '@usecapsule/react-components';
 import { UserIdentifier } from '@usecapsule/react-common';
-import { useUsername } from '../../../hooks/useUsername';
+import { useAuthInfo } from '../../../hooks/useAuthInfo';
 
 interface ManualLoginStepProps {
   onLoginClick: () => void;
 }
 
 export const ManualLoginStep = ({ onLoginClick }: ManualLoginStepProps) => {
-  const username = useUsername();
+  const authInfo = useAuthInfo();
 
   return (
     <FlexStartInnerContainer>
       <CpslText weight="bold" variant="headingS">
         Login
       </CpslText>
-      <UserIdentifier identifier={username} />
+      {authInfo && <UserIdentifier {...authInfo} />}
       <CpslButton fullWidth onClick={onLoginClick}>
         Login with Passkey
       </CpslButton>

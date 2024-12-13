@@ -6,11 +6,10 @@ import { ModalStep } from '../../utils/steps.js';
 import { AuthMethod, isMobile } from '@usecapsule/web-sdk';
 
 const FarcasterOAuthStep = () => {
+  const setAuthInfo = useUserInfoStore(state => state.setAuthInfo);
   const setStep = useModalStore(state => state.setStep);
   const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
   const setPasswordUrlForCreate = useModalStore(state => state.setPasswordUrlForCreate);
-  const setIdentifier = useUserInfoStore(state => state.setIdentifier);
-  const setIdentifierType = useUserInfoStore(state => state.setIdentifierType);
   const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
   const setBiometricLocationHints = useModalStore(state => state.setBiometricLocationHints);
   const capsule = useCapsuleStore(state => state.capsule);
@@ -21,12 +20,11 @@ const FarcasterOAuthStep = () => {
   useEffect(() => {
     if (farcasterConnectUri) {
       const pollStatus = async () => {
-        const { userExists, username } = await capsule.waitForFarcasterStatus();
+        const { userExists, username, pfpUrl } = await capsule.waitForFarcasterStatus();
+
+        setAuthInfo({ farcasterUsername: username, pfpUrl });
 
         setStep(ModalStep.AWAITING_OAUTH);
-
-        setIdentifier(username);
-        setIdentifierType('farcaster');
 
         if (userExists) {
           const supportedAuthMethods = await capsule.initiateUserLoginV2(username, 'farcaster');

@@ -1,4 +1,4 @@
-import { OAuthMethod } from '@usecapsule/web-sdk';
+import { AuthMethod, OAuthMethod } from '@usecapsule/web-sdk';
 import { styled } from 'styled-components';
 import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
@@ -26,11 +26,9 @@ export const OAuth = ({ methods }: OAuthProps) => {
   const setFlow = useModalStore(state => state.setFlow);
   const setStep = useModalStore(state => state.setStep);
   const setPopupWindow = useModalStore(state => state.setPopupWindow);
-  const setIdentifier = useUserInfoStore(state => state.setIdentifier);
-  const setIdentifierType = useUserInfoStore(state => state.setIdentifierType);
+  const setAuthInfo = useUserInfoStore(state => state.setAuthInfo);
+  const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
   const setBiometricLocationHints = useModalStore(state => state.setBiometricLocationHints);
-  const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
-  const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
   const setFarcasterConnectUri = useModalStore(state => state.setFarcasterConnectUri);
   const farcasterConnectUri = useModalStore(state => state.farcasterConnectUri);
   const showAll = useModalStore(state => state.step === ModalStep.AUTH_MORE);
@@ -92,23 +90,31 @@ export const OAuth = ({ methods }: OAuthProps) => {
       throw new Error('email is required');
     }
 
-    setIdentifier(email);
-    setIdentifierType('email');
+    setAuthInfo({ email });
 
     if (userExists) {
-      const webAuthUrlForLogin = await capsule.initiateUserLogin(email);
-      const biometricLocationHints = await capsule.getUserBiometricLocationHints();
-      setFlow('login');
-      setWebAuthURLForLogin(webAuthUrlForLogin);
-      setBiometricLocationHints(biometricLocationHints);
-      setStep(ModalStep.BIOMETRIC_LOGIN);
-    } else {
-      const webAuthURLForCreate = await capsule.getSetUpBiometricsURL(false);
-      setFlow('signUp');
-      setWebAuthURLForCreate(webAuthURLForCreate);
-      setStep(ModalStep.BIOMETRIC_CREATION);
+      const supportedAuthMethods = await capsule.initiateUserLoginV2(email, 'email');
+
+      if (supportedAuthMethods.size === 0) {
+        setFlow('signUp');
+        setStep(ModalStep.BIOMETRIC_CREATION);
+      } else {
+        const biometricLocationHints = supportedAuthMethods.has(AuthMethod.PASSKEY)
+          ? await capsule.getUserBiometricLocationHints()
+          : [];
+
+        setFlow('login');
+        setStep(ModalStep.BIOMETRIC_LOGIN);
+        setSupportedAuthMethods(supportedAuthMethods);
+        setBiometricLocationHints(biometricLocationHints);
+        return;
+      }
     }
-    setPopupWindow(undefined);
+
+    await capsule.createUser(email);
+    setFlow('signUp');
+    setStep(ModalStep.VERIFICATIONS);
+    return;
   };
 
   const useBrandedLogos = oAuthLogoVariant === 'default';

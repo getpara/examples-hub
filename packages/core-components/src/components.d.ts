@@ -78,6 +78,10 @@ export namespace Components {
          */
         "alt"?: string;
         /**
+          * The CSS width and height of the icon.
+         */
+        "size"?: string;
+        /**
           * The source of the avatar image.
          */
         "src": string;
@@ -1574,6 +1578,10 @@ declare namespace LocalJSX {
           * The alternate text for the avatar image.
          */
         "alt"?: string;
+        /**
+          * The CSS width and height of the icon.
+         */
+        "size"?: string;
         /**
           * The source of the avatar image.
          */
