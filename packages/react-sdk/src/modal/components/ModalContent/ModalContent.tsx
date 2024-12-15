@@ -19,6 +19,7 @@ import { CapsuleModalProps } from '../../types/modalProps.js';
 import { DEFAULTS } from '../../constants/defaults.js';
 import { useGoBack } from '../../hooks/useGoBack.js';
 import { openPopup } from '../../utils/openPopup.js';
+import { useExternalWalletProviderStore } from '../../stores/externalWalletProvider/useExternalWalletProviderStore.js';
 
 type ModalContentProps = Omit<
   CapsuleModalProps,
@@ -96,6 +97,9 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
 
     const [walletCreationInProgress, setWalletCreationInProgress] = useState(false);
 
+    // Get the connectCapsuleEvmWallet action if available. This is used to trigger Capsule as an active connection when the user logs in using a non external wallet method.
+    const { connectCapsuleEvmWallet, evmContext, EvmProvider } = useExternalWalletProviderStore.getState();
+
     useImperativeHandle(ref, () => {
       return {
         handleModalClose() {
@@ -136,6 +140,17 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
         if (needsWallet) {
           setStep(ModalStep.AWAITING_WALLET_CREATION);
         } else {
+          // If we're in the CapsuleEvmProvider context call the connect method to trigger Capsule as an active connection
+          if (evmContext && EvmProvider && connectCapsuleEvmWallet) {
+            try {
+              const { error } = await connectCapsuleEvmWallet();
+              if (error) {
+                console.warn('Failed to connect Capsule EVM wallet to Wagmi:', error);
+              }
+            } catch (err) {
+              console.warn('Error calling connectCapsuleEvmWallet:', err);
+            }
+          }
           if (await is2FASetup()) {
             setStep(ModalStep.LOGIN_DONE);
           } else {
@@ -219,6 +234,17 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
             setWebAuthURLForLogin('');
             setPasswordUrlForLogin('');
             setBiometricLocationHints();
+            // If we're in the CapsuleEvmProvider context call the connect method to trigger Capsule as an active connection
+            if (evmContext && EvmProvider && connectCapsuleEvmWallet) {
+              try {
+                const { error } = await connectCapsuleEvmWallet();
+                if (error) {
+                  console.warn('Failed to connect Capsule EVM wallet to Wagmi:', error);
+                }
+              } catch (err) {
+                console.warn('Error calling connectCapsuleEvmWallet:', err);
+              }
+            }
 
             if (await is2FASetup()) {
               setStep(ModalStep.LOGIN_DONE);

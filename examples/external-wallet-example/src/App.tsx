@@ -16,6 +16,7 @@ import { useMemo } from 'react';
 import { clusterApiUrl } from '@solana/web3.js';
 import { useCosmosStore } from './stores/cosmosStore/useCosmosStore';
 import { axelar, cosmoshub, osmosis, sommelier, stargaze } from '@usecapsule/graz/chains';
+import capsule from './clients/capsule';
 
 export const cosmosChains = [
   { ...cosmoshub, rpc: 'https://rpc.cosmos.directory/cosmoshub', rest: 'https://rest.cosmos.directory/cosmoshub' },
@@ -51,6 +52,7 @@ export const App = () => {
           appName: 'Capsule Example',
           chains: [mainnet, polygon, sepolia, celo],
           wallets: [metaMaskWallet, rainbowWallet, walletConnectWallet, zerionWallet, coinbaseWallet, rabbyWallet],
+          capsule: capsule,
         }}
       >
         <CapsuleSolanaProvider
