@@ -60,6 +60,7 @@ export const Body = ({
   const stepDirection = useModalStore(state => state.stepDirection);
   const setStepDirection = useModalStore(state => state.setStepDirection);
   const accountAddFundTab = useModalStore(state => state.accountAddFundTab);
+  const setAccountAddFundTab = useModalStore(state => state.setAccountAddFundTab);
   const appName = useThemeStore(state => state.appName);
   const embeddedModal = useThemeStore(state => state.embeddedModal);
 
@@ -138,7 +139,9 @@ export const Body = ({
       case ModalStep.FARCASTER_OAUTH: {
         return <FarcasterOAuthStep />;
       }
-      case ModalStep.ADD_FUNDS: {
+      case ModalStep.ADD_FUNDS_BUY:
+      case ModalStep.ADD_FUNDS_RECEIVE:
+      case ModalStep.ADD_FUNDS_WITHDRAW: {
         return <AddFunds />;
       }
       case ModalStep.ADD_FUNDS_AWAITING: {
@@ -168,6 +171,22 @@ export const Body = ({
     }
   }, [onRampConfig?.testMode]);
 
+  useEffect(() => {
+    switch (currentStep) {
+      case ModalStep.ADD_FUNDS_BUY:
+        setAccountAddFundTab(EnabledFlow.BUY);
+        break;
+      case ModalStep.ADD_FUNDS_RECEIVE:
+        setAccountAddFundTab(EnabledFlow.RECEIVE);
+        break;
+      case ModalStep.ADD_FUNDS_WITHDRAW:
+        setAccountAddFundTab(EnabledFlow.WITHDRAW);
+        break;
+      default:
+        break;
+    }
+  }, [currentStep]);
+
   return (
     <Container slot="body" data-testid="modal-content">
       {!embeddedModal && (
@@ -186,7 +205,9 @@ export const Body = ({
           custom={stepDirection}
         >
           <BodyContainer
-            key={currentStep}
+            key={
+              ['ADD_FUNDS_BUY', 'ADD_FUNDS_RECEIVE', 'ADD_FUNDS_WITHDRAW'].includes(currentStep) ? 'ADD_FUNDS' : currentStep
+            }
             custom={stepDirection}
             variants={BODY_MOTION_VARIANTS}
             initial="enter"
@@ -199,7 +220,8 @@ export const Body = ({
               {Content()}
               {onRampConfig?.testMode &&
                 [
-                  ModalStep.ADD_FUNDS,
+                  ModalStep.ADD_FUNDS_BUY,
+                  ModalStep.ADD_FUNDS_WITHDRAW,
                   ModalStep.ADD_FUNDS_AWAITING,
                   ModalStep.ADD_FUNDS_FAILURE,
                   ModalStep.ADD_FUNDS_SUCCESS,

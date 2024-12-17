@@ -217,7 +217,9 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
         resetUserInfoState();
         setRecoveryShare(null);
       } else if (
-        currentStep === ModalStep.ADD_FUNDS ||
+        currentStep === ModalStep.ADD_FUNDS_BUY ||
+        currentStep === ModalStep.ADD_FUNDS_RECEIVE ||
+        currentStep === ModalStep.ADD_FUNDS_WITHDRAW ||
         currentStep === ModalStep.ADD_FUNDS_AWAITING ||
         currentStep === ModalStep.ADD_FUNDS_SUCCESS ||
         currentStep === ModalStep.ADD_FUNDS_FAILURE

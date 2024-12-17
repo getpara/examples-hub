@@ -28,7 +28,7 @@ import { ReactNode, useEffect, useMemo } from 'react';
 import { OnRampProviderButton } from '../OnRampComponents/OnRampProviderButton.js';
 import { isMobile } from '@usecapsule/web-sdk';
 import { useActiveWallet } from '../../hooks/useActiveWallet.js';
-import { ModalStep } from '../../utils/steps.js';
+import { getAddFundsStep, ModalStep } from '../../utils/steps.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useExternalWallets } from '../../providers/ExternalWalletContext.js';
 import { getNetworkFromChainId, getNetworkOrMainNetEquivalent, useCopyToClipboard } from '@usecapsule/react-common';
@@ -60,7 +60,6 @@ export const AddFunds = () => {
   const appName = useThemeStore(state => state.appName);
   const onRampConfig = useModalStore(state => state.onRampConfig);
   const storedTab = useModalStore(state => state.accountAddFundTab);
-  const setTab = useModalStore(state => state.setAccountAddFundTab);
   const setStep = useModalStore(state => state.setStep);
   const setOnRampPurchase = useModalStore(state => state.setOnRampPurchase);
   const { chainId } = useExternalWallets();
@@ -78,7 +77,7 @@ export const AddFunds = () => {
   );
 
   const onSetTab = (event: CpslTabsCustomEvent<TabsChangedEventDetail>) => {
-    setTab(event.detail.tab as Tab);
+    setStep(getAddFundsStep(event.detail.tab as Tab));
   };
   const onCopy = () => {
     copy(address);

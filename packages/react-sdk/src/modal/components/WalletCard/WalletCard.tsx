@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { useCapsuleStore, useModalStore, useThemeStore } from '../../stores/index.js';
 import { CpslButton, CpslIdenticon, CpslText } from '@usecapsule/react-components';
 import { truncateAddress, WalletType } from '@usecapsule/web-sdk';
-import { useBuyCryptoClick } from '../../hooks/useBuyCryptoClick.js';
+import { ModalStep } from '../../utils/steps.js';
 
 export const ExternalWalletCard = ({ address, showAddFunds }: Pick<SharedWalletCardProps, 'address' | 'showAddFunds'>) => {
   const capsule = useCapsuleStore(state => state.capsule);
@@ -61,13 +61,15 @@ interface SharedWalletCardProps {
   showAddFunds?: boolean;
 }
 const SharedWalletCard = ({ address, name, identiconHash, showAddFunds, id, type }: SharedWalletCardProps) => {
+  const onRampConfig = useModalStore(state => state.onRampConfig);
   const setActiveWallet = useModalStore(state => state.setActiveWallet);
-  const onBuyCryptoClick = useBuyCryptoClick();
+  const setStep = useModalStore(state => state.setStep);
 
+  const isAddFundsEnabled = onRampConfig.isBuyEnabled || onRampConfig.isReceiveEnabled;
   const handleAddFundsClick = () => {
     if (id && type) {
       setActiveWallet([id, type]);
-      onBuyCryptoClick();
+      isAddFundsEnabled && setStep(onRampConfig.isBuyEnabled ? ModalStep.ADD_FUNDS_BUY : ModalStep.ADD_FUNDS_RECEIVE);
     }
   };
 
@@ -86,7 +88,7 @@ const SharedWalletCard = ({ address, name, identiconHash, showAddFunds, id, type
           </Name>
         </WalletNameContainer>
       </InnerContainer>
-      {showAddFunds && (
+      {showAddFunds && isAddFundsEnabled && (
         <AddFundsButton onClick={handleAddFundsClick}>
           <CpslText variant="bodyXS" color="contrast" weight="medium">
             Add Funds

@@ -1,20 +1,18 @@
 import styled from 'styled-components';
 import { InnerStepContainer, StepContainer, StyledCpslTileButton } from '../common.js';
 import { CpslButton, CpslIcon, CpslSpinner, CpslText } from '@usecapsule/react-components';
-import { useBuyCryptoClick } from '../../hooks/useBuyCryptoClick.js';
 import { useCapsuleStore, useModalStore } from '../../stores/index.js';
 import { useExternalWallets } from '../../providers/ExternalWalletContext.js';
 import { useState } from 'react';
-import { EnabledFlow } from '@usecapsule/web-sdk';
+import { ModalStep } from '../../utils/steps.js';
 
 interface AccountProps {
   onClose: () => void;
 }
 
 export const Account = ({ onClose }: AccountProps) => {
-  const onBuyCryptoClick = useBuyCryptoClick();
   const onRampConfig = useModalStore(state => state.onRampConfig);
-  const setAccountAddFundTab = useModalStore(state => state.setAccountAddFundTab);
+  const setStep = useModalStore(state => state.setStep);
   const capsule = useCapsuleStore(state => state.capsule);
   const { disconnectExternalWallet } = useExternalWallets();
 
@@ -23,18 +21,15 @@ export const Account = ({ onClose }: AccountProps) => {
   const isOnRampLoaded = !!onRampConfig;
 
   const handleBuyClick = () => {
-    setAccountAddFundTab(EnabledFlow.BUY);
-    onBuyCryptoClick();
+    setStep(ModalStep.ADD_FUNDS_BUY);
   };
 
   const handleReceiveClick = () => {
-    setAccountAddFundTab(EnabledFlow.RECEIVE);
-    onBuyCryptoClick();
+    setStep(ModalStep.ADD_FUNDS_RECEIVE);
   };
 
   const handleSellClick = () => {
-    setAccountAddFundTab(EnabledFlow.WITHDRAW);
-    onBuyCryptoClick();
+    setStep(ModalStep.ADD_FUNDS_WITHDRAW);
   };
 
   const handleDisconnectClick = async () => {

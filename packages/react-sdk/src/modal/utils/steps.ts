@@ -1,3 +1,5 @@
+import { EnabledFlow } from '@usecapsule/web-sdk';
+
 export enum ModalStep {
   AUTH_MAIN = 'AUTH_MAIN',
   AUTH_MORE = 'AUTH_MORE',
@@ -20,7 +22,9 @@ export enum ModalStep {
   SETUP_2FA = 'SETUP_2FA',
   VERIFY_2FA = 'VERIFY_2FA',
   TWO_FACTOR_DONE = 'TWO_FACTOR_DONE',
-  ADD_FUNDS = 'ADD_FUNDS',
+  ADD_FUNDS_BUY = 'ADD_FUNDS_BUY',
+  ADD_FUNDS_RECEIVE = 'ADD_FUNDS_RECEIVE',
+  ADD_FUNDS_WITHDRAW = 'ADD_FUNDS_WITHDRAW',
   ADD_FUNDS_AWAITING = 'ADD_FUNDS_AWAITING',
   ADD_FUNDS_SUCCESS = 'ADD_FUNDS_SUCCESS',
   ADD_FUNDS_FAILURE = 'ADD_FUNDS_FAILURE',
@@ -36,7 +40,9 @@ export type ModalStepProp = ModalStepPropU | ModalStepPropL;
 
 enum AccountStep {
   ACCOUNT_MAIN = 'ACCOUNT_MAIN',
-  ADD_FUNDS = 'ADD_FUNDS',
+  ADD_FUNDS_BUY = 'ADD_FUNDS_BUY',
+  ADD_FUNDS_RECEIVE = 'ADD_FUNDS_RECEIVE',
+  ADD_FUNDS_WITHDRAW = 'ADD_FUNDS_WITHDRAW',
   ADD_FUNDS_AWAITING = 'ADD_FUNDS_AWAITING',
   ADD_FUNDS_SUCCESS = 'ADD_FUNDS_SUCCESS',
   ADD_FUNDS_FAILURE = 'ADD_FUNDS_FAILURE',
@@ -47,8 +53,10 @@ export const AccountPreviousStep: {
   [key in AccountStep]: ModalStep | undefined;
 } = {
   [AccountStep.ACCOUNT_MAIN]: undefined,
-  [AccountStep.ADD_FUNDS]: ModalStep.ACCOUNT_MAIN,
-  [AccountStep.ADD_FUNDS_AWAITING]: ModalStep.ADD_FUNDS,
+  [AccountStep.ADD_FUNDS_BUY]: ModalStep.ACCOUNT_MAIN,
+  [AccountStep.ADD_FUNDS_WITHDRAW]: ModalStep.ACCOUNT_MAIN,
+  [AccountStep.ADD_FUNDS_RECEIVE]: ModalStep.ACCOUNT_MAIN,
+  [AccountStep.ADD_FUNDS_AWAITING]: ModalStep.ADD_FUNDS_BUY,
   [AccountStep.ADD_FUNDS_SUCCESS]: ModalStep.ACCOUNT_MAIN,
   [AccountStep.ADD_FUNDS_FAILURE]: ModalStep.ACCOUNT_MAIN,
   [AccountStep.CHAIN_SWITCH]: ModalStep.ACCOUNT_MAIN,
@@ -72,7 +80,9 @@ enum SignUpModalStep {
   SETUP_2FA = 'SETUP_2FA',
   VERIFY_2FA = 'VERIFY_2FA',
   TWO_FACTOR_DONE = 'TWO_FACTOR_DONE',
-  ADD_FUNDS = 'ADD_FUNDS',
+  ADD_FUNDS_BUY = 'ADD_FUNDS_BUY',
+  ADD_FUNDS_RECEIVE = 'ADD_FUNDS_RECEIVE',
+  ADD_FUNDS_WITHDRAW = 'ADD_FUNDS_WITHDRAW',
   ADD_FUNDS_AWAITING = 'ADD_FUNDS_AWAITING',
   ADD_FUNDS_SUCCESS = 'ADD_FUNDS_SUCCESS',
   ADD_FUNDS_FAILURE = 'ADD_FUNDS_FAILURE',
@@ -98,8 +108,10 @@ export const SignUpPreviousStep: {
   [SignUpModalStep.SETUP_2FA]: ModalStep.SECRET,
   [SignUpModalStep.VERIFY_2FA]: ModalStep.SETUP_2FA,
   [SignUpModalStep.TWO_FACTOR_DONE]: undefined,
-  [SignUpModalStep.ADD_FUNDS]: ModalStep.WALLET_CREATION_DONE,
-  [SignUpModalStep.ADD_FUNDS_AWAITING]: ModalStep.ADD_FUNDS,
+  [SignUpModalStep.ADD_FUNDS_BUY]: ModalStep.WALLET_CREATION_DONE,
+  [SignUpModalStep.ADD_FUNDS_RECEIVE]: ModalStep.WALLET_CREATION_DONE,
+  [SignUpModalStep.ADD_FUNDS_WITHDRAW]: ModalStep.WALLET_CREATION_DONE,
+  [SignUpModalStep.ADD_FUNDS_AWAITING]: ModalStep.ADD_FUNDS_BUY,
   [SignUpModalStep.ADD_FUNDS_SUCCESS]: undefined,
   [SignUpModalStep.ADD_FUNDS_FAILURE]: undefined,
 };
@@ -121,7 +133,9 @@ enum LoginModalStep {
   VERIFY_2FA = 'VERIFY_2FA',
   TWO_FACTOR_DONE = 'TWO_FACTOR_DONE',
   LOGIN_DONE = 'LOGIN_DONE',
-  ADD_FUNDS = 'ADD_FUNDS',
+  ADD_FUNDS_BUY = 'ADD_FUNDS_BUY',
+  ADD_FUNDS_RECEIVE = 'ADD_FUNDS_RECEIVE',
+  ADD_FUNDS_WITHDRAW = 'ADD_FUNDS_WITHDRAW',
   ADD_FUNDS_AWAITING = 'ADD_FUNDS_AWAITING',
   ADD_FUNDS_SUCCESS = 'ADD_FUNDS_SUCCESS',
   ADD_FUNDS_FAILURE = 'ADD_FUNDS_FAILURE',
@@ -146,8 +160,10 @@ export const LoginPreviousStep: {
   [LoginModalStep.VERIFY_2FA]: ModalStep.SETUP_2FA,
   [LoginModalStep.TWO_FACTOR_DONE]: undefined,
   [LoginModalStep.LOGIN_DONE]: undefined,
-  [LoginModalStep.ADD_FUNDS]: ModalStep.LOGIN_DONE,
-  [LoginModalStep.ADD_FUNDS_AWAITING]: ModalStep.ADD_FUNDS,
+  [LoginModalStep.ADD_FUNDS_BUY]: ModalStep.LOGIN_DONE,
+  [LoginModalStep.ADD_FUNDS_RECEIVE]: ModalStep.LOGIN_DONE,
+  [LoginModalStep.ADD_FUNDS_WITHDRAW]: ModalStep.LOGIN_DONE,
+  [LoginModalStep.ADD_FUNDS_AWAITING]: ModalStep.ADD_FUNDS_BUY,
   [LoginModalStep.ADD_FUNDS_SUCCESS]: undefined,
   [LoginModalStep.ADD_FUNDS_FAILURE]: undefined,
 };
@@ -166,3 +182,15 @@ export const getStepHasFooter = (step: ModalStep): boolean => {
     }
   }
 };
+
+export function getAddFundsStep(currentTab: EnabledFlow): ModalStep {
+  switch (currentTab) {
+    case 'BUY':
+      return ModalStep.ADD_FUNDS_BUY;
+    case 'RECEIVE':
+      return ModalStep.ADD_FUNDS_RECEIVE;
+    case 'WITHDRAW':
+    default:
+      return ModalStep.ADD_FUNDS_WITHDRAW;
+  }
+}

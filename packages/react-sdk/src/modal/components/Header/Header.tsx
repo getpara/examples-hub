@@ -13,7 +13,7 @@ export const Header = () => {
   return (
     <AnimatePresence mode="popLayout" initial={false} custom={stepDirection}>
       <Container
-        key={currentStep}
+        key={['ADD_FUNDS_BUY', 'ADD_FUNDS_RECEIVE', 'ADD_FUNDS_WITHDRAW'].includes(currentStep) ? 'ADD_FUNDS' : currentStep}
         custom={stepDirection}
         variants={BODY_MOTION_VARIANTS}
         initial="enter"

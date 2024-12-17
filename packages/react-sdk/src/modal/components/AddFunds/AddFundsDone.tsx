@@ -2,7 +2,7 @@ import { Heading, HeroIcon, InnerStepContainer, StepContainer } from '../common.
 import { useModalStore } from '../../stores/index.js';
 import { useMemo } from 'react';
 import { CpslButton, CpslText } from '@usecapsule/react-components';
-import { ModalStep } from '../../utils/steps.js';
+import { getAddFundsStep } from '../../utils/steps.js';
 
 interface AddFundsDoneProps {
   isSuccess?: boolean;
@@ -12,6 +12,7 @@ interface AddFundsDoneProps {
 export const AddFundsDone = ({ isSuccess, onClose }: AddFundsDoneProps) => {
   const setStep = useModalStore(state => state.setStep);
   const onRampPurchase = useModalStore(state => state.onRampPurchase);
+  const accountAddFundTab = useModalStore(state => state.accountAddFundTab);
 
   const formatter = useMemo(() => {
     return new Intl.NumberFormat('en-US', {
@@ -40,7 +41,7 @@ export const AddFundsDone = ({ isSuccess, onClose }: AddFundsDoneProps) => {
       <CpslButton
         fullWidth
         onClick={() => {
-          isSuccess ? onClose() : setStep(ModalStep.ADD_FUNDS);
+          isSuccess ? onClose() : setStep(getAddFundsStep(accountAddFundTab));
         }}
       >
         {buttonText}

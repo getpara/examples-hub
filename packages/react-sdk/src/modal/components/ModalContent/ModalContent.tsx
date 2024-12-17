@@ -10,6 +10,7 @@ import {
   Network,
   EnabledFlow,
   AuthMethod,
+  OnRampConfig,
 } from '@usecapsule/web-sdk';
 import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
@@ -89,6 +90,8 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     const setPasswordUrlForLogin = useModalStore(state => state.setPasswordUrlForLogin);
     const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
     const setOnRampConfig = useModalStore(state => state.setOnRampConfig);
+    const accountAddFundTab = useModalStore(state => state.accountAddFundTab);
+    const setAccountAddFundTab = useModalStore(state => state.setAccountAddFundTab);
     const setRecoveryShare = useUserInfoStore(state => state.setRecoveryShare);
     const goBack = useGoBack();
 
@@ -286,11 +289,12 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
         capsule.ctx.capsuleClient
           .getOnRampConfig()
           .then(res => {
+            let newOnRampConfig: OnRampConfig & { testMode?: boolean };
             if (!!propsOnRampConfig) {
               const { enabledFlows, network, asset, providers, testMode } = propsOnRampConfig;
               const rampConfig = providers.find(config => isRampConfig(config));
 
-              setOnRampConfig({
+              newOnRampConfig = {
                 isBuyEnabled: !enabledFlows || enabledFlows.some(str => EnabledFlow[str] === EnabledFlow.BUY),
                 isReceiveEnabled: !enabledFlows || enabledFlows.some(str => EnabledFlow[str] === EnabledFlow.RECEIVE),
                 isWithdrawEnabled: !enabledFlows || enabledFlows.some(str => EnabledFlow[str] === EnabledFlow.WITHDRAW),
@@ -303,12 +307,24 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
                 providers: providers.map(({ id }) => OnRampProvider[id]),
                 rampApiKey: rampConfig?.hostApiKey ?? res.rampApiKey,
                 testMode: testMode ?? onRampTestMode,
-              });
-
-              return;
+              };
+            } else {
+              newOnRampConfig = { ...res, testMode: onRampTestMode };
             }
 
-            setOnRampConfig({ ...res, testMode: onRampTestMode });
+            setOnRampConfig(newOnRampConfig);
+
+            if (!accountAddFundTab) {
+              setAccountAddFundTab(
+                newOnRampConfig.isBuyEnabled
+                  ? EnabledFlow.BUY
+                  : newOnRampConfig.isReceiveEnabled
+                    ? EnabledFlow.RECEIVE
+                    : newOnRampConfig.isWithdrawEnabled
+                      ? EnabledFlow.WITHDRAW
+                      : undefined,
+              );
+            }
           })
           .catch();
       }
