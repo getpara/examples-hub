@@ -137,7 +137,9 @@ export function refresh(
 }> {
   return new Promise(async resolve => {
     const worker = await setupWorker(ctx, async res => {
-      await waitUntilTrue(async () => isRefreshComplete(ctx, userId, walletId, newPartnerId), 15000, 1000);
+      if (!(await waitUntilTrue(async () => isRefreshComplete(ctx, userId, walletId, newPartnerId), 15000, 1000))) {
+        throw new Error('refresh failed');
+      }
 
       resolve({
         signer: res,
