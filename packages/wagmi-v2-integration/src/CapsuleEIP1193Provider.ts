@@ -17,7 +17,7 @@ import {
 } from 'viem';
 import { EventEmitter } from 'eventemitter3';
 import { Chain } from 'wagmi/chains';
-
+import { extractRpcUrls } from '@wagmi/core';
 import { getViemChain, createCapsuleViemClient, createCapsuleAccount } from '@usecapsule/viem-v2-integration';
 import CapsuleWeb, { decimalToHex, hexToDecimal, CapsuleModalProps } from '@usecapsule/react-sdk';
 import { renderModal } from './connectorModal.js';
@@ -33,6 +33,7 @@ interface CapsuleEIP1193ProviderOpts extends Partial<CapsuleModalPropsForInit> {
   chains: Chain[];
   disableModal?: boolean;
   storageOverride?: Pick<Storage, 'setItem' | 'getItem'>;
+  transports?: Record<number, Transport>;
 }
 
 type WebSocketTransportSubscribeParameters = {
@@ -67,6 +68,7 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
   private storage: Pick<Storage, 'setItem' | 'getItem'>;
   private modalProps: Partial<CapsuleModalProps>;
   private isModalClosed: boolean;
+  private transports?: Record<number, Transport>;
 
   constructor(opts: CapsuleEIP1193ProviderOpts) {
     super();
@@ -82,6 +84,7 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
       return acc;
     }, {});
     this.chains = this.wagmiChainsToAddEthereumChainParameters(opts.chains);
+    this.transports = opts.transports;
 
     const defaultChainId = this.getStorageChainId() || opts.chainId;
     const currentChainId = this.chains[decimalToHex(defaultChainId)] ? defaultChainId : `${opts.chains[0].id}`;
@@ -104,7 +107,7 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
   }
 
   private getRpcUrlsFromViemChain = (chain: Chain): string[] => {
-    return [...(chain.rpcUrls.default.webSocket || []), ...chain.rpcUrls.default.http];
+    return extractRpcUrls({ chain, transports: this.transports });
   };
 
   private wagmiChainToAddEthereumChainParameters = (chain: Chain): [Hex, AddEthereumChainParameter] => {
@@ -134,15 +137,23 @@ export class CapsuleEIP1193Provider extends EventEmitter implements EIP1193Provi
     this.setChainId(chainId);
 
     const viemChain = this.viemChains[chainId] || getViemChain(hexToDecimal(chainId));
+    const rpcUrls = this.getRpcUrlsFromViemChain(viemChain);
     let transport: Transport;
-    if (chain.rpcUrls[0].startsWith('ws')) {
+
+    if (this.transports[viemChain.id]) {
+      transport = this.transports[viemChain.id];
+    } else if (rpcUrls[0].startsWith('ws')) {
       transport = webSocket(chain.rpcUrls[0]);
-      this.chainTransportSubscribe = transport({
-        chain: viemChain,
-      }).value.subscribe;
     } else {
-      transport = http(chain.rpcUrls[0]);
+      transport = http(rpcUrls[0]);
       this.chainTransportSubscribe = undefined;
+    }
+
+    const chainTransport = transport({
+      chain: viemChain,
+    });
+    if (chainTransport.config.type === 'ws') {
+      this.chainTransportSubscribe = chainTransport.value.subscribe;
     }
 
     this.walletClient = createCapsuleViemClient(
