@@ -24,12 +24,9 @@ export async function authCreation(
 ): Promise<void> {
   let identifier;
 
-  const { auth, authType, identifier: _identifier } = extractAuthInfo(authParams);
+  const { authType, identifier: _identifier } = extractAuthInfo(authParams);
 
   switch (authType) {
-    case 'phone':
-      identifier = `${auth.countryCode}${_identifier}`;
-      break;
     case 'farcasterUsername':
       identifier = `${_identifier}-farcaster`;
       break;

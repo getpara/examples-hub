@@ -43,4 +43,12 @@ describe('extractAuth', () => {
   it('rejects multiple fields', () => {
     expect(() => extractAuthInfo({ email: USER_EMAIL, phone: USER_PHONE, foo: 'bar' })).toThrow('invalid auth object');
   });
+
+  it('can optionally return undefined', () => {
+    expect(extractAuth({ email: USER_EMAIL, phone: USER_PHONE, foo: 'bar' }, { optional: true })).toBeUndefined();
+
+    expect(extractAuth({ email: USER_EMAIL, foo: 'bar' }, { optional: true })).toEqual({ email: USER_EMAIL });
+
+    expect(extractAuth({}, { optional: true })).toBeUndefined();
+  });
 });

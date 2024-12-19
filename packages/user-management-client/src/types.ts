@@ -91,8 +91,19 @@ export function extractAuthInfo(obj: AuthParams, { allowUserId }: { allowUserId?
   }
 }
 
-export function extractAuth(obj: AuthParams, opts: Parameters<typeof extractAuthInfo>[1] = {}): Auth {
-  return extractAuthInfo(obj, opts).auth;
+export function extractAuth(
+  obj: AuthParams,
+  opts: Parameters<typeof extractAuthInfo>[1] & { optional?: boolean } = {},
+): Auth | undefined {
+  try {
+    return extractAuthInfo(obj, { allowUserId: opts.allowUserId || false }).auth;
+  } catch (e) {
+    if (opts.optional) {
+      return undefined;
+    }
+
+    throw e;
+  }
 }
 
 export enum OAuthMethod {

@@ -193,10 +193,9 @@ export class CapsuleMobile extends CoreCapsule {
    * @param {string} [phone] - The user's phone number.
    * @param {CountryCallingCode} [countryCode] - The country calling code for phone numbers.
    * @returns {Promise<Wallet[]>} An array of user wallets.
-   * @throws {Error} If neither email nor both phone and countryCode are provided.
    */
   async login(email?: string, phone?: string, countryCode?: CountryCallingCode): Promise<void> {
-    const auth = extractAuth({ email, phone, countryCode });
+    const auth = extractAuth({ email, phone, countryCode }, { optional: true });
     const { challenge, allowedPublicKeys } = await this.ctx.capsuleClient.getWebChallenge(auth);
 
     const requestJson: PasskeyGetRequest = {
