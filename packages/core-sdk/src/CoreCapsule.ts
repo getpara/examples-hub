@@ -798,7 +798,7 @@ export abstract class CoreCapsule {
       ...(isLogin
         ? {
             encryptionKey: opts.loginEncryptionPublicKey,
-            newDeviceSessionId: opts.newDeviceSessionId,
+            newDeviceSessionLookupId: opts.newDeviceSessionId,
             newDeviceEncryptionKey: opts.newDeviceEncryptionKey,
             pregenIds: JSON.stringify(this.pregenIds),
             displayName: opts.displayName,
