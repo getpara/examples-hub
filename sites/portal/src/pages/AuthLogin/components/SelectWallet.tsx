@@ -116,20 +116,20 @@ const WalletButton = ({ wallet, disabled, onClick, isClaimable, isNew, isSelecte
                 <>
                   <span>Created on</span>
                   <PartnerIconInline partner={wallet.partner} />
-                  <span>{wallet.partner.displayName}</span>
+                  <PartnerName>{wallet.partner.displayName}</PartnerName>
                 </>
               )
             ) : !!wallet.lastUsedPartner?.displayName ? (
               <>
                 Last used on <PartnerIconInline partner={wallet.lastUsedPartner} />
-                {wallet.lastUsedPartner.displayName}
+                <PartnerName>{wallet.lastUsedPartner.displayName}</PartnerName>
               </>
             ) : null}
           </div>
           {!isNew && <div>{timestamp}</div>}
         </WalletButtonLower>
       </WalletButtonContainer>
-      {!disabled && <CpslRadio checked={isSelected} />}
+      {!disabled && <WalletButtonRadio checked={isSelected} />}
     </WalletButtonRoot>
   );
 };
@@ -353,7 +353,7 @@ export const SelectWallet = ({ onSuccess, sessionLookupId }: { onSuccess: () => 
                         </svg>
                       </CreateWalletIcon>
                       <CreateWalletText>Create New Wallet</CreateWalletText>
-                      <CpslRadio checked={isCreateNew} />
+                      <WalletButtonRadio checked={isCreateNew} />
                     </CreateWalletContainer>
                   </ButtonRoot>
                 )}
@@ -438,7 +438,7 @@ export function CreateWalletButton({ isSelected, onClick }: Pick<WalletButtonPro
           </svg>
         </CreateWalletIcon>
         <CreateWalletText>Create New Wallet</CreateWalletText>
-        <CpslRadio checked={isSelected} />
+        <WalletButtonRadio checked={isSelected} />
       </CreateWalletContainer>
     </ButtonRoot>
   );
@@ -492,11 +492,15 @@ const PageHeading = styled(FlexColumn)`
   flex: 0;
 `;
 
-const Heading = styled(CpslText)`
+const Heading = styled.div`
   text-align: center;
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 600;
   line-height: 1;
+  width: 100%;
+  overflow-x: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 `;
 
 const WalletGroupHeading = styled.div`
@@ -584,6 +588,7 @@ const ButtonRoot = styled.button<Pick<WalletButtonProps, 'isSelected'>>`
 
 const WalletButtonRoot = styled(ButtonRoot)<Pick<WalletButtonProps, 'isClaimable'>>`
   height: 128px;
+  position: relative;
 
   ${({ isClaimable }) =>
     isClaimable
@@ -603,7 +608,7 @@ const WalletButtonContainer = styled.div`
   flex-direction: column;
   justify-content: space-between;
   gap: 8px;
-  width: 100%;
+  width: calc(100% - 20px);
 `;
 
 const WalletButtonUpper = styled.div`
@@ -622,7 +627,7 @@ const WalletInfo = styled.div`
   align-items: flex-start;
   justify-content: flex-start;
   gap: 4px;
-  max-width: 60%;
+  max-width: calc(100% - 68px);
 `;
 
 const WalletName = styled.div`
@@ -633,6 +638,7 @@ const WalletName = styled.div`
   overflow-x: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  max-width: 100%;
 `;
 
 const WalletAddress = styled.div`
@@ -685,6 +691,18 @@ const WalletButtonLower = styled(WalletButtonUpper)`
       }
     }
   }
+`;
+
+const PartnerName = styled.span`
+  white-space: nowrap;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+`;
+
+const WalletButtonRadio = styled(CpslRadio)`
+  position: absolute;
+  right: 24px;
 `;
 
 const CreateWalletContainer = styled.div`
