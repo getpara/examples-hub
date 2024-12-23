@@ -194,7 +194,7 @@ export const AddFunds = () => {
                         onClick={async () => {
                           if (!activeWallet?.type) return;
 
-                          const isPopup = id === OnRampProvider.MOONPAY;
+                          const isPopup = id !== OnRampProvider.RAMP;
 
                           const { onRampPurchase: newOnRampPurchase } = await capsule.initiateOnRampTransaction({
                             walletId: activeWallet.isExternal ? undefined : activeWallet.id,

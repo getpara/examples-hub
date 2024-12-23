@@ -149,7 +149,8 @@ const OuterContainer = styled.div`
 const Container = styled.div<{ isReady: boolean }>`
   height: 100%;
   width: 100%;
-  display: ${({ isReady }) => (isReady ? 'block' : 'none')};
+  display: ${({ isReady }) => (isReady ? 'flex' : 'none')};
+  justify-content: center;
 
   & > iframe {
     height: 100%;

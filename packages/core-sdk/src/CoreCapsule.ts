@@ -2915,8 +2915,9 @@ export abstract class CoreCapsule {
 
   private async getOnRampTransactionUrl({
     purchaseId,
+    providerKey,
     ...walletParams
-  }: { purchaseId: string } & WalletParams): Promise<string> {
+  }: { purchaseId: string; providerKey?: string } & WalletParams): Promise<string> {
     const res = await this.touchSession();
     const [key, identifier] = extractWalletRef(walletParams);
 
@@ -2926,6 +2927,7 @@ export abstract class CoreCapsule {
       sessionId: res.data.sessionId,
       params: {
         [key]: identifier,
+        providerKey,
         currentWalletIds: JSON.stringify(this.currentWalletIds),
       },
     });
@@ -3176,7 +3178,11 @@ export abstract class CoreCapsule {
       ...walletParams,
     });
 
-    const portalUrl = await this.getOnRampTransactionUrl({ purchaseId: onRampPurchase.id, ...walletParams });
+    const portalUrl = await this.getOnRampTransactionUrl({
+      purchaseId: onRampPurchase.id,
+      providerKey: onRampPurchase.providerKey,
+      ...walletParams,
+    });
 
     if (shouldOpenPopup) {
       this.platformUtils.openPopup(portalUrl, { type: PopupType.ON_RAMP_TRANSACTION });

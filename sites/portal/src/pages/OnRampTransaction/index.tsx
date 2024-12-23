@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
-import { MoonPayEmbed } from '@usecapsule/react-common';
+import { useSearchParams } from 'react-router-dom';
+import { MoonPayEmbed, StripeEmbed } from '@usecapsule/react-common';
 import { useCapsule } from '../../components/CapsuleContext';
 import { authLogin, authUpdateKeyShares } from '../../utils/authLogin';
 import { useModalOutletContext } from '../../hooks/useModalOutletContext';
@@ -8,12 +8,17 @@ import { CurrentWalletIds, OnRampConfig, OnRampProvider, OnRampPurchase } from '
 import { CpslSpinner } from '@usecapsule/react-components';
 import styled from 'styled-components';
 import { getPublicKeyHex } from '@usecapsule/web-sdk';
+import { useExtractedParams } from '../../hooks/useExtractedParams';
 
 const MAX_AUTH_RETRIES = 5;
 
 export function OnRampTransaction() {
   const capsule = useCapsule();
-  const { userId, purchaseId } = useParams();
+  const { userId, purchaseId, providerKey } = useExtractedParams<{
+    userId: string;
+    purchaseId: string;
+    providerKey?: string;
+  }>();
   const [searchParams] = useSearchParams();
   const { isDark } = useModalOutletContext();
 
@@ -97,7 +102,7 @@ export function OnRampTransaction() {
       }
     }
 
-    setOnRampPurchase(_onRampPurchase);
+    setOnRampPurchase({ ..._onRampPurchase, providerKey });
     setOnRampConfig(_onRampConfig);
   }
 
@@ -105,17 +110,20 @@ export function OnRampTransaction() {
     if (!onRampConfig || !onRampPurchase) {
       return <CpslSpinner />;
     }
+
+    const props = {
+      capsule,
+      onRampConfig,
+      onRampPurchase: onRampPurchase as OnRampPurchase,
+      isDark,
+      setOnRampPurchase,
+    };
+
     switch (onRampPurchase?.provider) {
       case OnRampProvider.MOONPAY:
-        return (
-          <MoonPayEmbed
-            capsule={capsule}
-            isDark={isDark}
-            onRampConfig={onRampConfig}
-            onRampPurchase={onRampPurchase}
-            setOnRampPurchase={setOnRampPurchase}
-          />
-        );
+        return <MoonPayEmbed {...props} />;
+      case OnRampProvider.STRIPE:
+        return <StripeEmbed {...props} />;
       default:
         return null;
     }
