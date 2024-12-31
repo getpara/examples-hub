@@ -1,4 +1,4 @@
-import { OnRampProvider, OnRampPurchaseStatus, WalletType } from '@usecapsule/web-sdk';
+import { OnRampProvider, OnRampPurchaseStatus } from '@usecapsule/web-sdk';
 import { lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import { getCurrencyCodes, reverseCurrencyLookup, offRampSend } from '../utils/index.js';
 import styled from 'styled-components';
@@ -8,14 +8,10 @@ import type { MoonPayBuyWidget, MoonPaySellWidget } from '@moonpay/moonpay-react
 const MOONPAY_PUBLISHABLE_KEY = 'pk_live_EQva4LydtNDE0Rwd9X7SG9w58wqOzbux';
 const MOONPAY_PUBLISHABLE_KEY_TEST = 'pk_test_HYobzemmTBXxcSStVA4dSED6jT';
 
-const addressKeys = {
-  [WalletType.EVM]: 'eth',
-  [WalletType.SOLANA]: 'sol',
-};
-
 export const MoonPayEmbed = ({ capsule, isDark, isEmbedded, onRampConfig, onRampPurchase, setOnRampPurchase }: Props) => {
-  const [LazyMoonPayBuyWidget, setLazyMoonPayBuyWidget] = useState(null);
-  const [LazyMoonPaySellWidget, setLazyMoonPaySellWidget] = useState(null);
+  const [LazyMoonPayBuyWidget, setLazyMoonPayBuyWidget] = useState<React.FC<Parameters<typeof MoonPayBuyWidget>[0]>>(null);
+  const [LazyMoonPaySellWidget, setLazyMoonPaySellWidget] =
+    useState<React.FC<Parameters<typeof MoonPaySellWidget>[0]>>(null);
   const [LazyMoonPayProvider, setLazyMoonPayProvider] = useState(null);
 
   useEffect(() => {
@@ -107,14 +103,12 @@ export const MoonPayEmbed = ({ capsule, isDark, isEmbedded, onRampConfig, onRamp
         assetQuantity: payload.cryptoCurrencyAmount,
         fiatQuantity: payload.fiatCurrencyAmount || undefined,
         fiat: payload.fiatCurrency.code.toUpperCase(),
-        testMode: onRampPurchase.testMode,
-        walletType: onRampPurchase.walletType!,
         destinationAddress: payload.depositWalletAddress,
         contractAddress: payload.cryptoCurrency.contractAddress,
         chainId: payload.cryptoCurrency.chainId,
       });
 
-      return { depositId: txHash };
+      return { depositId: txHash, cancelTransactionOnError: false };
     },
     [
       capsule,
@@ -131,6 +125,10 @@ export const MoonPayEmbed = ({ capsule, isDark, isEmbedded, onRampConfig, onRamp
       return null;
     }
 
+    const walletAddresses = currencyCodes.reduce((acc, code) => {
+      return { ...acc, [code.toLowerCase()]: onRampPurchase.address };
+    }, {});
+
     return onRampPurchase.type === 'BUY' ? (
       <LazyMoonPayBuyWidget
         variant="embedded"
@@ -138,7 +136,7 @@ export const MoonPayEmbed = ({ capsule, isDark, isEmbedded, onRampConfig, onRamp
         baseCurrencyAmount={onRampPurchase.fiatQuantity}
         showOnlyCurrencies={currencyCodes.join(',')}
         defaultCurrencyCode={defaultCurrencyCode}
-        walletAddresses={JSON.stringify({ [addressKeys[onRampPurchase.walletType]]: onRampPurchase.address })}
+        walletAddresses={JSON.stringify(walletAddresses)}
         visible
         theme={isDark ? 'dark' : 'light'}
         style={{
@@ -154,7 +152,7 @@ export const MoonPayEmbed = ({ capsule, isDark, isEmbedded, onRampConfig, onRamp
     ) : (
       <LazyMoonPaySellWidget
         variant="embedded"
-        refundWalletAddresses={JSON.stringify({ [addressKeys[onRampPurchase.walletType]]: onRampPurchase.address })}
+        refundWalletAddresses={JSON.stringify(walletAddresses)}
         visible
         theme={isDark ? 'dark' : 'light'}
         style={{

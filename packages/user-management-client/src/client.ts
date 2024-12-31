@@ -1044,6 +1044,7 @@ class Client {
       walletId,
       walletType,
       destinationAddress,
+      sourceAddress,
       assetQuantity,
     }: {
       provider: OnRampProvider;
@@ -1053,6 +1054,7 @@ class Client {
       walletId: string;
       walletType: WalletType;
       destinationAddress: string;
+      sourceAddress?: string;
       assetQuantity: string | number;
     },
   ): Promise<ReturnType> {
@@ -1064,6 +1066,7 @@ class Client {
       walletId,
       walletType,
       destinationAddress,
+      sourceAddress,
       assetQuantity,
     });
 

@@ -47,6 +47,8 @@ import { CapsuleSolanaWeb3Signer } from '@usecapsule/solana-web3.js-v1-integrati
 import { FONT_OPTIONS } from './constants';
 import '@usecapsule/react-sdk/styles.css';
 import { ArrayField } from './array';
+import { OfframpSend } from './offramp';
+import { ToastContainer } from 'react-toastify';
 
 interface Partner {
   apiKey: string;
@@ -1337,6 +1339,13 @@ function App() {
                     >
                       Mint NFT
                     </Button>
+                    <OfframpSend
+                      capsule={capsule}
+                      walletId={walletId}
+                      walletType={walletType}
+                      testMode={onRampTestMode}
+                      setTestMode={setOnRampTestMode}
+                    />
                     <Button
                       colorScheme="red"
                       onClick={async () => {
@@ -1392,6 +1401,7 @@ function App() {
           />
         )}
       </ChakraProvider>
+      <ToastContainer />
     </>
   );
 }

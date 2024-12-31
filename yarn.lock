@@ -5595,10 +5595,10 @@
     semver "^7.5.4"
     uuid "^9.0.1"
 
-"@moonpay/moonpay-react@^1.8.0":
-  version "1.8.0"
-  resolved "https://registry.yarnpkg.com/@moonpay/moonpay-react/-/moonpay-react-1.8.0.tgz#b6fd30e07279f18737e926e375f16c3ee9fe4a13"
-  integrity sha512-Hi+Sq0ms0tFJ8EST/WYaLqL76Xc9KQ0KBs+KxpnQZM5Kc+wlc7s+mvuuSfZiA7SKDQU+cs4N90XWlw5i2sqa4Q==
+"@moonpay/moonpay-react@^1.8.3":
+  version "1.8.3"
+  resolved "https://registry.yarnpkg.com/@moonpay/moonpay-react/-/moonpay-react-1.8.3.tgz#0cb372fb387db3993985bf492b68fc3b491e4cf0"
+  integrity sha512-kz0W0nt+tg4NZWGSVIN5nF3AYQttQF07UH8klrdVtfIg+Jg8GbxazlQDCvg8FX21KaEld1buBLBh0EfAGO7/sw==
 
 "@motionone/animation@^10.15.1", "@motionone/animation@^10.18.0":
   version "10.18.0"
@@ -12564,7 +12564,7 @@ clsx@^1.2.1:
   resolved "https://registry.yarnpkg.com/clsx/-/clsx-1.2.1.tgz#0ddc4a20a549b59c93a4116bb26f5294ca17dc12"
   integrity sha512-EcR6r5a8bj6pu3ycsa/E/cKVGuTgZJZdsyUYHOksG/UHIiKfjxzRxYJpyVBwYaQeOvghal9fcc4PidlgzugAQg==
 
-clsx@^2.0.0, clsx@^2.1.0:
+clsx@^2.0.0, clsx@^2.1.0, clsx@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/clsx/-/clsx-2.1.1.tgz#eed397c9fd8bd882bfb18deab7102049a2f32999"
   integrity sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==
@@ -22816,6 +22816,13 @@ react-toastify@^10.0.5:
   integrity sha512-mNKt2jBXJg4O7pSdbNUfDdTsK9FIdikfsIE/yUCxbAEXl4HMyJaivrVFcn3Elvt5xvCQYhUZm+hqTIu1UXM3Pw==
   dependencies:
     clsx "^2.1.0"
+
+react-toastify@latest:
+  version "11.0.2"
+  resolved "https://registry.yarnpkg.com/react-toastify/-/react-toastify-11.0.2.tgz#5c5ae745f3c7240015a8746217595cd26701fdc3"
+  integrity sha512-GjHuGaiXMvbls3ywqv8XdWONwrcO4DXCJIY1zVLkHU73gEElKvTTXNI5Vom3s/k/M8hnkrfsqgBSX3OwmlonbA==
+  dependencies:
+    clsx "^2.1.1"
 
 react-transition-group@^4.4.5:
   version "4.4.5"
