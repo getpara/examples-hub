@@ -54,11 +54,11 @@ export class KeyContainer {
     }
   }
 
-  decrypt(encryptedBackup: string) {
+  decrypt(encryptedBackup: string): string {
     try {
       const buf = Buffer.from(encryptedBackup, 'base64');
       const data = ECIESDecrypt(Buffer.from(this.backupDecryptionKey, 'hex'), buf);
-      return data.toString('ucs2');
+      return Buffer.from(data.buffer).toString('ucs2');
     } catch (error: any) {
       throw Error('Error decrypting backup');
     }

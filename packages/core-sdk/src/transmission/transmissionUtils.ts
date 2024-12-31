@@ -34,6 +34,6 @@ export async function retrieve(uriEncodedMessage: string, userManagementClient: 
   const response = await userManagementClient.tempTrasmission(id as string);
   const data = response.data.message;
   const buf = Buffer.from(data as string, 'base64');
-  const res = ECIESDecrypt(Buffer.from(secret as string, 'hex'), buf).toString('ucs2');
+  const res = Buffer.from(ECIESDecrypt(Buffer.from(secret as string, 'hex'), buf).buffer).toString('ucs2');
   return res;
 }
