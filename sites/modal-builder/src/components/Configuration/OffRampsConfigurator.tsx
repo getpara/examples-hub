@@ -1,78 +1,56 @@
-import React, { ReactElement } from 'react';
-import {
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-  Button,
-  DraggableArea,
-  DraggableHeader,
-  DraggableItem,
-  Text,
-} from '../UI';
+import React, { useState, useCallback } from 'react';
+import { AccordionContent, AccordionItem, AccordionTrigger, Button, Text } from '../UI';
+import { DraggableArea, DraggableItem } from '../UI/draggable';
 import { OnRampProvider } from '@usecapsule/react-sdk';
 import { ONRAMPS_CONFIGS } from '../../constants';
-import { ReorderableType } from '../../types';
-import { extractId } from '../../utils';
-import styled from 'styled-components';
 import { CpslIcon } from '@usecapsule/react-components';
+import styled from 'styled-components';
 
-interface OffRampsConfiguratorProps {}
+const DEVELOPER_PORTAL_URL = 'https://developer.usecapsule.com';
+const DEVELOPER_PORTAL_LABEL = 'Configure In Developer Portal';
+const SECTION_LABEL = 'Off Ramps';
+const SECTION_SECONDARY_TEXT =
+  'Choose which providers and assets are available to your users. This configuration is managed in the Capsule Developer Portal in the On & Off Ramps section.';
+const DRAGGABLE_BACKGROUND_COLOR = '#f0f0f0';
 
-export const OffRampsConfigurator: React.FC<OffRampsConfiguratorProps> = () => {
-  const [onRampsOrder, setOnRampsOrder] = React.useState<OnRampProvider[]>(Object.keys(ONRAMPS_CONFIGS) as OnRampProvider[]);
+export const OffRampsConfigurator: React.FC = () => {
+  const [offRampsOrder, setOffRampsOrder] = useState<OnRampProvider[]>(Object.keys(ONRAMPS_CONFIGS) as OnRampProvider[]);
+  const [enabledOffRamps, setEnabledOffRamps] = useState<OnRampProvider[]>([]);
 
-  const [enabledOnRamps, setEnabledOnRamps] = React.useState<OnRampProvider[]>([]);
+  const handleOffRampsReorder = useCallback((newOrder: OnRampProvider[]) => {
+    setOffRampsOrder(newOrder);
+  }, []);
 
-  const handleReorder = <T extends ReorderableType>(newOrder: ReactElement[]) => {
-    const newOrderIds: T[] = newOrder.map(item => extractId<T>(item)).filter((id): id is T => id !== null);
-    return newOrderIds;
-  };
+  const handleToggleOffRampProvider = useCallback((provider: OnRampProvider) => {
+    setEnabledOffRamps(prev => (prev.includes(provider) ? prev.filter(item => item !== provider) : [...prev, provider]));
+  }, []);
 
-  const handleOnRampsReorder = (newOrder: React.ReactElement[]) => {
-    const newOrderIds = handleReorder<OnRampProvider>(newOrder);
-    setOnRampsOrder(newOrderIds);
-  };
-
-  const handleToggleOnRampProvider = (provider: OnRampProvider) => {
-    if (enabledOnRamps.includes(provider)) {
-      setEnabledOnRamps(enabledOnRamps.filter(enabledProvider => enabledProvider !== provider));
-    } else {
-      setEnabledOnRamps([...enabledOnRamps, provider]);
-    }
-  };
+  const handleOpenDeveloperPortal = useCallback(() => {
+    window.open(DEVELOPER_PORTAL_URL, '_blank');
+  }, []);
 
   return (
     <AccordionItem value="off-ramps" enableToggle onToggleChange={() => {}}>
-      <AccordionTrigger
-        label="Off Ramps"
-        secondaryText="Choose which providers and assets are available to your users.This configuration is managed in the Capsule Developer Portal in the On & Off Ramps section."
-      />
+      <AccordionTrigger label={SECTION_LABEL} secondaryText={SECTION_SECONDARY_TEXT} />
       <AccordionContent>
-        <DraggableArea onOrderChange={handleOnRampsReorder}>
-          {onRampsOrder.map(provider => {
-            return (
-              <DraggableItem key={provider} id={provider} backgroundColor="#f0f0f0">
-                <DraggableHeader
-                  id={provider}
-                  logo={ONRAMPS_CONFIGS[provider].logo}
-                  label={ONRAMPS_CONFIGS[provider].label}
-                  isEnabled={enabledOnRamps.includes(provider)}
-                  onToggle={() => handleToggleOnRampProvider(provider)}
-                  accordion={false}
-                  isExpanded={false}
-                />
-              </DraggableItem>
-            );
-          })}
+        <DraggableArea items={offRampsOrder} onOrderChange={handleOffRampsReorder}>
+          {provider => (
+            <DraggableItem
+              key={provider}
+              value={provider}
+              label={ONRAMPS_CONFIGS[provider].label}
+              logo={ONRAMPS_CONFIGS[provider].logo}
+              backgroundColor={DRAGGABLE_BACKGROUND_COLOR}
+              isEnabled={enabledOffRamps.includes(provider)}
+              onToggle={() => handleToggleOffRampProvider(provider)}
+            />
+          )}
         </DraggableArea>
-        <ActionButton
-          variant="secondary"
-          onClick={() => window.open('https://developer.usecapsule.com', '_blank')}
-          size="small"
-        >
+
+        <ActionButton variant="secondary" onClick={handleOpenDeveloperPortal} size="small">
           <ButtonContent>
             <Text variant="bodyS" weight="medium" color="primary">
-              Configure In Developer Portal
+              {DEVELOPER_PORTAL_LABEL}
             </Text>
             <ButtonIcon icon="linkExternal" />
           </ButtonContent>

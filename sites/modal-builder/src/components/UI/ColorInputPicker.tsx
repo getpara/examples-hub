@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { HexColorPicker } from 'react-colorful';
 import styled from 'styled-components';
 import { Text } from './StyledText';
-import { logDebug } from '../../utils';
 
 interface ColorInputPickerProps {
   name?: string;
@@ -22,7 +21,6 @@ export const ColorInputPicker: React.FC<ColorInputPickerProps> = ({ color: color
   const pickerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    logDebug('ColorInputPicker', colorProp);
     setInputValue(colorProp);
     setIsValidColor(validateColor(colorProp));
   }, [colorProp]);

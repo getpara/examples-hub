@@ -1,255 +1,405 @@
-import React, { ReactElement, useState } from 'react';
-import { AuthLayout, EvmWallet, Network, SolanaWallet } from '@usecapsule/react-sdk';
-import { AUTH_METHOD_CONFIGS, EXTERNAL_WALLET_CONFIGS, ALL_AUTH_METHODS, ALL_EXTERNAL_WALLETS } from '../../constants';
-import { AuthMethod, ExternalWallet, AuthSectionId, ReorderableType } from '../../types';
-import { extractId } from '../../utils/elementIdExtractor';
-import {
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-  DraggableArea,
-  DraggableBody,
-  DraggableHeader,
-  DraggableItem,
-  SegmentControl,
-} from '../UI';
+import React, { useState, useEffect } from 'react';
 import { useAtom } from 'jotai';
-import { authenticationConfigAtom, networksConfigAtom } from '../../atoms';
+import {
+  OAuthMethod,
+  ExternalWallet as SDKExternalWallet,
+  EvmWallet,
+  SolanaWallet,
+  CosmosWallet,
+} from '@usecapsule/react-sdk';
+import { AUTH_METHOD_CONFIGS, EXTERNAL_WALLET_CONFIGS, ALL_AUTH_METHODS, ALL_EXTERNAL_WALLETS } from '../../constants';
+import { AuthMethod, ExternalWallet, AuthSectionId, TAuthLayout } from '../../types';
+import { AccordionContent, AccordionItem, AccordionTrigger, DraggableArea, DraggableItem, SegmentControl } from '../UI';
+import { authenticationConfigAtom, networksConfigAtom, previousWeb2StateAtom, previousWeb3StateAtom } from '../../atoms';
 
 export const AuthenticationConfigurator: React.FC = () => {
   const [authenticationConfig, setAuthenticationConfig] = useAtom(authenticationConfigAtom);
   const [networksConfig] = useAtom(networksConfigAtom);
+  const [prevWeb2State, setPrevWeb2State] = useAtom(previousWeb2StateAtom);
+  const [prevWeb3State, setPrevWeb3State] = useAtom(previousWeb3StateAtom);
 
   const [authSectionOrder, setAuthSectionOrder] = useState<AuthSectionId[]>(['web2', 'web3']);
   const [authMethodsOrder, setAuthMethodsOrder] = useState<AuthMethod[]>(ALL_AUTH_METHODS);
   const [externalWalletsOrder, setExternalWalletsOrder] = useState<ExternalWallet[]>(ALL_EXTERNAL_WALLETS);
 
-  const updateAuthLayout = (id: AuthSectionId, value: AuthLayout) => {
-    const prefix = id === 'web2' ? 'AUTH:' : 'EXTERNAL:';
-    const currentAuthLayout: `${AuthLayout}`[] = authenticationConfig.authLayout ?? [];
-    const updatedAuthLayout = currentAuthLayout.map(layout => (layout.startsWith(prefix) ? value : layout));
+  useEffect(() => {
+    if (!prevWeb2State) {
+      setPrevWeb2State({
+        oAuthMethods: authenticationConfig.oAuthMethods ?? [],
+        disableEmailLogin: authenticationConfig.disableEmailLogin ?? false,
+        disablePhoneLogin: authenticationConfig.disablePhoneLogin ?? false,
+        authLayoutWeb2:
+          authenticationConfig.authLayout?.find(l => l === 'AUTH:FULL' || l === 'AUTH:CONDENSED') ??
+          ('AUTH:FULL' as TAuthLayout),
+      });
+    }
+    if (!prevWeb3State) {
+      setPrevWeb3State({
+        externalWallets: authenticationConfig.externalWallets ?? [],
+        authLayoutWeb3:
+          authenticationConfig.authLayout?.find(l => l === 'EXTERNAL:FULL' || l === 'EXTERNAL:CONDENSED') ??
+          ('EXTERNAL:FULL' as TAuthLayout),
+      });
+    }
+  }, [authenticationConfig, prevWeb2State, prevWeb3State, setPrevWeb2State, setPrevWeb3State]);
 
+  const updateAuthLayout = (id: AuthSectionId, value: TAuthLayout) => {
+    const currentAuthLayout = authenticationConfig.authLayout ?? [];
+    const isWeb2 = id === 'web2';
+    const updatedAuthLayout = currentAuthLayout.map(layout => {
+      const isAuthSectionLayout = layout === 'AUTH:FULL' || layout === 'AUTH:CONDENSED';
+      const isExternalSectionLayout = layout === 'EXTERNAL:FULL' || layout === 'EXTERNAL:CONDENSED';
+      if (isWeb2 && isAuthSectionLayout) {
+        return value;
+      } else if (!isWeb2 && isExternalSectionLayout) {
+        return value;
+      }
+      return layout;
+    });
+    ensureAuthLayoutConsistency(id, updatedAuthLayout);
     setAuthenticationConfig({
       ...authenticationConfig,
       authLayout: updatedAuthLayout,
     });
+    if (isWeb2 && prevWeb2State) {
+      setPrevWeb2State({
+        ...prevWeb2State,
+        authLayoutWeb2: value,
+      });
+    } else if (!isWeb2 && prevWeb3State) {
+      setPrevWeb3State({
+        ...prevWeb3State,
+        authLayoutWeb3: value,
+      });
+    }
   };
 
-  const handleReorder = <T extends ReorderableType>(newOrder: ReactElement[]) => {
-    const newOrderIds: T[] = newOrder.map(item => extractId<T>(item)).filter((id): id is T => id !== null);
-    return newOrderIds;
-  };
-
-  const handleAuthSectionsReorder = (newOrder: ReactElement[]) => {
-    const newOrderIds = handleReorder<AuthSectionId>(newOrder);
-
-    const newAuthLayout: `${AuthLayout}`[] = [];
-    newOrderIds.forEach(id => {
-      const layout = id === 'web2' ? authenticationConfig.authLayout?.[0] : authenticationConfig.authLayout?.[1];
-
-      newAuthLayout.push(layout ?? AuthLayout.AUTH_FULL);
-    });
-
-    setAuthSectionOrder(newOrderIds);
-
-    setAuthenticationConfig({
-      ...authenticationConfig,
-      authLayout: newAuthLayout,
-    });
-  };
-
-  const handleOAuthMethodsReorder = (newOrder: ReactElement[]) => {
-    const newOrderIds = handleReorder<AuthMethod>(newOrder);
-    const newOAuthMethods = newOrderIds.filter(method => method !== 'email-auth' && method !== 'phone-auth');
-    const enabledOAuthMethodsSet = new Set(authenticationConfig.oAuthMethods);
-    const filteredOAuthMethods = newOAuthMethods.filter(method => enabledOAuthMethodsSet.has(method));
-    setAuthMethodsOrder(newOrderIds);
-    setAuthenticationConfig({
-      ...authenticationConfig,
-      oAuthMethods: filteredOAuthMethods,
-    });
-  };
-
-  const handleExternalWalletsReorder = (newOrder: ReactElement[]) => {
-    const newOrderIds = handleReorder<ExternalWallet>(newOrder);
-
-    const enabledExternalWalletsSet = new Set(authenticationConfig.externalWallets);
-
-    const filteredExternalWallets = newOrderIds.filter(wallet => enabledExternalWalletsSet.has(wallet));
-
-    setExternalWalletsOrder(newOrderIds);
-
-    setAuthenticationConfig({
-      ...authenticationConfig,
-      externalWallets: filteredExternalWallets,
-    });
+  const ensureAuthLayoutConsistency = (sectionId: AuthSectionId, newLayout: TAuthLayout[]) => {
+    if (sectionId === 'web2' && authenticationConfig.isWeb2AuthEnabled) {
+      const hasAuth = newLayout.some(l => l === 'AUTH:FULL' || l === 'AUTH:CONDENSED');
+      if (!hasAuth) {
+        const layoutToAdd = prevWeb2State?.authLayoutWeb2 ?? ('AUTH:FULL' as TAuthLayout);
+        newLayout.push(layoutToAdd);
+      }
+    } else if (sectionId === 'web3' && authenticationConfig.isWeb3AuthEnabled) {
+      const hasExternal = newLayout.some(l => l === 'EXTERNAL:FULL' || l === 'EXTERNAL:CONDENSED');
+      if (!hasExternal) {
+        const layoutToAdd = prevWeb3State?.authLayoutWeb3 ?? ('EXTERNAL:FULL' as TAuthLayout);
+        newLayout.push(layoutToAdd);
+      }
+    }
   };
 
   const toggleAuthSection = (sectionId: AuthSectionId) => {
     const newAuthConfig = { ...authenticationConfig };
-
-    if (
-      (sectionId === 'web2' && !newAuthConfig.isWeb3AuthEnabled && newAuthConfig.isWeb2AuthEnabled) ||
-      (sectionId === 'web3' && !newAuthConfig.isWeb2AuthEnabled && newAuthConfig.isWeb3AuthEnabled)
-    ) {
-      return;
-    }
-
-    if (sectionId === 'web2') {
-      newAuthConfig.isWeb2AuthEnabled = !newAuthConfig.isWeb2AuthEnabled;
-      if (!newAuthConfig.isWeb2AuthEnabled) {
+    const isWeb2 = sectionId === 'web2';
+    if (isWeb2) {
+      if (newAuthConfig.isWeb2AuthEnabled) {
+        setPrevWeb2State({
+          oAuthMethods: newAuthConfig.oAuthMethods ?? [],
+          disableEmailLogin: newAuthConfig.disableEmailLogin ?? false,
+          disablePhoneLogin: newAuthConfig.disablePhoneLogin ?? false,
+          authLayoutWeb2:
+            newAuthConfig.authLayout?.find(l => l === 'AUTH:FULL' || l === 'AUTH:CONDENSED') ?? ('AUTH:FULL' as TAuthLayout),
+        });
+        newAuthConfig.isWeb2AuthEnabled = false;
         newAuthConfig.disableEmailLogin = true;
         newAuthConfig.disablePhoneLogin = true;
         newAuthConfig.oAuthMethods = [];
-        newAuthConfig.authLayout = newAuthConfig.authLayout?.filter(layout => !layout.startsWith('AUTH:'));
+        newAuthConfig.authLayout = (newAuthConfig.authLayout ?? []).filter(
+          layout => layout !== 'AUTH:FULL' && layout !== 'AUTH:CONDENSED',
+        );
+      } else {
+        newAuthConfig.isWeb2AuthEnabled = true;
+        if (prevWeb2State) {
+          newAuthConfig.oAuthMethods = prevWeb2State.oAuthMethods ?? [];
+          newAuthConfig.disableEmailLogin = prevWeb2State.disableEmailLogin ?? false;
+          newAuthConfig.disablePhoneLogin = prevWeb2State.disablePhoneLogin ?? false;
+          const hasAuth = (newAuthConfig.authLayout ?? []).some(l => l === 'AUTH:FULL' || l === 'AUTH:CONDENSED');
+          if (!hasAuth) {
+            const layoutToAdd = prevWeb2State.authLayoutWeb2 ?? ('AUTH:FULL' as TAuthLayout);
+            newAuthConfig.authLayout = [...(newAuthConfig.authLayout ?? []), layoutToAdd];
+          }
+        } else {
+          newAuthConfig.disableEmailLogin = false;
+          newAuthConfig.disablePhoneLogin = false;
+          newAuthConfig.oAuthMethods = [OAuthMethod.GOOGLE];
+          if (!(newAuthConfig.authLayout ?? []).some(l => l === 'AUTH:FULL' || l === 'AUTH:CONDENSED')) {
+            newAuthConfig.authLayout = ['AUTH:FULL' as TAuthLayout, ...(newAuthConfig.authLayout ?? [])];
+          }
+        }
       }
     } else {
-      newAuthConfig.isWeb3AuthEnabled = !newAuthConfig.isWeb3AuthEnabled;
-      if (!newAuthConfig.isWeb3AuthEnabled) {
+      if (newAuthConfig.isWeb3AuthEnabled) {
+        setPrevWeb3State({
+          externalWallets: newAuthConfig.externalWallets ?? [],
+          authLayoutWeb3:
+            newAuthConfig.authLayout?.find(l => l === 'EXTERNAL:FULL' || l === 'EXTERNAL:CONDENSED') ??
+            ('EXTERNAL:FULL' as TAuthLayout),
+        });
+        newAuthConfig.isWeb3AuthEnabled = false;
         newAuthConfig.externalWallets = [];
-        newAuthConfig.authLayout = newAuthConfig.authLayout?.filter(layout => !layout.startsWith('EXTERNAL:'));
+        newAuthConfig.authLayout = (newAuthConfig.authLayout ?? []).filter(
+          layout => layout !== 'EXTERNAL:FULL' && layout !== 'EXTERNAL:CONDENSED',
+        );
+      } else {
+        newAuthConfig.isWeb3AuthEnabled = true;
+        if (prevWeb3State) {
+          newAuthConfig.externalWallets = prevWeb3State.externalWallets ?? [];
+          const hasExternal = (newAuthConfig.authLayout ?? []).some(
+            l => l === 'EXTERNAL:FULL' || l === 'EXTERNAL:CONDENSED',
+          );
+          if (!hasExternal) {
+            const layoutToAdd = prevWeb3State.authLayoutWeb3 ?? ('EXTERNAL:FULL' as TAuthLayout);
+            newAuthConfig.authLayout = [...(newAuthConfig.authLayout ?? []), layoutToAdd];
+          }
+        } else {
+          newAuthConfig.externalWallets = [SDKExternalWallet.METAMASK];
+          if (!(newAuthConfig.authLayout ?? []).some(l => l === 'EXTERNAL:FULL' || l === 'EXTERNAL:CONDENSED')) {
+            newAuthConfig.authLayout = [...(newAuthConfig.authLayout ?? []), 'EXTERNAL:FULL' as TAuthLayout];
+          }
+        }
       }
     }
-
     setAuthenticationConfig(newAuthConfig);
   };
 
   const toggleAuthMethod = (method: AuthMethod) => {
     const newAuthConfig = { ...authenticationConfig };
-    switch (method) {
-      case 'email-auth':
-        newAuthConfig.disableEmailLogin = !newAuthConfig.disableEmailLogin;
-        break;
-      case 'phone-auth':
-        newAuthConfig.disablePhoneLogin = !newAuthConfig.disablePhoneLogin;
-        break;
-      default:
-        const oAuthMethods = new Set(newAuthConfig.oAuthMethods);
-        oAuthMethods.has(method) ? oAuthMethods.delete(method) : oAuthMethods.add(method);
-        newAuthConfig.oAuthMethods = Array.from(oAuthMethods).sort((a, b) => {
-          return authMethodsOrder.indexOf(a) - authMethodsOrder.indexOf(b);
-        });
-    }
-
-    if (newAuthConfig.oAuthMethods?.length === 0 && newAuthConfig.disableEmailLogin && newAuthConfig.disablePhoneLogin) {
-      newAuthConfig.authLayout = newAuthConfig.authLayout?.filter(layout => !layout.startsWith('AUTH:'));
-    } else {
-      if (!newAuthConfig.authLayout?.some(layout => layout.startsWith('AUTH:'))) {
-        newAuthConfig.authLayout = [AuthLayout.AUTH_FULL, ...(newAuthConfig.authLayout ?? [])];
+    const currentlyEnabledWeb2Methods = [
+      newAuthConfig.disableEmailLogin ? null : 'email-auth',
+      newAuthConfig.disablePhoneLogin ? null : 'phone-auth',
+      ...(newAuthConfig.oAuthMethods ?? []),
+    ].filter(Boolean) as (string | OAuthMethod)[];
+    const isWeb2Method =
+      method === 'email-auth' || method === 'phone-auth' || Object.values(OAuthMethod).includes(method as OAuthMethod);
+    const removingLastWeb2 =
+      isWeb2Method && currentlyEnabledWeb2Methods.length === 1 && currentlyEnabledWeb2Methods.includes(method);
+    if (removingLastWeb2) {
+      const web3Enabled = newAuthConfig.isWeb3AuthEnabled ?? false;
+      const web3Count = (newAuthConfig.externalWallets ?? []).length;
+      if (!web3Enabled || web3Count === 0) {
+        return;
       }
     }
-
+    if (method === 'email-auth') {
+      newAuthConfig.disableEmailLogin = !newAuthConfig.disableEmailLogin;
+    } else if (method === 'phone-auth') {
+      newAuthConfig.disablePhoneLogin = !newAuthConfig.disablePhoneLogin;
+    } else {
+      const oAuthSet = new Set(newAuthConfig.oAuthMethods ?? []);
+      if (oAuthSet.has(method as OAuthMethod)) {
+        oAuthSet.delete(method as OAuthMethod);
+      } else {
+        oAuthSet.add(method as OAuthMethod);
+      }
+      newAuthConfig.oAuthMethods = Array.from(oAuthSet).sort(
+        (a, b) => authMethodsOrder.indexOf(a) - authMethodsOrder.indexOf(b),
+      );
+    }
     setAuthenticationConfig(newAuthConfig);
   };
 
   const toggleExternalWallet = (wallet: ExternalWallet) => {
     const newAuthConfig = { ...authenticationConfig };
-    const externalWallets = new Set(newAuthConfig.externalWallets);
-    externalWallets.has(wallet) ? externalWallets.delete(wallet) : externalWallets.add(wallet);
-    newAuthConfig.externalWallets = Array.from(externalWallets).sort((a, b) => {
-      return externalWalletsOrder.indexOf(a) - externalWalletsOrder.indexOf(b);
-    });
+    const externalWallets = new Set(newAuthConfig.externalWallets ?? []);
+    const currentlyEnabledWeb3 = newAuthConfig.externalWallets ?? [];
+    const removingLastWeb3 = externalWallets.has(wallet) && currentlyEnabledWeb3.length === 1;
+    if (removingLastWeb3) {
+      const web2Enabled = newAuthConfig.isWeb2AuthEnabled ?? false;
+      const web2Methods = [
+        newAuthConfig.disableEmailLogin ? null : 'email-auth',
+        newAuthConfig.disablePhoneLogin ? null : 'phone-auth',
+        ...(newAuthConfig.oAuthMethods ?? []),
+      ].filter(Boolean);
+      if (!web2Enabled || web2Methods.length === 0) {
+        return;
+      }
+    }
+    if (externalWallets.has(wallet)) {
+      externalWallets.delete(wallet);
+    } else {
+      externalWallets.add(wallet);
+    }
+    newAuthConfig.externalWallets = Array.from(externalWallets);
     setAuthenticationConfig(newAuthConfig);
   };
 
   const filteredExternalWallets = (wallets: ExternalWallet[]) => {
-    return wallets.filter(wallet => {
-      if (Object.values(EvmWallet).includes(wallet as EvmWallet)) {
-        return networksConfig.networks!.includes(Network.ETHEREUM);
-      }
+    const evmValues = Object.values(EvmWallet) as string[];
+    const solValues = Object.values(SolanaWallet) as string[];
+    const cosmosValues = Object.values(CosmosWallet) as string[];
 
-      if (Object.values(SolanaWallet).includes(wallet as SolanaWallet)) {
-        return networksConfig.networks!.includes(Network.SOLANA);
-      }
-      return false;
+    const filtered = wallets.filter(wallet => {
+      const isEvmWallet = evmValues.includes(wallet);
+      const isSolWallet = solValues.includes(wallet);
+      const isCosmosWallet = cosmosValues.includes(wallet);
+
+      const hasEthereumNetwork = networksConfig.networks?.includes('ETHEREUM');
+      const hasSolanaNetwork = networksConfig.networks?.includes('SOLANA');
+      const hasCosmosNetwork = networksConfig.networks?.includes('COSMOS');
+
+      const shouldInclude =
+        (isEvmWallet && hasEthereumNetwork) || (isSolWallet && hasSolanaNetwork) || (isCosmosWallet && hasCosmosNetwork);
+
+      return shouldInclude;
     });
+
+    return filtered;
   };
 
-  const renderWeb2Section = () => (
-    <DraggableItem key="web2" id="web2" backgroundColor="#f0f0f0">
-      <DraggableHeader
-        id="web2"
-        label="Web 2.0"
-        isEnabled={authenticationConfig.isWeb2AuthEnabled}
-        onToggle={() => toggleAuthSection('web2')}
-        accordion={false}
-        isExpanded={true}
+  const getWeb2LayoutIndex = () => {
+    const isWeb2Enabled = authenticationConfig.isWeb2AuthEnabled;
+    let layout: TAuthLayout | undefined;
+    if (isWeb2Enabled) {
+      layout = (authenticationConfig.authLayout ?? []).find(l => l === 'AUTH:FULL' || l === 'AUTH:CONDENSED');
+    }
+    if (!layout) {
+      layout = prevWeb2State?.authLayoutWeb2 ?? 'AUTH:FULL';
+    }
+    return layout === 'AUTH:FULL' ? 0 : 1;
+  };
+
+  const getWeb3LayoutIndex = () => {
+    const isWeb3Enabled = authenticationConfig.isWeb3AuthEnabled;
+    let layout: TAuthLayout | undefined;
+    if (isWeb3Enabled) {
+      layout = (authenticationConfig.authLayout ?? []).find(l => l === 'EXTERNAL:FULL' || l === 'EXTERNAL:CONDENSED');
+    }
+    if (!layout) {
+      layout = prevWeb3State?.authLayoutWeb3 ?? 'EXTERNAL:FULL';
+    }
+    return layout === 'EXTERNAL:FULL' ? 0 : 1;
+  };
+
+  function handleWeb2MethodsReorder(newOrder: AuthMethod[]) {
+    const updatedOAuthMethods = newOrder.filter(m => m !== 'email-auth' && m !== 'phone-auth');
+    const enabledOAuthSet = new Set(authenticationConfig.oAuthMethods ?? []);
+    const filtered = updatedOAuthMethods.filter(m => enabledOAuthSet.has(m as OAuthMethod));
+    setAuthMethodsOrder(newOrder);
+    setAuthenticationConfig({
+      ...authenticationConfig,
+      oAuthMethods: filtered as OAuthMethod[],
+    });
+  }
+
+  function handleExternalWalletsReorder(newOrder: ExternalWallet[]) {
+    const enabledSet = new Set(authenticationConfig.externalWallets ?? []);
+    const filtered = newOrder.filter(wallet => enabledSet.has(wallet));
+    setExternalWalletsOrder(newOrder);
+    setAuthenticationConfig({
+      ...authenticationConfig,
+      externalWallets: filtered,
+    });
+  }
+
+  function handleAuthSectionsReorder(newOrder: AuthSectionId[]) {
+    const newAuthLayout: TAuthLayout[] = [];
+    newOrder.forEach(id => {
+      const isWeb2 = id === 'web2';
+      const existing = authenticationConfig.authLayout?.find(l =>
+        isWeb2 ? l === 'AUTH:FULL' || l === 'AUTH:CONDENSED' : l === 'EXTERNAL:FULL' || l === 'EXTERNAL:CONDENSED',
+      );
+      if (existing) {
+        newAuthLayout.push(existing);
+      } else if (isWeb2) {
+        newAuthLayout.push(prevWeb2State?.authLayoutWeb2 ?? 'AUTH:FULL');
+      } else {
+        newAuthLayout.push(prevWeb3State?.authLayoutWeb3 ?? 'EXTERNAL:FULL');
+      }
+    });
+    setAuthSectionOrder(newOrder);
+    setAuthenticationConfig({
+      ...authenticationConfig,
+      authLayout: newAuthLayout,
+    });
+  }
+
+  const renderWeb2Section = (sectionId: AuthSectionId) => (
+    <DraggableItem
+      key={sectionId}
+      value={sectionId}
+      label="Web 2.0"
+      isEnabled={authenticationConfig.isWeb2AuthEnabled ?? false}
+      onToggle={() => toggleAuthSection('web2')}
+      accordion={false}
+      isExpanded
+      backgroundColor="#f0f0f0"
+    >
+      <SegmentControl
+        items={[
+          { icon: 'spacingHeight', label: 'Expanded', value: 'AUTH:FULL' as TAuthLayout },
+          { icon: 'alignVerticalCenter', label: 'Collapsed', value: 'AUTH:CONDENSED' as TAuthLayout },
+        ]}
+        onSelect={value => updateAuthLayout('web2', value as TAuthLayout)}
+        defaultSelectedIndex={getWeb2LayoutIndex()}
       />
-      <DraggableBody isExpanded>
-        <SegmentControl
-          items={[
-            { icon: 'spacingHeight', label: 'Expanded', value: AuthLayout.AUTH_FULL },
-            { icon: 'alignVerticalCenter', label: 'Collapsed', value: AuthLayout.AUTH_CONDENSED },
-          ]}
-          onSelect={value => updateAuthLayout('web2', value as AuthLayout)}
-          defaultSelectedIndex={authenticationConfig.authLayout?.includes(AuthLayout.AUTH_FULL) ? 0 : 1}
-        />
-        <DraggableArea onOrderChange={handleOAuthMethodsReorder}>
-          {authMethodsOrder
-            .filter(id => AUTH_METHOD_CONFIGS[id] !== undefined)
-            .map(id => (
-              <DraggableItem key={id} id={id} backgroundColor="#ffffff" padding="0.5rem 0.75rem">
-                <DraggableHeader
-                  id={id}
-                  logo={AUTH_METHOD_CONFIGS[id]!.logo}
-                  label={AUTH_METHOD_CONFIGS[id]!.label}
-                  isEnabled={
-                    id === 'email-auth'
-                      ? !authenticationConfig.disableEmailLogin
-                      : id === 'phone-auth'
-                        ? !authenticationConfig.disablePhoneLogin
-                        : authenticationConfig.oAuthMethods!.includes(id)
-                  }
-                  onToggle={() => toggleAuthMethod(id)}
-                  accordion={false}
-                  isExpanded={false}
-                  disabled={!authenticationConfig.isWeb2AuthEnabled}
-                />
-              </DraggableItem>
-            ))}
-        </DraggableArea>
-      </DraggableBody>
+
+      <DraggableArea items={authMethodsOrder} onOrderChange={handleWeb2MethodsReorder}>
+        {(id, _, isLast) => (
+          <DraggableItem
+            key={id}
+            value={id}
+            label={AUTH_METHOD_CONFIGS[id]?.label ?? ''}
+            logo={AUTH_METHOD_CONFIGS[id]?.logo}
+            isEnabled={
+              id === 'email-auth'
+                ? !authenticationConfig.disableEmailLogin
+                : id === 'phone-auth'
+                  ? !authenticationConfig.disablePhoneLogin
+                  : (authenticationConfig.oAuthMethods ?? []).includes(id as OAuthMethod)
+            }
+            onToggle={() => toggleAuthMethod(id)}
+            accordion={false}
+            isExpanded={false}
+            disabled={!(authenticationConfig.isWeb2AuthEnabled ?? false)}
+            backgroundColor="#ffffff"
+            padding="0.5rem 0.75rem"
+            isLastItem={isLast}
+          />
+        )}
+      </DraggableArea>
     </DraggableItem>
   );
 
-  const renderWeb3Section = () => (
-    <DraggableItem key="web3" id="web3" backgroundColor="#f0f0f0">
-      <DraggableHeader
-        id="web3"
-        label="Web 3.0"
-        isEnabled={authenticationConfig.isWeb3AuthEnabled}
-        onToggle={() => toggleAuthSection('web3')}
-        accordion={false}
-        isExpanded={true}
+  const renderWeb3Section = (sectionId: AuthSectionId) => (
+    <DraggableItem
+      key={sectionId}
+      value={sectionId}
+      label="Web 3.0"
+      isEnabled={authenticationConfig.isWeb3AuthEnabled ?? false}
+      onToggle={() => toggleAuthSection('web3')}
+      accordion={false}
+      isExpanded
+      backgroundColor="#f0f0f0"
+    >
+      <SegmentControl
+        items={[
+          { icon: 'spacingHeight', label: 'Expanded', value: 'EXTERNAL:FULL' as TAuthLayout },
+          { icon: 'alignVerticalCenter', label: 'Collapsed', value: 'EXTERNAL:CONDENSED' as TAuthLayout },
+        ]}
+        onSelect={value => updateAuthLayout('web3', value as TAuthLayout)}
+        defaultSelectedIndex={getWeb3LayoutIndex()}
       />
-      <DraggableBody isExpanded={true}>
-        <SegmentControl
-          items={[
-            { icon: 'spacingHeight', label: 'Expanded', value: AuthLayout.EXTERNAL_FULL },
-            { icon: 'alignVerticalCenter', label: 'Collapsed', value: AuthLayout.EXTERNAL_CONDENSED },
-          ]}
-          onSelect={value => updateAuthLayout('web3', value as AuthLayout)}
-          defaultSelectedIndex={0}
-        />
-        <DraggableArea onOrderChange={handleExternalWalletsReorder}>
-          {filteredExternalWallets(externalWalletsOrder)
-            .filter(wallet => EXTERNAL_WALLET_CONFIGS[wallet] !== undefined)
-            .map(wallet => (
-              <DraggableItem key={wallet} id={wallet} backgroundColor="#ffffff" padding="0.5rem 0.75rem">
-                <DraggableHeader
-                  id={wallet}
-                  logo={EXTERNAL_WALLET_CONFIGS[wallet]!.logo}
-                  label={EXTERNAL_WALLET_CONFIGS[wallet]!.label}
-                  isEnabled={authenticationConfig.externalWallets!.includes(wallet)}
-                  onToggle={() => toggleExternalWallet(wallet)}
-                  accordion={false}
-                  isExpanded={false}
-                  disabled={!authenticationConfig.isWeb3AuthEnabled}
-                />
-              </DraggableItem>
-            ))}
-        </DraggableArea>
-      </DraggableBody>
+
+      <DraggableArea items={filteredExternalWallets(externalWalletsOrder)} onOrderChange={handleExternalWalletsReorder}>
+        {(wallet, _, isLast) => (
+          <DraggableItem
+            key={wallet}
+            value={wallet}
+            label={EXTERNAL_WALLET_CONFIGS[wallet]?.label ?? ''}
+            logo={EXTERNAL_WALLET_CONFIGS[wallet]?.logo}
+            isEnabled={(authenticationConfig.externalWallets ?? []).includes(wallet)}
+            onToggle={() => toggleExternalWallet(wallet)}
+            accordion={false}
+            isExpanded={false}
+            disabled={!(authenticationConfig.isWeb3AuthEnabled ?? false)}
+            backgroundColor="#ffffff"
+            padding="0.5rem 0.75rem"
+            isLastItem={isLast}
+          />
+        )}
+      </DraggableArea>
     </DraggableItem>
   );
 
@@ -257,8 +407,8 @@ export const AuthenticationConfigurator: React.FC = () => {
     <AccordionItem value="authentication">
       <AccordionTrigger label="Authentication" secondaryText="Configure login, sign up, and wallet connection options." />
       <AccordionContent>
-        <DraggableArea onOrderChange={handleAuthSectionsReorder}>
-          {authSectionOrder.map(sectionId => (sectionId === 'web2' ? renderWeb2Section() : renderWeb3Section()))}
+        <DraggableArea items={authSectionOrder} onOrderChange={handleAuthSectionsReorder}>
+          {sectionId => (sectionId === 'web2' ? renderWeb2Section(sectionId) : renderWeb3Section(sectionId))}
         </DraggableArea>
       </AccordionContent>
     </AccordionItem>

@@ -1,4 +1,4 @@
-import { OAuthMethod, ExternalWallet, Network, AuthLayout, OnRampProvider } from '@usecapsule/react-sdk';
+import { OAuthMethod, ExternalWallet, Network, OnRampProvider } from '@usecapsule/react-sdk';
 import { Network as CosmosNetwork } from '@delphi-labs/shuttle';
 import {
   MailIcon,
@@ -22,6 +22,7 @@ import {
   BackpackIcon,
   LeapIcon,
   KeplrIcon,
+  RabbyIcon,
 } from '../assets';
 import {
   AuthMethod,
@@ -29,6 +30,7 @@ import {
   DropdownOption,
   ModalBuilderConfig,
   DraggableItemHeaderConfig,
+  TAuthLayout,
 } from '../types';
 
 export const ALL_AUTH_METHODS: AuthMethod[] = ['email-auth', 'phone-auth', ...Object.values(OAuthMethod)];
@@ -54,6 +56,7 @@ export const EXTERNAL_WALLET_CONFIGS: Partial<Record<CustomExternalWallet, Dragg
   [ExternalWallet.COINBASE]: { logo: CoinbaseIcon, label: 'Coinbase' },
   [ExternalWallet.WALLETCONNECT]: { logo: WalletConnectIcon, label: 'WalletConnect' },
   [ExternalWallet.ZERION]: { logo: ZerionIcon, label: 'Zerion' },
+  [ExternalWallet.RABBY]: { logo: RabbyIcon, label: 'Rabby' },
   [ExternalWallet.PHANTOM]: { logo: PhantomIcon, label: 'Phantom' },
   [ExternalWallet.GLOW]: { logo: GlowIcon, label: 'Glow' },
   [ExternalWallet.BACKPACK]: { logo: BackpackIcon, label: 'Backpack' },
@@ -79,7 +82,7 @@ export const MODAL_BUILDER_DEFAULT_CONFIG: ModalBuilderConfig = {
     oAuthMethods: [OAuthMethod.GOOGLE, OAuthMethod.FARCASTER],
     disableEmailLogin: false,
     disablePhoneLogin: false,
-    authLayout: [AuthLayout.AUTH_FULL, AuthLayout.EXTERNAL_FULL],
+    authLayout: ['AUTH:FULL', 'EXTERNAL:FULL'] as TAuthLayout[],
     externalWallets: [ExternalWallet.METAMASK, ExternalWallet.PHANTOM],
     isWeb2AuthEnabled: true,
     isWeb3AuthEnabled: true,

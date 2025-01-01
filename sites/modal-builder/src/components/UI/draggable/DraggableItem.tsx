@@ -1,87 +1,150 @@
-import React, { useState, ReactElement, cloneElement } from 'react';
+import React, { FC, MouseEvent } from 'react';
 import styled from 'styled-components';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { DraggableHeader, DraggableHeaderProps } from './DraggableHeader';
-import { DraggableBody, DraggableBodyProps } from './DraggableBody';
+import { Reorder, useDragControls } from 'framer-motion';
+import { CpslIcon } from '@usecapsule/react-components';
+import { Switch } from '../StyledSwitch';
+import { Text } from '../StyledText';
 
-export interface DraggableItemProps {
-  id: string;
-  children:
-    | ReactElement<DraggableHeaderProps | DraggableBodyProps>
-    | ReactElement<DraggableHeaderProps | DraggableBodyProps>[];
+interface DraggableItemProps {
+  value: string;
+  logo?: string;
+  label: string;
+  isEnabled: boolean;
+  onToggle: (enabled: boolean) => void;
+  accordion?: boolean;
+  isExpanded?: boolean;
+  toggleExpand?: () => void;
+  disabled?: boolean;
   backgroundColor?: string;
   padding?: string;
+  children?: React.ReactNode;
+  isLastItem?: boolean; // New prop to identify the last item
 }
 
-export const DraggableItem: React.FC<DraggableItemProps> = ({ id, children, backgroundColor, padding }) => {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+export const DraggableItem: FC<DraggableItemProps> = ({
+  value,
+  logo,
+  label,
+  isEnabled,
+  onToggle,
+  accordion = false,
+  isExpanded = false,
+  toggleExpand,
+  disabled,
+  backgroundColor,
+  padding,
+  children,
+  isLastItem = false, // Default to false
+}) => {
+  const dragControls = useDragControls();
 
-  const style: React.CSSProperties = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
-
-  const [isExpanded, setIsExpanded] = useState(true);
-
-  const toggleExpand = () => {
-    setIsExpanded(prev => !prev);
-  };
-
-  const clonedChildren = React.Children.map(children, child => {
-    if (!React.isValidElement(child)) return child;
-
-    if (isDraggableHeader(child)) {
-      const draggableHeaderProps: Partial<DraggableHeaderProps> = {
-        attributes,
-        listeners,
-        isExpanded,
-        toggleExpand,
-        id,
-      };
-      return cloneElement(child, draggableHeaderProps);
-    }
-
-    if (isDraggableBody(child)) {
-      return cloneElement(child, { isExpanded });
-    }
-
-    return child;
-  });
+  function handlePointerDown(e: MouseEvent) {
+    dragControls.start(e as any);
+  }
 
   return (
-    <ItemContainer
-      ref={setNodeRef}
-      style={style}
-      $backgroundColor={backgroundColor || 'white'}
-      $padding={padding}
-      $isDragging={isDragging}
-    >
-      {clonedChildren}
-    </ItemContainer>
+    <Reorder.Item as="div" value={value} dragListener={false} dragControls={dragControls}>
+      <ItemContainer $backgroundColor={backgroundColor || 'white'} $padding={padding} $isLastItem={isLastItem}>
+        <Header>
+          <DragHandle onPointerDown={handlePointerDown}>
+            <CpslIcon icon="gridDots" color="#ADADAD" />
+            {logo && <LogoImage src={logo} alt={label} />}
+            <Text variant="bodyM" weight="medium">
+              {label}
+            </Text>
+          </DragHandle>
+          <RightContent>
+            <Switch checked={isEnabled} onCheckedChange={onToggle} disabled={disabled} />
+            {accordion && (
+              <ChevronIcon $isExpanded={isExpanded} onClick={toggleExpand}>
+                <CpslIcon icon="chevronUp" />
+              </ChevronIcon>
+            )}
+          </RightContent>
+        </Header>
+
+        {children ? (
+          accordion ? (
+            <BodyContainer $isExpanded={isExpanded}>
+              <BodyContent>{children}</BodyContent>
+            </BodyContainer>
+          ) : (
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.5rem',
+              }}
+            >
+              {children}
+            </div>
+          )
+        ) : null}
+      </ItemContainer>
+    </Reorder.Item>
   );
 };
 
-export function isDraggableHeader(element: ReactElement): element is ReactElement<DraggableHeaderProps> {
-  return element.type === DraggableHeader;
-}
-
-export function isDraggableBody(element: ReactElement): element is ReactElement<DraggableBodyProps> {
-  return element.type === DraggableBody;
-}
-
-const ItemContainer = styled.div<{ $backgroundColor: string; $padding?: string; $isDragging: boolean }>`
+const ItemContainer = styled.div<{
+  $backgroundColor: string;
+  $padding?: string;
+  $isLastItem: boolean;
+}>`
   background-color: ${({ $backgroundColor }) => $backgroundColor};
   border-radius: 0.75rem;
   padding: ${({ $padding }) => $padding || '1rem'};
-  gap: 0.5rem;
   display: flex;
   flex-direction: column;
-  opacity: ${({ $isDragging }) => ($isDragging ? 0.5 : 1)};
-  box-shadow: ${({ $isDragging }) => ($isDragging ? '0 0 10px rgba(0, 0, 0, 0.1)' : 'none')};
-  transform: ${({ $isDragging }) => ($isDragging ? 'scale(1.02)' : 'none')};
   transition:
     opacity 0.2s,
     box-shadow 0.2s,
     transform 0.2s;
+  margin-bottom: ${({ $isLastItem }) => ($isLastItem ? '0' : '0.5rem')};
+  gap: 0.5rem;
+`;
+
+const Header = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const DragHandle = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  cursor: grab;
+`;
+
+const LogoImage = styled.img`
+  width: 20px;
+  height: 20px;
+`;
+
+const RightContent = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const ChevronIcon = styled.div<{ $isExpanded: boolean }>`
+  transition: transform 0.3s ease;
+  transform: rotate(${({ $isExpanded }) => ($isExpanded ? '180deg' : '0deg')});
+  cursor: pointer;
+`;
+
+const BodyContainer = styled.div<{ $isExpanded: boolean }>`
+  overflow: hidden;
+  transition:
+    max-height 0.3s ease-out,
+    opacity 0.3s ease-out;
+  max-height: ${({ $isExpanded }) => ($isExpanded ? '1000px' : '0')};
+  opacity: ${({ $isExpanded }) => ($isExpanded ? '1' : '0')};
+`;
+
+const BodyContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
 `;

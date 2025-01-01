@@ -1,17 +1,30 @@
-// src/atoms/index.ts
 import { atom, WritableAtom } from 'jotai';
-import { Environment, CapsuleWeb } from '@usecapsule/react-sdk';
+import { Environment, CapsuleWeb, OAuthMethod } from '@usecapsule/react-sdk';
 import qs from 'qs';
 import merge from 'lodash.merge';
 import { getModalCodeString } from '../utils/codeGenerator';
-import { ModalBuilderConfig, ViewType } from '../types';
+import { ModalBuilderConfig, ViewType, ExternalWallet, TAuthLayout } from '../types';
 import { MODAL_BUILDER_DEFAULT_CONFIG, CAPSULE_API_KEY } from '../constants';
-import { logDebug, logError } from '../utils/';
+import { logError } from '../utils/';
 
 export const modalConfigAtom = atom<ModalBuilderConfig>(MODAL_BUILDER_DEFAULT_CONFIG);
 export const viewAtom = atom<ViewType>('desktop');
 export const isLoggedInAtom = atom<boolean>(false);
 export const capsuleClientAtom = atom<CapsuleWeb>(new CapsuleWeb(Environment.BETA, CAPSULE_API_KEY));
+
+interface PreviousWeb2State {
+  oAuthMethods: OAuthMethod[];
+  disableEmailLogin: boolean;
+  disablePhoneLogin: boolean;
+  authLayoutWeb2?: TAuthLayout;
+}
+interface PreviousWeb3State {
+  externalWallets: ExternalWallet[];
+  authLayoutWeb3?: TAuthLayout;
+}
+
+export const previousWeb2StateAtom = atom<PreviousWeb2State | null>(null);
+export const previousWeb3StateAtom = atom<PreviousWeb3State | null>(null);
 
 export const initializeConfigAtom: WritableAtom<null, [null], void> = atom(null, (_, set) => {
   const searchParams = new URLSearchParams(window.location.search);
@@ -22,7 +35,6 @@ export const initializeConfigAtom: WritableAtom<null, [null], void> = atom(null,
       depth: 10,
       arrayLimit: 100,
     });
-    logDebug('Parsed query parameters:', parsedParams);
 
     const parseBooleanRecursive = (obj: any): any => {
       if (typeof obj === 'string') {
@@ -36,10 +48,7 @@ export const initializeConfigAtom: WritableAtom<null, [null], void> = atom(null,
 
     const parsedParamsBoolean = parseBooleanRecursive(parsedParams);
 
-    logDebug('Parsed query parameters:', parsedParamsBoolean);
-
     const mergedConfig: ModalBuilderConfig = merge(MODAL_BUILDER_DEFAULT_CONFIG, parsedParamsBoolean);
-    logDebug('Merged configuration:', mergedConfig);
     set(modalConfigAtom, mergedConfig);
   } catch (error) {
     logError('Failed to parse query parameters:', error);
@@ -51,13 +60,11 @@ const createConfigSectionAtom = <T extends keyof ModalBuilderConfig>(sectionKey:
   return atom(
     get => get(modalConfigAtom)[sectionKey],
     (_, set, update: Partial<ModalBuilderConfig[T]>) => {
-      logDebug(`Updating ${sectionKey} configuration with:`, update);
       set(modalConfigAtom, prev => {
         const newConfig = {
           ...prev,
           [sectionKey]: { ...prev[sectionKey], ...update },
         };
-        logDebug('New modal configuration after update:', newConfig);
         syncUrlWithConfig(newConfig);
         return newConfig;
       });
@@ -77,7 +84,6 @@ export const resetConfigAtom: WritableAtom<void, [null], void> = atom(null, (_, 
   try {
     set(modalConfigAtom, MODAL_BUILDER_DEFAULT_CONFIG);
     set(viewAtom, 'desktop');
-    logDebug('Configuration reset to default:', MODAL_BUILDER_DEFAULT_CONFIG);
     window.history.replaceState(null, '', window.location.pathname);
   } catch (error) {
     logError('Failed to reset configuration:', error);
@@ -92,7 +98,6 @@ export const getShareUrlAtom = atom<string>(get => {
     arrayFormat: 'brackets',
   });
   const shareUrl = `${window.location.origin}${window.location.pathname}${queryString ? `?${queryString}` : ''}`;
-  logDebug('Generated share URL:', shareUrl);
   return shareUrl;
 });
 
@@ -108,7 +113,6 @@ export const copyShareUrlAtom: WritableAtom<void, [null], Promise<void>> = atom(
 export const getCodeStringAtom = atom<string>(get => {
   const config = get(modalConfigAtom);
   const codeString = getModalCodeString(config);
-  logDebug('Generated code string:', codeString);
   return codeString;
 });
 
@@ -117,7 +121,6 @@ export const checkLoginStatusAtom: WritableAtom<void, [null], Promise<void>> = a
   try {
     const loggedIn = await capsuleClient.isFullyLoggedIn();
     set(isLoggedInAtom, loggedIn);
-    logDebug('Login status checked:', loggedIn);
   } catch (error) {
     logError('Error checking login status:', error);
     set(isLoggedInAtom, false);
@@ -126,7 +129,6 @@ export const checkLoginStatusAtom: WritableAtom<void, [null], Promise<void>> = a
 
 export const initializeAppAtom: WritableAtom<void, [unknown], void> = atom(null, (_get, set) => {
   try {
-    logDebug('Initializing atom state');
     set(initializeConfigAtom, null);
     set(checkLoginStatusAtom, null);
   } catch (error) {
@@ -143,7 +145,6 @@ const syncUrlWithConfig = (config: ModalBuilderConfig) => {
     });
     const newUrl = `${window.location.pathname}${queryString ? `?${queryString}` : ''}`;
     window.history.replaceState(null, '', newUrl);
-    logDebug('URL synchronized with config:', newUrl);
   } catch (error) {
     logError('Failed to synchronize URL with config:', error);
   }

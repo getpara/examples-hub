@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import { Network } from '@usecapsule/react-sdk';
 import CosmosLogo from '../../assets/cosmos.svg';
@@ -8,51 +8,64 @@ import { AccordionContent, AccordionItem, AccordionTrigger, SwitchItem } from '.
 import { networksConfigAtom } from '../../atoms';
 import { useAtom } from 'jotai';
 
+const SECTION_LABEL = 'Networks';
+const SECTION_SECONDARY_TEXT =
+  'Choose the networks that your app supports. Network choices will affect the wallet and asset configuration options for your Capsule instance.';
+
+const NETWORK_CONFIGS = [
+  {
+    network: Network.ETHEREUM,
+    logo: EthereumLogo,
+    label: 'Ethereum',
+  },
+  {
+    network: Network.SOLANA,
+    logo: SolanaLogo,
+    label: 'Solana',
+  },
+  {
+    network: Network.COSMOS,
+    logo: CosmosLogo,
+    label: 'Cosmos',
+  },
+];
+
 interface NetworksConfiguratorProps {}
 
 export const NetworksConfigurator: React.FC<NetworksConfiguratorProps> = () => {
   const [networksConfig, setNetworksConfig] = useAtom(networksConfigAtom);
 
-  const handleToggleNetwork = (network: Network, isChecked: boolean) => {
-    const networkSet = new Set(networksConfig.networks);
+  const handleToggleNetwork = useCallback(
+    (network: Network, isChecked: boolean) => {
+      const networkSet = new Set(networksConfig.networks);
 
-    if (isChecked) {
-      networkSet.add(network);
-    } else {
-      networkSet.delete(network);
-    }
-    setNetworksConfig({
-      ...networksConfig,
-      networks: Array.from(networkSet),
-    });
-  };
+      if (isChecked) {
+        networkSet.add(network);
+      } else {
+        networkSet.delete(network);
+      }
+      setNetworksConfig({
+        ...networksConfig,
+        networks: Array.from(networkSet),
+      });
+    },
+    [networksConfig],
+  );
 
   return (
     <AccordionItem value="networks">
-      <AccordionTrigger
-        label="Networks"
-        secondaryText="Choose the networks that your app supports. Network choices will affect the wallet and asset configuration options for your Capsule instance."
-      />
+      <AccordionTrigger label={SECTION_LABEL} secondaryText={SECTION_SECONDARY_TEXT} />
       <AccordionContent>
         <ContentWrapper>
-          <SwitchItem
-            logo={EthereumLogo}
-            label="Ethereum"
-            isChecked={networksConfig.networks?.includes(Network.ETHEREUM)!}
-            onToggle={isChecked => handleToggleNetwork(Network.ETHEREUM, isChecked)}
-          />
-          <SwitchItem
-            logo={SolanaLogo}
-            label="Solana"
-            isChecked={networksConfig.networks?.includes(Network.SOLANA)!}
-            onToggle={isChecked => handleToggleNetwork(Network.SOLANA, isChecked)}
-          />
-          <SwitchItem
-            logo={CosmosLogo}
-            label="Cosmos"
-            isChecked={networksConfig.networks?.includes(Network.COSMOS)!}
-            onToggle={isChecked => handleToggleNetwork(Network.COSMOS, isChecked)}
-          />
+          {NETWORK_CONFIGS.map(({ network, logo, label }) => (
+            <SwitchItem
+              key={network}
+              logo={logo}
+              label={label}
+              isChecked={networksConfig.networks?.includes(network)!}
+              onToggle={isChecked => handleToggleNetwork(network, isChecked)}
+            />
+          ))}
         </ContentWrapper>
       </AccordionContent>
     </AccordionItem>

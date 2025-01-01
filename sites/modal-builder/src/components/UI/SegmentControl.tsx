@@ -1,13 +1,8 @@
 import React, { useState, useRef, useLayoutEffect, useEffect } from 'react';
 import styled from 'styled-components';
-import { CpslIcon, IconType } from '@usecapsule/react-components';
+import { CpslIcon } from '@usecapsule/react-components';
 import { Text } from './StyledText';
-
-interface SegmentItem {
-  icon: IconType;
-  label: string;
-  value: string;
-}
+import { SegmentItem } from '../../types';
 
 interface SegmentControlProps {
   items: SegmentItem[];

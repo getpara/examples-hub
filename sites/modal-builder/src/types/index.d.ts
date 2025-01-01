@@ -1,4 +1,7 @@
-import { CapsuleModalProps, OAuthMethod, ExternalWallet as SDKExternalWallet } from '@usecapsule/react-sdk';
+import { IconType } from '@usecapsule/react-components';
+import { AuthLayout, CapsuleModalProps, OAuthMethod, ExternalWallet as SDKExternalWallet } from '@usecapsule/react-sdk';
+
+export type TAuthLayout = `${AuthLayout}`;
 
 export type ViewType = 'desktop' | 'mobile' | 'code';
 export type AuthSectionId = 'web2' | 'web3';
@@ -56,4 +59,10 @@ export interface ModalBuilderConfig {
   onRamps: OnRampsConfig;
   offRamps: OffRampsConfig;
   depositCrypto: DepositCryptoConfig;
+}
+
+export interface SegmentItem {
+  icon: IconType;
+  label: string;
+  value: string;
 }

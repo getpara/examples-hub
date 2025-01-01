@@ -15,13 +15,34 @@ import {
 } from '../UI/';
 import { useAtom } from 'jotai';
 import { appearanceConfigAtom } from '../../atoms';
-import { logDebug } from '../../utils';
+
+const SECTION_LABEL = 'Appearance';
+const SECTION_SECONDARY_TEXT = 'Control the look and feel of your modal integration';
+const LOGO_MAX_SIZE_TEXT = 'Max size: 372px X 160px';
+const LOGO_PLACEHOLDER = 'www.yourwebsite.com';
+
+const COLOR_INPUTS = [
+  {
+    name: 'foreground',
+    label: 'Foreground Color',
+    getColor: (config: any) => config.theme?.foregroundColor,
+  },
+  {
+    name: 'background',
+    label: 'Background Color',
+    getColor: (config: any) => config.theme?.backgroundColor,
+  },
+  {
+    name: 'accent',
+    label: 'Accent Color (Optional)',
+    getColor: (config: any) => config.theme?.accentColor,
+  },
+];
 
 interface AppearanceConfiguratorProps {}
 
 export const AppearanceConfigurator: React.FC<AppearanceConfiguratorProps> = () => {
   const [appearanceConfig, setAppearanceConfig] = useAtom(appearanceConfigAtom);
-  logDebug('AppearanceConfigurator', appearanceConfig);
 
   const handleForegroundColorChange = (color: string) => {
     setAppearanceConfig({
@@ -65,30 +86,9 @@ export const AppearanceConfigurator: React.FC<AppearanceConfiguratorProps> = () 
     });
   };
 
-  const colorInputs = [
-    {
-      name: 'foreground',
-      onColorChange: handleForegroundColorChange,
-      label: 'Foreground Color',
-      color: appearanceConfig.theme?.foregroundColor,
-    },
-    {
-      name: 'background',
-      onColorChange: handleBackgroundColorChange,
-      label: 'Background Color',
-      color: appearanceConfig.theme?.backgroundColor,
-    },
-    {
-      name: 'accent',
-      onColorChange: handleAccentColorChange,
-      label: 'Accent Color (Optional)',
-      color: appearanceConfig.theme?.accentColor,
-    },
-  ];
-
   return (
     <AccordionItem value="appearance">
-      <AccordionTrigger label="Appearance" secondaryText="Control the look and feel of your modal integration" />
+      <AccordionTrigger label={SECTION_LABEL} secondaryText={SECTION_SECONDARY_TEXT} />
       <AccordionContent>
         <StyledContent>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
@@ -101,7 +101,7 @@ export const AppearanceConfigurator: React.FC<AppearanceConfiguratorProps> = () 
                 name="logo"
                 type="text"
                 value={appearanceConfig.logo || ''}
-                placeholder="www.yourwebsite.com"
+                placeholder={LOGO_PLACEHOLDER}
                 className="mb-2"
                 onChange={e => handleLogoChange(e.currentTarget.value)}
                 onInput={e => handleLogoChange(e.currentTarget.value)}
@@ -109,15 +109,21 @@ export const AppearanceConfigurator: React.FC<AppearanceConfiguratorProps> = () 
               />
             </InputContainer>
             <Text variant="bodyXS" color="secondary" weight="medium">
-              Max size: 372px X 160px
+              {LOGO_MAX_SIZE_TEXT}
             </Text>
           </div>
-          {colorInputs.map((input, index) => (
+          {COLOR_INPUTS.map((input, index) => (
             <ColorInputPicker
               key={index}
-              onColorChange={input.onColorChange}
+              onColorChange={
+                input.name === 'foreground'
+                  ? handleForegroundColorChange
+                  : input.name === 'background'
+                    ? handleBackgroundColorChange
+                    : handleAccentColorChange
+              }
               label={input.label}
-              color={input.color}
+              color={input.getColor(appearanceConfig)}
               name={input.name}
             />
           ))}

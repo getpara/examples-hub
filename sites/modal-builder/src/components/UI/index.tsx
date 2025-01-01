@@ -12,7 +12,7 @@ export * from './Accordion';
 export * from './StyledInput';
 export * from './AccountActionButtons';
 export * from './ExternalLinksButtons';
-export * from './Draggable';
 export * from './MoreQuestions';
 export * from './Nav';
 export * from './ErrorFallback';
+export * from './draggable';

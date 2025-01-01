@@ -26,3 +26,4 @@ export { default as BackpackIcon } from './backpack.svg';
 export { default as CapsuleLogo } from './capsule-logo.svg';
 export { default as LeapIcon } from './leap.svg';
 export { default as KeplrIcon } from './keplr.svg';
+export { default as RabbyIcon } from './rabby.svg';
