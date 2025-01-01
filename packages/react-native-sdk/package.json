@@ -2,8 +2,8 @@
   "name": "@usecapsule/react-native-wallet",
   "version": "2.11.0",
   "description": "Capsule Wallet for React Native",
-  "author": "Capsule Team <hello@usecapsule.com> (https://usecapsule.com)",
   "homepage": "https://usecapsule.com",
+  "author": "Capsule Team <hello@usecapsule.com> (https://usecapsule.com)",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -22,27 +22,35 @@
     "compile-signer": "bash ./scripts/compileSigner.sh"
   },
   "dependencies": {
-    "@react-native-async-storage/async-storage": "^1.15.14",
+    "@peculiar/webcrypto": "^1.5.0",
     "@usecapsule/core-sdk": "2.14.0",
     "@usecapsule/user-management-client": "1.36.0",
     "@usecapsule/web-sdk": "2.14.0",
+    "fastestsmallesttextencoderdecoder": "1.0.22",
     "node-forge": "1.3.1",
-    "react-native-get-random-values": "^1.11.0",
-    "react-native-keychain": "8.0.0",
-    "react-native-modpow": "1.1.0",
-    "react-native-passkey": "3.0.0",
-    "text-encoding": "0.7.0"
+    "react-native-url-polyfill": "2.0.0",
+    "web-streams-polyfill": "4.0.0"
   },
   "devDependencies": {
+    "@react-native-async-storage/async-storage": "2.1.0",
     "@types/node-forge": "1.3.1",
     "@types/react": "^18.0.31",
     "@types/react-native": "0.70.0",
     "@types/text-encoding": "0.0.39",
+    "react-native-keychain": "9.2.2",
+    "react-native-modpow": "1.1.0",
+    "react-native-passkey": "3.0.0",
+    "react-native-quick-base64": "2.1.2",
     "typescript": "^5.4.3"
   },
   "peerDependencies": {
+    "@react-native-async-storage/async-storage": "*",
     "react": "*",
-    "react-native": "*"
+    "react-native": "*",
+    "react-native-keychain": "*",
+    "react-native-modpow": "*",
+    "react-native-passkey": "*",
+    "react-native-quick-base64": "*"
   },
   "publishConfig": {
     "access": "public"

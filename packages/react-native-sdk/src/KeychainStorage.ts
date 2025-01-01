@@ -40,8 +40,8 @@ export class KeychainStorage implements StorageUtils {
   async set(key: string, value: string): Promise<void> {
     const result = await Keychain.setGenericPassword(USERNAME, value, {
       service: key,
-      accessible: Keychain.ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY,
-      rules: Keychain.SECURITY_RULES.NONE,
+      accessible: Keychain.ACCESSIBLE.AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY,
+      securityLevel: Keychain.SECURITY_LEVEL.ANY,
     });
     if (!result) {
       throw new Error('Failed to store key ' + key);

@@ -13,8 +13,10 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "resolveJsonModule": true,
-    "strict": true
+    "strict": true,
+    "allowJs": true,
+    "checkJs": false
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/shim.js"],
   "exclude": ["node_modules", "dist"]
 }
