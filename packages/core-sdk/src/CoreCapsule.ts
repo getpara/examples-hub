@@ -2630,6 +2630,11 @@ export abstract class CoreCapsule {
       );
     }
 
+    await this.setCurrentWalletIds({
+      ...this.currentWalletIds,
+      [walletType]: [...(this.currentWalletIds[walletType] ?? []), walletId],
+    });
+
     return [wallet, recoveryShare];
   }
 
