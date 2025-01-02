@@ -53,7 +53,7 @@ Forge.jsbn.BigInteger.prototype.modPow = function nativeModPow(e, m) {
 };
 
 // 5) Provide global Buffer
-import { Buffer } from 'buffer';
+import { Buffer } from '@craftzdog/react-native-buffer';
 if (typeof global.Buffer === 'undefined') {
   global.Buffer = Buffer;
 }
