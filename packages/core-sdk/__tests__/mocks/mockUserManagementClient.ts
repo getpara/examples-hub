@@ -41,7 +41,8 @@ export const mockTouchSession = vi.fn().mockResolvedValue({
     needsWallet: false,
   },
 });
-export const mockTempTrasmissionInit = vi.fn().mockResolvedValue({ data: { id: TEMP_TRANSMISSION_INIT_ID } });
+export const mockTempTransmissionInit = vi.fn().mockResolvedValue({ data: { id: TEMP_TRANSMISSION_INIT_ID } });
+export const mockTempTransmission = vi.fn().mockResolvedValue({ data: { message: 'test' } });
 export const mockInitializeFarcasterLogin = vi.fn().mockResolvedValue({
   data: { connect_uri: FARCASTER_CONNECT_URI },
 });
@@ -54,6 +55,7 @@ export const mockGetSessionPublicKeys = vi.fn().mockResolvedValue({ data: { keys
 export const mockUploadUserKeyShares = vi.fn().mockResolvedValue({});
 export const mockDistributeCapsuleShare = vi.fn().mockResolvedValue({});
 export const mockGetRecoveryPublicKeys = vi.fn().mockResolvedValue({ recoveryPublicKeys: RECOVERY_PUBLIC_KEYS });
+export const mockPersistRecoveryPublicKeys = vi.fn().mockResolvedValue({ recoveryPublicKeys: RECOVERY_PUBLIC_KEYS });
 export const mockClaimPregenWallets = vi
   .fn()
   .mockImplementation(({ walletIds }: { walletIds: string[]; userId: string }) => ({ walletIds }));
@@ -69,6 +71,7 @@ export const mockEnable2FA = vi.fn().mockResolvedValue({});
 export const mockVerify2FA = vi.fn().mockResolvedValue({ data: TWOFA_VERIFY_RESP });
 export const mockVerify2FAForPhone = vi.fn().mockResolvedValue({ data: TWOFA_VERIFY_RESP });
 export const mockGetPasswords = vi.fn().mockResolvedValue([]);
+export const mockGetSupportedAuthMethods = vi.fn().mockResolvedValue({ supportedAuthMethods: ['BIOMETRIC', 'PASSWORD'] });
 
 vi.mock('@usecapsule/user-management-client', async importOriginal => {
   const actual = await importOriginal();
@@ -85,7 +88,8 @@ vi.mock('@usecapsule/user-management-client', async importOriginal => {
       getPartner: mockGetPartner,
       logout: mockLogout,
       touchSession: mockTouchSession,
-      tempTrasmissionInit: mockTempTrasmissionInit,
+      tempTrasmissionInit: mockTempTransmissionInit,
+      tempTrasmission: mockTempTransmission,
       initializeFarcasterLogin: mockInitializeFarcasterLogin,
       getFarcasterAuthStatus: mockGetFarcasterAuthStatus,
       getPregenWallets: mockGetPregenWallets,
@@ -103,6 +107,8 @@ vi.mock('@usecapsule/user-management-client', async importOriginal => {
       verify2FA: mockVerify2FA,
       verify2FAForPhone: mockVerify2FAForPhone,
       getPasswords: mockGetPasswords,
+      persistRecoveryPublicKeys: mockPersistRecoveryPublicKeys,
+      getSupportedAuthMethods: mockGetSupportedAuthMethods,
     })),
   };
 });

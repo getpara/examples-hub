@@ -15,8 +15,9 @@ export class TransactionReviewDenied extends Error {
   }
 }
 
-export class TransactionReviewTimeout extends TransactionReviewError {
+export class TransactionReviewTimeout extends Error {
   pendingTransactionId: string;
+  transactionReviewUrl: string;
 
   constructor(transactionReviewUrl: string, pendingTransactionId: string) {
     super('transaction review has timed out');

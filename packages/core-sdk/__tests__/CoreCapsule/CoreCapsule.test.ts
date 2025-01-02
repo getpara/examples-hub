@@ -1,6 +1,13 @@
 import { describe, vi, afterEach, expect, it, beforeAll } from 'vitest';
 
-import CoreCapsule, { Environment, getBaseUrl, getPortalBaseURL, getPublicKeyHex, OAuthMethod } from '../../src/index.js';
+import CoreCapsule, {
+  AuthMethod,
+  Environment,
+  getBaseUrl,
+  getPortalBaseURL,
+  getPublicKeyHex,
+  OAuthMethod,
+} from '../../src/index.js';
 import {
   API_KEY,
   EXTERNAL_WALLET,
@@ -58,6 +65,8 @@ import { PublicKeyStatus, PublicKeyType, WalletType } from '@usecapsule/user-man
 import { PregenIdentifierType } from '../../src/CoreCapsule.js';
 import { getWorkerContent } from '../utils.js';
 import { mockPreKeygen } from '../mocks/mockPlatformUtils.js';
+import '../mocks/mockCryptographyUtils.js';
+import '../mocks/mockUserManagementClient.js';
 
 const COMMON_SEARCH_PARAMS = {
   partnerId: PARTNER.id,
@@ -83,6 +92,13 @@ function expectSearchParams(url: URL, expected: Record<string, string>): void {
 
   expect(searchParams).toEqual(expected);
 }
+vi.mock('../../src/cryptography/utils', async importOriginal => {
+  const actual = await importOriginal();
+  return {
+    ...(actual as any),
+    decryptWithPrivateKey: vi.fn(),
+  };
+});
 
 describe('CoreCapsule', () => {
   afterEach(() => {
@@ -341,9 +357,11 @@ describe('CoreCapsule', () => {
         );
 
         const loginRes = await capsule.initiateUserLogin(USER_EMAIL);
+        const isEmail = await capsule.isEmail;
 
         const url = new URL(loginRes);
 
+        expect(isEmail).toBeTruthy();
         expect(url.origin).toEqual(PARTNER.portalUrl);
         expect(url.pathname).toEqual('/web/biometrics/login');
         expectSearchParams(url, {
@@ -372,6 +390,22 @@ describe('CoreCapsule', () => {
         expect(url.origin).toEqual('http://localhost:3003');
         expect(url.pathname).toContain(`/short/${TEMP_TRANSMISSION_INIT_ID}`);
       });
+      it('initiates loginV2', async () => {
+        const capsule = new MockCapsule(Environment.DEV, API_KEY);
+
+        const workerFileContent = await getWorkerContent();
+
+        global.fetch = vi.fn(() =>
+          Promise.resolve({
+            text: () => Promise.resolve(workerFileContent),
+          } as Response),
+        );
+
+        const loginRes = await capsule.initiateUserLoginV2(USER_EMAIL, 'email');
+
+        expect(loginRes.has(AuthMethod.PASSKEY)).toBeTruthy();
+        expect(loginRes.has(AuthMethod.PASSWORD)).toBeTruthy();
+      });
     });
     describe('phone', () => {
       it('initiates login', async () => {
@@ -392,8 +426,11 @@ describe('CoreCapsule', () => {
           USER_COUNTRY_CODE as CountryCallingCode,
         );
 
+        const isPhone = await capsule.isPhone;
+
         const url = new URL(loginRes);
 
+        expect(isPhone).toBeTruthy();
         expect(url.origin).toEqual(PARTNER.portalUrl);
         expect(url.pathname).toEqual('/web/biometrics/login');
         expectSearchParams(url, {
@@ -433,6 +470,22 @@ describe('CoreCapsule', () => {
           pregenIds: '{}',
         });
       });
+      it('initiates loginV2', async () => {
+        const capsule = new MockCapsule(Environment.DEV, API_KEY);
+
+        const workerFileContent = await getWorkerContent();
+
+        global.fetch = vi.fn(() =>
+          Promise.resolve({
+            text: () => Promise.resolve(workerFileContent),
+          } as Response),
+        );
+
+        const loginRes = await capsule.initiateUserLoginV2(USER_PHONE, 'phone', USER_COUNTRY_CODE as CountryCallingCode);
+
+        expect(loginRes.has(AuthMethod.PASSKEY)).toBeTruthy();
+        expect(loginRes.has(AuthMethod.PASSWORD)).toBeTruthy();
+      });
     });
     describe('farcaster', () => {
       it('get connect url', async () => {
@@ -447,8 +500,13 @@ describe('CoreCapsule', () => {
 
         const { userExists, username } = await capsule.waitForFarcasterStatus();
 
+        const farcasterUsername = await capsule.getFarcasterUsername();
+        const isFarcaster = await capsule.isFarcaster;
+
         expect(userExists).toBeTruthy();
         expect(username).toEqual(USER_FARCASTER_USERNAME);
+        expect(farcasterUsername).toEqual(USER_FARCASTER_USERNAME);
+        expect(isFarcaster).toBeTruthy();
         expect(capsule.getUserId()).toEqual(USER_ID);
       });
       it('wait for login fails', async () => {
@@ -459,6 +517,22 @@ describe('CoreCapsule', () => {
         const waitResp = await capsule.waitForFarcasterStatus();
 
         await expect(waitResp).toBeUndefined();
+      });
+      it('initiates loginV2', async () => {
+        const capsule = new MockCapsule(Environment.DEV, API_KEY);
+
+        const workerFileContent = await getWorkerContent();
+
+        global.fetch = vi.fn(() =>
+          Promise.resolve({
+            text: () => Promise.resolve(workerFileContent),
+          } as Response),
+        );
+
+        const loginRes = await capsule.initiateUserLoginV2(USER_FARCASTER_USERNAME, 'farcaster');
+
+        expect(loginRes.has(AuthMethod.PASSKEY)).toBeTruthy();
+        expect(loginRes.has(AuthMethod.PASSWORD)).toBeTruthy();
       });
     });
     describe('oauth', () => {
