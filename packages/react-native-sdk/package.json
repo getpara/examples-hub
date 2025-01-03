@@ -1,6 +1,6 @@
 {
   "name": "@usecapsule/react-native-wallet",
-  "version": "2.11.0",
+  "version": "2.12.0",
   "description": "Capsule Wallet for React Native",
   "homepage": "https://usecapsule.com",
   "author": "Capsule Team <hello@usecapsule.com> (https://usecapsule.com)",
@@ -23,9 +23,9 @@
   },
   "dependencies": {
     "@peculiar/webcrypto": "^1.5.0",
-    "@usecapsule/core-sdk": "2.14.0",
-    "@usecapsule/user-management-client": "1.36.0",
-    "@usecapsule/web-sdk": "2.14.0",
+    "@usecapsule/core-sdk": "2.15.0",
+    "@usecapsule/user-management-client": "1.37.0",
+    "@usecapsule/web-sdk": "2.15.0",
     "fastestsmallesttextencoderdecoder": "1.0.22",
     "node-forge": "1.3.1",
     "react-native-url-polyfill": "2.0.0"
@@ -47,13 +47,13 @@
   "peerDependencies": {
     "@craftzdog/react-native-buffer": "*",
     "@react-native-async-storage/async-storage": "*",
-    "react-native-quick-crypto": "*",
     "react": "*",
     "react-native": "*",
     "react-native-keychain": "*",
     "react-native-modpow": "*",
     "react-native-passkey": "*",
     "react-native-quick-base64": "*",
+    "react-native-quick-crypto": "*",
     "readable-stream": "*"
   },
   "publishConfig": {
