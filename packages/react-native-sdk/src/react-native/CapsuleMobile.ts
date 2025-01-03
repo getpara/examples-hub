@@ -195,6 +195,7 @@ export class CapsuleMobile extends CoreCapsule {
    * @returns {Promise<Wallet[]>} An array of user wallets.
    */
   async login(email?: string, phone?: string, countryCode?: CountryCallingCode): Promise<void> {
+    await this.logout();
     const auth = extractAuth({ email, phone, countryCode }, { optional: true });
     const { challenge, allowedPublicKeys } = await this.ctx.capsuleClient.getWebChallenge(auth);
 
@@ -229,6 +230,20 @@ export class CapsuleMobile extends CoreCapsule {
     const userId = verifyWebChallengeResult.data.userId;
 
     await this.setUserId(userId);
+
+    const { user } = await this.ctx.capsuleClient.getUser(userId);
+
+    if (user.phoneNumber) {
+      await this.setPhoneNumber(user.phoneNumber.number, user.phoneNumber.countryCode);
+    }
+
+    if (user.email) {
+      await this.setEmail(user.email);
+    }
+
+    if (user.farcasterUsername) {
+      await this.setFarcasterUsername(user.farcasterUsername);
+    }
 
     const encryptedSharesResult = await this.ctx.capsuleClient.getBiometricKeyshares(userId, resultJson.id);
 

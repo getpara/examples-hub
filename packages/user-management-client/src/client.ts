@@ -1225,6 +1225,12 @@ class Client {
     const res = await this.baseRequest.get<any>(`/encrypted-wallet-private-keys?${query}`);
     return res;
   }
+
+  // GET /users/:userId
+  async getUser(userId: string): Promise<any> {
+    const res = await this.baseRequest.get<any>(`/users/${userId}`);
+    return res.data;
+  }
 }
 
 export default Client;
