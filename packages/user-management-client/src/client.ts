@@ -7,11 +7,36 @@ import axios, {
 } from 'axios';
 import { AxiosRequestConfig } from 'axios';
 import qs from 'qs';
-import { $Auth, Auth, AuthParams, extractWalletRef, PregenIds, TPregenIdentifierType, WalletParams } from './types.js';
-
-export const USER_NOT_VERIFIED = 'user must verify biometrics';
-export const USER_NOT_AUTHENTICATED_ERROR = 'user must be authenticated';
-export const USER_NOT_MATCHING_ERROR = 'route param userId must match session userId';
+import {
+  $Auth,
+  Auth,
+  AuthParams,
+  BackupKitEmailProps,
+  BiometricLocationHint,
+  Chain,
+  CurrentWalletIds,
+  EncryptedKeyShare,
+  EncryptorType,
+  KeyType,
+  Network,
+  OnRampAsset,
+  OnRampConfig,
+  OnRampProvider,
+  OnRampPurchase,
+  OnRampPurchaseCreateParams,
+  OnRampPurchaseUpdateParams,
+  PasswordStatus,
+  PregenIds,
+  PublicKeyStatus,
+  PublicKeyType,
+  TPregenIdentifierType,
+  VerificationEmailProps,
+  WalletEntity,
+  WalletParams,
+  WalletScheme,
+  WalletType,
+} from './types/index.js';
+import { extractWalletRef } from './utils.js';
 
 interface ConfigOpts {
   useFetchAdapter?: boolean;
@@ -26,76 +51,41 @@ type ClientConfig = {
   persistSessionCookie?: (cookie: string) => void;
 };
 
-export enum EmailTheme {
-  LIGHT = 'light',
-  DARK = 'dark',
-}
-
-export interface VerificationEmailProps {
-  theme?: EmailTheme;
-  homepageUrl?: string;
-  xUrl?: string;
-  linkedinUrl?: string;
-  githubUrl?: string;
-  supportUrl?: string;
-  brandColor?: string;
-}
-
-export interface BackupKitEmailProps {
-  theme?: EmailTheme;
-  homepageUrl?: string;
-  xUrl?: string;
-  linkedinUrl?: string;
-  githubUrl?: string;
-  supportUrl?: string;
-  brandColor?: string;
-}
-
-export interface createUserBody {
+interface createUserBody {
   email: string;
 }
 
-export interface createUserBodyForPhone {
+interface createUserBodyForPhone {
   phone: string;
   countryCode: string;
 }
 
-export interface ExternalWalletLoginBody {
+interface ExternalWalletLoginBody {
   externalAddress: string;
   type: 'EVM' | 'SOLANA' | 'COSMOS';
   externalWalletProvider?: string;
 }
 
-export interface ExternalWalletLoginRes {
+interface ExternalWalletLoginRes {
   userId: string;
 }
 
-export interface createUserIdRes {
+interface createUserIdRes {
   protocolId: string;
   userId: string;
 }
 
-export interface verifyBody {
+interface verifyBody {
   verificationCode: string;
 }
 
-export interface getWebChallengeRes {
+interface getWebChallengeRes {
   challenge: string;
   allowedPublicKeys?: string[];
 }
 
-export interface GetCapsuleShareRes {
+interface GetCapsuleShareRes {
   share: string;
-}
-
-export enum PublicKeyStatus {
-  PENDING = 'PENDING',
-  COMPLETE = 'COMPLETE',
-}
-
-export enum PublicKeyType {
-  MOBILE = 'MOBILE',
-  WEB = 'WEB',
 }
 
 interface sessionPublicKeyBody {
@@ -142,62 +132,11 @@ interface verifySessionChallengeBody {
 interface verifySessionChallengeRes {
   sessionChallenge: string;
 }
-
-export enum WalletScheme {
-  DKLS = 'DKLS',
-  CGGMP = 'CGGMP',
-  ED25519 = 'ED25519',
-}
-
-export enum WalletType {
-  EVM = 'EVM',
-  SOLANA = 'SOLANA',
-  COSMOS = 'COSMOS',
-}
-
-export type CurrentWalletIds = Partial<Record<WalletType, string[]>>;
-
-export const NON_ED25519 = [WalletScheme.DKLS, WalletScheme.CGGMP];
-
-export interface PartnerEntity {
-  id: string;
-  displayName: string;
-  logoUrl?: string;
-  iconUrl?: string;
-  portalHeaderLogoUrl?: string;
-  policiesEnabled: boolean;
-  backgroundColor?: string;
-  foregroundColor?: string;
-  accentColor?: string;
-  font?: string;
-  themeMode?: 'light' | 'dark';
-}
-export interface WalletEntity {
-  address: string | null;
-  createdAt: string;
-  isPregen?: boolean;
-  pregenIdentifier: string;
-  pregenIdentifierType: TPregenIdentifierType;
-  id: string;
-  keyGenComplete: boolean;
-  name: string | null;
-  partnerId: string;
-  partner?: PartnerEntity;
-  publicKey: string | null;
-  scheme: string;
-  type: WalletType;
-  updatedAt: string;
-  userId: string | null;
-  lastUsedAt: string | null;
-  lastUsedPartnerId?: string;
-  lastUsedPartner?: PartnerEntity;
-}
-
 interface GetWalletsRes {
   wallets: WalletEntity[];
 }
 
-export interface PasswordEntity {
+interface PasswordEntity {
   id: string;
   userId: string;
   status: PasswordStatus;
@@ -240,12 +179,6 @@ interface signTransactionBody {
   chainId: string;
 }
 
-export enum Chain {
-  ETH = 'ETH',
-  CELO = 'CELO',
-  MATIC = 'MATIC',
-}
-
 // TODO: delete chain field and make chainId required
 interface sendTransactionBody {
   transaction: string;
@@ -258,137 +191,16 @@ interface AcceptScopesBody {
   partnerId: string;
 }
 
-export interface encryptedKeyshare {
-  encryptedShare: string;
-  encryptedKey?: string;
-  type: (typeof KeyType)[keyof typeof KeyType];
-  biometricPublicKey?: string;
-  encryptor: (typeof EncryptorType)[keyof typeof EncryptorType];
-  recoveryPublicKeyId?: string;
-  partnerId?: string;
-}
-
-export enum EncryptorType {
-  USER = 'USER',
-  RECOVERY = 'RECOVERY',
-  BIOMETRICS = 'BIOMETRICS',
-  PASSWORD = 'PASSWORD',
-}
-
-export const KeyType = {
-  USER: 'USER',
-  RECOVERY: 'RECOVERY',
-} as const;
-
-export enum Network {
-  ETHEREUM = 'ETHEREUM',
-  SEPOLIA = 'SEPOLIA',
-  ARBITRUM = 'ARBITRUM',
-  BASE = 'BASE',
-  OPTIMISM = 'OPTIMISM',
-  POLYGON = 'POLYGON',
-  SOLANA = 'SOLANA',
-  COSMOS = 'COSMOS',
-  CELO = 'CELO',
-}
-
-export enum OnRampProvider {
-  RAMP = 'RAMP',
-  STRIPE = 'STRIPE',
-  MOONPAY = 'MOONPAY',
-}
-
-export enum OnRampAsset {
-  ETHEREUM = 'ETHEREUM',
-  USDC = 'USDC',
-  TETHER = 'TETHER',
-  POLYGON = 'POLYGON',
-  SOLANA = 'SOLANA',
-  ATOM = 'ATOM',
-  CELO = 'CELO',
-  CUSD = 'CUSD',
-  CEUR = 'CEUR',
-  CREAL = 'CREAL',
-}
-
-export enum OnRampPurchaseStatus {
-  INITIATED = 'INITIATED',
-  FINISHED = 'FINISHED',
-  CANCELLED = 'CANCELLED',
-}
-
-export enum OnRampPurchaseType {
-  BUY = 'BUY',
-  SELL = 'SELL',
-}
-export interface OnRampPurchase {
-  id: string;
-  userId: string;
-  type?: OnRampPurchaseType;
-  walletId?: string | null;
-  walletType?: WalletType;
-  externalWalletAddress?: string | null;
-  address?: string | null;
-  status?: OnRampPurchaseStatus;
-  provider?: OnRampProvider;
-  providerKey?: string | null;
-  fiat?: string | null;
-  fiatQuantity?: string | null;
-  asset?: OnRampAsset;
-  assetQuantity?: string | null;
-  network?: Network | null;
-  testMode?: boolean;
-}
-
-export type OnRampPurchaseCreateParams = Omit<OnRampPurchase, 'id' | 'userId'> & {
-  networks?: Network[] | 'all';
-  assets?: OnRampAsset[] | 'all';
-  defaultNetwork?: Network;
-  defaultAsset?: OnRampAsset;
-};
-
-export type OnRampPurchaseUpdateParams = Omit<OnRampPurchase, 'id' | 'userId'>;
-
-type ProviderAssetInfo = [string, Partial<Record<OnRampPurchaseType, boolean>>];
-
-export type OnRampAssetInfo = Record<
-  WalletType,
-  Partial<Record<Network, Partial<Record<OnRampAsset, Partial<Record<OnRampProvider, ProviderAssetInfo>>>>>>
->;
-
-export type OnRampAllowedAssets = Partial<Record<Network, true | OnRampAsset[]>>;
-
-export type OnRampConfig = {
-  isBuyEnabled: boolean;
-  isReceiveEnabled: boolean;
-  isWithdrawEnabled: boolean;
-  assetInfo: OnRampAssetInfo;
-  providers: OnRampProvider[];
-  allowedAssets?: OnRampAllowedAssets;
-  rampApiKey?: string;
-  defaultOnRampAsset?: OnRampAsset;
-  defaultOnRampNetwork?: Network;
-  defaultBuyAmount?: [string, string];
-};
-
-export enum PasswordStatus {
-  PENDING = 'PENDING',
-  COMPLETE = 'COMPLETE',
-}
-
 interface sessionPasswordBody {
   status?: PasswordStatus;
   sigDerivedPublicKey?: string;
   salt?: string;
 }
 
-export type BiometricLocationHint = { useragent?: string; aaguid?: string };
-
 type BiometricLocationHintParams = AuthParams;
 
 const SESSION_COOKIE_HEADER_NAME = 'x-capsule-sid';
 const VERSION_HEADER_NAME = 'x-capsule-version';
-
 class Client {
   private baseRequest: AxiosInstance;
   constructor({ userManagementHost, apiKey, version, opts, retrieveSessionCookie, persistSessionCookie }: ClientConfig) {
@@ -721,14 +533,14 @@ class Client {
 
   // DEPRECATED: use uploadUserKeyShares instead
   // POST /users/:userId/wallets/:walletId/key-shares
-  async uploadKeyshares(userId: string, walletId: string, encryptedKeyshares: encryptedKeyshare[]): Promise<any> {
+  async uploadKeyshares(userId: string, walletId: string, encryptedKeyshares: EncryptedKeyShare[]): Promise<any> {
     const body = { keyShares: encryptedKeyshares };
     const res = await this.baseRequest.post<any>(`/users/${userId}/wallets/${walletId}/key-shares`, body);
     return res;
   }
 
   // POST /users/:userId/key-shares
-  async uploadUserKeyShares(userId: string, encryptedKeyshares: (encryptedKeyshare & { walletId: string })[]): Promise<any> {
+  async uploadUserKeyShares(userId: string, encryptedKeyshares: (EncryptedKeyShare & { walletId: string })[]): Promise<any> {
     const body = { keyShares: encryptedKeyshares };
     const res = await this.baseRequest.post<any>(`/users/${userId}/key-shares`, body);
     return res;

@@ -1,4 +1,4 @@
-import { BackupKitEmailProps, encryptedKeyshare, EncryptorType, KeyType } from '@usecapsule/user-management-client';
+import { BackupKitEmailProps, EncryptedKeyShare, EncryptorType, KeyType } from '@usecapsule/user-management-client';
 
 import { KeyContainer } from './KeyContainer.js';
 import { Ctx } from '../definitions.js';
@@ -7,7 +7,7 @@ export async function sendRecoveryForShare(
   ctx: Ctx,
   userId: string,
   walletId: string,
-  otherEncryptedShares: encryptedKeyshare[],
+  otherEncryptedShares: EncryptedKeyShare[],
   userSigner: string,
   ignoreRedistributingBackupEncryptedShare = false,
   emailProps: BackupKitEmailProps,
@@ -24,7 +24,7 @@ export async function sendRecoveryForShare(
     return '';
   }
 
-  let userBackupKeyShareOptsArr: (encryptedKeyshare & {
+  let userBackupKeyShareOptsArr: (EncryptedKeyShare & {
     walletId: string;
   })[];
   let recoveryPrivateKeyContainer: KeyContainer | undefined;

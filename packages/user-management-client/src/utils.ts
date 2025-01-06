@@ -1,6 +1,4 @@
-type WalletRef = 'walletId' | 'externalWalletAddress';
-
-export type WalletParams = Partial<{ walletId?: string; externalWalletAddress?: string }>;
+import { $Auth, Auth, AuthParams, ExtractAuth, WalletParams, WalletRef } from './types/index.js';
 
 export function isWalletId(params: WalletParams): params is { walletId: string } {
   return !!params.walletId && !params.externalWalletAddress;
@@ -19,38 +17,6 @@ export function extractWalletRef(params: WalletParams): [WalletRef, string] {
 
   throw new Error('invalid wallet params');
 }
-
-export type AuthType = 'email' | 'phone' | 'farcasterUsername' | 'userId';
-
-export type ExtractAuth =
-  | $ExtractAuth<'email'>
-  | $ExtractAuth<'phone'>
-  | $ExtractAuth<'farcasterUsername'>
-  | $ExtractAuth<'userId'>;
-
-export type $ExtractAuth<T extends AuthType> = {
-  auth: $Auth<T>;
-  authType: T;
-  identifier: string;
-};
-
-export type AuthParams = Record<string, any> & {
-  email?: string;
-  phone?: string;
-  countryCode?: string;
-  farcasterUsername?: string;
-  userId?: string;
-};
-
-export type $Auth<T extends AuthType> = T extends 'email'
-  ? { email: string }
-  : T extends 'phone'
-    ? { phone: string; countryCode: string }
-    : T extends 'farcasterUsername'
-      ? { farcasterUsername: string }
-      : { userId: string };
-
-export type Auth = $Auth<'email'> | $Auth<'phone'> | $Auth<'farcasterUsername'> | $Auth<'userId'>;
 
 export function isEmail(params: AuthParams): params is $Auth<'email'> {
   return !!params.email && !params.phone && !params.countryCode && !params.farcasterUsername;
@@ -105,18 +71,3 @@ export function extractAuth(
     throw e;
   }
 }
-
-export enum OAuthMethod {
-  GOOGLE = 'GOOGLE',
-  TWITTER = 'TWITTER',
-  APPLE = 'APPLE',
-  DISCORD = 'DISCORD',
-  FACEBOOK = 'FACEBOOK',
-  FARCASTER = 'FARCASTER',
-}
-
-export const PREGEN_IDENTIFIER_TYPES = ['EMAIL', 'PHONE', 'CUSTOM_ID', OAuthMethod.DISCORD, OAuthMethod.TWITTER] as const;
-
-export type TPregenIdentifierType = (typeof PREGEN_IDENTIFIER_TYPES)[number];
-
-export type PregenIds = Partial<Record<TPregenIdentifierType, string[]>>;
