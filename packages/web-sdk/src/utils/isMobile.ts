@@ -39,8 +39,8 @@ export function isSafari(): boolean {
   );
 }
 
-const isStandalone = typeof navigator !== 'undefined' && !(navigator as any).standalone;
 export function isIOSWebview(): boolean {
+  const isStandalone = typeof navigator !== 'undefined' && !(navigator as any).standalone;
   return typeof navigator !== 'undefined' && isIOS() && !isStandalone && !/safari/i.test(navigator.userAgent.toLowerCase());
 }
 

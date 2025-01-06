@@ -151,7 +151,7 @@ export class WebUtils implements PlatformUtils {
 
   disableProviderModal = false;
 
-  openPopup(popupUrl: string, opts: { type: PopupType }): Window {
+  openPopup(popupUrl: string, opts?: { type: PopupType }): Window {
     if (opts) {
       const { type } = opts;
       const popUpWidth = 550;
