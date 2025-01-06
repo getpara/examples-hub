@@ -118,7 +118,9 @@ export interface CapsuleModalProps {
   embeddedModal?: boolean;
   className?: string;
   /**
-   * Which external wallets to support.
+   * Which external wallets to show and in what order they should be displayed.
+   *
+   * NOTE: Any wallets that are detected as installed will be sorted first, followed by those that are not detected or not installed.
    */
   externalWallets?: TExternalWallet[];
   /**
