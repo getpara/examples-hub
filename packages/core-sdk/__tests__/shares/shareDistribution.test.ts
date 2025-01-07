@@ -4,7 +4,7 @@ import { distributeNewShare } from '../../src/shares/shareDistribution.js';
 import { Environment } from '../../src/definitions.js';
 import { initClient } from '../../src/external/capsuleClient.js';
 import { mockGetSessionPublicKeys, mockGetPasswords } from '../mocks/mockUserManagementClient.js';
-import { EncryptorType, KeyType } from '@usecapsule/user-management-client';
+import { EncryptorType, KeyShareType } from '@usecapsule/user-management-client';
 import * as recovery from '../../src/shares/recovery';
 
 const TEST_CTX = {
@@ -38,7 +38,7 @@ describe('shareDistribution', () => {
           {
             encryptedShare: expect.stringMatching(/./),
             encryptedKey: expect.stringMatching(/./),
-            type: KeyType.USER,
+            type: KeyShareType.USER,
             encryptor: EncryptorType.BIOMETRICS,
             biometricPublicKey: SESSION_PUBLIC_KEYS[0].sigDerivedPublicKey,
             partnerId: undefined,
@@ -70,7 +70,7 @@ describe('shareDistribution', () => {
           {
             encryptedShare: expect.stringMatching(/./),
             encryptedKey: expect.stringMatching(/./),
-            type: KeyType.USER,
+            type: KeyShareType.USER,
             encryptor: EncryptorType.BIOMETRICS,
             biometricPublicKey: SESSION_PUBLIC_KEYS[0].sigDerivedPublicKey,
             partnerId: undefined,
@@ -78,7 +78,7 @@ describe('shareDistribution', () => {
           {
             encryptedShare: expect.stringMatching(/./),
             encryptedKey: expect.stringMatching(/./),
-            type: KeyType.USER,
+            type: KeyShareType.USER,
             encryptor: EncryptorType.PASSWORD,
             partnerId: undefined,
             passwordId: '1',

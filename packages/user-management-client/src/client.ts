@@ -17,7 +17,7 @@ import {
   CurrentWalletIds,
   EncryptedKeyShare,
   EncryptorType,
-  KeyType,
+  KeyShareType,
   Network,
   OnRampAsset,
   OnRampConfig,
@@ -37,6 +37,7 @@ import {
   WalletType,
 } from './types/index.js';
 import { extractWalletRef } from './utils.js';
+import { SESSION_COOKIE_HEADER_NAME, VERSION_HEADER_NAME, PARTNER_ID_HEADER_NAME } from './consts.js';
 
 interface ConfigOpts {
   useFetchAdapter?: boolean;
@@ -199,8 +200,6 @@ interface sessionPasswordBody {
 
 type BiometricLocationHintParams = AuthParams;
 
-const SESSION_COOKIE_HEADER_NAME = 'x-capsule-sid';
-const VERSION_HEADER_NAME = 'x-capsule-version';
 class Client {
   private baseRequest: AxiosInstance;
   constructor({ userManagementHost, apiKey, version, opts, retrieveSessionCookie, persistSessionCookie }: ClientConfig) {
@@ -341,7 +340,7 @@ class Client {
   ): Promise<any> => {
     const res = await this.baseRequest.patch<any>(`/users/${userId}/biometrics/${biometricId}`, body, {
       headers: {
-        'X-Partner-ID': partnerId,
+        [PARTNER_ID_HEADER_NAME]: partnerId,
       },
     });
     return res;
@@ -374,7 +373,7 @@ class Client {
   verifyWebChallenge = async (partnerId: string, body: verifyWebChallengeBody): Promise<any> => {
     const res = await this.baseRequest.post<{}>(`/biometrics/verify`, body, {
       headers: {
-        'X-Partner-ID': partnerId,
+        [PARTNER_ID_HEADER_NAME]: partnerId,
       },
     });
     return res;
@@ -443,7 +442,7 @@ class Client {
 
   // PATCH /wallets/pregen/:walletId
   updatePregenWallet = async (walletId: string, body: updatePregenWalletBody): Promise<any> => {
-    const res = await this.baseRequest.patch<any>(`wallets/pregen/${walletId}`, body);
+    const res = await this.baseRequest.patch<any>(`/wallets/pregen/${walletId}`, body);
     return res.data;
   };
 
@@ -547,12 +546,7 @@ class Client {
   }
 
   // GET /users/:userId/wallets/:walletId/key-shares
-  async getKeyshare(
-    userId: string,
-    walletId: string,
-    type: (typeof KeyType)[keyof typeof KeyType],
-    encryptor?: (typeof EncryptorType)[keyof typeof EncryptorType],
-  ): Promise<any> {
+  async getKeyshare(userId: string, walletId: string, type: KeyShareType, encryptor?: EncryptorType): Promise<any> {
     const res = await this.baseRequest.get<any>(
       `/users/${userId}/wallets/${walletId}/key-shares?type=${type}${encryptor ? `&encryptor=${encryptor}` : ''}`,
     );
@@ -617,7 +611,7 @@ class Client {
 
   // POST recovery/cancel
   async cancelRecoveryAttempt(email: string) {
-    const res = await this.baseRequest.post<any>(`recovery/cancel`, { email });
+    const res = await this.baseRequest.post<any>(`/recovery/cancel`, { email });
     return res;
   }
 
@@ -964,12 +958,12 @@ class Client {
 
   async getGasEstimate(chainId: string, totalGasPrice: string) {
     const params = { totalGasPrice };
-    const res = await this.baseRequest.get<any>(`chains/${chainId}/gas-estimate`, { params });
+    const res = await this.baseRequest.get<any>(`/chains/${chainId}/gas-estimate`, { params });
     return res.data;
   }
 
   async getGasOracle(chainId: string) {
-    const res = await this.baseRequest.get<any>(`chains/${chainId}/gas-oracle`);
+    const res = await this.baseRequest.get<any>(`/chains/${chainId}/gas-oracle`);
     return res.data;
   }
 
@@ -1000,7 +994,7 @@ class Client {
   ): Promise<any> => {
     const res = await this.baseRequest.patch<any>(`/users/${userId}/passwords/${passwordId}`, body, {
       headers: {
-        'X-Partner-ID': partnerId,
+        [PARTNER_ID_HEADER_NAME]: partnerId,
       },
     });
     return res;
@@ -1024,7 +1018,7 @@ class Client {
   async verifyPasswordChallenge(partnerId: string, body: verifyPasswordChallengeBody): Promise<any> {
     const res = await this.baseRequest.post<{}>(`/passwords/verify`, body, {
       headers: {
-        'X-Partner-ID': partnerId,
+        [PARTNER_ID_HEADER_NAME]: partnerId,
       },
     });
     return res;

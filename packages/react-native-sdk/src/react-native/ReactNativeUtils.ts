@@ -3,7 +3,7 @@
 import { PlatformUtils, TPregenIdentifierType } from '@usecapsule/web-sdk';
 import { Ctx } from '@usecapsule/web-sdk';
 import { SignatureRes } from '@usecapsule/web-sdk';
-import { BackupKitEmailProps, KeyType, WalletScheme, WalletType } from '@usecapsule/user-management-client';
+import { BackupKitEmailProps, KeyShareType, WalletScheme, WalletType } from '@usecapsule/user-management-client';
 import { NativeModules } from 'react-native';
 
 import { AsyncStorage } from '../AsyncStorage.js';
@@ -88,7 +88,7 @@ export class ReactNativeUtils implements PlatformUtils {
     }
 
     const createAccountFn = !ctx.useDKLS ? CapsuleSignerModule.createAccount : CapsuleSignerModule.dklsCreateAccount;
-    const signer = await createAccountFn(walletId, protocolId, KeyType.USER, userId);
+    const signer = await createAccountFn(walletId, protocolId, KeyShareType.USER, userId);
     return { signer, walletId };
   }
 

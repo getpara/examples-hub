@@ -28,14 +28,17 @@ export const mockCreateCred = vi.fn(async () => {
 
 export const mockGetCred = vi.fn();
 
-global.navigator = {
-  credentials: {
-    create: mockCreateCred,
-    get: mockGetCred,
-    preventSilentAccess: vi.fn(),
-    store: vi.fn(),
-  },
-} as any;
+Object.defineProperty(globalThis, 'navigator', {
+  value: {
+    credentials: {
+      create: mockCreateCred,
+      get: mockGetCred,
+      preventSilentAccess: vi.fn(),
+      store: vi.fn(),
+    },
+  } as any,
+  writable: true,
+});
 
 export const mockWindowOpen = vi.fn(url => ({
   location: {

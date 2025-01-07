@@ -8,7 +8,7 @@ import {
   mockDistributeCapsuleShare,
   mockPersistRecoveryPublicKeys,
 } from '../mocks/mockUserManagementClient.js';
-import { EncryptorType, KeyType } from '@usecapsule/user-management-client';
+import { EncryptorType, KeyShareType } from '@usecapsule/user-management-client';
 
 const TEST_CTX = {
   env: Environment.DEV,
@@ -17,7 +17,7 @@ const TEST_CTX = {
   useDKLS: true,
 };
 
-const OTHER_SHARES = [{ encryptedShare: 'test', type: KeyType.USER, encryptor: EncryptorType.USER }];
+const OTHER_SHARES = [{ encryptedShare: 'test', type: KeyShareType.USER, encryptor: EncryptorType.USER }];
 
 describe('recovery', () => {
   describe('sendRecoveryForShare', () => {
@@ -34,7 +34,7 @@ describe('recovery', () => {
           encryptedShare: expect.stringMatching(/./),
           encryptor: EncryptorType.RECOVERY,
           recoveryPublicKeyId: RECOVERY_PUBLIC_KEYS[0].id,
-          type: KeyType.USER,
+          type: KeyShareType.USER,
           walletId: WALLET.id,
         },
       ]);
@@ -56,7 +56,7 @@ describe('recovery', () => {
           encryptedShare: expect.stringMatching(/./),
           encryptor: EncryptorType.RECOVERY,
           recoveryPublicKeyId: RECOVERY_PUBLIC_KEYS[0].id,
-          type: KeyType.USER,
+          type: KeyShareType.USER,
           walletId: WALLET.id,
         },
       ]);
@@ -98,7 +98,7 @@ describe('recovery', () => {
           encryptedShare: expect.stringMatching(/./),
           encryptor: EncryptorType.RECOVERY,
           recoveryPublicKeyId: RECOVERY_PUBLIC_KEYS[0].id,
-          type: KeyType.USER,
+          type: KeyShareType.USER,
           walletId: WALLET.id,
         },
       ]);

@@ -1,4 +1,4 @@
-import { BackupKitEmailProps, EncryptorType, KeyType } from '@usecapsule/user-management-client';
+import { BackupKitEmailProps, EncryptorType, KeyShareType } from '@usecapsule/user-management-client';
 
 import { encryptWithDerivedPublicKey } from '../cryptography/utils.js';
 import { sendRecoveryForShare } from './recovery.js';
@@ -25,7 +25,7 @@ export async function distributeNewShare(
       return {
         encryptedShare: encryptedMessageHex,
         encryptedKey: encryptedKeyHex,
-        type: KeyType.USER,
+        type: KeyShareType.USER,
         encryptor: EncryptorType.BIOMETRICS,
         biometricPublicKey: key.sigDerivedPublicKey,
         partnerId,
@@ -44,7 +44,7 @@ export async function distributeNewShare(
       return {
         encryptedShare: encryptedMessageHex,
         encryptedKey: encryptedKeyHex,
-        type: KeyType.USER,
+        type: KeyShareType.USER,
         encryptor: EncryptorType.PASSWORD,
         passwordId: password.id,
         partnerId,

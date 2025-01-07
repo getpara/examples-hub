@@ -9,7 +9,13 @@ import Capsule, {
   getSHA256HashHex,
 } from '@usecapsule/web-sdk';
 import { ENV } from '../constants';
-import { AuthParams, EncryptorType, extractAuthInfo, KeyType, PublicKeyStatus } from '@usecapsule/user-management-client';
+import {
+  AuthParams,
+  EncryptorType,
+  extractAuthInfo,
+  KeyShareType,
+  PublicKeyStatus,
+} from '@usecapsule/user-management-client';
 
 export type AuthCreationParams = AuthParams & {
   biometricId: string;
@@ -77,7 +83,7 @@ export async function authCreation(
         walletId: share.walletId,
         encryptedShare: encryptedMessageHex,
         encryptedKey: encryptedKeyHex,
-        type: KeyType.USER,
+        type: KeyShareType.USER,
         encryptor: EncryptorType.BIOMETRICS,
         biometricPublicKey: publicKeyHex,
         partnerId: share.partnerId,

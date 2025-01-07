@@ -1,4 +1,4 @@
-import { BackupKitEmailProps, EncryptedKeyShare, EncryptorType, KeyType } from '@usecapsule/user-management-client';
+import { BackupKitEmailProps, EncryptedKeyShare, EncryptorType, KeyShareType } from '@usecapsule/user-management-client';
 
 import { KeyContainer } from './KeyContainer.js';
 import { Ctx } from '../definitions.js';
@@ -41,7 +41,7 @@ export async function sendRecoveryForShare(
       {
         walletId,
         encryptedShare: encryptedUserBackup,
-        type: KeyType.USER,
+        type: KeyShareType.USER,
         encryptor: EncryptorType.RECOVERY,
         recoveryPublicKeyId: recoveryPublicKeys[0].id,
       },
@@ -53,7 +53,7 @@ export async function sendRecoveryForShare(
       return {
         walletId,
         encryptedShare: encryptedUserBackup,
-        type: KeyType.USER,
+        type: KeyShareType.USER,
         encryptor: EncryptorType.RECOVERY,
         recoveryPublicKeyId,
       };

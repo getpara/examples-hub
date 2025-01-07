@@ -37,10 +37,10 @@ export enum EncryptorType {
   PASSWORD = 'PASSWORD',
 }
 
-export const KeyType = {
-  USER: 'USER',
-  RECOVERY: 'RECOVERY',
-} as const;
+export enum KeyShareType {
+  USER = 'USER',
+  RECOVERY = 'RECOVERY',
+}
 
 export enum PasswordStatus {
   PENDING = 'PENDING',
@@ -60,9 +60,9 @@ export enum PublicKeyType {
 export interface EncryptedKeyShare {
   encryptedShare: string;
   encryptedKey?: string;
-  type: (typeof KeyType)[keyof typeof KeyType];
+  type: KeyShareType;
   biometricPublicKey?: string;
-  encryptor: (typeof EncryptorType)[keyof typeof EncryptorType];
+  encryptor: EncryptorType;
   recoveryPublicKeyId?: string;
   partnerId?: string;
 }
