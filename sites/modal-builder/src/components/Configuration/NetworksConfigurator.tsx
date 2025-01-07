@@ -1,11 +1,11 @@
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
-import { Network } from '@usecapsule/react-sdk';
+import { CosmosWallet, EvmWallet, Network, SolanaWallet } from '@usecapsule/react-sdk';
 import CosmosLogo from '../../assets/cosmos.svg';
 import EthereumLogo from '../../assets/ethereum.svg';
 import SolanaLogo from '../../assets/solana.svg';
 import { AccordionContent, AccordionItem, AccordionTrigger, SwitchItem } from '../UI';
-import { networksConfigAtom } from '../../atoms';
+import { authenticationConfigAtom, networksConfigAtom } from '../../atoms';
 import { useAtom } from 'jotai';
 
 const SECTION_LABEL = 'Networks';
@@ -34,6 +34,7 @@ interface NetworksConfiguratorProps {}
 
 export const NetworksConfigurator: React.FC<NetworksConfiguratorProps> = () => {
   const [networksConfig, setNetworksConfig] = useAtom(networksConfigAtom);
+  const [authConfig, setAuthConfig] = useAtom(authenticationConfigAtom);
 
   const handleToggleNetwork = useCallback(
     (network: Network, isChecked: boolean) => {
@@ -44,13 +45,57 @@ export const NetworksConfigurator: React.FC<NetworksConfiguratorProps> = () => {
       } else {
         networkSet.delete(network);
       }
-      setNetworksConfig({
+      const updatedNetworksConfig = {
         ...networksConfig,
         networks: Array.from(networkSet),
-      });
+      };
+      setNetworksConfig(updatedNetworksConfig);
+
+      if (!isChecked) {
+        const filteredWallets = (authConfig.externalWallets ?? []).filter(wallet => !walletIsForNetwork(wallet, network));
+        setAuthConfig({
+          ...authConfig,
+          externalWallets: filteredWallets,
+        });
+      }
+
+      if (networkSet.size === 0 && authConfig.isWeb3AuthEnabled) {
+        setAuthConfig({
+          ...authConfig,
+          isWeb3AuthEnabled: false,
+          authLayout: (authConfig.authLayout ?? []).filter(l => l !== 'EXTERNAL:FULL' && l !== 'EXTERNAL:CONDENSED'),
+        });
+      }
+      if (networkSet.size === 1 && !authConfig.isWeb3AuthEnabled) {
+        setAuthConfig({
+          ...authConfig,
+          isWeb3AuthEnabled: true,
+          authLayout: ensureExternalLayout(authConfig),
+        });
+      }
     },
-    [networksConfig],
+    [networksConfig, authConfig],
   );
+
+  function ensureExternalLayout(prevAuthConfig: typeof authConfig) {
+    const layouts = new Set(prevAuthConfig.authLayout ?? []);
+    const hasExternal = [...layouts].some(l => l === 'EXTERNAL:FULL' || l === 'EXTERNAL:CONDENSED');
+    if (!hasExternal) {
+      layouts.add('EXTERNAL:FULL');
+    }
+    return Array.from(layouts);
+  }
+
+  function walletIsForNetwork(wallet: string, network: Network) {
+    const evmValues = Object.values(EvmWallet) as string[];
+    const solValues = Object.values(SolanaWallet) as string[];
+    const cosmosValues = Object.values(CosmosWallet) as string[];
+
+    if (network === Network.ETHEREUM && evmValues.includes(wallet)) return true;
+    if (network === Network.SOLANA && solValues.includes(wallet)) return true;
+    if (network === Network.COSMOS && cosmosValues.includes(wallet)) return true;
+    return false;
+  }
 
   return (
     <AccordionItem value="networks">

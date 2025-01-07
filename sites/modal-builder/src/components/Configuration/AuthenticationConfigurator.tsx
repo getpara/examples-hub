@@ -6,6 +6,7 @@ import {
   EvmWallet,
   SolanaWallet,
   CosmosWallet,
+  Network,
 } from '@usecapsule/react-sdk';
 import { AUTH_METHOD_CONFIGS, EXTERNAL_WALLET_CONFIGS, ALL_AUTH_METHODS, ALL_EXTERNAL_WALLETS } from '../../constants';
 import { AuthMethod, ExternalWallet, AuthSectionId, TAuthLayout } from '../../types';
@@ -14,7 +15,7 @@ import { authenticationConfigAtom, networksConfigAtom, previousWeb2StateAtom, pr
 
 export const AuthenticationConfigurator: React.FC = () => {
   const [authenticationConfig, setAuthenticationConfig] = useAtom(authenticationConfigAtom);
-  const [networksConfig] = useAtom(networksConfigAtom);
+  const [networksConfig, setNetworksConfig] = useAtom(networksConfigAtom);
   const [prevWeb2State, setPrevWeb2State] = useAtom(previousWeb2StateAtom);
   const [prevWeb3State, setPrevWeb3State] = useAtom(previousWeb3StateAtom);
 
@@ -158,6 +159,12 @@ export const AuthenticationConfigurator: React.FC = () => {
           if (!(newAuthConfig.authLayout ?? []).some(l => l === 'EXTERNAL:FULL' || l === 'EXTERNAL:CONDENSED')) {
             newAuthConfig.authLayout = [...(newAuthConfig.authLayout ?? []), 'EXTERNAL:FULL' as TAuthLayout];
           }
+        }
+        if (networksConfig.networks!.length === 0) {
+          setNetworksConfig({
+            ...networksConfig,
+            networks: [Network.ETHEREUM, Network.SOLANA, Network.COSMOS],
+          });
         }
       }
     }

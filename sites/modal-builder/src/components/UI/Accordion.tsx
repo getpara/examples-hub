@@ -33,6 +33,7 @@ const AccordionItemContext = createContext<AccordionItemContextProps | undefined
 type AccordinoProp = {
   defaultActive?: string;
 };
+
 const Accordion: React.FC<PropsWithChildren<AccordinoProp>> = ({ children, defaultActive }) => {
   const [activeItem, setActiveItem] = useState<string>(defaultActive || '');
   const [hasMounted, setHasMounted] = useState<boolean>(false);
@@ -173,7 +174,7 @@ const AccordionContent: React.FC<AccordionContentProps> = ({ children }) => {
     } else {
       setHeight(0);
     }
-  }, [isOpen]);
+  }, [isOpen, children]);
 
   return (
     <AccordionContentWrapper className={`accordion-content-wrapper ${isOpen ? 'open' : ''}`} $height={height}>
@@ -263,7 +264,6 @@ const AccordionContentWrapper = styled.div<{ $height: number }>`
 
 const AccordionContentInner = styled.div`
   padding: 0 1.5rem 1.5rem 1.5rem;
-
   transition: all 0.3s ease-in-out;
 
   & > :first-child {
