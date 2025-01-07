@@ -233,8 +233,8 @@ export class CapsuleMobile extends CoreCapsule {
 
     const { user } = await this.ctx.capsuleClient.getUser(userId);
 
-    if (user.phoneNumber) {
-      await this.setPhoneNumber(user.phoneNumber.number, user.phoneNumber.countryCode);
+    if (user.phone) {
+      await this.setPhoneNumber(user.phone.number, user.phone.countryCode);
     }
 
     if (user.email) {
