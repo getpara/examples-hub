@@ -88,3 +88,7 @@ export const ClickableText = styled(CpslText)`
   text-decoration: underline;
   cursor: pointer;
 `;
+
+export const UnderlinedText = styled(CpslText)`
+  text-decoration: underline;
+`;

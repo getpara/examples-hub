@@ -9,6 +9,16 @@
   -moz-osx-font-smoothing: grayscale;
 
   --cpsl-default-font: 'Inter', sans-serif;
+
+  --cpsl-color-background-0: #ffffff !important;
+  --cpsl-color-background-4: #f8f7fb !important;
+  --cpsl-color-background-8: #ebe8f2 !important;
+  --cpsl-color-background-16: #d3cfde !important;
+  --cpsl-color-background-32: #b1acbe !important;
+  --cpsl-color-background-48: #9590a1 !important;
+  --cpsl-color-background-64: #6c6977 !important;
+  --cpsl-color-background-80: #423f4b !important;
+  --cpsl-color-background-96: #18161e !important;
 }
 
 body {

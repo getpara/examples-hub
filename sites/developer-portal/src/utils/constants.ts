@@ -136,3 +136,13 @@ export const LOGIN_METHOD_LABELS: Record<string, string> = {
 export const MOST_POPULAR_PLAN_SLUG = PlanSlug.GROWTH;
 export const ENTERPRISE_PLAN_SLUG = PlanSlug.ENTERPRISE;
 export const FREE_PLAN_SLUG = PlanSlug.FREE;
+
+export const LANDING_HEADER_LINKS = [
+  { label: 'Pricing', url: 'https://www.usecapsule.com/pricing' },
+  { label: 'Docs', url: 'https://docs.usecapsule.com/' },
+  { label: 'Modal Designer', url: 'https://demo.usecapsule.com/' },
+  { label: 'Blog', url: 'https://blog.usecapsule.com/' },
+];
+
+export const PRIVACY_POLICY = 'https://www.usecapsule.com/privacy-policy';
+export const TOS = 'https://www.usecapsule.com/terms-of-service';

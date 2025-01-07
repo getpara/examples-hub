@@ -40,8 +40,6 @@ const Logo = styled.img`
   height: 100px;
   max-width: 260px;
   object-fit: contain;
-  padding: 16px 0px;
-  margin: 16px 0px;
   box-sizing: content-box;
   align-self: center;
 `;

@@ -191,7 +191,7 @@ export class CpslAuthModal {
         <cpsl-card id="modal-body-card" class={{ 'modal-body-card': true, 'body': true }} part="modal-body-card">
           <slot name="body"></slot>
           {this.isMobile && (
-            <div class="mobile-footer">
+            <div class="mobile-footer" part="modal-mobile-footer">
               <slot name="footer"></slot>
             </div>
           )}

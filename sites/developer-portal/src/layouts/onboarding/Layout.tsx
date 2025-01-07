@@ -1,15 +1,15 @@
 import { Outlet } from 'react-router-dom';
-import { UnAuthAppBar } from '../../components/AppBar/UnAuthAppBar';
+import { UNAUTH_APP_BAR_HEIGHT, UnAuthAppBar } from '../../components/AppBar/UnAuthAppBar';
 import { AuthenticatedWrapper } from '../../components/AuthenticatedWrapper/AuthenticatedWrapper';
-import { UnAuthMain } from '../unauthenticated/Layout';
 import { ErrorBoundary as SentryErrorBoundary } from '@sentry/react';
 import { ErrorBoundary } from '../../components/ErrorBoundary/ErrorBoundary';
+import { styled } from 'styled-components';
 
 export const Layout = () => {
   return (
     <AuthenticatedWrapper>
       <UnAuthAppBar />
-      <UnAuthMain>
+      <OnboardingMain>
         <SentryErrorBoundary
           fallback={({ error, resetError }) => (
             <ErrorBoundary
@@ -22,7 +22,18 @@ export const Layout = () => {
         >
           <Outlet />
         </SentryErrorBoundary>
-      </UnAuthMain>
+      </OnboardingMain>
     </AuthenticatedWrapper>
   );
 };
+
+export const OnboardingMain = styled.main`
+  overflow: auto;
+
+  display: flex;
+  justify-content: center;
+  background-color: var(--cpsl-color-background-0);
+  min-height: calc(100vh - ${UNAUTH_APP_BAR_HEIGHT}px);
+  box-sizing: border-box;
+  padding: 34px 24px 24px 24px;
+`;

@@ -29,11 +29,12 @@
 
 ## Shadow Parts
 
-| Part                | Description |
-| ------------------- | ----------- |
-| `"modal-body-card"` |             |
-| `"modal-container"` |             |
-| `"modal-footer"`    |             |
+| Part                    | Description |
+| ----------------------- | ----------- |
+| `"modal-body-card"`     |             |
+| `"modal-container"`     |             |
+| `"modal-footer"`        |             |
+| `"modal-mobile-footer"` |             |
 
 
 ## Dependencies
