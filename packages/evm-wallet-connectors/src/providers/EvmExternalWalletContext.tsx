@@ -188,10 +188,15 @@ export function EvmExternalWalletProvider({ children, capsule, onSwitchWallet }:
     return { address, error };
   };
 
-  const connectMobile = async (connector: WagmiConnectorInstance): Promise<{ address?: string; error?: string }> => {
+  const connectMobile = async (
+    connector: WagmiConnectorInstance,
+    isManualWalletConnect?: boolean,
+  ): Promise<{ address?: string; error?: string }> => {
+    const _isMobile = isManualWalletConnect !== undefined ? isManualWalletConnect : isMobile();
+
     // If on mobile and the connector contains the wallet connect modal connector, use it.
     const _connector =
-      connector.walletConnectModalConnector && isMobile() ? connector.walletConnectModalConnector : connector;
+      connector.walletConnectModalConnector && _isMobile ? connector.walletConnectModalConnector : connector;
 
     return await connect(_connector);
   };
@@ -247,7 +252,7 @@ export function EvmExternalWalletProvider({ children, capsule, onSwitchWallet }:
     return {
       ...connector,
       connect: () => connect(connector),
-      connectMobile: () => connectMobile(connector),
+      connectMobile: isManualWalletConnect => connectMobile(connector, isManualWalletConnect),
       type: WalletType.EVM,
       getQrUri: getQrUri(connector),
     } as CommonWallet;

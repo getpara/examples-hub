@@ -44,7 +44,7 @@ export const ExternalWalletContext = createContext<{
   };
   username?: string;
   avatar?: string;
-  connectExternalWallet: (wallet: CommonWallet, isMobile?: boolean) => void;
+  connectExternalWallet: (wallet: CommonWallet, isMobile?: boolean, isManualWalletConnect?: boolean) => void;
   disconnectExternalWallet: () => Promise<void>;
   switchChain: (chainId: string) => Promise<void>;
   setChainIdSwitchingTo: (chainId?: string) => void;
@@ -197,17 +197,40 @@ export function ExternalWalletProvider({
   );
 
   const connectExternalWallet = useCallback(
-    async (wallet: CommonWallet, isMobileConnect?: boolean) => {
-      if (!isExternalWalletConnecting) {
+    async (
+      wallet: CommonWallet,
+      isMobileConnect?: boolean,
+      isManualWalletConnect?: boolean,
+      isResetAfterManualWalletConnect?: boolean,
+    ) => {
+      // If triggering the WC modal manually from desktop, disconnect the current connection attempt to trigger the mobile connection attempt
+      if (isExternalWalletConnecting && isManualWalletConnect) {
+        await evmDisconnect();
+        await solanaDisconnect();
+        await cosmosDisconnect();
+        setQrUri(undefined);
+        setIsExternalWalletConnecting(false);
+      }
+
+      if (isResetAfterManualWalletConnect || isManualWalletConnect || !isExternalWalletConnecting) {
         setExternalWalletError();
         setIsExternalWalletConnecting(true);
         setIsUsingMobileConnector(isMobileConnect);
 
-        const { address, error } = await (isMobileConnect ? wallet.connectMobile() : wallet.connect());
+        const { address, error } = await (isMobileConnect ? wallet.connectMobile(isManualWalletConnect) : wallet.connect());
 
         if (error) {
           setExternalWalletError([error]);
           setIsUsingMobileConnector();
+
+          // If triggering the WC modal manually from desktop, attempt desktop reconnect on connection rejection
+          if (isManualWalletConnect && error === 'Connection request rejected') {
+            setExternalWalletError();
+
+            await connectExternalWallet(wallet, false, false, true);
+            await updateQrUri();
+            return;
+          }
         } else if (address) {
           setStep(ModalStep.LOGIN_DONE);
         }

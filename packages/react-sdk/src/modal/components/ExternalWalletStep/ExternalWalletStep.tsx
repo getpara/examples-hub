@@ -32,7 +32,8 @@ export const ExternalWalletStep = () => {
       return null;
     }
 
-    const isMobileWalletConnect = isMobile() && wallet.id === 'walletConnect';
+    const isWalletConnect = wallet.id === 'walletConnect';
+    const isMobileWalletConnect = isMobile() && isWalletConnect;
 
     if (isMobileWalletConnect) {
       <InnerStepContainer>
@@ -105,8 +106,8 @@ export const ExternalWalletStep = () => {
                   Connect Wallet
                 </CpslButton>
                 <Link href={wallet.downloadUrl ?? ''} target="_blank">
-                  <ExternalButton>
-                    <ExternalText weight="medium">{`Get ${wallet.name}`}</ExternalText>
+                  <ExternalButton variant="secondary">
+                    {`Get ${wallet.name}`}
                     <ExternalIcon icon="linkExternal" />
                   </ExternalButton>
                 </Link>
@@ -115,6 +116,18 @@ export const ExternalWalletStep = () => {
           </>
         );
       }
+
+      const openWCModal = async () => {
+        await connectExternalWallet(wallet, true, true);
+      };
+
+      const GetWalletButton = (
+        <ExternalButton variant="secondary" onClick={isWalletConnect ? openWCModal : undefined}>
+          {`${isWalletConnect ? 'Open' : 'Get'} ${wallet.name}`}
+          <ExternalIcon icon="linkExternal" />
+        </ExternalButton>
+      );
+
       return (
         <>
           <InnerStepContainer>
@@ -128,12 +141,13 @@ export const ExternalWalletStep = () => {
             </CpslButton>
           </InnerStepContainer>
           <InnerStepContainer>
-            <Link href={wallet.downloadUrl ?? ''} target="_blank">
-              <ExternalButton>
-                <ExternalText weight="medium">{`Get ${wallet.name}`}</ExternalText>
-                <ExternalIcon icon="linkExternal" />
-              </ExternalButton>
-            </Link>
+            {isWalletConnect ? (
+              <>{GetWalletButton}</>
+            ) : (
+              <Link href={wallet.downloadUrl ?? ''} target="_blank">
+                {GetWalletButton}
+              </Link>
+            )}
           </InnerStepContainer>
         </>
       );
@@ -175,7 +189,7 @@ const Text = styled(CenteredText)`
   white-space: pre-line;
 `;
 
-const ExternalButton = styled.div`
+const ExternalButton = styled(CpslButton)`
   display: flex;
   gap: 8px;
   align-items: center;
@@ -189,10 +203,6 @@ const ExternalButton = styled.div`
 const ExternalIcon = styled(CpslIcon)`
   --height: 20px;
   --width: 20px;
-`;
-
-const ExternalText = styled(CpslText)`
-  text-decoration: none;
 `;
 
 const Link = styled.a`

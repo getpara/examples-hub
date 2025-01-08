@@ -12,7 +12,7 @@ export type WalletMetadata = {
 
 export type CommonWallet = {
   connect: () => Promise<{ address?: string; error?: string }>;
-  connectMobile: () => Promise<{ address?: string; error?: string }>;
+  connectMobile: (isManualWalletConnect?: boolean) => Promise<{ address?: string; error?: string }>;
   type: 'EVM' | 'SOLANA' | 'COSMOS';
 } & WalletMetadata;
 
