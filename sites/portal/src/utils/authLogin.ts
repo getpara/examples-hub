@@ -136,12 +136,45 @@ export async function authUpdateKeyShares(
     partnerId = touchRes.data.partnerId;
   }
 
+  const walletIdToPartnerShareCount = {} as Record<string, number>;
+  for (const share of encryptedShares) {
+    if (share.partnerId !== partnerId) {
+      continue;
+    }
+
+    if (!walletIdToPartnerShareCount[share.walletId]) {
+      walletIdToPartnerShareCount[share.walletId] = 0;
+    }
+    walletIdToPartnerShareCount[share.walletId]++;
+  }
+
   // get all shares that are associated with this partnerId
-  const sharesForPartnerToDecrypt = encryptedShares
+  const potentialSharesForPartnerToDecrypt = encryptedShares
     .filter(share => !capsule.currentWalletIds || capsule.currentWalletIdsUnique.includes(share.walletId))
     .filter(share => {
       return share.walletScheme !== WalletScheme.DKLS || share.partnerId === partnerId;
     });
+
+  const sharesForPartnerToDecrypt = [];
+  // pick out shares for partner if there is only one share for the walletId
+  // or if there are more, ensure it has a protocolId, otherwise we will refresh to ensure the refreshed share
+  // has a protocolId
+  potentialSharesForPartnerToDecrypt.forEach(share => {
+    if (
+      share.walletScheme === WalletScheme.DKLS &&
+      share.partnerId === partnerId &&
+      walletIdToPartnerShareCount[share.walletId] !== 1
+    ) {
+      if (sharesForPartnerToDecrypt.some(s => s.walletId === share.walletId)) {
+        return;
+      }
+      if (share.protocolId) {
+        sharesForPartnerToDecrypt.push(share);
+      }
+    } else {
+      sharesForPartnerToDecrypt.push(share);
+    }
+  });
 
   // get all walletIds that we'll need a share for
   const allWalletIds = capsule.currentWalletIdsUnique || [
@@ -158,9 +191,10 @@ export async function authUpdateKeyShares(
   const sharesStillNeededForPartnerToDecrypt = walletIdsWithoutPartnerIdShare
     .map(
       walletId =>
-        // just find some share for walletId so we can refresh it, prioritizing first share created
-        encryptedShares.find(share => !share.partnerId && share.walletId === walletId) ||
-        encryptedShares.find(share => share.walletId === walletId),
+        // find the oldest share for walletId so we can refresh it
+        encryptedShares
+          .filter(share => share.walletId === walletId)
+          .sort((s1, s2) => new Date(s1.createdAt).valueOf() - new Date(s2.createdAt).valueOf())[0],
     )
     .filter(share => !!share);
 
@@ -171,7 +205,7 @@ export async function authUpdateKeyShares(
   // passkey was generated with a different platform (flutter, swift, etc.) and if that's the case,
   // then the user will have to login on the original platform to upgrade to the new style of
   // passkey storage which will enable cross platform use.
-  let decryptedShares: { walletId: string; walletScheme: string; signer: string; partnerId: string }[];
+  let decryptedShares: { walletId: string; walletScheme: string; signer: string; partnerId?: string; protocolId?: string }[];
   if (encryptedPrivateKeys.length === 0) {
     // If this is successful, we can upgrade the user to the new method of passkey schema
     decryptedShares = await getDerivedPrivateKeyAndDecrypt(capsule.ctx, userHandle, allSharesToDecrypt);
@@ -192,22 +226,22 @@ export async function authUpdateKeyShares(
   }
 
   // refresh needed shares so we have all associated with new partnerId
-  const decryptedSharesToRefresh = decryptedShares.filter(
-    share => share.walletScheme === WalletScheme.DKLS && share.partnerId !== partnerId,
-  );
-  const refreshedShares = [] as { walletId: string; signer: string; partnerId: string }[];
+  const decryptedSharesToRefresh = decryptedShares.filter(share => walletIdsWithoutPartnerIdShare.includes(share.walletId));
+  const refreshedShares = [] as { walletId: string; signer: string; partnerId: string; protocolId: string }[];
 
   for (const share of decryptedSharesToRefresh) {
-    const { signer: refreshedSigner } = await capsule.refreshShare({
+    const { signer: refreshedSigner, protocolId } = await capsule.refreshShare({
       walletId: share.walletId,
       share: share.signer,
       oldPartnerId: share.partnerId,
       newPartnerId: partnerId,
+      keyShareProtocolId: share.protocolId,
     });
     refreshedShares.push({
       walletId: share.walletId,
       signer: refreshedSigner,
       partnerId: partnerId,
+      protocolId,
     });
   }
 
@@ -228,6 +262,7 @@ export async function authUpdateKeyShares(
       encryptedKey: encryptedKeyHex,
       sessionLookupId: sessionId,
       partnerId: share.partnerId,
+      protocolId: share.protocolId,
     };
   });
 
@@ -251,6 +286,7 @@ export async function authUpdateKeyShares(
         encryptedKey: newKeyHex,
         sessionLookupId: `${newDeviceSessionLookupId}-new-device`,
         partnerId: share.partnerId,
+        protocolId: share.protocolId,
       });
     });
   }

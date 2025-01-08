@@ -9,10 +9,10 @@ export default defineConfig({
       include: ['src/**/*.{ts,tsx,js,jsx}'],
       exclude: ['**/wasm_exec.js', '**/prime.worker.min.js'],
       thresholds: {
-        lines: 98.23,
+        lines: 98.26,
         functions: 98.88,
-        branches: 98.62,
-        statements: 98.23,
+        branches: 98.63,
+        statements: 98.26,
       },
       reportOnFailure: true,
     },

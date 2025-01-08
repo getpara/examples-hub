@@ -8,8 +8,14 @@ async function isKeygenComplete(ctx: Ctx, userId: string, walletId: string): Pro
   return !!wallet.address;
 }
 
-async function isRefreshComplete(ctx: Ctx, userId: string, walletId: string, partnerId?: string): Promise<boolean> {
-  const { isDone } = await ctx.capsuleClient.isRefreshDone(userId, walletId, partnerId);
+async function isRefreshComplete(
+  ctx: Ctx,
+  userId: string,
+  walletId: string,
+  partnerId?: string,
+  protocolId?: string,
+): Promise<boolean> {
+  const { isDone } = await ctx.capsuleClient.isRefreshDone(userId, walletId, partnerId, protocolId);
   return isDone;
 }
 
@@ -132,8 +138,10 @@ export function refresh(
   share: string,
   oldPartnerId?: string,
   newPartnerId?: string,
+  keyShareProtocolId?: string,
 ): Promise<{
   signer: string;
+  protocolId: string;
 }> {
   return new Promise(async resolve => {
     const worker = await setupWorker(ctx, async res => {
@@ -141,21 +149,25 @@ export function refresh(
         throw new Error('refresh failed');
       }
 
+      const { protocolId, signer } = res;
+
       resolve({
-        signer: res,
+        signer,
+        protocolId,
       });
       worker.terminate();
     });
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,
-      params: { userId, walletId, share, oldPartnerId, newPartnerId },
+      params: { userId, walletId, share, oldPartnerId, newPartnerId, keyShareProtocolId },
       functionType: 'REFRESH',
       disableWorkers: ctx.disableWorkers,
       sessionCookie,
       useDKLS: ctx.useDKLS,
       disableWebSockets: ctx.disableWebSockets,
       wasmOverride: ctx.wasmOverride,
+      returnObject: true,
     });
   });
 }

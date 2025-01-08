@@ -434,8 +434,14 @@ class Client {
   };
 
   // POST /users/:userId/wallets/:walletId/refresh
-  refreshKeys = async (userId: string, walletId: string, oldPartnerId?: string, newPartnerId?: string): Promise<any> => {
-    const body = { oldPartnerId, newPartnerId };
+  refreshKeys = async (
+    userId: string,
+    walletId: string,
+    oldPartnerId?: string,
+    newPartnerId?: string,
+    keyShareProtocolId?: string,
+  ): Promise<any> => {
+    const body = { oldPartnerId, newPartnerId, keyShareProtocolId };
     const res = await this.baseRequest.post<any>(`/users/${userId}/wallets/${walletId}/refresh`, body);
     return res;
   };
@@ -968,9 +974,13 @@ class Client {
   }
 
   // GET /users/:userId/wallets/:walletId/refresh-done
-  async isRefreshDone(userId: string, walletId: string, partnerId?: string): Promise<{ isDone: true }> {
-    const partnerIdStr = partnerId ? `?partnerId=${partnerId}` : '';
-    const res = await this.baseRequest.get<any>(`/users/${userId}/wallets/${walletId}/refresh-done${partnerIdStr}`);
+  async isRefreshDone(userId: string, walletId: string, partnerId?: string, protocolId?: string): Promise<{ isDone: true }> {
+    const queryParams = {};
+    if (partnerId) queryParams['partnerId'] = partnerId;
+    if (protocolId) queryParams['protocolId'] = protocolId;
+    const query = qs.stringify(queryParams);
+
+    const res = await this.baseRequest.get<any>(`/users/${userId}/wallets/${walletId}/refresh-done?${query}`);
     return res.data;
   }
 

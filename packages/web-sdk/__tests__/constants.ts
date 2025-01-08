@@ -21,6 +21,7 @@ export const WALLET = {
   share: JSON.stringify(SHARE),
   privateKey: 'test-wallet-pk',
   protocolId: 'test-protocol-id',
+  preExistingProtocolId: 'test-pre-existing-protocol-id',
   pendingTransactionId: 'test-pending-tx-id',
 };
 export const WALLETS = [WALLET];

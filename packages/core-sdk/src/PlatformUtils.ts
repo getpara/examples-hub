@@ -27,8 +27,10 @@ export interface PlatformUtils {
     signer: string,
     oldPartnerId?: string,
     newPartnerId?: string,
+    keyShareProtocolId?: string,
   ): Promise<{
     signer: string;
+    protocolId?: string;
   }>;
 
   preKeygen(

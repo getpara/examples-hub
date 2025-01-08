@@ -65,6 +65,7 @@ export interface EncryptedKeyShare {
   encryptor: EncryptorType;
   recoveryPublicKeyId?: string;
   partnerId?: string;
+  protocolId?: string;
 }
 
 export enum OAuthMethod {

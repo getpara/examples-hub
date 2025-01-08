@@ -659,11 +659,19 @@ describe('walletUtils', () => {
   describe('refresh', () => {
     describe('success', () => {
       it('DKLS', async () => {
-        const resp = await refresh(TEST_CTX, WALLET.share, WALLET.id, USER.id, PARTNER.id, PARTNER.id);
+        const resp = await refresh(
+          TEST_CTX,
+          WALLET.share,
+          WALLET.id,
+          USER.id,
+          PARTNER.id,
+          PARTNER.id,
+          WALLET.preExistingProtocolId,
+        );
 
-        expect(resp).toBe(WALLET.signer);
+        expect(resp).toStrictEqual({ signer: WALLET.signer, protocolId: WALLET.protocolId });
         expect(mockRefreshKeys).toBeCalledTimes(1);
-        expect(mockRefreshKeys).toBeCalledWith(USER.id, WALLET.id, PARTNER.id, PARTNER.id);
+        expect(mockRefreshKeys).toBeCalledWith(USER.id, WALLET.id, PARTNER.id, PARTNER.id, WALLET.preExistingProtocolId);
         expect(mockDklsRefresh).toBeCalledTimes(1);
         expect(mockDklsRefresh).toBeCalledWith(
           WALLET.share,
@@ -674,11 +682,19 @@ describe('walletUtils', () => {
       });
       it('no DKLS', async () => {
         const _TEST_CTX: Ctx = { ...TEST_CTX, useDKLS: false, offloadMPCComputationURL: undefined };
-        const resp = await refresh(_TEST_CTX, WALLET.share, WALLET.id, USER.id, PARTNER.id, PARTNER.id);
+        const resp = await refresh(
+          _TEST_CTX,
+          WALLET.share,
+          WALLET.id,
+          USER.id,
+          PARTNER.id,
+          PARTNER.id,
+          WALLET.preExistingProtocolId,
+        );
 
-        expect(resp).toBe(WALLET.signer);
+        expect(resp).toStrictEqual({ signer: WALLET.signer, protocolId: WALLET.protocolId });
         expect(mockRefreshKeys).toBeCalledTimes(1);
-        expect(mockRefreshKeys).toBeCalledWith(USER.id, WALLET.id, PARTNER.id, PARTNER.id);
+        expect(mockRefreshKeys).toBeCalledWith(USER.id, WALLET.id, PARTNER.id, PARTNER.id, WALLET.preExistingProtocolId);
         expect(mockRefresh).toBeCalledTimes(1);
         expect(mockRefresh).toBeCalledWith(
           WALLET.share,
@@ -689,11 +705,19 @@ describe('walletUtils', () => {
       });
       it('disableWebSockets', async () => {
         const _TEST_CTX: Ctx = { ...TEST_CTX, disableWebSockets: true };
-        const resp = await refresh(_TEST_CTX, WALLET.share, WALLET.id, USER.id, PARTNER.id, PARTNER.id);
+        const resp = await refresh(
+          _TEST_CTX,
+          WALLET.share,
+          WALLET.id,
+          USER.id,
+          PARTNER.id,
+          PARTNER.id,
+          WALLET.preExistingProtocolId,
+        );
 
-        expect(resp).toBe(WALLET.signer);
+        expect(resp).toStrictEqual({ signer: WALLET.signer, protocolId: WALLET.protocolId });
         expect(mockRefreshKeys).toBeCalledTimes(1);
-        expect(mockRefreshKeys).toBeCalledWith(USER.id, WALLET.id, PARTNER.id, PARTNER.id);
+        expect(mockRefreshKeys).toBeCalledWith(USER.id, WALLET.id, PARTNER.id, PARTNER.id, WALLET.preExistingProtocolId);
         expect(mockDklsRefresh).toBeCalledTimes(1);
         expect(mockDklsRefresh).toBeCalledWith(
           JSON.stringify({ ...SHARE, disableWebSockets: true }),
@@ -708,11 +732,11 @@ describe('walletUtils', () => {
         cb('test error', undefined);
       });
 
-      await expect(refresh(TEST_CTX, WALLET.share, WALLET.id, USER.id, PARTNER.id, PARTNER.id)).rejects.toThrowError(
-        'test error',
-      );
+      await expect(
+        refresh(TEST_CTX, WALLET.share, WALLET.id, USER.id, PARTNER.id, PARTNER.id, WALLET.preExistingProtocolId),
+      ).rejects.toThrowError('test error');
       expect(mockRefreshKeys).toBeCalledTimes(1);
-      expect(mockRefreshKeys).toBeCalledWith(USER.id, WALLET.id, PARTNER.id, PARTNER.id);
+      expect(mockRefreshKeys).toBeCalledWith(USER.id, WALLET.id, PARTNER.id, PARTNER.id, WALLET.preExistingProtocolId);
       expect(mockDklsRefresh).toBeCalledTimes(1);
       expect(mockDklsRefresh).toBeCalledWith(
         WALLET.share,

@@ -2530,16 +2530,18 @@ export abstract class CoreCapsule {
     share,
     oldPartnerId,
     newPartnerId,
+    keyShareProtocolId,
     redistributeBackupEncryptedShares,
   }: {
     walletId: string;
     share: string;
     oldPartnerId?: string;
     newPartnerId?: string;
+    keyShareProtocolId?: string;
     redistributeBackupEncryptedShares?: boolean;
     emailProps?: BackupKitEmailProps;
-  }): Promise<{ signer: string; recoverySecret?: string }> {
-    const { signer } = await this.platformUtils.refresh(
+  }): Promise<{ signer: string; recoverySecret?: string; protocolId: string }> {
+    const { signer, protocolId } = await this.platformUtils.refresh(
       this.ctx,
       this.retrieveSessionCookie(),
       this.userId,
@@ -2547,6 +2549,7 @@ export abstract class CoreCapsule {
       share,
       oldPartnerId,
       newPartnerId,
+      keyShareProtocolId,
     );
     const recoverySecret = await distributeNewShare(
       this.ctx,
@@ -2556,8 +2559,9 @@ export abstract class CoreCapsule {
       !redistributeBackupEncryptedShares,
       this.getBackupKitEmailProps(),
       newPartnerId,
+      protocolId,
     );
-    return { signer, recoverySecret };
+    return { signer, recoverySecret, protocolId };
   }
 
   /**

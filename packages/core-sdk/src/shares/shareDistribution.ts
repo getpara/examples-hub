@@ -13,6 +13,7 @@ export async function distributeNewShare(
   ignoreRedistributingBackupEncryptedShare = false,
   emailProps: BackupKitEmailProps,
   partnerId?: string,
+  protocolId?: string,
 ): Promise<string> {
   const publicKeysRes = await ctx.capsuleClient.getSessionPublicKeys(userId);
   const biometricEncryptedShares = publicKeysRes.data.keys
@@ -29,6 +30,7 @@ export async function distributeNewShare(
         encryptor: EncryptorType.BIOMETRICS,
         biometricPublicKey: key.sigDerivedPublicKey,
         partnerId,
+        protocolId,
       };
     })
     .filter(Boolean);
@@ -48,6 +50,7 @@ export async function distributeNewShare(
         encryptor: EncryptorType.PASSWORD,
         passwordId: password.id,
         partnerId,
+        protocolId,
       };
     })
     .filter(Boolean);

@@ -319,10 +319,11 @@ export async function refresh(
   userId: string,
   oldPartnerId?: string,
   newPartnerId?: string,
-): Promise<string> {
+  keyShareProtocolId?: string,
+): Promise<{ protocolId: string; signer: string }> {
   const {
     data: { protocolId },
-  } = await ctx.capsuleClient.refreshKeys(userId, walletId, oldPartnerId, newPartnerId);
+  } = await ctx.capsuleClient.refreshKeys(userId, walletId, oldPartnerId, newPartnerId, keyShareProtocolId);
   const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
   const refreshFn = ctx.useDKLS ? global.dklsRefresh : global.refresh;
 
@@ -336,7 +337,7 @@ export async function refresh(
       if (err) {
         reject(err);
       }
-      resolve(result);
+      resolve({ protocolId, signer: result });
     }),
   );
 }

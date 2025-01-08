@@ -33,6 +33,15 @@ export class Worker {
         return;
       }
       case 'REFRESH': {
+        if (msg.returnObject) {
+          this.onmessage({
+            data: {
+              protocolId: WALLET.protocolId,
+              signer: WALLET.signer,
+            },
+          });
+          return;
+        }
         this.onmessage({
           data: WALLET.signer,
         });

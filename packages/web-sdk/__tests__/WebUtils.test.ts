@@ -33,6 +33,7 @@ const keygenSpy = vi.spyOn(keygen, 'keygen').mockImplementation(async () => ({
 }));
 const refreshSpy = vi.spyOn(keygen, 'refresh').mockImplementation(async () => ({
   signer: WALLET.signer,
+  protocolId: WALLET.protocolId,
 }));
 const preKeygenSpy = vi.spyOn(keygen, 'preKeygen').mockImplementation(async () => ({
   signer: WALLET.signer,
@@ -112,10 +113,12 @@ describe('WebUtils', () => {
       WALLET.share,
       PARTNER.id,
       PARTNER.id,
+      WALLET.preExistingProtocolId,
     );
 
     expect(resp).toStrictEqual({
       signer: WALLET.signer,
+      protocolId: WALLET.protocolId,
     });
     expect(refreshSpy).toBeCalledTimes(1);
     expect(refreshSpy).toBeCalledWith(
@@ -126,6 +129,7 @@ describe('WebUtils', () => {
       WALLET.share,
       PARTNER.id,
       PARTNER.id,
+      WALLET.preExistingProtocolId,
     );
   });
   it('preKeygen', async () => {

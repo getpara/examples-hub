@@ -136,10 +136,20 @@ describe('keygen', () => {
   });
   describe('refresh', () => {
     it('success', async () => {
-      const resp = await refresh(TEST_CTX, USER.sessionCookie, USER.id, WALLET.id, WALLET.share, PARTNER.id, PARTNER.id);
+      const resp = await refresh(
+        TEST_CTX,
+        USER.sessionCookie,
+        USER.id,
+        WALLET.id,
+        WALLET.share,
+        PARTNER.id,
+        PARTNER.id,
+        WALLET.preExistingProtocolId,
+      );
 
       expect(resp).toStrictEqual({
         signer: WALLET.signer,
+        protocolId: WALLET.protocolId,
       });
       expect(workerTerminateSpy).toBeCalledTimes(1);
       expect(workerMessagePostSpy).toBeCalledTimes(1);
@@ -152,6 +162,7 @@ describe('keygen', () => {
           share: WALLET.share,
           oldPartnerId: PARTNER.id,
           newPartnerId: PARTNER.id,
+          keyShareProtocolId: WALLET.preExistingProtocolId,
         },
         functionType: 'REFRESH',
         disableWorkers: false,
@@ -159,6 +170,7 @@ describe('keygen', () => {
         useDKLS: true,
         disableWebSockets: false,
         wasmOverride: undefined,
+        returnObject: true,
       });
     });
   });

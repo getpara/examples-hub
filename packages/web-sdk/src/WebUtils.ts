@@ -35,10 +35,11 @@ export class WebUtils implements PlatformUtils {
     share: string,
     oldPartnerId?: string,
     newPartnerId?: string,
+    keyShareProtocolId?: string,
   ): Promise<{
     signer: string;
   }> {
-    return refresh(ctx, sessionCookie, userId, walletId, share, oldPartnerId, newPartnerId);
+    return refresh(ctx, sessionCookie, userId, walletId, share, oldPartnerId, newPartnerId, keyShareProtocolId);
   }
 
   preKeygen(

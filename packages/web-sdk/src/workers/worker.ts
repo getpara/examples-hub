@@ -26,6 +26,7 @@ export interface Message {
   useDKLS?: boolean;
   disableWebSockets?: boolean;
   wasmOverride?: ArrayBuffer;
+  returnObject?: boolean;
 }
 
 async function loadWasm(ctx: Ctx, wasmOverride?: ArrayBuffer) {
@@ -46,7 +47,7 @@ async function loadWasm(ctx: Ctx, wasmOverride?: ArrayBuffer) {
 }
 
 async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
-  const { functionType, params } = message;
+  const { functionType, params, returnObject } = message;
 
   switch (functionType) {
     case 'KEYGEN': {
@@ -67,8 +68,17 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
       return walletUtils.signMessage(ctx, share, walletId, userId, message, cosmosSignDoc);
     }
     case 'REFRESH': {
-      const { share, walletId, userId, oldPartnerId, newPartnerId } = params;
-      return walletUtils.refresh(ctx, share, walletId, userId, oldPartnerId, newPartnerId);
+      const { share, walletId, userId, oldPartnerId, newPartnerId, keyShareProtocolId } = params;
+      const { protocolId, signer } = await walletUtils.refresh(
+        ctx,
+        share,
+        walletId,
+        userId,
+        oldPartnerId,
+        newPartnerId,
+        keyShareProtocolId,
+      );
+      return returnObject ? { protocolId, signer } : signer;
     }
     case 'PREKEYGEN': {
       const { email, partnerId, secretKey, type = WalletType.EVM } = params;

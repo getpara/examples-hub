@@ -32,7 +32,9 @@ const sendTransactionSpy = vi.spyOn(walletUtils, 'sendTransaction').mockImplemen
 const signMessageSpy = vi.spyOn(walletUtils, 'signMessage').mockImplementationOnce(async () => ({
   signature: SIGNATURE,
 }));
-const refreshSpy = vi.spyOn(walletUtils, 'refresh').mockImplementationOnce(async () => WALLET.signer);
+const refreshSpy = vi
+  .spyOn(walletUtils, 'refresh')
+  .mockImplementationOnce(async () => ({ signer: WALLET.signer, protocolId: WALLET.protocolId }));
 const preKeygenSpy = vi.spyOn(walletUtils, 'preKeygen').mockImplementationOnce(async () => ({
   signer: WALLET.signer,
   walletId: WALLET.id,
@@ -246,6 +248,7 @@ describe('worker', () => {
               walletId: WALLET.id,
               oldPartnerId: PARTNER.id,
               newPartnerId: PARTNER.id,
+              keyShareProtocolId: WALLET.preExistingProtocolId,
             },
             ..._TEST_CTX,
           },
@@ -256,8 +259,64 @@ describe('worker', () => {
 
       expect(resp).toBeFalsy();
       expect(refreshSpy).toBeCalledTimes(1);
-      expect(refreshSpy).toBeCalledWith({ ..._TEST_CTX }, WALLET.share, WALLET.id, USER.id, PARTNER.id, PARTNER.id);
+      expect(refreshSpy).toBeCalledWith(
+        { ..._TEST_CTX },
+        WALLET.share,
+        WALLET.id,
+        USER.id,
+        PARTNER.id,
+        PARTNER.id,
+        WALLET.preExistingProtocolId,
+      );
       expect(mockPostMessage).toBeCalledTimes(1);
+      expect(mockPostMessage).toBeCalledWith(WALLET.signer);
+      expect(mockGoRun).toBeCalledTimes(1);
+      expect(mockWASMInit).toBeCalledTimes(1);
+    });
+    it('refresh - returnObject', async () => {
+      const _TEST_CTX = {
+        ...TEST_CTX,
+        disableWorkers: undefined,
+        offloadMPCComputationURL: undefined,
+        mpcComputationClient: undefined,
+      };
+
+      const resp = await handleMessage(
+        {
+          data: {
+            functionType: 'REFRESH',
+            params: {
+              userId: USER.id,
+              share: WALLET.share,
+              walletId: WALLET.id,
+              oldPartnerId: PARTNER.id,
+              newPartnerId: PARTNER.id,
+              keyShareProtocolId: WALLET.preExistingProtocolId,
+            },
+            returnObject: true,
+            ..._TEST_CTX,
+          },
+        },
+        mockPostMessage,
+        false,
+      );
+
+      expect(resp).toBeFalsy();
+      expect(refreshSpy).toBeCalledTimes(1);
+      expect(refreshSpy).toBeCalledWith(
+        { ..._TEST_CTX },
+        WALLET.share,
+        WALLET.id,
+        USER.id,
+        PARTNER.id,
+        PARTNER.id,
+        WALLET.preExistingProtocolId,
+      );
+      expect(mockPostMessage).toBeCalledTimes(1);
+      expect(mockPostMessage).toBeCalledWith({
+        protocolId: WALLET.protocolId,
+        signer: WALLET.signer,
+      });
       expect(mockGoRun).toBeCalledTimes(1);
       expect(mockWASMInit).toBeCalledTimes(1);
     });
