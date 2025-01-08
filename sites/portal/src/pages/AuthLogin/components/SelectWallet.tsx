@@ -176,6 +176,7 @@ export const SelectWallet = ({ onSuccess, sessionLookupId }: { onSuccess: () => 
   const [newWallets, setNewWallets] = useState<NewWallets>({});
   const [recoverySecret, setRecoverySecret] = useState<string | undefined>();
   const [isRecoverySecretSaved, setIsRecoverySecretSaved] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
 
   const isIncomplete = isOnlyOneType
     ? selectedWalletIds[selectWalletTypes[0].type].length === 0
@@ -191,6 +192,7 @@ export const SelectWallet = ({ onSuccess, sessionLookupId }: { onSuccess: () => 
 
   const onSubmit = useCallback(
     async (walletIds: CurrentWalletIds) => {
+      setIsConnecting(true);
       const toCreate = Object.keys(walletIds).filter(type => walletIds[type][0] === 'CREATE_NEW') as WalletType[];
       if (toCreate.length > 0) {
         if (!capsule.ctx.apiKey) {
@@ -414,7 +416,7 @@ export const SelectWallet = ({ onSuccess, sessionLookupId }: { onSuccess: () => 
       </Container>
       {!isCreatingWallets && !isCreated && (
         <BottomSheet>
-          <CpslButton fullWidth onClick={() => onSubmit(selectedWalletIds)} disabled={isIncomplete}>
+          <CpslButton fullWidth onClick={() => onSubmit(selectedWalletIds)} disabled={isIncomplete || isConnecting}>
             {walletCount > 1 ? `Connect ${walletCount} Wallets` : 'Connect Wallet'}
             <CpslIcon icon="arrow" />
           </CpslButton>
