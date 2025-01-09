@@ -136,16 +136,21 @@ export async function authUpdateKeyShares(
     partnerId = touchRes.data.partnerId;
   }
 
-  const walletIdToPartnerShareCount = {} as Record<string, number>;
+  const walletIdToPartnerShareCount = {} as Record<string, Record<string, number>>;
+  let tooManyKeySharesForSomePartner = false;
   for (const share of encryptedShares) {
-    if (share.partnerId !== partnerId) {
-      continue;
+    if (!walletIdToPartnerShareCount[share.walletId]) {
+      walletIdToPartnerShareCount[share.walletId] = {};
+    }
+    if (!walletIdToPartnerShareCount[share.walletId][share.partnerId]) {
+      walletIdToPartnerShareCount[share.walletId][share.partnerId] = 0;
     }
 
-    if (!walletIdToPartnerShareCount[share.walletId]) {
-      walletIdToPartnerShareCount[share.walletId] = 0;
+    walletIdToPartnerShareCount[share.walletId][share.partnerId]++;
+    if (walletIdToPartnerShareCount[share.walletId][share.partnerId] > 1) {
+      tooManyKeySharesForSomePartner = true;
+      break;
     }
-    walletIdToPartnerShareCount[share.walletId]++;
   }
 
   // get all shares that are associated with this partnerId
@@ -160,11 +165,7 @@ export async function authUpdateKeyShares(
   // or if there are more, ensure it has a protocolId, otherwise we will refresh to ensure the refreshed share
   // has a protocolId
   potentialSharesForPartnerToDecrypt.forEach(share => {
-    if (
-      share.walletScheme === WalletScheme.DKLS &&
-      share.partnerId === partnerId &&
-      walletIdToPartnerShareCount[share.walletId] !== 1
-    ) {
+    if (share.walletScheme === WalletScheme.DKLS && share.partnerId === partnerId && tooManyKeySharesForSomePartner) {
       if (sharesForPartnerToDecrypt.some(s => s.walletId === share.walletId)) {
         return;
       }
