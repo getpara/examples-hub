@@ -34,7 +34,7 @@ export const EnterPasswordStep = ({ error, onLoginClick }: EnterPasswordStepProp
   return (
     <Container>
       <CpslText variant="headingS">Login</CpslText>
-      <UserIdentifier {...authInfo} />
+      {authInfo.authType !== 'userId' && <UserIdentifier {...authInfo} />}
       <ButtonContainer>
         <CpslInput
           placeholder="Enter a password"

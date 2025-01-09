@@ -2,13 +2,14 @@ import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { MoonPayEmbed, StripeEmbed } from '@usecapsule/react-common';
 import { useCapsule } from '../../components/CapsuleContext';
-import { authLogin, authUpdateKeyShares } from '../../utils/authLogin';
+import { authLogin, authLoginWithPassword, authUpdateKeyShares } from '../../utils/authLogin';
 import { useModalOutletContext } from '../../hooks/useModalOutletContext';
 import { CurrentWalletIds, OnRampConfig, OnRampProvider, OnRampPurchase } from '@usecapsule/user-management-client';
 import { CpslSpinner } from '@usecapsule/react-components';
 import styled from 'styled-components';
-import { getPublicKeyHex } from '@usecapsule/web-sdk';
+import { AuthMethod, getPublicKeyHex } from '@usecapsule/web-sdk';
 import { useExtractedParams } from '../../hooks/useExtractedParams';
+import { EnterPasswordStep } from '../AuthLogin/components/EnterPasswordStep';
 
 const MAX_AUTH_RETRIES = 5;
 
@@ -21,6 +22,8 @@ export function OnRampTransaction() {
   }>();
   const [searchParams] = useSearchParams();
   const { isDark } = useModalOutletContext();
+  const [isAwaitingPassword, setIsAwaitingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
 
   const paramsCurrentWalletIds = (() => {
     try {
@@ -56,57 +59,104 @@ export function OnRampTransaction() {
     await capsule.setupAfterLogin(temporaryShares.data.temporaryShares);
   }
 
-  async function performSetup() {
-    const res = await capsule.ctx.capsuleClient.touchSession(true);
-    const partnerId = res.data.partnerId;
+  async function postLoginSetup() {
+    await capsule.userSetupAfterLogin();
+    await capsule.setCurrentWalletIds(paramsCurrentWalletIds);
 
-    let _onRampPurchase: OnRampPurchase, _onRampConfig: OnRampConfig;
+    const _onRampPurchase = (
+      await capsule.ctx.capsuleClient.getOnRampPurchase({
+        userId,
+        purchaseId,
+        walletId: searchParams.get('walletId') || undefined,
+        externalWalletAddress: searchParams.get('externalWalletAddress') || undefined,
+      })
+    ).data;
 
-    let retriesLeft = MAX_AUTH_RETRIES;
-
-    while (retriesLeft > 0) {
-      try {
-        if (
-          !capsule.isFullyLoggedIn() ||
-          Object.values(paramsCurrentWalletIds)
-            .flat()
-            .some(id => !capsule.wallets[id]?.signer)
-        ) {
-          await login(res.data.sessionId, partnerId);
-        }
-
-        _onRampPurchase = (
-          await capsule.ctx.capsuleClient.getOnRampPurchase({
-            userId,
-            purchaseId,
-            walletId: searchParams.get('walletId') || undefined,
-            externalWalletAddress: searchParams.get('externalWalletAddress') || undefined,
-          })
-        ).data;
-
-        _onRampConfig = await capsule.ctx.capsuleClient.getOnRampConfig();
-        break;
-      } catch (e) {
-        console.error(e);
-
-        if (e.response?.status === 401) {
-          await login(res.data.sessionId, partnerId);
-        }
-
-        retriesLeft--;
-      }
-
-      if (retriesLeft === 0) {
-        // setTransactionReviewState(TransactionReviewState.Error);
-        return;
-      }
-    }
+    const _onRampConfig = await capsule.ctx.capsuleClient.getOnRampConfig();
 
     setOnRampPurchase({ ..._onRampPurchase, providerKey });
     setOnRampConfig(_onRampConfig);
   }
 
+  async function loginWithPassword(password: string) {
+    const res = await capsule.touchSession();
+    const partnerId = res.data.partnerId;
+
+    try {
+      setPasswordError(undefined);
+      await capsule.touchSession();
+      await authLoginWithPassword(capsule, { password, partnerId, userId });
+
+      setIsAwaitingPassword(false);
+      await postLoginSetup();
+    } catch (err) {
+      setPasswordError('Password is incorrect');
+    }
+  }
+
+  async function performSetup() {
+    const res = await capsule.touchSession(true);
+    const partnerId = res.data.partnerId;
+
+    if (
+      !capsule.isFullyLoggedIn() ||
+      Object.values(paramsCurrentWalletIds)
+        .flat()
+        .some(id => !capsule.wallets[id]?.signer)
+    ) {
+      const supportedAuthMethods = await capsule.supportedAuthMethods(userId, 'userId');
+
+      const [isPasskey, isPassword] = [
+        supportedAuthMethods.has(AuthMethod.PASSKEY),
+        supportedAuthMethods.has(AuthMethod.PASSWORD),
+      ];
+
+      if (isPasskey) {
+        let retriesLeft = MAX_AUTH_RETRIES;
+
+        while (retriesLeft > 0) {
+          try {
+            if (
+              !capsule.isFullyLoggedIn() ||
+              Object.values(paramsCurrentWalletIds)
+                .flat()
+                .some(id => !capsule.wallets[id]?.signer)
+            ) {
+              await login(res.data.sessionId, partnerId);
+            }
+
+            break;
+          } catch (e) {
+            console.error(e);
+
+            if (e.response?.status === 401) {
+              await login(res.data.sessionId, partnerId);
+            }
+
+            retriesLeft--;
+          }
+
+          if (retriesLeft === 0) {
+            // setTransactionReviewState(TransactionReviewState.Error);
+            return;
+          }
+        }
+
+        await postLoginSetup();
+        return;
+      }
+
+      if (isPassword) {
+        setIsAwaitingPassword(true);
+        return;
+      }
+    }
+  }
+
   const onRampEmbed = useMemo(() => {
+    if (isAwaitingPassword) {
+      return <EnterPasswordStep error={passwordError} onLoginClick={loginWithPassword} />;
+    }
     if (!onRampConfig || !onRampPurchase) {
       return <CpslSpinner />;
     }
@@ -127,7 +177,7 @@ export function OnRampTransaction() {
       default:
         return null;
     }
-  }, [onRampPurchase?.provider]);
+  }, [onRampPurchase?.provider, isAwaitingPassword]);
 
   useEffect(() => {
     performSetup();
