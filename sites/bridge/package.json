@@ -1,13 +1,13 @@
 {
   "name": "capsule-js-bridge",
-  "version": "0.43.0",
+  "version": "0.44.0",
   "main": "src/index.tsx",
   "private": true,
   "dependencies": {
     "@metamask/eth-sig-util": "7.0.3",
     "@metamask/utils": "^8.1.0",
-    "@usecapsule/user-management-client": "1.38.0",
-    "@usecapsule/web-sdk": "2.16.0",
+    "@usecapsule/user-management-client": "1.39.0",
+    "@usecapsule/web-sdk": "2.17.0",
     "base64url": "^3.0.1",
     "cbor-web": "^9.0.2",
     "node-forge": "^1.3.1",
