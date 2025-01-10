@@ -12,6 +12,7 @@ import { ExternalWalletsWrapper } from './components/ExternalWalletsWrapper/Exte
 import { CountryCallingCode } from 'libphonenumber-js';
 import styled from 'styled-components';
 import { useExternalWallets } from './providers/ExternalWalletContext.js';
+import { hasEmbeddedAuth, hasExternalWallet } from './utils/authLayoutHelpers.js';
 
 defineCustomElements();
 
@@ -53,6 +54,7 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     const setIsFullyLoggedIn = useModalStore(state => state.setIsFullyLoggedIn);
     const goBack = useGoBack();
     const setAuthLayout = useThemeStore(state => state.setAuthLayout);
+    const storedAuthLayout = useThemeStore(state => state.authLayout);
     const resetModalState = useModalStore(state => state.resetState);
     const resetUserInfoState = useUserInfoStore(state => state.resetState);
     const setRecoveryShare = useUserInfoStore(state => state.setRecoveryShare);
@@ -133,8 +135,21 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     };
 
     useEffect(() => {
-      setAuthLayout(authLayout && !externalWallets?.length ? authLayout.filter(l => !l.includes('EXTERNAL')) : authLayout);
-    }, [externalWallets, authLayout]);
+      let _authLayout = authLayout;
+
+      // Removing unused auth layouts based on what auth methods are passed in
+      if (!externalWallets?.length && hasExternalWallet(authLayout)) {
+        _authLayout = _authLayout.filter(l => !l.includes('EXTERNAL'));
+      }
+
+      if (disableEmailLogin && disablePhoneLogin && !oAuthMethods?.length && hasEmbeddedAuth(authLayout)) {
+        _authLayout = _authLayout.filter(l => !l.includes('AUTH'));
+      }
+
+      if (JSON.stringify(storedAuthLayout) !== JSON.stringify(_authLayout)) {
+        setAuthLayout(_authLayout);
+      }
+    }, [disableEmailLogin, disablePhoneLogin, oAuthMethods, externalWallets, authLayout]);
 
     useEffect(() => {
       setOnModalStepChange(onModalStepChange);
@@ -236,11 +251,31 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     };
 
     if (!capsule) {
+      console.error('A Capsule instance is required.');
       return null;
     }
 
-    if (disableEmailLogin && disablePhoneLogin && !oAuthMethods?.length && !externalWallets?.length) {
-      console.error('At least one OAuth method must be provided if email and phone login are disabled.');
+    if (!storedAuthLayout?.length) {
+      // Checking props here to verify a valid configuration was passed in.
+      // Doing this since we auto adjust the auth layouts based on passed in auth method props, if an empty storedAuthLayout was triggered based on invalid props we want to be sure the message reflects that correctly.
+      const hasExternalWalletError = !externalWallets?.length && hasExternalWallet(authLayout);
+      const hasEmbeddedWalletError =
+        disableEmailLogin && disablePhoneLogin && !oAuthMethods?.length && hasEmbeddedAuth(authLayout);
+
+      if (hasExternalWalletError || hasEmbeddedWalletError) {
+        if (hasExternalWalletError) {
+          console.error('At least one external wallet must be provided if external wallet auth is enabled.');
+        }
+
+        if (hasEmbeddedWalletError) {
+          console.error(
+            'At least one login method (email, phone or OAuth) must be provided if embedded wallet auth is enabled.',
+          );
+        }
+      } else {
+        console.error('At least one auth layout selection is required.');
+      }
+
       return null;
     }
 
