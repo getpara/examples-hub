@@ -1,6 +1,6 @@
 {
   "name": "@usecapsule/react-sdk",
-  "version": "4.15.0",
+  "version": "4.16.0",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,9 +12,9 @@
     "*.css"
   ],
   "dependencies": {
-    "@usecapsule/react-common": "1.12.0",
-    "@usecapsule/react-components": "3.20.0",
-    "@usecapsule/web-sdk": "2.15.0",
+    "@usecapsule/react-common": "1.13.0",
+    "@usecapsule/react-components": "3.21.0",
+    "@usecapsule/web-sdk": "2.16.0",
     "date-fns": "^3.6.0",
     "detect-browser": "^5.3.0",
     "framer-motion": "11.3.28",
