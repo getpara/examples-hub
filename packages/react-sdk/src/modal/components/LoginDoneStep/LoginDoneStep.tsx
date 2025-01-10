@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Heading, HeroIcon, StepContainer } from '../common.js';
 import { ExternalWalletCard, WalletCard, WalletCards } from '../WalletCard/WalletCard.js';
-import { useCapsuleStore } from '../../stores/index.js';
+import { useCapsuleStore, useThemeStore } from '../../stores/index.js';
 
 interface LoginDoneStep {
   onClose: () => void;
@@ -9,6 +9,7 @@ interface LoginDoneStep {
 
 export const LoginDoneStep = ({ onClose }: LoginDoneStep) => {
   const capsule = useCapsuleStore(state => state.capsule);
+  const hideWallets = useThemeStore(state => state.hideWallets);
 
   useEffect(() => {
     setTimeout(() => {
@@ -22,15 +23,17 @@ export const LoginDoneStep = ({ onClose }: LoginDoneStep) => {
       <Heading variant="headingS" weight="bold">
         Connected
       </Heading>
-      <WalletCards>
-        {capsule.isUsingExternalWallet() ? (
-          <ExternalWalletCard address={capsule.currentExternalWalletAddresses?.[0]} />
-        ) : (
-          capsule.currentWalletIdsArray.map(([id, type]) => {
-            return <WalletCard key={`${id}-${type}`} id={id} type={type} />;
-          })
-        )}
-      </WalletCards>
+      {!hideWallets && (
+        <WalletCards>
+          {capsule.isUsingExternalWallet() ? (
+            <ExternalWalletCard address={capsule.currentExternalWalletAddresses?.[0]} />
+          ) : (
+            capsule.currentWalletIdsArray.map(([id, type]) => {
+              return <WalletCard key={`${id}-${type}`} id={id} type={type} />;
+            })
+          )}
+        </WalletCards>
+      )}
     </StepContainer>
   );
 };

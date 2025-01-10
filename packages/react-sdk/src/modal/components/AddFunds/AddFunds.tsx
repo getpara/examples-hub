@@ -59,6 +59,7 @@ export const AddFunds = () => {
   const capsule = useCapsuleStore(state => state.capsule);
   const appName = useThemeStore(state => state.appName);
   const onRampConfig = useModalStore(state => state.onRampConfig);
+  const hideWallets = useThemeStore(state => state.hideWallets);
   const storedTab = useModalStore(state => state.accountAddFundTab);
   const setStep = useModalStore(state => state.setStep);
   const setOnRampPurchase = useModalStore(state => state.setOnRampPurchase);
@@ -173,7 +174,7 @@ export const AddFunds = () => {
             </Heading>
             <$InnerStepContainer>
               <NoProviders isHidden={Object.values(isProviderAllowed).some(v => !!v)} variant="bodyM">
-                No providers are available for this wallet
+                No providers are available for this {hideWallets ? 'account' : 'wallet'}
               </NoProviders>
               <AnimatePresence>
                 {onRampConfig.providers.map((id, index) => {
@@ -253,8 +254,10 @@ export const AddFunds = () => {
             )}
             <InnerStepContainer>
               <CenteredText weight="semiBold">
-                {!!onRampConfig.allowedAssets && allowedNetworks.length > 0 ? (appName ?? 'This App') : 'This Wallet'} Only
-                Supports:
+                {(!!onRampConfig.allowedAssets && allowedNetworks.length > 0) || hideWallets
+                  ? (appName ?? 'This App')
+                  : 'This Wallet'}{' '}
+                Only Supports:
               </CenteredText>
               <CenteredText weight="medium" color="secondary">
                 {!!onRampConfig.allowedAssets && allowedNetworks.length > 0

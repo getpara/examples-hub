@@ -1,7 +1,7 @@
 import { CpslIdenticon, CpslSelect, CpslSelectItem, CpslText } from '@usecapsule/react-components';
 import { useExternalWallets } from '../../providers/ExternalWalletContext.js';
 import styled from 'styled-components';
-import { useCapsuleStore, useModalStore } from '../../stores/index.js';
+import { useCapsuleStore, useModalStore, useThemeStore } from '../../stores/index.js';
 import CapsuleWeb, { truncateAddress, WalletType } from '@usecapsule/web-sdk';
 import { useEffect, useRef } from 'react';
 import { useDropdownPosition } from '../AuthInput/hooks/useDropdownPosition.js';
@@ -80,17 +80,29 @@ export const ChainSelect = () => {
 
 function getName(
   capsule: CapsuleWeb,
-  { type, isExternal, name }: Pick<(typeof capsule.availableWallets)[0], 'type' | 'isExternal' | 'name'>,
-  isMenu = false,
+  {
+    type,
+    isExternal,
+    name,
+    isMenu = false,
+    hideWallets = false,
+  }: Pick<(typeof capsule.availableWallets)[0], 'type' | 'isExternal' | 'name'> & {
+    isMenu?: boolean;
+    hideWallets?: boolean;
+  },
 ) {
   if (capsule.isMultiWallet) {
-    return name ?? `${isExternal ? 'External ' : ''}${WALLET_TYPES[type]}${isMenu || isExternal ? ' Wallet' : ''}`;
+    return (
+      name ??
+      `${isExternal ? 'External ' : ''}${WALLET_TYPES[type]}${!hideWallets && (isMenu || isExternal) ? ' Wallet' : ''}`
+    );
   }
 
-  return name ?? 'My Wallet';
+  return hideWallets ? 'My Account' : name || 'My Wallet';
 }
 
 export const AccountSelect = () => {
+  const hideWallets = useThemeStore(state => state.hideWallets);
   const capsule = useCapsuleStore(state => state.capsule);
   const containerRef = useRef<HTMLDivElement>(null);
   const { dropdownMaxHeight, dropdownWidth, mobileAnchor, resize } = useDropdownPosition(containerRef);
@@ -102,11 +114,13 @@ export const AccountSelect = () => {
     <FlexRow slot="selected-item">
       <CpslIdenticon variant="avatar" size="14px" hash={capsule.getIdenticonHash(activeWallet.id, activeWallet.type)} />
       <WalletName variant="bodyXS" color="contrast">
-        {getName(capsule, activeWallet)}
+        {getName(capsule, { ...activeWallet, hideWallets })}
       </WalletName>
-      <CpslText variant="bodyXS" color="secondary">
-        {capsule.getDisplayAddress(activeWallet.id, { truncate: true, addressType: activeWallet.type })}
-      </CpslText>
+      {!hideWallets && (
+        <CpslText variant="bodyXS" color="secondary">
+          {capsule.getDisplayAddress(activeWallet.id, { truncate: true, addressType: activeWallet.type })}
+        </CpslText>
+      )}
     </FlexRow>
   ) : null;
 
@@ -139,7 +153,7 @@ export const AccountSelect = () => {
             {activeWallet && ActiveWalletNode}
             {capsule.availableWallets.map(({ address, name: _name, id, type, isExternal }) => {
               const key = getValue(id, type);
-              const name = _name ?? getName(capsule, { type, isExternal }, true);
+              const name = _name ?? getName(capsule, { type, isExternal, isMenu: true, hideWallets });
               return (
                 <StyledSelectItem key={key} slot="items" value={key}>
                   <FlexRow>
@@ -150,9 +164,11 @@ export const AccountSelect = () => {
                           {name}
                         </CpslText>
                       )}
-                      <CpslText variant="bodyXS" color="secondary">
-                        {truncateAddress(address, type, { prefix: capsule.cosmosPrefix })}
-                      </CpslText>
+                      {!hideWallets && (
+                        <CpslText variant="bodyXS" color="secondary">
+                          {truncateAddress(address, type, { prefix: capsule.cosmosPrefix })}
+                        </CpslText>
+                      )}
                     </FlexCol>
                   </FlexRow>
                 </StyledSelectItem>

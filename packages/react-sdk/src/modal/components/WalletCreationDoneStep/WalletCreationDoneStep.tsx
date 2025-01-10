@@ -1,6 +1,6 @@
-import { CpslButton } from '@usecapsule/react-components';
+import { CpslButton, CpslText } from '@usecapsule/react-components';
 import { StepContainer, InnerStepContainer } from '../common.js';
-import { useCapsuleStore, useModalStore } from '../../stores/index.js';
+import { useCapsuleStore, useModalStore, useThemeStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { WalletCard, WalletCards } from '../WalletCard/WalletCard.js';
 import styled from 'styled-components';
@@ -11,6 +11,7 @@ interface WalletCreationDoneStepProps {
 }
 
 export const WalletCreationDoneStep = ({ twoFactorAuthEnabled, onClose }: WalletCreationDoneStepProps) => {
+  const hideWallets = useThemeStore(state => state.hideWallets);
   const setStep = useModalStore(state => state.setStep);
   const isLogin = useModalStore(state => state.isLogin());
   const onRampConfig = useModalStore(state => state.onRampConfig);
@@ -40,11 +41,17 @@ export const WalletCreationDoneStep = ({ twoFactorAuthEnabled, onClose }: Wallet
   return (
     <StepContainer $wide>
       <CardContainer>
-        <WalletCards>
-          {capsule.currentWalletIdsArray.map(([id, type]) => {
-            return <WalletCard key={id} id={id} type={type} showAddFunds={isOnRampConfigured} />;
-          })}
-        </WalletCards>
+        {hideWallets ? (
+          <CpslText variant="bodyS" color="secondary" weight="medium">
+            Your account has been created.
+          </CpslText>
+        ) : (
+          <WalletCards>
+            {capsule.currentWalletIdsArray.map(([id, type]) => {
+              return <WalletCard key={id} id={id} type={type} showAddFunds={isOnRampConfigured} />;
+            })}
+          </WalletCards>
+        )}
       </CardContainer>
       <InnerStepContainer>
         <CpslButton fullWidth onClick={handleNext}>

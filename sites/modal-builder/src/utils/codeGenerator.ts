@@ -9,13 +9,16 @@ export const getModalCodeString = (config: ModalBuilderConfig): string => {
   logo={${JSON.stringify(config.appearance.logo)}}
   theme={${JSON.stringify(config.appearance.theme)}}
   oAuthMethods={${JSON.stringify(config.authentication.oAuthMethods)}}
-  disableEmailLogin={${JSON.stringify(config.authentication.disableEmailLogin)}}
-  disablePhoneLogin={${JSON.stringify(config.authentication.disablePhoneLogin)}}
+  ${!!config.authentication.disableEmailLogin ? 'disableEmailLogin' : ''}
+  ${!!config.authentication.disablePhoneLogin ? 'disablePhoneLogin' : ''}
   authLayout={${JSON.stringify(config.authentication.authLayout)}}
   externalWallets={${JSON.stringify(config.authentication.externalWallets)}}
-  twoFactorAuthEnabled={${JSON.stringify(config.security.twoFactorAuthEnabled)}}
-  recoverySecretStepEnabled={${JSON.stringify(config.security.recoverySecretStepEnabled)}}
-  onRampTestMode
-  />
-`.trim();
+  ${!!config.security.twoFactorAuthEnabled ? 'twoFactorAuthEnabled' : ''}
+  ${!!config.security.recoverySecretStepEnabled ? 'recoverySecretStepEnabled' : ''}
+  ${!!config.wallets.hideWallets ? 'hideWallets' : ''}
+  onRampTestMode={true}
+/>
+`
+    .replace(/((  )?\n)+/g, `\n`)
+    .trim();
 };

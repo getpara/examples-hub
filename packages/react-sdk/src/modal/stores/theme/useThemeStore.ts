@@ -11,6 +11,7 @@ interface ThemeState {
   oAuthLogoVariant?: OAuthLogoVariantType;
   authLayout?: TAuthLayout[];
   theme?: CapsuleModalTheme;
+  hideWallets?: boolean;
 }
 
 export interface ThemeActions {
@@ -29,6 +30,7 @@ const DEFAULT_THEME: ThemeState = {
   embeddedModal: false,
   oAuthLogoVariant: undefined,
   authLayout: [AuthLayout.AUTH_FULL, AuthLayout.EXTERNAL_FULL],
+  hideWallets: false,
 };
 
 export const useThemeStore = create<ThemeStore>((set, get) => ({

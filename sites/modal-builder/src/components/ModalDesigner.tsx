@@ -9,6 +9,7 @@ import {
   OffRampsConfigurator,
   OnRampsConfigurator,
   SecurityConfigurator,
+  WalletsConfigurator,
 } from './Configuration';
 import { Accordion, AnnouncementBanner, AccountActionButtons, MoreQuestions, Text, ErrorFallback } from './UI';
 import { CodePreviewDisplay, ModalPreviewDisplay, PreviewControls } from './Preview';
@@ -63,6 +64,7 @@ export const ModalDesigner: React.FC = () => {
               <Accordion defaultActive="appearance">
                 <AppearanceConfigurator />
                 <NetworksConfigurator />
+                <WalletsConfigurator />
                 <AuthenticationConfigurator />
                 <SecurityConfigurator />
                 <OnRampsConfigurator />

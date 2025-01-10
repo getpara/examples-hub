@@ -79,6 +79,7 @@ export const securityConfigAtom = createConfigSectionAtom('security');
 export const onRampsConfigAtom = createConfigSectionAtom('onRamps');
 export const offRampsConfigAtom = createConfigSectionAtom('offRamps');
 export const depositCryptoConfigAtom = createConfigSectionAtom('depositCrypto');
+export const walletsConfigAtom = createConfigSectionAtom('wallets');
 
 export const resetConfigAtom: WritableAtom<void, [null], void> = atom(null, (_, set) => {
   try {

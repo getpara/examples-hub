@@ -104,6 +104,10 @@ export interface CapsuleModalProps {
    * Whether or not to run configured on-ramp providers in test mode.
    */
   onRampTestMode?: boolean;
+  /**
+   * Whether to display information about on-chain wallets and use related terminology in the Capsule Modal.
+   */
+  hideWallets?: boolean;
   currentStepOverride?: ModalStepProp | undefined;
   /**
    * Whether or not to display just the modal without the overlay component.

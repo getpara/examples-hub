@@ -542,6 +542,7 @@ function App() {
 
   const [externalWallets, setExternalWallets] = useLocalStorage('@EXAMPLE-CAPSULE/externalWallets', []);
   const [onRampTestMode, setOnRampTestMode] = useLocalStorage('@EXAMPLE-CAPSULE/onRampTestMode', true);
+  const [hideWallets, setHideWallets] = useLocalStorage('@EXAMPLE-CAPSULE/hideWallets', false);
 
   const [pregenIdentifier, setPregenIdentifier] = useState('');
   const [pregenIdentifierType, setPregenIdentifierType] = useState<TPregenIdentifierType>('EMAIL');
@@ -956,6 +957,13 @@ function App() {
                 </Text>
                 <Checkbox isChecked={onRampTestMode} onChange={e => setOnRampTestMode(e.currentTarget.checked)} />
               </HStack>
+              <HStack>
+                <Text width={'15%'}>
+                  <strong>Hide Wallets:</strong>
+                </Text>
+                <Checkbox isChecked={hideWallets} onChange={e => setHideWallets(e.currentTarget.checked)} />
+              </HStack>
+
               <HStack>
                 <Text width={'15%'}>
                   <strong>Current Step:</strong>
@@ -1383,6 +1391,7 @@ function App() {
               OAuthMethod.FARCASTER,
             ]}
             onRampTestMode={onRampTestMode}
+            hideWallets={hideWallets}
             twoFactorAuthEnabled
             theme={
               useTheme

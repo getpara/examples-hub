@@ -34,6 +34,7 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
       authLayout = [AuthLayout.AUTH_FULL, AuthLayout.EXTERNAL_FULL],
       embeddedModal,
       onModalStepChange,
+      hideWallets = false,
       onClose,
       ...rest
     }: CapsuleModalProps,
@@ -156,8 +157,15 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
     }, [onModalStepChange]);
 
     useEffect(() => {
-      updateThemeState({ logo, appName, oAuthLogoVariant: theme?.oAuthLogoVariant ?? 'default', bareModal, embeddedModal });
-    }, [logo, appName, theme?.oAuthLogoVariant, bareModal, embeddedModal]);
+      updateThemeState({
+        logo,
+        appName,
+        oAuthLogoVariant: theme?.oAuthLogoVariant ?? 'default',
+        bareModal,
+        embeddedModal,
+        hideWallets,
+      });
+    }, [logo, appName, theme?.oAuthLogoVariant, bareModal, embeddedModal, hideWallets]);
 
     useEffect(() => {
       if (theme) {

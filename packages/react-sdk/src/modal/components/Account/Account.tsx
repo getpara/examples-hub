@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { InnerStepContainer, StepContainer, StyledCpslTileButton } from '../common.js';
 import { CpslButton, CpslIcon, CpslSpinner, CpslText } from '@usecapsule/react-components';
-import { useCapsuleStore, useModalStore } from '../../stores/index.js';
+import { useCapsuleStore, useModalStore, useThemeStore } from '../../stores/index.js';
 import { useExternalWallets } from '../../providers/ExternalWalletContext.js';
 import { useState } from 'react';
 import { ModalStep } from '../../utils/steps.js';
@@ -14,6 +14,7 @@ export const Account = ({ onClose }: AccountProps) => {
   const onRampConfig = useModalStore(state => state.onRampConfig);
   const setStep = useModalStore(state => state.setStep);
   const capsule = useCapsuleStore(state => state.capsule);
+  const hideWallets = useThemeStore(state => state.hideWallets);
   const { disconnectExternalWallet } = useExternalWallets();
 
   const [isDisconnecting, setIsDisconnecting] = useState(false);
@@ -77,7 +78,7 @@ export const Account = ({ onClose }: AccountProps) => {
             <CpslSpinner size={16} />
           ) : (
             <>
-              Disconnect Wallet
+              {hideWallets ? 'Logout' : 'Disconnect Wallet'}
               <CpslIcon icon="logOut" slot="end" />
             </>
           )}

@@ -2,8 +2,10 @@ import { CpslIcon, CpslInfoBox, CpslText } from '@usecapsule/react-components';
 import { InfoBoxContent, InfoBoxHeader, StepContainer } from '../common.js';
 import { useEffect, useRef, useState } from 'react';
 import { Waiting } from '../Waiting/Waiting.js';
+import { useThemeStore } from '../../stores/index.js';
 
 export const AwaitingWalletCreationStep = () => {
+  const hideWallets = useThemeStore(state => state.hideWallets);
   const [showInfoBox, setShowInfoBox] = useState(false);
   const showInfoBoxTimeout = useRef<number>();
 
@@ -17,7 +19,10 @@ export const AwaitingWalletCreationStep = () => {
 
   return (
     <StepContainer $wide>
-      <Waiting heading="Creating Your Wallet" subheading="This should only take a couple of seconds." />
+      <Waiting
+        heading={hideWallets ? 'Creating Your Account' : 'Creating Your Wallet'}
+        subheading="This should only take a couple of seconds."
+      />
       {showInfoBox && (
         <CpslInfoBox>
           <InfoBoxContent>
@@ -26,7 +31,8 @@ export const AwaitingWalletCreationStep = () => {
               <CpslText weight="medium">Hang on</CpslText>
             </InfoBoxHeader>
             <CpslText variant="bodyS" weight="medium" color="secondary">
-              Creating your wallet is taking a little longer than expected, but we’re working on it!
+              Creating your {hideWallets ? 'account' : 'wallet'} is taking a little longer than expected, but we're working
+              on it!
             </CpslText>
           </InfoBoxContent>
         </CpslInfoBox>

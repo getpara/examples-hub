@@ -2,8 +2,10 @@ import { useMemo } from 'react';
 import { useModalStore } from '../../../stores/modal/useModalStore.js';
 import { ModalStep } from '../../../utils/steps.js';
 import { useExternalWallets } from '../../../providers/ExternalWalletContext.js';
+import { useThemeStore } from '../../../stores/index.js';
 
 export const useStepTitle = () => {
+  const hideWallets = useThemeStore(state => state.hideWallets);
   const isLogin = useModalStore(state => state.isLogin());
   const currentStep = useModalStore(state => state.step);
   const { chainId } = useExternalWallets();
@@ -21,7 +23,7 @@ export const useStepTitle = () => {
       [ModalStep.AWAITING_BIOMETRIC_CREATION]: 'Sign Up',
       [ModalStep.AWAITING_WALLET_CREATION]: isLogin ? 'Login' : 'Sign Up',
       [ModalStep.AWAITING_PASSWORD_CREATION]: 'Sign Up',
-      [ModalStep.WALLET_CREATION_DONE]: 'Wallet Created',
+      [ModalStep.WALLET_CREATION_DONE]: hideWallets ? 'Account Created' : 'Wallet Created',
       [ModalStep.SECRET]: isLogin ? 'Login' : 'Sign Up',
       [ModalStep.BIOMETRIC_LOGIN]: 'Login',
       [ModalStep.AWAITING_PASSWORD_LOGIN]: 'Login',
@@ -39,7 +41,7 @@ export const useStepTitle = () => {
       [ModalStep.ACCOUNT_MAIN]: '',
       [ModalStep.CHAIN_SWITCH]: '',
     }),
-    [isLogin, chainId],
+    [isLogin, chainId, hideWallets],
   );
 
   return { title: titles[currentStep] };

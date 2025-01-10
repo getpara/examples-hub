@@ -41,6 +41,10 @@ export interface AuthenticationConfig
   isWeb3AuthEnabled: boolean;
 }
 
+export interface WalletsConfig extends Pick<CapsuleModalProps, 'hideWallets'> {
+  hideWallets: boolean;
+}
+
 export interface SecurityConfig extends Pick<CapsuleModalProps, 'twoFactorAuthEnabled' | 'recoverySecretStepEnabled'> {}
 
 export interface OnRampsConfig {
@@ -59,6 +63,7 @@ export interface ModalBuilderConfig {
   onRamps: OnRampsConfig;
   offRamps: OffRampsConfig;
   depositCrypto: DepositCryptoConfig;
+  wallets: WalletsConfig;
 }
 
 export interface SegmentItem {

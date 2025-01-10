@@ -1,5 +1,5 @@
 import { CpslButton, CpslText } from '@usecapsule/react-components';
-import { useModalStore, useUserInfoStore } from '../../stores/index.js';
+import { useModalStore, useThemeStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { Heading, InnerStepContainer, StepContainer, StyledCpslTileButton } from '../common.js';
 import { styled } from 'styled-components';
@@ -73,6 +73,7 @@ export const SaveRecoverySecret = ({
 };
 
 export const RecoverySecretStep = () => {
+  const hideWallets = useThemeStore(state => state.hideWallets);
   const setStep = useModalStore(state => state.setStep);
   const authInfo = useUserInfoStore(state => state.getAuthInfo());
   const recoveryShare = useUserInfoStore(state => state.recoveryShare);
@@ -87,14 +88,15 @@ export const RecoverySecretStep = () => {
     <StepContainer>
       <InnerStepContainer>
         <Heading variant="headingS" weight="bold">
-          Don’t lose your wallet
+          {hideWallets ? "Don't lose access" : "Don't lose your wallet"}
         </Heading>
         <InlineText variant="bodyS" color="secondary" weight="medium">
           Your{' '}
           <InlineText variant="bodyS" weight="medium">
             Recovery Secret
           </InlineText>{' '}
-          ensures you will be able to regain access to your wallet if you lose your Passkey.
+          ensures you will be able to regain access to your {hideWallets ? 'account' : 'wallet'} if you lose your Passkey or
+          Password.
         </InlineText>
       </InnerStepContainer>
       <SaveRecoverySecret

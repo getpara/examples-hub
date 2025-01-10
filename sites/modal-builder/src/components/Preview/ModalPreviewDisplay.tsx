@@ -44,6 +44,7 @@ export const ModalPreviewDisplay: React.FC<ModalPreviewDisplayProps> = () => {
           externalWallets={modalConfig.authentication.externalWallets}
           twoFactorAuthEnabled={modalConfig.security.twoFactorAuthEnabled}
           recoverySecretStepEnabled={modalConfig.security.recoverySecretStepEnabled}
+          hideWallets={modalConfig.wallets.hideWallets}
           onRampTestMode={modalConfig.onRamps.onRampTestMode}
           className={view === 'mobile' ? 'force-mobile-media include-mobile-styling' : ''}
         />

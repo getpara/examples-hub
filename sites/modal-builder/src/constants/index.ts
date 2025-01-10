@@ -96,6 +96,9 @@ export const MODAL_BUILDER_DEFAULT_CONFIG: ModalBuilderConfig = {
   },
   offRamps: {},
   depositCrypto: {},
+  wallets: {
+    hideWallets: false,
+  },
 };
 
 export const COSMOS_CHAINS: CosmosNetwork[] = [

@@ -222,6 +222,7 @@ const AccordionTriggerContainer = styled.div<{
   cursor: ${props => (props.$disabled ? 'not-allowed' : 'pointer')};
   background-color: #ffffff;
   opacity: ${props => (props.$disabled ? 0.6 : 1)};
+  gap: 8px;
 
   .trigger-header {
     display: flex;

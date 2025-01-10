@@ -1,7 +1,7 @@
 import { beforeAll, afterAll, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import Capsule, { CapsuleModal, Environment, OAuthMethod, OnRampConfig } from '../../src/index.js';
-import { OnRampAssetInfo } from '@usecapsule/user-management-client';
+import Capsule, { CapsuleModal, Environment, OAuthMethod } from '../../src/index.js';
+import { OnRampAssetInfo, OnRampConfig } from '@usecapsule/user-management-client';
 
 describe('CapsuleModal', () => {
   beforeAll(() => {
@@ -23,14 +23,12 @@ describe('CapsuleModal', () => {
             getPartner: vi.fn(() => ({ data: {} })),
             createUser: vi.fn(() => ({ userId: '123' })),
             touchSession: vi.fn(() => ({ data: {} })),
-            getOnRampConfig: vi.fn<never, Promise<{ data: OnRampConfig }>>(async () => ({
-              data: {
-                isBuyEnabled: false,
-                isReceiveEnabled: false,
-                isWithdrawEnabled: false,
-                assetInfo: {} as OnRampAssetInfo,
-                providers: [],
-              },
+            getOnRampConfig: vi.fn<never, Promise<OnRampConfig>>(async () => ({
+              isBuyEnabled: false,
+              isReceiveEnabled: false,
+              isWithdrawEnabled: false,
+              assetInfo: {} as OnRampAssetInfo,
+              providers: [],
             })),
           };
         }),

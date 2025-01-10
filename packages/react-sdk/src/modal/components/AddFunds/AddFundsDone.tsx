@@ -1,5 +1,5 @@
 import { Heading, HeroIcon, InnerStepContainer, StepContainer } from '../common.js';
-import { useModalStore } from '../../stores/index.js';
+import { useModalStore, useThemeStore } from '../../stores/index.js';
 import { useMemo } from 'react';
 import { CpslButton, CpslText } from '@usecapsule/react-components';
 import { getAddFundsStep } from '../../utils/steps.js';
@@ -10,6 +10,7 @@ interface AddFundsDoneProps {
 }
 
 export const AddFundsDone = ({ isSuccess, onClose }: AddFundsDoneProps) => {
+  const hideWallets = useThemeStore(state => state.hideWallets);
   const setStep = useModalStore(state => state.setStep);
   const onRampPurchase = useModalStore(state => state.onRampPurchase);
   const accountAddFundTab = useModalStore(state => state.accountAddFundTab);
@@ -23,8 +24,8 @@ export const AddFundsDone = ({ isSuccess, onClose }: AddFundsDoneProps) => {
 
   const heading = isSuccess ? 'Transaction Successful' : 'Something Went Wrong';
   const text = isSuccess
-    ? `${formatter.format(parseFloat(onRampPurchase?.fiatQuantity))} is now available in your wallet.`
-    : 'No funds were added to your wallet.';
+    ? `${formatter.format(parseFloat(onRampPurchase?.fiatQuantity))} is now available in your ${hideWallets ? 'account' : 'wallet'}.`
+    : `No funds were added to your ${hideWallets ? 'account' : 'wallet'}.`;
   const buttonText = isSuccess ? 'Done' : 'Try Again';
 
   return (
