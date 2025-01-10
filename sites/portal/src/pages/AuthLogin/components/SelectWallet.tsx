@@ -221,8 +221,6 @@ export const SelectWallet = ({ onSuccess, sessionLookupId }: { onSuccess: () => 
           }, {}),
         );
 
-        setIsCreatingWallets(false);
-
         await capsule.setCurrentWalletIds({ ...walletIds, ...createdIds }, sessionLookupId, false, newDeviceSessionLookupId);
 
         if (created.recoverySecret) {
@@ -231,7 +229,9 @@ export const SelectWallet = ({ onSuccess, sessionLookupId }: { onSuccess: () => 
           setRecoverySecret(newRecoverySecret);
         }
 
-        finishLogin();
+        await finishLogin();
+
+        setIsCreatingWallets(false);
       } else {
         await capsule.setCurrentWalletIds(walletIds, sessionLookupId, false, newDeviceSessionLookupId);
         await authUpdateKeyShares();
