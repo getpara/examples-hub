@@ -1,12 +1,12 @@
 import { Controller } from 'react-hook-form';
-import { Network, OnRampAsset, getOnRampNetworks } from '@usecapsule/react-sdk';
+import { Network, OnRampAsset, getOnRampNetworks, toAssetInfoArray } from '@usecapsule/react-sdk';
 import { ArraySelect } from '../../../../../components/ArraySelect/index.js';
 import { useOnRampAllAssets } from '../../../../../hooks/api/queries/useOnRampAssets.js';
 import { SectionCard } from '../../common.js';
 import { CpslIcon, CpslSelect as _CpslSelect, CpslTab, CpslTabs } from '@usecapsule/react-components';
 import { CpslTabsCustomEvent, TabsChangedEventDetail } from '@usecapsule/core-components';
 import { useOnRampConfigFormData } from '../../../hooks/useOnRampConfigFormData.js';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import _ from 'lodash';
 import { NetworkAssetSelector, TABS, WatchTab } from './components.js';
 import { useGetOrganizationKey } from '../../../../../hooks/api/queries/useOrganizationKeys.js';
@@ -18,6 +18,8 @@ export const OnRampAssetsConfiguration = () => {
   const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
   const { data: allAssets, isLoading } = useOnRampAllAssets();
   const form = useOnRampConfigFormData();
+
+  const assetInfo = useMemo(() => (allAssets ? toAssetInfoArray(allAssets) : undefined), [allAssets]);
 
   const currentValue = form.watch('onRampAssets');
   const [tab, setTab] = useState<'any' | 'selection'>(!!currentValue ? 'selection' : 'any');
@@ -37,7 +39,9 @@ export const OnRampAssetsConfiguration = () => {
                 !value ||
                 Object.entries(value).reduce(
                   (acc: boolean, [network, value]) =>
-                    acc && !!Network[network as Network] && (value === true || (Array.isArray(value) && value.length > 0)),
+                    acc &&
+                    !!assetInfo?.some(([_, _network]) => network === _network) &&
+                    (value === true || (Array.isArray(value) && value.length > 0)),
                   true,
                 ) ||
                 'Asset arrays cannot be empty',
@@ -122,12 +126,21 @@ export const OnRampAssetsConfiguration = () => {
                       );
                     }}
                     rowAdd={() => {
-                      const networkOptions = Object.values(Network).filter(
-                        n =>
-                          n !== Network.SEPOLIA &&
-                          (!value || !value[n]) &&
-                          apiKeyData?.supportedWalletTypes.some(({ type }) => !!allAssets[type]?.[n]),
-                      );
+                      const networkOptions = assetInfo
+                        ? [
+                            ...new Set(
+                              assetInfo
+                                .filter(([walletType, network]) => {
+                                  return (
+                                    apiKeyData?.supportedWalletTypes.some(({ type }) => type === walletType) &&
+                                    !value?.[network] &&
+                                    !['SEPOLIA', 'SOLANA_DEVNET'].includes(network)
+                                  );
+                                })
+                                .map(([_, network]) => network),
+                            ),
+                          ]
+                        : [];
 
                       return networkOptions.length > 0 ? (
                         <NetworkAssetSelector
@@ -136,12 +149,7 @@ export const OnRampAssetsConfiguration = () => {
                             if (!network) return;
                             onChange({ ...value, [network]: true });
                           }}
-                          networkOptions={Object.values(Network).filter(
-                            n =>
-                              n !== Network.SEPOLIA &&
-                              (!value || !value[n]) &&
-                              apiKeyData?.supportedWalletTypes.some(({ type }) => !!allAssets[type]?.[n]),
-                          )}
+                          networkOptions={networkOptions}
                         />
                       ) : undefined;
                     }}
