@@ -109,6 +109,7 @@ import Monitor from './monitor.svg';
 import MoonpayBrand from './moonpay-brand.svg';
 import MoreLoginOptions from './more-login-options.svg';
 import Motorola from './motorola.svg';
+import NobleBrand from './noble-brand.svg';
 import OptimismBrand from './optimism-brand.svg';
 import Passcode from './passcode.svg';
 import Phone from './phone.svg';
@@ -507,6 +508,7 @@ export const Icons = {
   moonpayBrand: MoonpayBrand,
   moreLoginOptions: MoreLoginOptions,
   motorola: Motorola,
+  nobleBrand: NobleBrand,
   optimismBrand: OptimismBrand,
   passcode: Passcode,
   phone: Phone,

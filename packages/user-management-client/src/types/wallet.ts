@@ -29,6 +29,7 @@ export enum Network {
   SOLANA = 'SOLANA',
   COSMOS = 'COSMOS',
   CELO = 'CELO',
+  NOBLE = 'NOBLE',
 }
 
 export type WalletRef = 'walletId' | 'externalWalletAddress';

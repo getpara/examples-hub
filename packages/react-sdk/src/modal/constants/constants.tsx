@@ -52,6 +52,7 @@ export const NETWORKS: Record<Network, { name: string; icon: IconType }> = {
   [Network.SOLANA]: { name: 'Solana', icon: 'solana' },
   [Network.COSMOS]: { name: 'Cosmos', icon: 'cosmos' },
   [Network.CELO]: { name: 'Celo', icon: 'celoBrand' },
+  [Network.NOBLE]: { name: 'Noble', icon: 'nobleBrand' },
 };
 
 export const ON_RAMP_ASSETS: Record<OnRampAsset, { name: string; code: string; icon: IconType }> = {
