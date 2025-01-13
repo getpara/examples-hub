@@ -1,5 +1,5 @@
 import { CpslButton, CpslText } from '@usecapsule/react-components';
-import { StepContainer, InnerStepContainer } from '../common.js';
+import { StepContainer, InnerStepContainer, HeroIcon } from '../common.js';
 import { useCapsuleStore, useModalStore, useThemeStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { WalletCard, WalletCards } from '../WalletCard/WalletCard.js';
@@ -42,9 +42,12 @@ export const WalletCreationDoneStep = ({ twoFactorAuthEnabled, onClose }: Wallet
     <StepContainer $wide>
       <CardContainer>
         {hideWallets ? (
-          <CpslText variant="bodyS" color="secondary" weight="medium">
-            Your account has been created.
-          </CpslText>
+          <>
+            <HeroIcon icon="checkCircleFilled" />
+            <CpslText variant="bodyM" color="secondary" weight="medium" style={{ marginTop: '16px' }}>
+              Your account has been created.
+            </CpslText>
+          </>
         ) : (
           <WalletCards>
             {capsule.currentWalletIdsArray.map(([id, type]) => {
