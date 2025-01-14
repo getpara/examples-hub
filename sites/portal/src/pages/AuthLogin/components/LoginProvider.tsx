@@ -75,7 +75,9 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
     await capsule.touchSession();
     const _wallets = (await capsule.fetchWallets()).filter(({ pregenIdentifier }) => !pregenIdentifier);
 
-    const _pregenWallets = capsule.ctx.apiKey ? await capsule.getPregenWallets() : [];
+    const _pregenWallets = capsule.ctx.apiKey
+      ? (await capsule.ctx.capsuleClient.getPregenWallets(capsule.pregenIds, true, capsule.getUserId())).wallets
+      : [];
 
     const partnerCount = [...new Set([..._wallets, ..._pregenWallets].map(wallet => wallet.partnerId))].reduce(
       (obj, partnerId) => ({
@@ -182,6 +184,10 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
 
       if (params.farcasterUsername) {
         await capsule.setFarcasterUsername(params.farcasterUsername);
+      }
+
+      if (params.telegramUserId) {
+        await capsule.setTelegramUserId(params.telegramUserId);
       }
 
       if (params.pregenIds) {

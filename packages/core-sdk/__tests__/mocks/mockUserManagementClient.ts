@@ -17,7 +17,7 @@ import {
   WALLET,
   WALLETS,
 } from '../constants';
-import { WalletType } from '@usecapsule/user-management-client';
+import Client, { WalletType } from '@usecapsule/user-management-client';
 
 export const mockExternalWalletLogin = vi.fn().mockResolvedValue({ userId: USER_ID });
 export const mockCreateUser = vi.fn().mockResolvedValue({ userId: USER_ID });
@@ -72,13 +72,22 @@ export const mockVerify2FA = vi.fn().mockResolvedValue({ data: TWOFA_VERIFY_RESP
 export const mockVerify2FAForPhone = vi.fn().mockResolvedValue({ data: TWOFA_VERIFY_RESP });
 export const mockGetPasswords = vi.fn().mockResolvedValue([]);
 export const mockGetSupportedAuthMethods = vi.fn().mockResolvedValue({ supportedAuthMethods: ['BIOMETRIC', 'PASSWORD'] });
+export const mockVerifyTelegram = vi
+  .fn<Parameters<Client['verifyTelegram']>, ReturnType<Client['verifyTelegram']>>()
+  .mockImplementation(async obj => {
+    return Promise.resolve({ isValid: true, userId: USER_ID, telegramUserId: obj.id.toString() });
+  });
+export const mockKeepSessionAlive = vi.fn().mockResolvedValue({});
+export const mockCreateOnRampPurchase = vi
+  .fn()
+  .mockImplementation(({ params }) => ({ id: 'id', userId: USER_ID, ...params }));
 
 vi.mock('@usecapsule/user-management-client', async importOriginal => {
-  const actual = await importOriginal();
+  const actual = await importOriginal<{ default: Client }>();
   return {
-    ...(actual as any),
+    ...actual,
     default: vi.fn().mockImplementation(() => ({
-      ...(actual as any).default,
+      ...actual.default,
       externalWalletLogin: mockExternalWalletLogin,
       createUser: mockCreateUser,
       checkUserExists: mockCheckUserExists,
@@ -109,6 +118,9 @@ vi.mock('@usecapsule/user-management-client', async importOriginal => {
       getPasswords: mockGetPasswords,
       persistRecoveryPublicKeys: mockPersistRecoveryPublicKeys,
       getSupportedAuthMethods: mockGetSupportedAuthMethods,
+      verifyTelegram: mockVerifyTelegram,
+      keepSessionAlive: mockKeepSessionAlive,
+      createOnRampPurchase: mockCreateOnRampPurchase,
     })),
   };
 });

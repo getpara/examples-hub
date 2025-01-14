@@ -36,7 +36,14 @@ export type WalletRef = 'walletId' | 'externalWalletAddress';
 
 export type WalletParams = Partial<{ walletId?: string; externalWalletAddress?: string }>;
 
-export const PREGEN_IDENTIFIER_TYPES = ['EMAIL', 'PHONE', 'CUSTOM_ID', OAuthMethod.DISCORD, OAuthMethod.TWITTER] as const;
+export const PREGEN_IDENTIFIER_TYPES = [
+  'EMAIL',
+  'PHONE',
+  'CUSTOM_ID',
+  OAuthMethod.DISCORD,
+  OAuthMethod.TWITTER,
+  OAuthMethod.TELEGRAM,
+] as const;
 
 export type TPregenIdentifierType = (typeof PREGEN_IDENTIFIER_TYPES)[number];
 

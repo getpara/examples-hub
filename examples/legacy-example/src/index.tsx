@@ -1384,6 +1384,7 @@ function App() {
             onClose={handleOnClose}
             oAuthMethods={[
               OAuthMethod.GOOGLE,
+              OAuthMethod.TELEGRAM,
               OAuthMethod.FACEBOOK,
               OAuthMethod.APPLE,
               OAuthMethod.TWITTER,

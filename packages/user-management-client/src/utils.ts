@@ -18,40 +18,88 @@ export function extractWalletRef(params: WalletParams): [WalletRef, string] {
   throw new Error('invalid wallet params');
 }
 
+function isValid(s?: string | null | undefined): boolean {
+  return !!s && s !== 'null' && s !== 'undefined' && s !== '';
+}
+
 export function isEmail(params: AuthParams): params is $Auth<'email'> {
-  return !!params.email && !params.phone && !params.countryCode && !params.farcasterUsername;
+  return (
+    isValid(params.email) &&
+    !isValid(params.phone) &&
+    !isValid(params.countryCode) &&
+    !isValid(params.farcasterUsername) &&
+    !isValid(params.telegramUserId)
+  );
 }
 
 export function isPhone(params: AuthParams): params is $Auth<'phone'> {
-  return !!params.phone && !!params.countryCode && !params.email && !params.farcasterUsername;
+  return (
+    isValid(params.phone) &&
+    isValid(params.countryCode) &&
+    !isValid(params.email) &&
+    !isValid(params.farcasterUsername) &&
+    !isValid(params.telegramUserId)
+  );
 }
 
 export function isFarcaster(params: AuthParams): params is $Auth<'farcasterUsername'> {
-  return !!params.farcasterUsername && !params.email && !params.phone && !params.countryCode;
+  return (
+    isValid(params.farcasterUsername) &&
+    !isValid(params.email) &&
+    !isValid(params.phone) &&
+    !isValid(params.countryCode) &&
+    !isValid(params.telegramUserId)
+  );
+}
+
+export function isTelegram(params: AuthParams): params is { telegramUserId: string } {
+  return (
+    isValid(params.telegramUserId) &&
+    !isValid(params.email) &&
+    !isValid(params.phone) &&
+    !isValid(params.countryCode) &&
+    !isValid(params.farcasterUsername)
+  );
 }
 
 export function isUserId(params: AuthParams): params is { userId: string } {
-  return !!params.userId;
+  return (
+    isValid(params.userId) &&
+    !isValid(params.email) &&
+    !isValid(params.phone) &&
+    !isValid(params.countryCode) &&
+    !isValid(params.farcasterUsername) &&
+    !isValid(params.telegramUserId)
+  );
 }
 
 export function extractAuthInfo(obj: AuthParams, { allowUserId }: { allowUserId?: boolean } = {}): ExtractAuth {
   switch (true) {
     case isEmail(obj):
-      return { auth: { email: obj.email }, authType: 'email', identifier: obj.email };
+      return { auth: { email: obj.email }, authType: 'email', identifier: obj.email, publicKeyIdentifier: obj.email };
     case isPhone(obj):
       return {
         auth: { phone: obj.phone, countryCode: obj.countryCode },
         authType: 'phone',
         identifier: `${obj.countryCode}${obj.phone}`,
+        publicKeyIdentifier: `${obj.countryCode}${obj.phone}`,
       };
     case isFarcaster(obj):
       return {
         auth: { farcasterUsername: obj.farcasterUsername },
         authType: 'farcasterUsername',
         identifier: obj.farcasterUsername,
+        publicKeyIdentifier: `${obj.farcasterUsername}-farcaster`,
+      };
+    case isTelegram(obj):
+      return {
+        auth: { telegramUserId: obj.telegramUserId },
+        authType: 'telegramUserId',
+        identifier: obj.telegramUserId,
+        publicKeyIdentifier: `${obj.telegramUserId}-telegram`,
       };
     case isUserId(obj) && allowUserId:
-      return { auth: { userId: obj.userId }, authType: 'userId', identifier: obj.userId };
+      return { auth: { userId: obj.userId }, authType: 'userId', identifier: obj.userId, publicKeyIdentifier: obj.userId };
     default:
       throw new Error('invalid auth object');
   }

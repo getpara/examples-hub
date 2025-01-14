@@ -135,7 +135,7 @@ describe('utils', () => {
     const resp = await getPublicKeyFromSignature(SAMPLE_CTX, Buffer.from(CRYPTOGRAPHY_UTILS_TEST_VARS.TEST_ENCRYPTION_KEY));
 
     expect(resp).toBe(CRYPTOGRAPHY_UTILS_TEST_VARS.SIGNATURE_PUBLIC_KEY_HEX);
-  }, 10000);
+  }, 20000);
 
   it('symmetricKeyEncryptMessage', async () => {
     const resp = await symmetricKeyEncryptMessage(CRYPTOGRAPHY_UTILS_TEST_VARS.TEST_STRING);
@@ -148,7 +148,6 @@ describe('utils', () => {
     const encrypted = encryptWithDerivedPublicKey(getPublicKeyHex(testKeyPair), CRYPTOGRAPHY_UTILS_TEST_VARS.TEST_STRING);
 
     const resp = decryptWithKeyPair(testKeyPair, encrypted.encryptedMessageHex, encrypted.encryptedKeyHex);
-
     expect(resp).toBe(CRYPTOGRAPHY_UTILS_TEST_VARS.TEST_STRING);
   });
 

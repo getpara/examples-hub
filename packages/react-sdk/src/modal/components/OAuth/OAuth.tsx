@@ -58,63 +58,67 @@ export const OAuth = ({ methods }: OAuthProps) => {
     if (!!popupWindow) {
       return;
     }
+    switch (method) {
+      case OAuthMethod.FARCASTER:
+        if (!farcasterConnectUri) {
+          return;
+        }
 
-    if (method === OAuthMethod.FARCASTER) {
-      if (!farcasterConnectUri) {
+        routeMobileExternalWallet(farcasterConnectUri);
+        setStep(ModalStep.FARCASTER_OAUTH);
         return;
-      }
+      case OAuthMethod.TELEGRAM:
+        setStep(ModalStep.TELEGRAM_OAUTH);
+        break;
+      default: {
+        setStep(ModalStep.AWAITING_OAUTH);
 
-      routeMobileExternalWallet(farcasterConnectUri);
-      setStep(ModalStep.FARCASTER_OAUTH);
-      return;
-    }
+        const oAuthURL = await capsule.getOAuthURL(method);
+        const oAuthWindow = openPopup(oAuthURL, `${method}AuthPopup`, 'OAUTH');
 
-    setStep(ModalStep.AWAITING_OAUTH);
+        setPopupWindow(oAuthWindow);
 
-    const oAuthURL = await capsule.getOAuthURL(method);
-    const oAuthWindow = openPopup(oAuthURL, `${method}AuthPopup`, 'OAUTH');
+        const { email, isError, userExists } = await capsule.waitForOAuth(oAuthWindow);
 
-    setPopupWindow(oAuthWindow);
+        setPopupWindow(undefined);
 
-    const { email, isError, userExists } = await capsule.waitForOAuth(oAuthWindow);
+        if (isError) {
+          goBack();
+          return;
+        }
 
-    setPopupWindow(undefined);
+        if (!email) {
+          setStep(ModalStep.AUTH_MAIN);
+          throw new Error('email is required');
+        }
 
-    if (isError) {
-      goBack();
-      return;
-    }
+        setAuthInfo({ email });
 
-    if (!email) {
-      setStep(ModalStep.AUTH_MAIN);
-      throw new Error('email is required');
-    }
+        if (userExists) {
+          const supportedAuthMethods = await capsule.initiateUserLoginV2(email, 'email');
 
-    setAuthInfo({ email });
+          if (supportedAuthMethods.size === 0) {
+            setFlow('signUp');
+            setStep(ModalStep.BIOMETRIC_CREATION);
+          } else {
+            const biometricLocationHints = supportedAuthMethods.has(AuthMethod.PASSKEY)
+              ? await capsule.getUserBiometricLocationHints()
+              : [];
 
-    if (userExists) {
-      const supportedAuthMethods = await capsule.initiateUserLoginV2(email, 'email');
+            setFlow('login');
+            setStep(ModalStep.BIOMETRIC_LOGIN);
+            setSupportedAuthMethods(supportedAuthMethods);
+            setBiometricLocationHints(biometricLocationHints);
+            return;
+          }
+        }
 
-      if (supportedAuthMethods.size === 0) {
+        await capsule.createUser(email);
         setFlow('signUp');
-        setStep(ModalStep.BIOMETRIC_CREATION);
-      } else {
-        const biometricLocationHints = supportedAuthMethods.has(AuthMethod.PASSKEY)
-          ? await capsule.getUserBiometricLocationHints()
-          : [];
-
-        setFlow('login');
-        setStep(ModalStep.BIOMETRIC_LOGIN);
-        setSupportedAuthMethods(supportedAuthMethods);
-        setBiometricLocationHints(biometricLocationHints);
+        setStep(ModalStep.VERIFICATIONS);
         return;
       }
     }
-
-    await capsule.createUser(email);
-    setFlow('signUp');
-    setStep(ModalStep.VERIFICATIONS);
-    return;
   };
 
   const useBrandedLogos = oAuthLogoVariant === 'default';

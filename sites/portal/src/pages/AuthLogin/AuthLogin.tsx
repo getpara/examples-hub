@@ -24,6 +24,7 @@ const AuthLoginBase = ({ authMethod }) => {
       phone,
       email,
       farcasterUsername,
+      telegramUserId,
       newDeviceSessionLookupId,
       skipAutoLogin,
     },
@@ -147,7 +148,7 @@ const AuthLoginBase = ({ authMethod }) => {
 
   useEffect(() => {
     if (
-      (email || phone || farcasterUsername) &&
+      (email || phone || farcasterUsername || telegramUserId) &&
       sessionId &&
       encryptionKey &&
       !skipAutoLogin &&

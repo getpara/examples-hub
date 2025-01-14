@@ -8,6 +8,7 @@ export const brandedOAuthLogos: { [key in OAuthMethod]: IconType } = {
   DISCORD: 'discordBrand',
   FACEBOOK: 'facebookBrand',
   FARCASTER: 'farcasterBrand',
+  TELEGRAM: 'telegramBrand',
 };
 
 export const oAuthLogos: { [key in OAuthMethod]: IconType } = {
@@ -17,4 +18,5 @@ export const oAuthLogos: { [key in OAuthMethod]: IconType } = {
   DISCORD: 'discord',
   FACEBOOK: 'facebook',
   FARCASTER: 'farcaster',
+  TELEGRAM: 'telegram',
 };

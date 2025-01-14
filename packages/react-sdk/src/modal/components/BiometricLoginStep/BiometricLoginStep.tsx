@@ -35,11 +35,17 @@ export const BiometricLoginStep = () => {
         return;
       }
 
-      if (!capsule.isEmail && !capsule.isPhone && !capsule.isFarcaster) {
+      if (!capsule.isEmail && !capsule.isPhone && !capsule.isFarcaster && !capsule.isTelegram) {
         return;
       }
 
-      const authType = capsule.isEmail ? 'email' : capsule.isPhone ? 'phone' : 'farcaster';
+      const authType = capsule.isEmail
+        ? 'email'
+        : capsule.isPhone
+          ? 'phone'
+          : capsule.isFarcaster
+            ? 'farcaster'
+            : 'telegram';
 
       const res = await capsule.touchSession();
       const webAuthUrlForLogin =

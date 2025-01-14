@@ -20,6 +20,7 @@ import {
   PhantomIcon,
   GlowIcon,
   BackpackIcon,
+  TelegramIcon,
   LeapIcon,
   KeplrIcon,
   RabbyIcon,
@@ -48,6 +49,7 @@ export const AUTH_METHOD_CONFIGS: Partial<Record<AuthMethod, DraggableItemHeader
   [OAuthMethod.FARCASTER]: { logo: FarcasterIcon, label: 'Farcaster' },
   [OAuthMethod.FACEBOOK]: { logo: FacebookIcon, label: 'Facebook' },
   [OAuthMethod.APPLE]: { logo: AppleIcon, label: 'Apple' },
+  [OAuthMethod.TELEGRAM]: { logo: TelegramIcon, label: 'Telegram' },
 };
 
 export const EXTERNAL_WALLET_CONFIGS: Partial<Record<CustomExternalWallet, DraggableItemHeaderConfig>> = {

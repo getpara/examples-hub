@@ -1,4 +1,5 @@
 import { WalletType } from '@usecapsule/user-management-client';
+import { TelegramAuthResponse } from '@usecapsule/user-management-client/src';
 
 export const UUID = 'ef3bf91c-fc1e-4d18-afe2-f2654c9531e5';
 export const USER_ID = 'ef3bf91c-fc1e-4d18-afe2-f2654c9531e5';
@@ -6,6 +7,15 @@ export const USER_EMAIL = 'test@test.com';
 export const USER_PHONE = '5555555555';
 export const USER_COUNTRY_CODE = '1';
 export const USER_FARCASTER_USERNAME = 'TestFarcaster';
+export const USER_TELEGRAM_AUTH_OBJECT: TelegramAuthResponse = {
+  id: 123,
+  first_name: 'Test',
+  last_name: 'User',
+  username: 'testuser',
+  photo_url: 'https://test.com/test.jpg',
+  auth_date: 1234567890,
+  hash: 'test-hash',
+};
 
 export const VERIFICATION_CODE = '123456';
 
@@ -29,6 +39,7 @@ export const PARTNER = {
     { type: WalletType.EVM, optional: false },
     { type: WalletType.SOLANA, optional: false },
   ],
+  supportedAuthMethods: ['PASSKEY', 'PASSWORD'],
   cosmosPrefix: 'test',
 };
 

@@ -29,6 +29,7 @@ import { ChainSwitch } from '../ChainSwitch/ChainSwitch.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Controls } from '../Controls/Controls.js';
 import { useEffect, useState } from 'react';
+import { TelegramOAuthStep } from '../OAuth/TelegramOAuthStep.js';
 import { AwaitingPasswordStep } from '../AwaitingPasswordStep/AwaitingPasswordStep.js';
 import { PasswordCreationStep } from '../PasswordCreationStep/PasswordCreationStep.js';
 
@@ -44,6 +45,14 @@ interface BodyProps {
 
 const MIN_HEIGHT = {
   [ModalStep.ADD_FUNDS_AWAITING]: '680px',
+};
+
+const PADDING_TOP = {
+  [ModalStep.TELEGRAM_OAUTH]: '36px',
+};
+
+const PADDING_BOTTOM = {
+  [ModalStep.TELEGRAM_OAUTH]: '16px',
 };
 
 export const Body = ({
@@ -138,6 +147,9 @@ export const Body = ({
       }
       case ModalStep.FARCASTER_OAUTH: {
         return <FarcasterOAuthStep />;
+      }
+      case ModalStep.TELEGRAM_OAUTH: {
+        return <TelegramOAuthStep />;
       }
       case ModalStep.ADD_FUNDS_BUY:
       case ModalStep.ADD_FUNDS_RECEIVE:
@@ -269,12 +281,13 @@ const InnerContainer = styled.div<{ $embeddedModal: boolean; step: ModalStep }>`
   flex-direction: column;
   justify-content: flex-start;
   gap: 24px;
-  padding: ${({ $embeddedModal }) => ($embeddedModal ? '12px 0px 0px' : '72px 72px 32px')};
+  padding: ${({ $embeddedModal, step }) =>
+    $embeddedModal ? '12px 0px 0px' : `${PADDING_TOP[step] ?? '72px'} 72px ${PADDING_BOTTOM[step] ?? '32px'}`};
   min-height: ${({ step }) => MIN_HEIGHT[step] ?? 'auto'};
   height: ${({ step }) => MIN_HEIGHT[step] ?? 'auto'};
 
   @media (max-width: ${MOBILE_SIZE}px) {
-    padding: ${({ $embeddedModal }) => ($embeddedModal ? '12px 0px 0px' : '72px 16px 0px')};
+    padding: ${({ $embeddedModal, step }) => ($embeddedModal ? '12px 0px 0px' : `${PADDING_TOP[step] ?? '72px'} 16px 0px`)};
   }
 
   cpsl-auth-modal.force-mobile-media & {

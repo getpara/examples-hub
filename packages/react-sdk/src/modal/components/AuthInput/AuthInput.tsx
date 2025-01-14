@@ -50,7 +50,7 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
   );
   const [identifier, setIdentifier] = useState(
     (() => {
-      if (!authInfo || authInfo.authType === 'farcasterUsername') {
+      if (!authInfo || ['telegramUserId', 'farcasterUsername'].includes(authInfo.authType)) {
         return '';
       }
       if (authInfo.authType !== 'phone') {

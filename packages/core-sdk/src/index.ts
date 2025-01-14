@@ -1,6 +1,7 @@
 import { CoreCapsule, PREFIX as STORAGE_PREFIX, PregenIdentifierType, isWalletSupported } from './CoreCapsule.js';
 
 export {
+  AuthMethod,
   type CurrentWalletIds,
   EmailTheme,
   type PartnerEntity,

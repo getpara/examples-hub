@@ -5,4 +5,8 @@ export class MockCapsule extends CoreCapsule {
   protected getPlatformUtils() {
     return new MockPlatformUtils();
   }
+
+  retrieveSessionCookie = () => 'session-cookie';
+
+  persistSessionCookie = (_: string) => {};
 }

@@ -13,6 +13,7 @@ import Recovery from './pages/Recovery/Recovery';
 import { ENV } from './constants';
 import TransactionReview from './pages/TransactionReview/TransactionReview';
 import { OnRampTransaction } from './pages/OnRampTransaction';
+import { TelegramLogin } from './pages/TelegramLogin';
 import { PasswordCreation } from './pages/PasswordCreation/PasswordCreation';
 import { AuthMethod } from '@usecapsule/web-sdk';
 
@@ -40,6 +41,7 @@ const App = () => {
           <Route element={<TransactionReview />} path="users/:userId/transaction-review/:pendingTransactionId" />
           <Route element={<OnRampTransaction />} path="users/:userId/on-ramp-transaction/:purchaseId" />
         </Route>
+        <Route element={<TelegramLogin />} path="/auth/telegram" />
         <Route element={<ShortUrl />} path="/short/:shortenedUrl" />
       </Routes>
     </CapsuleProvider>

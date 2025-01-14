@@ -84,9 +84,10 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
 
     // This will run on mount and on isOpen change but won't cause a rerender unless step or email changes
     const initModal = async () => {
+      const isAccount = await capsule.isFullyLoggedIn();
       if (currentStepOverride) {
         setStep(ModalStep[currentStepOverride.toUpperCase()]);
-      } else if (await capsule.isFullyLoggedIn()) {
+      } else if (isAccount) {
         setFlow('account');
         setStep(ModalStep.ACCOUNT_MAIN);
         setIsFullyLoggedIn(true);
@@ -129,6 +130,14 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
 
         case capsule.isFarcaster:
           setAuthInfo({ farcasterUsername: capsule.getFarcasterUsername() });
+          break;
+
+        case capsule.isTelegram:
+          setAuthInfo({ telegramUserId: capsule.telegramUserId });
+
+          if (!isAccount) {
+            setStep(ModalStep.TELEGRAM_OAUTH);
+          }
           break;
       }
 

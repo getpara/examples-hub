@@ -9,7 +9,7 @@ export default mergeConfig(baseConfig, {
       reporter: ['html', 'text'],
       all: true,
       include: ['src/**/*.{ts,tsx,js,jsx}'],
-      exclude: ['node_modules', 'dist', '**/__tests__/**'],
+      exclude: ['node_modules', 'dist', '**/__mocks__/**', '**/__tests__/**'],
       thresholds: {
         lines: 56.94,
         functions: 29.94,
@@ -17,6 +17,7 @@ export default mergeConfig(baseConfig, {
         statements: 56.94,
       },
       reportOnFailure: true,
+      setupFiles: ['./__tests__/setup-zustand.ts'],
     },
   },
 });

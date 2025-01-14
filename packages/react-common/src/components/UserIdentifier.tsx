@@ -31,11 +31,20 @@ export const UserIdentifier = ({ identifier, authType, displayName, pfpUrl }: Mo
     case 'farcasterUsername':
       icon = 'farcasterBrand';
       break;
+    case 'telegramUserId':
+      icon = 'telegramBrand';
+      break;
   }
 
   return (
     <Container>
-      <IconContainer>{pfpUrl ? <Avatar src={pfpUrl} size="20px" /> : <Icon icon={icon} size="13px" />}</IconContainer>
+      <IconContainer>
+        {pfpUrl ? (
+          <Avatar src={pfpUrl} size="20px" />
+        ) : (
+          <Icon icon={icon} size={authType === 'telegramUserId' ? '20px' : '13px'} />
+        )}
+      </IconContainer>
       <IdentifierText variant="bodyS" weight="medium">
         {displayName || defaultDisplayName(authType, identifier)}
       </IdentifierText>

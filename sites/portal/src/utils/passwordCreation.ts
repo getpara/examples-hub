@@ -5,31 +5,28 @@ import Capsule, {
   getSHA256HashHex,
   hashPasswordWithSalt,
 } from '@usecapsule/web-sdk';
-import { CountryCallingCode } from 'libphonenumber-js';
-import { PasswordStatus } from '@usecapsule/user-management-client';
+import { AuthParams, extractAuthInfo, PasswordStatus } from '@usecapsule/user-management-client';
 
 export async function passwordCreation(
   capsule: Capsule,
-  partnerId: string,
-  userId: string,
-  email: string,
-  phone: string,
-  countryCode: CountryCallingCode,
-  farcasterUsername: string,
-  password: string,
-  passwordId: string,
+  {
+    auth,
+    userId,
+    partnerId,
+    password,
+    passwordId,
+  }: {
+    partnerId: string;
+    userId: string;
+    auth: AuthParams;
+    password: string;
+    passwordId: string;
+  },
 ): Promise<void> {
-  let identifier;
+  const { publicKeyIdentifier } = extractAuthInfo(auth);
 
-  if (email !== 'null' && email !== undefined && email !== '') {
-    identifier = email;
-  } else if (phone !== 'null' && phone !== undefined && phone !== '') {
-    identifier = `${countryCode}${phone}`;
-  } else if (farcasterUsername !== 'null' && farcasterUsername !== undefined && farcasterUsername !== '') {
-    identifier = `${farcasterUsername}-farcaster`;
-  }
-  if (!identifier) {
-    throw new Error('either a phone number or email address or farcaster username must be provided.');
+  if (!publicKeyIdentifier) {
+    throw new Error('a phone number, email address, Farcaster username, or Telegram user ID must be provided');
   }
 
   const keyPair = await getAsymmetricKeyPair(capsule.ctx);

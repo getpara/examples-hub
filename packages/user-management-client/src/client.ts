@@ -10,6 +10,7 @@ import qs from 'qs';
 import {
   $Auth,
   Auth,
+  AuthMethod,
   AuthParams,
   BackupKitEmailProps,
   BiometricLocationHint,
@@ -29,6 +30,7 @@ import {
   PregenIds,
   PublicKeyStatus,
   PublicKeyType,
+  TelegramAuthResponse,
   TPregenIdentifierType,
   VerificationEmailProps,
   WalletEntity,
@@ -200,6 +202,19 @@ interface sessionPasswordBody {
 
 type BiometricLocationHintParams = AuthParams;
 
+export type VerifyTelegramRes =
+  | {
+      isValid: true;
+      userId: string;
+      telegramUserId: string;
+      isNewUser: boolean;
+      biometricHints?: BiometricLocationHint[];
+      supportedAuthMethods: AuthMethod[];
+    }
+  | {
+      isValid: false;
+    };
+
 class Client {
   private baseRequest: AxiosInstance;
   constructor({ userManagementHost, apiKey, version, opts, retrieveSessionCookie, persistSessionCookie }: ClientConfig) {
@@ -289,6 +304,14 @@ class Client {
       params: { ...auth },
     });
     return res;
+  };
+
+  verifyTelegram = async (authObject: TelegramAuthResponse): Promise<VerifyTelegramRes> => {
+    return (
+      await this.baseRequest.post<VerifyTelegramRes>('/users/telegram', {
+        authObject,
+      })
+    ).data;
   };
 
   externalWalletLogin = async (body: ExternalWalletLoginBody): Promise<ExternalWalletLoginRes> => {
@@ -406,9 +429,12 @@ class Client {
   // GET /wallets/pregen?pregenIdentifier={pregenIdentifier}&pregenIdentifierType={pregenIdentifierType}
   getPregenWallets = async <ReturnType = { wallets: WalletEntity[] }>(
     pregenIds: PregenIds,
-    expand = false,
+    isPortal = false,
+    userId?: string,
   ): Promise<ReturnType> => {
-    const res = await this.baseRequest.get<ReturnType>('/wallets/pregen', { params: { ids: pregenIds, expand } });
+    const res = await this.baseRequest.get<ReturnType>('/wallets/pregen', {
+      params: { ids: pregenIds, expand: isPortal, userId },
+    });
 
     return res.data;
   };

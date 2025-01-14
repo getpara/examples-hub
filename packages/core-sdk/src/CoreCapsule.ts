@@ -1,4 +1,5 @@
 import Client, {
+  AuthMethod,
   BackupKitEmailProps,
   CurrentWalletIds,
   EmailTheme,
@@ -18,6 +19,8 @@ import Client, {
   extractWalletRef,
   PasswordStatus,
   BiometricLocationHint,
+  TelegramAuthResponse,
+  VerifyTelegramRes,
 } from '@usecapsule/user-management-client';
 import type { pki as pkiType, jsbn as jsbnType } from 'node-forge';
 import forge from 'node-forge';
@@ -34,6 +37,7 @@ import {
   WalletFilters,
   WalletTypeProp,
   getCapsuleConnectBaseURL,
+  TAuthType,
 } from './definitions.js';
 import { getBaseUrl, initClient } from './external/capsuleClient.js';
 import * as mpcComputationClient from './external/mpcComputationClient.js';
@@ -45,11 +49,17 @@ import { sendRecoveryForShare } from './shares/recovery.js';
 import parsePhoneNumberFromString, { CountryCallingCode } from 'libphonenumber-js';
 import { getCosmosAddress, truncateAddress } from './utils/formattingUtils.js';
 import { TransactionReviewDenied, TransactionReviewError, TransactionReviewTimeout } from './errors.js';
-import { AuthMethod } from './types/authMethods.js';
 
 const CORE_CAPSULE_VERSION = process.env.CORE_CAPSULE_VERSION;
 
-function isPregenIdentifierMatch(a: string, b: string, type: TPregenIdentifierType): boolean {
+function isPregenIdentifierMatch(
+  a: string | null | undefined,
+  b: string | null | undefined,
+  type: TPregenIdentifierType,
+): boolean {
+  if (!a || !b) {
+    return false;
+  }
   switch (type) {
     case 'EMAIL':
       return a.toLowerCase() === b.toLowerCase();
@@ -225,13 +235,12 @@ export interface ConstructorOpts {
   useSessionStorage?: boolean;
 }
 
-type AuthType = 'email' | 'phone' | 'farcaster';
-
 export const PREFIX = '@CAPSULE/';
 const LOCAL_STORAGE_EMAIL = `${PREFIX}e-mail`;
 const LOCAL_STORAGE_PHONE = `${PREFIX}phone`;
 const LOCAL_STORAGE_COUNTRY_CODE = `${PREFIX}countryCode`;
 const LOCAL_STORAGE_FARCASTER_USERNAME = `${PREFIX}farcasterUsername`;
+const LOCAL_STORAGE_TELEGRAM_USER_ID = `${PREFIX}telegramUserId`;
 const LOCAL_STORAGE_USER_ID = `${PREFIX}userId`;
 const LOCAL_STORAGE_ED25519_WALLETS = `${PREFIX}ed25519Wallets`;
 const LOCAL_STORAGE_WALLETS = `${PREFIX}wallets`;
@@ -310,6 +319,7 @@ export abstract class CoreCapsule {
   protected phone?: string;
   protected countryCode?: CountryCallingCode;
   private farcasterUsername?: string;
+  telegramUserId?: string;
   private userId?: string;
   private sessionCookie?: string;
 
@@ -319,15 +329,19 @@ export abstract class CoreCapsule {
   private isAwaitingOAuth = false;
 
   get isEmail(): boolean {
-    return !!this.email && !this.phone && !this.farcasterUsername;
+    return !!this.email && !this.phone && !this.countryCode && !this.farcasterUsername && !this.telegramUserId;
   }
 
   get isPhone(): boolean {
-    return !!this.phone && !this.email && !this.farcasterUsername;
+    return !!this.phone && !!this.countryCode && !this.email && !this.farcasterUsername && !this.telegramUserId;
   }
 
   get isFarcaster(): boolean {
-    return !!this.farcasterUsername && !this.email && !this.phone;
+    return !!this.farcasterUsername && !this.email && !this.phone && !this.countryCode && !this.telegramUserId;
+  }
+
+  get isTelegram(): boolean {
+    return !!this.telegramUserId && !this.email && !this.phone && !this.countryCode && !this.farcasterUsername;
   }
 
   /**
@@ -593,9 +607,13 @@ export abstract class CoreCapsule {
     return (
       this.isWalletSupported(wallet) &&
       this.isPregenWalletUnclaimed(wallet) &&
-      (!['EMAIL', 'PHONE'].includes(wallet.pregenIdentifierType) ||
+      (!['EMAIL', 'PHONE', 'TELEGRAM'].includes(wallet.pregenIdentifierType) ||
         isPregenIdentifierMatch(
-          wallet.pregenIdentifierType === 'EMAIL' ? this.email : this.getPhoneNumber(),
+          wallet.pregenIdentifierType === 'EMAIL'
+            ? this.email
+            : wallet.pregenIdentifierType === 'TELEGRAM'
+              ? this.telegramUserId
+              : this.getPhoneNumber(),
           wallet.pregenIdentifier,
           wallet.pregenIdentifierType,
         ))
@@ -713,7 +731,7 @@ export abstract class CoreCapsule {
     type: 'createAuth' | 'createPassword' | 'loginAuth' | 'loginPassword' | 'txReview' | 'onRamp',
     opts: {
       params?: Record<string, string | undefined | null>;
-      authType?: AuthType;
+      authType?: TAuthType;
       isForNewDevice?: boolean;
       loginEncryptionPublicKey?: string;
       newDeviceSessionId?: string;
@@ -792,6 +810,7 @@ export abstract class CoreCapsule {
             ...(opts.authType === 'email' ? { email: this.email } : {}),
             ...(opts.authType === 'phone' ? { phone: this.phone, countryCode: this.countryCode } : {}),
             ...(opts.authType === 'farcaster' ? { farcasterUsername: this.farcasterUsername } : {}),
+            ...(opts.authType === 'telegram' ? { telegramUserId: this.telegramUserId } : {}),
           }
         : {}),
       ...(isLogin || isOnRamp ? { sessionId: opts.sessionId } : {}),
@@ -930,6 +949,7 @@ export abstract class CoreCapsule {
     this.countryCode = (this.localStorageGetItem(LOCAL_STORAGE_COUNTRY_CODE) as CountryCallingCode) || undefined;
     this.phone = (this.localStorageGetItem(LOCAL_STORAGE_PHONE) as string) || undefined;
     this.userId = (this.localStorageGetItem(LOCAL_STORAGE_USER_ID) as string) || undefined;
+    this.telegramUserId = (this.localStorageGetItem(LOCAL_STORAGE_TELEGRAM_USER_ID) as string) || undefined;
 
     const stringWallets = this.platformUtils.secureStorage
       ? this.platformUtils.secureStorage.get(LOCAL_STORAGE_WALLETS)
@@ -1068,6 +1088,7 @@ export abstract class CoreCapsule {
     this.countryCode = ((await this.localStorageGetItem(LOCAL_STORAGE_COUNTRY_CODE)) as CountryCallingCode) || undefined;
     this.phone = ((await this.localStorageGetItem(LOCAL_STORAGE_PHONE)) as string) || undefined;
     this.userId = ((await this.localStorageGetItem(LOCAL_STORAGE_USER_ID)) as string) || undefined;
+    this.telegramUserId = ((await this.localStorageGetItem(LOCAL_STORAGE_TELEGRAM_USER_ID)) as string) || undefined;
 
     const stringWallets = this.platformUtils.secureStorage
       ? await this.platformUtils.secureStorage.get(LOCAL_STORAGE_WALLETS)
@@ -1159,6 +1180,15 @@ export abstract class CoreCapsule {
   async setEmail(email: string): Promise<void> {
     this.email = email;
     await this.localStorageSetItem(LOCAL_STORAGE_EMAIL, email);
+  }
+
+  /**
+   * Sets the Telegram user ID associated with the `CoreCapsule` instance.
+   * @param telegramUserId - Telegram user ID to set.
+   */
+  async setTelegramUserId(telegramUserId: string): Promise<void> {
+    this.telegramUserId = telegramUserId;
+    await this.localStorageSetItem(LOCAL_STORAGE_TELEGRAM_USER_ID, telegramUserId);
   }
 
   /**
@@ -1487,7 +1517,8 @@ export abstract class CoreCapsule {
     return <WalletType[]>(
       this.supportedWalletTypes
         .filter(
-          ({ type: t, optional }) => !optional && Object.values(this.wallets).every(w => !WalletSchemeTypeMap[w.scheme][t]),
+          ({ type: t, optional }) =>
+            !optional && Object.values(this.wallets).every(w => !this.isWalletOwned(w) || !WalletSchemeTypeMap[w.scheme][t]),
         )
         .map(({ type }) => type)
     );
@@ -1525,7 +1556,7 @@ export abstract class CoreCapsule {
   }
 
   private async getWebAuthURLForCreate(
-    authType: AuthType,
+    authType: TAuthType,
     webAuthId: string,
     partnerId?: string,
     isForNewDevice?: boolean,
@@ -1534,7 +1565,7 @@ export abstract class CoreCapsule {
   }
 
   private async getPasswordURLForCreate(
-    authType: AuthType,
+    authType: TAuthType,
     passwordId: string,
     partnerId?: string,
     isForNewDevice?: boolean,
@@ -1577,7 +1608,7 @@ export abstract class CoreCapsule {
     partnerId?: string,
     newDeviceSessionId?: string,
     newDeviceEncryptionKey?: string,
-    authType: AuthType = 'email',
+    authType: TAuthType = 'email',
     displayName?: string,
     pfpUrl?: string,
   ): Promise<string> {
@@ -1599,7 +1630,7 @@ export abstract class CoreCapsule {
     partnerId?: string,
     newDeviceSessionId?: string,
     newDeviceEncryptionKey?: string,
-    authType: AuthType = 'email',
+    authType: TAuthType = 'email',
     displayName?: string,
     pfpUrl?: string,
   ): Promise<string> {
@@ -1810,6 +1841,28 @@ export abstract class CoreCapsule {
   }
 
   /**
+   * Validates the response received from an attempted Telegram login for authenticity, then
+   * creates or retrieves the corresponding Capsule user and prepares the Capsule instance to sign in with that user.
+   * @param authResponse - the response JSON object received from the Telegram widget.
+   * @returns `{ isValid: boolean; telegramUserId?: string; userId?: string; isNewUser?: boolean; supportedAuthMethods?: AuthMethod[]; biometricHints?: BiometricLocationHint[] }`
+   */
+  async verifyTelegram(authObject: TelegramAuthResponse): Promise<VerifyTelegramRes> {
+    const res = await this.ctx.capsuleClient.verifyTelegram(authObject);
+
+    if (res.isValid) {
+      await this.setUserId(res.userId);
+      await this.setTelegramUserId(res.telegramUserId);
+
+      await this.touchSession(true);
+      if (!this.loginEncryptionKeyPair) {
+        await this.setLoginEncryptionKeyPair();
+      }
+    }
+
+    return res;
+  }
+
+  /**
    * Performs 2FA verification.
    * @param email - email to use for performing a 2FA verification.
    * @param verificationCode - verification code to received via 2FA.
@@ -1909,7 +1962,7 @@ export abstract class CoreCapsule {
   }
 
   // returns web auth url for creating a new credential
-  async getSetUpBiometricsURL(isForNewDevice: boolean, type: 'email' | 'phone' | 'farcaster' = 'email'): Promise<string> {
+  async getSetUpBiometricsURL(isForNewDevice: boolean, type: TAuthType = 'email'): Promise<string> {
     const res = await this.ctx.capsuleClient.addSessionPublicKey(this.userId, {
       status: PublicKeyStatus.PENDING,
       type: PublicKeyType.WEB,
@@ -1928,11 +1981,7 @@ export abstract class CoreCapsule {
     return this.getWebAuthURLForCreate('phone', res.data.id, res.data.partnerId, isForNewDevice);
   }
 
-  async getSetupPasswordURL(
-    isForNewDevice: boolean,
-    type: 'email' | 'phone' | 'farcaster' = 'email',
-    themeOverride?: Theme,
-  ): Promise<string> {
+  async getSetupPasswordURL(isForNewDevice: boolean, type: TAuthType = 'email', themeOverride?: Theme): Promise<string> {
     const res = await this.ctx.capsuleClient.addSessionPasswordPublicKey(this.userId, {
       status: PasswordStatus.PENDING,
     });
@@ -1973,7 +2022,7 @@ export abstract class CoreCapsule {
 
   async supportedAuthMethods(
     identifier: string,
-    authType: AuthType | 'userId' = 'email',
+    authType: TAuthType | 'userId' = 'email',
     countryCode?: string,
   ): Promise<Set<AuthMethod>> {
     let auth;
@@ -1986,6 +2035,9 @@ export abstract class CoreCapsule {
         break;
       case 'farcaster':
         auth = { farcasterUsername: identifier };
+        break;
+      case 'telegram':
+        auth = { telegramUserId: identifier };
         break;
       case 'userId':
         auth = { userId: identifier };
@@ -2013,7 +2065,7 @@ export abstract class CoreCapsule {
    * @returns Array containing useragents and AAGuids for stored biometrics
    */
   async getUserBiometricLocationHints(): Promise<BiometricLocationHint[]> {
-    if (!this.email && !this.phone && !this.farcasterUsername) {
+    if (!this.email && !this.phone && !this.farcasterUsername && !this.telegramUserId) {
       throw new Error('one of email, phone or farcaster username are required to get biometric location hints');
     }
     return await this.ctx.capsuleClient.getBiometricLocationHints({
@@ -2021,6 +2073,7 @@ export abstract class CoreCapsule {
       phone: this.phone,
       countryCode: this.countryCode,
       farcasterUsername: this.farcasterUsername,
+      telegramUserId: this.telegramUserId,
     });
   }
 
@@ -2033,16 +2086,24 @@ export abstract class CoreCapsule {
   async initiateUserLogin(
     identifier: string,
     useShortURL?: boolean,
-    type: 'email' | 'phone' | 'farcaster' = 'email',
+    type: TAuthType = 'email',
     countryCode?: CountryCallingCode,
   ): Promise<string> {
-    if (type === 'email') {
-      await this.setEmail(identifier);
-    } else if (type === 'phone') {
-      await this.setPhoneNumber(identifier, countryCode);
-    } else if (type === 'farcaster') {
-      await this.setFarcasterUsername(identifier);
+    switch (true) {
+      case type === 'email':
+        await this.setEmail(identifier);
+        break;
+      case type === 'phone':
+        await this.setPhoneNumber(identifier, countryCode);
+        break;
+      case type === 'farcaster':
+        await this.setFarcasterUsername(identifier);
+        break;
+      case type === 'telegram':
+        await this.setTelegramUserId(identifier);
+        break;
     }
+
     const res = await this.touchSession(true);
     if (!this.loginEncryptionKeyPair) {
       await this.setLoginEncryptionKeyPair();
@@ -2070,17 +2131,23 @@ export abstract class CoreCapsule {
    **/
   async initiateUserLoginV2(
     identifier: string,
-    type: 'email' | 'phone' | 'farcaster' = 'email',
+    type: TAuthType = 'email',
     countryCode?: CountryCallingCode,
   ): Promise<Set<AuthMethod>> {
-    if (type === 'email') {
-      await this.setEmail(identifier);
-    } else if (type === 'phone') {
-      await this.setPhoneNumber(identifier, countryCode);
-    } else if (type === 'farcaster') {
-      await this.setFarcasterUsername(identifier);
+    switch (type) {
+      case 'email':
+        await this.setEmail(identifier);
+        break;
+      case 'phone':
+        await this.setPhoneNumber(identifier, countryCode);
+        break;
+      case 'farcaster':
+        await this.setFarcasterUsername(identifier);
+        break;
+      case 'telegram':
+        await this.setTelegramUserId(identifier);
+        break;
     }
-
     await this.touchSession(true);
     if (!this.loginEncryptionKeyPair) {
       await this.setLoginEncryptionKeyPair();
@@ -2211,7 +2278,7 @@ export abstract class CoreCapsule {
     const res = await this.touchSession(true);
 
     return constructUrl({
-      base: getBaseUrl(this.ctx.env),
+      base: oAuthMethod === OAuthMethod.TELEGRAM ? getPortalBaseURL(this.ctx, true) : getBaseUrl(this.ctx.env),
       path: `/auth/${oAuthMethod.toLowerCase()}`,
       params: {
         apiKey: this.ctx.apiKey,
@@ -2863,6 +2930,7 @@ export abstract class CoreCapsule {
     const res = await this.ctx.capsuleClient.getPregenWallets(
       pregenIdentifier && pregenIdentifierType ? { [pregenIdentifierType]: [pregenIdentifier] } : this.pregenIds,
       this.isPortal,
+      this.userId,
     );
     return res.wallets.filter(w => this.isWalletSupported(entityToWallet(w)));
   }
@@ -3300,6 +3368,7 @@ export abstract class CoreCapsule {
     this.externalWallets = {};
     this.loginEncryptionKeyPair = undefined;
     this.email = undefined;
+    this.telegramUserId = undefined;
     this.phone = undefined;
     this.countryCode = undefined;
     this.userId = undefined;
@@ -3343,6 +3412,7 @@ export abstract class CoreCapsule {
       email: this.email,
       phone: this.phone,
       countryCode: this.countryCode,
+      telegramUserId: this.telegramUserId,
       farcasterUsername: this.farcasterUsername,
       userId: this.userId,
       pregenIds: this.pregenIds,

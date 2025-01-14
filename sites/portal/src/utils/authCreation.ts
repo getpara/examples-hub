@@ -28,20 +28,9 @@ export async function authCreation(
   capsule: Capsule,
   { biometricId, isForNewDevice, partnerId, userId, ...authParams }: AuthCreationParams,
 ): Promise<void> {
-  let identifier;
+  const { publicKeyIdentifier } = extractAuthInfo(authParams);
 
-  const { authType, identifier: _identifier } = extractAuthInfo(authParams);
-
-  switch (authType) {
-    case 'farcasterUsername':
-      identifier = `${_identifier}-farcaster`;
-      break;
-    default:
-      identifier = _identifier;
-      break;
-  }
-
-  const { creds, userHandle, algorithm } = await createCredential(ENV, userId, identifier, capsule.ctx.isE2E);
+  const { creds, userHandle, algorithm } = await createCredential(ENV, userId, publicKeyIdentifier, capsule.ctx.isE2E);
   const { cosePublicKey, clientDataJSON, aaguid } = parseCredentialCreationRes(creds, algorithm);
   const keyPair = await getAsymmetricKeyPair(capsule.ctx);
   const publicKeyHex = getPublicKeyHex(keyPair);

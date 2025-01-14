@@ -53,7 +53,7 @@ export const mockKeygen = vi.fn().mockReturnValue(WALLET_KEYGEN_RES);
 export const mockPreKeygen = vi.fn().mockReturnValue(PREGEN_WALLET_EMAIL_KEYGEN_RES);
 
 export class MockPlatformUtils implements PlatformUtils {
-  refresh = vi.fn().mockReturnValue({ signer: 'test-refresh-signer' });
+  refresh = vi.fn().mockReturnValue({ signer: 'test-refresh-signer', protocolId: 'protocolId' });
 
   getPrivateKey = vi.fn().mockReturnValue('getPrivateKey');
 
@@ -61,19 +61,21 @@ export class MockPlatformUtils implements PlatformUtils {
 
   preKeygen = mockPreKeygen;
 
-  signMessage = vi.fn().mockReturnValue({});
+  signMessage = vi.fn().mockReturnValue({ signature: 'signature' });
 
-  signTransaction = vi.fn().mockReturnValue({});
+  signTransaction = vi.fn().mockReturnValue({ signature: 'signature' });
 
-  sendTransaction = vi.fn().mockReturnValue({});
+  sendTransaction = vi.fn().mockReturnValue({ signature: 'signature' });
 
-  signHash = vi.fn().mockReturnValue({});
+  signHash = vi.fn().mockReturnValue({ signature: 'signature' });
 
   ed25519Keygen = vi.fn().mockReturnValue(SOLANA_WALLET_KEYGEN_RES);
 
   ed25519PreKeygen = vi.fn().mockReturnValue(SOLANA_PREGEN_WALLET_KEYGEN_RES);
 
-  ed25519Sign = vi.fn().mockReturnValue({});
+  ed25519Sign = vi.fn().mockReturnValue({ signature: 'signature' });
+
+  refreshShare = vi.fn().mockResolvedValue('recoverySecret');
 
   localStorage = new MockLocalStorage();
 

@@ -3,29 +3,25 @@ import { Card, CardContent } from '../../components/common';
 import { CpslButton, CpslIcon, CpslInput, CpslText } from '@usecapsule/react-components';
 import { useEffect, useState } from 'react';
 import { CpslInputCustomEvent, InputInputEventDetail } from '@usecapsule/core-components';
-import { useParams, useSearchParams } from 'react-router-dom';
 import { passwordCreation } from '../../utils/passwordCreation';
-import { CountryCallingCode } from 'libphonenumber-js';
 import { REDIRECT_TIMEOUT } from '../../constants';
 import { ModalSuccess } from '../../components/ModalSuccess';
 import { useModalOutletContext } from '../../hooks/useModalOutletContext';
 import { useCapsule } from '../../components';
+import { useExtractedParams } from '../../hooks/useExtractedParams';
+import { AuthParams } from '@usecapsule/user-management-client';
 
 export const PasswordCreation = () => {
   const capsule = useCapsule();
+  const { partnerId, userId, passwordId, email, phone, countryCode, farcasterUsername, telegramUserId } = useExtractedParams<
+    AuthParams & { userId: string; partnerId: string; passwordId: string }
+  >();
+
   const [password, setPassword] = useState<string>();
   const [passwordVerification, setPasswordVerification] = useState<string>();
-  const { passwordId: paramsPasswordId, userId: paramsUserId } = useParams();
-  const [searchParams, _] = useSearchParams();
-  const paramsEmail = decodeURIComponent(searchParams.get('email'));
-  const paramsPhone = decodeURIComponent(searchParams.get('phone'));
-  const paramsCountryCode = decodeURIComponent(searchParams.get('countryCode')) as CountryCallingCode;
-  const paramsFarcasterUsername = decodeURIComponent(searchParams.get('farcasterUsername'));
   const [passwordVisible, setPasswordVisible] = useState<boolean>();
 
   const [passwordCreated, setPasswordCreated] = useState<boolean>();
-
-  const paramsPartnerId = searchParams.get('partnerId');
 
   const handlePasswordInput = (ev: CpslInputCustomEvent<InputInputEventDetail>) => {
     setPassword(ev.detail.value);
@@ -62,17 +58,19 @@ export const PasswordCreation = () => {
   }
 
   const handlePasswordClick = async () => {
-    await passwordCreation(
-      capsule,
-      paramsPartnerId,
-      paramsUserId,
-      paramsEmail,
-      paramsPhone,
-      paramsCountryCode,
-      paramsFarcasterUsername,
+    await passwordCreation(capsule, {
+      partnerId,
+      userId,
+      auth: {
+        email,
+        phone,
+        countryCode,
+        farcasterUsername,
+        telegramUserId,
+      },
       password,
-      paramsPasswordId,
-    );
+      passwordId,
+    });
 
     setPasswordCreated(true);
 

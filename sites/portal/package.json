@@ -23,8 +23,8 @@
     "usehooks-ts": "^3.1.0"
   },
   "scripts": {
-    "dev": "VITE_CAPSULE_CONNECT_PARTNER_ID=2c58a7f9-c505-4482-86d1-5a69ef68bb26 DISABLE_ESLINT_PLUGIN=true VITE_ENVIRONMENT=dev vite --port 3003",
-    "start": "VITE_CAPSULE_CONNECT_PARTNER_ID=2c58a7f9-c505-4482-86d1-5a69ef68bb26 DISABLE_ESLINT_PLUGIN=true VITE_ENVIRONMENT=dev vite --port 3003",
+    "dev": "VITE_CAPSULE_CONNECT_PARTNER_ID=2c58a7f9-c505-4482-86d1-5a69ef68bb26 DISABLE_ESLINT_PLUGIN=true VITE_ENVIRONMENT=dev vite --port 3003 --host",
+    "start": "VITE_CAPSULE_CONNECT_PARTNER_ID=2c58a7f9-c505-4482-86d1-5a69ef68bb26 DISABLE_ESLINT_PLUGIN=true VITE_ENVIRONMENT=dev vite --port 3003 --host",
     "build": "rm -rf dist && tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",

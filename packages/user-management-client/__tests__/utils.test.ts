@@ -5,6 +5,14 @@ const email = 'test@email.com';
 const phone = '5555555555';
 const countryCode = '+1';
 const farcasterUsername = 'farcasterUsername';
+const telegramUserId = 'telegramUserId';
+const userId = 'userId';
+
+const emailAuth = { email, foo: 'bar', phone: 'undefined' };
+const phoneAuth = { phone, countryCode, foo: 'bar', email: 'undefined' };
+const farcasterAuth = { farcasterUsername, foo: 'bar', email: 'null' };
+const telegramAuth = { telegramUserId, foo: 'bar', email: 'null' };
+const userIdAuth = { userId: 'userId', foo: 'bar', email: 'null' };
 
 describe('utils', () => {
   it('isWalletId', () => {
@@ -28,40 +36,71 @@ describe('utils', () => {
 
   describe('extractAuth', () => {
     it('extracts email auth', () => {
-      expect(extractAuthInfo({ email, foo: 'bar' })).toMatchObject({
+      expect(extractAuthInfo(emailAuth)).toEqual({
         auth: { email },
         authType: 'email',
         identifier: email,
+        publicKeyIdentifier: email,
       });
 
-      expect(extractAuth({ email, foo: 'bar' })).toEqual({ email });
+      expect(extractAuth(emailAuth)).toEqual({ email });
     });
 
     it('extracts phone auth', () => {
-      expect(extractAuthInfo({ phone, countryCode, foo: 'bar' })).toEqual({
+      expect(extractAuthInfo(phoneAuth)).toEqual({
         auth: { phone, countryCode },
         authType: 'phone',
         identifier: `${countryCode}${phone}`,
+        publicKeyIdentifier: `${countryCode}${phone}`,
       });
 
-      expect(extractAuth({ phone, countryCode, foo: 'bar' })).toEqual({
+      expect(extractAuth(phoneAuth)).toEqual({
         phone,
         countryCode,
       });
 
-      expect(() => extractAuthInfo({ phone, foo: 'bar' })).toThrow('invalid auth object');
+      expect(() => extractAuthInfo({ phone, foo: 'bar', email: 'null' })).toThrow('invalid auth object');
     });
 
     it('extracts farcaster auth', () => {
-      expect(extractAuthInfo({ farcasterUsername, foo: 'bar' })).toMatchObject({
+      expect(extractAuthInfo(farcasterAuth)).toEqual({
         auth: { farcasterUsername },
         authType: 'farcasterUsername',
         identifier: farcasterUsername,
+        publicKeyIdentifier: `${farcasterUsername}-farcaster`,
       });
 
-      expect(extractAuth({ farcasterUsername, foo: 'bar' })).toMatchObject({
+      expect(extractAuth(farcasterAuth)).toEqual({
         farcasterUsername,
       });
+    });
+
+    it('extracts telegram auth', () => {
+      expect(extractAuthInfo(telegramAuth)).toEqual({
+        auth: { telegramUserId },
+        authType: 'telegramUserId',
+        identifier: telegramUserId,
+        publicKeyIdentifier: `${telegramUserId}-telegram`,
+      });
+
+      expect(extractAuth(telegramAuth)).toEqual({
+        telegramUserId,
+      });
+    });
+
+    it('extracts userId auth', () => {
+      expect(() => extractAuthInfo(userIdAuth)).toThrowError();
+
+      expect(() => extractAuth(userIdAuth)).toThrowError();
+
+      expect(extractAuthInfo(userIdAuth, { allowUserId: true })).toEqual({
+        auth: { userId },
+        authType: 'userId',
+        identifier: userId,
+        publicKeyIdentifier: userId,
+      });
+
+      expect(extractAuth(userIdAuth, { allowUserId: true })).toEqual({ userId });
     });
 
     it('rejects multiple fields', () => {

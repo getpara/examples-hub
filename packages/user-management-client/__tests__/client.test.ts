@@ -132,6 +132,22 @@ describe('Client', () => {
       });
     });
 
+    it('verifyTelegram', async () => {
+      const data = {
+        username: 'username',
+        auth_date: Date.now(),
+        first_name: 'first_name',
+        hash: 'hash',
+        id: 1,
+        last_name: 'last_name',
+        photo_url: 'photo_url',
+      };
+
+      await client.verifyTelegram(data);
+
+      expect(mocks.post).toBeCalledWith('/users/telegram', { authObject: data });
+    });
+
     it('externalWalletLogin', async () => {
       const body = {
         externalAddress: 'external-address',

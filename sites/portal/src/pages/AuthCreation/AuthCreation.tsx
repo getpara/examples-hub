@@ -36,7 +36,11 @@ export const AuthCreation = () => {
   }, [params]);
 
   useEffect(() => {
-    if (params.biometricId && (params.email || params.phone || params.farcasterUsername) && params.userId) {
+    if (
+      params.biometricId &&
+      (params.email || params.phone || params.farcasterUsername || params.telegramUserId) &&
+      params.userId
+    ) {
       // In development this will trigger a 'request is already pending.' error due to duplicate renders caused by React.StrictMode.
       // See ref: https://legacy.reactjs.org/docs/strict-mode.html#detecting-unexpected-side-effects
       setUpBiometrics();

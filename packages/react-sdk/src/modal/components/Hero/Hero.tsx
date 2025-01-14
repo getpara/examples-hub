@@ -9,7 +9,7 @@ import { isMobile } from '@usecapsule/web-sdk';
 import { useActiveWallet } from '../../hooks/useActiveWallet.js';
 
 type StepHeroConfig = {
-  variant: 'externalWalletConnection' | 'approved' | 'failed' | 'customContent';
+  variant: 'externalWalletConnection' | 'approved' | 'failed' | 'customContent' | 'pending';
   topOffset: number;
   spacerHeight: number;
   hideFadeOut?: boolean;

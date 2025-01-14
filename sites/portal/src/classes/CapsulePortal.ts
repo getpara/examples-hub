@@ -18,6 +18,7 @@ export class CapsulePortal extends CapsuleWeb {
         ...(this.getEmail() ? { EMAIL: [this.getEmail()] } : {}),
         ...(this.getPhoneNumber() ? { PHONE: [this.getPhoneNumber()] } : {}),
         ...(this.getFarcasterUsername() ? { FARCASTER: [this.getFarcasterUsername()] } : {}),
+        ...(this.telegramUserId ? { TELEGRAM: [this.telegramUserId] } : {}),
       },
     );
   }

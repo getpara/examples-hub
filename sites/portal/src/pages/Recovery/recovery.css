@@ -2,8 +2,10 @@
   /* Add a fallback font */
   text-align: left;
   color: white;
-  margin-top: 150px;
-  margin-left: 150px;
+  width: 100vw;
+  height: 100vh;
+  background: black;
+  padding: 150px 0 0 150px;
 }
 
 .App h1 {
