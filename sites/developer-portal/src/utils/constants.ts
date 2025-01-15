@@ -40,10 +40,11 @@ export const FLUTTER_SETUP_DOCS_LINK =
 export const NEXT_EXTRA_DOCS_LINK = 'https://docs.usecapsule.com/troubleshooting/nextjs';
 export const VITE_EXTRA_DOCS_LINK = 'https://docs.usecapsule.com/troubleshooting/react-vite';
 
-export const MOBILE_SIZE = 1000;
+export const MOBILE_SIZE = 767;
 
 export const IS_PROD = ENV_VARS.environment === Environment.PROD;
 export const IS_BETA = ENV_VARS.environment === Environment.BETA;
+export const IS_DEV = ENV_VARS.environment === Environment.DEV;
 
 export const EMAIL_FONTS = [
   'Arial',
@@ -146,3 +147,7 @@ export const LANDING_HEADER_LINKS = [
 
 export const PRIVACY_POLICY = 'https://www.usecapsule.com/privacy-policy';
 export const TOS = 'https://www.usecapsule.com/terms-of-service';
+
+export const ZAPIER_WEBHOOK_URL = IS_PROD
+  ? 'https://hooks.zapier.com/hooks/catch/20717871/2ib0ip3/'
+  : 'https://hooks.zapier.com/hooks/catch/20717871/2ibwxti/';

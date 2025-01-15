@@ -1,18 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
 import { OrganizationMember } from '../../../types/api';
-import { useAppStore } from '../../../stores/app/useAppStore';
 import { getOrganizationMembers } from '../../../api/organizationMembers/queries';
+import { useParams } from 'react-router-dom';
 
 export const ORGANIZATION_MEMBERS_QUERY_KEY = 'organizationMembers';
 
 export const useOrganizationMembersQuery = <T>(select: (data: OrganizationMember[]) => T) => {
-  const selectedOrganizationId = useAppStore(state => state.getSelectedOrganization());
+  const { organizationId } = useParams();
 
   return useQuery({
-    enabled: !!selectedOrganizationId,
-    queryKey: [ORGANIZATION_MEMBERS_QUERY_KEY, selectedOrganizationId],
+    enabled: !!organizationId,
+    queryKey: [ORGANIZATION_MEMBERS_QUERY_KEY, organizationId],
     queryFn: async () => {
-      const { data } = await getOrganizationMembers(selectedOrganizationId ?? '');
+      const { data } = await getOrganizationMembers(organizationId ?? '');
 
       return data.members;
     },

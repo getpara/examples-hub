@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { OrganizationTotalUsersTSResponse } from '../../../types/api';
-import { useAppStore } from '../../../stores/app/useAppStore';
 import { getOrganizationTotalUsersTS } from '../../../api/organizations/queries';
 import { sub } from 'date-fns';
 import { TODAY } from '../../../utils/constants';
 import { formatTSData } from '../../../utils/analyticsDataFormatters';
+import { useParams } from 'react-router-dom';
 
 export const ORGANIZATIONS_TOTAL_USERS_TS_QUERY_KEY = 'organizationTotalUsersTS';
 
@@ -16,13 +16,13 @@ export const useOrganizationTotalUsersTSQuery = <T>(
   endDate: Date = DEFAULT_END_DATE,
   select: (data: OrganizationTotalUsersTSResponse) => T,
 ) => {
-  const selectedOrganizationId = useAppStore(state => state.getSelectedOrganization());
+  const { organizationId } = useParams();
 
   return useQuery({
-    enabled: !!selectedOrganizationId,
-    queryKey: [ORGANIZATIONS_TOTAL_USERS_TS_QUERY_KEY, selectedOrganizationId, startDate, endDate],
+    enabled: !!organizationId,
+    queryKey: [ORGANIZATIONS_TOTAL_USERS_TS_QUERY_KEY, organizationId, startDate, endDate],
     queryFn: async () => {
-      const { data } = await getOrganizationTotalUsersTS(selectedOrganizationId ?? '', startDate, endDate);
+      const { data } = await getOrganizationTotalUsersTS(organizationId ?? '', startDate, endDate);
 
       return { data: formatTSData(data.data) };
     },

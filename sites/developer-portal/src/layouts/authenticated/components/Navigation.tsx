@@ -1,5 +1,5 @@
 import { CpslIcon, CpslNavButton, CpslNavButtonGroup, CpslText } from '@usecapsule/react-components';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { NavRoute } from '../../../types/navigation';
 import { BRAND_COLORS, MODAL_DESIGNER_LINK } from '../../../utils/constants';
@@ -10,10 +10,9 @@ import { useIsOwner } from '../../../hooks/api/queries/useOrganizationMember';
 
 const NAV_ROUTES: NavRoute[] = [
   {
-    path: '/',
+    path: '/dashboard',
     label: 'Home',
     icon: 'home',
-    exactMainRouteMatch: true,
   },
   {
     path: '/project',
@@ -47,6 +46,7 @@ interface NavigationProps {
 }
 
 export const Navigation = ({ closeNav }: NavigationProps) => {
+  const { organizationId } = useParams();
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { earlyAccessItems } = useEarlyAccess();
@@ -72,7 +72,7 @@ export const Navigation = ({ closeNav }: NavigationProps) => {
 
   const handleButtonClick = (event: CpslNavButtonCustomEvent<string>) => {
     const path = event.detail;
-    let pathStr = path;
+    let pathStr = `/${organizationId}${path}`;
 
     if (path === '/modal-designer') {
       window.open(MODAL_DESIGNER_LINK, '_blank');
@@ -83,7 +83,7 @@ export const Navigation = ({ closeNav }: NavigationProps) => {
       if (projects?.length) {
         pathStr = `${pathStr}/${projects?.[0]?.id}`;
       } else {
-        pathStr = '/';
+        pathStr = `/${organizationId}/dashboard`;
       }
     }
 
@@ -92,7 +92,7 @@ export const Navigation = ({ closeNav }: NavigationProps) => {
   };
 
   const handleSubRouteClick = (event: CpslNavButtonCustomEvent<string>) => {
-    navigate(event.detail);
+    navigate(`/${organizationId}${event.detail}`);
     closeNav();
   };
 

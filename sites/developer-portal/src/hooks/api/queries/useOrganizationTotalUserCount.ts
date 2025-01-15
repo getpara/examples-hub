@@ -1,18 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
 import { OrganizationTotalUserCountResponse } from '../../../types/api';
-import { useAppStore } from '../../../stores/app/useAppStore';
 import { getOrganizationTotalUserCount } from '../../../api/organizations/queries';
+import { useParams } from 'react-router-dom';
 
 export const ORGANIZATIONS_TOTAL_USER_COUNT_QUERY_KEY = 'organizationTotalUserCount';
 
 export const useOrganizationTotalUserCountQuery = <T>(select: (data: OrganizationTotalUserCountResponse) => T) => {
-  const selectedOrganizationId = useAppStore(state => state.getSelectedOrganization());
+  const { organizationId } = useParams();
 
   return useQuery({
-    enabled: !!selectedOrganizationId,
-    queryKey: [ORGANIZATIONS_TOTAL_USER_COUNT_QUERY_KEY, selectedOrganizationId],
+    enabled: !!organizationId,
+    queryKey: [ORGANIZATIONS_TOTAL_USER_COUNT_QUERY_KEY, organizationId],
     queryFn: async () => {
-      const { data } = await getOrganizationTotalUserCount(selectedOrganizationId ?? '');
+      const { data } = await getOrganizationTotalUserCount(organizationId ?? '');
 
       return data;
     },

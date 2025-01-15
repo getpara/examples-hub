@@ -1,22 +1,22 @@
 import { useQuery } from '@tanstack/react-query';
 import { Project } from '../../../types/api';
 import { getProjects } from '../../../api/projects/queries';
-import { useAppStore } from '../../../stores/app/useAppStore';
+import { useParams } from 'react-router-dom';
 
 export const PROJECTS_QUERY_KEY = 'projects';
 
 export const useProjectsQuery = <T>(select: (data: Project[]) => T) => {
-  const selectedOrganizationId = useAppStore(state => state.getSelectedOrganization());
+  const { organizationId } = useParams();
 
   return useQuery({
-    enabled: !!selectedOrganizationId,
-    queryKey: [PROJECTS_QUERY_KEY, selectedOrganizationId],
+    enabled: !!organizationId,
+    queryKey: [PROJECTS_QUERY_KEY, organizationId],
     queryFn: async () => {
-      if (!selectedOrganizationId) {
+      if (!organizationId) {
         return [];
       }
 
-      const { data } = await getProjects(selectedOrganizationId);
+      const { data } = await getProjects(organizationId);
 
       return data.projects;
     },

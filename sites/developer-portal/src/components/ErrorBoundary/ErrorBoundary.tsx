@@ -58,7 +58,7 @@ export const ErrorBoundary = ({
     } catch (e) {
       localStorage.clear();
       sessionStorage.clear();
-      navigate('/login', { replace: true });
+      navigate('/', { replace: true });
     }
   };
 

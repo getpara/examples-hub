@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { OrganizationUserMetricsResponse } from '../../../types/api';
-import { useAppStore } from '../../../stores/app/useAppStore';
 import { getOrganizationUserMetrics } from '../../../api/organizations/queries';
+import { useParams } from 'react-router-dom';
 
 export const ORGANIZATION_USER_METRICS_QUERY_KEY = 'organizationUserMetrics';
 
@@ -10,13 +10,13 @@ export const useOrganizationUserMetricsQuery = <T>(
   startDate?: Date,
   endDate?: Date,
 ) => {
-  const selectedOrganizationId = useAppStore(state => state.getSelectedOrganization());
+  const { organizationId } = useParams();
 
   return useQuery({
-    enabled: !!selectedOrganizationId && !!startDate && !!endDate,
-    queryKey: [ORGANIZATION_USER_METRICS_QUERY_KEY, selectedOrganizationId, startDate, endDate],
+    enabled: !!organizationId,
+    queryKey: [ORGANIZATION_USER_METRICS_QUERY_KEY, organizationId, startDate, endDate],
     queryFn: async () => {
-      const { data } = await getOrganizationUserMetrics(selectedOrganizationId ?? '', startDate, endDate);
+      const { data } = await getOrganizationUserMetrics(organizationId ?? '', startDate, endDate);
 
       return data;
     },

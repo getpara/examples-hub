@@ -45,7 +45,7 @@ export class CpslSelect {
   /**
    * Format value for display when selected.
    */
-  @Prop() formatValue?: (value: string) => string;
+  @Prop() formatValue?: (value: string | string[]) => string;
 
   /**
    * Helper text to show below the input. If `"errorText"` is provided that will take precedence.
@@ -70,6 +70,11 @@ export class CpslSelect {
   @Prop() label?: string;
 
   /**
+   * If `true`, the user can select more than one value.
+   */
+  @Prop() multiple?: boolean;
+
+  /**
    * Whether or not to show the rotation animation for the end icon.
    */
   @Prop() noIconAnimation?: boolean;
@@ -87,7 +92,7 @@ export class CpslSelect {
   /**
    * Value of the selected item.
    */
-  @Prop() selectedValue?: string;
+  @Prop() selectedValue?: string | string[];
 
   /**
    * Will show the formatted selected item (passed in the `selected-item` slot) in the select rather than the item value.
@@ -153,7 +158,9 @@ export class CpslSelect {
 
   @Watch('selectedValue')
   onValueChange() {
-    this.popoverEl.closePopover();
+    if (!this.multiple) {
+      this.popoverEl.closePopover();
+    }
   }
 
   @Watch('selectedValue')
@@ -208,14 +215,22 @@ export class CpslSelect {
     const items = Array.from(this.el.querySelectorAll('cpsl-select-item')) as HTMLCpslSelectItemElement[];
 
     items.forEach(item => {
-      if (item.value === this.selectedValue) {
-        item.setAttribute('selected', 'true');
+      if (typeof this.selectedValue === 'string') {
+        if (item.value === this.selectedValue) {
+          item.setAttribute('selected', 'true');
+        } else {
+          item.setAttribute('selected', 'false');
+        }
       } else {
-        item.setAttribute('selected', 'false');
+        if (this.selectedValue?.includes(item.value)) {
+          item.setAttribute('selected', 'true');
+        } else {
+          item.setAttribute('selected', 'false');
+        }
       }
     });
 
-    this.hasSelectedItem = !!this.selectedValue;
+    this.hasSelectedItem = typeof this.selectedValue === 'string' ? !!this.selectedValue : !!this.selectedValue?.length;
   };
 
   private handleClickOutside = (event: MouseEvent) => {
@@ -233,8 +248,10 @@ export class CpslSelect {
   };
 
   render() {
+    const selectedValueAsString = typeof this.selectedValue === 'string' ? this.selectedValue : this.selectedValue.join(', ');
+
     return (
-      <Host id={this.id} class={{ 'disabled': this.disabled, 'focused': this.hasFocus, 'has-value': Boolean(this.selectedValue) }}>
+      <Host id={this.id} class={{ 'disabled': this.disabled, 'focused': this.hasFocus, 'has-value': this.hasSelectedItem }}>
         {this.label && (
           <label class="label" htmlFor={this.inputId}>
             {this.label}
@@ -253,11 +270,11 @@ export class CpslSelect {
                 variant={this.selectedItemVariant}
                 weight={this.selectedItemWeight}
               >
-                {!this.selectedValue ? (this.placeholder ?? 'Select') : (this.formatValue?.(this.selectedValue) ?? this.selectedValue)}
+                {!this.selectedValue ? (this.placeholder ?? 'Select') : (this.formatValue?.(this.selectedValue) ?? selectedValueAsString)}
               </cpsl-text>
             )}
           </div>
-          <cpsl-icon part="icon" class={{ 'chevron': true, 'open': !this.noIconAnimation && this.popoverOpen, 'has-value': Boolean(this.selectedValue) }} icon={this.icon} />
+          <cpsl-icon part="icon" class={{ 'chevron': true, 'open': !this.noIconAnimation && this.popoverOpen, 'has-value': this.hasSelectedItem }} icon={this.icon} />
           <input
             id={this.inputId}
             disabled={this.disabled}

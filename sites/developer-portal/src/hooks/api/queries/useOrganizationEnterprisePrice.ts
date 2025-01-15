@@ -1,21 +1,21 @@
 import { useQuery } from '@tanstack/react-query';
-import { useAppStore } from '../../../stores/app/useAppStore';
 import { getOrganizationEnterprisePrice } from '../../../api/organizations/queries';
+import { useParams } from 'react-router-dom';
 
 export const ORGANIZATIONS_ENTERPRISE_PRICE_QUERY_KEY = 'organizationEnterprisePrice';
 
 export const useOrganizationEnterprisePriceQuery = <T>(select: (data: number | undefined) => T) => {
-  const selectedOrganizationId = useAppStore(state => state.getSelectedOrganization());
+  const { organizationId } = useParams();
 
   return useQuery({
-    enabled: !!selectedOrganizationId,
-    queryKey: [ORGANIZATIONS_ENTERPRISE_PRICE_QUERY_KEY, selectedOrganizationId],
+    enabled: !!organizationId,
+    queryKey: [ORGANIZATIONS_ENTERPRISE_PRICE_QUERY_KEY, organizationId],
     queryFn: async () => {
-      if (!selectedOrganizationId) {
+      if (!organizationId) {
         return undefined;
       }
 
-      const { data } = await getOrganizationEnterprisePrice(selectedOrganizationId);
+      const { data } = await getOrganizationEnterprisePrice(organizationId);
 
       return data.price / 100;
     },

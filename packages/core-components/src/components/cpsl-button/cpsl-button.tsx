@@ -35,12 +35,17 @@ export class CpslButton {
    * Options are: `"small"`, `"medium".
    * Default is: `"medium"`.
    */
-  @Prop() size?: 'small' | 'medium' = 'medium';
+  @Prop() size?: 'xSmall' | 'small' | 'medium' = 'medium';
 
   /**
    * target to use when using a link.
    */
   @Prop() target?: string;
+
+  /**
+   * The type of the button.
+   */
+  @Prop() type?: 'button' | 'submit' | 'reset' = 'button';
 
   /**
    * The variant of the button.
@@ -63,11 +68,12 @@ export class CpslButton {
           'disabled': this.disabled,
           'full-width': this.fullWidth,
           // SIZES
+          'xSmall': this.size === 'xSmall',
           'small': this.size === 'small',
           'medium': this.size === 'medium',
         }}
       >
-        <this.as href={this.href} target={this.target} part="button-native" class="button-native">
+        <this.as href={this.href} target={this.target} part="button-native" class="button-native" type={this.type}>
           <slot name="start"></slot>
           <slot></slot>
           <slot name="end"></slot>

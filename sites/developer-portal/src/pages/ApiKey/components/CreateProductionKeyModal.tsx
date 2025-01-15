@@ -22,7 +22,7 @@ interface CopyToModalProps {
 }
 
 export const CreateProductionKeyModal = ({ open, onClose }: CopyToModalProps) => {
-  const { projectId } = useParams();
+  const { projectId, organizationId } = useParams();
   const { data: availableKeyEnvs } = useGetAvailableKeyEnvs(projectId ?? '');
   const { mutate: createApiKey, isPending } = useCreateApiKey();
   const { data: plan } = useGetOrganizationSubscriptionPlan();
@@ -74,7 +74,7 @@ export const CreateProductionKeyModal = ({ open, onClose }: CopyToModalProps) =>
   };
 
   const handleUpgradeClick = () => {
-    navigate('/billing');
+    navigate(`/${organizationId}/billing`);
   };
 
   const handleExited = () => {

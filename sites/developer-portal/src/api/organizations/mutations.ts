@@ -6,10 +6,14 @@ import {
   UpdateOrganizationBody,
 } from '../../types/api';
 
-export const updateOrganization = async (organizationId: string, body: UpdateOrganizationBody) => {
+export type UpdateOrganizationVars = {
+  organizationId: string;
+  data: Partial<UpdateOrganizationBody>;
+};
+export const updateOrganization = async ({ organizationId, data }: UpdateOrganizationVars) => {
   const endpoint = `/organizations/${organizationId}/`;
 
-  return axiosClient.patch<boolean>(endpoint, body);
+  return (await axiosClient.patch<boolean>(endpoint, data)).data;
 };
 
 export type ChangePlanVars = { organizationId: string; newPlanSlug: string };

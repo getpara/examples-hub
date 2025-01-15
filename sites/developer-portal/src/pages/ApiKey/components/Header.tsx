@@ -16,7 +16,7 @@ import { useGetSelectedOrganizationIsValid } from '../../../hooks/api/queries/us
 
 export const Header = () => {
   const navigate = useNavigate();
-  const { projectId } = useParams();
+  const { projectId, organizationId } = useParams();
   const form = useKeyDataForm();
   const { data: availableKeyEnvs } = useGetAvailableKeyEnvs(projectId ?? '');
   const { data: orgValid } = useGetSelectedOrganizationIsValid();
@@ -25,7 +25,7 @@ export const Header = () => {
   const [isCreateProdKeyModalOpen, setIsCreateProdKeyModalOpen] = useState(false);
 
   const handleBackClick = () => {
-    navigate(`/project/${projectId}`);
+    navigate(`/${organizationId}/project/${projectId}`);
   };
 
   const handleEditClick = () => {

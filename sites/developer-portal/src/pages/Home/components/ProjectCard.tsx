@@ -3,7 +3,7 @@ import { Project } from '../../../types/api';
 import styled from 'styled-components';
 import { useProjectTotalUsersCount } from '../../../hooks/api/queries/useProjectTotalUsersCount';
 import { truncateNumber } from '../../../utils/formatNumber';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 interface ProjectCardProps {
   project: Project;
@@ -11,11 +11,12 @@ interface ProjectCardProps {
 
 export const ProjectCard = ({ project }: ProjectCardProps) => {
   const navigate = useNavigate();
+  const { organizationId } = useParams();
 
   const { data: totalUsers } = useProjectTotalUsersCount(project.id);
 
   const handleClick = () => {
-    navigate(`/project/${project.id}`);
+    navigate(`/${organizationId}/project/${project.id}`);
   };
 
   return (

@@ -2,7 +2,7 @@ import { CpslButton, CpslCard, CpslText } from '@usecapsule/react-components';
 import { useGetOrganizationSubscription } from '../../../hooks/api/queries/useOrganizationSubscription';
 import styled from 'styled-components';
 import { usePlanMetadata } from '../../../hooks/configs/usePlanMetadata';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useOrganizationUserMetrics } from '../../../hooks/api/queries/useOrganizationUserMetrics';
 import { truncateNumber } from '../../../utils/formatNumber';
 import { GradientProgressBar } from '../../../components/GradientProgressBar/GradientProgressBar';
@@ -10,6 +10,7 @@ import { ENTERPRISE_PLAN_SLUG, FREE_PLAN_SLUG } from '../../../utils/constants';
 import { useOrganizationTotalUserCount } from '../../../hooks/api/queries/useOrganizationTotalUserCount';
 
 export const PlanUsage = () => {
+  const { organizationId } = useParams();
   const navigate = useNavigate();
   const { planMetaBySlug } = usePlanMetadata();
   const { data: subscription } = useGetOrganizationSubscription();
@@ -28,7 +29,7 @@ export const PlanUsage = () => {
   const usageString = `${currentMonthlyUsers.toLocaleString()}/${truncateNumber(maxUsers)}`;
 
   const handleUpgradeClick = () => {
-    navigate('/billing');
+    navigate(`/${organizationId}/billing`);
   };
 
   return (

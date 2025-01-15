@@ -20,8 +20,7 @@ export const getActions = (set: StoreApi<AppStore>['setState'], get: StoreApi<Ap
       },
     });
   },
-  getSelectedOrganization: () => {
-    const userId = capsule.getUserId();
+  getSelectedOrganization: (userId?: string) => {
     return get().userSelectedOrganizationId[userId ?? ''];
   },
 });

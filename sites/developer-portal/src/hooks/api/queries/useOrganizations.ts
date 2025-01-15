@@ -3,7 +3,7 @@ import { Organization } from '../../../types/api';
 import { getOrganizations } from '../../../api/users/queries';
 import { capsule } from '../../../clients/capsule';
 import { useCallback } from 'react';
-import { useAppStore } from '../../../stores/app/useAppStore';
+import { useParams } from 'react-router-dom';
 
 export const ORGANIZATIONS_QUERY_KEY = 'organizations';
 
@@ -40,64 +40,64 @@ export const useGetAllOrganizationsWithAccess = (retry?: boolean) => {
 };
 
 export const useGetSelectedOrganization = () => {
-  const selectedOrganizationId = useAppStore(state => state.getSelectedOrganization());
+  const { organizationId } = useParams();
 
   return useOrganizationsQuery(
     useCallback(
       data => {
-        return data.find(o => o.id === selectedOrganizationId);
+        return data.find(o => o.id === organizationId);
       },
-      [selectedOrganizationId],
+      [organizationId],
     ),
   );
 };
 
 export const useGetSelectedOrganizationIsValid = () => {
-  const selectedOrganizationId = useAppStore(state => state.getSelectedOrganization());
+  const { organizationId } = useParams();
 
   return useOrganizationsQuery(
     useCallback(
       data => {
-        const org = data.find(o => o.id === selectedOrganizationId);
+        const org = data.find(o => o.id === organizationId);
         return !org?.suspended && !org?.archived;
       },
-      [selectedOrganizationId],
+      [organizationId],
     ),
   );
 };
 
 export const useGetOrganizationEarlyAccess = () => {
-  const selectedOrganizationId = useAppStore(state => state.getSelectedOrganization());
+  const { organizationId } = useParams();
 
   return useOrganizationsQuery(
     useCallback(
       data => {
-        const org = data.find(o => o.id === selectedOrganizationId);
+        const org = data.find(o => o.id === organizationId);
 
         return {
           granted: org?.grantedEarlyAccessSlugs ?? [],
           requested: org?.requestedEarlyAccessSlugs ?? [],
         };
       },
-      [selectedOrganizationId],
+      [organizationId],
     ),
   );
 };
 
 export const useGetOrganizationAccess = () => {
-  const selectedOrganizationId = useAppStore(state => state.getSelectedOrganization());
+  const { organizationId } = useParams();
 
   return useOrganizationsQuery(
     useCallback(
       data => {
-        const org = data.find(o => o.id === selectedOrganizationId);
+        const org = data.find(o => o.id === organizationId);
 
         return {
           hasAccess: !!org?.hasDevPortalAccess,
           requestedAccess: !!org?.requestedDevPortalAccess,
         };
       },
-      [selectedOrganizationId],
+      [organizationId],
     ),
   );
 };

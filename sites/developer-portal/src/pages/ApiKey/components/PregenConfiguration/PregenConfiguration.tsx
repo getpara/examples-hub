@@ -6,18 +6,19 @@ import { InnerConfigurationCard } from '../InnerConfigurationCard';
 import { useGetOrganizationSubscriptionPlan } from '../../../../hooks/api/queries/useOrganizationSubscription';
 import { HighlightedCard } from '../../../../components/HighlightedCard/HighlightedCard';
 import { GradientCTAButton } from '../../../../components/GradientCTAButton/GradientCTAButton';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const TITLE = 'Pregenerated Wallets';
 const SUBTITLE =
   'Just looking to add MPC wallets to your existing app’s auth and user models? You can reserve wallets for users and progressively onboard them to Web3 with Pregenerated Wallets.';
 
 export const PregenConfiguration = () => {
+  const { organizationId } = useParams();
   const navigate = useNavigate();
   const { data: plan } = useGetOrganizationSubscriptionPlan();
 
   const handleUpgradeClick = () => {
-    navigate('/billing');
+    navigate(`/${organizationId}/billing`);
   };
 
   if (!plan?.canPregen) {

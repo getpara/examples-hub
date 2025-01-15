@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { ApiKeyMonthlyActiveUsersTSResponse } from '../../../types/api';
-import { useAppStore } from '../../../stores/app/useAppStore';
 import { sub } from 'date-fns';
 import { TODAY } from '../../../utils/constants';
 import { getApiKeyMonthlyActiveUsersTS } from '../../../api/apiKeys/queries';
 import { formatTSData } from '../../../utils/analyticsDataFormatters';
+import { useParams } from 'react-router-dom';
 
 export const API_KEY_MONTHLY_ACTIVE_USERS_TS_QUERY_KEY = 'apiKeyMonthlyActiveUsersTS';
 
@@ -19,20 +19,13 @@ export const useApiKeyMonthlyActiveUsersTSQuery = <T>(
   endDate: Date = DEFAULT_END_DATE,
   select: (data: ApiKeyMonthlyActiveUsersTSResponse) => T,
 ) => {
-  const selectedOrganizationId = useAppStore(state => state.getSelectedOrganization());
+  const { organizationId } = useParams();
 
   return useQuery({
-    enabled: !!selectedOrganizationId && !!projectId && !!keyId,
-    queryKey: [API_KEY_MONTHLY_ACTIVE_USERS_TS_QUERY_KEY, selectedOrganizationId, projectId, keyId, env, startDate, endDate],
+    enabled: !!organizationId && !!projectId && !!keyId,
+    queryKey: [API_KEY_MONTHLY_ACTIVE_USERS_TS_QUERY_KEY, organizationId, projectId, keyId, env, startDate, endDate],
     queryFn: async () => {
-      const { data } = await getApiKeyMonthlyActiveUsersTS(
-        selectedOrganizationId ?? '',
-        projectId,
-        keyId,
-        env,
-        startDate,
-        endDate,
-      );
+      const { data } = await getApiKeyMonthlyActiveUsersTS(organizationId ?? '', projectId, keyId, env, startDate, endDate);
 
       return { data: formatTSData(data.data) };
     },

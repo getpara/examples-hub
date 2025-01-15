@@ -9,7 +9,7 @@ interface AppState {
 export interface AppActions {
   resetState: () => void;
   setSelectedOrganization: (orgId?: string) => void;
-  getSelectedOrganization: () => string | undefined;
+  getSelectedOrganization: (_?: string) => string | undefined;
 }
 
 export type AppStore = AppState & AppActions;
@@ -25,7 +25,7 @@ export const useAppStore = create<AppStore>()(
       ...getActions(set, get),
     }),
     {
-      name: '@CAPSULE/appState',
+      name: '@CAPSULE-DEVELOPER-PORTAL/appState',
       partialize: state => ({
         userSelectedOrganizationId: state.userSelectedOrganizationId,
       }),

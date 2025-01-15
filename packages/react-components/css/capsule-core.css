@@ -150,8 +150,8 @@ body.backdrop-no-scroll {
   --cpsl-color-primary-button-outline: var(--cpsl-color-foreground-32);
   --cpsl-color-secondary-button-text: var(--cpsl-color-text-primary);
   --cpsl-color-secondary-button-surface-default: transparent;
-  --cpsl-color-secondary-button-surface-hover: var(--cpsl-color-background-16);
-  --cpsl-color-secondary-button-surface-pressed: var(--cpsl-color-background-16);
+  --cpsl-color-secondary-button-surface-hover: var(--cpsl-color-foreground-96);
+  --cpsl-color-secondary-button-surface-pressed: var(--cpsl-color-foreground-96);
   --cpsl-color-secondary-button-surface-disabled: var(--cpsl-color-foreground-96);
   --cpsl-color-secondary-button-border-default: var(--cpsl-color-background-32);
   --cpsl-color-secondary-button-border-disabled: var(--cpsl-color-foreground-96);

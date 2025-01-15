@@ -122,7 +122,8 @@ input {
 .file-container {
   display: flex;
   flex-direction: column;
-  flex: 1;
+  flex: 0;
+  min-width: 33%;
   gap: 8px;
   justify-content: center;
   align-items: center;

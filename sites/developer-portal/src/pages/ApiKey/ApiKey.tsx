@@ -10,7 +10,7 @@ import { useGetApiKeySetupStatus } from '../../hooks/api/queries/useApiKeySetupS
 
 export const ApiKey = () => {
   const navigate = useNavigate();
-  const { projectId, apiKey, env } = useParams();
+  const { organizationId, projectId, apiKey, env } = useParams();
   const { data: apiKeyData, isLoading: isApiKeyDataLoading } = useGetOrganizationKey(
     projectId ?? '',
     apiKey ?? '',
@@ -19,11 +19,11 @@ export const ApiKey = () => {
   const { isLoading: isStatusLoading } = useGetApiKeySetupStatus(projectId ?? '', apiKey ?? '', env ?? '');
 
   if (!apiKey || !env) {
-    navigate(`/project/${projectId}`);
+    navigate(`/${organizationId}/project/${projectId}`);
   }
 
   if (!isApiKeyDataLoading && !apiKeyData) {
-    navigate(`/project/${projectId}`);
+    navigate(`/${organizationId}/project/${projectId}`);
     triggerToast({
       variant: 'error',
       title: 'Failed to Load Key',

@@ -11,8 +11,9 @@
 | `disabled`  | `disabled`   | If the button is disabled. Default is: false.                                                                                        | `boolean`                                                            | `false`     |
 | `fullWidth` | `full-width` | Whether the button takes the full width of it's container. Default is: false.                                                        | `boolean`                                                            | `false`     |
 | `href`      | `href`       | href to use when using a link.                                                                                                       | `string`                                                             | `undefined` |
-| `size`      | `size`       | The size of the button. Options are: `"small"`, `"medium". Default is: `"medium"`.                                                   | `"medium" \| "small"`                                                | `'medium'`  |
+| `size`      | `size`       | The size of the button. Options are: `"small"`, `"medium". Default is: `"medium"`.                                                   | `"medium" \| "small" \| "xSmall"`                                    | `'medium'`  |
 | `target`    | `target`     | target to use when using a link.                                                                                                     | `string`                                                             | `undefined` |
+| `type`      | `type`       | The type of the button.                                                                                                              | `"button" \| "reset" \| "submit"`                                    | `'button'`  |
 | `variant`   | `variant`    | The variant of the button. Options are: `"primary"`, `"secondary", `"tertiary", `"ghost"`, `"destructive"`. Default is: `"primary"`. | `"destructive" \| "ghost" \| "primary" \| "secondary" \| "tertiary"` | `'primary'` |
 
 

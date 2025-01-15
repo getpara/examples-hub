@@ -62,6 +62,12 @@ const Drawer = styled(CpslDrawer)`
 const Username = styled(CpslText)`
   width: 100%;
   padding: 16px 0px;
+
+  &::part(text-element) {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
 `;
 
 const BottomContainer = styled.div`

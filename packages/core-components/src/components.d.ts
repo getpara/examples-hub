@@ -110,11 +110,15 @@ export namespace Components {
         /**
           * The size of the button. Options are: `"small"`, `"medium". Default is: `"medium"`.
          */
-        "size"?: 'small' | 'medium';
+        "size"?: 'xSmall' | 'small' | 'medium';
         /**
           * target to use when using a link.
          */
         "target"?: string;
+        /**
+          * The type of the button.
+         */
+        "type"?: 'button' | 'submit' | 'reset';
         /**
           * The variant of the button. Options are: `"primary"`, `"secondary", `"tertiary", `"ghost"`, `"destructive"`. Default is: `"primary"`.
          */
@@ -758,7 +762,7 @@ export namespace Components {
         /**
           * Format value for display when selected.
          */
-        "formatValue"?: (value: string) => string;
+        "formatValue"?: (value: string | string[]) => string;
         /**
           * Helper text to show below the input. If `"errorText"` is provided that will take precedence.
          */
@@ -775,6 +779,10 @@ export namespace Components {
           * The label for the input.
          */
         "label"?: string;
+        /**
+          * If `true`, the user can select more than one value.
+         */
+        "multiple"?: boolean;
         /**
           * Whether or not to show the rotation animation for the end icon.
          */
@@ -806,7 +814,7 @@ export namespace Components {
         /**
           * Value of the selected item.
          */
-        "selectedValue"?: string;
+        "selectedValue"?: string | string[];
         /**
           * Will show the formatted selected item (passed in the `selected-item` slot) in the select rather than the item value.
          */
@@ -1611,11 +1619,15 @@ declare namespace LocalJSX {
         /**
           * The size of the button. Options are: `"small"`, `"medium". Default is: `"medium"`.
          */
-        "size"?: 'small' | 'medium';
+        "size"?: 'xSmall' | 'small' | 'medium';
         /**
           * target to use when using a link.
          */
         "target"?: string;
+        /**
+          * The type of the button.
+         */
+        "type"?: 'button' | 'submit' | 'reset';
         /**
           * The variant of the button. Options are: `"primary"`, `"secondary", `"tertiary", `"ghost"`, `"destructive"`. Default is: `"primary"`.
          */
@@ -2347,7 +2359,7 @@ declare namespace LocalJSX {
         /**
           * Format value for display when selected.
          */
-        "formatValue"?: (value: string) => string;
+        "formatValue"?: (value: string | string[]) => string;
         /**
           * Helper text to show below the input. If `"errorText"` is provided that will take precedence.
          */
@@ -2364,6 +2376,10 @@ declare namespace LocalJSX {
           * The label for the input.
          */
         "label"?: string;
+        /**
+          * If `true`, the user can select more than one value.
+         */
+        "multiple"?: boolean;
         /**
           * Whether or not to show the rotation animation for the end icon.
          */
@@ -2411,7 +2427,7 @@ declare namespace LocalJSX {
         /**
           * Value of the selected item.
          */
-        "selectedValue"?: string;
+        "selectedValue"?: string | string[];
         /**
           * Will show the formatted selected item (passed in the `selected-item` slot) in the select rather than the item value.
          */

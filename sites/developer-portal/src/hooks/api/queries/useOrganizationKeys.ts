@@ -1,26 +1,26 @@
 import { useQuery } from '@tanstack/react-query';
 import { ApiKey } from '../../../types/api';
-import { useAppStore } from '../../../stores/app/useAppStore';
 import { getApiKeys } from '../../../api/apiKeys/queries';
 import { Environment } from '../../../types/environment';
 import { ENV_VARS } from '../../../utils/constants';
 import { useCallback } from 'react';
 import { useGetOrganizationSubscriptionPlan } from './useOrganizationSubscription';
+import { useParams } from 'react-router-dom';
 
 export const ORGANIZATIONS_KEYS_QUERY_KEY = 'organizationKeys';
 
 export const useOrganizationKeysQuery = <T>(projectId: string, select: (data: ApiKey[]) => T) => {
-  const selectedOrganizationId = useAppStore(state => state.getSelectedOrganization());
+  const { organizationId } = useParams();
 
   return useQuery({
-    enabled: !!selectedOrganizationId && !!projectId,
-    queryKey: [ORGANIZATIONS_KEYS_QUERY_KEY, selectedOrganizationId, projectId],
+    enabled: !!organizationId && !!projectId,
+    queryKey: [ORGANIZATIONS_KEYS_QUERY_KEY, organizationId, projectId],
     queryFn: async () => {
-      if (!selectedOrganizationId || !projectId) {
+      if (!organizationId || !projectId) {
         return [];
       }
 
-      const { data } = await getApiKeys(selectedOrganizationId, projectId, ENV_VARS.environment);
+      const { data } = await getApiKeys(organizationId, projectId, ENV_VARS.environment);
 
       return data.keys;
     },

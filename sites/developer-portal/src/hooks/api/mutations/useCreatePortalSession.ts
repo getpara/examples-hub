@@ -1,7 +1,7 @@
 import { MutationOptions, useMutation } from '@tanstack/react-query';
-import { useAppStore } from '../../../stores/app/useAppStore';
 import { createCustomerPortalSession, CreateCustomerPortalSessionVars } from '../../../api/organizations/mutations';
 import { CreateCustomerPortalSessionResponse } from '../../../types/api';
+import { useParams } from 'react-router-dom';
 
 export const useCreatePortalSession = (
   options?: MutationOptions<
@@ -11,7 +11,7 @@ export const useCreatePortalSession = (
     unknown
   >,
 ) => {
-  const organizationId = useAppStore(state => state.getSelectedOrganization());
+  const { organizationId } = useParams();
 
   return useMutation<
     CreateCustomerPortalSessionResponse,

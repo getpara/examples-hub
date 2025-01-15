@@ -1,36 +1,45 @@
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useIsLoggedIn } from '../../hooks/useIsLoggedIn';
-import { useGetOrganizationAccess } from '../../hooks/api/queries/useOrganizations';
+import { useGetAllOrganizations } from '../../hooks/api/queries/useOrganizations';
 import { useEffect } from 'react';
 import { MainLoader } from '../../components/MainLoader';
 import { ErrorBoundary as SentryErrorBoundary } from '@sentry/react';
 import { ErrorBoundary } from '../../components/ErrorBoundary/ErrorBoundary';
 import { LANDING_APP_BAR_HEIGHT, LandingAppBar } from '../../components/AppBar/LandingAppBar';
+import { useSetSelectedOrganizationWithNavigation } from '../../hooks/useSetSelectedOrganizationWithNavigation';
 
 export const Layout = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { isLoggedIn, isLoading: isLoadingLoggedIn } = useIsLoggedIn();
-  const { data: access, isLoading: isLoadingOrgs } = useGetOrganizationAccess();
+  const { data: allOrgs, isLoading: isLoadingOrgs, isRefetching: isRefetchingOrgs } = useGetAllOrganizations();
+  const { setSelectedOrganization } = useSetSelectedOrganizationWithNavigation(false);
 
   useEffect(() => {
-    if (isLoggedIn && access?.hasAccess) {
-      navigate('/', { replace: true });
+    if (isLoggedIn && !isLoadingOrgs && !isRefetchingOrgs) {
+      const inviteId = searchParams.get('invite');
+      if (inviteId) {
+        const route = !allOrgs?.length ? '/onboarding/invite' : '/invite';
+        navigate({ pathname: route, search: searchParams.toString() }, { replace: true });
+      } else {
+        setSelectedOrganization();
+      }
     }
-  }, [access?.hasAccess, isLoggedIn, navigate]);
+  }, [isLoggedIn, isLoadingOrgs, navigate, setSelectedOrganization, allOrgs?.length, isRefetchingOrgs, searchParams]);
 
-  if (isLoadingLoggedIn || isLoadingOrgs) {
+  if (isLoadingLoggedIn || isLoadingOrgs || isRefetchingOrgs) {
     return <MainLoader headerHeight={LANDING_APP_BAR_HEIGHT} />;
   }
 
-  if (isLoggedIn && access?.hasAccess) {
+  if (isLoggedIn) {
     return null;
   }
 
   return (
     <>
       <LandingAppBar />
-      <UnAuthMain>
+      <LandingMain>
         <SentryErrorBoundary
           fallback={({ error, resetError }) => (
             <ErrorBoundary
@@ -43,12 +52,12 @@ export const Layout = () => {
         >
           <Outlet />
         </SentryErrorBoundary>
-      </UnAuthMain>
+      </LandingMain>
     </>
   );
 };
 
-export const UnAuthMain = styled.main`
+const LandingMain = styled.main`
   overflow: auto;
 
   display: flex;

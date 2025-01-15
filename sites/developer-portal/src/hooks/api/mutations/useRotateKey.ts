@@ -1,13 +1,13 @@
 import { MutationOptions, useMutation } from '@tanstack/react-query';
 import { queryClient } from '../../../clients/queryClient';
 import { RotateApiKeyVars, rotateApiKey } from '../../../api/apiKeys/mutations';
-import { useAppStore } from '../../../stores/app/useAppStore';
 import { ORGANIZATIONS_KEYS_QUERY_KEY } from '../queries/useOrganizationKeys';
+import { useParams } from 'react-router-dom';
 
 export const useRotateKey = (
   options?: MutationOptions<string, Error, Omit<RotateApiKeyVars, 'organizationId'>, unknown>,
 ) => {
-  const organizationId = useAppStore(state => state.getSelectedOrganization());
+  const { organizationId } = useParams();
 
   return useMutation<string, Error, Omit<RotateApiKeyVars, 'organizationId'>, unknown>({
     mutationFn: vars => rotateApiKey({ ...vars, organizationId: organizationId ?? '' }),

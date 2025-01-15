@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { UsersTableDataResponse } from '../../../types/api';
-import { useAppStore } from '../../../stores/app/useAppStore';
 import { getOrganizationUsersTableData } from '../../../api/organizations/queries';
+import { useParams } from 'react-router-dom';
 
 export const ORGANIZATIONS_KEY_USERS_TABLE_DATA_QUERY_KEY = 'organizationUsersTableData';
 
@@ -11,13 +11,13 @@ export const useOrganizationUsersTableDataQuery = <T>(
   offset?: number,
   limit?: number,
 ) => {
-  const selectedOrganizationId = useAppStore(state => state.getSelectedOrganization());
+  const { organizationId } = useParams();
 
   return useQuery({
-    enabled: !!selectedOrganizationId,
-    queryKey: [ORGANIZATIONS_KEY_USERS_TABLE_DATA_QUERY_KEY, selectedOrganizationId, env, offset, limit],
+    enabled: !!organizationId,
+    queryKey: [ORGANIZATIONS_KEY_USERS_TABLE_DATA_QUERY_KEY, organizationId, env, offset, limit],
     queryFn: async () => {
-      const { data } = await getOrganizationUsersTableData(selectedOrganizationId ?? '', env, offset, limit);
+      const { data } = await getOrganizationUsersTableData(organizationId ?? '', env, offset, limit);
 
       return data;
     },

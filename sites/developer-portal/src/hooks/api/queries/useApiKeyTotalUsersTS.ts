@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { ApiKeyTotalUsersTSResponse } from '../../../types/api';
-import { useAppStore } from '../../../stores/app/useAppStore';
 import { sub } from 'date-fns';
 import { TODAY } from '../../../utils/constants';
 import { getApiKeyTotalUsersTS } from '../../../api/apiKeys/queries';
 import { formatTSData } from '../../../utils/analyticsDataFormatters';
+import { useParams } from 'react-router-dom';
 
 export const API_KEY_TOTAL_USERS_TS_QUERY_KEY = 'apiKeyTotalUsersTS';
 
@@ -19,13 +19,13 @@ export const useApiKeyTotalUsersTSQuery = <T>(
   endDate: Date = DEFAULT_END_DATE,
   select: (data: ApiKeyTotalUsersTSResponse) => T,
 ) => {
-  const selectedOrganizationId = useAppStore(state => state.getSelectedOrganization());
+  const { organizationId } = useParams();
 
   return useQuery({
-    enabled: !!selectedOrganizationId && !!projectId && !!keyId,
-    queryKey: [API_KEY_TOTAL_USERS_TS_QUERY_KEY, selectedOrganizationId, projectId, keyId, env, startDate, endDate],
+    enabled: !!organizationId && !!projectId && !!keyId,
+    queryKey: [API_KEY_TOTAL_USERS_TS_QUERY_KEY, organizationId, projectId, keyId, env, startDate, endDate],
     queryFn: async () => {
-      const { data } = await getApiKeyTotalUsersTS(selectedOrganizationId ?? '', projectId, keyId, env, startDate, endDate);
+      const { data } = await getApiKeyTotalUsersTS(organizationId ?? '', projectId, keyId, env, startDate, endDate);
 
       return { data: formatTSData(data.data) };
     },

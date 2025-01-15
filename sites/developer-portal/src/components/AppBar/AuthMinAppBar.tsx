@@ -2,11 +2,11 @@ import { CpslAppBar } from '@usecapsule/react-components';
 import styled from 'styled-components';
 import { CapsuleBlack } from '../Icons';
 
-export const UNAUTH_APP_BAR_HEIGHT = 70;
+export const AUTH_MIN_APP_BAR_HEIGHT = 70;
 
-export const UnAuthAppBar = () => {
+export const AuthMinAppBar = () => {
   return (
-    <CpslAppBar height={UNAUTH_APP_BAR_HEIGHT}>
+    <CpslAppBar height={AUTH_MIN_APP_BAR_HEIGHT}>
       <Container>
         <LogoContainer>
           <CapsuleBlack />
@@ -17,7 +17,7 @@ export const UnAuthAppBar = () => {
 };
 
 const Container = styled.div`
-  background-color: #fff;
+  background-color: var(--cpsl-color-background-0);
   display: flex;
   align-items: center;
   flex: 1;

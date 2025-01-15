@@ -13,6 +13,7 @@ export class CpslPopover {
   @Element() el!: HTMLCpslPopoverElement;
 
   @State() open = false;
+  @State() hasSetInitialPosition = false;
   @State() positionX?: number;
   @State() positionY?: number;
 
@@ -303,6 +304,7 @@ export class CpslPopover {
       // Using a small timeout here to ensure the popover is open before attempting to do position calculations
       setTimeout(() => {
         this.setPosition();
+        this.hasSetInitialPosition = true;
       }, 20);
     }
   };
@@ -311,6 +313,7 @@ export class CpslPopover {
     this.open = false;
     this.startedInside = false;
     this.cpslClose.emit();
+    this.hasSetInitialPosition = false;
   };
 
   get containerEl() {
@@ -329,9 +332,19 @@ export class CpslPopover {
           'transform-v-center': this.transformOriginVertical === 'center',
           'transform-v-bottom': this.transformOriginVertical === 'bottom',
         }}
-        style={{ top: `${this.positionY}px`, left: `${this.positionX}px`, width: !this.open ? '0px' : this.autoWidth ? 'auto' : `${this.triggerEl?.clientWidth}px` }}
+        style={{
+          top: `${this.positionY}px`,
+          left: `${this.positionX}px`,
+          width: !this.open ? '0px' : this.autoWidth ? 'auto' : `${this.triggerEl?.clientWidth}px`,
+        }}
       >
-        <div id="container" class={{ container: true, open: this.open }}>
+        <div
+          id="container"
+          class={{ container: true, open: this.open }}
+          style={{
+            visibility: this.hasSetInitialPosition ? 'visible' : 'hidden',
+          }}
+        >
           <slot></slot>
         </div>
       </Host>

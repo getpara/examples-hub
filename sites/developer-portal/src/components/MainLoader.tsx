@@ -8,7 +8,7 @@ interface MainLoaderProps {
 export const MainLoader = ({ headerHeight }: MainLoaderProps) => {
   return (
     <Container $headerHeight={headerHeight}>
-      <CpslSpinner />
+      <StyledSpinner />
     </Container>
   );
 };
@@ -19,4 +19,8 @@ const Container = styled.div<{ $headerHeight: number }>`
   display: flex;
   justify-content: center;
   align-items: center;
+`;
+
+const StyledSpinner = styled(CpslSpinner)`
+  --background-color: var(--cpsl-color-background-4);
 `;

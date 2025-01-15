@@ -1,22 +1,22 @@
 import { useQuery } from '@tanstack/react-query';
-import { useAppStore } from '../../../stores/app/useAppStore';
 import { getOrganizationSubscription } from '../../../api/organizations/queries';
 import { Subscription } from '../../../types/api';
+import { useParams } from 'react-router-dom';
 
 export const ORGANIZATIONS_SUBSCRIPTION_QUERY_KEY = 'organizationSubscription';
 
 export const useOrganizationSubscriptionQuery = <T>(select: (data: Subscription | undefined) => T) => {
-  const selectedOrganizationId = useAppStore(state => state.getSelectedOrganization());
+  const { organizationId } = useParams();
 
   return useQuery({
-    enabled: !!selectedOrganizationId,
-    queryKey: [ORGANIZATIONS_SUBSCRIPTION_QUERY_KEY, selectedOrganizationId],
+    enabled: !!organizationId,
+    queryKey: [ORGANIZATIONS_SUBSCRIPTION_QUERY_KEY, organizationId],
     queryFn: async () => {
-      if (!selectedOrganizationId) {
+      if (!organizationId) {
         return undefined;
       }
 
-      const { data } = await getOrganizationSubscription(selectedOrganizationId);
+      const { data } = await getOrganizationSubscription(organizationId);
 
       return data.subscription;
     },

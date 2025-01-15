@@ -1,5 +1,5 @@
 import { CpslButton, CpslCard, CpslText } from '@usecapsule/react-components';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { BRAND_COLORS, MOBILE_SIZE } from '../utils/constants';
 import { Environment } from '../types/environment';
 import { getKeyColor } from '../utils/apiKey';
@@ -72,6 +72,20 @@ export const BaseCard = styled(CpslCard)`
   }
 `;
 
+const centeredStyle = css`
+  text-align: center;
+`;
+
+const clickableStyle = css`
+  text-decoration: underline;
+  cursor: pointer;
+`;
+
+const underlinedStyle = css`
+  text-decoration: underline;
+  cursor: pointer;
+`;
+
 export const InlineText = styled(CpslText)`
   display: inline-block;
 `;
@@ -81,14 +95,28 @@ export const CapitalizedText = styled(CpslText)`
 `;
 
 export const CenteredText = styled(CpslText)`
-  text-align: center;
+  ${centeredStyle}
 `;
 
 export const ClickableText = styled(CpslText)`
-  text-decoration: underline;
-  cursor: pointer;
+  ${clickableStyle}
 `;
 
 export const UnderlinedText = styled(CpslText)`
-  text-decoration: underline;
+  ${underlinedStyle}
+`;
+
+export const LinkText = styled(CpslText)<{ $centered?: boolean }>`
+  ${({ $centered }) => $centered && centeredStyle}
+  ${clickableStyle}
+  ${underlinedStyle}
+`;
+
+export const VerticalCenteredContainer = styled.div<{ $gap: number }>`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: ${({ $gap }) => `${$gap}px`};
 `;

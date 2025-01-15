@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { ApiKeyUsersLoginMetricsResponse } from '../../../types/api';
-import { useAppStore } from '../../../stores/app/useAppStore';
 import { getApiKeyUsersLoginMetrics } from '../../../api/apiKeys/queries';
+import { useParams } from 'react-router-dom';
 
 export const ORGANIZATIONS_KEY_USERS_LOGIN_METRICS_QUERY_KEY = 'organizationKeyUsersLoginMetrics';
 
@@ -11,13 +11,13 @@ export const useOrganizationKeyUsersLoginMetricsQuery = <T>(
   env: string,
   select: (data: ApiKeyUsersLoginMetricsResponse) => T,
 ) => {
-  const selectedOrganizationId = useAppStore(state => state.getSelectedOrganization());
+  const { organizationId } = useParams();
 
   return useQuery({
-    enabled: !!selectedOrganizationId && !!projectId,
-    queryKey: [ORGANIZATIONS_KEY_USERS_LOGIN_METRICS_QUERY_KEY, selectedOrganizationId, projectId, keyId, env],
+    enabled: !!organizationId && !!projectId,
+    queryKey: [ORGANIZATIONS_KEY_USERS_LOGIN_METRICS_QUERY_KEY, organizationId, projectId, keyId, env],
     queryFn: async () => {
-      const { data } = await getApiKeyUsersLoginMetrics(selectedOrganizationId ?? '', projectId, keyId, env);
+      const { data } = await getApiKeyUsersLoginMetrics(organizationId ?? '', projectId, keyId, env);
 
       return data;
     },

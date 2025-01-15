@@ -19,14 +19,14 @@ import { CpslText } from '@usecapsule/react-components';
 const TITLE = 'Native Passkey Configuration';
 
 export const NativePasskeyConfiguration = () => {
-  const { projectId } = useParams();
+  const { projectId, organizationId } = useParams();
   const form = useNativePasskeyConfigFormData();
   const navigate = useNavigate();
   const { data: plan } = useGetOrganizationSubscriptionPlan();
   const { data: project } = useGetProject(projectId ?? '');
 
   const handleUpgradeClick = () => {
-    navigate('/billing');
+    navigate(`/${organizationId}/billing`);
   };
 
   if (!plan?.canUseNativePasskeys) {

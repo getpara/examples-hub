@@ -34,6 +34,8 @@
   --helper-text-font-size: var(--cpsl-font-size-body-xs);
   --helper-text-margin-top: 0px;
 
+  --select-color: var(--cpsl-color-text-primary);
+
   --icon-height: 24px;
   --icon-width: 24px;
 
@@ -172,10 +174,10 @@ input {
 }
 
 .selected-text {
-  color: var(--cpsl-color-text-primary);
+  --color-override: var(--select-color);
 
   &.placeholder {
-    color: var(--cpsl-color-text-disabled);
+    --color-override: var(--select-color);
   }
 }
 

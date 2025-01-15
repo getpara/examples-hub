@@ -2,19 +2,19 @@ import { CpslAvatar, CpslSelect, CpslSelectItem, CpslText } from '@usecapsule/re
 import styled from 'styled-components';
 import { useGetAllOrganizationsWithAccess, useGetSelectedOrganization } from '../../../hooks/api/queries/useOrganizations';
 import { CpslSelectCustomEvent } from '@usecapsule/core-components';
-import { useAppStore } from '../../../stores/app/useAppStore';
-import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect } from 'react';
 import { useLogout } from '../../../hooks/useLogout';
 import { triggerToast } from '../../../utils/toasts';
+import { useAppStore } from '../../../stores/app/useAppStore';
 
 export const Organizations = () => {
+  const { organizationId } = useParams();
   const navigate = useNavigate();
   const { logout } = useLogout();
   const { data: org } = useGetSelectedOrganization();
   const { data: orgs } = useGetAllOrganizationsWithAccess();
   const setSelectedOrganization = useAppStore(state => state.setSelectedOrganization);
-  const [selectedOrgId, setSelectedOrgId] = useState(org?.id ?? '');
 
   useEffect(() => {
     const resetState = async () => {
@@ -28,7 +28,7 @@ export const Organizations = () => {
           body: 'If you believe this is an error, contact Capsule support.',
         });
       } else {
-        handleOrgSelect({ detail: firstOrgWithAccess.id } as CpslSelectCustomEvent<string>);
+        navigate(`/${firstOrgWithAccess.id}/dashboard`);
       }
     };
 
@@ -36,18 +36,12 @@ export const Organizations = () => {
     if (orgs && org && !orgs.find(o => o.id === org.id)) {
       resetState();
     }
-  }, [orgs, org, logout]);
+  }, [orgs, org, logout, navigate]);
 
   const handleOrgSelect = (e: CpslSelectCustomEvent<string>) => {
-    if (e.detail !== org?.id) {
-      navigate('/');
-      setSelectedOrgId(e.detail);
-
-      // Using a small timeout here to allow routing to complete before setting the org at the app state level.
-      // Without this some inadvertent errors are shown on project screens.
-      setTimeout(() => {
-        setSelectedOrganization(e.detail);
-      }, 100);
+    if (e.detail !== organizationId) {
+      navigate(`/${e.detail}/dashboard`);
+      setSelectedOrganization(e.detail);
     }
   };
 
@@ -56,7 +50,7 @@ export const Organizations = () => {
       {org?.logoUrl && <Avatar src={org.logoUrl} />}
       <StyledSelect
         onCpslSelectValueChange={handleOrgSelect}
-        selectedValue={selectedOrgId}
+        selectedValue={organizationId}
         showFormattedSelectedItem
         noIconAnimation
         icon="chevronSelectorVertical"

@@ -7,7 +7,7 @@ import { Dispatch, SetStateAction } from 'react';
 import { DocsButton } from '../DocsButton/DocsButton';
 import { useAppBanner } from '../../hooks/configs/useAppBanner';
 import { EXPANDED_SIDEBAR_WIDTH } from '../../layouts/authenticated/components/NavBar';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { GradientCTAButton } from '../GradientCTAButton/GradientCTAButton';
 import { useGetSelectedOrganization } from '../../hooks/api/queries/useOrganizations';
 
@@ -18,6 +18,7 @@ interface AuthAppBarProps {
 }
 
 export const AuthAppBar = ({ setNavOpen }: AuthAppBarProps) => {
+  const { organizationId } = useParams();
   const { data: organization } = useGetSelectedOrganization();
   const isMobile = useIsMobile();
   const { bannerText } = useAppBanner();
@@ -28,7 +29,7 @@ export const AuthAppBar = ({ setNavOpen }: AuthAppBarProps) => {
   };
 
   const handleUpgradeClick = () => {
-    navigate('/billing');
+    navigate(`/${organizationId}/billing`);
   };
 
   return (

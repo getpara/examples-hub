@@ -3,46 +3,16 @@ import { CenteredText } from '../../../components/common';
 import { usePlanMetadata } from '../../../hooks/configs/usePlanMetadata';
 import { useGetOrganizationEnterprisePrice } from '../../../hooks/api/queries/useOrganizationEnterprisePrice';
 import { PlanCard } from '../../../components/PlanCard/PlanCard';
-import { useStripePlan } from '../../../hooks/useStripePlan';
-import { ENTERPRISE_PLAN_SLUG, FREE_PLAN_SLUG } from '../../../utils/constants';
-import { useCreateOrganization } from '../../../hooks/api/mutations/useCreateOrganization';
-import { triggerToast } from '../../../utils/toasts';
-import { useSetSelectedOrganizationWithNavigation } from '../../../hooks/useSetSelectedOrganizationWithNavigation';
+import { ENTERPRISE_PLAN_SLUG } from '../../../utils/constants';
+import { useSubmitOnboarding } from '../hooks/useSubmitOnboarding';
 
-interface PlanSelectProps {
-  orgName: string;
-}
-
-export const PlanSelect = ({ orgName }: PlanSelectProps) => {
+export const PlanSelect = () => {
   const { planMeta } = usePlanMetadata();
   const { data: enterprisePrice } = useGetOrganizationEnterprisePrice();
-  const { changePlan, isCreatingStripeSession } = useStripePlan();
-  const { mutate: createOrganization, isPending: isCreatingOrg } = useCreateOrganization();
-  const { setSelectedOrganization } = useSetSelectedOrganizationWithNavigation(true);
+  const { submitOnboarding, isLoading } = useSubmitOnboarding();
 
-  const handleUpgradeClick = async (planSlug: string) => {
-    createOrganization(
-      { data: { organizationName: orgName } },
-      {
-        onSuccess: async data => {
-          if (planSlug === FREE_PLAN_SLUG) {
-            setSelectedOrganization();
-            return;
-          }
-          if (planSlug.toUpperCase() === ENTERPRISE_PLAN_SLUG) {
-            return;
-          }
-          await changePlan(planSlug, data.organization.id, location.origin);
-        },
-        onError: () => {
-          triggerToast({
-            variant: 'error',
-            title: 'Error Creating Your Organization',
-            body: 'Please try again. If the problem persists, contact Capsule support.',
-          });
-        },
-      },
-    );
+  const handleSubmitClick = async (planSlug: string) => {
+    await submitOnboarding(planSlug);
   };
 
   return (
@@ -61,8 +31,8 @@ export const PlanSelect = ({ orgName }: PlanSelectProps) => {
                   planMetadata={planMetadata}
                   isActive={false}
                   isHigherPlanActive={false}
-                  disabled={isCreatingOrg || isCreatingStripeSession}
-                  onUpgradeClick={handleUpgradeClick}
+                  disabled={isLoading}
+                  onUpgradeClick={handleSubmitClick}
                   enterprisePrice={enterprisePrice}
                   type="onboarding"
                 />
@@ -85,7 +55,6 @@ const InnerContainer = styled.div`
   flex-direction: column;
   gap: 16px;
   justify-content: center;
-  margin-top: 77px;
 `;
 
 const PlanContainer = styled.div`

@@ -38,12 +38,20 @@ export type Organization = {
   hasRequestedDowngrade?: boolean;
   hasRequestedCancel?: boolean;
   enterpriseStripePriceId?: string | null;
+  homepageUrl?: string | null;
+  onboardingAnswersRaw?: object | null;
 };
+export type OrganizationInvite = Organization & { members: OrganizationMember[] };
 
 export type OrganizationResponse = { organization: Organization };
 export type OrganizationsResponse = { organizations: Organization[] };
-export type UpdateOrganizationBody = Pick<Organization, 'name' | 'logoUrl'>;
-export type CreateOrganizationBody = { organizationName: string };
+export type OrganizationsInviteResponse = { organizations: OrganizationInvite[] };
+export type UpdateOrganizationBody = Pick<Organization, 'name' | 'logoUrl' | 'homepageUrl'>;
+export type CreateOrganizationBody = {
+  organizationName: string;
+  homepageUrl?: string;
+  onboardingAnswersRaw?: object;
+};
 export type LogoUploadUrlResponse = {
   url: string;
   fields: Record<string, string>;
@@ -79,6 +87,7 @@ export type UpdateProjectBody = Omit<Project, 'id' | 'archived'>;
 export type OrganizationMember = {
   id: string;
   pendingEmail?: string;
+  invitedBy?: string;
   joinedAt?: Date;
   owner: boolean;
   permissions: string[];

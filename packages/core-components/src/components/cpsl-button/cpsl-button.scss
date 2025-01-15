@@ -146,6 +146,30 @@
   }
 }
 
+:host(.xSmall) {
+  --button-font-size: var(--cpsl-font-size-body-xs);
+  --button-padding-top: 8px;
+  --button-padding-bottom: 8px;
+  --button-icon-size: var(--cpsl-font-size-body-s);
+  --button-border-radius: 8px;
+}
+
+:host(.xSmall.primary) {
+  --button-padding-top: 9px;
+  --button-padding-bottom: 9px;
+  --button-border-radius: 8px;
+}
+
+:host(.xSmall.secondary) {
+  --button-border-radius: 8px;
+}
+
+:host(.xSmall.tertiary) {
+  --button-padding-top: 9px;
+  --button-padding-bottom: 9px;
+  --button-border-radius: 8px;
+}
+
 :host(.small) {
   --button-font-size: var(--cpsl-font-size-body-s);
   --button-padding-top: 12px;

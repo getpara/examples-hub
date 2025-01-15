@@ -33,9 +33,9 @@ export const Project = () => {
 
   const handleViewClick = useCallback(
     (id: string, env: string) => () => {
-      navigate(`/project/${projectId}/key/${env}/${id}`);
+      navigate(`key/${env}/${id}`);
     },
-    [navigate, projectId],
+    [navigate],
   );
 
   const formattedData: TableData[] = useMemo(() => {

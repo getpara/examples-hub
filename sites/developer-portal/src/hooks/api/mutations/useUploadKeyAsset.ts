@@ -1,15 +1,15 @@
 import { MutationOptions, useMutation } from '@tanstack/react-query';
-import { useAppStore } from '../../../stores/app/useAppStore';
 import axios from 'axios';
 import { Environment } from '@usecapsule/react-sdk';
 import { getKeyAssetUploadUrl } from '../../../api/apiKeys/mutations';
 import { PartnerAssetType } from '../../../types/api';
+import { useParams } from 'react-router-dom';
 
 export const useUploadKeyAsset = (
   assetType: PartnerAssetType,
   options?: MutationOptions<string, Error, { projectId: string; keyId: string; file: File; env: string }, unknown>,
 ) => {
-  const organizationId = useAppStore(state => state.getSelectedOrganization());
+  const { organizationId } = useParams();
 
   return useMutation<string, Error, { projectId: string; keyId: string; file: File; env: string }, unknown>({
     mutationFn: async vars => {

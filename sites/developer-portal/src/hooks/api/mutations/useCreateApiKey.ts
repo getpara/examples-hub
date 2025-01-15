@@ -1,14 +1,14 @@
 import { MutationOptions, useMutation } from '@tanstack/react-query';
 import { queryClient } from '../../../clients/queryClient';
 import { CreateApiKeyVars, createApiKey } from '../../../api/apiKeys/mutations';
-import { useAppStore } from '../../../stores/app/useAppStore';
 import { ORGANIZATIONS_KEYS_QUERY_KEY } from '../queries/useOrganizationKeys';
 import { ApiKeyResponse } from '../../../types/api';
+import { useParams } from 'react-router-dom';
 
 export const useCreateApiKey = (
   options?: MutationOptions<ApiKeyResponse, Error, Omit<CreateApiKeyVars, 'organizationId'>, unknown>,
 ) => {
-  const organizationId = useAppStore(state => state.getSelectedOrganization());
+  const { organizationId } = useParams();
 
   return useMutation<ApiKeyResponse, Error, Omit<CreateApiKeyVars, 'organizationId'>, unknown>({
     mutationFn: vars => createApiKey({ ...vars, organizationId: organizationId ?? '' }),
