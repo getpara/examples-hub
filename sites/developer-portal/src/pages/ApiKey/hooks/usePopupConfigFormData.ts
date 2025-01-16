@@ -4,7 +4,7 @@ import { useGetOrganizationKey } from '../../../hooks/api/queries/useOrganizatio
 import { Environment } from '../../../types/environment';
 import { UpdateApiKeyFormData } from '../../../types/api';
 
-export type UpdatePopup = Pick<UpdateApiKeyFormData, 'transactionPopupsEnabled'>;
+export type UpdatePopup = Pick<UpdateApiKeyFormData, 'forceTransactionPopups'>;
 
 export const usePopupConfigFormData = () => {
   const { apiKey, env, projectId } = useParams();
@@ -14,7 +14,7 @@ export const usePopupConfigFormData = () => {
     mode: 'onChange',
     reValidateMode: 'onChange',
     defaultValues: {
-      transactionPopupsEnabled: apiKeyData?.transactionPopupsEnabled ?? false,
+      forceTransactionPopups: apiKeyData?.forceTransactionPopups ?? false,
     },
   });
 

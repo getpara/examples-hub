@@ -155,6 +155,7 @@ export type ApiKey = {
   accentColor: string | null;
   themeMode: ThemeMode | null;
   transactionPopupsEnabled: boolean;
+  forceTransactionPopups: boolean;
   origins: string[] | null;
   supportedWalletTypes: SupportedWalletTypes;
   cosmosPrefix: string;
@@ -215,6 +216,7 @@ export type UpdateApiKeyBody = Nullable<
       | 'accentColor'
       | 'themeMode'
       | 'transactionPopupsEnabled'
+      | 'forceTransactionPopups'
       | 'origins'
       | 'supportedWalletTypes'
       | 'cosmosPrefix'

@@ -8,16 +8,16 @@ import { UpdatePopup } from '../../hooks/usePopupConfigFormData';
 export const Popup = () => {
   const { control, watch } = useFormContext<UpdatePopup>();
 
-  const isChecked = watch('transactionPopupsEnabled');
+  const forceTransactionPopupsIsChecked = watch('forceTransactionPopups');
 
   return (
     <InnerConfigurationCard>
       <InlineContainer>
         <InlineText weight="medium">
-          Status: <SuccessText weight="medium">{isChecked ? 'On' : 'Off'}</SuccessText>
+          Status: <SuccessText weight="medium">{forceTransactionPopupsIsChecked ? 'On' : 'Off'}</SuccessText>
         </InlineText>
         <Controller
-          name="transactionPopupsEnabled"
+          name="forceTransactionPopups"
           control={control}
           render={({ field: { onChange, value } }) => (
             <CpslSwitch
