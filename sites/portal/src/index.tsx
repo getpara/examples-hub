@@ -1,23 +1,31 @@
 import ReactDOM from 'react-dom/client';
 import { Routes, Route } from 'react-router';
 import { BrowserRouter, useSearchParams } from 'react-router-dom';
-import { AuthCreation } from './pages/AuthCreation/AuthCreation';
 import '@usecapsule/react-components/css/capsule-core.css';
 import './portal.css';
 import { ModalLayout } from './components/ModalLayout';
-import { AuthLogin } from './pages/AuthLogin/AuthLogin';
-import ShortUrl from './pages/ShortUrl/ShortUrl';
 import { defineCustomElements } from '@usecapsule/react-components';
 import { CapsuleProvider } from './components/CapsuleContext';
-import Recovery from './pages/Recovery/Recovery';
 import { ENV } from './constants';
-import TransactionReview from './pages/TransactionReview/TransactionReview';
-import { OnRampTransaction } from './pages/OnRampTransaction';
-import { TelegramLogin } from './pages/TelegramLogin';
-import { PasswordCreation } from './pages/PasswordCreation/PasswordCreation';
 import { AuthMethod } from '@usecapsule/web-sdk';
+import { lazy } from 'react';
 
 defineCustomElements();
+
+const Recovery = lazy(() => import('./pages/Recovery/Recovery'));
+const AuthCreation = lazy(() =>
+  import('./pages/AuthCreation/AuthCreation').then(module => ({ default: module.AuthCreation })),
+);
+const AuthLogin = lazy(() => import('./pages/AuthLogin/AuthLogin').then(module => ({ default: module.AuthLogin })));
+const PasswordCreation = lazy(() =>
+  import('./pages/PasswordCreation/PasswordCreation').then(module => ({ default: module.PasswordCreation })),
+);
+const TransactionReview = lazy(() => import('./pages/TransactionReview/TransactionReview'));
+const OnRampTransaction = lazy(() =>
+  import('./pages/OnRampTransaction').then(module => ({ default: module.OnRampTransaction })),
+);
+const TelegramLogin = lazy(() => import('./pages/TelegramLogin').then(module => ({ default: module.TelegramLogin })));
+const ShortUrl = lazy(() => import('./pages/ShortUrl/ShortUrl'));
 
 const App = () => {
   const [searchParams] = useSearchParams();

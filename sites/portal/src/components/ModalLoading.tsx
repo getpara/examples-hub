@@ -3,21 +3,26 @@ import { Heading, Subheading } from './common';
 import { CpslSpinner } from '@usecapsule/react-components';
 
 interface ModalLoadingProps {
-  heading: string;
+  heading?: string;
+  noText?: boolean;
 }
 
-export const ModalLoading = ({ heading }: ModalLoadingProps) => {
+export const ModalLoading = ({ heading, noText }: ModalLoadingProps) => {
   return (
     <>
       <SpinnerContainer>
         <CpslSpinner />
       </SpinnerContainer>
-      <Heading>
-        <span>{heading}</span>
-      </Heading>
-      <Subheading>
-        <span>Follow the prompts presented by your browser.</span>
-      </Subheading>
+      {!noText && (
+        <>
+          <Heading>
+            <span>{heading}</span>
+          </Heading>
+          <Subheading>
+            <span>Follow the prompts presented by your browser.</span>
+          </Subheading>
+        </>
+      )}
     </>
   );
 };

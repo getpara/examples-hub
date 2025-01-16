@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer';
 global.Buffer = Buffer;
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { Outlet, useSearchParams } from 'react-router-dom';
 import { styled } from 'styled-components';
 import { Partner } from '../types';
@@ -10,6 +10,7 @@ import { BorderRadius, generateTheme } from '@usecapsule/react-components';
 import { BetaBannerNoChakra } from './BetaBannerNoChakra';
 import { Theme } from '@usecapsule/web-sdk';
 import { useCapsule } from './CapsuleContext';
+import { ModalLoading } from './ModalLoading';
 
 const DEFAULT_THEME = {
   foregroundColor: '#000',
@@ -140,7 +141,9 @@ export const ModalLayout = () => {
     <>
       <BetaBannerNoChakra />
       <OuterContainer isBranded={isBranded}>
-        <Outlet context={{ partner, homepageUrl, isDark, toggleBranding }} />
+        <Suspense fallback={<ModalLoading noText />}>
+          <Outlet context={{ partner, homepageUrl, isDark, toggleBranding }} />
+        </Suspense>
       </OuterContainer>
     </>
   );
