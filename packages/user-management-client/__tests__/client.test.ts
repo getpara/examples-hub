@@ -1,6 +1,6 @@
 import { describe, vi, afterEach, expect, it, beforeEach } from 'vitest';
-import Client from '../src/client';
-import { AxiosInstance } from 'axios';
+import Client, { handleResponseError, handleResponseSuccess } from '../src/client';
+import { AxiosError, AxiosInstance } from 'axios';
 import { PARTNER_ID_HEADER_NAME, SESSION_COOKIE_HEADER_NAME } from '../src/consts';
 import {
   Chain,
@@ -62,6 +62,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('axios', async importActual => {
   const actual = await importActual<typeof import('axios')>();
   return {
+    ...actual,
     default: {
       ...actual.default,
       create: vi.fn(opts => ({
@@ -97,6 +98,93 @@ describe('Client', () => {
       expect(baseRequest.defaults.baseURL).toEqual(opts.userManagementHost);
       expect(baseRequest.defaults.withCredentials).toEqual(true);
       expect(baseRequest.defaults.headers['X-External-API-Key']).toEqual(opts.apiKey);
+    });
+  });
+
+  describe('response handlers', () => {
+    describe('success handler', () => {
+      it('success', async () => {
+        const resp = handleResponseSuccess({
+          data: { test: 'test' },
+          status: 200,
+          statusText: '',
+          headers: undefined,
+          config: undefined,
+        });
+
+        expect(resp.data).toStrictEqual({ test: 'test' });
+      });
+      it('fail - not 200 status', async () => {
+        expect(() =>
+          handleResponseSuccess({
+            data: undefined,
+            status: 400,
+            statusText: '',
+            headers: undefined,
+            config: undefined,
+          }),
+        ).toThrowError('Invalid status code');
+      });
+    });
+    describe('error handler', () => {
+      it('null error', async () => {
+        expect(() => handleResponseError(null)).toThrowError('Error is null');
+      });
+      it('axios error - connection error', async () => {
+        expect(() =>
+          handleResponseError(
+            new AxiosError('Test Error', 'ERR_NETWORK', undefined, undefined, {
+              data: 'Test Error',
+              status: 400,
+              statusText: '',
+              headers: undefined,
+              config: undefined,
+            }),
+          ),
+        ).toThrowError('Connection error');
+      });
+      it('axios error - connection canceled', async () => {
+        expect(() =>
+          handleResponseError(
+            new AxiosError('Test Error', 'ERR_CANCELED', undefined, undefined, {
+              data: 'Test Error',
+              status: 400,
+              statusText: '',
+              headers: undefined,
+              config: undefined,
+            }),
+          ),
+        ).toThrowError('Connection canceled');
+      });
+      it('axios error - backend error', async () => {
+        expect(() =>
+          handleResponseError(
+            new AxiosError('Test Error', '', undefined, undefined, {
+              data: 'Test Error',
+              status: 400,
+              statusText: '',
+              headers: undefined,
+              config: undefined,
+            }),
+          ),
+        ).toThrowError('Test Error');
+      });
+      it('axios error - unknown error', async () => {
+        expect(() =>
+          handleResponseError(
+            new AxiosError('Test Error', '', undefined, undefined, {
+              data: undefined,
+              status: 400,
+              statusText: '',
+              headers: undefined,
+              config: undefined,
+            }),
+          ),
+        ).toThrowError('Unknown error');
+      });
+      it('unknown error', async () => {
+        expect(() => handleResponseError('some unknown error')).toThrowError('Unknown error');
+      });
     });
   });
 

@@ -40,6 +40,7 @@ import {
 } from './types/index.js';
 import { extractWalletRef } from './utils.js';
 import { SESSION_COOKIE_HEADER_NAME, VERSION_HEADER_NAME, PARTNER_ID_HEADER_NAME } from './consts.js';
+import { CapsuleApiError } from './error.js';
 
 interface ConfigOpts {
   useFetchAdapter?: boolean;
@@ -215,6 +216,30 @@ export type VerifyTelegramRes =
       isValid: false;
     };
 
+export const handleResponseSuccess = (response: AxiosResponse<any, any>) => {
+  if (response.status === 200) {
+    return response;
+  }
+  throw new CapsuleApiError('Invalid status code');
+};
+
+export const handleResponseError = (error: any) => {
+  if (error === null) throw new CapsuleApiError('Error is null');
+  if (axios.isAxiosError(error)) {
+    let message = error.response?.data ?? 'Unknown error';
+
+    // Add meaningful messages to connection errors
+    // Can do this for other Axios codes as well in the future if we need: https://github.com/axios/axios/blob/v1.x/lib/core/AxiosError.js#L61
+    if (error.code === 'ERR_NETWORK') {
+      message = 'Connection error';
+    } else if (error.code === 'ERR_CANCELED') {
+      message = 'Connection canceled';
+    }
+    throw new CapsuleApiError(message, error.code, error.status, error.request?.responseURL);
+  }
+  throw new CapsuleApiError('Unknown error');
+};
+
 class Client {
   private baseRequest: AxiosInstance;
   constructor({ userManagementHost, apiKey, version, opts, retrieveSessionCookie, persistSessionCookie }: ClientConfig) {
@@ -290,6 +315,9 @@ class Client {
           });
       } as any;
     }
+
+    // Intercept response to add more concise errors rather than returning the entire AxiosError
+    this.baseRequest.interceptors.response.use(handleResponseSuccess, handleResponseError);
   }
 
   createUser = async (
