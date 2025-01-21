@@ -65,7 +65,7 @@ describe('utils', () => {
     it('extracts farcaster auth', () => {
       expect(extractAuthInfo(farcasterAuth)).toEqual({
         auth: { farcasterUsername },
-        authType: 'farcasterUsername',
+        authType: 'farcaster',
         identifier: farcasterUsername,
         publicKeyIdentifier: `${farcasterUsername}-farcaster`,
       });
@@ -78,7 +78,7 @@ describe('utils', () => {
     it('extracts telegram auth', () => {
       expect(extractAuthInfo(telegramAuth)).toEqual({
         auth: { telegramUserId },
-        authType: 'telegramUserId',
+        authType: 'telegram',
         identifier: telegramUserId,
         publicKeyIdentifier: `${telegramUserId}-telegram`,
       });

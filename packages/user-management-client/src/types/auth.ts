@@ -1,10 +1,10 @@
-export type AuthType = 'email' | 'phone' | 'farcasterUsername' | 'telegramUserId' | 'userId';
+export type AuthType = 'email' | 'phone' | 'farcaster' | 'telegram' | 'userId';
 
 export type ExtractAuth =
   | $ExtractAuth<'email'>
   | $ExtractAuth<'phone'>
-  | $ExtractAuth<'farcasterUsername'>
-  | $ExtractAuth<'telegramUserId'>
+  | $ExtractAuth<'farcaster'>
+  | $ExtractAuth<'telegram'>
   | $ExtractAuth<'userId'>;
 
 export type $ExtractAuth<T extends AuthType> = {
@@ -27,13 +27,13 @@ export type $Auth<T extends AuthType> = T extends 'email'
   ? { email: string }
   : T extends 'phone'
     ? { phone: string; countryCode: string }
-    : T extends 'farcasterUsername'
+    : T extends 'farcaster'
       ? { farcasterUsername: string }
-      : T extends 'telegramUserId'
+      : T extends 'telegram'
         ? { telegramUserId: string }
         : { userId: string };
 
-export type Auth = $Auth<'email'> | $Auth<'phone'> | $Auth<'farcasterUsername'> | $Auth<'telegramUserId'> | $Auth<'userId'>;
+export type Auth = $Auth<'email'> | $Auth<'phone'> | $Auth<'farcaster'> | $Auth<'telegram'> | $Auth<'userId'>;
 
 export enum EncryptorType {
   USER = 'USER',

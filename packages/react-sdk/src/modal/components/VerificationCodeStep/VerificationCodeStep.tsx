@@ -5,7 +5,7 @@ import { ModalStep } from '../../utils/steps.js';
 import { CodeChangeEventDetail, CpslCodeInputCustomEvent } from '@usecapsule/core-components';
 import { useCapsuleStore, useModalStore, useThemeStore, useUserInfoStore } from '../../stores/index.js';
 import { Heading, InnerStepContainer, StepContainer } from '../common.js';
-import { AuthMethod, TAuthType } from '@usecapsule/core-sdk';
+import { AuthMethod } from '@usecapsule/core-sdk';
 
 export const VerificationCodeStep = () => {
   const theme = useThemeStore(state => state.theme);
@@ -77,29 +77,10 @@ export const VerificationCodeStep = () => {
       try {
         const supportedCreateAuthMethods = await capsule.getSupportedCreateAuthMethods();
 
-        // This is a temporary fix until a larger refactor of the auth types is done
-        let authMethod: TAuthType;
-        switch (authInfo.authType) {
-          case 'email':
-            authMethod = 'email';
-            break;
-          case 'phone':
-            authMethod = 'phone';
-            break;
-          case 'farcasterUsername':
-            authMethod = 'farcaster';
-            break;
-          case 'telegramUserId':
-            authMethod = 'telegram';
-            break;
-          default:
-            throw new Error('Invalid authentication type');
-        }
-
         if (supportedCreateAuthMethods.has(AuthMethod.PASSWORD) && supportedCreateAuthMethods.has(AuthMethod.PASSKEY)) {
           setIsIFrameReady(false);
           const webAuthUrl = isEmail ? await capsule.verifyEmail(code) : await capsule.verifyPhone(code);
-          const passwordAuthUrl = await capsule.getSetupPasswordURL(false, authMethod, theme);
+          const passwordAuthUrl = await capsule.getSetupPasswordURL(false, authInfo?.authType, theme);
           setWebAuthURLForCreate(await capsule.shortenLoginLink(webAuthUrl));
           setIFrameUrl(await capsule.shortenLoginLink(passwordAuthUrl));
           setShouldRouteToStep(ModalStep.BIOMETRIC_CREATION);
@@ -107,7 +88,7 @@ export const VerificationCodeStep = () => {
         } else if ((await capsule.getSupportedCreateAuthMethods()).has(AuthMethod.PASSWORD)) {
           setIsIFrameReady(false);
           isEmail ? await capsule.verifyEmail(code) : await capsule.verifyPhone(code);
-          const url = await capsule.getSetupPasswordURL(false, authMethod, theme);
+          const url = await capsule.getSetupPasswordURL(false, authInfo?.authType, theme);
           setIFrameUrl(await capsule.shortenLoginLink(url));
           setShouldRouteToStep(ModalStep.PASSWORD_CREATION);
           return;

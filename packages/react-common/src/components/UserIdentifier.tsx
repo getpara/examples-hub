@@ -28,10 +28,10 @@ export const UserIdentifier = ({ identifier, authType, displayName, pfpUrl }: Mo
     case 'phone':
       icon = 'phone';
       break;
-    case 'farcasterUsername':
+    case 'farcaster':
       icon = 'farcasterBrand';
       break;
-    case 'telegramUserId':
+    case 'telegram':
       icon = 'telegramBrand';
       break;
   }
@@ -42,7 +42,7 @@ export const UserIdentifier = ({ identifier, authType, displayName, pfpUrl }: Mo
         {pfpUrl ? (
           <Avatar src={pfpUrl} size="20px" />
         ) : (
-          <Icon icon={icon} size={authType === 'telegramUserId' ? '20px' : '13px'} />
+          <Icon icon={icon} size={authType === 'telegram' ? '20px' : '13px'} />
         )}
       </IconContainer>
       <IdentifierText variant="bodyS" weight="medium">

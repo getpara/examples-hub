@@ -1,5 +1,6 @@
 import Client, {
   AuthMethod,
+  AuthType,
   BackupKitEmailProps,
   CurrentWalletIds,
   EmailTheme,
@@ -37,7 +38,6 @@ import {
   WalletFilters,
   WalletTypeProp,
   getCapsuleConnectBaseURL,
-  TAuthType,
 } from './definitions.js';
 import { getBaseUrl, initClient } from './external/capsuleClient.js';
 import * as mpcComputationClient from './external/mpcComputationClient.js';
@@ -731,7 +731,7 @@ export abstract class CoreCapsule {
     type: 'createAuth' | 'createPassword' | 'loginAuth' | 'loginPassword' | 'txReview' | 'onRamp',
     opts: {
       params?: Record<string, string | undefined | null>;
-      authType?: TAuthType;
+      authType?: AuthType;
       isForNewDevice?: boolean;
       loginEncryptionPublicKey?: string;
       newDeviceSessionId?: string;
@@ -1556,7 +1556,7 @@ export abstract class CoreCapsule {
   }
 
   private async getWebAuthURLForCreate(
-    authType: TAuthType,
+    authType: AuthType,
     webAuthId: string,
     partnerId?: string,
     isForNewDevice?: boolean,
@@ -1565,7 +1565,7 @@ export abstract class CoreCapsule {
   }
 
   private async getPasswordURLForCreate(
-    authType: TAuthType,
+    authType: AuthType,
     passwordId: string,
     partnerId?: string,
     isForNewDevice?: boolean,
@@ -1608,7 +1608,7 @@ export abstract class CoreCapsule {
     partnerId?: string,
     newDeviceSessionId?: string,
     newDeviceEncryptionKey?: string,
-    authType: TAuthType = 'email',
+    authType: AuthType = 'email',
     displayName?: string,
     pfpUrl?: string,
   ): Promise<string> {
@@ -1630,7 +1630,7 @@ export abstract class CoreCapsule {
     partnerId?: string,
     newDeviceSessionId?: string,
     newDeviceEncryptionKey?: string,
-    authType: TAuthType = 'email',
+    authType: AuthType = 'email',
     displayName?: string,
     pfpUrl?: string,
   ): Promise<string> {
@@ -1962,7 +1962,7 @@ export abstract class CoreCapsule {
   }
 
   // returns web auth url for creating a new credential
-  async getSetUpBiometricsURL(isForNewDevice: boolean, type: TAuthType = 'email'): Promise<string> {
+  async getSetUpBiometricsURL(isForNewDevice: boolean, type: AuthType = 'email'): Promise<string> {
     const res = await this.ctx.capsuleClient.addSessionPublicKey(this.userId, {
       status: PublicKeyStatus.PENDING,
       type: PublicKeyType.WEB,
@@ -1981,7 +1981,7 @@ export abstract class CoreCapsule {
     return this.getWebAuthURLForCreate('phone', res.data.id, res.data.partnerId, isForNewDevice);
   }
 
-  async getSetupPasswordURL(isForNewDevice: boolean, type: TAuthType = 'email', themeOverride?: Theme): Promise<string> {
+  async getSetupPasswordURL(isForNewDevice: boolean, type: AuthType = 'email', themeOverride?: Theme): Promise<string> {
     const res = await this.ctx.capsuleClient.addSessionPasswordPublicKey(this.userId, {
       status: PasswordStatus.PENDING,
     });
@@ -2022,7 +2022,7 @@ export abstract class CoreCapsule {
 
   async supportedAuthMethods(
     identifier: string,
-    authType: TAuthType | 'userId' = 'email',
+    authType: AuthType = 'email',
     countryCode?: string,
   ): Promise<Set<AuthMethod>> {
     let auth;
@@ -2086,7 +2086,7 @@ export abstract class CoreCapsule {
   async initiateUserLogin(
     identifier: string,
     useShortURL?: boolean,
-    type: TAuthType = 'email',
+    type: AuthType = 'email',
     countryCode?: CountryCallingCode,
   ): Promise<string> {
     switch (true) {
@@ -2131,7 +2131,7 @@ export abstract class CoreCapsule {
    **/
   async initiateUserLoginV2(
     identifier: string,
-    type: TAuthType = 'email',
+    type: AuthType = 'email',
     countryCode?: CountryCallingCode,
   ): Promise<Set<AuthMethod>> {
     switch (type) {

@@ -42,7 +42,7 @@ export function isPhone(params: AuthParams): params is $Auth<'phone'> {
   );
 }
 
-export function isFarcaster(params: AuthParams): params is $Auth<'farcasterUsername'> {
+export function isFarcaster(params: AuthParams): params is $Auth<'farcaster'> {
   return (
     isValid(params.farcasterUsername) &&
     !isValid(params.email) &&
@@ -52,7 +52,7 @@ export function isFarcaster(params: AuthParams): params is $Auth<'farcasterUsern
   );
 }
 
-export function isTelegram(params: AuthParams): params is { telegramUserId: string } {
+export function isTelegram(params: AuthParams): params is $Auth<'telegram'> {
   return (
     isValid(params.telegramUserId) &&
     !isValid(params.email) &&
@@ -62,7 +62,7 @@ export function isTelegram(params: AuthParams): params is { telegramUserId: stri
   );
 }
 
-export function isUserId(params: AuthParams): params is { userId: string } {
+export function isUserId(params: AuthParams): params is $Auth<'userId'> {
   return (
     isValid(params.userId) &&
     !isValid(params.email) &&
@@ -87,14 +87,14 @@ export function extractAuthInfo(obj: AuthParams, { allowUserId }: { allowUserId?
     case isFarcaster(obj):
       return {
         auth: { farcasterUsername: obj.farcasterUsername },
-        authType: 'farcasterUsername',
+        authType: 'farcaster',
         identifier: obj.farcasterUsername,
         publicKeyIdentifier: `${obj.farcasterUsername}-farcaster`,
       };
     case isTelegram(obj):
       return {
         auth: { telegramUserId: obj.telegramUserId },
-        authType: 'telegramUserId',
+        authType: 'telegram',
         identifier: obj.telegramUserId,
         publicKeyIdentifier: `${obj.telegramUserId}-telegram`,
       };

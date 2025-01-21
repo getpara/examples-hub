@@ -52,8 +52,6 @@ export interface Ctx {
   isE2E?: boolean;
 }
 
-export type TAuthType = 'email' | 'phone' | 'farcaster' | 'telegram';
-
 export type deprecated__NetworkProp = keyof typeof Network | Network;
 
 export type WalletTypeProp = keyof typeof WalletType | WalletType;
