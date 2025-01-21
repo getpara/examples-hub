@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { CpslButton, CpslIcon, CpslQrCode, CpslSpinner, CpslText } from '@usecapsule/react-components';
 import { CenteredText, Heading, InnerStepContainer, QRContainer, StepContainer } from '../common.js';
-import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
+import { useCapsuleStore, useModalStore, useThemeStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { AuthMethod, isMobile } from '@usecapsule/web-sdk';
 
@@ -9,13 +9,27 @@ const FarcasterOAuthStep = () => {
   const setAuthInfo = useUserInfoStore(state => state.setAuthInfo);
   const setStep = useModalStore(state => state.setStep);
   const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
-  const setPasswordUrlForCreate = useModalStore(state => state.setPasswordUrlForCreate);
+  const setIFrameUrl = useModalStore(state => state.setIFrameUrl);
+  const setIsIFrameReady = useModalStore(state => state.setIsIFrameReady);
+  const isIFrameReady = useModalStore(state => state.isIFrameReady);
   const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
   const setBiometricLocationHints = useModalStore(state => state.setBiometricLocationHints);
   const capsule = useCapsuleStore(state => state.capsule);
   const setFlow = useModalStore(state => state.setFlow);
   const farcasterConnectUri = useModalStore(state => state.farcasterConnectUri);
   const setFarcasterConnectUri = useModalStore(state => state.setFarcasterConnectUri);
+  const theme = useThemeStore(state => state.theme);
+
+  const [shouldRouteToStep, setShouldRouteToStep] = useState<ModalStep>();
+
+  useEffect(() => {
+    if (!!shouldRouteToStep && isIFrameReady) {
+      // Using a small timeout here to fully ensure the iframe is loaded before triggering any animation
+      setTimeout(() => {
+        setStep(shouldRouteToStep);
+      }, 200);
+    }
+  }, [shouldRouteToStep, isIFrameReady]);
 
   useEffect(() => {
     if (farcasterConnectUri) {
@@ -45,16 +59,19 @@ const FarcasterOAuthStep = () => {
 
         const supportedCreateAuthMethods = await capsule.getSupportedCreateAuthMethods();
 
-        if (supportedCreateAuthMethods.has(AuthMethod.PASSWORD)) {
-          setPasswordUrlForCreate(await capsule.getSetupPasswordURL(false, 'farcaster'));
-        }
-
-        if (supportedCreateAuthMethods.has(AuthMethod.PASSKEY)) {
-          setWebAuthURLForCreate(await capsule.getSetUpBiometricsURL(false, 'farcaster'));
-        }
-
+        setIsIFrameReady(false);
         setFlow('signUp');
-        setStep(ModalStep.BIOMETRIC_CREATION);
+        const supportsPasskey = supportedCreateAuthMethods.has(AuthMethod.PASSKEY);
+
+        if (supportsPasskey) {
+          setWebAuthURLForCreate(await capsule.shortenLoginLink(await capsule.getSetUpBiometricsURL(false, 'farcaster')));
+          setStep(ModalStep.BIOMETRIC_CREATION);
+        }
+        if (supportedCreateAuthMethods.has(AuthMethod.PASSWORD)) {
+          setIFrameUrl(await capsule.shortenLoginLink(await capsule.getSetupPasswordURL(false, 'farcaster', theme)));
+          setShouldRouteToStep(supportsPasskey ? ModalStep.BIOMETRIC_CREATION : ModalStep.PASSWORD_CREATION);
+        }
+
         return;
       };
 

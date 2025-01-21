@@ -12,7 +12,9 @@ export const VerificationCodeStep = () => {
   const authInfo = useUserInfoStore(state => state.getAuthInfo());
   const setStep = useModalStore(state => state.setStep);
   const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
-  const setPasswordUrlForCreate = useModalStore(state => state.setPasswordUrlForCreate);
+  const setIFrameUrl = useModalStore(state => state.setIFrameUrl);
+  const setIsIFrameReady = useModalStore(state => state.setIsIFrameReady);
+  const isIFrameReady = useModalStore(state => state.isIFrameReady);
   const capsule = useCapsuleStore(state => state.capsule);
 
   const inputRef = useRef<HTMLCpslCodeInputElement>(null);
@@ -22,6 +24,7 @@ export const VerificationCodeStep = () => {
   const [resendStatus, setResendStatus] = useState('Resend.');
   const [resendDisabled, setResendDisabled] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [shouldRouteToStep, setShouldRouteToStep] = useState<ModalStep>();
 
   const isEmail = authInfo?.authType === 'email';
 
@@ -31,6 +34,16 @@ export const VerificationCodeStep = () => {
       inputRef.current.shadowRoot.querySelectorAll('input')?.[0]?.focus();
     }, 10);
   }, []);
+
+  useEffect(() => {
+    if (!!shouldRouteToStep && isIFrameReady) {
+      // Using a small timeout here to fully ensure the iframe is loaded before triggering any animation
+      setTimeout(() => {
+        setStep(shouldRouteToStep);
+        setIsVerifying(false);
+      }, 200);
+    }
+  }, [shouldRouteToStep, isIFrameReady]);
 
   useEffect(() => {
     if (code.length === 6) {
@@ -65,19 +78,23 @@ export const VerificationCodeStep = () => {
         const supportedCreateAuthMethods = await capsule.getSupportedCreateAuthMethods();
 
         if (supportedCreateAuthMethods.has(AuthMethod.PASSWORD) && supportedCreateAuthMethods.has(AuthMethod.PASSKEY)) {
+          setIsIFrameReady(false);
           const webAuthUrl = isEmail ? await capsule.verifyEmail(code) : await capsule.verifyPhone(code);
           const passwordAuthUrl = await capsule.getSetupPasswordURL(false, undefined, theme);
-          setWebAuthURLForCreate(webAuthUrl);
-          setPasswordUrlForCreate(passwordAuthUrl);
-          setStep(ModalStep.BIOMETRIC_CREATION);
+          setWebAuthURLForCreate(await capsule.shortenLoginLink(webAuthUrl));
+          setIFrameUrl(await capsule.shortenLoginLink(passwordAuthUrl));
+          setShouldRouteToStep(ModalStep.BIOMETRIC_CREATION);
+          return;
         } else if ((await capsule.getSupportedCreateAuthMethods()).has(AuthMethod.PASSWORD)) {
+          setIsIFrameReady(false);
           isEmail ? await capsule.verifyEmail(code) : await capsule.verifyPhone(code);
           const url = await capsule.getSetupPasswordURL(false, undefined, theme);
-          setPasswordUrlForCreate(url);
-          setStep(ModalStep.PASSWORD_CREATION);
+          setIFrameUrl(await capsule.shortenLoginLink(url));
+          setShouldRouteToStep(ModalStep.PASSWORD_CREATION);
+          return;
         } else {
           const url = isEmail ? await capsule.verifyEmail(code) : await capsule.verifyPhone(code);
-          setWebAuthURLForCreate(url);
+          setWebAuthURLForCreate(await capsule.shortenLoginLink(url));
           setStep(ModalStep.BIOMETRIC_CREATION);
         }
       } catch (e) {

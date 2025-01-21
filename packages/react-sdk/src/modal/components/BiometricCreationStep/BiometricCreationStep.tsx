@@ -1,12 +1,8 @@
 import { CpslButton, CpslDivider, CpslIcon, CpslQrCode, CpslSpinner, CpslText } from '@usecapsule/react-components';
-import { useEffect, useState } from 'react';
-import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
-import { ModalStep } from '../../utils/steps.js';
+import { useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { InnerStepContainer, StepContainer, Heading, QRContainer } from '../common.js';
 import { isPasskeySupported } from '../../utils/isPasskeySupported.js';
 import { useCopyToClipboard, UserIdentifier } from '@usecapsule/react-common';
-
-const SHORTENING_AVAILABLE = true;
 
 export const BiometricCreationStep = ({
   handlePasswordClick,
@@ -16,37 +12,15 @@ export const BiometricCreationStep = ({
   handlePasskeyClick: () => Promise<void>;
 }) => {
   const webAuthURLForCreate = useModalStore(state => state.webAuthURLForCreate);
-  const passwordUrlForCreate = useModalStore(state => state.passwordUrlForCreate);
+  const iFrameUrl = useModalStore(state => state.iFrameUrl);
   const authInfo = useUserInfoStore(state => state.getAuthInfo());
-  const currentStep = useModalStore(state => state.step);
-  const capsule = useCapsuleStore(state => state.capsule);
-  const [shortLoginLink, setShortLoginLink] = useState<string>();
   const [isCopied, copy] = useCopyToClipboard();
 
-  useEffect(() => {
-    if (currentStep !== ModalStep.BIOMETRIC_LOGIN) {
-      setShortLoginLink(null);
-    }
-    if (!webAuthURLForCreate) {
-      return;
-    }
-
-    async function shortenUrl() {
-      const shortUrl = await capsule.shortenLoginLink(webAuthURLForCreate);
-      setShortLoginLink(shortUrl);
-    }
-    if (SHORTENING_AVAILABLE) {
-      shortenUrl();
-    } else {
-      setShortLoginLink(webAuthURLForCreate);
-    }
-  }, [webAuthURLForCreate]);
-
   const handleCopy = () => {
-    copy(shortLoginLink);
+    copy(webAuthURLForCreate);
   };
 
-  const isBoth = !!webAuthURLForCreate && !!passwordUrlForCreate;
+  const isBoth = !!webAuthURLForCreate && !!iFrameUrl;
 
   return (
     <StepContainer $wide>
@@ -69,7 +43,9 @@ export const BiometricCreationStep = ({
         ) : (
           <>
             <CpslText weight="semiBold">Scan with your mobile device</CpslText>
-            <QRContainer>{!shortLoginLink ? <CpslSpinner size={100} /> : <CpslQrCode url={shortLoginLink} />}</QRContainer>
+            <QRContainer>
+              {!webAuthURLForCreate ? <CpslSpinner size={100} /> : <CpslQrCode url={webAuthURLForCreate} />}
+            </QRContainer>
             <CpslButton size="small" variant="ghost" onClick={handleCopy}>
               <CpslIcon slot="start" icon={isCopied ? 'check' : 'copy'} />
               {isCopied ? 'Copied' : 'Copy Link'}

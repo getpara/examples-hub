@@ -25,7 +25,6 @@ interface ModalState {
   webAuthURLForLogin: string | undefined;
   webAuthURLForCreate: string | undefined;
   passwordUrlForLogin: string | undefined;
-  passwordUrlForCreate: string | undefined;
   supportedAuthMethods: Set<AuthMethod>;
   onModalStepChange: (value: OnModalStepChangeValue) => void | undefined;
   onRampConfig: OnRampConfig | undefined;
@@ -40,6 +39,8 @@ interface ModalState {
   activeWallet: ActiveWallet | undefined;
   farcasterConnectUri: string | undefined;
   biometricLocationHints: BiometricLocationHint[] | undefined;
+  iFrameUrl: string | undefined;
+  isIFrameReady: boolean | undefined;
 }
 
 export interface ModalActions {
@@ -54,7 +55,6 @@ export interface ModalActions {
   setWebAuthURLForLogin: (url?: string) => void;
   setWebAuthURLForCreate: (url?: string) => void;
   setPasswordUrlForLogin: (url?: string) => void;
-  setPasswordUrlForCreate: (url?: string) => void;
   setOnModalStepChange: (fn: (value: OnModalStepChangeValue) => void) => void;
   setOnRampConfig: (_: OnRampConfig | undefined) => void;
   setOnRampPurchase: (_: Partial<OnRampPurchase> | undefined) => void;
@@ -69,6 +69,8 @@ export interface ModalActions {
   setActiveWallet: (_: ActiveWallet | undefined) => void;
   setFarcasterConnectUri: (_: string | undefined) => void;
   setBiometricLocationHints: (_?: BiometricLocationHint[]) => void;
+  setIFrameUrl: (_?: string) => void;
+  setIsIFrameReady: (_?: boolean) => void;
 }
 
 export type ModalStore = ModalState & ModalActions;
@@ -80,7 +82,6 @@ export const DEFAULT_MODAL_STATE: Omit<ModalState, 'step' | 'onRampConfig'> = {
   webAuthURLForLogin: undefined,
   webAuthURLForCreate: undefined,
   passwordUrlForLogin: undefined,
-  passwordUrlForCreate: undefined,
   supportedAuthMethods: new Set<AuthMethod>(),
   onModalStepChange: undefined,
   onRampPurchase: undefined,
@@ -92,6 +93,8 @@ export const DEFAULT_MODAL_STATE: Omit<ModalState, 'step' | 'onRampConfig'> = {
   activeWallet: [undefined, undefined],
   farcasterConnectUri: undefined,
   biometricLocationHints: undefined,
+  iFrameUrl: undefined,
+  isIFrameReady: undefined,
 };
 
 export const useModalStore = create<ModalStore>()(
@@ -112,7 +115,6 @@ export const useModalStore = create<ModalStore>()(
         webAuthURLForLogin: state.webAuthURLForLogin,
         webAuthURLForCreate: state.webAuthURLForCreate,
         passwordUrlForLogin: state.passwordUrlForLogin,
-        passwordUrlForCreate: state.passwordUrlForCreate,
         biometricLocationHints: state.biometricLocationHints,
         onRampPurchase: state.onRampPurchase,
         selectedExternalWalletId: state.selectedExternalWalletId,

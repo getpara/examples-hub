@@ -1,5 +1,5 @@
 import { AuthMethod, OAuthMethod } from '@usecapsule/web-sdk';
-import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
+import { useCapsuleStore, useModalStore, useThemeStore, useUserInfoStore } from '../../stores/index.js';
 import styled from 'styled-components';
 import { useEffect, useRef, useState } from 'react';
 import { HeroSpinner } from '@usecapsule/react-common';
@@ -22,13 +22,26 @@ export function TelegramOAuthStep() {
   const setAuthInfo = useUserInfoStore(state => state.setAuthInfo);
   const setBiometricLocationHints = useModalStore(state => state.setBiometricLocationHints);
   const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
-  const setPasswordURLForCreate = useModalStore(state => state.setPasswordUrlForCreate);
+  const setIFrameUrl = useModalStore(state => state.setIFrameUrl);
+  const setIsIFrameReady = useModalStore(state => state.setIsIFrameReady);
+  const isIFrameReady = useModalStore(state => state.isIFrameReady);
   const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
+  const theme = useThemeStore(state => state.theme);
 
   const [url, setUrl] = useState(undefined);
   const [isWaiting, setIsWaiting] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [shouldRouteToStep, setShouldRouteToStep] = useState<ModalStep>();
+
+  useEffect(() => {
+    if (!!shouldRouteToStep && isIFrameReady) {
+      // Using a small timeout here to fully ensure the iframe is loaded before triggering any animation
+      setTimeout(() => {
+        setStep(shouldRouteToStep);
+      }, 200);
+    }
+  }, [shouldRouteToStep, isIFrameReady]);
 
   useEffect(() => {
     if (!url) {
@@ -78,18 +91,20 @@ export function TelegramOAuthStep() {
             if (isNewUser) {
               const supportedCreateAuthMethods = await capsule.getSupportedCreateAuthMethods();
 
-              if (supportedCreateAuthMethods.has(AuthMethod.PASSWORD)) {
-                setPasswordURLForCreate(await capsule.getSetupPasswordURL(false, 'telegram'));
-              }
-
-              if (supportedCreateAuthMethods.has(AuthMethod.PASSKEY)) {
-                setWebAuthURLForCreate(await capsule.getSetUpBiometricsURL(false, 'telegram'));
-              }
-
-              const webAuthURLForCreate = await capsule.getSetUpBiometricsURL(false, 'telegram');
+              setIsIFrameReady(false);
               setFlow('signUp');
-              setWebAuthURLForCreate(webAuthURLForCreate);
-              setStep(ModalStep.BIOMETRIC_CREATION);
+              const supportsPasskey = supportedCreateAuthMethods.has(AuthMethod.PASSKEY);
+
+              if (supportsPasskey) {
+                setWebAuthURLForCreate(
+                  await capsule.shortenLoginLink(await capsule.getSetUpBiometricsURL(false, 'telegram')),
+                );
+                setStep(ModalStep.BIOMETRIC_CREATION);
+              }
+              if (supportedCreateAuthMethods.has(AuthMethod.PASSWORD)) {
+                setIFrameUrl(await capsule.shortenLoginLink(await capsule.getSetupPasswordURL(false, 'telegram', theme)));
+                setShouldRouteToStep(supportsPasskey ? ModalStep.BIOMETRIC_CREATION : ModalStep.PASSWORD_CREATION);
+              }
             } else {
               setFlow('login');
               supportedAuthMethods && setSupportedAuthMethods(new Set<AuthMethod>(supportedAuthMethods));

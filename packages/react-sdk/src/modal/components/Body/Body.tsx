@@ -1,5 +1,5 @@
 import { styled } from 'styled-components';
-import { ModalStep } from '../../utils/steps.js';
+import { IFrameSteps, ModalStep } from '../../utils/steps.js';
 import { CpslAlert, CpslIcon } from '@usecapsule/react-components';
 import { VerificationCodeStep } from '../VerificationCodeStep/VerificationCodeStep.js';
 import { useModalStore, useThemeStore } from '../../stores/index.js';
@@ -31,7 +31,7 @@ import { Controls } from '../Controls/Controls.js';
 import { useEffect, useState } from 'react';
 import { TelegramOAuthStep } from '../OAuth/TelegramOAuthStep.js';
 import { AwaitingPasswordStep } from '../AwaitingPasswordStep/AwaitingPasswordStep.js';
-import { PasswordCreationStep } from '../PasswordCreationStep/PasswordCreationStep.js';
+import { IFrameStep } from '../IFrameStep/IFrameStep.js';
 
 interface BodyProps {
   oAuthMethods?: OAuthMethod[];
@@ -139,9 +139,6 @@ export const Body = ({
           />
         );
       }
-      case ModalStep.PASSWORD_CREATION: {
-        return <PasswordCreationStep />;
-      }
       case ModalStep.AWAITING_OAUTH: {
         return <AwaitingOAuthStep />;
       }
@@ -173,6 +170,11 @@ export const Body = ({
       }
       case ModalStep.CHAIN_SWITCH: {
         return <ChainSwitch />;
+      }
+      default: {
+        if (IFrameSteps.includes(currentStep)) {
+          return null;
+        }
       }
     }
   };
@@ -228,7 +230,11 @@ export const Body = ({
             transition={BODY_TRANSITION}
           >
             <Hero />
-            <InnerContainer $embeddedModal={embeddedModal} step={currentStep}>
+            <InnerContainer
+              $embeddedModal={embeddedModal}
+              $step={currentStep}
+              $isIFrameStep={IFrameSteps.includes(currentStep)}
+            >
               {Content()}
               {onRampConfig?.testMode &&
                 [
@@ -253,6 +259,8 @@ export const Body = ({
             </InnerContainer>
           </BodyContainer>
         </AnimatePresence>
+        {/* Leaving IFrameStep outside of the animation container to avoid unnecessary rerenders and excessive data loading */}
+        <IFrameStep />
       </AnimatedWrapper>
     </Container>
   );
@@ -274,20 +282,25 @@ const BodyContainer = styled(motion.div)`
   will-change: auto !important;
 `;
 
-const InnerContainer = styled.div<{ $embeddedModal: boolean; step: ModalStep }>`
+const InnerContainer = styled.div<{ $embeddedModal: boolean; $step: ModalStep; $isIFrameStep: boolean }>`
   z-index: 1;
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   gap: 24px;
-  padding: ${({ $embeddedModal, step }) =>
-    $embeddedModal ? '12px 0px 0px' : `${PADDING_TOP[step] ?? '72px'} 72px ${PADDING_BOTTOM[step] ?? '32px'}`};
-  min-height: ${({ step }) => MIN_HEIGHT[step] ?? 'auto'};
-  height: ${({ step }) => MIN_HEIGHT[step] ?? 'auto'};
+  padding: ${({ $embeddedModal, $step, $isIFrameStep }) =>
+    $isIFrameStep
+      ? '0px'
+      : $embeddedModal
+        ? '12px 0px 0px'
+        : `${PADDING_TOP[$step] ?? '72px'} 72px ${PADDING_BOTTOM[$step] ?? '32px'}`};
+  min-height: ${({ $step }) => MIN_HEIGHT[$step] ?? 'auto'};
+  height: ${({ $step }) => MIN_HEIGHT[$step] ?? 'auto'};
 
   @media (max-width: ${MOBILE_SIZE}px) {
-    padding: ${({ $embeddedModal, step }) => ($embeddedModal ? '12px 0px 0px' : `${PADDING_TOP[step] ?? '72px'} 16px 0px`)};
+    padding: ${({ $embeddedModal, $step, $isIFrameStep }) =>
+      $isIFrameStep ? '0px' : $embeddedModal ? '12px 0px 0px' : `${PADDING_TOP[$step] ?? '72px'} 16px 0px`};
   }
 
   cpsl-auth-modal.force-mobile-media & {

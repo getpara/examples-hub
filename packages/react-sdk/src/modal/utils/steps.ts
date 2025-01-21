@@ -199,3 +199,5 @@ export function getAddFundsStep(currentTab: EnabledFlow): ModalStep {
       return ModalStep.ADD_FUNDS_WITHDRAW;
   }
 }
+
+export const IFrameSteps: ModalStep[] = [ModalStep.PASSWORD_CREATION];

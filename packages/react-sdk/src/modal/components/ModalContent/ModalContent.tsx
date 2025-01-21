@@ -86,7 +86,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
     const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
     const setPopupWindow = useModalStore(state => state.setPopupWindow);
-    const setPasswordUrlForCreate = useModalStore(state => state.setPasswordUrlForCreate);
+    const setIFrameUrl = useModalStore(state => state.setIFrameUrl);
     const setPasswordUrlForLogin = useModalStore(state => state.setPasswordUrlForLogin);
     const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
     const setOnRampConfig = useModalStore(state => state.setOnRampConfig);
@@ -168,7 +168,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
 
       if (isComplete) {
         setWebAuthURLForCreate('');
-        setPasswordUrlForCreate('');
+        setIFrameUrl('');
         setStep(ModalStep.AWAITING_WALLET_CREATION);
       }
     }

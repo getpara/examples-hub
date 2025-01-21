@@ -18,12 +18,17 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
     const isLogin = get().flow === 'login';
     const isAccount = get().flow === 'account';
     const currentStep = get().step;
+    const webAuthURLForCreate = get().webAuthURLForCreate;
+    const iFrameUrl = get().iFrameUrl;
 
+    let prevStep = (isAccount ? AccountPreviousStep : isLogin ? LoginPreviousStep : SignUpPreviousStep)[currentStep];
+
+    if (currentStep === ModalStep.PASSWORD_CREATION && iFrameUrl && !webAuthURLForCreate) {
+      prevStep = ModalStep.AUTH_MAIN;
+    }
     if (currentStep === ModalStep.EX_WALLET_SELECTED) {
       set({ selectedExternalWalletId: undefined, isExternalWalletConnecting: false, externalWalletError: undefined });
     }
-
-    const prevStep = (isAccount ? AccountPreviousStep : isLogin ? LoginPreviousStep : SignUpPreviousStep)[currentStep];
 
     if (prevStep) {
       set({ step: prevStep, stepDirection: -1 });
@@ -50,7 +55,6 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
   isAccount: () => get().flow === 'account',
   setWebAuthURLForLogin: url => set({ webAuthURLForLogin: url }),
   setWebAuthURLForCreate: url => set({ webAuthURLForCreate: url }),
-  setPasswordUrlForCreate: url => set({ passwordUrlForCreate: url }),
   setPasswordUrlForLogin: url => set({ passwordUrlForLogin: url }),
   setSupportedAuthMethods: supportedAuthMethods => set({ supportedAuthMethods }),
   setOnRampPurchase: onRampPurchase =>
@@ -66,4 +70,6 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
   setActiveWallet: activeWallet => set({ activeWallet }),
   setFarcasterConnectUri: farcasterConnectUri => set({ farcasterConnectUri }),
   setBiometricLocationHints: biometricLocationHints => set({ biometricLocationHints }),
+  setIFrameUrl: iFrameUrl => set({ iFrameUrl }),
+  setIsIFrameReady: isIFrameReady => set({ isIFrameReady }),
 });

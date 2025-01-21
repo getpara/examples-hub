@@ -28,6 +28,7 @@ vi.mock('../../../src/modal/stores/index.js', () => ({
     getter({
       setAuthInfo: vi.fn(),
     }),
+  useThemeStore: getter => getter({}),
 }));
 
 describe('TelegramOAuthStep', () => {
