@@ -30,10 +30,12 @@ const ShortUrl = lazy(() => import('./pages/ShortUrl/ShortUrl'));
 const App = () => {
   const [searchParams] = useSearchParams();
   const apiKey = searchParams.get('apiKey') || undefined;
+  const partnerId = searchParams.get('partnerId') || undefined;
 
   return (
     <CapsuleProvider
       apiKey={apiKey}
+      partnerId={partnerId}
       environment={ENV}
       options={{ useSessionStorage: true }}
       onMount={capsule => capsule.clearStorage('local')}

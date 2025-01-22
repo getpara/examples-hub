@@ -233,6 +233,10 @@ export interface ConstructorOpts {
    * If `true`, the SDK will use the device's temporary session storage instead of saving user and wallet data to local storage.
    */
   useSessionStorage?: boolean;
+  /**
+   * Partner ID set in the Capsule Portal to track analytics for legacy SDK versions. This variable is unused outside of the Capsule Portal.
+   */
+  portalPartnerId?: string;
 }
 
 export const PREFIX = '@CAPSULE/';
@@ -565,8 +569,11 @@ export abstract class CoreCapsule {
     };
   }
 
-  private get isPortal(): boolean {
-    return typeof window !== 'undefined' && getPortalBaseURL(this.ctx).includes(window.location.host);
+  private isPortal(envOverride?: Environment): boolean {
+    return (
+      typeof window !== 'undefined' &&
+      getPortalBaseURL(envOverride ? { env: envOverride } : this.ctx).includes(window.location.host)
+    );
   }
 
   private isCapsuleConnect(): boolean {
@@ -884,6 +891,7 @@ export abstract class CoreCapsule {
         env,
         CoreCapsule.version,
         apiKey,
+        this.isPortal(env) ? opts.portalPartnerId : undefined,
         opts.disableWorkers,
         this.retrieveSessionCookie,
         this.persistSessionCookie,
@@ -1705,7 +1713,7 @@ export abstract class CoreCapsule {
    * @returns - wallets that were fetched.
    */
   async fetchWallets(): Promise<WalletEntity[]> {
-    const res = await (this.isPortal || this.isCapsuleConnect()
+    const res = await (this.isPortal() || this.isCapsuleConnect()
       ? this.ctx.capsuleClient.getAllWallets(this.userId)
       : this.ctx.capsuleClient.getWallets(this.userId, true));
 
@@ -2415,7 +2423,7 @@ export abstract class CoreCapsule {
     await this.setUserId(res.data.userId);
 
     if (res.data.currentWalletIds && res.data.currentWalletIds !== this.currentWalletIds)
-      await this.setCurrentWalletIds(res.data.currentWalletIds, this.isPortal ? res.data.sessionLookupId : undefined);
+      await this.setCurrentWalletIds(res.data.currentWalletIds, this.isPortal() ? res.data.sessionLookupId : undefined);
 
     return res;
   }
@@ -2929,7 +2937,7 @@ export abstract class CoreCapsule {
     this.requireApiKey();
     const res = await this.ctx.capsuleClient.getPregenWallets(
       pregenIdentifier && pregenIdentifierType ? { [pregenIdentifierType]: [pregenIdentifier] } : this.pregenIds,
-      this.isPortal,
+      this.isPortal(),
       this.userId,
     );
     return res.wallets.filter(w => this.isWalletSupported(entityToWallet(w)));

@@ -39,7 +39,7 @@ import {
   WalletType,
 } from './types/index.js';
 import { extractWalletRef } from './utils.js';
-import { SESSION_COOKIE_HEADER_NAME, VERSION_HEADER_NAME, PARTNER_ID_HEADER_NAME } from './consts.js';
+import { SESSION_COOKIE_HEADER_NAME, VERSION_HEADER_NAME, PARTNER_ID_HEADER_NAME, API_KEY_HEADER_NAME } from './consts.js';
 import { CapsuleApiError } from './error.js';
 
 interface ConfigOpts {
@@ -49,6 +49,7 @@ interface ConfigOpts {
 type ClientConfig = {
   userManagementHost: string;
   version?: string;
+  partnerId?: string;
   apiKey?: string;
   opts?: ConfigOpts;
   retrieveSessionCookie?: () => string | undefined;
@@ -242,9 +243,20 @@ export const handleResponseError = (error: any) => {
 
 class Client {
   private baseRequest: AxiosInstance;
-  constructor({ userManagementHost, apiKey, version, opts, retrieveSessionCookie, persistSessionCookie }: ClientConfig) {
+  constructor({
+    userManagementHost,
+    apiKey,
+    partnerId,
+    version,
+    opts,
+    retrieveSessionCookie,
+    persistSessionCookie,
+  }: ClientConfig) {
     // TODO remove after this is not optional anymore
-    const headers = apiKey ? { 'X-External-API-Key': apiKey } : undefined;
+    const headers = {
+      ...(apiKey && { [API_KEY_HEADER_NAME]: apiKey }),
+      ...(partnerId && { [PARTNER_ID_HEADER_NAME]: partnerId }),
+    };
     const axiosConfig = {
       baseURL: userManagementHost,
       withCredentials: true,

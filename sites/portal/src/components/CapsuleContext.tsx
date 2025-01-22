@@ -5,6 +5,7 @@ import { CapsulePortal } from '../classes/CapsulePortal';
 
 interface CapsuleProviderProps extends PropsWithChildren {
   apiKey?: string;
+  partnerId?: string;
   capsule?: CapsulePortal;
   environment: CapsuleEnvironment;
   options?: CapsuleConstructorOpts;
@@ -52,9 +53,10 @@ export const CapsuleContext = createContext<CapsulePortal>(undefined as unknown 
  *   );
  * }
  */
+
 export const CapsuleProvider = (props: CapsuleProviderProps) => {
   const [searchParams] = useSearchParams();
-  const { apiKey, environment, options, onMount, children } = props;
+  const { apiKey, environment, options, onMount, children, partnerId } = props;
   const paramsSupportedWalletTypes = searchParams.get('supportedWalletTypes');
 
   const capsule = useMemo(
@@ -65,6 +67,7 @@ export const CapsuleProvider = (props: CapsuleProviderProps) => {
         ...(paramsSupportedWalletTypes
           ? { supportedWalletTypes: JSON.parse(decodeURIComponent(paramsSupportedWalletTypes)) }
           : {}),
+        ...(partnerId && { portalPartnerId: partnerId }),
       }),
     [apiKey, environment, options, props.capsule, paramsSupportedWalletTypes],
   );

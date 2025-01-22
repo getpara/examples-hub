@@ -142,7 +142,7 @@ export async function handleMessage(
     env,
     apiKey,
     cosmosPrefix,
-    capsuleClient: initClient(env, capsuleVersion, apiKey, useFetchAdapter, () => sessionCookie),
+    capsuleClient: initClient(env, capsuleVersion, apiKey, undefined, useFetchAdapter, () => sessionCookie),
     offloadMPCComputationURL: offloadMPCComputationURL,
     mpcComputationClient: offloadMPCComputationURL
       ? mpcComputationClient.initClient(offloadMPCComputationURL, !!disableWorkers)

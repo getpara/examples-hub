@@ -129,7 +129,7 @@ export async function handleMessage(e: { data: Message }): Promise<any> {
   const ctx = {
     env,
     apiKey,
-    capsuleClient: initClient(env, capsuleVersion, apiKey, false, () => sessionCookie),
+    capsuleClient: initClient(env, capsuleVersion, apiKey, undefined, false, () => sessionCookie),
     offloadMPCComputationURL: offloadMPCComputationURL,
     mpcComputationClient: offloadMPCComputationURL
       ? mpcComputationClient.initClient(offloadMPCComputationURL, !!disableWorkers)
