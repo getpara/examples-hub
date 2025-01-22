@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { capsule } from "@/client/capsule";
 import { WalletType } from "@usecapsule/web-sdk";
 import { EmailInput } from "@/components/EmailInput";
-import { VerificationInput } from "@/components/VerificationInput";
+import { OTPInput } from "@/components/OTPInput";
 import { AuthButton } from "@/components/AuthButton";
 import { WalletDisplay } from "@/components/WalletDisplay";
 
@@ -134,10 +134,10 @@ export default function Home() {
 
         {step === 1 && (
           <>
-            <VerificationInput
+            <OTPInput
               disabled={isLoading}
               value={verificationCode}
-              onChange={(e) => setVerificationCode(e.target.value)}
+              onChange={setVerificationCode}
             />
             <AuthButton
               isLoading={isLoading}
