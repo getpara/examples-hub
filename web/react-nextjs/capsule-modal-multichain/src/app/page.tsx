@@ -47,7 +47,7 @@ export default function Home() {
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen gap-6 p-8">
-      <h1 className="text-2xl font-bold">Capsule Modal + All Wallets Example</h1>
+      <h1 className="text-2xl font-bold">Capsule Modal + Multichain Wallets Example</h1>
       <p className="max-w-md text-center">
         This minimal example demonstrates how to integrate the Capsule Modal with all available external wallets and
         Auth methods in a Next.js (App Router) project.
@@ -56,7 +56,7 @@ export default function Home() {
       <button
         disabled={isLoading}
         onClick={handleOpenModal}
-        className="rounded-md px-4 py-2 bg-blue-600 text-white hover:bg-blue-700">
+        className="rounded-none px-4 py-2 bg-blue-600 text-white hover:bg-blue-700">
         Open Capsule Modal
       </button>
       {error && <p className="text-red-500 text-sm text-center">{error}</p>}
@@ -101,6 +101,8 @@ export default function Home() {
           borderRadius: "none",
           font: "Inter",
         }}
+        appName="Capsule Modal + Multichain Wallets Example"
+        logo="/capsule.svg"
       />
     </main>
   );

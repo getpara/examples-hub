@@ -55,7 +55,7 @@ export default function Home() {
       <button
         disabled={isLoading}
         onClick={handleOpenModal}
-        className="rounded-md px-4 py-2 bg-blue-600 text-white hover:bg-blue-700">
+        className="rounded-none px-4 py-2 bg-blue-600 text-white hover:bg-blue-700">
         Open Capsule Modal
       </button>
       {error && <p className="text-red-500 text-sm text-center">{error}</p>}
@@ -79,6 +79,8 @@ export default function Home() {
           borderRadius: "none",
           font: "Inter",
         }}
+        appName="Capsule Modal + Cosmos Wallets Example"
+        logo="/capsule.svg"
       />
     </main>
   );
