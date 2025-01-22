@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { AuthLayout, CapsuleModal, ExternalWallet } from "@usecapsule/react-sdk";
-import { capsule } from "@/client/capsule";
+import { AuthLayout, ExternalWallet, OAuthMethod } from "@usecapsule/react-sdk";
+import { CapsuleModal } from "@usecapsule/react-sdk";
 import "@usecapsule/react-sdk/styles.css";
+import { capsule } from "@/client/capsule";
 
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,10 +22,10 @@ export default function Home() {
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen gap-6 p-8">
-      <h1 className="text-2xl font-bold">Capsule Modal + Solana Wallets Example</h1>
+      <h1 className="text-2xl font-bold">Capsule Modal + All Wallets Example</h1>
       <p className="max-w-md text-center">
-        This minimal example demonstrates how to integrate the Capsule Modal with Solana Wallet Connectors in a Next.js
-        (App Router) project.
+        This minimal example demonstrates how to integrate the Capsule Modal with all available external wallets and
+        Auth methods in a Next.js (App Router) project.
       </p>
       <button
         onClick={handleOpenModal}
@@ -36,10 +37,30 @@ export default function Home() {
         capsule={capsule}
         isOpen={isOpen}
         onClose={handleCloseModal}
-        disableEmailLogin={true}
-        disablePhoneLogin={true}
-        authLayout={[AuthLayout.EXTERNAL_FULL]}
-        externalWallets={[ExternalWallet.PHANTOM, ExternalWallet.BACKPACK, ExternalWallet.GLOW]}
+        disableEmailLogin={false}
+        disablePhoneLogin={false}
+        authLayout={[AuthLayout.AUTH_FULL, AuthLayout.EXTERNAL_FULL]}
+        oAuthMethods={[
+          OAuthMethod.APPLE,
+          OAuthMethod.DISCORD,
+          OAuthMethod.FACEBOOK,
+          OAuthMethod.FARCASTER,
+          OAuthMethod.GOOGLE,
+          OAuthMethod.TWITTER,
+        ]}
+        externalWallets={[
+          ExternalWallet.BACKPACK,
+          ExternalWallet.COINBASE,
+          ExternalWallet.GLOW,
+          ExternalWallet.KEPLR,
+          ExternalWallet.LEAP,
+          ExternalWallet.METAMASK,
+          ExternalWallet.PHANTOM,
+          ExternalWallet.RABBY,
+          ExternalWallet.RAINBOW,
+          ExternalWallet.WALLETCONNECT,
+          ExternalWallet.ZERION,
+        ]}
         onRampTestMode={true}
         theme={{
           foregroundColor: "#2D3648",

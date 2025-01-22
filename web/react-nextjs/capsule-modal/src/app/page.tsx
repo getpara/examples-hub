@@ -1,6 +1,7 @@
 "use client";
+
 import { useState } from "react";
-import { CapsuleModal, OAuthMethod } from "@usecapsule/react-sdk";
+import { AuthLayout, CapsuleModal, OAuthMethod } from "@usecapsule/react-sdk";
 import { capsule } from "@/client/capsule";
 
 import "@usecapsule/react-sdk/styles.css";
@@ -23,7 +24,8 @@ export default function Home() {
     <main className="flex flex-col items-center justify-center min-h-screen gap-6 p-8">
       <h1 className="text-2xl font-bold">Capsule + Cosmos Example</h1>
       <p className="max-w-md text-center">
-        This minimal example demonstrates how to integrate the Capsule Modal in a Next.js (App Router) project.
+        This minimal example demonstrates how to integrate the Capsule Modal with EVM Wallet Connectors in a Next.js
+        (App Router) project.
       </p>
       <button
         onClick={handleOpenModal}
@@ -37,6 +39,7 @@ export default function Home() {
         onClose={handleCloseModal}
         disableEmailLogin={false}
         disablePhoneLogin={false}
+        authLayout={[AuthLayout.AUTH_FULL]}
         oAuthMethods={[
           OAuthMethod.APPLE,
           OAuthMethod.DISCORD,
@@ -46,6 +49,17 @@ export default function Home() {
           OAuthMethod.TWITTER,
         ]}
         onRampTestMode={true}
+        theme={{
+          foregroundColor: "#2D3648",
+          backgroundColor: "#FFFFFF",
+          accentColor: "#0066CC",
+          darkForegroundColor: "#E8EBF2",
+          darkBackgroundColor: "#1A1F2B",
+          darkAccentColor: "#4D9FFF",
+          mode: "light",
+          borderRadius: "none",
+          font: "Inter",
+        }}
       />
     </main>
   );

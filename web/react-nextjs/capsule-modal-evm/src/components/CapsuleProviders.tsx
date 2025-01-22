@@ -24,7 +24,7 @@ export const CapsuleProviders: React.FC<Props> = ({ children }) => {
     <QueryClientProvider client={queryClient}>
       <CapsuleEvmProvider
         config={{
-          projectId: "your_wallet_connect_project_id",
+          projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "",
           appName: "Capsule EVM Wallet Connect",
           chains: [mainnet, polygon, sepolia, celo],
           wallets: [metaMaskWallet, rainbowWallet, walletConnectWallet, zerionWallet, coinbaseWallet, rabbyWallet],
