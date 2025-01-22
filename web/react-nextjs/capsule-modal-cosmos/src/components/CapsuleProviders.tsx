@@ -8,16 +8,16 @@ type Props = {
   children: React.ReactNode;
 };
 
-export const CapsuleProviders: React.FC<Props> = ({ children }) => {
-  // Example chain config for Cosmos Hub; you can add more as needed.
-  const cosmosChains = [
-    {
-      ...cosmoshub,
-      rpc: "https://rpc.cosmos.directory/cosmoshub",
-      rest: "https://rest.cosmos.directory/cosmoshub",
-    },
-  ];
+// Example chain config for Cosmos Hub; you can add more as needed.
+const cosmosChains = [
+  {
+    ...cosmoshub,
+    rpc: "https://rpc.cosmos.directory/cosmoshub",
+    rest: "https://rest.cosmos.directory/cosmoshub",
+  },
+];
 
+export const CapsuleProviders: React.FC<Props> = ({ children }) => {
   return (
     <CapsuleCosmosProvider
       chains={cosmosChains}
