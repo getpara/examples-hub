@@ -11,7 +11,7 @@ export default function Home() {
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen gap-6 p-8">
-      <h1 className="text-2xl font-bold">Capsule + Cosmos Example</h1>
+      <h1 className="text-2xl font-bold">Capsule + Rainbowkit Wallet Connector Example</h1>
       <p className="max-w-md text-center">
         This minimal example demonstrates how to integrate the Capsule Modal with Rainbowkit Wallet Connector in a
         Next.js (App Router) project.

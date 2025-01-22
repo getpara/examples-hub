@@ -46,10 +46,9 @@ export default function Home() {
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen gap-6 p-8">
-      <h1 className="text-2xl font-bold">Capsule + Cosmos Example</h1>
+      <h1 className="text-2xl font-bold">Capsule Modal Example</h1>
       <p className="max-w-md text-center">
-        This minimal example demonstrates how to integrate the Capsule Modal with EVM Wallet Connectors in a Next.js
-        (App Router) project.
+        This minimal example demonstrates how to integrate the Capsule Modal in a Next.js (App Router) project.
       </p>
       {isConnected ? <WalletDisplay walletAddress={wallet} /> : <p className="text-center">You are not logged in.</p>}
       <button
