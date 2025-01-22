@@ -1,20 +1,20 @@
-# Capsule Modal + Cosmos Wallets Example
+# Capsule Modal + Solana Wallets Example
 
 This repository demonstrates how to integrate [Capsule](https://usecapsule.com/) into a **Next.js** application using
-Cosmos External Wallets (such as **Keplr** and **Leap**). The project scaffolds a minimal Next.js 15.x app, showing a
-Capsule Modal that supports external wallet connections in the Cosmos ecosystem.
+Solana Wallet Connectors (e.g., Phantom, Glow, Backpack). The project scaffolds a minimal Next.js 15.x app, showing a
+Capsule Modal that supports external wallet connections on Solana.
 
 ## Features
 
 - **Next.js (App Router)** – Utilizing the latest Next.js version.
 - **Capsule Modal** – Provides a user-friendly modal for authentication flows.
-- **Cosmos Wallet Connectors** – Demonstrates connecting to Keplr and Leap wallets.
+- **Solana Wallet Connectors** – Demonstrates connecting to Phantom, Glow, Backpack, etc.
 
 ## Prerequisites
 
 1. **Node.js v18+** (or an environment that supports Next.js 15)
 2. **yarn** / **npm** / **pnpm** / **bun** – choose your package manager
-3. A [Capsule account + API key](https://developer.usecapsule.com/) in **BETA** or **PRODUCTION** environment.
+3. A [Capsule account + API key](https://developer.usecapsule.com/) in **BETA** or **PRODUCTION** environment
 
 ## Installation
 
@@ -22,7 +22,7 @@ Capsule Modal that supports external wallet connections in the Cosmos ecosystem.
 
    ```bash
    git clone https://github.com/capsule-org/examples-hub.git
-   cd examples-hub/web/react-nextjs/capsule-modal-cosmos
+   cd examples-hub/web/react-nextjs/capsule-modal-solana
    ```
 
 2. **Install Dependencies**:
@@ -37,24 +37,12 @@ Capsule Modal that supports external wallet connections in the Cosmos ecosystem.
    bun install
    ```
 
-3. **Generate Graz Chains** (optional, if you see type issues):
-
-   ```bash
-   yarn graz --generate
-   ```
-
-   or
-
-   ```bash
-   npx graz --generate
-   ```
-
-4. **Set up Environment Variables**:
-   - Create a `.env` file (or `.env.local` in Next.js) with:
+3. **Set up Environment Variables**:
+   - Create a `.env` (or `.env.local`) file with:
      ```bash
      NEXT_PUBLIC_CAPSULE_API_KEY=YOUR_CAPSULE_API_KEY
      ```
-   - Make sure to use a valid Capsule API key and environment for the `Environment.BETA` or `Environment.PRODUCTION`.
+   - Make sure to use a valid Capsule API key and environment for `Environment.BETA` or `Environment.PRODUCTION`.
 
 ## Usage
 
@@ -71,56 +59,45 @@ bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser. You should see a basic homepage with a button
-labeled **Connect Wallet**.
+labeled **Open Capsule Modal**.
 
-### Connecting a Cosmos Wallet
+### Connecting a Solana Wallet
 
-The **CapsuleModal** is configured to show external Cosmos wallets (Keplr, Leap). When you click **Connect Wallet**:
+The **CapsuleModal** is configured to show external Solana wallets (Phantom, Backpack, Glow). When you click
+**Open Capsule Modal**:
 
 1. The Capsule Modal will appear.
-2. Users can either connect Keplr or Leap (or any other wallet you configure).
-3. Upon successful connection, you can read the user’s wallet address within your own app.
+2. Users can connect Phantom, Glow, or Backpack (or any other supported Solana wallet you configure).
+3. Upon successful connection, you can read the user’s wallet address within your app.
 
 ### Files of Interest
 
-- **`src/app/page.tsx`** Contains a simple UI with a button opening the Capsule Modal and demonstration of external
-  wallets.
-- **`src/app/components/CapsuleProviders.tsx`** Wraps your app in the `CapsuleCosmosProvider`, which is needed for
-  external Cosmos wallets.
-- **`src/client/capsule.ts`** Creates a **CapsuleWeb** instance using your `NEXT_PUBLIC_CAPSULE_API_KEY`. You can switch
-  between `Environment.BETA` or `Environment.PRODUCTION`.
+- **`src/app/page.tsx`** - Contains a simple UI with a button opening the Capsule Modal for Solana wallets.
+- **`src/app/components/CapsuleProviders.tsx`** - Wraps your app in `CapsuleSolanaProvider`, needed for external Solana
+  wallet connections.
+- **`src/client/capsule.ts`** - Creates a **CapsuleWeb** instance using your `NEXT_PUBLIC_CAPSULE_API_KEY`.
 
 ### Important Packages
 
 - `@usecapsule/react-sdk` – Core React SDK for Capsule.
-- `@usecapsule/cosmos-wallet-connectors` – Connectors for Cosmos wallets (Keplr, Leap, etc.).
-- `@usecapsule/graz` – A specialized fork of graz with Capsule integration.
-- `@leapwallet/cosmos-social-login-capsule-provider` – A peer dependency for Leap’s integration (required even if you
-  don’t actively use Leap social login).
-- `@usecapsule/core-sdk` – Core library that the React SDK depends on. We add this to override the out of date
-  `@leapwallet/cosmos-social-login-capsule-provider` which is using an older version of the core-sdk.
-- `@usecapsule/user-management-client` – User management client for Capsule. Again, we add this to override the out of
-  date `@leapwallet/cosmos-social-login-capsule-provider` which is using an older version of the user-management-client
-  via the core-sdk.
+- `@usecapsule/solana-wallet-connectors` – Connectors for Solana wallets (Phantom, Glow, Backpack, etc.).
+- `@solana/wallet-adapter-*` – Official Solana adapter libraries and dependencies.
 
 ## Common Issues / Troubleshooting
 
-1. **Hydration Mismatch**: If you see a console warning about hydration failing, it’s often caused by browser extensions
-   (like Grammarly) injecting attributes.
+1. **Hydration Mismatch**: May be triggered by browser extensions injecting unwanted attributes.
 2. **Missing `pino-pretty` Warning**: If Next.js logs a warning about `pino-pretty` not found, you can ignore it or
-   install `pino-pretty` as a dev dependency. It’s used by underlying libraries for local logging.
-3. **API Key**: Make sure your `.env` is set up correctly. The `NEXT_PUBLIC_CAPSULE_API_KEY` must be exposed to client
-   code.
-4. **Package Versions**: If you see a module resolution conflict (e.g.,
-   `@leapwallet/cosmos-social-login-capsule-provider` referencing older versions), ensure your `@usecapsule/core-sdk`,
-   `@usecapsule/react-sdk`, etc., match the same major version range.
+   install it. It's used for local logging by underlying libraries.
+3. **API Key**: Make sure your `.env` is set up correctly. `NEXT_PUBLIC_CAPSULE_API_KEY` must be exposed to client code.
+4. **Solana Devnet vs Mainnet**: The example defaults to Devnet with `clusterApiUrl`. Switch to Mainnet or your custom
+   endpoint as needed.
 
 ---
 
-**Enjoy building with Capsule and Cosmos wallets!** If you have any questions or need help, check out:
+**Enjoy building with Capsule + Solana wallets!** If you have any questions or need help, check out:
 
 - [Capsule Docs](https://docs.usecapsule.com/)
-- [Cosmos Docs](https://docs.cosmos.network/)
+- [Solana Docs](https://docs.solana.com/)
 - [Next.js Documentation](https://nextjs.org/docs)
 
-Feel free to open issues or PRs if you find something that needs improving. Happy coding!
+Happy coding!

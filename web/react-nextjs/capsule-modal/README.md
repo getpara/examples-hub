@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Capsule Modal Example
 
-## Getting Started
+This repository demonstrates how to integrate [Capsule](https://usecapsule.com/) into a **Next.js** application with a
+minimal example of the Capsule Modal. The project scaffolds a minimal Next.js 15.x app that shows how to open and
+configure the Capsule Modal for basic user login.
 
-First, run the development server:
+## Features
+
+- **Next.js (App Router)** – Utilizing the latest Next.js version.
+- **Capsule Modal** – Provides a user-friendly modal for Capsule authentication flows.
+
+## Prerequisites
+
+1. **Node.js v18+** (or an environment that supports Next.js 15)
+2. **yarn** / **npm** / **pnpm** / **bun** – choose your package manager
+3. A [Capsule account + API key](https://developer.usecapsule.com/) in **BETA** or **PRODUCTION** environment
+
+## Installation
+
+1. **Clone** or download this repository:
+
+   ```bash
+   git clone https://github.com/capsule-org/examples-hub.git
+   cd examples-hub/web/react-nextjs/capsule-modal
+   ```
+
+2. **Install Dependencies**:
+
+   ```bash
+   yarn install
+   # or
+   npm install
+   # or
+   pnpm install
+   # or
+   bun install
+   ```
+
+3. **Set up Environment Variables**:
+   - Create a `.env` (or `.env.local`) file and set:
+     ```bash
+     NEXT_PUBLIC_CAPSULE_API_KEY=YOUR_CAPSULE_API_KEY
+     ```
+   - Make sure to use a valid Capsule API key and environment for `Environment.BETA` or `Environment.PRODUCTION`.
+
+## Usage
+
+### Running the Development Server
 
 ```bash
-npm run dev
-# or
 yarn dev
+# or
+npm run dev
 # or
 pnpm dev
 # or
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser. You should see a basic homepage with a button
+labeled **Open Capsule Modal**.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Files of Interest
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **`src/app/page.tsx`** - Displays a button that, when clicked, opens the Capsule Modal.
+- **`src/client/capsule.ts`** - Creates a **CapsuleWeb** instance using your `NEXT_PUBLIC_CAPSULE_API_KEY`.
 
-## Learn More
+### Important Packages
 
-To learn more about Next.js, take a look at the following resources:
+- `@usecapsule/react-sdk` – Core React SDK for Capsule.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Common Issues / Troubleshooting
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. **Hydration Mismatch**: If you see a console warning about hydration failing, it can be due to browser extensions
+   injecting attributes.
+2. **API Key**: Ensure your `.env` is set up correctly. The `NEXT_PUBLIC_CAPSULE_API_KEY` must be exposed to client code.
+3. **Missing `pino-pretty`**: If Next.js complains about `pino-pretty` not found, you can ignore it or install it
+   locally. It's used by some underlying libraries for local logging.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**Enjoy building with Capsule!** If you have questions or need help, check out:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Capsule Docs](https://docs.usecapsule.com/)
+- [Next.js Documentation](https://nextjs.org/docs)
+
+Happy coding!
