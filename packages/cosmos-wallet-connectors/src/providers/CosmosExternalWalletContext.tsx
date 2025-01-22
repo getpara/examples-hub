@@ -10,6 +10,8 @@ import {
   useActiveWalletType,
   useConnect,
   useDisconnect,
+  useSuggestChainAndConnect,
+  getChainInfo,
 } from '@usecapsule/graz';
 
 export const defaultCosmosExternalWallet = {
@@ -35,7 +37,15 @@ interface CosmosExternalWalletProviderProps {
 }
 
 export function CosmosExternalWalletProvider({ children, capsule, onSwitchWallet }: CosmosExternalWalletProviderProps) {
-  const { selectedChainId, wallets: incompleteWallets, chains, multiChain, onSwitchChain } = useCapsuleCosmos();
+  const {
+    selectedChainId,
+    wallets: incompleteWallets,
+    chains,
+    multiChain,
+    shouldUseSuggestChainAndConnect,
+    onSwitchChain,
+  } = useCapsuleCosmos();
+  const { suggestAndConnectAsync } = useSuggestChainAndConnect();
   const {
     data: account,
     isConnecting,
@@ -145,7 +155,25 @@ export function CosmosExternalWalletProvider({ children, capsule, onSwitchWallet
       return;
     } else {
       try {
-        const connectedWallet = await connectAsync({ walletType, chainId: _chainId });
+        let chainInfo;
+
+        if (shouldUseSuggestChainAndConnect) {
+          if (typeof _chainId !== 'string') {
+            console.error('multiChain is not compatible with shouldUseSuggestChainAndConnect.');
+            return;
+          }
+
+          chainInfo = getChainInfo({ chainId: _chainId });
+
+          if (!chainInfo) {
+            console.error('Chain not found.');
+            return;
+          }
+        }
+
+        const connectedWallet = await (shouldUseSuggestChainAndConnect
+          ? suggestAndConnectAsync({ walletType, chainInfo })
+          : connectAsync({ walletType, chainId: _chainId }));
 
         const firstChain = typeof _chainId === 'string' ? _chainId : _chainId[0];
 
@@ -165,6 +193,7 @@ export function CosmosExternalWalletProvider({ children, capsule, onSwitchWallet
         if (err.message === 'No wallet exists') {
           error = err.message;
         } else {
+          console.error('Graz connection error:', err);
           error = 'An unknown error occurred.';
         }
       }

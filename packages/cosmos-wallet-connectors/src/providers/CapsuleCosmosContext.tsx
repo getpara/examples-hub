@@ -10,6 +10,7 @@ export const CapsuleCosmosContext = createContext<{
   wallets: WalletWithType[];
   chains: ChainInfo[];
   multiChain?: boolean;
+  shouldUseSuggestChainAndConnect?: boolean;
   onSwitchChain: (chainId: string) => void;
 }>({ wallets: [], chains: [], onSwitchChain: () => {} });
 
@@ -30,6 +31,11 @@ interface CapsuleCosmosProviderProps extends Omit<ConfigureGrazArgs, 'chains'> {
   /**
    * Called with the newly selected chainId when a the chain value is changed in the Capsule modal.
    */
+  /**
+   * If true, the initial connection request will use the Graz useSuggestChainAndConnect hook to connect to the selected wallet
+   * Ref: https://graz.sh/docs/hooks/useSuggestChainAndConnect
+   */
+  shouldUseSuggestChainAndConnect?: boolean;
   onSwitchChain: (chainId: string) => void;
 }
 
@@ -39,6 +45,7 @@ export function CapsuleCosmosProvider({
   chains,
   selectedChainId,
   multiChain,
+  shouldUseSuggestChainAndConnect,
   onSwitchChain,
   ...grazOpts
 }: CapsuleCosmosProviderProps) {
@@ -63,8 +70,15 @@ export function CapsuleCosmosProvider({
   });
 
   const value = useMemo(
-    () => ({ selectedChainId, wallets: walletsWithType, chains, multiChain, onSwitchChain }),
-    [selectedChainId, walletsWithType, chains, multiChain, onSwitchChain],
+    () => ({
+      selectedChainId,
+      wallets: walletsWithType,
+      chains,
+      multiChain,
+      shouldUseSuggestChainAndConnect,
+      onSwitchChain,
+    }),
+    [selectedChainId, walletsWithType, chains, multiChain, shouldUseSuggestChainAndConnect, onSwitchChain],
   );
 
   if (!cosmosContext || !CosmosProvider) {
