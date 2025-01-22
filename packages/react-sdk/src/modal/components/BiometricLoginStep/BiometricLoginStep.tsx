@@ -1,5 +1,5 @@
 import { CpslButton, CpslDivider, CpslIcon } from '@usecapsule/react-components';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { Heading, StepContainer, InnerStepContainer } from '../common.js';
@@ -24,6 +24,8 @@ export const BiometricLoginStep = () => {
   const passkeysSupported = isPasskeySupported();
   const formattedHints = useMemo(() => formatBiometricHints(biometricLocationHints), [biometricLocationHints]);
   const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
+
+  const [webAuthURLForKnownDeviceLogin, setWebAuthURLForKnownDeviceLogin] = useState<string>();
 
   useEffect(() => {
     async function setLinks() {
@@ -62,6 +64,20 @@ export const BiometricLoginStep = () => {
             )
           : undefined;
 
+      const _webAuthURLForKnownDeviceLogin =
+        supportedAuthMethods?.has && supportedAuthMethods.has(AuthMethod.PASSKEY)
+          ? await capsule.getWebAuthURLForLogin(
+              res.data.sessionId,
+              getPublicKeyHex(capsule.loginEncryptionKeyPair),
+              res.data.partnerId,
+              res.data.sessionLookupId,
+              getPublicKeyHex(capsule.loginEncryptionKeyPair),
+              authType,
+              authInfo.displayName,
+              authInfo.pfpUrl,
+            )
+          : undefined;
+
       const passwordAuthUrlForLogin =
         supportedAuthMethods?.has && supportedAuthMethods.has(AuthMethod.PASSWORD)
           ? await capsule.getPasswordURLForLogin(
@@ -77,7 +93,11 @@ export const BiometricLoginStep = () => {
           : undefined;
 
       const shortWebAuthLoginLink = webAuthUrlForLogin ? await capsule.shortenLoginLink(webAuthUrlForLogin) : undefined;
+      const shortWebAuthForKnownDeviceLoginLink = _webAuthURLForKnownDeviceLogin
+        ? await capsule.shortenLoginLink(_webAuthURLForKnownDeviceLogin)
+        : undefined;
 
+      setWebAuthURLForKnownDeviceLogin(shortWebAuthForKnownDeviceLoginLink);
       setWebAuthURLForLogin(shortWebAuthLoginLink);
       setPasswordUrlForLogin(passwordAuthUrlForLogin);
     }
@@ -125,15 +145,18 @@ export const BiometricLoginStep = () => {
           <PasswordOnly handlePasswordClick={handlePasswordClick} />
         )}
 
-        {supportedAuthMethods?.has && supportedAuthMethods.has(AuthMethod.PASSKEY) && webAuthURLForLogin && (
-          <BiometricOnly
-            handlePasskeyClick={handlePasskeyClick}
-            formattedHints={formattedHints}
-            shortLoginLink={webAuthURLForLogin}
-            passkeysSupported={passkeysSupported}
-            biometricLocationHints={biometricLocationHints}
-          />
-        )}
+        {supportedAuthMethods?.has &&
+          supportedAuthMethods.has(AuthMethod.PASSKEY) &&
+          webAuthURLForLogin &&
+          webAuthURLForKnownDeviceLogin && (
+            <BiometricOnly
+              handlePasskeyClick={handlePasskeyClick}
+              formattedHints={formattedHints}
+              shortLoginLink={webAuthURLForKnownDeviceLogin}
+              passkeysSupported={passkeysSupported}
+              biometricLocationHints={biometricLocationHints}
+            />
+          )}
       </MainContainer>
     </StepContainer>
   );

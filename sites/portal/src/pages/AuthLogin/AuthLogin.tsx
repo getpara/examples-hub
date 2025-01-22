@@ -199,6 +199,7 @@ const AuthLoginBase = ({ authMethod }) => {
         onSuccess={() => {
           setStep(AuthLoginStep.SUCCESS);
         }}
+        isKnownDeviceLogin={isKnownDeviceLogin}
       />
     );
   }

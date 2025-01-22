@@ -23,6 +23,7 @@ import {
   PartnerIcon as PartnerIconRoot,
 } from '../../../components';
 import { motion } from 'framer-motion';
+import { CenteredText } from '@usecapsule/react-common';
 
 const GRADIENT = `linear-gradient(to right, #fe5330, #9400db)`;
 
@@ -134,7 +135,15 @@ const WalletButton = ({ wallet, disabled, onClick, isClaimable, isNew, isSelecte
   );
 };
 
-export const SelectWallet = ({ onSuccess, sessionLookupId }: { onSuccess: () => void; sessionLookupId: string }) => {
+export const SelectWallet = ({
+  onSuccess,
+  sessionLookupId,
+  isKnownDeviceLogin,
+}: {
+  onSuccess: () => void;
+  sessionLookupId: string;
+  isKnownDeviceLogin: boolean;
+}) => {
   const capsule = useCapsule();
   const {
     fns: { finishLogin, authUpdateKeyShares },
@@ -279,9 +288,15 @@ export const SelectWallet = ({ onSuccess, sessionLookupId }: { onSuccess: () => 
               <SaveRecoverySecret email={email} value={recoverySecret} onComplete={() => setIsRecoverySecretSaved(true)} />
             </RecoverySecretContainer>
           )}
-          <CpslButton fullWidth disabled={!!recoverySecret && !isRecoverySecretSaved} onClick={() => window.close()}>
-            Done
-          </CpslButton>
+          {isKnownDeviceLogin ? (
+            <CenteredText weight="medium" variant="bodyS" color="secondary">
+              You can close this window and return to your other device.
+            </CenteredText>
+          ) : (
+            <CpslButton fullWidth disabled={!!recoverySecret && !isRecoverySecretSaved} onClick={() => window.close()}>
+              Done
+            </CpslButton>
+          )}
         </FlexColumn>,
       ];
     }
