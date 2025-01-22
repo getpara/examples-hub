@@ -88,6 +88,7 @@ export default function Home() {
         }}
         appName="Capsule Modal Example"
         logo="/capsule.svg"
+        recoverySecretStepEnabled={true}
       />
     </main>
   );

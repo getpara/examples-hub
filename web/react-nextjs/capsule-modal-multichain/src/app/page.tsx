@@ -103,6 +103,7 @@ export default function Home() {
         }}
         appName="Capsule Modal + Multichain Wallets Example"
         logo="/capsule.svg"
+        recoverySecretStepEnabled={true}
       />
     </main>
   );
