@@ -1,22 +1,47 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AuthLayout, ExternalWallet, OAuthMethod } from "@usecapsule/react-sdk";
 import { CapsuleModal } from "@usecapsule/react-sdk";
-import "@usecapsule/react-sdk/styles.css";
 import { capsule } from "@/client/capsule";
+import "@usecapsule/react-sdk/styles.css";
+import { WalletDisplay } from "@/components/WalletDisplay";
 
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
-  const [_, setIsConnected] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [wallet, setWallet] = useState<string>("");
+  const [error, setError] = useState<string>("");
+
+  const handleCheckIfAuthenticated = async () => {
+    setIsLoading(true);
+    setError("");
+    try {
+      const isAuthenticated = await capsule.isFullyLoggedIn();
+      setIsConnected(isAuthenticated);
+      if (isAuthenticated) {
+        const wallets = Object.values(await capsule.getWallets());
+        if (wallets?.length) {
+          setWallet(wallets[0].address || "unknown");
+        }
+      }
+    } catch (err: any) {
+      setError(err.message || "An error occurred during authentication");
+    }
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    handleCheckIfAuthenticated();
+  }, []);
 
   const handleOpenModal = () => {
     setIsOpen(true);
   };
 
   const handleCloseModal = async () => {
-    const isFullyLoggedIn = await capsule.isFullyLoggedIn();
-    setIsConnected(isFullyLoggedIn);
+    handleCheckIfAuthenticated();
     setIsOpen(false);
   };
 
@@ -27,11 +52,14 @@ export default function Home() {
         This minimal example demonstrates how to integrate the Capsule Modal with all available external wallets and
         Auth methods in a Next.js (App Router) project.
       </p>
+      {isConnected ? <WalletDisplay walletAddress={wallet} /> : <p className="text-center">You are not logged in.</p>}
       <button
+        disabled={isLoading}
         onClick={handleOpenModal}
-        className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700">
+        className="rounded-md px-4 py-2 bg-blue-600 text-white hover:bg-blue-700">
         Open Capsule Modal
       </button>
+      {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
       <CapsuleModal
         capsule={capsule}
