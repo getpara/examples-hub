@@ -82,6 +82,7 @@ export default function Home() {
         appName="Capsule Modal + Cosmos Wallets Example"
         logo="/capsule.svg"
         recoverySecretStepEnabled={true}
+        twoFactorAuthEnabled={false}
       />
     </main>
   );

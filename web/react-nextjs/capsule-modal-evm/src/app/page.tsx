@@ -89,6 +89,7 @@ export default function Home() {
         appName="Capsule Modal + EVM Wallets Example"
         logo="/capsule.svg"
         recoverySecretStepEnabled={true}
+        twoFactorAuthEnabled={false}
       />
     </main>
   );
