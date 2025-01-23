@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "rm -rf dist && tsc && vite build",
-    "deploy-prod": "VITE_CAPSULE_API_KEY=533efae5f7427d73cf9c1cc7e32b627b VITE_WALLET_CONNECT_PROJECT_ID=dc87c564a371d823d3795ae407391656 yarn && yarn build && aws s3 sync dist/ s3://capsule-prod-demo-site --profile prod --delete",
-    "deploy-sandbox": "VITE_CAPSULE_API_KEY=dd4d7071735029ce97dce17969e82ad6 VITE_WALLET_CONNECT_PROJECT_ID=dc87c564a371d823d3795ae407391656 yarn && yarn build && aws s3 sync dist/ s3://capsule-sandbox-demo-site --profile sandbox --delete",
+    "deploy-prod": "yarn && VITE_CAPSULE_API_KEY=533efae5f7427d73cf9c1cc7e32b627b VITE_WALLET_CONNECT_PROJECT_ID=dc87c564a371d823d3795ae407391656 yarn build && aws s3 sync dist/ s3://capsule-prod-demo-site --profile prod --delete",
+    "deploy-sandbox": "yarn && VITE_CAPSULE_API_KEY=dd4d7071735029ce97dce17969e82ad6 VITE_WALLET_CONNECT_PROJECT_ID=dc87c564a371d823d3795ae407391656 yarn build && aws s3 sync dist/ s3://capsule-sandbox-demo-site --profile sandbox --delete",
     "dev": "vite --host",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
