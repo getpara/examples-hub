@@ -18,7 +18,7 @@ export const AuthButton: React.FC<AuthButtonProps> = ({
   <button
     disabled={disabled || isLoading}
     onClick={onClick}
-    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-none w-full">
+    className="bg-blue-900 hover:bg-blue-950 text-white px-4 py-2 rounded-none w-full">
     {isLoading ? loadingText : children}
   </button>
 );

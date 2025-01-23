@@ -42,14 +42,12 @@ dist/
 
 # Gatsby files
 .cache/
-public/
 
 # Vue.js
 /dist/
 
 # Svelte
 __sapper__/
-public/
 
 # Angular
 .angular/

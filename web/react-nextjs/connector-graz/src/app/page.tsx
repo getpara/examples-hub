@@ -38,7 +38,7 @@ export default function Home() {
       <button
         disabled={isConnecting}
         onClick={handleOpenModal}
-        className="rounded-none px-4 py-2 bg-blue-600 text-white hover:bg-blue-700">
+        className="rounded-none px-4 py-2 bg-blue-900 text-white hover:bg-blue-950">
         Open Modal
       </button>
       <div className="leap-ui">

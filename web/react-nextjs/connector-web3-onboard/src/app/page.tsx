@@ -23,7 +23,7 @@ export default function Home() {
       <button
         disabled={connecting}
         onClick={() => (wallet ? disconnect(wallet) : connect())}
-        className="rounded-none px-4 py-2 bg-blue-600 text-white hover:bg-blue-700">
+        className="rounded-none px-4 py-2 bg-blue-900 text-white hover:bg-blue-950">
         {connecting ? "Connecting..." : wallet ? "Disconnect Web3 Onboard" : "Connect Web3 Onboard"}
       </button>
     </main>

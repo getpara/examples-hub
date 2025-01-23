@@ -54,7 +54,7 @@ export default function Home() {
       <button
         disabled={isLoading}
         onClick={handleOpenModal}
-        className="rounded-none px-4 py-2 bg-blue-600 text-white hover:bg-blue-700">
+        className="rounded-none px-4 py-2 bg-blue-900 text-white hover:bg-blue-950">
         Open Capsule Modal
       </button>
       {error && <p className="text-red-500 text-sm text-center">{error}</p>}
