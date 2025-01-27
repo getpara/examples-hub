@@ -1,7 +1,7 @@
 {
   "name": "developer-portal",
   "private": true,
-  "version": "0.20.0",
+  "version": "0.21.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -16,8 +16,8 @@
     "@sentry/react": "8.33.0",
     "@tanstack/react-query": "^5.40.1",
     "@typeform/embed-react": "^4.1.0",
-    "@usecapsule/react-components": "3.23.0",
-    "@usecapsule/react-sdk": "4.18.0",
+    "@usecapsule/react-components": "3.24.0",
+    "@usecapsule/react-sdk": "4.19.0",
     "axios": "^1.7.2",
     "color2k": "^2.0.3",
     "date-fns": "^3.6.0",

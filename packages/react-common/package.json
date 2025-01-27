@@ -1,6 +1,6 @@
 {
   "name": "@usecapsule/react-common",
-  "version": "1.15.0",
+  "version": "1.16.0",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -15,7 +15,7 @@
     "@ramp-network/ramp-instant-sdk": "^4.0.5",
     "@stripe/crypto": "^0.0.4",
     "@stripe/stripe-js": "^3.4.0",
-    "@usecapsule/web-sdk": "2.18.0",
+    "@usecapsule/web-sdk": "2.19.0",
     "libphonenumber-js": "^1.11.1",
     "styled-components": "^6.1.8"
   },
