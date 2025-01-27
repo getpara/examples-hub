@@ -143,10 +143,8 @@ export default function TokenTransferDemo() {
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold tracking-tight mb-6">Token Transfer Demo</h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Transfer {tokenSymbol} tokens using the Capsule SDK with ethers.js integration. Interact with the ERC20
-          contract via the{" "}
-          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md">ethersCapsuleSigner</code>{" "}
-          provider.
+          Transfer {tokenSymbol} tokens using the Capsule SDK with ethers.js integration. The example shows querying for
+          ERC20 token data directly from contract and submitting a transfer transaction.
         </p>
       </div>
 

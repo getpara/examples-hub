@@ -146,7 +146,8 @@ export default function BatchedTransactionDemo() {
         <h1 className="text-4xl font-bold tracking-tight mb-6">Batched Transaction Demo</h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
           Execute multiple token operations in a single transaction using the{" "}
-          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md">multicall</code> function.
+          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md">multicall</code> function of
+          the CapsuleTestToken contract.
         </p>
       </div>
 

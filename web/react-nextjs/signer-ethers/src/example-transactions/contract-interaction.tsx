@@ -130,7 +130,8 @@ export default function ContractInteractionDemo() {
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold tracking-tight mb-6">Contract Interaction Demo</h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Mint CTT tokens by interacting with the smart contract. Each address can mint up to 10 CTT tokens.
+          This demo shows how to interact with a deployed contract. Mint CTT tokens by interacting with the smart
+          contract. Each address can mint up to 10 CTT tokens.
         </p>
       </div>
 

@@ -11,11 +11,14 @@ export default function Home() {
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold tracking-tight mb-4">Capsule Signing Demo</h1>
+        <h1 className="text-4xl font-bold tracking-tight mb-4">Capsul + Ethers Demo</h1>
         <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-          Explore the different signing methods available with the Capsule client. You can sign directly using these
-          methods or alternatively use on of our signer libraries for popular libraries like Ethers, CosmJS,
-          Solana-Web3, and more.
+          Explore signing different transaction types using Capsule with Ethers.js. Reference the
+          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md">
+            /src/components/CapsuleProvider.tsx
+          </code>
+          file to see how we provide Capsule globally to the app and create the
+          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md">CapsuleEthersSigner</code>.
         </p>
       </div>
 
