@@ -27,7 +27,7 @@
     "@tanstack/react-query": "^5.24.1",
     "@usecapsule/cosmos-wallet-connectors": "1.18.0",
     "@usecapsule/evm-wallet-connectors": "1.18.0",
-    "@usecapsule/graz": "^0.2.0",
+    "@usecapsule/graz": "^0.3.0",
     "@usecapsule/react-components": "3.23.0",
     "@usecapsule/react-sdk": "4.18.0",
     "@usecapsule/solana-wallet-connectors": "1.18.0",

@@ -9455,10 +9455,10 @@
   dependencies:
     "@usecapsule/core-sdk" "1.24.1"
 
-"@usecapsule/graz@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@usecapsule/graz/-/graz-0.2.0.tgz#309ef4b8fccecbf2d7a858e3b58064839a1ed552"
-  integrity sha512-CTBnBHch9bH69liurCFZwT3BJAtPnbL+RM3Yx25Duzxyzmo6+SRRcNjacQnI+ethurfKm4Re+vB92aPtQ6YriQ==
+"@usecapsule/graz@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@usecapsule/graz/-/graz-0.3.0.tgz#2ea8cb8085dee0b4582a5dd3e3b80cb00f0f0488"
+  integrity sha512-JfT3bnirhxpFM+n1xkj3je/6BNLSylVMTcmgyQuTH2RIAdIkv3pSoNnyDvWCKoPFzh6bbgFK4UMvP/6E9LbCZw==
   dependencies:
     "@cosmsnap/snapper" "0.1.29"
     "@dao-dao/cosmiframe" "0.1.0"
@@ -9467,6 +9467,8 @@
     "@metamask/providers" "12.0.0"
     "@tanstack/react-query" ">=5.0.0"
     "@terra-money/station-connector" "1.1.0"
+    "@usecapsule/cosmjs-v0-integration" ">=2.17.0"
+    "@usecapsule/react-sdk" ">=4.17.0"
     "@vectis/extension-client" "^0.7.2"
     "@walletconnect/modal" "2.7.0"
     "@walletconnect/sign-client" "2.17.2"

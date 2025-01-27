@@ -1,9 +1,9 @@
-import { ReactNode, createContext, useContext, useEffect, useMemo } from 'react';
+import { ReactNode, createContext, useCallback, useContext, useEffect, useMemo } from 'react';
 import { WalletList, WalletWithType } from '../types/Wallet.js';
 import { useExternalWalletProviderStore } from '@usecapsule/react-sdk';
 import { CosmosExternalWalletContext, CosmosExternalWalletProvider } from './CosmosExternalWalletContext.js';
 import { ChainInfo } from '@keplr-wallet/types';
-import { ConfigureGrazArgs, GrazProvider } from '@usecapsule/graz';
+import { ConfigureGrazArgs, GrazProvider, WalletType, connect } from '@usecapsule/graz';
 
 export const CapsuleCosmosContext = createContext<{
   selectedChainId?: string;
@@ -53,11 +53,27 @@ export function CapsuleCosmosProvider({
   const CosmosProvider = useExternalWalletProviderStore(state => state.CosmosProvider);
   const cosmosContext = useExternalWalletProviderStore(state => state.cosmosContext);
 
+  const connectCapsuleCosmosWallet = useCallback(async (): Promise<{ result?: unknown; error?: string }> => {
+    if (!grazOpts.capsule) {
+      return { error: 'No capsule instance passed to Graz' };
+    }
+
+    try {
+      const chainId = multiChain ? chains.map(c => c.chainId) : selectedChainId;
+      const result = await connect({ walletType: WalletType.CAPSULE_EMBEDDED, chainId });
+      return { result };
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err.message : 'Unknown error';
+      return { error };
+    }
+  }, [connect]);
+
   useEffect(() => {
     if (!cosmosContext || !CosmosProvider) {
       updateExternalWalletProviderState({
         CosmosProvider: CosmosExternalWalletProvider,
         cosmosContext: CosmosExternalWalletContext,
+        connectCapsuleCosmosWallet,
       });
     }
   }, []);

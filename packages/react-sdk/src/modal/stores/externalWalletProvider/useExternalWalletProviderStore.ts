@@ -18,7 +18,8 @@ interface ExternalWalletProviderState {
   solanaContext?: Context<SolanaExternalWalletContextType>;
   CosmosProvider?: typeof CosmosExternalWalletProvider;
   cosmosContext?: Context<CosmosExternalWalletContextType>;
-  connectCapsuleEvmWallet?: () => Promise<any>; // A store that will set a connect function to connect to the capule connector
+  connectCapsuleEvmWallet?: () => Promise<any>; // A store that will set a connect function to connect to the capsule EVM connector
+  connectCapsuleCosmosWallet?: () => Promise<any>; // A store that will set a connect function to connect to the capsule Cosmos connector
 }
 
 export interface ExternalWalletProviderActions {
@@ -35,6 +36,7 @@ const DEFAULT_EX_WALLET_PROVIDER_STATE: ExternalWalletProviderState = {
   CosmosProvider: undefined,
   cosmosContext: undefined,
   connectCapsuleEvmWallet: undefined,
+  connectCapsuleCosmosWallet: undefined,
 };
 
 export const useExternalWalletProviderStore = create<ExternalWalletProviderStore>(set => ({

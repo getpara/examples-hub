@@ -45,6 +45,7 @@ export const App = () => {
       }}
       multiChain
       walletConnect={{ options: { projectId: 'dc87c564a371d823d3795ae407391656' } }}
+      capsule={capsule}
     >
       <CapsuleEvmProvider
         config={{
