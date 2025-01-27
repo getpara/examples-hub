@@ -211,7 +211,11 @@ export default function ContractDeploymentDemo() {
               </div>
               <div className="p-6">
                 <p className="text-sm font-mono break-all text-gray-600 bg-white p-4 border border-gray-200">
-                  {deploymentInfo.deployedBytecode}
+                  {deploymentInfo.deployedBytecode
+                    ? `${deploymentInfo.deployedBytecode.slice(0, 128)}...${deploymentInfo.deployedBytecode.slice(
+                        -128
+                      )}`
+                    : ""}
                 </p>
               </div>
             </div>
