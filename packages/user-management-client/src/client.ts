@@ -236,7 +236,7 @@ export const handleResponseError = (error: any) => {
     } else if (error.code === 'ERR_CANCELED') {
       message = 'Connection canceled';
     }
-    throw new CapsuleApiError(message, error.code, error.status, error.request?.responseURL);
+    throw new CapsuleApiError(message, error.code, error.response.status, error.request?.responseURL);
   }
   throw new CapsuleApiError('Unknown error');
 };

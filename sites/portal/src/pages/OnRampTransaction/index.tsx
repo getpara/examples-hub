@@ -129,7 +129,7 @@ export function OnRampTransaction() {
           } catch (e) {
             console.error(e);
 
-            if (e.response?.status === 401) {
+            if (e.status === 401) {
               await login(res.data.sessionId, partnerId);
             }
 
