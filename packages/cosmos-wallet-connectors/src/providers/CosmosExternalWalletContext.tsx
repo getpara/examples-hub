@@ -113,7 +113,8 @@ export function CosmosExternalWalletProvider({ children, capsule, onSwitchWallet
       !isLocalConnecting &&
       address &&
       storedExternalWallet &&
-      storedExternalWallet.address !== address
+      storedExternalWallet.address !== address &&
+      walletType !== GrazWalletType.CAPSULE_EMBEDDED
     ) {
       capsule.setExternalWallet(bufferAddress, WalletType.COSMOS, getProviderName(walletType), address);
     }
@@ -122,7 +123,14 @@ export function CosmosExternalWalletProvider({ children, capsule, onSwitchWallet
   useEffect(() => {
     const storedExternalWallet = capsule.externalWallets[bufferAddress ?? ''];
 
-    if (!isConnecting && !isReconnecting && !isLocalConnecting && !!bufferAddress && !storedExternalWallet) {
+    if (
+      !isConnecting &&
+      !isReconnecting &&
+      !isLocalConnecting &&
+      !!bufferAddress &&
+      !storedExternalWallet &&
+      walletType !== GrazWalletType.CAPSULE_EMBEDDED
+    ) {
       reset();
     }
   }, [isConnecting, isReconnecting]);
