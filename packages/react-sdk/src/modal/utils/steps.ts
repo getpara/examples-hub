@@ -50,6 +50,39 @@ enum AccountStep {
   CHAIN_SWITCH = 'CHAIN_SWITCH',
 }
 
+export const RESET_TO_AUTH_STEPS = [
+  ModalStep.EX_WALLET_MORE,
+  ModalStep.EX_WALLET_SELECTED,
+  ModalStep.VERIFICATIONS,
+  ModalStep.AWAITING_OAUTH,
+  ModalStep.FARCASTER_OAUTH,
+  ModalStep.TELEGRAM_OAUTH,
+  ModalStep.BIOMETRIC_CREATION,
+  ModalStep.AWAITING_BIOMETRIC_CREATION,
+  ModalStep.PASSWORD_CREATION,
+  ModalStep.AWAITING_PASSWORD_CREATION,
+  ModalStep.BIOMETRIC_LOGIN,
+  ModalStep.AWAITING_BIOMETRIC_LOGIN,
+  ModalStep.AWAITING_PASSWORD_LOGIN,
+  ModalStep.AWAITING_WALLET_CREATION,
+  ModalStep.AWAITING_WALLET_CREATION,
+  ModalStep.WALLET_CREATION_DONE,
+  ModalStep.SETUP_2FA,
+  ModalStep.VERIFY_2FA,
+  ModalStep.TWO_FACTOR_DONE,
+  ModalStep.LOGIN_DONE,
+];
+
+export const RESET_TO_ACCOUNT_STEPS = [
+  ModalStep.ADD_FUNDS_BUY,
+  ModalStep.ADD_FUNDS_RECEIVE,
+  ModalStep.ADD_FUNDS_WITHDRAW,
+  ModalStep.ADD_FUNDS_AWAITING,
+  ModalStep.ADD_FUNDS_SUCCESS,
+  ModalStep.ADD_FUNDS_FAILURE,
+  ModalStep.CHAIN_SWITCH,
+];
+
 export const AccountPreviousStep: {
   [key in AccountStep]: ModalStep | undefined;
 } = {

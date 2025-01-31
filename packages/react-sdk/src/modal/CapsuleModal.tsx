@@ -3,7 +3,7 @@ import { CpslAuthModal, defineCustomElements, generateTheme } from '@usecapsule/
 import { ModalContent, ModalContentHandle } from './components/index.js';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { useCapsuleStore, useModalStore, useUserInfoStore, useThemeStore } from './stores/index.js';
-import { ModalStep } from './utils/steps.js';
+import { ModalStep, RESET_TO_ACCOUNT_STEPS, RESET_TO_AUTH_STEPS } from './utils/steps.js';
 import { AuthLayout, CapsuleModalHandle, CapsuleModalProps } from './types/modalProps.js';
 import { DEFAULTS } from './constants/defaults.js';
 import { useGoBack } from './hooks/useGoBack.js';
@@ -92,17 +92,7 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
         setStep(ModalStep.ACCOUNT_MAIN);
         setIsFullyLoggedIn(true);
       } else {
-        if (
-          currentStep === ModalStep.ACCOUNT_MAIN ||
-          currentStep === ModalStep.LOGIN_DONE ||
-          currentStep === ModalStep.TWO_FACTOR_DONE ||
-          currentStep === ModalStep.SETUP_2FA ||
-          currentStep === ModalStep.SECRET ||
-          currentStep === ModalStep.BIOMETRIC_LOGIN ||
-          currentStep === ModalStep.BIOMETRIC_CREATION ||
-          currentStep === ModalStep.WALLET_CREATION_DONE ||
-          currentStep === ModalStep.EX_WALLET_SELECTED
-        ) {
+        if (RESET_TO_AUTH_STEPS.includes(currentStep)) {
           setStep(ModalStep.AUTH_MAIN);
           setFlow();
           setWebAuthURLForLogin();
@@ -233,29 +223,11 @@ export const CapsuleModal = forwardRef<CapsuleModalHandle, CapsuleModalProps>(
 
     const handleModalExited = async () => {
       setIsModalMounted(false);
-      if (
-        currentStep === ModalStep.LOGIN_DONE ||
-        currentStep === ModalStep.TWO_FACTOR_DONE ||
-        currentStep === ModalStep.SETUP_2FA ||
-        currentStep === ModalStep.SECRET ||
-        currentStep === ModalStep.BIOMETRIC_LOGIN ||
-        currentStep === ModalStep.BIOMETRIC_CREATION ||
-        currentStep === ModalStep.WALLET_CREATION_DONE ||
-        currentStep === ModalStep.EX_WALLET_SELECTED ||
-        currentStep === ModalStep.AWAITING_BIOMETRIC_CREATION ||
-        currentStep === ModalStep.AWAITING_BIOMETRIC_LOGIN
-      ) {
+      if (RESET_TO_ACCOUNT_STEPS.includes(currentStep)) {
         resetModalState();
         resetUserInfoState();
         setRecoveryShare(null);
-      } else if (
-        currentStep === ModalStep.ADD_FUNDS_BUY ||
-        currentStep === ModalStep.ADD_FUNDS_RECEIVE ||
-        currentStep === ModalStep.ADD_FUNDS_WITHDRAW ||
-        currentStep === ModalStep.ADD_FUNDS_AWAITING ||
-        currentStep === ModalStep.ADD_FUNDS_SUCCESS ||
-        currentStep === ModalStep.ADD_FUNDS_FAILURE
-      ) {
+      } else if (RESET_TO_ACCOUNT_STEPS.includes(currentStep)) {
         setStep(ModalStep.LOGIN_DONE);
       }
 
