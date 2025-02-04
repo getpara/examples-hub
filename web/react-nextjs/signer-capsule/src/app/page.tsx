@@ -1,6 +1,6 @@
 "use client";
 
-import { useCapsule } from "@/components/CapsuleProvider";
+import { usePara } from "@/components/ParaProvider";
 import { Card } from "@/components/Card";
 import Link from "next/link";
 
@@ -20,14 +20,14 @@ const transactionTypes = [
 ];
 
 export default function Home() {
-  const { isConnected, openModal } = useCapsule();
+  const { isConnected, openModal } = usePara();
 
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold tracking-tight mb-4">Capsule Signing Demo</h1>
+        <h1 className="text-4xl font-bold tracking-tight mb-4">Para Signing Demo</h1>
         <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-          Explore the different signing methods available with the Capsule client. You can sign directly using these
+          Explore the different signing methods available with the Para client. You can sign directly using these
           methods or alternatively use on of our signer libraries for popular libraries like Ethers, CosmJS,
           Solana-Web3, and more.
         </p>

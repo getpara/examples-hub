@@ -1,5 +1,5 @@
 import React from "react";
-import { OAuthMethod } from "@usecapsule/web-sdk";
+import { OAuthMethod } from "@getpara/web-sdk";
 
 interface OAuthOption {
   method: OAuthMethod;

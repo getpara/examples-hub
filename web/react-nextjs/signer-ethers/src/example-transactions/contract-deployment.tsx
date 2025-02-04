@@ -1,9 +1,9 @@
 "use client";
 
-import { useCapsule } from "@/components/CapsuleProvider";
+import { usePara } from "@/components/ParaProvider";
 import { useState, useEffect } from "react";
 import { ContractFactory, formatEther } from "ethers";
-import CapsuleTestToken from "@/contracts/artifacts/contracts/CapsuleTestToken.sol/CapsuleTestToken.json";
+import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
 
 export default function ContractDeploymentDemo() {
   const [isLoading, setIsLoading] = useState(false);
@@ -20,7 +20,7 @@ export default function ContractDeploymentDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { isConnected, walletId, address, signer, provider } = useCapsule();
+  const { isConnected, walletId, address, signer, provider } = usePara();
 
   const fetchBalance = async () => {
     if (!address || !provider) return;
@@ -59,7 +59,7 @@ export default function ContractDeploymentDemo() {
         throw new Error("No wallet ID found. Please reconnect your wallet.");
       }
 
-      const factory = new ContractFactory(CapsuleTestToken.abi, CapsuleTestToken.bytecode, signer);
+      const factory = new ContractFactory(ParaTestToken.abi, ParaTestToken.bytecode, signer);
 
       const contractDeployment = await factory.deploy();
 
@@ -87,7 +87,7 @@ export default function ContractDeploymentDemo() {
       setDeploymentInfo({
         contractAddress: contractAddress,
         transactionHash: receipt.hash,
-        deployedBytecode: CapsuleTestToken.bytecode,
+        deployedBytecode: ParaTestToken.bytecode,
       });
 
       setStatus({
@@ -115,8 +115,8 @@ export default function ContractDeploymentDemo() {
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold tracking-tight mb-6">Contract Deployment Demo</h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Deploy an ERC20 token contract using the Capsule SDK with ethers.js v6 integration. This demo uses the{" "}
-          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md">CapsuleTestToken</code>{" "}
+          Deploy an ERC20 token contract using the Para SDK with ethers.js v6 integration. This demo uses the{" "}
+          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md">ParaTestToken</code>{" "}
           contract implementation.
         </p>
       </div>

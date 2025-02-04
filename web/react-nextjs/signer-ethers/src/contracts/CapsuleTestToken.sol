@@ -8,13 +8,13 @@ import {ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC2
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Multicall} from "@openzeppelin/contracts/utils/Multicall.sol";
 
-contract CapsuleTestToken is ERC20, ERC20Permit, ERC20Capped, ERC20Burnable, Ownable {
+contract ParaTestToken is ERC20, ERC20Permit, ERC20Capped, ERC20Burnable, Ownable {
     mapping(address => uint256) public mintedAmount;
     uint256 public constant MINT_LIMIT = 10 * 10**18;
 
     constructor() 
-        ERC20("Capsule Test Token", "CTT") 
-        ERC20Permit("Capsule Test Token") 
+        ERC20("Para Test Token", "CTT") 
+        ERC20Permit("Para Test Token") 
         ERC20Capped(1000000 * 10**decimals())
         Ownable(msg.sender)
     {

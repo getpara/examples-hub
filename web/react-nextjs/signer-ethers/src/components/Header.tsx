@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCapsule } from "./CapsuleProvider";
+import { usePara } from "./ParaProvider";
 
 export default function Header() {
   const pathname = usePathname();
-  const { isConnected, openModal, address } = useCapsule();
+  const { isConnected, openModal, address } = usePara();
 
   return (
     <header className="border-b border-gray-200">

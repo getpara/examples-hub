@@ -1,6 +1,6 @@
 "use client";
 
-import { useCapsule } from "@/components/CapsuleProvider";
+import { usePara } from "@/components/ParaProvider";
 import { useState, useEffect } from "react";
 import { parseEther, type TransactionRequest, toBigInt, formatEther } from "ethers";
 
@@ -17,7 +17,7 @@ export default function EthTransferDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { isConnected, walletId, address, signer, provider } = useCapsule();
+  const { isConnected, walletId, address, signer, provider } = usePara();
 
   const fetchBalance = async () => {
     if (!address || !provider) return;
@@ -189,9 +189,9 @@ export default function EthTransferDemo() {
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold tracking-tight mb-6">ETH Transfer Demo</h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Send ETH with your connected wallet. This demonstrates a basic ETH transfer using the Capsule SDK with
-          ethers.js integration via the{" "}
-          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md">ethersCapsuleSigner</code>{" "}
+          Send ETH with your connected wallet. This demonstrates a basic ETH transfer using the Para SDK with ethers.js
+          integration via the{" "}
+          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md">ethersParaSigner</code>{" "}
           provider.
         </p>
       </div>

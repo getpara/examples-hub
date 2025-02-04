@@ -1,6 +1,6 @@
 "use client";
 
-import { useCapsule } from "@/components/CapsuleProvider";
+import { usePara } from "@/components/ParaProvider";
 import { useState } from "react";
 import { verifyMessage } from "ethers";
 
@@ -15,7 +15,7 @@ export default function MessageSigningDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { isConnected, walletId, signer } = useCapsule();
+  const { isConnected, walletId, signer } = usePara();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,11 +91,9 @@ export default function MessageSigningDemo() {
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold tracking-tight mb-6">Sign Message Demo</h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Sign a message with your connected wallet. This demonstrates a basic message signing interaction with the
-          Capsule SDK using the{" "}
-          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-none">
-            capsule.signMessage()
-          </code>
+          Sign a message with your connected wallet. This demonstrates a basic message signing interaction with the Para
+          SDK using the{" "}
+          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-none">para.signMessage()</code>
           method.
         </p>
       </div>

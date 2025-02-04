@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { capsule } from "@/client/capsule";
+import { para } from "@/client/para";
 import { WalletDisplay } from "@/components/WalletDisplay";
-import { CustomCapsuleModalView } from "@leapwallet/cosmos-social-login-capsule-provider-ui";
-import { OAuthMethod } from "@usecapsule/web-sdk";
-import "@leapwallet/cosmos-social-login-capsule-provider-ui/styles.css";
+import { CustomParaModalView } from "@leapwallet/cosmos-social-login-para-provider-ui";
+import { OAuthMethod } from "@getpara/web-sdk";
+import "@leapwallet/cosmos-social-login-para-provider-ui/styles.css";
 
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,10 +18,10 @@ export default function Home() {
     setIsLoading(true);
     setError("");
     try {
-      const isAuthenticated = await capsule.isFullyLoggedIn();
+      const isAuthenticated = await para.isFullyLoggedIn();
       setIsConnected(isAuthenticated);
       if (isAuthenticated) {
-        const wallets = Object.values(await capsule.getWallets());
+        const wallets = Object.values(await para.getWallets());
         if (wallets?.length) {
           setWallet(wallets[0].address || "unknown");
         }
@@ -51,9 +51,9 @@ export default function Home() {
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen gap-6 p-8">
-      <h1 className="text-2xl font-bold">Capsule Modal + Cosmos Wallets Example</h1>
+      <h1 className="text-2xl font-bold">Para Modal + Cosmos Wallets Example</h1>
       <p className="max-w-md text-center">
-        This minimal example demonstrates how to integrate the Capsule Modal with Cosmos Wallet Connectors in a Next.js
+        This minimal example demonstrates how to integrate the Para Modal with Cosmos Wallet Connectors in a Next.js
         (App Router) project.
       </p>
       {isConnected ? <WalletDisplay walletAddress={wallet} /> : <p className="text-center">You are not logged in.</p>}
@@ -61,14 +61,14 @@ export default function Home() {
         disabled={isLoading}
         onClick={handleOpenModal}
         className="rounded-none px-4 py-2 bg-blue-900 text-white hover:bg-blue-950">
-        Open Capsule Modal
+        Open Para Modal
       </button>
       {error && <p className="text-red-500 text-sm text-center">{error}</p>}
       <div className="leap-ui">
-        <CustomCapsuleModalView
-          capsule={capsule as any}
-          showCapsuleModal={isOpen}
-          setShowCapsuleModal={setIsOpen}
+        <CustomParaModalView
+          para={para as any}
+          showParaModal={isOpen}
+          setShowParaModal={setIsOpen}
           theme="light"
           onAfterLoginSuccessful={handleLoginSuccess}
           onLoginFailure={handleLoginFailure}

@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AuthLayout, CapsuleModal, ExternalWallet } from "@usecapsule/react-sdk";
-import { capsule } from "@/client/capsule";
-import "@usecapsule/react-sdk/styles.css";
+import { AuthLayout, ParaModal, ExternalWallet } from "@getpara/react-sdk";
+import { para } from "@/client/para";
+import "@getpara/react-sdk/styles.css";
 import { WalletDisplay } from "@/components/WalletDisplay";
 
 export default function Home() {
@@ -17,10 +17,10 @@ export default function Home() {
     setIsLoading(true);
     setError("");
     try {
-      const isAuthenticated = await capsule.isFullyLoggedIn();
+      const isAuthenticated = await para.isFullyLoggedIn();
       setIsConnected(isAuthenticated);
       if (isAuthenticated) {
-        const wallets = Object.values(await capsule.getWallets());
+        const wallets = Object.values(await para.getWallets());
         if (wallets?.length) {
           setWallet(wallets[0].address || "unknown");
         }
@@ -46,9 +46,9 @@ export default function Home() {
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen gap-6 p-8">
-      <h1 className="text-2xl font-bold">Capsule Modal + Solana Wallets Example</h1>
+      <h1 className="text-2xl font-bold">Para Modal + Solana Wallets Example</h1>
       <p className="max-w-md text-center">
-        This minimal example demonstrates how to integrate the Capsule Modal with Solana Wallet Connectors in a Next.js
+        This minimal example demonstrates how to integrate the Para Modal with Solana Wallet Connectors in a Next.js
         (App Router) project.
       </p>
       {isConnected ? <WalletDisplay walletAddress={wallet} /> : <p className="text-center">You are not logged in.</p>}
@@ -56,11 +56,11 @@ export default function Home() {
         disabled={isLoading}
         onClick={handleOpenModal}
         className="rounded-none px-4 py-2 bg-blue-900 text-white hover:bg-blue-950">
-        Open Capsule Modal
+        Open Para Modal
       </button>
       {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-      <CapsuleModal
-        capsule={capsule}
+      <ParaModal
+        para={para}
         isOpen={isOpen}
         onClose={handleCloseModal}
         disableEmailLogin={true}
@@ -79,8 +79,8 @@ export default function Home() {
           borderRadius: "none",
           font: "Inter",
         }}
-        appName="Capsule Modal + Solana Wallets Example"
-        logo="/capsule.svg"
+        appName="Para Modal + Solana Wallets Example"
+        logo="/para.svg"
         recoverySecretStepEnabled={true}
         twoFactorAuthEnabled={false}
       />

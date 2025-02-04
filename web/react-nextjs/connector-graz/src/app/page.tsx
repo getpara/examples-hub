@@ -1,18 +1,18 @@
 "use client";
 
 import { WalletDisplay } from "@/components/WalletDisplay";
-import { CustomCapsuleModalView } from "@leapwallet/cosmos-social-login-capsule-provider-ui";
-import "@leapwallet/cosmos-social-login-capsule-provider-ui/styles.css";
-import { useAccount, useCapsule, useConnect, WalletType } from "graz";
-import { OAuthMethod } from "@leapwallet/cosmos-social-login-capsule-provider";
+import { CustomParaModalView } from "@leapwallet/cosmos-social-login-para-provider-ui";
+import "@leapwallet/cosmos-social-login-para-provider-ui/styles.css";
+import { useAccount, usePara, useConnect, WalletType } from "graz";
+import { OAuthMethod } from "@leapwallet/cosmos-social-login-para-provider";
 
 export default function Home() {
   const { connect } = useConnect();
   const { isConnected, isConnecting, data: account } = useAccount();
-  const { client, modalState, onAfterLoginSuccessful, setModalState, onLoginFailure } = useCapsule();
+  const { client, modalState, onAfterLoginSuccessful, setModalState, onLoginFailure } = usePara();
 
   const handleOpenModal = () => {
-    connect({ walletType: WalletType.CAPSULE, chainId: "cosmoshub-4" });
+    connect({ walletType: WalletType.PARA, chainId: "cosmoshub-4" });
   };
 
   const handleLoginSuccess = async () => {
@@ -25,9 +25,9 @@ export default function Home() {
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen gap-6 p-8">
-      <h1 className="text-2xl font-bold">Capsule Modal + Graz Connector</h1>
+      <h1 className="text-2xl font-bold">Para Modal + Graz Connector</h1>
       <p className="max-w-md text-center">
-        This minimal example demonstrates how to integrate the Capsule Modal with the Graz Connector in a Next.js (App
+        This minimal example demonstrates how to integrate the Para Modal with the Graz Connector in a Next.js (App
         Router) project.
       </p>
       {isConnected ? (
@@ -42,10 +42,10 @@ export default function Home() {
         Open Modal
       </button>
       <div className="leap-ui">
-        <CustomCapsuleModalView
-          capsule={client?.getClient()}
-          showCapsuleModal={modalState}
-          setShowCapsuleModal={setModalState}
+        <CustomParaModalView
+          para={client?.getClient()}
+          showParaModal={modalState}
+          setShowParaModal={setModalState}
           theme="light"
           onAfterLoginSuccessful={handleLoginSuccess}
           onLoginFailure={handleLoginFailure}

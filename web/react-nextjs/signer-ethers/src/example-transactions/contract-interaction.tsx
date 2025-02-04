@@ -1,10 +1,10 @@
 "use client";
 
-import { useCapsule } from "@/components/CapsuleProvider";
+import { usePara } from "@/components/ParaProvider";
 import { useState, useEffect } from "react";
 import { formatEther, parseEther, Contract } from "ethers";
-import { CAPSULE_TEST_TOKEN_CONTRACT_ADDRESS } from ".";
-import CapsuleTestToken from "@/contracts/artifacts/contracts/CapsuleTestToken.sol/CapsuleTestToken.json";
+import { PARA_TEST_TOKEN_CONTRACT_ADDRESS } from ".";
+import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
 
 export default function ContractInteractionDemo() {
   const [amount, setAmount] = useState("");
@@ -20,14 +20,14 @@ export default function ContractInteractionDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { isConnected, walletId, address, signer, provider } = useCapsule();
+  const { isConnected, walletId, address, signer, provider } = usePara();
 
   const fetchContractData = async () => {
     if (!address || !provider) return;
 
     setIsBalanceLoading(true);
     try {
-      const contract = new Contract(CAPSULE_TEST_TOKEN_CONTRACT_ADDRESS, CapsuleTestToken.abi, provider);
+      const contract = new Contract(PARA_TEST_TOKEN_CONTRACT_ADDRESS, ParaTestToken.abi, provider);
 
       // Get token balance
       const balance = await contract.balanceOf(address);
@@ -90,7 +90,7 @@ export default function ContractInteractionDemo() {
         }
       }
 
-      const contract = new Contract(CAPSULE_TEST_TOKEN_CONTRACT_ADDRESS, CapsuleTestToken.abi, signer);
+      const contract = new Contract(PARA_TEST_TOKEN_CONTRACT_ADDRESS, ParaTestToken.abi, signer);
       const tx = await contract.mint(parseEther(amount));
 
       setTxHash(tx.hash);

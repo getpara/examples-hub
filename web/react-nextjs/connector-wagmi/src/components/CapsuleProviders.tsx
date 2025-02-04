@@ -1,8 +1,8 @@
 "use client";
 
-import { AuthLayout, OAuthMethod } from "@usecapsule/react-sdk";
-import { capsuleConnector } from "@usecapsule/wagmi-v2-integration";
-import { capsule } from "@/client/capsule";
+import { AuthLayout, OAuthMethod } from "@getpara/react-sdk";
+import { paraConnector } from "@getpara/wagmi-v2-integration";
+import { para } from "@/client/para";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createConfig, WagmiProvider, CreateConfigParameters, http } from "wagmi";
 import { injected, coinbaseWallet, walletConnect, metaMask } from "wagmi/connectors";
@@ -12,11 +12,11 @@ type Props = {
   children: React.ReactNode;
 };
 
-const connector = capsuleConnector({
-  capsule: capsule,
+const connector = paraConnector({
+  para: para,
   chains: [sepolia, mainnet],
-  appName: "Capsule RainbowKit Example",
-  logo: "/capsule.svg",
+  appName: "Para RainbowKit Example",
+  logo: "/para.svg",
   oAuthMethods: [
     OAuthMethod.APPLE,
     OAuthMethod.DISCORD,
@@ -65,7 +65,7 @@ const wagmiConfig = createConfig(config);
 
 const queryClient = new QueryClient();
 
-export const CapsuleProviders: React.FC<Props> = ({ children }) => {
+export const ParaProviders: React.FC<Props> = ({ children }) => {
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>

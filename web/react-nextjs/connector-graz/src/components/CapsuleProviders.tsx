@@ -20,14 +20,14 @@ const cosmosChains = [
 
 const queryClient = new QueryClient();
 
-export const CapsuleProviders: React.FC<Props> = ({ children }) => {
+export const ParaProviders: React.FC<Props> = ({ children }) => {
   return (
     <QueryClientProvider client={queryClient}>
       <GrazProvider
         grazOptions={{
           chains: [cosmoshub],
-          capsuleConfig: {
-            apiKey: process.env.NEXT_PUBLIC_CAPSULE_API_KEY || "",
+          paraConfig: {
+            apiKey: process.env.NEXT_PUBLIC_PARA_API_KEY || "",
             env: "BETA",
           },
         }}>

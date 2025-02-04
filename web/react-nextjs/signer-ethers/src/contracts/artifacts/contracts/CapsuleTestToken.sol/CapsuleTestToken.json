@@ -1,7 +1,7 @@
 {
   "_format": "hh-sol-artifact-1",
-  "contractName": "CapsuleTestToken",
-  "sourceName": "contracts/CapsuleTestToken.sol",
+  "contractName": "ParaTestToken",
+  "sourceName": "contracts/ParaTestToken.sol",
   "abi": [
     {
       "inputs": [],

@@ -1,10 +1,10 @@
 "use client";
 
-import { useCapsule } from "@/components/CapsuleProvider";
+import { usePara } from "@/components/ParaProvider";
 import { useState, useEffect } from "react";
 import { formatEther, parseEther, Contract, MaxUint256 } from "ethers";
-import { CAPSULE_TEST_TOKEN_CONTRACT_ADDRESS, CAPSULE_TEST_TOKEN_CONTRACT_OWNER } from ".";
-import CapsuleTestToken from "@/contracts/artifacts/contracts/CapsuleTestToken.sol/CapsuleTestToken.json";
+import { PARA_TEST_TOKEN_CONTRACT_ADDRESS, PARA_TEST_TOKEN_CONTRACT_OWNER } from ".";
+import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
 
 export default function PermitSigningDemo() {
   const [isLoading, setIsLoading] = useState(false);
@@ -24,21 +24,21 @@ export default function PermitSigningDemo() {
     s: string;
   } | null>(null);
 
-  const { isConnected, walletId, address, signer, provider } = useCapsule();
+  const { isConnected, walletId, address, signer, provider } = usePara();
 
   const fetchTokenData = async () => {
     if (!address) return;
 
     setIsBalanceLoading(true);
     try {
-      const contract = new Contract(CAPSULE_TEST_TOKEN_CONTRACT_ADDRESS, CapsuleTestToken.abi, provider);
+      const contract = new Contract(PARA_TEST_TOKEN_CONTRACT_ADDRESS, ParaTestToken.abi, provider);
 
       // Get token balance
       const balance = await contract.balanceOf(address);
       setTokenBalance(formatEther(balance));
 
       // Get current allowance
-      const allowance = await contract.allowance(address, CAPSULE_TEST_TOKEN_CONTRACT_OWNER);
+      const allowance = await contract.allowance(address, PARA_TEST_TOKEN_CONTRACT_OWNER);
       setCurrentAllowance(formatEther(allowance));
     } catch (error) {
       console.error("Error fetching token data:", error);
@@ -71,7 +71,7 @@ export default function PermitSigningDemo() {
         throw new Error("No wallet ID found. Please reconnect your wallet.");
       }
 
-      const contract = new Contract(CAPSULE_TEST_TOKEN_CONTRACT_ADDRESS, CapsuleTestToken.abi, provider);
+      const contract = new Contract(PARA_TEST_TOKEN_CONTRACT_ADDRESS, ParaTestToken.abi, provider);
 
       // Get the current nonce for the owner
       const nonce = await contract.nonces(address);
@@ -88,7 +88,7 @@ export default function PermitSigningDemo() {
         name: name,
         version: "1",
         chainId: 17000, // Holesky
-        verifyingContract: CAPSULE_TEST_TOKEN_CONTRACT_ADDRESS,
+        verifyingContract: PARA_TEST_TOKEN_CONTRACT_ADDRESS,
       };
 
       const types = {
@@ -103,7 +103,7 @@ export default function PermitSigningDemo() {
 
       const value = {
         owner: address,
-        spender: CAPSULE_TEST_TOKEN_CONTRACT_OWNER,
+        spender: PARA_TEST_TOKEN_CONTRACT_OWNER,
         value: MaxUint256,
         nonce: nonce,
         deadline: deadline,

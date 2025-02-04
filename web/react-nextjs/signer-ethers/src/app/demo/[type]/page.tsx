@@ -1,13 +1,13 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useCapsule } from "@/components/CapsuleProvider";
+import { usePara } from "@/components/ParaProvider";
 import { transactionTypes, TransactionID } from "@/example-transactions";
 
 export default function DemoPage() {
   const params = useParams();
   const type = params.type as TransactionID;
-  const { isConnected, openModal } = useCapsule();
+  const { isConnected, openModal } = usePara();
 
   if (!isConnected) {
     return (

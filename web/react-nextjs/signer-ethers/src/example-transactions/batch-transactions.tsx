@@ -1,10 +1,10 @@
 "use client";
 
-import { useCapsule } from "@/components/CapsuleProvider";
+import { usePara } from "@/components/ParaProvider";
 import { useState, useEffect } from "react";
 import { formatEther, parseEther, Contract, Interface } from "ethers";
-import { CAPSULE_TEST_TOKEN_CONTRACT_ADDRESS } from ".";
-import CapsuleTestToken from "@/contracts/artifacts/contracts/CapsuleTestToken.sol/CapsuleTestToken.json";
+import { PARA_TEST_TOKEN_CONTRACT_ADDRESS } from ".";
+import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
 
 type Operation = {
   type: "mint" | "transfer";
@@ -24,14 +24,14 @@ export default function BatchedTransactionDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { isConnected, address, signer, provider } = useCapsule();
+  const { isConnected, address, signer, provider } = usePara();
 
   const fetchTokenData = async () => {
     if (!address || !provider) return;
 
     setIsBalanceLoading(true);
     try {
-      const contract = new Contract(CAPSULE_TEST_TOKEN_CONTRACT_ADDRESS, CapsuleTestToken.abi, provider);
+      const contract = new Contract(PARA_TEST_TOKEN_CONTRACT_ADDRESS, ParaTestToken.abi, provider);
 
       const balance = await contract.balanceOf(address);
       setTokenBalance(formatEther(balance));
@@ -86,9 +86,9 @@ export default function BatchedTransactionDemo() {
         throw new Error("Please connect your wallet.");
       }
 
-      const contract = new Contract(CAPSULE_TEST_TOKEN_CONTRACT_ADDRESS, CapsuleTestToken.abi, signer);
+      const contract = new Contract(PARA_TEST_TOKEN_CONTRACT_ADDRESS, ParaTestToken.abi, signer);
 
-      const iface = new Interface(CapsuleTestToken.abi);
+      const iface = new Interface(ParaTestToken.abi);
 
       // Prepare calldata for each operation
       const calldata = operations.map((op) => {
@@ -147,7 +147,7 @@ export default function BatchedTransactionDemo() {
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
           Execute multiple token operations in a single transaction using the{" "}
           <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md">multicall</code> function of
-          the CapsuleTestToken contract.
+          the ParaTestToken contract.
         </p>
       </div>
 

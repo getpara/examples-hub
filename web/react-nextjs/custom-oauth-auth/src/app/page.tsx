@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { OAuthButtons } from "@/components/OAuthButtons";
 import { WalletDisplay } from "@/components/WalletDisplay";
-import { capsule } from "@/client/capsule";
-import { OAuthMethod } from "@usecapsule/web-sdk";
+import { para } from "@/client/para";
+import { OAuthMethod } from "@getpara/web-sdk";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
@@ -16,10 +16,10 @@ export default function Home() {
     setIsLoading(true);
     setError("");
     try {
-      const isAuthenticated = await capsule.isFullyLoggedIn();
+      const isAuthenticated = await para.isFullyLoggedIn();
       setIsConnected(isAuthenticated);
       if (isAuthenticated) {
-        const wallets = Object.values(await capsule.getWallets());
+        const wallets = Object.values(await para.getWallets());
         if (wallets?.length) {
           setWallet(wallets[0].address || "unknown");
         }
@@ -50,47 +50,45 @@ export default function Home() {
   };
 
   const handleFarcasterAuth = async () => {
-    const connectUri = await capsule.getFarcasterConnectURL();
+    const connectUri = await para.getFarcasterConnectURL();
     window.open(connectUri, "farcasterConnectPopup", "popup=true");
 
-    const { userExists, username } = await capsule.waitForFarcasterStatus();
+    const { userExists, username } = await para.waitForFarcasterStatus();
 
     const authUrl = userExists
-      ? await capsule.initiateUserLogin(username, false, "farcaster")
-      : await capsule.getSetUpBiometricsURL(false, "farcaster");
+      ? await para.initiateUserLogin(username, false, "farcaster")
+      : await para.getSetUpBiometricsURL(false, "farcaster");
 
     const popupWindow = window.open(authUrl, userExists ? "loginPopup" : "signUpPopup", "popup=true");
 
-    await (userExists ? capsule.waitForLoginAndSetup(popupWindow!) : capsule.waitForPasskeyAndCreateWallet());
+    await (userExists ? para.waitForLoginAndSetup(popupWindow!) : para.waitForPasskeyAndCreateWallet());
   };
 
   const handleRegularOAuth = async (method: OAuthMethod) => {
-    const oAuthURL = await capsule.getOAuthURL(method);
+    const oAuthURL = await para.getOAuthURL(method);
     window.open(oAuthURL, "oAuthPopup", "popup=true");
 
-    const { email, userExists } = await capsule.waitForOAuth();
+    const { email, userExists } = await para.waitForOAuth();
 
     const authUrl = userExists
-      ? await capsule.initiateUserLogin(email!, false, "email")
-      : await capsule.getSetUpBiometricsURL(false, "email");
+      ? await para.initiateUserLogin(email!, false, "email")
+      : await para.getSetUpBiometricsURL(false, "email");
 
     const popupWindow = window.open(authUrl, userExists ? "loginPopup" : "signUpPopup", "popup=true");
 
-    const result = await (userExists
-      ? capsule.waitForLoginAndSetup(popupWindow!)
-      : capsule.waitForPasskeyAndCreateWallet());
+    const result = await (userExists ? para.waitForLoginAndSetup(popupWindow!) : para.waitForPasskeyAndCreateWallet());
 
     if ("needsWallet" in result && result.needsWallet) {
-      await capsule.createWallet();
+      await para.createWallet();
     }
   };
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen gap-6 p-8">
-      <h1 className="text-2xl font-bold">Custom OAuth Auth + Capsule Example</h1>
+      <h1 className="text-2xl font-bold">Custom OAuth Auth + Para Example</h1>
       <p className="max-w-md text-center">
-        This example demonstrates a minimal custom OAuth authentication flow using Capsule's SDK in a Next.js (App
-        Router) project.
+        This example demonstrates a minimal custom OAuth authentication flow using Para's SDK in a Next.js (App Router)
+        project.
       </p>
 
       {isConnected ? (

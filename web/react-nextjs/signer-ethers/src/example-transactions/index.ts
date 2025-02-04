@@ -36,7 +36,7 @@ export const transactionTypes: TransactionsConfig = {
   "message-signing": {
     title: "Message Signing",
     description:
-      "Sign a message with your Capsule account to prove ownership of an address. This is commonly used for authentication and verifying wallet ownership.",
+      "Sign a message with your Para account to prove ownership of an address. This is commonly used for authentication and verifying wallet ownership.",
     path: "/example-transactions/message-signing",
     component: MessageSigning,
   },
@@ -50,21 +50,21 @@ export const transactionTypes: TransactionsConfig = {
   "contract-deployment": {
     title: "Contract Deployment",
     description:
-      "Deploy your own instance of the CapsuleTestToken contract. Learn about contract bytecode, constructor arguments, and deployment transactions.",
+      "Deploy your own instance of the ParaTestToken contract. Learn about contract bytecode, constructor arguments, and deployment transactions.",
     path: "/example-transactions/contract-deployment",
     component: ContractDeployment,
   },
   "token-transfer": {
     title: "Token Transfer",
     description:
-      "Transfer ERC20 tokens between addresses using our CapsuleTestToken contract. Understand token decimals, allowances, and balances.",
+      "Transfer ERC20 tokens between addresses using our ParaTestToken contract. Understand token decimals, allowances, and balances.",
     path: "/example-transactions/token-transfer",
     component: TokenTransfer,
   },
   "contract-interaction": {
     title: "Contract Interaction",
     description:
-      "Interact with deployed CapsuleTestToken contract functions. Explore different types of contract calls, state changes, and error handling.",
+      "Interact with deployed ParaTestToken contract functions. Explore different types of contract calls, state changes, and error handling.",
     path: "/example-transactions/contract-interaction",
     component: ContractInteraction,
   },
@@ -91,5 +91,5 @@ export const transactionTypes: TransactionsConfig = {
   },
 };
 
-export const CAPSULE_TEST_TOKEN_CONTRACT_ADDRESS = "0x83cC70475A0d71EF1F2F61FeDE625c8C7E90C3f2";
-export const CAPSULE_TEST_TOKEN_CONTRACT_OWNER = "0x0f35268de976323e06f5aed6f366b490d9b17750";
+export const PARA_TEST_TOKEN_CONTRACT_ADDRESS = "0x83cC70475A0d71EF1F2F61FeDE625c8C7E90C3f2";
+export const PARA_TEST_TOKEN_CONTRACT_OWNER = "0x0f35268de976323e06f5aed6f366b490d9b17750";

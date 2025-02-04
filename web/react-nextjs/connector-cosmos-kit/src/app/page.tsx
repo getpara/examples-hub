@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { capsule } from "@/client/capsule";
+import { para } from "@/client/para";
 import { WalletDisplay } from "@/components/WalletDisplay";
-import { CustomCapsuleModalView } from "@leapwallet/cosmos-social-login-capsule-provider-ui";
-import { OAuthMethod } from "@usecapsule/web-sdk";
+import { CustomParaModalView } from "@leapwallet/cosmos-social-login-para-provider-ui";
+import { OAuthMethod } from "@getpara/web-sdk";
 import { useChain } from "@cosmos-kit/react";
-import "@leapwallet/cosmos-social-login-capsule-provider-ui/styles.css";
+import "@leapwallet/cosmos-social-login-para-provider-ui/styles.css";
 import "@interchain-ui/react/styles";
 
 export default function Home() {
@@ -14,24 +14,24 @@ export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    window.openCapsuleModal = () => {
+    window.openParaModal = () => {
       setIsOpen(true);
     };
   }, []);
 
   const handleLoginSuccess = async () => {
-    window.successFromCapsuleModal();
+    window.successFromParaModal();
   };
 
   const handleLoginFailure = () => {
-    window.failureFromCapsuleModal();
+    window.failureFromParaModal();
   };
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen gap-6 p-8">
-      <h1 className="text-2xl font-bold">Capsule Modal + Cosmos Kit Connector</h1>
+      <h1 className="text-2xl font-bold">Para Modal + Cosmos Kit Connector</h1>
       <p className="max-w-md text-center">
-        This minimal example demonstrates how to integrate the Leap Social Login Capsule Modal with the Cosmos Kit
+        This minimal example demonstrates how to integrate the Leap Social Login Para Modal with the Cosmos Kit
         Connector in a Next.js (App Router) project.
       </p>
       {isWalletConnected ? (
@@ -46,10 +46,10 @@ export default function Home() {
         Open Modal
       </button>
       <div className="leap-ui z-[2147483647]">
-        <CustomCapsuleModalView
-          capsule={capsule as any}
-          showCapsuleModal={isOpen}
-          setShowCapsuleModal={setIsOpen}
+        <CustomParaModalView
+          para={para as any}
+          showParaModal={isOpen}
+          setShowParaModal={setIsOpen}
           theme="light"
           onAfterLoginSuccessful={handleLoginSuccess}
           onLoginFailure={handleLoginFailure}

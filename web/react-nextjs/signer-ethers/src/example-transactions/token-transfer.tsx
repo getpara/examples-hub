@@ -1,9 +1,9 @@
 "use client";
 
-import { useCapsule } from "@/components/CapsuleProvider";
+import { usePara } from "@/components/ParaProvider";
 import { useState, useEffect } from "react";
 import { formatEther, parseEther, Contract } from "ethers";
-import { CAPSULE_TEST_TOKEN_CONTRACT_ADDRESS } from ".";
+import { PARA_TEST_TOKEN_CONTRACT_ADDRESS } from ".";
 
 // ERC20 minimal ABI for transfer function
 const ERC20_ABI = [
@@ -16,7 +16,7 @@ const ERC20_ABI = [
 export default function TokenTransferDemo() {
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState("");
-  const [contractAddress, setContractAddress] = useState(CAPSULE_TEST_TOKEN_CONTRACT_ADDRESS);
+  const [contractAddress, setContractAddress] = useState(PARA_TEST_TOKEN_CONTRACT_ADDRESS);
   const [isLoading, setIsLoading] = useState(false);
   const [isBalanceLoading, setIsBalanceLoading] = useState(false);
   const [ethBalance, setEthBalance] = useState<string | null>(null);
@@ -29,7 +29,7 @@ export default function TokenTransferDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { isConnected, walletId, address, signer, provider } = useCapsule();
+  const { isConnected, walletId, address, signer, provider } = usePara();
 
   const fetchBalances = async () => {
     if (!address || provider === null) return;
@@ -143,7 +143,7 @@ export default function TokenTransferDemo() {
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold tracking-tight mb-6">Token Transfer Demo</h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Transfer {tokenSymbol} tokens using the Capsule SDK with ethers.js integration. The example shows querying for
+          Transfer {tokenSymbol} tokens using the Para SDK with ethers.js integration. The example shows querying for
           ERC20 token data directly from contract and submitting a transfer transaction.
         </p>
       </div>

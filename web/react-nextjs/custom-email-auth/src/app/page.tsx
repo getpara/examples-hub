@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { capsule } from "@/client/capsule";
-import { WalletType } from "@usecapsule/web-sdk";
+import { para } from "@/client/para";
+import { WalletType } from "@getpara/web-sdk";
 import { EmailInput } from "@/components/EmailInput";
 import { OTPInput } from "@/components/OTPInput";
 import { AuthButton } from "@/components/AuthButton";
@@ -20,9 +20,9 @@ export default function Home() {
     setIsLoading(true);
     setError("");
     try {
-      const isAuthenticated = await capsule.isFullyLoggedIn();
+      const isAuthenticated = await para.isFullyLoggedIn();
       if (isAuthenticated) {
-        const wallets = Object.values(await capsule.getWallets());
+        const wallets = Object.values(await para.getWallets());
         if (wallets?.length) {
           setWallet(wallets[0].address || "unknown");
         }
@@ -42,26 +42,26 @@ export default function Home() {
     setIsLoading(true);
     setError("");
     try {
-      const isExistingUser = await capsule.checkIfUserExists(email);
+      const isExistingUser = await para.checkIfUserExists(email);
 
       if (isExistingUser) {
-        const webAuthUrlForLogin = await capsule.initiateUserLogin(email, false, "email");
+        const webAuthUrlForLogin = await para.initiateUserLogin(email, false, "email");
         const popupWindow = window.open(webAuthUrlForLogin, "loginPopup", "popup=true");
         if (!popupWindow) throw new Error("Popup was blocked");
 
-        const { isComplete, needsWallet } = await capsule.waitForLoginAndSetup(popupWindow);
+        const { isComplete, needsWallet } = await para.waitForLoginAndSetup(popupWindow);
 
         if (needsWallet) {
-          await capsule.createWallet(WalletType.EVM, false);
+          await para.createWallet(WalletType.EVM, false);
         }
 
-        const wallets = Object.values(await capsule.getWallets());
+        const wallets = Object.values(await para.getWallets());
         if (wallets?.length) {
           setWallet(wallets[0].address || "unknown");
         }
         setStep(2);
       } else {
-        await capsule.createUser(email);
+        await para.createUser(email);
         setStep(1);
       }
     } catch (err: any) {
@@ -74,22 +74,22 @@ export default function Home() {
     setIsLoading(true);
     setError("");
     try {
-      const isVerified = await capsule.verifyEmail(verificationCode);
+      const isVerified = await para.verifyEmail(verificationCode);
       if (!isVerified) {
         setError("Verification code incorrect or expired");
         setIsLoading(false);
         return;
       }
 
-      const setupUrl = await capsule.getSetUpBiometricsURL(false);
+      const setupUrl = await para.getSetUpBiometricsURL(false);
       const popupWindow = window.open(setupUrl, "signUpPopup", "popup=true");
 
       if (!popupWindow) {
         throw new Error("Popup was blocked");
       }
 
-      await capsule.waitForPasskeyAndCreateWallet();
-      const wallets = Object.values(await capsule.getWallets());
+      await para.waitForPasskeyAndCreateWallet();
+      const wallets = Object.values(await para.getWallets());
 
       if (wallets?.length) {
         setWallet(wallets[0].address || "unknown");
@@ -104,10 +104,10 @@ export default function Home() {
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen gap-6 p-8">
-      <h1 className="text-2xl font-bold">Custom Email Auth + Capsule Example</h1>
+      <h1 className="text-2xl font-bold">Custom Email Auth + Para Example</h1>
       <p className="max-w-md text-center">
-        This example demonstrates a minimal custom email authentication flow using Capsule's SDK in a Next.js (App
-        Router) project.
+        This example demonstrates a minimal custom email authentication flow using Para's SDK in a Next.js (App Router)
+        project.
       </p>
       <div className="flex flex-col items-center justify-center gap-4 p-4 max-w-sm w-full">
         {step < 2 && (

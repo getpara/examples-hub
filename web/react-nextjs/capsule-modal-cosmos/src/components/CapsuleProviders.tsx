@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { CapsuleCosmosProvider, keplrWallet, leapWallet } from "@usecapsule/cosmos-wallet-connectors";
-import { cosmoshub } from "@usecapsule/graz/chains";
+import { ParaCosmosProvider, keplrWallet, leapWallet } from "@getpara/cosmos-wallet-connectors";
+import { cosmoshub } from "@getpara/graz/chains";
 
 type Props = {
   children: React.ReactNode;
@@ -17,9 +17,9 @@ const cosmosChains = [
   },
 ];
 
-export const CapsuleProviders: React.FC<Props> = ({ children }) => {
+export const ParaProviders: React.FC<Props> = ({ children }) => {
   return (
-    <CapsuleCosmosProvider
+    <ParaCosmosProvider
       chains={cosmosChains}
       wallets={[keplrWallet, leapWallet]}
       selectedChainId={cosmoshub.chainId}
@@ -28,6 +28,6 @@ export const CapsuleProviders: React.FC<Props> = ({ children }) => {
         console.log("Switched chain to:", chainId);
       }}>
       {children}
-    </CapsuleCosmosProvider>
+    </ParaCosmosProvider>
   );
 };

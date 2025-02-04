@@ -2,13 +2,13 @@
 
 import { ChainProvider } from "@cosmos-kit/react";
 import { assets, chains } from "chain-registry";
-import { wallets as leapSocial } from "@cosmos-kit/leap-capsule-social-login";
+import { wallets as leapSocial } from "@cosmos-kit/leap-para-social-login";
 
 type Props = {
   children: React.ReactNode;
 };
 
-export const CapsuleProviders: React.FC<Props> = ({ children }) => {
+export const ParaProviders: React.FC<Props> = ({ children }) => {
   return (
     <ChainProvider
       chains={chains}

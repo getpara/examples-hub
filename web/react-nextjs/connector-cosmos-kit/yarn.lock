@@ -924,6 +924,45 @@
   resolved "https://registry.yarnpkg.com/@formkit/auto-animate/-/auto-animate-0.8.2.tgz#24a56e816159fd5585405dcee6bb992f81c27585"
   integrity sha512-SwPWfeRa5veb1hOIBMdzI+73te5puUBHmqqaF1Bu7FjvxlYSz/kJcZKSa9Cg60zL0uRNeJL2SbRxV6Jp6Q1nFQ==
 
+"@getpara/core-sdk@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-0.1.0.tgz#187176a39f4b13784fe8b68dfc5d58bac5d4c456"
+  integrity sha512-KgxD3xUqycl/T+kHMorkeMuG1aty1x7dhLVglpg1/z3U2EvkAKZK4+wTvkmzatHae+bu18x5uJ+PhvffM2wj0w==
+  dependencies:
+    "@celo/utils" "^8.0.0"
+    "@cosmjs/encoding" "^0.32.4"
+    "@getpara/user-management-client" "0.1.0"
+    "@noble/hashes" "^1.5.0"
+    base64url "^3.0.1"
+    buffer "6.0.3"
+    ethereumjs-util "7.1.5"
+    libphonenumber-js "1.11.2"
+    node-forge "^1.3.1"
+    qs "^6.12.0"
+
+"@getpara/user-management-client@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-0.1.0.tgz#4e6d97e47b67fb2213254e04a83a205762fed214"
+  integrity sha512-4UbFI6zQ8u5EEV+Jv3oZpP4tHRSU1SW5l7HLXDrp2MDKIUfMfHHqxvzG5wQuRawCrkq9/YbxbZiBtBLwm34cBQ==
+  dependencies:
+    axios "^1.6.3"
+    libphonenumber-js "1.11.2"
+    qs "^6.12.0"
+
+"@getpara/web-sdk@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-0.1.0.tgz#1b523e7857c84e6fdd29f567d73f751a9e2a8ce2"
+  integrity sha512-UD9wE/G+zXdxhSL6KbPG3G8/HoRh5tpPFoFiBD63FhRK8pfwLFDZhszt8iAQncZanKczeRYTlNYBg6Rwe2+gVg==
+  dependencies:
+    "@getpara/core-sdk" "0.1.0"
+    "@getpara/user-management-client" "0.1.0"
+    assert "^2.1.0"
+    base64url "3.0.1"
+    buffer "6.0.3"
+    cbor-web "8.1.0"
+    node-forge "1.3.1"
+    ua-parser-js "1.0.39"
+
 "@heroicons/react@^2.0.18":
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/@heroicons/react/-/react-2.2.0.tgz#0c05124af50434a800773abec8d3af6a297d904b"
@@ -3486,22 +3525,6 @@
     libphonenumber-js "1.11.2"
     node-forge "^1.3.1"
 
-"@usecapsule/core-sdk@2.17.0":
-  version "2.17.0"
-  resolved "https://registry.yarnpkg.com/@usecapsule/core-sdk/-/core-sdk-2.17.0.tgz#fa14341430065a7a37cf0998d74987e439ded889"
-  integrity sha512-vrnbGUWKwjdAzQCbMWWFO0KLLlwhcxniPnpaQD9cF/4wehCxhMRPrUZbz7856EoWkaOAQ/togzTjTH0napJ1Og==
-  dependencies:
-    "@celo/utils" "^8.0.0"
-    "@cosmjs/encoding" "^0.32.4"
-    "@noble/hashes" "^1.5.0"
-    "@usecapsule/user-management-client" "1.39.0"
-    base64url "^3.0.1"
-    buffer "6.0.3"
-    ethereumjs-util "7.1.5"
-    libphonenumber-js "1.11.2"
-    node-forge "^1.3.1"
-    qs "^6.12.0"
-
 "@usecapsule/cosmjs-v0-integration@1.21.0":
   version "1.21.0"
   resolved "https://registry.yarnpkg.com/@usecapsule/cosmjs-v0-integration/-/cosmjs-v0-integration-1.21.0.tgz#1fecafb86d6b952f339fdf929e5d178867214c3e"
@@ -3532,15 +3555,6 @@
     axios "^1.6.3"
     qs "^6.12.0"
 
-"@usecapsule/user-management-client@1.39.0":
-  version "1.39.0"
-  resolved "https://registry.yarnpkg.com/@usecapsule/user-management-client/-/user-management-client-1.39.0.tgz#cc708a5529a8d8d7672bad4e05efa76fd45ad99e"
-  integrity sha512-Eu4QWYOEpToCfV1AFaXNplikCHxtWwor2GrsyPeqF11K7PKA/i6YVqJxpJwzdxGLeaEY0jGbr6imuLSudh0gHg==
-  dependencies:
-    axios "^1.6.3"
-    libphonenumber-js "1.11.2"
-    qs "^6.12.0"
-
 "@usecapsule/web-sdk@1.23.0":
   version "1.23.0"
   resolved "https://registry.yarnpkg.com/@usecapsule/web-sdk/-/web-sdk-1.23.0.tgz#b359653892300299b1898acf5241a4537d787da8"
@@ -3553,20 +3567,6 @@
     buffer "6.0.3"
     cbor-web "8.1.0"
     node-forge "1.3.1"
-
-"@usecapsule/web-sdk@^2.17.0":
-  version "2.17.0"
-  resolved "https://registry.yarnpkg.com/@usecapsule/web-sdk/-/web-sdk-2.17.0.tgz#42a6643d0f99f94d305a56c511a231e3b37e98d9"
-  integrity sha512-GN/83Rsu99WVFx6vvxzz+Nhzf7oUCJ1GUbA9VltT4DS2prdJy9QfAI2IyyOjgoj9F0LDFJ0panP/JX2pVdJKow==
-  dependencies:
-    "@usecapsule/core-sdk" "2.17.0"
-    "@usecapsule/user-management-client" "1.39.0"
-    assert "^2.1.0"
-    base64url "3.0.1"
-    buffer "6.0.3"
-    cbor-web "8.1.0"
-    node-forge "1.3.1"
-    ua-parser-js "1.0.39"
 
 "@vanilla-extract/css-utils@^0.1.4":
   version "0.1.4"

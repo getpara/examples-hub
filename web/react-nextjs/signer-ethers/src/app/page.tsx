@@ -1,24 +1,24 @@
 "use client";
 
-import { useCapsule } from "@/components/CapsuleProvider";
+import { usePara } from "@/components/ParaProvider";
 import { Card } from "@/components/Card";
 import Link from "next/link";
 import { transactionTypes } from "@/example-transactions";
 
 export default function Home() {
-  const { isConnected, openModal } = useCapsule();
+  const { isConnected, openModal } = usePara();
 
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold tracking-tight mb-4">Capsul + Ethers Demo</h1>
         <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-          Explore signing different transaction types using Capsule with Ethers.js. Reference the
+          Explore signing different transaction types using Para with Ethers.js. Reference the
           <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md">
-            /src/components/CapsuleProvider.tsx
+            /src/components/ParaProvider.tsx
           </code>
-          file to see how we provide Capsule globally to the app and create the
-          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md">CapsuleEthersSigner</code>.
+          file to see how we provide Para globally to the app and create the
+          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md">ParaEthersSigner</code>.
         </p>
       </div>
 

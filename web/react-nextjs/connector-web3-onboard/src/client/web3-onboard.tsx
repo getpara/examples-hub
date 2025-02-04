@@ -1,13 +1,13 @@
-import capsuleModule, { Environment, OAuthMethod } from "@web3-onboard/capsule";
-import { CapsuleInitOptions } from "@web3-onboard/capsule/dist/types";
+import paraModule, { Environment, OAuthMethod } from "@web3-onboard/para";
+import { ParaInitOptions } from "@web3-onboard/para/dist/types";
 import { init } from "@web3-onboard/react";
 import injectedModule from "@web3-onboard/injected-wallets";
 
-const CAPSULE_API_KEY = process.env.NEXT_PUBLIC_CAPSULE_API_KEY || "";
+const PARA_API_KEY = process.env.NEXT_PUBLIC_PARA_API_KEY || "";
 
-const initOptions: CapsuleInitOptions = {
+const initOptions: ParaInitOptions = {
   environment: Environment.BETA,
-  apiKey: CAPSULE_API_KEY,
+  apiKey: PARA_API_KEY,
   modalProps: {
     authLayout: ["AUTH:FULL"],
     oAuthMethods: [
@@ -18,20 +18,20 @@ const initOptions: CapsuleInitOptions = {
       OAuthMethod.GOOGLE,
       OAuthMethod.TWITTER,
     ],
-    appName: "Capsule Web3-Onboard Example",
-    logo: "/capsule.svg",
+    appName: "Para Web3-Onboard Example",
+    logo: "/para.svg",
     recoverySecretStepEnabled: true,
     disableEmailLogin: false,
     disablePhoneLogin: false,
   },
-  walletLabel: "Sign in with Capsule",
+  walletLabel: "Sign in with Para",
 };
 
-const capsule = capsuleModule(initOptions);
+const para = paraModule(initOptions);
 
 const injected = injectedModule();
 
-const wallets = [capsule, injected];
+const wallets = [para, injected];
 
 const chains = [
   {
@@ -42,8 +42,8 @@ const chains = [
   },
 ];
 const appMetadata = {
-  name: "Capsule Example App",
-  description: "Example app for Capsule Web3-Onboard Authentication",
+  name: "Para Example App",
+  description: "Example app for Para Web3-Onboard Authentication",
 };
 
 init({

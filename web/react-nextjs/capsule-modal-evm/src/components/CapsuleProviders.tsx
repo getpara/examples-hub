@@ -1,17 +1,17 @@
 "use client";
 
 import {
-  CapsuleEvmProvider,
+  ParaEvmProvider,
   coinbaseWallet,
   metaMaskWallet,
   rabbyWallet,
   rainbowWallet,
   walletConnectWallet,
   zerionWallet,
-} from "@usecapsule/evm-wallet-connectors";
+} from "@getpara/evm-wallet-connectors";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { sepolia, celo, mainnet, polygon } from "wagmi/chains";
-import { capsule } from "@/client/capsule";
+import { para } from "@/client/para";
 
 type Props = {
   children: React.ReactNode;
@@ -19,19 +19,19 @@ type Props = {
 
 const queryClient = new QueryClient();
 
-export const CapsuleProviders: React.FC<Props> = ({ children }) => {
+export const ParaProviders: React.FC<Props> = ({ children }) => {
   return (
     <QueryClientProvider client={queryClient}>
-      <CapsuleEvmProvider
+      <ParaEvmProvider
         config={{
           projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "",
-          appName: "Capsule EVM Wallet Connect",
+          appName: "Para EVM Wallet Connect",
           chains: [mainnet, polygon, sepolia, celo],
           wallets: [metaMaskWallet, rainbowWallet, walletConnectWallet, zerionWallet, coinbaseWallet, rabbyWallet],
-          capsule: capsule,
+          para: para,
         }}>
         {children}
-      </CapsuleEvmProvider>
+      </ParaEvmProvider>
     </QueryClientProvider>
   );
 };

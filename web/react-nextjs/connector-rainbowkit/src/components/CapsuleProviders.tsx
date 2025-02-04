@@ -2,9 +2,9 @@
 
 import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { RainbowKitProvider, connectorsForWallets, lightTheme } from "@usecapsule/rainbowkit";
-import { getCapsuleWallet, GetCapsuleOpts, OAuthMethod, AuthLayout } from "@usecapsule/rainbowkit-wallet";
-import { Environment } from "@usecapsule/web-sdk";
+import { RainbowKitProvider, connectorsForWallets, lightTheme } from "@getpara/rainbowkit";
+import { getParaWallet, GetParaOpts, OAuthMethod, AuthLayout } from "@getpara/rainbowkit-wallet";
+import { Environment } from "@getpara/web-sdk";
 import { WagmiProvider, createConfig, http } from "wagmi";
 import { sepolia, mainnet } from "wagmi/chains";
 
@@ -12,17 +12,17 @@ type Props = {
   children: React.ReactNode;
 };
 
-const API_KEY = process.env.NEXT_PUBLIC_CAPSULE_API_KEY || "";
+const API_KEY = process.env.NEXT_PUBLIC_PARA_API_KEY || "";
 
 const WALLET_CONNECT_PROJECT_ID = process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "";
 
-const capsuleWalletOpts: GetCapsuleOpts = {
-  capsule: {
+const paraWalletOpts: GetParaOpts = {
+  para: {
     environment: Environment.BETA,
     apiKey: API_KEY,
   },
-  appName: "Capsule RainbowKit Example",
-  logo: "/capsule.svg",
+  appName: "Para RainbowKit Example",
+  logo: "/para.svg",
   oAuthMethods: [
     OAuthMethod.APPLE,
     OAuthMethod.DISCORD,
@@ -49,18 +49,18 @@ const capsuleWalletOpts: GetCapsuleOpts = {
   recoverySecretStepEnabled: true,
 };
 
-const capsuleWallet = getCapsuleWallet(capsuleWalletOpts);
+const paraWallet = getParaWallet(paraWalletOpts);
 
 const connectors = connectorsForWallets(
   [
     {
       groupName: "Social Login",
-      wallets: [capsuleWallet],
+      wallets: [paraWallet],
     },
   ],
   {
-    appName: "Capsule RainbowKit Example",
-    appDescription: "Example of Capsule integration with RainbowKit Wallet Connector",
+    appName: "Para RainbowKit Example",
+    appDescription: "Example of Para integration with RainbowKit Wallet Connector",
     projectId: WALLET_CONNECT_PROJECT_ID,
   }
 );
@@ -86,7 +86,7 @@ const rainbowkitTheme = lightTheme({
   overlayBlur: "large",
 });
 
-export const CapsuleProviders: React.FC<Props> = ({ children }) => {
+export const ParaProviders: React.FC<Props> = ({ children }) => {
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>

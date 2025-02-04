@@ -5,23 +5,23 @@ import { useConnect } from "wagmi";
 export function WalletConnectors() {
   const { connect, connectors } = useConnect();
 
-  const capsuleConnector = connectors.find((connector) => connector.id === "capsule");
-  const otherConnectors = connectors.filter((connector) => connector.id !== "capsule");
+  const paraConnector = connectors.find((connector) => connector.id === "para");
+  const otherConnectors = connectors.filter((connector) => connector.id !== "para");
 
   return (
     <div className="w-full max-w-md">
       <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-6">Capsule Wagmi Example</h2>
+        <h2 className="text-xl font-semibold mb-6">Para Wagmi Example</h2>
 
         <div className="space-y-6">
           {/* Social Login Section */}
           <div>
             <h3 className="text-sm font-medium text-gray-500 mb-3">Social Login</h3>
-            {capsuleConnector && (
+            {paraConnector && (
               <button
-                onClick={() => connect({ connector: capsuleConnector })}
+                onClick={() => connect({ connector: paraConnector })}
                 className="w-full px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-950 transition-colors">
-                Connect with {capsuleConnector.name}
+                Connect with {paraConnector.name}
               </button>
             )}
           </div>

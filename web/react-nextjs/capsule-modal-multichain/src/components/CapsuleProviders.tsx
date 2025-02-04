@@ -5,19 +5,19 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { clusterApiUrl } from "@solana/web3.js";
 import { sepolia, celo, mainnet, polygon } from "wagmi/chains";
-import { capsule } from "@/client/capsule";
+import { para } from "@/client/para";
 import {
-  CapsuleEvmProvider,
+  ParaEvmProvider,
   coinbaseWallet,
   metaMaskWallet,
   rabbyWallet,
   rainbowWallet,
   walletConnectWallet,
   zerionWallet,
-} from "@usecapsule/evm-wallet-connectors";
-import { CapsuleCosmosProvider, keplrWallet, leapWallet } from "@usecapsule/cosmos-wallet-connectors";
-import { cosmoshub } from "@usecapsule/graz/chains";
-import { backpackWallet, CapsuleSolanaProvider, glowWallet, phantomWallet } from "@usecapsule/solana-wallet-connectors";
+} from "@getpara/evm-wallet-connectors";
+import { ParaCosmosProvider, keplrWallet, leapWallet } from "@getpara/cosmos-wallet-connectors";
+import { cosmoshub } from "@getpara/graz/chains";
+import { backpackWallet, ParaSolanaProvider, glowWallet, phantomWallet } from "@getpara/solana-wallet-connectors";
 
 type Props = {
   children: React.ReactNode;
@@ -27,7 +27,7 @@ const queryClient = new QueryClient();
 const solanaNetwork = WalletAdapterNetwork.Devnet;
 const endpoint = clusterApiUrl(solanaNetwork);
 
-export const CapsuleProviders: React.FC<Props> = ({ children }) => {
+export const ParaProviders: React.FC<Props> = ({ children }) => {
   const cosmosChains = [
     {
       ...cosmoshub,
@@ -38,15 +38,15 @@ export const CapsuleProviders: React.FC<Props> = ({ children }) => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <CapsuleEvmProvider
+      <ParaEvmProvider
         config={{
           projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "",
-          appName: "Capsule EVM Wallet Connect",
+          appName: "Para EVM Wallet Connect",
           chains: [mainnet, polygon, sepolia, celo],
           wallets: [metaMaskWallet, rainbowWallet, walletConnectWallet, zerionWallet, coinbaseWallet, rabbyWallet],
-          capsule: capsule,
+          para: para,
         }}>
-        <CapsuleCosmosProvider
+        <ParaCosmosProvider
           chains={cosmosChains}
           wallets={[keplrWallet, leapWallet]}
           selectedChainId={cosmoshub.chainId}
@@ -54,7 +54,7 @@ export const CapsuleProviders: React.FC<Props> = ({ children }) => {
           onSwitchChain={(chainId) => {
             console.log("Switched chain to:", chainId);
           }}>
-          <CapsuleSolanaProvider
+          <ParaSolanaProvider
             endpoint={endpoint}
             wallets={[glowWallet, phantomWallet, backpackWallet]}
             chain={solanaNetwork}
@@ -63,9 +63,9 @@ export const CapsuleProviders: React.FC<Props> = ({ children }) => {
               uri: typeof window !== "undefined" ? `${window.location.protocol}//${window.location.host}` : "",
             }}>
             {children}
-          </CapsuleSolanaProvider>
-        </CapsuleCosmosProvider>
-      </CapsuleEvmProvider>
+          </ParaSolanaProvider>
+        </ParaCosmosProvider>
+      </ParaEvmProvider>
     </QueryClientProvider>
   );
 };

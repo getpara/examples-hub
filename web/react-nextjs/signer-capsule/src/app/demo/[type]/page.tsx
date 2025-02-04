@@ -1,13 +1,13 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useCapsule } from "@/components/CapsuleProvider";
+import { usePara } from "@/components/ParaProvider";
 import SignMessageDemo from "@/example-tx/sign-message";
 import SignTransactionDemo from "@/example-tx/sign-transaction";
 
 export default function DemoPage() {
   const { type } = useParams();
-  const { isConnected, openModal } = useCapsule();
+  const { isConnected, openModal } = usePara();
 
   if (!isConnected) {
     return (

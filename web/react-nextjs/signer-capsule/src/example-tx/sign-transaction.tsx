@@ -1,7 +1,7 @@
 "use client";
 
-import { capsule } from "@/client/capsule";
-import { useCapsule } from "@/components/CapsuleProvider";
+import { para } from "@/client/para";
+import { usePara } from "@/components/ParaProvider";
 import { useState } from "react";
 import { encode as rlpEncode } from "@ethereumjs/rlp";
 
@@ -16,7 +16,7 @@ export default function SignTransactionDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { isConnected, walletId, address } = useCapsule();
+  const { isConnected, walletId, address } = usePara();
   console.log(address);
 
   // Helper function to convert hex string to buffer removing leading zeros
@@ -103,7 +103,7 @@ export default function SignTransactionDemo() {
 
       console.log("Chain ID:", chainId);
 
-      const result = await capsule.signTransaction(walletId, base64EncodedTx, chainId);
+      const result = await para.signTransaction(walletId, base64EncodedTx, chainId);
 
       console.log("Transaction result:", result);
 
@@ -143,9 +143,9 @@ export default function SignTransactionDemo() {
         <h1 className="text-4xl font-bold tracking-tight mb-6">Send Transaction Demo</h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
           Sign a transaction with your connected wallet. This demonstrates a basic transaction signing interaction with
-          the Capsule SDK using the{" "}
+          the Para SDK using the{" "}
           <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md">
-            capsule.signTransaction()
+            para.signTransaction()
           </code>{" "}
           method. Use this for manual transaction signing without one of the signer libraries.
         </p>
