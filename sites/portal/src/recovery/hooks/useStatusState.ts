@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { STORAGE_PREFIX } from '@usecapsule/web-sdk';
-import type { RecoveryStatus } from '@usecapsule/web-sdk';
+import { STORAGE_PREFIX } from '@getpara/web-sdk';
+import type { RecoveryStatus } from '@getpara/web-sdk';
 
 const useStatusState = (initialValue: RecoveryStatus | null) => {
   const [state, setState] = useState<RecoveryStatus | null>(() => {

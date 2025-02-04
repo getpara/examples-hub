@@ -1,6 +1,6 @@
 import { HStack, Spacer, VStack } from '@chakra-ui/react';
 import React, { useState, useEffect, useContext } from 'react';
-import { RecoveryStatus } from '@usecapsule/web-sdk';
+import { RecoveryStatus } from '@getpara/web-sdk';
 import RecoverWalletButton from './RecoverWalletButton';
 import { RecoveryAttemptContext } from '../../contexts/RecoveryAttemptContext';
 import { ENV } from '../../../constants';

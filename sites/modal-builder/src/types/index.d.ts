@@ -1,5 +1,5 @@
-import { IconType } from '@usecapsule/react-components';
-import { AuthLayout, CapsuleModalProps, OAuthMethod, ExternalWallet as SDKExternalWallet } from '@usecapsule/react-sdk';
+import { IconType } from '@getpara/react-components';
+import { AuthLayout, ParaModalProps, OAuthMethod, ExternalWallet as SDKExternalWallet } from '@getpara/react-sdk';
 
 export type TAuthLayout = `${AuthLayout}`;
 
@@ -24,28 +24,28 @@ export interface DropdownOption {
 
 export interface AppearanceConfig {
   theme: Pick<
-    NonNullable<CapsuleModalProps['theme']>,
+    NonNullable<ParaModalProps['theme']>,
     'foregroundColor' | 'backgroundColor' | 'accentColor' | 'font' | 'borderRadius'
   >;
-  logo?: CapsuleModalProps['logo'];
+  logo?: ParaModalProps['logo'];
 }
 
-export interface NetworksConfig extends Pick<CapsuleModalProps, 'networks'> {}
+export interface NetworksConfig extends Pick<ParaModalProps, 'networks'> {}
 
 export interface AuthenticationConfig
   extends Pick<
-    CapsuleModalProps,
+    ParaModalProps,
     'oAuthMethods' | 'disableEmailLogin' | 'disablePhoneLogin' | 'authLayout' | 'externalWallets'
   > {
   isWeb2AuthEnabled: boolean;
   isWeb3AuthEnabled: boolean;
 }
 
-export interface WalletsConfig extends Pick<CapsuleModalProps, 'hideWallets'> {
+export interface WalletsConfig extends Pick<ParaModalProps, 'hideWallets'> {
   hideWallets: boolean;
 }
 
-export interface SecurityConfig extends Pick<CapsuleModalProps, 'twoFactorAuthEnabled' | 'recoverySecretStepEnabled'> {}
+export interface SecurityConfig extends Pick<ParaModalProps, 'twoFactorAuthEnabled' | 'recoverySecretStepEnabled'> {}
 
 export interface OnRampsConfig {
   onRampTestMode: boolean;

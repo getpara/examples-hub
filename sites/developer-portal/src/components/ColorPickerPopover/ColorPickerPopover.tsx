@@ -1,7 +1,7 @@
 import { HexAlphaColorPicker } from 'react-colorful';
 
 import styled from 'styled-components';
-import { CpslPopover } from '@usecapsule/react-components';
+import { CpslPopover } from '@getpara/react-components';
 
 interface ColorPickerPopoverProps {
   id: string;

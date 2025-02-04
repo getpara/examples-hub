@@ -95,7 +95,7 @@ export class WebExamplePage {
     await this.page.reload();
     await this.page.waitForTimeout(1000);
     if (!skipClickCapsule) {
-      await this.page.getByRole('button', { name: 'Capsule' }).click();
+      await this.page.getByRole('button', { name: 'Para' }).click();
       await this.page.waitForTimeout(300);
       await this.page.reload();
     }

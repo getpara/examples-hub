@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { useFloating, offset, flip, shift, autoUpdate } from '@floating-ui/react';
-import { CpslIcon } from '@usecapsule/react-components';
+import { CpslIcon } from '@getpara/react-components';
 import styled from 'styled-components';
 import { Text } from './StyledText';
 import { DropdownOption } from '../../types';

@@ -1,0 +1,86 @@
+import { PropsWithChildren, createContext, useContext, useEffect, useMemo } from 'react';
+import { ConstructorOpts as ParaConstructorOpts, Environment as ParaEnvironment } from '@getpara/web-sdk';
+import { useSearchParams } from 'react-router-dom';
+import { ParaPortal } from '../classes/ParaPortal';
+
+interface ParaProviderProps extends PropsWithChildren {
+  apiKey?: string;
+  partnerId?: string;
+  para?: ParaPortal;
+  environment: ParaEnvironment;
+  options?: ParaConstructorOpts;
+  onMount?: (para: ParaPortal) => void;
+}
+
+export const ParaContext = createContext<ParaPortal>(undefined as unknown as ParaPortal);
+
+/**
+ * A React Context provider that provides a `Para` instance to its children. You can either provide a `Para` instance
+ * directly or provide the necessary information to create a new instance. To access the `Para` instance, use the `usePara` hook.
+ *
+ * @component
+ * @param {Para} props.para - The `Para` object to provide to the children. If not provided, a new instance will be created using the other props.
+ * @param {ParaEnvironment} props.environment - The environment to use for the `Para` instance, if an instance is not passed. Defaults to `PROD`.
+ * @param {string?} props.apiKey - The partner API key used to create the `Para` instance, if an instance is not passed. Defaults to `undefined`.
+ * @param {ParaConstructorOpts?} props.options - The constructor options used to create the `Para` instance, if an instance is not passed. Defaults to an empty object.
+ * @param {(_: Para) => void?} props.onMount - A callback function that is called with the `Para` instance after it is first created or modified.
+ *
+ * @example
+ * // Provide a pre-created `Para` instance
+ * const para = new Para();
+ *
+ * <ParaProvider para={para}>
+ *   <ChildComponent />
+ * </ParaProvider>
+ *
+ * // Provide the options for a new `Para` instance
+ * <ParaProvider
+ *   environment="DEV"
+ *   apiKey="my-api-key"
+ *   options={{
+ *     useSessionStorage: true,
+ *   }}
+ * >
+ *   <ChildComponent />
+ * </ParaProvider>
+ *
+ * // Access the `Para` instance from within a child component
+ * const ChildComponent = () => {
+ *   const para = usePara();
+ *
+ *   return (
+ *     <div>{para.getEmail()}</div>
+ *   );
+ * }
+ */
+
+export const ParaProvider = (props: ParaProviderProps) => {
+  const [searchParams] = useSearchParams();
+  const { apiKey, environment, options, onMount, children, partnerId } = props;
+  const paramsSupportedWalletTypes = searchParams.get('supportedWalletTypes');
+
+  const para = useMemo(
+    () =>
+      props.para ??
+      new ParaPortal(environment, apiKey, {
+        ...options,
+        ...(paramsSupportedWalletTypes
+          ? { supportedWalletTypes: JSON.parse(decodeURIComponent(paramsSupportedWalletTypes)) }
+          : {}),
+        ...(partnerId && { portalPartnerId: partnerId }),
+      }),
+    [apiKey, environment, options, props.para, paramsSupportedWalletTypes],
+  );
+  para.ctx.isE2E = import.meta.env.VITE_IS_E2E === 'true';
+
+  useEffect(() => {
+    onMount?.(para);
+  }, [onMount, para]);
+
+  return <ParaContext.Provider value={para}>{children}</ParaContext.Provider>;
+};
+
+/**
+ * Returns the `Para` instance provided by the nearest `ParaProvider` in the component tree.
+ */
+export const usePara = () => useContext(ParaContext);

@@ -1,6 +1,6 @@
-import { CpslButton, CpslInput, CpslSelect, CpslSelectItem, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslInput, CpslSelect, CpslSelectItem, CpslText } from '@getpara/react-components';
 import styled from 'styled-components';
-import { CpslSelectCustomEvent } from '@usecapsule/core-components';
+import { CpslSelectCustomEvent } from '@getpara/core-components';
 import { Environment } from '../../../types/environment';
 import { formatEnvName, getKeyColor } from '../../../utils/apiKey';
 import { Modal } from '../../../components/Modal/Modal';
@@ -60,7 +60,7 @@ export const CreateKeyModal = ({ open, onClose }: CreateKeyModalProps) => {
             });
           },
           onError: err => {
-            let body = 'Please try again. If the problem persists, contact Capsule support.';
+            let body = 'Please try again. If the problem persists, contact Para support.';
 
             if ((err as AxiosError).response?.data === 'max keys created for the current project') {
               body = `You've reached the max number of ${formatEnvName(environment as Environment)} API keys allowed on this project. Archive another key or create another project to add more API keys.`;

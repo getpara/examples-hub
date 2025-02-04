@@ -1,12 +1,12 @@
 import { styled } from 'styled-components';
 import { IFrameSteps, ModalStep } from '../../utils/steps.js';
-import { CpslAlert, CpslIcon } from '@usecapsule/react-components';
+import { CpslAlert, CpslIcon } from '@getpara/react-components';
 import { VerificationCodeStep } from '../VerificationCodeStep/VerificationCodeStep.js';
 import { useModalStore, useThemeStore } from '../../stores/index.js';
 import { BiometricLoginStep } from '../BiometricLoginStep/BiometricLoginStep.js';
 import { Setup2FAStep } from '../Setup2FAStep/Setup2FAStep.js';
 import { LoginDoneStep } from '../LoginDoneStep/LoginDoneStep.js';
-import { EnabledFlow, OAuthMethod } from '@usecapsule/web-sdk';
+import { EnabledFlow, OAuthMethod } from '@getpara/web-sdk';
 import { AwaitingBiometricsStep } from '../AwaitingBiometricsStep/AwaitingBiometricsStep.js';
 import { AwaitingWalletCreationStep } from '../AwaitingWalletCreationStep/AwaitingWalletCreationStep.js';
 import { WalletCreationDoneStep } from '../WalletCreationDoneStep/WalletCreationDoneStep.js';
@@ -248,7 +248,7 @@ export const Body = ({
                 accountAddFundTab !== EnabledFlow.RECEIVE && (
                   <TestModeAlert>
                     <div style={{ fontSize: '14px' }}>
-                      This Capsule Modal is configured to run on-ramp services in <b>test mode</b> only, for development
+                      This Para Modal is configured to run on-ramp services in <b>test mode</b> only, for development
                       purposes. If you are a user of {appName}, please contact support.
                       <CloseButton onClick={() => setIsTestModeAlert(false)}>
                         <CloseX icon="x" />

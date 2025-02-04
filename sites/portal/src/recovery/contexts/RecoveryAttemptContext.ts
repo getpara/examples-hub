@@ -1,5 +1,5 @@
 import { createContext } from 'react';
-import type { RecoveryStatus } from '@usecapsule/web-sdk';
+import type { RecoveryStatus } from '@getpara/web-sdk';
 import emptyFunction from '../emptyFunction';
 
 export enum RecoveryType {

@@ -6,20 +6,20 @@ import {
   SuccessfulSignatureRes,
   WalletType,
   hexStringToBase64,
-} from '@usecapsule/core-sdk';
-import { getContractAddressFromAsset, getChainId } from '@usecapsule/react-common';
-import CapsuleWeb from '@usecapsule/web-sdk';
+} from '@getpara/core-sdk';
+import { getContractAddressFromAsset, getChainId } from '@getpara/react-common';
+import ParaWeb from '@getpara/web-sdk';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
 export function OfframpSend({
-  capsule,
+  para,
   walletId,
   walletType,
   testMode,
   setTestMode,
 }: {
-  capsule: CapsuleWeb;
+  para: ParaWeb;
   walletType: WalletType;
   walletId: string;
   testMode: boolean;
@@ -102,13 +102,13 @@ export function OfframpSend({
 
           try {
             const chainId = getChainId(network);
-            const generated = await capsule.ctx.capsuleClient.generateOffRampTx(capsule.getUserId(), {
+            const generated = await para.ctx.client.generateOffRampTx(para.getUserId(), {
               walletId,
               walletType,
               provider: OnRampProvider.MOONPAY,
               chainId: getChainId(network),
               destinationAddress,
-              sourceAddress: capsule.getDisplayAddress(walletId, { addressType: walletType }),
+              sourceAddress: para.getDisplayAddress(walletId, { addressType: walletType }),
               contractAddress: getContractAddressFromAsset(network, asset),
               testMode,
               assetQuantity,
@@ -120,11 +120,11 @@ export function OfframpSend({
             switch (walletType) {
               case WalletType.EVM:
                 signature = (
-                  (await capsule.signTransaction(
+                  (await para.signTransaction({
                     walletId,
-                    hexStringToBase64(generated.tx),
+                    rlpEncodedTxBase64: hexStringToBase64(generated.tx),
                     chainId,
-                  )) as SuccessfulSignatureRes
+                  })) as SuccessfulSignatureRes
                 )?.signature;
                 break;
 
@@ -132,7 +132,7 @@ export function OfframpSend({
                 throw new Error(`unsupported wallet type: ${walletType}`);
             }
 
-            sent = await capsule.ctx.capsuleClient.sendOffRampTx(capsule.getUserId(), {
+            sent = await para.ctx.client.sendOffRampTx(para.getUserId(), {
               tx: generated.tx,
               signature: walletType === 'EVM' ? `0x${signature}` : signature,
               network,

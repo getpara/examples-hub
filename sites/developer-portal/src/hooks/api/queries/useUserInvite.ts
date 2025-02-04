@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { OrganizationInvite } from '../../../types/api';
 import { getOrganizationInvites } from '../../../api/users/queries';
-import { capsule } from '../../../clients/capsule';
+import { para } from '../../../clients/para';
 
 export const USER_INVITE_QUERY_KEY = 'userInvite';
 
@@ -10,7 +10,7 @@ export const useUserInviteQuery = <T>(
   organizationId?: string,
   memberId?: string,
 ) => {
-  const userId = capsule.getUserId();
+  const userId = para.getUserId();
 
   return useQuery({
     enabled: !!userId && !!organizationId && !!memberId,

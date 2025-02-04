@@ -1,14 +1,14 @@
 import React from 'react';
 import styled, { keyframes } from 'styled-components';
-import { CpslIcon } from '@usecapsule/react-components';
+import { CpslIcon } from '@getpara/react-components';
 import { Text } from './StyledText';
 import { Button } from './StyledButton';
 import { Card } from './StyledCard';
 import { useAtom } from 'jotai';
-import { capsuleClientAtom, checkLoginStatusAtom, copyShareUrlAtom, getCodeStringAtom, resetConfigAtom } from '../../atoms';
+import { paraAtom, checkLoginStatusAtom, copyShareUrlAtom, getCodeStringAtom, resetConfigAtom } from '../../atoms';
 
 export const AnnouncementBanner: React.FC = () => {
-  const [capsuleClient] = useAtom(capsuleClientAtom);
+  const [para] = useAtom(paraAtom);
   const [, checkLoginStatus] = useAtom(checkLoginStatusAtom);
   const [, resetConfig] = useAtom(resetConfigAtom);
   const [getCodeString] = useAtom(getCodeStringAtom);
@@ -20,7 +20,7 @@ export const AnnouncementBanner: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      await capsuleClient.logout();
+      await para.logout();
       checkLoginStatus(null);
     } catch (error) {
       console.error('Error logging out:', error);
@@ -90,7 +90,7 @@ export const AnnouncementBanner: React.FC = () => {
             </ButtonContent>
           </ActionButton>
         </ButtonGroup>
-        <GradientBanner href="https://developer.usecapsule.com/" target="_blank">
+        <GradientBanner href="https://developer.getpara.com/" target="_blank">
           <BannerIcon
             icon="stars"
             style={{

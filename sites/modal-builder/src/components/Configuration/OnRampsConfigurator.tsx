@@ -1,16 +1,16 @@
 import React, { useState, useCallback } from 'react';
 import { AccordionContent, AccordionItem, AccordionTrigger, Button, Text } from '../UI';
 import { DraggableArea, DraggableItem } from '../UI/draggable';
-import { OnRampProvider } from '@usecapsule/react-sdk';
+import { OnRampProvider } from '@getpara/react-sdk';
 import { ONRAMPS_CONFIGS } from '../../constants';
-import { CpslIcon } from '@usecapsule/react-components';
+import { CpslIcon } from '@getpara/react-components';
 import styled from 'styled-components';
 
-const DEVELOPER_PORTAL_URL = 'https://developer.usecapsule.com';
+const DEVELOPER_PORTAL_URL = 'https://developer.getpara.com';
 const DEVELOPER_PORTAL_LABEL = 'Configure In Developer Portal';
 const SECTION_LABEL = 'On Ramps';
 const SECTION_SECONDARY_TEXT =
-  'Choose which providers and assets are available to your users. This configuration is managed in the Capsule Developer Portal in the On & Off Ramps section.';
+  'Choose which providers and assets are available to your users. This configuration is managed in the Para Developer Portal in the On & Off Ramps section.';
 const DRAGGABLE_BACKGROUND_COLOR = '#f0f0f0';
 
 export const OnRampsConfigurator: React.FC = () => {

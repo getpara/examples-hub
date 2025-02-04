@@ -1,9 +1,9 @@
-import { ExtractAuth } from '@usecapsule/user-management-client';
-import CapsuleWeb, { type OnRampConfig, type OnRampPurchase } from '@usecapsule/web-sdk';
+import { ExtractAuth } from '@getpara/user-management-client';
+import ParaWeb, { type OnRampConfig, type OnRampPurchase } from '@getpara/web-sdk';
 
 export type Props = {
   appName?: string;
-  capsule: CapsuleWeb;
+  para: ParaWeb;
   isDark?: boolean;
   isEmbedded?: boolean;
   onClose?: () => void;

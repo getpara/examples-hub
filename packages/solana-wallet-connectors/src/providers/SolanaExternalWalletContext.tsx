@@ -2,8 +2,8 @@ import { ReactNode, createContext, useEffect, useMemo } from 'react';
 import { CommonWallet } from '../types/CommonTypes.js';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Adapter, WalletReadyState } from '@solana/wallet-adapter-base';
-import { useCapsuleSolana } from './CapsuleSolanaProvider.js';
-import CapsuleWeb, { WalletType } from '@usecapsule/web-sdk';
+import { useParaSolana } from './ParaSolanaProvider.js';
+import ParaWeb, { WalletType } from '@getpara/web-sdk';
 
 export const defaultSolanaExternalWallet = {
   wallets: [],
@@ -17,11 +17,11 @@ export const SolanaExternalWalletContext = createContext<{
 
 interface SolanaExternalWalletProviderProps {
   children: ReactNode;
-  capsule: CapsuleWeb;
+  para: ParaWeb;
   onSwitchWallet: (args: { address?: string; error?: string }) => void;
 }
 
-export function SolanaExternalWalletProvider({ children, capsule, onSwitchWallet }: SolanaExternalWalletProviderProps) {
+export function SolanaExternalWalletProvider({ children, para, onSwitchWallet }: SolanaExternalWalletProviderProps) {
   const {
     wallets: adapters,
     select: selectWallet,
@@ -30,16 +30,16 @@ export function SolanaExternalWalletProvider({ children, capsule, onSwitchWallet
     wallet,
     connecting,
   } = useWallet();
-  const { wallets: walletFns } = useCapsuleSolana();
+  const { wallets: walletFns } = useParaSolana();
 
   const reset = async () => {
     await _disconnect();
-    await capsule.logout(true);
+    await para.logout();
   };
 
   const login = async (address: string, providerName?: string) => {
     try {
-      await capsule.externalWalletLogin(address, WalletType.SOLANA, providerName);
+      await para.externalWalletLogin({ address, type: WalletType.SOLANA, provider: providerName });
     } catch (err) {
       await reset();
 
@@ -50,9 +50,9 @@ export function SolanaExternalWalletProvider({ children, capsule, onSwitchWallet
   const switchWallet = async (address?: string) => {
     let error: string;
 
-    // If we're calling switch wallet with no address, treat it as if the user disconnected the wallet from the app and logout to reset the Capsule instance.
+    // If we're calling switch wallet with no address, treat it as if the user disconnected the wallet from the app and logout to reset the Para instance.
     if (!address) {
-      await capsule.logout(true);
+      await para.logout();
     } else {
       try {
         await login(address, wallet?.adapter?.name);
@@ -65,7 +65,7 @@ export function SolanaExternalWalletProvider({ children, capsule, onSwitchWallet
   };
 
   useEffect(() => {
-    const storedExternalWallet = capsule.externalWallets[solanaAddress?.toString() ?? ''];
+    const storedExternalWallet = para.externalWallets[solanaAddress?.toString() ?? ''];
 
     if (!!solanaAddress && !storedExternalWallet) {
       reset();
@@ -73,7 +73,7 @@ export function SolanaExternalWalletProvider({ children, capsule, onSwitchWallet
   }, []);
 
   useEffect(() => {
-    const storedExternalWallet = capsule.externalWallets[capsule.currentExternalWalletAddresses?.[0] ?? ''];
+    const storedExternalWallet = para.externalWallets[para.currentExternalWalletAddresses?.[0] ?? ''];
 
     // If the user is using an external Solana wallet we want to watch for wallet changes and log them in to a different user when the wallet changes
     if (

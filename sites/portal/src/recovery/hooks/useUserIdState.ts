@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { STORAGE_PREFIX } from '@usecapsule/web-sdk';
+import { STORAGE_PREFIX } from '@getpara/web-sdk';
 
 const useUserIdState = (initialValue: string | null) => {
   const [state, setState] = useState<string | null>(() => {

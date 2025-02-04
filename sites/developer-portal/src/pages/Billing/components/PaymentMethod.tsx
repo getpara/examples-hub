@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { SplitCard } from '../../../components/SplitCard/SplitCard';
-import { CpslButton, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslText } from '@getpara/react-components';
 import { useGetOrganizationSubscription } from '../../../hooks/api/queries/useOrganizationSubscription';
 import { CARD_NAMES, getPaymentTypeConfig } from '../../../utils/paymentType';
 import { InlineText } from '../../../components/common';

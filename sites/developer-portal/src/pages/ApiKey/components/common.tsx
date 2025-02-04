@@ -1,4 +1,4 @@
-import { CpslCard, CpslSwitch, CpslText } from '@usecapsule/react-components';
+import { CpslCard, CpslSwitch, CpslText } from '@getpara/react-components';
 import { PropsWithChildren, ReactNode } from 'react';
 import styled from 'styled-components';
 

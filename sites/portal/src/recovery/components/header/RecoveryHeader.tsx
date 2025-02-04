@@ -1,12 +1,12 @@
 import { Box, Flex } from '@chakra-ui/react';
-import CapsuleSmall from '../../../assets/capsuleSmall';
+import ParaSmall from '../../../assets/paraSmall';
 import Exit from '../../../assets/exit';
 
 export function RecoveryHeader({ step = 0, onClose }: { step?: number; onClose: () => void }) {
   return (
     <Box height="62px" width="100%">
       <Flex h="57px" w="100%" justifyContent={'center'} alignItems={'center'}>
-        <CapsuleSmall w={19} h={32} />
+        <ParaSmall w={19} h={32} />
         <Box cursor="pointer" onClick={onClose} position="absolute" right="12px">
           <Exit />
         </Box>

@@ -1,4 +1,4 @@
-import { CpslAlert, CpslButton, CpslCard, CpslText } from '@usecapsule/react-components';
+import { CpslAlert, CpslButton, CpslCard, CpslText } from '@getpara/react-components';
 import styled from 'styled-components';
 import { AUTH_APP_BAR_HEIGHT } from '../../components/AppBar/AuthAppBar';
 import { CenteredText, ClickableText } from '../../components/common';

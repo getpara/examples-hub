@@ -17,7 +17,7 @@ export default mergeConfig(baseConfig, {
         statements: 56.94,
       },
       reportOnFailure: true,
-      setupFiles: ['./__tests__/setup-zustand.ts'],
     },
+    setupFiles: './__tests__/setup.ts',
   },
 });

@@ -1,4 +1,4 @@
-import { BiometricLocationHint } from '@usecapsule/user-management-client';
+import { BiometricLocationHint } from '@getpara/user-management-client';
 import UAParser from 'ua-parser-js';
 import { aaguidMetadata } from '../constants/aaguiMetadata.js';
 

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { getActions } from './actions.js';
-import { AuthLayout, CapsuleModalTheme, OAuthLogoVariantType, TAuthLayout } from '../../types/modalProps.js';
+import { AuthLayout, ParaModalTheme, OAuthLogoVariantType, TAuthLayout } from '../../types/modalProps.js';
 
 interface ThemeState {
   isDark?: boolean;
@@ -10,7 +10,7 @@ interface ThemeState {
   embeddedModal?: boolean;
   oAuthLogoVariant?: OAuthLogoVariantType;
   authLayout?: TAuthLayout[];
-  theme?: CapsuleModalTheme;
+  theme?: ParaModalTheme;
   hideWallets?: boolean;
 }
 

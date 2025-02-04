@@ -1,4 +1,4 @@
-import { EnabledFlow } from '@usecapsule/web-sdk';
+import { EnabledFlow } from '@getpara/web-sdk';
 
 export enum ModalStep {
   AUTH_MAIN = 'AUTH_MAIN',

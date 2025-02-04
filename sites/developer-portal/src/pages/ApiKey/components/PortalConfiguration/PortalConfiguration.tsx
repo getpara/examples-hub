@@ -11,8 +11,8 @@ export const PortalConfiguration = () => {
 
   return (
     <ConfigurationCard
-      title="Capsule Portal Settings"
-      subtitle="To learn more about Capsule Portal, please visit the docs."
+      title="Para Portal Settings"
+      subtitle="To learn more about Para Portal, please visit the docs."
       // TODO: customize the docs link
       docsLink={DOCS_LINK}
     >

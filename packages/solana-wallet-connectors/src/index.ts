@@ -1,3 +1,3 @@
 export { SolanaExternalWalletProvider, SolanaExternalWalletContext } from './providers/SolanaExternalWalletContext.js';
-export { CapsuleSolanaProvider } from './providers/CapsuleSolanaProvider.js';
+export { ParaSolanaProvider } from './providers/ParaSolanaProvider.js';
 export * from './wallets/connectors/index.js';

@@ -10,40 +10,40 @@ import { Secp256k1, Sha256, sha256, ExtendedSecp256k1Signature } from '@cosmjs/c
 import { OfflineDirectSigner, makeSignBytes, DirectSignResponse } from '@cosmjs/proto-signing';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
-import CoreCapsule, {
+import ParaCore, {
   SuccessfulSignatureRes,
   hexToSignature,
   hexToUint8Array,
   Wallet,
   getCosmosAddress,
-} from '@usecapsule/core-sdk';
+} from '@getpara/core-sdk';
 
-class CapsuleCosmosSigner {
+class ParaCosmosSigner {
   readonly prefix: string;
-  readonly capsule: CoreCapsule;
+  readonly para: ParaCore;
   readonly currentWalletId: string;
   readonly messageSigningTimeoutMs?: number;
 
   /**
    * Signs a message.
    *
-   * @param capsule - the CoreCapsule instance
+   * @param para - the ParaCore instance
    * @param prefix - the cosmos address prefix, defaults to 'cosmos'
    * @param walletId - optional wallet ID to use. If not present, will use the first wallet found.
    * @param messageSigningTimeoutMs - optional timeout in milliseconds. If not present, defaults to 30 seconds.
    **/
-  constructor(capsule: CoreCapsule, prefix = 'cosmos', walletId?: string, messageSigningTimeoutMs?: number) {
-    this.currentWalletId = capsule.findWalletId(walletId, { type: ['COSMOS'] });
-    this.capsule = capsule;
+  constructor(para: ParaCore, prefix = 'cosmos', walletId?: string, messageSigningTimeoutMs?: number) {
+    this.currentWalletId = para.findWalletId(walletId, { type: ['COSMOS'] });
+    this.para = para;
     this.prefix = prefix;
     this.messageSigningTimeoutMs = messageSigningTimeoutMs;
   }
 
   get currentWallet(): Wallet {
     return (
-      this.capsule.wallets[this.currentWalletId] ??
+      this.para.wallets[this.currentWalletId] ??
       (() => {
-        throw new Error(`no valid Capsule wallet found`);
+        throw new Error(`no valid Para wallet found`);
       })()
     );
   }
@@ -69,7 +69,7 @@ class CapsuleCosmosSigner {
   }
 }
 
-export class CapsuleProtoSigner extends CapsuleCosmosSigner implements OfflineDirectSigner {
+export class ParaProtoSigner extends ParaCosmosSigner implements OfflineDirectSigner {
   async signDirect(address: string, signDoc: SignDoc): Promise<DirectSignResponse> {
     const signBytes = makeSignBytes(signDoc);
     if (address !== this.address) {
@@ -81,12 +81,12 @@ export class CapsuleProtoSigner extends CapsuleCosmosSigner implements OfflineDi
     const signDocJsonStringified = JSON.stringify(signDocJson);
     const signDocJsonStringEncoded = btoa(signDocJsonStringified);
 
-    const res = await this.capsule.signMessage(
-      this.currentWallet.id,
-      Buffer.from(hashedMessage.buffer).toString('base64'),
-      this.messageSigningTimeoutMs,
-      signDocJsonStringEncoded,
-    );
+    const res = await this.para.signMessage({
+      walletId: this.currentWallet.id,
+      messageBase64: Buffer.from(hashedMessage.buffer).toString('base64'),
+      timeoutMs: this.messageSigningTimeoutMs,
+      cosmosSignDocBase64: signDocJsonStringEncoded,
+    });
     const signature = hexToSignature(`0x${(res as SuccessfulSignatureRes).signature}`);
     const extendedSignature = new ExtendedSecp256k1Signature(
       hexToUint8Array(signature.r),
@@ -102,14 +102,17 @@ export class CapsuleProtoSigner extends CapsuleCosmosSigner implements OfflineDi
   }
 }
 
-export class CapsuleAminoSigner extends CapsuleCosmosSigner implements OfflineAminoSigner {
+export class ParaAminoSigner extends ParaCosmosSigner implements OfflineAminoSigner {
   async signAmino(signerAddress: string, signDoc: StdSignDoc): Promise<AminoSignResponse> {
     if (signerAddress !== this.address) {
       throw new Error(`Address ${signerAddress} not found in wallet`);
     }
     const hashedMessage = new Sha256(serializeSignDoc(signDoc)).digest();
 
-    const res = await this.capsule.signMessage(this.currentWallet.id, Buffer.from(hashedMessage.buffer).toString('base64'));
+    const res = await this.para.signMessage({
+      walletId: this.currentWallet.id,
+      messageBase64: Buffer.from(hashedMessage.buffer).toString('base64'),
+    });
     const signature = hexToSignature(`0x${(res as SuccessfulSignatureRes).signature}`);
     const extendedSignature = new ExtendedSecp256k1Signature(
       hexToUint8Array(signature.r),

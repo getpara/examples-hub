@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { LINEAR_GRADIENT } from '../common';
-import { capsule } from '../../clients/capsule';
+import { para } from '../../clients/para';
 import { OnboardingStep, useOnboardingStore } from '../../stores/onboarding/useOnboardingStore';
 
 interface GradientProgressBarProps {
@@ -10,7 +10,7 @@ interface GradientProgressBarProps {
 }
 
 export const GradientProgressBar = ({ current, max, maxWidth }: GradientProgressBarProps) => {
-  const userId = capsule.getUserId();
+  const userId = para.getUserId();
   const currentStep = useOnboardingStore(state => state.getStep(userId));
 
   const fillWidth = (current / max) * 100;

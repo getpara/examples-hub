@@ -6,10 +6,10 @@ import { styled } from 'styled-components';
 import { Partner } from '../types';
 import { DEFAULT_HOMEPAGE_URL, DEFAULT_PARTNER } from '../constants';
 import { validateColorInput } from '../utils/validateColorInput';
-import { BorderRadius, generateTheme } from '@usecapsule/react-components';
+import { BorderRadius, generateTheme } from '@getpara/react-components';
 import { BetaBannerNoChakra } from './BetaBannerNoChakra';
-import { Theme } from '@usecapsule/web-sdk';
-import { useCapsule } from './CapsuleContext';
+import { Theme } from '@getpara/web-sdk';
+import { usePara } from './ParaContext';
 import { ModalLoading } from './ModalLoading';
 
 const DEFAULT_THEME = {
@@ -18,7 +18,7 @@ const DEFAULT_THEME = {
 };
 
 export const ModalLayout = () => {
-  const capsule = useCapsule();
+  const para = usePara();
   const [searchParams] = useSearchParams();
   // TODO: Move this to the partner config
   const homepageUrl = searchParams.get('homepageUrl') ?? DEFAULT_HOMEPAGE_URL;
@@ -64,10 +64,10 @@ export const ModalLayout = () => {
   useEffect(() => {
     const isLegacy = portalBackgroundColor && !portalForegroundColor;
 
-    capsule.portalBackgroundColor = portalBackgroundColor;
-    capsule.portalPrimaryButtonColor = portalPrimaryButtonColor;
-    capsule.portalTextColor = portalTextColor;
-    capsule.portalTheme = {
+    para.portalBackgroundColor = portalBackgroundColor;
+    para.portalPrimaryButtonColor = portalPrimaryButtonColor;
+    para.portalTextColor = portalTextColor;
+    para.portalTheme = {
       backgroundColor: portalBackgroundColor,
       foregroundColor: portalForegroundColor,
       borderRadius: portalBorderRadius as unknown as any,
@@ -108,7 +108,7 @@ export const ModalLayout = () => {
           }
         : newTheme),
     });
-    setIsDark(portalThemeMode === 'dark');
+    setIsDark(portalThemeMode?.toLowerCase() === 'dark');
   }, [
     isBranded,
     portalForegroundColor,
@@ -124,9 +124,9 @@ export const ModalLayout = () => {
 
   useEffect(() => {
     async function getPartner() {
-      const touchRes = await capsule.touchSession();
+      const touchRes = await para.touchSession();
       if (touchRes.data.partnerId) {
-        const detailsRes = (await capsule.ctx.capsuleClient.getPartner(touchRes.data.partnerId)).data;
+        const detailsRes = (await para.ctx.client.getPartner(touchRes.data.partnerId)).data;
         setPartner(detailsRes.partner);
       } else {
         setPartner(DEFAULT_PARTNER);

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import styled, { css, keyframes } from 'styled-components';
-import { CpslIcon } from '@usecapsule/react-components';
+import { CpslIcon } from '@getpara/react-components';
 import { codeToHtml } from 'shiki';
 import { Text } from '../UI';
 import { useAtom } from 'jotai';

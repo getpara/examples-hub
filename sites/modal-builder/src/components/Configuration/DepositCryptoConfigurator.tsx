@@ -3,7 +3,7 @@ import { AccordionItem, AccordionTrigger } from '../UI';
 
 const SECTION_LABEL = 'Deposit Crypto';
 const SECTION_SECONDARY_TEXT =
-  'Allow users to deposit crypto from another wallet or exchange. This configuration is managed in the Capsule Developer Portal in the On & Off Ramps section.';
+  'Allow users to deposit crypto from another wallet or exchange. This configuration is managed in the Para Developer Portal in the On & Off Ramps section.';
 
 interface DepositCryptoConfiguratorProps {}
 

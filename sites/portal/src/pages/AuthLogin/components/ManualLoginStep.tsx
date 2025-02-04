@@ -1,6 +1,6 @@
 import { FlexStartInnerContainer } from '../../../components/common';
-import { CpslButton, CpslText } from '@usecapsule/react-components';
-import { UserIdentifier } from '@usecapsule/react-common';
+import { CpslButton, CpslText } from '@getpara/react-components';
+import { UserIdentifier } from '@getpara/react-common';
 import { useAuthInfo } from '../../../hooks/useAuthInfo';
 
 interface ManualLoginStepProps {
@@ -15,7 +15,7 @@ export const ManualLoginStep = ({ onLoginClick }: ManualLoginStepProps) => {
       <CpslText weight="bold" variant="headingS">
         Login
       </CpslText>
-      {authInfo && <UserIdentifier {...authInfo} />}
+      {!!authInfo && <UserIdentifier {...authInfo} />}
       <CpslButton fullWidth onClick={onLoginClick}>
         Login with Passkey
       </CpslButton>

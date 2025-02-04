@@ -1,4 +1,4 @@
-import { CpslIcon, CpslInput, CpslText, CpslCard } from '@usecapsule/react-components';
+import { CpslIcon, CpslInput, CpslText, CpslCard } from '@getpara/react-components';
 import { styled } from 'styled-components';
 
 export const Heading: typeof CpslText = styled(CpslText)`
@@ -70,7 +70,7 @@ export const FilledDisabledInput: typeof CpslInput = styled(CpslInput)`
   width: 334px;
 `;
 
-export const capsuleBrandBorder = (width = '1px', radius = '16px') => `
+export const paraBrandBorder = (width = '1px', radius = '16px') => `
   border: ${width} solid transparent;
   border-radius: ${radius};
   background-image: linear-gradient(var(--cpsl-color-background-0), var(--cpsl-color-background-8)),

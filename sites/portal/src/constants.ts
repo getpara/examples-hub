@@ -1,4 +1,4 @@
-import { Environment } from '@usecapsule/web-sdk';
+import { Environment } from '@getpara/web-sdk';
 import { Partner } from './types';
 
 export const ENV = import.meta.env.VITE_ENVIRONMENT
@@ -7,12 +7,12 @@ export const ENV = import.meta.env.VITE_ENVIRONMENT
 
 export const DEFAULT_PARTNER: Partner = {
   id: 'id',
-  displayName: 'Capsule',
+  displayName: 'Para',
   policiesEnabled: false,
 };
 
 // TODO: move this to partner config
-export const DEFAULT_HOMEPAGE_URL = 'https://www.usecapsule.com';
+export const DEFAULT_HOMEPAGE_URL = 'https://www.getpara.com';
 
 // STEPS
 export enum AuthCreationStep {
@@ -37,16 +37,16 @@ export const REDIRECT_TIMEOUT = 1000;
 
 export const KNOWN_DEVICE_LOGIN_POLLING_INTERVAL = 2000;
 
-export function CAPSULE_CONNECT_DOMAINS() {
+export function PARA_CONNECT_DOMAINS() {
   switch (ENV) {
     case Environment.DEV:
       return ['http://localhost:3008'];
     case Environment.SANDBOX:
-      return ['connect.sandbox.usecapsule.com'];
+      return ['connect.sandbox.getpara.com'];
     case Environment.BETA:
-      return ['connect.beta.usecapsule.com'];
+      return ['connect.beta.getpara.com'];
     case Environment.PROD:
-      return ['connect.usecapsule.com'];
+      return ['connect.getpara.com'];
     default:
       throw new Error(`env: ${ENV} not supported`);
   }

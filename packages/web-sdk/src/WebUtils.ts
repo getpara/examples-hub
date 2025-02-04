@@ -1,12 +1,12 @@
-import { Ctx, PlatformUtils, SignatureRes, PopupType } from '@usecapsule/core-sdk';
+import { Ctx, PlatformUtils, SignatureRes, PopupType } from '@getpara/core-sdk';
 
 import { LocalStorage } from './LocalStorage.js';
 import { SessionStorage } from './SessionStorage.js';
 import { keygen, preKeygen, ed25519Keygen, ed25519PreKeygen, refresh } from './wallet/keygen.js';
 import { signMessage, sendTransaction, signTransaction, ed25519Sign } from './wallet/signing.js';
-import { BackupKitEmailProps, WalletType } from '@usecapsule/user-management-client';
+import { BackupKitEmailProps, WalletType } from '@getpara/user-management-client';
 import { getPrivateKey } from './wallet/privateKey.js';
-import { TPregenIdentifierType } from '@usecapsule/core-sdk';
+import { TPregenIdentifierType } from '@getpara/core-sdk';
 
 export class WebUtils implements PlatformUtils {
   getPrivateKey(ctx: Ctx, userId: string, walletId: string, share: string, sessionCookie: string): Promise<string> {

@@ -1,10 +1,11 @@
 import styled from 'styled-components';
 import { InnerStepContainer, StepContainer, StyledCpslTileButton } from '../common.js';
-import { CpslButton, CpslIcon, CpslSpinner, CpslText } from '@usecapsule/react-components';
-import { useCapsuleStore, useModalStore, useThemeStore } from '../../stores/index.js';
+import { CpslButton, CpslIcon, CpslSpinner, CpslText } from '@getpara/react-components';
+import { useModalStore, useThemeStore } from '../../stores/index.js';
 import { useExternalWallets } from '../../providers/ExternalWalletContext.js';
 import { useState } from 'react';
 import { ModalStep } from '../../utils/steps.js';
+import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 
 interface AccountProps {
   onClose: () => void;
@@ -13,9 +14,9 @@ interface AccountProps {
 export const Account = ({ onClose }: AccountProps) => {
   const onRampConfig = useModalStore(state => state.onRampConfig);
   const setStep = useModalStore(state => state.setStep);
-  const capsule = useCapsuleStore(state => state.capsule);
   const hideWallets = useThemeStore(state => state.hideWallets);
   const { disconnectExternalWallet } = useExternalWallets();
+  const para = useInternalClient();
 
   const [isDisconnecting, setIsDisconnecting] = useState(false);
 
@@ -35,7 +36,7 @@ export const Account = ({ onClose }: AccountProps) => {
 
   const handleDisconnectClick = async () => {
     setIsDisconnecting(true);
-    await capsule.logout();
+    await para.logout();
     await disconnectExternalWallet();
     onClose();
     setIsDisconnecting(false);

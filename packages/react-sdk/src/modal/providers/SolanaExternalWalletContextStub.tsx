@@ -1,6 +1,6 @@
 import { ReactNode, createContext, useMemo } from 'react';
 import { CommonWallet } from '../types/commonTypes.js';
-import CapsuleWeb from '@usecapsule/web-sdk';
+import ParaWeb from '@getpara/web-sdk';
 
 export const defaultSolanaExternalWallet = {
   wallets: [],
@@ -16,7 +16,7 @@ export const SolanaExternalWalletContext = createContext<SolanaExternalWalletCon
 
 export interface SolanaExternalWalletProviderProps {
   children: ReactNode;
-  capsule: CapsuleWeb;
+  para: ParaWeb;
   onSwitchWallet: (args: { address?: string; error?: string }) => void;
 }
 

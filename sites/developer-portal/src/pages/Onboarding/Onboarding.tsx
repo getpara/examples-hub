@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { capsule } from '../../clients/capsule';
+import { para } from '../../clients/para';
 import { OnboardingStep, useOnboardingStore } from '../../stores/onboarding/useOnboardingStore';
 import { useGetAllOrganizations } from '../../hooks/api/queries/useOrganizations';
 import { PlanSelect } from './components/PlanSelect';
@@ -17,7 +17,7 @@ import { aboutProjectQuestions, aboutYouQuestions, orgQuestions } from './config
 
 export const Onboarding = () => {
   const form = useOnboardingForm();
-  const userId = capsule.getUserId();
+  const userId = para.getUserId();
   const currentStep = useOnboardingStore(state => state.getStep(userId));
   const setStep = useOnboardingStore(state => state.setStep);
   const direction = useOnboardingStore(state => state.direction);

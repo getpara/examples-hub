@@ -1,4 +1,4 @@
-import { CpslButton, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslText } from '@getpara/react-components';
 import styled from 'styled-components';
 import { Modal } from '../../../../components/Modal/Modal';
 
@@ -15,7 +15,7 @@ export const WelcomeImageModal = ({ open, imageSrc, displayName, onClose }: Welc
       open={open}
       onClose={onClose}
       title="Welcome Email Image"
-      subtitle="When a user creates a wallet using Capsule in your app, you can
+      subtitle="When a user creates a wallet using Para in your app, you can
             choose for them to receive a Welcome email. This email contains a
             space for an image that links to the URL of your choice."
     >

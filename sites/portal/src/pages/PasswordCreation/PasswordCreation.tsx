@@ -1,18 +1,18 @@
 import styled from 'styled-components';
 import { Card, CardContent } from '../../components/common';
-import { CpslButton, CpslIcon, CpslInput, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon, CpslInput, CpslText } from '@getpara/react-components';
 import { useEffect, useState } from 'react';
-import { CpslInputCustomEvent, InputInputEventDetail } from '@usecapsule/core-components';
+import { CpslInputCustomEvent, InputInputEventDetail } from '@getpara/core-components';
 import { passwordCreation } from '../../utils/passwordCreation';
 import { REDIRECT_TIMEOUT } from '../../constants';
 import { ModalSuccess } from '../../components/ModalSuccess';
 import { useModalOutletContext } from '../../hooks/useModalOutletContext';
-import { useCapsule } from '../../components';
+import { usePara } from '../../components';
 import { useExtractedParams } from '../../hooks/useExtractedParams';
-import { AuthParams } from '@usecapsule/user-management-client';
+import { AuthParams } from '@getpara/user-management-client';
 
 export const PasswordCreation = () => {
-  const capsule = useCapsule();
+  const para = usePara();
   const { partnerId, userId, passwordId, email, phone, countryCode, farcasterUsername, telegramUserId } = useExtractedParams<
     AuthParams & { userId: string; partnerId: string; passwordId: string }
   >();
@@ -58,7 +58,7 @@ export const PasswordCreation = () => {
   }
 
   const handlePasswordClick = async () => {
-    await passwordCreation(capsule, {
+    await passwordCreation(para, {
       partnerId,
       userId,
       auth: {

@@ -1,6 +1,6 @@
-import { AuthMethod, OAuthMethod } from '@usecapsule/web-sdk';
+import { AuthMethod, OAuthMethod } from '@getpara/web-sdk';
 import { styled } from 'styled-components';
-import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
+import { useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { openPopup } from '../../utils/openPopup.js';
 import { useThemeStore } from '../../stores/theme/useThemeStore.js';
@@ -10,6 +10,7 @@ import { brandedOAuthLogos, oAuthLogos } from '../../constants/oAuthLogos.js';
 import { useEffect } from 'react';
 import { routeMobileExternalWallet } from '../../utils/routeMobileExternalWallet.js';
 import { useGoBack } from '../../hooks/useGoBack.js';
+import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 
 interface OAuthProps {
   methods: OAuthMethod[];
@@ -21,7 +22,7 @@ export const OAuth = ({ methods }: OAuthProps) => {
   const goBack = useGoBack();
   const oAuthLogoVariant = useThemeStore(state => state.oAuthLogoVariant);
   const isDark = useThemeStore(state => state.isDark);
-  const capsule = useCapsuleStore(state => state.capsule);
+  const para = useInternalClient();
   const popupWindow = useModalStore(state => state.popupWindow);
   const setFlow = useModalStore(state => state.setFlow);
   const setStep = useModalStore(state => state.setStep);
@@ -39,7 +40,7 @@ export const OAuth = ({ methods }: OAuthProps) => {
         return;
       }
 
-      const connectUri = await capsule.getFarcasterConnectURL();
+      const connectUri = await para.getFarcasterConnectURL();
       setFarcasterConnectUri(connectUri);
     };
 
@@ -73,12 +74,12 @@ export const OAuth = ({ methods }: OAuthProps) => {
       default: {
         setStep(ModalStep.AWAITING_OAUTH);
 
-        const oAuthURL = await capsule.getOAuthURL(method);
+        const oAuthURL = await para.getOAuthURL({ method });
         const oAuthWindow = openPopup(oAuthURL, `${method}AuthPopup`, 'OAUTH');
 
         setPopupWindow(oAuthWindow);
 
-        const { email, isError, userExists } = await capsule.waitForOAuth(oAuthWindow);
+        const { email, isError, userExists } = await para.waitForOAuth({ popupWindow: oAuthWindow });
 
         setPopupWindow(undefined);
 
@@ -95,14 +96,14 @@ export const OAuth = ({ methods }: OAuthProps) => {
         setAuthInfo({ email });
 
         if (userExists) {
-          const supportedAuthMethods = await capsule.initiateUserLoginV2(email, 'email');
+          const supportedAuthMethods = await para.initiateUserLoginV2({ email });
 
           if (supportedAuthMethods.size === 0) {
             setFlow('signUp');
             setStep(ModalStep.BIOMETRIC_CREATION);
           } else {
             const biometricLocationHints = supportedAuthMethods.has(AuthMethod.PASSKEY)
-              ? await capsule.getUserBiometricLocationHints()
+              ? await para.getUserBiometricLocationHints()
               : [];
 
             setFlow('login');
@@ -113,7 +114,7 @@ export const OAuth = ({ methods }: OAuthProps) => {
           }
         }
 
-        await capsule.createUser(email);
+        await para.createUser({ email });
         setFlow('signUp');
         setStep(ModalStep.VERIFICATIONS);
         return;

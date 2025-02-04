@@ -6,14 +6,15 @@ import {
   CpslQrCode,
   CpslSpinner,
   CpslText,
-} from '@usecapsule/react-components';
+} from '@getpara/react-components';
 import { useEffect, useRef, useState } from 'react';
-import { useCapsuleStore, useModalStore } from '../../stores/index.js';
+import { useModalStore } from '../../stores/index.js';
 import { Heading, QRContainer, FilledDisabledInput, StepContainer, InnerStepContainer } from '../common.js';
 import { ModalStep } from '../../utils/steps.js';
-import { CodeChangeEventDetail, CpslCodeInputCustomEvent } from '@usecapsule/core-components';
+import { CodeChangeEventDetail, CpslCodeInputCustomEvent } from '@getpara/core-components';
 import { styled } from 'styled-components';
-import { useCopyToClipboard } from '@usecapsule/react-common';
+import { useCopyToClipboard } from '@getpara/react-common';
+import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 
 interface Setup2FAStepProps {
   onClose: () => void;
@@ -22,7 +23,7 @@ interface Setup2FAStepProps {
 export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
   const isLogin = useModalStore(state => state.isLogin());
   const setStep = useModalStore(state => state.setStep);
-  const capsule = useCapsuleStore(state => state.capsule);
+  const para = useInternalClient();
   const isVerifying = useModalStore(state => state.step === ModalStep.VERIFY_2FA);
   const [copied, copy] = useCopyToClipboard();
 
@@ -39,7 +40,7 @@ export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
   useEffect(() => {
     async function fetchOtpAuthUrl() {
       try {
-        const { uri } = await capsule.setup2FA();
+        const { uri } = await para.setup2FA();
         setQrCodeValue(uri);
       } catch (error) {
         console.error('Error fetching OTPAuth URL:', error);
@@ -85,7 +86,7 @@ export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
     setIsVerifyingCode(true);
     if (code.length === 6 && /^\d+$/.test(code)) {
       try {
-        await capsule.enable2FA(code);
+        await para.enable2FA({ verificationCode: code });
         setStep(ModalStep.TWO_FACTOR_DONE);
       } catch (e) {
         setCodeError('Incorrect Code');

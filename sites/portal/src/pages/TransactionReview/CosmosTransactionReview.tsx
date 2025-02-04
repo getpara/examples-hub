@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
 
 import TransactionReviewAwaitingApproval from './components/TransactionReviewAwaitingApproval';
-import { useCapsule } from '../../components/CapsuleContext';
+import { usePara } from '../../components/ParaContext';
 import { AuthInfo, Fee, SignDoc, TxBody } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { MsgSend } from 'cosmjs-types/cosmos/bank/v1beta1/tx';
 
-import { Wallet } from '@usecapsule/web-sdk';
+import { Wallet } from '@getpara/web-sdk';
 import { Partner } from '../../types';
 import { iconForChainId, iconForCurrency, TransactionReviewContainer, TransactionType } from './TransactionReview';
 import { TransactionCoin } from './components/TransactionReviewBody';
 import { fetchConversionRate } from '../../utils/transactionReview';
 import { Coin } from 'cosmjs-types/cosmos/base/v1beta1/coin';
-import { CpslSpinner } from '@usecapsule/react-components';
+import { CpslSpinner } from '@getpara/react-components';
 
 enum CosmosTransactionReviewState {
   Loading,
@@ -55,7 +55,7 @@ function CosmosTransactionReview({
   confirmTransaction,
   rejectTransaction,
 }: CosmosTransactionReviewProps) {
-  const capsule = useCapsule();
+  const para = usePara();
 
   const [txReviewState, setTxReviewState] = useState(CosmosTransactionReviewState.Loading);
   const [coins, setCoins] = useState<TransactionCoin[]>([]);
@@ -80,7 +80,7 @@ function CosmosTransactionReview({
     for (const amount of msgSend.amount) {
       let conversionRate;
       try {
-        conversionRate = await fetchConversionRate(capsule, cosmosSignDoc.chainId, amount.denom);
+        conversionRate = await fetchConversionRate(para, cosmosSignDoc.chainId, amount.denom);
       } catch (e) {
         console.error(e);
       }
@@ -89,7 +89,7 @@ function CosmosTransactionReview({
     setCoins(txCoins);
 
     try {
-      const feeConversionRate = await fetchConversionRate(capsule, cosmosSignDoc.chainId, authInfo.fee.amount[0].denom);
+      const feeConversionRate = await fetchConversionRate(para, cosmosSignDoc.chainId, authInfo.fee.amount[0].denom);
       setFeeConversionRate(feeConversionRate);
     } catch (e) {
       console.error(e);

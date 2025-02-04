@@ -1,8 +1,8 @@
-import { OnRampPurchaseUpdateParams } from '@usecapsule/user-management-client';
-import Capsule, { hexStringToBase64, OnRampPurchase, SuccessfulSignatureRes, WalletType } from '@usecapsule/web-sdk';
+import { OnRampPurchaseUpdateParams } from '@getpara/user-management-client';
+import Para, { hexStringToBase64, OnRampPurchase, SuccessfulSignatureRes, WalletType } from '@getpara/web-sdk';
 
 export async function offRampSend(
-  capsule: Capsule,
+  para: Para,
   { id: purchaseId, provider, walletId, walletType, address, testMode = false }: Partial<OnRampPurchase>,
   setOnRampPurchase: (_: OnRampPurchase) => void,
   {
@@ -23,7 +23,7 @@ export async function offRampSend(
   }
 
   try {
-    const { tx, network, asset } = await capsule.ctx.capsuleClient.generateOffRampTx(capsule.getUserId(), {
+    const { tx, network, asset } = await para.ctx.client.generateOffRampTx(para.getUserId(), {
       walletId,
       walletType,
       provider,
@@ -38,15 +38,20 @@ export async function offRampSend(
     let signature: string | undefined;
     switch (walletType) {
       case WalletType.EVM:
-        signature = ((await capsule.signTransaction(walletId, hexStringToBase64(tx), chainId)) as SuccessfulSignatureRes)
-          ?.signature;
+        signature = (
+          (await para.signTransaction({
+            walletId,
+            rlpEncodedTxBase64: hexStringToBase64(tx),
+            chainId,
+          })) as SuccessfulSignatureRes
+        )?.signature;
         break;
 
       default:
         throw new Error(`Unsupported wallet type: ${walletType}`);
     }
 
-    const { txHash } = await capsule.ctx.capsuleClient.sendOffRampTx(capsule.getUserId(), {
+    const { txHash } = await para.ctx.client.sendOffRampTx(para.getUserId(), {
       tx,
       signature: walletType === 'EVM' ? `0x${signature}` : signature,
       network,
@@ -54,8 +59,8 @@ export async function offRampSend(
       walletType,
     });
 
-    const updated = await capsule.ctx.capsuleClient.updateOnRampPurchase({
-      userId: capsule.getUserId(),
+    const updated = await para.ctx.client.updateOnRampPurchase({
+      userId: para.getUserId(),
       walletId,
       purchaseId,
       updates: {

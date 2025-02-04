@@ -1,20 +1,25 @@
 import { render } from '@testing-library/react';
 import { TelegramOAuthStep } from '../../../src/modal/components/OAuth/TelegramOAuthStep.js';
 import { describe, expect, it, vi } from 'vitest';
+import { MockPara } from '../../mocks/mockCorePara.js';
+import { API_KEY } from '../../constants.js';
+import { Environment } from '@getpara/web-sdk';
 
-vi.mock('@usecapsule/react-common', () => ({
-  HeroSpinner: ({ icon, text }) => (
-    <div>
-      <div>{icon}</div>
-      <div>{text}</div>
-    </div>
-  ),
-}));
+vi.mock('@getpara/react-common', async importOriginal => {
+  const actual = await importOriginal();
+  return {
+    ...(actual as any),
+    HeroSpinner: ({ icon, text }) => (
+      <div>
+        <div>{icon}</div>
+        <div>{text}</div>
+      </div>
+    ),
+    HeaderButton: () => <div></div>,
+  };
+});
 
 vi.mock('../../../src/modal/stores/index.js', () => ({
-  useCapsuleStore: _ => ({
-    getOAuthURL: vi.fn().mockResolvedValue('https://example.com'),
-  }),
   useModalStore: getter =>
     getter({
       setFlow: vi.fn(),
@@ -29,6 +34,13 @@ vi.mock('../../../src/modal/stores/index.js', () => ({
       setAuthInfo: vi.fn(),
     }),
   useThemeStore: getter => getter({}),
+}));
+
+vi.mock('../../../src/provider/stores/useStore.js', () => ({
+  useStore: getter =>
+    getter({
+      client: new MockPara(Environment.DEV, API_KEY),
+    }),
 }));
 
 describe('TelegramOAuthStep', () => {

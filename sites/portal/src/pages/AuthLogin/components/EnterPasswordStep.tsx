@@ -1,10 +1,10 @@
 import { styled } from 'styled-components';
 import { Text, Link } from '../../../components/common';
-import { CpslButton, CpslIcon, CpslInput, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon, CpslInput, CpslText } from '@getpara/react-components';
 import { useEffect, useState } from 'react';
-import { useCapsule } from '../../../components/CapsuleContext';
-import { CpslInputCustomEvent, InputInputEventDetail } from '@usecapsule/core-components';
-import { UserIdentifier } from '@usecapsule/react-common';
+import { usePara } from '../../../components/ParaContext';
+import { CpslInputCustomEvent, InputInputEventDetail } from '@getpara/core-components';
+import { UserIdentifier } from '@getpara/react-common';
 import { useAuthInfo } from '../../../hooks/useAuthInfo';
 
 interface EnterPasswordStepProps {
@@ -13,7 +13,7 @@ interface EnterPasswordStepProps {
 }
 
 export const EnterPasswordStep = ({ error, onLoginClick }: EnterPasswordStepProps) => {
-  const capsule = useCapsule();
+  const para = usePara();
   const [recoveryUrl, setRecoveryUrl] = useState<string | undefined>();
   const [password, setPassword] = useState<string>('');
   const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
@@ -24,17 +24,17 @@ export const EnterPasswordStep = ({ error, onLoginClick }: EnterPasswordStepProp
   };
 
   const getPortalUrl = async () => {
-    setRecoveryUrl(await capsule?.getPortalURL());
+    setRecoveryUrl(await para?.getPortalURL());
   };
 
   useEffect(() => {
     getPortalUrl();
-  }, [capsule]);
+  }, [para]);
 
   return (
     <Container>
       <CpslText variant="headingS">Login</CpslText>
-      {authInfo.authType !== 'userId' && <UserIdentifier {...authInfo} />}
+      {!!authInfo && authInfo.authType !== 'userId' && <UserIdentifier {...authInfo} />}
       <ButtonContainer>
         <CpslInput
           placeholder="Enter a password"

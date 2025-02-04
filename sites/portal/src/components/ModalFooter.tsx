@@ -1,5 +1,5 @@
 import { styled } from 'styled-components';
-import { CpslIcon, CpslText } from '@usecapsule/react-components';
+import { CpslIcon, CpslText } from '@getpara/react-components';
 import { AuthLoginStep } from '../constants';
 
 interface ModalFooterProps {
@@ -18,7 +18,7 @@ export const ModalFooter = ({ step, setStep }: ModalFooterProps) => {
         <FooterText color="secondary" variant="bodyXS">
           Powered by
         </FooterText>
-        <CapsuleLogo icon="capsuleLogo" />
+        <ParaLogo icon="para" />
       </PoweredByContainer>
       {step === AuthLoginStep.LOGIN_FAILED && (
         <ClickableText variant="bodyS" color="contrast" weight="medium" onClick={handleTroubleshootingClick}>
@@ -54,10 +54,10 @@ const FooterText = styled(CpslText)`
   white-space: pre-line;
 `;
 
-const CapsuleLogo = styled(CpslIcon)`
+const ParaLogo = styled(CpslIcon)`
   display: inline-block;
   --icon-color: var(--cpsl-color-text-secondary);
-  --width: 65px;
+  --width: 45px;
   --height: auto;
 `;
 

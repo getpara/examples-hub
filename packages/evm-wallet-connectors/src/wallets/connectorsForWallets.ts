@@ -1,7 +1,7 @@
 import type { CreateConnectorFn } from 'wagmi';
 import { uniqueBy } from '../utils/uniqueBy.js';
 import type { WalletDetailsParams, WalletList } from '../types/Wallet.js';
-import type { CapsuleWalletConnectParameters, Wallet } from '../types/Wallet.js';
+import type { ParaWalletConnectParameters, Wallet } from '../types/Wallet.js';
 import { computeWalletConnectMetaData } from '../utils/computeWalletConnectMetaData.js';
 import { omitUndefinedValues } from '../utils/omitUndefinedValues.js';
 
@@ -15,7 +15,7 @@ export interface ConnectorsForWalletsParameters {
   appDescription?: string;
   appUrl?: string;
   appIcon?: string;
-  walletConnectParameters?: CapsuleWalletConnectParameters;
+  walletConnectParameters?: ParaWalletConnectParameters;
 }
 
 export const connectorsForWallets = (
@@ -74,20 +74,20 @@ export const connectorsForWallets = (
   for (const { createConnector, ...walletMeta } of walletListItems) {
     const walletMetaData = (
       // For now we should only use these as the additional parameters
-      additionalCapsuleParams?: Pick<
-        WalletDetailsParams['capsuleDetails'],
-        'isWalletConnectModalConnector' | 'showQrModal'
-      > & { id?: string; rdns?: string },
+      additionalParaParams?: Pick<WalletDetailsParams['paraDetails'], 'isWalletConnectModalConnector' | 'showQrModal'> & {
+        id?: string;
+        rdns?: string;
+      },
     ) => {
       return {
-        capsuleDetails: omitUndefinedValues({
+        paraDetails: omitUndefinedValues({
           ...walletMeta,
-          isCapsuleConnector: true,
-          // These additional params will be used in capsule react tree to
+          isParaConnector: true,
+          // These additional params will be used in Para react tree to
           // merge `walletConnectWallet` and `walletConnect` connector from wagmi with
           // showQrModal: true. This way we can let the user choose if they want to
           // connect via QR code or open the official walletConnect modal instead
-          ...(additionalCapsuleParams ? additionalCapsuleParams : {}),
+          ...(additionalParaParams ? additionalParaParams : {}),
         }),
       };
     };

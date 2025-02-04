@@ -1,5 +1,5 @@
 import { PropsWithChildren, ReactNode, useState } from 'react';
-import { CpslIcon, CpslRow } from '@usecapsule/react-components';
+import { CpslIcon, CpslRow } from '@getpara/react-components';
 import { Reorder, useDragControls } from 'framer-motion';
 import styled from 'styled-components';
 

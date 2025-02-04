@@ -1,20 +1,20 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { MoonPayEmbed, StripeEmbed } from '@usecapsule/react-common';
-import { useCapsule } from '../../components/CapsuleContext';
+import { MoonPayEmbed, StripeEmbed } from '@getpara/react-common';
+import { usePara } from '../../components/ParaContext';
 import { authLogin, authLoginWithPassword, authUpdateKeyShares } from '../../utils/authLogin';
 import { useModalOutletContext } from '../../hooks/useModalOutletContext';
-import { CurrentWalletIds, OnRampConfig, OnRampProvider, OnRampPurchase } from '@usecapsule/user-management-client';
-import { CpslSpinner } from '@usecapsule/react-components';
+import { CurrentWalletIds, OnRampConfig, OnRampProvider, OnRampPurchase } from '@getpara/user-management-client';
+import { CpslSpinner } from '@getpara/react-components';
 import styled from 'styled-components';
-import { AuthMethod, getPublicKeyHex } from '@usecapsule/web-sdk';
+import { AuthMethod, getPublicKeyHex } from '@getpara/web-sdk';
 import { useExtractedParams } from '../../hooks/useExtractedParams';
 import { EnterPasswordStep } from '../AuthLogin/components/EnterPasswordStep';
 
 const MAX_AUTH_RETRIES = 5;
 
 export function OnRampTransaction() {
-  const capsule = useCapsule();
+  const para = usePara();
   const { userId, purchaseId, providerKey } = useExtractedParams<{
     userId: string;
     purchaseId: string;
@@ -41,30 +41,30 @@ export function OnRampTransaction() {
   const [onRampConfig, setOnRampConfig] = useState<OnRampConfig | null>(null);
 
   async function login(sessionId: string, partnerId: string) {
-    await capsule.setLoginEncryptionKeyPair();
-    const { userHandle, signature } = await authLogin(capsule, { partnerId, userId, sessionId });
+    await para.setLoginEncryptionKeyPair();
+    const { userHandle, signature } = await authLogin(para, { partnerId, userId, sessionId });
 
-    await capsule.userSetupAfterLogin();
-    await capsule.setCurrentWalletIds(paramsCurrentWalletIds);
+    await para.userSetupAfterLogin();
+    await para.setCurrentWalletIds(paramsCurrentWalletIds);
 
-    await authUpdateKeyShares(capsule, {
+    await authUpdateKeyShares(para, {
       sessionId,
       userId,
-      encryptionKey: getPublicKeyHex(capsule.loginEncryptionKeyPair),
+      encryptionKey: getPublicKeyHex(para.loginEncryptionKeyPair),
       userHandle,
       signature,
     });
 
-    const temporaryShares = await capsule.getTransmissionKeyShares();
-    await capsule.setupAfterLogin(temporaryShares.data.temporaryShares);
+    const temporaryShares = await para.getTransmissionKeyShares();
+    await para.setupAfterLogin(temporaryShares.data.temporaryShares);
   }
 
   async function postLoginSetup() {
-    await capsule.userSetupAfterLogin();
-    await capsule.setCurrentWalletIds(paramsCurrentWalletIds);
+    await para.userSetupAfterLogin();
+    await para.setCurrentWalletIds(paramsCurrentWalletIds);
 
     const _onRampPurchase = (
-      await capsule.ctx.capsuleClient.getOnRampPurchase({
+      await para.ctx.client.getOnRampPurchase({
         userId,
         purchaseId,
         walletId: searchParams.get('walletId') || undefined,
@@ -72,20 +72,20 @@ export function OnRampTransaction() {
       })
     ).data;
 
-    const _onRampConfig = await capsule.ctx.capsuleClient.getOnRampConfig();
+    const _onRampConfig = await para.ctx.client.getOnRampConfig();
 
     setOnRampPurchase({ ..._onRampPurchase, providerKey });
     setOnRampConfig(_onRampConfig);
   }
 
   async function loginWithPassword(password: string) {
-    const res = await capsule.touchSession();
+    const res = await para.touchSession();
     const partnerId = res.data.partnerId;
 
     try {
       setPasswordError(undefined);
-      await capsule.touchSession();
-      await authLoginWithPassword(capsule, { password, partnerId, userId });
+      await para.touchSession();
+      await authLoginWithPassword(para, { password, partnerId, userId });
 
       setIsAwaitingPassword(false);
       await postLoginSetup();
@@ -95,16 +95,16 @@ export function OnRampTransaction() {
   }
 
   async function performSetup() {
-    const res = await capsule.touchSession(true);
+    const res = await para.touchSession(true);
     const partnerId = res.data.partnerId;
 
     if (
-      !capsule.isFullyLoggedIn() ||
+      !para.isFullyLoggedIn() ||
       Object.values(paramsCurrentWalletIds)
         .flat()
-        .some(id => !capsule.wallets[id]?.signer)
+        .some(id => !para.wallets[id]?.signer)
     ) {
-      const supportedAuthMethods = await capsule.supportedAuthMethods(userId, 'userId');
+      const supportedAuthMethods = await para.supportedAuthMethods({ userId });
 
       const [isPasskey, isPassword] = [
         supportedAuthMethods.has(AuthMethod.PASSKEY),
@@ -117,10 +117,10 @@ export function OnRampTransaction() {
         while (retriesLeft > 0) {
           try {
             if (
-              !capsule.isFullyLoggedIn() ||
+              !para.isFullyLoggedIn() ||
               Object.values(paramsCurrentWalletIds)
                 .flat()
-                .some(id => !capsule.wallets[id]?.signer)
+                .some(id => !para.wallets[id]?.signer)
             ) {
               await login(res.data.sessionId, partnerId);
             }
@@ -162,7 +162,7 @@ export function OnRampTransaction() {
     }
 
     const props = {
-      capsule,
+      para,
       onRampConfig,
       onRampPurchase: onRampPurchase as OnRampPurchase,
       isDark,
@@ -181,7 +181,7 @@ export function OnRampTransaction() {
 
   useEffect(() => {
     performSetup();
-  }, [capsule]);
+  }, [para]);
 
   return <Container>{onRampEmbed}</Container>;
 }

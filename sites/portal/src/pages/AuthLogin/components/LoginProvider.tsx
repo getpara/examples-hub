@@ -1,12 +1,12 @@
 import { PropsWithChildren, createContext, useCallback, useContext, useEffect, useState } from 'react';
 import * as utils from '../../../utils/authLogin';
 import { AuthLoginParams } from '../../../utils/authLogin';
-import { useCapsule } from '../../../components/CapsuleContext';
+import { usePara } from '../../../components/ParaContext';
 import { CountryCallingCode } from 'libphonenumber-js';
-import { entityToWallet, isWalletSupported, WalletEntity, WalletType } from '@usecapsule/core-sdk';
+import { entityToWallet, isWalletSupported, WalletEntity, WalletType } from '@getpara/core-sdk';
 import { formatISO } from 'date-fns';
 import { useCloseWindow } from '../../../hooks/useCloseWindow';
-import { BiometricLocationHint } from '@usecapsule/user-management-client';
+import { BiometricLocationHint } from '@getpara/user-management-client';
 import { useExtractedParams } from '../../../hooks/useExtractedParams';
 
 const NOOP = () => {
@@ -39,7 +39,7 @@ export const LoginContext = createContext<Login>({
 });
 
 export const LoginProvider = ({ children }: PropsWithChildren) => {
-  const capsule = useCapsule();
+  const para = usePara();
   const closeWindow = useCloseWindow();
 
   const params = useExtractedParams<AuthLoginParams>();
@@ -50,16 +50,16 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
   const [sessionOrigin, setSessionOrigin] = useState<string>();
 
   const authLogin = useCallback(async (): ReturnType<typeof utils.authLogin> => {
-    const loginRes = await utils.authLogin(capsule, params);
+    const loginRes = await utils.authLogin(para, params);
 
     setLoginRes(loginRes);
 
     return loginRes;
-  }, [capsule, params]);
+  }, [para, params]);
 
   const authLoginWithPassword = useCallback(
     async (password: string): Promise<Awaited<ReturnType<typeof utils.authLoginWithPassword>>> => {
-      const loginRes = await utils.authLoginWithPassword(capsule, {
+      const loginRes = await utils.authLoginWithPassword(para, {
         password,
         userId: params.userId,
         ...params,
@@ -68,15 +68,15 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
       setLoginRes(loginRes);
       return loginRes;
     },
-    [capsule, params],
+    [para, params],
   );
 
   const fetchWallets = useCallback(async (): Promise<Wallets> => {
-    await capsule.touchSession();
-    const _wallets = (await capsule.fetchWallets()).filter(({ pregenIdentifier }) => !pregenIdentifier);
+    await para.touchSession();
+    const _wallets = (await para.fetchWallets()).filter(({ pregenIdentifier }) => !pregenIdentifier);
 
-    const _pregenWallets = capsule.ctx.apiKey
-      ? (await capsule.ctx.capsuleClient.getPregenWallets(capsule.pregenIds, true, capsule.getUserId())).wallets
+    const _pregenWallets = para.ctx.apiKey
+      ? (await para.ctx.client.getPregenWallets(para.pregenIds, true, para.getUserId())).wallets
       : [];
 
     const partnerCount = [...new Set([..._wallets, ..._pregenWallets].map(wallet => wallet.partnerId))].reduce(
@@ -101,7 +101,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
         };
       });
 
-    const wallets = capsule.supportedWalletTypes.reduce(
+    const wallets = para.supportedWalletTypes.reduce(
       (obj, { type }) => ({
         ...obj,
         [type]: allWallets
@@ -113,7 +113,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
       {},
     );
 
-    await capsule.setWallets(
+    await para.setWallets(
       allWallets.reduce(
         (obj, wallet) => ({
           ...obj,
@@ -126,7 +126,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
     setWallets(wallets);
 
     return wallets;
-  }, [capsule, params]);
+  }, [para, params]);
 
   const authUpdateKeyShares = useCallback(
     async (loginResParam?: LoginRes) => {
@@ -138,7 +138,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
 
       const { userId, userHandle, signature, passwordId } = _loginRes;
 
-      await utils.authUpdateKeyShares(capsule, {
+      await utils.authUpdateKeyShares(para, {
         ...params,
         encryptionKey: params.encryptionKey,
         userHandle,
@@ -147,7 +147,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
         userId,
       });
     },
-    [capsule, params, loginRes],
+    [para, params, loginRes],
   );
 
   const finishLogin = useCallback(
@@ -164,7 +164,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
   useEffect(() => {
     const loadSessionOrigin = async () => {
       if (params.sessionId) {
-        const { origin } = await capsule.ctx.capsuleClient.sessionOrigin(params.sessionId);
+        const { origin } = await para.ctx.client.sessionOrigin(params.sessionId);
         setSessionOrigin(origin);
       }
     };
@@ -174,32 +174,32 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
 
   useEffect(() => {
     async function setUserDetails() {
-      if (!capsule.getEmail() && params.email) {
-        await capsule.setEmail(params.email);
+      if (!para.getEmail() && params.email) {
+        await para.setEmail(params.email);
       }
 
       if (params.phone && params.countryCode) {
-        await capsule.setPhoneNumber(params.phone, params.countryCode as CountryCallingCode);
+        await para.setPhoneNumber(params.phone, params.countryCode as CountryCallingCode);
       }
 
       if (params.farcasterUsername) {
-        await capsule.setFarcasterUsername(params.farcasterUsername);
+        await para.setFarcasterUsername(params.farcasterUsername);
       }
 
       if (params.telegramUserId) {
-        await capsule.setTelegramUserId(params.telegramUserId);
+        await para.setTelegramUserId(params.telegramUserId);
       }
 
       if (params.pregenIds) {
-        capsule.pregenIds = params.pregenIds;
+        para.pregenIds = params.pregenIds;
       }
 
-      const hints = await capsule.getUserBiometricLocationHints();
+      const hints = await para.getUserBiometricLocationHints();
       setBiometricLocationHints(hints);
     }
 
     setUserDetails();
-  }, [capsule, params]);
+  }, [para, params]);
 
   return (
     <LoginContext.Provider

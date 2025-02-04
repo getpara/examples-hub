@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { capsule } from '../clients/capsule';
+import { para } from '../clients/para';
 import { useLogout } from './useLogout';
 
 export const useIsLoggedIn = () => {
@@ -10,7 +10,7 @@ export const useIsLoggedIn = () => {
 
   useEffect(() => {
     const checkLoggedIn = async () => {
-      const _isLoggedIn = await capsule.isFullyLoggedIn();
+      const _isLoggedIn = await para.isFullyLoggedIn();
       if (!_isLoggedIn) {
         await logout();
       }

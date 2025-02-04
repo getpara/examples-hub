@@ -1,4 +1,4 @@
-import { StorageUtils } from '@usecapsule/core-sdk';
+import { StorageUtils } from '@getpara/core-sdk';
 
 /**
  * Implements `StorageUtils` using `sessionStorage`.

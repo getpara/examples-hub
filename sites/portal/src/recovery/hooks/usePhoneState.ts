@@ -1,4 +1,4 @@
-import { STORAGE_PREFIX } from '@usecapsule/core-sdk';
+import { STORAGE_PREFIX } from '@getpara/core-sdk';
 import { useState } from 'react';
 
 const usePhoneState = (initialValue: string | null) => {

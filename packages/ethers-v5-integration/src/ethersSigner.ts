@@ -2,23 +2,23 @@ import { Transaction, ethers } from 'ethers';
 
 import { _TypedDataEncoder } from '@ethersproject/hash';
 
-import CoreCapsule, { hexStringToBase64, SuccessfulSignatureRes } from '@usecapsule/core-sdk';
+import ParaCore, { hexStringToBase64, SuccessfulSignatureRes } from '@getpara/core-sdk';
 import { defineReadOnly, keccak256, resolveProperties, serializeTransaction } from 'ethers/lib/utils';
 
-export class CapsuleEthersV5Signer extends ethers.Signer {
-  private capsule: CoreCapsule;
+export class ParaEthersV5Signer extends ethers.Signer {
+  private para: ParaCore;
   private currentWalletId: string;
 
-  constructor(capsule: CoreCapsule, provider?: null | ethers.providers.Provider, walletId?: string) {
+  constructor(para: ParaCore, provider?: null | ethers.providers.Provider, walletId?: string) {
     super();
 
-    this.currentWalletId = capsule.findWalletId(walletId, { type: ['EVM'] });
-    this.capsule = capsule;
+    this.currentWalletId = para.findWalletId(walletId, { type: ['EVM'] });
+    this.para = para;
     defineReadOnly(this, 'provider', provider);
   }
 
   setCurrentWalletId(walletId: string) {
-    if (!this.capsule.wallets[walletId]) {
+    if (!this.para.wallets[walletId]) {
       throw new Error(`no wallet exists with id ${walletId}`);
     }
     this.currentWalletId = walletId;
@@ -29,7 +29,7 @@ export class CapsuleEthersV5Signer extends ethers.Signer {
     if (!id) {
       throw new Error(`no wallet available`);
     }
-    if (!this.capsule.wallets[id]) {
+    if (!this.para.wallets[id]) {
       throw new Error(`no wallet exists with id ${id}`);
     }
     return id;
@@ -40,17 +40,17 @@ export class CapsuleEthersV5Signer extends ethers.Signer {
     if (!walletId) {
       throw new Error('no wallet available');
     }
-    return this.capsule.wallets[walletId].address;
+    return this.para.wallets[walletId].address;
   }
 
-  connect(provider: ethers.providers.Provider | null): CapsuleEthersV5Signer {
-    return new CapsuleEthersV5Signer(this.capsule, provider, this.currentWalletId);
+  connect(provider: ethers.providers.Provider | null): ParaEthersV5Signer {
+    return new ParaEthersV5Signer(this.para, provider, this.currentWalletId);
   }
 
   async signMessage(message: string | Uint8Array): Promise<string> {
     const hashedMessage = ethers.utils.hashMessage(message);
     const base64HashedMessage = hexStringToBase64(hashedMessage);
-    const res = await this.capsule.signMessage(this.getCurrentWalletId(), base64HashedMessage);
+    const res = await this.para.signMessage({ walletId: this.getCurrentWalletId(), messageBase64: base64HashedMessage });
 
     const signature = (res as SuccessfulSignatureRes).signature;
     return `0x${signature}`;
@@ -94,10 +94,10 @@ export class CapsuleEthersV5Signer extends ethers.Signer {
       return address;
     });
 
-    const res = await this.capsule.signMessage(
-      this.getCurrentWalletId(),
-      hexStringToBase64(_TypedDataEncoder.hash(populated.domain, types, populated.value)),
-    );
+    const res = await this.para.signMessage({
+      walletId: this.getCurrentWalletId(),
+      messageBase64: hexStringToBase64(_TypedDataEncoder.hash(populated.domain, types, populated.value)),
+    });
 
     const signature = (res as SuccessfulSignatureRes).signature;
     return `0x${signature}`;

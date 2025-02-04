@@ -1,7 +1,7 @@
 import { vi, describe, it, expect, afterEach, beforeEach } from 'vitest';
 
 import { ed25519Keygen, ed25519PreKeygen, keygen, preKeygen, refresh } from '../../src/wallet/keygen.js';
-import { Environment, WalletType } from '@usecapsule/core-sdk';
+import { Environment, WalletType } from '@getpara/core-sdk';
 import {
   COSMOS_PREFIX,
   OFFLOAD_MPC_COMPUTATION_URL,

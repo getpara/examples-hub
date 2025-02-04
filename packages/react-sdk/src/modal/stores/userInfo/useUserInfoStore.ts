@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { getActions } from './actions.js';
-import { Auth } from '@usecapsule/user-management-client';
-import { ModalAuthInfo } from '@usecapsule/react-common';
+import { Auth } from '@getpara/user-management-client';
+import { ModalAuthInfo } from '@getpara/react-common';
 
 type SetAuthInfo = Auth & Partial<Pick<ModalAuthInfo, 'pfpUrl' | 'displayName'>>;
 

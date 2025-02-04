@@ -12,7 +12,7 @@ export type Wallet = {
 
 export interface DefaultWalletOptions {
   projectId: string;
-  walletConnectParameters?: CapsuleWalletConnectParameters;
+  walletConnectParameters?: ParaWalletConnectParameters;
 }
 
 export type CreateWalletFn = (
@@ -25,32 +25,32 @@ export type CreateWalletFn = (
 export type WalletList = CreateWalletFn[];
 
 // We don't want users to pass in `showQrModal` or `projectId`.
-// Those two values are handled by Capsule. The rest of WalletConnect
+// Those two values are handled by Para. The rest of WalletConnect
 // parameters can be passed with no issue
-export type CapsuleWalletConnectParameters = Omit<WalletConnectParameters, 'showQrModal' | 'projectId'>;
+export type ParaWalletConnectParameters = Omit<WalletConnectParameters, 'showQrModal' | 'projectId'>;
 
-export type CapsuleDetails = Omit<Wallet, 'createConnector' | 'createWCConnector' | 'hidden'> & {
+export type ParaDetails = Omit<Wallet, 'createConnector' | 'createWCConnector' | 'hidden'> & {
   isWalletConnectModalConnector?: boolean;
-  isCapsuleConnector: boolean;
+  isParaConnector: boolean;
   walletConnectModalConnector?: Connector;
   // Used specifically in `connectorsForWallets` logic
-  // to make sure we can also get WalletConnect modal in Capsule
+  // to make sure we can also get WalletConnect modal in Para
   showQrModal?: true;
 };
 
-export type WalletDetailsParams = { capsuleDetails: CapsuleDetails };
+export type WalletDetailsParams = { paraDetails: ParaDetails };
 
-export type CreateConnector = (walletDetails: { capsuleDetails: CapsuleDetails }) => CreateConnectorFn;
+export type CreateConnector = (walletDetails: WalletDetailsParams) => CreateConnectorFn;
 
 // This is the default connector you get at first from wagmi
-// "Connector" + Capsule details we inject into the connector
+// "Connector" + Para details we inject into the connector
 export type WagmiConnectorInstance = Connector & {
   // this is optional since we only get
-  // capsuleDetails if we use Capsule connectors
-  capsuleDetails?: CapsuleDetails;
+  // paraDetails if we use Para connectors
+  paraDetails?: ParaDetails;
   walletConnectModalConnector?: WagmiConnectorInstance;
 };
 
 // This will be the wallet instance we will return
-// in the Capsule connect modal
-export type WalletInstance = Connector & CapsuleDetails;
+// in the Para connect modal
+export type WalletInstance = Connector & ParaDetails;

@@ -6,7 +6,7 @@ import { ModalStep } from '../../steps/attemptSteps';
 import Plus from '../../../assets/plus';
 import WalletCreation from '../../../assets/walletCreation';
 import PhoneContext from '../../contexts/PhoneContext';
-import { CpslButton, CpslDropdown, CpslIcon, CpslInput } from '@usecapsule/react-components';
+import { CpslButton, CpslDropdown, CpslIcon, CpslInput } from '@getpara/react-components';
 import parsePhoneNumberFromString, { CountryCallingCode } from 'libphonenumber-js';
 import {
   CpslInputCustomEvent,
@@ -14,14 +14,14 @@ import {
   IconType,
   InputInputEventDetail,
   CpslDropdownCustomEvent,
-} from '@usecapsule/core-components';
+} from '@getpara/core-components';
 import countryCodes from './countryCodes';
-import { useCapsule } from '../../../components/CapsuleContext';
+import { usePara } from '../../../components/ParaContext';
 
 const DEFAULT_COUNTRY = { label: 'United States', value: '+1', selectedLabel: 'US', icon: 'US' as IconType };
 
 const RecoveryEmailCollectionStep: React.FC = () => {
-  const capsule = useCapsule();
+  const para = usePara();
   const { setCurrentStep } = useContext(StepContext);
   const { setEmail } = useContext(EmailContext);
   const { setPhone, setCountryCode } = useContext(PhoneContext);
@@ -123,15 +123,15 @@ const RecoveryEmailCollectionStep: React.FC = () => {
               if (!inputEmail) {
                 throw new Error('Email is required');
               }
-              capsule.clearStorage();
+              para.clearStorage();
 
-              const userExists = await capsule.checkIfUserExists(inputEmail);
+              const userExists = await para.checkIfUserExists(inputEmail);
               if (userExists) {
                 setEmail(inputEmail);
                 setCurrentStep(ModalStep.VERIFICATION_CODE);
-                await capsule.ctx.capsuleClient.initializeRecovery(inputEmail);
+                await para.ctx.client.initializeRecovery(inputEmail);
               } else {
-                setEmailError('This user does not exist with Capsule');
+                setEmailError('This user does not exist with Para');
               }
             }}
           >
@@ -165,16 +165,16 @@ const RecoveryEmailCollectionStep: React.FC = () => {
                 throw new Error('Country code and phone number are required');
               }
 
-              capsule.clearStorage();
+              para.clearStorage();
 
-              const userExists = await capsule.checkIfUserExistsByPhone(inputPhone, inputCountryCode);
+              const userExists = await para.checkIfUserExistsByPhone({ phone: inputPhone, countryCode: inputCountryCode });
               if (userExists) {
                 setPhone(inputPhone);
                 setCountryCode(inputCountryCode);
                 setCurrentStep(ModalStep.VERIFICATION_CODE_PHONE);
-                await capsule.ctx.capsuleClient.initializeRecoveryForPhone(inputPhone, inputCountryCode);
+                await para.ctx.client.initializeRecoveryForPhone(inputPhone, inputCountryCode);
               } else {
-                setPhoneError('This user does not exist with Capsule');
+                setPhoneError('This user does not exist with Para');
               }
             }}
           >

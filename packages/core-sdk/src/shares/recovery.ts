@@ -1,20 +1,29 @@
-import { BackupKitEmailProps, EncryptedKeyShare, EncryptorType, KeyShareType } from '@usecapsule/user-management-client';
+import { BackupKitEmailProps, EncryptedKeyShare, EncryptorType, KeyShareType } from '@getpara/user-management-client';
 
 import { KeyContainer } from './KeyContainer.js';
 import { Ctx } from '../definitions.js';
 
-export async function sendRecoveryForShare(
-  ctx: Ctx,
-  userId: string,
-  walletId: string,
-  otherEncryptedShares: EncryptedKeyShare[],
-  userSigner: string,
+export async function sendRecoveryForShare({
+  ctx,
+  userId,
+  walletId,
+  otherEncryptedShares = [],
+  userSigner,
   ignoreRedistributingBackupEncryptedShare = false,
-  emailProps: BackupKitEmailProps,
+  emailProps = {},
   forceRefresh = false,
-): Promise<string> {
+}: {
+  ctx: Ctx;
+  userId: string;
+  walletId: string;
+  otherEncryptedShares?: EncryptedKeyShare[];
+  userSigner: string;
+  ignoreRedistributingBackupEncryptedShare?: boolean;
+  emailProps?: BackupKitEmailProps;
+  forceRefresh?: boolean;
+}): Promise<string> {
   if (ignoreRedistributingBackupEncryptedShare) {
-    await ctx.capsuleClient.uploadUserKeyShares(
+    await ctx.client.uploadUserKeyShares(
       userId,
       otherEncryptedShares.map(share => ({
         walletId,
@@ -28,11 +37,11 @@ export async function sendRecoveryForShare(
     walletId: string;
   })[];
   let recoveryPrivateKeyContainer: KeyContainer | undefined;
-  const { recoveryPublicKeys } = await ctx.capsuleClient.getRecoveryPublicKeys(userId);
+  const { recoveryPublicKeys } = await ctx.client.getRecoveryPublicKeys(userId);
 
   if (forceRefresh || !recoveryPublicKeys?.length) {
     recoveryPrivateKeyContainer = new KeyContainer(walletId, '', '');
-    const { recoveryPublicKeys } = await ctx.capsuleClient.persistRecoveryPublicKeys(userId, [
+    const { recoveryPublicKeys } = await ctx.client.persistRecoveryPublicKeys(userId, [
       recoveryPrivateKeyContainer.getPublicEncryptionKeyHex(),
     ]);
 
@@ -60,7 +69,7 @@ export async function sendRecoveryForShare(
     });
   }
 
-  await ctx.capsuleClient.uploadUserKeyShares(userId, [
+  await ctx.client.uploadUserKeyShares(userId, [
     ...otherEncryptedShares.map(share => ({
       walletId,
       ...share,
@@ -68,7 +77,7 @@ export async function sendRecoveryForShare(
     ...(ignoreRedistributingBackupEncryptedShare ? [] : userBackupKeyShareOptsArr),
   ]);
 
-  await ctx.capsuleClient.distributeCapsuleShare({
+  await ctx.client.distributeParaShare({
     userId,
     walletId,
     useDKLS: ctx.useDKLS,

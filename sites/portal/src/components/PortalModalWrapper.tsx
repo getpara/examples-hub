@@ -2,7 +2,7 @@ import { Box, ChakraProvider, Container, Flex, Theme } from '@chakra-ui/react';
 import { PropsWithChildren } from 'react';
 import BetaBanner from './BetaBanner';
 import { getPartnerTheme } from '../theme';
-import PoweredByCapsule from '../assets/poweredByCapsule';
+import PoweredByPara from '../assets/poweredByPara';
 
 interface BasePortalModalWrapperProps extends PropsWithChildren {
   paramsPartnerId?: string;
@@ -44,7 +44,7 @@ export const PortalModalWrapper = ({
       {paramsPartnerId && (
         <Box backgroundColor={portalBackgroundColor} height="62px" width="100%">
           <Flex backgroundColor={portalBackgroundColor} h="57px" w="100%" justifyContent={'center'} alignItems={'center'}>
-            <PoweredByCapsule color={portalTextColor} />
+            <PoweredByPara color={portalTextColor} />
           </Flex>
         </Box>
       )}

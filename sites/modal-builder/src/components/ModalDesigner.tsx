@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
-import '@usecapsule/react-sdk/styles.css';
+import '@getpara/react-sdk/styles.css';
 import {
   AppearanceConfigurator,
   AuthenticationConfigurator,
@@ -16,7 +16,7 @@ import { CodePreviewDisplay, ModalPreviewDisplay, PreviewControls } from './Prev
 import { useAtom } from 'jotai';
 import { isLoggedInAtom, viewAtom } from '../atoms';
 import { NavBar } from './UI/Nav';
-import { CpslIcon } from '@usecapsule/react-components';
+import { CpslIcon } from '@getpara/react-components';
 import { ErrorBoundary } from 'react-error-boundary';
 
 export const ModalDesigner: React.FC = () => {

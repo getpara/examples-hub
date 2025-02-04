@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { STORAGE_PREFIX } from '@usecapsule/core-sdk';
+import { STORAGE_PREFIX } from '@getpara/core-sdk';
 
 const useTwoFactorVerifiedState = (initialValue: boolean | null) => {
   const [state, setState] = useState<boolean | null>(() => {

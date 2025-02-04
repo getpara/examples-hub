@@ -1,7 +1,7 @@
 import { HTMLAttributes, PropsWithChildren } from 'react';
 import { GradientButton } from '../common';
-import { CpslIcon } from '@usecapsule/react-components';
-import { Components, IconType } from '@usecapsule/core-components';
+import { CpslIcon } from '@getpara/react-components';
+import { Components, IconType } from '@getpara/core-components';
 import styled from 'styled-components';
 
 type GradientCTAButtonProps = {

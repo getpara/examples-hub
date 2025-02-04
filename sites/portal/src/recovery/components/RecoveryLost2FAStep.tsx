@@ -14,12 +14,12 @@ const RecoveryLost2FA: React.FC<RecoveryLost2FAProps> = ({ onClose }) => {
         Please contact
         <Box
           as="a"
-          href="mailto:support@usecapsule.com"
+          href="mailto:support@getpara.com"
           cursor="pointer"
           fontWeight="bold"
           _hover={{ textDecoration: 'underline' }}
         >
-          <> support@usecapsule.com </>
+          <> support@getpara.com </>
         </Box>
         for further assistance recovering your account
       </Text>

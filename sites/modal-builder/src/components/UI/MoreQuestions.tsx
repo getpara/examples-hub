@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { Card } from './StyledCard';
 import { Text } from './StyledText';
 import { Button } from './StyledButton';
-import { CpslIcon } from '@usecapsule/react-components';
+import { CpslIcon } from '@getpara/react-components';
 
 export const MoreQuestions: React.FC = () => {
   return (

@@ -1,4 +1,4 @@
-import { WalletType } from '@usecapsule/graz';
+import { WalletType } from '@getpara/graz';
 import { WalletMetadata } from './CommonTypes.js';
 
 export type WalletList = (() => WalletWithType)[];

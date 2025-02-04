@@ -1,6 +1,6 @@
 import { Controller, useFormContext } from 'react-hook-form';
 import { OnboardingAnswerOption, OnboardingAnswers, QuestionType } from '../../../types/onboarding';
-import { CpslInput, CpslSelect, CpslSelectItem } from '@usecapsule/react-components';
+import { CpslInput, CpslSelect, CpslSelectItem } from '@getpara/react-components';
 import {
   questionIsMultipleSelect,
   questionLabel,
@@ -10,14 +10,14 @@ import {
   selectQuestionOptions,
 } from '../config/questionConfig';
 import { useOnboardingStore } from '../../../stores/onboarding/useOnboardingStore';
-import { capsule } from '../../../clients/capsule';
+import { para } from '../../../clients/para';
 
 interface QuestionInputProps {
   question: OnboardingAnswerOption;
 }
 
 export const QuestionInput = ({ question }: QuestionInputProps) => {
-  const userId = capsule.getUserId();
+  const userId = para.getUserId();
   const setInput = useOnboardingStore(state => state.setInput);
   const { control } = useFormContext<OnboardingAnswers>();
 

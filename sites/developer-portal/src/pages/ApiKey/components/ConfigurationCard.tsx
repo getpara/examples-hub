@@ -1,4 +1,4 @@
-import { CpslButton, CpslIcon, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon, CpslText } from '@getpara/react-components';
 import { PropsWithChildren, ReactNode, useState } from 'react';
 import { DocsButton } from '../../../components/DocsButton/DocsButton';
 import { SplitCard, SplitCardInnerContainer } from '../../../components/SplitCard/SplitCard';

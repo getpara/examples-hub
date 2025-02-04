@@ -1,4 +1,4 @@
-import { $Auth, Auth, AuthParams, ExtractAuth, WalletParams, WalletRef } from './types/index.js';
+import { Auth, AuthParams, ExtractAuth, WalletParams, WalletRef } from './types/index.js';
 
 export function isWalletId(params: WalletParams): params is { walletId: string } {
   return !!params.walletId && !params.externalWalletAddress;
@@ -22,7 +22,7 @@ function isValid(s?: string | null | undefined): boolean {
   return !!s && s !== 'null' && s !== 'undefined' && s !== '';
 }
 
-export function isEmail(params: AuthParams): params is $Auth<'email'> {
+export function isEmail(params: AuthParams): params is Auth<'email'> {
   return (
     isValid(params.email) &&
     !isValid(params.phone) &&
@@ -32,7 +32,7 @@ export function isEmail(params: AuthParams): params is $Auth<'email'> {
   );
 }
 
-export function isPhone(params: AuthParams): params is $Auth<'phone'> {
+export function isPhone(params: AuthParams): params is Auth<'phone'> {
   return (
     isValid(params.phone) &&
     isValid(params.countryCode) &&
@@ -42,7 +42,7 @@ export function isPhone(params: AuthParams): params is $Auth<'phone'> {
   );
 }
 
-export function isFarcaster(params: AuthParams): params is $Auth<'farcaster'> {
+export function isFarcaster(params: AuthParams): params is Auth<'farcaster'> {
   return (
     isValid(params.farcasterUsername) &&
     !isValid(params.email) &&
@@ -52,7 +52,7 @@ export function isFarcaster(params: AuthParams): params is $Auth<'farcaster'> {
   );
 }
 
-export function isTelegram(params: AuthParams): params is $Auth<'telegram'> {
+export function isTelegram(params: AuthParams): params is Auth<'telegram'> {
   return (
     isValid(params.telegramUserId) &&
     !isValid(params.email) &&
@@ -62,7 +62,7 @@ export function isTelegram(params: AuthParams): params is $Auth<'telegram'> {
   );
 }
 
-export function isUserId(params: AuthParams): params is $Auth<'userId'> {
+export function isUserId(params: AuthParams): params is Auth<'userId'> {
   return (
     isValid(params.userId) &&
     !isValid(params.email) &&
@@ -73,7 +73,15 @@ export function isUserId(params: AuthParams): params is $Auth<'userId'> {
   );
 }
 
-export function extractAuthInfo(obj: AuthParams, { allowUserId }: { allowUserId?: boolean } = {}): ExtractAuth {
+type ExtractAuthOpts = { allowUserId?: boolean; isRequired?: boolean };
+
+export function extractAuthInfo(obj: AuthParams, opts?: ExtractAuthOpts): ExtractAuth | undefined;
+export function extractAuthInfo(obj: AuthParams, opts: ExtractAuthOpts & { isRequired: true }): ExtractAuth;
+
+export function extractAuthInfo(
+  obj: AuthParams,
+  { allowUserId = false, isRequired = false }: ExtractAuthOpts = {},
+): ExtractAuth | undefined {
   switch (true) {
     case isEmail(obj):
       return { auth: { email: obj.email }, authType: 'email', identifier: obj.email, publicKeyIdentifier: obj.email };
@@ -101,21 +109,10 @@ export function extractAuthInfo(obj: AuthParams, { allowUserId }: { allowUserId?
     case isUserId(obj) && allowUserId:
       return { auth: { userId: obj.userId }, authType: 'userId', identifier: obj.userId, publicKeyIdentifier: obj.userId };
     default:
-      throw new Error('invalid auth object');
-  }
-}
+      if (isRequired) {
+        throw new Error('invalid auth object');
+      }
 
-export function extractAuth(
-  obj: AuthParams,
-  opts: Parameters<typeof extractAuthInfo>[1] & { optional?: boolean } = {},
-): Auth | undefined {
-  try {
-    return extractAuthInfo(obj, { allowUserId: opts.allowUserId || false }).auth;
-  } catch (e) {
-    if (opts.optional) {
       return undefined;
-    }
-
-    throw e;
   }
 }

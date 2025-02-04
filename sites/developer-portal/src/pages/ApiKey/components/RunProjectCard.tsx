@@ -1,4 +1,4 @@
-import { CpslButton, CpslIcon, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon, CpslText } from '@getpara/react-components';
 import { SplitCard, SplitCardInnerContainer } from '../../../components/SplitCard/SplitCard';
 import { ExternalLinkButton } from '../../../components/ExternalLinkButton/ExternalLinkButton';
 import { DOCS_LINK } from '../../../utils/constants';

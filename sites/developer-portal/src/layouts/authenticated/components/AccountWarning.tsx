@@ -1,4 +1,4 @@
-import { CpslAlert, CpslButton, CpslText } from '@usecapsule/react-components';
+import { CpslAlert, CpslButton, CpslText } from '@getpara/react-components';
 import { useGetSelectedOrganization, useGetSelectedOrganizationIsValid } from '../../../hooks/api/queries/useOrganizations';
 import styled from 'styled-components';
 import { SUPPORT_URL, TODAY } from '../../../utils/constants';

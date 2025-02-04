@@ -67,7 +67,6 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
   setExternalWalletError: externalWalletError => set({ externalWalletError }),
   setIsUsingMobileConnector: isUsingMobileConnector => set({ isUsingMobileConnector }),
   setStepDirection: stepDirection => set({ stepDirection }),
-  setActiveWallet: activeWallet => set({ activeWallet }),
   setFarcasterConnectUri: farcasterConnectUri => set({ farcasterConnectUri }),
   setBiometricLocationHints: biometricLocationHints => set({ biometricLocationHints }),
   setIFrameUrl: iFrameUrl => set({ iFrameUrl }),

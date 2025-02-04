@@ -7,7 +7,7 @@ import {
   SolanaWallet,
   CosmosWallet,
   Network,
-} from '@usecapsule/react-sdk';
+} from '@getpara/react-sdk';
 import { AUTH_METHOD_CONFIGS, EXTERNAL_WALLET_CONFIGS, ALL_AUTH_METHODS, ALL_EXTERNAL_WALLETS } from '../../constants';
 import { AuthMethod, ExternalWallet, AuthSectionId, TAuthLayout } from '../../types';
 import { AccordionContent, AccordionItem, AccordionTrigger, DraggableArea, DraggableItem, SegmentControl } from '../UI';

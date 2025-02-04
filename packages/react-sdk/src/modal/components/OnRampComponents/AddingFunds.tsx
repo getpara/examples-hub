@@ -1,8 +1,8 @@
-import { OnRampPurchaseStatus } from '@usecapsule/web-sdk';
+import { OnRampPurchaseStatus } from '@getpara/web-sdk';
 import { SpinnerContainer } from '../common.js';
 import { ON_RAMP_PROVIDERS } from '../../constants/constants.js';
 import { useModalStore } from '../../stores/index.js';
-import { CpslSpinner, CpslText } from '@usecapsule/react-components';
+import { CpslSpinner, CpslText } from '@getpara/react-components';
 
 export const AddingFunds = () => {
   const onRampPurchase = useModalStore(state => state.onRampPurchase);

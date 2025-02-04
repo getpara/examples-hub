@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { OnrampSession, OnrampSessionResult, StripeOnramp, loadStripeOnramp } from '@stripe/crypto';
-import { Network, OnRampAsset, OnRampProvider, OnRampPurchaseStatus } from '@usecapsule/web-sdk';
-import { CpslSpinner } from '@usecapsule/react-components';
+import { Network, OnRampAsset, OnRampProvider, OnRampPurchaseStatus } from '@getpara/web-sdk';
+import { CpslSpinner } from '@getpara/react-components';
 import { SpinnerContainer } from './common.js';
 import styled from 'styled-components';
 import { Props } from '../types/index.js';
@@ -40,7 +40,7 @@ const useOnrampSessionListener = (type, session, callback) => {
   }, [session, callback, type]);
 };
 
-export const StripeEmbed = ({ capsule, isDark, isEmbedded, onRampPurchase, setOnRampPurchase }: Props) => {
+export const StripeEmbed = ({ para, isDark, isEmbedded, onRampPurchase, setOnRampPurchase }: Props) => {
   const [isReady, setIsReady] = useState(false);
 
   const isStripeEmbed = useMemo(() => onRampPurchase.provider === OnRampProvider.STRIPE, [onRampPurchase]);
@@ -91,8 +91,8 @@ export const StripeEmbed = ({ capsule, isDark, isEmbedded, onRampPurchase, setOn
       switch (session.status) {
         case 'fulfillment_processing':
         case 'fulfillment_complete':
-          const updatedPurchase = await capsule.ctx.capsuleClient.updateOnRampPurchase({
-            userId: capsule.getUserId(),
+          const updatedPurchase = await para.ctx.client.updateOnRampPurchase({
+            userId: para.getUserId(),
             walletId: onRampPurchase.walletId,
             externalWalletAddress: onRampPurchase.externalWalletAddress,
             purchaseId: onRampPurchase.id,

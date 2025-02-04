@@ -1,17 +1,14 @@
-import { useEffect, useState } from 'react';
-import capsule from '../clients/capsule';
-import { CapsuleModal } from '@usecapsule/react-sdk';
+import { ParaModal, useModal, useAccount } from '@getpara/react-sdk';
 import { SolanaProfile } from './SolanaProfile';
-import { CpslButton } from '@usecapsule/react-components';
+import { CpslButton } from '@getpara/react-components';
 import styled from 'styled-components';
 import { EvmProfile } from './EvmProfile';
 import { CosmosProfile } from './CosmosProfile';
 import { ModalConfig } from './ModalConfig/ModalConfig';
 import { useModalStateStore } from '../stores/modalStateStore/useModalStateStore';
+import { ParaProfile } from './ParaProfile';
 
 export const Content = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const oAuthMethods = useModalStateStore(state => state.oAuthMethods);
   const externalWallets = useModalStateStore(state => state.externalWallets);
   const authLayout = useModalStateStore(state => state.authLayout);
@@ -20,22 +17,11 @@ export const Content = () => {
   const accentColor = useModalStateStore(state => state.accentColor);
   const mode = useModalStateStore(state => state.mode);
   const logo = useModalStateStore(state => state.logo);
-  const checkIsLoggedIn = async () => {
-    const isLoggedIn = await capsule.isFullyLoggedIn();
-    setIsLoggedIn(isLoggedIn);
-  };
-
-  useEffect(() => {
-    checkIsLoggedIn();
-  }, []);
+  const { openModal } = useModal();
+  const { data: account } = useAccount();
 
   const handleModalButtonClick = () => {
-    setIsModalOpen(true);
-  };
-
-  const onModalClose = () => {
-    setIsModalOpen(false);
-    checkIsLoggedIn();
+    openModal();
   };
 
   return (
@@ -44,15 +30,13 @@ export const Content = () => {
         <ModalConfig />
       </ConfigContainer>
       <InnerContainer>
+        <ParaProfile />
         <EvmProfile />
         <CosmosProfile />
         <SolanaProfile />
-        <CpslButton onClick={handleModalButtonClick}>{isLoggedIn ? 'Open Modal' : 'Login'}</CpslButton>
+        <CpslButton onClick={handleModalButtonClick}>{!!account ? 'Open Modal' : 'Login'}</CpslButton>
       </InnerContainer>
-      <CapsuleModal
-        capsule={capsule}
-        isOpen={isModalOpen}
-        onClose={onModalClose}
+      <ParaModal
         oAuthMethods={oAuthMethods}
         externalWallets={externalWallets}
         authLayout={authLayout}
@@ -63,7 +47,7 @@ export const Content = () => {
           accentColor,
         }}
         logo={logo}
-        appName="Capsule External Wallet Example"
+        appName="Para External Wallet Example"
         onRampTestMode={true}
       />
     </Container>

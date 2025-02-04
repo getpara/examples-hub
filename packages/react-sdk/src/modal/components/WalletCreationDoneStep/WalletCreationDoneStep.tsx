@@ -1,9 +1,10 @@
-import { CpslButton, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslText } from '@getpara/react-components';
 import { StepContainer, InnerStepContainer, HeroIcon } from '../common.js';
-import { useCapsuleStore, useModalStore, useThemeStore } from '../../stores/index.js';
+import { useModalStore, useThemeStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { WalletCard, WalletCards } from '../WalletCard/WalletCard.js';
 import styled from 'styled-components';
+import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 
 interface WalletCreationDoneStepProps {
   twoFactorAuthEnabled?: boolean;
@@ -15,7 +16,7 @@ export const WalletCreationDoneStep = ({ twoFactorAuthEnabled, onClose }: Wallet
   const setStep = useModalStore(state => state.setStep);
   const isLogin = useModalStore(state => state.isLogin());
   const onRampConfig = useModalStore(state => state.onRampConfig);
-  const capsule = useCapsuleStore(state => state.capsule);
+  const para = useInternalClient();
 
   const isOnRampConfigured = onRampConfig?.isBuyEnabled || onRampConfig?.isReceiveEnabled || onRampConfig?.isWithdrawEnabled;
 
@@ -26,7 +27,7 @@ export const WalletCreationDoneStep = ({ twoFactorAuthEnabled, onClose }: Wallet
         return;
       }
 
-      const is2FAComplete = await capsule.check2FAStatus();
+      const is2FAComplete = await para.check2FAStatus();
 
       setStep(is2FAComplete ? ModalStep.LOGIN_DONE : ModalStep.SETUP_2FA);
     } else {
@@ -50,7 +51,7 @@ export const WalletCreationDoneStep = ({ twoFactorAuthEnabled, onClose }: Wallet
           </>
         ) : (
           <WalletCards>
-            {capsule.currentWalletIdsArray.map(([id, type]) => {
+            {para.currentWalletIdsArray.map(([id, type]) => {
               return <WalletCard key={id} id={id} type={type} showAddFunds={isOnRampConfigured} />;
             })}
           </WalletCards>

@@ -9,15 +9,15 @@ import VerifyCode from '../../../assets/verifyCode';
 import Console from '../../../assets/console';
 import UserContext from '../../contexts/UserContext';
 import TwoFactorContext from '../../contexts/TwoFactorContext';
-import { RecoveryStatus } from '@usecapsule/core-sdk';
-import { useCapsule } from '../../../components/CapsuleContext';
+import { RecoveryStatus } from '@getpara/core-sdk';
+import { usePara } from '../../../components/ParaContext';
 
 type RecoveryVerificationCodeStepProps = {
   onClose: () => void;
 };
 
 const RecoveryVerificationCodeStep: React.FC<RecoveryVerificationCodeStepProps> = ({ onClose }) => {
-  const capsule = useCapsule();
+  const para = usePara();
   const { setCurrentStep } = useContext(StepContext);
   const { email } = useContext(EmailContext);
   const { setWallets } = useContext(WalletContext);
@@ -92,7 +92,7 @@ const RecoveryVerificationCodeStep: React.FC<RecoveryVerificationCodeStepProps> 
         onClick={async () => {
           if (verificationCode.length === 6 && /^\d+$/.test(verificationCode)) {
             try {
-              const res = await capsule.ctx.capsuleClient.verifyEmailForRecovery(email, verificationCode);
+              const res = await para.ctx.client.verifyEmailForRecovery(email, verificationCode);
               const status = res.data.status;
               const initiatedAt = res.data.initiatedAt as Date;
               const skip2FA = res.data.skip2FA as boolean;
@@ -138,7 +138,7 @@ const RecoveryVerificationCodeStep: React.FC<RecoveryVerificationCodeStepProps> 
         onClick={async () => {
           setResendStatus('Code Resent!');
           setResendButtonDisabled(true);
-          await capsule.ctx.capsuleClient.initializeRecovery(email);
+          await para.ctx.client.initializeRecovery(email);
 
           setTimeout(() => {
             setResendStatus('Resend Code');

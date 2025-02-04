@@ -1,4 +1,4 @@
-import { OnRampConfig } from '@usecapsule/web-sdk';
+import { OnRampConfig } from '@getpara/web-sdk';
 
 export class OnRampConfigError extends Error {
   constructor(message) {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 
-import { useCapsule } from '../../components/CapsuleContext';
+import { usePara } from '../../components/ParaContext';
 import { authLogin, authLoginWithPassword } from '../../utils/authLogin';
 import SignMessageReview from './SignMessageReview';
 import { useModalOutletContext } from '../../hooks/useModalOutletContext';
@@ -9,8 +9,8 @@ import { useModalOutletContext } from '../../hooks/useModalOutletContext';
 import styled from 'styled-components';
 import ETHTransactionReview from './ETHTransactionReview';
 import CosmosTransactionReview from './CosmosTransactionReview';
-import { CpslIcon, CpslSpinner } from '@usecapsule/react-components';
-import { AuthMethod } from '@usecapsule/web-sdk';
+import { CpslIcon, CpslSpinner } from '@getpara/react-components';
+import { AuthMethod } from '@getpara/web-sdk';
 import { EnterPasswordStep } from '../AuthLogin/components/EnterPasswordStep';
 
 const MAX_AUTH_RETRIES = 5;
@@ -58,7 +58,7 @@ export function iconForCurrency(currency: string): JSX.Element {
 }
 
 function TransactionReview() {
-  const capsule = useCapsule();
+  const para = usePara();
   const { userId, pendingTransactionId } = useParams();
 
   const [searchParams] = useSearchParams();
@@ -80,11 +80,11 @@ function TransactionReview() {
 
     while (retriesLeft > 0) {
       try {
-        await capsule.ctx.capsuleClient.acceptPendingTransaction(userId, pendingTransactionId);
+        await para.ctx.client.acceptPendingTransaction(userId, pendingTransactionId);
         break;
       } catch (e) {
         console.error(e);
-        await authLogin(capsule, { partnerId: partner.id, userId });
+        await authLogin(para, { partnerId: partner.id, userId });
       }
 
       retriesLeft--;
@@ -99,12 +99,12 @@ function TransactionReview() {
   }
 
   async function handleRejectTransaction() {
-    await capsule.ctx.capsuleClient.deletePendingTransaction(userId, pendingTransactionId);
+    await para.ctx.client.deletePendingTransaction(userId, pendingTransactionId);
     window.close();
   }
 
   async function performSetup() {
-    const res = await capsule.touchSession();
+    const res = await para.touchSession();
     const partnerId = res.data.partnerId;
 
     let pendingTransaction, partner, decodedTx, txData;
@@ -118,7 +118,7 @@ function TransactionReview() {
       }, parseInt(timeoutMs));
     }
 
-    const supportedAuthMethods = await capsule.supportedAuthMethods(userId, 'userId');
+    const supportedAuthMethods = await para.supportedAuthMethods({ userId });
 
     if (supportedAuthMethods.has(AuthMethod.PASSWORD)) {
       setTransactionReviewState(TransactionReviewState.PasswordLogin);
@@ -126,7 +126,7 @@ function TransactionReview() {
       while (retriesLeft > 0) {
         try {
           ({ pendingTransaction, partner, decodedTx, txData } = (
-            await capsule.ctx.capsuleClient.getPendingTransaction(userId, pendingTransactionId)
+            await para.ctx.client.getPendingTransaction(userId, pendingTransactionId)
           ).data);
 
           setPartner(partner);
@@ -138,7 +138,7 @@ function TransactionReview() {
           console.error(e);
 
           if (e.status === 401) {
-            await authLogin(capsule, { partnerId, userId });
+            await authLogin(para, { partnerId, userId });
           }
 
           setTransactionReviewState(TransactionReviewState.Error);
@@ -151,11 +151,11 @@ function TransactionReview() {
         }
       }
 
-      await capsule.userSetupAfterLogin();
-      await capsule.setupAfterLogin();
+      await para.userSetupAfterLogin();
+      await para.setupAfterLogin();
 
       const walletId = pendingTransaction.walletId;
-      let { wallets } = (await capsule.ctx.capsuleClient.getWallets(userId)).data;
+      let { wallets } = (await para.ctx.client.getWallets(userId)).data;
       const wallet = wallets.find(w => w.id === walletId);
       setWallet(wallet);
 
@@ -176,22 +176,22 @@ function TransactionReview() {
   }
 
   const loginWithPassword = async (password: string) => {
-    const res = await capsule.touchSession();
+    const res = await para.touchSession();
     const partnerId = res.data.partnerId;
     try {
       setLoginWithPasswordError(undefined);
-      await capsule.touchSession();
-      await authLoginWithPassword(capsule, { password, partnerId, userId });
+      await para.touchSession();
+      await authLoginWithPassword(para, { password, partnerId, userId });
 
-      await capsule.userSetupAfterLogin();
-      await capsule.setupAfterLogin();
+      await para.userSetupAfterLogin();
+      await para.setupAfterLogin();
 
       const { pendingTransaction, partner, decodedTx, txData } = (
-        await capsule.ctx.capsuleClient.getPendingTransaction(userId, pendingTransactionId)
+        await para.ctx.client.getPendingTransaction(userId, pendingTransactionId)
       ).data;
 
       const walletId = pendingTransaction.walletId;
-      let { wallets } = (await capsule.ctx.capsuleClient.getWallets(userId)).data;
+      let { wallets } = (await para.ctx.client.getWallets(userId)).data;
       const wallet = wallets.find(w => w.id === walletId);
       setWallet(wallet);
 

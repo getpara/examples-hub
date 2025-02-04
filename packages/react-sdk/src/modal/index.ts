@@ -1,5 +1,5 @@
-export * from './CapsuleModal.js';
-export type { CapsuleModalProps, CapsuleModalHandle, CapsuleModalTheme } from './types/modalProps.js';
+export * from './ParaModal.js';
+export type { ParaModalProps, ParaModalHandle, ParaModalTheme } from './types/modalProps.js';
 export { ModalStep, type ModalStepProp } from './utils/steps.js';
 export { AuthLayout } from './types/modalProps.js';
 export * from './utils/openPopup.js';

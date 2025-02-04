@@ -1,4 +1,4 @@
-import { CpslCard, CpslText } from '@usecapsule/react-components';
+import { CpslCard, CpslText } from '@getpara/react-components';
 import { ResponsiveContainer } from 'recharts';
 import styled from 'styled-components';
 import { ReactElement } from 'react';

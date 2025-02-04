@@ -1,4 +1,4 @@
-import { CpslIcon, CpslInput, CpslRow, CpslSelect, CpslText, IconType } from '@usecapsule/react-components';
+import { CpslIcon, CpslInput, CpslRow, CpslSelect, CpslText, IconType } from '@getpara/react-components';
 import styled from 'styled-components';
 
 export function OptionDisplay({ name, icon, slot }: { name: string; icon: IconType; slot?: string }) {

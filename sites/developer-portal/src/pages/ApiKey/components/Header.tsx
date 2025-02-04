@@ -1,4 +1,4 @@
-import { CpslButton, CpslIcon } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon } from '@getpara/react-components';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';

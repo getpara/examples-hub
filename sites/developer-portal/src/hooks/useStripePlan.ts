@@ -33,7 +33,7 @@ export const useStripePlan = () => {
             triggerToast({
               variant: 'error',
               title: 'Failed to Create Stripe Customer Portal',
-              body: 'Please try again. If the problem persists, contact Capsule support.',
+              body: 'Please try again. If the problem persists, contact Para support.',
             });
           }
         },
@@ -42,7 +42,7 @@ export const useStripePlan = () => {
           triggerToast({
             variant: 'error',
             title: 'Failed to Create Stripe Customer Portal',
-            body: 'Please try again. If the problem persists, contact Capsule support.',
+            body: 'Please try again. If the problem persists, contact Para support.',
           });
         },
       },
@@ -67,7 +67,7 @@ export const useStripePlan = () => {
               triggerToast({
                 variant: 'error',
                 title: 'Failed to Create Stripe Checkout',
-                body: 'Please try again. If the problem persists, contact Capsule support.',
+                body: 'Please try again. If the problem persists, contact Para support.',
               });
             }
           },
@@ -76,7 +76,7 @@ export const useStripePlan = () => {
             triggerToast({
               variant: 'error',
               title: 'Failed to Create Stripe Checkout',
-              body: 'Please try again. If the problem persists, contact Capsule support.',
+              body: 'Please try again. If the problem persists, contact Para support.',
             });
           },
         },

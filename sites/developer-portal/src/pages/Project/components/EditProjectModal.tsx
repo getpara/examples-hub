@@ -1,11 +1,11 @@
-import { CpslButton, CpslInput, CpslSelect, CpslSelectItem, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslInput, CpslSelect, CpslSelectItem, CpslText } from '@getpara/react-components';
 import styled from 'styled-components';
 import { Modal } from '../../../components/Modal/Modal';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { triggerToast } from '../../../utils/toasts';
 import { Framework } from '../../../types/framework';
 import { PackageManager } from '../../../types/packageManager';
-import { CpslSelectCustomEvent } from '@usecapsule/core-components';
+import { CpslSelectCustomEvent } from '@getpara/core-components';
 import { useUpdateProject } from '../../../hooks/api/mutations/useUpdateProject';
 import { useParams } from 'react-router-dom';
 import { useGetProject } from '../../../hooks/api/queries/useProjects';
@@ -67,7 +67,7 @@ export const EditProjectModal = ({ open, onClose }: EditProjectModalProps) => {
           triggerToast({
             variant: 'error',
             title: 'Failed to Update Project',
-            body: 'Please try again. If the problem persists, contact Capsule support.',
+            body: 'Please try again. If the problem persists, contact Para support.',
           });
         },
       },

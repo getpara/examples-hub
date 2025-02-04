@@ -1,8 +1,8 @@
-import { OnRampConfig } from '@usecapsule/web-sdk';
+import { OnRampConfig } from '@getpara/web-sdk';
 import { useState } from 'react';
 import { ON_RAMP_PROVIDERS, OnRampProviderConfig } from '../../constants/constants.js';
 import styled from 'styled-components';
-import { CpslButton, CpslIcon, CpslSpinner, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon, CpslSpinner, CpslText } from '@getpara/react-components';
 import { motion } from 'framer-motion';
 
 interface OnRampButtonProps {

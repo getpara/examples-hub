@@ -1,4 +1,4 @@
-import { CpslIcon, CpslInfoBox, CpslText } from '@usecapsule/react-components';
+import { CpslIcon, CpslInfoBox, CpslText } from '@getpara/react-components';
 import { InfoBoxContent, InfoBoxHeader, StepContainer } from '../common.js';
 import { useEffect, useRef, useState } from 'react';
 import { Waiting } from '../Waiting/Waiting.js';

@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useCapsule } from '../../components/CapsuleContext';
-import { CpslButton, CpslIcon } from '@usecapsule/react-components';
+import { usePara } from '../../components/ParaContext';
+import { CpslButton, CpslIcon } from '@getpara/react-components';
 import styled from 'styled-components';
-import { TelegramAuthResponse } from '@usecapsule/user-management-client';
-import { Environment } from '@usecapsule/web-sdk';
+import { TelegramAuthResponse } from '@getpara/user-management-client';
+import { Environment } from '@getpara/web-sdk';
 
 interface Options {
   bot_id: string;
@@ -24,12 +24,12 @@ declare global {
 }
 
 export function TelegramLogin() {
-  const capsule = useCapsule();
+  const para = usePara();
   const [isWaiting, setIsWaiting] = useState(false);
   const [isSecondAttempt, setIsSecondAttempt] = useState(false);
 
   const botId = (() => {
-    switch (capsule.ctx.env) {
+    switch (para.ctx.env) {
       case Environment.PROD:
         return '7643995807';
       case Environment.BETA:

@@ -1,4 +1,4 @@
-import Capsule from '@usecapsule/web-sdk';
+import Para from '@getpara/web-sdk';
 import axios from 'axios';
 
 export async function fetchChainData(chainId: number) {
@@ -9,8 +9,8 @@ export async function fetchChainData(chainId: number) {
   return res.data;
 }
 
-export async function fetchConversionRate(capsule: Capsule, chainId: string, symbol: string) {
-  const res = await capsule.ctx.capsuleClient.getConversionRate(chainId, symbol, 'USD');
+export async function fetchConversionRate(para: Para, chainId: string, symbol: string) {
+  const res = await para.ctx.client.getConversionRate(chainId, symbol, 'USD');
 
   return res.conversionRate;
 }

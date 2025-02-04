@@ -1,7 +1,7 @@
 import { Heading, HeroIcon, InnerStepContainer, StepContainer } from '../common.js';
 import { useModalStore, useThemeStore } from '../../stores/index.js';
 import { useMemo } from 'react';
-import { CpslButton, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslText } from '@getpara/react-components';
 import { getAddFundsStep } from '../../utils/steps.js';
 
 interface AddFundsDoneProps {

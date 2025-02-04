@@ -1,14 +1,10 @@
-import CapsuleWeb, { CapsuleModal } from '@usecapsule/react-sdk';
-import { CapsuleModalPropsForInit } from './CapsuleEIP1193Provider.js';
+import ParaWeb, { ParaModal } from '@getpara/react-sdk';
+import { ParaModalPropsForInit } from './ParaEIP1193Provider.js';
 
-export function renderModal(
-  capsule: CapsuleWeb,
-  modalProps: Partial<CapsuleModalPropsForInit>,
-  onCloseArg: () => void,
-): void {
-  const existingContainer = document.getElementById('capsule-modal');
+export function renderModal(para: ParaWeb, modalProps: Partial<ParaModalPropsForInit>, onCloseArg: () => void): void {
+  const existingContainer = document.getElementById('para-modal');
   const container = existingContainer ?? document.createElement('div');
-  container.id = 'capsule-modal';
+  container.id = 'para-modal';
 
   if (!existingContainer) {
     document.body.appendChild(container); // Add the container to the DOM
@@ -21,7 +17,7 @@ export function renderModal(
   };
 
   const render = async (isOpen: boolean) => {
-    const Modal = <CapsuleModal {...modalProps} onClose={onClose} capsule={capsule} isOpen={isOpen} />;
+    const Modal = <ParaModal {...modalProps} onClose={onClose} para={para} isOpen={isOpen} />;
 
     try {
       const client = await import('react-dom/client');

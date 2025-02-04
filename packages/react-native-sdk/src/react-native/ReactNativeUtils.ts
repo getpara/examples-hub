@@ -1,15 +1,15 @@
 // Copyright (c) Capsule Labs Inc. All rights reserved.
 
-import { PlatformUtils, TPregenIdentifierType } from '@usecapsule/web-sdk';
-import { Ctx } from '@usecapsule/web-sdk';
-import { SignatureRes } from '@usecapsule/web-sdk';
-import { BackupKitEmailProps, KeyShareType, WalletScheme, WalletType } from '@usecapsule/user-management-client';
+import { PlatformUtils, TPregenIdentifierType } from '@getpara/web-sdk';
+import { Ctx } from '@getpara/web-sdk';
+import { SignatureRes } from '@getpara/web-sdk';
+import { BackupKitEmailProps, KeyShareType, WalletScheme, WalletType } from '@getpara/user-management-client';
 import { NativeModules } from 'react-native';
 
 import { AsyncStorage } from '../AsyncStorage.js';
 import { KeychainStorage } from '../KeychainStorage.js';
 
-const { CapsuleSignerModule } = NativeModules;
+const { ParaSignerModule } = NativeModules;
 
 async function keygenRequest(ctx: Ctx, userId: string, walletId: string, protocolId: string): Promise<{ signer: string }> {
   const { data } = await ctx.mpcComputationClient!.post('/wallets', {
@@ -76,7 +76,7 @@ export class ReactNativeUtils implements PlatformUtils {
     _sessionCookie: string,
     _emailProps?: BackupKitEmailProps | undefined,
   ): Promise<{ signer: string; walletId: string }> {
-    const { walletId, protocolId } = await ctx.capsuleClient.createWallet(userId, {
+    const { walletId, protocolId } = await ctx.client.createWallet(userId, {
       type,
       useTwoSigners: true,
       scheme: ctx.useDKLS ? WalletScheme.DKLS : WalletScheme.CGGMP,
@@ -87,7 +87,7 @@ export class ReactNativeUtils implements PlatformUtils {
       return { signer, walletId };
     }
 
-    const createAccountFn = !ctx.useDKLS ? CapsuleSignerModule.createAccount : CapsuleSignerModule.dklsCreateAccount;
+    const createAccountFn = !ctx.useDKLS ? ParaSignerModule.createAccount : ParaSignerModule.dklsCreateAccount;
     const signer = await createAccountFn(walletId, protocolId, KeyShareType.USER, userId);
     return { signer, walletId };
   }
@@ -140,7 +140,7 @@ export class ReactNativeUtils implements PlatformUtils {
       return { signature };
     }
 
-    const sendTransactionFn = isDKLS ? CapsuleSignerModule.dklsSendTransaction : CapsuleSignerModule.sendTransaction;
+    const sendTransactionFn = isDKLS ? ParaSignerModule.dklsSendTransaction : ParaSignerModule.sendTransaction;
     const signature = await sendTransactionFn(protocolId, share, rlpEncodedTxBase64, userId);
     return { signature: signature.slice(2) };
   }
@@ -156,7 +156,7 @@ export class ReactNativeUtils implements PlatformUtils {
     isDKLS?: boolean,
   ): Promise<SignatureRes> {
     const { protocolId } = (
-      await ctx.capsuleClient.sendTransaction(userId, walletId, {
+      await ctx.client.sendTransaction(userId, walletId, {
         transaction: rlpEncodedTxBase64,
         chainId,
       })
@@ -177,14 +177,14 @@ export class ReactNativeUtils implements PlatformUtils {
     _sessionCookie: string,
     isDKLS?: boolean,
   ): Promise<SignatureRes> {
-    const res = await ctx.capsuleClient.preSignMessage(userId, walletId, messageBase64);
+    const res = await ctx.client.preSignMessage(userId, walletId, messageBase64);
 
     if (ctx.mpcComputationClient && !isDKLS) {
       const signature = (await signMessageRequest(ctx, userId, walletId, res.protocolId, messageBase64, share)).signature;
       return { signature };
     }
 
-    const signMessageFn = isDKLS ? CapsuleSignerModule.dklsSignMessage : CapsuleSignerModule.signMessage;
+    const signMessageFn = isDKLS ? ParaSignerModule.dklsSignMessage : ParaSignerModule.signMessage;
     const signature = await signMessageFn(res.protocolId, share, messageBase64, userId);
 
     if (signature.startsWith('0x')) {
@@ -204,7 +204,7 @@ export class ReactNativeUtils implements PlatformUtils {
     isDKLS?: boolean,
   ): Promise<SignatureRes> {
     const { protocolId } = (
-      await ctx.capsuleClient.signTransaction(userId, walletId, {
+      await ctx.client.signTransaction(userId, walletId, {
         transaction: rlpEncodedTxBase64,
         chainId,
       })
@@ -221,12 +221,12 @@ export class ReactNativeUtils implements PlatformUtils {
     signer: string;
     walletId: string;
   }> {
-    const { walletId, protocolId } = await ctx.capsuleClient.createWallet(userId, {
+    const { walletId, protocolId } = await ctx.client.createWallet(userId, {
       scheme: WalletScheme.ED25519,
       type: WalletType.SOLANA,
     });
 
-    const signer = await CapsuleSignerModule.ed25519CreateAccount(walletId, protocolId);
+    const signer = await ParaSignerModule.ed25519CreateAccount(walletId, protocolId);
     return { signer, walletId };
   }
 
@@ -239,14 +239,14 @@ export class ReactNativeUtils implements PlatformUtils {
     signer: string;
     walletId: string;
   }> {
-    const { walletId, protocolId } = await ctx.capsuleClient.createWalletPreGen({
+    const { walletId, protocolId } = await ctx.client.createPregenWallet({
       pregenIdentifier,
       pregenIdentifierType,
       scheme: WalletScheme.ED25519,
       type: WalletType.SOLANA,
     });
 
-    const signer = await CapsuleSignerModule.ed25519CreateAccount(walletId, protocolId);
+    const signer = await ParaSignerModule.ed25519CreateAccount(walletId, protocolId);
     return { signer, walletId };
   }
 
@@ -258,9 +258,9 @@ export class ReactNativeUtils implements PlatformUtils {
     base64Bytes: string,
     _sessionCookie: string,
   ): Promise<SignatureRes> {
-    const { protocolId } = await ctx.capsuleClient.preSignMessage(userId, walletId, base64Bytes, WalletScheme.ED25519);
+    const { protocolId } = await ctx.client.preSignMessage(userId, walletId, base64Bytes, WalletScheme.ED25519);
 
-    const base64Sig = await CapsuleSignerModule.ed25519Sign(protocolId, share, base64Bytes);
+    const base64Sig = await ParaSignerModule.ed25519Sign(protocolId, share, base64Bytes);
     return { signature: base64Sig };
   }
 }

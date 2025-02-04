@@ -1,19 +1,18 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Button } from './StyledButton';
-import { CpslIcon } from '@usecapsule/react-components';
+import { CpslIcon } from '@getpara/react-components';
 import { Text } from './StyledText';
-import { CapsuleLogo } from '../../assets';
 
 export const NavBar: React.FC = () => {
   return (
     <NavWrapper>
-      <Logo src={CapsuleLogo} alt="Capsule Logo" />
+      <Logo icon="para" />
       <NavButtons>
         <GradientButton>
           <StyledButton
             variant="secondary"
-            onClick={() => window.open('https://usecapsule.com/talk-to-us', '_blank')}
+            onClick={() => window.open('https://getpara.com/talk-to-us', '_blank')}
             size="small"
           >
             <Text variant="bodyS" weight="medium" color="primary">
@@ -22,7 +21,7 @@ export const NavBar: React.FC = () => {
             </Text>
           </StyledButton>
         </GradientButton>
-        <Button variant="secondary" onClick={() => window.open('https://developer.usecapsule.com/', '_blank')} size="small">
+        <Button variant="secondary" onClick={() => window.open('https://developer.getpara.com/', '_blank')} size="small">
           <ButtonContent>
             <Text variant="bodyS" weight="medium" color="primary">
               Developer Portal
@@ -45,8 +44,9 @@ const NavWrapper = styled.nav`
   position: relative;
 `;
 
-const Logo = styled.img`
-  height: 2rem;
+const Logo = styled(CpslIcon)`
+  --height: 2rem;
+  --width: auto;
 `;
 
 const NavButtons = styled.div`

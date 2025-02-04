@@ -1,4 +1,4 @@
-import { CpslButton, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslText } from '@getpara/react-components';
 import { Modal } from '../../../components/Modal/Modal';
 import { triggerToast } from '../../../utils/toasts';
 import { useUpgradeSubscription } from '../../../hooks/api/mutations/useUpgradeSubscription';
@@ -31,7 +31,7 @@ export const UpgradeModal = ({ open, planSlug, onClose }: UpgradeModalProps) => 
           triggerToast({
             variant: 'error',
             title: 'Failed to Upgrade Subscription',
-            body: 'Please try again. If the problem persists, contact Capsule support.',
+            body: 'Please try again. If the problem persists, contact Para support.',
           });
         },
       },

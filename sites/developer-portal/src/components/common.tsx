@@ -1,4 +1,4 @@
-import { CpslButton, CpslCard, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslCard, CpslText } from '@getpara/react-components';
 import styled, { css } from 'styled-components';
 import { BRAND_COLORS, MOBILE_SIZE } from '../utils/constants';
 import { Environment } from '../types/environment';

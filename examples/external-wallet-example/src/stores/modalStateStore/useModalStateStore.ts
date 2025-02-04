@@ -1,4 +1,4 @@
-import { OAuthMethod, ExternalWallet, AuthLayout } from '@usecapsule/react-sdk';
+import { OAuthMethod, ExternalWallet, AuthLayout } from '@getpara/react-sdk';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
@@ -45,7 +45,7 @@ export const useModalStateStore = create<ModalStateStore>()(
     }),
     {
       version: 2,
-      name: '@CAPSULE_EXAMPLE_APP/modalState',
+      name: '@PARA_EXAMPLE_APP/modalState',
       storage: createJSONStorage(() => sessionStorage),
       partialize: state => ({
         oAuthMethods: state.oAuthMethods,

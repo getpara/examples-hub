@@ -1,4 +1,4 @@
-import { isAndroid, isMobile, isTelegram } from '@usecapsule/web-sdk';
+import { isAndroid, isMobile, isTelegram } from '@getpara/web-sdk';
 
 export const routeMobileExternalWallet = (qrUri?: string) => {
   if (isMobile()) {

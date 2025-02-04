@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { CpslSpinner } from '@usecapsule/react-components';
+import { CpslSpinner } from '@getpara/react-components';
 import { useSetSelectedOrganizationWithNavigation } from '../../../hooks/useSetSelectedOrganizationWithNavigation';
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';

@@ -1,6 +1,6 @@
 import { vi, describe, it, expect, afterEach, beforeEach } from 'vitest';
 
-import { Environment } from '@usecapsule/core-sdk';
+import { Environment } from '@getpara/core-sdk';
 import {
   BASE64_BYTES,
   CHAIN,

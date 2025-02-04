@@ -1,11 +1,12 @@
-import { AuthMethod, OAuthMethod } from '@usecapsule/web-sdk';
-import { useCapsuleStore, useModalStore, useThemeStore, useUserInfoStore } from '../../stores/index.js';
+import { AuthMethod, OAuthMethod } from '@getpara/web-sdk';
+import { useModalStore, useThemeStore, useUserInfoStore } from '../../stores/index.js';
 import styled from 'styled-components';
 import { useEffect, useRef, useState } from 'react';
-import { HeroSpinner } from '@usecapsule/react-common';
+import { HeroSpinner } from '@getpara/react-common';
 import { ModalStep } from '../../utils/steps.js';
-import { TelegramAuthResponse } from '@usecapsule/user-management-client';
-import { CpslSpinner } from '@usecapsule/react-components';
+import { TelegramAuthResponse } from '@getpara/user-management-client';
+import { CpslSpinner } from '@getpara/react-components';
+import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 
 type EventType = 'TELEGRAM_LOGIN' | 'TELEGRAM_SUCCESS' | 'TELEGRAM_FAILED';
 
@@ -16,7 +17,7 @@ type Event = {
 
 export function TelegramOAuthStep() {
   const iframe = useRef<HTMLIFrameElement>();
-  const capsule = useCapsuleStore(state => state.capsule);
+  const para = useInternalClient();
   const setFlow = useModalStore(state => state.setFlow);
   const setStep = useModalStore(state => state.setStep);
   const setAuthInfo = useUserInfoStore(state => state.setAuthInfo);
@@ -45,7 +46,7 @@ export function TelegramOAuthStep() {
 
   useEffect(() => {
     if (!url) {
-      capsule.getOAuthURL(OAuthMethod.TELEGRAM).then(url => {
+      para.getOAuthURL({ method: OAuthMethod.TELEGRAM }).then(url => {
         setUrl(url);
       });
     }
@@ -65,7 +66,7 @@ export function TelegramOAuthStep() {
         case 'TELEGRAM_SUCCESS':
           if (!!event.data.payload) {
             const authObject = event.data.payload;
-            const result = await capsule.verifyTelegram(authObject);
+            const result = await para.verifyTelegram(authObject);
 
             if (!result.isValid) {
               setIsWaiting(false);
@@ -89,7 +90,7 @@ export function TelegramOAuthStep() {
             });
 
             if (isNewUser) {
-              const supportedCreateAuthMethods = await capsule.getSupportedCreateAuthMethods();
+              const supportedCreateAuthMethods = await para.getSupportedCreateAuthMethods();
 
               setIsIFrameReady(false);
               setFlow('signUp');
@@ -97,12 +98,12 @@ export function TelegramOAuthStep() {
 
               if (supportsPasskey) {
                 setWebAuthURLForCreate(
-                  await capsule.shortenLoginLink(await capsule.getSetUpBiometricsURL(false, 'telegram')),
+                  await para.shortenLoginLink(await para.getSetUpBiometricsURL({ authType: 'telegram' })),
                 );
                 setStep(ModalStep.BIOMETRIC_CREATION);
               }
               if (supportedCreateAuthMethods.has(AuthMethod.PASSWORD)) {
-                setIFrameUrl(await capsule.shortenLoginLink(await capsule.getSetupPasswordURL(false, 'telegram', theme)));
+                setIFrameUrl(await para.shortenLoginLink(await para.getSetupPasswordURL({ authType: 'telegram', theme })));
                 setShouldRouteToStep(supportsPasskey ? ModalStep.BIOMETRIC_CREATION : ModalStep.PASSWORD_CREATION);
               }
             } else {

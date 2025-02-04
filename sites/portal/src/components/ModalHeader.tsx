@@ -1,6 +1,6 @@
 import { styled } from 'styled-components';
-import { CapsuleBlack, CapsuleWhite } from './Icons';
 import { useModalOutletContext } from '../hooks/useModalOutletContext';
+import { CpslIcon } from '@getpara/react-components';
 
 export const ModalHeader = () => {
   const { partner, isDark } = useModalOutletContext();
@@ -11,7 +11,7 @@ export const ModalHeader = () => {
         {partner.portalHeaderLogoUrl ? (
           <Logo src={partner.portalHeaderLogoUrl} alt={`${partner.displayName ? `${partner.displayName} -` : ''}logo`} />
         ) : (
-          <LogoSvg>{isDark ? <CapsuleWhite /> : <CapsuleBlack />}</LogoSvg>
+          <ParaLogo icon="para" $isDark={isDark} />
         )}
       </InnerContainer>
     </Container>
@@ -39,11 +39,9 @@ const Logo = styled.img`
   box-sizing: content-box;
 `;
 
-const LogoSvg = styled.div`
-  height: 25px;
-  align-self: center;
+const ParaLogo = styled(CpslIcon)<{ $isDark: boolean }>`
+  --height: 25px;
+  --width: auto;
 
-  svg {
-    height: 25px;
-  }
+  --icon-color: ${({ $isDark }) => ($isDark ? 'white' : 'black')};
 `;

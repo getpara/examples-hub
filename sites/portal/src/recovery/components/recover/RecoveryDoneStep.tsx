@@ -1,6 +1,6 @@
 import { VStack, Spacer, Text, Button } from '@chakra-ui/react';
 import { useContext } from 'react';
-import { RecoveryStatus } from '@usecapsule/web-sdk';
+import { RecoveryStatus } from '@getpara/web-sdk';
 import { ModalStep } from '../../steps/attemptSteps';
 import { ModalStep as RecoveryModalStep } from '../../steps/recoverySteps';
 import StepContext from '../../contexts/StepContext';

@@ -1,4 +1,4 @@
-import { CpslSelect, CpslSelectItem } from '@usecapsule/react-components';
+import { CpslSelect, CpslSelectItem } from '@getpara/react-components';
 import { InnerConfigurationCard } from '../InnerConfigurationCard';
 import { Controller, useFormContext } from 'react-hook-form';
 import { UpdateApiKeyBranding } from '../../hooks/useBrandingConfigFormData';

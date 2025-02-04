@@ -1,5 +1,5 @@
 import { useModalStateStore } from '../../stores/modalStateStore/useModalStateStore';
-import { CpslInput, CpslSelect, CpslSelectItem, CpslText } from '@usecapsule/react-components';
+import { CpslInput, CpslSelect, CpslSelectItem, CpslText } from '@getpara/react-components';
 import { LabelContainer } from './ModalConfig';
 
 export const Theme = () => {

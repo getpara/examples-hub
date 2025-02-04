@@ -1,4 +1,4 @@
-import { CpslText } from '@usecapsule/react-components';
+import { CpslText } from '@getpara/react-components';
 import styled from 'styled-components';
 import { Environment } from '../../../types/environment';
 import { formatEnvName, getKeyColor } from '../../../utils/apiKey';

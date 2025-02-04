@@ -156,13 +156,13 @@ export const getFrameworkPackages = (framework: Framework) => {
     case Framework.REACT:
     case Framework.VITE:
     case Framework.NEXT: {
-      return '@usecapsule/react-sdk';
+      return '@getpara/react-sdk';
     }
     case Framework.REACT_NATIVE: {
-      return '@usecapsule/react-native-wallet @usecapsule/react-native-passkey @react-native-async-storage/async-storage  react-native-get-random-values react-native-inappbrowser-reborn react-native-keychain react-native-modpow react-native-quick-base64 react-native-quick-crypto react-native-webview react-native-webview-crypto node-libs-react-native node-forge readable-stream text-encoding';
+      return '@getpara/react-native-wallet @usecapsule/react-native-passkey @react-native-async-storage/async-storage  react-native-get-random-values react-native-inappbrowser-reborn react-native-keychain react-native-modpow react-native-quick-base64 react-native-quick-crypto react-native-webview react-native-webview-crypto node-libs-react-native node-forge readable-stream text-encoding';
     }
     case Framework.EXPO: {
-      return '@usecapsule/react-native-wallet @usecapsule/react-native-passkey @react-native-async-storage/async-storage  @craftzdog/react-native-buffer expo-crypto react-native-get-random-values react-native-inappbrowser-reborn react-native-keychain react-native-modpow react-native-quick-base64 react-native-quick-crypto react-native-webview react-native-webview-crypto node-libs-react-native node-forge readable-stream text-encoding';
+      return '@getpara/react-native-wallet @usecapsule/react-native-passkey @react-native-async-storage/async-storage  @craftzdog/react-native-buffer expo-crypto react-native-get-random-values react-native-inappbrowser-reborn react-native-keychain react-native-modpow react-native-quick-base64 react-native-quick-crypto react-native-webview react-native-webview-crypto node-libs-react-native node-forge readable-stream text-encoding';
     }
     case Framework.FLUTTER: {
       return 'flutter pub add capsule';
@@ -173,11 +173,11 @@ export const getFrameworkPackages = (framework: Framework) => {
     case Framework.NODE:
     case Framework.DENO:
     case Framework.BUN: {
-      return '@usecapsule/server-sdk';
+      return '@getpara/server-sdk';
     }
     case Framework.SVELTE:
     case Framework.VUE: {
-      return '@usecapsule/web-sdk';
+      return '@getpara/web-sdk';
     }
   }
 };

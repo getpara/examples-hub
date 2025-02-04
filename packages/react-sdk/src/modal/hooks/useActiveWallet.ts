@@ -1,11 +1,13 @@
 import { useMemo } from 'react';
-import { useCapsuleStore, useModalStore } from '../stores/index.js';
+import { useWalletState } from '../../provider/index.js';
+import { useInternalClient } from '../../provider/hooks/utils/useInternalClient.js';
 
+// TODO: remove this hook in favor of the useAccount hook once we force the use of the ParaProvider
 export function useActiveWallet() {
-  const capsule = useCapsuleStore(state => state.capsule);
-  const [activeWalletId, activeWalletType] = useModalStore(state => state.activeWallet);
+  const client = useInternalClient();
+  const { selectedWallet } = useWalletState();
 
   return useMemo(() => {
-    return capsule.findWallet(activeWalletId, activeWalletType, { forbidPregen: true });
-  }, [capsule, activeWalletId, activeWalletType]);
+    return client.findWallet(selectedWallet.id, selectedWallet.type, { forbidPregen: true });
+  }, [client, selectedWallet]);
 }

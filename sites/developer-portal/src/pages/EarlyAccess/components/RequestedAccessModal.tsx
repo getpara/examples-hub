@@ -1,4 +1,4 @@
-import { CpslButton } from '@usecapsule/react-components';
+import { CpslButton } from '@getpara/react-components';
 import { Modal } from '../../../components/Modal/Modal';
 
 interface RequestedAccessModalProps {

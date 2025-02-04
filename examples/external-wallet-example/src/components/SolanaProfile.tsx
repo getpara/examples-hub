@@ -1,4 +1,4 @@
-import { CpslButton, CpslInput, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslInput, CpslText } from '@getpara/react-components';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { ProfileInnerContainer, Card, OverflowText } from './common';
 import { useState } from 'react';

@@ -1,7 +1,7 @@
 import { styled } from 'styled-components';
 import { InnerContainer } from '../../../components/common';
-import { CpslButton, CpslText } from '@usecapsule/react-components';
-import { CenteredText } from '@usecapsule/react-common';
+import { CpslButton, CpslText } from '@getpara/react-components';
+import { CenteredText } from '@getpara/react-common';
 import { useCloseWindow } from '../../../hooks/useCloseWindow';
 
 interface SuccessFromKnownDeviceStepProps {

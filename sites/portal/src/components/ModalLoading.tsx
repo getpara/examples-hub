@@ -1,6 +1,6 @@
 import { styled } from 'styled-components';
 import { Heading, Subheading } from './common';
-import { CpslSpinner } from '@usecapsule/react-components';
+import { CpslSpinner } from '@getpara/react-components';
 
 interface ModalLoadingProps {
   heading?: string;

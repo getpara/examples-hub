@@ -1,4 +1,4 @@
-import { CpslButton, CpslIcon, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon, CpslText } from '@getpara/react-components';
 import { Modal } from '../../../components/Modal/Modal';
 import { useUpdateApiKey } from '../../../hooks/api/mutations/useUpdateApiKey';
 import { useParams } from 'react-router-dom';
@@ -36,14 +36,14 @@ export const EditKeyModal = ({ open, onClose }: EditKeyModalProps) => {
             triggerToast({
               variant: 'success',
               title: 'Key Rotated!',
-              body: 'Please ensure you update all Capsule instances with the new key.',
+              body: 'Please ensure you update all Para instances with the new key.',
             });
           },
           onError: () => {
             triggerToast({
               variant: 'error',
               title: 'Failed to Rotate Key',
-              body: 'Please try again. If the problem persists, contact Capsule support.',
+              body: 'Please try again. If the problem persists, contact Para support.',
             });
           },
         },
@@ -67,7 +67,7 @@ export const EditKeyModal = ({ open, onClose }: EditKeyModalProps) => {
             triggerToast({
               variant: 'error',
               title: 'Failed to Archive Key',
-              body: 'Please try again. If the problem persists, contact Capsule support.',
+              body: 'Please try again. If the problem persists, contact Para support.',
             });
           },
         },
@@ -91,7 +91,7 @@ export const EditKeyModal = ({ open, onClose }: EditKeyModalProps) => {
             triggerToast({
               variant: 'error',
               title: 'Failed to Update Key',
-              body: 'Please try again. If the problem persists, contact Capsule support.',
+              body: 'Please try again. If the problem persists, contact Para support.',
             });
           },
         },

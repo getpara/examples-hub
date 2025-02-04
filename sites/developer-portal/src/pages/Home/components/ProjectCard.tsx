@@ -1,4 +1,4 @@
-import { CpslCard, CpslIcon, CpslText } from '@usecapsule/react-components';
+import { CpslCard, CpslIcon, CpslText } from '@getpara/react-components';
 import { Project } from '../../../types/api';
 import styled from 'styled-components';
 import { useProjectTotalUsersCount } from '../../../hooks/api/queries/useProjectTotalUsersCount';

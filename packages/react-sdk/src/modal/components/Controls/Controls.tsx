@@ -1,11 +1,11 @@
-import { CpslIcon } from '@usecapsule/react-components';
+import { CpslIcon } from '@getpara/react-components';
 import { styled } from 'styled-components';
 import { useModalStore } from '../../stores/index.js';
 import { useThemeStore } from '../../stores/theme/useThemeStore.js';
 import { useGoBack } from '../../hooks/useGoBack.js';
 import { AccountSelect, ChainSelect } from './Selects.js';
 import { ModalStep } from '../../utils/steps.js';
-import { HeaderButton } from '@usecapsule/react-common';
+import { HeaderButton } from '@getpara/react-common';
 
 interface ControlsProps {
   onClose: () => void;

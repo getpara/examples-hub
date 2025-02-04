@@ -1,7 +1,7 @@
 import React, { FC, MouseEvent } from 'react';
 import styled from 'styled-components';
 import { Reorder, useDragControls } from 'framer-motion';
-import { CpslIcon } from '@usecapsule/react-components';
+import { CpslIcon } from '@getpara/react-components';
 import { Switch } from '../StyledSwitch';
 import { Text } from '../StyledText';
 

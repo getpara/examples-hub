@@ -1,4 +1,4 @@
-import { cosmoshub } from '@usecapsule/graz/chains';
+import { cosmoshub } from '@getpara/graz/chains';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
@@ -24,7 +24,7 @@ export const useCosmosStore = create<CosmosStore>()(
     }),
     {
       version: 2,
-      name: '@CAPSULE_EXAMPLE_APP/cosmosStore',
+      name: '@PARA_EXAMPLE_APP/cosmosStore',
       storage: createJSONStorage(() => sessionStorage),
       partialize: state => ({
         selectedChainId: state.selectedChainId,

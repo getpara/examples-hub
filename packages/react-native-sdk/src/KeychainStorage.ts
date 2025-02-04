@@ -1,6 +1,6 @@
 // Copyright (c) Capsule Labs Inc. All rights reserved.
 
-import { StorageUtils } from '@usecapsule/web-sdk';
+import { StorageUtils } from '@getpara/web-sdk';
 import Keychain from 'react-native-keychain';
 
 const USERNAME = '@CAPSULE';

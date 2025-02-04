@@ -3,10 +3,10 @@ import styled from 'styled-components';
 import { AccordionContent, AccordionItem, AccordionTrigger, Button, SegmentControl, SwitchItem, Text } from '../UI';
 import { useAtom } from 'jotai';
 import { securityConfigAtom } from '../../atoms';
-import { CpslIcon } from '@usecapsule/react-components';
+import { CpslIcon } from '@getpara/react-components';
 import { SegmentItem } from '../../types';
 
-const DEVELOPER_PORTAL_URL = 'https://developer.usecapsule.com';
+const DEVELOPER_PORTAL_URL = 'https://developer.getpara.com';
 const DEVELOPER_PORTAL_LABEL = 'Configure In Developer Portal';
 const SECTION_LABEL = 'Security';
 const SECTION_SECONDARY_TEXT = 'Control how your users protect their account.';

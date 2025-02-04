@@ -1,4 +1,4 @@
-import { CpslButton, CpslInput } from '@usecapsule/react-components';
+import { CpslButton, CpslInput } from '@getpara/react-components';
 import { Modal } from '../../../components/Modal/Modal';
 import { useDeleteUser } from '../../../hooks/api/mutations/useDeleteUser';
 import { triggerToast } from '../../../utils/toasts';
@@ -35,7 +35,7 @@ export const DeleteUserModal = ({ open, userEmail, userId, walletId, onClose, on
             triggerToast({
               variant: 'error',
               title: 'Failed to Delete Wallet',
-              body: 'Please try again. If the problem persists, contact Capsule support.',
+              body: 'Please try again. If the problem persists, contact Para support.',
             });
           },
         },
@@ -58,7 +58,7 @@ export const DeleteUserModal = ({ open, userEmail, userId, walletId, onClose, on
             triggerToast({
               variant: 'error',
               title: 'Failed to Delete User',
-              body: 'Please try again. If the problem persists, contact Capsule support.',
+              body: 'Please try again. If the problem persists, contact Para support.',
             });
           },
         },

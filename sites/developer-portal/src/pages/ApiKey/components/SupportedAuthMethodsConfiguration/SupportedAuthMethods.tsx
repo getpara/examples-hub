@@ -1,4 +1,4 @@
-import { CpslSwitch, CpslText } from '@usecapsule/react-components';
+import { CpslSwitch, CpslText } from '@getpara/react-components';
 import { InnerConfigurationCard } from '../InnerConfigurationCard';
 import { Controller } from 'react-hook-form';
 import { InlineText } from '../../../../components/common';

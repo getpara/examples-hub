@@ -1,4 +1,4 @@
-import { CpslButton, CpslIcon, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon, CpslText } from '@getpara/react-components';
 import styled from 'styled-components';
 
 type Variant = 'success' | 'error' | 'warning';

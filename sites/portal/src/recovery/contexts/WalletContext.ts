@@ -1,6 +1,6 @@
 import React from 'react';
 import emptyFunction from '../emptyFunction';
-import { Wallet } from '@usecapsule/web-sdk';
+import { Wallet } from '@getpara/web-sdk';
 
 interface WalletContextType {
   wallets: Pick<Wallet, 'address' | 'id'>[] | null;

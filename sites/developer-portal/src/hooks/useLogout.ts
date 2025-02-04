@@ -1,5 +1,5 @@
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { capsule } from '../clients/capsule';
+import { para } from '../clients/para';
 
 export const useLogout = () => {
   const [searchParams] = useSearchParams();
@@ -7,7 +7,7 @@ export const useLogout = () => {
   const navigate = useNavigate();
 
   const logout = async () => {
-    await capsule.logout();
+    await para.logout();
     searchParams.delete('invite');
     if (pathname !== '/') {
       navigate({ pathname: '/', search: searchParams.toString() }, { replace: true });

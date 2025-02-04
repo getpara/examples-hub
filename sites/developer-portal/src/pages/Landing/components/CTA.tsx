@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { GradientCTAButton } from '../../../components/GradientCTAButton/GradientCTAButton';
-import { CpslIcon, CpslText } from '@usecapsule/react-components';
+import { CpslIcon, CpslText } from '@getpara/react-components';
 import { ON_RAMP_DOCS_LINK } from '../../../utils/constants';
 
 export const CTA = () => {

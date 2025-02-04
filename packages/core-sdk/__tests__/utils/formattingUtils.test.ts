@@ -8,7 +8,7 @@ import {
   hexToUint8Array,
   truncateAddress,
 } from '../../src/utils/formattingUtils.js';
-import { WalletType } from '@usecapsule/user-management-client';
+import { WalletType } from '@getpara/user-management-client';
 
 const TEST_HEX_STRING = '74686520717569636b2062726f776e20666f78206a756d7073206f76657220746865206c617a7920646f67';
 const TEST_B64_STRING = 'dGhlIHF1aWNrIGJyb3duIGZveCBqdW1wcyBvdmVyIHRoZSBsYXp5IGRvZw==';

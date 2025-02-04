@@ -420,7 +420,7 @@ describe('Client', () => {
       expect(mocks.post).toBeCalledWith(`/users/${userId}/wallets`, body);
     });
 
-    it('createWalletPreGen', async () => {
+    it('createPregenWallet', async () => {
       const body = {
         type: WalletType.EVM,
         network: Network.ETHEREUM,
@@ -434,7 +434,7 @@ describe('Client', () => {
         pregenIdentifier: email,
       };
 
-      await client.createWalletPreGen(body as any);
+      await client.createPregenWallet(body as any);
 
       expect(mocks.post).toBeCalledWith(`/wallets/pregen`, body);
     });
@@ -690,8 +690,8 @@ describe('Client', () => {
       expect(mocks.get).toBeCalledWith(`/users/${userId}/temporary-shares?sessionLookupId=${sessionLookupId}`);
     });
 
-    it('getCapsuleShare', async () => {
-      await client.getCapsuleShare(userId, walletId);
+    it('getParaShare', async () => {
+      await client.getParaShare(userId, walletId);
 
       expect(mocks.get).toBeCalledWith(`/users/${userId}/wallets/${walletId}/capsule-share`);
     });
@@ -1000,11 +1000,11 @@ describe('Client', () => {
       });
     });
 
-    it('distributeCapsuleShare', async () => {
+    it('distributeParaShare', async () => {
       const useDKLS = true;
       const body = { homepageUrl: 'homepageUrl' };
 
-      await client.distributeCapsuleShare({ userId, walletId, useDKLS, ...body });
+      await client.distributeParaShare({ userId, walletId, useDKLS, ...body });
 
       expect(mocks.post).toBeCalledWith(`/users/${userId}/wallets/${walletId}/capsule-share/distribute`, {
         ...body,

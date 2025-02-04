@@ -1,4 +1,4 @@
-import { OAuthMethod, ExternalWallet, Network, OnRampProvider } from '@usecapsule/react-sdk';
+import { OAuthMethod, ExternalWallet, Network, OnRampProvider } from '@getpara/react-sdk';
 import { Network as CosmosNetwork } from '@delphi-labs/shuttle';
 import {
   MailIcon,
@@ -121,7 +121,7 @@ export const COSMOS_CHAINS: CosmosNetwork[] = [
 ];
 
 export const WALLET_CONNECT_PROJECT_ID: string = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
-export const CAPSULE_API_KEY: string = import.meta.env.VITE_CAPSULE_API_KEY;
+export const PARA_API_KEY: string = import.meta.env.VITE_CAPSULE_API_KEY;
 
 export const BORDER_RADIUS_OPTIONS: DropdownOption[] = [
   { label: 'None', value: 'none' },

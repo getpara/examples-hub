@@ -1,7 +1,7 @@
 // Copyright (c) Capsule Labs Inc. All rights reserved.
 
 import { NativeModules } from 'react-native';
-import { Environment } from '@usecapsule/web-sdk';
+import { Environment } from '@getpara/web-sdk';
 
 function getPortalBaseURL(env: Environment) {
   switch (env) {
@@ -23,11 +23,11 @@ function getBaseUrl(env: Environment): string {
     case Environment.DEV:
       return 'http://localhost:8080/';
     case Environment.SANDBOX:
-      return 'https://api.sandbox.usecapsule.com/';
+      return 'https://api.sandbox.getpara.com/';
     case Environment.BETA:
-      return 'https://api.beta.usecapsule.com/';
+      return 'https://api.beta.getpara.com/';
     case Environment.PROD:
-      return 'https://api.usecapsule.com/';
+      return 'https://api.getpara.com/';
     default:
       throw new Error(`unsupported env: ${env}`);
   }
@@ -38,11 +38,11 @@ export function getBaseMPCNetworkWSUrl(env: Environment): string {
     case Environment.DEV:
       return `ws://localhost:3000`;
     case Environment.SANDBOX:
-      return `wss://mpc-network.sandbox.usecapsule.com`;
+      return `wss://mpc-network.sandbox.getpara.com`;
     case Environment.BETA:
-      return `wss://mpc-network.beta.usecapsule.com`;
+      return `wss://mpc-network.beta.getpara.com`;
     case Environment.PROD:
-      return `wss://mpc-network.usecapsule.com`;
+      return `wss://mpc-network.getpara.com`;
     default:
       throw new Error(`unsupported env: ${env}`);
   }

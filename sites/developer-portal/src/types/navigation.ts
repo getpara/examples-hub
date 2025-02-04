@@ -1,4 +1,4 @@
-import { IconType } from '@usecapsule/core-components';
+import { IconType } from '@getpara/core-components';
 
 export type NavRoute = {
   path: string;

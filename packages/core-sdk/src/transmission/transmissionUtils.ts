@@ -2,7 +2,7 @@ import { randomBytes } from 'crypto';
 import { Encrypt as ECIESEncrypt, Decrypt as ECIESDecrypt } from '@celo/utils/lib/ecies.js';
 import { Buffer } from 'buffer';
 import * as eutil from 'ethereumjs-util';
-import Client from '@usecapsule/user-management-client';
+import Client from '@getpara/user-management-client';
 
 export async function upload(message: string, userManagementClient: Client) {
   let secret: string;

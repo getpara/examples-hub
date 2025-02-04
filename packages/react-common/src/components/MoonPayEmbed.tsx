@@ -1,4 +1,4 @@
-import { OnRampProvider, OnRampPurchaseStatus } from '@usecapsule/web-sdk';
+import { OnRampProvider, OnRampPurchaseStatus } from '@getpara/web-sdk';
 import { lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import { getCurrencyCodes, reverseCurrencyLookup, offRampSend } from '../utils/index.js';
 import styled from 'styled-components';
@@ -8,7 +8,7 @@ import type { MoonPayBuyWidget, MoonPaySellWidget } from '@moonpay/moonpay-react
 const MOONPAY_PUBLISHABLE_KEY = 'pk_live_EQva4LydtNDE0Rwd9X7SG9w58wqOzbux';
 const MOONPAY_PUBLISHABLE_KEY_TEST = 'pk_test_HYobzemmTBXxcSStVA4dSED6jT';
 
-export const MoonPayEmbed = ({ capsule, isDark, isEmbedded, onRampConfig, onRampPurchase, setOnRampPurchase }: Props) => {
+export const MoonPayEmbed = ({ para, isDark, isEmbedded, onRampConfig, onRampPurchase, setOnRampPurchase }: Props) => {
   const [LazyMoonPayBuyWidget, setLazyMoonPayBuyWidget] = useState<React.FC<Parameters<typeof MoonPayBuyWidget>[0]>>(null);
   const [LazyMoonPaySellWidget, setLazyMoonPaySellWidget] =
     useState<React.FC<Parameters<typeof MoonPaySellWidget>[0]>>(null);
@@ -34,13 +34,13 @@ export const MoonPayEmbed = ({ capsule, isDark, isEmbedded, onRampConfig, onRamp
 
   const onUrlSignatureRequested = useCallback(
     async (url: string): Promise<string> => {
-      if (!capsule.getUserId() || !onRampPurchase.walletType) {
+      if (!para.getUserId() || !onRampPurchase.walletType) {
         throw new Error('missing required fields');
       }
-      const res = await capsule.ctx.capsuleClient.signMoonPayUrl(capsule.getUserId()!, {
+      const res = await para.ctx.client.signMoonPayUrl(para.getUserId()!, {
         url,
         type: onRampPurchase.walletType,
-        cosmosPrefix: capsule.cosmosPrefix,
+        cosmosPrefix: para.cosmosPrefix,
         testMode: onRampPurchase.testMode,
         walletId: onRampPurchase.walletId || undefined,
         externalWalletAddress: onRampPurchase.externalWalletAddress || undefined,
@@ -48,7 +48,7 @@ export const MoonPayEmbed = ({ capsule, isDark, isEmbedded, onRampConfig, onRamp
 
       return res.data.signature;
     },
-    [onRampPurchase.walletId, onRampPurchase.walletType, capsule.cosmosPrefix, onRampPurchase.testMode, capsule],
+    [onRampPurchase.walletId, onRampPurchase.walletType, para.cosmosPrefix, onRampPurchase.testMode, para],
   );
 
   const { currencyCodes, defaultCurrencyCode } = useMemo(
@@ -69,8 +69,8 @@ export const MoonPayEmbed = ({ capsule, isDark, isEmbedded, onRampConfig, onRamp
           OnRampProvider.MOONPAY,
           payload.quoteCurrency.code,
         );
-        const updated = await capsule.ctx.capsuleClient.updateOnRampPurchase({
-          userId: capsule.getUserId(),
+        const updated = await para.ctx.client.updateOnRampPurchase({
+          userId: para.getUserId(),
           walletId: onRampPurchase.walletId,
           purchaseId: onRampPurchase.id,
           externalWalletAddress: onRampPurchase.externalWalletAddress,
@@ -99,7 +99,7 @@ export const MoonPayEmbed = ({ capsule, isDark, isEmbedded, onRampConfig, onRamp
 
   const onInitiateDeposit = useCallback<Parameters<typeof MoonPaySellWidget>[0]['onInitiateDeposit']>(
     async payload => {
-      const txHash = await offRampSend(capsule, onRampPurchase, setOnRampPurchase, {
+      const txHash = await offRampSend(para, onRampPurchase, setOnRampPurchase, {
         assetQuantity: payload.cryptoCurrencyAmount,
         fiatQuantity: payload.fiatCurrencyAmount || undefined,
         fiat: payload.fiatCurrency.code.toUpperCase(),
@@ -111,7 +111,7 @@ export const MoonPayEmbed = ({ capsule, isDark, isEmbedded, onRampConfig, onRamp
       return { depositId: txHash, cancelTransactionOnError: false };
     },
     [
-      capsule,
+      para,
       onRampPurchase.id,
       onRampPurchase.testMode,
       onRampPurchase.walletId,

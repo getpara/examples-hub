@@ -1,5 +1,5 @@
-import type { Ctx, SignatureRes, PlatformUtils, TPregenIdentifierType, WalletType } from '@usecapsule/core-sdk';
-import { BackupKitEmailProps } from '@usecapsule/user-management-client';
+import type { Ctx, SignatureRes, PlatformUtils, TPregenIdentifierType, WalletType } from '@getpara/core-sdk';
+import { BackupKitEmailProps } from '@getpara/user-management-client';
 import { ServerLocalStorage } from './ServerLocalStorage.js';
 import { ServerSessionStorage } from './ServerSessionStorage.js';
 import { keygen, preKeygen, ed25519Keygen, ed25519PreKeygen } from './wallet/keygen.js';

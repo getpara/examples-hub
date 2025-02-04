@@ -1,9 +1,9 @@
-import { CpslButton, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslText } from '@getpara/react-components';
 import { useModalStore, useThemeStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { Heading, InnerStepContainer, StepContainer, StyledCpslTileButton } from '../common.js';
 import { styled } from 'styled-components';
-import { useCopyToClipboard } from '@usecapsule/react-common';
+import { useCopyToClipboard } from '@getpara/react-common';
 import { getMailtoLink } from '../../utils/getMailtoLink.js';
 import { useState } from 'react';
 

@@ -1,13 +1,15 @@
 import styled from 'styled-components';
-import { useCapsuleStore, useModalStore, useThemeStore } from '../../stores/index.js';
-import { CpslButton, CpslIdenticon, CpslText } from '@usecapsule/react-components';
-import { truncateAddress, WalletType } from '@usecapsule/web-sdk';
+import { useModalStore, useThemeStore } from '../../stores/index.js';
+import { CpslButton, CpslIdenticon, CpslText } from '@getpara/react-components';
+import { truncateAddress, WalletType } from '@getpara/web-sdk';
 import { ModalStep } from '../../utils/steps.js';
+import { useWalletState } from '../../../provider/index.js';
+import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 
 export const ExternalWalletCard = ({ address, showAddFunds }: Pick<SharedWalletCardProps, 'address' | 'showAddFunds'>) => {
-  const capsule = useCapsuleStore(state => state.capsule);
+  const para = useInternalClient();
 
-  const wallet = capsule.externalWallets[address];
+  const wallet = para.externalWallets[address];
 
   if (!wallet) {
     return null;
@@ -16,7 +18,7 @@ export const ExternalWalletCard = ({ address, showAddFunds }: Pick<SharedWalletC
   return (
     <SharedWalletCard
       address={truncateAddress(wallet.address, wallet.type)}
-      identiconHash={capsule.getIdenticonHash(wallet.id, wallet.type)}
+      identiconHash={para.getIdenticonHash(wallet.id, wallet.type)}
       showAddFunds={showAddFunds}
     />
   );
@@ -29,24 +31,24 @@ interface WalletCardProps {
 }
 
 export const WalletCard = ({ id, type, showAddFunds }: WalletCardProps) => {
-  const capsule = useCapsuleStore(state => state.capsule);
+  const para = useInternalClient();
   const appName = useThemeStore(state => state.appName);
 
-  const wallet = capsule.findWallet(id, type);
+  const wallet = para.findWallet(id, type);
 
   if (!wallet) {
     return null;
   }
 
-  const address = capsule.getDisplayAddress(wallet.id, { addressType: type });
+  const address = para.getDisplayAddress(wallet.id, { addressType: type });
 
   return (
     <SharedWalletCard
       id={wallet.id}
       type={wallet.type}
-      address={truncateAddress(address, type, { prefix: capsule.cosmosPrefix })}
+      address={truncateAddress(address, type, { prefix: para.cosmosPrefix })}
       name={wallet.name ?? `${appName ? `${appName} ` : ''}Wallet`}
-      identiconHash={capsule.getIdenticonHash(wallet.id, type)}
+      identiconHash={para.getIdenticonHash(wallet.id, type)}
       showAddFunds={showAddFunds}
     />
   );
@@ -62,13 +64,13 @@ interface SharedWalletCardProps {
 }
 const SharedWalletCard = ({ address, name, identiconHash, showAddFunds, id, type }: SharedWalletCardProps) => {
   const onRampConfig = useModalStore(state => state.onRampConfig);
-  const setActiveWallet = useModalStore(state => state.setActiveWallet);
+  const { setSelectedWallet } = useWalletState();
   const setStep = useModalStore(state => state.setStep);
 
   const isAddFundsEnabled = onRampConfig.isBuyEnabled || onRampConfig.isReceiveEnabled;
   const handleAddFundsClick = () => {
     if (id && type) {
-      setActiveWallet([id, type]);
+      setSelectedWallet({ id, type });
       isAddFundsEnabled && setStep(onRampConfig.isBuyEnabled ? ModalStep.ADD_FUNDS_BUY : ModalStep.ADD_FUNDS_RECEIVE);
     }
   };

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { RampInstantPurchase, RampInstantSDK } from '@ramp-network/ramp-instant-sdk';
-import { Network, OnRampAsset, OnRampProvider, getPortalBaseURL } from '@usecapsule/web-sdk';
+import { Network, OnRampAsset, OnRampProvider, getPortalBaseURL } from '@getpara/web-sdk';
 import {
   getChainId,
   getContractAddressFromAsset,
@@ -13,7 +13,7 @@ import { Props } from '../types/index.js';
 const TEST_MODE_FORBIDDEN = ['ETH_ETH', 'ETH_USDC'];
 
 export const RampEmbed = ({
-  capsule,
+  para,
   appName,
   onRampConfig,
   onRampPurchase,
@@ -38,10 +38,10 @@ export const RampEmbed = ({
           swapAsset: currencyCodes.filter(code => !onRampPurchase.testMode || !TEST_MODE_FORBIDDEN.includes(code)).join(','),
           fiatValue: onRampPurchase.fiatQuantity,
           fiatCurrency: onRampPurchase.fiat,
-          hostLogoUrl: `${getPortalBaseURL(capsule.ctx)}/wordmark_black.svg`,
+          hostLogoUrl: `${getPortalBaseURL(para.ctx)}/wordmark_black.svg`,
           hostApiKey: apiKey,
           userAddress: onRampPurchase.address,
-          userEmailAddress: capsule.getEmail(),
+          userEmailAddress: para.getEmail(),
           url: onRampPurchase?.testMode ? 'https://app.demo.ramp.network' : 'https://app.ramp.network',
           enabledFlows: [onRampPurchase.type === 'BUY' ? 'ONRAMP' : 'OFFRAMP'],
           useSendCryptoCallback: true,
@@ -55,8 +55,8 @@ export const RampEmbed = ({
               ? [Network.ETHEREUM, OnRampAsset.ETHEREUM]
               : reverseCurrencyLookup(onRampConfig.assetInfo, OnRampProvider.RAMP, p.asset.symbol) || [];
 
-            const updated = await capsule.ctx.capsuleClient.updateOnRampPurchase({
-              userId: capsule.getUserId(),
+            const updated = await para.ctx.client.updateOnRampPurchase({
+              userId: para.getUserId(),
               walletId: onRampPurchase.walletId,
               externalWalletAddress: onRampPurchase.externalWalletAddress,
               purchaseId: onRampPurchase.id,
@@ -84,7 +84,7 @@ export const RampEmbed = ({
           .onSendCrypto(async (assetInfo, amount, address) => {
             try {
               const [network, asset] = reverseCurrencyLookup(onRampConfig.assetInfo, OnRampProvider.RAMP, assetInfo.symbol);
-              const txHash = await offRampSend(capsule, onRampPurchase, setOnRampPurchase, {
+              const txHash = await offRampSend(para, onRampPurchase, setOnRampPurchase, {
                 assetQuantity: amount,
                 destinationAddress: address,
                 contractAddress: getContractAddressFromAsset(network, asset),

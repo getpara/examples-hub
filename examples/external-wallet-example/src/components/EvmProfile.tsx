@@ -1,4 +1,4 @@
-import { CpslButton, CpslInput, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslInput, CpslText } from '@getpara/react-components';
 import { useEffect, useState } from 'react';
 import { useAccount, useSignMessage, useVerifyMessage } from 'wagmi';
 import { Card, OverflowText, ProfileInnerContainer } from './common';

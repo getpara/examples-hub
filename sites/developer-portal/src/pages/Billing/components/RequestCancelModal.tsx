@@ -1,4 +1,4 @@
-import { CpslButton, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslText } from '@getpara/react-components';
 import { Modal } from '../../../components/Modal/Modal';
 import { useCancelPlan } from '../../../hooks/api/mutations/useCancelPlan';
 import { triggerToast } from '../../../utils/toasts';
@@ -24,7 +24,7 @@ export const RequestCancelModal = ({ open, onClose }: RequestCancelModalProps) =
         triggerToast({
           variant: 'error',
           title: 'Failed to Send Cancel Request',
-          body: 'Please try again. If the problem persists, contact Capsule support.',
+          body: 'Please try again. If the problem persists, contact Para support.',
         });
       },
     });
@@ -41,7 +41,7 @@ export const RequestCancelModal = ({ open, onClose }: RequestCancelModalProps) =
       <>
         <CpslText color="secondary">
           We will notify you when your plan has been cancelled. This process typically takes 24hrs and you will no longer
-          have access to your Capsule instance.
+          have access to your Para instance.
         </CpslText>
         <CpslButton variant="destructive" fullWidth onClick={handleCancelClick}>
           Cancel Plan

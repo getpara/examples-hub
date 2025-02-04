@@ -1,5 +1,5 @@
 import { Flex, Spacer } from '@chakra-ui/react';
-import { CpslText } from '@usecapsule/react-components';
+import { CpslText } from '@getpara/react-components';
 
 export interface TransactionReviewFeeProps {
   estimatedFee: string;

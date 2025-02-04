@@ -1,10 +1,10 @@
 import { styled } from 'styled-components';
-import { CpslButton, CpslDivider, CpslIcon, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslDivider, CpslIcon, CpslText } from '@getpara/react-components';
 import { useEffect, useMemo, useRef } from 'react';
-import { BiometricLocationHint } from '@usecapsule/user-management-client';
-import { FlexStartInnerContainer, useCapsule } from '../../../components';
+import { BiometricLocationHint } from '@getpara/user-management-client';
+import { FlexStartInnerContainer, usePara } from '../../../components';
 import { KNOWN_DEVICE_LOGIN_POLLING_INTERVAL } from '../../../constants';
-import { formatBiometricHints, getBrowserName, KnownDevices } from '@usecapsule/react-common';
+import { formatBiometricHints, getBrowserName, KnownDevices } from '@getpara/react-common';
 
 interface LoginFailedStepProps {
   onLoginClick: () => void;
@@ -21,10 +21,10 @@ export const LoginFailedStep = ({
 }: LoginFailedStepProps) => {
   const loginTimeout = useRef<number>();
 
-  const capsule = useCapsule();
+  const para = usePara();
 
   const sessionListener = async (): Promise<void> => {
-    const touchRes = await capsule.touchSession();
+    const touchRes = await para.touchSession();
     const isAuthenticated = touchRes.data.isAuthenticated;
     const hasSetWallets = touchRes.data.currentWalletIds !== undefined;
     const needsWallet = touchRes.data.needsWallet !== undefined;

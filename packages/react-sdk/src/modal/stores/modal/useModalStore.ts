@@ -2,10 +2,10 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { ModalStep } from '../../utils/steps.js';
 import { getActions } from './actions.js';
-import { OnRampConfig as OnRampConfigBase, OnRampPurchase, WalletType } from '@usecapsule/web-sdk';
+import { OnRampConfig as OnRampConfigBase, OnRampPurchase, WalletType } from '@getpara/web-sdk';
 import { Tab as AddFundsTabType } from '../../components/AddFunds/AddFunds.js';
-import { AuthMethod } from '@usecapsule/core-sdk';
-import { BiometricLocationHint } from '@usecapsule/user-management-client';
+import { AuthMethod } from '@getpara/core-sdk';
+import { BiometricLocationHint } from '@getpara/user-management-client';
 
 type Flow = 'login' | 'signUp' | 'account';
 
@@ -66,7 +66,6 @@ export interface ModalActions {
   setIsExternalWalletConnecting: (isExternalWalletConnecting: boolean) => void;
   setExternalWalletError: (externalWalletError?: string[]) => void;
   setStepDirection: (stepDirection: 1 | -1) => void;
-  setActiveWallet: (_: ActiveWallet | undefined) => void;
   setFarcasterConnectUri: (_: string | undefined) => void;
   setBiometricLocationHints: (_?: BiometricLocationHint[]) => void;
   setIFrameUrl: (_?: string) => void;

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { STORAGE_PREFIX, Wallet } from '@usecapsule/web-sdk';
+import { STORAGE_PREFIX, Wallet } from '@getpara/web-sdk';
 
 const useWalletsState = (initialValue: Pick<Wallet, 'address' | 'id'>[] | null) => {
   const [state, setState] = useState<Pick<Wallet, 'address' | 'id'>[] | null>(() => {

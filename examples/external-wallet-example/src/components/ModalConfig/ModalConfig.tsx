@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { CpslCard, CpslIcon, CpslText } from '@usecapsule/react-components';
+import { CpslCard, CpslIcon, CpslText } from '@getpara/react-components';
 import { OAuthMethods } from './OAuthMethods';
 import { ExternalWallets } from './ExternalWallets';
 import { AuthLayouts } from './AuthLayouts';

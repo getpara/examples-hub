@@ -15,7 +15,7 @@ export const ProjectsTab = () => {
     triggerToast({
       variant: 'error',
       title: 'Error Loading Projects',
-      body: 'Please try to login again. If the problem persists, contact Capsule support.',
+      body: 'Please try to login again. If the problem persists, contact Para support.',
     });
   }
 

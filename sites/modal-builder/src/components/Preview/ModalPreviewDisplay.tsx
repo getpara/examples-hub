@@ -1,19 +1,19 @@
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
-import { CapsuleModal } from '@usecapsule/react-sdk';
-import '@usecapsule/react-sdk/styles.css';
+import { ParaModal } from '@getpara/react-sdk';
+import '@getpara/react-sdk/styles.css';
 import { PlaceHolderLogo } from '../../assets';
 
 import iPhoneImage from '../../assets/iphone.png';
 import { useAtom } from 'jotai';
-import { capsuleClientAtom, checkLoginStatusAtom, isLoggedInAtom, modalConfigAtom, viewAtom } from '../../atoms';
+import { paraAtom, checkLoginStatusAtom, isLoggedInAtom, modalConfigAtom, viewAtom } from '../../atoms';
 import { calculateBrightness } from '../../utils';
 
 interface ModalPreviewDisplayProps {}
 
 export const ModalPreviewDisplay: React.FC<ModalPreviewDisplayProps> = () => {
   const [modalConfig] = useAtom(modalConfigAtom);
-  const [capsuleClient] = useAtom(capsuleClientAtom);
+  const [para] = useAtom(paraAtom);
   const [view] = useAtom(viewAtom);
   const [, checkLoginStatus] = useAtom(checkLoginStatusAtom);
   const [isLoggedIn] = useAtom(isLoggedInAtom);
@@ -25,10 +25,10 @@ export const ModalPreviewDisplay: React.FC<ModalPreviewDisplayProps> = () => {
   return (
     <IPhoneOuterContainer $isMobile={view === 'mobile'}>
       <ModalContainer $isMobile={view === 'mobile'}>
-        <CapsuleModal
+        <ParaModal
           key={`modal-${view}-${isLoggedIn}`}
           bareModal
-          capsule={capsuleClient}
+          para={para}
           isOpen
           onClose={() => handleClose()}
           logo={modalConfig.appearance.logo || PlaceHolderLogo}

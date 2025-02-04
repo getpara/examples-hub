@@ -1,4 +1,4 @@
-import { CpslFileUpload, CpslText } from '@usecapsule/react-components';
+import { CpslFileUpload, CpslText } from '@getpara/react-components';
 import { ReactNode } from 'react';
 import styled from 'styled-components';
 

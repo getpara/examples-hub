@@ -1,4 +1,4 @@
-import Capsule, {
+import {
   createCredential,
   decryptWithPrivateKey,
   encryptWithDerivedPublicKey,
@@ -7,15 +7,10 @@ import Capsule, {
   getPublicKeyHex,
   encryptPrivateKey,
   getSHA256HashHex,
-} from '@usecapsule/web-sdk';
+} from '@getpara/web-sdk';
 import { ENV } from '../constants';
-import {
-  AuthParams,
-  EncryptorType,
-  extractAuthInfo,
-  KeyShareType,
-  PublicKeyStatus,
-} from '@usecapsule/user-management-client';
+import { AuthParams, EncryptorType, extractAuthInfo, KeyShareType, PublicKeyStatus } from '@getpara/user-management-client';
+import { ParaPortal } from '../classes/ParaPortal';
 
 export type AuthCreationParams = AuthParams & {
   biometricId: string;
@@ -25,20 +20,20 @@ export type AuthCreationParams = AuthParams & {
 };
 
 export async function authCreation(
-  capsule: Capsule,
+  para: ParaPortal,
   { biometricId, isForNewDevice, partnerId, userId, ...authParams }: AuthCreationParams,
 ): Promise<void> {
-  const { publicKeyIdentifier } = extractAuthInfo(authParams);
+  const { publicKeyIdentifier } = extractAuthInfo(authParams, { isRequired: true });
 
-  const { creds, userHandle, algorithm } = await createCredential(ENV, userId, publicKeyIdentifier, capsule.ctx.isE2E);
+  const { creds, userHandle, algorithm } = await createCredential(ENV, userId, publicKeyIdentifier, para.ctx.isE2E);
   const { cosePublicKey, clientDataJSON, aaguid } = parseCredentialCreationRes(creds, algorithm);
-  const keyPair = await getAsymmetricKeyPair(capsule.ctx);
+  const keyPair = await getAsymmetricKeyPair(para.ctx);
   const publicKeyHex = getPublicKeyHex(keyPair);
 
   const encryptionKeyHash = getSHA256HashHex(userHandle);
   const encryptedPrivateKeyHex = await encryptPrivateKey(keyPair, userHandle);
 
-  await capsule.ctx.capsuleClient.patchSessionPublicKey(partnerId, userId, biometricId, {
+  await para.ctx.client.patchSessionPublicKey(partnerId, userId, biometricId, {
     publicKey: creds.id,
     sigDerivedPublicKey: publicKeyHex,
     cosePublicKey,
@@ -47,22 +42,17 @@ export async function authCreation(
     aaguid,
   });
 
-  await capsule.ctx.capsuleClient.uploadEncryptedWalletPrivateKey(
-    userId,
-    encryptedPrivateKeyHex,
-    encryptionKeyHash,
-    creds.id,
-  );
+  await para.ctx.client.uploadEncryptedWalletPrivateKey(userId, encryptedPrivateKeyHex, encryptionKeyHash, creds.id);
 
   // this means we are adding additional biometrics to an existing account and need to encrypt
   // shares with new biometric
   // since we are redirecting to auth creation route from auth login route, the session initially
   // setup should still be available here
   if (isForNewDevice) {
-    const temporaryShares = (await capsule.getTransmissionKeyShares(true)).data.temporaryShares;
+    const temporaryShares = (await para.getTransmissionKeyShares({ isForNewDevice: true })).data.temporaryShares;
     const biometricEncryptedKeyshares = temporaryShares.map(share => {
       const decryptedShare = decryptWithPrivateKey(
-        capsule.loginEncryptionKeyPair.privateKey,
+        para.loginEncryptionKeyPair.privateKey,
         share.encryptedShare,
         share.encryptedKey,
       );
@@ -79,6 +69,6 @@ export async function authCreation(
       };
     });
 
-    await capsule.ctx.capsuleClient.uploadUserKeyShares(userId, biometricEncryptedKeyshares);
+    await para.ctx.client.uploadUserKeyShares(userId, biometricEncryptedKeyshares);
   }
 }

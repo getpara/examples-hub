@@ -1,6 +1,5 @@
-import { CpslButton, CpslIcon, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon, CpslText } from '@getpara/react-components';
 import styled from 'styled-components';
-import { CapsuleBlack } from '../Icons';
 import { LANDING_HEADER_LINKS } from '../../utils/constants';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { useEffect, useState } from 'react';
@@ -28,9 +27,7 @@ export const LandingAppBar = () => {
     <Container>
       <InnerContainer>
         <ContentContainer>
-          <LogoContainer>
-            <CapsuleBlack />
-          </LogoContainer>
+          <Logo icon="para" />
           {isMobile ? (
             <>
               <CpslIcon icon="menu" onClick={handleMenuClick} />
@@ -115,12 +112,9 @@ const MobileLinksContainer = styled(motion.div)`
   flex-direction: column;
 `;
 
-const LogoContainer = styled.div`
-  height: 24px;
-  display: flex;
-  svg {
-    height: 24px;
-  }
+const Logo = styled(CpslIcon)`
+  --height: 24px;
+  --width: auto;
 `;
 
 const LinkButton = styled(CpslButton)`

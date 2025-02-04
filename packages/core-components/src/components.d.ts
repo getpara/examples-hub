@@ -380,7 +380,7 @@ export namespace Components {
          */
         "variant"?: 'customContent' | 'connection' | 'externalWalletConnection' | 'pending' | 'approved' | 'add' | 'failed';
         /**
-          * Whether to use the Capsule custom theming or use the provided theme Default is: `false`.
+          * Whether to use the Para custom theming or use the provided theme Default is: `false`.
          */
         "withDefaultTheme"?: boolean;
     }
@@ -1921,7 +1921,7 @@ declare namespace LocalJSX {
          */
         "variant"?: 'customContent' | 'connection' | 'externalWalletConnection' | 'pending' | 'approved' | 'add' | 'failed';
         /**
-          * Whether to use the Capsule custom theming or use the provided theme Default is: `false`.
+          * Whether to use the Para custom theming or use the provided theme Default is: `false`.
          */
         "withDefaultTheme"?: boolean;
     }

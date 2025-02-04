@@ -1,15 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import {
   Environment,
-  getCapsuleConnectBaseURL,
-  getCapsuleConnectDomain,
+  getParaConnectBaseUrl,
+  getParaConnectDomain,
   getOnRampAssets,
   getOnRampNetworks,
   getPortalBaseURL,
   getPortalDomain,
   toAssetInfoArray,
 } from '../src/definitions';
-import { Network, OnRampAsset, WalletType } from '@usecapsule/user-management-client';
+import { Network, OnRampAsset, WalletType } from '@getpara/user-management-client';
 
 describe('definitions', () => {
   describe('getPortalDomain', () => {
@@ -79,56 +79,56 @@ describe('definitions', () => {
       expect(resp).toBe('https://app.sandbox.usecapsule.com');
     });
   });
-  describe('getCapsuleConnectDomain', () => {
+  describe('getParaConnectDomain', () => {
     it('DEV', () => {
-      const resp = getCapsuleConnectDomain(Environment.DEV);
+      const resp = getParaConnectDomain(Environment.DEV);
 
       expect(resp).toBe('localhost');
     });
     it('SANDBOX', () => {
-      const resp = getCapsuleConnectDomain(Environment.SANDBOX);
+      const resp = getParaConnectDomain(Environment.SANDBOX);
 
-      expect(resp).toBe('connect.sandbox.usecapsule.com');
+      expect(resp).toBe('connect.sandbox.getpara.com');
     });
     it('BETA', () => {
-      const resp = getCapsuleConnectDomain(Environment.BETA);
+      const resp = getParaConnectDomain(Environment.BETA);
 
-      expect(resp).toBe('connect.beta.usecapsule.com');
+      expect(resp).toBe('connect.beta.getpara.com');
     });
     it('PROD', () => {
-      const resp = getCapsuleConnectDomain(Environment.PROD);
+      const resp = getParaConnectDomain(Environment.PROD);
 
-      expect(resp).toBe('connect.usecapsule.com');
+      expect(resp).toBe('connect.getpara.com');
     });
     it('fail', () => {
-      expect(() => getCapsuleConnectDomain('fail' as Environment)).toThrowError('env: fail not supported');
+      expect(() => getParaConnectDomain('fail' as Environment)).toThrowError('env: fail not supported');
     });
   });
-  describe('getCapsuleConnectBaseURL', () => {
+  describe('getParaConnectBaseUrl', () => {
     it('DEV', () => {
-      const resp = getCapsuleConnectBaseURL({ env: Environment.DEV });
+      const resp = getParaConnectBaseUrl({ env: Environment.DEV });
 
       expect(resp).toBe('http://localhost:3008');
     });
     it('DEV - local IP', () => {
-      const resp = getCapsuleConnectBaseURL({ env: Environment.DEV }, true);
+      const resp = getParaConnectBaseUrl({ env: Environment.DEV }, true);
 
       expect(resp).toBe('http://127.0.0.1:3008');
     });
     it('SANDBOX', () => {
-      const resp = getCapsuleConnectBaseURL({ env: Environment.SANDBOX });
+      const resp = getParaConnectBaseUrl({ env: Environment.SANDBOX });
 
-      expect(resp).toBe('https://connect.sandbox.usecapsule.com');
+      expect(resp).toBe('https://connect.sandbox.getpara.com');
     });
     it('BETA', () => {
-      const resp = getCapsuleConnectBaseURL({ env: Environment.BETA });
+      const resp = getParaConnectBaseUrl({ env: Environment.BETA });
 
-      expect(resp).toBe('https://connect.beta.usecapsule.com');
+      expect(resp).toBe('https://connect.beta.getpara.com');
     });
     it('PROD', () => {
-      const resp = getCapsuleConnectBaseURL({ env: Environment.PROD });
+      const resp = getParaConnectBaseUrl({ env: Environment.PROD });
 
-      expect(resp).toBe('https://connect.usecapsule.com');
+      expect(resp).toBe('https://connect.getpara.com');
     });
   });
   describe('toAssetInfoArray', () => {

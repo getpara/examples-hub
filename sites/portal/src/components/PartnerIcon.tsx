@@ -1,5 +1,5 @@
 import { Avatar, Tooltip } from '@chakra-ui/react';
-import { getPseudoRandomBackground } from '@usecapsule/core-components';
+import { getPseudoRandomBackground } from '@getpara/core-components';
 import { Partner } from '../types';
 
 export const PartnerIcon = ({

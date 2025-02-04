@@ -4,7 +4,7 @@ import { Tabs } from '../../components/Tabs/Tabs';
 import { AnalyticsTab } from './components/AnalyticsTab';
 import { UsersTab } from './components/UsersTab';
 import { ProjectsTab } from './components/ProjectsTab';
-import { CpslText } from '@usecapsule/react-components';
+import { CpslText } from '@getpara/react-components';
 import { useGetSelectedOrganization } from '../../hooks/api/queries/useOrganizations';
 
 const TABS = [

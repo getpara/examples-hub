@@ -2,10 +2,10 @@ import { MutationOptions, useMutation } from '@tanstack/react-query';
 import { queryClient } from '../../../clients/queryClient';
 import { ORGANIZATIONS_QUERY_KEY } from '../queries/useOrganizations';
 import { AcceptInviteVars, acceptOrganizationInvite } from '../../../api/users/mutations';
-import { capsule } from '../../../clients/capsule';
+import { para } from '../../../clients/para';
 
 export const useAcceptInvite = (options?: MutationOptions<boolean, Error, Omit<AcceptInviteVars, 'userId'>, unknown>) => {
-  const userId = capsule.getUserId();
+  const userId = para.getUserId();
 
   return useMutation<boolean, Error, Omit<AcceptInviteVars, 'userId'>, unknown>({
     mutationFn: vars =>

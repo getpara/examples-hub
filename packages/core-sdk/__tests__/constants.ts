@@ -1,5 +1,5 @@
-import { WalletType } from '@usecapsule/user-management-client';
-import { TelegramAuthResponse } from '@usecapsule/user-management-client/src';
+import { WalletType } from '@getpara/user-management-client';
+import { TelegramAuthResponse } from '@getpara/user-management-client/src';
 
 export const UUID = 'ef3bf91c-fc1e-4d18-afe2-f2654c9531e5';
 export const USER_ID = 'ef3bf91c-fc1e-4d18-afe2-f2654c9531e5';
@@ -159,8 +159,16 @@ export const PREGEN_WALLET_PHONE_KEYGEN_RES = {
   walletId: PREGEN_WALLET_PHONE.id,
   signer: 'test-pregen-wallet-phone-signer',
 };
+export const SOLANA_PREGEN_WALLET_PHONE = {
+  ...PREGEN_WALLET_PHONE,
+  address: '0x1aD2B053b8c6b1592cB645DEfadf105F34d8C6e5',
+  id: 'ef3bf91c-fc1e-4d18-afe2-f2654c9556e5',
+  name: 'Test Solana Pregen Wallet',
+  type: WalletType.SOLANA,
+  scheme: 'ED25519',
+};
 export const PREGEN_WALLETS_EMAIL = [PREGEN_WALLET_EMAIL, SOLANA_PREGEN_WALLET_EMAIL];
-export const PREGEN_WALLETS_PHONE = [PREGEN_WALLET_PHONE];
+export const PREGEN_WALLETS_PHONE = [PREGEN_WALLET_PHONE, SOLANA_PREGEN_WALLET_PHONE];
 
 export const SESSION_PUBLIC_KEYS = [
   {

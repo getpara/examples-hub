@@ -1,7 +1,7 @@
 import { styled } from 'styled-components';
-import { CpslButton, CpslIcon, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon, CpslText } from '@getpara/react-components';
 import { useModalStore } from '../../stores/index.js';
-import { CAPSULE_CONNECT, CAPSULE_TERMS_AND_CONDITIONS } from '../../constants/constants.js';
+import { PARA_CONNECT, PARA_TERMS_AND_CONDITIONS } from '../../constants/constants.js';
 import { useMemo } from 'react';
 import { getStepHasFooter } from '../../utils/steps.js';
 
@@ -17,13 +17,13 @@ export const Footer = () => {
         <ConnectContainer>
           <ConnectText variant="bodyS" color="secondary" weight="medium">
             Access all your wallet’s features at{' '}
-            <a href={CAPSULE_CONNECT} target="blank">
+            <a href={PARA_CONNECT} target="blank">
               <ClickableText variant="bodyS" weight="medium">
-                Capsule Connect
+                Para Connect
               </ClickableText>
             </a>
           </ConnectText>
-          <CpslButton as="a" href={CAPSULE_CONNECT} target="blank" variant="ghost">
+          <CpslButton as="a" href={PARA_CONNECT} target="blank" variant="ghost">
             <RightChevron icon="chevronUp" />
           </CpslButton>
         </ConnectContainer>
@@ -34,7 +34,7 @@ export const Footer = () => {
       <>
         <InlineText variant="body2XS" color="secondary" weight="medium">
           By logging in you agree to our{' '}
-          <a href={CAPSULE_TERMS_AND_CONDITIONS} target="blank">
+          <a href={PARA_TERMS_AND_CONDITIONS} target="blank">
             <ClickableText variant="body2XS" weight="medium">
               Terms & Conditions
             </ClickableText>
@@ -44,7 +44,7 @@ export const Footer = () => {
           <InlineText variant="bodyS" color="secondary" weight="medium">
             Powered by
           </InlineText>
-          <CapsuleLogo icon="capsuleLogo" />
+          <ParaLogo icon="para" />
         </PoweredByContainer>
       </>
     );
@@ -112,9 +112,9 @@ const ClickableText = styled(InlineText)`
   display: inline-block;
 `;
 
-const CapsuleLogo = styled(CpslIcon)`
+const ParaLogo = styled(CpslIcon)`
   display: inline-block;
   --icon-color: var(--cpsl-color-text-secondary);
-  --width: 85px;
+  --width: 49px;
   --height: auto;
 `;

@@ -1,14 +1,14 @@
-import Capsule, {
+import Para, {
   encryptPrivateKeyWithPassword,
   getAsymmetricKeyPair,
   getPublicKeyHex,
   getSHA256HashHex,
   hashPasswordWithSalt,
-} from '@usecapsule/web-sdk';
-import { AuthParams, extractAuthInfo, PasswordStatus } from '@usecapsule/user-management-client';
+} from '@getpara/web-sdk';
+import { AuthParams, extractAuthInfo, PasswordStatus } from '@getpara/user-management-client';
 
 export async function passwordCreation(
-  capsule: Capsule,
+  para: Para,
   {
     auth,
     userId,
@@ -29,20 +29,20 @@ export async function passwordCreation(
     throw new Error('a phone number, email address, Farcaster username, or Telegram user ID must be provided');
   }
 
-  const keyPair = await getAsymmetricKeyPair(capsule.ctx);
+  const keyPair = await getAsymmetricKeyPair(para.ctx);
   const publicKeyHex = getPublicKeyHex(keyPair);
 
   const { salt, hash: userHandle } = hashPasswordWithSalt(password);
   const encryptionKeyHash = getSHA256HashHex(userHandle);
   const encryptedPrivateKeyHex = await encryptPrivateKeyWithPassword(keyPair, userHandle);
 
-  await capsule.ctx.capsuleClient.patchSessionPassword(partnerId, userId, passwordId, {
+  await para.ctx.client.patchSessionPassword(partnerId, userId, passwordId, {
     status: PasswordStatus.COMPLETE,
     sigDerivedPublicKey: publicKeyHex,
     salt: salt,
   });
 
-  await capsule.ctx.capsuleClient.uploadEncryptedWalletPrivateKey(
+  await para.ctx.client.uploadEncryptedWalletPrivateKey(
     userId,
     encryptedPrivateKeyHex,
     encryptionKeyHash,

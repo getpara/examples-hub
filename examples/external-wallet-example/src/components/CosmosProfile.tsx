@@ -1,12 +1,12 @@
-import { CpslButton, CpslInput, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslInput, CpslText } from '@getpara/react-components';
 import { ProfileInnerContainer, Card, OverflowText } from './common';
 import { useState } from 'react';
-import { getWallet, useAccount, useActiveWalletType } from '@usecapsule/graz';
+import { getWallet, useAccount, useActiveWalletType } from '@getpara/graz';
 import { useCosmosStore } from '../stores/cosmosStore/useCosmosStore';
-import { useCapsuleCosmos } from '../../../../packages/cosmos-wallet-connectors/dist/providers/CapsuleCosmosContext';
+import { useParaCosmos } from '../../../../packages/cosmos-wallet-connectors/dist/providers/ParaCosmosContext';
 
 export const CosmosProfile = () => {
-  const { multiChain, chains } = useCapsuleCosmos();
+  const { multiChain, chains } = useParaCosmos();
   const selectedCosmosChainId = useCosmosStore(state => state.selectedChainId);
   const { data: account } = useAccount({ multiChain, chains });
   const { walletType } = useActiveWalletType();

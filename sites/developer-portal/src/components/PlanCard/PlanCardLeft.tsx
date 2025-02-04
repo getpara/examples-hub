@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { CpslButton, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslText } from '@getpara/react-components';
 import { InlineText } from '../../components/common';
 import { GradientCTAButton } from '../../components/GradientCTAButton/GradientCTAButton';
 import { usePlan } from '../../hooks/api/queries/usePlans';

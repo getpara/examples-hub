@@ -1,6 +1,6 @@
 import { ReactNode, createContext, useMemo } from 'react';
 import { CommonChain, CommonWallet } from '../types/commonTypes.js';
-import CapsuleWeb from '@usecapsule/web-sdk';
+import ParaWeb from '@getpara/web-sdk';
 
 export const defaultCosmosExternalWallet = {
   wallets: [],
@@ -22,7 +22,7 @@ export const CosmosExternalWalletContext = createContext<CosmosExternalWalletCon
 
 export interface CosmosExternalWalletProviderProps {
   children: ReactNode;
-  capsule: CapsuleWeb;
+  para: ParaWeb;
   onSwitchWallet: (args: { address?: string; error?: string }) => void;
 }
 

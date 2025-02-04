@@ -1,5 +1,5 @@
 import * as uuid from 'uuid';
-import { Ctx } from '@usecapsule/core-sdk';
+import { Ctx } from '@getpara/core-sdk';
 import { setupWorker } from '../workers/workerWrapper.js';
 
 export async function getPrivateKey(

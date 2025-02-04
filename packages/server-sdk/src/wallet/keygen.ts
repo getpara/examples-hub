@@ -1,10 +1,10 @@
 import * as uuid from 'uuid';
-import { waitUntilTrue, Ctx, TPregenIdentifierType } from '@usecapsule/core-sdk';
+import { waitUntilTrue, Ctx, TPregenIdentifierType } from '@getpara/core-sdk';
 import { setupWorker } from '../workers/workerWrapper.js';
-import { BackupKitEmailProps, WalletType } from '@usecapsule/user-management-client';
+import { BackupKitEmailProps, WalletType } from '@getpara/user-management-client';
 
 async function isKeygenComplete(ctx: Ctx, userId: string, walletId: string): Promise<boolean> {
-  const wallets = await ctx.capsuleClient.getWallets(userId);
+  const wallets = await ctx.client.getWallets(userId);
   const wallet = wallets.data.wallets.find(w => w.id === walletId);
   return !!wallet.address;
 }
@@ -15,7 +15,7 @@ async function isPreKeygenComplete(
   pregenIdentifierType: TPregenIdentifierType,
   walletId: string,
 ): Promise<boolean> {
-  const wallets = await ctx.capsuleClient.getPregenWallets({ [pregenIdentifierType]: [pregenIdentifier] });
+  const wallets = await ctx.client.getPregenWallets({ [pregenIdentifierType]: [pregenIdentifier] });
   const wallet = wallets.wallets.find(w => w.id === walletId);
   return !!wallet?.address;
 }

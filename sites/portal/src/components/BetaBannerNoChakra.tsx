@@ -1,7 +1,7 @@
 import { ENV } from '../constants';
-import { Environment } from '@usecapsule/web-sdk';
+import { Environment } from '@getpara/web-sdk';
 import { styled } from 'styled-components';
-import { CpslIcon } from '@usecapsule/react-components';
+import { CpslIcon } from '@getpara/react-components';
 import { useState } from 'react';
 
 export const BetaBannerNoChakra = () => {
@@ -14,8 +14,7 @@ export const BetaBannerNoChakra = () => {
             <StyledIcon icon="x" />
           </CloseButton>
           <StyledIcon icon="alertCircle" />
-          You're using Capsule in a development (non-production) environment: {ENV}. Be wary of sharing sensitive
-          information.
+          You're using Para in a development (non-production) environment: {ENV}. Be wary of sharing sensitive information.
         </Alert>
       )
     : null;

@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { CpslText } from '@usecapsule/react-components';
+import { CpslText } from '@getpara/react-components';
 import { AnalyticsCard } from '../../../components/AnalyticsCard/AnalyticsCard';
 import { useOrganizationKeyUsersLoginMetrics } from '../../../hooks/api/queries/useOrganizationKeyUsersLoginMetrics';
 import { LOGIN_METHOD_LABELS } from '../../../utils/constants';

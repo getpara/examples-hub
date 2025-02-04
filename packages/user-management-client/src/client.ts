@@ -8,7 +8,6 @@ import axios, {
 import { AxiosRequestConfig } from 'axios';
 import qs from 'qs';
 import {
-  $Auth,
   Auth,
   AuthMethod,
   AuthParams,
@@ -40,7 +39,7 @@ import {
 } from './types/index.js';
 import { extractWalletRef } from './utils.js';
 import { SESSION_COOKIE_HEADER_NAME, VERSION_HEADER_NAME, PARTNER_ID_HEADER_NAME, API_KEY_HEADER_NAME } from './consts.js';
-import { CapsuleApiError } from './error.js';
+import { ParaApiError } from './error.js';
 
 interface ConfigOpts {
   useFetchAdapter?: boolean;
@@ -89,7 +88,7 @@ interface getWebChallengeRes {
   allowedPublicKeys?: string[];
 }
 
-interface GetCapsuleShareRes {
+interface GetParaShareRes {
   share: string;
 }
 
@@ -166,7 +165,7 @@ interface createWalletRes {
   walletId: string;
 }
 
-interface createWalletPreGenBody {
+interface createPregenWalletBody {
   pregenIdentifier: string;
   pregenIdentifierType: TPregenIdentifierType;
   scheme?: WalletScheme;
@@ -221,11 +220,11 @@ export const handleResponseSuccess = (response: AxiosResponse<any, any>) => {
   if (response.status === 200) {
     return response;
   }
-  throw new CapsuleApiError('Invalid status code');
+  throw new ParaApiError('Invalid status code');
 };
 
 export const handleResponseError = (error: any) => {
-  if (error === null) throw new CapsuleApiError('Error is null');
+  if (error === null) throw new ParaApiError('Error is null');
   if (axios.isAxiosError(error)) {
     let message = error.response?.data ?? 'Unknown error';
 
@@ -236,9 +235,9 @@ export const handleResponseError = (error: any) => {
     } else if (error.code === 'ERR_CANCELED') {
       message = 'Connection canceled';
     }
-    throw new CapsuleApiError(message, error.code, error.response.status, error.request?.responseURL);
+    throw new ParaApiError(message, error.code, error.response.status, error.request?.responseURL);
   }
-  throw new CapsuleApiError('Unknown error');
+  throw new ParaApiError('Unknown error');
 };
 
 class Client {
@@ -339,7 +338,7 @@ class Client {
     return res.data;
   };
 
-  checkUserExists = async (auth: $Auth<'email' | 'phone'>): Promise<any> => {
+  checkUserExists = async (auth: Auth<'email' | 'phone'>): Promise<any> => {
     const res = await this.baseRequest.get<any>('/users/exists', {
       params: { ...auth },
     });
@@ -461,7 +460,7 @@ class Client {
   };
 
   // POST /wallets/pregen
-  createWalletPreGen = async (body?: createWalletPreGenBody): Promise<createWalletRes> => {
+  createPregenWallet = async (body?: createPregenWalletBody): Promise<createWalletRes> => {
     const res = await this.baseRequest.post<createWalletRes>(`/wallets/pregen`, body);
     return res.data;
   };
@@ -658,8 +657,8 @@ class Client {
   }
 
   // GET /users/:userId/wallets/:walletId/capsule-share
-  getCapsuleShare = async (userId: string, walletId: string): Promise<string> => {
-    const res = await this.baseRequest.get<GetCapsuleShareRes>(`/users/${userId}/wallets/${walletId}/capsule-share`);
+  getParaShare = async (userId: string, walletId: string): Promise<string> => {
+    const res = await this.baseRequest.get<GetParaShareRes>(`/users/${userId}/wallets/${walletId}/capsule-share`);
     return res.data.share;
   };
 
@@ -977,7 +976,7 @@ class Client {
     return res.data;
   }
 
-  async distributeCapsuleShare({
+  async distributeParaShare({
     userId,
     walletId,
     ...rest

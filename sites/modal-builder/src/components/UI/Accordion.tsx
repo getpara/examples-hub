@@ -10,7 +10,7 @@ import React, {
 } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { Text } from './StyledText';
-import { CpslIcon } from '@usecapsule/react-components';
+import { CpslIcon } from '@getpara/react-components';
 import { Switch } from './StyledSwitch';
 
 interface AccordionContextProps {

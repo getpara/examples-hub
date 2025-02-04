@@ -1,6 +1,6 @@
 import { VStack, Spacer, HStack, Button, Box, Text, Textarea } from '@chakra-ui/react';
 import { useContext, useState } from 'react';
-import { KeyContainer } from '@usecapsule/web-sdk';
+import { KeyContainer } from '@getpara/web-sdk';
 import EmailContext from '../../contexts/EmailContext';
 import RecoveryStepContext from '../../contexts/RecoveryStepContext';
 import { ModalStep } from '../../steps/recoverySteps';
@@ -9,7 +9,7 @@ import WalletContext from '../../contexts/WalletContext';
 import VerifyCode from '../../../assets/verifyCode';
 import { RecoveryAttemptContext, RecoveryType } from '../../contexts/RecoveryAttemptContext';
 import PhoneContext from '../../contexts/PhoneContext';
-import { useCapsule } from '../../../components/CapsuleContext';
+import { usePara } from '../../../components/ParaContext';
 
 type RecoverWalletWithSecretStepProps = {
   setWebAuthURLForCreate: (webAuthURLForCreate: string | null) => void;
@@ -20,7 +20,7 @@ const RecoverWalletWithSecretStep: React.FC<RecoverWalletWithSecretStepProps> = 
   setWebAuthURLForCreate,
   setUserShares,
 }) => {
-  const capsule = useCapsule();
+  const para = usePara();
   const { setCurrentRecoveryStep } = useContext(RecoveryStepContext);
   const { type } = useContext(RecoveryAttemptContext);
   const { phone, countryCode } = useContext(PhoneContext);
@@ -36,9 +36,7 @@ const RecoverWalletWithSecretStep: React.FC<RecoverWalletWithSecretStepProps> = 
     // Get all the users fully generated wallets
     const allCompleteUserWallets = wallets.filter(wallet => !!wallet.address);
 
-    const recoveryUserSharesPromises = allCompleteUserWallets.map(wal =>
-      capsule.ctx.capsuleClient.recoverUserShares(userId, wal.id),
-    );
+    const recoveryUserSharesPromises = allCompleteUserWallets.map(wal => para.ctx.client.recoverUserShares(userId, wal.id));
     const recoveryUserShares = await Promise.all(recoveryUserSharesPromises);
 
     const keyShares = recoveryUserShares
@@ -73,7 +71,7 @@ const RecoverWalletWithSecretStep: React.FC<RecoverWalletWithSecretStepProps> = 
             Confirm Recovery Secret
           </Text>
           <Text textColor="brand.content" fontSize="s">
-            In onboarding you should have received an email titled "Capsule Recovery". Find that text and paste it into the
+            In onboarding you should have received an email titled "Para Recovery". Find that text and paste it into the
             field below.
           </Text>
         </Box>
@@ -118,14 +116,14 @@ const RecoverWalletWithSecretStep: React.FC<RecoverWalletWithSecretStepProps> = 
             }
             setUserShares(userShares);
             setIncorrectCode(false);
-            await capsule.setEmail(email);
-            await capsule.setPhoneNumber(phone, countryCode);
-            await capsule.setUserId(userId);
+            await para.setEmail(email);
+            await para.setPhoneNumber(phone, countryCode);
+            await para.setUserId(userId);
             let link;
             if (type === RecoveryType.PHONE) {
-              link = await capsule.getSetUpBiometricsURLForPhone(false);
+              link = await para.getSetUpBiometricsURLForPhone();
             } else {
-              link = await capsule.getSetUpBiometricsURL(false);
+              link = await para.getSetUpBiometricsURL();
             }
             setWebAuthURLForCreate(link);
             setCurrentRecoveryStep(ModalStep.BIOMETRIC);

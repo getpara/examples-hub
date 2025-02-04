@@ -1,6 +1,6 @@
 {
-  "name": "@usecapsule/react-components",
-  "version": "3.25.0",
+  "name": "@getpara/react-components",
+  "version": "1.0.0",
   "description": "Capsule Core React Components",
   "type": "module",
   "main": "dist/index.js",
@@ -28,7 +28,7 @@
     "copy": "node scripts/copy.cjs"
   },
   "dependencies": {
-    "@usecapsule/core-components": "3.25.0"
+    "@getpara/core-components": "1.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.64",

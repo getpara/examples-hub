@@ -1,4 +1,4 @@
-import { CpslButton, CpslIcon, CpslModalV2, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon, CpslModalV2, CpslText } from '@getpara/react-components';
 import styled from 'styled-components';
 import { PropsWithChildren } from 'react';
 import { MOBILE_SIZE } from '../../utils/constants';

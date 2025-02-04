@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useGetOrganizationKey } from '../../../hooks/api/queries/useOrganizationKeys';
 import { Environment } from '../../../types/environment';
 import { UpdateApiKeyBody } from '../../../types/api';
-import { WalletType } from '@usecapsule/react-sdk';
+import { WalletType } from '@getpara/react-sdk';
 
 export type UpdateApiKeyOnRampConfig<T extends keyof UpdateApiKeyBody> = Pick<UpdateApiKeyBody, T>;
 

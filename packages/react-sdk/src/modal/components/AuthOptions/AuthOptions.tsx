@@ -1,7 +1,7 @@
 import { ReactNode, useMemo } from 'react';
 import styled from 'styled-components';
 import { OAuth } from '../OAuth/OAuth.js';
-import { OAuthMethod } from '@usecapsule/web-sdk';
+import { OAuthMethod } from '@getpara/web-sdk';
 import { AuthInput } from '../AuthInput/AuthInput.js';
 import { useExternalWallets } from '../../providers/ExternalWalletContext.js';
 import { useModalStore } from '../../stores/index.js';

@@ -1,13 +1,13 @@
 import ReactDOM from 'react-dom/client';
 import { Routes, Route } from 'react-router';
 import { BrowserRouter, useSearchParams } from 'react-router-dom';
-import '@usecapsule/react-components/css/capsule-core.css';
+import '@getpara/react-components/css/capsule-core.css';
 import './portal.css';
 import { ModalLayout } from './components/ModalLayout';
-import { defineCustomElements } from '@usecapsule/react-components';
-import { CapsuleProvider } from './components/CapsuleContext';
+import { defineCustomElements } from '@getpara/react-components';
+import { ParaProvider } from './components/ParaContext';
 import { ENV } from './constants';
-import { AuthMethod } from '@usecapsule/web-sdk';
+import { AuthMethod } from '@getpara/web-sdk';
 import { lazy } from 'react';
 
 defineCustomElements();
@@ -33,12 +33,12 @@ const App = () => {
   const partnerId = searchParams.get('partnerId') || undefined;
 
   return (
-    <CapsuleProvider
+    <ParaProvider
       apiKey={apiKey}
       partnerId={partnerId}
       environment={ENV}
       options={{ useSessionStorage: true }}
-      onMount={capsule => capsule.clearStorage('local')}
+      onMount={para => para.clearStorage('local')}
     >
       <Routes>
         <Route element={<Recovery />} path="/" />
@@ -54,7 +54,7 @@ const App = () => {
         <Route element={<TelegramLogin />} path="/auth/telegram" />
         <Route element={<ShortUrl />} path="/short/:shortenedUrl" />
       </Routes>
-    </CapsuleProvider>
+    </ParaProvider>
   );
 };
 

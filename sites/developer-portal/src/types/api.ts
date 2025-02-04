@@ -1,4 +1,4 @@
-import { Network, OnRampAsset, OnRampAssetInfo, OnRampProvider, SupportedWalletTypes } from '@usecapsule/react-sdk';
+import { Network, OnRampAsset, OnRampAssetInfo, OnRampProvider, SupportedWalletTypes } from '@getpara/react-sdk';
 import { Environment } from './environment';
 
 type Nullable<T> = { [K in keyof T]: T[K] | null };

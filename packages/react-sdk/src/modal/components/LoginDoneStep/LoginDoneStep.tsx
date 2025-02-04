@@ -1,14 +1,15 @@
 import { useEffect } from 'react';
 import { Heading, HeroIcon, StepContainer } from '../common.js';
 import { ExternalWalletCard, WalletCard, WalletCards } from '../WalletCard/WalletCard.js';
-import { useCapsuleStore, useThemeStore } from '../../stores/index.js';
+import { useThemeStore } from '../../stores/index.js';
+import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 
 interface LoginDoneStep {
   onClose: () => void;
 }
 
 export const LoginDoneStep = ({ onClose }: LoginDoneStep) => {
-  const capsule = useCapsuleStore(state => state.capsule);
+  const para = useInternalClient();
   const hideWallets = useThemeStore(state => state.hideWallets);
 
   useEffect(() => {
@@ -25,10 +26,10 @@ export const LoginDoneStep = ({ onClose }: LoginDoneStep) => {
       </Heading>
       {!hideWallets && (
         <WalletCards>
-          {capsule.isUsingExternalWallet() ? (
-            <ExternalWalletCard address={capsule.currentExternalWalletAddresses?.[0]} />
+          {para.isUsingExternalWallet() ? (
+            <ExternalWalletCard address={para.currentExternalWalletAddresses?.[0]} />
           ) : (
-            capsule.currentWalletIdsArray.map(([id, type]) => {
+            para.currentWalletIdsArray.map(([id, type]) => {
               return <WalletCard key={`${id}-${type}`} id={id} type={type} />;
             })
           )}

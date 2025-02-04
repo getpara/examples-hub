@@ -1,7 +1,7 @@
-import { CpslAvatar, CpslSelect, CpslSelectItem, CpslText } from '@usecapsule/react-components';
+import { CpslAvatar, CpslSelect, CpslSelectItem, CpslText } from '@getpara/react-components';
 import styled from 'styled-components';
 import { useGetAllOrganizationsWithAccess, useGetSelectedOrganization } from '../../../hooks/api/queries/useOrganizations';
-import { CpslSelectCustomEvent } from '@usecapsule/core-components';
+import { CpslSelectCustomEvent } from '@getpara/core-components';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useLogout } from '../../../hooks/useLogout';
@@ -25,7 +25,7 @@ export const Organizations = () => {
         triggerToast({
           variant: 'error',
           title: 'None of your organizations have access',
-          body: 'If you believe this is an error, contact Capsule support.',
+          body: 'If you believe this is an error, contact Para support.',
         });
       } else {
         navigate(`/${firstOrgWithAccess.id}/dashboard`);

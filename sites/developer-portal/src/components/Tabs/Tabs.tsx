@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { CpslButton, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslText } from '@getpara/react-components';
 
 export type TabType = {
   label: string;

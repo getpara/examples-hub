@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { CpslButton, CpslIcon, CpslQrCode, CpslSpinner, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon, CpslQrCode, CpslSpinner, CpslText } from '@getpara/react-components';
 import { CenteredText, Heading, InnerStepContainer, QRContainer, StepContainer } from '../common.js';
-import { useCapsuleStore, useModalStore, useThemeStore, useUserInfoStore } from '../../stores/index.js';
+import { useModalStore, useThemeStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
-import { AuthMethod, isMobile } from '@usecapsule/web-sdk';
+import { AuthMethod, isMobile } from '@getpara/web-sdk';
+import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 
 const FarcasterOAuthStep = () => {
   const setAuthInfo = useUserInfoStore(state => state.setAuthInfo);
@@ -14,7 +15,7 @@ const FarcasterOAuthStep = () => {
   const isIFrameReady = useModalStore(state => state.isIFrameReady);
   const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
   const setBiometricLocationHints = useModalStore(state => state.setBiometricLocationHints);
-  const capsule = useCapsuleStore(state => state.capsule);
+  const para = useInternalClient();
   const setFlow = useModalStore(state => state.setFlow);
   const farcasterConnectUri = useModalStore(state => state.farcasterConnectUri);
   const setFarcasterConnectUri = useModalStore(state => state.setFarcasterConnectUri);
@@ -34,20 +35,20 @@ const FarcasterOAuthStep = () => {
   useEffect(() => {
     if (farcasterConnectUri) {
       const pollStatus = async () => {
-        const { userExists, username, pfpUrl } = await capsule.waitForFarcasterStatus();
+        const { userExists, username, pfpUrl } = await para.waitForFarcasterStatus();
 
         setAuthInfo({ farcasterUsername: username, pfpUrl });
 
         setStep(ModalStep.AWAITING_OAUTH);
 
         if (userExists) {
-          const supportedAuthMethods = await capsule.initiateUserLoginV2(username, 'farcaster');
+          const supportedAuthMethods = await para.initiateUserLoginV2({ farcasterUsername: username });
 
           if (supportedAuthMethods.size > 0) {
             setSupportedAuthMethods(supportedAuthMethods);
 
             const biometricLocationHints = supportedAuthMethods.has(AuthMethod.PASSKEY)
-              ? await capsule.getUserBiometricLocationHints()
+              ? await para.getUserBiometricLocationHints()
               : [];
 
             setFlow('login');
@@ -57,18 +58,18 @@ const FarcasterOAuthStep = () => {
           }
         }
 
-        const supportedCreateAuthMethods = await capsule.getSupportedCreateAuthMethods();
+        const supportedCreateAuthMethods = await para.getSupportedCreateAuthMethods();
 
         setIsIFrameReady(false);
         setFlow('signUp');
         const supportsPasskey = supportedCreateAuthMethods.has(AuthMethod.PASSKEY);
 
         if (supportsPasskey) {
-          setWebAuthURLForCreate(await capsule.shortenLoginLink(await capsule.getSetUpBiometricsURL(false, 'farcaster')));
+          setWebAuthURLForCreate(await para.shortenLoginLink(await para.getSetUpBiometricsURL({ authType: 'farcaster' })));
           setStep(ModalStep.BIOMETRIC_CREATION);
         }
         if (supportedCreateAuthMethods.has(AuthMethod.PASSWORD)) {
-          setIFrameUrl(await capsule.shortenLoginLink(await capsule.getSetupPasswordURL(false, 'farcaster', theme)));
+          setIFrameUrl(await para.shortenLoginLink(await para.getSetupPasswordURL({ authType: 'farcaster', theme })));
           setShouldRouteToStep(supportsPasskey ? ModalStep.BIOMETRIC_CREATION : ModalStep.PASSWORD_CREATION);
         }
 

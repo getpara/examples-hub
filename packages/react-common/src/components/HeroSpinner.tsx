@@ -1,4 +1,4 @@
-import { CpslIcon, CpslSpinner, CpslText, IconType } from '@usecapsule/react-components';
+import { CpslIcon, CpslSpinner, CpslText, IconType } from '@getpara/react-components';
 import { PropsWithChildren, ReactNode } from 'react';
 import styled from 'styled-components';
 

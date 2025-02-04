@@ -1,9 +1,9 @@
 import { Box, Flex } from '@chakra-ui/react';
-import { CpslButton, CpslIcon } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon } from '@getpara/react-components';
 import { Partner } from '../../../types';
 import TransactionReviewBody, { TransactionCoin } from './TransactionReviewBody';
 import TransactionReviewFee from './TransactionReviewFee';
-import { CpslHero, CpslIdenticon } from '@usecapsule/react-components';
+import { CpslHero, CpslIdenticon } from '@getpara/react-components';
 import { PartnerIcon } from '../../../components/PartnerIcon';
 import { TransactionType } from '../TransactionReview';
 

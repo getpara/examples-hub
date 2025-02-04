@@ -1,10 +1,10 @@
 import { Controller } from 'react-hook-form';
-import { Network, OnRampAsset, getOnRampNetworks, toAssetInfoArray } from '@usecapsule/react-sdk';
+import { Network, OnRampAsset, getOnRampNetworks, toAssetInfoArray } from '@getpara/react-sdk';
 import { ArraySelect } from '../../../../../components/ArraySelect/index.js';
 import { useOnRampAllAssets } from '../../../../../hooks/api/queries/useOnRampAssets.js';
 import { SectionCard } from '../../common.js';
-import { CpslIcon, CpslSelect as _CpslSelect, CpslTab, CpslTabs } from '@usecapsule/react-components';
-import { CpslTabsCustomEvent, TabsChangedEventDetail } from '@usecapsule/core-components';
+import { CpslIcon, CpslSelect as _CpslSelect, CpslTab, CpslTabs } from '@getpara/react-components';
+import { CpslTabsCustomEvent, TabsChangedEventDetail } from '@getpara/core-components';
 import { useOnRampConfigFormData } from '../../../hooks/useOnRampConfigFormData.js';
 import { useMemo, useState } from 'react';
 import _ from 'lodash';

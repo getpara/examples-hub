@@ -1,9 +1,9 @@
 {
-  "name": "@usecapsule/react-native-wallet",
-  "version": "2.17.0",
-  "description": "Capsule Wallet for React Native",
-  "homepage": "https://usecapsule.com",
-  "author": "Capsule Team <hello@usecapsule.com> (https://usecapsule.com)",
+  "name": "@getpara/react-native-wallet",
+  "version": "1.0.0",
+  "description": "Para Wallet for React Native",
+  "homepage": "https://getpara.com",
+  "author": "Para Team <hello@getpara.com> (https://getpara.com)",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -22,10 +22,10 @@
     "compile-signer": "bash ./scripts/compileSigner.sh"
   },
   "dependencies": {
+    "@getpara/core-sdk": "1.0.0",
+    "@getpara/user-management-client": "1.0.0",
+    "@getpara/web-sdk": "1.0.0",
     "@peculiar/webcrypto": "^1.5.0",
-    "@usecapsule/core-sdk": "2.20.0",
-    "@usecapsule/user-management-client": "1.42.0",
-    "@usecapsule/web-sdk": "2.20.0",
     "fastestsmallesttextencoderdecoder": "1.0.22",
     "node-forge": "1.3.1",
     "react-native-url-polyfill": "2.0.0"

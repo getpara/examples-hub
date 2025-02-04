@@ -71,6 +71,6 @@ if (isNewArchitectureEnabled()) {
   react {
     jsRootDir = file("../src/")
     libraryName = "ReactNativeWallet"
-    codegenJavaPackageName = "com.capsule.reactnativewallet"
+    codegenJavaPackageName = "com.para.reactnativewallet"
   }
 }

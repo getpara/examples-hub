@@ -1,5 +1,5 @@
-import { CpslButton, CpslSelect, CpslSelectItem, CpslText } from '@usecapsule/react-components';
-import { CpslSelectCustomEvent } from '@usecapsule/core-components';
+import { CpslButton, CpslSelect, CpslSelectItem, CpslText } from '@getpara/react-components';
+import { CpslSelectCustomEvent } from '@getpara/core-components';
 import { Modal } from '../../../components/Modal/Modal';
 import { useUpdateApiKey } from '../../../hooks/api/mutations/useUpdateApiKey';
 import { useParams } from 'react-router-dom';
@@ -62,7 +62,7 @@ export const CopyToModal = ({ open, onClose }: CopyToModalProps) => {
             triggerToast({
               variant: 'error',
               title: 'Failed to Copy Key Config',
-              body: 'Please try again. If the problem persists, contact Capsule support.',
+              body: 'Please try again. If the problem persists, contact Para support.',
             });
           },
         },

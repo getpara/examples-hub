@@ -1,9 +1,16 @@
-import { ModalAuthInfo } from '@usecapsule/react-common';
+import { ModalAuthInfo } from '@getpara/react-common';
 import { useExtractedParams } from './useExtractedParams';
-import { AuthParams, extractAuthInfo } from '@usecapsule/user-management-client';
+import { AuthParams, ExtractAuth, extractAuthInfo } from '@getpara/user-management-client';
 
-export const useAuthInfo = () => {
+export const useAuthInfo = (): null | (ExtractAuth & { displayName?: string; pfpUrl?: string }) => {
   const params = useExtractedParams<AuthParams & Pick<ModalAuthInfo, 'displayName' | 'pfpUrl'>>();
+  const authInfo = extractAuthInfo(params, { allowUserId: true });
 
-  return { ...extractAuthInfo(params, { allowUserId: true }), pfpUrl: params.pfpUrl, displayName: params.displayName };
+  return authInfo
+    ? {
+        ...authInfo,
+        pfpUrl: params.pfpUrl,
+        displayName: params.displayName,
+      }
+    : null;
 };

@@ -1,5 +1,5 @@
-import { CapsuleWeb, Environment } from '@usecapsule/web-sdk';
-import { parseCredentialCreationRes } from '@usecapsule/web-sdk/dist/cryptography/webAuth';
+import { ParaWeb, Environment } from '@getpara/web-sdk';
+import { parseCredentialCreationRes } from '@getpara/web-sdk/dist/cryptography/webAuth';
 import {
   getAsymmetricKeyPair,
   getPublicKeyHex,
@@ -10,8 +10,8 @@ import {
   getPublicKeyFromSignature,
   Wallet,
   WalletScheme,
-} from '@usecapsule/core-sdk';
-import { PublicKeyStatus } from '@usecapsule/user-management-client';
+} from '@getpara/core-sdk';
+import { PublicKeyStatus } from '@getpara/user-management-client';
 
 enum Platform {
   flutter,
@@ -35,19 +35,21 @@ window.addEventListener('message', event => {
   const requestId = data['requestId'];
 
   switch (data['messageType']) {
-    case 'Capsule#init': {
-      console.log('Initializing Capsule with args:', data['arguments']);
+    case 'Capsule#init':
+    case 'Para#init': {
+      console.log('Initializing Para with args:', data['arguments']);
       const initArgs = data['arguments'] ?? {};
-      initCapsule(initArgs['environment'], initArgs['apiKey']);
+      initPara(initArgs['environment'], initArgs['apiKey']);
       platform = Platform[initArgs['platform'] as keyof typeof Platform] ?? Platform.flutter;
       version = initArgs['version'];
-      console.log('Capsule initialized successfully. Platform:', platform, 'Version:', version);
-      sendResponse('Capsule#init', requestId, true);
+      console.log('Para initialized successfully. Platform:', platform, 'Version:', version);
+      sendResponse(data['messageType'], requestId, true);
       break;
     }
     case 'Capsule#invokeMethod':
+    case 'Para#invokeMethod':
       console.log('Invoking method:', data['methodName'], 'with args:', data['arguments']);
-      invokeCapsuleMethod(data['methodName'], data['arguments'], requestId);
+      invokeParaMethod(data['methodName'], data['arguments'], requestId);
       break;
 
     default:
@@ -71,59 +73,59 @@ function sendResponse(method: string, requestId: string, responseData: any, erro
   }
 }
 
-// Initialize CapsuleWeb with the provided environment and apiKey and store it in the window object
-function initCapsule(environment: string, apiKey: string) {
-  if (window['capsule'] != null) {
-    throw new Error('Capsule already initialized');
+// Initialize ParaWeb with the provided environment and apiKey and store it in the window object
+function initPara(environment: string, apiKey: string) {
+  if (window['para'] != null) {
+    throw new Error('Para already initialized');
   }
 
-  const capsule = new CapsuleWeb(environment as Environment, apiKey, {
+  const para = new ParaWeb(environment as Environment, apiKey, {
     disableWorkers: false,
   });
-  capsule.init();
-  window['capsule'] = capsule;
+  para.init();
+  window['para'] = para;
 }
 
 /**
- * Invokes a CapsuleWeb method or a custom handler based on methodName and arguments.
+ * Invokes a ParaWeb method or a custom handler based on methodName and arguments.
  * On completion or error, sends a response back with the requestId.
  */
-async function invokeCapsuleMethod(methodName: string, args: any[], requestId: string) {
+async function invokeParaMethod(methodName: string, args: any[], requestId: string) {
   console.log(`Invoking method: ${methodName} with args:`, args, `and requestId: ${requestId}`);
   try {
-    const capsule = window['capsule'] as CapsuleWeb;
+    const para = window['para'] as ParaWeb;
     switch (methodName) {
       case 'createWallet': {
         console.log('Creating wallet...');
-        const [wallet, recoveryShare] = await capsule.createWallet(args[0], args[1]);
+        const [wallet, recoveryShare] = await para.createWallet({ type: args[0], skipDistribute: args[1] });
         console.log('Wallet created:', wallet, 'Recovery share:', recoveryShare);
         sendResponse('createWallet', requestId, [{ wallet, recoveryShare }]);
         break;
       }
       case 'generatePasskey': {
         console.log('Generating passkey...');
-        await generatePasskey(capsule, args);
+        await generatePasskey(para, args);
         console.log('Passkey generated successfully.');
         sendResponse('generatePasskey', requestId, true);
         break;
       }
       case 'generatePasskeyV2': {
         console.log('Generating passkey V2...');
-        await generatePasskeyV2(capsule, args);
+        await generatePasskeyV2(para, args);
         console.log('Passkey V2 generated successfully.');
         sendResponse('generatePasskeyV2', requestId, true);
         break;
       }
       case 'getWebChallenge': {
         console.log('Getting web challenge...');
-        const getWebChallengeResult = await capsule.ctx.capsuleClient.getWebChallenge(args[0] ?? { email: '' });
+        const getWebChallengeResult = await para.ctx.client.getWebChallenge(args[0] ?? { email: '' });
         console.log('Web challenge result:', getWebChallengeResult);
         sendResponse('getWebChallenge', requestId, getWebChallengeResult);
         break;
       }
       case 'verifyWebChallenge': {
         console.log('Verifying web challenge...');
-        const verifyWebChallengeResult = await verifyWebChallenge(capsule, args);
+        const verifyWebChallengeResult = await verifyWebChallenge(para, args);
         console.log('Web challenge verified:', verifyWebChallengeResult);
         sendResponse(
           'verifyWebChallenge',
@@ -134,21 +136,21 @@ async function invokeCapsuleMethod(methodName: string, args: any[], requestId: s
       }
       case 'login': {
         console.log('Logging in...');
-        const desiredWallet = await login(capsule, args);
+        const desiredWallet = await login(para, args);
         console.log('Login successful. Desired wallet:', desiredWallet);
         sendResponse('login', requestId, desiredWallet);
         break;
       }
       case 'loginV2': {
         console.log('Logging in V2...');
-        const desiredWallet2 = await loginV2(capsule, args);
+        const desiredWallet2 = await loginV2(para, args);
         console.log('Login V2 successful. Desired wallet:', desiredWallet2);
         sendResponse('loginV2', requestId, desiredWallet2);
         break;
       }
       default: {
         console.log(`Invoking default method: ${methodName}`);
-        const result = capsule[methodName](...args);
+        const result = para[methodName](...args);
         const resolvedResult = result instanceof Promise ? await result : result;
         console.log(`Method ${methodName} invoked successfully. Result:`, resolvedResult);
         sendResponse(methodName, requestId, resolvedResult);
@@ -163,7 +165,7 @@ async function invokeCapsuleMethod(methodName: string, args: any[], requestId: s
 }
 
 // Legacy passkey generation
-async function generatePasskey(capsule: CapsuleWeb, args: any[]) {
+async function generatePasskey(para: ParaWeb, args: any[]) {
   const attestationObject = args[0];
   const clientDataJson = args[1];
   const credentialsId = args[2];
@@ -178,10 +180,10 @@ async function generatePasskey(capsule: CapsuleWeb, args: any[]) {
   };
 
   const { cosePublicKey, clientDataJSON } = parseCredentialCreationRes(credentials, -7);
-  const publicKeyHex = await getPublicKeyFromSignature(capsule.ctx, userHandle);
-  const session = await capsule.ctx.capsuleClient.touchSession();
+  const publicKeyHex = await getPublicKeyFromSignature(para.ctx, userHandle);
+  const session = await para.ctx.client.touchSession();
 
-  await capsule.ctx.capsuleClient.patchSessionPublicKey(session.data.partnerId, capsule.getUserId(), biometricsId, {
+  await para.ctx.client.patchSessionPublicKey(session.data.partnerId, para.getUserId(), biometricsId, {
     publicKey: credentialsId,
     sigDerivedPublicKey: publicKeyHex,
     cosePublicKey,
@@ -191,7 +193,7 @@ async function generatePasskey(capsule: CapsuleWeb, args: any[]) {
 }
 
 // New style of passkey generation
-async function generatePasskeyV2(capsule: CapsuleWeb, args: any[]) {
+async function generatePasskeyV2(para: ParaWeb, args: any[]) {
   const attestationObject = args[0];
   ``;
   const clientDataJson = args[1];
@@ -207,15 +209,15 @@ async function generatePasskeyV2(capsule: CapsuleWeb, args: any[]) {
   };
 
   const { cosePublicKey, clientDataJSON } = parseCredentialCreationRes(credentials, -7);
-  const keyPair = await getAsymmetricKeyPair(capsule.ctx);
+  const keyPair = await getAsymmetricKeyPair(para.ctx);
   const publicKeyHex = getPublicKeyHex(keyPair);
 
   const encryptionKeyHash = getSHA256HashHex(userHandle);
   const encryptedPrivateKeyHex = await encryptPrivateKey(keyPair, userHandle);
 
-  const session = await capsule.ctx.capsuleClient.touchSession();
+  const session = await para.ctx.client.touchSession();
 
-  await capsule.ctx.capsuleClient.patchSessionPublicKey(session.data.partnerId, capsule.getUserId(), biometricsId, {
+  await para.ctx.client.patchSessionPublicKey(session.data.partnerId, para.getUserId(), biometricsId, {
     publicKey: credentialsId,
     sigDerivedPublicKey: publicKeyHex,
     cosePublicKey,
@@ -223,22 +225,22 @@ async function generatePasskeyV2(capsule: CapsuleWeb, args: any[]) {
     status: PublicKeyStatus.COMPLETE,
   });
 
-  await capsule.ctx.capsuleClient.uploadEncryptedWalletPrivateKey(
-    capsule.getUserId(),
+  await para.ctx.client.uploadEncryptedWalletPrivateKey(
+    para.getUserId(),
     encryptedPrivateKeyHex,
     encryptionKeyHash,
     credentialsId,
   );
 }
 
-async function verifyWebChallenge(capsule: CapsuleWeb, args: any[]) {
+async function verifyWebChallenge(para: ParaWeb, args: any[]) {
   const publicKey = args[0];
   const authenticatorData = args[1];
   const clientDataJSON = args[2];
   const signature = args[3];
 
-  const session = await capsule.ctx.capsuleClient.touchSession();
-  return await capsule.ctx.capsuleClient.verifyWebChallenge(session.data.partnerId, {
+  const session = await para.ctx.client.touchSession();
+  return await para.ctx.client.verifyWebChallenge(session.data.partnerId, {
     publicKey,
     signature: {
       clientDataJSON,
@@ -248,23 +250,23 @@ async function verifyWebChallenge(capsule: CapsuleWeb, args: any[]) {
   });
 }
 
-async function login(capsule: CapsuleWeb, args: any[]) {
+async function login(para: ParaWeb, args: any[]) {
   const userId = args[0];
   const signatureId = args[1];
   const userHandle = args[2];
 
-  await capsule.setUserId(userId);
-  if (!capsule.getEmail()) {
-    const touchRes = await capsule.ctx.capsuleClient.touchSession();
+  await para.setUserId(userId);
+  if (!para.getEmail()) {
+    const touchRes = await para.ctx.client.touchSession();
     if (touchRes.data.email) {
-      await capsule.setEmail(touchRes.data.email);
+      await para.setEmail(touchRes.data.email);
     }
   }
 
-  const encryptedSharesRes = await capsule.ctx.capsuleClient.getBiometricKeyshares(userId, signatureId);
-  const decryptedShares = await getDerivedPrivateKeyAndDecrypt(capsule.ctx, userHandle, encryptedSharesRes.data.keyShares);
+  const encryptedSharesRes = await para.ctx.client.getBiometricKeyshares(userId, signatureId);
+  const decryptedShares = await getDerivedPrivateKeyAndDecrypt(para.ctx, userHandle, encryptedSharesRes.data.keyShares);
 
-  const walletsRes = await capsule.ctx.capsuleClient.getWallets(userId);
+  const walletsRes = await para.ctx.client.getWallets(userId);
   const desiredWallets = walletsRes.data.wallets;
 
   const walletsToInsert: { [id: string]: Wallet } = {};
@@ -279,41 +281,36 @@ async function login(capsule: CapsuleWeb, args: any[]) {
         scheme: desiredWallet.scheme as WalletScheme,
       };
     }
-    await capsule.setWallets(walletsToInsert);
+    await para.setWallets(walletsToInsert);
 
     // Return first wallet for backwards compatibility
     return desiredWallets[0];
   }
 }
 
-async function loginV2(capsule: CapsuleWeb, args: any[]) {
+async function loginV2(para: ParaWeb, args: any[]) {
   const userId = args[0];
   const credentialsId = args[1];
   const userHandle = args[2];
 
-  await capsule.setUserId(userId);
-  if (!capsule.getEmail()) {
-    const touchRes = await capsule.ctx.capsuleClient.touchSession();
+  await para.setUserId(userId);
+  if (!para.getEmail()) {
+    const touchRes = await para.ctx.client.touchSession();
     if (touchRes.data.email) {
-      await capsule.setEmail(touchRes.data.email);
+      await para.setEmail(touchRes.data.email);
     }
   }
 
   const encryptionKeyHash = getSHA256HashHex(userHandle);
-  const encryptedSharesRes = await capsule.ctx.capsuleClient.getBiometricKeyshares(userId, credentialsId);
-  const { encryptedPrivateKeys } = await capsule.ctx.capsuleClient.getEncryptedWalletPrivateKeys(userId, encryptionKeyHash);
+  const encryptedSharesRes = await para.ctx.client.getBiometricKeyshares(userId, credentialsId);
+  const { encryptedPrivateKeys } = await para.ctx.client.getEncryptedWalletPrivateKeys(userId, encryptionKeyHash);
   let decryptedShares;
 
   if (encryptedPrivateKeys.length === 0) {
-    decryptedShares = await getDerivedPrivateKeyAndDecrypt(capsule.ctx, userHandle, encryptedSharesRes.data.keyShares);
-    const keyPair = await getAsymmetricKeyPair(capsule.ctx, userHandle);
+    decryptedShares = await getDerivedPrivateKeyAndDecrypt(para.ctx, userHandle, encryptedSharesRes.data.keyShares);
+    const keyPair = await getAsymmetricKeyPair(para.ctx, userHandle);
     const encryptedPrivateKeyHex = await encryptPrivateKey(keyPair, userHandle);
-    await capsule.ctx.capsuleClient.uploadEncryptedWalletPrivateKey(
-      userId,
-      encryptedPrivateKeyHex,
-      encryptionKeyHash,
-      credentialsId,
-    );
+    await para.ctx.client.uploadEncryptedWalletPrivateKey(userId, encryptedPrivateKeyHex, encryptionKeyHash, credentialsId);
   } else {
     decryptedShares = await decryptPrivateKeyAndDecryptShare(
       userHandle,
@@ -322,7 +319,7 @@ async function loginV2(capsule: CapsuleWeb, args: any[]) {
     );
   }
 
-  const walletsRes = await capsule.ctx.capsuleClient.getWallets(userId);
+  const walletsRes = await para.ctx.client.getWallets(userId);
   const desiredWallets = walletsRes.data.wallets;
 
   const walletsToInsert: { [id: string]: Wallet } = {};
@@ -341,7 +338,7 @@ async function loginV2(capsule: CapsuleWeb, args: any[]) {
     }
   }
 
-  await capsule.setWallets(walletsToInsert);
+  await para.setWallets(walletsToInsert);
 
   return desiredWallets[0];
 }

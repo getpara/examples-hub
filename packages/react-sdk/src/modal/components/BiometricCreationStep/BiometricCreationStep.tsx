@@ -1,8 +1,8 @@
-import { CpslButton, CpslDivider, CpslIcon, CpslQrCode, CpslSpinner, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslDivider, CpslIcon, CpslQrCode, CpslSpinner, CpslText } from '@getpara/react-components';
 import { useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { InnerStepContainer, StepContainer, Heading, QRContainer } from '../common.js';
 import { isPasskeySupported } from '../../utils/isPasskeySupported.js';
-import { useCopyToClipboard, UserIdentifier } from '@usecapsule/react-common';
+import { useCopyToClipboard, UserIdentifier } from '@getpara/react-common';
 
 export const BiometricCreationStep = ({
   handlePasswordClick,

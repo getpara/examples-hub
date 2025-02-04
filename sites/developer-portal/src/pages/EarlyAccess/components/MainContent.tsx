@@ -8,7 +8,7 @@ import { RequestEnterpriseModal } from '../../../components/RequestEnterpriseMod
 import { useGetOrganizationEarlyAccess, useGetSelectedOrganization } from '../../../hooks/api/queries/useOrganizations';
 import { useRequestEarlyAccess } from '../../../hooks/api/mutations/useRequestEarlyAccess';
 import { triggerToast } from '../../../utils/toasts';
-import { CpslText } from '@usecapsule/react-components';
+import { CpslText } from '@getpara/react-components';
 import { useStripePlan } from '../../../hooks/useStripePlan';
 import { useGetOrganizationSubscription } from '../../../hooks/api/queries/useOrganizationSubscription';
 
@@ -35,7 +35,7 @@ export const MainContent = () => {
           triggerToast({
             variant: 'error',
             title: 'Error Requesting Early Access',
-            body: 'Please try again. If the problem persists, contact Capsule support.',
+            body: 'Please try again. If the problem persists, contact Para support.',
           });
         },
       },

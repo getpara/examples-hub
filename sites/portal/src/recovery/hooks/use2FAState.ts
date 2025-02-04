@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { STORAGE_PREFIX } from '@usecapsule/react-sdk';
+import { STORAGE_PREFIX } from '@getpara/react-sdk';
 
 const use2FAState = (initialValue: boolean | null) => {
   const [state, setState] = useState<boolean | null>(() => {

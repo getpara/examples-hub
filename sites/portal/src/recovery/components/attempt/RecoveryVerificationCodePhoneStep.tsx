@@ -9,15 +9,15 @@ import Console from '../../../assets/console';
 import PhoneContext from '../../contexts/PhoneContext';
 import UserContext from '../../contexts/UserContext';
 import TwoFactorContext from '../../contexts/TwoFactorContext';
-import { RecoveryStatus } from '@usecapsule/core-sdk';
-import { useCapsule } from '../../../components/CapsuleContext';
+import { RecoveryStatus } from '@getpara/core-sdk';
+import { usePara } from '../../../components/ParaContext';
 
 type RecoveryVerificationCodePhoneStepProps = {
   onClose: () => void;
 };
 
 const RecoveryVerificationCodePhoneStep: React.FC<RecoveryVerificationCodePhoneStepProps> = ({ onClose }) => {
-  const capsule = useCapsule();
+  const para = usePara();
   const { setCurrentStep } = useContext(StepContext);
   const { phone, countryCode } = useContext(PhoneContext);
   const { setWallets } = useContext(WalletContext);
@@ -92,7 +92,7 @@ const RecoveryVerificationCodePhoneStep: React.FC<RecoveryVerificationCodePhoneS
         onClick={async () => {
           if (verificationCode.length === 6 && /^\d+$/.test(verificationCode)) {
             try {
-              const res = await capsule.ctx.capsuleClient.verifyPhoneForRecovery(phone, countryCode, verificationCode);
+              const res = await para.ctx.client.verifyPhoneForRecovery(phone, countryCode, verificationCode);
               const status = res.data.status;
               const initiatedAt = res.data.initiatedAt as Date;
               const skip2FA = res.data.skip2FA as boolean;
@@ -139,7 +139,7 @@ const RecoveryVerificationCodePhoneStep: React.FC<RecoveryVerificationCodePhoneS
         onClick={async () => {
           setResendStatus('Code Resent!');
           setResendButtonDisabled(true);
-          await capsule.ctx.capsuleClient.initializeRecoveryForPhone(phone, countryCode);
+          await para.ctx.client.initializeRecoveryForPhone(phone, countryCode);
 
           setTimeout(() => {
             setResendStatus('Resend Code');

@@ -10,7 +10,7 @@ if (typeof global === 'undefined') {
 }
 
 // leaving this for now as we don't want to export all walletUtils function from web-sdk
-import { Message, handleMessage } from '@usecapsule/web-sdk/dist/workers/worker';
+import { Message, handleMessage } from '@getpara/web-sdk/dist/workers/worker';
 
 addEventListener('message', async (e: { data: Message }) => {
   const skipClose = await handleMessage(e, self.postMessage);

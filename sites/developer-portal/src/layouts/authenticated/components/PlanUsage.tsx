@@ -1,4 +1,4 @@
-import { CpslButton, CpslCard, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslCard, CpslText } from '@getpara/react-components';
 import { useGetOrganizationSubscription } from '../../../hooks/api/queries/useOrganizationSubscription';
 import styled from 'styled-components';
 import { usePlanMetadata } from '../../../hooks/configs/usePlanMetadata';

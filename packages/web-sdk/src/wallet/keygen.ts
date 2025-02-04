@@ -1,9 +1,9 @@
 import { setupWorker } from '../workers/workerWrapper.js';
-import { Ctx, distributeNewShare, waitUntilTrue, TPregenIdentifierType } from '@usecapsule/core-sdk';
-import { BackupKitEmailProps, WalletType } from '@usecapsule/user-management-client';
+import { Ctx, distributeNewShare, waitUntilTrue, TPregenIdentifierType } from '@getpara/core-sdk';
+import { BackupKitEmailProps, WalletType } from '@getpara/user-management-client';
 
 async function isKeygenComplete(ctx: Ctx, userId: string, walletId: string): Promise<boolean> {
-  const wallets = await ctx.capsuleClient.getWallets(userId);
+  const wallets = await ctx.client.getWallets(userId);
   const wallet = wallets.data.wallets.find(w => w.id === walletId);
   return !!wallet.address;
 }
@@ -15,7 +15,7 @@ async function isRefreshComplete(
   partnerId?: string,
   protocolId?: string,
 ): Promise<boolean> {
-  const { isDone } = await ctx.capsuleClient.isRefreshDone(userId, walletId, partnerId, protocolId);
+  const { isDone } = await ctx.client.isRefreshDone(userId, walletId, partnerId, protocolId);
   return isDone;
 }
 
@@ -25,7 +25,7 @@ async function isPreKeygenComplete(
   pregenIdentifierType: TPregenIdentifierType,
   walletId: string,
 ): Promise<boolean> {
-  const wallets = await ctx.capsuleClient.getPregenWallets({ [pregenIdentifierType]: [pregenIdentifier] });
+  const wallets = await ctx.client.getPregenWallets({ [pregenIdentifierType]: [pregenIdentifier] });
   const wallet = wallets.wallets.find(w => w.id === walletId);
   return !!wallet.address;
 }
@@ -56,7 +56,13 @@ export function keygen(
         return;
       }
 
-      const recoveryShare = await distributeNewShare(ctx, userId, res.walletId, res.signer, false, emailProps);
+      const recoveryShare = await distributeNewShare({
+        ctx,
+        userId,
+        walletId: res.walletId,
+        userShare: res.signer,
+        emailProps,
+      });
       resolve({
         signer: res.signer,
         walletId: res.walletId,
@@ -145,6 +151,7 @@ export function refresh(
 }> {
   return new Promise(async resolve => {
     const worker = await setupWorker(ctx, async res => {
+      /* v8 ignore next 3 */
       if (!(await waitUntilTrue(async () => isRefreshComplete(ctx, userId, walletId, newPartnerId), 15000, 1000))) {
         throw new Error('refresh failed');
       }

@@ -1,4 +1,4 @@
-import { CpslSpinner, CpslText } from '@usecapsule/react-components';
+import { CpslSpinner, CpslText } from '@getpara/react-components';
 import { Heading, SpinnerContainer, StepContainer, InnerStepContainer } from '../common.js';
 
 interface WaitingProps {

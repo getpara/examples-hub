@@ -4,10 +4,10 @@ import RecoveryStepContext from '../../contexts/RecoveryStepContext';
 import { ModalStep } from '../../steps/recoverySteps';
 import UserContext from '../../contexts/UserContext';
 import WalletContext from '../../contexts/WalletContext';
-import { useCapsule } from '../../../components/CapsuleContext';
+import { usePara } from '../../../components/ParaContext';
 
 const RecoveryAwaitingFinishStep: React.FC = () => {
-  const capsule = useCapsule();
+  const para = usePara();
   const [percentDone, setPercentDone] = useState(0);
   const { setCurrentRecoveryStep } = useContext(RecoveryStepContext);
   const { id: userId } = useContext(UserContext);
@@ -17,7 +17,7 @@ const RecoveryAwaitingFinishStep: React.FC = () => {
     const finishRecovery = async () => {
       setCurrentRecoveryStep(ModalStep.FINISH);
 
-      const finalizePromises = wallets.map(w => capsule.ctx.capsuleClient.finalizeRecovery(userId, w.id));
+      const finalizePromises = wallets.map(w => para.ctx.client.finalizeRecovery(userId, w.id));
 
       await Promise.all(finalizePromises);
     };

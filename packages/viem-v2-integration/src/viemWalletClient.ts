@@ -15,19 +15,19 @@ import {
 } from 'viem';
 import * as viemChains from 'viem/chains';
 
-import CoreCapsule, { hexStringToBase64, hexToSignature, Wallet, SuccessfulSignatureRes } from '@usecapsule/core-sdk';
+import ParaCore, { hexStringToBase64, hexToSignature, Wallet, SuccessfulSignatureRes } from '@getpara/core-sdk';
 
 interface ViemClientOpts {
   noAccount?: boolean;
 }
 
-export function createCapsuleAccount(capsule: CoreCapsule, walletAddress?: Hex): LocalAccount {
+export function createParaAccount(para: ParaCore, walletAddress?: Hex): LocalAccount {
   let currentWallet: Wallet;
   if (walletAddress) {
-    currentWallet = capsule.findWalletByAddress(walletAddress, { type: ['EVM'] });
+    currentWallet = para.findWalletByAddress(walletAddress, { type: ['EVM'] });
   } else {
-    const walletId = capsule.findWalletId(undefined, { type: ['EVM'] });
-    currentWallet = capsule.wallets[walletId];
+    const walletId = para.findWalletId(undefined, { type: ['EVM'] });
+    currentWallet = para.wallets[walletId];
   }
 
   return {
@@ -37,7 +37,7 @@ export function createCapsuleAccount(capsule: CoreCapsule, walletAddress?: Hex):
     type: 'local',
     signMessage: async ({ message }) => {
       const hashedMessage = hashMessage(message);
-      const res = await capsule.signMessage(currentWallet.id, hexStringToBase64(hashedMessage));
+      const res = await para.signMessage({ walletId: currentWallet.id, messageBase64: hexStringToBase64(hashedMessage) });
       const signature = (res as SuccessfulSignatureRes).signature;
       return `0x${signature}`;
     },
@@ -57,11 +57,11 @@ export function createCapsuleAccount(capsule: CoreCapsule, walletAddress?: Hex):
         s: '0x',
         v: BigInt(0),
       });
-      const res = await capsule.signTransaction(
-        currentWallet.id,
-        hexStringToBase64(serializedTx.substring(2)),
-        `${transaction.chainId}`,
-      );
+      const res = await para.signTransaction({
+        walletId: currentWallet.id,
+        rlpEncodedTxBase64: hexStringToBase64(serializedTx.substring(2)),
+        chainId: `${transaction.chainId}`,
+      });
       const signature = (res as SuccessfulSignatureRes).signature;
       const formattedSig = hexToSignature(`0x${signature}`);
       formattedSig.v += BigInt(27);
@@ -74,7 +74,10 @@ export function createCapsuleAccount(capsule: CoreCapsule, walletAddress?: Hex):
     >(
       typedDataDefinition: TypedDataDefinition<typedData, primaryType>,
     ) => {
-      const res = await capsule.signMessage(currentWallet.id, hexStringToBase64(hashTypedData(typedDataDefinition)));
+      const res = await para.signMessage({
+        walletId: currentWallet.id,
+        messageBase64: hexStringToBase64(hashTypedData(typedDataDefinition)),
+      });
       const signature = (res as SuccessfulSignatureRes).signature;
       return `0x${signature}`;
     },
@@ -92,13 +95,9 @@ export function getViemChain(chainId: string): viemChains.Chain {
   throw new Error(`chain with id ${chainId} not found`);
 }
 
-export function createCapsuleViemClient(
-  capsule: CoreCapsule,
-  params: WalletClientConfig,
-  opts?: ViemClientOpts,
-): WalletClient {
+export function createParaViemClient(para: ParaCore, params: WalletClientConfig, opts?: ViemClientOpts): WalletClient {
   return createWalletClient({
-    account: opts?.noAccount ? undefined : createCapsuleAccount(capsule),
+    account: opts?.noAccount ? undefined : createParaAccount(para),
     ...params,
   });
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ModalStep } from '../steps/recoverySteps';
-import { STORAGE_PREFIX } from '@usecapsule/web-sdk';
+import { STORAGE_PREFIX } from '@getpara/web-sdk';
 
 const useCurrentRecoveryStepState = (initialValue: ModalStep) => {
   const [state, setState] = useState(

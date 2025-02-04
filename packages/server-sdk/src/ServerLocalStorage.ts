@@ -1,4 +1,4 @@
-import type { StorageUtils } from '@usecapsule/core-sdk';
+import type { StorageUtils } from '@getpara/core-sdk';
 
 /**
  * Implements `StorageUtils`

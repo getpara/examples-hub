@@ -18,7 +18,7 @@ import Client, {
   OnRampPurchaseType,
   WalletScheme,
   WalletType,
-} from '@usecapsule/user-management-client';
+} from '@getpara/user-management-client';
 import { AxiosInstance } from 'axios';
 
 export { Network, OnRampAsset, OnRampProvider, OnRampPurchaseStatus, type OnRampPurchase };
@@ -40,7 +40,7 @@ export enum Environment {
 export interface Ctx {
   env: Environment;
   apiKey?: string;
-  capsuleClient: Client;
+  client: Client;
   disableWorkers?: boolean;
   offloadMPCComputationURL?: string;
   mpcComputationClient?: AxiosInstance;
@@ -168,23 +168,23 @@ export function getPortalBaseURL(
   return `https://${domain}`;
 }
 
-export function getCapsuleConnectDomain(env: Environment) {
+export function getParaConnectDomain(env: Environment) {
   switch (env) {
     case Environment.DEV:
       return 'localhost';
     case Environment.SANDBOX:
-      return 'connect.sandbox.usecapsule.com';
+      return 'connect.sandbox.getpara.com';
     case Environment.BETA:
-      return 'connect.beta.usecapsule.com';
+      return 'connect.beta.getpara.com';
     case Environment.PROD:
-      return 'connect.usecapsule.com';
+      return 'connect.getpara.com';
     default:
       throw new Error(`env: ${env} not supported`);
   }
 }
 
-export function getCapsuleConnectBaseURL({ env }: { env: Environment }, useLocalIp?: boolean) {
-  const domain = getCapsuleConnectDomain(env);
+export function getParaConnectBaseUrl({ env }: { env: Environment }, useLocalIp?: boolean) {
+  const domain = getParaConnectDomain(env);
   if (env === Environment.DEV) {
     if (useLocalIp) {
       return `http://127.0.0.1:3008`;
@@ -193,9 +193,6 @@ export function getCapsuleConnectBaseURL({ env }: { env: Environment }, useLocal
   }
   return `https://${domain}`;
 }
-
-export const EXTERNAL_WALLET_CHANGE_EVENT = 'capsuleExternalWalletChange';
-export const CURRENT_WALLET_IDS_CHANGE_EVENT = 'capsuleCurrentWalletIdsChange';
 
 export type ProviderAssetInfo = [string, Partial<Record<OnRampPurchaseType, boolean>>];
 

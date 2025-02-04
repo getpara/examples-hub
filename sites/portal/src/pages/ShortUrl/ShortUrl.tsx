@@ -1,14 +1,14 @@
 import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
-import { transmissionUtilsRetrieve } from '@usecapsule/web-sdk';
-import { useCapsule } from '../../components/CapsuleContext';
+import { transmissionUtilsRetrieve } from '@getpara/web-sdk';
+import { usePara } from '../../components/ParaContext';
 
 export default function ShortUrl() {
-  const capsule = useCapsule();
+  const para = usePara();
   const { shortenedUrl } = useParams();
   useEffect(() => {
     async function navigate() {
-      const message = await transmissionUtilsRetrieve(shortenedUrl!, capsule.ctx.capsuleClient);
+      const message = await transmissionUtilsRetrieve(shortenedUrl!, para.ctx.client);
       location.href = message;
     }
 

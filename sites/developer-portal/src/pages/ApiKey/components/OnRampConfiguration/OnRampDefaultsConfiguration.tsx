@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
 import { useOnRampAllAssets } from '../../../../hooks/api/queries/useOnRampAssets';
-import { getAssetIcon, getAssetName, getNetworkName, Network, OnRampAsset, toAssetInfoArray } from '@usecapsule/react-sdk';
+import { getAssetIcon, getAssetName, getNetworkName, Network, OnRampAsset, toAssetInfoArray } from '@getpara/react-sdk';
 import { OptionDisplay } from './common';
 import { GreenSwitch, SectionCard } from '../common';
-import { CpslIcon, CpslInput, CpslSelect, CpslSelectItem } from '@usecapsule/react-components';
+import { CpslIcon, CpslInput, CpslSelect, CpslSelectItem } from '@getpara/react-components';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { OnRampAssets } from '../../../../types/api';
 import { useOnRampConfigFormData } from '../../hooks/useOnRampConfigFormData';

@@ -10,7 +10,7 @@ import {
   ProviderAssetInfo,
   OnRampConfig,
   WalletType,
-} from '@usecapsule/web-sdk';
+} from '@getpara/web-sdk';
 
 export function getCurrencyCodes(
   { assetInfo, allowedAssets, defaultOnRampNetwork, defaultOnRampAsset }: OnRampConfig,

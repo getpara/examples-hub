@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { STORAGE_PREFIX } from '@usecapsule/core-sdk';
+import { STORAGE_PREFIX } from '@getpara/core-sdk';
 import { RecoveryType } from '../contexts/RecoveryAttemptContext';
 
 const useRecoveryTypeState = (initialValue: RecoveryType | null) => {

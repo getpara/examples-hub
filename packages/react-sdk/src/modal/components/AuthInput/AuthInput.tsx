@@ -4,7 +4,7 @@ import {
   DropdownInputEventDetail,
   IconType,
   InputInputEventDetail,
-} from '@usecapsule/core-components';
+} from '@getpara/core-components';
 import {
   CpslButton,
   CpslIcon,
@@ -13,18 +13,19 @@ import {
   CpslSelectItem,
   CpslSpinner,
   CpslText,
-} from '@usecapsule/react-components';
+} from '@getpara/react-components';
 import { CountryCallingCode } from 'libphonenumber-js';
 import { useRef, useState } from 'react';
 import styled from 'styled-components';
 import countryCodes from './countryCodes.js';
-import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
+import { useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { EMAIL_REGEX, MOBILE_SIZE } from '../../constants/constants.js';
 import { useDropdownPosition } from './hooks/useDropdownPosition.js';
 import { ModalStep } from '../../utils/steps.js';
 import { defaultPhoneMask, phoneMasks } from './phoneMasks.js';
-import { AuthMethod } from '@usecapsule/web-sdk';
-import { AuthType } from '@usecapsule/user-management-client';
+import { AuthMethod } from '@getpara/web-sdk';
+import { AuthType } from '@getpara/user-management-client';
+import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 
 interface AuthInputProps {
   disableEmailLogin?: boolean;
@@ -37,7 +38,7 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
   const inputRef = useRef<HTMLCpslInputElement>(null);
   const { dropdownMaxHeight, dropdownWidth } = useDropdownPosition(inputRef);
 
-  const capsule = useCapsuleStore(state => state.capsule);
+  const para = useInternalClient();
   const setAuthInfo = useUserInfoStore(state => state.setAuthInfo);
   const authInfo = useUserInfoStore(state => state.getAuthInfo());
   const setFlow = useModalStore(state => state.setFlow);
@@ -126,6 +127,8 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
       return;
     }
 
+    let auth;
+
     if (isEmail) {
       if (!EMAIL_REGEX.test(identifier)) {
         setError('Please enter a valid email!');
@@ -133,14 +136,17 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
       }
 
       // Logout to ensure cleared Capsule state but preserve pregen wallets
-      await capsule.logout(true);
+      // TODO: migrate to hook once we force the use of the CapsuleProvider
+      await para.logout();
 
-      setAuthInfo({ email: identifier });
-      const userExists = await capsule.checkIfUserExists(identifier);
+      auth = { email: identifier };
+
+      setAuthInfo(auth);
+      const userExists = await para.checkIfUserExists({ email: identifier });
       if (userExists) {
-        const supportedAuthMethods = await capsule.initiateUserLoginV2(identifier, 'email');
+        const supportedAuthMethods = await para.initiateUserLoginV2(auth);
         const biometricLocationHints = supportedAuthMethods.has(AuthMethod.PASSKEY)
-          ? await capsule.getUserBiometricLocationHints()
+          ? await para.getUserBiometricLocationHints()
           : [];
 
         setFlow('login');
@@ -150,30 +156,35 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
         return;
       }
 
-      await capsule.createUser(identifier);
+      // TODO: migrate to hook once we force the use of the CapsuleProvider
+      await para.createUser(auth);
       setFlow('signUp');
       setStep(ModalStep.VERIFICATIONS);
       return;
     }
     if (isPhone) {
       // Logout to ensure cleared Capsule state but preserve pregen wallets
-      await capsule.logout(true);
+      // TODO: migrate to hook once we force the use of the CapsuleProvider
+      await para.logout();
 
       let userExists = false;
 
       try {
-        userExists = await capsule.checkIfUserExistsByPhone(identifier, countryCode);
+        userExists = await para.checkIfUserExistsByPhone({ phone: identifier, countryCode });
       } catch (error) {
         setError('Please enter a valid phone number!');
         return;
       }
 
-      setAuthInfo({ phone: identifier, countryCode });
+      auth = { phone: identifier, countryCode };
+
+      setAuthInfo(auth);
 
       if (userExists) {
-        const supportedAuthMethods = await capsule.initiateUserLoginV2(identifier, 'phone', countryCode);
+        // TODO: migrate to hook once we force the use of the CapsuleProvider
+        const supportedAuthMethods = await para.initiateUserLoginV2(auth);
         const biometricLocationHints = supportedAuthMethods.has(AuthMethod.PASSKEY)
-          ? await capsule.getUserBiometricLocationHints()
+          ? await para.getUserBiometricLocationHints()
           : [];
 
         setFlow('login');
@@ -183,7 +194,8 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
         return;
       }
 
-      await capsule.createUserByPhone(identifier, countryCode);
+      // TODO: migrate to hook once we force the use of the CapsuleProvider
+      await para.createUserByPhone(auth);
       setFlow('signUp');
       setStep(ModalStep.VERIFICATIONS);
       return;

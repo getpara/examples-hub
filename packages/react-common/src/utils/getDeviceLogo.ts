@@ -1,4 +1,4 @@
-import { IconType } from '@usecapsule/react-components';
+import { IconType } from '@getpara/react-components';
 
 export const getDeviceLogo = (vendor?: string, isMobile?: boolean): IconType => {
   switch (vendor?.toLowerCase()) {

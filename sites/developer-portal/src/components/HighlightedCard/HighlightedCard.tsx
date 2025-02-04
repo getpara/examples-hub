@@ -1,4 +1,4 @@
-import { CpslText } from '@usecapsule/react-components';
+import { CpslText } from '@getpara/react-components';
 import { PropsWithChildren } from 'react';
 import styled from 'styled-components';
 import { BaseCard, LINEAR_GRADIENT } from '../common';

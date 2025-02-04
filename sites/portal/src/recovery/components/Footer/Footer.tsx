@@ -1,11 +1,11 @@
 import { Box, Flex } from '@chakra-ui/react';
-import PoweredByCapsule from '../../../assets/poweredByCapsule';
+import PoweredByPara from '../../../assets/poweredByPara';
 
 export function Footer() {
   return (
     <Box height="62px" width="100%">
       <Flex h="57px" w="100%" justifyContent={'center'} alignItems={'center'}>
-        <PoweredByCapsule />
+        <PoweredByPara />
       </Flex>
     </Box>
   );

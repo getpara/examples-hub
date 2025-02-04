@@ -2,7 +2,7 @@ import { afterAll, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { AuthInput } from '../../../src/modal/components/AuthInput/AuthInput.js';
-import { defineCustomElements } from '@usecapsule/react-components';
+import { defineCustomElements } from '@getpara/react-components';
 
 function mockModalStore(store = {}) {
   vi.mock('../../src/modal/stores/useModalStore.js', () => ({
@@ -56,7 +56,7 @@ async function setup() {
   };
 }
 
-describe('CapsuleModal', () => {
+describe('ParaModal', () => {
   afterAll(() => {
     vi.clearAllMocks();
   });
@@ -113,11 +113,11 @@ describe('CapsuleModal', () => {
 
   // TODO: add data-testid as optional field to all components and reimpliment using data-testid selector
   // it('can continue with email', async () => {
-  //   const capsule = new Capsule(Environment.DEV, 'apikey123');
+  //   const para = new Para(Environment.DEV, 'apikey123');
   //   render(
-  //     <CapsuleModal
+  //     <ParaModal
   //       isOpen={true}
-  //       capsule={capsule}
+  //       para={para}
   //       appName="App Name"
   //       oAuthMethods={[OAuthMethod.GOOGLE, OAuthMethod.FACEBOOK, OAuthMethod.APPLE]}
   //       onClose={() => {}}

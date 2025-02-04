@@ -1,4 +1,4 @@
-import { CpslIcon, CpslText } from '@usecapsule/react-components';
+import { CpslIcon, CpslText } from '@getpara/react-components';
 import styled from 'styled-components';
 
 export const ArchiveLabel = () => {

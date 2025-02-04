@@ -12,7 +12,7 @@ export const USER = {
 };
 export const COSMOS_PREFIX = 'test';
 export const SHARE = { id: 'test-share', disableWebSockets: false };
-export const CAPSULE_SHARE = 'test-capsule-share';
+export const PARA_SHARE = 'test-para-share';
 export const WALLET = {
   address: '0x1aD2B053b8c6b1592cB645DEfadf105F34d8C6p0',
   createdAt: '2024-10-22T00:00:00.000Z',

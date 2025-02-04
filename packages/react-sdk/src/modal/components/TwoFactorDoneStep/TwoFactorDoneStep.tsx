@@ -1,4 +1,4 @@
-import { CpslButton, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslText } from '@getpara/react-components';
 import { Heading, StepContainer, InnerStepContainer, HeroIcon } from '../common.js';
 import { useThemeStore } from '../../stores/index.js';
 

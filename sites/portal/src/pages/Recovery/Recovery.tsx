@@ -1,7 +1,7 @@
 import { Box, ChakraProvider, HStack, Text, VStack } from '@chakra-ui/react';
 import React, { useEffect } from 'react';
 import './recovery.css';
-import { truncateEthAddress, RecoveryStatus } from '@usecapsule/web-sdk';
+import { truncateEthAddress, RecoveryStatus } from '@getpara/web-sdk';
 import EmailContext from '../../recovery/contexts/EmailContext';
 import PhoneContext from '../../recovery/contexts/PhoneContext';
 import RecoveryButton from '../../recovery/components/attempt/RecoveryButton';
@@ -57,7 +57,7 @@ const Recovery: React.FC = () => {
     <ChakraProvider theme={newTheme}>
       <div className="App">
         <h1>Recovery Portal</h1>
-        <p>Welcome to the Capsule Recovery Portal</p>
+        <p>Welcome to the Para Recovery Portal</p>
         <p>Here you'll be able to regain access to your account</p>
         {!wallets?.length && (
           <p>
@@ -70,7 +70,7 @@ const Recovery: React.FC = () => {
             <li>
               Initiate a <strong>Recovery Attempt</strong>. To do this, you'll need to confirm your email
             </li>
-            <li>Enter your 2FA code if you had it set up for your Capsule Wallet, and begin to recover your wallet.</li>
+            <li>Enter your 2FA code if you had it set up for your Para Wallet, and begin to recover your wallet.</li>
           </ol>
         </div>
         <div className="button-container">

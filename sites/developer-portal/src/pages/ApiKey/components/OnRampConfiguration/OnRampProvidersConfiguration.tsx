@@ -1,7 +1,7 @@
 import { Controller } from 'react-hook-form';
-import { ON_RAMP_PROVIDERS, OnRampProvider } from '@usecapsule/react-sdk';
+import { ON_RAMP_PROVIDERS, OnRampProvider } from '@getpara/react-sdk';
 import { ArraySelect } from '../../../../components/ArraySelect/index.js';
-import { CpslRow, CpslText } from '@usecapsule/react-components';
+import { CpslRow, CpslText } from '@getpara/react-components';
 import { BrandIcon, InnerInput } from './common.js';
 import { SectionCard, GreenSwitch } from '../common.js';
 

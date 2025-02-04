@@ -1,4 +1,4 @@
-import { CpslInput } from '@usecapsule/react-components';
+import { CpslInput } from '@getpara/react-components';
 import { Controller, useFormContext } from 'react-hook-form';
 import { UpdateNativePasskey } from '../../hooks/useNativePasskeyConfigFormData';
 

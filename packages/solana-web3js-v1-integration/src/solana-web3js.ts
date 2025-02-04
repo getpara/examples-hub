@@ -1,30 +1,26 @@
 import * as solana from '@solana/web3.js';
 import bs58 from 'bs58';
 
-import CoreCapsule, {
-  DeniedSignatureResWithUrl,
-  SuccessfulSignatureRes,
-  TransactionReviewError,
-} from '@usecapsule/core-sdk';
+import ParaCore, { DeniedSignatureResWithUrl, SuccessfulSignatureRes, TransactionReviewError } from '@getpara/core-sdk';
 
-export class CapsuleSolanaWeb3Signer {
+export class ParaSolanaWeb3Signer {
   private connection: solana.Connection;
-  private capsule: CoreCapsule;
+  private para: ParaCore;
   private currentWalletId: string;
 
   public address?: string;
   public sender?: solana.PublicKey;
 
-  constructor(capsule: CoreCapsule, connection: solana.Connection, walletId?: string) {
-    this.currentWalletId = capsule.findWalletId(walletId, { type: ['SOLANA'] });
+  constructor(para: ParaCore, connection: solana.Connection, walletId?: string) {
+    this.currentWalletId = para.findWalletId(walletId, { type: ['SOLANA'] });
     this.connection = connection;
-    this.capsule = capsule;
-    this.address = capsule.wallets[this.currentWalletId].address;
+    this.para = para;
+    this.address = para.wallets[this.currentWalletId].address;
     this.sender = this.address ? new solana.PublicKey(bs58.decode(this.address)) : undefined;
   }
 
   async signBytes(bytes: Buffer): Promise<Buffer> {
-    const res = await this.capsule.signMessage(this.currentWalletId, bytes.toString('base64'));
+    const res = await this.para.signMessage({ walletId: this.currentWalletId, messageBase64: bytes.toString('base64') });
     if ((res as DeniedSignatureResWithUrl).transactionReviewUrl) {
       throw new TransactionReviewError((res as DeniedSignatureResWithUrl).transactionReviewUrl);
     }

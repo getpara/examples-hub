@@ -1,4 +1,4 @@
-import { CpslButton } from '@usecapsule/react-components';
+import { CpslButton } from '@getpara/react-components';
 import styled from 'styled-components';
 import { useFormContext } from 'react-hook-form';
 import { useGetAvailableKeyEnvs } from '../../../hooks/api/queries/useOrganizationKeys';

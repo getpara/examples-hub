@@ -1,4 +1,4 @@
-import { CpslAlert } from '@usecapsule/react-components';
+import { CpslAlert } from '@getpara/react-components';
 import styled from 'styled-components';
 import { InlineText } from '../../../components/common';
 import { useParams } from 'react-router-dom';

@@ -14,7 +14,7 @@ import { Framework } from '../../../../types/framework.ts';
 import { InnerConfigurationCard } from '../InnerConfigurationCard.tsx';
 import { AndroidPackageName } from './AndroidPackageName.tsx';
 import { AndroidSha256CertFingerprints } from './AndroidSha256CertFingerprints.tsx';
-import { CpslText } from '@usecapsule/react-components';
+import { CpslText } from '@getpara/react-components';
 
 const TITLE = 'Native Passkey Configuration';
 

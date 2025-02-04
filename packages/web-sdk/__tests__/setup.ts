@@ -14,7 +14,7 @@ import {
   WINDOW_INNER_HEIGHT,
   WINDOW_INNER_WIDTH,
 } from './constants';
-import { Ctx, Environment, initClient } from '@usecapsule/core-sdk';
+import { Ctx, Environment, initClient } from '@getpara/core-sdk';
 import { mockMPCClient } from './mocks/mockMPCClient.js';
 
 export const mockCreateCred = vi.fn(async () => {
@@ -90,7 +90,7 @@ Object.defineProperty(globalThis, 'WebAssembly', {
 
 export const TEST_CTX: Ctx = {
   env: Environment.DEV,
-  capsuleClient: initClient(Environment.DEV),
+  client: initClient({ env: Environment.DEV }),
   disableWebSockets: false,
   useDKLS: true,
   apiKey: PARTNER.apiKey,

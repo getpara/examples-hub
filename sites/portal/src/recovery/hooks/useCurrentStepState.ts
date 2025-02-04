@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ModalStep } from '../steps/attemptSteps';
-import { STORAGE_PREFIX } from '@usecapsule/web-sdk';
+import { STORAGE_PREFIX } from '@getpara/web-sdk';
 
 const useCurrentStepState = (initialValue: ModalStep) => {
   const [state, setState] = useState((sessionStorage.getItem(`${STORAGE_PREFIX}currentStep`) as ModalStep) || initialValue);

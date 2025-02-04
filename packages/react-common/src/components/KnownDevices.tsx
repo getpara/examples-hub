@@ -1,4 +1,4 @@
-import { CpslButton, CpslIcon, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon, CpslText } from '@getpara/react-components';
 import styled from 'styled-components';
 import { CenteredColumnContainer, FullWidthFilledDisabledInput, CenteredText } from './common.js';
 import { QRCode } from './QRCode.js';
@@ -47,7 +47,7 @@ export const KnownDevices = ({ hints, link, showCurrentDevice }: KnownDevicesPro
         </DevicesContainer>
       )}
       {hints.hasMobileDevice ? (
-        <QRCode link={link} icon="capsuleBlackBg" />
+        <QRCode link={link} icon="paraIconQr" />
       ) : (
         <CenteredColumnContainer>
           <FullWidthFilledDisabledInput noAutoDisable readonly disabled value={link}>

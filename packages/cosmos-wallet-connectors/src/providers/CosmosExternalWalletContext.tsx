@@ -1,7 +1,7 @@
 import { ReactNode, createContext, useEffect, useMemo, useState } from 'react';
 import { CommonChain, CommonWallet } from '../types/CommonTypes.js';
-import { useCapsuleCosmos } from './CapsuleCosmosContext.js';
-import CapsuleWeb, { WalletType } from '@usecapsule/react-sdk';
+import { useParaCosmos } from './ParaCosmosContext.js';
+import ParaWeb, { WalletType } from '@getpara/react-sdk';
 import {
   checkWallet,
   WalletType as GrazWalletType,
@@ -12,7 +12,7 @@ import {
   useDisconnect,
   useSuggestChainAndConnect,
   getChainInfo,
-} from '@usecapsule/graz';
+} from '@getpara/graz';
 
 export const defaultCosmosExternalWallet = {
   wallets: [],
@@ -32,11 +32,11 @@ export const CosmosExternalWalletContext = createContext<{
 
 interface CosmosExternalWalletProviderProps {
   children: ReactNode;
-  capsule: CapsuleWeb;
+  para: ParaWeb;
   onSwitchWallet: (args: { address?: string; error?: string }) => void;
 }
 
-export function CosmosExternalWalletProvider({ children, capsule, onSwitchWallet }: CosmosExternalWalletProviderProps) {
+export function CosmosExternalWalletProvider({ children, para, onSwitchWallet }: CosmosExternalWalletProviderProps) {
   const {
     selectedChainId,
     wallets: incompleteWallets,
@@ -44,7 +44,7 @@ export function CosmosExternalWalletProvider({ children, capsule, onSwitchWallet
     multiChain,
     shouldUseSuggestChainAndConnect,
     onSwitchChain,
-  } = useCapsuleCosmos();
+  } = useParaCosmos();
   const { suggestAndConnectAsync } = useSuggestChainAndConnect();
   const {
     data: account,
@@ -65,7 +65,7 @@ export function CosmosExternalWalletProvider({ children, capsule, onSwitchWallet
 
   const reset = async () => {
     await disconnectAsync();
-    await capsule.logout(true);
+    await para.logout();
   };
 
   const switchChain = async (chainId: string) => {
@@ -96,7 +96,12 @@ export function CosmosExternalWalletProvider({ children, capsule, onSwitchWallet
 
   const login = async (bufferAddress: string, address: string, providerName?: string) => {
     try {
-      await capsule.externalWalletLogin(bufferAddress, WalletType.COSMOS, providerName, address);
+      await para.externalWalletLogin({
+        address: bufferAddress,
+        type: WalletType.COSMOS,
+        provider: providerName,
+        addressBech32: address,
+      });
     } catch (err) {
       await reset();
 
@@ -105,7 +110,7 @@ export function CosmosExternalWalletProvider({ children, capsule, onSwitchWallet
   };
 
   useEffect(() => {
-    const storedExternalWallet = capsule.externalWallets[bufferAddress ?? ''];
+    const storedExternalWallet = para.externalWallets[bufferAddress ?? ''];
 
     if (
       !isConnecting &&
@@ -114,14 +119,19 @@ export function CosmosExternalWalletProvider({ children, capsule, onSwitchWallet
       address &&
       storedExternalWallet &&
       storedExternalWallet.address !== address &&
-      walletType !== GrazWalletType.CAPSULE_EMBEDDED
+      walletType !== GrazWalletType.PARA
     ) {
-      capsule.setExternalWallet(bufferAddress, WalletType.COSMOS, getProviderName(walletType), address);
+      para.setExternalWallet({
+        address: bufferAddress,
+        type: WalletType.COSMOS,
+        provider: getProviderName(walletType),
+        addressBech32: address,
+      });
     }
   }, [isConnecting, isReconnecting, address]);
 
   useEffect(() => {
-    const storedExternalWallet = capsule.externalWallets[bufferAddress ?? ''];
+    const storedExternalWallet = para.externalWallets[bufferAddress ?? ''];
 
     if (
       !isConnecting &&
@@ -129,7 +139,7 @@ export function CosmosExternalWalletProvider({ children, capsule, onSwitchWallet
       !isLocalConnecting &&
       !!bufferAddress &&
       !storedExternalWallet &&
-      walletType !== GrazWalletType.CAPSULE_EMBEDDED
+      walletType !== GrazWalletType.PARA
     ) {
       reset();
     }

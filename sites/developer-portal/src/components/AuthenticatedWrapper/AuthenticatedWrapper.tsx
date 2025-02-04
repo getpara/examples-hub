@@ -42,7 +42,7 @@ export const AuthenticatedWrapper = ({ requireOrgs, children }: AuthenticatedWra
           triggerToast({
             variant: 'error',
             title: 'Invite not found',
-            body: 'Please try again. If the problem persists, contact Capsule support.',
+            body: 'Please try again. If the problem persists, contact Para support.',
           });
           setSelectedOrganization();
         }

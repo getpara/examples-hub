@@ -1,28 +1,23 @@
 import { createConnector } from 'wagmi';
 import type { CreateConnectorFn } from 'wagmi';
 import { WalletConnectParameters, walletConnect } from 'wagmi/connectors';
-import type {
-  CreateConnector,
-  CapsuleDetails,
-  CapsuleWalletConnectParameters,
-  WalletDetailsParams,
-} from '../types/Wallet.js';
+import type { CreateConnector, ParaDetails, ParaWalletConnectParameters, WalletDetailsParams } from '../types/Wallet.js';
 
 interface GetWalletConnectConnectorParams {
   projectId: string;
-  walletConnectParameters?: CapsuleWalletConnectParameters;
+  walletConnectParameters?: ParaWalletConnectParameters;
 }
 
 interface CreateWalletConnectConnectorParams {
   projectId: string;
   walletDetails: WalletDetailsParams;
-  walletConnectParameters?: CapsuleWalletConnectParameters;
+  walletConnectParameters?: ParaWalletConnectParameters;
 }
 
 interface GetOrCreateWalletConnectInstanceParams {
   projectId: string;
-  walletConnectParameters?: CapsuleWalletConnectParameters;
-  capsuleDetailsShowQrModal?: CapsuleDetails['showQrModal'];
+  walletConnectParameters?: ParaWalletConnectParameters;
+  paraDetailsShowQrModal?: ParaDetails['showQrModal'];
 }
 
 const walletConnectInstances = new Map<string, ReturnType<typeof walletConnect>>();
@@ -31,7 +26,7 @@ const walletConnectInstances = new Map<string, ReturnType<typeof walletConnect>>
 const getOrCreateWalletConnectInstance = ({
   projectId,
   walletConnectParameters,
-  capsuleDetailsShowQrModal,
+  paraDetailsShowQrModal,
 }: GetOrCreateWalletConnectInstanceParams): ReturnType<typeof walletConnect> => {
   let config: WalletConnectParameters = {
     ...(walletConnectParameters ? walletConnectParameters : {}),
@@ -39,8 +34,8 @@ const getOrCreateWalletConnectInstance = ({
     showQrModal: false, // Required. Otherwise WalletConnect modal (Web3Modal) will popup during time of connection for a wallet
   };
 
-  // `capsuleDetailsShowQrModal` should always be `true`
-  if (capsuleDetailsShowQrModal) {
+  // `paraDetailsShowQrModal` should always be `true`
+  if (paraDetailsShowQrModal) {
     config = { ...config, showQrModal: true };
   }
 
@@ -72,11 +67,11 @@ function createWalletConnectConnector({
       projectId,
       walletConnectParameters,
       // Used in `connectorsForWallets` to add another
-      // walletConnect wallet into capsule with modal popup option
-      capsuleDetailsShowQrModal: walletDetails.capsuleDetails.showQrModal,
+      // walletConnect wallet into Para with modal popup option
+      paraDetailsShowQrModal: walletDetails.paraDetails.showQrModal,
     })(config),
     ...walletDetails,
-    id: walletDetails.capsuleDetails.id,
+    id: walletDetails.paraDetails.id,
   }));
 }
 

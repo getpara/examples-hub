@@ -1,4 +1,4 @@
-import { CpslButton, CpslIcon, CpslInput, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon, CpslInput, CpslText } from '@getpara/react-components';
 import styled from 'styled-components';
 import { MOBILE_SIZE } from '../../../utils/constants';
 import { useState } from 'react';

@@ -3,7 +3,7 @@ import { useAppStore } from '../stores/app/useAppStore';
 import { triggerToast } from '../utils/toasts';
 import { useGetAllOrganizations } from './api/queries/useOrganizations';
 import { useLogout } from './useLogout';
-import { capsule } from '../clients/capsule';
+import { para } from '../clients/para';
 
 export const useSetSelectedOrganizationWithNavigation = (shouldRefetch: boolean) => {
   const { organizationId } = useParams();
@@ -15,7 +15,7 @@ export const useSetSelectedOrganizationWithNavigation = (shouldRefetch: boolean)
   const { pathname } = useLocation();
 
   const setSelectedOrganization = async () => {
-    const isFullyLoggedIn = await capsule.isFullyLoggedIn();
+    const isFullyLoggedIn = await para.isFullyLoggedIn();
 
     if (!isFullyLoggedIn) {
       return;
@@ -35,14 +35,14 @@ export const useSetSelectedOrganizationWithNavigation = (shouldRefetch: boolean)
       triggerToast({
         variant: 'error',
         title: 'Error Loading Organizations',
-        body: 'Please try to login again. If the problem persists, contact Capsule support.',
+        body: 'Please try to login again. If the problem persists, contact Para support.',
       });
       await logout();
     }
 
     // If user has any organizations, set selected to the first or the previously selected (if it's a valid org)
     if (_allUserOrgs?.length) {
-      const userId = capsule.getUserId();
+      const userId = para.getUserId();
       const storedOrgId = getSelectedOrganization(userId!);
       let selectedOrgId = organizationId ?? storedOrgId;
 

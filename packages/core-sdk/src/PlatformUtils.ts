@@ -1,4 +1,4 @@
-import { BackupKitEmailProps, TPregenIdentifierType, WalletType } from '@usecapsule/user-management-client';
+import { BackupKitEmailProps, TPregenIdentifierType, WalletType } from '@getpara/user-management-client';
 import { Ctx } from './definitions.js';
 import { SignatureRes } from './types/walletTypes.js';
 import { StorageUtils } from './StorageUtils.js';

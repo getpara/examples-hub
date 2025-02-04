@@ -1,4 +1,4 @@
-import { CpslCard, CpslText } from '@usecapsule/react-components';
+import { CpslCard, CpslText } from '@getpara/react-components';
 import styled from 'styled-components';
 
 export const ProfileInnerContainer = styled.div`

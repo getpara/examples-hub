@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { useExternalWallets } from '../../providers/ExternalWalletContext.js';
 import { StyledCpslTileButton } from '../common.js';
-import { CpslButton, CpslIcon, CpslInput, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon, CpslInput, CpslText } from '@getpara/react-components';
 import { useModalStore, useThemeStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { useState } from 'react';
@@ -32,7 +32,7 @@ export const ExternalWallets = () => {
     setStep(ModalStep.EX_WALLET_MORE);
   };
 
-  const handleCapsuleClick = () => {
+  const handleParaClick = () => {
     setStep(ModalStep.AUTH_MORE);
   };
 
@@ -64,11 +64,11 @@ export const ExternalWallets = () => {
             </SearchInput>
           </SearchInputWrapper>
           {hasEmbeddedAuth(authLayout) && (
-            <CpslButton fullWidth variant="tertiary" onClick={handleCapsuleClick}>
+            <CpslButton fullWidth variant="tertiary" onClick={handleParaClick}>
               <WalletButtonOuterContainer>
                 <WalletButtonInnerContainer>
-                  <CpslIcon slot="start" icon="capsule" />
-                  <CpslText weight="medium">Capsule</CpslText>
+                  <CpslIcon slot="start" icon="paraIcon" />
+                  <CpslText weight="medium">Para</CpslText>
                 </WalletButtonInnerContainer>
                 <Badge $show $variant="installed">
                   <CpslText variant="body2XS" weight="medium">

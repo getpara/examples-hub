@@ -1,4 +1,4 @@
-import { CpslSelect, CpslSelectItem, CpslText } from '@usecapsule/react-components';
+import { CpslSelect, CpslSelectItem, CpslText } from '@getpara/react-components';
 import { InnerConfigurationCard } from '../InnerConfigurationCard';
 import { Controller, useFormContext } from 'react-hook-form';
 import { styled } from 'styled-components';

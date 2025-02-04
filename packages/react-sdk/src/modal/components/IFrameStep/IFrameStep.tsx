@@ -1,8 +1,8 @@
 import { useModalStore, useThemeStore } from '../../stores/index.js';
 import { IFrameSteps } from '../../utils/steps.js';
 import styled from 'styled-components';
-import { SpinnerContainer } from '@usecapsule/react-common';
-import { CpslSpinner } from '@usecapsule/react-components';
+import { SpinnerContainer } from '@getpara/react-common';
+import { CpslSpinner } from '@getpara/react-components';
 import { MOBILE_SIZE } from '../../constants/constants.js';
 
 export const IFrameStep = () => {

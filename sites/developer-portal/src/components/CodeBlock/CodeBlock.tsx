@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { CodeBlock as ReactCodeBlock, github } from 'react-code-blocks';
-import { CpslButton, CpslIcon } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon } from '@getpara/react-components';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
 
 interface CodeBlockProps {

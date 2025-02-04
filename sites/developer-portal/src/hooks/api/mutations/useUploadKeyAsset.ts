@@ -1,6 +1,6 @@
 import { MutationOptions, useMutation } from '@tanstack/react-query';
 import axios from 'axios';
-import { Environment } from '@usecapsule/react-sdk';
+import { Environment } from '@getpara/react-sdk';
 import { getKeyAssetUploadUrl } from '../../../api/apiKeys/mutations';
 import { PartnerAssetType } from '../../../types/api';
 import { useParams } from 'react-router-dom';
@@ -43,7 +43,7 @@ export const useUploadKeyAsset = (
           vars.env.toUpperCase() === Environment.PROD
             ? ''
             : `${vars.env.toUpperCase() === Environment.DEV ? 'sandbox' : vars.env.toLowerCase()}.`
-        }usecapsule.com/${fields.key}`,
+        }getpara.com/${fields.key}`,
       );
     },
     ...options,

@@ -2,7 +2,7 @@ import base64url from 'base64url';
 import * as cbor from 'cbor-web';
 import forge from 'node-forge';
 
-import { Environment, getPortalDomain } from '@usecapsule/core-sdk';
+import { Environment, getPortalDomain } from '@getpara/core-sdk';
 
 const ES256_ALGORITHM = -7;
 const RS256_ALGORITHM = -257;
@@ -148,7 +148,7 @@ export async function createCredential(
       },
       rp: {
         id: getPortalDomain(env, isE2E),
-        name: 'Capsule',
+        name: 'Para',
       },
       user: {
         id: userHandle,

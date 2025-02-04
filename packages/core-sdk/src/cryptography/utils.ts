@@ -181,9 +181,15 @@ export function decryptWithPrivateKey(
 
 async function decryptWithDerivedPrivateKey(
   ctx: Ctx,
-  seedValue: string,
-  encryptedMessageHex: string,
-  encryptedKeyHex: string,
+  {
+    seedValue,
+    encryptedMessageHex,
+    encryptedKeyHex,
+  }: {
+    seedValue: string;
+    encryptedMessageHex: string;
+    encryptedKeyHex: string;
+  },
 ): Promise<string> {
   const keyPair = await getAsymmetricKeyPair(ctx, seedValue);
   return decryptWithPrivateKey(keyPair.privateKey, encryptedMessageHex, encryptedKeyHex);
@@ -199,7 +205,11 @@ export async function getDerivedPrivateKeyAndDecrypt(
       walletId: share.walletId,
       walletScheme: share.walletScheme,
       partnerId: share.partnerId,
-      signer: await decryptWithDerivedPrivateKey(ctx, seedValue, share.encryptedShare, share.encryptedKey),
+      signer: await decryptWithDerivedPrivateKey(ctx, {
+        seedValue,
+        encryptedMessageHex: share.encryptedShare,
+        encryptedKeyHex: share.encryptedKey,
+      }),
       protocolId: share.protocolId,
     })),
   );

@@ -2,7 +2,7 @@ import { useFormContext } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { useUpdateApiKey } from '../../../hooks/api/mutations/useUpdateApiKey';
 import { triggerToast } from '../../../utils/toasts';
-import { CpslButton } from '@usecapsule/react-components';
+import { CpslButton } from '@getpara/react-components';
 import styled from 'styled-components';
 import { useGetOrganizationKey } from '../../../hooks/api/queries/useOrganizationKeys';
 import { Environment } from '../../../types/environment';
@@ -55,7 +55,7 @@ export const Save = () => {
             triggerToast({
               variant: 'error',
               title: 'Failed to Save Config',
-              body: 'Please correct any errors. If the problem persists, contact Capsule support.',
+              body: 'Please correct any errors. If the problem persists, contact Para support.',
             });
           },
         },

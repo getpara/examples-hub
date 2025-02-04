@@ -11,9 +11,9 @@ export const CustomizationLink: React.FC<CustomizationLinkProps> = () => {
         Need More Customization?
       </GradientText>
       <Text variant="bodyS" weight="regular" color="secondary">
-        You can use Capsule's SDK with your own UI components.{' '}
+        You can use Para's SDK with your own UI components.{' '}
         <a
-          href="https://docs.usecapsule.com/customize-capsule/required-customization"
+          href="https://docs.getpara.com/customize-capsule/required-customization"
           target="_blank"
           rel="noreferrer"
           style={{ color: 'black' }}

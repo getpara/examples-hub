@@ -25,7 +25,7 @@ export const useAppStore = create<AppStore>()(
       ...getActions(set, get),
     }),
     {
-      name: '@CAPSULE-DEVELOPER-PORTAL/appState',
+      name: '@PARA-DEVELOPER-PORTAL/appState',
       partialize: state => ({
         userSelectedOrganizationId: state.userSelectedOrganizationId,
       }),

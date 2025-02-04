@@ -12,7 +12,7 @@ export const OnRampConfiguration = () => {
   return (
     <ConfigurationCard
       title="On-Ramps"
-      subtitle="Configure your Capsule Modal's on-ramp providers and available assets for purchase or withdrawal."
+      subtitle="Configure your Para Modal's on-ramp providers and available assets for purchase or withdrawal."
       docsLink={DOCS_LINK}
     >
       <FormProvider {...form}>

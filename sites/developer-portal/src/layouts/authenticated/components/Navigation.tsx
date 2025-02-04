@@ -1,11 +1,11 @@
-import { CpslIcon, CpslNavButton, CpslNavButtonGroup, CpslText } from '@usecapsule/react-components';
+import { CpslIcon, CpslNavButton, CpslNavButtonGroup, CpslText } from '@getpara/react-components';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { NavRoute } from '../../../types/navigation';
 import { BRAND_COLORS, MODAL_DESIGNER_LINK } from '../../../utils/constants';
 import { useEarlyAccess } from '../../../hooks/configs/useEarlyAccess';
 import { useGetAllProjects } from '../../../hooks/api/queries/useProjects';
-import { CpslNavButtonCustomEvent } from '@usecapsule/core-components';
+import { CpslNavButtonCustomEvent } from '@getpara/core-components';
 import { useIsOwner } from '../../../hooks/api/queries/useOrganizationMember';
 
 const NAV_ROUTES: NavRoute[] = [

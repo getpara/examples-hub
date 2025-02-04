@@ -31,7 +31,7 @@ export const useUploadOrganizationLogo = (
       await axios.post(url, postData);
 
       return encodeURI(
-        `https://partner-assets.${IS_PROD ? '' : `${IS_DEV ? Environment.SANDBOX.toLowerCase() : ENV_VARS.environment.toLowerCase()}.`}usecapsule.com/${fields.key}`,
+        `https://partner-assets.${IS_PROD ? '' : `${IS_DEV ? Environment.SANDBOX.toLowerCase() : ENV_VARS.environment.toLowerCase()}.`}getpara.com/${fields.key}`,
       );
     },
     ...options,

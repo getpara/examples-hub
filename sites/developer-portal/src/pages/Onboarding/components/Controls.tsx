@@ -1,8 +1,8 @@
 import { styled } from 'styled-components';
-import { capsule } from '../../../clients/capsule';
+import { para } from '../../../clients/para';
 import { OnboardingStep, useOnboardingStore } from '../../../stores/onboarding/useOnboardingStore';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { CpslButton, CpslIcon } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon } from '@getpara/react-components';
 import { useLogout } from '../../../hooks/useLogout';
 import { useFormContext, useFormState } from 'react-hook-form';
 import { OnboardingAnswerOption, OnboardingAnswers } from '../../../types/onboarding';
@@ -15,7 +15,7 @@ interface ControlsProps {
 
 export const Controls = ({ questions }: ControlsProps) => {
   const { watch } = useFormContext<OnboardingAnswers>();
-  const userId = capsule.getUserId();
+  const userId = para.getUserId();
   const currentStep = useOnboardingStore(state => state.getStep(userId));
   const setStep = useOnboardingStore(state => state.setStep);
   const setDirection = useOnboardingStore(state => state.setDirection);

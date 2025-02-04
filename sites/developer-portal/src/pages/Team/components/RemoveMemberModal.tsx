@@ -1,4 +1,4 @@
-import { CpslButton, CpslInput } from '@usecapsule/react-components';
+import { CpslButton, CpslInput } from '@getpara/react-components';
 import { Modal } from '../../../components/Modal/Modal';
 import { useRemoveMember } from '../../../hooks/api/mutations/useRemoveMember';
 import { triggerToast } from '../../../utils/toasts';
@@ -32,7 +32,7 @@ export const RemoveMemberModal = ({ open, memberEmail, memberId, onClose, onExit
             triggerToast({
               variant: 'error',
               title: 'Failed to Remove Member',
-              body: 'Please try again. If the problem persists, contact Capsule support.',
+              body: 'Please try again. If the problem persists, contact Para support.',
             });
           },
         },

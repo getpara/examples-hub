@@ -15,7 +15,7 @@ import {
   WALLET,
 } from '../constants.js';
 import { mockGoRun, mockWASMInit, TEST_CTX } from '../setup.js';
-import { Environment, WalletType } from '@usecapsule/core-sdk';
+import { Environment, WalletType } from '@getpara/core-sdk';
 
 const mockPostMessage = vi.fn();
 

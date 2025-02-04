@@ -1,4 +1,4 @@
-import { Network } from '@usecapsule/web-sdk';
+import { Network } from '@getpara/web-sdk';
 import { getNetworkName } from '../constants/constants.js';
 import { format } from 'date-fns';
 

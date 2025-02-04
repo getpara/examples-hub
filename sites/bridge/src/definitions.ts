@@ -1,4 +1,4 @@
-import Client from '@usecapsule/user-management-client';
+import Client from '@getpara/user-management-client';
 import { AxiosInstance } from 'axios';
 
 export enum Environment {
@@ -16,7 +16,7 @@ export enum Environment {
 export interface Ctx {
   env: Environment;
   apiKey?: string;
-  capsuleClient: Client;
+  client: Client;
   disableWorkers?: boolean;
   offloadMPCComputationURL?: string;
   mpcComputationClient?: AxiosInstance;

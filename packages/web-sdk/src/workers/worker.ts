@@ -10,9 +10,9 @@ import {
   getPortalBaseURL,
   initClient,
   mpcComputationClient,
-  capsuleVersion,
+  paraVersion,
   WalletType,
-} from '@usecapsule/core-sdk';
+} from '@getpara/core-sdk';
 
 export interface Message {
   env: Environment;
@@ -142,7 +142,13 @@ export async function handleMessage(
     env,
     apiKey,
     cosmosPrefix,
-    capsuleClient: initClient(env, capsuleVersion, apiKey, undefined, useFetchAdapter, () => sessionCookie),
+    client: initClient({
+      env,
+      version: paraVersion,
+      apiKey,
+      useFetchAdapter,
+      retrieveSessionCookie: () => sessionCookie,
+    }),
     offloadMPCComputationURL: offloadMPCComputationURL,
     mpcComputationClient: offloadMPCComputationURL
       ? mpcComputationClient.initClient(offloadMPCComputationURL, !!disableWorkers)

@@ -1,5 +1,5 @@
 import { Worker } from 'worker_threads';
-import { Ctx, getPortalBaseURL } from '@usecapsule/core-sdk';
+import { Ctx, getPortalBaseURL } from '@getpara/core-sdk';
 
 const CLEAR_WORKER_TIMEOUT_MS = 1000 * 90;
 

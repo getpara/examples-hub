@@ -1,11 +1,12 @@
-import { CpslCodeInput, CpslSpinner, CpslText } from '@usecapsule/react-components';
+import { CpslCodeInput, CpslSpinner, CpslText } from '@getpara/react-components';
 import { useEffect, useRef, useState } from 'react';
 import { styled } from 'styled-components';
 import { ModalStep } from '../../utils/steps.js';
-import { CodeChangeEventDetail, CpslCodeInputCustomEvent } from '@usecapsule/core-components';
-import { useCapsuleStore, useModalStore, useThemeStore, useUserInfoStore } from '../../stores/index.js';
+import { CodeChangeEventDetail, CpslCodeInputCustomEvent } from '@getpara/core-components';
+import { useModalStore, useThemeStore, useUserInfoStore } from '../../stores/index.js';
 import { Heading, InnerStepContainer, StepContainer } from '../common.js';
-import { AuthMethod } from '@usecapsule/core-sdk';
+import { AuthMethod } from '@getpara/core-sdk';
+import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 
 export const VerificationCodeStep = () => {
   const theme = useThemeStore(state => state.theme);
@@ -15,7 +16,7 @@ export const VerificationCodeStep = () => {
   const setIFrameUrl = useModalStore(state => state.setIFrameUrl);
   const setIsIFrameReady = useModalStore(state => state.setIsIFrameReady);
   const isIFrameReady = useModalStore(state => state.isIFrameReady);
-  const capsule = useCapsuleStore(state => state.capsule);
+  const para = useInternalClient();
 
   const inputRef = useRef<HTMLCpslCodeInputElement>(null);
 
@@ -55,7 +56,7 @@ export const VerificationCodeStep = () => {
     if (!resendDisabled) {
       setResendStatus('Resent!');
       setResendDisabled(true);
-      isEmail ? await capsule.resendVerificationCode() : await capsule.resendVerificationCodeByPhone();
+      isEmail ? await para.resendVerificationCode() : await para.resendVerificationCodeByPhone();
 
       setTimeout(() => {
         setResendStatus('Resend.');
@@ -75,26 +76,30 @@ export const VerificationCodeStep = () => {
     setIsVerifying(true);
     if (code.length === 6 && /^\d+$/.test(code)) {
       try {
-        const supportedCreateAuthMethods = await capsule.getSupportedCreateAuthMethods();
+        const supportedCreateAuthMethods = await para.getSupportedCreateAuthMethods();
 
         if (supportedCreateAuthMethods.has(AuthMethod.PASSWORD) && supportedCreateAuthMethods.has(AuthMethod.PASSKEY)) {
           setIsIFrameReady(false);
-          const webAuthUrl = isEmail ? await capsule.verifyEmail(code) : await capsule.verifyPhone(code);
-          const passwordAuthUrl = await capsule.getSetupPasswordURL(false, authInfo?.authType, theme);
-          setWebAuthURLForCreate(await capsule.shortenLoginLink(webAuthUrl));
-          setIFrameUrl(await capsule.shortenLoginLink(passwordAuthUrl));
+          const webAuthUrl = isEmail
+            ? await para.verifyEmail({ verificationCode: code })
+            : await para.verifyPhone({ verificationCode: code });
+          const passwordAuthUrl = await para.getSetupPasswordURL({ authType: authInfo?.authType, theme });
+          setWebAuthURLForCreate(await para.shortenLoginLink(webAuthUrl));
+          setIFrameUrl(await para.shortenLoginLink(passwordAuthUrl));
           setShouldRouteToStep(ModalStep.BIOMETRIC_CREATION);
           return;
-        } else if ((await capsule.getSupportedCreateAuthMethods()).has(AuthMethod.PASSWORD)) {
+        } else if ((await para.getSupportedCreateAuthMethods()).has(AuthMethod.PASSWORD)) {
           setIsIFrameReady(false);
-          isEmail ? await capsule.verifyEmail(code) : await capsule.verifyPhone(code);
-          const url = await capsule.getSetupPasswordURL(false, authInfo?.authType, theme);
-          setIFrameUrl(await capsule.shortenLoginLink(url));
+          isEmail ? await para.verifyEmail({ verificationCode: code }) : await para.verifyPhone({ verificationCode: code });
+          const url = await para.getSetupPasswordURL({ authType: authInfo?.authType, theme });
+          setIFrameUrl(await para.shortenLoginLink(url));
           setShouldRouteToStep(ModalStep.PASSWORD_CREATION);
           return;
         } else {
-          const url = isEmail ? await capsule.verifyEmail(code) : await capsule.verifyPhone(code);
-          setWebAuthURLForCreate(await capsule.shortenLoginLink(url));
+          const url = isEmail
+            ? await para.verifyEmail({ verificationCode: code })
+            : await para.verifyPhone({ verificationCode: code });
+          setWebAuthURLForCreate(await para.shortenLoginLink(url));
           setStep(ModalStep.BIOMETRIC_CREATION);
         }
       } catch (e) {

@@ -1,7 +1,7 @@
 import { Fragment, ReactNode, useMemo } from 'react';
-import { CpslButton, CpslDivider, CpslIconGroup, IconType } from '@usecapsule/react-components';
+import { CpslButton, CpslDivider, CpslIconGroup, IconType } from '@getpara/react-components';
 import styled from 'styled-components';
-import { OAuthMethod } from '@usecapsule/web-sdk';
+import { OAuthMethod } from '@getpara/web-sdk';
 import { useExternalWallets } from '../../providers/ExternalWalletContext.js';
 import { ExternalWallets } from '../ExternalWallets/ExternalWallets.js';
 import { useModalStore, useThemeStore } from '../../stores/index.js';

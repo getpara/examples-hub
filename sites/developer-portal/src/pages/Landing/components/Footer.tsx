@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { UnderlinedText } from '../../../components/common';
-import { CpslText } from '@usecapsule/react-components';
+import { CpslText } from '@getpara/react-components';
 import { PRIVACY_POLICY, TOS } from '../../../utils/constants';
 
 export const Footer = () => {

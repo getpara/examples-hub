@@ -10,10 +10,10 @@ import Console from '../../../assets/console';
 import TwoFactorContext from '../../contexts/TwoFactorContext';
 import { RecoveryAttemptContext, RecoveryType } from '../../contexts/RecoveryAttemptContext';
 import PhoneContext from '../../contexts/PhoneContext';
-import { useCapsule } from '../../../components/CapsuleContext';
+import { usePara } from '../../../components/ParaContext';
 
 const RecoveryWallet2FAStep: React.FC = () => {
-  const capsule = useCapsule();
+  const para = usePara();
   const [verificationCode, setVerificationCode] = useState('');
   const [incorrectCode, setIncorrectCode] = useState(false);
   const { setCurrentRecoveryStep } = useContext(RecoveryStepContext);
@@ -45,7 +45,7 @@ const RecoveryWallet2FAStep: React.FC = () => {
             Confirm 2FA
           </Text>
           <Text textColor="brand.content" fontSize="s">
-            Enter the 6-digit authentication code via SMS or the authenticator app you used to set up Capsule.
+            Enter the 6-digit authentication code via SMS or the authenticator app you used to set up Para.
           </Text>
         </Box>
       </HStack>
@@ -86,9 +86,9 @@ const RecoveryWallet2FAStep: React.FC = () => {
             try {
               let wallets, userId;
               if (type === RecoveryType.PHONE) {
-                ({ wallets, userId } = await capsule.verify2FAForPhone(phone, countryCode, verificationCode));
+                ({ wallets, userId } = await para.verify2FAForPhone({ phone, countryCode, verificationCode }));
               } else {
-                ({ wallets, userId } = await capsule.verify2FA(email, verificationCode));
+                ({ wallets, userId } = await para.verify2FA({ email, verificationCode }));
               }
               setWallets(wallets);
               setUserId(userId);

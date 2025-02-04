@@ -5,7 +5,7 @@ import { setupWorker } from '../../src/workers/workerWrapper.js';
 import { TEST_CTX } from '../setup.js';
 import { Worker } from '../mocks/mockWorker.js';
 import { getWorkerContent } from '../utils.js';
-import { Ctx } from '@usecapsule/core-sdk';
+import { Ctx } from '@getpara/core-sdk';
 
 const handleMessageSpy = vi.spyOn(worker, 'handleMessage').mockImplementationOnce(async () => false);
 const mockResFn = vi.fn();

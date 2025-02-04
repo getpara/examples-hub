@@ -1,12 +1,13 @@
-import { CpslHero, CpslIcon, CpslIdenticon } from '@usecapsule/react-components';
+import { CpslHero, CpslIcon, CpslIdenticon } from '@getpara/react-components';
 import styled from 'styled-components';
 import { ModalStep } from '../../utils/steps.js';
-import { useCapsuleStore, useModalStore } from '../../stores/index.js';
+import { useModalStore } from '../../stores/index.js';
 import { useExternalWallets } from '../../providers/ExternalWalletContext.js';
 import { NETWORK_NOT_SUPPORTED_ERROR } from '../../constants/constants.js';
 import { useEffect, useState } from 'react';
-import { isMobile } from '@usecapsule/web-sdk';
+import { isMobile } from '@getpara/web-sdk';
 import { useActiveWallet } from '../../hooks/useActiveWallet.js';
+import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 
 type StepHeroConfig = {
   variant: 'externalWalletConnection' | 'approved' | 'failed' | 'customContent' | 'pending';
@@ -53,7 +54,7 @@ const getStepConfig = ({
 });
 
 export const Hero = () => {
-  const capsule = useCapsuleStore(state => state.capsule);
+  const para = useInternalClient();
   const { wallet: connector, walletDisplayHelpers, avatar } = useExternalWallets();
   const step = useModalStore(state => state.step);
   const externalWalletError = useModalStore(state => state.externalWalletError);
@@ -112,7 +113,7 @@ export const Hero = () => {
               (avatar ? (
                 <Avatar slot="image" src={avatar} />
               ) : activeWallet ? (
-                <IconAvatar slot="image" size="100%" hash={capsule.getIdenticonHash(activeWallet.id, activeWallet.type)} />
+                <IconAvatar slot="image" size="100%" hash={para.getIdenticonHash(activeWallet.id, activeWallet.type)} />
               ) : null)}
           </StyledHero>
         )}

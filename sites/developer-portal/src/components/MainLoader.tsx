@@ -1,4 +1,4 @@
-import { CpslSpinner } from '@usecapsule/react-components';
+import { CpslSpinner } from '@getpara/react-components';
 import styled from 'styled-components';
 
 interface MainLoaderProps {

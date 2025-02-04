@@ -1,21 +1,30 @@
-import { BackupKitEmailProps, EncryptorType, KeyShareType } from '@usecapsule/user-management-client';
+import { BackupKitEmailProps, EncryptorType, KeyShareType } from '@getpara/user-management-client';
 
 import { encryptWithDerivedPublicKey } from '../cryptography/utils.js';
 import { sendRecoveryForShare } from './recovery.js';
 import { Ctx } from '../definitions.js';
 
 // function to call on new user share to perform all necessary distribution
-export async function distributeNewShare(
-  ctx: Ctx,
-  userId: string,
-  walletId: string,
-  userShare: string,
+export async function distributeNewShare({
+  ctx,
+  userId,
+  walletId,
+  userShare,
   ignoreRedistributingBackupEncryptedShare = false,
-  emailProps: BackupKitEmailProps,
-  partnerId?: string,
-  protocolId?: string,
-): Promise<string> {
-  const publicKeysRes = await ctx.capsuleClient.getSessionPublicKeys(userId);
+  emailProps = {},
+  partnerId,
+  protocolId,
+}: {
+  ctx: Ctx;
+  userId: string;
+  walletId: string;
+  userShare: string;
+  ignoreRedistributingBackupEncryptedShare?: boolean;
+  emailProps?: BackupKitEmailProps;
+  partnerId?: string;
+  protocolId?: string;
+}): Promise<string> {
+  const publicKeysRes = await ctx.client.getSessionPublicKeys(userId);
   const biometricEncryptedShares = publicKeysRes.data.keys
     .map(key => {
       if (!key.publicKey) {
@@ -35,7 +44,7 @@ export async function distributeNewShare(
     })
     .filter(Boolean);
 
-  const passwords = await ctx.capsuleClient.getPasswords({ userId });
+  const passwords = await ctx.client.getPasswords({ userId });
   const passwordEncryptedShares = passwords
     .map(password => {
       if (password.status === 'PENDING') {
@@ -56,13 +65,13 @@ export async function distributeNewShare(
     .filter(Boolean);
 
   const allEncryptedShares = [...biometricEncryptedShares, ...passwordEncryptedShares];
-  return await sendRecoveryForShare(
+  return await sendRecoveryForShare({
     ctx,
     userId,
     walletId,
-    allEncryptedShares,
-    userShare,
+    otherEncryptedShares: allEncryptedShares,
+    userSigner: userShare,
     ignoreRedistributingBackupEncryptedShare,
     emailProps,
-  );
+  });
 }

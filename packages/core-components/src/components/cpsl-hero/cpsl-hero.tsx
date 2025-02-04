@@ -31,7 +31,7 @@ export class CpslHero {
   @Prop({ reflect: true }) subtitle?: string;
 
   /**
-   * Whether to use the Capsule custom theming or use the provided theme
+   * Whether to use the Para custom theming or use the provided theme
    * Default is: `false`.
    */
   @Prop() withDefaultTheme?: boolean;

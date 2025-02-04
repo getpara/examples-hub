@@ -8,11 +8,11 @@ import WalletContext from '../../contexts/WalletContext';
 import StepContext from '../../contexts/StepContext';
 import { RecoveryAttemptContext } from '../../contexts/RecoveryAttemptContext';
 import { Footer } from '../Footer/Footer';
-import CapsuleSmall from '../../../assets/capsuleSmall';
+import ParaSmall from '../../../assets/paraSmall';
 import Console from '../../../assets/console';
 import Exit from '../../../assets/exit';
 import TwoFactorContext from '../../contexts/TwoFactorContext';
-import { useCapsule } from '../../../components/CapsuleContext';
+import { usePara } from '../../../components/ParaContext';
 
 type RecoveryCancelModalProps = {
   isOpen: boolean;
@@ -20,7 +20,7 @@ type RecoveryCancelModalProps = {
 };
 
 const RecoveryCancelModal: React.FC<RecoveryCancelModalProps> = ({ isOpen, onClose }) => {
-  const capsule = useCapsule();
+  const para = usePara();
   const { email, setEmail } = useContext(EmailContext);
   const { setCurrentStep } = useContext(StepContext);
   const { setCurrentRecoveryStep } = useContext(RecoveryStepContext);
@@ -36,7 +36,7 @@ const RecoveryCancelModal: React.FC<RecoveryCancelModalProps> = ({ isOpen, onClo
           <VStack alignItems="center" display="flex" flex={1} margin="22px 22px 0px">
             <Box height="62px" width="100%" marginBottom={12}>
               <Flex h="57px" w="100%" justifyContent={'center'} alignItems={'center'}>
-                <CapsuleSmall w={19} h={32} />
+                <ParaSmall w={19} h={32} />
                 <Box cursor="pointer" onClick={onClose} position="absolute" right="12px">
                   <Exit />
                 </Box>
@@ -60,7 +60,7 @@ const RecoveryCancelModal: React.FC<RecoveryCancelModalProps> = ({ isOpen, onClo
                 setCurrentStep(ModalStep.EMAIL_COLLECTION);
                 setCurrentRecoveryStep(RecoveryModalStep.VERIFY_2FA);
                 setWallets(null);
-                await capsule.ctx.capsuleClient.cancelRecoveryAttempt(email);
+                await para.ctx.client.cancelRecoveryAttempt(email);
                 setEmail(null);
                 setStatus(null);
                 setInitiatedAt(null);

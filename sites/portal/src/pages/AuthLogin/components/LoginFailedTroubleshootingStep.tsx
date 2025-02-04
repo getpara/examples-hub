@@ -1,8 +1,8 @@
 import { styled } from 'styled-components';
-import { CpslIcon, CpslText } from '@usecapsule/react-components';
-import { HeaderButton } from '@usecapsule/react-common';
+import { CpslIcon, CpslText } from '@getpara/react-components';
+import { HeaderButton } from '@getpara/react-common';
 import { AuthLoginStep, ENV } from '../../../constants';
-import { getPortalBaseURL } from '@usecapsule/web-sdk';
+import { getPortalBaseURL } from '@getpara/web-sdk';
 
 interface LoginFailedTroubleshootingStepProps {
   setStep: (step: AuthLoginStep) => void;
@@ -28,7 +28,7 @@ export const LoginFailedTroubleshootingStep = ({ setStep }: LoginFailedTroublesh
           Troubleshooting
         </CpslText>
         <CpslText variant="bodyS" color="secondary" weight="medium">
-          If your are having trouble logging into your Capsule account, please try the following.
+          If your are having trouble logging into your Para account, please try the following.
         </CpslText>
       </HeaderContainer>
       <ListText variant="bodyS" color="contrast" weight="medium">
@@ -53,9 +53,9 @@ export const LoginFailedTroubleshootingStep = ({ setStep }: LoginFailedTroublesh
       </InlineText>
       <InlineText variant="bodyS" color="contrast" weight="medium">
         If you are still having issues, please get in touch at{' '}
-        <a href="mailto:support@usecapsule.com" target="_blank">
+        <a href="mailto:support@getpara.com" target="_blank">
           <InlineText variant="bodyS" color="contrast" weight="medium">
-            support@usecapsule.com
+            support@getpara.com
           </InlineText>
         </a>
         .

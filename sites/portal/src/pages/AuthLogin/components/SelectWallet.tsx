@@ -1,29 +1,16 @@
 import { styled } from 'styled-components';
 import { useModalOutletContext } from '../../../hooks/useModalOutletContext';
-import { CpslIcon, CpslText, CpslButton, IconType, CpslRadio, CpslIdenticon } from '@usecapsule/react-components';
-import { SaveRecoverySecret } from '@usecapsule/react-sdk';
+import { CpslIcon, CpslText, CpslButton, IconType, CpslRadio, CpslIdenticon } from '@getpara/react-components';
+import { SaveRecoverySecret } from '@getpara/react-sdk';
 import { formatDistanceToNowStrict, parseISO } from 'date-fns';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CAPSULE_CONNECT_DOMAINS } from '../../../constants';
-import {
-  Wallet,
-  WalletType,
-  CurrentWalletIds,
-  WalletEntity,
-  PartnerEntity,
-  SupportedWalletTypes,
-} from '@usecapsule/web-sdk';
-import { useCapsule } from '../../../components/CapsuleContext';
+import { PARA_CONNECT_DOMAINS } from '../../../constants';
+import { Wallet, WalletType, CurrentWalletIds, WalletEntity, PartnerEntity, SupportedWalletTypes } from '@getpara/web-sdk';
+import { usePara } from '../../../components/ParaContext';
 import { useLogin } from './LoginProvider';
-import {
-  ConnectDiagram,
-  capsuleIcon,
-  HERO_HEIGHT,
-  LayoutWithHero,
-  PartnerIcon as PartnerIconRoot,
-} from '../../../components';
+import { ConnectDiagram, ParaIcon, HERO_HEIGHT, LayoutWithHero, PartnerIcon as PartnerIconRoot } from '../../../components';
 import { motion } from 'framer-motion';
-import { CenteredText } from '@usecapsule/react-common';
+import { CenteredText } from '@getpara/react-common';
 
 const GRADIENT = `linear-gradient(to right, #fe5330, #9400db)`;
 
@@ -75,8 +62,8 @@ const PartnerIconInline = ({ partner }: { partner: PartnerEntity }) => (
 );
 
 const WalletButton = ({ wallet, disabled, onClick, isClaimable, isNew, isSelected, addressType }: WalletButtonProps) => {
-  const capsule = useCapsule();
-  const displayCreation = isNew || !capsule.ctx.apiKey || !wallet.lastUsedAt;
+  const para = usePara();
+  const displayCreation = isNew || !para.ctx.apiKey || !wallet.lastUsedAt;
 
   const timestamp = useMemo(() => {
     return formatDistanceToNowStrict(parseISO(displayCreation ? wallet.createdAt : wallet.lastUsedAt), {
@@ -94,14 +81,14 @@ const WalletButton = ({ wallet, disabled, onClick, isClaimable, isNew, isSelecte
     >
       <WalletButtonContainer>
         <WalletButtonUpper>
-          <CpslIdenticon hash={capsule.getIdenticonHash(wallet.id, addressType)} size="48px" />
+          <CpslIdenticon hash={para.getIdenticonHash(wallet.id, addressType)} size="48px" />
           <WalletInfo>
             <WalletName>
               {wallet.name}
               {isClaimable && <WalletClaimable>Claimable</WalletClaimable>}
             </WalletName>
             {wallet.address && (
-              <WalletAddress>{capsule.getDisplayAddress(wallet.id, { addressType, truncate: true })}</WalletAddress>
+              <WalletAddress>{para.getDisplayAddress(wallet.id, { addressType, truncate: true })}</WalletAddress>
             )}
           </WalletInfo>
         </WalletButtonUpper>
@@ -144,7 +131,7 @@ export const SelectWallet = ({
   sessionLookupId: string;
   isKnownDeviceLogin: boolean;
 }) => {
-  const capsule = useCapsule();
+  const para = usePara();
   const {
     fns: { finishLogin, authUpdateKeyShares },
     params: { email, newDeviceSessionLookupId },
@@ -167,8 +154,8 @@ export const SelectWallet = ({
   };
 
   const selectWalletTypes = useMemo<SupportedWalletTypes>(() => {
-    return capsule.supportedWalletTypes.sort(({ type }) => (wallets[type].some(w => w.isPregen) ? -1 : 0));
-  }, [wallets, capsule.supportedWalletTypes]);
+    return para.supportedWalletTypes.sort(({ type }) => (wallets[type].some(w => w.isPregen) ? -1 : 0));
+  }, [wallets, para.supportedWalletTypes]);
 
   const isOnlyOneType = selectWalletTypes.length === 1;
 
@@ -204,7 +191,7 @@ export const SelectWallet = ({
       setIsConnecting(true);
       const toCreate = Object.keys(walletIds).filter(type => walletIds[type][0] === 'CREATE_NEW') as WalletType[];
       if (toCreate.length > 0) {
-        if (!capsule.ctx.apiKey) {
+        if (!para.ctx.apiKey) {
           return;
         }
 
@@ -212,7 +199,7 @@ export const SelectWallet = ({
 
         let newRecoverySecret: string | undefined;
 
-        const created = await capsule.createWalletPerType(false, toCreate);
+        const created = await para.createWalletPerType({ types: toCreate });
 
         const createdIds: CurrentWalletIds = Object.entries(created.walletIds)
           .filter(([type]) => walletIds[type][0] === 'CREATE_NEW')
@@ -221,7 +208,7 @@ export const SelectWallet = ({
         setNewWallets(
           Object.entries(createdIds).reduce((acc, [type, walletIds]) => {
             const wallets = walletIds.map(walletId => {
-              const wallet = Object.values(capsule.wallets).find(({ id }) => id === walletId);
+              const wallet = Object.values(para.wallets).find(({ id }) => id === walletId);
 
               return { ...wallet, partner, name: `${partner?.displayName ?? 'New'} Wallet` };
             });
@@ -230,7 +217,7 @@ export const SelectWallet = ({
           }, {}),
         );
 
-        await capsule.setCurrentWalletIds({ ...walletIds, ...createdIds }, sessionLookupId, false, newDeviceSessionLookupId);
+        await para.setCurrentWalletIds({ ...walletIds, ...createdIds }, { sessionLookupId, newDeviceSessionLookupId });
 
         if (created.recoverySecret) {
           newRecoverySecret = JSON.parse(recoverySecret || '{}').backupDecryptionKey;
@@ -242,12 +229,12 @@ export const SelectWallet = ({
 
         setIsCreatingWallets(false);
       } else {
-        await capsule.setCurrentWalletIds(walletIds, sessionLookupId, false, newDeviceSessionLookupId);
+        await para.setCurrentWalletIds(walletIds, { sessionLookupId, newDeviceSessionLookupId });
         await authUpdateKeyShares();
         onSuccess();
       }
     },
-    [capsule, onSuccess],
+    [para, onSuccess],
   );
 
   const [key, header, heading, subheading, content] = useMemo(() => {
@@ -308,7 +295,7 @@ export const SelectWallet = ({
 
     return [
       'select',
-      <ConnectDiagram left={capsuleIcon} right={<PartnerIconRoot partner={partner} fontSize="24px" />} />,
+      <ConnectDiagram left={<ParaIcon icon="paraIcon" />} right={<PartnerIconRoot partner={partner} fontSize="24px" />} />,
       `Connect to ${partner.displayName}`,
       pregenCount > 0 ? (
         <>
@@ -316,7 +303,7 @@ export const SelectWallet = ({
           <br />
           You can now claim {pregenCount > 1 ? 'these wallets' : 'this wallet'}.
         </>
-      ) : capsule.ctx.apiKey ? (
+      ) : para.ctx.apiKey ? (
         'Choose an existing wallet or create a new one.'
       ) : (
         'Choose an existing wallet.'
@@ -351,7 +338,7 @@ export const SelectWallet = ({
                     />
                   );
                 })}
-                {capsule.ctx.apiKey && (
+                {para.ctx.apiKey && (
                   <ButtonRoot
                     isSelected={isCreateNew}
                     onClick={() => {
@@ -399,11 +386,8 @@ export const SelectWallet = ({
       if (selectWalletTypes.every(({ type }) => wallets[type].length === 0)) {
         await onSubmit(selectWalletTypes.reduce((acc, { type }) => ({ ...acc, [type]: ['CREATE_NEW'] }), {}));
       }
-      // If coming from Capsule connect load all wallets
-      if (
-        partner.id === import.meta.env.VITE_CAPSULE_CONNECT_PARTNER_ID &&
-        CAPSULE_CONNECT_DOMAINS().includes(sessionOrigin)
-      ) {
+      // If coming from Para Connect load all wallets
+      if (partner.id === import.meta.env.VITE_PARA_CONNECT_PARTNER_ID && PARA_CONNECT_DOMAINS().includes(sessionOrigin)) {
         await onSubmit(selectWalletTypes.reduce((acc, { type }) => ({ ...acc, [type]: wallets[type].map(w => w.id) }), {}));
       }
       setIsSettingUp(false);

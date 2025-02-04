@@ -1,2 +1,2 @@
-export * from './CapsuleConnector.js';
-export * from './CapsuleEIP1193Provider.js';
+export * from './ParaConnector.js';
+export * from './ParaEIP1193Provider.js';

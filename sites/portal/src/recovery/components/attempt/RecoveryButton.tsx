@@ -7,15 +7,15 @@ import StepContext from '../../contexts/StepContext';
 import { ModalStep } from '../../steps/attemptSteps';
 import { ModalStep as RecoveryModalStep } from '../../steps/recoverySteps';
 import WalletContext from '../../contexts/WalletContext';
-import CapsuleSmall from '../../../assets/capsuleSmall';
+import ParaSmall from '../../../assets/paraSmall';
 import TwoFactorContext from '../../contexts/TwoFactorContext';
 import UserContext from '../../contexts/UserContext';
 import PhoneContext from '../../contexts/PhoneContext';
 import RecoveryStepContext from '../../contexts/RecoveryStepContext';
-import { useCapsule } from '../../../components/CapsuleContext';
+import { usePara } from '../../../components/ParaContext';
 
 const RecoveryButton: React.FC = () => {
-  const capsule = useCapsule();
+  const para = usePara();
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const { wallets, setWallets } = useContext(WalletContext);
   const { setId: setUserId } = useContext(UserContext);
@@ -44,7 +44,7 @@ const RecoveryButton: React.FC = () => {
           setIs2FAFlow(null);
           setCurrentStep(ModalStep.EMAIL_COLLECTION);
           setCurrentRecoveryStep(RecoveryModalStep.VERIFY_2FA);
-          await capsule.logout();
+          await para.logout();
         } else {
           setModalIsOpen(true);
         }
@@ -56,7 +56,9 @@ const RecoveryButton: React.FC = () => {
           {!!wallets?.length ? 'Logout' : 'Manage Recovery'}
         </Text>
       </HStack>
-      <CapsuleSmall />
+      <div>
+        <ParaSmall />
+      </div>
     </Button>
   );
 };

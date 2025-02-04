@@ -5,31 +5,31 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { Provider as JotaiProvider } from 'jotai';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { defineCustomElements } from '@usecapsule/react-components';
+import { defineCustomElements } from '@getpara/react-components';
 import { sepolia } from 'wagmi/chains';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { clusterApiUrl } from '@solana/web3.js';
 import {
-  CapsuleEvmProvider,
+  ParaEvmProvider,
   coinbaseWallet,
   metaMaskWallet,
   rainbowWallet,
   walletConnectWallet,
   zerionWallet,
   rabbyWallet,
-} from '@usecapsule/evm-wallet-connectors';
-import { backpackWallet, CapsuleSolanaProvider, glowWallet, phantomWallet } from '@usecapsule/solana-wallet-connectors';
-import { CapsuleCosmosProvider, leapWallet, keplrWallet } from '@usecapsule/cosmos-wallet-connectors';
-import { axelar, cosmoshub, osmosis, sommelier, stargaze } from '@usecapsule/graz/chains';
+} from '@getpara/evm-wallet-connectors';
+import { backpackWallet, ParaSolanaProvider, glowWallet, phantomWallet } from '@getpara/solana-wallet-connectors';
+import { ParaCosmosProvider, leapWallet, keplrWallet } from '@getpara/cosmos-wallet-connectors';
+import { axelar, cosmoshub, osmosis, sommelier, stargaze } from '@getpara/graz/chains';
 
 import { WALLET_CONNECT_PROJECT_ID } from './constants';
 import { ModalDesigner } from './components/ModalDesigner';
 import { initializeAppAtom } from './atoms';
 
-import '@usecapsule/react-components/css/capsule-core.css';
+import '@getpara/react-components/css/capsule-core.css';
 import './index.css';
 
-const APP_NAME = 'Capsule Modal Builder';
+const APP_NAME = 'Para Modal Builder';
 const SOLANA_NETWORK = WalletAdapterNetwork.Devnet;
 
 export const COSMOS_CHAINS = [
@@ -59,7 +59,7 @@ const EVM_WALLET_CONFIG = {
 const SOLANA_WALLET_CONFIG = {
   wallets: [glowWallet, phantomWallet, backpackWallet],
   appIdentity: {
-    name: 'Capsule Example',
+    name: 'Para Example',
     uri: `${location.protocol}//${location.host}`,
   },
 };
@@ -81,7 +81,7 @@ const App = () => {
     <BrowserRouter>
       <JotaiProvider>
         <QueryClientProvider client={queryClient}>
-          <CapsuleCosmosProvider
+          <ParaCosmosProvider
             selectedChainId={selectedCosmosChain}
             chains={COSMOS_WALLET_CONFIG.chains}
             onSwitchChain={setSelectedCosmosChain}
@@ -90,17 +90,17 @@ const App = () => {
               options: COSMOS_WALLET_CONFIG.walletConnectOptions,
             }}
           >
-            <CapsuleEvmProvider config={EVM_WALLET_CONFIG}>
-              <CapsuleSolanaProvider
+            <ParaEvmProvider config={EVM_WALLET_CONFIG}>
+              <ParaSolanaProvider
                 endpoint={endpoint}
                 wallets={SOLANA_WALLET_CONFIG.wallets}
                 chain={SOLANA_NETWORK}
                 appIdentity={SOLANA_WALLET_CONFIG.appIdentity}
               >
                 <ModalDesigner />
-              </CapsuleSolanaProvider>
-            </CapsuleEvmProvider>
-          </CapsuleCosmosProvider>
+              </ParaSolanaProvider>
+            </ParaEvmProvider>
+          </ParaCosmosProvider>
         </QueryClientProvider>
       </JotaiProvider>
     </BrowserRouter>

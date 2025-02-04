@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { CpslIcon } from '@usecapsule/react-components';
+import { CpslIcon } from '@getpara/react-components';
 import { Button } from '../UI';
 import { useAtom } from 'jotai';
 import { viewAtom } from '../../atoms';

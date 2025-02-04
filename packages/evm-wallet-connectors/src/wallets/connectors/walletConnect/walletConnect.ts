@@ -1,10 +1,10 @@
-import { CapsuleWalletConnectParameters, Wallet } from '../../../types/Wallet.js';
+import { ParaWalletConnectParameters, Wallet } from '../../../types/Wallet.js';
 import { getWalletConnectConnector } from '../../../utils/getWalletConnectConnector.js';
 import { icon } from './walletConnectIcon.js';
 
 export interface WalletConnectWalletOptions {
   projectId: string;
-  options?: CapsuleWalletConnectParameters;
+  options?: ParaWalletConnectParameters;
 }
 
 export const walletConnectWallet = ({ projectId, options }: WalletConnectWalletOptions): Wallet => {

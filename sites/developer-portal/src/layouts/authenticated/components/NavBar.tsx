@@ -1,4 +1,4 @@
-import { CpslButton, CpslDrawer, CpslIcon, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslDrawer, CpslIcon, CpslText } from '@getpara/react-components';
 import styled from 'styled-components';
 import { Navigation } from './Navigation';
 import { useIsMobile } from '../../../hooks/useIsMobile';

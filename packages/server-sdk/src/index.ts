@@ -1,5 +1,5 @@
-export * from '@usecapsule/core-sdk';
-export type { PlatformUtils, StorageUtils } from '@usecapsule/core-sdk';
-import { Capsule as CapsuleServer } from './CapsuleServer.js';
-export { CapsuleServer as Capsule };
-export default CapsuleServer;
+export * from '@getpara/core-sdk';
+export type { PlatformUtils, StorageUtils } from '@getpara/core-sdk';
+import { Para as ParaServer } from './ParaServer.js';
+export { ParaServer as Para };
+export default ParaServer;

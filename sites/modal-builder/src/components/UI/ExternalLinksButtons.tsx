@@ -1,13 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
-import { CpslIcon } from '@usecapsule/react-components';
+import { CpslIcon } from '@getpara/react-components';
 import { Button } from './StyledButton';
 import { Text } from './StyledText';
 
 export const ExternalLinksButtons: React.FC = () => {
   return (
     <ButtonGroup>
-      <ActionButton variant="secondary" onClick={() => window.open('https://docs.usecapsule.com/', '_blank')} size="small">
+      <ActionButton variant="secondary" onClick={() => window.open('https://docs.getpara.com/', '_blank')} size="small">
         <ButtonContent>
           <Text variant="bodyS" weight="medium" color="primary">
             Docs
@@ -16,11 +16,7 @@ export const ExternalLinksButtons: React.FC = () => {
         </ButtonContent>
       </ActionButton>
 
-      <ActionButton
-        variant="primary"
-        onClick={() => window.open('https://developer.usecapsule.com/', '_blank')}
-        size="small"
-      >
+      <ActionButton variant="primary" onClick={() => window.open('https://developer.getpara.com/', '_blank')} size="small">
         <ButtonContent>
           <Text variant="bodyS" weight="medium" color="inverted">
             Dev Portal

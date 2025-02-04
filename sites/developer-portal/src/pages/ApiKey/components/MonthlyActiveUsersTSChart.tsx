@@ -1,4 +1,4 @@
-import { CpslText } from '@usecapsule/react-components';
+import { CpslText } from '@getpara/react-components';
 import { XAxis, YAxis, Tooltip, BarChart, Bar, CartesianGrid } from 'recharts';
 import { format } from 'date-fns';
 import { ContentType } from 'recharts/types/component/Tooltip';

@@ -1,2 +1,2 @@
-export * from '@usecapsule/web-sdk';
-export { CapsuleMobile } from './react-native/CapsuleMobile.js';
+export * from '@getpara/web-sdk';
+export { ParaMobile } from './react-native/ParaMobile.js';

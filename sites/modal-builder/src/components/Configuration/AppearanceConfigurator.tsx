@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { BorderRadius } from '@usecapsule/react-components';
+import { BorderRadius } from '@getpara/react-components';
 
 import { BORDER_RADIUS_OPTIONS, FONT_OPTIONS } from '../../constants';
 import { DropdownOption } from '../../types';

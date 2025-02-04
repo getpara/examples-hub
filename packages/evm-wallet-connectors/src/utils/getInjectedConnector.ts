@@ -63,8 +63,8 @@ function createInjectedConnector(provider?: any): CreateConnector {
     const injectedConfig = provider
       ? {
           target: () => ({
-            id: walletDetails.capsuleDetails.id,
-            name: walletDetails.capsuleDetails.name,
+            id: walletDetails.paraDetails.id,
+            name: walletDetails.paraDetails.name,
             provider,
           }),
         }

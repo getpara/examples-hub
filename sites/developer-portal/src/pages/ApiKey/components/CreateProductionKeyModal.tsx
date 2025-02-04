@@ -1,4 +1,4 @@
-import { CpslAlert, CpslButton, CpslInput } from '@usecapsule/react-components';
+import { CpslAlert, CpslButton, CpslInput } from '@getpara/react-components';
 import { Modal } from '../../../components/Modal/Modal';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Controller, useFormContext } from 'react-hook-form';
@@ -56,7 +56,7 @@ export const CreateProductionKeyModal = ({ open, onClose }: CopyToModalProps) =>
             });
           },
           onError: err => {
-            let body = 'Please try again. If the problem persists, contact Capsule support.';
+            let body = 'Please try again. If the problem persists, contact Para support.';
 
             if ((err as AxiosError).response?.data === 'max keys created for the current project') {
               body = `You've reached the max number of ${formatEnvName(IS_PROD ? Environment.PROD : Environment.BETA)} API keys allowed on this project. Archive another key or create another project to add more API keys.`;

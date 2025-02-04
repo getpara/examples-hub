@@ -1,4 +1,4 @@
-import { EnabledFlow } from '@usecapsule/react-sdk';
+import { EnabledFlow } from '@getpara/react-sdk';
 import { EmailOption } from './utils/emailConfiguration';
 
 export const EMAIL_OPTIONS: {
@@ -42,7 +42,7 @@ export const ENABLED_FLOW_OPTIONS: {
   {
     value: EnabledFlow.BUY,
     title: 'Buy Crypto',
-    subtitle: 'Enable your users to purchase crypto and send it to their Capsule wallets.',
+    subtitle: 'Enable your users to purchase crypto and send it to their Para wallets.',
   },
   {
     value: EnabledFlow.WITHDRAW,

@@ -3,7 +3,7 @@ import { vi, describe, it, expect, afterEach } from 'vitest';
 import {
   BASE64_BYTES,
   BASE64_SIGNATURE,
-  CAPSULE_SHARE,
+  PARA_SHARE,
   CHAIN,
   COSMOS_PREFIX,
   COSMOS_SIGN_DOC,
@@ -42,11 +42,11 @@ import {
   mockSendTransaction,
   mockSignMessage,
 } from '../mocks/mockGlobalWalletUtils.js';
-import { Ctx, getBaseMPCNetworkUrl, WalletScheme, WalletType } from '@usecapsule/core-sdk';
+import { Ctx, getBaseMPCNetworkUrl, WalletScheme, WalletType } from '@getpara/core-sdk';
 import {
   mockCreateWallet,
-  mockCreateWalletPreGen,
-  mockGetCapsuleShare,
+  mockcreatePregenWallet,
+  mockGetParaShare,
   mockPreSignMessage,
   mockRefreshKeys,
   mockSendTransactionUserManagement,
@@ -102,8 +102,8 @@ describe('walletUtils', () => {
       const resp = await ed25519PreKeygen(TEST_CTX, USER.email, 'EMAIL');
 
       expect(resp).toStrictEqual({ signer: WALLET.signer, walletId: WALLET.id });
-      expect(mockCreateWalletPreGen).toBeCalledTimes(1);
-      expect(mockCreateWalletPreGen).toBeCalledWith({
+      expect(mockcreatePregenWallet).toBeCalledTimes(1);
+      expect(mockcreatePregenWallet).toBeCalledWith({
         pregenIdentifier: USER.email,
         pregenIdentifierType: 'EMAIL',
         scheme: WalletScheme.ED25519,
@@ -123,8 +123,8 @@ describe('walletUtils', () => {
       });
 
       await expect(ed25519PreKeygen(TEST_CTX, USER.email, 'EMAIL')).rejects.toThrowError('test error');
-      expect(mockCreateWalletPreGen).toBeCalledTimes(1);
-      expect(mockCreateWalletPreGen).toBeCalledWith({
+      expect(mockcreatePregenWallet).toBeCalledTimes(1);
+      expect(mockcreatePregenWallet).toBeCalledWith({
         pregenIdentifier: USER.email,
         pregenIdentifierType: 'EMAIL',
         scheme: WalletScheme.ED25519,
@@ -279,8 +279,8 @@ describe('walletUtils', () => {
         const resp = await preKeygen(TEST_CTX, PARTNER.id, USER.email, 'EMAIL', WalletType.EVM, SECRET_KEY);
 
         expect(resp).toStrictEqual({ signer: WALLET.signer, walletId: WALLET.id });
-        expect(mockCreateWalletPreGen).toBeCalledTimes(1);
-        expect(mockCreateWalletPreGen).toBeCalledWith({
+        expect(mockcreatePregenWallet).toBeCalledTimes(1);
+        expect(mockcreatePregenWallet).toBeCalledWith({
           pregenIdentifier: USER.email,
           pregenIdentifierType: 'EMAIL',
           type: WalletType.EVM,
@@ -300,8 +300,8 @@ describe('walletUtils', () => {
         const resp = await preKeygen(TEST_CTX, PARTNER.id, USER.email, 'EMAIL', WalletType.COSMOS, SECRET_KEY);
 
         expect(resp).toStrictEqual({ signer: WALLET.signer, walletId: WALLET.id });
-        expect(mockCreateWalletPreGen).toBeCalledTimes(1);
-        expect(mockCreateWalletPreGen).toBeCalledWith({
+        expect(mockcreatePregenWallet).toBeCalledTimes(1);
+        expect(mockcreatePregenWallet).toBeCalledWith({
           pregenIdentifier: USER.email,
           pregenIdentifierType: 'EMAIL',
           type: WalletType.COSMOS,
@@ -326,8 +326,8 @@ describe('walletUtils', () => {
       await expect(preKeygen(TEST_CTX, PARTNER.id, USER.email, 'EMAIL', WalletType.EVM, SECRET_KEY)).rejects.toThrowError(
         'test error',
       );
-      expect(mockCreateWalletPreGen).toBeCalledTimes(1);
-      expect(mockCreateWalletPreGen).toBeCalledWith({
+      expect(mockcreatePregenWallet).toBeCalledTimes(1);
+      expect(mockcreatePregenWallet).toBeCalledWith({
         pregenIdentifier: USER.email,
         pregenIdentifierType: 'EMAIL',
         type: WalletType.EVM,
@@ -752,18 +752,18 @@ describe('walletUtils', () => {
         const resp = await getPrivateKey(TEST_CTX, WALLET.share, WALLET.id, USER.id);
 
         expect(resp).toBe(WALLET.privateKey);
-        expect(mockGetCapsuleShare).toBeCalledTimes(1);
-        expect(mockGetCapsuleShare).toBeCalledWith(USER.id, WALLET.id);
+        expect(mockGetParaShare).toBeCalledTimes(1);
+        expect(mockGetParaShare).toBeCalledWith(USER.id, WALLET.id);
         expect(mockGetPrivateKey).toBeCalledTimes(1);
-        expect(mockGetPrivateKey).toBeCalledWith(WALLET.share, CAPSULE_SHARE, expect.any(Function));
+        expect(mockGetPrivateKey).toBeCalledWith(WALLET.share, PARA_SHARE, expect.any(Function));
       });
       it('no share', async () => {
-        mockGetCapsuleShare.mockResolvedValueOnce(undefined);
+        mockGetParaShare.mockResolvedValueOnce(undefined);
         const resp = await getPrivateKey(TEST_CTX, WALLET.share, WALLET.id, USER.id);
 
         expect(resp).toBe('');
-        expect(mockGetCapsuleShare).toBeCalledTimes(1);
-        expect(mockGetCapsuleShare).toBeCalledWith(USER.id, WALLET.id);
+        expect(mockGetParaShare).toBeCalledTimes(1);
+        expect(mockGetParaShare).toBeCalledWith(USER.id, WALLET.id);
         expect(mockGetPrivateKey).not.toBeCalled();
       });
     });
@@ -773,10 +773,10 @@ describe('walletUtils', () => {
       });
 
       await expect(getPrivateKey(TEST_CTX, WALLET.share, WALLET.id, USER.id)).rejects.toThrowError('test error');
-      expect(mockGetCapsuleShare).toBeCalledTimes(1);
-      expect(mockGetCapsuleShare).toBeCalledWith(USER.id, WALLET.id);
+      expect(mockGetParaShare).toBeCalledTimes(1);
+      expect(mockGetParaShare).toBeCalledWith(USER.id, WALLET.id);
       expect(mockGetPrivateKey).toBeCalledTimes(1);
-      expect(mockGetPrivateKey).toBeCalledWith(WALLET.share, CAPSULE_SHARE, expect.any(Function));
+      expect(mockGetPrivateKey).toBeCalledWith(WALLET.share, PARA_SHARE, expect.any(Function));
     });
   });
 });

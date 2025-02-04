@@ -1,4 +1,4 @@
-import { CpslButton, CpslIcon } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon } from '@getpara/react-components';
 import styled from 'styled-components';
 import { useCallback, useMemo, useState } from 'react';
 import { Table, TableData } from '../../components/Table/Table';
@@ -110,7 +110,7 @@ export const Project = () => {
           </CpslButton>
         }
         noContentTitle="No Keys Yet"
-        noContentSubtitle="Get started using Capsule by creating a new Beta API Key"
+        noContentSubtitle="Get started using Para by creating a new Beta API Key"
         NoContentActionButton={
           <CpslButton onClick={handleCreateClick} disabled={!orgValid}>
             <CpslIcon slot="start" icon="plus" />

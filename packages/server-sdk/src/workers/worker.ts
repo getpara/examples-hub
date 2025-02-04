@@ -5,9 +5,9 @@ import {
   getPortalBaseURL,
   initClient,
   mpcComputationClient,
-  capsuleVersion,
+  paraVersion,
   WalletType,
-} from '@usecapsule/core-sdk';
+} from '@getpara/core-sdk';
 import * as walletUtils from './walletUtils.js';
 
 let rawWasm: any;
@@ -129,7 +129,7 @@ export async function handleMessage(e: { data: Message }): Promise<any> {
   const ctx = {
     env,
     apiKey,
-    capsuleClient: initClient(env, capsuleVersion, apiKey, undefined, false, () => sessionCookie),
+    client: initClient({ env, version: paraVersion, apiKey, retrieveSessionCookie: () => sessionCookie }),
     offloadMPCComputationURL: offloadMPCComputationURL,
     mpcComputationClient: offloadMPCComputationURL
       ? mpcComputationClient.initClient(offloadMPCComputationURL, !!disableWorkers)

@@ -1,7 +1,7 @@
-import { CpslPagination, CpslTable, CpslText } from '@usecapsule/react-components';
+import { CpslPagination, CpslTable, CpslText } from '@getpara/react-components';
 import { ReactElement } from 'react';
 import styled from 'styled-components';
-import { CpslPaginationCustomEvent } from '@usecapsule/core-components';
+import { CpslPaginationCustomEvent } from '@getpara/core-components';
 import { MOBILE_SIZE } from '../../utils/constants';
 import { AUTH_APP_BAR_HEIGHT } from '../AppBar/AuthAppBar';
 

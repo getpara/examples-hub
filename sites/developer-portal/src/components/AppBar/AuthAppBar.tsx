@@ -1,4 +1,4 @@
-import { CpslAlert, CpslAppBar, CpslButton, CpslIcon } from '@usecapsule/react-components';
+import { CpslAlert, CpslAppBar, CpslButton, CpslIcon } from '@getpara/react-components';
 import styled from 'styled-components';
 import { DOCS_LINK, MOBILE_SIZE, PlanSlug } from '../../utils/constants';
 import { useIsMobile } from '../../hooks/useIsMobile';

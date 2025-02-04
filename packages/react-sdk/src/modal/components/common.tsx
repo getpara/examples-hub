@@ -1,4 +1,4 @@
-import { CpslIcon, CpslInput, CpslText, CpslTileButton } from '@usecapsule/react-components';
+import { CpslIcon, CpslInput, CpslText, CpslTileButton } from '@getpara/react-components';
 import { styled } from 'styled-components';
 
 export const SpinnerContainer = styled.div`

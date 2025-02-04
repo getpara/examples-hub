@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Table, TableData } from '../../../components/Table/Table';
 import { formatDate } from '../../../utils/formatDate';
-import { CpslButton, CpslIcon } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon } from '@getpara/react-components';
 import { GradientButton } from '../../../components/common';
 import { useIsMobile } from '../../../hooks/useIsMobile';
 import { RemoveMemberModal } from './RemoveMemberModal';
@@ -104,7 +104,7 @@ export const MembersTable = () => {
         page={page}
         totalPages={totalPages}
         title="Members"
-        subtitle="These are the people that currently have access to your Capsule instance"
+        subtitle="These are the people that currently have access to your Para instance"
         data={formattedData}
         onPageChange={handlePageChange}
         headers={[{ headerName: 'Name' }, { headerName: 'Email' }, { headerName: 'Date Joined', colSpan: 2 }]}

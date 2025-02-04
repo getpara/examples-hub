@@ -1,11 +1,12 @@
 import { StepContainer } from '../common.js';
-import { OnRampProvider, OnRampPurchase } from '@usecapsule/web-sdk';
-import { useCapsuleStore, useModalStore, useThemeStore } from '../../stores/index.js';
+import { OnRampProvider, OnRampPurchase } from '@getpara/web-sdk';
+import { useModalStore, useThemeStore } from '../../stores/index.js';
 import { lazy, useEffect, useMemo, useState } from 'react';
 import { ModalStep } from '../../utils/steps.js';
-import { RampEmbed, StripeEmbed } from '@usecapsule/react-common';
+import { RampEmbed, StripeEmbed } from '@getpara/react-common';
 import styled from 'styled-components';
 import { useGoBack } from '../../hooks/useGoBack.js';
+import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 
 const STEPS = {
   CANCELLED: ModalStep.ADD_FUNDS_FAILURE,
@@ -18,14 +19,14 @@ export const AddFundsAwaiting = () => {
   const onRampConfig = useModalStore(state => state.onRampConfig);
   const onRampPurchase = useModalStore(state => state.onRampPurchase);
   const setOnRampPurchase = useModalStore(state => state.setOnRampPurchase);
-  const capsule = useCapsuleStore(state => state.capsule);
+  const para = useInternalClient();
   const appName = useThemeStore(state => state.appName);
   const isDark = useThemeStore(state => state.isDark);
 
   const [MoonPayEmbed, setMoonPayEmbed] = useState(null);
 
   const props = {
-    capsule,
+    para,
     appName,
     onRampConfig,
     onRampPurchase: onRampPurchase as OnRampPurchase,

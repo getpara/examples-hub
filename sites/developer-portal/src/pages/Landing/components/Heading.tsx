@@ -5,10 +5,10 @@ export const Heading = () => {
   return (
     <Container>
       <CenteredText variant="headingM" weight="semiBold">
-        Capsule Developer Portal
+        Para Developer Portal
       </CenteredText>
       <CenteredText variant="bodyS" weight="medium" color="tertiary">
-        Customize, manage, and see analytics for your Capsule instance.
+        Customize, manage, and see analytics for your Para instance.
       </CenteredText>
     </Container>
   );

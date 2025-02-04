@@ -1,11 +1,4 @@
-import {
-  Ctx,
-  getBaseMPCNetworkUrl,
-  TPregenIdentifierType,
-  SignatureRes,
-  WalletScheme,
-  WalletType,
-} from '@usecapsule/core-sdk';
+import { Ctx, getBaseMPCNetworkUrl, TPregenIdentifierType, SignatureRes, WalletScheme, WalletType } from '@getpara/core-sdk';
 
 const configCGGMPBase = (serverUrl: string, walletId: string, id: string) =>
   `{"ServerUrl":"${serverUrl}", "WalletId": "${walletId}", "Id":"${id}", "Ids":["USER","CAPSULE"], "Threshold":1}`;
@@ -58,7 +51,7 @@ async function sendTransactionRequest(
 }
 
 export async function ed25519Keygen(ctx: Ctx, userId: string): Promise<{ signer: string; walletId: string }> {
-  const { walletId, protocolId } = await ctx.capsuleClient.createWallet(userId, {
+  const { walletId, protocolId } = await ctx.client.createWallet(userId, {
     scheme: WalletScheme.ED25519,
     type: WalletType.SOLANA,
   });
@@ -80,7 +73,7 @@ export async function ed25519PreKeygen(
   pregenIdentifier: string,
   pregenIdentifierType: TPregenIdentifierType,
 ): Promise<{ signer: string; walletId: string }> {
-  const { walletId, protocolId } = await ctx.capsuleClient.createWalletPreGen({
+  const { walletId, protocolId } = await ctx.client.createPregenWallet({
     pregenIdentifier,
     pregenIdentifierType,
     scheme: WalletScheme.ED25519,
@@ -106,7 +99,7 @@ export async function ed25519Sign(
   walletId: string,
   base64Bytes: string,
 ): Promise<{ signature: string }> {
-  const { protocolId } = await ctx.capsuleClient.preSignMessage(userId, walletId, base64Bytes, WalletScheme.ED25519);
+  const { protocolId } = await ctx.client.preSignMessage(userId, walletId, base64Bytes, WalletScheme.ED25519);
 
   const base64Sig = (await new Promise((resolve, reject) =>
     global.ed25519Sign(share, protocolId, base64Bytes, (err, result) => {
@@ -125,7 +118,7 @@ export async function keygen(
   type: Exclude<WalletType, WalletType.SOLANA>,
   secretKey: string | null,
 ): Promise<{ signer: string; walletId: string }> {
-  const { walletId, protocolId } = await ctx.capsuleClient.createWallet(userId, {
+  const { walletId, protocolId } = await ctx.client.createWallet(userId, {
     useTwoSigners: true,
     scheme: ctx.useDKLS ? WalletScheme.DKLS : WalletScheme.CGGMP,
     type,
@@ -170,7 +163,7 @@ export async function preKeygen(
   type: Exclude<WalletType, WalletType.SOLANA>,
   secretKey: string | null,
 ): Promise<{ signer: string; walletId: string }> {
-  const { walletId, protocolId } = await ctx.capsuleClient.createWalletPreGen({
+  const { walletId, protocolId } = await ctx.client.createPregenWallet({
     pregenIdentifier,
     pregenIdentifierType,
     type,
@@ -205,7 +198,7 @@ export async function signMessage(
   message: string,
   cosmosSignDoc?: string,
 ): Promise<SignatureRes> {
-  const { protocolId, pendingTransactionId } = await ctx.capsuleClient.preSignMessage(
+  const { protocolId, pendingTransactionId } = await ctx.client.preSignMessage(
     userId,
     walletId,
     message,
@@ -248,7 +241,7 @@ export async function signTransaction(
 ): Promise<SignatureRes> {
   const {
     data: { protocolId, pendingTransactionId },
-  } = await ctx.capsuleClient.signTransaction(userId, walletId, { transaction: tx, chainId });
+  } = await ctx.client.signTransaction(userId, walletId, { transaction: tx, chainId });
   if (pendingTransactionId) {
     return { pendingTransactionId };
   }
@@ -285,7 +278,7 @@ export async function sendTransaction(
 ): Promise<SignatureRes> {
   const {
     data: { protocolId, pendingTransactionId },
-  } = await ctx.capsuleClient.sendTransaction(userId, walletId, { transaction: tx, chainId });
+  } = await ctx.client.sendTransaction(userId, walletId, { transaction: tx, chainId });
   if (pendingTransactionId) {
     return { pendingTransactionId };
   }
@@ -323,7 +316,7 @@ export async function refresh(
 ): Promise<{ protocolId: string; signer: string }> {
   const {
     data: { protocolId },
-  } = await ctx.capsuleClient.refreshKeys(userId, walletId, oldPartnerId, newPartnerId, keyShareProtocolId);
+  } = await ctx.client.refreshKeys(userId, walletId, oldPartnerId, newPartnerId, keyShareProtocolId);
   const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
   const refreshFn = ctx.useDKLS ? global.dklsRefresh : global.refresh;
 
@@ -343,13 +336,13 @@ export async function refresh(
 }
 
 export async function getPrivateKey(ctx: Ctx, share: string, walletId: string, userId: string): Promise<string> {
-  const capsuleShare = await ctx.capsuleClient.getCapsuleShare(userId, walletId);
-  if (!capsuleShare) {
+  const paraShare = await ctx.client.getParaShare(userId, walletId);
+  if (!paraShare) {
     return '';
   }
 
   return new Promise((resolve, reject) =>
-    global.getPrivateKey(share, capsuleShare, (err, result) => {
+    global.getPrivateKey(share, paraShare, (err, result) => {
       if (err) {
         reject(err);
       }

@@ -17,7 +17,7 @@ export const BrandingConfiguration = () => {
   return (
     <ConfigurationCard
       title="Branding"
-      subtitle="These settings will be applied to Capsule Portal and Emails only. Customizing your Capsule Modal is done with the Capsule SDK."
+      subtitle="These settings will be applied to Para Portal and Emails only. Customizing your Para Modal is done with the Para SDK."
       docsLink={BRANDING_DOCS_LINK}
       defaultOpen={!form.getValues('homepageUrl')}
     >

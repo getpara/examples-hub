@@ -1,4 +1,4 @@
-import { CpslButton, CpslInput } from '@usecapsule/react-components';
+import { CpslButton, CpslInput } from '@getpara/react-components';
 import { Modal } from '../../../components/Modal/Modal';
 import { Controller, useForm } from 'react-hook-form';
 import { EMAIL_REGEX } from '../../../utils/regex';
@@ -44,7 +44,7 @@ export const AddMemberModal = ({ open, onClose }: AddMemberModalProps) => {
             triggerToast({
               variant: 'error',
               title: 'Failed to Invite Member',
-              body: 'Please try again. If the problem persists, contact Capsule support.',
+              body: 'Please try again. If the problem persists, contact Para support.',
             });
           },
         },
@@ -62,7 +62,7 @@ export const AddMemberModal = ({ open, onClose }: AddMemberModalProps) => {
       onClose={onClose}
       onExited={handleModalExited}
       title="Add Member"
-      subtitle="This person will be sent a link to join your Capsule organization."
+      subtitle="This person will be sent a link to join your Para organization."
     >
       <>
         <Controller

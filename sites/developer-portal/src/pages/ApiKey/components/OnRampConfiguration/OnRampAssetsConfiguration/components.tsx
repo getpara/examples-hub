@@ -7,7 +7,7 @@ import {
   getNetworkIcon,
   getAssetName,
   getAssetIcon,
-} from '@usecapsule/react-sdk';
+} from '@getpara/react-sdk';
 import { InnerSelect, OptionDisplay } from '../common.js';
 import {
   CpslButton,
@@ -18,8 +18,8 @@ import {
   CpslTabs,
   CpslRow,
   CpslCol as _CpslCol,
-} from '@usecapsule/react-components';
-import { CpslTabsCustomEvent, IconType, TabsChangedEventDetail } from '@usecapsule/core-components';
+} from '@getpara/react-components';
+import { CpslTabsCustomEvent, IconType, TabsChangedEventDetail } from '@getpara/core-components';
 import { useEffect, useState } from 'react';
 import _ from 'lodash';
 import styled from 'styled-components';

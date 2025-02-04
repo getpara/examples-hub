@@ -1,4 +1,4 @@
-import { capsule } from '../../../clients/capsule';
+import { para } from '../../../clients/para';
 import { ENTERPRISE_PLAN_SLUG, FREE_PLAN_SLUG, ZAPIER_WEBHOOK_URL } from '../../../utils/constants';
 import { useCreateOrganization } from '../../../hooks/api/mutations/useCreateOrganization';
 import { triggerToast } from '../../../utils/toasts';
@@ -12,8 +12,8 @@ import { useFormContext } from 'react-hook-form';
 import axios from 'axios';
 
 export const useSubmitOnboarding = () => {
-  const userId = capsule.getUserId();
-  const email = capsule.getEmail();
+  const userId = para.getUserId();
+  const email = para.getEmail();
   const { getValues } = useFormContext();
   const getInput = useOnboardingStore(state => state.getInput);
   const logoFile = useOnboardingStore(state => state.logoFile);
@@ -69,14 +69,14 @@ export const useSubmitOnboarding = () => {
         triggerToast({
           variant: 'error',
           title: 'Error Updating Your Organization',
-          body: "If your organization data isn't correct, contact Capsule support.",
+          body: "If your organization data isn't correct, contact Para support.",
         });
       }
     } catch (e) {
       triggerToast({
         variant: 'error',
         title: 'Error Creating Your Organization',
-        body: 'Please try again. If the problem persists, contact Capsule support.',
+        body: 'Please try again. If the problem persists, contact Para support.',
       });
     } finally {
       setIsSubmitting(false);

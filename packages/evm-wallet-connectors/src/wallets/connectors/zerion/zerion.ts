@@ -1,4 +1,4 @@
-import { isIOS, isTelegram } from '@usecapsule/react-sdk';
+import { isIOS, isTelegram } from '@getpara/react-sdk';
 import { DefaultWalletOptions, Wallet } from '../../../types/Wallet.js';
 import { getInjectedConnector, hasInjectedProvider } from '../../../utils/getInjectedConnector.js';
 import { getWalletConnectConnector } from '../../../utils/getWalletConnectConnector.js';

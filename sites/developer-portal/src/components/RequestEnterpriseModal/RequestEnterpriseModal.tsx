@@ -31,7 +31,7 @@ export const RequestEnterpriseModal = ({ open, onClose, onSuccess }: RequestEnte
           triggerToast({
             variant: 'error',
             title: 'Error Requesting Upgrade',
-            body: 'Please try again. If the problem persists, contact Capsule support.',
+            body: 'Please try again. If the problem persists, contact Para support.',
           });
         },
       },

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Table, TableData } from '../../../components/Table/Table';
 import { formatDate } from '../../../utils/formatDate';
-import { CpslButton } from '@usecapsule/react-components';
+import { CpslButton } from '@getpara/react-components';
 import { useParams } from 'react-router-dom';
 import { Environment } from '../../../types/environment';
 import { DeleteUserModal } from './DeleteUserModal';
@@ -146,7 +146,7 @@ export const UsersTable = () => {
       <Table
         page={page}
         title="Users"
-        subtitle="These are all the users who have logged into your app using your Capsule instance."
+        subtitle="These are all the users who have logged into your app using your Para instance."
         data={formattedData}
         totalPages={totalPages}
         onPageChange={handlePageChange}

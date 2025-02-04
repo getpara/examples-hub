@@ -1,14 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { Organization } from '../../../types/api';
 import { getOrganizations } from '../../../api/users/queries';
-import { capsule } from '../../../clients/capsule';
+import { para } from '../../../clients/para';
 import { useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 
 export const ORGANIZATIONS_QUERY_KEY = 'organizations';
 
 export const useOrganizationsQuery = <T>(select: (data: Organization[]) => T, retry?: boolean) => {
-  const userId = capsule.getUserId();
+  const userId = para.getUserId();
 
   return useQuery({
     enabled: !!userId,

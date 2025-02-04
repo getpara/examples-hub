@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { BaseCard } from '../../../components/common';
-import { CpslButton, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslText } from '@getpara/react-components';
 import { SCHEDULE_MEETING_LINK, SUPPORT_URL } from '../../../utils/constants';
 import {
   useHasStripeSubscription,

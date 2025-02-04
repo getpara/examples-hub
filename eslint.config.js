@@ -152,6 +152,14 @@ module.exports = [
     }),
   },
   {
+    name: 'Override for core SDKs',
+    files: ['packages/core-sdk/**/*.ts'],
+    ignores: ['**/dist/**'],
+    rules: Object.assign({}, prettierConfig.rules, {
+      'max-params': ['error', 3],
+    }),
+  },
+  {
     name: 'Override for developer portal',
     files: ['sites/developer-portal/**/*.ts', 'sites/developer-portal/**/*.tsx'],
     ignores: ['**/dist/**'],

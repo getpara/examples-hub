@@ -1,4 +1,4 @@
-import { CpslAvatar, CpslText } from '@usecapsule/react-components';
+import { CpslAvatar, CpslText } from '@getpara/react-components';
 import styled from 'styled-components';
 import { useGetSelectedOrganization } from '../../hooks/api/queries/useOrganizations';
 import { useOrganizationMember } from '../../hooks/api/queries/useOrganizationMember';

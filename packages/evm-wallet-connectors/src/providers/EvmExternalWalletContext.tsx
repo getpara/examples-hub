@@ -4,7 +4,7 @@ import { WagmiConnectorInstance } from '../types/Wallet.js';
 import { CommonChain, CommonWallet } from '../types/CommonTypes.js';
 import { isEIP6963Connector } from '../utils/isEIP6963Connector.js';
 import { getWalletConnectUri } from '../utils/getWalletConnectUri.js';
-import CapsuleWeb, { isMobile, WalletType } from '@usecapsule/react-sdk';
+import ParaWeb, { isMobile, WalletType } from '@getpara/react-sdk';
 import { normalize } from 'viem/ens';
 
 export const defaultEvmExternalWallet = {
@@ -29,11 +29,11 @@ export const EvmExternalWalletContext = createContext<{
 
 interface EvmExternalWalletProviderProps {
   children: ReactNode;
-  capsule: CapsuleWeb;
+  para: ParaWeb;
   onSwitchWallet: (args: { address?: string; error?: string }) => void;
 }
 
-export function EvmExternalWalletProvider({ children, capsule, onSwitchWallet }: EvmExternalWalletProviderProps) {
+export function EvmExternalWalletProvider({ children, para, onSwitchWallet }: EvmExternalWalletProviderProps) {
   const { connectAsync, connectors: untypedConnectors } = useConnect();
   const { address: wagmiAddress, isConnecting, isReconnecting, chainId, connector: connectedConnector } = useAccount();
   const { chains, switchChainAsync } = useSwitchChain();
@@ -46,7 +46,7 @@ export function EvmExternalWalletProvider({ children, capsule, onSwitchWallet }:
   const [isLocalConnecting, setIsLocalConnecting] = useState(false);
 
   useEffect(() => {
-    const storedExternalWallet = capsule.externalWallets[wagmiAddress ?? ''];
+    const storedExternalWallet = para.externalWallets[wagmiAddress ?? ''];
 
     if (
       !isConnecting &&
@@ -54,14 +54,14 @@ export function EvmExternalWalletProvider({ children, capsule, onSwitchWallet }:
       !isLocalConnecting &&
       !!wagmiAddress &&
       !storedExternalWallet &&
-      !(connectedConnector?.id === 'capsule')
+      !(connectedConnector?.id === 'para')
     ) {
       reset();
     }
   }, [isConnecting, isReconnecting, isLocalConnecting, wagmiAddress, connectedConnector]);
 
   useEffect(() => {
-    const storedExternalWallet = capsule.externalWallets[capsule.currentExternalWalletAddresses?.[0] ?? ''];
+    const storedExternalWallet = para.externalWallets[para.currentExternalWalletAddresses?.[0] ?? ''];
 
     // If the user is using an external EVM wallet we want to watch for wallet changes and log them in to a different user when the wallet changes
     if (
@@ -78,7 +78,7 @@ export function EvmExternalWalletProvider({ children, capsule, onSwitchWallet }:
 
   const reset = async () => {
     await disconnectAsync();
-    await capsule.logout(true);
+    await para.logout();
   };
 
   const switchChain = async (chainId: number) => {
@@ -91,7 +91,7 @@ export function EvmExternalWalletProvider({ children, capsule, onSwitchWallet }:
         const chain = chains.find(c => c.id === chainId);
         error = [
           'Network not supported.',
-          `You may need to add ${chain?.name} support to ${(connectedConnector as WagmiConnectorInstance)?.capsuleDetails?.name ?? connectedConnector?.name ?? 'the wallet'} manually.`,
+          `You may need to add ${chain?.name} support to ${(connectedConnector as WagmiConnectorInstance)?.paraDetails?.name ?? connectedConnector?.name ?? 'the wallet'} manually.`,
         ];
       } else {
         switch (e.name) {
@@ -112,10 +112,10 @@ export function EvmExternalWalletProvider({ children, capsule, onSwitchWallet }:
 
   const login = async (address: string, connectorName?: string) => {
     try {
-      await capsule.externalWalletLogin(address, WalletType.EVM, connectorName);
+      await para.externalWalletLogin({ address, type: WalletType.EVM, provider: connectorName });
     } catch (err) {
       await disconnectAsync();
-      await capsule.logout(true);
+      await para.logout();
 
       throw 'Error logging you in. Please try again.';
     }
@@ -125,9 +125,9 @@ export function EvmExternalWalletProvider({ children, capsule, onSwitchWallet }:
     setIsLocalConnecting(true);
     let error: string;
 
-    // If we're calling switch wallet with no address, treat it as if the user disconnected the wallet from the app and logout to reset the Capsule instance.
+    // If we're calling switch wallet with no address, treat it as if the user disconnected the wallet from the app and logout to reset the Para instance.
     if (!address) {
-      await capsule.logout(true);
+      await para.logout();
     } else {
       try {
         await login(address, connectedConnector?.name);
@@ -202,7 +202,7 @@ export function EvmExternalWalletProvider({ children, capsule, onSwitchWallet }:
   };
 
   const getQrUri = (connector: WagmiConnectorInstance) => () => {
-    return getWalletConnectUri(connector, connector.capsuleDetails?.getUri);
+    return getWalletConnectUri(connector, connector.paraDetails?.getUri);
   };
 
   // If an Eip6963 wallet is injected we want to remove the non Eip6963 connector and attach its metadata to the Eip6963 connector
@@ -211,10 +211,10 @@ export function EvmExternalWalletProvider({ children, capsule, onSwitchWallet }:
   connectors
     .filter(c => !isEIP6963Connector(c))
     .forEach(c => {
-      if (c.capsuleDetails) {
-        nonEip6963ConnectorsByRdns[c.capsuleDetails.rdns] = c.capsuleDetails;
+      if (c.paraDetails) {
+        nonEip6963ConnectorsByRdns[c.paraDetails.rdns] = c.paraDetails;
 
-        if (c.capsuleDetails.isWalletConnectModalConnector) {
+        if (c.paraDetails.isWalletConnectModalConnector) {
           walletConnectModalConnector = c;
         }
       }
@@ -224,21 +224,21 @@ export function EvmExternalWalletProvider({ children, capsule, onSwitchWallet }:
     .map(c => {
       // Filter out the duplicated walletConnect connector with the modal
       // This connector will be attached to the WC connector that doesn't contain the modal for use on mobile
-      if (c.capsuleDetails?.isWalletConnectModalConnector) {
+      if (c.paraDetails?.isWalletConnectModalConnector) {
         return;
       }
       // Remove any non EIP6963 connectors if they have a matching EIP6963 connectors
-      if (!isEIP6963Connector(c) && eip6963ids.includes(c.capsuleDetails?.rdns)) {
+      if (!isEIP6963Connector(c) && eip6963ids.includes(c.paraDetails?.rdns)) {
         return;
       }
       // Return the EIP6963 connectors
       if (isEIP6963Connector(c)) {
-        const capsuleMetadata = nonEip6963ConnectorsByRdns[c.id];
-        return { ...c, capsuleDetails: capsuleMetadata };
+        const paraMetadata = nonEip6963ConnectorsByRdns[c.id];
+        return { ...c, paraDetails: paraMetadata };
       }
 
       // Return the WC connector with the attached WC modal connector
-      if (c.capsuleDetails?.id === 'walletConnect' && walletConnectModalConnector) {
+      if (c.paraDetails?.id === 'walletConnect' && walletConnectModalConnector) {
         return { ...c, walletConnectModalConnector };
       }
 
@@ -247,7 +247,7 @@ export function EvmExternalWalletProvider({ children, capsule, onSwitchWallet }:
     .filter(c => !!c);
 
   const wallets = dedupedConnectors.map(c => {
-    const connector = { ...c, ...c.capsuleDetails };
+    const connector = { ...c, ...c.paraDetails };
 
     return {
       ...connector,

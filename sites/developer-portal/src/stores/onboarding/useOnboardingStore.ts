@@ -42,7 +42,7 @@ export const useOnboardingStore = create<OnboardingStore>()(
       ...getActions(set, get),
     }),
     {
-      name: '@CAPSULE-DEVELOPER-PORTAL/onboardingState',
+      name: '@PARA-DEVELOPER-PORTAL/onboardingState',
       partialize: state => ({
         userStepMap: state.userStepMap,
         userInputMap: state.userInputMap,

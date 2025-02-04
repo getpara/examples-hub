@@ -20,11 +20,11 @@ import {
 } from 'wagmi';
 import { coinbaseWallet, walletConnect } from 'wagmi/connectors';
 
-import Capsule from '@usecapsule/web-sdk';
-import { capsuleConnector } from '@usecapsule/wagmi-v2-integration';
-import CoreCapsule, { Environment, ConstructorOpts } from '@usecapsule/core-sdk';
+import Para from '@getpara/web-sdk';
+import { paraConnector } from '@getpara/wagmi-v2-integration';
+import ParaCore, { Environment, ConstructorOpts } from '@getpara/core-sdk';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import '@usecapsule/react-sdk/styles.css';
+import '@getpara/react-sdk/styles.css';
 
 const queryClient = new QueryClient();
 
@@ -183,8 +183,8 @@ function WagmiComponent(): JSX.Element {
       [sepolia.id]: http(),
     },
     connectors: [
-      capsuleConnector({
-        capsule,
+      paraConnector({
+        para,
         chains,
         options: {},
         appName: 'Example',
@@ -205,7 +205,7 @@ function WagmiComponent(): JSX.Element {
   );
 }
 
-function getCapsuleOpts(env: Environment, useDKLS: boolean): ConstructorOpts {
+function getParaOpts(env: Environment, useDKLS: boolean): ConstructorOpts {
   switch (env) {
     case Environment.DEV:
       return {
@@ -215,43 +215,43 @@ function getCapsuleOpts(env: Environment, useDKLS: boolean): ConstructorOpts {
     case Environment.SANDBOX:
       return {
         // useLocalFiles: true,
-        offloadMPCComputationURL: useDKLS ? undefined : 'https://partner-mpc-computation.sandbox.usecapsule.com',
+        offloadMPCComputationURL: useDKLS ? undefined : 'https://partner-mpc-computation.sandbox.getpara.com',
         // portalBackgroundColor: '#df092d',
         // portalPrimaryButtonColor: '#322e47',
         // portalTextColor: '#ffffff',
       };
     case Environment.BETA:
       return {
-        offloadMPCComputationURL: useDKLS ? undefined : 'https://partner-mpc-computation.beta.usecapsule.com',
+        offloadMPCComputationURL: useDKLS ? undefined : 'https://partner-mpc-computation.beta.getpara.com',
       };
     case Environment.PROD:
       return {
-        offloadMPCComputationURL: useDKLS ? undefined : 'https://partner-mpc-computation.prod.usecapsule.com',
+        offloadMPCComputationURL: useDKLS ? undefined : 'https://partner-mpc-computation.prod.getpara.com',
       };
     default:
       throw new Error(`invalid environment: ${env}`);
   }
 }
 
-let capsule: Capsule = undefined;
+let para: Para = undefined;
 
 function App() {
-  const [selectedEnv, setSelectedEnv] = useSessionStorage('@EXAMPLE-CAPSULE/selectedEnv', Environment.SANDBOX);
-  const [selectedApiKey, setSelectedApiKey] = useSessionStorage('@EXAMPLE-CAPSULE/selectedApiKey', API_KEY_WITH_BRANDING);
-  const [useDKLS, setUseDKLS] = useSessionStorage('@EXAMPLE-CAPSULE/useDKLS', true);
+  const [selectedEnv, setSelectedEnv] = useSessionStorage('@EXAMPLE-para/selectedEnv', Environment.SANDBOX);
+  const [selectedApiKey, setSelectedApiKey] = useSessionStorage('@EXAMPLE-para/selectedApiKey', API_KEY_WITH_BRANDING);
+  const [useDKLS, setUseDKLS] = useSessionStorage('@EXAMPLE-para/useDKLS', true);
 
-  capsule = React.useMemo(
-    () => new Capsule(selectedEnv, selectedApiKey, getCapsuleOpts(selectedEnv, useDKLS)),
+  para = React.useMemo(
+    () => new Para(selectedEnv, selectedApiKey, getParaOpts(selectedEnv, useDKLS)),
     [selectedEnv, useDKLS, selectedApiKey],
   );
 
   const [_isSessionActive, setIsSessionActive] = useState(false);
 
   async function checkIsSessionActive() {
-    const isFullyLoggedIn = await capsule.isFullyLoggedIn();
+    const isFullyLoggedIn = await para.isFullyLoggedIn();
     setIsSessionActive(isFullyLoggedIn);
-    if (isFullyLoggedIn && capsule instanceof CoreCapsule) {
-      console.log(`exported session:\n${(capsule as CoreCapsule).exportSession()}`);
+    if (isFullyLoggedIn && para instanceof ParaCore) {
+      console.log(`exported session:\n${(para as ParaCore).exportSession()}`);
     }
   }
 

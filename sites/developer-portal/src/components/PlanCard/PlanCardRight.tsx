@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { CpslIcon, CpslText } from '@usecapsule/react-components';
+import { CpslIcon, CpslText } from '@getpara/react-components';
 import { BRAND_COLORS } from '../../utils/constants';
 import { PlanIncludes } from '../../types/planMetadata';
 

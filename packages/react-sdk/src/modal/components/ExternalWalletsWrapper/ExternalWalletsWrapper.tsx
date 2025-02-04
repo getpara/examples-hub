@@ -19,15 +19,16 @@ import {
   CosmosExternalWalletProvider,
   CosmosExternalWalletProviderProps,
 } from '../../providers/CosmosExternalWalletContextStub.js';
-import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
+import { useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { useExternalWalletProviderStore } from '../../stores/externalWalletProvider/useExternalWalletProviderStore.js';
+import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 
 interface ExternalWalletsWrapperProps extends PropsWithChildren {
   wallets?: TExternalWallet[];
 }
 
 export const ExternalWalletsWrapper = ({ children, wallets }: ExternalWalletsWrapperProps) => {
-  const capsule = useCapsuleStore(state => state.capsule);
+  const para = useInternalClient();
   const resetModalState = useModalStore(state => state.resetState);
   const resetUserInfoState = useUserInfoStore(state => state.resetState);
   const StoredEvmProvider = useExternalWalletProviderStore(state => state.EvmProvider);
@@ -76,7 +77,7 @@ export const ExternalWalletsWrapper = ({ children, wallets }: ExternalWalletsWra
           // Handle EVM Wallets
           if (wallet in EvmWallet) {
             if (!StoredEvmProvider || !storedEvmContext) {
-              throw new Error('@usecapsule/evm-wallet-connectors is required to use an external EVM wallet.');
+              throw new Error('@getpara/evm-wallet-connectors is required to use an external EVM wallet.');
             } else {
               newEvmContext = storedEvmContext;
               newEvmProvider = StoredEvmProvider;
@@ -86,7 +87,7 @@ export const ExternalWalletsWrapper = ({ children, wallets }: ExternalWalletsWra
           // Handle Solana Wallets
           if (wallet in SolanaWallet) {
             if (!StoredSolanaProvider || !storedSolanaContext) {
-              throw new Error('@usecapsule/solana-wallet-connectors is required to use an external Solana wallet.');
+              throw new Error('@getpara/solana-wallet-connectors is required to use an external Solana wallet.');
             } else {
               newSolanaContext = storedSolanaContext;
               newSolanaProvider = StoredSolanaProvider;
@@ -96,7 +97,7 @@ export const ExternalWalletsWrapper = ({ children, wallets }: ExternalWalletsWra
           // Handle Cosmos Wallets
           if (wallet in CosmosWallet) {
             if (!StoredCosmosProvider || !storedCosmosContext) {
-              throw new Error('@usecapsule/cosmos-wallet-connectors is required to use an external Cosmos wallet.');
+              throw new Error('@getpara/cosmos-wallet-connectors is required to use an external Cosmos wallet.');
             } else {
               newCosmosContext = storedCosmosContext;
               newCosmosProvider = StoredCosmosProvider;
@@ -127,22 +128,22 @@ export const ExternalWalletsWrapper = ({ children, wallets }: ExternalWalletsWra
   ]);
 
   const handleSwitchWallet = ({ address, error }: { address?: string; error?: string }) => {
-    // If we error on switch wallets we logged out the Capsule instance so we need to reset the modal state
-    // Or if we don't return an address on switch wallets we logged out the Capsule instance so we need to reset the modal state
+    // If we error on switch wallets we logged out the Para instance so we need to reset the modal state
+    // Or if we don't return an address on switch wallets we logged out the Para instance so we need to reset the modal state
     if (error || !address) {
       resetModalState();
       resetUserInfoState();
     }
   };
 
-  if (!capsule || !EvmProvider || !SolanaProvider || !CosmosProvider) {
+  if (!para || !EvmProvider || !SolanaProvider || !CosmosProvider) {
     return null;
   }
 
   return (
-    <EvmProvider capsule={capsule} onSwitchWallet={handleSwitchWallet}>
-      <SolanaProvider capsule={capsule} onSwitchWallet={handleSwitchWallet}>
-        <CosmosProvider capsule={capsule} onSwitchWallet={handleSwitchWallet}>
+    <EvmProvider para={para} onSwitchWallet={handleSwitchWallet}>
+      <SolanaProvider para={para} onSwitchWallet={handleSwitchWallet}>
+        <CosmosProvider para={para} onSwitchWallet={handleSwitchWallet}>
           <ExternalWalletProvider
             evmContext={evmContext}
             solanaContext={solanaContext}

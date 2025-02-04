@@ -77,7 +77,7 @@ export const UsersTable = () => {
     <Table
       page={page}
       title="Users"
-      subtitle="These are all the users who have logged into your app using your Capsule instance."
+      subtitle="These are all the users who have logged into your app using your Para instance."
       data={formattedData}
       totalPages={totalPages}
       onPageChange={handlePageChange}

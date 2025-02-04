@@ -5,11 +5,11 @@ import { AuthCreationStep, REDIRECT_TIMEOUT } from '../../constants';
 import { Body } from './components/Body';
 import { Card, CardContent } from '../../components/common';
 import { ModalHeader } from '../../components/ModalHeader';
-import { useCapsule } from '../../components/CapsuleContext';
+import { usePara } from '../../components/ParaContext';
 import { useExtractedParams } from '../../hooks/useExtractedParams';
 
 export const AuthCreation = () => {
-  const capsule = useCapsule();
+  const para = usePara();
   const [step, setStep] = useState<AuthCreationStep>(AuthCreationStep.MANUAL_CREATION);
 
   const params = useExtractedParams<AuthCreationParams>();
@@ -17,7 +17,7 @@ export const AuthCreation = () => {
   const setUpBiometrics = useCallback(async () => {
     setStep(AuthCreationStep.CREATING);
     try {
-      await authCreation(capsule, params);
+      await authCreation(para, params);
 
       setStep(AuthCreationStep.SUCCESS);
       setTimeout(function () {

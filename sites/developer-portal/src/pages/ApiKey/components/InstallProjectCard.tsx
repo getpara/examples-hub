@@ -1,5 +1,5 @@
-import { CpslButton, CpslIcon, CpslInput, CpslSelect, CpslSelectItem, CpslText } from '@usecapsule/react-components';
-import { CpslSelectCustomEvent } from '@usecapsule/core-components';
+import { CpslButton, CpslIcon, CpslInput, CpslSelect, CpslSelectItem, CpslText } from '@getpara/react-components';
+import { CpslSelectCustomEvent } from '@getpara/core-components';
 import { SplitCard, SplitCardInnerContainer } from '../../../components/SplitCard/SplitCard';
 import { useParams } from 'react-router-dom';
 import { ExternalLinkButton } from '../../../components/ExternalLinkButton/ExternalLinkButton';
@@ -66,7 +66,7 @@ export const InstallProjectCard = ({
             triggerToast({
               variant: 'error',
               title: 'Failed to Save Step Completion',
-              body: 'Please try again. If the problem persists, contact Capsule support.',
+              body: 'Please try again. If the problem persists, contact Para support.',
             });
           },
         },

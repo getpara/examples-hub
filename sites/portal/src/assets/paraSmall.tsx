@@ -1,0 +1,10 @@
+export default function ParaSmall({ w = 13, h = 22 }: { w?: number; h?: number }) {
+  return (
+    <svg width={w} height={h} viewBox="0 0 216 204" fill="none" stroke="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M60 0H144C183.764 0 216 32.2355 216 72C216 111.765 183.764 144 144 144H96C82.7452 144 72 154.745 72 168V204H0V132H36C49.2548 132 60 121.255 60 108L60 0Z"
+        fill="white"
+      />
+    </svg>
+  );
+}

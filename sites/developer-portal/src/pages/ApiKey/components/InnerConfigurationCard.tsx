@@ -1,4 +1,4 @@
-import { CpslRadio } from '@usecapsule/react-components';
+import { CpslRadio } from '@getpara/react-components';
 import { PropsWithChildren } from 'react';
 import styled from 'styled-components';
 import { SplitCard, SplitCardInnerContainer } from '../../../components/SplitCard/SplitCard';

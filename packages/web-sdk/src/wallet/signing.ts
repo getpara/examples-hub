@@ -1,4 +1,4 @@
-import { Ctx, SignatureRes } from '@usecapsule/core-sdk';
+import { Ctx, SignatureRes } from '@getpara/core-sdk';
 import { setupWorker } from '../workers/workerWrapper.js';
 
 export async function signTransaction(

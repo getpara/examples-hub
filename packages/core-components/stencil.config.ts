@@ -19,7 +19,7 @@ export const config: Config = {
       type: 'dist',
     },
     reactOutputTarget({
-      componentCorePackage: '@usecapsule/core-components',
+      componentCorePackage: '@getpara/core-components',
       proxiesFile: '../react-components/lib/components/stencil-generated/index.ts',
     }),
     {

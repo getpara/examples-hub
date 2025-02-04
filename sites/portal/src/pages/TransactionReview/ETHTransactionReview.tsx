@@ -3,13 +3,13 @@ import { useState, useEffect } from 'react';
 import TransactionReviewAwaitingApproval from './components/TransactionReviewAwaitingApproval';
 import { FeeMarketEIP1559Transaction } from '@ethereumjs/tx';
 import web3 from 'web3';
-import { useCapsule } from '../../components/CapsuleContext';
+import { usePara } from '../../components/ParaContext';
 
 import { Partner } from '../../types';
-import { Wallet } from '@usecapsule/web-sdk';
+import { Wallet } from '@getpara/web-sdk';
 import { iconForChainId, iconForCurrency, TransactionReviewContainer, TransactionType } from './TransactionReview';
 import { fetchChainData } from '../../utils/transactionReview';
-import { CpslSpinner } from '@usecapsule/react-components';
+import { CpslSpinner } from '@getpara/react-components';
 
 enum ETHTransactionReviewState {
   Loading,
@@ -66,7 +66,7 @@ function ETHTransactionReview({
   confirmTransaction,
   rejectTransaction,
 }: ETHTransactionReviewProps) {
-  const capsule = useCapsule();
+  const para = usePara();
 
   const [feeMarketTransaction, setFeeMarketTransaction] = useState(null);
   const [transactionType, setTransactionType] = useState(null);
@@ -99,7 +99,7 @@ function ETHTransactionReview({
   useEffect(() => {
     async function fetchGasEstimate() {
       try {
-        const res = await capsule.ctx.capsuleClient.getGasEstimate(
+        const res = await para.ctx.client.getGasEstimate(
           feeMarketTransaction.chainId,
           web3.utils.toWei(feeMarketTransaction.maxFeePerGas + feeMarketTransaction.maxPriorityFeePerGas, 'gwei'),
         );
@@ -111,7 +111,7 @@ function ETHTransactionReview({
 
     async function fetchGasOracle() {
       try {
-        const res = await capsule.ctx.capsuleClient.getGasOracle(feeMarketTransaction.chainId);
+        const res = await para.ctx.client.getGasOracle(feeMarketTransaction.chainId);
         setGasOracle(res);
       } catch (error) {
         console.error('Error fetching gas oracle:', error);
@@ -127,11 +127,7 @@ function ETHTransactionReview({
   useEffect(() => {
     async function fetchConversionRate() {
       try {
-        const res = await capsule.ctx.capsuleClient.getConversionRate(
-          chainData.chainId,
-          chainData.nativeCurrency.symbol,
-          'USD',
-        );
+        const res = await para.ctx.client.getConversionRate(chainData.chainId, chainData.nativeCurrency.symbol, 'USD');
         setConversionRate(res.conversionRate);
       } catch (error) {
         console.error('Error fetching conversion rate:', error);

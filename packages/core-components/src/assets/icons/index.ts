@@ -15,11 +15,6 @@ import BackupKit from './backup-kit.svg';
 import Bank from './bank.svg';
 import BaseBrand from './base-brand.svg';
 import Brush from './brush.svg';
-import CapsuleBlackBg from './capsule-black-bg.svg';
-import CapsuleLogo from './capsule-logo.svg';
-import CapsuleRingsDark from './capsule-rings-dark.svg';
-import CapsuleRings from './capsule-rings.svg';
-import Capsule from './capsule.svg';
 import CeloBrand from './celo-brand.svg';
 import CheckCircleFilled from './check-circle-filled.svg';
 import CheckCircle from './check-circle.svg';
@@ -111,6 +106,15 @@ import MoreLoginOptions from './more-login-options.svg';
 import Motorola from './motorola.svg';
 import NobleBrand from './noble-brand.svg';
 import OptimismBrand from './optimism-brand.svg';
+import ParaBlackBg from './para-black-bg.svg';
+import ParaBrand from './para-brand.svg';
+import ParaIconBrand from './para-icon-brand.svg';
+import ParaIconQr from './para-icon-qr.svg';
+import ParaIcon from './para-icon.svg';
+import ParaLogo from './para-logo.svg';
+import ParaRingsDark from './para-rings-dark.svg';
+import ParaRings from './para-rings.svg';
+import Para from './para.svg';
 import Passcode from './passcode.svg';
 import Phone from './phone.svg';
 import PintrestBrand from './pintrest-brand.svg';
@@ -414,11 +418,6 @@ export const Icons = {
   bank: Bank,
   baseBrand: BaseBrand,
   brush: Brush,
-  capsuleBlackBg: CapsuleBlackBg,
-  capsuleLogo: CapsuleLogo,
-  capsuleRingsDark: CapsuleRingsDark,
-  capsuleRings: CapsuleRings,
-  capsule: Capsule,
   celoBrand: CeloBrand,
   checkCircleFilled: CheckCircleFilled,
   checkCircle: CheckCircle,
@@ -510,6 +509,15 @@ export const Icons = {
   motorola: Motorola,
   nobleBrand: NobleBrand,
   optimismBrand: OptimismBrand,
+  paraBlackBg: ParaBlackBg,
+  paraBrand: ParaBrand,
+  paraIconBrand: ParaIconBrand,
+  paraIconQr: ParaIconQr,
+  paraIcon: ParaIcon,
+  paraLogo: ParaLogo,
+  paraRingsDark: ParaRingsDark,
+  paraRings: ParaRings,
+  para: Para,
   passcode: Passcode,
   phone: Phone,
   pintrestBrand: PintrestBrand,

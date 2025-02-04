@@ -1,7 +1,7 @@
-import { CpslRow, CpslText, IconType } from '@usecapsule/react-components';
+import { CpslRow, CpslText, IconType } from '@getpara/react-components';
 import { Controller } from 'react-hook-form';
 import { useSupportedWalletTypesFormData } from '../../hooks/useSupportedWalletTypesFormData';
-import { SupportedWalletTypes, WalletType } from '@usecapsule/react-sdk';
+import { SupportedWalletTypes, WalletType } from '@getpara/react-sdk';
 import { DOCS_LINK } from '../../../../utils/constants';
 import { ConfigurationCard } from '../ConfigurationCard';
 import { FormProvider } from 'react-hook-form';
@@ -28,14 +28,15 @@ export const SupportedWalletTypesConfiguration = () => {
           Configure the wallet types your app supports.
           <br />
           <br />
-          When a new user signs up on your app, Capsule will automatically provision a new wallet for each{' '}
-          <b>non-optional</b> type you specify. Cross-app users who sign into your app will be required to connect or create
-          a new wallet of each non-optional type, and will also be permitted to connect or create wallets for each optional
-          type.
+          When a new user signs up on your app, Para will automatically provision a new wallet for each <b>
+            non-optional
+          </b>{' '}
+          type you specify. Cross-app users who sign into your app will be required to connect or create a new wallet of each
+          non-optional type, and will also be permitted to connect or create wallets for each optional type.
           <br />
           <br />
           The order of the wallet types will determine the order in which they are displayed in the login screen and in the
-          Capsule Modal dropdown menu after signing in. The wallet initially displayed in the modal after signing in will
+          Para Modal dropdown menu after signing in. The wallet initially displayed in the modal after signing in will
           default to the first wallet type in the list.
         </>
       }

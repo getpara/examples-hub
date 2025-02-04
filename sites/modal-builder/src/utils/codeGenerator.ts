@@ -2,8 +2,8 @@ import { ModalBuilderConfig } from '../types';
 
 export const getModalCodeString = (config: ModalBuilderConfig): string => {
   return `
-<CapsuleModal
-  capsule={capsuleClient}
+<ParaModal
+  para={para}
   isOpen={isModalOpen}
   onClose={() => setIsModalOpen(false)}
   logo={${JSON.stringify(config.appearance.logo)}}

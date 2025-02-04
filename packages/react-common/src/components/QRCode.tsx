@@ -1,7 +1,7 @@
-import { CpslButton, CpslIcon, CpslQrCode, CpslSpinner, CpslText, IconType } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon, CpslQrCode, CpslSpinner, CpslText, IconType } from '@getpara/react-components';
 import styled from 'styled-components';
 import { useCopyToClipboard } from '../hooks/index.js';
-import { isMobile } from '@usecapsule/web-sdk';
+import { isMobile } from '@getpara/web-sdk';
 
 interface QRCodeProps {
   link?: string;

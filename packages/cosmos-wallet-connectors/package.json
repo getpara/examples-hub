@@ -1,6 +1,6 @@
 {
-  "name": "@usecapsule/cosmos-wallet-connectors",
-  "version": "1.20.0",
+  "name": "@getpara/cosmos-wallet-connectors",
+  "version": "1.0.0",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -9,17 +9,17 @@
     "./connectors": "./dist/wallets/connectors/index.js"
   },
   "dependencies": {
-    "@usecapsule/react-sdk": "4.20.0"
+    "@getpara/react-sdk": "1.0.0"
   },
   "scripts": {
     "build": "rm -rf dist && tsc",
     "test": "vitest run --coverage"
   },
   "devDependencies": {
+    "@getpara/graz": "^0.1.0",
     "@leapwallet/cosmos-social-login-capsule-provider": "^0.0.41",
     "@types/react": "^18.0.31",
     "@types/react-dom": "^18.2.7",
-    "@usecapsule/graz": "^0.3.0",
     "typescript": "^5.4.3"
   },
   "peerDependencies": {
@@ -28,7 +28,7 @@
     "@cosmjs/proto-signing": "<=0.31.3",
     "@cosmjs/stargate": "<=0.31.3",
     "@cosmjs/tendermint-rpc": "<=0.31.3",
-    "@usecapsule/graz": "^0.3.0",
+    "@getpara/graz": "^0.1.0",
     "react": ">=18",
     "react-dom": ">=18"
   },

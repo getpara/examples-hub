@@ -1,10 +1,9 @@
-import { Network, OnRampAsset, OnRampMethod, OnRampProvider } from '@usecapsule/core-sdk';
-import { IconType } from '@usecapsule/react-components';
+import { Network, OnRampAsset, OnRampMethod, OnRampProvider } from '@getpara/core-sdk';
+import { IconType } from '@getpara/react-components';
 import { Transition, Variants } from 'framer-motion';
 
-export const CAPSULE_CONNECT = 'https://connect.usecapsule.com/';
-export const CAPSULE_TERMS_AND_CONDITIONS =
-  'https://capsule-org.notion.site/Terms-and-Conditions-d4a23d32c6a64acba9cec29a11cc09e9';
+export const PARA_CONNECT = 'https://connect.getpara.com/';
+export const PARA_TERMS_AND_CONDITIONS = 'https://getpara.com/terms';
 
 export interface OnRampProviderConfig {
   name: string;

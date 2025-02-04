@@ -1,18 +1,18 @@
 export type AuthType = 'email' | 'phone' | 'farcaster' | 'telegram' | 'userId';
 
+export type $ExtractAuth<T extends AuthType> = {
+  auth: Auth<T>;
+  authType: T;
+  identifier: string;
+  publicKeyIdentifier: string;
+};
+
 export type ExtractAuth =
   | $ExtractAuth<'email'>
   | $ExtractAuth<'phone'>
   | $ExtractAuth<'farcaster'>
   | $ExtractAuth<'telegram'>
   | $ExtractAuth<'userId'>;
-
-export type $ExtractAuth<T extends AuthType> = {
-  auth: $Auth<T>;
-  authType: T;
-  identifier: string;
-  publicKeyIdentifier: string;
-};
 
 export type AuthParams = Record<string, any> & {
   email?: string;
@@ -23,7 +23,7 @@ export type AuthParams = Record<string, any> & {
   userId?: string;
 };
 
-export type $Auth<T extends AuthType> = T extends 'email'
+export type Auth<T extends AuthType = AuthType> = T extends 'email'
   ? { email: string }
   : T extends 'phone'
     ? { phone: string; countryCode: string }
@@ -32,8 +32,6 @@ export type $Auth<T extends AuthType> = T extends 'email'
       : T extends 'telegram'
         ? { telegramUserId: string }
         : { userId: string };
-
-export type Auth = $Auth<'email'> | $Auth<'phone'> | $Auth<'farcaster'> | $Auth<'telegram'> | $Auth<'userId'>;
 
 export enum EncryptorType {
   USER = 'USER',

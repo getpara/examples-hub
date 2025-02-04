@@ -1,6 +1,6 @@
 import { useModalStateStore } from '../../stores/modalStateStore/useModalStateStore';
-import { CpslButton, CpslIcon, CpslText } from '@usecapsule/react-components';
-import { ExternalWallet } from '@usecapsule/react-sdk';
+import { CpslButton, CpslIcon, CpslText } from '@getpara/react-components';
+import { ExternalWallet } from '@getpara/react-sdk';
 import { DownIcon, FlexRow, LabelContainer, MethodRow, OptionRow } from './ModalConfig';
 
 export const ExternalWallets = () => {

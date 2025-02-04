@@ -6,7 +6,7 @@ import { ErrorBoundary } from '../../components/ErrorBoundary/ErrorBoundary';
 import { styled } from 'styled-components';
 import { GradientProgressBar } from '../../components/GradientProgessBar/GradientProgessBar';
 import { OnboardingStep, useOnboardingStore } from '../../stores/onboarding/useOnboardingStore';
-import { capsule } from '../../clients/capsule';
+import { para } from '../../clients/para';
 import { AnimatePresence, motion, Transition, Variants } from 'framer-motion';
 import { cloneElement, useEffect, useRef } from 'react';
 
@@ -41,7 +41,7 @@ export const ONBOARDING_TRANSITION: Transition = {
 export const Layout = () => {
   const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
-  const userId = capsule.getUserId();
+  const userId = para.getUserId();
   const currentStep = useOnboardingStore(state => state.getStep(userId));
   const element = useOutlet();
 

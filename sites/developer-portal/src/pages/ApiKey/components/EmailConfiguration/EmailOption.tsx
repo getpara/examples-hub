@@ -1,7 +1,7 @@
 import { styled } from 'styled-components';
 import { EMAIL_OPTIONS } from '../../config';
 import { InnerConfigurationCard } from '../InnerConfigurationCard';
-import { CpslIcon, CpslInput, CpslText } from '@usecapsule/react-components';
+import { CpslIcon, CpslInput, CpslText } from '@getpara/react-components';
 import { ImageUpload } from '../../../../components/ImageUpload/ImageUpload';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { HTTPS_URL_REGEX } from '../../../../utils/regex';

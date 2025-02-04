@@ -10,7 +10,7 @@ export const aboutYouQuestions = [
 ];
 
 export const aboutProjectQuestions = [
-  OnboardingAnswerOption.USE_CAPSULE,
+  OnboardingAnswerOption.USE_PARA,
   OnboardingAnswerOption.STAGE,
   OnboardingAnswerOption.CURRENT_PROVIDER,
   OnboardingAnswerOption.SUPPORTED_CHAINS,
@@ -21,7 +21,7 @@ export const aboutProjectQuestions = [
 export const orgQuestions = [OnboardingAnswerOption.NAME];
 
 export const selectQuestionOptions: Record<string, string[]> = {
-  [OnboardingAnswerOption.USE_CAPSULE]: [
+  [OnboardingAnswerOption.USE_PARA]: [
     'At my company',
     'For a personal project',
     'At a hackathon',
@@ -46,7 +46,7 @@ export const questionType: Record<string, QuestionType> = {
   [OnboardingAnswerOption.NAME]: QuestionType.TEXT,
   [OnboardingAnswerOption.ROLE]: QuestionType.TEXT,
   [OnboardingAnswerOption.HOMEPAGE_URL]: QuestionType.TEXT,
-  [OnboardingAnswerOption.USE_CAPSULE]: QuestionType.SELECT,
+  [OnboardingAnswerOption.USE_PARA]: QuestionType.SELECT,
   [OnboardingAnswerOption.STAGE]: QuestionType.SELECT,
   [OnboardingAnswerOption.CURRENT_PROVIDER]: QuestionType.SELECT,
   [OnboardingAnswerOption.SUPPORTED_CHAINS]: QuestionType.SELECT,
@@ -61,10 +61,10 @@ export const questionIsMultipleSelect: Record<string, boolean> = {
 export const questionLabel: Record<string, string> = {
   [OnboardingAnswerOption.USER_NAME]: 'Name',
   [OnboardingAnswerOption.TELEGRAM]: 'Telegram Handle',
-  [OnboardingAnswerOption.NAME]: 'Name your Capsule organization',
+  [OnboardingAnswerOption.NAME]: 'Name your Para organization',
   [OnboardingAnswerOption.ROLE]: 'Role',
   [OnboardingAnswerOption.HOMEPAGE_URL]: 'Website URL',
-  [OnboardingAnswerOption.USE_CAPSULE]: 'How will you use Capsule?',
+  [OnboardingAnswerOption.USE_PARA]: 'How will you use Para?',
   [OnboardingAnswerOption.STAGE]: 'What stage is your project?',
   [OnboardingAnswerOption.CURRENT_PROVIDER]: 'Are you already using an embedded wallet provider?',
   [OnboardingAnswerOption.SUPPORTED_CHAINS]: 'What chains does your app support?',
@@ -78,7 +78,7 @@ export const questionPlaceholder: Record<string, string> = {
   [OnboardingAnswerOption.NAME]: 'Name your organization',
   [OnboardingAnswerOption.ROLE]: 'Enter role',
   [OnboardingAnswerOption.HOMEPAGE_URL]: 'Link to your project or company',
-  [OnboardingAnswerOption.USE_CAPSULE]: 'Choose one',
+  [OnboardingAnswerOption.USE_PARA]: 'Choose one',
   [OnboardingAnswerOption.STAGE]: 'Choose one',
   [OnboardingAnswerOption.CURRENT_PROVIDER]: 'Choose one',
   [OnboardingAnswerOption.SUPPORTED_CHAINS]: 'Choose one or more',
@@ -106,8 +106,8 @@ export const questionRules: Record<
   [OnboardingAnswerOption.ROLE]: {
     required: 'Role is required.',
   },
-  [OnboardingAnswerOption.USE_CAPSULE]: {
-    required: 'How will you use Capsule is required.',
+  [OnboardingAnswerOption.USE_PARA]: {
+    required: 'How will you use Para is required.',
   },
   [OnboardingAnswerOption.STAGE]: {
     required: 'Stage is required.',

@@ -1,7 +1,7 @@
 import { Button, Text } from '@chakra-ui/react';
 import { useState } from 'react';
 import RecoveryCancelModal from './RecoveryCancelModal';
-import CapsuleSmall from '../../../assets/capsuleSmall';
+import ParaSmall from '../../../assets/paraSmall';
 
 const RecoveryCancelButton: React.FC = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -19,7 +19,7 @@ const RecoveryCancelButton: React.FC = () => {
       <Text size="18px" marginRight="9px">
         Cancel Recovery
       </Text>
-      <CapsuleSmall />
+      <ParaSmall />
     </Button>
   );
 };

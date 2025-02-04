@@ -1,12 +1,13 @@
 import { Context, ReactNode, createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { CommonChain, CommonWallet } from '../types/commonTypes.js';
 import { EvmExternalWalletContextType } from './EvmExternalWalletContextStub.js';
-import { useCapsuleStore, useModalStore } from '../stores/index.js';
+import { useModalStore } from '../stores/index.js';
 import { ModalStep } from '../utils/steps.js';
 import { TExternalWallet } from '../types/externalWallets.js';
 import { SolanaExternalWalletContextType } from './SolanaExternalWalletContextStub.js';
 import { CosmosExternalWalletContextType } from './CosmosExternalWalletContextStub.js';
-import { WalletType, isIOS, isIOSWebview, isMobile, truncateAddress } from '@usecapsule/web-sdk';
+import { WalletType, isIOS, isIOSWebview, isMobile, truncateAddress } from '@getpara/web-sdk';
+import { useInternalClient } from '../../provider/hooks/utils/useInternalClient.js';
 
 export const defaultExternalWallet = {
   wallets: [],
@@ -91,7 +92,7 @@ export function ExternalWalletProvider({
   const setExternalWalletError = useModalStore(state => state.setExternalWalletError);
   const setIsUsingMobileConnector = useModalStore(state => state.setIsUsingMobileConnector);
   const isUsingMobileConnector = useModalStore(state => state.isUsingMobileConnector);
-  const capsule = useCapsuleStore(state => state.capsule);
+  const para = useInternalClient();
 
   const [qrUri, setQrUri] = useState<string>();
   const [chainIdSwitchingTo, setChainIdSwitchingTo] = useState<string>();
@@ -125,7 +126,7 @@ export function ExternalWalletProvider({
   }, [wallet]);
 
   const chains: CommonChain[] = useMemo(() => {
-    const walletType = capsule.externalWallets[capsule.currentExternalWalletAddresses?.[0] ?? '']?.type;
+    const walletType = para.externalWallets[para.currentExternalWalletAddresses?.[0] ?? '']?.type;
 
     switch (walletType) {
       case WalletType.COSMOS: {
@@ -141,7 +142,7 @@ export function ExternalWalletProvider({
   }, [cosmosChains, evmChains, selectedExternalWalletId]);
 
   const chainId: string = useMemo(() => {
-    const walletType = capsule.externalWallets[capsule.currentExternalWalletAddresses?.[0] ?? '']?.type;
+    const walletType = para.externalWallets[para.currentExternalWalletAddresses?.[0] ?? '']?.type;
 
     switch (walletType) {
       case WalletType.COSMOS: {
@@ -158,7 +159,7 @@ export function ExternalWalletProvider({
 
   const switchChain = useCallback(
     async (chainId: string) => {
-      const walletType = capsule.externalWallets[capsule.currentExternalWalletAddresses?.[0] ?? '']?.type;
+      const walletType = para.externalWallets[para.currentExternalWalletAddresses?.[0] ?? '']?.type;
 
       if (walletType) {
         let resp: {
@@ -261,7 +262,7 @@ export function ExternalWalletProvider({
 
   const username: string = useMemo(() => {
     let username: string;
-    const storedExternalWallet = capsule.externalWallets[capsule.currentExternalWalletAddresses?.[0] ?? ''];
+    const storedExternalWallet = para.externalWallets[para.currentExternalWalletAddresses?.[0] ?? ''];
 
     if (storedExternalWallet) {
       const walletType = storedExternalWallet?.type;
@@ -288,7 +289,7 @@ export function ExternalWalletProvider({
   }, [evmUsername, wallet]);
 
   const avatar: string | undefined = useMemo(() => {
-    const walletType = capsule.externalWallets[capsule.currentExternalWalletAddresses?.[0] ?? '']?.type;
+    const walletType = para.externalWallets[para.currentExternalWalletAddresses?.[0] ?? '']?.type;
 
     if (walletType) {
       switch (walletType) {

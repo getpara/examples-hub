@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { OrganizationMember } from '../../../types/api';
 import { getOrganizationMember } from '../../../api/users/queries';
-import { capsule } from '../../../clients/capsule';
+import { para } from '../../../clients/para';
 import { useParams } from 'react-router-dom';
 
 export const ORGANIZATION_MEMBER_QUERY_KEY = 'organizationMember';
 
 export const useOrganizationMemberQuery = <T>(select: (data: OrganizationMember | undefined) => T) => {
-  const userId = capsule.getUserId();
+  const userId = para.getUserId();
   const { organizationId } = useParams();
 
   return useQuery({

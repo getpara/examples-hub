@@ -1,4 +1,4 @@
-import { CapsuleWalletConnectParameters } from '../types/Wallet.js';
+import { ParaWalletConnectParameters } from '../types/Wallet.js';
 
 interface ComputeMetaDataParameters {
   appName: string;
@@ -12,7 +12,7 @@ export const computeWalletConnectMetaData = ({
   appDescription,
   appUrl,
   appIcon,
-}: ComputeMetaDataParameters): CapsuleWalletConnectParameters['metadata'] => {
+}: ComputeMetaDataParameters): ParaWalletConnectParameters['metadata'] => {
   return {
     name: appName,
     description: appDescription ?? appName,

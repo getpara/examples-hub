@@ -1,6 +1,6 @@
 import styled from 'styled-components';
-import { CpslIcon, CpslText } from '@usecapsule/react-components';
-import { PartnerEntity } from '@usecapsule/user-management-client';
+import { CpslIcon, CpslText } from '@getpara/react-components';
+import { PartnerEntity } from '@getpara/user-management-client';
 
 interface PartnerIconProps {
   partner: PartnerEntity;

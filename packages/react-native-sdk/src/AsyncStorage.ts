@@ -1,6 +1,6 @@
 // Copyright (c) Capsule Labs Inc. All rights reserved.
 
-import { StorageUtils } from '@usecapsule/web-sdk';
+import { StorageUtils } from '@getpara/web-sdk';
 import RNAsyncStorage from '@react-native-async-storage/async-storage';
 
 /**

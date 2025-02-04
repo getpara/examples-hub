@@ -5,7 +5,7 @@ import { PackageManager } from '../types/packageManager';
 
 export const ENV_VARS = {
   environment: import.meta.env.VITE_ENVIRONMENT as string,
-  capsuleApiKey: import.meta.env.VITE_CAPSULE_API_KEY,
+  paraApiKey: import.meta.env.VITE_CAPSULE_API_KEY,
   statsigClientKey: import.meta.env.VITE_STATSIG_CLIENT_KEY,
   statsigEnv:
     import.meta.env.VITE_ENVIRONMENT === Environment.DEV
@@ -20,25 +20,24 @@ export const BRAND_COLORS = {
   secondary: '#9C1EFF',
 };
 
-export const DOCS_LINK = 'https://docs.usecapsule.com/';
-export const PREGEN_DOCS_LINK = 'https://docs.usecapsule.com/integration-guides/wallet-pregeneration';
-export const BRANDING_DOCS_LINK = 'https://docs.usecapsule.com/customize-capsule/required-customization';
-export const ON_RAMP_DOCS_LINK = 'https://docs.usecapsule.com/customize-capsule/fiat-onramps';
-export const REACT_DOCS_LINK = 'https://docs.usecapsule.com/getting-started/initial-setup/web-modal-and-sdk-setup';
-export const WEB_DOCS_LINK = 'https://docs.usecapsule.com/getting-started/initial-setup/web-modal-and-sdk-setup';
-export const NODE_DOCS_LINK = 'https://docs.usecapsule.com/getting-started/initial-setup/server';
-export const REACT_NATIVE_DOCS_LINK = 'https://docs.usecapsule.com/getting-started/initial-setup/react-native';
-export const EXPO_DOCS_LINK = 'https://docs.usecapsule.com/getting-started/initial-setup/expo';
-export const FLUTTER_DOCS_LINK = 'https://docs.usecapsule.com/getting-started/initial-setup/flutter-setup';
-export const SWIFT_DOCS_LINK = 'https://docs.usecapsule.com/getting-started/initial-setup/swift-sdk-setup';
+export const DOCS_LINK = 'https://docs.getpara.com/';
+export const PREGEN_DOCS_LINK = 'https://docs.getpara.com/integration-guides/wallet-pregeneration';
+export const BRANDING_DOCS_LINK = 'https://docs.getpara.com/customize-capsule/required-customization';
+export const ON_RAMP_DOCS_LINK = 'https://docs.getpara.com/customize-capsule/fiat-onramps';
+export const REACT_DOCS_LINK = 'https://docs.getpara.com/getting-started/initial-setup/web-modal-and-sdk-setup';
+export const WEB_DOCS_LINK = 'https://docs.getpara.com/getting-started/initial-setup/web-modal-and-sdk-setup';
+export const NODE_DOCS_LINK = 'https://docs.getpara.com/getting-started/initial-setup/server';
+export const REACT_NATIVE_DOCS_LINK = 'https://docs.getpara.com/getting-started/initial-setup/react-native';
+export const EXPO_DOCS_LINK = 'https://docs.getpara.com/getting-started/initial-setup/expo';
+export const FLUTTER_DOCS_LINK = 'https://docs.getpara.com/getting-started/initial-setup/flutter-setup';
+export const SWIFT_DOCS_LINK = 'https://docs.getpara.com/getting-started/initial-setup/swift-sdk-setup';
 export const REACT_NATIVE_SETUP_DOCS_LINK =
-  'https://docs.usecapsule.com/getting-started/initial-setup/react-native#project-setup';
-export const EXPO_SETUP_DOCS_LINK = 'https://docs.usecapsule.com/getting-started/initial-setup/expo#project-setup';
-export const FLUTTER_SETUP_DOCS_LINK =
-  'https://docs.usecapsule.com/getting-started/initial-setup/flutter-setup#project-setup';
+  'https://docs.getpara.com/getting-started/initial-setup/react-native#project-setup';
+export const EXPO_SETUP_DOCS_LINK = 'https://docs.getpara.com/getting-started/initial-setup/expo#project-setup';
+export const FLUTTER_SETUP_DOCS_LINK = 'https://docs.getpara.com/getting-started/initial-setup/flutter-setup#project-setup';
 
-export const NEXT_EXTRA_DOCS_LINK = 'https://docs.usecapsule.com/troubleshooting/nextjs';
-export const VITE_EXTRA_DOCS_LINK = 'https://docs.usecapsule.com/troubleshooting/react-vite';
+export const NEXT_EXTRA_DOCS_LINK = 'https://docs.getpara.com/troubleshooting/nextjs';
+export const VITE_EXTRA_DOCS_LINK = 'https://docs.getpara.com/troubleshooting/react-vite';
 
 export const MOBILE_SIZE = 767;
 
@@ -59,11 +58,11 @@ export const EMAIL_FONTS = [
 
 export const THEME_MODES = ['Light', 'Dark'];
 
-export const TWITTER_URL = 'https://twitter.com/usecapsule';
-export const LINKEDIN_URL = 'https://www.linkedin.com/company/usecapsule';
-export const SUPPORT_URL = 'mailto:support@usecapsule.com';
-export const SCHEDULE_MEETING_LINK = 'https://usecapsule.com/talk-to-us';
-export const MODAL_DESIGNER_LINK = 'https://demo.usecapsule.com';
+export const TWITTER_URL = 'https://twitter.com/get_para';
+export const LINKEDIN_URL = 'https://www.linkedin.com/company/parahq';
+export const SUPPORT_URL = 'mailto:support@getpara.com';
+export const SCHEDULE_MEETING_LINK = 'https://getpara.com/talk-to-us';
+export const MODAL_DESIGNER_LINK = 'https://demo.getpara.com';
 
 export const FRAMEWORK_OPTIONS: Framework[] = [
   Framework.REACT,
@@ -139,14 +138,14 @@ export const ENTERPRISE_PLAN_SLUG = PlanSlug.ENTERPRISE;
 export const FREE_PLAN_SLUG = PlanSlug.FREE;
 
 export const LANDING_HEADER_LINKS = [
-  { label: 'Pricing', url: 'https://www.usecapsule.com/pricing' },
-  { label: 'Docs', url: 'https://docs.usecapsule.com/' },
-  { label: 'Modal Designer', url: 'https://demo.usecapsule.com/' },
-  { label: 'Blog', url: 'https://blog.usecapsule.com/' },
+  { label: 'Pricing', url: 'https://www.getpara.com/pricing' },
+  { label: 'Docs', url: 'https://docs.getpara.com/' },
+  { label: 'Modal Designer', url: 'https://demo.getpara.com/' },
+  { label: 'Blog', url: 'https://blog.getpara.com/' },
 ];
 
-export const PRIVACY_POLICY = 'https://www.usecapsule.com/privacy-policy';
-export const TOS = 'https://www.usecapsule.com/terms-of-service';
+export const PRIVACY_POLICY = 'https://www.getpara.com/privacy-policy';
+export const TOS = 'https://www.getpara.com/terms-of-service';
 
 export const ZAPIER_WEBHOOK_URL = IS_PROD
   ? 'https://hooks.zapier.com/hooks/catch/20717871/2ib0ip3/'

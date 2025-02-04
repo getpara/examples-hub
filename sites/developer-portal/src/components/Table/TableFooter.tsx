@@ -1,7 +1,7 @@
-import { CpslPagination } from '@usecapsule/react-components';
+import { CpslPagination } from '@getpara/react-components';
 import { memo } from 'react';
 import styled from 'styled-components';
-import { CpslPaginationCustomEvent } from '@usecapsule/core-components';
+import { CpslPaginationCustomEvent } from '@getpara/core-components';
 
 interface TableFooterProps {
   totalPages: number;

@@ -1,13 +1,13 @@
 import { useEffect, useRef } from 'react';
-import { useCapsule } from '../components';
+import { usePara } from '../components';
 
-export function useClearCapsuleStorage() {
-  const capsule = useCapsule();
+export function useClearParaStorage() {
+  const para = usePara();
   const isCleared = useRef(false);
 
   useEffect(() => {
     if (!isCleared.current) {
-      capsule.clearStorage('local');
+      para.clearStorage('local');
       isCleared.current = true;
     }
   }, []);

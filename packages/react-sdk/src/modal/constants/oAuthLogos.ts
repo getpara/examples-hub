@@ -1,5 +1,5 @@
-import { IconType } from '@usecapsule/react-components';
-import { OAuthMethod } from '@usecapsule/web-sdk';
+import { IconType } from '@getpara/react-components';
+import { OAuthMethod } from '@getpara/web-sdk';
 
 export const brandedOAuthLogos: { [key in OAuthMethod]: IconType } = {
   GOOGLE: 'googleBrand',

@@ -1,4 +1,4 @@
-import { CpslText } from '@usecapsule/react-components';
+import { CpslText } from '@getpara/react-components';
 import { SplitCard, SplitCardInnerContainer } from '../../../components/SplitCard/SplitCard';
 import { useParams } from 'react-router-dom';
 import { useGetApiKeySetupStatus } from '../../../hooks/api/queries/useApiKeySetupStatus';

@@ -35,7 +35,7 @@ export const AssetUpload = ({ fieldName, assetType, label, recommendedSize }: As
           triggerToast({
             variant: 'error',
             title: 'Failed to Upload Image',
-            body: 'Please try again. If the problem persists, contact Capsule support.',
+            body: 'Please try again. If the problem persists, contact Para support.',
           });
         },
       },

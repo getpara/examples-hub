@@ -1,4 +1,4 @@
-import { IconType } from '@usecapsule/react-components';
+import { IconType } from '@getpara/react-components';
 
 export type WalletMetadata = {
   id: string;

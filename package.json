@@ -24,7 +24,7 @@
     "start-demo": "lerna run dev --scope=modal-builder",
     "start-dev-portal": "lerna run dev --scope=developer-portal",
     "start-e2e": "lerna run start-e2e  --scope=capsule-legacy-example --scope=capsule-portal",
-    "lerna-version": "lerna version",
+    "lerna-version": "lerna version --tag-version-prefix=\"getpara-\"",
     "lerna-publish": "lerna publish from-package --no-private",
     "lerna-publish-dev": "lerna publish preminor --preid dev --dist-tag dev",
     "prepare": "husky",

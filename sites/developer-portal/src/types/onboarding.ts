@@ -9,7 +9,7 @@ export enum OnboardingAnswerOption {
   USER_NAME = 'userName',
   TELEGRAM = 'telegram',
   ROLE = 'role',
-  USE_CAPSULE = 'useCapsule',
+  USE_PARA = 'usePara',
   STAGE = 'stage',
   CURRENT_PROVIDER = 'currentProvider',
   SUPPORTED_CHAINS = 'supportedChains',
@@ -23,7 +23,7 @@ export type OnboardingAnswers = {
   [OnboardingAnswerOption.USER_NAME]: string;
   [OnboardingAnswerOption.TELEGRAM]: string;
   [OnboardingAnswerOption.ROLE]: string;
-  [OnboardingAnswerOption.USE_CAPSULE]: string;
+  [OnboardingAnswerOption.USE_PARA]: string;
   [OnboardingAnswerOption.STAGE]: string;
   [OnboardingAnswerOption.CURRENT_PROVIDER]: string;
   [OnboardingAnswerOption.SUPPORTED_CHAINS]: string[];

@@ -1,6 +1,6 @@
 import { vi, describe, it, expect, afterEach, beforeEach } from 'vitest';
 
-import { Environment } from '@usecapsule/core-sdk';
+import { Environment } from '@getpara/core-sdk';
 import { COSMOS_PREFIX, OFFLOAD_MPC_COMPUTATION_URL, PARTNER, USER, WALLET } from '../constants.js';
 import { getWorkerContent } from '../utils.js';
 import { getPrivateKey } from '../../src/wallet/privateKey.js';

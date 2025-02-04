@@ -26,14 +26,14 @@ import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
 import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
 import * as solana from '@solana/web3.js';
-import Capsule from '@usecapsule/web-sdk';
-import { CapsuleModal, OAuthMethod, ModalStep, ModalStepProp, ExternalWallet } from '@usecapsule/react-sdk';
+import Para from '@getpara/web-sdk';
+import { ParaModal, OAuthMethod, ModalStep, ModalStepProp, ExternalWallet } from '@getpara/react-sdk';
 import { FeeMarketEIP1559Transaction } from '@ethereumjs/tx';
-import { CapsuleProtoSigner } from '@usecapsule/cosmjs-v0-integration';
-import { CapsuleEthersSigner } from '@usecapsule/ethers-v6-integration';
-import { createCapsuleViemClient } from '@usecapsule/viem-v1-integration';
-import { CapsuleConnector, CapsuleEIP1193Provider } from '@usecapsule/wagmi-v1-integration';
-import CoreCapsule, {
+import { ParaProtoSigner } from '@getpara/cosmjs-v0-integration';
+import { ParaEthersSigner } from '@getpara/ethers-v6-integration';
+import { createParaViemClient } from '@getpara/viem-v1-integration';
+import { ParaConnector, ParaEIP1193Provider } from '@getpara/wagmi-v1-integration';
+import ParaCore, {
   Environment,
   ConstructorOpts,
   getBaseUrl,
@@ -42,10 +42,10 @@ import CoreCapsule, {
   PREGEN_IDENTIFIER_TYPES,
   TransactionReviewDenied,
   TransactionReviewTimeout,
-} from '@usecapsule/core-sdk';
-import { CapsuleSolanaWeb3Signer } from '@usecapsule/solana-web3.js-v1-integration';
+} from '@getpara/core-sdk';
+import { ParaSolanaWeb3Signer } from '@getpara/solana-web3.js-v1-integration';
 import { FONT_OPTIONS } from './constants';
-import '@usecapsule/react-sdk/styles.css';
+import '@getpara/react-sdk/styles.css';
 import { ArrayField } from './array';
 import { OfframpSend } from './offramp';
 import { ToastContainer } from 'react-toastify';
@@ -123,8 +123,8 @@ const PLACEHOLDERS = {
 // below is address of existing smart contract on sepolia
 // const DEFAULT_CONTRACT_ADDRESS = '0xc08c00e1aa97a18583dc1a72a7e9fb9ce56cfef5'
 
-async function sendCosmosTx(capsule: Capsule): Promise<void> {
-  const protoSigner = new CapsuleProtoSigner(capsule);
+async function sendCosmosTx(para: Para): Promise<void> {
+  const protoSigner = new ParaProtoSigner(para);
   const client = await SigningStargateClient.connectWithSigner(COSMOS_TESTNET_RPC, protoSigner);
 
   console.log(await client.getAccount(protoSigner.address));
@@ -167,10 +167,10 @@ async function sendCosmosTx(capsule: Capsule): Promise<void> {
 const SOLANA_RECIPIENT_PUBLIC_KEY = '4TUYF5Q6sCkBCjamQrTkNYJyxhyaCPiPnq9oVg6qXbTp';
 const SOLANA_DEVNET_RPC_ENDPOINT = 'https://api.devnet.solana.com';
 
-async function sendSolanaTx(capsule: Capsule, walletId: string, setSig: any): Promise<void> {
+async function sendSolanaTx(para: Para, walletId: string, setSig: any): Promise<void> {
   try {
     const connection = new solana.Connection(SOLANA_DEVNET_RPC_ENDPOINT, 'confirmed');
-    const solanaSigner = new CapsuleSolanaWeb3Signer(capsule, connection, walletId);
+    const solanaSigner = new ParaSolanaWeb3Signer(para, connection, walletId);
     const tx = new solana.Transaction().add(
       solana.SystemProgram.transfer({
         fromPubkey: solanaSigner.sender,
@@ -201,7 +201,7 @@ async function sendSolanaTx(capsule: Capsule, walletId: string, setSig: any): Pr
 }
 
 async function _sendViemTransaction(nonce = 0): Promise<void> {
-  const viemClient = createCapsuleViemClient(capsule, {
+  const viemClient = createParaViemClient(para, {
     chain: sepolia,
     transport: http(ALCHEMY_SEPOLIA_PROVIDER),
   });
@@ -220,8 +220,8 @@ async function _sendViemTransaction(nonce = 0): Promise<void> {
 }
 
 async function _sendEIP1193ProviderTransaction(): Promise<void> {
-  const eip1193Provider = new CapsuleEIP1193Provider({
-    capsule,
+  const eip1193Provider = new ParaEIP1193Provider({
+    para,
     chainId: DEFAULT_CHAIN_ID,
     chains: [sepolia],
     appName: 'Example',
@@ -386,7 +386,7 @@ function WagmiProfileComponent(): JSX.Element {
   );
 }
 
-function WagmiComponent({ capsule }: { capsule: Capsule }): JSX.Element {
+function WagmiComponent({ para }: { para: Para }): JSX.Element {
   const { chains, publicClient, webSocketPublicClient } = configureChains(
     [sepolia],
     [alchemyProvider({ apiKey: 'HfT9dMNs3W0h1vJmiPZQ_APaFjPo-BF9' })],
@@ -394,8 +394,8 @@ function WagmiComponent({ capsule }: { capsule: Capsule }): JSX.Element {
   const config = createConfig({
     autoConnect: true,
     connectors: [
-      new CapsuleConnector({
-        capsule,
+      new ParaConnector({
+        para,
         chains,
         options: {},
         appName: 'Example',
@@ -425,15 +425,15 @@ function WagmiComponent({ capsule }: { capsule: Capsule }): JSX.Element {
   );
 }
 
-async function sendEthersTransaction(capsule: Capsule, tx: any): Promise<void> {
+async function sendEthersTransaction(para: Para, tx: any): Promise<void> {
   console.log('sending ethers tx:\n', tx);
-  const currentWalletId = capsule?.currentWalletIds?.EVM?.[0];
+  const currentWalletId = para?.currentWalletIds?.EVM?.[0];
   if (!currentWalletId) {
     return;
   }
 
   const provider = new ethers.EtherscanProvider(Number(tx.chainId), 'KfxK8ZFXw9mTUuJ7jt751xGJCa3r8noZ');
-  const ethersSigner = new CapsuleEthersSigner(capsule, provider, currentWalletId);
+  const ethersSigner = new ParaEthersSigner(para, provider, currentWalletId);
   let res;
   try {
     res = await ethersSigner.sendTransaction(tx);
@@ -443,15 +443,15 @@ async function sendEthersTransaction(capsule: Capsule, tx: any): Promise<void> {
   console.log('send ethers tx response:\n', res);
 }
 
-async function sendEthersMintNFTTransaction(capsule: Capsule, tx: any): Promise<void> {
+async function sendEthersMintNFTTransaction(para: Para, tx: any): Promise<void> {
   console.log('sending ethers tx:\n', tx);
-  const currentWalletId = capsule?.currentWalletIds?.EVM?.[0];
+  const currentWalletId = para?.currentWalletIds?.EVM?.[0];
   if (!currentWalletId) {
     return;
   }
   const provider = new ethers.JsonRpcProvider(INFURA_HOST, 'sepolia');
 
-  const ethersSigner = new CapsuleEthersSigner(capsule, provider, currentWalletId);
+  const ethersSigner = new ParaEthersSigner(para, provider, currentWalletId);
   let res;
   try {
     res = await ethersSigner.sendTransaction(tx);
@@ -495,7 +495,7 @@ async function _createTransaction(
   return tx.serialize().toString('base64');
 }
 
-function getCapsuleOpts(env: Environment, useDKLS: boolean): ConstructorOpts {
+function getParaOpts(env: Environment, useDKLS: boolean): ConstructorOpts {
   switch (env) {
     case Environment.DEV:
       return {
@@ -505,18 +505,18 @@ function getCapsuleOpts(env: Environment, useDKLS: boolean): ConstructorOpts {
     case Environment.SANDBOX:
       return {
         // useLocalFiles: true,
-        offloadMPCComputationURL: useDKLS ? undefined : 'https://partner-mpc-computation.sandbox.usecapsule.com',
+        offloadMPCComputationURL: useDKLS ? undefined : 'https://partner-mpc-computation.sandbox.getpara.com',
         // portalBackgroundColor: '#df092d',
         // portalPrimaryButtonColor: '#322e47',
         // portalTextColor: '#ffffff',
       };
     case Environment.BETA:
       return {
-        offloadMPCComputationURL: useDKLS ? undefined : 'https://partner-mpc-computation.beta.usecapsule.com',
+        offloadMPCComputationURL: useDKLS ? undefined : 'https://partner-mpc-computation.beta.getpara.com',
       };
     case Environment.PROD:
       return {
-        offloadMPCComputationURL: useDKLS ? undefined : 'https://partner-mpc-computation.prod.usecapsule.com',
+        offloadMPCComputationURL: useDKLS ? undefined : 'https://partner-mpc-computation.prod.getpara.com',
       };
     default:
       throw new Error(`invalid environment: ${env}`);
@@ -524,37 +524,37 @@ function getCapsuleOpts(env: Environment, useDKLS: boolean): ConstructorOpts {
 }
 
 function App() {
-  const [selectedView, setSelectedView] = useLocalStorage('@EXAMPLE-CAPSULE/selectedView', 'OLD_VIEW');
-  const [selectedEnv, setSelectedEnv] = useLocalStorage('@EXAMPLE-CAPSULE/selectedEnv', Environment.SANDBOX);
-  const [selectedApiKey, setSelectedApiKey] = useLocalStorage('@EXAMPLE-CAPSULE/selectedApiKey', API_KEY_WITH_BRANDING);
-  const [useDKLS, setUseDKLS] = useLocalStorage('@EXAMPLE-CAPSULE/useDKLS', true);
-  const [partners, setPartners] = useLocalStorage<Partner[]>('@EXAMPLE-CAPSULE/partners', []);
-  const [homepageUrl, setHomepageUrl] = useLocalStorage('@EXAMPLE-CAPSULE/homepageUrl', 'www.capsule.com');
+  const [selectedView, setSelectedView] = useLocalStorage('@EXAMPLE-PARA/selectedView', 'OLD_VIEW');
+  const [selectedEnv, setSelectedEnv] = useLocalStorage('@EXAMPLE-PARA/selectedEnv', Environment.SANDBOX);
+  const [selectedApiKey, setSelectedApiKey] = useLocalStorage('@EXAMPLE-PARA/selectedApiKey', API_KEY_WITH_BRANDING);
+  const [useDKLS, setUseDKLS] = useLocalStorage('@EXAMPLE-PARA/useDKLS', true);
+  const [partners, setPartners] = useLocalStorage<Partner[]>('@EXAMPLE-PARA/partners', []);
+  const [homepageUrl, setHomepageUrl] = useLocalStorage('@EXAMPLE-PARA/homepageUrl', 'www.para.com');
 
-  const [logo, setLogo] = useLocalStorage('@EXAMPLE-CAPSULE/logo', '');
-  const [useTheme, setUseTheme] = useLocalStorage('@EXAMPLE-CAPSULE/useTheme', false);
-  const [isDarkTheme, setIsDarkTheme] = useLocalStorage('@EXAMPLE-CAPSULE/useTheme', false);
-  const [foregroundColor, setForegroundColor] = useLocalStorage('@EXAMPLE-CAPSULE/foregroundColor', '#FAFAFA');
-  const [backgroundColor, setBackgroundColor] = useLocalStorage('@EXAMPLE-CAPSULE/backgroundColor', '#121212');
-  const [borderRadius, setBorderRadius] = useLocalStorage('@EXAMPLE-CAPSULE/borderRadius', 'sm');
-  const [font, setFont] = useLocalStorage('@EXAMPLE-CAPSULE/font', 'inter');
-  const [logoVariant, setLogoVariant] = useLocalStorage('@EXAMPLE-CAPSULE/logoVariant', 'branded');
+  const [logo, setLogo] = useLocalStorage('@EXAMPLE-PARA/logo', '');
+  const [useTheme, setUseTheme] = useLocalStorage('@EXAMPLE-PARA/useTheme', false);
+  const [isDarkTheme, setIsDarkTheme] = useLocalStorage('@EXAMPLE-PARA/useTheme', false);
+  const [foregroundColor, setForegroundColor] = useLocalStorage('@EXAMPLE-PARA/foregroundColor', '#FAFAFA');
+  const [backgroundColor, setBackgroundColor] = useLocalStorage('@EXAMPLE-PARA/backgroundColor', '#121212');
+  const [borderRadius, setBorderRadius] = useLocalStorage('@EXAMPLE-PARA/borderRadius', 'sm');
+  const [font, setFont] = useLocalStorage('@EXAMPLE-PARA/font', 'inter');
+  const [logoVariant, setLogoVariant] = useLocalStorage('@EXAMPLE-PARA/logoVariant', 'branded');
 
-  const [externalWallets, setExternalWallets] = useLocalStorage('@EXAMPLE-CAPSULE/externalWallets', []);
-  const [onRampTestMode, setOnRampTestMode] = useLocalStorage('@EXAMPLE-CAPSULE/onRampTestMode', true);
-  const [hideWallets, setHideWallets] = useLocalStorage('@EXAMPLE-CAPSULE/hideWallets', false);
+  const [externalWallets, setExternalWallets] = useLocalStorage('@EXAMPLE-PARA/externalWallets', []);
+  const [onRampTestMode, setOnRampTestMode] = useLocalStorage('@EXAMPLE-PARA/onRampTestMode', true);
+  const [hideWallets, setHideWallets] = useLocalStorage('@EXAMPLE-PARA/hideWallets', false);
 
   const [pregenIdentifier, setPregenIdentifier] = useState('');
   const [pregenIdentifierType, setPregenIdentifierType] = useState<TPregenIdentifierType>('EMAIL');
   const [pregenWalletType, setPregenWalletType] = useLocalStorage<WalletType | 'missing'>(
-    '@EXAMPLE-CAPSULE/pregenWalletType',
+    '@EXAMPLE-PARA/pregenWalletType',
     'missing',
   );
 
   const [updatePregenIdentifier, setUpdatePregenIdentifier] = useState('');
   const [updatePregenIdentifierType, setUpdatePregenIdentifierType] = useState<TPregenIdentifierType>('EMAIL');
 
-  const [pregenUserShare, setPregenUserShare] = useLocalStorage<string>('@EXAMPLE-CAPSULE/pregenUserShare', '');
+  const [pregenUserShare, setPregenUserShare] = useLocalStorage<string>('@EXAMPLE-PARA/pregenUserShare', '');
   const [deletedEmail, setDeletedEmail] = useState('');
   const [emailPendingDeletion, setEmailPendingDeletion] = useState('');
   const [isSessionActive, setIsSessionActive] = useState(false);
@@ -569,7 +569,7 @@ function App() {
   const [smartContractFunctionArgs, setSmartContractFunctionArgs] = useState('');
   const [smartContractAbi, setSmartContractAbi] = useState(JSON.stringify(DEFAULT_CONTRACT_ABI));
   const [smartContractByteCode, setSmartContractByteCode] = useState('');
-  const [_capsuleKey, setCapsuleKey] = useState(0);
+  const [_paraKey, setParaKey] = useState(0);
   const [deleteButtonDisabled, setDeleteButtonDisabled] = useState(false);
   const [secondsToDelete, setSecondsToDelete] = useState(4);
   const [messageToSign, setMessageToSign] = useState('');
@@ -579,43 +579,43 @@ function App() {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [currentStepOverride, setCurrentStepOverride] = useState<ModalStepProp | undefined>(undefined);
 
-  const [capsule, setCapsule] = useState<Capsule | undefined>();
-  const [capsuleError, setCapsuleError] = useState<Error | undefined>();
+  const [para, setPara] = useState<Para | undefined>();
+  const [paraError, setParaError] = useState<Error | undefined>();
 
   useEffect(() => {
     async function create() {
       try {
-        const _capsule = new Capsule(selectedEnv, selectedApiKey, {
-          ...getCapsuleOpts(selectedEnv, useDKLS),
+        const _para = new Para(selectedEnv, selectedApiKey, {
+          ...getParaOpts(selectedEnv, useDKLS),
           homepageUrl,
-          xUrl: 'https://twitter.com/usecapsule',
-          linkedinUrl: 'https://www.linkedin.com/company/usecapsule',
-          supportUrl: 'mailto:support@usecapsule.com',
+          xUrl: 'https://twitter.com/get_para',
+          linkedinUrl: 'https://www.linkedin.com/company/parahq',
+          supportUrl: 'mailto:support@getpara.com',
           portalTheme: useTheme ? { backgroundColor, foregroundColor } : undefined,
         });
-        _capsule.ctx.isE2E = process?.env?.REACT_APP_IS_E2E === 'true';
-        await _capsule.touchSession();
-        setCapsuleError(undefined);
-        return _capsule;
+        _para.ctx.isE2E = process?.env?.REACT_APP_IS_E2E === 'true';
+        await _para.touchSession();
+        setParaError(undefined);
+        return _para;
       } catch (e) {
         console.error(e);
 
-        setCapsuleError(e);
+        setParaError(e);
         throw new Error(e);
       }
     }
 
-    create().then(setCapsule);
+    create().then(setPara);
   }, [selectedEnv, useDKLS, selectedApiKey, foregroundColor, backgroundColor, useTheme, homepageUrl]);
 
-  const isMultiWallet = Object.values(capsule?.supportedWalletTypes ?? []).length > 1;
+  const isMultiWallet = Object.values(para?.supportedWalletTypes ?? []).length > 1;
 
   const [[walletType, walletId, isPregen], setWallet] = useState<[WalletType | undefined, string | undefined]>(
     (() => {
       try {
-        if (capsule) {
-          const walletId = capsule?.findWalletId();
-          return [capsule.wallets[walletId]?.type, walletId, !!capsule.wallets[walletId]?.pregenIdentifier];
+        if (para) {
+          const walletId = para?.findWalletId();
+          return [para.wallets[walletId]?.type, walletId, !!para.wallets[walletId]?.pregenIdentifier];
         }
         return [undefined, undefined, false];
       } catch (e) {
@@ -624,24 +624,24 @@ function App() {
     })(),
   );
 
-  const [, setCapsuleToString] = useState(capsule?.toString());
+  const [, setParaToString] = useState(para?.toString());
 
   function updateToString() {
-    setCapsuleToString(capsule?.toString());
+    setParaToString(para?.toString());
   }
 
   useEffect(() => {
     updateToString();
-  }, [capsule?.supportedWalletTypes, capsule?.cosmosPrefix]);
+  }, [para?.supportedWalletTypes, para?.cosmosPrefix]);
 
   async function checkIsSessionActive() {
-    const isFullyLoggedIn = await capsule?.isSessionActive();
+    const isFullyLoggedIn = await para?.isSessionActive();
     setIsSessionActive(isFullyLoggedIn);
-    if (isFullyLoggedIn && capsule instanceof CoreCapsule) {
-      console.log(`exported session:\n${(capsule as CoreCapsule).exportSession()}`);
+    if (isFullyLoggedIn && para instanceof ParaCore) {
+      console.log(`exported session:\n${(para as ParaCore).exportSession()}`);
     }
 
-    const [email, phone] = [capsule?.getEmail(), capsule?.getPhoneNumber()];
+    const [email, phone] = [para?.getEmail(), para?.getPhoneNumber()];
 
     pregenIdentifierType === 'EMAIL' && !!email && setPregenIdentifier(email);
     pregenIdentifierType === 'PHONE' && !!phone && setPregenIdentifier(phone);
@@ -649,7 +649,7 @@ function App() {
 
   useEffect(() => {
     checkIsSessionActive();
-  }, [capsule]);
+  }, [para]);
 
   useEffect(() => {
     async function fetchPartners() {
@@ -701,12 +701,12 @@ function App() {
 
   const handleDeleteClick = async () => {
     setDeleteButtonDisabled(true);
-    if (!(await capsule?.isFullyLoggedIn())) {
+    if (!(await para?.isFullyLoggedIn())) {
       throw new Error('Need to be fully loggedIn to delete user.');
     }
-    const res = await capsule?.ctx.capsuleClient.deleteSelf((capsule as CoreCapsule).getUserId());
+    const res = await para?.ctx.client.deleteSelf((para as ParaCore).getUserId());
 
-    await capsule?.logout();
+    await para?.logout();
 
     const userEmail = res.data.email;
     setEmailPendingDeletion(userEmail);
@@ -716,7 +716,7 @@ function App() {
         () => {
           setSecondsToDelete(i - 1);
           if (i - 1 === 0) {
-            setCapsuleKey(prevKey => prevKey + 1);
+            setParaKey(prevKey => prevKey + 1);
             setIsSessionActive(false);
             setDeletedEmail('');
             setDeleteButtonDisabled(false);
@@ -737,7 +737,7 @@ function App() {
     console.log('handle sign message');
     try {
       const provider = new ethers.JsonRpcProvider(ALCHEMY_SEPOLIA_PROVIDER, 'sepolia');
-      const ethersSigner = new CapsuleEthersSigner(capsule, provider, capsule?.findWalletId(walletId, { type: ['EVM'] }));
+      const ethersSigner = new ParaEthersSigner(para, provider, para?.findWalletId(walletId, { type: ['EVM'] }));
       console.log('signing message..');
       const messageSignature = await ethersSigner.signMessage(messageToSign);
       console.log('message signature:', messageSignature);
@@ -745,28 +745,28 @@ function App() {
     } catch (error) {
       console.error(error);
     }
-  }, [capsule, messageToSign, walletId]);
+  }, [para, messageToSign, walletId]);
 
   useEffect(() => {
-    if (walletId && !capsule?.wallets[walletId]) {
+    if (walletId && !para?.wallets[walletId]) {
       setWallet([undefined, undefined]);
     }
 
-    if (!walletId || !capsule?.wallets[walletId]) {
+    if (!walletId || !para?.wallets[walletId]) {
       let wallet;
       try {
-        wallet = capsule?.findWallet();
+        wallet = para?.findWallet();
       } catch (e) {
         console.error(e);
       } finally {
         wallet && setWallet([wallet.type, wallet.id]);
       }
     }
-  }, [walletId, capsule?.currentWalletIds, capsule?.wallets]);
+  }, [walletId, para?.currentWalletIds, para?.wallets]);
 
   const [isEvm, isSolana] = [
-    !!walletId && capsule?.wallets[walletId]?.scheme !== 'ED25519',
-    !!walletId && capsule?.wallets[walletId]?.scheme === 'ED25519',
+    !!walletId && para?.wallets[walletId]?.scheme !== 'ED25519',
+    !!walletId && para?.wallets[walletId]?.scheme === 'ED25519',
   ];
 
   return (
@@ -845,7 +845,7 @@ function App() {
           </HStack>
           {selectedView === 'WAGMI' && (
             <VStack align="left" spacing={5}>
-              <WagmiComponent capsule={capsule} />
+              <WagmiComponent para={para} />
             </VStack>
           )}
           {selectedView === 'OLD_VIEW' && (
@@ -925,7 +925,7 @@ function App() {
                   </Text>
                   <Select disabled={!useTheme} defaultValue={font} onChange={e => setFont(e.target.value)}>
                     {FONT_OPTIONS.map(font => (
-                      <option value={font}>{font === 'Inter' ? 'Inter (Capsule Default)' : font.replaceAll("'", '')}</option>
+                      <option value={font}>{font === 'Inter' ? 'Inter (Para Default)' : font.replaceAll("'", '')}</option>
                     ))}
                   </Select>
                 </HStack>
@@ -987,7 +987,7 @@ function App() {
               <HStack>
                 <Button
                   colorScheme="green"
-                  isDisabled={!capsule}
+                  isDisabled={!para}
                   onClick={() => {
                     setModalIsOpen(true);
                   }}
@@ -999,7 +999,7 @@ function App() {
                     <Button
                       colorScheme="green"
                       onClick={async () => {
-                        await capsule?.logout(true);
+                        await para?.logout();
                         setIsSessionActive(false);
                       }}
                     >
@@ -1022,11 +1022,7 @@ function App() {
                     <Button
                       colorScheme="teal"
                       onClick={async () => {
-                        const newShare = await capsule?.distributeNewWalletShare(
-                          capsule?.findWalletId(walletId),
-                          undefined,
-                          true,
-                        );
+                        const newShare = await para?.distributeNewWalletShare(para?.findWalletId(walletId), undefined, true);
 
                         const backupDecryptionKey = JSON.parse(newShare || '{}').backupDecryptionKey;
 
@@ -1054,7 +1050,7 @@ function App() {
                         <option key="missing" value="missing">
                           MISSING
                         </option>
-                        {capsule?.supportedWalletTypes.map(({ type }) => (
+                        {para?.supportedWalletTypes.map(({ type }) => (
                           <option key={type} value={type}>
                             {type}
                           </option>
@@ -1064,7 +1060,7 @@ function App() {
                     <Button
                       colorScheme="teal"
                       onClick={async () => {
-                        await capsule?.createPregenWalletPerType(
+                        await para?.createPregenWalletPerType(
                           pregenIdentifier,
                           pregenIdentifierType,
                           pregenWalletType === 'missing' ? undefined : [pregenWalletType],
@@ -1092,7 +1088,7 @@ function App() {
                         flex={1}
                         colorScheme="teal"
                         onClick={() => {
-                          setPregenUserShare(capsule?.getUserShare());
+                          setPregenUserShare(para?.getUserShare());
                         }}
                       >
                         Save
@@ -1102,7 +1098,7 @@ function App() {
                         colorScheme="teal"
                         disabled={}
                         onClick={async () => {
-                          await capsule?.setUserShare(pregenUserShare);
+                          await para?.setUserShare(pregenUserShare);
 
                           updateToString();
                         }}
@@ -1113,9 +1109,9 @@ function App() {
 
                     <Button
                       colorScheme="teal"
-                      isDisabled={!isSessionActive || Object.values(capsule?.pregenIds || []).flat().length === 0}
+                      isDisabled={!isSessionActive || Object.values(para?.pregenIds || []).flat().length === 0}
                       onClick={async () => {
-                        console.log(await capsule?.claimPregenWallets());
+                        console.log(await para?.claimPregenWallets());
                         updateToString();
                       }}
                     >
@@ -1127,7 +1123,7 @@ function App() {
                     </Button>
                     <Text>{isSessionActive ? 'Fully Logged In!' : 'Log In Pending...'}</Text>
 
-                    {Object.entries(capsule?.wallets ?? {}).length > 0 && (
+                    {Object.entries(para?.wallets ?? {}).length > 0 && (
                       <Select
                         value={`${walletType}~${walletId}`}
                         onChange={e => {
@@ -1136,7 +1132,7 @@ function App() {
                           setWallet([walletType as WalletType, walletId]);
                         }}
                       >
-                        {Object.entries(capsule?.currentWalletIds ?? {}).map(([type, ids]) => (
+                        {Object.entries(para?.currentWalletIds ?? {}).map(([type, ids]) => (
                           <>
                             {ids.map(id => (
                               <option key={id} value={`${type}~${id}`}>
@@ -1145,7 +1141,7 @@ function App() {
                             ))}
                           </>
                         ))}
-                        {Object.values(capsule?.wallets)
+                        {Object.values(para?.wallets)
                           .filter(w => !w.userId || (w.isPregen && !!w.pregenIdentifier))
                           .map(w => {
                             return (
@@ -1168,7 +1164,7 @@ function App() {
                       >
                         {(() => {
                           try {
-                            return capsule?.getDisplayAddress(walletId, { addressType: walletType });
+                            return para?.getDisplayAddress(walletId, { addressType: walletType });
                           } catch (e) {
                             return 'none';
                           }
@@ -1200,7 +1196,7 @@ function App() {
                         <Button
                           colorScheme="teal"
                           onClick={async () => {
-                            await capsule?.updateWalletIdentifierPreGen(
+                            await para?.updateWalletIdentifierPreGen(
                               updatePregenIdentifier,
                               walletId,
                               updatePregenIdentifierType,
@@ -1280,9 +1276,9 @@ function App() {
                       colorScheme="teal"
                       isDisabled={!isEvm}
                       onClick={async () => {
-                        const currentWalletId = capsule?.currentWalletIds?.[0];
+                        const currentWalletId = para?.currentWalletIds?.[0];
                         const tx = {
-                          from: capsule?.wallets?.[currentWalletId]?.address,
+                          from: para?.wallets?.[currentWalletId]?.address,
                           to: txToAddress,
                           value: web3.utils.toWei(txValue, 'gwei'),
                           gasLimit: txGasAmount,
@@ -1297,7 +1293,7 @@ function App() {
                           type: 2,
                         };
 
-                        sendEthersTransaction(capsule, tx);
+                        sendEthersTransaction(para, tx);
                       }}
                     >
                       Send Transaction
@@ -1306,7 +1302,7 @@ function App() {
                       colorScheme="teal"
                       isDisabled={!isEvm}
                       onClick={async () => {
-                        await sendCosmosTx(capsule);
+                        await sendCosmosTx(para);
                       }}
                     >
                       Send Cosmos Transaction
@@ -1318,7 +1314,7 @@ function App() {
                       colorScheme="teal"
                       isDisabled={!isSolana}
                       onClick={async () => {
-                        await sendSolanaTx(capsule, walletId, setSolanaSignature);
+                        await sendSolanaTx(para, walletId, setSolanaSignature);
                       }}
                     >
                       Send Solana Transaction
@@ -1326,9 +1322,9 @@ function App() {
                     <Button
                       colorScheme={'teal'}
                       onClick={async () => {
-                        const currentWalletId = capsule?.currentWalletIds?.[0];
+                        const currentWalletId = para?.currentWalletIds?.[0];
                         const tx = await createTransaction(
-                          capsule?.wallets?.[currentWalletId]?.address,
+                          para?.wallets?.[currentWalletId]?.address,
                           MINTER_CONTRACT_ADDRESS,
                           MINT_PRICE,
                           '140000',
@@ -1342,13 +1338,13 @@ function App() {
                           '',
                         );
 
-                        sendEthersMintNFTTransaction(capsule, tx);
+                        sendEthersMintNFTTransaction(para, tx);
                       }}
                     >
                       Mint NFT
                     </Button>
                     <OfframpSend
-                      capsule={capsule}
+                      para={para}
                       walletId={walletId}
                       walletType={walletType}
                       testMode={onRampTestMode}
@@ -1357,8 +1353,8 @@ function App() {
                     <Button
                       colorScheme="red"
                       onClick={async () => {
-                        await capsule?.logout();
-                        await capsule?.clearStorage();
+                        await para?.logout({ clearPregenWallets: true });
+                        await para?.clearStorage();
 
                         updateToString();
                       }}
@@ -1369,17 +1365,17 @@ function App() {
                 </VStack>
                 <Box flexGrow={1} bg="#222" overflow="auto" maxH="100vh" position="sticky" top={0}>
                   <Box color="white" fontFamily={'monospace'} whiteSpace={'pre'} p={6} fontSize="14px">
-                    {capsuleError?.message ?? capsule?.toString()}
+                    {paraError?.message ?? para?.toString()}
                   </Box>
                 </Box>
               </HStack>
             </VStack>
           )}
         </Container>
-        {capsule && (
-          <CapsuleModal
+        {para && (
+          <ParaModal
             isOpen={modalIsOpen}
-            capsule={capsule}
+            para={para}
             appName={(partners || []).find(({ apiKey }) => apiKey === selectedApiKey)?.displayName || 'Example'}
             onClose={handleOnClose}
             oAuthMethods={[

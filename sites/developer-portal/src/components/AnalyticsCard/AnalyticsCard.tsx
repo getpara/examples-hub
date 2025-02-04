@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { CpslText } from '@usecapsule/react-components';
+import { CpslText } from '@getpara/react-components';
 import { BaseCard } from '../common';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { useRef } from 'react';

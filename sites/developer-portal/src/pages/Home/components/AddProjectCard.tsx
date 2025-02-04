@@ -1,4 +1,4 @@
-import { CpslButton, CpslCard, CpslHero, CpslIcon } from '@usecapsule/react-components';
+import { CpslButton, CpslCard, CpslHero, CpslIcon } from '@getpara/react-components';
 import styled from 'styled-components';
 import { useCanCreateProject } from '../../../hooks/subscriptionGating/useCanCreateProject';
 

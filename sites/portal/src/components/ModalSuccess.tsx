@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { HeroIcon, InnerContainer } from './common';
-import { CenteredText } from '@usecapsule/react-common';
+import { CenteredText } from '@getpara/react-common';
 
 interface ModalSuccessProps {
   heading: string;

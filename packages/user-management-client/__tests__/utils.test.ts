@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { extractAuth, extractAuthInfo, extractWalletRef, isExternalWalletAddress, isWalletId } from '../src';
+import { extractAuthInfo, extractWalletRef, isExternalWalletAddress, isWalletId } from '../src';
 
 const email = 'test@email.com';
 const phone = '5555555555';
@@ -42,8 +42,6 @@ describe('utils', () => {
         identifier: email,
         publicKeyIdentifier: email,
       });
-
-      expect(extractAuth(emailAuth)).toEqual({ email });
     });
 
     it('extracts phone auth', () => {
@@ -54,12 +52,11 @@ describe('utils', () => {
         publicKeyIdentifier: `${countryCode}${phone}`,
       });
 
-      expect(extractAuth(phoneAuth)).toEqual({
-        phone,
-        countryCode,
-      });
+      expect(extractAuthInfo({ phone, foo: 'bar', email: 'null' })).toBeUndefined();
 
-      expect(() => extractAuthInfo({ phone, foo: 'bar', email: 'null' })).toThrow('invalid auth object');
+      expect(() => extractAuthInfo({ phone, foo: 'bar', email: 'null' }, { isRequired: true })).toThrow(
+        'invalid auth object',
+      );
     });
 
     it('extracts farcaster auth', () => {
@@ -68,10 +65,6 @@ describe('utils', () => {
         authType: 'farcaster',
         identifier: farcasterUsername,
         publicKeyIdentifier: `${farcasterUsername}-farcaster`,
-      });
-
-      expect(extractAuth(farcasterAuth)).toEqual({
-        farcasterUsername,
       });
     });
 
@@ -82,16 +75,12 @@ describe('utils', () => {
         identifier: telegramUserId,
         publicKeyIdentifier: `${telegramUserId}-telegram`,
       });
-
-      expect(extractAuth(telegramAuth)).toEqual({
-        telegramUserId,
-      });
     });
 
     it('extracts userId auth', () => {
-      expect(() => extractAuthInfo(userIdAuth)).toThrowError();
+      expect(extractAuthInfo(userIdAuth)).toBeUndefined();
 
-      expect(() => extractAuth(userIdAuth)).toThrowError();
+      expect(() => extractAuthInfo(userIdAuth, { isRequired: true })).toThrow('invalid auth object');
 
       expect(extractAuthInfo(userIdAuth, { allowUserId: true })).toEqual({
         auth: { userId },
@@ -99,20 +88,18 @@ describe('utils', () => {
         identifier: userId,
         publicKeyIdentifier: userId,
       });
-
-      expect(extractAuth(userIdAuth, { allowUserId: true })).toEqual({ userId });
     });
 
     it('rejects multiple fields', () => {
-      expect(() => extractAuthInfo({ email, phone, foo: 'bar' })).toThrow('invalid auth object');
+      expect(extractAuthInfo({ email, phone, foo: 'bar' })).toBeUndefined();
+
+      expect(() => extractAuthInfo({ email, phone, foo: 'bar' }, { isRequired: true })).toThrow('invalid auth object');
     });
 
-    it('can optionally return undefined', () => {
-      expect(extractAuth({ email, phone, foo: 'bar' }, { optional: true })).toBeUndefined();
+    it('can optionally throw an error', () => {
+      expect(extractAuthInfo({ email, phone, foo: 'bar' })).toBeUndefined();
 
-      expect(extractAuth({ email, foo: 'bar' }, { optional: true })).toEqual({ email });
-
-      expect(extractAuth({}, { optional: true })).toBeUndefined();
+      expect(() => extractAuthInfo({ email, phone, foo: 'bar' }, { isRequired: true })).toThrow('invalid auth object');
     });
   });
 });

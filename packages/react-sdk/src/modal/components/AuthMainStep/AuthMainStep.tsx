@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { OAuthMethod } from '@usecapsule/web-sdk';
+import { OAuthMethod } from '@getpara/web-sdk';
 import { useThemeStore } from '../../stores/theme/useThemeStore.js';
 import { AuthMainStepContent } from './AuthMainStepContent.js';
 import { CenteredText } from '../common.js';

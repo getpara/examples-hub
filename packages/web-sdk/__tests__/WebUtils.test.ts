@@ -16,12 +16,12 @@ import {
   WINDOW_INNER_WIDTH,
 } from './constants.js';
 import { documentElementMockValue, mockWindowOpen, TEST_CTX, windowMockValue } from './setup.js';
-import { WalletType } from '@usecapsule/user-management-client';
+import { WalletType } from '@getpara/user-management-client';
 import * as keygen from '../src/wallet/keygen.js';
 import * as signing from '../src/wallet/signing.js';
 import { LocalStorage } from '../src/LocalStorage.js';
 import { SessionStorage } from '../src/SessionStorage.js';
-import { PopupType } from '@usecapsule/core-sdk';
+import { PopupType } from '@getpara/core-sdk';
 
 const TEST_POPUP_URL = 'https://test.com';
 

@@ -52,6 +52,8 @@ const Container = styled.div`
   flex-direction: column;
   gap: 8px;
   justify-content: space-between;
+
+  max-height: calc(100% - var(--card-padding-top));
 `;
 
 const InnerContainer = styled.div`
@@ -61,4 +63,7 @@ const InnerContainer = styled.div`
   justify-content: center;
   flex-direction: column;
   gap: 8px;
+  width: 100%;
+  padding: 0px 24px;
+  overflow: auto;
 `;

@@ -3,7 +3,7 @@ import { usePlanMetadata } from '../../../hooks/configs/usePlanMetadata';
 import { RequestEnterpriseModal } from '../../../components/RequestEnterpriseModal/RequestEnterpriseModal';
 import { useGetSelectedOrganization } from '../../../hooks/api/queries/useOrganizations';
 import { useGetOrganizationEnterprisePrice } from '../../../hooks/api/queries/useOrganizationEnterprisePrice';
-import { CpslText } from '@usecapsule/react-components';
+import { CpslText } from '@getpara/react-components';
 import { useGetOrganizationSubscription } from '../../../hooks/api/queries/useOrganizationSubscription';
 import { PlanCard } from '../../../components/PlanCard/PlanCard';
 import { UpgradeModal } from './UpgradeModal';

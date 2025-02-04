@@ -1,3 +1,3 @@
-import { MoonPayEmbed } from '@usecapsule/react-common';
+import { MoonPayEmbed } from '@getpara/react-common';
 
 export default MoonPayEmbed;

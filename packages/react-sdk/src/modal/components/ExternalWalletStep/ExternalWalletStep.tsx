@@ -1,12 +1,12 @@
-import { CpslButton, CpslIcon, CpslQrCode, CpslSpinner, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon, CpslQrCode, CpslSpinner, CpslText } from '@getpara/react-components';
 import { CenteredText, InnerStepContainer, QRContainer, StepContainer } from '../common.js';
 import { useEffect, useMemo } from 'react';
 import { useModalStore } from '../../stores/index.js';
 import styled from 'styled-components';
 import { useExternalWallets } from '../../providers/ExternalWalletContext.js';
-import { useCopyToClipboard } from '@usecapsule/react-common';
+import { useCopyToClipboard } from '@getpara/react-common';
 import { ModalStep } from '../../utils/steps.js';
-import { isMobile, isTablet, WalletType } from '@usecapsule/web-sdk';
+import { isMobile, isTablet, WalletType } from '@getpara/web-sdk';
 import { routeMobileExternalWallet } from '../../utils/routeMobileExternalWallet.js';
 
 export const ExternalWalletStep = () => {

@@ -6,7 +6,7 @@ import { ModalLoading } from '../../../components/ModalLoading';
 import { ModalSuccess } from '../../../components/ModalSuccess';
 import { useModalOutletContext } from '../../../hooks/useModalOutletContext';
 import { EnterPasswordStep } from './EnterPasswordStep';
-import { BiometricLocationHint } from '@usecapsule/user-management-client';
+import { BiometricLocationHint } from '@getpara/user-management-client';
 import { LoginFailedStep } from './LoginFailedStep';
 import { LoginFailedTroubleshootingStep } from './LoginFailedTroubleshootingStep';
 import { SuccessFromKnownDeviceStep } from './SuccessFromKnownDeviceStep';
@@ -99,6 +99,8 @@ const Container = styled.div`
   align-items: center;
   flex-direction: column;
   gap: 8px;
+
+  max-height: calc(100% - var(--card-padding-top));
 `;
 
 const InnerContainer = styled.div<{ $isTroubleshooting: boolean }>`
@@ -110,4 +112,5 @@ const InnerContainer = styled.div<{ $isTroubleshooting: boolean }>`
   gap: 8px;
   width: 100%;
   padding: 0px 24px;
+  overflow: auto;
 `;

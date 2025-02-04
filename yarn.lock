@@ -4425,6 +4425,123 @@
   resolved "https://registry.yarnpkg.com/@floating-ui/utils/-/utils-0.2.8.tgz#21a907684723bbbaa5f0974cf7730bd797eb8e62"
   integrity sha512-kym7SodPp8/wloecOpcmSnWJsK7M0E5Wg8UcFA+uO4B9s5d0ywXOEro/8HM9x0rW+TljRzul/14UYz3TleT3ig==
 
+"@getpara/core-components@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@getpara/core-components/-/core-components-0.1.0.tgz#b4562bdcaf8a914dc5c3ec2c8c49b0537da2ef2b"
+  integrity sha512-rLPL+Zd9hQ04YJfzH6Dj15rvo1MHABJXvncAZrKKIoxbwfvcAZEMB1295gxw8AYbB8KFQqym8l58D6Vn5ej6TQ==
+  dependencies:
+    "@stencil/core" "^4.7.0"
+    color-blend "^4.0.0"
+    color2k "^2.0.3"
+    gsap "^3.12.5"
+    inputmask "5.0.9"
+    qrcode-with-logos "1.1.1"
+
+"@getpara/core-sdk@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-0.1.0.tgz#187176a39f4b13784fe8b68dfc5d58bac5d4c456"
+  integrity sha512-KgxD3xUqycl/T+kHMorkeMuG1aty1x7dhLVglpg1/z3U2EvkAKZK4+wTvkmzatHae+bu18x5uJ+PhvffM2wj0w==
+  dependencies:
+    "@celo/utils" "^8.0.0"
+    "@cosmjs/encoding" "^0.32.4"
+    "@getpara/user-management-client" "0.1.0"
+    "@noble/hashes" "^1.5.0"
+    base64url "^3.0.1"
+    buffer "6.0.3"
+    ethereumjs-util "7.1.5"
+    libphonenumber-js "1.11.2"
+    node-forge "^1.3.1"
+    qs "^6.12.0"
+
+"@getpara/cosmjs-v0-integration@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@getpara/cosmjs-v0-integration/-/cosmjs-v0-integration-0.1.0.tgz#c974e1b8531f2785d5ea3d69047e06b0dcd68982"
+  integrity sha512-pqEoC0MOFHZpYyH/I7nlfvYeRpM8/HZoC/xny+afr2EJmGw1a5+X9bc2x18zvKYf3LnmWuzfFr4B85W0WxZH1w==
+  dependencies:
+    "@getpara/core-sdk" "0.1.0"
+
+"@getpara/graz@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@getpara/graz/-/graz-0.1.0.tgz#0d7f9a962106c64c8ae1ce3c4fa5f824322b8035"
+  integrity sha512-4Zo6qTcMG+xqnSXfL6/dWzjkMWkM7+2udA1CFyQJ7qJK7whVVxUKh9llqLJUOvkMhKrw6LVyszAa3BFA+78vvA==
+  dependencies:
+    "@cosmsnap/snapper" "0.1.29"
+    "@dao-dao/cosmiframe" "0.1.0"
+    "@getpara/cosmjs-v0-integration" "0.1.0"
+    "@getpara/react-sdk" "0.1.0"
+    "@keplr-wallet/cosmos" "0.12.156"
+    "@keplr-wallet/types" "0.12.156"
+    "@metamask/providers" "12.0.0"
+    "@tanstack/react-query" ">=5.0.0"
+    "@terra-money/station-connector" "1.1.0"
+    "@vectis/extension-client" "^0.7.2"
+    "@walletconnect/modal" "2.7.0"
+    "@walletconnect/sign-client" "2.17.2"
+    "@walletconnect/types" "2.17.2"
+    "@walletconnect/utils" "2.17.2"
+    cosmos-directory-client "0.0.6"
+    long "4"
+    zustand "4.5.2"
+
+"@getpara/react-common@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@getpara/react-common/-/react-common-0.1.0.tgz#2d85cfcee7a82c3e1b549eafd7f13ad9ea8f2aa0"
+  integrity sha512-fNvNCPmuNY+mOdJZJwkphs8RcFWJQqUAMy1VXwvrclwMPXzC6JBT2DQmANCjV0tNKTI0WuZSJ7iwB2BEIH37bA==
+  dependencies:
+    "@getpara/react-components" "0.1.0"
+    "@getpara/web-sdk" "0.1.0"
+    "@moonpay/moonpay-react" "^1.8.3"
+    "@ramp-network/ramp-instant-sdk" "^4.0.5"
+    "@stripe/crypto" "^0.0.4"
+    "@stripe/stripe-js" "^3.4.0"
+    libphonenumber-js "^1.11.1"
+    styled-components "^6.1.8"
+
+"@getpara/react-components@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@getpara/react-components/-/react-components-0.1.0.tgz#b003c2cba80054c5b044fc3cc7805cab8e7612d7"
+  integrity sha512-VO9dfP0mqkcc0uVjPXmirPo3JPrUwK33eIc0pTptGKaIKdAbADZ5krVD/ZQ97Nwm8SPdHqjT1vEVnKYpvnvm0w==
+  dependencies:
+    "@getpara/core-components" "0.1.0"
+
+"@getpara/react-sdk@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@getpara/react-sdk/-/react-sdk-0.1.0.tgz#12af98ae7975d8caca857a73d6ae2458813b920a"
+  integrity sha512-UQtM0KqRBhB5SnlyPHqAjgFHaxSsHwx+kgqI9MSDtVsJOThklwIYP31pvzOcAkjIcVvEBbAZUW1071HbE3OmSA==
+  dependencies:
+    "@getpara/react-common" "0.1.0"
+    "@getpara/react-components" "0.1.0"
+    "@getpara/web-sdk" "0.1.0"
+    date-fns "^3.6.0"
+    detect-browser "^5.3.0"
+    framer-motion "11.3.28"
+    libphonenumber-js "^1.11.1"
+    styled-components "^6.1.8"
+    zustand "^4.5.2"
+
+"@getpara/user-management-client@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-0.1.0.tgz#4e6d97e47b67fb2213254e04a83a205762fed214"
+  integrity sha512-4UbFI6zQ8u5EEV+Jv3oZpP4tHRSU1SW5l7HLXDrp2MDKIUfMfHHqxvzG5wQuRawCrkq9/YbxbZiBtBLwm34cBQ==
+  dependencies:
+    axios "^1.6.3"
+    libphonenumber-js "1.11.2"
+    qs "^6.12.0"
+
+"@getpara/web-sdk@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-0.1.0.tgz#1b523e7857c84e6fdd29f567d73f751a9e2a8ce2"
+  integrity sha512-UD9wE/G+zXdxhSL6KbPG3G8/HoRh5tpPFoFiBD63FhRK8pfwLFDZhszt8iAQncZanKczeRYTlNYBg6Rwe2+gVg==
+  dependencies:
+    "@getpara/core-sdk" "0.1.0"
+    "@getpara/user-management-client" "0.1.0"
+    assert "^2.1.0"
+    base64url "3.0.1"
+    buffer "6.0.3"
+    cbor-web "8.1.0"
+    node-forge "1.3.1"
+    ua-parser-js "1.0.39"
+
 "@graphql-typed-document-node/core@^3.1.1":
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/@graphql-typed-document-node/core/-/core-3.2.0.tgz#5f3d96ec6b2354ad6d8a28bf216a1d97b5426861"
@@ -8146,6 +8263,11 @@
   resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.61.4.tgz#ad331f94824fe1087dc505a9f62dc84e841a6a28"
   integrity sha512-rsnemyhPvEG4ViZe0R2UQDM8NgQS/BNC5/Gf9RTs0TKN5thUhPUwnL2anWG4jxAGKFyDfvG7PXbx6MRq3hxi1w==
 
+"@tanstack/query-core@5.66.0":
+  version "5.66.0"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.66.0.tgz#163f670b3b4e3b3cdbff6698ad44b2edfcaed185"
+  integrity sha512-J+JeBtthiKxrpzUu7rfIPDzhscXF2p5zE/hVdrqkACBP8Yu0M96mwJ5m/8cPPYQE9aRNvXztXHlNwIh4FEeMZw==
+
 "@tanstack/query-persist-client-core@4.36.1":
   version "4.36.1"
   resolved "https://registry.yarnpkg.com/@tanstack/query-persist-client-core/-/query-persist-client-core-4.36.1.tgz#4d7284994bdc2a15fe6cbe7161be21e03033fe12"
@@ -8181,6 +8303,13 @@
   dependencies:
     "@tanstack/query-core" "4.36.1"
     use-sync-external-store "^1.2.0"
+
+"@tanstack/react-query@^5.0.0":
+  version "5.66.0"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.66.0.tgz#9f7aa1b3e844ea6a0ad2ee61fccaed76e614b865"
+  integrity sha512-z3sYixFQJe8hndFnXgWu7C79ctL+pI0KAelYyW+khaNJ1m22lWrhJU2QrsTcRKMuVPtoZvfBYrTStIdKo+x0Xw==
+  dependencies:
+    "@tanstack/query-core" "5.66.0"
 
 "@tanstack/react-query@^5.24.1":
   version "5.51.11"
@@ -9454,29 +9583,6 @@
   integrity sha512-XlRsz+iroZK4YPRjnBFuBXUiM+yIpypeGBZuO89BZhLHdMal2c4y+R6qv1+p/7HTw6sCKVfztXTI859u32NR4w==
   dependencies:
     "@usecapsule/core-sdk" "1.24.1"
-
-"@usecapsule/graz@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@usecapsule/graz/-/graz-0.3.0.tgz#2ea8cb8085dee0b4582a5dd3e3b80cb00f0f0488"
-  integrity sha512-JfT3bnirhxpFM+n1xkj3je/6BNLSylVMTcmgyQuTH2RIAdIkv3pSoNnyDvWCKoPFzh6bbgFK4UMvP/6E9LbCZw==
-  dependencies:
-    "@cosmsnap/snapper" "0.1.29"
-    "@dao-dao/cosmiframe" "0.1.0"
-    "@keplr-wallet/cosmos" "0.12.156"
-    "@keplr-wallet/types" "0.12.156"
-    "@metamask/providers" "12.0.0"
-    "@tanstack/react-query" ">=5.0.0"
-    "@terra-money/station-connector" "1.1.0"
-    "@usecapsule/cosmjs-v0-integration" ">=2.17.0"
-    "@usecapsule/react-sdk" ">=4.17.0"
-    "@vectis/extension-client" "^0.7.2"
-    "@walletconnect/modal" "2.7.0"
-    "@walletconnect/sign-client" "2.17.2"
-    "@walletconnect/types" "2.17.2"
-    "@walletconnect/utils" "2.17.2"
-    cosmos-directory-client "0.0.6"
-    long "4"
-    zustand "4.5.2"
 
 "@usecapsule/user-management-client@1.18.0":
   version "1.18.0"

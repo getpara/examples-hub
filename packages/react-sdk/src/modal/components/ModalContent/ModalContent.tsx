@@ -11,20 +11,21 @@ import {
   EnabledFlow,
   AuthMethod,
   OnRampConfig,
-} from '@usecapsule/web-sdk';
-import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
+} from '@getpara/web-sdk';
+import { useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { Body } from '../Body/Body.js';
 import { Footer } from '../Footer/Footer.js';
-import { CapsuleModalProps } from '../../types/modalProps.js';
+import { ParaModalProps } from '../../types/modalProps.js';
 import { DEFAULTS } from '../../constants/defaults.js';
 import { useGoBack } from '../../hooks/useGoBack.js';
 import { openPopup } from '../../utils/openPopup.js';
+import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 import { useEmbeddedExternalConnection } from '../../hooks/useEmbeddedExternalConnection.js';
 
 type ModalContentProps = Omit<
-  CapsuleModalProps,
-  'capsule' | 'isOpen' | 'theme' | 'branding' | 'onModalStepChange' | 'onExpandModalChange'
+  ParaModalProps,
+  'para' | 'isOpen' | 'theme' | 'branding' | 'onModalStepChange' | 'onExpandModalChange'
 >;
 
 export type ModalContentHandle = {
@@ -73,7 +74,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     },
     ref,
   ) => {
-    const capsule = useCapsuleStore(state => state.capsule);
+    const para = useInternalClient();
     const currentStep = useModalStore(state => state.step);
     const webAuthURLForLogin = useModalStore(state => state.webAuthURLForLogin);
     const webAuthURLForCreate = useModalStore(state => state.webAuthURLForCreate);
@@ -115,7 +116,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
         return true;
       }
       try {
-        const { isSetup } = await capsule.check2FAStatus();
+        const { isSetup } = await para.check2FAStatus();
         return isSetup;
       } catch (error) {
         console.error('An error occurred while checking 2FA:', error);
@@ -124,7 +125,8 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     };
 
     async function awaitLoginTransition(): Promise<void> {
-      const { isComplete, isError, needsWallet } = await capsule.waitForLoginAndSetup(popupWindow);
+      // TODO: migrate to useWaitForLoginAndSetup hook once we force the use of the CapsuleProvider
+      const { isComplete, isError, needsWallet } = await para.waitForLoginAndSetup({ popupWindow });
 
       setPopupWindow(undefined);
 
@@ -153,7 +155,8 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     }
 
     async function awaitWalletCreationTransition(): Promise<void> {
-      const isComplete = await capsule.waitForAccountCreation();
+      // TODO: migrate to useWaitForAccountCreation hook once we force the use of the ParaProvider
+      const isComplete = await para.waitForAccountCreation();
 
       if (isComplete) {
         setWebAuthURLForCreate('');
@@ -171,12 +174,13 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
         setWalletCreationInProgress(true);
         let recoverySecret: string, walletIds: CurrentWalletIds;
         if (!createWalletOverride) {
-          const created = await capsule.waitForPasskeyAndCreateWallet();
+          // TODO: migrate to useWaitForPasskeyAndCreateWallet hook once we force the use of the ParaProvider
+          const created = await para.waitForPasskeyAndCreateWallet();
           recoverySecret = created.recoverySecret;
           walletIds = created.walletIds;
         } else {
-          const created = await createWalletOverride(capsule);
-          const fetchedWallets = (await capsule.fetchWallets()).filter(wallet => !!wallet.address);
+          const created = await createWalletOverride(para);
+          const fetchedWallets = (await para.fetchWallets()).filter(wallet => !!wallet.address);
           const newWallets: Record<string, Wallet> = {};
           for (const wallet of fetchedWallets) {
             newWallets[wallet.id] = {
@@ -184,11 +188,11 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
               signer: '',
             };
           }
-          capsule.setWallets(newWallets);
+          para.setWallets(newWallets);
           recoverySecret = created.recoverySecret;
           walletIds = created.walletIds;
         }
-        await capsule.setCurrentWalletIds(walletIds);
+        await para.setCurrentWalletIds(walletIds);
 
         if (recoverySecretStepEnabled) {
           setRecoveryShare(recoverySecret);
@@ -212,7 +216,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     async function createAccountWithPasskey() {
       clearTimeout(createAccountTimeout.current);
       createAccountTimeout.current = window.setTimeout(awaitWalletCreationTransition, DEFAULTS.POLLING_INTERVAL_MS);
-      openPopup(webAuthURLForCreate, 'CapsulePasskey', 'CREATE_PASSKEY');
+      openPopup(webAuthURLForCreate, 'ParaPasskey', 'CREATE_PASSKEY');
       setStep(ModalStep.AWAITING_BIOMETRIC_CREATION);
     }
 
@@ -221,7 +225,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
       if (webAuthURLForLogin || passwordUrlForLogin) {
         if (loginTransitionOverride) {
           async function loginOverride() {
-            await loginTransitionOverride(capsule);
+            await loginTransitionOverride(para);
 
             setWebAuthURLForLogin('');
             setPasswordUrlForLogin('');
@@ -242,7 +246,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
       }
       return () => {
         window.clearTimeout(loginTimeout.current);
-        capsule.exitLogin();
+        para.exitLogin();
       };
     }, [webAuthURLForLogin, passwordUrlForLogin, popupWindow]);
 
@@ -252,21 +256,21 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
 
     useEffect(() => {
       if (![ModalStep.BIOMETRIC_CREATION, ModalStep.AWAITING_BIOMETRIC_CREATION].includes(currentStep)) {
-        capsule.exitAccountCreation();
+        para.exitAccountCreation();
       }
 
       if (![ModalStep.BIOMETRIC_LOGIN, ModalStep.AWAITING_BIOMETRIC_LOGIN].includes(currentStep)) {
-        capsule.exitLogin();
+        para.exitLogin();
       }
 
       if (![ModalStep.AWAITING_OAUTH, ModalStep.FARCASTER_OAUTH].includes(currentStep)) {
-        capsule.exitOAuth();
+        para.exitOAuth();
       }
     }, [currentStep]);
 
     useEffect(() => {
       if (!onRampConfig) {
-        capsule.ctx.capsuleClient
+        para.ctx.client
           .getOnRampConfig()
           .then(res => {
             let newOnRampConfig: OnRampConfig & { testMode?: boolean };
@@ -318,7 +322,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
 
     useEffect(() => {
       return () => {
-        capsule.exitLoops();
+        para.exitLoops();
       };
     }, []);
 

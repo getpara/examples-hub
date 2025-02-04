@@ -1,4 +1,4 @@
-import { CpslButton, CpslCard, CpslIcon, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslCard, CpslIcon, CpslText } from '@getpara/react-components';
 import styled from 'styled-components';
 import { EarlyAccess } from '../../../types/earlyAccess';
 import { GradientCTAButton } from '../../../components/GradientCTAButton/GradientCTAButton';

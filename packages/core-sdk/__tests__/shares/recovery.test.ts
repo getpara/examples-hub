@@ -2,17 +2,17 @@ import { describe, expect, it, vi, afterEach } from 'vitest';
 import { RECOVERY_PUBLIC_KEYS, USER_ID, WALLET } from '../constants';
 import { sendRecoveryForShare } from '../../src/shares/recovery';
 import { Environment } from '../../src/definitions.js';
-import { initClient } from '../../src/external/capsuleClient.js';
+import { initClient } from '../../src/external/userManagementClient.js';
 import {
   mockUploadUserKeyShares,
-  mockDistributeCapsuleShare,
+  mockDistributeParaShare,
   mockPersistRecoveryPublicKeys,
 } from '../mocks/mockUserManagementClient.js';
-import { EncryptorType, KeyShareType } from '@usecapsule/user-management-client';
+import { EncryptorType, KeyShareType } from '@getpara/user-management-client';
 
 const TEST_CTX = {
   env: Environment.DEV,
-  capsuleClient: initClient(Environment.DEV),
+  client: initClient({ env: Environment.DEV }),
   disableWebSockets: false,
   useDKLS: true,
 };
@@ -26,7 +26,7 @@ describe('recovery', () => {
     });
 
     it('base', async () => {
-      const resp = await sendRecoveryForShare(TEST_CTX, USER_ID, WALLET.id, [], 'test', false, {}, false);
+      const resp = await sendRecoveryForShare({ ctx: TEST_CTX, userId: USER_ID, walletId: WALLET.id, userSigner: 'test' });
 
       expect(mockUploadUserKeyShares).toBeCalledTimes(1);
       expect(mockUploadUserKeyShares).toBeCalledWith(USER_ID, [
@@ -38,8 +38,8 @@ describe('recovery', () => {
           walletId: WALLET.id,
         },
       ]);
-      expect(mockDistributeCapsuleShare).toBeCalledTimes(1);
-      expect(mockDistributeCapsuleShare).toBeCalledWith({
+      expect(mockDistributeParaShare).toBeCalledTimes(1);
+      expect(mockDistributeParaShare).toBeCalledWith({
         userId: USER_ID,
         walletId: WALLET.id,
         useDKLS: TEST_CTX.useDKLS,
@@ -47,7 +47,13 @@ describe('recovery', () => {
       expect(resp).toBe('');
     });
     it('include other shares', async () => {
-      const resp = await sendRecoveryForShare(TEST_CTX, USER_ID, WALLET.id, OTHER_SHARES, 'test', false, {}, false);
+      const resp = await sendRecoveryForShare({
+        ctx: TEST_CTX,
+        userId: USER_ID,
+        walletId: WALLET.id,
+        userSigner: 'test',
+        otherEncryptedShares: OTHER_SHARES,
+      });
 
       expect(mockUploadUserKeyShares).toBeCalledTimes(1);
       expect(mockUploadUserKeyShares).toBeCalledWith(USER_ID, [
@@ -60,8 +66,8 @@ describe('recovery', () => {
           walletId: WALLET.id,
         },
       ]);
-      expect(mockDistributeCapsuleShare).toBeCalledTimes(1);
-      expect(mockDistributeCapsuleShare).toBeCalledWith({
+      expect(mockDistributeParaShare).toBeCalledTimes(1);
+      expect(mockDistributeParaShare).toBeCalledWith({
         userId: USER_ID,
         walletId: WALLET.id,
         useDKLS: TEST_CTX.useDKLS,
@@ -69,26 +75,45 @@ describe('recovery', () => {
       expect(resp).toBe('');
     });
     it('ignoreRedistributingBackupEncryptedShare', async () => {
-      const resp = await sendRecoveryForShare(TEST_CTX, USER_ID, WALLET.id, [], 'test', true, {}, false);
+      const resp = await sendRecoveryForShare({
+        ctx: TEST_CTX,
+        userId: USER_ID,
+        walletId: WALLET.id,
+        userSigner: 'test',
+        ignoreRedistributingBackupEncryptedShare: true,
+      });
 
       expect(mockUploadUserKeyShares).toBeCalledTimes(1);
       expect(mockUploadUserKeyShares).toBeCalledWith(USER_ID, []);
-      expect(mockDistributeCapsuleShare).toBeCalledTimes(0);
+      expect(mockDistributeParaShare).toBeCalledTimes(0);
       expect(resp).toBe('');
     });
     it('ignoreRedistributingBackupEncryptedShare & include other shares', async () => {
-      const resp = await sendRecoveryForShare(TEST_CTX, USER_ID, WALLET.id, OTHER_SHARES, 'test', true, {}, false);
+      const resp = await sendRecoveryForShare({
+        ctx: TEST_CTX,
+        userId: USER_ID,
+        walletId: WALLET.id,
+        userSigner: 'test',
+        otherEncryptedShares: OTHER_SHARES,
+        ignoreRedistributingBackupEncryptedShare: true,
+      });
 
       expect(mockUploadUserKeyShares).toBeCalledTimes(1);
       expect(mockUploadUserKeyShares).toBeCalledWith(
         USER_ID,
         OTHER_SHARES.map(s => ({ ...s, walletId: WALLET.id })),
       );
-      expect(mockDistributeCapsuleShare).toBeCalledTimes(0);
+      expect(mockDistributeParaShare).toBeCalledTimes(0);
       expect(resp).toBe('');
     });
     it('forceRefresh', async () => {
-      const resp = await sendRecoveryForShare(TEST_CTX, USER_ID, WALLET.id, [], 'test', false, {}, true);
+      const resp = await sendRecoveryForShare({
+        ctx: TEST_CTX,
+        userId: USER_ID,
+        walletId: WALLET.id,
+        userSigner: 'test',
+        forceRefresh: true,
+      });
 
       expect(mockPersistRecoveryPublicKeys).toBeCalledTimes(1);
       expect(mockPersistRecoveryPublicKeys).toBeCalledWith(USER_ID, [expect.stringMatching(/./)]);
@@ -102,8 +127,8 @@ describe('recovery', () => {
           walletId: WALLET.id,
         },
       ]);
-      expect(mockDistributeCapsuleShare).toBeCalledTimes(1);
-      expect(mockDistributeCapsuleShare).toBeCalledWith({
+      expect(mockDistributeParaShare).toBeCalledTimes(1);
+      expect(mockDistributeParaShare).toBeCalledWith({
         userId: USER_ID,
         walletId: WALLET.id,
         useDKLS: TEST_CTX.useDKLS,

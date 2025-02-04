@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
-import { CosmosWallet, EvmWallet, Network, SolanaWallet } from '@usecapsule/react-sdk';
+import { CosmosWallet, EvmWallet, Network, SolanaWallet } from '@getpara/react-sdk';
 import CosmosLogo from '../../assets/cosmos.svg';
 import EthereumLogo from '../../assets/ethereum.svg';
 import SolanaLogo from '../../assets/solana.svg';
@@ -10,7 +10,7 @@ import { useAtom } from 'jotai';
 
 const SECTION_LABEL = 'Networks';
 const SECTION_SECONDARY_TEXT =
-  'Choose the networks that your app supports. Network choices will affect the wallet and asset configuration options for your Capsule instance.';
+  'Choose the networks that your app supports. Network choices will affect the wallet and asset configuration options for your Para instance.';
 
 const NETWORK_CONFIGS = [
   {

@@ -17,7 +17,7 @@ import {
   WALLET,
   WALLETS,
 } from '../constants';
-import Client, { WalletType } from '@usecapsule/user-management-client';
+import Client, { WalletType } from '@getpara/user-management-client';
 
 export const mockExternalWalletLogin = vi.fn().mockResolvedValue({ userId: USER_ID });
 export const mockCreateUser = vi.fn().mockResolvedValue({ userId: USER_ID });
@@ -53,7 +53,7 @@ export const mockGetPregenWallets = vi.fn().mockResolvedValue({ wallets: [] });
 export const mockGetWallets = vi.fn().mockResolvedValue({ data: { wallets: WALLETS } });
 export const mockGetSessionPublicKeys = vi.fn().mockResolvedValue({ data: { keys: SESSION_PUBLIC_KEYS } });
 export const mockUploadUserKeyShares = vi.fn().mockResolvedValue({});
-export const mockDistributeCapsuleShare = vi.fn().mockResolvedValue({});
+export const mockDistributeParaShare = vi.fn().mockResolvedValue({});
 export const mockGetRecoveryPublicKeys = vi.fn().mockResolvedValue({ recoveryPublicKeys: RECOVERY_PUBLIC_KEYS });
 export const mockPersistRecoveryPublicKeys = vi.fn().mockResolvedValue({ recoveryPublicKeys: RECOVERY_PUBLIC_KEYS });
 export const mockClaimPregenWallets = vi
@@ -75,14 +75,20 @@ export const mockGetSupportedAuthMethods = vi.fn().mockResolvedValue({ supported
 export const mockVerifyTelegram = vi
   .fn<Parameters<Client['verifyTelegram']>, ReturnType<Client['verifyTelegram']>>()
   .mockImplementation(async obj => {
-    return Promise.resolve({ isValid: true, userId: USER_ID, telegramUserId: obj.id.toString() });
+    return Promise.resolve({
+      isValid: true,
+      userId: USER_ID,
+      telegramUserId: obj.id.toString(),
+      isNewUser: false,
+      supportedAuthMethods: [],
+    });
   });
 export const mockKeepSessionAlive = vi.fn().mockResolvedValue({});
 export const mockCreateOnRampPurchase = vi
   .fn()
   .mockImplementation(({ params }) => ({ id: 'id', userId: USER_ID, ...params }));
 
-vi.mock('@usecapsule/user-management-client', async importOriginal => {
+vi.mock('@getpara/user-management-client', async importOriginal => {
   const actual = await importOriginal<{ default: Client }>();
   return {
     ...actual,
@@ -105,7 +111,7 @@ vi.mock('@usecapsule/user-management-client', async importOriginal => {
       getWallets: mockGetWallets,
       getSessionPublicKeys: mockGetSessionPublicKeys,
       uploadUserKeyShares: mockUploadUserKeyShares,
-      distributeCapsuleShare: mockDistributeCapsuleShare,
+      distributeParaShare: mockDistributeParaShare,
       getRecoveryPublicKeys: mockGetRecoveryPublicKeys,
       claimPregenWallets: mockClaimPregenWallets,
       getTransmissionKeyshares: mockGetTransmissionKeyshares,

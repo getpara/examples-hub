@@ -4,13 +4,13 @@ import * as uuid from 'uuid';
 import * as ethers from 'ethers';
 import { sepolia } from 'viem/chains';
 import { http } from 'viem';
-import { PublicKeyStatus, WalletType } from '@usecapsule/user-management-client';
+import { PublicKeyStatus, WalletType } from '@getpara/user-management-client';
 import * as solana from '@solana/web3.js';
-import { CapsuleSolanaWeb3Signer } from '@usecapsule/solana-web3.js-v1-integration';
+import { ParaSolanaWeb3Signer } from '@getpara/solana-web3.js-v1-integration';
 
-import CapsuleServer, { Environment } from '@usecapsule/server-sdk';
-import { CapsuleEthersSigner } from '@usecapsule/ethers-v6-integration';
-import { createCapsuleViemClient } from '@usecapsule/viem-v2-integration';
+import ParaServer, { Environment } from '@getpara/server-sdk';
+import { ParaEthersSigner } from '@getpara/ethers-v6-integration';
+import { createParaViemClient } from '@getpara/viem-v2-integration';
 const app: Express = express();
 const port = process.env.PORT || '7007';
 
@@ -38,23 +38,27 @@ async function errorMiddleware(err: Error, _req: Request, res: Response, _next: 
 
 async function createUserAndWallet(params: Params) {
   const { email, isPregen, useSolana } = params;
-  const capsule = new CapsuleServer(Environment.SANDBOX, '2f938ac0c48ef356050a79bd66042a23', {
+  const para = new ParaServer(Environment.SANDBOX, '2f938ac0c48ef356050a79bd66042a23', {
     supportedWalletTypes: useSolana ? { SOLANA: true } : { EVM: true },
   });
-  await capsule.logout();
+  await para.logout();
   if (isPregen) {
-    await capsule.createWalletPreGen(useSolana ? WalletType.SOLANA : WalletType.EVM, email);
+    await para.createPregenWallet({
+      type: useSolana ? WalletType.SOLANA : WalletType.EVM,
+      pregenIdentifier: email,
+      pregenIdentifierType: 'EMAIL',
+    });
   } else {
-    await capsule.createUser(email || `server-test${uuid.v4()}@test.usecapsule.com`);
-    const webAuthURL = await capsule.verifyEmail('123456');
+    await para.createUser({ email: email || `server-test${uuid.v4()}@test.getpara.com` });
+    const webAuthURL = await para.verifyEmail({ verificationCode: '123456' });
     // the steps between the `~~~~~~~` will happen in the portal and don't need to be manually performed
     // ~~~~~~~
     // @ts-ignore
-    const userId = capsule.userId;
+    const userId = para.userId;
     const biometricIdRegex = /\/biometrics\/(.*?)\?email/;
     const biometricId = webAuthURL.match(biometricIdRegex)[1];
-    const res = await capsule.ctx.capsuleClient.touchSession(false);
-    await capsule.ctx.capsuleClient.patchSessionPublicKey(res.data.partnerId, userId, biometricId, {
+    const res = await para.ctx.client.touchSession(false);
+    await para.ctx.client.patchSessionPublicKey(res.data.partnerId, userId, biometricId, {
       publicKey: SAMPLE_PUBLIC_KEY,
       sigDerivedPublicKey: SAMPLE_SIG_DERIVED_PUBLIC_KEY,
       cosePublicKey: SAMPLE_COSE_PUBLIC_KEY,
@@ -62,17 +66,17 @@ async function createUserAndWallet(params: Params) {
       status: PublicKeyStatus.COMPLETE,
     });
     // ~~~~~~~
-    await capsule.createWalletPerType();
+    await para.createWalletPerType();
   }
 
-  const walletId = capsule.findWalletId(undefined, { type: ['EVM'] });
-  const walletAddress = capsule.wallets[walletId].address;
+  const walletId = para.findWalletId(undefined, { type: ['EVM'] });
+  const walletAddress = para.wallets[walletId].address;
   console.log(`address: ${walletAddress}`);
 
-  console.log(walletAddress, 'session', capsule.retrieveSessionCookie());
+  console.log(walletAddress, 'session', para.retrieveSessionCookie());
   if (useSolana) {
     const connection = new solana.Connection(SOLANA_DEVNET_RPC_ENDPOINT, 'confirmed');
-    const solanaSigner = new CapsuleSolanaWeb3Signer(capsule, connection);
+    const solanaSigner = new ParaSolanaWeb3Signer(para, connection);
     const tx = new solana.Transaction().add(
       solana.SystemProgram.transfer({
         fromPubkey: solanaSigner.sender,
@@ -93,8 +97,8 @@ async function createUserAndWallet(params: Params) {
     return;
   }
   const provider = new ethers.JsonRpcProvider(ALCHEMY_SEPOLIA_PROVIDER, 'sepolia');
-  const ethersSigner = new CapsuleEthersSigner(capsule, provider, walletId);
-  const viemClient = createCapsuleViemClient(capsule, {
+  const ethersSigner = new ParaEthersSigner(para, provider, walletId);
+  const viemClient = createParaViemClient(para, {
     chain: sepolia,
     transport: http(ALCHEMY_SEPOLIA_PROVIDER),
   });
@@ -111,22 +115,22 @@ async function createUserAndWallet(params: Params) {
   console.log('sign:', walletAddress, 'hello-world', await sign1);
   console.log('sign:', walletAddress, 'hello-world2', await sign2);
   console.log('sign:', walletAddress, 'hello-world3', await sign3);
-  console.log(walletAddress, 'keep session alive', await capsule.keepSessionAlive());
-  console.log(walletAddress, 'session', capsule.retrieveSessionCookie());
+  console.log(walletAddress, 'keep session alive', await para.keepSessionAlive());
+  console.log(walletAddress, 'session', para.retrieveSessionCookie());
 }
 
 async function signMessageWithImport(serializedInstance: string): Promise<void> {
-  const capsule = new CapsuleServer(Environment.SANDBOX, '2f938ac0c48ef356050a79bd66042a23');
+  const para = new ParaServer(Environment.SANDBOX, '2f938ac0c48ef356050a79bd66042a23');
   console.log('importing session');
-  await capsule.importSession(serializedInstance);
+  await para.importSession(serializedInstance);
   // @ts-ignore
-  const walletId = capsule.currentWalletIds?.[0] || Object.values(capsule.wallets)[0].id;
-  const address = capsule.wallets[walletId].address;
+  const walletId = para.currentWalletIds?.[0] || Object.values(para.wallets)[0].id;
+  const address = para.wallets[walletId].address;
   console.log(`address: ${address}`);
 
   const provider = new ethers.JsonRpcProvider(ALCHEMY_SEPOLIA_PROVIDER, 'sepolia');
-  const ethersSigner = new CapsuleEthersSigner(capsule, provider, walletId);
-  const viemClient = createCapsuleViemClient(capsule, {
+  const ethersSigner = new ParaEthersSigner(para, provider, walletId);
+  const viemClient = createParaViemClient(para, {
     chain: sepolia,
     transport: http(ALCHEMY_SEPOLIA_PROVIDER),
   });
@@ -177,12 +181,12 @@ app.post('/wallets', async (req: Request, res: Response, next: NextFunction) => 
 
 app.post('/sign', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const capsule = new CapsuleServer(Environment.SANDBOX, '2f938ac0c48ef356050a79bd66042a23');
+    const para = new ParaServer(Environment.SANDBOX, '2f938ac0c48ef356050a79bd66042a23');
     const { message } = req.body;
     const provider = new ethers.JsonRpcProvider(ALCHEMY_SEPOLIA_PROVIDER, 'sepolia');
-    const walletId = capsule.findWalletId(undefined, { type: ['EVM'] });
-    const ethersSigner = new CapsuleEthersSigner(capsule, provider, walletId);
-    const viemClient = createCapsuleViemClient(capsule, {
+    const walletId = para.findWalletId(undefined, { type: ['EVM'] });
+    const ethersSigner = new ParaEthersSigner(para, provider, walletId);
+    const viemClient = createParaViemClient(para, {
       chain: sepolia,
       transport: http(ALCHEMY_SEPOLIA_PROVIDER),
     });

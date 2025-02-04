@@ -22,17 +22,17 @@ import {
 } from '../../src/cryptography/utils.js';
 import { CRYPTOGRAPHY_UTILS_TEST_VARS } from '../constants.js';
 import { Environment } from '../../src/definitions.js';
-import { initClient } from '../../src/external/capsuleClient.js';
+import { initClient } from '../../src/external/userManagementClient.js';
 import { getWorkerContent } from '../utils.js';
 import forge from 'node-forge';
-import { WalletScheme } from '@usecapsule/user-management-client';
+import { WalletScheme } from '@getpara/user-management-client';
 
 // Remove white space from PEM strings to ensure values are compared accurately
 const cleanPEMString = (str: string) => str.replace(/\s+/g, '');
 
 const SAMPLE_CTX = {
   env: Environment.DEV,
-  capsuleClient: initClient(Environment.DEV),
+  client: initClient({ env: Environment.DEV }),
   disableWebSockets: false,
 };
 

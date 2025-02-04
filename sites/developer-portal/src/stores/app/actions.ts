@@ -1,13 +1,13 @@
 import { StoreApi } from 'zustand';
 import { AppStore, DEFAULT_APP_STATE, AppActions } from './useAppStore.js';
-import { capsule } from '../../clients/capsule.js';
+import { para } from '../../clients/para.js';
 
 export const getActions = (set: StoreApi<AppStore>['setState'], get: StoreApi<AppStore>['getState']): AppActions => ({
   resetState: () => {
     set(DEFAULT_APP_STATE);
   },
   setSelectedOrganization: orgId => {
-    const userId = capsule.getUserId();
+    const userId = para.getUserId();
 
     if (!userId) {
       return;

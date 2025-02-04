@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { OrganizationInvite } from '../../../types/api';
-import { CpslAvatar, CpslButton, CpslCard, CpslText } from '@usecapsule/react-components';
+import { CpslAvatar, CpslButton, CpslCard, CpslText } from '@getpara/react-components';
 import { useAcceptInvite } from '../../../hooks/api/mutations/useAcceptInvite';
 import { triggerToast } from '../../../utils/toasts';
 import { useLogout } from '../../../hooks/useLogout';
@@ -23,7 +23,7 @@ export const OrgCard = ({ organization }: OrgCardProps) => {
       triggerToast({
         variant: 'error',
         title: 'Error Accepting Invitation',
-        body: 'Please try to login again. If the problem persists, contact Capsule support.',
+        body: 'Please try to login again. If the problem persists, contact Para support.',
       });
       await logout();
       return;

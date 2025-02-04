@@ -1,4 +1,4 @@
-import { CpslInput, CpslText } from '@usecapsule/react-components';
+import { CpslInput, CpslText } from '@getpara/react-components';
 import { SplitCard, SplitCardInnerContainer } from '../../../components/SplitCard/SplitCard';
 import { ExternalLinkButton } from '../../../components/ExternalLinkButton/ExternalLinkButton';
 import { DOCS_LINK } from '../../../utils/constants';
@@ -28,7 +28,7 @@ export const CreateUserCard = () => {
             Create User
           </CpslText>
           <CpslText variant="bodyS" color="secondary">
-            Confirm your Capsule instance has been integrated correctly and is working by adding yourself as your first user.
+            Confirm your Para instance has been integrated correctly and is working by adding yourself as your first user.
           </CpslText>
           <ExternalLinkButton link={DOCS_LINK} text="Creating Users" size="small" />
         </SplitCardInnerContainer>

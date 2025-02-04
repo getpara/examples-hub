@@ -1,12 +1,14 @@
-import { CpslIdenticon, CpslSelect, CpslSelectItem, CpslText } from '@usecapsule/react-components';
+import { CpslIdenticon, CpslSelect, CpslSelectItem, CpslText } from '@getpara/react-components';
 import { useExternalWallets } from '../../providers/ExternalWalletContext.js';
 import styled from 'styled-components';
-import { useCapsuleStore, useModalStore, useThemeStore } from '../../stores/index.js';
-import CapsuleWeb, { truncateAddress, WalletType } from '@usecapsule/web-sdk';
+import { useThemeStore } from '../../stores/index.js';
+import ParaWeb, { truncateAddress, WalletType } from '@getpara/web-sdk';
 import { useEffect, useRef } from 'react';
 import { useDropdownPosition } from '../AuthInput/hooks/useDropdownPosition.js';
 import { MOBILE_SIZE } from '../../constants/constants.js';
 import { useActiveWallet } from '../../hooks/useActiveWallet.js';
+import { useWalletState } from '../../../provider/index.js';
+import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 
 const getValue = (id: string, type: WalletType) => {
   return id && type ? `${id}~${type}` : undefined;
@@ -79,19 +81,19 @@ export const ChainSelect = () => {
 };
 
 function getName(
-  capsule: CapsuleWeb,
+  para: ParaWeb,
   {
     type,
     isExternal,
     name,
     isMenu = false,
     hideWallets = false,
-  }: Pick<(typeof capsule.availableWallets)[0], 'type' | 'isExternal' | 'name'> & {
+  }: Pick<(typeof para.availableWallets)[0], 'type' | 'isExternal' | 'name'> & {
     isMenu?: boolean;
     hideWallets?: boolean;
   },
 ) {
-  if (capsule.isMultiWallet) {
+  if (para.isMultiWallet) {
     return (
       name ??
       `${isExternal ? 'External ' : ''}${WALLET_TYPES[type]}${!hideWallets && (isMenu || isExternal) ? ' Wallet' : ''}`
@@ -103,22 +105,22 @@ function getName(
 
 export const AccountSelect = () => {
   const hideWallets = useThemeStore(state => state.hideWallets);
-  const capsule = useCapsuleStore(state => state.capsule);
+  const para = useInternalClient();
   const containerRef = useRef<HTMLDivElement>(null);
   const { dropdownMaxHeight, dropdownWidth, mobileAnchor, resize } = useDropdownPosition(containerRef);
 
-  const setActiveWallet = useModalStore(state => state.setActiveWallet);
+  const { setSelectedWallet } = useWalletState();
   const activeWallet = useActiveWallet();
 
   const ActiveWalletNode = activeWallet ? (
     <FlexRow slot="selected-item">
-      <CpslIdenticon variant="avatar" size="14px" hash={capsule.getIdenticonHash(activeWallet.id, activeWallet.type)} />
+      <CpslIdenticon variant="avatar" size="14px" hash={para.getIdenticonHash(activeWallet.id, activeWallet.type)} />
       <WalletName variant="bodyXS" color="contrast">
-        {getName(capsule, { ...activeWallet, hideWallets })}
+        {getName(para, { ...activeWallet, hideWallets })}
       </WalletName>
       {!hideWallets && (
         <CpslText variant="bodyXS" color="secondary">
-          {capsule.getDisplayAddress(activeWallet.id, { truncate: true, addressType: activeWallet.type })}
+          {para.getDisplayAddress(activeWallet.id, { truncate: true, addressType: activeWallet.type })}
         </CpslText>
       )}
     </FlexRow>
@@ -128,17 +130,17 @@ export const AccountSelect = () => {
     if (dropdownMaxHeight && activeWallet?.address) {
       resize();
     }
-  }, [activeWallet, capsule.availableWallets, dropdownMaxHeight]);
+  }, [activeWallet, para.availableWallets, dropdownMaxHeight]);
 
   return (
     <Container>
       <SelectContainer ref={containerRef} id="addressInputContainer">
-        {capsule.availableWallets.length > 1 ? (
+        {para.availableWallets.length > 1 ? (
           <StyledSelect
             selectedValue={getValue(activeWallet?.id, activeWallet?.type)}
             onCpslSelectValueChange={e => {
               const [id, type] = e.detail.split('~');
-              setActiveWallet([id, type as WalletType]);
+              setSelectedWallet({ id, type: type as WalletType });
             }}
             showFormattedSelectedItem
             placeholder="Choose wallet..."
@@ -151,13 +153,13 @@ export const AccountSelect = () => {
             selectedItemVariant="bodyXS"
           >
             {activeWallet && ActiveWalletNode}
-            {capsule.availableWallets.map(({ address, name: _name, id, type, isExternal }) => {
+            {para.availableWallets.map(({ address, name: _name, id, type, isExternal }) => {
               const key = getValue(id, type);
-              const name = _name ?? getName(capsule, { type, isExternal, isMenu: true, hideWallets });
+              const name = _name ?? getName(para, { type, isExternal, isMenu: true, hideWallets });
               return (
                 <StyledSelectItem key={key} slot="items" value={key}>
                   <FlexRow>
-                    <CpslIdenticon size="40px" hash={capsule.getIdenticonHash(id, type)} />
+                    <CpslIdenticon size="40px" hash={para.getIdenticonHash(id, type)} />
                     <FlexCol>
                       {name && (
                         <CpslText variant="bodyS" color="contrast">
@@ -166,7 +168,7 @@ export const AccountSelect = () => {
                       )}
                       {!hideWallets && (
                         <CpslText variant="bodyXS" color="secondary">
-                          {truncateAddress(address, type, { prefix: capsule.cosmosPrefix })}
+                          {truncateAddress(address, type, { prefix: para.cosmosPrefix })}
                         </CpslText>
                       )}
                     </FlexCol>

@@ -1,6 +1,5 @@
-import { CpslAppBar } from '@usecapsule/react-components';
+import { CpslAppBar, CpslIcon } from '@getpara/react-components';
 import styled from 'styled-components';
-import { CapsuleBlack } from '../Icons';
 
 export const AUTH_MIN_APP_BAR_HEIGHT = 70;
 
@@ -8,9 +7,7 @@ export const AuthMinAppBar = () => {
   return (
     <CpslAppBar height={AUTH_MIN_APP_BAR_HEIGHT}>
       <Container>
-        <LogoContainer>
-          <CapsuleBlack />
-        </LogoContainer>
+        <Logo icon="para" />
       </Container>
     </CpslAppBar>
   );
@@ -26,11 +23,7 @@ const Container = styled.div`
   padding-left: 32px;
 `;
 
-const LogoContainer = styled.div`
-  width: 115px;
-  height: 100%;
-  display: flex;
-  svg {
-    width: 115px;
-  }
+const Logo = styled(CpslIcon)`
+  --height: 27px;
+  --width: auto;
 `;

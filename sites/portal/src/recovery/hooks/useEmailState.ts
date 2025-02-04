@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { STORAGE_PREFIX } from '@usecapsule/web-sdk';
+import { STORAGE_PREFIX } from '@getpara/web-sdk';
 
 const useEmailState = (initialValue: string | null) => {
   // Try to get the value from local storage first, and if it's not available, use the initial value

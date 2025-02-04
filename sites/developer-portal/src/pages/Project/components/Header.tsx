@@ -1,4 +1,4 @@
-import { CpslButton, CpslIcon, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon, CpslText } from '@getpara/react-components';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useGetProject } from '../../../hooks/api/queries/useProjects';

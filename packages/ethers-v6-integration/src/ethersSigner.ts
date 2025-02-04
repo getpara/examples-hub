@@ -1,34 +1,34 @@
 import { ethers } from 'ethers';
 
-import CoreCapsule, { SuccessfulSignatureRes, hexStringToBase64 } from '@usecapsule/core-sdk';
+import ParaCore, { SuccessfulSignatureRes, hexStringToBase64 } from '@getpara/core-sdk';
 
-export class CapsuleEthersSigner extends ethers.AbstractSigner {
-  private capsule: CoreCapsule;
+export class ParaEthersSigner extends ethers.AbstractSigner {
+  private para: ParaCore;
   private currentWalletId: string;
   private messageSigningTimeoutMs?: number;
 
   /**
    * Signs a message.
    *
-   * @param capsule - the CoreCapsule instance
+   * @param para - the ParaCore instance
    * @param provider - the ethers provider to use. If not present, will use the default ethers.Provider.
    * @param walletId - optional wallet ID to use. If not present, will use the first wallet found.
    * @param messageSigningTimeoutMs - optional timeout in milliseconds. If not present, defaults to 30 seconds.
    **/
-  constructor(capsule: CoreCapsule, provider?: null | ethers.Provider, walletId?: string, messageSigningTimeoutMs?: number) {
+  constructor(para: ParaCore, provider?: null | ethers.Provider, walletId?: string, messageSigningTimeoutMs?: number) {
     super(provider);
 
-    this.currentWalletId = capsule.findWalletId(walletId, { type: ['EVM'] });
-    this.capsule = capsule;
+    this.currentWalletId = para.findWalletId(walletId, { type: ['EVM'] });
+    this.para = para;
     this.messageSigningTimeoutMs = messageSigningTimeoutMs;
   }
 
   async getAddress(): Promise<string> {
-    return this.capsule.wallets[this.currentWalletId].address;
+    return this.para.wallets[this.currentWalletId].address;
   }
 
-  connect(provider: ethers.Provider | null): CapsuleEthersSigner {
-    return new CapsuleEthersSigner(this.capsule, provider, this.currentWalletId);
+  connect(provider: ethers.Provider | null): ParaEthersSigner {
+    return new ParaEthersSigner(this.para, provider, this.currentWalletId);
   }
 
   /**
@@ -39,7 +39,11 @@ export class CapsuleEthersSigner extends ethers.AbstractSigner {
   async signMessage(message: string | Uint8Array): Promise<string> {
     const hashedMessage = ethers.hashMessage(message);
     const base64HashedMessage = hexStringToBase64(hashedMessage);
-    const res = await this.capsule.signMessage(this.currentWalletId, base64HashedMessage, this.messageSigningTimeoutMs);
+    const res = await this.para.signMessage({
+      walletId: this.currentWalletId,
+      messageBase64: base64HashedMessage,
+      timeoutMs: this.messageSigningTimeoutMs,
+    });
 
     const signature = (res as SuccessfulSignatureRes).signature;
     return `0x${signature}`;
@@ -79,11 +83,11 @@ export class CapsuleEthersSigner extends ethers.AbstractSigner {
       v: 0,
     };
 
-    const res = await this.capsule.signTransaction(
-      this.currentWalletId,
-      hexStringToBase64(txObj.serialized),
-      `${txObj.chainId}`,
-    );
+    const res = await this.para.signTransaction({
+      walletId: this.currentWalletId,
+      rlpEncodedTxBase64: hexStringToBase64(txObj.serialized),
+      chainId: `${txObj.chainId}`,
+    });
 
     const signature = (res as SuccessfulSignatureRes).signature;
     const btx = ethers.Transaction.from(<ethers.TransactionLike<string>>tx);
@@ -110,10 +114,10 @@ export class CapsuleEthersSigner extends ethers.AbstractSigner {
       return address;
     });
 
-    const res = await this.capsule.signMessage(
-      this.currentWalletId,
-      hexStringToBase64(ethers.TypedDataEncoder.hash(populated.domain, types, populated.value)),
-    );
+    const res = await this.para.signMessage({
+      walletId: this.currentWalletId,
+      messageBase64: hexStringToBase64(ethers.TypedDataEncoder.hash(populated.domain, types, populated.value)),
+    });
 
     const signature = (res as SuccessfulSignatureRes).signature;
     return `0x${signature}`;

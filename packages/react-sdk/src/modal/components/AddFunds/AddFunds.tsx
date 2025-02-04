@@ -9,8 +9,8 @@ import {
   OnRampPurchaseType,
   toAssetInfoArray,
   WalletType,
-} from '@usecapsule/web-sdk';
-import { CpslTabsCustomEvent, IconType, TabsChangedEventDetail } from '@usecapsule/core-components';
+} from '@getpara/web-sdk';
+import { CpslTabsCustomEvent, IconType, TabsChangedEventDetail } from '@getpara/core-components';
 import { CenteredText, FilledDisabledInput, Heading, InnerStepContainer, QRContainer, StepContainer } from '../common.js';
 import {
   CpslButton,
@@ -22,18 +22,19 @@ import {
   CpslTab,
   CpslTabs,
   CpslText,
-} from '@usecapsule/react-components';
-import { useCapsuleStore, useModalStore, useThemeStore } from '../../stores/index.js';
+} from '@getpara/react-components';
+import { useModalStore, useThemeStore } from '../../stores/index.js';
 import { ReactNode, useEffect, useMemo } from 'react';
 import { OnRampProviderButton } from '../OnRampComponents/OnRampProviderButton.js';
-import { isMobile } from '@usecapsule/web-sdk';
+import { isMobile } from '@getpara/web-sdk';
 import { useActiveWallet } from '../../hooks/useActiveWallet.js';
 import { getAddFundsStep, ModalStep } from '../../utils/steps.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useExternalWallets } from '../../providers/ExternalWalletContext.js';
-import { getNetworkFromChainId, getNetworkOrMainNetEquivalent, useCopyToClipboard } from '@usecapsule/react-common';
+import { getNetworkFromChainId, getNetworkOrMainNetEquivalent, useCopyToClipboard } from '@getpara/react-common';
 import { formatNetworkList } from '../../utils/stringFormatters.js';
 import styled from 'styled-components';
+import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 
 export type Tab = EnabledFlow;
 
@@ -56,7 +57,7 @@ const GENERIC_WALLET = {
 
 export const AddFunds = () => {
   const [isCopied, copy] = useCopyToClipboard();
-  const capsule = useCapsuleStore(state => state.capsule);
+  const para = useInternalClient();
   const appName = useThemeStore(state => state.appName);
   const onRampConfig = useModalStore(state => state.onRampConfig);
   const hideWallets = useThemeStore(state => state.hideWallets);
@@ -73,8 +74,8 @@ export const AddFunds = () => {
   const tab = storedTab ?? tabs[0][0];
 
   const address = useMemo(
-    () => (activeWallet ? capsule.getDisplayAddress(activeWallet.id, { addressType: activeWallet.type }) : ''),
-    [capsule, activeWallet?.id, activeWallet?.type],
+    () => (activeWallet ? para.getDisplayAddress(activeWallet.id, { addressType: activeWallet.type }) : ''),
+    [para, activeWallet?.id, activeWallet?.type],
   );
 
   const onSetTab = (event: CpslTabsCustomEvent<TabsChangedEventDetail>) => {
@@ -197,7 +198,7 @@ export const AddFunds = () => {
 
                           const isPopup = id !== OnRampProvider.RAMP;
 
-                          const { onRampPurchase: newOnRampPurchase } = await capsule.initiateOnRampTransaction({
+                          const { onRampPurchase: newOnRampPurchase } = await para.initiateOnRampTransaction({
                             walletId: activeWallet.isExternal ? undefined : activeWallet.id,
                             externalWalletAddress: activeWallet.isExternal ? activeWallet.id : undefined,
                             shouldOpenPopup: isPopup,
@@ -229,11 +230,7 @@ export const AddFunds = () => {
           <>
             <InnerStepContainer>
               <FilledDisabledInput noAutoDisable key={address} readonly placeholder={address}>
-                <CpslIdenticon
-                  slot="start"
-                  size="32px"
-                  hash={capsule.getIdenticonHash(activeWallet.id, activeWallet.type)}
-                />
+                <CpslIdenticon slot="start" size="32px" hash={para.getIdenticonHash(activeWallet.id, activeWallet.type)} />
                 <CpslButton slot="end" variant="ghost" onClick={onCopy}>
                   <CpslIcon icon={isCopied ? 'check' : 'copy'} />
                 </CpslButton>

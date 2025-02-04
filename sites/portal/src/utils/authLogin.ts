@@ -1,4 +1,4 @@
-import Capsule, {
+import {
   encryptWithDerivedPublicKey,
   generateSignature,
   decryptPrivateKeyAndDecryptShare,
@@ -7,9 +7,10 @@ import Capsule, {
   encryptPrivateKey,
   getSHA256HashHex,
   decryptPrivateKeyWithPassword,
-} from '@usecapsule/web-sdk';
+} from '@getpara/web-sdk';
+import { ParaPortal } from '../classes/ParaPortal';
 import { ENV } from '../constants';
-import { AuthParams, extractAuthInfo, PregenIds, WalletScheme } from '@usecapsule/user-management-client';
+import { AuthParams, extractAuthInfo, PregenIds, WalletScheme } from '@getpara/user-management-client';
 import forge from 'node-forge';
 
 export type AuthLoginParams = {
@@ -38,21 +39,21 @@ export type AuthUpdateKeySharesParams = AuthLoginParams & {
 };
 
 export async function authLogin(
-  capsule: Capsule,
+  para: ParaPortal,
   { partnerId, sessionId, newDeviceSessionLookupId, ...authParams }: AuthLoginParams,
 ): Promise<{ userId: string; userHandle: string; signature: any; publicKey?: string; passwordId?: string }> {
-  const { auth, identifier } = extractAuthInfo(authParams, { allowUserId: true });
+  const { auth, identifier } = extractAuthInfo(authParams, { allowUserId: true, isRequired: true });
 
   if (!identifier) {
     throw new Error('either a phone number or email address or farcaster username must be provided.');
   }
 
-  const data = await capsule.ctx.capsuleClient.getWebChallenge(auth);
+  const data = await para.ctx.client.getWebChallenge(auth);
 
-  const signature = await generateSignature(ENV, data.challenge, data.allowedPublicKeys, capsule.ctx.isE2E);
+  const signature = await generateSignature(ENV, data.challenge, data.allowedPublicKeys, para.ctx.isE2E);
   const { userHandle, ...sigResponse } = signature.response;
 
-  const verifyRes = await capsule.ctx.capsuleClient.verifyWebChallenge(partnerId, {
+  const verifyRes = await para.ctx.client.verifyWebChallenge(partnerId, {
     signature: sigResponse,
     publicKey: signature.id,
     sessionLookupId: sessionId,
@@ -63,19 +64,19 @@ export async function authLogin(
 }
 
 export async function authLoginWithPassword(
-  capsule: Capsule,
+  para: ParaPortal,
   { password, partnerId, sessionId, newDeviceSessionLookupId, ...authParams }: AuthLoginPasswordParams,
 ) {
-  const { auth, identifier } = extractAuthInfo(authParams, { allowUserId: true });
+  const { auth, identifier } = extractAuthInfo(authParams, { allowUserId: true, isRequired: true });
 
   if (!identifier) {
     throw new Error('either a phone number or email address or farcaster username must be provided.');
   }
 
-  const passwordEntity = (await capsule.ctx.capsuleClient.getPasswords(auth))[0];
-  const encryptedWalletPrivateKey = (await capsule.ctx.capsuleClient.getEncryptedWalletPrivateKey(passwordEntity.id)).data
+  const passwordEntity = (await para.ctx.client.getPasswords(auth))[0];
+  const encryptedWalletPrivateKey = (await para.ctx.client.getEncryptedWalletPrivateKey(passwordEntity.id)).data
     .encryptedWalletPrivateKey;
-  const challenge = (await capsule.ctx.capsuleClient.getWebChallenge(auth)).challenge;
+  const challenge = (await para.ctx.client.getWebChallenge(auth)).challenge;
 
   const { salt } = passwordEntity;
   const saltedPassword = salt + password;
@@ -87,7 +88,7 @@ export async function authLoginWithPassword(
   md.update(challenge, 'utf8');
   const signature = privateKey.sign(md);
 
-  const verifyRes = await capsule.ctx.capsuleClient.verifyPasswordChallenge(partnerId, {
+  const verifyRes = await para.ctx.client.verifyPasswordChallenge(partnerId, {
     signature,
     publicKey: passwordEntity.sigDerivedPublicKey,
     sessionLookupId: sessionId,
@@ -104,7 +105,7 @@ export async function authLoginWithPassword(
 }
 
 export async function authUpdateKeyShares(
-  capsule: Capsule,
+  para: ParaPortal,
   {
     sessionId,
     userId,
@@ -120,19 +121,19 @@ export async function authUpdateKeyShares(
   const encryptionKeyHash = getSHA256HashHex(userHandle);
   let encryptedShares = [];
   if (passwordId) {
-    const encryptedSharesRes = await capsule.ctx.capsuleClient.getPasswordKeyshares(userId, passwordId, true);
+    const encryptedSharesRes = await para.ctx.client.getPasswordKeyshares(userId, passwordId, true);
     encryptedShares = encryptedSharesRes.data.keyShares;
   } else if (signature) {
-    const encryptedSharesRes = await capsule.ctx.capsuleClient.getBiometricKeyshares(userId, signature.id, true);
+    const encryptedSharesRes = await para.ctx.client.getBiometricKeyshares(userId, signature.id, true);
     encryptedShares = encryptedSharesRes.data.keyShares;
   }
-  const { encryptedPrivateKeys } = await capsule.ctx.capsuleClient.getEncryptedWalletPrivateKeys(userId, encryptionKeyHash);
+  const { encryptedPrivateKeys } = await para.ctx.client.getEncryptedWalletPrivateKeys(userId, encryptionKeyHash);
   if (!encryptedShares.length) {
     return;
   }
 
   if (!partnerId) {
-    const touchRes = await capsule.touchSession();
+    const touchRes = await para.touchSession();
     partnerId = touchRes.data.partnerId;
   }
 
@@ -155,7 +156,7 @@ export async function authUpdateKeyShares(
 
   // get all shares that are associated with this partnerId
   const potentialSharesForPartnerToDecrypt = encryptedShares
-    .filter(share => !capsule.currentWalletIds || capsule.currentWalletIdsUnique.includes(share.walletId))
+    .filter(share => !para.currentWalletIds || para.currentWalletIdsUnique.includes(share.walletId))
     .filter(share => {
       return share.walletScheme !== WalletScheme.DKLS || share.partnerId === partnerId;
     });
@@ -178,7 +179,7 @@ export async function authUpdateKeyShares(
   });
 
   // get all walletIds that we'll need a share for
-  const allWalletIds = capsule.currentWalletIdsUnique || [
+  const allWalletIds = para.currentWalletIdsUnique || [
     ...new Set([...sharesForPartnerToDecrypt.map(share => share.walletId)]),
   ];
 
@@ -209,15 +210,10 @@ export async function authUpdateKeyShares(
   let decryptedShares: { walletId: string; walletScheme: string; signer: string; partnerId?: string; protocolId?: string }[];
   if (encryptedPrivateKeys.length === 0) {
     // If this is successful, we can upgrade the user to the new method of passkey schema
-    decryptedShares = await getDerivedPrivateKeyAndDecrypt(capsule.ctx, userHandle, allSharesToDecrypt);
-    const keyPair = await getAsymmetricKeyPair(capsule.ctx, userHandle);
+    decryptedShares = await getDerivedPrivateKeyAndDecrypt(para.ctx, userHandle, allSharesToDecrypt);
+    const keyPair = await getAsymmetricKeyPair(para.ctx, userHandle);
     const encryptedPrivateKeyHex = await encryptPrivateKey(keyPair, userHandle);
-    await capsule.ctx.capsuleClient.uploadEncryptedWalletPrivateKey(
-      userId,
-      encryptedPrivateKeyHex,
-      encryptionKeyHash,
-      signature.id,
-    );
+    await para.ctx.client.uploadEncryptedWalletPrivateKey(userId, encryptedPrivateKeyHex, encryptionKeyHash, signature.id);
   } else {
     decryptedShares = await decryptPrivateKeyAndDecryptShare(
       userHandle,
@@ -231,7 +227,7 @@ export async function authUpdateKeyShares(
   const refreshedShares = [] as { walletId: string; signer: string; partnerId: string; protocolId: string }[];
 
   for (const share of decryptedSharesToRefresh) {
-    const { signer: refreshedSigner, protocolId } = await capsule.refreshShare({
+    const { signer: refreshedSigner, protocolId } = await para.refreshShare({
       walletId: share.walletId,
       share: share.signer,
       oldPartnerId: share.partnerId,
@@ -270,7 +266,7 @@ export async function authUpdateKeyShares(
   if (newDeviceSessionLookupId) {
     // need to fetch and decrypt all shares for the new device
     // can't use response above as a refreshed share may have been added here so we must fetch again
-    const newEncryptedSharesRes = await capsule.ctx.capsuleClient.getBiometricKeyshares(userId, signature.id, true);
+    const newEncryptedSharesRes = await para.ctx.client.getBiometricKeyshares(userId, signature.id, true);
     const allDecryptedShares = await decryptPrivateKeyAndDecryptShare(
       userHandle,
       newEncryptedSharesRes.data.keyShares,
@@ -293,7 +289,7 @@ export async function authUpdateKeyShares(
   }
 
   if (tempShareOpts.length > 0) {
-    await capsule.ctx.capsuleClient.uploadTransmissionKeyshares(userId, tempShareOpts);
+    await para.ctx.client.uploadTransmissionKeyshares(userId, tempShareOpts);
   }
 
   return userId;

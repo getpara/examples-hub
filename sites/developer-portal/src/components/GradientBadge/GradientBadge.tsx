@@ -1,4 +1,4 @@
-import { CpslIcon, CpslText, IconType } from '@usecapsule/react-components';
+import { CpslIcon, CpslText, IconType } from '@getpara/react-components';
 import styled from 'styled-components';
 import { LINEAR_GRADIENT } from '../common';
 

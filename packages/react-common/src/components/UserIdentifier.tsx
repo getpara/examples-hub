@@ -1,4 +1,4 @@
-import { CpslAvatar, CpslIcon, CpslText, IconType } from '@usecapsule/react-components';
+import { CpslAvatar, CpslIcon, CpslText, IconType } from '@getpara/react-components';
 import parsePhoneNumberFromString from 'libphonenumber-js';
 import styled from 'styled-components';
 import { ModalAuthInfo } from '../types/index.js';

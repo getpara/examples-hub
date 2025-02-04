@@ -3,16 +3,16 @@ import { AuthLoginStep } from '../../constants';
 import { Body } from './components/Body';
 import { Card, CardContent } from '../../components/common';
 import { ModalHeader } from '../../components/ModalHeader';
-import { getAsymmetricKeyPair, getPublicKeyHex } from '@usecapsule/web-sdk';
-import { useCapsule } from '../../components/CapsuleContext';
+import { getAsymmetricKeyPair, getPublicKeyHex } from '@getpara/web-sdk';
+import { usePara } from '../../components/ParaContext';
 import { LoginProvider, LoginRes, useLogin } from './components/LoginProvider';
 import { SelectWallet } from './components/SelectWallet';
 import { useModalOutletContext } from '../../hooks/useModalOutletContext';
 import { useCloseWindow } from '../../hooks/useCloseWindow';
-import { AuthMethod } from '@usecapsule/web-sdk';
+import { AuthMethod } from '@getpara/web-sdk';
 
 const AuthLoginBase = ({ authMethod }) => {
-  const capsule = useCapsule();
+  const para = usePara();
   const closeWindow = useCloseWindow();
   const { toggleBranding } = useModalOutletContext();
   const {
@@ -42,7 +42,7 @@ const AuthLoginBase = ({ authMethod }) => {
   };
 
   const postLogin = async ({ fromKnownDevice, loginRes }: { fromKnownDevice?: boolean; loginRes?: LoginRes }) => {
-    await capsule.userSetupAfterLogin();
+    await para.userSetupAfterLogin();
 
     if (fromKnownDevice) {
       setStep(AuthLoginStep.SUCCESS_FROM_KNOWN_DEVICE);
@@ -53,19 +53,23 @@ const AuthLoginBase = ({ authMethod }) => {
 
     const [isWithoutWallets, isOnlyOwnedPartnerWallets] = [
       Object.values(wallets).every(arr => arr.length === 0),
-      capsule.supportedWalletTypes.every(
+      para.supportedWalletTypes.every(
         ({ type }) =>
           wallets[type].length === 1 && wallets[type][0].partnerId === partnerId && !wallets[type][0].pregenIdentifier,
       ),
     ];
 
     const defaultWalletIds = isOnlyOwnedPartnerWallets
-      ? capsule.supportedWalletTypes.reduce((acc, { type }) => ({ ...acc, [type]: wallets[type].map(({ id }) => id) }), {})
+      ? para.supportedWalletTypes.reduce((acc, { type }) => ({ ...acc, [type]: wallets[type].map(({ id }) => id) }), {})
       : undefined;
 
-    if (!!defaultWalletIds || (isWithoutWallets && !capsule.ctx.apiKey)) {
-      await capsule.setCurrentWalletIds(defaultWalletIds ?? {}, sessionId, isWithoutWallets, newDeviceSessionLookupId);
-      if (capsule.currentWalletIdsArray.length > 0) {
+    if (!!defaultWalletIds || (isWithoutWallets && !para.ctx.apiKey)) {
+      await para.setCurrentWalletIds(defaultWalletIds ?? {}, {
+        sessionLookupId: sessionId,
+        needsWallet: isWithoutWallets,
+        newDeviceSessionLookupId,
+      });
+      if (para.currentWalletIdsArray.length > 0) {
         await authUpdateKeyShares(loginRes);
       }
       setStep(fromKnownDevice ? AuthLoginStep.SUCCESS_FROM_KNOWN_DEVICE : AuthLoginStep.SUCCESS);
@@ -77,7 +81,7 @@ const AuthLoginBase = ({ authMethod }) => {
   const loginWithPassword = async (password: string) => {
     try {
       setLoginWithPasswordError(undefined);
-      await capsule.touchSession();
+      await para.touchSession();
       const loginRes = await authLoginWithPassword(password);
 
       await postLogin({ loginRes });
@@ -94,7 +98,7 @@ const AuthLoginBase = ({ authMethod }) => {
     }
 
     try {
-      await capsule.touchSession();
+      await para.touchSession();
 
       const loginRes = await authLogin();
 
@@ -108,27 +112,26 @@ const AuthLoginBase = ({ authMethod }) => {
       setStep(AuthLoginStep.LOGIN_FAILED);
       console.error('Error retrieving passkey: ', err);
     }
-  }, [capsule, authLogin, authMethod]);
+  }, [para, authLogin, authMethod]);
 
   async function getWebAuthURLForKnownDeviceLogin() {
-    let touchRes = await capsule.touchSession();
+    let touchRes = await para.touchSession();
     if (!touchRes.data.sessionLookupId) {
-      touchRes = await capsule.touchSession(true);
+      touchRes = await para.touchSession(true);
     }
-    if (!capsule.loginEncryptionKeyPair) {
-      const keyPair = await getAsymmetricKeyPair(capsule.ctx);
-      await capsule.setLoginEncryptionKeyPair(keyPair);
+    if (!para.loginEncryptionKeyPair) {
+      const keyPair = await getAsymmetricKeyPair(para.ctx);
+      await para.setLoginEncryptionKeyPair(keyPair);
     }
 
-    const url = await capsule.getWebAuthURLForLogin(
+    const url = await para.getWebAuthURLForLogin({
       sessionId,
-      encryptionKey,
+      loginEncryptionPublicKey: encryptionKey,
       partnerId,
-      touchRes.data.sessionLookupId,
-      getPublicKeyHex(capsule.loginEncryptionKeyPair),
-      undefined,
-    );
-    const shortUrl = await capsule.shortenLoginLink(url);
+      newDeviceSessionId: touchRes.data.sessionLookupId,
+      newDeviceEncryptionKey: getPublicKeyHex(para.loginEncryptionKeyPair),
+    });
+    const shortUrl = await para.shortenLoginLink(url);
     setUrlForNewDeviceLogin(shortUrl);
   }
 
@@ -170,18 +173,18 @@ const AuthLoginBase = ({ authMethod }) => {
     };
 
     try {
-      const isActive = await capsule.isSessionActive();
+      const isActive = await para.isSessionActive();
       if (!isActive) {
         reset();
         return;
       }
-      const touchRes = await capsule.touchSession();
-      await capsule.setUserId(touchRes.data.userId);
-      const fetchedWallets = await capsule.fetchWallets();
-      const temporaryShares = (await capsule.getTransmissionKeyShares(true)).data.temporaryShares;
+      const touchRes = await para.touchSession();
+      await para.setUserId(touchRes.data.userId);
+      const fetchedWallets = await para.fetchWallets();
+      const temporaryShares = (await para.getTransmissionKeyShares({ isForNewDevice: true })).data.temporaryShares;
 
       if (temporaryShares.length >= fetchedWallets.length) {
-        const authCreationURL = await capsule.getSetUpBiometricsURL(true);
+        const authCreationURL = await para.getSetUpBiometricsURL({ isForNewDevice: true });
         window.location.href = authCreationURL;
       } else {
         reset();

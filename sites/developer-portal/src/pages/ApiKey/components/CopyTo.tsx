@@ -1,4 +1,4 @@
-import { CpslButton, CpslIcon } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon } from '@getpara/react-components';
 import styled from 'styled-components';
 import { CopyToModal } from './CopyToModal';
 import { useState } from 'react';

@@ -1,6 +1,6 @@
 import { Flex, Spacer } from '@chakra-ui/react';
 import { useState } from 'react';
-import { CpslButton, CpslIcon, CpslText } from '@usecapsule/react-components';
+import { CpslButton, CpslIcon, CpslText } from '@getpara/react-components';
 import styled from 'styled-components';
 import { TransactionType } from '../TransactionReview';
 

@@ -1,15 +1,10 @@
-import CapsuleWeb, {
-  CurrentWalletIds,
-  OAuthMethod,
-  deprecated__NetworkProp,
-  deprecated__OnRampConfig,
-} from '@usecapsule/web-sdk';
-import { Theme } from '@usecapsule/react-components';
+import ParaWeb, { CurrentWalletIds, OAuthMethod, deprecated__NetworkProp, deprecated__OnRampConfig } from '@getpara/web-sdk';
+import { Theme } from '@getpara/react-components';
 import { OnModalStepChangeValue } from '../stores/index.js';
 import { ModalStep, ModalStepProp } from '../utils/steps.js';
 import { TExternalWallet } from './externalWallets.js';
 
-export type CapsuleModalHandle = {
+export type ParaModalHandle = {
   /**
    * Move the modal backward
    */
@@ -30,7 +25,7 @@ export type CapsuleModalHandle = {
 
 export type OAuthLogoVariantType = 'dark' | 'light' | 'default';
 
-export type CapsuleModalTheme = Theme & {
+export type ParaModalTheme = Theme & {
   oAuthLogoVariant?: OAuthLogoVariantType;
 };
 
@@ -43,15 +38,15 @@ export enum AuthLayout {
 
 export type TAuthLayout = `${AuthLayout}`;
 
-export interface CapsuleModalProps {
+export interface ParaModalProps {
   /**
-   * Your CapsuleWeb instance.
+   * Your ParaWeb instance.
    */
-  capsule: CapsuleWeb;
+  para?: ParaWeb;
   /**
    * Whether or not the modal is open.
    */
-  isOpen: boolean;
+  isOpen?: boolean;
   /**
    * Whether or not to show two-factor authentication steps to users.
    * Defaults to `false`.
@@ -80,7 +75,7 @@ export interface CapsuleModalProps {
   /**
    * Theming to be used throughout the modal.
    */
-  theme?: CapsuleModalTheme;
+  theme?: ParaModalTheme;
   /**
    * Logo to be shown throughout the modal.
    */
@@ -91,13 +86,13 @@ export interface CapsuleModalProps {
   appName?: string;
   /**
    * Configure on-ramp providers to allow users to add funds upon signing up.
-   * @deprecated Configure on-ramps in the Capsule Developer Portal.
+   * @deprecated Configure on-ramps in the Para Developer Portal.
    */
   onRampConfig?: deprecated__OnRampConfig;
   /**
    * Configures which EVM networks your app supports, an array of one or more of `["ETHEREUM", "ARBITRUM", "BASE", "OPTIMISM", and "POLYGON"]`.
    * Defaults to `["ETHEREUM"]`.
-   * @deprecated Configure this setting in the Capsule Developer Portal.
+   * @deprecated Configure this setting in the Para Developer Portal.
    */
   networks?: deprecated__NetworkProp[];
   /**
@@ -105,7 +100,7 @@ export interface CapsuleModalProps {
    */
   onRampTestMode?: boolean;
   /**
-   * Whether to display information about on-chain wallets and use related terminology in the Capsule Modal.
+   * Whether to display information about on-chain wallets and use related terminology in the Para Modal.
    */
   hideWallets?: boolean;
   currentStepOverride?: ModalStepProp | undefined;
@@ -117,7 +112,7 @@ export interface CapsuleModalProps {
   bareModal?: boolean;
   /**
    * Whether or not to use the embedded modal styling
-   * This is typically only used internally by Capsule and may result in unwanted styling!
+   * This is typically only used internally by Para and may result in unwanted styling!
    */
   embeddedModal?: boolean;
   className?: string;
@@ -140,7 +135,7 @@ export interface CapsuleModalProps {
   /**
    * Called when the modal is closed
    */
-  onClose: () => void;
-  loginTransitionOverride?: (capsule: CapsuleWeb) => Promise<void>;
-  createWalletOverride?: (capsule: CapsuleWeb) => Promise<{ recoverySecret?: string; walletIds: CurrentWalletIds }>;
+  onClose?: () => void;
+  loginTransitionOverride?: (para: ParaWeb) => Promise<void>;
+  createWalletOverride?: (para: ParaWeb) => Promise<{ recoverySecret?: string; walletIds: CurrentWalletIds }>;
 }

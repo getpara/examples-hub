@@ -1,13 +1,14 @@
-import { CpslButton, CpslDivider, CpslIcon } from '@usecapsule/react-components';
+import { CpslButton, CpslDivider, CpslIcon } from '@getpara/react-components';
 import { useEffect, useMemo, useState } from 'react';
-import { useCapsuleStore, useModalStore, useUserInfoStore } from '../../stores/index.js';
+import { useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { Heading, StepContainer, InnerStepContainer } from '../common.js';
 import { openPopup } from '../../utils/openPopup.js';
 import styled from 'styled-components';
-import { AuthMethod, getPublicKeyHex } from '@usecapsule/web-sdk';
+import { AuthMethod, getPublicKeyHex } from '@getpara/web-sdk';
 import { isPasskeySupported } from '../../utils/isPasskeySupported.js';
-import { formatBiometricHints, KnownDevices, UserIdentifier } from '@usecapsule/react-common';
+import { formatBiometricHints, KnownDevices, UserIdentifier } from '@getpara/react-common';
+import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 
 export const BiometricLoginStep = () => {
   const popupWindow = useModalStore(state => state.popupWindow);
@@ -17,7 +18,7 @@ export const BiometricLoginStep = () => {
   const setStep = useModalStore(state => state.setStep);
   const setPopupWindow = useModalStore(state => state.setPopupWindow);
   const biometricLocationHints = useModalStore(state => state.biometricLocationHints);
-  const capsule = useCapsuleStore(state => state.capsule);
+  const para = useInternalClient();
   const authInfo = useUserInfoStore(state => state.getAuthInfo());
   const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
   const setPasswordUrlForLogin = useModalStore(state => state.setPasswordUrlForLogin);
@@ -29,72 +30,66 @@ export const BiometricLoginStep = () => {
 
   useEffect(() => {
     async function setLinks() {
-      if (!supportedAuthMethods?.size && capsule.getUserId()) {
-        const fetchedSupportedAuthMethods = await capsule.supportedAuthMethods(capsule.getUserId(), 'userId');
+      if (!supportedAuthMethods?.size && para.getUserId()) {
+        const fetchedSupportedAuthMethods = await para.supportedAuthMethods({ userId: para.getUserId() });
         if (fetchedSupportedAuthMethods?.size) {
           setSupportedAuthMethods(fetchedSupportedAuthMethods);
         }
         return;
       }
 
-      if (!capsule.isEmail && !capsule.isPhone && !capsule.isFarcaster && !capsule.isTelegram) {
+      if (!para.isEmail && !para.isPhone && !para.isFarcaster && !para.isTelegram) {
         return;
       }
 
-      const authType = capsule.isEmail
-        ? 'email'
-        : capsule.isPhone
-          ? 'phone'
-          : capsule.isFarcaster
-            ? 'farcaster'
-            : 'telegram';
+      if (!para.loginEncryptionKeyPair) {
+        return;
+      }
 
-      const res = await capsule.touchSession();
+      const authType = para.isEmail ? 'email' : para.isPhone ? 'phone' : para.isFarcaster ? 'farcaster' : 'telegram';
+
+      const res = await para.touchSession();
       const webAuthUrlForLogin =
         supportedAuthMethods?.has && supportedAuthMethods.has(AuthMethod.PASSKEY)
-          ? await capsule.getWebAuthURLForLogin(
-              res.data.sessionId,
-              getPublicKeyHex(capsule.loginEncryptionKeyPair),
-              res.data.partnerId,
-              undefined,
-              undefined,
+          ? await para.getWebAuthURLForLogin({
+              sessionId: res.data.sessionId,
+              loginEncryptionPublicKey: getPublicKeyHex(para.loginEncryptionKeyPair),
+              partnerId: res.data.partnerId,
               authType,
-              authInfo.displayName,
-              authInfo.pfpUrl,
-            )
+              displayName: authInfo.displayName,
+              pfpUrl: authInfo.pfpUrl,
+            })
           : undefined;
 
       const _webAuthURLForKnownDeviceLogin =
         supportedAuthMethods?.has && supportedAuthMethods.has(AuthMethod.PASSKEY)
-          ? await capsule.getWebAuthURLForLogin(
-              res.data.sessionId,
-              getPublicKeyHex(capsule.loginEncryptionKeyPair),
-              res.data.partnerId,
-              res.data.sessionLookupId,
-              getPublicKeyHex(capsule.loginEncryptionKeyPair),
+          ? await para.getWebAuthURLForLogin({
+              sessionId: res.data.sessionId,
+              loginEncryptionPublicKey: getPublicKeyHex(para.loginEncryptionKeyPair),
+              partnerId: res.data.partnerId,
+              newDeviceSessionId: res.data.sessionLookupId,
+              newDeviceEncryptionKey: getPublicKeyHex(para.loginEncryptionKeyPair),
               authType,
-              authInfo.displayName,
-              authInfo.pfpUrl,
-            )
+              displayName: authInfo.displayName,
+              pfpUrl: authInfo.pfpUrl,
+            })
           : undefined;
 
       const passwordAuthUrlForLogin =
         supportedAuthMethods?.has && supportedAuthMethods.has(AuthMethod.PASSWORD)
-          ? await capsule.getPasswordURLForLogin(
-              res.data.sessionId,
-              getPublicKeyHex(capsule.loginEncryptionKeyPair),
-              res.data.partnerId,
-              undefined,
-              undefined,
+          ? await para.getPasswordURLForLogin({
+              sessionId: res.data.sessionId,
+              loginEncryptionPublicKey: getPublicKeyHex(para.loginEncryptionKeyPair),
+              partnerId: res.data.partnerId,
               authType,
-              authInfo.displayName,
-              authInfo.pfpUrl,
-            )
+              displayName: authInfo.displayName,
+              pfpUrl: authInfo.pfpUrl,
+            })
           : undefined;
 
-      const shortWebAuthLoginLink = webAuthUrlForLogin ? await capsule.shortenLoginLink(webAuthUrlForLogin) : undefined;
+      const shortWebAuthLoginLink = webAuthUrlForLogin ? await para.shortenLoginLink(webAuthUrlForLogin) : undefined;
       const shortWebAuthForKnownDeviceLoginLink = _webAuthURLForKnownDeviceLogin
-        ? await capsule.shortenLoginLink(_webAuthURLForKnownDeviceLogin)
+        ? await para.shortenLoginLink(_webAuthURLForKnownDeviceLogin)
         : undefined;
 
       setWebAuthURLForKnownDeviceLogin(shortWebAuthForKnownDeviceLoginLink);
@@ -103,21 +98,21 @@ export const BiometricLoginStep = () => {
     }
 
     setLinks();
-  }, [supportedAuthMethods]);
+  }, [supportedAuthMethods, para]);
 
   const handlePasskeyClick = () => {
     if (!!popupWindow) {
       return;
     }
 
-    const loginWindow = openPopup(webAuthURLForLogin, 'CapsulePasskey', 'LOGIN_PASSKEY');
+    const loginWindow = openPopup(webAuthURLForLogin, 'ParaPasskey', 'LOGIN_PASSKEY');
 
     setPopupWindow(loginWindow);
     setStep(ModalStep.AWAITING_BIOMETRIC_LOGIN);
   };
 
   const handlePasswordClick = () => {
-    const loginWindow = openPopup(passwordUrlForLogin, 'CapsulePassword', 'LOGIN_PASSWORD');
+    const loginWindow = openPopup(passwordUrlForLogin, 'ParaPassword', 'LOGIN_PASSWORD');
     setPopupWindow(loginWindow);
     setStep(ModalStep.AWAITING_PASSWORD_LOGIN);
   };
