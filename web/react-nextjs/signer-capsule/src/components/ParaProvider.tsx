@@ -130,7 +130,7 @@ export function ParaProvider({ children }: { children: React.ReactNode }) {
 
   const handleSessionRefresh = async () => {
     try {
-      await para.refreshSession(true);
+      await para.refreshSession({ shouldOpenPopup: true });
       await checkAuthentication();
     } catch (err) {
       console.error("Failed to refresh session:", err);

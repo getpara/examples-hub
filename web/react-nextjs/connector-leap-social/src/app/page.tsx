@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { para } from "@/client/para";
 import { WalletDisplay } from "@/components/WalletDisplay";
-import { CustomParaModalView } from "@leapwallet/cosmos-social-login-para-provider-ui";
+import { CustomCapsuleModalView } from "@leapwallet/cosmos-social-login-capsule-provider-ui";
 import { OAuthMethod } from "@getpara/web-sdk";
-import "@leapwallet/cosmos-social-login-para-provider-ui/styles.css";
+import "@leapwallet/cosmos-social-login-capsule-provider-ui/styles.css";
 
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
@@ -65,7 +65,7 @@ export default function Home() {
       </button>
       {error && <p className="text-red-500 text-sm text-center">{error}</p>}
       <div className="leap-ui">
-        <CustomParaModalView
+        <CustomCapsuleModalView
           para={para as any}
           showParaModal={isOpen}
           setShowParaModal={setIsOpen}

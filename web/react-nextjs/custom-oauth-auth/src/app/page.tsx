@@ -56,27 +56,33 @@ export default function Home() {
     const { userExists, username } = await para.waitForFarcasterStatus();
 
     const authUrl = userExists
-      ? await para.initiateUserLogin(username, false, "farcaster")
-      : await para.getSetUpBiometricsURL(false, "farcaster");
+      ? await para.initiateUserLogin({ useShortUrl: false, farcasterUsername: username })
+      : await para.getSetUpBiometricsURL({ authType: "farcaster", isForNewDevice: false });
 
     const popupWindow = window.open(authUrl, userExists ? "loginPopup" : "signUpPopup", "popup=true");
 
-    await (userExists ? para.waitForLoginAndSetup(popupWindow!) : para.waitForPasskeyAndCreateWallet());
+    if (!popupWindow) throw new Error("Failed to open popup window");
+
+    await (userExists ? para.waitForLoginAndSetup({ popupWindow }) : para.waitForPasskeyAndCreateWallet());
   };
 
   const handleRegularOAuth = async (method: OAuthMethod) => {
-    const oAuthURL = await para.getOAuthURL(method);
+    const oAuthURL = await para.getOAuthURL({method});
     window.open(oAuthURL, "oAuthPopup", "popup=true");
 
     const { email, userExists } = await para.waitForOAuth();
 
+    if (!email) throw new Error("Email not found");
+
     const authUrl = userExists
-      ? await para.initiateUserLogin(email!, false, "email")
-      : await para.getSetUpBiometricsURL(false, "email");
+      ? await para.initiateUserLogin({email, useShortUrl: false})
+      : await para.getSetUpBiometricsURL({authType: "email", isForNewDevice: false});
 
     const popupWindow = window.open(authUrl, userExists ? "loginPopup" : "signUpPopup", "popup=true");
 
-    const result = await (userExists ? para.waitForLoginAndSetup(popupWindow!) : para.waitForPasskeyAndCreateWallet());
+    if (!popupWindow) throw new Error("Failed to open popup window");
+
+    const result = await (userExists ? para.waitForLoginAndSetup({popupWindow}) : para.waitForPasskeyAndCreateWallet());
 
     if ("needsWallet" in result && result.needsWallet) {
       await para.createWallet();

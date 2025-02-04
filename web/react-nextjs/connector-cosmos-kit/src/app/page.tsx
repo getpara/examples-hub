@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { para } from "@/client/para";
 import { WalletDisplay } from "@/components/WalletDisplay";
-import { CustomParaModalView } from "@leapwallet/cosmos-social-login-para-provider-ui";
+import { CustomCapsuleModalView } from "@leapwallet/cosmos-social-login-capsule-provider-ui";
 import { OAuthMethod } from "@getpara/web-sdk";
 import { useChain } from "@cosmos-kit/react";
-import "@leapwallet/cosmos-social-login-para-provider-ui/styles.css";
+import "@leapwallet/cosmos-social-login-capsule-provider-ui/styles.css";
 import "@interchain-ui/react/styles";
 
 export default function Home() {
@@ -46,7 +46,7 @@ export default function Home() {
         Open Modal
       </button>
       <div className="leap-ui z-[2147483647]">
-        <CustomParaModalView
+        <CustomCapsuleModalView
           para={para as any}
           showParaModal={isOpen}
           setShowParaModal={setIsOpen}

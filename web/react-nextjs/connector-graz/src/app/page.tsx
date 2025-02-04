@@ -1,10 +1,10 @@
 "use client";
 
 import { WalletDisplay } from "@/components/WalletDisplay";
-import { CustomParaModalView } from "@leapwallet/cosmos-social-login-para-provider-ui";
-import "@leapwallet/cosmos-social-login-para-provider-ui/styles.css";
+import { CustomCapsuleModalView } from "@leapwallet/cosmos-social-login-capsule-provider-ui";
+import "@leapwallet/cosmos-social-login-capsule-provider-ui/styles.css";
 import { useAccount, usePara, useConnect, WalletType } from "graz";
-import { OAuthMethod } from "@leapwallet/cosmos-social-login-para-provider";
+import { OAuthMethod } from "@leapwallet/cosmos-social-login-capsule-provider";
 
 export default function Home() {
   const { connect } = useConnect();
@@ -42,7 +42,7 @@ export default function Home() {
         Open Modal
       </button>
       <div className="leap-ui">
-        <CustomParaModalView
+        <CustomCapsuleModalView
           para={client?.getClient()}
           showParaModal={modalState}
           setShowParaModal={setModalState}

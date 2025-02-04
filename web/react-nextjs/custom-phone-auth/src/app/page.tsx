@@ -44,17 +44,17 @@ export default function Home() {
     setIsLoading(true);
     setError("");
     try {
-      const isExistingUser = await para.checkIfUserExistsByPhone(phoneNumber, countryCode as CountryCallingCode);
+      const isExistingUser = await para.checkIfUserExistsByPhone({ phone: phoneNumber, countryCode });
 
       if (isExistingUser) {
-        const webAuthUrlForLogin = await para.initiateUserLoginForPhone(phoneNumber, countryCode as CountryCallingCode);
+        const webAuthUrlForLogin = await para.initiateUserLoginForPhone({ phone: phoneNumber, countryCode });
         const popupWindow = window.open(webAuthUrlForLogin, "loginPopup", "popup=true");
         if (!popupWindow) throw new Error("Popup was blocked");
 
-        const { isComplete, needsWallet } = await para.waitForLoginAndSetup(popupWindow);
+        const { isComplete, needsWallet } = await para.waitForLoginAndSetup({ popupWindow });
 
         if (needsWallet) {
-          await para.createWallet(WalletType.EVM, false);
+          await para.createWallet({ type: WalletType.EVM, skipDistribute: false });
         }
 
         const wallets = Object.values(await para.getWallets());
@@ -63,7 +63,7 @@ export default function Home() {
         }
         setStep(2);
       } else {
-        await para.createUserByPhone(phoneNumber, countryCode as CountryCallingCode);
+        await para.createUserByPhone({ phone: phoneNumber, countryCode });
         setStep(1);
       }
     } catch (err: any) {
@@ -76,14 +76,14 @@ export default function Home() {
     setIsLoading(true);
     setError("");
     try {
-      const isVerified = await para.verifyPhone(verificationCode);
+      const isVerified = await para.verifyPhone({ verificationCode });
       if (!isVerified) {
         setError("Verification code incorrect or expired");
         setIsLoading(false);
         return;
       }
 
-      const setupUrl = await para.getSetUpBiometricsURL(false);
+      const setupUrl = await para.getSetUpBiometricsURL({ authType: "phone", isForNewDevice: false });
       const popupWindow = window.open(setupUrl, "signUpPopup", "popup=true");
 
       if (!popupWindow) {

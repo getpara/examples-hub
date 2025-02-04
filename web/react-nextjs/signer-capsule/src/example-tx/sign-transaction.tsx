@@ -98,12 +98,12 @@ export default function SignTransactionDemo() {
       const rlpEncoded = rlpEncode(txFields);
       console.log("RLP encoded transaction:", rlpEncoded);
 
-      const base64EncodedTx = Buffer.from(rlpEncoded).toString("base64");
-      console.log("Base64 encoded transaction:", base64EncodedTx);
+      const rlpEncodedTxBase64 = Buffer.from(rlpEncoded).toString("base64");
+      console.log("Base64 encoded transaction:", rlpEncodedTxBase64);
 
       console.log("Chain ID:", chainId);
 
-      const result = await para.signTransaction(walletId, base64EncodedTx, chainId);
+      const result = await para.signTransaction({walletId, rlpEncodedTxBase64, chainId});
 
       console.log("Transaction result:", result);
 

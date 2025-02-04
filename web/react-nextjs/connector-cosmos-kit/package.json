@@ -1,6 +1,6 @@
 {
   "name": "connector-cosmos-kit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "build": "next build",
@@ -15,7 +15,7 @@
     "@interchain-ui/react": "^1.26.1",
     "@leapwallet/cosmos-social-login-capsule-provider": "^0.0.44",
     "@leapwallet/cosmos-social-login-capsule-provider-ui": "^0.0.59",
-    "@getpara/web-sdk": "0.1.0",
+    "@getpara/web-sdk": "0.2.0",
     "chain-registry": "^1.69.101",
     "next": "15.1.5",
     "react": "19.0.0",

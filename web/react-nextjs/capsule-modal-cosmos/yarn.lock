@@ -622,6 +622,18 @@
     inputmask "5.0.9"
     qrcode-with-logos "1.1.1"
 
+"@getpara/core-components@0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@getpara/core-components/-/core-components-0.2.0.tgz#c06049cb1426d2b2e7fa4eaff5cfa8b78c2ff94a"
+  integrity sha512-2rql62IQcBCpj6ZNEE7vxeiZ8mAJuRhh7ZqtNp3N1bVlx1I00BTzsswUPhiIfYu9JzatrCb5qmTupa7fIRdhlA==
+  dependencies:
+    "@stencil/core" "^4.7.0"
+    color-blend "^4.0.0"
+    color2k "^2.0.3"
+    gsap "^3.12.5"
+    inputmask "5.0.9"
+    qrcode-with-logos "1.1.1"
+
 "@getpara/core-sdk@0.1.0":
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-0.1.0.tgz#187176a39f4b13784fe8b68dfc5d58bac5d4c456"
@@ -638,6 +650,22 @@
     node-forge "^1.3.1"
     qs "^6.12.0"
 
+"@getpara/core-sdk@0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-0.2.0.tgz#728c070be7dde0ee2184fc805f742809b6920276"
+  integrity sha512-J5sQXLu2LugSwLKuLJdP1r4zoOnbv3foBTF8s6rpXRd8mWioMGVGHBaTK/hapsBsksOEZcH9w8ezorbwlPKQLg==
+  dependencies:
+    "@celo/utils" "^8.0.0"
+    "@cosmjs/encoding" "^0.32.4"
+    "@getpara/user-management-client" "0.2.0"
+    "@noble/hashes" "^1.5.0"
+    base64url "^3.0.1"
+    buffer "6.0.3"
+    ethereumjs-util "7.1.5"
+    libphonenumber-js "1.11.2"
+    node-forge "^1.3.1"
+    qs "^6.12.0"
+
 "@getpara/cosmjs-v0-integration@0.1.0":
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/@getpara/cosmjs-v0-integration/-/cosmjs-v0-integration-0.1.0.tgz#c974e1b8531f2785d5ea3d69047e06b0dcd68982"
@@ -645,14 +673,14 @@
   dependencies:
     "@getpara/core-sdk" "0.1.0"
 
-"@getpara/cosmos-wallet-connectors@0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@getpara/cosmos-wallet-connectors/-/cosmos-wallet-connectors-0.1.0.tgz#6b158f6256fa35ad950491007e7c4fbe23b41b73"
-  integrity sha512-foW5PCJHhloMCT4IZfGOHoC+QexydOzxAIu3X3tSTG3QcqA3R1RqY4C/rDcrVjH80rujfkn3rDmm8tBkM7L+Tg==
+"@getpara/cosmos-wallet-connectors@0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@getpara/cosmos-wallet-connectors/-/cosmos-wallet-connectors-0.2.0.tgz#b36d24f9925987a31c7026196be87a41b33e08d7"
+  integrity sha512-VhUhwhSZ/bpuf9A2Kj6Vgac1YHpX+2rFcx58dwLZL28FZ0XF3pdEdDOAyn6GhSEss09992hDiPROX8ESIhdUdw==
   dependencies:
-    "@getpara/react-sdk" "0.1.0"
+    "@getpara/react-sdk" "0.2.0"
 
-"@getpara/graz@0.1.0":
+"@getpara/graz@0.2.0":
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/@getpara/graz/-/graz-0.1.0.tgz#0d7f9a962106c64c8ae1ce3c4fa5f824322b8035"
   integrity sha512-4Zo6qTcMG+xqnSXfL6/dWzjkMWkM7+2udA1CFyQJ7qJK7whVVxUKh9llqLJUOvkMhKrw6LVyszAa3BFA+78vvA==
@@ -689,12 +717,33 @@
     libphonenumber-js "^1.11.1"
     styled-components "^6.1.8"
 
+"@getpara/react-common@0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@getpara/react-common/-/react-common-0.2.0.tgz#6b5656d6a37b5eec78b3ad625a10bc970a594f8a"
+  integrity sha512-SFc/G10XneImXlDCl8gYFW4A8o22eXIoHuwN++6cmBxKAdVa4wYuCkIk+dwPpz7qZglrrxddgznaMvCXV3o+jw==
+  dependencies:
+    "@getpara/react-components" "0.2.0"
+    "@getpara/web-sdk" "0.2.0"
+    "@moonpay/moonpay-react" "^1.8.3"
+    "@ramp-network/ramp-instant-sdk" "^4.0.5"
+    "@stripe/crypto" "^0.0.4"
+    "@stripe/stripe-js" "^3.4.0"
+    libphonenumber-js "^1.11.1"
+    styled-components "^6.1.8"
+
 "@getpara/react-components@0.1.0":
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/@getpara/react-components/-/react-components-0.1.0.tgz#b003c2cba80054c5b044fc3cc7805cab8e7612d7"
   integrity sha512-VO9dfP0mqkcc0uVjPXmirPo3JPrUwK33eIc0pTptGKaIKdAbADZ5krVD/ZQ97Nwm8SPdHqjT1vEVnKYpvnvm0w==
   dependencies:
     "@getpara/core-components" "0.1.0"
+
+"@getpara/react-components@0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@getpara/react-components/-/react-components-0.2.0.tgz#b278f211c2a771cb5b62e47f59bfae11c581585d"
+  integrity sha512-p1jL+feEsCa0NBLvJLUvRzI9BuWvkRM5pCq43/cUT/e7F02vtA+3iJz9Iro2Teh2z7KBweLDZvwAphRlbtFnPA==
+  dependencies:
+    "@getpara/core-components" "0.2.0"
 
 "@getpara/react-sdk@0.1.0":
   version "0.1.0"
@@ -711,10 +760,34 @@
     styled-components "^6.1.8"
     zustand "^4.5.2"
 
+"@getpara/react-sdk@0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@getpara/react-sdk/-/react-sdk-0.2.0.tgz#3577aad216def4481056a1fa086c77c6f7bfc0af"
+  integrity sha512-RoRuPrM0ObA1LPE0XmIv/6xLMSuwoFEF4bXae5vIyIvWRt8ao0sSmgvTL4BIfaKfVjrMMfiOISA0V2VWhAHc8A==
+  dependencies:
+    "@getpara/react-common" "0.2.0"
+    "@getpara/react-components" "0.2.0"
+    "@getpara/web-sdk" "0.2.0"
+    date-fns "^3.6.0"
+    detect-browser "^5.3.0"
+    framer-motion "11.3.28"
+    libphonenumber-js "^1.11.1"
+    styled-components "^6.1.8"
+    zustand "^4.5.2"
+
 "@getpara/user-management-client@0.1.0":
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-0.1.0.tgz#4e6d97e47b67fb2213254e04a83a205762fed214"
   integrity sha512-4UbFI6zQ8u5EEV+Jv3oZpP4tHRSU1SW5l7HLXDrp2MDKIUfMfHHqxvzG5wQuRawCrkq9/YbxbZiBtBLwm34cBQ==
+  dependencies:
+    axios "^1.6.3"
+    libphonenumber-js "1.11.2"
+    qs "^6.12.0"
+
+"@getpara/user-management-client@0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-0.2.0.tgz#7ea2859963fb00e5f6d25b5e64d80f353a098296"
+  integrity sha512-Pmcfl3K8JV6UuafytuMuXO5rSvPrwnpR4koZadFaGWGrmoDRS5S6FT8s/57HuFJOSu6OUsSkin95oo7xjEAlJw==
   dependencies:
     axios "^1.6.3"
     libphonenumber-js "1.11.2"
@@ -727,6 +800,20 @@
   dependencies:
     "@getpara/core-sdk" "0.1.0"
     "@getpara/user-management-client" "0.1.0"
+    assert "^2.1.0"
+    base64url "3.0.1"
+    buffer "6.0.3"
+    cbor-web "8.1.0"
+    node-forge "1.3.1"
+    ua-parser-js "1.0.39"
+
+"@getpara/web-sdk@0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-0.2.0.tgz#9ce3b4a0ecdbab1c7022926a6879e4faed50dc99"
+  integrity sha512-c86RnsbVFKrHws9PygYaF315/3NKr5nTkNxWzxPHIFpmhbsmh7/6G7Rfxy9jzn4XARRNqJZ1GQyOLgoDy0artQ==
+  dependencies:
+    "@getpara/core-sdk" "0.2.0"
+    "@getpara/user-management-client" "0.2.0"
     assert "^2.1.0"
     base64url "3.0.1"
     buffer "6.0.3"

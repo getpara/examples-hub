@@ -40,9 +40,9 @@ export default function SignMessageDemo() {
       }
 
       const messageToSign = message.trim();
-      const base64Message = Buffer.from(messageToSign).toString("base64");
+      const messageBase64 = Buffer.from(messageToSign).toString("base64");
 
-      const signature = await para.signMessage(walletId, base64Message);
+      const signature = await para.signMessage({walletId, messageBase64});
 
       if ("pendingTransactionId" in signature || "transactionReviewUrl" in signature) {
         setStatus({
