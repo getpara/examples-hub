@@ -2,17 +2,18 @@ import { CpslAvatar, CpslIcon, CpslText, IconType } from '@getpara/react-compone
 import parsePhoneNumberFromString from 'libphonenumber-js';
 import styled from 'styled-components';
 import { ModalAuthInfo } from '../types/index.js';
+import { AuthType } from '@getpara/user-management-client';
 
-function defaultDisplayName(authType: string, identifier: string) {
+function defaultDisplayName(authType: AuthType, identifier: string) {
   switch (authType) {
     case 'email':
       return identifier.toLowerCase();
     case 'phone':
       const parsed = parsePhoneNumberFromString(identifier);
       return `+${parsed.countryCallingCode} ${parsed.formatNational()}`;
-    case 'farcasterUsername':
+    case 'farcaster':
       return `@${identifier}`;
-    case 'telegramUserId':
+    case 'telegram':
       return `Telegram User @${identifier}`;
     default:
       return null;
