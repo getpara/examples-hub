@@ -40,7 +40,7 @@ Capsule Modal that supports external wallet connections on Solana.
 3. **Set up Environment Variables**:
    - Create a `.env` (or `.env.local`) file with:
      ```bash
-     NEXT_PUBLIC_CAPSULE_API_KEY=YOUR_CAPSULE_API_KEY
+     NEXT_PUBLIC_PARA_API_KEY=YOUR_PARA_API_KEY
      ```
    - Make sure to use a valid Capsule API key and environment for `Environment.BETA` or `Environment.PRODUCTION`.
 
@@ -63,8 +63,8 @@ labeled **Open Capsule Modal**.
 
 ### Connecting a Solana Wallet
 
-The **CapsuleModal** is configured to show external Solana wallets (Phantom, Backpack, Glow). When you click
-**Open Capsule Modal**:
+The **CapsuleModal** is configured to show external Solana wallets (Phantom, Backpack, Glow). When you click **Open
+Capsule Modal**:
 
 1. The Capsule Modal will appear.
 2. Users can connect Phantom, Glow, or Backpack (or any other supported Solana wallet you configure).
@@ -75,7 +75,7 @@ The **CapsuleModal** is configured to show external Solana wallets (Phantom, Bac
 - **`src/app/page.tsx`** - Contains a simple UI with a button opening the Capsule Modal for Solana wallets.
 - **`src/app/components/CapsuleProviders.tsx`** - Wraps your app in `CapsuleSolanaProvider`, needed for external Solana
   wallet connections.
-- **`src/client/capsule.ts`** - Creates a **CapsuleWeb** instance using your `NEXT_PUBLIC_CAPSULE_API_KEY`.
+- **`src/client/capsule.ts`** - Creates a **CapsuleWeb** instance using your `NEXT_PUBLIC_PARA_API_KEY`.
 
 ### Important Packages
 
@@ -88,7 +88,7 @@ The **CapsuleModal** is configured to show external Solana wallets (Phantom, Bac
 1. **Hydration Mismatch**: May be triggered by browser extensions injecting unwanted attributes.
 2. **Missing `pino-pretty` Warning**: If Next.js logs a warning about `pino-pretty` not found, you can ignore it or
    install it. It's used for local logging by underlying libraries.
-3. **API Key**: Make sure your `.env` is set up correctly. `NEXT_PUBLIC_CAPSULE_API_KEY` must be exposed to client code.
+3. **API Key**: Make sure your `.env` is set up correctly. `NEXT_PUBLIC_PARA_API_KEY` must be exposed to client code.
 4. **Solana Devnet vs Mainnet**: The example defaults to Devnet with `clusterApiUrl`. Switch to Mainnet or your custom
    endpoint as needed.
 

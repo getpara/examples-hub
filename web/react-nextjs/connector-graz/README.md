@@ -52,7 +52,7 @@ Capsule Modal that supports external wallet connections in the Cosmos ecosystem.
 4. **Set up Environment Variables**:
    - Create a `.env` file (or `.env.local` in Next.js) with:
      ```bash
-     NEXT_PUBLIC_CAPSULE_API_KEY=YOUR_CAPSULE_API_KEY
+     NEXT_PUBLIC_PARA_API_KEY=YOUR_PARA_API_KEY
      ```
    - Make sure to use a valid Capsule API key and environment for the `Environment.BETA` or `Environment.PRODUCTION`.
 
@@ -87,7 +87,7 @@ The **CapsuleModal** is configured to show external Cosmos wallets (Keplr, Leap)
   wallets.
 - **`src/app/components/CapsuleProviders.tsx`** Wraps your app in the `CapsuleCosmosProvider`, which is needed for
   external Cosmos wallets.
-- **`src/client/capsule.ts`** Creates a **CapsuleWeb** instance using your `NEXT_PUBLIC_CAPSULE_API_KEY`. You can switch
+- **`src/client/capsule.ts`** Creates a **CapsuleWeb** instance using your `NEXT_PUBLIC_PARA_API_KEY`. You can switch
   between `Environment.BETA` or `Environment.PRODUCTION`.
 
 ### Important Packages
@@ -109,7 +109,7 @@ The **CapsuleModal** is configured to show external Cosmos wallets (Keplr, Leap)
    (like Grammarly) injecting attributes.
 2. **Missing `pino-pretty` Warning**: If Next.js logs a warning about `pino-pretty` not found, you can ignore it or
    install `pino-pretty` as a dev dependency. It’s used by underlying libraries for local logging.
-3. **API Key**: Make sure your `.env` is set up correctly. The `NEXT_PUBLIC_CAPSULE_API_KEY` must be exposed to client
+3. **API Key**: Make sure your `.env` is set up correctly. The `NEXT_PUBLIC_PARA_API_KEY` must be exposed to client
    code.
 4. **Package Versions**: If you see a module resolution conflict (e.g.,
    `@leapwallet/cosmos-social-login-capsule-provider` referencing older versions), ensure your `@usecapsule/core-sdk`,

@@ -2,7 +2,7 @@
 
 import { ChainProvider } from "@cosmos-kit/react";
 import { assets, chains } from "chain-registry";
-import { wallets as leapSocial } from "@cosmos-kit/leap-para-social-login";
+import { wallets as leapSocial } from "@cosmos-kit/leap-capsule-social-login";
 
 type Props = {
   children: React.ReactNode;

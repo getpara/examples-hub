@@ -46,7 +46,7 @@ support for all major blockchains—Cosmos, Solana, and EVM—in one project. Th
 3. **Set up Environment Variables**:
    - Create a `.env` (or `.env.local`) file with:
      ```bash
-     NEXT_PUBLIC_CAPSULE_API_KEY=YOUR_CAPSULE_API_KEY
+     NEXT_PUBLIC_PARA_API_KEY=YOUR_PARA_API_KEY
      ```
    - Make sure to use a valid Capsule API key and environment for `Environment.BETA` or `Environment.PRODUCTION`.
 4. **(Optional) `postinstall` scripts**:
@@ -90,7 +90,7 @@ You can customize which wallet connectors appear, or disable certain login flows
   - `CapsuleCosmosProvider` for Cosmos
   - `CapsuleSolanaProvider` for Solana
   - `CapsuleEvmProvider` for EVM
-- **`src/client/capsule.ts`** - Creates a single **CapsuleWeb** instance using your `NEXT_PUBLIC_CAPSULE_API_KEY`.
+- **`src/client/capsule.ts`** - Creates a single **CapsuleWeb** instance using your `NEXT_PUBLIC_PARA_API_KEY`.
 
 ### Important Packages
 
@@ -115,7 +115,7 @@ You can customize which wallet connectors appear, or disable certain login flows
    extensions injecting extra attributes into the DOM.
 2. **Missing `pino-pretty` Warning**: Next.js might log about `pino-pretty` not being found. This is optional for local
    logging by underlying libraries and can be safely ignored or installed if you prefer.
-3. **API Key**: Ensure `.env` is set up correctly. The `NEXT_PUBLIC_CAPSULE_API_KEY` must be exposed to client code.
+3. **API Key**: Ensure `.env` is set up correctly. The `NEXT_PUBLIC_PARA_API_KEY` must be exposed to client code.
 4. **Chain Config**:
    - Update the default chain(s) in your provider code if you want to switch from testnets to mainnets or different
      endpoints (e.g., `clusterApiUrl` for Solana, `chains` for EVM, or `rpc`/`rest` for Cosmos).

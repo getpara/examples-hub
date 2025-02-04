@@ -26,7 +26,7 @@ export const ParaProviders: React.FC<Props> = ({ children }) => {
       <GrazProvider
         grazOptions={{
           chains: [cosmoshub],
-          paraConfig: {
+          capsuleConfig: {
             apiKey: process.env.NEXT_PUBLIC_PARA_API_KEY || "",
             env: "BETA",
           },

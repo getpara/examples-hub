@@ -40,7 +40,7 @@ showing a Capsule Modal that supports external wallet connections on EVM-based b
 3. **Set up Environment Variables**:
    - Create a `.env` (or `.env.local`) file with:
      ```bash
-     NEXT_PUBLIC_CAPSULE_API_KEY=YOUR_CAPSULE_API_KEY
+     NEXT_PUBLIC_PARA_API_KEY=YOUR_PARA_API_KEY
      ```
    - Make sure to use a valid Capsule API key and environment for the `Environment.BETA` or `Environment.PRODUCTION`.
 
@@ -75,7 +75,7 @@ click **Open Capsule Modal**:
 - **`src/app/page.tsx`** - A simple UI with a button to open the Capsule Modal for EVM wallets.
 - **`src/app/components/CapsuleProviders.tsx`** - Wraps your app in `CapsuleEvmProvider`, needed for external EVM wallet
   connections.
-- **`src/client/capsule.ts`** - Creates a **CapsuleWeb** instance using your `NEXT_PUBLIC_CAPSULE_API_KEY`.
+- **`src/client/capsule.ts`** - Creates a **CapsuleWeb** instance using your `NEXT_PUBLIC_PARA_API_KEY`.
 
 ### Important Packages
 
@@ -89,7 +89,7 @@ click **Open Capsule Modal**:
    attributes.
 2. **Missing `pino-pretty` Warning**: Next.js might log a warning about `pino-pretty` not found. You can safely ignore
    this or install it.
-3. **API Key**: Make sure your `.env` is set up correctly. The `NEXT_PUBLIC_CAPSULE_API_KEY` must be exposed to client
+3. **API Key**: Make sure your `.env` is set up correctly. The `NEXT_PUBLIC_PARA_API_KEY` must be exposed to client
    code.
 4. **Chain Config**: The example uses test networks (e.g., Sepolia). Update to mainnet or other chains as you see fit.
 
