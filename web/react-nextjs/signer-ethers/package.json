@@ -10,8 +10,8 @@
     "start": "next start"
   },
   "dependencies": {
-    "@usecapsule/ethers-v6-integration": "^2.17.0",
-    "@usecapsule/react-sdk": "^4.17.0",
+    "@getpara/ethers-v6-integration": "0.1.0",
+    "@getpara/react-sdk": "0.1.0",
     "ethers": "^6.13.5",
     "next": "15.1.5",
     "react": "^19.0.0",
