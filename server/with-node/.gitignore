@@ -1,0 +1,23 @@
+# Deno specific
+deno.lock
+deno_dir/
+
+# Node specific
+node_modules/
+
+# Environment variables
+.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+
+*.db

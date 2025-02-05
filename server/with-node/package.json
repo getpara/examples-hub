@@ -1,0 +1,41 @@
+{
+  "name": "with-node",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch server.ts",
+    "lint": "eslint . --ext .ts,.tsx",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "@alchemy/aa-alchemy": "^3.19.0",
+    "@cosmjs/stargate": "^0.32.4",
+    "@ethereumjs/rlp": "^5.0.2",
+    "@solana/web3.js": "^1.95.2",
+    "@types/crypto-js": "^4.2.2",
+    "@usecapsule/cosmjs-v0-integration": "^2.11.0",
+    "@usecapsule/ethers-v6-integration": "^2.11.0",
+    "@usecapsule/server-sdk": "^2.11.0",
+    "@usecapsule/solana-web3.js-v1-integration": "^1.11.0",
+    "@usecapsule/viem-v2-integration": "^2.11.0",
+    "@zerodev/ecdsa-validator": "^5.4.0",
+    "@zerodev/sdk": "^5.4.3",
+    "crypto-js": "^4.2.0",
+    "dotenv": "^16.4.7",
+    "ethers": "^6.13.4",
+    "express": "^4.21.2",
+    "sqlite3": "^5.1.7",
+    "viem": "2.8.6"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/node": "^20.0.0",
+    "@types/sqlite3": "^3.1.11",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "ts-node": "^10.9.1",
+    "tsx": "^4.19.1",
+    "typescript": "^5.0.0"
+  }
+}

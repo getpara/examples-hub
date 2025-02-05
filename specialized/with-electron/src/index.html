@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hello World!</title>
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: https://api.beta.usecapsule.com https://app.beta.usecapsule.com;
+    connect-src 'self' https://api.beta.usecapsule.com https://app.beta.usecapsule.com wss://mpc-network.beta.usecapsule.com https://product-assets.sandbox.usecapsule.com https://m.stripe.com;
+    img-src 'self' data:;
+    style-src 'self' 'unsafe-inline';
+    font-src 'self' https://rsms.me;
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://crypto-js.stripe.com;
+    frame-src https://js.stripe.com https://m.stripe.network https://m.stripe.com;
+    worker-src 'self' blob:;" />
+    <script src="https://js.stripe.com/v3/" defer></script>
+    <script src="https://crypto-js.stripe.com/crypto-onramp-outer.js" defer></script>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
