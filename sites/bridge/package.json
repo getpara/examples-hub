@@ -1,11 +1,11 @@
 {
   "name": "capsule-js-bridge",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "src/index.tsx",
   "private": true,
   "dependencies": {
-    "@getpara/user-management-client": "1.0.0",
-    "@getpara/web-sdk": "1.0.0",
+    "@getpara/user-management-client": "1.0.1",
+    "@getpara/web-sdk": "1.0.1",
     "@metamask/eth-sig-util": "7.0.3",
     "@metamask/utils": "^8.1.0",
     "base64url": "^3.0.1",

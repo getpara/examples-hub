@@ -1,6 +1,6 @@
 {
   "name": "@getpara/evm-wallet-connectors",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@coinbase/wallet-sdk": "3.9.3",
-    "@getpara/react-sdk": "1.0.0",
-    "@getpara/wagmi-v2-integration": "1.0.0"
+    "@getpara/react-sdk": "1.0.1",
+    "@getpara/wagmi-v2-integration": "1.0.1"
   },
   "scripts": {
     "build": "rm -rf dist && tsc",

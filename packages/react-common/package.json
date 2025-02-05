@@ -1,6 +1,6 @@
 {
   "name": "@getpara/react-common",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -11,8 +11,8 @@
     "*.css"
   ],
   "dependencies": {
-    "@getpara/react-components": "1.0.0",
-    "@getpara/web-sdk": "1.0.0",
+    "@getpara/react-components": "1.0.1",
+    "@getpara/web-sdk": "1.0.1",
     "@moonpay/moonpay-react": "^1.8.3",
     "@ramp-network/ramp-instant-sdk": "^4.0.5",
     "@stripe/crypto": "^0.0.4",
