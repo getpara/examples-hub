@@ -23,6 +23,7 @@
     "@react-native/typescript-config": "0.77.0",
     "@types/react": "^18.2.6",
     "@types/react-test-renderer": "^18.0.0",
+    "react-test-renderer": "18.3.1",
     "typescript": "5.0.4"
   },
   "engines": {

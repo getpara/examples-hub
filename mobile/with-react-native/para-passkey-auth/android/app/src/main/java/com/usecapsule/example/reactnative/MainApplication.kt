@@ -1,4 +1,4 @@
-package com.parapasskeyauth
+package com.usecapsule.example.reactnative
 
 import android.app.Application
 import com.facebook.react.PackageList
