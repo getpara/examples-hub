@@ -12,6 +12,9 @@ import {
   WalletScheme,
 } from '@getpara/core-sdk';
 import { PublicKeyStatus } from '@getpara/user-management-client';
+import { ethers } from 'ethers';
+import { base64ToBytes } from '@metamask/utils';
+import { ParaEthersSigner } from '@getpara/ethers-v6-integration';
 
 enum Platform {
   flutter,
@@ -148,6 +151,29 @@ async function invokeParaMethod(methodName: string, args: any[], requestId: stri
         sendResponse('loginV2', requestId, desiredWallet2);
         break;
       }
+      case 'initEthersSigner': {
+        await initEthersSigner(para, args);
+        sendResponse('initEthersSigner', requestId, true);
+        break;
+      }
+      case 'ethersSignMessage': {
+        console.log('Signing ethers message...');
+        const signature = await ethersSignMessage(args);
+        sendResponse('ethersSignMessage', requestId, signature);
+        break;
+      }
+      case 'ethersSignTransaction': {
+        console.log('Signing ethers transaction...');
+        const signature = await ethersSignTransaction(args);
+        sendResponse('ethersSignTransaction', requestId, signature);
+        break;
+      }
+      case 'ethersSendTransaction': {
+        console.log('Sending ethers transaction...');
+        const txResponse = await ethersSendTransaction(args);
+        sendResponse('ethersSendTransaction', requestId, txResponse);
+        break;
+      }
       default: {
         console.log(`Invoking default method: ${methodName}`);
         const result = para[methodName](...args);
@@ -162,6 +188,51 @@ async function invokeParaMethod(methodName: string, args: any[], requestId: stri
     console.error(`Error invoking method ${methodName}:`, errorMessage);
     sendResponse(methodName, requestId, null, errorMessage);
   }
+}
+
+async function initEthersSigner(capsule: ParaWeb, args: any[]) {
+  const walletId = args[0];
+  const providerUrl = args[1];
+  const provider = new ethers.JsonRpcProvider(providerUrl);
+  const ethersSigner = new ParaEthersSigner(capsule, provider, walletId);
+
+  window['ethersSigner'] = ethersSigner;
+
+  return;
+}
+
+async function ethersSignMessage(args: any[]) {
+  const message = args[0];
+  const ethersSigner = window['ethersSigner'] as ParaEthersSigner;
+
+  const signature = await ethersSigner.signMessage(message);
+  return signature;
+}
+
+async function ethersSignTransaction(args: any[]) {
+  const b64EncodedTx = args[0];
+  const txBytes = base64ToBytes(b64EncodedTx);
+  const decoder = new TextDecoder();
+  const jsonString = decoder.decode(txBytes);
+  const jsonTx = JSON.parse(jsonString);
+
+  const ethersSigner = window['ethersSigner'] as ParaEthersSigner;
+
+  const signature = ethersSigner.signTransaction(jsonTx);
+  return signature;
+}
+
+async function ethersSendTransaction(args: any[]) {
+  const b64EncodedTx = args[0];
+  const txBytes = base64ToBytes(b64EncodedTx);
+  const decoder = new TextDecoder();
+  const jsonString = decoder.decode(txBytes);
+  const jsonTx = JSON.parse(jsonString);
+
+  const ethersSigner = window['ethersSigner'] as ParaEthersSigner;
+
+  const txResponse = await ethersSigner.sendTransaction(jsonTx);
+  return txResponse;
 }
 
 // Legacy passkey generation

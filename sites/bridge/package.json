@@ -6,10 +6,12 @@
   "dependencies": {
     "@getpara/user-management-client": "1.0.1",
     "@getpara/web-sdk": "1.0.1",
+    "@getpara/ethers-v6-integration": "1.0.1",
     "@metamask/eth-sig-util": "7.0.3",
     "@metamask/utils": "^8.1.0",
     "base64url": "^3.0.1",
     "cbor-web": "^9.0.2",
+    "ethers": "6.x",
     "node-forge": "^1.3.1",
     "react": "18.2.0",
     "react-circular-progressbar": "2.1.0",
@@ -23,7 +25,7 @@
     "start": "vite",
     "build": "rm -rf build && tsc && vite build",
     "preview": "vite preview",
-    "deploy-s3": "echo \"Need to fix bridge to work with new classes before deploying\" && exit 1 && yarn && yarn build && aws s3 sync build/ s3://$VITE_BUCKET_NAME --profile $VITE_ENV --delete",
+    "deploy-s3": "yarn && yarn build && aws s3 sync build/ s3://$VITE_BUCKET_NAME --profile $VITE_ENV --delete",
     "deploy-sandbox": "VITE_ENV=sandbox VITE_BUCKET_NAME=capsule-sandbox-js-bridge yarn deploy-s3",
     "deploy-beta": "VITE_ENV=beta VITE_BUCKET_NAME=capsule-beta-js-bridge yarn deploy-s3",
     "deploy-prod": "VITE_ENV=prod VITE_BUCKET_NAME=capsule-prod-js-bridge yarn deploy-s3"
