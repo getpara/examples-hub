@@ -607,14 +607,16 @@ export abstract class ParaCore {
   }
 
   private isPortal(envOverride?: Environment): boolean {
+    if (typeof window === 'undefined') return false;
     return (
-      typeof window !== 'undefined' &&
+      !!window.location?.host &&
       getPortalBaseURL(envOverride ? { env: envOverride } : this.ctx).includes(window.location.host)
     );
   }
 
   private isParaConnect(): boolean {
-    return typeof window !== 'undefined' && getParaConnectBaseUrl(this.ctx).includes(window.location.host);
+    if (typeof window === 'undefined') return false;
+    return !!window.location?.host && getParaConnectBaseUrl(this.ctx).includes(window.location.host);
   }
 
   private requireApiKey() {

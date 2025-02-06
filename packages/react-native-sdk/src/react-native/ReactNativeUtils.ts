@@ -1,5 +1,3 @@
-// Copyright (c) Capsule Labs Inc. All rights reserved.
-
 import { PlatformUtils, TPregenIdentifierType } from '@getpara/web-sdk';
 import { Ctx } from '@getpara/web-sdk';
 import { SignatureRes } from '@getpara/web-sdk';

@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 import { describe, vi, afterEach, expect, it, beforeAll } from 'vitest';
 
 import ParaCore, {
@@ -1475,6 +1476,47 @@ describe('ParaCore', () => {
         await expect(
           para.verify2FAForPhone({ phone: USER_PHONE, countryCode: USER_COUNTRY_CODE, verificationCode: '123456' }),
         ).rejects.toThrowError();
+      });
+    });
+  });
+
+  describe('Para URL validation', () => {
+    let para: MockPara;
+
+    beforeAll(() => {
+      para = new MockPara(Environment.DEV, API_KEY);
+    });
+
+    describe('isPortal', () => {
+      it('should return true when host matches portal URL', () => {
+        vi.spyOn(window, 'location', 'get').mockReturnValue({ host: 'localhost:3003' } as Location);
+        expect((para as unknown as any).isPortal()).toBe(true);
+        expect(para).toBeDefined();
+      });
+
+      it('should return false when host does not match portal URL', () => {
+        vi.spyOn(window, 'location', 'get').mockReturnValue({ host: 'different-host.com' } as Location);
+        expect((para as unknown as any).isPortal()).toBe(false);
+        expect(para).toBeDefined();
+      });
+
+      it('should return true when host matches portal URL with environment override', () => {
+        vi.spyOn(window, 'location', 'get').mockReturnValue({ host: 'app.sandbox.usecapsule.com' } as Location);
+        expect((para as unknown as any).isPortal(Environment.SANDBOX)).toBe(true);
+      });
+    });
+
+    describe('isParaConnect', () => {
+      it('should return true when host matches para connect URL', () => {
+        vi.spyOn(window, 'location', 'get').mockReturnValue({ host: 'localhost:3008' } as Location);
+        expect((para as unknown as any).isParaConnect()).toBe(true);
+        expect(para).toBeDefined();
+      });
+
+      it('should return false when host does not match para connect URL', () => {
+        vi.spyOn(window, 'location', 'get').mockReturnValue({ host: 'different-host.com' } as Location);
+        expect((para as unknown as any).isParaConnect()).toBe(false);
+        expect(para).toBeDefined();
       });
     });
   });

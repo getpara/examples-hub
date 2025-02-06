@@ -1,4 +1,4 @@
-// Copyright (c) Capsule Labs Inc. All rights reserved.
+
 
 //
 //  ParaSignerModule.h

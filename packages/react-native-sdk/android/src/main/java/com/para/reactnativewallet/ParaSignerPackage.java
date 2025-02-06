@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class CapsuleSignerPackage implements ReactPackage {
+public class ParaSignerPackage implements ReactPackage {
 
   @Override
   public List<ViewManager> createViewManagers(

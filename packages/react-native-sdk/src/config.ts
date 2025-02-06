@@ -1,5 +1,3 @@
-// Copyright (c) Capsule Labs Inc. All rights reserved.
-
 import { NativeModules } from 'react-native';
 import { Environment } from '@getpara/web-sdk';
 
@@ -59,12 +57,12 @@ export function setEnv(env: Environment) {
   init();
 }
 
-const { CapsuleSignerModule } = NativeModules;
+const { ParaSignerModule } = NativeModules;
 export const DEBUG_MODE_ENABLED = false;
 
 function init() {
-  CapsuleSignerModule.setServerUrl(userManagementServer);
-  CapsuleSignerModule.setWsServerUrl(mpcNetworkWSServer);
+  ParaSignerModule.setServerUrl(userManagementServer);
+  ParaSignerModule.setWsServerUrl(mpcNetworkWSServer);
 }
 
 init();
