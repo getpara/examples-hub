@@ -17,17 +17,8 @@ const AuthLoginBase = ({ authMethod }) => {
   const { toggleBranding } = useModalOutletContext();
   const {
     fns: { authLogin, authLoginWithPassword, fetchWallets, authUpdateKeyShares },
-    params: {
-      sessionId,
-      partnerId,
-      encryptionKey,
-      phone,
-      email,
-      farcasterUsername,
-      telegramUserId,
-      newDeviceSessionLookupId,
-      skipAutoLogin,
-    },
+    authInfo,
+    params: { sessionId, partnerId, encryptionKey, newDeviceSessionLookupId, skipAutoLogin },
     biometricLocationHints,
   } = useLogin();
   const [urlForNewDeviceLogin, setUrlForNewDeviceLogin] = useState<string>('');
@@ -125,6 +116,7 @@ const AuthLoginBase = ({ authMethod }) => {
     }
 
     const url = await para.getWebAuthURLForLogin({
+      authType: authInfo?.authType,
       sessionId,
       loginEncryptionPublicKey: encryptionKey,
       partnerId,
@@ -150,13 +142,7 @@ const AuthLoginBase = ({ authMethod }) => {
   }, [step]);
 
   useEffect(() => {
-    if (
-      (email || phone || farcasterUsername || telegramUserId) &&
-      sessionId &&
-      encryptionKey &&
-      !skipAutoLogin &&
-      step === AuthLoginStep.MANUAL_LOGIN
-    ) {
+    if (!!authInfo && sessionId && encryptionKey && !skipAutoLogin && step === AuthLoginStep.MANUAL_LOGIN) {
       // In development this will trigger a 'request is already pending.' error due to duplicate renders caused by React.StrictMode.
       // See ref: https://legacy.reactjs.org/docs/strict-mode.html#detecting-unexpected-side-effects
       login();

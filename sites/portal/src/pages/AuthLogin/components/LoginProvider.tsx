@@ -6,7 +6,7 @@ import { CountryCallingCode } from 'libphonenumber-js';
 import { entityToWallet, isWalletSupported, WalletEntity, WalletType } from '@getpara/core-sdk';
 import { formatISO } from 'date-fns';
 import { useCloseWindow } from '../../../hooks/useCloseWindow';
-import { BiometricLocationHint } from '@getpara/user-management-client';
+import { ExtractAuth, BiometricLocationHint, extractAuthInfo } from '@getpara/user-management-client';
 import { useExtractedParams } from '../../../hooks/useExtractedParams';
 
 const NOOP = () => {
@@ -25,6 +25,7 @@ type Login = {
     fetchWallets: () => Promise<Wallets>;
     finishLogin: (_?: boolean) => Promise<void>;
   };
+  authInfo?: ExtractAuth | undefined;
   params: AuthLoginParams;
   wallets?: Wallets;
   biometricLocationHints?: BiometricLocationHint[];
@@ -43,6 +44,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
   const closeWindow = useCloseWindow();
 
   const params = useExtractedParams<AuthLoginParams>();
+  const authInfo = extractAuthInfo(params);
 
   const [loginRes, setLoginRes] = useState<Awaited<ReturnType<typeof utils.authLogin>> | undefined>();
   const [wallets, setWallets] = useState<Wallets>();
@@ -174,20 +176,19 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
 
   useEffect(() => {
     async function setUserDetails() {
-      if (!para.getEmail() && params.email) {
-        await para.setEmail(params.email);
-      }
-
-      if (params.phone && params.countryCode) {
-        await para.setPhoneNumber(params.phone, params.countryCode as CountryCallingCode);
-      }
-
-      if (params.farcasterUsername) {
-        await para.setFarcasterUsername(params.farcasterUsername);
-      }
-
-      if (params.telegramUserId) {
-        await para.setTelegramUserId(params.telegramUserId);
+      switch (authInfo?.authType) {
+        case 'email':
+          await para.setEmail(authInfo.identifier);
+          break;
+        case 'phone':
+          await para.setPhoneNumber(authInfo.auth.phone, authInfo.auth.countryCode as CountryCallingCode);
+          break;
+        case 'farcaster':
+          await para.setFarcasterUsername(authInfo.identifier);
+          break;
+        case 'telegram':
+          await para.setTelegramUserId(authInfo.identifier);
+          break;
       }
 
       if (params.pregenIds) {
@@ -199,12 +200,13 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
     }
 
     setUserDetails();
-  }, [para, params]);
+  }, [para, params, authInfo]);
 
   return (
     <LoginContext.Provider
       value={{
         fns: { authLogin, authLoginWithPassword, authUpdateKeyShares, fetchWallets, finishLogin },
+        authInfo,
         params,
         wallets,
         biometricLocationHints,
