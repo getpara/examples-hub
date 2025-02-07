@@ -1,8 +1,8 @@
-import 'package:cpsl_flutter/widgets/demo_transactions.dart';
+import 'package:para_flutter/widgets/demo_transactions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:capsule/capsule.dart';
-import 'package:cpsl_flutter/client/capsule.dart';
+import 'package:para/para.dart';
+import 'package:para_flutter/client/para.dart';
 
 class DemoHome extends StatefulWidget {
   const DemoHome({super.key});
@@ -25,7 +25,7 @@ class _DemoHomeState extends State<DemoHome> {
   Future<void> _loadWallets() async {
     setState(() => _isLoading = true);
     try {
-      final wallets = await capsuleClient.fetchWallets();
+      final wallets = await para.fetchWallets();
       setState(() => _wallets = wallets);
     } catch (e) {
       if (mounted) {
@@ -41,7 +41,7 @@ class _DemoHomeState extends State<DemoHome> {
   Future<void> _createWallet(WalletType type) async {
     setState(() => _creatingWallet[type] = true);
     try {
-      await capsuleClient.createWallet(
+      await para.createWallet(
         type: type,
         skipDistribute: false,
       );

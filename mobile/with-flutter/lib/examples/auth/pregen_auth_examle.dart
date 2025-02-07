@@ -1,18 +1,18 @@
 // ignore_for_file: unused_field, unused_local_variable
 
 import 'package:flutter/material.dart';
-import 'package:capsule/capsule.dart';
-import 'package:cpsl_flutter/client/capsule.dart';
-import 'package:cpsl_flutter/widgets/demo_home.dart';
+import 'package:para/para.dart';
+import 'package:para_flutter/client/para.dart';
+import 'package:para_flutter/widgets/demo_home.dart';
 
-class CapsulePregenExample extends StatefulWidget {
-  const CapsulePregenExample({super.key});
+class ParaPregenExample extends StatefulWidget {
+  const ParaPregenExample({super.key});
 
   @override
-  State<CapsulePregenExample> createState() => _CapsulePregenExampleState();
+  State<ParaPregenExample> createState() => _ParaPregenExampleState();
 }
 
-class _CapsulePregenExampleState extends State<CapsulePregenExample> {
+class _ParaPregenExampleState extends State<ParaPregenExample> {
   final _formKey = GlobalKey<FormState>();
   final _identifierController = TextEditingController();
   bool _isLoading = false;
@@ -35,7 +35,7 @@ class _CapsulePregenExampleState extends State<CapsulePregenExample> {
 
   Future<void> _checkExistingWallet() async {
     try {
-      final wallets = await capsuleClient.getWallets();
+      final wallets = await para.getWallets();
       if (wallets.isNotEmpty) {
         setState(() {
           _wallet = wallets.values.first;
@@ -87,21 +87,21 @@ class _CapsulePregenExampleState extends State<CapsulePregenExample> {
       final identifier = _selectedType == PregenIdentifierType.phone
           ? '+${_countryCodeController.text}${_phoneController.text}'
           : _identifierController.text.trim();
-      final hasWallet = await capsuleClient.hasPregenWallet(
+      final hasWallet = await para.hasPregenWallet(
         pregenIdentifier: identifier,
         pregenIdentifierType: _selectedType,
       );
 
       if (hasWallet) {
-        await capsuleClient.setUserShare(_userShare);
+        await para.setUserShare(_userShare);
       } else {
-        final wallet = await capsuleClient.createWalletPreGen(
+        final wallet = await para.createWalletPreGen(
           type: WalletType.evm,
           pregenIdentifier: identifier,
           pregenIdentifierType: _selectedType,
         );
 
-        final userShare = await capsuleClient.getUserShare();
+        final userShare = await para.getUserShare();
         setState(() {
           _wallet = wallet;
           _address = wallet.address;
@@ -148,7 +148,7 @@ class _CapsulePregenExampleState extends State<CapsulePregenExample> {
                 ),
                 const SizedBox(height: 12),
                 const Text(
-                  'Example implementation of pregen wallet creation and loading using Capsule SDK.',
+                  'Example implementation of pregen wallet creation and loading using Para SDK.',
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.black87,

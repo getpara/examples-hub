@@ -98,7 +98,7 @@ class _OAuthBrowserState extends State<OAuthBrowser> {
                       final currentUrl = url?.toString() ?? '';
 
                       if ((currentUrl.contains('/auth/') && currentUrl.contains('/callback')) ||
-                          RegExp(r'https://api\..*\.usecapsule\.com/').hasMatch(currentUrl)) {
+                          RegExp(r'https://api\..*\.usepara\.com/').hasMatch(currentUrl)) {
                         widget.onBrowserClosed(false);
                         if (mounted) {
                           Navigator.of(context).pop();

@@ -1,6 +1,6 @@
-# Capsule SDK Demo App
+# Para SDK Demo App
 
-This Flutter application demonstrates the integration and usage of the Capsule SDK, showcasing various authentication
+This Flutter application demonstrates the integration and usage of the Para SDK, showcasing various authentication
 methods and wallet management features.
 
 ## Features
@@ -37,9 +37,9 @@ to use other Dart packages for Solana interaction based on your needs.
 
 1. Ensure you have Flutter installed and set up on your development machine
 2. Clone this repository
-3. Create a `.env` file in the root directory with your Capsule API key:
+3. Create a `.env` file in the root directory with your Para API key:
    ```
-   CAPSULE_API_KEY=your_api_key_here
+   PARA_BETA_API_KEY=your_api_key_here
    ```
 4. Run `flutter pub get` to install dependencies
 
@@ -82,36 +82,36 @@ Note: For iOS development, you need a Mac with Xcode installed.
 1. Check if user exists
 
    ```dart
-   final exists = await capsuleClient.checkIfUserExists(email);
+   final exists = await para.checkIfUserExists(email);
    ```
 
 2. Create new user
 
    ```dart
-   await capsuleClient.createUser(email);
+   await para.createUser(email);
    ```
 
 3. Verify email with OTP
 
    ```dart
-   final biometricsId = await capsuleClient.verifyEmail(code);
+   final biometricsId = await para.verifyEmail(code);
    ```
 
 4. Set up passkey
 
    ```dart
-   await capsuleClient.generatePasskey(email, biometricsId);
+   await para.generatePasskey(email, biometricsId);
    ```
 
 5. Create wallet
 
    ```dart
-   final result = await capsuleClient.createWallet(skipDistribute: false);
+   final result = await para.createWallet(skipDistribute: false);
    ```
 
 6. Login with passkey
    ```dart
-   final wallet = await capsuleClient.login();
+   final wallet = await para.login();
    ```
 
 ### Phone + Passkey
@@ -119,7 +119,7 @@ Note: For iOS development, you need a Mac with Xcode installed.
 1. Check if user exists
 
    ```dart
-   final exists = await capsuleClient.checkIfUserExistsByPhone(
+   final exists = await para.checkIfUserExistsByPhone(
      phone,
      countryCode
    );
@@ -128,13 +128,13 @@ Note: For iOS development, you need a Mac with Xcode installed.
 2. Create new user
 
    ```dart
-   await capsuleClient.createUserByPhone(phone, countryCode);
+   await para.createUserByPhone(phone, countryCode);
    ```
 
 3. Verify phone number
 
    ```dart
-   final biometricsId = await capsuleClient.verifyPhone(code);
+   final biometricsId = await para.verifyPhone(code);
    ```
 
 4. Set up passkey and create wallet (same as email flow)
@@ -144,27 +144,27 @@ Note: For iOS development, you need a Mac with Xcode installed.
 1. Get OAuth URL and initiate flow
 
    ```dart
-   final oauthUrl = await capsuleClient.getOAuthURL(provider);
-   final oauthResult = await capsuleClient.waitForOAuth();
+   final oauthUrl = await para.getOAuthURL(provider);
+   final oauthResult = await para.waitForOAuth();
    ```
 
 2. For new users:
 
    ```dart
-   final biometricsId = await capsuleClient.verifyOAuth();
-   await capsuleClient.generatePasskey(oauthResult.email!, biometricsId);
-   final result = await capsuleClient.createWallet(skipDistribute: false);
+   final biometricsId = await para.verifyOAuth();
+   await para.generatePasskey(oauthResult.email!, biometricsId);
+   final result = await para.createWallet(skipDistribute: false);
    ```
 
 3. For existing users:
    ```dart
-   final wallet = await capsuleClient.login();
+   final wallet = await para.login();
    ```
 
 ## Transaction Signing Examples
 
 The demo app includes examples of transaction signing for different blockchain networks. These examples show how to
-integrate Capsule's signing capabilities with chain-specific transaction construction.
+integrate Para's signing capabilities with chain-specific transaction construction.
 
 ### Solana Transaction Signing
 
@@ -190,8 +190,8 @@ final transaction = web3.Transaction.v0(
 final message = transaction.serializeMessage().toList();
 final messageBase64 = base64Encode(message);
 
-// Sign using Capsule
-final result = await capsuleClient.signMessage(
+// Sign using Para
+final result = await para.signMessage(
   walletId: wallet.id!,
   messageBase64: messageBase64,
 );
@@ -205,5 +205,5 @@ if (result is SuccessfulSignatureResult) {
 ```
 
 Note: While this example uses the `solana_web3` package, you can adapt the signing flow to work with other Solana
-packages. The key integration point is Capsule's `signMessage` method which handles the actual signing of the serialized
+packages. The key integration point is Para's `signMessage` method which handles the actual signing of the serialized
 transaction.

@@ -1,8 +1,8 @@
-import 'package:cpsl_flutter/examples/signing/cosmos_sign_example.dart';
-import 'package:cpsl_flutter/examples/signing/evm_sign_example.dart';
-import 'package:cpsl_flutter/examples/signing/solana_sign_example.dart';
+import 'package:para_flutter/examples/signing/cosmos_sign_example.dart';
+import 'package:para_flutter/examples/signing/evm_sign_example.dart';
+import 'package:para_flutter/examples/signing/solana_sign_example.dart';
 import 'package:flutter/material.dart';
-import 'package:capsule/capsule.dart';
+import 'package:para/para.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class DemoTransactions extends StatelessWidget {

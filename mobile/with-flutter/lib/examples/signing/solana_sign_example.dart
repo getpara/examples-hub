@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:cpsl_flutter/client/capsule.dart';
+import 'package:para_flutter/client/para.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:capsule/capsule.dart';
+import 'package:para/para.dart';
 import 'package:solana_web3/solana_web3.dart' as web3;
 import 'package:solana_web3/programs.dart' as programs;
 
@@ -34,7 +34,7 @@ class _SolanaSignExampleState extends State<SolanaSignExample> {
     super.dispose();
   }
 
-// This method assumes usage of solan_web3 (https://pub.dev/packages/solana_web3) package but can be adapted to other Solana libraries like the solana package (https://pub.dev/packages/solana). The key when signing a transaction is to first construct the transaction and then sign on the raw message bytes by calling the signMessage method on the Capsule client. The message bytes can be obtained by serializing the transaction message. The signature returned by the signMessage method can then be added to the transaction object. The transaction can then be sent to the Solana network.
+// This method assumes usage of solan_web3 (https://pub.dev/packages/solana_web3) package but can be adapted to other Solana libraries like the solana package (https://pub.dev/packages/solana). The key when signing a transaction is to first construct the transaction and then sign on the raw message bytes by calling the signMessage method on the Para client. The message bytes can be obtained by serializing the transaction message. The signature returned by the signMessage method can then be added to the transaction object. The transaction can then be sent to the Solana network.
   Future<void> _signTransaction() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -69,7 +69,7 @@ class _SolanaSignExampleState extends State<SolanaSignExample> {
 
       final messageBase64 = base64Encode(message);
 
-      final result = await capsuleClient.signMessage(
+      final result = await para.signMessage(
         walletId: widget.wallet.id!,
         messageBase64: messageBase64,
       );
@@ -99,7 +99,6 @@ class _SolanaSignExampleState extends State<SolanaSignExample> {
     }
   }
 
-// This method
   Future<void> _signWithSolanaWeb3Adaptter() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -112,7 +111,7 @@ class _SolanaSignExampleState extends State<SolanaSignExample> {
     try {
       final connection = web3.Connection(web3.Cluster.devnet);
 
-      final solanaWeb3Signer = CapsuleSolanaWeb3Signer(capsule: capsuleClient, connection: connection);
+      final solanaWeb3Signer = ParaSolanaWeb3Signer(para: para, connection: connection);
 
       final publicKey = web3.Pubkey.fromBase58(widget.wallet.address!);
 
