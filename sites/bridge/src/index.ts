@@ -250,7 +250,7 @@ async function invokeParaMethod(methodName: string, args: any[], requestId: stri
       case 'getOAuthURL': {
         console.log('Getting OAuth URL...');
         const oAuthUrl = await para.getOAuthURL({ method: args[0] });
-        sendResponse('getOAuthUrl', requestId, oAuthUrl);
+        sendResponse('getOAuthURL', requestId, oAuthUrl);
         break;
       }
       case 'getPregenWallets': {
