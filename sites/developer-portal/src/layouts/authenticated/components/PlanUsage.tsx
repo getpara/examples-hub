@@ -35,9 +35,11 @@ export const PlanUsage = () => {
   return (
     <Container>
       <InnerContainer>
-        <CpslText variant="bodyL" weight="semiBold">
-          {planMetadata.name} Tier
-        </CpslText>
+        {planMetadata && (
+          <CpslText variant="bodyL" weight="semiBold">
+            {planMetadata.name} Tier
+          </CpslText>
+        )}
         <UsageTextContainer>
           <CpslText>Usage</CpslText>
           <CpslText variant="body2XS" color="secondary">
