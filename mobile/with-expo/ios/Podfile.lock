@@ -1,12 +1,5 @@
 PODS:
   - boost (1.84.0)
-  - capsule-react-native-wallet (2.14.0):
-    - RCT-Folly
-    - RCTRequired
-    - RCTTypeSafety
-    - React-Codegen
-    - React-Core
-    - ReactCommon/turbomodule/core
   - DoubleConversion (1.1.6)
   - EXConstants (17.0.4):
     - ExpoModulesCore
@@ -58,6 +51,13 @@ PODS:
     - hermes-engine/Pre-built (= 0.76.6)
   - hermes-engine/Pre-built (0.76.6)
   - OpenSSL-Universal (3.3.2000)
+  - para-react-native-wallet (1.0.2-dev.6):
+    - RCT-Folly
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Codegen
+    - React-Core
+    - ReactCommon/turbomodule/core
   - RCT-Folly (2024.01.01.00):
     - boost
     - DoubleConversion
@@ -1772,7 +1772,6 @@ PODS:
 
 DEPENDENCIES:
   - boost (from `../node_modules/react-native/third-party-podspecs/boost.podspec`)
-  - "capsule-react-native-wallet (from `../node_modules/@usecapsule/react-native-wallet`)"
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - EXConstants (from `../node_modules/expo-constants/ios`)
   - Expo (from `../node_modules/expo`)
@@ -1789,6 +1788,7 @@ DEPENDENCIES:
   - fmt (from `../node_modules/react-native/third-party-podspecs/fmt.podspec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
+  - "para-react-native-wallet (from `../node_modules/@getpara/react-native-wallet`)"
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCT-Folly/Fabric (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCTDeprecation (from `../node_modules/react-native/ReactApple/Libraries/RCTFoundation/RCTDeprecation`)
@@ -1866,8 +1866,6 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   boost:
     :podspec: "../node_modules/react-native/third-party-podspecs/boost.podspec"
-  capsule-react-native-wallet:
-    :path: "../node_modules/@usecapsule/react-native-wallet"
   DoubleConversion:
     :podspec: "../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec"
   EXConstants:
@@ -1901,6 +1899,8 @@ EXTERNAL SOURCES:
   hermes-engine:
     :podspec: "../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec"
     :tag: hermes-2024-11-12-RNv0.76.2-5b4aa20c719830dcf5684832b89a6edb95ac3d64
+  para-react-native-wallet:
+    :path: "../node_modules/@getpara/react-native-wallet"
   RCT-Folly:
     :podspec: "../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec"
   RCTDeprecation:
@@ -2034,7 +2034,6 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   boost: 1dca942403ed9342f98334bf4c3621f011aa7946
-  capsule-react-native-wallet: bcca43187aaa6deddcf516ece5f1e9269c8d17fc
   DoubleConversion: f16ae600a246532c4020132d54af21d0ddb2a385
   EXConstants: cc788e18fb962b77999c16f6b90e551542b1bcf4
   Expo: 377cc60ce8c9030cf52e36987ab3ce099ab9006e
@@ -2052,6 +2051,7 @@ SPEC CHECKSUMS:
   glog: 08b301085f15bcbb6ff8632a8ebaf239aae04e6a
   hermes-engine: 1949ca944b195a8bde7cbf6316b9068e19cf53c6
   OpenSSL-Universal: b60a3702c9fea8b3145549d421fdb018e53ab7b4
+  para-react-native-wallet: dd9d9719cf17c51b76c9ac17ac865816507dca86
   RCT-Folly: bf5c0376ffe4dd2cf438dcf86db385df9fdce648
   RCTDeprecation: 063fc281b30b7dc944c98fe53a7e266dab1a8706
   RCTRequired: 8eda2a5a745f6081157a4f34baac40b65fe02b31
@@ -2120,6 +2120,6 @@ SPEC CHECKSUMS:
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: be6f55a028e86c83ae066f018e9b5d24ffc45436
 
-PODFILE CHECKSUM: 0e4d8a7c29211b551ea9fbc3f6cd96284ff349c3
+PODFILE CHECKSUM: 281402a77c3a2b3bcffc8b6b8b5658694e88ae9e
 
 COCOAPODS: 1.15.2

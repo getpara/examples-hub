@@ -1,20 +1,20 @@
 // ignore_for_file: unused_field, unused_local_variable
 
-import 'package:cpsl_flutter/client/capsule.dart';
-import 'package:cpsl_flutter/util/random.dart';
-import 'package:cpsl_flutter/widgets/demo_home.dart';
-import 'package:cpsl_flutter/widgets/demo_otp_verification.dart';
+import 'package:para_flutter/client/para.dart';
+import 'package:para_flutter/util/random.dart';
+import 'package:para_flutter/widgets/demo_home.dart';
+import 'package:para_flutter/widgets/demo_otp_verification.dart';
 import 'package:flutter/material.dart';
-import 'package:capsule/capsule.dart';
+import 'package:para/para.dart';
 
-class CapsuleEmailExample extends StatefulWidget {
-  const CapsuleEmailExample({super.key});
+class ParaEmailExample extends StatefulWidget {
+  const ParaEmailExample({super.key});
 
   @override
-  State<CapsuleEmailExample> createState() => _CapsuleEmailExampleState();
+  State<ParaEmailExample> createState() => _ParaEmailExampleState();
 }
 
-class _CapsuleEmailExampleState extends State<CapsuleEmailExample> {
+class _ParaEmailExampleState extends State<ParaEmailExample> {
   final _emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
@@ -37,10 +37,10 @@ class _CapsuleEmailExampleState extends State<CapsuleEmailExample> {
 
   Future<void> _checkLoginStatus() async {
     try {
-      final isLoggedIn = await capsuleClient.isFullyLoggedIn();
+      final isLoggedIn = await para.isFullyLoggedIn();
       if (isLoggedIn && mounted) {
-        final email = await capsuleClient.getEmail();
-        final wallets = await capsuleClient.getWallets();
+        final email = await para.getEmail();
+        final wallets = await para.getWallets();
 
         if (wallets.isNotEmpty) {
           setState(() {
@@ -66,7 +66,7 @@ class _CapsuleEmailExampleState extends State<CapsuleEmailExample> {
 
     try {
       final email = _emailController.text.trim();
-      if (await capsuleClient.checkIfUserExists(email)) {
+      if (await para.checkIfUserExists(email)) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('User already exists, please use passkey login')),
@@ -74,7 +74,7 @@ class _CapsuleEmailExampleState extends State<CapsuleEmailExample> {
         return;
       }
 
-      await capsuleClient.createUser(email);
+      await para.createUser(email);
       if (!mounted) return;
 
       final bool verified = await Navigator.push<bool>(
@@ -83,9 +83,9 @@ class _CapsuleEmailExampleState extends State<CapsuleEmailExample> {
               builder: (context) => DemoOtpVerification(
                 onVerify: (String code) async {
                   try {
-                    final biometricsId = await capsuleClient.verifyEmail(code);
-                    await capsuleClient.generatePasskey(email, biometricsId);
-                    final result = await capsuleClient.createWallet(skipDistribute: false);
+                    final biometricsId = await para.verifyEmail(code);
+                    await para.generatePasskey(email, biometricsId);
+                    final result = await para.createWallet(skipDistribute: false);
                     setState(() {
                       _wallet = result.wallet;
                       _address = result.wallet.address;
@@ -121,7 +121,7 @@ class _CapsuleEmailExampleState extends State<CapsuleEmailExample> {
     setState(() => _isLoading = true);
 
     try {
-      final wallet = await capsuleClient.login();
+      final wallet = await para.login();
 
       if (!mounted) return;
 
@@ -169,7 +169,7 @@ class _CapsuleEmailExampleState extends State<CapsuleEmailExample> {
                 ),
                 const SizedBox(height: 12),
                 const Text(
-                  'Example implementation of email-based authentication using Capsule SDK with passkey support.',
+                  'Example implementation of email-based authentication using Para SDK with passkey support.',
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.black87,

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import { CapsuleEthersSigner } from "@usecapsule/ethers-v6-integration";
-import { createCapsuleViemClient, createCapsuleAccount } from "@usecapsule/viem-v2-integration";
-import { capsuleClient } from "@/client/capsule";
-import { WalletType } from "@usecapsule/react-native-wallet";
+import { ParaEthersSigner } from "@getpara/ethers-v6-integration";
+import { createParaViemClient, createParaAccount } from "@getpara/viem-v2-integration";
+import { para } from "@/client/para";
+import { WalletType } from "@getpara/react-native-wallet";
 import { http, parseEther, parseGwei } from "viem";
 import { sepolia } from "viem/chains";
 import TransactionScreen from "@/components/TransactionScreen";
@@ -23,7 +23,7 @@ export default function EVMSendScreen() {
   useEffect(() => {
     const initializeAddress = async () => {
       try {
-        const wallet = await capsuleClient.getWalletsByType(WalletType.EVM)[0];
+        const wallet = await para.getWalletsByType(WalletType.EVM)[0];
         if (wallet?.address) {
           setFromAddress(wallet.address);
         }
@@ -55,7 +55,7 @@ export default function EVMSendScreen() {
 
   const signWithEthers = async (toAddress: string, amount: string) => {
     const provider = new ethers.JsonRpcProvider(RPC_URL);
-    const ethersSigner = new CapsuleEthersSigner(capsuleClient, provider);
+    const ethersSigner = new ParaEthersSigner(para, provider);
 
     const transaction = {
       from: fromAddress,
@@ -69,16 +69,16 @@ export default function EVMSendScreen() {
   };
 
   const signWithViem = async (toAddress: string, amount: string) => {
-    const viemCapsuleAccount = await createCapsuleAccount(capsuleClient);
+    const viemParaAccount = await createParaAccount(para);
 
-    const capsuleViemSigner = createCapsuleViemClient(capsuleClient, {
-      account: viemCapsuleAccount,
+    const paraViemSigner = createParaViemClient(para, {
+      account: viemParaAccount,
       chain: sepolia,
       transport: http(RPC_URL),
     });
 
     const transaction = {
-      account: viemCapsuleAccount,
+      account: viemParaAccount,
       chain: sepolia,
       to: toAddress as `0x${string}`,
       value: parseEther(amount),
@@ -86,7 +86,7 @@ export default function EVMSendScreen() {
       gasPrice: parseEther("0.000000001"),
     };
 
-    await capsuleViemSigner.signTransaction(transaction);
+    await paraViemSigner.signTransaction(transaction);
   };
 
   return (

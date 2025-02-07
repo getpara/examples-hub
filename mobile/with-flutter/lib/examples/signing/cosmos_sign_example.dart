@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:capsule/capsule.dart';
+import 'package:para/para.dart';
 
 class CosmosSignExample extends StatefulWidget {
   final Wallet wallet;

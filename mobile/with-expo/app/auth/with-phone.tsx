@@ -5,27 +5,27 @@ import { webcrypto } from "crypto";
 import { useRouter } from "expo-router";
 import { CountryCallingCode } from "libphonenumber-js";
 import OTPVerificationComponent from "@/components/OTPVerificationComponent";
-import { capsuleClient } from "@/client/capsule";
+import { para } from "@/client/para";
 import { randomTestPhone } from "@/util/random";
 
 export default function PhoneAuthScreen() {
   const [countryCode, setCountryCode] = useState("+1");
-  const [phoneNumber, setPhoneNumber] = useState(randomTestPhone());
+  const [phone, setPhone] = useState(randomTestPhone());
   const [showOTP, setShowOTP] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
 
   const handleContinue = async () => {
-    if (!countryCode || !phoneNumber) return;
+    if (!countryCode || !phone) return;
     setIsLoading(true);
     try {
-      const userExists = await capsuleClient.checkIfUserExistsByPhone(phoneNumber, countryCode as CountryCallingCode);
+      const userExists = await para.checkIfUserExistsByPhone({ phone, countryCode });
       if (userExists) {
-        await capsuleClient.login(undefined, phoneNumber, countryCode as CountryCallingCode);
+        await para.login({ phone, countryCode });
         router.navigate("../home");
       } else {
-        await capsuleClient.createUserByPhone(phoneNumber, countryCode as CountryCallingCode);
+        await para.createUserByPhone({ phone, countryCode });
         setShowOTP(true);
       }
     } catch (error) {
@@ -34,18 +34,12 @@ export default function PhoneAuthScreen() {
     setIsLoading(false);
   };
 
-  const handleVerify = async (code: string) => {
-    if (!code) return;
+  const handleVerify = async (verificationCode: string) => {
+    if (!verificationCode) return;
     try {
-      const biometricsId = await capsuleClient.verifyPhoneBiometricsId(code);
+      const biometricsId = await para.verifyPhoneBiometricsId({ verificationCode });
       if (biometricsId) {
-        await capsuleClient.registerPasskey(
-          phoneNumber,
-          biometricsId,
-          webcrypto,
-          "phone",
-          countryCode as CountryCallingCode
-        );
+        await para.registerPasskey({ phone, countryCode, biometricsId });
         router.navigate("../home");
       }
     } catch (error) {
@@ -54,7 +48,7 @@ export default function PhoneAuthScreen() {
   };
 
   const resendOTP = async () => {
-    await capsuleClient.resendVerificationCode();
+    await para.resendVerificationCode();
   };
 
   return (
@@ -71,7 +65,7 @@ export default function PhoneAuthScreen() {
           <Text style={styles.subtitle}>
             {showOTP
               ? "Enter the code sent to your phone. When using a +1-XXX-555-XXXX test number, a random 6-digit code is auto-filled for rapid testing. For personal numbers, check your phone for the actual code."
-              : "Test the Capsule Auth SDK. A random test number (+1-XXX-555-XXXX) is pre-filled for quick testing with auto-generated codes. Use your phone number instead to test actual SMS delivery. Test users can be managed in your portal's API key section."}
+              : "Test the Para Auth SDK. A random test number (+1-XXX-555-XXXX) is pre-filled for quick testing with auto-generated codes. Use your phone number instead to test actual SMS delivery. Test users can be managed in your portal's API key section."}
           </Text>
         </View>
 
@@ -90,8 +84,8 @@ export default function PhoneAuthScreen() {
               <Input
                 label="Number"
                 placeholder="Phone Number"
-                value={phoneNumber}
-                onChangeText={setPhoneNumber}
+                value={phone}
+                onChangeText={setPhone}
                 keyboardType="phone-pad"
                 containerStyle={styles.phoneNumberInput}
                 inputContainerStyle={styles.input}
@@ -100,7 +94,7 @@ export default function PhoneAuthScreen() {
             <Button
               title="Continue"
               onPress={handleContinue}
-              disabled={!countryCode || !phoneNumber || isLoading}
+              disabled={!countryCode || !phone || isLoading}
               loading={isLoading}
               buttonStyle={styles.button}
               containerStyle={styles.buttonContainer}

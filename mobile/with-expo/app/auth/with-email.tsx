@@ -2,9 +2,8 @@ import React, { useState } from "react";
 import { SafeAreaView, StyleSheet, ScrollView, View } from "react-native";
 import { Input, Button, Text } from "@rneui/themed";
 import { useRouter } from "expo-router";
-import { webcrypto } from "crypto";
 import OTPVerificationComponent from "@/components/OTPVerificationComponent";
-import { capsuleClient } from "@/client/capsule";
+import { para } from "@/client/para";
 import { randomTestEmail } from "@/util/random";
 
 export default function EmailAuthScreen() {
@@ -18,12 +17,12 @@ export default function EmailAuthScreen() {
     if (!email) return;
     setIsLoading(true);
     try {
-      const userExists = await capsuleClient.checkIfUserExists(email);
+      const userExists = await para.checkIfUserExists({ email });
       if (userExists) {
-        await capsuleClient.login(email);
+        await para.login({ email });
         router.navigate("../home");
       } else {
-        await capsuleClient.createUser(email);
+        await para.createUser({ email });
         setShowOTP(true);
       }
     } catch (error) {
@@ -32,12 +31,12 @@ export default function EmailAuthScreen() {
     setIsLoading(false);
   };
 
-  const handleVerify = async (code: string) => {
-    if (!code) return;
+  const handleVerify = async (verificationCode: string) => {
+    if (!verificationCode) return;
     try {
-      const biometricsId = await capsuleClient.verifyEmailBiometricsId(code);
+      const biometricsId = await para.verifyEmailBiometricsId({ verificationCode });
       if (biometricsId) {
-        await capsuleClient.registerPasskey(email, biometricsId, webcrypto);
+        await para.registerPasskey({ email, biometricsId });
         router.navigate("../home");
       }
     } catch (error) {
@@ -46,7 +45,7 @@ export default function EmailAuthScreen() {
   };
 
   const resendOTP = async () => {
-    await capsuleClient.resendVerificationCode();
+    await para.resendVerificationCode();
   };
 
   return (
@@ -62,8 +61,8 @@ export default function EmailAuthScreen() {
           </Text>
           <Text style={styles.subtitle}>
             {showOTP
-              ? "Enter the code sent to your email. When using @test.usecapsule.com, a random 6-digit code is auto-filled for rapid testing. For personal emails, check your inbox for the actual code."
-              : "Test the Capsule Auth SDK. A random @test.usecapsule.com email is pre-filled for quick testing with auto-generated codes. Use your email instead to test custom email templates from your developer portal. Test users can be managed in your portal's API key section."}
+              ? "Enter the code sent to your email. When using @test.usepara.com, a random 6-digit code is auto-filled for rapid testing. For personal emails, check your inbox for the actual code."
+              : "Test the Para Auth SDK. A random @test.usepara.com email is pre-filled for quick testing with auto-generated codes. Use your email instead to test custom email templates from your developer portal. Test users can be managed in your portal's API key section."}
           </Text>
         </View>
 

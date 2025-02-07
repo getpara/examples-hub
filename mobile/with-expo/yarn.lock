@@ -1544,6 +1544,112 @@
     find-up "^5.0.0"
     js-yaml "^4.1.0"
 
+"@getpara/core-sdk@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.0.1.tgz#a40c589b16e8bdc19e4744c1843336a432bd8797"
+  integrity sha512-pbktswYjhjS6ySeOUIhCuO6wxr4Uh3N+3OhIeG0YFgZJg6AqGcBhASCySJqV2tVES191LubqnCFUwkhkCsELzA==
+  dependencies:
+    "@celo/utils" "^8.0.0"
+    "@cosmjs/encoding" "^0.32.4"
+    "@getpara/user-management-client" "1.0.1"
+    "@noble/hashes" "^1.5.0"
+    base64url "^3.0.1"
+    buffer "6.0.3"
+    ethereumjs-util "7.1.5"
+    libphonenumber-js "1.11.2"
+    node-forge "^1.3.1"
+    qs "^6.12.0"
+
+"@getpara/core-sdk@1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.0.2.tgz#e8fdfe14a81dd2e576e370ede24dabb478802e84"
+  integrity sha512-nUfIY/JzmmLCBy8+au5PRMhhBXO9YBa6dW/OxHc5DH6bzzi3t5xySv8i9Fg1/sd9C+43aYtFr3pWWGLdmwnwRA==
+  dependencies:
+    "@celo/utils" "^8.0.0"
+    "@cosmjs/encoding" "^0.32.4"
+    "@getpara/user-management-client" "1.0.2"
+    "@noble/hashes" "^1.5.0"
+    base64url "^3.0.1"
+    buffer "6.0.3"
+    ethereumjs-util "7.1.5"
+    libphonenumber-js "1.11.2"
+    node-forge "^1.3.1"
+    qs "^6.12.0"
+
+"@getpara/cosmjs-v0-integration@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@getpara/cosmjs-v0-integration/-/cosmjs-v0-integration-1.0.1.tgz#4971df0f1d8f31f2054d041c1d0935d0c0549f20"
+  integrity sha512-GMZXhEy7eSQWMN1lOkhHcJT8fcWpeb/oVf6iPB8tePa6YUAYGivDMLVxygRfruRHMIR8lKJqFM6EAeXudghk6g==
+  dependencies:
+    "@getpara/core-sdk" "1.0.1"
+
+"@getpara/ethers-v6-integration@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@getpara/ethers-v6-integration/-/ethers-v6-integration-1.0.1.tgz#36f99212f54299a00dacbb49e2df541ca8b66477"
+  integrity sha512-1opokL95eZknuO+TRSxOaqCJ6y5H331TMM1ZNctUSlBcsF9LNd7Rweuqp0zm8SFS1XR0kjU22jBJ3rxweiVlOw==
+  dependencies:
+    "@getpara/core-sdk" "1.0.1"
+
+"@getpara/react-native-wallet@1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@getpara/react-native-wallet/-/react-native-wallet-1.0.2.tgz#986b5ff250572b1fee2b40043bcf30213027d665"
+  integrity sha512-hAuXiIDOp+OzyaBn33wmO/t5yEn3Tgq5wi2zVcNtEkpK+4vHq6tki8ewoQxuAF6yRDCfrtd40CbcOx7RWydoww==
+  dependencies:
+    "@getpara/core-sdk" "1.0.2"
+    "@getpara/user-management-client" "1.0.2"
+    "@getpara/web-sdk" "1.0.2"
+    "@peculiar/webcrypto" "^1.5.0"
+    node-forge "1.3.1"
+    react-native-url-polyfill "2.0.0"
+    text-encoding "0.7.0"
+
+"@getpara/solana-web3.js-v1-integration@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@getpara/solana-web3.js-v1-integration/-/solana-web3.js-v1-integration-1.0.1.tgz#7c2f1705f05105a9d507a35abf92c962be906ffe"
+  integrity sha512-yp8jGk4ph4/kVzzK8UQMcQN6YMS7Ssil7wYiC7rX/m1I2xfNi7p1vuAsjzuSRNKdsBdTJVJhXHbnU5gGR/5ooA==
+  dependencies:
+    "@getpara/core-sdk" "1.0.1"
+    "@solana/web3.js" "^1.95.8"
+
+"@getpara/user-management-client@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.0.1.tgz#ac1bd909c49c6af4577a717ca1dddf4899091cda"
+  integrity sha512-NQKq9G32xALKlRD0q5uBXC6reGMUPbjaTfaAtAoQrCyJOIH5h6JsmRdecd1ZhCapN0X6FtuILSt7RfKEy+HYkg==
+  dependencies:
+    axios "^1.6.3"
+    libphonenumber-js "1.11.2"
+    qs "^6.12.0"
+
+"@getpara/user-management-client@1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.0.2.tgz#007fa067d58f4eefeabc08fb868faab67a8a0000"
+  integrity sha512-NNy/CqqjoUvn1PwqngK8siIR+/kricCQSjvzoW0/hWpDBqFSTbT5Mezw78zJ/19AittsScJpoqugKmvTuQ5Udw==
+  dependencies:
+    axios "^1.6.3"
+    libphonenumber-js "1.11.2"
+    qs "^6.12.0"
+
+"@getpara/viem-v2-integration@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@getpara/viem-v2-integration/-/viem-v2-integration-1.0.1.tgz#6ecc352ad8e2bda7b56d226c10778a02dbe73f98"
+  integrity sha512-c+SFqt3mYCX1puXxL4drbYdE9GDpfw4+y+NZO7kQGQTfqo1EQzsOnq8xQvqfbpvWSxrGJEO7ZW+VOlmg7nhRWQ==
+  dependencies:
+    "@getpara/core-sdk" "1.0.1"
+
+"@getpara/web-sdk@1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-1.0.2.tgz#61523aef82c57ed516b98ff04f8753eb2a67318b"
+  integrity sha512-iB8eBMnH1Qgd5JOp+1A0BLMfgjzKlnSAbsQIBuqUr5tbw/MSE6xAUhZXzxfuSCw3q4AceSKJ336JSHevW9XHkg==
+  dependencies:
+    "@getpara/core-sdk" "1.0.2"
+    "@getpara/user-management-client" "1.0.2"
+    assert "^2.1.0"
+    base64url "3.0.1"
+    buffer "6.0.3"
+    cbor-web "8.1.0"
+    node-forge "1.3.1"
+    ua-parser-js "1.0.39"
+
 "@isaacs/cliui@^8.0.2":
   version "8.0.2"
   resolved "https://registry.yarnpkg.com/@isaacs/cliui/-/cliui-8.0.2.tgz#b37667b7bc181c168782259bab42474fbf52b550"
@@ -2720,112 +2826,6 @@
   dependencies:
     "@urql/core" "^5.0.0"
     wonka "^6.3.2"
-
-"@usecapsule/core-sdk@2.15.0":
-  version "2.15.0"
-  resolved "https://registry.yarnpkg.com/@usecapsule/core-sdk/-/core-sdk-2.15.0.tgz#793e5f1142a8eaa479458c58f92f4f18c34c041a"
-  integrity sha512-bojNKIcrcgau7KS2LHIue7Kfy/u0NI2jpxotiAUpGbQ1XlaLdH5201CkITHQcruwhW3NstUGnem5gmFZLst9UA==
-  dependencies:
-    "@celo/utils" "^8.0.0"
-    "@cosmjs/encoding" "^0.32.4"
-    "@noble/hashes" "^1.5.0"
-    "@usecapsule/user-management-client" "1.37.0"
-    base64url "^3.0.1"
-    buffer "6.0.3"
-    ethereumjs-util "7.1.5"
-    libphonenumber-js "1.11.2"
-    node-forge "^1.3.1"
-    qs "^6.12.0"
-
-"@usecapsule/core-sdk@2.17.0":
-  version "2.17.0"
-  resolved "https://registry.yarnpkg.com/@usecapsule/core-sdk/-/core-sdk-2.17.0.tgz#fa14341430065a7a37cf0998d74987e439ded889"
-  integrity sha512-vrnbGUWKwjdAzQCbMWWFO0KLLlwhcxniPnpaQD9cF/4wehCxhMRPrUZbz7856EoWkaOAQ/togzTjTH0napJ1Og==
-  dependencies:
-    "@celo/utils" "^8.0.0"
-    "@cosmjs/encoding" "^0.32.4"
-    "@noble/hashes" "^1.5.0"
-    "@usecapsule/user-management-client" "1.39.0"
-    base64url "^3.0.1"
-    buffer "6.0.3"
-    ethereumjs-util "7.1.5"
-    libphonenumber-js "1.11.2"
-    node-forge "^1.3.1"
-    qs "^6.12.0"
-
-"@usecapsule/cosmjs-v0-integration@2.15.0":
-  version "2.15.0"
-  resolved "https://registry.yarnpkg.com/@usecapsule/cosmjs-v0-integration/-/cosmjs-v0-integration-2.15.0.tgz#cd78f9802478f77300cab85bb9107463dc433aac"
-  integrity sha512-cfvRw9whsp22/q205DpjlQTaXc7t0eELbkHXydXzRuyzkR3jQQWDz6WmAixUm6BpIwpWCQf8TQaB/AwQ2vXZ3Q==
-  dependencies:
-    "@usecapsule/core-sdk" "2.15.0"
-
-"@usecapsule/ethers-v6-integration@2.15.0":
-  version "2.15.0"
-  resolved "https://registry.yarnpkg.com/@usecapsule/ethers-v6-integration/-/ethers-v6-integration-2.15.0.tgz#95e8e0ddc3b823ce3176adf8c6657680dd06a2e2"
-  integrity sha512-ZoQsaEPLAsi+xIT+/6ww7sIS6DvbxP1CYckpzhiea66jQBnA9kPOV3BGt+CUSrUpmVLAzOjuP9fWxG+tvqyiVg==
-  dependencies:
-    "@usecapsule/core-sdk" "2.15.0"
-
-"@usecapsule/react-native-wallet@2.14.0":
-  version "2.14.0"
-  resolved "https://registry.yarnpkg.com/@usecapsule/react-native-wallet/-/react-native-wallet-2.14.0.tgz#2c7659ece862c9df19b5281fcd8ca9d575024c4d"
-  integrity sha512-0lsjU2wTNABqfc+p77oz4/Qhxwu22g4vWeN3CkQ7HXMHDs3pniEh5Bnrr/hg67grMqJiZ4l9pwGsTKwFCBEjyg==
-  dependencies:
-    "@peculiar/webcrypto" "^1.5.0"
-    "@usecapsule/core-sdk" "2.17.0"
-    "@usecapsule/user-management-client" "1.39.0"
-    "@usecapsule/web-sdk" "2.17.0"
-    fastestsmallesttextencoderdecoder "1.0.22"
-    node-forge "1.3.1"
-    react-native-url-polyfill "2.0.0"
-
-"@usecapsule/solana-web3.js-v1-integration@1.15.0":
-  version "1.15.0"
-  resolved "https://registry.yarnpkg.com/@usecapsule/solana-web3.js-v1-integration/-/solana-web3.js-v1-integration-1.15.0.tgz#b45b923bc84a4d3f6c06d5f265e49ed12b5f8c43"
-  integrity sha512-xkMgO/U/0T+98X0UuPunXH8Fj7W3Wn2DnVj/4/JfL4aJJFMDhqMnZgRCVDqeefST6iUITQzyA1ZX964XkTOmtQ==
-  dependencies:
-    "@solana/web3.js" "^1.95.8"
-    "@usecapsule/core-sdk" "2.15.0"
-
-"@usecapsule/user-management-client@1.37.0":
-  version "1.37.0"
-  resolved "https://registry.yarnpkg.com/@usecapsule/user-management-client/-/user-management-client-1.37.0.tgz#192eb72929739f49d984146d19eaa6d129278445"
-  integrity sha512-RVaxVhGvlJj+pWZdQ/8V0vRZYMeSFJeTIiPJ11P1t8Ehf0FJeXEj+3/n98gMDMmZTNXYR5HLI8Y0paA34cFtFg==
-  dependencies:
-    axios "^1.6.3"
-    libphonenumber-js "1.11.2"
-    qs "^6.12.0"
-
-"@usecapsule/user-management-client@1.39.0":
-  version "1.39.0"
-  resolved "https://registry.yarnpkg.com/@usecapsule/user-management-client/-/user-management-client-1.39.0.tgz#cc708a5529a8d8d7672bad4e05efa76fd45ad99e"
-  integrity sha512-Eu4QWYOEpToCfV1AFaXNplikCHxtWwor2GrsyPeqF11K7PKA/i6YVqJxpJwzdxGLeaEY0jGbr6imuLSudh0gHg==
-  dependencies:
-    axios "^1.6.3"
-    libphonenumber-js "1.11.2"
-    qs "^6.12.0"
-
-"@usecapsule/viem-v2-integration@2.15.0":
-  version "2.15.0"
-  resolved "https://registry.yarnpkg.com/@usecapsule/viem-v2-integration/-/viem-v2-integration-2.15.0.tgz#f4e4aa74bc683d01f35e63dd6524a89119060c75"
-  integrity sha512-uzTOgfRkC8HLMb6AFsF3PwxMmOBoF1jIq3nxrskaAELYCMrSHOUCJ4V6KkvpLCnD04Vpl9JrsUvsZPjNIGIJAQ==
-  dependencies:
-    "@usecapsule/core-sdk" "2.15.0"
-
-"@usecapsule/web-sdk@2.17.0":
-  version "2.17.0"
-  resolved "https://registry.yarnpkg.com/@usecapsule/web-sdk/-/web-sdk-2.17.0.tgz#42a6643d0f99f94d305a56c511a231e3b37e98d9"
-  integrity sha512-GN/83Rsu99WVFx6vvxzz+Nhzf7oUCJ1GUbA9VltT4DS2prdJy9QfAI2IyyOjgoj9F0LDFJ0panP/JX2pVdJKow==
-  dependencies:
-    "@usecapsule/core-sdk" "2.17.0"
-    "@usecapsule/user-management-client" "1.39.0"
-    assert "^2.1.0"
-    base64url "3.0.1"
-    buffer "6.0.3"
-    cbor-web "8.1.0"
-    node-forge "1.3.1"
-    ua-parser-js "1.0.39"
 
 "@web3-storage/multipart-parser@^1.0.0":
   version "1.0.0"
@@ -4690,11 +4690,6 @@ fast-uri@^3.0.1:
   version "3.0.5"
   resolved "https://registry.yarnpkg.com/fast-uri/-/fast-uri-3.0.5.tgz#19f5f9691d0dab9b85861a7bb5d98fca961da9cd"
   integrity sha512-5JnBCWpFlMo0a3ciDy/JckMzzv1U9coZrIhedq+HXxxUfDTAiS0LA8OKVao4G9BxmCVck/jtA5r3KAtRWEyD8Q==
-
-fastestsmallesttextencoderdecoder@1.0.22:
-  version "1.0.22"
-  resolved "https://registry.yarnpkg.com/fastestsmallesttextencoderdecoder/-/fastestsmallesttextencoderdecoder-1.0.22.tgz#59b47e7b965f45258629cc6c127bf783281c5e93"
-  integrity sha512-Pb8d48e+oIuY4MaM64Cd7OW1gt4nxCHs7/ddPPZ/Ic3sg8yVGM7O9wDvZ7us6ScaUupzM+pfBolwtYhN1IxBIw==
 
 fastq@^1.6.0:
   version "1.18.0"
@@ -7515,7 +7510,7 @@ react-native-modpow@^1.1.0:
   resolved "https://registry.yarnpkg.com/react-native-modpow/-/react-native-modpow-1.1.0.tgz#14867fc678daeb74ce678df15a8abc5955115e5c"
   integrity sha512-pEXAecjrp06UG2B1gy+yNuU7laoe7gjMWT63bfsH/V9lIHrwQLqQKTz073AgJsWWVBArVVC0wRI2jjqiTCf61w==
 
-react-native-passkey@^3.0.0:
+react-native-passkey@3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/react-native-passkey/-/react-native-passkey-3.1.0.tgz#26617ed0cc115c6037e2537d264955d852395168"
   integrity sha512-qOJ0q7AqbUOGXDOObcfiOJo1BOnG+lIQMEgltgeqmyMC+2XDlr7YrOQZgLwZbXheGC7BXPpwMSev/gxkgbt3xw==
@@ -8604,6 +8599,11 @@ text-encoding-utf-8@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/text-encoding-utf-8/-/text-encoding-utf-8-1.0.2.tgz#585b62197b0ae437e3c7b5d0af27ac1021e10d13"
   integrity sha512-8bw4MY9WjdsD2aMtO0OzOCY3pXGYNx2d2FfHRVUKkiCPDWjKuOlhLVASS+pD7VkLTVjW268LYJHwsnPFlBpbAg==
+
+text-encoding@0.7.0:
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/text-encoding/-/text-encoding-0.7.0.tgz#f895e836e45990624086601798ea98e8f36ee643"
+  integrity sha512-oJQ3f1hrOnbRLOcwKz0Liq2IcrvDeZRHXhd9RgLrsT+DjWY/nty1Hi7v3dtkaEYbPYe0mUoOfzRrMwfXXwgPUA==
 
 thenify-all@^1.0.0:
   version "1.6.0"

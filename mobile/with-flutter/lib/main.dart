@@ -6,16 +6,16 @@ import 'theme/app_theme.dart';
 void main() async {
   await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const CapsuleDemoApp());
+  runApp(const ParaDemoApp());
 }
 
-class CapsuleDemoApp extends StatelessWidget {
-  const CapsuleDemoApp({super.key});
+class ParaDemoApp extends StatelessWidget {
+  const ParaDemoApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Capsule SDK Demo',
+      title: 'Para SDK Demo',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
       home: const DemoAuthSelector(),

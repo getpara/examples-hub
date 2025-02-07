@@ -31,12 +31,12 @@ export default function AuthSelectionScreen() {
           <Text
             h2
             h2Style={styles.title}>
-            Capsule Auth SDK Demo
+            Para Auth SDK Demo
           </Text>
           <Text style={styles.subtitle}>
             Test user authentication via email or phone. Upon first authentication, a passkey is created to secure the
             user's wallets. This passkey becomes their primary authentication method for future logins. Explore our
-            documentation at docs.usecapsule.com for implementation details.
+            documentation at docs.usepara.com for implementation details.
           </Text>
         </View>
 

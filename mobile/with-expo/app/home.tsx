@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { SafeAreaView, StyleSheet, ScrollView, View } from "react-native";
 import { Text } from "@rneui/themed";
 import { useRouter } from "expo-router";
-import { Wallet, WalletType } from "@usecapsule/react-native-wallet";
+import { Wallet, WalletType } from "@getpara/react-native-wallet";
 import WalletCard from "@/components/WalletCard";
-import { capsuleClient } from "@/client/capsule";
+import { para } from "@/client/para";
 
 export default function HomeScreen() {
   const [walletsByType, setWalletsByType] = useState<Record<WalletType, Wallet | null>>({
@@ -18,7 +18,7 @@ export default function HomeScreen() {
     try {
       const updatedWallets = Object.values(WalletType).reduce((acc, type) => {
         try {
-          const wallet = capsuleClient.getWalletsByType(WalletType[type])[0];
+          const wallet = para.getWalletsByType(WalletType[type])[0];
           acc[type] = wallet;
         } catch (error) {
           acc[type] = null;
@@ -51,7 +51,7 @@ export default function HomeScreen() {
 
   const handleCreate = async (type: WalletType) => {
     try {
-      await capsuleClient.createWallet(type, false);
+      await para.createWallet({ type, skipDistribute: false });
       await fetchWallets();
     } catch (error) {
       console.error(`Error creating ${type} wallet:`, error);

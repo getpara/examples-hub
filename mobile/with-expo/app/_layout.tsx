@@ -1,27 +1,24 @@
 import React, { useEffect } from "react";
 import { Stack } from "expo-router";
-import { capsuleClient } from "@/client/capsule";
+import { para } from "@/client/para";
 
 export default function RootLayout() {
   useEffect(() => {
-    const initializeCapsuleClient = async () => {
+    const initializeParaClient = async () => {
       try {
-        await capsuleClient.logout();
-        await capsuleClient.clearStorage("all");
-        await capsuleClient.init();
+        await para.init();
       } catch (error) {
-        console.error("Failed to initialize capsule client:", error);
+        console.error("Failed to initialize para client:", error);
       }
     };
 
-    initializeCapsuleClient();
+    initializeParaClient();
   }, []);
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="home" />
       <Stack.Screen name="auth/with-email" />
       <Stack.Screen name="auth/with-phone" />
-      {/* <Stack.Screen name="auth/with-oauth" /> */}
       <Stack.Screen name="sign/with-evm" />
       <Stack.Screen name="sign/with-cosmos" />
       <Stack.Screen name="sign/with-solana" />

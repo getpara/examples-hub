@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "expo-router";
 import { SigningStargateClient } from "@cosmjs/stargate";
-import { WalletType } from "@usecapsule/react-native-wallet";
-import { CapsuleProtoSigner } from "@usecapsule/cosmjs-v0-integration";
-import { capsuleClient } from "@/client/capsule";
+import { WalletType } from "@getpara/react-native-wallet";
+import { ParaProtoSigner } from "@getpara/cosmjs-v0-integration";
+import { para } from "@/client/para";
 import TransactionScreen from "@/components/TransactionScreen";
 
 const RPC_ENDPOINT = "https://cosmos-rpc.publicnode.com:443";
@@ -16,7 +16,7 @@ export default function CosmosSendScreen() {
   useEffect(() => {
     const initializeAddress = async () => {
       try {
-        const wallet = await capsuleClient.getWalletsByType(WalletType.COSMOS)[0];
+        const wallet = await para.getWalletsByType(WalletType.COSMOS)[0];
         if (wallet?.address) {
           setFromAddress(wallet.address);
         }
@@ -30,7 +30,7 @@ export default function CosmosSendScreen() {
 
   const handleSign = async (toAddress: string, amount: string) => {
     try {
-      const protoSigner = new CapsuleProtoSigner(capsuleClient, "cosmos");
+      const protoSigner = new ParaProtoSigner(para, "cosmos");
       const client = await SigningStargateClient.connectWithSigner(RPC_ENDPOINT, protoSigner);
 
       const amountInUAtom = {

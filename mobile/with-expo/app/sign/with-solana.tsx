@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "expo-router";
 import { Connection, clusterApiUrl, SystemProgram, LAMPORTS_PER_SOL, PublicKey, Transaction } from "@solana/web3.js";
-import { CapsuleSolanaWeb3Signer } from "@usecapsule/solana-web3.js-v1-integration";
-import { capsuleClient } from "@/client/capsule";
-import { WalletType } from "@usecapsule/react-native-wallet";
+import { ParaSolanaWeb3Signer } from "@getpara/solana-web3.js-v1-integration";
+import { para } from "@/client/para";
+import { WalletType } from "@getpara/react-native-wallet";
 import TransactionScreen from "@/components/TransactionScreen";
 
 export default function SolanaSendScreen() {
@@ -14,7 +14,7 @@ export default function SolanaSendScreen() {
   useEffect(() => {
     const initializeAddress = async () => {
       try {
-        const wallet = await capsuleClient.getWalletsByType(WalletType.SOLANA)[0];
+        const wallet = await para.getWalletsByType(WalletType.SOLANA)[0];
         if (wallet?.address) {
           setFromAddress(wallet.address);
         }
@@ -29,7 +29,7 @@ export default function SolanaSendScreen() {
   const handleSign = async (toAddress: string, amount: string) => {
     try {
       const connection = new Connection(clusterApiUrl("mainnet-beta"));
-      const solanaSigner = new CapsuleSolanaWeb3Signer(capsuleClient, connection);
+      const solanaSigner = new ParaSolanaWeb3Signer(para, connection);
 
       const transaction = new Transaction().add(
         SystemProgram.transfer({
@@ -43,7 +43,6 @@ export default function SolanaSendScreen() {
         skipPreflight: false,
         preflightCommitment: "confirmed",
       });
-
     } catch (error) {
       console.error("Error signing Solana transaction:", error);
       throw error;

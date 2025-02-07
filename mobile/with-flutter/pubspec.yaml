@@ -1,5 +1,5 @@
-name: cpsl_flutter
-description: "A demo app for using Capsule SDK in Flutter"
+name: para_flutter
+description: "A demo app for using Para SDK in Flutter"
 publish_to: "none"
 version: 1.0.0+1
 
@@ -9,7 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  capsule: 0.7.0
+  para: 1.0.0
   flutter_dotenv: ^5.2.1
   flutter_inappwebview: ^6.1.5
   font_awesome_flutter: ^10.8.0

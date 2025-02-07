@@ -2,7 +2,7 @@ import 'dart:math';
 
 String randomTestEmail({
   int length = 12,
-  String domain = "test.usecapsule.com",
+  String domain = "test.usepara.com",
   bool includeNumbers = true,
 }) {
   final random = Random();

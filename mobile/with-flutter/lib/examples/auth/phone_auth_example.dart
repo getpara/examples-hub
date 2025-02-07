@@ -1,20 +1,20 @@
 // ignore_for_file: unused_field, unused_local_variable
-import 'package:cpsl_flutter/util/random.dart';
+import 'package:para_flutter/util/random.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:capsule/capsule.dart';
-import 'package:cpsl_flutter/client/capsule.dart';
-import 'package:cpsl_flutter/widgets/demo_home.dart';
-import 'package:cpsl_flutter/widgets/demo_otp_verification.dart';
+import 'package:para/para.dart';
+import 'package:para_flutter/client/para.dart';
+import 'package:para_flutter/widgets/demo_home.dart';
+import 'package:para_flutter/widgets/demo_otp_verification.dart';
 
-class CapsulePhoneExample extends StatefulWidget {
-  const CapsulePhoneExample({super.key});
+class ParaPhoneExample extends StatefulWidget {
+  const ParaPhoneExample({super.key});
 
   @override
-  State<CapsulePhoneExample> createState() => _CapsulePhoneExampleState();
+  State<ParaPhoneExample> createState() => _ParaPhoneExampleState();
 }
 
-class _CapsulePhoneExampleState extends State<CapsulePhoneExample> {
+class _ParaPhoneExampleState extends State<ParaPhoneExample> {
   final _formKey = GlobalKey<FormState>();
   final _phoneController = TextEditingController();
   final _countryCodeController = TextEditingController(text: '1');
@@ -42,9 +42,9 @@ class _CapsulePhoneExampleState extends State<CapsulePhoneExample> {
 
   Future<void> _checkLoginStatus() async {
     try {
-      final isLoggedIn = await capsuleClient.isFullyLoggedIn();
+      final isLoggedIn = await para.isFullyLoggedIn();
       if (isLoggedIn && mounted) {
-        final wallets = await capsuleClient.getWallets();
+        final wallets = await para.getWallets();
 
         if (wallets.isNotEmpty) {
           setState(() {
@@ -71,7 +71,7 @@ class _CapsulePhoneExampleState extends State<CapsulePhoneExample> {
     try {
       final phoneNumber = _phoneController.text;
       final countryCode = '+${_countryCodeController.text}';
-      if (await capsuleClient.checkIfUserExistsByPhone(phoneNumber, countryCode)) {
+      if (await para.checkIfUserExistsByPhone(phoneNumber, countryCode)) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('User already exists, please use passkey login')),
@@ -79,7 +79,7 @@ class _CapsulePhoneExampleState extends State<CapsulePhoneExample> {
         return;
       }
 
-      await capsuleClient.createUserByPhone(phoneNumber, countryCode);
+      await para.createUserByPhone(phoneNumber, countryCode);
       if (!mounted) return;
 
       final bool verified = await Navigator.push<bool>(
@@ -88,9 +88,9 @@ class _CapsulePhoneExampleState extends State<CapsulePhoneExample> {
               builder: (context) => DemoOtpVerification(
                 onVerify: (String code) async {
                   try {
-                    final biometricsId = await capsuleClient.verifyPhone(code);
-                    await capsuleClient.generatePasskey(_fullPhoneNumber, biometricsId);
-                    final result = await capsuleClient.createWallet(skipDistribute: false);
+                    final biometricsId = await para.verifyPhone(code);
+                    await para.generatePasskey(_fullPhoneNumber, biometricsId);
+                    final result = await para.createWallet(skipDistribute: false);
 
                     if (!mounted) return false;
                     setState(() {
@@ -105,7 +105,7 @@ class _CapsulePhoneExampleState extends State<CapsulePhoneExample> {
                 },
                 onResendCode: () async {
                   try {
-                    await capsuleClient.resendVerificationCodeByPhone();
+                    await para.resendVerificationCodeByPhone();
                     return true;
                   } catch (e) {
                     return false;
@@ -136,7 +136,7 @@ class _CapsulePhoneExampleState extends State<CapsulePhoneExample> {
     setState(() => _isLoading = true);
 
     try {
-      final wallet = await capsuleClient.login();
+      final wallet = await para.login();
 
       if (!mounted) return;
 
@@ -184,7 +184,7 @@ class _CapsulePhoneExampleState extends State<CapsulePhoneExample> {
                 ),
                 const SizedBox(height: 12),
                 const Text(
-                  'Example implementation of phone-based authentication using Capsule SDK with passkey support.',
+                  'Example implementation of phone-based authentication using Para SDK with passkey support.',
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.black87,
