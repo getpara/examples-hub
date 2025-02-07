@@ -1,9 +1,9 @@
 {
   "name": "capsule-mpc-worker",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "dependencies": {
-    "@getpara/web-sdk": "1.0.1"
+    "@getpara/web-sdk": "1.0.2"
   },
   "scripts": {
     "build": "rm -rf dist && tsc && npx webpack && mv ./dist/mpcWorker-bundle.js ../../sites/portal/public/static/js/mpcWorker-bundle.js"

@@ -1,6 +1,6 @@
 {
   "name": "wagmi-v2-example",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "src/index.tsx",
   "private": true,
   "dependencies": {
@@ -8,10 +8,10 @@
     "@emotion/react": "11.10.6",
     "@emotion/styled": "11.10.6",
     "@ethereumjs/common": "3.1.1",
-    "@getpara/core-sdk": "1.0.1",
-    "@getpara/react-sdk": "1.0.1",
-    "@getpara/wagmi-v2-integration": "1.0.1",
-    "@getpara/web-sdk": "1.0.1",
+    "@getpara/core-sdk": "1.0.2",
+    "@getpara/react-sdk": "1.0.2",
+    "@getpara/wagmi-v2-integration": "1.0.2",
+    "@getpara/web-sdk": "1.0.2",
     "@tanstack/react-query": "^5.24.1",
     "crypto-browserify": "3.12.0",
     "framer-motion": "10.9.2",
