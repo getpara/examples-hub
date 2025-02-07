@@ -60,7 +60,7 @@ export function ParaEvmProvider<
   const updateExternalWalletProviderState = useExternalWalletProviderStore(state => state.updateState);
   const EvmProvider = useExternalWalletProviderStore(state => state.EvmProvider);
   const evmContext = useExternalWalletProviderStore(state => state.evmContext);
-  const para = useClient() ?? _config.para;
+  const para = _config.para ?? useClient();
 
   const {
     projectId,

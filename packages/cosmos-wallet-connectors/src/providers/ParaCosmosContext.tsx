@@ -52,7 +52,7 @@ export function ParaCosmosProvider({
   const updateExternalWalletProviderState = useExternalWalletProviderStore(state => state.updateState);
   const CosmosProvider = useExternalWalletProviderStore(state => state.CosmosProvider);
   const cosmosContext = useExternalWalletProviderStore(state => state.cosmosContext);
-  const para = useClient() ?? (grazOpts.para as any);
+  const para = (grazOpts.para as any) ?? useClient();
 
   const connectParaCosmosWallet = useCallback(async (): Promise<{ result?: unknown; error?: string }> => {
     if (!para) {
