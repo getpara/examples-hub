@@ -75,8 +75,8 @@ export function isUserId(params: AuthParams): params is Auth<'userId'> {
 
 type ExtractAuthOpts = { allowUserId?: boolean; isRequired?: boolean };
 
-export function extractAuthInfo(obj: AuthParams, opts?: ExtractAuthOpts): ExtractAuth | undefined;
 export function extractAuthInfo(obj: AuthParams, opts: ExtractAuthOpts & { isRequired: true }): ExtractAuth;
+export function extractAuthInfo(obj: AuthParams, opts?: ExtractAuthOpts): ExtractAuth | undefined;
 
 export function extractAuthInfo(
   obj: AuthParams,

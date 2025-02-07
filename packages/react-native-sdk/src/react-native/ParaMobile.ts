@@ -1,5 +1,3 @@
-// Copyright (c) Para Labs Inc. All rights reserved.
-
 import {
   ConstructorOpts,
   ParaCore,
@@ -22,11 +20,10 @@ import {
   PasskeyGetRequest,
   PasskeyGetResult,
 } from 'react-native-passkey';
-import { extractAuthInfo, PublicKeyStatus, WalletScheme } from '@getpara/user-management-client';
+import { Auth, extractAuthInfo, PublicKeyStatus, WalletScheme } from '@getpara/user-management-client';
 import { setEnv } from '../config.js';
 import base64url from 'base64url';
 import { webcrypto } from 'crypto';
-import { CountryCallingCode } from 'libphonenumber-js';
 
 const ES256_ALGORITHM = -7;
 const RS256_ALGORITHM = -257;
@@ -34,6 +31,9 @@ const RS256_ALGORITHM = -257;
 /**
  * Represents a mobile implementation of the Para SDK.
  * @extends ParaCore
+ *
+ * @example
+ * const para = new ParaMobile(Environment.BETA, "api_key");
  */
 export class ParaMobile extends ParaCore {
   private relyingPartyId: string;
@@ -77,7 +77,7 @@ export class ParaMobile extends ParaCore {
    * @param {string} verificationCode - The verification code sent to the email.
    * @returns {Promise<string>} The biometrics ID.
    */
-  async verifyEmailBiometricsId(verificationCode: string): Promise<string> {
+  async verifyEmailBiometricsId({ verificationCode }: { verificationCode: string }): Promise<string> {
     const webAuthCreateUrl = await super.verifyEmail({ verificationCode });
     const segments = webAuthCreateUrl.split('/');
     const segments2 = segments[segments.length - 1]!.split('?');
@@ -91,7 +91,7 @@ export class ParaMobile extends ParaCore {
    * @param {string} verificationCode - The verification code sent to the phone.
    * @returns {Promise<string>} The biometrics ID.
    */
-  async verifyPhoneBiometricsId(verificationCode: string): Promise<string> {
+  async verifyPhoneBiometricsId({ verificationCode }: { verificationCode: string }): Promise<string> {
     const webAuthCreateUrl = await super.verifyPhone({ verificationCode });
     const segments = webAuthCreateUrl.split('/');
     const segments2 = segments[segments.length - 1]!.split('?');
@@ -99,28 +99,21 @@ export class ParaMobile extends ParaCore {
 
     return biometricsId;
   }
-
   /**
    * Registers a passkey for the user.
-   * @param {string} identifier - The user's email or phone number.
+   * @param {Auth<'email'> | Auth<'phone'>} auth - The user's authentication details
    * @param {string} biometricsId - The biometrics ID obtained from verification.
-   * @param {webcrypto.Crypto} crypto - The Web Crypto API instance.
-   * @param {'email' | 'phone'} [identifierType='email'] - The type of identifier used.
-   * @param {CountryCallingCode} [countryCode] - The country calling code for phone numbers.
    * @returns {Promise<void>}
    */
-  async registerPasskey(
-    identifier: string,
-    biometricsId: string,
-    crypto: webcrypto.Crypto,
-    identifierType: 'email' | 'phone' = 'email',
-    countryCode?: CountryCallingCode,
-  ) {
+  async registerPasskey({ biometricsId, ...auth }: { biometricsId: string } & (Auth<'email'> | Auth<'phone'>)) {
+    if (!webcrypto || !webcrypto.getRandomValues) {
+      throw new Error('Web crypto is not available. Ensure you have imported the shim from @getpara/react-native-wallet.');
+    }
     const userHandle = new Uint8Array(32);
-    crypto.getRandomValues(userHandle);
+    webcrypto.getRandomValues(userHandle);
     const userHandleEncoded = base64url.encode(userHandle as any);
 
-    const displayIdentifier = identifierType === 'email' ? identifier : `${countryCode}${identifier}`;
+    const { identifier: displayIdentifier } = extractAuthInfo(auth, { isRequired: true });
 
     const requestJson: PasskeyCreateRequest = {
       authenticatorSelection: {
@@ -188,21 +181,16 @@ export class ParaMobile extends ParaCore {
   }
 
   /**
-   * Logs in the user using either email or phone number.
-   * @param {string} [email] - The user's email address.
-   * @param {string} [phone] - The user's phone number.
-   * @param {CountryCallingCode} [countryCode] - The country calling code for phone numbers.
-   * @returns {Promise<Wallet[]>} An array of user wallets.
+   * Logs in the user using their authentication credentials.
+   * @param {AuthParams} params - The authentication parameters.
+   * @returns {Promise<void>}
    */
-  async login(email?: string, phone?: string, countryCode?: CountryCallingCode): Promise<void> {
+  async login({ ...auth }: Auth<'email'> | Auth<'phone'>): Promise<void> {
     await this.logout();
-    const auth = extractAuthInfo({ email, phone, countryCode })?.auth;
 
-    if (!auth) {
-      throw new Error('No auth provided');
-    }
+    const authInfo = extractAuthInfo(auth, { isRequired: true });
 
-    const { challenge, allowedPublicKeys } = await this.ctx.client.getWebChallenge(auth);
+    const { challenge, allowedPublicKeys } = await this.ctx.client.getWebChallenge(authInfo.auth);
 
     const requestJson: PasskeyGetRequest = {
       challenge,
