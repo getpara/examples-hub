@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "capsule-expo",
-    "slug": "capsule-expo",
+    "name": "para-expo",
+    "slug": "para-expo",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

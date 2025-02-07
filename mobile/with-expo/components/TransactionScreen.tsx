@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { SafeAreaView, ScrollView, View, StyleSheet } from "react-native";
 import { Text, Input, Button } from "@rneui/themed";
 import { SelectList } from "react-native-dropdown-select-list";
-import { WalletType } from "@usecapsule/react-native-wallet";
+import { WalletType } from "@getpara/react-native-wallet";
 
 interface SigningOption {
   key: string;

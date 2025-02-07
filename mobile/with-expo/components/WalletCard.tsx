@@ -2,7 +2,7 @@ import React from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { Text, Button, Badge } from "@rneui/themed";
 import * as Clipboard from "expo-clipboard";
-import { WalletType } from "@usecapsule/react-native-wallet";
+import { WalletType } from "@getpara/react-native-wallet";
 
 interface WalletCardProps {
   type: WalletType;
