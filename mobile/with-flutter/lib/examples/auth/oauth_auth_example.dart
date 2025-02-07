@@ -2,7 +2,6 @@
 import 'dart:async';
 import 'package:para_flutter/widgets/demo_home.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:para/para.dart';
 import 'package:para_flutter/client/para.dart';
