@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { Environment } from '../../src/definitions';
+import { Environment } from '../../src/types';
 import { getBaseMPCNetworkUrl, getBaseUrl, initClient } from '../../src/external/userManagementClient';
 import Client from '@getpara/user-management-client';
 

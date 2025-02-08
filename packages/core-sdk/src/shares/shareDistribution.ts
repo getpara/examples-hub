@@ -2,7 +2,7 @@ import { BackupKitEmailProps, EncryptorType, KeyShareType } from '@getpara/user-
 
 import { encryptWithDerivedPublicKey } from '../cryptography/utils.js';
 import { sendRecoveryForShare } from './recovery.js';
-import { Ctx } from '../definitions.js';
+import { Ctx } from '../types/index.js';
 
 // function to call on new user share to perform all necessary distribution
 export async function distributeNewShare({

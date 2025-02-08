@@ -1,6 +1,6 @@
 import Client from '@getpara/user-management-client';
 
-import { Environment } from '../definitions.js';
+import { Environment } from '../types/index.js';
 
 export function getBaseOAuthUrl(env: Environment): string {
   switch (env) {

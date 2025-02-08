@@ -6,10 +6,10 @@ import { WALLET_BASE_KEY } from '../queries/useWallet.js';
 import { Compute } from '../../types/utils.js';
 import { UseMutationReturnType } from '../../types/query.js';
 import { renameMutations } from '../../utils/renameMutations.js';
-import { LoginResp } from '@getpara/web-sdk';
+import { LoginResponse } from '@getpara/web-sdk';
 
 type UseWaitForLoginAndSetupReturnType<
-  TData = LoginResp,
+  TData = LoginResponse,
   TError = Error,
   TVariables = WaitForLoginAndSetupArgs,
   TContext = unknown,
@@ -35,7 +35,7 @@ export const useWaitForLoginAndSetup = () => {
     },
   });
 
-  return renameMutations<UseWaitForLoginAndSetupReturnType, LoginResp, Error, WaitForLoginAndSetupArgs, unknown>(
+  return renameMutations<UseWaitForLoginAndSetupReturnType, LoginResponse, Error, WaitForLoginAndSetupArgs, unknown>(
     mutation,
     'waitForLoginAndSetup',
   );

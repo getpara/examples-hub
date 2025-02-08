@@ -1,16 +1,9 @@
 /// <reference lib="dom" />
 import { describe, vi, afterEach, expect, it, beforeAll } from 'vitest';
 
-import ParaCore, {
-  AuthMethod,
-  Environment,
-  getBaseUrl,
-  getPortalBaseURL,
-  getPublicKeyHex,
-  OAuthMethod,
-  PopupType,
-  SuccessfulSignatureRes,
-} from '../../src/index.js';
+import { AuthMethod, OAuthMethod } from '@getpara/user-management-client';
+import ParaCore, { getBaseUrl, getPortalBaseURL, getPublicKeyHex } from '../../src/index.js';
+import { Environment, PopupType, SuccessfulSignatureRes, PregenIdentifierType, Wallet } from '../../src/types/index.js';
 import {
   API_KEY,
   EXTERNAL_WALLET,
@@ -78,7 +71,6 @@ import {
   PublicKeyType,
   WalletType,
 } from '@getpara/user-management-client';
-import { PregenIdentifierType, Wallet } from '../../src/ParaCore.js';
 import { getWorkerContent } from '../utils.js';
 import { mockPreKeygen } from '../mocks/mockPlatformUtils.js';
 import '../mocks/mockCryptographyUtils.js';

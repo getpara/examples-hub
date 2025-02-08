@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, afterEach } from 'vitest';
 import { SESSION_PUBLIC_KEYS, USER_ID, WALLET } from '../constants';
 import { distributeNewShare } from '../../src/shares/shareDistribution.js';
-import { Environment } from '../../src/definitions.js';
+import { Environment } from '../../src/types/index.js';
 import { initClient } from '../../src/external/userManagementClient.js';
 import { mockGetSessionPublicKeys, mockGetPasswords } from '../mocks/mockUserManagementClient.js';
 import { EncryptorType, KeyShareType } from '@getpara/user-management-client';

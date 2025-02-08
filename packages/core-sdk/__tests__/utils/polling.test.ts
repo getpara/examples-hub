@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, afterEach } from 'vitest';
-import { waitUntilTrue } from '../../src/utils/pollingUtils.js';
+import { waitUntilTrue } from '../../src/utils/index.js';
 
 function timeout(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));

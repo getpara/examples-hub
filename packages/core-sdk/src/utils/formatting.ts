@@ -3,7 +3,8 @@ import { sha256 } from '@noble/hashes/sha256';
 import { ripemd160 } from '@noble/hashes/ripemd160';
 
 import elliptic from 'elliptic';
-import { WalletTypeProp } from '../definitions.js';
+import { WalletTypeProp } from '../types/index.js';
+import parsePhoneNumberFromString from 'libphonenumber-js';
 
 const secp256k1 = new elliptic.ec('secp256k1');
 
@@ -82,4 +83,14 @@ export function truncateAddress(
   const headLength = (addressType === 'COSMOS' ? prefix.length : addressType === 'SOLANA' ? 0 : 2) + 4;
 
   return `${str.slice(0, headLength)}...${str.slice(-4)}`;
+}
+
+export function stringToPhoneNumber(str: string): string {
+  return parsePhoneNumberFromString(str)
+    ?.formatInternational()
+    .replace(/[^\d+]/g, '');
+}
+
+export function normalizePhoneNumber(countryCode: string, number: string): string | undefined {
+  return stringToPhoneNumber(`${countryCode[0] !== '+' ? '+' : ''}${countryCode}${number}`);
 }

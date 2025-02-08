@@ -1,7 +1,7 @@
 import { BackupKitEmailProps, EncryptedKeyShare, EncryptorType, KeyShareType } from '@getpara/user-management-client';
 
 import { KeyContainer } from './KeyContainer.js';
-import { Ctx } from '../definitions.js';
+import { Ctx } from '../types/index.js';
 
 export async function sendRecoveryForShare({
   ctx,

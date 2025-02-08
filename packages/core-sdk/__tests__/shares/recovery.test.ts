@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, afterEach } from 'vitest';
 import { RECOVERY_PUBLIC_KEYS, USER_ID, WALLET } from '../constants';
 import { sendRecoveryForShare } from '../../src/shares/recovery';
-import { Environment } from '../../src/definitions.js';
+import { Environment } from '../../src/types/index.js';
 import { initClient } from '../../src/external/userManagementClient.js';
 import {
   mockUploadUserKeyShares,

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { Environment } from '../../src/definitions';
+import { Environment } from '../../src/types';
 import { initClient } from '../../src/external/mpcComputationClient';
 import { getBaseMPCNetworkUrl } from '../../src';
 

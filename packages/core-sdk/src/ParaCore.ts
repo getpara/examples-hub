@@ -1,6 +1,16 @@
+import { Buffer as NodeBuffer } from 'buffer';
+if (typeof global !== 'undefined') {
+  global.Buffer = global.Buffer || NodeBuffer;
+} else if (typeof window !== 'undefined') {
+  window.Buffer = window.Buffer || NodeBuffer;
+  window.global = window.global || window;
+} else {
+  self.Buffer = self.Buffer || NodeBuffer;
+  self.global = self.global || self;
+}
+
 import Client, {
   AuthMethod,
-  AuthType,
   BackupKitEmailProps,
   CurrentWalletIds,
   EmailTheme,
@@ -31,328 +41,57 @@ import forge from 'node-forge';
 const { pki, jsbn } = forge;
 
 import { decryptWithPrivateKey, getAsymmetricKeyPair, getPublicKeyHex } from './cryptography/utils.js';
-import {
-  Ctx,
-  WalletSchemeTypeMap,
-  getPortalBaseURL,
-  Environment,
-  WalletFilters,
-  WalletTypeProp,
-  getParaConnectBaseUrl,
-} from './definitions.js';
 import { getBaseOAuthUrl, initClient } from './external/userManagementClient.js';
 import * as mpcComputationClient from './external/mpcComputationClient.js';
 import { distributeNewShare } from './shares/shareDistribution.js';
 import {
+  Ctx,
+  Environment,
   Theme,
   FullSignatureRes,
   SuccessfulSignatureRes,
   DeniedSignatureRes,
   PopupType,
-  EmbeddedWalletType,
-  ExternalWalletType,
   ExternalWalletInfo,
   GetWebAuthUrlForLoginParams,
   ParaEvent,
-  BaseEvent,
-  AccountSetupResp,
-  LoginResp,
-  WalletCreatedResp,
-  PregenWalletClaimedResp,
+  AccountSetupResponse,
+  LoginResponse,
+  WalletCreatedResponse,
+  PregenWalletClaimedResponse,
+  WalletFilters,
+  WalletTypeProp,
+  Wallet,
+  SupportedWalletTypes,
+  deprecated__SupportedWalletTypesOpt,
+  PortalUrlOptions,
+  ConstructorOpts,
+  RecoveryStatus,
 } from './types/index.js';
 import * as transmissionUtils from './transmission/transmissionUtils.js';
 import { PlatformUtils } from './PlatformUtils.js';
 import { sendRecoveryForShare } from './shares/recovery.js';
-import parsePhoneNumberFromString, { CountryCallingCode } from 'libphonenumber-js';
-import { getCosmosAddress, truncateAddress } from './utils/formattingUtils.js';
+import { CountryCallingCode } from 'libphonenumber-js';
+import {
+  constructUrl,
+  dispatchEvent,
+  entityToWallet,
+  getCosmosAddress,
+  getEquivalentTypes,
+  getParaConnectBaseUrl,
+  getPortalBaseURL,
+  getSchemes,
+  isPregenIdentifierMatch,
+  isWalletSupported,
+  migrateWallet,
+  normalizePhoneNumber,
+  truncateAddress,
+  WalletSchemeTypeMap,
+} from './utils/index.js';
 import { TransactionReviewDenied, TransactionReviewError, TransactionReviewTimeout } from './errors.js';
-
-const PARA_CORE_VERSION = process.env.PARA_CORE_VERSION;
-
-function dispatchEvent<T>(type: ParaEvent, data: T, error?: string) {
-  typeof window !== 'undefined' &&
-    !!window.dispatchEvent &&
-    window.dispatchEvent(
-      new CustomEvent<BaseEvent<T>>(type, { detail: { data, ...(error && { error: new Error(error) }) } }),
-    );
-}
-
-function isPregenIdentifierMatch(
-  a: string | null | undefined,
-  b: string | null | undefined,
-  type: TPregenIdentifierType,
-): boolean {
-  if (!a || !b) {
-    return false;
-  }
-  switch (type) {
-    case 'EMAIL':
-      return a.toLowerCase() === b.toLowerCase();
-    case 'PHONE':
-      return stringToPhoneNumber(a) === stringToPhoneNumber(b);
-    case 'CUSTOM_ID':
-      return a === b;
-    default:
-      return a.replace(/^@/g, '').toLowerCase() === b.replace(/^@/g, '').toLowerCase();
-  }
-}
-
-export function entityToWallet(w: WalletEntity): Omit<Wallet, 'signer'> {
-  return {
-    ...w,
-    scheme: w.scheme as WalletScheme,
-    type: w.type as WalletType,
-    pregenIdentifierType: w.pregenIdentifierType as TPregenIdentifierType,
-  };
-}
-
-function migrateWallet(obj: Record<string, unknown>): Wallet {
-  if (['USER', 'PREGEN'].includes(obj.type as string)) {
-    obj.isPregen = obj.type === 'PREGEN';
-    obj.type = obj.scheme === WalletScheme.ED25519 ? WalletType.SOLANA : WalletType.EVM;
-  }
-
-  if (!!obj.scheme && !obj.type) {
-    obj.type = obj.scheme === WalletScheme.ED25519 ? WalletType.SOLANA : WalletType.EVM;
-  }
-
-  return obj as unknown as Wallet;
-}
-
-export type SupportedWalletTypeConfig = {
-  optional?: boolean;
-};
-
-export type deprecated__SupportedWalletTypesOpt = {
-  [WalletType.EVM]?: boolean | SupportedWalletTypeConfig;
-  [WalletType.SOLANA]?: boolean | SupportedWalletTypeConfig;
-  [WalletType.COSMOS]?: boolean | (SupportedWalletTypeConfig & { prefix?: string });
-};
-
-export type SupportedWalletTypes = { type: WalletType; optional?: boolean }[];
-
-// Make sure to keep this in sync with capsule-org/src/entities/recoveryAttemptEntity.ts
-export enum RecoveryStatus {
-  INITIATED = 'INITIATED',
-  READY = 'READY',
-  EXPIRED = 'EXPIRED',
-  FINISHED = 'FINISHED',
-  CANCELLED = 'CANCELLED',
-}
-
-/** @deprecated */
-export enum PregenIdentifierType {
-  EMAIL = 'EMAIL',
-  PHONE = 'PHONE',
-}
-
-export interface Wallet {
-  createdAt?: string;
-  id: string;
-  name?: string;
-  signer: string;
-  address?: string;
-  addressSecondary?: string;
-  publicKey?: string;
-  scheme?: WalletScheme;
-  type?: EmbeddedWalletType | ExternalWalletType;
-  isPregen?: boolean;
-  pregenIdentifier?: string;
-  pregenIdentifierType?: TPregenIdentifierType;
-  userId?: string;
-  partnerId?: string;
-  partner?: PartnerEntity;
-  lastUsedAt?: string;
-  lastUsedPartner?: PartnerEntity;
-  lastUsedPartnerId?: string;
-  isExternal?: boolean;
-}
-
-export interface ConstructorOpts {
-  useStorageOverrides?: boolean;
-  disableWorkers?: boolean;
-  offloadMPCComputationURL?: string;
-  useLocalFiles?: boolean;
-  localStorageGetItemOverride?: (key: string) => Promise<string | null>;
-  localStorageSetItemOverride?: (key: string, value: string) => Promise<void>;
-  sessionStorageGetItemOverride?: (key: string) => Promise<string | null>;
-  sessionStorageSetItemOverride?: (key: string, value: string) => Promise<void>;
-  sessionStorageRemoveItemOverride?: (key: string) => Promise<void>;
-  clearStorageOverride?: () => Promise<void>;
-  /**
-   * Hex color to use in the portal for the background color.
-   * @deprecated use portalTheme instead
-   */
-  portalBackgroundColor?: string; // please use hex color codes
-  /**
-   * Hex color to use in the portal for the primary button.
-   * @deprecated use portalTheme instead
-   */
-  portalPrimaryButtonColor?: string; // please use hex color codes
-  /**
-   * Hex text color to use in the portal.
-   * @deprecated use portalTheme instead
-   */
-  portalTextColor?: string; // please use hex color codes
-  /**
-   * Hex color to use in the portal for the primary button text.
-   * @deprecated use portalTheme instead
-   */
-  portalPrimaryButtonTextColor?: string; // please use hex color codes
-  /**
-   * Theme to use for the portal
-   * @deprecated configure theming through the developer portal
-   */
-  portalTheme?: Theme;
-  useDKLSForCreation?: boolean;
-  disableWebSockets?: boolean;
-  wasmOverride?: ArrayBuffer;
-  /**
-   * Base theme for the emails sent from this Para instance.
-   * @default - dark
-   * @deprecated configure theming through the developer portal
-   */
-  emailTheme?: EmailTheme;
-  /**
-   * Hex color to use as the primary color in the emails.
-   * @default - #FE452B
-   * @deprecated configure theming through the developer portal
-   */
-  emailPrimaryColor?: string;
-  /**
-   * Linkedin URL to link to in the emails. Should be a secure URL string starting with https://www.linkedin.com/company/.
-   * @deprecated configure this through the developer portal
-   */
-  linkedinUrl?: string;
-  /**
-   * Github URL to link to in the emails. Should be a secure URL string starting with https://github.com/.
-   * @deprecated configure this through the developer portal
-   */
-  githubUrl?: string;
-  /**
-   * X (Twitter) URL to link to in the emails. Should be a secure URL string starting with https://twitter.com/.
-   * @deprecated configure this through the developer portal
-   */
-  xUrl?: string;
-  /**
-   * Support URL to link to in the emails. This can be a secure https URL or a mailto: string. Will default to using the stored application URL is nothing is provided here.
-   * @deprecated homepageUrl will be used for this, configure it through the developer portal
-   */
-  supportUrl?: string;
-  /**
-   * URL for your home landing page. Should be a secure URL string starting with https://.
-   * @deprecated configure this through the developer portal
-   */
-  homepageUrl?: string;
-  /**
-   * Which type of wallet your application supports, in the form `{ [WalletType]: true }`. Currently allowed values for `WalletType` are `'EVM'`, `'SOLANA'`, or `'COSMOS'`.
-   *
-   * To specify which prefix to use for new Cosmos wallets, pass `{ COSMOS: { prefix: 'your-prefix' } }`. Defaults to `'cosmos'`.
-   * @deprecated Configure your app's supported wallet types in the Para Developer Portal.
-   */
-  supportedWalletTypes?: deprecated__SupportedWalletTypesOpt;
-  /**
-   * If `true`, the SDK will use the device's temporary session storage instead of saving user and wallet data to local storage.
-   */
-  useSessionStorage?: boolean;
-  /**
-   * Partner ID set in the Para Portal to track analytics for legacy SDK versions. This variable is unused outside of the Para Portal.
-   */
-  portalPartnerId?: string;
-}
-
-type PortalUrlOptions = {
-  params?: Record<string, string | undefined | null>;
-  authType?: AuthType;
-  isForNewDevice?: boolean;
-  loginEncryptionPublicKey?: string;
-  newDeviceSessionId?: string;
-  newDeviceEncryptionKey?: string;
-  partnerId?: string;
-  sessionId?: string;
-  theme?: Theme;
-  pathId?: string;
-  displayName?: string;
-  pfpUrl?: string;
-};
-
-export const PREFIX = '@CAPSULE/';
-const LOCAL_STORAGE_EMAIL = `${PREFIX}e-mail`;
-const LOCAL_STORAGE_PHONE = `${PREFIX}phone`;
-const LOCAL_STORAGE_COUNTRY_CODE = `${PREFIX}countryCode`;
-const LOCAL_STORAGE_FARCASTER_USERNAME = `${PREFIX}farcasterUsername`;
-const LOCAL_STORAGE_TELEGRAM_USER_ID = `${PREFIX}telegramUserId`;
-const LOCAL_STORAGE_USER_ID = `${PREFIX}userId`;
-const LOCAL_STORAGE_ED25519_WALLETS = `${PREFIX}ed25519Wallets`;
-const LOCAL_STORAGE_WALLETS = `${PREFIX}wallets`;
-const LOCAL_STORAGE_EXTERNAL_WALLETS = `${PREFIX}externalWallets`;
-const LOCAL_STORAGE_CURRENT_WALLET_IDS = `${PREFIX}currentWalletIds`;
-const LOCAL_STORAGE_CURRENT_EXTERNAL_WALLET_ADDRESSES = `${PREFIX}currentExternalWalletAddresses`;
-const LOCAL_STORAGE_SESSION_COOKIE = `${PREFIX}sessionCookie`;
-const SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR = `${PREFIX}loginEncryptionKeyPair`;
-const POLLING_INTERVAL_MS = 2000;
-const SHORT_POLLING_INTERVAL_MS = 1000;
-
-export function stringToPhoneNumber(str: string): string {
-  return parsePhoneNumberFromString(str)
-    ?.formatInternational()
-    .replace(/[^\d+]/g, '');
-}
-
-export function normalizePhoneNumber(countryCode: string, number: string): string | undefined {
-  return stringToPhoneNumber(`${countryCode[0] !== '+' ? '+' : ''}${countryCode}${number}`);
-}
-
-export function isWalletSupported(types: WalletType[], wallet: Omit<Wallet, 'signer'>): boolean {
-  return types.some((walletType: WalletType) => !!WalletSchemeTypeMap[wallet.scheme][walletType]);
-}
-
-function getSchemes(types: WalletTypeProp[] | SupportedWalletTypes): WalletScheme[] {
-  return <WalletScheme[]>Object.keys(WalletSchemeTypeMap).filter(scheme => {
-    if (scheme === WalletScheme.CGGMP) {
-      return false;
-    }
-    return (Array.isArray(types) ? types : Object.keys(types)).some(type => WalletSchemeTypeMap[scheme][type]);
-  });
-}
-
-export function getWalletTypes(schemes: WalletScheme[]): WalletType[] {
-  return [
-    ...new Set(
-      schemes.reduce((acc, scheme) => {
-        return [...acc, ...Object.keys(WalletSchemeTypeMap[scheme]).filter(type => WalletSchemeTypeMap[scheme][type])];
-      }, []),
-    ),
-  ];
-}
-
-export function getEquivalentTypes(types: WalletTypeProp[] | WalletTypeProp): WalletType[] {
-  return getWalletTypes(getSchemes((Array.isArray(types) ? types : [types]).map(t => WalletType[t])));
-}
-
-export function isCosmosRequired(supportedWalletTypes: SupportedWalletTypes): boolean {
-  return supportedWalletTypes.some(({ type, optional }) => type === WalletType.COSMOS && !optional);
-}
-
-function constructUrl({
-  base,
-  path,
-  params = {},
-}: {
-  base: string;
-  path: string;
-  params?: Record<string, string | undefined | null>;
-}): string {
-  const url = new URL(path, base);
-
-  Object.entries(params).forEach(([key, value]) => {
-    if (!!value && value !== 'undefined' && value !== 'null') url.searchParams.set(key, value.toString());
-  });
-
-  return url.toString();
-}
+import * as constants from './constants.js';
 export abstract class ParaCore {
-  static version?: string = PARA_CORE_VERSION;
+  static version?: string = constants.PARA_CORE_VERSION;
 
   ctx: Ctx;
 
@@ -572,10 +311,10 @@ export abstract class ParaCore {
    */
   clearStorage = async (type: 'local' | 'session' | 'secure' | 'all' = 'all'): Promise<void> => {
     const isAll = type === 'all';
-    (isAll || type === 'local') && this.platformUtils.localStorage.clear(PREFIX);
-    (isAll || type === 'session') && this.platformUtils.sessionStorage.clear(PREFIX);
+    (isAll || type === 'local') && this.platformUtils.localStorage.clear(constants.PREFIX);
+    (isAll || type === 'session') && this.platformUtils.sessionStorage.clear(constants.PREFIX);
     if ((isAll || type === 'secure') && this.platformUtils.secureStorage) {
-      this.platformUtils.secureStorage.clear(PREFIX);
+      this.platformUtils.secureStorage.clear(constants.PREFIX);
     }
   };
 
@@ -907,7 +646,10 @@ export abstract class ParaCore {
 
     this.persistSessionCookie = (cookie: string) => {
       this.sessionCookie = cookie;
-      (opts.useSessionStorage ? this.sessionStorageSetItem : this.localStorageSetItem)(LOCAL_STORAGE_SESSION_COOKIE, cookie);
+      (opts.useSessionStorage ? this.sessionStorageSetItem : this.localStorageSetItem)(
+        constants.LOCAL_STORAGE_SESSION_COOKIE,
+        cookie,
+      );
     };
 
     this.ctx = {
@@ -979,19 +721,19 @@ export abstract class ParaCore {
       return;
     }
 
-    this.email = (this.localStorageGetItem(LOCAL_STORAGE_EMAIL) as string) || undefined;
-    this.countryCode = (this.localStorageGetItem(LOCAL_STORAGE_COUNTRY_CODE) as CountryCallingCode) || undefined;
-    this.phone = (this.localStorageGetItem(LOCAL_STORAGE_PHONE) as string) || undefined;
-    this.userId = (this.localStorageGetItem(LOCAL_STORAGE_USER_ID) as string) || undefined;
-    this.telegramUserId = (this.localStorageGetItem(LOCAL_STORAGE_TELEGRAM_USER_ID) as string) || undefined;
+    this.email = (this.localStorageGetItem(constants.LOCAL_STORAGE_EMAIL) as string) || undefined;
+    this.countryCode = (this.localStorageGetItem(constants.LOCAL_STORAGE_COUNTRY_CODE) as CountryCallingCode) || undefined;
+    this.phone = (this.localStorageGetItem(constants.LOCAL_STORAGE_PHONE) as string) || undefined;
+    this.userId = (this.localStorageGetItem(constants.LOCAL_STORAGE_USER_ID) as string) || undefined;
+    this.telegramUserId = (this.localStorageGetItem(constants.LOCAL_STORAGE_TELEGRAM_USER_ID) as string) || undefined;
 
     const stringWallets = this.platformUtils.secureStorage
-      ? this.platformUtils.secureStorage.get(LOCAL_STORAGE_WALLETS)
-      : this.localStorageGetItem(LOCAL_STORAGE_WALLETS);
+      ? this.platformUtils.secureStorage.get(constants.LOCAL_STORAGE_WALLETS)
+      : this.localStorageGetItem(constants.LOCAL_STORAGE_WALLETS);
     const _wallets = JSON.parse((stringWallets as string) || '{}');
     const stringEd25519Wallets = this.platformUtils.secureStorage
-      ? this.platformUtils.secureStorage.get(LOCAL_STORAGE_ED25519_WALLETS)
-      : this.localStorageGetItem(LOCAL_STORAGE_ED25519_WALLETS);
+      ? this.platformUtils.secureStorage.get(constants.LOCAL_STORAGE_ED25519_WALLETS)
+      : this.localStorageGetItem(constants.LOCAL_STORAGE_ED25519_WALLETS);
     const _ed25519Wallets = JSON.parse((stringEd25519Wallets as string) || '{}');
 
     const wallets = {
@@ -1012,7 +754,7 @@ export abstract class ParaCore {
     this.setWallets(wallets);
 
     // TODO: Improve not great check
-    const _currentWalletIds = (this.localStorageGetItem(LOCAL_STORAGE_CURRENT_WALLET_IDS) as string) ?? undefined;
+    const _currentWalletIds = (this.localStorageGetItem(constants.LOCAL_STORAGE_CURRENT_WALLET_IDS) as string) ?? undefined;
     const currentWalletIds = [undefined, null, 'undefined'].includes(_currentWalletIds)
       ? {}
       : (() => {
@@ -1035,8 +777,8 @@ export abstract class ParaCore {
 
     // TODO: remove sessionStorageGetItem call once new version is being consumed
     this.sessionCookie =
-      (this.localStorageGetItem(LOCAL_STORAGE_SESSION_COOKIE) as string) ||
-      (this.sessionStorageGetItem(LOCAL_STORAGE_SESSION_COOKIE) as string) ||
+      (this.localStorageGetItem(constants.LOCAL_STORAGE_SESSION_COOKIE) as string) ||
+      (this.sessionStorageGetItem(constants.LOCAL_STORAGE_SESSION_COOKIE) as string) ||
       undefined;
 
     // In case currentWalletIds was missing from storage
@@ -1047,18 +789,20 @@ export abstract class ParaCore {
       this.findWalletId(undefined, { forbidPregen: true });
     }
 
-    const loginEncryptionKey = this.sessionStorageGetItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR) as string | null;
+    const loginEncryptionKey = this.sessionStorageGetItem(constants.SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR) as
+      | string
+      | null;
     if (loginEncryptionKey && loginEncryptionKey !== 'undefined') {
       this.loginEncryptionKeyPair = this.convertEncryptionKeyPair(JSON.parse(loginEncryptionKey));
     }
 
-    const stringExternalWallets = this.localStorageGetItem(LOCAL_STORAGE_EXTERNAL_WALLETS);
+    const stringExternalWallets = this.localStorageGetItem(constants.LOCAL_STORAGE_EXTERNAL_WALLETS);
     const _externalWallets = JSON.parse((stringExternalWallets as string) || '{}');
 
     this.setExternalWallets(_externalWallets);
 
     const _currentExternalWalletAddresses =
-      (this.localStorageGetItem(LOCAL_STORAGE_CURRENT_EXTERNAL_WALLET_ADDRESSES) as string) || undefined;
+      (this.localStorageGetItem(constants.LOCAL_STORAGE_CURRENT_EXTERNAL_WALLET_ADDRESSES) as string) || undefined;
     this.currentExternalWalletAddresses = _currentExternalWalletAddresses
       ? JSON.parse(_currentExternalWalletAddresses)
       : undefined;
@@ -1118,19 +862,21 @@ export abstract class ParaCore {
    * Init only needs to be called for storage that is async.
    */
   async init(): Promise<void> {
-    this.email = ((await this.localStorageGetItem(LOCAL_STORAGE_EMAIL)) as string) || undefined;
-    this.countryCode = ((await this.localStorageGetItem(LOCAL_STORAGE_COUNTRY_CODE)) as CountryCallingCode) || undefined;
-    this.phone = ((await this.localStorageGetItem(LOCAL_STORAGE_PHONE)) as string) || undefined;
-    this.userId = ((await this.localStorageGetItem(LOCAL_STORAGE_USER_ID)) as string) || undefined;
-    this.telegramUserId = ((await this.localStorageGetItem(LOCAL_STORAGE_TELEGRAM_USER_ID)) as string) || undefined;
+    this.email = ((await this.localStorageGetItem(constants.LOCAL_STORAGE_EMAIL)) as string) || undefined;
+    this.countryCode =
+      ((await this.localStorageGetItem(constants.LOCAL_STORAGE_COUNTRY_CODE)) as CountryCallingCode) || undefined;
+    this.phone = ((await this.localStorageGetItem(constants.LOCAL_STORAGE_PHONE)) as string) || undefined;
+    this.userId = ((await this.localStorageGetItem(constants.LOCAL_STORAGE_USER_ID)) as string) || undefined;
+    this.telegramUserId =
+      ((await this.localStorageGetItem(constants.LOCAL_STORAGE_TELEGRAM_USER_ID)) as string) || undefined;
 
     const stringWallets = this.platformUtils.secureStorage
-      ? await this.platformUtils.secureStorage.get(LOCAL_STORAGE_WALLETS)
-      : await this.localStorageGetItem(LOCAL_STORAGE_WALLETS);
+      ? await this.platformUtils.secureStorage.get(constants.LOCAL_STORAGE_WALLETS)
+      : await this.localStorageGetItem(constants.LOCAL_STORAGE_WALLETS);
     const _wallets = JSON.parse((stringWallets as string) || '{}');
     const stringEd25519Wallets = this.platformUtils.secureStorage
-      ? await this.platformUtils.secureStorage.get(LOCAL_STORAGE_ED25519_WALLETS)
-      : await this.localStorageGetItem(LOCAL_STORAGE_ED25519_WALLETS);
+      ? await this.platformUtils.secureStorage.get(constants.LOCAL_STORAGE_ED25519_WALLETS)
+      : await this.localStorageGetItem(constants.LOCAL_STORAGE_ED25519_WALLETS);
     const _ed25519Wallets = JSON.parse((stringEd25519Wallets as string) || '{}');
 
     const wallets = {
@@ -1151,7 +897,8 @@ export abstract class ParaCore {
     await this.setWallets(wallets);
 
     // TODO: Improve not great check
-    const _currentWalletIds = ((await this.localStorageGetItem(LOCAL_STORAGE_CURRENT_WALLET_IDS)) as string) ?? undefined;
+    const _currentWalletIds =
+      ((await this.localStorageGetItem(constants.LOCAL_STORAGE_CURRENT_WALLET_IDS)) as string) ?? undefined;
     const currentWalletIds = [undefined, null, 'undefined', 'null'].includes(_currentWalletIds)
       ? {}
       : (() => {
@@ -1174,8 +921,8 @@ export abstract class ParaCore {
 
     // TODO: remove sessionStorageGetItem call once new version is being consumed
     this.sessionCookie =
-      ((await this.localStorageGetItem(LOCAL_STORAGE_SESSION_COOKIE)) as string) ||
-      ((await this.sessionStorageGetItem(LOCAL_STORAGE_SESSION_COOKIE)) as string) ||
+      ((await this.localStorageGetItem(constants.LOCAL_STORAGE_SESSION_COOKIE)) as string) ||
+      ((await this.sessionStorageGetItem(constants.LOCAL_STORAGE_SESSION_COOKIE)) as string) ||
       undefined;
 
     // In case currentWalletIds was missing from storage
@@ -1186,20 +933,20 @@ export abstract class ParaCore {
       this.findWalletId(undefined, { forbidPregen: true });
     }
 
-    const loginEncryptionKey = (await this.sessionStorageGetItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR)) as
+    const loginEncryptionKey = (await this.sessionStorageGetItem(constants.SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR)) as
       | string
       | null;
     if (loginEncryptionKey && loginEncryptionKey !== 'undefined') {
       this.loginEncryptionKeyPair = this.convertEncryptionKeyPair(JSON.parse(loginEncryptionKey));
     }
 
-    const stringExternalWallets = await this.localStorageGetItem(LOCAL_STORAGE_EXTERNAL_WALLETS);
+    const stringExternalWallets = await this.localStorageGetItem(constants.LOCAL_STORAGE_EXTERNAL_WALLETS);
     const _externalWallets = JSON.parse((stringExternalWallets as string) || '{}');
 
     await this.setExternalWallets(_externalWallets);
 
     const _currentExternalWalletAddresses =
-      ((await this.localStorageGetItem(LOCAL_STORAGE_CURRENT_EXTERNAL_WALLET_ADDRESSES)) as string) || undefined;
+      ((await this.localStorageGetItem(constants.LOCAL_STORAGE_CURRENT_EXTERNAL_WALLET_ADDRESSES)) as string) || undefined;
     this.currentExternalWalletAddresses = _currentExternalWalletAddresses
       ? JSON.parse(_currentExternalWalletAddresses)
       : undefined;
@@ -1213,7 +960,7 @@ export abstract class ParaCore {
    */
   async setEmail(email: string): Promise<void> {
     this.email = email;
-    await this.localStorageSetItem(LOCAL_STORAGE_EMAIL, email);
+    await this.localStorageSetItem(constants.LOCAL_STORAGE_EMAIL, email);
   }
 
   /**
@@ -1222,7 +969,7 @@ export abstract class ParaCore {
    */
   async setTelegramUserId(telegramUserId: string): Promise<void> {
     this.telegramUserId = telegramUserId;
-    await this.localStorageSetItem(LOCAL_STORAGE_TELEGRAM_USER_ID, telegramUserId);
+    await this.localStorageSetItem(constants.LOCAL_STORAGE_TELEGRAM_USER_ID, telegramUserId);
   }
 
   /**
@@ -1233,8 +980,8 @@ export abstract class ParaCore {
   async setPhoneNumber(phone: string, countryCode: CountryCallingCode): Promise<void> {
     this.phone = phone;
     this.countryCode = countryCode;
-    await this.localStorageSetItem(LOCAL_STORAGE_PHONE, phone);
-    await this.localStorageSetItem(LOCAL_STORAGE_COUNTRY_CODE, countryCode);
+    await this.localStorageSetItem(constants.LOCAL_STORAGE_PHONE, phone);
+    await this.localStorageSetItem(constants.LOCAL_STORAGE_COUNTRY_CODE, countryCode);
   }
 
   /**
@@ -1243,7 +990,7 @@ export abstract class ParaCore {
    */
   async setFarcasterUsername(farcasterUsername: string): Promise<void> {
     this.farcasterUsername = farcasterUsername;
-    await this.localStorageSetItem(LOCAL_STORAGE_FARCASTER_USERNAME, farcasterUsername);
+    await this.localStorageSetItem(constants.LOCAL_STORAGE_FARCASTER_USERNAME, farcasterUsername);
   }
 
   /**
@@ -1275,7 +1022,7 @@ export abstract class ParaCore {
    */
   async setUserId(userId: string): Promise<void> {
     this.userId = userId;
-    await this.localStorageSetItem(LOCAL_STORAGE_USER_ID, userId);
+    await this.localStorageSetItem(constants.LOCAL_STORAGE_USER_ID, userId);
   }
 
   /**
@@ -1285,10 +1032,10 @@ export abstract class ParaCore {
   async setWallets(wallets: Record<string, Wallet>): Promise<void> {
     this.wallets = wallets;
     if (this.platformUtils.secureStorage) {
-      await this.platformUtils.secureStorage.set(LOCAL_STORAGE_WALLETS, JSON.stringify(wallets));
+      await this.platformUtils.secureStorage.set(constants.LOCAL_STORAGE_WALLETS, JSON.stringify(wallets));
       return;
     }
-    await this.localStorageSetItem(LOCAL_STORAGE_WALLETS, JSON.stringify(wallets));
+    await this.localStorageSetItem(constants.LOCAL_STORAGE_WALLETS, JSON.stringify(wallets));
   }
 
   /**
@@ -1297,14 +1044,14 @@ export abstract class ParaCore {
    */
   async setExternalWallets(externalWallets: Record<string, Wallet>): Promise<void> {
     this.externalWallets = externalWallets;
-    await this.localStorageSetItem(LOCAL_STORAGE_EXTERNAL_WALLETS, JSON.stringify(externalWallets));
+    await this.localStorageSetItem(constants.LOCAL_STORAGE_EXTERNAL_WALLETS, JSON.stringify(externalWallets));
   }
 
   async setCurrentExternalWalletAddresses(currentExternalWalletAddresses: string[]): Promise<void> {
     this.currentExternalWalletAddresses = currentExternalWalletAddresses;
 
     await this.localStorageSetItem(
-      LOCAL_STORAGE_CURRENT_EXTERNAL_WALLET_ADDRESSES,
+      constants.LOCAL_STORAGE_CURRENT_EXTERNAL_WALLET_ADDRESSES,
       JSON.stringify(currentExternalWalletAddresses),
     );
   }
@@ -1319,12 +1066,12 @@ export abstract class ParaCore {
     }
 
     this.loginEncryptionKeyPair = keyPair;
-    await this.sessionStorageSetItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR, JSON.stringify(keyPair));
+    await this.sessionStorageSetItem(constants.SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR, JSON.stringify(keyPair));
   }
 
   private async deleteLoginEncryptionKeyPair(): Promise<void> {
     this.loginEncryptionKeyPair = undefined;
-    await this.sessionStorageRemoveItem(SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR);
+    await this.sessionStorageRemoveItem(constants.SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR);
   }
 
   /**
@@ -1384,7 +1131,7 @@ export abstract class ParaCore {
   ): Promise<void> {
     this.currentWalletIds = currentWalletIds;
 
-    await this.localStorageSetItem(LOCAL_STORAGE_CURRENT_WALLET_IDS, JSON.stringify(this.currentWalletIds));
+    await this.localStorageSetItem(constants.LOCAL_STORAGE_CURRENT_WALLET_IDS, JSON.stringify(this.currentWalletIds));
     if (sessionLookupId) {
       await this.ctx.client.setCurrentWalletIds(
         this.getUserId(),
@@ -2215,7 +1962,7 @@ export abstract class ParaCore {
     this.isAwaitingAccountCreation = true;
     while (this.isAwaitingAccountCreation) {
       try {
-        await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS));
+        await new Promise(resolve => setTimeout(resolve, constants.POLLING_INTERVAL_MS));
 
         if (await this.isSessionActive()) {
           this.isAwaitingAccountCreation = false;
@@ -2232,7 +1979,7 @@ export abstract class ParaCore {
     return false;
   }
 
-  async waitForPasskeyAndCreateWallet(): Promise<AccountSetupResp> {
+  async waitForPasskeyAndCreateWallet(): Promise<AccountSetupResponse> {
     await this.waitForAccountCreation();
 
     const pregenWallets = await this.getPregenWallets();
@@ -2287,7 +2034,7 @@ export abstract class ParaCore {
     this.isAwaitingFarcaster = true;
     while (this.isAwaitingFarcaster) {
       try {
-        await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS));
+        await new Promise(resolve => setTimeout(resolve, constants.POLLING_INTERVAL_MS));
 
         const res = await this.ctx.client.getFarcasterAuthStatus();
         if (res.data.state === 'completed') {
@@ -2348,7 +2095,7 @@ export abstract class ParaCore {
           return { isError: true, userExists: false };
         }
 
-        await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS));
+        await new Promise(resolve => setTimeout(resolve, constants.POLLING_INTERVAL_MS));
 
         if (this.isAwaitingOAuth) {
           const res = await this.touchSession();
@@ -2385,7 +2132,7 @@ export abstract class ParaCore {
   }: {
     popupWindow?: Window;
     skipSessionRefresh?: boolean;
-  } = {}): Promise<LoginResp> {
+  } = {}): Promise<LoginResponse> {
     // Remove external wallets if logging in with Capsule
     this.currentExternalWalletAddresses = undefined;
     this.externalWallets = {};
@@ -2393,7 +2140,7 @@ export abstract class ParaCore {
     this.isAwaitingLogin = true;
     while (this.isAwaitingLogin) {
       try {
-        await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS));
+        await new Promise(resolve => setTimeout(resolve, constants.POLLING_INTERVAL_MS));
 
         if (!(await this.isSessionActive())) {
           if (popupWindow?.closed) {
@@ -2592,7 +2339,7 @@ export abstract class ParaCore {
         if (wallet && wallet.address) {
           return;
         }
-        await new Promise(resolve => setTimeout(resolve, SHORT_POLLING_INTERVAL_MS));
+        await new Promise(resolve => setTimeout(resolve, constants.SHORT_POLLING_INTERVAL_MS));
       } catch (err) {
         // want to continue polling on error
         console.error(err);
@@ -2624,7 +2371,7 @@ export abstract class ParaCore {
         if (wallet && wallet.address) {
           return;
         }
-        await new Promise(resolve => setTimeout(resolve, SHORT_POLLING_INTERVAL_MS));
+        await new Promise(resolve => setTimeout(resolve, constants.SHORT_POLLING_INTERVAL_MS));
       } catch (err) {
         // want to continue polling on error
         console.error(err);
@@ -2813,7 +2560,7 @@ export abstract class ParaCore {
     const walletNoSigner = { ...wallet };
     delete walletNoSigner.signer;
 
-    dispatchEvent<WalletCreatedResp>(ParaEvent.WALLET_CREATED, {
+    dispatchEvent<WalletCreatedResponse>(ParaEvent.WALLET_CREATED, {
       wallet: walletNoSigner,
       recoverySecret: recoveryShare,
     });
@@ -2988,7 +2735,7 @@ export abstract class ParaCore {
       const walletNoSigner = { ...this.wallets[wallet.id] };
       delete walletNoSigner.signer;
 
-      dispatchEvent<PregenWalletClaimedResp>(ParaEvent.PREGEN_WALLET_CLAIMED, {
+      dispatchEvent<PregenWalletClaimedResponse>(ParaEvent.PREGEN_WALLET_CLAIMED, {
         wallet: walletNoSigner,
         recoverySecret: newRecoverySecret,
       });
@@ -3195,7 +2942,7 @@ export abstract class ParaCore {
       return signRes as SuccessfulSignatureRes;
     }
 
-    await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS));
+    await new Promise(resolve => setTimeout(resolve, constants.POLLING_INTERVAL_MS));
     while (true) {
       if (Date.now() - timeStart > timeoutMs) {
         break;
@@ -3212,7 +2959,7 @@ export abstract class ParaCore {
       signRes = await this.signMessageInner({ wallet, signerId, messageBase64, cosmosSignDocBase64 });
 
       if ((signRes as DeniedSignatureRes).pendingTransactionId) {
-        await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS));
+        await new Promise(resolve => setTimeout(resolve, constants.POLLING_INTERVAL_MS));
       } else {
         break;
       }
@@ -3320,7 +3067,7 @@ export abstract class ParaCore {
       return signRes as SuccessfulSignatureRes;
     }
 
-    await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS));
+    await new Promise(resolve => setTimeout(resolve, constants.POLLING_INTERVAL_MS));
     while (true) {
       if (Date.now() - timeStart > timeoutMs) {
         break;
@@ -3346,7 +3093,7 @@ export abstract class ParaCore {
       );
 
       if ((signRes as DeniedSignatureRes).pendingTransactionId) {
-        await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS));
+        await new Promise(resolve => setTimeout(resolve, constants.POLLING_INTERVAL_MS));
       } else {
         break;
       }

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, afterEach } from 'vitest';
 import { upload, retrieve } from '../../src/transmission/transmissionUtils.js';
-import { Environment } from '../../src/definitions.js';
+import { Environment } from '../../src/types/index.js';
 import { initClient } from '../../src/external/userManagementClient.js';
 import { mockTempTransmission, mockTempTransmissionInit } from '../mocks/mockUserManagementClient.js';
 import { TEMP_TRANSMISSION_INIT_ID } from '../constants.js';

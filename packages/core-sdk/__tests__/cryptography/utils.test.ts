@@ -21,7 +21,7 @@ import {
   symmetricKeyEncryptMessage,
 } from '../../src/cryptography/utils.js';
 import { CRYPTOGRAPHY_UTILS_TEST_VARS } from '../constants.js';
-import { Environment } from '../../src/definitions.js';
+import { Environment } from '../../src/types/index.js';
 import { initClient } from '../../src/external/userManagementClient.js';
 import { getWorkerContent } from '../utils.js';
 import forge from 'node-forge';

@@ -1,4 +1,4 @@
-import { ParaCore, PREFIX as STORAGE_PREFIX, PregenIdentifierType, isWalletSupported } from './ParaCore.js';
+import { ParaCore } from './ParaCore.js';
 
 export {
   AuthMethod,
@@ -6,24 +6,43 @@ export {
   EmailTheme,
   type PartnerEntity,
   type WalletEntity,
+  Network,
   WalletType,
   WalletScheme,
+  OnRampAsset,
   OnRampPurchaseType,
+  OnRampProvider,
+  OnRampPurchaseStatus,
   type OnRampConfig,
   type OnRampAllowedAssets,
+  type OnRampPurchase,
   OAuthMethod,
   type TPregenIdentifierType,
   type PregenIds,
   NON_ED25519,
   PREGEN_IDENTIFIER_TYPES,
 } from '@getpara/user-management-client';
-export * from './definitions.js';
-export type { Ctx } from './definitions.js';
-export * from './types/index.js';
+export {
+  OnRampMethod,
+  PopupType,
+  PregenIdentifierType,
+  RecoveryStatus,
+  type ProviderAssetInfo,
+  type SignatureRes,
+  type FullSignatureRes,
+  type SuccessfulSignatureRes,
+  type DeniedSignatureRes,
+  type DeniedSignatureResWithUrl,
+  type OnRampAssetInfo,
+  type Theme,
+  type Wallet,
+} from './types/index.js';
+export * from './types/events.js';
+export * from './types/config.js';
+export { getPortalDomain, stringToPhoneNumber, entityToWallet } from './utils/index.js';
+export { PREFIX as STORAGE_PREFIX } from './constants.js';
 export { distributeNewShare } from './shares/shareDistribution.js';
 export { KeyContainer } from './shares/KeyContainer.js';
-export { RecoveryStatus, stringToPhoneNumber, entityToWallet } from './ParaCore.js';
-export type { Wallet, ConstructorOpts, SupportedWalletTypes } from './ParaCore.js';
 export type { PlatformUtils } from './PlatformUtils.js';
 export type { StorageUtils } from './StorageUtils.js';
 export { getBaseUrl, initClient } from './external/userManagementClient.js';
@@ -47,11 +66,13 @@ export {
   publicKeyFromHex,
 } from './cryptography/utils.js';
 export * from './external/userManagementClient.js';
-export * from './utils/pollingUtils.js';
 export * from './errors.js';
-export * from './utils/formattingUtils.js';
+export * from './utils/formatting.js';
+export * from './utils/polling.js';
+export { isWalletSupported } from './utils/wallet.js';
+export { getOnRampAssets, getOnRampNetworks, toAssetInfoArray } from './utils/onRamps.js';
+export { getPortalBaseURL } from './utils/url.js';
 export { retrieve as transmissionUtilsRetrieve } from './transmission/transmissionUtils.js';
-export { STORAGE_PREFIX, PregenIdentifierType, isWalletSupported };
 
 export const paraVersion = ParaCore.version;
 export default ParaCore;

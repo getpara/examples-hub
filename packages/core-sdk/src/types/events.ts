@@ -1,6 +1,6 @@
 import { CurrentWalletIds } from '@getpara/user-management-client';
-import { FullSignatureRes } from './walletTypes.js';
-import { Wallet } from '../ParaCore.js';
+import { FullSignatureRes } from './wallet.js';
+import { Wallet } from './wallet.js';
 
 const EVENT_PREFIX = 'para';
 
@@ -22,13 +22,13 @@ export type BaseEvent<T> = {
   error?: Error;
 };
 
-export type LoginResp = { isComplete: boolean; isError?: boolean; needsWallet?: boolean; partnerId?: string };
-export type LoginEvent = CustomEventInit<BaseEvent<LoginResp>>;
+export type LoginResponse = { isComplete: boolean; isError?: boolean; needsWallet?: boolean; partnerId?: string };
+export type LoginEvent = CustomEventInit<BaseEvent<LoginResponse>>;
 
 export type AccountCreationEvent = CustomEventInit<BaseEvent<boolean>>;
 
-export type AccountSetupResp = { walletIds: CurrentWalletIds; recoverySecret?: string };
-export type AccountSetupEvent = CustomEventInit<BaseEvent<AccountSetupResp>>;
+export type AccountSetupResponse = { walletIds: CurrentWalletIds; recoverySecret?: string };
+export type AccountSetupEvent = CustomEventInit<BaseEvent<AccountSetupResponse>>;
 
 export type LogoutEvent = CustomEventInit<BaseEvent<null>>;
 
@@ -40,8 +40,8 @@ export type ExternalWalletChangeEvent = CustomEventInit<BaseEvent<null>>;
 
 export type WalletsChangeEvent = CustomEventInit<BaseEvent<null>>;
 
-export type WalletCreatedResp = { wallet: Omit<Wallet, 'signer'>; recoverySecret?: string };
-export type WalletCreatedEvent = CustomEventInit<BaseEvent<WalletCreatedResp>>;
+export type WalletCreatedResponse = { wallet: Omit<Wallet, 'signer'>; recoverySecret?: string };
+export type WalletCreatedEvent = CustomEventInit<BaseEvent<WalletCreatedResponse>>;
 
-export type PregenWalletClaimedResp = { wallet: Omit<Wallet, 'signer'>; recoverySecret?: string };
-export type PregenWalletClaimedEvent = CustomEventInit<BaseEvent<WalletCreatedResp>>;
+export type PregenWalletClaimedResponse = { wallet: Omit<Wallet, 'signer'>; recoverySecret?: string };
+export type PregenWalletClaimedEvent = CustomEventInit<BaseEvent<WalletCreatedResponse>>;

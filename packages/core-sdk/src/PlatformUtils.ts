@@ -1,8 +1,6 @@
 import { BackupKitEmailProps, TPregenIdentifierType, WalletType } from '@getpara/user-management-client';
-import { Ctx } from './definitions.js';
-import { SignatureRes } from './types/walletTypes.js';
+import { Ctx, PopupType, SignatureRes } from './types/index.js';
 import { StorageUtils } from './StorageUtils.js';
-import { PopupType } from './types/popupTypes.js';
 
 export interface PlatformUtils {
   getPrivateKey(ctx: Ctx, userId: string, walletId: string, share: string, sessionCookie: string): Promise<string>;
