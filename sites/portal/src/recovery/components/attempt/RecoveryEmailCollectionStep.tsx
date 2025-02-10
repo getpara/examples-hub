@@ -25,8 +25,8 @@ const RecoveryEmailCollectionStep: React.FC = () => {
   const { setCurrentStep } = useContext(StepContext);
   const { setEmail } = useContext(EmailContext);
   const { setPhone, setCountryCode } = useContext(PhoneContext);
-  const [inputEmail, setInputEmail] = useState(null);
-  const [inputPhone, setInputPhone] = useState(null);
+  const [inputEmail, setInputEmail] = useState<string>(null);
+  const [inputPhone, setInputPhone] = useState<string>(null);
   const [inputCountryCode, setInputCountryCode] = useState<CountryCallingCode>('+1' as CountryCallingCode);
 
   const [emailError, setEmailError] = useState('');
@@ -125,7 +125,7 @@ const RecoveryEmailCollectionStep: React.FC = () => {
               }
               para.clearStorage();
 
-              const userExists = await para.checkIfUserExists(inputEmail);
+              const userExists = await para.checkIfUserExists({ email: inputEmail });
               if (userExists) {
                 setEmail(inputEmail);
                 setCurrentStep(ModalStep.VERIFICATION_CODE);
