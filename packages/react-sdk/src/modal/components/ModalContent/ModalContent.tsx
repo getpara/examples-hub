@@ -208,8 +208,6 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     }, [isLogin, currentStep]);
 
     async function createAccountWithPassword() {
-      clearTimeout(createAccountTimeout.current);
-      createAccountTimeout.current = window.setTimeout(awaitWalletCreationTransition, DEFAULTS.POLLING_INTERVAL_MS);
       setStep(ModalStep.PASSWORD_CREATION);
     }
 
@@ -265,6 +263,11 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
 
       if (![ModalStep.AWAITING_OAUTH, ModalStep.FARCASTER_OAUTH].includes(currentStep)) {
         para.exitOAuth();
+      }
+
+      if (currentStep === ModalStep.PASSWORD_CREATION) {
+        clearTimeout(createAccountTimeout.current);
+        createAccountTimeout.current = window.setTimeout(awaitWalletCreationTransition, DEFAULTS.POLLING_INTERVAL_MS);
       }
     }, [currentStep]);
 

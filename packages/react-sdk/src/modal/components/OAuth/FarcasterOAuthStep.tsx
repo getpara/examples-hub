@@ -39,8 +39,6 @@ const FarcasterOAuthStep = () => {
 
         setAuthInfo({ farcasterUsername: username, pfpUrl });
 
-        setStep(ModalStep.AWAITING_OAUTH);
-
         if (userExists) {
           const supportedAuthMethods = await para.initiateUserLoginV2({ farcasterUsername: username });
 

@@ -88,7 +88,7 @@ export const VerificationCodeStep = () => {
           setIFrameUrl(await para.shortenLoginLink(passwordAuthUrl));
           setShouldRouteToStep(ModalStep.BIOMETRIC_CREATION);
           return;
-        } else if ((await para.getSupportedCreateAuthMethods()).has(AuthMethod.PASSWORD)) {
+        } else if (supportedCreateAuthMethods.has(AuthMethod.PASSWORD)) {
           setIsIFrameReady(false);
           isEmail ? await para.verifyEmail({ verificationCode: code }) : await para.verifyPhone({ verificationCode: code });
           const url = await para.getSetupPasswordURL({ authType: authInfo?.authType, theme });
