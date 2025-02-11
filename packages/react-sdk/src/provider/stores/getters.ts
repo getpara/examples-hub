@@ -1,6 +1,6 @@
-import { useStore } from './useStore.js';
+import { vanillaStore } from './useStore.js';
 
-export const getClient = () => useStore().client;
-export const getIsOpen = () => useStore().isOpen;
-export const getSelectedWalletId = () => useStore().selectedWalletId;
-export const getSelectedWalletType = () => useStore().selectedWalletType;
+export const getClient = () => vanillaStore.getState().client;
+export const getIsOpen = () => vanillaStore.getState().isOpen;
+export const getSelectedWalletId = () => vanillaStore.getState().selectedWalletId;
+export const getSelectedWalletType = () => vanillaStore.getState().selectedWalletType;

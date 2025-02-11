@@ -1,4 +1,4 @@
-import {
+import ParaWeb, {
   AccountCreationEvent,
   AccountSetupEvent,
   ConstructorOpts,
@@ -31,8 +31,8 @@ export type ParaProviderConfig = {
   disableAutoSessionKeepAlive?: boolean;
 };
 
-export interface ParaProviderProps extends PropsWithChildren {
-  paraClientConfig: {
+interface ParaProviderPropsBase extends PropsWithChildren {
+  paraClientConfig?: {
     env: Environment;
     apiKey: string;
     opts?: ConstructorOpts;
@@ -40,3 +40,10 @@ export interface ParaProviderProps extends PropsWithChildren {
   callbacks?: Callbacks;
   config?: ParaProviderConfig;
 }
+
+export type ParaProviderProps =
+  | ({ config: ParaProviderConfig & { paraClientOverride: ParaWeb }; paraClientConfig?: never } & ParaProviderPropsBase)
+  | ({
+      config?: ParaProviderConfig & { paraClientOverride?: never };
+      paraClientConfig: ParaProviderPropsBase['paraClientConfig'];
+    } & ParaProviderPropsBase);

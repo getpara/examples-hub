@@ -30,7 +30,7 @@ export const useEventListeners = ({
   onPregenWalletClaimed,
   onExternalWalletChange,
   onWalletsChange,
-}: Callbacks) => {
+}: Callbacks = {}) => {
   const queryClient = useQueryClient();
   const client = useClient();
   const clearSelectedWallet = useStore(state => state.clearSelectedWallet);

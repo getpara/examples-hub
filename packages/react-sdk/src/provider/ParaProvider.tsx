@@ -14,10 +14,12 @@ export const ParaProvider = ({ children, paraClientConfig, callbacks, config = D
   const setClient = useStore(state => state.setClient);
 
   useEffect(() => {
-    const newClient = new ParaInternal(paraClientConfig.env, paraClientConfig.apiKey, paraClientConfig.opts);
+    const newClient =
+      (config.paraClientOverride as ParaInternal) ??
+      new ParaInternal(paraClientConfig.env, paraClientConfig.apiKey, paraClientConfig.opts);
 
     setClient(newClient);
-  }, [paraClientConfig]);
+  }, [paraClientConfig, config.paraClientOverride]);
 
   return children;
 };
