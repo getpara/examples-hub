@@ -2059,9 +2059,10 @@ export abstract class ParaCore {
    *
    * @param {Object} opts the options object
    * @param {OAuthMethod} opts.method the third-party service to use for OAuth.
+   * @param {string} [opts.deeplinkUrl] the deeplink to redirect to after the OAuth flow. This is for mobile only.
    * @returns {string} the URL for the user to log in with OAuth.
    */
-  async getOAuthURL({ method }: { method: OAuthMethod }): Promise<string> {
+  async getOAuthURL({ method, deeplinkUrl }: { method: OAuthMethod; deeplinkUrl?: string }): Promise<string> {
     await this.logout();
     const res = await this.touchSession(true);
 
@@ -2071,6 +2072,7 @@ export abstract class ParaCore {
       params: {
         apiKey: this.ctx.apiKey,
         sessionLookupId: res.data.sessionLookupId,
+        deeplinkUrl,
       },
     });
   }

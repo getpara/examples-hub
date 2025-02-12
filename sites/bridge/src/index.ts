@@ -249,7 +249,7 @@ async function invokeParaMethod(methodName: string, args: any[], requestId: stri
       }
       case 'getOAuthURL': {
         console.log('Getting OAuth URL...');
-        const oAuthUrl = await para.getOAuthURL({ method: args[0] });
+        const oAuthUrl = await para.getOAuthURL({ method: args[0], deeplinkUrl: args[1] });
         sendResponse('getOAuthURL', requestId, oAuthUrl);
         break;
       }
