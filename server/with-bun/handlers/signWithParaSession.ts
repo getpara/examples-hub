@@ -1,4 +1,4 @@
-import { Capsule as CapsuleServer, Environment } from "@usecapsule/server-sdk";
+import { Para as ParaServer, Environment } from "@getpara/server-sdk";
 import { simulateVerifyToken } from "../utils/auth-utils";
 
 interface RequestBody {
@@ -7,12 +7,12 @@ interface RequestBody {
 }
 
 /**
- * Handles signing with Capsule Session.
+ * Handles signing with Para Session.
  *
  * @param {Request} req - The incoming request object.
  * @returns {Promise<Response>} - The response indicating the session was processed.
  */
-export const signWithCapsuleSession = async (req: Request): Promise<Response> => {
+export const signWithParaSession = async (req: Request): Promise<Response> => {
   // Validate Authorization header
   const authHeader = req.headers.get("Authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -33,18 +33,18 @@ export const signWithCapsuleSession = async (req: Request): Promise<Response> =>
     return new Response("Forbidden", { status: 403 });
   }
 
-  // Ensure CAPSULE_API_KEY is available
-  const CAPSULE_API_KEY = Bun.env.CAPSULE_API_KEY;
-  if (!CAPSULE_API_KEY) {
-    return new Response("CAPSULE_API_KEY not set", { status: 500 });
+  // Ensure PARA_API_KEY is available
+  const PARA_API_KEY = Bun.env.PARA_API_KEY;
+  if (!PARA_API_KEY) {
+    return new Response("PARA_API_KEY not set", { status: 500 });
   }
 
-  // Initialize Capsule client and import session
+  // Initialize Para client and import session
   // This replaces loading a user share from the database and setting it on the client with pregen wallets.
-  const capsuleClient = new CapsuleServer(Environment.BETA, CAPSULE_API_KEY);
-  await capsuleClient.importSession(session);
+  const para = new ParaServer(Environment.BETA, PARA_API_KEY);
+  await para.importSession(session);
 
-  // Capsule client can now be used to sign transactions, etc., with the session imported.
-  // Reference other handlers for examples of how to use the Capsule client with signers.
-  return new Response("signWithCapsuleSession", { status: 200 });
+  // Para client can now be used to sign transactions, etc., with the session imported.
+  // Reference other handlers for examples of how to use the Para client with signers.
+  return new Response("signWithParaSession", { status: 200 });
 };

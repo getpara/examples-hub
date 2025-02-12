@@ -1,7 +1,7 @@
-# Capsule Integration with Node Server
+# Para Integration with Node Server
 
-This repository provides a Node-based example showcasing how to integrate the [Capsule SDK](https://docs.usecapsule.com)
-into a server environment for transaction signing and wallet management. It demonstrates various scenarios including
+This repository provides a Node-based example showcasing how to integrate the [Para SDK](https://docs.usepara.com) into
+a server environment for transaction signing and wallet management. It demonstrates various scenarios including
 pre-generated wallets, session-based wallets, and integration with multiple ecosystems such as Ethers, Viem, CosmJS,
 Solana-Web3, and Alchemy-AA.
 
@@ -10,22 +10,22 @@ Solana-Web3, and Alchemy-AA.
 - **Pre-Generated Wallet:**  
   Created ahead of time and associated with a user (e.g., via `email`). Ideal for cases where you want a wallet ready
   before any signing occurs.  
-  [Pre-Generation Integration Guide](https://docs.usecapsule.com/integration-guides/wallet-pregeneration)
+  [Pre-Generation Integration Guide](https://docs.usepara.com/integration-guides/wallet-pregeneration)
 
 - **Session-Based Wallet:**  
-  Created and managed through active Capsule user sessions. You import/export sessions as needed, allowing the user’s
+  Created and managed through active Para user sessions. You import/export sessions as needed, allowing the user’s
   wallet to be accessed server-side as long as a valid session is present.  
-  [Session Management Integration Guide](https://docs.usecapsule.com/integration-guides/session-management)
+  [Session Management Integration Guide](https://docs.usepara.com/integration-guides/session-management)
 
 ## Key Example Locations
 
 Refer to these links to explore different integrations. Each file contains detailed comments explaining prerequisites,
 environment variables, and steps needed before calling the routes.
 
-- [**Capsule Integration Examples**](./examples/capsule)
+- [**Para Integration Examples**](./examples/para)
 
-  - [Pre-Gen](./examples/capsule/pregen.ts)
-  - [Session](./examples/capsule/session.ts)
+  - [Pre-Gen](./examples/para/pregen.ts)
+  - [Session](./examples/para/session.ts)
 
 - [**Ethers Integration Examples**](./examples/ethers)
 
@@ -57,8 +57,8 @@ environment variables, and steps needed before calling the routes.
 
 ## Prerequisites
 
-- **Capsule API Key:**  
-  Required for all routes. Sign up or manage your keys at [developer.usecapsule.com](https://developer.usecapsule.com).
+- **Para API Key:**  
+  Required for all routes. Sign up or manage your keys at [developer.usepara.com](https://developer.usepara.com).
 
 - **Additional Environment Variables:**  
   Based on the integration you are testing:
@@ -77,7 +77,7 @@ environment variables, and steps needed before calling the routes.
    ```
 
 2. **Configure `.env`:**
-   - Set `CAPSULE_API_KEY`.
+   - Set `PARA_API_KEY`.
    - If using Alchemy-AA, set `ALCHEMY_API_KEY` and `ALCHEMY_GAS_POLICY_ID`.
    - If using pre-generated wallets, set `ENCRYPTION_KEY` to securely store user shares.
 3. **Start the Server:**
@@ -101,17 +101,17 @@ for details on what is expected in the request body and prerequisites (like havi
     -d '{"email":"user@example.com"}'
   ```
 
-- **Sign with Capsule (Pre-Gen):**
+- **Sign with Para (Pre-Gen):**
 
   ```bash
-  curl -X POST http://localhost:3000/examples/capsule/pregen \
+  curl -X POST http://localhost:3000/examples/para/pregen \
     -H "Content-Type: application/json" \
     -d '{"email":"user@example.com"}'
   ```
 
-- **Sign with Capsule (Session-Based):**
+- **Sign with Para (Session-Based):**
   ```bash
-  curl -X POST http://localhost:3000/examples/capsule/session \
+  curl -X POST http://localhost:3000/examples/para/session \
     -H "Content-Type: application/json" \
     -d '{"session":"<exported_session_string>"}'
   ```
@@ -144,7 +144,7 @@ Replace endpoints and request bodies accordingly for Ethers, Viem, CosmJS, Solan
 
 ## Adapting for Production
 
-These examples focus on demonstrating how to integrate Capsule into your codebase. Before deploying to production:
+These examples focus on demonstrating how to integrate Para into your codebase. Before deploying to production:
 
 - Implement proper authentication and authorization.
 - Improve error handling and logging.
@@ -152,9 +152,9 @@ These examples focus on demonstrating how to integrate Capsule into your codebas
 
 ## Additional Resources
 
-- [Capsule SDK Documentation](https://docs.usecapsule.com)
-- [Pre-Generation Integration Guide](https://docs.usecapsule.com/integration-guides/wallet-pregeneration)
-- [Session Management Integration Guide](https://docs.usecapsule.com/integration-guides/session-management)
+- [Para SDK Documentation](https://docs.usepara.com)
+- [Pre-Generation Integration Guide](https://docs.usepara.com/integration-guides/wallet-pregeneration)
+- [Session Management Integration Guide](https://docs.usepara.com/integration-guides/session-management)
 - [Ethers.js Documentation](https://docs.ethers.io/)
 - [Viem Documentation](https://viem.sh/)
 - [CosmJS Documentation](https://cosmos.github.io/cosmjs/)

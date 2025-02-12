@@ -1,4 +1,4 @@
-import { Capsule as CapsuleServer, Environment, WalletType, PregenIdentifierType } from "@usecapsule/server-sdk";
+import { Para as ParaServer, Environment, WalletType, PregenIdentifierType } from "@getpara/server-sdk";
 import { simulateVerifyToken } from "../utils/auth-utils";
 import { encrypt } from "../utils/encryption-utils";
 import { setKeyShareInDB } from "../db/keySharesDB";
@@ -30,29 +30,33 @@ export const createWallet = async (req: Request): Promise<Response> => {
     return new Response("Forbidden", { status: 403 });
   }
 
-  // Ensure CAPSULE_API_KEY is available
-  const CAPSULE_API_KEY = Bun.env.CAPSULE_API_KEY;
-  if (!CAPSULE_API_KEY) {
-    return new Response("CAPSULE_API_KEY not set", { status: 500 });
+  // Ensure PARA_API_KEY is available
+  const PARA_API_KEY = Bun.env.PARA_API_KEY;
+  if (!PARA_API_KEY) {
+    return new Response("PARA_API_KEY not set", { status: 500 });
   }
 
-  // Initialize Capsule client
-  const capsuleClient = new CapsuleServer(Environment.BETA, CAPSULE_API_KEY);
+  // Initialize Para client
+  const para = new ParaServer(Environment.BETA, PARA_API_KEY);
 
   // Check if a pre-generated wallet already exists
-  const hasPregenWallet = await capsuleClient.hasPregenWallet(email);
+  const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
   if (hasPregenWallet) {
     return new Response("Wallet already exists", { status: 400 });
   }
 
   // Create a new wallet
-  const wallet = await capsuleClient.createWalletPreGen(WalletType.EVM, email, PregenIdentifierType.EMAIL);
+  const wallet = await para.createPregenWallet({
+    type: WalletType.EVM,
+    pregenIdentifier: email,
+    pregenIdentifierType: "EMAIL",
+  });
   if (!wallet) {
     return new Response("Failed to create wallet", { status: 500 });
   }
 
   // Retrieve and encrypt the key share
-  const keyShare = capsuleClient.getUserShare();
+  const keyShare = para.getUserShare();
   if (!keyShare) {
     return new Response("Failed to get key share", { status: 500 });
   }

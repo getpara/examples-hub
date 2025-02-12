@@ -1,6 +1,6 @@
 ## Deno Server Example
 
-This example demonstrates how to integrate the Capsule SDK with a Deno server. The server includes routes for wallet
+This example demonstrates how to integrate the Para SDK with a Deno server. The server includes routes for wallet
 creation and signing using different libraries.
 
 ### Running the Example
@@ -33,16 +33,16 @@ Each route requires an `email` in the body of the request.
   curl -X POST http://localhost:8000/wallets/create -H "Content-Type: application/json" -d '{"email": "user@example.com"}'
   ```
 
-- **Sign with Capsule Pre-Generated Wallet**
+- **Sign with Para Pre-Generated Wallet**
 
   ```bash
-  curl -X POST http://localhost:8000/wallets/sign/capsulePreGen -H "Content-Type: application/json" -d '{"email": "user@example.com"}'
+  curl -X POST http://localhost:8000/wallets/sign/paraPreGen -H "Content-Type: application/json" -d '{"email": "user@example.com"}'
   ```
 
-- **Sign with Capsule Session**
+- **Sign with Para Session**
 
   ```bash
-  curl -X POST http://localhost:8000/wallets/sign/capsuleSession -H "Content-Type: application/json" -d '{"email": "user@example.com"}'
+  curl -X POST http://localhost:8000/wallets/sign/paraSession -H "Content-Type: application/json" -d '{"email": "user@example.com"}'
   ```
 
 - **Sign with Ethers**
@@ -75,4 +75,4 @@ Each route requires an `email` in the body of the request.
   curl -X POST http://localhost:8000/wallets/sign/alchemy -H "Content-Type: application/json" -d '{"email": "user@example.com"}'
   ```
 
-For more details, visit the [Capsule SDK documentation](https://docs.usecapsule.com/welcome).
+For more details, visit the [Para SDK documentation](https://docs.usepara.com/welcome).

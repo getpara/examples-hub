@@ -1,8 +1,8 @@
 import { Router } from "express";
 
 import { createPregenWalletHandler } from "./examples/wallets/pregen-create.js";
-import { capsulePregenSignHandler } from "./examples/capsule/pregen.js";
-import { capsuleSessionSignHandler } from "./examples/capsule/session.js";
+import { paraPregenSignHandler } from "./examples/para/pregen.js";
+import { paraSessionSignHandler } from "./examples/para/session.js";
 import { ethersPregenSignHandler } from "./examples/ethers/pregen.js";
 import { ethersSessionSignHandler } from "./examples/ethers/session.js";
 import { viemPregenSignHandler } from "./examples/viem/pregen.js";
@@ -17,7 +17,7 @@ import { alchemySessionSignHandler } from "./examples/alchemy-aa/session.js";
 const router = Router();
 
 /**
- * Use these routes to demonstrate various workflows with Capsule and different integrations (Ethers, Viem, CosmJS, Solana-Web3, Alchemy-AA).
+ * Use these routes to demonstrate various workflows with Para and different integrations (Ethers, Viem, CosmJS, Solana-Web3, Alchemy-AA).
  * Each endpoint focuses on a specific scenario (pre-generated wallets vs session-based wallets) and technology stack.
  *
  * Before calling these routes, ensure you meet any prerequisites mentioned in their comments (e.g., having a pre-generated wallet, setting environment variables, or exporting a session).
@@ -26,9 +26,9 @@ const router = Router();
 // Wallet creation route for pre-generated wallets.
 router.post("/examples/wallets/pregen/create", createPregenWalletHandler);
 
-// Capsule-only signing examples
-router.post("/examples/capsule/pregen", capsulePregenSignHandler);
-router.post("/examples/capsule/session", capsuleSessionSignHandler);
+// Para-only signing examples
+router.post("/examples/para/pregen", paraPregenSignHandler);
+router.post("/examples/para/session", paraSessionSignHandler);
 
 // Ethers signing examples
 router.post("/examples/ethers/pregen", ethersPregenSignHandler);

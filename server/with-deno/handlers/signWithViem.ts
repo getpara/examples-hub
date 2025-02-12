@@ -1,9 +1,9 @@
 import { Handler } from "@std/http";
 import { simulateVerifyToken } from "../utils/auth-utils.ts";
-import { Capsule as CapsuleServer, Environment } from "@usecapsule/server-sdk";
+import { Para as ParaServer, Environment } from "@getpara/server-sdk";
 import { getKeyShareInDB } from "../db/keySharesDB.ts";
 import { decrypt } from "../utils/encryption-utils.ts";
-import { createCapsuleAccount, createCapsuleViemClient } from "@usecapsule/viem-v2-integration";
+import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integration";
 import { sepolia } from "viem/chains";
 import {
   http,
@@ -41,15 +41,15 @@ export const signWithViem: Handler = async (req: Request): Promise<Response> => 
     return new Response("Forbidden", { status: 403 });
   }
 
-  const CAPSULE_API_KEY = Deno.env.get("CAPSULE_API_KEY");
+  const PARA_API_KEY = Deno.env.get("PARA_API_KEY");
 
-  if (!CAPSULE_API_KEY) {
-    return new Response("CAPSULE_API_KEY not set", { status: 500 });
+  if (!PARA_API_KEY) {
+    return new Response("PARA_API_KEY not set", { status: 500 });
   }
 
-  const capsuleClient = new CapsuleServer(Environment.BETA, CAPSULE_API_KEY);
+  const para = new ParaServer(Environment.BETA, PARA_API_KEY);
 
-  const hasPregenWallet = await capsuleClient.hasPregenWallet(email);
+  const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
 
   if (!hasPregenWallet) {
     return new Response("Wallet does not exist", { status: 400 });
@@ -63,20 +63,20 @@ export const signWithViem: Handler = async (req: Request): Promise<Response> => 
 
   const decryptedKeyShare = decrypt(keyShare);
 
-  await capsuleClient.setUserShare(decryptedKeyShare);
+  await para.setUserShare(decryptedKeyShare);
 
-  const viemCapsuleAccount: LocalAccount = await createCapsuleAccount(capsuleClient);
+  const viemParaAccount: LocalAccount = await createParaAccount(para);
 
-  const viemClient: WalletClient = createCapsuleViemClient(capsuleClient, {
-    account: viemCapsuleAccount,
+  const viemClient: WalletClient = createParaViemClient(para, {
+    account: viemParaAccount,
     chain: sepolia,
     transport: http("https://ethereum-sepolia-rpc.publicnode.com"),
   });
 
   const demoTx: SignTransactionParameters<Chain | undefined, Account | undefined, Chain | undefined> = {
-    account: viemCapsuleAccount,
+    account: viemParaAccount,
     chain: sepolia,
-    to: viemCapsuleAccount.address,
+    to: viemParaAccount.address,
     value: parseEther("0.001"),
     gas: 21000n,
     maxFeePerGas: parseGwei("20"),

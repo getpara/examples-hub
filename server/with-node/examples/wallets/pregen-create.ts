@@ -1,19 +1,19 @@
 import type { Request, Response, NextFunction } from "express";
-import { Capsule as CapsuleServer, Environment, WalletType, PregenIdentifierType } from "@usecapsule/server-sdk";
+import { Para as ParaServer, Environment, WalletType, PregenIdentifierType } from "@getpara/server-sdk";
 import { encrypt } from "../../utils/encryption-utils.js";
 import { setKeyShareInDB } from "../../db/keySharesDB.js";
 
 /**
- * Use this handler when you need to create a pre-generated Capsule wallet for a user and securely store their key share.
+ * Use this handler when you need to create a pre-generated Para wallet for a user and securely store their key share.
  *
  * Before using this handler, ensure that:
- * - You have `CAPSULE_API_KEY` set in your environment.
+ * - You have `PARA_API_KEY` set in your environment.
  * - The user is identified by an `email` provided in the request body.
  *
  * Steps for developers:
  * 1. Use `email` from the request body to associate the pre-generated wallet with a specific user.
- * 2. Create the pre-generated wallet using the Capsule server SDK.
- * 3. Retrieve the user's key share from Capsule and encrypt it before storing in your database.
+ * 2. Create the pre-generated wallet using the Para server SDK.
+ * 3. Retrieve the user's key share from Para and encrypt it before storing in your database.
  * 4. Return the wallet address to confirm that the wallet has been created successfully.
  *
  * Note:
@@ -29,17 +29,17 @@ export async function createPregenWalletHandler(req: Request, res: Response, nex
       return;
     }
 
-    // Ensure CAPSULE_API_KEY is set, otherwise you cannot interact with Capsule.
-    const CAPSULE_API_KEY = process.env.CAPSULE_API_KEY;
-    if (!CAPSULE_API_KEY) {
-      res.status(500).send("Set CAPSULE_API_KEY in the environment before using this handler.");
+    // Ensure PARA_API_KEY is set, otherwise you cannot interact with Para.
+    const PARA_API_KEY = process.env.PARA_API_KEY;
+    if (!PARA_API_KEY) {
+      res.status(500).send("Set PARA_API_KEY in the environment before using this handler.");
       return;
     }
 
-    // 2. Initialize the Capsule client and check if a pre-generated wallet already exists for this email.
+    // 2. Initialize the Para client and check if a pre-generated wallet already exists for this email.
     // If it does, return a 409 to indicate a duplicate wallet scenario.
-    const capsuleClient = new CapsuleServer(Environment.BETA, CAPSULE_API_KEY);
-    const walletExists = await capsuleClient.hasPregenWallet(email);
+    const para = new ParaServer(Environment.BETA, PARA_API_KEY);
+    const walletExists = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
     if (walletExists) {
       res
         .status(409)
@@ -51,17 +51,21 @@ export async function createPregenWalletHandler(req: Request, res: Response, nex
 
     // Create a new pre-generated EVM wallet associated with the user's email.
     // Use PregenIdentifierType.EMAIL to link the wallet to the provided email.
-    const wallet = await capsuleClient.createWalletPreGen(WalletType.EVM, email, PregenIdentifierType.EMAIL);
+    const wallet = await para.createPregenWallet({
+      type: WalletType.EVM,
+      pregenIdentifier: email,
+      pregenIdentifierType: "EMAIL",
+    });
     if (!wallet) {
-      res.status(500).send("Failed to create pre-generated wallet. Check your Capsule configuration and try again.");
+      res.status(500).send("Failed to create pre-generated wallet. Check your Para configuration and try again.");
       return;
     }
 
-    // 3. Retrieve the user's key share from the Capsule client.
-    // This key share, combined with Capsule's share, allows for MPC signing later.
-    const keyShare = capsuleClient.getUserShare();
+    // 3. Retrieve the user's key share from the Para client.
+    // This key share, combined with Para's share, allows for MPC signing later.
+    const keyShare = para.getUserShare();
     if (!keyShare) {
-      res.status(500).send("Failed to retrieve user share from the Capsule client. Confirm wallet creation steps.");
+      res.status(500).send("Failed to retrieve user share from the Para client. Confirm wallet creation steps.");
       return;
     }
 

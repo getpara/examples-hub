@@ -1,5 +1,5 @@
 import { Handler } from "@std/http";
-import { Capsule as CapsuleServer, Environment } from "@usecapsule/server-sdk";
+import { Para as ParaServer, Environment } from "@getpara/server-sdk";
 import { simulateVerifyToken } from "../utils/auth-utils.ts";
 import { getKeyShareInDB } from "../db/keySharesDB.ts";
 import { encodeBase64 } from "@std/encoding/base64";
@@ -10,7 +10,7 @@ interface RequestBody {
   email: string;
 }
 
-export const signWithCapsulePreGen: Handler = async (req: Request): Promise<Response> => {
+export const signWithParaPreGen: Handler = async (req: Request): Promise<Response> => {
   const authHeader = req.headers.get("Authorization");
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -31,15 +31,15 @@ export const signWithCapsulePreGen: Handler = async (req: Request): Promise<Resp
     return new Response("Forbidden", { status: 403 });
   }
 
-  const CAPSULE_API_KEY = Deno.env.get("CAPSULE_API_KEY");
+  const PARA_API_KEY = Deno.env.get("PARA_API_KEY");
 
-  if (!CAPSULE_API_KEY) {
-    return new Response("CAPSULE_API_KEY not set", { status: 500 });
+  if (!PARA_API_KEY) {
+    return new Response("PARA_API_KEY not set", { status: 500 });
   }
 
-  const capsuleClient = new CapsuleServer(Environment.BETA, CAPSULE_API_KEY);
+  const para = new ParaServer(Environment.BETA, PARA_API_KEY);
 
-  const hasPregenWallet = await capsuleClient.hasPregenWallet(email);
+  const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
 
   if (!hasPregenWallet) {
     return new Response("Wallet does not exist", { status: 400 });
@@ -53,9 +53,9 @@ export const signWithCapsulePreGen: Handler = async (req: Request): Promise<Resp
 
   const decryptedKeyShare = decrypt(keyShare);
 
-  await capsuleClient.setUserShare(decryptedKeyShare);
+  await para.setUserShare(decryptedKeyShare);
 
-  const wallets = await capsuleClient.getWallets();
+  const wallets = await para.getWallets();
 
   const wallet = Object.values(wallets)[0]; //
 
@@ -63,9 +63,9 @@ export const signWithCapsulePreGen: Handler = async (req: Request): Promise<Resp
 
   const walletAddress = wallet.address;
 
-  const message = "Sign with Capsule PreGen and Capsule Client";
+  const message = "Sign with Para PreGen and Para Client";
 
-  const signMessageResult = await capsuleClient.signMessage(walletId, encodeBase64(message));
+  const signMessageResult = await para.signMessage({ walletId, messageBase64: encodeBase64(message) });
 
   const demoRawTx = {
     nonce: "0x00",
@@ -93,13 +93,13 @@ export const signWithCapsulePreGen: Handler = async (req: Request): Promise<Resp
 
   const rlpEncodedTxBase64 = encodeBase64(rlpEncodedTx);
 
-  const signTransactionResult = await capsuleClient.signTransaction(walletId, rlpEncodedTxBase64, "11155111");
+  const signTransactionResult = await para.signTransaction({ walletId, rlpEncodedTxBase64, chainId: "11155111" });
 
-  return new Response(JSON.stringify({ route: "signWithCapsulePreGen", signMessageResult, signTransactionResult }), {
+  return new Response(JSON.stringify({ route: "signWithParaPreGen", signMessageResult, signTransactionResult }), {
     status: 200,
   });
 };
 
 // How to run this route with a Terminal command:
-// curl -X POST http://localhost:8000/signWithCapsulePreGen -H 'Content-Type: application/json' -H "Authorization: Bearer SIMULATED.$(echo -n ${EMAIL:-user@example.com} | base64)" -d "{\"email\": \"${EMAIL:-user@example.com}\"}"
+// curl -X POST http://localhost:8000/signWithParaPreGen -H 'Content-Type: application/json' -H "Authorization: Bearer SIMULATED.$(echo -n ${EMAIL:-user@example.com} | base64)" -d "{\"email\": \"${EMAIL:-user@example.com}\"}"
 // Replace email with an example email address to test the route.
