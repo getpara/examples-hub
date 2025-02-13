@@ -27,7 +27,8 @@ export const AuthCreation = () => {
     } catch (err) {
       if (
         err.message?.toLowerCase().includes('the operation either timed out or was not allowed') ||
-        err.message?.toLowerCase().includes('the document is not focused')
+        err.message?.toLowerCase().includes('the document is not focused') ||
+        err.message?.toLowerCase().includes('fallbackrequested')
       ) {
         setStep(AuthCreationStep.MANUAL_CREATION);
       } else {
