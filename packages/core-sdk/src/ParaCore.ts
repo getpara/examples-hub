@@ -3228,6 +3228,8 @@ export abstract class ParaCore {
       sessionCookie: this.sessionCookie,
       phone: this.phone,
       countryCode: this.countryCode,
+      telegramUserId: this.telegramUserId,
+      farcasterUsername: this.farcasterUsername,
     };
     return Buffer.from(JSON.stringify(sessionInfo)).toString('base64');
   }
@@ -3285,6 +3287,16 @@ export abstract class ParaCore {
     this.exitLogin();
     this.exitFarcaster();
     this.exitOAuth();
+  }
+
+  /**
+   * Retrieves a token to verify the current session.
+   * @returns {Promise<string>} the ID
+   **/
+  async getVerificationToken(): Promise<string> {
+    const { data } = await this.touchSession();
+
+    return data.sessionLookupId;
   }
 
   /**
