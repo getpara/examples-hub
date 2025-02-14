@@ -1,9 +1,9 @@
 import { Handler } from "@std/http";
 import { simulateVerifyToken } from "../utils/auth-utils.ts";
-import { Capsule as CapsuleServer, Environment } from "@usecapsule/server-sdk";
+import { Para as ParaServer, Environment } from "@getpara/server-sdk";
 import { getKeyShareInDB } from "../db/keySharesDB.ts";
 import { decrypt } from "../utils/encryption-utils.ts";
-import { CapsuleEthersSigner } from "@usecapsule/ethers-v6-integration";
+import { ParaEthersSigner } from "@getpara/ethers-v6-integration";
 import { ethers, TransactionRequest } from "ethers";
 
 interface RequestBody {
@@ -31,15 +31,15 @@ export const signWithEthers: Handler = async (req: Request): Promise<Response> =
     return new Response("Forbidden", { status: 403 });
   }
 
-  const CAPSULE_API_KEY = Deno.env.get("CAPSULE_API_KEY");
+  const PARA_API_KEY = Deno.env.get("PARA_API_KEY");
 
-  if (!CAPSULE_API_KEY) {
-    return new Response("CAPSULE_API_KEY not set", { status: 500 });
+  if (!PARA_API_KEY) {
+    return new Response("PARA_API_KEY not set", { status: 500 });
   }
 
-  const capsuleClient = new CapsuleServer(Environment.BETA, CAPSULE_API_KEY);
+  const para = new ParaServer(Environment.BETA, PARA_API_KEY);
 
-  const hasPregenWallet = await capsuleClient.hasPregenWallet(email);
+  const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
 
   if (!hasPregenWallet) {
     return new Response("Wallet does not exist", { status: 400 });
@@ -53,17 +53,17 @@ export const signWithEthers: Handler = async (req: Request): Promise<Response> =
 
   const decryptedKeyShare = decrypt(keyShare);
 
-  await capsuleClient.setUserShare(decryptedKeyShare);
+  await para.setUserShare(decryptedKeyShare);
 
   const provider = new ethers.JsonRpcProvider("https://ethereum-sepolia-rpc.publicnode.com");
 
-  const capsuleEthersSigner = new CapsuleEthersSigner(capsuleClient, provider);
+  const paraEthersSigner = new ParaEthersSigner(para, provider);
 
-  const address = await capsuleEthersSigner.getAddress();
+  const address = await paraEthersSigner.getAddress();
 
-  const message = "Sign with Capsule PreGen and Capsule Ethers Signer";
+  const message = "Sign with Para PreGen and Para Ethers Signer";
 
-  const signMessageResult = await capsuleEthersSigner.signMessage(message);
+  const signMessageResult = await paraEthersSigner.signMessage(message);
 
   const demoTx: TransactionRequest = {
     to: address,
@@ -73,7 +73,7 @@ export const signWithEthers: Handler = async (req: Request): Promise<Response> =
     gasPrice: (await provider.getFeeData()).gasPrice,
   };
 
-  const signTxResult = await capsuleEthersSigner.signTransaction(demoTx);
+  const signTxResult = await paraEthersSigner.signTransaction(demoTx);
 
   return new Response(JSON.stringify({ route: "signWithEthers", signMessageResult, signTxResult }), { status: 200 });
 };

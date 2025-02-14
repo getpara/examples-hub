@@ -1,16 +1,16 @@
-import { Capsule as CapsuleServer, Environment } from "@usecapsule/server-sdk";
+import { Para as ParaServer, Environment } from "@getpara/server-sdk";
 import { simulateVerifyToken } from "../utils/auth-utils";
 import { getKeyShareInDB } from "../db/keySharesDB";
 import { decrypt } from "../utils/encryption-utils";
 import { RLP } from "@ethereumjs/rlp";
 
 /**
- * Handles signing with Capsule PreGen and Capsule Client.
+ * Handles signing with Para PreGen and Para Client.
  *
  * @param {Request} req - The incoming request object.
  * @returns {Promise<Response>} - The response with sign message and transaction results.
  */
-export const signWithCapsulePreGen = async (req: Request): Promise<Response> => {
+export const signWithParaPreGen = async (req: Request): Promise<Response> => {
   // Validate Authorization header
   const authHeader = req.headers.get("Authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -31,15 +31,15 @@ export const signWithCapsulePreGen = async (req: Request): Promise<Response> => 
     return new Response("Forbidden", { status: 403 });
   }
 
-  // Ensure CAPSULE_API_KEY is available
-  const CAPSULE_API_KEY = Bun.env.CAPSULE_API_KEY;
-  if (!CAPSULE_API_KEY) {
-    return new Response("CAPSULE_API_KEY not set", { status: 500 });
+  // Ensure PARA_API_KEY is available
+  const PARA_API_KEY = Bun.env.PARA_API_KEY;
+  if (!PARA_API_KEY) {
+    return new Response("PARA_API_KEY not set", { status: 500 });
   }
 
-  // Initialize Capsule client
-  const capsuleClient = new CapsuleServer(Environment.BETA, CAPSULE_API_KEY);
-  const hasPregenWallet = await capsuleClient.hasPregenWallet(email);
+  // Initialize Para client
+  const para = new ParaServer(Environment.BETA, PARA_API_KEY);
+  const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
 
   if (!hasPregenWallet) {
     return new Response("Wallet does not exist", { status: 400 });
@@ -52,10 +52,10 @@ export const signWithCapsulePreGen = async (req: Request): Promise<Response> => 
   }
 
   const decryptedKeyShare = decrypt(keyShare);
-  await capsuleClient.setUserShare(decryptedKeyShare);
+  await para.setUserShare(decryptedKeyShare);
 
   // Get wallet details
-  const wallets = await capsuleClient.getWallets();
+  const wallets = await para.getWallets();
   const wallet = Object.values(wallets)[0];
   const walletId = wallet.id;
   const walletAddress = wallet.address;
@@ -86,10 +86,10 @@ export const signWithCapsulePreGen = async (req: Request): Promise<Response> => 
   const rlpEncodedTxBase64 = Buffer.from(rlpEncodedTx).toString("base64");
 
   // Sign the transaction
-  const signTransactionResult = await capsuleClient.signTransaction(walletId, rlpEncodedTxBase64, "11155111");
+  const signTransactionResult = await para.signTransaction({ walletId, rlpEncodedTxBase64, chainId: "11155111" });
 
   // Return the final signed transaction result
-  return new Response(JSON.stringify({ route: "signWithCapsulePreGen", signTransactionResult }), {
+  return new Response(JSON.stringify({ route: "signWithParaPreGen", signTransactionResult }), {
     status: 200,
   });
 };

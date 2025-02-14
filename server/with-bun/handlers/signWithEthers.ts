@@ -1,13 +1,13 @@
 import { simulateVerifyToken } from "../utils/auth-utils";
-import { Capsule as CapsuleServer, Environment } from "@usecapsule/server-sdk";
+import { Para as ParaServer, Environment } from "@getpara/server-sdk";
 import { getKeyShareInDB } from "../db/keySharesDB";
 import { decrypt } from "../utils/encryption-utils";
-import { CapsuleEthersSigner } from "@usecapsule/ethers-v6-integration";
+import { ParaEthersSigner } from "@getpara/ethers-v6-integration";
 import { ethers } from "ethers";
 import type { TransactionRequest } from "ethers";
 
 /**
- * Handles signing with Ethers and CapsuleEthersSigner.
+ * Handles signing with Ethers and ParaEthersSigner.
  *
  * @param {Request} req - The incoming request object.
  * @returns {Promise<Response>} - The response containing the sign message and transaction result.
@@ -33,15 +33,15 @@ export const signWithEthers = async (req: Request): Promise<Response> => {
     return new Response("Forbidden", { status: 403 });
   }
 
-  // Ensure CAPSULE_API_KEY is available
-  const CAPSULE_API_KEY = Bun.env.CAPSULE_API_KEY;
-  if (!CAPSULE_API_KEY) {
-    return new Response("CAPSULE_API_KEY not set", { status: 500 });
+  // Ensure PARA_API_KEY is available
+  const PARA_API_KEY = Bun.env.PARA_API_KEY;
+  if (!PARA_API_KEY) {
+    return new Response("PARA_API_KEY not set", { status: 500 });
   }
 
-  // Initialize Capsule client and check if wallet exists
-  const capsuleClient = new CapsuleServer(Environment.BETA, CAPSULE_API_KEY);
-  const hasPregenWallet = await capsuleClient.hasPregenWallet(email);
+  // Initialize Para client and check if wallet exists
+  const para = new ParaServer(Environment.BETA, PARA_API_KEY);
+  const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
 
   if (!hasPregenWallet) {
     return new Response("Wallet does not exist", { status: 400 });
@@ -54,14 +54,14 @@ export const signWithEthers = async (req: Request): Promise<Response> => {
   }
 
   const decryptedKeyShare = decrypt(keyShare);
-  await capsuleClient.setUserShare(decryptedKeyShare);
+  await para.setUserShare(decryptedKeyShare);
 
-  // Initialize Ethers provider and CapsuleEthersSigner
+  // Initialize Ethers provider and ParaEthersSigner
   const provider = new ethers.JsonRpcProvider("https://ethereum-sepolia-rpc.publicnode.com");
-  const capsuleEthersSigner = new CapsuleEthersSigner(capsuleClient, provider);
+  const paraEthersSigner = new ParaEthersSigner(para, provider);
 
   // Get address
-  const address = await capsuleEthersSigner.getAddress();
+  const address = await paraEthersSigner.getAddress();
 
   // Create and sign a demo transaction
   const demoTx: TransactionRequest = {
@@ -73,7 +73,7 @@ export const signWithEthers = async (req: Request): Promise<Response> => {
     gasPrice: (await provider.getFeeData()).gasPrice,
   };
 
-  const signTransactionResult = await capsuleEthersSigner.signTransaction(demoTx);
+  const signTransactionResult = await paraEthersSigner.signTransaction(demoTx);
 
   // Return the result
   return new Response(JSON.stringify({ route: "signWithEthers", signTransactionResult }), { status: 200 });

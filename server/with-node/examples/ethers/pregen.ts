@@ -1,12 +1,12 @@
 import type { NextFunction, Request, Response } from "express";
-import { Capsule as CapsuleServer, Environment } from "@usecapsule/server-sdk";
-import { CapsuleEthersSigner } from "@usecapsule/ethers-v6-integration";
+import { Para as ParaServer, Environment } from "@getpara/server-sdk";
+import { ParaEthersSigner } from "@getpara/ethers-v6-integration";
 import { ethers } from "ethers";
 import { getKeyShareInDB } from "../../db/keySharesDB.js";
 import { decrypt } from "../../utils/encryption-utils.js";
 
 /**
- * Use this handler when you need to sign a transaction using a pre-generated Capsule wallet integrated with Ethers.
+ * Use this handler when you need to sign a transaction using a pre-generated Para wallet integrated with Ethers.
  * This approach demonstrates how to leverage a pre-created MPC wallet (and its stored key share) within your code.
  *
  * Prerequisites:
@@ -16,9 +16,9 @@ import { decrypt } from "../../utils/encryption-utils.js";
  *
  * Steps for developers:
  * 1. Use `email` from the request body to look up the user's pre-generated wallet and encrypted key share.
- * 2. Decrypt the key share and provide it to the Capsule client to enable MPC-based signing.
- * 3. Initialize the CapsuleEthersSigner with the Ethers provider and the MPC-enabled wallet.
- * 4. Construct a transaction and sign it using CapsuleEthersSigner, producing a fully signed transaction.
+ * 2. Decrypt the key share and provide it to the Para client to enable MPC-based signing.
+ * 3. Initialize the ParaEthersSigner with the Ethers provider and the MPC-enabled wallet.
+ * 4. Construct a transaction and sign it using ParaEthersSigner, producing a fully signed transaction.
  *
  * Note:
  * - This example focuses on using a pre-generated wallet. For production use, add authentication,
@@ -33,18 +33,18 @@ export async function ethersPregenSignHandler(req: Request, res: Response, next:
     }
     const email = req.body.email as string;
 
-    // Ensure CAPSULE_API_KEY is set in your environment.
-    // Without this key, you cannot communicate with the Capsule service.
-    const CAPSULE_API_KEY = process.env.CAPSULE_API_KEY;
-    if (!CAPSULE_API_KEY) {
-      res.status(500).send("Set CAPSULE_API_KEY in the environment before using this handler.");
+    // Ensure PARA_API_KEY is set in your environment.
+    // Without this key, you cannot communicate with the Para service.
+    const PARA_API_KEY = process.env.PARA_API_KEY;
+    if (!PARA_API_KEY) {
+      res.status(500).send("Set PARA_API_KEY in the environment before using this handler.");
       return;
     }
 
-    // 2. Initialize the Capsule client and verify the existence of the pre-generated wallet for the given email.
-    const capsuleClient = new CapsuleServer(Environment.BETA, CAPSULE_API_KEY);
+    // 2. Initialize the Para client and verify the existence of the pre-generated wallet for the given email.
+    const para = new ParaServer(Environment.BETA, PARA_API_KEY);
 
-    const hasPregenWallet = await capsuleClient.hasPregenWallet(email);
+    const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
     if (!hasPregenWallet) {
       res.status(400).send("No pre-generated wallet found for this email. Ask the user to create one first.");
       return;
@@ -58,21 +58,21 @@ export async function ethersPregenSignHandler(req: Request, res: Response, next:
       return;
     }
 
-    // Decrypt the key share and set it on the Capsule client.
+    // Decrypt the key share and set it on the Para client.
     // This step enables MPC-based signing functionality for the user's wallet.
     const decryptedKeyShare = decrypt(keyShare);
-    await capsuleClient.setUserShare(decryptedKeyShare);
+    await para.setUserShare(decryptedKeyShare);
 
     // 3. Set up an Ethers provider.
     // Here we use a Sepolia RPC endpoint for demonstration, but you can switch to mainnet or another testnet as needed.
     const ethersProvider = new ethers.JsonRpcProvider("https://ethereum-sepolia-rpc.publicnode.com");
 
-    // Initialize the CapsuleEthersSigner with the Capsule client and the Ethers provider.
-    // The MPC wallet managed by Capsule is now accessible via Ethers.js.
-    const capsuleEthersSigner = new CapsuleEthersSigner(capsuleClient, ethersProvider);
+    // Initialize the ParaEthersSigner with the Para client and the Ethers provider.
+    // The MPC wallet managed by Para is now accessible via Ethers.js.
+    const paraEthersSigner = new ParaEthersSigner(para, ethersProvider);
 
     // Retrieve the MPC-managed wallet address.
-    const address = await capsuleEthersSigner.getAddress();
+    const address = await paraEthersSigner.getAddress();
 
     // 4. Construct a transaction.
     // In this example, we create a simple ETH transfer transaction. Adjust the parameters to suit your use case.
@@ -85,14 +85,14 @@ export async function ethersPregenSignHandler(req: Request, res: Response, next:
       gasPrice: (await ethersProvider.getFeeData()).gasPrice,
     };
 
-    // Sign the transaction using the CapsuleEthersSigner.
+    // Sign the transaction using the ParaEthersSigner.
     // If this fails, ensure that the key share was decrypted correctly and that the wallet is accessible.
-    const signedTx = await capsuleEthersSigner.signTransaction(tx);
+    const signedTx = await paraEthersSigner.signTransaction(tx);
 
     // Return the signed transaction. You can broadcast it using the provider if desired.
     // For example: await ethersProvider.broadcastTransaction(signedTx)
     res.status(200).json({
-      message: "Transaction signed using Ethers + Capsule (pre-generated wallet).",
+      message: "Transaction signed using Ethers + Para (pre-generated wallet).",
       signedTransaction: signedTx,
     });
   } catch (error) {

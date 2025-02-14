@@ -1,9 +1,9 @@
 import { Handler } from "@std/http";
 import { simulateVerifyToken } from "../utils/auth-utils.ts";
-import { Capsule as CapsuleServer, Environment } from "@usecapsule/server-sdk";
+import { Para as ParaServer, Environment } from "@getpara/server-sdk";
 import { getKeyShareInDB } from "../db/keySharesDB.ts";
 import { decrypt } from "../utils/encryption-utils.ts";
-import { CapsuleSolanaWeb3Signer } from "@usecapsule/solana-web3.js-v1-integration";
+import { ParaSolanaWeb3Signer } from "@getpara/solana-web3.js-v1-integration";
 import { Connection, clusterApiUrl, Transaction } from "@solana/web3.js";
 import { SystemProgram } from "@solana/web3.js";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
@@ -33,15 +33,15 @@ export const signWithSolanaWeb3: Handler = async (req: Request): Promise<Respons
     return new Response("Forbidden", { status: 403 });
   }
 
-  const CAPSULE_API_KEY = Deno.env.get("CAPSULE_API_KEY");
+  const PARA_API_KEY = Deno.env.get("PARA_API_KEY");
 
-  if (!CAPSULE_API_KEY) {
-    return new Response("CAPSULE_API_KEY not set", { status: 500 });
+  if (!PARA_API_KEY) {
+    return new Response("PARA_API_KEY not set", { status: 500 });
   }
 
-  const capsuleClient = new CapsuleServer(Environment.BETA, CAPSULE_API_KEY);
+  const para = new ParaServer(Environment.BETA, PARA_API_KEY);
 
-  const hasPregenWallet = await capsuleClient.hasPregenWallet(email);
+  const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
 
   if (!hasPregenWallet) {
     return new Response("Wallet does not exist", { status: 400 });
@@ -55,11 +55,11 @@ export const signWithSolanaWeb3: Handler = async (req: Request): Promise<Respons
 
   const decryptedKeyShare = decrypt(keyShare);
 
-  await capsuleClient.setUserShare(decryptedKeyShare);
+  await para.setUserShare(decryptedKeyShare);
 
   const solanaConnection = new Connection(clusterApiUrl("testnet"));
 
-  const solanaSigner = new CapsuleSolanaWeb3Signer(capsuleClient, solanaConnection);
+  const solanaSigner = new ParaSolanaWeb3Signer(para, solanaConnection);
 
   const demoTx = new Transaction().add(
     SystemProgram.transfer({

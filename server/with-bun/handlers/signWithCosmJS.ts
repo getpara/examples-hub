@@ -1,14 +1,14 @@
 import { simulateVerifyToken } from "../utils/auth-utils";
-import { Capsule as CapsuleServer, Environment } from "@usecapsule/server-sdk";
+import { Para as ParaServer, Environment } from "@getpara/server-sdk";
 import { SigningStargateClient } from "@cosmjs/stargate";
 import type { StdFee, Coin, MsgSendEncodeObject } from "@cosmjs/stargate";
 import { MsgSend } from "cosmjs-types/cosmos/bank/v1beta1/tx";
-import { CapsuleProtoSigner } from "@usecapsule/cosmjs-v0-integration";
+import { ParaProtoSigner } from "@getpara/cosmjs-v0-integration";
 import { getKeyShareInDB } from "../db/keySharesDB";
 import { decrypt } from "../utils/encryption-utils";
 
 /**
- * Handles signing with CosmJS and Capsule ProtoSigner.
+ * Handles signing with CosmJS and Para ProtoSigner.
  *
  * @param {Request} req - The incoming request object.
  * @returns {Promise<Response>} - The response containing the signed transaction result.
@@ -34,15 +34,15 @@ export const signWithCosmJS = async (req: Request): Promise<Response> => {
     return new Response("Forbidden", { status: 403 });
   }
 
-  // Ensure CAPSULE_API_KEY is available
-  const CAPSULE_API_KEY = Bun.env.CAPSULE_API_KEY;
-  if (!CAPSULE_API_KEY) {
-    return new Response("CAPSULE_API_KEY not set", { status: 500 });
+  // Ensure PARA_API_KEY is available
+  const PARA_API_KEY = Bun.env.PARA_API_KEY;
+  if (!PARA_API_KEY) {
+    return new Response("PARA_API_KEY not set", { status: 500 });
   }
 
-  // Initialize Capsule client and check if wallet exists
-  const capsuleClient = new CapsuleServer(Environment.BETA, CAPSULE_API_KEY);
-  const hasPregenWallet = await capsuleClient.hasPregenWallet(email);
+  // Initialize Para client and check if wallet exists
+  const para = new ParaServer(Environment.BETA, PARA_API_KEY);
+  const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
 
   if (!hasPregenWallet) {
     return new Response("Wallet does not exist", { status: 400 });
@@ -55,18 +55,18 @@ export const signWithCosmJS = async (req: Request): Promise<Response> => {
   }
 
   const decryptedKeyShare = decrypt(keyShare);
-  await capsuleClient.setUserShare(decryptedKeyShare);
+  await para.setUserShare(decryptedKeyShare);
 
-  // Initialize Capsule ProtoSigner and Stargate client
-  const capsuleProtoSigner = new CapsuleProtoSigner(capsuleClient, "cosmos");
+  // Initialize Para ProtoSigner and Stargate client
+  const paraProtoSigner = new ParaProtoSigner(para, "cosmos");
   const stargateClient = await SigningStargateClient.connectWithSigner(
     "https://rpc-t.cosmos.nodestake.top",
-    capsuleProtoSigner
+    paraProtoSigner
   );
 
   // Prepare transaction details
   const toAddress = "cosmos1c4k24jzduc365kywrsvf5ujz4ya6mwymy8vq4q"; // Replace with the actual recipient address
-  const fromAddress = capsuleProtoSigner.address;
+  const fromAddress = paraProtoSigner.address;
 
   const amount: Coin = {
     denom: "uatom",
@@ -89,9 +89,9 @@ export const signWithCosmJS = async (req: Request): Promise<Response> => {
     value: message,
   };
 
-  const memo = "Signed with Capsule";
+  const memo = "Signed with Para";
 
-  // Sign the transaction. Internally this will use the Capsule ProtoSigner.
+  // Sign the transaction. Internally this will use the Para ProtoSigner.
   const signResult = await stargateClient.sign(fromAddress, [demoTxMessage], fee, memo);
 
   // Return the result

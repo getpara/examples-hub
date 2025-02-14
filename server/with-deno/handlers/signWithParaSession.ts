@@ -1,5 +1,5 @@
 import { Handler } from "@std/http";
-import { Capsule as CapsuleServer, Environment } from "@usecapsule/server-sdk";
+import { Para as ParaServer, Environment } from "@getpara/server-sdk";
 import { simulateVerifyToken } from "../utils/auth-utils.ts";
 
 interface RequestBody {
@@ -7,7 +7,7 @@ interface RequestBody {
   session: string;
 }
 
-export const signWithCapsuleSession: Handler = async (req: Request): Promise<Response> => {
+export const signWithParaSession: Handler = async (req: Request): Promise<Response> => {
   const authHeader = req.headers.get("Authorization");
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -28,18 +28,18 @@ export const signWithCapsuleSession: Handler = async (req: Request): Promise<Res
     return new Response("Forbidden", { status: 403 });
   }
 
-  const CAPSULE_API_KEY = Deno.env.get("CAPSULE_API_KEY");
+  const PARA_API_KEY = Deno.env.get("PARA_API_KEY");
 
-  if (!CAPSULE_API_KEY) {
-    return new Response("CAPSULE_API_KEY not set", { status: 500 });
+  if (!PARA_API_KEY) {
+    return new Response("PARA_API_KEY not set", { status: 500 });
   }
 
-  const capsuleClient = new CapsuleServer(Environment.BETA, CAPSULE_API_KEY);
+  const para = new ParaServer(Environment.BETA, PARA_API_KEY);
 
   // Instead of loading the preGen user share like in other examples, we import the session exported from the client.
-  await capsuleClient.importSession(session);
+  await para.importSession(session);
 
-  // You can now use the capsule client to sign transactions, etc. like any of the other examples.
+  // You can now use the para client to sign transactions, etc. like any of the other examples.
 
-  return new Response("signWithCapsuleSession", { status: 200 });
+  return new Response("signWithParaSession", { status: 200 });
 };

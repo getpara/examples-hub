@@ -1,5 +1,5 @@
 import { Handler } from "@std/http";
-import { Capsule as CapsuleServer, Environment, WalletType, PregenIdentifierType } from "@usecapsule/server-sdk";
+import { Para as ParaServer, Environment, WalletType, PregenIdentifierType } from "@getpara/server-sdk";
 
 import { simulateVerifyToken } from "../utils/auth-utils.ts";
 import { encrypt } from "../utils/encryption-utils.ts";
@@ -31,27 +31,31 @@ export const createWallet: Handler = async (req: Request): Promise<Response> => 
     return new Response("Forbidden", { status: 403 });
   }
 
-  const CAPSULE_API_KEY = Deno.env.get("CAPSULE_API_KEY");
+  const PARA_API_KEY = Deno.env.get("PARA_API_KEY");
 
-  if (!CAPSULE_API_KEY) {
-    return new Response("CAPSULE_API_KEY not set", { status: 500 });
+  if (!PARA_API_KEY) {
+    return new Response("PARA_API_KEY not set", { status: 500 });
   }
 
-  const capsuleClient = new CapsuleServer(Environment.BETA, CAPSULE_API_KEY);
+  const para = new ParaServer(Environment.BETA, PARA_API_KEY);
 
-  const hasPregenWallet = await capsuleClient.hasPregenWallet(email);
+  const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
 
   if (hasPregenWallet) {
     return new Response("Wallet already exists", { status: 400 });
   }
 
-  const wallet = await capsuleClient.createWalletPreGen(WalletType.EVM, email, PregenIdentifierType.EMAIL);
+  const wallet = await para.createPregenWallet({
+    type: WalletType.EVM,
+    pregenIdentifier: email,
+    pregenIdentifierType: "EMAIL",
+  });
 
   if (!wallet) {
     return new Response("Failed to create wallet", { status: 500 });
   }
 
-  const keyShare = capsuleClient.getUserShare();
+  const keyShare = para.getUserShare();
 
   if (!keyShare) {
     return new Response("Failed to get key share", { status: 500 });

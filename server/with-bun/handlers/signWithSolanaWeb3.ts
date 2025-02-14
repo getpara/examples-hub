@@ -1,12 +1,12 @@
 import { simulateVerifyToken } from "../utils/auth-utils";
-import { Capsule as CapsuleServer, Environment } from "@usecapsule/server-sdk";
+import { Para as ParaServer, Environment } from "@getpara/server-sdk";
 import { getKeyShareInDB } from "../db/keySharesDB";
 import { decrypt } from "../utils/encryption-utils";
-import { CapsuleSolanaWeb3Signer } from "@usecapsule/solana-web3.js-v1-integration";
+import { ParaSolanaWeb3Signer } from "@getpara/solana-web3.js-v1-integration";
 import { Connection, clusterApiUrl, Transaction, SystemProgram, LAMPORTS_PER_SOL } from "@solana/web3.js";
 
 /**
- * Handles signing with Solana Web3 and CapsuleSolanaWeb3Signer.
+ * Handles signing with Solana Web3 and ParaSolanaWeb3Signer.
  *
  * @param {Request} req - The incoming request object.
  * @returns {Promise<Response>} - The response containing the signed transaction result.
@@ -32,15 +32,15 @@ export const signWithSolanaWeb3 = async (req: Request): Promise<Response> => {
     return new Response("Forbidden", { status: 403 });
   }
 
-  // Ensure CAPSULE_API_KEY is available
-  const CAPSULE_API_KEY = Bun.env.CAPSULE_API_KEY;
-  if (!CAPSULE_API_KEY) {
-    return new Response("CAPSULE_API_KEY not set", { status: 500 });
+  // Ensure PARA_API_KEY is available
+  const PARA_API_KEY = Bun.env.PARA_API_KEY;
+  if (!PARA_API_KEY) {
+    return new Response("PARA_API_KEY not set", { status: 500 });
   }
 
-  // Initialize Capsule client and check if wallet exists
-  const capsuleClient = new CapsuleServer(Environment.BETA, CAPSULE_API_KEY);
-  const hasPregenWallet = await capsuleClient.hasPregenWallet(email);
+  // Initialize Para client and check if wallet exists
+  const para = new ParaServer(Environment.BETA, PARA_API_KEY);
+  const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
 
   if (!hasPregenWallet) {
     return new Response("Wallet does not exist", { status: 400 });
@@ -53,11 +53,11 @@ export const signWithSolanaWeb3 = async (req: Request): Promise<Response> => {
   }
 
   const decryptedKeyShare = decrypt(keyShare);
-  await capsuleClient.setUserShare(decryptedKeyShare);
+  await para.setUserShare(decryptedKeyShare);
 
   // Initialize Solana connection and signer
   const solanaConnection = new Connection(clusterApiUrl("testnet"));
-  const solanaSigner = new CapsuleSolanaWeb3Signer(capsuleClient, solanaConnection);
+  const solanaSigner = new ParaSolanaWeb3Signer(para, solanaConnection);
 
   // Create and sign a demo transaction
   const demoTx = new Transaction().add(

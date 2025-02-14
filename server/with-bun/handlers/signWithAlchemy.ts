@@ -1,9 +1,9 @@
-import { Capsule as CapsuleServer, hexStringToBase64, Environment } from "@usecapsule/server-sdk";
-import type { SuccessfulSignatureRes } from "@usecapsule/server-sdk";
+import { Para as ParaServer, hexStringToBase64, Environment } from "@getpara/server-sdk";
+import type { SuccessfulSignatureRes } from "@getpara/server-sdk";
 import { simulateVerifyToken } from "../utils/auth-utils";
 import { decrypt } from "../utils/encryption-utils";
 import { getKeyShareInDB } from "../db/keySharesDB";
-import { createCapsuleAccount, createCapsuleViemClient } from "@usecapsule/viem-v2-integration";
+import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integration";
 import { http, encodeFunctionData, hashMessage } from "viem";
 import type { WalletClient, LocalAccount, SignableMessage, Hash, Chain } from "viem";
 import { createModularAccountAlchemyClient } from "@alchemy/aa-alchemy";
@@ -14,7 +14,7 @@ import type { BatchUserOperationCallData, SendUserOperationResult } from "@alche
 const EXAMPLE_CONTRACT_ADDRESS = "0x7920b6d8b07f0b9a3b96f238c64e022278db1419";
 
 /**
- * Handles signing using Alchemy and Capsule SDK.
+ * Handles signing using Alchemy and Para SDK.
  *
  * @param {Request} req - The incoming request object.
  * @returns {Promise<Response>} - The response containing the user operation result.
@@ -46,21 +46,21 @@ export const signWithAlchemy = async (req: Request): Promise<Response> => {
   }
 
   // Ensure environment variables are set
-  const CAPSULE_API_KEY = Bun.env.CAPSULE_API_KEY;
+  const PARA_API_KEY = Bun.env.PARA_API_KEY;
   const ALCHEMY_API_KEY = Bun.env.ALCHEMY_API_KEY;
   const ALCHEMY_GAS_POLICY_ID = Bun.env.ALCHEMY_GAS_POLICY_ID;
 
-  if (!CAPSULE_API_KEY) {
-    return new Response("CAPSULE_API_KEY not set", { status: 500 });
+  if (!PARA_API_KEY) {
+    return new Response("PARA_API_KEY not set", { status: 500 });
   }
 
   if (!ALCHEMY_API_KEY || !ALCHEMY_GAS_POLICY_ID) {
     return new Response("ALCHEMY_API_KEY or ALCHEMY_GAS_POLICY_ID not set", { status: 500 });
   }
 
-  // Initialize Capsule client and check wallet existence
-  const capsuleClient = new CapsuleServer(Environment.BETA, CAPSULE_API_KEY);
-  const hasPregenWallet = await capsuleClient.hasPregenWallet(email);
+  // Initialize Para client and check wallet existence
+  const para = new ParaServer(Environment.BETA, PARA_API_KEY);
+  const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
   if (!hasPregenWallet) {
     return new Response("Wallet does not exist", { status: 400 });
   }
@@ -72,22 +72,22 @@ export const signWithAlchemy = async (req: Request): Promise<Response> => {
   }
 
   const decryptedKeyShare = decrypt(keyShare);
-  await capsuleClient.setUserShare(decryptedKeyShare);
+  await para.setUserShare(decryptedKeyShare);
 
-  // Create viem capsule account and client
-  const viemCapsuleAccount: LocalAccount = await createCapsuleAccount(capsuleClient);
-  const viemClient: WalletClient = createCapsuleViemClient(capsuleClient, {
-    account: viemCapsuleAccount,
+  // Create viem para account and client
+  const viemParaAccount: LocalAccount = await createParaAccount(para);
+  const viemClient: WalletClient = createParaViemClient(para, {
+    account: viemParaAccount,
     chain: arbitrumSepolia as Chain,
     transport: http("https://ethereum-sepolia-rpc.publicnode.com"),
   });
 
   // Override the default signMessage method to fix the v value of the signature (necessary for UserOp validity)
   viemClient.signMessage = async ({ message }: { message: SignableMessage }): Promise<Hash> => {
-    return customSignMessage(capsuleClient, message);
+    return customSignMessage(para, message);
   };
 
-  const walletClientSigner: WalletClientSigner = new WalletClientSigner(viemClient, "capsule");
+  const walletClientSigner: WalletClientSigner = new WalletClientSigner(viemClient, "para");
 
   // Initialize the Alchemy client
   const alchemyClient = await createModularAccountAlchemyClient({
@@ -120,13 +120,16 @@ export const signWithAlchemy = async (req: Request): Promise<Response> => {
 /**
  * Custom signMessage method to fix the v value of the signature.
  *
- * @param {CapsuleServer} capsule - Capsule server instance.
+ * @param {ParaServer} para - Para server instance.
  * @param {SignableMessage} message - The message to sign.
  * @returns {Promise<Hash>} - The signed hash.
  */
-async function customSignMessage(capsule: CapsuleServer, message: SignableMessage): Promise<Hash> {
+async function customSignMessage(para: ParaServer, message: SignableMessage): Promise<Hash> {
   const hashedMessage = hashMessage(message);
-  const res = await capsule.signMessage(Object.values(capsule.wallets!)[0]!.id, hexStringToBase64(hashedMessage));
+  const res = await para.signMessage({
+    walletId: Object.values(para.wallets!)[0]!.id,
+    messageBase64: hexStringToBase64(hashedMessage),
+  });
 
   let signature = (res as SuccessfulSignatureRes).signature;
 
