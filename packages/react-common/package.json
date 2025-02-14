@@ -21,7 +21,8 @@
     "styled-components": "^6.1.8"
   },
   "scripts": {
-    "build": "rm -rf dist && tsc"
+    "build": "rm -rf dist && yarn typegen && node ./scripts/build.mjs",
+    "typegen": "tsc --emitDeclarationOnly"
   },
   "devDependencies": {
     "@types/react": "^18.0.31",

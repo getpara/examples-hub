@@ -86,33 +86,35 @@ export class CpslDropdown implements ComponentInterface {
   }
 
   private adjustPosition() {
-    const dropdownOptions = this.el.shadowRoot.querySelector('.dropdown-options') as HTMLElement;
-    const parentRect = this.el.parentElement?.getBoundingClientRect();
-    const searchBar = this.el.shadowRoot.querySelector('.search-bar') as HTMLElement;
-    const viewportHeight = window.innerHeight;
+    if (typeof window !== 'undefined') {
+      const dropdownOptions = this.el.shadowRoot.querySelector('.dropdown-options') as HTMLElement;
+      const parentRect = this.el.parentElement?.getBoundingClientRect();
+      const searchBar = this.el.shadowRoot.querySelector('.search-bar') as HTMLElement;
+      const viewportHeight = window.innerHeight;
 
-    if (parentRect) {
-      this.width = `${parentRect.width}px`;
-      dropdownOptions.style.left = `${parentRect.x}px`;
-      if (window.innerWidth <= 480) {
-        searchBar.style.maxHeight = `30px`;
-        dropdownOptions.style.top = `425px`;
-        dropdownOptions.style.maxHeight = '110px';
-        return;
+      if (parentRect) {
+        this.width = `${parentRect.width}px`;
+        dropdownOptions.style.left = `${parentRect.x}px`;
+        if (window.innerWidth <= 480) {
+          searchBar.style.maxHeight = `30px`;
+          dropdownOptions.style.top = `425px`;
+          dropdownOptions.style.maxHeight = '110px';
+          return;
+        }
+        dropdownOptions.style.top = `${parentRect.y + parentRect.height}px`;
+
+        const availableHeight = viewportHeight - parentRect.bottom;
+        dropdownOptions.style.maxHeight = `${availableHeight - 8}px`;
       }
-      dropdownOptions.style.top = `${parentRect.y + parentRect.height}px`;
-
-      const availableHeight = viewportHeight - parentRect.bottom;
-      dropdownOptions.style.maxHeight = `${availableHeight - 8}px`;
     }
   }
 
   private addClickOutsideListener() {
-    window.addEventListener('click', this.handleClickOutside);
+    typeof window !== 'undefined' && window.addEventListener('click', this.handleClickOutside);
   }
 
   private removeClickOutsideListener() {
-    window.removeEventListener('click', this.handleClickOutside);
+    typeof window !== 'undefined' && window.removeEventListener('click', this.handleClickOutside);
   }
 
   private handleClickOutside = (event: MouseEvent) => {

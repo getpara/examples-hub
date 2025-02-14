@@ -87,7 +87,9 @@ export const MoonPayEmbed = ({ para, isDark, isEmbedded, onRampConfig, onRampPur
         setOnRampPurchase(updated);
         if (!isEmbedded) {
           setTimeout(() => {
-            window.close();
+            if (typeof window !== 'undefined') {
+              window.close();
+            }
           }, 5000);
         }
       } catch (e) {

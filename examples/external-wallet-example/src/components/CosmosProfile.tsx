@@ -3,7 +3,7 @@ import { ProfileInnerContainer, Card, OverflowText } from './common';
 import { useState } from 'react';
 import { getWallet, useAccount, useActiveWalletType } from '@getpara/graz';
 import { useCosmosStore } from '../stores/cosmosStore/useCosmosStore';
-import { useParaCosmos } from '../../../../packages/cosmos-wallet-connectors/dist/providers/ParaCosmosContext';
+import { useParaCosmos } from '@getpara/cosmos-wallet-connectors';
 
 export const CosmosProfile = () => {
   const { multiChain, chains } = useParaCosmos();

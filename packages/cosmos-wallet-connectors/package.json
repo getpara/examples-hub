@@ -12,7 +12,8 @@
     "@getpara/react-sdk": "1.2.0"
   },
   "scripts": {
-    "build": "rm -rf dist && tsc",
+    "build": "rm -rf dist && yarn typegen && node ./scripts/build.mjs",
+    "typegen": "tsc --emitDeclarationOnly",
     "test": "vitest run --coverage"
   },
   "devDependencies": {

@@ -23,7 +23,9 @@
     "css/"
   ],
   "scripts": {
-    "build": "node scripts/fixExtensions.js && yarn copy && yarn tsc",
+    "old-build": "node scripts/fixExtensions.js && yarn copy && yarn tsc",
+    "build": "node scripts/fixExtensions.js && yarn copy && rm -rf dist && node ./scripts/build.mjs && yarn typegen",
+    "typegen": "tsc --emitDeclarationOnly",
     "tsc": "tsc -p . --outDir ./dist",
     "copy": "node scripts/copy.cjs"
   },
@@ -33,8 +35,8 @@
   "devDependencies": {
     "@types/react": "^18.2.64",
     "glob": "^11.0.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
     "typescript": "^5.4.2"
   },
   "publishConfig": {

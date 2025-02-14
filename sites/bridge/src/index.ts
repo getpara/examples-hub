@@ -1,5 +1,4 @@
-import { ParaWeb, Environment } from '@getpara/web-sdk';
-import { parseCredentialCreationRes } from '@getpara/web-sdk/dist/cryptography/webAuth';
+import { ParaWeb, Environment, parseCredentialCreationRes } from '@getpara/web-sdk';
 import {
   getAsymmetricKeyPair,
   getPublicKeyHex,

@@ -18,7 +18,9 @@
     "ua-parser-js": "1.0.39"
   },
   "scripts": {
-    "build": "rm -rf dist && tsc && yarn post-build",
+    "build": "rm -rf dist && yarn typegen && node ./scripts/build.mjs && yarn post-build",
+    "typegen": "tsc --emitDeclarationOnly",
+    "old-build": "rm -rf dist && tsc && yarn post-build",
     "post-build": "./scripts/post-build.sh",
     "test": "vitest run --coverage"
   },

@@ -317,6 +317,22 @@ describe('WebUtils', () => {
     expect(webUtils.disableProviderModal).toBeFalsy();
   });
   describe('openPopup', () => {
+    it('no window', () => {
+      Object.defineProperty(globalThis, 'window', {
+        value: undefined,
+        configurable: true,
+      });
+
+      const webUtils = new WebUtils();
+
+      const resp = webUtils.openPopup(TEST_POPUP_URL);
+
+      expect(resp).toBeUndefined();
+      Object.defineProperty(globalThis, 'window', {
+        value: windowMockValue,
+        configurable: true,
+      });
+    });
     describe('no type', () => {
       it('no delay', () => {
         const webUtils = new WebUtils();

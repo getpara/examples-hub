@@ -110,7 +110,9 @@ export const StripeEmbed = ({ para, isDark, isEmbedded, onRampPurchase, setOnRam
           setOnRampPurchase(updatedPurchase);
           if (!isEmbedded) {
             setTimeout(() => {
-              window.close();
+              if (typeof window !== 'undefined') {
+                window.close();
+              }
             }, 5000);
           }
           break;

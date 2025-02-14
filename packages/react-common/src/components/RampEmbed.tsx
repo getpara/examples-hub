@@ -77,7 +77,9 @@ export const RampEmbed = ({
 
             if (!isEmbedded) {
               setTimeout(() => {
-                window.close();
+                if (typeof window !== 'undefined') {
+                  window.close();
+                }
               }, 5000);
             }
           })

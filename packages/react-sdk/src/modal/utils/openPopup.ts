@@ -3,6 +3,10 @@ export function openPopup(
   target: string,
   type: 'OAUTH' | 'LOGIN_PASSKEY' | 'CREATE_PASSKEY' | 'TRANSACTION_REVIEW' | 'CREATE_PASSWORD' | 'LOGIN_PASSWORD',
 ): Window {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
   const popUpWidth = 560;
   let popUpHeight: number;
 

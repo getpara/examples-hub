@@ -4,7 +4,9 @@
     "outDir": "./dist",
     "lib": ["dom", "dom.iterable", "esnext"],
     "jsx": "react-jsx",
-    "module": "ESNext"
+    "module": "ESNext",
+    "declaration": true,
+    "declarationDir": "dist"
   },
   "include": ["src/**/*.ts", "src/window.d.ts", "src/providers/SolanaExternalWalletContext.tsx"]
 }

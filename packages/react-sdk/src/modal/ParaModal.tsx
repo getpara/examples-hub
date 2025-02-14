@@ -96,6 +96,7 @@ const ParaModalInner = forwardRef<ParaModalHandle, ParaModalProps>(
 
     const [isModalMounted, setIsModalMounted] = useState(false);
     const [isInit, setIsInit] = useState(false);
+    const [ready, setIsReady] = useState(false);
 
     useImperativeHandle(ref, () => {
       return {
@@ -239,12 +240,15 @@ const ParaModalInner = forwardRef<ParaModalHandle, ParaModalProps>(
 
     useEffect(() => {
       // TODO: remove this redundant listener once we force the use of the ParaProvider
-      window.addEventListener(ParaEvent.WALLETS_CHANGE_EVENT, updateActiveWallet);
-      window.addEventListener(ParaEvent.EXTERNAL_WALLET_CHANGE_EVENT, updateActiveWallet);
+      typeof window !== 'undefined' && window.addEventListener(ParaEvent.WALLETS_CHANGE_EVENT, updateActiveWallet);
+      typeof window !== 'undefined' && window.addEventListener(ParaEvent.EXTERNAL_WALLET_CHANGE_EVENT, updateActiveWallet);
+
+      setIsReady(true);
 
       return () => {
-        window.removeEventListener(ParaEvent.WALLETS_CHANGE_EVENT, updateActiveWallet);
-        window.removeEventListener(ParaEvent.EXTERNAL_WALLET_CHANGE_EVENT, updateActiveWallet);
+        typeof window !== 'undefined' && window.removeEventListener(ParaEvent.WALLETS_CHANGE_EVENT, updateActiveWallet);
+        typeof window !== 'undefined' &&
+          window.removeEventListener(ParaEvent.EXTERNAL_WALLET_CHANGE_EVENT, updateActiveWallet);
       };
     }, []);
 
@@ -274,6 +278,10 @@ const ParaModalInner = forwardRef<ParaModalHandle, ParaModalProps>(
 
       setIsInit(false);
     };
+
+    if (!ready) {
+      return null;
+    }
 
     if (!para) {
       console.error('A Para instance is required.');

@@ -236,14 +236,14 @@ export class CpslSelect {
   private handleClickOutside = (event: MouseEvent) => {
     if (this.hasFocus && !this.el.contains(event.target as Node)) {
       this.hasFocus = false;
-      window.removeEventListener('click', this.handleClickOutside);
+      typeof window !== 'undefined' && window.removeEventListener('click', this.handleClickOutside);
     }
   };
 
   private handleClick = () => {
     if (!this.disabled) {
       this.hasFocus = true;
-      window.addEventListener('click', this.handleClickOutside);
+      typeof window !== 'undefined' && window.addEventListener('click', this.handleClickOutside);
     }
   };
 

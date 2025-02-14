@@ -23,7 +23,8 @@
     "wagmi": "1.x"
   },
   "scripts": {
-    "build": "rm -rf dist && tsc"
+    "build": "rm -rf dist && yarn typegen && node ./scripts/build.mjs",
+    "typegen": "tsc --emitDeclarationOnly"
   },
   "files": [
     "dist",

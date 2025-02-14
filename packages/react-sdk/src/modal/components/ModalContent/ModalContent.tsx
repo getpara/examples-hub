@@ -212,10 +212,12 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     }
 
     async function createAccountWithPasskey() {
-      clearTimeout(createAccountTimeout.current);
-      createAccountTimeout.current = window.setTimeout(awaitWalletCreationTransition, DEFAULTS.POLLING_INTERVAL_MS);
-      openPopup(webAuthURLForCreate, 'ParaPasskey', 'CREATE_PASSKEY');
-      setStep(ModalStep.AWAITING_BIOMETRIC_CREATION);
+      if (typeof window !== 'undefined') {
+        clearTimeout(createAccountTimeout.current);
+        createAccountTimeout.current = window.setTimeout(awaitWalletCreationTransition, DEFAULTS.POLLING_INTERVAL_MS);
+        openPopup(webAuthURLForCreate, 'ParaPasskey', 'CREATE_PASSKEY');
+        setStep(ModalStep.AWAITING_BIOMETRIC_CREATION);
+      }
     }
 
     // wait for login auth to do post login setup
@@ -240,10 +242,12 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
           loginOverride();
           return;
         }
-        loginTimeout.current = window.setTimeout(awaitLoginTransition, DEFAULTS.LOGGIN_POLLING_DELAY_MS);
+        if (typeof window !== 'undefined') {
+          loginTimeout.current = window.setTimeout(awaitLoginTransition, DEFAULTS.LOGGIN_POLLING_DELAY_MS);
+        }
       }
       return () => {
-        window.clearTimeout(loginTimeout.current);
+        typeof window !== 'undefined' && window.clearTimeout(loginTimeout.current);
         para.exitLogin();
       };
     }, [webAuthURLForLogin, passwordUrlForLogin, popupWindow]);
@@ -266,8 +270,10 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
       }
 
       if (currentStep === ModalStep.PASSWORD_CREATION) {
-        clearTimeout(createAccountTimeout.current);
-        createAccountTimeout.current = window.setTimeout(awaitWalletCreationTransition, DEFAULTS.POLLING_INTERVAL_MS);
+        if (typeof window !== 'undefined') {
+          clearTimeout(createAccountTimeout.current);
+          createAccountTimeout.current = window.setTimeout(awaitWalletCreationTransition, DEFAULTS.POLLING_INTERVAL_MS);
+        }
       }
     }, [currentStep]);
 

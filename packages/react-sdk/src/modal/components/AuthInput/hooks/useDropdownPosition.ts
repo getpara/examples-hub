@@ -6,13 +6,15 @@ export const useDropdownPosition = (inputRef: MutableRefObject<HTMLCpslInputElem
   const [mobileAnchor, setMobileAnchor] = useState<number | undefined>();
 
   const resize = () => {
-    const newMaxHeight = Math.max(
-      window.innerHeight - inputRef?.current?.getBoundingClientRect().bottom - 20,
-      window.innerHeight * 0.25,
-    );
-    setDropdownMaxHeight(newMaxHeight);
-    setDropdownWidth(inputRef?.current?.getBoundingClientRect().width);
-    setMobileAnchor(inputRef?.current?.getBoundingClientRect().height);
+    if (typeof window !== 'undefined') {
+      const newMaxHeight = Math.max(
+        window.innerHeight - inputRef?.current?.getBoundingClientRect().bottom - 20,
+        window.innerHeight * 0.25,
+      );
+      setDropdownMaxHeight(newMaxHeight);
+      setDropdownWidth(inputRef?.current?.getBoundingClientRect().width);
+      setMobileAnchor(inputRef?.current?.getBoundingClientRect().height);
+    }
   };
 
   if (inputRef.current && !dropdownMaxHeight) {
@@ -20,10 +22,10 @@ export const useDropdownPosition = (inputRef: MutableRefObject<HTMLCpslInputElem
   }
 
   useEffect(() => {
-    window.addEventListener('resize', resize);
+    typeof window !== 'undefined' && window.addEventListener('resize', resize);
 
     return () => {
-      window.removeEventListener('resize', resize);
+      typeof window !== 'undefined' && window.removeEventListener('resize', resize);
     };
   }, []);
 

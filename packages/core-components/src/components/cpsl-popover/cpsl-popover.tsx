@@ -120,18 +120,20 @@ export class CpslPopover {
 
   @Watch('open')
   onOpenChange() {
-    if (this.open) {
-      window.addEventListener('mousedown', this.validateEventStart);
-      window.addEventListener('touchstart', this.validateEventStart);
-      window.addEventListener('click', this.handleClickOutside);
-      window.addEventListener('scroll', () => this.setPosition(), true);
-      window.addEventListener('resize', () => this.setPosition(), true);
-    } else {
-      window.removeEventListener('mousedown', this.validateEventStart);
-      window.removeEventListener('touchstart', this.validateEventStart);
-      window.removeEventListener('click', this.handleClickOutside);
-      window.removeEventListener('scroll', () => this.setPosition(), true);
-      window.removeEventListener('resize', () => this.setPosition(), true);
+    if (typeof window !== 'undefined') {
+      if (this.open) {
+        window.addEventListener('mousedown', this.validateEventStart);
+        window.addEventListener('touchstart', this.validateEventStart);
+        window.addEventListener('click', this.handleClickOutside);
+        window.addEventListener('scroll', () => this.setPosition(), true);
+        window.addEventListener('resize', () => this.setPosition(), true);
+      } else {
+        window.removeEventListener('mousedown', this.validateEventStart);
+        window.removeEventListener('touchstart', this.validateEventStart);
+        window.removeEventListener('click', this.handleClickOutside);
+        window.removeEventListener('scroll', () => this.setPosition(), true);
+        window.removeEventListener('resize', () => this.setPosition(), true);
+      }
     }
   }
 
@@ -224,7 +226,7 @@ export class CpslPopover {
 
   private setPosition = () => {
     const anchorEl = this.anchorEl ?? this.triggerEl;
-    if (anchorEl) {
+    if (anchorEl && typeof window !== 'undefined') {
       const windowWidth = window.innerWidth;
       const windowHeight = window.innerHeight;
       const elWidth = this.el.clientWidth;

@@ -1,6 +1,10 @@
 import { isAndroid, isMobile, isTelegram } from '@getpara/web-sdk';
 
 export const routeMobileExternalWallet = (qrUri?: string) => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
   if (isMobile()) {
     if (!qrUri) return;
 

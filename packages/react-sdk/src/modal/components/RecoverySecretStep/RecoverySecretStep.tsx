@@ -35,7 +35,7 @@ export const SaveRecoverySecret = ({
   };
 
   const onEmail = () => {
-    window.open(getMailtoLink(email, value), '_self');
+    typeof window !== 'undefined' && window.open(getMailtoLink(email, value), '_self');
     setIsSecretSaved(true);
   };
 

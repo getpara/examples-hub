@@ -6,7 +6,7 @@
   "types": "dist/index.d.ts",
   "exports": {
     ".": "./dist/index.js",
-    "./styles.css": "./dist/modal/css/modal.css"
+    "./styles.css": "./dist/css/modal.css"
   },
   "sideEffects": [
     "*.css"
@@ -24,8 +24,9 @@
     "zustand": "^4.5.2"
   },
   "scripts": {
-    "build": "rm -rf dist && tsc && yarn post-build",
     "post-build": "./scripts/post-build.sh",
+    "build": "rm -rf dist && yarn typegen && node ./scripts/build.mjs && yarn post-build",
+    "typegen": "tsc --emitDeclarationOnly",
     "test": "vitest run --coverage"
   },
   "devDependencies": {

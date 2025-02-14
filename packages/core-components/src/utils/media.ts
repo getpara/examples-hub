@@ -13,7 +13,7 @@ export const matchBreakpoint = (breakpoint: string | undefined) => {
   if (breakpoint === undefined || breakpoint === '') {
     return true;
   }
-  if ((window as any).matchMedia) {
+  if (typeof window !== 'undefined' && (window as any).matchMedia) {
     const mediaQuery = SIZE_TO_MEDIA[breakpoint];
     return window.matchMedia(mediaQuery).matches;
   }

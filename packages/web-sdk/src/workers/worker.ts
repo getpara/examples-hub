@@ -30,6 +30,10 @@ export interface Message {
 }
 
 async function loadWasm(ctx: Ctx, wasmOverride?: ArrayBuffer) {
+  if (typeof self === 'undefined') {
+    return;
+  }
+
   // @ts-ignore
   const goWasm = new self.Go();
   let wasmArrayBuffer = wasmOverride;

@@ -10,9 +10,11 @@ export const AwaitingWalletCreationStep = () => {
   const showInfoBoxTimeout = useRef<number>();
 
   useEffect(() => {
-    showInfoBoxTimeout.current = window.setTimeout(() => {
-      setShowInfoBox(true);
-    }, 4000);
+    if (typeof window !== 'undefined') {
+      showInfoBoxTimeout.current = window.setTimeout(() => {
+        setShowInfoBox(true);
+      }, 4000);
+    }
 
     return () => clearTimeout(showInfoBoxTimeout.current);
   }, []);

@@ -137,6 +137,10 @@ export async function createCredential(
   userHandle: string;
   algorithm: number;
 }> {
+  if (typeof navigator === 'undefined') {
+    return;
+  }
+
   const userHandle = generateUserHandle();
   const createCredentialDefaultArgs = {
     publicKey: {

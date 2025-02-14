@@ -99,72 +99,74 @@ export class CpslAuthModal {
   }
 
   private handleAnimation() {
-    if (this.open) {
-      if (window.innerWidth >= MOBILE_SIZE + 1) {
-        gsap
-          .timeline({
-            onStart: () => {
-              this.cpslModalEntering.emit();
-            },
-            onComplete: () => {
-              this.cpslModalEntered.emit();
-            },
-          })
-          .set(this.modalWrapperEl, { display: 'flex', yPercent: 0 })
-          .to(this.modalWrapperEl, {
-            scale: 1,
-            opacity: 1,
-            duration: this.enterTransitionDuration,
-          });
+    if (typeof window !== 'undefined') {
+      if (this.open) {
+        if (window.innerWidth >= MOBILE_SIZE + 1) {
+          gsap
+            .timeline({
+              onStart: () => {
+                this.cpslModalEntering.emit();
+              },
+              onComplete: () => {
+                this.cpslModalEntered.emit();
+              },
+            })
+            .set(this.modalWrapperEl, { display: 'flex', yPercent: 0 })
+            .to(this.modalWrapperEl, {
+              scale: 1,
+              opacity: 1,
+              duration: this.enterTransitionDuration,
+            });
+        } else {
+          gsap
+            .timeline({
+              onStart: () => {
+                this.cpslModalEntering.emit();
+              },
+              onComplete: () => {
+                this.cpslModalEntered.emit();
+              },
+            })
+            .set(this.modalWrapperEl, { display: 'flex', scale: 1, opacity: 1 })
+            .to(this.modalWrapperEl, {
+              yPercent: -100,
+              duration: this.enterTransitionDuration,
+            });
+        }
       } else {
-        gsap
-          .timeline({
-            onStart: () => {
-              this.cpslModalEntering.emit();
-            },
-            onComplete: () => {
-              this.cpslModalEntered.emit();
-            },
-          })
-          .set(this.modalWrapperEl, { display: 'flex', scale: 1, opacity: 1 })
-          .to(this.modalWrapperEl, {
-            yPercent: -100,
-            duration: this.enterTransitionDuration,
-          });
-      }
-    } else {
-      if (window.innerWidth >= MOBILE_SIZE + 1) {
-        gsap
-          .timeline({
-            onStart: () => {
-              this.cpslModalExiting.emit();
-            },
-            onComplete: () => {
-              this.cpslModalExited.emit();
-              this.modalWrapperEl?.style.setProperty('display', 'none');
-            },
-          })
-          .to(this.modalWrapperEl, {
-            scale: 0.8,
-            opacity: 0,
-            duration: this.exitTransitionDuration,
-          });
-      } else {
-        gsap
-          .timeline({
-            onStart: () => {
-              this.cpslModalExiting.emit();
-            },
-            onComplete: () => {
-              this.cpslModalExited.emit();
-              this.modalWrapperEl?.style.setProperty('display', 'none');
-            },
-          })
-          .to(this.modalWrapperEl, {
-            yPercent: 0,
-            duration: this.exitTransitionDuration,
-          })
-          .set(this.modalContainerEl, { y: 0 });
+        if (window.innerWidth >= MOBILE_SIZE + 1) {
+          gsap
+            .timeline({
+              onStart: () => {
+                this.cpslModalExiting.emit();
+              },
+              onComplete: () => {
+                this.cpslModalExited.emit();
+                this.modalWrapperEl?.style.setProperty('display', 'none');
+              },
+            })
+            .to(this.modalWrapperEl, {
+              scale: 0.8,
+              opacity: 0,
+              duration: this.exitTransitionDuration,
+            });
+        } else {
+          gsap
+            .timeline({
+              onStart: () => {
+                this.cpslModalExiting.emit();
+              },
+              onComplete: () => {
+                this.cpslModalExited.emit();
+                this.modalWrapperEl?.style.setProperty('display', 'none');
+              },
+            })
+            .to(this.modalWrapperEl, {
+              yPercent: 0,
+              duration: this.exitTransitionDuration,
+            })
+            .set(this.modalContainerEl, { y: 0 });
+        }
       }
     }
   }
