@@ -19,3 +19,7 @@ body {
   background: var(--background);
   font-family: "Inter", Arial, Helvetica, sans-serif;
 }
+
+#para-modal > cpsl-auth-modal {
+  z-index: 9999999999;
+}
