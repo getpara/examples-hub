@@ -102,6 +102,8 @@ export default function Home() {
     setIsLoading(false);
   };
 
+  
+
   return (
     <main className="flex flex-col items-center justify-center min-h-screen gap-6 p-8">
       <h1 className="text-2xl font-bold">Custom Email Auth + Para Example</h1>
