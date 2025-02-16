@@ -3230,6 +3230,7 @@ export abstract class ParaCore {
       countryCode: this.countryCode,
       telegramUserId: this.telegramUserId,
       farcasterUsername: this.farcasterUsername,
+      externalWallets: this.externalWallets,
     };
     return Buffer.from(JSON.stringify(sessionInfo)).toString('base64');
   }
@@ -3244,6 +3245,7 @@ export abstract class ParaCore {
     await this.setEmail(sessionInfo.email);
     await this.setUserId(sessionInfo.userId);
     await this.setWallets(sessionInfo.wallets);
+    await this.setExternalWallets(sessionInfo.externalWallets);
     for (const walletId of Object.keys(this.wallets)) {
       if (!this.wallets[walletId].userId) {
         this.wallets[walletId].userId = this.userId;
