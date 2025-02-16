@@ -3245,7 +3245,7 @@ export abstract class ParaCore {
     await this.setEmail(sessionInfo.email);
     await this.setUserId(sessionInfo.userId);
     await this.setWallets(sessionInfo.wallets);
-    await this.setExternalWallets(sessionInfo.externalWallets);
+    await this.setExternalWallets(sessionInfo.externalWallets || {});
     for (const walletId of Object.keys(this.wallets)) {
       if (!this.wallets[walletId].userId) {
         this.wallets[walletId].userId = this.userId;
