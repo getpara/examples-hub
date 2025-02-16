@@ -43,8 +43,8 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Error checking login status: ${e.toString()}')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Error checking login status: ${e.toString()}')));
       }
     }
   }
@@ -57,47 +57,14 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
       _loadingProvider = provider.value;
     });
 
-    final chromeSafariBrowser = ChromeSafariBrowser();
-
     try {
-      final isFarcaster = provider == OAuthMethod.farcaster;
-      final authUrl = isFarcaster ? await para.getFarcasterConnectURL() : await para.getOAuthURL(provider);
+      final email = await para.oAuthConnect(provider, "paraflutter");
+      final userExists = await para.checkIfUserExists(email);
 
-      final authStatusFuture = isFarcaster ? para.waitForFarcasterStatus() : para.waitForOAuth();
-
-      chromeSafariBrowser.open(
-        url: WebUri(authUrl),
-        settings: ChromeSafariBrowserSettings(),
-      );
-
-      final authResult = await authStatusFuture;
-
-      if (chromeSafariBrowser.isOpened()) {
-        await chromeSafariBrowser.close();
-      }
-
-      if (isFarcaster) {
-        final farcasterResult = authResult as FarcasterStatus;
-        if (!farcasterResult.userExists) {
-          await _handleNewUserSetup(farcasterResult.username);
-        } else {
-          await _handlePasskeyLogin();
-        }
+      if (userExists) {
+        await _handlePasskeyLogin(email);
       } else {
-        final oauthResult = authResult as OAuthResponse;
-
-        if (oauthResult.isError == true) {
-          throw Exception('OAuth authentication failed');
-        }
-
-        if (oauthResult.userExists) {
-          await _handlePasskeyLogin();
-        } else {
-          if (oauthResult.email == null) {
-            throw Exception('Email is required for new user registration');
-          }
-          await _handleNewUserSetup(oauthResult.email!);
-        }
+        await _handleNewUserSetup(email);
       }
     } catch (e) {
       if (!mounted) return;
@@ -133,11 +100,11 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
     );
   }
 
-  Future<void> _handlePasskeyLogin() async {
+  Future<void> _handlePasskeyLogin(String email) async {
     setState(() => _isLoading = true);
 
     try {
-      final wallet = await para.login();
+      final wallet = await para.login(email: email);
 
       if (!mounted) return;
 
