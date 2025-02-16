@@ -1,6 +1,6 @@
 {
   "name": "@getpara/core-sdk",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/types/index.d.ts",
@@ -9,7 +9,7 @@
   "dependencies": {
     "@celo/utils": "^8.0.0",
     "@cosmjs/encoding": "^0.32.4",
-    "@getpara/user-management-client": "1.2.0",
+    "@getpara/user-management-client": "1.3.0",
     "@noble/hashes": "^1.5.0",
     "base64url": "^3.0.1",
     "ethereumjs-util": "7.1.5",
