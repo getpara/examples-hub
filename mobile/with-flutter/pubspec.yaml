@@ -9,7 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  para: 1.0.0
+  para: 1.1.0
   flutter_dotenv: ^5.2.1
   flutter_inappwebview: ^6.1.5
   font_awesome_flutter: ^10.8.0
@@ -29,3 +29,5 @@ flutter:
   assets:
     - .env
     - lib/assets/farcaster.svg
+    - lib/assets/metamask_icon.svg
+    - lib/assets/phantom_icon.svg

@@ -1,4 +1,5 @@
 import 'package:para_flutter/examples/auth/email_auth_example.dart';
+import 'package:para_flutter/examples/auth/external_wallet_auth_example.dart';
 import 'package:para_flutter/examples/auth/oauth_auth_example.dart';
 import 'package:para_flutter/examples/auth/phone_auth_example.dart';
 import 'package:para_flutter/examples/auth/pregen_auth_examle.dart';
@@ -51,7 +52,8 @@ class _DemoAuthSelectorState extends State<DemoAuthSelector> {
               _buildExampleCard(
                 context: context,
                 title: 'Email + Passkey Authentication',
-                description: 'Implement email-based authentication with passkey support for enhanced security.',
+                description:
+                    'Implement email-based authentication with passkey support for enhanced security.',
                 route: const ParaEmailExample(),
                 icon: Icons.email_outlined,
               ),
@@ -59,7 +61,8 @@ class _DemoAuthSelectorState extends State<DemoAuthSelector> {
               _buildExampleCard(
                 context: context,
                 title: 'Phone + Passkey Authentication',
-                description: 'Add phone number authentication with passkey support to your application.',
+                description:
+                    'Add phone number authentication with passkey support to your application.',
                 route: const ParaPhoneExample(),
                 icon: Icons.phone_android_outlined,
               ),
@@ -67,7 +70,8 @@ class _DemoAuthSelectorState extends State<DemoAuthSelector> {
               _buildExampleCard(
                 context: context,
                 title: 'OAuth Authentication',
-                description: 'Integrate popular OAuth providers (Google, Apple, X, Discord) into your app.',
+                description:
+                    'Integrate popular OAuth providers (Google, Apple, X, Discord) into your app.',
                 route: const ParaOAuthExample(),
                 icon: Icons.account_circle_outlined,
               ),
@@ -75,10 +79,18 @@ class _DemoAuthSelectorState extends State<DemoAuthSelector> {
               _buildExampleCard(
                 context: context,
                 title: 'Pregen Wallet Authentication',
-                description: 'Create and manage pre-generated wallets using various identifier types.',
+                description:
+                    'Create and manage pre-generated wallets using various identifier types.',
                 route: const ParaPregenExample(),
                 icon: Icons.wallet_outlined,
               ),
+              const SizedBox(height: 16),
+              _buildExampleCard(
+                  context: context,
+                  title: "External Wallet Authentication",
+                  description: "Login with an external wallet",
+                  route: const ParaExternalWalletExample(),
+                  icon: Icons.wallet_outlined),
             ],
           ),
         ),
