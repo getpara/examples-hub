@@ -7,6 +7,7 @@ import 'package:para/para.dart';
 import 'package:para_flutter/client/para.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ParaOAuthExample extends StatefulWidget {
   const ParaOAuthExample({super.key});
@@ -58,21 +59,28 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
     });
 
     final chromeSafariBrowser = ChromeSafariBrowser();
+    final isFarcaster = provider == OAuthMethod.farcaster;
 
     try {
-      final isFarcaster = provider == OAuthMethod.farcaster;
       final authUrl = isFarcaster ? await para.getFarcasterConnectURL() : await para.getOAuthURL(provider);
 
       final authStatusFuture = isFarcaster ? para.waitForFarcasterStatus() : para.waitForOAuth();
 
-      chromeSafariBrowser.open(
-        url: WebUri(authUrl),
-        settings: ChromeSafariBrowserSettings(),
-      );
+      if (isFarcaster) {
+        print('Opening Farcaster URL: $authUrl');
+        if (!await launchUrl(Uri.parse(authUrl), mode: LaunchMode.externalApplication)) {
+          throw Exception('Could not launch Farcaster URL');
+        }
+      } else {
+        await chromeSafariBrowser.open(
+          url: WebUri(authUrl),
+          settings: ChromeSafariBrowserSettings(),
+        );
+      }
 
       final authResult = await authStatusFuture;
 
-      if (chromeSafariBrowser.isOpened()) {
+      if (!isFarcaster && chromeSafariBrowser.isOpened()) {
         await chromeSafariBrowser.close();
       }
 
