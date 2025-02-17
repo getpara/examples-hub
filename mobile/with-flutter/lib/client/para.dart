@@ -10,3 +10,9 @@ final para = Para(
       environment == 'sandbox' ? Environment.sandbox : Environment.beta,
   apiKey: apiKey,
 );
+
+final phantomConnector = ParaPhantomConnector(
+    para: para, appUrl: "https://usecapsule.com", deepLink: "paraflutter");
+
+final metamaskConnector = ParaMetaMaskConnector(
+    para: para, appUrl: "https://usecapsule.com", deepLink: "paraflutter");

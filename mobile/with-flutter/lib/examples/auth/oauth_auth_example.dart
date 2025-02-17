@@ -6,7 +6,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:para/para.dart';
 import 'package:para_flutter/client/para.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 class ParaOAuthExample extends StatefulWidget {
   const ParaOAuthExample({super.key});
