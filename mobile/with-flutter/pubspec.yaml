@@ -9,21 +9,18 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  para: ^1.0.0
+  para: 1.2.0
   flutter_dotenv: ^5.2.1
   flutter_inappwebview: ^6.1.5
   font_awesome_flutter: ^10.8.0
   web3dart: ^2.7.3
   solana_web3: ^0.1.3
   flutter_svg: ^2.0.16
-  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
-  flutter_launcher_icons: ^0.13.1
-
 dependency_overrides:
   pinenacl: 0.6.0
 
@@ -32,8 +29,5 @@ flutter:
   assets:
     - .env
     - lib/assets/farcaster.svg
-
-flutter_launcher_icons:
-  android: true
-  ios: true
-  image_path: "lib/assets/app_icon.png"
+    - lib/assets/metamask_icon.svg
+    - lib/assets/phantom_icon.svg
