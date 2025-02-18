@@ -57,13 +57,12 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
     });
 
     try {
-      final email = await para.oAuthConnect(provider, "paraflutter");
-      final userExists = await para.checkIfUserExists(email);
+      final oAuthResponse = await para.oAuthConnect(provider, "paraflutter");
 
-      if (userExists) {
-        await _handlePasskeyLogin(email);
+      if (oAuthResponse.userExists) {
+        await _handlePasskeyLogin(oAuthResponse.email!);
       } else {
-        await _handleNewUserSetup(email);
+        await _handleNewUserSetup(oAuthResponse.email!);
       }
     } catch (e) {
       if (!mounted) return;
@@ -239,13 +238,6 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
                 label: 'Discord',
                 icon: FontAwesomeIcons.discord,
                 backgroundColor: const Color(0xFF5865F2),
-                textColor: Colors.white,
-              ),
-              _buildOAuthButton(
-                provider: OAuthMethod.farcaster,
-                label: 'Farcaster',
-                icon: 'lib/assets/farcaster.svg',
-                backgroundColor: const Color(0xFF855DCD),
                 textColor: Colors.white,
               ),
             ],
