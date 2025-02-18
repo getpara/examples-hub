@@ -2,19 +2,19 @@
 import 'dart:async';
 import 'package:para_flutter/widgets/demo_home.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:para/para.dart';
 import 'package:para_flutter/client/para.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class ParaOAuthExample extends StatefulWidget {
-  const ParaOAuthExample({super.key});
+class ParaFarcasterAuthExample extends StatefulWidget {
+  const ParaFarcasterAuthExample({super.key});
 
   @override
-  State<ParaOAuthExample> createState() => _ParaOAuthExampleState();
+  State<ParaFarcasterAuthExample> createState() =>
+      _ParaFarcasterAuthExampleState();
 }
 
-class _ParaOAuthExampleState extends State<ParaOAuthExample> {
+class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
   bool _isLoading = false;
   String? _loadingProvider;
   Wallet? _wallet;
@@ -44,37 +44,6 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text('Error checking login status: ${e.toString()}')));
-      }
-    }
-  }
-
-  Future<void> _handleOAuthLogin(OAuthMethod provider) async {
-    if (!mounted) return;
-
-    setState(() {
-      _isLoading = true;
-      _loadingProvider = provider.value;
-    });
-
-    try {
-      final oAuthResponse = await para.oAuthConnect(provider, "paraflutter");
-
-      if (oAuthResponse.userExists) {
-        await _handlePasskeyLogin(oAuthResponse.email!);
-      } else {
-        await _handleNewUserSetup(oAuthResponse.email!);
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _loadingProvider = null;
-        });
       }
     }
   }
@@ -127,11 +96,11 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
     );
   }
 
-  Future<void> _handlePasskeyLogin(String email) async {
+  Future<void> _handlePasskeyLogin(String farcasterUsername) async {
     setState(() => _isLoading = true);
 
     try {
-      final wallet = await para.login(email: email);
+      final wallet = await para.login(farcasterUsername: farcasterUsername);
 
       if (!mounted) return;
 
@@ -155,19 +124,16 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
     }
   }
 
-  Widget _buildOAuthButton({
-    required OAuthMethod provider,
-    required String label,
-    required dynamic icon,
-    required Color backgroundColor,
-    required Color textColor,
-  }) {
-    final isLoading = _isLoading && _loadingProvider == provider.value;
+  Widget _buildFarcasterButton() {
+    final isLoading = _isLoading;
+    dynamic icon = 'lib/assets/farcaster.svg';
+    final backgroundColor = const Color(0xFF855DCD);
+    final textColor = Colors.white;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: ElevatedButton(
-        onPressed: _isLoading ? null : () => _handleOAuthLogin(provider),
+        onPressed: _isLoading ? null : () => _handleFarcasterLogin(),
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor,
           foregroundColor: textColor,
@@ -191,7 +157,7 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
             const SizedBox(width: 16),
             Expanded(
               child: Text(
-                'Continue with $label',
+                'Continue with Farcaster',
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -217,7 +183,7 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('OAuth Example'),
+        title: const Text('Alternate Example'),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -226,7 +192,7 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Text(
-                'OAuth Authentication',
+                'Alternate Authentication',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -234,41 +200,14 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
               ),
               const SizedBox(height: 12),
               const Text(
-                'Example implementation of OAuth authentication using Para SDK with various providers.',
+                'Example implementation of alternate authentication using Para SDK with various providers.',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.black87,
                 ),
               ),
               const SizedBox(height: 48),
-              _buildOAuthButton(
-                provider: OAuthMethod.google,
-                label: 'Google',
-                icon: FontAwesomeIcons.google,
-                backgroundColor: const Color(0xFF4285F4),
-                textColor: Colors.white,
-              ),
-              _buildOAuthButton(
-                provider: OAuthMethod.apple,
-                label: 'Apple',
-                icon: FontAwesomeIcons.apple,
-                backgroundColor: Colors.white,
-                textColor: Colors.black87,
-              ),
-              _buildOAuthButton(
-                provider: OAuthMethod.twitter,
-                label: 'X.com',
-                icon: FontAwesomeIcons.xTwitter,
-                backgroundColor: const Color(0xFF1DA1F2),
-                textColor: Colors.white,
-              ),
-              _buildOAuthButton(
-                provider: OAuthMethod.discord,
-                label: 'Discord',
-                icon: FontAwesomeIcons.discord,
-                backgroundColor: const Color(0xFF5865F2),
-                textColor: Colors.white,
-              ),
+              _buildFarcasterButton(),
             ],
           ),
         ),

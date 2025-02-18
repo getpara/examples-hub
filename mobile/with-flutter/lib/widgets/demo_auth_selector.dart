@@ -1,3 +1,4 @@
+import 'package:para_flutter/examples/auth/farcaster_auth_example.dart';
 import 'package:para_flutter/examples/auth/email_auth_example.dart';
 import 'package:para_flutter/examples/auth/external_wallet_auth_example.dart';
 import 'package:para_flutter/examples/auth/oauth_auth_example.dart';
@@ -84,6 +85,13 @@ class _DemoAuthSelectorState extends State<DemoAuthSelector> {
                 route: const ParaPregenExample(),
                 icon: Icons.wallet_outlined,
               ),
+              const SizedBox(height: 16),
+              _buildExampleCard(
+                  context: context,
+                  title: "Farcaster Authentication",
+                  description: "Login with farcaster",
+                  route: const ParaFarcasterAuthExample(),
+                  icon: Icons.wallet_outlined),
               const SizedBox(height: 16),
               _buildExampleCard(
                   context: context,
