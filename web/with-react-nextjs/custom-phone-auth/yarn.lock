@@ -273,38 +273,37 @@
     "@ethersproject/properties" "^5.7.0"
     "@ethersproject/strings" "^5.7.0"
 
-"@getpara/core-sdk@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-0.2.0.tgz#728c070be7dde0ee2184fc805f742809b6920276"
-  integrity sha512-J5sQXLu2LugSwLKuLJdP1r4zoOnbv3foBTF8s6rpXRd8mWioMGVGHBaTK/hapsBsksOEZcH9w8ezorbwlPKQLg==
+"@getpara/core-sdk@1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.3.0.tgz#902ffccfeb0d09662b3b8627c5a0b222ae6dbb9f"
+  integrity sha512-Vw8wxGVwPxrh6r2rvjXxGehDok4hZ0VwOABhyvaGjJh/2uGa4LvTbqqPDtvr093q/Dr3OqBeyI1sDeaE+CpH9A==
   dependencies:
     "@celo/utils" "^8.0.0"
     "@cosmjs/encoding" "^0.32.4"
-    "@getpara/user-management-client" "0.2.0"
+    "@getpara/user-management-client" "1.3.0"
     "@noble/hashes" "^1.5.0"
     base64url "^3.0.1"
-    buffer "6.0.3"
     ethereumjs-util "7.1.5"
     libphonenumber-js "1.11.2"
     node-forge "^1.3.1"
     qs "^6.12.0"
 
-"@getpara/user-management-client@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-0.2.0.tgz#7ea2859963fb00e5f6d25b5e64d80f353a098296"
-  integrity sha512-Pmcfl3K8JV6UuafytuMuXO5rSvPrwnpR4koZadFaGWGrmoDRS5S6FT8s/57HuFJOSu6OUsSkin95oo7xjEAlJw==
+"@getpara/user-management-client@1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.3.0.tgz#f303ec30279c94386e175df00f685e3abbfca20d"
+  integrity sha512-HOEN0SmIYFu9JVrhVIMaGzQIPXG9eFPhejWWg3pYP0zDniZLNwAJQQadbCFwr45rTxjVNAFO4enehw5R/HW4dQ==
   dependencies:
     axios "^1.6.3"
     libphonenumber-js "1.11.2"
     qs "^6.12.0"
 
-"@getpara/web-sdk@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-0.2.0.tgz#9ce3b4a0ecdbab1c7022926a6879e4faed50dc99"
-  integrity sha512-c86RnsbVFKrHws9PygYaF315/3NKr5nTkNxWzxPHIFpmhbsmh7/6G7Rfxy9jzn4XARRNqJZ1GQyOLgoDy0artQ==
+"@getpara/web-sdk@1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-1.3.0.tgz#c2720fb937a956e4d2197776610f03953d0d1fac"
+  integrity sha512-M8MUcqyU0lXiz9Vkfy31euKjnTgtjWwf3heQi5N30YyEnaYNoUqwkeI8W80J8bhu7N5//n5kPg4tbVbGbbT70w==
   dependencies:
-    "@getpara/core-sdk" "0.2.0"
-    "@getpara/user-management-client" "0.2.0"
+    "@getpara/core-sdk" "1.3.0"
+    "@getpara/user-management-client" "1.3.0"
     assert "^2.1.0"
     base64url "3.0.1"
     buffer "6.0.3"

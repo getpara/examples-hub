@@ -1,8 +1,8 @@
-# Capsule Modal + All Chains Example
+# Para Modal + All Chains Example
 
-This repository demonstrates how to integrate [Capsule](https://usecapsule.com/) into a **Next.js** application with
-support for all major blockchains—Cosmos, Solana, and EVM—in one project. The application scaffolds a minimal Next.js
-15.x setup, showing how to open a single Capsule Modal that supports:
+This repository demonstrates how to integrate [Para](https://getpara.com/) into a **Next.js** application with support
+for all major blockchains—Cosmos, Solana, and EVM—in one project. The application scaffolds a minimal Next.js 15.x
+setup, showing how to open a single Para Modal that supports:
 
 - **Cosmos Wallets** (e.g., Keplr, Leap)
 - **Solana Wallets** (e.g., Phantom, Backpack, Glow)
@@ -14,7 +14,7 @@ support for all major blockchains—Cosmos, Solana, and EVM—in one project. Th
 ## Features
 
 - **Next.js (App Router)** – Utilizing the latest Next.js version.
-- **Capsule Modal** – Provides a user-friendly modal for authentication flows across multiple blockchains and OAuth
+- **Para Modal** – Provides a user-friendly modal for authentication flows across multiple blockchains and OAuth
   providers.
 - **Cosmos / EVM / Solana Connectors** – Demonstrates how to unify wallet connections in a single Next.js application.
 
@@ -22,14 +22,14 @@ support for all major blockchains—Cosmos, Solana, and EVM—in one project. Th
 
 1. **Node.js v18+** (or environment that supports Next.js 15)
 2. **yarn** / **npm** / **pnpm** / **bun** – pick your package manager
-3. A [Capsule account + API key](https://developer.usecapsule.com/) in **BETA** or **PRODUCTION** environment
+3. A [Para account + API key](https://developer.getpara.com/) in **BETA** or **PRODUCTION** environment
 
 ## Installation
 
 1. **Clone** or download this repository:
 
    ```bash
-   git clone https://github.com/capsule-org/examples-hub.git
+   git clone https://github.com/getpara/examples-hub.git
    cd examples-hub/web/react-nextjs/capsule-modal-all
    ```
 
@@ -48,7 +48,7 @@ support for all major blockchains—Cosmos, Solana, and EVM—in one project. Th
      ```bash
      NEXT_PUBLIC_PARA_API_KEY=YOUR_PARA_API_KEY
      ```
-   - Make sure to use a valid Capsule API key and environment for `Environment.BETA` or `Environment.PRODUCTION`.
+   - Make sure to use a valid Para API key and environment for `Environment.BETA` or `Environment.PRODUCTION`.
 4. **(Optional) `postinstall` scripts**:
    - The `package.json` includes a `postinstall` script (`yarn graz --generate`) which regenerates certain Cosmos chain
      definitions. If you see type errors, re-run `yarn graz --generate` or `npx graz --generate`.
@@ -68,11 +68,11 @@ bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser. You should see a homepage with a button labeled
-**Open Capsule Modal**.
+**Open Para Modal**.
 
 ### Connecting Wallets
 
-Upon clicking **Open Capsule Modal**, you’ll see a single Capsule Modal that includes:
+Upon clicking **Open Para Modal**, you’ll see a single Para Modal that includes:
 
 - **Cosmos external wallets**: Keplr, Leap, etc.
 - **Solana external wallets**: Phantom, Backpack, Glow.
@@ -84,8 +84,8 @@ You can customize which wallet connectors appear, or disable certain login flows
 
 ### Files of Interest
 
-- **`src/app/page.tsx`** - A simple UI with a button to open the Capsule Modal. The external wallets from Cosmos,
-  Solana, and EVM are merged into a single array, enabling multi-chain support.
+- **`src/app/page.tsx`** - A simple UI with a button to open the Para Modal. The external wallets from Cosmos, Solana,
+  and EVM are merged into a single array, enabling multi-chain support.
 - **`src/components/CapsuleProviders.tsx`** - Provides multi-chain context, hooking in all the required connectors:
   - `CapsuleCosmosProvider` for Cosmos
   - `CapsuleSolanaProvider` for Solana
@@ -94,16 +94,16 @@ You can customize which wallet connectors appear, or disable certain login flows
 
 ### Important Packages
 
-- `@usecapsule/react-sdk` – Core React SDK for Capsule.
+- `@usecapsule/react-sdk` – Core React SDK for Para.
 - `@usecapsule/cosmos-wallet-connectors` – Connectors for Cosmos wallets (Keplr, Leap, etc.).
-- `@usecapsule/graz` – A specialized fork of graz with Capsule integration.
+- `@usecapsule/graz` – A specialized fork of graz with Para integration.
 - `@leapwallet/cosmos-social-login-capsule-provider` – A peer dependency for Leap’s integration (required even if you
   don’t actively use Leap social login).
 - `@usecapsule/core-sdk` – Core library that the React SDK depends on. We add this to override the out of date
   `@leapwallet/cosmos-social-login-capsule-provider` which is using an older version of the core-sdk.
-- `@usecapsule/user-management-client` – User management client for Capsule. Again, we add this to override the out of
-  date `@leapwallet/cosmos-social-login-capsule-provider` which is using an older version of the user-management-client
-  via the core-sdk.
+- `@usecapsule/user-management-client` – User management client for Para. Again, we add this to override the out of date
+  `@leapwallet/cosmos-social-login-capsule-provider` which is using an older version of the user-management-client via
+  the core-sdk.
 - `@usecapsule/evm-wallet-connectors` – Connectors for EVM wallets (Metamask, WalletConnect, etc.).
 - `wagmi` – EVM-based chain utility library used in the example.
 - `@usecapsule/solana-wallet-connectors` – Connectors for Solana wallets (Phantom, Glow, Backpack, etc.).
@@ -124,9 +124,9 @@ You can customize which wallet connectors appear, or disable certain login flows
 
 ---
 
-**Enjoy building with Capsule + multi-chain wallets!** If you have any questions or need help, check out:
+**Enjoy building with Para + multi-chain wallets!** If you have any questions or need help, check out:
 
-- [Capsule Docs](https://docs.usecapsule.com/)
+- [Para Docs](https://docs.getpara.com/)
 - [Cosmos Docs](https://docs.cosmos.network/)
 - [Solana Docs](https://docs.solana.com/)
 - [wagmi Docs (for EVM)](https://wagmi.sh/)

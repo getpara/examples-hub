@@ -42,14 +42,14 @@ export default function Home() {
     setIsLoading(true);
     setError("");
     try {
-      const isExistingUser = await para.checkIfUserExists({email});
+      const isExistingUser = await para.checkIfUserExists({ email });
 
       if (isExistingUser) {
         const webAuthUrlForLogin = await para.initiateUserLogin({ email, useShortUrl: false });
         const popupWindow = window.open(webAuthUrlForLogin, "loginPopup", "popup=true");
         if (!popupWindow) throw new Error("Popup was blocked");
 
-        const { isComplete, needsWallet } = await para.waitForLoginAndSetup({ popupWindow });
+        const { needsWallet } = await para.waitForLoginAndSetup({ popupWindow });
 
         if (needsWallet) {
           await para.createWallet({ type: WalletType.EVM, skipDistribute: false });
@@ -74,14 +74,13 @@ export default function Home() {
     setIsLoading(true);
     setError("");
     try {
-      const isVerified = await para.verifyEmail({verificationCode});
-      if (!isVerified) {
+      const setupUrl = await para.verifyEmail({ verificationCode });
+      if (!setupUrl) {
         setError("Verification code incorrect or expired");
         setIsLoading(false);
         return;
       }
 
-      const setupUrl = await para.getSetUpBiometricsURL({ authType: "email", isForNewDevice: false });
       const popupWindow = window.open(setupUrl, "signUpPopup", "popup=true");
 
       if (!popupWindow) {
@@ -101,8 +100,6 @@ export default function Home() {
     }
     setIsLoading(false);
   };
-
-  
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen gap-6 p-8">
