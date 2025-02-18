@@ -67,11 +67,11 @@ export const OAuth = ({ methods }: OAuthProps) => {
 
         routeMobileExternalWallet(farcasterConnectUri);
         setStep(ModalStep.FARCASTER_OAUTH);
-        return;
+        break;
       case OAuthMethod.TELEGRAM:
         setStep(ModalStep.TELEGRAM_OAUTH);
         break;
-      default: {
+      default:
         setStep(ModalStep.AWAITING_OAUTH);
 
         const oAuthURL = await para.getOAuthURL({ method });
@@ -98,10 +98,7 @@ export const OAuth = ({ methods }: OAuthProps) => {
         if (userExists) {
           const supportedAuthMethods = await para.initiateUserLoginV2({ email });
 
-          if (supportedAuthMethods.size === 0) {
-            setFlow('signUp');
-            setStep(ModalStep.BIOMETRIC_CREATION);
-          } else {
+          if (supportedAuthMethods.size > 0) {
             const biometricLocationHints = supportedAuthMethods.has(AuthMethod.PASSKEY)
               ? await para.getUserBiometricLocationHints()
               : [];
@@ -114,11 +111,9 @@ export const OAuth = ({ methods }: OAuthProps) => {
           }
         }
 
-        await para.createUser({ email });
         setFlow('signUp');
-        setStep(ModalStep.VERIFICATIONS);
-        return;
-      }
+        setStep(ModalStep.BIOMETRIC_CREATION);
+        break;
     }
   };
 
