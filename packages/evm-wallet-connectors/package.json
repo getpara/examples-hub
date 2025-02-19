@@ -11,7 +11,9 @@
   "dependencies": {
     "@coinbase/wallet-sdk": "4.3.0",
     "@getpara/react-sdk": "1.3.1",
-    "@getpara/wagmi-v2-integration": "1.3.1"
+    "@getpara/wagmi-v2-integration": "1.3.1",
+    "zustand": "^4.5.2",
+    "zustand-sync-tabs": "^0.2.2"
   },
   "scripts": {
     "build": "rm -rf dist && yarn typegen && node ./scripts/build.mjs",

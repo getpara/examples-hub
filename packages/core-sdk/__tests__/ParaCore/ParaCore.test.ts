@@ -76,6 +76,21 @@ import { mockPreKeygen } from '../mocks/mockPlatformUtils.js';
 import '../mocks/mockCryptographyUtils.js';
 import '../mocks/mockUserManagementClient.js';
 import * as shareDistribution from '../../src/shares/shareDistribution.js';
+import {
+  LOCAL_STORAGE_COUNTRY_CODE,
+  LOCAL_STORAGE_CURRENT_EXTERNAL_WALLET_ADDRESSES,
+  LOCAL_STORAGE_CURRENT_WALLET_IDS,
+  LOCAL_STORAGE_ED25519_WALLETS,
+  LOCAL_STORAGE_EMAIL,
+  LOCAL_STORAGE_EXTERNAL_WALLETS,
+  LOCAL_STORAGE_PHONE,
+  LOCAL_STORAGE_SESSION_COOKIE,
+  LOCAL_STORAGE_TELEGRAM_USER_ID,
+  LOCAL_STORAGE_USER_ID,
+  LOCAL_STORAGE_WALLETS,
+  SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR,
+} from '../../src/constants.js';
+import { storageListener } from '../../src/utils/listeners.js';
 
 const COMMON_SEARCH_PARAMS = {
   partnerId: PARTNER.id,
@@ -186,6 +201,181 @@ describe('ParaCore', () => {
       expect((para as unknown as any).sessionStorageSetItem).toEqual(opts.sessionStorageSetItemOverride);
       expect((para as unknown as any).clearStorage).toEqual(opts.clearStorageOverride);
     });
+  });
+  describe('storage listeners', () => {
+    it('from another origin', () => {
+      const para = new MockPara(Environment.DEV, API_KEY);
+      const spy = vi.spyOn(para as any, 'updateTelegramUserIdFromStorage');
+
+      storageListener.bind(para)({
+        key: LOCAL_STORAGE_TELEGRAM_USER_ID,
+        url: 'https://test.com',
+      } as StorageEvent);
+
+      expect(spy).toBeCalledTimes(0);
+    });
+    it('updateTelegramUserIdFromStorage', () => {
+      const para = new MockPara(Environment.DEV, API_KEY);
+      const spy = vi.spyOn(para as any, 'updateTelegramUserIdFromStorage');
+
+      storageListener.bind(para)({
+        key: LOCAL_STORAGE_TELEGRAM_USER_ID,
+        url: 'http://localhost:3000',
+      } as StorageEvent);
+
+      expect(spy).toBeCalledTimes(1);
+    });
+    it('updateUserIdFromStorage', () => {
+      const para = new MockPara(Environment.DEV, API_KEY);
+      const spy = vi.spyOn(para as any, 'updateUserIdFromStorage');
+
+      storageListener.bind(para)({
+        key: LOCAL_STORAGE_USER_ID,
+        url: 'http://localhost:3000',
+      } as StorageEvent);
+
+      expect(spy).toBeCalledTimes(1);
+    });
+    it('updatePhoneFromStorage', () => {
+      const para = new MockPara(Environment.DEV, API_KEY);
+      const spy = vi.spyOn(para as any, 'updatePhoneFromStorage');
+
+      storageListener.bind(para)({
+        key: LOCAL_STORAGE_PHONE,
+        url: 'http://localhost:3000',
+      } as StorageEvent);
+
+      expect(spy).toBeCalledTimes(1);
+    });
+    it('updateCountryCodeFromStorage', () => {
+      const para = new MockPara(Environment.DEV, API_KEY);
+      const spy = vi.spyOn(para as any, 'updateCountryCodeFromStorage');
+
+      storageListener.bind(para)({
+        key: LOCAL_STORAGE_COUNTRY_CODE,
+        url: 'http://localhost:3000',
+      } as StorageEvent);
+
+      expect(spy).toBeCalledTimes(1);
+    });
+    it('updateEmailFromStorage', () => {
+      const para = new MockPara(Environment.DEV, API_KEY);
+      const spy = vi.spyOn(para as any, 'updateEmailFromStorage');
+
+      storageListener.bind(para)({
+        key: LOCAL_STORAGE_EMAIL,
+        url: 'http://localhost:3000',
+      } as StorageEvent);
+
+      expect(spy).toBeCalledTimes(1);
+    });
+    it('updateWalletsFromStorage', () => {
+      const para = new MockPara(Environment.DEV, API_KEY);
+      const spy = vi.spyOn(para as any, 'updateWalletsFromStorage');
+
+      storageListener.bind(para)({
+        key: LOCAL_STORAGE_ED25519_WALLETS,
+        url: 'http://localhost:3000',
+      } as StorageEvent);
+
+      expect(spy).toBeCalledTimes(1);
+    });
+    it('updateWalletsFromStorage', () => {
+      const para = new MockPara(Environment.DEV, API_KEY);
+      const spy = vi.spyOn(para as any, 'updateWalletsFromStorage');
+
+      storageListener.bind(para)({
+        key: LOCAL_STORAGE_WALLETS,
+        url: 'http://localhost:3000',
+      } as StorageEvent);
+
+      expect(spy).toBeCalledTimes(1);
+    });
+    it('updateWalletIdsFromStorage', () => {
+      const para = new MockPara(Environment.DEV, API_KEY);
+      const spy = vi.spyOn(para as any, 'updateWalletIdsFromStorage');
+
+      storageListener.bind(para)({
+        key: LOCAL_STORAGE_CURRENT_WALLET_IDS,
+        url: 'http://localhost:3000',
+      } as StorageEvent);
+
+      expect(spy).toBeCalledTimes(1);
+    });
+    it('updateSessionCookieFromStorage', () => {
+      const para = new MockPara(Environment.DEV, API_KEY);
+      const spy = vi.spyOn(para as any, 'updateSessionCookieFromStorage');
+
+      storageListener.bind(para)({
+        key: LOCAL_STORAGE_SESSION_COOKIE,
+        url: 'http://localhost:3000',
+      } as StorageEvent);
+
+      expect(spy).toBeCalledTimes(1);
+    });
+    it('updateLoginEncryptionKeyPairFromStorage', () => {
+      const para = new MockPara(Environment.DEV, API_KEY);
+      const spy = vi.spyOn(para as any, 'updateLoginEncryptionKeyPairFromStorage');
+
+      storageListener.bind(para)({
+        key: SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR,
+        url: 'http://localhost:3000',
+      } as StorageEvent);
+
+      expect(spy).toBeCalledTimes(1);
+    });
+    it('updateExternalWalletsFromStorage', () => {
+      const para = new MockPara(Environment.DEV, API_KEY);
+      const spy = vi.spyOn(para as any, 'updateExternalWalletsFromStorage');
+
+      storageListener.bind(para)({
+        key: LOCAL_STORAGE_EXTERNAL_WALLETS,
+        url: 'http://localhost:3000',
+      } as StorageEvent);
+
+      expect(spy).toBeCalledTimes(1);
+    });
+    it('updateCurrentExternalWalletAddressesFromStorage', () => {
+      const para = new MockPara(Environment.DEV, API_KEY);
+      const spy = vi.spyOn(para as any, 'updateCurrentExternalWalletAddressesFromStorage');
+
+      storageListener.bind(para)({
+        key: LOCAL_STORAGE_CURRENT_EXTERNAL_WALLET_ADDRESSES,
+        url: 'http://localhost:3000',
+      } as StorageEvent);
+
+      expect(spy).toBeCalledTimes(1);
+    });
+    // it('LOCAL_STORAGE_EXTERNAL_WALLETS', () => {
+    //   localStorage[LOCAL_STORAGE_EXTERNAL_WALLETS] = JSON.stringify({ test: { id: 'test' } });
+    //   const spy = vi.spyOn(window, 'addEventListener').mockImplementationOnce((event, handler) => {
+    //     if (event === 'storage') {
+    //       const typedHandler = handler as EventListener;
+    //       typedHandler({
+    //         key: LOCAL_STORAGE_EXTERNAL_WALLETS,
+    //         url: 'http://localhost:3000',
+    //       } as StorageEvent);
+    //     }
+    //   });
+    //   const para = new MockPara(Environment.DEV, API_KEY);
+    //   expect(spy).toBeCalledTimes(1);
+    //   expect(para.externalWallets).toStrictEqual({ test: { id: 'test' } });
+    // });
+    // it('LOCAL_STORAGE_USER_ID', () => {
+    //   localStorage[LOCAL_STORAGE_USER_ID] = 'test';
+    //   const spy = vi.spyOn(window, 'addEventListener').mockImplementationOnce((event, handler) => {
+    //     if (event === 'storage') {
+    //       const typedHandler = handler as EventListener;
+    //       typedHandler({
+    //         key: LOCAL_STORAGE_USER_ID,
+    //         url: 'http://localhost:3000',
+    //       } as StorageEvent);
+    //     }
+    //   });
+    //   const para = new MockPara(Environment.DEV, API_KEY);
+    //   expect(spy).toBeCalledTimes(1);
+    //   expect(para.userId).toBe('test');
+    // });
   });
   describe('external wallets', () => {
     it('logs in successfully', async () => {

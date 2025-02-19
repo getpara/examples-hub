@@ -1,4 +1,4 @@
-import { ReactNode, createContext, useEffect, useMemo, useState } from 'react';
+import { ReactNode, createContext, useEffect, useMemo } from 'react';
 import { useAccount, useSwitchChain, useConnect, useDisconnect, useEnsName, useEnsAvatar } from 'wagmi';
 import { WagmiConnectorInstance } from '../types/Wallet.js';
 import { CommonChain, CommonWallet } from '../types/CommonTypes.js';
@@ -6,6 +6,7 @@ import { isEIP6963Connector } from '../utils/isEIP6963Connector.js';
 import { getWalletConnectUri } from '../utils/getWalletConnectUri.js';
 import ParaWeb, { isMobile, WalletType } from '@getpara/react-sdk';
 import { normalize } from 'viem/ens';
+import { useExternalWalletStore } from '../stores/useStore.js';
 
 export const defaultEvmExternalWallet = {
   wallets: [],
@@ -43,10 +44,22 @@ export function EvmExternalWalletProvider({ children, para, onSwitchWallet }: Ev
     name: normalize(ensName),
   });
 
-  const [isLocalConnecting, setIsLocalConnecting] = useState(false);
+  const isLocalConnecting = useExternalWalletStore(state => state.isConnecting);
+  const updateExternalWalletState = useExternalWalletStore(state => state.updateState);
+
+  const getStoredExternalWallets = () => {
+    const storedExternalWalletsString = localStorage.getItem('@CAPSULE/externalWallets');
+
+    let storedExternalWallets = {};
+    if (storedExternalWalletsString) {
+      storedExternalWallets = JSON.parse(storedExternalWalletsString);
+    }
+
+    return storedExternalWallets;
+  };
 
   useEffect(() => {
-    const storedExternalWallet = para.externalWallets[wagmiAddress ?? ''];
+    const storedExternalWallet = getStoredExternalWallets()[wagmiAddress ?? ''];
 
     if (
       !isConnecting &&
@@ -61,10 +74,11 @@ export function EvmExternalWalletProvider({ children, para, onSwitchWallet }: Ev
   }, [isConnecting, isReconnecting, isLocalConnecting, wagmiAddress, connectedConnector]);
 
   useEffect(() => {
-    const storedExternalWallet = para.externalWallets[para.currentExternalWalletAddresses?.[0] ?? ''];
+    const storedExternalWallet = getStoredExternalWallets()[para.currentExternalWalletAddresses?.[0] ?? ''];
 
     // If the user is using an external EVM wallet we want to watch for wallet changes and log them in to a different user when the wallet changes
     if (
+      !isLocalConnecting &&
       !isConnecting &&
       !isReconnecting &&
       storedExternalWallet?.type === WalletType.EVM &&
@@ -72,7 +86,7 @@ export function EvmExternalWalletProvider({ children, para, onSwitchWallet }: Ev
     ) {
       switchWallet(wagmiAddress);
     }
-  }, [wagmiAddress, isReconnecting, isConnecting]);
+  }, [isLocalConnecting, wagmiAddress, isReconnecting, isConnecting]);
 
   const connectors = untypedConnectors as WagmiConnectorInstance[];
 
@@ -122,7 +136,7 @@ export function EvmExternalWalletProvider({ children, para, onSwitchWallet }: Ev
   };
 
   const switchWallet = async (address: string) => {
-    setIsLocalConnecting(true);
+    updateExternalWalletState({ isConnecting: true });
     let error: string;
 
     // If we're calling switch wallet with no address, treat it as if the user disconnected the wallet from the app and logout to reset the Para instance.
@@ -137,11 +151,11 @@ export function EvmExternalWalletProvider({ children, para, onSwitchWallet }: Ev
     }
 
     onSwitchWallet({ address, error });
-    setIsLocalConnecting(false);
+    updateExternalWalletState({ isConnecting: false });
   };
 
   const connect = async (connector: WagmiConnectorInstance): Promise<{ address?: string; error?: string }> => {
-    setIsLocalConnecting(true);
+    updateExternalWalletState({ isConnecting: true });
     await disconnectAsync();
 
     const walletChainId = await connector.getChainId();
@@ -184,7 +198,7 @@ export function EvmExternalWalletProvider({ children, para, onSwitchWallet }: Ev
       }
     }
 
-    setIsLocalConnecting(false);
+    updateExternalWalletState({ isConnecting: false });
     return { address, error };
   };
 

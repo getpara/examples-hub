@@ -1,11 +1,12 @@
 import { useEffect, useRef } from 'react';
-import { useAccount, useClient, useKeepSessionAlive, useLogout } from '../index.js';
+import { useAccount, useKeepSessionAlive, useLogout } from '../index.js';
+import { useInternalClient } from './useInternalClient.js';
 
 const SESSION_CHECK_INTERVAL = 60000;
 const SESSION_REFRESH_THRESHOLD = 300000;
 
 export const useAutoSessionKeepAlive = ({ disabled }: { disabled?: boolean }) => {
-  const client = useClient();
+  const client = useInternalClient();
   const { data: account } = useAccount();
   const { logoutAsync } = useLogout();
   const { keepSessionAliveAsync } = useKeepSessionAlive();
@@ -18,7 +19,7 @@ export const useAutoSessionKeepAlive = ({ disabled }: { disabled?: boolean }) =>
       return;
     }
 
-    if (account?.isConnected) {
+    if (account?.isConnected && !client.isUsingExternalWallet()) {
       setupSessionMonitoring();
     } else {
       clearSessionMonitoring();

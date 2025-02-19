@@ -90,6 +90,8 @@ import {
 } from './utils/index.js';
 import { TransactionReviewDenied, TransactionReviewError, TransactionReviewTimeout } from './errors.js';
 import * as constants from './constants.js';
+import { setupListeners } from './utils/listeners.js';
+
 export abstract class ParaCore {
   static version?: string = constants.PARA_CORE_VERSION;
 
@@ -720,13 +722,62 @@ export abstract class ParaCore {
     if (!this.platformUtils.isSyncStorage || opts.useStorageOverrides) {
       return;
     }
+    this.initializeFromStorage();
 
-    this.email = (this.localStorageGetItem(constants.LOCAL_STORAGE_EMAIL) as string) || undefined;
-    this.countryCode = (this.localStorageGetItem(constants.LOCAL_STORAGE_COUNTRY_CODE) as CountryCallingCode) || undefined;
-    this.phone = (this.localStorageGetItem(constants.LOCAL_STORAGE_PHONE) as string) || undefined;
-    this.userId = (this.localStorageGetItem(constants.LOCAL_STORAGE_USER_ID) as string) || undefined;
+    setupListeners.bind(this)();
+  }
+
+  private initializeFromStorage = () => {
+    this.updateEmailFromStorage();
+    this.updateCountryCodeFromStorage();
+    this.updatePhoneFromStorage();
+    this.updateUserIdFromStorage();
+    this.updateTelegramUserIdFromStorage();
+    this.updateWalletsFromStorage();
+    this.updateWalletIdsFromStorage();
+    this.updateSessionCookieFromStorage();
+    this.updateLoginEncryptionKeyPairFromStorage();
+    this.updateExternalWalletsFromStorage();
+    this.updateCurrentExternalWalletAddressesFromStorage();
+  };
+
+  private updateTelegramUserIdFromStorage = () => {
     this.telegramUserId = (this.localStorageGetItem(constants.LOCAL_STORAGE_TELEGRAM_USER_ID) as string) || undefined;
+  };
+  private updateUserIdFromStorage = () => {
+    this.userId = (this.localStorageGetItem(constants.LOCAL_STORAGE_USER_ID) as string) || undefined;
+  };
+  private updatePhoneFromStorage = () => {
+    this.phone = (this.localStorageGetItem(constants.LOCAL_STORAGE_PHONE) as string) || undefined;
+  };
+  private updateCountryCodeFromStorage = () => {
+    this.countryCode = (this.localStorageGetItem(constants.LOCAL_STORAGE_COUNTRY_CODE) as CountryCallingCode) || undefined;
+  };
+  private updateEmailFromStorage = () => {
+    this.email = (this.localStorageGetItem(constants.LOCAL_STORAGE_EMAIL) as string) || undefined;
+  };
+  private updateWalletsFromStorage = async () => {
+    // TODO: Improve not great check
+    const _currentWalletIds = (this.localStorageGetItem(constants.LOCAL_STORAGE_CURRENT_WALLET_IDS) as string) ?? undefined;
+    const currentWalletIds = [undefined, null, 'undefined'].includes(_currentWalletIds)
+      ? {}
+      : (() => {
+          const fromJson = JSON.parse(_currentWalletIds);
 
+          return Array.isArray(fromJson)
+            ? Object.keys(WalletType).reduce((acc: CurrentWalletIds, type: WalletType) => {
+                const wallet = Object.values(this.wallets).find(
+                  w => fromJson.includes(w.id) && WalletSchemeTypeMap[w.scheme][type],
+                );
+                return {
+                  ...acc,
+                  ...(wallet && !acc[type] ? { [type]: [wallet.id] } : {}),
+                };
+              }, {})
+            : fromJson;
+        })();
+
+    this.setCurrentWalletIds(currentWalletIds);
     const stringWallets = this.platformUtils.secureStorage
       ? this.platformUtils.secureStorage.get(constants.LOCAL_STORAGE_WALLETS)
       : this.localStorageGetItem(constants.LOCAL_STORAGE_WALLETS);
@@ -752,7 +803,8 @@ export abstract class ParaCore {
     };
 
     this.setWallets(wallets);
-
+  };
+  private updateWalletIdsFromStorage = () => {
     // TODO: Improve not great check
     const _currentWalletIds = (this.localStorageGetItem(constants.LOCAL_STORAGE_CURRENT_WALLET_IDS) as string) ?? undefined;
     const currentWalletIds = [undefined, null, 'undefined'].includes(_currentWalletIds)
@@ -775,12 +827,6 @@ export abstract class ParaCore {
 
     this.setCurrentWalletIds(currentWalletIds);
 
-    // TODO: remove sessionStorageGetItem call once new version is being consumed
-    this.sessionCookie =
-      (this.localStorageGetItem(constants.LOCAL_STORAGE_SESSION_COOKIE) as string) ||
-      (this.sessionStorageGetItem(constants.LOCAL_STORAGE_SESSION_COOKIE) as string) ||
-      undefined;
-
     // In case currentWalletIds was missing from storage
     if (
       Object.values(this.wallets).filter(w => this.isWalletOwned(w)).length > 0 &&
@@ -788,25 +834,35 @@ export abstract class ParaCore {
     ) {
       this.findWalletId(undefined, { forbidPregen: true });
     }
-
+  };
+  private updateSessionCookieFromStorage = () => {
+    // TODO: remove sessionStorageGetItem call once new version is being consumed
+    this.sessionCookie =
+      (this.localStorageGetItem(constants.LOCAL_STORAGE_SESSION_COOKIE) as string) ||
+      (this.sessionStorageGetItem(constants.LOCAL_STORAGE_SESSION_COOKIE) as string) ||
+      undefined;
+  };
+  private updateLoginEncryptionKeyPairFromStorage = () => {
     const loginEncryptionKey = this.sessionStorageGetItem(constants.SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR) as
       | string
       | null;
     if (loginEncryptionKey && loginEncryptionKey !== 'undefined') {
       this.loginEncryptionKeyPair = this.convertEncryptionKeyPair(JSON.parse(loginEncryptionKey));
     }
-
+  };
+  private updateExternalWalletsFromStorage = () => {
     const stringExternalWallets = this.localStorageGetItem(constants.LOCAL_STORAGE_EXTERNAL_WALLETS);
     const _externalWallets = JSON.parse((stringExternalWallets as string) || '{}');
 
     this.setExternalWallets(_externalWallets);
-
+  };
+  private updateCurrentExternalWalletAddressesFromStorage = () => {
     const _currentExternalWalletAddresses =
       (this.localStorageGetItem(constants.LOCAL_STORAGE_CURRENT_EXTERNAL_WALLET_ADDRESSES) as string) || undefined;
     this.currentExternalWalletAddresses = _currentExternalWalletAddresses
       ? JSON.parse(_currentExternalWalletAddresses)
       : undefined;
-  }
+  };
 
   async touchSession(regenerate = false): Promise<Awaited<ReturnType<Client['touchSession']>>> {
     const res = await this.ctx.client.touchSession(regenerate);
@@ -950,6 +1006,8 @@ export abstract class ParaCore {
     this.currentExternalWalletAddresses = _currentExternalWalletAddresses
       ? JSON.parse(_currentExternalWalletAddresses)
       : undefined;
+
+    setupListeners.bind(this)();
 
     await this.touchSession();
   }

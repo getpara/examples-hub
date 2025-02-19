@@ -107,8 +107,8 @@ export const useModalStore = create<ModalStore>()(
     }),
     {
       version: 1,
-      name: '@CAPSULE/modalState',
-      storage: createJSONStorage(() => sessionStorage),
+      name: '@PARA/modalState',
+      storage: createJSONStorage(() => localStorage),
       partialize: state => ({
         step: state.step,
         webAuthURLForLogin: state.webAuthURLForLogin,

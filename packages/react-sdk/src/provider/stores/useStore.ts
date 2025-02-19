@@ -13,7 +13,7 @@ export const vanillaStore = createStore<Store>()(
     {
       version: 1,
       name: '@PARA/web-state',
-      storage: createJSONStorage(() => sessionStorage),
+      storage: createJSONStorage(() => localStorage),
       partialize: state => ({
         selectedWalletId: state.selectedWalletId,
         selectedWalletType: state.selectedWalletType,

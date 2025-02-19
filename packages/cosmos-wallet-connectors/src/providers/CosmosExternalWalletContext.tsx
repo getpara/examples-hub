@@ -1,4 +1,4 @@
-import { ReactNode, createContext, useEffect, useMemo, useState } from 'react';
+import { ReactNode, createContext, useEffect, useMemo } from 'react';
 import { CommonChain, CommonWallet } from '../types/CommonTypes.js';
 import { useParaCosmos } from './ParaCosmosContext.js';
 import ParaWeb, { WalletType } from '@getpara/react-sdk';
@@ -13,6 +13,7 @@ import {
   useSuggestChainAndConnect,
   getChainInfo,
 } from '@getpara/graz';
+import { useExternalWalletStore } from '../stores/useStore.js';
 
 export const defaultCosmosExternalWallet = {
   wallets: [],
@@ -58,7 +59,8 @@ export function CosmosExternalWalletProvider({ children, para, onSwitchWallet }:
   const { connectAsync } = useConnect();
   const { disconnectAsync } = useDisconnect();
   const { walletType } = useActiveWalletType();
-  const [isLocalConnecting, setIsLocalConnecting] = useState(false);
+  const isLocalConnecting = useExternalWalletStore(state => state.isConnecting);
+  const updateExternalWalletState = useExternalWalletStore(state => state.updateState);
 
   const bufferAddress = multiChain ? account?.[selectedChainId]?.address.toString() : account?.address.toString();
   const address = multiChain ? account?.[selectedChainId]?.bech32Address : account?.bech32Address;
@@ -74,14 +76,14 @@ export function CosmosExternalWalletProvider({ children, para, onSwitchWallet }:
     const hasActiveChain = activeChainIds.includes(chainId);
 
     if (!hasActiveChain) {
-      setIsLocalConnecting(true);
+      updateExternalWalletState({ isConnecting: true });
       let changeResp: { address?: string; bufferAddress?: string; error?: string };
 
       changeResp = await connect(walletType, chainId);
       // Calling onSwitchWallet here so the modal correctly processes any error from the reconnection.
       onSwitchWallet(changeResp);
 
-      setIsLocalConnecting(false);
+      updateExternalWalletState({ isConnecting: false });
 
       if (changeResp.error) {
         error = [changeResp?.error];
@@ -149,7 +151,7 @@ export function CosmosExternalWalletProvider({ children, para, onSwitchWallet }:
     walletType: GrazWalletType,
     chainId?: string | string[],
   ): Promise<{ address?: string; bufferAddress?: string; error?: string }> => {
-    setIsLocalConnecting(true);
+    updateExternalWalletState({ isConnecting: true });
 
     // chainID is passed in when switching chains, in that case we can skip disconnecting
     if (!chainId) {
@@ -217,7 +219,7 @@ export function CosmosExternalWalletProvider({ children, para, onSwitchWallet }:
       }
     }
 
-    setIsLocalConnecting(false);
+    updateExternalWalletState({ isConnecting: false });
     return { address, bufferAddress, error };
   };
 

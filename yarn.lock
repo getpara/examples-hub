@@ -28236,6 +28236,11 @@ zod@^3.21.4:
   resolved "https://registry.yarnpkg.com/zod/-/zod-3.23.8.tgz#e37b957b5d52079769fb8097099b592f0ef4067d"
   integrity sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==
 
+zustand-sync-tabs@^0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/zustand-sync-tabs/-/zustand-sync-tabs-0.2.2.tgz#d7eba49cf69a751f3f7d1451148f2598a923c102"
+  integrity sha512-i2pQPm5SGBIq50v7tt6XFXZSR/iJNErOslS5HzMKJVd06+xDyBCXioxEap0Ke6u98+a49fU5QRqzypo21wMe9A==
+
 zustand@4.4.1:
   version "4.4.1"
   resolved "https://registry.yarnpkg.com/zustand/-/zustand-4.4.1.tgz#0cd3a3e4756f21811bd956418fdc686877e8b3b0"
