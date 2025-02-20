@@ -7,6 +7,9 @@ export const getDeviceModelName = (model?: string) => {
     case 'macintosh': {
       return 'Mac';
     }
+    case 'k': {
+      return 'Android';
+    }
     default: {
       return model;
     }
