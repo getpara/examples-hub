@@ -1,11 +1,11 @@
-import paraModule, { Environment, OAuthMethod } from "@web3-onboard/para";
-import { ParaInitOptions } from "@web3-onboard/para/dist/types";
+import paraModule, { Environment, OAuthMethod } from "@web3-onboard/capsule";
+import { CapsuleInitOptions } from "@web3-onboard/capsule/dist/types";
 import { init } from "@web3-onboard/react";
 import injectedModule from "@web3-onboard/injected-wallets";
 
 const PARA_API_KEY = process.env.NEXT_PUBLIC_PARA_API_KEY || "";
 
-const initOptions: ParaInitOptions = {
+const initOptions: CapsuleInitOptions = {
   environment: Environment.BETA,
   apiKey: PARA_API_KEY,
   modalProps: {

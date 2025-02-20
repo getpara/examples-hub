@@ -22,7 +22,7 @@ export async function zerodevSessionSignHandler(req: Request, res: Response, nex
     const PROJECT_ID = process.env.ZERODEV_PROJECT_ID;
     const BUNDLER_RPC = process.env.ZERODEV_BUNDLER_RPC;
     const PAYMASTER_RPC = process.env.ZERODEV_PAYMASTER_RPC;
-    const RPC_URL = process.env.ZERODEV_RPC_URL;
+    const RPC_URL = process.env.ARBITRUM_SEPOLIA_RPC;
 
     if (!PARA_API_KEY || !PROJECT_ID || !BUNDLER_RPC || !PAYMASTER_RPC || !RPC_URL) {
       res
@@ -31,11 +31,9 @@ export async function zerodevSessionSignHandler(req: Request, res: Response, nex
       return;
     }
 
-    // 1. Import the session into Para.
     const para = new ParaServer(Environment.BETA, PARA_API_KEY);
     await para.importSession(session);
 
-    // 2. Extract the user’s wallet from Para’s session.
     const wallets = await para.getWallets();
     const wallet = Object.values(wallets)[0];
     if (!wallet) {
@@ -43,7 +41,6 @@ export async function zerodevSessionSignHandler(req: Request, res: Response, nex
       return;
     }
 
-    // 3. Create a viem account & wallet client from the Para session.
     const viemParaAccount = createParaAccount(para);
     const viemClient = createParaViemClient(para, {
       account: viemParaAccount,
@@ -51,7 +48,6 @@ export async function zerodevSessionSignHandler(req: Request, res: Response, nex
       transport: http(RPC_URL),
     });
 
-    // 5. Use the viem-based signer with signerToEcdsaValidator.
     const entryPoint = getEntryPoint("0.7");
     const kernelVersion = KERNEL_V3_1;
     const publicClient = createParaViemClient(para, {
@@ -65,20 +61,17 @@ export async function zerodevSessionSignHandler(req: Request, res: Response, nex
       kernelVersion,
     });
 
-    // 6. Create a Kernel account using the ECDSA validator.
     const account = await createKernelAccount(publicClient, {
       plugins: { sudo: ecdsaValidator },
       entryPoint,
       kernelVersion,
     });
 
-    // 7. Optionally set up paymaster for gas sponsorship.
     const zerodevPaymaster = createZeroDevPaymasterClient({
       chain: sepolia,
       transport: http(PAYMASTER_RPC),
     });
 
-    // 8. Create the Kernel account client.
     const kernelClient = createKernelAccountClient({
       account,
       chain: sepolia,
@@ -88,7 +81,6 @@ export async function zerodevSessionSignHandler(req: Request, res: Response, nex
       },
     });
 
-    // 9. Send a sample UserOp.
     const userOpHash = await kernelClient.sendUserOperation({
       callData: await kernelClient.account.encodeCalls([
         {
@@ -99,7 +91,6 @@ export async function zerodevSessionSignHandler(req: Request, res: Response, nex
       ]),
     });
 
-    // Wait for the UserOp to be included.
     await kernelClient.waitForUserOperationReceipt({
       hash: userOpHash,
       timeout: 1000 * 30,

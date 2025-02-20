@@ -31,11 +31,9 @@ export async function zerodevSessionSignHandler(req: Request, res: Response, nex
       return;
     }
 
-    // 1. Import the session into Para.
     const para = new ParaServer(Environment.BETA, PARA_API_KEY);
     await para.importSession(session);
 
-    // 2. Extract the user’s wallet from Para’s session.
     const wallets = await para.getWallets();
     const wallet = Object.values(wallets)[0];
     if (!wallet) {
@@ -43,7 +41,6 @@ export async function zerodevSessionSignHandler(req: Request, res: Response, nex
       return;
     }
 
-    // 3. Create a viem account & wallet client from the Para session.
     const viemParaAccount = createParaAccount(para);
     const viemClient = createParaViemClient(para, {
       account: viemParaAccount,
@@ -51,13 +48,11 @@ export async function zerodevSessionSignHandler(req: Request, res: Response, nex
       transport: http(RPC_URL),
     });
 
-    // 4. Create a public client (just like the ZeroDev docs suggest).
     const publicClient = createPublicClient({
       transport: http(RPC_URL),
       chain: sepolia,
     });
 
-    // 5. Use the viemClient as the signer with signerToEcdsaValidator.
     const entryPoint = getEntryPoint("0.7");
     const kernelVersion = KERNEL_V3_1;
 
@@ -67,20 +62,17 @@ export async function zerodevSessionSignHandler(req: Request, res: Response, nex
       kernelVersion,
     });
 
-    // 6. Create a Kernel account using the ECDSA validator.
     const account = await createKernelAccount(publicClient, {
       plugins: { sudo: ecdsaValidator },
       entryPoint,
       kernelVersion,
     });
 
-    // 7. Optionally set up paymaster for gas sponsorship.
     const zerodevPaymaster = createZeroDevPaymasterClient({
       chain: sepolia,
       transport: http(PAYMASTER_RPC),
     });
 
-    // 8. Create the Kernel account client.
     const kernelClient = createKernelAccountClient({
       account,
       chain: sepolia,
@@ -90,7 +82,6 @@ export async function zerodevSessionSignHandler(req: Request, res: Response, nex
       },
     });
 
-    // 9. Send a sample UserOp.
     const userOpHash = await kernelClient.sendUserOperation({
       callData: await kernelClient.account.encodeCalls([
         {
@@ -101,7 +92,6 @@ export async function zerodevSessionSignHandler(req: Request, res: Response, nex
       ]),
     });
 
-    // Wait for the UserOp to be included.
     await kernelClient.waitForUserOperationReceipt({
       hash: userOpHash,
       timeout: 1000 * 30,

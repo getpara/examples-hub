@@ -1,27 +1,27 @@
-# Capsule Modal + Cosmos Wallets Example
+# Para Modal + Cosmos Wallets Example
 
-This repository demonstrates how to integrate [Capsule](https://usecapsule.com/) into a **Next.js** application using
-Cosmos External Wallets (such as **Keplr** and **Leap**). The project scaffolds a minimal Next.js 15.x app, showing a
-Capsule Modal that supports external wallet connections in the Cosmos ecosystem.
+This repository demonstrates how to integrate [Para](https://getpara.com/) into a **Next.js** application using Cosmos
+External Wallets (such as **Keplr** and **Leap**). The project scaffolds a minimal Next.js 15.x app, showing a Para
+Modal that supports external wallet connections in the Cosmos ecosystem.
 
 ## Features
 
 - **Next.js (App Router)** – Utilizing the latest Next.js version.
-- **Capsule Modal** – Provides a user-friendly modal for authentication flows.
+- **Para Modal** – Provides a user-friendly modal for authentication flows.
 - **Cosmos Wallet Connectors** – Demonstrates connecting to Keplr and Leap wallets.
 
 ## Prerequisites
 
 1. **Node.js v18+** (or an environment that supports Next.js 15)
 2. **yarn** / **npm** / **pnpm** / **bun** – choose your package manager
-3. A [Capsule account + API key](https://developer.usecapsule.com/) in **BETA** or **PRODUCTION** environment.
+3. A [Para account + API key](https://developer.getpara.com/) in **BETA** or **PRODUCTION** environment.
 
 ## Installation
 
 1. **Clone** or download this repository:
 
    ```bash
-   git clone https://github.com/capsule-org/examples-hub.git
+   git clone https://github.com/getpara/examples-hub.git
    cd examples-hub/web/react-nextjs/capsule-modal-cosmos
    ```
 
@@ -54,7 +54,7 @@ Capsule Modal that supports external wallet connections in the Cosmos ecosystem.
      ```bash
      NEXT_PUBLIC_PARA_API_KEY=YOUR_PARA_API_KEY
      ```
-   - Make sure to use a valid Capsule API key and environment for the `Environment.BETA` or `Environment.PRODUCTION`.
+   - Make sure to use a valid Para API key and environment for the `Environment.BETA` or `Environment.PRODUCTION`.
 
 ## Usage
 
@@ -77,13 +77,13 @@ labeled **Connect Wallet**.
 
 The **CapsuleModal** is configured to show external Cosmos wallets (Keplr, Leap). When you click **Connect Wallet**:
 
-1. The Capsule Modal will appear.
+1. The Para Modal will appear.
 2. Users can either connect Keplr or Leap (or any other wallet you configure).
 3. Upon successful connection, you can read the user’s wallet address within your own app.
 
 ### Files of Interest
 
-- **`src/app/page.tsx`** Contains a simple UI with a button opening the Capsule Modal and demonstration of external
+- **`src/app/page.tsx`** Contains a simple UI with a button opening the Para Modal and demonstration of external
   wallets.
 - **`src/app/components/CapsuleProviders.tsx`** Wraps your app in the `CapsuleCosmosProvider`, which is needed for
   external Cosmos wallets.
@@ -92,16 +92,16 @@ The **CapsuleModal** is configured to show external Cosmos wallets (Keplr, Leap)
 
 ### Important Packages
 
-- `@usecapsule/react-sdk` – Core React SDK for Capsule.
+- `@usecapsule/react-sdk` – Core React SDK for Para.
 - `@usecapsule/cosmos-wallet-connectors` – Connectors for Cosmos wallets (Keplr, Leap, etc.).
-- `@usecapsule/graz` – A specialized fork of graz with Capsule integration.
+- `@usecapsule/graz` – A specialized fork of graz with Para integration.
 - `@leapwallet/cosmos-social-login-capsule-provider` – A peer dependency for Leap’s integration (required even if you
   don’t actively use Leap social login).
 - `@usecapsule/core-sdk` – Core library that the React SDK depends on. We add this to override the out of date
   `@leapwallet/cosmos-social-login-capsule-provider` which is using an older version of the core-sdk.
-- `@usecapsule/user-management-client` – User management client for Capsule. Again, we add this to override the out of
-  date `@leapwallet/cosmos-social-login-capsule-provider` which is using an older version of the user-management-client
-  via the core-sdk.
+- `@usecapsule/user-management-client` – User management client for Para. Again, we add this to override the out of date
+  `@leapwallet/cosmos-social-login-capsule-provider` which is using an older version of the user-management-client via
+  the core-sdk.
 
 ## Common Issues / Troubleshooting
 
@@ -117,9 +117,9 @@ The **CapsuleModal** is configured to show external Cosmos wallets (Keplr, Leap)
 
 ---
 
-**Enjoy building with Capsule and Cosmos wallets!** If you have any questions or need help, check out:
+**Enjoy building with Para and Cosmos wallets!** If you have any questions or need help, check out:
 
-- [Capsule Docs](https://docs.usecapsule.com/)
+- [Para Docs](https://docs.getpara.com/)
 - [Cosmos Docs](https://docs.cosmos.network/)
 - [Next.js Documentation](https://nextjs.org/docs)
 

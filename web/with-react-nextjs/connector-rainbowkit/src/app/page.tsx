@@ -7,7 +7,7 @@ import { useAccount } from "wagmi";
 import "@getpara/rainbowkit/styles.css";
 
 export default function Home() {
-  const { address, addresses, status, isConnected, isConnecting, connector } = useAccount();
+  const { address, isConnected } = useAccount();
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen gap-6 p-8">

@@ -622,10 +622,10 @@
     inputmask "5.0.9"
     qrcode-with-logos "1.1.1"
 
-"@getpara/core-components@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@getpara/core-components/-/core-components-0.2.0.tgz#c06049cb1426d2b2e7fa4eaff5cfa8b78c2ff94a"
-  integrity sha512-2rql62IQcBCpj6ZNEE7vxeiZ8mAJuRhh7ZqtNp3N1bVlx1I00BTzsswUPhiIfYu9JzatrCb5qmTupa7fIRdhlA==
+"@getpara/core-components@1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@getpara/core-components/-/core-components-1.3.0.tgz#fe95d740de6de5bdd3ab28f7e900d3d85d5bad03"
+  integrity sha512-fNcV8KdUi9c7aaYpYr7F3v8GXKNdzSk1NTt328fPxXRJXejIC18HD+hUH8sj1aQqLVFgpHlVLHpN7x4RabV7qg==
   dependencies:
     "@stencil/core" "^4.7.0"
     color-blend "^4.0.0"
@@ -650,17 +650,16 @@
     node-forge "^1.3.1"
     qs "^6.12.0"
 
-"@getpara/core-sdk@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-0.2.0.tgz#728c070be7dde0ee2184fc805f742809b6920276"
-  integrity sha512-J5sQXLu2LugSwLKuLJdP1r4zoOnbv3foBTF8s6rpXRd8mWioMGVGHBaTK/hapsBsksOEZcH9w8ezorbwlPKQLg==
+"@getpara/core-sdk@1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.3.0.tgz#902ffccfeb0d09662b3b8627c5a0b222ae6dbb9f"
+  integrity sha512-Vw8wxGVwPxrh6r2rvjXxGehDok4hZ0VwOABhyvaGjJh/2uGa4LvTbqqPDtvr093q/Dr3OqBeyI1sDeaE+CpH9A==
   dependencies:
     "@celo/utils" "^8.0.0"
     "@cosmjs/encoding" "^0.32.4"
-    "@getpara/user-management-client" "0.2.0"
+    "@getpara/user-management-client" "1.3.0"
     "@noble/hashes" "^1.5.0"
     base64url "^3.0.1"
-    buffer "6.0.3"
     ethereumjs-util "7.1.5"
     libphonenumber-js "1.11.2"
     node-forge "^1.3.1"
@@ -673,14 +672,14 @@
   dependencies:
     "@getpara/core-sdk" "0.1.0"
 
-"@getpara/cosmos-wallet-connectors@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@getpara/cosmos-wallet-connectors/-/cosmos-wallet-connectors-0.2.0.tgz#b36d24f9925987a31c7026196be87a41b33e08d7"
-  integrity sha512-VhUhwhSZ/bpuf9A2Kj6Vgac1YHpX+2rFcx58dwLZL28FZ0XF3pdEdDOAyn6GhSEss09992hDiPROX8ESIhdUdw==
+"@getpara/cosmos-wallet-connectors@1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@getpara/cosmos-wallet-connectors/-/cosmos-wallet-connectors-1.3.0.tgz#167b0f4a83a074bac02dba42c8919a82cf171fc3"
+  integrity sha512-kDveM/qLAkZhlpgc+yprA3AAo0fQNsdy3nHpzvlXTmvsA9Haks4QRyiHWNaqdV3/+gaKeP8DGsHE5dOMho+cBA==
   dependencies:
-    "@getpara/react-sdk" "0.2.0"
+    "@getpara/react-sdk" "1.3.0"
 
-"@getpara/graz@0.2.0":
+"@getpara/graz@0.1.0":
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/@getpara/graz/-/graz-0.1.0.tgz#0d7f9a962106c64c8ae1ce3c4fa5f824322b8035"
   integrity sha512-4Zo6qTcMG+xqnSXfL6/dWzjkMWkM7+2udA1CFyQJ7qJK7whVVxUKh9llqLJUOvkMhKrw6LVyszAa3BFA+78vvA==
@@ -717,13 +716,13 @@
     libphonenumber-js "^1.11.1"
     styled-components "^6.1.8"
 
-"@getpara/react-common@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@getpara/react-common/-/react-common-0.2.0.tgz#6b5656d6a37b5eec78b3ad625a10bc970a594f8a"
-  integrity sha512-SFc/G10XneImXlDCl8gYFW4A8o22eXIoHuwN++6cmBxKAdVa4wYuCkIk+dwPpz7qZglrrxddgznaMvCXV3o+jw==
+"@getpara/react-common@1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@getpara/react-common/-/react-common-1.3.0.tgz#8112be238979239cb55a1851606d952c81a5b19a"
+  integrity sha512-tXG9UbnDwNccO3SnVM/Z7UEBVc/rpJh4JCp1lOiAZoWeLTxHeFMwB830F3uA/1kL0FNTNxb8xEohHtBgOiDxZw==
   dependencies:
-    "@getpara/react-components" "0.2.0"
-    "@getpara/web-sdk" "0.2.0"
+    "@getpara/react-components" "1.3.0"
+    "@getpara/web-sdk" "1.3.0"
     "@moonpay/moonpay-react" "^1.8.3"
     "@ramp-network/ramp-instant-sdk" "^4.0.5"
     "@stripe/crypto" "^0.0.4"
@@ -738,12 +737,12 @@
   dependencies:
     "@getpara/core-components" "0.1.0"
 
-"@getpara/react-components@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@getpara/react-components/-/react-components-0.2.0.tgz#b278f211c2a771cb5b62e47f59bfae11c581585d"
-  integrity sha512-p1jL+feEsCa0NBLvJLUvRzI9BuWvkRM5pCq43/cUT/e7F02vtA+3iJz9Iro2Teh2z7KBweLDZvwAphRlbtFnPA==
+"@getpara/react-components@1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@getpara/react-components/-/react-components-1.3.0.tgz#4c6fda057ff5154ceee030d8400cb57d547ca780"
+  integrity sha512-ImtyO9PhaYXwjhuBSU+AA+XbmH39Tjwr8YO/DGWzScxaoBkLxmBsDDmC0G0BGH5sdE6SU3echo5xeKCNkT5T6A==
   dependencies:
-    "@getpara/core-components" "0.2.0"
+    "@getpara/core-components" "1.3.0"
 
 "@getpara/react-sdk@0.1.0":
   version "0.1.0"
@@ -760,14 +759,15 @@
     styled-components "^6.1.8"
     zustand "^4.5.2"
 
-"@getpara/react-sdk@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@getpara/react-sdk/-/react-sdk-0.2.0.tgz#3577aad216def4481056a1fa086c77c6f7bfc0af"
-  integrity sha512-RoRuPrM0ObA1LPE0XmIv/6xLMSuwoFEF4bXae5vIyIvWRt8ao0sSmgvTL4BIfaKfVjrMMfiOISA0V2VWhAHc8A==
+"@getpara/react-sdk@1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@getpara/react-sdk/-/react-sdk-1.3.0.tgz#c1347e34ca48ca5681b1c3c780c198bf0d77b748"
+  integrity sha512-Nol0ttMmfObTFobX8JKSomkArHvNwwbERE/7aYMbrXEOjtAydBINAXK0B/xRWWM4+fIpTsWcoqMv/goaGyA/cA==
   dependencies:
-    "@getpara/react-common" "0.2.0"
-    "@getpara/react-components" "0.2.0"
-    "@getpara/web-sdk" "0.2.0"
+    "@getpara/react-common" "1.3.0"
+    "@getpara/react-components" "1.3.0"
+    "@getpara/web-sdk" "1.3.0"
+    "@tanstack/react-query" "^5.0.0"
     date-fns "^3.6.0"
     detect-browser "^5.3.0"
     framer-motion "11.3.28"
@@ -784,10 +784,10 @@
     libphonenumber-js "1.11.2"
     qs "^6.12.0"
 
-"@getpara/user-management-client@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-0.2.0.tgz#7ea2859963fb00e5f6d25b5e64d80f353a098296"
-  integrity sha512-Pmcfl3K8JV6UuafytuMuXO5rSvPrwnpR4koZadFaGWGrmoDRS5S6FT8s/57HuFJOSu6OUsSkin95oo7xjEAlJw==
+"@getpara/user-management-client@1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.3.0.tgz#f303ec30279c94386e175df00f685e3abbfca20d"
+  integrity sha512-HOEN0SmIYFu9JVrhVIMaGzQIPXG9eFPhejWWg3pYP0zDniZLNwAJQQadbCFwr45rTxjVNAFO4enehw5R/HW4dQ==
   dependencies:
     axios "^1.6.3"
     libphonenumber-js "1.11.2"
@@ -807,13 +807,13 @@
     node-forge "1.3.1"
     ua-parser-js "1.0.39"
 
-"@getpara/web-sdk@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-0.2.0.tgz#9ce3b4a0ecdbab1c7022926a6879e4faed50dc99"
-  integrity sha512-c86RnsbVFKrHws9PygYaF315/3NKr5nTkNxWzxPHIFpmhbsmh7/6G7Rfxy9jzn4XARRNqJZ1GQyOLgoDy0artQ==
+"@getpara/web-sdk@1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-1.3.0.tgz#c2720fb937a956e4d2197776610f03953d0d1fac"
+  integrity sha512-M8MUcqyU0lXiz9Vkfy31euKjnTgtjWwf3heQi5N30YyEnaYNoUqwkeI8W80J8bhu7N5//n5kPg4tbVbGbbT70w==
   dependencies:
-    "@getpara/core-sdk" "0.2.0"
-    "@getpara/user-management-client" "0.2.0"
+    "@getpara/core-sdk" "1.3.0"
+    "@getpara/user-management-client" "1.3.0"
     assert "^2.1.0"
     base64url "3.0.1"
     buffer "6.0.3"
@@ -1661,12 +1661,24 @@
   resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.64.2.tgz#be06e7c7966d14ea3e7c82bea1086b463f2f6809"
   integrity sha512-hdO8SZpWXoADNTWXV9We8CwTkXU88OVWRBcsiFrk7xJQnhm6WRlweDzMD+uH+GnuieTBVSML6xFa17C2cNV8+g==
 
+"@tanstack/query-core@5.66.4":
+  version "5.66.4"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.66.4.tgz#44b87bff289466adbfa0de8daa5756cbd2d61c61"
+  integrity sha512-skM/gzNX4shPkqmdTCSoHtJAPMTtmIJNS0hE+xwTTUVYwezArCT34NMermABmBVUg5Ls5aiUXEDXfqwR1oVkcA==
+
 "@tanstack/react-query@>=5.0.0":
   version "5.64.2"
   resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.64.2.tgz#199c8a5a8ff92a8565f8cdd378747398347512a2"
   integrity sha512-3pakNscZNm8KJkxmovvtZ4RaXLyiYYobwleTMvpIGUoKRa8j8VlrQKNl5W8VUEfVfZKkikvXVddLuWMbcSCA1Q==
   dependencies:
     "@tanstack/query-core" "5.64.2"
+
+"@tanstack/react-query@^5.0.0":
+  version "5.66.5"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.66.5.tgz#a1c466c81837cb56b279b5189e1efd6d31754d46"
+  integrity sha512-D9aABj3/aFeNmifsdllh5O3hPyA8gUnZ1jAV8MjODQ7blirfAyGed9NjAnm8rgEdr1wChyjTT738ij3vY0EREQ==
+  dependencies:
+    "@tanstack/query-core" "5.66.4"
 
 "@terra-money/station-connector@1.1.0":
   version "1.1.0"

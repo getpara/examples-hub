@@ -7,7 +7,6 @@ import { PhoneInput } from "@/components/PhoneInput";
 import { OTPInput } from "@/components/OTPInput";
 import { AuthButton } from "@/components/AuthButton";
 import { WalletDisplay } from "@/components/WalletDisplay";
-import { CountryCallingCode } from "libphonenumber-js";
 
 export default function Home() {
   const [step, setStep] = useState<number>(0);
@@ -76,14 +75,13 @@ export default function Home() {
     setIsLoading(true);
     setError("");
     try {
-      const isVerified = await para.verifyPhone({ verificationCode });
-      if (!isVerified) {
+      const setupUrl = await para.verifyPhone({ verificationCode });
+      if (!setupUrl) {
         setError("Verification code incorrect or expired");
         setIsLoading(false);
         return;
       }
 
-      const setupUrl = await para.getSetUpBiometricsURL({ authType: "phone", isForNewDevice: false });
       const popupWindow = window.open(setupUrl, "signUpPopup", "popup=true");
 
       if (!popupWindow) {
