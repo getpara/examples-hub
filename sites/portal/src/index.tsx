@@ -9,6 +9,7 @@ import { ParaProvider } from './components/ParaContext';
 import { ENV } from './constants';
 import { AuthMethod } from '@getpara/web-sdk';
 import { lazy } from 'react';
+import './clients/sentry';
 
 defineCustomElements();
 
