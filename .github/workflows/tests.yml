@@ -4,7 +4,7 @@ on:
   pull_request:
     branches:
       - main
-      - para-migration
+      - 2.0.0-alpha
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
