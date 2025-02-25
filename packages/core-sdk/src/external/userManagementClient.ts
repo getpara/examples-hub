@@ -59,7 +59,7 @@ export function initClient({
 }: {
   env: Environment;
   version?: string;
-  apiKey?: string;
+  apiKey: string;
   partnerId?: string;
   useFetchAdapter?: boolean;
   retrieveSessionCookie?: () => string;

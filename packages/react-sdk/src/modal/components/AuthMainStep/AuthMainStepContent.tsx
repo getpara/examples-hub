@@ -2,13 +2,14 @@ import { Fragment, ReactNode, useMemo } from 'react';
 import { CpslButton, CpslDivider, CpslIconGroup, IconType } from '@getpara/react-components';
 import styled from 'styled-components';
 import { OAuthMethod } from '@getpara/web-sdk';
-import { useExternalWallets } from '../../providers/ExternalWalletContext.js';
 import { ExternalWallets } from '../ExternalWallets/ExternalWallets.js';
-import { useModalStore, useThemeStore } from '../../stores/index.js';
+import { useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { AuthLayout } from '../../types/modalProps.js';
 import { brandedOAuthLogos, oAuthLogos } from '../../constants/oAuthLogos.js';
 import { AuthOptions } from '../AuthOptions/AuthOptions.js';
+import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
+import { useStore } from '../../../provider/stores/useStore.js';
 
 interface AuthMainStepContentProps {
   oAuthMethods?: OAuthMethod[];
@@ -18,10 +19,10 @@ interface AuthMainStepContentProps {
 
 export const AuthMainStepContent = ({ oAuthMethods, disableEmailLogin, disablePhoneLogin }: AuthMainStepContentProps) => {
   const { wallets } = useExternalWallets();
-  const authLayout = useThemeStore(state => state.authLayout);
+  const authLayout = useModalStore(state => state.authLayout);
   const setStep = useModalStore(state => state.setStep);
-  const oAuthLogoVariant = useThemeStore(state => state.oAuthLogoVariant);
-  const isDark = useThemeStore(state => state.isDark);
+  const oAuthLogoVariant = useStore(state => state.oAuthLogoVariant);
+  const isDark = useStore(state => state.isDarkTheme);
 
   const useBrandedLogos = oAuthLogoVariant === 'default';
   const useDarkLogos = useBrandedLogos ? isDark : oAuthLogoVariant !== 'dark';
@@ -37,7 +38,7 @@ export const AuthMainStepContent = ({ oAuthMethods, disableEmailLogin, disablePh
   const Content = useMemo(() => {
     const methods: [ReactNode, string][] = [];
 
-    authLayout.forEach(layout => {
+    authLayout?.forEach(layout => {
       switch (layout) {
         case AuthLayout.AUTH_FULL: {
           methods.push([

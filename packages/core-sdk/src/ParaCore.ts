@@ -91,6 +91,7 @@ import {
 import { TransactionReviewDenied, TransactionReviewError, TransactionReviewTimeout } from './errors.js';
 import * as constants from './constants.js';
 import { setupListeners } from './utils/listeners.js';
+import { autoBind } from './utils/autobind.js';
 
 export abstract class ParaCore {
   static version?: string = constants.PARA_CORE_VERSION;
@@ -611,7 +612,11 @@ export abstract class ParaCore {
    * @param opts - Additional constructor options; see `ConstructorOpts`.
    * @returns - A new ParaCore instance.
    */
-  constructor(env: Environment, apiKey?: string, opts?: ConstructorOpts) {
+  constructor(env: Environment, apiKey: string, opts?: ConstructorOpts) {
+    if (!apiKey) {
+      throw new Error('A Para API key is required.');
+    }
+
     // TODO: consider using sessionStorage instead of localStorage
     if (!opts) opts = {};
 
@@ -725,6 +730,9 @@ export abstract class ParaCore {
     this.initializeFromStorage();
 
     setupListeners.bind(this)();
+
+    // Auto bind all functions to the instance so the instance can be destructured i.e. in the react-sdk
+    autoBind(this);
   }
 
   private initializeFromStorage = () => {

@@ -23,7 +23,7 @@ export enum Environment {
 
 export interface Ctx {
   env: Environment;
-  apiKey?: string;
+  apiKey: string;
   client: Client;
   disableWorkers?: boolean;
   offloadMPCComputationURL?: string;

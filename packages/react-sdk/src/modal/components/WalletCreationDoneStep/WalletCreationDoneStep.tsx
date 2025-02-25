@@ -1,10 +1,11 @@
 import { CpslButton, CpslText } from '@getpara/react-components';
 import { StepContainer, InnerStepContainer, HeroIcon } from '../common.js';
-import { useModalStore, useThemeStore } from '../../stores/index.js';
+import { useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { WalletCard, WalletCards } from '../WalletCard/WalletCard.js';
 import styled from 'styled-components';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
+import { useStore } from '../../../provider/stores/useStore.js';
 
 interface WalletCreationDoneStepProps {
   twoFactorAuthEnabled?: boolean;
@@ -12,7 +13,7 @@ interface WalletCreationDoneStepProps {
 }
 
 export const WalletCreationDoneStep = ({ twoFactorAuthEnabled, onClose }: WalletCreationDoneStepProps) => {
-  const hideWallets = useThemeStore(state => state.hideWallets);
+  const hideWallets = useStore(state => state.modalConfig?.hideWallets);
   const setStep = useModalStore(state => state.setStep);
   const isLogin = useModalStore(state => state.isLogin());
   const onRampConfig = useModalStore(state => state.onRampConfig);

@@ -1,7 +1,8 @@
 import { createStore, StoreApi, useStore as useZustandStore } from 'zustand';
-import { createClientSlice, createModalSlice, createWalletSlice } from './slices/index.js';
+import { createClientSlice, createExternalWalletsSlice, createModalSlice, createWalletSlice } from './slices/index.js';
 import { Store } from './types.js';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import { createConfigSlice } from './slices/config.js';
 
 export const vanillaStore = createStore<Store>()(
   persist<Store, [], [], Pick<Store, 'selectedWalletId' | 'selectedWalletType'>>(
@@ -9,10 +10,12 @@ export const vanillaStore = createStore<Store>()(
       ...createClientSlice(...a),
       ...createModalSlice(...a),
       ...createWalletSlice(...a),
+      ...createExternalWalletsSlice(...a),
+      ...createConfigSlice(...a),
     }),
     {
       version: 1,
-      name: '@PARA/web-state',
+      name: '@PARA/provider-state',
       storage: createJSONStorage(() => localStorage),
       partialize: state => ({
         selectedWalletId: state.selectedWalletId,

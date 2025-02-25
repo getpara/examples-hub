@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { CpslButton, CpslIcon, CpslQrCode, CpslSpinner, CpslText } from '@getpara/react-components';
 import { CenteredText, Heading, InnerStepContainer, QRContainer, StepContainer } from '../common.js';
-import { useModalStore, useThemeStore, useUserInfoStore } from '../../stores/index.js';
+import { useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { AuthMethod, isMobile } from '@getpara/web-sdk';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
+import { useStore } from '../../../provider/stores/useStore.js';
 
 const FarcasterOAuthStep = () => {
   const setAuthInfo = useUserInfoStore(state => state.setAuthInfo);
@@ -19,7 +20,7 @@ const FarcasterOAuthStep = () => {
   const setFlow = useModalStore(state => state.setFlow);
   const farcasterConnectUri = useModalStore(state => state.farcasterConnectUri);
   const setFarcasterConnectUri = useModalStore(state => state.setFarcasterConnectUri);
-  const theme = useThemeStore(state => state.theme);
+  const theme = useStore(state => state.modalConfig?.theme);
 
   const [shouldRouteToStep, setShouldRouteToStep] = useState<ModalStep>();
 
@@ -38,6 +39,8 @@ const FarcasterOAuthStep = () => {
         const { userExists, username, pfpUrl } = await para.waitForFarcasterStatus();
 
         setAuthInfo({ farcasterUsername: username, pfpUrl });
+
+        setStep(ModalStep.AWAITING_OAUTH);
 
         if (userExists) {
           const supportedAuthMethods = await para.initiateUserLoginV2({ farcasterUsername: username });

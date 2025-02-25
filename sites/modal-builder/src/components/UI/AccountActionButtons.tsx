@@ -2,16 +2,17 @@ import React from 'react';
 import styled from 'styled-components';
 import { Button } from '.';
 import { useAtom } from 'jotai';
-import { paraAtom, checkLoginStatusAtom, resetConfigAtom } from '../../atoms';
+import { checkLoginStatusAtom, resetConfigAtom } from '../../atoms';
+import { useClient } from '@getpara/react-sdk';
 
 export const AccountActionButtons: React.FC = () => {
-  const [para] = useAtom(paraAtom);
+  const para = useClient();
   const [, checkLoginStatus] = useAtom(checkLoginStatusAtom);
   const [, resetConfig] = useAtom(resetConfigAtom);
 
   const handleLogout = async () => {
     try {
-      await para.logout();
+      await para?.logout();
       checkLoginStatus(null);
     } catch (error) {
       console.error('Error logging out:', error);
@@ -21,7 +22,7 @@ export const AccountActionButtons: React.FC = () => {
     try {
       resetConfig(null);
       await handleLogout();
-      await para.ctx.client.deleteSelf(para.getUserId()!);
+      await para?.ctx.client.deleteSelf(para?.getUserId()!);
     } catch (error) {
       console.error('Error deleting account:', error);
     }

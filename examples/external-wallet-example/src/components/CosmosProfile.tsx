@@ -3,19 +3,18 @@ import { ProfileInnerContainer, Card, OverflowText } from './common';
 import { useState } from 'react';
 import { getWallet, useAccount, useActiveWalletType } from '@getpara/graz';
 import { useCosmosStore } from '../stores/cosmosStore/useCosmosStore';
-import { useParaCosmos } from '@getpara/cosmos-wallet-connectors';
+import { cosmosChains } from '../App';
 
 export const CosmosProfile = () => {
-  const { multiChain, chains } = useParaCosmos();
   const selectedCosmosChainId = useCosmosStore(state => state.selectedChainId);
-  const { data: account } = useAccount({ multiChain, chains });
+  const { data: account } = useAccount({ multiChain: true, chains: cosmosChains });
   const { walletType } = useActiveWalletType();
 
   const [message, setMessage] = useState<string>('');
   const [messageSignature, setMessageSignature] = useState<string>();
   const [verified, setVerified] = useState<boolean>();
 
-  const address = multiChain ? (account as any)?.[selectedCosmosChainId]?.bech32Address : account?.bech32Address;
+  const address = (account as any)?.[selectedCosmosChainId]?.bech32Address;
 
   const handleSign = async () => {
     const wallet = getWallet(walletType);

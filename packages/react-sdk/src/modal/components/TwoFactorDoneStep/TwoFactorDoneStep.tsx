@@ -1,13 +1,13 @@
 import { CpslButton, CpslText } from '@getpara/react-components';
 import { Heading, StepContainer, InnerStepContainer, HeroIcon } from '../common.js';
-import { useThemeStore } from '../../stores/index.js';
+import { useStore } from '../../../provider/stores/useStore.js';
 
 interface TwoFactorDoneStepStep {
   onClose: () => void;
 }
 
 export const TwoFactorDoneStep = ({ onClose }: TwoFactorDoneStepStep) => {
-  const hideWallets = useThemeStore(state => state.hideWallets);
+  const hideWallets = useStore(state => state.modalConfig?.hideWallets);
 
   return (
     <StepContainer>

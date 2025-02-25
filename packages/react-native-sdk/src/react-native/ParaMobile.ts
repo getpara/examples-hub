@@ -46,7 +46,7 @@ export class ParaMobile extends ParaCore {
    * @param {string} [relyingPartyId] - The relying party ID for WebAuthn.
    * @param {ConstructorOpts} [opts] - Additional constructor options.
    */
-  constructor(env: Environment, apiKey?: string, relyingPartyId?: string, opts?: ConstructorOpts) {
+  constructor(env: Environment, apiKey: string, relyingPartyId?: string, opts?: ConstructorOpts) {
     super(env, apiKey, opts);
 
     // starting with non-prod to see what kind of errors we get and if sensitive data is tracked

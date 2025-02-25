@@ -23,18 +23,19 @@ import {
   CpslTabs,
   CpslText,
 } from '@getpara/react-components';
-import { useModalStore, useThemeStore } from '../../stores/index.js';
+import { useModalStore } from '../../stores/index.js';
 import { ReactNode, useEffect, useMemo } from 'react';
 import { OnRampProviderButton } from '../OnRampComponents/OnRampProviderButton.js';
 import { isMobile } from '@getpara/web-sdk';
-import { useActiveWallet } from '../../hooks/useActiveWallet.js';
 import { getAddFundsStep, ModalStep } from '../../utils/steps.js';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useExternalWallets } from '../../providers/ExternalWalletContext.js';
 import { getNetworkFromChainId, getNetworkOrMainNetEquivalent, useCopyToClipboard } from '@getpara/react-common';
 import { formatNetworkList } from '../../utils/stringFormatters.js';
 import styled from 'styled-components';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
+import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
+import { useWallet } from '../../../provider/index.js';
+import { useStore } from '../../../provider/stores/useStore.js';
 
 export type Tab = EnabledFlow;
 
@@ -58,17 +59,17 @@ const GENERIC_WALLET = {
 export const AddFunds = () => {
   const [isCopied, copy] = useCopyToClipboard();
   const para = useInternalClient();
-  const appName = useThemeStore(state => state.appName);
   const onRampConfig = useModalStore(state => state.onRampConfig);
-  const hideWallets = useThemeStore(state => state.hideWallets);
+  const hideWallets = useStore(state => state.modalConfig?.hideWallets);
+  const appName = useStore(state => state.appName);
   const storedTab = useModalStore(state => state.accountAddFundTab);
   const setStep = useModalStore(state => state.setStep);
   const setOnRampPurchase = useModalStore(state => state.setOnRampPurchase);
   const { chainId } = useExternalWallets();
 
-  const activeWallet = useActiveWallet();
+  const { data: activeWallet } = useWallet();
 
-  const tabs = TABS.filter(([, key]) => !!onRampConfig[key]);
+  const tabs = TABS.filter(([, key]) => !!onRampConfig?.[key]);
   const isMultiFlow = tabs.length > 1;
 
   const tab = storedTab ?? tabs[0][0];
@@ -131,7 +132,7 @@ export const AddFunds = () => {
     );
 
     return [allowedNetworks, [...new Set(Object.values(allowedAssetsLookup).flat())], isProviderAllowed];
-  }, [activeWallet?.type, activeWallet?.isExternal, tab, onRampConfig.assetInfo, onRampConfig.allowedAssets, chainId]);
+  }, [activeWallet?.type, activeWallet?.isExternal, tab, onRampConfig?.assetInfo, onRampConfig?.allowedAssets, chainId]);
 
   useEffect(() => {
     setOnRampPurchase(undefined);
@@ -259,7 +260,7 @@ export const AddFunds = () => {
               <CenteredText weight="medium" color="secondary">
                 {!!onRampConfig.allowedAssets && allowedNetworks.length > 0
                   ? formatNetworkList(allowedNetworks)
-                  : GENERIC_WALLET[activeWallet.type]}
+                  : GENERIC_WALLET[activeWallet?.type ?? WalletType.EVM]}
               </CenteredText>
             </InnerStepContainer>
           </>

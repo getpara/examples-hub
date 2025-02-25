@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { OrganizationInvite } from '../../../types/api';
 import { getOrganizationInvites } from '../../../api/users/queries';
-import { para } from '../../../clients/para';
+import { useAccount } from '@getpara/react-sdk';
 
 export const USER_INVITE_QUERY_KEY = 'userInvite';
 
@@ -10,10 +10,11 @@ export const useUserInviteQuery = <T>(
   organizationId?: string,
   memberId?: string,
 ) => {
-  const userId = para.getUserId();
+  const { data: account } = useAccount();
+  const userId = account?.userId;
 
   return useQuery({
-    enabled: !!userId && !!organizationId && !!memberId,
+    enabled: !!userId && !!organizationId && !!memberId && account.isConnected,
     queryKey: [USER_INVITE_QUERY_KEY, userId, organizationId, memberId],
     queryFn: async () => {
       if (!userId || !organizationId || !memberId) {

@@ -3,13 +3,14 @@ import { useEffect, useRef, useState } from 'react';
 import { styled } from 'styled-components';
 import { ModalStep } from '../../utils/steps.js';
 import { CodeChangeEventDetail, CpslCodeInputCustomEvent } from '@getpara/core-components';
-import { useModalStore, useThemeStore, useUserInfoStore } from '../../stores/index.js';
+import { useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { Heading, InnerStepContainer, StepContainer } from '../common.js';
 import { AuthMethod } from '@getpara/core-sdk';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
+import { useStore } from '../../../provider/stores/useStore.js';
 
 export const VerificationCodeStep = () => {
-  const theme = useThemeStore(state => state.theme);
+  const theme = useStore(state => state.modalConfig?.theme);
   const authInfo = useUserInfoStore(state => state.getAuthInfo());
   const setStep = useModalStore(state => state.setStep);
   const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
@@ -32,7 +33,7 @@ export const VerificationCodeStep = () => {
   useEffect(() => {
     // Using a small timeout here to ensure the input is mounted before attempting focus
     setTimeout(() => {
-      inputRef.current.shadowRoot.querySelectorAll('input')?.[0]?.focus();
+      inputRef.current?.shadowRoot?.querySelectorAll('input')?.[0]?.focus();
     }, 10);
   }, []);
 
@@ -88,7 +89,7 @@ export const VerificationCodeStep = () => {
           setIFrameUrl(await para.shortenLoginLink(passwordAuthUrl));
           setShouldRouteToStep(ModalStep.BIOMETRIC_CREATION);
           return;
-        } else if (supportedCreateAuthMethods.has(AuthMethod.PASSWORD)) {
+        } else if ((await para.getSupportedCreateAuthMethods()).has(AuthMethod.PASSWORD)) {
           setIsIFrameReady(false);
           isEmail ? await para.verifyEmail({ verificationCode: code }) : await para.verifyPhone({ verificationCode: code });
           const url = await para.getSetupPasswordURL({ authType: authInfo?.authType, theme });

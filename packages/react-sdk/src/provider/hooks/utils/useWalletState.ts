@@ -14,7 +14,7 @@ export const useWalletState = () => {
 
   const setSelectedWallet = ({ id, type }: { id?: string; type?: WalletType }) => {
     try {
-      const validId = client.findWalletId(id, { type: [type] });
+      const validId = client?.findWalletId(id, type ? { type: [type] } : undefined);
 
       if (validId !== id) {
         clearSelectedWallet();

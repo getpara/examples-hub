@@ -8,30 +8,30 @@
     ".": "./dist/index.js",
     "./connectors": "./dist/wallets/connectors/index.js"
   },
-  "dependencies": {
-    "@getpara/react-sdk": "1.4.0",
-    "zustand": "^4.5.2",
-    "zustand-sync-tabs": "^0.2.2"
-  },
   "scripts": {
     "build": "rm -rf dist && yarn typegen && node ./scripts/build.mjs",
     "typegen": "tsc --emitDeclarationOnly",
     "test": "vitest run --coverage"
   },
-  "devDependencies": {
-    "@getpara/graz": "^0.1.0",
-    "@leapwallet/cosmos-social-login-capsule-provider": "^0.0.41",
-    "@types/react": "^18.0.31",
-    "@types/react-dom": "^18.2.7",
-    "typescript": "^5.4.3"
-  },
-  "peerDependencies": {
+  "dependencies": {
     "@cosmjs/cosmwasm-stargate": "<=0.31.3",
     "@cosmjs/launchpad": "*",
     "@cosmjs/proto-signing": "<=0.31.3",
     "@cosmjs/stargate": "<=0.31.3",
     "@cosmjs/tendermint-rpc": "<=0.31.3",
     "@getpara/graz": "^0.1.0",
+    "@getpara/web-sdk": "^1.4.0",
+    "@leapwallet/cosmos-social-login-capsule-provider": "^0.0.41",
+    "zustand": "^4.5.2",
+    "zustand-sync-tabs": "^0.2.2"
+  },
+  "devDependencies": {
+    "@getpara/react-common": "^1.4.0",
+    "@types/react": "^18.0.31",
+    "@types/react-dom": "^18.2.7",
+    "typescript": "^5.4.3"
+  },
+  "peerDependencies": {
     "react": ">=18",
     "react-dom": ">=18"
   },

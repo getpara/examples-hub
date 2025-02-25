@@ -1,5 +1,4 @@
 import { styled } from 'styled-components';
-import { para } from '../../../clients/para';
 import { OnboardingStep, useOnboardingStore } from '../../../stores/onboarding/useOnboardingStore';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CpslButton, CpslIcon } from '@getpara/react-components';
@@ -8,6 +7,7 @@ import { useFormContext, useFormState } from 'react-hook-form';
 import { OnboardingAnswerOption, OnboardingAnswers } from '../../../types/onboarding';
 import { useSubmitOnboarding } from '../hooks/useSubmitOnboarding';
 import { PlanSlug } from '../../../utils/constants';
+import { useAccount } from '@getpara/react-sdk';
 
 interface ControlsProps {
   questions: OnboardingAnswerOption[];
@@ -15,7 +15,8 @@ interface ControlsProps {
 
 export const Controls = ({ questions }: ControlsProps) => {
   const { watch } = useFormContext<OnboardingAnswers>();
-  const userId = para.getUserId();
+  const { data: account } = useAccount();
+  const userId = account?.userId;
   const currentStep = useOnboardingStore(state => state.getStep(userId));
   const setStep = useOnboardingStore(state => state.setStep);
   const setDirection = useOnboardingStore(state => state.setDirection);

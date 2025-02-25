@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { Heading, HeroIcon, StepContainer } from '../common.js';
 import { ExternalWalletCard, WalletCard, WalletCards } from '../WalletCard/WalletCard.js';
-import { useThemeStore } from '../../stores/index.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
+import { useStore } from '../../../provider/stores/useStore.js';
 
 interface LoginDoneStep {
   onClose: () => void;
@@ -10,7 +10,7 @@ interface LoginDoneStep {
 
 export const LoginDoneStep = ({ onClose }: LoginDoneStep) => {
   const para = useInternalClient();
-  const hideWallets = useThemeStore(state => state.hideWallets);
+  const hideWallets = useStore(state => state.modalConfig?.hideWallets);
 
   useEffect(() => {
     setTimeout(() => {
@@ -27,7 +27,7 @@ export const LoginDoneStep = ({ onClose }: LoginDoneStep) => {
       {!hideWallets && (
         <WalletCards>
           {para.isUsingExternalWallet() ? (
-            <ExternalWalletCard address={para.currentExternalWalletAddresses?.[0]} />
+            <ExternalWalletCard address={para.currentExternalWalletAddresses?.[0] ?? ''} />
           ) : (
             para.currentWalletIdsArray.map(([id, type]) => {
               return <WalletCard key={`${id}-${type}`} id={id} type={type} />;

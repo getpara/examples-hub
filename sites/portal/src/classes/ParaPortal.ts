@@ -2,15 +2,15 @@ import { PregenIds } from '@getpara/user-management-client';
 import { ParaInternal } from '@getpara/react-common';
 
 export class ParaPortal extends ParaInternal {
-  #pregenIds: PregenIds;
+  _pregenIds: PregenIds;
 
   get pregenIds(): PregenIds {
-    return Object.keys({ ...super.pregenIds, ...this.#pregenIds }).reduce(
+    return Object.keys({ ...super.pregenIds, ...this._pregenIds }).reduce(
       (acc, pregenIdentifierType) => {
         return {
           ...acc,
           [pregenIdentifierType]: [
-            ...new Set([...(super.pregenIds[pregenIdentifierType] || []), ...(this.#pregenIds[pregenIdentifierType] || [])]),
+            ...new Set([...(super.pregenIds[pregenIdentifierType] || []), ...(this._pregenIds[pregenIdentifierType] || [])]),
           ],
         };
       },
@@ -24,6 +24,6 @@ export class ParaPortal extends ParaInternal {
   }
 
   set pregenIds(pregenIds: PregenIds) {
-    this.#pregenIds = pregenIds;
+    this._pregenIds = pregenIds;
   }
 }

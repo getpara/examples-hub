@@ -1,16 +1,15 @@
 import { CpslIdenticon, CpslSelect, CpslSelectItem, CpslText } from '@getpara/react-components';
-import { useExternalWallets } from '../../providers/ExternalWalletContext.js';
 import styled from 'styled-components';
-import { useThemeStore } from '../../stores/index.js';
 import ParaWeb, { truncateAddress, WalletType } from '@getpara/web-sdk';
 import { useEffect, useRef } from 'react';
 import { useDropdownPosition } from '../AuthInput/hooks/useDropdownPosition.js';
 import { MOBILE_SIZE } from '../../constants/constants.js';
-import { useActiveWallet } from '../../hooks/useActiveWallet.js';
-import { useWalletState } from '../../../provider/index.js';
+import { useWallet, useWalletState } from '../../../provider/index.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
+import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
+import { useStore } from '../../../provider/stores/useStore.js';
 
-const getValue = (id: string, type: WalletType) => {
+const getValue = (id?: string, type?: WalletType) => {
   return id && type ? `${id}~${type}` : undefined;
 };
 
@@ -23,7 +22,7 @@ const WALLET_TYPES = {
 export const ChainSelect = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { dropdownMaxHeight, dropdownWidth, mobileAnchor, resize } = useDropdownPosition(containerRef);
-  const activeWallet = useActiveWallet();
+  const { data: activeWallet } = useWallet();
 
   const { switchChain, chainId, chains, chainIdSwitchingTo } = useExternalWallets();
 
@@ -56,9 +55,9 @@ export const ChainSelect = () => {
           placeholder="Choose chain..."
           anchorElId="inputContainer"
           dropdownMaxHeight={dropdownMaxHeight}
-          $width={dropdownWidth}
+          $width={dropdownWidth ?? 0}
           // Adding 16 for the top padding + 1 for the border
-          $top={mobileAnchor + 16 + 1}
+          $top={(mobileAnchor ?? 0) + 16 + 1}
           autoWidth
           selectedItemVariant="bodyXS"
         >
@@ -96,7 +95,7 @@ function getName(
   if (para.isMultiWallet) {
     return (
       name ??
-      `${isExternal ? 'External ' : ''}${WALLET_TYPES[type]}${!hideWallets && (isMenu || isExternal) ? ' Wallet' : ''}`
+      `${isExternal ? 'External ' : ''}${type ? WALLET_TYPES[type] : ''}${!hideWallets && (isMenu || isExternal) ? ' Wallet' : ''}`
     );
   }
 
@@ -104,13 +103,13 @@ function getName(
 }
 
 export const AccountSelect = () => {
-  const hideWallets = useThemeStore(state => state.hideWallets);
+  const hideWallets = useStore(state => state.modalConfig?.hideWallets);
   const para = useInternalClient();
   const containerRef = useRef<HTMLDivElement>(null);
   const { dropdownMaxHeight, dropdownWidth, mobileAnchor, resize } = useDropdownPosition(containerRef);
 
   const { setSelectedWallet } = useWalletState();
-  const activeWallet = useActiveWallet();
+  const { data: activeWallet } = useWallet();
 
   const ActiveWalletNode = activeWallet ? (
     <FlexRow slot="selected-item">
@@ -146,9 +145,9 @@ export const AccountSelect = () => {
             placeholder="Choose wallet..."
             anchorElId="addressInputContainer"
             dropdownMaxHeight={dropdownMaxHeight}
-            $width={dropdownWidth}
+            $width={dropdownWidth ?? 0}
             // Adding 16 for the top padding + 1 for the border
-            $top={mobileAnchor + 16 + 1}
+            $top={(mobileAnchor ?? 0) + 16 + 1}
             autoWidth
             selectedItemVariant="bodyXS"
           >
@@ -166,7 +165,7 @@ export const AccountSelect = () => {
                           {name}
                         </CpslText>
                       )}
-                      {!hideWallets && (
+                      {!hideWallets && address && type && (
                         <CpslText variant="bodyXS" color="secondary">
                           {truncateAddress(address, type, { prefix: para.cosmosPrefix })}
                         </CpslText>

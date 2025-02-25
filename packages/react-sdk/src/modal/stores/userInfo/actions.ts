@@ -15,7 +15,7 @@ export const getActions = (
   getAuthInfo: () => {
     try {
       return get().auth
-        ? { ...extractAuthInfo(get().auth, { isRequired: true }), pfpUrl: get().pfpUrl, displayName: get().displayName }
+        ? { ...extractAuthInfo(get().auth!, { isRequired: true }), pfpUrl: get().pfpUrl, displayName: get().displayName }
         : null;
     } catch (e) {
       return null;

@@ -1,8 +1,7 @@
-import ParaWeb, { CurrentWalletIds, OAuthMethod, deprecated__NetworkProp, deprecated__OnRampConfig } from '@getpara/web-sdk';
+import ParaWeb, { CurrentWalletIds, OAuthMethod } from '@getpara/web-sdk';
 import { Theme } from '@getpara/react-components';
 import { OnModalStepChangeValue } from '../stores/index.js';
 import { ModalStep, ModalStepProp } from '../utils/steps.js';
-import { TExternalWallet } from './externalWallets.js';
 
 export type ParaModalHandle = {
   /**
@@ -39,10 +38,6 @@ export enum AuthLayout {
 export type TAuthLayout = `${AuthLayout}`;
 
 export interface ParaModalProps {
-  /**
-   * Your ParaWeb instance.
-   */
-  para?: ParaWeb;
   /**
    * Whether or not the modal is open.
    */
@@ -81,21 +76,6 @@ export interface ParaModalProps {
    */
   logo?: string;
   /**
-   * App name to be shown throughout the modal.
-   */
-  appName?: string;
-  /**
-   * Configure on-ramp providers to allow users to add funds upon signing up.
-   * @deprecated Configure on-ramps in the Para Developer Portal.
-   */
-  onRampConfig?: deprecated__OnRampConfig;
-  /**
-   * Configures which EVM networks your app supports, an array of one or more of `["ETHEREUM", "ARBITRUM", "BASE", "OPTIMISM", and "POLYGON"]`.
-   * Defaults to `["ETHEREUM"]`.
-   * @deprecated Configure this setting in the Para Developer Portal.
-   */
-  networks?: deprecated__NetworkProp[];
-  /**
    * Whether or not to run configured on-ramp providers in test mode.
    */
   onRampTestMode?: boolean;
@@ -116,12 +96,6 @@ export interface ParaModalProps {
    */
   embeddedModal?: boolean;
   className?: string;
-  /**
-   * Which external wallets to show and in what order they should be displayed.
-   *
-   * NOTE: Any wallets that are detected as installed will be sorted first, followed by those that are not detected or not installed.
-   */
-  externalWallets?: TExternalWallet[];
   /**
    * How the modal should order the components on the main auth screen.
    * Only the first method of each type (auth or external) will be used.

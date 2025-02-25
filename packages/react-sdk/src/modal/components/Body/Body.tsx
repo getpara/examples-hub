@@ -2,7 +2,7 @@ import { styled } from 'styled-components';
 import { IFrameSteps, ModalStep } from '../../utils/steps.js';
 import { CpslAlert, CpslIcon } from '@getpara/react-components';
 import { VerificationCodeStep } from '../VerificationCodeStep/VerificationCodeStep.js';
-import { useModalStore, useThemeStore } from '../../stores/index.js';
+import { useModalStore } from '../../stores/index.js';
 import { BiometricLoginStep } from '../BiometricLoginStep/BiometricLoginStep.js';
 import { Setup2FAStep } from '../Setup2FAStep/Setup2FAStep.js';
 import { LoginDoneStep } from '../LoginDoneStep/LoginDoneStep.js';
@@ -32,6 +32,7 @@ import { useEffect, useState } from 'react';
 import { TelegramOAuthStep } from '../OAuth/TelegramOAuthStep.js';
 import { AwaitingPasswordStep } from '../AwaitingPasswordStep/AwaitingPasswordStep.js';
 import { IFrameStep } from '../IFrameStep/IFrameStep.js';
+import { useStore } from '../../../provider/stores/useStore.js';
 
 interface BodyProps {
   oAuthMethods?: OAuthMethod[];
@@ -70,8 +71,8 @@ export const Body = ({
   const setStepDirection = useModalStore(state => state.setStepDirection);
   const accountAddFundTab = useModalStore(state => state.accountAddFundTab);
   const setAccountAddFundTab = useModalStore(state => state.setAccountAddFundTab);
-  const appName = useThemeStore(state => state.appName);
-  const embeddedModal = useThemeStore(state => state.embeddedModal);
+  const embeddedModal = useStore(state => state.modalConfig?.embeddedModal);
+  const appName = useStore(state => state.appName);
 
   const [isTestModeAlert, setIsTestModeAlert] = useState(onRampConfig?.testMode);
 
@@ -231,7 +232,7 @@ export const Body = ({
           >
             <Hero />
             <InnerContainer
-              $embeddedModal={embeddedModal}
+              $embeddedModal={!!embeddedModal}
               $step={currentStep}
               $isIFrameStep={IFrameSteps.includes(currentStep)}
             >

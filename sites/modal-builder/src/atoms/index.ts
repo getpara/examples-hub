@@ -1,16 +1,15 @@
 import { atom, WritableAtom } from 'jotai';
-import { Environment, ParaWeb, OAuthMethod } from '@getpara/react-sdk';
+import { getClient, OAuthMethod } from '@getpara/react-sdk';
 import qs from 'qs';
 import merge from 'lodash.merge';
 import { getModalCodeString } from '../utils/codeGenerator';
 import { ModalBuilderConfig, ViewType, ExternalWallet, TAuthLayout } from '../types';
-import { MODAL_BUILDER_DEFAULT_CONFIG, PARA_API_KEY } from '../constants';
+import { MODAL_BUILDER_DEFAULT_CONFIG } from '../constants';
 import { logError } from '../utils/';
 
 export const modalConfigAtom = atom<ModalBuilderConfig>(MODAL_BUILDER_DEFAULT_CONFIG);
 export const viewAtom = atom<ViewType>('desktop');
 export const isLoggedInAtom = atom<boolean>(false);
-export const paraAtom = atom<ParaWeb>(new ParaWeb(Environment.BETA, PARA_API_KEY));
 
 interface PreviousWeb2State {
   oAuthMethods: OAuthMethod[];
@@ -117,11 +116,11 @@ export const getCodeStringAtom = atom<string>(get => {
   return codeString;
 });
 
-export const checkLoginStatusAtom: WritableAtom<void, [null], Promise<void>> = atom(null, async (get, set) => {
-  const para = get(paraAtom);
+export const checkLoginStatusAtom: WritableAtom<void, [null], Promise<void>> = atom(null, async (_, set) => {
+  const para = getClient();
   try {
-    const loggedIn = await para.isFullyLoggedIn();
-    set(isLoggedInAtom, loggedIn);
+    const loggedIn = await para?.isFullyLoggedIn();
+    set(isLoggedInAtom, !!loggedIn);
   } catch (error) {
     logError('Error checking login status:', error);
     set(isLoggedInAtom, false);

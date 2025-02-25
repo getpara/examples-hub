@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
 import { ParaInternal } from '@getpara/react-common';
-import { TEST_EMAIL, TEST_WALLETS, TEST_WALLET } from '../constants';
+import { TEST_EMAIL, TEST_WALLETS, TEST_WALLET, TEST_USER_ID } from '../constants';
 
 export const mockCheckIfUserExists = vi.fn();
 export const mockCheckIfUserExistsByPhone = vi.fn();
@@ -37,6 +37,7 @@ export class MockPara extends ParaInternal {
 
   email = TEST_EMAIL;
   wallets = TEST_WALLETS;
+  userId = TEST_USER_ID;
 
   getOAuthURL = vi.fn().mockResolvedValue('https://example.com');
 }

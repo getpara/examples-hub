@@ -1,7 +1,10 @@
 import { beforeAll, afterAll, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import Para, { ParaModal, Environment, OAuthMethod } from '../../src/index.js';
+import Para, { Environment, OAuthMethod, ParaProvider, setIsOpen } from '../../src/index.js';
 import { OnRampAssetInfo, OnRampConfig } from '@getpara/user-management-client';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
 
 describe('ParaModal', () => {
   beforeAll(() => {
@@ -57,14 +60,18 @@ describe('ParaModal', () => {
   it('renders first screen', async () => {
     const para = new Para(Environment.DEV, 'apikey123');
     render(
-      <ParaModal
-        isOpen={true}
-        para={para}
-        appName="App Name"
-        oAuthMethods={[OAuthMethod.GOOGLE, OAuthMethod.FACEBOOK, OAuthMethod.APPLE]}
-        onClose={() => {}}
-      />,
+      <QueryClientProvider client={queryClient}>
+        <ParaProvider
+          paraClientConfig={para}
+          config={{ appName: 'App Name' }}
+          paraModalConfig={{
+            oAuthMethods: [OAuthMethod.GOOGLE, OAuthMethod.FACEBOOK, OAuthMethod.APPLE],
+          }}
+        />
+      </QueryClientProvider>,
     );
+
+    setIsOpen(true);
 
     expect(screen.getAllByTestId('modal')).toBeDefined();
 

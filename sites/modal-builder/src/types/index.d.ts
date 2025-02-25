@@ -1,5 +1,12 @@
 import { IconType } from '@getpara/react-components';
-import { AuthLayout, ParaModalProps, OAuthMethod, ExternalWallet as SDKExternalWallet } from '@getpara/react-sdk';
+import {
+  AuthLayout,
+  ParaModalProps,
+  OAuthMethod,
+  ExternalWallet as SDKExternalWallet,
+  TExternalWallet,
+} from '@getpara/react-sdk';
+import { Network } from '@getpara/user-management-client';
 
 export type TAuthLayout = `${AuthLayout}`;
 
@@ -30,13 +37,12 @@ export interface AppearanceConfig {
   logo?: ParaModalProps['logo'];
 }
 
-export interface NetworksConfig extends Pick<ParaModalProps, 'networks'> {}
+type NetworkProp = keyof typeof Network | Network;
+export type NetworksConfig = { networks: NetworkProp[] };
 
 export interface AuthenticationConfig
-  extends Pick<
-    ParaModalProps,
-    'oAuthMethods' | 'disableEmailLogin' | 'disablePhoneLogin' | 'authLayout' | 'externalWallets'
-  > {
+  extends Pick<ParaModalProps, 'oAuthMethods' | 'disableEmailLogin' | 'disablePhoneLogin' | 'authLayout'> {
+  externalWallets: TExternalWallet[];
   isWeb2AuthEnabled: boolean;
   isWeb3AuthEnabled: boolean;
 }

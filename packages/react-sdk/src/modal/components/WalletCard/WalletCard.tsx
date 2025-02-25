@@ -1,24 +1,25 @@
 import styled from 'styled-components';
-import { useModalStore, useThemeStore } from '../../stores/index.js';
+import { useModalStore } from '../../stores/index.js';
 import { CpslButton, CpslIdenticon, CpslText } from '@getpara/react-components';
 import { truncateAddress, WalletType } from '@getpara/web-sdk';
 import { ModalStep } from '../../utils/steps.js';
 import { useWalletState } from '../../../provider/index.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
+import { useStore } from '../../../provider/stores/useStore.js';
 
 export const ExternalWalletCard = ({ address, showAddFunds }: Pick<SharedWalletCardProps, 'address' | 'showAddFunds'>) => {
   const para = useInternalClient();
 
   const wallet = para.externalWallets[address];
 
-  if (!wallet) {
+  if (!wallet?.address || !wallet?.type) {
     return null;
   }
 
   return (
     <SharedWalletCard
       address={truncateAddress(wallet.address, wallet.type)}
-      identiconHash={para.getIdenticonHash(wallet.id, wallet.type)}
+      identiconHash={para.getIdenticonHash(wallet.id, wallet.type) ?? ''}
       showAddFunds={showAddFunds}
     />
   );
@@ -32,7 +33,7 @@ interface WalletCardProps {
 
 export const WalletCard = ({ id, type, showAddFunds }: WalletCardProps) => {
   const para = useInternalClient();
-  const appName = useThemeStore(state => state.appName);
+  const appName = useStore(state => state.appName);
 
   const wallet = para.findWallet(id, type);
 
@@ -48,7 +49,7 @@ export const WalletCard = ({ id, type, showAddFunds }: WalletCardProps) => {
       type={wallet.type}
       address={truncateAddress(address, type, { prefix: para.cosmosPrefix })}
       name={wallet.name ?? `${appName ? `${appName} ` : ''}Wallet`}
-      identiconHash={para.getIdenticonHash(wallet.id, type)}
+      identiconHash={para.getIdenticonHash(wallet.id, type) ?? ''}
       showAddFunds={showAddFunds}
     />
   );
@@ -67,7 +68,7 @@ const SharedWalletCard = ({ address, name, identiconHash, showAddFunds, id, type
   const { setSelectedWallet } = useWalletState();
   const setStep = useModalStore(state => state.setStep);
 
-  const isAddFundsEnabled = onRampConfig.isBuyEnabled || onRampConfig.isReceiveEnabled;
+  const isAddFundsEnabled = onRampConfig?.isBuyEnabled || onRampConfig?.isReceiveEnabled;
   const handleAddFundsClick = () => {
     if (id && type) {
       setSelectedWallet({ id, type });

@@ -9,3 +9,5 @@ export const TEST_WALLET: Omit<Wallet, 'signer'> = {
 };
 
 export const TEST_WALLETS = { [TEST_WALLET.id]: TEST_WALLET as Wallet };
+
+export const TEST_USER_ID = '123456';

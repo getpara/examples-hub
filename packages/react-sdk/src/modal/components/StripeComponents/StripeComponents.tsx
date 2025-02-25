@@ -6,7 +6,7 @@ export const STRIPE_PUBLISHABLE_KEY =
 export const STRIPE_PUBLISHABLE_KEY_TEST =
   'pk_test_51MvquNGrzDeP5yP98WgPaAUgQ50I3OpfPhVfiLO47FBHepJnZRPO62IzZY2uxT5ovhSS10RwcTcnaVil1mcJOzIi00dHapODdS';
 
-const CryptoElementsContext = React.createContext(null);
+const CryptoElementsContext = React.createContext<{ onramp: any }>({ onramp: null });
 CryptoElementsContext.displayName = 'CryptoElementsContext';
 
 export const CryptoElements = ({ stripeOnramp, children }) => {
@@ -64,7 +64,7 @@ export const OnrampElement = ({
   onSessionChange: (_: { session: OnrampSessionResult }) => void;
 }) => {
   const stripeOnramp = useStripeOnramp();
-  const onrampElementRef = React.useRef(null);
+  const onrampElementRef = React.useRef<HTMLDivElement>(null);
   const [session, setSession] = React.useState();
 
   const appearanceJSON = JSON.stringify(appearance);

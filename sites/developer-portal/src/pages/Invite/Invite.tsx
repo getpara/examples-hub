@@ -4,8 +4,8 @@ import { AUTH_MIN_APP_BAR_HEIGHT } from '../../components/AppBar/AuthMinAppBar';
 import { useGetInvite } from '../../hooks/api/queries/useUserInvite';
 import { OrgCard } from './components/OrgCard';
 import { OnboardingStep, useOnboardingStore } from '../../stores/onboarding/useOnboardingStore';
-import { para } from '../../clients/para';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useAccount } from '@getpara/react-sdk';
 
 interface InviteProps {
   isOnboarding?: boolean;
@@ -15,7 +15,8 @@ export const Invite = ({ isOnboarding }: InviteProps) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const inviteId = searchParams.get('invite');
-  const userId = para.getUserId();
+  const { data: account } = useAccount();
+  const userId = account?.userId;
   const [inviteOrgId, inviteMemberId] = inviteId?.split('|') ?? [];
   const setStep = useOnboardingStore(state => state.setStep);
 

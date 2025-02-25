@@ -1,7 +1,7 @@
 import { describe, vi, afterEach, it, expect } from 'vitest';
 import { MockPara } from '../../mocks/mockCorePara';
 import { Environment } from '@getpara/web-sdk';
-import { API_KEY, TEST_EMAIL, TEST_WALLETS } from '../../constants';
+import { API_KEY, TEST_EMAIL, TEST_USER_ID, TEST_WALLETS } from '../../constants';
 import { getAccount } from '../../../src/provider/actions/getAccount';
 
 describe('getAccount', () => {
@@ -19,6 +19,7 @@ describe('getAccount', () => {
       email: TEST_EMAIL,
       wallets: TEST_WALLETS,
       phone: undefined,
+      userId: TEST_USER_ID,
     });
   });
 });

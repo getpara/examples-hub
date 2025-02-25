@@ -14,7 +14,8 @@ export const AddingFunds = () => {
       </SpinnerContainer>
       <CpslText>
         Follow the prompts presented by{' '}
-        {OnRampPurchaseStatus ? ON_RAMP_PROVIDERS[onRampPurchase.provider].name : 'the provider'}.
+        {OnRampPurchaseStatus && onRampPurchase?.provider ? ON_RAMP_PROVIDERS[onRampPurchase.provider].name : 'the provider'}
+        .
       </CpslText>
     </>
   );

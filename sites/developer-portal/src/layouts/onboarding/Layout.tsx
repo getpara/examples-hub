@@ -6,9 +6,9 @@ import { ErrorBoundary } from '../../components/ErrorBoundary/ErrorBoundary';
 import { styled } from 'styled-components';
 import { GradientProgressBar } from '../../components/GradientProgessBar/GradientProgessBar';
 import { OnboardingStep, useOnboardingStore } from '../../stores/onboarding/useOnboardingStore';
-import { para } from '../../clients/para';
 import { AnimatePresence, motion, Transition, Variants } from 'framer-motion';
 import { cloneElement, useEffect, useRef } from 'react';
+import { useAccount } from '@getpara/react-sdk';
 
 export const ONBOARDING_MOTION_VARIANTS: Variants = {
   enter: (direction: number) => {
@@ -41,7 +41,8 @@ export const ONBOARDING_TRANSITION: Transition = {
 export const Layout = () => {
   const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
-  const userId = para.getUserId();
+  const { data: account } = useAccount();
+  const userId = account?.userId;
   const currentStep = useOnboardingStore(state => state.getStep(userId));
   const element = useOutlet();
 

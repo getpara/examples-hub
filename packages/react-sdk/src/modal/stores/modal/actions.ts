@@ -1,6 +1,7 @@
 import { StoreApi } from 'zustand';
 import { DEFAULT_MODAL_STATE, ModalActions, ModalStore } from './useModalStore.js';
 import { AccountPreviousStep, LoginPreviousStep, ModalStep, SignUpPreviousStep } from '../../utils/steps.js';
+import { TAuthLayout } from '../../types/modalProps.js';
 
 export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<ModalStore>['getState']): ModalActions => ({
   resetState: () => set(DEFAULT_MODAL_STATE),
@@ -71,4 +72,22 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
   setBiometricLocationHints: biometricLocationHints => set({ biometricLocationHints }),
   setIFrameUrl: iFrameUrl => set({ iFrameUrl }),
   setIsIFrameReady: isIFrameReady => set({ isIFrameReady }),
+  setAuthLayout: authLayout => {
+    const types: string[] = [];
+    const uniqueLayouts: TAuthLayout[] = [];
+
+    authLayout.map(layout => {
+      const type = layout.split(':')[0];
+
+      if (!types.includes(type)) {
+        uniqueLayouts.push(layout);
+
+        types.push(type);
+      } else {
+        console.warn(`${layout} is a duplicate ${type} layout type. Please remove the duplicate type from your config.`);
+      }
+    });
+
+    set({ authLayout: uniqueLayouts });
+  },
 });

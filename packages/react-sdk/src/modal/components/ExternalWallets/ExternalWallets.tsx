@@ -1,12 +1,12 @@
 import styled from 'styled-components';
-import { useExternalWallets } from '../../providers/ExternalWalletContext.js';
 import { StyledCpslTileButton } from '../common.js';
 import { CpslButton, CpslIcon, CpslInput, CpslText } from '@getpara/react-components';
-import { useModalStore, useThemeStore } from '../../stores/index.js';
+import { useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { useState } from 'react';
 import type { CommonWallet } from '../../types/commonTypes.js';
 import { hasEmbeddedAuth } from '../../utils/authLayoutHelpers.js';
+import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 
 const HAS_MORE_LENGTH = 3;
 
@@ -15,7 +15,7 @@ export const ExternalWallets = () => {
   const setSelectedExternalWalletId = useModalStore(state => state.setSelectedExternalWalletId);
   const setStep = useModalStore(state => state.setStep);
   const showAll = useModalStore(state => state.step === ModalStep.EX_WALLET_MORE);
-  const authLayout = useThemeStore(state => state.authLayout);
+  const authLayout = useModalStore(state => state.authLayout);
 
   const [search, setSearch] = useState('');
 
@@ -55,7 +55,7 @@ export const ExternalWallets = () => {
             <SearchInput
               placeholder="Search for your wallet"
               onCpslInput={async e => {
-                setSearch(e.target.value);
+                setSearch(e.target.value ?? '');
               }}
               value={search}
               style={{ width: '100%' }}
@@ -63,7 +63,7 @@ export const ExternalWallets = () => {
               <SearchIcon slot="start" icon="search" />
             </SearchInput>
           </SearchInputWrapper>
-          {hasEmbeddedAuth(authLayout) && (
+          {hasEmbeddedAuth(authLayout ?? []) && (
             <CpslButton fullWidth variant="tertiary" onClick={handleParaClick}>
               <WalletButtonOuterContainer>
                 <WalletButtonInnerContainer>
@@ -88,7 +88,7 @@ export const ExternalWallets = () => {
                 <CpslIcon slot="start" src={wallet.iconUrl} />
                 <CpslText weight="medium">{wallet.name}</CpslText>
               </WalletButtonInnerContainer>
-              <Badge $show={wallet.isMobile || wallet.installed} $variant={wallet.installed ? 'installed' : 'mobile'}>
+              <Badge $show={!!wallet.isMobile || !!wallet.installed} $variant={wallet.installed ? 'installed' : 'mobile'}>
                 <CpslText variant="body2XS" weight="medium">
                   {wallet.installed ? 'Installed' : 'Mobile'}
                 </CpslText>

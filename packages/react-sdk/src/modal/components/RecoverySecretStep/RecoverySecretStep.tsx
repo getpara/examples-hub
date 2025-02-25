@@ -1,11 +1,12 @@
 import { CpslButton, CpslText } from '@getpara/react-components';
-import { useModalStore, useThemeStore, useUserInfoStore } from '../../stores/index.js';
+import { useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { Heading, InnerStepContainer, StepContainer, StyledCpslTileButton } from '../common.js';
 import { styled } from 'styled-components';
 import { useCopyToClipboard } from '@getpara/react-common';
 import { getMailtoLink } from '../../utils/getMailtoLink.js';
 import { useState } from 'react';
+import { useStore } from '../../../provider/stores/useStore.js';
 
 export const SaveRecoverySecret = ({
   email,
@@ -73,7 +74,7 @@ export const SaveRecoverySecret = ({
 };
 
 export const RecoverySecretStep = () => {
-  const hideWallets = useThemeStore(state => state.hideWallets);
+  const hideWallets = useStore(state => state.modalConfig?.hideWallets);
   const setStep = useModalStore(state => state.setStep);
   const authInfo = useUserInfoStore(state => state.getAuthInfo());
   const recoveryShare = useUserInfoStore(state => state.recoveryShare);

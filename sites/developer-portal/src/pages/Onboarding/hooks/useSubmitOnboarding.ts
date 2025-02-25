@@ -1,4 +1,3 @@
-import { para } from '../../../clients/para';
 import { ENTERPRISE_PLAN_SLUG, FREE_PLAN_SLUG, ZAPIER_WEBHOOK_URL } from '../../../utils/constants';
 import { useCreateOrganization } from '../../../hooks/api/mutations/useCreateOrganization';
 import { triggerToast } from '../../../utils/toasts';
@@ -10,10 +9,12 @@ import { useUpdateOrganization } from '../../../hooks/api/mutations/useUpdateOrg
 import { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import axios from 'axios';
+import { useAccount } from '@getpara/react-sdk';
 
 export const useSubmitOnboarding = () => {
-  const userId = para.getUserId();
-  const email = para.getEmail();
+  const { data: account } = useAccount();
+  const userId = account?.userId;
+  const email = account?.email;
   const { getValues } = useFormContext();
   const getInput = useOnboardingStore(state => state.getInput);
   const logoFile = useOnboardingStore(state => state.logoFile);

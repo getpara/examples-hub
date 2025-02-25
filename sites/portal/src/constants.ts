@@ -5,6 +5,8 @@ export const ENV = import.meta.env.VITE_ENVIRONMENT
   ? (import.meta.env.VITE_ENVIRONMENT.toUpperCase() as Environment)
   : Environment.SANDBOX;
 
+export const DEFAULT_API_KEY = import.meta.env.VITE_CAPSULE_API_KEY ?? undefined;
+
 export const DEFAULT_PARTNER: Partner = {
   id: 'id',
   displayName: 'Para',

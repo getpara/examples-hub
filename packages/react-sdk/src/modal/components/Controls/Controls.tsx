@@ -1,18 +1,18 @@
 import { CpslIcon } from '@getpara/react-components';
 import { styled } from 'styled-components';
 import { useModalStore } from '../../stores/index.js';
-import { useThemeStore } from '../../stores/theme/useThemeStore.js';
 import { useGoBack } from '../../hooks/useGoBack.js';
 import { AccountSelect, ChainSelect } from './Selects.js';
 import { ModalStep } from '../../utils/steps.js';
 import { HeaderButton } from '@getpara/react-common';
+import { useStore } from '../../../provider/stores/useStore.js';
 
 interface ControlsProps {
   onClose: () => void;
 }
 
 export const Controls = ({ onClose }: ControlsProps) => {
-  const bareModal = useThemeStore(state => state.bareModal);
+  const bareModal = useStore(state => state.modalConfig?.bareModal);
   const hasPreviousStep = useModalStore(state => state.hasPreviousStep());
   const step = useModalStore(state => state.step);
   const isFullyLoggedIn = useModalStore(state => state.isFullyLoggedIn);

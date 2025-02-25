@@ -1,16 +1,7 @@
+import { Auth } from '@getpara/user-management-client';
 import ParaWeb from '@getpara/web-sdk';
-import { CountryCallingCode } from 'libphonenumber-js';
 
-export enum CreateUserType {
-  EMAIL = 'EMAIL',
-  PHONE = 'PHONE',
-}
-
-export interface CreateUserArgs {
-  type: CreateUserType;
-  identifier: string;
-  countryCode?: CountryCallingCode;
-}
+export type CreateUserArgs = Auth<'email'> | Auth<'phone'>;
 
 export const createUser = async (para?: ParaWeb, args?: CreateUserArgs) => {
   if (!para) {
@@ -21,10 +12,15 @@ export const createUser = async (para?: ParaWeb, args?: CreateUserArgs) => {
     throw new Error('no valid args passed to createUser');
   }
 
+  const isEmail = 'email' in args;
+  const isPhone = 'phone' in args;
+
+  if ((!isEmail && !isPhone) || (isPhone && !args.countryCode)) {
+    throw new Error('invalid user creation args');
+  }
+
   try {
-    await (args.type === CreateUserType.EMAIL
-      ? para.createUser({ email: args.identifier })
-      : para.createUserByPhone({ phone: args.identifier, countryCode: args.countryCode }));
+    await (isEmail ? para.createUser(args) : para.createUserByPhone(args));
   } catch (e) {
     throw new Error(e);
   }

@@ -2,12 +2,12 @@ import { CpslHero, CpslIcon, CpslIdenticon } from '@getpara/react-components';
 import styled from 'styled-components';
 import { ModalStep } from '../../utils/steps.js';
 import { useModalStore } from '../../stores/index.js';
-import { useExternalWallets } from '../../providers/ExternalWalletContext.js';
 import { NETWORK_NOT_SUPPORTED_ERROR } from '../../constants/constants.js';
 import { useEffect, useState } from 'react';
 import { isMobile } from '@getpara/web-sdk';
-import { useActiveWallet } from '../../hooks/useActiveWallet.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
+import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
+import { useWallet } from '../../../provider/index.js';
 
 type StepHeroConfig = {
   variant: 'externalWalletConnection' | 'approved' | 'failed' | 'customContent' | 'pending';
@@ -58,7 +58,7 @@ export const Hero = () => {
   const { wallet: connector, walletDisplayHelpers, avatar } = useExternalWallets();
   const step = useModalStore(state => state.step);
   const externalWalletError = useModalStore(state => state.externalWalletError);
-  const activeWallet = useActiveWallet();
+  const { data: activeWallet } = useWallet();
 
   const [currentStep, setCurrentStep] = useState(step);
 
@@ -104,7 +104,7 @@ export const Hero = () => {
 
   return (
     <>
-      <Container $top={-45 + topOffset}>
+      <Container $top={-45 + (topOffset ?? 0)}>
         {shouldHide ? null : (
           <StyledHero $isAccount={isAccountStep} hideFadeOut={hideFadeOut} variant={variant} height={480} withDefaultTheme>
             {(isExternalStep || isChainSwitchStep) && <WalletLogo slot="connectionLeft" src={connector?.iconUrl} />}
@@ -118,7 +118,7 @@ export const Hero = () => {
           </StyledHero>
         )}
       </Container>
-      {!shouldHide && <Spacer $height={spacerHeight} />}
+      {!shouldHide && <Spacer $height={spacerHeight ?? 0} />}
     </>
   );
 };

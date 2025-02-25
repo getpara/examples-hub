@@ -1,20 +1,21 @@
-import { useModalStore, useThemeStore } from '../../stores/index.js';
+import { useModalStore } from '../../stores/index.js';
 import { IFrameSteps } from '../../utils/steps.js';
 import styled from 'styled-components';
 import { SpinnerContainer } from '@getpara/react-common';
 import { CpslSpinner } from '@getpara/react-components';
 import { MOBILE_SIZE } from '../../constants/constants.js';
+import { useStore } from '../../../provider/stores/useStore.js';
 
 export const IFrameStep = () => {
   const iFrameUrl = useModalStore(state => state.iFrameUrl);
   const setIsReady = useModalStore(state => state.setIsIFrameReady);
   const isReady = useModalStore(state => state.isIFrameReady);
   const currentStep = useModalStore(state => state.step);
-  const embeddedModal = useThemeStore(state => state.embeddedModal);
+  const embeddedModal = useStore(state => state.modalConfig?.embeddedModal);
 
   return (
-    <OuterContainer $isVisible={IFrameSteps.includes(currentStep)} $embeddedModal={embeddedModal}>
-      <Container $isReady={isReady}>
+    <OuterContainer $isVisible={IFrameSteps.includes(currentStep)} $embeddedModal={!!embeddedModal}>
+      <Container $isReady={!!isReady}>
         <iframe
           src={iFrameUrl}
           onLoad={() => {

@@ -49,7 +49,7 @@ type ClientConfig = {
   userManagementHost: string;
   version?: string;
   partnerId?: string;
-  apiKey?: string;
+  apiKey: string;
   opts?: ConfigOpts;
   retrieveSessionCookie?: () => string | undefined;
   persistSessionCookie?: (cookie: string) => void;

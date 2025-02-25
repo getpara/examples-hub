@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useAtom } from 'jotai';
 import { useHydrateAtoms } from 'jotai/utils';
 import { createRoot } from 'react-dom/client';
@@ -9,25 +9,17 @@ import { defineCustomElements } from '@getpara/react-components';
 import { sepolia } from 'wagmi/chains';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { clusterApiUrl } from '@solana/web3.js';
-import {
-  ParaEvmProvider,
-  coinbaseWallet,
-  metaMaskWallet,
-  rainbowWallet,
-  walletConnectWallet,
-  zerionWallet,
-  rabbyWallet,
-} from '@getpara/evm-wallet-connectors';
-import { backpackWallet, ParaSolanaProvider, glowWallet, phantomWallet } from '@getpara/solana-wallet-connectors';
-import { ParaCosmosProvider, leapWallet, keplrWallet } from '@getpara/cosmos-wallet-connectors';
 import { axelar, cosmoshub, osmosis, sommelier, stargaze } from '@getpara/graz/chains';
 
-import { WALLET_CONNECT_PROJECT_ID } from './constants';
+import { PARA_API_KEY, WALLET_CONNECT_PROJECT_ID } from './constants';
 import { ModalDesigner } from './components/ModalDesigner';
-import { initializeAppAtom } from './atoms';
+import { checkLoginStatusAtom, initializeAppAtom, modalConfigAtom, viewAtom } from './atoms';
 
 import '@getpara/react-components/css/capsule-core.css';
 import './index.css';
+import { Environment, ParaProvider } from '@getpara/react-sdk';
+import { PlaceHolderLogo } from './assets';
+import { calculateBrightness } from './utils';
 
 const APP_NAME = 'Para Modal Builder';
 const SOLANA_NETWORK = WalletAdapterNetwork.Devnet;
@@ -42,22 +34,15 @@ export const COSMOS_CHAINS = [
 
 const COSMOS_WALLET_CONFIG = {
   chains: COSMOS_CHAINS,
-  wallets: [leapWallet, keplrWallet],
-  walletConnectOptions: {
-    projectId: WALLET_CONNECT_PROJECT_ID,
-    name: APP_NAME,
-  },
 };
 
 const EVM_WALLET_CONFIG = {
-  projectId: WALLET_CONNECT_PROJECT_ID,
-  appName: APP_NAME,
   chains: [sepolia] as const,
-  wallets: [metaMaskWallet, rainbowWallet, walletConnectWallet, zerionWallet, coinbaseWallet, rabbyWallet],
 };
 
 const SOLANA_WALLET_CONFIG = {
-  wallets: [glowWallet, phantomWallet, backpackWallet],
+  endpoint: clusterApiUrl(SOLANA_NETWORK),
+  chain: SOLANA_NETWORK,
   appIdentity: {
     name: 'Para Example',
     uri: `${location.protocol}//${location.host}`,
@@ -68,10 +53,70 @@ defineCustomElements();
 const queryClient = new QueryClient();
 
 const App = () => {
+  const [selectedCosmosChain, setSelectedCosmosChain] = useState(cosmoshub.chainId);
+  const [modalConfig] = useAtom(modalConfigAtom);
+  const [view] = useAtom(viewAtom);
+  const [, checkLoginStatus] = useAtom(checkLoginStatusAtom);
+
+  const handleClose = useCallback(() => {
+    checkLoginStatus(null);
+  }, [checkLoginStatus]);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ParaProvider
+        config={{ disableEmbeddedModal: true, appName: APP_NAME }}
+        paraClientConfig={{
+          env: Environment.BETA,
+          apiKey: PARA_API_KEY,
+        }}
+        externalWalletConfig={{
+          wallets: modalConfig.authentication.externalWallets ?? [],
+          walletConnect: { projectId: WALLET_CONNECT_PROJECT_ID },
+          cosmosConnector: {
+            config: {
+              selectedChainId: selectedCosmosChain,
+              onSwitchChain: setSelectedCosmosChain,
+              ...COSMOS_WALLET_CONFIG,
+            },
+          },
+          evmConnector: {
+            config: EVM_WALLET_CONFIG,
+          },
+          solanaConnector: {
+            config: SOLANA_WALLET_CONFIG,
+          },
+        }}
+        paraModalConfig={{
+          bareModal: true,
+          isOpen: true,
+          onClose: handleClose,
+          logo: modalConfig.appearance.logo || PlaceHolderLogo,
+          theme: {
+            ...modalConfig.appearance.theme,
+            mode: calculateBrightness(modalConfig.appearance.theme.backgroundColor || '#ffffff') > 0.5 ? 'light' : 'dark',
+            font: modalConfig.appearance.theme.font ?? 'Inter',
+          },
+          oAuthMethods: modalConfig.authentication.oAuthMethods,
+          disableEmailLogin: modalConfig.authentication.disableEmailLogin,
+          disablePhoneLogin: modalConfig.authentication.disablePhoneLogin,
+          authLayout: modalConfig.authentication.authLayout,
+          twoFactorAuthEnabled: modalConfig.security.twoFactorAuthEnabled,
+          recoverySecretStepEnabled: modalConfig.security.recoverySecretStepEnabled,
+          hideWallets: modalConfig.wallets.hideWallets,
+          onRampTestMode: modalConfig.onRamps.onRampTestMode,
+          className: view === 'mobile' ? 'force-mobile-media include-mobile-styling' : '',
+        }}
+      >
+        <ModalDesigner />
+      </ParaProvider>
+    </QueryClientProvider>
+  );
+};
+
+const AppWrapper = () => {
   useHydrateAtoms([[initializeAppAtom, null]]);
   const [, initialize] = useAtom(initializeAppAtom);
-  const [selectedCosmosChain, setSelectedCosmosChain] = useState(cosmoshub.chainId);
-  const endpoint = useMemo(() => clusterApiUrl(SOLANA_NETWORK), [SOLANA_NETWORK]);
 
   React.useEffect(() => {
     initialize(null);
@@ -80,31 +125,10 @@ const App = () => {
   return (
     <BrowserRouter>
       <JotaiProvider>
-        <QueryClientProvider client={queryClient}>
-          <ParaCosmosProvider
-            selectedChainId={selectedCosmosChain}
-            chains={COSMOS_WALLET_CONFIG.chains}
-            onSwitchChain={setSelectedCosmosChain}
-            wallets={COSMOS_WALLET_CONFIG.wallets}
-            walletConnect={{
-              options: COSMOS_WALLET_CONFIG.walletConnectOptions,
-            }}
-          >
-            <ParaEvmProvider config={EVM_WALLET_CONFIG}>
-              <ParaSolanaProvider
-                endpoint={endpoint}
-                wallets={SOLANA_WALLET_CONFIG.wallets}
-                chain={SOLANA_NETWORK}
-                appIdentity={SOLANA_WALLET_CONFIG.appIdentity}
-              >
-                <ModalDesigner />
-              </ParaSolanaProvider>
-            </ParaEvmProvider>
-          </ParaCosmosProvider>
-        </QueryClientProvider>
+        <App />
       </JotaiProvider>
     </BrowserRouter>
   );
 };
 
-createRoot(document.getElementById('root')!).render(<App />);
+createRoot(document.getElementById('root')!).render(<AppWrapper />);

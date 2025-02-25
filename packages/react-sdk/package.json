@@ -4,6 +4,9 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "setup-para": "dist/cli/cli.mjs"
+  },
   "exports": {
     ".": "./dist/index.js",
     "./styles.css": "./dist/css/modal.css"
@@ -28,17 +31,26 @@
     "post-build": "./scripts/post-build.sh",
     "build": "rm -rf dist && yarn typegen && node ./scripts/build.mjs && yarn post-build",
     "typegen": "tsc --emitDeclarationOnly",
-    "test": "vitest run --coverage"
+    "test": "vitest run --coverage",
+    "cli": "node ./dist/cli/cli.mjs"
   },
   "devDependencies": {
+    "@getpara/cosmos-wallet-connectors": "^1.4.0",
+    "@getpara/evm-wallet-connectors": "^1.4.0",
+    "@getpara/solana-wallet-connectors": "^1.4.0",
     "@testing-library/dom": "^10.1.0",
     "@testing-library/react": "^16.0.0",
     "@types/chrome": "^0.0.237",
     "@types/react": "^18.0.31",
     "@types/react-dom": "^18.2.7",
-    "typescript": "^5.4.3"
+    "typescript": "^5.4.3",
+    "viem": "2.x",
+    "wagmi": "2.x"
   },
   "peerDependencies": {
+    "@getpara/cosmos-wallet-connectors": "^1.4.0",
+    "@getpara/evm-wallet-connectors": "^1.4.0",
+    "@getpara/solana-wallet-connectors": "^1.4.0",
     "react": "*",
     "react-dom": "*"
   },

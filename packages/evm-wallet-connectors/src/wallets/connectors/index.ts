@@ -6,3 +6,5 @@ import { zerionWallet } from './zerion/zerion.js';
 import { rabbyWallet } from './rabby/rabby.js';
 
 export { metaMaskWallet, rainbowWallet, walletConnectWallet, coinbaseWallet, zerionWallet, rabbyWallet };
+
+export const allWallets = [metaMaskWallet, rainbowWallet, walletConnectWallet, coinbaseWallet, zerionWallet, rabbyWallet];

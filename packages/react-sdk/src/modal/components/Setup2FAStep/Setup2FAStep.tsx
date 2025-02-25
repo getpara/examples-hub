@@ -29,7 +29,7 @@ export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
 
   const inputRef = useRef<HTMLCpslCodeInputElement>(null);
 
-  const [qrCodeValue, setQrCodeValue] = useState(null);
+  const [qrCodeValue, setQrCodeValue] = useState<string>();
   const [code, setCode] = useState('');
   const [codeError, setCodeError] = useState('');
   const [isVerifyingCode, setIsVerifyingCode] = useState(false);
@@ -41,7 +41,7 @@ export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
     async function fetchOtpAuthUrl() {
       try {
         const { uri } = await para.setup2FA();
-        setQrCodeValue(uri);
+        setQrCodeValue(uri ?? '');
       } catch (error) {
         console.error('Error fetching OTPAuth URL:', error);
       }
@@ -53,7 +53,7 @@ export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
   useEffect(() => {
     // Using a small timeout here to ensure the input is mounted before attempting focus
     setTimeout(() => {
-      inputRef?.current?.shadowRoot.querySelectorAll('input')?.[0]?.focus();
+      inputRef?.current?.shadowRoot?.querySelectorAll('input')?.[0]?.focus();
     }, 10);
   }, [isVerifying]);
 
@@ -98,7 +98,9 @@ export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
   };
 
   const handleCopy = () => {
-    copy(secret);
+    if (secret) {
+      copy(secret);
+    }
   };
 
   return (
@@ -151,7 +153,7 @@ export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
             <CpslDivider>or enter the code manually</CpslDivider>
           </InnerStepContainer>
           <InnerStepContainer>
-            <FilledDisabledInput disabled value={secret} noAutoDisable>
+            <FilledDisabledInput disabled value={secret ?? ''} noAutoDisable>
               <CpslButton slot="end" variant="ghost" onClick={handleCopy}>
                 <CpslIcon icon={copied ? 'check' : 'copy'} />
               </CpslButton>

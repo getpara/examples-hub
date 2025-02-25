@@ -3,7 +3,6 @@ import { mockCheckIfUserExists, mockCheckIfUserExistsByPhone, MockPara } from '.
 import { Environment } from '@getpara/web-sdk';
 import { API_KEY } from '../../constants';
 import { checkIfUserExists } from '../../../src/provider/actions/checkIfUserExists';
-import { CreateUserType } from '../../../src/provider/actions/createUser';
 import { CountryCallingCode } from 'libphonenumber-js';
 
 describe('checkIfUserExists', () => {
@@ -15,14 +14,13 @@ describe('checkIfUserExists', () => {
 
   describe('success', () => {
     it('email', async () => {
-      await checkIfUserExists(paraClient, { identifier: 'test@test.com', type: CreateUserType.EMAIL });
+      await checkIfUserExists(paraClient, { email: 'test@test.com' });
 
       expect(mockCheckIfUserExists).toHaveBeenCalledTimes(1);
     });
     it('phone', async () => {
       await checkIfUserExists(paraClient, {
-        identifier: '5555555',
-        type: CreateUserType.PHONE,
+        phone: '5555555',
         countryCode: '+1' as CountryCallingCode,
       });
 
@@ -31,9 +29,7 @@ describe('checkIfUserExists', () => {
   });
   describe('fail', () => {
     it('no para', async () => {
-      expect(
-        checkIfUserExists(undefined, { identifier: 'test@test.com', type: CreateUserType.EMAIL }),
-      ).rejects.toThrowError();
+      expect(checkIfUserExists(undefined, { email: 'test@test.com' })).rejects.toThrowError();
     });
     it('no args', async () => {
       expect(checkIfUserExists(paraClient, undefined)).rejects.toThrowError();

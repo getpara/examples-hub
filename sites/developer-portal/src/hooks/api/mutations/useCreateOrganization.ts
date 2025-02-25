@@ -3,12 +3,13 @@ import { queryClient } from '../../../clients/queryClient';
 import { OrganizationResponse } from '../../../types/api';
 import { createOrganization, CreateOrganizationVars } from '../../../api/users/mutations';
 import { ORGANIZATIONS_QUERY_KEY } from '../queries/useOrganizations';
-import { para } from '../../../clients/para';
+import { useAccount } from '@getpara/react-sdk';
 
 export const useCreateOrganization = (
   options?: MutationOptions<OrganizationResponse, Error, Omit<CreateOrganizationVars, 'userId'>, unknown>,
 ) => {
-  const userId = para.getUserId();
+  const { data: account } = useAccount();
+  const userId = account?.userId;
 
   return useMutation<OrganizationResponse, Error, Omit<CreateOrganizationVars, 'userId'>, unknown>({
     mutationFn: vars => createOrganization({ ...vars, userId: userId ?? '' }),

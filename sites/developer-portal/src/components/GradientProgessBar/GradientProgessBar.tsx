@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { LINEAR_GRADIENT } from '../common';
-import { para } from '../../clients/para';
 import { OnboardingStep, useOnboardingStore } from '../../stores/onboarding/useOnboardingStore';
+import { useAccount } from '@getpara/react-sdk';
 
 interface GradientProgressBarProps {
   current: number;
@@ -10,7 +10,8 @@ interface GradientProgressBarProps {
 }
 
 export const GradientProgressBar = ({ current, max, maxWidth }: GradientProgressBarProps) => {
-  const userId = para.getUserId();
+  const { data: account } = useAccount();
+  const userId = account?.userId;
   const currentStep = useOnboardingStore(state => state.getStep(userId));
 
   const fillWidth = (current / max) * 100;

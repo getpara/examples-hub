@@ -14,7 +14,7 @@ let rawWasm: any;
 
 interface Message {
   env: Environment;
-  apiKey?: string;
+  apiKey: string;
   cosmosPrefix?: string;
   offloadMPCComputationURL?: string;
   disableWorkers?: boolean;

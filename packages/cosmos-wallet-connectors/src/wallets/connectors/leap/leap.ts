@@ -1,7 +1,7 @@
 import { icon } from './leapIcon.js';
 import { WalletWithType } from '../../../types/Wallet.js';
 import { WalletType } from '@getpara/graz';
-import { isMobile } from '@getpara/react-sdk';
+import { isMobile } from '@getpara/web-sdk';
 
 export const leapWallet = (): WalletWithType => {
   return {

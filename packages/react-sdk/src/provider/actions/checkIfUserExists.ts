@@ -1,12 +1,7 @@
-import { CountryCallingCode } from 'libphonenumber-js';
-import { CreateUserType } from './createUser.js';
 import ParaWeb from '@getpara/web-sdk';
+import { Auth } from '@getpara/user-management-client';
 
-export interface CheckIfUserExistsArgs {
-  type: CreateUserType;
-  identifier: string;
-  countryCode?: CountryCallingCode;
-}
+export type CheckIfUserExistsArgs = Auth<'email'> | Auth<'phone'>;
 
 export const checkIfUserExists = async (para?: ParaWeb, args?: CheckIfUserExistsArgs) => {
   if (!para) {
@@ -17,10 +12,15 @@ export const checkIfUserExists = async (para?: ParaWeb, args?: CheckIfUserExists
     throw new Error('no valid args passed to checkIfUserExists');
   }
 
+  const isEmail = 'email' in args;
+  const isPhone = 'phone' in args;
+
+  if ((!isEmail && !isPhone) || (isPhone && !args.countryCode)) {
+    throw new Error('invalid user exists args');
+  }
+
   try {
-    return await (args.type === CreateUserType.EMAIL
-      ? para.checkIfUserExists({ email: args.identifier })
-      : para.checkIfUserExistsByPhone({ phone: args.identifier, countryCode: args.countryCode }));
+    return await (isEmail ? para.checkIfUserExists(args) : para.checkIfUserExistsByPhone(args));
   } catch (e) {
     throw new Error(e);
   }

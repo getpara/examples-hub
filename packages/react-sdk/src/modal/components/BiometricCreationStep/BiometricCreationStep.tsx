@@ -17,7 +17,9 @@ export const BiometricCreationStep = ({
   const [isCopied, copy] = useCopyToClipboard();
 
   const handleCopy = () => {
-    copy(webAuthURLForCreate);
+    if (webAuthURLForCreate) {
+      copy(webAuthURLForCreate);
+    }
   };
 
   const isBoth = !!webAuthURLForCreate && !!iFrameUrl;
@@ -28,7 +30,7 @@ export const BiometricCreationStep = ({
         <Heading variant="headingS" weight="bold">
           {isBoth ? 'Secure Your Account' : 'Create Passkey'}
         </Heading>
-        <UserIdentifier {...authInfo} />
+        {authInfo && <UserIdentifier {...authInfo} />}
         <CpslText variant="bodyS" color="secondary" weight="medium">
           {isBoth ? 'Choose a password or set up a passkey' : 'Your Passkey keeps your account safe.'}
         </CpslText>

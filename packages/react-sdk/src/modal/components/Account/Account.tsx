@@ -1,11 +1,12 @@
 import styled from 'styled-components';
 import { InnerStepContainer, StepContainer, StyledCpslTileButton } from '../common.js';
 import { CpslButton, CpslIcon, CpslSpinner, CpslText } from '@getpara/react-components';
-import { useModalStore, useThemeStore } from '../../stores/index.js';
-import { useExternalWallets } from '../../providers/ExternalWalletContext.js';
+import { useModalStore } from '../../stores/index.js';
 import { useState } from 'react';
 import { ModalStep } from '../../utils/steps.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
+import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
+import { useStore } from '../../../provider/stores/useStore.js';
 
 interface AccountProps {
   onClose: () => void;
@@ -14,7 +15,7 @@ interface AccountProps {
 export const Account = ({ onClose }: AccountProps) => {
   const onRampConfig = useModalStore(state => state.onRampConfig);
   const setStep = useModalStore(state => state.setStep);
-  const hideWallets = useThemeStore(state => state.hideWallets);
+  const hideWallets = useStore(state => state.modalConfig?.hideWallets);
   const { disconnectExternalWallet } = useExternalWallets();
   const para = useInternalClient();
 

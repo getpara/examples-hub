@@ -3,7 +3,6 @@ import { styled } from 'styled-components';
 import { useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { openPopup } from '../../utils/openPopup.js';
-import { useThemeStore } from '../../stores/theme/useThemeStore.js';
 import { getTileButtonFlex } from '../../utils/getTileButtonFlex.js';
 import { StyledCpslTileButton } from '../common.js';
 import { brandedOAuthLogos, oAuthLogos } from '../../constants/oAuthLogos.js';
@@ -11,6 +10,7 @@ import { useEffect } from 'react';
 import { routeMobileExternalWallet } from '../../utils/routeMobileExternalWallet.js';
 import { useGoBack } from '../../hooks/useGoBack.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
+import { useStore } from '../../../provider/stores/useStore.js';
 
 interface OAuthProps {
   methods: OAuthMethod[];
@@ -20,8 +20,8 @@ const HAS_MORE_LENGTH = 3;
 
 export const OAuth = ({ methods }: OAuthProps) => {
   const goBack = useGoBack();
-  const oAuthLogoVariant = useThemeStore(state => state.oAuthLogoVariant);
-  const isDark = useThemeStore(state => state.isDark);
+  const oAuthLogoVariant = useStore(state => state.oAuthLogoVariant);
+  const isDark = useStore(state => state.isDarkTheme);
   const para = useInternalClient();
   const popupWindow = useModalStore(state => state.popupWindow);
   const setFlow = useModalStore(state => state.setFlow);

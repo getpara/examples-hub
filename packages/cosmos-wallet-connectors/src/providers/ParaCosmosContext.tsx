@@ -1,21 +1,10 @@
-import { ReactNode, createContext, useCallback, useContext, useEffect, useMemo } from 'react';
+import { PropsWithChildren, useMemo } from 'react';
 import { WalletList, WalletWithType } from '../types/Wallet.js';
-import { useClient, useExternalWalletProviderStore } from '@getpara/react-sdk';
-import { CosmosExternalWalletContext, CosmosExternalWalletProvider } from './CosmosExternalWalletContext.js';
+import { CosmosExternalWalletProvider, CosmosExternalWalletProviderConfig } from './CosmosExternalWalletContext.js';
 import { ChainInfo } from '@keplr-wallet/types';
-import { ConfigureGrazArgs, GrazProvider, WalletType, connect } from '@getpara/graz';
+import { ConfigureGrazArgs, GrazProvider } from '@getpara/graz';
 
-export const ParaCosmosContext = createContext<{
-  selectedChainId?: string;
-  wallets: WalletWithType[];
-  chains: ChainInfo[];
-  multiChain?: boolean;
-  shouldUseSuggestChainAndConnect?: boolean;
-  onSwitchChain: (chainId: string) => void;
-}>({ wallets: [], chains: [], onSwitchChain: () => {} });
-
-interface ParaCosmosProviderProps extends Omit<ConfigureGrazArgs, 'chains'> {
-  children: ReactNode;
+export type ParaCosmosProviderConfig = {
   wallets: WalletList;
   chains: ChainInfo[];
   /**
@@ -37,52 +26,25 @@ interface ParaCosmosProviderProps extends Omit<ConfigureGrazArgs, 'chains'> {
    */
   shouldUseSuggestChainAndConnect?: boolean;
   onSwitchChain: (chainId: string) => void;
-}
+};
+
+export type ParaGrazProviderProps = Omit<ConfigureGrazArgs, 'config' | 'chains'>;
+
+export type ParaCosmosProviderProps = {
+  config: ParaCosmosProviderConfig;
+  internalConfig: CosmosExternalWalletProviderConfig;
+  grazProviderProps: ParaGrazProviderProps;
+};
 
 export function ParaCosmosProvider({
   children,
-  wallets,
-  chains,
-  selectedChainId,
-  multiChain,
-  shouldUseSuggestChainAndConnect,
-  onSwitchChain,
-  ...grazOpts
-}: ParaCosmosProviderProps) {
-  const updateExternalWalletProviderState = useExternalWalletProviderStore(state => state.updateState);
-  const CosmosProvider = useExternalWalletProviderStore(state => state.CosmosProvider);
-  const cosmosContext = useExternalWalletProviderStore(state => state.cosmosContext);
-  const para = (grazOpts.para as any) ?? useClient();
+  config,
+  internalConfig,
+  grazProviderProps,
+}: ParaCosmosProviderProps & PropsWithChildren) {
+  const para = internalConfig.para;
 
-  const connectParaCosmosWallet = useCallback(async (): Promise<{ result?: unknown; error?: string }> => {
-    if (!para) {
-      return { error: 'No para instance available' };
-    }
-
-    try {
-      const chainId = multiChain ? chains.map(c => c.chainId) : selectedChainId;
-      const result = await connect({ walletType: WalletType.PARA, chainId });
-      return { result };
-    } catch (err: unknown) {
-      const error = err instanceof Error ? err.message : 'Unknown error';
-      return { error };
-    }
-  }, [para, connect]);
-
-  useEffect(() => {
-    if (!cosmosContext || !CosmosProvider) {
-      updateExternalWalletProviderState({
-        CosmosProvider: CosmosExternalWalletProvider,
-        cosmosContext: CosmosExternalWalletContext,
-      });
-    }
-  }, []);
-
-  useEffect(() => {
-    updateExternalWalletProviderState({
-      connectParaCosmosWallet,
-    });
-  }, [para]);
+  const { chains, wallets } = config;
 
   const walletsWithType: WalletWithType[] = [];
 
@@ -91,27 +53,20 @@ export function ParaCosmosProvider({
     walletsWithType.push(wallet);
   });
 
-  const value = useMemo(
+  const cosmosExternalWalletProviderProps = useMemo(
     () => ({
-      selectedChainId,
+      ...config,
+      ...internalConfig,
       wallets: walletsWithType,
-      chains,
-      multiChain,
-      shouldUseSuggestChainAndConnect,
-      onSwitchChain,
     }),
-    [selectedChainId, walletsWithType, chains, multiChain, shouldUseSuggestChainAndConnect, onSwitchChain],
+    [walletsWithType, config, internalConfig],
   );
 
-  if (!cosmosContext || !CosmosProvider) {
-    return null;
-  }
-
   return (
-    <GrazProvider grazOptions={{ chains, autoReconnect: true, ...grazOpts, para }}>
-      <ParaCosmosContext.Provider value={value}>{children}</ParaCosmosContext.Provider>
+    // Casting Para as any here to avoid ts errors due to the graz version being behind.
+    // TODO: update graz para sdk to current version
+    <GrazProvider grazOptions={{ chains, autoReconnect: true, para: para as any, ...grazProviderProps }}>
+      <CosmosExternalWalletProvider {...cosmosExternalWalletProviderProps}>{children}</CosmosExternalWalletProvider>
     </GrazProvider>
   );
 }
-
-export const useParaCosmos = () => useContext(ParaCosmosContext);

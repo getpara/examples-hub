@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
 import { useModalStore } from '../../../stores/modal/useModalStore.js';
 import { ModalStep } from '../../../utils/steps.js';
-import { useExternalWallets } from '../../../providers/ExternalWalletContext.js';
-import { useThemeStore } from '../../../stores/index.js';
+import { useExternalWallets } from '../../../../provider/providers/ExternalWalletProvider.js';
+import { useStore } from '../../../../provider/stores/useStore.js';
 
 export const useStepTitle = () => {
-  const hideWallets = useThemeStore(state => state.hideWallets);
+  const hideWallets = useStore(state => state.modalConfig?.hideWallets);
   const isLogin = useModalStore(state => state.isLogin());
   const currentStep = useModalStore(state => state.step);
   const { chainId } = useExternalWallets();

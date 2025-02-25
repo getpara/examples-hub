@@ -7,8 +7,9 @@ import { openPopup } from '../../utils/openPopup.js';
 import styled from 'styled-components';
 import { AuthMethod, getPublicKeyHex } from '@getpara/web-sdk';
 import { isPasskeySupported } from '../../utils/isPasskeySupported.js';
-import { formatBiometricHints, KnownDevices, UserIdentifier } from '@getpara/react-common';
+import { BiometricHints, formatBiometricHints, KnownDevices, UserIdentifier } from '@getpara/react-common';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
+import { BiometricLocationHint } from '@getpara/user-management-client';
 
 export const BiometricLoginStep = () => {
   const popupWindow = useModalStore(state => state.popupWindow);
@@ -23,7 +24,7 @@ export const BiometricLoginStep = () => {
   const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
   const setPasswordUrlForLogin = useModalStore(state => state.setPasswordUrlForLogin);
   const passkeysSupported = isPasskeySupported();
-  const formattedHints = useMemo(() => formatBiometricHints(biometricLocationHints), [biometricLocationHints]);
+  const formattedHints = useMemo(() => formatBiometricHints(biometricLocationHints ?? []), [biometricLocationHints]);
   const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
 
   const [webAuthURLForKnownDeviceLogin, setWebAuthURLForKnownDeviceLogin] = useState<string>();
@@ -31,7 +32,7 @@ export const BiometricLoginStep = () => {
   useEffect(() => {
     async function setLinks() {
       if (!supportedAuthMethods?.size && para.getUserId()) {
-        const fetchedSupportedAuthMethods = await para.supportedAuthMethods({ userId: para.getUserId() });
+        const fetchedSupportedAuthMethods = await para.supportedAuthMethods({ userId: para.getUserId()! });
         if (fetchedSupportedAuthMethods?.size) {
           setSupportedAuthMethods(fetchedSupportedAuthMethods);
         }
@@ -56,8 +57,8 @@ export const BiometricLoginStep = () => {
               loginEncryptionPublicKey: getPublicKeyHex(para.loginEncryptionKeyPair),
               partnerId: res.data.partnerId,
               authType,
-              displayName: authInfo.displayName,
-              pfpUrl: authInfo.pfpUrl,
+              displayName: authInfo?.displayName ?? '',
+              pfpUrl: authInfo?.pfpUrl ?? '',
             })
           : undefined;
 
@@ -70,8 +71,8 @@ export const BiometricLoginStep = () => {
               newDeviceSessionId: res.data.sessionLookupId,
               newDeviceEncryptionKey: getPublicKeyHex(para.loginEncryptionKeyPair),
               authType,
-              displayName: authInfo.displayName,
-              pfpUrl: authInfo.pfpUrl,
+              displayName: authInfo?.displayName ?? '',
+              pfpUrl: authInfo?.pfpUrl ?? '',
             })
           : undefined;
 
@@ -82,8 +83,8 @@ export const BiometricLoginStep = () => {
               loginEncryptionPublicKey: getPublicKeyHex(para.loginEncryptionKeyPair),
               partnerId: res.data.partnerId,
               authType,
-              displayName: authInfo.displayName,
-              pfpUrl: authInfo.pfpUrl,
+              displayName: authInfo?.displayName ?? '',
+              pfpUrl: authInfo?.pfpUrl ?? '',
             })
           : undefined;
 
@@ -101,7 +102,7 @@ export const BiometricLoginStep = () => {
   }, [supportedAuthMethods, para]);
 
   const handlePasskeyClick = () => {
-    if (!!popupWindow) {
+    if (!!popupWindow || !webAuthURLForLogin) {
       return;
     }
 
@@ -112,6 +113,10 @@ export const BiometricLoginStep = () => {
   };
 
   const handlePasswordClick = () => {
+    if (!passwordUrlForLogin) {
+      return;
+    }
+
     const loginWindow = openPopup(passwordUrlForLogin, 'ParaPassword', 'LOGIN_PASSWORD');
     setPopupWindow(loginWindow);
     setStep(ModalStep.AWAITING_PASSWORD_LOGIN);
@@ -133,7 +138,7 @@ export const BiometricLoginStep = () => {
             Welcome back,
           </Heading>
         )}
-        <UserIdentifier {...authInfo} />
+        {authInfo && <UserIdentifier {...authInfo} />}
       </InnerStepContainer>
       <MainContainer>
         {supportedAuthMethods?.has && supportedAuthMethods.has(AuthMethod.PASSWORD) && passwordUrlForLogin && (
@@ -171,6 +176,12 @@ const BiometricOnly = ({
   shortLoginLink,
   passkeysSupported,
   biometricLocationHints = [],
+}: {
+  handlePasskeyClick: () => void;
+  formattedHints: BiometricHints;
+  shortLoginLink: string;
+  passkeysSupported: boolean;
+  biometricLocationHints?: BiometricLocationHint[];
 }) => {
   const [hasHints, isOnKnownDevice] = [biometricLocationHints.length > 0, formattedHints.isOnKnownDevice];
   return (

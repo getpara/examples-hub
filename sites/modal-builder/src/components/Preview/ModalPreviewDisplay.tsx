@@ -1,53 +1,22 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { ParaModal } from '@getpara/react-sdk';
 import '@getpara/react-sdk/styles.css';
-import { PlaceHolderLogo } from '../../assets';
 
 import iPhoneImage from '../../assets/iphone.png';
 import { useAtom } from 'jotai';
-import { paraAtom, checkLoginStatusAtom, isLoggedInAtom, modalConfigAtom, viewAtom } from '../../atoms';
-import { calculateBrightness } from '../../utils';
+import { isLoggedInAtom, viewAtom } from '../../atoms';
 
 interface ModalPreviewDisplayProps {}
 
 export const ModalPreviewDisplay: React.FC<ModalPreviewDisplayProps> = () => {
-  const [modalConfig] = useAtom(modalConfigAtom);
-  const [para] = useAtom(paraAtom);
   const [view] = useAtom(viewAtom);
-  const [, checkLoginStatus] = useAtom(checkLoginStatusAtom);
   const [isLoggedIn] = useAtom(isLoggedInAtom);
-
-  const handleClose = useCallback(() => {
-    checkLoginStatus(null);
-  }, [checkLoginStatus]);
 
   return (
     <IPhoneOuterContainer $isMobile={view === 'mobile'}>
       <ModalContainer $isMobile={view === 'mobile'}>
-        <ParaModal
-          key={`modal-${view}-${isLoggedIn}`}
-          bareModal
-          para={para}
-          isOpen
-          onClose={() => handleClose()}
-          logo={modalConfig.appearance.logo || PlaceHolderLogo}
-          theme={{
-            ...modalConfig.appearance.theme,
-            mode: calculateBrightness(modalConfig.appearance.theme.backgroundColor || '#ffffff') > 0.5 ? 'light' : 'dark',
-            font: modalConfig.appearance.theme.font ?? 'Inter',
-          }}
-          oAuthMethods={modalConfig.authentication.oAuthMethods}
-          disableEmailLogin={modalConfig.authentication.disableEmailLogin}
-          disablePhoneLogin={modalConfig.authentication.disablePhoneLogin}
-          authLayout={modalConfig.authentication.authLayout}
-          externalWallets={modalConfig.authentication.externalWallets}
-          twoFactorAuthEnabled={modalConfig.security.twoFactorAuthEnabled}
-          recoverySecretStepEnabled={modalConfig.security.recoverySecretStepEnabled}
-          hideWallets={modalConfig.wallets.hideWallets}
-          onRampTestMode={modalConfig.onRamps.onRampTestMode}
-          className={view === 'mobile' ? 'force-mobile-media include-mobile-styling' : ''}
-        />
+        <ParaModal key={`modal-${view}-${isLoggedIn}`} />
       </ModalContainer>
       <StyledIPhoneImage $isMobile={view === 'mobile'} src={iPhoneImage} alt="iPhone" />
     </IPhoneOuterContainer>

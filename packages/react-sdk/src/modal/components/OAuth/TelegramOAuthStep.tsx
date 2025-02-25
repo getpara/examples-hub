@@ -1,5 +1,5 @@
 import { AuthMethod, OAuthMethod } from '@getpara/web-sdk';
-import { useModalStore, useThemeStore, useUserInfoStore } from '../../stores/index.js';
+import { useModalStore, useUserInfoStore } from '../../stores/index.js';
 import styled from 'styled-components';
 import { useEffect, useRef, useState } from 'react';
 import { HeroSpinner } from '@getpara/react-common';
@@ -7,6 +7,7 @@ import { ModalStep } from '../../utils/steps.js';
 import { TelegramAuthResponse } from '@getpara/user-management-client';
 import { CpslSpinner } from '@getpara/react-components';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
+import { useStore } from '../../../provider/stores/useStore.js';
 
 type EventType = 'TELEGRAM_LOGIN' | 'TELEGRAM_SUCCESS' | 'TELEGRAM_FAILED';
 
@@ -16,7 +17,7 @@ type Event = {
 };
 
 export function TelegramOAuthStep() {
-  const iframe = useRef<HTMLIFrameElement>();
+  const iframe = useRef<any>();
   const para = useInternalClient();
   const setFlow = useModalStore(state => state.setFlow);
   const setStep = useModalStore(state => state.setStep);
@@ -27,9 +28,9 @@ export function TelegramOAuthStep() {
   const setIsIFrameReady = useModalStore(state => state.setIsIFrameReady);
   const isIFrameReady = useModalStore(state => state.isIFrameReady);
   const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
-  const theme = useThemeStore(state => state.theme);
+  const theme = useStore(state => state.modalConfig?.theme);
 
-  const [url, setUrl] = useState(undefined);
+  const [url, setUrl] = useState<string>();
   const [isWaiting, setIsWaiting] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -72,7 +73,7 @@ export function TelegramOAuthStep() {
               setIsWaiting(false);
               setIsError(true);
 
-              iframe.current && iframe.current.contentWindow.postMessage({ type: 'TELEGRAM_FAILED' }, '*');
+              iframe.current && iframe.current.contentWindow?.postMessage({ type: 'TELEGRAM_FAILED' }, '*');
 
               return;
             }

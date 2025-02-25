@@ -3,12 +3,12 @@ import { CenteredText, InnerStepContainer, QRContainer, StepContainer } from '..
 import { useEffect, useMemo } from 'react';
 import { useModalStore } from '../../stores/index.js';
 import styled from 'styled-components';
-import { useExternalWallets } from '../../providers/ExternalWalletContext.js';
 import { useCopyToClipboard } from '@getpara/react-common';
 import { ModalStep } from '../../utils/steps.js';
 import { routeMobileExternalWallet } from '../../utils/routeMobileExternalWallet.js';
 import { NETWORK_NOT_SUPPORTED_ERROR } from '../../constants/constants.js';
 import { WalletType } from '@getpara/web-sdk';
+import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 
 export const ChainSwitch = () => {
   const [isCopied, copy] = useCopyToClipboard();
@@ -37,7 +37,9 @@ export const ChainSwitch = () => {
   };
 
   const handleCopy = () => {
-    copy(qrUri);
+    if (qrUri) {
+      copy(qrUri);
+    }
   };
 
   const Content = useMemo(() => {

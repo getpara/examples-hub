@@ -10,8 +10,10 @@
   },
   "dependencies": {
     "@coinbase/wallet-sdk": "4.3.0",
-    "@getpara/react-sdk": "1.4.0",
-    "@getpara/wagmi-v2-integration": "1.4.0",
+    "@getpara/wagmi-v2-connector": "1.0.0",
+    "@getpara/web-sdk": "^1.4.0",
+    "viem": "2.x",
+    "wagmi": "2.x",
     "zustand": "^4.5.2",
     "zustand-sync-tabs": "^0.2.2"
   },
@@ -21,17 +23,14 @@
     "test": "vitest run --coverage"
   },
   "devDependencies": {
+    "@getpara/react-common": "^1.4.0",
     "@types/react": "^18.0.31",
     "@types/react-dom": "^18.2.7",
-    "typescript": "^5.4.3",
-    "viem": "2.x",
-    "wagmi": "2.x"
+    "typescript": "^5.4.3"
   },
   "peerDependencies": {
     "react": ">=18",
-    "react-dom": ">=18",
-    "viem": "2.x",
-    "wagmi": "2.x"
+    "react-dom": ">=18"
   },
   "files": [
     "dist",

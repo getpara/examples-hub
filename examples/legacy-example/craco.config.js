@@ -1,6 +1,18 @@
 const webpack = require('webpack');
+const CracoAliasPlugin = require('craco-alias');
 
 module.exports = {
+  plugins: [
+    {
+      plugin: CracoAliasPlugin,
+      options: {
+        source: 'options',
+        aliases: {
+          '@tanstack/react-query': '../../node_modules/@tanstack/react-query',
+        },
+      },
+    },
+  ],
   babel: {
     plugins: [
       // some plugins needed for ethers providers to work
@@ -12,6 +24,14 @@ module.exports = {
   },
   webpack: {
     configure: webpackConfig => {
+      // Remove import from src restriction so we can alias the proper @tanstack/react-query package
+      // Partners won't have to do this, we have two versions of react-query in the monorepo due to the Wagmi V1 integration
+      const scopePluginIndex = webpackConfig.resolve.plugins.findIndex(({ constructor }) => {
+        return constructor && constructor.name === 'ModuleScopePlugin';
+      });
+
+      webpackConfig.resolve.plugins.splice(scopePluginIndex, 1);
+
       // ts-loader is required to reference external typescript projects/files (non-transpiled)
       webpackConfig.module.rules.push({
         test: /\.tsx?$/,
@@ -43,7 +63,6 @@ module.exports = {
           process: 'process/browser',
         }),
       ];
-
       return webpackConfig;
     },
   },

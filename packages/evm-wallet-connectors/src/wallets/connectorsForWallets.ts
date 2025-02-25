@@ -23,7 +23,7 @@ export const connectorsForWallets = (
   { projectId, walletConnectParameters, appName, appDescription, appUrl, appIcon }: ConnectorsForWalletsParameters,
 ): CreateConnectorFn[] => {
   if (!walletList.length) {
-    throw new Error('No wallet list was provided');
+    return [];
   }
 
   let index = -1;

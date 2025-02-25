@@ -10,14 +10,15 @@ import {
   selectQuestionOptions,
 } from '../config/questionConfig';
 import { useOnboardingStore } from '../../../stores/onboarding/useOnboardingStore';
-import { para } from '../../../clients/para';
+import { useAccount } from '@getpara/react-sdk';
 
 interface QuestionInputProps {
   question: OnboardingAnswerOption;
 }
 
 export const QuestionInput = ({ question }: QuestionInputProps) => {
-  const userId = para.getUserId();
+  const { data: account } = useAccount();
+  const userId = account?.userId;
   const setInput = useOnboardingStore(state => state.setInput);
   const { control } = useFormContext<OnboardingAnswers>();
 

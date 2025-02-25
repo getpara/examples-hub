@@ -1,5 +1,11 @@
-import ParaWeb, { ParaModal } from '@getpara/react-sdk';
-import { ParaModalPropsForInit } from './ParaEIP1193Provider.js';
+import ParaWeb, { ParaProvider, setIsOpen } from '@getpara/react-sdk';
+import { ParaModalPropsForInit } from './paraConnector.js';
+import { QueryClient } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
+
+let Root;
 
 export function renderModal(para: ParaWeb, modalProps: Partial<ParaModalPropsForInit>, onCloseArg: () => void): void {
   const existingContainer = document.getElementById('para-modal');
@@ -13,21 +19,31 @@ export function renderModal(para: ParaWeb, modalProps: Partial<ParaModalPropsFor
   const onClose = () => {
     onCloseArg();
     modalProps.onClose && modalProps.onClose();
-    render(false);
+    setIsOpen(false);
   };
 
-  const render = async (isOpen: boolean) => {
-    const Modal = <ParaModal {...modalProps} onClose={onClose} para={para} isOpen={isOpen} />;
+  const render = async () => {
+    const Modal = (
+      <QueryClientProvider client={queryClient}>
+        <ParaProvider
+          paraClientConfig={para}
+          config={{ appName: modalProps.appName ?? '' }}
+          paraModalConfig={{ ...modalProps, onClose }}
+        />
+      </QueryClientProvider>
+    );
 
     try {
       const client = await import('react-dom/client');
-      const root = client.createRoot(container);
-      root.render(Modal);
+      if (!Root) {
+        Root = client.createRoot(container);
+      }
+      Root.render(Modal);
     } catch (e) {
       const ReactDOM = await import('react-dom');
       ReactDOM.render(Modal, container);
     }
   };
 
-  render(true);
+  render();
 }

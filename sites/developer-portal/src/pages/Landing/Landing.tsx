@@ -1,49 +1,27 @@
-import { ParaModal, OAuthMethod } from '@getpara/react-sdk';
-import { para } from '../../clients/para';
+import { ParaModal, useAccount } from '@getpara/react-sdk';
 import styled from 'styled-components';
-import { paraLogo } from '../../assets/paraLogo';
 import { Footer } from './components/Footer';
 import { Heading } from './components/Heading';
 import { CTA } from './components/CTA';
 import { useState } from 'react';
 import { Loading } from './components/Loading';
-import { useQueryClient } from '@tanstack/react-query';
-import { ORGANIZATIONS_QUERY_KEY } from '../../hooks/api/queries/useOrganizations';
 
 export const Landing = () => {
-  const queryClient = useQueryClient();
+  const { data: account } = useAccount();
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleModalClose = async () => {
-    const isFullyLoggedIn = await para.isFullyLoggedIn();
-    if (!isFullyLoggedIn) {
-      return;
+  const handleModalClose = () => {
+    if (account?.isConnected) {
+      setIsLoading(true);
     }
-
-    setIsLoading(true);
-    await queryClient.invalidateQueries({
-      queryKey: [ORGANIZATIONS_QUERY_KEY],
-    });
   };
 
   return (
     <Container>
       <Heading />
       <CTA />
-      {isLoading ? (
-        <Loading />
-      ) : (
-        <StyledModal
-          para={para}
-          isOpen
-          onClose={handleModalClose}
-          bareModal
-          oAuthMethods={[OAuthMethod.GOOGLE]}
-          disablePhoneLogin
-          logo={paraLogo}
-        />
-      )}
+      {isLoading ? <Loading /> : <StyledModal onClose={handleModalClose} />}
       <Footer />
     </Container>
   );

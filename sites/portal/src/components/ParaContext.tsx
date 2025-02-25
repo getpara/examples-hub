@@ -2,9 +2,10 @@ import { PropsWithChildren, createContext, useContext, useEffect, useMemo } from
 import { ConstructorOpts as ParaConstructorOpts, Environment as ParaEnvironment } from '@getpara/web-sdk';
 import { useSearchParams } from 'react-router-dom';
 import { ParaPortal } from '../classes/ParaPortal';
+import { DEFAULT_API_KEY } from '../constants';
 
 interface ParaProviderProps extends PropsWithChildren {
-  apiKey?: string;
+  apiKey: string;
   partnerId?: string;
   para?: ParaPortal;
   environment: ParaEnvironment;
@@ -62,7 +63,7 @@ export const ParaProvider = (props: ParaProviderProps) => {
   const para = useMemo(
     () =>
       props.para ??
-      new ParaPortal(environment, apiKey, {
+      new ParaPortal(environment, apiKey ?? DEFAULT_API_KEY, {
         ...options,
         ...(paramsSupportedWalletTypes
           ? { supportedWalletTypes: JSON.parse(decodeURIComponent(paramsSupportedWalletTypes)) }

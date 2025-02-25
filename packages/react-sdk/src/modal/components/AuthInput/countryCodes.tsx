@@ -30,13 +30,13 @@ const generateCountryCodes = (): Array<{ label: string; value: string; selectedL
       const countryCode = getCountryCallingCode(country);
       const countryName = new Intl.DisplayNames(['en'], { type: 'region' }).of(country);
       return {
-        label: countryName,
+        label: countryName ?? '',
         value: `+${countryCode}`,
         selectedLabel: country,
         icon: country as IconType,
       };
     })
-    .sort((a, b) => a.label.localeCompare(b.label));
+    .sort((a, b) => (a.label ?? '').localeCompare(b.label ?? ''));
 
   return countryList;
 };

@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { para } from '../../clients/para';
 import { OnboardingStep, useOnboardingStore } from '../../stores/onboarding/useOnboardingStore';
 import { useGetAllOrganizations } from '../../hooks/api/queries/useOrganizations';
 import { PlanSelect } from './components/PlanSelect';
@@ -14,10 +13,12 @@ import { ONBOARDING_MOTION_VARIANTS, ONBOARDING_TRANSITION } from '../../layouts
 import { useOnboardingForm } from './hooks/useOnboardingForm';
 import { FormProvider } from 'react-hook-form';
 import { aboutProjectQuestions, aboutYouQuestions, orgQuestions } from './config/questionConfig';
+import { useAccount } from '@getpara/react-sdk';
 
 export const Onboarding = () => {
   const form = useOnboardingForm();
-  const userId = para.getUserId();
+  const { data: account } = useAccount();
+  const userId = account?.userId;
   const currentStep = useOnboardingStore(state => state.getStep(userId));
   const setStep = useOnboardingStore(state => state.setStep);
   const direction = useOnboardingStore(state => state.direction);

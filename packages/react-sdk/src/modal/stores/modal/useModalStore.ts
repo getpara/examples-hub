@@ -6,6 +6,7 @@ import { OnRampConfig as OnRampConfigBase, OnRampPurchase, WalletType } from '@g
 import { Tab as AddFundsTabType } from '../../components/AddFunds/AddFunds.js';
 import { AuthMethod } from '@getpara/core-sdk';
 import { BiometricLocationHint } from '@getpara/user-management-client';
+import { AuthLayout, TAuthLayout } from '../../types/modalProps.js';
 
 type Flow = 'login' | 'signUp' | 'account';
 
@@ -26,7 +27,7 @@ interface ModalState {
   webAuthURLForCreate: string | undefined;
   passwordUrlForLogin: string | undefined;
   supportedAuthMethods: Set<AuthMethod>;
-  onModalStepChange: (value: OnModalStepChangeValue) => void | undefined;
+  onModalStepChange?: (value: OnModalStepChangeValue) => void | undefined;
   onRampConfig: OnRampConfig | undefined;
   onRampPurchase: Partial<OnRampPurchase> | undefined;
   popupWindow: Window | undefined;
@@ -41,6 +42,7 @@ interface ModalState {
   biometricLocationHints: BiometricLocationHint[] | undefined;
   iFrameUrl: string | undefined;
   isIFrameReady: boolean | undefined;
+  authLayout?: TAuthLayout[];
 }
 
 export interface ModalActions {
@@ -55,12 +57,12 @@ export interface ModalActions {
   setWebAuthURLForLogin: (url?: string) => void;
   setWebAuthURLForCreate: (url?: string) => void;
   setPasswordUrlForLogin: (url?: string) => void;
-  setOnModalStepChange: (fn: (value: OnModalStepChangeValue) => void) => void;
+  setOnModalStepChange: (fn?: (value: OnModalStepChangeValue) => void) => void;
   setOnRampConfig: (_: OnRampConfig | undefined) => void;
   setOnRampPurchase: (_: Partial<OnRampPurchase> | undefined) => void;
   setPopupWindow: (_: Window | undefined) => void;
   setIsFullyLoggedIn: (isFullyLoggedIn: boolean) => void;
-  setAccountAddFundTab: (accountAddFundTab: AddFundsTabType) => void;
+  setAccountAddFundTab: (accountAddFundTab?: AddFundsTabType) => void;
   setSelectedExternalWalletId: (id?: string) => void;
   setIsUsingMobileConnector: (isUsingMobileConnector?: boolean) => void;
   setIsExternalWalletConnecting: (isExternalWalletConnecting: boolean) => void;
@@ -70,6 +72,7 @@ export interface ModalActions {
   setBiometricLocationHints: (_?: BiometricLocationHint[]) => void;
   setIFrameUrl: (_?: string) => void;
   setIsIFrameReady: (_?: boolean) => void;
+  setAuthLayout: (authLayout: TAuthLayout[]) => void;
 }
 
 export type ModalStore = ModalState & ModalActions;
@@ -94,6 +97,7 @@ export const DEFAULT_MODAL_STATE: Omit<ModalState, 'step' | 'onRampConfig'> = {
   biometricLocationHints: undefined,
   iFrameUrl: undefined,
   isIFrameReady: undefined,
+  authLayout: [AuthLayout.AUTH_FULL, AuthLayout.EXTERNAL_FULL],
 };
 
 export const useModalStore = create<ModalStore>()(
@@ -101,7 +105,6 @@ export const useModalStore = create<ModalStore>()(
     (set, get) => ({
       step: ModalStep.AUTH_MAIN,
       onRampConfig: undefined,
-      activeWallet: undefined,
       ...DEFAULT_MODAL_STATE,
       ...getActions(set, get),
     }),

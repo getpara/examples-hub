@@ -1,6 +1,8 @@
 import { ExtractAuth } from '@getpara/user-management-client';
 import ParaWeb, { type OnRampConfig, type OnRampPurchase } from '@getpara/web-sdk';
 
+export * from './externalWalletCommon.js';
+
 export type Props = {
   appName?: string;
   para: ParaWeb;

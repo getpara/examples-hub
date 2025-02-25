@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestHeaders, InternalAxiosRequestConfig } from 'axios';
 import { ENV_VARS } from '../utils/constants';
 import { Environment } from '../types/environment';
-import { para } from './para';
+import { getClient } from '@getpara/react-sdk';
 
 function getBaseUrl(env: Environment): string {
   switch (env) {
@@ -27,7 +27,8 @@ export const axiosClient: AxiosInstance = axios.create({
   },
   transformRequest: [
     function (this: InternalAxiosRequestConfig, data: any, headers: AxiosRequestHeaders): any {
-      const currentSessionCookie = para.retrieveSessionCookie();
+      const para = getClient();
+      const currentSessionCookie = para?.retrieveSessionCookie();
       if (currentSessionCookie) {
         headers[SESSION_COOKIE_HEADER_NAME] = currentSessionCookie;
       }

@@ -1,7 +1,5 @@
-import { ReactNode, createContext, useEffect, useMemo } from 'react';
-import { CommonChain, CommonWallet } from '../types/CommonTypes.js';
-import { useParaCosmos } from './ParaCosmosContext.js';
-import ParaWeb, { WalletType } from '@getpara/react-sdk';
+import { PropsWithChildren, createContext, useCallback, useEffect, useMemo } from 'react';
+import { ParaCosmosProviderConfig } from './ParaCosmosContext.js';
 import {
   checkWallet,
   WalletType as GrazWalletType,
@@ -14,38 +12,51 @@ import {
   getChainInfo,
 } from '@getpara/graz';
 import { useExternalWalletStore } from '../stores/useStore.js';
+import { WalletWithType } from '../types/Wallet.js';
+import ParaWeb, { WalletType } from '@getpara/web-sdk';
+import type { CommonChain, CommonWallet } from '@getpara/react-common';
 
-export const defaultCosmosExternalWallet = {
+const defaultCosmosExternalWallet = {
   wallets: [],
   chains: [],
   chainId: undefined,
   disconnect: () => Promise.resolve(),
   switchChain: () => Promise.resolve({}),
+  connectParaEmbedded: () => Promise.resolve({}),
 };
 
-export const CosmosExternalWalletContext = createContext<{
+export type CosmosExternalWalletContextType = {
   wallets: CommonWallet[];
   chains: CommonChain[];
-  chainId: string;
+  chainId?: string;
   disconnect: () => Promise<void>;
   switchChain: (chainId: string) => Promise<{ error?: string[] }>;
-}>(defaultCosmosExternalWallet);
+  connectParaEmbedded: () => Promise<{ result?: unknown; error?: string }>;
+};
 
-interface CosmosExternalWalletProviderProps {
-  children: ReactNode;
+export type CosmosExternalWalletProviderConfig = {
+  onSwitchWallet?: (args: { address?: string; error?: string }) => void;
   para: ParaWeb;
-  onSwitchWallet: (args: { address?: string; error?: string }) => void;
-}
+};
 
-export function CosmosExternalWalletProvider({ children, para, onSwitchWallet }: CosmosExternalWalletProviderProps) {
-  const {
-    selectedChainId,
-    wallets: incompleteWallets,
-    chains,
-    multiChain,
-    shouldUseSuggestChainAndConnect,
-    onSwitchChain,
-  } = useParaCosmos();
+export type CosmosExternalWalletProviderConfigFull = {
+  wallets: WalletWithType[];
+} & Omit<ParaCosmosProviderConfig, 'wallets'> &
+  CosmosExternalWalletProviderConfig;
+
+export const CosmosExternalWalletContext = createContext<CosmosExternalWalletContextType>(defaultCosmosExternalWallet);
+
+export function CosmosExternalWalletProvider({
+  children,
+  onSwitchWallet,
+  selectedChainId,
+  wallets: incompleteWallets,
+  chains,
+  multiChain,
+  shouldUseSuggestChainAndConnect,
+  onSwitchChain,
+  para,
+}: CosmosExternalWalletProviderConfigFull & PropsWithChildren) {
   const { suggestAndConnectAsync } = useSuggestChainAndConnect();
   const {
     data: account,
@@ -246,11 +257,33 @@ export function CosmosExternalWalletProvider({ children, para, onSwitchWallet }:
     };
   });
 
+  const connectParaEmbedded = useCallback(async (): Promise<{ result?: unknown; error?: string }> => {
+    if (!para) {
+      return { error: 'No para instance available' };
+    }
+
+    try {
+      const chainId = multiChain ? chains.map(c => c.chainId) : selectedChainId;
+      const result = await connectAsync({ walletType: GrazWalletType.PARA, chainId });
+      return { result };
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err.message : 'Unknown error';
+      return { error };
+    }
+  }, [para, multiChain, chains, selectedChainId]);
+
   return (
     <CosmosExternalWalletContext.Provider
       value={useMemo(
-        () => ({ wallets, chains: formattedChains, chainId: selectedChainId, disconnect: disconnectAsync, switchChain }),
-        [wallets, formattedChains, selectedChainId, disconnectAsync, switchChain],
+        () => ({
+          wallets,
+          chains: formattedChains,
+          chainId: selectedChainId,
+          disconnect: disconnectAsync,
+          switchChain,
+          connectParaEmbedded,
+        }),
+        [wallets, formattedChains, selectedChainId, disconnectAsync, switchChain, connectParaEmbedded],
       )}
     >
       {children}

@@ -2,10 +2,10 @@ import { CpslIcon, CpslInfoBox, CpslText } from '@getpara/react-components';
 import { InfoBoxContent, InfoBoxHeader, StepContainer } from '../common.js';
 import { useEffect, useRef, useState } from 'react';
 import { Waiting } from '../Waiting/Waiting.js';
-import { useThemeStore } from '../../stores/index.js';
+import { useStore } from '../../../provider/stores/useStore.js';
 
 export const AwaitingWalletCreationStep = () => {
-  const hideWallets = useThemeStore(state => state.hideWallets);
+  const hideWallets = useStore(state => state.modalConfig?.hideWallets);
   const [showInfoBox, setShowInfoBox] = useState(false);
   const showInfoBoxTimeout = useRef<number>();
 

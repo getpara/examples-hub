@@ -1,10 +1,11 @@
 import { useForm } from 'react-hook-form';
 import { OnboardingAnswers } from '../../../types/onboarding';
-import { para } from '../../../clients/para';
 import { useOnboardingStore } from '../../../stores/onboarding/useOnboardingStore';
+import { useAccount } from '@getpara/react-sdk';
 
 export const useOnboardingForm = () => {
-  const userId = para.getUserId();
+  const { data: account } = useAccount();
+  const userId = account?.userId;
   const defaultValues = useOnboardingStore(state => state.getInput(userId));
 
   const form = useForm<OnboardingAnswers>({

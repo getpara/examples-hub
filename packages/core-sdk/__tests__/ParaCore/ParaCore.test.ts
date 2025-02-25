@@ -142,6 +142,9 @@ describe('ParaCore', () => {
   });
 
   describe('constructor', () => {
+    it('fails with no api key', () => {
+      expect(() => new MockPara(Environment.DEV)).toThrow('A Para API key is required.');
+    });
     it('creates a new instance of ParaCore with correct fields', () => {
       const para = new MockPara(Environment.DEV, API_KEY);
 

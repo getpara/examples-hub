@@ -3,6 +3,9 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { AuthInput } from '../../../src/modal/components/AuthInput/AuthInput.js';
 import { defineCustomElements } from '@getpara/react-components';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
 
 function mockModalStore(store = {}) {
   vi.mock('../../src/modal/stores/useModalStore.js', () => ({
@@ -35,7 +38,11 @@ function mockModalStore(store = {}) {
 async function setup() {
   defineCustomElements(window);
 
-  const renderer = render(<AuthInput />);
+  const renderer = render(
+    <QueryClientProvider client={queryClient}>
+      <AuthInput />
+    </QueryClientProvider>,
+  );
   const host = screen.getByTestId('auth-input') as HTMLInputElement;
 
   await waitFor(

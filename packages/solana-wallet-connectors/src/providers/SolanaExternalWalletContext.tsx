@@ -1,27 +1,37 @@
-import { ReactNode, createContext, useEffect, useMemo } from 'react';
-import { CommonWallet } from '../types/CommonTypes.js';
+import { PropsWithChildren, createContext, useEffect, useMemo } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Adapter, WalletReadyState } from '@solana/wallet-adapter-base';
-import { useParaSolana } from './ParaSolanaProvider.js';
 import ParaWeb, { WalletType } from '@getpara/web-sdk';
+import { WalletList } from '../types/Wallet.js';
+import { type CommonWallet } from '@getpara/react-common';
 
-export const defaultSolanaExternalWallet = {
+const defaultSolanaExternalWallet = {
   wallets: [],
   disconnect: () => Promise.resolve(),
 };
 
-export const SolanaExternalWalletContext = createContext<{
+export type SolanaExternalWalletContextType = {
   wallets: CommonWallet[];
   disconnect: () => Promise<void>;
-}>(defaultSolanaExternalWallet);
+};
 
-interface SolanaExternalWalletProviderProps {
-  children: ReactNode;
+export const SolanaExternalWalletContext = createContext<SolanaExternalWalletContextType>(defaultSolanaExternalWallet);
+
+export type SolanaExternalWalletProviderConfig = {
+  onSwitchWallet?: (args: { address?: string; error?: string }) => void;
   para: ParaWeb;
-  onSwitchWallet: (args: { address?: string; error?: string }) => void;
-}
+};
 
-export function SolanaExternalWalletProvider({ children, para, onSwitchWallet }: SolanaExternalWalletProviderProps) {
+type SolanaExternalWalletProviderConfigFull = {
+  wallets: WalletList;
+} & SolanaExternalWalletProviderConfig;
+
+export function SolanaExternalWalletProvider({
+  children,
+  wallets: walletFns,
+  onSwitchWallet,
+  para,
+}: SolanaExternalWalletProviderConfigFull & PropsWithChildren) {
   const {
     wallets: adapters,
     select: selectWallet,
@@ -29,8 +39,8 @@ export function SolanaExternalWalletProvider({ children, para, onSwitchWallet }:
     publicKey: solanaAddress,
     wallet,
     connecting,
+    connected,
   } = useWallet();
-  const { wallets: walletFns } = useParaSolana();
 
   const reset = async () => {
     await _disconnect();
@@ -74,16 +84,16 @@ export function SolanaExternalWalletProvider({ children, para, onSwitchWallet }:
 
   useEffect(() => {
     const storedExternalWallet = para.externalWallets[para.currentExternalWalletAddresses?.[0] ?? ''];
-
     // If the user is using an external Solana wallet we want to watch for wallet changes and log them in to a different user when the wallet changes
     if (
       !connecting &&
+      (!wallet || wallet?.adapter.connected) &&
       storedExternalWallet?.type === WalletType.SOLANA &&
       storedExternalWallet?.address !== solanaAddress?.toString()
     ) {
       switchWallet(solanaAddress?.toString());
     }
-  }, [solanaAddress, connecting]);
+  }, [solanaAddress, connecting, wallet]);
 
   const connect = async (adapter?: Adapter): Promise<{ address?: string; error?: string }> => {
     await _disconnect();
@@ -153,7 +163,9 @@ export function SolanaExternalWalletProvider({ children, para, onSwitchWallet }:
     await _disconnect();
     // The solana library seems to keep some state hanging around that will auto receonnect the same wallet if the window isn't refreshed and the wallet connector is selected again in the modal.
     // Refreshing here after a disconnect fixes the issue.
-    typeof window !== undefined && window?.location.reload();
+    if (connected) {
+      typeof window !== undefined && window?.location.reload();
+    }
   };
 
   return (

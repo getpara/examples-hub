@@ -3,9 +3,10 @@ import { useAppStore } from '../stores/app/useAppStore';
 import { triggerToast } from '../utils/toasts';
 import { useGetAllOrganizations } from './api/queries/useOrganizations';
 import { useLogout } from './useLogout';
-import { para } from '../clients/para';
+import { useAccount } from '@getpara/react-sdk';
 
 export const useSetSelectedOrganizationWithNavigation = (shouldRefetch: boolean) => {
+  const { data: account } = useAccount();
   const { organizationId } = useParams();
   const { data: allUserOrgs, error: allUserOrgsError, refetch: refetchOrgs } = useGetAllOrganizations(false);
   const setStoredSelectedOrganization = useAppStore(state => state.setSelectedOrganization);
@@ -15,9 +16,7 @@ export const useSetSelectedOrganizationWithNavigation = (shouldRefetch: boolean)
   const { pathname } = useLocation();
 
   const setSelectedOrganization = async () => {
-    const isFullyLoggedIn = await para.isFullyLoggedIn();
-
-    if (!isFullyLoggedIn) {
+    if (!account?.isConnected) {
       return;
     }
 
@@ -42,7 +41,7 @@ export const useSetSelectedOrganizationWithNavigation = (shouldRefetch: boolean)
 
     // If user has any organizations, set selected to the first or the previously selected (if it's a valid org)
     if (_allUserOrgs?.length) {
-      const userId = para.getUserId();
+      const userId = account.userId;
       const storedOrgId = getSelectedOrganization(userId!);
       let selectedOrgId = organizationId ?? storedOrgId;
 

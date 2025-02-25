@@ -1,14 +1,14 @@
-import { ReactNode, createContext, useEffect, useMemo } from 'react';
+import { PropsWithChildren, createContext, useCallback, useEffect, useMemo } from 'react';
 import { useAccount, useSwitchChain, useConnect, useDisconnect, useEnsName, useEnsAvatar } from 'wagmi';
 import { WagmiConnectorInstance } from '../types/Wallet.js';
-import { CommonChain, CommonWallet } from '../types/CommonTypes.js';
 import { isEIP6963Connector } from '../utils/isEIP6963Connector.js';
 import { getWalletConnectUri } from '../utils/getWalletConnectUri.js';
-import ParaWeb, { isMobile, WalletType } from '@getpara/react-sdk';
 import { normalize } from 'viem/ens';
 import { useExternalWalletStore } from '../stores/useStore.js';
+import type { CommonChain, CommonWallet } from '@getpara/react-common';
+import ParaWeb, { isMobile, WalletType } from '@getpara/web-sdk';
 
-export const defaultEvmExternalWallet = {
+const defaultEvmExternalWallet = {
   wallets: [],
   chains: [],
   chainId: undefined,
@@ -16,33 +16,38 @@ export const defaultEvmExternalWallet = {
   avatar: undefined,
   disconnect: () => Promise.resolve(),
   switchChain: () => Promise.resolve({}),
+  connectParaEmbedded: () => Promise.resolve({}),
 };
 
-export const EvmExternalWalletContext = createContext<{
+export type EvmExternalWalletContextType = {
   wallets: CommonWallet[];
   chains: CommonChain[];
-  chainId: number;
-  username: string;
+  chainId?: number;
+  username?: string;
   avatar?: string;
   disconnect: () => Promise<void>;
   switchChain: (chainId: number) => Promise<{ error?: string[] }>;
-}>(defaultEvmExternalWallet);
+  connectParaEmbedded: () => Promise<{ result?: unknown; error?: string }>;
+};
 
-interface EvmExternalWalletProviderProps {
-  children: ReactNode;
+export const EvmExternalWalletContext = createContext<EvmExternalWalletContextType>(defaultEvmExternalWallet);
+
+export type EvmExternalWalletProviderConfig = {
+  onSwitchWallet?: (args: { address?: string; error?: string }) => void;
   para: ParaWeb;
-  onSwitchWallet: (args: { address?: string; error?: string }) => void;
-}
+};
 
-export function EvmExternalWalletProvider({ children, para, onSwitchWallet }: EvmExternalWalletProviderProps) {
+export function EvmExternalWalletProvider({
+  children,
+  onSwitchWallet,
+  para,
+}: EvmExternalWalletProviderConfig & PropsWithChildren) {
   const { connectAsync, connectors: untypedConnectors } = useConnect();
   const { address: wagmiAddress, isConnecting, isReconnecting, chainId, connector: connectedConnector } = useAccount();
   const { chains, switchChainAsync } = useSwitchChain();
   const { disconnectAsync } = useDisconnect();
   const { data: ensName } = useEnsName({ address: wagmiAddress });
-  const { data: ensAvatar } = useEnsAvatar({
-    name: normalize(ensName),
-  });
+  const { data: ensAvatar } = useEnsAvatar({ name: normalize(ensName) });
 
   const isLocalConnecting = useExternalWalletStore(state => state.isConnecting);
   const updateExternalWalletState = useExternalWalletStore(state => state.updateState);
@@ -150,7 +155,7 @@ export function EvmExternalWalletProvider({ children, para, onSwitchWallet }: Ev
       }
     }
 
-    onSwitchWallet({ address, error });
+    onSwitchWallet?.({ address, error });
     updateExternalWalletState({ isConnecting: false });
   };
 
@@ -281,14 +286,32 @@ export function EvmExternalWalletProvider({ children, para, onSwitchWallet }: Ev
 
   const username = useMemo(() => ensName ?? wagmiAddress, [ensName, wagmiAddress]);
 
-  const disconnect = disconnectAsync;
+  const connectParaEmbedded = useCallback(async (): Promise<{ result?: unknown; error?: string }> => {
+    const paraConnectorInstance = connectors.find(c => c.id === 'para');
+    if (!paraConnectorInstance) {
+      return { error: 'No para connector instance' };
+    }
+    try {
+      const result = await connectAsync({ connector: paraConnectorInstance });
+      return { result };
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err.message : 'Unknown error';
+      return { error };
+    }
+  }, [connectors]);
 
   return (
     <EvmExternalWalletContext.Provider
-      value={useMemo(
-        () => ({ wallets, chains: formattedChains, chainId, username, avatar: ensAvatar, disconnect, switchChain }),
-        [wallets, formattedChains, chainId, username, ensAvatar, disconnect, switchChain],
-      )}
+      value={{
+        wallets,
+        chains: formattedChains,
+        chainId,
+        username,
+        avatar: ensAvatar,
+        disconnect: disconnectAsync,
+        switchChain,
+        connectParaEmbedded,
+      }}
     >
       {children}
     </EvmExternalWalletContext.Provider>

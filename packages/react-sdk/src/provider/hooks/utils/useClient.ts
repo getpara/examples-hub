@@ -1,3 +1,4 @@
+import ParaWeb from '@getpara/web-sdk';
 import { useStore } from '../../stores/useStore.js';
 
 /**
@@ -6,5 +7,5 @@ import { useStore } from '../../stores/useStore.js';
 export const useClient = () => {
   const client = useStore(state => state.client);
 
-  return client;
+  return client as ParaWeb;
 };

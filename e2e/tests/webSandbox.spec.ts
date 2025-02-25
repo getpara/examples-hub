@@ -22,7 +22,7 @@ test.describe('web sandbox', () => {
 
     await webExamplePage.login(context, credential, email);
 
-    await webExamplePage.switchToWagmiView(true);
+    await webExamplePage.switchToWagmiView();
     const { address: address2, recoveredAddress: recoveredAddress2 } = await webExamplePage.signWagmiMessage();
     expect(recoveredAddress2).toBe(address2);
   });

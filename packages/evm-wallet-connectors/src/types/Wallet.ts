@@ -2,7 +2,7 @@ import { Connector, CreateConnectorFn } from 'wagmi';
 import { WalletConnectParameters } from 'wagmi/connectors';
 import { CoinbaseWalletOptions } from '../wallets/connectors/coinbase/coinbase.js';
 import { WalletConnectWalletOptions } from '../wallets/connectors/walletConnect/walletConnect.js';
-import { WalletMetadata } from './CommonTypes.js';
+import { type WalletMetadata } from '@getpara/react-common';
 
 export type Wallet = {
   createConnector?: (walletDetails: WalletDetailsParams) => CreateConnectorFn;

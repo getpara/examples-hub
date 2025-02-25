@@ -1,8 +1,7 @@
-import { ReactNode, createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { PropsWithChildren, useMemo } from 'react';
 import { ConnectionProvider, WalletProvider as SolanaWalletProvider } from '@solana/wallet-adapter-react';
 import { WalletList } from '../types/Wallet.js';
-import { useExternalWalletProviderStore } from '@getpara/react-sdk';
-import { SolanaExternalWalletContext, SolanaExternalWalletProvider } from './SolanaExternalWalletContext.js';
+import { SolanaExternalWalletProvider, SolanaExternalWalletProviderConfig } from './SolanaExternalWalletContext.js';
 import {
   createDefaultAddressSelector,
   createDefaultAuthorizationResultCache,
@@ -12,16 +11,7 @@ import {
 import { type ConnectionConfig } from '@solana/web3.js';
 import { Chain } from '@solana-mobile/mobile-wallet-adapter-protocol';
 
-export const defaultWallet = {
-  wallets: [],
-};
-
-export const ParaSolanaContext = createContext<{
-  wallets: WalletList;
-}>(defaultWallet);
-
-interface ParaSolanaProviderProps {
-  children: ReactNode;
+export interface ParaSolanaProviderConfig {
   wallets: WalletList;
   /** Endpoint passed to the ConnectionProvider
    * Ref: https://solana-labs.github.io/solana-web3.js/classes/Connection.html
@@ -45,38 +35,18 @@ interface ParaSolanaProviderProps {
   chain: Chain;
 }
 
-export function ParaSolanaProvider({
-  children,
-  wallets: walletFns,
-  endpoint,
-  appIdentity,
-  chain,
-  connectionConfig,
-}: ParaSolanaProviderProps) {
-  const updateExternalWalletProviderState = useExternalWalletProviderStore(state => state.updateState);
-  const SolanaProvider = useExternalWalletProviderStore(state => state.SolanaProvider);
-  const solanaContext = useExternalWalletProviderStore(state => state.solanaContext);
-  const [shouldAutoConnect, setShouldAutoConnect] = useState(true);
+export type ParaSolanaProviderProps = {
+  config: ParaSolanaProviderConfig;
+  internalConfig: SolanaExternalWalletProviderConfig;
+};
 
-  // Only auto connect on initial render, after that rely on our connect function
-  useEffect(() => {
-    setShouldAutoConnect(false);
-  }, []);
+export function ParaSolanaProvider({ children, config, internalConfig }: ParaSolanaProviderProps & PropsWithChildren) {
+  const { wallets: walletFns, endpoint, appIdentity, chain, connectionConfig } = config;
 
-  useEffect(() => {
-    if (!solanaContext || !SolanaProvider) {
-      updateExternalWalletProviderState({
-        SolanaProvider: SolanaExternalWalletProvider,
-        solanaContext: SolanaExternalWalletContext,
-      });
-    }
-  }, []);
-
-  const value = useMemo(() => ({ wallets: walletFns }), [walletFns]);
-
-  if (!solanaContext || !SolanaProvider) {
-    return null;
-  }
+  const solanaExternalWalletProviderProps = useMemo(
+    () => ({ wallets: walletFns, ...internalConfig }),
+    [walletFns, internalConfig],
+  );
 
   return (
     <ConnectionProvider endpoint={endpoint} config={connectionConfig}>
@@ -91,12 +61,10 @@ export function ParaSolanaProvider({
           }),
         ]}
         localStorageKey="paraSolanaExternal"
-        autoConnect={shouldAutoConnect}
+        autoConnect={true}
       >
-        <ParaSolanaContext.Provider value={value}>{children}</ParaSolanaContext.Provider>
+        <SolanaExternalWalletProvider {...solanaExternalWalletProviderProps}>{children}</SolanaExternalWalletProvider>
       </SolanaWalletProvider>
     </ConnectionProvider>
   );
 }
-
-export const useParaSolana = () => useContext(ParaSolanaContext);

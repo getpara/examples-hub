@@ -30,7 +30,7 @@ export const useAutoSessionKeepAlive = ({ disabled }: { disabled?: boolean }) =>
 
   const getSessionExpiry = async (): Promise<Date | null> => {
     try {
-      const sessionCookie = await client.retrieveSessionCookie();
+      const sessionCookie = await client?.retrieveSessionCookie();
       if (!sessionCookie) return null;
 
       const expiresMatch = sessionCookie.match(/Expires=([^;]+)/);
@@ -46,7 +46,7 @@ export const useAutoSessionKeepAlive = ({ disabled }: { disabled?: boolean }) =>
     sessionCheckInterval.current = setInterval(async () => {
       const expiry = await getSessionExpiry();
       if (!expiry) {
-        await logoutAsync();
+        await logoutAsync({});
         clearSessionMonitoring();
         return;
       }
@@ -54,7 +54,7 @@ export const useAutoSessionKeepAlive = ({ disabled }: { disabled?: boolean }) =>
       const timeUntilExpiry = expiry.getTime() - Date.now();
 
       if (timeUntilExpiry <= 0) {
-        await logoutAsync();
+        await logoutAsync({});
         clearSessionMonitoring();
         return;
       }
@@ -65,7 +65,7 @@ export const useAutoSessionKeepAlive = ({ disabled }: { disabled?: boolean }) =>
           setupSessionMonitoring();
         } catch (err) {
           console.error('Failed to keep session alive:', err);
-          await logoutAsync();
+          await logoutAsync({});
           clearSessionMonitoring();
         }
         return;

@@ -1,6 +1,6 @@
 import { MutableRefObject, useEffect, useState } from 'react';
 
-export const useDropdownPosition = (inputRef: MutableRefObject<HTMLCpslInputElement | HTMLDivElement>) => {
+export const useDropdownPosition = (inputRef: MutableRefObject<HTMLCpslInputElement | HTMLDivElement | null>) => {
   const [dropdownMaxHeight, setDropdownMaxHeight] = useState<number | undefined>();
   const [dropdownWidth, setDropdownWidth] = useState<number | undefined>();
   const [mobileAnchor, setMobileAnchor] = useState<number | undefined>();
@@ -8,7 +8,7 @@ export const useDropdownPosition = (inputRef: MutableRefObject<HTMLCpslInputElem
   const resize = () => {
     if (typeof window !== 'undefined') {
       const newMaxHeight = Math.max(
-        window.innerHeight - inputRef?.current?.getBoundingClientRect().bottom - 20,
+        window.innerHeight - (inputRef?.current?.getBoundingClientRect().bottom ?? 0) - 20,
         window.innerHeight * 0.25,
       );
       setDropdownMaxHeight(newMaxHeight);

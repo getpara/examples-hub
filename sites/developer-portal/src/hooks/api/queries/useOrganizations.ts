@@ -1,17 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
 import { Organization } from '../../../types/api';
 import { getOrganizations } from '../../../api/users/queries';
-import { para } from '../../../clients/para';
 import { useCallback } from 'react';
 import { useParams } from 'react-router-dom';
+import { useAccount } from '@getpara/react-sdk';
 
 export const ORGANIZATIONS_QUERY_KEY = 'organizations';
 
 export const useOrganizationsQuery = <T>(select: (data: Organization[]) => T, retry?: boolean) => {
-  const userId = para.getUserId();
+  const { data: account } = useAccount();
+  const userId = account?.userId;
 
   return useQuery({
-    enabled: !!userId,
+    enabled: !!userId && account.isConnected,
     queryKey: [ORGANIZATIONS_QUERY_KEY, userId],
     queryFn: async () => {
       if (!userId) {

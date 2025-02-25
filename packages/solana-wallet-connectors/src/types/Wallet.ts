@@ -1,4 +1,4 @@
-import { WalletMetadata } from './CommonTypes.js';
+import { type WalletMetadata } from '@getpara/react-common';
 
 export type Wallet = {
   getUri?: (uri: string) => string;

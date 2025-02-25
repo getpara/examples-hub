@@ -1,6 +1,5 @@
 import { Outlet, useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { useIsLoggedIn } from '../../hooks/useIsLoggedIn';
 import { useGetAllOrganizations } from '../../hooks/api/queries/useOrganizations';
 import { useEffect } from 'react';
 import { MainLoader } from '../../components/MainLoader';
@@ -8,11 +7,13 @@ import { ErrorBoundary as SentryErrorBoundary } from '@sentry/react';
 import { ErrorBoundary } from '../../components/ErrorBoundary/ErrorBoundary';
 import { LANDING_APP_BAR_HEIGHT, LandingAppBar } from '../../components/AppBar/LandingAppBar';
 import { useSetSelectedOrganizationWithNavigation } from '../../hooks/useSetSelectedOrganizationWithNavigation';
+import { useAccount } from '@getpara/react-sdk';
 
 export const Layout = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { isLoggedIn, isLoading: isLoadingLoggedIn } = useIsLoggedIn();
+  const { data: account, isLoading: isLoadingLoggedIn } = useAccount();
+  const isLoggedIn = account?.isConnected;
   const { data: allOrgs, isLoading: isLoadingOrgs, isRefetching: isRefetchingOrgs } = useGetAllOrganizations();
   const { setSelectedOrganization } = useSetSelectedOrganizationWithNavigation(false);
 

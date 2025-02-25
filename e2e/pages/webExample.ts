@@ -84,7 +84,7 @@ export class WebExamplePage {
     await this.page.waitForTimeout(2100);
   }
 
-  async switchToWagmiView(skipClickCapsule = false) {
+  async switchToWagmiView() {
     await this.page.waitForTimeout(1000);
     await this.page
       .locator('div')
@@ -94,11 +94,6 @@ export class WebExamplePage {
     await this.page.waitForTimeout(1000);
     await this.page.reload();
     await this.page.waitForTimeout(1000);
-    if (!skipClickCapsule) {
-      await this.page.getByRole('button', { name: 'Para' }).click();
-      await this.page.waitForTimeout(300);
-      await this.page.reload();
-    }
   }
 
   async switchToDefaultView() {

@@ -1,5 +1,4 @@
 import { PropsWithChildren, useEffect } from 'react';
-import { useIsLoggedIn } from '../../hooks/useIsLoggedIn';
 import { useGetAllOrganizationsWithAccess } from '../../hooks/api/queries/useOrganizations';
 import { useLogout } from '../../hooks/useLogout';
 import { useOrganizationMember } from '../../hooks/api/queries/useOrganizationMember';
@@ -12,6 +11,7 @@ import { useLocation, useSearchParams } from 'react-router-dom';
 import { AUTH_MIN_APP_BAR_HEIGHT } from '../AppBar/AuthMinAppBar';
 import { useGetInvite } from '../../hooks/api/queries/useUserInvite';
 import { triggerToast } from '../../utils/toasts';
+import { useAccount } from '@getpara/react-sdk';
 
 interface AuthenticatedWrapperProps extends PropsWithChildren {
   requireOrgs?: boolean;
@@ -24,7 +24,7 @@ export const AuthenticatedWrapper = ({ requireOrgs, children }: AuthenticatedWra
   const inviteId = searchParams.get('invite');
   const [inviteOrgId, inviteMemberId] = inviteId?.split('|') ?? [];
   const { data: invite, isLoading: isLoadingInvite } = useGetInvite(inviteOrgId, inviteMemberId);
-  const { isLoggedIn, isLoading: isLoadingLoggedIn } = useIsLoggedIn();
+  const { data: account, isLoading: isLoadingLoggedIn } = useAccount();
   const { isLoading: isLoadingSubscription } = useGetOrganizationSubscription();
   const { isLoading: isLoadingPlans } = usePlans();
   const { isLoading: isLoadingMember } = useOrganizationMember();
@@ -37,7 +37,7 @@ export const AuthenticatedWrapper = ({ requireOrgs, children }: AuthenticatedWra
   // invite route useEffect
   useEffect(() => {
     if (isInvite && !isLoadingLoggedIn) {
-      if (isLoggedIn && !isLoadingInvite) {
+      if (account?.isConnected && !isLoadingInvite) {
         if (inviteId && !invite) {
           triggerToast({
             variant: 'error',
@@ -48,21 +48,28 @@ export const AuthenticatedWrapper = ({ requireOrgs, children }: AuthenticatedWra
         }
       }
     }
-  }, [isLoggedIn, isLoadingInvite, isLoadingLoggedIn, inviteId, invite, setSelectedOrganization, isInvite]);
+  }, [account?.isConnected, isLoadingInvite, isLoadingLoggedIn, inviteId, invite, setSelectedOrganization, isInvite]);
 
   // onboarding route useEffect
   useEffect(() => {
     if (isOnboarding && !isLoadingLoggedIn) {
-      if (isLoggedIn && !isLoadingOrgs && orgsWithAccess?.length) {
+      if (account?.isConnected && !isLoadingOrgs && orgsWithAccess?.length) {
         setSelectedOrganization();
       }
     }
-  }, [isLoadingLoggedIn, isLoadingOrgs, isLoggedIn, isOnboarding, orgsWithAccess?.length, setSelectedOrganization]);
+  }, [
+    isLoadingLoggedIn,
+    isLoadingOrgs,
+    account?.isConnected,
+    isOnboarding,
+    orgsWithAccess?.length,
+    setSelectedOrganization,
+  ]);
 
   // default route useEffect
   useEffect(() => {
     if (!isOnboarding && !isInvite && !isLoadingLoggedIn) {
-      if (isLoggedIn && !isLoadingOrgs && orgsWithAccess?.length) {
+      if (account?.isConnected && !isLoadingOrgs && orgsWithAccess?.length) {
         setSelectedOrganization();
       }
     }
@@ -74,7 +81,7 @@ export const AuthenticatedWrapper = ({ requireOrgs, children }: AuthenticatedWra
     return <MainLoader headerHeight={appBarHeight} />;
   }
 
-  if (!isLoggedIn) {
+  if (!account?.isConnected) {
     logout();
     return null;
   }

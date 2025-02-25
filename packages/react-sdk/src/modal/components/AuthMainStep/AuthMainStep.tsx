@@ -1,8 +1,9 @@
 import styled from 'styled-components';
 import { OAuthMethod } from '@getpara/web-sdk';
-import { useThemeStore } from '../../stores/theme/useThemeStore.js';
 import { AuthMainStepContent } from './AuthMainStepContent.js';
 import { CenteredText } from '../common.js';
+import { useStore } from '../../../provider/stores/useStore.js';
+import { useModalStore } from '../../stores/index.js';
 
 interface AuthMainStepProps {
   oAuthMethods?: OAuthMethod[];
@@ -11,12 +12,12 @@ interface AuthMainStepProps {
 }
 
 export const AuthMainStep = ({ oAuthMethods, disableEmailLogin, disablePhoneLogin }: AuthMainStepProps) => {
-  const logo = useThemeStore(state => state.getLogo());
-  const appName = useThemeStore(state => state.appName);
-  const authLayout = useThemeStore(state => state.authLayout);
-  const embeddedModal = useThemeStore(state => state.embeddedModal);
+  const authLayout = useModalStore(state => state.authLayout);
+  const embeddedModal = useStore(state => state.modalConfig?.embeddedModal);
+  const logo = useStore(state => state.modalConfig?.logo);
+  const appName = useStore(state => state.appName);
 
-  const firstLayoutType = authLayout[0].split(':')[0];
+  const firstLayoutType = authLayout?.[0].split(':')[0];
   const heading = firstLayoutType === 'AUTH' ? 'Sign Up or Login' : 'Connect Wallet';
 
   return (

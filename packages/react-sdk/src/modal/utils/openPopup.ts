@@ -2,7 +2,7 @@ export function openPopup(
   popupUrl: string,
   target: string,
   type: 'OAUTH' | 'LOGIN_PASSKEY' | 'CREATE_PASSKEY' | 'TRANSACTION_REVIEW' | 'CREATE_PASSWORD' | 'LOGIN_PASSWORD',
-): Window {
+): Window | undefined {
   if (typeof window === 'undefined') {
     return;
   }
@@ -66,5 +66,5 @@ export function openPopup(
     }, 0);
   }
 
-  return popupWindow;
+  return popupWindow ?? undefined;
 }

@@ -1,17 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import {
-  Wallet,
-  CurrentWalletIds,
-  entityToWallet,
-  OnRampProvider,
-  deprecated__StripeConfig,
-  deprecated__RampConfig,
-  OnRampAsset,
-  Network,
-  EnabledFlow,
-  AuthMethod,
-  OnRampConfig,
-} from '@getpara/web-sdk';
+import { Wallet, CurrentWalletIds, entityToWallet, EnabledFlow, AuthMethod, OnRampConfig } from '@getpara/web-sdk';
 import { useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { Body } from '../Body/Body.js';
@@ -21,7 +9,12 @@ import { DEFAULTS } from '../../constants/defaults.js';
 import { useGoBack } from '../../hooks/useGoBack.js';
 import { openPopup } from '../../utils/openPopup.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
-import { useEmbeddedExternalConnection } from '../../hooks/useEmbeddedExternalConnection.js';
+import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
+import {
+  useWaitForAccountCreation,
+  useWaitForLoginAndSetup,
+  useWaitForPasskeyAndCreateWallet,
+} from '../../../provider/index.js';
 
 type ModalContentProps = Omit<
   ParaModalProps,
@@ -35,33 +28,9 @@ export type ModalContentHandle = {
   handleModalClose: () => void;
 };
 
-function isRampConfig(config: deprecated__StripeConfig | deprecated__RampConfig): config is deprecated__RampConfig {
-  return 'hostApiKey' in config;
-}
-
-const AssetNetworks = {
-  [OnRampAsset.SOLANA]: Network.SOLANA,
-  [OnRampAsset.ATOM]: Network.COSMOS,
-  [OnRampAsset.CELO]: Network.CELO,
-  [OnRampAsset.POLYGON]: Network.POLYGON,
-};
-
-const AssetMap = {
-  SOLANA: OnRampAsset.SOLANA,
-  SOL: OnRampAsset.SOLANA,
-  ATOM: OnRampAsset.ATOM,
-  CELO: OnRampAsset.CELO,
-  POLYGON: OnRampAsset.POLYGON,
-  MATIC: OnRampAsset.POLYGON,
-  USDC: OnRampAsset.USDC,
-  ETH: OnRampAsset.ETHEREUM,
-  ETHEREUM: OnRampAsset.ETHEREUM,
-};
-
 export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
   (
     {
-      onRampConfig: propsOnRampConfig,
       twoFactorAuthEnabled = false,
       recoverySecretStepEnabled = false,
       oAuthMethods,
@@ -95,13 +64,15 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     const setAccountAddFundTab = useModalStore(state => state.setAccountAddFundTab);
     const setRecoveryShare = useUserInfoStore(state => state.setRecoveryShare);
     const goBack = useGoBack();
+    const { connectEmbeddedToExternalConnectors } = useExternalWallets();
+    const { waitForLoginAndSetup } = useWaitForLoginAndSetup();
+    const { waitForAccountCreation } = useWaitForAccountCreation();
+    const { waitForPasskeyAndCreateWalletAsync } = useWaitForPasskeyAndCreateWallet();
 
     const loginTimeout = useRef<number>();
     const createAccountTimeout = useRef<number>();
 
     const [walletCreationInProgress, setWalletCreationInProgress] = useState(false);
-
-    const connectEmbeddedToExternalConnectors = useEmbeddedExternalConnection();
 
     useImperativeHandle(ref, () => {
       return {
@@ -124,45 +95,54 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
       }
     };
 
-    async function awaitLoginTransition(): Promise<void> {
-      // TODO: migrate to useWaitForLoginAndSetup hook once we force the use of the CapsuleProvider
-      const { isComplete, isError, needsWallet } = await para.waitForLoginAndSetup({ popupWindow });
+    async function awaitLoginTransition() {
+      waitForLoginAndSetup(
+        { popupWindow },
+        {
+          onSuccess: async ({ isComplete, isError, needsWallet }) => {
+            if (isError) {
+              goBack();
+              return;
+            }
 
-      setPopupWindow(undefined);
+            if (isComplete) {
+              setWebAuthURLForLogin('');
+              setPasswordUrlForLogin('');
+              setSupportedAuthMethods(new Set<AuthMethod>());
+              setBiometricLocationHints();
 
-      if (isError) {
-        goBack();
-        return;
-      }
-
-      if (isComplete) {
-        setWebAuthURLForLogin('');
-        setPasswordUrlForLogin('');
-        setSupportedAuthMethods(new Set<AuthMethod>());
-        setBiometricLocationHints();
-
-        if (needsWallet) {
-          setStep(ModalStep.AWAITING_WALLET_CREATION);
-        } else {
-          await connectEmbeddedToExternalConnectors();
-          if (await is2FASetup()) {
-            setStep(ModalStep.LOGIN_DONE);
-          } else {
-            setStep(ModalStep.SETUP_2FA);
-          }
-        }
-      }
+              if (needsWallet) {
+                setStep(ModalStep.AWAITING_WALLET_CREATION);
+              } else {
+                await connectEmbeddedToExternalConnectors();
+                if (await is2FASetup()) {
+                  setStep(ModalStep.LOGIN_DONE);
+                } else {
+                  setStep(ModalStep.SETUP_2FA);
+                }
+              }
+            }
+          },
+          onError: () => {
+            goBack();
+          },
+          onSettled: () => {
+            setPopupWindow(undefined);
+          },
+        },
+      );
     }
 
-    async function awaitWalletCreationTransition(): Promise<void> {
-      // TODO: migrate to useWaitForAccountCreation hook once we force the use of the ParaProvider
-      const isComplete = await para.waitForAccountCreation();
-
-      if (isComplete) {
-        setWebAuthURLForCreate('');
-        setIFrameUrl('');
-        setStep(ModalStep.AWAITING_WALLET_CREATION);
-      }
+    async function awaitWalletCreationTransition() {
+      waitForAccountCreation(undefined, {
+        onSuccess: isComplete => {
+          if (isComplete) {
+            setWebAuthURLForCreate('');
+            setIFrameUrl('');
+            setStep(ModalStep.AWAITING_WALLET_CREATION);
+          }
+        },
+      });
     }
 
     // generate/claim wallet once we know it's account creation
@@ -172,12 +152,13 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
       }
       async function genWallet() {
         setWalletCreationInProgress(true);
-        let recoverySecret: string, walletIds: CurrentWalletIds;
+        let recoverySecret: string | undefined, walletIds: CurrentWalletIds | undefined;
         if (!createWalletOverride) {
-          // TODO: migrate to useWaitForPasskeyAndCreateWallet hook once we force the use of the ParaProvider
-          const created = await para.waitForPasskeyAndCreateWallet();
-          recoverySecret = created.recoverySecret;
-          walletIds = created.walletIds;
+          try {
+            const created = await waitForPasskeyAndCreateWalletAsync();
+            recoverySecret = created.recoverySecret;
+            walletIds = created.walletIds;
+          } catch (e) {}
         } else {
           const created = await createWalletOverride(para);
           const fetchedWallets = (await para.fetchWallets()).filter(wallet => !!wallet.address);
@@ -192,9 +173,11 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
           recoverySecret = created.recoverySecret;
           walletIds = created.walletIds;
         }
-        await para.setCurrentWalletIds(walletIds);
+        if (walletIds) {
+          await para.setCurrentWalletIds(walletIds);
+        }
 
-        if (recoverySecretStepEnabled) {
+        if (recoverySecret && recoverySecretStepEnabled) {
           setRecoveryShare(recoverySecret);
         }
         setWalletCreationInProgress(false);
@@ -208,6 +191,10 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     }, [isLogin, currentStep]);
 
     async function createAccountWithPassword() {
+      if (typeof window !== 'undefined') {
+        clearTimeout(createAccountTimeout.current);
+        createAccountTimeout.current = window.setTimeout(awaitWalletCreationTransition, DEFAULTS.POLLING_INTERVAL_MS);
+      }
       setStep(ModalStep.PASSWORD_CREATION);
     }
 
@@ -215,7 +202,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
       if (typeof window !== 'undefined') {
         clearTimeout(createAccountTimeout.current);
         createAccountTimeout.current = window.setTimeout(awaitWalletCreationTransition, DEFAULTS.POLLING_INTERVAL_MS);
-        openPopup(webAuthURLForCreate, 'ParaPasskey', 'CREATE_PASSKEY');
+        webAuthURLForCreate && openPopup(webAuthURLForCreate, 'ParaPasskey', 'CREATE_PASSKEY');
         setStep(ModalStep.AWAITING_BIOMETRIC_CREATION);
       }
     }
@@ -225,7 +212,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
       if (webAuthURLForLogin || passwordUrlForLogin) {
         if (loginTransitionOverride) {
           async function loginOverride() {
-            await loginTransitionOverride(para);
+            await loginTransitionOverride?.(para);
 
             setWebAuthURLForLogin('');
             setPasswordUrlForLogin('');
@@ -253,7 +240,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     }, [webAuthURLForLogin, passwordUrlForLogin, popupWindow]);
 
     const handleClose = () => {
-      onClose();
+      onClose?.();
     };
 
     useEffect(() => {
@@ -268,13 +255,6 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
       if (![ModalStep.AWAITING_OAUTH, ModalStep.FARCASTER_OAUTH].includes(currentStep)) {
         para.exitOAuth();
       }
-
-      if (currentStep === ModalStep.PASSWORD_CREATION) {
-        if (typeof window !== 'undefined') {
-          clearTimeout(createAccountTimeout.current);
-          createAccountTimeout.current = window.setTimeout(awaitWalletCreationTransition, DEFAULTS.POLLING_INTERVAL_MS);
-        }
-      }
     }, [currentStep]);
 
     useEffect(() => {
@@ -283,27 +263,8 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
           .getOnRampConfig()
           .then(res => {
             let newOnRampConfig: OnRampConfig & { testMode?: boolean };
-            if (!!propsOnRampConfig) {
-              const { enabledFlows, network, asset, providers, testMode } = propsOnRampConfig;
-              const rampConfig = providers.find(config => isRampConfig(config));
 
-              newOnRampConfig = {
-                isBuyEnabled: !enabledFlows || enabledFlows.some(str => EnabledFlow[str] === EnabledFlow.BUY),
-                isReceiveEnabled: !enabledFlows || enabledFlows.some(str => EnabledFlow[str] === EnabledFlow.RECEIVE),
-                isWithdrawEnabled: !enabledFlows || enabledFlows.some(str => EnabledFlow[str] === EnabledFlow.WITHDRAW),
-                allowedAssets: network
-                  ? { [Network[network]]: asset ? [AssetMap[asset]] : true }
-                  : asset
-                    ? { [AssetNetworks[AssetMap[asset]] ?? Network.ETHEREUM]: [AssetMap[asset]] }
-                    : res.allowedAssets,
-                assetInfo: res.assetInfo,
-                providers: providers.map(({ id }) => OnRampProvider[id]),
-                rampApiKey: rampConfig?.hostApiKey ?? res.rampApiKey,
-                testMode: testMode ?? onRampTestMode,
-              };
-            } else {
-              newOnRampConfig = { ...res, testMode: onRampTestMode };
-            }
+            newOnRampConfig = { ...res, testMode: onRampTestMode };
 
             setOnRampConfig(newOnRampConfig);
 
@@ -340,8 +301,8 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
         <Body
           oAuthMethods={oAuthMethods}
           twoFactorAuthEnabled={twoFactorAuthEnabled}
-          disableEmailLogin={disableEmailLogin}
-          disablePhoneLogin={disablePhoneLogin}
+          disableEmailLogin={!!disableEmailLogin}
+          disablePhoneLogin={!!disablePhoneLogin}
           onClose={handleClose}
           createAccountWithPasskey={createAccountWithPasskey}
           createAccountWithPassword={createAccountWithPassword}

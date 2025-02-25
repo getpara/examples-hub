@@ -16,7 +16,7 @@ import {
 } from '@getpara/web-sdk';
 import { ACCOUNT_BASE_KEY } from '../queries/useAccount.js';
 import { useStore } from '../../stores/useStore.js';
-import { WALLET_BASE_KEY } from '../../hooks/queries/useWallet.js';
+import { WALLET_BASE_KEY } from '../queries/useWallet.js';
 import { Callbacks } from '../../types/provider.js';
 
 export const useEventListeners = ({

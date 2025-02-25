@@ -1,38 +1,24 @@
-// @ts-nocheck
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
 import ReactDOM from 'react-dom/client';
 import { Box, Button, ChakraProvider, Checkbox, Container, HStack, Input, Select, Text, VStack } from '@chakra-ui/react';
 import { useDebounce } from 'use-debounce';
 import Web3 from 'web3';
-import { http, parseEther } from 'viem';
-import { sepolia } from 'viem/chains';
 import { SigningStargateClient } from '@cosmjs/stargate';
 import { ethers } from 'ethers';
-import {
-  configureChains,
-  createConfig,
-  useAccount,
-  useConnect,
-  useDisconnect,
-  usePrepareSendTransaction,
-  useSendTransaction,
-  useSignMessage,
-  useWaitForTransaction,
-  WagmiConfig,
-} from 'wagmi';
-import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet';
-import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
-import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
-import { alchemyProvider } from 'wagmi/providers/alchemy';
 import * as solana from '@solana/web3.js';
 import Para from '@getpara/web-sdk';
-import { ParaModal, OAuthMethod, ModalStep, ModalStepProp, ExternalWallet } from '@getpara/react-sdk';
-import { FeeMarketEIP1559Transaction } from '@ethereumjs/tx';
+import {
+  OAuthMethod,
+  ModalStep,
+  ModalStepProp,
+  ParaProvider,
+  useModal,
+  useClient,
+  useAccount as useParaAccount,
+} from '@getpara/react-sdk';
 import { ParaProtoSigner } from '@getpara/cosmjs-v0-integration';
 import { ParaEthersSigner } from '@getpara/ethers-v6-integration';
-import { createParaViemClient } from '@getpara/viem-v1-integration';
-import { ParaConnector, ParaEIP1193Provider } from '@getpara/wagmi-v1-integration';
 import ParaCore, {
   Environment,
   ConstructorOpts,
@@ -42,13 +28,31 @@ import ParaCore, {
   PREGEN_IDENTIFIER_TYPES,
   TransactionReviewDenied,
   TransactionReviewTimeout,
+  Wallet,
 } from '@getpara/core-sdk';
 import { ParaSolanaWeb3Signer } from '@getpara/solana-web3.js-v1-integration';
 import { FONT_OPTIONS } from './constants';
 import '@getpara/react-sdk/styles.css';
-import { ArrayField } from './array';
 import { OfframpSend } from './offramp';
 import { ToastContainer } from 'react-toastify';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+  createConfig,
+  useAccount,
+  useConnect,
+  useDisconnect,
+  usePrepareTransactionRequest,
+  useSendTransaction,
+  useSignMessage,
+  useWaitForTransactionReceipt,
+  WagmiProvider,
+} from 'wagmi';
+import { http, parseEther } from 'viem';
+import { sepolia } from 'viem/chains';
+import { paraConnector } from '@getpara/wagmi-v2-integration';
+import { coinbaseWallet, walletConnect } from 'wagmi/connectors';
+
+const queryClient = new QueryClient();
 
 interface Partner {
   apiKey: string;
@@ -189,7 +193,7 @@ async function sendSolanaTx(para: Para, walletId: string, setSig: any): Promise<
         skipPreflight: false,
         preflightCommitment: 'confirmed',
       });
-    } catch (error: TransactionReviewError) {
+    } catch (error) {
       console.error(error);
     }
 
@@ -200,63 +204,14 @@ async function sendSolanaTx(para: Para, walletId: string, setSig: any): Promise<
   }
 }
 
-async function _sendViemTransaction(nonce = 0): Promise<void> {
-  const viemClient = createParaViemClient(para, {
-    chain: sepolia,
-    transport: http(ALCHEMY_SEPOLIA_PROVIDER),
-  });
-  console.log(
-    await viemClient.sendTransaction({
-      value: BigInt(10100000000),
-      to: DEFAULT_TO_ADDRESS,
-      chain: sepolia,
-      gas: BigInt(21000),
-      maxPriorityFeePerGas: BigInt(1000000000),
-      maxFeePerGas: BigInt(3000000000),
-      account: viemClient.account,
-      nonce,
-    }),
-  );
-}
-
-async function _sendEIP1193ProviderTransaction(): Promise<void> {
-  const eip1193Provider = new ParaEIP1193Provider({
-    para,
-    chainId: DEFAULT_CHAIN_ID,
-    chains: [sepolia],
-    appName: 'Example',
-  });
-  const accounts = await eip1193Provider.request({
-    method: 'eth_accounts',
-    params: undefined,
-  });
-  console.log(accounts);
-  const tx = {
-    value: BigInt(190000000000),
-    to: DEFAULT_TO_ADDRESS,
-    chain: sepolia,
-    gas: BigInt(21000),
-    maxPriorityFeePerGas: BigInt(1100000000),
-    maxFeePerGas: BigInt(3000000000),
-    account: accounts[0],
-    nonce: 0,
-    type: 'eip1559',
-  };
-  console.log(
-    await eip1193Provider.request({
-      method: 'eth_sendTransaction',
-      params: [tx],
-    }),
-  );
-}
-
 function WagmiSignMessage(): JSX.Element {
   const [message, setMessage] = useState<string>('');
   const [messageSignature, setMessageSignature] = useState<string | undefined>();
   const onSuccess = (data: string) => {
     setMessageSignature(data);
   };
-  const { signMessageAsync } = useSignMessage({ onSuccess });
+  const { address } = useAccount();
+  const { signMessageAsync } = useSignMessage();
   return (
     <>
       <Input
@@ -267,13 +222,9 @@ function WagmiSignMessage(): JSX.Element {
       />
       {messageSignature && <Text>Message Signature: {messageSignature}</Text>}
       <Button
-        isDisabled={!message}
+        isDisabled={!message || !address}
         onClick={async () => {
-          try {
-            await signMessageAsync({ message });
-          } catch (error) {
-            console.error(error);
-          }
+          await signMessageAsync({ account: address, message }, { onSuccess });
         }}
       >
         Sign Message
@@ -289,17 +240,17 @@ function WagmiSendTransaction(): JSX.Element {
   const [amount, setAmount] = useState(DEFAULT_VALUE);
   const [debouncedValue] = useDebounce(amount, 500);
 
-  const { config } = usePrepareSendTransaction({
-    to: debouncedToAddress,
+  const { data: config } = usePrepareTransactionRequest({
+    to: debouncedToAddress as `0x${string}`,
     value: debouncedValue ? parseEther(amount, 'gwei') : undefined,
     chainId: Number(DEFAULT_CHAIN_ID),
     type: 'eip1559',
   });
 
-  const { data, sendTransaction, isLoading: isSendTxLoading } = useSendTransaction(config);
+  const { data: txHash, sendTransaction, isPending: isSendTxPending } = useSendTransaction();
 
-  const { isLoading: isWaitTxLoading, isSuccess } = useWaitForTransaction({
-    hash: data?.hash,
+  const { data: txReceipt, isLoading: isWaitTxLoading } = useWaitForTransactionReceipt({
+    hash: txHash,
     confirmations: 0,
   });
 
@@ -320,16 +271,20 @@ function WagmiSendTransaction(): JSX.Element {
         }}
       />
       <Button
-        isDisabled={isSendTxLoading || isWaitTxLoading || !sendTransaction || !toAddress || !amount}
+        isDisabled={isSendTxPending || isWaitTxLoading || !sendTransaction || !toAddress || !amount}
         onClick={() => {
-          sendTransaction();
+          sendTransaction(config, {
+            onError: e => {
+              console.log('Err', e);
+            },
+          });
         }}
       >
-        {isSendTxLoading ? 'Sending Transaction...' : isWaitTxLoading ? 'Awaiting Confirmation...' : 'Send Transaction'}
+        {isSendTxPending ? 'Sending Transaction...' : isWaitTxLoading ? 'Awaiting Confirmation...' : 'Send Transaction'}
       </Button>
-      {isSuccess && (
+      {txReceipt && (
         <Text>
-          <a rel="noreferrer" target="_blank" href={`https://sepolia.etherscan.io/tx/${data?.hash}`}>
+          <a rel="noreferrer" target="_blank" href={`https://sepolia.etherscan.io/tx/${txHash}`}>
             <u>Sepolia Scan Link</u>
           </a>
         </Text>
@@ -340,10 +295,10 @@ function WagmiSendTransaction(): JSX.Element {
 
 function WagmiProfileComponent(): JSX.Element {
   const { address, connector, isConnected } = useAccount();
-  const { connect, connectors, error, isLoading, pendingConnector } = useConnect();
+  const { connect, connectors, error } = useConnect();
   const { disconnect } = useDisconnect();
 
-  if (isConnected) {
+  if (isConnected && connector) {
     return (
       <>
         <VStack backgroundColor="blue.400" padding={6}>
@@ -353,7 +308,11 @@ function WagmiProfileComponent(): JSX.Element {
             color="red.600"
             backgroundColor="white"
             onClick={() => {
-              disconnect();
+              disconnect(undefined, {
+                onError: e => {
+                  console.log('ERR', e);
+                },
+              });
             }}
           >
             Disconnect
@@ -376,8 +335,6 @@ function WagmiProfileComponent(): JSX.Element {
           onClick={() => connect({ connector })}
         >
           {connector.name}
-          {!connector.ready && ' (unsupported)'}
-          {isLoading && connector.id === pendingConnector?.id && ' (connecting)'}
         </Button>
       ))}
 
@@ -386,45 +343,37 @@ function WagmiProfileComponent(): JSX.Element {
   );
 }
 
-function WagmiComponent({ para }: { para: Para }): JSX.Element {
-  const { chains, publicClient, webSocketPublicClient } = configureChains(
-    [sepolia],
-    [alchemyProvider({ apiKey: 'HfT9dMNs3W0h1vJmiPZQ_APaFjPo-BF9' })],
-  );
-  const config = createConfig({
-    autoConnect: true,
-    connectors: [
-      new ParaConnector({
-        para,
-        chains,
-        options: {},
-        appName: 'Example',
-      }),
-      new MetaMaskConnector({ chains }),
-      new CoinbaseWalletConnector({
-        chains,
-        options: {
-          appName: 'wagmi',
-        },
-      }),
-      new WalletConnectConnector({
-        chains,
-        options: {
+function WagmiComponent(): JSX.Element {
+  const para = useClient();
+  const chains = [sepolia] as any;
+
+  const config = useMemo(() => {
+    return createConfig({
+      chains,
+      transports: {
+        [sepolia.id]: http(),
+      },
+      connectors: [
+        paraConnector({
+          para,
+          chains,
+          options: {},
+          appName: 'Example',
+        }),
+        coinbaseWallet({ appName: 'wagmi' }),
+        walletConnect({
           projectId: '2e3018ef50ea4ee9bf3683a9f0a6bd03',
-        },
-      }),
-    ],
-    publicClient,
-    webSocketPublicClient,
-  });
+        }),
+      ],
+    });
+  }, []);
 
   return (
-    <WagmiConfig config={config}>
+    <WagmiProvider config={config}>
       <WagmiProfileComponent />
-    </WagmiConfig>
+    </WagmiProvider>
   );
 }
-
 async function sendEthersTransaction(para: Para, tx: any): Promise<void> {
   console.log('sending ethers tx:\n', tx);
   const currentWalletId = para?.currentWalletIds?.EVM?.[0];
@@ -461,40 +410,6 @@ async function sendEthersMintNFTTransaction(para: Para, tx: any): Promise<void> 
   console.log('send ethers tx response:\n', res);
 }
 
-async function _createTransaction(
-  toAddress: string,
-  value: string,
-  gasAmount: string,
-  maxPriorityFeePerGas: string,
-  maxFeePerGas: string,
-  nonce: string,
-  chainId: string,
-  contractAbi: string,
-  functionName: string,
-  functionArgs: string[],
-  deployByteCode: string,
-): Promise<string> {
-  let functionCallData: any;
-  if (functionName && contractAbi) {
-    const contract = new web3.eth.Contract(JSON.parse(contractAbi), toAddress);
-    functionCallData = contract.methods[functionName](...functionArgs).encodeABI();
-  }
-  console.log('1');
-  const tx = new FeeMarketEIP1559Transaction({
-    to: !deployByteCode ? toAddress : undefined,
-    value: value ? web3.utils.toHex(web3.utils.toWei(value, 'gwei')) : undefined,
-    gasLimit: web3.utils.toHex(Number(gasAmount)),
-    maxPriorityFeePerGas: web3.utils.toHex(web3.utils.toWei(maxPriorityFeePerGas, 'gwei')),
-    maxFeePerGas: web3.utils.toHex(web3.utils.toWei(maxFeePerGas, 'gwei')),
-    nonce: web3.utils.toHex(Number(nonce)),
-    data: functionCallData || deployByteCode || undefined,
-    chainId: web3.utils.toHex(chainId),
-    type: '0x02',
-  });
-  console.log('2');
-  return tx.serialize().toString('base64');
-}
-
 function getParaOpts(env: Environment, useDKLS: boolean): ConstructorOpts {
   switch (env) {
     case Environment.DEV:
@@ -523,7 +438,13 @@ function getParaOpts(env: Environment, useDKLS: boolean): ConstructorOpts {
   }
 }
 
-function App() {
+function AppInner({
+  currentStepOverride,
+  setCurrentStepOverride,
+}: {
+  currentStepOverride: ModalStepProp;
+  setCurrentStepOverride: React.Dispatch<React.SetStateAction<ModalStepProp>>;
+}) {
   const [selectedView, setSelectedView] = useLocalStorage('@EXAMPLE-PARA/selectedView', 'OLD_VIEW');
   const [selectedEnv, setSelectedEnv] = useLocalStorage('@EXAMPLE-PARA/selectedEnv', Environment.SANDBOX);
   const [selectedApiKey, setSelectedApiKey] = useLocalStorage('@EXAMPLE-PARA/selectedApiKey', API_KEY_WITH_BRANDING);
@@ -540,7 +461,6 @@ function App() {
   const [font, setFont] = useLocalStorage('@EXAMPLE-PARA/font', 'inter');
   const [logoVariant, setLogoVariant] = useLocalStorage('@EXAMPLE-PARA/logoVariant', 'branded');
 
-  const [externalWallets, setExternalWallets] = useLocalStorage('@EXAMPLE-PARA/externalWallets', []);
   const [onRampTestMode, setOnRampTestMode] = useLocalStorage('@EXAMPLE-PARA/onRampTestMode', true);
   const [hideWallets, setHideWallets] = useLocalStorage('@EXAMPLE-PARA/hideWallets', false);
 
@@ -557,7 +477,6 @@ function App() {
   const [pregenUserShare, setPregenUserShare] = useLocalStorage<string>('@EXAMPLE-PARA/pregenUserShare', '');
   const [deletedEmail, setDeletedEmail] = useState('');
   const [emailPendingDeletion, setEmailPendingDeletion] = useState('');
-  const [isSessionActive, setIsSessionActive] = useState(false);
   const [txToAddress, setTxToAddress] = useState(DEFAULT_TO_ADDRESS);
   const [txValue, setTxValue] = useState(DEFAULT_VALUE);
   const [txGasAmount, setTxGasAmount] = useState(DEFAULT_GAS_AMOUNT);
@@ -576,41 +495,20 @@ function App() {
   const [ethersSignature, setEthersSignature] = useState('');
   const [solanaSignature, setSolanaSignature] = useState('');
 
-  const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [currentStepOverride, setCurrentStepOverride] = useState<ModalStepProp | undefined>(undefined);
+  const { data: paraAccount, isLoading: isAccountLoading } = useParaAccount();
 
-  const [para, setPara] = useState<Para | undefined>();
-  const [paraError, setParaError] = useState<Error | undefined>();
+  const { openModal } = useModal();
+  const para = useClient();
 
   useEffect(() => {
-    async function create() {
-      try {
-        const _para = new Para(selectedEnv, selectedApiKey, {
-          ...getParaOpts(selectedEnv, useDKLS),
-          homepageUrl,
-          xUrl: 'https://twitter.com/get_para',
-          linkedinUrl: 'https://www.linkedin.com/company/parahq',
-          supportUrl: 'mailto:support@getpara.com',
-          portalTheme: useTheme ? { backgroundColor, foregroundColor } : undefined,
-        });
-        _para.ctx.isE2E = process?.env?.REACT_APP_IS_E2E === 'true';
-        await _para.touchSession();
-        setParaError(undefined);
-        return _para;
-      } catch (e) {
-        console.error(e);
-
-        setParaError(e);
-        throw new Error(e);
-      }
+    if (para && para.ctx.isE2E !== (process?.env?.REACT_APP_IS_E2E === 'true')) {
+      para.ctx.isE2E = process?.env?.REACT_APP_IS_E2E === 'true';
     }
-
-    create().then(setPara);
-  }, [selectedEnv, useDKLS, selectedApiKey, foregroundColor, backgroundColor, useTheme, homepageUrl]);
+  }, [para]);
 
   const isMultiWallet = Object.values(para?.supportedWalletTypes ?? []).length > 1;
 
-  const [[walletType, walletId, isPregen], setWallet] = useState<[WalletType | undefined, string | undefined]>(
+  const [[walletType, walletId, isPregen], setWallet] = useState<[WalletType | undefined, string | undefined, boolean]>(
     (() => {
       try {
         if (para) {
@@ -636,7 +534,6 @@ function App() {
 
   async function checkIsSessionActive() {
     const isFullyLoggedIn = await para?.isSessionActive();
-    setIsSessionActive(isFullyLoggedIn);
     if (isFullyLoggedIn && para instanceof ParaCore) {
       console.log(`exported session:\n${(para as ParaCore).exportSession()}`);
     }
@@ -649,7 +546,7 @@ function App() {
 
   useEffect(() => {
     checkIsSessionActive();
-  }, [para]);
+  }, [paraAccount?.isConnected]);
 
   useEffect(() => {
     async function fetchPartners() {
@@ -694,11 +591,6 @@ function App() {
     }
   }, [selectedApiKey, partners]);
 
-  const handleOnClose = async () => {
-    setModalIsOpen(false);
-    await checkIsSessionActive();
-  };
-
   const handleDeleteClick = async () => {
     setDeleteButtonDisabled(true);
     if (!(await para?.isFullyLoggedIn())) {
@@ -717,7 +609,6 @@ function App() {
           setSecondsToDelete(i - 1);
           if (i - 1 === 0) {
             setParaKey(prevKey => prevKey + 1);
-            setIsSessionActive(false);
             setDeletedEmail('');
             setDeleteButtonDisabled(false);
             setSecondsToDelete(4);
@@ -749,17 +640,17 @@ function App() {
 
   useEffect(() => {
     if (walletId && !para?.wallets[walletId]) {
-      setWallet([undefined, undefined]);
+      setWallet([undefined, undefined, false]);
     }
 
     if (!walletId || !para?.wallets[walletId]) {
-      let wallet;
+      let wallet: Omit<Wallet, 'signer'> | undefined;
       try {
         wallet = para?.findWallet();
       } catch (e) {
         console.error(e);
       } finally {
-        wallet && setWallet([wallet.type, wallet.id]);
+        wallet && setWallet([wallet.type, wallet.id, !!wallet.pregenIdentifier]);
       }
     }
   }, [walletId, para?.currentWalletIds, para?.wallets]);
@@ -768,6 +659,10 @@ function App() {
     !!walletId && para?.wallets[walletId]?.scheme !== 'ED25519',
     !!walletId && para?.wallets[walletId]?.scheme === 'ED25519',
   ];
+
+  if (isAccountLoading) {
+    return null;
+  }
 
   return (
     <>
@@ -845,7 +740,7 @@ function App() {
           </HStack>
           {selectedView === 'WAGMI' && (
             <VStack align="left" spacing={5}>
-              <WagmiComponent para={para} />
+              <WagmiComponent />
             </VStack>
           )}
           {selectedView === 'OLD_VIEW' && (
@@ -942,17 +837,6 @@ function App() {
               </VStack>
               <HStack>
                 <Text width={'15%'}>
-                  <strong>External Wallets:</strong>
-                </Text>
-                <ArrayField<ExternalWallet>
-                  value={externalWallets}
-                  onChange={setExternalWallets}
-                  rowTitle={id => id}
-                  remaining={Object.keys(ExternalWallet)}
-                />
-              </HStack>
-              <HStack>
-                <Text width={'15%'}>
                   <strong>On-Ramp Test Mode:</strong>
                 </Text>
                 <Checkbox isChecked={onRampTestMode} onChange={e => setOnRampTestMode(e.currentTarget.checked)} />
@@ -970,12 +854,12 @@ function App() {
                 </Text>
                 <Checkbox
                   isChecked={!!currentStepOverride}
-                  onChange={e => setCurrentStepOverride(e.currentTarget.checked ? 'SIGN_UP' : undefined)}
+                  onChange={e => setCurrentStepOverride(e.currentTarget.checked ? ModalStep.AUTH_MAIN : undefined)}
                 />
                 <Select
                   isDisabled={!currentStepOverride}
                   value={currentStepOverride}
-                  onChange={e => setCurrentStepOverride(e.target.value)}
+                  onChange={e => setCurrentStepOverride(e.target.value as ModalStep)}
                 >
                   {Object.keys(ModalStep).map(step => (
                     <option key={step} value={step}>
@@ -985,22 +869,15 @@ function App() {
                 </Select>
               </HStack>
               <HStack>
-                <Button
-                  colorScheme="green"
-                  isDisabled={!para}
-                  onClick={() => {
-                    setModalIsOpen(true);
-                  }}
-                >
+                <Button colorScheme="green" isDisabled={!para} onClick={openModal}>
                   Open Modal
                 </Button>
-                {isSessionActive && (
+                {paraAccount.isConnected && (
                   <>
                     <Button
                       colorScheme="green"
                       onClick={async () => {
                         await para?.logout();
-                        setIsSessionActive(false);
                       }}
                     >
                       Log Out
@@ -1022,7 +899,10 @@ function App() {
                     <Button
                       colorScheme="teal"
                       onClick={async () => {
-                        const newShare = await para?.distributeNewWalletShare(para?.findWalletId(walletId), undefined, true);
+                        const newShare = await para?.distributeNewWalletShare({
+                          walletId: para?.findWalletId(walletId),
+                          skipBiometricShareCreation: true,
+                        });
 
                         const backupDecryptionKey = JSON.parse(newShare || '{}').backupDecryptionKey;
 
@@ -1032,7 +912,10 @@ function App() {
                       Regen Recovery
                     </Button>
                     <HStack>
-                      <select value={pregenIdentifierType} onChange={e => setPregenIdentifierType(e.currentTarget.value)}>
+                      <select
+                        value={pregenIdentifierType}
+                        onChange={e => setPregenIdentifierType(e.currentTarget.value as any)}
+                      >
                         {PREGEN_IDENTIFIER_TYPES.map(type => (
                           <option key={type} value={type}>
                             {type}
@@ -1046,7 +929,7 @@ function App() {
                         }}
                         value={pregenIdentifier}
                       />
-                      <select value={pregenWalletType} onChange={e => setPregenWalletType(e.currentTarget.value)}>
+                      <select value={pregenWalletType} onChange={e => setPregenWalletType(e.currentTarget.value as any)}>
                         <option key="missing" value="missing">
                           MISSING
                         </option>
@@ -1060,11 +943,11 @@ function App() {
                     <Button
                       colorScheme="teal"
                       onClick={async () => {
-                        await para?.createPregenWalletPerType(
+                        await para?.createPregenWalletPerType({
                           pregenIdentifier,
                           pregenIdentifierType,
-                          pregenWalletType === 'missing' ? undefined : [pregenWalletType],
-                        );
+                          types: pregenWalletType === 'missing' ? undefined : [pregenWalletType],
+                        });
 
                         updateToString();
                       }}
@@ -1096,7 +979,6 @@ function App() {
                       <Button
                         flex={1}
                         colorScheme="teal"
-                        disabled={}
                         onClick={async () => {
                           await para?.setUserShare(pregenUserShare);
 
@@ -1109,7 +991,7 @@ function App() {
 
                     <Button
                       colorScheme="teal"
-                      isDisabled={!isSessionActive || Object.values(para?.pregenIds || []).flat().length === 0}
+                      isDisabled={!paraAccount.isConnected || Object.values(para?.pregenIds || []).flat().length === 0}
                       onClick={async () => {
                         console.log(await para?.claimPregenWallets());
                         updateToString();
@@ -1121,7 +1003,7 @@ function App() {
                     <Button colorScheme="teal" onClick={checkIsSessionActive}>
                       Is Fully Logged In?
                     </Button>
-                    <Text>{isSessionActive ? 'Fully Logged In!' : 'Log In Pending...'}</Text>
+                    <Text>{paraAccount.isConnected ? 'Fully Logged In!' : 'Log In Pending...'}</Text>
 
                     {Object.entries(para?.wallets ?? {}).length > 0 && (
                       <Select
@@ -1129,7 +1011,7 @@ function App() {
                         onChange={e => {
                           const [walletType, walletId] = e.target.value.split('~');
 
-                          setWallet([walletType as WalletType, walletId]);
+                          setWallet([walletType as WalletType, walletId, false]);
                         }}
                       >
                         {Object.entries(para?.currentWalletIds ?? {}).map(([type, ids]) => (
@@ -1177,7 +1059,7 @@ function App() {
                         <HStack>
                           <select
                             value={updatePregenIdentifierType}
-                            onChange={e => setUpdatePregenIdentifierType(e.currentTarget.value)}
+                            onChange={e => setUpdatePregenIdentifierType(e.currentTarget.value as any)}
                           >
                             {PREGEN_IDENTIFIER_TYPES.map(type => (
                               <option key={type} value={type}>
@@ -1196,11 +1078,11 @@ function App() {
                         <Button
                           colorScheme="teal"
                           onClick={async () => {
-                            await para?.updateWalletIdentifierPreGen(
-                              updatePregenIdentifier,
+                            await para?.updatePregenWalletIdentifier({
+                              newPregenIdentifier: updatePregenIdentifier,
                               walletId,
-                              updatePregenIdentifierType,
-                            );
+                              newPregenIdentifierType: updatePregenIdentifierType,
+                            });
 
                             updateToString();
                           }}
@@ -1330,7 +1212,7 @@ function App() {
                           '140000',
                           '1',
                           '3',
-                          nonce,
+                          parseInt(nonce),
                           DEFAULT_CHAIN_ID,
                           JSON.stringify(MINTER_CONTRACT_ABI),
                           'mintPublic',
@@ -1365,52 +1247,85 @@ function App() {
                 </VStack>
                 <Box flexGrow={1} bg="#222" overflow="auto" maxH="100vh" position="sticky" top={0}>
                   <Box color="white" fontFamily={'monospace'} whiteSpace={'pre'} p={6} fontSize="14px">
-                    {paraError?.message ?? para?.toString()}
+                    {para?.toString()}
                   </Box>
                 </Box>
               </HStack>
             </VStack>
           )}
         </Container>
-        {para && (
-          <ParaModal
-            isOpen={modalIsOpen}
-            para={para}
-            appName={(partners || []).find(({ apiKey }) => apiKey === selectedApiKey)?.displayName || 'Example'}
-            onClose={handleOnClose}
-            oAuthMethods={[
-              OAuthMethod.GOOGLE,
-              OAuthMethod.TELEGRAM,
-              OAuthMethod.FACEBOOK,
-              OAuthMethod.APPLE,
-              OAuthMethod.TWITTER,
-              OAuthMethod.DISCORD,
-              OAuthMethod.FARCASTER,
-            ]}
-            onRampTestMode={onRampTestMode}
-            hideWallets={hideWallets}
-            twoFactorAuthEnabled
-            theme={
-              useTheme
-                ? {
-                    mode: isDarkTheme ? 'dark' : 'light',
-                    backgroundColor,
-                    foregroundColor,
-                    borderRadius,
-                    font,
-                    oAuthLogoVariant: logoVariant,
-                  }
-                : {}
-            }
-            logo={logo !== '' ? logo : undefined}
-            currentStepOverride={currentStepOverride ?? undefined}
-          />
-        )}
       </ChakraProvider>
       <ToastContainer />
     </>
   );
 }
+
+const App = () => {
+  const [selectedView] = useLocalStorage('@EXAMPLE-PARA/selectedView', 'OLD_VIEW');
+  const [selectedEnv] = useLocalStorage('@EXAMPLE-PARA/selectedEnv', Environment.SANDBOX);
+  const [selectedApiKey] = useLocalStorage('@EXAMPLE-PARA/selectedApiKey', API_KEY_WITH_BRANDING);
+  const [useDKLS] = useLocalStorage('@EXAMPLE-PARA/useDKLS', true);
+  const [partners] = useLocalStorage<Partner[]>('@EXAMPLE-PARA/partners', []);
+  const [logo] = useLocalStorage('@EXAMPLE-PARA/logo', '');
+  const [useTheme] = useLocalStorage('@EXAMPLE-PARA/useTheme', false);
+  const [isDarkTheme] = useLocalStorage('@EXAMPLE-PARA/useTheme', false);
+  const [foregroundColor] = useLocalStorage('@EXAMPLE-PARA/foregroundColor', '#FAFAFA');
+  const [backgroundColor] = useLocalStorage('@EXAMPLE-PARA/backgroundColor', '#121212');
+  const [borderRadius] = useLocalStorage('@EXAMPLE-PARA/borderRadius', 'sm');
+  const [font] = useLocalStorage('@EXAMPLE-PARA/font', 'inter');
+  const [logoVariant] = useLocalStorage('@EXAMPLE-PARA/logoVariant', 'branded');
+  const [onRampTestMode] = useLocalStorage('@EXAMPLE-PARA/onRampTestMode', true);
+  const [hideWallets] = useLocalStorage('@EXAMPLE-PARA/hideWallets', false);
+
+  const [currentStepOverride, setCurrentStepOverride] = useState<ModalStepProp | undefined>(undefined);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ParaProvider
+        paraClientConfig={{
+          env: selectedEnv,
+          apiKey: selectedApiKey,
+          opts: {
+            ...getParaOpts(selectedEnv, useDKLS),
+          },
+        }}
+        config={{
+          appName: (partners || []).find(({ apiKey }) => apiKey === selectedApiKey)?.displayName || 'Example',
+          // Since Wagmi uses a separate provider we want to not use this modal for wagmi
+          disableEmbeddedModal: selectedView === 'WAGMI',
+        }}
+        paraModalConfig={{
+          currentStepOverride,
+          logo: logo !== '' ? logo : undefined,
+          theme: useTheme
+            ? {
+                mode: isDarkTheme ? 'dark' : 'light',
+                backgroundColor,
+                foregroundColor,
+                borderRadius: borderRadius as any,
+                font,
+                oAuthLogoVariant: logoVariant as any,
+              }
+            : {},
+          twoFactorAuthEnabled: true,
+          hideWallets,
+          onRampTestMode,
+          oAuthMethods: [
+            OAuthMethod.GOOGLE,
+            OAuthMethod.TELEGRAM,
+            OAuthMethod.FACEBOOK,
+            OAuthMethod.APPLE,
+            OAuthMethod.TWITTER,
+            OAuthMethod.DISCORD,
+            OAuthMethod.FARCASTER,
+          ],
+        }}
+      >
+        <AppInner currentStepOverride={currentStepOverride} setCurrentStepOverride={setCurrentStepOverride} />
+      </ParaProvider>
+    </QueryClientProvider>
+  );
+};
 
 const createTransaction = async (
   walletAddress: string,

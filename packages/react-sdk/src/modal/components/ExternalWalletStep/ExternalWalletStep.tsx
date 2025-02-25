@@ -3,11 +3,11 @@ import { CenteredText, InnerStepContainer, QRContainer, StepContainer } from '..
 import { useEffect, useMemo } from 'react';
 import { useModalStore } from '../../stores/index.js';
 import styled from 'styled-components';
-import { useExternalWallets } from '../../providers/ExternalWalletContext.js';
 import { useCopyToClipboard } from '@getpara/react-common';
 import { ModalStep } from '../../utils/steps.js';
 import { isMobile, isTablet, WalletType } from '@getpara/web-sdk';
 import { routeMobileExternalWallet } from '../../utils/routeMobileExternalWallet.js';
+import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 
 export const ExternalWalletStep = () => {
   const [isCopied, copy] = useCopyToClipboard();
@@ -20,11 +20,15 @@ export const ExternalWalletStep = () => {
   }, [qrUri]);
 
   const handleTryAgainClick = async () => {
-    await connectExternalWallet(wallet);
+    if (wallet) {
+      await connectExternalWallet(wallet);
+    }
   };
 
   const handleCopy = () => {
-    copy(qrUri);
+    if (qrUri) {
+      copy(qrUri);
+    }
   };
 
   const Content = useMemo(() => {

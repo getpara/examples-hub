@@ -1,7 +1,7 @@
 import { icon } from './keplrIcon.js';
 import { WalletWithType } from '../../../types/Wallet.js';
 import { WalletType } from '@getpara/graz';
-import { isMobile } from '@getpara/react-sdk';
+import { isMobile } from '@getpara/web-sdk';
 
 export const keplrWallet = (): WalletWithType => {
   return {

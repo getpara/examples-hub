@@ -1,4 +1,4 @@
-import { useExternalWallets } from '../providers/ExternalWalletContext.js';
+import { useExternalWallets } from '../../provider/providers/ExternalWalletProvider.js';
 import { useModalStore } from '../stores/index.js';
 import { getAddFundsStep, ModalStep } from '../utils/steps.js';
 
@@ -11,7 +11,7 @@ export const useGoBack = () => {
   const { setChainIdSwitchingTo } = useExternalWallets();
 
   const goBack = () => {
-    if (currentStep === ModalStep.ADD_FUNDS_AWAITING) {
+    if (accountAddFundTab && currentStep === ModalStep.ADD_FUNDS_AWAITING) {
       setStep(getAddFundsStep(accountAddFundTab));
     } else {
       decrementStep();
@@ -19,8 +19,10 @@ export const useGoBack = () => {
     switch (currentStep) {
       case ModalStep.VERIFY_2FA:
       case ModalStep.BIOMETRIC_CREATION:
-      case ModalStep.BIOMETRIC_LOGIN: {
+      case ModalStep.BIOMETRIC_LOGIN:
+      case ModalStep.EX_WALLET_SELECTED: {
         resetState();
+
         break;
       }
     }
