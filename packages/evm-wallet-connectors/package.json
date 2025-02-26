@@ -1,6 +1,6 @@
 {
   "name": "@getpara/evm-wallet-connectors",
-  "version": "1.4.0",
+  "version": "2.0.0-alpha.0",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@coinbase/wallet-sdk": "4.3.0",
-    "@getpara/wagmi-v2-connector": "1.0.0",
-    "@getpara/web-sdk": "^1.4.0",
+    "@getpara/wagmi-v2-connector": "2.0.0-alpha.0",
+    "@getpara/web-sdk": "^2.0.0-alpha.0",
     "viem": "2.x",
     "wagmi": "2.x",
     "zustand": "^4.5.2",
@@ -23,7 +23,7 @@
     "test": "vitest run --coverage"
   },
   "devDependencies": {
-    "@getpara/react-common": "^1.4.0",
+    "@getpara/react-common": "^2.0.0-alpha.0",
     "@types/react": "^18.0.31",
     "@types/react-dom": "^18.2.7",
     "typescript": "^5.4.3"

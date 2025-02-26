@@ -27,6 +27,8 @@
     "lerna-version": "lerna version --tag-version-prefix=\"getpara-\"",
     "lerna-publish": "lerna publish from-package --no-private",
     "lerna-publish-dev": "lerna publish preminor --preid dev --dist-tag dev",
+    "alpha-version": "lerna version prerelease --preid alpha --no-push --no-git-tag-version",
+    "alpha-publish": "lerna publish --dist-tag alpha --no-private",
     "prepare": "husky",
     "test": "lerna run test",
     "e2e": "playwright test --headed"

@@ -1,13 +1,13 @@
 {
   "name": "@getpara/wagmi-v2-connector",
-  "version": "1.0.0",
+  "version": "2.0.0-alpha.0",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "sideEffects": false,
   "dependencies": {
-    "@getpara/web-sdk": "1.4.0",
-    "@getpara/viem-v2-integration": "1.4.0"
+    "@getpara/web-sdk": "2.0.0-alpha.0",
+    "@getpara/viem-v2-integration": "2.0.0-alpha.0"
   },
   "scripts": {
     "build": "rm -rf dist && yarn typegen && node ./scripts/build.mjs",
