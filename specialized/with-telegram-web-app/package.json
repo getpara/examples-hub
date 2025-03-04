@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "predeploy": "yarn run build",
-    "deploy": "gh-pages -d dist --dest with-telegram-web-app --add true"
+    "deploy": "gh-pages -d dist --dest with-telegram-web-app --add true -b gh-pages"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.2",
