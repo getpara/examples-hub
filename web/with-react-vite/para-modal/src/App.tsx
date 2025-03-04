@@ -55,6 +55,7 @@ export default function Home() {
         className="rounded-none px-4 py-2 bg-blue-900 text-white hover:bg-blue-950">
         Open Para Modal
       </button>
+
       {error && <p className="text-red-500 text-sm text-center">{error}</p>}
       <ParaModal
         para={para}

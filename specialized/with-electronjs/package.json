@@ -38,7 +38,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@usecapsule/react-sdk": "latest",
+    "@getpara/react-sdk": "^1.4.4",
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.0",
     "dotenv": "^16.4.5",

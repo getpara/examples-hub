@@ -10,8 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@getpara/ethers-v6-integration": "1.3.0",
-    "@getpara/react-sdk": "1.3.0",
+    "@getpara/ethers-v6-integration": "1.4.4",
+    "@getpara/react-sdk": "1.4.4",
     "ethers": "^6.13.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
