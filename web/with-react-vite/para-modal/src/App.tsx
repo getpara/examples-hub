@@ -39,8 +39,46 @@ export default function Home() {
 
   const handleCloseModal = async () => {
     handleCheckIfAuthenticated();
+    console.log(para.exportSession());
     setIsOpen(false);
   };
+
+  async function testWorkerEndpoint() {
+    try {
+      // Export the current Para session.
+      const session = para.exportSession();
+
+      // Build the request body for your Worker.
+      const requestBody = {
+        to: "0x1234567890123456789012345678901234567890",
+        value: "1",
+        contractAddress: "0x1234567890123456789012345678901234567890",
+        serializedSession: session,
+        decimals: 18,
+      };
+
+      // Send a POST request to your Worker.
+      const response = await fetch("http://localhost:17004", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      console.log("Response status:", response);
+
+      if (!response.ok) {
+        throw new Error(`Worker returned error ${response.status} - ${response.statusText}`);
+      }
+
+      // Parse and log the response.
+      const data = await response.json();
+      console.log("Response from the Worker:", data);
+    } catch (error) {
+      console.error("Error testing Worker endpoint:", error);
+    }
+  }
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen gap-6 p-8">
@@ -55,10 +93,16 @@ export default function Home() {
         className="rounded-none px-4 py-2 bg-blue-900 text-white hover:bg-blue-950">
         Open Para Modal
       </button>
+      <button
+        onClick={testWorkerEndpoint}
+        className="rounded-none px-4 py-2 bg-blue-900 text-white hover:bg-blue-950">
+        Test Backend
+      </button>
       {error && <p className="text-red-500 text-sm text-center">{error}</p>}
       <ParaModal
+        bareModal
         para={para}
-        isOpen={isOpen}
+        isOpen={true}
         onClose={handleCloseModal}
         disableEmailLogin={false}
         disablePhoneLogin={false}
