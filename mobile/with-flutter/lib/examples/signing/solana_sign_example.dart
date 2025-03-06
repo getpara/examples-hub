@@ -1,11 +1,11 @@
-import 'dart:convert';
-
 import 'package:para_flutter/client/para.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:para/para.dart';
-import 'package:solana_web3/solana_web3.dart' as web3;
-import 'package:solana_web3/programs.dart' as programs;
+import 'package:solana/solana.dart' as web3;
+
+Uri devnetRpcUrl = Uri.parse('https://api.devnet.solana.com');
+Uri devnetWsUrl = Uri.parse('wss://api.devnet.solana.com');
 
 class SolanaSignExample extends StatefulWidget {
   final Wallet wallet;
@@ -23,9 +23,12 @@ class _SolanaSignExampleState extends State<SolanaSignExample> {
   final _formKey = GlobalKey<FormState>();
   final _recipientController = TextEditingController();
   final _amountController = TextEditingController();
+  late final web3.SolanaClient _solanaClient;
+  late final ParaSolanaWeb3Signer _solanaSigner;
   bool _isLoading = false;
   String? _lastSignature;
   String? _error;
+  double? _balanceSol;
 
   @override
   void dispose() {
@@ -34,7 +37,28 @@ class _SolanaSignExampleState extends State<SolanaSignExample> {
     super.dispose();
   }
 
-// This method assumes usage of solan_web3 (https://pub.dev/packages/solana_web3) package but can be adapted to other Solana libraries like the solana package (https://pub.dev/packages/solana). The key when signing a transaction is to first construct the transaction and then sign on the raw message bytes by calling the signMessage method on the Para client. The message bytes can be obtained by serializing the transaction message. The signature returned by the signMessage method can then be added to the transaction object. The transaction can then be sent to the Solana network.
+  @override
+  void initState() {
+    super.initState();
+
+    _solanaClient =
+        web3.SolanaClient(rpcUrl: devnetRpcUrl, websocketUrl: devnetWsUrl);
+    _solanaSigner =
+        ParaSolanaWeb3Signer(para: para, solanaClient: _solanaClient);
+
+    _checkBalance();
+  }
+
+  void _checkBalance() async {
+    final balance =
+        await _solanaClient.rpcClient.getBalance(widget.wallet.address!);
+
+    setState(() {
+      _balanceSol = balance.value / web3.lamportsPerSol;
+    });
+  }
+
+// This method assumes usage of solana (https://pub.dev/packages/solana) package.
   Future<void> _signTransaction() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -45,50 +69,27 @@ class _SolanaSignExampleState extends State<SolanaSignExample> {
     });
 
     try {
-      final connection = web3.Connection(web3.Cluster.devnet);
+      final publicKey =
+          web3.Ed25519HDPublicKey.fromBase58(widget.wallet.address!);
+      final blockhash =
+          (await _solanaClient.rpcClient.getLatestBlockhash()).value;
+      final lamports =
+          web3.lamportsPerSol * double.parse(_amountController.text);
 
-      final publicKey = web3.Pubkey.fromBase58(widget.wallet.address!);
+      final instruction = web3.SystemInstruction.transfer(
+          fundingAccount: publicKey,
+          recipientAccount:
+              web3.Ed25519HDPublicKey.fromBase58(_recipientController.text),
+          lamports: lamports.toInt());
 
-      final blockhash = await connection.getLatestBlockhash();
-
-      final lamports = web3.solToLamports(double.parse(_amountController.text));
-
-      final transaction = web3.Transaction.v0(
-        payer: publicKey,
-        recentBlockhash: blockhash.blockhash,
-        instructions: [
-          programs.SystemProgram.transfer(
-            fromPubkey: publicKey,
-            toPubkey: web3.Pubkey.fromBase58(_recipientController.text),
-            lamports: lamports,
-          ),
-        ],
-      );
-
-      final message = Uint8List.fromList(transaction.serializeMessage().toList());
-
-      final messageBase64 = base64Encode(message);
-
-      final result = await para.signMessage(
-        walletId: widget.wallet.id!,
-        messageBase64: messageBase64,
-      );
-
-      late final Uint8List signature;
-      if (result is SuccessfulSignatureResult) {
-        signature = base64.decode(result.signature);
-      } else if (result is DeniedSignatureResultWithUrl) {
-        throw Exception('Signature denied: ${result.transactionReviewUrl}');
-      } else {
-        throw Exception('Signature denied');
-      }
-
-      transaction.addSignature(publicKey, signature);
-
-      final signatureString = web3.base58.encode(transaction.signature!);
+      final message = web3.Message(instructions: [instruction]);
+      final compiledMessage = message.compile(
+          recentBlockhash: blockhash.blockhash, feePayer: publicKey);
+      final signedTransaction =
+          await _solanaSigner.signTransaction(compiledMessage);
 
       setState(() {
-        _lastSignature = signatureString;
+        _lastSignature = signedTransaction.signatures.first.toString();
         _isLoading = false;
       });
     } catch (e) {
@@ -99,7 +100,7 @@ class _SolanaSignExampleState extends State<SolanaSignExample> {
     }
   }
 
-  Future<void> _signWithSolanaWeb3Adaptter() async {
+  Future<void> _sendTransaction() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
@@ -109,32 +110,30 @@ class _SolanaSignExampleState extends State<SolanaSignExample> {
     });
 
     try {
-      final connection = web3.Connection(web3.Cluster.devnet);
+      final publicKey =
+          web3.Ed25519HDPublicKey.fromBase58(widget.wallet.address!);
+      final blockhash =
+          (await _solanaClient.rpcClient.getLatestBlockhash()).value;
+      final lamports =
+          web3.lamportsPerSol * double.parse(_amountController.text);
 
-      final solanaWeb3Signer = ParaSolanaWeb3Signer(para: para, connection: connection);
+      final instruction = web3.SystemInstruction.transfer(
+          fundingAccount: publicKey,
+          recipientAccount:
+              web3.Ed25519HDPublicKey.fromBase58(_recipientController.text),
+          lamports: lamports.toInt());
 
-      final publicKey = web3.Pubkey.fromBase58(widget.wallet.address!);
+      final message = web3.Message(instructions: [instruction]);
+      final compiledMessage = message.compile(
+          recentBlockhash: blockhash.blockhash, feePayer: publicKey);
+      final signedTransaction =
+          await _solanaSigner.signTransaction(compiledMessage);
 
-      final blockhash = await connection.getLatestBlockhash();
-
-      final lamports = web3.solToLamports(double.parse(_amountController.text));
-
-      final transaction = web3.Transaction.v0(
-        payer: publicKey,
-        recentBlockhash: blockhash.blockhash,
-        instructions: [
-          programs.SystemProgram.transfer(
-            fromPubkey: publicKey,
-            toPubkey: web3.Pubkey.fromBase58(_recipientController.text),
-            lamports: lamports,
-          ),
-        ],
-      );
-
-      final signedTransaction = await solanaWeb3Signer.signTransaction(transaction);
+      final sendTransaction =
+          await _solanaSigner.sendTransaction(signedTransaction);
 
       setState(() {
-        _lastSignature = signedTransaction.signature.toString();
+        _lastSignature = signedTransaction.signatures.first.toString();
         _isLoading = false;
       });
     } catch (e) {
@@ -171,7 +170,13 @@ class _SolanaSignExampleState extends State<SolanaSignExample> {
                   'Example of signing a transfer transaction on Solana.',
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: _checkBalance,
+                  child: Text(
+                    'Balance: ${_balanceSol ?? 'Loading...'} SOL',
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -187,7 +192,7 @@ class _SolanaSignExampleState extends State<SolanaSignExample> {
                       return 'Please enter a recipient address';
                     }
                     try {
-                      web3.Pubkey.fromBase58(value);
+                      web3.Ed25519HDPublicKey.fromBase58(value);
                       return null;
                     } catch (_) {
                       return 'Invalid Solana address';
@@ -202,7 +207,8 @@ class _SolanaSignExampleState extends State<SolanaSignExample> {
                     hintText: 'Enter amount in SOL',
                     prefixIcon: Icon(Icons.attach_money),
                   ),
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
                   ],
@@ -227,6 +233,17 @@ class _SolanaSignExampleState extends State<SolanaSignExample> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Text('Sign Transaction'),
+                ),
+                const SizedBox(height: 12),
+                ElevatedButton(
+                  onPressed: _isLoading ? null : _sendTransaction,
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Send Transaction'),
                 ),
                 if (_error != null) ...[
                   const SizedBox(height: 24),
@@ -260,9 +277,12 @@ class _SolanaSignExampleState extends State<SolanaSignExample> {
                           IconButton(
                             icon: const Icon(Icons.copy),
                             onPressed: () {
-                              Clipboard.setData(ClipboardData(text: _lastSignature!));
+                              Clipboard.setData(
+                                  ClipboardData(text: _lastSignature!));
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Signature copied to clipboard')),
+                                const SnackBar(
+                                    content:
+                                        Text('Signature copied to clipboard')),
                               );
                             },
                           ),
