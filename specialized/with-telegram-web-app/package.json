@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "predeploy": "yarn run build",
-    "deploy": "gh-pages -d dist --dest with-telegram-web-app --add true"
+    "deploy": "gh-pages -d dist --dest with-telegram-web-app --add true -b gh-pages"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.2",
@@ -16,8 +16,8 @@
     "@radix-ui/react-slot": "^1.1.0",
     "@twa-dev/sdk": "^7.8.0",
     "@types/lodash": "^4.17.13",
-    "@getpara/ethers-v6-integration": "0.2.0",
-    "@getpara/web-sdk": "0.2.0",
+    "@getpara/ethers-v6-integration": "1.4.4",
+    "@getpara/web-sdk": "1.4.4",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "ethers": "6.13.4",
