@@ -1,5 +1,5 @@
 import { BiometricLocationHint } from '@getpara/user-management-client';
-import UAParser from 'ua-parser-js';
+import { UAParser } from 'ua-parser-js';
 import { aaguidMetadata } from '../constants/aaguiMetadata.js';
 
 type FormattedBiometricHint = {
@@ -29,7 +29,7 @@ export const formatBiometricHints = (hints: BiometricLocationHint[]): BiometricH
   let hasMobileDevice = false,
     isOnKnownDevice = false;
 
-  const deviceParsedUA = new UAParser().getResult();
+  const deviceParsedUA = UAParser();
 
   const formattedHintsByKey: Record<string, FormattedBiometricHint> = {};
 

@@ -23,16 +23,20 @@ export const OAuth = ({ methods }: OAuthProps) => {
   const oAuthLogoVariant = useStore(state => state.oAuthLogoVariant);
   const isDark = useStore(state => state.isDarkTheme);
   const para = useInternalClient();
-  const popupWindow = useModalStore(state => state.popupWindow);
+  const refs = useModalStore(state => state.refs);
   const setFlow = useModalStore(state => state.setFlow);
   const setStep = useModalStore(state => state.setStep);
-  const setPopupWindow = useModalStore(state => state.setPopupWindow);
   const setAuthInfo = useUserInfoStore(state => state.setAuthInfo);
   const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
   const setBiometricLocationHints = useModalStore(state => state.setBiometricLocationHints);
   const setFarcasterConnectUri = useModalStore(state => state.setFarcasterConnectUri);
   const farcasterConnectUri = useModalStore(state => state.farcasterConnectUri);
   const showAll = useModalStore(state => state.step === ModalStep.AUTH_MORE);
+  const setIFrameUrl = useModalStore(state => state.setIFrameUrl);
+  const setIsIFrameReady = useModalStore(state => state.setIsIFrameReady);
+  const setAuthStepRoute = useModalStore(state => state.setAuthStepRoute);
+  const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
+  const theme = useStore(state => state.modalConfig?.theme);
 
   useEffect(() => {
     const initializeFarcaster = async () => {
@@ -56,9 +60,6 @@ export const OAuth = ({ methods }: OAuthProps) => {
   };
 
   const handleMethodClick = (method: OAuthMethod) => async () => {
-    if (!!popupWindow) {
-      return;
-    }
     switch (method) {
       case OAuthMethod.FARCASTER:
         if (!farcasterConnectUri) {
@@ -75,22 +76,22 @@ export const OAuth = ({ methods }: OAuthProps) => {
         setStep(ModalStep.AWAITING_OAUTH);
 
         const oAuthURL = await para.getOAuthURL({ method });
-        const oAuthWindow = openPopup(oAuthURL, `${method}AuthPopup`, 'OAUTH');
+        refs.popupWindow.current = openPopup({
+          url: oAuthURL,
+          target: `${method}AuthPopup`,
+          type: 'OAUTH',
+          current: refs.popupWindow.current,
+        });
 
-        setPopupWindow(oAuthWindow);
+        const { email, isError, userExists } = await para.waitForOAuth({ popupWindow: refs.popupWindow.current });
 
-        const { email, isError, userExists } = await para.waitForOAuth({ popupWindow: oAuthWindow });
+        refs.popupWindow.current = null;
 
-        setPopupWindow(undefined);
-
-        if (isError) {
-          goBack();
+        if (isError || !email) {
+          if (refs.currentStep.current === ModalStep.AWAITING_OAUTH) {
+            goBack();
+          }
           return;
-        }
-
-        if (!email) {
-          setStep(ModalStep.AUTH_MAIN);
-          throw new Error('email is required');
         }
 
         setAuthInfo({ email });
@@ -111,8 +112,26 @@ export const OAuth = ({ methods }: OAuthProps) => {
           }
         }
 
+        const supportedCreateAuthMethods = await para.getSupportedCreateAuthMethods();
+
+        setIsIFrameReady(false);
         setFlow('signUp');
-        setStep(ModalStep.BIOMETRIC_CREATION);
+        const supportsPasskey = supportedCreateAuthMethods.has(AuthMethod.PASSKEY);
+        const supportsPassword = supportedCreateAuthMethods.has(AuthMethod.PASSWORD);
+
+        if (supportsPasskey) {
+          setWebAuthURLForCreate(await para.shortenLoginLink(await para.getSetUpBiometricsURL({ authType: 'email' })));
+
+          if (!supportsPassword) {
+            setStep(ModalStep.BIOMETRIC_CREATION);
+            return;
+          }
+        }
+        if (supportsPassword) {
+          setIFrameUrl(await para.shortenLoginLink(await para.getSetupPasswordURL({ authType: 'email', theme })));
+        }
+
+        setAuthStepRoute(supportsPasskey ? ModalStep.BIOMETRIC_CREATION : ModalStep.PASSWORD_CREATION);
         break;
     }
   };

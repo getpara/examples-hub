@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { CpslButton, CpslIcon, CpslQrCode, CpslSpinner, CpslText } from '@getpara/react-components';
 import { CenteredText, Heading, InnerStepContainer, QRContainer, StepContainer } from '../common.js';
 import { useModalStore, useUserInfoStore } from '../../stores/index.js';
@@ -13,7 +13,7 @@ const FarcasterOAuthStep = () => {
   const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
   const setIFrameUrl = useModalStore(state => state.setIFrameUrl);
   const setIsIFrameReady = useModalStore(state => state.setIsIFrameReady);
-  const isIFrameReady = useModalStore(state => state.isIFrameReady);
+  const setAuthStepRoute = useModalStore(state => state.setAuthStepRoute);
   const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
   const setBiometricLocationHints = useModalStore(state => state.setBiometricLocationHints);
   const para = useInternalClient();
@@ -21,17 +21,6 @@ const FarcasterOAuthStep = () => {
   const farcasterConnectUri = useModalStore(state => state.farcasterConnectUri);
   const setFarcasterConnectUri = useModalStore(state => state.setFarcasterConnectUri);
   const theme = useStore(state => state.modalConfig?.theme);
-
-  const [shouldRouteToStep, setShouldRouteToStep] = useState<ModalStep>();
-
-  useEffect(() => {
-    if (!!shouldRouteToStep && isIFrameReady) {
-      // Using a small timeout here to fully ensure the iframe is loaded before triggering any animation
-      setTimeout(() => {
-        setStep(shouldRouteToStep);
-      }, 200);
-    }
-  }, [shouldRouteToStep, isIFrameReady]);
 
   useEffect(() => {
     if (farcasterConnectUri) {
@@ -71,7 +60,7 @@ const FarcasterOAuthStep = () => {
         }
         if (supportedCreateAuthMethods.has(AuthMethod.PASSWORD)) {
           setIFrameUrl(await para.shortenLoginLink(await para.getSetupPasswordURL({ authType: 'farcaster', theme })));
-          setShouldRouteToStep(supportsPasskey ? ModalStep.BIOMETRIC_CREATION : ModalStep.PASSWORD_CREATION);
+          setAuthStepRoute(supportsPasskey ? ModalStep.BIOMETRIC_CREATION : ModalStep.PASSWORD_CREATION);
         }
 
         return;

@@ -26,7 +26,7 @@ export function TelegramOAuthStep() {
   const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
   const setIFrameUrl = useModalStore(state => state.setIFrameUrl);
   const setIsIFrameReady = useModalStore(state => state.setIsIFrameReady);
-  const isIFrameReady = useModalStore(state => state.isIFrameReady);
+  const setAuthStepRoute = useModalStore(state => state.setAuthStepRoute);
   const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
   const theme = useStore(state => state.modalConfig?.theme);
 
@@ -34,16 +34,6 @@ export function TelegramOAuthStep() {
   const [isWaiting, setIsWaiting] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
-  const [shouldRouteToStep, setShouldRouteToStep] = useState<ModalStep>();
-
-  useEffect(() => {
-    if (!!shouldRouteToStep && isIFrameReady) {
-      // Using a small timeout here to fully ensure the iframe is loaded before triggering any animation
-      setTimeout(() => {
-        setStep(shouldRouteToStep);
-      }, 200);
-    }
-  }, [shouldRouteToStep, isIFrameReady]);
 
   useEffect(() => {
     if (!url) {
@@ -105,7 +95,7 @@ export function TelegramOAuthStep() {
               }
               if (supportedCreateAuthMethods.has(AuthMethod.PASSWORD)) {
                 setIFrameUrl(await para.shortenLoginLink(await para.getSetupPasswordURL({ authType: 'telegram', theme })));
-                setShouldRouteToStep(supportsPasskey ? ModalStep.BIOMETRIC_CREATION : ModalStep.PASSWORD_CREATION);
+                setAuthStepRoute(supportsPasskey ? ModalStep.BIOMETRIC_CREATION : ModalStep.PASSWORD_CREATION);
               }
             } else {
               setFlow('login');

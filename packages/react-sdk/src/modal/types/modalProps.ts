@@ -39,6 +39,10 @@ export type TAuthLayout = `${AuthLayout}`;
 
 export interface ParaModalProps {
   /**
+   * Your ParaWeb instance.
+   */
+  para?: ParaWeb;
+  /**
    * Whether or not the modal is open.
    */
   isOpen?: boolean;

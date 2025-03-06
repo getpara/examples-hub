@@ -18,7 +18,7 @@ await esbuild.build({
   outdir: 'dist',
   allowOverwrite: true,
   splitting: true, // Required for tree shaking
-  minify: true,
+  minify: false,
   plugins: [
     compress({
       exclude: ['**/*.map'],

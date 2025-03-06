@@ -248,6 +248,16 @@ describe('Client', () => {
       expect(mocks.post).toBeCalledWith('/users/external-wallets/login', body);
     });
 
+    it('verifyExternalWallet', async () => {
+      const body = {
+        address: 'external-address',
+        signedMessage: 'signedMessage',
+      };
+
+      await client.verifyExternalWallet(userId, body);
+      expect(mocks.post).toBeCalledWith(`/users/${userId}/external-wallets/verify`, body);
+    });
+
     it('verifyEmail', async () => {
       const body = {
         verificationCode: 'verification-code',

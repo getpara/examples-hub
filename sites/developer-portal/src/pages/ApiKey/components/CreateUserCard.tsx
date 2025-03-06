@@ -5,7 +5,7 @@ import { DOCS_LINK } from '../../../utils/constants';
 import { InnerConfigurationCard } from './InnerConfigurationCard';
 import { useParams } from 'react-router-dom';
 import { useGetApiKeySetupStatus } from '../../../hooks/api/queries/useApiKeySetupStatus';
-import { formatPhoneNumber } from '../../../utils/formatPhoneNumber';
+import { formatPhoneNumber } from '@getpara/react-common';
 
 export const CreateUserCard = () => {
   const { apiKey, env, projectId } = useParams();

@@ -5,19 +5,17 @@ import { ModalStep } from '../../utils/steps.js';
 import { Heading, StepContainer, InnerStepContainer } from '../common.js';
 import { openPopup } from '../../utils/openPopup.js';
 import styled from 'styled-components';
-import { AuthMethod, getPublicKeyHex } from '@getpara/web-sdk';
-import { isPasskeySupported } from '../../utils/isPasskeySupported.js';
+import { AuthMethod, getPublicKeyHex, isPasskeySupported } from '@getpara/web-sdk';
 import { BiometricHints, formatBiometricHints, KnownDevices, UserIdentifier } from '@getpara/react-common';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 import { BiometricLocationHint } from '@getpara/user-management-client';
 
 export const BiometricLoginStep = () => {
-  const popupWindow = useModalStore(state => state.popupWindow);
+  const refs = useModalStore(state => state.refs);
   const supportedAuthMethods = useModalStore(state => state.supportedAuthMethods);
   const passwordUrlForLogin = useModalStore(state => state.passwordUrlForLogin);
   const webAuthURLForLogin = useModalStore(state => state.webAuthURLForLogin);
   const setStep = useModalStore(state => state.setStep);
-  const setPopupWindow = useModalStore(state => state.setPopupWindow);
   const biometricLocationHints = useModalStore(state => state.biometricLocationHints);
   const para = useInternalClient();
   const authInfo = useUserInfoStore(state => state.getAuthInfo());
@@ -102,24 +100,30 @@ export const BiometricLoginStep = () => {
   }, [supportedAuthMethods, para]);
 
   const handlePasskeyClick = () => {
-    if (!!popupWindow || !webAuthURLForLogin) {
-      return;
+    if (!!webAuthURLForLogin) {
+      refs.popupWindow.current =
+        openPopup({
+          url: webAuthURLForLogin,
+          target: 'ParaPasskey',
+          type: 'LOGIN_PASSKEY',
+          current: refs.popupWindow.current,
+        }) ?? null;
+
+      setStep(ModalStep.AWAITING_BIOMETRIC_LOGIN);
     }
-
-    const loginWindow = openPopup(webAuthURLForLogin, 'ParaPasskey', 'LOGIN_PASSKEY');
-
-    setPopupWindow(loginWindow);
-    setStep(ModalStep.AWAITING_BIOMETRIC_LOGIN);
   };
 
   const handlePasswordClick = () => {
-    if (!passwordUrlForLogin) {
-      return;
-    }
+    if (!!passwordUrlForLogin) {
+      refs.popupWindow.current = openPopup({
+        url: passwordUrlForLogin,
+        target: 'ParaPassword',
+        type: 'LOGIN_PASSWORD',
+        current: refs.popupWindow.current,
+      });
 
-    const loginWindow = openPopup(passwordUrlForLogin, 'ParaPassword', 'LOGIN_PASSWORD');
-    setPopupWindow(loginWindow);
-    setStep(ModalStep.AWAITING_PASSWORD_LOGIN);
+      setStep(ModalStep.AWAITING_PASSWORD_LOGIN);
+    }
   };
 
   function shouldShowWelcomeBack() {

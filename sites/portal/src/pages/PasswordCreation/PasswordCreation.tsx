@@ -22,6 +22,7 @@ export const PasswordCreation = () => {
   const [passwordVisible, setPasswordVisible] = useState<boolean>();
 
   const [passwordCreated, setPasswordCreated] = useState<boolean>();
+  const [isProcessing, setIsProcessing] = useState<boolean>();
 
   const handlePasswordInput = (ev: CpslInputCustomEvent<InputInputEventDetail>) => {
     setPassword(ev.detail.value);
@@ -57,26 +58,37 @@ export const PasswordCreation = () => {
     return null;
   }
 
-  const handlePasswordClick = async () => {
-    await passwordCreation(para, {
-      partnerId,
-      userId,
-      auth: {
-        email,
-        phone,
-        countryCode,
-        farcasterUsername,
-        telegramUserId,
-      },
-      password,
-      passwordId,
-    });
+  const onSubmit = async () => {
+    if (isProcessing) {
+      return;
+    }
 
-    setPasswordCreated(true);
+    setIsProcessing(true);
 
-    setTimeout(function () {
-      window.close();
-    }, REDIRECT_TIMEOUT);
+    try {
+      await passwordCreation(para, {
+        partnerId,
+        userId,
+        auth: {
+          email,
+          phone,
+          countryCode,
+          farcasterUsername,
+          telegramUserId,
+        },
+        password,
+        passwordId,
+      });
+
+      setPasswordCreated(true);
+
+      setTimeout(function () {
+        window.close();
+      }, REDIRECT_TIMEOUT);
+    } catch (e) {
+      console.error(e);
+      setIsProcessing(false);
+    }
   };
 
   const { partner } = useModalOutletContext();
@@ -100,7 +112,12 @@ export const PasswordCreation = () => {
                   Write down your password somewhere safe. It cannot be recovered.
                 </CpslText>
               </InnerContainer>
-              <InnerContainer>
+              <InnerContainerForm
+                onSubmit={e => {
+                  e.preventDefault();
+                  onSubmit();
+                }}
+              >
                 <CpslInput
                   placeholder="Enter password"
                   type={passwordVisible ? 'text' : 'password'}
@@ -123,6 +140,7 @@ export const PasswordCreation = () => {
                   placeholder="Confirm password"
                   type={passwordVisible ? 'text' : 'password'}
                   onCpslInput={handlePasswordVerificationInput}
+                  onKeyDown={async e => e.key === 'Enter' && onSubmit()}
                   value={passwordVerification}
                   style={{ width: '100%' }}
                 >
@@ -137,10 +155,10 @@ export const PasswordCreation = () => {
                     Passwords do not match.
                   </CpslText>
                 )}
-                <CpslButton fullWidth onClick={handlePasswordClick} disabled={!passwordValid}>
+                <CpslButton fullWidth disabled={!passwordValid || isProcessing} onClick={onSubmit}>
                   Save Password
                 </CpslButton>
-              </InnerContainer>
+              </InnerContainerForm>
             </>
           )}
         </Container>
@@ -157,13 +175,21 @@ const Container = styled.div`
   gap: 34px;
 `;
 
-const InnerContainer = styled.div`
+const innerContainer = `
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
   gap: 8px;
   width: 100%;
+`;
+
+const InnerContainer = styled.div`
+  ${innerContainer}
+`;
+
+const InnerContainerForm = styled.form`
+  ${innerContainer}
 `;
 
 const ClickableIcon = styled(CpslIcon)`

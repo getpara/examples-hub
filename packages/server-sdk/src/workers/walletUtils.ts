@@ -57,15 +57,19 @@ export async function ed25519Keygen(ctx: Ctx, userId: string): Promise<{ signer:
   });
   const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
 
-  const newSigner = (await new Promise((resolve, reject) =>
-    global.ed25519CreateAccount(serverUrl, walletId, protocolId, (err, result) => {
-      if (err) {
-        reject(err);
-      }
-      resolve(result);
-    }),
-  )) as string;
-  return { signer: newSigner, walletId };
+  try {
+    const newSigner = (await new Promise((resolve, reject) =>
+      global.ed25519CreateAccount(serverUrl, walletId, protocolId, (err, result) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(result);
+      }),
+    )) as string;
+    return { signer: newSigner, walletId };
+  } catch (e) {
+    throw new Error(`error creating account of type SOLANA with userId ${userId} and walletId ${walletId}`);
+  }
 }
 
 export async function ed25519PreKeygen(
@@ -81,15 +85,20 @@ export async function ed25519PreKeygen(
   });
 
   const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
-  const newSigner = (await new Promise((resolve, reject) =>
-    global.ed25519CreateAccount(serverUrl, walletId, protocolId, (err, result) => {
-      if (err) {
-        reject(err);
-      }
-      resolve(result);
-    }),
-  )) as string;
-  return { signer: newSigner, walletId };
+
+  try {
+    const newSigner = (await new Promise((resolve, reject) =>
+      global.ed25519CreateAccount(serverUrl, walletId, protocolId, (err, result) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(result);
+      }),
+    )) as string;
+    return { signer: newSigner, walletId };
+  } catch (e) {
+    throw new Error(`error creating account of type SOLANA with walletId ${walletId}`);
+  }
 }
 
 export async function ed25519Sign(
@@ -101,15 +110,19 @@ export async function ed25519Sign(
 ): Promise<{ signature: string }> {
   const { protocolId } = await ctx.client.preSignMessage(userId, walletId, base64Bytes, WalletScheme.ED25519);
 
-  const base64Sig = (await new Promise((resolve, reject) =>
-    global.ed25519Sign(share, protocolId, base64Bytes, (err, result) => {
-      if (err) {
-        reject(err);
-      }
-      resolve(result);
-    }),
-  )) as string;
-  return { signature: base64Sig };
+  try {
+    const base64Sig = (await new Promise((resolve, reject) =>
+      global.ed25519Sign(share, protocolId, base64Bytes, (err, result) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(result);
+      }),
+    )) as string;
+    return { signature: base64Sig };
+  } catch (e) {
+    throw new Error(`error signing for account of type SOLANA with userId ${userId} and walletId ${walletId}`);
+  }
 }
 
 export async function keygen(
@@ -137,22 +150,27 @@ export async function keygen(
     ? configDKLSBase(walletId, 'USER', ctx.disableWebSockets)
     : configCGGMPBase(serverUrl, walletId, 'USER');
   const createAccountFn = ctx.useDKLS ? global.dklsCreateAccount : global.createAccountV2;
-  const newSigner = (await new Promise((resolve, reject) =>
-    createAccountFn(
-      signerConfigUser,
-      serverUrl,
-      protocolId,
-      secretKey,
-      () => {}, // no-op for deprecated callback to update progress percentage
-      (err, result) => {
-        if (err) {
-          reject(err);
-        }
-        resolve(result);
-      },
-    ),
-  )) as string;
-  return { signer: newSigner, walletId };
+
+  try {
+    const newSigner = (await new Promise((resolve, reject) =>
+      createAccountFn(
+        signerConfigUser,
+        serverUrl,
+        protocolId,
+        secretKey,
+        () => {}, // no-op for deprecated callback to update progress percentage
+        (err, result) => {
+          if (err) {
+            reject(err);
+          }
+          resolve(result);
+        },
+      ),
+    )) as string;
+    return { signer: newSigner, walletId };
+  } catch (e) {
+    throw new Error(`error creating account of type ${type} with userId ${userId} and walletId ${walletId}`);
+  }
 }
 
 export async function preKeygen(
@@ -182,22 +200,27 @@ export async function preKeygen(
     ? configDKLSBase(walletId, 'USER', ctx.disableWebSockets)
     : configCGGMPBase(serverUrl, walletId, 'USER');
   const createAccountFn = ctx.useDKLS ? global.dklsCreateAccount : global.createAccountV2;
-  const newSigner = (await new Promise((resolve, reject) =>
-    createAccountFn(
-      signerConfigUser,
-      serverUrl,
-      protocolId,
-      secretKey,
-      () => {}, // no-op for deprecated callback to update progress percentage
-      (err, result) => {
-        if (err) {
-          reject(err);
-        }
-        resolve(result);
-      },
-    ),
-  )) as string;
-  return { signer: newSigner, walletId };
+
+  try {
+    const newSigner = (await new Promise((resolve, reject) =>
+      createAccountFn(
+        signerConfigUser,
+        serverUrl,
+        protocolId,
+        secretKey,
+        () => {}, // no-op for deprecated callback to update progress percentage
+        (err, result) => {
+          if (err) {
+            reject(err);
+          }
+          resolve(result);
+        },
+      ),
+    )) as string;
+    return { signer: newSigner, walletId };
+  } catch (e) {
+    throw new Error(`error creating account of type ${type} with  walletId ${walletId}`);
+  }
 }
 
 export async function signMessage(
@@ -218,14 +241,19 @@ export async function signMessage(
 
   const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
   const signMessageFn = ctx.useDKLS ? global.dklsSignMessage : global.signMessage;
-  return new Promise((resolve, reject) =>
-    signMessageFn(share, serverUrl, message, protocolId, (err, result) => {
-      if (err) {
-        reject(err);
-      }
-      resolve({ signature: result });
-    }),
-  );
+
+  try {
+    return new Promise((resolve, reject) =>
+      signMessageFn(share, serverUrl, message, protocolId, (err, result) => {
+        if (err) {
+          reject(err);
+        }
+        resolve({ signature: result });
+      }),
+    );
+  } catch (e) {
+    throw new Error(`error signing for account with userId ${userId} and walletId ${walletId}`);
+  }
 }
 
 export async function signTransaction(
@@ -249,14 +277,19 @@ export async function signTransaction(
 
   const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
   const signTransactionFn = ctx.useDKLS ? global.dklsSendTransaction : global.sendTransaction;
-  return new Promise((resolve, reject) =>
-    signTransactionFn(share, serverUrl, tx, chainId, protocolId, (err, result) => {
-      if (err) {
-        reject(err);
-      }
-      resolve({ signature: result });
-    }),
-  );
+
+  try {
+    return new Promise((resolve, reject) =>
+      signTransactionFn(share, serverUrl, tx, chainId, protocolId, (err, result) => {
+        if (err) {
+          reject(err);
+        }
+        resolve({ signature: result });
+      }),
+    );
+  } catch (e) {
+    throw new Error(`error signing transaction for account with userId ${userId} and walletId ${walletId}`);
+  }
 }
 
 export async function sendTransaction(
@@ -280,14 +313,19 @@ export async function sendTransaction(
 
   const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
   const sendTransactionFn = ctx.useDKLS ? global.dklsSendTransaction : global.sendTransaction;
-  return new Promise((resolve, reject) =>
-    sendTransactionFn(share, serverUrl, tx, chainId, protocolId, (err, result) => {
-      if (err) {
-        reject(err);
-      }
-      resolve({ signature: result });
-    }),
-  );
+
+  try {
+    return new Promise((resolve, reject) =>
+      sendTransactionFn(share, serverUrl, tx, chainId, protocolId, (err, result) => {
+        if (err) {
+          reject(err);
+        }
+        resolve({ signature: result });
+      }),
+    );
+  } catch (e) {
+    throw new Error(`error signing transaction to send for account with userId ${userId} and walletId ${walletId}`);
+  }
 }
 
 export async function refresh(ctx: Ctx, share: string, walletId: string, userId: string): Promise<string> {
@@ -296,14 +334,19 @@ export async function refresh(ctx: Ctx, share: string, walletId: string, userId:
   } = await ctx.client.refreshKeys(userId, walletId);
   const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
   const refreshFn = ctx.useDKLS ? global.dklsRefresh : global.refresh;
-  return new Promise((resolve, reject) =>
-    refreshFn(share, serverUrl, protocolId, (err, result) => {
-      if (err) {
-        reject(err);
-      }
-      resolve(result);
-    }),
-  );
+
+  try {
+    return new Promise((resolve, reject) =>
+      refreshFn(share, serverUrl, protocolId, (err, result) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(result);
+      }),
+    );
+  } catch (e) {
+    throw new Error(`error refreshing keys for account with userId ${userId} and walletId ${walletId}`);
+  }
 }
 
 export async function getPrivateKey(ctx: Ctx, share: string, walletId: string, userId: string): Promise<string> {
@@ -313,12 +356,16 @@ export async function getPrivateKey(ctx: Ctx, share: string, walletId: string, u
     return '';
   }
 
-  return new Promise((resolve, reject) =>
-    global.getPrivateKey(share, paraShare, (err, result) => {
-      if (err) {
-        reject(err);
-      }
-      resolve(result);
-    }),
-  );
+  try {
+    return new Promise((resolve, reject) =>
+      global.getPrivateKey(share, paraShare, (err, result) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(result);
+      }),
+    );
+  } catch (e) {
+    throw new Error(`error getting private key for account with userId ${userId} and walletId ${walletId}`);
+  }
 }

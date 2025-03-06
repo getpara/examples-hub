@@ -24,6 +24,6 @@ await esbuild.build({
   ],
   external: ['react', 'react-dom'],
   splitting: true, // Required for tree shaking
-  minify: true,
+  minify: false,
   packages: 'external',
 });

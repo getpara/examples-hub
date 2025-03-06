@@ -7,8 +7,7 @@
   "sideEffects": false,
   "dependencies": {
     "@getpara/react-sdk": "2.0.0-alpha.0",
-    "@getpara/wagmi-v2-connector": "2.0.0-alpha.0",
-    "@tanstack/react-query": "^5.0.0"
+    "@getpara/wagmi-v2-connector": "2.0.0-alpha.0"
   },
   "scripts": {
     "build": "rm -rf dist && yarn typegen && node ./scripts/build.mjs",

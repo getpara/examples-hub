@@ -1,11 +1,19 @@
-export function openPopup(
-  popupUrl: string,
-  target: string,
-  type: 'OAUTH' | 'LOGIN_PASSKEY' | 'CREATE_PASSKEY' | 'TRANSACTION_REVIEW' | 'CREATE_PASSWORD' | 'LOGIN_PASSWORD',
-): Window | undefined {
+export function openPopup({
+  url,
+  target,
+  type,
+  current,
+}: {
+  url: string;
+  target: string;
+  type: 'OAUTH' | 'LOGIN_PASSKEY' | 'CREATE_PASSKEY' | 'TRANSACTION_REVIEW' | 'CREATE_PASSWORD' | 'LOGIN_PASSWORD';
+  current?: Window | null;
+}): Window | null {
   if (typeof window === 'undefined') {
-    return;
+    return null;
   }
+
+  current?.close();
 
   const popUpWidth = 560;
   let popUpHeight: number;
@@ -59,12 +67,12 @@ export function openPopup(
   const windowFeatures = `toolbar=no, menubar=no, width=${popUpWidth}, 
     height=${popUpHeight}, top=${top}, left=${left}`;
 
-  let popupWindow = window.open(popupUrl, target, windowFeatures);
+  let popupWindow = window.open(url, target, windowFeatures);
   if (!popupWindow) {
     setTimeout(() => {
-      popupWindow = window.open(popupUrl, '_blank');
+      popupWindow = window.open(url, '_blank');
     }, 0);
   }
 
-  return popupWindow ?? undefined;
+  return popupWindow ?? null;
 }

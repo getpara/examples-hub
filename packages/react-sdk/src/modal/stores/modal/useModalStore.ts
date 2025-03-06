@@ -7,6 +7,7 @@ import { Tab as AddFundsTabType } from '../../components/AddFunds/AddFunds.js';
 import { AuthMethod } from '@getpara/core-sdk';
 import { BiometricLocationHint } from '@getpara/user-management-client';
 import { AuthLayout, TAuthLayout } from '../../types/modalProps.js';
+import { createRef, MutableRefObject } from 'react';
 
 type Flow = 'login' | 'signUp' | 'account';
 
@@ -30,7 +31,6 @@ interface ModalState {
   onModalStepChange?: (value: OnModalStepChangeValue) => void | undefined;
   onRampConfig: OnRampConfig | undefined;
   onRampPurchase: Partial<OnRampPurchase> | undefined;
-  popupWindow: Window | undefined;
   isFullyLoggedIn: boolean;
   accountAddFundTab?: AddFundsTabType;
   selectedExternalWalletId?: string;
@@ -43,6 +43,12 @@ interface ModalState {
   iFrameUrl: string | undefined;
   isIFrameReady: boolean | undefined;
   authLayout?: TAuthLayout[];
+  authStepRoute: ModalStep | undefined;
+  refs: {
+    popupWindow: MutableRefObject<Window | null>;
+    poll: MutableRefObject<{ action: 'login' | 'createPasskey' | 'createPassword'; timeout: number } | null>;
+    currentStep: MutableRefObject<ModalStep | null>;
+  };
 }
 
 export interface ModalActions {
@@ -60,7 +66,6 @@ export interface ModalActions {
   setOnModalStepChange: (fn?: (value: OnModalStepChangeValue) => void) => void;
   setOnRampConfig: (_: OnRampConfig | undefined) => void;
   setOnRampPurchase: (_: Partial<OnRampPurchase> | undefined) => void;
-  setPopupWindow: (_: Window | undefined) => void;
   setIsFullyLoggedIn: (isFullyLoggedIn: boolean) => void;
   setAccountAddFundTab: (accountAddFundTab?: AddFundsTabType) => void;
   setSelectedExternalWalletId: (id?: string) => void;
@@ -73,6 +78,7 @@ export interface ModalActions {
   setIFrameUrl: (_?: string) => void;
   setIsIFrameReady: (_?: boolean) => void;
   setAuthLayout: (authLayout: TAuthLayout[]) => void;
+  setAuthStepRoute: (_?: ModalStep) => void;
 }
 
 export type ModalStore = ModalState & ModalActions;
@@ -87,7 +93,6 @@ export const DEFAULT_MODAL_STATE: Omit<ModalState, 'step' | 'onRampConfig'> = {
   supportedAuthMethods: new Set<AuthMethod>(),
   onModalStepChange: undefined,
   onRampPurchase: undefined,
-  popupWindow: undefined,
   isFullyLoggedIn: false,
   accountAddFundTab: undefined,
   isExternalWalletConnecting: false,
@@ -98,6 +103,12 @@ export const DEFAULT_MODAL_STATE: Omit<ModalState, 'step' | 'onRampConfig'> = {
   iFrameUrl: undefined,
   isIFrameReady: undefined,
   authLayout: [AuthLayout.AUTH_FULL, AuthLayout.EXTERNAL_FULL],
+  authStepRoute: undefined,
+  refs: {
+    popupWindow: createRef(),
+    poll: createRef(),
+    currentStep: createRef(),
+  },
 };
 
 export const useModalStore = create<ModalStore>()(

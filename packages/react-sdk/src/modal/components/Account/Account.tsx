@@ -40,6 +40,7 @@ export const Account = ({ onClose }: AccountProps) => {
     await para.logout();
     await disconnectExternalWallet();
     onClose();
+    setStep(ModalStep.AUTH_MAIN);
     setIsDisconnecting(false);
   };
 

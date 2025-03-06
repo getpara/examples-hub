@@ -21,6 +21,7 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
     const currentStep = get().step;
     const webAuthURLForCreate = get().webAuthURLForCreate;
     const iFrameUrl = get().iFrameUrl;
+    const refs = get().refs;
 
     let prevStep = (isAccount ? AccountPreviousStep : isLogin ? LoginPreviousStep : SignUpPreviousStep)[currentStep];
 
@@ -36,6 +37,9 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
 
       onModalStepChange?.({ previousStep: currentStep, currentStep: prevStep, canGoBack: get().hasPreviousStep() });
     }
+
+    refs.popupWindow.current?.close();
+    refs.popupWindow.current = null;
   },
   hasPreviousStep: () => {
     const isLogin = get().flow === 'login';
@@ -47,9 +51,6 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
       : isLogin
         ? LoginPreviousStep[currentStep]
         : SignUpPreviousStep[currentStep]);
-  },
-  setPopupWindow: popupWindow => {
-    set({ popupWindow });
   },
   setFlow: flow => set({ flow }),
   isLogin: () => get().flow === 'login',
@@ -90,4 +91,5 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
 
     set({ authLayout: uniqueLayouts });
   },
+  setAuthStepRoute: authStepRoute => set({ authStepRoute }),
 });

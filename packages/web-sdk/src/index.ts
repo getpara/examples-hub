@@ -10,6 +10,7 @@ export {
 } from '@getpara/core-sdk';
 export { createCredential, generateSignature, parseCredentialCreationRes } from './cryptography/webAuth.js';
 export { truncateEthAddress } from './utils/truncateEthAddress.js';
+export { isPasskeySupported } from './utils/isPasskeySupported.js';
 export * from './utils/isMobile.js';
 
 export { ParaWeb, ParaCore };

@@ -35,6 +35,10 @@ interface AuthInputProps {
 
 const DEFAULT_COUNTRY = { label: 'United States', value: '+1', selectedLabel: 'US', icon: 'US' as IconType };
 
+function isCcMatch(countryCode: string, option: (typeof countryCodes)[number]) {
+  return countryCode === '+1' ? option.selectedLabel === 'US' : option.value === countryCode;
+}
+
 export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputProps) => {
   const inputRef = useRef<HTMLCpslInputElement>(null);
   const { dropdownMaxHeight, dropdownWidth } = useDropdownPosition(inputRef);
@@ -52,11 +56,11 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
   const setBiometricLocationHints = useModalStore(state => state.setBiometricLocationHints);
 
   const [countryCode, setCountryCode] = useState<CountryCallingCode>(
-    (authInfo?.authType === 'phone' ? authInfo.auth.countryCode : '+1') as CountryCallingCode,
+    (authInfo?.authType === 'phone' ? authInfo.auth.countryCode || '+1' : '+1') as CountryCallingCode,
   );
   const [identifier, setIdentifier] = useState(
     (() => {
-      if (!authInfo || ['telegramUserId', 'farcasterUsername'].includes(authInfo.authType)) {
+      if (!authInfo || ['telegram', 'farcaster'].includes(authInfo.authType)) {
         return '';
       }
       if (authInfo.authType !== 'phone') {
@@ -70,7 +74,9 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
     authInfo && (authInfo.authType === 'email' || authInfo.authType === 'phone') ? authInfo.authType : undefined,
   );
 
-  const [matchedCountryCode, setMatchedCountryCode] = useState<DropdownInputEventDetail>(DEFAULT_COUNTRY);
+  const [matchedCountryCode, setMatchedCountryCode] = useState<DropdownInputEventDetail>(
+    countryCodes.find(option => isCcMatch(countryCode, option)) ?? DEFAULT_COUNTRY,
+  );
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
@@ -98,7 +104,7 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
       isNewEmail = false;
 
     if (!disablePhoneLogin) {
-      const countryCodeInputMatch = countryCodes.find(cc => cc.value === newIdentifier);
+      const countryCodeInputMatch = countryCodes.find(option => isCcMatch(newIdentifier, option));
       if (countryCodeInputMatch) {
         setCountryCode(countryCodeInputMatch.value as CountryCallingCode);
         setMatchedCountryCode(countryCodeInputMatch);

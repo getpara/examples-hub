@@ -1,5 +1,13 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { Wallet, CurrentWalletIds, entityToWallet, EnabledFlow, AuthMethod, OnRampConfig } from '@getpara/web-sdk';
+import { createContext, forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import {
+  Wallet,
+  CurrentWalletIds,
+  entityToWallet,
+  EnabledFlow,
+  AuthMethod,
+  OnRampConfig,
+  isPasskeySupported,
+} from '@getpara/web-sdk';
 import { useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { Body } from '../Body/Body.js';
@@ -7,19 +15,20 @@ import { Footer } from '../Footer/Footer.js';
 import { ParaModalProps } from '../../types/modalProps.js';
 import { DEFAULTS } from '../../constants/defaults.js';
 import { useGoBack } from '../../hooks/useGoBack.js';
-import { openPopup } from '../../utils/openPopup.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
-import {
-  useWaitForAccountCreation,
-  useWaitForLoginAndSetup,
-  useWaitForPasskeyAndCreateWallet,
-} from '../../../provider/index.js';
+import { useWaitForLoginAndSetup, useWaitForPasskeyAndCreateWallet } from '../../../provider/index.js';
+import { useCreateAccount } from '../../hooks/useCreateAccount.js';
+import { formatBiometricHints } from '@getpara/react-common';
 
 type ModalContentProps = Omit<
   ParaModalProps,
   'para' | 'isOpen' | 'theme' | 'branding' | 'onModalStepChange' | 'onExpandModalChange'
 >;
+
+export const ActionsContext = createContext<{ createAccount: ReturnType<typeof useCreateAccount> }>({
+  createAccount: { withPasskey: () => {}, withPassword: () => {} },
+});
 
 export type ModalContentHandle = {
   /**
@@ -44,35 +53,43 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     ref,
   ) => {
     const para = useInternalClient();
+    const refs = useModalStore(state => state.refs);
     const currentStep = useModalStore(state => state.step);
     const webAuthURLForLogin = useModalStore(state => state.webAuthURLForLogin);
-    const webAuthURLForCreate = useModalStore(state => state.webAuthURLForCreate);
     const passwordUrlForLogin = useModalStore(state => state.passwordUrlForLogin);
     const isLogin = useModalStore(state => state.isLogin());
-    const popupWindow = useModalStore(state => state.popupWindow);
     const onRampConfig = useModalStore(state => state.onRampConfig);
     const setStep = useModalStore(state => state.setStep);
     const setBiometricLocationHints = useModalStore(state => state.setBiometricLocationHints);
     const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
-    const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
-    const setPopupWindow = useModalStore(state => state.setPopupWindow);
-    const setIFrameUrl = useModalStore(state => state.setIFrameUrl);
     const setPasswordUrlForLogin = useModalStore(state => state.setPasswordUrlForLogin);
     const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
     const setOnRampConfig = useModalStore(state => state.setOnRampConfig);
     const accountAddFundTab = useModalStore(state => state.accountAddFundTab);
     const setAccountAddFundTab = useModalStore(state => state.setAccountAddFundTab);
     const setRecoveryShare = useUserInfoStore(state => state.setRecoveryShare);
+    const authStepRoute = useModalStore(state => state.authStepRoute);
+    const isIFrameReady = useModalStore(state => state.isIFrameReady);
     const goBack = useGoBack();
     const { connectEmbeddedToExternalConnectors } = useExternalWallets();
     const { waitForLoginAndSetup } = useWaitForLoginAndSetup();
-    const { waitForAccountCreation } = useWaitForAccountCreation();
     const { waitForPasskeyAndCreateWalletAsync } = useWaitForPasskeyAndCreateWallet();
-
-    const loginTimeout = useRef<number>();
-    const createAccountTimeout = useRef<number>();
+    const createAccount = useCreateAccount();
+    const biometricLocationHints = useModalStore(state => state.biometricLocationHints ?? []);
+    const formattedHints = useMemo(() => formatBiometricHints(biometricLocationHints), [biometricLocationHints]);
+    const passkeysSupported = isPasskeySupported();
+    const [hasHints, isOnKnownDevice] = [biometricLocationHints?.length > 0, formattedHints?.isOnKnownDevice ?? false];
 
     const [walletCreationInProgress, setWalletCreationInProgress] = useState(false);
+
+    useEffect(() => {
+      if (!!authStepRoute && isIFrameReady) {
+        // Using a small timeout here to fully ensure the iframe is loaded before triggering any animation
+        setTimeout(() => {
+          setStep(authStepRoute);
+        }, 200);
+      }
+    }, [authStepRoute, isIFrameReady]);
 
     useImperativeHandle(ref, () => {
       return {
@@ -97,11 +114,10 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
 
     async function awaitLoginTransition() {
       waitForLoginAndSetup(
-        { popupWindow },
+        { popupWindow: refs.popupWindow.current },
         {
           onSuccess: async ({ isComplete, isError, needsWallet }) => {
             if (isError) {
-              goBack();
               return;
             }
 
@@ -123,26 +139,20 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
               }
             }
           },
-          onError: () => {
-            goBack();
-          },
           onSettled: () => {
-            setPopupWindow(undefined);
+            window.clearTimeout(refs.poll.current?.timeout);
+            refs.poll.current = null;
+            refs.popupWindow.current = null;
+
+            if (
+              refs.currentStep.current === ModalStep.AWAITING_BIOMETRIC_LOGIN ||
+              refs.currentStep.current === ModalStep.AWAITING_PASSWORD_LOGIN
+            ) {
+              goBack();
+            }
           },
         },
       );
-    }
-
-    async function awaitWalletCreationTransition() {
-      waitForAccountCreation(undefined, {
-        onSuccess: isComplete => {
-          if (isComplete) {
-            setWebAuthURLForCreate('');
-            setIFrameUrl('');
-            setStep(ModalStep.AWAITING_WALLET_CREATION);
-          }
-        },
-      });
     }
 
     // generate/claim wallet once we know it's account creation
@@ -190,26 +200,18 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
       genWallet();
     }, [isLogin, currentStep]);
 
-    async function createAccountWithPassword() {
-      if (typeof window !== 'undefined') {
-        clearTimeout(createAccountTimeout.current);
-        createAccountTimeout.current = window.setTimeout(awaitWalletCreationTransition, DEFAULTS.POLLING_INTERVAL_MS);
-      }
-      setStep(ModalStep.PASSWORD_CREATION);
-    }
-
-    async function createAccountWithPasskey() {
-      if (typeof window !== 'undefined') {
-        clearTimeout(createAccountTimeout.current);
-        createAccountTimeout.current = window.setTimeout(awaitWalletCreationTransition, DEFAULTS.POLLING_INTERVAL_MS);
-        webAuthURLForCreate && openPopup(webAuthURLForCreate, 'ParaPasskey', 'CREATE_PASSKEY');
-        setStep(ModalStep.AWAITING_BIOMETRIC_CREATION);
-      }
-    }
-
-    // wait for login auth to do post login setup
     useEffect(() => {
-      if (webAuthURLForLogin || passwordUrlForLogin) {
+      const isAwaitingLogin = [ModalStep.AWAITING_BIOMETRIC_LOGIN, ModalStep.AWAITING_PASSWORD_LOGIN].includes(currentStep);
+
+      const isUnknownDeviceWithHints = hasHints && !isOnKnownDevice;
+
+      const isPasskeyUnsupported = !passkeysSupported;
+
+      const hasLoginURLs = webAuthURLForLogin || passwordUrlForLogin;
+
+      const userNeedsToLogin = isAwaitingLogin || isUnknownDeviceWithHints || isPasskeyUnsupported;
+
+      if (userNeedsToLogin && hasLoginURLs) {
         if (loginTransitionOverride) {
           async function loginOverride() {
             await loginTransitionOverride?.(para);
@@ -229,31 +231,52 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
           loginOverride();
           return;
         }
+
         if (typeof window !== 'undefined') {
-          loginTimeout.current = window.setTimeout(awaitLoginTransition, DEFAULTS.LOGGIN_POLLING_DELAY_MS);
+          refs.poll.current = {
+            action: 'login',
+            timeout: window.setTimeout(awaitLoginTransition, DEFAULTS.LOGGIN_POLLING_DELAY_MS),
+          };
         }
+
+        return () => {
+          if (typeof window !== 'undefined' && !!refs.poll.current) {
+            window.clearTimeout(refs.poll.current?.timeout);
+          }
+          para.exitLogin();
+        };
       }
-      return () => {
-        typeof window !== 'undefined' && window.clearTimeout(loginTimeout.current);
-        para.exitLogin();
-      };
-    }, [webAuthURLForLogin, passwordUrlForLogin, popupWindow]);
+    }, [currentStep, webAuthURLForLogin, passwordUrlForLogin]);
 
     const handleClose = () => {
       onClose?.();
     };
 
     useEffect(() => {
-      if (![ModalStep.BIOMETRIC_CREATION, ModalStep.AWAITING_BIOMETRIC_CREATION].includes(currentStep)) {
+      refs.currentStep.current = currentStep;
+
+      let resetPoll = false;
+      if (![ModalStep.AWAITING_BIOMETRIC_CREATION, ModalStep.PASSWORD_CREATION].includes(currentStep)) {
         para.exitAccountCreation();
+        resetPoll = !!refs.poll.current && ['createPassword', 'createPasskey'].includes(refs.poll.current.action);
       }
 
-      if (![ModalStep.BIOMETRIC_LOGIN, ModalStep.AWAITING_BIOMETRIC_LOGIN].includes(currentStep)) {
+      if (![ModalStep.AWAITING_PASSWORD_LOGIN, ModalStep.AWAITING_BIOMETRIC_LOGIN].includes(currentStep)) {
         para.exitLogin();
+        resetPoll = refs.poll.current?.action === 'login';
       }
 
       if (![ModalStep.AWAITING_OAUTH, ModalStep.FARCASTER_OAUTH].includes(currentStep)) {
         para.exitOAuth();
+      }
+
+      if (currentStep === ModalStep.PASSWORD_CREATION) {
+        createAccount.withPassword();
+      }
+
+      if (resetPoll && typeof window !== 'undefined') {
+        window.clearTimeout(refs.poll.current?.timeout);
+        refs.poll.current = null;
       }
     }, [currentStep]);
 
@@ -292,23 +315,22 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
 
     useEffect(() => {
       return () => {
+        window.clearTimeout(refs.poll.current?.timeout);
         para.exitLoops();
       };
     }, []);
 
     return (
-      <>
+      <ActionsContext.Provider value={{ createAccount }}>
         <Body
           oAuthMethods={oAuthMethods}
           twoFactorAuthEnabled={twoFactorAuthEnabled}
           disableEmailLogin={!!disableEmailLogin}
           disablePhoneLogin={!!disablePhoneLogin}
           onClose={handleClose}
-          createAccountWithPasskey={createAccountWithPasskey}
-          createAccountWithPassword={createAccountWithPassword}
         />
         <Footer />
-      </>
+      </ActionsContext.Provider>
     );
   },
 );

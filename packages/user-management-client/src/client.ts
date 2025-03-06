@@ -68,10 +68,14 @@ interface ExternalWalletLoginBody {
   externalAddress: string;
   type: 'EVM' | 'SOLANA' | 'COSMOS';
   externalWalletProvider?: string;
+  shouldTrackUser?: boolean;
 }
 
-interface ExternalWalletLoginRes {
+export interface ExternalWalletLoginRes {
   userId: string;
+  userExists: boolean;
+  isVerified: boolean;
+  signatureVerificationMessage: string;
 }
 
 interface createUserIdRes {
@@ -81,6 +85,13 @@ interface createUserIdRes {
 
 interface verifyBody {
   verificationCode: string;
+}
+
+interface verifyExternalWalletBody {
+  address: string;
+  signedMessage: string;
+  cosmosPublicKeyHex?: string;
+  cosmosSigner?: string;
 }
 
 interface getWebChallengeRes {
@@ -354,7 +365,7 @@ class Client {
   };
 
   externalWalletLogin = async (body: ExternalWalletLoginBody): Promise<ExternalWalletLoginRes> => {
-    const res = await this.baseRequest.post<createUserIdRes>(`/users/external-wallets/login`, body);
+    const res = await this.baseRequest.post<ExternalWalletLoginRes>(`/users/external-wallets/login`, body);
     return res.data;
   };
 
@@ -366,6 +377,11 @@ class Client {
 
   verifyPhone = async (userId: string, body: verifyBody): Promise<any> => {
     const res = await this.baseRequest.post<any>(`/users/${userId}/verify-identifier`, body);
+    return res;
+  };
+
+  verifyExternalWallet = async (userId: string, body: verifyExternalWalletBody): Promise<any> => {
+    const res = await this.baseRequest.post<any>(`/users/${userId}/external-wallets/verify`, body);
     return res;
   };
 

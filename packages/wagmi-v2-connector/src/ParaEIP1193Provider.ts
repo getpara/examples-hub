@@ -176,46 +176,80 @@ export class ParaEIP1193Provider extends EventEmitter implements EIP1193Provider
     this.isModalClosed = true;
   };
 
+  private async waitForLogin(timeoutMs = TEN_MINUTES_MS): Promise<boolean> {
+    const startTime = Date.now();
+    while (Date.now() - startTime < timeoutMs) {
+      if (await this.para.isFullyLoggedIn()) {
+        return true;
+      }
+
+      if (!this.disableModal && this.isModalClosed) {
+        throw new ProviderRpcError(new Error('user closed modal'), {
+          code: 4001,
+          shortMessage: 'user closed modal',
+        });
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+
+    throw new ProviderRpcError(new Error('timed out waiting for user to log in'), {
+      code: 4900, //provider is disconnected code
+      shortMessage: 'timed out waiting for user to log in',
+    });
+  }
+
+  private async waitForAccounts(timeoutMs = 5000): Promise<string[]> {
+    const startTime = Date.now();
+    while (Date.now() - startTime < timeoutMs) {
+      const accounts = this.accounts;
+      if (accounts && accounts.length > 0) {
+        return accounts;
+      }
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+
+    throw new ProviderRpcError(new Error('timed out waiting for accounts to load'), {
+      code: 4900, //provider is disconnected code
+      shortMessage: 'timed out waiting for accounts to load',
+    });
+  }
+
   request: EIP1193RequestFn<EIP1474Methods> = async (args): Promise<any> => {
     const { method, params } = args;
 
     switch (method) {
       case 'eth_accounts': {
-        return this.accounts;
+        const accounts = this.accounts;
+        return accounts || [];
       }
       case 'eth_chainId': {
         return this.currentHexChainId;
       }
       case 'eth_requestAccounts': {
         if (await this.para.isFullyLoggedIn()) {
-          return this.accounts;
+          const accounts = this.accounts;
+          if (accounts && accounts.length > 0) {
+            return accounts;
+          }
         }
 
         this.isModalClosed = false;
 
         this.openModal();
 
-        // check if para is fully logged in every 2 seconds for 10 minutes at most
-        const now = Date.now();
-        while (Date.now() - now < TEN_MINUTES_MS) {
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          if (await this.para.isFullyLoggedIn()) {
-            const accounts = this.accounts;
-            this.emit('accountsChanged', accounts);
-            return accounts;
-          }
-          if (this.isModalClosed) {
-            throw new ProviderRpcError(new Error('user closed modal'), {
-              code: 4001,
-              shortMessage: 'user closed modal',
-            });
-          }
-        }
+        await this.waitForLogin();
 
-        throw new ProviderRpcError(new Error('timed out waiting for user to log in'), {
-          code: 4001,
-          shortMessage: 'timed out waiting for user to log in',
-        });
+        try {
+          const accounts = await this.waitForAccounts();
+          this.emit('accountsChanged', accounts);
+          return accounts;
+        } catch (error) {
+          throw new ProviderRpcError(new Error('accounts not available after login'), {
+            code: 4001,
+            shortMessage: 'accounts not available after login',
+          });
+        }
       }
       case 'eth_sendTransaction': {
         const fromAddress = params[0].from;

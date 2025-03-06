@@ -1,30 +1,4 @@
-import Client from '@getpara/user-management-client';
-import { AxiosInstance } from 'axios';
-
-export enum Environment {
-  // Internal Environments
-  DEV = 'DEV',
-  SANDBOX = 'SANDBOX',
-  BETA = 'BETA',
-  PROD = 'PROD',
-  // Customer-Facing Environments
-  // NOTE: these resolve to the corresponding internal environments for convenience
-  DEVELOPMENT = 'BETA',
-  PRODUCTION = 'PROD',
-}
-
-export interface Ctx {
-  env: Environment;
-  apiKey: string;
-  client: Client;
-  disableWorkers?: boolean;
-  offloadMPCComputationURL?: string;
-  mpcComputationClient?: AxiosInstance;
-  useLocalFiles?: boolean;
-  useDKLS?: boolean;
-  disableWebSockets: boolean;
-  wasmOverride?: ArrayBuffer;
-}
+import { Environment } from '@getpara/web-sdk';
 
 export function getPortalDomain(env: Environment) {
   switch (env) {

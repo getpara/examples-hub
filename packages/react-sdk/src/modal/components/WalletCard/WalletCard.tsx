@@ -123,7 +123,7 @@ const Container = styled.div`
 const InnerContainer = styled.div`
   display: flex;
   justify-content: flex-start;
-  gap: 4px;
+  gap: 8px;
   align-items: center;
   overflow: hidden;
 `;

@@ -1,7 +1,7 @@
 import ParaWeb from '@getpara/web-sdk';
 
 export interface WaitForLoginAndSetupArgs {
-  popupWindow?: Window;
+  popupWindow?: Window | null;
   skipSessionRefresh?: boolean;
 }
 

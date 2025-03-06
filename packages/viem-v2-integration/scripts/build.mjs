@@ -13,7 +13,7 @@ await esbuild.build({
   outdir: 'dist/esm',
   allowOverwrite: true,
   splitting: true, // Required for tree shaking
-  minify: true,
+  minify: false,
   packages: 'external',
   plugins: [
     compress({
@@ -33,7 +33,7 @@ await esbuild.build({
   entryPoints: ['src/index.ts'],
   outdir: 'dist/cjs',
   allowOverwrite: true,
-  minify: true,
+  minify: false,
   plugins: [
     compress({
       exclude: ['**/*.map'],

@@ -1,16 +1,13 @@
 import { CpslButton, CpslDivider, CpslIcon, CpslQrCode, CpslSpinner, CpslText } from '@getpara/react-components';
 import { useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { InnerStepContainer, StepContainer, Heading, QRContainer } from '../common.js';
-import { isPasskeySupported } from '../../utils/isPasskeySupported.js';
 import { useCopyToClipboard, UserIdentifier } from '@getpara/react-common';
+import { isPasskeySupported } from '@getpara/web-sdk';
+import { useContext } from 'react';
+import { ActionsContext } from '../ModalContent/ModalContent.js';
 
-export const BiometricCreationStep = ({
-  handlePasswordClick,
-  handlePasskeyClick,
-}: {
-  handlePasswordClick: () => Promise<void>;
-  handlePasskeyClick: () => Promise<void>;
-}) => {
+export const BiometricCreationStep = () => {
+  const { createAccount } = useContext(ActionsContext);
   const webAuthURLForCreate = useModalStore(state => state.webAuthURLForCreate);
   const iFrameUrl = useModalStore(state => state.iFrameUrl);
   const authInfo = useUserInfoStore(state => state.getAuthInfo());
@@ -38,7 +35,7 @@ export const BiometricCreationStep = ({
 
       <InnerStepContainer>
         {isPasskeySupported() ? (
-          <CpslButton fullWidth onClick={handlePasskeyClick}>
+          <CpslButton fullWidth onClick={createAccount.withPasskey}>
             <CpslIcon slot="start" icon="key" />
             {isBoth ? 'Create Passkey' : 'Create'}
           </CpslButton>
@@ -59,7 +56,7 @@ export const BiometricCreationStep = ({
           <>
             <CpslDivider>or</CpslDivider>
 
-            <CpslButton fullWidth onClick={handlePasswordClick}>
+            <CpslButton fullWidth onClick={createAccount.withPassword}>
               <CpslIcon slot="start" icon="passcode" />
               Choose Password
             </CpslButton>

@@ -1,16 +1,15 @@
 import { CpslAvatar, CpslIcon, CpslText, IconType } from '@getpara/react-components';
-import parsePhoneNumberFromString from 'libphonenumber-js';
 import styled from 'styled-components';
 import { ModalAuthInfo } from '../types/index.js';
 import { AuthType } from '@getpara/user-management-client';
+import { formatPhoneNumber } from '../utils/formatPhoneNumber.js';
 
 function defaultDisplayName(authType: AuthType, identifier: string) {
   switch (authType) {
     case 'email':
       return identifier.toLowerCase();
     case 'phone':
-      const parsed = parsePhoneNumberFromString(identifier);
-      return `+${parsed.countryCallingCode} ${parsed.formatNational()}`;
+      return formatPhoneNumber(identifier);
     case 'farcaster':
       return `@${identifier}`;
     case 'telegram':

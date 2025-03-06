@@ -18,11 +18,13 @@
     "@stripe/crypto": "^0.0.4",
     "@stripe/stripe-js": "^3.4.0",
     "libphonenumber-js": "^1.11.1",
-    "styled-components": "^6.1.8"
+    "styled-components": "^6.1.8",
+    "ua-parser-js": "^2.0.2"
   },
   "scripts": {
     "build": "rm -rf dist && yarn typegen && node ./scripts/build.mjs",
-    "typegen": "tsc --emitDeclarationOnly"
+    "typegen": "tsc --emitDeclarationOnly",
+    "test": "vitest run --coverage"
   },
   "devDependencies": {
     "@types/react": "^18.0.31",

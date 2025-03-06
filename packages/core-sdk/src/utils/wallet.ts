@@ -37,7 +37,7 @@ export function isPregenIdentifierMatch(
 }
 
 export function isWalletSupported(types: WalletType[], wallet: Omit<Wallet, 'signer'>): boolean {
-  return types.some((walletType: WalletType) => !!WalletSchemeTypeMap[wallet.scheme][walletType]);
+  return types.some((walletType: WalletType) => !!WalletSchemeTypeMap[wallet?.scheme]?.[walletType]);
 }
 
 export function getSchemes(types: WalletTypeProp[] | SupportedWalletTypes): WalletScheme[] {

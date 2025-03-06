@@ -82,7 +82,9 @@ describe('walletUtils', () => {
         cb('test error', undefined);
       });
 
-      await expect(ed25519Keygen(TEST_CTX, USER.id)).rejects.toThrowError('test error');
+      await expect(ed25519Keygen(TEST_CTX, USER.id)).rejects.toThrowError(
+        `error creating account of type SOLANA with userId ${USER.id} and walletId ${WALLET.id}`,
+      );
       expect(mockCreateWallet).toBeCalledTimes(1);
       expect(mockCreateWallet).toBeCalledWith(USER.id, {
         scheme: WalletScheme.ED25519,
@@ -122,7 +124,9 @@ describe('walletUtils', () => {
         cb('test error', undefined);
       });
 
-      await expect(ed25519PreKeygen(TEST_CTX, USER.email, 'EMAIL')).rejects.toThrowError('test error');
+      await expect(ed25519PreKeygen(TEST_CTX, USER.email, 'EMAIL')).rejects.toThrowError(
+        `error creating account of type SOLANA with walletId ${WALLET.id}`,
+      );
       expect(mockcreatePregenWallet).toBeCalledTimes(1);
       expect(mockcreatePregenWallet).toBeCalledWith({
         pregenIdentifier: USER.email,
@@ -154,7 +158,9 @@ describe('walletUtils', () => {
         cb('test error', undefined);
       });
 
-      await expect(ed25519Sign(TEST_CTX, WALLET.share, USER.id, WALLET.id, BASE64_BYTES)).rejects.toThrowError('test error');
+      await expect(ed25519Sign(TEST_CTX, WALLET.share, USER.id, WALLET.id, BASE64_BYTES)).rejects.toThrowError(
+        `error signing for account of type SOLANA with userId ${USER.id} and walletId ${WALLET.id}`,
+      );
       expect(mockPreSignMessage).toBeCalledTimes(1);
       expect(mockPreSignMessage).toBeCalledWith(USER.id, WALLET.id, BASE64_BYTES, WalletScheme.ED25519);
       expect(mockEd25519Sign).toBeCalledTimes(1);
@@ -254,7 +260,9 @@ describe('walletUtils', () => {
         cb('test error', undefined);
       });
 
-      await expect(keygen(TEST_CTX, USER.id, WalletType.EVM, SECRET_KEY)).rejects.toThrowError('test error');
+      await expect(keygen(TEST_CTX, USER.id, WalletType.EVM, SECRET_KEY)).rejects.toThrowError(
+        `error creating account of type ${WalletType.EVM} with userId ${USER.id} and walletId ${WALLET.id}`,
+      );
       expect(mockCreateWallet).toBeCalledTimes(1);
       expect(mockCreateWallet).toBeCalledWith(USER.id, {
         useTwoSigners: true,
@@ -324,7 +332,7 @@ describe('walletUtils', () => {
       });
 
       await expect(preKeygen(TEST_CTX, PARTNER.id, USER.email, 'EMAIL', WalletType.EVM, SECRET_KEY)).rejects.toThrowError(
-        'test error',
+        `error creating account of type ${WalletType.EVM} with walletId ${WALLET.id}`,
       );
       expect(mockcreatePregenWallet).toBeCalledTimes(1);
       expect(mockcreatePregenWallet).toBeCalledWith({
@@ -430,7 +438,7 @@ describe('walletUtils', () => {
       });
 
       await expect(signMessage(TEST_CTX, WALLET.share, WALLET.id, USER.id, MESSAGE, COSMOS_SIGN_DOC)).rejects.toThrowError(
-        'test error',
+        `error signing for account with userId ${USER.id} and walletId ${WALLET.id}`,
       );
       expect(mockPreSignMessage).toBeCalledTimes(1);
       expect(mockPreSignMessage).toBeCalledWith(USER.id, WALLET.id, MESSAGE, null, COSMOS_SIGN_DOC);
@@ -535,7 +543,7 @@ describe('walletUtils', () => {
       });
 
       await expect(signTransaction(TEST_CTX, WALLET.share, WALLET.id, USER.id, TX, CHAIN)).rejects.toThrowError(
-        'test error',
+        `error signing transaction for account with userId ${USER.id} and walletId ${WALLET.id}`,
       );
       expect(mockSignTransaction).toBeCalledTimes(1);
       expect(mockSignTransaction).toBeCalledWith(USER.id, WALLET.id, { transaction: TX, chainId: CHAIN });
@@ -641,7 +649,7 @@ describe('walletUtils', () => {
       });
 
       await expect(sendTransaction(TEST_CTX, WALLET.share, WALLET.id, USER.id, TX, CHAIN)).rejects.toThrowError(
-        'test error',
+        `error signing transaction to send for account with userId ${USER.id} and walletId ${WALLET.id}`,
       );
       expect(mockSendTransactionUserManagement).toBeCalledTimes(1);
       expect(mockSendTransactionUserManagement).toBeCalledWith(USER.id, WALLET.id, { transaction: TX, chainId: CHAIN });
@@ -734,7 +742,7 @@ describe('walletUtils', () => {
 
       await expect(
         refresh(TEST_CTX, WALLET.share, WALLET.id, USER.id, PARTNER.id, PARTNER.id, WALLET.preExistingProtocolId),
-      ).rejects.toThrowError('test error');
+      ).rejects.toThrowError(`error refreshing keys for account with userId ${USER.id} and walletId ${WALLET.id}`);
       expect(mockRefreshKeys).toBeCalledTimes(1);
       expect(mockRefreshKeys).toBeCalledWith(USER.id, WALLET.id, PARTNER.id, PARTNER.id, WALLET.preExistingProtocolId);
       expect(mockDklsRefresh).toBeCalledTimes(1);
@@ -772,7 +780,9 @@ describe('walletUtils', () => {
         cb('test error', undefined);
       });
 
-      await expect(getPrivateKey(TEST_CTX, WALLET.share, WALLET.id, USER.id)).rejects.toThrowError('test error');
+      await expect(getPrivateKey(TEST_CTX, WALLET.share, WALLET.id, USER.id)).rejects.toThrowError(
+        `error getting private key for account with userId ${USER.id} and walletId ${WALLET.id}`,
+      );
       expect(mockGetParaShare).toBeCalledTimes(1);
       expect(mockGetParaShare).toBeCalledWith(USER.id, WALLET.id);
       expect(mockGetPrivateKey).toBeCalledTimes(1);

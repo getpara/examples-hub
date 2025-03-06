@@ -9,7 +9,7 @@ import { LoginProvider, LoginRes, useLogin } from './components/LoginProvider';
 import { SelectWallet } from './components/SelectWallet';
 import { useModalOutletContext } from '../../hooks/useModalOutletContext';
 import { useCloseWindow } from '../../hooks/useCloseWindow';
-import { AuthMethod } from '@getpara/web-sdk';
+import { AuthMethod, isPasskeySupported } from '@getpara/web-sdk';
 
 const AuthLoginBase = ({ authMethod }) => {
   const para = usePara();
@@ -36,6 +36,10 @@ const AuthLoginBase = ({ authMethod }) => {
     await para.userSetupAfterLogin();
 
     if (fromKnownDevice) {
+      if (!isPasskeySupported()) {
+        closeWindow();
+        return;
+      }
       setStep(AuthLoginStep.SUCCESS_FROM_KNOWN_DEVICE);
       return;
     }
@@ -142,6 +146,14 @@ const AuthLoginBase = ({ authMethod }) => {
   }, [step]);
 
   useEffect(() => {
+    if (!isPasskeySupported() && authMethod === AuthMethod.PASSKEY) {
+      getWebAuthURLForKnownDeviceLogin().then(() => {
+        setStep(AuthLoginStep.LOGIN_FAILED);
+      });
+
+      return;
+    }
+
     if (!!authInfo && sessionId && encryptionKey && !skipAutoLogin && step === AuthLoginStep.MANUAL_LOGIN) {
       // In development this will trigger a 'request is already pending.' error due to duplicate renders caused by React.StrictMode.
       // See ref: https://legacy.reactjs.org/docs/strict-mode.html#detecting-unexpected-side-effects

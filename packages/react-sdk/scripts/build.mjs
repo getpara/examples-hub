@@ -29,7 +29,7 @@ await esbuild.build({
     }),
   ],
   splitting: true, // Required for tree shaking
-  minify: true,
+  minify: false,
   // external: externals,
   packages: 'external',
 });

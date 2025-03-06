@@ -9,7 +9,7 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "deploy-s3": "yarn && yarn build && aws s3 sync dist/ s3://$VITE_BUCKET_NAME --acl public-read --delete",
-    "deploy-sandbox": "VITE_ENV=sandbox VITE_BUCKET_NAME=capsule-rainbowkit-playground yarn deploy-s3",
+    "deploy-sandbox": "VITE_ENV=sandbox VITE_BUCKET_NAME=capsule-rainbowkit-playground VITE_PARA_API_KEY=8ee2d015fbc6062a6e30bdc472f2946c yarn deploy-s3",
     "postinstall": "yarn graz -g"
   },
   "dependencies": {

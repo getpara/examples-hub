@@ -35,6 +35,7 @@ import Client, {
   Auth,
   extractAuthInfo,
   ExtractAuth,
+  ExternalWalletLoginRes,
 } from '@getpara/user-management-client';
 import type { pki as pkiType, jsbn as jsbnType } from 'node-forge';
 import forge from 'node-forge';
@@ -371,23 +372,25 @@ export abstract class ParaCore {
   }
 
   private isWalletSupported(wallet: Omit<Wallet, 'signer'>): boolean {
-    return !this.#supportedWalletTypes || isWalletSupported(this.supportedWalletTypes.map(({ type }) => type) ?? [], wallet);
+    return (
+      !this.#supportedWalletTypes || isWalletSupported(this.supportedWalletTypes?.map(({ type }) => type) ?? [], wallet)
+    );
   }
 
   private isWalletOwned(wallet: Wallet): boolean {
     return (
       this.isWalletSupported(wallet) &&
-      !wallet.pregenIdentifier &&
-      !wallet.pregenIdentifierType &&
+      !wallet?.pregenIdentifier &&
+      !wallet?.pregenIdentifierType &&
       !!this.userId &&
-      wallet.userId === this.userId
+      wallet?.userId === this.userId
     );
   }
 
   private isPregenWalletUnclaimed(wallet: Wallet): boolean {
     return (
       this.isWalletSupported(wallet) &&
-      (!wallet.userId || (wallet.isPregen && !!wallet.pregenIdentifier && !!wallet.pregenIdentifierType))
+      (!wallet?.userId || (wallet?.isPregen && !!wallet?.pregenIdentifier && !!wallet?.pregenIdentifierType))
     );
   }
 
@@ -395,15 +398,15 @@ export abstract class ParaCore {
     return (
       this.isWalletSupported(wallet) &&
       this.isPregenWalletUnclaimed(wallet) &&
-      (!['EMAIL', 'PHONE', 'TELEGRAM'].includes(wallet.pregenIdentifierType) ||
+      (!['EMAIL', 'PHONE', 'TELEGRAM'].includes(wallet?.pregenIdentifierType) ||
         isPregenIdentifierMatch(
-          wallet.pregenIdentifierType === 'EMAIL'
+          wallet?.pregenIdentifierType === 'EMAIL'
             ? this.email
-            : wallet.pregenIdentifierType === 'TELEGRAM'
+            : wallet?.pregenIdentifierType === 'TELEGRAM'
               ? this.telegramUserId
               : this.getPhoneNumber(),
-          wallet.pregenIdentifier,
-          wallet.pregenIdentifierType,
+          wallet?.pregenIdentifier,
+          wallet?.pregenIdentifierType,
         ))
     );
   }
@@ -423,19 +426,21 @@ export abstract class ParaCore {
       const [isUnclaimed, isOwned] = [this.isPregenWalletUnclaimed(wallet), this.isWalletOwned(wallet)];
 
       if (forbidPregen && isUnclaimed) {
-        error = `pre-generated wallet with id ${wallet.id} cannot be selected`;
+        error = `pre-generated wallet with id ${wallet?.id} cannot be selected`;
       } else if (!isOwned && !isUnclaimed) {
-        error = `wallet with id ${wallet.id} is not owned by the current user`;
+        error = `wallet with id ${wallet?.id} is not owned by the current user`;
       } else if (!this.isWalletSupported(wallet)) {
-        error = `wallet with id ${wallet.id} and type ${wallet.type} is not supported, supported types are: ${this.supportedWalletTypes.map(({ type }) => type).join(', ')}`;
+        error = `wallet with id ${wallet?.id} and type ${wallet?.type} is not supported, supported types are: ${this.supportedWalletTypes
+          .map(({ type }) => type)
+          .join(', ')}`;
       } else if (
         types &&
-        (!getEquivalentTypes(types).includes(wallet.type) ||
-          (isOwned && !types.some(type => (this.currentWalletIds[type] ?? []).includes(walletId))))
+        (!getEquivalentTypes(types).includes(wallet?.type) ||
+          (isOwned && !types.some(type => this.currentWalletIds?.[type]?.includes(walletId))))
       ) {
-        error = `wallet with id ${wallet.id} and type ${wallet.type} cannot be selected`;
-      } else if (schemes && !schemes.includes(wallet.scheme)) {
-        error = `wallet with id ${wallet.id} and scheme ${wallet.scheme} cannot be selected`;
+        error = `wallet with id ${wallet?.id} and type ${wallet?.type} cannot be selected`;
+      } else if (schemes && !schemes.includes(wallet?.scheme)) {
+        error = `wallet with id ${wallet?.id} and scheme ${wallet?.scheme} cannot be selected`;
       }
     }
 
@@ -510,7 +515,7 @@ export abstract class ParaCore {
   }
 
   getAddress(walletId?: string): string | undefined {
-    return walletId ? this.wallets[walletId].address : Object.values(this.wallets)?.[0]?.address;
+    return walletId ? this.wallets[walletId]?.address : Object.values(this.wallets)?.[0]?.address;
   }
 
   protected abstract getPlatformUtils(): PlatformUtils;
@@ -1596,15 +1601,18 @@ export abstract class ParaCore {
    * @param {WalletType} opts.type type of external wallet to use for identification.
    * @param {string} opts.provider the name of the provider for the external wallet.
    */
-  async externalWalletLogin(wallet: ExternalWalletInfo): Promise<void> {
+  async externalWalletLogin(wallet: ExternalWalletInfo): Promise<ExternalWalletLoginRes> {
     this.requireApiKey();
-    const { userId } = await this.ctx.client.externalWalletLogin({
+    const res = await this.ctx.client.externalWalletLogin({
       externalAddress: wallet.address,
       type: wallet.type,
       externalWalletProvider: wallet.provider,
+      shouldTrackUser: wallet.shouldTrackUser,
     });
     await this.setExternalWallet(wallet);
-    await this.setUserId(userId);
+    await this.setUserId(res.userId);
+
+    return res;
   }
 
   /**
@@ -1622,6 +1630,21 @@ export abstract class ParaCore {
    */
   async verifyEmail({ verificationCode }: { verificationCode: string }): Promise<string> {
     await this.ctx.client.verifyEmail(this.userId, { verificationCode });
+    return this.getSetUpBiometricsURL();
+  }
+
+  async verifyExternalWallet({
+    address,
+    signedMessage,
+    cosmosPublicKeyHex,
+    cosmosSigner,
+  }: {
+    address: string;
+    signedMessage: string;
+    cosmosPublicKeyHex?: string;
+    cosmosSigner?: string;
+  }): Promise<string> {
+    await this.ctx.client.verifyExternalWallet(this.userId, { address, signedMessage, cosmosPublicKeyHex, cosmosSigner });
     return this.getSetUpBiometricsURL();
   }
 
@@ -2018,7 +2041,7 @@ export abstract class ParaCore {
   /**
    * Waits for the session to be active.
    **/
-  async waitForAccountCreation(): Promise<boolean> {
+  async waitForAccountCreation({ popupWindow }: { popupWindow?: Window | null } = {}): Promise<boolean> {
     await this.touchSession();
 
     // Remove external wallets if creating an account with Para
@@ -2035,6 +2058,11 @@ export abstract class ParaCore {
 
           dispatchEvent(ParaEvent.ACCOUNT_CREATION_EVENT, true);
           return true;
+        } else {
+          if (popupWindow?.closed) {
+            this.isAwaitingAccountCreation = false;
+            return false;
+          }
         }
       } catch (err) {
         // want to continue polling on error
@@ -2045,8 +2073,12 @@ export abstract class ParaCore {
     return false;
   }
 
-  async waitForPasskeyAndCreateWallet(): Promise<AccountSetupResponse> {
-    await this.waitForAccountCreation();
+  async waitForPasskeyAndCreateWallet({
+    popupWindow,
+  }: {
+    popupWindow?: Window;
+  } = {}): Promise<AccountSetupResponse> {
+    await this.waitForAccountCreation({ popupWindow });
 
     const pregenWallets = await this.getPregenWallets();
 
@@ -2151,7 +2183,7 @@ export abstract class ParaCore {
    * @param {Window} [opts.popupWindow] the popup window being used for login.
    * @return {Object} `{ email?: string; isError?: boolean; userExists: boolean; }` the result data
    */
-  async waitForOAuth({ popupWindow }: { popupWindow?: Window } = {}): Promise<{
+  async waitForOAuth({ popupWindow }: { popupWindow?: Window | null } = {}): Promise<{
     email?: string;
     isError?: boolean;
     userExists: boolean;
@@ -2169,6 +2201,9 @@ export abstract class ParaCore {
           const res = await this.touchSession();
           if (res.data.userId) {
             const { userId, email } = res.data;
+            if (!this.loginEncryptionKeyPair) {
+              await this.setLoginEncryptionKeyPair();
+            }
             await this.setUserId(userId);
             await this.setEmail(email);
             const userExists = await this.checkIfUserExists({ email });
@@ -2198,7 +2233,7 @@ export abstract class ParaCore {
     popupWindow,
     skipSessionRefresh = false,
   }: {
-    popupWindow?: Window;
+    popupWindow?: Window | null;
     skipSessionRefresh?: boolean;
   } = {}): Promise<LoginResponse> {
     // Remove external wallets if logging in with Capsule
@@ -3309,6 +3344,8 @@ export abstract class ParaCore {
     const serializedInstance = Buffer.from(serializedInstanceBase64, 'base64').toString('utf8');
     const sessionInfo = JSON.parse(serializedInstance);
     await this.setEmail(sessionInfo.email);
+    await this.setTelegramUserId(sessionInfo.telegramUserId);
+    await this.setFarcasterUsername(sessionInfo.farcasterUsername);
     await this.setUserId(sessionInfo.userId);
     await this.setWallets(sessionInfo.wallets);
     await this.setExternalWallets(sessionInfo.externalWallets || {});

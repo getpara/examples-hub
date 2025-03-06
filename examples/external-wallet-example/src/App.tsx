@@ -3,7 +3,7 @@ import { Content } from './components/Content';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { clusterApiUrl } from '@solana/web3.js';
 import { axelar, cosmoshub, osmosis, sommelier, stargaze } from '@getpara/graz/chains';
-import { ParaProvider, Environment } from '@getpara/react-sdk';
+import { ParaProvider } from '@getpara/react-sdk';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useModalStateStore } from './stores/modalStateStore/useModalStateStore';
 import { useCosmosStore } from './stores/cosmosStore/useCosmosStore';
@@ -58,8 +58,8 @@ export const App = () => {
     <QueryClientProvider client={queryClient}>
       <ParaProvider
         paraClientConfig={{
-          env: Environment.DEV,
-          apiKey: '2f938ac0c48ef356050a79bd66042a23',
+          env: import.meta.env.VITE_ENVIRONMENT,
+          apiKey: import.meta.env.VITE_PARA_API_KEY,
           // opts: {}
         }}
         config={{

@@ -17,16 +17,12 @@ export const useGoBack = () => {
       decrementStep();
     }
     switch (currentStep) {
-      case ModalStep.VERIFY_2FA:
-      case ModalStep.BIOMETRIC_CREATION:
-      case ModalStep.BIOMETRIC_LOGIN:
-      case ModalStep.EX_WALLET_SELECTED: {
+      case ModalStep.AUTH_MAIN:
+      case ModalStep.AUTH_MORE: {
         resetState();
 
         break;
       }
-    }
-    switch (currentStep) {
       case ModalStep.CHAIN_SWITCH: {
         setChainIdSwitchingTo();
         break;

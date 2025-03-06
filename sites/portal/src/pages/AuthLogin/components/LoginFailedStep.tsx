@@ -5,6 +5,7 @@ import { BiometricLocationHint } from '@getpara/user-management-client';
 import { FlexStartInnerContainer, usePara } from '../../../components';
 import { KNOWN_DEVICE_LOGIN_POLLING_INTERVAL } from '../../../constants';
 import { formatBiometricHints, getBrowserName, KnownDevices } from '@getpara/react-common';
+import { isPasskeySupported } from '@getpara/web-sdk';
 
 interface LoginFailedStepProps {
   onLoginClick: () => void;
@@ -52,24 +53,28 @@ export const LoginFailedStep = ({
       <CpslText weight="bold" variant="headingS">
         Login Failed
       </CpslText>
-      <TipsContainer>
-        <TipListItem>
-          <StyledIcon icon="lockKeyholeCircle" />
-          <CpslText weight="medium" variant="bodyXS" color="contrast">
-            If you use a Password Manager, please make sure it is enabled.
-          </CpslText>
-        </TipListItem>
-        <TipListItem>
-          <StyledIcon icon="userCircle" />
-          <CpslText weight="medium" variant="bodyXS" color="contrast">
-            {`Make sure you are using the right ${getBrowserName() ?? 'browser'} profile.`}
-          </CpslText>
-        </TipListItem>
-      </TipsContainer>
-      <CpslButton fullWidth onClick={onLoginClick}>
-        Try again on this device
-      </CpslButton>
-      <CpslDivider>or</CpslDivider>
+      {isPasskeySupported() && (
+        <>
+          <TipsContainer>
+            <TipListItem>
+              <StyledIcon icon="lockKeyholeCircle" />
+              <CpslText weight="medium" variant="bodyXS" color="contrast">
+                If you use a Password Manager, please make sure it is enabled.
+              </CpslText>
+            </TipListItem>
+            <TipListItem>
+              <StyledIcon icon="userCircle" />
+              <CpslText weight="medium" variant="bodyXS" color="contrast">
+                {`Make sure you are using the right ${getBrowserName() ?? 'browser'} profile.`}
+              </CpslText>
+            </TipListItem>
+          </TipsContainer>
+          <CpslButton fullWidth onClick={onLoginClick}>
+            Try again on this device
+          </CpslButton>
+          <CpslDivider>or</CpslDivider>
+        </>
+      )}
       <KnownDevices hints={formattedHints} link={urlForKnownDeviceLogin} showCurrentDevice />
     </FlexStartInnerContainer>
   );

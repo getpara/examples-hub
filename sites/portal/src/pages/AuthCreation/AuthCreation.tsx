@@ -8,6 +8,7 @@ import { ModalHeader } from '../../components/ModalHeader';
 import { usePara } from '../../components/ParaContext';
 import { useExtractedParams } from '../../hooks/useExtractedParams';
 import { extractAuthInfo } from '@getpara/user-management-client';
+import { isPasskeySupported } from '@getpara/web-sdk';
 
 export const AuthCreation = () => {
   const para = usePara();
@@ -16,6 +17,10 @@ export const AuthCreation = () => {
   const params = useExtractedParams<AuthCreationParams>();
 
   const setUpBiometrics = useCallback(async () => {
+    if (!isPasskeySupported()) {
+      return;
+    }
+
     setStep(AuthCreationStep.CREATING);
     try {
       await authCreation(para, params);

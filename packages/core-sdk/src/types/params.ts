@@ -10,6 +10,7 @@ export type ExternalWalletInfo = {
   type: ExternalWalletType;
   provider?: string;
   addressBech32?: string;
+  shouldTrackUser?: boolean;
 };
 
 export type PortalUrlOptions = {

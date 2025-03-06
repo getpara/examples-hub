@@ -16,7 +16,7 @@ export const VerificationCodeStep = () => {
   const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
   const setIFrameUrl = useModalStore(state => state.setIFrameUrl);
   const setIsIFrameReady = useModalStore(state => state.setIsIFrameReady);
-  const isIFrameReady = useModalStore(state => state.isIFrameReady);
+  const setAuthStepRoute = useModalStore(state => state.setAuthStepRoute);
   const para = useInternalClient();
 
   const inputRef = useRef<HTMLCpslCodeInputElement>(null);
@@ -26,7 +26,6 @@ export const VerificationCodeStep = () => {
   const [resendStatus, setResendStatus] = useState('Resend.');
   const [resendDisabled, setResendDisabled] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [shouldRouteToStep, setShouldRouteToStep] = useState<ModalStep>();
 
   const isEmail = authInfo?.authType === 'email';
 
@@ -36,16 +35,6 @@ export const VerificationCodeStep = () => {
       inputRef.current?.shadowRoot?.querySelectorAll('input')?.[0]?.focus();
     }, 10);
   }, []);
-
-  useEffect(() => {
-    if (!!shouldRouteToStep && isIFrameReady) {
-      // Using a small timeout here to fully ensure the iframe is loaded before triggering any animation
-      setTimeout(() => {
-        setStep(shouldRouteToStep);
-        setIsVerifying(false);
-      }, 200);
-    }
-  }, [shouldRouteToStep, isIFrameReady]);
 
   useEffect(() => {
     if (code.length === 6) {
@@ -87,14 +76,14 @@ export const VerificationCodeStep = () => {
           const passwordAuthUrl = await para.getSetupPasswordURL({ authType: authInfo?.authType, theme });
           setWebAuthURLForCreate(await para.shortenLoginLink(webAuthUrl));
           setIFrameUrl(await para.shortenLoginLink(passwordAuthUrl));
-          setShouldRouteToStep(ModalStep.BIOMETRIC_CREATION);
+          setAuthStepRoute(ModalStep.BIOMETRIC_CREATION);
           return;
         } else if ((await para.getSupportedCreateAuthMethods()).has(AuthMethod.PASSWORD)) {
           setIsIFrameReady(false);
           isEmail ? await para.verifyEmail({ verificationCode: code }) : await para.verifyPhone({ verificationCode: code });
           const url = await para.getSetupPasswordURL({ authType: authInfo?.authType, theme });
           setIFrameUrl(await para.shortenLoginLink(url));
-          setShouldRouteToStep(ModalStep.PASSWORD_CREATION);
+          setAuthStepRoute(ModalStep.PASSWORD_CREATION);
           return;
         } else {
           const url = isEmail
@@ -123,7 +112,7 @@ export const VerificationCodeStep = () => {
           Verify {isEmail ? 'Email' : 'Phone Number'}
         </Heading>
         <InlineText variant="bodyS" color="secondary">
-          Please enter the code we sent to <InlineText variant="bodyS">{authInfo!.identifier}</InlineText>
+          Please enter the code we sent to <InlineText variant="bodyS">{authInfo?.identifier}</InlineText>
         </InlineText>
       </InnerStepContainer>
       <InnerStepContainer>

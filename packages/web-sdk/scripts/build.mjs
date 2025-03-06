@@ -22,7 +22,7 @@ await esbuild.build({
   outdir: 'dist',
   allowOverwrite: true,
   splitting: true, // Required for tree shaking
-  minify: true,
+  minify: false,
   plugins: [
     compress({
       exclude: ['**/*.map'],
@@ -50,7 +50,7 @@ await esbuild.build({
   outdir: 'dist/workers',
   allowOverwrite: true,
   splitting: true, // Required for tree shaking
-  minify: true,
+  minify: false,
   packages: 'external',
   plugins: [
     compress({

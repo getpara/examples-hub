@@ -19,6 +19,8 @@ export const EnterPasswordStep = ({ error, onLoginClick }: EnterPasswordStepProp
   const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
   const authInfo = useAuthInfo();
 
+  const [isProcessing, setIsProcessing] = useState(false);
+
   const handlePasswordInput = (ev: CpslInputCustomEvent<InputInputEventDetail>) => {
     setPassword(ev.detail.value);
   };
@@ -27,12 +29,36 @@ export const EnterPasswordStep = ({ error, onLoginClick }: EnterPasswordStepProp
     setRecoveryUrl(await para?.getPortalURL());
   };
 
+  const onSubmit = async () => {
+    if (isProcessing) {
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      await onLoginClick(password);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   useEffect(() => {
     getPortalUrl();
   }, [para]);
 
+  useEffect(() => {
+    if (!!error) {
+      setPassword('');
+    }
+  }, [error]);
+
   return (
-    <Container>
+    <Container
+      onSubmit={e => {
+        e.preventDefault();
+        onSubmit();
+      }}
+    >
       <CpslText variant="headingS">Login</CpslText>
       {!!authInfo && authInfo.authType !== 'userId' && <UserIdentifier {...authInfo} />}
       <ButtonContainer>
@@ -40,6 +66,7 @@ export const EnterPasswordStep = ({ error, onLoginClick }: EnterPasswordStepProp
           placeholder="Enter a password"
           type={passwordVisible ? 'text' : 'password'}
           onCpslInput={handlePasswordInput}
+          onKeyDown={async e => e.key === 'Enter' && onSubmit()}
           value={password}
           style={{ width: '100%' }}
         >
@@ -57,7 +84,7 @@ export const EnterPasswordStep = ({ error, onLoginClick }: EnterPasswordStepProp
             </CpslText>
           </ErrorContainer>
         )}
-        <CpslButton fullWidth onClick={() => onLoginClick(password)}>
+        <CpslButton fullWidth disabled={isProcessing || password === ''} onClick={onSubmit}>
           Continue
         </CpslButton>
         <Link href={recoveryUrl}>
@@ -97,7 +124,7 @@ const ClickableIcon = styled(CpslIcon)`
   cursor: pointer;
 `;
 
-const Container = styled.div`
+const Container = styled.form`
   flex: 1;
   padding-left: 83px;
   padding-right: 83px;
