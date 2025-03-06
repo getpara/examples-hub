@@ -57,5 +57,8 @@
     "jest-expo": "~52.0.2",
     "react-test-renderer": "18.3.1",
     "typescript": "^5.3.3"
+  },
+  "resolutions": {
+    "@getpara/core-sdk": "1.4.5-dev.0"
   }
 }
