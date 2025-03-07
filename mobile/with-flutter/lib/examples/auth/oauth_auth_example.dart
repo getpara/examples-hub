@@ -42,8 +42,8 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Error checking login status: ${e.toString()}')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Error checking login status: ${e.toString()}')));
       }
     }
   }
