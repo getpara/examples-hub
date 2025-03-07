@@ -3,7 +3,6 @@ import 'package:para_flutter/examples/auth/email_auth_example.dart';
 import 'package:para_flutter/examples/auth/external_wallet_auth_example.dart';
 import 'package:para_flutter/examples/auth/oauth_auth_example.dart';
 import 'package:para_flutter/examples/auth/phone_auth_example.dart';
-import 'package:para_flutter/examples/auth/pregen_auth_examle.dart';
 import 'package:para_flutter/client/para.dart';
 import 'package:flutter/material.dart';
 
@@ -75,15 +74,6 @@ class _DemoAuthSelectorState extends State<DemoAuthSelector> {
                     'Integrate popular OAuth providers (Google, Apple, X, Discord) into your app.',
                 route: const ParaOAuthExample(),
                 icon: Icons.account_circle_outlined,
-              ),
-              const SizedBox(height: 16),
-              _buildExampleCard(
-                context: context,
-                title: 'Pregen Wallet Authentication',
-                description:
-                    'Create and manage pre-generated wallets using various identifier types.',
-                route: const ParaPregenExample(),
-                icon: Icons.wallet_outlined,
               ),
               const SizedBox(height: 16),
               _buildExampleCard(
