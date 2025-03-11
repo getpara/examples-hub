@@ -7,6 +7,8 @@ import { compress } from 'esbuild-plugin-compress';
 
 // const externals = [...Object.keys(pkg.dependencies || {}), ...Object.keys(pkg.peerDependencies || {})];
 
+/** @type {import('esbuild').BuildOptions} */
+
 await esbuild.build({
   banner: {
     js: '"use client";', // Required for Next 13 App Router
@@ -23,6 +25,7 @@ await esbuild.build({
   allowOverwrite: true,
   splitting: true, // Required for tree shaking
   minify: false,
+  target: ['es2015'],
   plugins: [
     compress({
       exclude: ['**/*.map'],
@@ -51,6 +54,7 @@ await esbuild.build({
   allowOverwrite: true,
   splitting: true, // Required for tree shaking
   minify: false,
+  target: ['es2015'],
   packages: 'external',
   plugins: [
     compress({

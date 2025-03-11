@@ -5,9 +5,6 @@ export function storageListener(e: StorageEvent) {
     return;
   }
 
-  if (e.key === constants.LOCAL_STORAGE_CURRENT_EXTERNAL_WALLET_ADDRESSES) {
-    this.updateCurrentExternalWalletAddressesFromStorage();
-  }
   if (e.key === constants.LOCAL_STORAGE_EXTERNAL_WALLETS) {
     this.updateExternalWalletsFromStorage();
   }

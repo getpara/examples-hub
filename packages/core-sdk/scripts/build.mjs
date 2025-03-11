@@ -12,6 +12,8 @@ import * as esbuild from 'esbuild';
 //   dep => !skipDeps.includes(dep),
 // );
 
+/** @type {import('esbuild').BuildOptions} */
+
 await esbuild.build({
   bundle: true,
   write: false,
@@ -25,6 +27,7 @@ await esbuild.build({
   allowOverwrite: true,
   splitting: true, // Required for tree shaking
   minify: false,
+  target: ['es2015'],
   plugins: [
     compress({
       exclude: ['**/*.map'],
@@ -54,6 +57,7 @@ await esbuild.build({
   outdir: 'dist/cjs',
   allowOverwrite: true,
   minify: false,
+  target: ['es2015'],
   plugins: [
     compress({
       exclude: ['**/*.map'],

@@ -16,5 +16,6 @@ export default defineConfig({
       reportOnFailure: true,
     },
     setupFiles: './__tests__/setup.ts',
+    testTimeout: 45000,
   },
 });

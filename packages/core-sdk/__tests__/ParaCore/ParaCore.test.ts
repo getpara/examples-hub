@@ -78,7 +78,6 @@ import '../mocks/mockUserManagementClient.js';
 import * as shareDistribution from '../../src/shares/shareDistribution.js';
 import {
   LOCAL_STORAGE_COUNTRY_CODE,
-  LOCAL_STORAGE_CURRENT_EXTERNAL_WALLET_ADDRESSES,
   LOCAL_STORAGE_CURRENT_WALLET_IDS,
   LOCAL_STORAGE_ED25519_WALLETS,
   LOCAL_STORAGE_EMAIL,
@@ -153,7 +152,6 @@ describe('ParaCore', () => {
       expect(para.ctx.apiKey).toBe(API_KEY);
       expect(para.wallets).toEqual({});
       expect(para.externalWallets).toEqual({});
-      expect(para.currentExternalWalletAddresses).toBeUndefined();
 
       // casting as any to access protected fields
       expect((para as any).supportedWalletTypes).toEqual([]);
@@ -338,17 +336,6 @@ describe('ParaCore', () => {
 
       expect(spy).toBeCalledTimes(1);
     });
-    it('updateCurrentExternalWalletAddressesFromStorage', () => {
-      const para = new MockPara(Environment.DEV, API_KEY);
-      const spy = vi.spyOn(para as any, 'updateCurrentExternalWalletAddressesFromStorage');
-
-      storageListener.bind(para)({
-        key: LOCAL_STORAGE_CURRENT_EXTERNAL_WALLET_ADDRESSES,
-        url: 'http://localhost:3000',
-      } as StorageEvent);
-
-      expect(spy).toBeCalledTimes(1);
-    });
     // it('LOCAL_STORAGE_EXTERNAL_WALLETS', () => {
     //   localStorage[LOCAL_STORAGE_EXTERNAL_WALLETS] = JSON.stringify({ test: { id: 'test' } });
     //   const spy = vi.spyOn(window, 'addEventListener').mockImplementationOnce((event, handler) => {
@@ -394,7 +381,6 @@ describe('ParaCore', () => {
       expect(para.externalWallets).toEqual({
         [address]: STORED_EXTERNAL_WALLET,
       });
-      expect(para.currentExternalWalletAddresses).toEqual([address]);
       expect((para as unknown as any).isUsingExternalWallet()).toBeTruthy();
       expect(isFullyLoggedIn).toBeTruthy();
       expect(isSessionActive).toBeTruthy();
@@ -409,7 +395,6 @@ describe('ParaCore', () => {
       await expect(para.externalWalletLogin({ address, type, provider })).rejects.toThrowError(LOGIN_ERROR);
 
       expect(para.externalWallets).toEqual({});
-      expect(para.currentExternalWalletAddresses).toBeUndefined();
     });
     it('logs out and clears external wallets', async () => {
       const para = new MockPara(Environment.DEV, API_KEY);
@@ -421,12 +406,10 @@ describe('ParaCore', () => {
       expect(para.externalWallets).toEqual({
         [address]: STORED_EXTERNAL_WALLET,
       });
-      expect(para.currentExternalWalletAddresses).toEqual([address]);
 
       await para.logout();
 
       expect(para.externalWallets).toEqual({});
-      expect(para.currentExternalWalletAddresses).toBeUndefined();
     });
     it('util functions', async () => {
       const para = new MockPara(Environment.DEV, API_KEY);
@@ -438,7 +421,6 @@ describe('ParaCore', () => {
       expect(para.externalWallets).toEqual({
         [address]: STORED_EXTERNAL_WALLET,
       });
-      expect(para.currentExternalWalletAddresses).toEqual([address]);
 
       const displayAddress = para.getDisplayAddress(address);
       expect(displayAddress).toEqual(address);

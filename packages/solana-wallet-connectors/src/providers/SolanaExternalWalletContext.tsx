@@ -83,7 +83,8 @@ export function SolanaExternalWalletProvider({
   }, []);
 
   useEffect(() => {
-    const storedExternalWallet = para.externalWallets[para.currentExternalWalletAddresses?.[0] ?? ''];
+    const storedExternalWallet = Object.values(para.externalWallets || {})[0];
+
     // If the user is using an external Solana wallet we want to watch for wallet changes and log them in to a different user when the wallet changes
     if (
       !connecting &&

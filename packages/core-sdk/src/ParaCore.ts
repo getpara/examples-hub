@@ -154,11 +154,6 @@ export abstract class ParaCore {
   wallets: Record<string, Wallet>;
 
   /**
-   * The addresses of the currently active external wallets.
-   */
-  currentExternalWalletAddresses?: string[];
-
-  /**
    * Wallets associated with the `ParaCore` instance.
    */
   externalWallets: Record<string, Wallet>;
@@ -751,7 +746,6 @@ export abstract class ParaCore {
     this.updateSessionCookieFromStorage();
     this.updateLoginEncryptionKeyPairFromStorage();
     this.updateExternalWalletsFromStorage();
-    this.updateCurrentExternalWalletAddressesFromStorage();
   };
 
   private updateTelegramUserIdFromStorage = () => {
@@ -868,13 +862,6 @@ export abstract class ParaCore {
     const _externalWallets = JSON.parse((stringExternalWallets as string) || '{}');
 
     this.setExternalWallets(_externalWallets);
-  };
-  private updateCurrentExternalWalletAddressesFromStorage = () => {
-    const _currentExternalWalletAddresses =
-      (this.localStorageGetItem(constants.LOCAL_STORAGE_CURRENT_EXTERNAL_WALLET_ADDRESSES) as string) || undefined;
-    this.currentExternalWalletAddresses = _currentExternalWalletAddresses
-      ? JSON.parse(_currentExternalWalletAddresses)
-      : undefined;
   };
 
   async touchSession(regenerate = false): Promise<Awaited<ReturnType<Client['touchSession']>>> {
@@ -1014,12 +1001,6 @@ export abstract class ParaCore {
 
     await this.setExternalWallets(_externalWallets);
 
-    const _currentExternalWalletAddresses =
-      ((await this.localStorageGetItem(constants.LOCAL_STORAGE_CURRENT_EXTERNAL_WALLET_ADDRESSES)) as string) || undefined;
-    this.currentExternalWalletAddresses = _currentExternalWalletAddresses
-      ? JSON.parse(_currentExternalWalletAddresses)
-      : undefined;
-
     setupListeners.bind(this)();
 
     await this.touchSession();
@@ -1081,8 +1062,6 @@ export abstract class ParaCore {
         signer: '',
       },
     };
-    this.currentExternalWalletAddresses = [address];
-    this.setCurrentExternalWalletAddresses(this.currentExternalWalletAddresses);
     this.setExternalWallets(this.externalWallets);
     dispatchEvent(ParaEvent.EXTERNAL_WALLET_CHANGE_EVENT, null);
   }
@@ -1116,15 +1095,6 @@ export abstract class ParaCore {
   async setExternalWallets(externalWallets: Record<string, Wallet>): Promise<void> {
     this.externalWallets = externalWallets;
     await this.localStorageSetItem(constants.LOCAL_STORAGE_EXTERNAL_WALLETS, JSON.stringify(externalWallets));
-  }
-
-  async setCurrentExternalWalletAddresses(currentExternalWalletAddresses: string[]): Promise<void> {
-    this.currentExternalWalletAddresses = currentExternalWalletAddresses;
-
-    await this.localStorageSetItem(
-      constants.LOCAL_STORAGE_CURRENT_EXTERNAL_WALLET_ADDRESSES,
-      JSON.stringify(currentExternalWalletAddresses),
-    );
   }
 
   /**
@@ -2045,7 +2015,6 @@ export abstract class ParaCore {
     await this.touchSession();
 
     // Remove external wallets if creating an account with Para
-    this.currentExternalWalletAddresses = undefined;
     this.externalWallets = {};
 
     this.isAwaitingAccountCreation = true;
@@ -2237,7 +2206,6 @@ export abstract class ParaCore {
     skipSessionRefresh?: boolean;
   } = {}): Promise<LoginResponse> {
     // Remove external wallets if logging in with Capsule
-    this.currentExternalWalletAddresses = undefined;
     this.externalWallets = {};
 
     this.isAwaitingLogin = true;
@@ -3424,7 +3392,6 @@ export abstract class ParaCore {
       this.wallets = {};
     }
     this.currentWalletIds = {};
-    this.currentExternalWalletAddresses = undefined;
     this.externalWallets = {};
     this.loginEncryptionKeyPair = undefined;
     this.email = undefined;

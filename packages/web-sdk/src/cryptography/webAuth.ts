@@ -8,7 +8,7 @@ const ES256_ALGORITHM = -7;
 const RS256_ALGORITHM = -257;
 
 function publicKeyCredentialToJSON(pubKeyCred: ArrayBuffer | Array<string> | Object) {
-  if (pubKeyCred instanceof ArrayBuffer) {
+  if (pubKeyCred instanceof ArrayBuffer || ArrayBuffer.isView(pubKeyCred)) {
     return base64url.encode(pubKeyCred as any);
   } else if (pubKeyCred instanceof Array) {
     return pubKeyCred.map(publicKeyCredentialToJSON);

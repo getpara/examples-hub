@@ -1,6 +1,8 @@
 import { compress } from 'esbuild-plugin-compress';
 import * as esbuild from 'esbuild';
 
+/** @type {import('esbuild').BuildOptions} */
+
 await esbuild.build({
   bundle: true,
   write: false,
@@ -14,6 +16,7 @@ await esbuild.build({
   allowOverwrite: true,
   splitting: true, // Required for tree shaking
   minify: false,
+  target: ['es2015'],
   packages: 'external',
   plugins: [
     compress({
@@ -34,6 +37,7 @@ await esbuild.build({
   outdir: 'dist/cjs',
   allowOverwrite: true,
   minify: false,
+  target: ['es2015'],
   plugins: [
     compress({
       exclude: ['**/*.map'],

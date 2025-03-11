@@ -36,7 +36,7 @@ export class ServerUtils implements PlatformUtils {
   ): Promise<{
     signer: string;
   }> {
-    throw new Error('not implemented');
+    throw new Error('Refresh function is not implemented in the ServerUtils class.');
   }
 
   preKeygen(
@@ -100,9 +100,8 @@ export class ServerUtils implements PlatformUtils {
     r: Buffer;
     s: Buffer;
   }> {
-    throw new Error('not implemented');
+    throw new Error('SignHash is not implemented in the ServerUtils class.');
   }
-
   ed25519Keygen(
     ctx: Ctx,
     userId: string,
@@ -149,6 +148,6 @@ export class ServerUtils implements PlatformUtils {
   disableProviderModal = true;
 
   openPopup(_popupUrl: string): Window {
-    throw new Error('not implemented');
+    throw new Error('OpenPopup is not implemented in the ServerUtils class.');
   }
 }

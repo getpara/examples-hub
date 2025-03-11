@@ -118,7 +118,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
   }, [wallet]);
 
   const chains: CommonChain[] = useMemo(() => {
-    const walletType = para.externalWallets[para.currentExternalWalletAddresses?.[0] ?? '']?.type;
+    const walletType = Object.values(para.externalWallets || {})[0]?.type;
 
     switch (walletType) {
       case WalletType.COSMOS: {
@@ -134,7 +134,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
   }, [cosmosChains, evmChains, selectedExternalWalletId]);
 
   const chainId: string | undefined = useMemo(() => {
-    const walletType = para.externalWallets[para.currentExternalWalletAddresses?.[0] ?? '']?.type;
+    const walletType = Object.values(para.externalWallets || {})[0]?.type;
 
     switch (walletType) {
       case WalletType.COSMOS: {
@@ -151,7 +151,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
 
   const switchChain = useCallback(
     async (chainId: string) => {
-      const walletType = para.externalWallets[para.currentExternalWalletAddresses?.[0] ?? '']?.type;
+      const walletType = Object.values(para.externalWallets || {})[0]?.type;
 
       if (walletType) {
         let resp: {
@@ -255,7 +255,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
 
   const username: string | undefined = useMemo(() => {
     let username: string | undefined;
-    const storedExternalWallet = para.externalWallets[para.currentExternalWalletAddresses?.[0] ?? ''];
+    const storedExternalWallet = Object.values(para.externalWallets || {})[0];
 
     if (storedExternalWallet) {
       const walletType = storedExternalWallet?.type;
@@ -283,7 +283,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
   }, [evmUsername, wallet]);
 
   const avatar: string | undefined = useMemo(() => {
-    const walletType = para.externalWallets[para.currentExternalWalletAddresses?.[0] ?? '']?.type;
+    const walletType = Object.values(para.externalWallets || {})[0]?.type;
 
     if (walletType) {
       switch (walletType) {

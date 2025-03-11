@@ -79,7 +79,7 @@ export function EvmExternalWalletProvider({
   }, [isConnecting, isReconnecting, isLocalConnecting, wagmiAddress, connectedConnector]);
 
   useEffect(() => {
-    const storedExternalWallet = getStoredExternalWallets()[para.currentExternalWalletAddresses?.[0] ?? ''];
+    const storedExternalWallet = Object.values(para.externalWallets || {})[0];
 
     // If the user is using an external EVM wallet we want to watch for wallet changes and log them in to a different user when the wallet changes
     if (

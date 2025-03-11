@@ -40,13 +40,7 @@ export async function passwordCreation(
     status: PasswordStatus.COMPLETE,
     sigDerivedPublicKey: publicKeyHex,
     salt: salt,
+    encryptedWalletPrivateKey: encryptedPrivateKeyHex,
+    encryptionKeyHash: encryptionKeyHash,
   });
-
-  await para.ctx.client.uploadEncryptedWalletPrivateKey(
-    userId,
-    encryptedPrivateKeyHex,
-    encryptionKeyHash,
-    undefined,
-    passwordId,
-  );
 }

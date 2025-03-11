@@ -91,6 +91,15 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
       }
     }, [authStepRoute, isIFrameReady]);
 
+    useEffect(() => {
+      if (!!authStepRoute && isIFrameReady) {
+        // Using a small timeout here to fully ensure the iframe is loaded before triggering any animation
+        setTimeout(() => {
+          setStep(authStepRoute);
+        }, 200);
+      }
+    }, [authStepRoute, isIFrameReady]);
+
     useImperativeHandle(ref, () => {
       return {
         handleModalClose() {

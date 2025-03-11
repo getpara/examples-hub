@@ -210,6 +210,8 @@ interface sessionPasswordBody {
   status?: PasswordStatus;
   sigDerivedPublicKey?: string;
   salt?: string;
+  encryptedWalletPrivateKey?: string;
+  encryptionKeyHash?: string;
 }
 
 type BiometricLocationHintParams = AuthParams;

@@ -1,6 +1,8 @@
 import * as esbuild from 'esbuild';
 import { compress } from 'esbuild-plugin-compress';
 
+/** @type {import('esbuild').BuildOptions} */
+
 await esbuild.build({
   banner: {
     js: '"use client";', // Required for Next 13 App Router
@@ -18,7 +20,8 @@ await esbuild.build({
   outdir: 'dist',
   allowOverwrite: true,
   splitting: true, // Required for tree shaking
-  minify: true,
+  minify: false,
+  target: ['es2015'],
   plugins: [
     compress({
       exclude: ['**/*.map'],
