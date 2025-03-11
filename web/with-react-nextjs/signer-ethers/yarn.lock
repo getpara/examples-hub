@@ -307,10 +307,10 @@
   resolved "https://registry.yarnpkg.com/@fastify/busboy/-/busboy-2.1.1.tgz#b9da6a878a371829a0502c9b6c1c143ef6663f4d"
   integrity sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==
 
-"@getpara/core-components@1.4.4":
-  version "1.4.4"
-  resolved "https://registry.yarnpkg.com/@getpara/core-components/-/core-components-1.4.4.tgz#9decba46712a24417a44664136678bf418dbfa98"
-  integrity sha512-jfIgq8ZQRfgIuCIJNo1xtLPZd3GT0yuLG85YWsOWr7aa1T9x9OoiKJhyKRQrUsIneSlqnqTPJo47PHLHAur7GA==
+"@getpara/core-components@1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@getpara/core-components/-/core-components-1.5.0.tgz#701a06217421f66b3c834e8a2923c7b4bca707b4"
+  integrity sha512-VEqa8Wt/jaDNtlbUmy2yZVw0qAX0EsKN0ZD7QnhAlyQx4bo27SW2LHMKmB3ewNB67jg7bLxMRadaZ2elR+arSA==
   dependencies:
     "@stencil/core" "^4.7.0"
     color-blend "^4.0.0"
@@ -319,14 +319,14 @@
     inputmask "5.0.9"
     qrcode-with-logos "1.1.1"
 
-"@getpara/core-sdk@1.4.4":
-  version "1.4.4"
-  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.4.4.tgz#7bedcdc7c43ac0de40e1892221658591d5e3c0f0"
-  integrity sha512-MpDdFBzySjKeWSxtR4Iv0xLqehtKbTSGzUztYpqu7xY+hmIkgJL3/1g5HwRHbTmJvsM1Mlj/h3FjFc18ehWrcg==
+"@getpara/core-sdk@1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.5.0.tgz#20d3a302ac69541d618b44bdb47d9ef59cea30f1"
+  integrity sha512-yNLohWkNEUloph+XpcMQPRG2Wa9U2D/HS7DM1Toxi6yB8FcGq6v72ZQd1mDA0Vvy2TUmDBvyqOh+Lxd546m8vw==
   dependencies:
     "@celo/utils" "^8.0.0"
     "@cosmjs/encoding" "^0.32.4"
-    "@getpara/user-management-client" "1.4.4"
+    "@getpara/user-management-client" "1.5.0"
     "@noble/hashes" "^1.5.0"
     base64url "^3.0.1"
     ethereumjs-util "7.1.5"
@@ -334,20 +334,20 @@
     node-forge "^1.3.1"
     qs "^6.12.0"
 
-"@getpara/ethers-v6-integration@1.4.4":
-  version "1.4.4"
-  resolved "https://registry.yarnpkg.com/@getpara/ethers-v6-integration/-/ethers-v6-integration-1.4.4.tgz#35dedae707c69f332f27c64c27e1b6103a7b5125"
-  integrity sha512-iRnmhi7IN+qVyQ7KQYprq9JvKumaJqfh4TdfoRWawymLBn2p4ZNTBO5pZHwmw8LfWaPE3e+BJhU9OlNMrBBnrQ==
+"@getpara/ethers-v6-integration@1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@getpara/ethers-v6-integration/-/ethers-v6-integration-1.5.0.tgz#02ab68f76ff0ca4292677cbfe439d7f20e4635b3"
+  integrity sha512-LUu050vfFXnbsyikB5vTuqn1QLgScsgTKZaa3KFsnd5U7128X2b/99Udd+EQzjqZT9T8k+LeDiGoHDDhqczZdg==
   dependencies:
-    "@getpara/core-sdk" "1.4.4"
+    "@getpara/core-sdk" "1.5.0"
 
-"@getpara/react-common@1.4.4":
-  version "1.4.4"
-  resolved "https://registry.yarnpkg.com/@getpara/react-common/-/react-common-1.4.4.tgz#2391bbdf3adfbf09e2fabe5439285f51befd964c"
-  integrity sha512-04rybGLk2yPWhPlAzRqYdU9fSXlBMS/DR9mvezjIh24tEGyro/8Hssczw8NeNXn0sPq0xURtCoMZVxnLQJVatg==
+"@getpara/react-common@1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@getpara/react-common/-/react-common-1.5.0.tgz#635fe3f17382ab70fe91f8a49139e4030fd99598"
+  integrity sha512-Rg8KgRinWutCQjlQQYXkIVxjVAZ8sAfzoAJWTYaR03EO2+ZXACsPGTyBdsFDHKJD/KaHNIOYfDdxyVlN1Bh/Sw==
   dependencies:
-    "@getpara/react-components" "1.4.4"
-    "@getpara/web-sdk" "1.4.4"
+    "@getpara/react-components" "1.5.0"
+    "@getpara/web-sdk" "1.5.0"
     "@moonpay/moonpay-react" "^1.8.3"
     "@ramp-network/ramp-instant-sdk" "^4.0.5"
     "@stripe/crypto" "^0.0.4"
@@ -356,21 +356,21 @@
     styled-components "^6.1.8"
     ua-parser-js "^2.0.2"
 
-"@getpara/react-components@1.4.4":
-  version "1.4.4"
-  resolved "https://registry.yarnpkg.com/@getpara/react-components/-/react-components-1.4.4.tgz#6489941479f64a64a889e178fd2c0af923c0da1f"
-  integrity sha512-2EDPpyu5QHLp0B40LfZrNcXdkKCdL5hl+fvx0zjnYe/Slqj2ww/43L2xfKLz07n+GL3RfPP5MpaFofTKy5B+NQ==
+"@getpara/react-components@1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@getpara/react-components/-/react-components-1.5.0.tgz#b561d800f35d3fbf757225906c58a0b6b518ccca"
+  integrity sha512-q1aUQh6CjvkiPxJF2N1cendXXgod5mtiXoWEx3SZ3V7z2jAhCZP4cGno0FaZF/SfnrpdvaLLhkgYdiFkFMsHgA==
   dependencies:
-    "@getpara/core-components" "1.4.4"
+    "@getpara/core-components" "1.5.0"
 
-"@getpara/react-sdk@1.4.4":
-  version "1.4.4"
-  resolved "https://registry.yarnpkg.com/@getpara/react-sdk/-/react-sdk-1.4.4.tgz#efcf851e90476e40a0ef605e2e8ffab20b880c4a"
-  integrity sha512-3sWzG2G+NjxG+6WRbvKgLrIVxIAN2o4JfqFa8iVmunradme6gLG6/KuRWHmL8gUPl51Z8g0U0hdwO6nPpLPHZA==
+"@getpara/react-sdk@1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@getpara/react-sdk/-/react-sdk-1.5.0.tgz#a5046501dffa17ea701af30cbf742f36f6ada4b1"
+  integrity sha512-7YtkH0zvgoB5E6icYdJrBj9u6Zm+RvntsV0CokS5G3oxpG5Cukqy24G6OZjKL202TSfPIL+LclDUkdhQ89sdyg==
   dependencies:
-    "@getpara/react-common" "1.4.4"
-    "@getpara/react-components" "1.4.4"
-    "@getpara/web-sdk" "1.4.4"
+    "@getpara/react-common" "1.5.0"
+    "@getpara/react-components" "1.5.0"
+    "@getpara/web-sdk" "1.5.0"
     "@tanstack/react-query" "^5.0.0"
     date-fns "^3.6.0"
     framer-motion "11.3.28"
@@ -379,22 +379,22 @@
     zustand "^4.5.2"
     zustand-sync-tabs "^0.2.2"
 
-"@getpara/user-management-client@1.4.4":
-  version "1.4.4"
-  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.4.4.tgz#d3d65d882f1785395b5848c25d78ec3de6987e68"
-  integrity sha512-VXHLaZFPdt10BeWu6YLr6MFBrd4FdahQOKq6XWV7g+RH8qGUuaxa73jrSncp7P0VoPHxmvPTjchE3P04TLjE2g==
+"@getpara/user-management-client@1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.5.0.tgz#78fe4340e74967cd825f731d6e1f2e6799fe4297"
+  integrity sha512-7RwtOtVBg31wNH36NvxgCR1tnVlCA5VG7G1pw49iY0G/UcquklhML5RKlD29n3+OCiIFTuwtB/dSF5D/2VMddQ==
   dependencies:
     axios "^1.6.3"
     libphonenumber-js "1.11.2"
     qs "^6.12.0"
 
-"@getpara/web-sdk@1.4.4":
-  version "1.4.4"
-  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-1.4.4.tgz#4e6ef02f072b33a0206fd1bf68dcf42c2060c647"
-  integrity sha512-vvTX9bX6jxDzKbPxYME83GBr7HkPv//AJ7BjNXbBM09DePqR478jAXYPKjetLz1kql+3FrptntSR5rdb19750w==
+"@getpara/web-sdk@1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-1.5.0.tgz#cd97ab254c4a6823d0078e517b32af163abff02a"
+  integrity sha512-8/QNaHiCxQ+ZxLHVP7DjgZk/6fUUtAnNHR1NeWGoF2W/25ty9QUw3QYmm23ULvshqgN/EoIhGQQUFRVOhiRa5g==
   dependencies:
-    "@getpara/core-sdk" "1.4.4"
-    "@getpara/user-management-client" "1.4.4"
+    "@getpara/core-sdk" "1.5.0"
+    "@getpara/user-management-client" "1.5.0"
     "@sentry/browser" "^9.1.0"
     assert "^2.1.0"
     base64url "3.0.1"

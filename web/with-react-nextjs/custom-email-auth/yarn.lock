@@ -273,14 +273,14 @@
     "@ethersproject/properties" "^5.7.0"
     "@ethersproject/strings" "^5.7.0"
 
-"@getpara/core-sdk@1.4.4":
-  version "1.4.4"
-  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.4.4.tgz#7bedcdc7c43ac0de40e1892221658591d5e3c0f0"
-  integrity sha512-MpDdFBzySjKeWSxtR4Iv0xLqehtKbTSGzUztYpqu7xY+hmIkgJL3/1g5HwRHbTmJvsM1Mlj/h3FjFc18ehWrcg==
+"@getpara/core-sdk@1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.5.0.tgz#20d3a302ac69541d618b44bdb47d9ef59cea30f1"
+  integrity sha512-yNLohWkNEUloph+XpcMQPRG2Wa9U2D/HS7DM1Toxi6yB8FcGq6v72ZQd1mDA0Vvy2TUmDBvyqOh+Lxd546m8vw==
   dependencies:
     "@celo/utils" "^8.0.0"
     "@cosmjs/encoding" "^0.32.4"
-    "@getpara/user-management-client" "1.4.4"
+    "@getpara/user-management-client" "1.5.0"
     "@noble/hashes" "^1.5.0"
     base64url "^3.0.1"
     ethereumjs-util "7.1.5"
@@ -288,22 +288,22 @@
     node-forge "^1.3.1"
     qs "^6.12.0"
 
-"@getpara/user-management-client@1.4.4":
-  version "1.4.4"
-  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.4.4.tgz#d3d65d882f1785395b5848c25d78ec3de6987e68"
-  integrity sha512-VXHLaZFPdt10BeWu6YLr6MFBrd4FdahQOKq6XWV7g+RH8qGUuaxa73jrSncp7P0VoPHxmvPTjchE3P04TLjE2g==
+"@getpara/user-management-client@1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.5.0.tgz#78fe4340e74967cd825f731d6e1f2e6799fe4297"
+  integrity sha512-7RwtOtVBg31wNH36NvxgCR1tnVlCA5VG7G1pw49iY0G/UcquklhML5RKlD29n3+OCiIFTuwtB/dSF5D/2VMddQ==
   dependencies:
     axios "^1.6.3"
     libphonenumber-js "1.11.2"
     qs "^6.12.0"
 
-"@getpara/web-sdk@1.4.4":
-  version "1.4.4"
-  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-1.4.4.tgz#4e6ef02f072b33a0206fd1bf68dcf42c2060c647"
-  integrity sha512-vvTX9bX6jxDzKbPxYME83GBr7HkPv//AJ7BjNXbBM09DePqR478jAXYPKjetLz1kql+3FrptntSR5rdb19750w==
+"@getpara/web-sdk@1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-1.5.0.tgz#cd97ab254c4a6823d0078e517b32af163abff02a"
+  integrity sha512-8/QNaHiCxQ+ZxLHVP7DjgZk/6fUUtAnNHR1NeWGoF2W/25ty9QUw3QYmm23ULvshqgN/EoIhGQQUFRVOhiRa5g==
   dependencies:
-    "@getpara/core-sdk" "1.4.4"
-    "@getpara/user-management-client" "1.4.4"
+    "@getpara/core-sdk" "1.5.0"
+    "@getpara/user-management-client" "1.5.0"
     "@sentry/browser" "^9.1.0"
     assert "^2.1.0"
     base64url "3.0.1"

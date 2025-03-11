@@ -3,11 +3,15 @@ import { CapsuleInitOptions } from "@web3-onboard/capsule/dist/types";
 import { init } from "@web3-onboard/react";
 import injectedModule from "@web3-onboard/injected-wallets";
 
-const PARA_API_KEY = process.env.NEXT_PUBLIC_PARA_API_KEY || "";
+const API_KEY = process.env.NEXT_PUBLIC_PARA_API_KEY || "";
+
+if (!API_KEY) {
+  throw new Error("API key is not defined. Please set NEXT_PUBLIC_PARA_API_KEY in your environment variables.");
+}
 
 const initOptions: CapsuleInitOptions = {
   environment: Environment.BETA,
-  apiKey: PARA_API_KEY,
+  apiKey: API_KEY,
   modalProps: {
     authLayout: ["AUTH:FULL"],
     oAuthMethods: [
