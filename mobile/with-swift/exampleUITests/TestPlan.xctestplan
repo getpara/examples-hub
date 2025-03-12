@@ -1,0 +1,32 @@
+{
+  "configurations" : [
+    {
+      "id" : "A6BC943E-0431-4FAC-A94C-C4E0B65AE2E0",
+      "name" : "Configuration 1",
+      "options" : {
+        "targetForVariableExpansion" : {
+          "containerPath" : "container:example.xcodeproj",
+          "identifier" : "8FE93AA62D80F58C00CE018E",
+          "name" : "exampleUITests"
+        }
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "environmentVariableEntries" : [
+      {
+        "key" : "PARA_ENVIRONMENT",
+        "value" : "\"$(PARA_ENVIRONMENT)\""
+      },
+      {
+        "key" : "PARA_API_KEY",
+        "value" : "\"$(PARA_API_KEY)\""
+      }
+    ],
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+
+  ],
+  "version" : 1
+}
