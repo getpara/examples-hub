@@ -1,5 +1,5 @@
-import paraModule, { Environment, OAuthMethod } from "@web3-onboard/capsule";
-import { CapsuleInitOptions } from "@web3-onboard/capsule/dist/types";
+import paraModule, { Environment, OAuthMethod } from "@web3-onboard/para";
+import { CapsuleInitOptions } from "@web3-onboard/para/dist/types";
 import { init } from "@web3-onboard/react";
 import injectedModule from "@web3-onboard/injected-wallets";
 

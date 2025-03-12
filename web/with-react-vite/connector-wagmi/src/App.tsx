@@ -13,6 +13,9 @@ export default function Home() {
         This minimal example demonstrates how to integrate the Para Modal using the Wagmi SDK in a Next.js (App Router)
         project.
       </p>
+      <p className="max-w-md text-center">
+        Use the Wagmi SDK when you're trying to create your own custom wallet connection modal.
+      </p>
       {isConnected ? <WalletDisplay walletAddress={address} /> : <WalletConnectors />}
     </main>
   );

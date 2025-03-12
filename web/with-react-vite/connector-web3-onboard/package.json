@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@web3-onboard/capsule": "2.4.0",
+    "@web3-onboard/para": "2.4.0",
     "@web3-onboard/core": "^2.24.0",
     "@web3-onboard/injected-wallets": "^2.11.3",
     "@web3-onboard/react": "^2.11.0",

@@ -1,5 +1,5 @@
 import { useConnectWallet } from "@web3-onboard/react";
-import "@usecapsule/react-sdk/styles.css";
+import "@usepara/react-sdk/styles.css";
 import { WalletDisplay } from "./components/WalletDisplay";
 import "./client/web3-onboard";
 
