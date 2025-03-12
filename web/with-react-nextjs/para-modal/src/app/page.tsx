@@ -1,17 +1,42 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AuthLayout, ParaModal, OAuthMethod } from "@getpara/react-sdk";
+import {
+  AuthLayout,
+  ParaModal,
+  OAuthMethod,
+  ModalStep,
+  ParaWeb,
+  WalletType,
+  CurrentWalletIds,
+} from "@getpara/react-sdk";
 import { para } from "@/client/para";
 import "@getpara/react-sdk/styles.css";
-import { WalletDisplay } from "@/components/WalletDisplay";
+import Spinner from "@/components/Spinner";
 
+/**
+ * Home component that manages the authentication state and wallet creation process.
+ *
+ * This component:
+ * - Checks if the user is authenticated on mount.
+ * - Manages the current modal step and displays a loading spinner during wallet creation steps.
+ * - Handles wallet creation and stores the recovery secret.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered component.
+ *
+ * @example
+ * <Home />
+ */
 export default function Home() {
-  const [isOpen, setIsOpen] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [wallet, setWallet] = useState<string>("");
   const [error, setError] = useState<string>("");
+
+  const [secret, setSecret] = useState<string>("");
+
+  const [currentModalStep, setCurrentModalStep] = useState<ModalStep>();
 
   const handleCheckIfAuthenticated = async () => {
     setIsLoading(true);
@@ -35,33 +60,45 @@ export default function Home() {
     handleCheckIfAuthenticated();
   }, []);
 
-  const handleOpenModal = () => {
-    setIsOpen(true);
+  const handleStepChange = (step: { previousStep: ModalStep; currentStep: ModalStep; canGoBack: boolean }) => {
+    if (
+      step.currentStep === ModalStep.AWAITING_WALLET_CREATION ||
+      step.currentStep === ModalStep.WALLET_CREATION_DONE ||
+      step.currentStep === ModalStep.SECRET
+    ) {
+      // SET A PAGE STATE DURING THE STEP SO THAT YOU CAN SHOW A LOADING SPINNER OR SOMETHING
+      setCurrentModalStep(step.currentStep);
+      return;
+    }
   };
 
-  const handleCloseModal = async () => {
-    handleCheckIfAuthenticated();
-    setIsOpen(false);
+  const handleWalletCreationOverride = async (
+    para: ParaWeb
+  ): Promise<{
+    recoverySecret?: string;
+    walletIds: CurrentWalletIds;
+  }> => {
+    const [wallet, recoverySecret] = await para.createWallet({ type: WalletType.SOLANA });
+    // DO SOMETHING WITH THE WALLET SECRET. This is the recovery secret. If you set the recoverySecretStepEnabled to true, the user will see this secret as well so they can store it otherwise you should store it for them.
+    setSecret(recoverySecret!);
+    return {
+      recoverySecret: recoverySecret as string | undefined,
+      walletIds: {
+        [WalletType.SOLANA]: [wallet.id],
+      },
+    };
   };
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen gap-6 p-8">
-      <h1 className="text-2xl font-bold">Para Modal Example</h1>
-      <p className="max-w-md text-center">
-        This minimal example demonstrates how to integrate the Para Modal in a Next.js (App Router) project.
-      </p>
-      {isConnected ? <WalletDisplay walletAddress={wallet} /> : <p className="text-center">You are not logged in.</p>}
-      <button
-        disabled={isLoading}
-        onClick={handleOpenModal}
-        className="rounded-none px-4 py-2 bg-blue-900 text-white hover:bg-blue-950">
-        Open Para Modal
-      </button>
-      {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+      <h1 className="text-2xl font-bold">Current Modal Step: {currentModalStep}</h1>
+      {secret && <p className="text-xl font-semibold text-center max-w-md text-wrap">The User Secret: {secret}</p>}
+
+      {(currentModalStep === ModalStep.AWAITING_WALLET_CREATION ||
+        currentModalStep === ModalStep.WALLET_CREATION_DONE) && <Spinner />}
+
       <ParaModal
         para={para}
-        isOpen={isOpen}
-        onClose={handleCloseModal}
         disableEmailLogin={false}
         disablePhoneLogin={false}
         authLayout={[AuthLayout.AUTH_FULL]}
@@ -87,8 +124,19 @@ export default function Home() {
         }}
         appName="Para Modal Example"
         logo="/para.svg"
-        recoverySecretStepEnabled={true}
+        recoverySecretStepEnabled={false}
         twoFactorAuthEnabled={false}
+        bareModal={
+          currentModalStep === ModalStep.AWAITING_WALLET_CREATION ||
+          currentModalStep === ModalStep.WALLET_CREATION_DONE ||
+          currentModalStep === ModalStep.SECRET
+            ? false
+            : true
+        }
+        isOpen={false}
+        onModalStepChange={handleStepChange}
+        currentStepOverride={currentModalStep}
+        createWalletOverride={handleWalletCreationOverride}
       />
     </main>
   );
