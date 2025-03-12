@@ -41,6 +41,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8F924CB92D824A1700938496 /* Example.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; name = Example.xctestplan; path = exampleUITests/Example.xctestplan; sourceTree = "<group>"; };
 		8FA007812D57EB0D009EF0C3 /* ParaConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParaConfig.swift; sourceTree = "<group>"; };
 		8FA007842D57F1AA009EF0C3 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		8FA007872D581F08009EF0C3 /* ExternalWalletAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalWalletAuthView.swift; sourceTree = "<group>"; };
@@ -151,6 +152,7 @@
 		E8F93B1F2C21EBED006AA3F6 = {
 			isa = PBXGroup;
 			children = (
+				8F924CB92D824A1700938496 /* Example.xctestplan */,
 				E8F93B2A2C21EBED006AA3F6 /* example */,
 				8FE93AA82D80F58C00CE018E /* exampleUITests */,
 				E8F93B292C21EBED006AA3F6 /* Products */,

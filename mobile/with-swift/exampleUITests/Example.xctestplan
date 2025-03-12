@@ -1,0 +1,45 @@
+{
+  "configurations" : [
+    {
+      "id" : "AAE20D5E-CD24-4038-B4C7-D5689EBB63D3",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "commandLineArgumentEntries" : [
+      {
+        "argument" : "",
+        "enabled" : false
+      }
+    ],
+    "environmentVariableEntries" : [
+      {
+        "key" : "PARA_ENVIRONMENT",
+        "value" : "\"$(PARA_ENVIRONMENT)\""
+      },
+      {
+        "key" : "PARA_API_KEY",
+        "value" : "\"$(PARA_API_KEY)\","
+      }
+    ],
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:example.xcodeproj",
+      "identifier" : "E8F93B272C21EBED006AA3F6",
+      "name" : "example"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:example.xcodeproj",
+        "identifier" : "8FE93AA62D80F58C00CE018E",
+        "name" : "exampleUITests"
+      }
+    }
+  ],
+  "version" : 1
+}
