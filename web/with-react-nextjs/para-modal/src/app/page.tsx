@@ -135,7 +135,6 @@ export default function Home() {
         }
         isOpen={false}
         onModalStepChange={handleStepChange}
-        currentStepOverride={currentModalStep}
         createWalletOverride={handleWalletCreationOverride}
       />
     </main>
