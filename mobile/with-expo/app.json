@@ -6,6 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "newArchEnabled": true,
+    "scheme": "para-expo",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.usecapsule.example.expo",
