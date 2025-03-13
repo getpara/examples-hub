@@ -14,6 +14,7 @@ module.exports = [
       import: importPlugin,
     },
     files: ['packages/**/src/**/*.{ts,tsx,js,jsx}'],
+    ignores: ['packages/react-component-library/**'],
     rules: {
       'import/extensions': [
         'error',
@@ -161,7 +162,11 @@ module.exports = [
   },
   {
     name: 'Override for developer portal',
-    files: ['sites/developer-portal/**/*.ts', 'sites/developer-portal/**/*.tsx'],
+    files: [
+      'sites/developer-portal/**/*.ts',
+      'sites/developer-portal/**/*.tsx',
+      'packages/react-component-library/**/*.tsx',
+    ],
     ignores: ['**/dist/**'],
 
     plugins: {
