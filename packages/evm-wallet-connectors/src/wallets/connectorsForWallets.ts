@@ -94,7 +94,7 @@ export const connectorsForWallets = (
 
     const isWalletConnectConnector = walletMeta.id === 'walletConnect';
 
-    if (isWalletConnectConnector) {
+    if (isWalletConnectConnector && createConnector) {
       connectors.push(
         createConnector(
           walletMetaData({

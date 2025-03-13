@@ -71,9 +71,14 @@ describe('ParaModal', () => {
       </QueryClientProvider>,
     );
 
-    setIsOpen(true);
+    await waitFor(
+      () => {
+        expect(screen.getAllByTestId('modal')).toBeDefined();
+      },
+      { timeout: 2000 },
+    );
 
-    expect(screen.getAllByTestId('modal')).toBeDefined();
+    setIsOpen(true);
 
     await waitFor(
       () => {

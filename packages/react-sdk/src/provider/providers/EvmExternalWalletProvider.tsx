@@ -76,7 +76,7 @@ export function EvmExternalWalletProvider<
       </EvmProvider>
     );
   } else if (isUsing) {
-    throw new Error('@getpara/evm-wallet-connectors is required to use an external EVM wallet.');
+    console.warn('@getpara/evm-wallet-connectors is required to use an external EVM wallet.');
   }
 
   return children;

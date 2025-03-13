@@ -62,7 +62,7 @@ export function CosmosExternalWalletProvider({
       </CosmosProvider>
     );
   } else if (isUsing) {
-    throw new Error('@getpara/cosmos-wallet-connectors is required to use an external Cosmos wallet.');
+    console.warn('@getpara/cosmos-wallet-connectors is required to use an external Cosmos wallet.');
   }
 
   return children;

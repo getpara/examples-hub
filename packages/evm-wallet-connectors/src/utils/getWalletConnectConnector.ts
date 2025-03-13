@@ -79,11 +79,9 @@ function createWalletConnectConnector({
 export function getWalletConnectConnector({
   projectId,
   walletConnectParameters,
-}: GetWalletConnectConnectorParams): CreateConnector {
+}: GetWalletConnectConnectorParams): CreateConnector | undefined {
   if (!projectId || projectId === '') {
-    throw new Error(
-      'No projectId found. Every dApp must now provide a WalletConnect Cloud projectId to enable WalletConnect v2. Sign up for your free key at https://cloud.walletconnect.com/sign-in',
-    );
+    return;
   }
 
   // Return a function that merges additional wallet details with `CreateConnectorFn`.

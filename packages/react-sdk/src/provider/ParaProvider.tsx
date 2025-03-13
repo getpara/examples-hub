@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useMemo } from 'react';
+import { forwardRef, useEffect } from 'react';
 import { useStore } from './stores/useStore.js';
 import { useAutoSessionKeepAlive } from './hooks/utils/useAutoSessionKeepAlive.js';
 import { useEventListeners } from './hooks/utils/useEventListeners.js';
@@ -6,72 +6,59 @@ import { ParaProviderProps } from './types/provider.js';
 import { Chain, Transport } from 'viem';
 import { ExternalWalletWrapper } from './components/ExternalWalletWrapper.js';
 import { ParaModal } from '../modal/ParaModal.js';
-import { ParaModalHandle } from '../modal/index.js';
+import { ExternalWallet, ParaModalHandle } from '../modal/index.js';
 import { isConfigType, isParaWeb } from './utils/paraConfigTypeGuards.js';
 import ParaWeb from '@getpara/web-sdk';
 
 export const ParaProvider = forwardRef<
   ParaModalHandle,
   ParaProviderProps<readonly [Chain, ...Chain[]], Record<[Chain, ...Chain[]][number]['id'], Transport>>
->(
-  (
-    { children, paraClientConfig, callbacks, config, externalWalletConfig: externalWalletConfigFromProps, paraModalConfig },
-    ref,
-  ) => {
-    useEventListeners(callbacks);
-    useAutoSessionKeepAlive({ disabled: config.disableAutoSessionKeepAlive });
+>(({ children, paraClientConfig, callbacks, config, externalWalletConfig, paraModalConfig }, ref) => {
+  useEventListeners(callbacks);
+  useAutoSessionKeepAlive({ disabled: config.disableAutoSessionKeepAlive });
 
-    const setClient = useStore(state => state.setClient);
-    const client = useStore(state => state.client);
-    const setExternalWallets = useStore(state => state.setExternalWallets);
-    const externalWallets = useStore(state => state.externalWallets);
-    const setModalConfig = useStore(state => state.setModalConfig);
-    const modalConfig = useStore(state => state.modalConfig);
-    const setAppName = useStore(state => state.setAppName);
-    const appName = useStore(state => state.appName);
+  const setClient = useStore(state => state.setClient);
+  const client = useStore(state => state.client);
+  const setExternalWallets = useStore(state => state.setExternalWallets);
+  const externalWallets = useStore(state => state.externalWallets);
+  const setModalConfig = useStore(state => state.setModalConfig);
+  const modalConfig = useStore(state => state.modalConfig);
+  const setAppName = useStore(state => state.setAppName);
+  const appName = useStore(state => state.appName);
 
-    useEffect(() => {
-      if (appName !== config.appName) setAppName(config.appName);
-    }, [config.appName]);
+  useEffect(() => {
+    if (appName !== config.appName) setAppName(config.appName);
+  }, [config.appName]);
 
-    useEffect(() => {
-      if (modalConfig !== paraModalConfig) setModalConfig(paraModalConfig);
-    }, [paraModalConfig]);
+  useEffect(() => {
+    if (modalConfig !== paraModalConfig) setModalConfig(paraModalConfig);
+  }, [paraModalConfig]);
 
-    useEffect(() => {
-      if (externalWallets !== externalWalletConfigFromProps?.wallets)
-        setExternalWallets(externalWalletConfigFromProps?.wallets ?? []);
-    }, [externalWalletConfigFromProps?.wallets]);
+  useEffect(() => {
+    if (externalWallets !== externalWalletConfig?.wallets)
+      setExternalWallets(externalWalletConfig?.wallets ?? Object.values(ExternalWallet));
+  }, [externalWalletConfig?.wallets]);
 
-    useEffect(() => {
-      if (!isConfigType(paraClientConfig) && !isParaWeb(paraClientConfig)) {
-        throw new Error('Invalid Para config');
-      }
-
-      const newClient = isConfigType(paraClientConfig)
-        ? new ParaWeb(paraClientConfig.env, paraClientConfig.apiKey, paraClientConfig.opts)
-        : paraClientConfig;
-
-      setClient(newClient);
-    }, [paraClientConfig]);
-
-    const externalWalletConfig = useMemo(
-      () => ({
-        ...externalWalletConfigFromProps,
-        appName: config.appName,
-      }),
-      [externalWalletConfigFromProps, config.appName],
-    );
-
-    if (!client) {
-      return null;
+  useEffect(() => {
+    if (!isConfigType(paraClientConfig) && !isParaWeb(paraClientConfig)) {
+      throw new Error('Invalid Para config');
     }
 
-    return (
-      <ExternalWalletWrapper config={externalWalletConfig}>
-        {children}
-        {!config.disableEmbeddedModal && <ParaModal ref={ref} />}
-      </ExternalWalletWrapper>
-    );
-  },
-);
+    const newClient = isConfigType(paraClientConfig)
+      ? new ParaWeb(paraClientConfig.env, paraClientConfig.apiKey, paraClientConfig.opts)
+      : paraClientConfig;
+
+    setClient(newClient);
+  }, [paraClientConfig]);
+
+  if (!client) {
+    return null;
+  }
+
+  return (
+    <ExternalWalletWrapper config={externalWalletConfig}>
+      {children}
+      {!config.disableEmbeddedModal && <ParaModal ref={ref} />}
+    </ExternalWalletWrapper>
+  );
+});

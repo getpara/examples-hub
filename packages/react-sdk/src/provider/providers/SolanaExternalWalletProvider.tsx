@@ -62,7 +62,7 @@ export function SolanaExternalWalletProvider({
       </SolanaProvider>
     );
   } else if (isUsing) {
-    throw new Error('@getpara/solana-wallet-connectors is required to use an external Solana wallet.');
+    console.warn('@getpara/solana-wallet-connectors is required to use an external Solana wallet.');
   }
 
   return children;

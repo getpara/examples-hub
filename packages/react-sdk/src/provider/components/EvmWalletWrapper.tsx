@@ -16,7 +16,7 @@ export const EvmWalletWrapper = <
   wagmiProviderProps,
   onSwitchWallet,
 }: {
-  evmProviderConfig?: ParaEvmProviderConfigNoWallets<chains, transports>;
+  evmProviderConfig: ParaEvmProviderConfigNoWallets<chains, transports>;
   wagmiProviderProps: ParaWagmiProviderProps;
   onSwitchWallet: ({ address, error }: { address?: string; error?: string }) => void;
 } & PropsWithChildren) => {
@@ -24,13 +24,6 @@ export const EvmWalletWrapper = <
   const wallets = useStore(state => state.externalWallets);
 
   const isUsing = wallets.some(w => w in EvmWallet);
-  if (!evmProviderConfig) {
-    if (isUsing) {
-      throw new Error('A valid evmConnector config is required to use an external EVM wallet.');
-    }
-
-    return children;
-  }
 
   return (
     <EvmExternalWalletProvider

@@ -10,7 +10,7 @@ export const SolanaWalletWrapper = ({
   solanaProviderConfig,
   onSwitchWallet,
 }: {
-  solanaProviderConfig?: ParaSolanaProviderConfigNoWallets;
+  solanaProviderConfig: ParaSolanaProviderConfigNoWallets;
   onSwitchWallet: ({ address, error }: { address?: string; error?: string }) => void;
 } & PropsWithChildren) => {
   const para = useInternalClient();
