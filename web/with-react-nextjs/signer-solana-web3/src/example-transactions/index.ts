@@ -5,9 +5,7 @@ import ProgramDeployment from "./program-deployment";
 import ProgramInteraction from "./program-interaction";
 import BatchInstructions from "./batch-instructions";
 
-export type TransactionID =
-  // | "message-signing"
-  "sol-transfer";
+export type TransactionID = "message-signing" | "sol-transfer";
 // | "token-transfer"
 // | "program-deployment"
 // | "program-interaction"
@@ -27,13 +25,13 @@ export type TransactionsConfig = {
 
 // The actual configuration object
 export const transactionTypes: TransactionsConfig = {
-  // "message-signing": {
-  //   title: "Message Signing",
-  //   description:
-  //     "Sign a message with your Para account. This is used for signing arbitrary data and off-chain messages.",
-  //   path: "/example-transactions/message-signing",
-  //   component: MessageSigning,
-  // },
+  "message-signing": {
+    title: "Message Signing",
+    description:
+      "Sign a message with your Para account. This is used for signing arbitrary data and off-chain messages.",
+    path: "/example-transactions/message-signing",
+    component: MessageSigning,
+  },
   "sol-transfer": {
     title: "SOL Transfer",
     description:

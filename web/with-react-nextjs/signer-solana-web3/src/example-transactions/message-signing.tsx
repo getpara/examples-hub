@@ -2,12 +2,14 @@
 
 import { usePara } from "@/components/ParaProvider";
 import { useState } from "react";
-import { verifyMessage } from "ethers";
+import { verifySignature, getBase58Decoder, getBase58Encoder, getUtf8Encoder, SignatureBytes } from "@solana/kit";
+import nacl from "tweetnacl";
+import nacl_util from "tweetnacl-util";
 
 export default function MessageSigningDemo() {
   const [message, setMessage] = useState("");
   const [signature, setSignature] = useState("");
-  const [recoveredAddress, setRecoveredAddress] = useState("");
+  const [recoveredAddress, setRecoveredAddress] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<{
     show: boolean;
@@ -20,7 +22,7 @@ export default function MessageSigningDemo() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setRecoveredAddress("");
+    setRecoveredAddress(false);
 
     if (!signer) return;
 
@@ -45,7 +47,12 @@ export default function MessageSigningDemo() {
 
       const messageToSign = message.trim();
 
-      const signature = await signer.signMessage(messageToSign);
+      const messageBytes = getUtf8Encoder().encode(messageToSign);
+
+      const signedBytes = await signer.signBytes(Buffer.from(messageBytes));
+
+      const signature = getBase58Decoder().decode(signedBytes);
+
       setSignature(`${signature}`);
 
       setStatus({
@@ -69,12 +76,22 @@ export default function MessageSigningDemo() {
     try {
       if (!message || !signature) return;
 
-      const recovered = verifyMessage(message, signature);
-      setRecoveredAddress(recovered);
+      const messageBytes = getUtf8Encoder().encode(message);
+
+      const signatureBytes = new Uint8Array(getBase58Encoder().encode(signature)) as SignatureBytes;
+
+      const publicKeyBuffer = new Uint8Array(signer?.sender!.toBuffer()!);
+
+      const cryptoKey = await crypto.subtle.importKey("raw", publicKeyBuffer, "Ed25519", true, ["verify"]);
+
+      const isValid = await verifySignature(cryptoKey, signatureBytes, messageBytes);
+
+      setRecoveredAddress(isValid);
+
       setStatus({
         show: true,
-        type: "success",
-        message: "Signature verified successfully!",
+        type: isValid ? "success" : "error",
+        message: isValid ? "Signature verified successfully!" : "Invalid signature for this message and public key.",
       });
     } catch (error) {
       setStatus({
@@ -86,6 +103,34 @@ export default function MessageSigningDemo() {
     }
   };
 
+  const handleVerify2 = async () => {
+    try {
+      if (!message || !signature) return;
+
+      const messageBytes = new Uint8Array(getUtf8Encoder().encode(message));
+
+      const signatureBytes = new Uint8Array(getBase58Encoder().encode(signature));
+
+      const publicKeyBuffer = signer?.sender!.toBytes()!;
+
+      const isValid = nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBuffer);
+
+      setRecoveredAddress(isValid);
+
+      setStatus({
+        show: true,
+        type: isValid ? "success" : "error",
+        message: isValid ? "Signature verified successfully!" : "Invalid signature for this message and public key.",
+      });
+    } catch (error) {
+      setStatus({
+        show: true,
+        type: "error",
+        message: "Failed to verify signature. Please try again.",
+      });
+      console.error("Error verifying signature:", error);
+    }
+  };
   return (
     <div className="container mx-auto px-4">
       <div className="text-center mb-8">
@@ -93,8 +138,8 @@ export default function MessageSigningDemo() {
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
           Sign a message with your connected wallet. This demonstrates a basic message signing interaction with the Para
           SDK using the{" "}
-          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-none">para.signMessage()</code>
-          method.
+          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-none">signBytes()</code>
+          method of the ParaSolanaWeb3Signer. You can also verify the signature to ensure its authenticity.
         </p>
       </div>
 
@@ -144,7 +189,7 @@ export default function MessageSigningDemo() {
                 <h3 className="text-sm font-medium text-gray-900">Signature:</h3>
                 <button
                   type="button"
-                  onClick={handleVerify}
+                  onClick={handleVerify2}
                   className="px-3 py-1 text-sm bg-blue-900 text-white hover:bg-blue-950 transition-colors rounded-none">
                   Verify
                 </button>
@@ -153,14 +198,14 @@ export default function MessageSigningDemo() {
                 <p className="text-sm font-mono break-all text-gray-600 bg-white p-4 border border-gray-200">
                   {signature}
                 </p>
-                {recoveredAddress && (
+                {/* {recoveredAddress && (
                   <div className="mt-4">
                     <p className="text-sm font-medium text-gray-900 mb-2">Recovered Address:</p>
                     <p className="text-sm font-mono break-all text-gray-600 bg-white p-4 border border-gray-200">
                       {recoveredAddress}
                     </p>
                   </div>
-                )}
+                )} */}
               </div>
             </div>
           )}
