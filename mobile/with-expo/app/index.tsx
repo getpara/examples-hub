@@ -3,7 +3,6 @@ import { SafeAreaView, ScrollView, StyleSheet, View } from "react-native";
 import { Text } from "@rneui/themed";
 import { useRouter } from "expo-router";
 import AuthMethodButton from "@/components/AuthMethodButton";
-
 const authMethods = [
   {
     type: "email",
@@ -18,6 +17,13 @@ const authMethods = [
     description: "Test phone number-based authentication flow",
     icon: "phone",
     route: "./auth/with-phone",
+  },
+  {
+    type: "oauth",
+    title: "OAuth Authentication",
+    description: "Test OAuth-based authentication flow",
+    icon: "lock",
+    route: "./auth/with-oauth",
   },
 ] as const;
 

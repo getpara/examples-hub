@@ -1,10 +1,10 @@
 import React from "react";
-import { SafeAreaView, StyleSheet } from "react-native";
+import { SafeAreaView, StyleSheet, View } from "react-native";
 import { Button } from "@rneui/themed";
 import { useRouter } from "expo-router";
 import { para } from "@/client/para";
 import { OAuthMethod } from "@getpara/react-native-wallet";
-import { openAuthSessionAsync, maybeCompleteAuthSession } from "expo-web-browser";
+import { openAuthSessionAsync } from "expo-web-browser";
 
 import { openURL } from "expo-linking";
 
@@ -14,8 +14,6 @@ export default function OauthAuthScreen() {
   const router = useRouter();
 
   const handleOauthLogin = async (provider: OAuthMethod) => {
-    maybeCompleteAuthSession();
-
     if (!provider) return;
 
     if (provider === OAuthMethod.FARCASTER) {
@@ -23,15 +21,23 @@ export default function OauthAuthScreen() {
       return;
     }
 
-    const oauthUrl = await para.getOAuthURL({ method: provider, deeplinkUrl: APP_SCHEME });
+    const oauthUrl = await para.getOAuthURL({
+      method: provider,
+      deeplinkUrl: APP_SCHEME,
+    });
 
-    await openAuthSessionAsync(oauthUrl, APP_SCHEME, { preferEphemeralSession: false });
+    await openAuthSessionAsync(oauthUrl, APP_SCHEME, {
+      preferEphemeralSession: false,
+    });
+
     const { email, userExists } = await para.waitForOAuth();
 
     if (userExists) {
+      console.log("User exists, logging in with email:", email);
       await para.login({ email: email! });
       router.navigate("../home");
     } else {
+      console.log("User does not exist, registering with email:", email);
       const biometricId = await para.getSetUpBiometricsURL({ isForNewDevice: false, authType: "email" });
       if (biometricId) {
         await para.registerPasskey({ email: email!, biometricsId: biometricId });
@@ -58,17 +64,24 @@ export default function OauthAuthScreen() {
       }
     }
   };
+
   return (
     <SafeAreaView style={styles.safeArea}>
-      {Object.values(OAuthMethod).map((provider) => (
-        <Button
-          key={provider}
-          title={`Login with ${provider}`}
-          onPress={() => handleOauthLogin(provider)}
-          containerStyle={styles.buttonContainer}
-          buttonStyle={styles.button}
-        />
-      ))}
+      <View style={styles.container}>
+        {Object.values(OAuthMethod).map((provider, index) => (
+          <Button
+            key={provider}
+            title={`Login with ${provider}`}
+            onPress={() => handleOauthLogin(provider)}
+            containerStyle={[
+              styles.buttonContainer,
+              index !== Object.values(OAuthMethod).length - 1 && styles.buttonMargin,
+            ]}
+            buttonStyle={styles.button}
+            titleStyle={styles.buttonTitle}
+          />
+        ))}
+      </View>
     </SafeAreaView>
   );
 }
@@ -78,42 +91,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f0f0f0",
   },
-  scrollContainer: {
+  container: {
+    flex: 1,
     paddingHorizontal: 20,
     paddingVertical: 24,
-  },
-  headerContainer: {
-    marginBottom: 32,
-  },
-  title: {
-    color: "#333333",
-    textAlign: "left",
-    fontWeight: "bold",
-    fontSize: 32,
-    marginBottom: 8,
-  },
-  subtitle: {
-    textAlign: "left",
-    fontSize: 16,
-    color: "#666666",
-    lineHeight: 22,
-  },
-  inputContainer: {
-    paddingHorizontal: 0,
-    marginBottom: 16,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
-    borderRadius: 8,
-    paddingHorizontal: 12,
+    justifyContent: "center",
   },
   button: {
     backgroundColor: "#fc6c58",
     borderRadius: 8,
-    paddingVertical: 12,
+    paddingVertical: 14,
   },
   buttonContainer: {
     width: "100%",
+  },
+  buttonMargin: {
+    marginBottom: 16,
+  },
+  buttonTitle: {
+    fontWeight: "600",
+    fontSize: 16,
   },
 });
