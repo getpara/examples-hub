@@ -620,6 +620,12 @@ export abstract class ParaCore {
     // TODO: consider using sessionStorage instead of localStorage
     if (!opts) opts = {};
 
+    let isE2E = false;
+    if (env === ('E2E' as Environment)) {
+      isE2E = true;
+      env = Environment.SANDBOX;
+    }
+
     this.emailPrimaryColor = opts.emailPrimaryColor;
     this.emailTheme = opts.emailTheme;
     this.homepageUrl = opts.homepageUrl;
@@ -678,6 +684,7 @@ export abstract class ParaCore {
       disableWebSockets: !!opts.disableWebSockets,
       wasmOverride: opts.wasmOverride,
       cosmosPrefix: this.cosmosPrefix,
+      isE2E,
     };
     if (opts.offloadMPCComputationURL) {
       this.ctx.mpcComputationClient = mpcComputationClient.initClient(opts.offloadMPCComputationURL, opts.disableWorkers);

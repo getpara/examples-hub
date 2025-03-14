@@ -18,16 +18,28 @@ export class WebExamplePage {
     await this.page.goto('/');
   }
 
-  async createUser(context: BrowserContext) {
+  async createUser({
+    context,
+    openModalText = 'Open Modal',
+    is2FAEnabled,
+    isRecoverySecretEnabled,
+    password,
+  }: {
+    context: BrowserContext;
+    openModalText?: string;
+    is2FAEnabled?: boolean;
+    isRecoverySecretEnabled?: boolean;
+    password?: string;
+  }) {
     await this.page.waitForTimeout(700);
-    await this.page.getByRole('button', { name: 'Open Modal' }).click();
+    await this.page.getByRole('button', { name: openModalText }).click();
     await this.page.waitForTimeout(1000);
 
     const randomHexString = crypto.randomBytes(5).toString('hex');
     const email = `teste2e+${randomHexString}@test.usecapsule.com`;
-    await this.page.getByRole('textbox', { name: 'Enter email or phone' }).click();
+    await this.page.getByRole('textbox', { name: /^Enter email/ }).click();
     await this.page.waitForTimeout(300);
-    await this.page.getByRole('textbox', { name: 'Enter email or phone' }).fill(email);
+    await this.page.getByRole('textbox', { name: /^Enter email/ }).fill(email);
     await this.page.waitForTimeout(500);
     await this.page.locator('.primary > .hydrated > div > svg').first().click();
     await this.page.waitForTimeout(3000);
@@ -44,44 +56,92 @@ export class WebExamplePage {
     await this.page.locator('#code-input-5').click();
     await this.page.locator('#code-input-5').fill('6');
 
-    const page1Promise = this.page.waitForEvent('popup');
-    await this.page.waitForTimeout(500);
-    await this.page.getByTestId('modal-content').getByRole('button', { name: 'Create' }).click();
+    let credentials: Protocol.WebAuthn.Credential[] = [];
+    if (password) {
+      await this.page.getByRole('button', { name: 'Choose Password' }).click();
+      await this.page.frameLocator('#root iframe').getByRole('textbox', { name: 'Enter password' }).click();
+      await this.page.frameLocator('#root iframe').getByRole('textbox', { name: 'Enter password' }).fill(password);
+      await this.page.frameLocator('#root iframe').getByRole('textbox', { name: 'Confirm password' }).click();
+      await this.page.frameLocator('#root iframe').getByRole('textbox', { name: 'Confirm password' }).fill(password);
+      await this.page.frameLocator('#root iframe').getByRole('button', { name: 'Save Password' }).click();
+    } else {
+      const page1Promise = this.page.waitForEvent('popup');
+      await this.page.waitForTimeout(500);
+      await this.page.getByTestId('modal-content').getByRole('button', { name: 'Create' }).click();
 
-    const page1 = await page1Promise;
-    const authPortal = new AuthPortalPage(page1);
-    await this.page.waitForTimeout(500);
-    const credentials = await authPortal.setup(context);
+      const page1 = await page1Promise;
+      const authPortal = new AuthPortalPage(page1);
+      await this.page.waitForTimeout(500);
+      credentials = await authPortal.setup(context);
+    }
 
-    await this.page.getByRole('button', { name: 'Continue' }).click();
-    await this.page.getByRole('button', { name: 'Skip' }).click();
+    let clipboardText = '';
+    if (isRecoverySecretEnabled) {
+      await this.page.getByTestId('modal-content').getByRole('button', { name: 'Copy' }).click();
+      clipboardText = await this.page.evaluate('navigator.clipboard.readText()');
+      await this.page.getByRole('button', { name: 'I’ve saved my recovery secret' }).click();
+    }
+
+    if (is2FAEnabled) {
+      await this.page.getByRole('button', { name: 'Continue' }).click();
+      await this.page.getByRole('button', { name: 'Skip' }).click();
+    } else {
+      await this.page.getByRole('button', { name: 'Done' }).click();
+    }
 
     await this.page.waitForTimeout(2000);
     return {
       email,
       credential: credentials[0],
+      clipboardText,
     };
   }
 
-  async login(context: BrowserContext, credential: Protocol.WebAuthn.Credential, email: string) {
+  async login({
+    context,
+    credential,
+    email,
+    openModalText = 'Open Modal',
+    is2FAEnabled,
+    password,
+  }: {
+    context: BrowserContext;
+    credential: Protocol.WebAuthn.Credential;
+    email: string;
+    openModalText?: string;
+    is2FAEnabled?: boolean;
+    password?: string;
+  }) {
     await this.page.reload();
     await this.page.waitForTimeout(500);
-    await this.page.getByRole('button', { name: 'Open Modal' }).click();
+    await this.page.getByRole('button', { name: openModalText }).click();
     await this.page.waitForTimeout(750);
-    await this.page.getByRole('textbox', { name: 'Enter email or phone' }).click();
-    await this.page.getByRole('textbox', { name: 'Enter email or phone' }).fill(email);
+    await this.page.getByRole('textbox', { name: /^Enter email/ }).click();
+    await this.page.getByRole('textbox', { name: /^Enter email/ }).fill(email);
     await this.page.waitForTimeout(250);
     await this.page.locator('.primary > .hydrated > div > svg').first().click();
 
     const page2Promise = this.page.waitForEvent('popup');
     await this.page.waitForTimeout(750);
-    await this.page.getByText('Login with passkey').click();
-    const page2 = await page2Promise;
-    const authPortal = new AuthPortalPage(page2);
-    await authPortal.login(context, credential);
+    if (password) {
+      await this.page.getByRole('button', { name: 'Login' }).click();
+      const page2 = await page2Promise;
+      const authPortal = new AuthPortalPage(page2);
+      await authPortal.page.getByRole('textbox', { name: 'Enter a password' }).click();
+      await authPortal.page.getByRole('textbox', { name: 'Enter a password' }).fill(password);
+      await authPortal.page.getByRole('button', { name: 'Continue' }).click();
+    } else {
+      await this.page.getByText('Login with passkey').click();
+      const page2 = await page2Promise;
+      const authPortal = new AuthPortalPage(page2);
+      await authPortal.login(context, credential);
+    }
+
     await this.page.waitForTimeout(1000);
-    await this.page.getByRole('button', { name: 'Skip' }).click();
-    await this.page.waitForTimeout(2100);
+    if (is2FAEnabled) {
+      await this.page.getByRole('button', { name: 'Skip' }).click();
+      await this.page.waitForTimeout(2100);
+    }
   }
 
   async switchToWagmiView() {
@@ -118,8 +178,9 @@ export class WebExamplePage {
     };
   }
 
-  async logout() {
-    await this.page.getByRole('button', { name: 'Log Out', exact: true }).click();
+  async logout({ openModalText = 'Open Modal' }: { openModalText?: string }) {
+    await this.page.getByRole('button', { name: openModalText }).click();
+    await this.page.getByRole('button', { name: 'Disconnect Wallet' }).last().click();
     await this.page.waitForTimeout(250);
   }
 }

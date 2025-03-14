@@ -17,7 +17,7 @@ export const AuthCreation = () => {
   const params = useExtractedParams<AuthCreationParams>();
 
   const setUpBiometrics = useCallback(async () => {
-    if (!isPasskeySupported()) {
+    if (!(await isPasskeySupported())) {
       return;
     }
 

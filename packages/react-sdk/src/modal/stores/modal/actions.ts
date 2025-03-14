@@ -92,4 +92,5 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
     set({ authLayout: uniqueLayouts });
   },
   setAuthStepRoute: authStepRoute => set({ authStepRoute }),
+  setIsPasskeySupported: isPasskeySupported => set({ isPasskeySupported }),
 });

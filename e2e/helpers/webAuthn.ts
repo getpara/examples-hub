@@ -36,3 +36,13 @@ export async function getCredentials(authenticator: CDPSession, authenticatorId:
   });
   return credentials;
 }
+
+export async function setIsUserVerifyingPlatformAuthenticatorAvailable(page: Page) {
+  await page.addInitScript(() => {
+    globalThis.PublicKeyCredential = class {
+      static async isUserVerifyingPlatformAuthenticatorAvailable() {
+        return true;
+      }
+    };
+  });
+}

@@ -56,6 +56,9 @@ export const windowMockValue = {
   innerHeight: WINDOW_INNER_WIDTH,
   screenX: 0,
   screenY: 0,
+  PublicKeyCredential: {
+    isUserVerifyingPlatformAuthenticatorAvailable: vi.fn(),
+  },
 };
 Object.defineProperty(globalThis, 'window', {
   value: windowMockValue,

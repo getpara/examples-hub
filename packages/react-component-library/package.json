@@ -25,10 +25,10 @@
     "dev": "vite",
     "build": "yarn build:components && yarn build:css",
     "build:components": "vite build",
-    "build:css": "npx @tailwindcss/cli -i src/global.css -o dist/styles.css",
+    "build:css": "npx -y @tailwindcss/cli -i src/global.css -o dist/styles.css",
     "lint": "eslint .",
     "preview": "vite preview",
-    "add-component": "npx shadcn@canary add"
+    "add-component": "npx -y shadcn@canary add"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.1.3",

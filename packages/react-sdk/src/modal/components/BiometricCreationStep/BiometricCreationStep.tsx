@@ -2,7 +2,6 @@ import { CpslButton, CpslDivider, CpslIcon, CpslQrCode, CpslSpinner, CpslText } 
 import { useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { InnerStepContainer, StepContainer, Heading, QRContainer } from '../common.js';
 import { useCopyToClipboard, UserIdentifier } from '@getpara/react-common';
-import { isPasskeySupported } from '@getpara/web-sdk';
 import { useContext } from 'react';
 import { ActionsContext } from '../ModalContent/ModalContent.js';
 
@@ -10,6 +9,7 @@ export const BiometricCreationStep = () => {
   const { createAccount } = useContext(ActionsContext);
   const webAuthURLForCreate = useModalStore(state => state.webAuthURLForCreate);
   const iFrameUrl = useModalStore(state => state.iFrameUrl);
+  const isPasskeySupported = useModalStore(state => state.isPasskeySupported);
   const authInfo = useUserInfoStore(state => state.getAuthInfo());
   const [isCopied, copy] = useCopyToClipboard();
 
@@ -34,7 +34,7 @@ export const BiometricCreationStep = () => {
       </InnerStepContainer>
 
       <InnerStepContainer>
-        {isPasskeySupported() ? (
+        {isPasskeySupported ? (
           <CpslButton fullWidth onClick={createAccount.withPasskey}>
             <CpslIcon slot="start" icon="key" />
             {isBoth ? 'Create Passkey' : 'Create'}

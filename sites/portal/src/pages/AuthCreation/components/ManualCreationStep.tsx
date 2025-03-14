@@ -15,6 +15,8 @@ interface ManualCreationStepProps {
 export const ManualCreationStep = ({ onCreateClick }: ManualCreationStepProps) => {
   const closeWindow = useCloseWindow();
   const [webAuthURLForCreate, setWebAuthURLForCreate] = useState<string | null>(null);
+  const [isPasskeySupportedValue, setIsPasskeySupportedValue] = useState<boolean>();
+  const [isUIReady, setIsUIReady] = useState(false);
   const loginTimeout = useRef<number>();
   const para = usePara();
 
@@ -31,19 +33,24 @@ export const ManualCreationStep = ({ onCreateClick }: ManualCreationStepProps) =
   };
 
   useEffect(() => {
-    para.shortenLoginLink(window.location.href).then(loginLink => {
-      setWebAuthURLForCreate(loginLink);
-    });
+    (async function () {
+      const _isPasskeySupported = await isPasskeySupported();
+      setIsPasskeySupportedValue(_isPasskeySupported);
+      para.shortenLoginLink(window.location.href).then(loginLink => {
+        setWebAuthURLForCreate(loginLink);
+      });
+      setIsUIReady(true);
 
-    if (!isPasskeySupported()) {
-      loginTimeout.current = window.setTimeout(sessionListener, KNOWN_DEVICE_LOGIN_POLLING_INTERVAL);
-      return () => {
-        window.clearTimeout(loginTimeout.current);
-      };
-    }
+      if (!_isPasskeySupported) {
+        loginTimeout.current = window.setTimeout(sessionListener, KNOWN_DEVICE_LOGIN_POLLING_INTERVAL);
+        return () => {
+          window.clearTimeout(loginTimeout.current);
+        };
+      }
+    })();
   }, []);
 
-  return (
+  return isUIReady ? (
     <FlexStartInnerContainer>
       <HeadingContainer>
         <CpslText weight="bold" variant="headingS">
@@ -53,7 +60,7 @@ export const ManualCreationStep = ({ onCreateClick }: ManualCreationStepProps) =
           Your Passkey will allow you to safely reuse this wallet across the web.
         </CenteredText>
       </HeadingContainer>
-      {isPasskeySupported() ? (
+      {isPasskeySupportedValue ? (
         <CpslButton fullWidth onClick={onCreateClick}>
           Create
         </CpslButton>
@@ -66,7 +73,7 @@ export const ManualCreationStep = ({ onCreateClick }: ManualCreationStepProps) =
         </>
       )}
     </FlexStartInnerContainer>
-  );
+  ) : undefined;
 };
 
 const HeadingContainer = styled.div`

@@ -49,6 +49,7 @@ interface ModalState {
     poll: MutableRefObject<{ action: 'login' | 'createPasskey' | 'createPassword'; timeout: number } | null>;
     currentStep: MutableRefObject<ModalStep | null>;
   };
+  isPasskeySupported: boolean;
 }
 
 export interface ModalActions {
@@ -79,6 +80,7 @@ export interface ModalActions {
   setIsIFrameReady: (_?: boolean) => void;
   setAuthLayout: (authLayout: TAuthLayout[]) => void;
   setAuthStepRoute: (_?: ModalStep) => void;
+  setIsPasskeySupported: (_: boolean) => void;
 }
 
 export type ModalStore = ModalState & ModalActions;
@@ -109,6 +111,7 @@ export const DEFAULT_MODAL_STATE: Omit<ModalState, 'step' | 'onRampConfig'> = {
     poll: createRef(),
     currentStep: createRef(),
   },
+  isPasskeySupported: true,
 };
 
 export const useModalStore = create<ModalStore>()(
@@ -133,6 +136,7 @@ export const useModalStore = create<ModalStore>()(
         selectedExternalWalletId: state.selectedExternalWalletId,
         isUsingMobileConnector: state.isUsingMobileConnector,
         supportedAuthMethods: state.supportedAuthMethods,
+        isPasskeySupported: state.isPasskeySupported,
       }),
     },
   ),

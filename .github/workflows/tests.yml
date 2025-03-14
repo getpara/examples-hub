@@ -187,8 +187,96 @@ jobs:
         env:
           BUCKET_NAME: capsule-sandbox-artifacts-site
           RUN_ID: ${{ github.run_id }}
-        run: aws s3 sync playwright-report "s3://${BUCKET_NAME}/e2e-runs/${RUN_ID}"
+        run: aws s3 sync playwright-report "s3://${BUCKET_NAME}/e2e-runs/${RUN_ID}/legacy-example"
 
       - name: Trace Report URL
         if: failure()
-        run: echo "View failed test artifacts at https://artifacts.sandbox.usecapsule.com/e2e-runs/${{ github.run_id }}/index.html"
+        run: echo "View failed test artifacts at https://artifacts.sandbox.usecapsule.com/e2e-runs/${{ github.run_id }}/legacy-example/index.html"
+
+  example-hub-e2e-tests:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout monorepo
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.15.1"
+      
+      - name: Set up cache key prefix
+        id: vars
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "CACHE_KEY_PREFIX=${{ github.head_ref }}" >> $GITHUB_ENV
+          else
+            echo "CACHE_KEY_PREFIX=${{ github.ref_name }}" >> $GITHUB_ENV
+          fi
+
+      - name: Yarn cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}-${{ hashFiles('**/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}
+
+      - name: Nx cache
+        uses: actions/cache@v4
+        with:
+          path: .nx/cache
+          key: ${{ runner.os }}-nx-${{ env.CACHE_KEY_PREFIX }}-${{ hashFiles('packages/**/*.ts') }}-${{ hashFiles('packages/**/*.tsx') }}
+          restore-keys: |
+            ${{ runner.os }}-nx-${{ env.CACHE_KEY_PREFIX }}
+    
+      - name: Build packages
+        run: yarn build
+        env:
+          NX_REJECT_UNKNOWN_LOCAL_CACHE: 0
+          NODE_OPTIONS: '--max_old_space_size=4096'
+      
+      - name: Build MPC Worker
+        run: yarn build
+        working-directory: ./workers/mpc-worker
+
+      - name: Install Playwright Browsers
+        run: npx playwright install chromium
+
+      - name: Checkout examples repo
+        uses: actions/checkout@v4
+        with:
+          repository: getpara/examples-hub
+          path: examples-hub
+      
+      - name: Move examples-hub outside to be parallel with web-sdk
+        run: |
+          mv examples-hub ../examples-hub
+
+      - name: Run Examples Hub E2Es
+        shell: bash
+        run: xvfb-run yarn e2e-examples-hub-script
+
+      - name: Configure AWS credentials
+        if: failure()
+        uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-role
+          role-session-name: github-upload-sandbox-artifacts
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Upload Trace Report
+        if: failure()
+        env:
+          BUCKET_NAME: capsule-sandbox-artifacts-site
+          RUN_ID: ${{ github.run_id }}
+        run: aws s3 sync playwright-report "s3://${BUCKET_NAME}/e2e-runs/${RUN_ID}/examples-hub"
+
+      - name: Trace Report URL
+        if: failure()
+        run: echo "View failed test artifacts at https://artifacts.sandbox.usecapsule.com/e2e-runs/${{ github.run_id }}/examples-hub/index.html"

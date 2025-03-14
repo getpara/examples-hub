@@ -1,13 +1,5 @@
 import { createContext, forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
-import {
-  Wallet,
-  CurrentWalletIds,
-  entityToWallet,
-  EnabledFlow,
-  AuthMethod,
-  OnRampConfig,
-  isPasskeySupported,
-} from '@getpara/web-sdk';
+import { Wallet, CurrentWalletIds, entityToWallet, EnabledFlow, AuthMethod, OnRampConfig } from '@getpara/web-sdk';
 import { useModalStore, useUserInfoStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { Body } from '../Body/Body.js';
@@ -77,19 +69,10 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     const createAccount = useCreateAccount();
     const biometricLocationHints = useModalStore(state => state.biometricLocationHints ?? []);
     const formattedHints = useMemo(() => formatBiometricHints(biometricLocationHints), [biometricLocationHints]);
-    const passkeysSupported = isPasskeySupported();
+    const passkeysSupported = useModalStore(state => state.isPasskeySupported);
     const [hasHints, isOnKnownDevice] = [biometricLocationHints?.length > 0, formattedHints?.isOnKnownDevice ?? false];
 
     const [walletCreationInProgress, setWalletCreationInProgress] = useState(false);
-
-    useEffect(() => {
-      if (!!authStepRoute && isIFrameReady) {
-        // Using a small timeout here to fully ensure the iframe is loaded before triggering any animation
-        setTimeout(() => {
-          setStep(authStepRoute);
-        }, 200);
-      }
-    }, [authStepRoute, isIFrameReady]);
 
     useEffect(() => {
       if (!!authStepRoute && isIFrameReady) {

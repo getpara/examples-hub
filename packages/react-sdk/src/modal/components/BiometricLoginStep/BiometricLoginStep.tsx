@@ -5,7 +5,7 @@ import { ModalStep } from '../../utils/steps.js';
 import { Heading, StepContainer, InnerStepContainer } from '../common.js';
 import { openPopup } from '../../utils/openPopup.js';
 import styled from 'styled-components';
-import { AuthMethod, getPublicKeyHex, isPasskeySupported } from '@getpara/web-sdk';
+import { AuthMethod, getPublicKeyHex } from '@getpara/web-sdk';
 import { BiometricHints, formatBiometricHints, KnownDevices, UserIdentifier } from '@getpara/react-common';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 import { BiometricLocationHint } from '@getpara/user-management-client';
@@ -21,7 +21,7 @@ export const BiometricLoginStep = () => {
   const authInfo = useUserInfoStore(state => state.getAuthInfo());
   const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
   const setPasswordUrlForLogin = useModalStore(state => state.setPasswordUrlForLogin);
-  const passkeysSupported = isPasskeySupported();
+  const passkeysSupported = useModalStore(state => state.isPasskeySupported);
   const formattedHints = useMemo(() => formatBiometricHints(biometricLocationHints ?? []), [biometricLocationHints]);
   const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
 

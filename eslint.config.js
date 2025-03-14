@@ -115,8 +115,8 @@ module.exports = [
     }),
   },
   {
-    name: 'Override for examples directory',
-    files: ['examples/**', 'examples/**/*.*'],
+    name: 'Override for no console',
+    files: ['examples/**', 'examples/**/*.*', 'e2e/scripts/**'],
     rules: {
       'no-console': 'off',
     },

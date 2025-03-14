@@ -1,6 +1,6 @@
 import { styled } from 'styled-components';
 import { CpslButton, CpslDivider, CpslIcon, CpslText } from '@getpara/react-components';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { BiometricLocationHint } from '@getpara/user-management-client';
 import { FlexStartInnerContainer, usePara } from '../../../components';
 import { KNOWN_DEVICE_LOGIN_POLLING_INTERVAL } from '../../../constants';
@@ -21,6 +21,7 @@ export const LoginFailedStep = ({
   urlForKnownDeviceLogin,
 }: LoginFailedStepProps) => {
   const loginTimeout = useRef<number>();
+  const [isPasskeySupportedValue, setIsPasskeySupportedValue] = useState<boolean>();
 
   const para = usePara();
 
@@ -40,6 +41,10 @@ export const LoginFailedStep = ({
   };
 
   useEffect(() => {
+    (async function () {
+      setIsPasskeySupportedValue(await isPasskeySupported());
+    })();
+
     loginTimeout.current = window.setTimeout(sessionListener, KNOWN_DEVICE_LOGIN_POLLING_INTERVAL);
     return () => {
       window.clearTimeout(loginTimeout.current);
@@ -53,7 +58,7 @@ export const LoginFailedStep = ({
       <CpslText weight="bold" variant="headingS">
         Login Failed
       </CpslText>
-      {isPasskeySupported() && (
+      {isPasskeySupportedValue && (
         <>
           <TipsContainer>
             <TipListItem>
