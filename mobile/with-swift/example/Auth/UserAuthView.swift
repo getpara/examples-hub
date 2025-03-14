@@ -20,6 +20,7 @@ struct UserAuthView: View {
                         description: "Use your email to create or sign in with a passkey."
                     )
                 }
+                .accessibilityIdentifier("emailAuthButton")
                 
                 NavigationLink {
                     PhoneAuthView()
@@ -30,6 +31,7 @@ struct UserAuthView: View {
                         description: "Use your phone number to create or sign in with a passkey."
                     )
                 }
+                .accessibilityIdentifier("phoneAuthButton")
                 
                 NavigationLink(destination: OAuthView()) {
                     AuthTypeView(
@@ -38,6 +40,7 @@ struct UserAuthView: View {
                         description: "Use different OAuth providers to create or sign in with a passkey"
                     )
                 }
+                .accessibilityIdentifier("oauthAuthButton")
                 
                 NavigationLink {
                     ExternalWalletAuthView()
@@ -48,12 +51,12 @@ struct UserAuthView: View {
                         description: "Login as an external wallet."
                     )
                 }
-                
-                
+                .accessibilityIdentifier("externalWalletButton")
             }
             .navigationTitle("Authentication")
             .listStyle(.insetGrouped)
         }
+        .accessibilityIdentifier("authenticationView")
     }
 }
 

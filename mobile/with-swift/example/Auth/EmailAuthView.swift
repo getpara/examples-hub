@@ -14,6 +14,23 @@ struct EmailAuthView: View {
     
     @Environment(\.authorizationController) private var authorizationController
     
+    private func validateEmail() -> Bool {
+        if email.isEmpty {
+            errorMessage = "Please enter an email address."
+            return false
+        }
+        
+        // Basic email format validation
+        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+        let emailPredicate = NSPredicate(format:"SELF MATCHES %@", emailRegex)
+        if !emailPredicate.evaluate(with: email) {
+            errorMessage = "Please enter a valid email address."
+            return false
+        }
+        
+        return true
+    }
+    
     var body: some View {
         VStack(spacing: 20) {
             Text("Enter your email address to create or log in with a passkey.")
@@ -26,12 +43,14 @@ struct EmailAuthView: View {
                 .textFieldStyle(.roundedBorder)
                 .keyboardType(.emailAddress)
                 .padding(.horizontal)
+                .accessibilityIdentifier("emailInputField")
             
             if let errorMessage = errorMessage {
                 Text(errorMessage)
                     .foregroundColor(.red)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
+                    .accessibilityIdentifier("errorMessage")
             }
             
             if isLoading {
@@ -39,12 +58,15 @@ struct EmailAuthView: View {
             }
             
             Button {
-                guard !email.isEmpty else {
-                    errorMessage = "Please enter an email address."
+                // Clear any previous error message
+                errorMessage = nil
+                
+                // Validate email first
+                guard validateEmail() else {
                     return
                 }
+                
                 isLoading = true
-                errorMessage = nil
                 Task {
                     do {
                         let userExists = try await paraManager.checkIfUserExists(email: email)
@@ -68,8 +90,9 @@ struct EmailAuthView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
-            .disabled(isLoading || email.isEmpty)
+            .disabled(isLoading)
             .padding(.horizontal)
+            .accessibilityIdentifier("continueButton")
             .navigationDestination(isPresented: $shouldNavigateToVerifyEmail) {
                 VerifyEmailView(email: email)
                     .environmentObject(paraManager)
@@ -92,7 +115,7 @@ struct EmailAuthView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.bordered)
-            
+            .accessibilityIdentifier("passkeyAuthButton")
             
             Spacer()
             

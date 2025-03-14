@@ -27,12 +27,15 @@ struct VerifyEmailView: View {
                 .textFieldStyle(.roundedBorder)
                 .padding(.horizontal)
                 .disabled(isLoading)
+                .accessibilityIdentifier("codeInput-0")
+                .accessibilityLabel("Verification Code")
             
             if let errorMessage = errorMessage {
                 Text(errorMessage)
                     .foregroundColor(.red)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
+                    .accessibilityIdentifier("errorMessage")
             }
             
             if isLoading {
@@ -78,11 +81,20 @@ struct VerifyEmailView: View {
             .buttonStyle(.borderedProminent)
             .disabled(isLoading || code.isEmpty)
             .padding(.horizontal)
+            .accessibilityIdentifier("verifyButton")
+            .accessibilityLabel("Verify Button")
+            
+            Button("Resend Code") {
+                // Add resend code functionality
+            }
+            .padding(.top)
+            .accessibilityIdentifier("resendCodeButton")
             
             Spacer()
         }
         .padding()
         .navigationTitle("Verify Email")
+        .accessibilityIdentifier("verifyEmailView")
     }
 }
 

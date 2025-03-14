@@ -28,6 +28,7 @@ struct VerifyPhoneView: View {
                 .textFieldStyle(.roundedBorder)
                 .padding(.horizontal)
                 .disabled(isLoading)
+                .accessibilityLabel("codeInput-0")
             
             if let errorMessage = errorMessage {
                 Text(errorMessage)
@@ -79,6 +80,7 @@ struct VerifyPhoneView: View {
             .buttonStyle(.borderedProminent)
             .disabled(isLoading || code.isEmpty)
             .padding(.horizontal)
+            .accessibilityLabel("verifyButton")
             
             Spacer()
         }

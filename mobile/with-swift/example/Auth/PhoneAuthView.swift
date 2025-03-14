@@ -107,6 +107,7 @@ struct PhoneAuthView: View {
                     .textFieldStyle(.roundedBorder)
                     .keyboardType(.phonePad)
                     .padding(.horizontal)
+                    .accessibilityLabel("phoneInputField")
                     .onReceive(Just(phoneNumber)) { _ in
                         applyPatternOnNumbers(&phoneNumber, pattern: countryPattern, replacementCharacter: "#")
                         print(phoneNumber)
@@ -155,6 +156,7 @@ struct PhoneAuthView: View {
             }
             .buttonStyle(.borderedProminent)
             .disabled(isLoading || phoneNumber.isEmpty)
+            .accessibilityLabel("continueButton")
             .navigationDestination(isPresented: $shouldNavigateToVerifyPhoneView) {
                 VerifyPhoneView(phoneNumber: phoneNumber.replacingOccurrences(of: " ", with: ""), countryCode: countryCode)
             }
