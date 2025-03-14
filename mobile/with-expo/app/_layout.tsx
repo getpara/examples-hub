@@ -19,6 +19,7 @@ export default function RootLayout() {
       <Stack.Screen name="home" />
       <Stack.Screen name="auth/with-email" />
       <Stack.Screen name="auth/with-phone" />
+      <Stack.Screen name="auth/with-oauth" />
       <Stack.Screen name="sign/with-evm" />
       <Stack.Screen name="sign/with-cosmos" />
       <Stack.Screen name="sign/with-solana" />
