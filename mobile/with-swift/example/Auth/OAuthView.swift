@@ -65,6 +65,7 @@ struct OAuthView: View {
             .controlSize(.large)
             .tint(.primary)
             .foregroundStyle(.background)
+            .accessibilityIdentifier("googleOAuthButton")
             
             Button {
                 login(provider: .discord)

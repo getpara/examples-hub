@@ -4,7 +4,16 @@
       "id" : "AAE20D5E-CD24-4038-B4C7-D5689EBB63D3",
       "name" : "Test Scheme Action",
       "options" : {
-
+        "environmentVariableEntries" : [
+          {
+            "key" : "PARA_ENVIRONMENT",
+            "value" : "sandbox"
+          },
+          {
+            "key" : "PARA_API_KEY",
+            "value" : "12e3517d125169ea9847d0da5bdcd9c9"
+          }
+        ]
       }
     }
   ],
