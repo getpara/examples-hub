@@ -21,15 +21,15 @@ struct VerifyEmailView: View {
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
             
+            // MARK: - Verification Code Field
             TextField("Verification Code", text: $code)
                 .textInputAutocapitalization(.never)
                 .disableAutocorrection(true)
                 .textFieldStyle(.roundedBorder)
                 .padding(.horizontal)
                 .disabled(isLoading)
-                .accessibilityIdentifier("codeInput-0")
-                .accessibilityLabel("Verification Code")
-            
+                .accessibilityIdentifier("verificationCodeField")
+                
             if let errorMessage = errorMessage {
                 Text(errorMessage)
                     .foregroundColor(.red)
@@ -46,6 +46,7 @@ struct VerifyEmailView: View {
                 ProgressView()
             }
             
+            // MARK: - Verify Button
             Button {
                 guard !code.isEmpty else {
                     errorMessage = "Please enter the verification code."
@@ -82,8 +83,8 @@ struct VerifyEmailView: View {
             .disabled(isLoading || code.isEmpty)
             .padding(.horizontal)
             .accessibilityIdentifier("verifyButton")
-            .accessibilityLabel("Verify Button")
             
+            // MARK: - Resend Code Button
             Button("Resend Code") {
                 // Add resend code functionality
             }
@@ -94,7 +95,6 @@ struct VerifyEmailView: View {
         }
         .padding()
         .navigationTitle("Verify Email")
-        .accessibilityIdentifier("verifyEmailView")
     }
 }
 
@@ -105,4 +105,3 @@ struct VerifyEmailView: View {
             .environmentObject(AppRootManager())
     }
 }
-
