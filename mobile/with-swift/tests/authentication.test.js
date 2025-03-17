@@ -13,17 +13,17 @@ const appiumConfig = {
     capabilities: {
         platformName: "ios",
         "appium:automationName": "xcuitest",
-        "appium:deviceName": "iPhone Simulator",
+        "appium:deviceName": "iPhone 16 Pro",
         "appium:platformVersion": "18.3.1",
-        "appium:udid": "2EC1AA46-FA7C-4428-BC51-213156A4C087",
+        "appium:udid": process.env.SIMULATOR_UDID || "2EC1AA46-FA7C-4428-BC51-213156A4C087",
         "appium:bundleId": "com.usecapsule.example.swift",
         "appium:simulatorEnrolledBiometrics": true,
         "appium:autoAcceptAlerts": true,
         "appium:processArguments": {
             args: ["a", "b"],
             env: {
-                PARA_API_KEY: "12e3517d125169ea9847d0da5bdcd9c9",
-                PARA_ENVIRONMENT: "sandbox"
+                PARA_API_KEY: process.env.PARA_API_KEY || "12e3517d125169ea9847d0da5bdcd9c9",
+                PARA_ENVIRONMENT: process.env.PARA_ENVIRONMENT || "sandbox"
             }
         }
     }
