@@ -28,7 +28,7 @@ struct VerifyPhoneView: View {
                 .textFieldStyle(.roundedBorder)
                 .padding(.horizontal)
                 .disabled(isLoading)
-                .accessibilityLabel("codeInput-0")
+                .accessibilityIdentifier("verificationCodeField")
             
             if let errorMessage = errorMessage {
                 Text(errorMessage)

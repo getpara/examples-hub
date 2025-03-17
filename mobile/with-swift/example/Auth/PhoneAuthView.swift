@@ -156,7 +156,7 @@ struct PhoneAuthView: View {
             }
             .buttonStyle(.borderedProminent)
             .disabled(isLoading || phoneNumber.isEmpty)
-            .accessibilityLabel("continueButton")
+            .accessibilityIdentifier("continueButton")
             .navigationDestination(isPresented: $shouldNavigateToVerifyPhoneView) {
                 VerifyPhoneView(phoneNumber: phoneNumber.replacingOccurrences(of: " ", with: ""), countryCode: countryCode)
             }
