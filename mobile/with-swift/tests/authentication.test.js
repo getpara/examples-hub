@@ -10,8 +10,8 @@ const appiumConfig = {
     hostname: 'localhost',
     port: 4723,
     path: '/',
-    connectionRetryTimeout: 180000, // increased timeout (3 minutes)
-    connectionRetryCount: 3, // number of retries
+    connectionRetryTimeout: 300000, // 5 minutes to match server
+    connectionRetryCount: 8, // match server retries
     capabilities: {
         platformName: "ios",
         "appium:automationName": "xcuitest",
@@ -23,11 +23,11 @@ const appiumConfig = {
         "appium:autoAcceptAlerts": true,
         "appium:showXcodeLog": true,
         "appium:derivedDataPath": "/Users/runner/wda-derived-data",
-        "appium:wdaStartupRetries": 4,
-        "appium:wdaStartupRetryInterval": 20000,
+        "appium:wdaStartupRetries": 8,
+        "appium:wdaStartupRetryInterval": 60000,
         "appium:iosInstallPause": 8000,
-        "appium:newCommandTimeout": 600, // increased from 60 to 600 seconds
-        "appium:useNewWDA": true, // force a new WDA session
+        "appium:newCommandTimeout": 600,
+        "appium:useNewWDA": true,
         "appium:processArguments": {
             args: ["a", "b"],
             env: {
