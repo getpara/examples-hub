@@ -21,6 +21,10 @@ const appiumConfig = {
         "appium:autoAcceptAlerts": true,
         "appium:showXcodeLog": true,
         "appium:derivedDataPath": "/Users/runner/wda-derived-data/${Date.now()}",
+        "appium:wdaStartupRetries": 4,
+        "appium:wdaStartupRetryInterval": 20000,
+        "appium:iosInstallPause": 8000,
+        "appium:newCommandTimeout": 60,
         "appium:processArguments": {
             args: ["a", "b"],
             env: {
