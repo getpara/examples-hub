@@ -19,6 +19,8 @@ const appiumConfig = {
         "appium:bundleId": "com.usecapsule.example.swift",
         "appium:simulatorEnrolledBiometrics": true,
         "appium:autoAcceptAlerts": true,
+        "appium:showXcodeLog": true,
+        "appium:derivedDataPath": "/Users/runner/wda-derived-data/${Date.now()}",
         "appium:processArguments": {
             args: ["a", "b"],
             env: {
