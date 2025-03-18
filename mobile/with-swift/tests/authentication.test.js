@@ -20,7 +20,7 @@ const appiumConfig = {
         "appium:simulatorEnrolledBiometrics": true,
         "appium:autoAcceptAlerts": true,
         "appium:showXcodeLog": true,
-        "appium:derivedDataPath": "/Users/runner/wda-derived-data/${Date.now()}",
+        "appium:derivedDataPath": "/Users/runner/wda-derived-data",
         "appium:wdaStartupRetries": 4,
         "appium:wdaStartupRetryInterval": 20000,
         "appium:iosInstallPause": 8000,
