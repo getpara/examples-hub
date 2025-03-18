@@ -10,6 +10,8 @@ const appiumConfig = {
     hostname: 'localhost',
     port: 4723,
     path: '/',
+    connectionRetryTimeout: 180000, // increased timeout (3 minutes)
+    connectionRetryCount: 3, // number of retries
     capabilities: {
         platformName: "ios",
         "appium:automationName": "xcuitest",
@@ -24,7 +26,8 @@ const appiumConfig = {
         "appium:wdaStartupRetries": 4,
         "appium:wdaStartupRetryInterval": 20000,
         "appium:iosInstallPause": 8000,
-        "appium:newCommandTimeout": 60,
+        "appium:newCommandTimeout": 600, // increased from 60 to 600 seconds
+        "appium:useNewWDA": true, // force a new WDA session
         "appium:processArguments": {
             args: ["a", "b"],
             env: {
