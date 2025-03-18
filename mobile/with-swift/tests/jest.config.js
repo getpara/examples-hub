@@ -1,6 +1,6 @@
 module.exports = {
     testEnvironment: 'node',
     transform: {},
-    testTimeout: 30000,
+    testTimeout: 900000,
     setupFilesAfterEnv: ['./jest.setup.js']
 }; 

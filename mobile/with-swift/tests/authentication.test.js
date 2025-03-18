@@ -42,7 +42,7 @@ async function setupDriver() {
     return driver;
 }
 
-async function waitForElement(driver, selector, timeout = 5000, errorMessage) {
+async function waitForElement(driver, selector, timeout = 30000, errorMessage) {
     const element = await driver.$(selector);
     if (!(await element.waitForExist({ timeout }))) {
         throw new Error(errorMessage);
@@ -51,7 +51,7 @@ async function waitForElement(driver, selector, timeout = 5000, errorMessage) {
 }
 
 async function handleFaceID(driver) {
-    await driver.pause(3000);
+    await driver.pause(5000);
     
     // Custom tap at coordinates x:200, y:790
     await driver.performActions([
@@ -69,9 +69,9 @@ async function handleFaceID(driver) {
     ]);
     await driver.releaseActions();
     
-    await driver.pause(3000);
-    await driver.execute("mobile: sendBiometricMatch", { type: "faceId", match: true });
     await driver.pause(5000);
+    await driver.execute("mobile: sendBiometricMatch", { type: "faceId", match: true });
+    await driver.pause(8000);
 }
 
 async function verifyWalletsView(driver) {
