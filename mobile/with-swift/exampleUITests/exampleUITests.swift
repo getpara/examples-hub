@@ -17,6 +17,8 @@ class ExampleUITests: XCTestCase {
     private enum TestConstants {
         static let emailDomain = "test.usecapsule.com"
         static let verificationCode = "123456"
+        static var savedPhoneNumber: String?
+        static var savedEmail: String?
         
         static func generateTestPhoneNumber() -> String {
             let lastFour = String(format: "%04d", Int.random(in: 0...9999))
@@ -49,13 +51,13 @@ class ExampleUITests: XCTestCase {
     }
     
     // MARK: - Helper Methods
-    private func performBiometricAuthentication() {
+    private func performBiometricAuthentication(offsetFromBottom: CGFloat) {
         let window = app.windows.firstMatch
         let screenWidth = window.frame.size.width
         let screenHeight = window.frame.size.height
         
-        let normalizedX = (screenWidth / 2) / screenWidth      // equals 0.5
-        let normalizedY = (screenHeight - 100) / screenHeight    // a value slightly less than 1
+        let normalizedX = (screenWidth / 2) / screenWidth
+        let normalizedY = (screenHeight - offsetFromBottom) / screenHeight
         
         let tapCoordinate = window.coordinate(withNormalizedOffset: CGVector(dx: normalizedX, dy: normalizedY))
         sleep(3)
@@ -78,15 +80,16 @@ class ExampleUITests: XCTestCase {
     }
     
     // MARK: - Test Methods
-    func testEmailAuthenticationFlow() throws {
+    func test01EmailAuthenticationFlow() throws {
         // Start email authentication
         let emailButton = app.buttons["emailAuthButton"]
         XCTAssertTrue(emailButton.exists)
         emailButton.tap()
         
-        // Enter email
+        // Enter email and save it
         let timestamp = Int(Date().timeIntervalSince1970)
         let uniqueEmail = "teste2e+\(String(format: "%010x", timestamp))@\(TestConstants.emailDomain)"
+        TestConstants.savedEmail = uniqueEmail
         
         let emailField = app.textFields["emailInputField"]
         emailField.tap()
@@ -106,22 +109,25 @@ class ExampleUITests: XCTestCase {
         verifyButton.tap()
         
         // Perform biometric authentication
-        performBiometricAuthentication()
+        performBiometricAuthentication(offsetFromBottom: 100)
         
         // Verify successful authentication
         waitForWalletsView()
     }
     
-    func testPhoneAuthenticationFlow() throws {
+    func test02PhoneAuthenticationFlow() throws {
         // Start phone authentication
         let phoneButton = app.buttons["phoneAuthButton"]
         XCTAssertTrue(phoneButton.exists)
         phoneButton.tap()
         
-        // Enter phone number
+        // Enter phone number and save it
+        let phoneNumber = TestConstants.generateTestPhoneNumber()
+        TestConstants.savedPhoneNumber = phoneNumber
+        
         let phoneField = app.textFields["phoneInputField"]
         phoneField.tap()
-        phoneField.typeText(TestConstants.generateTestPhoneNumber())
+        phoneField.typeText(phoneNumber)
         app.buttons["continueButton"].tap()
         
         // Verify email verification view
@@ -137,7 +143,55 @@ class ExampleUITests: XCTestCase {
         verifyButton.tap()
         
         // Perform biometric authentication
-        performBiometricAuthentication()
+        performBiometricAuthentication(offsetFromBottom: 100)
+        
+        // Verify successful authentication
+        waitForWalletsView()
+    }
+    
+    func test03EmailPasskeyLoginFlow() throws {
+        // Start email authentication
+        let emailButton = app.buttons["emailAuthButton"]
+        XCTAssertTrue(emailButton.exists)
+        emailButton.tap()
+        
+        // Enter the saved email from signup
+        guard let savedEmail = TestConstants.savedEmail else {
+            XCTFail("No saved email found. Run testEmailAuthenticationFlow first.")
+            return
+        }
+        
+        let emailField = app.textFields["emailInputField"]
+        emailField.tap()
+        emailField.typeText(savedEmail)
+        app.buttons["continueButton"].tap()
+        
+        // Perform biometric authentication
+        performBiometricAuthentication(offsetFromBottom: 50)
+        
+        // Verify successful authentication
+        waitForWalletsView()
+    }
+    
+    func test04PasskeyLoginFlow() throws {
+        // Start phone authentication
+        let phoneButton = app.buttons["phoneAuthButton"]
+        XCTAssertTrue(phoneButton.exists)
+        phoneButton.tap()
+        
+        // Enter the saved phone number from signup
+        guard let savedPhoneNumber = TestConstants.savedPhoneNumber else {
+            XCTFail("No saved phone number found. Run testPhoneAuthenticationFlow first.")
+            return
+        }
+        
+        let phoneField = app.textFields["phoneInputField"]
+        phoneField.tap()
+        phoneField.typeText(savedPhoneNumber)
+        app.buttons["continueButton"].tap()
+        
+        // Perform biometric authentication
+        performBiometricAuthentication(offsetFromBottom: 50)
         
         // Verify successful authentication
         waitForWalletsView()
