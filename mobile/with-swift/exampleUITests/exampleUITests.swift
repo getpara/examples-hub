@@ -205,5 +205,99 @@ class ExampleUITests: XCTestCase {
         // Verify successful authentication
         waitForWalletsView()
     }
+    
+    func test05WalletRefreshFlow() throws {
+        // Start phone authentication
+        let phoneButton = app.buttons["phoneAuthButton"]
+        XCTAssertTrue(phoneButton.exists)
+        phoneButton.tap()
+        
+        // Enter the saved phone number from signup
+        guard let savedPhoneNumber = TestConstants.savedPhoneNumber else {
+            XCTFail("No saved phone number found. Run testPhoneAuthenticationFlow first.")
+            return
+        }
+        
+        let phoneField = app.textFields["phoneInputField"]
+        phoneField.tap()
+        phoneField.typeText(savedPhoneNumber)
+        app.buttons["continueButton"].tap()
+        
+        // Perform biometric authentication
+        performBiometricAuthentication(offsetFromBottom: 50)
+        
+        // Verify successful authentication
+        waitForWalletsView()
+        
+        // Find and tap the refresh button
+        let refreshButton = app.buttons["refreshButton"]
+        XCTAssertTrue(refreshButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Refresh button should exist")
+        
+        // Get initial wallet count
+        let initialWalletCount = app.cells.count
+        
+        // Tap refresh and wait for the action to complete
+        refreshButton.tap()
+        
+        // Verify no error alerts appear during refresh
+        let errorAlert = app.alerts.element
+        XCTAssertFalse(errorAlert.exists, "No error alert should appear during refresh")
+        
+        // Wait for the refresh to complete and verify the wallet list is still accessible
+        let walletCells = app.cells
+        XCTAssertTrue(walletCells.firstMatch.waitForExistence(timeout: TestConstants.defaultTimeout), "Wallet cells should still exist after refresh")
+        
+        // Verify we still have the same number of wallets
+        XCTAssertEqual(walletCells.count, initialWalletCount, "Wallet count should remain the same after refresh")
+        
+        // Verify the first wallet is still tappable
+        let firstWalletCell = walletCells.element(boundBy: 0)
+        XCTAssertTrue(firstWalletCell.isHittable, "First wallet cell should remain tappable after refresh")
+        
+        // Verify the refresh button is back
+        XCTAssertTrue(refreshButton.exists, "Refresh button should reappear after refresh")
+    }
+    
+    func test06CreateWalletFlow() throws {
+        // Start phone authentication
+        let phoneButton = app.buttons["phoneAuthButton"]
+        XCTAssertTrue(phoneButton.exists)
+        phoneButton.tap()
+        
+        // Enter the saved phone number from signup
+        guard let savedPhoneNumber = TestConstants.savedPhoneNumber else {
+            XCTFail("No saved phone number found. Run testPhoneAuthenticationFlow first.")
+            return
+        }
+        
+        let phoneField = app.textFields["phoneInputField"]
+        phoneField.tap()
+        phoneField.typeText(savedPhoneNumber)
+        app.buttons["continueButton"].tap()
+        
+        // Perform biometric authentication
+        performBiometricAuthentication(offsetFromBottom: 50)
+        
+        // Verify successful authentication
+        waitForWalletsView()
+        
+        // Find and tap the create wallet button
+        let createButton = app.buttons["createWalletButton"]
+        XCTAssertTrue(createButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Create button should exist")
+        createButton.tap()
+        
+        // Select EVM wallet type
+        let evmButton = app.buttons["evmWalletButton"]
+        XCTAssertTrue(evmButton.waitForExistence(timeout: TestConstants.defaultTimeout), "EVM button should exist")
+        evmButton.tap()
+        
+        // Wait for the new wallet to appear in the list
+        let walletCells = app.cells
+        XCTAssertTrue(walletCells.element(boundBy: 1).waitForExistence(timeout: TestConstants.longTimeout), "New wallet should appear as the second item in the list")
+        
+        // Verify that the new wallet is tappable
+        let newWalletCell = walletCells.element(boundBy: 1)
+        XCTAssertTrue(newWalletCell.isHittable, "New wallet cell should be tappable")
+    }
 }
 
