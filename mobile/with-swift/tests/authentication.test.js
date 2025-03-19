@@ -6,7 +6,7 @@ const wdioConfig = {
         platformName: 'iOS',
         'appium:automationName': 'XCUITest',
         'appium:deviceName': 'iPhone 16 Pro',
-        'appium:platformVersion': '18.3',
+        'appium:platformVersion': '18.2',
         'appium:bundleId': 'com.usecapsule.example.swift',
         'appium:newCommandTimeout': 240,
         'appium:wdaLocalPort': 8100
