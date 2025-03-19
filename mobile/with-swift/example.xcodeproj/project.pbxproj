@@ -11,6 +11,7 @@
 		8FA007862D57F1AA009EF0C3 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA007842D57F1AA009EF0C3 /* Extensions.swift */; };
 		8FA007882D581F0D009EF0C3 /* ExternalWalletAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA007872D581F08009EF0C3 /* ExternalWalletAuthView.swift */; };
 		8FA0078B2D5A7841009EF0C3 /* MetaMaskDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA0078A2D5A7841009EF0C3 /* MetaMaskDemoView.swift */; };
+		8FC8B8FD2D8B7AE10046C3DC /* LaunchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FC8B8FB2D8B7AE10046C3DC /* LaunchView.swift */; };
 		E8315DD82D5548F100FFF8C8 /* WalletsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8315DD72D5548F100FFF8C8 /* WalletsView.swift */; };
 		E8315DDA2D55717300FFF8C8 /* SolanaWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8315DD92D55717300FFF8C8 /* SolanaWalletView.swift */; };
 		E8315DDC2D55717F00FFF8C8 /* CosmosWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8315DDB2D55717F00FFF8C8 /* CosmosWalletView.swift */; };
@@ -47,6 +48,7 @@
 		8FA007872D581F08009EF0C3 /* ExternalWalletAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalWalletAuthView.swift; sourceTree = "<group>"; };
 		8FA007892D58387F009EF0C3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8FA0078A2D5A7841009EF0C3 /* MetaMaskDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetaMaskDemoView.swift; sourceTree = "<group>"; };
+		8FC8B8FB2D8B7AE10046C3DC /* LaunchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchView.swift; sourceTree = "<group>"; };
 		8FE93AA72D80F58C00CE018E /* exampleUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = exampleUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8315DD72D5548F100FFF8C8 /* WalletsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletsView.swift; sourceTree = "<group>"; };
 		E8315DD92D55717300FFF8C8 /* SolanaWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SolanaWalletView.swift; sourceTree = "<group>"; };
@@ -149,6 +151,14 @@
 			path = Utils;
 			sourceTree = "<group>";
 		};
+		8FC8B8FC2D8B7AE10046C3DC /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				8FC8B8FB2D8B7AE10046C3DC /* LaunchView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		E8F93B1F2C21EBED006AA3F6 = {
 			isa = PBXGroup;
 			children = (
@@ -172,6 +182,7 @@
 		E8F93B2A2C21EBED006AA3F6 /* example */ = {
 			isa = PBXGroup;
 			children = (
+				8FC8B8FC2D8B7AE10046C3DC /* Views */,
 				8FA007892D58387F009EF0C3 /* Info.plist */,
 				8FA007852D57F1AA009EF0C3 /* Utils */,
 				8FA007822D57EB0D009EF0C3 /* Config */,
@@ -329,6 +340,7 @@
 				E8F93B402C21ED00006AA3F6 /* VerifyEmailView.swift in Sources */,
 				E8C5B8662D272DCD00B151C4 /* VerifyPhoneView.swift in Sources */,
 				E8F93B422C21ED05006AA3F6 /* EVMWalletView.swift in Sources */,
+				8FC8B8FD2D8B7AE10046C3DC /* LaunchView.swift in Sources */,
 				E8315DDC2D55717F00FFF8C8 /* CosmosWalletView.swift in Sources */,
 				E8F93B2C2C21EBED006AA3F6 /* ExampleApp.swift in Sources */,
 				E8F93B3E2C21ECFB006AA3F6 /* UserAuthView.swift in Sources */,
