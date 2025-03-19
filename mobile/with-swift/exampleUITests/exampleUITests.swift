@@ -77,6 +77,15 @@ class ExampleUITests: XCTestCase {
     private func waitForWalletsView() {
         let homeView = app.otherElements["walletsView"]
         XCTAssertTrue(homeView.waitForExistence(timeout: TestConstants.longTimeout), "Wallets view should appear after successful authentication")
+        
+        // Wait for and verify that there is at least one wallet listed
+        let walletCells = app.cells
+        XCTAssertTrue(walletCells.firstMatch.waitForExistence(timeout: TestConstants.defaultTimeout), "At least one wallet cell should exist")
+        
+        // Verify the first wallet cell exists and is tappable
+        let firstWalletCell = walletCells.element(boundBy: 0)
+        XCTAssertTrue(firstWalletCell.exists, "First wallet cell should exist")
+        XCTAssertTrue(firstWalletCell.isHittable, "First wallet cell should be tappable")
     }
     
     // MARK: - Test Methods
