@@ -4,39 +4,9 @@ const { remote } = require('webdriverio');
 const TEST_EMAIL_DOMAIN = "test.usecapsule.com";
 const VERIFICATION_CODE = "123456";
 
-// Appium configuration
-const appiumConfig = {
-    protocol: 'http',
-    hostname: 'localhost',
-    port: 4723,
-    path: '/',
-    capabilities: {
-        platformName: "ios",
-        "appium:automationName": "xcuitest",
-        "appium:deviceName": "iPhone 16 Pro",
-        "appium:platformVersion": "18.2",
-        "appium:bundleId": "com.usecapsule.example.swift",
-        "appium:simulatorEnrolledBiometrics": true,
-        "appium:autoAcceptAlerts": true,
-        "appium:showXcodeLog": true,
-        "appium:derivedDataPath": process.env.HOME + "/wda-derived-data",
-        "appium:newCommandTimeout": 600,
-        "appium:useNewWDA": true,
-        "appium:simulator": true,
-        "appium:noReset": true,
-        "appium:processArguments": {
-            args: ["a", "b"],
-            env: {
-                PARA_API_KEY: process.env.PARA_API_KEY || "12e3517d125169ea9847d0da5bdcd9c9",
-                PARA_ENVIRONMENT: process.env.PARA_ENVIRONMENT || "sandbox"
-            }
-        }
-    }
-};
-
 // Helper functions
 async function setupDriver() {
-    const driver = await remote(appiumConfig);
+    const driver = await remote();
     await driver.execute("mobile: enrollBiometric", { enrolled: true });
     return driver;
 }
