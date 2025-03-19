@@ -6,6 +6,8 @@
 //
 
 import XCTest
+import Foundation
+import Darwin
 
 class ExampleUITests: XCTestCase {
     let app = XCUIApplication()
@@ -26,6 +28,8 @@ class ExampleUITests: XCTestCase {
             "RPC_URL": ProcessInfo.processInfo.environment["RPC_URL"] ?? ""
             // Add any other environment variables your app needs
         ]
+        
+        Biometrics.enrolled()
         
         app.launch()
     }
@@ -60,14 +64,45 @@ class ExampleUITests: XCTestCase {
         codeInput.typeText(VERIFICATION_CODE)
         
         // Wait for the verify button using its explicit accessibility label
-        let verifyButton = app.buttons["Verify Button"]
+        let verifyButton = app.buttons["verifyButton"]
         XCTAssertTrue(verifyButton.waitForExistence(timeout: 5.0), "Verify button should exist")
         verifyButton.tap()
         
-        // Verify successful authentication and wallet creation (ToDo: need to figure out faceID enrollment in automated tests)
-        //let homeView = app.otherElements["homeView"]
-        //XCTAssertTrue(homeView.waitForExistence(timeout: 20.0), "Home view should appear after successful authentication")
+        // Assuming app is your XCUIApplication
+        let window = app.windows.firstMatch
+
+        // Calculate screen dimensions
+        let screenWidth = window.frame.size.width
+        let screenHeight = window.frame.size.height
+
+        // Define the tap position in absolute terms.
+        // If you already have centerX defined as the center, it would be:
+        // let centerX = screenWidth / 2
+        // Here we calculate the normalized coordinates.
+        let normalizedX = (screenWidth / 2) / screenWidth      // equals 0.5
+        let normalizedY = (screenHeight - 100) / screenHeight    // a value slightly less than 1
+
+        // Get a coordinate relative to the window
+        let tapCoordinate = window.coordinate(withNormalizedOffset: CGVector(dx: normalizedX, dy: normalizedY))
+
+        // Introduce a small delay before tapping (e.g., 1 second)
+        Thread.sleep(forTimeInterval: 3.0)
+
+        // Perform the tap
+        tapCoordinate.tap()
+        
+        sleep(2)
+        
+        Biometrics.successfulAuthentication()
+        
+        // Optionally, wait a moment to let your app process the biometric match event
+        sleep(1)
+//        
+//        // Verify successful authentication and wallet creation (ToDo: need to figure out faceID enrollment in automated tests)
+        let homeView = app.otherElements["walletsView"]
+        XCTAssertTrue(homeView.waitForExistence(timeout: 20.0), "Wallets view should appear after successful authentication")
     }
+
     
 //    func testPhoneAuthenticationFlow() throws {
 //        // Test complete phone authentication flow

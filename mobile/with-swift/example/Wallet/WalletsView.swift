@@ -87,6 +87,7 @@ struct WalletsView: View {
                 }
             }
         }
+        .accessibilityIdentifier("walletsView")
     }
 }
 
