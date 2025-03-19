@@ -10,24 +10,20 @@ const appiumConfig = {
     hostname: 'localhost',
     port: 4723,
     path: '/',
-    connectionRetryTimeout: 300000, // 5 minutes to match server
-    connectionRetryCount: 8, // match server retries
     capabilities: {
         platformName: "ios",
         "appium:automationName": "xcuitest",
         "appium:deviceName": "iPhone 16 Pro",
         "appium:platformVersion": "18.2",
-        "appium:udid": process.env.SIMULATOR_UDID || "2EC1AA46-FA7C-4428-BC51-213156A4C087",
         "appium:bundleId": "com.usecapsule.example.swift",
         "appium:simulatorEnrolledBiometrics": true,
         "appium:autoAcceptAlerts": true,
         "appium:showXcodeLog": true,
-        "appium:derivedDataPath": "/Users/runner/wda-derived-data",
-        "appium:wdaStartupRetries": 8,
-        "appium:wdaStartupRetryInterval": 60000,
-        "appium:iosInstallPause": 8000,
+        "appium:derivedDataPath": process.env.HOME + "/wda-derived-data",
         "appium:newCommandTimeout": 600,
         "appium:useNewWDA": true,
+        "appium:simulator": true,
+        "appium:noReset": true,
         "appium:processArguments": {
             args: ["a", "b"],
             env: {
