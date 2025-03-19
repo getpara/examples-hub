@@ -64,7 +64,7 @@ struct VerifyPhoneView: View {
                         appRootManager.currentRoot = .home
                     } catch {
                         isLoading = false
-                        errorMessage = "Verification failed: \(error.localizedDescription)"
+                        errorMessage = String(describing: error)
                     }
                 }
             } label: {

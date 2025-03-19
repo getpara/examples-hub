@@ -146,7 +146,7 @@ struct PhoneAuthView: View {
                         isLoading = false
                         shouldNavigateToVerifyPhoneView = true
                     } catch {
-                        errorMessage = "Failed to create user: \(error.localizedDescription)"
+                        errorMessage = String(describing: error)
                         isLoading = false
                     }
                 }
