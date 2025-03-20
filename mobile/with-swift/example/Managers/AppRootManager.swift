@@ -7,5 +7,5 @@ enum AppRoot {
 }
 
 final class AppRootManager: ObservableObject {
-    @Published var currentRoot: AppRoot = .launch
+    @Published var currentRoot: AppRoot = .authentication
 }

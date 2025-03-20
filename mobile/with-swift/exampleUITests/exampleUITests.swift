@@ -44,13 +44,26 @@ class ExampleUITests: XCTestCase {
         Biometrics.enrolled()
         
         app.launch()
-    }
-    
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        
+        // Wait for the main screen to appear after launch
+        waitForMainScreen()
     }
     
     // MARK: - Helper Methods
+    private func waitForMainScreen() {
+        // Wait for either email or phone auth button to appear, indicating the main screen is loaded
+        let emailButton = app.buttons["emailAuthButton"]
+        let phoneButton = app.buttons["phoneAuthButton"]
+        
+        // Wait for at least one of the buttons to appear
+        let predicate = NSPredicate(format: "exists == true")
+        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: emailButton)
+        let expectation2 = XCTNSPredicateExpectation(predicate: predicate, object: phoneButton)
+        
+        let result = XCTWaiter.wait(for: [expectation, expectation2], timeout: TestConstants.longTimeout)
+        XCTAssertTrue(result == .completed, "Main screen should appear within timeout period")
+    }
+    
     private func performBiometricAuthentication(offsetFromBottom: CGFloat) {
         let window = app.windows.firstMatch
         let screenWidth = window.frame.size.width
