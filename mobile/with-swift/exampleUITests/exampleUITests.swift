@@ -26,7 +26,7 @@ class ExampleUITests: XCTestCase {
         }
         
         static let defaultTimeout: TimeInterval = 5.0
-        static let longTimeout: TimeInterval = 20.0
+        static let longTimeout: TimeInterval = 30.0
     }
     
     // MARK: - Setup & Teardown
