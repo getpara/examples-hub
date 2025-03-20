@@ -4,12 +4,11 @@ import { usePara } from "@/components/ParaProvider";
 import { useState } from "react";
 import { verifySignature, getBase58Decoder, getBase58Encoder, getUtf8Encoder, SignatureBytes } from "@solana/kit";
 import nacl from "tweetnacl";
-import nacl_util from "tweetnacl-util";
 
 export default function MessageSigningDemo() {
   const [message, setMessage] = useState("");
   const [signature, setSignature] = useState("");
-  const [recoveredAddress, setRecoveredAddress] = useState<boolean>(false);
+  const [_, setRecoveredAddress] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<{
     show: boolean;

@@ -5,7 +5,7 @@ import { LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana
 import { useState, useEffect } from "react";
 
 export default function EthTransferDemo() {
-  const [to, setTo] = useState("");
+  const [to, setTo] = useState("devwuNsNYACyiEYxRNqMNseBpNnGfnd4ZwNHL7sphqv"); // default send back to faucet
   const [amount, setAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isBalanceLoading, setIsBalanceLoading] = useState(false);
