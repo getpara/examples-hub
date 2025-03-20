@@ -16,10 +16,22 @@ struct WalletsView: View {
     @State private var isRefreshing = false
     @State private var refreshError: Error?
     @State private var showRefreshError = false
+    @State private var createWalletError: Error?
+    @State private var showCreateWalletError = false
     
     private func createWallet(type: WalletType) {
         Task {
-            try! await paraManager.createWallet(type: type, skipDistributable: false)
+            do {
+                try await paraManager.createWallet(type: type, skipDistributable: false)
+                await MainActor.run {
+                    showSelectCreateWalletTypeView = false
+                }
+            } catch {
+                await MainActor.run {
+                    createWalletError = error
+                    showCreateWalletError = true
+                }
+            }
         }
     }
     
@@ -117,6 +129,11 @@ struct WalletsView: View {
                 Button("OK", role: .cancel) { }
             } message: {
                 Text(refreshError?.localizedDescription ?? "An unknown error occurred")
+            }
+            .alert("Create Wallet Failed", isPresented: $showCreateWalletError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(createWalletError?.localizedDescription ?? "An unknown error occurred")
             }
         }
         .accessibilityIdentifier("walletsView")
