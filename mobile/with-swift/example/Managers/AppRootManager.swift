@@ -1,6 +1,7 @@
 import Foundation
 
 enum AppRoot {
+    case launch
     case authentication
     case home
 }

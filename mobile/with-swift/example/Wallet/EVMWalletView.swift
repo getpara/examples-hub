@@ -130,132 +130,196 @@ struct EVMWalletView: View {
     }
     
     var body: some View {
-        ZStack {
-            VStack(spacing: 20) {
-                Text(selectedWallet.address ?? "No wallet found")
-                    .font(.system(.callout, design: .monospaced))
+        ScrollView {
+            VStack(spacing: 24) {
+                // Wallet Address & Balance Card
+                VStack(spacing: 12) {
+                    Text("Wallet Address")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    HStack {
+                        Text(selectedWallet.address ?? "No wallet found")
+                            .font(.system(.footnote, design: .monospaced))
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                        
+                        Spacer()
+                        
+                        Button(action: {
+                            if let address = selectedWallet.address {
+                                UIPasteboard.general.string = address
+                                result = ("Success", "Address copied to clipboard")
+                            } else {
+                                result = ("Error", "No address to copy")
+                            }
+                        }) {
+                            Image(systemName: "doc.on.doc")
+                                .font(.footnote)
+                        }
+                        .buttonStyle(.borderless)
+                        .accessibilityIdentifier("copyAddressButton")
+                    }
                     .padding()
                     .background(Color(.systemGray6))
-                    .cornerRadius(8)
-                
-                if let balance {
-                    Text(balance)
-                        .font(.body)
-                        .padding(.horizontal)
-                }
-                
-                TextField("Enter a message to sign", text: $messageToSign)
-                    .autocorrectionDisabled()
-                    .textFieldStyle(.roundedBorder)
-                    .padding(.horizontal)
-                
-                // Fixed height container for sign message loading
-                ZStack {
-                    if isSigning {
-                        ProgressView("Signing message...")
-                    }
-                }
-                .frame(height: 20) // Fixed height for loading indicator
-                
-                Button("Sign Message") {
-                    guard !messageToSign.isEmpty else {
-                        result = ("Error", "Please enter a message to sign.")
-                        return
-                    }
-                    isSigning = true
-                    Task {
-                        let (duration, error) = await measureTime {
-                            let messageBytes = messageToSign.data(using: .utf8)
-                            guard let base64Message = messageBytes?.base64EncodedString() else {
-                                throw ParaError.bridgeError("Failed to encode message.")
+                    .cornerRadius(10)
+                    
+                    if balance != nil {
+                        HStack {
+                            Text("Balance:")
+                                .foregroundColor(.secondary)
+                            Text(balance!)
+                                .bold()
+                            Spacer()
+                            Button(action: fetchBalance) {
+                                Image(systemName: "arrow.clockwise")
                             }
-                            _ = try await paraManager.signMessage(walletId: selectedWallet.id, message: base64Message)
+                            .buttonStyle(.borderless)
+                            .accessibilityIdentifier("refreshBalanceButton")
                         }
+                        .padding(.vertical, 8)
+                    } else {
+                        Button("Fetch Balance") {
+                            fetchBalance()
+                        }
+                        .buttonStyle(.bordered)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                    }
+                }
+                .padding()
+                .background(Color(.systemBackground))
+                .cornerRadius(16)
+                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+                
+                // Signing Messages
+                VStack(spacing: 16) {
+                    Text("Message Signing")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    TextField("Enter a message to sign", text: $messageToSign)
+                        .autocorrectionDisabled()
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(10)
+                    
+                    Button("Sign Message") {
+                        guard !messageToSign.isEmpty else {
+                            result = ("Error", "Please enter a message to sign.")
+                            return
+                        }
+                        isSigning = true
+                        Task {
+                            let (duration, error) = await measureTime {
+                                let messageBytes = messageToSign.data(using: .utf8)
+                                guard let base64Message = messageBytes?.base64EncodedString() else {
+                                    throw ParaError.bridgeError("Failed to encode message.")
+                                }
+                                _ = try await paraManager.signMessage(walletId: selectedWallet.id, message: base64Message)
+                            }
+                            
+                            isSigning = false
+                            if let error = error {
+                                result = ("Error", "Failed to sign message: \(error.localizedDescription)\nDuration: \(String(format: "%.2f", duration))s")
+                            } else {
+                                result = ("Success", "Message signed successfully\nDuration: \(String(format: "%.2f", duration))s")
+                            }
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(isSigning || messageToSign.isEmpty)
+                    .frame(maxWidth: .infinity)
+                    .overlay {
+                        if isSigning {
+                            ProgressView()
+                        }
+                    }
+                }
+                .padding()
+                .background(Color(.systemBackground))
+                .cornerRadius(16)
+                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+                
+                // Transaction Operations
+                VStack(spacing: 16) {
+                    Text("Transaction Operations")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    HStack(spacing: 16) {
+                        Button("Send Transaction") {
+                            sendTransaction()
+                        }
+                        .buttonStyle(.bordered)
+                        .frame(maxWidth: .infinity)
                         
-                        isSigning = false
-                        if let error = error {
-                            result = ("Error", "Failed to sign message: \(error.localizedDescription)\nDuration: \(String(format: "%.2f", duration))s")
-                        } else {
-                            result = ("Success", "Message signed successfully\nDuration: \(String(format: "%.2f", duration))s")
+                        Button("Sign Transaction") {
+                            signTransaction()
                         }
+                        .buttonStyle(.bordered)
+                        .frame(maxWidth: .infinity)
                     }
+                    .disabled(isLoading)
                 }
-                .buttonStyle(.borderedProminent)
-                .disabled(isSigning || messageToSign.isEmpty)
-                .padding(.horizontal)
+                .padding()
+                .background(Color(.systemBackground))
+                .cornerRadius(16)
+                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
                 
-                // Fixed height container for fetch loading
-                ZStack {
-                    if isFetching {
-                        ProgressView("Fetching wallets...")
-                    }
-                }
-                .frame(height: 20) // Fixed height for loading indicator
-                
-                // Buttons for session/wallet actions
-                HStack {
-                    Button("Check Session Active") {
-                        isFetching = true
-                        Task {
-                            do {
-                                let active = try await paraManager.isSessionActive()
-                                result = ("Session Status", "Session Active: \(active)")
-                                isFetching = false
-                            } catch {
-                                isFetching = false
-                                result = ("Error", "Failed to check session: \(error.localizedDescription)")
+                // Wallet Management
+                VStack(spacing: 16) {
+                    Text("Wallet Management")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    HStack(spacing: 16) {
+                        Button("Check Session") {
+                            isFetching = true
+                            Task {
+                                do {
+                                    let active = try await paraManager.isSessionActive()
+                                    result = ("Session Status", "Session Active: \(active)")
+                                    isFetching = false
+                                } catch {
+                                    isFetching = false
+                                    result = ("Error", "Failed to check session: \(error.localizedDescription)")
+                                }
                             }
                         }
-                    }
-                    .buttonStyle(.bordered)
-                    
-                    Button("Fetch Wallets") {
-                        isFetching = true
-                        Task {
-                            do {
-                                let wallets = try await paraManager.fetchWallets()
-                                let addresses = wallets.map { $0.address ?? "No Address" }
-                                result = ("Wallets", addresses.joined(separator: "\n"))
-                                isFetching = false
-                            } catch {
-                                isFetching = false
-                                result = ("Error", "Failed to fetch wallets: \(error.localizedDescription)")
+                        .buttonStyle(.bordered)
+                        .frame(maxWidth: .infinity)
+                        
+                        Button("Fetch Wallets") {
+                            isFetching = true
+                            Task {
+                                do {
+                                    let wallets = try await paraManager.fetchWallets()
+                                    let addresses = wallets.map { $0.address ?? "No Address" }
+                                    result = ("Wallets", addresses.joined(separator: "\n"))
+                                    isFetching = false
+                                } catch {
+                                    isFetching = false
+                                    result = ("Error", "Failed to fetch wallets: \(error.localizedDescription)")
+                                }
                             }
                         }
+                        .buttonStyle(.bordered)
+                        .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.bordered)
-                    
-                    Button("Copy Address") {
-                        if let address = selectedWallet.address {
-                            UIPasteboard.general.string = address
-                            result = ("Success", "Address copied to clipboard")
-                        } else {
-                            result = ("Error", "No address to copy")
+                    .disabled(isFetching)
+                    .overlay {
+                        if isFetching {
+                            ProgressView()
                         }
                     }
-                    .buttonStyle(.bordered)
                 }
+                .padding()
+                .background(Color(.systemBackground))
+                .cornerRadius(16)
+                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
                 
-                HStack {
-                    Button("Fetch Balance") {
-                        fetchBalance()
-                    }
-                    .buttonStyle(.bordered)
-                    
-                    Button("EVM Send Tx") {
-                        sendTransaction()
-                    }
-                    .buttonStyle(.bordered)
-                    
-                    Button("EVM Sign Tx") {
-                        signTransaction()
-                    }
-                    .buttonStyle(.bordered)
-                }
-                .disabled(isLoading)
-                
-                Spacer()
-                
+                // Logout
                 Button("Logout") {
                     Task {
                         isLoading = true
@@ -269,41 +333,43 @@ struct EVMWalletView: View {
                     }
                 }
                 .buttonStyle(.bordered)
+                .tint(.red)
                 .disabled(isLoading)
+                .padding(.top, 12)
             }
             .padding()
-            .navigationTitle("EVM Wallet")
-            .alert(item: Binding(
-                get: { result.map { AlertItem(title: $0.title, message: $0.message) } },
-                set: { _ in result = nil }
-            )) { alert in
-                Alert(
-                    title: Text(alert.title),
-                    message: Text(alert.message),
-                    dismissButton: .default(Text("OK"))
-                )
-            }
-            .onAppear {
-                Task {
-                    isLoading = true
-                    do {
-                        try await paraEvmSigner.selectWallet(walletId: selectedWallet.id)
-                    } catch {
-                        result = ("Error", "Failed to select wallet: \(error.localizedDescription)")
-                    }
-                    isLoading = false
+        }
+        .navigationTitle("EVM Wallet")
+        .alert(item: Binding(
+            get: { result.map { AlertItem(title: $0.title, message: $0.message) } },
+            set: { _ in result = nil }
+        )) { alert in
+            Alert(
+                title: Text(alert.title),
+                message: Text(alert.message),
+                dismissButton: .default(Text("OK"))
+            )
+        }
+        .onAppear {
+            Task {
+                isLoading = true
+                do {
+                    try await paraEvmSigner.selectWallet(walletId: selectedWallet.id)
+                    fetchBalance()
+                } catch {
+                    result = ("Error", "Failed to select wallet: \(error.localizedDescription)")
                 }
+                isLoading = false
             }
-            
-            // Loading overlay
+        }
+        .overlay {
             if isLoading {
-                Color.black.opacity(0.2)
-                    .edgesIgnoringSafeArea(.all)
-                    .overlay(
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            .scaleEffect(1.5)
-                    )
+                ZStack {
+                    Color.black.opacity(0.2)
+                    ProgressView()
+                        .scaleEffect(1.5)
+                }
+                .ignoresSafeArea()
             }
         }
     }
