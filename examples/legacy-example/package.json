@@ -47,7 +47,8 @@
     "start-e2e": "DISABLE_ESLINT_PLUGIN=true PORT=3002 REACT_APP_IS_E2E=true craco start",
     "build": "DISABLE_ESLINT_PLUGIN=true craco build",
     "serve-build": "PORT=3002 serve -s build",
-    "deploy-sandbox": "yarn && yarn build && aws s3 sync build/ s3://capsule-web-playground --acl public-read"
+    "deploy-sandbox": "yarn && yarn build && aws s3 sync build/ s3://capsule-web-playground --acl public-read --delete",
+    "deploy-alpha": "yarn && yarn build && aws s3 sync build/ s3://capsule-sandbox-alpha-site --delete"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "7.18.6",
