@@ -4,6 +4,7 @@ import TokenTransfer from "./token-transfer";
 import ProgramDeployment from "./program-deployment";
 import ProgramInteraction from "./program-interaction";
 import BatchInstructions from "./batch-instructions";
+import { PublicKey } from "@solana/web3.js";
 
 export type TransactionID = "message-signing" | "sol-transfer";
 // | "token-transfer"
@@ -69,5 +70,4 @@ export const transactionTypes: TransactionsConfig = {
   // },
 };
 
-export const PARA_TEST_TOKEN_CONTRACT_OWNER = "0x0f35268de976323e06f5aed6f366b490d9b17750";
-export const PARA_TEST_TOKEN_CONTRACT_ADDRESS = "0x83cC70475A0d71EF1F2F61FeDE625c8C7E90C3f2";
+export const PROGRAM_ID = new PublicKey("nHi9DdNjuupjQ3c8AJU9sChB5gLbZvTLsJQouY4hU67");

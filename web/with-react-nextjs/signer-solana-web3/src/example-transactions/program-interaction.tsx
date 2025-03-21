@@ -2,67 +2,84 @@
 
 import { usePara } from "@/components/ParaProvider";
 import { useState, useEffect } from "react";
-import { formatEther, parseEther, Contract } from "ethers";
-import { PARA_TEST_TOKEN_CONTRACT_ADDRESS } from ".";
-import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
+import { Program, AnchorProvider, BN, Idl } from "@project-serum/anchor";
+import { PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL, sendAndConfirmTransaction } from "@solana/web3.js";
+import {
+  TOKEN_PROGRAM_ID,
+  getAssociatedTokenAddress,
+  createAssociatedTokenAccountInstruction,
+  createMintToInstruction,
+} from "@solana/spl-token";
+import { PROGRAM_ID } from ".";
 
-export default function ContractInteractionDemo() {
+export default function ProgramInteractionDemo() {
   const [amount, setAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isBalanceLoading, setIsBalanceLoading] = useState(false);
   const [tokenBalance, setTokenBalance] = useState<string | null>(null);
-  const [mintedAmount, setMintedAmount] = useState<string | null>(null);
-  const [mintLimit, setMintLimit] = useState<string | null>(null);
-  const [txHash, setTxHash] = useState("");
+  const [mintAddress, setMintAddress] = useState<string | null>("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
+
+  const [tokenAccount, setTokenAccount] = useState<string | null>(null);
+  const [txSignature, setTxSignature] = useState("");
   const [status, setStatus] = useState<{
     show: boolean;
     type: "success" | "error" | "info";
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { isConnected, walletId, address, signer, provider } = usePara();
+  const { isConnected, walletId, address, signer, connection } = usePara();
 
-  const fetchContractData = async () => {
-    if (!address || !provider) return;
+  const fetchTokenData = async () => {
+    if (!address || !connection || !signer) return;
 
     setIsBalanceLoading(true);
     try {
-      const contract = new Contract(PARA_TEST_TOKEN_CONTRACT_ADDRESS, ParaTestToken.abi, provider);
+      // For demonstration, we'll just show SOL balance
+      // In a real app, you'd fetch the token balance from the associated token account
+      const solBalance = await connection.getBalance(signer.sender);
+      setTokenBalance((solBalance / LAMPORTS_PER_SOL).toFixed(4));
 
-      // Get token balance
-      const balance = await contract.balanceOf(address);
-      setTokenBalance(formatEther(balance));
+      // Find the user's token account for this mint
+      if (mintAddress) {
+        const mint = new PublicKey(mintAddress);
+        const userPubkey = signer.sender;
+        const tokenAccountAddress = await getAssociatedTokenAddress(mint, userPubkey);
 
-      // Get minted amount for address
-      const minted = await contract.mintedAmount(address);
-      setMintedAmount(formatEther(minted));
+        setTokenAccount(tokenAccountAddress.toString());
 
-      // Get mint limit
-      const limit = await contract.MINT_LIMIT();
-      setMintLimit(formatEther(limit));
+        // You would typically fetch token balance here
+        // const tokenAccountInfo = await connection.getTokenAccountBalance(tokenAccountAddress);
+        // setTokenBalance(tokenAccountInfo.value.uiAmount.toString());
+      }
     } catch (error) {
-      console.error("Error fetching contract data:", error);
+      console.error("Error fetching token data:", error);
       setTokenBalance(null);
-      setMintedAmount(null);
-      setMintLimit(null);
     } finally {
       setIsBalanceLoading(false);
     }
   };
 
   useEffect(() => {
-    if (address) {
-      fetchContractData();
+    if (address && connection && signer) {
+      fetchTokenData();
     }
-  }, [address]);
+  }, [address, connection, signer]);
 
   const handleMint = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setStatus({ show: false, type: "success", message: "" });
-    setTxHash("");
+    setTxSignature("");
 
-    if (!signer) return;
+    if (!signer || !connection) {
+      setStatus({
+        show: true,
+        type: "error",
+        message: "Signer or connection not available",
+      });
+      setIsLoading(false);
+      return;
+    }
 
     try {
       if (!isConnected) {
@@ -79,21 +96,69 @@ export default function ContractInteractionDemo() {
         throw new Error("Please enter a valid amount greater than 0.");
       }
 
-      // Check if mint would exceed limit
-      if (mintedAmount && mintLimit) {
-        const currentMinted = parseFloat(mintedAmount);
-        const limit = parseFloat(mintLimit);
-        const requestedAmount = amountFloat;
+      // Convert amount to lamports/smallest units
+      const mintAmount = new BN(amountFloat * LAMPORTS_PER_SOL);
 
-        if (currentMinted + requestedAmount > limit) {
-          throw new Error(`Minting ${requestedAmount} tokens would exceed your limit of ${limit} tokens.`);
-        }
+      // Create a connection to use with AnchorProvider
+      const anchorConnection = connection;
+
+      // Create an Anchor provider
+      const provider = new AnchorProvider(
+        anchorConnection,
+        {
+          publicKey: signer.sender,
+          signTransaction: async (tx: Transaction) => {
+            return await signer.signTransaction(tx);
+          },
+          signAllTransactions: async (txs: Transaction[]) => {
+            return await Promise.all(txs.map((tx) => signer.signTransaction(tx)));
+          },
+        },
+        { commitment: "confirmed" }
+      );
+
+      // Create a program instance
+      const program = new Program(programIdl, PROGRAM_ID, provider);
+
+      // Get token mint address
+      const mint = new PublicKey(mintAddress as string);
+
+      // Get the associated token account
+      const tokenAccountAddress = await getAssociatedTokenAddress(mint, signer.sender);
+
+      // Check if token account exists, if not create it
+      let transaction = new Transaction();
+
+      try {
+        await connection.getTokenAccountBalance(tokenAccountAddress);
+      } catch (error) {
+        // Token account doesn't exist, add instruction to create it
+        transaction.add(
+          createAssociatedTokenAccountInstruction(signer.sender, tokenAccountAddress, signer.sender, mint)
+        );
       }
 
-      const contract = new Contract(PARA_TEST_TOKEN_CONTRACT_ADDRESS, ParaTestToken.abi, signer);
-      const tx = await contract.mint(parseEther(amount));
+      // Add mint instruction using the program's interface
+      transaction.add(
+        await program.methods
+          .mint(mintAmount)
+          .accounts({
+            mintAuthority: signer.sender,
+            mint: mint,
+            tokenAccount: tokenAccountAddress,
+            tokenProgram: TOKEN_PROGRAM_ID,
+          })
+          .instruction()
+      );
 
-      setTxHash(tx.hash);
+      // Set recent blockhash and fee payer
+      transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+      transaction.feePayer = signer.sender;
+
+      // Sign and send the transaction
+      const signature = await signer.sendTransaction(transaction);
+
+      setTxSignature(signature);
 
       setStatus({
         show: true,
@@ -101,16 +166,21 @@ export default function ContractInteractionDemo() {
         message: "Transaction submitted. Waiting for confirmation...",
       });
 
-      // Wait for transaction to be mined
-      const receipt = await tx.wait();
+      // Wait for confirmation
+      const confirmation = await connection.confirmTransaction(signature, "confirmed");
+
+      if (confirmation.value.err) {
+        throw new Error(`Transaction failed: ${confirmation.value.err}`);
+      }
 
       setStatus({
         show: true,
         type: "success",
-        message: `Successfully minted ${amount} CTT tokens!`,
+        message: `Successfully minted ${amount} tokens!`,
       });
 
-      await fetchContractData();
+      // Refresh token data
+      await fetchTokenData();
 
       setAmount("");
     } catch (error) {
@@ -128,19 +198,19 @@ export default function ContractInteractionDemo() {
   return (
     <div className="container mx-auto px-4">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold tracking-tight mb-6">Contract Interaction Demo</h1>
+        <h1 className="text-4xl font-bold tracking-tight mb-6">Program Interaction Demo</h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          This demo shows how to interact with a deployed contract. Mint CTT tokens by interacting with the smart
-          contract. Each address can mint up to 10 CTT tokens.
+          This demo shows how to interact with a deployed Solana program using Anchor. Mint tokens by interacting with
+          the token program at address {PROGRAM_ID.toString()}.
         </p>
       </div>
 
       <div className="max-w-xl mx-auto">
         <div className="mb-8 rounded-none border border-gray-200">
           <div className="flex justify-between items-center px-6 py-3 bg-gray-50 border-b border-gray-200">
-            <h3 className="text-sm font-medium text-gray-900">Contract Information:</h3>
+            <h3 className="text-sm font-medium text-gray-900">Account Information:</h3>
             <button
-              onClick={fetchContractData}
+              onClick={fetchTokenData}
               disabled={isBalanceLoading || !address}
               className="p-1 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
               title="Refresh data">
@@ -149,27 +219,27 @@ export default function ContractInteractionDemo() {
           </div>
           <div className="px-6 py-3 space-y-2">
             <div>
-              <p className="text-sm text-gray-600">Current Balance:</p>
+              <p className="text-sm text-gray-600">SOL Balance:</p>
               <p className="text-lg font-medium text-gray-900">
                 {!address
                   ? "Please connect your wallet"
                   : isBalanceLoading
                   ? "Loading..."
                   : tokenBalance
-                  ? `${parseFloat(tokenBalance).toFixed(4)} CTT`
+                  ? `${tokenBalance} SOL`
                   : "Unable to fetch balance"}
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Amount Minted:</p>
-              <p className="text-lg font-medium text-gray-900">
+              <p className="text-sm text-gray-600">Token Account:</p>
+              <p className="text-sm font-mono break-all text-gray-600">
                 {!address
                   ? "Please connect your wallet"
                   : isBalanceLoading
                   ? "Loading..."
-                  : mintedAmount && mintLimit
-                  ? `${parseFloat(mintedAmount).toFixed(4)} / ${parseFloat(mintLimit).toFixed(4)} CTT`
-                  : "Unable to fetch minted amount"}
+                  : tokenAccount
+                  ? tokenAccount
+                  : "Not created yet"}
               </p>
             </div>
           </div>
@@ -195,7 +265,7 @@ export default function ContractInteractionDemo() {
             <label
               htmlFor="amount"
               className="block text-sm font-medium text-gray-700">
-              Amount to Mint (CTT)
+              Amount to Mint
             </label>
             <input
               id="amount"
@@ -217,40 +287,26 @@ export default function ContractInteractionDemo() {
             {isLoading ? "Minting Tokens..." : "Mint Tokens"}
           </button>
 
-          {txHash && (
+          {txSignature && (
             <div className="mt-8 rounded-none border border-gray-200">
               <div className="flex justify-between items-center px-6 py-4 bg-gray-50 border-b border-gray-200">
-                <h3 className="text-sm font-medium text-gray-900">Transaction Hash:</h3>
+                <h3 className="text-sm font-medium text-gray-900">Transaction Signature:</h3>
                 <a
-                  href={`https://holesky.etherscan.io/tx/${txHash}`}
+                  href={`https://solscan.io/tx/${txSignature}?cluster=devnet`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-3 py-1 text-sm bg-blue-900 text-white hover:bg-blue-950 transition-colors rounded-none">
-                  View on Etherscan
+                  View on Solscan
                 </a>
               </div>
               <div className="p-6">
                 <p className="text-sm font-mono break-all text-gray-600 bg-white p-4 border border-gray-200">
-                  {txHash}
+                  {txSignature}
                 </p>
               </div>
             </div>
           )}
-
-          {mintedAmount && mintLimit && parseFloat(mintedAmount) >= parseFloat(mintLimit) && (
-            <div className="mt-4 bg-yellow-50 border border-yellow-200 p-4 text-yellow-800">
-              <p>You have reached your minting limit. No more tokens can be minted to this address.</p>
-            </div>
-          )}
         </form>
-
-        <div className="mt-8 text-center">
-          <a
-            href="/demo/token-transfer"
-            className="text-blue-900 hover:text-blue-950 text-sm font-medium">
-            → Go to Token Transfer Demo
-          </a>
-        </div>
       </div>
     </div>
   );

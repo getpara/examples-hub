@@ -43,3 +43,7 @@ next-env.d.ts
 src/cache
 
 .next
+transfer_tokens-keypair.json
+program-keypair.json
+recovery.txt
+target/

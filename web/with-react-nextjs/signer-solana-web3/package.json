@@ -9,23 +9,26 @@
     "start": "next start"
   },
   "dependencies": {
-    "@getpara/react-sdk": "1.5.0",
-    "@getpara/solana-web3.js-v1-integration": "1.5.0",
+    "@coral-xyz/anchor": "0.31.0",
+    "@project-serum/anchor": "0.26.0",
+    "@getpara/react-sdk": "1.6.0",
+    "@getpara/solana-web3.js-v1-integration": "1.6.0",
     "@solana/kit": "2.1.0",
+    "@solana/spl-token": "0.4.13",
     "@solana/web3.js": "1.98.0",
     "next": "15.1.5",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "tweetnacl": "^1.0.3",
-    "tweetnacl-util": "^0.15.1"
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "tweetnacl": "1.0.3",
+    "tweetnacl-util": "0.15.1"
   },
   "devDependencies": {
-    "@types/node": "^22.10.10",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.7.3"
+    "@types/node": "22.10.10",
+    "@types/react": "19",
+    "@types/react-dom": "19",
+    "postcss": "8",
+    "tailwindcss": "3.4.1",
+    "ts-node": "10.9.2",
+    "typescript": "5.7.3"
   }
 }
