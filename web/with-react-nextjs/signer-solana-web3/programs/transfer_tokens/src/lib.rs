@@ -12,7 +12,7 @@ use {
     },
 };
 
-declare_id!("5gscQip1qnTz73BMcBPn8VQivyW9rLs1sfLoi5tqPuot");
+declare_id!("7aZTQdMeajFATgMKS7h7mGWVqh1UaRnWt1Pf8mnvBDkk");
 
 // CREATE TOKEN ACCOUNTS AND INSTRUCTION
 #[derive(Accounts)]

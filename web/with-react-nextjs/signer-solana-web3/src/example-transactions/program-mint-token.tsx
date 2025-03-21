@@ -3,22 +3,20 @@
 import { usePara } from "@/components/ParaProvider";
 import { useState, useEffect } from "react";
 import { Program, AnchorProvider, BN, Idl } from "@project-serum/anchor";
-import { PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL, sendAndConfirmTransaction } from "@solana/web3.js";
-import {
-  TOKEN_PROGRAM_ID,
-  getAssociatedTokenAddress,
-  createAssociatedTokenAccountInstruction,
-  createMintToInstruction,
-} from "@solana/spl-token";
+import { PublicKey, Transaction, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { TOKEN_PROGRAM_ID, getAssociatedTokenAddress } from "@solana/spl-token";
 import { PROGRAM_ID } from ".";
 
-export default function ProgramInteractionDemo() {
+import idl from "../../target/idl/transfer_tokens.json";
+
+export default function ProgramMintToken() {
   const [amount, setAmount] = useState("");
+  const [recipient, setRecipient] = useState("");
+  const [mintAccount, setMintAccount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isBalanceLoading, setIsBalanceLoading] = useState(false);
+  const [solBalance, setSolBalance] = useState<string | null>(null);
   const [tokenBalance, setTokenBalance] = useState<string | null>(null);
-  const [mintAddress, setMintAddress] = useState<string | null>("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
-
   const [tokenAccount, setTokenAccount] = useState<string | null>(null);
   const [txSignature, setTxSignature] = useState("");
   const [status, setStatus] = useState<{
@@ -29,31 +27,37 @@ export default function ProgramInteractionDemo() {
 
   const { isConnected, walletId, address, signer, connection } = usePara();
 
-  const fetchTokenData = async () => {
+  const fetchBalances = async () => {
     if (!address || !connection || !signer) return;
 
     setIsBalanceLoading(true);
     try {
-      // For demonstration, we'll just show SOL balance
-      // In a real app, you'd fetch the token balance from the associated token account
-      const solBalance = await connection.getBalance(signer.sender);
-      setTokenBalance((solBalance / LAMPORTS_PER_SOL).toFixed(4));
+      const balance = await connection.getBalance(signer.sender!);
+      setSolBalance((balance / LAMPORTS_PER_SOL).toFixed(4));
 
-      // Find the user's token account for this mint
-      if (mintAddress) {
-        const mint = new PublicKey(mintAddress);
-        const userPubkey = signer.sender;
-        const tokenAccountAddress = await getAssociatedTokenAddress(mint, userPubkey);
+      // Fetch token balance if mint address is available
+      if (mintAccount && mintAccount.length > 0) {
+        try {
+          const mint = new PublicKey(mintAccount);
+          const userPubkey = signer.sender!;
+          const tokenAccountAddress = await getAssociatedTokenAddress(mint, userPubkey);
+          setTokenAccount(tokenAccountAddress.toString());
 
-        setTokenAccount(tokenAccountAddress.toString());
-
-        // You would typically fetch token balance here
-        // const tokenAccountInfo = await connection.getTokenAccountBalance(tokenAccountAddress);
-        // setTokenBalance(tokenAccountInfo.value.uiAmount.toString());
+          try {
+            const tokenAccountInfo = await connection.getTokenAccountBalance(tokenAccountAddress);
+            setTokenBalance(tokenAccountInfo.value.uiAmount?.toString() || "0");
+          } catch (error) {
+            setTokenBalance("0");
+          }
+        } catch (error) {
+          console.error("Error fetching token account:", error);
+          setTokenAccount(null);
+          setTokenBalance(null);
+        }
       }
     } catch (error) {
-      console.error("Error fetching token data:", error);
-      setTokenBalance(null);
+      console.error("Error fetching balances:", error);
+      setSolBalance(null);
     } finally {
       setIsBalanceLoading(false);
     }
@@ -61,11 +65,11 @@ export default function ProgramInteractionDemo() {
 
   useEffect(() => {
     if (address && connection && signer) {
-      fetchTokenData();
+      fetchBalances();
     }
-  }, [address, connection, signer]);
+  }, [address, connection, signer, mintAccount]);
 
-  const handleMint = async (e: React.FormEvent) => {
+  const handleMintToken = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setStatus({ show: false, type: "success", message: "" });
@@ -90,23 +94,29 @@ export default function ProgramInteractionDemo() {
         throw new Error("No wallet ID found. Please reconnect your wallet.");
       }
 
+      if (!mintAccount) {
+        throw new Error("Please enter a mint account address.");
+      }
+
+      if (!recipient) {
+        throw new Error("Please enter a recipient address.");
+      }
+
       // Validate amount
-      const amountFloat = parseFloat(amount);
-      if (isNaN(amountFloat) || amountFloat <= 0) {
+      const amountValue = parseInt(amount);
+      if (isNaN(amountValue) || amountValue <= 0) {
         throw new Error("Please enter a valid amount greater than 0.");
       }
 
-      // Convert amount to lamports/smallest units
-      const mintAmount = new BN(amountFloat * LAMPORTS_PER_SOL);
-
-      // Create a connection to use with AnchorProvider
-      const anchorConnection = connection;
+      // Parse addresses
+      const mintPubkey = new PublicKey(mintAccount);
+      const recipientPubkey = new PublicKey(recipient);
 
       // Create an Anchor provider
       const provider = new AnchorProvider(
-        anchorConnection,
+        connection,
         {
-          publicKey: signer.sender,
+          publicKey: signer.sender!,
           signTransaction: async (tx: Transaction) => {
             return await signer.signTransaction(tx);
           },
@@ -117,36 +127,26 @@ export default function ProgramInteractionDemo() {
         { commitment: "confirmed" }
       );
 
-      // Create a program instance
-      const program = new Program(programIdl, PROGRAM_ID, provider);
+      const program = new Program(idl as any, PROGRAM_ID, provider);
 
-      // Get token mint address
-      const mint = new PublicKey(mintAddress as string);
+      // Get the recipient's associated token account
+      const recipientTokenAccount = await getAssociatedTokenAddress(mintPubkey, recipientPubkey);
 
-      // Get the associated token account
-      const tokenAccountAddress = await getAssociatedTokenAddress(mint, signer.sender);
-
-      // Check if token account exists, if not create it
+      // Create transaction
       let transaction = new Transaction();
 
-      try {
-        await connection.getTokenAccountBalance(tokenAccountAddress);
-      } catch (error) {
-        // Token account doesn't exist, add instruction to create it
-        transaction.add(
-          createAssociatedTokenAccountInstruction(signer.sender, tokenAccountAddress, signer.sender, mint)
-        );
-      }
-
-      // Add mint instruction using the program's interface
+      // Add instruction to mint tokens
       transaction.add(
         await program.methods
-          .mint(mintAmount)
+          .mintToken(new BN(amountValue))
           .accounts({
             mintAuthority: signer.sender,
-            mint: mint,
-            tokenAccount: tokenAccountAddress,
+            recipient: recipientPubkey,
+            mintAccount: mintPubkey,
+            associatedTokenAccount: recipientTokenAccount,
             tokenProgram: TOKEN_PROGRAM_ID,
+            associatedTokenProgram: new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"),
+            systemProgram: new PublicKey("11111111111111111111111111111111"),
           })
           .instruction()
       );
@@ -157,7 +157,6 @@ export default function ProgramInteractionDemo() {
 
       // Sign and send the transaction
       const signature = await signer.sendTransaction(transaction);
-
       setTxSignature(signature);
 
       setStatus({
@@ -170,20 +169,21 @@ export default function ProgramInteractionDemo() {
       const confirmation = await connection.confirmTransaction(signature, "confirmed");
 
       if (confirmation.value.err) {
-        throw new Error(`Transaction failed: ${confirmation.value.err}`);
+        throw new Error(`Transaction failed: ${JSON.stringify(confirmation.value.err)}`);
       }
 
       setStatus({
         show: true,
         type: "success",
-        message: `Successfully minted ${amount} tokens!`,
+        message: `Successfully minted ${amount} tokens to ${recipient}!`,
       });
 
-      // Refresh token data
-      await fetchTokenData();
+      // Refresh balances
+      await fetchBalances();
 
+      // Reset form
       setAmount("");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error minting tokens:", error);
       setStatus({
         show: true,
@@ -198,10 +198,10 @@ export default function ProgramInteractionDemo() {
   return (
     <div className="container mx-auto px-4">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold tracking-tight mb-6">Program Interaction Demo</h1>
+        <h1 className="text-4xl font-bold tracking-tight mb-6">Mint Tokens Demo</h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          This demo shows how to interact with a deployed Solana program using Anchor. Mint tokens by interacting with
-          the token program at address {PROGRAM_ID.toString()}.
+          This demo shows how to mint tokens using the transfer_tokens program deployed at address{" "}
+          {PROGRAM_ID.toString()}.
         </p>
       </div>
 
@@ -210,7 +210,7 @@ export default function ProgramInteractionDemo() {
           <div className="flex justify-between items-center px-6 py-3 bg-gray-50 border-b border-gray-200">
             <h3 className="text-sm font-medium text-gray-900">Account Information:</h3>
             <button
-              onClick={fetchTokenData}
+              onClick={fetchBalances}
               disabled={isBalanceLoading || !address}
               className="p-1 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
               title="Refresh data">
@@ -219,29 +219,51 @@ export default function ProgramInteractionDemo() {
           </div>
           <div className="px-6 py-3 space-y-2">
             <div>
+              <p className="text-sm text-gray-600">Your Address:</p>
+              <p className="text-sm font-mono break-all text-gray-900">
+                {!address ? "Please connect your wallet" : address}
+              </p>
+            </div>
+            <div>
               <p className="text-sm text-gray-600">SOL Balance:</p>
               <p className="text-lg font-medium text-gray-900">
                 {!address
                   ? "Please connect your wallet"
                   : isBalanceLoading
                   ? "Loading..."
-                  : tokenBalance
-                  ? `${tokenBalance} SOL`
+                  : solBalance
+                  ? `${solBalance} SOL`
                   : "Unable to fetch balance"}
               </p>
             </div>
-            <div>
-              <p className="text-sm text-gray-600">Token Account:</p>
-              <p className="text-sm font-mono break-all text-gray-600">
-                {!address
-                  ? "Please connect your wallet"
-                  : isBalanceLoading
-                  ? "Loading..."
-                  : tokenAccount
-                  ? tokenAccount
-                  : "Not created yet"}
-              </p>
-            </div>
+            {mintAccount && (
+              <>
+                <div>
+                  <p className="text-sm text-gray-600">Token Account:</p>
+                  <p className="text-sm font-mono break-all text-gray-600">
+                    {!address
+                      ? "Please connect your wallet"
+                      : isBalanceLoading
+                      ? "Loading..."
+                      : tokenAccount
+                      ? tokenAccount
+                      : "Not created yet"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Token Balance:</p>
+                  <p className="text-lg font-medium text-gray-900">
+                    {!address
+                      ? "Please connect your wallet"
+                      : isBalanceLoading
+                      ? "Loading..."
+                      : tokenBalance !== null
+                      ? tokenBalance
+                      : "Unable to fetch balance"}
+                  </p>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -259,8 +281,44 @@ export default function ProgramInteractionDemo() {
         )}
 
         <form
-          onSubmit={handleMint}
+          onSubmit={handleMintToken}
           className="space-y-4">
+          <div className="space-y-3">
+            <label
+              htmlFor="mintAccount"
+              className="block text-sm font-medium text-gray-700">
+              Mint Account Address
+            </label>
+            <input
+              id="mintAccount"
+              type="text"
+              value={mintAccount}
+              onChange={(e) => setMintAccount(e.target.value)}
+              placeholder="Enter mint account public key"
+              required
+              disabled={isLoading}
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+            />
+          </div>
+
+          <div className="space-y-3">
+            <label
+              htmlFor="recipient"
+              className="block text-sm font-medium text-gray-700">
+              Recipient Address
+            </label>
+            <input
+              id="recipient"
+              type="text"
+              value={recipient}
+              onChange={(e) => setRecipient(e.target.value)}
+              placeholder="Enter recipient public key"
+              required
+              disabled={isLoading}
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+            />
+          </div>
+
           <div className="space-y-3">
             <label
               htmlFor="amount"
@@ -272,18 +330,21 @@ export default function ProgramInteractionDemo() {
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              placeholder="0.0"
-              step="0.01"
+              placeholder="Enter amount to mint"
+              min="1"
               required
               disabled={isLoading}
               className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
+            <p className="text-xs text-gray-500">
+              Note: The amount will be adjusted for decimals (9 decimals) in the contract
+            </p>
           </div>
 
           <button
             type="submit"
             className="w-full rounded-none bg-blue-900 px-6 py-3 text-sm font-medium text-white hover:bg-blue-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!amount || isLoading || !isConnected}>
+            disabled={!mintAccount || !recipient || !amount || isLoading || !isConnected}>
             {isLoading ? "Minting Tokens..." : "Mint Tokens"}
           </button>
 
