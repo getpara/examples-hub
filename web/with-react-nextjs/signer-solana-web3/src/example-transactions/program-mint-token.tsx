@@ -2,12 +2,19 @@
 
 import { usePara } from "@/components/ParaProvider";
 import { useState, useEffect } from "react";
-import { Program, AnchorProvider, BN, Idl } from "@project-serum/anchor";
-import { PublicKey, Transaction, LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { TOKEN_PROGRAM_ID, getAssociatedTokenAddress } from "@solana/spl-token";
-import { PROGRAM_ID } from ".";
+import * as anchor from "@coral-xyz/anchor";
+import { Transaction, LAMPORTS_PER_SOL, SystemProgram, VersionedTransaction } from "@solana/web3.js";
+import {
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+  getAccount,
+  getAssociatedTokenAddress,
+  getMint,
+  TOKEN_2022_PROGRAM_ID,
+} from "@solana/spl-token";
+import { TransferTokens } from "../../target/types/transfer_tokens";
 
-import idl from "../../target/idl/transfer_tokens.json";
+import idl from "../../target/idl/transfer_tokens.json" assert { type: "json" };
+import { PROGRAM_ID } from ".";
 
 export default function ProgramMintToken() {
   const [amount, setAmount] = useState("");
@@ -32,21 +39,41 @@ export default function ProgramMintToken() {
 
     setIsBalanceLoading(true);
     try {
+      // Fetch SOL balance
       const balance = await connection.getBalance(signer.sender!);
       setSolBalance((balance / LAMPORTS_PER_SOL).toFixed(4));
 
       // Fetch token balance if mint address is available
       if (mintAccount && mintAccount.length > 0) {
         try {
-          const mint = new PublicKey(mintAccount);
+          const mint = new anchor.web3.PublicKey(mintAccount);
           const userPubkey = signer.sender!;
-          const tokenAccountAddress = await getAssociatedTokenAddress(mint, userPubkey);
+
+          const tokenAccountAddress = await getAssociatedTokenAddress(
+            mint,
+            userPubkey,
+            false, // allowOwnerOffCurve
+            TOKEN_2022_PROGRAM_ID // Use Token Extension Program
+          );
+
           setTokenAccount(tokenAccountAddress.toString());
 
           try {
-            const tokenAccountInfo = await connection.getTokenAccountBalance(tokenAccountAddress);
-            setTokenBalance(tokenAccountInfo.value.uiAmount?.toString() || "0");
+            try {
+              const accountInfo = await getAccount(connection, tokenAccountAddress, "confirmed", TOKEN_2022_PROGRAM_ID);
+
+              const mintInfo = await getMint(connection, mint, "confirmed", TOKEN_2022_PROGRAM_ID);
+
+              const decimals = mintInfo.decimals;
+              const uiAmount = Number(accountInfo.amount) / Math.pow(10, decimals);
+              setTokenBalance(uiAmount.toString());
+            } catch (error) {
+              // If token-2022 fails, try the original token program
+              const tokenAccountInfo = await connection.getTokenAccountBalance(tokenAccountAddress);
+              setTokenBalance(tokenAccountInfo.value.uiAmount?.toString() || "0");
+            }
           } catch (error) {
+            console.log("No token account found, balance is 0");
             setTokenBalance("0");
           }
         } catch (error) {
@@ -108,69 +135,41 @@ export default function ProgramMintToken() {
         throw new Error("Please enter a valid amount greater than 0.");
       }
 
-      // Parse addresses
-      const mintPubkey = new PublicKey(mintAccount);
-      const recipientPubkey = new PublicKey(recipient);
+      const mintPubkey = new anchor.web3.PublicKey(mintAccount);
+      const recipientPubkey = new anchor.web3.PublicKey(recipient);
 
       // Create an Anchor provider
-      const provider = new AnchorProvider(
+      const provider = new anchor.AnchorProvider(
         connection,
         {
           publicKey: signer.sender!,
-          signTransaction: async (tx: Transaction) => {
+          signTransaction: async <T extends Transaction | VersionedTransaction>(tx: T): Promise<T> => {
             return await signer.signTransaction(tx);
           },
-          signAllTransactions: async (txs: Transaction[]) => {
+          signAllTransactions: async <T extends Transaction | VersionedTransaction>(txs: T[]): Promise<T[]> => {
             return await Promise.all(txs.map((tx) => signer.signTransaction(tx)));
           },
         },
         { commitment: "confirmed" }
       );
 
-      const program = new Program(idl as any, PROGRAM_ID, provider);
+      anchor.setProvider(provider);
 
-      // Get the recipient's associated token account
-      const recipientTokenAccount = await getAssociatedTokenAddress(mintPubkey, recipientPubkey);
+      const program = new anchor.Program(idl as TransferTokens, provider);
 
-      // Create transaction
-      let transaction = new Transaction();
+      const signature = await program.methods
+        .mintToken(new anchor.BN(amountValue))
+        .accounts({
+          mintAuthority: signer.sender!,
+          recipient: recipientPubkey,
+          mintAccount: mintPubkey,
+          tokenProgram: TOKEN_2022_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+        })
+        .rpc();
 
-      // Add instruction to mint tokens
-      transaction.add(
-        await program.methods
-          .mintToken(new BN(amountValue))
-          .accounts({
-            mintAuthority: signer.sender,
-            recipient: recipientPubkey,
-            mintAccount: mintPubkey,
-            associatedTokenAccount: recipientTokenAccount,
-            tokenProgram: TOKEN_PROGRAM_ID,
-            associatedTokenProgram: new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"),
-            systemProgram: new PublicKey("11111111111111111111111111111111"),
-          })
-          .instruction()
-      );
-
-      // Set recent blockhash and fee payer
-      transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-      transaction.feePayer = signer.sender;
-
-      // Sign and send the transaction
-      const signature = await signer.sendTransaction(transaction);
       setTxSignature(signature);
-
-      setStatus({
-        show: true,
-        type: "info",
-        message: "Transaction submitted. Waiting for confirmation...",
-      });
-
-      // Wait for confirmation
-      const confirmation = await connection.confirmTransaction(signature, "confirmed");
-
-      if (confirmation.value.err) {
-        throw new Error(`Transaction failed: ${JSON.stringify(confirmation.value.err)}`);
-      }
 
       setStatus({
         show: true,

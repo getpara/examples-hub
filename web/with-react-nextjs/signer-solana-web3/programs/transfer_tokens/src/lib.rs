@@ -4,11 +4,10 @@ use {
     anchor_lang::prelude::*,
     anchor_spl::{
         associated_token::AssociatedToken,
-        metadata::{
-            create_metadata_accounts_v3, mpl_token_metadata::types::DataV2,
-            CreateMetadataAccountsV3, Metadata,
+        token_interface::{
+            self, Mint, TokenAccount, TokenInterface,
+            MintTo, TransferChecked,
         },
-        token::{mint_to, transfer, Mint, MintTo, Token, TokenAccount, Transfer},
     },
 };
 
@@ -26,21 +25,10 @@ pub struct CreateToken<'info> {
         mint::decimals = 9,
         mint::authority = payer.key(),
         mint::freeze_authority = payer.key(),
-
     )]
-    pub mint_account: Account<'info, Mint>,
+    pub mint_account: InterfaceAccount<'info, Mint>,
 
-    /// CHECK: Validate address by deriving pda
-    #[account(
-        mut,
-        seeds = [b"metadata", token_metadata_program.key().as_ref(), mint_account.key().as_ref()],
-        bump,
-        seeds::program = token_metadata_program.key(),
-    )]
-    pub metadata_account: UncheckedAccount<'info>,
-
-    pub token_program: Program<'info, Token>,
-    pub token_metadata_program: Program<'info, Metadata>,
+    pub token_program: Interface<'info, TokenInterface>,
     pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
 }
@@ -52,17 +40,20 @@ pub struct MintToken<'info> {
     pub mint_authority: Signer<'info>,
 
     pub recipient: SystemAccount<'info>,
+    
     #[account(mut)]
-    pub mint_account: Account<'info, Mint>,
+    pub mint_account: InterfaceAccount<'info, Mint>,
+    
     #[account(
         init_if_needed,
         payer = mint_authority,
         associated_token::mint = mint_account,
         associated_token::authority = recipient,
+        associated_token::token_program = token_program,
     )]
-    pub associated_token_account: Account<'info, TokenAccount>,
+    pub associated_token_account: InterfaceAccount<'info, TokenAccount>,
 
-    pub token_program: Program<'info, Token>,
+    pub token_program: Interface<'info, TokenInterface>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
 }
@@ -74,23 +65,26 @@ pub struct TransferTokens<'info> {
     pub sender: Signer<'info>,
     pub recipient: SystemAccount<'info>,
 
-    #[account(mut)]
-    pub mint_account: Account<'info, Mint>,
+    pub mint_account: InterfaceAccount<'info, Mint>,
+    
     #[account(
         mut,
         associated_token::mint = mint_account,
         associated_token::authority = sender,
+        associated_token::token_program = token_program,
     )]
-    pub sender_token_account: Account<'info, TokenAccount>,
+    pub sender_token_account: InterfaceAccount<'info, TokenAccount>,
+    
     #[account(
         init_if_needed,
         payer = sender,
         associated_token::mint = mint_account,
         associated_token::authority = recipient,
+        associated_token::token_program = token_program,
     )]
-    pub recipient_token_account: Account<'info, TokenAccount>,
+    pub recipient_token_account: InterfaceAccount<'info, TokenAccount>,
 
-    pub token_program: Program<'info, Token>,
+    pub token_program: Interface<'info, TokenInterface>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
 }
@@ -101,43 +95,12 @@ pub mod transfer_tokens {
 
     pub fn create_token(
         ctx: Context<CreateToken>,
-        token_name: String,
-        token_symbol: String,
-        token_uri: String,
+        _token_name: String,  // These are kept for reference but not used
+        _token_symbol: String, // in the actual token creation
     ) -> Result<()> {
-        msg!("Creating metadata account");
-
-        // Cross Program Invocation (CPI)
-        // Invoking the create_metadata_account_v3 instruction on the token metadata program
-        create_metadata_accounts_v3(
-            CpiContext::new(
-                ctx.accounts.token_metadata_program.to_account_info(),
-                CreateMetadataAccountsV3 {
-                    metadata: ctx.accounts.metadata_account.to_account_info(),
-                    mint: ctx.accounts.mint_account.to_account_info(),
-                    mint_authority: ctx.accounts.payer.to_account_info(),
-                    update_authority: ctx.accounts.payer.to_account_info(),
-                    payer: ctx.accounts.payer.to_account_info(),
-                    system_program: ctx.accounts.system_program.to_account_info(),
-                    rent: ctx.accounts.rent.to_account_info(),
-                },
-            ),
-            DataV2 {
-                name: token_name,
-                symbol: token_symbol,
-                uri: token_uri,
-                seller_fee_basis_points: 0,
-                creators: None,
-                collection: None,
-                uses: None,
-            },
-            false, // Is mutable
-            true,  // Update authority is signer
-            None,  // Collection details
-        )?;
-
         msg!("Token created successfully.");
-
+        // Note: The Token Program itself doesn't store name and symbol
+        // These parameters are kept for your reference only
         Ok(())
     }
 
@@ -149,18 +112,20 @@ pub mod transfer_tokens {
             &ctx.accounts.associated_token_account.key()
         );
 
+        // Calculate the amount with decimals
+        let amount_with_decimals = amount * 10u64.pow(ctx.accounts.mint_account.decimals as u32);
+
         // Invoke the mint_to instruction on the token program
-        mint_to(
-            CpiContext::new(
-                ctx.accounts.token_program.to_account_info(),
-                MintTo {
-                    mint: ctx.accounts.mint_account.to_account_info(),
-                    to: ctx.accounts.associated_token_account.to_account_info(),
-                    authority: ctx.accounts.mint_authority.to_account_info(),
-                },
-            ),
-            amount * 10u64.pow(ctx.accounts.mint_account.decimals as u32), // Mint tokens
-        )?;
+        let cpi_accounts = MintTo {
+            mint: ctx.accounts.mint_account.to_account_info(),
+            to: ctx.accounts.associated_token_account.to_account_info(),
+            authority: ctx.accounts.mint_authority.to_account_info(),
+        };
+        
+        let cpi_program = ctx.accounts.token_program.to_account_info();
+        let cpi_context = CpiContext::new(cpi_program, cpi_accounts);
+        
+        token_interface::mint_to(cpi_context, amount_with_decimals)?;
 
         msg!("Token minted successfully.");
 
@@ -169,31 +134,26 @@ pub mod transfer_tokens {
 
     pub fn transfer_tokens(ctx: Context<TransferTokens>, amount: u64) -> Result<()> {
         msg!("Transferring tokens...");
-        msg!(
-            "Mint: {}",
-            &ctx.accounts.mint_account.to_account_info().key()
-        );
-        msg!(
-            "From Token Address: {}",
-            &ctx.accounts.sender_token_account.key()
-        );
-        msg!(
-            "To Token Address: {}",
-            &ctx.accounts.recipient_token_account.key()
-        );
+        msg!("Mint: {}", &ctx.accounts.mint_account.key());
+        msg!("From Token Address: {}", &ctx.accounts.sender_token_account.key());
+        msg!("To Token Address: {}", &ctx.accounts.recipient_token_account.key());
 
-        // Invoke the transfer instruction on the token program
-        transfer(
-            CpiContext::new(
-                ctx.accounts.token_program.to_account_info(),
-                Transfer {
-                    from: ctx.accounts.sender_token_account.to_account_info(),
-                    to: ctx.accounts.recipient_token_account.to_account_info(),
-                    authority: ctx.accounts.sender.to_account_info(),
-                },
-            ),
-            amount * 10u64.pow(ctx.accounts.mint_account.decimals as u32), // Transfer amount, adjust for decimals
-        )?;
+        // Calculate the amount with decimals
+        let amount_with_decimals = amount * 10u64.pow(ctx.accounts.mint_account.decimals as u32);
+        let decimals = ctx.accounts.mint_account.decimals;
+
+        // Invoke the transfer_checked instruction for better security
+        let cpi_accounts = TransferChecked {
+            mint: ctx.accounts.mint_account.to_account_info(),
+            from: ctx.accounts.sender_token_account.to_account_info(),
+            to: ctx.accounts.recipient_token_account.to_account_info(),
+            authority: ctx.accounts.sender.to_account_info(),
+        };
+        
+        let cpi_program = ctx.accounts.token_program.to_account_info();
+        let cpi_context = CpiContext::new(cpi_program, cpi_accounts);
+        
+        token_interface::transfer_checked(cpi_context, amount_with_decimals, decimals)?;
 
         msg!("Tokens transferred successfully.");
 

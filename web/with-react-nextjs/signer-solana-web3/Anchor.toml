@@ -1,4 +1,5 @@
 [toolchain]
+rust = "local"
 
 [features]
 resolution = true

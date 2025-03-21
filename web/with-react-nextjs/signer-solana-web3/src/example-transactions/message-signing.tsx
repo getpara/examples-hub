@@ -71,6 +71,7 @@ export default function MessageSigningDemo() {
     }
   };
 
+  // Verify signature on Firefox that has support for Ed25519 subtle
   const handleVerify = async () => {
     try {
       if (!message || !signature) return;
@@ -102,6 +103,7 @@ export default function MessageSigningDemo() {
     }
   };
 
+  // Verify signature on all browsers using tweetnacl
   const handleVerify2 = async () => {
     try {
       if (!message || !signature) return;

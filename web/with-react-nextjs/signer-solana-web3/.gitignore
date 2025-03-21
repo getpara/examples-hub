@@ -46,4 +46,14 @@ src/cache
 transfer_tokens-keypair.json
 program-keypair.json
 recovery.txt
+target/debug
+target/deploy
+target/release
+target/sbf-solana-solana
+# Anchor
+.anchor
 target/
+**/*.rs.bk
+
+# Solana
+test-ledger/

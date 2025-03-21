@@ -2,25 +2,21 @@
 
 import { usePara } from "@/components/ParaProvider";
 import { useState, useEffect } from "react";
-import { Program, AnchorProvider, Idl } from "@project-serum/anchor";
-import { PublicKey, Transaction, LAMPORTS_PER_SOL, SystemProgram, Keypair } from "@solana/web3.js";
-import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import * as anchor from "@coral-xyz/anchor";
+import { Transaction, LAMPORTS_PER_SOL, SystemProgram, VersionedTransaction } from "@solana/web3.js";
+import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
+import { TransferTokens } from "../../target/types/transfer_tokens";
 
-import idl from "../../target/idl/transfer_tokens.json";
-import { TOKEN_METADATA_PROGRAM_ID } from ".";
+import idl from "../../target/idl/transfer_tokens.json" assert { type: "json" };
 
-export default function ProgramCreateToken() {
-  const [isDeploying, setIsDeploying] = useState(false);
-  const [isCreatingToken, setIsCreatingToken] = useState(false);
+export default function ProgramDeploymentDemo() {
+  const [isCreateTokenLoading, setIsCreateTokenLoading] = useState(false);
   const [isBalanceLoading, setIsBalanceLoading] = useState(false);
   const [balance, setBalance] = useState<string | null>(null);
-  const [deployedProgramId, setDeployedProgramId] = useState<string | null>(null);
-  const [deploymentTxHash, setDeploymentTxHash] = useState<string | null>(null);
   const [createdMint, setCreatedMint] = useState<string | null>(null);
-  const [tokenTxHash, setTokenTxHash] = useState<string | null>(null);
   const [tokenName, setTokenName] = useState("");
   const [tokenSymbol, setTokenSymbol] = useState("");
-  const [tokenUri, setTokenUri] = useState("");
+  const [transactionHash, setTransactionHash] = useState<string | null>(null);
 
   const [status, setStatus] = useState<{
     show: boolean;
@@ -28,7 +24,7 @@ export default function ProgramCreateToken() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { isConnected, address, signer, connection } = usePara();
+  const { isConnected, walletId, address, signer, connection } = usePara();
 
   const fetchBalance = async () => {
     if (!address || !connection || !signer) return;
@@ -51,84 +47,10 @@ export default function ProgramCreateToken() {
     }
   }, [address, connection, signer]);
 
-  const deployProgram = async () => {
-    setIsDeploying(true);
-    setStatus({ show: false, type: "success", message: "" });
-    setDeployedProgramId(null);
-    setDeploymentTxHash(null);
-
-    if (!signer || !connection) {
-      setStatus({
-        show: true,
-        type: "error",
-        message: "Signer or connection not available",
-      });
-      setIsDeploying(false);
-      return;
-    }
-
-    try {
-      if (!isConnected) {
-        throw new Error("Please connect your wallet to deploy the program.");
-      }
-
-      setStatus({
-        show: true,
-        type: "info",
-        message: "Generating program keypair...",
-      });
-
-      // Generate a new keypair for the program
-      const programKeypair = Keypair.generate();
-
-      // In a real deployment scenario, we would:
-      // 1. Build the program (which you've already done via Anchor CLI)
-      // 2. Load the compiled BPF from target/deploy/*.so
-      // 3. Create a BPF loader transaction to deploy the program
-
-      // Since we can't actually deploy the program in this web context
-      // (it requires the compiled .so file which needs secure handling),
-      // we'll simulate deployment by using your pre-deployed program ID
-
-      // Simulate deployment delay
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // Use the prepopulated program ID from your Anchor.toml
-      const programId = new PublicKey("5gscQip1qnTz73BMcBPn8VQivyW9rLs1sfLoi5tqPuot");
-
-      setDeployedProgramId(programId.toString());
-
-      // Create a fake transaction hash for demo purposes
-      const mockTxHash = "SimulatedDeployment" + Math.random().toString(36).substring(2, 15);
-      setDeploymentTxHash(mockTxHash);
-
-      setStatus({
-        show: true,
-        type: "success",
-        message:
-          "Program deployment simulated successfully! In a real deployment, you would upload the program binary and execute a BPF loader transaction.",
-      });
-
-      // Refresh balance
-      await fetchBalance();
-    } catch (error: any) {
-      console.error("Error deploying program:", error);
-      setStatus({
-        show: true,
-        type: "error",
-        message: error instanceof Error ? error.message : "Failed to deploy program. Please try again.",
-      });
-    } finally {
-      setIsDeploying(false);
-    }
-  };
-
   const createToken = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsCreatingToken(true);
+    setIsCreateTokenLoading(true);
     setStatus({ show: false, type: "success", message: "" });
-    setCreatedMint(null);
-    setTokenTxHash(null);
 
     if (!signer || !connection) {
       setStatus({
@@ -136,7 +58,7 @@ export default function ProgramCreateToken() {
         type: "error",
         message: "Signer or connection not available",
       });
-      setIsCreatingToken(false);
+      setIsCreateTokenLoading(false);
       return;
     }
 
@@ -145,80 +67,48 @@ export default function ProgramCreateToken() {
         throw new Error("Please connect your wallet to create a token.");
       }
 
-      if (!deployedProgramId) {
-        throw new Error("Please deploy the program first.");
+      if (!walletId) {
+        throw new Error("No wallet ID found. Please reconnect your wallet.");
       }
 
-      if (!tokenName || !tokenSymbol || !tokenUri) {
+      if (!tokenName || !tokenSymbol) {
         throw new Error("Please fill in all token details.");
       }
 
-      const programId = new PublicKey(deployedProgramId);
-
-      // Create an Anchor provider
-      const provider = new AnchorProvider(
+      const provider = new anchor.AnchorProvider(
         connection,
         {
           publicKey: signer.sender!,
-          signTransaction: async (tx: Transaction) => {
+          signTransaction: async <T extends Transaction | VersionedTransaction>(tx: T): Promise<T> => {
             return await signer.signTransaction(tx);
           },
-          signAllTransactions: async (txs: Transaction[]) => {
+          signAllTransactions: async <T extends Transaction | VersionedTransaction>(txs: T[]): Promise<T[]> => {
             return await Promise.all(txs.map((tx) => signer.signTransaction(tx)));
           },
         },
         { commitment: "confirmed" }
       );
 
-      const program = new Program(idl as any, programId, provider);
+      anchor.setProvider(provider);
 
-      // Generate a new keypair for the mint account
-      const mintKeypair = Keypair.generate();
+      const program = new anchor.Program(idl as TransferTokens, provider);
+
+      const mintKeypair = anchor.web3.Keypair.generate();
       setCreatedMint(mintKeypair.publicKey.toString());
 
-      const [metadataAccount] = PublicKey.findProgramAddressSync(
-        [Buffer.from("metadata"), TOKEN_METADATA_PROGRAM_ID.toBuffer(), mintKeypair.publicKey.toBuffer()],
-        TOKEN_METADATA_PROGRAM_ID
-      );
+      const tx = await program.methods
+        .createToken(tokenName, tokenSymbol)
+        .accounts({
+          payer: signer.sender!,
+          mintAccount: mintKeypair.publicKey,
+          tokenProgram: TOKEN_2022_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+          rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+        })
+        .signers([mintKeypair])
+        .rpc();
 
-      let transaction = new Transaction();
-
-      transaction.add(
-        await program.methods
-          .createToken(tokenName, tokenSymbol, tokenUri)
-          .accounts({
-            payer: signer.sender,
-            mintAccount: mintKeypair.publicKey,
-            metadataAccount: metadataAccount,
-            tokenProgram: TOKEN_PROGRAM_ID,
-            tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
-            systemProgram: SystemProgram.programId,
-            rent: new PublicKey("SysvarRent111111111111111111111111111111111"),
-          })
-          .instruction()
-      );
-
-      transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-      transaction.feePayer = signer.sender;
-
-      transaction.partialSign(mintKeypair);
-
-      // Sign and send the transaction
-      const signature = await signer.sendTransaction(transaction);
-      setTokenTxHash(signature);
-
-      setStatus({
-        show: true,
-        type: "info",
-        message: "Transaction submitted. Waiting for confirmation...",
-      });
-
-      // Wait for confirmation
-      const confirmation = await connection.confirmTransaction(signature, "confirmed");
-
-      if (confirmation.value.err) {
-        throw new Error(`Transaction failed: ${JSON.stringify(confirmation.value.err)}`);
-      }
+      setTransactionHash(tx);
 
       setStatus({
         show: true,
@@ -226,7 +116,6 @@ export default function ProgramCreateToken() {
         message: `Successfully created token "${tokenName}" (${tokenSymbol})!`,
       });
 
-      // Refresh balance
       await fetchBalance();
     } catch (error: any) {
       console.error("Error creating token:", error);
@@ -237,16 +126,18 @@ export default function ProgramCreateToken() {
       });
       setCreatedMint(null);
     } finally {
-      setIsCreatingToken(false);
+      setIsCreateTokenLoading(false);
     }
   };
 
   return (
     <div className="container mx-auto px-4">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold tracking-tight mb-6">Solana Program Deployment Demo</h1>
+        <h1 className="text-4xl font-bold tracking-tight mb-6">Solana Program Demo</h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Deploy a Solana program and create tokens using it. This demonstrates program deployment and token creation.
+          Create tokens using the deployed Solana program. This demo shows how to interact with the{" "}
+          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md">transfer_tokens</code>{" "}
+          program.
         </p>
       </div>
 
@@ -289,72 +180,9 @@ export default function ProgramCreateToken() {
           </div>
         )}
 
-        {/* Program Deployment Section */}
         <div className="bg-white border border-gray-200 mb-8">
           <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Step 1: Deploy Program</h3>
-          </div>
-          <div className="p-6">
-            <p className="text-sm text-gray-600 mb-4">
-              Deploy the transfer_tokens Solana program to the blockchain. You must deploy the program before creating
-              tokens.
-            </p>
-            <button
-              onClick={deployProgram}
-              className="w-full rounded-none bg-blue-900 px-6 py-3 text-sm font-medium text-white hover:bg-blue-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={!isConnected || isDeploying || !!deployedProgramId}>
-              {isDeploying ? "Deploying Program..." : deployedProgramId ? "Program Deployed" : "Deploy Program"}
-            </button>
-          </div>
-        </div>
-
-        {deployedProgramId && (
-          <div className="space-y-4 mb-8">
-            <div className="rounded-none border border-gray-200">
-              <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                <h3 className="text-sm font-medium text-gray-900">Program ID:</h3>
-              </div>
-              <div className="p-6">
-                <p className="text-sm font-mono break-all text-gray-600 bg-white p-4 border border-gray-200">
-                  {deployedProgramId}
-                </p>
-              </div>
-            </div>
-
-            {deploymentTxHash && (
-              <div className="rounded-none border border-gray-200">
-                <div className="flex justify-between items-center px-6 py-4 bg-gray-50 border-b border-gray-200">
-                  <h3 className="text-sm font-medium text-gray-900">Deployment Transaction:</h3>
-                  {!deploymentTxHash.startsWith("Simulated") && (
-                    <a
-                      href={`https://solscan.io/tx/${deploymentTxHash}?cluster=devnet`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-3 py-1 text-sm bg-blue-900 text-white hover:bg-blue-950 transition-colors rounded-none">
-                      View on Solscan
-                    </a>
-                  )}
-                </div>
-                <div className="p-6">
-                  <p className="text-sm font-mono break-all text-gray-600 bg-white p-4 border border-gray-200">
-                    {deploymentTxHash}
-                  </p>
-                  {deploymentTxHash.startsWith("Simulated") && (
-                    <p className="text-xs text-gray-500 mt-2">
-                      Note: This is a simulated deployment. In a production environment, you would deploy the actual
-                      program binary.
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Token Creation Section */}
-        <div className="bg-white border border-gray-200 mb-8">
-          <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Step 2: Create a New Token</h3>
+            <h3 className="text-lg font-medium text-gray-900">Create a New Token</h3>
           </div>
           <div className="p-6">
             <form
@@ -373,11 +201,10 @@ export default function ProgramCreateToken() {
                   onChange={(e) => setTokenName(e.target.value)}
                   placeholder="e.g. My Test Token"
                   required
-                  disabled={isCreatingToken || !deployedProgramId}
+                  disabled={isCreateTokenLoading}
                   className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
                 />
               </div>
-
               <div className="space-y-2">
                 <label
                   htmlFor="tokenSymbol"
@@ -391,37 +218,15 @@ export default function ProgramCreateToken() {
                   onChange={(e) => setTokenSymbol(e.target.value)}
                   placeholder="e.g. MTT"
                   required
-                  disabled={isCreatingToken || !deployedProgramId}
+                  disabled={isCreateTokenLoading}
                   className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
                 />
-              </div>
-
-              <div className="space-y-2">
-                <label
-                  htmlFor="tokenUri"
-                  className="block text-sm font-medium text-gray-700">
-                  Token URI
-                </label>
-                <input
-                  id="tokenUri"
-                  type="text"
-                  value={tokenUri}
-                  onChange={(e) => setTokenUri(e.target.value)}
-                  placeholder="e.g. https://example.com/token-metadata.json"
-                  required
-                  disabled={isCreatingToken || !deployedProgramId}
-                  className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
-                />
-                <p className="text-xs text-gray-500">URI to JSON metadata for your token (image, description, etc.)</p>
-              </div>
-
+              </div>{" "}
               <button
                 type="submit"
                 className="w-full rounded-none bg-blue-900 px-6 py-3 text-sm font-medium text-white hover:bg-blue-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={
-                  !isConnected || isCreatingToken || !tokenName || !tokenSymbol || !tokenUri || !deployedProgramId
-                }>
-                {isCreatingToken ? "Creating Token..." : "Create Token"}
+                disabled={!isConnected || isCreateTokenLoading || !tokenName || !tokenSymbol}>
+                {isCreateTokenLoading ? "Creating Token..." : "Create Token"}
               </button>
             </form>
           </div>
@@ -447,12 +252,12 @@ export default function ProgramCreateToken() {
               </div>
             </div>
 
-            {tokenTxHash && (
+            {transactionHash && (
               <div className="rounded-none border border-gray-200">
                 <div className="flex justify-between items-center px-6 py-4 bg-gray-50 border-b border-gray-200">
-                  <h3 className="text-sm font-medium text-gray-900">Token Transaction Hash:</h3>
+                  <h3 className="text-sm font-medium text-gray-900">Transaction Hash:</h3>
                   <a
-                    href={`https://solscan.io/tx/${tokenTxHash}?cluster=devnet`}
+                    href={`https://solscan.io/tx/${transactionHash}?cluster=devnet`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="px-3 py-1 text-sm bg-blue-900 text-white hover:bg-blue-950 transition-colors rounded-none">
@@ -461,7 +266,7 @@ export default function ProgramCreateToken() {
                 </div>
                 <div className="p-6">
                   <p className="text-sm font-mono break-all text-gray-600 bg-white p-4 border border-gray-200">
-                    {tokenTxHash}
+                    {transactionHash}
                   </p>
                 </div>
               </div>

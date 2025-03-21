@@ -36,17 +36,17 @@ export const transactionTypes: TransactionsConfig = {
     title: "Program Create Token",
     description:
       "Deploy your own instance of a token program and mint tokens. Understand how to deploy programs and interact with them.",
-    path: "/example-transactions/program-deployment",
+    path: "/example-transactions/program-create-token",
     component: ProgramCreateToken,
   },
   "program-mint-token": {
     title: "Program Mint Token",
     description:
       "Interact with deployed programs to mint tokens. Learn how to call program methods and handle the responses.",
-    path: "/example-transactions/program-interaction",
+    path: "/example-transactions/program-mint-token",
     component: ProgramMintToken,
   },
 };
 
-export const PROGRAM_ID = new PublicKey("nHi9DdNjuupjQ3c8AJU9sChB5gLbZvTLsJQouY4hU67");
+export const PROGRAM_ID = new PublicKey("7aZTQdMeajFATgMKS7h7mGWVqh1UaRnWt1Pf8mnvBDkk");
 export const TOKEN_METADATA_PROGRAM_ID = new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s");
