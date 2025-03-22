@@ -1,0 +1,19 @@
+[toolchain]
+rust = "local"
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.localnet]
+transfer_tokens = "7aZTQdMeajFATgMKS7h7mGWVqh1UaRnWt1Pf8mnvBDkk"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "devnet"
+wallet = "~/.config/solana/id.json"
+
+[workspace]
+types = "target/idl/"
