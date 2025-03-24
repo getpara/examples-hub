@@ -73,3 +73,5 @@ export interface WalletEntity {
 export type CurrentWalletIds = Partial<Record<WalletType, string[]>>;
 
 export const NON_ED25519 = [WalletScheme.DKLS, WalletScheme.CGGMP];
+
+export type SupportedWalletTypes = { type: WalletType; optional?: boolean }[];

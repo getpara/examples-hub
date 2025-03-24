@@ -133,8 +133,8 @@ export async function authUpdateKeyShares(
   }
 
   if (!partnerId) {
-    const touchRes = await para.touchSession();
-    partnerId = touchRes.data.partnerId;
+    const session = await para.touchSession();
+    partnerId = session.partnerId;
   }
 
   const walletIdToPartnerShareCount = {} as Record<string, Record<string, number>>;

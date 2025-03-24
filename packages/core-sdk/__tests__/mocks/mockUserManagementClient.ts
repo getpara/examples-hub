@@ -17,7 +17,7 @@ import {
   WALLET,
   WALLETS,
 } from '../constants';
-import Client, { WalletType } from '@getpara/user-management-client';
+import Client, { SessionInfo, WalletType } from '@getpara/user-management-client';
 
 export const mockExternalWalletLogin = vi.fn().mockResolvedValue({ userId: USER_ID });
 export const mockCreateUser = vi.fn().mockResolvedValue({ userId: USER_ID });
@@ -27,19 +27,17 @@ export const mockVerifyPhone = vi.fn().mockResolvedValue({});
 export const mockGetPartner = vi.fn().mockResolvedValue({ data: { partner: PARTNER } });
 export const mockAddSessionPublicKey = vi.fn().mockResolvedValue({ data: { id: SESSION_ID, partnerId: PARTNER.id } });
 export const mockLogout = vi.fn().mockResolvedValue(true);
-export const mockTouchSession = vi.fn().mockResolvedValue({
-  data: {
-    sessionId: SESSION_ID,
-    partnerId: PARTNER.id,
-    sessionLookupId: SESSION_LOOKUP_ID,
-    userId: USER_ID,
-    email: USER_EMAIL,
-    isAuthenticated: true,
-    supportedWalletTypes: PARTNER.supportedWalletTypes,
-    cosmosPrefix: PARTNER.cosmosPrefix,
-    currentWalletIds: { [WalletType.EVM]: [WALLET.id], [WalletType.SOLANA]: [SOLANA_WALLET.id] },
-    needsWallet: false,
-  },
+export const mockTouchSession = vi.fn<never, SessionInfo>().mockResolvedValue({
+  sessionId: SESSION_ID,
+  partnerId: PARTNER.id,
+  sessionLookupId: SESSION_LOOKUP_ID,
+  userId: USER_ID,
+  email: USER_EMAIL,
+  isAuthenticated: true,
+  supportedWalletTypes: PARTNER.supportedWalletTypes,
+  cosmosPrefix: PARTNER.cosmosPrefix,
+  currentWalletIds: { [WalletType.EVM]: [WALLET.id], [WalletType.SOLANA]: [SOLANA_WALLET.id] },
+  needsWallet: false,
 });
 export const mockTempTransmissionInit = vi.fn().mockResolvedValue({ data: { id: TEMP_TRANSMISSION_INIT_ID } });
 export const mockTempTransmission = vi.fn().mockResolvedValue({ data: { message: 'test' } });

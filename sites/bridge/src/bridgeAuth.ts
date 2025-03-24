@@ -63,7 +63,7 @@ export async function generatePasskey(para: ParaWeb, args: any[]) {
     }
 
     try {
-      await para.ctx.client.patchSessionPublicKey(session.data.partnerId, para.getUserId(), biometricsId, {
+      await para.ctx.client.patchSessionPublicKey(session.partnerId, para.getUserId(), biometricsId, {
         publicKey: credentialsId,
         sigDerivedPublicKey: publicKeyHex,
         cosePublicKey,
@@ -143,7 +143,7 @@ export async function generatePasskeyV2(para: ParaWeb, args: any[]) {
     }
 
     try {
-      await para.ctx.client.patchSessionPublicKey(session.data.partnerId, para.getUserId(), biometricsId, {
+      await para.ctx.client.patchSessionPublicKey(session.partnerId, para.getUserId(), biometricsId, {
         publicKey: credentialsId,
         sigDerivedPublicKey: publicKeyHex,
         cosePublicKey,
@@ -192,7 +192,7 @@ export async function verifyWebChallenge(para: ParaWeb, args: any[]) {
       throw sessionErr;
     }
 
-    const result = await para.ctx.client.verifyWebChallenge(session.data.partnerId, {
+    const result = await para.ctx.client.verifyWebChallenge(session.partnerId, {
       publicKey,
       signature: {
         clientDataJSON,
@@ -227,9 +227,9 @@ export async function login(para: ParaWeb, args: any[]) {
     if (!para.getEmail()) {
       logger.info('Email not set, retrieving from session...');
       try {
-        const touchRes = await para.ctx.client.touchSession();
-        if (touchRes.data.email) {
-          await para.setEmail(touchRes.data.email);
+        const session = await para.ctx.client.touchSession();
+        if (session.email) {
+          await para.setEmail(session.email);
           logger.info('Email set from session for user:', userId);
         }
       } catch (touchErr) {
@@ -313,9 +313,9 @@ export async function loginV2(para: ParaWeb, args: any[]) {
     if (!para.getEmail()) {
       logger.info('Email not set, retrieving from session in loginV2...');
       try {
-        const touchRes = await para.ctx.client.touchSession();
-        if (touchRes.data.email) {
-          await para.setEmail(touchRes.data.email);
+        const session = await para.ctx.client.touchSession();
+        if (session.email) {
+          await para.setEmail(session.email);
           logger.info('Email set from session for user:', userId);
         }
       } catch (touchErr) {

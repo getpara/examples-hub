@@ -47,13 +47,13 @@ export const BiometricLoginStep = () => {
 
       const authType = para.isEmail ? 'email' : para.isPhone ? 'phone' : para.isFarcaster ? 'farcaster' : 'telegram';
 
-      const res = await para.touchSession();
+      const { partnerId, sessionId, sessionLookupId } = await para.touchSession();
       const webAuthUrlForLogin =
         supportedAuthMethods?.has && supportedAuthMethods.has(AuthMethod.PASSKEY)
           ? await para.getWebAuthURLForLogin({
-              sessionId: res.data.sessionId,
+              sessionId: sessionId!,
               loginEncryptionPublicKey: getPublicKeyHex(para.loginEncryptionKeyPair),
-              partnerId: res.data.partnerId,
+              partnerId,
               authType,
               displayName: authInfo?.displayName ?? '',
               pfpUrl: authInfo?.pfpUrl ?? '',
@@ -63,10 +63,10 @@ export const BiometricLoginStep = () => {
       const _webAuthURLForKnownDeviceLogin =
         supportedAuthMethods?.has && supportedAuthMethods.has(AuthMethod.PASSKEY)
           ? await para.getWebAuthURLForLogin({
-              sessionId: res.data.sessionId,
+              sessionId: sessionId!,
               loginEncryptionPublicKey: getPublicKeyHex(para.loginEncryptionKeyPair),
-              partnerId: res.data.partnerId,
-              newDeviceSessionId: res.data.sessionLookupId,
+              partnerId: partnerId,
+              newDeviceSessionId: sessionLookupId,
               newDeviceEncryptionKey: getPublicKeyHex(para.loginEncryptionKeyPair),
               authType,
               displayName: authInfo?.displayName ?? '',
@@ -77,9 +77,9 @@ export const BiometricLoginStep = () => {
       const passwordAuthUrlForLogin =
         supportedAuthMethods?.has && supportedAuthMethods.has(AuthMethod.PASSWORD)
           ? await para.getPasswordURLForLogin({
-              sessionId: res.data.sessionId,
+              sessionId: sessionId!,
               loginEncryptionPublicKey: getPublicKeyHex(para.loginEncryptionKeyPair),
-              partnerId: res.data.partnerId,
+              partnerId,
               authType,
               displayName: authInfo?.displayName ?? '',
               pfpUrl: authInfo?.pfpUrl ?? '',

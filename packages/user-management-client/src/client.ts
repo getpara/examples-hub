@@ -29,6 +29,7 @@ import {
   PregenIds,
   PublicKeyStatus,
   PublicKeyType,
+  SessionInfo,
   TelegramAuthResponse,
   TPregenIdentifierType,
   VerificationEmailProps,
@@ -436,11 +437,9 @@ class Client {
   };
 
   // POST /touch
-  touchSession = async (regenerate?: boolean): Promise<any> => {
-    const res = await this.baseRequest.post<{ userId?: string; sessionLookupId: string; biometricVerifiedAt?: number }>(
-      `/touch?regenerate=${!!regenerate}`,
-    );
-    return res;
+  touchSession = async (regenerate?: boolean): Promise<SessionInfo> => {
+    const res = await this.baseRequest.post<SessionInfo>(`/touch?regenerate=${!!regenerate}`);
+    return res.data;
   };
 
   // GET /session/origin

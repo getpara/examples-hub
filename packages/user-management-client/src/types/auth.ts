@@ -1,3 +1,5 @@
+import { CurrentWalletIds, SupportedWalletTypes } from './wallet.js';
+
 export type AuthType = 'email' | 'phone' | 'farcaster' | 'telegram' | 'userId';
 
 export type $ExtractAuth<T extends AuthType> = {
@@ -96,4 +98,19 @@ export type TelegramAuthResponse = {
   last_name?: string;
   photo_url?: string;
   username?: string;
+};
+
+export type SessionInfo = {
+  userId?: string;
+  sessionId?: string;
+  sessionLookupId?: string;
+  partnerId: string;
+  biometricVerifiedAt?: number;
+  currentWalletIds?: CurrentWalletIds;
+  needsWallet?: boolean;
+  isAuthenticated?: boolean;
+  supportedWalletTypes: SupportedWalletTypes;
+  cosmosPrefix?: string;
+  origin?: string;
+  email?: string;
 };

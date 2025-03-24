@@ -79,8 +79,7 @@ export function OnRampTransaction() {
   }
 
   async function loginWithPassword(password: string) {
-    const res = await para.touchSession();
-    const partnerId = res.data.partnerId;
+    const { partnerId } = await para.touchSession();
 
     try {
       setPasswordError(undefined);
@@ -95,8 +94,7 @@ export function OnRampTransaction() {
   }
 
   async function performSetup() {
-    const res = await para.touchSession(true);
-    const partnerId = res.data.partnerId;
+    const { partnerId, sessionId } = await para.touchSession(true);
 
     if (
       !para.isFullyLoggedIn() ||
@@ -122,7 +120,7 @@ export function OnRampTransaction() {
                 .flat()
                 .some(id => !para.wallets[id]?.signer)
             ) {
-              await login(res.data.sessionId, partnerId);
+              await login(sessionId, partnerId);
             }
 
             break;
@@ -130,7 +128,7 @@ export function OnRampTransaction() {
             console.error(e);
 
             if (e.status === 401) {
-              await login(res.data.sessionId, partnerId);
+              await login(sessionId, partnerId);
             }
 
             retriesLeft--;

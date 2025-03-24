@@ -124,9 +124,9 @@ export const ModalLayout = () => {
 
   useEffect(() => {
     async function getPartner() {
-      const touchRes = await para.touchSession();
-      if (touchRes.data.partnerId) {
-        const detailsRes = (await para.ctx.client.getPartner(touchRes.data.partnerId)).data;
+      const { partnerId } = await para.touchSession();
+      if (partnerId) {
+        const detailsRes = (await para.ctx.client.getPartner(partnerId)).data;
         setPartner(detailsRes.partner);
       } else {
         setPartner(DEFAULT_PARTNER);

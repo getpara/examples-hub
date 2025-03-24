@@ -21,8 +21,7 @@ export const ManualCreationStep = ({ onCreateClick }: ManualCreationStepProps) =
   const para = usePara();
 
   const sessionListener = async (): Promise<void> => {
-    const touchRes = await para.touchSession();
-    const isAuthenticated = touchRes.data.isAuthenticated;
+    const { isAuthenticated } = await para.touchSession();
     // Treat session as setup if authenticated and wallets are selected &/or the user needs a wallet
     if (!isAuthenticated) {
       loginTimeout.current = window.setTimeout(sessionListener, KNOWN_DEVICE_LOGIN_POLLING_INTERVAL);

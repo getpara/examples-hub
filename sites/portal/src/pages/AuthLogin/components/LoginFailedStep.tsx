@@ -26,10 +26,8 @@ export const LoginFailedStep = ({
   const para = usePara();
 
   const sessionListener = async (): Promise<void> => {
-    const touchRes = await para.touchSession();
-    const isAuthenticated = touchRes.data.isAuthenticated;
-    const hasSetWallets = touchRes.data.currentWalletIds !== undefined;
-    const needsWallet = touchRes.data.needsWallet !== undefined;
+    const { isAuthenticated, currentWalletIds, needsWallet } = await para.touchSession();
+    const hasSetWallets = currentWalletIds !== undefined;
     // Treat session as setup if authenticated and wallets are selected &/or the user needs a wallet
     const isSessionSetup = isAuthenticated && (hasSetWallets || needsWallet);
     if (!isSessionSetup) {

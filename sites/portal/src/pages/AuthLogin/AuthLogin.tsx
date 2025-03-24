@@ -110,9 +110,9 @@ const AuthLoginBase = ({ authMethod }) => {
   }, [para, authLogin, authMethod]);
 
   async function getWebAuthURLForKnownDeviceLogin() {
-    let touchRes = await para.touchSession();
-    if (!touchRes.data.sessionLookupId) {
-      touchRes = await para.touchSession(true);
+    let { sessionLookupId } = await para.touchSession();
+    if (!sessionLookupId) {
+      ({ sessionLookupId } = await para.touchSession(true));
     }
     if (!para.loginEncryptionKeyPair) {
       const keyPair = await getAsymmetricKeyPair(para.ctx);
@@ -124,7 +124,7 @@ const AuthLoginBase = ({ authMethod }) => {
       sessionId,
       loginEncryptionPublicKey: encryptionKey,
       partnerId,
-      newDeviceSessionId: touchRes.data.sessionLookupId,
+      newDeviceSessionId: sessionLookupId,
       newDeviceEncryptionKey: getPublicKeyHex(para.loginEncryptionKeyPair),
     });
     const shortUrl = await para.shortenLoginLink(url);
@@ -178,8 +178,8 @@ const AuthLoginBase = ({ authMethod }) => {
         reset();
         return;
       }
-      const touchRes = await para.touchSession();
-      await para.setUserId(touchRes.data.userId);
+      const { userId } = await para.touchSession();
+      await para.setUserId(userId);
       const fetchedWallets = await para.fetchWallets();
       const temporaryShares = (await para.getTransmissionKeyShares({ isForNewDevice: true })).data.temporaryShares;
 

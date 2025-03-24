@@ -9,7 +9,7 @@ if (typeof global !== 'undefined') {
   self.global = self.global || self;
 }
 
-import Client, {
+import {
   AuthMethod,
   BackupKitEmailProps,
   CurrentWalletIds,
@@ -36,6 +36,7 @@ import Client, {
   extractAuthInfo,
   ExtractAuth,
   ExternalWalletLoginRes,
+  SessionInfo,
 } from '@getpara/user-management-client';
 import type { pki as pkiType, jsbn as jsbnType } from 'node-forge';
 import forge from 'node-forge';
@@ -871,12 +872,12 @@ export abstract class ParaCore {
     this.setExternalWallets(_externalWallets);
   };
 
-  async touchSession(regenerate = false): Promise<Awaited<ReturnType<Client['touchSession']>>> {
-    const res = await this.ctx.client.touchSession(regenerate);
+  async touchSession(regenerate = false): Promise<SessionInfo> {
+    const session = await this.ctx.client.touchSession(regenerate);
 
-    this.setSupportedWalletTypes(res.data.supportedWalletTypes, res.data.cosmosPrefix);
+    this.setSupportedWalletTypes(session.supportedWalletTypes, session.cosmosPrefix);
 
-    return res;
+    return session;
   }
 
   private setSupportedWalletTypes(supportedWalletTypes?: SupportedWalletTypes, cosmosPrefix?: string): void {
@@ -1849,9 +1850,9 @@ export abstract class ParaCore {
       return true;
     }
 
-    const res = await this.touchSession();
+    const { isAuthenticated } = await this.touchSession();
 
-    return !!res.data.isAuthenticated;
+    return !!isAuthenticated;
   }
 
   /**
@@ -1944,15 +1945,15 @@ export abstract class ParaCore {
       return;
     }
 
-    const res = await this.touchSession(true);
+    const { partnerId, sessionId } = await this.touchSession(true);
     if (!this.loginEncryptionKeyPair) {
       await this.setLoginEncryptionKeyPair();
     }
 
     const webAuthLoginURL = await this.getWebAuthURLForLogin({
       authType: authInfo.authType,
-      sessionId: res.data.sessionId,
-      partnerId: res.data.partnerId,
+      sessionId,
+      partnerId,
       loginEncryptionPublicKey: getPublicKeyHex(this.loginEncryptionKeyPair),
     });
 
@@ -1997,15 +1998,15 @@ export abstract class ParaCore {
   }: Auth<'phone'> & { useShortUrl?: boolean }): Promise<string> {
     await this.setAuth(auth);
 
-    const res = await this.touchSession(true);
+    const { sessionId, partnerId } = await this.touchSession(true);
     if (!this.loginEncryptionKeyPair) {
       await this.setLoginEncryptionKeyPair();
     }
 
     const webAuthLoginURL = await this.getWebAuthURLForLoginForPhone({
-      sessionId: res.data.sessionId,
+      sessionId,
       loginEncryptionPublicKey: getPublicKeyHex(this.loginEncryptionKeyPair),
-      partnerId: res.data.partnerId,
+      partnerId,
     });
 
     if (!useShortUrl) {
@@ -2138,14 +2139,14 @@ export abstract class ParaCore {
    */
   async getOAuthURL({ method, deeplinkUrl }: { method: OAuthMethod; deeplinkUrl?: string }): Promise<string> {
     await this.logout();
-    const res = await this.touchSession(true);
+    const { sessionLookupId } = await this.touchSession(true);
 
     return constructUrl({
       base: method === OAuthMethod.TELEGRAM ? getPortalBaseURL(this.ctx, true) : getBaseOAuthUrl(this.ctx.env),
       path: `/auth/${method.toLowerCase()}`,
       params: {
         apiKey: this.ctx.apiKey,
-        sessionLookupId: res.data.sessionLookupId,
+        sessionLookupId,
         deeplinkUrl,
       },
     });
@@ -2174,9 +2175,8 @@ export abstract class ParaCore {
         await new Promise(resolve => setTimeout(resolve, constants.POLLING_INTERVAL_MS));
 
         if (this.isAwaitingOAuth) {
-          const res = await this.touchSession();
-          if (res.data.userId) {
-            const { userId, email } = res.data;
+          const { userId, email } = await this.touchSession();
+          if (!!userId) {
             if (!this.loginEncryptionKeyPair) {
               await this.setLoginEncryptionKeyPair();
             }
@@ -2229,9 +2229,9 @@ export abstract class ParaCore {
           continue;
         }
 
-        const postLoginData = await this.userSetupAfterLogin();
+        const session = await this.userSetupAfterLogin();
 
-        const needsWallet = postLoginData.data.needsWallet ?? false;
+        const needsWallet = session.needsWallet ?? false;
 
         if (!needsWallet) {
           if (this.currentWalletIdsArray.length === 0) {
@@ -2258,7 +2258,7 @@ export abstract class ParaCore {
           const resp = {
             isComplete: true,
             needsWallet: needsWallet || Object.values(this.wallets).length === 0,
-            partnerId: postLoginData.data.partnerId,
+            partnerId: session.partnerId,
           };
 
           dispatchEvent(ParaEvent.LOGIN_EVENT, resp);
@@ -2284,13 +2284,13 @@ export abstract class ParaCore {
    * @returns a URL for the user to reauthenticate.
    **/
   async refreshSession({ shouldOpenPopup = false }: { shouldOpenPopup?: boolean } = {}): Promise<string> {
-    const res = await this.touchSession(true);
+    const { sessionId } = await this.touchSession(true);
     if (!this.loginEncryptionKeyPair) {
       await this.setLoginEncryptionKeyPair();
     }
 
     const link = await this.getWebAuthURLForLogin({
-      sessionId: res.data.sessionId,
+      sessionId,
       loginEncryptionPublicKey: getPublicKeyHex(this.loginEncryptionKeyPair),
     });
 
@@ -2305,18 +2305,16 @@ export abstract class ParaCore {
    * Call this method after login to ensure that the user ID is set
    * internally.
    **/
-  protected async userSetupAfterLogin(): Promise<{
-    data: { partnerId?: string; needsWallet?: boolean; sessionLookupId: string };
-  }> {
-    const res = await this.touchSession();
-    await this.setUserId(res.data.userId);
+  protected async userSetupAfterLogin(): Promise<SessionInfo> {
+    const session = await this.touchSession();
+    await this.setUserId(session.userId);
 
-    if (res.data.currentWalletIds && res.data.currentWalletIds !== this.currentWalletIds)
-      await this.setCurrentWalletIds(res.data.currentWalletIds, {
-        sessionLookupId: this.isPortal() ? res.data.sessionLookupId : undefined,
+    if (session.currentWalletIds && session.currentWalletIds !== this.currentWalletIds)
+      await this.setCurrentWalletIds(session.currentWalletIds, {
+        sessionLookupId: this.isPortal() ? session.sessionLookupId : undefined,
       });
 
-    return res;
+    return session;
   }
 
   /**
@@ -2326,8 +2324,8 @@ export abstract class ParaCore {
    * @returns - transmission keyshares.
    **/
   protected async getTransmissionKeyShares({ isForNewDevice = false }: { isForNewDevice?: boolean } = {}): Promise<any> {
-    const res = await this.touchSession();
-    const sessionLookupId = isForNewDevice ? `${res.data.sessionLookupId}-new-device` : res.data.sessionLookupId;
+    const session = await this.touchSession();
+    const sessionLookupId = isForNewDevice ? `${session.sessionLookupId}-new-device` : session.sessionLookupId;
     return this.ctx.client.getTransmissionKeyshares(this.userId, sessionLookupId);
   }
 
@@ -2946,10 +2944,10 @@ export abstract class ParaCore {
   }
 
   private async getTransactionReviewUrl(transactionId: string, timeoutMs?: number): Promise<string> {
-    const res = await this.touchSession();
+    const { partnerId } = await this.touchSession();
 
     return this.constructPortalUrl('txReview', {
-      partnerId: res.data.partnerId,
+      partnerId,
       pathId: transactionId,
       params: {
         email: this.email,
@@ -2963,13 +2961,13 @@ export abstract class ParaCore {
     providerKey,
     ...walletParams
   }: { purchaseId: string; providerKey?: string } & WalletParams): Promise<string> {
-    const res = await this.touchSession();
+    const { partnerId, sessionId } = await this.touchSession();
     const [key, identifier] = extractWalletRef(walletParams);
 
     return this.constructPortalUrl('onRamp', {
-      partnerId: res.data.partnerId,
+      partnerId,
       pathId: purchaseId,
-      sessionId: res.data.sessionId,
+      sessionId,
       params: {
         [key]: identifier,
         providerKey,
@@ -3374,9 +3372,9 @@ export abstract class ParaCore {
    * @returns {Promise<string>} the ID
    **/
   async getVerificationToken(): Promise<string> {
-    const { data } = await this.touchSession();
+    const { sessionLookupId } = await this.touchSession();
 
-    return data.sessionLookupId;
+    return sessionLookupId;
   }
 
   /**
@@ -3412,8 +3410,7 @@ export abstract class ParaCore {
   }
 
   protected async getSupportedCreateAuthMethods(): Promise<Set<AuthMethod>> {
-    const res = await this.touchSession();
-    const partnerId = res.data.partnerId;
+    const { partnerId } = await this.touchSession();
 
     const partnerRes = await this.ctx.client.getPartner(partnerId);
 

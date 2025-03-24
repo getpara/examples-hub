@@ -104,8 +104,7 @@ function TransactionReview() {
   }
 
   async function performSetup() {
-    const res = await para.touchSession();
-    const partnerId = res.data.partnerId;
+    const { partnerId } = await para.touchSession();
 
     let pendingTransaction, partner, decodedTx, txData;
 
@@ -176,8 +175,8 @@ function TransactionReview() {
   }
 
   const loginWithPassword = async (password: string) => {
-    const res = await para.touchSession();
-    const partnerId = res.data.partnerId;
+    const { partnerId } = await para.touchSession();
+
     try {
       setLoginWithPasswordError(undefined);
       await para.touchSession();

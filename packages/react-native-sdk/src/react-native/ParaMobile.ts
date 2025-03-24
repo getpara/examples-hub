@@ -174,8 +174,8 @@ export class ParaMobile extends ParaCore {
     const encryptionKeyHash = getSHA256HashHex(userHandleEncoded);
     const encryptedPrivateKeyHex = await encryptPrivateKey(keyPair, userHandleEncoded);
 
-    const session = await this.ctx.client.touchSession();
-    await this.ctx.client.patchSessionPublicKey(session.data.partnerId, this.getUserId()!, biometricsId, {
+    const { partnerId } = await this.ctx.client.touchSession();
+    await this.ctx.client.patchSessionPublicKey(partnerId, this.getUserId()!, biometricsId, {
       publicKey: resultJson.id,
       sigDerivedPublicKey: publicKeyHex,
       cosePublicKey,
@@ -220,9 +220,9 @@ export class ParaMobile extends ParaCore {
       resultJson = result;
     }
 
-    const session = await this.ctx.client.touchSession();
+    const { partnerId } = await this.ctx.client.touchSession();
     const publicKey = resultJson.id;
-    const verifyWebChallengeResult = await this.ctx.client.verifyWebChallenge(session.data.partnerId, {
+    const verifyWebChallengeResult = await this.ctx.client.verifyWebChallenge(partnerId, {
       publicKey,
       signature: {
         clientDataJSON: resultJson.response.clientDataJSON,

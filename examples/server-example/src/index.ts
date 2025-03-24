@@ -57,8 +57,8 @@ async function createUserAndWallet(params: Params) {
     const userId = para.userId;
     const biometricIdRegex = /\/biometrics\/(.*?)\?email/;
     const biometricId = webAuthURL.match(biometricIdRegex)[1];
-    const res = await para.ctx.client.touchSession(false);
-    await para.ctx.client.patchSessionPublicKey(res.data.partnerId, userId, biometricId, {
+    const { partnerId } = await para.ctx.client.touchSession(false);
+    await para.ctx.client.patchSessionPublicKey(partnerId, userId, biometricId, {
       publicKey: SAMPLE_PUBLIC_KEY,
       sigDerivedPublicKey: SAMPLE_SIG_DERIVED_PUBLIC_KEY,
       cosePublicKey: SAMPLE_COSE_PUBLIC_KEY,
