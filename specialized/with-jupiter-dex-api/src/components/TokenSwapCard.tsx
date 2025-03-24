@@ -154,25 +154,16 @@ export default function TokenSwapCard() {
 
       const swapData = await swapResponse.json();
 
-      console.log("Swap data:", swapData);
-
       const base64Transaction = Buffer.from(swapData.swapTransaction, "base64");
-      console.log("Base64 transaction:", base64Transaction);
 
       const transaction = VersionedTransaction.deserialize(base64Transaction);
 
-      console.log("Transaction to sign:", transaction);
-
       const signedTransaction = await signer.signVersionedTransaction(transaction);
-
-      console.log("Signed transaction:", signedTransaction);
 
       const signature = await connection.sendRawTransaction(signedTransaction.serialize(), {
         skipPreflight: true,
         maxRetries: 3,
       });
-
-      console.log("Transaction sent:", signature);
 
       const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
 
@@ -182,11 +173,7 @@ export default function TokenSwapCard() {
         lastValidBlockHeight,
       };
 
-      console.log(`Confirming transaction: ${signature}`);
-
       const confirmation = await connection.confirmTransaction(confirmationStrategy, "confirmed");
-
-      console.log("Transaction confirmed:", confirmation.value);
 
       if (confirmation.value.err) {
         throw new Error(`Transaction failed: ${JSON.stringify(confirmation.value.err)}`);
