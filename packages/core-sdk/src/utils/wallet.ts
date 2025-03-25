@@ -1,6 +1,12 @@
-import { TPregenIdentifierType, WalletEntity, WalletScheme, WalletType } from '@getpara/user-management-client';
+import {
+  SupportedWalletTypes,
+  TPregenIdentifierType,
+  WalletEntity,
+  WalletScheme,
+  WalletType,
+} from '@getpara/user-management-client';
 import { stringToPhoneNumber } from './formatting.js';
-import { SupportedWalletTypes, Wallet, WalletTypeProp } from '../types/index.js';
+import { Wallet, WalletTypeProp } from '../types/index.js';
 
 export const WalletSchemeTypeMap: Record<WalletScheme, Partial<Record<WalletType, true>>> = {
   [WalletScheme.DKLS]: {
@@ -83,4 +89,10 @@ export function migrateWallet(obj: Record<string, unknown>): Wallet {
   }
 
   return obj as unknown as Wallet;
+}
+
+export function supportedWalletTypesEq(a: SupportedWalletTypes, b: SupportedWalletTypes) {
+  return (
+    a.length === b.length && a.every(({ type, optional }, index) => b[index].type === type && b[index].optional === optional)
+  );
 }

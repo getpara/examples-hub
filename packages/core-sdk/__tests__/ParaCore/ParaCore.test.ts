@@ -54,7 +54,6 @@ import {
   mockGetTransmissionKeyshares,
   mockGetWallets,
   mockKeepSessionAlive,
-  mockTouchSession,
   mockUpdatePregenWallet,
   mockVerify2FA,
   mockVerify2FAForPhone,
@@ -155,33 +154,6 @@ describe('ParaCore', () => {
 
       // casting as any to access protected fields
       expect((para as any).supportedWalletTypes).toEqual([]);
-    });
-
-    it('supportedWalletTypes option', () => {
-      let para = new MockPara(Environment.DEV, API_KEY, {
-        supportedWalletTypes: { [WalletType.EVM]: { optional: true } },
-      });
-
-      expect(para.supportedWalletTypes).toEqual([]);
-
-      para = new MockPara(Environment.DEV, API_KEY, {
-        supportedWalletTypes: { ['FOO' as unknown as WalletType]: true },
-      });
-
-      expect(para.supportedWalletTypes).toEqual([]);
-
-      para = new MockPara(Environment.DEV, API_KEY, {
-        supportedWalletTypes: { [WalletType.EVM]: true, [WalletType.COSMOS]: { optional: true, prefix: 'celestia' } },
-      });
-
-      expect(para.supportedWalletTypes).toEqual([
-        { type: WalletType.EVM, optional: false },
-        { type: WalletType.COSMOS, optional: true },
-      ]);
-
-      expect(para.cosmosPrefix).toEqual('celestia');
-
-      // casting as any to access protected fields
     });
 
     it('useStorageOverrides option', () => {
@@ -1508,8 +1480,6 @@ describe('ParaCore', () => {
       });
       it('supported auth methods', async () => {
         const supportedAuthMethods = await (para as unknown as any).getSupportedCreateAuthMethods();
-
-        expect(mockTouchSession).toHaveBeenCalled();
 
         expect(supportedAuthMethods).toEqual(new Set([AuthMethod.PASSKEY, AuthMethod.PASSWORD]));
       });

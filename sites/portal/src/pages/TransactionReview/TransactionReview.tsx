@@ -176,7 +176,6 @@ function TransactionReview() {
 
   const loginWithPassword = async (password: string) => {
     const { partnerId } = await para.touchSession();
-
     try {
       setLoginWithPasswordError(undefined);
       await para.touchSession();

@@ -6,7 +6,11 @@ export function autoBind(instance) {
       const value = instance[key];
 
       if (typeof value === 'function' && key !== 'constructor') {
-        instance[key] = value.bind(instance);
+        try {
+          instance[key] = value.bind(instance);
+        } catch (e) {
+          // continue
+        }
       }
     }
     proto = Object.getPrototypeOf(proto);

@@ -1,4 +1,4 @@
-import { Auth, AuthParams, ExtractAuth, WalletParams, WalletRef } from './types/index.js';
+import { Auth, AuthInfo, AuthParams, WalletParams, WalletRef } from './types/index.js';
 
 export function isWalletId(params: WalletParams): params is { walletId: string } {
   return !!params.walletId && !params.externalWalletAddress;
@@ -75,13 +75,13 @@ export function isUserId(params: AuthParams): params is Auth<'userId'> {
 
 type ExtractAuthOpts = { allowUserId?: boolean; isRequired?: boolean };
 
-export function extractAuthInfo(obj: AuthParams, opts: ExtractAuthOpts & { isRequired: true }): ExtractAuth;
-export function extractAuthInfo(obj: AuthParams, opts?: ExtractAuthOpts): ExtractAuth | undefined;
+export function extractAuthInfo(obj: AuthParams, opts: ExtractAuthOpts & { isRequired: true }): AuthInfo;
+export function extractAuthInfo(obj: AuthParams, opts?: ExtractAuthOpts): AuthInfo | undefined;
 
 export function extractAuthInfo(
   obj: AuthParams,
   { allowUserId = false, isRequired = false }: ExtractAuthOpts = {},
-): ExtractAuth | undefined {
+): AuthInfo | undefined {
   switch (true) {
     case isEmail(obj):
       return { auth: { email: obj.email }, authType: 'email', identifier: obj.email, publicKeyIdentifier: obj.email };

@@ -1,3 +1,5 @@
+import { AuthMethod } from './auth.js';
+import { SupportedWalletTypes } from './wallet.js';
 export interface PartnerEntity {
   id: string;
   displayName: string;
@@ -10,4 +12,8 @@ export interface PartnerEntity {
   accentColor?: string;
   font?: string;
   themeMode?: 'light' | 'dark';
+  portalUrl?: string;
+  supportedAuthMethods?: AuthMethod[];
+  supportedWalletTypes?: SupportedWalletTypes;
+  cosmosPrefix?: string;
 }

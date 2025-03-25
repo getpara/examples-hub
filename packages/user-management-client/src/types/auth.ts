@@ -2,19 +2,19 @@ import { CurrentWalletIds, SupportedWalletTypes } from './wallet.js';
 
 export type AuthType = 'email' | 'phone' | 'farcaster' | 'telegram' | 'userId';
 
-export type $ExtractAuth<T extends AuthType> = {
+export type $AuthInfo<T extends AuthType = AuthType> = {
   auth: Auth<T>;
   authType: T;
   identifier: string;
   publicKeyIdentifier: string;
 };
 
-export type ExtractAuth =
-  | $ExtractAuth<'email'>
-  | $ExtractAuth<'phone'>
-  | $ExtractAuth<'farcaster'>
-  | $ExtractAuth<'telegram'>
-  | $ExtractAuth<'userId'>;
+export type AuthInfo =
+  | $AuthInfo<'email'>
+  | $AuthInfo<'phone'>
+  | $AuthInfo<'farcaster'>
+  | $AuthInfo<'telegram'>
+  | $AuthInfo<'userId'>;
 
 export type AuthParams = Record<string, any> & {
   email?: string;

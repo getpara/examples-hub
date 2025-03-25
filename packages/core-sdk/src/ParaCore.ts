@@ -34,7 +34,8 @@ import {
   VerifyTelegramRes,
   Auth,
   extractAuthInfo,
-  ExtractAuth,
+  AuthInfo,
+  SupportedWalletTypes,
   ExternalWalletLoginRes,
   SessionInfo,
 } from '@getpara/user-management-client';
@@ -64,8 +65,6 @@ import {
   WalletFilters,
   WalletTypeProp,
   Wallet,
-  SupportedWalletTypes,
-  deprecated__SupportedWalletTypesOpt,
   PortalUrlOptions,
   ConstructorOpts,
   RecoveryStatus,
@@ -87,6 +86,7 @@ import {
   isWalletSupported,
   migrateWallet,
   normalizePhoneNumber,
+  supportedWalletTypesEq,
   truncateAddress,
   WalletSchemeTypeMap,
 } from './utils/index.js';
@@ -105,7 +105,11 @@ export abstract class ParaCore {
   countryCode?: CountryCallingCode;
   farcasterUsername?: string;
   telegramUserId?: string;
+
+  #partner?: PartnerEntity;
+
   userId?: string;
+
   private sessionCookie?: string;
 
   private isAwaitingAccountCreation = false;
@@ -129,20 +133,39 @@ export abstract class ParaCore {
     return !!this.telegramUserId && !this.email && !this.phone && !this.countryCode && !this.farcasterUsername;
   }
 
+  get partnerId(): string | undefined {
+    return this.#partner?.id;
+  }
+
+  async #assertPartner(): Promise<PartnerEntity> {
+    if (!this.#partner) {
+      await this.touchSession();
+    }
+
+    if (this.#partner?.cosmosPrefix && this.ctx.cosmosPrefix !== this.#partner.cosmosPrefix) {
+      this.ctx.cosmosPrefix = this.#partner?.cosmosPrefix;
+    }
+
+    return this.#partner!;
+  }
+
   /**
    * The IDs of the currently active wallets, for each supported wallet type. Any signer integrations will default to the first viable wallet ID in this dictionary.
    */
   currentWalletIds: CurrentWalletIds = {};
 
   get currentWalletIdsArray(): [string, WalletType][] {
-    return this.supportedWalletTypes.reduce((acc, { type }) => {
-      return [
-        ...acc,
-        ...(this.currentWalletIds[type] ?? []).map(id => {
-          return [id, type];
-        }),
-      ];
-    }, []);
+    return (this.#partner?.supportedWalletTypes ?? Object.keys(this.currentWalletIds).map(type => ({ type }))).reduce(
+      (acc, { type }) => {
+        return [
+          ...acc,
+          ...(this.currentWalletIds[type] ?? []).map(id => {
+            return [id, type];
+          }),
+        ];
+      },
+      [],
+    );
   }
 
   get currentWalletIdsUnique(): string[] {
@@ -269,16 +292,16 @@ export abstract class ParaCore {
 
   private disableProviderModal?: boolean;
 
-  #supportedWalletTypes: SupportedWalletTypes | undefined = undefined;
-
-  #supportedWalletTypesOpt: deprecated__SupportedWalletTypesOpt | undefined = undefined;
-
   get supportedWalletTypes(): SupportedWalletTypes {
-    return this.#supportedWalletTypes ?? [];
+    return this.#partner?.supportedWalletTypes ?? [];
+  }
+
+  get cosmosPrefix(): string | undefined {
+    return this.#partner?.cosmosPrefix;
   }
 
   get isWalletTypeEnabled(): Partial<Record<WalletType, boolean>> {
-    return this.supportedWalletTypes.reduce((acc, { type }) => {
+    return (this.#partner?.supportedWalletTypes || []).reduce((acc, { type }) => {
       return { ...acc, [type]: true };
     }, {});
   }
@@ -369,7 +392,8 @@ export abstract class ParaCore {
 
   private isWalletSupported(wallet: Omit<Wallet, 'signer'>): boolean {
     return (
-      !this.#supportedWalletTypes || isWalletSupported(this.supportedWalletTypes?.map(({ type }) => type) ?? [], wallet)
+      !this.#partner?.supportedWalletTypes ||
+      isWalletSupported(this.#partner.supportedWalletTypes.map(({ type }) => type) ?? [], wallet)
     );
   }
 
@@ -426,9 +450,7 @@ export abstract class ParaCore {
       } else if (!isOwned && !isUnclaimed) {
         error = `wallet with id ${wallet?.id} is not owned by the current user`;
       } else if (!this.isWalletSupported(wallet)) {
-        error = `wallet with id ${wallet?.id} and type ${wallet?.type} is not supported, supported types are: ${this.supportedWalletTypes
-          .map(({ type }) => type)
-          .join(', ')}`;
+        error = `wallet with id ${wallet.id} and type ${wallet.type} is not supported, supported types are: ${(this.#partner?.supportedWalletTypes || []).map(({ type }) => type).join(', ')}`;
       } else if (
         types &&
         (!getEquivalentTypes(types).includes(wallet?.type) ||
@@ -465,7 +487,9 @@ export abstract class ParaCore {
     if (this.externalWallets[walletId]) {
       const wallet = this.externalWallets[walletId];
 
-      return options.truncate ? truncateAddress(wallet.address, wallet.type, { prefix: this.cosmosPrefix }) : wallet.address;
+      return options.truncate
+        ? truncateAddress(wallet.address, wallet.type, { prefix: this.#partner?.cosmosPrefix })
+        : wallet.address;
     }
 
     const wallet = this.findWallet(walletId, options.addressType);
@@ -478,14 +502,14 @@ export abstract class ParaCore {
 
     switch (wallet.type) {
       case WalletType.COSMOS:
-        str = getCosmosAddress(wallet.publicKey!, this.cosmosPrefix ?? 'cosmos');
+        str = getCosmosAddress(wallet.publicKey!, this.#partner?.cosmosPrefix ?? 'cosmos');
         break;
       default:
         str = wallet.address;
         break;
     }
 
-    return options.truncate ? truncateAddress(str, wallet.type, { prefix: this.cosmosPrefix }) : str;
+    return options.truncate ? truncateAddress(str, wallet.type, { prefix: this.#partner?.cosmosPrefix }) : str;
   }
 
   /**
@@ -520,7 +544,17 @@ export abstract class ParaCore {
     type: 'createAuth' | 'createPassword' | 'loginAuth' | 'loginPassword' | 'txReview' | 'onRamp',
     opts: PortalUrlOptions = {},
   ) {
-    const base = type === 'onRamp' ? getPortalBaseURL(this.ctx) : await this.getPortalURL(opts.partnerId);
+    const [isCreate, isLogin, isOnRamp] = [
+      ['createAuth', 'createPassword'].includes(type),
+      ['loginAuth', 'loginPassword'].includes(type),
+      type === 'onRamp',
+    ];
+
+    if ((isLogin || isOnRamp) && !opts.sessionId) {
+      opts.sessionId = (await this.touchSession()).sessionLookupId;
+    }
+
+    const base = isOnRamp ? getPortalBaseURL(this.ctx) : await this.getPortalURL();
 
     let path: string;
     switch (type) {
@@ -553,19 +587,11 @@ export abstract class ParaCore {
       }
     }
 
-    const [isCreate, isLogin, isOnRamp] = [
-      ['createAuth', 'createPassword'].includes(type),
-      ['loginAuth', 'loginPassword'].includes(type),
-      type === 'onRamp',
-    ];
-
-    const partner: PartnerEntity = opts.partnerId
-      ? (await this.ctx.client.getPartner(opts.partnerId)).data?.partner
-      : undefined;
+    const partner = await this.#assertPartner();
 
     const params: Record<string, string | undefined | null> = {
       apiKey: this.ctx.apiKey,
-      partnerId: opts.partnerId,
+      partnerId: partner.id,
       portalFont: opts.theme?.font || partner?.font || this.portalTheme?.font,
       portalBorderRadius: opts.theme?.borderRadius || this.portalTheme?.borderRadius,
       portalThemeMode: opts.theme?.mode || partner?.themeMode || this.portalTheme?.mode,
@@ -580,7 +606,6 @@ export abstract class ParaCore {
       portalTextColor: this.portalTextColor,
       portalPrimaryButtonTextColor: this.portalPrimaryButtonTextColor,
       isForNewDevice: opts.isForNewDevice ? opts.isForNewDevice.toString() : undefined,
-      supportedWalletTypes: this.#supportedWalletTypesOpt ? JSON.stringify(this.#supportedWalletTypesOpt) : undefined,
       ...(isCreate || isLogin
         ? {
             ...(opts.authType === 'email' ? { email: this.email } : {}),
@@ -684,52 +709,10 @@ export abstract class ParaCore {
       useDKLS: opts.useDKLSForCreation || !opts.offloadMPCComputationURL,
       disableWebSockets: !!opts.disableWebSockets,
       wasmOverride: opts.wasmOverride,
-      cosmosPrefix: this.cosmosPrefix,
       isE2E,
     };
     if (opts.offloadMPCComputationURL) {
       this.ctx.mpcComputationClient = mpcComputationClient.initClient(opts.offloadMPCComputationURL, opts.disableWorkers);
-    }
-
-    // Support legacy supportedWalletTypes
-    try {
-      this.#supportedWalletTypes = opts.supportedWalletTypes
-        ? ((() => {
-            if (
-              Object.values(opts.supportedWalletTypes).every(
-                config => !!config && typeof config === 'object' && config.optional,
-              )
-            ) {
-              throw new Error('at least one wallet type must be non-optional');
-            }
-
-            if (
-              !Object.keys(opts.supportedWalletTypes).every(type => Object.values(WalletType).includes(<WalletType>type))
-            ) {
-              throw new Error('unsupported wallet type');
-            }
-
-            this.#supportedWalletTypesOpt = opts.supportedWalletTypes;
-
-            return Object.entries(opts.supportedWalletTypes).reduce((acc, [key, value]) => {
-              if (!value) {
-                return acc;
-              }
-
-              if (
-                key === WalletType.COSMOS &&
-                typeof value === 'object' &&
-                !!(value as Partial<{ prefix?: string }>).prefix
-              ) {
-                this.cosmosPrefix = (value as Partial<{ prefix?: string }>).prefix;
-              }
-
-              return [...acc, { type: key, optional: value === true ? false : (value.optional ?? false) }];
-            }, []);
-          })() as SupportedWalletTypes)
-        : undefined;
-    } catch (e) {
-      this.#supportedWalletTypes = undefined;
     }
 
     if (!this.platformUtils.isSyncStorage || opts.useStorageOverrides) {
@@ -822,7 +805,7 @@ export abstract class ParaCore {
   private updateWalletIdsFromStorage = () => {
     // TODO: Improve not great check
     const _currentWalletIds = (this.localStorageGetItem(constants.LOCAL_STORAGE_CURRENT_WALLET_IDS) as string) ?? undefined;
-    const currentWalletIds = [undefined, null, 'undefined'].includes(_currentWalletIds)
+    const currentWalletIds = [undefined, null, 'undefined', 'null'].includes(_currentWalletIds)
       ? {}
       : (() => {
           const fromJson = JSON.parse(_currentWalletIds);
@@ -875,25 +858,16 @@ export abstract class ParaCore {
   async touchSession(regenerate = false): Promise<SessionInfo> {
     const session = await this.ctx.client.touchSession(regenerate);
 
-    this.setSupportedWalletTypes(session.supportedWalletTypes, session.cosmosPrefix);
+    if (
+      !this.#partner ||
+      this.#partner?.id !== session.partnerId ||
+      !supportedWalletTypesEq(this.#partner?.supportedWalletTypes || [], session.supportedWalletTypes) ||
+      (this.#partner?.cosmosPrefix || 'cosmos') !== session.cosmosPrefix
+    ) {
+      await this.#getPartner(session.partnerId);
+    }
 
     return session;
-  }
-
-  private setSupportedWalletTypes(supportedWalletTypes?: SupportedWalletTypes, cosmosPrefix?: string): void {
-    if (supportedWalletTypes && !this.#supportedWalletTypes) {
-      this.#supportedWalletTypes = supportedWalletTypes;
-
-      Object.keys(this.currentWalletIds).forEach((type: WalletType) => {
-        if (!this.#supportedWalletTypes?.some(({ type: supportedType }) => supportedType === type)) {
-          delete this.currentWalletIds[type];
-        }
-      });
-    }
-
-    if (cosmosPrefix && !this.cosmosPrefix) {
-      this.cosmosPrefix = cosmosPrefix;
-    }
   }
 
   private getVerificationEmailProps(): VerificationEmailProps {
@@ -1194,11 +1168,6 @@ export abstract class ParaCore {
   }
 
   /**
-   * The prefix for the instance's managed Cosmos wallets. Defaults to `'cosmos'`.
-   */
-  cosmosPrefix?: string;
-
-  /**
    * Validates that a wallet ID is present on the instance, usable, and matches the desired filters.
    * If no ID is passed, this will instead return the first valid, usable wallet ID that matches the filters.
    * @param {string} [walletId] the wallet ID to validate.
@@ -1323,14 +1292,12 @@ export abstract class ParaCore {
   }
 
   private async assertIsValidWalletType(type: string, walletTypes?: WalletType[]): Promise<WalletType> {
-    if (!this.#supportedWalletTypes) {
-      await this.touchSession();
-    }
+    const { supportedWalletTypes } = await this.#assertPartner();
 
     if (
       !type ||
       !Object.values(WalletType).includes(<WalletType>type) ||
-      !(walletTypes ?? this.supportedWalletTypes.map(({ type }) => type)).includes(<WalletType>type)
+      !(walletTypes ?? supportedWalletTypes.map(({ type }) => type)).includes(<WalletType>type)
     ) {
       throw new Error(`wallet type ${type} is not supported`);
     }
@@ -1339,12 +1306,10 @@ export abstract class ParaCore {
   }
 
   private async getMissingTypes(): Promise<WalletType[]> {
-    if (!this.#supportedWalletTypes) {
-      await this.touchSession();
-    }
+    const { supportedWalletTypes } = await this.#assertPartner();
 
     return <WalletType[]>(
-      this.supportedWalletTypes
+      supportedWalletTypes
         .filter(
           ({ type: t, optional }) =>
             !optional && Object.values(this.wallets).every(w => !this.isWalletOwned(w) || !WalletSchemeTypeMap[w.scheme][t]),
@@ -1354,25 +1319,32 @@ export abstract class ParaCore {
   }
 
   private async getTypesToCreate(types?: WalletType[]): Promise<WalletType[]> {
-    if (!this.#supportedWalletTypes) {
-      await this.touchSession();
-    }
+    const { supportedWalletTypes } = await this.#assertPartner();
 
     return getSchemes(types ?? (await this.getMissingTypes())).map(scheme => {
       switch (scheme) {
         case WalletScheme.ED25519:
           return WalletType.SOLANA;
         default:
-          return this.supportedWalletTypes.some(({ type, optional }) => type === WalletType.COSMOS && !optional)
+          return supportedWalletTypes.some(({ type, optional }) => type === WalletType.COSMOS && !optional)
             ? WalletType.COSMOS
             : WalletType.EVM;
       }
     });
   }
 
-  private async getPartnerURL(partnerId: string): Promise<string | undefined> {
+  async #getPartner(partnerId: string): Promise<PartnerEntity> {
     const res = await this.ctx.client.getPartner(partnerId);
-    return res.data.partner.portalUrl;
+
+    this.#partner = res.data.partner;
+
+    return this.#partner;
+  }
+
+  private async getPartnerURL(): Promise<string | undefined> {
+    const { portalUrl } = await this.#assertPartner();
+
+    return portalUrl;
   }
 
   /**
@@ -1380,8 +1352,8 @@ export abstract class ParaCore {
    * @param partnerId: string - id of the partner to get the portal URL for
    * @returns - portal URL
    */
-  protected async getPortalURL(partnerId?: string): Promise<string> {
-    return (partnerId && (await this.getPartnerURL(partnerId))) || getPortalBaseURL(this.ctx);
+  protected async getPortalURL(): Promise<string> {
+    return (await this.getPartnerURL()) || getPortalBaseURL(this.ctx);
   }
 
   private async getWebAuthURLForCreate({
@@ -1907,7 +1879,7 @@ export abstract class ParaCore {
     });
   }
 
-  private async setAuth(auth: Auth): Promise<ExtractAuth | undefined> {
+  private async setAuth(auth: Auth): Promise<AuthInfo | undefined> {
     const authInfo = extractAuthInfo(auth);
 
     if (!authInfo) {
@@ -2056,6 +2028,7 @@ export abstract class ParaCore {
     popupWindow?: Window;
   } = {}): Promise<AccountSetupResponse> {
     await this.waitForAccountCreation({ popupWindow });
+    const { supportedWalletTypes } = await this.#assertPartner();
 
     const pregenWallets = await this.getPregenWallets();
 
@@ -2064,7 +2037,7 @@ export abstract class ParaCore {
 
     if (pregenWallets.length > 0) {
       recoverySecret = await this.claimPregenWallets();
-      walletIds = this.supportedWalletTypes.reduce((acc: CurrentWalletIds, { type }) => {
+      walletIds = supportedWalletTypes.reduce((acc: CurrentWalletIds, { type }) => {
         return {
           ...acc,
           [type]: [pregenWallets.find(w => !!WalletSchemeTypeMap[w.scheme][type])?.id],
@@ -2217,10 +2190,13 @@ export abstract class ParaCore {
 
     this.isAwaitingLogin = true;
     while (this.isAwaitingLogin) {
+      let session: SessionInfo;
       try {
         await new Promise(resolve => setTimeout(resolve, constants.POLLING_INTERVAL_MS));
 
-        if (!(await this.isSessionActive())) {
+        session = await this.touchSession();
+
+        if (!session.isAuthenticated) {
           if (popupWindow?.closed) {
             const resp = { isComplete: false, isError: true };
             dispatchEvent(ParaEvent.LOGIN_EVENT, resp, 'failed to setup user');
@@ -2229,7 +2205,7 @@ export abstract class ParaCore {
           continue;
         }
 
-        const session = await this.userSetupAfterLogin();
+        session = await this.userSetupAfterLogin();
 
         const needsWallet = session.needsWallet ?? false;
 
@@ -2572,8 +2548,9 @@ export abstract class ParaCore {
     skipDistribute?: boolean;
   } = {}): Promise<[Wallet, string | null]> {
     this.requireApiKey();
+    const { supportedWalletTypes } = await this.#assertPartner();
     const walletType = await this.assertIsValidWalletType(
-      _type ?? this.supportedWalletTypes.find(({ optional }) => !optional)?.type,
+      _type ?? supportedWalletTypes.find(({ optional }) => !optional)?.type,
     );
 
     let signer: string;
@@ -2657,14 +2634,15 @@ export abstract class ParaCore {
     pregenIdentifier: string;
     pregenIdentifierType: TPregenIdentifierType;
   }): Promise<Wallet> {
+    const { supportedWalletTypes } = await this.#assertPartner();
     const {
-      type: _type = this.supportedWalletTypes.find(({ optional }) => !optional)?.type,
+      type: _type = supportedWalletTypes.find(({ optional }) => !optional)?.type,
       pregenIdentifier,
       pregenIdentifierType = 'EMAIL',
     } = opts;
     this.requireApiKey();
     const walletType = await this.assertIsValidWalletType(
-      _type ?? this.supportedWalletTypes.find(({ optional }) => !optional)?.type,
+      _type ?? supportedWalletTypes.find(({ optional }) => !optional)?.type,
     );
 
     let keygenRes;
@@ -2944,7 +2922,7 @@ export abstract class ParaCore {
   }
 
   private async getTransactionReviewUrl(transactionId: string, timeoutMs?: number): Promise<string> {
-    const { partnerId } = await this.touchSession();
+    const { id: partnerId } = await this.#assertPartner();
 
     return this.constructPortalUrl('txReview', {
       partnerId,
@@ -3410,13 +3388,11 @@ export abstract class ParaCore {
   }
 
   protected async getSupportedCreateAuthMethods(): Promise<Set<AuthMethod>> {
-    const { partnerId } = await this.touchSession();
-
-    const partnerRes = await this.ctx.client.getPartner(partnerId);
+    const partner = await this.#assertPartner();
 
     let supportedAuthMethods = new Set<AuthMethod>();
 
-    for (const authMethod of partnerRes.data.partner.supportedAuthMethods) {
+    for (const authMethod of partner.supportedAuthMethods) {
       supportedAuthMethods.add(AuthMethod[authMethod]);
     }
 
@@ -3440,8 +3416,9 @@ export abstract class ParaCore {
       {},
     );
     const obj = {
-      supportedWalletTypes: this.supportedWalletTypes,
-      cosmosPrefix: this.cosmosPrefix,
+      partnerId: this.#partner?.id,
+      supportedWalletTypes: this.#partner?.supportedWalletTypes,
+      cosmosPrefix: this.#partner?.cosmosPrefix,
       email: this.email,
       phone: this.phone,
       countryCode: this.countryCode,

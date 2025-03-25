@@ -38,9 +38,7 @@ async function errorMiddleware(err: Error, _req: Request, res: Response, _next: 
 
 async function createUserAndWallet(params: Params) {
   const { email, isPregen, useSolana } = params;
-  const para = new ParaServer(Environment.SANDBOX, '2f938ac0c48ef356050a79bd66042a23', {
-    supportedWalletTypes: useSolana ? { SOLANA: true } : { EVM: true },
-  });
+  const para = new ParaServer(Environment.SANDBOX, '2f938ac0c48ef356050a79bd66042a23');
   await para.logout();
   if (isPregen) {
     await para.createPregenWallet({

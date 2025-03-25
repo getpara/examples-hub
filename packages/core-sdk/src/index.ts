@@ -17,6 +17,7 @@ export {
   type OnRampAllowedAssets,
   type OnRampPurchase,
   OAuthMethod,
+  type SupportedWalletTypes,
   type TPregenIdentifierType,
   type PregenIds,
   NON_ED25519,

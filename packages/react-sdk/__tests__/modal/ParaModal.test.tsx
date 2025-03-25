@@ -25,7 +25,7 @@ describe('ParaModal', () => {
           return {
             getPartner: vi.fn(() => ({ data: {} })),
             createUser: vi.fn(() => ({ userId: '123' })),
-            touchSession: vi.fn(() => ({ data: {} })),
+            touchSession: vi.fn(() => ({})),
             getOnRampConfig: vi.fn<never, Promise<OnRampConfig>>(async () => ({
               isBuyEnabled: false,
               isReceiveEnabled: false,

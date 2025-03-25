@@ -5,12 +5,11 @@ import Para, {
   getSHA256HashHex,
   hashPasswordWithSalt,
 } from '@getpara/web-sdk';
-import { AuthParams, extractAuthInfo, PasswordStatus } from '@getpara/user-management-client';
+import { PasswordStatus } from '@getpara/user-management-client';
 
 export async function passwordCreation(
   para: Para,
   {
-    auth,
     userId,
     partnerId,
     password,
@@ -18,17 +17,10 @@ export async function passwordCreation(
   }: {
     partnerId: string;
     userId: string;
-    auth: AuthParams;
     password: string;
     passwordId: string;
   },
 ): Promise<void> {
-  const { publicKeyIdentifier } = extractAuthInfo(auth);
-
-  if (!publicKeyIdentifier) {
-    throw new Error('a phone number, email address, Farcaster username, or Telegram user ID must be provided');
-  }
-
   const keyPair = await getAsymmetricKeyPair(para.ctx);
   const publicKeyHex = getPublicKeyHex(keyPair);
 

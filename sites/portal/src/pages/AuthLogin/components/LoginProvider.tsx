@@ -6,7 +6,7 @@ import { CountryCallingCode } from 'libphonenumber-js';
 import { entityToWallet, isWalletSupported, WalletEntity, WalletType } from '@getpara/core-sdk';
 import { formatISO } from 'date-fns';
 import { useCloseWindow } from '../../../hooks/useCloseWindow';
-import { ExtractAuth, BiometricLocationHint, extractAuthInfo } from '@getpara/user-management-client';
+import { AuthInfo, BiometricLocationHint, extractAuthInfo } from '@getpara/user-management-client';
 import { useExtractedParams } from '../../../hooks/useExtractedParams';
 
 const NOOP = () => {
@@ -25,7 +25,7 @@ type Login = {
     fetchWallets: () => Promise<Wallets>;
     finishLogin: (_?: boolean) => Promise<void>;
   };
-  authInfo?: ExtractAuth | undefined;
+  authInfo?: AuthInfo | undefined;
   params: AuthLoginParams;
   wallets?: Wallets;
   biometricLocationHints?: BiometricLocationHint[];

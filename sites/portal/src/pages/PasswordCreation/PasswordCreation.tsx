@@ -9,13 +9,10 @@ import { ModalSuccess } from '../../components/ModalSuccess';
 import { useModalOutletContext } from '../../hooks/useModalOutletContext';
 import { usePara } from '../../components';
 import { useExtractedParams } from '../../hooks/useExtractedParams';
-import { AuthParams } from '@getpara/user-management-client';
 
 export const PasswordCreation = () => {
   const para = usePara();
-  const { partnerId, userId, passwordId, email, phone, countryCode, farcasterUsername, telegramUserId } = useExtractedParams<
-    AuthParams & { userId: string; partnerId: string; passwordId: string }
-  >();
+  const { partnerId, userId, passwordId } = useExtractedParams<{ userId: string; partnerId: string; passwordId: string }>();
 
   const [password, setPassword] = useState<string>();
   const [passwordVerification, setPasswordVerification] = useState<string>();
@@ -69,13 +66,6 @@ export const PasswordCreation = () => {
       await passwordCreation(para, {
         partnerId,
         userId,
-        auth: {
-          email,
-          phone,
-          countryCode,
-          farcasterUsername,
-          telegramUserId,
-        },
         password,
         passwordId,
       });

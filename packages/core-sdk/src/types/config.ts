@@ -96,15 +96,6 @@ export type deprecated__OnRampConfig = {
 export type SupportedWalletTypeConfig = {
   optional?: boolean;
 };
-
-export type deprecated__SupportedWalletTypesOpt = {
-  [WalletType.EVM]?: boolean | SupportedWalletTypeConfig;
-  [WalletType.SOLANA]?: boolean | SupportedWalletTypeConfig;
-  [WalletType.COSMOS]?: boolean | (SupportedWalletTypeConfig & { prefix?: string });
-};
-
-export type SupportedWalletTypes = { type: WalletType; optional?: boolean }[];
-
 export interface ConstructorOpts {
   useStorageOverrides?: boolean;
   disableWorkers?: boolean;
@@ -181,13 +172,6 @@ export interface ConstructorOpts {
    * @deprecated configure this through the developer portal
    */
   homepageUrl?: string;
-  /**
-   * Which type of wallet your application supports, in the form `{ [WalletType]: true }`. Currently allowed values for `WalletType` are `'EVM'`, `'SOLANA'`, or `'COSMOS'`.
-   *
-   * To specify which prefix to use for new Cosmos wallets, pass `{ COSMOS: { prefix: 'your-prefix' } }`. Defaults to `'cosmos'`.
-   * @deprecated Configure your app's supported wallet types in the Para Developer Portal.
-   */
-  supportedWalletTypes?: deprecated__SupportedWalletTypesOpt;
   /**
    * If `true`, the SDK will use the device's temporary session storage instead of saving user and wallet data to local storage.
    */
