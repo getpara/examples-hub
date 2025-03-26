@@ -11,7 +11,6 @@ import {
   Auth,
   AuthIdentifier,
   AuthMethod,
-  AuthParams,
   BackupKitEmailProps,
   BiometricLocationHint,
   Chain,
@@ -28,6 +27,7 @@ import {
   OnRampPurchaseUpdateParams,
   PasswordStatus,
   PregenIds,
+  PrimaryAuth,
   PublicKeyStatus,
   PublicKeyType,
   SessionInfo,
@@ -207,8 +207,6 @@ interface sessionPasswordBody {
   encryptedWalletPrivateKey?: string;
   encryptionKeyHash?: string;
 }
-
-type BiometricLocationHintParams = AuthParams;
 
 export type VerifyTelegramRes =
   | {
@@ -392,8 +390,10 @@ class Client {
   };
 
   // GET /biometrics/location-hints
-  getBiometricLocationHints = async (params: BiometricLocationHintParams): Promise<BiometricLocationHint[]> => {
-    const res = await this.baseRequest.get<{ hints: BiometricLocationHint[] }>(`/biometrics/location-hints`, { params });
+  getBiometricLocationHints = async (auth: PrimaryAuth): Promise<BiometricLocationHint[]> => {
+    const res = await this.baseRequest.get<{ hints: BiometricLocationHint[] }>(`/biometrics/location-hints`, {
+      params: auth,
+    });
     return res.data.hints;
   };
 
@@ -419,7 +419,7 @@ class Client {
   };
 
   // GET /biometrics/challenge?email&publicKey
-  getWebChallenge = async (auth?: Auth): Promise<getWebChallengeRes> => {
+  getWebChallenge = async (auth?: PrimaryAuth): Promise<getWebChallengeRes> => {
     const res = await this.baseRequest.get<any>('/biometrics/challenge', {
       params: { ...(auth || {}) },
     });

@@ -1,4 +1,4 @@
-import { AuthType, WalletType } from '@getpara/user-management-client';
+import { AuthType, PrimaryAuthInfo, WalletType } from '@getpara/user-management-client';
 import { Theme } from './theme.js';
 
 export type EmbeddedWalletType = Exclude<WalletType, never>;
@@ -25,6 +25,21 @@ export type PortalUrlOptions = {
   theme?: Theme;
   pathId?: string;
   displayName?: string;
+  pfpUrl?: string;
+};
+
+export type AuthExtras = {
+  /**
+   * The current user's third-party username.
+   */
+  username?: string;
+  /**
+   * The current user's third-party display name.
+   */
+  displayName?: string;
+  /**
+   * The current user's third-party profile picture URL.
+   */
   pfpUrl?: string;
 };
 
@@ -62,3 +77,4 @@ export type GetWebAuthUrlForLoginParams = {
    */
   pfpUrl?: string;
 };
+export type CoreAuthInfo = PrimaryAuthInfo & AuthExtras;

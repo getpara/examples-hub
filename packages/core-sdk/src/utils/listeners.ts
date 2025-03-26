@@ -20,20 +20,11 @@ export function storageListener(e: StorageEvent) {
   if (e.key === constants.LOCAL_STORAGE_WALLETS || e.key === constants.LOCAL_STORAGE_ED25519_WALLETS) {
     this.updateWalletsFromStorage();
   }
-  if (e.key === constants.LOCAL_STORAGE_EMAIL) {
-    this.updateEmailFromStorage();
-  }
-  if (e.key === constants.LOCAL_STORAGE_COUNTRY_CODE) {
-    this.updateCountryCodeFromStorage();
-  }
-  if (e.key === constants.LOCAL_STORAGE_PHONE) {
-    this.updatePhoneFromStorage();
+  if (e.key === constants.LOCAL_STORAGE_AUTH_INFO) {
+    this.updateAuthInfoFromStorage();
   }
   if (e.key === constants.LOCAL_STORAGE_USER_ID) {
     this.updateUserIdFromStorage();
-  }
-  if (e.key === constants.LOCAL_STORAGE_TELEGRAM_USER_ID) {
-    this.updateTelegramUserIdFromStorage();
   }
 }
 

@@ -10,7 +10,6 @@ import {
   PARTNER,
   SESSION_ID,
   STORED_EXTERNAL_WALLET,
-  USER_COUNTRY_CODE,
   USER_EMAIL,
   USER_ID,
   USER_PHONE,
@@ -38,6 +37,7 @@ import {
   CURRENT_WALLET_IDS,
   USER_TELEGRAM_AUTH_OBJECT,
   SOLANA_PREGEN_WALLET_PHONE,
+  PUBLIC_KEY_ID,
 } from '../constants';
 import { MockPara } from '../mocks/mockParaCore.js';
 import {
@@ -75,18 +75,17 @@ import '../mocks/mockCryptographyUtils.js';
 import '../mocks/mockUserManagementClient.js';
 import * as shareDistribution from '../../src/shares/shareDistribution.js';
 import {
+  LOCAL_STORAGE_AUTH_INFO,
   LOCAL_STORAGE_CURRENT_WALLET_IDS,
   LOCAL_STORAGE_ED25519_WALLETS,
-  LOCAL_STORAGE_EMAIL,
   LOCAL_STORAGE_EXTERNAL_WALLETS,
-  LOCAL_STORAGE_PHONE,
   LOCAL_STORAGE_SESSION_COOKIE,
-  LOCAL_STORAGE_TELEGRAM_USER_ID,
   LOCAL_STORAGE_USER_ID,
   LOCAL_STORAGE_WALLETS,
   SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR,
 } from '../../src/constants.js';
 import { storageListener } from '../../src/utils/listeners.js';
+import _ from 'lodash';
 
 const COMMON_SEARCH_PARAMS = {
   partnerId: PARTNER.id,
@@ -95,6 +94,12 @@ const COMMON_SEARCH_PARAMS = {
   portalFont: PARTNER.font,
   portalForegroundColor: PARTNER.foregroundColor,
   portalThemeMode: PARTNER.themeMode,
+};
+
+const emailAuthInfo = {
+  auth: { email: USER_EMAIL },
+  authType: 'email',
+  identifier: USER_EMAIL,
 };
 
 function searchParamsToObject(url: URL): Record<string, string> {
@@ -112,6 +117,36 @@ function expectSearchParams(url: URL, expected: Record<string, string>): void {
 
   expect(searchParams).toEqual(expected);
 }
+
+function testLoginUrl(para: MockPara, str: string, authMethod: AuthMethod) {
+  const url = new URL(str);
+
+  expect(url.origin).toEqual(PARTNER.portalUrl);
+  expect(url.pathname).toEqual(authMethod === AuthMethod.PASSKEY ? '/web/biometrics/login' : '/web/passwords/login');
+  expectSearchParams(url, {
+    ...COMMON_SEARCH_PARAMS,
+    ...para.authInfo!.auth,
+    apiKey: PARTNER.apiKey,
+    encryptionKey: getPublicKeyHex(para.loginEncryptionKeyPair),
+    sessionId: expect.stringMatching(new RegExp(`^(${SESSION_ID}|${SESSION_LOOKUP_ID})$`)),
+    pregenIds: '{}',
+  });
+}
+
+function testCreateUrl(para: MockPara, str: string, authMethod: AuthMethod) {
+  const url = new URL(str);
+
+  expect(url.origin).toEqual(PARTNER.portalUrl);
+  expect(url.pathname).toEqual(
+    `/web/users/${USER_ID}/${authMethod === AuthMethod.PASSKEY ? 'biometrics' : 'passwords'}/${PUBLIC_KEY_ID}`,
+  );
+  expectSearchParams(url, {
+    ...COMMON_SEARCH_PARAMS,
+    ...para.authInfo!.auth,
+    apiKey: PARTNER.apiKey,
+  });
+}
+
 vi.mock('../../src/cryptography/utils', async importOriginal => {
   const actual = await importOriginal();
   return {
@@ -176,25 +211,14 @@ describe('ParaCore', () => {
   describe('storage listeners', () => {
     it('from another origin', () => {
       const para = new MockPara(Environment.DEV, API_KEY);
-      const spy = vi.spyOn(para as any, 'updateTelegramUserIdFromStorage');
+      const spy = vi.spyOn(para as any, 'updateAuthInfoFromStorage');
 
       storageListener.bind(para)({
-        key: LOCAL_STORAGE_TELEGRAM_USER_ID,
+        key: LOCAL_STORAGE_AUTH_INFO,
         url: 'https://test.com',
       } as StorageEvent);
 
       expect(spy).toBeCalledTimes(0);
-    });
-    it('updateTelegramUserIdFromStorage', () => {
-      const para = new MockPara(Environment.DEV, API_KEY);
-      const spy = vi.spyOn(para as any, 'updateTelegramUserIdFromStorage');
-
-      storageListener.bind(para)({
-        key: LOCAL_STORAGE_TELEGRAM_USER_ID,
-        url: 'http://localhost:3000',
-      } as StorageEvent);
-
-      expect(spy).toBeCalledTimes(1);
     });
     it('updateUserIdFromStorage', () => {
       const para = new MockPara(Environment.DEV, API_KEY);
@@ -207,23 +231,12 @@ describe('ParaCore', () => {
 
       expect(spy).toBeCalledTimes(1);
     });
-    it('updatePhoneFromStorage', () => {
+    it('updateAuthInfoFromStorage', () => {
       const para = new MockPara(Environment.DEV, API_KEY);
-      const spy = vi.spyOn(para as any, 'updatePhoneFromStorage');
+      const spy = vi.spyOn(para as any, 'updateAuthInfoFromStorage');
 
       storageListener.bind(para)({
-        key: LOCAL_STORAGE_PHONE,
-        url: 'http://localhost:3000',
-      } as StorageEvent);
-
-      expect(spy).toBeCalledTimes(1);
-    });
-    it('updateEmailFromStorage', () => {
-      const para = new MockPara(Environment.DEV, API_KEY);
-      const spy = vi.spyOn(para as any, 'updateEmailFromStorage');
-
-      storageListener.bind(para)({
-        key: LOCAL_STORAGE_EMAIL,
+        key: LOCAL_STORAGE_AUTH_INFO,
         url: 'http://localhost:3000',
       } as StorageEvent);
 
@@ -439,15 +452,7 @@ describe('ParaCore', () => {
           type: PublicKeyType.WEB,
         });
 
-        const url = new URL(verifyRes);
-
-        expect(url.origin).toEqual(PARTNER.portalUrl);
-        expect(url.pathname).toEqual(`/web/users/${USER_ID}/biometrics/${SESSION_ID}`);
-        expectSearchParams(url, {
-          ...COMMON_SEARCH_PARAMS,
-          apiKey: PARTNER.apiKey,
-          email: USER_EMAIL,
-        });
+        testCreateUrl(para, verifyRes, AuthMethod.PASSKEY);
       });
       it('logs out and clears user data', async () => {
         const para = new MockPara(Environment.DEV, API_KEY);
@@ -543,15 +548,7 @@ describe('ParaCore', () => {
           type: PublicKeyType.WEB,
         });
 
-        const url = new URL(verifyRes);
-
-        expect(url.origin).toEqual(PARTNER.portalUrl);
-        expect(url.pathname).toEqual(`/web/users/${USER_ID}/biometrics/${SESSION_ID}`);
-        expectSearchParams(url, {
-          ...COMMON_SEARCH_PARAMS,
-          apiKey: PARTNER.apiKey,
-          phone: USER_PHONE,
-        });
+        testCreateUrl(para, verifyRes, AuthMethod.PASSKEY);
       });
       it('logs out and clears user data', async () => {
         const para = new MockPara(Environment.DEV, API_KEY);
@@ -584,19 +581,8 @@ describe('ParaCore', () => {
         const loginRes = await para.initiateUserLogin({ email: USER_EMAIL });
         const isEmail = await para.isEmail;
 
-        const url = new URL(loginRes);
-
         expect(isEmail).toBeTruthy();
-        expect(url.origin).toEqual(PARTNER.portalUrl);
-        expect(url.pathname).toEqual('/web/biometrics/login');
-        expectSearchParams(url, {
-          ...COMMON_SEARCH_PARAMS,
-          apiKey: PARTNER.apiKey,
-          email: USER_EMAIL,
-          encryptionKey: getPublicKeyHex(para.loginEncryptionKeyPair!),
-          sessionId: SESSION_ID,
-          pregenIds: '{}',
-        });
+        testLoginUrl(para, loginRes, AuthMethod.PASSKEY);
       });
       it('initiates login - short url', async () => {
         const para = new MockPara(Environment.DEV, API_KEY);
@@ -648,19 +634,8 @@ describe('ParaCore', () => {
 
         const isPhone = await para.isPhone;
 
-        const url = new URL(loginRes);
-
         expect(isPhone).toBeTruthy();
-        expect(url.origin).toEqual(PARTNER.portalUrl);
-        expect(url.pathname).toEqual('/web/biometrics/login');
-        expectSearchParams(url, {
-          ...COMMON_SEARCH_PARAMS,
-          apiKey: PARTNER.apiKey,
-          encryptionKey: getPublicKeyHex(para.loginEncryptionKeyPair!),
-          phone: USER_PHONE,
-          sessionId: SESSION_ID,
-          pregenIds: '{}',
-        });
+        testLoginUrl(para, loginRes, AuthMethod.PASSKEY);
       });
       it('initiates login - phone only method', async () => {
         const para = new MockPara(Environment.DEV, API_KEY);
@@ -675,18 +650,7 @@ describe('ParaCore', () => {
 
         const loginRes = await para.initiateUserLoginForPhone({ phone: USER_PHONE });
 
-        const url = new URL(loginRes);
-
-        expect(url.origin).toEqual(PARTNER.portalUrl);
-        expect(url.pathname).toEqual('/web/biometrics/login');
-        expectSearchParams(url, {
-          ...COMMON_SEARCH_PARAMS,
-          apiKey: PARTNER.apiKey,
-          encryptionKey: getPublicKeyHex(para.loginEncryptionKeyPair!),
-          phone: USER_PHONE,
-          sessionId: SESSION_ID,
-          pregenIds: '{}',
-        });
+        testLoginUrl(para, loginRes, AuthMethod.PASSKEY);
       });
       it('initiates loginV2', async () => {
         const para = new MockPara(Environment.DEV, API_KEY);
@@ -899,18 +863,29 @@ describe('ParaCore', () => {
         await para.initiateUserLogin({ email: USER_EMAIL });
         await para.waitForLoginAndSetup();
 
+        const [wallets, currentWalletIds, sessionCookie, externalWallets] = [
+          para.wallets,
+          para.currentWalletIds,
+          para.retrieveSessionCookie(),
+          para.externalWallets,
+        ];
+
         const session = await para.exportSession();
 
         expect(JSON.parse(Buffer.from(session, 'base64').toString())).toMatchObject({
-          email: USER_EMAIL,
+          authInfo: emailAuthInfo,
           userId: USER_ID,
+          wallets: Object.fromEntries(Object.entries(wallets).map(([id, wallet]) => [id, _.omit(wallet, ['signer'])])),
+          currentWalletIds,
+          sessionCookie,
+          externalWallets,
         });
       });
 
       it('importSession', async () => {
         const session = Buffer.from(
           JSON.stringify({
-            email: USER_EMAIL,
+            authInfo: emailAuthInfo,
             userId: USER_ID,
             wallets: { [WALLET.id]: WALLET },
             currentWalletIds: { EVM: [WALLET.id] },
@@ -927,7 +902,7 @@ describe('ParaCore', () => {
         expect(para.currentWalletIds).toEqual({ EVM: [WALLET.id] });
       });
 
-      it('keey session alive', async () => {
+      it('keep session alive', async () => {
         const para = new MockPara(Environment.DEV, API_KEY);
 
         let isAlive = await para.keepSessionAlive();
@@ -1113,7 +1088,7 @@ describe('ParaCore', () => {
           mockPreKeygen.mockResolvedValueOnce(PREGEN_WALLET_PHONE_KEYGEN_RES);
 
           const pregenWallets = await para.createPregenWalletPerType({
-            pregenIdentifier: `${USER_COUNTRY_CODE}${USER_PHONE}`,
+            pregenIdentifier: USER_PHONE,
             pregenIdentifierType: 'PHONE',
             types: [WalletType.EVM, WalletType.SOLANA],
           });

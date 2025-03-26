@@ -1,6 +1,7 @@
 export const PARA_CORE_VERSION = process.env.PARA_CORE_VERSION;
 
 export const PREFIX = '@CAPSULE/';
+export const LOCAL_STORAGE_AUTH_INFO = `${PREFIX}authInfo`;
 export const LOCAL_STORAGE_EMAIL = `${PREFIX}e-mail`;
 export const LOCAL_STORAGE_PHONE = `${PREFIX}phone`;
 export const LOCAL_STORAGE_COUNTRY_CODE = `${PREFIX}countryCode`;

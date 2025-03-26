@@ -2,6 +2,7 @@ import { vi } from 'vitest';
 import {
   FARCASTER_CONNECT_URI,
   PARTNER,
+  PUBLIC_KEY_ID,
   RECOVERY_PUBLIC_KEYS,
   SESSION_ID,
   SESSION_LOOKUP_ID,
@@ -25,7 +26,7 @@ export const mockCheckUserExists = vi.fn().mockResolvedValue({ data: { exists: t
 export const mockVerifyEmail = vi.fn().mockResolvedValue({});
 export const mockVerifyPhone = vi.fn().mockResolvedValue({});
 export const mockGetPartner = vi.fn().mockResolvedValue({ data: { partner: PARTNER } });
-export const mockAddSessionPublicKey = vi.fn().mockResolvedValue({ data: { id: SESSION_ID, partnerId: PARTNER.id } });
+export const mockAddSessionPublicKey = vi.fn().mockResolvedValue({ data: { id: PUBLIC_KEY_ID, partnerId: PARTNER.id } });
 export const mockLogout = vi.fn().mockResolvedValue(true);
 export const mockTouchSession = vi.fn<never, SessionInfo>().mockResolvedValue({
   sessionId: SESSION_ID,

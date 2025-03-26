@@ -301,9 +301,7 @@ describe('Client', () => {
     });
 
     it('getBiometricLocationHints', async () => {
-      const params = {
-        type: PublicKeyType.WEB,
-      };
+      const params = { email };
 
       await client.getBiometricLocationHints(params);
 

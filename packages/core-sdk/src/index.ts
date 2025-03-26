@@ -1,6 +1,9 @@
 import { ParaCore } from './ParaCore.js';
 
 export {
+  type AuthInfo,
+  type PrimaryAuthInfo,
+  type VerifiedAuthInfo,
   AuthMethod,
   type CurrentWalletIds,
   EmailTheme,
@@ -28,6 +31,8 @@ export {
   PopupType,
   PregenIdentifierType,
   RecoveryStatus,
+  type AuthExtras,
+  type CoreAuthInfo,
   type ProviderAssetInfo,
   type SignatureRes,
   type FullSignatureRes,

@@ -1,6 +1,6 @@
 export * from './config.js';
 export * from './wallet.js';
-export * from './params.js';
+export * from './methods.js';
 export * from './theme.js';
 export * from './onRamps.js';
 export * from './popup.js';

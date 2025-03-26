@@ -11,6 +11,7 @@ if (typeof global !== 'undefined') {
 
 import {
   AuthMethod,
+  AuthParams,
   BackupKitEmailProps,
   CurrentWalletIds,
   EmailTheme,
@@ -35,10 +36,15 @@ import {
   Auth,
   extractAuthInfo,
   SupportedWalletTypes,
+  AuthIdentifier,
+  isEmail,
+  isPhone,
+  isFarcaster,
+  isTelegram,
+  AuthType,
   ExternalWalletLoginRes,
   SessionInfo,
   PrimaryAuth,
-  PrimaryAuthInfo,
   PrimaryAuthType,
 } from '@getpara/user-management-client';
 import type { pki as pkiType, jsbn as jsbnType } from 'node-forge';
@@ -70,12 +76,15 @@ import {
   PortalUrlOptions,
   ConstructorOpts,
   RecoveryStatus,
+  CoreAuthInfo,
+  AuthExtras,
 } from './types/index.js';
 import * as transmissionUtils from './transmission/transmissionUtils.js';
 import { PlatformUtils } from './PlatformUtils.js';
 import { sendRecoveryForShare } from './shares/recovery.js';
 import { CountryCallingCode } from 'libphonenumber-js';
 import {
+  autoBind,
   constructUrl,
   dispatchEvent,
   entityToWallet,
@@ -86,7 +95,9 @@ import {
   getSchemes,
   isPregenIdentifierMatch,
   isWalletSupported,
+  jsonParse,
   migrateWallet,
+  setupListeners,
   formatPhoneNumber,
   supportedWalletTypesEq,
   truncateAddress,
@@ -94,18 +105,33 @@ import {
 } from './utils/index.js';
 import { TransactionReviewDenied, TransactionReviewError, TransactionReviewTimeout } from './errors.js';
 import * as constants from './constants.js';
-import { setupListeners } from './utils/listeners.js';
-import { autoBind } from './utils/autobind.js';
 
 export abstract class ParaCore {
   static version?: string = constants.PARA_CORE_VERSION;
 
   ctx: Ctx;
 
-  email?: string;
-  phone?: `+${number}`;
-  farcasterUsername?: string;
-  telegramUserId?: string;
+  #authInfo?: CoreAuthInfo;
+
+  get authInfo(): CoreAuthInfo | undefined {
+    return this.#authInfo;
+  }
+
+  get email(): AuthIdentifier<'email'> | undefined {
+    return isEmail(this.#authInfo?.auth) ? this.#authInfo.auth.email : undefined;
+  }
+
+  get phone(): AuthIdentifier<'phone'> | undefined {
+    return isPhone(this.#authInfo?.auth) ? this.#authInfo.auth.phone : undefined;
+  }
+
+  get farcasterUsername(): AuthIdentifier<'farcaster'> | undefined {
+    return isFarcaster(this.#authInfo?.auth) ? this.#authInfo.auth.farcasterUsername : undefined;
+  }
+
+  get telegramUserId(): AuthIdentifier<'telegram'> | undefined {
+    return isTelegram(this.#authInfo?.auth) ? this.#authInfo.auth.telegramUserId : undefined;
+  }
 
   #partner?: PartnerEntity;
 
@@ -119,19 +145,19 @@ export abstract class ParaCore {
   private isAwaitingOAuth = false;
 
   get isEmail(): boolean {
-    return !!this.email && !this.phone && !this.farcasterUsername && !this.telegramUserId;
+    return isEmail(this.authInfo?.auth);
   }
 
   get isPhone(): boolean {
-    return !!this.phone && !this.email && !this.farcasterUsername && !this.telegramUserId;
+    return isPhone(this.authInfo?.auth);
   }
 
   get isFarcaster(): boolean {
-    return !!this.farcasterUsername && !this.email && !this.phone && !this.telegramUserId;
+    return isFarcaster(this.authInfo?.auth);
   }
 
   get isTelegram(): boolean {
-    return !!this.telegramUserId && !this.email && !this.phone && !this.farcasterUsername;
+    return isTelegram(this.authInfo?.auth);
   }
 
   get partnerId(): string | undefined {
@@ -314,6 +340,9 @@ export abstract class ParaCore {
   };
   private localStorageSetItem = (key: string, value: string): Promise<void> | void => {
     return this.platformUtils.localStorage.set(key, value);
+  };
+  private localStorageRemoveItem = (key: string): Promise<void> | void => {
+    return this.platformUtils.localStorage.removeItem(key);
   };
   private sessionStorageGetItem = (key: string): Promise<string | null> | string | null => {
     return this.platformUtils.sessionStorage.get(key);
@@ -551,6 +580,11 @@ export abstract class ParaCore {
       type === 'onRamp',
     ];
 
+    let auth: PrimaryAuth | undefined;
+    if (isCreate || isLogin) {
+      auth = this.#assertIsAuthSet();
+    }
+
     if ((isLogin || isOnRamp) && !opts.sessionId) {
       opts.sessionId = (await this.touchSession()).sessionLookupId;
     }
@@ -607,14 +641,7 @@ export abstract class ParaCore {
       portalTextColor: this.portalTextColor,
       portalPrimaryButtonTextColor: this.portalPrimaryButtonTextColor,
       isForNewDevice: opts.isForNewDevice ? opts.isForNewDevice.toString() : undefined,
-      ...(isCreate || isLogin
-        ? {
-            ...(opts.authType === 'email' ? { email: this.email } : {}),
-            ...(opts.authType === 'phone' ? { phone: this.phone } : {}),
-            ...(opts.authType === 'farcaster' ? { farcasterUsername: this.farcasterUsername } : {}),
-            ...(opts.authType === 'telegram' ? { telegramUserId: this.telegramUserId } : {}),
-          }
-        : {}),
+      ...(auth && (isCreate || isLogin) ? auth : {}),
       ...(isLogin || isOnRamp ? { sessionId: opts.sessionId } : {}),
       ...(isLogin
         ? {
@@ -630,6 +657,37 @@ export abstract class ParaCore {
     };
 
     return constructUrl({ base, path, params });
+  }
+
+  #toAuthInfo({
+    email,
+    phone,
+    countryCode,
+    farcasterUsername,
+    telegramUserId,
+  }: { [key in keyof Omit<AuthParams, 'userId'>]: string | null | undefined }): CoreAuthInfo | undefined {
+    let auth;
+
+    switch (true) {
+      case !!email:
+        auth = { email };
+        break;
+      case !!phone:
+        {
+          const validPhone = formatPhoneNumber(phone, countryCode);
+
+          if (validPhone) auth = { phone: formatPhoneNumber(phone, countryCode) };
+        }
+        break;
+      case !!farcasterUsername:
+        auth = { farcasterUsername };
+        break;
+      case !!telegramUserId:
+        auth = { telegramUserId };
+        break;
+    }
+
+    return extractAuthInfo(auth);
   }
 
   /**
@@ -728,10 +786,8 @@ export abstract class ParaCore {
   }
 
   private initializeFromStorage = () => {
-    this.updateEmailFromStorage();
-    this.updatePhoneFromStorage();
+    this.updateAuthInfoFromStorage();
     this.updateUserIdFromStorage();
-    this.updateTelegramUserIdFromStorage();
     this.updateWalletsFromStorage();
     this.updateWalletIdsFromStorage();
     this.updateSessionCookieFromStorage();
@@ -739,23 +795,30 @@ export abstract class ParaCore {
     this.updateExternalWalletsFromStorage();
   };
 
-  private updateTelegramUserIdFromStorage = () => {
-    this.telegramUserId = (this.localStorageGetItem(constants.LOCAL_STORAGE_TELEGRAM_USER_ID) as string) || undefined;
+  private updateAuthInfoFromStorage = () => {
+    const storageAuthInfo = (this.localStorageGetItem(constants.LOCAL_STORAGE_AUTH_INFO) as string) || undefined;
+
+    let authInfo = jsonParse<CoreAuthInfo>(storageAuthInfo);
+
+    if (!authInfo) {
+      const authParams = {
+        email: (this.localStorageGetItem(constants.LOCAL_STORAGE_EMAIL) as string) || undefined,
+        phone: (this.localStorageGetItem(constants.LOCAL_STORAGE_PHONE) as string) || undefined,
+        countryCode: (this.localStorageGetItem(constants.LOCAL_STORAGE_COUNTRY_CODE) as CountryCallingCode) || undefined,
+        farcasterUsername: (this.localStorageGetItem(constants.LOCAL_STORAGE_FARCASTER_USERNAME) as string) || undefined,
+        telegramUserId: (this.localStorageGetItem(constants.LOCAL_STORAGE_TELEGRAM_USER_ID) as string) || undefined,
+      };
+
+      authInfo = this.#toAuthInfo(authParams);
+    }
+
+    this.#authInfo = authInfo;
   };
+
   private updateUserIdFromStorage = () => {
     this.userId = (this.localStorageGetItem(constants.LOCAL_STORAGE_USER_ID) as string) || undefined;
   };
-  private updatePhoneFromStorage = () => {
-    const countryCode = (this.localStorageGetItem(constants.LOCAL_STORAGE_COUNTRY_CODE) as CountryCallingCode) || undefined;
-    const phone = (this.localStorageGetItem(constants.LOCAL_STORAGE_PHONE) as string) || undefined;
 
-    if (phone) {
-      this.phone = formatPhoneNumber(phone, countryCode) || undefined;
-    }
-  };
-  private updateEmailFromStorage = () => {
-    this.email = (this.localStorageGetItem(constants.LOCAL_STORAGE_EMAIL) as string) || undefined;
-  };
   private updateWalletsFromStorage = async () => {
     // TODO: Improve not great check
     const _currentWalletIds = (this.localStorageGetItem(constants.LOCAL_STORAGE_CURRENT_WALLET_IDS) as string) ?? undefined;
@@ -804,6 +867,7 @@ export abstract class ParaCore {
 
     this.setWallets(wallets);
   };
+
   private updateWalletIdsFromStorage = () => {
     // TODO: Improve not great check
     const _currentWalletIds = (this.localStorageGetItem(constants.LOCAL_STORAGE_CURRENT_WALLET_IDS) as string) ?? undefined;
@@ -835,6 +899,7 @@ export abstract class ParaCore {
       this.findWalletId(undefined, { forbidPregen: true });
     }
   };
+
   private updateSessionCookieFromStorage = () => {
     // TODO: remove sessionStorageGetItem call once new version is being consumed
     this.sessionCookie =
@@ -842,6 +907,7 @@ export abstract class ParaCore {
       (this.sessionStorageGetItem(constants.LOCAL_STORAGE_SESSION_COOKIE) as string) ||
       undefined;
   };
+
   private updateLoginEncryptionKeyPairFromStorage = () => {
     const loginEncryptionKey = this.sessionStorageGetItem(constants.SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR) as
       | string
@@ -850,6 +916,7 @@ export abstract class ParaCore {
       this.loginEncryptionKeyPair = this.convertEncryptionKeyPair(JSON.parse(loginEncryptionKey));
     }
   };
+
   private updateExternalWalletsFromStorage = () => {
     const stringExternalWallets = this.localStorageGetItem(constants.LOCAL_STORAGE_EXTERNAL_WALLETS);
     const _externalWallets = JSON.parse((stringExternalWallets as string) || '{}');
@@ -902,16 +969,27 @@ export abstract class ParaCore {
    * Init only needs to be called for storage that is async.
    */
   async init(): Promise<void> {
-    this.email = ((await this.localStorageGetItem(constants.LOCAL_STORAGE_EMAIL)) as string) || undefined;
-
-    const countryCode =
-      ((await this.localStorageGetItem(constants.LOCAL_STORAGE_COUNTRY_CODE)) as CountryCallingCode) || undefined;
-    const phone = ((await this.localStorageGetItem(constants.LOCAL_STORAGE_PHONE)) as string) || undefined;
-    this.phone = formatPhoneNumber(phone, countryCode) || undefined;
-
     this.userId = ((await this.localStorageGetItem(constants.LOCAL_STORAGE_USER_ID)) as string) || undefined;
-    this.telegramUserId =
-      ((await this.localStorageGetItem(constants.LOCAL_STORAGE_TELEGRAM_USER_ID)) as string) || undefined;
+
+    const storageAuthInfo = ((await this.localStorageGetItem(constants.LOCAL_STORAGE_AUTH_INFO)) as string) || undefined;
+
+    let authInfo = jsonParse<CoreAuthInfo>(storageAuthInfo);
+
+    if (!authInfo) {
+      const authParams = {
+        email: ((await this.localStorageGetItem(constants.LOCAL_STORAGE_EMAIL)) as string) || undefined,
+        phone: ((await this.localStorageGetItem(constants.LOCAL_STORAGE_PHONE)) as string) || undefined,
+        countryCode:
+          ((await this.localStorageGetItem(constants.LOCAL_STORAGE_COUNTRY_CODE)) as CountryCallingCode) || undefined,
+        farcasterUsername:
+          ((await this.localStorageGetItem(constants.LOCAL_STORAGE_FARCASTER_USERNAME)) as string) || undefined,
+        telegramUserId: ((await this.localStorageGetItem(constants.LOCAL_STORAGE_TELEGRAM_USER_ID)) as string) || undefined,
+      };
+
+      authInfo = this.#toAuthInfo(authParams);
+    }
+
+    this.#authInfo = authInfo;
 
     const stringWallets = this.platformUtils.secureStorage
       ? await this.platformUtils.secureStorage.get(constants.LOCAL_STORAGE_WALLETS)
@@ -993,13 +1071,52 @@ export abstract class ParaCore {
     await this.touchSession();
   }
 
+  async #setAuthInfo(authInfo: CoreAuthInfo): Promise<void> {
+    this.#authInfo = authInfo;
+    await this.localStorageSetItem(constants.LOCAL_STORAGE_AUTH_INFO, JSON.stringify(authInfo));
+    await this.localStorageRemoveItem(constants.LOCAL_STORAGE_EMAIL);
+    await this.localStorageRemoveItem(constants.LOCAL_STORAGE_PHONE);
+    await this.localStorageRemoveItem(constants.LOCAL_STORAGE_COUNTRY_CODE);
+    await this.localStorageRemoveItem(constants.LOCAL_STORAGE_FARCASTER_USERNAME);
+    await this.localStorageRemoveItem(constants.LOCAL_STORAGE_TELEGRAM_USER_ID);
+  }
+
+  protected async setAuth(
+    auth: PrimaryAuth,
+    { extras = {}, userId }: { extras?: AuthExtras; userId?: string } = {},
+  ): Promise<typeof this.authInfo> {
+    const authInfo = {
+      ...extractAuthInfo(auth, { isRequired: true }),
+      ...(extras || {}),
+    };
+
+    await this.#setAuthInfo(authInfo);
+
+    if (!!userId) {
+      await this.setUserId(userId);
+    }
+
+    return this.#authInfo;
+  }
+
+  #assertIsAuthSet(allowed?: AuthType[]): PrimaryAuth {
+    if (!this.#authInfo) {
+      throw new Error('auth is not set');
+    }
+
+    if (allowed && !allowed.includes(this.#authInfo.authType)) {
+      throw new Error(`invalid auth type, expected ${allowed.join(', ')}`);
+    }
+
+    return this.#authInfo.auth;
+  }
+
   /**
    * Sets the email associated with the `ParaCore` instance.
    * @param email - Email to set.
    */
   async setEmail(email: string): Promise<void> {
-    this.email = email;
-    await this.localStorageSetItem(constants.LOCAL_STORAGE_EMAIL, email);
+    await this.setAuth({ email });
   }
 
   /**
@@ -1007,8 +1124,7 @@ export abstract class ParaCore {
    * @param telegramUserId - Telegram user ID to set.
    */
   async setTelegramUserId(telegramUserId: string): Promise<void> {
-    this.telegramUserId = telegramUserId;
-    await this.localStorageSetItem(constants.LOCAL_STORAGE_TELEGRAM_USER_ID, telegramUserId);
+    await this.setAuth({ telegramUserId });
   }
 
   /**
@@ -1017,8 +1133,7 @@ export abstract class ParaCore {
    * @param countryCode - Country Code to set.
    */
   async setPhoneNumber(phone: `+${number}` | string, countryCode?: string): Promise<void> {
-    this.phone = formatPhoneNumber(phone, countryCode);
-    await this.localStorageSetItem(constants.LOCAL_STORAGE_PHONE, phone);
+    await this.setAuth({ phone: formatPhoneNumber(phone, countryCode) });
   }
 
   /**
@@ -1026,8 +1141,7 @@ export abstract class ParaCore {
    * @param farcasterUsername - Farcaster Username to set.
    */
   async setFarcasterUsername(farcasterUsername: string): Promise<void> {
-    this.farcasterUsername = farcasterUsername;
-    await this.localStorageSetItem(constants.LOCAL_STORAGE_FARCASTER_USERNAME, farcasterUsername);
+    await this.setAuth({ farcasterUsername });
   }
 
   /**
@@ -1121,9 +1235,6 @@ export abstract class ParaCore {
    * @returns - formatted phone number associated with the `ParaCore` instance.
    */
   getPhoneNumber(): `+${number}` | undefined {
-    if (!this.phone) {
-      return undefined;
-    }
     return this.phone;
   }
 
@@ -1611,8 +1722,20 @@ export abstract class ParaCore {
     const res = await this.ctx.client.verifyTelegram(authObject);
 
     if (res.isValid) {
-      await this.setUserId(res.userId);
-      await this.setTelegramUserId(res.telegramUserId);
+      const { userId, telegramUserId } = res;
+      const { photo_url: pfpUrl, username, first_name: firstName, last_name: lastName } = authObject;
+
+      await this.setAuth(
+        { telegramUserId },
+        {
+          extras: {
+            pfpUrl,
+            username,
+            displayName: firstName ? `${firstName}${lastName ? ` ${lastName}` : ''}` : username ? `@${username}` : undefined,
+          },
+          userId,
+        },
+      );
 
       await this.touchSession(true);
       if (!this.loginEncryptionKeyPair) {
@@ -1856,39 +1979,9 @@ export abstract class ParaCore {
    * @returns Array containing useragents and AAGuids for stored biometrics
    */
   protected async getUserBiometricLocationHints(): Promise<BiometricLocationHint[]> {
-    if (!this.email && !this.phone && !this.farcasterUsername && !this.telegramUserId) {
-      throw new Error('one of email, phone or farcaster username are required to get biometric location hints');
-    }
-    return await this.ctx.client.getBiometricLocationHints({
-      email: this.email,
-      phone: this.phone,
-      farcasterUsername: this.farcasterUsername,
-      telegramUserId: this.telegramUserId,
-    });
-  }
+    const auth = this.#assertIsAuthSet();
 
-  private async setAuth(auth: PrimaryAuth): Promise<PrimaryAuthInfo | undefined> {
-    const authInfo = extractAuthInfo(auth);
-
-    if (!authInfo) {
-      return undefined;
-    }
-
-    switch (authInfo.authType) {
-      case 'email':
-        await this.setEmail(authInfo.identifier);
-        break;
-      case 'phone':
-        await this.setPhoneNumber(authInfo.identifier);
-        break;
-      case 'farcaster':
-        await this.setFarcasterUsername(authInfo.identifier);
-        break;
-      case 'telegram':
-        await this.setTelegramUserId(authInfo.identifier);
-        break;
-    }
-    return authInfo;
+    return await this.ctx.client.getBiometricLocationHints(auth);
   }
 
   /**
@@ -1930,7 +2023,10 @@ export abstract class ParaCore {
    * @returns - a set of supported auth methods for the user
    **/
   async initiateUserLoginV2(auth: PrimaryAuth): Promise<Set<AuthMethod>> {
-    const authInfo = await this.setAuth(auth);
+    let authInfo = this.#authInfo;
+    if (!authInfo || JSON.stringify(authInfo.auth) !== JSON.stringify(auth)) {
+      authInfo = await this.setAuth(auth);
+    }
 
     if (!authInfo) {
       return;
@@ -2063,6 +2159,7 @@ export abstract class ParaCore {
    * @return {Object} `{userExists: boolean; username: string; pfpUrl?: string | null }` - the user's information and whether the user already exists.
    */
   async waitForFarcasterStatus(): Promise<{
+    userId: string;
     userExists: boolean;
     username: string;
     pfpUrl?: string | null;
@@ -2075,9 +2172,14 @@ export abstract class ParaCore {
         const res = await this.ctx.client.getFarcasterAuthStatus();
         if (res.data.state === 'completed') {
           const { userId, userExists, username, pfpUrl } = res.data;
-          await this.setUserId(userId);
-          await this.setFarcasterUsername(username);
+
+          await this.setAuth(
+            { farcasterUsername: username },
+            { extras: { pfpUrl, username, displayName: username }, userId },
+          );
+
           return {
+            userId,
             userExists,
             username,
             pfpUrl,
@@ -2143,10 +2245,9 @@ export abstract class ParaCore {
             }
             await this.setUserId(userId);
             await this.setEmail(email);
-            const userExists = await this.checkIfUserExists({ email });
             this.isAwaitingOAuth = false;
             return {
-              userExists,
+              userExists: true,
               email,
             };
           }
@@ -2212,6 +2313,7 @@ export abstract class ParaCore {
         const fetchedWallets = await this.fetchWallets();
 
         const tempSharesRes = await this.getTransmissionKeyShares();
+
         // need this check for the case where user has logged in but temp encrypted shares
         // haven't been sent to the backend yet
         if (tempSharesRes.data.temporaryShares.length === fetchedWallets.length) {
@@ -3261,14 +3363,11 @@ export abstract class ParaCore {
    */
   exportSession(): string {
     const sessionInfo = {
-      email: this.email,
+      authInfo: this.#authInfo,
       userId: this.userId,
       wallets: this.wallets,
       currentWalletIds: this.currentWalletIds,
-      sessionCookie: this.sessionCookie,
-      phone: this.phone,
-      telegramUserId: this.telegramUserId,
-      farcasterUsername: this.farcasterUsername,
+      sessionCookie: this.retrieveSessionCookie(),
       externalWallets: this.externalWallets,
     };
     return Buffer.from(JSON.stringify(sessionInfo)).toString('base64');
@@ -3280,10 +3379,11 @@ export abstract class ParaCore {
    */
   async importSession(serializedInstanceBase64: string): Promise<void> {
     const serializedInstance = Buffer.from(serializedInstanceBase64, 'base64').toString('utf8');
-    const sessionInfo = JSON.parse(serializedInstance);
-    await this.setEmail(sessionInfo.email);
-    await this.setTelegramUserId(sessionInfo.telegramUserId);
-    await this.setFarcasterUsername(sessionInfo.farcasterUsername);
+    const sessionInfo = jsonParse(serializedInstance);
+
+    const authInfo = sessionInfo.authInfo ?? this.#toAuthInfo(sessionInfo);
+    await this.#setAuthInfo(authInfo);
+
     await this.setUserId(sessionInfo.userId);
     await this.setWallets(sessionInfo.wallets);
     await this.setExternalWallets(sessionInfo.externalWallets || {});
@@ -3306,7 +3406,6 @@ export abstract class ParaCore {
     }
 
     this.persistSessionCookie(sessionInfo.sessionCookie);
-    await this.setPhoneNumber(sessionInfo.phone, sessionInfo.countryCode);
   }
 
   protected exitAccountCreation() {
@@ -3364,9 +3463,7 @@ export abstract class ParaCore {
     this.currentWalletIds = {};
     this.externalWallets = {};
     this.loginEncryptionKeyPair = undefined;
-    this.email = undefined;
-    this.telegramUserId = undefined;
-    this.phone = undefined;
+    this.#authInfo = undefined;
     this.userId = undefined;
     this.sessionCookie = undefined;
 
@@ -3405,10 +3502,7 @@ export abstract class ParaCore {
       partnerId: this.#partner?.id,
       supportedWalletTypes: this.#partner?.supportedWalletTypes,
       cosmosPrefix: this.#partner?.cosmosPrefix,
-      email: this.email,
-      phone: this.phone,
-      telegramUserId: this.telegramUserId,
-      farcasterUsername: this.farcasterUsername,
+      authInfo: this.#authInfo,
       userId: this.userId,
       pregenIds: this.pregenIds,
       currentWalletIds: this.currentWalletIds,

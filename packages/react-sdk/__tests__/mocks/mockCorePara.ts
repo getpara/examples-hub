@@ -35,9 +35,15 @@ export class MockPara extends ParaInternal {
   isFullyLoggedIn = mockIsFullyLoggedIn;
   findWallet = mockFindWallet;
 
-  email = TEST_EMAIL;
   wallets = TEST_WALLETS;
   userId = TEST_USER_ID;
 
   getOAuthURL = vi.fn().mockResolvedValue('https://example.com');
 }
+
+vi.spyOn(MockPara.prototype, 'email', 'get').mockReturnValue(TEST_EMAIL);
+vi.spyOn(MockPara.prototype, 'authInfo', 'get').mockReturnValue({
+  auth: { email: TEST_EMAIL },
+  authType: 'email',
+  identifier: TEST_EMAIL,
+});

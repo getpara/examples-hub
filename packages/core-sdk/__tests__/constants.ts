@@ -22,6 +22,7 @@ export const VERIFICATION_CODE = '123456';
 
 export const SESSION_ID = 'ef3bf91c-fc1e-4d18-afe2-f2654c9531c3';
 export const SESSION_LOOKUP_ID = 'ef3bf91c-fc1e-4d18-afe2-f2654c9531c5';
+export const PUBLIC_KEY_ID = '453bf91c-fc1e-4d18-afe2-f2654c9531c6';
 export const TEMP_TRANSMISSION_INIT_ID = 'ef3bf91c-fc1e-4d18-afe2-f2654c9531t1';
 
 export const FARCASTER_CONNECT_URI = 'https://test.com/test-farcaster-connect';
