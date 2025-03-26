@@ -10,6 +10,8 @@ export const defaultEvmExternalWallet: EvmExternalWalletContextType = {
   disconnect: () => Promise.resolve(),
   switchChain: () => Promise.resolve({}),
   connectParaEmbedded: () => Promise.resolve({}),
+  signMessage: () => Promise.resolve({}),
+  signVerificationMessage: () => Promise.resolve({}),
 };
 
 export const EvmExternalWalletContext = createContext<EvmExternalWalletContextType>(defaultEvmExternalWallet);

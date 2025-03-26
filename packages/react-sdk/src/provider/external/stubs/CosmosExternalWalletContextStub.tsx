@@ -8,6 +8,8 @@ export const defaultCosmosExternalWallet = {
   disconnect: () => Promise.resolve(),
   switchChain: () => Promise.resolve({}),
   connectParaEmbedded: () => Promise.resolve({}),
+  signMessage: () => Promise.resolve({}),
+  signVerificationMessage: () => Promise.resolve({}),
 };
 
 export const CosmosExternalWalletContext = createContext<CosmosExternalWalletContextType>(defaultCosmosExternalWallet);

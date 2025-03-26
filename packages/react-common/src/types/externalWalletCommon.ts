@@ -1,3 +1,5 @@
+import { WalletType } from '@getpara/web-sdk';
+
 export type WalletMetadata = {
   id: string;
   name: string;
@@ -28,9 +30,17 @@ export type WalletMetadata = {
 };
 
 export type CommonWallet = {
-  connect: () => Promise<{ address?: string; error?: string }>;
-  connectMobile: (isManualWalletConnect?: boolean) => Promise<{ address?: string; error?: string }>;
-  type: 'EVM' | 'SOLANA' | 'COSMOS';
+  connect: () => Promise<{
+    address?: string;
+    bufferAddress?: string;
+    error?: string;
+    userExists: boolean;
+    isVerified: boolean;
+  }>;
+  connectMobile: (
+    isManualWalletConnect?: boolean,
+  ) => Promise<{ address?: string; bufferAddress?: string; error?: string; userExists: boolean; isVerified: boolean }>;
+  type: WalletType;
 } & WalletMetadata;
 
 export type CommonChain = {

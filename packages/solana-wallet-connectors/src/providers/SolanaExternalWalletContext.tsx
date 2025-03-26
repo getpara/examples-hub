@@ -1,18 +1,27 @@
-import { PropsWithChildren, createContext, useEffect, useMemo } from 'react';
+import { PropsWithChildren, createContext, useEffect, useMemo, useRef } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Adapter, WalletReadyState } from '@solana/wallet-adapter-base';
 import ParaWeb, { WalletType } from '@getpara/web-sdk';
 import { WalletList } from '../types/Wallet.js';
 import { type CommonWallet } from '@getpara/react-common';
+import bs58 from 'bs58';
 
 const defaultSolanaExternalWallet = {
   wallets: [],
   disconnect: () => Promise.resolve(),
+  signMessage: () => Promise.resolve({}),
+  signVerificationMessage: () => Promise.resolve({}),
 };
 
 export type SolanaExternalWalletContextType = {
   wallets: CommonWallet[];
   disconnect: () => Promise<void>;
+  signMessage: (message: string) => Promise<{ signature?: string; error?: string }>;
+  signVerificationMessage: () => Promise<{
+    address?: string;
+    signature?: string;
+    error?: string;
+  }>;
 };
 
 export const SolanaExternalWalletContext = createContext<SolanaExternalWalletContextType>(defaultSolanaExternalWallet);
@@ -40,16 +49,19 @@ export function SolanaExternalWalletProvider({
     wallet,
     connecting,
     connected,
+    signMessage: solanaSignMessage,
   } = useWallet();
+
+  const verificationMessage = useRef<string>();
 
   const reset = async () => {
     await _disconnect();
     await para.logout();
   };
 
-  const login = async (address: string, providerName?: string) => {
+  const login = async ({ address, providerName }: { address: string; providerName?: string }) => {
     try {
-      await para.externalWalletLogin({ address, type: WalletType.SOLANA, provider: providerName });
+      return await para.externalWalletLogin({ address, type: WalletType.SOLANA, provider: providerName });
     } catch (err) {
       await reset();
 
@@ -65,7 +77,7 @@ export function SolanaExternalWalletProvider({
       await para.logout();
     } else {
       try {
-        await login(address, wallet?.adapter?.name);
+        await login({ address, providerName: wallet?.adapter?.name });
       } catch (err) {
         error = err;
       }
@@ -96,11 +108,36 @@ export function SolanaExternalWalletProvider({
     }
   }, [solanaAddress, connecting, wallet]);
 
-  const connect = async (adapter?: Adapter): Promise<{ address?: string; error?: string }> => {
+  const signMessage = async (message: string) => {
+    try {
+      const encodedMessage = new TextEncoder().encode(message);
+      const signature = await solanaSignMessage(encodedMessage);
+
+      return {
+        address: solanaAddress.toString(),
+        signature: bs58.encode(signature),
+      };
+    } catch (e) {
+      if (e.message.includes('User rejected the request')) {
+        return { error: 'Signature request rejected' };
+      }
+      return { error: 'An unknown error occurred' };
+    }
+  };
+
+  const signVerificationMessage = async () => {
+    const signature = await signMessage(verificationMessage.current);
+
+    return signature;
+  };
+
+  const connect = async (
+    adapter?: Adapter,
+  ): Promise<{ address?: string; error?: string; userExists: boolean; isVerified: boolean }> => {
     await _disconnect();
 
     if (!adapter) {
-      return { address: undefined, error: 'Adapter not found.' };
+      return { address: undefined, error: 'Adapter not found.', userExists: false, isVerified: false };
     }
 
     selectWallet(adapter.name);
@@ -110,6 +147,8 @@ export function SolanaExternalWalletProvider({
 
     let address: string | undefined;
     let error: string | undefined;
+    let userExists = false;
+    let isVerified = false;
 
     try {
       await adapter.connect();
@@ -118,7 +157,7 @@ export function SolanaExternalWalletProvider({
 
       if (address) {
         try {
-          await login(address, adapter.name);
+          await login({ address, providerName: adapter.name });
         } catch (err) {
           await _disconnect();
           address = undefined;
@@ -139,7 +178,7 @@ export function SolanaExternalWalletProvider({
         }
       }
     }
-    return { address, error };
+    return { address, error, userExists, isVerified };
   };
 
   const getAdapter = (name: string) =>
@@ -170,7 +209,12 @@ export function SolanaExternalWalletProvider({
   };
 
   return (
-    <SolanaExternalWalletContext.Provider value={useMemo(() => ({ wallets, disconnect }), [wallets, disconnect])}>
+    <SolanaExternalWalletContext.Provider
+      value={useMemo(
+        () => ({ wallets, disconnect, signMessage, signVerificationMessage }),
+        [wallets, disconnect, signMessage, signVerificationMessage],
+      )}
+    >
       {children}
     </SolanaExternalWalletContext.Provider>
   );

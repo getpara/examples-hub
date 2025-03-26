@@ -4,6 +4,8 @@ import { SolanaExternalWalletContextType } from '@getpara/solana-wallet-connecto
 export const defaultSolanaExternalWallet = {
   wallets: [],
   disconnect: () => Promise.resolve(),
+  signMessage: () => Promise.resolve({}),
+  signVerificationMessage: () => Promise.resolve({}),
 };
 
 export const SolanaExternalWalletContext = createContext<SolanaExternalWalletContextType>(defaultSolanaExternalWallet);
