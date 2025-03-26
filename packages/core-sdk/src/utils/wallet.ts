@@ -5,8 +5,8 @@ import {
   WalletScheme,
   WalletType,
 } from '@getpara/user-management-client';
-import { stringToPhoneNumber } from './formatting.js';
 import { Wallet, WalletTypeProp } from '../types/index.js';
+import { formatPhoneNumber } from './phone.js';
 
 export const WalletSchemeTypeMap: Record<WalletScheme, Partial<Record<WalletType, true>>> = {
   [WalletScheme.DKLS]: {
@@ -34,7 +34,7 @@ export function isPregenIdentifierMatch(
     case 'EMAIL':
       return a.toLowerCase() === b.toLowerCase();
     case 'PHONE':
-      return stringToPhoneNumber(a) === stringToPhoneNumber(b);
+      return formatPhoneNumber(a) === formatPhoneNumber(b);
     case 'CUSTOM_ID':
       return a === b;
     default:

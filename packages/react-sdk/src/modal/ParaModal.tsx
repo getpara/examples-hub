@@ -8,7 +8,6 @@ import { AuthLayout, ParaModalHandle, ParaModalProps } from './types/modalProps.
 import { DEFAULTS } from './constants/defaults.js';
 import { useGoBack } from './hooks/useGoBack.js';
 import { OAuthMethod, ParaEvent } from '@getpara/web-sdk';
-import { CountryCallingCode } from 'libphonenumber-js';
 import styled from 'styled-components';
 import { hasEmbeddedAuth, hasExternalWallet } from './utils/authLayoutHelpers.js';
 import { useModal, useWalletState } from '../provider/index.js';
@@ -113,8 +112,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
 
       case para.isPhone:
         {
-          const { phone, countryCode } = para.getPhone();
-          setAuthInfo({ phone: phone!, countryCode: countryCode as CountryCallingCode });
+          setAuthInfo({ phone: para.getPhoneNumber()! });
         }
         break;
 

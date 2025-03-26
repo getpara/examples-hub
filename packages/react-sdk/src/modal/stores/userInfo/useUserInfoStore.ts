@@ -1,12 +1,12 @@
 import { create } from 'zustand';
 import { getActions } from './actions.js';
-import { Auth } from '@getpara/user-management-client';
+import { PrimaryAuth } from '@getpara/user-management-client';
 import { ModalAuthInfo } from '@getpara/react-common';
 
-type SetAuthInfo = Auth & Partial<Pick<ModalAuthInfo, 'pfpUrl' | 'displayName'>>;
+type SetAuthInfo = PrimaryAuth & Partial<Pick<ModalAuthInfo, 'pfpUrl' | 'displayName'>>;
 
 type UserInfoState = {
-  auth: Auth | null;
+  auth: PrimaryAuth | null;
   pfpUrl: string | null;
   displayName: string | null;
   recoveryShare: string | null;

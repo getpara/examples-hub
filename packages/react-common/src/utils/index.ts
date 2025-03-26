@@ -128,4 +128,3 @@ export * from './getDeviceLogo.js';
 export * from './getDeviceModelName.js';
 export * from './getBrowserName.js';
 export * from './formatBiometricHints.js';
-export * from './formatPhoneNumber.js';

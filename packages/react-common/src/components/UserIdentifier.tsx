@@ -2,7 +2,7 @@ import { CpslAvatar, CpslIcon, CpslText, IconType } from '@getpara/react-compone
 import styled from 'styled-components';
 import { ModalAuthInfo } from '../types/index.js';
 import { AuthType } from '@getpara/user-management-client';
-import { formatPhoneNumber } from '../utils/formatPhoneNumber.js';
+import { formatPhoneNumber } from '@getpara/web-sdk';
 
 function defaultDisplayName(authType: AuthType, identifier: string) {
   switch (authType) {

@@ -4,8 +4,9 @@ import { TelegramAuthResponse } from '@getpara/user-management-client/src';
 export const UUID = 'ef3bf91c-fc1e-4d18-afe2-f2654c9531e5';
 export const USER_ID = 'ef3bf91c-fc1e-4d18-afe2-f2654c9531e5';
 export const USER_EMAIL = 'test@test.com';
-export const USER_PHONE = '5555555555';
 export const USER_COUNTRY_CODE = '1';
+export const USER_PHONE_NATIONAL = '9495551234';
+export const USER_PHONE = `+${USER_COUNTRY_CODE}${USER_PHONE_NATIONAL}`;
 export const USER_FARCASTER_USERNAME = 'TestFarcaster';
 export const USER_TELEGRAM_AUTH_OBJECT: TelegramAuthResponse = {
   id: 123,

@@ -17,6 +17,7 @@ import {
 } from '@getpara/core-components';
 import countryCodes from './countryCodes';
 import { usePara } from '../../../components/ParaContext';
+import { formatPhoneNumber } from '@getpara/web-sdk';
 
 const DEFAULT_COUNTRY = { label: 'United States', value: '+1', selectedLabel: 'US', icon: 'US' as IconType };
 
@@ -167,7 +168,9 @@ const RecoveryEmailCollectionStep: React.FC = () => {
 
               para.clearStorage();
 
-              const userExists = await para.checkIfUserExistsByPhone({ phone: inputPhone, countryCode: inputCountryCode });
+              const userExists = await para.checkIfUserExistsByPhone({
+                phone: formatPhoneNumber(inputPhone, inputCountryCode),
+              });
               if (userExists) {
                 setPhone(inputPhone);
                 setCountryCode(inputCountryCode);

@@ -9,7 +9,14 @@ import {
   getSHA256HashHex,
 } from '@getpara/web-sdk';
 import { ENV } from '../constants';
-import { AuthParams, EncryptorType, extractAuthInfo, KeyShareType, PublicKeyStatus } from '@getpara/user-management-client';
+import {
+  AuthParams,
+  EncryptorType,
+  extractAuthInfo,
+  KeyShareType,
+  PrimaryAuthInfo,
+  PublicKeyStatus,
+} from '@getpara/user-management-client';
 import { ParaPortal } from '../classes/ParaPortal';
 
 export type AuthCreationParams = AuthParams & {
@@ -19,13 +26,29 @@ export type AuthCreationParams = AuthParams & {
   userId: string;
 };
 
+function getPublicKeyIdentifier(authInfo: PrimaryAuthInfo): string {
+  switch (authInfo.authType) {
+    case 'telegram':
+      return `${authInfo.identifier}-telegram`;
+    case 'farcaster':
+      return `${authInfo.identifier}-farcaster`;
+    default:
+      return authInfo.identifier;
+  }
+}
+
 export async function authCreation(
   para: ParaPortal,
   { biometricId, isForNewDevice, partnerId, userId, ...authParams }: AuthCreationParams,
 ): Promise<void> {
-  const { publicKeyIdentifier } = extractAuthInfo(authParams, { isRequired: true });
+  const authInfo = extractAuthInfo(authParams, { isRequired: true });
 
-  const { creds, userHandle, algorithm } = await createCredential(ENV, userId, publicKeyIdentifier, para.ctx.isE2E);
+  const { creds, userHandle, algorithm } = await createCredential(
+    ENV,
+    userId,
+    getPublicKeyIdentifier(authInfo),
+    para.ctx.isE2E,
+  );
   const { cosePublicKey, clientDataJSON, aaguid } = parseCredentialCreationRes(creds, algorithm);
   const keyPair = await getAsymmetricKeyPair(para.ctx);
   const publicKeyHex = getPublicKeyHex(keyPair);

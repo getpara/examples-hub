@@ -60,7 +60,6 @@ import {
   mockVerifyEmail,
   mockVerifyPhone,
 } from '../mocks/mockUserManagementClient';
-import { CountryCallingCode } from 'libphonenumber-js';
 import {
   Network,
   OnRampAsset,
@@ -76,7 +75,6 @@ import '../mocks/mockCryptographyUtils.js';
 import '../mocks/mockUserManagementClient.js';
 import * as shareDistribution from '../../src/shares/shareDistribution.js';
 import {
-  LOCAL_STORAGE_COUNTRY_CODE,
   LOCAL_STORAGE_CURRENT_WALLET_IDS,
   LOCAL_STORAGE_ED25519_WALLETS,
   LOCAL_STORAGE_EMAIL,
@@ -215,17 +213,6 @@ describe('ParaCore', () => {
 
       storageListener.bind(para)({
         key: LOCAL_STORAGE_PHONE,
-        url: 'http://localhost:3000',
-      } as StorageEvent);
-
-      expect(spy).toBeCalledTimes(1);
-    });
-    it('updateCountryCodeFromStorage', () => {
-      const para = new MockPara(Environment.DEV, API_KEY);
-      const spy = vi.spyOn(para as any, 'updateCountryCodeFromStorage');
-
-      storageListener.bind(para)({
-        key: LOCAL_STORAGE_COUNTRY_CODE,
         url: 'http://localhost:3000',
       } as StorageEvent);
 
@@ -518,41 +505,35 @@ describe('ParaCore', () => {
 
         const userExists = await para.checkIfUserExistsByPhone({
           phone: USER_PHONE,
-          countryCode: USER_COUNTRY_CODE,
         });
 
-        expect(mockCheckUserExists).toBeCalledWith({ phone: USER_PHONE, countryCode: USER_COUNTRY_CODE });
+        expect(mockCheckUserExists).toBeCalledWith({ phone: USER_PHONE });
         expect(userExists).toBeTruthy();
 
-        await para.createUserByPhone({ phone: USER_PHONE, countryCode: USER_COUNTRY_CODE as CountryCallingCode });
+        await para.createUserByPhone({ phone: USER_PHONE });
 
         expect(mockCreateUser).toBeCalledWith({
           phone: USER_PHONE,
-          countryCode: USER_COUNTRY_CODE,
         });
 
-        expect(para.getPhone()).toEqual({
-          phone: USER_PHONE,
-          countryCode: USER_COUNTRY_CODE,
-        });
-        expect(para.getPhoneNumber()).toEqual(`+${USER_COUNTRY_CODE}${USER_PHONE}`);
+        expect(para.getPhoneNumber()).toEqual(USER_PHONE);
         expect(para.getUserId()).toEqual(USER_ID);
       });
 
-      it("user doesn't", async () => {
+      it("user doesn't exist", async () => {
         const para = new MockPara(Environment.DEV, API_KEY);
 
         mockCheckUserExists.mockResolvedValueOnce({ data: { exists: false } });
 
-        const userExists = await para.checkIfUserExistsByPhone({ phone: USER_PHONE, countryCode: USER_COUNTRY_CODE });
+        const userExists = await para.checkIfUserExistsByPhone({ phone: USER_PHONE });
 
-        expect(mockCheckUserExists).toBeCalledWith({ phone: USER_PHONE, countryCode: USER_COUNTRY_CODE });
+        expect(mockCheckUserExists).toBeCalledWith({ phone: USER_PHONE });
         expect(userExists).toBeFalsy();
       });
       it('verify', async () => {
         const para = new MockPara(Environment.DEV, API_KEY);
 
-        await para.createUserByPhone({ phone: USER_PHONE, countryCode: USER_COUNTRY_CODE as CountryCallingCode });
+        await para.createUserByPhone({ phone: USER_PHONE });
 
         const verifyRes = await para.verifyPhone({ verificationCode: VERIFICATION_CODE });
 
@@ -569,28 +550,19 @@ describe('ParaCore', () => {
         expectSearchParams(url, {
           ...COMMON_SEARCH_PARAMS,
           apiKey: PARTNER.apiKey,
-          countryCode: USER_COUNTRY_CODE,
           phone: USER_PHONE,
         });
       });
       it('logs out and clears user data', async () => {
         const para = new MockPara(Environment.DEV, API_KEY);
 
-        await para.createUserByPhone({ phone: USER_PHONE, countryCode: USER_COUNTRY_CODE as CountryCallingCode });
+        await para.createUserByPhone({ phone: USER_PHONE });
 
-        expect(para.getPhone()).toEqual({
-          phone: USER_PHONE,
-          countryCode: USER_COUNTRY_CODE,
-        });
-        expect(para.getPhoneNumber()).toEqual(`+${USER_COUNTRY_CODE}${USER_PHONE}`);
+        expect(para.getPhoneNumber()).toEqual(USER_PHONE);
         expect(para.getUserId()).toEqual(USER_ID);
 
         await para.logout();
 
-        expect(para.getPhone()).toEqual({
-          phone: undefined,
-          countryCode: undefined,
-        });
         expect(para.getPhoneNumber()).toBeUndefined();
         expect(para.getUserId()).toBeUndefined();
       });
@@ -672,7 +644,7 @@ describe('ParaCore', () => {
           } as Response),
         );
 
-        const loginRes = await para.initiateUserLogin({ phone: USER_PHONE, countryCode: USER_COUNTRY_CODE });
+        const loginRes = await para.initiateUserLogin({ phone: USER_PHONE });
 
         const isPhone = await para.isPhone;
 
@@ -684,7 +656,6 @@ describe('ParaCore', () => {
         expectSearchParams(url, {
           ...COMMON_SEARCH_PARAMS,
           apiKey: PARTNER.apiKey,
-          countryCode: USER_COUNTRY_CODE,
           encryptionKey: getPublicKeyHex(para.loginEncryptionKeyPair!),
           phone: USER_PHONE,
           sessionId: SESSION_ID,
@@ -702,7 +673,7 @@ describe('ParaCore', () => {
           } as Response),
         );
 
-        const loginRes = await para.initiateUserLoginForPhone({ phone: USER_PHONE, countryCode: USER_COUNTRY_CODE });
+        const loginRes = await para.initiateUserLoginForPhone({ phone: USER_PHONE });
 
         const url = new URL(loginRes);
 
@@ -711,7 +682,6 @@ describe('ParaCore', () => {
         expectSearchParams(url, {
           ...COMMON_SEARCH_PARAMS,
           apiKey: PARTNER.apiKey,
-          countryCode: USER_COUNTRY_CODE,
           encryptionKey: getPublicKeyHex(para.loginEncryptionKeyPair!),
           phone: USER_PHONE,
           sessionId: SESSION_ID,
@@ -729,7 +699,7 @@ describe('ParaCore', () => {
           } as Response),
         );
 
-        const loginRes = await para.initiateUserLoginV2({ phone: USER_PHONE, countryCode: USER_COUNTRY_CODE });
+        const loginRes = await para.initiateUserLoginV2({ phone: USER_PHONE });
 
         expect(loginRes.has(AuthMethod.PASSKEY)).toBeTruthy();
         expect(loginRes.has(AuthMethod.PASSWORD)).toBeTruthy();
@@ -1128,7 +1098,7 @@ describe('ParaCore', () => {
         });
 
         it('waitForPasskeyAndCreateWallet - no pregen', async () => {
-          await para.createUserByPhone({ phone: USER_PHONE, countryCode: USER_COUNTRY_CODE as CountryCallingCode });
+          await para.createUserByPhone({ phone: USER_PHONE });
 
           const created = await para.waitForPasskeyAndCreateWallet();
           await para.setCurrentWalletIds(created.walletIds);
@@ -1154,7 +1124,7 @@ describe('ParaCore', () => {
 
           await para.setWallets(walletsToSet);
 
-          await para.createUserByPhone({ phone: USER_PHONE, countryCode: USER_COUNTRY_CODE as CountryCallingCode });
+          await para.createUserByPhone({ phone: USER_PHONE });
 
           const created = await para.waitForPasskeyAndCreateWallet();
           await para.setCurrentWalletIds(created.walletIds);
@@ -1602,7 +1572,6 @@ describe('ParaCore', () => {
       it('phone', async () => {
         const resp = await para.verify2FAForPhone({
           phone: USER_PHONE,
-          countryCode: USER_COUNTRY_CODE,
           verificationCode: '123456',
         });
 
@@ -1610,9 +1579,7 @@ describe('ParaCore', () => {
       });
       it('email - fail', async () => {
         mockVerify2FAForPhone.mockRejectedValueOnce('invalid');
-        await expect(
-          para.verify2FAForPhone({ phone: USER_PHONE, countryCode: USER_COUNTRY_CODE, verificationCode: '123456' }),
-        ).rejects.toThrowError();
+        await expect(para.verify2FAForPhone({ phone: USER_PHONE, verificationCode: '123456' })).rejects.toThrowError();
       });
     });
   });

@@ -1,15 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { extractAuthInfo, extractWalletRef, isExternalWalletAddress, isWalletId } from '../src';
+import { extractAuthInfo, extractWalletRef, isExternalWalletAddress, isPrimary, isVerifiedAuth, isWalletId } from '../src';
 
 const email = 'test@email.com';
-const phone = '5555555555';
+const phoneNational = '9495551234';
 const countryCode = '+1';
+const phone = `${countryCode}${phoneNational}`;
 const farcasterUsername = 'farcasterUsername';
 const telegramUserId = 'telegramUserId';
 const userId = 'userId';
 
 const emailAuth = { email, foo: 'bar', phone: 'undefined' };
-const phoneAuth = { phone, countryCode, foo: 'bar', email: 'undefined' };
+const phoneAuth = { phone, foo: 'bar' };
+const phoneLegacyAuth = { phone: phoneNational, countryCode, foo: 'bar', email: 'undefined' };
 const farcasterAuth = { farcasterUsername, foo: 'bar', email: 'null' };
 const telegramAuth = { telegramUserId, foo: 'bar', email: 'null' };
 const userIdAuth = { userId: 'userId', foo: 'bar', email: 'null' };
@@ -40,23 +42,29 @@ describe('utils', () => {
         auth: { email },
         authType: 'email',
         identifier: email,
-        publicKeyIdentifier: email,
       });
     });
 
     it('extracts phone auth', () => {
-      expect(extractAuthInfo(phoneAuth)).toEqual({
-        auth: { phone, countryCode },
+      expect(extractAuthInfo(phoneLegacyAuth)).toEqual({
+        auth: { phone: `${countryCode}${phoneNational}` },
         authType: 'phone',
-        identifier: `${countryCode}${phone}`,
-        publicKeyIdentifier: `${countryCode}${phone}`,
+        identifier: `${countryCode}${phoneNational}`,
       });
 
-      expect(extractAuthInfo({ phone, foo: 'bar', email: 'null' })).toBeUndefined();
+      expect(extractAuthInfo({ countryCode, foo: 'bar', email: 'null' })).toBeUndefined();
 
-      expect(() => extractAuthInfo({ phone, foo: 'bar', email: 'null' }, { isRequired: true })).toThrow(
+      expect(extractAuthInfo({ phone: phoneNational, foo: 'bar', email: 'null' })).toBeUndefined();
+
+      expect(() => extractAuthInfo({ phone: phoneNational, foo: 'bar', email: 'null' }, { isRequired: true })).toThrow(
         'invalid auth object',
       );
+
+      expect(extractAuthInfo(phoneAuth)).toEqual({
+        auth: { phone: `${countryCode}${phoneNational}` },
+        authType: 'phone',
+        identifier: `${countryCode}${phoneNational}`,
+      });
     });
 
     it('extracts farcaster auth', () => {
@@ -64,7 +72,6 @@ describe('utils', () => {
         auth: { farcasterUsername },
         authType: 'farcaster',
         identifier: farcasterUsername,
-        publicKeyIdentifier: `${farcasterUsername}-farcaster`,
       });
     });
 
@@ -73,7 +80,6 @@ describe('utils', () => {
         auth: { telegramUserId },
         authType: 'telegram',
         identifier: telegramUserId,
-        publicKeyIdentifier: `${telegramUserId}-telegram`,
       });
     });
 
@@ -86,7 +92,6 @@ describe('utils', () => {
         auth: { userId },
         authType: 'userId',
         identifier: userId,
-        publicKeyIdentifier: userId,
       });
     });
 
@@ -101,5 +106,25 @@ describe('utils', () => {
 
       expect(() => extractAuthInfo({ email, phone, foo: 'bar' }, { isRequired: true })).toThrow('invalid auth object');
     });
+  });
+
+  it('isPrimary', () => {
+    expect(isPrimary({})).toBe(false);
+
+    expect(isPrimary({ email })).toBe(true);
+    expect(isPrimary({ phone })).toBe(true);
+    expect(isPrimary({ farcasterUsername })).toBe(true);
+    expect(isPrimary({ telegramUserId })).toBe(true);
+    expect(isPrimary({ foo: 'bar' })).toBe(false);
+  });
+
+  it('isVerifiedAuth', () => {
+    expect(isVerifiedAuth({})).toBe(false);
+
+    expect(isVerifiedAuth({ email })).toBe(true);
+    expect(isVerifiedAuth({ phone })).toBe(true);
+    expect(isVerifiedAuth({ farcasterUsername })).toBe(false);
+    expect(isVerifiedAuth({ telegramUserId })).toBe(false);
+    expect(isVerifiedAuth({ foo: 'bar' })).toBe(false);
   });
 });

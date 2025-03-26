@@ -40,7 +40,7 @@ export {
 } from './types/index.js';
 export * from './types/events.js';
 export * from './types/config.js';
-export { getPortalDomain, stringToPhoneNumber, entityToWallet } from './utils/index.js';
+export { getPortalDomain, entityToWallet } from './utils/index.js';
 export { PREFIX as STORAGE_PREFIX } from './constants.js';
 export { distributeNewShare } from './shares/shareDistribution.js';
 export { KeyContainer } from './shares/KeyContainer.js';
@@ -70,6 +70,7 @@ export * from './external/userManagementClient.js';
 export * from './errors.js';
 export * from './utils/formatting.js';
 export * from './utils/polling.js';
+export * from './utils/phone.js';
 export { isWalletSupported } from './utils/wallet.js';
 export { getOnRampAssets, getOnRampNetworks, toAssetInfoArray } from './utils/onRamps.js';
 export { getPortalBaseURL } from './utils/url.js';

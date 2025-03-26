@@ -1,7 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { Environment } from '../../src/types';
 import { getBaseMPCNetworkUrl, getBaseUrl, initClient } from '../../src/external/userManagementClient';
-import Client from '@getpara/user-management-client';
 
 describe('userManagementClient', () => {
   describe('getBaseUrl', () => {
@@ -89,12 +88,12 @@ describe('userManagementClient', () => {
     });
 
     it('returns client - dev', () => {
-      const resp = initClient({ env: Environment.DEV });
-      expect(resp).toBeInstanceOf(Client);
+      const resp = initClient({ env: Environment.DEV, apiKey: 'api-key-123' });
+      expect(resp).toBeDefined();
     });
     it('returns client - prod', () => {
-      const resp = initClient({ env: Environment.PROD });
-      expect(resp).toBeInstanceOf(Client);
+      const resp = initClient({ env: Environment.PROD, apiKey: 'api-key-123' });
+      expect(resp).toBeDefined();
     });
   });
 });

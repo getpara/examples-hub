@@ -2,7 +2,6 @@ import { PropsWithChildren, createContext, useCallback, useContext, useEffect, u
 import * as utils from '../../../utils/authLogin';
 import { AuthLoginParams } from '../../../utils/authLogin';
 import { usePara } from '../../../components/ParaContext';
-import { CountryCallingCode } from 'libphonenumber-js';
 import { entityToWallet, isWalletSupported, WalletEntity, WalletType } from '@getpara/core-sdk';
 import { formatISO } from 'date-fns';
 import { useCloseWindow } from '../../../hooks/useCloseWindow';
@@ -181,7 +180,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
           await para.setEmail(authInfo.identifier);
           break;
         case 'phone':
-          await para.setPhoneNumber(authInfo.auth.phone, authInfo.auth.countryCode as CountryCallingCode);
+          await para.setPhoneNumber(authInfo.identifier);
           break;
         case 'farcaster':
           await para.setFarcasterUsername(authInfo.identifier);

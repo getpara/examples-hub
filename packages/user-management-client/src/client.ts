@@ -9,6 +9,7 @@ import { AxiosRequestConfig } from 'axios';
 import qs from 'qs';
 import {
   Auth,
+  AuthIdentifier,
   AuthMethod,
   AuthParams,
   BackupKitEmailProps,
@@ -33,6 +34,7 @@ import {
   TelegramAuthResponse,
   TPregenIdentifierType,
   VerificationEmailProps,
+  VerifiedAuth,
   WalletEntity,
   WalletParams,
   WalletScheme,
@@ -55,15 +57,6 @@ type ClientConfig = {
   retrieveSessionCookie?: () => string | undefined;
   persistSessionCookie?: (cookie: string) => void;
 };
-
-interface createUserBody {
-  email: string;
-}
-
-interface createUserBodyForPhone {
-  phone: string;
-  countryCode: string;
-}
 
 interface ExternalWalletLoginBody {
   externalAddress: string;
@@ -345,14 +338,12 @@ class Client {
     this.baseRequest.interceptors.response.use(handleResponseSuccess, handleResponseError);
   }
 
-  createUser = async (
-    body: (createUserBody | createUserBodyForPhone) & VerificationEmailProps,
-  ): Promise<createUserIdRes> => {
+  createUser = async (body: VerifiedAuth & VerificationEmailProps): Promise<createUserIdRes> => {
     const res = await this.baseRequest.post<createUserIdRes>(`/users`, body);
     return res.data;
   };
 
-  checkUserExists = async (auth: Auth<'email' | 'phone'>): Promise<any> => {
+  checkUserExists = async (auth: VerifiedAuth): Promise<any> => {
     const res = await this.baseRequest.get<any>('/users/exists', {
       params: { ...auth },
     });
@@ -782,8 +773,8 @@ class Client {
   }
 
   // POST /2fa/phone/verify
-  async verify2FAForPhone(phone: string, countryCode: string, verificationCode: string) {
-    const body = { phone, countryCode, verificationCode };
+  async verify2FAForPhone(phone: AuthIdentifier<'phone'>, verificationCode: string) {
+    const body = { phone, verificationCode };
     const res = await this.baseRequest.post<any>('/2fa/verify', body);
     return res;
   }

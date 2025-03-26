@@ -11,6 +11,7 @@ import TwoFactorContext from '../../contexts/TwoFactorContext';
 import { RecoveryAttemptContext, RecoveryType } from '../../contexts/RecoveryAttemptContext';
 import PhoneContext from '../../contexts/PhoneContext';
 import { usePara } from '../../../components/ParaContext';
+import { formatPhoneNumber } from '@getpara/web-sdk';
 
 const RecoveryWallet2FAStep: React.FC = () => {
   const para = usePara();
@@ -86,7 +87,10 @@ const RecoveryWallet2FAStep: React.FC = () => {
             try {
               let wallets, userId;
               if (type === RecoveryType.PHONE) {
-                ({ wallets, userId } = await para.verify2FAForPhone({ phone, countryCode, verificationCode }));
+                ({ wallets, userId } = await para.verify2FAForPhone({
+                  phone: formatPhoneNumber(phone, countryCode),
+                  verificationCode,
+                }));
               } else {
                 ({ wallets, userId } = await para.verify2FA({ email, verificationCode }));
               }

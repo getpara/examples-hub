@@ -1,9 +1,9 @@
-import { Auth } from '@getpara/user-management-client';
+import { PrimaryAuth } from '@getpara/user-management-client';
 import ParaWeb from '@getpara/web-sdk';
 
-export type InitiateLoginArgs = Auth;
+export type InitiateLoginArgs = PrimaryAuth;
 
-export const initiateLogin = async (para?: ParaWeb, args?: Auth) => {
+export const initiateLogin = async (para?: ParaWeb, args?: InitiateLoginArgs) => {
   if (!para) {
     throw new Error('no para instance');
   }

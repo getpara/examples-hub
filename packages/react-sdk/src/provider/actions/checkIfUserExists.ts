@@ -15,7 +15,7 @@ export const checkIfUserExists = async (para?: ParaWeb, args?: CheckIfUserExists
   const isEmail = 'email' in args;
   const isPhone = 'phone' in args;
 
-  if ((!isEmail && !isPhone) || (isPhone && !args.countryCode)) {
+  if (!isEmail && !isPhone) {
     throw new Error('invalid user exists args');
   }
 

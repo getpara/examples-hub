@@ -9,6 +9,7 @@ import VerifyCode from '../../../assets/verifyCode';
 import PhoneContext from '../../contexts/PhoneContext';
 import UserContext from '../../contexts/UserContext';
 import { usePara } from '../../../components/ParaContext';
+import { formatPhoneNumber } from '@getpara/web-sdk';
 
 const Recovery2FAPhoneStep: React.FC = () => {
   const para = usePara();
@@ -77,8 +78,7 @@ const Recovery2FAPhoneStep: React.FC = () => {
           if (verificationCode.length === 6 && /^\d+$/.test(verificationCode)) {
             try {
               const { initiatedAt, status, userId, wallets } = await para.verify2FAForPhone({
-                phone,
-                countryCode,
+                phone: formatPhoneNumber(phone, countryCode),
                 verificationCode,
               });
               setWallets(wallets);

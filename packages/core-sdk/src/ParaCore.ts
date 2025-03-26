@@ -34,10 +34,12 @@ import {
   VerifyTelegramRes,
   Auth,
   extractAuthInfo,
-  AuthInfo,
   SupportedWalletTypes,
   ExternalWalletLoginRes,
   SessionInfo,
+  PrimaryAuth,
+  PrimaryAuthInfo,
+  PrimaryAuthType,
 } from '@getpara/user-management-client';
 import type { pki as pkiType, jsbn as jsbnType } from 'node-forge';
 import forge from 'node-forge';
@@ -85,7 +87,7 @@ import {
   isPregenIdentifierMatch,
   isWalletSupported,
   migrateWallet,
-  normalizePhoneNumber,
+  formatPhoneNumber,
   supportedWalletTypesEq,
   truncateAddress,
   WalletSchemeTypeMap,
@@ -101,8 +103,7 @@ export abstract class ParaCore {
   ctx: Ctx;
 
   email?: string;
-  phone?: string;
-  countryCode?: CountryCallingCode;
+  phone?: `+${number}`;
   farcasterUsername?: string;
   telegramUserId?: string;
 
@@ -118,19 +119,19 @@ export abstract class ParaCore {
   private isAwaitingOAuth = false;
 
   get isEmail(): boolean {
-    return !!this.email && !this.phone && !this.countryCode && !this.farcasterUsername && !this.telegramUserId;
+    return !!this.email && !this.phone && !this.farcasterUsername && !this.telegramUserId;
   }
 
   get isPhone(): boolean {
-    return !!this.phone && !!this.countryCode && !this.email && !this.farcasterUsername && !this.telegramUserId;
+    return !!this.phone && !this.email && !this.farcasterUsername && !this.telegramUserId;
   }
 
   get isFarcaster(): boolean {
-    return !!this.farcasterUsername && !this.email && !this.phone && !this.countryCode && !this.telegramUserId;
+    return !!this.farcasterUsername && !this.email && !this.phone && !this.telegramUserId;
   }
 
   get isTelegram(): boolean {
-    return !!this.telegramUserId && !this.email && !this.phone && !this.countryCode && !this.farcasterUsername;
+    return !!this.telegramUserId && !this.email && !this.phone && !this.farcasterUsername;
   }
 
   get partnerId(): string | undefined {
@@ -609,7 +610,7 @@ export abstract class ParaCore {
       ...(isCreate || isLogin
         ? {
             ...(opts.authType === 'email' ? { email: this.email } : {}),
-            ...(opts.authType === 'phone' ? { phone: this.phone, countryCode: this.countryCode } : {}),
+            ...(opts.authType === 'phone' ? { phone: this.phone } : {}),
             ...(opts.authType === 'farcaster' ? { farcasterUsername: this.farcasterUsername } : {}),
             ...(opts.authType === 'telegram' ? { telegramUserId: this.telegramUserId } : {}),
           }
@@ -728,7 +729,6 @@ export abstract class ParaCore {
 
   private initializeFromStorage = () => {
     this.updateEmailFromStorage();
-    this.updateCountryCodeFromStorage();
     this.updatePhoneFromStorage();
     this.updateUserIdFromStorage();
     this.updateTelegramUserIdFromStorage();
@@ -746,10 +746,12 @@ export abstract class ParaCore {
     this.userId = (this.localStorageGetItem(constants.LOCAL_STORAGE_USER_ID) as string) || undefined;
   };
   private updatePhoneFromStorage = () => {
-    this.phone = (this.localStorageGetItem(constants.LOCAL_STORAGE_PHONE) as string) || undefined;
-  };
-  private updateCountryCodeFromStorage = () => {
-    this.countryCode = (this.localStorageGetItem(constants.LOCAL_STORAGE_COUNTRY_CODE) as CountryCallingCode) || undefined;
+    const countryCode = (this.localStorageGetItem(constants.LOCAL_STORAGE_COUNTRY_CODE) as CountryCallingCode) || undefined;
+    const phone = (this.localStorageGetItem(constants.LOCAL_STORAGE_PHONE) as string) || undefined;
+
+    if (phone) {
+      this.phone = formatPhoneNumber(phone, countryCode) || undefined;
+    }
   };
   private updateEmailFromStorage = () => {
     this.email = (this.localStorageGetItem(constants.LOCAL_STORAGE_EMAIL) as string) || undefined;
@@ -901,9 +903,12 @@ export abstract class ParaCore {
    */
   async init(): Promise<void> {
     this.email = ((await this.localStorageGetItem(constants.LOCAL_STORAGE_EMAIL)) as string) || undefined;
-    this.countryCode =
+
+    const countryCode =
       ((await this.localStorageGetItem(constants.LOCAL_STORAGE_COUNTRY_CODE)) as CountryCallingCode) || undefined;
-    this.phone = ((await this.localStorageGetItem(constants.LOCAL_STORAGE_PHONE)) as string) || undefined;
+    const phone = ((await this.localStorageGetItem(constants.LOCAL_STORAGE_PHONE)) as string) || undefined;
+    this.phone = formatPhoneNumber(phone, countryCode) || undefined;
+
     this.userId = ((await this.localStorageGetItem(constants.LOCAL_STORAGE_USER_ID)) as string) || undefined;
     this.telegramUserId =
       ((await this.localStorageGetItem(constants.LOCAL_STORAGE_TELEGRAM_USER_ID)) as string) || undefined;
@@ -1011,11 +1016,9 @@ export abstract class ParaCore {
    * @param phone - Phone number to set.
    * @param countryCode - Country Code to set.
    */
-  async setPhoneNumber(phone: string, countryCode: CountryCallingCode): Promise<void> {
-    this.phone = phone;
-    this.countryCode = countryCode;
+  async setPhoneNumber(phone: `+${number}` | string, countryCode?: string): Promise<void> {
+    this.phone = formatPhoneNumber(phone, countryCode);
     await this.localStorageSetItem(constants.LOCAL_STORAGE_PHONE, phone);
-    await this.localStorageSetItem(constants.LOCAL_STORAGE_COUNTRY_CODE, countryCode);
   }
 
   /**
@@ -1114,22 +1117,14 @@ export abstract class ParaCore {
   }
 
   /**
-   * Gets the phone object associated with the `ParaCore` instance.
-   * @returns - phone object with phone number and country code associated with the `ParaCore` instance.
-   */
-  getPhone(): { phone?: string; countryCode?: string } {
-    return { phone: this.phone, countryCode: this.countryCode };
-  }
-
-  /**
    * Gets the formatted phone number associated with the `ParaCore` instance.
    * @returns - formatted phone number associated with the `ParaCore` instance.
    */
-  getPhoneNumber(): string | undefined {
-    if (!this.phone || !this.countryCode) {
+  getPhoneNumber(): `+${number}` | undefined {
+    if (!this.phone) {
       return undefined;
     }
-    return normalizePhoneNumber(this.countryCode, this.phone);
+    return this.phone;
   }
 
   /**
@@ -1508,8 +1503,8 @@ export abstract class ParaCore {
    * @param {string} opts.countryCode - the country code.
    * @returns true if user exists, false otherwise.
    */
-  async checkIfUserExistsByPhone({ phone, countryCode }: { phone: string; countryCode: string }): Promise<boolean> {
-    const res = await this.ctx.client.checkUserExists({ phone, countryCode });
+  async checkIfUserExistsByPhone(auth: Auth<'phone'>): Promise<boolean> {
+    const res = await this.ctx.client.checkUserExists(auth);
     return res.data.exists;
   }
 
@@ -1534,13 +1529,10 @@ export abstract class ParaCore {
    * @param {string} opts.phone - the phone number to use for creating the user.
    * @param {string} opts.countryCode - the country code to use for creating the user.
    */
-  async createUserByPhone({ phone, countryCode }: Auth<'phone'>): Promise<void> {
+  async createUserByPhone(auth: Auth<'phone'>): Promise<void> {
     this.requireApiKey();
-    await this.setPhoneNumber(phone, countryCode as CountryCallingCode);
-    const { userId } = await this.ctx.client.createUser({
-      phone: this.phone,
-      countryCode: this.countryCode,
-    });
+    await this.setPhoneNumber(auth.phone);
+    const { userId } = await this.ctx.client.createUser(auth);
     await this.setUserId(userId);
   }
 
@@ -1663,11 +1655,8 @@ export abstract class ParaCore {
    */
   async verify2FAForPhone({
     phone,
-    countryCode,
     verificationCode,
-  }: {
-    phone: string;
-    countryCode: string;
+  }: Auth<'phone'> & {
     verificationCode: string;
   }): Promise<{
     initiatedAt?: Date;
@@ -1675,7 +1664,7 @@ export abstract class ParaCore {
     userId: string;
     wallets: Pick<Wallet, 'address' | 'id'>[];
   }> {
-    const res = await this.ctx.client.verify2FAForPhone(phone, countryCode, verificationCode);
+    const res = await this.ctx.client.verify2FAForPhone(phone, verificationCode);
     return {
       initiatedAt: res.data.initiatedAt,
       status: res.data.status,
@@ -1845,7 +1834,7 @@ export abstract class ParaCore {
     );
   }
 
-  protected async supportedAuthMethods(auth: Auth): Promise<Set<AuthMethod>> {
+  protected async supportedAuthMethods(auth: Auth<PrimaryAuthType | 'userId'>): Promise<Set<AuthMethod>> {
     const { supportedAuthMethods } = await this.ctx.client.getSupportedAuthMethods(auth);
 
     const authMethods = new Set<AuthMethod>();
@@ -1873,13 +1862,12 @@ export abstract class ParaCore {
     return await this.ctx.client.getBiometricLocationHints({
       email: this.email,
       phone: this.phone,
-      countryCode: this.countryCode,
       farcasterUsername: this.farcasterUsername,
       telegramUserId: this.telegramUserId,
     });
   }
 
-  private async setAuth(auth: Auth): Promise<AuthInfo | undefined> {
+  private async setAuth(auth: PrimaryAuth): Promise<PrimaryAuthInfo | undefined> {
     const authInfo = extractAuthInfo(auth);
 
     if (!authInfo) {
@@ -1891,7 +1879,7 @@ export abstract class ParaCore {
         await this.setEmail(authInfo.identifier);
         break;
       case 'phone':
-        await this.setPhoneNumber(authInfo.auth.phone, authInfo.auth.countryCode as CountryCallingCode);
+        await this.setPhoneNumber(authInfo.identifier);
         break;
       case 'farcaster':
         await this.setFarcasterUsername(authInfo.identifier);
@@ -1910,7 +1898,7 @@ export abstract class ParaCore {
    * @param {boolean} opts.useShortURL - whether to shorten the link
    * @returns - the WebAuth URL for logging in
    **/
-  async initiateUserLogin({ useShortUrl = false, ...auth }: Auth & { useShortUrl?: boolean }): Promise<string> {
+  async initiateUserLogin({ useShortUrl = false, ...auth }: PrimaryAuth & { useShortUrl?: boolean }): Promise<string> {
     const authInfo = await this.setAuth(auth);
 
     if (!authInfo) {
@@ -1941,7 +1929,7 @@ export abstract class ParaCore {
    * @param email - the email to login with
    * @returns - a set of supported auth methods for the user
    **/
-  async initiateUserLoginV2(auth: Auth): Promise<Set<AuthMethod>> {
+  async initiateUserLoginV2(auth: PrimaryAuth): Promise<Set<AuthMethod>> {
     const authInfo = await this.setAuth(auth);
 
     if (!authInfo) {
@@ -3279,7 +3267,6 @@ export abstract class ParaCore {
       currentWalletIds: this.currentWalletIds,
       sessionCookie: this.sessionCookie,
       phone: this.phone,
-      countryCode: this.countryCode,
       telegramUserId: this.telegramUserId,
       farcasterUsername: this.farcasterUsername,
       externalWallets: this.externalWallets,
@@ -3380,7 +3367,6 @@ export abstract class ParaCore {
     this.email = undefined;
     this.telegramUserId = undefined;
     this.phone = undefined;
-    this.countryCode = undefined;
     this.userId = undefined;
     this.sessionCookie = undefined;
 
@@ -3421,7 +3407,6 @@ export abstract class ParaCore {
       cosmosPrefix: this.#partner?.cosmosPrefix,
       email: this.email,
       phone: this.phone,
-      countryCode: this.countryCode,
       telegramUserId: this.telegramUserId,
       farcasterUsername: this.farcasterUsername,
       userId: this.userId,

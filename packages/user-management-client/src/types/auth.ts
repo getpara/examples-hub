@@ -1,20 +1,22 @@
 import { CurrentWalletIds, SupportedWalletTypes } from './wallet.js';
 
-export type AuthType = 'email' | 'phone' | 'farcaster' | 'telegram' | 'userId';
+export type AuthType = 'email' | 'phone' | 'phoneLegacy' | 'farcaster' | 'telegram' | 'userId';
 
-export type $AuthInfo<T extends AuthType = AuthType> = {
+export type PrimaryAuthType = Extract<AuthType, 'email' | 'phone' | 'farcaster' | 'telegram'>;
+
+export type VerifiedAuthType = Extract<PrimaryAuthType, 'email' | 'phone'>;
+
+export type AuthIdentifier<T extends AuthType | never> = T extends 'phone' ? `+${number}` : string;
+
+export type AuthInfo<T extends Exclude<AuthType, 'phoneLegacy'> = Exclude<AuthType, 'phoneLegacy'>> = {
   auth: Auth<T>;
   authType: T;
-  identifier: string;
-  publicKeyIdentifier: string;
+  identifier: AuthIdentifier<T>;
 };
 
-export type AuthInfo =
-  | $AuthInfo<'email'>
-  | $AuthInfo<'phone'>
-  | $AuthInfo<'farcaster'>
-  | $AuthInfo<'telegram'>
-  | $AuthInfo<'userId'>;
+export type PrimaryAuthInfo = AuthInfo<PrimaryAuthType>;
+
+export type VerifiedAuthInfo = AuthInfo<VerifiedAuthType>;
 
 export type AuthParams = Record<string, any> & {
   email?: string;
@@ -27,13 +29,19 @@ export type AuthParams = Record<string, any> & {
 
 export type Auth<T extends AuthType = AuthType> = T extends 'email'
   ? { email: string }
-  : T extends 'phone'
+  : T extends 'phoneLegacy'
     ? { phone: string; countryCode: string }
-    : T extends 'farcaster'
-      ? { farcasterUsername: string }
-      : T extends 'telegram'
-        ? { telegramUserId: string }
-        : { userId: string };
+    : T extends 'phone'
+      ? { phone: AuthIdentifier<'phone'> }
+      : T extends 'farcaster'
+        ? { farcasterUsername: AuthIdentifier<'farcaster'> }
+        : T extends 'telegram'
+          ? { telegramUserId: AuthIdentifier<'telegram'> }
+          : { userId: AuthIdentifier<'userId'> };
+
+export type PrimaryAuth = Auth<PrimaryAuthType>;
+
+export type VerifiedAuth = Auth<VerifiedAuthType>;
 
 export enum EncryptorType {
   USER = 'USER',

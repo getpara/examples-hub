@@ -15,7 +15,7 @@ import {
   CpslText,
 } from '@getpara/react-components';
 import { CountryCallingCode } from 'libphonenumber-js';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import countryCodes from './countryCodes.js';
 import { useModalStore, useUserInfoStore } from '../../stores/index.js';
@@ -23,10 +23,12 @@ import { EMAIL_REGEX, MOBILE_SIZE } from '../../constants/constants.js';
 import { useDropdownPosition } from './hooks/useDropdownPosition.js';
 import { ModalStep } from '../../utils/steps.js';
 import { defaultPhoneMask, phoneMasks } from './phoneMasks.js';
-import { AuthMethod } from '@getpara/web-sdk';
+import { AuthMethod, formatPhoneNumber } from '@getpara/web-sdk';
 import { Auth, AuthType } from '@getpara/user-management-client';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 import { useCheckIfUserExists, useCreateUser, useInitiateLogin, useLogout } from '../../../provider/index.js';
+import parsePhoneNumberFromString from 'libphonenumber-js';
+import { NationalNumber } from 'libphonenumber-js';
 
 interface AuthInputProps {
   disableEmailLogin?: boolean;
@@ -55,19 +57,29 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
   const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
   const setBiometricLocationHints = useModalStore(state => state.setBiometricLocationHints);
 
-  const [countryCode, setCountryCode] = useState<CountryCallingCode>(
-    (authInfo?.authType === 'phone' ? authInfo.auth.countryCode || '+1' : '+1') as CountryCallingCode,
-  );
+  const [storedNationalNumber, storedCountryCode] = useMemo<
+    [NationalNumber | undefined, CountryCallingCode | undefined]
+  >(() => {
+    if (authInfo?.authType !== 'phone') {
+      return [undefined, undefined];
+    }
+
+    const parsed = parsePhoneNumberFromString(authInfo.identifier);
+
+    return [parsed?.nationalNumber, parsed?.countryCallingCode];
+  }, [authInfo?.authType, authInfo?.identifier]);
+
+  const [countryCode, setCountryCode] = useState<CountryCallingCode>((storedCountryCode ?? '+1') as CountryCallingCode);
   const [identifier, setIdentifier] = useState(
     (() => {
-      if (!authInfo || ['telegram', 'farcaster'].includes(authInfo.authType)) {
+      if (!authInfo?.authType || ['telegram', 'farcaster'].includes(authInfo?.authType)) {
         return '';
       }
       if (authInfo.authType !== 'phone') {
         return authInfo.identifier;
       }
 
-      return authInfo.auth.phone;
+      return storedNationalNumber ?? '';
     })(),
   );
   const [identifierType, setIdentifierType] = useState<Extract<AuthType, 'email' | 'phone'> | undefined>(
@@ -179,7 +191,7 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
 
       let userExists = false;
 
-      auth = { phone: identifier, countryCode };
+      auth = { phone: formatPhoneNumber(identifier, countryCode)! };
 
       try {
         userExists = await checkIfUserExistsAsync(auth);

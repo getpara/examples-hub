@@ -831,12 +831,11 @@ describe('Client', () => {
 
     it('verify2FAForPhone', async () => {
       const phone = 'phone';
-      const countryCode = 'country-code';
       const verificationCode = 'verification-code';
 
-      await client.verify2FAForPhone(phone, countryCode, verificationCode);
+      await client.verify2FAForPhone(phone, verificationCode);
 
-      expect(mocks.post).toBeCalledWith(`/2fa/verify`, { phone, countryCode, verificationCode });
+      expect(mocks.post).toBeCalledWith(`/2fa/verify`, { phone, verificationCode });
     });
 
     it('tempTrasmissionInit', async () => {
