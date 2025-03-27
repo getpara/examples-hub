@@ -26,7 +26,7 @@ export const LoginDoneStep = ({ onClose }: LoginDoneStep) => {
       </Heading>
       {!hideWallets && (
         <WalletCards>
-          {para.isUsingExternalWallet() ? (
+          {para.externalWalletConnectionType === 'CONNECTION_ONLY' ? (
             <ExternalWalletCard address={Object.values(para.externalWallets || {})[0]?.address ?? ''} />
           ) : (
             para.currentWalletIdsArray.map(([id, type]) => {

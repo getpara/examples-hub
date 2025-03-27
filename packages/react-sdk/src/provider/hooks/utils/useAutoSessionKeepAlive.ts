@@ -19,7 +19,7 @@ export const useAutoSessionKeepAlive = ({ disabled }: { disabled?: boolean }) =>
       return;
     }
 
-    if (account?.isConnected && !client.isUsingExternalWallet()) {
+    if (account?.isConnected && client.externalWalletConnectionType !== 'CONNECTION_ONLY') {
       setupSessionMonitoring();
     } else {
       clearSessionMonitoring();

@@ -21,6 +21,7 @@ export interface Wallet {
   lastUsedPartner?: PartnerEntity;
   lastUsedPartnerId?: string;
   isExternal?: boolean;
+  isExternalWithParaAuth?: boolean;
 }
 
 /** @deprecated */
@@ -43,3 +44,5 @@ export interface DeniedSignatureResWithUrl extends DeniedSignatureRes {
 
 export type SignatureRes = SuccessfulSignatureRes | DeniedSignatureRes;
 export type FullSignatureRes = SuccessfulSignatureRes | DeniedSignatureResWithUrl;
+
+export type ExternalWalletConnectionType = 'NONE' | 'CONNECTION_ONLY' | 'AUTHENTICATED';

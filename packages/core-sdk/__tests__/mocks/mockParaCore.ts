@@ -11,7 +11,6 @@ export class MockPara extends ParaCore {
   persistSessionCookie = (_: string) => {};
 
   getSupportedCreateAuthMethods = super.getSupportedCreateAuthMethods;
-  isUsingExternalWallet = super.isUsingExternalWallet;
   getTransmissionKeyShares = super.getTransmissionKeyShares;
   userSetupAfterLogin = super.userSetupAfterLogin;
   setLoginEncryptionKeyPair = super.setLoginEncryptionKeyPair;

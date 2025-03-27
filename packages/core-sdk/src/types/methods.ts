@@ -10,7 +10,14 @@ export type ExternalWalletInfo = {
   type: ExternalWalletType;
   provider?: string;
   addressBech32?: string;
-  shouldTrackUser?: boolean;
+  withFullParaAuth?: boolean;
+};
+
+export type VerifyExternalWallet = {
+  address: string;
+  signedMessage: string;
+  cosmosPublicKeyHex?: string;
+  cosmosSigner?: string;
 };
 
 export type PortalUrlOptions = {

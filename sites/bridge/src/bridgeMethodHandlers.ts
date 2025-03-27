@@ -132,7 +132,7 @@ export const methodHandlers: Record<string, (para: ParaWeb, args: any[]) => Prom
       address: args[0],
       type: args[1],
       provider: args[2],
-      shouldTrackUser: args[3],
+      withFullParaAuth: args[3],
     });
     return externalWalletLoginResult;
   },

@@ -39,7 +39,8 @@ export function isEmail(params: AuthParams | undefined): params is Auth<'email'>
     !isValid(params.phone) &&
     !isValid(params.countryCode) &&
     !isValid(params.farcasterUsername) &&
-    !isValid(params.telegramUserId)
+    !isValid(params.telegramUserId) &&
+    !isValid(params.externalWalletAddress)
   );
 }
 
@@ -52,7 +53,8 @@ export function isPhone(params: AuthParams | undefined): params is Auth<'phone'>
     !isValid(params.email) &&
     !isValid(params.farcasterUsername) &&
     !isValid(params.telegramUserId) &&
-    !isValid(params.userId)
+    !isValid(params.userId) &&
+    !isValid(params.externalWalletAddress)
   );
 }
 
@@ -63,7 +65,8 @@ export function isPhoneLegacy(params: AuthParams | undefined): params is Auth<'p
     isValid(params.countryCode) &&
     !isValid(params.email) &&
     !isValid(params.farcasterUsername) &&
-    !isValid(params.telegramUserId)
+    !isValid(params.telegramUserId) &&
+    !isValid(params.externalWalletAddress)
   );
 }
 
@@ -74,7 +77,8 @@ export function isFarcaster(params: AuthParams | undefined): params is Auth<'far
     !isValid(params.email) &&
     !isValid(params.phone) &&
     !isValid(params.countryCode) &&
-    !isValid(params.telegramUserId)
+    !isValid(params.telegramUserId) &&
+    !isValid(params.externalWalletAddress)
   );
 }
 
@@ -85,7 +89,8 @@ export function isTelegram(params: AuthParams | undefined): params is Auth<'tele
     !isValid(params.email) &&
     !isValid(params.phone) &&
     !isValid(params.countryCode) &&
-    !isValid(params.farcasterUsername)
+    !isValid(params.farcasterUsername) &&
+    !isValid(params.externalWalletAddress)
   );
 }
 
@@ -93,6 +98,18 @@ export function isUserId(params: AuthParams | undefined): params is Auth<'userId
   return (
     !!params &&
     isValid(params.userId) &&
+    !isValid(params.email) &&
+    !isValid(params.phone) &&
+    !isValid(params.countryCode) &&
+    !isValid(params.farcasterUsername) &&
+    !isValid(params.telegramUserId) &&
+    !isValid(params.externalWalletAddress)
+  );
+}
+export function isExternalWallet(params: AuthParams | undefined): params is Auth<'externalWallet'> {
+  return (
+    !!params &&
+    isValid(params.externalWalletAddress) &&
     !isValid(params.email) &&
     !isValid(params.phone) &&
     !isValid(params.countryCode) &&
@@ -176,6 +193,12 @@ export function extractAuthInfo(
         auth: { telegramUserId: obj.telegramUserId },
         authType: 'telegram',
         identifier: obj.telegramUserId,
+      };
+    case isExternalWallet(obj):
+      return {
+        auth: { externalWalletAddress: obj.externalWalletAddress },
+        authType: 'externalWallet',
+        identifier: obj.externalWalletAddress,
       };
     case isUserId(obj) && allowUserId:
       return {

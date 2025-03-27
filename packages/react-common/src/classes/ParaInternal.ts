@@ -2,7 +2,6 @@ import ParaWeb from '@getpara/web-sdk';
 
 export class ParaInternal extends ParaWeb {
   getSupportedCreateAuthMethods = super.getSupportedCreateAuthMethods;
-  isUsingExternalWallet = super.isUsingExternalWallet;
   getTransmissionKeyShares = super.getTransmissionKeyShares;
   userSetupAfterLogin = super.userSetupAfterLogin;
   setLoginEncryptionKeyPair = super.setLoginEncryptionKeyPair;

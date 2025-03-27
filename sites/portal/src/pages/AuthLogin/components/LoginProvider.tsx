@@ -188,6 +188,13 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
         case 'telegram':
           await para.setTelegramUserId(authInfo.identifier);
           break;
+        case 'externalWallet':
+          await para.setExternalWallet({
+            address: params.externalWalletAddress,
+            // Type isn't important here, we only care about the address
+            type: WalletType.EVM,
+          });
+          break;
       }
 
       if (params.pregenIds) {
@@ -199,7 +206,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
     }
 
     setUserDetails();
-  }, [para, params, authInfo]);
+  }, [para, params, JSON.stringify(authInfo)]);
 
   return (
     <LoginContext.Provider

@@ -46,6 +46,7 @@ import {
   SessionInfo,
   PrimaryAuth,
   PrimaryAuthType,
+  isExternalWallet,
 } from '@getpara/user-management-client';
 import type { pki as pkiType, jsbn as jsbnType } from 'node-forge';
 import forge from 'node-forge';
@@ -78,6 +79,8 @@ import {
   RecoveryStatus,
   CoreAuthInfo,
   AuthExtras,
+  VerifyExternalWallet,
+  ExternalWalletConnectionType,
 } from './types/index.js';
 import * as transmissionUtils from './transmission/transmissionUtils.js';
 import { PlatformUtils } from './PlatformUtils.js';
@@ -133,6 +136,22 @@ export abstract class ParaCore {
     return isTelegram(this.#authInfo?.auth) ? this.#authInfo.auth.telegramUserId : undefined;
   }
 
+  get externalWalletWithParaAuth(): Wallet | undefined {
+    const externalWallets = Object.values(this.externalWallets);
+
+    return externalWallets.find(w => w.isExternalWithParaAuth);
+  }
+
+  get externalWalletConnectionType(): ExternalWalletConnectionType {
+    if (this.isExternalWalletAuth) {
+      return 'AUTHENTICATED';
+    } else if (!!Object.keys(this.externalWallets).length) {
+      return 'CONNECTION_ONLY';
+    }
+
+    return 'NONE';
+  }
+
   #partner?: PartnerEntity;
 
   userId?: string;
@@ -158,6 +177,10 @@ export abstract class ParaCore {
 
   get isTelegram(): boolean {
     return isTelegram(this.authInfo?.auth);
+  }
+
+  get isExternalWalletAuth(): boolean {
+    return isExternalWallet(this.#authInfo?.auth);
   }
 
   get partnerId(): string | undefined {
@@ -468,6 +491,10 @@ export abstract class ParaCore {
   ): boolean {
     let error;
 
+    if (this.externalWallets?.[walletId]) {
+      return true;
+    }
+
     if (!this.wallets[walletId]) {
       error = `wallet with id ${walletId} does not exist`;
     } else {
@@ -665,6 +692,7 @@ export abstract class ParaCore {
     countryCode,
     farcasterUsername,
     telegramUserId,
+    externalWalletAddress,
   }: { [key in keyof Omit<AuthParams, 'userId'>]: string | null | undefined }): CoreAuthInfo | undefined {
     let auth;
 
@@ -684,6 +712,9 @@ export abstract class ParaCore {
         break;
       case !!telegramUserId:
         auth = { telegramUserId };
+        break;
+      case !!externalWalletAddress:
+        auth = { externalWalletAddress };
         break;
     }
 
@@ -786,13 +817,14 @@ export abstract class ParaCore {
   }
 
   private initializeFromStorage = () => {
+    // Loading external wallets before auth so we can check for any full auth wallets
+    this.updateExternalWalletsFromStorage();
     this.updateAuthInfoFromStorage();
     this.updateUserIdFromStorage();
     this.updateWalletsFromStorage();
     this.updateWalletIdsFromStorage();
     this.updateSessionCookieFromStorage();
     this.updateLoginEncryptionKeyPairFromStorage();
-    this.updateExternalWalletsFromStorage();
   };
 
   private updateAuthInfoFromStorage = () => {
@@ -807,6 +839,8 @@ export abstract class ParaCore {
         countryCode: (this.localStorageGetItem(constants.LOCAL_STORAGE_COUNTRY_CODE) as CountryCallingCode) || undefined,
         farcasterUsername: (this.localStorageGetItem(constants.LOCAL_STORAGE_FARCASTER_USERNAME) as string) || undefined,
         telegramUserId: (this.localStorageGetItem(constants.LOCAL_STORAGE_TELEGRAM_USER_ID) as string) || undefined,
+        // Using id here since we store the bech32 address for cosmos in the address field of the wallet
+        externalWalletAddress: this.externalWalletWithParaAuth?.id || undefined,
       };
 
       authInfo = this.#toAuthInfo(authParams);
@@ -973,6 +1007,12 @@ export abstract class ParaCore {
 
     const storageAuthInfo = ((await this.localStorageGetItem(constants.LOCAL_STORAGE_AUTH_INFO)) as string) || undefined;
 
+    // Loading external wallets before auth so we can check for any full auth wallets
+    const stringExternalWallets = await this.localStorageGetItem(constants.LOCAL_STORAGE_EXTERNAL_WALLETS);
+    const _externalWallets = JSON.parse((stringExternalWallets as string) || '{}');
+
+    await this.setExternalWallets(_externalWallets);
+
     let authInfo = jsonParse<CoreAuthInfo>(storageAuthInfo);
 
     if (!authInfo) {
@@ -984,6 +1024,8 @@ export abstract class ParaCore {
         farcasterUsername:
           ((await this.localStorageGetItem(constants.LOCAL_STORAGE_FARCASTER_USERNAME)) as string) || undefined,
         telegramUserId: ((await this.localStorageGetItem(constants.LOCAL_STORAGE_TELEGRAM_USER_ID)) as string) || undefined,
+        // Using id here since we store the bech32 address for cosmos in the address field of the wallet
+        externalWalletAddress: this.externalWalletWithParaAuth?.id || undefined,
       };
 
       authInfo = this.#toAuthInfo(authParams);
@@ -1060,11 +1102,6 @@ export abstract class ParaCore {
     if (loginEncryptionKey && loginEncryptionKey !== 'undefined') {
       this.loginEncryptionKeyPair = this.convertEncryptionKeyPair(JSON.parse(loginEncryptionKey));
     }
-
-    const stringExternalWallets = await this.localStorageGetItem(constants.LOCAL_STORAGE_EXTERNAL_WALLETS);
-    const _externalWallets = JSON.parse((stringExternalWallets as string) || '{}');
-
-    await this.setExternalWallets(_externalWallets);
 
     setupListeners.bind(this)();
 
@@ -1149,7 +1186,7 @@ export abstract class ParaCore {
    * @param externalAddress - External wallet address to set.
    * @param externalType - Type of external wallet to set.
    */
-  async setExternalWallet({ address, type, provider, addressBech32 }: ExternalWalletInfo): Promise<void> {
+  async setExternalWallet({ address, type, provider, addressBech32, withFullParaAuth }: ExternalWalletInfo): Promise<void> {
     // Can change this to continue storing existing external wallets if/when we want to allow multiple connected external wallets
     this.externalWallets = {
       [address]: {
@@ -1158,6 +1195,7 @@ export abstract class ParaCore {
         type,
         name: provider,
         isExternal: true,
+        isExternalWithParaAuth: withFullParaAuth,
         signer: '',
       },
     };
@@ -1338,11 +1376,14 @@ export abstract class ParaCore {
     overrideType?: WalletTypeProp,
     filter: WalletFilters = {},
   ): Omit<Wallet, 'signer'> | undefined {
-    if (!idOrAddress && Object.keys(this.externalWallets).length > 0) {
-      return Object.values(this.externalWallets)[0];
+    // Only default to the external wallet if we're not using external wallet auth
+    if (!this.isExternalWalletAuth) {
+      if (!idOrAddress && Object.keys(this.externalWallets).length > 0) {
+        return Object.values(this.externalWallets)[0];
+      }
     }
 
-    if (this.externalWallets[idOrAddress]) {
+    if (this.externalWallets?.[idOrAddress]) {
       return this.externalWallets[idOrAddress];
     }
 
@@ -1660,19 +1701,13 @@ export abstract class ParaCore {
       externalAddress: wallet.address,
       type: wallet.type,
       externalWalletProvider: wallet.provider,
-      shouldTrackUser: wallet.shouldTrackUser,
+      // If the wallet isn't using full Para auth we want to track the login here
+      shouldTrackUser: !wallet.withFullParaAuth,
     });
     await this.setExternalWallet(wallet);
     await this.setUserId(res.userId);
 
     return res;
-  }
-
-  /**
-   * Returns whether or not the user is connected with an external wallet.
-   */
-  protected isUsingExternalWallet(): boolean {
-    return !!Object.keys(this.externalWallets).length;
   }
 
   /**
@@ -1691,14 +1726,9 @@ export abstract class ParaCore {
     signedMessage,
     cosmosPublicKeyHex,
     cosmosSigner,
-  }: {
-    address: string;
-    signedMessage: string;
-    cosmosPublicKeyHex?: string;
-    cosmosSigner?: string;
-  }): Promise<string> {
+  }: VerifyExternalWallet): Promise<string> {
     await this.ctx.client.verifyExternalWallet(this.userId, { address, signedMessage, cosmosPublicKeyHex, cosmosSigner });
-    return this.getSetUpBiometricsURL();
+    return this.getSetUpBiometricsURL({ authType: this.#authInfo.authType });
   }
 
   /**
@@ -1930,7 +1960,7 @@ export abstract class ParaCore {
    * @returns `true` if active, `false` otherwise
    */
   async isSessionActive(): Promise<boolean> {
-    if (this.isUsingExternalWallet()) {
+    if (this.externalWalletConnectionType === 'CONNECTION_ONLY') {
       return true;
     }
 
@@ -1944,7 +1974,7 @@ export abstract class ParaCore {
    * @returns `true` if active, `false` otherwise
    **/
   async isFullyLoggedIn(): Promise<boolean> {
-    if (this.isUsingExternalWallet()) {
+    if (this.externalWalletConnectionType === 'CONNECTION_ONLY') {
       return true;
     }
 
@@ -2078,8 +2108,10 @@ export abstract class ParaCore {
   async waitForAccountCreation({ popupWindow }: { popupWindow?: Window | null } = {}): Promise<boolean> {
     await this.touchSession();
 
-    // Remove external wallets if creating an account with Para
-    this.externalWallets = {};
+    if (!this.isExternalWalletAuth) {
+      // Remove external wallets if creating an account with Para
+      this.externalWallets = {};
+    }
 
     this.isAwaitingAccountCreation = true;
     while (this.isAwaitingAccountCreation) {
@@ -2274,8 +2306,10 @@ export abstract class ParaCore {
     popupWindow?: Window | null;
     skipSessionRefresh?: boolean;
   } = {}): Promise<LoginResponse> {
-    // Remove external wallets if logging in with Capsule
-    this.externalWallets = {};
+    if (!this.isExternalWalletAuth) {
+      // Remove external wallets if logging in with Capsule
+      this.externalWallets = {};
+    }
 
     this.isAwaitingLogin = true;
     while (this.isAwaitingLogin) {
@@ -3498,6 +3532,16 @@ export abstract class ParaCore {
       }),
       {},
     );
+    const redactedExternalWallets = Object.keys(this.externalWallets).reduce(
+      (acc, walletId) => ({
+        ...acc,
+        [walletId]: {
+          ...this.externalWallets[walletId],
+          signer: this.externalWallets[walletId].signer ? '[REDACTED]' : undefined,
+        },
+      }),
+      {},
+    );
     const obj = {
       partnerId: this.#partner?.id,
       supportedWalletTypes: this.#partner?.supportedWalletTypes,
@@ -3507,6 +3551,7 @@ export abstract class ParaCore {
       pregenIds: this.pregenIds,
       currentWalletIds: this.currentWalletIds,
       wallets: redactedWallets,
+      externalWallets: redactedExternalWallets,
       loginEncryptionKeyPair: this.loginEncryptionKeyPair ? '[REDACTED]' : undefined,
       ctx: {
         apiKey: this.ctx.apiKey,

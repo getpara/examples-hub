@@ -8,6 +8,7 @@ const phone = `${countryCode}${phoneNational}`;
 const farcasterUsername = 'farcasterUsername';
 const telegramUserId = 'telegramUserId';
 const userId = 'userId';
+const externalWalletAddress = 'externalWalletAddress';
 
 const emailAuth = { email, foo: 'bar', phone: 'undefined' };
 const phoneAuth = { phone, foo: 'bar' };
@@ -15,6 +16,7 @@ const phoneLegacyAuth = { phone: phoneNational, countryCode, foo: 'bar', email: 
 const farcasterAuth = { farcasterUsername, foo: 'bar', email: 'null' };
 const telegramAuth = { telegramUserId, foo: 'bar', email: 'null' };
 const userIdAuth = { userId: 'userId', foo: 'bar', email: 'null' };
+const externalWalletAuth = { externalWalletAddress };
 
 describe('utils', () => {
   it('isWalletId', () => {
@@ -37,6 +39,14 @@ describe('utils', () => {
   });
 
   describe('extractAuth', () => {
+    it('extracts external wallet auth', () => {
+      expect(extractAuthInfo(externalWalletAuth)).toEqual({
+        auth: { externalWalletAddress },
+        authType: 'externalWallet',
+        identifier: externalWalletAddress,
+      });
+    });
+
     it('extracts email auth', () => {
       expect(extractAuthInfo(emailAuth)).toEqual({
         auth: { email },

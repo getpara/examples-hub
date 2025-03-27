@@ -353,7 +353,7 @@ describe('ParaCore', () => {
       expect(para.externalWallets).toEqual({
         [address]: STORED_EXTERNAL_WALLET,
       });
-      expect((para as unknown as any).isUsingExternalWallet()).toBeTruthy();
+      expect(para.externalWalletConnectionType === 'CONNECTION_ONLY').toBeTruthy();
       expect(isFullyLoggedIn).toBeTruthy();
       expect(isSessionActive).toBeTruthy();
     });

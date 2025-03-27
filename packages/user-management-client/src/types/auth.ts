@@ -1,8 +1,8 @@
 import { CurrentWalletIds, SupportedWalletTypes } from './wallet.js';
 
-export type AuthType = 'email' | 'phone' | 'phoneLegacy' | 'farcaster' | 'telegram' | 'userId';
+export type AuthType = 'email' | 'phone' | 'phoneLegacy' | 'farcaster' | 'telegram' | 'userId' | 'externalWallet';
 
-export type PrimaryAuthType = Extract<AuthType, 'email' | 'phone' | 'farcaster' | 'telegram'>;
+export type PrimaryAuthType = Extract<AuthType, 'email' | 'phone' | 'farcaster' | 'telegram' | 'externalWallet'>;
 
 export type VerifiedAuthType = Extract<PrimaryAuthType, 'email' | 'phone'>;
 
@@ -25,6 +25,7 @@ export type AuthParams = Record<string, any> & {
   farcasterUsername?: string;
   telegramUserId?: string;
   userId?: string;
+  externalWalletAddress?: string;
 };
 
 export type Auth<T extends AuthType = AuthType> = T extends 'email'
@@ -37,7 +38,9 @@ export type Auth<T extends AuthType = AuthType> = T extends 'email'
         ? { farcasterUsername: AuthIdentifier<'farcaster'> }
         : T extends 'telegram'
           ? { telegramUserId: AuthIdentifier<'telegram'> }
-          : { userId: AuthIdentifier<'userId'> };
+          : T extends 'externalWallet'
+            ? { externalWalletAddress: string }
+            : { userId: string };
 
 export type PrimaryAuth = Auth<PrimaryAuthType>;
 
