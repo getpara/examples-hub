@@ -1,95 +1,127 @@
 import { Para as ParaServer, Environment } from "@getpara/server-sdk";
-import { simulateVerifyToken } from "../utils/auth-utils";
 import { getKeyShareInDB } from "../db/keySharesDB";
 import { decrypt } from "../utils/encryption-utils";
 import { RLP } from "@ethereumjs/rlp";
+import { Buffer } from "buffer";
 
-/**
- * Handles signing with Para PreGen and Para Client.
- *
- * @param {Request} req - The incoming request object.
- * @returns {Promise<Response>} - The response with sign message and transaction results.
- */
+function toHexString(value: bigint | number): string {
+  if (typeof value === "number") {
+    if (!Number.isInteger(value) || value < 0) {
+      throw new Error("Input must be a non-negative integer or bigint.");
+    }
+    value = BigInt(value);
+  }
+  if (value < 0n) {
+    throw new Error("Input must be a non-negative integer or bigint.");
+  }
+  if (value === 0n) {
+    return "0x0";
+  }
+  return `0x${value.toString(16)}`;
+}
+
 export const signWithParaPreGen = async (req: Request): Promise<Response> => {
-  // Validate Authorization header
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return new Response("Unauthorized", { status: 401 });
+  const { email }: { email: string } = await req.json();
+
+  if (!email) {
+    return new Response("Email is required in the request body", { status: 400 });
   }
 
-  // Use your own token verification logic here
-  const token = authHeader.split(" ")[1];
-  const user = simulateVerifyToken(token);
-
-  if (!user) {
-    return new Response("Unauthorized", { status: 401 });
-  }
-
-  // Parse and validate request body
-  const { email }: RequestBody = await req.json();
-  if (user.email !== email) {
-    return new Response("Forbidden", { status: 403 });
-  }
-
-  // Ensure PARA_API_KEY is available
   const PARA_API_KEY = Bun.env.PARA_API_KEY;
+
   if (!PARA_API_KEY) {
-    return new Response("PARA_API_KEY not set", { status: 500 });
+    console.error("Server configuration error: PARA_API_KEY not set");
+    return new Response("Server configuration error", { status: 500 });
   }
 
-  // Initialize Para client
-  const para = new ParaServer(Environment.BETA, PARA_API_KEY);
-  const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
+  const para = new ParaServer(Environment.BETA, PARA_API_KEY, { disableWebSockets: true, disableWorkers: true });
 
-  if (!hasPregenWallet) {
-    return new Response("Wallet does not exist", { status: 400 });
+  try {
+    const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
+    if (!hasPregenWallet) {
+      return new Response(`Pregenerated wallet does not exist for ${email}`, { status: 404 });
+    }
+
+    const keyShare = getKeyShareInDB(email);
+    if (!keyShare) {
+      return new Response(`Key share not found in DB for ${email}`, { status: 404 });
+    }
+
+    let decryptedKeyShare: string;
+    try {
+      decryptedKeyShare = await decrypt(keyShare);
+    } catch (decryptionError) {
+      console.error(`Failed to decrypt key share for ${email}:`, decryptionError);
+      return new Response("Failed to process key share", { status: 500 });
+    }
+
+    await para.setUserShare(decryptedKeyShare);
+
+    const wallets = await para.getWallets();
+    if (!wallets || Object.keys(wallets).length === 0) {
+      throw new Error("Failed to load wallet details after setting user share.");
+    }
+
+    const wallet = Object.values(wallets)[0];
+    const walletId = wallet.id;
+    const walletAddress = wallet.address;
+
+    if (!walletId || !walletAddress) {
+      throw new Error("Failed to retrieve wallet ID or address.");
+    }
+
+    const chainId = "11155111";
+
+    const nonce = 0n;
+    const gasLimit = 21000n;
+    const gasPriceInGwei = 20n;
+    const valueInEth = 0n;
+
+    const gasPriceInWei = gasPriceInGwei * 10n ** 9n;
+    const valueInWei = valueInEth * 10n ** 18n;
+
+    const demoRawTxData = {
+      nonce: toHexString(nonce),
+      gasPrice: toHexString(gasPriceInWei),
+      gasLimit: toHexString(gasLimit),
+      to: walletAddress,
+      value: toHexString(valueInWei),
+      data: "0x",
+    };
+
+    const txFields = [
+      demoRawTxData.nonce,
+      demoRawTxData.gasPrice,
+      demoRawTxData.gasLimit,
+      demoRawTxData.to,
+      demoRawTxData.value,
+      demoRawTxData.data,
+      toHexString(BigInt(chainId)),
+      "0x",
+      "0x",
+      "0x",
+    ];
+
+    const rlpEncodedTx = RLP.encode(txFields);
+    const rlpEncodedTxBase64 = Buffer.from(rlpEncodedTx).toString("base64");
+
+    const signTransactionResult = await para.signTransaction({ walletId, rlpEncodedTxBase64, chainId });
+
+    if ("error" in signTransactionResult) {
+      throw new Error(`Para signTransaction failed: ${signTransactionResult.error}`);
+    }
+
+    return new Response(JSON.stringify({ route: "signWithParaPreGen", signTransactionResult }), {
+      headers: { "Content-Type": "application/json" },
+      status: 200,
+    });
+  } catch (error) {
+    console.error(`Error during signWithParaPreGen process for ${email}:`, error);
+    return new Response(
+      `Failed to sign with Para client: ${error instanceof Error ? error.message : "Unknown error"}`,
+      {
+        status: 500,
+      }
+    );
   }
-
-  // Retrieve and decrypt key share
-  const keyShare = getKeyShareInDB(email);
-  if (!keyShare) {
-    return new Response("Key share does not exist", { status: 400 });
-  }
-
-  const decryptedKeyShare = decrypt(keyShare);
-  await para.setUserShare(decryptedKeyShare);
-
-  // Get wallet details
-  const wallets = await para.getWallets();
-  const wallet = Object.values(wallets)[0];
-  const walletId = wallet.id;
-  const walletAddress = wallet.address;
-
-  // Prepare raw transaction data. These are dummy values and should be replaced with actual values.
-  const demoRawTx = {
-    nonce: "0x00", // Should match the current nonce on the network
-    gasPrice: "0x09184e72a000", // Should match the current gas price on the network
-    gasLimit: "0x2710", // Gas limit for the transaction
-    to: walletAddress, // Destination address
-    from: walletAddress, // Source address
-    value: "0x00", // No Ether transfer (0 value)
-    data: "0x", // No data being sent
-  };
-
-  // RLP encode the transaction and convert to base64 (before signing)
-  const rlpEncodedTx = RLP.encode([
-    demoRawTx.nonce,
-    demoRawTx.gasPrice,
-    demoRawTx.gasLimit,
-    demoRawTx.to,
-    demoRawTx.from,
-    demoRawTx.value,
-    demoRawTx.data,
-  ]);
-
-  // Convert the RLP encoded transaction to base64 for signing
-  const rlpEncodedTxBase64 = Buffer.from(rlpEncodedTx).toString("base64");
-
-  // Sign the transaction
-  const signTransactionResult = await para.signTransaction({ walletId, rlpEncodedTxBase64, chainId: "11155111" });
-
-  // Return the final signed transaction result
-  return new Response(JSON.stringify({ route: "signWithParaPreGen", signTransactionResult }), {
-    status: 200,
-  });
 };
