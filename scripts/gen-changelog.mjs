@@ -3,6 +3,7 @@ import fs from 'fs';
 import glob from 'glob';
 
 const CHANGELOG_FILE = './CHANGELOG.md';
+const ALPHA_CHANGELOG_FILE = './ALPHA-CHANGELOG.md';
 const COMMIT_TITLE = 'chore: publish';
 let branch = 'main';
 
@@ -60,6 +61,8 @@ function getCommitsSinceLastPublish() {
 function genChangelog() {
   const args = process.argv.slice(2);
 
+  let isAlpha = false;
+
   if (args[0] !== '--branch') {
     throw new Error(`Invalid argument ${args[0]}`);
   }
@@ -68,6 +71,11 @@ function genChangelog() {
     throw new Error('Branch name is required');
   }
 
+  if (args.includes('--alpha')) {
+    isAlpha = true;
+  }
+
+  const filename = isAlpha ? ALPHA_CHANGELOG_FILE : CHANGELOG_FILE;
   branch = args[1];
 
   const commits = getCommitsSinceLastPublish();
@@ -166,13 +174,13 @@ ${tests ?? ''}
 
   try {
     // Read the existing content of the file
-    const existingContent = fs.existsSync(CHANGELOG_FILE) ? fs.readFileSync(CHANGELOG_FILE, 'utf8') : '';
+    const existingContent = fs.existsSync(filename) ? fs.readFileSync(filename, 'utf8') : '';
 
     // Combine new text with the existing content
     const newContent = stringToWrite + '\n\n' + existingContent;
 
     // Write the updated content back to the file
-    fs.writeFileSync(CHANGELOG_FILE, newContent, 'utf8');
+    fs.writeFileSync(filename, newContent, 'utf8');
 
     console.log('Changelog generated successfully!');
   } catch (error) {
