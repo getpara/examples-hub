@@ -3,7 +3,12 @@ import { paraConnector } from "@getpara/wagmi-v2-integration";
 import { para } from "./para";
 import { QueryClient } from "@tanstack/react-query";
 import { createConfig, CreateConfigParameters, http } from "wagmi";
-import { injected, coinbaseWallet, walletConnect, metaMask } from "wagmi/connectors";
+import {
+  injected,
+  coinbaseWallet,
+  walletConnect,
+  metaMask,
+} from "wagmi/connectors";
 import { mainnet, sepolia } from "wagmi/chains";
 
 const connector = paraConnector({
