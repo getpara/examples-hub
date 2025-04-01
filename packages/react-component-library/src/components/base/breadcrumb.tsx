@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { ChevronRight, MoreHorizontal } from 'lucide-react';
 
-import { appendParaPrefix, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 function Breadcrumb({ ...props }: React.ComponentProps<'nav'>) {
   return <nav aria-label="breadcrumb" data-slot="breadcrumb" {...props} />;
@@ -13,7 +13,7 @@ function BreadcrumbList({ className, ...props }: React.ComponentProps<'ol'>) {
     <ol
       data-slot="breadcrumb-list"
       className={cn(
-        appendParaPrefix('text-muted-foreground flex flex-wrap items-center gap-1.5 text-sm break-words sm:gap-2.5'),
+        'para:text-muted-foreground para:flex para:flex-wrap para:items-center para:gap-1.5 para:text-sm para:break-words para:sm:gap-2.5',
         className,
       )}
       {...props}
@@ -25,7 +25,7 @@ function BreadcrumbItem({ className, ...props }: React.ComponentProps<'li'>) {
   return (
     <li
       data-slot="breadcrumb-item"
-      className={cn(appendParaPrefix('inline-flex items-center gap-1.5'), className)}
+      className={cn('para:inline-flex para:items-center para:gap-1.5', className)}
       {...props}
     />
   );
@@ -43,7 +43,7 @@ function BreadcrumbLink({
   return (
     <Comp
       data-slot="breadcrumb-link"
-      className={cn(appendParaPrefix('hover:text-foreground transition-colors'), className)}
+      className={cn('para:hover:text-foreground para:transition-colors', className)}
       {...props}
     />
   );
@@ -56,7 +56,7 @@ function BreadcrumbPage({ className, ...props }: React.ComponentProps<'span'>) {
       role="link"
       aria-disabled="true"
       aria-current="page"
-      className={cn(appendParaPrefix('text-foreground font-normal'), className)}
+      className={cn('para:text-foreground para:font-normal', className)}
       {...props}
     />
   );
@@ -68,7 +68,7 @@ function BreadcrumbSeparator({ children, className, ...props }: React.ComponentP
       data-slot="breadcrumb-separator"
       role="presentation"
       aria-hidden="true"
-      className={cn(appendParaPrefix('[&>svg]:size-3.5'), className)}
+      className={cn('para:[&>svg]:size-3.5', className)}
       {...props}
     >
       {children ?? <ChevronRight />}
@@ -82,11 +82,11 @@ function BreadcrumbEllipsis({ className, ...props }: React.ComponentProps<'span'
       data-slot="breadcrumb-ellipsis"
       role="presentation"
       aria-hidden="true"
-      className={cn(appendParaPrefix('flex size-9 items-center justify-center'), className)}
+      className={cn('para:flex para:size-9 para:items-center para:justify-center', className)}
       {...props}
     >
-      <MoreHorizontal className={appendParaPrefix('size-4')} />
-      <span className={appendParaPrefix('sr-only')}>More</span>
+      <MoreHorizontal className={'para:size-4'} />
+      <span className={'para:sr-only'}>More</span>
     </span>
   );
 }

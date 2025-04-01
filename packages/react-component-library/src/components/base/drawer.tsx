@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { Drawer as DrawerPrimitive } from 'vaul';
 
-import { appendParaPrefix, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 function Drawer({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Root>) {
   return <DrawerPrimitive.Root data-slot="drawer" {...props} />;
@@ -26,9 +26,8 @@ function DrawerOverlay({ className, ...props }: React.ComponentProps<typeof Draw
     <DrawerPrimitive.Overlay
       data-slot="drawer-overlay"
       className={cn(
-        appendParaPrefix(
-          'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/80',
-        ),
+        'para:data-[state=open]:animate-in para:data-[state=closed]:animate-out para:data-[state=closed]:fade-out-0 para:data-[state=open]:fade-in-0 para:fixed para:inset-0 para:z-50 para:bg-black/80',
+
         className,
       )}
       {...props}
@@ -43,27 +42,24 @@ function DrawerContent({ className, children, ...props }: React.ComponentProps<t
       <DrawerPrimitive.Content
         data-slot="drawer-content"
         className={cn(
-          appendParaPrefix('group/drawer-content bg-background fixed z-50 flex h-auto flex-col'),
-          appendParaPrefix(
-            'data-[vaul-drawer-direction=top]:inset-x-0 data-[vaul-drawer-direction=top]:top-0 data-[vaul-drawer-direction=top]:mb-24 data-[vaul-drawer-direction=top]:max-h-[80vh] data-[vaul-drawer-direction=top]:rounded-b-lg',
-          ),
-          appendParaPrefix(
-            'data-[vaul-drawer-direction=bottom]:inset-x-0 data-[vaul-drawer-direction=bottom]:bottom-0 data-[vaul-drawer-direction=bottom]:mt-24 data-[vaul-drawer-direction=bottom]:max-h-[80vh] data-[vaul-drawer-direction=bottom]:rounded-t-lg',
-          ),
-          appendParaPrefix(
-            'data-[vaul-drawer-direction=right]:inset-y-0 data-[vaul-drawer-direction=right]:right-0 data-[vaul-drawer-direction=right]:w-3/4 data-[vaul-drawer-direction=right]:sm:max-w-sm',
-          ),
-          appendParaPrefix(
-            'data-[vaul-drawer-direction=left]:inset-y-0 data-[vaul-drawer-direction=left]:left-0 data-[vaul-drawer-direction=left]:w-3/4 data-[vaul-drawer-direction=left]:sm:max-w-sm',
-          ),
+          'para:group/drawer-content para:bg-background para:fixed para:z-50 para:flex para:h-auto para:flex-col',
+
+          'para:data-[vaul-drawer-direction=top]:inset-x-0 para:data-[vaul-drawer-direction=top]:top-0 para:data-[vaul-drawer-direction=top]:mb-24 para:data-[vaul-drawer-direction=top]:max-h-[80vh] para:data-[vaul-drawer-direction=top]:rounded-b-lg',
+
+          'para:data-[vaul-drawer-direction=bottom]:inset-x-0 para:data-[vaul-drawer-direction=bottom]:bottom-0 para:data-[vaul-drawer-direction=bottom]:mt-24 para:data-[vaul-drawer-direction=bottom]:max-h-[80vh] para:data-[vaul-drawer-direction=bottom]:rounded-t-lg',
+
+          'para:data-[vaul-drawer-direction=right]:inset-y-0 para:data-[vaul-drawer-direction=right]:right-0 para:data-[vaul-drawer-direction=right]:w-3/4 para:data-[vaul-drawer-direction=right]:sm:max-w-sm',
+
+          'para:data-[vaul-drawer-direction=left]:inset-y-0 para:data-[vaul-drawer-direction=left]:left-0 para:data-[vaul-drawer-direction=left]:w-3/4 para:data-[vaul-drawer-direction=left]:sm:max-w-sm',
+
           className,
         )}
         {...props}
       >
         <div
-          className={appendParaPrefix(
-            'bg-muted mx-auto mt-4 hidden h-2 w-[100px] shrink-0 rounded-full group-data-[vaul-drawer-direction=bottom]/drawer-content:block',
-          )}
+          className={
+            'para:bg-muted para:mx-auto para:mt-4 para:hidden para:h-2 para:w-[100px] para:shrink-0 para:rounded-full para:group-data-[vaul-drawer-direction=bottom]/drawer-content:block'
+          }
         />
         {children}
       </DrawerPrimitive.Content>
@@ -73,7 +69,7 @@ function DrawerContent({ className, children, ...props }: React.ComponentProps<t
 
 function DrawerHeader({ className, ...props }: React.ComponentProps<'div'>) {
   return (
-    <div data-slot="drawer-header" className={cn(appendParaPrefix('flex flex-col gap-1.5 p-4'), className)} {...props} />
+    <div data-slot="drawer-header" className={cn('para:flex para:flex-col para:gap-1.5 para:p-4', className)} {...props} />
   );
 }
 
@@ -81,7 +77,7 @@ function DrawerFooter({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="drawer-footer"
-      className={cn(appendParaPrefix('mt-auto flex flex-col gap-2 p-4'), className)}
+      className={cn('para:mt-auto para:flex para:flex-col para:gap-2 para:p-4', className)}
       {...props}
     />
   );
@@ -91,7 +87,7 @@ function DrawerTitle({ className, ...props }: React.ComponentProps<typeof Drawer
   return (
     <DrawerPrimitive.Title
       data-slot="drawer-title"
-      className={cn(appendParaPrefix('text-foreground font-semibold'), className)}
+      className={cn('para:text-foreground para:font-semibold', className)}
       {...props}
     />
   );
@@ -101,7 +97,7 @@ function DrawerDescription({ className, ...props }: React.ComponentProps<typeof 
   return (
     <DrawerPrimitive.Description
       data-slot="drawer-description"
-      className={cn(appendParaPrefix('text-muted-foreground text-sm'), className)}
+      className={cn('para:text-muted-foreground para:text-sm', className)}
       {...props}
     />
   );

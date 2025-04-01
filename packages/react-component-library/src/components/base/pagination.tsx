@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { ChevronLeftIcon, ChevronRightIcon, MoreHorizontalIcon } from 'lucide-react';
 
-import { appendParaPrefix, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { Button, buttonVariants } from './button';
 
 function Pagination({ className, ...props }: React.ComponentProps<'nav'>) {
@@ -10,7 +10,7 @@ function Pagination({ className, ...props }: React.ComponentProps<'nav'>) {
       role="navigation"
       aria-label="pagination"
       data-slot="pagination"
-      className={cn(appendParaPrefix('mx-auto flex w-full justify-center'), className)}
+      className={cn('para:mx-auto para:flex para:w-full para:justify-center', className)}
       {...props}
     />
   );
@@ -20,7 +20,7 @@ function PaginationContent({ className, ...props }: React.ComponentProps<'ul'>) 
   return (
     <ul
       data-slot="pagination-content"
-      className={cn(appendParaPrefix('flex flex-row items-center gap-1'), className)}
+      className={cn('para:flex para:flex-row para:items-center para:gap-1', className)}
       {...props}
     />
   );
@@ -58,11 +58,11 @@ function PaginationPrevious({ className, ...props }: React.ComponentProps<typeof
     <PaginationLink
       aria-label="Go to previous page"
       size="default"
-      className={cn(appendParaPrefix('gap-1 px-2.5 sm:pl-2.5'), className)}
+      className={cn('para:gap-1 para:px-2.5 para:sm:pl-2.5', className)}
       {...props}
     >
       <ChevronLeftIcon />
-      <span className={appendParaPrefix('hidden sm:block')}>Previous</span>
+      <span className={'para:hidden para:sm:block'}>Previous</span>
     </PaginationLink>
   );
 }
@@ -72,10 +72,10 @@ function PaginationNext({ className, ...props }: React.ComponentProps<typeof Pag
     <PaginationLink
       aria-label="Go to next page"
       size="default"
-      className={cn(appendParaPrefix('gap-1 px-2.5 sm:pr-2.5'), className)}
+      className={cn('para:gap-1 para:px-2.5 para:sm:pr-2.5', className)}
       {...props}
     >
-      <span className={appendParaPrefix('hidden sm:block')}>Next</span>
+      <span className={'para:hidden para:sm:block'}>Next</span>
       <ChevronRightIcon />
     </PaginationLink>
   );
@@ -86,11 +86,11 @@ function PaginationEllipsis({ className, ...props }: React.ComponentProps<'span'
     <span
       aria-hidden
       data-slot="pagination-ellipsis"
-      className={cn(appendParaPrefix('flex size-9 items-center justify-center'), className)}
+      className={cn('para:flex para:size-9 para:items-center para:justify-center', className)}
       {...props}
     >
-      <MoreHorizontalIcon className={appendParaPrefix('size-4')} />
-      <span className={appendParaPrefix('sr-only')}>More pages</span>
+      <MoreHorizontalIcon className={'para:size-4'} />
+      <span className={'para:sr-only'}>More pages</span>
     </span>
   );
 }

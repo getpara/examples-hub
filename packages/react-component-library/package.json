@@ -28,7 +28,9 @@
     "build:css": "npx -y @tailwindcss/cli -i src/global.css -o dist/styles.css",
     "lint": "eslint .",
     "preview": "vite preview",
-    "add-component": "npx -y shadcn@canary add"
+    "add-component": "npx -y shadcn@canary add",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.1.3",
@@ -61,7 +63,15 @@
     "react-dom": "*"
   },
   "devDependencies": {
+    "@chromatic-com/storybook": "^3.2.5",
     "@eslint/js": "^9.21.0",
+    "@storybook/addon-essentials": "^8.6.4",
+    "@storybook/addon-interactions": "^8.6.4",
+    "@storybook/addon-onboarding": "^8.6.4",
+    "@storybook/blocks": "^8.6.4",
+    "@storybook/react": "^8.6.4",
+    "@storybook/react-vite": "^8.6.4",
+    "@storybook/test": "^8.6.4",
     "@tailwindcss/vite": "^4.0.13",
     "@types/node": "^22.13.5",
     "@types/react": "^18.2.64",
@@ -69,13 +79,20 @@
     "autoprefixer": "^10.4.20",
     "eslint": "^9.21.0",
     "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-storybook": "^0.11.4",
     "globals": "^15.15.0",
     "postcss": "^8.5.3",
+    "storybook": "^8.6.4",
     "tailwindcss": "^4.0.9",
     "typescript": "^5.4.2",
     "typescript-eslint": "^8.24.1",
     "vite": "^6.2.0",
     "vite-plugin-dts": "^4.5.0",
     "vite-plugin-static-copy": "^2.3.0"
+  },
+  "eslintConfig": {
+    "extends": [
+      "plugin:storybook/recommended"
+    ]
   }
 }

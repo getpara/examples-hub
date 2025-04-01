@@ -1,6 +1,5 @@
 'use client';
 
-import { appendParaPrefix } from '@/lib/utils';
 import { useTheme } from 'next-themes';
 import { Toaster as Sonner, ToasterProps } from 'sonner';
 
@@ -13,12 +12,11 @@ const Toaster = ({ ...props }: ToasterProps) => {
       className="toaster group"
       toastOptions={{
         classNames: {
-          toast: appendParaPrefix(
-            'group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg',
-          ),
-          description: appendParaPrefix('group-[.toast]:text-muted-foreground'),
-          actionButton: appendParaPrefix('group-[.toast]:bg-primary group-[.toast]:text-primary-foreground font-medium'),
-          cancelButton: appendParaPrefix('group-[.toast]:bg-muted group-[.toast]:text-muted-foreground font-medium'),
+          toast:
+            'para:group para:toast para:group-[.toaster]:bg-background para:group-[.toaster]:text-foreground para:group-[.toaster]:border-border para:group-[.toaster]:shadow-lg',
+          description: 'para:group-[.toast]:text-muted-foreground',
+          actionButton: 'para:group-[.toast]:bg-primary para:group-[.toast]:text-primary-foreground para:font-medium',
+          cancelButton: 'para:group-[.toast]:bg-muted para:group-[.toast]:text-muted-foreground para:font-medium',
         },
       }}
       {...props}

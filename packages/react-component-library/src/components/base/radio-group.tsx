@@ -4,12 +4,10 @@ import * as React from 'react';
 import * as RadioGroupPrimitive from '@radix-ui/react-radio-group';
 import { CircleIcon } from 'lucide-react';
 
-import { appendParaPrefix, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 function RadioGroup({ className, ...props }: React.ComponentProps<typeof RadioGroupPrimitive.Root>) {
-  return (
-    <RadioGroupPrimitive.Root data-slot="radio-group" className={cn(appendParaPrefix('grid gap-3'), className)} {...props} />
-  );
+  return <RadioGroupPrimitive.Root data-slot="radio-group" className={cn('para:grid para:gap-3', className)} {...props} />;
 }
 
 function RadioGroupItem({ className, ...props }: React.ComponentProps<typeof RadioGroupPrimitive.Item>) {
@@ -17,19 +15,19 @@ function RadioGroupItem({ className, ...props }: React.ComponentProps<typeof Rad
     <RadioGroupPrimitive.Item
       data-slot="radio-group-item"
       className={cn(
-        appendParaPrefix(
-          'border-input text-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive aspect-square size-4 shrink-0 rounded-full border shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50',
-        ),
+        'para:border-input para:text-primary para:focus-visible:border-ring para:focus-visible:ring-ring/50 para:aria-invalid:ring-destructive/20 para:dark:aria-invalid:ring-destructive/40 para:aria-invalid:border-destructive para:aspect-square para:size-4 para:shrink-0 para:rounded-full para:border para:shadow-xs para:transition-[color,box-shadow] para:outline-none para:focus-visible:ring-[3px] para:disabled:cursor-not-allowed para:disabled:opacity-50',
         className,
       )}
       {...props}
     >
       <RadioGroupPrimitive.Indicator
         data-slot="radio-group-indicator"
-        className={appendParaPrefix('relative flex items-center justify-center')}
+        className={'para:relative para:flex para:items-center para:justify-center'}
       >
         <CircleIcon
-          className={appendParaPrefix('fill-primary absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2')}
+          className={
+            'para:fill-primary para:absolute para:top-1/2 para:left-1/2 para:size-2 para:-translate-x-1/2 para:-translate-y-1/2'
+          }
         />
       </RadioGroupPrimitive.Indicator>
     </RadioGroupPrimitive.Item>

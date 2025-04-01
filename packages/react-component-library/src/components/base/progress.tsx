@@ -3,18 +3,21 @@
 import * as React from 'react';
 import * as ProgressPrimitive from '@radix-ui/react-progress';
 
-import { appendParaPrefix, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 function Progress({ className, value, ...props }: React.ComponentProps<typeof ProgressPrimitive.Root>) {
   return (
     <ProgressPrimitive.Root
       data-slot="progress"
-      className={cn(appendParaPrefix('bg-primary/20 relative h-2 w-full overflow-hidden rounded-full'), className)}
+      className={cn(
+        'para:bg-primary/20 para:relative para:h-2 para:w-full para:overflow-hidden para:rounded-full',
+        className,
+      )}
       {...props}
     >
       <ProgressPrimitive.Indicator
         data-slot="progress-indicator"
-        className={appendParaPrefix('bg-primary h-full w-full flex-1 transition-all')}
+        className={'para:bg-primary para:h-full para:w-full para:flex-1 para:transition-all'}
         style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
       />
     </ProgressPrimitive.Root>

@@ -1,4 +1,5 @@
 import { ParaModal, useAccount } from '@getpara/react-sdk';
+import { Checkbox } from '@getpara/react-component-library';
 import styled from 'styled-components';
 import { Footer } from './components/Footer';
 import { Heading } from './components/Heading';
@@ -19,6 +20,7 @@ export const Landing = () => {
 
   return (
     <Container>
+      <Checkbox />
       <Heading />
       <CTA />
       {isLoading ? <Loading /> : <StyledModal onClose={handleModalClose} />}

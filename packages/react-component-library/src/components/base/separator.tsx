@@ -3,7 +3,7 @@
 import * as React from 'react';
 import * as SeparatorPrimitive from '@radix-ui/react-separator';
 
-import { appendParaPrefix, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 function Separator({
   className,
@@ -17,9 +17,7 @@ function Separator({
       decorative={decorative}
       orientation={orientation}
       className={cn(
-        appendParaPrefix(
-          'bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px',
-        ),
+        'para:bg-border para:shrink-0 para:data-[orientation=horizontal]:h-px para:data-[orientation=horizontal]:w-full para:data-[orientation=vertical]:h-full para:data-[orientation=vertical]:w-px',
         className,
       )}
       {...props}

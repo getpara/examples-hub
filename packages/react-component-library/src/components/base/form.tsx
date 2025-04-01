@@ -13,7 +13,7 @@ import {
   type FieldValues,
 } from 'react-hook-form';
 
-import { appendParaPrefix, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { Label } from './label';
 
 const Form = FormProvider;
@@ -74,7 +74,7 @@ function FormItem({ className, ...props }: React.ComponentProps<'div'>) {
 
   return (
     <FormItemContext.Provider value={{ id }}>
-      <div data-slot="form-item" className={cn(appendParaPrefix('grid gap-2'), className)} {...props} />
+      <div data-slot="form-item" className={(cn('para:grid para:gap-2'), className)} {...props} />
     </FormItemContext.Provider>
   );
 }
@@ -86,7 +86,7 @@ function FormLabel({ className, ...props }: React.ComponentProps<typeof LabelPri
     <Label
       data-slot="form-label"
       data-error={!!error}
-      className={cn(appendParaPrefix('data-[error=true]:text-destructive-foreground'), className)}
+      className={(cn('para:data-[error=true]:text-destructive-foreground'), className)}
       htmlFor={formItemId}
       {...props}
     />
@@ -114,7 +114,7 @@ function FormDescription({ className, ...props }: React.ComponentProps<'p'>) {
     <p
       data-slot="form-description"
       id={formDescriptionId}
-      className={cn(appendParaPrefix('text-muted-foreground text-sm'), className)}
+      className={(cn('para:text-muted-foreground para:text-sm'), className)}
       {...props}
     />
   );
@@ -132,7 +132,7 @@ function FormMessage({ className, ...props }: React.ComponentProps<'p'>) {
     <p
       data-slot="form-message"
       id={formMessageId}
-      className={cn(appendParaPrefix('text-destructive-foreground text-sm'), className)}
+      className={(cn('para:text-destructive-foreground para:text-sm'), className)}
       {...props}
     >
       {body}

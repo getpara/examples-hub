@@ -5,7 +5,7 @@ import { Slot } from '@radix-ui/react-slot';
 import { VariantProps, cva } from 'class-variance-authority';
 import { PanelLeftIcon } from 'lucide-react';
 
-import { appendParaPrefix, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from './sheet';
 import { Button } from './button';
 import { Input } from './input';
@@ -125,7 +125,7 @@ function SidebarProvider({
             } as React.CSSProperties
           }
           className={cn(
-            appendParaPrefix('group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full'),
+            'para:group/sidebar-wrapper para:has-data-[variant=inset]:bg-sidebar para:flex para:min-h-svh para:w-full',
             className,
           )}
           {...props}
@@ -156,7 +156,7 @@ function Sidebar({
       <div
         data-slot="sidebar"
         className={cn(
-          appendParaPrefix('bg-sidebar text-sidebar-foreground flex h-full w-(--sidebar-width) flex-col'),
+          'para:bg-sidebar para:text-sidebar-foreground para:flex para:h-full para:w-(--sidebar-width) para:flex-col',
           className,
         )}
         {...props}
@@ -173,7 +173,7 @@ function Sidebar({
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
-          className={appendParaPrefix('bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden')}
+          className={'para:bg-sidebar para:text-sidebar-foreground para:w-(--sidebar-width) para:p-0 para:[&>button]:hidden'}
           style={
             {
               '--sidebar-width': SIDEBAR_WIDTH_MOBILE,
@@ -181,11 +181,11 @@ function Sidebar({
           }
           side={side}
         >
-          <SheetHeader className={appendParaPrefix('sr-only')}>
+          <SheetHeader className={'para:sr-only'}>
             <SheetTitle>Sidebar</SheetTitle>
             <SheetDescription>Displays the mobile sidebar.</SheetDescription>
           </SheetHeader>
-          <div className={appendParaPrefix('flex h-full w-full flex-col')}>{children}</div>
+          <div className={'para:flex para:h-full para:w-full para:flex-col'}>{children}</div>
         </SheetContent>
       </Sheet>
     );
@@ -193,7 +193,7 @@ function Sidebar({
 
   return (
     <div
-      className={appendParaPrefix('group peer text-sidebar-foreground hidden md:block')}
+      className={'para:group para:peer para:text-sidebar-foreground para:hidden para:md:block'}
       data-state={state}
       data-collapsible={state === 'collapsed' ? collapsible : ''}
       data-variant={variant}
@@ -203,37 +203,34 @@ function Sidebar({
       {/* This is what handles the sidebar gap on desktop */}
       <div
         className={cn(
-          appendParaPrefix('relative w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear'),
-          appendParaPrefix('group-data-[collapsible=offcanvas]:w-0'),
-          appendParaPrefix('group-data-[side=right]:rotate-180'),
+          'para:relative para:w-(--sidebar-width) para:bg-transparent para:transition-[width] para:duration-200 para:ease-linear',
+          'para:group-data-[collapsible=offcanvas]:w-0',
+          'para:group-data-[side=right]:rotate-180',
           variant === 'floating' || variant === 'inset'
-            ? appendParaPrefix('group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4)))]')
-            : appendParaPrefix('group-data-[collapsible=icon]:w-(--sidebar-width-icon)'),
+            ? 'para:group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4)))]'
+            : 'para:group-data-[collapsible=icon]:w-(--sidebar-width-icon)',
         )}
       />
       <div
         className={cn(
-          appendParaPrefix(
-            'fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex',
-          ),
+          'para:fixed para:inset-y-0 para:z-10 para:hidden para:h-svh para:w-(--sidebar-width) para:transition-[left,right,width] para:duration-200 para:ease-linear para:md:flex',
           side === 'left'
-            ? appendParaPrefix('left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]')
-            : appendParaPrefix('right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]'),
+            ? 'para:left-0 para:group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]'
+            : 'para:right-0 para:group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]',
           // Adjust the padding for floating and inset variants.
           variant === 'floating' || variant === 'inset'
-            ? appendParaPrefix('p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]')
-            : appendParaPrefix(
-                'group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l',
-              ),
+            ? 'para:p-2 para:group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]'
+            : 'para:group-data-[collapsible=icon]:w-(--sidebar-width-icon) para:group-data-[side=left]:border-r para:group-data-[side=right]:border-l',
+
           className,
         )}
         {...props}
       >
         <div
           data-sidebar="sidebar"
-          className={appendParaPrefix(
-            'bg-sidebar group-data-[variant=floating]:border-sidebar-border flex h-full w-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm',
-          )}
+          className={
+            'para:bg-sidebar para:group-data-[variant=floating]:border-sidebar-border para:flex para:h-full para:w-full para:flex-col para:group-data-[variant=floating]:rounded-lg para:group-data-[variant=floating]:border para:group-data-[variant=floating]:shadow-sm'
+          }
         >
           {children}
         </div>
@@ -251,7 +248,7 @@ function SidebarTrigger({ className, onClick, ...props }: React.ComponentProps<t
       data-slot="sidebar-trigger"
       variant="ghost"
       size="icon"
-      className={cn(appendParaPrefix('h-7 w-7'), className)}
+      className={(cn('para:h-7 para:w-7'), className)}
       onClick={event => {
         onClick?.(event);
         toggleSidebar();
@@ -259,7 +256,7 @@ function SidebarTrigger({ className, onClick, ...props }: React.ComponentProps<t
       {...props}
     >
       <PanelLeftIcon />
-      <span className={appendParaPrefix('sr-only')}>Toggle Sidebar</span>
+      <span className={'para:sr-only'}>Toggle Sidebar</span>
     </Button>
   );
 }
@@ -276,18 +273,12 @@ function SidebarRail({ className, ...props }: React.ComponentProps<'button'>) {
       onClick={toggleSidebar}
       title="Toggle Sidebar"
       className={cn(
-        appendParaPrefix(
-          'hover:after:bg-sidebar-border absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] sm:flex',
-        ),
-        appendParaPrefix('in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize'),
-        appendParaPrefix(
-          '[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize',
-        ),
-        appendParaPrefix(
-          'hover:group-data-[collapsible=offcanvas]:bg-sidebar group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full',
-        ),
-        appendParaPrefix('[[data-side=left][data-collapsible=offcanvas]_&]:-right-2'),
-        appendParaPrefix('[[data-side=right][data-collapsible=offcanvas]_&]:-left-2'),
+        'para:hover:after:bg-sidebar-border para:absolute para:inset-y-0 para:z-20 para:hidden para:w-4 para:-translate-x-1/2 para:transition-all para:ease-linear para:group-data-[side=left]:-right-4 para:group-data-[side=right]:left-0 para:after:absolute para:after:inset-y-0 para:after:left-1/2 para:after:w-[2px] para:sm:flex',
+        'para:in-data-[side=left]:cursor-w-resize para:in-data-[side=right]:cursor-e-resize',
+        'para:[[data-side=left][data-state=collapsed]_&]:cursor-e-resize para:[[data-side=right][data-state=collapsed]_&]:cursor-w-resize',
+        'para:hover:group-data-[collapsible=offcanvas]:bg-sidebar para:group-data-[collapsible=offcanvas]:translate-x-0 para:group-data-[collapsible=offcanvas]:after:left-full',
+        'para:[[data-side=left][data-collapsible=offcanvas]_&]:-right-2',
+        'para:[[data-side=right][data-collapsible=offcanvas]_&]:-left-2',
         className,
       )}
       {...props}
@@ -300,10 +291,8 @@ function SidebarInset({ className, ...props }: React.ComponentProps<'main'>) {
     <main
       data-slot="sidebar-inset"
       className={cn(
-        appendParaPrefix('bg-background relative flex w-full flex-1 flex-col'),
-        appendParaPrefix(
-          'md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2',
-        ),
+        'para:bg-background para:relative para:flex para:w-full para:flex-1 para:flex-col',
+        'para:md:peer-data-[variant=inset]:m-2 para:md:peer-data-[variant=inset]:ml-0 para:md:peer-data-[variant=inset]:rounded-xl para:md:peer-data-[variant=inset]:shadow-sm para:md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2',
         className,
       )}
       {...props}
@@ -316,7 +305,7 @@ function SidebarInput({ className, ...props }: React.ComponentProps<typeof Input
     <Input
       data-slot="sidebar-input"
       data-sidebar="input"
-      className={cn(appendParaPrefix('bg-background h-8 w-full shadow-none'), className)}
+      className={cn('para:bg-background para:h-8 para:w-full para:shadow-none', className)}
       {...props}
     />
   );
@@ -327,7 +316,7 @@ function SidebarHeader({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="sidebar-header"
       data-sidebar="header"
-      className={cn(appendParaPrefix('flex flex-col gap-2 p-2'), className)}
+      className={cn('para:flex para:flex-col para:gap-2 para:p-2', className)}
       {...props}
     />
   );
@@ -338,7 +327,7 @@ function SidebarFooter({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="sidebar-footer"
       data-sidebar="footer"
-      className={cn(appendParaPrefix('flex flex-col gap-2 p-2'), className)}
+      className={cn('para:flex para:flex-col para:gap-2 para:p-2', className)}
       {...props}
     />
   );
@@ -349,7 +338,7 @@ function SidebarSeparator({ className, ...props }: React.ComponentProps<typeof S
     <Separator
       data-slot="sidebar-separator"
       data-sidebar="separator"
-      className={cn(appendParaPrefix('bg-sidebar-border mx-2 w-auto'), className)}
+      className={cn('para:bg-sidebar-border para:mx-2 para:w-auto', className)}
       {...props}
     />
   );
@@ -361,7 +350,7 @@ function SidebarContent({ className, ...props }: React.ComponentProps<'div'>) {
       data-slot="sidebar-content"
       data-sidebar="content"
       className={cn(
-        appendParaPrefix('flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden'),
+        'para:flex para:min-h-0 para:flex-1 para:flex-col para:gap-2 para:overflow-auto para:group-data-[collapsible=icon]:overflow-hidden',
         className,
       )}
       {...props}
@@ -374,7 +363,7 @@ function SidebarGroup({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="sidebar-group"
       data-sidebar="group"
-      className={cn(appendParaPrefix('relative flex w-full min-w-0 flex-col p-2'), className)}
+      className={cn('para:relative para:flex para:w-full para:min-w-0 para:flex-col para:p-2', className)}
       {...props}
     />
   );
@@ -388,10 +377,8 @@ function SidebarGroupLabel({ className, asChild = false, ...props }: React.Compo
       data-slot="sidebar-group-label"
       data-sidebar="group-label"
       className={cn(
-        appendParaPrefix(
-          'text-sidebar-foreground/70 ring-sidebar-ring flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium outline-hidden transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0',
-        ),
-        appendParaPrefix('group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0'),
+        'para:text-sidebar-foreground/70 para:ring-sidebar-ring para:flex para:h-8 para:shrink-0 para:items-center para:rounded-md para:px-2 para:text-xs para:font-medium para:outline-hidden para:transition-[margin,opacity] para:duration-200 para:ease-linear para:focus-visible:ring-2 para:[&>svg]:size-4 para:[&>svg]:shrink-0',
+        'para:group-data-[collapsible=icon]:-mt-8 para:group-data-[collapsible=icon]:opacity-0',
         className,
       )}
       {...props}
@@ -411,12 +398,10 @@ function SidebarGroupAction({
       data-slot="sidebar-group-action"
       data-sidebar="group-action"
       className={cn(
-        appendParaPrefix(
-          'text-sidebar-foreground ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground absolute top-3.5 right-3 flex aspect-square w-5 items-center justify-center rounded-md p-0 outline-hidden transition-transform focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0',
-        ),
+        'para:text-sidebar-foreground para:ring-sidebar-ring para:hover:bg-sidebar-accent para:hover:text-sidebar-accent-foreground para:absolute para:top-3.5 para:right-3 para:flex para:aspect-square para:w-5 para:items-center para:justify-center para:rounded-md para:p-0 para:outline-hidden para:transition-transform para:focus-visible:ring-2 para:[&>svg]:size-4 para:[&>svg]:shrink-0',
         // Increases the hit area of the button on mobile.
-        appendParaPrefix('after:absolute after:-inset-2 md:after:hidden'),
-        appendParaPrefix('group-data-[collapsible=icon]:hidden'),
+        'para:after:absolute para:after:-inset-2 para:md:after:hidden',
+        'para:group-data-[collapsible=icon]:hidden',
         className,
       )}
       {...props}
@@ -429,7 +414,7 @@ function SidebarGroupContent({ className, ...props }: React.ComponentProps<'div'
     <div
       data-slot="sidebar-group-content"
       data-sidebar="group-content"
-      className={cn(appendParaPrefix('w-full text-sm'), className)}
+      className={(cn('para:w-full para:text-sm'), className)}
       {...props}
     />
   );
@@ -440,7 +425,7 @@ function SidebarMenu({ className, ...props }: React.ComponentProps<'ul'>) {
     <ul
       data-slot="sidebar-menu"
       data-sidebar="menu"
-      className={cn(appendParaPrefix('flex w-full min-w-0 flex-col gap-1'), className)}
+      className={cn('para:flex para:w-full para:min-w-0 para:flex-col para:gap-1', className)}
       {...props}
     />
   );
@@ -451,28 +436,25 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<'li'>) {
     <li
       data-slot="sidebar-menu-item"
       data-sidebar="menu-item"
-      className={cn(appendParaPrefix('group/menu-item relative'), className)}
+      className={cn('para:group/menu-item para:relative', className)}
       {...props}
     />
   );
 }
 
 const sidebarMenuButtonVariants = cva(
-  appendParaPrefix(
-    'peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-hidden ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0',
-  ),
+  'para:peer/menu-button para:flex para:w-full para:items-center para:gap-2 para:overflow-hidden para:rounded-md para:p-2 para:text-left para:text-sm para:outline-hidden para:ring-sidebar-ring para:transition-[width,height,padding] para:hover:bg-sidebar-accent para:hover:text-sidebar-accent-foreground para:focus-visible:ring-2 para:active:bg-sidebar-accent para:active:text-sidebar-accent-foreground para:disabled:pointer-events-none para:disabled:opacity-50 para:group-has-data-[sidebar=menu-action]/menu-item:pr-8 para:aria-disabled:pointer-events-none para:aria-disabled:opacity-50 para:data-[active=true]:bg-sidebar-accent para:data-[active=true]:font-medium para:data-[active=true]:text-sidebar-accent-foreground para:data-[state=open]:hover:bg-sidebar-accent para:data-[state=open]:hover:text-sidebar-accent-foreground para:group-data-[collapsible=icon]:size-8! para:group-data-[collapsible=icon]:p-2! para:[&>span:last-child]:truncate para:[&>svg]:size-4 para:[&>svg]:shrink-0',
   {
     variants: {
       variant: {
-        default: appendParaPrefix('hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'),
-        outline: appendParaPrefix(
-          'bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]',
-        ),
+        default: 'para:hover:bg-sidebar-accent para:hover:text-sidebar-accent-foreground',
+        outline:
+          'para:bg-background para:shadow-[0_0_0_1px_hsl(var(--sidebar-border))] para:hover:bg-sidebar-accent para:hover:text-sidebar-accent-foreground para:hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]',
       },
       size: {
-        default: appendParaPrefix('h-8 text-sm'),
-        sm: appendParaPrefix('h-7 text-xs'),
-        lg: appendParaPrefix('h-12 text-sm group-data-[collapsible=icon]:p-0!'),
+        default: 'para:h-8 para:text-sm',
+        sm: 'para:h-7 para:text-xs',
+        lg: 'para:h-12 para:text-sm para:group-data-[collapsible=icon]:p-0!',
       },
     },
     defaultVariants: {
@@ -543,19 +525,15 @@ function SidebarMenuAction({
       data-slot="sidebar-menu-action"
       data-sidebar="menu-action"
       className={cn(
-        appendParaPrefix(
-          'text-sidebar-foreground ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground peer-hover/menu-button:text-sidebar-accent-foreground absolute top-1.5 right-1 flex aspect-square w-5 items-center justify-center rounded-md p-0 outline-hidden transition-transform focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0',
-        ),
+        'para:text-sidebar-foreground para:ring-sidebar-ring para:hover:bg-sidebar-accent para:hover:text-sidebar-accent-foreground para:peer-hover/menu-button:text-sidebar-accent-foreground para:absolute para:top-1.5 para:right-1 para:flex para:aspect-square para:w-5 para:items-center para:justify-center para:rounded-md para:p-0 para:outline-hidden para:transition-transform para:focus-visible:ring-2 para:[&>svg]:size-4 para:[&>svg]:shrink-0',
         // Increases the hit area of the button on mobile.
-        appendParaPrefix('after:absolute after:-inset-2 md:after:hidden'),
-        appendParaPrefix('peer-data-[size=sm]/menu-button:top-1'),
-        appendParaPrefix('peer-data-[size=default]/menu-button:top-1.5'),
-        appendParaPrefix('peer-data-[size=lg]/menu-button:top-2.5'),
-        appendParaPrefix('group-data-[collapsible=icon]:hidden'),
+        'para:after:absolute para:after:-inset-2 para:md:after:hidden',
+        'para:peer-data-[size=sm]/menu-button:top-1',
+        'para:peer-data-[size=default]/menu-button:top-1.5',
+        'para:peer-data-[size=lg]/menu-button:top-2.5',
+        'para:group-data-[collapsible=icon]:hidden',
         showOnHover &&
-          appendParaPrefix(
-            'peer-data-[active=true]/menu-button:text-sidebar-accent-foreground group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 md:opacity-0',
-          ),
+          'para:peer-data-[active=true]/menu-button:text-sidebar-accent-foreground para:group-focus-within/menu-item:opacity-100 para:group-hover/menu-item:opacity-100 para:data-[state=open]:opacity-100 para:md:opacity-0',
         className,
       )}
       {...props}
@@ -569,16 +547,12 @@ function SidebarMenuBadge({ className, ...props }: React.ComponentProps<'div'>) 
       data-slot="sidebar-menu-badge"
       data-sidebar="menu-badge"
       className={cn(
-        appendParaPrefix(
-          'text-sidebar-foreground pointer-events-none absolute right-1 flex h-5 min-w-5 items-center justify-center rounded-md px-1 text-xs font-medium tabular-nums select-none',
-        ),
-        appendParaPrefix(
-          'peer-hover/menu-button:text-sidebar-accent-foreground peer-data-[active=true]/menu-button:text-sidebar-accent-foreground',
-        ),
-        appendParaPrefix('peer-data-[size=sm]/menu-button:top-1'),
-        appendParaPrefix('peer-data-[size=default]/menu-button:top-1.5'),
-        appendParaPrefix('peer-data-[size=lg]/menu-button:top-2.5'),
-        appendParaPrefix('group-data-[collapsible=icon]:hidden'),
+        'para:text-sidebar-foreground para:pointer-events-none para:absolute para:right-1 para:flex para:h-5 para:min-w-5 para:items-center para:justify-center para:rounded-md para:px-1 para:text-xs para:font-medium para:tabular-nums para:select-none',
+        'para:peer-hover/menu-button:text-sidebar-accent-foreground para:peer-data-[active=true]/menu-button:text-sidebar-accent-foreground',
+        'para:peer-data-[size=sm]/menu-button:top-1',
+        'para:peer-data-[size=default]/menu-button:top-1.5',
+        'para:peer-data-[size=lg]/menu-button:top-2.5',
+        'para:group-data-[collapsible=icon]:hidden',
         className,
       )}
       {...props}
@@ -602,12 +576,12 @@ function SidebarMenuSkeleton({
     <div
       data-slot="sidebar-menu-skeleton"
       data-sidebar="menu-skeleton"
-      className={cn(appendParaPrefix('flex h-8 items-center gap-2 rounded-md px-2'), className)}
+      className={cn('para:flex para:h-8 para:items-center para:gap-2 para:rounded-md para:px-2', className)}
       {...props}
     >
-      {showIcon && <Skeleton className={appendParaPrefix('size-4 rounded-md')} data-sidebar="menu-skeleton-icon" />}
+      {showIcon && <Skeleton className={'para:size-4 para:rounded-md'} data-sidebar="menu-skeleton-icon" />}
       <Skeleton
-        className={appendParaPrefix('h-4 max-w-(--skeleton-width) flex-1')}
+        className={'para:h-4 para:max-w-(--skeleton-width) para:flex-1'}
         data-sidebar="menu-skeleton-text"
         style={
           {
@@ -625,8 +599,8 @@ function SidebarMenuSub({ className, ...props }: React.ComponentProps<'ul'>) {
       data-slot="sidebar-menu-sub"
       data-sidebar="menu-sub"
       className={cn(
-        appendParaPrefix('border-sidebar-border mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-l px-2.5 py-0.5'),
-        appendParaPrefix('group-data-[collapsible=icon]:hidden'),
+        'para:border-sidebar-border para:mx-3.5 para:flex para:min-w-0 para:translate-x-px para:flex-col para:gap-1 para:border-l para:px-2.5 para:py-0.5',
+        'para:group-data-[collapsible=icon]:hidden',
         className,
       )}
       {...props}
@@ -639,7 +613,7 @@ function SidebarMenuSubItem({ className, ...props }: React.ComponentProps<'li'>)
     <li
       data-slot="sidebar-menu-sub-item"
       data-sidebar="menu-sub-item"
-      className={cn(appendParaPrefix('group/menu-sub-item relative'), className)}
+      className={cn('para:group/menu-sub-item para:relative', className)}
       {...props}
     />
   );
@@ -665,13 +639,11 @@ function SidebarMenuSubButton({
       data-size={size}
       data-active={isActive}
       className={cn(
-        appendParaPrefix(
-          'text-sidebar-foreground ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground [&>svg]:text-sidebar-accent-foreground flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 outline-hidden focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0',
-        ),
-        appendParaPrefix('data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground'),
-        size === 'sm' && appendParaPrefix('text-xs'),
-        size === 'md' && appendParaPrefix('text-sm'),
-        appendParaPrefix('group-data-[collapsible=icon]:hidden'),
+        'para:text-sidebar-foreground para:ring-sidebar-ring para:hover:bg-sidebar-accent para:hover:text-sidebar-accent-foreground para:active:bg-sidebar-accent para:active:text-sidebar-accent-foreground para:[&>svg]:text-sidebar-accent-foreground para:flex para:h-7 para:min-w-0 para:-translate-x-px para:items-center para:gap-2 para:overflow-hidden para:rounded-md para:px-2 para:outline-hidden para:focus-visible:ring-2 para:disabled:pointer-events-none para:disabled:opacity-50 para:aria-disabled:pointer-events-none para:aria-disabled:opacity-50 para:[&>span:last-child]:truncate para:[&>svg]:size-4 para:[&>svg]:shrink-0',
+        'para:data-[active=true]:bg-sidebar-accent para:data-[active=true]:text-sidebar-accent-foreground',
+        size === 'sm' && 'para:text-xs',
+        size === 'md' && 'para:text-sm',
+        'para:group-data-[collapsible=icon]:hidden',
         className,
       )}
       {...props}

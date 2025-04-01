@@ -3,12 +3,10 @@
 import * as React from 'react';
 import * as TabsPrimitive from '@radix-ui/react-tabs';
 
-import { appendParaPrefix, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 function Tabs({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.Root>) {
-  return (
-    <TabsPrimitive.Root data-slot="tabs" className={cn(appendParaPrefix('flex flex-col gap-2'), className)} {...props} />
-  );
+  return <TabsPrimitive.Root data-slot="tabs" className={cn('para:flex para:flex-col para:gap-2', className)} {...props} />;
 }
 
 function TabsList({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.List>) {
@@ -16,7 +14,7 @@ function TabsList({ className, ...props }: React.ComponentProps<typeof TabsPrimi
     <TabsPrimitive.List
       data-slot="tabs-list"
       className={cn(
-        appendParaPrefix('bg-muted text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-lg p-1'),
+        'para:bg-muted para:text-muted-foreground para:inline-flex para:h-9 para:w-fit para:items-center para:justify-center para:rounded-lg para:p-1',
         className,
       )}
       {...props}
@@ -29,9 +27,7 @@ function TabsTrigger({ className, ...props }: React.ComponentProps<typeof TabsPr
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        appendParaPrefix(
-          "data-[state=active]:bg-background data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring inline-flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        ),
+        "para:data-[state=active]:bg-background para:data-[state=active]:text-foreground para:focus-visible:border-ring para:focus-visible:ring-ring/50 para:focus-visible:outline-ring para:inline-flex para:flex-1 para:items-center para:justify-center para:gap-1.5 para:rounded-md para:px-2 para:py-1 para:text-sm para:font-medium para:whitespace-nowrap para:transition-[color,box-shadow] para:focus-visible:ring-[3px] para:focus-visible:outline-1 para:disabled:pointer-events-none para:disabled:opacity-50 para:data-[state=active]:shadow-sm para:[&_svg]:pointer-events-none para:[&_svg]:shrink-0 para:[&_svg:not([class*='size-'])]:size-4",
         className,
       )}
       {...props}
@@ -41,11 +37,7 @@ function TabsTrigger({ className, ...props }: React.ComponentProps<typeof TabsPr
 
 function TabsContent({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.Content>) {
   return (
-    <TabsPrimitive.Content
-      data-slot="tabs-content"
-      className={cn(appendParaPrefix('flex-1 outline-none'), className)}
-      {...props}
-    />
+    <TabsPrimitive.Content data-slot="tabs-content" className={cn('para:flex-1 para:outline-none', className)} {...props} />
   );
 }
 

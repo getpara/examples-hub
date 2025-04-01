@@ -4,25 +4,23 @@ import * as React from 'react';
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
 import { CheckIcon } from 'lucide-react';
 
-import { appendParaPrefix, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 function Checkbox({ className, ...props }: React.ComponentProps<typeof CheckboxPrimitive.Root>) {
   return (
     <CheckboxPrimitive.Root
       data-slot="checkbox"
       className={cn(
-        appendParaPrefix(
-          'peer border-input data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground data-[state=checked]:border-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50',
-        ),
+        'para:peer para:border-input para:data-[state=checked]:bg-primary para:data-[state=checked]:text-primary-foreground para:data-[state=checked]:border-primary para:focus-visible:border-ring para:focus-visible:ring-ring/50 para:aria-invalid:ring-destructive/20 para:dark:aria-invalid:ring-destructive/40 para:aria-invalid:border-destructive para:size-4 para:shrink-0 para:rounded-[4px] para:border para:shadow-xs para:transition-shadow para:outline-none para:focus-visible:ring-[3px] para:disabled:cursor-not-allowed para:disabled:opacity-50',
         className,
       )}
       {...props}
     >
       <CheckboxPrimitive.Indicator
         data-slot="checkbox-indicator"
-        className={appendParaPrefix('flex items-center justify-center text-current transition-none')}
+        className={'para:flex para:items-center para:justify-center para:text-current para:transition-none'}
       >
-        <CheckIcon className={appendParaPrefix('size-3.5')} />
+        <CheckIcon className={'para:size-3.5'} />
       </CheckboxPrimitive.Indicator>
     </CheckboxPrimitive.Root>
   );

@@ -9,14 +9,14 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'para:bg-primary para:text-primary-foreground para:shadow-xs para:hover:bg-primary/90',
+        default: 'para:bg-primary para:text-primary-foreground para:hover:bg-primary/90',
         destructive:
-          'para:bg-destructive para:text-white para:shadow-xs para:hover:bg-destructive/90 para:focus-visible:ring-destructive/20 para:dark:focus-visible:ring-destructive/40',
-        outline:
-          'para:border para:border-input para:bg-background para:shadow-xs para:hover:bg-accent para:hover:text-accent-foreground',
-        secondary: 'para:bg-secondary para:text-secondary-foreground para:shadow-xs para:hover:bg-secondary/80',
-        ghost: 'para:hover:bg-accent para:hover:text-accent-foreground',
+          'para:bg-destructive para:text-white para:hover:bg-destructive/90 para:focus-visible:ring-destructive/20 para:dark:focus-visible:ring-destructive/40',
+        outline: 'para:border para:border-input para:bg-background para:hover:bg-muted para:hover:text-accent-foreground',
+        secondary: 'para:bg-secondary para:text-secondary-foreground para:hover:bg-secondary/80',
+        ghost: 'para:hover:bg-muted para:hover:text-accent-foreground',
         link: 'para:text-primary para:underline-offset-4 para:hover:underline',
+        neutral: 'para:bg-foreground para:text-primary-foreground para:hover:bg-foreground/90',
       },
       size: {
         default: 'para:h-9 para:px-4 para:py-2 para:has-[>svg]:px-3',

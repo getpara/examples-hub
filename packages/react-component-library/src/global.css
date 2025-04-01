@@ -81,4 +81,9 @@
   [role='button']:not(:disabled) {
     cursor: pointer;
   }
+
+  a:not(:disabled),
+  [role='a']:not(:disabled) {
+    cursor: pointer;
+  }
 }

@@ -13,9 +13,14 @@ To install components that **DO NOT** require additional dependency installation
 To install components that require additional dependency installation do the following:
 
 1. Find the component you're looking to add [here](https://github.com/shadcn-ui/ui/tree/12d4cf2ab0caefec5d6232e6c32220a8e62d73c4/apps/v4/registry/new-york-v4/ui)
-   - **NOTE** Don't use the current shadcn docs until they are upgraded to the canary branch. We are using this release to take advantage of v4 of Tailwind.
+
+- **NOTE** Don't use the current shadcn docs until they are upgraded to the canary branch. We are using this release to take advantage of v4 of Tailwind.
+
 2. Copy the entire component file into the `src/components/base` directory. It's recommended to use the same naming convention that shadcn uses here.
-3. Wrap all defined classname strings in the `appendParaPrefix` function.
+3. Append all existing classname strings with `APPLY_PARA_PREFIX ` & run `node ./scrips/appendParaPrefix.mjs` to append `para:` to all classnames.
+
+- **NOTE** In addition to this prefix application, look out for Tailwind theme vars that will need `para` appended. The most prevalent example of this is the `--spacing` var, this would need to be updated to `--para-spacing`. If things aren't looking right in Storybook for new components this is something that should be checked.
+
 4. Install any dependencies the component requires. The correct versions can be found [here](https://github.com/shadcn-ui/ui/blob/12d4cf2ab0caefec5d6232e6c32220a8e62d73c4/apps/v4/package.json)
 5. Export the component from `src/components/base/index.ts`
 

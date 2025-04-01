@@ -3,16 +3,14 @@
 import * as React from 'react';
 import * as SwitchPrimitive from '@radix-ui/react-switch';
 
-import { appendParaPrefix, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 function Switch({ className, ...props }: React.ComponentProps<typeof SwitchPrimitive.Root>) {
   return (
     <SwitchPrimitive.Root
       data-slot="switch"
       className={cn(
-        appendParaPrefix(
-          'peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-input focus-visible:border-ring focus-visible:ring-ring/50 inline-flex h-5 w-9 shrink-0 items-center rounded-full border-2 border-transparent shadow-xs transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50',
-        ),
+        'para:peer para:data-[state=checked]:bg-primary para:data-[state=unchecked]:bg-input para:focus-visible:border-ring para:focus-visible:ring-ring/50 para:inline-flex para:h-5 para:w-9 para:shrink-0 para:items-center para:rounded-full para:border-2 para:border-transparent para:shadow-xs para:transition-all para:outline-none para:focus-visible:ring-[3px] para:disabled:cursor-not-allowed para:disabled:opacity-50',
         className,
       )}
       {...props}
@@ -20,9 +18,7 @@ function Switch({ className, ...props }: React.ComponentProps<typeof SwitchPrimi
       <SwitchPrimitive.Thumb
         data-slot="switch-thumb"
         className={cn(
-          appendParaPrefix(
-            'bg-background pointer-events-none block size-4 rounded-full ring-0 shadow-lg transition-transform data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0',
-          ),
+          'para:bg-background para:pointer-events-none para:block para:size-4 para:rounded-full para:ring-0 para:shadow-lg para:transition-transform para:data-[state=checked]:translate-x-4 para:data-[state=unchecked]:translate-x-0',
         )}
       />
     </SwitchPrimitive.Root>
