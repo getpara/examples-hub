@@ -2,8 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthLayout, OAuthMethod, ParaProvider } from "@getpara/react-sdk";
-import { ParaSignerProvider } from "@/components/ParaSignerProvider";
-import { para } from "@/client/para";
+import { API_KEY, ENVIRONMENT } from "@/constants";
 
 const queryClient = new QueryClient();
 
@@ -15,7 +14,10 @@ export function Providers({
   return (
     <QueryClientProvider client={queryClient}>
       <ParaProvider
-        paraClientConfig={para}
+        paraClientConfig={{
+          apiKey: API_KEY,
+          env: ENVIRONMENT,
+        }}
         config={{ appName: "Para Modal Example" }}
         paraModalConfig={{
           disableEmailLogin: false,
@@ -46,7 +48,7 @@ export function Providers({
           twoFactorAuthEnabled: false,
         }}
       >
-        <ParaSignerProvider>{children}</ParaSignerProvider>
+        {children}
       </ParaProvider>
     </QueryClientProvider>
   );
