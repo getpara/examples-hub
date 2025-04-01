@@ -23,9 +23,9 @@ export function ParaSignerProvider({
 
   useEffect(() => {
     if (account?.isConnected) {
-      initializeEthers;
+      initializeEthers();
     } else {
-      clearEthers;
+      clearEthers();
     }
   }, [account?.isConnected]);
 

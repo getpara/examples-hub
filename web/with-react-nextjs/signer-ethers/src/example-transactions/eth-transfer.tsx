@@ -1,8 +1,15 @@
 "use client";
 
-import { usePara } from "@/components/ParaProvider";
 import { useState, useEffect } from "react";
-import { parseEther, type TransactionRequest, toBigInt, formatEther } from "ethers";
+import {
+  parseEther,
+  type TransactionRequest,
+  toBigInt,
+  formatEther,
+} from "ethers";
+import { useParaSigner } from "@/components/ParaSignerProvider";
+import { useAccount, useWallet } from "@getpara/react-sdk";
+import { provider } from "@/client/ethers";
 
 export default function EthTransferDemo() {
   const [to, setTo] = useState("");
@@ -17,7 +24,13 @@ export default function EthTransferDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { isConnected, walletId, address, signer, provider } = usePara();
+  const { signer } = useParaSigner();
+  const { data: account } = useAccount();
+  const { data: wallet } = useWallet();
+
+  const address = wallet?.address;
+  const walletId = wallet?.id;
+  const isConnected = account?.isConnected;
 
   const fetchBalance = async () => {
     if (!address || !provider) return;
@@ -40,8 +53,12 @@ export default function EthTransferDemo() {
     }
   }, [address]);
 
-  const constructTransaction = async (toAddress: string, ethAmount: string): Promise<TransactionRequest> => {
-    if (!address || !provider) throw new Error("No sender address or provider available");
+  const constructTransaction = async (
+    toAddress: string,
+    ethAmount: string
+  ): Promise<TransactionRequest> => {
+    if (!address || !provider)
+      throw new Error("No sender address or provider available");
 
     const nonce = await provider.getTransactionCount(address);
     const feeData = await provider.getFeeData();
@@ -60,8 +77,12 @@ export default function EthTransferDemo() {
 
     return tx;
   };
-  const validateTransaction = async (toAddress: string, ethAmount: string): Promise<boolean> => {
-    if (!address || !provider) throw new Error("No sender address or provider available");
+  const validateTransaction = async (
+    toAddress: string,
+    ethAmount: string
+  ): Promise<boolean> => {
+    if (!address || !provider)
+      throw new Error("No sender address or provider available");
 
     try {
       // Get current balance
@@ -178,7 +199,10 @@ export default function EthTransferDemo() {
       setStatus({
         show: true,
         type: "error",
-        message: error instanceof Error ? error.message : "Failed to send transaction. Please try again.",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to send transaction. Please try again.",
       });
     } finally {
       setIsLoading(false);
@@ -187,11 +211,15 @@ export default function EthTransferDemo() {
   return (
     <div className="container mx-auto px-4">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold tracking-tight mb-6">ETH Transfer Demo</h1>
+        <h1 className="text-4xl font-bold tracking-tight mb-6">
+          ETH Transfer Demo
+        </h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Send ETH with your connected wallet. This demonstrates a basic ETH transfer using the Para SDK with ethers.js
-          integration via the{" "}
-          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md">ethersParaSigner</code>{" "}
+          Send ETH with your connected wallet. This demonstrates a basic ETH
+          transfer using the Para SDK with ethers.js integration via the{" "}
+          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md">
+            ethersParaSigner
+          </code>{" "}
           provider.
         </p>
       </div>
@@ -199,17 +227,28 @@ export default function EthTransferDemo() {
       <div className="max-w-xl mx-auto">
         <div className="mb-8 rounded-none border border-gray-200">
           <div className="flex justify-between items-center px-6 py-3 bg-gray-50 border-b border-gray-200">
-            <h3 className="text-sm font-medium text-gray-900">Current Balance:</h3>
+            <h3 className="text-sm font-medium text-gray-900">
+              Current Balance:
+            </h3>
             <button
               onClick={fetchBalance}
               disabled={isBalanceLoading || !address}
               className="p-1 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
-              title="Refresh balance">
-              <span className={`inline-block ${isBalanceLoading ? "animate-spin" : ""}`}>🔄</span>
+              title="Refresh balance"
+            >
+              <span
+                className={`inline-block ${
+                  isBalanceLoading ? "animate-spin" : ""
+                }`}
+              >
+                🔄
+              </span>
             </button>
           </div>
           <div className="px-6 py-3">
-            <p className="text-sm text-gray-500 bg-gray-100 p-2 rounded-md">Network: Holesky</p>
+            <p className="text-sm text-gray-500 bg-gray-100 p-2 rounded-md">
+              Network: Holesky
+            </p>
             <p className="text-lg font-medium text-gray-900">
               {!address
                 ? "Please connect your wallet"
@@ -230,18 +269,18 @@ export default function EthTransferDemo() {
                 : status.type === "error"
                 ? "bg-red-50 border-red-500 text-red-700"
                 : "bg-blue-50 border-blue-500 text-blue-700"
-            }`}>
+            }`}
+          >
             <p className="px-6 py-4 break-words">{status.message}</p>
           </div>
         )}
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-3">
             <label
               htmlFor="to"
-              className="block text-sm font-medium text-gray-700">
+              className="block text-sm font-medium text-gray-700"
+            >
               Recipient Address
             </label>
             <input
@@ -259,7 +298,8 @@ export default function EthTransferDemo() {
           <div className="space-y-3">
             <label
               htmlFor="amount"
-              className="block text-sm font-medium text-gray-700">
+              className="block text-sm font-medium text-gray-700"
+            >
               Amount (ETH)
             </label>
             <input
@@ -278,19 +318,23 @@ export default function EthTransferDemo() {
           <button
             type="submit"
             className="w-full rounded-none bg-blue-900 px-6 py-3 text-sm font-medium text-white hover:bg-blue-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!to || !amount || isLoading}>
+            disabled={!to || !amount || isLoading}
+          >
             {isLoading ? "Sending Transaction..." : "Send Transaction"}
           </button>
 
           {txHash && (
             <div className="mt-8 rounded-none border border-gray-200">
               <div className="flex justify-between items-center px-6 py-4 bg-gray-50 border-b border-gray-200">
-                <h3 className="text-sm font-medium text-gray-900">Transaction Hash:</h3>
+                <h3 className="text-sm font-medium text-gray-900">
+                  Transaction Hash:
+                </h3>
                 <a
                   href={`https://holesky.etherscan.io/tx/${txHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-1 text-sm bg-blue-900 text-white hover:bg-blue-950 transition-colors rounded-none">
+                  className="px-3 py-1 text-sm bg-blue-900 text-white hover:bg-blue-950 transition-colors rounded-none"
+                >
                   View on Etherscan
                 </a>
               </div>

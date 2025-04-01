@@ -6,11 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "yarn setup-para"
   },
   "dependencies": {
-    "@getpara/react-sdk": "1.5.0",
-    "@tanstack/react-query": "5.66.0",
+    "@getpara/react-sdk": "2.0.0-dev.0",
+    "@tanstack/react-query": "^5.0.0",
     "next": "15.1.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

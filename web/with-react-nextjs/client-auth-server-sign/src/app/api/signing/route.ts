@@ -16,28 +16,31 @@ export async function POST(request: NextRequest) {
 
     if (!session || !transaction) {
       return NextResponse.json(
-        { error: "Provide both `session` and `transaction` in the request body." },
+        {
+          error:
+            "Provide both `session` and `transaction` in the request body.",
+        },
         { status: 400 }
       );
     }
 
-    const PARA_API_KEY = process.env.PARA_API_KEY;
-    if (!PARA_API_KEY) {
-      return NextResponse.json(
-        { error: "Set PARA_API_KEY in the environment before using this handler." },
-        { status: 500 }
-      );
-    }
+    const PARA_API_KEY = process.env.NEXT_PUBLIC_PARA_API_KEY;
 
     const txParsed = JSON.parse(transaction);
 
     const tx = ethers.Transaction.from(txParsed);
 
-    const para = new ParaServer(Environment.BETA, PARA_API_KEY);
+    const para = new ParaServer(
+      (process.env.NEXT_PUBLIC_PARA_ENVIRONMENT as Environment) ??
+        Environment.BETA,
+      PARA_API_KEY
+    );
 
     await para.importSession(session);
 
-    const ethersProvider = new ethers.JsonRpcProvider("https://ethereum-sepolia-rpc.publicnode.com");
+    const ethersProvider = new ethers.JsonRpcProvider(
+      "https://ethereum-sepolia-rpc.publicnode.com"
+    );
 
     const paraEthersSigner = new ParaEthersSigner(para, ethersProvider);
 
@@ -54,7 +57,10 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Error in transaction signing handler:", error);
     return NextResponse.json(
-      { error: "Failed to sign or broadcast transaction", details: (error as Error).message },
+      {
+        error: "Failed to sign or broadcast transaction",
+        details: (error as Error).message,
+      },
       { status: 500 }
     );
   }

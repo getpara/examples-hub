@@ -5,11 +5,17 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    if (!process.env.PARA_API_KEY) {
-      throw new Error("PARA_API_KEY is not defined in the environment variables");
+    if (!process.env.NEXT_PUBLIC_PARA_API_KEY) {
+      throw new Error(
+        "NEXT_PUBLIC_PARA_API_KEY is not defined in the environment variables"
+      );
     }
 
-    const para = new Para(Environment.BETA, process.env.PARA_API_KEY);
+    const para = new Para(
+      (process.env.NEXT_PUBLIC_PARA_ENVIRONMENT as Environment) ??
+        Environment.BETA,
+      process.env.NEXT_PUBLIC_PARA_API_KEY
+    );
     const uuid = uuidv4();
 
     const wallet = await para.createPregenWallet({
@@ -34,6 +40,9 @@ export async function GET() {
       },
     });
   } catch (error) {
-    return NextResponse.json({ success: false, error: (error as Error).message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: (error as Error).message },
+      { status: 500 }
+    );
   }
 }
