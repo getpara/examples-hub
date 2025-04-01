@@ -1,6 +1,7 @@
 import { Card } from "./components/Card";
 import { transactionTypes } from "./example-transactions";
 import { useAccount, useModal } from "@getpara/react-sdk";
+import "@getpara/react-sdk/styles.css";
 
 export default function Home() {
   const { openModal } = useModal();

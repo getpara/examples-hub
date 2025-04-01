@@ -1,7 +1,6 @@
 "use client";
 
-import { para } from "../client/para";
-import { usePara } from "../components/ParaProvider";
+import { useAccount, useSignMessage } from "@getpara/react-sdk";
 import { useState } from "react";
 
 export default function SignMessageDemo() {
@@ -14,14 +13,15 @@ export default function SignMessageDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { isConnected, walletId } = usePara();
+  const { data: account } = useAccount();
+  const { signMessageAsync } = useSignMessage();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      if (!isConnected) {
+      if (!account?.isConnected) {
         setStatus({
           show: true,
           type: "error",
@@ -30,21 +30,15 @@ export default function SignMessageDemo() {
         return;
       }
 
-      if (!walletId) {
-        setStatus({
-          show: true,
-          type: "error",
-          message: "No wallet ID found. Please reconnect your wallet.",
-        });
-        return;
-      }
-
       const messageToSign = message.trim();
       const messageBase64 = Buffer.from(messageToSign).toString("base64");
 
-      const signature = await para.signMessage({ walletId, messageBase64 });
+      const signature = await signMessageAsync({ messageBase64 });
 
-      if ("pendingTransactionId" in signature || "transactionReviewUrl" in signature) {
+      if (
+        "pendingTransactionId" in signature ||
+        "transactionReviewUrl" in signature
+      ) {
         setStatus({
           show: true,
           type: "error",
@@ -74,11 +68,15 @@ export default function SignMessageDemo() {
   return (
     <div className="container mx-auto px-4">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold tracking-tight mb-6">Sign Message Demo</h1>
+        <h1 className="text-4xl font-bold tracking-tight mb-6">
+          Sign Message Demo
+        </h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Sign a message with your connected wallet. This demonstrates a basic message signing interaction with the Para
-          SDK using the{" "}
-          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-none">para.signMessage()</code>
+          Sign a message with your connected wallet. This demonstrates a basic
+          message signing interaction with the Para SDK using the{" "}
+          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-none">
+            para.signMessage()
+          </code>
           method.
         </p>
       </div>
@@ -90,18 +88,18 @@ export default function SignMessageDemo() {
               status.type === "success"
                 ? "bg-green-50 border-green-500 text-green-700"
                 : "bg-red-50 border-red-500 text-red-700"
-            }`}>
+            }`}
+          >
             <p className="px-6 py-4">{status.message}</p>
           </div>
         )}
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-3">
             <label
               htmlFor="message"
-              className="block text-sm font-medium text-gray-700">
+              className="block text-sm font-medium text-gray-700"
+            >
               Message to Sign
             </label>
             <input
@@ -119,7 +117,8 @@ export default function SignMessageDemo() {
           <button
             type="submit"
             className="w-full rounded-none bg-blue-900 px-6 py-3 text-sm font-medium text-white hover:bg-blue-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!message || isLoading}>
+            disabled={!message || isLoading}
+          >
             {isLoading ? "Signing Message..." : "Sign Message"}
           </button>
 
