@@ -1,5 +1,4 @@
 import { ParaModal, useAccount } from '@getpara/react-sdk';
-import { Checkbox } from '@getpara/react-component-library';
 import styled from 'styled-components';
 import { Footer } from './components/Footer';
 import { Heading } from './components/Heading';
@@ -19,25 +18,14 @@ export const Landing = () => {
   };
 
   return (
-    <Container>
-      <Checkbox />
+    <div className="para:flex para:flex-1 para:flex-col para:items-center para:gap-6 para:max-w-[558px] para:w-full">
       <Heading />
       <CTA />
       {isLoading ? <Loading /> : <StyledModal onClose={handleModalClose} />}
       <Footer />
-    </Container>
+    </div>
   );
 };
-
-const Container = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 24px;
-  max-width: 558px;
-  width: 100%;
-`;
 
 const StyledModal = styled(ParaModal)`
   width: 100%;

@@ -1,32 +1,25 @@
-import styled from 'styled-components';
-import { UnderlinedText } from '../../../components/common';
-import { CpslText } from '@getpara/react-components';
+import clsx from 'clsx';
 import { PRIVACY_POLICY, TOS } from '../../../utils/constants';
+import { Button, Typography } from '@getpara/react-component-library';
+import { Link } from 'react-router-dom';
 
 export const Footer = () => {
+  const footerTextCN = 'para:text-sm para:text-muted-foreground para:font-medium';
+  const linkCN = 'para:underline';
+
   return (
-    <Container>
-      <CpslText variant="bodyS" color="tertiary">
-        © {new Date().getFullYear()} Capsule Labs, Inc.
-      </CpslText>
-      <UnderlinedText variant="bodyS" color="tertiary">
-        <a href={TOS} target="_blank">
+    <div className="para:mt-auto para:pt-4 para:flex para:items-center para:gap-4">
+      <Typography className={footerTextCN}>© {new Date().getFullYear()} Capsule Labs, Inc.</Typography>
+      <Button asChild className={clsx(footerTextCN, linkCN)} variant="link">
+        <Link to={TOS} target="_blank">
           Terms and Conditions
-        </a>
-      </UnderlinedText>
-      <UnderlinedText variant="bodyS" color="tertiary">
-        <a href={PRIVACY_POLICY} target="_blank">
+        </Link>
+      </Button>
+      <Button asChild className={clsx(footerTextCN, linkCN)} variant="link">
+        <Link to={PRIVACY_POLICY} target="_blank">
           Privacy Policy
-        </a>
-      </UnderlinedText>
-    </Container>
+        </Link>
+      </Button>
+    </div>
   );
 };
-
-const Container = styled.div`
-  margin-top: auto;
-  padding-top: 16px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-`;

@@ -1,11 +1,12 @@
-import { CpslButton, CpslIcon, CpslText } from '@getpara/react-components';
-import styled from 'styled-components';
 import { LANDING_HEADER_LINKS } from '../../utils/constants';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { Menu } from 'lucide-react';
+import { Button, ParaBrand } from '@getpara/react-component-library';
+import { Link } from 'react-router-dom';
 
-export const LANDING_APP_BAR_HEIGHT = 80;
+export const LANDING_APP_BAR_HEIGHT = 78;
 
 export const LandingAppBar = () => {
   const isMobile = useIsMobile();
@@ -24,104 +25,51 @@ export const LandingAppBar = () => {
   };
 
   return (
-    <Container>
-      <InnerContainer>
-        <ContentContainer>
-          <Logo icon="para" />
-          {isMobile ? (
-            <>
-              <CpslIcon icon="menu" onClick={handleMenuClick} />
-            </>
-          ) : (
-            <LinksContainer>
-              {LANDING_HEADER_LINKS.map(({ label, url }) => (
-                <LinkButton href={url} variant="ghost" as="a" target="_blank">
-                  <CpslText variant="bodyS" weight="medium">
-                    {label}
-                  </CpslText>
-                </LinkButton>
-              ))}
-            </LinksContainer>
-          )}
-        </ContentContainer>
-        <AnimatePresence>
-          {isMobile && isMenuOpen && (
-            <MobileLinksContainer
-              style={{ overflow: 'hidden' }}
-              initial={{ height: 0 }}
-              animate={{ height: 'auto' }}
-              transition={{ duration: 0.15 }}
-              exit={{ height: 0 }}
-              key={'container'}
-            >
-              {LANDING_HEADER_LINKS.map(({ label, url }) => (
-                <MobileLinkButton href={url} variant="ghost" as="a" target="_blank">
-                  <CpslText variant="bodyS" weight="medium">
-                    {label}
-                  </CpslText>
-                </MobileLinkButton>
-              ))}
-            </MobileLinksContainer>
-          )}
-        </AnimatePresence>
-      </InnerContainer>
-    </Container>
+    <>
+      <div className="para:p-4 para:pb-0 para:w-full para:fixed para:flex para:items-center para:justify-center para:top-0 para:h-auto para:z-10">
+        <div className="para:border para:border-border para:max-w-[1183px] para:w-full para:h-auto para:py-5 para:px-6 para:rounded-2xl para:bg-background">
+          <div className="para:flex para:items-center para:flex-1 para:gap-2 para:justify-between">
+            <ParaBrand className="para:w-auto" />
+            {isMobile ? (
+              <>
+                <Menu onClick={handleMenuClick} />
+              </>
+            ) : (
+              <div className="para:flex para:gap-6 para:items-center">
+                {LANDING_HEADER_LINKS.map(({ label, url }) => (
+                  <Button asChild className="para:px-0 para:text-foreground" variant="link">
+                    <Link to={url} target="_blank">
+                      {label}
+                    </Link>
+                  </Button>
+                ))}
+              </div>
+            )}
+          </div>
+          <AnimatePresence>
+            {isMobile && isMenuOpen && (
+              <motion.div
+                className="para:overflow-hidden para:flex-1 para:flex para:flex-col"
+                style={{ overflow: 'hidden' }}
+                initial={{ height: 0 }}
+                animate={{ height: 'auto' }}
+                transition={{ duration: 0.15 }}
+                exit={{ height: 0 }}
+                key={'container'}
+              >
+                {LANDING_HEADER_LINKS.map(({ label, url }) => (
+                  <Button asChild className="para:px-0 para:pt-6 para:text-foreground" variant="link">
+                    <Link to={url} target="_blank">
+                      {label}
+                    </Link>
+                  </Button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+      <div className="para:h-[94px]" />
+    </>
   );
 };
-
-const Container = styled.div`
-  padding: 16px 16px 0px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: fixed;
-  top: 0px;
-  width: 100vw;
-  z-index: 10;
-  height: auto;
-`;
-
-const InnerContainer = styled.div`
-  border: 1px solid;
-  border-color: var(--cpsl-color-background-8);
-  border-radius: 16px;
-  background-color: var(--cpsl-color-background-0);
-  width: 100%;
-  height: auto;
-  padding: 20px 24px;
-  max-width: 1183px;
-`;
-
-const ContentContainer = styled.div`
-  display: flex;
-  align-items: center;
-  flex: 1;
-  gap: 8px;
-  justify-content: space-between;
-`;
-
-const LinksContainer = styled.div`
-  display: flex;
-  gap: 24px;
-  align-items: center;
-`;
-
-const MobileLinksContainer = styled(motion.div)`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-`;
-
-const Logo = styled(CpslIcon)`
-  --height: 24px;
-  --width: auto;
-`;
-
-const LinkButton = styled(CpslButton)`
-  --button-ghost-color: var(--cpsl-color-text-primary);
-  --button-ghost-hover-color: var(--cpsl-color-text-primary);
-`;
-
-const MobileLinkButton = styled(LinkButton)`
-  padding-top: 24px;
-`;

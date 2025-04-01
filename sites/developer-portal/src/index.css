@@ -41,11 +41,6 @@ body {
   overflow: auto;
 }
 
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
 .Toastify__toast-container {
   z-index: 99999 !important;
 }

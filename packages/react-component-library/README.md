@@ -17,7 +17,7 @@ To install components that require additional dependency installation do the fol
 - **NOTE** Don't use the current shadcn docs until they are upgraded to the canary branch. We are using this release to take advantage of v4 of Tailwind.
 
 2. Copy the entire component file into the `src/components/base` directory. It's recommended to use the same naming convention that shadcn uses here.
-3. Append all existing classname strings with `APPLY_PARA_PREFIX ` & run `node ./scrips/appendParaPrefix.mjs` to append `para:` to all classnames.
+3. Append all existing classname strings with `APPLY_PARA_PREFIX ` & run `node ./scripts/applyParaPrefix.mjs` to append `para:` to all classnames.
 
 - **NOTE** In addition to this prefix application, look out for Tailwind theme vars that will need `para` appended. The most prevalent example of this is the `--spacing` var, this would need to be updated to `--para-spacing`. If things aren't looking right in Storybook for new components this is something that should be checked.
 

@@ -35,4 +35,40 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  --color-shadowstone-50: var(--shadowstone-50);
+  --color-shadowstone-100: var(--shadowstone-100);
+  --color-shadowstone-200: var(--shadowstone-200);
+  --color-shadowstone-300: var(--shadowstone-300);
+  --color-shadowstone-400: var(--shadowstone-400);
+  --color-shadowstone-500: var(--shadowstone-500);
+  --color-shadowstone-600: var(--shadowstone-600);
+  --color-shadowstone-700: var(--shadowstone-700);
+  --color-shadowstone-800: var(--shadowstone-800);
+  --color-shadowstone-900: var(--shadowstone-900);
+  --color-shadowstone-950: var(--shadowstone-950);
+
+  --color-magnetica-50: var(--magnetica-50);
+  --color-magnetica-100: var(--magnetica-100);
+  --color-magnetica-200: var(--magnetica-200);
+  --color-magnetica-300: var(--magnetica-300);
+  --color-magnetica-400: var(--magnetica-400);
+  --color-magnetica-500: var(--magnetica-500);
+  --color-magnetica-600: var(--magnetica-600);
+  --color-magnetica-700: var(--magnetica-700);
+  --color-magnetica-800: var(--magnetica-800);
+  --color-magnetica-900: var(--magnetica-900);
+  --color-magnetica-950: var(--magnetica-950);
+
+  --color-mist-50: var(--mist-50);
+  --color-mist-100: var(--mist-100);
+  --color-mist-200: var(--mist-200);
+  --color-mist-300: var(--mist-300);
+  --color-mist-400: var(--mist-400);
+  --color-mist-500: var(--mist-500);
+  --color-mist-600: var(--mist-600);
+  --color-mist-700: var(--mist-700);
+  --color-mist-800: var(--mist-800);
+  --color-mist-900: var(--mist-900);
+  --color-mist-950: var(--mist-950);
 }

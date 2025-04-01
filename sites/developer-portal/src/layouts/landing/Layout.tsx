@@ -1,5 +1,4 @@
 import { Outlet, useNavigate, useSearchParams } from 'react-router-dom';
-import styled from 'styled-components';
 import { useGetAllOrganizations } from '../../hooks/api/queries/useOrganizations';
 import { useEffect } from 'react';
 import { MainLoader } from '../../components/MainLoader';
@@ -38,9 +37,9 @@ export const Layout = () => {
   }
 
   return (
-    <>
+    <div className="para:min-h-dvh para:flex para:flex-col para:bg-muted">
       <LandingAppBar />
-      <LandingMain>
+      <main className="para:flex para:flex-1 para:justify-center para:box-border para:overflow-auto para:px-6 para:pb-6 para:pt-[34px]">
         <SentryErrorBoundary
           fallback={({ error, resetError }) => (
             <ErrorBoundary
@@ -53,18 +52,7 @@ export const Layout = () => {
         >
           <Outlet />
         </SentryErrorBoundary>
-      </LandingMain>
-    </>
+      </main>
+    </div>
   );
 };
-
-const LandingMain = styled.main`
-  overflow: auto;
-
-  display: flex;
-  justify-content: center;
-  background-color: var(--cpsl-color-background-4);
-  min-height: 100vh;
-  box-sizing: border-box;
-  padding: calc(${LANDING_APP_BAR_HEIGHT}px + 34px) 24px 24px 24px;
-`;

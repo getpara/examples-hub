@@ -49,6 +49,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             bareModal: true,
             isOpen: true,
           }}
+          externalWalletConfig={{ wallets: [] }}
         >
           <RouterProvider router={router} />
           <ToastContainer />
