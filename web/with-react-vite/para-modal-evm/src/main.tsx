@@ -35,7 +35,7 @@ createRoot(document.getElementById("root")!).render(
             projectId: import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID || "",
           },
         }}
-        config={{ appName: "Para EVM Wallet Connect" }}
+        config={{ appName: "Para Modal + EVM Wallets Example" }}
         paraModalConfig={{
           disableEmailLogin: false,
           disablePhoneLogin: false,
