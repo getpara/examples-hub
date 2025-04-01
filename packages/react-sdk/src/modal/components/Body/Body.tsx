@@ -33,6 +33,7 @@ import { TelegramOAuthStep } from '../OAuth/TelegramOAuthStep.js';
 import { AwaitingPasswordStep } from '../AwaitingPasswordStep/AwaitingPasswordStep.js';
 import { IFrameStep } from '../IFrameStep/IFrameStep.js';
 import { useStore } from '../../../provider/stores/useStore.js';
+import { ExternalWalletVerificationStep } from '../ExternalWalletVerificationStep/ExternalWalletVerificationStep.js';
 
 interface BodyProps {
   oAuthMethods?: OAuthMethod[];
@@ -91,6 +92,9 @@ export const Body = ({ oAuthMethods, twoFactorAuthEnabled, disableEmailLogin, di
       }
       case ModalStep.VERIFICATIONS: {
         return <VerificationCodeStep />;
+      }
+      case ModalStep.EXTERNAL_WALLET_VERIFICATION: {
+        return <ExternalWalletVerificationStep />;
       }
       case ModalStep.BIOMETRIC_LOGIN: {
         return <BiometricLoginStep />;

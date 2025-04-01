@@ -8,6 +8,9 @@ export const createExternalWalletsSlice: StateCreator<Store, [], [], ExternalWal
   externalWallets: [],
   setExternalWallets: externalWallets => set({ externalWallets }),
 
+  externalWalletsWithFullAuth: [],
+  setExternalWalletsWithFullAuth: externalWalletsWithFullAuth => set({ externalWalletsWithFullAuth }),
+
   evmContext: EvmExternalWalletContext,
   setEvmContext: evmContext => set({ evmContext }),
   EvmProvider: undefined,

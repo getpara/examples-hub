@@ -20,6 +20,8 @@ function defaultDisplayName(authType: AuthType, identifier: string) {
 }
 
 export const UserIdentifier = ({ identifier, authType, displayName, pfpUrl }: ModalAuthInfo) => {
+  const shouldHideAvatar = authType === 'externalWallet';
+
   let icon: IconType;
   switch (authType) {
     case 'email':
@@ -38,13 +40,15 @@ export const UserIdentifier = ({ identifier, authType, displayName, pfpUrl }: Mo
 
   return (
     <Container>
-      <IconContainer>
-        {pfpUrl ? (
-          <Avatar src={pfpUrl} size="20px" />
-        ) : (
-          <Icon icon={icon} size={authType === 'telegram' ? '20px' : '13px'} />
-        )}
-      </IconContainer>
+      {!shouldHideAvatar && (
+        <IconContainer>
+          {pfpUrl ? (
+            <Avatar src={pfpUrl} size="20px" />
+          ) : (
+            <Icon icon={icon} size={authType === 'telegram' ? '20px' : '13px'} />
+          )}
+        </IconContainer>
+      )}
       <IdentifierText variant="bodyS" weight="medium">
         {displayName || defaultDisplayName(authType, identifier)}
       </IdentifierText>

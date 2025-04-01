@@ -47,3 +47,31 @@ export type CommonChain = {
   id: string | number;
   name: string;
 };
+
+export enum EvmWallet {
+  METAMASK = 'METAMASK',
+  RAINBOW = 'RAINBOW',
+  COINBASE = 'COINBASE',
+  WALLETCONNECT = 'WALLETCONNECT',
+  ZERION = 'ZERION',
+  RABBY = 'RABBY',
+}
+
+export enum SolanaWallet {
+  PHANTOM = 'PHANTOM',
+  GLOW = 'GLOW',
+  BACKPACK = 'BACKPACK',
+}
+
+export enum CosmosWallet {
+  KEPLR = 'KEPLR',
+  LEAP = 'LEAP',
+}
+
+export const ExternalWallet = {
+  ...EvmWallet,
+  ...SolanaWallet,
+  ...CosmosWallet,
+};
+
+export type TExternalWallet = keyof typeof ExternalWallet;

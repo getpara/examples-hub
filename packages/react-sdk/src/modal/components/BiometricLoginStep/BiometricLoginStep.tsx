@@ -37,7 +37,7 @@ export const BiometricLoginStep = () => {
         return;
       }
 
-      if (!para.isEmail && !para.isPhone && !para.isFarcaster && !para.isTelegram) {
+      if (!para.isEmail && !para.isPhone && !para.isFarcaster && !para.isTelegram && !para.isExternalWalletAuth) {
         return;
       }
 
@@ -45,7 +45,15 @@ export const BiometricLoginStep = () => {
         return;
       }
 
-      const authType = para.isEmail ? 'email' : para.isPhone ? 'phone' : para.isFarcaster ? 'farcaster' : 'telegram';
+      const authType = para.isEmail
+        ? 'email'
+        : para.isPhone
+          ? 'phone'
+          : para.isFarcaster
+            ? 'farcaster'
+            : para.isTelegram
+              ? 'telegram'
+              : 'externalWallet';
 
       const { partnerId, sessionId, sessionLookupId } = await para.touchSession();
       const webAuthUrlForLogin =

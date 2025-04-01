@@ -5303,10 +5303,10 @@
   resolved "https://registry.yarnpkg.com/@floating-ui/utils/-/utils-0.2.8.tgz#21a907684723bbbaa5f0974cf7730bd797eb8e62"
   integrity sha512-kym7SodPp8/wloecOpcmSnWJsK7M0E5Wg8UcFA+uO4B9s5d0ywXOEro/8HM9x0rW+TljRzul/14UYz3TleT3ig==
 
-"@getpara/core-components@0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@getpara/core-components/-/core-components-0.1.0.tgz#b4562bdcaf8a914dc5c3ec2c8c49b0537da2ef2b"
-  integrity sha512-rLPL+Zd9hQ04YJfzH6Dj15rvo1MHABJXvncAZrKKIoxbwfvcAZEMB1295gxw8AYbB8KFQqym8l58D6Vn5ej6TQ==
+"@getpara/core-components@1.7.1":
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/@getpara/core-components/-/core-components-1.7.1.tgz#03be9e1db814c0172c4de6f2bc023b0c8c1b655a"
+  integrity sha512-VzCglEeknhZXuRWxucxA1vJTlja/eNR9fXf1PZ75HrqgoBVtq3HjHIB7wQj/VyrNG19ScumYlhrkAQvCHGquhA==
   dependencies:
     "@stencil/core" "^4.7.0"
     color-blend "^4.0.0"
@@ -5315,38 +5315,37 @@
     inputmask "5.0.9"
     qrcode-with-logos "1.1.1"
 
-"@getpara/core-sdk@0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-0.1.0.tgz#187176a39f4b13784fe8b68dfc5d58bac5d4c456"
-  integrity sha512-KgxD3xUqycl/T+kHMorkeMuG1aty1x7dhLVglpg1/z3U2EvkAKZK4+wTvkmzatHae+bu18x5uJ+PhvffM2wj0w==
+"@getpara/core-sdk@1.7.1":
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.7.1.tgz#a967fc013603e6eaf135cb1d2cfd5e2c2d15e76e"
+  integrity sha512-LAziNnEteVvW0K3JDu+1pCGAxbWRlhgrx/E1Tx9jXtwlmpfcuJWrGMOOslAgkXUJ6xgjj+KL/Hnzjcdbmu3m/A==
   dependencies:
     "@celo/utils" "^8.0.0"
     "@cosmjs/encoding" "^0.32.4"
-    "@getpara/user-management-client" "0.1.0"
+    "@getpara/user-management-client" "1.7.1"
     "@noble/hashes" "^1.5.0"
     base64url "^3.0.1"
-    buffer "6.0.3"
     ethereumjs-util "7.1.5"
     libphonenumber-js "1.11.2"
     node-forge "^1.3.1"
     qs "^6.12.0"
 
-"@getpara/cosmjs-v0-integration@0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@getpara/cosmjs-v0-integration/-/cosmjs-v0-integration-0.1.0.tgz#c974e1b8531f2785d5ea3d69047e06b0dcd68982"
-  integrity sha512-pqEoC0MOFHZpYyH/I7nlfvYeRpM8/HZoC/xny+afr2EJmGw1a5+X9bc2x18zvKYf3LnmWuzfFr4B85W0WxZH1w==
+"@getpara/cosmjs-v0-integration@>=1.0.0":
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/@getpara/cosmjs-v0-integration/-/cosmjs-v0-integration-1.7.1.tgz#3272d14c10c31166603a7ff8d32e777dfc9f8d1b"
+  integrity sha512-rWpnxRaOlAKj3uB8iV2zyLbLZcjGXLW+5Wr+hwEV5NaBm38WDy2lpZQimGzRDFcdGAkoycitJzkk8yB6fTZ3uw==
   dependencies:
-    "@getpara/core-sdk" "0.1.0"
+    "@getpara/core-sdk" "1.7.1"
 
-"@getpara/graz@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@getpara/graz/-/graz-0.1.0.tgz#0d7f9a962106c64c8ae1ce3c4fa5f824322b8035"
-  integrity sha512-4Zo6qTcMG+xqnSXfL6/dWzjkMWkM7+2udA1CFyQJ7qJK7whVVxUKh9llqLJUOvkMhKrw6LVyszAa3BFA+78vvA==
+"@getpara/graz@^1.0.0-dev.1":
+  version "1.0.0-dev.1"
+  resolved "https://registry.yarnpkg.com/@getpara/graz/-/graz-1.0.0-dev.1.tgz#0b30dd4e8f373cd585ddbd2f43e4a134ebf77e08"
+  integrity sha512-MwnpPg8S3tBZPbqp6RUxK0Aic91zyDByqUlB0S/ZLNODY8dc9Q0Z7Y7cjkXpYHbvXevKHlles8wD08W9OlJU2Q==
   dependencies:
     "@cosmsnap/snapper" "0.1.29"
     "@dao-dao/cosmiframe" "0.1.0"
-    "@getpara/cosmjs-v0-integration" "0.1.0"
-    "@getpara/react-sdk" "0.1.0"
+    "@getpara/cosmjs-v0-integration" ">=1.0.0"
+    "@getpara/react-sdk" ">=1.0.0"
     "@keplr-wallet/cosmos" "0.12.156"
     "@keplr-wallet/types" "0.12.156"
     "@metamask/providers" "12.0.0"
@@ -5361,64 +5360,67 @@
     long "4"
     zustand "4.5.2"
 
-"@getpara/react-common@0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@getpara/react-common/-/react-common-0.1.0.tgz#2d85cfcee7a82c3e1b549eafd7f13ad9ea8f2aa0"
-  integrity sha512-fNvNCPmuNY+mOdJZJwkphs8RcFWJQqUAMy1VXwvrclwMPXzC6JBT2DQmANCjV0tNKTI0WuZSJ7iwB2BEIH37bA==
+"@getpara/react-common@1.7.1":
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/@getpara/react-common/-/react-common-1.7.1.tgz#4a92a56e701002835141ff5a3275a5be6e03d240"
+  integrity sha512-aPPbzqXAK/QFoZNJnR53YpjfKcFZbrmTX+1CFUulUGvoMkPAm3amb8IqCLGIeO7m4U4/8XXwkg35aj6wDZ3/XA==
   dependencies:
-    "@getpara/react-components" "0.1.0"
-    "@getpara/web-sdk" "0.1.0"
+    "@getpara/react-components" "1.7.1"
+    "@getpara/web-sdk" "1.7.1"
     "@moonpay/moonpay-react" "^1.8.3"
     "@ramp-network/ramp-instant-sdk" "^4.0.5"
     "@stripe/crypto" "^0.0.4"
     "@stripe/stripe-js" "^3.4.0"
     libphonenumber-js "^1.11.1"
     styled-components "^6.1.8"
+    ua-parser-js "^2.0.2"
 
-"@getpara/react-components@0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@getpara/react-components/-/react-components-0.1.0.tgz#b003c2cba80054c5b044fc3cc7805cab8e7612d7"
-  integrity sha512-VO9dfP0mqkcc0uVjPXmirPo3JPrUwK33eIc0pTptGKaIKdAbADZ5krVD/ZQ97Nwm8SPdHqjT1vEVnKYpvnvm0w==
+"@getpara/react-components@1.7.1":
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/@getpara/react-components/-/react-components-1.7.1.tgz#fad37843411cb5bcce98e8c00d65189e16dc8964"
+  integrity sha512-g80CzfGLZ8MfAdmos5+j7Og23qzrM1FDk5vpyrqJ1zPVCiu7ADmBE5NbtnqU26eDe6boNj0NSygMhQIVlXO5GA==
   dependencies:
-    "@getpara/core-components" "0.1.0"
+    "@getpara/core-components" "1.7.1"
 
-"@getpara/react-sdk@0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@getpara/react-sdk/-/react-sdk-0.1.0.tgz#12af98ae7975d8caca857a73d6ae2458813b920a"
-  integrity sha512-UQtM0KqRBhB5SnlyPHqAjgFHaxSsHwx+kgqI9MSDtVsJOThklwIYP31pvzOcAkjIcVvEBbAZUW1071HbE3OmSA==
+"@getpara/react-sdk@>=1.0.0":
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/@getpara/react-sdk/-/react-sdk-1.7.1.tgz#38dd3779964eea9ee928a15debfd88d026b3d7db"
+  integrity sha512-Ha9arF5Icx0IomFUu0XAdn8PNui5x8aWatijC8xD5fupRCPd/pkwprtd15QUk2NHD1a5esthitYlMhXXWYbqdw==
   dependencies:
-    "@getpara/react-common" "0.1.0"
-    "@getpara/react-components" "0.1.0"
-    "@getpara/web-sdk" "0.1.0"
+    "@getpara/react-common" "1.7.1"
+    "@getpara/react-components" "1.7.1"
+    "@getpara/web-sdk" "1.7.1"
+    "@tanstack/react-query" "^5.0.0"
     date-fns "^3.6.0"
-    detect-browser "^5.3.0"
     framer-motion "11.3.28"
     libphonenumber-js "^1.11.1"
     styled-components "^6.1.8"
     zustand "^4.5.2"
+    zustand-sync-tabs "^0.2.2"
 
-"@getpara/user-management-client@0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-0.1.0.tgz#4e6d97e47b67fb2213254e04a83a205762fed214"
-  integrity sha512-4UbFI6zQ8u5EEV+Jv3oZpP4tHRSU1SW5l7HLXDrp2MDKIUfMfHHqxvzG5wQuRawCrkq9/YbxbZiBtBLwm34cBQ==
+"@getpara/user-management-client@1.7.1":
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.7.1.tgz#642d12ab49ee70f607a1055cf5b138e33f15462e"
+  integrity sha512-FkwY6Ydwp8oW2vxVgqSRo3qbLr35nwq7BvGosUlAk7wFc959BTXdqkjXb8EK30hx/v5K1QSBcSnbU7omp1KCow==
   dependencies:
     axios "^1.6.3"
     libphonenumber-js "1.11.2"
     qs "^6.12.0"
 
-"@getpara/web-sdk@0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-0.1.0.tgz#1b523e7857c84e6fdd29f567d73f751a9e2a8ce2"
-  integrity sha512-UD9wE/G+zXdxhSL6KbPG3G8/HoRh5tpPFoFiBD63FhRK8pfwLFDZhszt8iAQncZanKczeRYTlNYBg6Rwe2+gVg==
+"@getpara/web-sdk@1.7.1":
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-1.7.1.tgz#8e416238aa0100170473c59a519c6535ecca8b0c"
+  integrity sha512-6LylvApL+gScMi4DpsSXIfxmiVAG2JO8s3KxHHWEXX/C8yB8sZDLxe+CwseqjDjv78T9xgOzFkHE5ZvkwyfTxw==
   dependencies:
-    "@getpara/core-sdk" "0.1.0"
-    "@getpara/user-management-client" "0.1.0"
+    "@getpara/core-sdk" "1.7.1"
+    "@getpara/user-management-client" "1.7.1"
+    "@sentry/browser" "^9.1.0"
     assert "^2.1.0"
     base64url "3.0.1"
     buffer "6.0.3"
     cbor-web "8.1.0"
     node-forge "1.3.1"
-    ua-parser-js "1.0.39"
+    ua-parser-js "^2.0.2"
 
 "@graphql-typed-document-node/core@^3.1.1":
   version "3.2.0"
@@ -16570,7 +16572,7 @@ detect-browser@5.2.0:
   resolved "https://registry.yarnpkg.com/detect-browser/-/detect-browser-5.2.0.tgz#c9cd5afa96a6a19fda0bbe9e9be48a6b6e1e9c97"
   integrity sha512-tr7XntDAu50BVENgQfajMLzacmSe34D+qZc4zjnniz0ZVuw/TZcLcyxHQjYpJTM36sGEkZZlYLnIM1hH7alTMA==
 
-detect-browser@5.3.0, detect-browser@^5.2.0, detect-browser@^5.3.0:
+detect-browser@5.3.0, detect-browser@^5.2.0:
   version "5.3.0"
   resolved "https://registry.yarnpkg.com/detect-browser/-/detect-browser-5.3.0.tgz#9705ef2bddf46072d0f7265a1fe300e36fe7ceca"
   integrity sha512-53rsFbGdwMwlF7qvCt0ypLM5V5/Mbl0szB7GPN8y9NCcbknYOeVVXdrXEq+90IwAfrrzt6Hd+u2E2ntakICU8w==
@@ -29418,11 +29420,6 @@ ua-is-frozen@^0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/ua-is-frozen/-/ua-is-frozen-0.1.2.tgz#bfbc5f06336e379590e36beca444188c7dc3a7f3"
   integrity sha512-RwKDW2p3iyWn4UbaxpP2+VxwqXh0jpvdxsYpZ5j/MLLiQOfbsV5shpgQiw93+KMYQPcteeMQ289MaAFzs3G9pw==
-
-ua-parser-js@1.0.39:
-  version "1.0.39"
-  resolved "https://registry.yarnpkg.com/ua-parser-js/-/ua-parser-js-1.0.39.tgz#bfc07f361549bf249bd8f4589a4cccec18fd2018"
-  integrity sha512-k24RCVWlEcjkdOxYmVJgeD/0a1TiSpqLg+ZalVGV9lsnr4yqu0w7tX/x2xX6G4zpkgQnRf89lxuZ1wsbjXM8lw==
 
 ua-parser-js@^2.0.2:
   version "2.0.2"

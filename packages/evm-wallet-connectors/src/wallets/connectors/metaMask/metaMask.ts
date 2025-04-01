@@ -1,7 +1,7 @@
 import { isAndroid, isIOS, isTelegram } from '@getpara/web-sdk';
 import { WindowProvider } from '../../../types/utils.js';
 import { DefaultWalletOptions, Wallet } from '../../../types/Wallet.js';
-import { getInjectedConnector, hasInjectedProvider } from '../../../utils/getInjectedConnector.js';
+import { getInjectedConnector, getInjectedProvider } from '../../../utils/getInjectedConnector.js';
 import { getWalletConnectConnector } from '../../../utils/getWalletConnectConnector.js';
 import { icon } from './metaMaskIcon.js';
 
@@ -54,7 +54,19 @@ function isMetaMask(ethereum?: WindowProvider['ethereum']): boolean {
 }
 
 export const metaMaskWallet = ({ projectId, walletConnectParameters }: MetaMaskWalletOptions): Wallet => {
-  const isMetaMaskInjected = hasInjectedProvider({ flag: 'isMetaMask' });
+  // Fix hanging when MM and Phantom are both enabled
+  let metaMaskTarget =
+    typeof window !== 'undefined'
+      ? ((window as WindowProvider).ethereum?.providers?.find(isMetaMask) ?? window.ethereum)
+      : undefined;
+  const metaMaskInjectedProvider = metaMaskTarget ? metaMaskTarget : getInjectedProvider({ flag: 'isMetaMask' });
+  const isMetaMaskInjected = !!metaMaskInjectedProvider && metaMaskInjectedProvider.isMetaMask;
+
+  const providerMapTarget = metaMaskTarget?.providerMap?.get('MetaMask');
+
+  if (providerMapTarget) {
+    metaMaskTarget = providerMapTarget;
+  }
 
   const getUri = (uri: string) => {
     return isAndroid()
@@ -79,10 +91,7 @@ export const metaMaskWallet = ({ projectId, walletConnectParameters }: MetaMaskW
     getUri,
     createConnector: isMetaMaskInjected
       ? getInjectedConnector({
-          target:
-            typeof window !== 'undefined'
-              ? ((window as WindowProvider).ethereum?.providers?.find(isMetaMask) ?? window.ethereum)
-              : undefined,
+          target: metaMaskTarget,
         })
       : getWalletConnectConnector({
           projectId,

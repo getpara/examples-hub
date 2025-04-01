@@ -3,7 +3,7 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { Adapter, WalletReadyState } from '@solana/wallet-adapter-base';
 import ParaWeb, { WalletType } from '@getpara/web-sdk';
 import { WalletList } from '../types/Wallet.js';
-import { type CommonWallet } from '@getpara/react-common';
+import { TExternalWallet, type CommonWallet } from '@getpara/react-common';
 import bs58 from 'bs58';
 
 const defaultSolanaExternalWallet = {
@@ -29,6 +29,7 @@ export const SolanaExternalWalletContext = createContext<SolanaExternalWalletCon
 export type SolanaExternalWalletProviderConfig = {
   onSwitchWallet?: (args: { address?: string; error?: string }) => void;
   para: ParaWeb;
+  walletsWithFullAuth: TExternalWallet[];
 };
 
 type SolanaExternalWalletProviderConfigFull = {
@@ -40,6 +41,7 @@ export function SolanaExternalWalletProvider({
   wallets: walletFns,
   onSwitchWallet,
   para,
+  walletsWithFullAuth,
 }: SolanaExternalWalletProviderConfigFull & PropsWithChildren) {
   const {
     wallets: adapters,
@@ -61,7 +63,14 @@ export function SolanaExternalWalletProvider({
 
   const login = async ({ address, providerName }: { address: string; providerName?: string }) => {
     try {
-      return await para.externalWalletLogin({ address, type: WalletType.SOLANA, provider: providerName });
+      return await para.externalWalletLogin({
+        address,
+        type: WalletType.SOLANA,
+        provider: providerName,
+        withFullParaAuth: walletsWithFullAuth?.includes(
+          (getWallet(providerName ?? '')?.id.toUpperCase() ?? '') as TExternalWallet,
+        ),
+      });
     } catch (err) {
       await reset();
 
@@ -183,6 +192,8 @@ export function SolanaExternalWalletProvider({
 
   const getAdapter = (name: string) =>
     adapters.find(a => (a.adapter.name === 'Mobile Wallet Adapter' ? a : a.adapter.name === name ? a : false))?.adapter;
+
+  const getWallet = (name: string) => wallets.find(w => w.name === name);
 
   const wallets = walletFns.map(walletFn => {
     const metaData = walletFn();

@@ -1,12 +1,22 @@
 import { PropsWithChildren, createContext, useCallback, useEffect, useMemo, useRef } from 'react';
-import { useAccount, useSwitchChain, useConnect, useDisconnect, useEnsName, useEnsAvatar, useSignMessage } from 'wagmi';
+import {
+  useAccount,
+  useSwitchChain,
+  useConnect,
+  useDisconnect,
+  useEnsName,
+  useEnsAvatar,
+  useSignMessage,
+  useSwitchAccount,
+  useConnections,
+} from 'wagmi';
 import { WagmiConnectorInstance } from '../types/Wallet.js';
 import { isEIP6963Connector } from '../utils/isEIP6963Connector.js';
 import { getWalletConnectUri } from '../utils/getWalletConnectUri.js';
 import { normalize } from 'viem/ens';
 import { useExternalWalletStore } from '../stores/useStore.js';
-import type { CommonChain, CommonWallet } from '@getpara/react-common';
-import ParaWeb, { isMobile, WalletType } from '@getpara/web-sdk';
+import type { CommonChain, CommonWallet, TExternalWallet } from '@getpara/react-common';
+import ParaWeb, { isMobile, Wallet, WalletType } from '@getpara/web-sdk';
 
 const defaultEvmExternalWallet = {
   wallets: [],
@@ -39,15 +49,28 @@ export const EvmExternalWalletContext = createContext<EvmExternalWalletContextTy
 export type EvmExternalWalletProviderConfig = {
   onSwitchWallet?: (args: { address?: string; error?: string }) => void;
   para: ParaWeb;
+  walletsWithFullAuth: TExternalWallet[];
+  connectedWallet?: Omit<Wallet, 'signer'> | null;
 };
 
 export function EvmExternalWalletProvider({
   children,
   onSwitchWallet,
   para,
+  walletsWithFullAuth,
+  connectedWallet,
 }: EvmExternalWalletProviderConfig & PropsWithChildren) {
   const { connectAsync, connectors: untypedConnectors } = useConnect();
-  const { address: wagmiAddress, isConnecting, isReconnecting, chainId, connector: connectedConnector } = useAccount();
+  const connections = useConnections();
+  const {
+    address: wagmiAddress,
+    isConnecting,
+    isReconnecting,
+    chainId,
+    connector: connectedConnector,
+    isConnected,
+  } = useAccount();
+  const { switchAccount: wagmiSwitchAccount } = useSwitchAccount();
   const { chains, switchChainAsync } = useSwitchChain();
   const { disconnectAsync } = useDisconnect();
   const { data: ensName } = useEnsName({ address: wagmiAddress });
@@ -70,6 +93,20 @@ export function EvmExternalWalletProvider({
     return storedExternalWallets;
   };
 
+  const switchAccount = useCallback(
+    (connectorName: string) => {
+      const connector = connections.find(c => c.connector.name === connectorName)?.connector;
+
+      if (!connector) {
+        console.warn(`connector not found: ${connectorName}`);
+        return;
+      }
+
+      wagmiSwitchAccount({ connector });
+    },
+    [connections, wagmiSwitchAccount],
+  );
+
   useEffect(() => {
     const storedExternalWallet = getStoredExternalWallets()[wagmiAddress ?? ''];
 
@@ -79,7 +116,7 @@ export function EvmExternalWalletProvider({
       !isLocalConnecting &&
       !!wagmiAddress &&
       !storedExternalWallet &&
-      !(connectedConnector?.id === 'para')
+      connectedConnector?.id !== 'para'
     ) {
       reset();
     }
@@ -94,11 +131,38 @@ export function EvmExternalWalletProvider({
       !isConnecting &&
       !isReconnecting &&
       storedExternalWallet?.type === WalletType.EVM &&
-      storedExternalWallet?.address !== wagmiAddress
+      storedExternalWallet?.address !== wagmiAddress &&
+      connectedConnector?.id !== 'para'
     ) {
       switchWallet(wagmiAddress);
     }
   }, [isLocalConnecting, wagmiAddress, isReconnecting, isConnecting]);
+
+  useEffect(() => {
+    if (
+      !isLocalConnecting &&
+      !isConnecting &&
+      !isReconnecting &&
+      connectedWallet &&
+      connectedConnector &&
+      connectedWallet.type === WalletType.EVM &&
+      connectedConnector.name !== connectedWallet.name
+    ) {
+      switchAccount(connectedWallet.isExternal ? connectedWallet.name : 'Para');
+    }
+  }, [isLocalConnecting, isConnecting, isReconnecting, connectedWallet, wagmiSwitchAccount]);
+
+  // If nothing is connected automatically connect to the Para connector if available
+  // This is mainly used to ensure any race conditions are handled when chains are switched in another external wallet connector when using full Para auth
+  useEffect(() => {
+    if (!isLocalConnecting && !isConnecting && !isReconnecting && !isConnected && !connectedConnector) {
+      if (Object.values(para.wallets).length === 0) {
+        return;
+      }
+
+      connectParaEmbedded();
+    }
+  }, [isLocalConnecting, isConnecting, isReconnecting, isConnected, connectedConnector]);
 
   const connectors = untypedConnectors as WagmiConnectorInstance[];
 
@@ -162,9 +226,22 @@ export function EvmExternalWalletProvider({
     return { error };
   };
 
-  const login = async ({ address, connectorName }: { address: string; connectorName?: string }) => {
+  const login = async ({
+    address,
+    walletId,
+    connectorName,
+  }: {
+    address: string;
+    walletId?: string;
+    connectorName?: string;
+  }) => {
     try {
-      return await para.externalWalletLogin({ address, type: WalletType.EVM, provider: connectorName });
+      return await para.externalWalletLogin({
+        address,
+        type: WalletType.EVM,
+        provider: connectorName,
+        withFullParaAuth: walletsWithFullAuth?.includes((walletId?.toUpperCase() ?? '') as TExternalWallet),
+      });
     } catch (err) {
       await disconnectAsync();
       await para.logout();
@@ -181,10 +258,18 @@ export function EvmExternalWalletProvider({
     if (!address) {
       await para.logout();
     } else {
-      try {
-        await login({ address, connectorName: connectedConnector?.name });
-      } catch (err) {
-        error = err;
+      if (para.isExternalWalletAuth) {
+        await reset();
+      } else {
+        try {
+          await login({
+            address,
+            connectorName: connectedConnector?.name,
+            walletId: getParaDetails(connectedConnector.id)?.id,
+          });
+        } catch (err) {
+          error = err;
+        }
       }
     }
 
@@ -217,7 +302,7 @@ export function EvmExternalWalletProvider({
 
       if (address) {
         try {
-          const loginResp = await login({ address, connectorName: connector.name });
+          const loginResp = await login({ address, connectorName: connector.name, walletId: connector.paraDetails.id });
           userExists = loginResp.userExists;
           isVerified = loginResp.isVerified;
           verificationMessage.current = loginResp.signatureVerificationMessage;
@@ -316,6 +401,8 @@ export function EvmExternalWalletProvider({
       getQrUri: getQrUri(connector),
     } as CommonWallet;
   });
+
+  const getParaDetails = (id: string) => connectors.find(w => w.id === id)?.paraDetails;
 
   const formattedChains: CommonChain[] = chains.map(c => {
     return {

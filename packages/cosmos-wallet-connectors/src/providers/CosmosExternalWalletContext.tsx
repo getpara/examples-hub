@@ -4,7 +4,6 @@ import {
   checkWallet,
   WalletType as GrazWalletType,
   useAccount,
-  useActiveChainIds,
   useActiveWalletType,
   useConnect,
   useDisconnect,
@@ -14,8 +13,8 @@ import {
 } from '@getpara/graz';
 import { useExternalWalletStore } from '../stores/useStore.js';
 import { WalletWithType } from '../types/Wallet.js';
-import ParaWeb, { WalletType } from '@getpara/web-sdk';
-import type { CommonChain, CommonWallet } from '@getpara/react-common';
+import ParaWeb, { Wallet, WalletType } from '@getpara/web-sdk';
+import type { CommonChain, CommonWallet, TExternalWallet } from '@getpara/react-common';
 
 const defaultCosmosExternalWallet = {
   wallets: [],
@@ -48,6 +47,8 @@ export type CosmosExternalWalletContextType = {
 export type CosmosExternalWalletProviderConfig = {
   onSwitchWallet?: (args: { address?: string; error?: string }) => void;
   para: ParaWeb;
+  walletsWithFullAuth: TExternalWallet[];
+  connectedWallet?: Omit<Wallet, 'signer'> | null;
 };
 
 export type CosmosExternalWalletProviderConfigFull = {
@@ -67,17 +68,19 @@ export function CosmosExternalWalletProvider({
   shouldUseSuggestChainAndConnect,
   onSwitchChain,
   para,
+  walletsWithFullAuth,
+  connectedWallet,
 }: CosmosExternalWalletProviderConfigFull & PropsWithChildren) {
   const { suggestAndConnectAsync } = useSuggestChainAndConnect();
   const {
     data: account,
     isConnecting,
     isReconnecting,
+    isConnected,
   } = useAccount({
     chainId: multiChain ? chains.map(c => c.chainId) : selectedChainId,
     multiChain,
   });
-  const activeChainIds = useActiveChainIds();
   const { connectAsync } = useConnect();
   const { disconnectAsync } = useDisconnect();
   const { walletType } = useActiveWalletType();
@@ -97,36 +100,59 @@ export function CosmosExternalWalletProvider({
   const switchChain = async (chainId: string) => {
     let error: string[];
 
-    const hasActiveChain = activeChainIds.includes(chainId);
+    let changeResp: { address?: string; bufferAddress?: string; error?: string } = {};
 
-    if (!hasActiveChain) {
-      updateExternalWalletState({ isConnecting: true });
-      let changeResp: { address?: string; bufferAddress?: string; error?: string };
+    try {
+      let chainInfo;
 
-      changeResp = await connect(walletType, chainId);
-      // Calling onSwitchWallet here so the modal correctly processes any error from the reconnection.
-      onSwitchWallet(changeResp);
+      if (shouldUseSuggestChainAndConnect) {
+        chainInfo = getChainInfo({ chainId });
 
-      updateExternalWalletState({ isConnecting: false });
+        if (!chainInfo) {
+          console.error('Chain not found.');
+          return;
+        }
+      }
 
-      if (changeResp.error) {
-        error = [changeResp?.error];
+      const connectedWallet = await (shouldUseSuggestChainAndConnect
+        ? suggestAndConnectAsync({ walletType, chainInfo })
+        : connectAsync({ walletType, chainId }));
+
+      changeResp.address = connectedWallet.accounts[chainId].bech32Address;
+      changeResp.bufferAddress = connectedWallet.accounts[chainId].address.toString();
+    } catch (err) {
+      if (err.message === 'No wallet exists') {
+        changeResp.error = err.message;
+      } else {
+        console.error('Graz connection error:', err);
+        changeResp.error = 'An unknown error occurred.';
       }
     }
+    onSwitchWallet(changeResp);
 
-    if (!error) {
+    if (!changeResp.error) {
       onSwitchChain(chainId);
+
+      const storedExternalWallet = para.externalWallets[changeResp.bufferAddress ?? ''];
+      para.setExternalWallet({
+        address: changeResp.bufferAddress,
+        type: WalletType.COSMOS,
+        provider: getProviderName(walletType),
+        addressBech32: changeResp.address,
+        withFullParaAuth: storedExternalWallet.isExternalWithParaAuth,
+      });
     }
     return { error };
   };
 
-  const login = async (bufferAddress: string, address: string, providerName?: string) => {
+  const login = async (bufferAddress: string, address: string, isFullAuthWallet?: boolean, providerName?: string) => {
     try {
       return await para.externalWalletLogin({
         address: bufferAddress,
         type: WalletType.COSMOS,
         provider: providerName,
         addressBech32: address,
+        withFullParaAuth: isFullAuthWallet,
       });
     } catch (err) {
       await reset();
@@ -139,27 +165,7 @@ export function CosmosExternalWalletProvider({
     const storedExternalWallet = para.externalWallets[bufferAddress ?? ''];
 
     if (
-      !isConnecting &&
-      !isReconnecting &&
-      !isLocalConnecting &&
-      address &&
-      storedExternalWallet &&
-      storedExternalWallet.address !== address &&
-      walletType !== GrazWalletType.PARA
-    ) {
-      para.setExternalWallet({
-        address: bufferAddress,
-        type: WalletType.COSMOS,
-        provider: getProviderName(walletType),
-        addressBech32: address,
-      });
-    }
-  }, [isConnecting, isReconnecting, address]);
-
-  useEffect(() => {
-    const storedExternalWallet = para.externalWallets[bufferAddress ?? ''];
-
-    if (
+      isConnected &&
       !isConnecting &&
       !isReconnecting &&
       !isLocalConnecting &&
@@ -169,7 +175,36 @@ export function CosmosExternalWalletProvider({
     ) {
       reset();
     }
-  }, [isConnecting, isReconnecting]);
+  }, [isConnecting, isLocalConnecting, isReconnecting, isConnected]);
+
+  // Listen for wallet changes (from external provider -> Para or from Para -> external provider)
+  useEffect(() => {
+    const connect = async () => {
+      if (
+        !isLocalConnecting &&
+        !isConnecting &&
+        !isReconnecting &&
+        connectedWallet &&
+        connectedWallet.type === WalletType.COSMOS &&
+        (connectedWallet.isExternal ? walletType !== connectedWallet.name?.toLowerCase() : walletType !== 'para')
+      ) {
+        const isLoggedIn = await para.isFullyLoggedIn();
+        if (!isLoggedIn) {
+          return;
+        }
+
+        const chainId = multiChain ? chains.map(c => c.chainId) : selectedChainId;
+        await connectAsync({
+          walletType: connectedWallet.isExternal
+            ? (connectedWallet.name.toLowerCase() as GrazWalletType)
+            : GrazWalletType.PARA,
+          chainId,
+        });
+      }
+    };
+
+    connect();
+  }, [isLocalConnecting, isConnecting, isReconnecting, walletType, connectedWallet]);
 
   const signMessage = async (message: string) => {
     const wallet = grazGetWallet(walletType);
@@ -207,6 +242,9 @@ export function CosmosExternalWalletProvider({
     chainId?: string | string[],
   ): Promise<{ address?: string; bufferAddress?: string; error?: string; userExists: boolean; isVerified: boolean }> => {
     updateExternalWalletState({ isConnecting: true });
+
+    const walletId = getWallet(walletType)?.id;
+    const isFullAuthWallet = walletsWithFullAuth.includes(walletId.toUpperCase() as TExternalWallet);
 
     // chainID is passed in when switching chains, in that case we can skip disconnecting
     if (!chainId) {
@@ -252,14 +290,14 @@ export function CosmosExternalWalletProvider({
           ? suggestAndConnectAsync({ walletType, chainInfo })
           : connectAsync({ walletType, chainId: _chainId }));
 
-        const firstChain = typeof _chainId === 'string' ? _chainId : _chainId[0];
+        const firstChain = !chainId ? selectedChainId : typeof _chainId === 'string' ? _chainId : _chainId[0];
 
         address = connectedWallet.accounts[firstChain].bech32Address;
         bufferAddress = connectedWallet.accounts[firstChain].address.toString();
 
         if (connectedWallet.accounts[firstChain]) {
           try {
-            const loginResp = await login(bufferAddress, address, getProviderName(walletType));
+            const loginResp = await login(bufferAddress, address, isFullAuthWallet, getProviderName(walletType));
             userExists = loginResp.userExists;
             isVerified = loginResp.isVerified;
             verificationMessage.current = loginResp.signatureVerificationMessage;
@@ -283,14 +321,16 @@ export function CosmosExternalWalletProvider({
     return { address, bufferAddress, error, userExists, isVerified };
   };
 
-  const getProviderName = (walletType: GrazWalletType) =>
-    incompleteWallets.find(w => w.grazType === walletType || w.grazMobileType === walletType)?.name;
+  const getWallet = (walletType: GrazWalletType) =>
+    incompleteWallets.find(w => w.grazType === walletType || w.grazMobileType === walletType);
+
+  const getProviderName = (walletType: GrazWalletType) => getWallet(walletType)?.name;
 
   const wallets = incompleteWallets
     .map(wallet => {
       return {
         connect: () => connect(wallet.grazType),
-        connectMobile: () => connect(wallet.grazMobileType),
+        connectMobile: () => connect(wallet.grazType),
         getQrUri: () => '',
         type: WalletType.COSMOS,
         ...wallet,

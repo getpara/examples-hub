@@ -4,7 +4,7 @@ type AccountType = {
   isConnected: boolean;
   email?: string;
   phone?: string;
-  wallets?: Record<string, Wallet>;
+  wallets?: Pick<Wallet, 'id' | 'type' | 'name' | 'address' | 'isExternal'>[];
   userId?: string;
 };
 
@@ -22,7 +22,7 @@ export const getAccount = async (para?: ParaWeb) => {
   if (para && resp.isConnected) {
     resp.email = para.getEmail();
     resp.phone = para.getPhoneNumber();
-    resp.wallets = para.getWallets();
+    resp.wallets = para.availableWallets;
     resp.userId = para.getUserId();
   }
 

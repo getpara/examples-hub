@@ -63,7 +63,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     const authStepRoute = useModalStore(state => state.authStepRoute);
     const isIFrameReady = useModalStore(state => state.isIFrameReady);
     const goBack = useGoBack();
-    const { connectEmbeddedToExternalConnectors } = useExternalWallets();
+    const { connectEmbeddedToExternalConnectors, disconnectExternalWallet } = useExternalWallets();
     const { waitForLoginAndSetup } = useWaitForLoginAndSetup();
     const { waitForPasskeyAndCreateWalletAsync } = useWaitForPasskeyAndCreateWallet();
     const createAccount = useCreateAccount();
@@ -177,6 +177,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
         }
         if (walletIds) {
           await para.setCurrentWalletIds(walletIds);
+          await connectEmbeddedToExternalConnectors();
         }
 
         if (recoverySecret && recoverySecretStepEnabled) {
@@ -242,6 +243,9 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
 
     const handleClose = () => {
       onClose?.();
+      if (currentStep === ModalStep.EXTERNAL_WALLET_VERIFICATION && para.isExternalWalletAuth) {
+        disconnectExternalWallet();
+      }
     };
 
     useEffect(() => {
@@ -306,6 +310,14 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     }, [onRampTestMode]);
 
     useEffect(() => {
+      const init = async () => {
+        if (!(await para.isFullyLoggedIn())) {
+          // Disconnect external wallets if the user is no longer logged in
+          await disconnectExternalWallet();
+        }
+      };
+
+      init();
       return () => {
         window.clearTimeout(refs.poll.current?.timeout);
         para.exitLoops();

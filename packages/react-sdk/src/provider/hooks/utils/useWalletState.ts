@@ -1,6 +1,7 @@
 import { WalletType } from '@getpara/web-sdk';
 import { useStore } from '../../stores/useStore.js';
 import { useClient } from './useClient.js';
+import { useCallback } from 'react';
 
 /**
  * Hook for controlling selected wallet
@@ -12,19 +13,35 @@ export const useWalletState = () => {
   const setStoredSelectedWallet = useStore(state => state.setSelectedWallet);
   const clearSelectedWallet = useStore(state => state.clearSelectedWallet);
 
-  const setSelectedWallet = ({ id, type }: { id?: string; type?: WalletType }) => {
-    try {
-      const validId = client?.findWalletId(id, type ? { type: [type] } : undefined);
+  const setSelectedWallet = useCallback(
+    ({ id, type }: { id?: string; type?: WalletType }) => {
+      try {
+        const validId = client?.findWalletId(id, type ? { type: [type] } : undefined);
 
-      if (validId !== id) {
+        if (validId !== id) {
+          clearSelectedWallet();
+        } else {
+          setStoredSelectedWallet(id, type);
+        }
+      } catch (e) {
         clearSelectedWallet();
-      } else {
-        setStoredSelectedWallet(id, type);
       }
-    } catch (e) {
+    },
+    [client, clearSelectedWallet, setStoredSelectedWallet],
+  );
+
+  const updateSelectedWallet = useCallback(() => {
+    if (!client) {
       clearSelectedWallet();
+      return;
     }
-  };
+
+    if (!selectedWalletId || !client.findWallet(selectedWalletId)) {
+      const defaultWallet = client.findWallet(undefined, undefined, { forbidPregen: true });
+
+      setSelectedWallet({ id: defaultWallet?.id, type: defaultWallet?.type });
+    }
+  }, [clearSelectedWallet, setSelectedWallet, client, selectedWalletId]);
 
   return {
     selectedWallet: {
@@ -32,5 +49,6 @@ export const useWalletState = () => {
       type: selectedWalletType,
     },
     setSelectedWallet,
+    updateSelectedWallet,
   };
 };

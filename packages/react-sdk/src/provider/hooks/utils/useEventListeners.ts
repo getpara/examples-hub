@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
-import { useClient, useWalletState } from '../index.js';
+import { useCallback, useEffect } from 'react';
+import { useWalletState } from '../index.js';
 import {
   AccountCreationEvent,
   AccountSetupEvent,
@@ -32,73 +32,91 @@ export const useEventListeners = ({
   onWalletsChange,
 }: Callbacks = {}) => {
   const queryClient = useQueryClient();
-  const client = useClient();
   const clearSelectedWallet = useStore(state => state.clearSelectedWallet);
-  const { selectedWallet, setSelectedWallet } = useWalletState();
+  const { updateSelectedWallet } = useWalletState();
 
-  const loginListener = (event: LoginEvent) => {
-    loginOrSetupListener();
-    onLogin?.(event);
-  };
+  const loginOrSetupListener = useCallback(() => {
+    queryClient.refetchQueries({ queryKey: [ACCOUNT_BASE_KEY] });
+    queryClient.refetchQueries({ queryKey: [WALLET_BASE_KEY] });
+  }, [queryClient]);
 
-  const accountSetupListener = (event: AccountSetupEvent) => {
-    loginOrSetupListener();
-    onAccountSetup?.(event);
-  };
+  const loginListener = useCallback(
+    (event: LoginEvent) => {
+      loginOrSetupListener();
+      onLogin?.(event);
+    },
+    [loginOrSetupListener, onLogin],
+  );
 
-  const loginOrSetupListener = () => {
-    queryClient.invalidateQueries({ queryKey: [ACCOUNT_BASE_KEY], exact: false });
-    queryClient.invalidateQueries({ queryKey: [WALLET_BASE_KEY], exact: false });
-  };
+  const accountSetupListener = useCallback(
+    (event: AccountSetupEvent) => {
+      loginOrSetupListener();
+      onAccountSetup?.(event);
+    },
+    [loginOrSetupListener, onAccountSetup],
+  );
 
-  const accountCreationListener = (event: AccountCreationEvent) => {
-    onAccountCreation?.(event);
-  };
+  const accountCreationListener = useCallback(
+    (event: AccountCreationEvent) => {
+      onAccountCreation?.(event);
+    },
+    [onAccountCreation],
+  );
 
-  const logoutListener = (event: LogoutEvent) => {
-    queryClient.invalidateQueries({ queryKey: [ACCOUNT_BASE_KEY], exact: false });
-    clearSelectedWallet();
-    onLogout?.(event);
-  };
-
-  const signMessageListener = (event: SignMessageEvent) => {
-    onSignMessage?.(event);
-  };
-
-  const signTransactionListener = (event: SignTransactionEvent) => {
-    onSignTransaction?.(event);
-  };
-
-  const walletChangeListener = (event: WalletsChangeEvent) => {
-    updateSelectedWallet();
-    onWalletsChange?.(event);
-  };
-
-  const externalWalletChangeListener = (event: ExternalWalletChangeEvent) => {
-    updateSelectedWallet();
-    onExternalWalletChange?.(event);
-  };
-
-  const walletCreatedListener = (event: WalletCreatedEvent) => {
-    onWalletCreated?.(event);
-  };
-
-  const pregenWalletClaimedListener = (event: PregenWalletClaimedEvent) => {
-    onPregenWalletClaimed?.(event);
-  };
-
-  const updateSelectedWallet = () => {
-    if (!client) {
+  const logoutListener = useCallback(
+    (event: LogoutEvent) => {
+      queryClient.refetchQueries({ queryKey: [ACCOUNT_BASE_KEY] });
       clearSelectedWallet();
-      return;
-    }
+      onLogout?.(event);
+    },
+    [queryClient, clearSelectedWallet, onLogout],
+  );
 
-    if (!selectedWallet?.id || !client.findWallet(selectedWallet?.id)) {
-      const defaultWallet = client.findWallet(undefined, undefined, { forbidPregen: true });
+  const signMessageListener = useCallback(
+    (event: SignMessageEvent) => {
+      onSignMessage?.(event);
+    },
+    [onSignMessage],
+  );
 
-      setSelectedWallet({ id: defaultWallet?.id, type: defaultWallet?.type });
-    }
-  };
+  const signTransactionListener = useCallback(
+    (event: SignTransactionEvent) => {
+      onSignTransaction?.(event);
+    },
+    [onSignTransaction],
+  );
+
+  const walletChangeListener = useCallback(
+    (event: WalletsChangeEvent) => {
+      queryClient.refetchQueries({ queryKey: [ACCOUNT_BASE_KEY] });
+      updateSelectedWallet();
+      onWalletsChange?.(event);
+    },
+    [queryClient, updateSelectedWallet, onWalletsChange],
+  );
+
+  const externalWalletChangeListener = useCallback(
+    (event: ExternalWalletChangeEvent) => {
+      queryClient.refetchQueries({ queryKey: [ACCOUNT_BASE_KEY] });
+      updateSelectedWallet();
+      onExternalWalletChange?.(event);
+    },
+    [queryClient, updateSelectedWallet, onExternalWalletChange],
+  );
+
+  const walletCreatedListener = useCallback(
+    (event: WalletCreatedEvent) => {
+      onWalletCreated?.(event);
+    },
+    [onWalletCreated],
+  );
+
+  const pregenWalletClaimedListener = useCallback(
+    (event: PregenWalletClaimedEvent) => {
+      onPregenWalletClaimed?.(event);
+    },
+    [onPregenWalletClaimed],
+  );
 
   useEffect(() => {
     window.addEventListener(ParaEvent.LOGIN_EVENT, loginListener);
@@ -124,5 +142,16 @@ export const useEventListeners = ({
       window.removeEventListener(ParaEvent.WALLET_CREATED, walletCreatedListener);
       window.removeEventListener(ParaEvent.PREGEN_WALLET_CLAIMED, pregenWalletClaimedListener);
     };
-  }, [client]);
+  }, [
+    loginListener,
+    accountSetupListener,
+    accountCreationListener,
+    logoutListener,
+    signMessageListener,
+    signTransactionListener,
+    walletChangeListener,
+    externalWalletChangeListener,
+    walletCreatedListener,
+    pregenWalletClaimedListener,
+  ]);
 };

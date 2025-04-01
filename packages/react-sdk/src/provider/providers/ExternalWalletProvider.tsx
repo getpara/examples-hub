@@ -1,10 +1,11 @@
 import { PropsWithChildren, createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { WalletType, isIOS, isIOSWebview, isMobile, truncateAddress } from '@getpara/web-sdk';
+import { AuthMethod, WalletType, isIOS, isIOSWebview, isMobile, truncateAddress } from '@getpara/web-sdk';
 import { useInternalClient } from '../hooks/utils/useInternalClient.js';
 import { useStore } from '../stores/useStore.js';
-import { CommonChain, CommonWallet } from '../../modal/types/commonTypes.js';
-import { ModalStep, TExternalWallet } from '../../modal/index.js';
-import { useModalStore } from '../../modal/stores/index.js';
+import { ModalStep } from '../../modal/index.js';
+import { useModalStore, useUserInfoStore } from '../../modal/stores/index.js';
+import { useWalletState } from '../hooks/index.js';
+import { CommonChain, CommonWallet, getExternalWalletDisplayName, TExternalWallet } from '@getpara/react-common';
 
 export const defaultExternalWallet = {
   wallets: [],
@@ -26,6 +27,7 @@ export const defaultExternalWallet = {
   switchChain: () => Promise.resolve(),
   setChainIdSwitchingTo: () => {},
   connectEmbeddedToExternalConnectors: () => Promise.resolve(),
+  verifyWalletSignature: () => Promise.resolve({}),
 };
 
 export const ExternalWalletContext = createContext<{
@@ -48,6 +50,15 @@ export const ExternalWalletContext = createContext<{
   switchChain: (chainId: string) => Promise<void>;
   setChainIdSwitchingTo: (chainId?: string) => void;
   connectEmbeddedToExternalConnectors: () => Promise<void>;
+  verifyWalletSignature: () => Promise<
+    | {
+        address?: string;
+        signature?: string;
+        cosmosPublicKeyHex?: string;
+        cosmosSigner?: string;
+      }
+    | undefined
+  >;
 }>(defaultExternalWallet);
 
 export function ExternalWalletProvider({ children }: PropsWithChildren) {
@@ -55,6 +66,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
   const cosmosContext = useStore(state => state.cosmosContext);
   const solanaContext = useStore(state => state.solanaContext);
   const externalWallets = useStore(state => state.externalWallets);
+  const externalWalletsWithFullAuth = useStore(state => state.externalWalletsWithFullAuth);
 
   const {
     wallets: evmWallets,
@@ -65,8 +77,13 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     username: evmUsername,
     avatar: evmAvatar,
     connectParaEmbedded: evmConnectParaEmbedded,
+    signVerificationMessage: evmSignVerificationMessage,
   } = useContext(evmContext);
-  const { wallets: solanaWallets, disconnect: solanaDisconnect } = useContext(solanaContext);
+  const {
+    wallets: solanaWallets,
+    disconnect: solanaDisconnect,
+    signVerificationMessage: solanaSignVerificationMessage,
+  } = useContext(solanaContext);
   const {
     wallets: cosmosWallets,
     disconnect: cosmosDisconnect,
@@ -74,6 +91,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     chainId: cosmosChainId,
     switchChain: cosmosSwitchChain,
     connectParaEmbedded: cosmosConnectParaEmbedded,
+    signVerificationMessage: cosmosSignVerificationMessage,
   } = useContext(cosmosContext);
   const setStep = useModalStore(state => state.setStep);
   const setStepDirection = useModalStore(state => state.setStepDirection);
@@ -84,7 +102,12 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
   const setExternalWalletError = useModalStore(state => state.setExternalWalletError);
   const setIsUsingMobileConnector = useModalStore(state => state.setIsUsingMobileConnector);
   const isUsingMobileConnector = useModalStore(state => state.isUsingMobileConnector);
+  const setFlow = useModalStore(state => state.setFlow);
+  const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
+  const setBiometricLocationHints = useModalStore(state => state.setBiometricLocationHints);
   const para = useInternalClient();
+  const { setSelectedWallet } = useWalletState();
+  const setAuthInfo = useUserInfoStore(state => state.setAuthInfo);
 
   const [qrUri, setQrUri] = useState<string>();
   const [chainIdSwitchingTo, setChainIdSwitchingTo] = useState<string>();
@@ -190,6 +213,110 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     [evmSwitchChain, cosmosSwitchChain],
   );
 
+  const verifyWalletSignature = useCallback(async () => {
+    setExternalWalletError();
+    const walletType = Object.values(para.externalWallets)[0]?.type;
+
+    if (walletType) {
+      const resp: { address: string; signature: string; cosmosPublicKeyHex: string; cosmosSigner: string } = {
+        address: '',
+        signature: '',
+        cosmosPublicKeyHex: '',
+        cosmosSigner: '',
+      };
+      switch (walletType) {
+        case WalletType.COSMOS: {
+          const { signature, error, cosmosPublicKeyHex, cosmosSigner, address } = await cosmosSignVerificationMessage();
+
+          if (error) {
+            setExternalWalletError([error]);
+          } else if (signature) {
+            // If signature is returned address, cosmosPublicKeyHex and cosmosSigner will also be returned
+            resp.address = address!;
+            resp.signature = signature;
+            resp.cosmosPublicKeyHex = cosmosPublicKeyHex!;
+            resp.cosmosSigner = cosmosSigner!;
+          }
+
+          return resp;
+        }
+        case WalletType.EVM: {
+          const { signature, error, address } = await evmSignVerificationMessage();
+
+          if (error) {
+            setExternalWalletError([error]);
+          } else if (signature && address) {
+            resp.address = address;
+            resp.signature = signature;
+          }
+
+          return resp;
+        }
+        case WalletType.SOLANA: {
+          const { signature, error, address } = await solanaSignVerificationMessage();
+
+          if (error) {
+            setExternalWalletError([error]);
+          } else if (signature && address) {
+            resp.address = address;
+            resp.signature = signature;
+          }
+
+          return resp;
+        }
+        default: {
+          return undefined;
+        }
+      }
+    }
+  }, [cosmosSignVerificationMessage, evmSignVerificationMessage, solanaSignVerificationMessage]);
+
+  const completeFullAuth = async (
+    address: string,
+    type: WalletType,
+    userExists: boolean,
+    isVerified: boolean,
+    bufferAddress?: string,
+  ) => {
+    setAuthInfo({
+      displayName: getExternalWalletDisplayName({
+        address,
+        type,
+      }),
+      externalWalletAddress: bufferAddress ?? address,
+    });
+
+    if (userExists && isVerified) {
+      // Check for supportedAuthMethods before initiating the login to ensure the user has biometrics
+      const supportedAuthMethods = await para.supportedAuthMethods({
+        externalWalletAddress: bufferAddress ?? address,
+      });
+
+      // If no biometrics have been set, reverify and create a biometric
+      if (!supportedAuthMethods.size) {
+        setFlow('signUp');
+        setStep(ModalStep.EXTERNAL_WALLET_VERIFICATION);
+        return;
+      }
+
+      await para.initiateUserLoginV2({
+        externalWalletAddress: bufferAddress ?? address,
+      });
+
+      const biometricLocationHints = supportedAuthMethods.has(AuthMethod.PASSKEY)
+        ? await para.getUserBiometricLocationHints()
+        : [];
+
+      setFlow('login');
+      setStep(ModalStep.BIOMETRIC_LOGIN);
+      setSupportedAuthMethods(supportedAuthMethods);
+      setBiometricLocationHints(biometricLocationHints);
+    } else {
+      setFlow('signUp');
+      setStep(ModalStep.EXTERNAL_WALLET_VERIFICATION);
+    }
+  };
+
   const connectExternalWallet = useCallback(
     async (
       wallet: CommonWallet,
@@ -211,7 +338,9 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
         setIsExternalWalletConnecting(true);
         setIsUsingMobileConnector(isMobileConnect);
 
-        const { address, error } = await (isMobileConnect ? wallet.connectMobile(isManualWalletConnect) : wallet.connect());
+        const { address, bufferAddress, error, userExists, isVerified } = await (isMobileConnect
+          ? wallet.connectMobile(isManualWalletConnect)
+          : wallet.connect());
 
         if (error) {
           setExternalWalletError([error]);
@@ -226,19 +355,25 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
             return;
           }
         } else if (address) {
-          setStep(ModalStep.LOGIN_DONE);
+          if (externalWalletsWithFullAuth?.includes(wallet.id.toUpperCase() as TExternalWallet)) {
+            await completeFullAuth(address, wallet.type as WalletType, userExists, isVerified, bufferAddress);
+          } else {
+            setStep(ModalStep.LOGIN_DONE);
+          }
         }
         setIsExternalWalletConnecting(false);
       }
     },
-    [isExternalWalletConnecting],
+    [isExternalWalletConnecting, externalWalletsWithFullAuth],
   );
 
   const disconnectExternalWallet = async () => {
+    await para.logout();
     await evmDisconnect();
-    await solanaDisconnect();
     await cosmosDisconnect();
     setSelectedExternalWalletId();
+    // Do Solana disconnect last so window refresh happens last
+    await solanaDisconnect();
   };
 
   const walletDisplayHelpers = {
@@ -302,6 +437,11 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
       const { error } = await evmConnectParaEmbedded();
       if (error) {
         console.warn('Failed to connect Para EVM wallet to Wagmi:', error);
+      } else {
+        const wallet = para.findWallet(undefined, undefined, { type: [WalletType.EVM] });
+        if (wallet) {
+          setSelectedWallet({ id: wallet.id, type: WalletType.EVM });
+        }
       }
     } catch (err) {
       console.warn('Error calling connectParaEvmWallet:', err);
@@ -310,6 +450,11 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
       const { error } = await cosmosConnectParaEmbedded();
       if (error) {
         console.warn('Failed to connect Para Cosmos wallet to Graz:', error);
+      } else {
+        const wallet = para.findWallet(undefined, undefined, { type: [WalletType.COSMOS] });
+        if (wallet) {
+          setSelectedWallet({ id: wallet.id, type: WalletType.COSMOS });
+        }
       }
     } catch (err) {
       console.warn('Error calling connectParaCosmosWallet:', err);
@@ -334,6 +479,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
           switchChain,
           setChainIdSwitchingTo,
           connectEmbeddedToExternalConnectors,
+          verifyWalletSignature,
         }),
         [
           wallets,
@@ -350,6 +496,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
           switchChain,
           setChainIdSwitchingTo,
           connectEmbeddedToExternalConnectors,
+          verifyWalletSignature,
         ],
       )}
     >

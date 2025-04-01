@@ -4,8 +4,12 @@ import { InnerStepContainer, StepContainer, Heading, QRContainer } from '../comm
 import { useCopyToClipboard, UserIdentifier } from '@getpara/react-common';
 import { useContext } from 'react';
 import { ActionsContext } from '../ModalContent/ModalContent.js';
+import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
+import { useStore } from '../../../provider/stores/useStore.js';
 
 export const BiometricCreationStep = () => {
+  const para = useInternalClient();
+  const appName = useStore(state => state.appName);
   const { createAccount } = useContext(ActionsContext);
   const webAuthURLForCreate = useModalStore(state => state.webAuthURLForCreate);
   const iFrameUrl = useModalStore(state => state.iFrameUrl);
@@ -25,7 +29,11 @@ export const BiometricCreationStep = () => {
     <StepContainer $wide>
       <InnerStepContainer>
         <Heading variant="headingS" weight="bold">
-          {isBoth ? 'Secure Your Account' : 'Create Passkey'}
+          {para.isExternalWalletAuth
+            ? `Finish setup for your${appName ? ` ${appName}` : ''} wallet`
+            : isBoth
+              ? 'Secure Your Account'
+              : 'Create Passkey'}
         </Heading>
         {authInfo && <UserIdentifier {...authInfo} />}
         <CpslText variant="bodyS" color="secondary" weight="medium">

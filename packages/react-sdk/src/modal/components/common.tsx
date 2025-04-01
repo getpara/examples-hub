@@ -77,3 +77,16 @@ export const HeroIcon = styled(CpslIcon)`
   --width: 80px;
   --icon-color: var(--cpsl-color-text-primary);
 `;
+
+export const ErrorContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+`;
+
+export const ErrorIcon = styled(CpslIcon)`
+  --height: 16px;
+  --width: 16px;
+  --icon-color: var(--cpsl-color-text-error);
+`;

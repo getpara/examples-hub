@@ -40,7 +40,7 @@ export function hasInjectedProvider({ flag, namespace }: { flag?: WalletProvider
 /*
  * Returns an injected provider that favors the flag match, but falls back to window.ethereum
  */
-function getInjectedProvider({ flag, namespace }: { flag?: WalletProviderFlags; namespace?: string }) {
+export function getInjectedProvider({ flag, namespace }: { flag?: WalletProviderFlags; namespace?: string }) {
   const _window = typeof window !== 'undefined' ? (window as WindowProvider) : undefined;
   if (typeof _window === 'undefined') return;
   if (namespace) {

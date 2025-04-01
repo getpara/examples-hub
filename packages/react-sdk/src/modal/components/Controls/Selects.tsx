@@ -4,7 +4,7 @@ import ParaWeb, { truncateAddress, WalletType } from '@getpara/web-sdk';
 import { useEffect, useRef } from 'react';
 import { useDropdownPosition } from '../AuthInput/hooks/useDropdownPosition.js';
 import { MOBILE_SIZE } from '../../constants/constants.js';
-import { useWallet, useWalletState } from '../../../provider/index.js';
+import { useAccount, useWallet, useWalletState } from '../../../provider/index.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 import { useStore } from '../../../provider/stores/useStore.js';
@@ -110,6 +110,9 @@ export const AccountSelect = () => {
 
   const { setSelectedWallet } = useWalletState();
   const { data: activeWallet } = useWallet();
+  const { data: account } = useAccount();
+
+  const availableWallets = account?.wallets;
 
   const ActiveWalletNode = activeWallet ? (
     <FlexRow slot="selected-item">
@@ -129,12 +132,12 @@ export const AccountSelect = () => {
     if (dropdownMaxHeight && activeWallet?.address) {
       resize();
     }
-  }, [activeWallet, para.availableWallets, dropdownMaxHeight]);
+  }, [activeWallet, availableWallets, dropdownMaxHeight]);
 
   return (
     <Container>
       <SelectContainer ref={containerRef} id="addressInputContainer">
-        {para.availableWallets.length > 1 ? (
+        {availableWallets && availableWallets.length > 1 ? (
           <StyledSelect
             selectedValue={getValue(activeWallet?.id, activeWallet?.type)}
             onCpslSelectValueChange={e => {
@@ -152,7 +155,7 @@ export const AccountSelect = () => {
             selectedItemVariant="bodyXS"
           >
             {activeWallet && ActiveWalletNode}
-            {para.availableWallets.map(({ address, name: _name, id, type, isExternal }) => {
+            {availableWallets.map(({ address, name: _name, id, type, isExternal }) => {
               const key = getValue(id, type);
               const name = _name ?? getName(para, { type, isExternal, isMenu: true, hideWallets });
               return (

@@ -1,9 +1,9 @@
 import { PropsWithChildren } from 'react';
-import { SolanaWallet } from '../../modal/index.js';
 import { ParaSolanaProviderConfigNoWallets } from '../types/externalWalletProviders.js';
 import { SolanaExternalWalletProvider } from '../providers/SolanaExternalWalletProvider.js';
 import { useInternalClient } from '../hooks/utils/useInternalClient.js';
 import { useStore } from '../stores/useStore.js';
+import { SolanaWallet } from '@getpara/react-common';
 
 export const SolanaWalletWrapper = ({
   children,
@@ -13,6 +13,7 @@ export const SolanaWalletWrapper = ({
   solanaProviderConfig: ParaSolanaProviderConfigNoWallets;
   onSwitchWallet: ({ address, error }: { address?: string; error?: string }) => void;
 } & PropsWithChildren) => {
+  const externalWalletsWithFullAuth = useStore(state => state.externalWalletsWithFullAuth);
   const para = useInternalClient();
   const wallets = useStore(state => state.externalWallets);
 
@@ -28,7 +29,7 @@ export const SolanaWalletWrapper = ({
   return (
     <SolanaExternalWalletProvider
       config={solanaProviderConfig}
-      internalConfig={{ onSwitchWallet, para }}
+      internalConfig={{ onSwitchWallet, para, walletsWithFullAuth: externalWalletsWithFullAuth }}
       isUsing={isUsing}
       wallets={wallets}
     >

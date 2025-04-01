@@ -6,9 +6,10 @@ import { ParaProviderProps } from './types/provider.js';
 import { Chain, Transport } from 'viem';
 import { ExternalWalletWrapper } from './components/ExternalWalletWrapper.js';
 import { ParaModal } from '../modal/ParaModal.js';
-import { ExternalWallet, ParaModalHandle } from '../modal/index.js';
+import { ParaModalHandle } from '../modal/index.js';
 import { isConfigType, isParaWeb } from './utils/paraConfigTypeGuards.js';
 import ParaWeb from '@getpara/web-sdk';
+import { ExternalWallet } from '@getpara/react-common';
 
 export const ParaProvider = forwardRef<
   ParaModalHandle,
@@ -21,6 +22,8 @@ export const ParaProvider = forwardRef<
   const client = useStore(state => state.client);
   const setExternalWallets = useStore(state => state.setExternalWallets);
   const externalWallets = useStore(state => state.externalWallets);
+  const setExternalWalletsWithFullAuth = useStore(state => state.setExternalWalletsWithFullAuth);
+  const externalWalletsWithFullAuth = useStore(state => state.externalWalletsWithFullAuth);
   const setModalConfig = useStore(state => state.setModalConfig);
   const modalConfig = useStore(state => state.modalConfig);
   const setAppName = useStore(state => state.setAppName);
@@ -35,9 +38,15 @@ export const ParaProvider = forwardRef<
   }, [paraModalConfig]);
 
   useEffect(() => {
-    if (externalWallets !== externalWalletConfig?.wallets)
+    if (externalWallets !== externalWalletConfig?.wallets) {
       setExternalWallets(externalWalletConfig?.wallets ?? Object.values(ExternalWallet));
+    }
   }, [externalWalletConfig?.wallets]);
+
+  useEffect(() => {
+    if (externalWalletsWithFullAuth !== externalWalletConfig?.walletsWithParaAuth)
+      setExternalWalletsWithFullAuth(externalWalletConfig?.walletsWithParaAuth ?? []);
+  }, [externalWalletConfig?.walletsWithParaAuth]);
 
   useEffect(() => {
     if (!isConfigType(paraClientConfig) && !isParaWeb(paraClientConfig)) {

@@ -7,13 +7,14 @@ import { ModalStep, RESET_TO_ACCOUNT_STEPS, RESET_TO_AUTH_STEPS } from './utils/
 import { AuthLayout, ParaModalHandle, ParaModalProps } from './types/modalProps.js';
 import { DEFAULTS } from './constants/defaults.js';
 import { useGoBack } from './hooks/useGoBack.js';
-import { OAuthMethod, ParaEvent } from '@getpara/web-sdk';
+import { OAuthMethod } from '@getpara/web-sdk';
 import styled from 'styled-components';
 import { hasEmbeddedAuth, hasExternalWallet } from './utils/authLayoutHelpers.js';
 import { useModal, useWalletState } from '../provider/index.js';
 import { useInternalClient } from '../provider/hooks/utils/useInternalClient.js';
 import { useExternalWallets } from '../provider/providers/ExternalWalletProvider.js';
 import { useStore } from '../provider/stores/useStore.js';
+import { getExternalWalletDisplayName } from '@getpara/react-common';
 
 defineCustomElements();
 
@@ -39,7 +40,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
   const { disconnectExternalWallet } = useExternalWallets();
   const { isOpen: storedIsOpen, closeModal } = useModal();
   const para = useInternalClient();
-  const { selectedWallet, setSelectedWallet } = useWalletState();
+  const { setSelectedWallet, updateSelectedWallet } = useWalletState();
 
   const [isModalMounted, setIsModalMounted] = useState(false);
   const [isInit, setIsInit] = useState(false);
@@ -127,6 +128,23 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
           setStep(ModalStep.TELEGRAM_OAUTH);
         }
         break;
+      case para.isExternalWalletAuth:
+        const externalWallets = Object.values(para.externalWallets);
+        const externalWalletWithFullAuth = externalWallets.find(w => w.isExternalWithParaAuth);
+
+        // if para.isExternalWalletAuth is true this block should never be hit. Appeasing TS here to avoid using non-null assertions
+        if (!externalWalletWithFullAuth?.address || !externalWalletWithFullAuth?.type) {
+          break;
+        }
+
+        setAuthInfo({
+          displayName: getExternalWalletDisplayName({
+            address: externalWalletWithFullAuth.address,
+            type: externalWalletWithFullAuth.type,
+          }),
+          externalWalletAddress: externalWalletWithFullAuth.id,
+        });
+        break;
     }
 
     setIsInit(true);
@@ -147,7 +165,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
     if (JSON.stringify(storedAuthLayout) !== JSON.stringify(_authLayout)) {
       setAuthLayout(_authLayout);
     }
-  }, [disableEmailLogin, disablePhoneLogin, oAuthMethods, externalWallets, authLayout]);
+  }, [disableEmailLogin, disablePhoneLogin, oAuthMethods, externalWallets, authLayout, storedAuthLayout]);
 
   useEffect(() => {
     if (theme) {
@@ -175,29 +193,9 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
     }
   }, [isOpen]);
 
-  const updateActiveWallet = () => {
-    if (!selectedWallet?.id || !para.findWallet(selectedWallet?.id)) {
-      const defaultWallet = para.findWallet(undefined, undefined, { forbidPregen: true });
-
-      setSelectedWallet({ id: defaultWallet?.id, type: defaultWallet?.type });
-    }
-  };
-
   useEffect(() => {
-    updateActiveWallet();
+    updateSelectedWallet();
   }, [para]);
-
-  useEffect(() => {
-    // TODO: remove this redundant listener once we force the use of the ParaProvider
-    typeof window !== 'undefined' && window.addEventListener(ParaEvent.WALLETS_CHANGE_EVENT, updateActiveWallet);
-    typeof window !== 'undefined' && window.addEventListener(ParaEvent.EXTERNAL_WALLET_CHANGE_EVENT, updateActiveWallet);
-
-    return () => {
-      typeof window !== 'undefined' && window.removeEventListener(ParaEvent.WALLETS_CHANGE_EVENT, updateActiveWallet);
-      typeof window !== 'undefined' &&
-        window.removeEventListener(ParaEvent.EXTERNAL_WALLET_CHANGE_EVENT, updateActiveWallet);
-    };
-  }, []);
 
   const handleClose = () => {
     closeModal();

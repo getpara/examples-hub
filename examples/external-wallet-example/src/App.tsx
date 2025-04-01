@@ -3,7 +3,7 @@ import { Content } from './components/Content';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { clusterApiUrl } from '@solana/web3.js';
 import { axelar, cosmoshub, osmosis, sommelier, stargaze } from '@getpara/graz/chains';
-import { ParaProvider } from '@getpara/react-sdk';
+import { ExternalWallet, ParaProvider } from '@getpara/react-sdk';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useModalStateStore } from './stores/modalStateStore/useModalStateStore';
 import { useCosmosStore } from './stores/cosmosStore/useCosmosStore';
@@ -90,6 +90,7 @@ export const App = () => {
         }}
         externalWalletConfig={{
           wallets: externalWallets,
+          walletsWithParaAuth: [ExternalWallet.METAMASK, ExternalWallet.KEPLR, ExternalWallet.PHANTOM],
           // appDescription
           // appIcon
           // appUrl

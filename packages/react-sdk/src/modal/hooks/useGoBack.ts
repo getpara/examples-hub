@@ -1,3 +1,4 @@
+import { useInternalClient } from '../../provider/hooks/utils/useInternalClient.js';
 import { useExternalWallets } from '../../provider/providers/ExternalWalletProvider.js';
 import { useModalStore } from '../stores/index.js';
 import { getAddFundsStep, ModalStep } from '../utils/steps.js';
@@ -8,7 +9,8 @@ export const useGoBack = () => {
   const accountAddFundTab = useModalStore(state => state.accountAddFundTab);
   const decrementStep = useModalStore(state => state.decrementStep);
   const resetState = useModalStore(state => state.resetState);
-  const { setChainIdSwitchingTo } = useExternalWallets();
+  const { setChainIdSwitchingTo, disconnectExternalWallet } = useExternalWallets();
+  const para = useInternalClient();
 
   const goBack = () => {
     if (accountAddFundTab && currentStep === ModalStep.ADD_FUNDS_AWAITING) {
@@ -18,8 +20,13 @@ export const useGoBack = () => {
     }
     switch (currentStep) {
       case ModalStep.AUTH_MAIN:
-      case ModalStep.AUTH_MORE: {
+      case ModalStep.AUTH_MORE:
+      case ModalStep.EX_WALLET_SELECTED:
+      case ModalStep.EXTERNAL_WALLET_VERIFICATION: {
         resetState();
+        if (para.isExternalWalletAuth) {
+          disconnectExternalWallet();
+        }
 
         break;
       }

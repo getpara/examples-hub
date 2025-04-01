@@ -33,6 +33,7 @@ describe('ParaModal', () => {
               assetInfo: {} as OnRampAssetInfo,
               providers: [],
             })),
+            logout: vi.fn(() => ({})),
           };
         }),
       };

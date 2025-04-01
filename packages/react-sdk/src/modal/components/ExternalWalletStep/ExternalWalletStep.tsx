@@ -1,5 +1,5 @@
 import { CpslButton, CpslIcon, CpslQrCode, CpslSpinner, CpslText } from '@getpara/react-components';
-import { CenteredText, InnerStepContainer, QRContainer, StepContainer } from '../common.js';
+import { CenteredText, ErrorContainer, ErrorIcon, InnerStepContainer, QRContainer, StepContainer } from '../common.js';
 import { useEffect, useMemo } from 'react';
 import { useModalStore } from '../../stores/index.js';
 import styled from 'styled-components';
@@ -174,19 +174,6 @@ export const ExternalWalletStep = () => {
 const Container = styled(StepContainer)`
   flex: 1;
   justify-content: space-between;
-`;
-
-const ErrorContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-`;
-
-const ErrorIcon = styled(CpslIcon)`
-  --height: 16px;
-  --width: 16px;
-  --icon-color: var(--cpsl-color-text-error);
 `;
 
 const Text = styled(CenteredText)`

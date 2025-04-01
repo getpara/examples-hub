@@ -72,7 +72,7 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
   const [countryCode, setCountryCode] = useState<CountryCallingCode>((storedCountryCode ?? '+1') as CountryCallingCode);
   const [identifier, setIdentifier] = useState(
     (() => {
-      if (!authInfo?.authType || ['telegram', 'farcaster'].includes(authInfo?.authType)) {
+      if (!authInfo?.authType || ['telegram', 'farcaster', 'externalWallet'].includes(authInfo?.authType)) {
         return '';
       }
       if (authInfo.authType !== 'phone') {

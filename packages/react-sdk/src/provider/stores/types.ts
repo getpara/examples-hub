@@ -45,6 +45,9 @@ export interface ExternalWalletsSlice {
   externalWallets: TExternalWallet[];
   setExternalWallets: (_: TExternalWallet[]) => void;
 
+  externalWalletsWithFullAuth: TExternalWallet[];
+  setExternalWalletsWithFullAuth: (_: TExternalWallet[]) => void;
+
   evmContext: Context<EvmExternalWalletContextType>;
   setEvmContext: (_: Context<EvmExternalWalletContextType>) => void;
   EvmProvider?: typeof ParaEvmProvider;
