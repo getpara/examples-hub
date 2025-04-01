@@ -1,82 +1,96 @@
-import { simulateVerifyToken } from "../utils/auth-utils";
 import { Para as ParaServer, Environment } from "@getpara/server-sdk";
 import { getKeyShareInDB } from "../db/keySharesDB";
 import { decrypt } from "../utils/encryption-utils";
 import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integration";
 import { sepolia } from "viem/chains";
-import { http, parseEther, parseGwei } from "viem";
-import type { SignTransactionParameters, WalletClient, Chain, Account, LocalAccount } from "viem";
+import { http, parseEther, parseGwei, createPublicClient } from "viem";
+import type { WalletClient } from "viem";
 
-/**
- * Handles signing with Viem and ParaViemClient.
- *
- * @param {Request} req - The incoming request object.
- * @returns {Promise<Response>} - The response containing the signed transaction result.
- */
 export const signWithViem = async (req: Request): Promise<Response> => {
-  // Validate Authorization header
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return new Response("Unauthorized", { status: 401 });
+  const { email }: { email: string } = await req.json();
+
+  if (!email) {
+    return new Response("Email is required in the request body", { status: 400 });
   }
 
-  const token = authHeader.split(" ")[1];
-  const user = simulateVerifyToken(token);
-
-  if (!user) {
-    return new Response("Unauthorized", { status: 401 });
-  }
-
-  // Parse and validate request body
-  const { email }: RequestBody = await req.json();
-  if (user.email !== email) {
-    return new Response("Forbidden", { status: 403 });
-  }
-
-  // Ensure PARA_API_KEY is available
   const PARA_API_KEY = Bun.env.PARA_API_KEY;
   if (!PARA_API_KEY) {
-    return new Response("PARA_API_KEY not set", { status: 500 });
+    console.error("Server configuration error: PARA_API_KEY not set");
+    return new Response("Server configuration error", { status: 500 });
   }
 
-  // Initialize Para client and check if wallet exists
-  const para = new ParaServer(Environment.BETA, PARA_API_KEY);
-  const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
-
-  if (!hasPregenWallet) {
-    return new Response("Wallet does not exist", { status: 400 });
-  }
-
-  // Retrieve and decrypt key share
-  const keyShare = getKeyShareInDB(email);
-  if (!keyShare) {
-    return new Response("Key share does not exist", { status: 400 });
-  }
-
-  const decryptedKeyShare = decrypt(keyShare);
-  await para.setUserShare(decryptedKeyShare);
-
-  // Create Viem account and client
-  const viemParaAccount: LocalAccount = await createParaAccount(para);
-  const viemClient: WalletClient = createParaViemClient(para, {
-    account: viemParaAccount,
+  const para = new ParaServer(Environment.BETA, PARA_API_KEY, { disableWebSockets: true, disableWorkers: true });
+  const transport = http("https://ethereum-sepolia-rpc.publicnode.com");
+  const publicClient = createPublicClient({
     chain: sepolia,
-    transport: http("https://ethereum-sepolia-rpc.publicnode.com"),
+    transport: transport,
   });
 
-  // Create and sign a demo transaction
-  const demoTx: SignTransactionParameters<Chain | undefined, Account | undefined, Chain | undefined> = {
-    account: viemParaAccount,
-    chain: sepolia,
-    to: viemParaAccount.address,
-    value: parseEther("0.001"),
-    gas: 21000n,
-    maxFeePerGas: parseGwei("20"),
-    maxPriorityFeePerGas: parseGwei("3"),
-  };
+  try {
+    const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
+    if (!hasPregenWallet) {
+      return new Response(`Pregenerated wallet does not exist for ${email}`, { status: 404 });
+    }
 
-  const signatureResult = await viemClient.signTransaction(demoTx);
+    const keyShare = getKeyShareInDB(email);
+    if (!keyShare) {
+      return new Response(`Key share not found in DB for ${email}`, { status: 404 });
+    }
 
-  // Return the result
-  return new Response(JSON.stringify({ route: "signWithViem", signatureResult }), { status: 200 });
+    let decryptedKeyShare: string;
+    try {
+      decryptedKeyShare = await decrypt(keyShare);
+    } catch (decryptionError) {
+      console.error(`Failed to decrypt key share for ${email}:`, decryptionError);
+      return new Response("Failed to process key share", { status: 500 });
+    }
+
+    await para.setUserShare(decryptedKeyShare);
+
+    if (!para.wallets || Object.keys(para.wallets).length === 0) {
+      throw new Error("Failed to load wallet details after setting user share.");
+    }
+
+    const viemParaAccount = await createParaAccount(para);
+
+    if (!viemParaAccount || !viemParaAccount.address) {
+      throw new Error("Failed to create Viem account from Para instance.");
+    }
+
+    const viemClient: WalletClient = createParaViemClient(para, {
+      account: viemParaAccount,
+      chain: sepolia,
+      transport: transport,
+    });
+
+    const nonce = await publicClient.getTransactionCount({
+      address: viemParaAccount.address,
+      blockTag: "pending",
+    });
+
+    const demoTx = {
+      account: viemParaAccount,
+      to: viemParaAccount.address,
+      value: parseEther("0.001"),
+      gas: 21000n,
+      maxFeePerGas: parseGwei("20"),
+      maxPriorityFeePerGas: parseGwei("2"),
+      nonce: nonce,
+      chain: sepolia,
+      maxFeePerBlobGas: 0n,
+      blobs: [],
+    };
+
+    const signatureResult = await viemClient.signTransaction(demoTx);
+
+    return new Response(JSON.stringify({ route: "signWithViem", signatureResult }), {
+      headers: { "Content-Type": "application/json" },
+      status: 200,
+    });
+  } catch (error) {
+    console.error(`Error during signWithViem process for ${email}:`, error);
+    return new Response(`Failed to sign with Viem: ${error instanceof Error ? error.message : "Unknown error"}`, {
+      status: 500,
+    });
+  }
 };
