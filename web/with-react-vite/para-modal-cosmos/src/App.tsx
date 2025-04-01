@@ -7,36 +7,6 @@ export default function Home() {
   const { data: wallet } = useWallet();
   const { data: account, isLoading, error } = useAccount();
 
-  //   setIsLoading(true);
-  //   setError("");
-  //   try {
-  //     const isAuthenticated = await para.isFullyLoggedIn();
-  //     setIsConnected(isAuthenticated);
-  //     if (isAuthenticated) {
-  //       const wallets = Object.values(await para.getWallets());
-  //       if (wallets?.length) {
-  //         setWallet(wallets[0].address || "unknown");
-  //       }
-  //     }
-  //   } catch (err: any) {
-  //     setError(err.message || "An error occurred during authentication");
-  //   }
-  //   setIsLoading(false);
-  // };
-
-  // useEffect(() => {
-  //   handleCheckIfAuthenticated();
-  // }, []);
-
-  // const handleOpenModal = () => {
-  //   setIsOpen(true);
-  // };
-
-  // const handleCloseModal = async () => {
-  //   handleCheckIfAuthenticated();
-  //   setIsOpen(false);
-  // };
-
   return (
     <main className="flex flex-col items-center justify-center min-h-screen gap-6 p-8">
       <h1 className="text-2xl font-bold">
