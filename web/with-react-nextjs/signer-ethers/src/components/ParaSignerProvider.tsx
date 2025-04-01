@@ -2,7 +2,6 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useAccount } from "@getpara/react-sdk";
 import { ParaEthersSigner } from "@getpara/ethers-v6-integration";
 import { para } from "../client/para";
-import "@getpara/react-sdk/styles.css";
 import { provider } from "../client/ethers";
 
 interface ParaSignerContextType {

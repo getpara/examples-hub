@@ -1,10 +1,12 @@
 "use client";
 
-import { usePara } from "@/components/ParaProvider";
 import { useState, useEffect } from "react";
 import { formatEther, parseEther, Contract, Interface } from "ethers";
 import { PARA_TEST_TOKEN_CONTRACT_ADDRESS } from ".";
 import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
+import { useParaSigner } from "@/components/ParaSignerProvider";
+import { useAccount, useWallet } from "@getpara/react-sdk";
+import { provider } from "@/client/ethers";
 
 type Operation = {
   type: "mint" | "transfer";
@@ -13,7 +15,9 @@ type Operation = {
 };
 
 export default function BatchedTransactionDemo() {
-  const [operations, setOperations] = useState<Operation[]>([{ type: "mint", recipient: "", amount: "" }]);
+  const [operations, setOperations] = useState<Operation[]>([
+    { type: "mint", recipient: "", amount: "" },
+  ]);
   const [isLoading, setIsLoading] = useState(false);
   const [isBalanceLoading, setIsBalanceLoading] = useState(false);
   const [tokenBalance, setTokenBalance] = useState<string | null>(null);
@@ -24,14 +28,23 @@ export default function BatchedTransactionDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { isConnected, address, signer, provider } = usePara();
+  const { signer } = useParaSigner();
+  const { data: account } = useAccount();
+  const { data: wallet } = useWallet();
+
+  const address = wallet?.address;
+  const isConnected = account?.isConnected;
 
   const fetchTokenData = async () => {
     if (!address || !provider) return;
 
     setIsBalanceLoading(true);
     try {
-      const contract = new Contract(PARA_TEST_TOKEN_CONTRACT_ADDRESS, ParaTestToken.abi, provider);
+      const contract = new Contract(
+        PARA_TEST_TOKEN_CONTRACT_ADDRESS,
+        ParaTestToken.abi,
+        provider
+      );
 
       const balance = await contract.balanceOf(address);
       setTokenBalance(formatEther(balance));
@@ -57,7 +70,11 @@ export default function BatchedTransactionDemo() {
     setOperations(operations.filter((_, i) => i !== index));
   };
 
-  const updateOperation = (index: number, field: keyof Operation, value: string) => {
+  const updateOperation = (
+    index: number,
+    field: keyof Operation,
+    value: string
+  ) => {
     const newOperations = [...operations];
     if (field === "type") {
       newOperations[index] = {
@@ -86,7 +103,11 @@ export default function BatchedTransactionDemo() {
         throw new Error("Please connect your wallet.");
       }
 
-      const contract = new Contract(PARA_TEST_TOKEN_CONTRACT_ADDRESS, ParaTestToken.abi, signer);
+      const contract = new Contract(
+        PARA_TEST_TOKEN_CONTRACT_ADDRESS,
+        ParaTestToken.abi,
+        signer
+      );
 
       const iface = new Interface(ParaTestToken.abi);
 
@@ -95,7 +116,10 @@ export default function BatchedTransactionDemo() {
         if (op.type === "mint") {
           return iface.encodeFunctionData("mint", [parseEther(op.amount)]);
         } else {
-          return iface.encodeFunctionData("transfer", [op.recipient, parseEther(op.amount)]);
+          return iface.encodeFunctionData("transfer", [
+            op.recipient,
+            parseEther(op.amount),
+          ]);
         }
       });
 
@@ -133,7 +157,10 @@ export default function BatchedTransactionDemo() {
       setStatus({
         show: true,
         type: "error",
-        message: error instanceof Error ? error.message : "Failed to execute operations. Please try again.",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to execute operations. Please try again.",
       });
     } finally {
       setIsLoading(false);
@@ -143,28 +170,43 @@ export default function BatchedTransactionDemo() {
   return (
     <div className="container mx-auto px-4">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold tracking-tight mb-6">Batched Transaction Demo</h1>
+        <h1 className="text-4xl font-bold tracking-tight mb-6">
+          Batched Transaction Demo
+        </h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
           Execute multiple token operations in a single transaction using the{" "}
-          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md">multicall</code> function of
-          the ParaTestToken contract.
+          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md">
+            multicall
+          </code>{" "}
+          function of the ParaTestToken contract.
         </p>
       </div>
 
       <div className="max-w-xl mx-auto">
         <div className="mb-8 rounded-none border border-gray-200">
           <div className="flex justify-between items-center px-6 py-3 bg-gray-50 border-b border-gray-200">
-            <h3 className="text-sm font-medium text-gray-900">Token Balance:</h3>
+            <h3 className="text-sm font-medium text-gray-900">
+              Token Balance:
+            </h3>
             <button
               onClick={fetchTokenData}
               disabled={isBalanceLoading || !address}
               className="p-1 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
-              title="Refresh balance">
-              <span className={`inline-block ${isBalanceLoading ? "animate-spin" : ""}`}>🔄</span>
+              title="Refresh balance"
+            >
+              <span
+                className={`inline-block ${
+                  isBalanceLoading ? "animate-spin" : ""
+                }`}
+              >
+                🔄
+              </span>
             </button>
           </div>
           <div className="px-6 py-3">
-            <p className="text-sm text-gray-500 bg-gray-100 p-2 rounded-md">Network: Holesky</p>
+            <p className="text-sm text-gray-500 bg-gray-100 p-2 rounded-md">
+              Network: Holesky
+            </p>
             <p className="text-lg font-medium text-gray-900">
               {!address
                 ? "Please connect your wallet"
@@ -185,7 +227,8 @@ export default function BatchedTransactionDemo() {
                 : status.type === "error"
                 ? "bg-red-50 border-red-500 text-red-700"
                 : "bg-blue-50 border-blue-500 text-blue-700"
-            }`}>
+            }`}
+          >
             <p className="px-6 py-4 break-words">{status.message}</p>
           </div>
         )}
@@ -194,25 +237,34 @@ export default function BatchedTransactionDemo() {
           {operations.map((operation, index) => (
             <div
               key={index}
-              className="p-4 border border-gray-200 rounded-none space-y-4">
+              className="p-4 border border-gray-200 rounded-none space-y-4"
+            >
               <div className="flex justify-between items-center">
-                <h4 className="text-sm font-medium text-gray-900">Operation {index + 1}</h4>
+                <h4 className="text-sm font-medium text-gray-900">
+                  Operation {index + 1}
+                </h4>
                 {operations.length > 1 && (
                   <button
                     onClick={() => removeOperation(index)}
-                    className="text-red-600 hover:text-red-800 text-sm">
+                    className="text-red-600 hover:text-red-800 text-sm"
+                  >
                     Remove
                   </button>
                 )}
               </div>
 
               <div className="space-y-3">
-                <label className="block text-sm font-medium text-gray-700">Operation Type</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Operation Type
+                </label>
                 <select
                   value={operation.type}
-                  onChange={(e) => updateOperation(index, "type", e.target.value)}
+                  onChange={(e) =>
+                    updateOperation(index, "type", e.target.value)
+                  }
                   disabled={isLoading}
-                  className="block w-full px-4 py-3 border border-gray-300 bg-white rounded-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                  className="block w-full px-4 py-3 border border-gray-300 bg-white rounded-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                >
                   <option value="mint">Mint</option>
                   <option value="transfer">Transfer</option>
                 </select>
@@ -220,11 +272,15 @@ export default function BatchedTransactionDemo() {
 
               {operation.type === "transfer" && (
                 <div className="space-y-3">
-                  <label className="block text-sm font-medium text-gray-700">Recipient Address</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Recipient Address
+                  </label>
                   <input
                     type="text"
                     value={operation.recipient}
-                    onChange={(e) => updateOperation(index, "recipient", e.target.value)}
+                    onChange={(e) =>
+                      updateOperation(index, "recipient", e.target.value)
+                    }
                     placeholder="0x..."
                     disabled={isLoading}
                     className="block w-full px-4 py-3 border border-gray-300 rounded-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
@@ -233,11 +289,15 @@ export default function BatchedTransactionDemo() {
               )}
 
               <div className="space-y-3">
-                <label className="block text-sm font-medium text-gray-700">Amount (CTT)</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Amount (CTT)
+                </label>
                 <input
                   type="number"
                   value={operation.amount}
-                  onChange={(e) => updateOperation(index, "amount", e.target.value)}
+                  onChange={(e) =>
+                    updateOperation(index, "amount", e.target.value)
+                  }
                   placeholder="0.0"
                   step="0.01"
                   disabled={isLoading}
@@ -250,7 +310,8 @@ export default function BatchedTransactionDemo() {
           <button
             onClick={addOperation}
             disabled={isLoading}
-            className="w-full px-4 py-2 border-2 border-dashed border-gray-300 text-gray-600 hover:text-gray-900 hover:border-gray-400 rounded-none transition-colors">
+            className="w-full px-4 py-2 border-2 border-dashed border-gray-300 text-gray-600 hover:text-gray-900 hover:border-gray-400 rounded-none transition-colors"
+          >
             + Add Operation
           </button>
 
@@ -259,21 +320,27 @@ export default function BatchedTransactionDemo() {
             disabled={
               !isConnected ||
               isLoading ||
-              operations.some((op) => !op.amount || (op.type === "transfer" && !op.recipient))
+              operations.some(
+                (op) => !op.amount || (op.type === "transfer" && !op.recipient)
+              )
             }
-            className="w-full rounded-none bg-blue-900 px-6 py-3 text-sm font-medium text-white hover:bg-blue-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            className="w-full rounded-none bg-blue-900 px-6 py-3 text-sm font-medium text-white hover:bg-blue-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             {isLoading ? "Executing Operations..." : "Execute Batch"}
           </button>
 
           {txHash && (
             <div className="mt-8 rounded-none border border-gray-200">
               <div className="flex justify-between items-center px-6 py-4 bg-gray-50 border-b border-gray-200">
-                <h3 className="text-sm font-medium text-gray-900">Transaction Hash:</h3>
+                <h3 className="text-sm font-medium text-gray-900">
+                  Transaction Hash:
+                </h3>
                 <a
                   href={`https://holesky.etherscan.io/tx/${txHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-1 text-sm bg-blue-900 text-white hover:bg-blue-950 transition-colors rounded-none">
+                  className="px-3 py-1 text-sm bg-blue-900 text-white hover:bg-blue-950 transition-colors rounded-none"
+                >
                   View on Etherscan
                 </a>
               </div>
