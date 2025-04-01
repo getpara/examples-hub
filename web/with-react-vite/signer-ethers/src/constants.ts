@@ -11,5 +11,5 @@ if (!API_KEY) {
 }
 
 export const HOLESKY_RPC_URL =
-  process.env.NEXT_PUBLIC_HOLESKY_RPC_URL ||
+  import.meta.env.VITE_HOLESKY_RPC_URL ||
   "https://ethereum-holesky-rpc.publicnode.com";
