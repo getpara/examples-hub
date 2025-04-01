@@ -19,7 +19,7 @@ export default function PhoneAuthScreen() {
     if (!countryCode || !phone) return;
     setIsLoading(true);
     try {
-      const authState = await para.signUpOrLogInV2({ auth: { email } });
+      const authState = await para.signUpOrLogInV2({ auth: { phone } });
 
       switch (authState.stage) {
         case "verify":

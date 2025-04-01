@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { para } from "./client/para";
-import { AuthStateSignup, WalletType } from "@getpara/web-sdk";
+import { AuthStateSignup, formatPhoneNumber, WalletType } from "@getpara/web-sdk";
 import { PhoneInput } from "./components/PhoneInput";
 import { OTPInput } from "./components/OTPInput";
 import { AuthButton } from "./components/AuthButton";
@@ -58,7 +58,7 @@ export default function Home() {
     setIsLoading(true);
     setError("");
     try {
-      const authState = await para.signUpOrLogInV2({ auth: { email }});
+      const authState = await para.signUpOrLogInV2({ auth: { phone: formatPhoneNumber(phoneNumber, countryCode) }});
 
       switch (authState.stage) {
         case 'verify':
