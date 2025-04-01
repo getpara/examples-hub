@@ -1,6 +1,7 @@
-import { usePara } from "../components/ParaProvider";
 import { useState } from "react";
 import { verifyMessage } from "ethers";
+import { useAccount, useWallet } from "@getpara/react-sdk";
+import { useParaSigner } from "../components/ParaSignerProvider";
 
 export default function MessageSigningDemo() {
   const [message, setMessage] = useState("");
@@ -13,7 +14,12 @@ export default function MessageSigningDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { isConnected, walletId, signer } = usePara();
+  const { signer } = useParaSigner();
+  const { data: account } = useAccount();
+  const { data: wallet } = useWallet();
+
+  const walletId = wallet?.id;
+  const isConnected = account?.isConnected;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,11 +93,15 @@ export default function MessageSigningDemo() {
   return (
     <div className="container mx-auto px-4">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold tracking-tight mb-6">Sign Message Demo</h1>
+        <h1 className="text-4xl font-bold tracking-tight mb-6">
+          Sign Message Demo
+        </h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Sign a message with your connected wallet. This demonstrates a basic message signing interaction with the Para
-          SDK using the{" "}
-          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-none">para.signMessage()</code>
+          Sign a message with your connected wallet. This demonstrates a basic
+          message signing interaction with the Para SDK using the{" "}
+          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-none">
+            para.signMessage()
+          </code>
           method.
         </p>
       </div>
@@ -103,18 +113,18 @@ export default function MessageSigningDemo() {
               status.type === "success"
                 ? "bg-green-50 border-green-500 text-green-700"
                 : "bg-red-50 border-red-500 text-red-700"
-            }`}>
+            }`}
+          >
             <p className="px-6 py-4">{status.message}</p>
           </div>
         )}
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-3">
             <label
               htmlFor="message"
-              className="block text-sm font-medium text-gray-700">
+              className="block text-sm font-medium text-gray-700"
+            >
               Message to Sign
             </label>
             <input
@@ -132,18 +142,22 @@ export default function MessageSigningDemo() {
           <button
             type="submit"
             className="w-full rounded-none bg-blue-900 px-6 py-3 text-sm font-medium text-white hover:bg-blue-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!message || isLoading}>
+            disabled={!message || isLoading}
+          >
             {isLoading ? "Signing Message..." : "Sign Message"}
           </button>
 
           {signature && (
             <div className="mt-8 rounded-none border border-gray-200">
               <div className="flex justify-between items-center px-6 py-4 bg-gray-50 border-b border-gray-200">
-                <h3 className="text-sm font-medium text-gray-900">Signature:</h3>
+                <h3 className="text-sm font-medium text-gray-900">
+                  Signature:
+                </h3>
                 <button
                   type="button"
                   onClick={handleVerify}
-                  className="px-3 py-1 text-sm bg-blue-900 text-white hover:bg-blue-950 transition-colors rounded-none">
+                  className="px-3 py-1 text-sm bg-blue-900 text-white hover:bg-blue-950 transition-colors rounded-none"
+                >
                   Verify
                 </button>
               </div>
@@ -153,7 +167,9 @@ export default function MessageSigningDemo() {
                 </p>
                 {recoveredAddress && (
                   <div className="mt-4">
-                    <p className="text-sm font-medium text-gray-900 mb-2">Recovered Address:</p>
+                    <p className="text-sm font-medium text-gray-900 mb-2">
+                      Recovered Address:
+                    </p>
                     <p className="text-sm font-mono break-all text-gray-600 bg-white p-4 border border-gray-200">
                       {recoveredAddress}
                     </p>

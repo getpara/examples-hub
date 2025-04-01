@@ -1,9 +1,8 @@
 "use client";
 
-import { para } from "../client/para";
-import { usePara } from "../components/ParaProvider";
 import { useState } from "react";
 import { encode as rlpEncode } from "@ethereumjs/rlp";
+import { useAccount, useSignTransaction } from "@getpara/react-sdk";
 
 export default function SignTransactionDemo() {
   const [to, setTo] = useState("");
@@ -16,12 +15,14 @@ export default function SignTransactionDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { isConnected, walletId, address } = usePara();
-  console.log(address);
+  const { data: account } = useAccount();
+  const { signTransactionAsync } = useSignTransaction();
 
   // Helper function to convert hex string to buffer removing leading zeros
   const hexToBuffer = (hexString: string): Buffer => {
-    const cleanHex = hexString.startsWith("0x") ? hexString.slice(2) : hexString;
+    const cleanHex = hexString.startsWith("0x")
+      ? hexString.slice(2)
+      : hexString;
     const nonZeroIndex = cleanHex.split("").findIndex((char) => char !== "0");
     const trimmedHex = nonZeroIndex === -1 ? "0" : cleanHex.slice(nonZeroIndex);
     const paddedHex = trimmedHex.length % 2 ? "0" + trimmedHex : trimmedHex;
@@ -34,20 +35,11 @@ export default function SignTransactionDemo() {
     setStatus({ show: false, type: "success", message: "" });
 
     try {
-      if (!isConnected) {
+      if (!account?.isConnected) {
         setStatus({
           show: true,
           type: "error",
           message: "Please connect your wallet to send a transaction.",
-        });
-        return;
-      }
-
-      if (!walletId) {
-        setStatus({
-          show: true,
-          type: "error",
-          message: "No wallet ID found. Please reconnect your wallet.",
         });
         return;
       }
@@ -103,11 +95,19 @@ export default function SignTransactionDemo() {
 
       console.log("Chain ID:", chainId);
 
-      const result = await para.signTransaction({ walletId, rlpEncodedTxBase64, chainId });
+      const result = await signTransactionAsync({
+        // TODO: update this to remove this empty walletId once the useSignTransaction is updated to properly omit walletId
+        walletId: "",
+        rlpEncodedTxBase64,
+        chainId,
+      });
 
       console.log("Transaction result:", result);
 
-      if ("pendingTransactionId" in result || "transactionReviewUrl" in result) {
+      if (
+        "pendingTransactionId" in result ||
+        "transactionReviewUrl" in result
+      ) {
         setStatus({
           show: true,
           type: "error",
@@ -130,7 +130,10 @@ export default function SignTransactionDemo() {
       setStatus({
         show: true,
         type: "error",
-        message: error instanceof Error ? error.message : "Failed to send transaction. Please try again.",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to send transaction. Please try again.",
       });
     } finally {
       setIsLoading(false);
@@ -140,17 +143,21 @@ export default function SignTransactionDemo() {
   return (
     <div className="container mx-auto px-4">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold tracking-tight mb-6">Send Transaction Demo</h1>
+        <h1 className="text-4xl font-bold tracking-tight mb-6">
+          Send Transaction Demo
+        </h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Sign a transaction with your connected wallet. This demonstrates a basic transaction signing interaction with
-          the Para SDK using the{" "}
+          Sign a transaction with your connected wallet. This demonstrates a
+          basic transaction signing interaction with the Para SDK using the{" "}
           <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md">
             para.signTransaction()
           </code>{" "}
-          method. Use this for manual transaction signing without one of the signer libraries.
+          method. Use this for manual transaction signing without one of the
+          signer libraries.
         </p>
         <p className="text-lg text-orange-600 max-w-2xl mx-auto font-bold">
-          Note: You have to still send the transaction to the chain manually post signing.
+          Note: You have to still send the transaction to the chain manually
+          post signing.
         </p>
       </div>
 
@@ -161,18 +168,18 @@ export default function SignTransactionDemo() {
               status.type === "success"
                 ? "bg-green-50 border-green-500 text-green-700"
                 : "bg-red-50 border-red-500 text-red-700"
-            }`}>
+            }`}
+          >
             <p className="px-6 py-4">{status.message}</p>
           </div>
         )}
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-3">
             <label
               htmlFor="to"
-              className="block text-sm font-medium text-gray-700">
+              className="block text-sm font-medium text-gray-700"
+            >
               Recipient Address
             </label>
             <input
@@ -190,7 +197,8 @@ export default function SignTransactionDemo() {
           <div className="space-y-3">
             <label
               htmlFor="amount"
-              className="block text-sm font-medium text-gray-700">
+              className="block text-sm font-medium text-gray-700"
+            >
               Amount (ETH)
             </label>
             <input
@@ -209,7 +217,8 @@ export default function SignTransactionDemo() {
           <button
             type="submit"
             className="w-full rounded-none bg-blue-900 px-6 py-3 text-sm font-medium text-white hover:bg-blue-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!to || !amount || isLoading}>
+            disabled={!to || !amount || isLoading}
+          >
             {isLoading ? "Signing Transaction..." : "Sign Transaction"}
           </button>
 
