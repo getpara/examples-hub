@@ -28,7 +28,7 @@ struct VerifyPhoneView: View {
                 .textFieldStyle(.roundedBorder)
                 .padding(.horizontal)
                 .disabled(isLoading)
-                .accessibilityLabel("codeInput-0")
+                .accessibilityIdentifier("verificationCodeField")
             
             if let errorMessage = errorMessage {
                 Text(errorMessage)
@@ -64,7 +64,7 @@ struct VerifyPhoneView: View {
                         appRootManager.currentRoot = .home
                     } catch {
                         isLoading = false
-                        errorMessage = "Verification failed: \(error.localizedDescription)"
+                        errorMessage = String(describing: error)
                     }
                 }
             } label: {
