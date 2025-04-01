@@ -18,7 +18,7 @@ export async function createPregenWalletHandler(req: Request, res: Response, nex
     }
 
     const para = new ParaServer(Environment.BETA, PARA_API_KEY);
-    const walletExists = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
+    const walletExists = await para.hasPregenWalletV2({ pregenId: { email } });
     if (walletExists) {
       res
         .status(409)
@@ -28,10 +28,9 @@ export async function createPregenWalletHandler(req: Request, res: Response, nex
       return;
     }
 
-    const wallet = await para.createPregenWallet({
+    const wallet = await para.createPregenWalletV2({
       type: WalletType.EVM,
-      pregenIdentifier: email,
-      pregenIdentifierType: "EMAIL",
+      pregenId: { email },
     });
     if (!wallet) {
       res.status(500).send("Failed to create pre-generated wallet. Check your Para configuration and try again.");

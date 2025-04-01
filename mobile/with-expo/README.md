@@ -177,8 +177,8 @@ For production or custom package names:
   login. New user creation triggers automatic OTP email delivery, followed by passkey registration via
   `registerPasskey`.
 
-- **Phone**: Implementation in [`app/auth/with-phone.tsx`](./app/auth/with-phone.tsx) follows the same flow as email
-  authentication, differing only in phone-specific method calls like `checkIfUserExistsByPhone`.
+- **Phone**: Implementation in [`app/auth/with-phone.tsx`](./app/auth/with-phone.tsx) follows largely the same flow as email
+  authentication, differing only in the argument passed to `signUpOrLogInV2`.
 
 > **Note**: The example utilizes test credential generation functions from `./util/random.ts` to create test email
 > addresses, phone numbers, and OTP values. This accelerates testing by bypassing actual email/SMS delivery, but should

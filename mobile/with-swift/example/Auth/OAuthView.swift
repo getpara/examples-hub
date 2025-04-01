@@ -36,13 +36,18 @@ struct OAuthView: View {
     private func handleLogin(email: String) {
         Task {
             self.email = email
-            let userExists = try await paraManager.checkIfUserExists(email: email)
-            if userExists {
-                try await paraManager.login(authorizationController: authorizationController, authInfo: EmailAuthInfo(email: email))
-                appRootManager.currentRoot = .home
-            } else {
-                try await paraManager.createUser(email: email)
-                shouldNavigateToVerificationView = true
+            let authState = try await paraManager.signUpOrLogInV2(auth: (email: email))
+
+            switch (authState['stage']) {
+                case "verify":
+                    isLoading = false
+                    shouldNavigateToVerificationView = true
+                    break
+                case "login":
+                    isLoading = false
+                    try await paraManager.login(authorizationController: authorizationController, authState: authState)
+                    appRootManager.currentRoot = .home
+                    break
             }
         }
     }

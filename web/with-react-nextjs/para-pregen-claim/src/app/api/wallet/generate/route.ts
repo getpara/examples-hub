@@ -12,10 +12,9 @@ export async function GET() {
     const para = new Para(Environment.BETA, process.env.PARA_API_KEY);
     const uuid = uuidv4();
 
-    const wallet = await para.createPregenWallet({
+    const wallet = await para.createPregenWalletV2({
       type: WalletType.EVM,
-      pregenIdentifier: uuid,
-      pregenIdentifierType: "CUSTOM_ID",
+      pregenId: { customId: uuid },
     });
 
     const userShare = await para.getUserShare();

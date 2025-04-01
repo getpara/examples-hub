@@ -1,14 +1,53 @@
-import { useEffect, useState } from "react";
-import { OAuthButtons } from "./components/OAuthButtons";
-import { WalletDisplay } from "./components/WalletDisplay";
-import { para } from "./client/para";
-import { OAuthMethod } from "@getpara/web-sdk";
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { OAuthButtons } from "@/components/OAuthButtons";
+import { WalletDisplay } from "@/components/WalletDisplay";
+import { para } from "@/client/para";
+import { OAuthMethod, AuthStateLogin, AuthStateSignup } from "@getpara/web-sdk";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [wallet, setWallet] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const popupWindow = useRef<Window | null>(null);
+
+  const openPopup = (...args: Parameters<typeof window.open>) => {
+    if (popupWindow.current) {
+      popupWindow.current.close();
+    }
+
+    popupWindow.current = window?.open(...args);
+
+    return popupWindow.current;
+  }
+
+  const handleAuthState = async (authState: AuthStateLogin | AuthStateSignup) => {
+    switch (authState.stage) {
+      case 'signup': {
+        openPopup(authState.passkeyUrl, "signUpPopup", "popup=true");
+
+        const { needsWallet } = await para.waitForWalletCreation({
+          isCanceled: () => popupWindow.current?.closed,
+        });
+
+        if (needsWallet) {
+          await para.createWallet();
+        }
+      }
+      break;
+
+      case 'login': {
+        openPopup(authState.passkeyUrl, "loginPopup", "popup=true");
+
+        await para.waitForLogin({
+          isCanceled: () => popupWindow.current?.closed,
+        });
+      }
+      break;
+    }
+  }
 
   const handleCheckIfAuthenticated = async () => {
     setIsLoading(true);
@@ -48,44 +87,33 @@ export default function Home() {
   };
 
   const handleFarcasterAuth = async () => {
-    const connectUri = await para.getFarcasterConnectURL();
-    window.open(connectUri, "farcasterConnectPopup", "popup=true");
+    try { 
+      const authState = await para.verifyFarcaster({
+        onConnectUri: connectUri => {
+          openPopup(connectUri, "farcasterConnectPopup", "popup=true");
+        },
+        isCanceled: () => popupWindow.current?.closed,
+      });
 
-    const { userExists, username } = await para.waitForFarcasterStatus();
+      handleAuthState(authState);
 
-    const authUrl = userExists
-      ? await para.initiateUserLogin({ useShortUrl: false, farcasterUsername: username })
-      : await para.getSetUpBiometricsURL({ authType: "farcaster", isForNewDevice: false });
-
-    const popupWindow = window.open(authUrl, userExists ? "loginPopup" : "signUpPopup", "popup=true");
-
-    if (!popupWindow) throw new Error("Failed to open popup window");
-
-    await (userExists ? para.waitForLoginAndSetup({ popupWindow }) : para.waitForPasskeyAndCreateWallet());
+    } catch (e) {
+      console.error("Farcaster auth error:", e);
+    }
   };
 
   const handleRegularOAuth = async (method: OAuthMethod) => {
-    const oAuthURL = await para.getOAuthURL({ method });
-    window.open(oAuthURL, "oAuthPopup", "popup=true");
+    try { 
+      const authState = await para.verifyOAuth({
+        onOAuthUrl: oAuthUrl => {
+          openPopup(oAuthUrl, "oAuthPopup", "popup=true");
+        },
+        isCanceled: () => popupWindow.current?.closed,
+      });
 
-    const { email, userExists } = await para.waitForOAuth();
-
-    if (!email) throw new Error("Email not found");
-
-    const authUrl = userExists
-      ? await para.initiateUserLogin({ email, useShortUrl: false })
-      : await para.getSetUpBiometricsURL({ authType: "email", isForNewDevice: false });
-
-    const popupWindow = window.open(authUrl, userExists ? "loginPopup" : "signUpPopup", "popup=true");
-
-    if (!popupWindow) throw new Error("Failed to open popup window");
-
-    const result = await (userExists
-      ? para.waitForLoginAndSetup({ popupWindow })
-      : para.waitForPasskeyAndCreateWallet());
-
-    if ("needsWallet" in result && result.needsWallet) {
-      await para.createWallet();
+      handleAuthState(authState);
+    } catch (e) {
+      console.error("Regular OAuth error:", e);
     }
   };
 

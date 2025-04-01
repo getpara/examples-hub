@@ -112,15 +112,13 @@ export default function Home() {
 
       await para.setUserShare(userShare);
 
-      await para.updatePregenWalletIdentifier({
+      await para.updatePregenWalletIdentifierV2({
         walletId,
-        newPregenIdentifier: userEmail,
-        newPregenIdentifierType: "EMAIL",
+        newPregenId: { email: userEmail },
       });
 
-      await para.claimPregenWallets({
-        pregenIdentifier: userEmail,
-        pregenIdentifierType: "EMAIL",
+      await para.claimPregenWalletsV2({
+        pregenId: { email: userEmail },
       });
 
       setClaimMessage("Claim successful! The wallet has been merged into your account.");
