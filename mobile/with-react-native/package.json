@@ -23,6 +23,7 @@
     "react": "19.0.0",
     "react-native": "0.78.2",
     "react-native-gesture-handler": "2.25.0",
+    "react-native-inappbrowser-reborn": "^3.7.0",
     "react-native-keychain": "10.0.0",
     "react-native-modpow": "1.1.0",
     "react-native-passkey": "3.1.0",
