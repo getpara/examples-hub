@@ -39,16 +39,15 @@ export const createWallet: Handler = async (req: Request): Promise<Response> => 
 
   const para = new ParaServer(Environment.BETA, PARA_API_KEY);
 
-  const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
+  const hasPregenWallet = await para.hasPregenWalletV2({ pregenId: { email } });
 
   if (hasPregenWallet) {
     return new Response("Wallet already exists", { status: 400 });
   }
 
-  const wallet = await para.createPregenWallet({
+  const wallet = await para.createPregenWalletV2({
     type: WalletType.EVM,
-    pregenIdentifier: email,
-    pregenIdentifierType: "EMAIL",
+    pregenId: { email },
   });
 
   if (!wallet) {

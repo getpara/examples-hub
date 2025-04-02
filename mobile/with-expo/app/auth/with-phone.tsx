@@ -20,13 +20,16 @@ export default function PhoneAuthScreen() {
     if (!countryCode || !phone) return;
     setIsLoading(true);
     try {
-      const userExists = await para.checkIfUserExistsByPhone({ phone, countryCode });
-      if (userExists) {
-        await para.login({ phone, countryCode });
-        router.navigate("../home");
-      } else {
-        await para.createUserByPhone({ phone, countryCode });
-        setShowOTP(true);
+      const authState = await para.signUpOrLogInV2({ auth: { phone } });
+
+      switch (authState.stage) {
+        case "verify":
+          setShowOTP(true);
+          break;
+        case "login":
+          await para.login(authState);
+          router.navigate("../home");
+          break;
       }
     } catch (error) {
       console.error("Error:", error);
@@ -37,9 +40,9 @@ export default function PhoneAuthScreen() {
   const handleVerify = async (verificationCode: string) => {
     if (!verificationCode) return;
     try {
-      const biometricsId = await para.verifyPhoneBiometricsId({ verificationCode });
-      if (biometricsId) {
-        await para.registerPasskey({ phone, countryCode, biometricsId });
+      const authState = await para.verifyNewAccount({ verificationCode });
+      if (authState?.passkeyId) {
+        await para.registerPasskey(authState);
         router.navigate("../home");
       }
     } catch (error) {

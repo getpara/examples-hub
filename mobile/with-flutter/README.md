@@ -135,20 +135,21 @@ The example implements multiple authentication flows, each supporting passkey fu
 **Email Authentication Flow**
 
 ```dart
-// Check if user exists
-final exists = await para.checkIfUserExists(email);
+// Sign up or log in
+var authState = await para.signUpOrLogInV2(auth: (email: email));
 
-// Create new user if needed
-await para.createUser(email);
+// First-time user setup
+if (authState.stage == 'verify') {
 
-// Verify email with OTP
-final biometricsId = await para.verifyEmail(code);
+  // Verify email with OTP
+  authState = await para.verifyNewAccount({ verificationCode: code });
 
-// Set up passkey
-await para.generatePasskey(email, biometricsId);
+  // Set up passkey
+  await para.generatePasskey({ email: email, biometricsId: signupState.passkeyId });
 
-// Create wallet
-final result = await para.createWallet(skipDistribute: false);
+  // Create wallet
+  final result = await para.createWallet({ skipDistribute: false });
+}
 
 // Login with passkey
 final wallet = await para.login();
@@ -157,35 +158,89 @@ final wallet = await para.login();
 **Phone Authentication Flow**
 
 ```dart
-// Check if user exists
-final exists = await para.checkIfUserExistsByPhone(phone, countryCode);
+// Sign up or log in - phone is an international format like `+13105551234`
+var authState = await para.signUpOrLogInV2(auth: (phone: phone));
 
-// Create new user if needed
-await para.createUserByPhone(phone, countryCode);
+// First-time user setup
+if (authState.stage == 'verify') {
 
-// Verify phone number
-final biometricsId = await para.verifyPhone(code);
+  // Verify email with OTP
+  authState = await para.verifyNewAccount(verificationCode: code);
 
-// Proceed with passkey setup and wallet creation (same as email flow)
+  // Set up passkey
+  await para.generatePasskey(phone: phone, biometricsId: signupState.passkeyId);
+
+  // Create wallet
+  final result = await para.createWallet(skipDistribute: false);
+}
+
+// Login with passkey
+final wallet = await para.login();
 ```
 
-**OAuth Authentication Flow**
-
+**Third-Party Authentication Flows**
+With third-party flows, verification via a one-time code is bypassed:
+***OAuth***
 ```dart
-// For standard OAuth providers
-final authUrl = await para.getOAuthURL(provider);
-final oauthResult = await para.waitForOAuth();
+// Verify via an OAuth service
+final authState = await para.verifyOAuthV2({
+  onOAuthUrl: (String oAuthUrl) {
+    // handle the OAuth URL, for example, opening it in a WebView
+  }
+  isCanceled: () {
+    // cancel if some change occurs in your UI
+  }
+})
 
-// For Farcaster
-final farcasterUrl = await para.getFarcasterConnectURL();
-final farcasterResult = await para.waitForFarcasterStatus();
+// First-time user setup
+if (authState.stage === 'signup') {
+  await para.generatePasskey(authState);
 
-// Verify and setup
-final biometricsId = await para.verifyOAuth();
-await para.generatePasskey(identifier, biometricsId);
-final result = await para.createWallet(skipDistribute: false);
+  await para.createWallet(skipDistribute: false);
+}
 
-// Login for existing users
+// Log in user
+final wallet = await para.login();
+```
+
+***Farcaster***
+```dart
+final authState = await para.verifyFarcasterV2(
+  onConnectUri: (String connectUri) {
+    // handle the Farcaster URI
+  }
+  isCanceled: () {
+    // cancel if some change occurs in your UI
+    return false;
+  }
+)
+
+// First-time user setup
+if (authState.stage === 'signup') {
+  await para.generatePasskey(authState);
+
+  await para.createWallet(skipDistribute: false);
+}
+
+// Log in user
+final wallet = await para.login();
+```
+
+***Telegram***
+```dart
+final authState = await para.verifyTelegramV2(
+  // Refer to the Telegram docs for information on bot authentication
+  telegramAuthObject: telegramAuthObject,
+);
+
+// First-time user setup
+if (authState.stage === 'signup') {
+  await para.generatePasskey(authState);
+
+  await para.createWallet(skipDistribute: false);
+}
+
+// Log in user
 final wallet = await para.login();
 ```
 

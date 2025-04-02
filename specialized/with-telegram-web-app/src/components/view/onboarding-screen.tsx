@@ -95,13 +95,12 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ setScreen }) => {
         return;
       }
 
-      const pregenIdentifier = `tg:${username}`;
+      const customId = `tg:${username}`;
 
       setLoadingMessage("Creating wallet with pre-generated identifier...");
-      const pregenWallet = await para.createPregenWallet({
+      const pregenWallet = await para.createPregenWalletV2({
         type: WalletType.EVM,
-        pregenIdentifier,
-        pregenIdentifierType: "CUSTOM_ID",
+        pregenId: { customId },
       });
 
       setLoadingMessage(`Wallet created successfully. Address: ${pregenWallet.address || "N/A"}`);

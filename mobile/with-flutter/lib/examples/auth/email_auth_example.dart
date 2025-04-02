@@ -39,7 +39,8 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
     try {
       final isLoggedIn = await para.isFullyLoggedIn();
       if (isLoggedIn && mounted) {
-        final email = await para.getEmail();
+        final authInfo = await para.getAuthInfo();
+          // (authType: 'email', identifier: 'their-email@test.com')
         final wallets = await para.getWallets();
 
         if (wallets.isNotEmpty) {
@@ -66,15 +67,15 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
 
     try {
       final email = _emailController.text.trim();
-      if (await para.checkIfUserExists(email)) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('User already exists, please use passkey login')),
-        );
-        return;
+
+      var authState = await para.signUpOrLogInV2(
+        auth: (email: email)
+      );
+
+      if (authState.stage === 'verify') {
+
       }
 
-      await para.createUser(email);
       if (!mounted) return;
 
       final bool verified = await Navigator.push<bool>(
@@ -83,8 +84,8 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
               builder: (context) => DemoOtpVerification(
                 onVerify: (String code) async {
                   try {
-                    final biometricsId = await para.verifyEmail(code);
-                    await para.generatePasskey(email, biometricsId);
+                    final authState = await para.verifyNewAccount(verificationCode: code);
+                    await para.generatePasskey(authState);
                     final result = await para.createWallet(skipDistribute: false);
                     setState(() {
                       _wallet = result.wallet;

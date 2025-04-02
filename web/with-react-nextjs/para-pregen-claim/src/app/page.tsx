@@ -85,12 +85,9 @@ export default function Home() {
 
       await para?.setUserShare(userShare);
 
-      await para?.updatePregenWalletIdentifier({
-        walletId,
-        newPregenIdentifier: userEmail,
-        newPregenIdentifierType: "EMAIL",
-      });
 
+      await para.claimPregenWalletsV2({
+        pregenId: { email: userEmail },
       await para?.claimPregenWallets({
         pregenIdentifier: userEmail,
         pregenIdentifierType: "EMAIL",

@@ -133,7 +133,7 @@ For custom package names:
 
 - **Email**: Implementation in [`app/auth/with-email.tsx`](./app/auth/with-email.tsx) demonstrates email-based passkey account creation and verification. The flow checks for existing users and proceeds with either new user creation or login. New user creation triggers automatic OTP email delivery, followed by passkey registration via `registerPasskey`.
 
-- **Phone**: Implementation in [`app/auth/with-phone.tsx`](./app/auth/with-phone.tsx) follows the same flow as email authentication, differing only in phone-specific method calls like `checkIfUserExistsByPhone`.
+- **Phone**: Implementation in [`app/auth/with-phone.tsx`](./app/auth/with-phone.tsx) follows the same flow as email authentication, differing only in the argument passed to `signUpOrLogInV2`.
 
 > **Note**: For testing purposes, random email addresses, phone numbers, and OTP values can be generated using functions from `./util/random.ts`. This accelerates testing by bypassing actual email/SMS delivery, but should not be used in production environments.
 
