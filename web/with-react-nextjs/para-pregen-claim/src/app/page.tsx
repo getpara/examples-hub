@@ -1,63 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { AuthLayout, ParaModal } from "@getpara/react-sdk";
-import { para } from "@/client/para";
+import { useState } from "react";
+import { useModal, useWallet, useAccount, useClient } from "@getpara/react-sdk";
 import "@getpara/react-sdk/styles.css";
 import { WalletDisplay } from "@/components/WalletDisplay";
 import { StepCard } from "@/components/StepCard";
 
 export default function Home() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [wallet, setWallet] = useState("");
-  const [error, setError] = useState("");
+  const { openModal } = useModal();
+  const { data: wallet } = useWallet();
+  const { data: account, isLoading, error } = useAccount();
+  const para = useClient();
 
   const [pregenUuid, setPregenUuid] = useState("");
   const [pregenWalletAddress, setPregenWalletAddress] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isClaiming, setIsClaiming] = useState(false);
   const [claimMessage, setClaimMessage] = useState("");
-
-  const handleCheckIfAuthenticated = async () => {
-    setError("");
-    setIsLoading(true);
-    try {
-      const isAuthenticated = await para.isFullyLoggedIn();
-      setIsConnected(isAuthenticated);
-      if (isAuthenticated) {
-        const wallets = Object.values(await para.getWallets());
-        if (wallets?.length) {
-          setWallet(wallets[0].address || "unknown");
-        }
-      }
-    } catch (err: any) {
-      setError(err.message || "An error occurred during authentication");
-    }
-    setIsLoading(false);
-  };
-
-  useEffect(() => {
-    const initialize = async () => {
-      await para.logout();
-      handleCheckIfAuthenticated();
-    };
-    initialize();
-  }, []);
-
-  const handleOpenModal = () => {
-    setIsOpen(true);
-  };
-
-  const handleCloseModal = async () => {
-    handleCheckIfAuthenticated();
-    setIsOpen(false);
-  };
+  const [pregenError, setPregenError] = useState("");
 
   const handleGeneratePregenWallet = async () => {
     setIsGenerating(true);
-    setError("");
+    setPregenError("");
     setPregenUuid("");
     setPregenWalletAddress("");
     setClaimMessage("");
@@ -68,10 +32,10 @@ export default function Home() {
         setPregenUuid(data.uuid);
         setPregenWalletAddress(data.wallet.address);
       } else {
-        setError(data.error || "Failed to generate wallet");
+        setPregenError(data.error || "Failed to generate wallet");
       }
     } catch (e: any) {
-      setError(e.message || "Error generating wallet");
+      setPregenError(e.message || "Error generating wallet");
     }
     setIsGenerating(false);
   };
@@ -84,14 +48,19 @@ export default function Home() {
       setIsClaiming(false);
       return;
     }
+    if (!para) {
+      setClaimMessage("No Para client set");
+      setIsClaiming(false);
+      return;
+    }
     try {
       //pregen claim requires a user to be authenticated
-      if (!isConnected) {
+      if (!account?.isConnected) {
         setClaimMessage("Please authenticate first.");
         setIsClaiming(false);
         return;
       }
-      const userEmail = await para.getEmail();
+      const userEmail = await para?.getEmail();
       if (!userEmail) {
         setClaimMessage("No user email found, please use an email login.");
         setIsClaiming(false);
@@ -99,29 +68,34 @@ export default function Home() {
       }
 
       // retrieve the userShare for the pregen wallet from the server
-      const retrievalResponse = await fetch(`/api/wallet/retrieve?uuid=${pregenUuid}`);
+      const retrievalResponse = await fetch(
+        `/api/wallet/retrieve?uuid=${pregenUuid}`
+      );
 
       const retrievalData = await retrievalResponse.json();
       if (!retrievalData.success) {
-        setClaimMessage(retrievalData.error || "Failed to retrieve wallet data.");
+        setClaimMessage(
+          retrievalData.error || "Failed to retrieve wallet data."
+        );
         setIsClaiming(false);
         return;
       }
 
       const { userShare, walletId } = retrievalData;
 
-      await para.setUserShare(userShare);
+      await para?.setUserShare(userShare);
 
-      await para.updatePregenWalletIdentifierV2({
-        walletId,
-        newPregenId: { email: userEmail },
-      });
 
       await para.claimPregenWalletsV2({
         pregenId: { email: userEmail },
+      await para?.claimPregenWallets({
+        pregenIdentifier: userEmail,
+        pregenIdentifierType: "EMAIL",
       });
 
-      setClaimMessage("Claim successful! The wallet has been merged into your account.");
+      setClaimMessage(
+        "Claim successful! The wallet has been merged into your account."
+      );
     } catch (e: any) {
       setClaimMessage(e.message || "Error while claiming");
     }
@@ -132,7 +106,8 @@ export default function Home() {
     <main className="flex flex-col items-center justify-center min-h-screen gap-6 p-8">
       <h1 className="text-2xl font-bold">Para Pregen Wallet Claim Demo</h1>
       <p className="max-w-md text-center">
-        A demonstration of generating and claiming pre-generated wallets using Para.
+        A demonstration of generating and claiming pre-generated wallets using
+        Para.
       </p>
       <div className="w-full flex flex-col items-center gap-6 mt-6">
         <StepCard
@@ -140,9 +115,10 @@ export default function Home() {
           title="Generate Pregen Wallet"
           description="Create a new wallet on the server and store its user share. This is a pre-generated wallet."
           buttonLabel={isGenerating ? "Generating..." : "Generate Wallet"}
-          disabled={isGenerating || isConnected}
+          disabled={isGenerating || !!account?.isConnected}
           onClick={handleGeneratePregenWallet}
-          isComplete={!!pregenUuid}>
+          isComplete={!!pregenUuid}
+        >
           {pregenUuid && (
             <div className="text-sm mt-2">
               <p>UUID: {pregenUuid}</p>
@@ -155,48 +131,32 @@ export default function Home() {
           title="Authenticate with Para"
           description="Use the Para Modal to authenticate the user that will claim the pre-generated wallet."
           buttonLabel="Open Para Modal"
-          disabled={!pregenUuid || isLoading || isConnected}
-          onClick={handleOpenModal}
-          isComplete={isConnected}
+          disabled={!pregenUuid || isLoading || !!account?.isConnected}
+          onClick={openModal}
+          isComplete={!!account?.isConnected}
         />
         <StepCard
           stepNumber={3}
           title="Claim Pregen Wallet"
           description="Once authenticated, retrieve the user share and claim the wallet on the client."
           buttonLabel="Claim Wallet"
-          disabled={!isConnected || !pregenUuid || isClaiming}
+          disabled={!account?.isConnected || !pregenUuid || isClaiming}
           onClick={handleClaimPregenWallet}
-          isComplete={claimMessage.includes("Claim successful")}>
+          isComplete={claimMessage.includes("Claim successful")}
+        >
           {claimMessage && <p className="text-sm mt-2">{claimMessage}</p>}
         </StepCard>
-        <div className="mt-6">{isConnected ? <WalletDisplay walletAddress={wallet} /> : null}</div>
+        <div className="mt-6">
+          {account?.isConnected ? (
+            <WalletDisplay walletAddress={wallet?.address} />
+          ) : null}
+        </div>
       </div>
-      {error && <p className="text-red-500 text-sm text-center mt-4">{error}</p>}
-      <ParaModal
-        para={para}
-        isOpen={isOpen}
-        onClose={handleCloseModal}
-        disableEmailLogin={false}
-        disablePhoneLogin={true}
-        authLayout={[AuthLayout.AUTH_FULL]}
-        oAuthMethods={[]}
-        onRampTestMode={true}
-        theme={{
-          foregroundColor: "#2D3648",
-          backgroundColor: "#FFFFFF",
-          accentColor: "#0066CC",
-          darkForegroundColor: "#E8EBF2",
-          darkBackgroundColor: "#1A1F2B",
-          darkAccentColor: "#4D9FFF",
-          mode: "light",
-          borderRadius: "none",
-          font: "Inter",
-        }}
-        appName="Para Pregen Claim"
-        logo="/para.svg"
-        recoverySecretStepEnabled={true}
-        twoFactorAuthEnabled={false}
-      />
+      {(error?.message || !!pregenError) && (
+        <p className="text-red-500 text-sm text-center mt-4">
+          {error?.message || pregenError}
+        </p>
+      )}
     </main>
   );
 }

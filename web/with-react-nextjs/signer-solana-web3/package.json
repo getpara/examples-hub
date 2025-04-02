@@ -10,14 +10,16 @@
     "anchor:build": "anchor build",
     "anchor:deploy": "anchor deploy --program-name transfer_tokens --program-keypair target/deploy/transfer_tokens-keypair.json",
     "anchor:build-deploy": "npm run anchor:build && npm run anchor:deploy",
-    "anchor:verify": "anchor verify"
+    "anchor:verify": "anchor verify",
+    "postinstall": "yarn setup-para"
   },
   "dependencies": {
-    "@getpara/react-sdk": "1.6.0",
-    "@getpara/solana-web3.js-v1-integration": "1.6.0",
+    "@getpara/react-sdk": "2.0.0-dev.0",
+    "@getpara/solana-web3.js-v1-integration": "2.0.0-dev.0",
     "@solana/kit": "2.1.0",
     "@solana/spl-token": "0.4.13",
     "@solana/web3.js": "1.98.0",
+    "@tanstack/react-query": "^5.0.0",
     "next": "15.1.5",
     "react": "19.0.0",
     "react-dom": "19.0.0",
