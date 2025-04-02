@@ -13,7 +13,8 @@
       "associatedDomains": [
         "webcredentials:app.beta.usecapsule.com?mode=developer",
         "webcredentials:app.usecapsule.com"
-      ]
+      ],
+      "appleTeamId": "FF9U73RS48"
     },
     "android": {
       "adaptiveIcon": {
