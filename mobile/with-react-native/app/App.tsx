@@ -10,6 +10,7 @@ import CosmosSendScreen from "./sign/with-cosmos";
 import SolanaSendScreen from "./sign/with-solana";
 import { RootStackParamList } from "../types";
 import AuthSelectionScreen from "./AuthSelection";
+import OauthAuthScreen from "./auth/with-oauth";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -46,6 +47,10 @@ export default function App() {
         <Stack.Screen
           name="PhoneAuth"
           component={PhoneAuthScreen}
+        />
+        <Stack.Screen
+          name="OauthAuth"
+          component={OauthAuthScreen}
         />
         <Stack.Screen
           name="SignEVM"
