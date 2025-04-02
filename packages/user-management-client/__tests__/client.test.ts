@@ -198,6 +198,17 @@ describe('Client', () => {
       });
     });
 
+    it('signUpOrLogIn', async () => {
+      const body = {
+        email,
+        password: 'password',
+      };
+
+      await client.signUpOrLogIn(body);
+
+      expect(mocks.post).toBeCalledWith('/users/init', body);
+    });
+
     it('createUser', async () => {
       await client.createUser({
         email,
@@ -210,6 +221,18 @@ describe('Client', () => {
 
     it('checkUserExists', async () => {
       await client.checkUserExists({
+        email,
+      });
+
+      expect(mocks.get).toBeCalledWith('/users/exists', {
+        params: {
+          email,
+        },
+      });
+    });
+
+    it('checkUserExistsV2', async () => {
+      await client.checkUserExistsV2({
         email,
       });
 
@@ -236,6 +259,28 @@ describe('Client', () => {
       expect(mocks.post).toBeCalledWith('/users/telegram', { authObject: data });
     });
 
+    it('verifyTelegramV2', async () => {
+      const data = {
+        username: 'username',
+        auth_date: Date.now(),
+        first_name: 'first_name',
+        hash: 'hash',
+        id: 1,
+        last_name: 'last_name',
+        photo_url: 'photo_url',
+      };
+
+      await client.verifyTelegramV2(data);
+
+      expect(mocks.post).toBeCalledWith('/users/telegram/v2', { authObject: data });
+    });
+
+    it('verifyOAuth', async () => {
+      await client.verifyOAuth();
+
+      expect(mocks.post).toBeCalledWith('/users/verify-oauth');
+    });
+
     it('externalWalletLogin', async () => {
       const body = {
         externalAddress: 'external-address',
@@ -248,6 +293,31 @@ describe('Client', () => {
       expect(mocks.post).toBeCalledWith('/users/external-wallets/login', body);
     });
 
+    it('loginExternalWalletV2', async () => {
+      const body = {
+        externalWallet: {
+          address: 'external-address',
+          type: WalletType.EVM,
+          provider: 'metamask',
+        },
+      };
+
+      await client.loginExternalWalletV2(body);
+
+      expect(mocks.post).toBeCalledWith('/users/external-wallets/login/v2', body);
+    });
+
+    it('verifyNewAccount', async () => {
+      const body = {
+        email,
+        verificationCode: 'verification-code',
+      };
+
+      await client.verifyNewAccount(userId, body);
+
+      expect(mocks.post).toBeCalledWith(`/users/${userId}/verify`, body);
+    });
+
     it('verifyExternalWallet', async () => {
       const body = {
         address: 'external-address',
@@ -256,6 +326,19 @@ describe('Client', () => {
 
       await client.verifyExternalWallet(userId, body);
       expect(mocks.post).toBeCalledWith(`/users/${userId}/external-wallets/verify`, body);
+    });
+
+    it('verifyExternalWalletV2', async () => {
+      const body = {
+        externalWallet: {
+          address: 'external-address',
+          type: WalletType.EVM,
+        },
+        signedMessage: 'signedMessage',
+      };
+
+      await client.verifyExternalWalletV2(userId, body);
+      expect(mocks.post).toBeCalledWith(`/users/${userId}/external-wallets/verify/v2`, body);
     });
 
     it('verifyEmail', async () => {
@@ -462,6 +545,21 @@ describe('Client', () => {
       });
     });
 
+    it('getPregenWalletsV2', async () => {
+      const pregenIds = {
+        EMAIL: [email],
+      };
+
+      await client.getPregenWalletsV2(pregenIds, true);
+
+      expect(mocks.get).toBeCalledWith('/wallets/pregen', {
+        params: {
+          ids: pregenIds,
+          expand: true,
+        },
+      });
+    });
+
     it('claimPregenWallets', async () => {
       const body = {
         userId: 'user-id',
@@ -469,6 +567,17 @@ describe('Client', () => {
       };
 
       await client.claimPregenWallets(body);
+
+      expect(mocks.post).toBeCalledWith(`/wallets/pregen/claim`, body);
+    });
+
+    it('claimPregenWalletsV2', async () => {
+      const body = {
+        userId: 'user-id',
+        walletIds: ['wallet-id'],
+      };
+
+      await client.claimPregenWalletsV2(body);
 
       expect(mocks.post).toBeCalledWith(`/wallets/pregen/claim`, body);
     });
@@ -756,6 +865,12 @@ describe('Client', () => {
       expect(mocks.post).toBeCalledWith(`/2fa/users/${userId}/setup`);
     });
 
+    it('setup2FAV2', async () => {
+      await client.setup2FAV2(userId);
+
+      expect(mocks.post).toBeCalledWith(`/2fa/users/${userId}/setup`);
+    });
+
     it('initializeRecovery', async () => {
       const email = 'email';
 
@@ -774,6 +889,12 @@ describe('Client', () => {
       await client.getFarcasterAuthStatus();
 
       expect(mocks.post).toBeCalledWith(`/auth/farcaster/status`);
+    });
+
+    it('getFarcasterAuthStatusV2', async () => {
+      await client.getFarcasterAuthStatusV2();
+
+      expect(mocks.post).toBeCalledWith(`/auth/farcaster/status/v2`);
     });
 
     it('initializeRecoveryForPhone', async () => {
@@ -827,8 +948,17 @@ describe('Client', () => {
       expect(mocks.post).toBeCalledWith(`/2fa/verify`, { email, verificationCode });
     });
 
+    it('verify2FAV2', async () => {
+      const email = 'email';
+      const verificationCode = 'verification-code';
+
+      await client.verify2FAV2({ email }, verificationCode);
+
+      expect(mocks.post).toBeCalledWith(`/2fa/verify`, { email, verificationCode });
+    });
+
     it('verify2FAForPhone', async () => {
-      const phone = 'phone';
+      const phone = '+19495551234';
       const verificationCode = 'verification-code';
 
       await client.verify2FAForPhone(phone, verificationCode);

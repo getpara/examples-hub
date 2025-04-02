@@ -1,19 +1,11 @@
-import { AuthType, PrimaryAuthInfo, WalletType } from '@getpara/user-management-client';
+import { AuthType, ExternalWalletInfo, PrimaryAuthInfo, WalletType } from '@getpara/user-management-client';
 import { Theme } from './theme.js';
 
 export type EmbeddedWalletType = Exclude<WalletType, never>;
 
 export type ExternalWalletType = Exclude<WalletType, never>;
 
-export type ExternalWalletInfo = {
-  address: string;
-  type: ExternalWalletType;
-  provider?: string;
-  addressBech32?: string;
-  withFullParaAuth?: boolean;
-};
-
-export type VerifyExternalWallet = {
+export type VerifyExternalWalletV1 = {
   address: string;
   signedMessage: string;
   cosmosPublicKeyHex?: string;
@@ -48,6 +40,10 @@ export type AuthExtras = {
    * The current user's third-party profile picture URL.
    */
   pfpUrl?: string;
+  /**
+   * The current user's external wallet information.
+   */
+  externalWallet?: ExternalWalletInfo;
 };
 
 export type GetWebAuthUrlForLoginParams = {

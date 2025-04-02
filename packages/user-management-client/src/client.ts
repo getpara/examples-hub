@@ -17,6 +17,8 @@ import {
   CurrentWalletIds,
   EncryptedKeyShare,
   EncryptorType,
+  ExternalWalletInfo,
+  LoginExternalWalletResponse,
   KeyShareType,
   Network,
   OnRampAsset,
@@ -30,15 +32,22 @@ import {
   PrimaryAuth,
   PublicKeyStatus,
   PublicKeyType,
+  ServerAuthStateSignup,
   SessionInfo,
+  Setup2faResponse,
+  SignUpOrLogInResponse,
   TelegramAuthResponse,
   TPregenIdentifierType,
   VerificationEmailProps,
   VerifiedAuth,
+  VerifyFarcasterResponse,
+  VerifyTelegramResponse,
+  VerifyThirdPartyAuth,
   WalletEntity,
   WalletParams,
   WalletScheme,
   WalletType,
+  VerifyExternalWalletParams,
 } from './types/index.js';
 import { extractWalletRef } from './utils.js';
 import { SESSION_COOKIE_HEADER_NAME, VERSION_HEADER_NAME, PARTNER_ID_HEADER_NAME, API_KEY_HEADER_NAME } from './consts.js';
@@ -336,6 +345,14 @@ class Client {
     this.baseRequest.interceptors.response.use(handleResponseSuccess, handleResponseError);
   }
 
+  signUpOrLogIn = async (body: VerifiedAuth & VerificationEmailProps): Promise<SignUpOrLogInResponse> => {
+    const res = await this.baseRequest.post<SignUpOrLogInResponse>(`/users/init`, body);
+    return res.data;
+  };
+
+  /**
+   * @deprecated
+   */
   createUser = async (body: VerifiedAuth & VerificationEmailProps): Promise<createUserIdRes> => {
     const res = await this.baseRequest.post<createUserIdRes>(`/users`, body);
     return res.data;
@@ -348,6 +365,13 @@ class Client {
     return res;
   };
 
+  checkUserExistsV2 = async (auth: VerifiedAuth): Promise<{ exists: boolean }> => {
+    const res = await this.baseRequest.get<{ exists: boolean }>('/users/exists', {
+      params: { ...auth },
+    });
+    return res.data;
+  };
+
   verifyTelegram = async (authObject: TelegramAuthResponse): Promise<VerifyTelegramRes> => {
     return (
       await this.baseRequest.post<VerifyTelegramRes>('/users/telegram', {
@@ -356,17 +380,56 @@ class Client {
     ).data;
   };
 
+  verifyTelegramV2 = async (authObject: TelegramAuthResponse): Promise<VerifyTelegramResponse> => {
+    return (
+      await this.baseRequest.post<VerifyTelegramResponse>('/users/telegram/v2', {
+        authObject,
+      })
+    ).data;
+  };
+
+  verifyOAuth = async (): Promise<VerifyThirdPartyAuth | null> => {
+    const res = await this.baseRequest.post<VerifyThirdPartyAuth | null>('/users/verify-oauth');
+
+    return res.data;
+  };
+
   externalWalletLogin = async (body: ExternalWalletLoginBody): Promise<ExternalWalletLoginRes> => {
     const res = await this.baseRequest.post<ExternalWalletLoginRes>(`/users/external-wallets/login`, body);
     return res.data;
   };
 
+  loginExternalWalletV2 = async ({
+    externalWallet,
+    shouldTrackUser,
+  }: {
+    externalWallet: ExternalWalletInfo;
+    shouldTrackUser?: boolean;
+  }): Promise<LoginExternalWalletResponse> => {
+    const res = await this.baseRequest.post<LoginExternalWalletResponse>(`/users/external-wallets/login/v2`, {
+      externalWallet,
+      shouldTrackUser,
+    });
+    return res.data;
+  };
+
+  verifyNewAccount = async (userId: string, body: verifyBody): Promise<ServerAuthStateSignup> => {
+    const res = await this.baseRequest.post<ServerAuthStateSignup>(`/users/${userId}/verify`, body);
+    return res.data;
+  };
+
   // POST /users/:userId/verify-email
+  /**
+   * @deprecated
+   */
   verifyEmail = async (userId: string, body: verifyBody): Promise<any> => {
     const res = await this.baseRequest.post<any>(`/users/${userId}/verify-email`, body);
     return res;
   };
 
+  /**
+   * @deprecated
+   */
   verifyPhone = async (userId: string, body: verifyBody): Promise<any> => {
     const res = await this.baseRequest.post<any>(`/users/${userId}/verify-identifier`, body);
     return res;
@@ -375,6 +438,11 @@ class Client {
   verifyExternalWallet = async (userId: string, body: verifyExternalWalletBody): Promise<any> => {
     const res = await this.baseRequest.post<any>(`/users/${userId}/external-wallets/verify`, body);
     return res;
+  };
+
+  verifyExternalWalletV2 = async (userId: string, body: VerifyExternalWalletParams): Promise<ServerAuthStateSignup> => {
+    const res = await this.baseRequest.post<ServerAuthStateSignup>(`/users/${userId}/external-wallets/verify/v2`, body);
+    return res.data;
   };
 
   // POST /users/:userId/biometrics/key
@@ -486,9 +554,27 @@ class Client {
     return res.data;
   };
 
+  getPregenWalletsV2 = async (
+    pregenIds: PregenIds,
+    isPortal = false,
+    userId?: string,
+  ): Promise<{ wallets: WalletEntity[] }> => {
+    const res = await this.baseRequest.get<{ wallets: WalletEntity[] }>('/wallets/pregen', {
+      params: { ids: pregenIds, expand: isPortal, userId },
+    });
+
+    return res.data;
+  };
+
   // POST /wallets/pregen/claim
   claimPregenWallets = async <ReturnType = { walletIds?: string[] }>(body?: claimPreGenWalletsBody): Promise<ReturnType> => {
     const res = await this.baseRequest.post<ReturnType>(`/wallets/pregen/claim`, body);
+
+    return res.data;
+  };
+
+  claimPregenWalletsV2 = async (body?: claimPreGenWalletsBody): Promise<{ walletIds: string[] }> => {
+    const res = await this.baseRequest.post<{ walletIds: string[] }>(`/wallets/pregen/claim`, body);
 
     return res.data;
   };
@@ -712,6 +798,11 @@ class Client {
     return res;
   }
 
+  async setup2FAV2(userId: string): Promise<Setup2faResponse> {
+    const res = await this.baseRequest.post<Setup2faResponse>(`/2fa/users/${userId}/setup`);
+    return res.data;
+  }
+
   // POST /recovery/init
   async initializeRecovery(email: string) {
     const res = await this.baseRequest.post<any>(`/recovery/init`, { email });
@@ -728,6 +819,11 @@ class Client {
   async getFarcasterAuthStatus() {
     const res = await this.baseRequest.post<any>(`/auth/farcaster/status`);
     return res;
+  }
+
+  async getFarcasterAuthStatusV2() {
+    const res = await this.baseRequest.post<VerifyFarcasterResponse>(`/auth/farcaster/status/v2`);
+    return res.data;
   }
 
   // POST /recovery/init
@@ -772,7 +868,16 @@ class Client {
     return res;
   }
 
+  async verify2FAV2(auth: VerifiedAuth, verificationCode: string) {
+    const body = { ...auth, verificationCode };
+    const res = await this.baseRequest.post<any>('/2fa/verify', body);
+    return res.data;
+  }
+
   // POST /2fa/phone/verify
+  /**
+   * @deprecated
+   */
   async verify2FAForPhone(phone: AuthIdentifier<'phone'>, verificationCode: string) {
     const body = { phone, verificationCode };
     const res = await this.baseRequest.post<any>('/2fa/verify', body);

@@ -43,6 +43,7 @@ import {
   isTelegram,
   AuthType,
   ExternalWalletLoginRes,
+  ExternalWalletInfo,
   SessionInfo,
   PrimaryAuth,
   PrimaryAuthType,
@@ -64,7 +65,6 @@ import {
   SuccessfulSignatureRes,
   DeniedSignatureRes,
   PopupType,
-  ExternalWalletInfo,
   GetWebAuthUrlForLoginParams,
   ParaEvent,
   AccountSetupResponse,
@@ -79,7 +79,7 @@ import {
   RecoveryStatus,
   CoreAuthInfo,
   AuthExtras,
-  VerifyExternalWallet,
+  VerifyExternalWalletV1,
   ExternalWalletConnectionType,
 } from './types/index.js';
 import * as transmissionUtils from './transmission/transmissionUtils.js';
@@ -1726,7 +1726,7 @@ export abstract class ParaCore {
     signedMessage,
     cosmosPublicKeyHex,
     cosmosSigner,
-  }: VerifyExternalWallet): Promise<string> {
+  }: VerifyExternalWalletV1): Promise<string> {
     await this.ctx.client.verifyExternalWallet(this.userId, { address, signedMessage, cosmosPublicKeyHex, cosmosSigner });
     return this.getSetUpBiometricsURL({ authType: this.#authInfo.authType });
   }

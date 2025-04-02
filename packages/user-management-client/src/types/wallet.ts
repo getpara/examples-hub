@@ -1,4 +1,3 @@
-import { OAuthMethod } from './auth.js';
 import { PartnerEntity } from './partner.js';
 
 export enum WalletScheme {
@@ -36,13 +35,18 @@ export type WalletRef = 'walletId' | 'externalWalletAddress';
 
 export type WalletParams = Partial<{ walletId?: string; externalWalletAddress?: string }>;
 
+export type EmbeddedWalletType = Exclude<WalletType, never>;
+
+export type ExternalWalletType = Exclude<WalletType, never>;
+
 export const PREGEN_IDENTIFIER_TYPES = [
   'EMAIL',
   'PHONE',
   'CUSTOM_ID',
-  OAuthMethod.DISCORD,
-  OAuthMethod.TWITTER,
-  OAuthMethod.TELEGRAM,
+  'DISCORD',
+  'TWITTER',
+  'TELEGRAM',
+  'FARCASTER',
 ] as const;
 
 export type TPregenIdentifierType = (typeof PREGEN_IDENTIFIER_TYPES)[number];

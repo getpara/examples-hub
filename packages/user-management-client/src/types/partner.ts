@@ -3,6 +3,7 @@ import { SupportedWalletTypes } from './wallet.js';
 export interface PartnerEntity {
   id: string;
   displayName: string;
+  apiKey?: string;
   logoUrl?: string;
   iconUrl?: string;
   portalHeaderLogoUrl?: string;

@@ -1,10 +1,35 @@
-import { CurrentWalletIds, SupportedWalletTypes } from './wallet.js';
+import { CurrentWalletIds, ExternalWalletType, SupportedWalletTypes } from './wallet.js';
 
-export type AuthType = 'email' | 'phone' | 'phoneLegacy' | 'farcaster' | 'telegram' | 'userId' | 'externalWallet';
+export const AUTH_TYPES = [
+  'email',
+  'phone',
+  'phoneLegacy',
+  'farcaster',
+  'telegram',
+  'userId',
+  'externalWallet',
+  'discord',
+  'x',
+  'customId',
+] as const;
+
+export type AuthType =
+  | 'email'
+  | 'phone'
+  | 'phoneLegacy'
+  | 'farcaster'
+  | 'telegram'
+  | 'userId'
+  | 'externalWallet'
+  | 'discord'
+  | 'x'
+  | 'customId';
 
 export type PrimaryAuthType = Extract<AuthType, 'email' | 'phone' | 'farcaster' | 'telegram' | 'externalWallet'>;
 
-export type VerifiedAuthType = Extract<PrimaryAuthType, 'email' | 'phone'>;
+export type VerifiedAuthType = Extract<PrimaryAuthType, 'email' | 'phone' | 'externalWallet'>;
+
+export type PregenAuthType = Exclude<PrimaryAuthType, 'externalWallet'> | Extract<AuthType, 'discord' | 'x' | 'customId'>;
 
 export type AuthIdentifier<T extends AuthType | never> = T extends 'phone' ? `+${number}` : string;
 
@@ -17,6 +42,8 @@ export type AuthInfo<T extends Exclude<AuthType, 'phoneLegacy'> = Exclude<AuthTy
 export type PrimaryAuthInfo = AuthInfo<PrimaryAuthType>;
 
 export type VerifiedAuthInfo = AuthInfo<VerifiedAuthType>;
+
+export type PregenAuthInfo = AuthInfo<PregenAuthType>;
 
 export type AuthParams = Record<string, any> & {
   email?: string;
@@ -39,12 +66,39 @@ export type Auth<T extends AuthType = AuthType> = T extends 'email'
         : T extends 'telegram'
           ? { telegramUserId: AuthIdentifier<'telegram'> }
           : T extends 'externalWallet'
-            ? { externalWalletAddress: string }
-            : { userId: string };
+            ? { externalWalletAddress: AuthIdentifier<'externalWallet'> }
+            : T extends 'x'
+              ? { xUsername: AuthIdentifier<'x'> }
+              : T extends 'discord'
+                ? { discordUsername: AuthIdentifier<'discord'> }
+                : T extends 'customId'
+                  ? { customId: AuthIdentifier<'customId'> }
+                  : { userId: AuthIdentifier<'userId'> };
 
 export type PrimaryAuth = Auth<PrimaryAuthType>;
 
 export type VerifiedAuth = Auth<VerifiedAuthType>;
+
+export type PregenAuth = Auth<PregenAuthType>;
+
+export type AuthExtras = {
+  /**
+   * The current user's third-party username.
+   */
+  username?: string;
+  /**
+   * The current user's third-party display name.
+   */
+  displayName?: string;
+  /**
+   * The current user's third-party profile picture URL.
+   */
+  pfpUrl?: string;
+  /**
+   * The current user's external wallet information.
+   */
+  externalWallet?: ExternalWalletInfo;
+};
 
 export enum EncryptorType {
   USER = 'USER',
@@ -125,3 +179,83 @@ export type SessionInfo = {
   origin?: string;
   email?: string;
 };
+
+export type ServerAuthStateBase = AuthExtras & {
+  auth: PrimaryAuth;
+  userId: string;
+};
+
+export type ServerAuthStateVerify = ServerAuthStateBase & {
+  stage: 'verify';
+  signatureVerificationMessage?: string;
+};
+
+export type ServerAuthStateSignup = ServerAuthStateBase & {
+  stage: 'signup';
+  signupAuthMethods: AuthMethod[];
+};
+
+export type ServerAuthStateLogin = ServerAuthStateBase & {
+  stage: 'login';
+  biometricHints?: BiometricLocationHint[];
+  loginAuthMethods: AuthMethod[];
+};
+
+export type VerifyThirdPartyAuth = ServerAuthStateSignup | ServerAuthStateLogin;
+
+export type ExternalWalletInfo = {
+  address: string;
+  type: ExternalWalletType;
+  provider?: string;
+  addressBech32?: string;
+  withFullParaAuth?: boolean;
+};
+
+export type VerifyExternalWalletParams = {
+  /**
+   * The external wallet information to verify.
+   */
+  externalWallet: ExternalWalletInfo;
+  /**
+   * The signature of the signed verification string.
+   */
+  signedMessage: string;
+  /**
+   * For Cosmos wallets, the wallet's public key as a hex string.
+   */
+  cosmosPublicKeyHex?: string;
+  /**
+   * For Cosmos wallets, the base64 signer string.
+   */
+  cosmosSigner?: string;
+};
+
+export type LoginExternalWalletResponse =
+  | ServerAuthStateLogin
+  | (ServerAuthStateVerify & {
+      signatureVerificationMessage: string;
+    });
+
+export type VerifyTelegramResponse = VerifyThirdPartyAuth;
+
+export type VerifyFarcasterResponse = VerifyThirdPartyAuth | null;
+
+export type ServerAuthState = ServerAuthStateVerify | ServerAuthStateSignup | ServerAuthStateLogin;
+
+export type SignUpOrLogInResponse = ServerAuthStateVerify | ServerAuthStateLogin;
+
+export type Setup2faResponse =
+  | {
+      /**
+       * Indicates whether 2FA has already been set up for the current user.
+       */
+      isSetup: true;
+      uri: undefined;
+    }
+  | {
+      isSetup?: false;
+      /**
+       * A URI for the user to set up two-factor authentication.
+       */
+      uri: string;
+    };
