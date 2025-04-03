@@ -13,6 +13,7 @@ struct ExampleApp: App {
     init() {
         // Load Para configuration
         let config = ParaConfig.fromEnvironment()
+        let bundleId = Bundle.main.bundleIdentifier ?? ""
         
         // Initialize Para manager
         let paraManager = ParaManager(environment: config.environment, apiKey: config.apiKey)
@@ -27,8 +28,6 @@ struct ExampleApp: App {
         }
         
         // Initialize MetaMask Connector with configuration
-        let bundleId = Bundle.main.bundleIdentifier ?? ""
-        // Create a MetaMask configuration for the connector
         let metaMaskConfig = MetaMaskConfig(appName: "ExampleApp", appId: bundleId, apiVersion: "1.0")
         let metaMaskConnector = MetaMaskConnector(para: paraManager, appUrl: "https://\(bundleId)", config: metaMaskConfig)
         _metaMaskConnector = StateObject(wrappedValue: metaMaskConnector)
@@ -38,6 +37,8 @@ struct ExampleApp: App {
         WindowGroup {
             Group {
                 switch appRootManager.currentRoot {
+                case .launch:
+                    LaunchView()
                 case .authentication:
                     UserAuthView()
                         .environmentObject(paraManager)
@@ -55,6 +56,30 @@ struct ExampleApp: App {
                 logger.debug("Received deep link URL: \(url.absoluteString)")
                 metaMaskConnector.handleURL(url)
             }
+//             .onChange(of: paraManager.sessionState) { newState in
+//                 switch newState {
+//                 case .activeLoggedIn:
+//                     appRootManager.currentRoot = .home
+//                 case .inactive:
+//                     appRootManager.currentRoot = .authentication
+//                 case .active:
+//                     // Handle partially active state if needed
+//                     appRootManager.currentRoot = .authentication
+//                 case .unknown:
+//                     // Keep showing launch view until we know the state
+//                     break
+//                 }
+//             }
+//            .task {
+//                // Add a minimum delay to show launch screen
+//                try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
+//                
+//                // If we're still in launch state after the delay and session state is known,
+//                // transition to the appropriate screen
+//                if appRootManager.currentRoot == .launch && paraManager.sessionState != .unknown {
+//                    appRootManager.currentRoot = paraManager.sessionState == .activeLoggedIn ? .home : .authentication
+//                }
+//            }
         }
     }
 }
