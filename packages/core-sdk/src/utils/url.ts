@@ -1,4 +1,5 @@
-import { Environment } from '../types/index.js';
+import { upload } from '../transmission/transmissionUtils.js';
+import { Ctx, Environment } from '../types/index.js';
 
 export function getPortalDomain(env: Environment, isE2E?: boolean) {
   if (isE2E) {
@@ -81,4 +82,13 @@ export function constructUrl({
   });
 
   return url.toString();
+}
+
+export async function shortenUrl(ctx: Ctx, url: string): Promise<string> {
+  const compressedUrl = await upload(url, ctx.client);
+
+  return constructUrl({
+    base: getPortalBaseURL(ctx),
+    path: `/short/${compressedUrl}`,
+  });
 }

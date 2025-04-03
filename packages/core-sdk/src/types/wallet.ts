@@ -1,5 +1,10 @@
-import { PartnerEntity, TPregenIdentifierType, WalletScheme } from '@getpara/user-management-client';
-import { EmbeddedWalletType, ExternalWalletType } from './methods.js';
+import {
+  EmbeddedWalletType,
+  ExternalWalletType,
+  PartnerEntity,
+  TPregenIdentifierType,
+  WalletScheme,
+} from '@getpara/user-management-client';
 
 export interface Wallet {
   createdAt?: string;

@@ -1,4 +1,5 @@
 export * from './config.js';
+export * from './coreApi.js';
 export * from './wallet.js';
 export * from './methods.js';
 export * from './theme.js';

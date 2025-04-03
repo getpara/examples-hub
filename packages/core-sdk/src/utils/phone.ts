@@ -1,27 +1,19 @@
 import parsePhoneNumberFromString from 'libphonenumber-js';
 
 export function formatPhoneNumber(
-  phone: string | undefined,
+  phone: string,
   countryCode?: string | undefined,
   opts?: { forDisplay: undefined | false },
 ): `+${number}` | null;
 
-export function formatPhoneNumber(
-  phone: string | undefined,
-  countryCode: string | undefined,
-  opts: { forDisplay: true },
-): string | null;
+export function formatPhoneNumber(phone: string, countryCode: string | undefined, opts: { forDisplay: true }): string | null;
 
 export function formatPhoneNumber(
-  phone: string | undefined,
+  phone: string,
   countryCode?: string,
   { forDisplay = false }: { forDisplay?: boolean } = {},
 ): string | `+${number}` | null {
-  if (!phone) {
-    return null;
-  }
-
-  phone = phone?.toString();
+  phone = phone.toString();
   countryCode = countryCode?.toString();
 
   let sanitizedNumber, parsedNumber;

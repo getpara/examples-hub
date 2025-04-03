@@ -11,6 +11,7 @@ if (typeof global !== 'undefined') {
 
 import {
   AuthMethod,
+  AuthExtras,
   AuthParams,
   BackupKitEmailProps,
   CurrentWalletIds,
@@ -78,7 +79,6 @@ import {
   ConstructorOpts,
   RecoveryStatus,
   CoreAuthInfo,
-  AuthExtras,
   VerifyExternalWalletV1,
   ExternalWalletConnectionType,
 } from './types/index.js';

@@ -1,4 +1,5 @@
 import {
+  CurrentWalletIds,
   SupportedWalletTypes,
   TPregenIdentifierType,
   WalletEntity,
@@ -95,4 +96,13 @@ export function supportedWalletTypesEq(a: SupportedWalletTypes, b: SupportedWall
   return (
     a.length === b.length && a.every(({ type, optional }, index) => b[index].type === type && b[index].optional === optional)
   );
+}
+
+export function mergeCurrentWalletIds(original: CurrentWalletIds, additional: CurrentWalletIds): CurrentWalletIds {
+  return [...new Set([...Object.keys(original), ...Object.keys(additional)])].reduce((acc, key) => {
+    return {
+      ...acc,
+      [key]: [...new Set([...(original[key] || []), ...(additional[key] || [])])],
+    };
+  }, {});
 }
