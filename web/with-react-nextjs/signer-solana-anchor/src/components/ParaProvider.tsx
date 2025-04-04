@@ -5,7 +5,8 @@ import { ParaModal, AuthLayout, OAuthMethod } from "@getpara/react-sdk";
 import { ParaSolanaWeb3Signer } from "@getpara/solana-web3.js-v1-integration";
 import { para } from "@/client/para";
 import "@getpara/react-sdk/styles.css";
-import { Connection } from "@solana/web3.js";
+import { Connection, SystemProgram, Transaction, VersionedTransaction } from "@solana/web3.js";
+import * as anchor from "@coral-xyz/anchor";
 
 const DEVNET_RPC_URL = process.env.NEXT_PUBLIC_DEVNET_RPC_URL || "https://api.devnet.solana.com/";
 
@@ -19,6 +20,7 @@ interface ParaContextType {
   closeModal: () => void;
   signer: ParaSolanaWeb3Signer | null;
   connection: Connection | null;
+  anchorProvider: anchor.AnchorProvider | null;
 }
 
 const ParaContext = createContext<ParaContextType | undefined>(undefined);
@@ -32,20 +34,64 @@ export function ParaProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [signer, setSigner] = useState<ParaSolanaWeb3Signer | null>(null);
   const [connection, setConnection] = useState<Connection | null>(null);
+  const [anchorProvider, setAnchorProvider] = useState<anchor.AnchorProvider | null>(null);
 
-  const initializeSolanaWeb3 = () => {
-    const connection = new Connection(DEVNET_RPC_URL, "confirmed");
-    const signer = new ParaSolanaWeb3Signer(para, connection);
-    setConnection(connection);
-    setSigner(signer);
+  useEffect(() => {
+    const conn = new Connection(DEVNET_RPC_URL, "confirmed");
+    setConnection(conn);
+  }, []);
+
+  useEffect(() => {
+    if (connection) {
+      if (signer && signer.sender) {
+        const signingWallet = {
+          publicKey: signer.sender,
+          signTransaction: async <T extends Transaction | VersionedTransaction>(tx: T): Promise<T> => {
+            return await signer.signTransaction(tx);
+          },
+          signAllTransactions: async <T extends Transaction | VersionedTransaction>(txs: T[]): Promise<T[]> => {
+            return await Promise.all(txs.map((tx) => signer.signTransaction(tx)));
+          },
+        };
+        const provider = new anchor.AnchorProvider(connection, signingWallet, {
+          commitment: connection.commitment || "confirmed",
+        });
+        setAnchorProvider(provider);
+      } else {
+        const readOnlyWallet = {
+          publicKey: SystemProgram.programId, // Fallback to SystemProgram's public key for read-only access
+          signTransaction: async <T extends Transaction | VersionedTransaction>(tx: T): Promise<T> => {
+            throw new Error("Read-only provider: Authenticate to sign transactions.");
+          },
+          signAllTransactions: async <T extends Transaction | VersionedTransaction>(txs: T[]): Promise<T[]> => {
+            throw new Error("Read-only provider: Authenticate to sign transactions.");
+          },
+        };
+        const provider = new anchor.AnchorProvider(connection, readOnlyWallet, {
+          commitment: connection.commitment || "confirmed",
+        });
+        setAnchorProvider(provider);
+      }
+    } else {
+      setAnchorProvider(null);
+    }
+  }, [connection, signer]);
+
+  const initializeSigner = () => {
+    if (connection) {
+      const paraSigner = new ParaSolanaWeb3Signer(para, connection);
+      setSigner(paraSigner);
+    } else {
+      setError("Failed to initialize signer: Connection not ready.");
+      console.error("Cannot initialize signer: Connection not available.");
+    }
   };
 
-  const clearSolanaWeb3 = () => {
-    setConnection(null);
+  const clearSigner = () => {
     setSigner(null);
   };
 
-  const checkAuthentication = async () => {
+  const checkAuthentication = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -53,38 +99,45 @@ export function ParaProvider({ children }: { children: React.ReactNode }) {
       setIsConnected(isAuthenticated);
       if (isAuthenticated) {
         const wallets = await para.getWalletsByType("SOLANA");
-        if (wallets.length) {
-          setAddress(wallets[0].address || null);
+        if (wallets.length > 0 && wallets[0].address) {
+          setAddress(wallets[0].address);
           setWalletId(wallets[0].id || null);
-
-          //  Only initialize the signer if we have wallets
-          initializeSolanaWeb3();
+          initializeSigner(); // Initialize signer now that we are authenticated and have wallet info
+        } else {
+          // Authenticated but no SOLANA wallet found
+          setAddress(null);
+          setWalletId(null);
+          clearSigner(); // Ensure signer is cleared if no wallet
+          setError("Authenticated, but no Solana wallet found in Para account.");
         }
       } else {
-        clearSolanaWeb3();
+        // Not authenticated
+        setAddress(null);
+        setWalletId(null);
+        clearSigner(); // Clear signer on logout/not authenticated
       }
     } catch (err: any) {
       setError(err.message || "An error occurred during authentication");
-      clearSolanaWeb3();
+      setIsConnected(false);
+      setAddress(null);
+      setWalletId(null);
+      clearSigner(); // Clear signer on error
     }
     setIsLoading(false);
-  };
+  }, [connection]);
 
   useEffect(() => {
     checkAuthentication();
-    return () => {
-      clearSolanaWeb3();
-    };
-  }, []);
+  }, [checkAuthentication]);
 
   const openModal = useCallback(() => {
     setIsOpen(true);
   }, []);
 
-  const closeModal = useCallback(async () => {
-    await checkAuthentication();
+  const closeModalCallback = useCallback(async () => {
     setIsOpen(false);
-  }, []);
+    await checkAuthentication();
+  }, [checkAuthentication]);
 
   return (
     <ParaContext.Provider
@@ -95,15 +148,16 @@ export function ParaProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         error,
         openModal,
-        closeModal,
+        closeModal: closeModalCallback,
         signer,
         connection,
+        anchorProvider,
       }}>
       {children}
       <ParaModal
         para={para}
         isOpen={isOpen}
-        onClose={closeModal}
+        onClose={closeModalCallback}
         disableEmailLogin={false}
         disablePhoneLogin={false}
         authLayout={[AuthLayout.AUTH_FULL]}
