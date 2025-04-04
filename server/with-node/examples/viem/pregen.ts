@@ -8,32 +8,33 @@ import { sepolia } from "viem/chains";
 
 export async function viemPregenSignHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { email } = req.body as { email?: string };
+    const email = req.body.email as string | undefined;
+
     if (!email) {
-      res.status(400).send("Provide `email` in the request body to identify the pre-generated wallet.");
+      res.status(400).send("Provide `email` in the request body.");
       return;
     }
 
-    const PARA_API_KEY = process.env.PARA_API_KEY;
-    if (!PARA_API_KEY) {
-      res.status(500).send("Set PARA_API_KEY in the environment before using this handler.");
+    const paraApiKey = process.env.PARA_API_KEY;
+    if (!paraApiKey) {
+      res.status(500).send("PARA_API_KEY is not set.");
       return;
     }
 
-    const para = new ParaServer(Environment.BETA, PARA_API_KEY);
+    const para = new ParaServer(Environment.BETA, paraApiKey);
+
     const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
     if (!hasPregenWallet) {
-      res.status(400).send("No pre-generated wallet found for this email. Have the user create one first.");
+      res.status(400).send("No pre-generated wallet found for this email.");
       return;
     }
 
     const keyShare = await getKeyShareInDB(email);
     if (!keyShare) {
-      res.status(400).send("Key share not found. Confirm that the wallet was properly initialized and stored.");
+      res.status(400).send("Key share not found.");
       return;
     }
-
-    const decryptedKeyShare = decrypt(keyShare);
+    const decryptedKeyShare = await decrypt(keyShare);
     await para.setUserShare(decryptedKeyShare);
 
     const viemParaAccount = createParaAccount(para);
@@ -46,18 +47,18 @@ export async function viemPregenSignHandler(req: Request, res: Response, next: N
     const request = await viemClient.prepareTransactionRequest({
       account: viemParaAccount,
       to: viemParaAccount.address,
-      value: parseEther("0.001"),
+      value: parseEther("0.0001"),
       gas: 21000n,
       maxFeePerGas: parseGwei("20"),
       maxPriorityFeePerGas: parseGwei("3"),
       chain: sepolia,
     });
 
-    const signatureResult = await viemClient.signTransaction(request);
+    const signedTxRlp = await viemClient.signTransaction(request);
 
     res.status(200).json({
       message: "Transaction signed using Viem + Para (pre-generated wallet).",
-      signatureResult,
+      signedTxRlp: signedTxRlp,
     });
   } catch (error) {
     console.error("Error in viemPregenSignHandler:", error);

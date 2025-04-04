@@ -1,63 +1,58 @@
-import type { Request, Response, NextFunction } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { Para as ParaServer, Environment } from "@getpara/server-sdk";
 import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integration";
-import { createPublicClient, http } from "viem";
+import { http, zeroAddress } from "viem";
 import { sepolia } from "viem/chains";
 
 import { signerToEcdsaValidator } from "@zerodev/ecdsa-validator";
 import { createKernelAccount, createKernelAccountClient, createZeroDevPaymasterClient } from "@zerodev/sdk";
 import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants";
-import { zeroAddress } from "viem";
 import { Signer } from "@zerodev/sdk/types";
 
 export async function zerodevSessionSignHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { session } = req.body as { session?: string };
+    const session = req.body.session as string | undefined;
+
     if (!session) {
       res.status(400).send("Provide `session` in the request body.");
       return;
     }
 
-    const PARA_API_KEY = process.env.PARA_API_KEY;
-    const PROJECT_ID = process.env.ZERODEV_PROJECT_ID;
-    const BUNDLER_RPC = process.env.ZERODEV_BUNDLER_RPC;
-    const PAYMASTER_RPC = process.env.ZERODEV_PAYMASTER_RPC;
-    const RPC_URL = process.env.ZERODEV_RPC_URL;
+    const paraApiKey = process.env.PARA_API_KEY;
+    const projectId = process.env.ZERODEV_PROJECT_ID;
+    const bundlerRpc = process.env.ZERODEV_BUNDLER_RPC;
+    const paymasterRpc = process.env.ZERODEV_PAYMASTER_RPC;
+    const rpcUrl = process.env.ARBITRUM_SEPOLIA_RPC;
 
-    if (!PARA_API_KEY || !PROJECT_ID || !BUNDLER_RPC || !PAYMASTER_RPC || !RPC_URL) {
+    if (!paraApiKey || !projectId || !bundlerRpc || !paymasterRpc || !rpcUrl) {
       res
         .status(500)
-        .send("Check PARA_API_KEY, ZERODEV_PROJECT_ID, ZERODEV_BUNDLER_RPC, ZERODEV_PAYMASTER_RPC, ZERODEV_RPC_URL.");
+        .send(
+          "Missing required environment variables (PARA_API_KEY, ZERODEV_PROJECT_ID, ZERODEV_BUNDLER_RPC, ZERODEV_PAYMASTER_RPC, ARBITRUM_SEPOLIA_RPC)."
+        );
       return;
     }
 
-    const para = new ParaServer(Environment.BETA, PARA_API_KEY);
+    const para = new ParaServer(Environment.BETA, paraApiKey);
     await para.importSession(session);
 
-    const wallets = await para.getWallets();
-    const wallet = Object.values(wallets)[0];
-    if (!wallet) {
-      res.status(500).send("No wallet found for this session.");
-      return;
-    }
-
     const viemParaAccount = createParaAccount(para);
-    const viemClient = createParaViemClient(para, {
+    const viemSignerClient = createParaViemClient(para, {
       account: viemParaAccount,
       chain: sepolia,
-      transport: http(RPC_URL),
+      transport: http(rpcUrl),
     });
-
-    const publicClient = createPublicClient({
-      transport: http(RPC_URL),
+    const publicClient = createParaViemClient(para, {
+      // Using Para for public client too, consistent with previous turn's simplification
       chain: sepolia,
+      transport: http(rpcUrl),
     });
 
     const entryPoint = getEntryPoint("0.7");
     const kernelVersion = KERNEL_V3_1;
 
     const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
-      signer: viemClient as Signer,
+      signer: viemSignerClient as Signer,
       entryPoint,
       kernelVersion,
     });
@@ -68,17 +63,19 @@ export async function zerodevSessionSignHandler(req: Request, res: Response, nex
       kernelVersion,
     });
 
-    const zerodevPaymaster = createZeroDevPaymasterClient({
-      chain: sepolia,
-      transport: http(PAYMASTER_RPC),
-    });
-
     const kernelClient = createKernelAccountClient({
       account,
       chain: sepolia,
-      bundlerTransport: http(BUNDLER_RPC),
+      bundlerTransport: http(bundlerRpc),
       paymaster: {
-        getPaymasterData: (userOperation) => zerodevPaymaster.sponsorUserOperation({ userOperation }),
+        getPaymasterData: (userOperation: any) => {
+          const zerodevPaymaster = createZeroDevPaymasterClient({
+            chain: sepolia,
+            transport: http(paymasterRpc),
+          });
+
+          return zerodevPaymaster.sponsorUserOperation({ userOperation });
+        },
       },
     });
 
@@ -94,7 +91,7 @@ export async function zerodevSessionSignHandler(req: Request, res: Response, nex
 
     await kernelClient.waitForUserOperationReceipt({
       hash: userOpHash,
-      timeout: 1000 * 30,
+      timeout: 30000,
     });
 
     res.status(200).json({

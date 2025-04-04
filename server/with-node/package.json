@@ -2,29 +2,26 @@
   "name": "with-node",
   "type": "module",
   "scripts": {
-    "build": "tsc",
-    "dev": "tsx watch server.ts",
-    "lint": "eslint . --ext .ts,.tsx",
-    "start": "node dist/server.js"
+    "dev": "tsx watch server.ts"
   },
   "dependencies": {
     "@alchemy/aa-alchemy": "3.19.0",
-    "@cosmjs/stargate": "0.33.0",
+    "@cosmjs/stargate": "0.33.1",
     "@ethereumjs/rlp": "5.0.2",
-    "@getpara/cosmjs-v0-integration": "1.4.4",
-    "@getpara/ethers-v6-integration": "1.4.4",
-    "@getpara/server-sdk": "1.4.4",
-    "@getpara/solana-web3.js-v1-integration": "1.4.4",
-    "@getpara/viem-v2-integration": "1.4.4",
+    "@getpara/cosmjs-v0-integration": "1.8.0",
+    "@getpara/ethers-v6-integration": "1.8.0",
+    "@getpara/server-sdk": "1.8.0",
+    "@getpara/solana-web3.js-v1-integration": "1.8.0",
+    "@getpara/viem-v2-integration": "1.8.0",
     "@solana/web3.js": "1.98.0",
-    "@zerodev/ecdsa-validator": "5.4.3",
-    "@zerodev/sdk": "5.4.19",
-    "crypto-js": "4.2.0",
+    "@zerodev/ecdsa-validator": "5.4.5",
+    "@zerodev/sdk": "5.4.28",
     "dotenv": "16.4.7",
     "ethers": "6.13.5",
     "express": "4.21.2",
     "sqlite3": "5.1.7",
-    "viem": "2.8.6"
+    "sqlite": "5.1.1",
+    "viem": "2.25.0"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
