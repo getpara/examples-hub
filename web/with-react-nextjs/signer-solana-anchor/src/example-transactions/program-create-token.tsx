@@ -24,7 +24,7 @@ export default function ProgramDeploymentDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { isConnected, walletId, address, signer, connection } = usePara();
+  const { isConnected, walletId, address, signer, connection, anchorProvider } = usePara();
 
   const fetchBalance = async () => {
     if (!address || !connection || !signer) return;
@@ -75,23 +75,13 @@ export default function ProgramDeploymentDemo() {
         throw new Error("Please fill in all token details.");
       }
 
-      const provider = new anchor.AnchorProvider(
-        connection,
-        {
-          publicKey: signer.sender!,
-          signTransaction: async <T extends Transaction | VersionedTransaction>(tx: T): Promise<T> => {
-            return await signer.signTransaction(tx);
-          },
-          signAllTransactions: async <T extends Transaction | VersionedTransaction>(txs: T[]): Promise<T[]> => {
-            return await Promise.all(txs.map((tx) => signer.signTransaction(tx)));
-          },
-        },
-        { commitment: "confirmed" }
-      );
+      if (!anchorProvider) {
+        throw new Error("Anchor provider is not initialized. Please reconnect your wallet.");
+      }
 
-      anchor.setProvider(provider);
+      anchor.setProvider(anchorProvider);
 
-      const program = new anchor.Program(idl as TransferTokens, provider);
+      const program = new anchor.Program(idl as TransferTokens, anchorProvider);
 
       const mintKeypair = anchor.web3.Keypair.generate();
       setCreatedMint(mintKeypair.publicKey.toString());

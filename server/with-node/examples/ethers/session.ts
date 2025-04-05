@@ -5,34 +5,35 @@ import { ethers } from "ethers";
 
 export async function ethersSessionSignHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { email, session } = req.body as { email?: string; session?: string };
-    if (!email || !session) {
-      res.status(400).send("Provide both `email` and `session` in the request body.");
+    const session = req.body.session as string | undefined;
+
+    if (!session) {
+      res.status(400).send("Provide `session` in the request body.");
       return;
     }
 
-    const PARA_API_KEY = process.env.PARA_API_KEY;
-    if (!PARA_API_KEY) {
-      res.status(500).send("Set PARA_API_KEY in the environment before using this handler.");
+    const paraApiKey = process.env.PARA_API_KEY;
+    if (!paraApiKey) {
+      res.status(500).send("PARA_API_KEY is not set.");
       return;
     }
 
-    const para = new ParaServer(Environment.BETA, PARA_API_KEY);
+    const para = new ParaServer(Environment.BETA, paraApiKey);
     await para.importSession(session);
 
     const ethersProvider = new ethers.JsonRpcProvider("https://ethereum-sepolia-rpc.publicnode.com");
-
     const paraEthersSigner = new ParaEthersSigner(para, ethersProvider);
 
     const address = await paraEthersSigner.getAddress();
+    const feeData = await ethersProvider.getFeeData();
+    const nonce = await ethersProvider.getTransactionCount(address);
 
     const tx = {
       to: address,
-      from: address,
-      value: ethers.parseEther("0.001"),
-      nonce: await ethersProvider.getTransactionCount(address),
+      value: ethers.parseEther("0.0001"),
+      nonce: nonce,
       gasLimit: 21000,
-      gasPrice: (await ethersProvider.getFeeData()).gasPrice,
+      gasPrice: feeData.gasPrice,
     };
 
     const signedTx = await paraEthersSigner.signTransaction(tx);

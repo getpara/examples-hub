@@ -9,38 +9,33 @@ import { decrypt } from "../../utils/encryption-utils.js";
 
 export async function cosmjsPregenSignHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { email } = req.body as { email?: string };
+    const email = req.body.email as string | undefined;
+
     if (!email) {
-      res
-        .status(400)
-        .send("Provide `email` in the request body. This is required to look up the pre-generated wallet.");
+      res.status(400).send("Provide `email` in the request body.");
       return;
     }
 
-    const PARA_API_KEY = process.env.PARA_API_KEY;
-    if (!PARA_API_KEY) {
-      res.status(500).send("Set PARA_API_KEY in the environment before using this handler.");
+    const paraApiKey = process.env.PARA_API_KEY;
+    if (!paraApiKey) {
+      res.status(500).send("PARA_API_KEY is not set.");
       return;
     }
 
-    const para = new ParaServer(Environment.BETA, PARA_API_KEY);
+    const para = new ParaServer(Environment.BETA, paraApiKey);
 
     const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
     if (!hasPregenWallet) {
-      res.status(400).send("No pre-generated wallet found for this email. Instruct the user to create one first.");
+      res.status(400).send("No pre-generated wallet found for this email.");
       return;
     }
 
     const keyShare = await getKeyShareInDB(email);
     if (!keyShare) {
-      res
-        .status(400)
-        .send("Key share not found. Confirm that the wallet was properly initialized and the key share stored.");
+      res.status(400).send("Key share not found.");
       return;
     }
-
-    const decryptedKeyShare = decrypt(keyShare);
-
+    const decryptedKeyShare = await decrypt(keyShare);
     await para.setUserShare(decryptedKeyShare);
 
     const paraProtoSigner = new ParaProtoSigner(para, "cosmos");
@@ -56,11 +51,11 @@ export async function cosmjsPregenSignHandler(req: Request, res: Response, next:
       denom: "uatom",
       amount: "1000",
     };
-
     const fee: StdFee = {
       amount: [{ denom: "uatom", amount: "500" }],
       gas: "200000",
     };
+    const memo = "Signed with Para";
 
     const message: MsgSend = {
       fromAddress,
@@ -72,8 +67,6 @@ export async function cosmjsPregenSignHandler(req: Request, res: Response, next:
       typeUrl: "/cosmos.bank.v1beta1.MsgSend",
       value: message,
     };
-
-    const memo = "Signed with Para";
 
     const signResult = await stargateClient.sign(fromAddress, [demoTxMessage], fee, memo);
 

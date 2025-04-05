@@ -1,30 +1,30 @@
 import type { Request, Response, NextFunction } from "express";
-import { Para as ParaServer, Environment, WalletType, PregenIdentifierType } from "@getpara/server-sdk";
+import { Para as ParaServer, Environment, WalletType } from "@getpara/server-sdk";
 import { encrypt } from "../../utils/encryption-utils.js";
 import { setKeyShareInDB } from "../../db/keySharesDB.js";
 
 export async function createPregenWalletHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { email } = req.body as { email?: string };
+    const email = req.body.email as string | undefined;
+
     if (!email) {
-      res.status(400).send("Provide `email` in the request body to create a pre-generated wallet.");
+      res.status(400).send("Provide `email` in the request body.");
       return;
     }
 
-    const PARA_API_KEY = process.env.PARA_API_KEY;
-    if (!PARA_API_KEY) {
-      res.status(500).send("Set PARA_API_KEY in the environment before using this handler.");
+    const paraApiKey = process.env.PARA_API_KEY;
+
+    if (!paraApiKey) {
+      res.status(500).send("PARA_API_KEY is not set.");
       return;
     }
 
-    const para = new ParaServer(Environment.BETA, PARA_API_KEY);
+    const para = new ParaServer(Environment.BETA, paraApiKey);
+
     const walletExists = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
+
     if (walletExists) {
-      res
-        .status(409)
-        .send(
-          "A pre-generated wallet already exists for this user. Consider using that wallet or choose a different email."
-        );
+      res.status(409).send("A pre-generated wallet already exists for this email.");
       return;
     }
 
@@ -33,18 +33,19 @@ export async function createPregenWalletHandler(req: Request, res: Response, nex
       pregenIdentifier: email,
       pregenIdentifierType: "EMAIL",
     });
+
     if (!wallet) {
-      res.status(500).send("Failed to create pre-generated wallet. Check your Para configuration and try again.");
+      res.status(500).send("Failed to create pre-generated wallet instance.");
       return;
     }
 
     const keyShare = para.getUserShare();
     if (!keyShare) {
-      res.status(500).send("Failed to retrieve user share from the Para client. Confirm wallet creation steps.");
+      res.status(500).send("Failed to retrieve user share after wallet creation.");
       return;
     }
 
-    const encryptedKeyShare = encrypt(keyShare);
+    const encryptedKeyShare = await encrypt(keyShare);
     await setKeyShareInDB(email, encryptedKeyShare);
 
     res.status(201).json({

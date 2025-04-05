@@ -1,72 +1,101 @@
+import { open, Database } from "sqlite";
 import sqlite3 from "sqlite3";
+import path, { dirname } from "path";
+import { fileURLToPath } from "url";
 
-sqlite3.verbose();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-const DB_PATH = "./keyShares.db";
+const DB_FILENAME = "keyShares.db";
+const DB_PATH = path.resolve(__dirname, DB_FILENAME);
 const TABLE_NAME = "keyShares";
 const COLUMN_EMAIL = "email";
 const COLUMN_KEY_SHARE = "keyShare";
 
-const db = new sqlite3.Database(DB_PATH, (err) => {
-  if (err) {
-    console.error("Could not open database:", err.message);
-  } else {
-    db.run(
-      `CREATE TABLE IF NOT EXISTS ${TABLE_NAME} (
-        ${COLUMN_EMAIL} TEXT PRIMARY KEY,
-        ${COLUMN_KEY_SHARE} TEXT
-      )`,
-      (err) => {
-        if (err) {
-          console.error("Failed to create table:", err.message);
-        }
-      }
-    );
+let dbPromise: Promise<Database> | null = null;
+
+function getDb(): Promise<Database> {
+  if (!dbPromise) {
+    dbPromise = initializeDatabase();
   }
-});
+  return dbPromise;
+}
 
-/**
- * Fetches the keyShare associated with the given email.
- *
- * @param {string} email - The email to search for in the database.
- * @returns {Promise<string | null>} - The keyShare if found, otherwise null.
- */
-const getKeyShareInDB = async (email: string): Promise<string | null> => {
-  return new Promise((resolve, reject) => {
-    db.get(`SELECT ${COLUMN_KEY_SHARE} FROM ${TABLE_NAME} WHERE ${COLUMN_EMAIL} = ?`, [email], (err, row) => {
-      if (err) {
-        console.error(`Failed to get keyShare for email: ${email}`, err);
-        reject(null);
-      } else {
-        resolve(row ? (row as any)[COLUMN_KEY_SHARE] : null);
-      }
+async function initializeDatabase(): Promise<Database> {
+  try {
+    const db = await open({
+      filename: DB_PATH,
+      driver: sqlite3.Database,
     });
-  });
-};
 
-/**
- * Sets or updates the keyShare associated with the given email.
- *
- * @param {string} email - The email for which the keyShare should be set.
- * @param {string} keyShare - The keyShare string to store in the database.
- * @returns {Promise<void>}
- */
-const setKeyShareInDB = async (email: string, keyShare: string): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    db.run(
-      `INSERT OR REPLACE INTO ${TABLE_NAME} (${COLUMN_EMAIL}, ${COLUMN_KEY_SHARE}) VALUES (?, ?)`,
-      [email, keyShare],
-      (err) => {
-        if (err) {
-          console.error(`Failed to set keyShare for email: ${email}`, err);
-          reject(err);
-        } else {
-          console.log(`Successfully set keyShare for email: ${email}`);
-          resolve();
-        }
-      }
+    await db.exec(
+      `CREATE TABLE IF NOT EXISTS ${TABLE_NAME} (
+        ${COLUMN_EMAIL} TEXT PRIMARY KEY NOT NULL,
+        ${COLUMN_KEY_SHARE} TEXT NOT NULL
+      )`
     );
-  });
-};
 
-export { getKeyShareInDB, setKeyShareInDB };
+    console.log(`Database initialized successfully at ${DB_PATH}`);
+    return db;
+  } catch (error) {
+    console.error("Fatal error during database initialization:", error);
+    dbPromise = null;
+    throw error;
+  }
+}
+
+export async function getKeyShareInDB(email: string): Promise<string | null> {
+  if (!email || typeof email !== "string") {
+    throw new Error("Invalid email provided: Must be a non-empty string.");
+  }
+
+  try {
+    const db = await getDb();
+    const row = await db.get<{ [COLUMN_KEY_SHARE]: string }>(
+      `SELECT ${COLUMN_KEY_SHARE} FROM ${TABLE_NAME} WHERE ${COLUMN_EMAIL} = ?`,
+      [email]
+    );
+    return row?.[COLUMN_KEY_SHARE] ?? null;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function setKeyShareInDB(email: string, keyShare: string): Promise<void> {
+  if (!email || typeof email !== "string") {
+    throw new Error("Invalid email provided: Must be a non-empty string.");
+  }
+  if (!keyShare || typeof keyShare !== "string") {
+    throw new Error("Invalid keyShare provided: Must be a non-empty string.");
+  }
+
+  try {
+    const db = await getDb();
+    const result = await db.run(
+      `INSERT INTO ${TABLE_NAME} (${COLUMN_EMAIL}, ${COLUMN_KEY_SHARE}) VALUES (?, ?)
+       ON CONFLICT(${COLUMN_EMAIL}) DO UPDATE SET ${COLUMN_KEY_SHARE} = excluded.${COLUMN_KEY_SHARE}`,
+      [email, keyShare]
+    );
+
+    if (result.changes === 0) {
+      console.warn(`No changes made when setting key share for email: ${email}. The value might have been the same.`);
+    }
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function closeDatabase(): Promise<void> {
+  if (!dbPromise) {
+    return;
+  }
+  try {
+    const db = await dbPromise;
+    await db.close();
+    dbPromise = null;
+    console.log("Database connection closed successfully.");
+  } catch (error) {
+    console.error("Failed to close the database connection:", error);
+    throw error;
+  }
+}
