@@ -16,3 +16,4 @@ export const LOCAL_STORAGE_SESSION_COOKIE = `${PREFIX}sessionCookie`;
 export const SESSION_STORAGE_LOGIN_ENCRYPTION_KEY_PAIR = `${PREFIX}loginEncryptionKeyPair`;
 export const POLLING_INTERVAL_MS = 2000;
 export const SHORT_POLLING_INTERVAL_MS = 1000;
+export const POLLING_TIMEOUT_MS = 300000;

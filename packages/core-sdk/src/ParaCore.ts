@@ -25,8 +25,6 @@ import {
   WalletScheme,
   WalletParams,
   OAuthMethod,
-  OnRampPurchaseCreateParams,
-  OnRampPurchase,
   TPregenIdentifierType,
   PregenIds,
   extractWalletRef,
@@ -45,6 +43,12 @@ import {
   AuthType,
   ExternalWalletLoginRes,
   ExternalWalletInfo,
+  ServerAuthStateVerify,
+  ServerAuthStateLogin,
+  ServerAuthStateSignup,
+  PrimaryAuthInfo,
+  toPregenTypeAndId,
+  toPregenIds,
   SessionInfo,
   PrimaryAuth,
   PrimaryAuthType,
@@ -79,6 +83,19 @@ import {
   ConstructorOpts,
   RecoveryStatus,
   CoreAuthInfo,
+  PortalUrlType,
+  PortalUrlOptionsV2,
+  CoreMethodParams,
+  CoreMethodResponse,
+  WithUseShortUrls,
+  WithCustomTheme,
+  AuthStateVerify,
+  AuthStateLogin,
+  AuthStateSignup,
+  OAuthUrlParams,
+  NewCredentialUrlParams,
+  LoginUrlParams,
+  CoreInterface,
   VerifyExternalWalletV1,
   ExternalWalletConnectionType,
 } from './types/index.js';
@@ -88,6 +105,7 @@ import { sendRecoveryForShare } from './shares/recovery.js';
 import { CountryCallingCode } from 'libphonenumber-js';
 import {
   autoBind,
+  formatPhoneNumber,
   constructUrl,
   dispatchEvent,
   entityToWallet,
@@ -101,20 +119,23 @@ import {
   jsonParse,
   migrateWallet,
   setupListeners,
-  formatPhoneNumber,
   supportedWalletTypesEq,
   truncateAddress,
   WalletSchemeTypeMap,
+  shortenUrl,
+  isServerAuthState,
 } from './utils/index.js';
 import { TransactionReviewDenied, TransactionReviewError, TransactionReviewTimeout } from './errors.js';
 import * as constants from './constants.js';
 
-export abstract class ParaCore {
+export abstract class ParaCore implements CoreInterface {
   static version?: string = constants.PARA_CORE_VERSION;
 
   ctx: Ctx;
 
   #authInfo?: CoreAuthInfo;
+
+  protected isNativePasskey: boolean = false;
 
   get authInfo(): CoreAuthInfo | undefined {
     return this.#authInfo;
@@ -230,7 +251,7 @@ export abstract class ParaCore {
   /**
    * Wallets associated with the `ParaCore` instance.
    */
-  externalWallets: Record<string, Wallet>;
+  externalWallets: Record<string, Wallet> = {};
 
   /**
    * A map of pre-generated wallet identifiers that can be claimed in the current instance.
@@ -385,7 +406,7 @@ export abstract class ParaCore {
    * Remove all local storage and prefixed session storage.
    * @param {'local' | 'session' | 'secure' | 'all'} type - Type of storage to clear. Defaults to 'all'.
    */
-  clearStorage = async (type: 'local' | 'session' | 'secure' | 'all' = 'all'): Promise<void> => {
+  clearStorage = async (type: CoreMethodParams<'clearStorage'> = 'all'): CoreMethodResponse<'clearStorage'> => {
     const isAll = type === 'all';
     (isAll || type === 'local') && this.platformUtils.localStorage.clear(constants.PREFIX);
     (isAll || type === 'session') && this.platformUtils.sessionStorage.clear(constants.PREFIX);
@@ -597,6 +618,114 @@ export abstract class ParaCore {
 
   protected abstract getPlatformUtils(): PlatformUtils;
 
+  protected async constructPortalUrlV2(type: PortalUrlType, opts: PortalUrlOptionsV2 = {}) {
+    const [isCreate, isLogin, isOnRamp] = [
+      ['createAuth', 'createPassword'].includes(type),
+      ['loginAuth', 'loginPassword'].includes(type),
+      type === 'onRamp',
+    ];
+
+    let auth: PrimaryAuth | undefined;
+    if (isCreate || isLogin) {
+      auth = this.assertIsAuthSet().auth;
+    }
+
+    let sessionId = opts.sessionId;
+    if ((isLogin || isOnRamp) && !sessionId) {
+      const session = await this.touchSession(true);
+
+      sessionId = session.sessionId;
+    }
+
+    if (!this.loginEncryptionKeyPair) {
+      await this.setLoginEncryptionKeyPair();
+    }
+
+    const base = type === 'onRamp' ? getPortalBaseURL(this.ctx) : await this.getPortalURL();
+
+    let path: string;
+    switch (type) {
+      case 'createPassword': {
+        path = `/web/users/${this.userId}/passwords/${opts.pathId}`;
+        break;
+      }
+      case 'createAuth': {
+        path = `/web/users/${this.userId}/biometrics/${opts.pathId}`;
+        break;
+      }
+      case 'loginPassword': {
+        path = '/web/passwords/login';
+        break;
+      }
+      case 'loginAuth': {
+        path = '/web/biometrics/login';
+        break;
+      }
+      case 'txReview': {
+        path = `/web/users/${this.userId}/transaction-review/${opts.pathId}`;
+        break;
+      }
+      case 'onRamp': {
+        path = `/web/users/${this.userId}/on-ramp-transaction/${opts.pathId}`;
+        break;
+      }
+      default: {
+        throw new Error(`invalid URL type ${type}`);
+      }
+    }
+
+    const partner = await this.#assertPartner();
+
+    const thisDevice = opts.thisDevice ?? {
+      encryptionKey: getPublicKeyHex(this.loginEncryptionKeyPair),
+      sessionId,
+    };
+
+    const params: Record<string, string | undefined | null> = {
+      apiKey: this.ctx.apiKey,
+      partnerId: partner.id,
+      portalFont: opts.portalTheme?.font || partner?.font || this.portalTheme?.font,
+      portalBorderRadius: opts.portalTheme?.borderRadius || this.portalTheme?.borderRadius,
+      portalThemeMode: opts.portalTheme?.mode || partner?.themeMode || this.portalTheme?.mode,
+      portalAccentColor: opts.portalTheme?.accentColor || partner?.accentColor || this.portalTheme?.accentColor,
+      portalForegroundColor:
+        opts.portalTheme?.foregroundColor || partner?.foregroundColor || this.portalTheme?.foregroundColor,
+      portalBackgroundColor:
+        opts.portalTheme?.backgroundColor ||
+        partner?.backgroundColor ||
+        this.portalBackgroundColor ||
+        this.portalTheme?.backgroundColor,
+      portalPrimaryButtonColor: this.portalPrimaryButtonColor,
+      portalTextColor: this.portalTextColor,
+      portalPrimaryButtonTextColor: this.portalPrimaryButtonTextColor,
+      isForNewDevice: opts.isForNewDevice ? opts.isForNewDevice.toString() : undefined,
+      ...(auth && (isCreate || isLogin) ? auth : {}),
+      ...(isOnRamp ? { sessionId } : {}),
+      ...(isLogin
+        ? {
+            sessionId: thisDevice.sessionId,
+            encryptionKey: thisDevice.encryptionKey,
+            ...(opts.newDevice
+              ? {
+                  newDeviceSessionLookupId: opts.newDevice.sessionId,
+                  newDeviceEncryptionKey: opts.newDevice.encryptionKey,
+                }
+              : {}),
+            pregenIds: JSON.stringify(this.pregenIds),
+          }
+        : {}),
+      ...(opts.params || {}),
+    };
+
+    const url = constructUrl({ base, path, params });
+
+    if (opts.shorten) {
+      return shortenUrl(this.ctx, url);
+    }
+
+    return url;
+  }
+
   private async constructPortalUrl(
     type: 'createAuth' | 'createPassword' | 'loginAuth' | 'loginPassword' | 'txReview' | 'onRamp',
     opts: PortalUrlOptions = {},
@@ -609,7 +738,7 @@ export abstract class ParaCore {
 
     let auth: PrimaryAuth | undefined;
     if (isCreate || isLogin) {
-      auth = this.#assertIsAuthSet();
+      auth = this.assertIsAuthSet().auth;
     }
 
     if ((isLogin || isOnRamp) && !opts.sessionId) {
@@ -669,6 +798,7 @@ export abstract class ParaCore {
       portalPrimaryButtonTextColor: this.portalPrimaryButtonTextColor,
       isForNewDevice: opts.isForNewDevice ? opts.isForNewDevice.toString() : undefined,
       ...(auth && (isCreate || isLogin) ? auth : {}),
+      ...(isCreate || isLogin ? { authInfo: JSON.stringify(this.authInfo!) } : {}),
       ...(isLogin || isOnRamp ? { sessionId: opts.sessionId } : {}),
       ...(isLogin
         ? {
@@ -1136,7 +1266,15 @@ export abstract class ParaCore {
     return this.#authInfo;
   }
 
-  #assertIsAuthSet(allowed?: AuthType[]): PrimaryAuth {
+  protected assertUserId(): string {
+    if (!this.userId) {
+      throw new Error('no userId is set');
+    }
+
+    return this.userId;
+  }
+
+  protected assertIsAuthSet(allowed?: AuthType[]): PrimaryAuthInfo {
     if (!this.#authInfo) {
       throw new Error('auth is not set');
     }
@@ -1145,7 +1283,7 @@ export abstract class ParaCore {
       throw new Error(`invalid auth type, expected ${allowed.join(', ')}`);
     }
 
-    return this.#authInfo.auth;
+    return this.#authInfo;
   }
 
   /**
@@ -1465,7 +1603,7 @@ export abstract class ParaCore {
     );
   }
 
-  private async getTypesToCreate(types?: WalletType[]): Promise<WalletType[]> {
+  private async getTypesToCreate(types?: Uppercase<WalletType>[]): Promise<WalletType[]> {
     const { supportedWalletTypes } = await this.#assertPartner();
 
     return getSchemes(types ?? (await this.getMissingTypes())).map(scheme => {
@@ -1538,6 +1676,7 @@ export abstract class ParaCore {
 
   /**
    * Generates a URL for registering a new WebAuth passkey.
+   * @deprecated
    * @param {GetWebAuthUrlForLoginParams} opts the options object
    * @returns - the URL for creating a new passkey
    */
@@ -1547,6 +1686,7 @@ export abstract class ParaCore {
 
   /**
    * Generates a URL for registering a new user password.
+   * @deprecated
    * @param {GetWebAuthUrlForLoginParams} opts the options object
    * @returns - the URL for creating a new password
    */
@@ -1556,6 +1696,7 @@ export abstract class ParaCore {
 
   /**
    * Generates a URL for registering a new WebAuth passkey for a phone number.
+   * @deprecated
    * @param {Omit<GetWebAuthUrlForLoginParams, 'authType'>} opts the options object
    * @returns - web auth url
    */
@@ -1597,7 +1738,7 @@ export abstract class ParaCore {
    * Fetches the wallets associated with the user.
    * @returns {WalletEntity[]} wallets that were fetched.
    */
-  async fetchWallets(): Promise<WalletEntity[]> {
+  async fetchWallets(): CoreMethodResponse<'fetchWallets'> {
     const res = await (this.isPortal() || this.isParaConnect()
       ? this.ctx.client.getAllWallets(this.userId)
       : this.ctx.client.getWallets(this.userId, true));
@@ -1624,7 +1765,7 @@ export abstract class ParaCore {
   }
 
   private async populatePregenWalletAddresses(): Promise<void> {
-    const res = await this.getPregenWallets();
+    const res = await this.getPregenWalletsV2();
 
     res.forEach(entity => {
       if (this.wallets[entity.id]) {
@@ -1639,6 +1780,7 @@ export abstract class ParaCore {
 
   /**
    * Checks if a user exists for an email address.
+   * @deprecated
    * @param {Object} opts the options object
    * @param {string} opts.email the email to check.
    * @returns true if user exists, false otherwise.
@@ -1650,6 +1792,7 @@ export abstract class ParaCore {
 
   /**
    * Checks if a user exists for a phone number.
+   * @deprecated
    * @param {Object} opts the options object
    * @param {string} opts.phone - phone number to check.
    * @param {string} opts.countryCode - the country code.
@@ -1662,6 +1805,7 @@ export abstract class ParaCore {
 
   /**
    * Creates a new user.
+   * @deprecated
    * @param {Object} opts the options object
    * @param {string} opts.email the email to use.
    */
@@ -1677,6 +1821,7 @@ export abstract class ParaCore {
 
   /**
    * Creates a new user with a phone number.
+   * @deprecated
    * @param {Object} opts the options object
    * @param {string} opts.phone - the phone number to use for creating the user.
    * @param {string} opts.countryCode - the country code to use for creating the user.
@@ -1690,6 +1835,7 @@ export abstract class ParaCore {
 
   /**
    * Logs in or creates a new user using an external wallet address.
+   * @deprecated
    * @param {Object} opts the options object
    * @param {string} opts.address the external wallet address to use for identification.
    * @param {WalletType} opts.type type of external wallet to use for identification.
@@ -1712,6 +1858,7 @@ export abstract class ParaCore {
 
   /**
    * Passes the email code obtained from the user for verification.
+   * @deprecated
    * @param {Object} opts the options object
    * @param {string} verificationCode the six-digit code to check
    * @returns {string} the web auth url for creating a new credential
@@ -1721,6 +1868,7 @@ export abstract class ParaCore {
     return this.getSetUpBiometricsURL();
   }
 
+  /** @deprecated */
   async verifyExternalWallet({
     address,
     signedMessage,
@@ -1728,11 +1876,12 @@ export abstract class ParaCore {
     cosmosSigner,
   }: VerifyExternalWalletV1): Promise<string> {
     await this.ctx.client.verifyExternalWallet(this.userId, { address, signedMessage, cosmosPublicKeyHex, cosmosSigner });
-    return this.getSetUpBiometricsURL({ authType: this.#authInfo.authType });
+    return this.getSetUpBiometricsURL();
   }
 
   /**
    * Passes the phone code obtained from the user for verification.
+   * @deprecated
    * @param {Object} opts the options object
    * @param {string} verificationCode the six-digit code to check
    * @returns {string} the web auth url for creating a new credential
@@ -1745,6 +1894,7 @@ export abstract class ParaCore {
   /**
    * Validates the response received from an attempted Telegram login for authenticity, then
    * creates or retrieves the corresponding Para user and prepares the Para instance to sign in with that user.
+   * @deprecated
    * @param authResponse - the response JSON object received from the Telegram widget.
    * @returns `{ isValid: boolean; telegramUserId?: string; userId?: string; isNewUser?: boolean; supportedAuthMethods?: AuthMethod[]; biometricHints?: BiometricLocationHint[] }`
    */
@@ -1778,6 +1928,7 @@ export abstract class ParaCore {
 
   /**
    * Performs 2FA verification.
+   * @deprecated
    * @param {Object} opts the options object
    * @param {string} opts.email the email to use for performing a 2FA verification.
    * @param {string} opts.verificationCode the verification code to received via 2FA.
@@ -1800,6 +1951,7 @@ export abstract class ParaCore {
 
   /**
    * Performs 2FA verification.
+   * @deprecated
    * @param {Object} opts the options object
    * @param {string} opts.phone the phone number
    * @param {string} opts.countryCode - the country code
@@ -1828,6 +1980,7 @@ export abstract class ParaCore {
 
   /**
    * Sets up two-factor authentication for the current user.
+   * @deprecated
    * @returns {string} uri - uri to use for setting up 2FA
    * */
   async setup2FA(): Promise<{
@@ -1841,6 +1994,7 @@ export abstract class ParaCore {
 
   /**
    * Enables 2FA.
+   * @deprecated
    * @param {Object} opts the options object
    * @param {string} opts.verificationCode - the verification code received via 2FA.
    */
@@ -1850,6 +2004,7 @@ export abstract class ParaCore {
 
   /**
    * Determines if 2FA has been set up.
+   * @deprecated
    * @returns {Object} `{ isSetup: boolean }` - true if 2FA is setup, false otherwise
    */
   async check2FAStatus(): Promise<{
@@ -1867,7 +2022,7 @@ export abstract class ParaCore {
   /**
    * Resend a verification email for the current user.
    */
-  async resendVerificationCode(): Promise<void> {
+  async resendVerificationCode(): CoreMethodResponse<'resendVerificationCode'> {
     await this.ctx.client.resendVerificationCode({
       userId: this.userId,
       ...this.getVerificationEmailProps(),
@@ -1876,6 +2031,7 @@ export abstract class ParaCore {
 
   /**
    * Resend a verification SMS for the current user.
+   * @deprecated
    */
   async resendVerificationCodeByPhone(): Promise<void> {
     await this.ctx.client.resendVerificationCodeByPhone({
@@ -1885,6 +2041,7 @@ export abstract class ParaCore {
 
   /**
    * Returns a URL for setting up a new WebAuth passkey.
+   * @deprecated
    * @param {Object} opts the options object
    * @param {string} opts.authType - the auth type to use
    * @param {boolean} opts.isForNewDevice whether the passkey is for a new device of an existing user
@@ -1909,6 +2066,7 @@ export abstract class ParaCore {
 
   /**
    * Returns a URL for setting up a new WebAuth passkey for a phone number.
+   * @deprecated
    * @param {Object} opts the options object
    * @param {boolean} opts.isForNewDevice whether the passkey is for a new device of an existing user
    * @returns {string} the URL
@@ -1931,6 +2089,7 @@ export abstract class ParaCore {
 
   /**
    * Returns a URL for setting up a new password.
+   * @deprecated
    * @param {Object} opts the options object
    * @param {string} opts.authType - the auth type to use
    * @param {boolean} opts.isForNewDevice whether the passkey is for a new device of an existing user
@@ -1959,7 +2118,7 @@ export abstract class ParaCore {
    * Checks if the current session is active.
    * @returns `true` if active, `false` otherwise
    */
-  async isSessionActive(): Promise<boolean> {
+  async isSessionActive(): CoreMethodResponse<'isSessionActive'> {
     if (this.externalWalletConnectionType === 'CONNECTION_ONLY') {
       return true;
     }
@@ -1973,7 +2132,7 @@ export abstract class ParaCore {
    * Checks if a session is active and a wallet exists.
    * @returns `true` if active, `false` otherwise
    **/
-  async isFullyLoggedIn(): Promise<boolean> {
+  async isFullyLoggedIn(): CoreMethodResponse<'isFullyLoggedIn'> {
     if (this.externalWalletConnectionType === 'CONNECTION_ONLY') {
       return true;
     }
@@ -1987,6 +2146,7 @@ export abstract class ParaCore {
     );
   }
 
+  /** @deprecated */
   protected async supportedAuthMethods(auth: Auth<PrimaryAuthType | 'userId'>): Promise<Set<AuthMethod>> {
     const { supportedAuthMethods } = await this.ctx.client.getSupportedAuthMethods(auth);
 
@@ -2006,16 +2166,18 @@ export abstract class ParaCore {
 
   /**
    * Get hints associated with the users stored biometrics.
+   * @deprecated
    * @returns Array containing useragents and AAGuids for stored biometrics
    */
   protected async getUserBiometricLocationHints(): Promise<BiometricLocationHint[]> {
-    const auth = this.#assertIsAuthSet();
+    const { auth } = this.assertIsAuthSet();
 
     return await this.ctx.client.getBiometricLocationHints(auth);
   }
 
   /**
    * Initiates a login.
+   * @deprecated
    * @param {Object} opts the options object
    * @param {String} opts.email - the email to login with
    * @param {boolean} opts.useShortURL - whether to shorten the link
@@ -2049,6 +2211,7 @@ export abstract class ParaCore {
 
   /**
    * Initiates a login.
+   * @deprecated
    * @param email - the email to login with
    * @returns - a set of supported auth methods for the user
    **/
@@ -2072,6 +2235,7 @@ export abstract class ParaCore {
 
   /**
    * Initiates a login.
+   * @deprecated
    * @param opts the options object
    * @param opts.phone the phone number
    * @param opts.countryCode the country code
@@ -2103,6 +2267,7 @@ export abstract class ParaCore {
   }
 
   /**
+   * @deprecated
    * Waits for the session to be active.
    **/
   async waitForAccountCreation({ popupWindow }: { popupWindow?: Window | null } = {}): Promise<boolean> {
@@ -2138,6 +2303,9 @@ export abstract class ParaCore {
     return false;
   }
 
+  /**
+   * @deprecated
+   */
   async waitForPasskeyAndCreateWallet({
     popupWindow,
   }: {
@@ -2146,7 +2314,7 @@ export abstract class ParaCore {
     await this.waitForAccountCreation({ popupWindow });
     const { supportedWalletTypes } = await this.#assertPartner();
 
-    const pregenWallets = await this.getPregenWallets();
+    const pregenWallets = await this.getPregenWalletsV2();
 
     let recoverySecret: string | undefined,
       walletIds: CurrentWalletIds = {};
@@ -2174,6 +2342,7 @@ export abstract class ParaCore {
   /**
    * Initiates a Farcaster login attempt and return the URI for the user to connect.
    * You can create a QR code with this URI that works with Farcaster's mobile app.
+   * @deprecated
    * @return {string} the Farcaster connect URI
    */
   async getFarcasterConnectURL(): Promise<string> {
@@ -2188,6 +2357,7 @@ export abstract class ParaCore {
   /**
    * Awaits the response from a user's attempt to log in with Farcaster.
    * If successful, this returns the user's Farcaster username and profile picture and indicates whether the user already exists.
+   * @deprecated
    * @return {Object} `{userExists: boolean; username: string; pfpUrl?: string | null }` - the user's information and whether the user already exists.
    */
   async waitForFarcasterStatus(): Promise<{
@@ -2226,7 +2396,7 @@ export abstract class ParaCore {
 
   /**
    * Generates a URL for the user to log in with OAuth using a desire method.
-   *
+   * @deprecated
    * @param {Object} opts the options object
    * @param {OAuthMethod} opts.method the third-party service to use for OAuth.
    * @param {string} [opts.deeplinkUrl] the deeplink to redirect to after the OAuth flow. This is for mobile only.
@@ -2250,7 +2420,7 @@ export abstract class ParaCore {
   /**
    * Awaits the response from a user's attempt to log in with OAuth.
    * If successful, this returns the user's email address and indicates whether the user already exists.
-   *
+   * @deprecated
    * @param {Object} opts the options object.
    * @param {Window} [opts.popupWindow] the popup window being used for login.
    * @return {Object} `{ email?: string; isError?: boolean; userExists: boolean; }` the result data
@@ -2293,7 +2463,7 @@ export abstract class ParaCore {
 
   /**
    * Waits for the session to be active and sets up the user.
-   *
+   * @deprecated
    * @param {Object} opts the options object
    * @param {Window} [opts.popupWindow] the popup window being used for login.
    * @param {boolean} [opts.skipSessionRefresh] whether to skip refreshing the session.
@@ -2383,7 +2553,9 @@ export abstract class ParaCore {
    * @param {boolean} [shouldOpenPopup] - if `true`, the running device will open a popup to reauthenticate the user.
    * @returns a URL for the user to reauthenticate.
    **/
-  async refreshSession({ shouldOpenPopup = false }: { shouldOpenPopup?: boolean } = {}): Promise<string> {
+  async refreshSession({
+    shouldOpenPopup = false,
+  }: CoreMethodParams<'refreshSession'> = {}): CoreMethodResponse<'refreshSession'> {
     const { sessionId } = await this.touchSession(true);
     if (!this.loginEncryptionKeyPair) {
       await this.setLoginEncryptionKeyPair();
@@ -2435,7 +2607,7 @@ export abstract class ParaCore {
    * @param {any[]} opts.temporaryShares optional temporary shares to use for decryption.
    * @param {boolean} [opts.skipSessionRefresh] - whether or not to skip refreshing the session.
    **/
-  async setupAfterLogin({
+  protected async setupAfterLogin({
     temporaryShares,
     skipSessionRefresh = false,
   }: { temporaryShares?: any[]; skipSessionRefresh?: boolean } = {}): Promise<void> {
@@ -2470,12 +2642,7 @@ export abstract class ParaCore {
     userShare,
     skipBiometricShareCreation = false,
     forceRefresh = false,
-  }: {
-    walletId: string;
-    userShare?: string;
-    skipBiometricShareCreation?: boolean;
-    forceRefresh?: boolean;
-  }): Promise<string> {
+  }: CoreMethodParams<'distributeNewWalletShare'>): CoreMethodResponse<'distributeNewWalletShare'> {
     let userSigner = userShare;
 
     if (!userSigner) {
@@ -2541,7 +2708,7 @@ export abstract class ParaCore {
           break;
         }
         ++maxPolls;
-        const res = await this.getPregenWallets();
+        const res = await this.getPregenWalletsV2();
 
         const wallet = res.find(w => w.id === walletId);
         if (wallet && wallet.address) {
@@ -2580,10 +2747,7 @@ export abstract class ParaCore {
   async createWalletPerType({
     skipDistribute = false,
     types,
-  }: {
-    skipDistribute?: boolean;
-    types?: WalletType[];
-  } = {}): Promise<{ wallets: Wallet[]; walletIds: CurrentWalletIds; recoverySecret?: string }> {
+  }: CoreMethodParams<'createWalletPerType'> = {}): CoreMethodResponse<'createWalletPerType'> {
     const wallets: Wallet[] = [];
     const walletIds: CurrentWalletIds = {};
     let recoverySecret: string;
@@ -2625,15 +2789,7 @@ export abstract class ParaCore {
     newPartnerId,
     keyShareProtocolId,
     redistributeBackupEncryptedShares,
-  }: {
-    walletId: string;
-    share: string;
-    oldPartnerId?: string;
-    newPartnerId?: string;
-    keyShareProtocolId?: string;
-    redistributeBackupEncryptedShares?: boolean;
-    emailProps?: BackupKitEmailProps;
-  }): Promise<{ signer: string; recoverySecret?: string; protocolId: string }> {
+  }: CoreMethodParams<'refreshShare'>): CoreMethodResponse<'refreshShare'> {
     const { signer, protocolId } = await this.platformUtils.refresh(
       this.ctx,
       this.retrieveSessionCookie(),
@@ -2667,10 +2823,7 @@ export abstract class ParaCore {
   async createWallet({
     type: _type,
     skipDistribute = false,
-  }: {
-    type?: WalletType;
-    skipDistribute?: boolean;
-  } = {}): Promise<[Wallet, string | null]> {
+  }: CoreMethodParams<'createWallet'> = {}): CoreMethodResponse<'createWallet'> {
     this.requireApiKey();
     const { supportedWalletTypes } = await this.#assertPartner();
     const walletType = await this.assertIsValidWalletType(
@@ -2731,7 +2884,7 @@ export abstract class ParaCore {
 
     await this.setCurrentWalletIds({
       ...this.currentWalletIds,
-      [walletType]: [...(this.currentWalletIds[walletType] ?? []), walletId],
+      [walletType]: [...new Set([...(this.currentWalletIds[walletType] ?? []), walletId])],
     });
 
     const walletNoSigner = { ...wallet };
@@ -2746,7 +2899,7 @@ export abstract class ParaCore {
 
   /**
    * Creates a new pregenerated wallet.
-   *
+   * @deprecated
    * @param {Object} opts the options object.
    * @param {string} opts.pregenIdentifier the identifier associated with the new wallet.
    * @param {TPregenIdentifierType} [opts.pregenIdentifierType] the identifier type. Defaults to `EMAIL`.
@@ -2814,6 +2967,7 @@ export abstract class ParaCore {
    * Creates new pregenerated wallets for each desired type.
    * If no types are provided, this method will create one for each of the non-optional types
    * specified in the instance's `supportedWalletTypes` array that are not already present.
+   * @deprecated
    * @param {Object} opts the options object.
    * @param {string} opts.pregenIdentifier the identifier to associate each wallet with.
    * @param {TPregenIdentifierType} opts.pregenIdentifierType - either `'EMAIL'` or `'PHONE'`.
@@ -2840,7 +2994,7 @@ export abstract class ParaCore {
 
   /**
    * Claims a pregenerated wallet.
-   *
+   * @deprecated
    * @param {Object} opts the options object.
    * @param {string} opts.pregenIdentifier string the identifier of the user claiming the wallet
    * @param {TPregenIdentifierType} opts.pregenIdentifierType type of the identifier of the user claiming the wallet
@@ -2926,6 +3080,7 @@ export abstract class ParaCore {
 
   /**
    * Updates the identifier for a pregen wallet.
+   * @deprecated
    * @param {Object} opts the options object.
    * @param {string} opts.walletId the pregen wallet ID
    * @param {string} opts.newPregenIdentifier the new identtifier
@@ -2960,6 +3115,7 @@ export abstract class ParaCore {
 
   /**
    * Checks if a pregen Wallet exists for the given identifier with the current partner.
+   * @deprecated
    * @param {Object} opts the options object.
    * @param {string} opts.pregenIdentifier string the identifier of the user claiming the wallet
    * @param {TPregenIdentifierType} opts.pregenIdentifierType type of the string of the identifier of the user claiming the wallet
@@ -2985,6 +3141,7 @@ export abstract class ParaCore {
 
   /**
    * Get pregen wallets for the given identifier.
+   * @deprecated
    * @param {Object} opts the options object.
    * @param {string} opts.pregenIdentifier - the identifier of the user claiming the wallet
    * @param {TPregenIdentifierType} opts.pregenIdentifierType - type of the identifier of the user claiming the wallet
@@ -3016,7 +3173,7 @@ export abstract class ParaCore {
    * Encodes the current wallets encoded in Base 64.
    * @returns {string} the encoded wallet string
    **/
-  getUserShare(): string | null {
+  getUserShare(): CoreMethodResponse<'getUserShare'> {
     if (Object.values(this.wallets).length === 0) {
       return null;
     }
@@ -3030,7 +3187,7 @@ export abstract class ParaCore {
    * Sets the current wallets from a Base 64 string.
    * @param {string} base64Wallet the encoded wallet string
    **/
-  async setUserShare(base64Wallets: string | null): Promise<void> {
+  async setUserShare(base64Wallets: CoreMethodParams<'setUserShare'>): CoreMethodResponse<'setUserShare'> {
     if (!base64Wallets) {
       return;
     }
@@ -3094,12 +3251,10 @@ export abstract class ParaCore {
     messageBase64,
     timeoutMs = 30000,
     cosmosSignDocBase64,
-  }: {
-    walletId: string;
-    messageBase64: string;
-    timeoutMs?: number;
-    cosmosSignDocBase64?: string;
-  }): Promise<FullSignatureRes> {
+    isCanceled = () => false,
+    onCancel,
+    onPoll,
+  }: CoreMethodParams<'signMessage'>): CoreMethodResponse<'signMessage'> {
     this.assertIsValidWalletId(walletId);
 
     const wallet = this.wallets[walletId];
@@ -3120,11 +3275,13 @@ export abstract class ParaCore {
       return signRes as SuccessfulSignatureRes;
     }
 
-    await new Promise(resolve => setTimeout(resolve, constants.POLLING_INTERVAL_MS));
     while (true) {
-      if (Date.now() - timeStart > timeoutMs) {
+      if (isCanceled() || Date.now() - timeStart > timeoutMs) {
+        onCancel?.();
         break;
       }
+
+      await new Promise(resolve => setTimeout(resolve, constants.POLLING_INTERVAL_MS));
 
       try {
         await this.ctx.client.getPendingTransaction(this.userId, signRes.pendingTransactionId);
@@ -3137,7 +3294,8 @@ export abstract class ParaCore {
       signRes = await this.signMessageInner({ wallet, signerId, messageBase64, cosmosSignDocBase64 });
 
       if ((signRes as DeniedSignatureRes).pendingTransactionId) {
-        await new Promise(resolve => setTimeout(resolve, constants.POLLING_INTERVAL_MS));
+        onPoll?.();
+        continue;
       } else {
         break;
       }
@@ -3210,12 +3368,10 @@ export abstract class ParaCore {
     rlpEncodedTxBase64,
     chainId,
     timeoutMs = 30000,
-  }: {
-    walletId: string;
-    rlpEncodedTxBase64: string;
-    chainId: string;
-    timeoutMs?: number;
-  }): Promise<FullSignatureRes> {
+    isCanceled = () => false,
+    onCancel,
+    onPoll,
+  }: CoreMethodParams<'signTransaction'>): CoreMethodResponse<'signTransaction'> {
     this.assertIsValidWalletId(walletId);
 
     const wallet = this.wallets[walletId];
@@ -3245,11 +3401,13 @@ export abstract class ParaCore {
       return signRes as SuccessfulSignatureRes;
     }
 
-    await new Promise(resolve => setTimeout(resolve, constants.POLLING_INTERVAL_MS));
     while (true) {
-      if (Date.now() - timeStart > timeoutMs) {
+      if (isCanceled() || Date.now() - timeStart > timeoutMs) {
+        onCancel?.();
         break;
       }
+
+      await new Promise(resolve => setTimeout(resolve, constants.POLLING_INTERVAL_MS));
 
       try {
         await this.ctx.client.getPendingTransaction(this.userId, (signRes as DeniedSignatureRes).pendingTransactionId);
@@ -3271,7 +3429,8 @@ export abstract class ParaCore {
       );
 
       if ((signRes as DeniedSignatureRes).pendingTransactionId) {
-        await new Promise(resolve => setTimeout(resolve, constants.POLLING_INTERVAL_MS));
+        onPoll?.();
+        continue;
       } else {
         break;
       }
@@ -3348,11 +3507,8 @@ export abstract class ParaCore {
    * @param {string} opts.externalWalletAddress the external wallet address to send funds to or withdraw funds from, if using an external wallet.
    **/
   async initiateOnRampTransaction(
-    options: WalletParams & { params: OnRampPurchaseCreateParams; shouldOpenPopup?: boolean },
-  ): Promise<{
-    onRampPurchase: OnRampPurchase;
-    portalUrl: string;
-  }> {
+    options: CoreMethodParams<'initiateOnRampTransaction'>,
+  ): CoreMethodResponse<'initiateOnRampTransaction'> {
     const { params, shouldOpenPopup, ...walletParams } = options;
 
     const onRampPurchase = await this.ctx.client.createOnRampPurchase({
@@ -3395,7 +3551,7 @@ export abstract class ParaCore {
    * Serialize the current session for import by another Para instance.
    * @returns {string} the serialized session
    */
-  exportSession(): string {
+  exportSession(): CoreMethodResponse<'exportSession'> {
     const sessionInfo = {
       authInfo: this.#authInfo,
       userId: this.userId,
@@ -3411,7 +3567,7 @@ export abstract class ParaCore {
    * Imports a session serialized by another Para instance.
    * @param {string} serializedInstanceBase64 the serialized session
    */
-  async importSession(serializedInstanceBase64: string): Promise<void> {
+  async importSession(serializedInstanceBase64: CoreMethodParams<'importSession'>): CoreMethodResponse<'importSession'> {
     const serializedInstance = Buffer.from(serializedInstanceBase64, 'base64').toString('utf8');
     const sessionInfo = jsonParse(serializedInstance);
 
@@ -3442,22 +3598,37 @@ export abstract class ParaCore {
     this.persistSessionCookie(sessionInfo.sessionCookie);
   }
 
+  /**
+   * @deprecated
+   */
   protected exitAccountCreation() {
     this.isAwaitingAccountCreation = false;
   }
 
+  /**
+   * @deprecated
+   */
   protected exitLogin() {
     this.isAwaitingLogin = false;
   }
 
+  /**
+   * @deprecated
+   */
   protected exitFarcaster() {
     this.isAwaitingFarcaster = false;
   }
 
+  /**
+   * @deprecated
+   */
   protected exitOAuth() {
     this.isAwaitingOAuth = false;
   }
 
+  /**
+   * @deprecated
+   */
   protected exitLoops() {
     this.exitAccountCreation();
     this.exitLogin();
@@ -3469,7 +3640,7 @@ export abstract class ParaCore {
    * Retrieves a token to verify the current session.
    * @returns {Promise<string>} the ID
    **/
-  async getVerificationToken(): Promise<string> {
+  async getVerificationToken(): CoreMethodResponse<'getVerificationToken'> {
     const { sessionLookupId } = await this.touchSession();
 
     return sessionLookupId;
@@ -3504,6 +3675,7 @@ export abstract class ParaCore {
     dispatchEvent(ParaEvent.LOGOUT_EVENT, null);
   }
 
+  /** @deprecated */
   protected async getSupportedCreateAuthMethods(): Promise<Set<AuthMethod>> {
     const partner = await this.#assertPartner();
 
@@ -3566,5 +3738,831 @@ export abstract class ParaCore {
     };
 
     return `Para ${JSON.stringify(obj, null, 2)}`;
+  }
+
+  /** NEW METHODS */
+
+  protected async getNewCredentialAndUrl({
+    authMethod = 'PASSKEY',
+    isForNewDevice = false,
+    portalTheme,
+    shorten = false,
+  }: NewCredentialUrlParams): Promise<{ credentialId: string; url: string }> {
+    this.assertIsAuthSet();
+
+    let credentialId: string, urlType: Extract<PortalUrlType, 'createAuth' | 'createPassword'>;
+    switch (authMethod) {
+      case 'PASSKEY':
+        ({
+          data: { id: credentialId },
+        } = await this.ctx.client.addSessionPublicKey(this.userId, {
+          status: PublicKeyStatus.PENDING,
+          type: PublicKeyType.WEB,
+        }));
+        urlType = 'createAuth';
+        break;
+      case 'PASSWORD':
+        ({
+          data: { id: credentialId },
+        } = await this.ctx.client.addSessionPasswordPublicKey(this.userId, {
+          status: PasswordStatus.PENDING,
+        }));
+        urlType = 'createPassword';
+        break;
+    }
+
+    const url = await this.constructPortalUrlV2(urlType, {
+      isForNewDevice,
+      pathId: credentialId,
+      portalTheme,
+      shorten,
+    });
+
+    return { credentialId, url };
+  }
+
+  protected async getLoginUrlV2({
+    authMethod = 'PASSKEY',
+    shorten = false,
+    portalTheme,
+    sessionId,
+  }: LoginUrlParams): Promise<string> {
+    if (!sessionId) {
+      sessionId = (await this.touchSession()).sessionLookupId;
+    }
+
+    this.assertIsAuthSet();
+
+    let urlType: 'loginAuth' | 'loginPassword';
+    switch (authMethod) {
+      case 'PASSKEY':
+        urlType = 'loginAuth';
+        break;
+      case 'PASSWORD':
+        urlType = 'loginPassword';
+        break;
+      default:
+        throw new Error(`invalid authentication method: '${authMethod}'`);
+    }
+    return this.constructPortalUrlV2(urlType, {
+      sessionId,
+      shorten,
+      portalTheme,
+    });
+  }
+
+  protected async getOAuthUrlV2({ method, deeplinkUrl }: OAuthUrlParams): Promise<string> {
+    await this.logout();
+    const { sessionLookupId } = await this.touchSession(true);
+
+    return constructUrl({
+      base: getBaseOAuthUrl(this.ctx.env),
+      path: `/auth/${method}`,
+      params: {
+        apiKey: this.ctx.apiKey,
+        sessionLookupId,
+        deeplinkUrl,
+      },
+    });
+  }
+
+  async #prepareAuthState<T extends ServerAuthStateVerify | ServerAuthStateLogin | ServerAuthStateSignup>(
+    serverAuthState: T,
+    opts: WithCustomTheme & WithUseShortUrls & { sessionLookupId?: string } = {},
+  ): Promise<
+    | (T extends ServerAuthStateVerify ? AuthStateVerify : never)
+    | (T extends ServerAuthStateLogin ? AuthStateLogin : never)
+    | (T extends ServerAuthStateSignup ? AuthStateSignup : never)
+  > {
+    if (!opts.sessionLookupId && serverAuthState.stage === 'login') {
+      opts.sessionLookupId = await this.#prepareLogin();
+    }
+
+    const { auth, externalWallet, userId, displayName, pfpUrl, username } = serverAuthState;
+
+    const authInfo = {
+      ...extractAuthInfo(auth, { isRequired: true }),
+      ...Object.fromEntries(
+        Object.entries({
+          displayName,
+          pfpUrl,
+          username,
+          externalWallet,
+        }).filter(([_, v]) => !!v),
+      ),
+    };
+    await this.#setAuthInfo(authInfo);
+
+    await this.assertIsAuthSet();
+
+    if (!!externalWallet) {
+      await this.setExternalWallet(externalWallet);
+    }
+
+    if (!!userId) {
+      await this.setUserId(userId);
+    }
+
+    let authState;
+
+    switch (serverAuthState.stage) {
+      case 'verify':
+        authState = serverAuthState;
+        break;
+      case 'login':
+        authState = await this.#prepareLoginState(serverAuthState, { ...opts, sessionLookupId: opts.sessionLookupId! });
+        break;
+      case 'signup':
+        authState = await this.#prepareSignUpState(serverAuthState, opts);
+        break;
+    }
+
+    return authState;
+  }
+
+  async #prepareLogin(): Promise<string> {
+    await this.logout();
+    const { sessionLookupId } = await this.touchSession(true);
+
+    if (!this.loginEncryptionKeyPair) {
+      await this.setLoginEncryptionKeyPair();
+    }
+
+    return sessionLookupId;
+  }
+
+  async #prepareLoginState(
+    loginState: ServerAuthStateLogin,
+    {
+      useShortUrls: shorten = false,
+      portalTheme,
+      sessionLookupId,
+    }: {
+      useShortUrls?: boolean;
+      portalTheme?: Theme;
+      sessionLookupId: string;
+    },
+  ): Promise<AuthStateLogin> {
+    const { loginAuthMethods, ...authState } = loginState;
+
+    return {
+      ...authState,
+      ...(!this.isNativePasskey && loginAuthMethods.includes(AuthMethod.PASSKEY)
+        ? {
+            passkeyUrl: await this.getLoginUrlV2({ sessionId: sessionLookupId, shorten, portalTheme }),
+            passkeyKnownDeviceUrl: await this.constructPortalUrlV2('loginAuth', {
+              sessionId: sessionLookupId,
+              newDevice: {
+                sessionId: sessionLookupId,
+                encryptionKey: getPublicKeyHex(this.loginEncryptionKeyPair),
+              },
+              shorten,
+              portalTheme,
+            }),
+          }
+        : {}),
+      ...(loginAuthMethods.includes(AuthMethod.PASSWORD)
+        ? {
+            passwordUrl: await this.constructPortalUrlV2('loginPassword', {
+              sessionId: sessionLookupId,
+              shorten,
+              portalTheme,
+            }),
+          }
+        : {}),
+    };
+  }
+
+  async #prepareSignUpState(
+    serverSignupState: ServerAuthStateSignup,
+    { useShortUrls: shorten = false, portalTheme }: WithCustomTheme & WithUseShortUrls,
+  ): Promise<AuthStateSignup> {
+    const { signupAuthMethods, ...authState } = serverSignupState;
+
+    const [isPasskey, isPassword] = [
+      signupAuthMethods.includes(AuthMethod.PASSKEY),
+      signupAuthMethods.includes(AuthMethod.PASSWORD),
+    ];
+
+    if (!isPasskey && !isPassword) {
+      throw new Error(
+        'No supported authentication methods found. Please ensure you have enabled either WebAuth passkeys or passwords in your Developer Portal settings.',
+      );
+    }
+
+    const signupState: Partial<AuthStateSignup> = authState;
+
+    if (isPasskey) {
+      const { url: passkeyUrl, credentialId: passkeyId } = await this.getNewCredentialAndUrl({
+        authMethod: 'PASSKEY',
+        shorten,
+      });
+
+      signupState.passkeyUrl = passkeyUrl;
+      signupState.passkeyId = passkeyId;
+    }
+
+    if (isPassword) {
+      const { url: passwordUrl, credentialId: passwordId } = await this.getNewCredentialAndUrl({
+        authMethod: 'PASSWORD',
+        portalTheme,
+        shorten,
+      });
+
+      signupState.passwordUrl = passwordUrl;
+      signupState.passwordId = passwordId;
+    }
+
+    return <AuthStateSignup>signupState;
+  }
+
+  async signUpOrLogInV2({
+    auth,
+    ...urlOptions
+  }: CoreMethodParams<'signUpOrLogInV2'>): CoreMethodResponse<'signUpOrLogInV2'> {
+    const serverAuthState = await this.ctx.client.signUpOrLogIn({
+      ...auth,
+      ...this.getVerificationEmailProps(),
+    });
+
+    return this.#prepareAuthState(serverAuthState, urlOptions);
+  }
+
+  async verifyNewAccountV2({
+    verificationCode,
+    ...urlOptions
+  }: CoreMethodParams<'verifyNewAccountV2'>): CoreMethodResponse<'verifyNewAccountV2'> {
+    this.assertIsAuthSet(['email', 'phone']);
+    const userId = this.assertUserId();
+
+    const serverAuthState = await this.ctx.client.verifyNewAccount(userId, {
+      verificationCode,
+    });
+
+    return this.#prepareAuthState(serverAuthState, urlOptions);
+  }
+
+  async verifyOAuthV2({
+    method,
+    deeplinkUrl,
+    isCanceled = () => false,
+    onCancel,
+    onPoll,
+    onOAuthUrl,
+    ...urlOptions
+  }: CoreMethodParams<'verifyOAuthV2'>): CoreMethodResponse<'verifyOAuthV2'> {
+    const sessionLookupId = await this.#prepareLogin();
+
+    const oAuthUrl = constructUrl({
+      base: getBaseOAuthUrl(this.ctx.env),
+      path: `/auth/${method}`,
+      params: {
+        apiKey: this.ctx.apiKey,
+        sessionLookupId,
+        deeplinkUrl,
+      },
+    });
+
+    onOAuthUrl(oAuthUrl);
+
+    const startedAt = Date.now();
+    return new Promise((resolve, reject) => {
+      (async () => {
+        while (true) {
+          try {
+            if (isCanceled() || Date.now() - startedAt > constants.POLLING_TIMEOUT_MS) {
+              onCancel?.();
+              return reject('canceled');
+            }
+
+            await new Promise(_resolve => setTimeout(_resolve, constants.POLLING_INTERVAL_MS));
+
+            const serverAuthState = await this.ctx.client.verifyOAuth();
+
+            if (isServerAuthState(serverAuthState)) {
+              const authState = await this.#prepareAuthState(serverAuthState, { ...urlOptions, sessionLookupId });
+
+              return resolve(authState);
+            }
+            onPoll?.();
+          } catch (err) {
+            console.error(err);
+            onPoll?.();
+          }
+        }
+      })();
+    });
+  }
+
+  async verifyFarcasterV2({
+    isCanceled = () => false,
+    onConnectUri,
+    onCancel,
+    onPoll,
+    ...urlOptions
+  }: CoreMethodParams<'verifyFarcasterV2'>): CoreMethodResponse<'verifyFarcasterV2'> {
+    const {
+      data: { connect_uri: connectUri },
+    } = await this.ctx.client.initializeFarcasterLogin();
+
+    onConnectUri(connectUri);
+
+    return new Promise((resolve, reject) => {
+      (async () => {
+        const startedAt = Date.now();
+        while (true) {
+          try {
+            if (isCanceled() || Date.now() - startedAt > constants.POLLING_TIMEOUT_MS) {
+              onCancel?.();
+              return reject('canceled');
+            }
+
+            await new Promise(_resolve => setTimeout(_resolve, constants.POLLING_INTERVAL_MS));
+
+            const serverAuthState = await this.ctx.client.getFarcasterAuthStatusV2();
+
+            if (isServerAuthState(serverAuthState)) {
+              const authState = await this.#prepareAuthState(serverAuthState, urlOptions);
+
+              return resolve(authState);
+            }
+            onPoll?.();
+          } catch (e) {
+            console.error(e);
+            return reject(e);
+          }
+        }
+      })();
+    });
+  }
+
+  /**
+   * Validates the response received from an attempted Telegram login for authenticity, then
+   * creates or retrieves the corresponding Para user and prepares the Para instance to sign in with that user.
+   * @param authResponse - the response JSON object received from the Telegram widget.
+   * @returns `{ isValid: boolean; telegramUserId?: string; userId?: string; isNewUser?: boolean; supportedAuthMethods?: AuthMethod[]; biometricHints?: BiometricLocationHint[] }`
+   */
+  async verifyTelegramV2({
+    telegramAuthResponse,
+    ...urlOptions
+  }: CoreMethodParams<'verifyTelegramV2'>): CoreMethodResponse<'verifyTelegramV2'> {
+    try {
+      const serverAuthState = await this.ctx.client.verifyTelegramV2(telegramAuthResponse);
+
+      return this.#prepareAuthState(serverAuthState, urlOptions);
+    } catch (e) {
+      throw new Error(e.message);
+    }
+  }
+
+  /**
+   * Waits for the session to be active and sets up the user.
+   *
+   * @param {Object} opts the options object
+   * @param {Window} [opts.popupWindow] the popup window being used for login.
+   * @param {boolean} [opts.skipSessionRefresh] whether to skip refreshing the session.
+   * @returns {Object} `{ isComplete: boolean; isError: boolean; needsWallet: boolean; partnerId: string; }` the result data
+   **/
+  async waitForLoginV2({
+    isCanceled = () => false,
+    onCancel,
+    onPoll,
+    skipSessionRefresh = false,
+  }: CoreMethodParams<'waitForLoginV2'> = {}): CoreMethodResponse<'waitForLoginV2'> {
+    const startedAt = Date.now();
+    return new Promise((resolve, reject) => {
+      (async () => {
+        if (!this.isExternalWalletAuth) {
+          // Remove external wallets if logging in with Capsule
+          this.externalWallets = {};
+        }
+
+        while (true) {
+          if (isCanceled() || Date.now() - startedAt > constants.POLLING_TIMEOUT_MS) {
+            dispatchEvent(ParaEvent.LOGIN_EVENT, { isComplete: false }, 'failed to setup user');
+            onCancel?.();
+            return reject('canceled');
+          }
+
+          await new Promise(resolve => setTimeout(resolve, constants.POLLING_INTERVAL_MS));
+
+          try {
+            let session = await this.touchSession();
+            if (!session.isAuthenticated) {
+              onPoll?.();
+              continue;
+            }
+
+            session = await this.userSetupAfterLogin();
+
+            const needsWallet = session.needsWallet ?? false;
+
+            if (!needsWallet) {
+              if (this.currentWalletIdsArray.length === 0) {
+                onPoll?.();
+                continue;
+              }
+            }
+
+            const fetchedWallets = await this.fetchWallets();
+
+            const tempSharesRes = await this.getTransmissionKeyShares();
+            // need this check for the case where user has logged in but temp encrypted shares
+            // haven't been sent to the backend yet
+            if (tempSharesRes.data.temporaryShares.length === fetchedWallets.length) {
+              await this.setupAfterLogin({ temporaryShares: tempSharesRes.data.temporaryShares, skipSessionRefresh });
+
+              await this.claimPregenWalletsV2();
+
+              const resp = {
+                needsWallet: needsWallet || Object.values(this.wallets).length === 0,
+                partnerId: session.partnerId,
+              };
+
+              dispatchEvent(ParaEvent.LOGIN_EVENT, resp);
+              return resolve(resp);
+            }
+            onPoll?.();
+          } catch (err) {
+            // want to continue polling on error
+            console.error(err);
+            onPoll?.();
+          }
+        }
+      })();
+    });
+  }
+
+  async waitForSignupV2({
+    isCanceled = () => false,
+    onCancel,
+    onPoll,
+  }: CoreMethodParams<'waitForSignupV2'>): CoreMethodResponse<'waitForSignupV2'> {
+    const startedAt = Date.now();
+
+    return new Promise((resolve, reject) => {
+      (async () => {
+        await this.touchSession();
+
+        if (!this.isExternalWalletAuth) {
+          // Remove external wallets if creating an account with Para
+          this.externalWallets = {};
+        }
+
+        while (true) {
+          try {
+            if (isCanceled() || Date.now() - startedAt > constants.POLLING_TIMEOUT_MS) {
+              onCancel?.();
+              dispatchEvent(ParaEvent.ACCOUNT_CREATION_EVENT, false, 'failed to sign up user');
+              return reject('canceled');
+            }
+
+            await new Promise(_resolve => setTimeout(_resolve, constants.POLLING_INTERVAL_MS));
+
+            if (await this.isSessionActive()) {
+              dispatchEvent(ParaEvent.ACCOUNT_CREATION_EVENT, true);
+              return resolve(true);
+            }
+            onPoll?.();
+          } catch (err) {
+            // want to continue polling on error
+            console.error(err);
+            onPoll?.();
+          }
+        }
+      })();
+    });
+  }
+
+  async waitForWalletCreationV2({
+    isCanceled = () => false,
+    onCancel,
+  }: CoreMethodParams<'waitForWalletCreationV2'> = {}): CoreMethodResponse<'waitForWalletCreationV2'> {
+    await this.waitForSignupV2({ isCanceled, onCancel });
+
+    const { supportedWalletTypes } = await this.#assertPartner();
+
+    const pregenWallets = await this.getPregenWalletsV2();
+
+    let recoverySecret: string | undefined,
+      walletIds: CurrentWalletIds = {};
+
+    if (pregenWallets.length > 0) {
+      recoverySecret = await this.claimPregenWalletsV2();
+      walletIds = supportedWalletTypes.reduce((acc: CurrentWalletIds, { type }) => {
+        return {
+          ...acc,
+          [type]: [pregenWallets.find(w => !!WalletSchemeTypeMap[w.scheme][type])?.id],
+        };
+      }, {});
+    }
+
+    // After claiming any pregen wallets, create wallets for the remaining missing types
+    const created = await this.createWalletPerType();
+
+    recoverySecret = recoverySecret ?? created.recoverySecret;
+    walletIds = { ...walletIds, ...created.walletIds };
+
+    const resp = { walletIds, recoverySecret };
+    dispatchEvent(ParaEvent.ACCOUNT_SETUP_EVENT, resp);
+    return resp;
+  }
+
+  async loginExternalWalletV2({
+    externalWallet,
+    ...urlOptions
+  }: CoreMethodParams<'loginExternalWalletV2'>): CoreMethodResponse<'loginExternalWalletV2'> {
+    this.requireApiKey();
+
+    const serverAuthState = await this.ctx.client.loginExternalWalletV2({ externalWallet });
+
+    return this.#prepareAuthState(serverAuthState, urlOptions);
+  }
+
+  async verifyExternalWalletV2({
+    externalWallet,
+    signedMessage,
+    cosmosPublicKeyHex,
+    cosmosSigner,
+    ...urlOptions
+  }: CoreMethodParams<'verifyExternalWalletV2'>): CoreMethodResponse<'verifyExternalWalletV2'> {
+    const serverAuthState = await this.ctx.client.verifyExternalWalletV2(this.userId, {
+      externalWallet,
+      signedMessage,
+      cosmosPublicKeyHex,
+      cosmosSigner,
+    });
+
+    return this.#prepareAuthState(serverAuthState, urlOptions);
+  }
+
+  /**
+   * Performs 2FA verification.
+   * @param {Object} opts the options object
+   * @param {string} opts.email the email to use for performing a 2FA verification.
+   * @param {string} opts.verificationCode the verification code to received via 2FA.
+   * @returns {Object} `{ address, initiatedAt, status, userId, walletId }`
+   */
+  async verify2faV2({ auth, verificationCode }: CoreMethodParams<'verify2faV2'>): CoreMethodResponse<'verify2faV2'> {
+    const res = await this.ctx.client.verify2FAV2(auth, verificationCode);
+    return {
+      initiatedAt: res.data.initiatedAt,
+      status: res.data.status,
+      userId: res.data.userId,
+      wallets: res.data.wallets,
+    };
+  }
+
+  /**
+   * Sets up two-factor authentication for the current user.
+   * @returns {string} uri - uri to use for setting up 2FA
+   * */
+  async setup2faV2(): CoreMethodResponse<'setup2faV2'> {
+    const userId = this.assertUserId();
+
+    const res = await this.ctx.client.setup2FAV2(userId);
+
+    return res;
+  }
+
+  /**
+   * Enables 2FA.
+   * @param {Object} opts the options object
+   * @param {string} opts.verificationCode - the verification code received via 2FA.
+   */
+  async enable2faV2({ verificationCode }: CoreMethodParams<'enable2faV2'>): CoreMethodResponse<'enable2faV2'> {
+    const userId = this.assertUserId();
+
+    await this.ctx.client.enable2FA(userId, verificationCode);
+  }
+
+  /**
+   * Creates a new pregenerated wallet.
+   *
+   * @param {Object} opts the options object.
+   * @param {string} opts.pregenIdentifier the identifier associated with the new wallet.
+   * @param {TPregenIdentifierType} [opts.pregenIdentifierType] the identifier type. Defaults to `EMAIL`.
+   * @param {WalletType} [opts.type] the type of wallet to create. Defaults to the first non-optional type in the instance's `supportedWalletTypes` array.
+   * @returns {Wallet} the created wallet.
+   **/
+  async createPregenWalletV2(opts: CoreMethodParams<'createPregenWalletV2'>): CoreMethodResponse<'createPregenWalletV2'> {
+    const { supportedWalletTypes } = await this.#assertPartner();
+    const { type: _type = supportedWalletTypes.find(({ optional }) => !optional)?.type, pregenId } = opts;
+    this.requireApiKey();
+    const walletType = await this.assertIsValidWalletType(
+      _type ?? supportedWalletTypes.find(({ optional }) => !optional)?.type,
+    );
+    const [pregenIdentifierType, pregenIdentifier] = toPregenTypeAndId(pregenId);
+
+    let keygenRes;
+    switch (walletType) {
+      case WalletType.SOLANA:
+        keygenRes = await this.platformUtils.ed25519PreKeygen(
+          this.ctx,
+          pregenIdentifier,
+          pregenIdentifierType,
+          this.retrieveSessionCookie(),
+        );
+        break;
+      default:
+        keygenRes = await this.platformUtils.preKeygen(
+          this.ctx,
+          undefined,
+          pregenIdentifier,
+          pregenIdentifierType,
+          walletType,
+          null,
+          this.retrieveSessionCookie(),
+        );
+        break;
+    }
+
+    const { signer, walletId } = keygenRes;
+
+    this.wallets[walletId] = {
+      id: walletId,
+      signer,
+      scheme: walletType === WalletType.SOLANA ? WalletScheme.ED25519 : WalletScheme.DKLS,
+      type: walletType,
+      isPregen: true,
+      pregenIdentifier,
+      pregenIdentifierType,
+    };
+
+    await this.waitForPregenWalletAddress(walletId);
+    await this.populatePregenWalletAddresses();
+
+    return this.wallets[walletId];
+  }
+
+  /**
+   * Creates new pregenerated wallets for each desired type.
+   * If no types are provided, this method will create one for each of the non-optional types
+   * specified in the instance's `supportedWalletTypes` array that are not already present.
+   * @param {Object} opts the options object.
+   * @param {string} opts.pregenIdentifier the identifier to associate each wallet with.
+   * @param {TPregenIdentifierType} opts.pregenIdentifierType - either `'EMAIL'` or `'PHONE'`.
+   * @param {WalletType[]} [opts.types] the wallet types to create. Defaults to any types the instance supports that are not already present.
+   * @returns {Wallet[]} an array containing the created wallets.
+   **/
+  async createPregenWalletPerTypeV2({
+    types,
+    pregenId,
+  }: CoreMethodParams<'createPregenWalletPerTypeV2'>): CoreMethodResponse<'createPregenWalletPerTypeV2'> {
+    const wallets = [];
+    for (const type of await this.getTypesToCreate(types)) {
+      const wallet = await this.createPregenWalletV2({ type, pregenId });
+
+      wallets.push(wallet);
+    }
+    return wallets;
+  }
+
+  /**
+   * Claims a pregenerated wallet.
+   * @param {Object} opts the options object.
+   * @param {string} opts.pregenIdentifier string the identifier of the user claiming the wallet
+   * @param {TPregenIdentifierType} opts.pregenIdentifierType type of the identifier of the user claiming the wallet
+   * @returns {[Wallet, string | null]} `[wallet, recoveryShare]` - the wallet object and the new recovery share.
+   **/
+  async claimPregenWalletsV2({
+    pregenId,
+  }: CoreMethodParams<'claimPregenWalletsV2'> = {}): CoreMethodResponse<'claimPregenWalletsV2'> {
+    this.requireApiKey();
+
+    const pregenWallets = pregenId ? await this.getPregenWalletsV2({ pregenId }) : await this.getPregenWalletsV2();
+
+    if (pregenWallets.length === 0) {
+      return undefined;
+    }
+
+    let newRecoverySecret: string | undefined;
+
+    const { walletIds } = await this.ctx.client.claimPregenWallets({
+      userId: this.userId,
+      walletIds: pregenWallets.map(w => w.id),
+    });
+
+    for (const walletId of walletIds) {
+      const wallet = this.wallets[walletId];
+      let refreshedShare;
+
+      if (wallet.scheme === WalletScheme.ED25519) {
+        const distributeRes = await distributeNewShare({
+          ctx: this.ctx,
+          userId: this.userId,
+          walletId: wallet.id,
+          userShare: this.wallets[wallet.id].signer,
+          emailProps: this.getBackupKitEmailProps(),
+          partnerId: wallet.partnerId,
+        });
+
+        if (distributeRes.length > 0) {
+          newRecoverySecret = distributeRes;
+        }
+      } else {
+        refreshedShare = await this.refreshShare({
+          walletId: wallet.id,
+          share: this.wallets[wallet.id].signer,
+          oldPartnerId: wallet.partnerId,
+          newPartnerId: wallet.partnerId,
+          redistributeBackupEncryptedShares: true,
+        });
+
+        if (refreshedShare.recoverySecret) {
+          newRecoverySecret = refreshedShare.recoverySecret;
+        }
+      }
+
+      this.wallets[wallet.id] = {
+        ...this.wallets[wallet.id],
+        signer: refreshedShare?.signer ?? wallet.signer,
+        userId: this.userId,
+        pregenIdentifier: undefined,
+        pregenIdentifierType: undefined,
+      };
+
+      const walletNoSigner = { ...this.wallets[wallet.id] };
+      delete walletNoSigner.signer;
+
+      dispatchEvent<PregenWalletClaimedResponse>(ParaEvent.PREGEN_WALLET_CLAIMED, {
+        wallet: walletNoSigner,
+        recoverySecret: newRecoverySecret,
+      });
+    }
+
+    await this.setWallets(this.wallets);
+
+    return newRecoverySecret;
+  }
+
+  /**
+   * Updates the identifier for a pregen wallet.
+   * @param {Object} opts the options object.
+   * @param {string} opts.walletId the pregen wallet ID
+   * @param {string} opts.newPregenIdentifier the new identtifier
+   * @param {TPregenIdentifierType} opts.newPregenIdentifierType: the new identifier type
+   **/
+  async updatePregenWalletIdentifierV2({
+    walletId,
+    newPregenId,
+  }: CoreMethodParams<'updatePregenWalletIdentifierV2'>): CoreMethodResponse<'updatePregenWalletIdentifierV2'> {
+    this.requireApiKey();
+
+    const [newPregenIdentifierType, newPregenIdentifier] = toPregenTypeAndId(newPregenId);
+    await this.ctx.client.updatePregenWallet(walletId, {
+      pregenIdentifier: newPregenIdentifier,
+      pregenIdentifierType: newPregenIdentifierType,
+    });
+
+    if (!!this.wallets[walletId]) {
+      this.wallets[walletId] = {
+        ...this.wallets[walletId],
+        pregenIdentifier: newPregenIdentifier,
+        pregenIdentifierType: newPregenIdentifierType,
+      };
+
+      await this.setWallets(this.wallets);
+    }
+  }
+
+  /**
+   * Checks if a pregen Wallet exists for the given identifier with the current partner.
+   * @param {Object} opts the options object.
+   * @param {string} opts.pregenIdentifier string the identifier of the user claiming the wallet
+   * @param {TPregenIdentifierType} opts.pregenIdentifierType type of the string of the identifier of the user claiming the wallet
+   * @returns {boolean} whether the pregen wallet exists
+   **/
+  async hasPregenWalletV2({ pregenId }: CoreMethodParams<'hasPregenWalletV2'>): CoreMethodResponse<'hasPregenWalletV2'> {
+    this.requireApiKey();
+
+    const [pregenIdentifierType, pregenIdentifier] = toPregenTypeAndId(pregenId);
+    const wallets = await this.getPregenWalletsV2({ pregenId });
+    const wallet = wallets.find(
+      w => w.pregenIdentifier === pregenIdentifier && w.pregenIdentifierType === pregenIdentifierType,
+    );
+    if (!wallet) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Get pregen wallets for the given identifier.
+   * @param {Object} opts the options object.
+   * @param {string} opts.pregenIdentifier - the identifier of the user claiming the wallet
+   * @param {TPregenIdentifierType} opts.pregenIdentifierType - type of the identifier of the user claiming the wallet
+   * @returns {Promise<WalletEntity[]>} the array of found wallets
+   **/
+  async getPregenWalletsV2({
+    pregenId,
+  }: CoreMethodParams<'getPregenWalletsV2'> = {}): CoreMethodResponse<'getPregenWalletsV2'> {
+    this.requireApiKey();
+    const res = await this.ctx.client.getPregenWallets(
+      pregenId ? toPregenIds(pregenId) : this.pregenIds,
+      this.isPortal(),
+      this.userId,
+    );
+    return res.wallets.filter(w => this.isWalletSupported(entityToWallet(w)));
   }
 }

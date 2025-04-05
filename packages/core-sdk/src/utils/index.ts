@@ -6,5 +6,6 @@ export * from './listeners.js';
 export * from './onRamps.js';
 export * from './phone.js';
 export * from './polling.js';
+export * from './types.js';
 export * from './url.js';
 export * from './wallet.js';

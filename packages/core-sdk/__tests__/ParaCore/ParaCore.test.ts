@@ -126,6 +126,7 @@ function testLoginUrl(para: MockPara, str: string, authMethod: AuthMethod) {
   expectSearchParams(url, {
     ...COMMON_SEARCH_PARAMS,
     ...para.authInfo!.auth,
+    authInfo: JSON.stringify(para.authInfo),
     apiKey: PARTNER.apiKey,
     encryptionKey: getPublicKeyHex(para.loginEncryptionKeyPair),
     sessionId: expect.stringMatching(new RegExp(`^(${SESSION_ID}|${SESSION_LOOKUP_ID})$`)),
@@ -143,6 +144,7 @@ function testCreateUrl(para: MockPara, str: string, authMethod: AuthMethod) {
   expectSearchParams(url, {
     ...COMMON_SEARCH_PARAMS,
     ...para.authInfo!.auth,
+    authInfo: JSON.stringify(para.authInfo),
     apiKey: PARTNER.apiKey,
   });
 }

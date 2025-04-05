@@ -238,7 +238,7 @@ export type LoginExternalWalletResponse =
 
 export type VerifyTelegramResponse = VerifyThirdPartyAuth;
 
-export type VerifyFarcasterResponse = VerifyThirdPartyAuth | null;
+export type VerifyFarcasterResponse = VerifyThirdPartyAuth | Record<string, never>;
 
 export type ServerAuthState = ServerAuthStateVerify | ServerAuthStateSignup | ServerAuthStateLogin;
 
