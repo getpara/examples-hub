@@ -57,6 +57,7 @@ export async function alchemySessionSignHandler(req: Request, res: Response, nex
     const alchemyApiKey = process.env.ALCHEMY_API_KEY;
     const alchemyGasPolicyId = process.env.ALCHEMY_GAS_POLICY_ID;
     const rpcUrl = process.env.ARBITRUM_SEPOLIA_RPC;
+    const env = process.env.PARA_ENVIRONMENT as Environment || Environment.BETA;
 
     if (!paraApiKey || !alchemyApiKey || !alchemyGasPolicyId || !rpcUrl) {
       res
@@ -67,7 +68,7 @@ export async function alchemySessionSignHandler(req: Request, res: Response, nex
       return;
     }
 
-    const para = new ParaServer(Environment.BETA, paraApiKey);
+    const para = new ParaServer(env, paraApiKey);
     await para.importSession(session);
 
     const viemParaAccount: LocalAccount = createParaAccount(para);
