@@ -1,22 +1,15 @@
 import type { NextFunction, Request, Response } from "express";
+
 import { Para as ParaServer, Environment, hexStringToBase64, SuccessfulSignatureRes } from "@getpara/server-sdk";
 import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integration";
-import {
-  http,
-  zeroAddress,
-  encodeFunctionData,
-  createPublicClient,
-  hashMessage,
-  SignableMessage,
-  Hash,
-  LocalAccount,
-  WalletClient,
-} from "viem";
-import { arbitrumSepolia } from "viem/chains"; // Using Arbitrum Sepolia based on RPC URL env var
+
+import { http, encodeFunctionData, hashMessage, SignableMessage, Hash, LocalAccount, WalletClient } from "viem";
+import { arbitrumSepolia } from "viem/chains";
 
 import { signerToEcdsaValidator } from "@zerodev/ecdsa-validator";
 import { createKernelAccount, createKernelAccountClient, createZeroDevPaymasterClient } from "@zerodev/sdk";
 import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants";
+
 import { getKeyShareInDB } from "../../db/keySharesDB.js";
 import { decrypt } from "../../utils/encryption-utils.js";
 import Example from "../../artifacts/Example.json" assert { type: "json" };
