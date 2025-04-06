@@ -3,6 +3,7 @@ import { ExternalWalletsSlice, Store } from '../types.js';
 import { EvmExternalWalletContext } from '../../external/stubs/EvmExternalWalletContextStub.js';
 import { CosmosExternalWalletContext } from '../../external/stubs/CosmosExternalWalletContextStub.js';
 import { SolanaExternalWalletContext } from '../../external/stubs/SolanaExternalWalletContextStub.js';
+import { createRef } from 'react';
 
 export const createExternalWalletsSlice: StateCreator<Store, [], [], ExternalWalletsSlice> = set => ({
   externalWallets: [],
@@ -37,4 +38,6 @@ export const createExternalWalletsSlice: StateCreator<Store, [], [], ExternalWal
   setSolanaWallets: solanaWallets => set({ solanaWallets }),
   isLoadingSolanaLib: true,
   setIsLoadingSolanaLib: isLoadingSolanaLib => set({ isLoadingSolanaLib }),
+
+  onLoginRef: createRef<(() => Promise<void>) | null>(),
 });

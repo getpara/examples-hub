@@ -40,7 +40,7 @@ export function useCreateAccount(): { withPasskey: () => void; withPassword: () 
 
   return {
     withPasskey: () => {
-      if (!webAuthURLForCreate || refs.poll.current?.action === 'createPasskey') {
+      if (!webAuthURLForCreate || refs.poll.current?.action === 'signup') {
         return;
       }
 
@@ -53,7 +53,7 @@ export function useCreateAccount(): { withPasskey: () => void; withPassword: () 
       });
 
       refs.poll.current = {
-        action: 'createPasskey',
+        action: 'signup',
         timeout: window.setTimeout(awaitWalletCreationTransition, DEFAULTS.POLLING_INTERVAL_MS),
       };
 
@@ -62,14 +62,14 @@ export function useCreateAccount(): { withPasskey: () => void; withPassword: () 
       }
     },
     withPassword: () => {
-      if (refs.poll.current?.action === 'createPassword') {
+      if (refs.poll.current?.action === 'signup') {
         return;
       }
 
       clearTimeout(refs.poll.current?.timeout);
 
       refs.poll.current = {
-        action: 'createPassword',
+        action: 'signup',
         timeout: window.setTimeout(awaitWalletCreationTransition, DEFAULTS.POLLING_INTERVAL_MS),
       };
 

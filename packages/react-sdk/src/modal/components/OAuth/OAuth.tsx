@@ -115,7 +115,7 @@ export const OAuth = ({ methods }: OAuthProps) => {
         const supportedCreateAuthMethods = await para.getSupportedCreateAuthMethods();
 
         setIsIFrameReady(false);
-        setFlow('signUp');
+        setFlow('signup');
         const supportsPasskey = supportedCreateAuthMethods.has(AuthMethod.PASSKEY);
         const supportsPassword = supportedCreateAuthMethods.has(AuthMethod.PASSWORD);
 

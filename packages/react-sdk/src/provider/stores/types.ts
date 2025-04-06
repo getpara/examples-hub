@@ -1,4 +1,4 @@
-import { Context } from 'react';
+import { Context, MutableRefObject } from 'react';
 import ParaWeb, { WalletType } from '@getpara/web-sdk';
 import { EvmExternalWalletContextType, ParaEvmProvider, WalletList as EvmWalletList } from '@getpara/evm-wallet-connectors';
 import {
@@ -74,6 +74,8 @@ export interface ExternalWalletsSlice {
   setSolanaWallets: (_: SolanaWalletList) => void;
   isLoadingSolanaLib: boolean;
   setIsLoadingSolanaLib: (_: boolean) => void;
+
+  onLoginRef: MutableRefObject<(() => Promise<void>) | null>;
 }
 
 export type Store = ClientSlice & ModalSlice & WalletSlice & ExternalWalletsSlice & ConfigSlice;

@@ -294,7 +294,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
 
       // If no biometrics have been set, reverify and create a biometric
       if (!supportedAuthMethods.size) {
-        setFlow('signUp');
+        setFlow('signup');
         setStep(ModalStep.EXTERNAL_WALLET_VERIFICATION);
         return;
       }
@@ -312,7 +312,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
       setSupportedAuthMethods(supportedAuthMethods);
       setBiometricLocationHints(biometricLocationHints);
     } else {
-      setFlow('signUp');
+      setFlow('signup');
       setStep(ModalStep.EXTERNAL_WALLET_VERIFICATION);
     }
   };

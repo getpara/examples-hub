@@ -32,6 +32,11 @@ export {
   PopupType,
   PregenIdentifierType,
   RecoveryStatus,
+  type AuthStateSignup,
+  type AuthStateVerify,
+  type AuthStateLogin,
+  type AuthState,
+  type OAuthResponse,
   type CoreAuthInfo,
   type ProviderAssetInfo,
   type SignatureRes,
@@ -43,9 +48,10 @@ export {
   type Theme,
   type Wallet,
 } from './types/index.js';
+export * from './types/coreApi.js';
 export * from './types/events.js';
 export * from './types/config.js';
-export { getPortalDomain, entityToWallet } from './utils/index.js';
+export { getPortalDomain, entityToWallet, constructUrl, shortenUrl } from './utils/index.js';
 export { PREFIX as STORAGE_PREFIX } from './constants.js';
 export { distributeNewShare } from './shares/shareDistribution.js';
 export { KeyContainer } from './shares/KeyContainer.js';

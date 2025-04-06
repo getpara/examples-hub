@@ -4,12 +4,12 @@ import { ModalStep } from '../../utils/steps.js';
 import { getActions } from './actions.js';
 import { OnRampConfig as OnRampConfigBase, OnRampPurchase, WalletType } from '@getpara/web-sdk';
 import { Tab as AddFundsTabType } from '../../components/AddFunds/AddFunds.js';
-import { AuthMethod } from '@getpara/core-sdk';
-import { BiometricLocationHint } from '@getpara/user-management-client';
+import { AuthStateLogin, AuthStateSignup, AuthMethod, AuthState, AuthStateVerify } from '@getpara/core-sdk';
 import { AuthLayout, TAuthLayout } from '../../types/modalProps.js';
 import { createRef, MutableRefObject } from 'react';
+import { BiometricLocationHint, Setup2faResponse } from '@getpara/user-management-client';
 
-type Flow = 'login' | 'signUp' | 'account';
+type Flow = AuthStateSignup['stage'] | AuthStateLogin['stage'] | 'account';
 
 type ActiveWallet = [string | undefined, WalletType | undefined];
 
@@ -24,6 +24,7 @@ interface ModalState {
   step: ModalStep;
   stepDirection: 1 | -1;
   flow: Flow | undefined;
+  authState: AuthState | undefined;
   webAuthURLForLogin: string | undefined;
   webAuthURLForCreate: string | undefined;
   passwordUrlForLogin: string | undefined;
@@ -39,6 +40,7 @@ interface ModalState {
   externalWalletError?: string[];
   activeWallet: ActiveWallet | undefined;
   farcasterConnectUri: string | undefined;
+  twoFactorStatus: Setup2faResponse | undefined;
   biometricLocationHints: BiometricLocationHint[] | undefined;
   iFrameUrl: string | undefined;
   isIFrameReady: boolean | undefined;
@@ -46,7 +48,7 @@ interface ModalState {
   authStepRoute: ModalStep | undefined;
   refs: {
     popupWindow: MutableRefObject<Window | null>;
-    poll: MutableRefObject<{ action: 'login' | 'createPasskey' | 'createPassword'; timeout: number } | null>;
+    poll: MutableRefObject<{ action: 'login' | 'signup'; timeout: number } | null>;
     currentStep: MutableRefObject<ModalStep | null>;
   };
   isPasskeySupported: boolean;
@@ -58,6 +60,10 @@ export interface ModalActions {
   decrementStep: () => void;
   hasPreviousStep: () => boolean;
   setFlow: (flow?: Flow) => void;
+  setAuthState: (authState?: AuthState | undefined) => void;
+  getVerifyState: () => AuthStateVerify | undefined;
+  getSignupState: () => AuthStateSignup | undefined;
+  getLoginState: () => AuthStateLogin | undefined;
   isLogin: () => boolean;
   isAccount: () => boolean;
   setSupportedAuthMethods: (authMethods: Set<AuthMethod>) => void;
@@ -75,6 +81,7 @@ export interface ModalActions {
   setExternalWalletError: (externalWalletError?: string[]) => void;
   setStepDirection: (stepDirection: 1 | -1) => void;
   setFarcasterConnectUri: (_: string | undefined) => void;
+  setTwoFactorStatus: (twoFactorStatus?: Setup2faResponse) => void;
   setBiometricLocationHints: (_?: BiometricLocationHint[]) => void;
   setIFrameUrl: (_?: string) => void;
   setIsIFrameReady: (_?: boolean) => void;
@@ -89,6 +96,7 @@ export type ModalStore = ModalState & ModalActions;
 export const DEFAULT_MODAL_STATE: Omit<ModalState, 'step' | 'onRampConfig'> = {
   flow: undefined,
   stepDirection: 1,
+  authState: undefined,
   webAuthURLForLogin: undefined,
   webAuthURLForCreate: undefined,
   passwordUrlForLogin: undefined,
@@ -101,6 +109,7 @@ export const DEFAULT_MODAL_STATE: Omit<ModalState, 'step' | 'onRampConfig'> = {
   externalWalletError: undefined,
   activeWallet: [undefined, undefined],
   farcasterConnectUri: undefined,
+  twoFactorStatus: undefined,
   biometricLocationHints: undefined,
   iFrameUrl: undefined,
   isIFrameReady: undefined,
@@ -128,6 +137,7 @@ export const useModalStore = create<ModalStore>()(
       storage: createJSONStorage(() => localStorage),
       partialize: state => ({
         step: state.step,
+        authState: state.authState,
         webAuthURLForLogin: state.webAuthURLForLogin,
         webAuthURLForCreate: state.webAuthURLForCreate,
         passwordUrlForLogin: state.passwordUrlForLogin,

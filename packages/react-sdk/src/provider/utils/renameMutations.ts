@@ -1,4 +1,6 @@
+import { CoreMethodName, CoreMethodParams, CoreMethodResponse, CoreMethods } from '@getpara/web-sdk';
 import { DefaultError, UseMutationResult } from '@tanstack/react-query';
+import { CoreMethodHook } from '../types/utils.js';
 
 export function renameMutations<
   TResp = unknown,
@@ -7,8 +9,6 @@ export function renameMutations<
   TVariables = void,
   TContext = unknown,
 >(mutationObj: UseMutationResult<TData, TError, TVariables, TContext>, name: string): TResp {
-  const { mutate: _, mutateAsync: __, ...mutationNoMutate } = mutationObj;
-
   const newMutations = {
     [name]: mutationObj.mutate,
     [`${name}Async`]: mutationObj.mutateAsync,
@@ -16,6 +16,13 @@ export function renameMutations<
 
   return {
     ...newMutations,
-    ...mutationNoMutate,
+    ...mutationObj,
   } as TResp;
+}
+
+export function renameCoreMutations<method extends CoreMethodName & keyof CoreMethods>(
+  mutationObj: UseMutationResult<CoreMethodResponse<method>, Error, CoreMethodParams<method> | undefined, unknown>,
+  name: method,
+): CoreMethodHook<method> {
+  return renameMutations(mutationObj, name);
 }

@@ -1,0 +1,27 @@
+import { generateAction } from './utils.js';
+
+export const signUpOrLogIn = generateAction('signUpOrLogInV2');
+export const verifyNewAccount = generateAction('verifyNewAccountV2');
+export const waitForLogin = generateAction('waitForLoginV2');
+export const waitForSignup = generateAction('waitForSignupV2');
+export const waitForWalletCreation = generateAction('waitForWalletCreationV2');
+export const verifyOAuth = generateAction('verifyOAuthV2');
+export const verifyFarcaster = generateAction('verifyFarcasterV2');
+export const verifyTelegram = generateAction('verifyTelegramV2');
+export const loginExternalWallet = generateAction('loginExternalWalletV2');
+export const verifyExternalWallet = generateAction('verifyExternalWalletV2');
+export const setup2fa = generateAction('setup2faV2');
+export const enable2fa = generateAction('enable2faV2');
+export const verify2fa = generateAction('verify2faV2');
+export const keepSessionAlive = generateAction('keepSessionAlive');
+export const logout = generateAction('logout');
+export const resendVerificationCode = generateAction('resendVerificationCode');
+export const createWallet = generateAction('createWallet');
+export const createWalletPerType = generateAction('createWalletPerType');
+export const createPregenWallet = generateAction('createPregenWalletV2');
+export const createPregenWalletPerType = generateAction('createPregenWalletPerTypeV2');
+export const claimPregenWallets = generateAction('claimPregenWalletsV2');
+export const hasPregenWallet = generateAction('hasPregenWalletV2');
+export const updatePregenWalletIdentifier = generateAction('updatePregenWalletIdentifierV2');
+export const signMessage = generateAction('signMessage');
+export const signTransaction = generateAction('signTransaction');

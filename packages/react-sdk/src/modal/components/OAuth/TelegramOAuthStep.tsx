@@ -84,7 +84,7 @@ export function TelegramOAuthStep() {
               const supportedCreateAuthMethods = await para.getSupportedCreateAuthMethods();
 
               setIsIFrameReady(false);
-              setFlow('signUp');
+              setFlow('signup');
               const supportsPasskey = supportedCreateAuthMethods.has(AuthMethod.PASSKEY);
 
               if (supportsPasskey) {

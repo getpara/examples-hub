@@ -19,21 +19,22 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
     const isLogin = get().flow === 'login';
     const isAccount = get().flow === 'account';
     const currentStep = get().step;
-    const webAuthURLForCreate = get().webAuthURLForCreate;
+    const signupState = get().getSignupState();
     const iFrameUrl = get().iFrameUrl;
     const refs = get().refs;
 
     let prevStep = (isAccount ? AccountPreviousStep : isLogin ? LoginPreviousStep : SignUpPreviousStep)[currentStep];
 
-    if (currentStep === ModalStep.PASSWORD_CREATION && iFrameUrl && !webAuthURLForCreate) {
+    if (currentStep === ModalStep.PASSWORD_CREATION && iFrameUrl && !signupState?.passkeyUrl) {
       prevStep = ModalStep.AUTH_MAIN;
     }
+
     if (currentStep === ModalStep.EX_WALLET_SELECTED) {
       set({ selectedExternalWalletId: undefined, isExternalWalletConnecting: false, externalWalletError: undefined });
     }
 
     if (prevStep) {
-      set({ step: prevStep, stepDirection: -1 });
+      set({ authStepRoute: undefined, step: prevStep, stepDirection: -1 });
 
       onModalStepChange?.({ previousStep: currentStep, currentStep: prevStep, canGoBack: get().hasPreviousStep() });
     }
@@ -55,6 +56,22 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
   setFlow: flow => set({ flow }),
   isLogin: () => get().flow === 'login',
   isAccount: () => get().flow === 'account',
+  setAuthState: authState => {
+    const newFlow = authState?.stage === 'signup' || authState?.stage === 'login' ? authState.stage : undefined;
+    set({ authState, ...(newFlow ? { flow: newFlow } : {}) });
+  },
+  getVerifyState: () => {
+    const authState = get().authState;
+    return authState?.stage === 'verify' ? authState : undefined;
+  },
+  getLoginState: () => {
+    const authState = get().authState;
+    return authState?.stage === 'login' ? authState : undefined;
+  },
+  getSignupState: () => {
+    const authState = get().authState;
+    return authState?.stage === 'signup' ? authState : undefined;
+  },
   setWebAuthURLForLogin: url => set({ webAuthURLForLogin: url }),
   setWebAuthURLForCreate: url => set({ webAuthURLForCreate: url }),
   setPasswordUrlForLogin: url => set({ passwordUrlForLogin: url }),
@@ -70,6 +87,7 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
   setIsUsingMobileConnector: isUsingMobileConnector => set({ isUsingMobileConnector }),
   setStepDirection: stepDirection => set({ stepDirection }),
   setFarcasterConnectUri: farcasterConnectUri => set({ farcasterConnectUri }),
+  setTwoFactorStatus: twoFactorStatus => set({ twoFactorStatus }),
   setBiometricLocationHints: biometricLocationHints => set({ biometricLocationHints }),
   setIFrameUrl: iFrameUrl => set({ iFrameUrl }),
   setIsIFrameReady: isIFrameReady => set({ isIFrameReady }),

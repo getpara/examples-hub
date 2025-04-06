@@ -181,7 +181,7 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
       }
 
       await createUserAsync(auth);
-      setFlow('signUp');
+      setFlow('signup');
       setStep(ModalStep.VERIFICATIONS);
       return;
     }
@@ -216,7 +216,7 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
       }
 
       await createUserAsync(auth);
-      setFlow('signUp');
+      setFlow('signup');
       setStep(ModalStep.VERIFICATIONS);
       return;
     }
