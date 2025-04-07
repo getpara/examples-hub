@@ -101,7 +101,7 @@ class ExampleUITests: XCTestCase {
         XCTAssertTrue(firstWalletCell.isHittable, "First wallet cell should be tappable")
     }
     
-    private func navigateToEVMWallet() {
+    private func loginWithEmailAndWaitForWalletsView() {
         // 1. Start email authentication
         let emailButton = app.buttons["emailAuthButton"]
         // Wait for the button to exist before trying to tap
@@ -111,7 +111,7 @@ class ExampleUITests: XCTestCase {
         // 2. Enter the saved email (Requires test01 to have run successfully)
         guard let savedEmail = TestConstants.savedEmail else {
             // Fail fast if the prerequisite test didn't save the email
-            XCTFail("No saved email found for navigateToEVMWallet. Ensure test01EmailAuthenticationFlow runs first and succeeds.")
+            XCTFail("No saved email found for login. Ensure test01EmailAuthenticationFlow runs first and succeeds.")
             return // Stop execution of this helper if email is missing
         }
 
@@ -124,18 +124,20 @@ class ExampleUITests: XCTestCase {
         // 3. Tap Continue
         let continueButton = app.buttons["continueButton"]
         XCTAssertTrue(continueButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Continue button should exist")
-        // Optional: Wait for hittable if there's a delay enabling it
-        // XCTAssertTrue(continueButton.isHittable, "Continue button should be hittable")
         continueButton.tap()
 
         // 4. Perform biometric authentication for login
-        // Using the offset typically used for login (adjust if needed)
         performBiometricAuthentication(offsetFromBottom: 50)
 
         // 5. Verify successful authentication and wait for wallets view
         waitForWalletsView() // This helper already contains necessary waits and assertions
-
-        // 6. Tap on the first wallet to navigate to EVMWalletView
+    }
+    
+    private func navigateToEVMWallet() {
+        // 1. Login via email and wait for the wallets view
+        loginWithEmailAndWaitForWalletsView()
+        
+        // 2. Tap on the first wallet to navigate to EVMWalletView
         let firstWalletCell = app.cells.element(boundBy: 0)
         // Ensure the cell exists and is hittable before tapping
         // waitForWalletsView should ensure existence, but checking hittable is good practice
@@ -143,7 +145,7 @@ class ExampleUITests: XCTestCase {
         XCTAssertTrue(firstWalletCell.isHittable, "First wallet cell should be hittable")
         firstWalletCell.tap()
 
-        // 7. Verify we're on the EVM Wallet screen
+        // 3. Verify we're on the EVM Wallet screen
         let walletTitle = app.navigationBars["EVM Wallet"]
         XCTAssertTrue(walletTitle.waitForExistence(timeout: TestConstants.defaultTimeout), "EVM Wallet view navigation bar should appear after tapping wallet")
     }
@@ -267,27 +269,8 @@ class ExampleUITests: XCTestCase {
     }
     
     func test05WalletRefreshFlow() throws {
-        // Start phone authentication
-        let phoneButton = app.buttons["phoneAuthButton"]
-        XCTAssertTrue(phoneButton.exists)
-        phoneButton.tap()
-        
-        // Enter the saved phone number from signup
-        guard let savedPhoneNumber = TestConstants.savedPhoneNumber else {
-            XCTFail("No saved phone number found. Run testPhoneAuthenticationFlow first.")
-            return
-        }
-        
-        let phoneField = app.textFields["phoneInputField"]
-        phoneField.tap()
-        phoneField.typeText(savedPhoneNumber)
-        app.buttons["continueButton"].tap()
-        
-        // Perform biometric authentication
-        performBiometricAuthentication(offsetFromBottom: 50)
-        
-        // Verify successful authentication
-        waitForWalletsView()
+        // Log in via email and wait for wallets view
+        loginWithEmailAndWaitForWalletsView()
         
         // Find and tap the refresh button
         let refreshButton = app.buttons["refreshButton"]
@@ -319,27 +302,8 @@ class ExampleUITests: XCTestCase {
     }
     
     func test06CreateWalletFlow() throws {
-        // Start phone authentication
-        let phoneButton = app.buttons["phoneAuthButton"]
-        XCTAssertTrue(phoneButton.exists)
-        phoneButton.tap()
-        
-        // Enter the saved phone number from signup
-        guard let savedPhoneNumber = TestConstants.savedPhoneNumber else {
-            XCTFail("No saved phone number found. Run testPhoneAuthenticationFlow first.")
-            return
-        }
-        
-        let phoneField = app.textFields["phoneInputField"]
-        phoneField.tap()
-        phoneField.typeText(savedPhoneNumber)
-        app.buttons["continueButton"].tap()
-        
-        // Perform biometric authentication
-        performBiometricAuthentication(offsetFromBottom: 50)
-        
-        // Verify successful authentication
-        waitForWalletsView()
+        // Log in via email and wait for wallets view
+        loginWithEmailAndWaitForWalletsView()
         
         // Find and tap the create wallet button
         let createButton = app.buttons["createWalletButton"]
