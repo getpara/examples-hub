@@ -7,7 +7,6 @@ import BatchTransactions from "./batch-transactions";
 import TypedDataSigning from "./typed-data-signing";
 import PermitSigning from "./permit-signing";
 
-// Define the possible transaction IDs as a union type
 export type TransactionID =
   | "message-signing"
   | "eth-transfer"
@@ -18,7 +17,6 @@ export type TransactionID =
   | "typed-data-signing"
   | "permit-signing";
 
-// Define the structure for each transaction
 export type TransactionType = {
   title: string;
   description: string;
@@ -26,12 +24,10 @@ export type TransactionType = {
   component: React.ComponentType;
 };
 
-// Create the object type with TransactionID keys
 export type TransactionsConfig = {
   [K in TransactionID]: TransactionType;
 };
 
-// The actual configuration object
 export const transactionTypes: TransactionsConfig = {
   "message-signing": {
     title: "Message Signing",

@@ -1,8 +1,9 @@
+import { Routes, Route } from "react-router-dom";
 import { usePara } from "./components/ParaProvider";
 import { Card } from "./components/Card";
 import { transactionTypes } from "./example-transactions";
 
-export default function Home() {
+function HomePage() {
   const { isConnected, openModal } = usePara();
 
   return (
@@ -28,8 +29,9 @@ export default function Home() {
             path={transaction.path}>
             <div>
               {isConnected ? (
+                // Use the path from the config for the href
                 <a
-                  href={`/demo/${id}`}
+                  href={transaction.path}
                   className="inline-flex w-full items-center justify-center rounded-none bg-blue-900 px-4 py-2 text-sm font-medium text-white hover:bg-blue-950 transition-colors mt-auto">
                   View Demo
                 </a>
@@ -45,5 +47,23 @@ export default function Home() {
         ))}
       </div>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route
+        path="/"
+        element={<HomePage />}
+      />
+      {Object.entries(transactionTypes).map(([id, config]) => (
+        <Route
+          key={id}
+          path={config.path}
+          element={<config.component />}
+        />
+      ))}
+    </Routes>
   );
 }
