@@ -329,15 +329,10 @@ class ExampleUITests: XCTestCase {
 
         let phoneField = app.textFields["phoneInputField"]
         phoneField.tap()
-        phoneField.typeText(savedPhoneNumber) // e.g., "4085553405"
+        phoneField.typeText(savedPhoneNumber)
 
-        // --- START FIX ---
         // Format the *actual* phone number used in this test run according to the expected pattern
         var expectedFormattedNumber = savedPhoneNumber // Start with the raw number
-        // Apply the *exact same* formatting logic used in the View (or a simplified version for the test)
-        // Assuming the default US pattern "### ### ####" and replacement '#'.
-        // NOTE: This is a simplified replication. If your app logic is complex,
-        // extracting the formatter or using a simpler wait might be better.
         let pattern = "### ### ####"
         let replacementCharacter: Character = "#"
         applyPatternOnNumbers(&expectedFormattedNumber, pattern: pattern, replacementCharacter: replacementCharacter)
