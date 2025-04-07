@@ -321,16 +321,39 @@ class ExampleUITests: XCTestCase {
         XCTAssertTrue(phoneButton.waitForExistence(timeout: TestConstants.defaultTimeout))
         phoneButton.tap()
         
+        
         guard let savedPhoneNumber = TestConstants.savedPhoneNumber else {
             XCTFail("No saved phone number found. Run testPhoneAuthenticationFlow first.")
             return
         }
-        
+
         let phoneField = app.textFields["phoneInputField"]
         phoneField.tap()
-        phoneField.typeText(savedPhoneNumber)
+        phoneField.typeText(savedPhoneNumber) // e.g., "4085553405"
+
+        // --- START FIX ---
+        // Format the *actual* phone number used in this test run according to the expected pattern
+        var expectedFormattedNumber = savedPhoneNumber // Start with the raw number
+        // Apply the *exact same* formatting logic used in the View (or a simplified version for the test)
+        // Assuming the default US pattern "### ### ####" and replacement '#'.
+        // NOTE: This is a simplified replication. If your app logic is complex,
+        // extracting the formatter or using a simpler wait might be better.
+        let pattern = "### ### ####"
+        let replacementCharacter: Character = "#"
+        applyPatternOnNumbers(&expectedFormattedNumber, pattern: pattern, replacementCharacter: replacementCharacter)
+
+        print("Expecting formatted number: \(expectedFormattedNumber)") // Debugging output
+
+        // Wait for the text field's value to match the fully formatted number
+        let predicate = NSPredicate(format: "value == %@", expectedFormattedNumber)
+        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: phoneField)
+
+        let result = XCTWaiter.wait(for: [expectation], timeout: TestConstants.defaultTimeout)
+        XCTAssertEqual(result, .completed, "Phone number field (\(phoneField.value as? String ?? "nil")) did not update to '\(expectedFormattedNumber)' within timeout.")
+        // --- END FIX ---
+
         app.buttons["continueButton"].tap()
-        
+
         performBiometricAuthentication(offsetFromBottom: 50)
         waitForWalletsView()
         
@@ -341,6 +364,24 @@ class ExampleUITests: XCTestCase {
         // Verify we're on the EVM Wallet screen
         let walletTitle = app.navigationBars["EVM Wallet"]
         XCTAssertTrue(walletTitle.waitForExistence(timeout: TestConstants.defaultTimeout), "EVM Wallet view should appear")
+    }
+    
+    func applyPatternOnNumbers(_ stringvar: inout String, pattern: String, replacementCharacter: Character) {
+        var pureNumber = stringvar.replacingOccurrences( of: "[^0-9]", with: "", options: .regularExpression)
+        for index in 0 ..< pattern.count {
+            guard index < pureNumber.count else {
+                stringvar = pureNumber // Return the number potentially partially formatted if it's shorter than the pattern
+                return
+            }
+            let stringIndex = String.Index(utf16Offset: index, in: pattern)
+            let patternCharacter = pattern[stringIndex]
+            guard patternCharacter != replacementCharacter else { continue }
+            // Ensure we don't insert beyond the current pure number length during iteration
+            if index < pureNumber.count {
+                 pureNumber.insert(patternCharacter, at: stringIndex)
+            }
+        }
+        stringvar = pureNumber
     }
     
     func test07CopyWalletAddressFlow() throws {
