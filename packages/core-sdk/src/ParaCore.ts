@@ -92,7 +92,6 @@ import {
   AuthStateVerify,
   AuthStateLogin,
   AuthStateSignup,
-  OAuthUrlParams,
   NewCredentialUrlParams,
   LoginUrlParams,
   CoreInterface,
@@ -3811,7 +3810,7 @@ export abstract class ParaCore implements CoreInterface {
     });
   }
 
-  protected async getOAuthUrlV2({ method, deeplinkUrl }: OAuthUrlParams): Promise<string> {
+  async getOAuthUrlV2({ method, deeplinkUrl }: CoreMethodParams<'getOAuthUrlV2'>): CoreMethodResponse<'getOAuthUrlV2'> {
     await this.logout();
     const { sessionLookupId } = await this.touchSession(true);
 
@@ -4054,6 +4053,14 @@ export abstract class ParaCore implements CoreInterface {
     });
   }
 
+  async getFarcasterConnectUriV2(): CoreMethodResponse<'getFarcasterConnectUriV2'> {
+    const {
+      data: { connect_uri: connectUri },
+    } = await this.ctx.client.initializeFarcasterLogin();
+
+    return connectUri;
+  }
+
   async verifyFarcasterV2({
     isCanceled = () => false,
     onConnectUri,
@@ -4061,9 +4068,7 @@ export abstract class ParaCore implements CoreInterface {
     onPoll,
     ...urlOptions
   }: CoreMethodParams<'verifyFarcasterV2'>): CoreMethodResponse<'verifyFarcasterV2'> {
-    const {
-      data: { connect_uri: connectUri },
-    } = await this.ctx.client.initializeFarcasterLogin();
+    const connectUri = await this.getFarcasterConnectUriV2();
 
     onConnectUri(connectUri);
 

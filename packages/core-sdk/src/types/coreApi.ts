@@ -36,7 +36,9 @@ export const PARA_CORE_METHODS = [
   'waitForLoginV2',
   'waitForSignupV2',
   'waitForWalletCreationV2',
+  'getOAuthUrlV2',
   'verifyOAuthV2',
+  'getFarcasterConnectUriV2',
   'verifyFarcasterV2',
   'verifyTelegramV2',
   'resendVerificationCode',
@@ -168,6 +170,10 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
       recoverySecret?: string;
     };
   };
+  getOAuthUrlV2: {
+    params: OAuthUrlParams;
+    response: string;
+  };
   verifyOAuthV2: {
     params: AuthStateBaseParams &
       OAuthUrlParams &
@@ -183,6 +189,10 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
         onOAuthUrl?: (url: string) => void;
       };
     response: OAuthResponse;
+  };
+  getFarcasterConnectUriV2: {
+    params: void;
+    response: string;
   };
   verifyFarcasterV2: {
     params: AuthStateBaseParams &
