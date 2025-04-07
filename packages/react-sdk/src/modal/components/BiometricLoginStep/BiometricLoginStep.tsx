@@ -1,6 +1,6 @@
 import { CpslButton, CpslDivider, CpslIcon } from '@getpara/react-components';
 import { useEffect, useMemo, useState } from 'react';
-import { useModalStore, useUserInfoStore } from '../../stores/index.js';
+import { useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { Heading, StepContainer, InnerStepContainer } from '../common.js';
 import { openPopup } from '../../utils/openPopup.js';
@@ -18,7 +18,7 @@ export const BiometricLoginStep = () => {
   const setStep = useModalStore(state => state.setStep);
   const biometricLocationHints = useModalStore(state => state.biometricLocationHints);
   const para = useInternalClient();
-  const authInfo = useUserInfoStore(state => state.getAuthInfo());
+  const authInfo = para.authInfo;
   const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
   const setPasswordUrlForLogin = useModalStore(state => state.setPasswordUrlForLogin);
   const passkeysSupported = useModalStore(state => state.isPasskeySupported);
@@ -150,7 +150,7 @@ export const BiometricLoginStep = () => {
             Welcome back,
           </Heading>
         )}
-        {authInfo && <UserIdentifier {...authInfo} />}
+        <UserIdentifier authInfo={authInfo} />
       </InnerStepContainer>
       <MainContainer>
         {supportedAuthMethods?.has && supportedAuthMethods.has(AuthMethod.PASSWORD) && passwordUrlForLogin && (

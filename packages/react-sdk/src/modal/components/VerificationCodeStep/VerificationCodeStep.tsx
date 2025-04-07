@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { styled } from 'styled-components';
 import { ModalStep } from '../../utils/steps.js';
 import { CodeChangeEventDetail, CpslCodeInputCustomEvent } from '@getpara/core-components';
-import { useModalStore, useUserInfoStore } from '../../stores/index.js';
+import { useModalStore } from '../../stores/index.js';
 import { Heading, InnerStepContainer, StepContainer } from '../common.js';
 import { AuthMethod } from '@getpara/core-sdk';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
@@ -11,13 +11,13 @@ import { useStore } from '../../../provider/stores/useStore.js';
 
 export const VerificationCodeStep = () => {
   const theme = useStore(state => state.modalConfig?.theme);
-  const authInfo = useUserInfoStore(state => state.getAuthInfo());
   const setStep = useModalStore(state => state.setStep);
   const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
   const setIFrameUrl = useModalStore(state => state.setIFrameUrl);
   const setIsIFrameReady = useModalStore(state => state.setIsIFrameReady);
   const setAuthStepRoute = useModalStore(state => state.setAuthStepRoute);
   const para = useInternalClient();
+  const authInfo = para.authInfo;
 
   const inputRef = useRef<HTMLCpslCodeInputElement>(null);
 

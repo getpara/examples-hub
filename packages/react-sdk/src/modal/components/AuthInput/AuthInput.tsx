@@ -18,7 +18,7 @@ import { CountryCallingCode } from 'libphonenumber-js';
 import { useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import countryCodes from './countryCodes.js';
-import { useModalStore, useUserInfoStore } from '../../stores/index.js';
+import { useModalStore } from '../../stores/index.js';
 import { EMAIL_REGEX, MOBILE_SIZE } from '../../constants/constants.js';
 import { useDropdownPosition } from './hooks/useDropdownPosition.js';
 import { ModalStep } from '../../utils/steps.js';
@@ -50,8 +50,7 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
   const { createUserAsync } = useCreateUser();
   const { initiateLoginAsync } = useInitiateLogin();
   const { checkIfUserExistsAsync } = useCheckIfUserExists();
-  const setAuthInfo = useUserInfoStore(state => state.setAuthInfo);
-  const authInfo = useUserInfoStore(state => state.getAuthInfo());
+  const authInfo = para.authInfo;
   const setFlow = useModalStore(state => state.setFlow);
   const setStep = useModalStore(state => state.setStep);
   const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
@@ -165,7 +164,6 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
 
       auth = { email: identifier };
 
-      setAuthInfo(auth);
       const userExists = await checkIfUserExistsAsync(auth);
       if (userExists) {
         const supportedAuthMethods = await initiateLoginAsync(auth);
@@ -199,8 +197,6 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
         setError('Please enter a valid phone number!');
         return;
       }
-
-      setAuthInfo(auth);
 
       if (userExists) {
         const supportedAuthMethods = await initiateLoginAsync(auth);

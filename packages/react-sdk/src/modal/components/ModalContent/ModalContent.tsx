@@ -1,6 +1,6 @@
 import { createContext, forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { Wallet, CurrentWalletIds, entityToWallet, EnabledFlow, AuthMethod, OnRampConfig } from '@getpara/web-sdk';
-import { useModalStore, useUserInfoStore } from '../../stores/index.js';
+import { useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { Body } from '../Body/Body.js';
 import { Footer } from '../Footer/Footer.js';
@@ -59,7 +59,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     const setOnRampConfig = useModalStore(state => state.setOnRampConfig);
     const accountAddFundTab = useModalStore(state => state.accountAddFundTab);
     const setAccountAddFundTab = useModalStore(state => state.setAccountAddFundTab);
-    const setRecoveryShare = useUserInfoStore(state => state.setRecoveryShare);
+    const setRecoveryShare = useModalStore(state => state.setRecoveryShare);
     const authStepRoute = useModalStore(state => state.authStepRoute);
     const isIFrameReady = useModalStore(state => state.isIFrameReady);
     const goBack = useGoBack();
@@ -254,7 +254,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
       let resetPoll = false;
       if (![ModalStep.AWAITING_BIOMETRIC_CREATION, ModalStep.PASSWORD_CREATION].includes(currentStep)) {
         para.exitAccountCreation();
-        resetPoll = !!refs.poll.current && ['createPassword', 'createPasskey'].includes(refs.poll.current.action);
+        resetPoll = !!refs.poll.current && ['signup'].includes(refs.poll.current.action);
       }
 
       if (![ModalStep.AWAITING_PASSWORD_LOGIN, ModalStep.AWAITING_BIOMETRIC_LOGIN].includes(currentStep)) {

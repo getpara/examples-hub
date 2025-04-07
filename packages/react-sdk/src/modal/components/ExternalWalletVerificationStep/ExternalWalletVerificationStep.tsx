@@ -2,7 +2,7 @@ import { CpslButton, CpslSpinner, CpslText } from '@getpara/react-components';
 import { useEffect, useState } from 'react';
 import { styled } from 'styled-components';
 import { ModalStep } from '../../utils/steps.js';
-import { useModalStore, useUserInfoStore } from '../../stores/index.js';
+import { useModalStore } from '../../stores/index.js';
 import { ErrorContainer, ErrorIcon, Heading, InnerStepContainer, StepContainer } from '../common.js';
 import { AuthMethod } from '@getpara/core-sdk';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
@@ -11,7 +11,6 @@ import { useExternalWallets } from '../../../provider/providers/ExternalWalletPr
 
 export const ExternalWalletVerificationStep = () => {
   const theme = useStore(state => state.modalConfig?.theme);
-  const authInfo = useUserInfoStore(state => state.getAuthInfo());
   const setStep = useModalStore(state => state.setStep);
   const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
   const isIFrameReady = useModalStore(state => state.isIFrameReady);
@@ -20,6 +19,7 @@ export const ExternalWalletVerificationStep = () => {
   const externalWalletError = useModalStore(state => state.externalWalletError);
   const setExternalWalletError = useModalStore(state => state.setExternalWalletError);
   const para = useInternalClient();
+  const authInfo = para.authInfo;
   const { verifyWalletSignature } = useExternalWallets();
 
   const [shouldRouteToStep, setShouldRouteToStep] = useState<ModalStep>();

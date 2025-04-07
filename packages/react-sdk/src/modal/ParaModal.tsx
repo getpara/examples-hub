@@ -2,7 +2,7 @@ import { CpslAuthModal, defineCustomElements, generateTheme } from '@getpara/rea
 
 import { ModalContent, ModalContentHandle } from './components/index.js';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { useModalStore, useUserInfoStore } from './stores/index.js';
+import { useModalStore } from './stores/index.js';
 import { ModalStep, RESET_TO_ACCOUNT_STEPS, RESET_TO_AUTH_STEPS } from './utils/steps.js';
 import { AuthLayout, ParaModalHandle, ParaModalProps } from './types/modalProps.js';
 import { DEFAULTS } from './constants/defaults.js';
@@ -14,7 +14,6 @@ import { useModal, useWalletState } from '../provider/index.js';
 import { useInternalClient } from '../provider/hooks/utils/useInternalClient.js';
 import { useExternalWallets } from '../provider/providers/ExternalWalletProvider.js';
 import { useStore } from '../provider/stores/useStore.js';
-import { getExternalWalletDisplayName } from '@getpara/react-common';
 
 defineCustomElements();
 
@@ -27,7 +26,6 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
   const currentStep = useModalStore(state => state.step);
   const setOnModalStepChange = useModalStore(state => state.setOnModalStepChange);
   const setStep = useModalStore(state => state.setStep);
-  const setAuthInfo = useUserInfoStore(state => state.setAuthInfo);
   const hasPreviousStep = useModalStore(state => state.hasPreviousStep());
   const setFlow = useModalStore(state => state.setFlow);
   const setIsFullyLoggedIn = useModalStore(state => state.setIsFullyLoggedIn);
@@ -35,8 +33,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
   const setAuthLayout = useModalStore(state => state.setAuthLayout);
   const storedAuthLayout = useModalStore(state => state.authLayout);
   const resetModalState = useModalStore(state => state.resetState);
-  const resetUserInfoState = useUserInfoStore(state => state.resetState);
-  const setRecoveryShare = useUserInfoStore(state => state.setRecoveryShare);
+  const setRecoveryShare = useModalStore(state => state.setRecoveryShare);
   const { disconnectExternalWallet } = useExternalWallets();
   const { isOpen: storedIsOpen, closeModal } = useModal();
   const para = useInternalClient();
@@ -107,43 +104,10 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
     }
 
     switch (true) {
-      case para.isEmail:
-        setAuthInfo({ email: para.getEmail()! });
-        break;
-
-      case para.isPhone:
-        {
-          setAuthInfo({ phone: para.getPhoneNumber()! });
-        }
-        break;
-
-      case para.isFarcaster:
-        setAuthInfo({ farcasterUsername: para.getFarcasterUsername()! });
-        break;
-
       case para.isTelegram:
-        setAuthInfo({ telegramUserId: para.telegramUserId! });
-
         if (!isAccount) {
           setStep(ModalStep.TELEGRAM_OAUTH);
         }
-        break;
-      case para.isExternalWalletAuth:
-        const externalWallets = Object.values(para.externalWallets);
-        const externalWalletWithFullAuth = externalWallets.find(w => w.isExternalWithParaAuth);
-
-        // if para.isExternalWalletAuth is true this block should never be hit. Appeasing TS here to avoid using non-null assertions
-        if (!externalWalletWithFullAuth?.address || !externalWalletWithFullAuth?.type) {
-          break;
-        }
-
-        setAuthInfo({
-          displayName: getExternalWalletDisplayName({
-            address: externalWalletWithFullAuth.address,
-            type: externalWalletWithFullAuth.type,
-          }),
-          externalWalletAddress: externalWalletWithFullAuth.id,
-        });
         break;
     }
 
@@ -210,7 +174,6 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
     setIsModalMounted(false);
     if (RESET_TO_AUTH_STEPS.includes(currentStep)) {
       resetModalState();
-      resetUserInfoState();
       setRecoveryShare(null);
     } else if (RESET_TO_ACCOUNT_STEPS.includes(currentStep)) {
       setStep(ModalStep.LOGIN_DONE);

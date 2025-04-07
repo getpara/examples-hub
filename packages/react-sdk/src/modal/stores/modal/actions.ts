@@ -6,6 +6,7 @@ import { TAuthLayout } from '../../types/modalProps.js';
 export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<ModalStore>['getState']): ModalActions => ({
   resetState: () => set(DEFAULT_MODAL_STATE),
   setOnModalStepChange: onModalStepChange => set({ onModalStepChange }),
+  setRecoveryShare: recoveryShare => set({ recoveryShare }),
   setStep: step => {
     const onModalStepChange = get().onModalStepChange;
     const previousStep = get().step;

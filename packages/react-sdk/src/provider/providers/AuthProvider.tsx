@@ -1,6 +1,6 @@
 import { BiometricHints, formatBiometricHints } from '@getpara/react-common';
 import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { useModalStore, useUserInfoStore } from '../../modal/stores/index.js';
+import { useModalStore } from '../../modal/stores/index.js';
 import { ModalStep } from '../../modal/utils/steps.js';
 import {
   useSignUpOrLogIn,
@@ -96,7 +96,7 @@ export function AuthProvider({
   const setAuthState = useModalStore(state => state.setAuthState);
   const setFarcasterConnectUri = useModalStore(state => state.setFarcasterConnectUri);
   const setTwoFactorStatus = useModalStore(state => state.setTwoFactorStatus);
-  const setRecoveryShare = useUserInfoStore(state => state.setRecoveryShare);
+  const setRecoveryShare = useModalStore(state => state.setRecoveryShare);
   const setExternalWalletError = useModalStore(state => state.setExternalWalletError);
   const authStepRoute = useModalStore(state => state.authStepRoute);
   const isIFrameReady = useModalStore(state => state.isIFrameReady);

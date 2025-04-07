@@ -4,6 +4,9 @@ import { userEvent } from '@testing-library/user-event';
 import { AuthInput } from '../../../src/modal/components/AuthInput/AuthInput.js';
 import { defineCustomElements } from '@getpara/react-components';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Environment } from '@getpara/web-sdk';
+import { API_KEY } from '../../constants.js';
+import { MockPara } from '../../mocks/mockCorePara.js';
 
 const queryClient = new QueryClient();
 
@@ -12,26 +15,21 @@ function mockModalStore(store = {}) {
     useModalStore: vi.fn(getter => {
       return getter({
         popupWindow: null,
-        supportedAuthMethods: new Set(),
-        passwordUrlForLogin: '',
-        webAuthURLForLogin: '',
-        authInfo: {
-          auth: null,
-          displayName: null,
-          pfpUrl: null,
-        },
-        setAuthInfo: vi.fn(),
+        authState: undefined,
+        setAuthState: vi.fn(),
         setFlow: vi.fn(),
         setStep: vi.fn(),
         setPopupWindow: vi.fn(),
-        biometricLocationHints: [],
-        setWebAuthURLForLogin: vi.fn(),
-        setPasswordUrlForLogin: vi.fn(),
-        setSupportedAuthMethods: vi.fn(),
-        setBiometricLocationHints: vi.fn(),
         ...store,
       });
     }),
+  }));
+
+  vi.mock('../../../src/provider/stores/useStore.js', () => ({
+    useStore: getter =>
+      getter({
+        client: new MockPara(Environment.DEV, API_KEY),
+      }),
   }));
 }
 
@@ -69,6 +67,8 @@ describe('ParaModal', () => {
   });
 
   it('renders input', async () => {
+    vi.spyOn(MockPara.prototype, 'authInfo', 'get').mockReturnValue(undefined);
+
     mockModalStore();
 
     const { input, countryCodeSelect } = await setup();

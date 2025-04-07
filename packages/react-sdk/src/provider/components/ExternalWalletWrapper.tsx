@@ -1,5 +1,5 @@
 import { PropsWithChildren, useCallback, useEffect, useMemo } from 'react';
-import { useModalStore, useUserInfoStore } from '../../modal/stores/index.js';
+import { useModalStore } from '../../modal/stores/index.js';
 import { ExternalWalletProvider } from '../providers/ExternalWalletProvider.js';
 import { ExternalWalletConfig } from '../types/provider.js';
 import { Chain, Transport } from 'viem';
@@ -32,7 +32,6 @@ export const ExternalWalletWrapper = <
 
   const appName = useStore(state => state.appName);
   const resetModalState = useModalStore(state => state.resetState);
-  const resetUserInfoState = useUserInfoStore(state => state.resetState);
 
   useEffect(() => {
     if (!walletConnect?.projectId) {
@@ -153,7 +152,6 @@ export const ExternalWalletWrapper = <
     // Or if we don't return an address on switch wallets we logged out the Para instance so we need to reset the modal state
     if (error || !address) {
       resetModalState();
-      resetUserInfoState();
     }
   }, []);
 

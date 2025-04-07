@@ -21,6 +21,7 @@ export interface OnModalStepChangeValue {
 }
 
 interface ModalState {
+  recoveryShare: string | null;
   step: ModalStep;
   stepDirection: 1 | -1;
   flow: Flow | undefined;
@@ -56,6 +57,7 @@ interface ModalState {
 
 export interface ModalActions {
   resetState: () => void;
+  setRecoveryShare: (recoveryShare: string | null) => void;
   setStep: (step: ModalStep) => void;
   decrementStep: () => void;
   hasPreviousStep: () => boolean;
@@ -94,6 +96,7 @@ export type ModalStore = ModalState & ModalActions;
 
 // Omitting step from default here since it's set dynamically when the modal opens and closes
 export const DEFAULT_MODAL_STATE: Omit<ModalState, 'step' | 'onRampConfig'> = {
+  recoveryShare: null,
   flow: undefined,
   stepDirection: 1,
   authState: undefined,

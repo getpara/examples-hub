@@ -1,14 +1,13 @@
 import { useEffect } from 'react';
 import { CpslButton, CpslIcon, CpslQrCode, CpslSpinner, CpslText } from '@getpara/react-components';
 import { CenteredText, Heading, InnerStepContainer, QRContainer, StepContainer } from '../common.js';
-import { useModalStore, useUserInfoStore } from '../../stores/index.js';
+import { useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { AuthMethod, isMobile } from '@getpara/web-sdk';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 import { useStore } from '../../../provider/stores/useStore.js';
 
 const FarcasterOAuthStep = () => {
-  const setAuthInfo = useUserInfoStore(state => state.setAuthInfo);
   const setStep = useModalStore(state => state.setStep);
   const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
   const setIFrameUrl = useModalStore(state => state.setIFrameUrl);
@@ -25,9 +24,7 @@ const FarcasterOAuthStep = () => {
   useEffect(() => {
     if (farcasterConnectUri) {
       const pollStatus = async () => {
-        const { userExists, username, pfpUrl } = await para.waitForFarcasterStatus();
-
-        setAuthInfo({ farcasterUsername: username, pfpUrl });
+        const { userExists, username } = await para.waitForFarcasterStatus();
 
         setStep(ModalStep.AWAITING_OAUTH);
 

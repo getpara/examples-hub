@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 import { usePara } from '../../../components/ParaContext';
 import { CpslInputCustomEvent, InputInputEventDetail } from '@getpara/core-components';
 import { UserIdentifier } from '@getpara/react-common';
-import { useAuthInfo } from '../../../hooks/useAuthInfo';
 
 interface EnterPasswordStepProps {
   error: string | undefined;
@@ -17,7 +16,7 @@ export const EnterPasswordStep = ({ error, onLoginClick }: EnterPasswordStepProp
   const [recoveryUrl, setRecoveryUrl] = useState<string | undefined>();
   const [password, setPassword] = useState<string>('');
   const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
-  const authInfo = useAuthInfo();
+  const authInfo = para.authInfo;
 
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -60,7 +59,7 @@ export const EnterPasswordStep = ({ error, onLoginClick }: EnterPasswordStepProp
       }}
     >
       <CpslText variant="headingS">Login</CpslText>
-      {!!authInfo && authInfo.authType !== 'userId' && <UserIdentifier {...authInfo} />}
+      <UserIdentifier authInfo={authInfo} />
       <ButtonContainer>
         <CpslInput
           placeholder="Enter a password"

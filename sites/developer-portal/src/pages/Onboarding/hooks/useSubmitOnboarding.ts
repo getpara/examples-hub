@@ -13,8 +13,8 @@ import { useAccount } from '@getpara/react-sdk';
 
 export const useSubmitOnboarding = () => {
   const { data: account } = useAccount();
-  const userId = account?.userId;
-  const email = account?.email;
+  const userId = account?.isConnected ? account.userId : undefined;
+  const email = account?.isConnected ? account.email : undefined;
   const { getValues } = useFormContext();
   const getInput = useOnboardingStore(state => state.getInput);
   const logoFile = useOnboardingStore(state => state.logoFile);

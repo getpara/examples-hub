@@ -1,56 +1,47 @@
 import { CpslAvatar, CpslIcon, CpslText, IconType } from '@getpara/react-components';
 import styled from 'styled-components';
-import { ModalAuthInfo } from '../types/index.js';
-import { AuthType } from '@getpara/user-management-client';
-import { formatPhoneNumber } from '@getpara/web-sdk';
+import { CoreAuthInfo, displayPhoneNumber } from '@getpara/web-sdk';
+import { getExternalWalletDisplayName } from '../utils/index.js';
 
-function defaultDisplayName(authType: AuthType, identifier: string) {
+function defaultDisplay(authInfo: CoreAuthInfo): { defaultName: string | null; defaultIcon: IconType | null } {
+  const { authType, identifier, externalWallet } = authInfo;
+
   switch (authType) {
     case 'email':
-      return identifier.toLowerCase();
+      return { defaultName: identifier.toLowerCase(), defaultIcon: 'mail' };
     case 'phone':
-      return formatPhoneNumber(identifier);
+      return { defaultName: displayPhoneNumber(identifier), defaultIcon: 'phone' };
     case 'farcaster':
-      return `@${identifier}`;
+      return { defaultName: `@${identifier}`, defaultIcon: 'farcasterBrand' };
     case 'telegram':
-      return `Telegram User @${identifier}`;
+      return { defaultName: `Telegram User @${identifier}`, defaultIcon: 'telegramBrand' };
+    case 'externalWallet':
+      return { defaultName: getExternalWalletDisplayName(externalWallet), defaultIcon: 'wallet' };
     default:
-      return null;
+      return { defaultName: null, defaultIcon: null };
   }
 }
 
-export const UserIdentifier = ({ identifier, authType, displayName, pfpUrl }: ModalAuthInfo) => {
-  const shouldHideAvatar = authType === 'externalWallet';
-
-  let icon: IconType;
-  switch (authType) {
-    case 'email':
-      icon = 'mail';
-      break;
-    case 'phone':
-      icon = 'phone';
-      break;
-    case 'farcaster':
-      icon = 'farcasterBrand';
-      break;
-    case 'telegram':
-      icon = 'telegramBrand';
-      break;
+export const UserIdentifier = ({ authInfo }: { authInfo?: CoreAuthInfo }) => {
+  if (!authInfo) {
+    return null;
   }
+
+  const { authType, displayName, pfpUrl } = authInfo;
+
+  const { defaultName, defaultIcon } = defaultDisplay(authInfo);
 
   return (
     <Container>
-      {!shouldHideAvatar && (
-        <IconContainer>
-          {pfpUrl ? (
-            <Avatar src={pfpUrl} size="20px" />
-          ) : (
-            <Icon icon={icon} size={authType === 'telegram' ? '20px' : '13px'} />
-          )}
-        </IconContainer>
-      )}
+      <IconContainer>
+        {pfpUrl ? (
+          <Avatar src={pfpUrl} size="20px" variant="round" />
+        ) : (
+          <Icon icon={defaultIcon} size={authType === 'telegram' ? '20px' : '13px'} />
+        )}
+      </IconContainer>
       <IdentifierText variant="bodyS" weight="medium">
-        {displayName || defaultDisplayName(authType, identifier)}
+        {displayName || defaultName}
       </IdentifierText>
     </Container>
   );

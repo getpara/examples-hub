@@ -15,10 +15,12 @@ describe('getAccount', () => {
     const resp = await getAccount(paraClient);
 
     expect(resp).toStrictEqual({
+      auth: { email: TEST_EMAIL },
+      authType: 'email',
+      identifier: TEST_EMAIL,
       isConnected: true,
       email: TEST_EMAIL,
       wallets: [TEST_WALLET],
-      phone: undefined,
       userId: TEST_USER_ID,
     });
   });

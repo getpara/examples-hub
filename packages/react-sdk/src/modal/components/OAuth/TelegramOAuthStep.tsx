@@ -1,5 +1,5 @@
 import { AuthMethod, OAuthMethod } from '@getpara/web-sdk';
-import { useModalStore, useUserInfoStore } from '../../stores/index.js';
+import { useModalStore } from '../../stores/index.js';
 import styled from 'styled-components';
 import { useEffect, useRef, useState } from 'react';
 import { HeroSpinner } from '@getpara/react-common';
@@ -21,7 +21,6 @@ export function TelegramOAuthStep() {
   const para = useInternalClient();
   const setFlow = useModalStore(state => state.setFlow);
   const setStep = useModalStore(state => state.setStep);
-  const setAuthInfo = useUserInfoStore(state => state.setAuthInfo);
   const setBiometricLocationHints = useModalStore(state => state.setBiometricLocationHints);
   const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
   const setIFrameUrl = useModalStore(state => state.setIFrameUrl);
@@ -68,17 +67,7 @@ export function TelegramOAuthStep() {
               return;
             }
 
-            const { telegramUserId, isNewUser, supportedAuthMethods, biometricHints } = result;
-
-            setAuthInfo({
-              telegramUserId,
-              pfpUrl: authObject.photo_url,
-              displayName: authObject.username
-                ? `@${authObject.username}`
-                : authObject.first_name
-                  ? `${authObject.first_name}${authObject.last_name ? ` ${authObject.last_name}` : ''}`
-                  : `Telegram User @${telegramUserId}`,
-            });
+            const { isNewUser, supportedAuthMethods, biometricHints } = result;
 
             if (isNewUser) {
               const supportedCreateAuthMethods = await para.getSupportedCreateAuthMethods();

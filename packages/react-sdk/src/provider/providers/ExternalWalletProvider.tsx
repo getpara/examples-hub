@@ -3,9 +3,9 @@ import { AuthMethod, WalletType, isIOS, isIOSWebview, isMobile, truncateAddress 
 import { useInternalClient } from '../hooks/utils/useInternalClient.js';
 import { useStore } from '../stores/useStore.js';
 import { ModalStep } from '../../modal/index.js';
-import { useModalStore, useUserInfoStore } from '../../modal/stores/index.js';
+import { useModalStore } from '../../modal/stores/index.js';
 import { useWalletState } from '../hooks/index.js';
-import { CommonChain, CommonWallet, getExternalWalletDisplayName, TExternalWallet } from '@getpara/react-common';
+import { CommonChain, CommonWallet, TExternalWallet } from '@getpara/react-common';
 
 export const defaultExternalWallet = {
   wallets: [],
@@ -107,7 +107,6 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
   const setBiometricLocationHints = useModalStore(state => state.setBiometricLocationHints);
   const para = useInternalClient();
   const { setSelectedWallet } = useWalletState();
-  const setAuthInfo = useUserInfoStore(state => state.setAuthInfo);
 
   const [qrUri, setQrUri] = useState<string>();
   const [chainIdSwitchingTo, setChainIdSwitchingTo] = useState<string>();
@@ -271,21 +270,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     }
   }, [cosmosSignVerificationMessage, evmSignVerificationMessage, solanaSignVerificationMessage]);
 
-  const completeFullAuth = async (
-    address: string,
-    type: WalletType,
-    userExists: boolean,
-    isVerified: boolean,
-    bufferAddress?: string,
-  ) => {
-    setAuthInfo({
-      displayName: getExternalWalletDisplayName({
-        address,
-        type,
-      }),
-      externalWalletAddress: bufferAddress ?? address,
-    });
-
+  const completeFullAuth = async (address: string, userExists: boolean, isVerified: boolean, bufferAddress?: string) => {
     if (userExists && isVerified) {
       // Check for supportedAuthMethods before initiating the login to ensure the user has biometrics
       const supportedAuthMethods = await para.supportedAuthMethods({
@@ -356,7 +341,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
           }
         } else if (address) {
           if (externalWalletsWithFullAuth?.includes(wallet.id.toUpperCase() as TExternalWallet)) {
-            await completeFullAuth(address, wallet.type as WalletType, userExists, isVerified, bufferAddress);
+            await completeFullAuth(address, userExists, isVerified, bufferAddress);
           } else {
             setStep(ModalStep.LOGIN_DONE);
           }

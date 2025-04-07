@@ -1,6 +1,6 @@
 import { AuthMethod, OAuthMethod } from '@getpara/web-sdk';
 import { styled } from 'styled-components';
-import { useModalStore, useUserInfoStore } from '../../stores/index.js';
+import { useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { openPopup } from '../../utils/openPopup.js';
 import { getTileButtonFlex } from '../../utils/getTileButtonFlex.js';
@@ -26,7 +26,6 @@ export const OAuth = ({ methods }: OAuthProps) => {
   const refs = useModalStore(state => state.refs);
   const setFlow = useModalStore(state => state.setFlow);
   const setStep = useModalStore(state => state.setStep);
-  const setAuthInfo = useUserInfoStore(state => state.setAuthInfo);
   const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
   const setBiometricLocationHints = useModalStore(state => state.setBiometricLocationHints);
   const setFarcasterConnectUri = useModalStore(state => state.setFarcasterConnectUri);
@@ -93,8 +92,6 @@ export const OAuth = ({ methods }: OAuthProps) => {
           }
           return;
         }
-
-        setAuthInfo({ email });
 
         if (userExists) {
           const supportedAuthMethods = await para.initiateUserLoginV2({ email });

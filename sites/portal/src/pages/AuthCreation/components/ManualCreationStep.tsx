@@ -2,7 +2,7 @@ import { styled } from 'styled-components';
 import { FlexStartInnerContainer } from '../../../components/common';
 import { CpslButton, CpslQrCode, CpslSpinner, CpslText } from '@getpara/react-components';
 import { CenteredText } from '@getpara/react-common';
-import { isPasskeySupported } from '@getpara/web-sdk';
+import { isPasskeySupported, shortenUrl } from '@getpara/web-sdk';
 import { usePara } from '../../../components/ParaContext';
 import { useEffect, useRef, useState } from 'react';
 import { KNOWN_DEVICE_LOGIN_POLLING_INTERVAL } from '../../../constants';
@@ -35,7 +35,7 @@ export const ManualCreationStep = ({ onCreateClick }: ManualCreationStepProps) =
     (async function () {
       const _isPasskeySupported = await isPasskeySupported();
       setIsPasskeySupportedValue(_isPasskeySupported);
-      para.shortenLoginLink(window.location.href).then(loginLink => {
+      shortenUrl(para.ctx, window.location.href).then(loginLink => {
         setWebAuthURLForCreate(loginLink);
       });
       setIsUIReady(true);

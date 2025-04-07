@@ -1,30 +1,60 @@
-import ParaWeb, { Wallet } from '@getpara/web-sdk';
+import ParaWeb, { CoreAuthInfo } from '@getpara/web-sdk';
 
-type AccountType = {
-  isConnected: boolean;
+type AccountValue = CoreAuthInfo & {
   email?: string;
-  phone?: string;
-  wallets?: Pick<Wallet, 'id' | 'type' | 'name' | 'address' | 'isExternal'>[];
-  userId?: string;
+  phone?: `+${number}`;
+  farcasterUsername?: string;
+  telegramUserId?: string;
+  externalWalletAddress?: string;
+  wallets: (typeof ParaWeb.prototype)['availableWallets'];
+  userId: string;
 };
 
-export const getAccount = async (para?: ParaWeb) => {
+export type Account =
+  | ({
+      isConnected: false;
+    } & {
+      [key in keyof AccountValue]?: undefined;
+    })
+  | ({
+      isConnected: true;
+    } & AccountValue);
+
+export const getAccount = async (para?: ParaWeb): Promise<Account> => {
   const isLoggedIn = await para?.isFullyLoggedIn();
 
-  const resp: AccountType = {
-    isConnected: !!isLoggedIn,
-    email: undefined,
-    phone: undefined,
-    wallets: undefined,
-    userId: undefined,
-  };
+  const isConnected = !!para && !!para.userId && !!para.authInfo && !!isLoggedIn;
 
-  if (para && resp.isConnected) {
-    resp.email = para.getEmail();
-    resp.phone = para.getPhoneNumber();
-    resp.wallets = para.availableWallets;
-    resp.userId = para.getUserId();
+  if (isConnected) {
+    const value: Account = {
+      ...para.authInfo!,
+      userId: para.userId!,
+      wallets: para.availableWallets,
+      isConnected: true,
+    };
+
+    switch (para.authInfo.authType) {
+      case 'email':
+        value.email = para.authInfo.identifier;
+        break;
+      case 'phone':
+        value.phone = para.authInfo.identifier as `+${number}`;
+        break;
+      case 'farcaster':
+        value.farcasterUsername = para.authInfo.identifier;
+        break;
+      case 'telegram':
+        value.telegramUserId = para.authInfo.identifier;
+        break;
+      case 'externalWallet':
+        value.externalWalletAddress = para.authInfo.identifier;
+        break;
+      default:
+        break;
+    }
+
+    return value;
   }
 
-  return resp;
+  return { isConnected: false };
 };
