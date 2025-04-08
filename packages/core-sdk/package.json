@@ -27,6 +27,7 @@
     "test": "vitest run --coverage"
   },
   "devDependencies": {
+    "@faker-js/faker": "^9.5.1",
     "typescript": "5.1.6"
   },
   "files": [

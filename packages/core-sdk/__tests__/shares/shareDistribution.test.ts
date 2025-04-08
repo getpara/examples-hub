@@ -8,8 +8,9 @@ import { EncryptorType, KeyShareType } from '@getpara/user-management-client';
 import * as recovery from '../../src/shares/recovery';
 
 const TEST_CTX = {
+  apiKey: 'test-key-123',
   env: Environment.DEV,
-  client: initClient({ env: Environment.DEV }),
+  client: initClient({ apiKey: 'test-key-123', env: Environment.DEV }),
   disableWebSockets: false,
   useDKLS: true,
 };

@@ -10,6 +10,7 @@ export class MockPara extends ParaCore {
 
   persistSessionCookie = (_: string) => {};
 
+  setAuth = super.setAuth;
   getSupportedCreateAuthMethods = super.getSupportedCreateAuthMethods;
   getTransmissionKeyShares = super.getTransmissionKeyShares;
   userSetupAfterLogin = super.userSetupAfterLogin;
@@ -23,4 +24,10 @@ export class MockPara extends ParaCore {
   exitAccountCreation = super.exitAccountCreation;
   exitOAuth = super.exitOAuth;
   exitFarcaster = super.exitFarcaster;
+}
+
+export class MockParaAsync extends MockPara {
+  protected getPlatformUtils() {
+    return new MockPlatformUtils(true);
+  }
 }

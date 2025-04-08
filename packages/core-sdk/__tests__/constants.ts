@@ -1,21 +1,54 @@
-import { WalletType } from '@getpara/user-management-client';
-import { TelegramAuthResponse } from '@getpara/user-management-client/src';
+import {
+  AuthMethod,
+  WalletEntity,
+  WalletType,
+  TelegramAuthResponse,
+  VerifyFarcasterResponse,
+  BiometricLocationHint,
+  PartnerEntity,
+} from '@getpara/user-management-client';
 
 export const UUID = 'ef3bf91c-fc1e-4d18-afe2-f2654c9531e5';
 export const USER_ID = 'ef3bf91c-fc1e-4d18-afe2-f2654c9531e5';
 export const USER_EMAIL = 'test@test.com';
 export const USER_COUNTRY_CODE = '1';
 export const USER_PHONE_NATIONAL = '9495551234';
-export const USER_PHONE = `+${USER_COUNTRY_CODE}${USER_PHONE_NATIONAL}`;
+export const USER_PHONE: `+${number}` = `+${USER_COUNTRY_CODE}${USER_PHONE_NATIONAL}`;
 export const USER_FARCASTER_USERNAME = 'TestFarcaster';
+export const USER_TELEGRAM_USER_ID = '12344567890';
+export const USER_DISCORD_USERNAME = 'TestDiscord';
+export const USER_X_USERNAME = 'TestX';
+export const USER_CUSTOM_ID = 'custom-id';
+export const USER_DISPLAY_NAME = 'Test User';
+export const USER_PFP_URL = 'https://test.com/i.jpg';
+export const USER_BIOMETRIC_HINTS: BiometricLocationHint[] = [
+  {
+    aaguid: 'aaguid',
+    useragent: 'useragent',
+  },
+];
 export const USER_TELEGRAM_AUTH_OBJECT: TelegramAuthResponse = {
-  id: 123,
+  id: parseInt(USER_TELEGRAM_USER_ID, 10),
   first_name: 'Test',
   last_name: 'User',
-  username: 'testuser',
-  photo_url: 'https://test.com/test.jpg',
+  username: USER_FARCASTER_USERNAME,
+  photo_url: USER_PFP_URL,
   auth_date: 1234567890,
   hash: 'test-hash',
+};
+
+export const USER_FARCASTER_AUTH_STAGE: Partial<VerifyFarcasterResponse> = {
+  userId: USER_ID,
+  auth: { farcasterUsername: USER_FARCASTER_USERNAME },
+  displayName: `@${USER_FARCASTER_USERNAME}`,
+  pfpUrl: USER_PFP_URL,
+  username: USER_FARCASTER_USERNAME,
+};
+
+export const USER_FARCASTER_SIGNUP_STAGE = <VerifyFarcasterResponse>{
+  ...USER_FARCASTER_AUTH_STAGE,
+  stage: 'signup',
+  signupAuthMethods: [AuthMethod.PASSKEY, AuthMethod.PASSWORD],
 };
 
 export const VERIFICATION_CODE = '123456';
@@ -26,6 +59,8 @@ export const PUBLIC_KEY_ID = '453bf91c-fc1e-4d18-afe2-f2654c9531c6';
 export const TEMP_TRANSMISSION_INIT_ID = 'ef3bf91c-fc1e-4d18-afe2-f2654c9531t1';
 
 export const FARCASTER_CONNECT_URI = 'https://test.com/test-farcaster-connect';
+
+export const SIGNATURE_VERIFICATION_MESSAGE = 'signatureVerificationMessage';
 
 export const API_KEY = 'api-key-123';
 export const PARTNER = {
@@ -40,9 +75,12 @@ export const PARTNER = {
   supportedWalletTypes: [
     { type: WalletType.EVM, optional: false },
     { type: WalletType.SOLANA, optional: false },
+    { type: WalletType.COSMOS, optional: false },
   ],
-  supportedAuthMethods: ['PASSKEY', 'PASSWORD'],
-  cosmosPrefix: 'test',
+  supportedAuthMethods: [AuthMethod.PASSKEY, AuthMethod.PASSWORD],
+  cosmosPrefix: 'cosmos',
+  displayName: 'Partner',
+  policiesEnabled: true,
 };
 
 export const EXTERNAL_WALLET = {
@@ -60,9 +98,28 @@ export const STORED_EXTERNAL_WALLET = {
   signer: '',
 };
 
+export const SESSION = {
+  sessionId: SESSION_LOOKUP_ID,
+  partnerId: PARTNER.id,
+  sessionLookupId: SESSION_LOOKUP_ID,
+  supportedWalletTypes: PARTNER.supportedWalletTypes,
+  cosmosPrefix: PARTNER.cosmosPrefix,
+  isAuthenticated: false,
+};
+
+export const EMAIL_PROPS = {
+  brandColor: undefined,
+  githubUrl: undefined,
+  homepageUrl: undefined,
+  linkedinUrl: undefined,
+  supportUrl: undefined,
+  theme: undefined,
+  xUrl: undefined,
+};
+
 export const LOGIN_ERROR = 'Login Error';
 
-export const WALLET = {
+export const WALLET: WalletEntity = {
   address: '0x1aD2B053b8c6b1592cB645DEfadf105F34d8C6p0',
   createdAt: '2024-10-22T00:00:00.000Z',
   isPregen: false,
@@ -72,7 +129,7 @@ export const WALLET = {
   keyGenComplete: true,
   name: 'Test Wallet',
   partnerId: PARTNER.id,
-  partner: PARTNER,
+  partner: PARTNER as PartnerEntity,
   publicKey: '0x1aD2B053b8c6b1592cB645DEfadf105F34d8C6p1',
   scheme: 'DKLS',
   type: WalletType.EVM,
@@ -80,7 +137,7 @@ export const WALLET = {
   userId: USER_ID,
   lastUsedAt: '2024-10-22T00:00:00.000Z',
   lastUsedPartnerId: PARTNER.id,
-  lastUsedPartner: PARTNER,
+  lastUsedPartner: PARTNER as PartnerEntity,
 };
 export const WALLET_KEYSHARE = 'test-keyshare';
 export const WALLET_KEYGEN_RES = {
@@ -101,7 +158,7 @@ export const SOLANA_WALLET_KEYGEN_RES = {
 };
 export const WALLETS = [WALLET, SOLANA_WALLET];
 
-export const PREGEN_WALLET_EMAIL = {
+export const PREGEN_WALLET_EMAIL: WalletEntity = {
   address: '0x1aD2B053b8c6b1592cB645DEfadf105F34d8C6p3',
   createdAt: '2024-10-22T00:00:00.000Z',
   isPregen: true,
@@ -111,7 +168,7 @@ export const PREGEN_WALLET_EMAIL = {
   keyGenComplete: true,
   name: 'Test Pregen Email Wallet',
   partnerId: PARTNER.id,
-  partner: PARTNER,
+  partner: PARTNER as PartnerEntity,
   publicKey: '0x1aD2B053b8c6b1592cB645DEfadf105F34d8C6p4',
   scheme: 'DKLS',
   type: WalletType.EVM,
@@ -119,9 +176,9 @@ export const PREGEN_WALLET_EMAIL = {
   userId: USER_ID,
   lastUsedAt: '2024-10-22T00:00:00.000Z',
   lastUsedPartnerId: PARTNER.id,
-  lastUsedPartner: PARTNER,
+  lastUsedPartner: PARTNER as PartnerEntity,
 };
-export const SOLANA_PREGEN_WALLET_EMAIL = {
+export const SOLANA_PREGEN_WALLET_EMAIL: WalletEntity = {
   ...PREGEN_WALLET_EMAIL,
   address: '0x1aD2B053b8c6b1592cB645DEfadf105F34d8C6e5',
   id: 'ef3bf91c-fc1e-4d18-afe2-f2654c9556e5',
@@ -137,7 +194,7 @@ export const PREGEN_WALLET_EMAIL_KEYGEN_RES = {
   walletId: PREGEN_WALLET_EMAIL.id,
   signer: 'test-pregen-wallet-email-signer',
 };
-export const PREGEN_WALLET_PHONE = {
+export const PREGEN_WALLET_PHONE: WalletEntity = {
   address: '0x1aD2B053b8c6b1592cB645DEfadf105F34d8C6p5',
   createdAt: '2024-10-22T00:00:00.000Z',
   isPregen: true,
@@ -147,7 +204,7 @@ export const PREGEN_WALLET_PHONE = {
   keyGenComplete: true,
   name: 'Test Pregen Phone Wallet',
   partnerId: PARTNER.id,
-  partner: PARTNER,
+  partner: PARTNER as PartnerEntity,
   publicKey: '0x1aD2B053b8c6b1592cB645DEfadf105F34d8C6p6',
   scheme: 'DKLS',
   type: WalletType.EVM,
@@ -155,13 +212,13 @@ export const PREGEN_WALLET_PHONE = {
   userId: USER_ID,
   lastUsedAt: '2024-10-22T00:00:00.000Z',
   lastUsedPartnerId: PARTNER.id,
-  lastUsedPartner: PARTNER,
+  lastUsedPartner: PARTNER as PartnerEntity,
 };
 export const PREGEN_WALLET_PHONE_KEYGEN_RES = {
   walletId: PREGEN_WALLET_PHONE.id,
   signer: 'test-pregen-wallet-phone-signer',
 };
-export const SOLANA_PREGEN_WALLET_PHONE = {
+export const SOLANA_PREGEN_WALLET_PHONE: WalletEntity = {
   ...PREGEN_WALLET_PHONE,
   address: '0x1aD2B053b8c6b1592cB645DEfadf105F34d8C6e5',
   id: 'ef3bf91c-fc1e-4d18-afe2-f2654c9556e5',
@@ -169,7 +226,7 @@ export const SOLANA_PREGEN_WALLET_PHONE = {
   type: WalletType.SOLANA,
   scheme: 'ED25519',
 };
-export const PREGEN_WALLETS_EMAIL = [PREGEN_WALLET_EMAIL, SOLANA_PREGEN_WALLET_EMAIL];
+export const PREGEN_WALLETS_EMAIL: WalletEntity[] = [PREGEN_WALLET_EMAIL, SOLANA_PREGEN_WALLET_EMAIL];
 export const PREGEN_WALLETS_PHONE = [PREGEN_WALLET_PHONE, SOLANA_PREGEN_WALLET_PHONE];
 
 export const SESSION_PUBLIC_KEYS = [
@@ -284,4 +341,13 @@ EDOj5z1wjBBFJrwADF0k6Je9UFy4txroQQIDAQAB
     '2d2d2d2d2d424547494e20525341205055424c4943204b45592d2d2d2d2d0d0a4d49494243674b43415145416d4248702f4f4b44334b6d72324463684458575233327543616d577a6653464875383772626c3753653456713661597a6c2f49300d0a414259304c4c7861743549612f4f4f546b387069626977386253565954567137576434716e6933445543362b38695a6257654b5669763161482b35396e44516f0d0a326957372b61793355724a674974784f546930594b4b452b5639516e6c594a557a64753144594c78696e3539577a3277453239346b394567696472314a51386a0d0a53544957304a5832774d577374594f3353475930413239496e6a564e7a4f66613967316251306c4a6d364c784b547764684d7435396f6a484e386f4b454334650d0a464475464f437a6a5256592f63334f5877452f6b4b503041777676465231484c477639322f6a584d72546a7744624f6357484f39557431464c4d56586a5875520d0a493059696b454468686177726469617754722f784a68665938646c52314d575074514944415141420d0a2d2d2d2d2d454e4420525341205055424c4943204b45592d2d2d2d2d0d0a',
   ENCRYPT_PRIVATE_KEY_PASSWORD_RESP:
     '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',
+};
+
+export const COMMON_SEARCH_PARAMS = {
+  partnerId: PARTNER.id,
+  portalAccentColor: PARTNER.accentColor,
+  portalBackgroundColor: PARTNER.backgroundColor,
+  portalFont: PARTNER.font,
+  portalForegroundColor: PARTNER.foregroundColor,
+  portalThemeMode: PARTNER.themeMode,
 };

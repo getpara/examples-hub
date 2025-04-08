@@ -16,7 +16,7 @@ vi.mock('ethereumjs-util', async importOriginal => {
   };
 });
 
-const TEST_CLIENT = initClient({ env: Environment.DEV });
+const TEST_CLIENT = initClient({ apiKey: 'test-key-123', env: Environment.DEV });
 
 describe('transmissionUtils', () => {
   afterEach(() => {
