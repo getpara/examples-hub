@@ -101,6 +101,55 @@ class ExampleUITests: XCTestCase {
         XCTAssertTrue(firstWalletCell.isHittable, "First wallet cell should be tappable")
     }
     
+    private func loginWithEmailAndWaitForWalletsView() {
+        // 1. Start email authentication
+        let emailButton = app.buttons["emailAuthButton"]
+        // Wait for the button to exist before trying to tap
+        XCTAssertTrue(emailButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Email auth button should exist")
+        emailButton.tap()
+
+        // 2. Enter the saved email (Requires test01 to have run successfully)
+        guard let savedEmail = TestConstants.savedEmail else {
+            // Fail fast if the prerequisite test didn't save the email
+            XCTFail("No saved email found for login. Ensure test01EmailAuthenticationFlow runs first and succeeds.")
+            return // Stop execution of this helper if email is missing
+        }
+
+        let emailField = app.textFields["emailInputField"]
+        // Wait for the field to exist
+        XCTAssertTrue(emailField.waitForExistence(timeout: TestConstants.defaultTimeout), "Email input field should exist")
+        emailField.tap()
+        emailField.typeText(savedEmail)
+
+        // 3. Tap Continue
+        let continueButton = app.buttons["continueButton"]
+        XCTAssertTrue(continueButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Continue button should exist")
+        continueButton.tap()
+
+        // 4. Perform biometric authentication for login
+        performBiometricAuthentication(offsetFromBottom: 50)
+
+        // 5. Verify successful authentication and wait for wallets view
+        waitForWalletsView() // This helper already contains necessary waits and assertions
+    }
+    
+    private func navigateToEVMWallet() {
+        // 1. Login via email and wait for the wallets view
+        loginWithEmailAndWaitForWalletsView()
+        
+        // 2. Tap on the first wallet to navigate to EVMWalletView
+        let firstWalletCell = app.cells.element(boundBy: 0)
+        // Ensure the cell exists and is hittable before tapping
+        // waitForWalletsView should ensure existence, but checking hittable is good practice
+        XCTAssertTrue(firstWalletCell.exists, "First wallet cell should exist after login")
+        XCTAssertTrue(firstWalletCell.isHittable, "First wallet cell should be hittable")
+        firstWalletCell.tap()
+
+        // 3. Verify we're on the EVM Wallet screen
+        let walletTitle = app.navigationBars["EVM Wallet"]
+        XCTAssertTrue(walletTitle.waitForExistence(timeout: TestConstants.defaultTimeout), "EVM Wallet view navigation bar should appear after tapping wallet")
+    }
+    
     // MARK: - Test Methods
     func test01EmailAuthenticationFlow() throws {
         // Start email authentication
@@ -220,27 +269,8 @@ class ExampleUITests: XCTestCase {
     }
     
     func test05WalletRefreshFlow() throws {
-        // Start phone authentication
-        let phoneButton = app.buttons["phoneAuthButton"]
-        XCTAssertTrue(phoneButton.exists)
-        phoneButton.tap()
-        
-        // Enter the saved phone number from signup
-        guard let savedPhoneNumber = TestConstants.savedPhoneNumber else {
-            XCTFail("No saved phone number found. Run testPhoneAuthenticationFlow first.")
-            return
-        }
-        
-        let phoneField = app.textFields["phoneInputField"]
-        phoneField.tap()
-        phoneField.typeText(savedPhoneNumber)
-        app.buttons["continueButton"].tap()
-        
-        // Perform biometric authentication
-        performBiometricAuthentication(offsetFromBottom: 50)
-        
-        // Verify successful authentication
-        waitForWalletsView()
+        // Log in via email and wait for wallets view
+        loginWithEmailAndWaitForWalletsView()
         
         // Find and tap the refresh button
         let refreshButton = app.buttons["refreshButton"]
@@ -272,27 +302,8 @@ class ExampleUITests: XCTestCase {
     }
     
     func test06CreateWalletFlow() throws {
-        // Start phone authentication
-        let phoneButton = app.buttons["phoneAuthButton"]
-        XCTAssertTrue(phoneButton.exists)
-        phoneButton.tap()
-        
-        // Enter the saved phone number from signup
-        guard let savedPhoneNumber = TestConstants.savedPhoneNumber else {
-            XCTFail("No saved phone number found. Run testPhoneAuthenticationFlow first.")
-            return
-        }
-        
-        let phoneField = app.textFields["phoneInputField"]
-        phoneField.tap()
-        phoneField.typeText(savedPhoneNumber)
-        app.buttons["continueButton"].tap()
-        
-        // Perform biometric authentication
-        performBiometricAuthentication(offsetFromBottom: 50)
-        
-        // Verify successful authentication
-        waitForWalletsView()
+        // Log in via email and wait for wallets view
+        loginWithEmailAndWaitForWalletsView()
         
         // Find and tap the create wallet button
         let createButton = app.buttons["createWalletButton"]
@@ -311,72 +322,6 @@ class ExampleUITests: XCTestCase {
         // Verify that the new wallet is tappable
         let newWalletCell = walletCells.element(boundBy: 1)
         XCTAssertTrue(newWalletCell.isHittable, "New wallet cell should be tappable")
-    }
-    
-    // MARK: - EVM Wallet View Tests
-    
-    private func navigateToEVMWallet() {
-        // Login and navigate to the first wallet
-        let phoneButton = app.buttons["phoneAuthButton"]
-        XCTAssertTrue(phoneButton.waitForExistence(timeout: TestConstants.defaultTimeout))
-        phoneButton.tap()
-        
-        
-        guard let savedPhoneNumber = TestConstants.savedPhoneNumber else {
-            XCTFail("No saved phone number found. Run testPhoneAuthenticationFlow first.")
-            return
-        }
-
-        let phoneField = app.textFields["phoneInputField"]
-        phoneField.tap()
-        phoneField.typeText(savedPhoneNumber)
-
-        // Format the *actual* phone number used in this test run according to the expected pattern
-        var expectedFormattedNumber = savedPhoneNumber // Start with the raw number
-        let pattern = "### ### ####"
-        let replacementCharacter: Character = "#"
-        applyPatternOnNumbers(&expectedFormattedNumber, pattern: pattern, replacementCharacter: replacementCharacter)
-
-        print("Expecting formatted number: \(expectedFormattedNumber)") // Debugging output
-
-        // Wait for the text field's value to match the fully formatted number
-        let predicate = NSPredicate(format: "value == %@", expectedFormattedNumber)
-        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: phoneField)
-
-        let result = XCTWaiter.wait(for: [expectation], timeout: TestConstants.defaultTimeout)
-        XCTAssertEqual(result, .completed, "Phone number field (\(phoneField.value as? String ?? "nil")) did not update to '\(expectedFormattedNumber)' within timeout.")
-        // --- END FIX ---
-
-        app.buttons["continueButton"].tap()
-
-        performBiometricAuthentication(offsetFromBottom: 50)
-        waitForWalletsView()
-        
-        // Tap on the first wallet to navigate to EVMWalletView
-        let firstWalletCell = app.cells.element(boundBy: 0)
-        firstWalletCell.tap()
-        
-        // Verify we're on the EVM Wallet screen
-        let walletTitle = app.navigationBars["EVM Wallet"]
-        XCTAssertTrue(walletTitle.waitForExistence(timeout: TestConstants.defaultTimeout), "EVM Wallet view should appear")
-    }
-    
-    func applyPatternOnNumbers(_ stringvar: inout String, pattern: String, replacementCharacter: Character) {
-        var pureNumber = stringvar.replacingOccurrences( of: "[^0-9]", with: "", options: .regularExpression)
-        for index in 0 ..< pattern.count {
-            guard index < pureNumber.count else {
-                stringvar = pureNumber // Return the number potentially partially formatted if it's shorter than the pattern
-                return
-            }
-            let stringIndex = String.Index(utf16Offset: index, in: pattern)
-            let patternCharacter = pattern[stringIndex]
-            guard patternCharacter != replacementCharacter else { continue }
-            // Ensure we don't insert beyond the current pure number length during iteration
-            if index < pureNumber.count {
-                 pureNumber.insert(patternCharacter, at: stringIndex)
-            }
-        }
-        stringvar = pureNumber
     }
     
     func test07CopyWalletAddressFlow() throws {
