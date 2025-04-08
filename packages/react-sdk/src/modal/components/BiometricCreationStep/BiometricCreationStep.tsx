@@ -2,28 +2,36 @@ import { CpslButton, CpslDivider, CpslIcon, CpslQrCode, CpslSpinner, CpslText } 
 import { useModalStore } from '../../stores/index.js';
 import { InnerStepContainer, StepContainer, Heading, QRContainer } from '../common.js';
 import { useCopyToClipboard, UserIdentifier } from '@getpara/react-common';
-import { useContext } from 'react';
-import { ActionsContext } from '../ModalContent/ModalContent.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
+import { useAuthActions } from '../../../provider/providers/AuthProvider.js';
+import { AuthMethod } from '@getpara/web-sdk';
 import { useStore } from '../../../provider/stores/useStore.js';
 
 export const BiometricCreationStep = () => {
   const para = useInternalClient();
   const authInfo = para.authInfo;
   const appName = useStore(state => state.appName);
-  const { createAccount } = useContext(ActionsContext);
-  const webAuthURLForCreate = useModalStore(state => state.webAuthURLForCreate);
-  const iFrameUrl = useModalStore(state => state.iFrameUrl);
+  const { presentSignupUi } = useAuthActions();
+  const signupState = useModalStore(state => state.getSignupState());
+  const authStepRoute = useModalStore(state => state.authStepRoute);
   const isPasskeySupported = useModalStore(state => state.isPasskeySupported);
   const [isCopied, copy] = useCopyToClipboard();
 
   const handleCopy = () => {
-    if (webAuthURLForCreate) {
-      copy(webAuthURLForCreate);
+    if (signupState?.passkeyUrl) {
+      copy(signupState.passkeyUrl);
     }
   };
 
-  const isBoth = !!webAuthURLForCreate && !!iFrameUrl;
+  const onClick = (method: AuthMethod) => () => {
+    presentSignupUi(method, signupState!);
+  };
+
+  const isBoth = !!signupState?.passkeyUrl && !!signupState?.passwordUrl;
+
+  if (!signupState) {
+    return null;
+  }
 
   return (
     <StepContainer $wide>
@@ -43,7 +51,7 @@ export const BiometricCreationStep = () => {
 
       <InnerStepContainer>
         {isPasskeySupported ? (
-          <CpslButton fullWidth onClick={createAccount.withPasskey}>
+          <CpslButton fullWidth onClick={onClick(AuthMethod.PASSKEY)}>
             <CpslIcon slot="start" icon="key" />
             {isBoth ? 'Create Passkey' : 'Create'}
           </CpslButton>
@@ -51,7 +59,7 @@ export const BiometricCreationStep = () => {
           <>
             <CpslText weight="semiBold">Scan with your mobile device</CpslText>
             <QRContainer>
-              {!webAuthURLForCreate ? <CpslSpinner size={100} /> : <CpslQrCode url={webAuthURLForCreate} />}
+              {!signupState?.passkeyUrl ? <CpslSpinner size={100} /> : <CpslQrCode url={signupState.passkeyUrl} />}
             </QRContainer>
             <CpslButton size="small" variant="ghost" onClick={handleCopy}>
               <CpslIcon slot="start" icon={isCopied ? 'check' : 'copy'} />
@@ -64,7 +72,7 @@ export const BiometricCreationStep = () => {
           <>
             <CpslDivider>or</CpslDivider>
 
-            <CpslButton fullWidth onClick={createAccount.withPassword}>
+            <CpslButton fullWidth onClick={onClick(AuthMethod.PASSWORD)} disabled={!!authStepRoute}>
               <CpslIcon slot="start" icon="passcode" />
               Choose Password
             </CpslButton>

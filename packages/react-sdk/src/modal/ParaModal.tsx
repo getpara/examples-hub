@@ -20,10 +20,8 @@ defineCustomElements();
 export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref) => {
   const storedModalConfig = useStore(state => state.modalConfig);
   const modalContentRef = useRef<ModalContentHandle>(null);
-  const setWebAuthURLForLogin = useModalStore(state => state.setWebAuthURLForLogin);
-  const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
-  const setBiometricLocationHints = useModalStore(state => state.setBiometricLocationHints);
   const currentStep = useModalStore(state => state.step);
+  const setAuthState = useModalStore(state => state.setAuthState);
   const setOnModalStepChange = useModalStore(state => state.setOnModalStepChange);
   const setStep = useModalStore(state => state.setStep);
   const hasPreviousStep = useModalStore(state => state.hasPreviousStep());
@@ -91,10 +89,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
     } else {
       if (currentStep !== ModalStep.AUTH_MAIN && currentStep !== ModalStep.SECRET) {
         setStep(ModalStep.AUTH_MAIN);
-        setFlow();
-        setWebAuthURLForLogin();
-        setWebAuthURLForCreate();
-        setBiometricLocationHints();
+        setAuthState();
       }
 
       // Disconnect external wallets if the user is not longer logged in

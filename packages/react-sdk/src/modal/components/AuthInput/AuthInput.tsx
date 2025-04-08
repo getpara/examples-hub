@@ -15,20 +15,18 @@ import {
   CpslText,
 } from '@getpara/react-components';
 import { CountryCallingCode } from 'libphonenumber-js';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import countryCodes from './countryCodes.js';
-import { useModalStore } from '../../stores/index.js';
 import { EMAIL_REGEX, MOBILE_SIZE } from '../../constants/constants.js';
 import { useDropdownPosition } from './hooks/useDropdownPosition.js';
-import { ModalStep } from '../../utils/steps.js';
 import { defaultPhoneMask, phoneMasks } from './phoneMasks.js';
-import { AuthMethod, formatPhoneNumber } from '@getpara/web-sdk';
+import { formatPhoneNumber } from '@getpara/web-sdk';
 import { Auth, AuthType } from '@getpara/user-management-client';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
-import { useCheckIfUserExists, useCreateUser, useInitiateLogin, useLogout } from '../../../provider/index.js';
 import parsePhoneNumberFromString from 'libphonenumber-js';
 import { NationalNumber } from 'libphonenumber-js';
+import { useAuthActions } from '../../../provider/providers/AuthProvider.js';
 
 interface AuthInputProps {
   disableEmailLogin?: boolean;
@@ -46,15 +44,8 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
   const { dropdownMaxHeight, dropdownWidth } = useDropdownPosition(inputRef);
 
   const para = useInternalClient();
-  const { logoutAsync } = useLogout();
-  const { createUserAsync } = useCreateUser();
-  const { initiateLoginAsync } = useInitiateLogin();
-  const { checkIfUserExistsAsync } = useCheckIfUserExists();
+  const { signUpOrLogIn, isSignUpOrLogInPending } = useAuthActions();
   const authInfo = para.authInfo;
-  const setFlow = useModalStore(state => state.setFlow);
-  const setStep = useModalStore(state => state.setStep);
-  const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
-  const setBiometricLocationHints = useModalStore(state => state.setBiometricLocationHints);
 
   const [storedNationalNumber, storedCountryCode] = useMemo<
     [NationalNumber | undefined, CountryCallingCode | undefined]
@@ -88,8 +79,8 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
   const [matchedCountryCode, setMatchedCountryCode] = useState<DropdownInputEventDetail>(
     countryCodes.find(option => isCcMatch(countryCode, option)) ?? DEFAULT_COUNTRY,
   );
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [error, setError] = useState('');
+  const [isPending, setIsPending] = useState(isSignUpOrLogInPending);
   const [search, setSearch] = useState('');
 
   const isEmail = identifierType === 'email';
@@ -144,85 +135,48 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
     }
   };
 
-  const login = async () => {
+  const onSubmit = async () => {
     setError('');
-    if (isUnknown) {
-      setError('Please enter a valid email or phone number!');
-      return;
-    }
 
     let auth: Auth<'email'> | Auth<'phone'>;
 
-    if (isEmail) {
-      if (!EMAIL_REGEX.test(identifier)) {
-        setError('Please enter a valid email!');
+    switch (true) {
+      case isEmail:
+        if (!EMAIL_REGEX.test(identifier)) {
+          setError('Please enter a valid email!');
+          return;
+        }
+        auth = { email: identifier };
+        break;
+      case isPhone:
+        {
+          const validatedPhone = formatPhoneNumber(identifier, countryCode);
+
+          if (!validatedPhone) {
+            setError('Please enter a valid phone number!');
+            return;
+          }
+
+          auth = { phone: validatedPhone };
+        }
+        break;
+      default:
+        setError('Please enter a valid email or phone number!');
         return;
-      }
-
-      // Logout to ensure cleared Capsule state but preserve pregen wallets
-      await logoutAsync({});
-
-      auth = { email: identifier };
-
-      const userExists = await checkIfUserExistsAsync(auth);
-      if (userExists) {
-        const supportedAuthMethods = await initiateLoginAsync(auth);
-        const biometricLocationHints = supportedAuthMethods.has(AuthMethod.PASSKEY)
-          ? await para.getUserBiometricLocationHints()
-          : [];
-
-        setFlow('login');
-        setStep(ModalStep.BIOMETRIC_LOGIN);
-        setSupportedAuthMethods(supportedAuthMethods);
-        setBiometricLocationHints(biometricLocationHints);
-        return;
-      }
-
-      await createUserAsync(auth);
-      setFlow('signup');
-      setStep(ModalStep.VERIFICATIONS);
-      return;
     }
-    if (isPhone) {
-      // Logout to ensure cleared Capsule state but preserve pregen wallets
-      await logoutAsync({});
 
-      let userExists = false;
-
-      auth = { phone: formatPhoneNumber(identifier, countryCode)! };
-
-      try {
-        userExists = await checkIfUserExistsAsync(auth);
-      } catch (error) {
-        setError('Please enter a valid phone number!');
-        return;
-      }
-
-      if (userExists) {
-        const supportedAuthMethods = await initiateLoginAsync(auth);
-        const biometricLocationHints = supportedAuthMethods.has(AuthMethod.PASSKEY)
-          ? await para.getUserBiometricLocationHints()
-          : [];
-
-        setFlow('login');
-        setStep(ModalStep.BIOMETRIC_LOGIN);
-        setSupportedAuthMethods(supportedAuthMethods);
-        setBiometricLocationHints(biometricLocationHints);
-        return;
-      }
-
-      await createUserAsync(auth);
-      setFlow('signup');
-      setStep(ModalStep.VERIFICATIONS);
-      return;
-    }
+    signUpOrLogIn(auth);
   };
 
-  const handleSubmit = async () => {
-    setIsLoggingIn(true);
-    await login();
-    setIsLoggingIn(false);
-  };
+  useEffect(() => {
+    if (isSignUpOrLogInPending) {
+      setIsPending(true);
+    }
+  }, [isSignUpOrLogInPending]);
+
+  useEffect(() => {
+    setIsPending(false);
+  }, [error]);
 
   if (disableEmailLogin && disablePhoneLogin) {
     return null;
@@ -232,7 +186,7 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
     <form
       onSubmit={async e => {
         e.preventDefault();
-        await handleSubmit();
+        onSubmit();
       }}
     >
       <StyledInput
@@ -251,7 +205,7 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
         errorText={error}
         autofocus
         inputMode="email"
-        onKeyDown={async e => e.key === 'Enter' && handleSubmit()}
+        onKeyDown={async e => e.key === 'Enter' && onSubmit()}
         contrastText
         isPhone={isPhone}
         mask={
@@ -259,7 +213,7 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
         }
         enterkeyhint="go"
         noAutoDisable
-        disabled={isLoggingIn}
+        disabled={isPending}
         data-testid="auth-input"
       >
         <IconContainer slot="start">
@@ -295,8 +249,8 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
           )}
         </IconContainer>
         {identifier && (
-          <CpslButton slot="end" size="small" fullWidth disabled={isLoggingIn} onClick={handleSubmit}>
-            {isLoggingIn ? <CpslSpinner size={16} /> : <CpslIcon icon="arrowNarrow" />}
+          <CpslButton slot="end" size="small" fullWidth disabled={isPending} onClick={onSubmit}>
+            {isPending ? <CpslSpinner size={16} /> : <CpslIcon icon="arrowNarrow" />}
           </CpslButton>
         )}
       </StyledInput>

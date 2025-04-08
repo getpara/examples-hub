@@ -1,13 +1,11 @@
-import { AuthMethod, OAuthMethod } from '@getpara/web-sdk';
-import { useModalStore } from '../../stores/index.js';
+import { constructUrl, getPortalBaseURL } from '@getpara/web-sdk';
 import styled from 'styled-components';
 import { useEffect, useRef, useState } from 'react';
 import { HeroSpinner } from '@getpara/react-common';
-import { ModalStep } from '../../utils/steps.js';
 import { TelegramAuthResponse } from '@getpara/user-management-client';
 import { CpslSpinner } from '@getpara/react-components';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
-import { useStore } from '../../../provider/stores/useStore.js';
+import { useAuthActions } from '../../../provider/providers/AuthProvider.js';
 
 type EventType = 'TELEGRAM_LOGIN' | 'TELEGRAM_SUCCESS' | 'TELEGRAM_FAILED';
 
@@ -19,15 +17,7 @@ type Event = {
 export function TelegramOAuthStep() {
   const iframe = useRef<any>();
   const para = useInternalClient();
-  const setFlow = useModalStore(state => state.setFlow);
-  const setStep = useModalStore(state => state.setStep);
-  const setBiometricLocationHints = useModalStore(state => state.setBiometricLocationHints);
-  const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
-  const setIFrameUrl = useModalStore(state => state.setIFrameUrl);
-  const setIsIFrameReady = useModalStore(state => state.setIsIFrameReady);
-  const setAuthStepRoute = useModalStore(state => state.setAuthStepRoute);
-  const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
-  const theme = useStore(state => state.modalConfig?.theme);
+  const { verifyTelegram } = useAuthActions();
 
   const [url, setUrl] = useState<string>();
   const [isWaiting, setIsWaiting] = useState(false);
@@ -36,9 +26,12 @@ export function TelegramOAuthStep() {
 
   useEffect(() => {
     if (!url) {
-      para.getOAuthURL({ method: OAuthMethod.TELEGRAM }).then(url => {
-        setUrl(url);
-      });
+      setUrl(
+        constructUrl({
+          base: getPortalBaseURL(para.ctx, true),
+          path: '/auth/telegram',
+        }),
+      );
     }
   }, [url]);
 
@@ -56,44 +49,9 @@ export function TelegramOAuthStep() {
         case 'TELEGRAM_SUCCESS':
           if (!!event.data.payload) {
             const authObject = event.data.payload;
-            const result = await para.verifyTelegram(authObject);
 
-            if (!result.isValid) {
-              setIsWaiting(false);
-              setIsError(true);
-
-              iframe.current && iframe.current.contentWindow?.postMessage({ type: 'TELEGRAM_FAILED' }, '*');
-
-              return;
-            }
-
-            const { isNewUser, supportedAuthMethods, biometricHints } = result;
-
-            if (isNewUser) {
-              const supportedCreateAuthMethods = await para.getSupportedCreateAuthMethods();
-
-              setIsIFrameReady(false);
-              setFlow('signup');
-              const supportsPasskey = supportedCreateAuthMethods.has(AuthMethod.PASSKEY);
-
-              if (supportsPasskey) {
-                setWebAuthURLForCreate(
-                  await para.shortenLoginLink(await para.getSetUpBiometricsURL({ authType: 'telegram' })),
-                );
-                setStep(ModalStep.BIOMETRIC_CREATION);
-              }
-              if (supportedCreateAuthMethods.has(AuthMethod.PASSWORD)) {
-                setIFrameUrl(await para.shortenLoginLink(await para.getSetupPasswordURL({ authType: 'telegram', theme })));
-                setAuthStepRoute(supportsPasskey ? ModalStep.BIOMETRIC_CREATION : ModalStep.PASSWORD_CREATION);
-              }
-            } else {
-              setFlow('login');
-              supportedAuthMethods && setSupportedAuthMethods(new Set<AuthMethod>(supportedAuthMethods));
-              biometricHints && setBiometricLocationHints(biometricHints);
-              setStep(ModalStep.BIOMETRIC_LOGIN);
-            }
+            verifyTelegram(authObject);
           }
-
           break;
       }
     };

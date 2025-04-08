@@ -1,31 +1,25 @@
 import { CpslCodeInput, CpslSpinner, CpslText } from '@getpara/react-components';
 import { useEffect, useRef, useState } from 'react';
 import { styled } from 'styled-components';
-import { ModalStep } from '../../utils/steps.js';
 import { CodeChangeEventDetail, CpslCodeInputCustomEvent } from '@getpara/core-components';
-import { useModalStore } from '../../stores/index.js';
 import { Heading, InnerStepContainer, StepContainer } from '../common.js';
-import { AuthMethod } from '@getpara/core-sdk';
+import { displayPhoneNumber } from '@getpara/core-sdk';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
-import { useStore } from '../../../provider/stores/useStore.js';
+import { useAuthActions } from '../../../provider/providers/AuthProvider.js';
+import { useResendVerificationCode } from '../../../provider/index.js';
 
 export const VerificationCodeStep = () => {
-  const theme = useStore(state => state.modalConfig?.theme);
-  const setStep = useModalStore(state => state.setStep);
-  const setWebAuthURLForCreate = useModalStore(state => state.setWebAuthURLForCreate);
-  const setIFrameUrl = useModalStore(state => state.setIFrameUrl);
-  const setIsIFrameReady = useModalStore(state => state.setIsIFrameReady);
-  const setAuthStepRoute = useModalStore(state => state.setAuthStepRoute);
   const para = useInternalClient();
   const authInfo = para.authInfo;
+  const { verifyNewAccount, isVerifyNewAccountPending, verifyNewAccountError } = useAuthActions();
+  const { resendVerificationCode } = useResendVerificationCode();
 
   const inputRef = useRef<HTMLCpslCodeInputElement>(null);
 
   const [code, setCode] = useState('');
-  const [codeError, setCodeError] = useState('');
-  const [resendStatus, setResendStatus] = useState('Resend.');
+  const [isPending, setIsPending] = useState(false);
+  const [codeError, setCodeError] = useState<string | null>(null);
   const [resendDisabled, setResendDisabled] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
 
   const isEmail = authInfo?.authType === 'email';
 
@@ -37,73 +31,60 @@ export const VerificationCodeStep = () => {
   }, []);
 
   useEffect(() => {
+    setCodeError(null);
+
     if (code.length === 6) {
       handleSubmitCode();
     }
   }, [code]);
 
+  useEffect(() => {
+    if (isVerifyNewAccountPending) {
+      setIsPending(isVerifyNewAccountPending);
+    }
+  }, [isVerifyNewAccountPending]);
+
   const handleResendClick = async () => {
     if (!resendDisabled) {
-      setResendStatus('Resent!');
       setResendDisabled(true);
-      isEmail ? await para.resendVerificationCode() : await para.resendVerificationCodeByPhone();
 
-      setTimeout(() => {
-        setResendStatus('Resend.');
-        setResendDisabled(false);
-      }, 3000);
+      resendVerificationCode(undefined, {
+        onSettled: () => {
+          setTimeout(() => {
+            setResendDisabled(false);
+          }, 3000);
+        },
+      });
     }
   };
 
   const handleCodeInput = (e: CpslCodeInputCustomEvent<CodeChangeEventDetail>) => {
-    if (codeError) {
-      setCodeError('');
-    }
     setCode(e.detail.value.trim());
   };
 
   const handleSubmitCode = async () => {
-    setIsVerifying(true);
     if (code.length === 6 && /^\d+$/.test(code)) {
-      try {
-        const supportedCreateAuthMethods = await para.getSupportedCreateAuthMethods();
-
-        if (supportedCreateAuthMethods.has(AuthMethod.PASSWORD) && supportedCreateAuthMethods.has(AuthMethod.PASSKEY)) {
-          setIsIFrameReady(false);
-          const webAuthUrl = isEmail
-            ? await para.verifyEmail({ verificationCode: code })
-            : await para.verifyPhone({ verificationCode: code });
-          const passwordAuthUrl = await para.getSetupPasswordURL({ authType: authInfo?.authType, theme });
-          setWebAuthURLForCreate(await para.shortenLoginLink(webAuthUrl));
-          setIFrameUrl(await para.shortenLoginLink(passwordAuthUrl));
-          setAuthStepRoute(ModalStep.BIOMETRIC_CREATION);
-          return;
-        } else if ((await para.getSupportedCreateAuthMethods()).has(AuthMethod.PASSWORD)) {
-          setIsIFrameReady(false);
-          isEmail ? await para.verifyEmail({ verificationCode: code }) : await para.verifyPhone({ verificationCode: code });
-          const url = await para.getSetupPasswordURL({ authType: authInfo?.authType, theme });
-          setIFrameUrl(await para.shortenLoginLink(url));
-          setAuthStepRoute(ModalStep.PASSWORD_CREATION);
-          return;
-        } else {
-          const url = isEmail
-            ? await para.verifyEmail({ verificationCode: code })
-            : await para.verifyPhone({ verificationCode: code });
-          setWebAuthURLForCreate(await para.shortenLoginLink(url));
-          setStep(ModalStep.BIOMETRIC_CREATION);
-        }
-      } catch (e) {
-        if (e.message.includes('429')) {
-          setCodeError('Too many incorrect attempts. Please try again in 10 minutes.');
-        } else {
-          setCodeError('Incorrect code.');
-        }
-      }
+      verifyNewAccount(code);
     } else {
       setCodeError('Incorrect code.');
     }
-    setIsVerifying(false);
   };
+
+  useEffect(() => {
+    if (!!verifyNewAccountError) {
+      setIsPending(false);
+      const status = (verifyNewAccountError as unknown as { status: number }).status;
+
+      switch (status) {
+        case 429:
+          setCodeError('Too many incorrect attempts. Please try again in 10 minutes.');
+          break;
+        default:
+          setCodeError('Incorrect code.');
+          break;
+      }
+    }
+  }, [verifyNewAccountError]);
 
   return (
     <StepContainer $wide>
@@ -112,11 +93,14 @@ export const VerificationCodeStep = () => {
           Verify {isEmail ? 'Email' : 'Phone Number'}
         </Heading>
         <InlineText variant="bodyS" color="secondary">
-          Please enter the code we sent to <InlineText variant="bodyS">{authInfo?.identifier}</InlineText>
+          Please enter the code we sent to{' '}
+          <InlineText variant="bodyS">
+            {authInfo?.authType === 'phone' ? displayPhoneNumber(authInfo.identifier) : authInfo!.identifier}
+          </InlineText>
         </InlineText>
       </InnerStepContainer>
       <InnerStepContainer>
-        {isVerifying ? (
+        {isPending ? (
           <CpslSpinner />
         ) : (
           <>
@@ -132,7 +116,7 @@ export const VerificationCodeStep = () => {
                 type="number"
                 code={code}
                 onCpslInput={handleCodeInput}
-                errorText={codeError}
+                errorText={codeError || ''}
                 onKeyDown={async e => e.key === 'Enter' && (await handleSubmitCode())}
               />
             </form>
@@ -143,7 +127,7 @@ export const VerificationCodeStep = () => {
                 style={{ cursor: resendDisabled ? 'default' : 'pointer' }}
                 onClick={handleResendClick}
               >
-                {resendStatus}
+                {resendDisabled ? 'Resent!' : 'Resend.'}
               </ClickableText>
             </InlineText>
           </>

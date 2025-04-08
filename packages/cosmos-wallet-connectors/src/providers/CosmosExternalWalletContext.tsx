@@ -13,7 +13,7 @@ import {
 } from '@getpara/graz';
 import { useExternalWalletStore } from '../stores/useStore.js';
 import { WalletWithType } from '../types/Wallet.js';
-import ParaWeb, { Wallet, WalletType } from '@getpara/web-sdk';
+import ParaWeb, { AuthState, Wallet, WalletType } from '@getpara/web-sdk';
 import type { CommonChain, CommonWallet, TExternalWallet } from '@getpara/react-common';
 
 const defaultCosmosExternalWallet = {
@@ -147,12 +147,14 @@ export function CosmosExternalWalletProvider({
 
   const login = async (bufferAddress: string, address: string, isFullAuthWallet?: boolean, providerName?: string) => {
     try {
-      return await para.externalWalletLogin({
-        address: bufferAddress,
-        type: WalletType.COSMOS,
-        provider: providerName,
-        addressBech32: address,
-        withFullParaAuth: isFullAuthWallet,
+      return await para.loginExternalWalletV2({
+        externalWallet: {
+          address: bufferAddress,
+          type: WalletType.COSMOS,
+          provider: providerName,
+          addressBech32: address,
+          withFullParaAuth: isFullAuthWallet,
+        },
       });
     } catch (err) {
       await reset();
@@ -240,7 +242,7 @@ export function CosmosExternalWalletProvider({
   const connect = async (
     walletType: GrazWalletType,
     chainId?: string | string[],
-  ): Promise<{ address?: string; bufferAddress?: string; error?: string; userExists: boolean; isVerified: boolean }> => {
+  ): Promise<{ authState?: AuthState; address?: string; bufferAddress?: string; error?: string }> => {
     updateExternalWalletState({ isConnecting: true });
 
     const walletId = getWallet(walletType)?.id;
@@ -261,8 +263,7 @@ export function CosmosExternalWalletProvider({
     let address: string | undefined;
     let bufferAddress: string | undefined;
     let error: string | undefined;
-    let userExists = false;
-    let isVerified = false;
+    let authState: AuthState | undefined;
 
     // The logic in the modal should prevent this from happening, logging for edge cases.
     if (!walletType) {
@@ -297,11 +298,10 @@ export function CosmosExternalWalletProvider({
 
         if (connectedWallet.accounts[firstChain]) {
           try {
-            const loginResp = await login(bufferAddress, address, isFullAuthWallet, getProviderName(walletType));
-            userExists = loginResp.userExists;
-            isVerified = loginResp.isVerified;
-            verificationMessage.current = loginResp.signatureVerificationMessage;
+            authState = await login(bufferAddress, address, isFullAuthWallet, getProviderName(walletType));
+            verificationMessage.current = authState.stage === 'verify' ? authState.signatureVerificationMessage : undefined;
           } catch (err) {
+            authState = undefined;
             bufferAddress = undefined;
             address = undefined;
             error = err;
@@ -318,7 +318,7 @@ export function CosmosExternalWalletProvider({
     }
 
     updateExternalWalletState({ isConnecting: false });
-    return { address, bufferAddress, error, userExists, isVerified };
+    return { authState, address, bufferAddress, error };
   };
 
   const getWallet = (walletType: GrazWalletType) =>

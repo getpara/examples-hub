@@ -5,6 +5,7 @@ import { getAddFundsStep, ModalStep } from '../utils/steps.js';
 
 export const useGoBack = () => {
   const currentStep = useModalStore(state => state.step);
+  const refs = useModalStore(state => state.refs);
   const setStep = useModalStore(state => state.setStep);
   const accountAddFundTab = useModalStore(state => state.accountAddFundTab);
   const decrementStep = useModalStore(state => state.decrementStep);
@@ -18,7 +19,8 @@ export const useGoBack = () => {
     } else {
       decrementStep();
     }
-    switch (currentStep) {
+
+    switch (refs.currentStep.current) {
       case ModalStep.AUTH_MAIN:
       case ModalStep.AUTH_MORE:
       case ModalStep.EX_WALLET_SELECTED:

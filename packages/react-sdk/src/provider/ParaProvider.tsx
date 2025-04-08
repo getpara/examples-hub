@@ -10,6 +10,7 @@ import { ParaModalHandle } from '../modal/index.js';
 import { isConfigType, isParaWeb } from './utils/paraConfigTypeGuards.js';
 import ParaWeb from '@getpara/web-sdk';
 import { ExternalWallet } from '@getpara/react-common';
+import { AuthProvider } from './providers/AuthProvider.js';
 
 export const ParaProvider = forwardRef<
   ParaModalHandle,
@@ -65,9 +66,18 @@ export const ParaProvider = forwardRef<
   }
 
   return (
-    <ExternalWalletWrapper config={externalWalletConfig}>
-      {children}
-      {!config.disableEmbeddedModal && <ParaModal ref={ref} />}
-    </ExternalWalletWrapper>
+    <AuthProvider
+      is2faEnabled={paraModalConfig?.twoFactorAuthEnabled}
+      isRecoverySecretStepEnabled={paraModalConfig?.recoverySecretStepEnabled}
+      overrides={{
+        login: paraModalConfig?.loginTransitionOverride,
+        createWallets: paraModalConfig?.createWalletOverride,
+      }}
+    >
+      <ExternalWalletWrapper config={externalWalletConfig}>
+        {children}
+        {!config.disableEmbeddedModal && <ParaModal ref={ref} />}
+      </ExternalWalletWrapper>
+    </AuthProvider>
   );
 });

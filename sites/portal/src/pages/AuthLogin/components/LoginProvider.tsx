@@ -201,12 +201,14 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
         para.pregenIds = params.pregenIds;
       }
 
-      const hints = await para.getUserBiometricLocationHints();
-      setBiometricLocationHints(hints);
+      if (!biometricLocationHints) {
+        const hints = await para.getUserBiometricLocationHints();
+        setBiometricLocationHints(hints);
+      }
     }
 
     setUserDetails();
-  }, [para, params, JSON.stringify(authInfo)]);
+  }, [para, params, JSON.stringify(authInfo), biometricLocationHints]);
 
   return (
     <LoginContext.Provider

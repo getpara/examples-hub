@@ -1,5 +1,5 @@
 import { BiometricHints, formatBiometricHints } from '@getpara/react-common';
-import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo } from 'react';
 import { useModalStore } from '../../modal/stores/index.js';
 import { ModalStep } from '../../modal/utils/steps.js';
 import {
@@ -13,7 +13,6 @@ import {
   useVerifyTelegram,
   useSetup2fa,
   useLogout,
-  useVerifyExternalWallet,
 } from '../index.js';
 import { DEFAULTS } from '../../modal/constants/defaults.js';
 import { openPopup } from '../../modal/utils/openPopup.js';
@@ -30,26 +29,23 @@ import {
 import { useInternalClient } from '../../provider/hooks/utils/useInternalClient.js';
 import { ParaModalProps } from '../../modal/types/modalProps.js';
 import { useGoBack } from '../../modal/hooks/useGoBack.js';
-import {
-  isExternalWallet,
-  TelegramAuthResponse,
-  VerifiedAuth,
-  VerifyExternalWalletParams,
-} from '@getpara/user-management-client';
+import { isExternalWallet, TelegramAuthResponse, VerifiedAuth } from '@getpara/user-management-client';
 import { routeMobileExternalWallet } from '../../modal/utils/routeMobileExternalWallet.js';
 import { useStore } from '../stores/useStore.js';
 
 type Value = {
-  signUpOrLogIn: [(_: VerifiedAuth) => void, boolean];
-  verifyNewAccount: [(_: string) => void, boolean, Error | null];
+  signUpOrLogIn: (_: VerifiedAuth) => void;
+  isSignUpOrLogInPending: boolean;
+  verifyNewAccount: (_: string) => void;
+  isVerifyNewAccountPending: boolean;
+  verifyNewAccountError: Error | null;
   verifyOAuth: (_: CoreMethodParams<'verifyOAuthV2'>['method']) => void;
   verifyFarcaster: () => void;
   verifyTelegram: (_: TelegramAuthResponse) => void;
-  verifyExternalWallet: (_: VerifyExternalWalletParams) => void;
   onNewAuthState: (_: AuthState) => void;
   presentSignupUi: (_: AuthMethod, __: AuthStateSignup) => void;
   presentLoginUi: (_: AuthMethod, __: AuthStateLogin) => void;
-  setup2fa: [boolean];
+  isSetup2faPending: boolean;
   logout: () => void;
   biometricHints?: BiometricHints;
 };
@@ -64,14 +60,16 @@ type Props = PropsWithChildren<{
 }>;
 
 export const AuthContext = createContext<Value>({
-  signUpOrLogIn: [() => {}, false],
-  verifyNewAccount: [() => {}, false, null],
+  signUpOrLogIn: () => {},
+  isSignUpOrLogInPending: false,
+  verifyNewAccount: () => {},
+  isVerifyNewAccountPending: false,
+  verifyNewAccountError: null,
   verifyOAuth: () => {},
   verifyFarcaster: () => {},
   verifyTelegram: () => {},
-  verifyExternalWallet: () => {},
   onNewAuthState: () => {},
-  setup2fa: [false],
+  isSetup2faPending: false,
   presentSignupUi: () => {},
   presentLoginUi: () => {},
   logout: () => {},
@@ -97,26 +95,26 @@ export function AuthProvider({
   const setFarcasterConnectUri = useModalStore(state => state.setFarcasterConnectUri);
   const setTwoFactorStatus = useModalStore(state => state.setTwoFactorStatus);
   const setRecoveryShare = useModalStore(state => state.setRecoveryShare);
-  const setExternalWalletError = useModalStore(state => state.setExternalWalletError);
   const authStepRoute = useModalStore(state => state.authStepRoute);
   const isIFrameReady = useModalStore(state => state.isIFrameReady);
 
   const goBack = useGoBack();
   const biometricHints = useMemo(() => formatBiometricHints(loginState?.biometricHints ?? []), [loginState?.biometricHints]);
 
-  const signUpOrLogInHook = useSignUpOrLogIn();
-  const verifyNewAccountHook = useVerifyNewAccount();
-  const verifyOAuthHook = useVerifyOAuth();
-  const verifyFarcasterHook = useVerifyFarcaster();
-  const verifyTelegramHook = useVerifyTelegram();
-  const verifyExternalWalletHook = useVerifyExternalWallet();
-  const waitForLoginHook = useWaitForLogin();
-  const waitForSignupHook = useWaitForSignup();
-  const waitForWalletCreationHook = useWaitForWalletCreation();
-  const setup2faHook = useSetup2fa();
-  const logoutHook = useLogout();
-
-  const [isVerifyExternalWalletPending, setIsVerifyExternalWalletPending] = useState(false);
+  const { mutate: mutateSignUpOrLogIn, isPending: isSignUpOrLogInPending } = useSignUpOrLogIn();
+  const {
+    mutate: mutateVerifyNewAccount,
+    isPending: isVerifyNewAccountPending,
+    error: verifyNewAccountError,
+  } = useVerifyNewAccount();
+  const { mutate: mutateVerifyOAuth } = useVerifyOAuth();
+  const { mutate: mutateVerifyFarcaster } = useVerifyFarcaster();
+  const { mutate: mutateVerifyTelegram } = useVerifyTelegram();
+  const { mutate: mutateWaitForLogin } = useWaitForLogin();
+  const { mutate: mutateWaitForSignup } = useWaitForSignup();
+  const { mutateAsync: mutateAsyncWaitForWalletCreation } = useWaitForWalletCreation();
+  const { mutate: mutateSetup2fa, isPending: isSetup2faPending } = useSetup2fa();
+  const { mutate: mutateLogout } = useLogout();
 
   const goBackIfPopupClosedOnSteps = (steps: ModalStep[]) => {
     if (refs.popupWindow.current?.closed && (!refs.currentStep.current || steps.includes(refs.currentStep.current))) {
@@ -135,7 +133,7 @@ export function AuthProvider({
       refs.poll.current = {
         action: 'signup',
         timeout: window?.setTimeout(async () => {
-          waitForSignupHook.mutate(
+          mutateWaitForSignup(
             {
               isCanceled: () =>
                 cancelIfExitedSteps([
@@ -205,7 +203,7 @@ export function AuthProvider({
     refs.poll.current = {
       action: 'login',
       timeout: window?.setTimeout(async () => {
-        waitForLoginHook.mutate(
+        mutateWaitForLogin(
           {
             isCanceled: () =>
               cancelIfExitedSteps([
@@ -304,7 +302,7 @@ export function AuthProvider({
   };
 
   const signUpOrLogIn = async (auth: VerifiedAuth) => {
-    signUpOrLogInHook.mutate(
+    mutateSignUpOrLogIn(
       { auth, useShortUrls: true },
       {
         onSuccess: onNewAuthState,
@@ -313,7 +311,7 @@ export function AuthProvider({
   };
 
   const verifyNewAccount = async (verificationCode: string) => {
-    verifyNewAccountHook.mutate(
+    mutateVerifyNewAccount(
       { verificationCode },
       {
         onSuccess: onNewAuthState,
@@ -324,7 +322,7 @@ export function AuthProvider({
   const verifyOAuth = async (method: CoreMethodParams<'verifyOAuthV2'>['method']) => {
     setStep(ModalStep.AWAITING_OAUTH);
 
-    verifyOAuthHook.mutate(
+    mutateVerifyOAuth(
       {
         method,
         isCanceled: () => refs.popupWindow.current?.closed || cancelIfExitedSteps([ModalStep.AWAITING_OAUTH]),
@@ -353,7 +351,7 @@ export function AuthProvider({
   const verifyFarcaster = async () => {
     setStep(ModalStep.FARCASTER_OAUTH);
 
-    verifyFarcasterHook.mutate(
+    mutateVerifyFarcaster(
       {
         isCanceled: () => refs.currentStep.current !== ModalStep.FARCASTER_OAUTH,
         onConnectUri: connectUri => {
@@ -374,7 +372,7 @@ export function AuthProvider({
   };
 
   const verifyTelegram = async (telegramAuthResponse: TelegramAuthResponse) => {
-    verifyTelegramHook.mutate(
+    mutateVerifyTelegram(
       {
         telegramAuthResponse,
         useShortUrls: true,
@@ -383,28 +381,6 @@ export function AuthProvider({
         onSuccess: onNewAuthState,
       },
     );
-  };
-
-  const verifyExternalWallet = async (verifyParams: VerifyExternalWalletParams) => {
-    setIsVerifyExternalWalletPending(true);
-    setExternalWalletError(undefined);
-
-    if (!verifyParams?.externalWallet || !verifyParams?.signedMessage) {
-      console.error('No signature or address found on the verifyWalletSignature response.');
-      setIsVerifyExternalWalletPending(false);
-      return;
-    }
-
-    verifyExternalWalletHook.mutate(verifyParams, {
-      onSuccess: onNewAuthState,
-      onError: e => {
-        console.error('Error verifying signature:', e);
-        setExternalWalletError(['Signature verification failed.']);
-      },
-      onSettled: () => {
-        setIsVerifyExternalWalletPending(false);
-      },
-    });
   };
 
   const onLoginComplete = useCallback(
@@ -420,7 +396,7 @@ export function AuthProvider({
       await onLoginRef.current?.();
 
       if (is2faEnabled) {
-        setup2faHook.mutate(undefined, {
+        mutateSetup2fa(undefined, {
           onSuccess: status => {
             setTwoFactorStatus(status);
 
@@ -461,7 +437,7 @@ export function AuthProvider({
         }
         para.setWallets(newWallets);
       } else {
-        ({ recoverySecret, walletIds } = await waitForWalletCreationHook.mutateAsync({
+        ({ recoverySecret, walletIds } = await mutateAsyncWaitForWalletCreation({
           isCanceled: () => false,
         }));
       }
@@ -481,7 +457,7 @@ export function AuthProvider({
   }, [isRecoverySecretStepEnabled, overrides?.createWallets]);
 
   const logout = () => {
-    logoutHook.mutate();
+    mutateLogout();
   };
 
   const isPasswordIFrameLoading = !!iFrameUrl && iFrameUrl === signupState?.passwordUrl && !isIFrameReady;
@@ -490,38 +466,35 @@ export function AuthProvider({
     () => ({
       presentSignupUi,
       presentLoginUi,
-      signUpOrLogIn: [signUpOrLogIn, signUpOrLogInHook.isPending],
-      verifyNewAccount: [
-        verifyNewAccount,
-        verifyNewAccountHook.isPending || isPasswordIFrameLoading,
-        verifyNewAccountHook.error,
-      ],
+      signUpOrLogIn,
+      isSignUpOrLogInPending,
+      verifyNewAccount,
+      isVerifyNewAccountPending: isVerifyNewAccountPending || isPasswordIFrameLoading,
+      verifyNewAccountError,
       verifyOAuth,
       verifyFarcaster,
       verifyTelegram,
-      verifyExternalWallet,
       onNewAuthState,
-      setup2fa: [setup2faHook.isPending],
+      isSetup2faPending,
       logout,
       biometricHints,
     }),
     [
-      signupState,
       presentSignupUi,
       presentLoginUi,
       signUpOrLogIn,
+      isSignUpOrLogInPending,
       verifyNewAccount,
-      signUpOrLogIn,
-      verifyTelegram,
-      verifyFarcaster,
-      onNewAuthState,
-      verifyExternalWallet,
-      biometricHints,
-      isVerifyExternalWalletPending,
+      isVerifyNewAccountPending,
       isPasswordIFrameLoading,
-      verifyNewAccountHook.isPending,
-      verifyNewAccountHook.error,
-      signUpOrLogInHook.isPending,
+      verifyNewAccountError,
+      verifyOAuth,
+      verifyFarcaster,
+      verifyTelegram,
+      onNewAuthState,
+      isSetup2faPending,
+      logout,
+      biometricHints,
     ],
   );
 

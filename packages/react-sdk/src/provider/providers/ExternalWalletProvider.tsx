@@ -1,11 +1,13 @@
 import { PropsWithChildren, createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { AuthMethod, WalletType, isIOS, isIOSWebview, isMobile, truncateAddress } from '@getpara/web-sdk';
+import { isIOS, isIOSWebview, isMobile, truncateAddress } from '@getpara/web-sdk';
 import { useInternalClient } from '../hooks/utils/useInternalClient.js';
 import { useStore } from '../stores/useStore.js';
 import { ModalStep } from '../../modal/index.js';
 import { useModalStore } from '../../modal/stores/index.js';
-import { useWalletState } from '../hooks/index.js';
-import type { CommonChain, CommonWallet, TExternalWallet } from '@getpara/react-common';
+import { useVerifyExternalWallet, useWalletState } from '../hooks/index.js';
+import { CommonChain, CommonWallet, TExternalWallet } from '@getpara/react-common';
+import { WalletType, VerifyExternalWalletParams } from '@getpara/user-management-client';
+import { useAuthActions } from './AuthProvider.js';
 
 export const defaultExternalWallet = {
   wallets: [],
@@ -22,7 +24,8 @@ export const defaultExternalWallet = {
   switchChain: () => Promise.resolve(),
   setChainIdSwitchingTo: () => {},
   connectEmbeddedToExternalConnectors: () => Promise.resolve(),
-  verifyWalletSignature: () => Promise.resolve({}),
+  verifyWalletSignature: () => Promise.resolve({} as unknown as any),
+  isExternalWalletVerifying: false,
 };
 
 export const ExternalWalletContext = createContext<{
@@ -45,9 +48,8 @@ export const ExternalWalletContext = createContext<{
   switchChain: (chainId: string) => Promise<void>;
   setChainIdSwitchingTo: (chainId?: string) => void;
   connectEmbeddedToExternalConnectors: () => Promise<void>;
-  verifyWalletSignature: () => Promise<
-    { address?: string; signature?: string; cosmosPublicKeyHex?: string; cosmosSigner?: string } | undefined
-  >;
+  verifyWalletSignature: () => Promise<VerifyExternalWalletParams | undefined>;
+  isExternalWalletVerifying?: boolean;
 }>(defaultExternalWallet);
 
 export function ExternalWalletProvider({ children }: PropsWithChildren) {
@@ -82,6 +84,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     connectParaEmbedded: cosmosConnectParaEmbedded,
     signVerificationMessage: cosmosSignVerificationMessage,
   } = useContext(cosmosContext);
+  const onLoginRef = useStore(state => state.onLoginRef);
   const setStep = useModalStore(state => state.setStep);
   const setStepDirection = useModalStore(state => state.setStepDirection);
   const setIsExternalWalletConnecting = useModalStore(state => state.setIsExternalWalletConnecting);
@@ -91,14 +94,14 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
   const setExternalWalletError = useModalStore(state => state.setExternalWalletError);
   const setIsUsingMobileConnector = useModalStore(state => state.setIsUsingMobileConnector);
   const isUsingMobileConnector = useModalStore(state => state.isUsingMobileConnector);
-  const setFlow = useModalStore(state => state.setFlow);
-  const setSupportedAuthMethods = useModalStore(state => state.setSupportedAuthMethods);
-  const setBiometricLocationHints = useModalStore(state => state.setBiometricLocationHints);
   const para = useInternalClient();
   const { setSelectedWallet } = useWalletState();
+  const { onNewAuthState } = useAuthActions();
+  const { mutate: verifyExternalWallet } = useVerifyExternalWallet();
 
   const [qrUri, setQrUri] = useState<string>();
   const [chainIdSwitchingTo, setChainIdSwitchingTo] = useState<string>();
+  const [isExternalWalletVerifying, setIsExternalWalletVerifying] = useState(false);
 
   // Filter any wallets that aren't included in the sort array, sort by the array then sort by installed extensions
   const wallets = [...evmWallets, ...solanaWallets, ...cosmosWallets]
@@ -201,89 +204,93 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
 
   const verifyWalletSignature = useCallback(async () => {
     setExternalWalletError();
+    setIsExternalWalletVerifying(true);
     const walletType = Object.values(para.externalWallets)[0]?.type;
 
-    if (walletType) {
-      const resp: { address: string; signature: string; cosmosPublicKeyHex: string; cosmosSigner: string } = {
-        address: '',
-        signature: '',
-        cosmosPublicKeyHex: '',
-        cosmosSigner: '',
-      };
-      switch (walletType) {
-        case WalletType.COSMOS: {
-          const { signature, error, cosmosPublicKeyHex, cosmosSigner, address } = await cosmosSignVerificationMessage();
+    let verifyExternalWalletParams: VerifyExternalWalletParams | undefined;
+
+    switch (walletType) {
+      case WalletType.COSMOS:
+        {
+          const { address, signature, error, cosmosPublicKeyHex, cosmosSigner } = await cosmosSignVerificationMessage();
 
           if (error) {
             setExternalWalletError([error]);
-          } else if (signature) {
+          } else if (signature && address) {
             // If signature is returned address, cosmosPublicKeyHex and cosmosSigner will also be returned
-            resp.address = address!;
-            resp.signature = signature;
-            resp.cosmosPublicKeyHex = cosmosPublicKeyHex!;
-            resp.cosmosSigner = cosmosSigner!;
+            verifyExternalWalletParams = {
+              externalWallet: {
+                type: WalletType.COSMOS,
+                address,
+              },
+              signedMessage: signature,
+              cosmosPublicKeyHex,
+              cosmosSigner,
+            };
           }
-
-          return resp;
         }
-        case WalletType.EVM: {
+        break;
+      case WalletType.EVM:
+        {
           const { signature, error, address } = await evmSignVerificationMessage();
 
           if (error) {
             setExternalWalletError([error]);
           } else if (signature && address) {
-            resp.address = address;
-            resp.signature = signature;
+            verifyExternalWalletParams = {
+              externalWallet: {
+                type: WalletType.EVM,
+                address,
+              },
+              signedMessage: signature,
+            };
           }
-
-          return resp;
         }
-        case WalletType.SOLANA: {
+        break;
+      case WalletType.SOLANA:
+        {
           const { signature, error, address } = await solanaSignVerificationMessage();
 
           if (error) {
             setExternalWalletError([error]);
           } else if (signature && address) {
-            resp.address = address;
-            resp.signature = signature;
+            verifyExternalWalletParams = {
+              externalWallet: {
+                type: WalletType.SOLANA,
+                address,
+              },
+              signedMessage: signature,
+            };
           }
-
-          return resp;
         }
-        default: {
-          return undefined;
-        }
-      }
+        break;
+      default:
+        break;
     }
-  }, [cosmosSignVerificationMessage, evmSignVerificationMessage, solanaSignVerificationMessage]);
 
-  const completeFullAuth = async (address: string, userExists: boolean, isVerified: boolean, bufferAddress?: string) => {
-    if (userExists && isVerified) {
-      // Check for supportedAuthMethods before initiating the login to ensure the user has biometrics
-      const supportedAuthMethods = await para.supportedAuthMethods({ externalWalletAddress: bufferAddress ?? address });
-
-      // If no biometrics have been set, reverify and create a biometric
-      if (!supportedAuthMethods.size) {
-        setFlow('signup');
-        setStep(ModalStep.EXTERNAL_WALLET_VERIFICATION);
+    if (verifyExternalWalletParams) {
+      if (!verifyExternalWalletParams?.externalWallet || !verifyExternalWalletParams?.signedMessage) {
+        console.error('No signature or address found on the verifyWalletSignature response.');
         return;
       }
 
-      await para.initiateUserLoginV2({ externalWalletAddress: bufferAddress ?? address });
+      verifyExternalWallet(verifyExternalWalletParams, {
+        onSuccess: onNewAuthState,
+        onError: e => {
+          console.error('Error verifying signature:', e);
+          setExternalWalletError(['Signature verification failed.']);
+        },
+        onSettled: () => {
+          setIsExternalWalletVerifying(false);
+        },
+      });
 
-      const biometricLocationHints = supportedAuthMethods.has(AuthMethod.PASSKEY)
-        ? await para.getUserBiometricLocationHints()
-        : [];
-
-      setFlow('login');
-      setStep(ModalStep.BIOMETRIC_LOGIN);
-      setSupportedAuthMethods(supportedAuthMethods);
-      setBiometricLocationHints(biometricLocationHints);
-    } else {
-      setFlow('signup');
-      setStep(ModalStep.EXTERNAL_WALLET_VERIFICATION);
+      return verifyExternalWalletParams;
     }
-  };
+
+    setIsExternalWalletVerifying(false);
+    return undefined;
+  }, [cosmosSignVerificationMessage, evmSignVerificationMessage, solanaSignVerificationMessage]);
 
   const connectExternalWallet = useCallback(
     async (
@@ -306,7 +313,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
         setIsExternalWalletConnecting(true);
         setIsUsingMobileConnector(isMobileConnect);
 
-        const { address, bufferAddress, error, userExists, isVerified } = await (isMobileConnect
+        const { address, error, authState } = await (isMobileConnect
           ? wallet.connectMobile(isManualWalletConnect)
           : wallet.connect());
 
@@ -323,8 +330,8 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
             return;
           }
         } else if (address) {
-          if (externalWalletsWithFullAuth?.includes(wallet.id.toUpperCase() as TExternalWallet)) {
-            await completeFullAuth(address, userExists, isVerified, bufferAddress);
+          if (!!authState && externalWalletsWithFullAuth?.includes(wallet.id.toUpperCase() as TExternalWallet)) {
+            onNewAuthState(authState);
           } else {
             setStep(ModalStep.LOGIN_DONE);
           }
@@ -429,6 +436,12 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     }
   }, [evmConnectParaEmbedded, cosmosConnectParaEmbedded]);
 
+  useEffect(() => {
+    onLoginRef.current = async () => {
+      await connectEmbeddedToExternalConnectors();
+    };
+  }, [connectEmbeddedToExternalConnectors]);
+
   return (
     <ExternalWalletContext.Provider
       value={useMemo(
@@ -448,6 +461,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
           setChainIdSwitchingTo,
           connectEmbeddedToExternalConnectors,
           verifyWalletSignature,
+          isExternalWalletVerifying,
         }),
         [
           wallets,
@@ -465,6 +479,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
           setChainIdSwitchingTo,
           connectEmbeddedToExternalConnectors,
           verifyWalletSignature,
+          isExternalWalletVerifying,
         ],
       )}
     >

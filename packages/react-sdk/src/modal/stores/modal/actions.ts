@@ -73,10 +73,6 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
     const authState = get().authState;
     return authState?.stage === 'signup' ? authState : undefined;
   },
-  setWebAuthURLForLogin: url => set({ webAuthURLForLogin: url }),
-  setWebAuthURLForCreate: url => set({ webAuthURLForCreate: url }),
-  setPasswordUrlForLogin: url => set({ passwordUrlForLogin: url }),
-  setSupportedAuthMethods: supportedAuthMethods => set({ supportedAuthMethods }),
   setOnRampPurchase: onRampPurchase =>
     set(state => ({ onRampPurchase: { ...(state.onRampPurchase || {}), ...onRampPurchase } })),
   setOnRampConfig: onRampConfig => set({ onRampConfig }),
@@ -89,7 +85,6 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
   setStepDirection: stepDirection => set({ stepDirection }),
   setFarcasterConnectUri: farcasterConnectUri => set({ farcasterConnectUri }),
   setTwoFactorStatus: twoFactorStatus => set({ twoFactorStatus }),
-  setBiometricLocationHints: biometricLocationHints => set({ biometricLocationHints }),
   setIFrameUrl: iFrameUrl => set({ iFrameUrl }),
   setIsIFrameReady: isIFrameReady => set({ isIFrameReady }),
   setAuthLayout: authLayout => {

@@ -16,7 +16,7 @@ import { getWalletConnectUri } from '../utils/getWalletConnectUri.js';
 import { normalize } from 'viem/ens';
 import { useExternalWalletStore } from '../stores/useStore.js';
 import type { CommonChain, CommonWallet, TExternalWallet } from '@getpara/react-common';
-import ParaWeb, { isMobile, Wallet, WalletType } from '@getpara/web-sdk';
+import ParaWeb, { AuthState, isMobile, Wallet, WalletType } from '@getpara/web-sdk';
 
 const defaultEvmExternalWallet = {
   wallets: [],
@@ -178,7 +178,10 @@ export function EvmExternalWalletProvider({
         account: wagmiAddress,
       });
 
-      return { address: wagmiAddress, signature };
+      return {
+        address: wagmiAddress,
+        signature,
+      };
     } catch (e) {
       switch (e.name) {
         case 'UserRejectedRequestError': {
@@ -236,11 +239,13 @@ export function EvmExternalWalletProvider({
     connectorName?: string;
   }) => {
     try {
-      return await para.externalWalletLogin({
-        address,
-        type: WalletType.EVM,
-        provider: connectorName,
-        withFullParaAuth: walletsWithFullAuth?.includes((walletId?.toUpperCase() ?? '') as TExternalWallet),
+      return await para.loginExternalWalletV2({
+        externalWallet: {
+          address,
+          type: WalletType.EVM,
+          provider: connectorName,
+          withFullParaAuth: walletsWithFullAuth?.includes((walletId?.toUpperCase() ?? '') as TExternalWallet),
+        },
       });
     } catch (err) {
       await disconnectAsync();
@@ -279,15 +284,14 @@ export function EvmExternalWalletProvider({
 
   const connect = async (
     connector: WagmiConnectorInstance,
-  ): Promise<{ address?: string; error?: string; userExists: boolean; isVerified: boolean }> => {
+  ): Promise<{ authState?: AuthState; address?: string; error?: string }> => {
     updateExternalWalletState({ isConnecting: true });
     await disconnectAsync();
 
     const walletChainId = await connector.getChainId();
+    let authState: AuthState;
     let address: string | undefined;
     let error: string | undefined;
-    let userExists = false;
-    let isVerified = false;
 
     try {
       const data = await connectAsync({
@@ -302,10 +306,8 @@ export function EvmExternalWalletProvider({
 
       if (address) {
         try {
-          const loginResp = await login({ address, connectorName: connector.name, walletId: connector.paraDetails.id });
-          userExists = loginResp.userExists;
-          isVerified = loginResp.isVerified;
-          verificationMessage.current = loginResp.signatureVerificationMessage;
+          authState = await login({ address, connectorName: connector.name, walletId: connector.paraDetails.id });
+          verificationMessage.current = authState.stage === 'verify' ? authState.signatureVerificationMessage : undefined;
         } catch (err) {
           address = undefined;
           error = err;
@@ -329,7 +331,7 @@ export function EvmExternalWalletProvider({
     }
 
     updateExternalWalletState({ isConnecting: false });
-    return { address, error, userExists, isVerified };
+    return { address, authState, error };
   };
 
   const connectMobile = async (

@@ -1,6 +1,7 @@
+import { ExternalWalletInfo } from '@getpara/user-management-client';
 import { truncateAddress, WalletType } from '@getpara/web-sdk';
 
-export const getExternalWalletDisplayName = ({ address, type }: { address: string; type: WalletType }) => {
+export const getExternalWalletDisplayName = ({ address, type, addressBech32 }: ExternalWalletInfo) => {
   const walletType = type as WalletType;
   let walletTypeDisplay: string;
 
@@ -16,5 +17,5 @@ export const getExternalWalletDisplayName = ({ address, type }: { address: strin
       break;
   }
 
-  return `${walletTypeDisplay} ${truncateAddress(address, walletType)}`;
+  return `${walletTypeDisplay} ${truncateAddress(addressBech32 ?? address, walletType)}`;
 };

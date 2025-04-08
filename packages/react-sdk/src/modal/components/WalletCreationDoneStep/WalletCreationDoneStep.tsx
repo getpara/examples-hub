@@ -6,6 +6,8 @@ import { WalletCard, WalletCards } from '../WalletCard/WalletCard.js';
 import styled from 'styled-components';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 import { useStore } from '../../../provider/stores/useStore.js';
+import { useAuthActions } from '../../../provider/providers/AuthProvider.js';
+import { useEffect, useState } from 'react';
 
 interface WalletCreationDoneStepProps {
   twoFactorAuthEnabled?: boolean;
@@ -13,32 +15,49 @@ interface WalletCreationDoneStepProps {
 }
 
 export const WalletCreationDoneStep = ({ twoFactorAuthEnabled, onClose }: WalletCreationDoneStepProps) => {
+  const { isSetup2faPending } = useAuthActions();
   const hideWallets = useStore(state => state.modalConfig?.hideWallets);
   const setStep = useModalStore(state => state.setStep);
   const isLogin = useModalStore(state => state.isLogin());
+  const twoFactorStatus = useModalStore(state => state.twoFactorStatus);
   const onRampConfig = useModalStore(state => state.onRampConfig);
   const para = useInternalClient();
 
+  const [isWaiting, setIsWaiting] = useState(false);
+
   const isOnRampConfigured = onRampConfig?.isBuyEnabled || onRampConfig?.isReceiveEnabled || onRampConfig?.isWithdrawEnabled;
 
-  const handleNext = async () => {
+  const onBypass2fa = () => {
     if (isLogin) {
-      if (!twoFactorAuthEnabled) {
-        setStep(ModalStep.LOGIN_DONE);
-        return;
-      }
-
-      const is2FAComplete = await para.check2FAStatus();
-
-      setStep(is2FAComplete ? ModalStep.LOGIN_DONE : ModalStep.SETUP_2FA);
+      setStep(ModalStep.LOGIN_DONE); // Proceed to login done if 2FA is not enabled and this is a login flow
     } else {
-      if (twoFactorAuthEnabled) {
-        setStep(ModalStep.SETUP_2FA);
+      onClose();
+    }
+  };
+
+  const handleNext = async () => {
+    if (!twoFactorAuthEnabled) {
+      onBypass2fa();
+    }
+
+    if (!twoFactorStatus) {
+      if (isSetup2faPending) {
+        setIsWaiting(true);
+      }
+    } else {
+      if (twoFactorStatus.isSetup) {
+        onBypass2fa();
       } else {
-        onClose();
+        setStep(ModalStep.SETUP_2FA);
       }
     }
   };
+
+  useEffect(() => {
+    if (isWaiting && !!twoFactorStatus) {
+      setStep(ModalStep.SETUP_2FA);
+    }
+  }, [isWaiting, twoFactorStatus]);
 
   return (
     <StepContainer $wide>
@@ -59,7 +78,7 @@ export const WalletCreationDoneStep = ({ twoFactorAuthEnabled, onClose }: Wallet
         )}
       </CardContainer>
       <InnerStepContainer>
-        <CpslButton fullWidth onClick={handleNext}>
+        <CpslButton fullWidth onClick={handleNext} disabled={isWaiting}>
           {twoFactorAuthEnabled ? 'Continue' : 'Done'}
         </CpslButton>
       </InnerStepContainer>

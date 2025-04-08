@@ -138,10 +138,6 @@ export const AddFunds = () => {
     setOnRampPurchase(undefined);
   }, []);
 
-  useEffect(() => {
-    setOnRampPurchase(undefined);
-  }, []);
-
   if (!onRampConfig || !activeWallet) {
     return (
       <SpinnerContainer>
@@ -149,10 +145,6 @@ export const AddFunds = () => {
       </SpinnerContainer>
     );
   }
-
-  useEffect(() => {
-    setOnRampPurchase(undefined);
-  }, []);
 
   return (
     <StepContainer>

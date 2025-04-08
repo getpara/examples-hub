@@ -1,4 +1,4 @@
-import { WalletType } from '@getpara/web-sdk';
+import { AuthStateLogin, AuthStateVerify, WalletType } from '@getpara/web-sdk';
 
 export type WalletMetadata = {
   id: string;
@@ -34,12 +34,11 @@ export type CommonWallet = {
     address?: string;
     bufferAddress?: string;
     error?: string;
-    userExists: boolean;
-    isVerified: boolean;
+    authState?: AuthStateLogin | AuthStateVerify;
   }>;
   connectMobile: (
     isManualWalletConnect?: boolean,
-  ) => Promise<{ address?: string; bufferAddress?: string; error?: string; userExists: boolean; isVerified: boolean }>;
+  ) => Promise<{ address?: string; bufferAddress?: string; error?: string; authState?: AuthStateLogin | AuthStateVerify }>;
   type: WalletType;
 } & WalletMetadata;
 

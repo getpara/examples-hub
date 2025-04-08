@@ -4,10 +4,10 @@ import { ModalStep } from '../../utils/steps.js';
 import { getActions } from './actions.js';
 import { OnRampConfig as OnRampConfigBase, OnRampPurchase, WalletType } from '@getpara/web-sdk';
 import { Tab as AddFundsTabType } from '../../components/AddFunds/AddFunds.js';
-import { AuthStateLogin, AuthStateSignup, AuthMethod, AuthState, AuthStateVerify } from '@getpara/core-sdk';
+import { AuthStateLogin, AuthStateSignup, AuthState, AuthStateVerify } from '@getpara/core-sdk';
 import { AuthLayout, TAuthLayout } from '../../types/modalProps.js';
 import { createRef, MutableRefObject } from 'react';
-import { BiometricLocationHint, Setup2faResponse } from '@getpara/user-management-client';
+import { Setup2faResponse } from '@getpara/user-management-client';
 
 type Flow = AuthStateSignup['stage'] | AuthStateLogin['stage'] | 'account';
 
@@ -26,10 +26,6 @@ interface ModalState {
   stepDirection: 1 | -1;
   flow: Flow | undefined;
   authState: AuthState | undefined;
-  webAuthURLForLogin: string | undefined;
-  webAuthURLForCreate: string | undefined;
-  passwordUrlForLogin: string | undefined;
-  supportedAuthMethods: Set<AuthMethod>;
   onModalStepChange?: (value: OnModalStepChangeValue) => void | undefined;
   onRampConfig: OnRampConfig | undefined;
   onRampPurchase: Partial<OnRampPurchase> | undefined;
@@ -42,7 +38,6 @@ interface ModalState {
   activeWallet: ActiveWallet | undefined;
   farcasterConnectUri: string | undefined;
   twoFactorStatus: Setup2faResponse | undefined;
-  biometricLocationHints: BiometricLocationHint[] | undefined;
   iFrameUrl: string | undefined;
   isIFrameReady: boolean | undefined;
   authLayout?: TAuthLayout[];
@@ -68,10 +63,6 @@ export interface ModalActions {
   getLoginState: () => AuthStateLogin | undefined;
   isLogin: () => boolean;
   isAccount: () => boolean;
-  setSupportedAuthMethods: (authMethods: Set<AuthMethod>) => void;
-  setWebAuthURLForLogin: (url?: string) => void;
-  setWebAuthURLForCreate: (url?: string) => void;
-  setPasswordUrlForLogin: (url?: string) => void;
   setOnModalStepChange: (fn?: (value: OnModalStepChangeValue) => void) => void;
   setOnRampConfig: (_: OnRampConfig | undefined) => void;
   setOnRampPurchase: (_: Partial<OnRampPurchase> | undefined) => void;
@@ -84,7 +75,6 @@ export interface ModalActions {
   setStepDirection: (stepDirection: 1 | -1) => void;
   setFarcasterConnectUri: (_: string | undefined) => void;
   setTwoFactorStatus: (twoFactorStatus?: Setup2faResponse) => void;
-  setBiometricLocationHints: (_?: BiometricLocationHint[]) => void;
   setIFrameUrl: (_?: string) => void;
   setIsIFrameReady: (_?: boolean) => void;
   setAuthLayout: (authLayout: TAuthLayout[]) => void;
@@ -100,10 +90,6 @@ export const DEFAULT_MODAL_STATE: Omit<ModalState, 'step' | 'onRampConfig'> = {
   flow: undefined,
   stepDirection: 1,
   authState: undefined,
-  webAuthURLForLogin: undefined,
-  webAuthURLForCreate: undefined,
-  passwordUrlForLogin: undefined,
-  supportedAuthMethods: new Set<AuthMethod>(),
   onModalStepChange: undefined,
   onRampPurchase: undefined,
   isFullyLoggedIn: false,
@@ -113,7 +99,6 @@ export const DEFAULT_MODAL_STATE: Omit<ModalState, 'step' | 'onRampConfig'> = {
   activeWallet: [undefined, undefined],
   farcasterConnectUri: undefined,
   twoFactorStatus: undefined,
-  biometricLocationHints: undefined,
   iFrameUrl: undefined,
   isIFrameReady: undefined,
   authLayout: [AuthLayout.AUTH_FULL, AuthLayout.EXTERNAL_FULL],
@@ -141,14 +126,9 @@ export const useModalStore = create<ModalStore>()(
       partialize: state => ({
         step: state.step,
         authState: state.authState,
-        webAuthURLForLogin: state.webAuthURLForLogin,
-        webAuthURLForCreate: state.webAuthURLForCreate,
-        passwordUrlForLogin: state.passwordUrlForLogin,
-        biometricLocationHints: state.biometricLocationHints,
         onRampPurchase: state.onRampPurchase,
         selectedExternalWalletId: state.selectedExternalWalletId,
         isUsingMobileConnector: state.isUsingMobileConnector,
-        supportedAuthMethods: state.supportedAuthMethods,
         isPasskeySupported: state.isPasskeySupported,
       }),
     },

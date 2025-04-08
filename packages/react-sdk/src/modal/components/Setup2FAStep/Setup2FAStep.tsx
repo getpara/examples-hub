@@ -14,7 +14,7 @@ import { ModalStep } from '../../utils/steps.js';
 import { CodeChangeEventDetail, CpslCodeInputCustomEvent } from '@getpara/core-components';
 import { styled } from 'styled-components';
 import { useCopyToClipboard } from '@getpara/react-common';
-import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
+import { useEnable2fa } from '../../../provider/index.js';
 
 interface Setup2FAStepProps {
   onClose: () => void;
@@ -23,32 +23,18 @@ interface Setup2FAStepProps {
 export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
   const isLogin = useModalStore(state => state.isLogin());
   const setStep = useModalStore(state => state.setStep);
-  const para = useInternalClient();
+  const twoFactorStatus = useModalStore(state => state.twoFactorStatus);
+  const { enable2faV2, isPending } = useEnable2fa();
   const isVerifying = useModalStore(state => state.step === ModalStep.VERIFY_2FA);
   const [copied, copy] = useCopyToClipboard();
 
   const inputRef = useRef<HTMLCpslCodeInputElement>(null);
 
-  const [qrCodeValue, setQrCodeValue] = useState<string>();
   const [code, setCode] = useState('');
   const [codeError, setCodeError] = useState('');
-  const [isVerifyingCode, setIsVerifyingCode] = useState(false);
 
-  const params = qrCodeValue ? new URL(qrCodeValue).searchParams : undefined;
+  const params = twoFactorStatus?.uri ? new URL(twoFactorStatus.uri).searchParams : undefined;
   const secret = params?.get('secret');
-
-  useEffect(() => {
-    async function fetchOtpAuthUrl() {
-      try {
-        const { uri } = await para.setup2FA();
-        setQrCodeValue(uri ?? '');
-      } catch (error) {
-        console.error('Error fetching OTPAuth URL:', error);
-      }
-    }
-
-    fetchOtpAuthUrl();
-  }, []);
 
   useEffect(() => {
     // Using a small timeout here to ensure the input is mounted before attempting focus
@@ -83,18 +69,21 @@ export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
   };
 
   const handleSubmitCode = async () => {
-    setIsVerifyingCode(true);
     if (code.length === 6 && /^\d+$/.test(code)) {
-      try {
-        await para.enable2FA({ verificationCode: code });
-        setStep(ModalStep.TWO_FACTOR_DONE);
-      } catch (e) {
-        setCodeError('Incorrect Code');
-      }
+      enable2faV2(
+        { verificationCode: code },
+        {
+          onSuccess: () => {
+            setStep(ModalStep.TWO_FACTOR_DONE);
+          },
+          onError: () => {
+            setCodeError('Incorrect Code');
+          },
+        },
+      );
     } else {
       setCodeError('Incorrect Code');
     }
-    setIsVerifyingCode(false);
   };
 
   const handleCopy = () => {
@@ -118,7 +107,7 @@ export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
       <InnerStepContainer>
         {isVerifying ? (
           <>
-            {isVerifyingCode ? (
+            {isPending ? (
               <CpslSpinner />
             ) : (
               <form
@@ -143,7 +132,9 @@ export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
             <CpslText variant="bodyS" color="secondary" weight="medium">
               Scan with your preferred authenticator app.
             </CpslText>
-            <QRContainer>{!qrCodeValue ? <CpslSpinner size={100} /> : <CpslQrCode url={qrCodeValue} />}</QRContainer>
+            <QRContainer>
+              {!twoFactorStatus?.uri ? <CpslSpinner size={100} /> : <CpslQrCode url={twoFactorStatus.uri} />}
+            </QRContainer>
           </>
         )}
       </InnerStepContainer>

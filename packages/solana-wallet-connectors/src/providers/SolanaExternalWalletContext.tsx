@@ -1,7 +1,7 @@
 import { PropsWithChildren, createContext, useEffect, useMemo, useRef } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Adapter, WalletReadyState } from '@solana/wallet-adapter-base';
-import ParaWeb, { WalletType } from '@getpara/web-sdk';
+import ParaWeb, { AuthState, WalletType } from '@getpara/web-sdk';
 import { WalletList } from '../types/Wallet.js';
 import { TExternalWallet, type CommonWallet } from '@getpara/react-common';
 import bs58 from 'bs58';
@@ -63,13 +63,15 @@ export function SolanaExternalWalletProvider({
 
   const login = async ({ address, providerName }: { address: string; providerName?: string }) => {
     try {
-      return await para.externalWalletLogin({
-        address,
-        type: WalletType.SOLANA,
-        provider: providerName,
-        withFullParaAuth: walletsWithFullAuth?.includes(
-          (getWallet(providerName ?? '')?.id.toUpperCase() ?? '') as TExternalWallet,
-        ),
+      return await para.loginExternalWalletV2({
+        externalWallet: {
+          address,
+          type: WalletType.SOLANA,
+          provider: providerName,
+          withFullParaAuth: walletsWithFullAuth?.includes(
+            (getWallet(providerName ?? '')?.id.toUpperCase() ?? '') as TExternalWallet,
+          ),
+        },
       });
     } catch (err) {
       await reset();
@@ -123,7 +125,11 @@ export function SolanaExternalWalletProvider({
       const signature = await solanaSignMessage(encodedMessage);
 
       return {
-        address: solanaAddress.toString(),
+        externalWallet: {
+          address: solanaAddress.toString(),
+          type: WalletType.SOLANA,
+          provider: wallet?.adapter?.name,
+        },
         signature: bs58.encode(signature),
       };
     } catch (e) {
@@ -140,13 +146,11 @@ export function SolanaExternalWalletProvider({
     return signature;
   };
 
-  const connect = async (
-    adapter?: Adapter,
-  ): Promise<{ address?: string; error?: string; userExists: boolean; isVerified: boolean }> => {
+  const connect = async (adapter?: Adapter): Promise<{ address?: string; error?: string; authState?: AuthState }> => {
     await _disconnect();
 
     if (!adapter) {
-      return { address: undefined, error: 'Adapter not found.', userExists: false, isVerified: false };
+      return { error: 'Adapter not found.' };
     }
 
     selectWallet(adapter.name);
@@ -156,8 +160,7 @@ export function SolanaExternalWalletProvider({
 
     let address: string | undefined;
     let error: string | undefined;
-    let userExists = false;
-    let isVerified = false;
+    let authState: AuthState | undefined;
 
     try {
       await adapter.connect();
@@ -166,7 +169,8 @@ export function SolanaExternalWalletProvider({
 
       if (address) {
         try {
-          await login({ address, providerName: adapter.name });
+          authState = await login({ address, providerName: adapter.name });
+          verificationMessage.current = authState.stage === 'verify' ? authState.signatureVerificationMessage : undefined;
         } catch (err) {
           await _disconnect();
           address = undefined;
@@ -187,7 +191,7 @@ export function SolanaExternalWalletProvider({
         }
       }
     }
-    return { address, error, userExists, isVerified };
+    return { address, error, authState };
   };
 
   const getAdapter = (name: string) =>
