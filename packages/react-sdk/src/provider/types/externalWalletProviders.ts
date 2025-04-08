@@ -1,13 +1,10 @@
 import { ParaCosmosProviderConfig } from '@getpara/cosmos-wallet-connectors';
-import { TExternalWallet } from '../../modal/index.js';
 import { ParaSolanaProviderConfig } from '@getpara/solana-wallet-connectors';
 import { Chain, Transport } from 'viem';
-import { ParaEvmProviderConfig } from '@getpara/evm-wallet-connectors';
+import { type ParaEvmProviderConfig } from '@getpara/evm-wallet-connectors';
+import { type TExternalWallet } from '@getpara/react-common';
 
-export type ExternalWalletProviderCommon = {
-  isUsing: boolean;
-  wallets: TExternalWallet[];
-};
+export type ExternalWalletProviderCommon = { isUsing: boolean; wallets: TExternalWallet[] };
 
 export type ParaEvmProviderConfigNoWallets<
   chains extends readonly [Chain, ...Chain[]],

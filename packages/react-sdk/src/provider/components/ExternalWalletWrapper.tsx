@@ -32,14 +32,15 @@ export const ExternalWalletWrapper = <
 
   const appName = useStore(state => state.appName);
   const resetModalState = useModalStore(state => state.resetState);
+  const wallets = useStore(state => state.externalWallets);
 
   useEffect(() => {
-    if (!walletConnect?.projectId) {
+    if (!!wallets.length && !walletConnect?.projectId) {
       console.warn(
         'It is recommended to provide a WalletConnect project id to ensure wallet connection works as expected. Sign up for your free key at https://cloud.walletconnect.com/sign-in',
       );
     }
-  }, [walletConnect]);
+  }, [wallets, walletConnect]);
 
   const evmProviderConfig: ParaEvmProviderConfigNoWallets<
     readonly [Chain, ...Chain[]],
@@ -84,15 +85,8 @@ export const ExternalWalletWrapper = <
     };
 
     return !solanaConnector
-      ? {
-          appIdentity,
-          chain: 'devnet',
-          endpoint: 'https://api.devnet.solana.com',
-        }
-      : {
-          appIdentity,
-          ...solanaConnector?.config,
-        };
+      ? { appIdentity, chain: 'devnet', endpoint: 'https://api.devnet.solana.com' }
+      : { appIdentity, ...solanaConnector?.config };
   }, [solanaConnector]);
 
   const cosmosProviderConfig: ParaCosmosProviderConfigNoWallets = useMemo(
@@ -139,10 +133,7 @@ export const ExternalWalletWrapper = <
       ...connectorsGrazProviderProps,
       walletConnect: {
         ...connectorsGrazProviderProps?.walletConnect,
-        options: {
-          ...connectorsGrazProviderProps?.walletConnect?.options,
-          projectId: walletConnect?.projectId ?? '',
-        },
+        options: { ...connectorsGrazProviderProps?.walletConnect?.options, projectId: walletConnect?.projectId ?? '' },
       },
     };
   }, [cosmosConnector, walletConnect?.projectId]);

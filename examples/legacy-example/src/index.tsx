@@ -359,6 +359,7 @@ function WagmiComponent(): JSX.Element {
           chains,
           options: {},
           appName: 'Example',
+          queryClient,
         }),
         coinbaseWallet({ appName: 'wagmi' }),
         walletConnect({

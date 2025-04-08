@@ -1,19 +1,17 @@
-import ParaWeb, { ParaProvider, setIsOpen } from '@getpara/react-sdk';
-import { ParaModalPropsForInit } from './paraConnector.js';
-import { QueryClient } from '@tanstack/react-query';
-import { QueryClientProvider } from '@tanstack/react-query';
-
-const queryClient = new QueryClient();
+import ParaWeb, { setIsOpen } from '@getpara/react-sdk';
+import { type ParaModalPropsForInit } from './paraConnector.js';
+import { type QueryClient } from '@tanstack/react-query';
 
 let Root;
 
-export function renderModal(para: ParaWeb, modalProps: Partial<ParaModalPropsForInit>, onCloseArg: () => void): void {
-  const existingContainer = document.getElementById('para-modal');
-  const container = existingContainer ?? document.createElement('div');
-  container.id = 'para-modal';
-
-  if (!existingContainer) {
-    document.body.appendChild(container); // Add the container to the DOM
+export function renderModal(
+  para: ParaWeb,
+  modalProps: Partial<ParaModalPropsForInit>,
+  onCloseArg: () => void,
+  queryClient: QueryClient,
+): { openModal: () => void } {
+  if (typeof window === 'undefined') {
+    return { openModal: () => {} };
   }
 
   const onClose = () => {
@@ -23,6 +21,17 @@ export function renderModal(para: ParaWeb, modalProps: Partial<ParaModalPropsFor
   };
 
   const render = async () => {
+    const { ParaProvider } = await import('@getpara/react-sdk');
+    const { QueryClientProvider } = await import('@tanstack/react-query');
+
+    const existingContainer = document.getElementById('para-modal');
+    const container = existingContainer ?? document.createElement('div');
+    container.id = 'para-modal';
+
+    if (!existingContainer) {
+      document.body.insertAdjacentElement('beforeend', container); // Add the container to the DOM
+    }
+
     const Modal = (
       <QueryClientProvider client={queryClient}>
         <ParaProvider
@@ -46,4 +55,6 @@ export function renderModal(para: ParaWeb, modalProps: Partial<ParaModalPropsFor
   };
 
   render();
+
+  return { openModal: () => setIsOpen(true) };
 }

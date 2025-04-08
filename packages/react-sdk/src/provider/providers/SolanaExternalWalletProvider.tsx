@@ -3,7 +3,7 @@ import { useStore } from '../stores/useStore.js';
 import { getParaSolanaConnector } from '../external/getParaSolanaConnector.js';
 import { ParaSolanaProviderProps } from '@getpara/solana-wallet-connectors';
 import { ExternalWalletProviderCommon, ParaSolanaProviderConfigNoWallets } from '../types/externalWalletProviders.js';
-import { TExternalWallet } from '../../modal/index.js';
+import { type TExternalWallet } from '@getpara/react-common';
 
 export function SolanaExternalWalletProvider({
   children,

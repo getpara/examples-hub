@@ -11,7 +11,7 @@ type SignTransactionMutationArgs = Omit<SignTransactionArgs, 'walletId'> & Parti
 type UseSignTransactionReturnType<
   TData = FullSignatureRes,
   TError = Error,
-  TVariables = SignTransactionArgs,
+  TVariables = SignTransactionMutationArgs,
   TContext = unknown,
 > = Compute<
   UseMutationReturnType<TData, TError, TVariables, TContext> & {

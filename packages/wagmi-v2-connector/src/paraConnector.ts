@@ -38,8 +38,7 @@ export const createParaConnector = ({
   idOverride,
   transports,
   renderModal,
-  openModal,
-}: ParaConnectorOpts & { renderModal?: (onClose: () => void) => void; openModal?: () => void }) => {
+}: ParaConnectorOpts & { renderModal?: (onClose: () => void) => { openModal: () => void } }) => {
   return createConnector(config => {
     const chains = [...config.chains];
     const eip1193Provider = new ParaEIP1193Provider({
@@ -50,7 +49,6 @@ export const createParaConnector = ({
       storageOverride,
       transports: transports || config.transports,
       renderModal,
-      openModal,
     });
 
     const injectedObj = injected({

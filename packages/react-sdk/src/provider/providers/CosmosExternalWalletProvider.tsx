@@ -3,7 +3,7 @@ import { useStore } from '../stores/useStore.js';
 import { getParaCosmosConnector } from '../external/getParaCosmosConnector.js';
 import { ExternalWalletProviderCommon, ParaCosmosProviderConfigNoWallets } from '../types/externalWalletProviders.js';
 import { ParaCosmosProviderProps } from '@getpara/cosmos-wallet-connectors';
-import { TExternalWallet } from '../../modal/index.js';
+import { type TExternalWallet } from '@getpara/react-common';
 
 export function CosmosExternalWalletProvider({
   children,

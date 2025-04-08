@@ -31,8 +31,7 @@ interface ParaEIP1193ProviderOpts {
   disableModal?: boolean;
   storageOverride?: Pick<Storage, 'setItem' | 'getItem'>;
   transports?: Record<number, Transport>;
-  renderModal?: (onClose: () => void) => void;
-  openModal?: () => void;
+  renderModal?: (onClose: () => void) => { openModal: () => void };
 }
 
 type WebSocketTransportSubscribeParameters = {
@@ -83,10 +82,10 @@ export class ParaEIP1193Provider extends EventEmitter implements EIP1193Provider
     }, {});
     this.chains = this.wagmiChainsToAddEthereumChainParameters(opts.chains);
     this.transports = opts.transports;
-    this.openModal = opts.openModal;
 
-    if (!this.disableModal) {
-      opts.renderModal?.(this.closeModal);
+    if (!this.disableModal && opts.renderModal) {
+      const { openModal } = opts.renderModal(this.closeModal);
+      this.openModal = openModal;
     }
 
     const defaultChainId = this.getStorageChainId() || opts.chainId;
@@ -236,7 +235,7 @@ export class ParaEIP1193Provider extends EventEmitter implements EIP1193Provider
 
         this.isModalClosed = false;
 
-        this.openModal();
+        this.openModal?.();
 
         await this.waitForLogin();
 

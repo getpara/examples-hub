@@ -11,8 +11,9 @@ import {
   SolanaExternalWalletContextType,
   WalletList as SolanaWalletList,
 } from '@getpara/solana-wallet-connectors';
-import { ParaModalProps, TExternalWallet } from '../../modal/index.js';
+import { ParaModalProps } from '../../modal/index.js';
 import { OAuthLogoVariantType } from '../../modal/types/modalProps.js';
+import { type TExternalWallet } from '@getpara/react-common';
 
 export interface ClientSlice {
   client?: ParaWeb;

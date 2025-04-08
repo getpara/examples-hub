@@ -15,13 +15,14 @@ import ParaWeb, {
 } from '@getpara/web-sdk';
 import { PropsWithChildren } from 'react';
 import { Chain, Transport } from 'viem';
-import { ParaModalProps, TExternalWallet } from '../../modal/index.js';
+import { ParaModalProps } from '../../modal/index.js';
 import { ParaGrazProviderProps } from '@getpara/cosmos-wallet-connectors';
 import {
   ParaCosmosProviderConfigNoWallets,
   ParaEvmProviderConfigNoWallets,
   ParaSolanaProviderConfigNoWallets,
 } from './externalWalletProviders.js';
+import { type TExternalWallet } from '@getpara/react-common';
 
 export type Callbacks = {
   onLogout?: (event: LogoutEvent) => void;

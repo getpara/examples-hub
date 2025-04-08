@@ -5,7 +5,7 @@ import { useStore } from '../stores/useStore.js';
 import { ModalStep } from '../../modal/index.js';
 import { useModalStore } from '../../modal/stores/index.js';
 import { useWalletState } from '../hooks/index.js';
-import { CommonChain, CommonWallet, TExternalWallet } from '@getpara/react-common';
+import type { CommonChain, CommonWallet, TExternalWallet } from '@getpara/react-common';
 
 export const defaultExternalWallet = {
   wallets: [],
@@ -14,12 +14,7 @@ export const defaultExternalWallet = {
   wallet: undefined,
   qrUri: undefined,
   chainIdSwitchingTo: undefined,
-  walletDisplayHelpers: {
-    showExtension: false,
-    showMobile: false,
-    isSolanaMobileIOS: false,
-    isCosmosMobileWallet: false,
-  },
+  walletDisplayHelpers: { showExtension: false, showMobile: false, isSolanaMobileIOS: false, isCosmosMobileWallet: false },
   username: undefined,
   avatar: undefined,
   connectExternalWallet: () => Promise.resolve(),
@@ -51,13 +46,7 @@ export const ExternalWalletContext = createContext<{
   setChainIdSwitchingTo: (chainId?: string) => void;
   connectEmbeddedToExternalConnectors: () => Promise<void>;
   verifyWalletSignature: () => Promise<
-    | {
-        address?: string;
-        signature?: string;
-        cosmosPublicKeyHex?: string;
-        cosmosSigner?: string;
-      }
-    | undefined
+    { address?: string; signature?: string; cosmosPublicKeyHex?: string; cosmosSigner?: string } | undefined
   >;
 }>(defaultExternalWallet);
 
@@ -176,9 +165,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
       const walletType = Object.values(para.externalWallets || {})[0]?.type;
 
       if (walletType) {
-        let resp: {
-          error?: string[];
-        };
+        let resp: { error?: string[] };
 
         setExternalWalletError();
         setChainIdSwitchingTo(chainId);
@@ -273,9 +260,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
   const completeFullAuth = async (address: string, userExists: boolean, isVerified: boolean, bufferAddress?: string) => {
     if (userExists && isVerified) {
       // Check for supportedAuthMethods before initiating the login to ensure the user has biometrics
-      const supportedAuthMethods = await para.supportedAuthMethods({
-        externalWalletAddress: bufferAddress ?? address,
-      });
+      const supportedAuthMethods = await para.supportedAuthMethods({ externalWalletAddress: bufferAddress ?? address });
 
       // If no biometrics have been set, reverify and create a biometric
       if (!supportedAuthMethods.size) {
@@ -284,9 +269,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
         return;
       }
 
-      await para.initiateUserLoginV2({
-        externalWalletAddress: bufferAddress ?? address,
-      });
+      await para.initiateUserLoginV2({ externalWalletAddress: bufferAddress ?? address });
 
       const biometricLocationHints = supportedAuthMethods.has(AuthMethod.PASSKEY)
         ? await para.getUserBiometricLocationHints()

@@ -4,7 +4,7 @@ import { ParaEvmProviderProps } from '@getpara/evm-wallet-connectors';
 import { useStore } from '../stores/useStore.js';
 import { Chain, Transport } from 'viem';
 import { ExternalWalletProviderCommon, ParaEvmProviderConfigNoWallets } from '../types/externalWalletProviders.js';
-import { TExternalWallet } from '../../modal/index.js';
+import { type TExternalWallet } from '@getpara/react-common';
 
 export function EvmExternalWalletProvider<
   const chains extends readonly [Chain, ...Chain[]],

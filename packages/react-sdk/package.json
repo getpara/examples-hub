@@ -18,7 +18,6 @@
     "@getpara/react-common": "2.0.0-alpha.0",
     "@getpara/react-components": "2.0.0-alpha.0",
     "@getpara/web-sdk": "2.0.0-alpha.0",
-    "@tanstack/react-query": "^5.0.0",
     "date-fns": "^3.6.0",
     "framer-motion": "11.3.28",
     "libphonenumber-js": "^1.11.1",
@@ -50,6 +49,7 @@
     "@getpara/cosmos-wallet-connectors": "^2.0.0-alpha.0",
     "@getpara/evm-wallet-connectors": "^2.0.0-alpha.0",
     "@getpara/solana-wallet-connectors": "^2.0.0-alpha.0",
+    "@tanstack/react-query": ">=5.0.0",
     "react": "*",
     "react-dom": "*"
   },

@@ -17,6 +17,7 @@
     "typescript": "5.1.6"
   },
   "peerDependencies": {
+    "@tanstack/react-query": ">=5.0.0",
     "react": "*",
     "react-dom": "*"
   },

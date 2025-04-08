@@ -4,9 +4,9 @@ import { CpslButton, CpslIcon, CpslInput, CpslText } from '@getpara/react-compon
 import { useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { useState } from 'react';
-import type { CommonWallet } from '../../types/commonTypes.js';
 import { hasEmbeddedAuth } from '../../utils/authLayoutHelpers.js';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
+import { type CommonWallet } from '@getpara/react-common';
 
 const HAS_MORE_LENGTH = 3;
 

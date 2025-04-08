@@ -21,17 +21,12 @@ const checkForPackages = async () => {
       await import(packageName);
     } catch (err) {
       if (err.code === 'ERR_MODULE_NOT_FOUND') {
-        const packageJsonContent = {
-          name: packageName,
-          main: './index.js',
-        };
+        const packageJsonContent = { name: packageName, main: './index.js' };
         await fs.mkdir(path.join(pathToNodeModules, packageName), { recursive: true });
         await fs.writeFile(path.join(pathToNodeModules, packageName, 'index.js'), '//STUB');
         await fs.writeFile(path.join(pathToNodeModules, packageName, 'package.json'), JSON.stringify(packageJsonContent), {
           encoding: 'utf-8',
         });
-      } else {
-        console.err('Para setup failed:', err);
       }
     }
   }
