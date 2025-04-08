@@ -28,6 +28,7 @@ createRoot(document.getElementById("root")!).render(
         }}
         externalWalletConfig={{
           wallets: [ExternalWallet.KEPLR, ExternalWallet.LEAP],
+          walletsWithParaAuth: [ExternalWallet.KEPLR],
           cosmosConnector: {
             config: {
               chains: cosmosChains,

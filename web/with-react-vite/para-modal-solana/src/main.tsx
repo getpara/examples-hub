@@ -27,6 +27,7 @@ createRoot(document.getElementById("root")!).render(
             ExternalWallet.PHANTOM,
             ExternalWallet.BACKPACK,
           ],
+          walletsWithParaAuth: [ExternalWallet.GLOW],
           solanaConnector: {
             config: {
               endpoint,

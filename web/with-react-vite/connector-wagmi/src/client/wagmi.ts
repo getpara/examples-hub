@@ -11,6 +11,8 @@ import {
 } from "wagmi/connectors";
 import { mainnet, sepolia } from "wagmi/chains";
 
+export const queryClient = new QueryClient();
+
 const connector = paraConnector({
   para: para,
   chains: [sepolia, mainnet],
@@ -41,6 +43,7 @@ const connector = paraConnector({
   authLayout: [AuthLayout.AUTH_FULL],
   recoverySecretStepEnabled: true,
   options: {},
+  queryClient,
 });
 
 const config: CreateConfigParameters = {
@@ -61,5 +64,3 @@ const config: CreateConfigParameters = {
 };
 
 export const wagmiConfig = createConfig(config);
-
-export const queryClient = new QueryClient();
