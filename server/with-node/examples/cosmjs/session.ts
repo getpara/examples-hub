@@ -20,7 +20,8 @@ export async function cosmjsSessionSignHandler(req: Request, res: Response, next
       return;
     }
 
-    const para = new ParaServer(Environment.BETA, paraApiKey);
+    const env = process.env.PARA_ENVIRONMENT as Environment || Environment.BETA;
+    const para = new ParaServer(env, paraApiKey);
     await para.importSession(session);
 
     const paraProtoSigner = new ParaProtoSigner(para, "cosmos");

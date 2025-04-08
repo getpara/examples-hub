@@ -62,6 +62,7 @@ export async function zerodevSessionSignHandler(req: Request, res: Response, nex
     const bundlerRpc = process.env.ZERODEV_BUNDLER_RPC;
     const paymasterRpc = process.env.ZERODEV_PAYMASTER_RPC;
     const rpcUrl = process.env.ARBITRUM_SEPOLIA_RPC;
+    const env = process.env.PARA_ENVIRONMENT as Environment || Environment.BETA;
 
     if (!paraApiKey || !projectId || !bundlerRpc || !paymasterRpc || !rpcUrl) {
       res
@@ -72,7 +73,7 @@ export async function zerodevSessionSignHandler(req: Request, res: Response, nex
       return;
     }
 
-    const para = new ParaServer(Environment.BETA, paraApiKey);
+    const para = new ParaServer(env, paraApiKey);
     await para.importSession(session);
 
     const viemParaAccount: LocalAccount = createParaAccount(para);

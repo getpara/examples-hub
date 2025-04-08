@@ -19,7 +19,8 @@ export async function createPregenWalletHandler(req: Request, res: Response, nex
       return;
     }
 
-    const para = new ParaServer(Environment.BETA, paraApiKey);
+    const env = process.env.PARA_ENVIRONMENT as Environment || Environment.BETA;
+    const para = new ParaServer(env, paraApiKey);
 
     const walletExists = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
 

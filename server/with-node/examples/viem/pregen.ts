@@ -21,7 +21,8 @@ export async function viemPregenSignHandler(req: Request, res: Response, next: N
       return;
     }
 
-    const para = new ParaServer(Environment.BETA, paraApiKey);
+    const env = process.env.PARA_ENVIRONMENT as Environment || Environment.BETA;
+    const para = new ParaServer(env, paraApiKey);
 
     const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
     if (!hasPregenWallet) {
