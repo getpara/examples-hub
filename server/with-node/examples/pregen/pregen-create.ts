@@ -28,13 +28,13 @@ export async function createPregenWalletHandler(req: Request, res: Response, nex
       return;
     }
 
-    const wallet = await para.createPregenWallet({
-      type: WalletType.EVM,
+    const wallets = await para.createPregenWalletPerType({
+      types: [WalletType.EVM, WalletType.SOLANA, WalletType.COSMOS], // Select the wallet type you want to create or use createPregenWallet() to create a single type.
       pregenIdentifier: email,
       pregenIdentifierType: "EMAIL",
     });
 
-    if (!wallet) {
+    if (!wallets) {
       res.status(500).send("Failed to create pre-generated wallet instance.");
       return;
     }
@@ -49,8 +49,8 @@ export async function createPregenWalletHandler(req: Request, res: Response, nex
     await setKeyShareInDB(email, encryptedKeyShare);
 
     res.status(201).json({
-      message: "Pre-generated wallet created successfully.",
-      address: wallet.address,
+      message: "Pre-generated wallets created successfully.",
+      addresses: wallets.map((wallet) => wallet.address),
     });
   } catch (error) {
     console.error("Error creating pre-generated wallet:", error);
