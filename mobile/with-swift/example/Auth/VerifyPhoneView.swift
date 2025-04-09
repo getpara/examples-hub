@@ -55,11 +55,29 @@ struct VerifyPhoneView: View {
                 loadingStateText = "Verifying..."
                 Task {
                     do {
-                        let biometricsId = try await paraManager.verifyByPhone(verificationCode: code)
-                        loadingStateText = "Generating Passkey..."
-                        try await paraManager.generatePasskey(identifier: "\(countryCode)\(phoneNumber)", biometricsId: biometricsId, authorizationController: authorizationController)
-                        loadingStateText = "Creating Wallet..."
-                        try await paraManager.createWallet(type: .evm, skipDistributable: false)
+                        let authState = try await paraManager.verifyNewAccount(verificationCode: code)
+                        
+                        guard authState.stage == .signup else {
+                            throw ParaError.error("Unexpected auth stage: \(authState.stage)")
+                        }
+                        
+                        if let passkeyId = authState.passkeyId {
+                            loadingStateText = "Generating Passkey..."
+                            try await paraManager.generatePasskey(
+                                identifier: "\(countryCode)\(phoneNumber)",
+                                biometricsId: passkeyId,
+                                authorizationController: authorizationController
+                            )
+                            loadingStateText = "Creating Wallet..."
+                            try await paraManager.createWallet(type: .evm, skipDistributable: false)
+                        } else if let passwordUrl = authState.passwordUrl {
+                            loadingStateText = "Setting up password..."
+                            loadingStateText = "Creating Wallet..."
+                            try await paraManager.createWallet(type: .evm, skipDistributable: false)
+                        } else {
+                            throw ParaError.error("No authentication method available")
+                        }
+                        
                         isLoading = false
                         appRootManager.currentRoot = .home
                     } catch {
