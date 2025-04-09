@@ -134,17 +134,35 @@ struct PhoneAuthView: View {
                 errorMessage = nil
                 Task {
                     do {
-                        let userExists = try await paraManager.checkIfUserExistsByPhone(phoneNumber: phoneNumber.replacingOccurrences(of: " ", with: ""), countryCode: countryCode)
+                        // Format the phone number in international format
+                        let formattedPhoneNumber = paraManager.formatPhoneNumber(
+                            phoneNumber: phoneNumber.replacingOccurrences(of: " ", with: ""),
+                            countryCode: countryCode.replacingOccurrences(of: "+", with: "")
+                        )
                         
-                        if userExists {
-                            try await paraManager.login(authorizationController: authorizationController, authInfo: PhoneAuthInfo(phone: phoneNumber.replacingOccurrences(of: " ", with: ""), countryCode: countryCode))
-                            appRootManager.currentRoot = .home
-                            return
+                        // Use the new signUpOrLogIn method
+                        let authState = try await paraManager.signUpOrLogIn(auth: .phone(formattedPhoneNumber))
+                        
+                        // Handle the auth state based on the stage
+                        switch authState.stage {
+                        case .verify:
+                            // New user needs verification
+                            isLoading = false
+                            shouldNavigateToVerifyPhoneView = true
+                        case .login:
+                            // Existing user, handle login
+                            if let passkeyUrl = authState.passkeyUrl {
+                                try await paraManager.login(authorizationController: authorizationController, authInfo: PhoneAuthInfo(phone: phoneNumber.replacingOccurrences(of: " ", with: ""), countryCode: countryCode.replacingOccurrences(of: "+", with: "")))
+                                appRootManager.currentRoot = .home
+                            } else {
+                                errorMessage = "No authentication method available"
+                                isLoading = false
+                            }
+                        case .signup:
+                            // This shouldn't happen at this stage
+                            errorMessage = "Unexpected authentication stage"
+                            isLoading = false
                         }
-                        
-                        try await paraManager.createUserByPhone(phoneNumber: phoneNumber.replacingOccurrences(of: " ", with: ""), countryCode: countryCode)
-                        isLoading = false
-                        shouldNavigateToVerifyPhoneView = true
                     } catch {
                         errorMessage = String(describing: error)
                         isLoading = false
