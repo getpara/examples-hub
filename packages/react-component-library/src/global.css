@@ -66,7 +66,7 @@
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
+  --radius: 0.5rem;
   --sidebar: oklch(1 0 0);
   --sidebar-foreground: var(--shadowstone-700);
   --sidebar-primary: var(--shadowstone-900);
@@ -113,7 +113,7 @@
   --mist-800: oklch(42.88% 0.0795 27.26);
   --mist-900: oklch(37.78% 0.063 27.46);
   --mist-950: oklch(24.93% 0.042 25.18);
-  
+
   --background: var(--shadowstone-950);
   --foreground: var(--mist-50);
   --card: var(--shadowstone-950);
@@ -138,7 +138,7 @@
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
+  --radius: 0.5rem;
   --sidebar: var(--shadowstone-950);
   --sidebar-foreground: var(--shadowstone-100);
   --sidebar-primary: var(--shadowstone-50);

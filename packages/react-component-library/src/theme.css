@@ -71,4 +71,7 @@
   --color-mist-800: var(--mist-800);
   --color-mist-900: var(--mist-900);
   --color-mist-950: var(--mist-950);
+
+  --text-2xs: 0.625rem;
+  --text-2xs--line-height: calc(1 / 0.625);
 }
