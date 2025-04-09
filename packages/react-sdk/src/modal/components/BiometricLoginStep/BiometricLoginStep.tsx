@@ -22,7 +22,7 @@ export const BiometricLoginStep = () => {
 
   const knownDeviceLink = loginState?.passkeyKnownDeviceUrl;
   const isPasskeyUnavailable = (hasHints && !biometricHints?.isOnKnownDevice) || !isPasskeySupported;
-  const displayWelcomeBack = isPasskeyOnKnownDevice || isPassword;
+  const displayWelcomeBack = hasHints || isPasskeyOnKnownDevice || isPassword;
 
   if (!loginState) {
     return null;

@@ -10,7 +10,7 @@ import {
   getPublicKeyFromSignature,
   Wallet,
 } from '@getpara/core-sdk';
-import { CurrentWalletIds, PublicKeyStatus } from '@getpara/user-management-client';
+import { PublicKeyStatus } from '@getpara/user-management-client';
 import { logger, formatError } from './logging';
 
 export async function generatePasskey(para: ParaWeb, args: any[]) {
@@ -63,7 +63,7 @@ export async function generatePasskey(para: ParaWeb, args: any[]) {
     }
 
     try {
-      await para.ctx.client.patchSessionPublicKey(session.data.partnerId, para.getUserId(), biometricsId, {
+      await para.ctx.client.patchSessionPublicKey(session.partnerId, para.getUserId(), biometricsId, {
         publicKey: credentialsId,
         sigDerivedPublicKey: publicKeyHex,
         cosePublicKey,
@@ -143,7 +143,7 @@ export async function generatePasskeyV2(para: ParaWeb, args: any[]) {
     }
 
     try {
-      await para.ctx.client.patchSessionPublicKey(session.data.partnerId, para.getUserId(), biometricsId, {
+      await para.ctx.client.patchSessionPublicKey(session.partnerId, para.getUserId(), biometricsId, {
         publicKey: credentialsId,
         sigDerivedPublicKey: publicKeyHex,
         cosePublicKey,
@@ -192,7 +192,7 @@ export async function verifyWebChallenge(para: ParaWeb, args: any[]) {
       throw sessionErr;
     }
 
-    const result = await para.ctx.client.verifyWebChallenge(session.data.partnerId, {
+    const result = await para.ctx.client.verifyWebChallenge(session.partnerId, {
       publicKey,
       signature: {
         clientDataJSON,
@@ -224,12 +224,12 @@ export async function login(para: ParaWeb, args: any[]) {
       throw setIdErr;
     }
 
-    const touchRes = await para.ctx.client.touchSession();
     if (!para.getEmail()) {
       logger.info('Email not set, retrieving from session...');
       try {
-        if (touchRes.data.email) {
-          await para.setEmail(touchRes.data.email);
+        const session = await para.ctx.client.touchSession();
+        if (session.email) {
+          await para.setEmail(session.email);
           logger.info('Email set from session for user:', userId);
         }
       } catch (touchErr) {
@@ -274,20 +274,10 @@ export async function login(para: ParaWeb, args: any[]) {
           address: desiredWallet.address,
           publicKey: desiredWallet.publicKey,
           scheme: desiredWallet.scheme as any,
-          type: desiredWallet.type || undefined,
         };
       }
       try {
-        const currentWalletIds: CurrentWalletIds = {};
-        for (const wallet of Object.values(walletsToInsert)) {
-          const { id, type } = wallet;
-          const currentIdsForType = currentWalletIds[type || 'EVM'] || [];
-          currentWalletIds[type || 'EVM'] = [...currentIdsForType, id];
-        }
         await para.setWallets(walletsToInsert);
-        await this.setCurrentWalletIds(currentWalletIds, {
-          sessionLookupId: touchRes.data.sessionLookupId,
-        });
       } catch (setWalletErr) {
         logger.error('Error setting wallets in login:', formatError(setWalletErr));
         throw setWalletErr;
@@ -320,12 +310,12 @@ export async function loginV2(para: ParaWeb, args: any[]) {
       throw setIdErr;
     }
 
-    const touchRes = await para.ctx.client.touchSession();
     if (!para.getEmail()) {
       logger.info('Email not set, retrieving from session in loginV2...');
       try {
-        if (touchRes.data.email) {
-          await para.setEmail(touchRes.data.email);
+        const session = await para.ctx.client.touchSession();
+        if (session.email) {
+          await para.setEmail(session.email);
           logger.info('Email set from session for user:', userId);
         }
       } catch (touchErr) {
@@ -417,16 +407,7 @@ export async function loginV2(para: ParaWeb, args: any[]) {
     }
 
     try {
-      const currentWalletIds: CurrentWalletIds = {};
-      for (const wallet of Object.values(walletsToInsert)) {
-        const { id, type } = wallet;
-        const currentIdsForType = currentWalletIds[type || 'EVM'] || [];
-        currentWalletIds[type || 'EVM'] = [...currentIdsForType, id];
-      }
       await para.setWallets(walletsToInsert);
-      await para.setCurrentWalletIds(currentWalletIds, {
-        sessionLookupId: touchRes.data.sessionLookupId,
-      });
     } catch (setWalletErr) {
       logger.error('Error setting wallets in loginV2:', formatError(setWalletErr));
       throw setWalletErr;

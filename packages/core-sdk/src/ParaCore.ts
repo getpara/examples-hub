@@ -1397,6 +1397,10 @@ export abstract class ParaCore implements CoreInterface {
     return this.userId;
   }
 
+  getAuthInfo(): CoreAuthInfo | undefined {
+    return this.authInfo;
+  }
+
   /**
    * Gets the email associated with the `ParaCore` instance.
    * @returns - email associated with the `ParaCore` instance.
@@ -1567,7 +1571,7 @@ export abstract class ParaCore implements CoreInterface {
    * @param {string} type the wallet type to filter by.
    * @returns {Wallet[]} an array of matching wallets.
    */
-  getWalletsByType(type: WalletTypeProp): Wallet[] {
+  getWalletsByType(type: CoreMethodParams<'getWalletsByType'>): CoreMethodResponse<'getWalletsByType'> {
     return Object.values(this.wallets).filter(w => this.isWalletUsable(w.id, { type: [type] }));
   }
 
@@ -3810,9 +3814,12 @@ export abstract class ParaCore implements CoreInterface {
     });
   }
 
-  async getOAuthUrlV2({ method, deeplinkUrl }: CoreMethodParams<'getOAuthUrlV2'>): CoreMethodResponse<'getOAuthUrlV2'> {
-    await this.logout();
-    const { sessionLookupId } = await this.touchSession(true);
+  async getOAuthUrlV2({
+    method,
+    deeplinkUrl,
+    ...params
+  }: CoreMethodParams<'getOAuthUrlV2'>): CoreMethodResponse<'getOAuthUrlV2'> {
+    const sessionLookupId = params.sessionLookupId ?? (await this.#prepareLogin());
 
     return constructUrl({
       base: getBaseOAuthUrl(this.ctx.env),
@@ -4010,19 +4017,17 @@ export abstract class ParaCore implements CoreInterface {
     onOAuthUrl,
     ...urlOptions
   }: CoreMethodParams<'verifyOAuthV2'>): CoreMethodResponse<'verifyOAuthV2'> {
-    const sessionLookupId = await this.#prepareLogin();
+    let sessionLookupId;
 
-    const oAuthUrl = constructUrl({
-      base: getBaseOAuthUrl(this.ctx.env),
-      path: `/auth/${method}`,
-      params: {
-        apiKey: this.ctx.apiKey,
-        sessionLookupId,
-        deeplinkUrl,
-      },
-    });
+    if (onOAuthUrl) {
+      sessionLookupId = await this.#prepareLogin();
 
-    onOAuthUrl(oAuthUrl);
+      const oAuthUrl = await this.getOAuthUrlV2({ method, deeplinkUrl, sessionLookupId });
+
+      onOAuthUrl(oAuthUrl);
+    } else {
+      ({ sessionLookupId } = await this.touchSession());
+    }
 
     const startedAt = Date.now();
     return new Promise((resolve, reject) => {
@@ -4068,9 +4073,11 @@ export abstract class ParaCore implements CoreInterface {
     onPoll,
     ...urlOptions
   }: CoreMethodParams<'verifyFarcasterV2'>): CoreMethodResponse<'verifyFarcasterV2'> {
-    const connectUri = await this.getFarcasterConnectUriV2();
+    if (onConnectUri) {
+      const connectUri = await this.getFarcasterConnectUriV2();
 
-    onConnectUri(connectUri);
+      onConnectUri?.(connectUri);
+    }
 
     return new Promise((resolve, reject) => {
       (async () => {

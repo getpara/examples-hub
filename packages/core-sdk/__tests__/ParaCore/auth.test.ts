@@ -707,64 +707,77 @@ describe('ParaCore - authentication', () => {
 
     describe('oauth', () => {
       describe('verify', () => {
-        const prepare = async (method: Parameters<typeof para.verifyOAuthV2>[0]['method']) => {
-          const onOAuthUrl = vi.fn();
+        [false, true].forEach(withCallback => {
+          describe(withCallback ? 'with onOAuthUrl' : 'without onOAuthUrl', () => {
+            const prepare = async (method: Parameters<typeof para.verifyOAuthV2>[0]['method']) => {
+              let url: URL, authState: AuthState;
+              if (withCallback) {
+                const onOAuthUrl = vi.fn();
 
-          const authState = await para.verifyOAuthV2({
-            method,
-            onOAuthUrl,
-          });
+                authState = await para.verifyOAuthV2({
+                  method,
+                  onOAuthUrl,
+                });
 
-          expect(onOAuthUrl).toHaveBeenCalledOnce();
-          expect(onOAuthUrl).toHaveBeenCalledWith(expect.stringContaining(''));
+                expect(onOAuthUrl).toHaveBeenCalledOnce();
+                expect(onOAuthUrl).toHaveBeenCalledWith(expect.stringContaining(''));
 
-          const oAuthUrl = onOAuthUrl.mock.calls[0][0];
-          const url = new URL(oAuthUrl);
+                const oAuthUrl = onOAuthUrl.mock.calls[0][0];
+                url = new URL(oAuthUrl);
+              } else {
+                const oAuthUrl = await para.getOAuthUrlV2({ method });
 
-          expect(url.origin).toEqual('http://localhost:8080');
-          expect(url.pathname).toEqual(`/auth/${method}`);
-          expectSearchParams(url, {
-            apiKey: PARTNER.apiKey,
-            sessionLookupId: SESSION_LOOKUP_ID,
-          });
+                authState = await para.verifyOAuthV2({ method });
 
-          testAuthInfo(para, emailAuthInfo);
+                url = new URL(oAuthUrl);
+              }
 
-          return authState;
-        };
-
-        ['google', 'apple', 'facebook', 'discord', 'twitter'].forEach(method => {
-          describe(method, async () => {
-            it('new user', async () => {
-              const authState = await prepare(method as any);
-
-              expect(authState).toStrictEqual({
-                ..._.omit(getSignupState(emailAuthInfo.auth), 'signupAuthMethods'),
-                passkeyId: expect.any(String),
-                passkeyUrl: expect.stringMatching(''),
-                passwordId: expect.any(String),
-                passwordUrl: expect.stringMatching(''),
+              expect(url.origin).toEqual('http://localhost:8080');
+              expect(url.pathname).toEqual(`/auth/${method}`);
+              expectSearchParams(url, {
+                apiKey: PARTNER.apiKey,
+                sessionLookupId: SESSION_LOOKUP_ID,
               });
 
-              testCreateUrl(para, authState.passkeyUrl!, AuthMethod.PASSKEY);
-              testCreateUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD);
-            });
+              testAuthInfo(para, emailAuthInfo);
 
-            it('returning user', async () => {
-              mockVerifyOAuth.mockResolvedValueOnce(getLoginState(emailAuthInfo.auth));
+              return authState;
+            };
 
-              const authState = await prepare(method as any);
+            ['google', 'apple', 'facebook', 'discord', 'twitter'].forEach(method => {
+              describe(method, async () => {
+                it('new user', async () => {
+                  const authState = await prepare(method as any);
 
-              expect(para.loginEncryptionKeyPair).toBeDefined();
-              expect(authState).toStrictEqual({
-                ..._.omit(getLoginState(emailAuthInfo.auth), 'loginAuthMethods'),
-                passkeyUrl: expect.stringMatching(''),
-                passkeyKnownDeviceUrl: expect.stringMatching(''),
-                passwordUrl: expect.stringMatching(''),
+                  expect(authState).toStrictEqual({
+                    ..._.omit(getSignupState(emailAuthInfo.auth), 'signupAuthMethods'),
+                    passkeyId: expect.any(String),
+                    passkeyUrl: expect.stringMatching(''),
+                    passwordId: expect.any(String),
+                    passwordUrl: expect.stringMatching(''),
+                  });
+
+                  testCreateUrl(para, authState.passkeyUrl!, AuthMethod.PASSKEY);
+                  testCreateUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD);
+                });
+
+                it('returning user', async () => {
+                  mockVerifyOAuth.mockResolvedValueOnce(getLoginState(emailAuthInfo.auth));
+
+                  const authState = await prepare(method as any);
+
+                  expect(para.loginEncryptionKeyPair).toBeDefined();
+                  expect(authState).toStrictEqual({
+                    ..._.omit(getLoginState(emailAuthInfo.auth), 'loginAuthMethods'),
+                    passkeyUrl: expect.stringMatching(''),
+                    passkeyKnownDeviceUrl: expect.stringMatching(''),
+                    passwordUrl: expect.stringMatching(''),
+                  });
+
+                  testLoginUrl(para, authState.passkeyUrl!, AuthMethod.PASSKEY);
+                  testLoginUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD);
+                });
               });
-
-              testLoginUrl(para, authState.passkeyUrl!, AuthMethod.PASSKEY);
-              testLoginUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD);
             });
           });
         });

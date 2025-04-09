@@ -29,7 +29,7 @@ export const methodHandlers: Record<string, (para: ParaWeb, args: any[]) => Prom
   },
   checkIfUserExistsByPhone: async (para, args) => {
     logger.info('Checking if user exists by phone...');
-    const userExistsByPhone = await para.checkIfUserExistsByPhone({ phone: args[0] });
+    const userExistsByPhone = await para.checkIfUserExistsByPhone({ phone: args[0], countryCode: args[1] });
     return userExistsByPhone;
   },
   claimPregenWallets: async (para, args) => {
@@ -68,7 +68,7 @@ export const methodHandlers: Record<string, (para: ParaWeb, args: any[]) => Prom
   },
   createUserByPhone: async (para, args) => {
     logger.info('Creating user by phone...');
-    await para.createUserByPhone({ phone: args[0] });
+    await para.createUserByPhone({ phone: args[0], countryCode: args[1] });
     return null;
   },
   createWallet: async (para, args) => {

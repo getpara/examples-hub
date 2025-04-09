@@ -26,11 +26,14 @@ import {
   OAuthUrlParams,
   StorageType,
   PollParams,
+  CoreAuthInfo,
 } from './methods.js';
 import { ParaCore } from '../ParaCore.js';
 import { FullSignatureRes, Wallet } from './wallet.js';
+import { WalletTypeProp } from './config.js';
 
 export const PARA_CORE_METHODS = [
+  'getAuthInfo',
   'signUpOrLogInV2',
   'verifyNewAccountV2',
   'waitForLoginV2',
@@ -56,6 +59,8 @@ export const PARA_CORE_METHODS = [
   'exportSession',
   'importSession',
   'getVerificationToken',
+  'getWallets',
+  'getWalletsByType',
   'fetchWallets',
   'createWallet',
   'createWalletPerType',
@@ -101,6 +106,11 @@ export type CoreAction<method extends CoreMethodName & keyof CoreMethods> =
     : (_?: ParaCore, __?: CoreMethodParams<method>) => CoreMethodResponse<method>;
 
 export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: unknown; sync?: true }> & {
+  getAuthInfo: {
+    params: void;
+    response: CoreAuthInfo | undefined;
+    sync: true;
+  };
   signUpOrLogInV2: {
     params: WithCustomTheme &
       WithUseShortUrls & {
@@ -171,7 +181,7 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
     };
   };
   getOAuthUrlV2: {
-    params: OAuthUrlParams;
+    params: OAuthUrlParams & { sessionLookupId?: string };
     response: string;
   };
   verifyOAuthV2: {
@@ -205,7 +215,7 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
          * A callback function that will be invoked with the Farcaster Connect URI when it is available.
          * You will need to display the URI as a QR code.
          */
-        onConnectUri: (uri: string) => void;
+        onConnectUri?: (uri: string) => void;
       };
     response: OAuthResponse;
   };
@@ -304,6 +314,16 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
       verificationCode: string;
     };
     response: Verify2faResponse;
+  };
+  getWallets: {
+    params: void;
+    response: Record<string, Wallet>;
+    sync: true;
+  };
+  getWalletsByType: {
+    params: WalletTypeProp;
+    response: Wallet[];
+    sync: true;
   };
   fetchWallets: {
     params: void;
