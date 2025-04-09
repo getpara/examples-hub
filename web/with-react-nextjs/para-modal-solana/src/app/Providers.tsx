@@ -29,6 +29,7 @@ export function Providers({
             ExternalWallet.PHANTOM,
             ExternalWallet.BACKPACK,
           ],
+          walletsWithParaAuth: [ExternalWallet.GLOW],
           solanaConnector: {
             config: {
               endpoint,

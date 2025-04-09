@@ -3,8 +3,15 @@ import { paraConnector } from "@getpara/wagmi-v2-integration";
 import { para } from "@/client/para";
 import { QueryClient } from "@tanstack/react-query";
 import { createConfig, CreateConfigParameters, http } from "wagmi";
-import { injected, coinbaseWallet, walletConnect, metaMask } from "wagmi/connectors";
+import {
+  injected,
+  coinbaseWallet,
+  walletConnect,
+  metaMask,
+} from "wagmi/connectors";
 import { mainnet, sepolia } from "wagmi/chains";
+
+export const queryClient = new QueryClient();
 
 const connector = paraConnector({
   para: para,
@@ -36,6 +43,7 @@ const connector = paraConnector({
   authLayout: [AuthLayout.AUTH_FULL],
   recoverySecretStepEnabled: true,
   options: {},
+  queryClient,
 });
 
 const config: CreateConfigParameters = {
@@ -56,5 +64,3 @@ const config: CreateConfigParameters = {
 };
 
 export const wagmiConfig = createConfig(config);
-
-export const queryClient = new QueryClient();

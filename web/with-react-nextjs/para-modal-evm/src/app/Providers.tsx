@@ -28,6 +28,7 @@ export function Providers({
             ExternalWallet.ZERION,
             ExternalWallet.RABBY,
           ],
+          walletsWithParaAuth: [ExternalWallet.METAMASK],
           evmConnector: {
             config: {
               chains: [mainnet, polygon, sepolia, celo],

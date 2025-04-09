@@ -30,6 +30,7 @@ export function Providers({
         }}
         externalWalletConfig={{
           wallets: [ExternalWallet.KEPLR, ExternalWallet.LEAP],
+          walletsWithParaAuth: [ExternalWallet.KEPLR],
           cosmosConnector: {
             config: {
               chains: cosmosChains,
