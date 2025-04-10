@@ -735,9 +735,8 @@ export abstract class ParaCore implements CoreInterface {
       type === 'onRamp',
     ];
 
-    let auth: PrimaryAuth | undefined;
     if (isCreate || isLogin) {
-      auth = this.assertIsAuthSet().auth;
+      this.assertIsAuthSet();
     }
 
     if ((isLogin || isOnRamp) && !opts.sessionId) {
@@ -796,7 +795,6 @@ export abstract class ParaCore implements CoreInterface {
       portalTextColor: this.portalTextColor,
       portalPrimaryButtonTextColor: this.portalPrimaryButtonTextColor,
       isForNewDevice: opts.isForNewDevice ? opts.isForNewDevice.toString() : undefined,
-      ...(auth && (isCreate || isLogin) ? auth : {}),
       ...(isCreate || isLogin ? { authInfo: JSON.stringify(this.authInfo!) } : {}),
       ...(isLogin || isOnRamp ? { sessionId: opts.sessionId } : {}),
       ...(isLogin

@@ -7,19 +7,14 @@ import {
   getPublicKeyHex,
   encryptPrivateKey,
   getSHA256HashHex,
+  CoreAuthInfo,
 } from '@getpara/web-sdk';
 import { ENV } from '../constants';
-import {
-  AuthParams,
-  EncryptorType,
-  extractAuthInfo,
-  KeyShareType,
-  PrimaryAuthInfo,
-  PublicKeyStatus,
-} from '@getpara/user-management-client';
+import { EncryptorType, KeyShareType, PrimaryAuthInfo, PublicKeyStatus } from '@getpara/user-management-client';
 import { ParaPortal } from '../classes/ParaPortal';
 
-export type AuthCreationParams = AuthParams & {
+export type AuthCreationParams = {
+  authInfo: CoreAuthInfo;
   biometricId: string;
   partnerId: string;
   isForNewDevice: boolean;
@@ -39,10 +34,8 @@ function getPublicKeyIdentifier(authInfo: PrimaryAuthInfo): string {
 
 export async function authCreation(
   para: ParaPortal,
-  { biometricId, isForNewDevice, partnerId, userId, ...authParams }: AuthCreationParams,
+  { authInfo, biometricId, isForNewDevice, partnerId, userId }: AuthCreationParams,
 ): Promise<void> {
-  const authInfo = extractAuthInfo(authParams, { isRequired: true });
-
   const { creds, userHandle, algorithm } = await createCredential(
     ENV,
     userId,

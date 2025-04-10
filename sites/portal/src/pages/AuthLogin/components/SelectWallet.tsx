@@ -133,8 +133,9 @@ export const SelectWallet = ({
 }) => {
   const para = usePara();
   const {
+    authInfo,
     fns: { finishLogin, authUpdateKeyShares },
-    params: { email, newDeviceSessionLookupId },
+    params: { newDeviceSessionLookupId },
     wallets,
     sessionOrigin,
   } = useLogin();
@@ -272,7 +273,11 @@ export const SelectWallet = ({
               <RecoverySecretInstructions>
                 <span>IMPORTANT:</span> Save your recovery secret before closing this window!
               </RecoverySecretInstructions>
-              <SaveRecoverySecret email={email} value={recoverySecret} onComplete={() => setIsRecoverySecretSaved(true)} />
+              <SaveRecoverySecret
+                email={authInfo.authType === 'email' ? authInfo.identifier : undefined}
+                value={recoverySecret}
+                onComplete={() => setIsRecoverySecretSaved(true)}
+              />
             </RecoverySecretContainer>
           )}
           {isKnownDeviceLogin ? (

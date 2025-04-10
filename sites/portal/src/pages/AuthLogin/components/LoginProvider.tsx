@@ -2,10 +2,10 @@ import { PropsWithChildren, createContext, useCallback, useContext, useEffect, u
 import * as utils from '../../../utils/authLogin';
 import { AuthLoginParams } from '../../../utils/authLogin';
 import { usePara } from '../../../components/ParaContext';
-import { entityToWallet, isWalletSupported, WalletEntity, WalletType } from '@getpara/core-sdk';
+import { CoreAuthInfo, entityToWallet, isWalletSupported, WalletEntity, WalletType } from '@getpara/core-sdk';
 import { formatISO } from 'date-fns';
 import { useCloseWindow } from '../../../hooks/useCloseWindow';
-import { AuthInfo, BiometricLocationHint, extractAuthInfo } from '@getpara/user-management-client';
+import { AuthExtras, AuthInfo, AuthParams, BiometricLocationHint, extractAuthInfo } from '@getpara/user-management-client';
 import { useExtractedParams } from '../../../hooks/useExtractedParams';
 
 const NOOP = () => {
@@ -42,8 +42,12 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
   const para = usePara();
   const closeWindow = useCloseWindow();
 
-  const params = useExtractedParams<AuthLoginParams>();
-  const authInfo = extractAuthInfo(params);
+  const params = useExtractedParams<AuthLoginParams & AuthParams & AuthExtras>();
+  const authInfo: CoreAuthInfo = params.authInfo ?? {
+    ...extractAuthInfo(params),
+    pfpUrl: params.pfpUrl,
+    displayName: params.displayName,
+  };
 
   const [loginRes, setLoginRes] = useState<Awaited<ReturnType<typeof utils.authLogin>> | undefined>();
   const [wallets, setWallets] = useState<Wallets>();
@@ -51,25 +55,25 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
   const [sessionOrigin, setSessionOrigin] = useState<string>();
 
   const authLogin = useCallback(async (): ReturnType<typeof utils.authLogin> => {
-    const loginRes = await utils.authLogin(para, params);
+    const loginRes = await utils.authLogin(para.ctx, { ...params, auth: authInfo.auth });
 
     setLoginRes(loginRes);
 
     return loginRes;
-  }, [para, params]);
+  }, [para, authInfo, params]);
 
   const authLoginWithPassword = useCallback(
     async (password: string): Promise<Awaited<ReturnType<typeof utils.authLoginWithPassword>>> => {
-      const loginRes = await utils.authLoginWithPassword(para, {
+      const loginRes = await utils.authLoginWithPassword(para.ctx, {
         password,
-        userId: params.userId,
+        auth: authInfo.auth,
         ...params,
       });
 
       setLoginRes(loginRes);
       return loginRes;
     },
-    [para, params],
+    [para, authInfo, params],
   );
 
   const fetchWallets = useCallback(async (): Promise<Wallets> => {
@@ -175,34 +179,21 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
 
   useEffect(() => {
     async function setUserDetails() {
-      switch (authInfo?.authType) {
-        case 'email':
-          await para.setEmail(authInfo.identifier);
-          break;
-        case 'phone':
-          await para.setPhoneNumber(authInfo.identifier);
-          break;
-        case 'farcaster':
-          await para.setFarcasterUsername(authInfo.identifier);
-          break;
-        case 'telegram':
-          await para.setTelegramUserId(authInfo.identifier);
-          break;
-        case 'externalWallet':
-          await para.setExternalWallet({
-            address: params.externalWalletAddress,
-            // Type isn't important here, we only care about the address
-            type: WalletType.EVM,
-          });
-          break;
-      }
+      await para.setAuth(authInfo.auth, {
+        extras: {
+          displayName: authInfo.displayName ?? params.displayName,
+          pfpUrl: authInfo.pfpUrl ?? params.pfpUrl,
+          externalWallet: authInfo.externalWallet ?? params.externalWallet,
+        },
+        userId: params.userId,
+      });
 
       if (params.pregenIds) {
         para.pregenIds = params.pregenIds;
       }
 
       if (!biometricLocationHints) {
-        const hints = await para.getUserBiometricLocationHints();
+        const hints = await para.ctx.client.getBiometricLocationHints(authInfo.auth);
         setBiometricLocationHints(hints);
       }
     }

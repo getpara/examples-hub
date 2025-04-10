@@ -119,16 +119,19 @@ const AuthLoginBase = ({ authMethod }) => {
       await para.setLoginEncryptionKeyPair(keyPair);
     }
 
-    const url = await para.getWebAuthURLForLogin({
-      authType: authInfo?.authType,
-      sessionId,
-      loginEncryptionPublicKey: encryptionKey,
-      partnerId,
-      newDeviceSessionId: sessionLookupId,
-      newDeviceEncryptionKey: getPublicKeyHex(para.loginEncryptionKeyPair),
+    const url = await para.constructPortalUrlV2('loginAuth', {
+      thisDevice: {
+        sessionId,
+        encryptionKey,
+      },
+      newDevice: {
+        sessionId: sessionLookupId,
+        encryptionKey: getPublicKeyHex(para.loginEncryptionKeyPair),
+      },
+      shorten: true,
     });
-    const shortUrl = await para.shortenLoginLink(url);
-    setUrlForNewDeviceLogin(shortUrl);
+
+    setUrlForNewDeviceLogin(url);
   }
 
   useEffect(() => {

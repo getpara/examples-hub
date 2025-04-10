@@ -7,14 +7,19 @@ import { Card, CardContent } from '../../components/common';
 import { ModalHeader } from '../../components/ModalHeader';
 import { usePara } from '../../components/ParaContext';
 import { useExtractedParams } from '../../hooks/useExtractedParams';
-import { extractAuthInfo } from '@getpara/user-management-client';
+import { AuthExtras, AuthParams, extractAuthInfo } from '@getpara/user-management-client';
 import { isPasskeySupported } from '@getpara/web-sdk';
 
 export const AuthCreation = () => {
   const para = usePara();
   const [step, setStep] = useState<AuthCreationStep>(AuthCreationStep.MANUAL_CREATION);
 
-  const params = useExtractedParams<AuthCreationParams>();
+  const params = useExtractedParams<AuthCreationParams & AuthParams & AuthExtras>();
+  const authInfo = params?.authInfo ?? {
+    ...extractAuthInfo(params, { isRequired: true }),
+    displayName: params?.displayName,
+    pfpUrl: params?.pfpUrl,
+  };
 
   const setUpBiometrics = useCallback(async () => {
     if (!(await isPasskeySupported())) {
@@ -23,7 +28,7 @@ export const AuthCreation = () => {
 
     setStep(AuthCreationStep.CREATING);
     try {
-      await authCreation(para, params);
+      await authCreation(para, { ...params, authInfo });
 
       setStep(AuthCreationStep.SUCCESS);
       setTimeout(function () {

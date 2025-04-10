@@ -42,7 +42,7 @@ export function OnRampTransaction() {
 
   async function login(sessionId: string, partnerId: string) {
     await para.setLoginEncryptionKeyPair();
-    const { userHandle, signature } = await authLogin(para, { partnerId, userId, sessionId });
+    const { userHandle, signature } = await authLogin(para.ctx, { partnerId, auth: { userId }, sessionId });
 
     await para.userSetupAfterLogin();
     await para.setCurrentWalletIds(paramsCurrentWalletIds);
@@ -84,7 +84,7 @@ export function OnRampTransaction() {
     try {
       setPasswordError(undefined);
       await para.touchSession();
-      await authLoginWithPassword(para, { password, partnerId, userId });
+      await authLoginWithPassword(para.ctx, { password, partnerId, auth: { userId } });
 
       setIsAwaitingPassword(false);
       await postLoginSetup();

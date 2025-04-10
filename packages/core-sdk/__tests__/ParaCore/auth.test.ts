@@ -554,7 +554,6 @@ describe('ParaCore - authentication', () => {
           expect(para.authInfo).toStrictEqual(authInfo);
           expect(para.loginEncryptionKeyPair).toBeDefined();
 
-          console.log((para as unknown as any).isNativePasskey);
           expect(authState).toStrictEqual({
             ..._.omit(getLoginState(auth), 'loginAuthMethods'),
             ...(isNativePasskey

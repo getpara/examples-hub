@@ -84,7 +84,7 @@ function TransactionReview() {
         break;
       } catch (e) {
         console.error(e);
-        await authLogin(para, { partnerId: partner.id, userId });
+        await authLogin(para.ctx, { partnerId: partner.id, auth: { userId } });
       }
 
       retriesLeft--;
@@ -137,7 +137,7 @@ function TransactionReview() {
           console.error(e);
 
           if (e.status === 401) {
-            await authLogin(para, { partnerId, userId });
+            await authLogin(para.ctx, { partnerId, auth: { userId } });
           }
 
           setTransactionReviewState(TransactionReviewState.Error);
@@ -179,7 +179,7 @@ function TransactionReview() {
     try {
       setLoginWithPasswordError(undefined);
       await para.touchSession();
-      await authLoginWithPassword(para, { password, partnerId, userId });
+      await authLoginWithPassword(para.ctx, { password, partnerId, auth: { userId } });
 
       await para.userSetupAfterLogin();
       await para.setupAfterLogin();

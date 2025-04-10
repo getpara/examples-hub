@@ -7,13 +7,14 @@ import {
   encryptPrivateKey,
   getSHA256HashHex,
   decryptPrivateKeyWithPassword,
+  Ctx,
 } from '@getpara/web-sdk';
 import { ParaPortal } from '../classes/ParaPortal';
 import { ENV } from '../constants';
-import { AuthParams, extractAuthInfo, PregenIds, WalletScheme } from '@getpara/user-management-client';
+import { Auth, PregenIds, PrimaryAuth, WalletScheme } from '@getpara/user-management-client';
 import forge from 'node-forge';
 
-export type AuthLoginParams = {
+export type PortalAuthParams = {
   encryptionKey?: string;
   sessionId?: string;
   newDeviceEncryptionKey?: string;
@@ -21,17 +22,19 @@ export type AuthLoginParams = {
   skipAutoLogin?: boolean;
   isForKnownDeviceLogin?: boolean;
   partnerId?: string;
-  userId?: string;
   pregenIds?: PregenIds;
-  displayName?: string;
-  pfpUrl?: string;
-} & AuthParams;
+};
+
+export type AuthLoginParams = PortalAuthParams & {
+  auth: PrimaryAuth | Auth<'userId'>;
+};
 
 export type AuthLoginPasswordParams = AuthLoginParams & {
   password: string;
 };
 
-export type AuthUpdateKeySharesParams = AuthLoginParams & {
+export type AuthUpdateKeySharesParams = PortalAuthParams & {
+  userId: string;
   encryptionKey: string;
   userHandle: string;
   signature?: any;
@@ -39,21 +42,15 @@ export type AuthUpdateKeySharesParams = AuthLoginParams & {
 };
 
 export async function authLogin(
-  para: ParaPortal,
-  { partnerId, sessionId, newDeviceSessionLookupId, ...authParams }: AuthLoginParams,
+  ctx: Ctx,
+  { auth, partnerId, sessionId, newDeviceSessionLookupId }: AuthLoginParams,
 ): Promise<{ userId: string; userHandle: string; signature: any; publicKey?: string; passwordId?: string }> {
-  const { auth, identifier } = extractAuthInfo(authParams, { allowUserId: true, isRequired: true });
+  const data = await ctx.client.getWebChallenge(auth);
 
-  if (!identifier) {
-    throw new Error('either a phone number or email address or farcaster username must be provided.');
-  }
-
-  const data = await para.ctx.client.getWebChallenge(auth);
-
-  const signature = await generateSignature(ENV, data.challenge, data.allowedPublicKeys, para.ctx.isE2E);
+  const signature = await generateSignature(ENV, data.challenge, data.allowedPublicKeys, ctx.isE2E);
   const { userHandle, ...sigResponse } = signature.response;
 
-  const verifyRes = await para.ctx.client.verifyWebChallenge(partnerId, {
+  const verifyRes = await ctx.client.verifyWebChallenge(partnerId, {
     signature: sigResponse,
     publicKey: signature.id,
     sessionLookupId: sessionId,
@@ -64,19 +61,13 @@ export async function authLogin(
 }
 
 export async function authLoginWithPassword(
-  para: ParaPortal,
-  { password, partnerId, sessionId, newDeviceSessionLookupId, ...authParams }: AuthLoginPasswordParams,
+  ctx: Ctx,
+  { auth, password, partnerId, sessionId, newDeviceSessionLookupId }: AuthLoginPasswordParams,
 ) {
-  const { auth, identifier } = extractAuthInfo(authParams, { allowUserId: true, isRequired: true });
-
-  if (!identifier) {
-    throw new Error('either a phone number or email address or farcaster username must be provided.');
-  }
-
-  const passwordEntity = (await para.ctx.client.getPasswords(auth))[0];
-  const encryptedWalletPrivateKey = (await para.ctx.client.getEncryptedWalletPrivateKey(passwordEntity.id)).data
+  const passwordEntity = (await ctx.client.getPasswords(auth))[0];
+  const encryptedWalletPrivateKey = (await ctx.client.getEncryptedWalletPrivateKey(passwordEntity.id)).data
     .encryptedWalletPrivateKey;
-  const challenge = (await para.ctx.client.getWebChallenge(auth)).challenge;
+  const challenge = (await ctx.client.getWebChallenge(auth)).challenge;
 
   const { salt } = passwordEntity;
   const saltedPassword = salt + password;
@@ -88,7 +79,7 @@ export async function authLoginWithPassword(
   md.update(challenge, 'utf8');
   const signature = privateKey.sign(md);
 
-  const verifyRes = await para.ctx.client.verifyPasswordChallenge(partnerId, {
+  const verifyRes = await ctx.client.verifyPasswordChallenge(partnerId, {
     signature,
     publicKey: passwordEntity.sigDerivedPublicKey,
     sessionLookupId: sessionId,
