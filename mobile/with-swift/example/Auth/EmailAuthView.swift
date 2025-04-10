@@ -68,30 +68,26 @@ struct EmailAuthView: View {
                 
                 isLoading = true
                 Task {
-                    do {
-                        let authState = try await paraManager.signUpOrLogIn(auth: .email(email))
-                        isLoading = false
+                    // Use the new handleEmailAuth method
+                    let result = await paraManager.handleEmailAuth(
+                        email: email,
+                        authorizationController: authorizationController
+                    )
+                    
+                    isLoading = false
+                    
+                    switch result.status {
+                    case .success:
+                        // Authentication successful, navigate to home
+                        appRootManager.currentRoot = .home
                         
-                        switch authState.stage {
-                        case .verify:
-                            // New user that needs to verify email
-                            shouldNavigateToVerifyEmail = true
-                        case .login:
-                            // Existing user, handle passkey login
-                            if let passkeyUrl = authState.passkeyUrl {
-                                try await paraManager.login(authorizationController: authorizationController, authInfo: EmailAuthInfo(email: email))
-                                appRootManager.currentRoot = .home
-                            } else {
-                                errorMessage = "Unable to get passkey authentication URL"
-                            }
-                        case .signup:
-                            // This shouldn't happen directly from signUpOrLogIn with email
-                            errorMessage = "Unexpected authentication state"
-                        }
-                    } catch {
-                        print(error.localizedDescription)
-                        errorMessage = "Authentication failed: \(error.localizedDescription)"
-                        isLoading = false
+                    case .needsVerification:
+                        // User needs to verify email
+                        shouldNavigateToVerifyEmail = true
+                        
+                    case .error:
+                        // Error occurred
+                        errorMessage = result.errorMessage
                     }
                 }
             } label: {

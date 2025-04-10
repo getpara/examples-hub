@@ -56,37 +56,29 @@ struct VerifyEmailView: View {
                 isLoading = true
                 errorMessage = nil
                 loadingStateText = "Verifying..."
+                
                 Task {
-                    do {
-                        // Use the new verifyNewAccount method
-                        let authState = try await paraManager.verifyNewAccount(verificationCode: code)
-                        
-                        // Check if we're in the signup stage
-                        guard authState.stage == .signup else {
-                            throw ParaError.error("Unexpected auth stage: \(authState.stage)")
-                        }
-                        
-                        // If we have a passkeyId, use it to generate a passkey
-                        if let passkeyId = authState.passkeyId {
-                            loadingStateText = "Generating Passkey..."
-                            try await paraManager.generatePasskey(identifier: email, biometricsId: passkeyId, authorizationController: authorizationController)
-                            loadingStateText = "Creating Wallet..."
-                            try await paraManager.createWallet(type: .evm, skipDistributable: false)
-                        } else if let passwordUrl = authState.passwordUrl {
-                            loadingStateText = "Setting up password..."
-                            // In a real app, you would open this URL in a new window
-                            // For this example, we'll just create a wallet directly
-                            loadingStateText = "Creating Wallet..."
-                            try await paraManager.createWallet(type: .evm, skipDistributable: false)
-                        } else {
-                            throw ParaError.error("No authentication method available")
-                        }
-                        
-                        isLoading = false
+                    // Use the new handleEmailAuth method with the verification code
+                    let result = await paraManager.handleEmailAuth(
+                        email: email,
+                        verificationCode: code,
+                        authorizationController: authorizationController
+                    )
+                    
+                    isLoading = false
+                    
+                    switch result.status {
+                    case .success:
+                        // Authentication successful, navigate to home
                         appRootManager.currentRoot = .home
-                    } catch {
-                        isLoading = false
-                        errorMessage = String(describing: error)
+                        
+                    case .needsVerification:
+                        // This shouldn't happen when verification code is provided
+                        errorMessage = "Unexpected verification required"
+                        
+                    case .error:
+                        // Error occurred
+                        errorMessage = result.errorMessage
                     }
                 }
             } label: {
@@ -107,6 +99,13 @@ struct VerifyEmailView: View {
             // MARK: - Resend Code Button
             Button("Resend Code") {
                 // Add resend code functionality
+                Task {
+                    do {
+                        try await paraManager.resendVerificationCode()
+                    } catch {
+                        errorMessage = "Failed to resend code: \(error.localizedDescription)"
+                    }
+                }
             }
             .padding(.top)
             .accessibilityIdentifier("resendCodeButton")
