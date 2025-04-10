@@ -5,7 +5,6 @@ import { getActions } from './actions.js';
 export enum OnboardingStep {
   ABOUT_YOU = 'ABOUT_YOU',
   ABOUT_PROJECT = 'ABOUT_PROJECT',
-  ORG_INFO = 'ORG_INFO',
   PLAN_SELECT = 'PLAN_SELECT',
 }
 

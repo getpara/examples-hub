@@ -1,7 +1,8 @@
 import styled from 'styled-components';
 import { ReactNode } from 'react';
-import { BaseCard, LINEAR_GRADIENT } from '../common';
-import { MOBILE_SIZE } from '../../utils/constants';
+import { LINEAR_GRADIENT } from '../common';
+import { Card, CardContent } from '@getpara/react-component-library';
+import clsx from 'clsx';
 
 interface SplitCardProps {
   LeftContent?: ReactNode;
@@ -12,52 +13,33 @@ interface SplitCardProps {
   onClick?: () => void;
 }
 
-export const SplitCard = ({ LeftContent, RightContent, isSelected, flexRow, highlighted, onClick }: SplitCardProps) => {
+export const SplitCard = ({ LeftContent, RightContent, isSelected, highlighted, onClick }: SplitCardProps) => {
   const Content = (
-    <Card $highlighted={highlighted} $isSelected={isSelected} $isSelectable={!!onClick} onClick={onClick}>
-      <Container $flexRow={flexRow}>
+    <Card
+      className={clsx('para:shadow-none para:rounded-2xl para:border-border para:max-w-[1200px] para:w-full', {
+        'para:hover:bg-muted para:cursor-pointer': !!onClick,
+        'para:border-foreground': isSelected,
+      })}
+      onClick={onClick}
+    >
+      <CardContent className={'para:flex para:flex-col para:gap-4 para:md:flex-row para:md:gap-6'}>
         {LeftContent}
         {RightContent}
-      </Container>
+      </CardContent>
     </Card>
   );
 
-  return highlighted ? <HighlightedWrapper>{Content}</HighlightedWrapper> : Content;
+  return highlighted ? (
+    <div
+      className="para:w-full para:h-full para:p-[1px] para:rounded-2xl para:shadow-[0px_4px_20px_0px_rgba(156,30,255,0.1)]"
+      style={{ background: LINEAR_GRADIENT }}
+    >
+      {Content}
+    </div>
+  ) : (
+    Content
+  );
 };
-
-const HighlightedWrapper = styled.div`
-  width: 100%;
-  height: 100%;
-  padding: 1px;
-  background: ${LINEAR_GRADIENT};
-  border-radius: var(--cpsl-border-radius-card);
-  box-shadow: 0px 4px 20px 0px rgba(156, 30, 255, 0.1);
-`;
-
-const Card = styled(BaseCard)<{
-  $isSelected?: boolean;
-  $isSelectable?: boolean;
-  $highlighted?: boolean;
-}>`
-  max-width: 1200px;
-
-  ${({ $isSelected }) => ($isSelected ? '--card-border-color: var(--cpsl-color-input-border-active)' : '')};
-
-  ${({ $isSelectable }) => ($isSelectable ? 'cursor: pointer' : '')};
-  ${({ $highlighted }) => ($highlighted ? '--card-border-width: 0px' : '')};
-`;
-
-const Container = styled.div<{ $flexRow?: boolean }>`
-  display: flex;
-
-  @media (max-width: ${MOBILE_SIZE}px) {
-    gap: 16px;
-    flex-direction: ${({ $flexRow }) => ($flexRow ? 'row' : 'column')};
-  }
-  @media (min-width: ${MOBILE_SIZE + 1}px) {
-    gap: 24px;
-  }
-`;
 
 export const SplitCardInnerContainer = styled.div`
   display: flex;

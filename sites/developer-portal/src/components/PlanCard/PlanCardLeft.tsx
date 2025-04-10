@@ -1,7 +1,3 @@
-import styled from 'styled-components';
-import { CpslButton, CpslText } from '@getpara/react-components';
-import { InlineText } from '../../components/common';
-import { GradientCTAButton } from '../../components/GradientCTAButton/GradientCTAButton';
 import { usePlan } from '../../hooks/api/queries/usePlans';
 import {
   useGetOrganizationSubscription,
@@ -12,7 +8,8 @@ import { useStripePlan } from '../../hooks/useStripePlan';
 import { PlanMetadata } from '../../types/planMetadata';
 import { ENTERPRISE_PLAN_SLUG, MOST_POPULAR_PLAN_SLUG } from '../../utils/constants';
 import { PlanCardType } from './PlanCard';
-import { GradientBadge } from '../GradientBadge/GradientBadge';
+import clsx from 'clsx';
+import { Badge, Button, Typography } from '@getpara/react-component-library';
 
 interface PlanCardLeftProps extends Pick<PlanMetadata, 'name' | 'allowanceString' | 'footnote' | 'monthlyCost' | 'slug'> {
   isActive?: boolean;
@@ -68,95 +65,66 @@ export const PlanCardLeft = ({
     createCustomerPortalSession({});
   };
 
-  const CTAButton = isBillingType || isMostPopular ? GradientCTAButton : CpslButton;
-
   return (
-    <Container>
-      <TopContainer>
-        <NameContainer>
-          <CpslText variant="bodyL" weight="semiBold">
-            {name}
-          </CpslText>
-          {!isBillingType && isMostPopular && <GradientBadge text="Most Popular" icon="star04Filled" />}
-        </NameContainer>
+    <div className="para:flex para:flex-1 para:flex-col para:gap-2">
+      <div className="para:flex para:flex-col para:gap-2">
+        <div className="para:flex para:items-center para:gap-2">
+          <Typography className="para:text-xl para:font-semibold">{name}</Typography>
+          {!isBillingType && isMostPopular && <Badge>Most Popular</Badge>}
+        </div>
         {isEnterprise && !enterprisePrice ? (
-          <CpslText variant="headingS" weight="bold">
-            Ask Us!
-          </CpslText>
+          <Typography className="para:text-3xl para:font-bold">Ask Us!</Typography>
         ) : (
           <>
             <span>
-              <InlineText variant="headingS" weight="bold">
+              <Typography className="para:text-3xl para:font-bold para:inline">
                 {isPriceLoading ? '-' : `$${monthlyCostString}`}
-              </InlineText>
-              <InlineText variant="bodyS" color="secondary">
+              </Typography>
+              <Typography color="secondary" className="para:text-sm para:inline">
                 /mo
-              </InlineText>
+              </Typography>
             </span>
-            <CpslText variant="bodyS" color="tertiary">
+            <Typography color="secondary" className="para:text-sm">
               {allowanceStringWithTier}
-            </CpslText>
+            </Typography>
           </>
         )}
         {isHigherPlanActive ? null : isActive ? (
           <>
-            <CurrentPlanContainer $willCancel={willSubscriptionCancel}>
-              <CpslText variant="body2XS" color={willSubscriptionCancel ? 'error' : 'tertiary'} weight="medium">
-                {willSubscriptionCancel ? 'Pending Cancellation' : 'CURRENT PLAN'}
-              </CpslText>
-            </CurrentPlanContainer>
+            <Badge
+              variant="outline"
+              className={clsx({
+                'para:border-destructive para:text-destructive': willSubscriptionCancel,
+                'para:border-border para:text-secondary-foreground': !willSubscriptionCancel,
+              })}
+            >
+              {willSubscriptionCancel ? 'Pending Cancellation' : 'CURRENT PLAN'}
+            </Badge>
             {hasStripeSubscription && (
-              <CpslButton onClick={handleManagePlanClick}>
+              <Button size="lg" className="para:w-fit" variant="neutral" onClick={handleManagePlanClick}>
                 {willSubscriptionCancel ? 'Renew Plan' : 'Manage Plan'}
-              </CpslButton>
+              </Button>
             )}
           </>
         ) : (
-          <CTAButton noIcon={!isBillingType} disabled={disabled} onClick={handleUpgradePlanClick}>
+          <Button
+            size="lg"
+            className="para:w-fit"
+            variant={isBillingType || isMostPopular ? 'default' : 'neutral'}
+            onClick={handleUpgradePlanClick}
+            disabled={disabled}
+          >
             {isBillingType ? 'Upgrade' : 'Choose'}
-          </CTAButton>
+          </Button>
         )}
-      </TopContainer>
+      </div>
       {footnoteWithTier && (
-        <BottomContainer>
-          <CpslText variant="body2XS" color="tertiary" weight="medium">
+        <div className="para:flex para:flex-1 para:items-end">
+          <Typography color="muted" className="para:text-2xs para:font-medium">
             {footnoteWithTier}
-          </CpslText>
-        </BottomContainer>
+          </Typography>
+        </div>
       )}
-    </Container>
+    </div>
   );
 };
-
-const Container = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-`;
-
-const TopContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-`;
-
-const BottomContainer = styled.div`
-  flex: 1;
-  display: flex;
-  align-items: flex-end;
-`;
-
-const CurrentPlanContainer = styled.div<{ $willCancel?: boolean }>`
-  width: fit-content;
-  padding: 8px 16px;
-  border: 1px solid;
-  border-color: ${({ $willCancel }) => ($willCancel ? 'var(--cpsl-color-utility-red)' : 'var(--cpsl-color-background-4)')};
-  border-radius: 4px;
-`;
-
-const NameContainer = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`;

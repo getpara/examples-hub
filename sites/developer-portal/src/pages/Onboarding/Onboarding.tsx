@@ -1,4 +1,3 @@
-import styled from 'styled-components';
 import { OnboardingStep, useOnboardingStore } from '../../stores/onboarding/useOnboardingStore';
 import { useGetAllOrganizations } from '../../hooks/api/queries/useOrganizations';
 import { PlanSelect } from './components/PlanSelect';
@@ -7,13 +6,13 @@ import { MainLoader } from '../../components/MainLoader';
 import { AUTH_MIN_APP_BAR_HEIGHT } from '../../components/AppBar/AuthMinAppBar';
 import { AboutYou } from './components/AboutYou';
 import { AboutProject } from './components/AboutProject';
-import { OrgInfo } from './components/OrgInfo';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ONBOARDING_MOTION_VARIANTS, ONBOARDING_TRANSITION } from '../../layouts/onboarding/Layout';
 import { useOnboardingForm } from './hooks/useOnboardingForm';
 import { FormProvider } from 'react-hook-form';
-import { aboutProjectQuestions, aboutYouQuestions, orgQuestions } from './config/questionConfig';
+import { aboutProjectQuestions, aboutYouQuestions } from './config/questionConfig';
 import { useAccount } from '@getpara/react-sdk';
+import { OnboardingAnswerOption } from '../../types/onboarding';
 
 export const Onboarding = () => {
   const form = useOnboardingForm();
@@ -24,12 +23,10 @@ export const Onboarding = () => {
   const direction = useOnboardingStore(state => state.direction);
   const { data: allOrgs, isLoading: isOrgsLoading } = useGetAllOrganizations();
 
-  const aboutYouValues = form.watch(aboutYouQuestions) as any[];
+  const aboutYouValues = form.watch(aboutYouQuestions.filter(q => q !== OnboardingAnswerOption.HOMEPAGE_URL)) as any[];
   const aboutYouComplete = aboutYouValues.every(v => !!v?.length);
   const aboutProjectValues = form.watch(aboutProjectQuestions) as any[];
   const aboutProjectComplete = aboutProjectValues.every(v => !!v?.length);
-  const orgValues = form.watch(orgQuestions) as any[];
-  const orgComplete = orgValues.every(v => !!v?.length);
 
   useEffect(() => {
     if (!userId) {
@@ -40,18 +37,10 @@ export const Onboarding = () => {
       setStep(userId, OnboardingStep.ABOUT_YOU);
     }
 
-    if (
-      aboutYouComplete &&
-      !aboutProjectComplete &&
-      (currentStep === OnboardingStep.ORG_INFO || currentStep === OnboardingStep.PLAN_SELECT)
-    ) {
+    if (aboutYouComplete && !aboutProjectComplete && currentStep === OnboardingStep.PLAN_SELECT) {
       setStep(userId, OnboardingStep.ABOUT_PROJECT);
     }
-
-    if (aboutYouComplete && aboutProjectComplete && !orgComplete && currentStep === OnboardingStep.PLAN_SELECT) {
-      setStep(userId, OnboardingStep.ORG_INFO);
-    }
-  }, [aboutProjectComplete, aboutYouComplete, currentStep, orgComplete, setStep, userId]);
+  }, [aboutProjectComplete, aboutYouComplete, currentStep, setStep, userId]);
 
   useEffect(() => {
     if (userId && !isOrgsLoading && !allOrgs?.length && !currentStep) {
@@ -70,14 +59,14 @@ export const Onboarding = () => {
   const Content = {
     [OnboardingStep.ABOUT_YOU]: <AboutYou />,
     [OnboardingStep.ABOUT_PROJECT]: <AboutProject />,
-    [OnboardingStep.ORG_INFO]: <OrgInfo />,
     [OnboardingStep.PLAN_SELECT]: <PlanSelect />,
   };
 
   return (
     <FormProvider {...form}>
       <AnimatePresence mode="wait" initial={false} custom={direction}>
-        <MotionContainer
+        <motion.div
+          className="para:will-change-auto para:w-full"
           key={currentStep}
           variants={ONBOARDING_MOTION_VARIANTS}
           initial="enter"
@@ -86,21 +75,11 @@ export const Onboarding = () => {
           transition={ONBOARDING_TRANSITION}
           custom={direction}
         >
-          <Container key={currentStep}>{Content[currentStep]}</Container>
-        </MotionContainer>
+          <div className="para:flex para:flex-col para:items-center para:gap-4 para:w-full" key={currentStep}>
+            {Content[currentStep]}
+          </div>
+        </motion.div>
       </AnimatePresence>
     </FormProvider>
   );
 };
-
-const MotionContainer = styled(motion.div)`
-  will-change: auto !important;
-`;
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  width: 100%;
-`;

@@ -1,65 +1,38 @@
-import styled from 'styled-components';
-import { CpslIcon, CpslText } from '@getpara/react-components';
-import { BRAND_COLORS } from '../../utils/constants';
 import { PlanIncludes } from '../../types/planMetadata';
+import { Typography } from '@getpara/react-component-library';
+import { CheckIcon } from 'lucide-react';
 
 type PlanCardRightProps = PlanIncludes;
 
 export const PlanCardRight = ({ title, subtitle, includes, comingSoon }: PlanCardRightProps) => {
   return (
-    <Container>
-      <CpslText variant="bodyS" weight="semiBold">
-        {title}
-      </CpslText>
+    <div className="para:flex para:flex-col para:flex-1 para:gap-2">
+      <Typography className="para:text-sm para:font-semibold">{title}</Typography>
       {subtitle && (
-        <CpslText variant="bodyS" color="secondary">
+        <Typography color="secondary" className="para:text-sm">
           {subtitle}
-        </CpslText>
+        </Typography>
       )}
       {includes.map(item => (
-        <IncludesContainer key={item}>
-          <CheckIcon icon="check" />
-          <CpslText variant="bodyS" color="secondary">
+        <div className="para:flex para:items-center para:gap-2" key={item}>
+          <CheckIcon className="para:size-4 para:stroke-foreground" />
+          <Typography color="secondary" className="para:text-sm">
             {item}
-          </CpslText>
-        </IncludesContainer>
+          </Typography>
+        </div>
       ))}
       {!!comingSoon?.length && (
         <>
-          <ComingSoonText variant="bodyS" weight="semiBold">
+          <Typography color="primary" className="para:text-sm para:font-semibold">
             Coming Soon
-          </ComingSoonText>
+          </Typography>
           {comingSoon.map(item => (
-            <CpslText key={item} variant="bodyS" color="tertiary">
+            <Typography key={item} color="secondary" className="para:text-sm">
               {item}
-            </CpslText>
+            </Typography>
           ))}
         </>
       )}
-    </Container>
+    </div>
   );
 };
-
-const Container = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-`;
-
-const IncludesContainer = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`;
-
-const ComingSoonText = styled(CpslText)`
-  &::part(text-element) {
-    color: ${BRAND_COLORS.primary};
-  }
-`;
-
-const CheckIcon = styled(CpslIcon)`
-  --height: 16px;
-  --width: 16px;
-`;

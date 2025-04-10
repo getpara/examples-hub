@@ -1,20 +1,14 @@
-import { styled } from 'styled-components';
 import { OnboardingStep, useOnboardingStore } from '../../../stores/onboarding/useOnboardingStore';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { CpslButton, CpslIcon } from '@getpara/react-components';
 import { useLogout } from '../../../hooks/useLogout';
-import { useFormContext, useFormState } from 'react-hook-form';
-import { OnboardingAnswerOption, OnboardingAnswers } from '../../../types/onboarding';
+import { useFormState } from 'react-hook-form';
 import { useSubmitOnboarding } from '../hooks/useSubmitOnboarding';
 import { PlanSlug } from '../../../utils/constants';
 import { useAccount } from '@getpara/react-sdk';
+import { Button } from '@getpara/react-component-library';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 
-interface ControlsProps {
-  questions: OnboardingAnswerOption[];
-}
-
-export const Controls = ({ questions }: ControlsProps) => {
-  const { watch } = useFormContext<OnboardingAnswers>();
+export const Controls = () => {
   const { data: account } = useAccount();
   const userId = account?.userId;
   const currentStep = useOnboardingStore(state => state.getStep(userId));
@@ -26,8 +20,7 @@ export const Controls = ({ questions }: ControlsProps) => {
   const { isValid } = useFormState();
   const { submitOnboarding, isLoading } = useSubmitOnboarding();
 
-  const formValues = watch(questions) as any[];
-  const canGoNext = formValues?.every(v => !!v?.length) && isValid;
+  const canGoNext = isValid;
 
   const hasInvite = searchParams.get('invite');
   // Excluding the plan select step here since that step doesn't contain controls
@@ -80,41 +73,32 @@ export const Controls = ({ questions }: ControlsProps) => {
   };
 
   return (
-    <Container>
-      <StyledButton variant="secondary" onClick={handlePrevClick} disabled={isLoading}>
-        <FlippedIcon icon="arrowNarrow" slot="start" />
+    <div className="para:flex para:justify-between para:flex-wrap para:gap-2">
+      <Button className="para:h-10" variant="outline" size="lg" onClick={handlePrevClick} disabled={isLoading}>
+        <ArrowLeft className="para:size-4 para:stroke-foreground" />
         {previousText}
-      </StyledButton>
-      <StyledButton onClick={handleNextClick} disabled={!canGoNext || isLoading}>
+      </Button>
+      <Button
+        className="para:h-10 para:flex-1"
+        size="lg"
+        variant="neutral"
+        onClick={handleNextClick}
+        disabled={!canGoNext || isLoading}
+      >
         {nextText}
-        <CpslIcon icon="arrowNarrow" slot="end" />
-      </StyledButton>
+        <ArrowRight className="para:size-4 para:stroke-foreground" />
+      </Button>
       {isLastStep && (
-        <FullRowButton variant="secondary" onClick={handlePlansClick} fullWidth disabled={isLoading}>
+        <Button
+          className="para:h-10 para:flex-1"
+          variant="outline"
+          size="lg"
+          onClick={handlePlansClick}
+          disabled={isLoading}
+        >
           View Plans
-        </FullRowButton>
+        </Button>
       )}
-    </Container>
+    </div>
   );
 };
-
-const Container = styled.div`
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
-`;
-
-const FlippedIcon = styled(CpslIcon)`
-  transform: rotate(180deg);
-`;
-
-const FullRowButton = styled(CpslButton)`
-  flex-basis: 100%;
-`;
-
-const StyledButton = styled(CpslButton)`
-  &::part(button-native) {
-    min-width: 100px;
-  }
-`;

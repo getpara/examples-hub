@@ -1,29 +1,14 @@
-import { CpslAppBar, CpslIcon } from '@getpara/react-components';
-import styled from 'styled-components';
+import { ParaBrand } from '@getpara/react-component-library';
 
 export const AUTH_MIN_APP_BAR_HEIGHT = 70;
 
 export const AuthMinAppBar = () => {
   return (
-    <CpslAppBar height={AUTH_MIN_APP_BAR_HEIGHT}>
-      <Container>
-        <Logo icon="para" />
-      </Container>
-    </CpslAppBar>
+    <>
+      <div className="para:w-full para:fixed para:h-[70px] para:pl-[31px] para:flex para:items-center para:bg-muted">
+        <ParaBrand className="para:w-auto" />
+      </div>
+      <div className="para:h-[70px]" />
+    </>
   );
 };
-
-const Container = styled.div`
-  background-color: var(--cpsl-color-background-0);
-  display: flex;
-  align-items: center;
-  flex: 1;
-  gap: 8px;
-  justify-content: space-between;
-  padding-left: 32px;
-`;
-
-const Logo = styled(CpslIcon)`
-  --height: 27px;
-  --width: auto;
-`;

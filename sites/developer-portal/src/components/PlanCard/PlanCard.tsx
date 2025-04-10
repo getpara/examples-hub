@@ -1,9 +1,7 @@
-import styled from 'styled-components';
 import { SplitCard } from '../../components/SplitCard/SplitCard';
 import { PlanCardLeft } from './PlanCardLeft';
 import { PlanCardRight } from './PlanCardRight';
 import { PlanMetadata } from '../../types/planMetadata';
-import { MOBILE_SIZE, MOST_POPULAR_PLAN_SLUG } from '../../utils/constants';
 
 export type PlanCardType = 'billing' | 'onboarding';
 
@@ -26,13 +24,9 @@ export const PlanCard = ({
   type = 'billing',
   onUpgradeClick,
 }: PlanCardProps) => {
-  const isOnboardingType = type === 'onboarding';
-  const isMostPopular = planMetadata.slug === MOST_POPULAR_PLAN_SLUG;
-
   return (
-    <Container>
+    <div className="para:flex para:shrink para:w-[848px] para:min-w-0 para:max-w-full">
       <SplitCard
-        highlighted={isOnboardingType && isMostPopular}
         LeftContent={
           <PlanCardLeft
             {...planMetadata}
@@ -46,14 +40,6 @@ export const PlanCard = ({
         }
         RightContent={<PlanCardRight {...planMetadata.includes} />}
       />
-    </Container>
+    </div>
   );
 };
-
-const Container = styled.div`
-  @media (min-width: ${MOBILE_SIZE + 1}px) {
-    width: 848px;
-  }
-
-  max-width: 848px;
-`;

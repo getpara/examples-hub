@@ -10,34 +10,30 @@ export const aboutYouQuestions = [
 ];
 
 export const aboutProjectQuestions = [
-  OnboardingAnswerOption.USE_PARA,
-  OnboardingAnswerOption.STAGE,
   OnboardingAnswerOption.CURRENT_PROVIDER,
   OnboardingAnswerOption.SUPPORTED_CHAINS,
-  OnboardingAnswerOption.TEAM_SIZE,
   OnboardingAnswerOption.HEAR_ABOUT,
 ];
 
-export const orgQuestions = [OnboardingAnswerOption.NAME];
-
-export const selectQuestionOptions: Record<string, string[]> = {
-  [OnboardingAnswerOption.USE_PARA]: [
-    'At my company',
-    'For a personal project',
-    'At a hackathon',
-    'I’m just looking around',
+export const selectQuestionOptions: Record<string, { label: string; value: string }[]> = {
+  [OnboardingAnswerOption.CURRENT_PROVIDER]: [
+    { label: 'No', value: 'No' },
+    { label: 'Yes', value: 'Yes' },
   ],
-  [OnboardingAnswerOption.STAGE]: [
-    'Just an idea',
-    'Getting ready to launch',
-    'We have users',
-    'We are growing',
-    'We’ve been around',
+  [OnboardingAnswerOption.SUPPORTED_CHAINS]: [
+    { label: 'Ethereum / EVM', value: 'Ethereum / EVM' },
+    { label: 'Solana', value: 'Solana' },
+    { label: 'Cosmos', value: 'Cosmos' },
+    { label: 'Other', value: 'Other' },
   ],
-  [OnboardingAnswerOption.CURRENT_PROVIDER]: ['No', 'Yes'],
-  [OnboardingAnswerOption.SUPPORTED_CHAINS]: ['Ethereum / EVM', 'Solana', 'Cosmos', 'Other'],
-  [OnboardingAnswerOption.TEAM_SIZE]: ['Just me', '2-5', '5-20', '20-100', '100+'],
-  [OnboardingAnswerOption.HEAR_ABOUT]: ['Word of mouth', 'Twitter', 'Google', 'Youtube', 'Conference', 'Other'],
+  [OnboardingAnswerOption.HEAR_ABOUT]: [
+    { label: 'Word of mouth', value: 'Word of mouth' },
+    { label: 'Twitter', value: 'Twitter' },
+    { label: 'Google', value: 'Google' },
+    { label: 'Youtube', value: 'Youtube' },
+    { label: 'Conference', value: 'Conference' },
+    { label: 'Other', value: 'Other' },
+  ],
 };
 
 export const questionType: Record<string, QuestionType> = {
@@ -46,43 +42,30 @@ export const questionType: Record<string, QuestionType> = {
   [OnboardingAnswerOption.NAME]: QuestionType.TEXT,
   [OnboardingAnswerOption.ROLE]: QuestionType.TEXT,
   [OnboardingAnswerOption.HOMEPAGE_URL]: QuestionType.TEXT,
-  [OnboardingAnswerOption.USE_PARA]: QuestionType.SELECT,
-  [OnboardingAnswerOption.STAGE]: QuestionType.SELECT,
   [OnboardingAnswerOption.CURRENT_PROVIDER]: QuestionType.SELECT,
-  [OnboardingAnswerOption.SUPPORTED_CHAINS]: QuestionType.SELECT,
-  [OnboardingAnswerOption.TEAM_SIZE]: QuestionType.SELECT,
+  [OnboardingAnswerOption.SUPPORTED_CHAINS]: QuestionType.MULTI_SELECT,
   [OnboardingAnswerOption.HEAR_ABOUT]: QuestionType.SELECT,
-};
-
-export const questionIsMultipleSelect: Record<string, boolean> = {
-  [OnboardingAnswerOption.SUPPORTED_CHAINS]: true,
 };
 
 export const questionLabel: Record<string, string> = {
   [OnboardingAnswerOption.USER_NAME]: 'Name',
-  [OnboardingAnswerOption.TELEGRAM]: 'Telegram Handle',
-  [OnboardingAnswerOption.NAME]: 'Name your Para organization',
+  [OnboardingAnswerOption.TELEGRAM]: 'Telegram Username',
+  [OnboardingAnswerOption.NAME]: 'Name your organization',
   [OnboardingAnswerOption.ROLE]: 'Role',
-  [OnboardingAnswerOption.HOMEPAGE_URL]: 'Website URL',
-  [OnboardingAnswerOption.USE_PARA]: 'How will you use Para?',
-  [OnboardingAnswerOption.STAGE]: 'What stage is your project?',
+  [OnboardingAnswerOption.HOMEPAGE_URL]: 'Website URL (Optional)',
   [OnboardingAnswerOption.CURRENT_PROVIDER]: 'Are you already using an embedded wallet provider?',
   [OnboardingAnswerOption.SUPPORTED_CHAINS]: 'What chains does your app support?',
-  [OnboardingAnswerOption.TEAM_SIZE]: 'How big is your team?',
   [OnboardingAnswerOption.HEAR_ABOUT]: 'How did you hear about us?',
 };
 
 export const questionPlaceholder: Record<string, string> = {
   [OnboardingAnswerOption.USER_NAME]: 'Enter name',
-  [OnboardingAnswerOption.TELEGRAM]: 'Enter Telegram handle',
-  [OnboardingAnswerOption.NAME]: 'Name your organization',
+  [OnboardingAnswerOption.TELEGRAM]: '@markscout',
+  [OnboardingAnswerOption.NAME]: 'Acme',
   [OnboardingAnswerOption.ROLE]: 'Enter role',
   [OnboardingAnswerOption.HOMEPAGE_URL]: 'Link to your project or company',
-  [OnboardingAnswerOption.USE_PARA]: 'Choose one',
-  [OnboardingAnswerOption.STAGE]: 'Choose one',
   [OnboardingAnswerOption.CURRENT_PROVIDER]: 'Choose one',
   [OnboardingAnswerOption.SUPPORTED_CHAINS]: 'Choose one or more',
-  [OnboardingAnswerOption.TEAM_SIZE]: 'Choose one',
   [OnboardingAnswerOption.HEAR_ABOUT]: 'Choose one',
 };
 
@@ -91,7 +74,7 @@ export const questionRules: Record<
   Omit<RegisterOptions<OnboardingAnswers, any>, 'valueAsNumber' | 'valueAsDate' | 'setValueAs' | 'disabled'>
 > = {
   [OnboardingAnswerOption.HOMEPAGE_URL]: {
-    required: 'Website URL is required.',
+    required: false,
     pattern: {
       value: HTTPS_URL_REGEX,
       message: 'Must be a secure (https) url.',
@@ -106,20 +89,11 @@ export const questionRules: Record<
   [OnboardingAnswerOption.ROLE]: {
     required: 'Role is required.',
   },
-  [OnboardingAnswerOption.USE_PARA]: {
-    required: 'How will you use Para is required.',
-  },
-  [OnboardingAnswerOption.STAGE]: {
-    required: 'Stage is required.',
-  },
   [OnboardingAnswerOption.CURRENT_PROVIDER]: {
     required: 'Current provider is required.',
   },
   [OnboardingAnswerOption.SUPPORTED_CHAINS]: {
     required: 'Supported chains are required.',
-  },
-  [OnboardingAnswerOption.TEAM_SIZE]: {
-    required: 'Team size is required.',
   },
   [OnboardingAnswerOption.HEAR_ABOUT]: {
     required: 'How did you hear about us is required.',

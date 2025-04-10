@@ -3,6 +3,8 @@ import styled, { css } from 'styled-components';
 import { BRAND_COLORS, MOBILE_SIZE } from '../utils/constants';
 import { Environment } from '../types/environment';
 import { getKeyColor } from '../utils/apiKey';
+import { PropsWithChildren } from 'react';
+import clsx from 'clsx';
 
 export const LINEAR_GRADIENT = `linear-gradient(
   90deg,
@@ -112,11 +114,8 @@ export const LinkText = styled(CpslText)<{ $centered?: boolean }>`
   ${underlinedStyle}
 `;
 
-export const VerticalCenteredContainer = styled.div<{ $gap: number }>`
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: ${({ $gap }) => `${$gap}px`};
-`;
+export const VerticalCenteredContainer = ({ children, className }: PropsWithChildren & { className?: string }) => (
+  <div className={clsx('para:flex para:flex-col para:justify-center para:w-full para:items-center', className)}>
+    {children}
+  </div>
+);

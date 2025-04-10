@@ -9,11 +9,13 @@ export const CTA = () => {
         <div className="para:flex para:flex-1 para:justify-between para:items-center">
           <div className="para:flex para:items-center para:gap-1">
             <StarsFilled className="para:size-4" />
-            <Typography className="para:text-sm para:font-semibold">Now with On and Off Ramps</Typography>
+            <Typography className="para:text-sm para:font-semibold para:text-primary-foreground">
+              Now with On and Off Ramps
+            </Typography>
           </div>
           <div className="para:flex para:items-center para:gap-1">
-            <Typography className="para:text-xs para:font-semibold">Learn More</Typography>
-            <ChevronRight className="para:size-5" />
+            <Typography className="para:text-xs para:font-semibold para:text-primary-foreground">Learn More</Typography>
+            <ChevronRight className="para:size-5 para:stroke-primary-foreground" />
           </div>
         </div>
       </Button>

@@ -17,6 +17,37 @@ import { paraLogo } from './assets/paraLogo';
 
 defineCustomElements();
 
+const App = () => {
+  return (
+    <ParaProvider
+      paraClientConfig={{
+        env: ENV_VARS.environment as Environment,
+        apiKey: ENV_VARS.paraApiKey,
+        opts: {
+          xUrl: TWITTER_URL,
+          linkedinUrl: LINKEDIN_URL,
+          supportUrl: SUPPORT_URL,
+        },
+      }}
+      config={{
+        appName: 'Para Developer Portal',
+        disableEmbeddedModal: true,
+      }}
+      paraModalConfig={{
+        oAuthMethods: [OAuthMethod.GOOGLE],
+        disablePhoneLogin: true,
+        logo: paraLogo,
+        bareModal: true,
+        isOpen: true,
+      }}
+      externalWalletConfig={{ wallets: [] }}
+    >
+      <RouterProvider router={router} />
+      <ToastContainer />
+    </ParaProvider>
+  );
+};
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
@@ -28,32 +59,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           environment: { tier: ENV_VARS.statsigEnv },
         }}
       >
-        <ParaProvider
-          paraClientConfig={{
-            env: ENV_VARS.environment as Environment,
-            apiKey: ENV_VARS.paraApiKey,
-            opts: {
-              xUrl: TWITTER_URL,
-              linkedinUrl: LINKEDIN_URL,
-              supportUrl: SUPPORT_URL,
-            },
-          }}
-          config={{
-            appName: 'Para Developer Portal',
-            disableEmbeddedModal: true,
-          }}
-          paraModalConfig={{
-            oAuthMethods: [OAuthMethod.GOOGLE],
-            disablePhoneLogin: true,
-            logo: paraLogo,
-            bareModal: true,
-            isOpen: true,
-          }}
-          externalWalletConfig={{ wallets: [] }}
-        >
-          <RouterProvider router={router} />
-          <ToastContainer />
-        </ParaProvider>
+        <App />
       </StatsigProvider>
     </QueryClientProvider>
   </React.StrictMode>,

@@ -3,12 +3,11 @@ import { AuthMinAppBar } from '../../components/AppBar/AuthMinAppBar';
 import { AuthenticatedWrapper } from '../../components/AuthenticatedWrapper/AuthenticatedWrapper';
 import { ErrorBoundary as SentryErrorBoundary } from '@sentry/react';
 import { ErrorBoundary } from '../../components/ErrorBoundary/ErrorBoundary';
-import { styled } from 'styled-components';
-import { GradientProgressBar } from '../../components/GradientProgessBar/GradientProgessBar';
 import { OnboardingStep, useOnboardingStore } from '../../stores/onboarding/useOnboardingStore';
 import { AnimatePresence, motion, Transition, Variants } from 'framer-motion';
 import { cloneElement, useEffect, useRef } from 'react';
 import { useAccount } from '@getpara/react-sdk';
+import { Progress } from '@getpara/react-component-library';
 
 export const ONBOARDING_MOTION_VARIANTS: Variants = {
   enter: (direction: number) => {
@@ -67,52 +66,41 @@ export const Layout = () => {
 
   return (
     <AuthenticatedWrapper>
-      <AuthMinAppBar />
-      <OnboardingMain>
-        <SentryErrorBoundary
-          fallback={({ error, resetError }) => (
-            <ErrorBoundary
-              onResetError={resetError}
-              variant="error"
-              containerType="unauthenticated"
-              errorMessage={(error as Error)?.message}
+      <div className="para:min-h-dvh para:flex para:flex-col para:bg-muted">
+        <AuthMinAppBar />
+        <main className="para:flex para:flex-col para:gap-8 para:justify-center para:items-center para:box-border para:overflow-auto para:px-6 para:pb-6 para:pt-10">
+          <SentryErrorBoundary
+            fallback={({ error, resetError }) => (
+              <ErrorBoundary
+                onResetError={resetError}
+                variant="error"
+                containerType="unauthenticated"
+                errorMessage={(error as Error)?.message}
+              />
+            )}
+          >
+            <Progress
+              value={(currentStepNumber / totalSteps) * 100}
+              className="para:max-w-[210px] para:bg-mist-100 para:h-1"
             />
-          )}
-        >
-          <GradientProgressBar current={currentStepNumber} max={totalSteps} maxWidth={210} />
-          <AnimatePresence mode="wait" initial={false} custom={stepDirection}>
-            <MotionContainer
-              key={location.pathname}
-              variants={ONBOARDING_MOTION_VARIANTS}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={ONBOARDING_TRANSITION}
-              custom={stepDirection}
-            >
-              {/* https://medium.com/@antonio.falcescu/animating-react-pages-with-react-router-dom-outlet-and-framer-motion-animatepresence-bd5438b3433b */}
-              {element && cloneElement(element, { key: location.pathname })}
-            </MotionContainer>
-          </AnimatePresence>
-        </SentryErrorBoundary>
-      </OnboardingMain>
+            <AnimatePresence mode="wait" initial={false} custom={stepDirection}>
+              <motion.div
+                className="para:will-change-auto para:w-full"
+                key={location.pathname}
+                variants={ONBOARDING_MOTION_VARIANTS}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={ONBOARDING_TRANSITION}
+                custom={stepDirection}
+              >
+                {/* https://medium.com/@antonio.falcescu/animating-react-pages-with-react-router-dom-outlet-and-framer-motion-animatepresence-bd5438b3433b */}{' '}
+                {element && cloneElement(element, { key: location.pathname })}
+              </motion.div>
+            </AnimatePresence>
+          </SentryErrorBoundary>
+        </main>
+      </div>
     </AuthenticatedWrapper>
   );
 };
-
-const MotionContainer = styled(motion.div)`
-  will-change: auto !important;
-`;
-
-const OnboardingMain = styled.main`
-  overflow: auto;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 32px;
-  background-color: var(--cpsl-color-background-0);
-  box-sizing: border-box;
-  padding: 40px 24px 24px 24px;
-`;

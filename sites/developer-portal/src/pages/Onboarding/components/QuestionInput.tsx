@@ -1,8 +1,6 @@
 import { Controller, useFormContext } from 'react-hook-form';
 import { OnboardingAnswerOption, OnboardingAnswers, QuestionType } from '../../../types/onboarding';
-import { CpslInput, CpslSelect, CpslSelectItem } from '@getpara/react-components';
 import {
-  questionIsMultipleSelect,
   questionLabel,
   questionPlaceholder,
   questionRules,
@@ -11,6 +9,17 @@ import {
 } from '../config/questionConfig';
 import { useOnboardingStore } from '../../../stores/onboarding/useOnboardingStore';
 import { useAccount } from '@getpara/react-sdk';
+import {
+  Input,
+  Label,
+  MultiSelect,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Typography,
+} from '@getpara/react-component-library';
 
 interface QuestionInputProps {
   question: OnboardingAnswerOption;
@@ -30,41 +39,71 @@ export const QuestionInput = ({ question }: QuestionInputProps) => {
           name={question}
           control={control}
           rules={questionRules[question]}
-          render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => {
-            const isMultiple = questionIsMultipleSelect[question];
-            return (
-              <CpslSelect
-                label={questionLabel[question]}
-                selectedValue={value ?? ''}
-                onCpslSelectValueChange={e => {
-                  let newVal;
-                  if (isMultiple && typeof value !== 'string') {
-                    if (value?.includes(e.detail)) {
-                      newVal = value.filter(v => v !== e.detail);
-                    } else {
-                      newVal = [...(value ?? []), e.detail];
-                    }
-                  } else {
-                    newVal = e.detail;
-                  }
+          render={({ field: { onChange }, fieldState: { error } }) => (
+            <div className="para:w-full para:flex para:flex-col para:gap-2">
+              <Label htmlFor={question}>{questionLabel[question]}</Label>
+              <Select
+                onValueChange={value => {
                   if (userId) {
-                    setInput(userId, question, newVal);
-                    onChange(newVal);
+                    setInput(userId, question, value);
+                    onChange(value);
                   }
                 }}
-                onCpslBlur={onBlur}
-                errorText={error?.message}
-                placeholder={questionPlaceholder[question]}
-                multiple={isMultiple}
               >
-                {selectQuestionOptions[question].map(o => (
-                  <CpslSelectItem key={o} slot="items" value={o}>
-                    {o}
-                  </CpslSelectItem>
-                ))}
-              </CpslSelect>
-            );
-          }}
+                <SelectTrigger className="para:w-full para:h-12">
+                  <SelectValue placeholder={questionPlaceholder[question]} />
+                </SelectTrigger>
+                <SelectContent>
+                  {selectQuestionOptions[question].map(o => (
+                    <SelectItem key={o.value} value={o.value}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {!!error && (
+                <Typography color="destructive" className="para:text-xs">
+                  {error.message}
+                </Typography>
+              )}
+            </div>
+          )}
+        />
+      );
+    }
+    case QuestionType.MULTI_SELECT: {
+      return (
+        <Controller
+          key={question}
+          name={question}
+          control={control}
+          rules={questionRules[question]}
+          render={({ field: { onChange }, fieldState: { error } }) => (
+            <div className="para:w-full para:flex para:flex-col para:gap-2">
+              <Label htmlFor={question}>{questionLabel[question]}</Label>
+              <MultiSelect
+                className="para:min-h-12"
+                options={selectQuestionOptions[question]}
+                placeholder={questionPlaceholder[question]}
+                emptyIndicator={
+                  <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">no results found.</p>
+                }
+                onChange={options => {
+                  if (userId) {
+                    const _options = options.map(o => o.value);
+                    setInput(userId, question, _options);
+                    onChange(_options);
+                  }
+                }}
+                hideClearAllButton
+              />
+              {!!error && (
+                <Typography color="destructive" className="para:text-xs">
+                  {error.message}
+                </Typography>
+              )}
+            </div>
+          )}
         />
       );
     }
@@ -75,20 +114,28 @@ export const QuestionInput = ({ question }: QuestionInputProps) => {
           name={question}
           control={control}
           rules={questionRules[question]}
-          render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
-            <CpslInput
-              label={questionLabel[question]}
-              placeholder={questionPlaceholder[question]}
-              onCpslInput={e => {
-                if (userId) {
-                  setInput(userId, question, e.detail.value);
-                  onChange(e.detail.value);
-                }
-              }}
-              onCpslBlur={onBlur}
-              value={(value as string) ?? ''}
-              errorText={error?.message}
-            />
+          render={({ field: { onChange, onBlur }, fieldState: { error } }) => (
+            <div className="para:w-full para:flex para:flex-col para:gap-2">
+              <Label htmlFor={question}>{questionLabel[question]}</Label>
+              <Input
+                className="para:h-12"
+                type={question}
+                id={question}
+                placeholder={questionPlaceholder[question]}
+                onChange={e => {
+                  if (userId) {
+                    setInput(userId, question, e.currentTarget.value);
+                    onChange(e);
+                  }
+                }}
+                onBlur={onBlur}
+              />
+              {!!error && (
+                <Typography color="destructive" className="para:text-xs">
+                  {error.message}
+                </Typography>
+              )}
+            </div>
           )}
         />
       );

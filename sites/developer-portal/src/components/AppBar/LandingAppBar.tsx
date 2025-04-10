@@ -32,7 +32,7 @@ export const LandingAppBar = () => {
             <ParaBrand className="para:w-auto" />
             {isMobile ? (
               <>
-                <Menu onClick={handleMenuClick} />
+                <Menu className="para:stroke-foreground" onClick={handleMenuClick} />
               </>
             ) : (
               <div className="para:flex para:gap-6 para:items-center">
