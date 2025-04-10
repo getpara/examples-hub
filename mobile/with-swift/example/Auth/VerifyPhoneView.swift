@@ -53,36 +53,34 @@ struct VerifyPhoneView: View {
                 isLoading = true
                 errorMessage = nil
                 loadingStateText = "Verifying..."
+                
                 Task {
-                    do {
-                        let authState = try await paraManager.verifyNewAccount(verificationCode: code)
-                        
-                        guard authState.stage == .signup else {
-                            throw ParaError.error("Unexpected auth stage: \(authState.stage)")
-                        }
-                        
-                        if let passkeyId = authState.passkeyId {
-                            loadingStateText = "Generating Passkey..."
-                            try await paraManager.generatePasskey(
-                                identifier: "\(countryCode)\(phoneNumber)",
-                                biometricsId: passkeyId,
-                                authorizationController: authorizationController
-                            )
-                            loadingStateText = "Creating Wallet..."
-                            try await paraManager.createWallet(type: .evm, skipDistributable: false)
-                        } else if let passwordUrl = authState.passwordUrl {
-                            loadingStateText = "Setting up password..."
-                            loadingStateText = "Creating Wallet..."
-                            try await paraManager.createWallet(type: .evm, skipDistributable: false)
-                        } else {
-                            throw ParaError.error("No authentication method available")
-                        }
-                        
-                        isLoading = false
+                    // Clean up phone number and country code
+                    let cleanPhoneNumber = phoneNumber.replacingOccurrences(of: " ", with: "")
+                    let cleanCountryCode = countryCode.replacingOccurrences(of: "+", with: "")
+                    
+                    // Use the new handlePhoneAuth method with verification code
+                    let result = await paraManager.handlePhoneAuth(
+                        phoneNumber: cleanPhoneNumber,
+                        countryCode: cleanCountryCode,
+                        verificationCode: code,
+                        authorizationController: authorizationController
+                    )
+                    
+                    isLoading = false
+                    
+                    switch result.status {
+                    case .success:
+                        // Authentication successful, navigate to home
                         appRootManager.currentRoot = .home
-                    } catch {
-                        isLoading = false
-                        errorMessage = String(describing: error)
+                        
+                    case .needsVerification:
+                        // This shouldn't happen when verification code is provided
+                        errorMessage = "Unexpected verification required"
+                        
+                    case .error:
+                        // Error occurred
+                        errorMessage = result.errorMessage
                     }
                 }
             } label: {
@@ -99,6 +97,17 @@ struct VerifyPhoneView: View {
             .disabled(isLoading || code.isEmpty)
             .padding(.horizontal)
             .accessibilityLabel("verifyButton")
+            
+            Button("Resend Code") {
+                Task {
+                    do {
+                        try await paraManager.resendVerificationCode()
+                    } catch {
+                        errorMessage = "Failed to resend code: \(error.localizedDescription)"
+                    }
+                }
+            }
+            .padding(.top)
             
             Spacer()
         }

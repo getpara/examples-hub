@@ -133,39 +133,31 @@ struct PhoneAuthView: View {
                 isLoading = true
                 errorMessage = nil
                 Task {
-                    do {
-                        // Format the phone number in international format
-                        let formattedPhoneNumber = paraManager.formatPhoneNumber(
-                            phoneNumber: phoneNumber.replacingOccurrences(of: " ", with: ""),
-                            countryCode: countryCode.replacingOccurrences(of: "+", with: "")
-                        )
+                    // Clean up phone number and country code
+                    let cleanPhoneNumber = phoneNumber.replacingOccurrences(of: " ", with: "")
+                    let cleanCountryCode = countryCode.replacingOccurrences(of: "+", with: "")
+                    
+                    // Use the new handlePhoneAuth method
+                    let result = await paraManager.handlePhoneAuth(
+                        phoneNumber: cleanPhoneNumber,
+                        countryCode: cleanCountryCode,
+                        authorizationController: authorizationController
+                    )
+                    
+                    isLoading = false
+                    
+                    switch result.status {
+                    case .success:
+                        // Authentication successful, navigate to home
+                        appRootManager.currentRoot = .home
                         
-                        // Use the new signUpOrLogIn method
-                        let authState = try await paraManager.signUpOrLogIn(auth: .phone(formattedPhoneNumber))
+                    case .needsVerification:
+                        // User needs to verify phone number
+                        shouldNavigateToVerifyPhoneView = true
                         
-                        // Handle the auth state based on the stage
-                        switch authState.stage {
-                        case .verify:
-                            // New user needs verification
-                            isLoading = false
-                            shouldNavigateToVerifyPhoneView = true
-                        case .login:
-                            // Existing user, handle login
-                            if let passkeyUrl = authState.passkeyUrl {
-                                try await paraManager.login(authorizationController: authorizationController, authInfo: PhoneAuthInfo(phone: phoneNumber.replacingOccurrences(of: " ", with: ""), countryCode: countryCode.replacingOccurrences(of: "+", with: "")))
-                                appRootManager.currentRoot = .home
-                            } else {
-                                errorMessage = "No authentication method available"
-                                isLoading = false
-                            }
-                        case .signup:
-                            // This shouldn't happen at this stage
-                            errorMessage = "Unexpected authentication stage"
-                            isLoading = false
-                        }
-                    } catch {
-                        errorMessage = String(describing: error)
-                        isLoading = false
+                    case .error:
+                        // Error occurred
+                        errorMessage = result.errorMessage
                     }
                 }
             } label: {
