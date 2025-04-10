@@ -1,5 +1,36 @@
-# Vue 3 + TypeScript + Vite
+# Para Vue + Vite Example
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+This example demonstrates integrating the Para SDK within a Vue.js application built using Vite. Note Para does not
+support an official Vue library. This example uses the React SDK with Vue.
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## Prerequisites
+
+- **Para API Key**: Obtain your API key from the Para developer portal. Create a `.env` file in the project root (you
+  can copy `.env.example`) and add your key:
+  ```env
+  VITE_PARA_API_KEY=your_api_key_here
+  ```
+
+## Installation
+
+1.  Install project dependencies:
+    ```bash
+    npm install
+    # or
+    yarn install
+    ```
+
+## Running the Example
+
+1.  Start the Vite development server:
+    ```bash
+    npm run dev
+    # or
+    yarn dev
+    ```
+2.  Open your browser to the local address provided by Vite (usually `http://localhost:5173` or similar).
+
+## Learn More
+
+For comprehensive guidance on using the Para SDK, setup details, and advanced features, please refer to the official
+documentation:[Para SDK documentation](https://docs.usepara.com/welcome)
