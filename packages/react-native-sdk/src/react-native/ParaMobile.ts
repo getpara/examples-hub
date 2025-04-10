@@ -1,4 +1,5 @@
 import {
+  AuthStateSignup,
   ConstructorOpts,
   ParaCore,
   Environment,
@@ -22,7 +23,7 @@ import {
   PasskeyGetRequest,
   PasskeyGetResult,
 } from 'react-native-passkey';
-import { Auth, extractAuthInfo, PublicKeyStatus, WalletScheme } from '@getpara/user-management-client';
+import { PublicKeyStatus, WalletScheme } from '@getpara/user-management-client';
 import { setEnv } from '../config.js';
 import base64url from 'base64url';
 import { webcrypto } from 'crypto';
@@ -38,6 +39,8 @@ const RS256_ALGORITHM = -257;
  * const para = new ParaMobile(Environment.BETA, "api_key");
  */
 export class ParaMobile extends ParaCore {
+  isNativePasskey = true;
+
   private relyingPartyId: string;
   /**
    * Creates an instance of ParaMobile.
@@ -84,47 +87,25 @@ export class ParaMobile extends ParaCore {
   }
 
   /**
-   * Verifies an email and returns the biometrics ID.
-   * @param {string} verificationCode - The verification code sent to the email.
-   * @returns {Promise<string>} The biometrics ID.
-   */
-  async verifyEmailBiometricsId({ verificationCode }: { verificationCode: string }): Promise<string> {
-    const webAuthCreateUrl = await super.verifyEmail({ verificationCode });
-    const segments = webAuthCreateUrl.split('/');
-    const segments2 = segments[segments.length - 1]!.split('?');
-    const biometricsId = segments2[0]!;
-
-    return biometricsId;
-  }
-
-  /**
-   * Verifies a phone number and returns the biometrics ID.
-   * @param {string} verificationCode - The verification code sent to the phone.
-   * @returns {Promise<string>} The biometrics ID.
-   */
-  async verifyPhoneBiometricsId({ verificationCode }: { verificationCode: string }): Promise<string> {
-    const webAuthCreateUrl = await super.verifyPhone({ verificationCode });
-    const segments = webAuthCreateUrl.split('/');
-    const segments2 = segments[segments.length - 1]!.split('?');
-    const biometricsId = segments2[0]!;
-
-    return biometricsId;
-  }
-  /**
    * Registers a passkey for the user.
    * @param {Auth<'email'> | Auth<'phone'>} auth - The user's authentication details
    * @param {string} biometricsId - The biometrics ID obtained from verification.
    * @returns {Promise<void>}
    */
-  async registerPasskey({ biometricsId, ...auth }: { biometricsId: string } & (Auth<'email'> | Auth<'phone'>)) {
+  async registerPasskey(authState: AuthStateSignup) {
+    if (!authState.passkeyId) {
+      throw new Error('Passkey ID not found. Make sure you have enabled passkey logins in the Para Developer Portal.');
+    }
+
+    const userId = this.assertUserId();
+    const authInfo = this.assertIsAuthSet();
+
     if (!webcrypto || !webcrypto.getRandomValues) {
       throw new Error('Web crypto is not available. Ensure you have imported the shim from @getpara/react-native-wallet.');
     }
     const userHandle = new Uint8Array(32);
     webcrypto.getRandomValues(userHandle);
     const userHandleEncoded = base64url.encode(userHandle as any);
-
-    const { identifier: displayIdentifier } = extractAuthInfo(auth, { isRequired: true });
 
     const requestJson: PasskeyCreateRequest = {
       authenticatorSelection: {
@@ -139,8 +120,8 @@ export class ParaMobile extends ParaCore {
       },
       user: {
         id: userHandleEncoded,
-        name: displayIdentifier,
-        displayName: displayIdentifier,
+        name: authInfo.identifier,
+        displayName: authInfo.identifier,
       },
       pubKeyCredParams: [
         {
@@ -175,7 +156,7 @@ export class ParaMobile extends ParaCore {
     const encryptedPrivateKeyHex = await encryptPrivateKey(keyPair, userHandleEncoded);
 
     const { partnerId } = await this.ctx.client.touchSession();
-    await this.ctx.client.patchSessionPublicKey(partnerId, this.getUserId()!, biometricsId, {
+    await this.ctx.client.patchSessionPublicKey(partnerId, userId, authState.passkeyId, {
       publicKey: resultJson.id,
       sigDerivedPublicKey: publicKeyHex,
       cosePublicKey,
@@ -183,12 +164,7 @@ export class ParaMobile extends ParaCore {
       status: PublicKeyStatus.COMPLETE,
     });
 
-    await this.ctx.client.uploadEncryptedWalletPrivateKey(
-      this.getUserId()!,
-      encryptedPrivateKeyHex,
-      encryptionKeyHash,
-      resultJson.id,
-    );
+    await this.ctx.client.uploadEncryptedWalletPrivateKey(userId, encryptedPrivateKeyHex, encryptionKeyHash, resultJson.id);
   }
 
   /**
@@ -196,12 +172,11 @@ export class ParaMobile extends ParaCore {
    * @param {AuthParams} params - The authentication parameters.
    * @returns {Promise<void>}
    */
-  async login({ ...auth }: Auth<'email'> | Auth<'phone'>): Promise<void> {
-    await this.logout();
+  async login(): Promise<void> {
+    this.assertIsAuthSet();
+    const userId = this.assertUserId();
 
-    const authInfo = extractAuthInfo(auth, { isRequired: true });
-
-    const { challenge, allowedPublicKeys } = await this.ctx.client.getWebChallenge(authInfo.auth);
+    const { challenge, allowedPublicKeys } = await this.ctx.client.getWebChallenge({ userId });
 
     const requestJson: PasskeyGetRequest = {
       challenge,
@@ -231,22 +206,8 @@ export class ParaMobile extends ParaCore {
       },
     });
 
-    const userId = verifyWebChallengeResult.data.userId;
-
-    await this.setUserId(userId);
-
-    const { user } = await this.ctx.client.getUser(userId);
-
-    if (user.phone) {
-      await this.setPhoneNumber(user.phone.number, user.phone.countryCode);
-    }
-
-    if (user.email) {
-      await this.setEmail(user.email);
-    }
-
-    if (user.farcasterUsername) {
-      await this.setFarcasterUsername(user.farcasterUsername);
+    if (userId !== verifyWebChallengeResult.data.userId) {
+      throw new Error('User ID mismatch');
     }
 
     const encryptedSharesResult = await this.ctx.client.getBiometricKeyshares(userId, resultJson.id);

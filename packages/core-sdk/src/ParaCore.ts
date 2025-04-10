@@ -3750,7 +3750,7 @@ export abstract class ParaCore implements CoreInterface {
     isForNewDevice = false,
     portalTheme,
     shorten = false,
-  }: NewCredentialUrlParams): Promise<{ credentialId: string; url: string }> {
+  }: NewCredentialUrlParams): Promise<{ credentialId: string; url?: string }> {
     this.assertIsAuthSet();
 
     let credentialId: string, urlType: Extract<PortalUrlType, 'createAuth' | 'createPassword'>;
@@ -3774,14 +3774,17 @@ export abstract class ParaCore implements CoreInterface {
         break;
     }
 
-    const url = await this.constructPortalUrlV2(urlType, {
-      isForNewDevice,
-      pathId: credentialId,
-      portalTheme,
-      shorten,
-    });
+    const url =
+      this.isNativePasskey && urlType === 'createAuth'
+        ? undefined
+        : await this.constructPortalUrlV2(urlType, {
+            isForNewDevice,
+            pathId: credentialId,
+            portalTheme,
+            shorten,
+          });
 
-    return { credentialId, url };
+    return { credentialId, ...(url ? { url } : {}) };
   }
 
   protected async getLoginUrlV2({
@@ -3964,7 +3967,7 @@ export abstract class ParaCore implements CoreInterface {
         shorten,
       });
 
-      signupState.passkeyUrl = passkeyUrl;
+      if (passkeyUrl) signupState.passkeyUrl = passkeyUrl;
       signupState.passkeyId = passkeyId;
     }
 

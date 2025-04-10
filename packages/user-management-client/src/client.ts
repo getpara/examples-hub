@@ -487,7 +487,7 @@ class Client {
   };
 
   // GET /biometrics/challenge?email&publicKey
-  getWebChallenge = async (auth?: PrimaryAuth): Promise<getWebChallengeRes> => {
+  getWebChallenge = async (auth?: PrimaryAuth | Auth<'userId'>): Promise<getWebChallengeRes> => {
     const res = await this.baseRequest.get<any>('/biometrics/challenge', {
       params: { ...(auth || {}) },
     });

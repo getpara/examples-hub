@@ -518,15 +518,18 @@ describe('ParaCore - authentication', () => {
   });
 
   describe('verified auth flows', () => {
-    beforeEach(async () => {
-      para = new MockPara(Environment.DEV, API_KEY);
-    });
-
-    const testAuthFlow = (authInfo: AuthInfo<'email'> | AuthInfo<'phone'>) => {
+    const testAuthFlow = (authInfo: AuthInfo<'email'> | AuthInfo<'phone'>, isNativePasskey = false) => {
       const auth = authInfo.auth;
 
       describe('sign up or log in', () => {
+        beforeEach(() => {
+          para = new MockPara(Environment.DEV, API_KEY);
+          (para as unknown as any).isNativePasskey = isNativePasskey;
+        });
+
         it('new user', async () => {
+          if (para) (para as unknown as any).isNativePasskey = isNativePasskey;
+
           mockSignUpOrLogIn.mockResolvedValueOnce(getVerifyState(auth));
 
           const authState = await para.signUpOrLogInV2({ auth });
@@ -539,6 +542,8 @@ describe('ParaCore - authentication', () => {
         });
 
         it('returning user', async () => {
+          if (para) (para as unknown as any).isNativePasskey = isNativePasskey;
+
           mockSignUpOrLogIn.mockResolvedValueOnce(getLoginState(auth));
 
           const authState = await initiateLogin(para, authInfo);
@@ -548,19 +553,36 @@ describe('ParaCore - authentication', () => {
           expect(para.userId).toEqual(USER_ID);
           expect(para.authInfo).toStrictEqual(authInfo);
           expect(para.loginEncryptionKeyPair).toBeDefined();
+
+          console.log((para as unknown as any).isNativePasskey);
           expect(authState).toStrictEqual({
             ..._.omit(getLoginState(auth), 'loginAuthMethods'),
-            passkeyUrl: expect.stringMatching(''),
-            passkeyKnownDeviceUrl: expect.stringMatching(''),
+            ...(isNativePasskey
+              ? {}
+              : {
+                  passkeyUrl: expect.stringMatching(''),
+                  passkeyKnownDeviceUrl: expect.stringMatching(''),
+                }),
             passwordUrl: expect.stringMatching(''),
           });
-          testLoginUrl(para, authState.passkeyUrl!, AuthMethod.PASSKEY);
+
+          if (!isNativePasskey) {
+            testLoginUrl(para, authState.passkeyUrl!, AuthMethod.PASSKEY);
+          }
+
           testLoginUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD);
         });
       });
 
       describe('verify', () => {
+        beforeEach(() => {
+          para = new MockPara(Environment.DEV, API_KEY);
+          (para as unknown as any).isNativePasskey = isNativePasskey;
+        });
+
         it('invalid auth', async () => {
+          if (para) (para as unknown as any).isNativePasskey = isNativePasskey;
+
           await para.signUpOrLogInV2({ auth });
 
           await para.setAuth({ telegramUserId: USER_TELEGRAM_USER_ID });
@@ -570,6 +592,8 @@ describe('ParaCore - authentication', () => {
           );
         });
         it('failure', async () => {
+          if (para) (para as unknown as any).isNativePasskey = isNativePasskey;
+
           await para.signUpOrLogInV2({ auth });
 
           mockVerifyNewAccount.mockRejectedValueOnce('invalid');
@@ -577,6 +601,8 @@ describe('ParaCore - authentication', () => {
           expect(() => para.verifyNewAccountV2({ verificationCode: VERIFICATION_CODE })).rejects.toThrow('invalid');
         });
         it('success', async () => {
+          if (para) (para as unknown as any).isNativePasskey = isNativePasskey;
+
           mockVerifyNewAccount.mockResolvedValueOnce(getSignupState(auth));
           await para.signUpOrLogInV2({ auth });
 
@@ -585,12 +611,18 @@ describe('ParaCore - authentication', () => {
           expect(signupState).toStrictEqual({
             ..._.omit(getSignupState(auth), ['signupAuthMethods']),
             passkeyId: expect.any(String),
-            passkeyUrl: expect.stringMatching(''),
+            ...(isNativePasskey
+              ? {}
+              : {
+                  passkeyUrl: expect.stringMatching(''),
+                }),
             passwordId: expect.any(String),
             passwordUrl: expect.stringMatching(''),
           });
 
-          testCreateUrl(para, signupState.passkeyUrl!, AuthMethod.PASSKEY);
+          if (!isNativePasskey) {
+            testCreateUrl(para, signupState.passkeyUrl!, AuthMethod.PASSKEY);
+          }
           testCreateUrl(para, signupState.passwordUrl!, AuthMethod.PASSWORD);
         });
       });
@@ -598,6 +630,7 @@ describe('ParaCore - authentication', () => {
       describe('login', () => {
         beforeEach(() => {
           para = new MockPara(Environment.DEV, API_KEY);
+          (para as unknown as any).isNativePasskey = isNativePasskey;
         });
 
         describe('initial', async () => {
@@ -632,6 +665,10 @@ describe('ParaCore - authentication', () => {
       });
 
       describe('2FA', () => {
+        beforeEach(() => {
+          para = new MockPara(Environment.DEV, API_KEY);
+        });
+
         describe('setup2faV2', () => {
           it('no userId', async () => {
             expect(() => para.setup2faV2()).rejects.toThrow();
@@ -690,11 +727,16 @@ describe('ParaCore - authentication', () => {
       });
     };
 
-    describe('email', () => {
-      testAuthFlow(emailAuthInfo);
-    });
-    describe('phone', () => {
-      testAuthFlow(phoneAuthInfo);
+    [false, true].forEach(isNativePasskey => {
+      describe(isNativePasskey ? 'with native passkeys' : 'without native passkeys', () => {
+        describe('email', () => {
+          testAuthFlow(emailAuthInfo, isNativePasskey);
+        });
+
+        describe('phone', () => {
+          testAuthFlow(phoneAuthInfo, isNativePasskey);
+        });
+      });
     });
   });
 
@@ -881,6 +923,8 @@ describe('ParaCore - authentication', () => {
         });
 
         it('logout', async () => {
+          para = new MockPara(Environment.DEV, API_KEY);
+
           await initiateLogin(para, authInfo);
 
           await para.logout();
