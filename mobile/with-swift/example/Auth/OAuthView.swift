@@ -31,59 +31,20 @@ struct OAuthView: View {
         debugInfo = "Starting OAuth flow for provider: \(provider.rawValue)"
         
         Task {
-            do {
-                logger.debug("Initiating OAuth flow for provider: \(provider.rawValue)")
-                
-                // Use the new verifyOAuth method
-                let authState = try await paraManager.verifyOAuth(provider: provider, webAuthenticationSession: webAuthenticationSession)
-                
-                logger.debug("Received auth state with stage: \(authState.stage.rawValue)")
-                debugInfo = "Auth state received: \(authState.stage.rawValue)"
-                
-                // Handle the auth state based on the stage
-                switch authState.stage {
-                case .login:
-                    logger.debug("Processing login stage")
-                    // Existing user, handle login
-                    if let passkeyUrl = authState.passkeyUrl {
-                        logger.debug("Using passkey URL for login")
-                        try await paraManager.login(authorizationController: authorizationController, authInfo: nil)
-                        appRootManager.currentRoot = .home
-                    } else {
-                        logger.error("No passkey URL available for login")
-                        errorMessage = "No authentication method available"
-                    }
-                case .signup:
-                    logger.debug("Processing signup stage")
-                    // New user, handle signup
-                    if let passkeyId = authState.passkeyId {
-                        logger.debug("Generating passkey with ID: \(passkeyId)")
-                        try await paraManager.generatePasskey(
-                            identifier: authState.userId,
-                            biometricsId: passkeyId,
-                            authorizationController: authorizationController
-                        )
-                        logger.debug("Creating wallet")
-                        try await paraManager.createWallet(type: .evm, skipDistributable: false)
-                        appRootManager.currentRoot = .home
-                    } else if let passwordUrl = authState.passwordUrl {
-                        logger.debug("Using password URL for signup")
-                        // In a real app, you would open this URL in a new window
-                        // For this example, we'll just create a wallet directly
-                        try await paraManager.createWallet(type: .evm, skipDistributable: false)
-                        appRootManager.currentRoot = .home
-                    } else {
-                        logger.error("No authentication method available for signup")
-                        errorMessage = "No authentication method available"
-                    }
-                case .verify:
-                    logger.error("Unexpected verify stage for OAuth")
-                    // This shouldn't happen with OAuth
-                    errorMessage = "Unexpected authentication stage"
-                }
-            } catch {
-                logger.error("OAuth error: \(error.localizedDescription)")
-                errorMessage = String(describing: error)
+            // Use the new handleOAuth method that encapsulates the entire flow
+            let result = await paraManager.handleOAuth(
+                provider: provider,
+                webAuthenticationSession: webAuthenticationSession,
+                authorizationController: authorizationController
+            )
+            
+            if result.success {
+                logger.debug("OAuth authentication successful")
+                debugInfo = "Authentication successful"
+                appRootManager.currentRoot = .home
+            } else {
+                logger.error("OAuth error: \(result.errorMessage ?? "Unknown error")")
+                errorMessage = result.errorMessage
             }
             
             isLoading = false
