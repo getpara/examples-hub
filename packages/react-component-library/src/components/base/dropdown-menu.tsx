@@ -14,8 +14,17 @@ function DropdownMenuPortal({ ...props }: React.ComponentProps<typeof DropdownMe
   return <DropdownMenuPrimitive.Portal data-slot="dropdown-menu-portal" {...props} />;
 }
 
-function DropdownMenuTrigger({ ...props }: React.ComponentProps<typeof DropdownMenuPrimitive.Trigger>) {
-  return <DropdownMenuPrimitive.Trigger data-slot="dropdown-menu-trigger" {...props} />;
+function DropdownMenuTrigger({ className, ...props }: React.ComponentProps<typeof DropdownMenuPrimitive.Trigger>) {
+  return (
+    <DropdownMenuPrimitive.Trigger
+      data-slot="dropdown-menu-trigger"
+      className={cn(
+        'para:focus-visible:border-ring para:focus-visible:ring-ring/50 para:focus-visible:ring-[3px] para:outline-none',
+        className,
+      )}
+      {...props}
+    />
+  );
 }
 
 function DropdownMenuContent({
@@ -29,7 +38,7 @@ function DropdownMenuContent({
         data-slot="dropdown-menu-content"
         sideOffset={sideOffset}
         className={cn(
-          'para:bg-popover para:text-popover-foreground para:data-[state=open]:animate-in para:data-[state=closed]:animate-out para:data-[state=closed]:fade-out-0 para:data-[state=open]:fade-in-0 para:data-[state=closed]:zoom-out-95 para:data-[state=open]:zoom-in-95 para:data-[side=bottom]:slide-in-from-top-2 para:data-[side=left]:slide-in-from-right-2 para:data-[side=right]:slide-in-from-left-2 para:data-[side=top]:slide-in-from-bottom-2 para:z-50 para:max-h-(--radix-dropdown-menu-content-available-height) para:min-w-[8rem] para:overflow-x-hidden para:overflow-y-auto para:rounded-md para:border para:p-1 para:shadow-md',
+          'para:border-border para:bg-popover para:text-popover-foreground para:data-[state=open]:animate-in para:data-[state=closed]:animate-out para:data-[state=closed]:fade-out-0 para:data-[state=open]:fade-in-0 para:data-[state=closed]:zoom-out-95 para:data-[state=open]:zoom-in-95 para:data-[side=bottom]:slide-in-from-top-2 para:data-[side=left]:slide-in-from-right-2 para:data-[side=right]:slide-in-from-left-2 para:data-[side=top]:slide-in-from-bottom-2 para:z-50 para:max-h-(--radix-dropdown-menu-content-available-height) para:min-w-[8rem] para:overflow-x-hidden para:overflow-y-auto para:rounded-md para:border para:p-1 para:shadow-md',
 
           className,
         )}

@@ -14,16 +14,19 @@ function SelectGroup({ ...props }: React.ComponentProps<typeof SelectPrimitive.G
   return <SelectPrimitive.Group data-slot="select-group" {...props} />;
 }
 
-function SelectValue({ ...props }: React.ComponentProps<typeof SelectPrimitive.Value>) {
-  return <SelectPrimitive.Value data-slot="select-value" {...props} />;
-}
+const SelectValue = React.forwardRef(function SelectValue(
+  { ...props }: React.ComponentProps<typeof SelectPrimitive.Value>,
+  ref: React.Ref<HTMLSpanElement>,
+) {
+  return <SelectPrimitive.Value data-slot="select-value" {...props} ref={ref} />;
+});
 
 function SelectTrigger({ className, children, ...props }: React.ComponentProps<typeof SelectPrimitive.Trigger>) {
   return (
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
       className={cn(
-        "para:border-border para:data-[placeholder]:text-muted-foreground para:[&_svg:not([class*='text-'])]:text-muted-foreground para:focus-visible:border-ring para:focus-visible:ring-ring/50 para:aria-invalid:ring-destructive/20 para:dark:aria-invalid:ring-destructive/40 para:aria-invalid:border-destructive para:flex para:h-9 para:w-fit para:items-center para:justify-between para:gap-2 para:rounded-md para:border para:bg-muted para:px-3 para:py-2 para:text-sm para:whitespace-nowrap para:transition-[color,box-shadow] para:outline-none para:focus-visible:ring-[3px] para:disabled:cursor-not-allowed para:disabled:opacity-50 para:*:data-[slot=select-value]:line-clamp-1 para:*:data-[slot=select-value]:flex para:*:data-[slot=select-value]:items-center para:*:data-[slot=select-value]:gap-2 para:[&_svg]:pointer-events-none para:[&_svg]:shrink-0 para:[&_svg:not([class*='size-'])]:size-4",
+        "para:border-border para:data-[placeholder]:text-muted-foreground para:[&_svg:not([class*='text-'])]:text-muted-foreground para:focus-visible:border-ring para:focus-visible:ring-ring/50 para:aria-invalid:ring-destructive/20 para:dark:aria-invalid:ring-destructive/40 para:aria-invalid:border-destructive para:flex para:h-9 para:w-fit para:items-center para:justify-between para:gap-2 para:rounded para:border para:bg-muted para:px-3 para:py-2 para:text-sm para:whitespace-nowrap para:transition-[color,box-shadow] para:outline-none para:focus-visible:ring-[3px] para:disabled:cursor-not-allowed para:disabled:opacity-50 para:*:data-[slot=select-value]:line-clamp-1 para:*:data-[slot=select-value]:flex para:*:data-[slot=select-value]:items-center para:*:data-[slot=select-value]:gap-2 para:[&_svg]:pointer-events-none para:[&_svg]:shrink-0 para:[&_svg:not([class*='size-'])]:size-4",
         className,
       )}
       {...props}
@@ -47,7 +50,7 @@ function SelectContent({
       <SelectPrimitive.Content
         data-slot="select-content"
         className={cn(
-          'para:bg-popover para:text-popover-foreground para:data-[state=open]:animate-in para:data-[state=closed]:animate-out para:data-[state=closed]:fade-out-0 para:data-[state=open]:fade-in-0 para:data-[state=closed]:zoom-out-95 para:data-[state=open]:zoom-in-95 para:data-[side=bottom]:slide-in-from-top-2 para:data-[side=left]:slide-in-from-right-2 para:data-[side=right]:slide-in-from-left-2 para:data-[side=top]:slide-in-from-bottom-2 para:relative para:z-50 para:max-h-96 para:min-w-[8rem] para:overflow-hidden para:rounded-md para:border para:shadow-md',
+          'para:border-border para:bg-popover para:text-popover-foreground para:data-[state=open]:animate-in para:data-[state=closed]:animate-out para:data-[state=closed]:fade-out-0 para:data-[state=open]:fade-in-0 para:data-[state=closed]:zoom-out-95 para:data-[state=open]:zoom-in-95 para:data-[side=bottom]:slide-in-from-top-2 para:data-[side=left]:slide-in-from-right-2 para:data-[side=right]:slide-in-from-left-2 para:data-[side=top]:slide-in-from-bottom-2 para:relative para:z-50 para:max-h-96 para:min-w-[8rem] para:overflow-hidden para:rounded-md para:border para:shadow-md',
           position === 'popper' &&
             'para:data-[side=bottom]:translate-y-1 para:data-[side=left]:-translate-x-1 para:data-[side=right]:translate-x-1 para:data-[side=top]:-translate-y-1',
           className,

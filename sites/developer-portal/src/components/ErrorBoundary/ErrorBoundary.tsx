@@ -1,6 +1,6 @@
 import { CpslAlert, CpslButton, CpslCard, CpslText } from '@getpara/react-components';
 import styled from 'styled-components';
-import { AUTH_APP_BAR_HEIGHT } from '../../components/AppBar/AuthAppBar';
+import { AUTH_APP_BAR_HEIGHT } from '../AppBar/AuthAppBar/AuthAppBar';
 import { CenteredText, ClickableText } from '../../components/common';
 import { useLocation, useNavigate, useRouteError } from 'react-router-dom';
 import { SUPPORT_URL } from '../../utils/constants';

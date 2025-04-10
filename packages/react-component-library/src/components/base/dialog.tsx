@@ -22,7 +22,10 @@ function DialogClose({ ...props }: React.ComponentProps<typeof DialogPrimitive.C
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
 }
 
-function DialogOverlay({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
+const DialogOverlay = React.forwardRef(function DialogOverlay(
+  { className, ...props }: React.ComponentProps<typeof DialogPrimitive.Overlay>,
+  ref: React.Ref<HTMLDivElement>,
+) {
   return (
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
@@ -31,9 +34,10 @@ function DialogOverlay({ className, ...props }: React.ComponentProps<typeof Dial
         className,
       )}
       {...props}
+      ref={ref}
     />
   );
-}
+});
 
 function DialogContent({ className, children, ...props }: React.ComponentProps<typeof DialogPrimitive.Content>) {
   return (

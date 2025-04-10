@@ -3,7 +3,7 @@ import { ReactElement } from 'react';
 import styled from 'styled-components';
 import { CpslPaginationCustomEvent } from '@getpara/core-components';
 import { MOBILE_SIZE } from '../../utils/constants';
-import { AUTH_APP_BAR_HEIGHT } from '../AppBar/AuthAppBar';
+import { AUTH_APP_BAR_HEIGHT } from '../AppBar/AuthAppBar/AuthAppBar';
 
 export type TableData = {
   key: string;

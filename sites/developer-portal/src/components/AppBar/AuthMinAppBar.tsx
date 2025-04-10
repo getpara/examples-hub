@@ -5,9 +5,9 @@ export const AUTH_MIN_APP_BAR_HEIGHT = 70;
 export const AuthMinAppBar = () => {
   return (
     <>
-      <div className="para:w-full para:fixed para:h-[70px] para:pl-[31px] para:flex para:items-center para:bg-muted">
+      <nav className="para:w-full para:fixed para:h-[70px] para:pl-[31px] para:flex para:items-center para:bg-muted">
         <ParaBrand className="para:w-auto" />
-      </div>
+      </nav>
       <div className="para:h-[70px]" />
     </>
   );

@@ -26,7 +26,7 @@ export const LandingAppBar = () => {
 
   return (
     <>
-      <div className="para:p-4 para:pb-0 para:w-full para:fixed para:flex para:items-center para:justify-center para:top-0 para:h-auto para:z-10">
+      <nav className="para:p-4 para:pb-0 para:w-full para:fixed para:flex para:items-center para:justify-center para:top-0 para:h-auto para:z-10">
         <div className="para:border para:border-border para:max-w-[1183px] para:w-full para:h-auto para:py-5 para:px-6 para:rounded-2xl para:bg-background">
           <div className="para:flex para:items-center para:flex-1 para:gap-2 para:justify-between">
             <ParaBrand className="para:w-auto" />
@@ -37,7 +37,7 @@ export const LandingAppBar = () => {
             ) : (
               <div className="para:flex para:gap-6 para:items-center">
                 {LANDING_HEADER_LINKS.map(({ label, url }) => (
-                  <Button asChild className="para:px-0 para:text-foreground" variant="link">
+                  <Button key={url} asChild className="para:px-0 para:text-foreground" variant="link">
                     <Link to={url} target="_blank">
                       {label}
                     </Link>
@@ -58,7 +58,7 @@ export const LandingAppBar = () => {
                 key={'container'}
               >
                 {LANDING_HEADER_LINKS.map(({ label, url }) => (
-                  <Button asChild className="para:px-0 para:pt-6 para:text-foreground" variant="link">
+                  <Button key={url} asChild className="para:px-0 para:pt-6 para:text-foreground" variant="link">
                     <Link to={url} target="_blank">
                       {label}
                     </Link>
@@ -68,7 +68,7 @@ export const LandingAppBar = () => {
             )}
           </AnimatePresence>
         </div>
-      </div>
+      </nav>
       <div className="para:h-[94px]" />
     </>
   );

@@ -6,7 +6,7 @@ import { MOBILE_SIZE } from '../../../utils/constants';
 import { useLogout } from '../../../hooks/useLogout';
 import { useOrganizationMember } from '../../../hooks/api/queries/useOrganizationMember';
 import { Organizations } from './Organizations';
-import { AUTH_APP_BAR_HEIGHT } from '../../../components/AppBar/AuthAppBar';
+import { AUTH_APP_BAR_HEIGHT } from '../../../components/AppBar/AuthAppBar/AuthAppBar';
 import { AccountWarning } from './AccountWarning';
 import { PlanUsage } from './PlanUsage';
 
@@ -54,6 +54,8 @@ export const NavBar = ({ isOpen, closeNav }: NavBarProps) => {
 };
 
 const Drawer = styled(CpslDrawer)`
+  /* temp padding to allow top nav to show, this will all change in the side nav update */
+  margin-top: 57px;
   @media (max-width: ${MOBILE_SIZE}px) {
     box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.05);
   }

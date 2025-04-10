@@ -58,9 +58,9 @@ export const GradientText = styled(CpslText)`
 `;
 
 export const EnvIcon = styled.span<{ $environment: Environment }>`
-  width: 10px;
-  height: 10px;
-  border-radius: 10px;
+  width: 8px;
+  height: 8px;
+  border-radius: 8px;
 
   background-color: ${({ $environment }) => getKeyColor($environment)};
 `;

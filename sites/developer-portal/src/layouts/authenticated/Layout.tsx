@@ -1,6 +1,6 @@
 import { NavBar, EXPANDED_SIDEBAR_WIDTH } from './components/NavBar';
 import { Outlet } from 'react-router-dom';
-import { AUTH_APP_BAR_HEIGHT, AuthAppBar } from '../../components/AppBar/AuthAppBar';
+import { AUTH_APP_BAR_HEIGHT, AuthAppBar } from '../../components/AppBar/AuthAppBar/AuthAppBar';
 import styled from 'styled-components';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { useState } from 'react';

@@ -4,7 +4,7 @@ import { useLogout } from '../../hooks/useLogout';
 import { useOrganizationMember } from '../../hooks/api/queries/useOrganizationMember';
 import { MainLoader } from '../MainLoader';
 import { useSetSelectedOrganizationWithNavigation } from '../../hooks/useSetSelectedOrganizationWithNavigation';
-import { AUTH_APP_BAR_HEIGHT } from '../AppBar/AuthAppBar';
+import { AUTH_APP_BAR_HEIGHT } from '../AppBar/AuthAppBar/AuthAppBar';
 import { useGetOrganizationSubscription } from '../../hooks/api/queries/useOrganizationSubscription';
 import { usePlans } from '../../hooks/api/queries/usePlans';
 import { useLocation, useSearchParams } from 'react-router-dom';

@@ -81,6 +81,10 @@ export const useGetAvailableKeyEnvs = (projectId: string) => {
             if (!hasKey) {
               availableOptions.push(ENV_VARS.environment as Environment);
             }
+
+            // Always make sandbox an option on sandbox and dev envs for testing
+            availableOptions.push(Environment.SANDBOX);
+
             break;
           }
         }
