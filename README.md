@@ -2,7 +2,7 @@
 
 A comprehensive collection of example projects and templates demonstrating various technologies, frameworks, and integrations across web, mobile, and server platforms. These examples serve as reference implementations and starting points for your projects.
 
-> **Main Project**: [Para](https://getpara.com)  
+> **Website**: [Para](https://getpara.com)  
 > **Documentation**: [Para Documentation](https://docs.getpara.com)  
 > **GitHub**: [getpara/examples-hub](https://github.com/getpara/examples-hub)
 
@@ -108,19 +108,19 @@ To get started:
 ```
 examples-hub/
 ├── web/
-│   ├── [with-react-vite/](web/with-react-vite/) - React + Vite examples
-│   ├── [with-react-nextjs/](web/with-react-nextjs/) - Next.js examples
-│   ├── [with-vue-vite/](web/with-vue-vite/) - Vue.js examples
-│   └── [with-svelte-vite/](web/with-svelte-vite/) - Svelte examples
+│   ├── with-react-vite/ - React + Vite examples
+│   ├── with-react-nextjs/ - Next.js examples
+│   ├── with-vue-vite/ - Vue.js examples
+│   └── with-svelte-vite/ - Svelte examples
 ├── mobile/
-│   ├── [with-react-native/](mobile/with-react-native/) - React Native examples
-│   ├── [with-expo/](mobile/with-expo/) - Expo examples
-│   ├── [with-flutter/](mobile/with-flutter/) - Flutter examples
-│   └── [with-swift/](mobile/with-swift/) - Swift examples
+│   ├── with-react-native/ - React Native examples
+│   ├── with-expo/ - Expo examples
+│   ├── with-flutter/ - Flutter examples
+│   └── with-swift/ - Swift examples
 └── server/
-    ├── [with-node/](server/with-node/) - Node.js examples
-    ├── [with-bun/](server/with-bun/) - Bun examples
-    └── [with-deno/](server/with-deno/) - Deno examples
+    ├── with-node/ - Node.js examples
+    ├── with-bun/ - Bun examples
+    └── with-deno/ - Deno examples
 ```
 
 ## 📝 License
