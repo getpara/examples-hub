@@ -114,10 +114,10 @@
 		8FA0077C2D56ECC9009EF0C3 /* Auth */ = {
 			isa = PBXGroup;
 			children = (
-				8FA007872D581F08009EF0C3 /* ExternalWalletAuthView.swift */,
 				E8F93B3D2C21ECFB006AA3F6 /* AuthOptionsView.swift */,
 				8F1708C42DA99E420070FE20 /* Email */,
 				8F1708C52DA99E4E0070FE20 /* Phone */,
+				8FA007872D581F08009EF0C3 /* ExternalWalletAuthView.swift */,
 				E84DDFA82D593E1F007C6E39 /* OAuthView.swift */,
 				8FA0078A2D5A7841009EF0C3 /* MetaMaskDemoView.swift */,
 			);
@@ -151,12 +151,12 @@
 			path = Managers;
 			sourceTree = "<group>";
 		};
-		8FA007822D57EB0D009EF0C3 /* Config */ = {
+		8FA007822D57EB0D009EF0C3 /* Configuration */ = {
 			isa = PBXGroup;
 			children = (
 				8FA007812D57EB0D009EF0C3 /* ParaConfig.swift */,
 			);
-			path = Config;
+			path = Configuration;
 			sourceTree = "<group>";
 		};
 		8FA007852D57F1AA009EF0C3 /* Utils */ = {
@@ -167,12 +167,39 @@
 			path = Utils;
 			sourceTree = "<group>";
 		};
-		8FC8B8FC2D8B7AE10046C3DC /* Views */ = {
+		8FC8B8FC2D8B7AE10046C3DC /* UI */ = {
 			isa = PBXGroup;
 			children = (
 				8FC8B8FB2D8B7AE10046C3DC /* LaunchView.swift */,
 			);
-			path = Views;
+			path = UI;
+			sourceTree = "<group>";
+		};
+		8FE94DE12DA9AC1E009CBD28 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				E8F93B2B2C21EBED006AA3F6 /* ExampleApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		8FE94DE22DA9AC31009CBD28 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				8FA007822D57EB0D009EF0C3 /* Configuration */,
+				8FA007802D56ED9D009EF0C3 /* Managers */,
+				8FA007852D57F1AA009EF0C3 /* Utils */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		8FE94DE32DA9ACDA009CBD28 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				8FA0077C2D56ECC9009EF0C3 /* Auth */,
+				8FA0077D2D56ECDA009EF0C3 /* Wallet */,
+			);
+			path = Features;
 			sourceTree = "<group>";
 		};
 		E8F93B1F2C21EBED006AA3F6 = {
@@ -198,15 +225,12 @@
 		E8F93B2A2C21EBED006AA3F6 /* example */ = {
 			isa = PBXGroup;
 			children = (
-				8FC8B8FC2D8B7AE10046C3DC /* Views */,
+				8FE94DE32DA9ACDA009CBD28 /* Features */,
+				8FE94DE22DA9AC31009CBD28 /* Core */,
+				8FC8B8FC2D8B7AE10046C3DC /* UI */,
 				8FA007892D58387F009EF0C3 /* Info.plist */,
-				8FA007852D57F1AA009EF0C3 /* Utils */,
-				8FA007822D57EB0D009EF0C3 /* Config */,
-				8FA007802D56ED9D009EF0C3 /* Managers */,
 				E8F93B432C21ED67006AA3F6 /* example.entitlements */,
-				E8F93B2B2C21EBED006AA3F6 /* ExampleApp.swift */,
-				8FA0077C2D56ECC9009EF0C3 /* Auth */,
-				8FA0077D2D56ECDA009EF0C3 /* Wallet */,
+				8FE94DE12DA9AC1E009CBD28 /* App */,
 				E8F93B2F2C21EBEE006AA3F6 /* Assets.xcassets */,
 				E8F93B312C21EBEE006AA3F6 /* Preview Content */,
 				8FA0077F2D56ECFB009EF0C3 /* Resources */,
