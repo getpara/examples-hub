@@ -52,14 +52,13 @@ struct VerifyPhoneView: View {
                 }
                 isLoading = true
                 errorMessage = nil
-                loadingStateText = "Verifying..."
+                loadingStateText = "Creating wallet..."
                 
                 Task {
                     // Clean up phone number and country code
                     let cleanPhoneNumber = phoneNumber.replacingOccurrences(of: " ", with: "")
                     let cleanCountryCode = countryCode.replacingOccurrences(of: "+", with: "")
                     
-                    // Use the new handlePhoneAuth method with verification code
                     let result = await paraManager.handlePhoneAuth(
                         phoneNumber: cleanPhoneNumber,
                         countryCode: cleanCountryCode,

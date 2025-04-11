@@ -179,7 +179,7 @@ struct PhoneAuthView: View {
             
             Button {
                 Task.init {
-                    try await paraManager.login(authorizationController: authorizationController, authInfo: nil)
+                    try await paraManager.loginWithPasskey(authorizationController: authorizationController, authInfo: nil)
                     appRootManager.currentRoot = .home
                 }
             } label: {

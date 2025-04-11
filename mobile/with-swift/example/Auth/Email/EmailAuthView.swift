@@ -68,7 +68,6 @@ struct EmailAuthView: View {
                 
                 isLoading = true
                 Task {
-                    // Use the new handleEmailAuth method
                     let result = await paraManager.handleEmailAuth(
                         email: email,
                         authorizationController: authorizationController
@@ -112,7 +111,7 @@ struct EmailAuthView: View {
             
             Button {
                 Task {
-                    try await paraManager.login(authorizationController: authorizationController, authInfo: nil)
+                    try await paraManager.loginWithPasskey(authorizationController: authorizationController, authInfo: nil)
                     appRootManager.currentRoot = .home
                 }
             } label: {

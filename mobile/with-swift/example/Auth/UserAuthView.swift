@@ -1,10 +1,6 @@
 import SwiftUI
 import ParaSwift
 
-enum NavigationDestination {
-    case verifyEmail, wallet
-}
-
 struct UserAuthView: View {
     @EnvironmentObject var paraManager: ParaManager
     

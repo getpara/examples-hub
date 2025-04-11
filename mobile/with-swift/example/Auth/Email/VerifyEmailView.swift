@@ -55,10 +55,9 @@ struct VerifyEmailView: View {
                 }
                 isLoading = true
                 errorMessage = nil
-                loadingStateText = "Verifying..."
+                loadingStateText = "Creating wallet..."
                 
                 Task {
-                    // Use the new handleEmailAuth method with the verification code
                     let result = await paraManager.handleEmailAuth(
                         email: email,
                         verificationCode: code,
@@ -98,7 +97,6 @@ struct VerifyEmailView: View {
             
             // MARK: - Resend Code Button
             Button("Resend Code") {
-                // Add resend code functionality
                 Task {
                     do {
                         try await paraManager.resendVerificationCode()

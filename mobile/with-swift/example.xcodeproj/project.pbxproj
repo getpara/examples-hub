@@ -93,16 +93,32 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8F1708C42DA99E420070FE20 /* Email */ = {
+			isa = PBXGroup;
+			children = (
+				E86A473E2D0CA0A400546CC2 /* EmailAuthView.swift */,
+				E8F93B3F2C21ED00006AA3F6 /* VerifyEmailView.swift */,
+			);
+			path = Email;
+			sourceTree = "<group>";
+		};
+		8F1708C52DA99E4E0070FE20 /* Phone */ = {
+			isa = PBXGroup;
+			children = (
+				E86A475A2D1F13CB00546CC2 /* PhoneAuthView.swift */,
+				E8C5B8652D272DCD00B151C4 /* VerifyPhoneView.swift */,
+			);
+			path = Phone;
+			sourceTree = "<group>";
+		};
 		8FA0077C2D56ECC9009EF0C3 /* Auth */ = {
 			isa = PBXGroup;
 			children = (
 				8FA007872D581F08009EF0C3 /* ExternalWalletAuthView.swift */,
 				E8F93B3D2C21ECFB006AA3F6 /* UserAuthView.swift */,
-				E86A473E2D0CA0A400546CC2 /* EmailAuthView.swift */,
-				E86A475A2D1F13CB00546CC2 /* PhoneAuthView.swift */,
+				8F1708C42DA99E420070FE20 /* Email */,
+				8F1708C52DA99E4E0070FE20 /* Phone */,
 				E84DDFA82D593E1F007C6E39 /* OAuthView.swift */,
-				E8F93B3F2C21ED00006AA3F6 /* VerifyEmailView.swift */,
-				E8C5B8652D272DCD00B151C4 /* VerifyPhoneView.swift */,
 				8FA0078A2D5A7841009EF0C3 /* MetaMaskDemoView.swift */,
 			);
 			path = Auth;
