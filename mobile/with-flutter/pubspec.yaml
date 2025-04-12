@@ -23,6 +23,8 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^5.0.0
 dependency_overrides:
+  para:
+    path: /Users/tyson/dev/flutter-sdk
   pinenacl: 0.6.0
 
 flutter:
