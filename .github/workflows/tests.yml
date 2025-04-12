@@ -6,44 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  discover-web-projects:
-    runs-on: ubuntu-latest
-    outputs:
-      projects: ${{ steps.set-projects.outputs.projects }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install jq
-        run: |
-          which jq || (apt-get update && apt-get install -y jq) || (apk update && apk add --no-cache jq) || echo "Failed to install jq, but continuing as it might already be available"
-      - id: set-projects
-        name: Discover web projects
-        run: |
-          PROJECTS=()
-          # Find all subdirectories at two levels deep
-          for FRAMEWORK_DIR in web/*; do
-            if [ -d "$FRAMEWORK_DIR" ]; then
-              for PROJECT_DIR in "$FRAMEWORK_DIR"/*; do
-                if [ -d "$PROJECT_DIR" ] && [ -f "$PROJECT_DIR/package.json" ]; then
-                  PROJECTS+=("$PROJECT_DIR")
-                fi
-              done
-            fi
-          done
-          # Convert array to JSON
-          JSON_PROJECTS=$(printf '%s\n' "${PROJECTS[@]}" | jq -R . | jq -s .)
-          echo "Discovered projects: $JSON_PROJECTS"
-          # GitHub Output syntax using EOF delimiter for multi-line values
-          echo "projects<<EOF" >> $GITHUB_OUTPUT
-          echo "$JSON_PROJECTS" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
   build-web-projects:
-    needs: discover-web-projects
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        project: ${{ fromJson(needs.discover-web-projects.outputs.projects) }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node.js
@@ -51,55 +15,68 @@ jobs:
         with:
           node-version: '18'
           cache: 'yarn'
-          cache-dependency-path: ${{ matrix.project }}/yarn.lock
         continue-on-error: true
-      - name: Install dependencies
+      - name: Install jq
         run: |
-          cd ${{ matrix.project }}
-          yarn install
-      - name: Build project
+          which jq || (apt-get update && apt-get install -y jq) || (apk update && apk add --no-cache jq) || echo "Failed to install jq, but continuing as it might already be available"
+      - name: Build all web projects
         run: |
-          cd ${{ matrix.project }}
-          yarn build
-
-  # discover-mobile-projects:
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     projects: ${{ steps.set-projects.outputs.projects }}
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Install jq
-  #       run: |
-  #         which jq || (apt-get update && apt-get install -y jq) || (apk update && apk add --no-cache jq) || echo "Failed to install jq, but continuing as it might already be available"
-  #     - id: set-projects
-  #       name: Discover mobile projects
-  #       run: |
-  #         PROJECTS=()
-  #         # Find all subdirectories at two levels deep
-  #         for FRAMEWORK_DIR in mobile/*; do
-  #           if [ -d "$FRAMEWORK_DIR" ]; then
-  #             for PROJECT_DIR in "$FRAMEWORK_DIR"/*; do
-  #               if [ -d "$PROJECT_DIR" ] && [ -f "$PROJECT_DIR/package.json" ]; then
-  #                 PROJECTS+=("$PROJECT_DIR")
-  #               fi
-  #             done
-  #           fi
-  #         done
-  #         # Convert array to JSON
-  #         JSON_PROJECTS=$(printf '%s\n' "${PROJECTS[@]}" | jq -R . | jq -s .)
-  #         echo "Discovered projects: $JSON_PROJECTS"
-  #         # GitHub Output syntax using EOF delimiter for multi-line values
-  #         echo "projects<<EOF" >> $GITHUB_OUTPUT
-  #         echo "$JSON_PROJECTS" >> $GITHUB_OUTPUT
-  #         echo "EOF" >> $GITHUB_OUTPUT
+          # Find all web projects
+          WEB_PROJECTS=()
+          for FRAMEWORK_DIR in web/*; do
+            if [ -d "$FRAMEWORK_DIR" ]; then
+              for PROJECT_DIR in "$FRAMEWORK_DIR"/*; do
+                if [ -d "$PROJECT_DIR" ] && [ -f "$PROJECT_DIR/package.json" ]; then
+                  WEB_PROJECTS+=("$PROJECT_DIR")
+                fi
+              done
+            fi
+          done
+          
+          # Print discovered projects
+          echo "Found $(echo ${#WEB_PROJECTS[@]}) web projects to build:"
+          printf "  - %s\n" "${WEB_PROJECTS[@]}"
+          
+          # Build each project
+          FAILED_PROJECTS=()
+          for PROJECT in "${WEB_PROJECTS[@]}"; do
+            echo ""
+            echo "========================================================"
+            echo "Building $PROJECT"
+            echo "========================================================"
+            
+            if cd "$PROJECT" && yarn install && yarn build; then
+              echo "✅ Successfully built $PROJECT"
+            else
+              echo "❌ Failed to build $PROJECT"
+              FAILED_PROJECTS+=("$PROJECT")
+            fi
+            
+            # Return to root directory
+            cd "$GITHUB_WORKSPACE"
+          done
+          
+          # Summary
+          echo ""
+          echo "========================================================"
+          echo "Web Projects Build Summary"
+          echo "========================================================"
+          echo "Total projects: ${#WEB_PROJECTS[@]}"
+          echo "Failed projects: ${#FAILED_PROJECTS[@]}"
+          
+          if [ ${#FAILED_PROJECTS[@]} -gt 0 ]; then
+            echo "The following projects failed to build:"
+            printf "  - %s\n" "${FAILED_PROJECTS[@]}"
+            # Exit with error only if everything failed
+            if [ ${#FAILED_PROJECTS[@]} -eq ${#WEB_PROJECTS[@]} ]; then
+              exit 1
+            fi
+          else
+            echo "All web projects built successfully! 🎉"
+          fi
 
   # build-mobile-projects:
-  #   needs: discover-mobile-projects
   #   runs-on: ubuntu-latest
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       project: ${{ fromJson(needs.discover-mobile-projects.outputs.projects) }}
   #   steps:
   #     - uses: actions/checkout@v4
   #     - name: Setup Node.js
@@ -107,125 +84,210 @@ jobs:
   #       with:
   #         node-version: '18'
   #         cache: 'yarn'
-  #         cache-dependency-path: ${{ matrix.project }}/yarn.lock
   #       continue-on-error: true
-  #     - name: Install dependencies
-  #       run: |
-  #         cd ${{ matrix.project }}
-  #         yarn install
-  #     - name: Build project
-  #       run: |
-  #         cd ${{ matrix.project }}
-  #         if [[ "${{ matrix.project }}" == *"with-expo"* ]]; then
-  #           yarn expo export:web || yarn build
-  #         else
-  #           yarn build || echo "Build command failed, but continuing anyway"
-  #         fi
-
-  # discover-server-projects:
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     projects: ${{ steps.set-projects.outputs.projects }}
-  #   steps:
-  #     - uses: actions/checkout@v4
   #     - name: Install jq
   #       run: |
   #         which jq || (apt-get update && apt-get install -y jq) || (apk update && apk add --no-cache jq) || echo "Failed to install jq, but continuing as it might already be available"
-  #     - id: set-projects
-  #       name: Discover server projects
+  #     - name: Build all mobile projects
   #       run: |
-  #         PROJECTS=()
-  #         # Find all subdirectories at two levels deep
-  #         for FRAMEWORK_DIR in server/*; do
-  #           if [ -d "$FRAMEWORK_DIR" ]; then
+  #         # Find all mobile projects (excluding Flutter)
+  #         MOBILE_PROJECTS=()
+  #         for FRAMEWORK_DIR in mobile/*; do
+  #           if [ -d "$FRAMEWORK_DIR" ] && [ "$(basename "$FRAMEWORK_DIR")" != "with-flutter" ] && [ "$(basename "$FRAMEWORK_DIR")" != "with-swift" ]; then
   #             for PROJECT_DIR in "$FRAMEWORK_DIR"/*; do
   #               if [ -d "$PROJECT_DIR" ] && [ -f "$PROJECT_DIR/package.json" ]; then
-  #                 PROJECTS+=("$PROJECT_DIR")
+  #                 MOBILE_PROJECTS+=("$PROJECT_DIR")
   #               fi
   #             done
   #           fi
   #         done
-  #         # Convert array to JSON
-  #         JSON_PROJECTS=$(printf '%s\n' "${PROJECTS[@]}" | jq -R . | jq -s .)
-  #         echo "Discovered projects: $JSON_PROJECTS"
-  #         # GitHub Output syntax using EOF delimiter for multi-line values
-  #         echo "projects<<EOF" >> $GITHUB_OUTPUT
-  #         echo "$JSON_PROJECTS" >> $GITHUB_OUTPUT
-  #         echo "EOF" >> $GITHUB_OUTPUT
-
-  # build-server-projects:
-  #   needs: discover-server-projects
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       project: ${{ fromJson(needs.discover-server-projects.outputs.projects) }}
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Setup Node.js
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: '18'
-  #         cache: 'yarn'
-  #         cache-dependency-path: ${{ matrix.project }}/yarn.lock
-  #       continue-on-error: true
-  #     - name: Install dependencies
-  #       run: |
-  #         cd ${{ matrix.project }}
-  #         yarn install
-  #     - name: Build project
-  #       run: |
-  #         cd ${{ matrix.project }}
-  #         yarn build || echo "Build command failed, but continuing anyway"
-
-  # # Special handling for Flutter projects
-  # discover-flutter-projects:
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     projects: ${{ steps.set-projects.outputs.projects }}
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Install jq
-  #       run: |
-  #         which jq || (apt-get update && apt-get install -y jq) || (apk update && apk add --no-cache jq) || echo "Failed to install jq, but continuing as it might already be available"
-  #     - id: set-projects
-  #       name: Discover Flutter projects
-  #       run: |
-  #         PROJECTS=()
-  #         # Find all subdirectories at two levels deep
-  #         for PROJECT_DIR in mobile/with-flutter/*; do
-  #           if [ -d "$PROJECT_DIR" ] && [ -f "$PROJECT_DIR/pubspec.yaml" ]; then
-  #             PROJECTS+=("$PROJECT_DIR")
+          
+  #         # Print discovered projects
+  #         echo "Found $(echo ${#MOBILE_PROJECTS[@]}) mobile projects to build:"
+  #         printf "  - %s\n" "${MOBILE_PROJECTS[@]}"
+          
+  #         # Build each project
+  #         FAILED_PROJECTS=()
+  #         for PROJECT in "${MOBILE_PROJECTS[@]}"; do
+  #           echo ""
+  #           echo "========================================================"
+  #           echo "Building $PROJECT"
+  #           echo "========================================================"
+            
+  #           cd "$PROJECT"
+            
+  #           if [[ "$PROJECT" == *"with-expo"* ]]; then
+  #             if yarn install && (yarn build || yarn expo export:web); then
+  #               echo "✅ Successfully built $PROJECT"
+  #             else
+  #               echo "❌ Failed to build $PROJECT"
+  #               FAILED_PROJECTS+=("$PROJECT")
+  #             fi
+  #           else
+  #             if yarn install && yarn build; then
+  #               echo "✅ Successfully built $PROJECT"
+  #             else
+  #               echo "❌ Failed to build $PROJECT"
+  #               FAILED_PROJECTS+=("$PROJECT")
+  #             fi
   #           fi
+            
+  #           # Return to root directory
+  #           cd "$GITHUB_WORKSPACE"
   #         done
-  #         # Convert array to JSON
-  #         JSON_PROJECTS=$(printf '%s\n' "${PROJECTS[@]}" | jq -R . | jq -s .)
-  #         echo "Discovered projects: $JSON_PROJECTS"
-  #         # GitHub Output syntax using EOF delimiter for multi-line values
-  #         echo "projects<<EOF" >> $GITHUB_OUTPUT
-  #         echo "$JSON_PROJECTS" >> $GITHUB_OUTPUT
-  #         echo "EOF" >> $GITHUB_OUTPUT
+          
+  #         # Summary
+  #         echo ""
+  #         echo "========================================================"
+  #         echo "Mobile Projects Build Summary"
+  #         echo "========================================================"
+  #         echo "Total projects: ${#MOBILE_PROJECTS[@]}"
+  #         echo "Failed projects: ${#FAILED_PROJECTS[@]}"
+          
+  #         if [ ${#FAILED_PROJECTS[@]} -gt 0 ]; then
+  #           echo "The following projects failed to build:"
+  #           printf "  - %s\n" "${FAILED_PROJECTS[@]}"
+  #           # Exit with error only if everything failed
+  #           if [ ${#FAILED_PROJECTS[@]} -eq ${#MOBILE_PROJECTS[@]} ]; then
+  #             exit 1
+  #           fi
+  #         else
+  #           echo "All mobile projects built successfully! 🎉"
+  #         fi
 
   # build-flutter-projects:
-  #   needs: discover-flutter-projects
   #   runs-on: ubuntu-latest
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       project: ${{ fromJson(needs.discover-flutter-projects.outputs.projects) }}
   #   steps:
   #     - uses: actions/checkout@v4
   #     - name: Setup Flutter
   #       uses: subosito/flutter-action@v2
   #       with:
   #         channel: 'stable'
-  #     - name: Build Flutter Web
+  #     - name: Install jq
   #       run: |
-  #         cd ${{ matrix.project }}
-  #         flutter pub get
-  #         flutter build web || echo "Build command failed, but continuing anyway"
+  #         which jq || (apt-get update && apt-get install -y jq) || (apk update && apk add --no-cache jq) || echo "Failed to install jq, but continuing as it might already be available"
+  #     - name: Build all Flutter projects
+  #       run: |
+  #         # Find all Flutter projects
+  #         FLUTTER_PROJECTS=()
+  #         for PROJECT_DIR in mobile/with-flutter/*; do
+  #           if [ -d "$PROJECT_DIR" ] && [ -f "$PROJECT_DIR/pubspec.yaml" ]; then
+  #             FLUTTER_PROJECTS+=("$PROJECT_DIR")
+  #           fi
+  #         done
+          
+  #         # Print discovered projects
+  #         echo "Found $(echo ${#FLUTTER_PROJECTS[@]}) Flutter projects to build:"
+  #         printf "  - %s\n" "${FLUTTER_PROJECTS[@]}"
+          
+  #         # Build each project
+  #         FAILED_PROJECTS=()
+  #         for PROJECT in "${FLUTTER_PROJECTS[@]}"; do
+  #           echo ""
+  #           echo "========================================================"
+  #           echo "Building $PROJECT"
+  #           echo "========================================================"
+            
+  #           if cd "$PROJECT" && flutter pub get && flutter build web; then
+  #             echo "✅ Successfully built $PROJECT"
+  #           else
+  #             echo "❌ Failed to build $PROJECT"
+  #             FAILED_PROJECTS+=("$PROJECT")
+  #           fi
+            
+  #           # Return to root directory
+  #           cd "$GITHUB_WORKSPACE"
+  #         done
+          
+  #         # Summary
+  #         echo ""
+  #         echo "========================================================"
+  #         echo "Flutter Projects Build Summary"
+  #         echo "========================================================"
+  #         echo "Total projects: ${#FLUTTER_PROJECTS[@]}"
+  #         echo "Failed projects: ${#FAILED_PROJECTS[@]}"
+          
+  #         if [ ${#FAILED_PROJECTS[@]} -gt 0 ]; then
+  #           echo "The following projects failed to build:"
+  #           printf "  - %s\n" "${FAILED_PROJECTS[@]}"
+  #           # Exit with error only if everything failed
+  #           if [ ${#FAILED_PROJECTS[@]} -eq ${#FLUTTER_PROJECTS[@]} ]; then
+  #             exit 1
+  #           fi
+  #         else
+  #           echo "All Flutter projects built successfully! 🎉"
+  #         fi
 
-  # build-deno-project:
+  # build-server-projects:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Setup Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: '18'
+  #         cache: 'yarn'
+  #       continue-on-error: true
+  #     - name: Install jq
+  #       run: |
+  #         which jq || (apt-get update && apt-get install -y jq) || (apk update && apk add --no-cache jq) || echo "Failed to install jq, but continuing as it might already be available"
+  #     - name: Build all server projects (Node.js and Bun)
+  #       run: |
+  #         # Find all server projects (excluding Deno)
+  #         SERVER_PROJECTS=()
+  #         for FRAMEWORK_DIR in server/*; do
+  #           if [ -d "$FRAMEWORK_DIR" ] && [ "$(basename "$FRAMEWORK_DIR")" != "with-deno" ]; then
+  #             for PROJECT_DIR in "$FRAMEWORK_DIR"/*; do
+  #               if [ -d "$PROJECT_DIR" ] && [ -f "$PROJECT_DIR/package.json" ]; then
+  #                 SERVER_PROJECTS+=("$PROJECT_DIR")
+  #               fi
+  #             done
+  #           fi
+  #         done
+          
+  #         # Print discovered projects
+  #         echo "Found $(echo ${#SERVER_PROJECTS[@]}) server projects to build:"
+  #         printf "  - %s\n" "${SERVER_PROJECTS[@]}"
+          
+  #         # Build each project
+  #         FAILED_PROJECTS=()
+  #         for PROJECT in "${SERVER_PROJECTS[@]}"; do
+  #           echo ""
+  #           echo "========================================================"
+  #           echo "Building $PROJECT"
+  #           echo "========================================================"
+            
+  #           if cd "$PROJECT" && yarn install && yarn build; then
+  #             echo "✅ Successfully built $PROJECT"
+  #           else
+  #             echo "❌ Failed to build $PROJECT"
+  #             FAILED_PROJECTS+=("$PROJECT")
+  #           fi
+            
+  #           # Return to root directory
+  #           cd "$GITHUB_WORKSPACE"
+  #         done
+          
+  #         # Summary
+  #         echo ""
+  #         echo "========================================================"
+  #         echo "Server Projects Build Summary"
+  #         echo "========================================================"
+  #         echo "Total projects: ${#SERVER_PROJECTS[@]}"
+  #         echo "Failed projects: ${#FAILED_PROJECTS[@]}"
+          
+  #         if [ ${#FAILED_PROJECTS[@]} -gt 0 ]; then
+  #           echo "The following projects failed to build:"
+  #           printf "  - %s\n" "${FAILED_PROJECTS[@]}"
+  #           # Exit with error only if everything failed
+  #           if [ ${#FAILED_PROJECTS[@]} -eq ${#SERVER_PROJECTS[@]} ]; then
+  #             exit 1
+  #           fi
+  #         else
+  #           echo "All server projects built successfully! 🎉"
+  #         fi
+
+  # build-deno-projects:
   #   runs-on: ubuntu-latest
   #   steps:
   #     - uses: actions/checkout@v4
@@ -233,7 +295,57 @@ jobs:
   #       uses: denoland/setup-deno@v1
   #       with:
   #         deno-version: v1.x
-  #     - name: Build Deno Project
+  #     - name: Install jq
   #       run: |
-  #         cd server/with-deno
-  #         deno task build
+  #         which jq || (apt-get update && apt-get install -y jq) || (apk update && apk add --no-cache jq) || echo "Failed to install jq, but continuing as it might already be available"
+  #     - name: Build all Deno projects
+  #       run: |
+  #         # Find all Deno projects
+  #         DENO_PROJECTS=()
+  #         for PROJECT_DIR in server/with-deno/*; do
+  #           if [ -d "$PROJECT_DIR" ] && [ -f "$PROJECT_DIR/deno.json" ]; then
+  #             DENO_PROJECTS+=("$PROJECT_DIR")
+  #           fi
+  #         done
+          
+  #         # Print discovered projects
+  #         echo "Found $(echo ${#DENO_PROJECTS[@]}) Deno projects to build:"
+  #         printf "  - %s\n" "${DENO_PROJECTS[@]}"
+          
+  #         # Build each project
+  #         FAILED_PROJECTS=()
+  #         for PROJECT in "${DENO_PROJECTS[@]}"; do
+  #           echo ""
+  #           echo "========================================================"
+  #           echo "Building $PROJECT"
+  #           echo "========================================================"
+            
+  #           if cd "$PROJECT" && deno task build; then
+  #             echo "✅ Successfully built $PROJECT"
+  #           else
+  #             echo "❌ Failed to build $PROJECT"
+  #             FAILED_PROJECTS+=("$PROJECT")
+  #           fi
+            
+  #           # Return to root directory
+  #           cd "$GITHUB_WORKSPACE"
+  #         done
+          
+  #         # Summary
+  #         echo ""
+  #         echo "========================================================"
+  #         echo "Deno Projects Build Summary"
+  #         echo "========================================================"
+  #         echo "Total projects: ${#DENO_PROJECTS[@]}"
+  #         echo "Failed projects: ${#FAILED_PROJECTS[@]}"
+          
+  #         if [ ${#FAILED_PROJECTS[@]} -gt 0 ]; then
+  #           echo "The following projects failed to build:"
+  #           printf "  - %s\n" "${FAILED_PROJECTS[@]}"
+  #           # Exit with error only if everything failed
+  #           if [ ${#FAILED_PROJECTS[@]} -eq ${#DENO_PROJECTS[@]} ]; then
+  #             exit 1
+  #           fi
+  #         else
+  #           echo "All Deno projects built successfully! 🎉"
+  #         fi
