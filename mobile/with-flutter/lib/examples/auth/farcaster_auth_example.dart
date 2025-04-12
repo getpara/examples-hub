@@ -79,15 +79,18 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
 
   Future<void> _handleNewUserSetup(String identifier) async {
     final biometricsId = await para.verifyOAuth();
-    await para.generatePasskey(identifier, biometricsId);
-    final result = await para.createWallet(skipDistribute: false);
+    await para.generatePasskey(
+      identifier: identifier,
+      biometricsId: biometricsId,
+    );
+    final createdWallet = await para.createWallet(skipDistribute: false);
 
     if (!mounted) return;
 
     setState(() {
-      _wallet = result.wallet;
-      _address = result.wallet.address;
-      _recoveryShare = result.recoveryShare;
+      _wallet = createdWallet;
+      _address = createdWallet.address;
+      _recoveryShare = null;
     });
 
     Navigator.pushReplacement(
@@ -100,7 +103,9 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
     setState(() => _isLoading = true);
 
     try {
-      final wallet = await para.login(farcasterUsername: farcasterUsername);
+      final wallet = await para.loginWithPasskey(
+        authInfo: EmailAuthInfo(email: farcasterUsername),
+      );
 
       if (!mounted) return;
 

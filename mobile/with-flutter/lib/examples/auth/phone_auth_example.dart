@@ -38,7 +38,8 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
     super.dispose();
   }
 
-  String get _fullPhoneNumber => '+${_countryCodeController.text}${_phoneController.text}';
+  String get _fullPhoneNumber =>
+      '+${_countryCodeController.text}${_phoneController.text}';
 
   Future<void> _checkLoginStatus() async {
     try {
@@ -57,7 +58,8 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error checking login status: ${e.toString()}')),
+          SnackBar(
+              content: Text('Error checking login status: ${e.toString()}')),
         );
       }
     }
@@ -74,7 +76,8 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
       if (await para.checkIfUserExistsByPhone(phoneNumber, countryCode)) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('User already exists, please use passkey login')),
+          const SnackBar(
+              content: Text('User already exists, please use passkey login')),
         );
         return;
       }
@@ -89,14 +92,18 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
                 onVerify: (String code) async {
                   try {
                     final biometricsId = await para.verifyPhone(code);
-                    await para.generatePasskey(_fullPhoneNumber, biometricsId);
-                    final result = await para.createWallet(skipDistribute: false);
+                    await para.generatePasskey(
+                      identifier: _fullPhoneNumber,
+                      biometricsId: biometricsId,
+                    );
+                    final createdWallet =
+                        await para.createWallet(skipDistribute: false);
 
                     if (!mounted) return false;
                     setState(() {
-                      _wallet = result.wallet;
-                      _address = result.wallet.address;
-                      _recoveryShare = result.recoveryShare;
+                      _wallet = createdWallet;
+                      _address = createdWallet.address;
+                      _recoveryShare = null;
                     });
                     return true;
                   } catch (e) {
@@ -136,7 +143,7 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
     setState(() => _isLoading = true);
 
     try {
-      final wallet = await para.login();
+      final wallet = await para.loginWithPasskey();
 
       if (!mounted) return;
 

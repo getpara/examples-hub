@@ -42,8 +42,8 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Error checking login status: ${e.toString()}')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Error checking login status: ${e.toString()}')));
       }
     }
   }
@@ -110,15 +110,18 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
 
   Future<void> _handleNewUserSetup(String identifier) async {
     final biometricsId = await para.verifyOAuth();
-    await para.generatePasskey(identifier, biometricsId);
-    final result = await para.createWallet(skipDistribute: false);
+    await para.generatePasskey(
+      identifier: identifier,
+      biometricsId: biometricsId,
+    );
+    final createdWallet = await para.createWallet(skipDistribute: false);
 
     if (!mounted) return;
 
     setState(() {
-      _wallet = result.wallet;
-      _address = result.wallet.address;
-      _recoveryShare = result.recoveryShare;
+      _wallet = createdWallet;
+      _address = createdWallet.address;
+      _recoveryShare = null;
     });
 
     Navigator.pushReplacement(
@@ -131,7 +134,9 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
     setState(() => _isLoading = true);
 
     try {
-      final wallet = await para.login(email: email);
+      final wallet = await para.loginWithPasskey(
+        authInfo: EmailAuthInfo(email: email),
+      );
 
       if (!mounted) return;
 
