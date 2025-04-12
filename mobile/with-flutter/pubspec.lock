@@ -460,9 +460,9 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: evm-web3-signer
-      resolved-ref: "885bd11c419e354da38edfd9d9fe25b752ce1e6d"
-      url: "https://github.com/capsule-org/flutter-sdk.git"
+      ref: main
+      resolved-ref: "7c3aa79ac85aca3dbfed31e92d7ba0eb1bcaf842"
+      url: "https://github.com/getpara/flutter-sdk.git"
     source: git
     version: "1.4.0-dev.1"
   passkeys:

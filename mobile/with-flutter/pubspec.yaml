@@ -11,8 +11,8 @@ dependencies:
     sdk: flutter
   para:
     git:
-      url: https://github.com/capsule-org/flutter-sdk.git
-      ref: evm-web3-signer
+      url: https://github.com/getpara/flutter-sdk.git
+      ref: main
   flutter_dotenv: ^5.2.1
   flutter_inappwebview: ^6.1.5
   font_awesome_flutter: ^10.8.0
