@@ -1,0 +1,239 @@
+name: Tests
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  discover-web-projects:
+    runs-on: ubuntu-latest
+    outputs:
+      projects: ${{ steps.set-projects.outputs.projects }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install jq
+        run: |
+          which jq || (apt-get update && apt-get install -y jq) || (apk update && apk add --no-cache jq) || echo "Failed to install jq, but continuing as it might already be available"
+      - id: set-projects
+        name: Discover web projects
+        run: |
+          PROJECTS=()
+          # Find all subdirectories at two levels deep
+          for FRAMEWORK_DIR in web/*; do
+            if [ -d "$FRAMEWORK_DIR" ]; then
+              for PROJECT_DIR in "$FRAMEWORK_DIR"/*; do
+                if [ -d "$PROJECT_DIR" ] && [ -f "$PROJECT_DIR/package.json" ]; then
+                  PROJECTS+=("$PROJECT_DIR")
+                fi
+              done
+            fi
+          done
+          # Convert array to JSON
+          JSON_PROJECTS=$(printf '%s\n' "${PROJECTS[@]}" | jq -R . | jq -s .)
+          echo "Discovered projects: $JSON_PROJECTS"
+          # GitHub Output syntax using EOF delimiter for multi-line values
+          echo "projects<<EOF" >> $GITHUB_OUTPUT
+          echo "$JSON_PROJECTS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+  build-web-projects:
+    needs: discover-web-projects
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: ${{ fromJson(needs.discover-web-projects.outputs.projects) }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'yarn'
+          cache-dependency-path: ${{ matrix.project }}/yarn.lock
+        continue-on-error: true
+      - name: Install dependencies
+        run: |
+          cd ${{ matrix.project }}
+          yarn install
+      - name: Build project
+        run: |
+          cd ${{ matrix.project }}
+          yarn build
+
+  # discover-mobile-projects:
+  #   runs-on: ubuntu-latest
+  #   outputs:
+  #     projects: ${{ steps.set-projects.outputs.projects }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Install jq
+  #       run: |
+  #         which jq || (apt-get update && apt-get install -y jq) || (apk update && apk add --no-cache jq) || echo "Failed to install jq, but continuing as it might already be available"
+  #     - id: set-projects
+  #       name: Discover mobile projects
+  #       run: |
+  #         PROJECTS=()
+  #         # Find all subdirectories at two levels deep
+  #         for FRAMEWORK_DIR in mobile/*; do
+  #           if [ -d "$FRAMEWORK_DIR" ]; then
+  #             for PROJECT_DIR in "$FRAMEWORK_DIR"/*; do
+  #               if [ -d "$PROJECT_DIR" ] && [ -f "$PROJECT_DIR/package.json" ]; then
+  #                 PROJECTS+=("$PROJECT_DIR")
+  #               fi
+  #             done
+  #           fi
+  #         done
+  #         # Convert array to JSON
+  #         JSON_PROJECTS=$(printf '%s\n' "${PROJECTS[@]}" | jq -R . | jq -s .)
+  #         echo "Discovered projects: $JSON_PROJECTS"
+  #         # GitHub Output syntax using EOF delimiter for multi-line values
+  #         echo "projects<<EOF" >> $GITHUB_OUTPUT
+  #         echo "$JSON_PROJECTS" >> $GITHUB_OUTPUT
+  #         echo "EOF" >> $GITHUB_OUTPUT
+
+  # build-mobile-projects:
+  #   needs: discover-mobile-projects
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       project: ${{ fromJson(needs.discover-mobile-projects.outputs.projects) }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Setup Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: '18'
+  #         cache: 'yarn'
+  #         cache-dependency-path: ${{ matrix.project }}/yarn.lock
+  #       continue-on-error: true
+  #     - name: Install dependencies
+  #       run: |
+  #         cd ${{ matrix.project }}
+  #         yarn install
+  #     - name: Build project
+  #       run: |
+  #         cd ${{ matrix.project }}
+  #         if [[ "${{ matrix.project }}" == *"with-expo"* ]]; then
+  #           yarn expo export:web || yarn build
+  #         else
+  #           yarn build || echo "Build command failed, but continuing anyway"
+  #         fi
+
+  # discover-server-projects:
+  #   runs-on: ubuntu-latest
+  #   outputs:
+  #     projects: ${{ steps.set-projects.outputs.projects }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Install jq
+  #       run: |
+  #         which jq || (apt-get update && apt-get install -y jq) || (apk update && apk add --no-cache jq) || echo "Failed to install jq, but continuing as it might already be available"
+  #     - id: set-projects
+  #       name: Discover server projects
+  #       run: |
+  #         PROJECTS=()
+  #         # Find all subdirectories at two levels deep
+  #         for FRAMEWORK_DIR in server/*; do
+  #           if [ -d "$FRAMEWORK_DIR" ]; then
+  #             for PROJECT_DIR in "$FRAMEWORK_DIR"/*; do
+  #               if [ -d "$PROJECT_DIR" ] && [ -f "$PROJECT_DIR/package.json" ]; then
+  #                 PROJECTS+=("$PROJECT_DIR")
+  #               fi
+  #             done
+  #           fi
+  #         done
+  #         # Convert array to JSON
+  #         JSON_PROJECTS=$(printf '%s\n' "${PROJECTS[@]}" | jq -R . | jq -s .)
+  #         echo "Discovered projects: $JSON_PROJECTS"
+  #         # GitHub Output syntax using EOF delimiter for multi-line values
+  #         echo "projects<<EOF" >> $GITHUB_OUTPUT
+  #         echo "$JSON_PROJECTS" >> $GITHUB_OUTPUT
+  #         echo "EOF" >> $GITHUB_OUTPUT
+
+  # build-server-projects:
+  #   needs: discover-server-projects
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       project: ${{ fromJson(needs.discover-server-projects.outputs.projects) }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Setup Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: '18'
+  #         cache: 'yarn'
+  #         cache-dependency-path: ${{ matrix.project }}/yarn.lock
+  #       continue-on-error: true
+  #     - name: Install dependencies
+  #       run: |
+  #         cd ${{ matrix.project }}
+  #         yarn install
+  #     - name: Build project
+  #       run: |
+  #         cd ${{ matrix.project }}
+  #         yarn build || echo "Build command failed, but continuing anyway"
+
+  # # Special handling for Flutter projects
+  # discover-flutter-projects:
+  #   runs-on: ubuntu-latest
+  #   outputs:
+  #     projects: ${{ steps.set-projects.outputs.projects }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Install jq
+  #       run: |
+  #         which jq || (apt-get update && apt-get install -y jq) || (apk update && apk add --no-cache jq) || echo "Failed to install jq, but continuing as it might already be available"
+  #     - id: set-projects
+  #       name: Discover Flutter projects
+  #       run: |
+  #         PROJECTS=()
+  #         # Find all subdirectories at two levels deep
+  #         for PROJECT_DIR in mobile/with-flutter/*; do
+  #           if [ -d "$PROJECT_DIR" ] && [ -f "$PROJECT_DIR/pubspec.yaml" ]; then
+  #             PROJECTS+=("$PROJECT_DIR")
+  #           fi
+  #         done
+  #         # Convert array to JSON
+  #         JSON_PROJECTS=$(printf '%s\n' "${PROJECTS[@]}" | jq -R . | jq -s .)
+  #         echo "Discovered projects: $JSON_PROJECTS"
+  #         # GitHub Output syntax using EOF delimiter for multi-line values
+  #         echo "projects<<EOF" >> $GITHUB_OUTPUT
+  #         echo "$JSON_PROJECTS" >> $GITHUB_OUTPUT
+  #         echo "EOF" >> $GITHUB_OUTPUT
+
+  # build-flutter-projects:
+  #   needs: discover-flutter-projects
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       project: ${{ fromJson(needs.discover-flutter-projects.outputs.projects) }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Setup Flutter
+  #       uses: subosito/flutter-action@v2
+  #       with:
+  #         channel: 'stable'
+  #     - name: Build Flutter Web
+  #       run: |
+  #         cd ${{ matrix.project }}
+  #         flutter pub get
+  #         flutter build web || echo "Build command failed, but continuing anyway"
+
+  # build-deno-project:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Setup Deno
+  #       uses: denoland/setup-deno@v1
+  #       with:
+  #         deno-version: v1.x
+  #     - name: Build Deno Project
+  #       run: |
+  #         cd server/with-deno
+  #         deno task build
