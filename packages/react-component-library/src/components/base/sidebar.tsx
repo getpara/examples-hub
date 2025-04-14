@@ -220,7 +220,7 @@ function Sidebar({
           // Adjust the padding for floating and inset variants.
           variant === 'floating' || variant === 'inset'
             ? 'para:p-2 para:group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]'
-            : 'para:group-data-[collapsible=icon]:w-(--sidebar-width-icon) para:group-data-[side=left]:border-r para:group-data-[side=right]:border-l',
+            : 'para:border-border para:group-data-[collapsible=icon]:w-(--sidebar-width-icon) para:group-data-[side=left]:border-r para:group-data-[side=right]:border-l',
 
           className,
         )}
@@ -229,7 +229,7 @@ function Sidebar({
         <div
           data-sidebar="sidebar"
           className={
-            'para:bg-sidebar para:group-data-[variant=floating]:border-sidebar-border para:flex para:h-full para:w-full para:flex-col para:group-data-[variant=floating]:rounded-lg para:group-data-[variant=floating]:border para:group-data-[variant=floating]:shadow-sm'
+            'para:bg-sidebar para:group-data-[variant=floating]:border-border para:flex para:h-full para:w-full para:flex-col para:group-data-[variant=floating]:rounded-lg para:group-data-[variant=floating]:border para:group-data-[variant=floating]:shadow-sm'
           }
         >
           {children}
@@ -443,7 +443,7 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<'li'>) {
 }
 
 const sidebarMenuButtonVariants = cva(
-  'para:peer/menu-button para:flex para:w-full para:items-center para:gap-2 para:overflow-hidden para:rounded-md para:p-2 para:text-left para:text-sm para:outline-hidden para:ring-sidebar-ring para:transition-[width,height,padding] para:hover:bg-sidebar-accent para:hover:text-sidebar-accent-foreground para:focus-visible:ring-2 para:active:bg-sidebar-accent para:active:text-sidebar-accent-foreground para:disabled:pointer-events-none para:disabled:opacity-50 para:group-has-data-[sidebar=menu-action]/menu-item:pr-8 para:aria-disabled:pointer-events-none para:aria-disabled:opacity-50 para:data-[active=true]:bg-sidebar-accent para:data-[active=true]:font-medium para:data-[active=true]:text-sidebar-accent-foreground para:data-[state=open]:hover:bg-sidebar-accent para:data-[state=open]:hover:text-sidebar-accent-foreground para:group-data-[collapsible=icon]:size-8! para:group-data-[collapsible=icon]:p-2! para:[&>span:last-child]:truncate para:[&>svg]:size-4 para:[&>svg]:shrink-0',
+  'para:peer/menu-button para:flex para:w-full para:items-center para:gap-2 para:overflow-hidden para:rounded-sm para:p-2 para:text-left para:text-sm para:outline-hidden para:ring-sidebar-ring para:transition-[width,height,padding] para:hover:bg-sidebar-accent para:hover:text-sidebar-accent-foreground para:focus-visible:ring-2 para:active:bg-sidebar-accent para:active:text-sidebar-accent-foreground para:disabled:pointer-events-none para:disabled:opacity-50 para:group-has-data-[sidebar=menu-action]/menu-item:pr-8 para:aria-disabled:pointer-events-none para:aria-disabled:opacity-50 para:data-[active=true]:border para:data-[active=true]:border-border para:data-[active=true]:bg-sidebar-accent para:data-[active=true]:font-medium para:data-[active=true]:text-sidebar-accent-foreground para:data-[state=open]:hover:bg-sidebar-accent para:data-[state=open]:hover:text-sidebar-accent-foreground para:group-data-[collapsible=icon]:size-8! para:group-data-[collapsible=icon]:p-2! para:[&>span:last-child]:truncate para:[&>svg]:size-4 para:[&>svg]:shrink-0',
   {
     variants: {
       variant: {
@@ -599,7 +599,7 @@ function SidebarMenuSub({ className, ...props }: React.ComponentProps<'ul'>) {
       data-slot="sidebar-menu-sub"
       data-sidebar="menu-sub"
       className={cn(
-        'para:border-sidebar-border para:mx-3.5 para:flex para:min-w-0 para:translate-x-px para:flex-col para:gap-1 para:border-l para:px-2.5 para:py-0.5',
+        'para:border-border para:mx-3.5 para:flex para:min-w-0 para:translate-x-px para:flex-col para:gap-1 para:border-l para:px-2.5 para:py-0.5',
         'para:group-data-[collapsible=icon]:hidden',
         className,
       )}

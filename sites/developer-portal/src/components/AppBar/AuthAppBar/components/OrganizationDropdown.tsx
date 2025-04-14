@@ -18,8 +18,13 @@ export const OrganizationDropdown = () => {
 
   return (
     <NavDropdown
-      selected={{ id: organization.id, name: organization.name, badge: 'PLAN', iconUrl: organization.logoUrl }}
-      options={orgsWithAccess.map(org => ({ id: org.id, name: org.name, badge: 'PLAN', iconUrl: org.logoUrl }))}
+      selected={{
+        id: organization.id,
+        name: organization.name,
+        badge: organization.activePlanSlug,
+        iconUrl: organization.logoUrl,
+      }}
+      options={orgsWithAccess.map(org => ({ id: org.id, name: org.name, badge: org.activePlanSlug, iconUrl: org.logoUrl }))}
       pathPrefix="/"
       pathSuffix="/dashboard"
       isOpen={isNavOpen}

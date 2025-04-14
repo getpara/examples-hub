@@ -1,5 +1,4 @@
 import { DOCS_LINK } from '../../../utils/constants';
-import { Dispatch, SetStateAction } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ParaIconBrand } from '@getpara/react-component-library';
 import { FileText, HelpCircle } from 'lucide-react';
@@ -10,10 +9,9 @@ import { AccountDropdown } from './components/AccountDropdown';
 import { NavLink } from './components/NavLink';
 
 export const AUTH_APP_BAR_HEIGHT = 57;
+export const AUTH_APP_BAR_SPACING_CN = 'para:mt-[57px]';
 
-interface AuthAppBarProps {
-  setNavOpen: Dispatch<SetStateAction<boolean>>;
-}
+interface AuthAppBarProps {}
 
 export const AuthAppBar = ({}: AuthAppBarProps) => {
   const { organizationId } = useParams();
@@ -35,7 +33,7 @@ export const AuthAppBar = ({}: AuthAppBarProps) => {
           <AccountDropdown />
         </div>
       </nav>
-      <div className="para:h-[57px]" />
+      <div className="para:h-[57px] para:w-full" />
     </>
   );
 };
