@@ -5,6 +5,19 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+# Global environment variables that apply to all jobs and steps
+env:
+  NODE_OPTIONS: "--max-old-space-size=4096"
+  CI: true
+  NEXT_TELEMETRY_DISABLED: 1
+  BUILD_CONCURRENCY: 4
+  DISABLE_ESLINT_PLUGIN: true
+  PARA_API_KEY: test-build-key
+  VITE_PARA_API_KEY: test-build-key-vite
+  NEXT_PUBLIC_PARA_API_KEY: test-build-key-next
+  ENCRYPTION_KEY: test-encryption-key
+  NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: test-wc-id
+
 jobs:
   build-web-projects:
     runs-on: ubuntu-latest
@@ -101,11 +114,11 @@ jobs:
   #             done
   #           fi
   #         done
-          
+  #         
   #         # Print discovered projects
   #         echo "Found $(echo ${#MOBILE_PROJECTS[@]}) mobile projects to build:"
   #         printf "  - %s\n" "${MOBILE_PROJECTS[@]}"
-          
+  #         
   #         # Build each project
   #         FAILED_PROJECTS=()
   #         for PROJECT in "${MOBILE_PROJECTS[@]}"; do
@@ -113,9 +126,9 @@ jobs:
   #           echo "========================================================"
   #           echo "Building $PROJECT"
   #           echo "========================================================"
-            
+  #           
   #           cd "$PROJECT"
-            
+  #           
   #           if [[ "$PROJECT" == *"with-expo"* ]]; then
   #             if yarn install && (yarn build || yarn expo export:web); then
   #               echo "✅ Successfully built $PROJECT"
@@ -131,11 +144,11 @@ jobs:
   #               FAILED_PROJECTS+=("$PROJECT")
   #             fi
   #           fi
-            
+  #           
   #           # Return to root directory
   #           cd "$GITHUB_WORKSPACE"
   #         done
-          
+  #         
   #         # Summary
   #         echo ""
   #         echo "========================================================"
@@ -143,7 +156,7 @@ jobs:
   #         echo "========================================================"
   #         echo "Total projects: ${#MOBILE_PROJECTS[@]}"
   #         echo "Failed projects: ${#FAILED_PROJECTS[@]}"
-          
+  #         
   #         if [ ${#FAILED_PROJECTS[@]} -gt 0 ]; then
   #           echo "The following projects failed to build:"
   #           printf "  - %s\n" "${FAILED_PROJECTS[@]}"
@@ -175,11 +188,11 @@ jobs:
   #             FLUTTER_PROJECTS+=("$PROJECT_DIR")
   #           fi
   #         done
-          
+  #         
   #         # Print discovered projects
   #         echo "Found $(echo ${#FLUTTER_PROJECTS[@]}) Flutter projects to build:"
   #         printf "  - %s\n" "${FLUTTER_PROJECTS[@]}"
-          
+  #         
   #         # Build each project
   #         FAILED_PROJECTS=()
   #         for PROJECT in "${FLUTTER_PROJECTS[@]}"; do
@@ -187,18 +200,18 @@ jobs:
   #           echo "========================================================"
   #           echo "Building $PROJECT"
   #           echo "========================================================"
-            
+  #           
   #           if cd "$PROJECT" && flutter pub get && flutter build web; then
   #             echo "✅ Successfully built $PROJECT"
   #           else
   #             echo "❌ Failed to build $PROJECT"
   #             FAILED_PROJECTS+=("$PROJECT")
   #           fi
-            
+  #           
   #           # Return to root directory
   #           cd "$GITHUB_WORKSPACE"
   #         done
-          
+  #         
   #         # Summary
   #         echo ""
   #         echo "========================================================"
@@ -206,7 +219,7 @@ jobs:
   #         echo "========================================================"
   #         echo "Total projects: ${#FLUTTER_PROJECTS[@]}"
   #         echo "Failed projects: ${#FAILED_PROJECTS[@]}"
-          
+  #         
   #         if [ ${#FAILED_PROJECTS[@]} -gt 0 ]; then
   #           echo "The following projects failed to build:"
   #           printf "  - %s\n" "${FAILED_PROJECTS[@]}"
@@ -244,11 +257,11 @@ jobs:
   #             done
   #           fi
   #         done
-          
+  #         
   #         # Print discovered projects
   #         echo "Found $(echo ${#SERVER_PROJECTS[@]}) server projects to build:"
   #         printf "  - %s\n" "${SERVER_PROJECTS[@]}"
-          
+  #         
   #         # Build each project
   #         FAILED_PROJECTS=()
   #         for PROJECT in "${SERVER_PROJECTS[@]}"; do
@@ -256,18 +269,18 @@ jobs:
   #           echo "========================================================"
   #           echo "Building $PROJECT"
   #           echo "========================================================"
-            
+  #           
   #           if cd "$PROJECT" && yarn install && yarn build; then
   #             echo "✅ Successfully built $PROJECT"
   #           else
   #             echo "❌ Failed to build $PROJECT"
   #             FAILED_PROJECTS+=("$PROJECT")
   #           fi
-            
+  #           
   #           # Return to root directory
   #           cd "$GITHUB_WORKSPACE"
   #         done
-          
+  #         
   #         # Summary
   #         echo ""
   #         echo "========================================================"
@@ -275,7 +288,7 @@ jobs:
   #         echo "========================================================"
   #         echo "Total projects: ${#SERVER_PROJECTS[@]}"
   #         echo "Failed projects: ${#FAILED_PROJECTS[@]}"
-          
+  #         
   #         if [ ${#FAILED_PROJECTS[@]} -gt 0 ]; then
   #           echo "The following projects failed to build:"
   #           printf "  - %s\n" "${FAILED_PROJECTS[@]}"
@@ -307,11 +320,11 @@ jobs:
   #             DENO_PROJECTS+=("$PROJECT_DIR")
   #           fi
   #         done
-          
+  #         
   #         # Print discovered projects
   #         echo "Found $(echo ${#DENO_PROJECTS[@]}) Deno projects to build:"
   #         printf "  - %s\n" "${DENO_PROJECTS[@]}"
-          
+  #         
   #         # Build each project
   #         FAILED_PROJECTS=()
   #         for PROJECT in "${DENO_PROJECTS[@]}"; do
@@ -319,18 +332,18 @@ jobs:
   #           echo "========================================================"
   #           echo "Building $PROJECT"
   #           echo "========================================================"
-            
+  #           
   #           if cd "$PROJECT" && deno task build; then
   #             echo "✅ Successfully built $PROJECT"
   #           else
   #             echo "❌ Failed to build $PROJECT"
   #             FAILED_PROJECTS+=("$PROJECT")
   #           fi
-            
+  #           
   #           # Return to root directory
   #           cd "$GITHUB_WORKSPACE"
   #         done
-          
+  #         
   #         # Summary
   #         echo ""
   #         echo "========================================================"
@@ -338,7 +351,7 @@ jobs:
   #         echo "========================================================"
   #         echo "Total projects: ${#DENO_PROJECTS[@]}"
   #         echo "Failed projects: ${#FAILED_PROJECTS[@]}"
-          
+  #         
   #         if [ ${#FAILED_PROJECTS[@]} -gt 0 ]; then
   #           echo "The following projects failed to build:"
   #           printf "  - %s\n" "${FAILED_PROJECTS[@]}"
