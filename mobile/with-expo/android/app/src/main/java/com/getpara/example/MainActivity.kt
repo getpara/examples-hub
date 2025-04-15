@@ -1,4 +1,4 @@
-package com.usecapsule.example.expo
+package com.getpara.example
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

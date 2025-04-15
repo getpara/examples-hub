@@ -28,7 +28,7 @@
         <key>CFBundleURLSchemes</key>
         <array>
           <string>para-expo</string>
-          <string>com.usecapsule.example.expo</string>
+          <string>com.getpara.example</string>
         </array>
       </dict>
     </array>
