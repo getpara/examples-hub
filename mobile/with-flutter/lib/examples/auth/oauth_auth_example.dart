@@ -283,13 +283,13 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
                 backgroundColor: Colors.black, // Common Apple button style
                 textColor: Colors.white,
               ),
-              // _buildOAuthButton( // Twitter/X might not be supported or need specific setup
-              //   provider: OAuthMethod.twitter,
-              //   label: 'X.com',
-              //   icon: FontAwesomeIcons.xTwitter,
-              //   backgroundColor: const Color(0xFF000000), // Updated X color
-              //   textColor: Colors.white,
-              // ),
+              _buildOAuthButton(
+                provider: OAuthMethod.twitter,
+                label: 'X.com',
+                icon: FontAwesomeIcons.xTwitter,
+                backgroundColor: const Color(0xFF000000), // Updated X color
+                textColor: Colors.white,
+              ),
               _buildOAuthButton(
                 provider: OAuthMethod.discord,
                 label: 'Discord',
