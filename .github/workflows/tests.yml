@@ -82,6 +82,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'yarn'
+          continue-on-error: true
       - name: Install jq
         run: |
           which jq || (apt-get update && apt-get install -y jq) || (apk update && apk add --no-cache jq) || echo "Failed to install jq, but continuing as it might already be available"
@@ -159,6 +160,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'yarn'
+          continue-on-error: true
       - name: Install jq
         run: |
           which jq || (apt-get update && apt-get install -y jq) || (apk update && apk add --no-cache jq) || echo "Failed to install jq, but continuing as it might already be available"
@@ -236,6 +238,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'yarn'
+          continue-on-error: true
       - name: Install jq
         run: |
           which jq || (apt-get update && apt-get install -y jq) || (apk update && apk add --no-cache jq) || echo "Failed to install jq, but continuing as it might already be available"
@@ -313,6 +316,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'yarn'
+          continue-on-error: true
       - name: Install jq
         run: |
           which jq || (apt-get update && apt-get install -y jq) || (apk update && apk add --no-cache jq) || echo "Failed to install jq, but continuing as it might already be available"
