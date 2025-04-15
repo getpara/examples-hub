@@ -72,7 +72,7 @@ env:
 
 jobs:
   # Job for React Next.js projects
-  build-react-nextjs:
+  build-web-react-nextjs:
     runs-on: ubuntu-latest
     env:
       PROJECT_DIR: "web/with-react-nextjs"
@@ -83,19 +83,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'yarn'
-          registry-url: 'https://registry.npmjs.org/'
         continue-on-error: true
-      - name: Clear yarn cache and update yarn
-        run: |
-          yarn cache clean
-          npm install -g yarn@latest
-      - name: Configure yarn for better network resilience
-        run: |
-          yarn config set network-timeout 300000
-          yarn config set network-concurrency 1
-          yarn config set registry https://registry.npmjs.org/
-          yarn config set npmRegistryServer https://registry.npmjs.org/
-          yarn config set retry-number-of-retries 5
       - name: Install required tools
         run: |
           sudo apt-get update
@@ -144,13 +132,12 @@ jobs:
             
             # Fix potential integrity issues by cleaning node_modules
             rm -rf node_modules
-            yarn cache clean
             
             # Set high network timeout and use official registry
             export YARN_REGISTRY=https://registry.npmjs.org/
             
             # Install and build with proper error handling
-            if yarn install --network-timeout 300000 --network-concurrency 1 --check-files --prefer-offline && yarn build; then
+            if yarn install && yarn build; then
               echo "✅ Successfully built $PROJECT"
               echo "$PROJECT" >> $GITHUB_WORKSPACE/success_projects.txt
             else
@@ -187,7 +174,7 @@ jobs:
           fi
 
   # Job for React Vite projects
-  build-react-vite:
+  build-web-react-vite:
     runs-on: ubuntu-latest
     env:
       PROJECT_DIR: "web/with-react-vite"
@@ -200,17 +187,6 @@ jobs:
           cache: 'yarn'
           registry-url: 'https://registry.npmjs.org/'
         continue-on-error: true
-      - name: Clear yarn cache and update yarn
-        run: |
-          yarn cache clean
-          npm install -g yarn@latest
-      - name: Configure yarn for better network resilience
-        run: |
-          yarn config set network-timeout 300000
-          yarn config set network-concurrency 1
-          yarn config set registry https://registry.npmjs.org/
-          yarn config set npmRegistryServer https://registry.npmjs.org/
-          yarn config set retry-number-of-retries 5
       - name: Install required tools
         run: |
           sudo apt-get update
@@ -259,13 +235,12 @@ jobs:
             
             # Fix potential integrity issues by cleaning node_modules
             rm -rf node_modules
-            yarn cache clean
             
             # Set high network timeout and use official registry
             export YARN_REGISTRY=https://registry.npmjs.org/
             
             # Install and build with proper error handling
-            if yarn install --network-timeout 300000 --network-concurrency 1 --check-files --prefer-offline && yarn build; then
+            if yarn install && yarn build; then
               echo "✅ Successfully built $PROJECT"
               echo "$PROJECT" >> $GITHUB_WORKSPACE/success_projects.txt
             else
@@ -302,7 +277,7 @@ jobs:
           fi
 
   # Job for Vue Vite projects
-  build-vue-vite:
+  build-web-vue-vite:
     runs-on: ubuntu-latest
     env:
       PROJECT_DIR: "web/with-vue-vite"
@@ -315,17 +290,6 @@ jobs:
           cache: 'yarn'
           registry-url: 'https://registry.npmjs.org/'
         continue-on-error: true
-      - name: Clear yarn cache and update yarn
-        run: |
-          yarn cache clean
-          npm install -g yarn@latest
-      - name: Configure yarn for better network resilience
-        run: |
-          yarn config set network-timeout 300000
-          yarn config set network-concurrency 1
-          yarn config set registry https://registry.npmjs.org/
-          yarn config set npmRegistryServer https://registry.npmjs.org/
-          yarn config set retry-number-of-retries 5
       - name: Install required tools
         run: |
           sudo apt-get update
@@ -374,13 +338,12 @@ jobs:
             
             # Fix potential integrity issues by cleaning node_modules
             rm -rf node_modules
-            yarn cache clean
             
             # Set high network timeout and use official registry
             export YARN_REGISTRY=https://registry.npmjs.org/
             
             # Install and build with proper error handling
-            if yarn install --network-timeout 300000 --network-concurrency 1 --check-files --prefer-offline && yarn build; then
+            if yarn install && yarn build; then
               echo "✅ Successfully built $PROJECT"
               echo "$PROJECT" >> $GITHUB_WORKSPACE/success_projects.txt
             else
@@ -417,7 +380,7 @@ jobs:
           fi
 
   # Job for Svelte Vite projects
-  build-svelte-vite:
+  build-web-svelte-vite:
     runs-on: ubuntu-latest
     env:
       PROJECT_DIR: "web/with-svelte-vite"
@@ -430,17 +393,6 @@ jobs:
           cache: 'yarn'
           registry-url: 'https://registry.npmjs.org/'
         continue-on-error: true
-      - name: Clear yarn cache and update yarn
-        run: |
-          yarn cache clean
-          npm install -g yarn@latest
-      - name: Configure yarn for better network resilience
-        run: |
-          yarn config set network-timeout 300000
-          yarn config set network-concurrency 1
-          yarn config set registry https://registry.npmjs.org/
-          yarn config set npmRegistryServer https://registry.npmjs.org/
-          yarn config set retry-number-of-retries 5
       - name: Install required tools
         run: |
           sudo apt-get update
@@ -489,13 +441,12 @@ jobs:
             
             # Fix potential integrity issues by cleaning node_modules
             rm -rf node_modules
-            yarn cache clean
             
             # Set high network timeout and use official registry
             export YARN_REGISTRY=https://registry.npmjs.org/
             
             # Install and build with proper error handling
-            if yarn install --network-timeout 300000 --network-concurrency 1 --check-files --prefer-offline && yarn build; then
+            if yarn install && yarn build; then
               echo "✅ Successfully built $PROJECT"
               echo "$PROJECT" >> $GITHUB_WORKSPACE/success_projects.txt
             else
