@@ -6,9 +6,11 @@ String randomTestEmail({
   bool includeNumbers = true,
 }) {
   final random = Random();
-  final chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" + (includeNumbers ? "0123456789" : "");
+  final chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+      (includeNumbers ? "0123456789" : "");
 
-  final result = List.generate(length, (_) => chars[random.nextInt(chars.length)]).join();
+  final result =
+      List.generate(length, (_) => chars[random.nextInt(chars.length)]).join();
 
   return "$result@$domain";
 }
@@ -36,11 +38,8 @@ String randomTestPhone({
   ],
 }) {
   final random = Random();
-  final areaCode = validAreaCodes[random.nextInt(validAreaCodes.length)];
-  const exchange = "555";
-  final subscriber = random.nextInt(10000).toString().padLeft(4, '0');
-
-  return "$areaCode$exchange$subscriber";
+  final lastFour = random.nextInt(10000).toString().padLeft(4, '0');
+  return '408555$lastFour';
 }
 
 String randomTestOTP({
