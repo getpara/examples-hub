@@ -23,7 +23,7 @@
     "@expo/vector-icons": "14.0.2",
     "@getpara/cosmjs-v0-integration": "1.10.0",
     "@getpara/ethers-v6-integration": "1.10.0",
-    "@getpara/react-native-wallet": "1.11.0-dev.2",
+    "@getpara/react-native-wallet": "1.10.0",
     "@getpara/solana-web3.js-v1-integration": "1.10.0",
     "@getpara/viem-v2-integration": "1.10.0",
     "@react-native-async-storage/async-storage": "1.23.1",
