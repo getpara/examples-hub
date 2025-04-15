@@ -82,7 +82,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'yarn'
       - name: Build projects
         run: |
           # Find all projects in the specified directory
@@ -156,7 +155,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'yarn'
       - name: Build projects
         run: |
           # Find all projects in the specified directory
@@ -230,7 +228,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'yarn'
       - name: Build projects
         run: |
           # Find all projects in the specified directory
@@ -304,7 +301,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'yarn'
       - name: Build projects
         run: |
           # Find all projects in the specified directory
