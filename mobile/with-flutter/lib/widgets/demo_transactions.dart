@@ -26,7 +26,7 @@ class DemoTransactions extends StatelessWidget {
     Widget screen;
     switch (type) {
       case WalletType.evm:
-        screen = EVMSignExample(wallet: walletsForType.first);
+        screen = EvmSignExample(wallet: walletsForType.first);
         break;
       case WalletType.solana:
         screen = SolanaSignExample(wallet: walletsForType.first);
