@@ -17,6 +17,33 @@ env:
   NEXT_PUBLIC_PARA_API_KEY: test-build-key-next
   ENCRYPTION_KEY: test-encryption-key
   NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: test-wc-id
+  REACT_APP_NETWORK: "testnet"
+  NEXT_PUBLIC_NETWORK: "testnet"
+  VITE_NETWORK: "testnet"
+  NEXT_PUBLIC_INFURA_ID: "test-infura-id"
+  REACT_APP_INFURA_ID: "test-infura-id"
+  VITE_INFURA_ID: "test-infura-id"
+  NEXT_PUBLIC_ALCHEMY_KEY: "test-alchemy-key"
+  REACT_APP_ALCHEMY_KEY: "test-alchemy-key"
+  VITE_ALCHEMY_KEY: "test-alchemy-key"
+  NEXT_PUBLIC_DEFAULT_CHAIN: "sepolia"
+  REACT_APP_DEFAULT_CHAIN: "sepolia"
+  VITE_DEFAULT_CHAIN: "sepolia"
+  NEXT_PUBLIC_AUTH_PROVIDERS: "email,wallet"
+  VITE_AUTH_PROVIDERS: "email,wallet"
+  REACT_APP_AUTH_PROVIDERS: "email,wallet"
+  NEXT_PUBLIC_SOLANA_NETWORK: "devnet"
+  REACT_APP_SOLANA_NETWORK: "devnet"
+  VITE_SOLANA_NETWORK: "devnet"
+  NEXT_PUBLIC_SOLANA_RPC_URL: "https://api.devnet.solana.com"
+  REACT_APP_SOLANA_RPC_URL: "https://api.devnet.solana.com"
+  VITE_SOLANA_RPC_URL: "https://api.devnet.solana.com"
+  NEXT_PUBLIC_COSMOS_CHAIN_ID: "theta-testnet-001"
+  REACT_APP_COSMOS_CHAIN_ID: "theta-testnet-001"
+  VITE_COSMOS_CHAIN_ID: "theta-testnet-001"
+  NEXT_PUBLIC_IPFS_GATEWAY: "https://ipfs.io/ipfs/"
+  REACT_APP_IPFS_GATEWAY: "https://ipfs.io/ipfs/"
+  VITE_IPFS_GATEWAY: "https://ipfs.io/ipfs/"
 
 jobs:
   build-web-projects:
@@ -29,10 +56,11 @@ jobs:
           node-version: '18'
           cache: 'yarn'
         continue-on-error: true
-      - name: Install jq
+      - name: Install required tools
         run: |
-          which jq || (apt-get update && apt-get install -y jq) || (apk update && apk add --no-cache jq) || echo "Failed to install jq, but continuing as it might already be available"
-      - name: Build all web projects
+          sudo apt-get update
+          sudo apt-get install -y parallel jq
+      - name: Build all web projects in parallel
         run: |
           # Find all web projects
           WEB_PROJECTS=()
@@ -50,38 +78,56 @@ jobs:
           echo "Found $(echo ${#WEB_PROJECTS[@]}) web projects to build:"
           printf "  - %s\n" "${WEB_PROJECTS[@]}"
           
-          # Build each project
-          FAILED_PROJECTS=()
-          for PROJECT in "${WEB_PROJECTS[@]}"; do
+          # Create a build function
+          build_project() {
+            PROJECT=$1
             echo ""
             echo "========================================================"
             echo "Building $PROJECT"
             echo "========================================================"
             
-            if cd "$PROJECT" && yarn install && yarn build; then
+            TEMP_LOG=$(mktemp)
+            
+            if cd "$PROJECT" && yarn install && yarn build > $TEMP_LOG 2>&1; then
               echo "✅ Successfully built $PROJECT"
+              echo "$PROJECT" >> $GITHUB_WORKSPACE/success_projects.txt
+              return 0
             else
               echo "❌ Failed to build $PROJECT"
-              FAILED_PROJECTS+=("$PROJECT")
+              echo "$PROJECT" >> $GITHUB_WORKSPACE/failed_projects.txt
+              cat $TEMP_LOG
+              return 1
             fi
-            
-            # Return to root directory
-            cd "$GITHUB_WORKSPACE"
-          done
+          }
+          
+          # Export the function for GNU Parallel
+          export -f build_project
+          
+          # Create empty result files
+          touch $GITHUB_WORKSPACE/success_projects.txt
+          touch $GITHUB_WORKSPACE/failed_projects.txt
+          
+          # Run builds in parallel (up to 3 at a time to avoid resource contention)
+          echo "${WEB_PROJECTS[@]}" | tr ' ' '\n' | parallel -j 3 --will-cite build_project
           
           # Summary
+          SUCCESSFUL_PROJECTS=$(cat $GITHUB_WORKSPACE/success_projects.txt | wc -l)
+          FAILED_PROJECTS=$(cat $GITHUB_WORKSPACE/failed_projects.txt | wc -l)
+          
           echo ""
           echo "========================================================"
           echo "Web Projects Build Summary"
           echo "========================================================"
           echo "Total projects: ${#WEB_PROJECTS[@]}"
-          echo "Failed projects: ${#FAILED_PROJECTS[@]}"
+          echo "Successful projects: $SUCCESSFUL_PROJECTS"
+          echo "Failed projects: $FAILED_PROJECTS"
           
-          if [ ${#FAILED_PROJECTS[@]} -gt 0 ]; then
+          if [ "$FAILED_PROJECTS" -gt 0 ]; then
             echo "The following projects failed to build:"
-            printf "  - %s\n" "${FAILED_PROJECTS[@]}"
+            cat $GITHUB_WORKSPACE/failed_projects.txt | sed 's/^/  - /'
+            
             # Exit with error only if everything failed
-            if [ ${#FAILED_PROJECTS[@]} -eq ${#WEB_PROJECTS[@]} ]; then
+            if [ "$FAILED_PROJECTS" -eq "${#WEB_PROJECTS[@]}" ]; then
               exit 1
             fi
           else
@@ -98,10 +144,11 @@ jobs:
   #         node-version: '18'
   #         cache: 'yarn'
   #       continue-on-error: true
-  #     - name: Install jq
+  #     - name: Install required tools
   #       run: |
-  #         which jq || (apt-get update && apt-get install -y jq) || (apk update && apk add --no-cache jq) || echo "Failed to install jq, but continuing as it might already be available"
-  #     - name: Build all mobile projects
+  #         sudo apt-get update
+  #         sudo apt-get install -y parallel jq
+  #     - name: Build all mobile projects in parallel
   #       run: |
   #         # Find all mobile projects (excluding Flutter)
   #         MOBILE_PROJECTS=()
@@ -119,49 +166,72 @@ jobs:
   #         echo "Found $(echo ${#MOBILE_PROJECTS[@]}) mobile projects to build:"
   #         printf "  - %s\n" "${MOBILE_PROJECTS[@]}"
   #         
-  #         # Build each project
-  #         FAILED_PROJECTS=()
-  #         for PROJECT in "${MOBILE_PROJECTS[@]}"; do
+  #         # Create a build function for mobile projects
+  #         build_mobile_project() {
+  #           PROJECT=$1
   #           echo ""
   #           echo "========================================================"
   #           echo "Building $PROJECT"
   #           echo "========================================================"
   #           
+  #           TEMP_LOG=$(mktemp)
+  #           
+  #           cd "$GITHUB_WORKSPACE"
   #           cd "$PROJECT"
   #           
   #           if [[ "$PROJECT" == *"with-expo"* ]]; then
-  #             if yarn install && (yarn build || yarn expo export:web); then
+  #             if yarn install && (yarn build || yarn expo export:web) > $TEMP_LOG 2>&1; then
   #               echo "✅ Successfully built $PROJECT"
+  #               echo "$PROJECT" >> $GITHUB_WORKSPACE/success_mobile_projects.txt
+  #               return 0
   #             else
   #               echo "❌ Failed to build $PROJECT"
-  #               FAILED_PROJECTS+=("$PROJECT")
+  #               echo "$PROJECT" >> $GITHUB_WORKSPACE/failed_mobile_projects.txt
+  #               cat $TEMP_LOG
+  #               return 1
   #             fi
   #           else
-  #             if yarn install && yarn build; then
+  #             if yarn install && yarn build > $TEMP_LOG 2>&1; then
   #               echo "✅ Successfully built $PROJECT"
+  #               echo "$PROJECT" >> $GITHUB_WORKSPACE/success_mobile_projects.txt
+  #               return 0
   #             else
   #               echo "❌ Failed to build $PROJECT"
-  #               FAILED_PROJECTS+=("$PROJECT")
+  #               echo "$PROJECT" >> $GITHUB_WORKSPACE/failed_mobile_projects.txt
+  #               cat $TEMP_LOG
+  #               return 1
   #             fi
   #           fi
-  #           
-  #           # Return to root directory
-  #           cd "$GITHUB_WORKSPACE"
-  #         done
+  #         }
+  #         
+  #         # Export the function for GNU Parallel
+  #         export -f build_mobile_project
+  #         
+  #         # Create empty result files
+  #         touch $GITHUB_WORKSPACE/success_mobile_projects.txt
+  #         touch $GITHUB_WORKSPACE/failed_mobile_projects.txt
+  #         
+  #         # Run builds in parallel (up to 3 at a time)
+  #         echo "${MOBILE_PROJECTS[@]}" | tr ' ' '\n' | parallel -j 3 --will-cite build_mobile_project
   #         
   #         # Summary
+  #         SUCCESSFUL_PROJECTS=$(cat $GITHUB_WORKSPACE/success_mobile_projects.txt | wc -l)
+  #         FAILED_PROJECTS=$(cat $GITHUB_WORKSPACE/failed_mobile_projects.txt | wc -l)
+  #         
   #         echo ""
   #         echo "========================================================"
   #         echo "Mobile Projects Build Summary"
   #         echo "========================================================"
   #         echo "Total projects: ${#MOBILE_PROJECTS[@]}"
-  #         echo "Failed projects: ${#FAILED_PROJECTS[@]}"
+  #         echo "Successful projects: $SUCCESSFUL_PROJECTS"
+  #         echo "Failed projects: $FAILED_PROJECTS"
   #         
-  #         if [ ${#FAILED_PROJECTS[@]} -gt 0 ]; then
+  #         if [ "$FAILED_PROJECTS" -gt 0 ]; then
   #           echo "The following projects failed to build:"
-  #           printf "  - %s\n" "${FAILED_PROJECTS[@]}"
+  #           cat $GITHUB_WORKSPACE/failed_mobile_projects.txt | sed 's/^/  - /'
+  #           
   #           # Exit with error only if everything failed
-  #           if [ ${#FAILED_PROJECTS[@]} -eq ${#MOBILE_PROJECTS[@]} ]; then
+  #           if [ "$FAILED_PROJECTS" -eq "${#MOBILE_PROJECTS[@]}" ]; then
   #             exit 1
   #           fi
   #         else
