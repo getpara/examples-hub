@@ -83,41 +83,23 @@ jobs:
         with:
           node-version: '18'
           cache: 'yarn'
-        continue-on-error: true
-      - name: Install required tools
+      - name: Build projects
         run: |
-          sudo apt-get update
-          sudo apt-get install -y jq
-      - name: Build all projects
-        run: |
-          if [ -z "$PROJECT_DIR" ]; then
-            echo "Error: PROJECT_DIR is not set"
-            exit 1
-          fi
-          
           # Find all projects in the specified directory
           PROJECTS=()
           
-          echo "Looking for projects in: $PROJECT_DIR"
+          for DIR in "$PROJECT_DIR"/*; do
+            if [ -d "$DIR" ] && [ -f "$DIR/package.json" ]; then
+              PROJECTS+=("$DIR")
+            fi
+          done
           
-          if [ -d "$PROJECT_DIR" ]; then
-            for DIR in "$PROJECT_DIR"/*; do
-              if [ -d "$DIR" ] && [ -f "$DIR/package.json" ]; then
-                PROJECTS+=("$DIR")
-              fi
-            done
-          else
-            echo "Directory $PROJECT_DIR does not exist"
-            exit 1
-          fi
-          
-          # Print discovered projects
           echo "Found $(echo ${#PROJECTS[@]}) projects to build:"
           printf "  - %s\n" "${PROJECTS[@]}"
           
-          # Create empty result files
-          touch $GITHUB_WORKSPACE/success_projects.txt
-          touch $GITHUB_WORKSPACE/failed_projects.txt
+          # Create tracking files
+          touch success_projects.txt
+          touch failed_projects.txt
           
           # Build each project sequentially
           for PROJECT in "${PROJECTS[@]}"; do
@@ -126,17 +108,12 @@ jobs:
             echo "Building $PROJECT"
             echo "========================================================"
             
-            # Make sure we're starting from the workspace root
-            cd "$GITHUB_WORKSPACE"
-            cd "$PROJECT"
+            cd "$GITHUB_WORKSPACE/$PROJECT"
             
-            # Fix potential integrity issues by cleaning node_modules
-            rm -rf node_modules
+            # Ensure node_modules/.bin is in the PATH
+            export PATH="$PWD/node_modules/.bin:$PATH"
             
-            # Set high network timeout and use official registry
-            export YARN_REGISTRY=https://registry.npmjs.org/
-            
-            # Install and build with proper error handling
+            # Install and build
             if yarn install && yarn build; then
               echo "✅ Successfully built $PROJECT"
               echo "$PROJECT" >> $GITHUB_WORKSPACE/success_projects.txt
@@ -145,32 +122,27 @@ jobs:
               echo "$PROJECT" >> $GITHUB_WORKSPACE/failed_projects.txt
             fi
             
-            # Return to workspace root for next project
             cd "$GITHUB_WORKSPACE"
           done
           
           # Summary
-          SUCCESSFUL_PROJECTS=$(cat $GITHUB_WORKSPACE/success_projects.txt | wc -l)
-          FAILED_PROJECTS=$(cat $GITHUB_WORKSPACE/failed_projects.txt | wc -l)
+          SUCCESSFUL=$(cat success_projects.txt | wc -l)
+          FAILED=$(cat failed_projects.txt | wc -l)
           
           echo ""
           echo "========================================================"
           echo "Build Summary for $PROJECT_DIR"
           echo "========================================================"
           echo "Total projects: ${#PROJECTS[@]}"
-          echo "Successful projects: $SUCCESSFUL_PROJECTS"
-          echo "Failed projects: $FAILED_PROJECTS"
+          echo "Successful: $SUCCESSFUL"
+          echo "Failed: $FAILED"
           
-          if [ "$FAILED_PROJECTS" -gt 0 ]; then
-            echo "The following projects failed to build:"
-            cat $GITHUB_WORKSPACE/failed_projects.txt | sed 's/^/  - /'
-            
-            # Exit with error only if everything failed
-            if [ "$FAILED_PROJECTS" -eq "${#PROJECTS[@]}" ]; then
+          if [ "$FAILED" -gt 0 ]; then
+            echo "Failed projects:"
+            cat failed_projects.txt | sed 's/^/  - /'
+            if [ "$FAILED" -eq "${#PROJECTS[@]}" ]; then
               exit 1
             fi
-          else
-            echo "All projects built successfully! 🎉"
           fi
 
   # Job for React Vite projects
@@ -185,42 +157,23 @@ jobs:
         with:
           node-version: '18'
           cache: 'yarn'
-          registry-url: 'https://registry.npmjs.org/'
-        continue-on-error: true
-      - name: Install required tools
+      - name: Build projects
         run: |
-          sudo apt-get update
-          sudo apt-get install -y jq
-      - name: Build all projects
-        run: |
-          if [ -z "$PROJECT_DIR" ]; then
-            echo "Error: PROJECT_DIR is not set"
-            exit 1
-          fi
-          
           # Find all projects in the specified directory
           PROJECTS=()
           
-          echo "Looking for projects in: $PROJECT_DIR"
+          for DIR in "$PROJECT_DIR"/*; do
+            if [ -d "$DIR" ] && [ -f "$DIR/package.json" ]; then
+              PROJECTS+=("$DIR")
+            fi
+          done
           
-          if [ -d "$PROJECT_DIR" ]; then
-            for DIR in "$PROJECT_DIR"/*; do
-              if [ -d "$DIR" ] && [ -f "$DIR/package.json" ]; then
-                PROJECTS+=("$DIR")
-              fi
-            done
-          else
-            echo "Directory $PROJECT_DIR does not exist"
-            exit 1
-          fi
-          
-          # Print discovered projects
           echo "Found $(echo ${#PROJECTS[@]}) projects to build:"
           printf "  - %s\n" "${PROJECTS[@]}"
           
-          # Create empty result files
-          touch $GITHUB_WORKSPACE/success_projects.txt
-          touch $GITHUB_WORKSPACE/failed_projects.txt
+          # Create tracking files
+          touch success_projects.txt
+          touch failed_projects.txt
           
           # Build each project sequentially
           for PROJECT in "${PROJECTS[@]}"; do
@@ -229,17 +182,12 @@ jobs:
             echo "Building $PROJECT"
             echo "========================================================"
             
-            # Make sure we're starting from the workspace root
-            cd "$GITHUB_WORKSPACE"
-            cd "$PROJECT"
+            cd "$GITHUB_WORKSPACE/$PROJECT"
             
-            # Fix potential integrity issues by cleaning node_modules
-            rm -rf node_modules
+            # Ensure node_modules/.bin is in the PATH
+            export PATH="$PWD/node_modules/.bin:$PATH"
             
-            # Set high network timeout and use official registry
-            export YARN_REGISTRY=https://registry.npmjs.org/
-            
-            # Install and build with proper error handling
+            # Install and build
             if yarn install && yarn build; then
               echo "✅ Successfully built $PROJECT"
               echo "$PROJECT" >> $GITHUB_WORKSPACE/success_projects.txt
@@ -248,32 +196,27 @@ jobs:
               echo "$PROJECT" >> $GITHUB_WORKSPACE/failed_projects.txt
             fi
             
-            # Return to workspace root for next project
             cd "$GITHUB_WORKSPACE"
           done
           
           # Summary
-          SUCCESSFUL_PROJECTS=$(cat $GITHUB_WORKSPACE/success_projects.txt | wc -l)
-          FAILED_PROJECTS=$(cat $GITHUB_WORKSPACE/failed_projects.txt | wc -l)
+          SUCCESSFUL=$(cat success_projects.txt | wc -l)
+          FAILED=$(cat failed_projects.txt | wc -l)
           
           echo ""
           echo "========================================================"
           echo "Build Summary for $PROJECT_DIR"
           echo "========================================================"
           echo "Total projects: ${#PROJECTS[@]}"
-          echo "Successful projects: $SUCCESSFUL_PROJECTS"
-          echo "Failed projects: $FAILED_PROJECTS"
+          echo "Successful: $SUCCESSFUL"
+          echo "Failed: $FAILED"
           
-          if [ "$FAILED_PROJECTS" -gt 0 ]; then
-            echo "The following projects failed to build:"
-            cat $GITHUB_WORKSPACE/failed_projects.txt | sed 's/^/  - /'
-            
-            # Exit with error only if everything failed
-            if [ "$FAILED_PROJECTS" -eq "${#PROJECTS[@]}" ]; then
+          if [ "$FAILED" -gt 0 ]; then
+            echo "Failed projects:"
+            cat failed_projects.txt | sed 's/^/  - /'
+            if [ "$FAILED" -eq "${#PROJECTS[@]}" ]; then
               exit 1
             fi
-          else
-            echo "All projects built successfully! 🎉"
           fi
 
   # Job for Vue Vite projects
@@ -288,42 +231,23 @@ jobs:
         with:
           node-version: '18'
           cache: 'yarn'
-          registry-url: 'https://registry.npmjs.org/'
-        continue-on-error: true
-      - name: Install required tools
+      - name: Build projects
         run: |
-          sudo apt-get update
-          sudo apt-get install -y jq
-      - name: Build all projects
-        run: |
-          if [ -z "$PROJECT_DIR" ]; then
-            echo "Error: PROJECT_DIR is not set"
-            exit 1
-          fi
-          
           # Find all projects in the specified directory
           PROJECTS=()
           
-          echo "Looking for projects in: $PROJECT_DIR"
+          for DIR in "$PROJECT_DIR"/*; do
+            if [ -d "$DIR" ] && [ -f "$DIR/package.json" ]; then
+              PROJECTS+=("$DIR")
+            fi
+          done
           
-          if [ -d "$PROJECT_DIR" ]; then
-            for DIR in "$PROJECT_DIR"/*; do
-              if [ -d "$DIR" ] && [ -f "$DIR/package.json" ]; then
-                PROJECTS+=("$DIR")
-              fi
-            done
-          else
-            echo "Directory $PROJECT_DIR does not exist"
-            exit 1
-          fi
-          
-          # Print discovered projects
           echo "Found $(echo ${#PROJECTS[@]}) projects to build:"
           printf "  - %s\n" "${PROJECTS[@]}"
           
-          # Create empty result files
-          touch $GITHUB_WORKSPACE/success_projects.txt
-          touch $GITHUB_WORKSPACE/failed_projects.txt
+          # Create tracking files
+          touch success_projects.txt
+          touch failed_projects.txt
           
           # Build each project sequentially
           for PROJECT in "${PROJECTS[@]}"; do
@@ -332,17 +256,12 @@ jobs:
             echo "Building $PROJECT"
             echo "========================================================"
             
-            # Make sure we're starting from the workspace root
-            cd "$GITHUB_WORKSPACE"
-            cd "$PROJECT"
+            cd "$GITHUB_WORKSPACE/$PROJECT"
             
-            # Fix potential integrity issues by cleaning node_modules
-            rm -rf node_modules
+            # Ensure node_modules/.bin is in the PATH
+            export PATH="$PWD/node_modules/.bin:$PATH"
             
-            # Set high network timeout and use official registry
-            export YARN_REGISTRY=https://registry.npmjs.org/
-            
-            # Install and build with proper error handling
+            # Install and build
             if yarn install && yarn build; then
               echo "✅ Successfully built $PROJECT"
               echo "$PROJECT" >> $GITHUB_WORKSPACE/success_projects.txt
@@ -351,32 +270,27 @@ jobs:
               echo "$PROJECT" >> $GITHUB_WORKSPACE/failed_projects.txt
             fi
             
-            # Return to workspace root for next project
             cd "$GITHUB_WORKSPACE"
           done
           
           # Summary
-          SUCCESSFUL_PROJECTS=$(cat $GITHUB_WORKSPACE/success_projects.txt | wc -l)
-          FAILED_PROJECTS=$(cat $GITHUB_WORKSPACE/failed_projects.txt | wc -l)
+          SUCCESSFUL=$(cat success_projects.txt | wc -l)
+          FAILED=$(cat failed_projects.txt | wc -l)
           
           echo ""
           echo "========================================================"
           echo "Build Summary for $PROJECT_DIR"
           echo "========================================================"
           echo "Total projects: ${#PROJECTS[@]}"
-          echo "Successful projects: $SUCCESSFUL_PROJECTS"
-          echo "Failed projects: $FAILED_PROJECTS"
+          echo "Successful: $SUCCESSFUL"
+          echo "Failed: $FAILED"
           
-          if [ "$FAILED_PROJECTS" -gt 0 ]; then
-            echo "The following projects failed to build:"
-            cat $GITHUB_WORKSPACE/failed_projects.txt | sed 's/^/  - /'
-            
-            # Exit with error only if everything failed
-            if [ "$FAILED_PROJECTS" -eq "${#PROJECTS[@]}" ]; then
+          if [ "$FAILED" -gt 0 ]; then
+            echo "Failed projects:"
+            cat failed_projects.txt | sed 's/^/  - /'
+            if [ "$FAILED" -eq "${#PROJECTS[@]}" ]; then
               exit 1
             fi
-          else
-            echo "All projects built successfully! 🎉"
           fi
 
   # Job for Svelte Vite projects
@@ -391,42 +305,23 @@ jobs:
         with:
           node-version: '18'
           cache: 'yarn'
-          registry-url: 'https://registry.npmjs.org/'
-        continue-on-error: true
-      - name: Install required tools
+      - name: Build projects
         run: |
-          sudo apt-get update
-          sudo apt-get install -y jq
-      - name: Build all projects
-        run: |
-          if [ -z "$PROJECT_DIR" ]; then
-            echo "Error: PROJECT_DIR is not set"
-            exit 1
-          fi
-          
           # Find all projects in the specified directory
           PROJECTS=()
           
-          echo "Looking for projects in: $PROJECT_DIR"
+          for DIR in "$PROJECT_DIR"/*; do
+            if [ -d "$DIR" ] && [ -f "$DIR/package.json" ]; then
+              PROJECTS+=("$DIR")
+            fi
+          done
           
-          if [ -d "$PROJECT_DIR" ]; then
-            for DIR in "$PROJECT_DIR"/*; do
-              if [ -d "$DIR" ] && [ -f "$DIR/package.json" ]; then
-                PROJECTS+=("$DIR")
-              fi
-            done
-          else
-            echo "Directory $PROJECT_DIR does not exist"
-            exit 1
-          fi
-          
-          # Print discovered projects
           echo "Found $(echo ${#PROJECTS[@]}) projects to build:"
           printf "  - %s\n" "${PROJECTS[@]}"
           
-          # Create empty result files
-          touch $GITHUB_WORKSPACE/success_projects.txt
-          touch $GITHUB_WORKSPACE/failed_projects.txt
+          # Create tracking files
+          touch success_projects.txt
+          touch failed_projects.txt
           
           # Build each project sequentially
           for PROJECT in "${PROJECTS[@]}"; do
@@ -435,17 +330,12 @@ jobs:
             echo "Building $PROJECT"
             echo "========================================================"
             
-            # Make sure we're starting from the workspace root
-            cd "$GITHUB_WORKSPACE"
-            cd "$PROJECT"
+            cd "$GITHUB_WORKSPACE/$PROJECT"
             
-            # Fix potential integrity issues by cleaning node_modules
-            rm -rf node_modules
+            # Ensure node_modules/.bin is in the PATH
+            export PATH="$PWD/node_modules/.bin:$PATH"
             
-            # Set high network timeout and use official registry
-            export YARN_REGISTRY=https://registry.npmjs.org/
-            
-            # Install and build with proper error handling
+            # Install and build
             if yarn install && yarn build; then
               echo "✅ Successfully built $PROJECT"
               echo "$PROJECT" >> $GITHUB_WORKSPACE/success_projects.txt
@@ -454,32 +344,27 @@ jobs:
               echo "$PROJECT" >> $GITHUB_WORKSPACE/failed_projects.txt
             fi
             
-            # Return to workspace root for next project
             cd "$GITHUB_WORKSPACE"
           done
           
           # Summary
-          SUCCESSFUL_PROJECTS=$(cat $GITHUB_WORKSPACE/success_projects.txt | wc -l)
-          FAILED_PROJECTS=$(cat $GITHUB_WORKSPACE/failed_projects.txt | wc -l)
+          SUCCESSFUL=$(cat success_projects.txt | wc -l)
+          FAILED=$(cat failed_projects.txt | wc -l)
           
           echo ""
           echo "========================================================"
           echo "Build Summary for $PROJECT_DIR"
           echo "========================================================"
           echo "Total projects: ${#PROJECTS[@]}"
-          echo "Successful projects: $SUCCESSFUL_PROJECTS"
-          echo "Failed projects: $FAILED_PROJECTS"
+          echo "Successful: $SUCCESSFUL"
+          echo "Failed: $FAILED"
           
-          if [ "$FAILED_PROJECTS" -gt 0 ]; then
-            echo "The following projects failed to build:"
-            cat $GITHUB_WORKSPACE/failed_projects.txt | sed 's/^/  - /'
-            
-            # Exit with error only if everything failed
-            if [ "$FAILED_PROJECTS" -eq "${#PROJECTS[@]}" ]; then
+          if [ "$FAILED" -gt 0 ]; then
+            echo "Failed projects:"
+            cat failed_projects.txt | sed 's/^/  - /'
+            if [ "$FAILED" -eq "${#PROJECTS[@]}" ]; then
               exit 1
             fi
-          else
-            echo "All projects built successfully! 🎉"
           fi
 
   # build-mobile-projects:
