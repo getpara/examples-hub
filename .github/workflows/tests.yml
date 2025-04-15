@@ -7,16 +7,31 @@ on:
 
 # Global environment variables that apply to all jobs and steps
 env:
+  # Node.js settings
   NODE_OPTIONS: "--max-old-space-size=4096"
   CI: true
+  NODE_ENV: "production"
+  
+  # Framework telemetry/feature flags
   NEXT_TELEMETRY_DISABLED: 1
   BUILD_CONCURRENCY: 4
   DISABLE_ESLINT_PLUGIN: true
+  GENERATE_SOURCEMAP: false
+  
+  # Yarn settings to avoid network issues
+  YARN_NETWORK_TIMEOUT: 300000
+  YARN_NETWORK_CONCURRENCY: 1
+  YARN_REGISTRY: "https://registry.npmjs.org/"
+  npm_config_registry: "https://registry.npmjs.org/"
+  
+  # API keys (placeholders for CI)
   PARA_API_KEY: test-build-key
   VITE_PARA_API_KEY: test-build-key-vite
   NEXT_PUBLIC_PARA_API_KEY: test-build-key-next
   ENCRYPTION_KEY: test-encryption-key
   NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: test-wc-id
+  
+  # Web3/blockchain configs
   REACT_APP_NETWORK: "testnet"
   NEXT_PUBLIC_NETWORK: "testnet"
   VITE_NETWORK: "testnet"
@@ -26,28 +41,38 @@ env:
   NEXT_PUBLIC_ALCHEMY_KEY: "test-alchemy-key"
   REACT_APP_ALCHEMY_KEY: "test-alchemy-key"
   VITE_ALCHEMY_KEY: "test-alchemy-key"
+  
+  # EVM chain settings
   NEXT_PUBLIC_DEFAULT_CHAIN: "sepolia"
   REACT_APP_DEFAULT_CHAIN: "sepolia"
   VITE_DEFAULT_CHAIN: "sepolia"
+  
+  # Auth providers
   NEXT_PUBLIC_AUTH_PROVIDERS: "email,wallet"
   VITE_AUTH_PROVIDERS: "email,wallet"
   REACT_APP_AUTH_PROVIDERS: "email,wallet"
+  
+  # Solana configs
   NEXT_PUBLIC_SOLANA_NETWORK: "devnet"
   REACT_APP_SOLANA_NETWORK: "devnet"
   VITE_SOLANA_NETWORK: "devnet"
   NEXT_PUBLIC_SOLANA_RPC_URL: "https://api.devnet.solana.com"
   REACT_APP_SOLANA_RPC_URL: "https://api.devnet.solana.com"
   VITE_SOLANA_RPC_URL: "https://api.devnet.solana.com"
+  
+  # Cosmos configs
   NEXT_PUBLIC_COSMOS_CHAIN_ID: "theta-testnet-001"
   REACT_APP_COSMOS_CHAIN_ID: "theta-testnet-001"
   VITE_COSMOS_CHAIN_ID: "theta-testnet-001"
+  
+  # IPFS/Arweave settings
   NEXT_PUBLIC_IPFS_GATEWAY: "https://ipfs.io/ipfs/"
   REACT_APP_IPFS_GATEWAY: "https://ipfs.io/ipfs/"
   VITE_IPFS_GATEWAY: "https://ipfs.io/ipfs/"
 
 jobs:
-  build-web-projects:
-    runs-on: ubuntu-latest
+  # Define a reusable job template for building projects
+  build-project-template: &build-project-template
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node.js
@@ -55,60 +80,84 @@ jobs:
         with:
           node-version: '18'
           cache: 'yarn'
+          registry-url: 'https://registry.npmjs.org/'
         continue-on-error: true
+      - name: Clear yarn cache and update yarn
+        run: |
+          yarn cache clean
+          npm install -g yarn@latest
+      - name: Configure yarn for better network resilience
+        run: |
+          yarn config set network-timeout 300000
+          yarn config set network-concurrency 1
+          yarn config set registry https://registry.npmjs.org/
+          yarn config set npmRegistryServer https://registry.npmjs.org/
+          yarn config set retry-number-of-retries 5
       - name: Install required tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y parallel jq
-      - name: Build all web projects in parallel
+          sudo apt-get install -y jq
+      - name: Build all projects
         run: |
-          # Find all web projects
-          WEB_PROJECTS=()
-          for FRAMEWORK_DIR in web/*; do
-            if [ -d "$FRAMEWORK_DIR" ]; then
-              for PROJECT_DIR in "$FRAMEWORK_DIR"/*; do
-                if [ -d "$PROJECT_DIR" ] && [ -f "$PROJECT_DIR/package.json" ]; then
-                  WEB_PROJECTS+=("$PROJECT_DIR")
-                fi
-              done
-            fi
-          done
+          if [ -z "$PROJECT_DIR" ]; then
+            echo "Error: PROJECT_DIR is not set"
+            exit 1
+          fi
+          
+          # Find all projects in the specified directory
+          PROJECTS=()
+          
+          echo "Looking for projects in: $PROJECT_DIR"
+          
+          if [ -d "$PROJECT_DIR" ]; then
+            for DIR in "$PROJECT_DIR"/*; do
+              if [ -d "$DIR" ] && [ -f "$DIR/package.json" ]; then
+                PROJECTS+=("$DIR")
+              fi
+            done
+          else
+            echo "Directory $PROJECT_DIR does not exist"
+            exit 1
+          fi
           
           # Print discovered projects
-          echo "Found $(echo ${#WEB_PROJECTS[@]}) web projects to build:"
-          printf "  - %s\n" "${WEB_PROJECTS[@]}"
-          
-          # Create a build function
-          build_project() {
-            PROJECT=$1
-            echo ""
-            echo "========================================================"
-            echo "Building $PROJECT"
-            echo "========================================================"
-            
-            TEMP_LOG=$(mktemp)
-            
-            if cd "$PROJECT" && yarn install && yarn build > $TEMP_LOG 2>&1; then
-              echo "✅ Successfully built $PROJECT"
-              echo "$PROJECT" >> $GITHUB_WORKSPACE/success_projects.txt
-              return 0
-            else
-              echo "❌ Failed to build $PROJECT"
-              echo "$PROJECT" >> $GITHUB_WORKSPACE/failed_projects.txt
-              cat $TEMP_LOG
-              return 1
-            fi
-          }
-          
-          # Export the function for GNU Parallel
-          export -f build_project
+          echo "Found $(echo ${#PROJECTS[@]}) projects to build:"
+          printf "  - %s\n" "${PROJECTS[@]}"
           
           # Create empty result files
           touch $GITHUB_WORKSPACE/success_projects.txt
           touch $GITHUB_WORKSPACE/failed_projects.txt
           
-          # Run builds in parallel (up to 3 at a time to avoid resource contention)
-          echo "${WEB_PROJECTS[@]}" | tr ' ' '\n' | parallel -j 3 --will-cite build_project
+          # Build each project sequentially
+          for PROJECT in "${PROJECTS[@]}"; do
+            echo ""
+            echo "========================================================"
+            echo "Building $PROJECT"
+            echo "========================================================"
+            
+            # Make sure we're starting from the workspace root
+            cd "$GITHUB_WORKSPACE"
+            cd "$PROJECT"
+            
+            # Fix potential integrity issues by cleaning node_modules
+            rm -rf node_modules
+            yarn cache clean
+            
+            # Set high network timeout and use official registry
+            export YARN_REGISTRY=https://registry.npmjs.org/
+            
+            # Install and build with proper error handling
+            if yarn install --network-timeout 300000 --network-concurrency 1 --check-files --prefer-offline && yarn build; then
+              echo "✅ Successfully built $PROJECT"
+              echo "$PROJECT" >> $GITHUB_WORKSPACE/success_projects.txt
+            else
+              echo "❌ Failed to build $PROJECT"
+              echo "$PROJECT" >> $GITHUB_WORKSPACE/failed_projects.txt
+            fi
+            
+            # Return to workspace root for next project
+            cd "$GITHUB_WORKSPACE"
+          done
           
           # Summary
           SUCCESSFUL_PROJECTS=$(cat $GITHUB_WORKSPACE/success_projects.txt | wc -l)
@@ -116,9 +165,9 @@ jobs:
           
           echo ""
           echo "========================================================"
-          echo "Web Projects Build Summary"
+          echo "Build Summary for $PROJECT_DIR"
           echo "========================================================"
-          echo "Total projects: ${#WEB_PROJECTS[@]}"
+          echo "Total projects: ${#PROJECTS[@]}"
           echo "Successful projects: $SUCCESSFUL_PROJECTS"
           echo "Failed projects: $FAILED_PROJECTS"
           
@@ -127,12 +176,40 @@ jobs:
             cat $GITHUB_WORKSPACE/failed_projects.txt | sed 's/^/  - /'
             
             # Exit with error only if everything failed
-            if [ "$FAILED_PROJECTS" -eq "${#WEB_PROJECTS[@]}" ]; then
+            if [ "$FAILED_PROJECTS" -eq "${#PROJECTS[@]}" ]; then
               exit 1
             fi
           else
-            echo "All web projects built successfully! 🎉"
+            echo "All projects built successfully! 🎉"
           fi
+
+  # Job for React Next.js projects
+  build-react-nextjs:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_DIR: "web/with-react-nextjs"
+    <<: *build-project-template
+
+  # Job for React Vite projects
+  build-react-vite:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_DIR: "web/with-react-vite"
+    <<: *build-project-template
+
+  # Job for Vue Vite projects
+  build-vue-vite:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_DIR: "web/with-vue-vite"
+    <<: *build-project-template
+
+  # Job for Svelte Vite projects
+  build-svelte-vite:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_DIR: "web/with-svelte-vite"
+    <<: *build-project-template
 
   # build-mobile-projects:
   #   runs-on: ubuntu-latest
