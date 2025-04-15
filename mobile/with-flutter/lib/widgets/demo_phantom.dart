@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:para_flutter/client/para.dart';
 import 'package:solana_web3/programs.dart';
 import 'package:solana_web3/solana_web3.dart';
@@ -15,14 +14,6 @@ class DemoPhantomState extends State<DemoPhantom> {
   @override
   void initState() {
     super.initState();
-  }
-
-  Future<void> _copyAddress(String address) async {
-    await Clipboard.setData(ClipboardData(text: address));
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Address copied to clipboard')),
-    );
   }
 
   Future<void> _signTransaction() async {
@@ -46,8 +37,7 @@ class DemoPhantomState extends State<DemoPhantom> {
           ),
         ]);
 
-    final signedTransaction =
-        await phantomConnector.signTransaction(transaction);
+    await phantomConnector.signTransaction(transaction);
   }
 
   void _signMessage() {

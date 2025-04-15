@@ -26,7 +26,7 @@ dev_dependencies:
 dependency_overrides:
   pinenacl: 0.6.0
   para:
-    path: /Users/tyson/dev/flutter-sdk
+    path: /Users/tyson/dev/flutter-sdk # TODO REMOVE THIS
 
 flutter:
   uses-material-design: true

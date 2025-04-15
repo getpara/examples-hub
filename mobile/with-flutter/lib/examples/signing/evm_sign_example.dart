@@ -14,10 +14,6 @@ class EVMSignExample extends StatefulWidget {
 }
 
 class _EVMSignExampleState extends State<EVMSignExample> {
-  bool _isLoading = false;
-  String? _lastSignature;
-  String? _error;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -12,7 +12,7 @@ String randomTestEmail({
   final result =
       List.generate(length, (_) => chars[random.nextInt(chars.length)]).join();
 
-  return "$result@$domain";
+  return '$result@$domain';
 }
 
 String randomTestPhone({
