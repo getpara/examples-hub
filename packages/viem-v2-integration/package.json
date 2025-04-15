@@ -18,11 +18,11 @@
   },
   "devDependencies": {
     "typescript": "5.1.6",
-    "viem": "2.x",
-    "wagmi": "2.x"
+    "viem": "^2.24.2",
+    "wagmi": "^2.14.16"
   },
   "peerDependencies": {
-    "viem": "2.x"
+    "viem": "^2.24.2"
   },
   "files": [
     "dist",

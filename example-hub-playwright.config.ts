@@ -58,13 +58,13 @@ export default defineConfig({
     {
       command: `yarn start-e2e-portal`,
       url: 'http://localhost:3003',
-      reuseExistingServer: true,
+      reuseExistingServer: !process.env.CI,
       timeout: 240 * 1000,
     },
     {
       command: `cd ../examples-hub/${process.env.E2E_APP_DIR} && ${process.env.APP_START_COMMAND}`,
       url: `http://localhost:${process.env.APP_PORT}`,
-      reuseExistingServer: true,
+      reuseExistingServer: !process.env.CI,
       timeout: 240 * 1000,
     },
   ],

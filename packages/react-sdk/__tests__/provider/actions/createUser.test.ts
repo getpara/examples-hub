@@ -32,7 +32,7 @@ describe('createUser', () => {
       expect(createUser(undefined, { email: 'test@test.com' })).rejects.toThrowError();
     });
     it('no args', async () => {
-      expect(createUser(paraClient, undefined)).rejects.toThrowError();
+      await expect(createUser(paraClient, undefined)).rejects.toThrowError();
     });
   });
 });

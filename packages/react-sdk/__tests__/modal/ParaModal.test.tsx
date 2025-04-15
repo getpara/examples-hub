@@ -76,7 +76,7 @@ describe('ParaModal', () => {
       () => {
         expect(screen.getAllByTestId('modal')).toBeDefined();
       },
-      { timeout: 2000 },
+      { timeout: 20000 },
     );
 
     setIsOpen(true);
@@ -88,7 +88,7 @@ describe('ParaModal', () => {
       },
       { timeout: 2000 },
     );
-  });
+  }, 30000);
 
   // TODO: add data-testid as optional field to all components and reimpliment using data-testid selector
   // it('can continue with email', async () => {

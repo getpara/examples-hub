@@ -77,9 +77,13 @@ export function getCosmosAddress(publicKey: string, prefix: string) {
 export function truncateAddress(
   str: string,
   addressType: WalletTypeProp,
-  { prefix = addressType === 'COSMOS' ? 'cosmos' : undefined }: { prefix?: string } = {},
+  {
+    prefix = addressType === 'COSMOS' ? 'cosmos' : undefined,
+    targetLength,
+  }: { prefix?: string; targetLength?: number } = {},
 ): string {
-  const headLength = (addressType === 'COSMOS' ? prefix.length : addressType === 'SOLANA' ? 0 : 2) + 4;
+  const minimum = addressType === 'COSMOS' ? prefix.length : addressType === 'EVM' ? 2 : 0;
+  const margin = targetLength !== undefined ? (targetLength - minimum) / 2 : 4;
 
-  return `${str.slice(0, headLength)}...${str.slice(-4)}`;
+  return `${str.slice(0, minimum + margin)}...${str.slice(-1 * margin)}`;
 }

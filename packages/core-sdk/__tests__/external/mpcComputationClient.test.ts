@@ -15,7 +15,7 @@ describe('mpcComputationClient', () => {
       expect(resp.getUri()).toBe(getBaseMPCNetworkUrl(Environment.DEV));
     });
     describe('with adapter', () => {
-      it('success', () => {
+      it('success', async () => {
         const resp = initClient(getBaseMPCNetworkUrl(Environment.DEV), true);
 
         expect(resp.defaults.adapter).toBeTypeOf('function');
@@ -24,10 +24,10 @@ describe('mpcComputationClient', () => {
         const resolvedFetch = vi.fn().mockResolvedValue({ text: async () => Promise.resolve({}) });
         global.fetch = resolvedFetch;
 
-        expect(resp.get('/')).resolves.not.toThrowError();
+        await expect(resp.get('/')).resolves.not.toThrowError();
         expect(resolvedFetch).toBeCalled();
       });
-      it('fail', () => {
+      it('fail', async () => {
         const resp = initClient(getBaseMPCNetworkUrl(Environment.DEV), true);
 
         expect(resp.defaults.adapter).toBeTypeOf('function');
@@ -36,7 +36,7 @@ describe('mpcComputationClient', () => {
         const resolvedFetch = vi.fn().mockRejectedValue('test fail');
         global.fetch = resolvedFetch;
 
-        expect(resp.get('/')).rejects.toThrowError('test fail');
+        await expect(resp.get('/')).rejects.toThrowError('test fail');
         expect(resolvedFetch).toBeCalled();
       });
     });

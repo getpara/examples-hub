@@ -31,13 +31,15 @@ module.exports = [
     name: 'Base JavaScript and JSX Rules',
     files: ['**/*.js', '**/*.jsx'],
     ignores: [
+      '**/dist/**',
+      '**/build/**',
       '**/*.min.js',
       '**/mpcWorker-bundle.js',
       '**/mpcWorkerServer-bundle.js',
       '**/wasm_exec.js',
       '**/dist/**',
       '**/build/**',
-      '**/fixExtensions.js',
+      '**/preBuild.js',
       '**/appendLoaderExports.ts',
     ],
     languageOptions: {
@@ -116,7 +118,7 @@ module.exports = [
   },
   {
     name: 'Override for no console',
-    files: ['examples/**', 'examples/**/*.*', 'e2e/scripts/**'],
+    files: ['examples/**', 'examples/**/*.*', 'e2e/scripts/**', 'tools/**'],
     rules: {
       'no-console': 'off',
     },

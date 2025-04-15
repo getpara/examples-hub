@@ -16,10 +16,17 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
     onModalStepChange?.({ previousStep, currentStep: step, canGoBack: get().hasPreviousStep() });
   },
   decrementStep: () => {
+    const currentStep = get().step;
+    const onRampStep = get().onRampStep;
+
+    if ([ModalStep.ADD_FUNDS_BUY, ModalStep.ADD_FUNDS_WITHDRAW].includes(currentStep) && onRampStep > 0) {
+      set({ onRampStep: onRampStep - 1 });
+      return;
+    }
+
     const onModalStepChange = get().onModalStepChange;
     const isLogin = get().flow === 'login';
     const isAccount = get().flow === 'account';
-    const currentStep = get().step;
     const signupState = get().getSignupState();
     const iFrameUrl = get().iFrameUrl;
     const refs = get().refs;
@@ -47,6 +54,11 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
     const isLogin = get().flow === 'login';
     const isAccount = get().flow === 'account';
     const currentStep = get().step;
+    const onRampStep = get().onRampStep;
+
+    if ([ModalStep.ADD_FUNDS_BUY, ModalStep.ADD_FUNDS_WITHDRAW].includes(currentStep) && onRampStep > 0) {
+      return true;
+    }
 
     return !!(isAccount
       ? AccountPreviousStep[currentStep]
@@ -76,6 +88,7 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
   setOnRampPurchase: onRampPurchase =>
     set(state => ({ onRampPurchase: { ...(state.onRampPurchase || {}), ...onRampPurchase } })),
   setOnRampConfig: onRampConfig => set({ onRampConfig }),
+  setOnRampStep: onRampStep => set({ onRampStep }),
   setIsFullyLoggedIn: isFullyLoggedIn => set({ isFullyLoggedIn }),
   setAccountAddFundTab: accountAddFundTab => set({ accountAddFundTab }),
   setSelectedExternalWalletId: selectedExternalWalletId => set({ selectedExternalWalletId }),

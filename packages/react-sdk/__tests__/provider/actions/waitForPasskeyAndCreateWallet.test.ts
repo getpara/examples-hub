@@ -18,7 +18,7 @@ describe('waitForPasskeyAndCreateWallet', () => {
   });
   describe('fail', () => {
     it('no para', async () => {
-      expect(waitForPasskeyAndCreateWallet(undefined)).rejects.toThrowError();
+      await expect(waitForPasskeyAndCreateWallet(undefined)).rejects.toThrowError();
     });
   });
 });

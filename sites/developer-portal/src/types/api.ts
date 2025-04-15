@@ -162,6 +162,7 @@ export type ApiKey = {
   androidSha256CertFingerprints: string[] | null;
   androidPackageName: string | null;
   supportedAuthMethods: string[] | null;
+  sessionMaxAge: string | null;
 };
 
 export type ApiKeyResponse = { key: ApiKey };
@@ -223,6 +224,7 @@ export type UpdateApiKeyBody = Nullable<
       | 'androidSha256CertFingerprints'
       | 'androidPackageName'
       | 'supportedAuthMethods'
+      | 'sessionMaxAge'
     >
   >
 >;

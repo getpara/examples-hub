@@ -6,7 +6,7 @@ import { useState } from 'react';
 export const ParaProfile = () => {
   const { data: account } = useAccount();
   const { data: wallet } = useWallet();
-  const { signMessageAsync } = useSignMessage();
+  const { signMessageAsync, error } = useSignMessage();
   const paraClient = useClient();
 
   const [message, setMessage] = useState<string>('');
@@ -39,7 +39,7 @@ export const ParaProfile = () => {
           Connected Para Wallet:{' '}
           {account?.isConnected
             ? wallet
-              ? paraClient.getDisplayAddress(wallet.id, { truncate: true, addressType: wallet.type })
+              ? paraClient?.getDisplayAddress(wallet.id, { truncate: true, addressType: wallet.type })
               : 'No Wallet Selected'
             : 'Not Connected'}
         </CpslText>
@@ -52,6 +52,7 @@ export const ParaProfile = () => {
               }}
             />
             {messageSignature && <OverflowText>Message Signature: {messageSignature}</OverflowText>}
+            {error && <OverflowText color="error">{error.message}</OverflowText>}
             <CpslButton disabled={!message} onClick={handleSign}>
               Sign Message
             </CpslButton>

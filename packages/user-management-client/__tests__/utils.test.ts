@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   extractAuthInfo,
   extractWalletRef,
+  fromAccountMetadata,
   isExternalWalletAddress,
   isPregenAuth,
   isPrimary,
@@ -74,6 +75,12 @@ describe('utils', () => {
         authType: 'phone',
         identifier: `${countryCode}${phoneNational}`,
       });
+
+      expect(extractAuthInfo({ phone: '+10' })).toEqual(undefined);
+
+      expect(extractAuthInfo({ phone: '0', countryCode: '+1' })).toEqual(undefined);
+
+      expect(extractAuthInfo({ phone: '0', countryCode: '1' })).toEqual(undefined);
 
       expect(extractAuthInfo({ countryCode, foo: 'bar', email: 'null' })).toBeUndefined();
 
@@ -218,5 +225,15 @@ describe('utils', () => {
     expect(toPregenIds({ xUsername })).toEqual({ TWITTER: [xUsername] });
     expect(toPregenIds({ discordUsername })).toEqual({ DISCORD: [discordUsername] });
     expect(toPregenIds({ customId })).toEqual({ CUSTOM_ID: [customId] });
+  });
+
+  it('fromAccountMetadata', () => {
+    const date = new Date();
+    expect(fromAccountMetadata({ google: { date: date.toISOString(), metadata: { foo: 'bar' } } })).toEqual({
+      google: {
+        date,
+        metadata: { foo: 'bar' },
+      },
+    });
   });
 });

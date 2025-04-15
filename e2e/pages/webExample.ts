@@ -7,6 +7,16 @@ import { AuthPortalPage } from './authPortal';
 
 const MESSAGE_TO_SIGN = 'hello world';
 
+function getRandomPhoneNumber() {
+  const last4 = `${Math.floor(Math.random() * 10000)}`.padStart(4, '0');
+  return `415555${last4}`;
+}
+
+function getRandomEmail() {
+  const randomHexString = crypto.randomBytes(5).toString('hex');
+  return `teste2e+${randomHexString}@test.usecapsule.com`;
+}
+
 export class WebExamplePage {
   page: Page;
 
@@ -24,37 +34,35 @@ export class WebExamplePage {
     is2FAEnabled,
     isRecoverySecretEnabled,
     password,
+    usePhoneNumber = false,
   }: {
     context: BrowserContext;
     openModalText?: string;
     is2FAEnabled?: boolean;
     isRecoverySecretEnabled?: boolean;
     password?: string;
+    usePhoneNumber?: boolean;
   }) {
     await this.page.waitForTimeout(700);
     await this.page.getByRole('button', { name: openModalText }).click();
     await this.page.waitForTimeout(1000);
 
-    const randomHexString = crypto.randomBytes(5).toString('hex');
-    const email = `teste2e+${randomHexString}@test.usecapsule.com`;
-    await this.page.getByRole('textbox', { name: /^Enter email/ }).click();
+    const emailOrPhone = usePhoneNumber ? getRandomPhoneNumber() : getRandomEmail();
+    const enterEmailOrPhoneInput = await this.page.getByRole('textbox', { name: 'Enter email or phone' }).elementHandle();
+    await enterEmailOrPhoneInput.click();
     await this.page.waitForTimeout(300);
-    await this.page.getByRole('textbox', { name: /^Enter email/ }).fill(email);
+    for (let i = 0; i < emailOrPhone.length; i++) {
+      await enterEmailOrPhoneInput.press(emailOrPhone[i]);
+      await this.page.waitForTimeout(50);
+    }
     await this.page.waitForTimeout(500);
     await this.page.locator('.primary > .hydrated > div > svg').first().click();
     await this.page.waitForTimeout(3000);
 
-    await this.page.locator('#code-input-0').fill('1');
-    await this.page.locator('#code-input-1').click();
-    await this.page.locator('#code-input-1').fill('2');
-    await this.page.locator('#code-input-2').click();
-    await this.page.locator('#code-input-2').fill('3');
-    await this.page.locator('#code-input-3').click();
-    await this.page.locator('#code-input-3').fill('4');
-    await this.page.locator('#code-input-4').click();
-    await this.page.locator('#code-input-4').fill('5');
-    await this.page.locator('#code-input-5').click();
-    await this.page.locator('#code-input-5').fill('6');
+    for (let i = 0; i < 6; i++) {
+      await this.page.locator(`#code-input-${i}`).click();
+      await this.page.locator(`#code-input-${i}`).fill((i + 1).toString());
+    }
 
     let credentials: Protocol.WebAuthn.Credential[] = [];
     if (password) {
@@ -91,7 +99,7 @@ export class WebExamplePage {
 
     await this.page.waitForTimeout(2000);
     return {
-      email,
+      emailOrPhone,
       credential: credentials[0],
       clipboardText,
     };
@@ -100,14 +108,14 @@ export class WebExamplePage {
   async login({
     context,
     credential,
-    email,
+    emailOrPhone,
     openModalText = 'Open Modal',
     is2FAEnabled,
     password,
   }: {
     context: BrowserContext;
     credential: Protocol.WebAuthn.Credential;
-    email: string;
+    emailOrPhone: string;
     openModalText?: string;
     is2FAEnabled?: boolean;
     password?: string;
@@ -116,8 +124,18 @@ export class WebExamplePage {
     await this.page.waitForTimeout(500);
     await this.page.getByRole('button', { name: openModalText }).click();
     await this.page.waitForTimeout(750);
-    await this.page.getByRole('textbox', { name: /^Enter email/ }).click();
-    await this.page.getByRole('textbox', { name: /^Enter email/ }).fill(email);
+
+    await this.page.reload();
+    await this.page.waitForTimeout(500);
+    await this.page.getByRole('button', { name: openModalText }).click();
+    await this.page.waitForTimeout(750);
+
+    const enterEmailOrPhoneInput = await this.page.getByRole('textbox', { name: 'Enter email or phone' }).elementHandle();
+    await enterEmailOrPhoneInput.click();
+    await this.page.waitForTimeout(300);
+    for (let i = 0; i < emailOrPhone.length; i++) {
+      await enterEmailOrPhoneInput.press(emailOrPhone[i]);
+    }
     await this.page.waitForTimeout(250);
     await this.page.locator('.primary > .hydrated > div > svg').first().click();
 

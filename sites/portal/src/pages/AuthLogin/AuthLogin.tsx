@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { AuthLoginStep } from '../../constants';
+import { AuthLoginStep, PARA_PORTAL_ID } from '../../constants';
 import { Body } from './components/Body';
 import { Card, CardContent } from '../../components/common';
 import { ModalHeader } from '../../components/ModalHeader';
@@ -14,7 +14,7 @@ import { AuthMethod, isPasskeySupported } from '@getpara/web-sdk';
 const AuthLoginBase = ({ authMethod }) => {
   const para = usePara();
   const closeWindow = useCloseWindow();
-  const { toggleBranding } = useModalOutletContext();
+  const { toggleBranding, partner } = useModalOutletContext();
   const {
     fns: { authLogin, authLoginWithPassword, fetchWallets, authUpdateKeyShares },
     authInfo,
@@ -46,19 +46,34 @@ const AuthLoginBase = ({ authMethod }) => {
 
     const wallets = await fetchWallets();
 
-    const [isWithoutWallets, isOnlyOwnedPartnerWallets] = [
-      Object.values(wallets).every(arr => arr.length === 0),
-      para.supportedWalletTypes.every(
-        ({ type }) =>
-          wallets[type].length === 1 && wallets[type][0].partnerId === partnerId && !wallets[type][0].pregenIdentifier,
-      ),
-    ];
+    const isWithoutWallets = Object.values(wallets).every(arr => arr.length === 0);
+
+    if (partner.id === PARA_PORTAL_ID) {
+      const allWalletIds = para.supportedWalletTypes.reduce(
+        (acc, { type }) => ({ ...acc, [type]: wallets[type].map(({ id }) => id) }),
+        {},
+      );
+      await para.setCurrentWalletIds(allWalletIds, {
+        sessionLookupId: sessionId,
+        needsWallet: isWithoutWallets,
+        newDeviceSessionLookupId,
+      });
+      await authUpdateKeyShares(loginRes);
+
+      setStep(fromKnownDevice ? AuthLoginStep.SUCCESS_FROM_KNOWN_DEVICE : AuthLoginStep.SUCCESS);
+      return;
+    }
+
+    const isOnlyOwnedPartnerWallets = para.supportedWalletTypes.every(
+      ({ type }) =>
+        wallets[type].length === 1 && wallets[type][0].partnerId === partnerId && !wallets[type][0].pregenIdentifier,
+    );
 
     const defaultWalletIds = isOnlyOwnedPartnerWallets
       ? para.supportedWalletTypes.reduce((acc, { type }) => ({ ...acc, [type]: wallets[type].map(({ id }) => id) }), {})
       : undefined;
 
-    if (!!defaultWalletIds || (isWithoutWallets && !para.ctx.apiKey)) {
+    if (para.isNoWalletConfig || !!defaultWalletIds || (isWithoutWallets && !para.ctx.apiKey)) {
       await para.setCurrentWalletIds(defaultWalletIds ?? {}, {
         sessionLookupId: sessionId,
         needsWallet: isWithoutWallets,

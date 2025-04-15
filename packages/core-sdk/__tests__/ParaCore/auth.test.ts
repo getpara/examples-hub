@@ -53,6 +53,7 @@ import {
   getSignupState,
   getLoginState,
   mockKeepSessionAlive,
+  mockGetAccountMetadata,
 } from '../mocks/mockUserManagementClient';
 import { getWallet, prepareMock } from '../utils.js';
 import { WalletType } from '@getpara/user-management-client';
@@ -1002,6 +1003,30 @@ describe('ParaCore - authentication', () => {
     });
   });
   describe('helpers', () => {
+    describe('account metadata', () => {
+      it('fails with no session', async () => {
+        const para = new MockPara(Environment.DEV, API_KEY);
+
+        mockTouchSession.mockResolvedValueOnce({
+          isAuthenticated: false,
+          partnerId: PARTNER.id,
+          supportedWalletTypes: [],
+        });
+
+        await expect(para.getAccountMetadata()).rejects.toThrowError();
+      });
+
+      it('retrieves account metadata', async () => {
+        const para = new MockPara(Environment.DEV, API_KEY);
+        await para.setUserId(USER_ID);
+
+        mockGetAccountMetadata.mockResolvedValueOnce({ accountMetadata: { google: 'any' } });
+        const res = await para.getAccountMetadata();
+
+        expect(mockGetAccountMetadata).toHaveBeenCalledWith(USER_ID, PARTNER.id);
+        expect(res).toEqual({ google: 'any' });
+      });
+    });
     it('keepSessionAlive', async () => {
       para = new MockPara(Environment.DEV, API_KEY);
 

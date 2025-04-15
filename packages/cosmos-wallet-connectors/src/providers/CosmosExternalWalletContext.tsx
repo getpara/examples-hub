@@ -87,10 +87,10 @@ export function CosmosExternalWalletProvider({
   const isLocalConnecting = useExternalWalletStore(state => state.isConnecting);
   const updateExternalWalletState = useExternalWalletStore(state => state.updateState);
 
-  const verificationMessage = useRef<string>();
-
   const bufferAddress = multiChain ? account?.[selectedChainId]?.address.toString() : account?.address.toString();
   const address = multiChain ? account?.[selectedChainId]?.bech32Address : account?.bech32Address;
+
+  const verificationMessage = useRef<string>();
 
   const reset = async () => {
     await disconnectAsync();

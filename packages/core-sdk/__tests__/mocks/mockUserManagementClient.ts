@@ -125,6 +125,10 @@ export const mockVerifyTelegramV2 = vi.fn<Parameters<Client['verifyTelegramV2']>
 export const mockKeepSessionAlive = vi.fn();
 export const mockCreateOnRampPurchase = vi.fn();
 export const mockGetPendingTransaction = vi.fn();
+export const mockGetWalletBalance = vi.fn().mockResolvedValue({ balance: '1000' });
+export const mockResendVerificationCode = vi.fn();
+export const mockResendVerificationCodeByPhone = vi.fn();
+export const mockGetAccountMetadata = vi.fn();
 
 export function resetClientMocks() {
   mockLoginExternalWallet.mockResolvedValue(getVerifyState({ externalWalletAddress: EXTERNAL_WALLET.address }));
@@ -233,6 +237,11 @@ vi.mock('@getpara/user-management-client', async importOriginal => {
       createOnRampPurchase: mockCreateOnRampPurchase,
       getBiometricLocationHints: mockGetBiometricLocationHints,
       getPendingTransaction: mockGetPendingTransaction,
+      verifyExternalWallet: mockVerifyExternalWallet,
+      getWalletBalance: mockGetWalletBalance,
+      resendVerificationCode: mockResendVerificationCode,
+      resendVerificationCodeByPhone: mockResendVerificationCodeByPhone,
+      getAccountMetadata: mockGetAccountMetadata,
     })),
   };
 });

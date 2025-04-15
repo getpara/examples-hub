@@ -38,7 +38,7 @@ export const AuthenticatedWrapper = ({ requireOrgs, children }: AuthenticatedWra
   useEffect(() => {
     if (isInvite && !isLoadingLoggedIn) {
       if (account?.isConnected && !isLoadingInvite) {
-        if (inviteId && !invite) {
+        if (!inviteId || (inviteId && !invite)) {
           triggerToast({
             variant: 'error',
             title: 'Invite not found',
@@ -73,7 +73,15 @@ export const AuthenticatedWrapper = ({ requireOrgs, children }: AuthenticatedWra
         setSelectedOrganization();
       }
     }
-  }, []);
+  }, [
+    isInvite,
+    isLoadingLoggedIn,
+    isLoadingOrgs,
+    account?.isConnected,
+    isOnboarding,
+    orgsWithAccess?.length,
+    setSelectedOrganization,
+  ]);
 
   const appBarHeight = isInvite || isOnboarding ? AUTH_MIN_APP_BAR_HEIGHT : AUTH_APP_BAR_HEIGHT;
 

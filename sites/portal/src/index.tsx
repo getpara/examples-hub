@@ -28,7 +28,7 @@ const OnRampTransaction = lazy(() =>
 const TelegramLogin = lazy(() => import('./pages/TelegramLogin').then(module => ({ default: module.TelegramLogin })));
 const ShortUrl = lazy(() => import('./pages/ShortUrl/ShortUrl'));
 
-const App = () => {
+export const App = () => {
   const [searchParams] = useSearchParams();
   const apiKey = searchParams.get('apiKey') || undefined;
   const partnerId = searchParams.get('partnerId') || undefined;

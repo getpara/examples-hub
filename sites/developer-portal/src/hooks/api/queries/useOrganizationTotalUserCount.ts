@@ -2,14 +2,16 @@ import { useQuery } from '@tanstack/react-query';
 import { OrganizationTotalUserCountResponse } from '../../../types/api';
 import { getOrganizationTotalUserCount } from '../../../api/organizations/queries';
 import { useParams } from 'react-router-dom';
+import { useIsValidOrg } from '../../useIsValidOrgConfig';
 
 export const ORGANIZATIONS_TOTAL_USER_COUNT_QUERY_KEY = 'organizationTotalUserCount';
 
 export const useOrganizationTotalUserCountQuery = <T>(select: (data: OrganizationTotalUserCountResponse) => T) => {
   const { organizationId } = useParams();
+  const isOrgValid = useIsValidOrg(organizationId);
 
   return useQuery({
-    enabled: !!organizationId,
+    enabled: isOrgValid,
     queryKey: [ORGANIZATIONS_TOTAL_USER_COUNT_QUERY_KEY, organizationId],
     queryFn: async () => {
       const { data } = await getOrganizationTotalUserCount(organizationId ?? '');

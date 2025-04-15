@@ -5,6 +5,7 @@ import { sub } from 'date-fns';
 import { TODAY } from '../../../utils/constants';
 import { formatTSData } from '../../../utils/analyticsDataFormatters';
 import { useParams } from 'react-router-dom';
+import { useIsValidOrg } from '../../useIsValidOrgConfig';
 
 export const ORGANIZATIONS_TOTAL_USERS_TS_QUERY_KEY = 'organizationTotalUsersTS';
 
@@ -17,9 +18,10 @@ export const useOrganizationTotalUsersTSQuery = <T>(
   select: (data: OrganizationTotalUsersTSResponse) => T,
 ) => {
   const { organizationId } = useParams();
+  const isOrgValid = useIsValidOrg(organizationId);
 
   return useQuery({
-    enabled: !!organizationId,
+    enabled: isOrgValid,
     queryKey: [ORGANIZATIONS_TOTAL_USERS_TS_QUERY_KEY, organizationId, startDate, endDate],
     queryFn: async () => {
       const { data } = await getOrganizationTotalUsersTS(organizationId ?? '', startDate, endDate);

@@ -5,8 +5,11 @@
   "type": "module",
   "scripts": {
     "build": "rm -rf dist && tsc && vite build",
-    "deploy-prod": "yarn && VITE_CAPSULE_API_KEY=533efae5f7427d73cf9c1cc7e32b627b VITE_WALLET_CONNECT_PROJECT_ID=dc87c564a371d823d3795ae407391656 yarn build && aws s3 sync dist/ s3://capsule-prod-demo-site --profile prod --delete",
-    "deploy-sandbox": "yarn && VITE_CAPSULE_API_KEY=dd4d7071735029ce97dce17969e82ad6 VITE_WALLET_CONNECT_PROJECT_ID=dc87c564a371d823d3795ae407391656 yarn build && aws s3 sync dist/ s3://capsule-sandbox-demo-site --profile sandbox --delete",
+    "build-for-deploy": "yarn --cwd ../.. lerna run build --scope=modal-builder --include-dependencies",
+    "build-sandbox": "VITE_CAPSULE_API_KEY=dd4d7071735029ce97dce17969e82ad6 VITE_WALLET_CONNECT_PROJECT_ID=dc87c564a371d823d3795ae407391656 yarn build-for-deploy",
+    "build-prod": "VITE_CAPSULE_API_KEY=533efae5f7427d73cf9c1cc7e32b627b VITE_WALLET_CONNECT_PROJECT_ID=dc87c564a371d823d3795ae407391656 yarn build-for-deploy",
+    "legacy-deploy-prod": "yarn && VITE_CAPSULE_API_KEY=533efae5f7427d73cf9c1cc7e32b627b VITE_WALLET_CONNECT_PROJECT_ID=dc87c564a371d823d3795ae407391656 yarn build && aws s3 sync dist/ s3://capsule-prod-demo-site --profile prod --delete",
+    "legacy-deploy-sandbox": "yarn && VITE_CAPSULE_API_KEY=dd4d7071735029ce97dce17969e82ad6 VITE_WALLET_CONNECT_PROJECT_ID=dc87c564a371d823d3795ae407391656 yarn build && aws s3 sync dist/ s3://capsule-sandbox-demo-site --profile sandbox --delete",
     "dev": "vite --host",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
@@ -17,7 +20,6 @@
     "styled-components": "5"
   },
   "dependencies": {
-    "@delphi-labs/shuttle": "3.28.0",
     "@dnd-kit/core": "6.1.0",
     "@dnd-kit/sortable": "8.0.0",
     "@dnd-kit/utilities": "3.2.2",
@@ -29,8 +31,8 @@
     "@getpara/solana-wallet-connectors": "2.0.0-alpha.0",
     "@radix-ui/react-switch": "1.1.0",
     "@solana/wallet-adapter-base": "0.9.23",
-    "@solana/web3.js": "1.95.8",
-    "@tanstack/react-query": "^5.0.0",
+    "@solana/web3.js": "^1.98.0",
+    "@tanstack/react-query": "^5.24.1",
     "imask": "7.6.1",
     "jotai": "2.10.0",
     "lodash.merge": "4.6.2",
@@ -43,9 +45,10 @@
     "react-router-dom": "6.24.1",
     "shiki": "1.17.7",
     "styled-components": "6.1.8",
-    "wagmi": "2.x"
+    "wagmi": "^2.14.16"
   },
   "devDependencies": {
+    "@delphi-labs/shuttle": "4.1.0",
     "@eslint/js": "9.9.0",
     "@types/lodash.merge": "4.6.9",
     "@types/react": "18.2.66",

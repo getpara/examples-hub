@@ -5,7 +5,7 @@ import {
   OnRampAssetInfo,
   getNetworkName,
   getNetworkIcon,
-  getAssetName,
+  getAssetCode,
   getAssetIcon,
 } from '@getpara/react-sdk';
 import { InnerSelect, OptionDisplay } from '../common.js';
@@ -145,11 +145,11 @@ export function NetworkAssetSelector({
                           showFormattedSelectedItem
                         >
                           {asset && (
-                            <OptionDisplay name={getAssetName(asset)} icon={getAssetIcon(asset)} slot="selected-item" />
+                            <OptionDisplay name={getAssetCode(asset)} icon={getAssetIcon(asset)} slot="selected-item" />
                           )}
                           {assetOptions.map((a: OnRampAsset) => (
                             <CpslSelectItem key={a} value={a} slot="items">
-                              <OptionDisplay name={getAssetName(a)} icon={getAssetIcon(a)} />
+                              <OptionDisplay name={getAssetCode(a)} icon={getAssetIcon(a)} />
                             </CpslSelectItem>
                           ))}
                         </InnerSelect>
@@ -170,7 +170,7 @@ export function NetworkAssetSelector({
                   >
                     {assetOptions.map((a: OnRampAsset) => (
                       <CpslSelectItem key={a} value={a} slot="items">
-                        <OptionDisplay name={getAssetName(a)} icon={getAssetIcon(a)} />
+                        <OptionDisplay name={getAssetCode(a)} icon={getAssetIcon(a)} />
                       </CpslSelectItem>
                     ))}
                   </InnerSelect>

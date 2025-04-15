@@ -45,5 +45,50 @@ describe('workerWrapper', () => {
       await resPromise;
       expect(resFunction).toBeCalledWith({ message: 'worker-test' });
     });
+
+    it('sets up a timeout that cleans up worker reference', async () => {
+      let timeoutCallback: Function;
+
+      vi.spyOn(global, 'setTimeout').mockImplementation((callback: any, _timeout: any): any => {
+        timeoutCallback = callback;
+        return 123;
+      });
+
+      const clearTimeoutMock = vi.fn();
+      vi.spyOn(global, 'clearTimeout').mockImplementation(clearTimeoutMock);
+
+      const workId = uuid.v4();
+      await setupWorker({ env: Environment.DEV } as any, vi.fn(), workId);
+
+      timeoutCallback();
+      expect(clearTimeoutMock).not.toHaveBeenCalled();
+      vi.restoreAllMocks();
+    });
+
+    it('throws error when worker emits an error event', async () => {
+      const workId = uuid.v4();
+      const worker = await setupWorker({ env: Environment.DEV } as any, vi.fn(), workId);
+
+      const errorHandler = worker.listeners('error')[0];
+      const testError = new Error('Test worker error');
+
+      expect(() => {
+        errorHandler(testError);
+      }).toThrow('Test worker error');
+    });
+
+    it('logs error when worker emits an exit event', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      const workId = uuid.v4();
+      const worker = await setupWorker({ env: Environment.DEV } as any, vi.fn(), workId);
+
+      const exitHandler = worker.listeners('exit')[0];
+      const exitCode = 1;
+
+      exitHandler(exitCode);
+      expect(consoleSpy).toHaveBeenCalledWith(`worker stopped with exit code ${exitCode}`);
+      consoleSpy.mockRestore();
+    });
   });
 });

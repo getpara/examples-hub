@@ -21,10 +21,7 @@ const getStepConfig = ({
 }: {
   externalWalletError?: string[];
 }): Record<
-  | `${ModalStep.EX_WALLET_SELECTED}`
-  | `${ModalStep.CHAIN_SWITCH}`
-  | `${ModalStep.ACCOUNT_MAIN}`
-  | `${ModalStep.FARCASTER_OAUTH}`,
+  `${ModalStep.EX_WALLET_SELECTED}` | `${ModalStep.CHAIN_SWITCH}` | `${ModalStep.FARCASTER_OAUTH}`,
   StepHeroConfig
 > => ({
   [ModalStep.EX_WALLET_SELECTED]: {
@@ -37,12 +34,6 @@ const getStepConfig = ({
     variant: externalWalletError?.[0]?.toLowerCase() === NETWORK_NOT_SUPPORTED_ERROR ? 'failed' : 'externalWalletConnection',
     topOffset: 20,
     spacerHeight: 158,
-    hideFadeOut: true,
-  },
-  [ModalStep.ACCOUNT_MAIN]: {
-    variant: 'customContent',
-    topOffset: 0,
-    spacerHeight: 104,
     hideFadeOut: true,
   },
   [ModalStep.FARCASTER_OAUTH]: {

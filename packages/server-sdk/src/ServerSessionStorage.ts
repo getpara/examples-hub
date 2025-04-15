@@ -17,7 +17,7 @@ export class ServerSessionStorage implements StorageUtils {
   };
   clear = (prefix: string): void => {
     const keys = Object.keys(this.sessionStorage);
-    for (let key in keys) {
+    for (const key of keys) {
       if (key && key.startsWith(prefix)) {
         this.removeItem(key);
       }

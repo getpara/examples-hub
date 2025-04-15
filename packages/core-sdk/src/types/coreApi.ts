@@ -27,6 +27,8 @@ import {
   StorageType,
   PollParams,
   CoreAuthInfo,
+  GetWalletBalanceParams,
+  GetWalletBalanceResponse,
 } from './methods.js';
 import { ParaCore } from '../ParaCore.js';
 import { FullSignatureRes, Wallet } from './wallet.js';
@@ -77,6 +79,7 @@ export const PARA_CORE_METHODS = [
   'signMessage',
   'signTransaction',
   'initiateOnRampTransaction',
+  'getWalletBalance',
 ] as const;
 
 export type CoreMethodName = (typeof PARA_CORE_METHODS)[number];
@@ -277,7 +280,12 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
     response: boolean;
   };
   exportSession: {
-    params: void;
+    params: {
+      /**
+       * Whether to exclude the wallet signers from the exported session.
+       */
+      excludeSigners?: boolean;
+    };
     response: string;
     sync: true;
   };
@@ -545,6 +553,10 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
        */
       portalUrl: string;
     };
+  };
+  getWalletBalance: {
+    params: GetWalletBalanceParams;
+    response: GetWalletBalanceResponse;
   };
 };
 

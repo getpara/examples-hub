@@ -17,7 +17,7 @@
     "@cosmjs/cosmwasm-stargate": "<=0.31.3",
     "@cosmjs/launchpad": "*",
     "@cosmjs/proto-signing": "<=0.31.3",
-    "@cosmjs/stargate": "<=0.31.3",
+    "@cosmjs/stargate": "<=0.33.1",
     "@cosmjs/tendermint-rpc": "<=0.31.3",
     "@getpara/graz": "^1.0.0-dev.2",
     "@getpara/web-sdk": "^2.0.0-alpha.0",

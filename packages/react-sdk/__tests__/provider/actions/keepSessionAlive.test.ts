@@ -18,7 +18,7 @@ describe('keepSessionAlive', () => {
   });
   describe('fail', () => {
     it('no para', async () => {
-      expect(keepSessionAlive(undefined)).rejects.toThrowError();
+      await expect(keepSessionAlive(undefined)).rejects.toThrowError();
     });
   });
 });

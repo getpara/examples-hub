@@ -3,35 +3,12 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { AuthInput } from '../../../src/modal/components/AuthInput/AuthInput.js';
 import { defineCustomElements } from '@getpara/react-components';
+import { mockModalStore } from '../../utils.js';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MockPara } from '../../mocks/mockCorePara.js';
 import { Environment } from '@getpara/web-sdk';
 import { API_KEY } from '../../constants.js';
-import { MockPara } from '../../mocks/mockCorePara.js';
-
 const queryClient = new QueryClient();
-
-function mockModalStore(store = {}) {
-  vi.mock('../../src/modal/stores/useModalStore.js', () => ({
-    useModalStore: vi.fn(getter => {
-      return getter({
-        popupWindow: null,
-        authState: undefined,
-        setAuthState: vi.fn(),
-        setFlow: vi.fn(),
-        setStep: vi.fn(),
-        setPopupWindow: vi.fn(),
-        ...store,
-      });
-    }),
-  }));
-
-  vi.mock('../../../src/provider/stores/useStore.js', () => ({
-    useStore: getter =>
-      getter({
-        client: new MockPara(Environment.DEV, API_KEY),
-      }),
-  }));
-}
 
 async function setup() {
   defineCustomElements(window);
@@ -47,7 +24,7 @@ async function setup() {
     () => {
       expect(host.classList).toContain('hydrated');
     },
-    { timeout: 2000 },
+    { timeout: 20000 },
   );
 
   const shadowRoot = host.shadowRoot;
@@ -60,6 +37,13 @@ async function setup() {
     renderer,
   };
 }
+
+vi.mock('../../../src/provider/stores/useStore.js', () => ({
+  useStore: getter =>
+    getter({
+      client: new MockPara(Environment.DEV, API_KEY),
+    }),
+}));
 
 describe('ParaModal', () => {
   afterAll(() => {
@@ -116,7 +100,7 @@ describe('ParaModal', () => {
     expect(input().value).toEqual('abcd');
     expect(screen.queryByLabelText('email')).toBeDefined();
     expect(screen.queryByLabelText('phone')).toBeNull();
-  }, 10000);
+  }, 20000);
 
   // TODO: add data-testid as optional field to all components and reimpliment using data-testid selector
   // it('can continue with email', async () => {

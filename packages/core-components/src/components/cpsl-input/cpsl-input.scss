@@ -76,7 +76,7 @@
   height: var(--container-height);
   gap: var(--container-gap);
 
-  border-style: solid;
+  border-style: var(--container-border-style, solid);
   border-width: var(--container-border-width);
   border-color: var(--container-border-color);
   border-radius: var(--container-border-radius);
@@ -105,6 +105,8 @@
   font-weight: var(--input-font-weight);
   color: var(--input-color);
   background: var(--input-background-color);
+  width: var(--input-width, auto);
+  text-align: var(--input-text-align, left);
 
   resize: none;
 

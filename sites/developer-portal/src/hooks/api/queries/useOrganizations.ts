@@ -67,6 +67,13 @@ export const useGetSelectedOrganizationIsValid = () => {
   );
 };
 
+export const useGetOrganizationIsValid = (organizationId?: string) => {
+  return useOrganizationsQuery(data => {
+    const org = data.find(o => o.id === organizationId);
+    return !!org && !org.suspended && !org.archived;
+  });
+};
+
 export const useGetOrganizationEarlyAccess = () => {
   const { organizationId } = useParams();
 

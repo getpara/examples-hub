@@ -18,10 +18,10 @@ describe('initiateLogin', () => {
   });
   describe('fail', () => {
     it('no para', async () => {
-      expect(initiateLogin(undefined, { email: 'test@test.com' })).rejects.toThrowError();
+      await expect(initiateLogin(undefined, { email: 'test@test.com' })).rejects.toThrowError();
     });
     it('no args', async () => {
-      expect(initiateLogin(paraClient, undefined)).rejects.toThrowError();
+      await expect(initiateLogin(paraClient, undefined)).rejects.toThrowError();
     });
   });
 });

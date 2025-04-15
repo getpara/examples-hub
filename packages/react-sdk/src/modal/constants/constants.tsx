@@ -41,7 +41,20 @@ export const ON_RAMP_PROVIDERS: Record<OnRampProvider, OnRampProviderConfig> = {
   },
 };
 
-export const NETWORKS: Record<Network, { name: string; icon: IconType }> = {
+const ICON_TYPES = {
+  ethereum: { isDark: true },
+  usdcBrand: { isCircular: true },
+  arbitrumBrand: { isCircular: true },
+  baseBrand: { isCircular: true },
+  optimismBrand: { isCircular: true },
+  cosmos: { isCircular: true, isDark: true },
+  celoBrand: { isCircular: true },
+  tetherBrand: { isCircular: true },
+};
+
+type Networks = Record<Network, { name: string; icon: IconType; isCircular?: boolean; isDark?: boolean }>;
+
+export const NETWORKS: Networks = Object.entries({
   [Network.ETHEREUM]: { name: 'Ethereum', icon: 'ethereum' },
   [Network.SEPOLIA]: { name: 'Sepolia', icon: 'ethereum' },
   [Network.ARBITRUM]: { name: 'Arbitrum', icon: 'arbitrumBrand' },
@@ -51,13 +64,30 @@ export const NETWORKS: Record<Network, { name: string; icon: IconType }> = {
   [Network.SOLANA]: { name: 'Solana', icon: 'solana' },
   [Network.COSMOS]: { name: 'Cosmos', icon: 'cosmos' },
   [Network.CELO]: { name: 'Celo', icon: 'celoBrand' },
+  [Network.SOLANA_DEVNET]: { name: 'Solana Devnet', icon: 'solana' },
   [Network.NOBLE]: { name: 'Noble', icon: 'nobleBrand' },
-};
+}).reduce((acc: Networks, [key, entry]) => {
+  return {
+    ...acc,
+    [key]: {
+      ...entry,
+      ...ICON_TYPES[entry.icon],
+    },
+  };
+}, {} as Networks);
 
-export const ON_RAMP_ASSETS: Record<OnRampAsset, { name: string; code: string; icon: IconType }> = {
+type OnRampAssets = Record<
+  OnRampAsset,
+  { name: string; code: string; icon: IconType; isCircular?: boolean; isDark?: boolean }
+>;
+
+export const ON_RAMP_ASSETS: Record<
+  OnRampAsset,
+  { name: string; code: string; icon: IconType; isCircular?: boolean; isDark?: boolean }
+> = Object.entries({
   [OnRampAsset.ETHEREUM]: { name: 'Ethereum', code: 'ETH', icon: 'ethereum' },
-  [OnRampAsset.USDC]: { name: 'USDC', code: 'USDC', icon: 'usdcBrand' },
-  [OnRampAsset.POLYGON]: { name: 'Polygon', code: 'MATIC', icon: 'polygonBrand' },
+  [OnRampAsset.USDC]: { name: 'USD Coin', code: 'USDC', icon: 'usdcBrand' },
+  [OnRampAsset.POLYGON]: { name: 'Polygon', code: 'POL', icon: 'polygonBrand' },
   [OnRampAsset.SOLANA]: { name: 'Solana', code: 'SOL', icon: 'solana' },
   [OnRampAsset.ATOM]: { name: 'Atom', code: 'ATOM', icon: 'cosmos' },
   [OnRampAsset.CELO]: { name: 'Celo', code: 'CELO', icon: 'celoBrand' },
@@ -65,7 +95,15 @@ export const ON_RAMP_ASSETS: Record<OnRampAsset, { name: string; code: string; i
   [OnRampAsset.CUSD]: { name: 'Celo Dollar', code: 'CUSD', icon: 'celoBrand' },
   [OnRampAsset.CEUR]: { name: 'Celo Euro', code: 'CEUR', icon: 'celoBrand' },
   [OnRampAsset.CREAL]: { name: 'Celo Real', code: 'CREAL', icon: 'celoBrand' },
-};
+}).reduce((acc: OnRampAssets, [key, entry]) => {
+  return {
+    ...acc,
+    [key]: {
+      ...entry,
+      ...ICON_TYPES[entry.icon],
+    },
+  };
+}, {} as OnRampAssets);
 
 export function getNetworkName(str: Network | string) {
   return NETWORKS[str as Network]?.name ?? `${str[0]}${str.slice(1).toLowerCase()}`;
@@ -75,8 +113,12 @@ export function getNetworkIcon(str: Network | string): IconType {
   return NETWORKS[str as Network]?.icon ?? 'globe';
 }
 
-export function getAssetName(str: OnRampAsset | string) {
+export function getAssetCode(str: OnRampAsset | string) {
   return ON_RAMP_ASSETS[str as OnRampAsset]?.code ?? str;
+}
+
+export function getAssetName(str: OnRampAsset | string) {
+  return ON_RAMP_ASSETS[str as OnRampAsset]?.name ?? str;
 }
 
 export function getAssetIcon(str: OnRampAsset | string) {

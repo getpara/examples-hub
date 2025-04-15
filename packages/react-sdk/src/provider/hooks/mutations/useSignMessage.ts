@@ -5,6 +5,7 @@ import { Compute } from '../../types/utils.js';
 import { UseMutationReturnType } from '../../types/query.js';
 import { renameMutations } from '../../utils/renameMutations.js';
 import { FullSignatureRes } from '@getpara/web-sdk';
+import { EXTERNAL_WALLET_PACKAGE_BY_TYPE } from '../../utils/constants.js';
 
 type SignMessageMutationArgs = Omit<SignMessageArgs, 'walletId'> & Partial<Pick<SignMessageArgs, 'walletId'>>;
 
@@ -32,6 +33,12 @@ export const useSignMessage = () => {
       let walletId = args?.walletId;
 
       if (!walletId) {
+        if (wallet?.isExternal) {
+          throw Error(
+            `Cannot sign with Capsule using an external wallet. Try using the methods from ${wallet.type ? EXTERNAL_WALLET_PACKAGE_BY_TYPE[wallet.type] : 'the external wallet provider package'}.`,
+          );
+        }
+
         walletId = wallet?.id;
       }
 

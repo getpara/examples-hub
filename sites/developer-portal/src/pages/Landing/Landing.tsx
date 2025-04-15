@@ -29,8 +29,9 @@ export const Landing = () => {
 
 const StyledModal = styled(ParaModal)`
   width: 100%;
-  --card-box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.05), 0px 4px 6px 0px rgba(34, 42, 53, 0.04),
-    0px 24px 68px 0px rgba(47, 48, 55, 0.05), 0px 2px 3px 0px rgba(0, 0, 0, 0.04);
+  --card-box-shadow:
+    0px 1px 1px 0px rgba(0, 0, 0, 0.05), 0px 4px 6px 0px rgba(34, 42, 53, 0.04), 0px 24px 68px 0px rgba(47, 48, 55, 0.05),
+    0px 2px 3px 0px rgba(0, 0, 0, 0.04);
 
   &::part(modal-container) {
     width: 100%;

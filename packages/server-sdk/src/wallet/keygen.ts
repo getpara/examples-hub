@@ -3,13 +3,13 @@ import { waitUntilTrue, Ctx, TPregenIdentifierType } from '@getpara/core-sdk';
 import { setupWorker } from '../workers/workerWrapper.js';
 import { BackupKitEmailProps, WalletType } from '@getpara/user-management-client';
 
-async function isKeygenComplete(ctx: Ctx, userId: string, walletId: string): Promise<boolean> {
+export async function isKeygenComplete(ctx: Ctx, userId: string, walletId: string): Promise<boolean> {
   const wallets = await ctx.client.getWallets(userId);
   const wallet = wallets.data.wallets.find(w => w.id === walletId);
-  return !!wallet.address;
+  return !!wallet?.address;
 }
 
-async function isPreKeygenComplete(
+export async function isPreKeygenComplete(
   ctx: Ctx,
   pregenIdentifier: string,
   pregenIdentifierType: TPregenIdentifierType,
@@ -25,7 +25,6 @@ export function keygen(
   userId: string,
   type: WalletType,
   secretKey: string | null,
-  skipDistribute = false,
   sessionCookie?: string,
   _emailProps: BackupKitEmailProps = {},
 ): Promise<{
@@ -39,13 +38,11 @@ export function keygen(
       ctx,
       async res => {
         await waitUntilTrue(async () => isKeygenComplete(ctx, userId, res.walletId), 15000, 1000);
-        if (skipDistribute) {
-          resolve({
-            signer: res.signer,
-            walletId: res.walletId,
-            recoveryShare: null,
-          });
-        }
+        resolve({
+          signer: res.signer,
+          walletId: res.walletId,
+          recoveryShare: null,
+        });
       },
       workId,
     );

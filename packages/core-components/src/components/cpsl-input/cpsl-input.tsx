@@ -86,6 +86,11 @@ export class CpslInput {
   @Prop() errorText?: string;
 
   /**
+   * Update the native input size to match the text content
+   */
+  @Prop() fitContent = false;
+
+  /**
    * Mask string to apply to the input.
    */
   @Prop() mask?: string;
@@ -458,6 +463,7 @@ export class CpslInput {
             placeholder={this.placeholder || ''}
             readOnly={this.readonly}
             required={this.required}
+            size={this.fitContent ? (this.value?.length ?? 1) : undefined}
             spellcheck={this.spellcheck}
             type={this.type}
             value={this.value ?? ''}

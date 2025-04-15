@@ -226,3 +226,10 @@ export type Verify2faResponse = {
 export type CoreAuthInfo = PrimaryAuthInfo & AuthExtras;
 
 export type StorageType = 'local' | 'session' | 'secure' | 'all';
+
+export type GetWalletBalanceParams = {
+  walletId: string;
+  rpcUrl?: string;
+};
+
+export type GetWalletBalanceResponse = Promise<string | undefined>;

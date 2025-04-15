@@ -1,5 +1,8 @@
 import * as esbuild from 'esbuild';
-import { compress } from 'esbuild-plugin-compress';
+import * as fs from 'fs/promises';
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
+import { glob } from 'glob';
 // import { createRequire } from 'module';
 
 // const require = createRequire(import.meta.url);
@@ -7,30 +10,34 @@ import { compress } from 'esbuild-plugin-compress';
 
 // const externals = [...Object.keys(pkg.dependencies || {}), ...Object.keys(pkg.peerDependencies || {})];
 
-/** @type {import('esbuild').BuildOptions} */
+const entryPoints = await glob('src/**/*.{ts,tsx,js,jsx}');
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const distDir = resolve(__dirname, '../dist');
+
+await fs.mkdir(distDir, { recursive: true });
+await fs.writeFile(`${distDir}/package.json`, JSON.stringify({ type: 'module', sideEffects: ['wasm_exec.js'] }, null, 2));
+
+await fs.mkdir(`${distDir}/workers`, { recursive: true });
+
+/** @type {import('esbuild').BuildOptions} */
 await esbuild.build({
   banner: {
     js: '"use client";', // Required for Next 13 App Router
   },
-  bundle: true,
-  write: false,
+  bundle: false,
+  write: true,
   format: 'esm',
   loader: {
     '.json': 'text',
   },
   platform: 'browser',
-  entryPoints: ['src/index.ts'],
-  outdir: 'dist',
+  entryPoints,
+  outdir: distDir,
   allowOverwrite: true,
   splitting: true, // Required for tree shaking
   minify: false,
   target: ['es2015'],
-  plugins: [
-    compress({
-      exclude: ['**/*.map'],
-    }),
-  ],
   define: {
     global: 'globalThis',
   },
@@ -42,25 +49,20 @@ await esbuild.build({
   banner: {
     js: '"use client";', // Required for Next 13 App Router
   },
-  bundle: true,
-  write: false,
+  bundle: false,
+  write: true,
   format: 'esm',
   loader: {
     '.json': 'text',
   },
   platform: 'browser',
   entryPoints: ['src/workers/worker.ts'],
-  outdir: 'dist/workers',
+  outdir: `${distDir}/workers`,
   allowOverwrite: true,
   splitting: true, // Required for tree shaking
   minify: false,
   target: ['es2015'],
   packages: 'external',
-  plugins: [
-    compress({
-      exclude: ['**/*.map'],
-    }),
-  ],
   define: {
     global: 'globalThis',
   },

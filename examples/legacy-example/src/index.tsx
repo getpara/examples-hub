@@ -17,8 +17,8 @@ import {
   useClient,
   useAccount as useParaAccount,
 } from '@getpara/react-sdk';
-import { ParaProtoSigner } from '@getpara/cosmjs-v0-integration';
-import { ParaEthersSigner } from '@getpara/ethers-v6-integration';
+import { ParaProtoSigner, createTestTransaction as createTestTransactionCosmos } from '@getpara/cosmjs-v0-integration';
+import { ParaEthersSigner, createTestTransaction as createTestTransactionEvm } from '@getpara/ethers-v6-integration';
 import ParaCore, {
   Environment,
   ConstructorOpts,
@@ -30,7 +30,10 @@ import ParaCore, {
   TransactionReviewTimeout,
   Wallet,
 } from '@getpara/core-sdk';
-import { ParaSolanaWeb3Signer } from '@getpara/solana-web3.js-v1-integration';
+import {
+  ParaSolanaWeb3Signer,
+  createTestTransaction as createTestTransactionSolana,
+} from '@getpara/solana-web3.js-v1-integration';
 import { FONT_OPTIONS } from './constants';
 import '@getpara/react-sdk/styles.css';
 import { OfframpSend } from './offramp';
@@ -118,6 +121,7 @@ const PLACEHOLDERS = {
   CUSTOM_ID: 'custom-id',
   DISCORD: 'discord_username',
   TWITTER: 'twitter_username',
+  TELEGRAM: '123456789',
 };
 
 // use below to call "view" smart contract function
@@ -451,11 +455,11 @@ function AppInner({
   const [selectedApiKey, setSelectedApiKey] = useLocalStorage('@EXAMPLE-PARA/selectedApiKey', API_KEY_WITH_BRANDING);
   const [useDKLS, setUseDKLS] = useLocalStorage('@EXAMPLE-PARA/useDKLS', true);
   const [partners, setPartners] = useLocalStorage<Partner[]>('@EXAMPLE-PARA/partners', []);
-  const [homepageUrl, setHomepageUrl] = useLocalStorage('@EXAMPLE-PARA/homepageUrl', 'www.para.com');
+  const [homepageUrl, setHomepageUrl] = useLocalStorage('@EXAMPLE-PARA/homepageUrl', 'https://www.para.com');
 
   const [logo, setLogo] = useLocalStorage('@EXAMPLE-PARA/logo', '');
   const [useTheme, setUseTheme] = useLocalStorage('@EXAMPLE-PARA/useTheme', false);
-  const [isDarkTheme, setIsDarkTheme] = useLocalStorage('@EXAMPLE-PARA/useTheme', false);
+  const [isDarkTheme, setIsDarkTheme] = useLocalStorage('@EXAMPLE-PARA/isDarkTheme', false);
   const [foregroundColor, setForegroundColor] = useLocalStorage('@EXAMPLE-PARA/foregroundColor', '#FAFAFA');
   const [backgroundColor, setBackgroundColor] = useLocalStorage('@EXAMPLE-PARA/backgroundColor', '#121212');
   const [borderRadius, setBorderRadius] = useLocalStorage('@EXAMPLE-PARA/borderRadius', 'sm');
@@ -495,6 +499,7 @@ function AppInner({
   const [messageToSign, setMessageToSign] = useState('');
   const [ethersSignature, setEthersSignature] = useState('');
   const [solanaSignature, setSolanaSignature] = useState('');
+  const [testTxSignature, setTestTxSignature] = useState('');
 
   const { data: paraAccount, isLoading: isAccountLoading } = useParaAccount();
 
@@ -502,8 +507,8 @@ function AppInner({
   const para = useClient();
 
   useEffect(() => {
-    if (para && para.ctx.isE2E !== (process?.env?.REACT_APP_IS_E2E === 'true')) {
-      para.ctx.isE2E = process?.env?.REACT_APP_IS_E2E === 'true';
+    if (para && para.ctx.isE2E !== (process?.env?.VITE_APP_IS_E2E === 'true')) {
+      para.ctx.isE2E = process?.env?.VITE_APP_IS_E2E === 'true';
     }
   }, [para]);
 
@@ -638,6 +643,43 @@ function AppInner({
       console.error(error);
     }
   }, [para, messageToSign, walletId]);
+
+  const handleSignTestTx = useCallback(async () => {
+    let _testTxSignature;
+    switch (walletType) {
+      case 'EVM':
+        {
+          const _walletId = para?.findWalletId(walletId, { type: ['EVM'] });
+          const provider = new ethers.JsonRpcProvider(ALCHEMY_SEPOLIA_PROVIDER, 'sepolia');
+          const ethersSigner = new ParaEthersSigner(para, provider, _walletId);
+          const tx = await createTestTransactionEvm(para, _walletId);
+
+          _testTxSignature = await ethersSigner.signTransaction(tx);
+        }
+        break;
+      case 'SOLANA':
+        {
+          const _walletId = para?.findWalletId(walletId, { type: ['SOLANA'] });
+          const connection = new solana.Connection(SOLANA_DEVNET_RPC_ENDPOINT, 'confirmed');
+          const solanaSigner = new ParaSolanaWeb3Signer(para, connection, walletId);
+          const tx = await createTestTransactionSolana(para, walletId);
+
+          _testTxSignature = ((await solanaSigner.signTransaction(tx)).signature as Buffer).toString('base64');
+        }
+        break;
+      case 'COSMOS':
+        {
+          const _walletId = para?.findWalletId(walletId, { type: ['COSMOS'] });
+
+          const cosmosSigner = new ParaProtoSigner(para);
+          const signDoc = await createTestTransactionCosmos(para, walletId);
+
+          _testTxSignature = await cosmosSigner.signDirect(cosmosSigner.address, signDoc);
+        }
+        break;
+    }
+    setTestTxSignature(_testTxSignature);
+  }, [walletType, walletId]);
 
   useEffect(() => {
     if (walletId && !para?.wallets[walletId]) {
@@ -1006,6 +1048,19 @@ function AppInner({
                     </Button>
                     <Text>{paraAccount.isConnected ? 'Fully Logged In!' : 'Log In Pending...'}</Text>
 
+                    <Button
+                      isDisabled={paraAccount.isConnected}
+                      colorScheme="teal"
+                      onClick={async () => {
+                        if (para) {
+                          const accountMetadata = await para.getAccountMetadata();
+                          console.log(accountMetadata);
+                        }
+                      }}
+                    >
+                      Fetch Account Metadata
+                    </Button>
+
                     {Object.entries(para?.wallets ?? {}).length > 0 && (
                       <Select
                         value={`${walletType}~${walletId}`}
@@ -1233,6 +1288,15 @@ function AppInner({
                       testMode={onRampTestMode}
                       setTestMode={setOnRampTestMode}
                     />
+                    <Button colorScheme="teal" isDisabled={!walletId} onClick={handleSignTestTx}>
+                      Sign Test Transaction
+                    </Button>
+                    {testTxSignature && (
+                      <Text>
+                        Test Tx Signature: <strong>{testTxSignature}</strong>
+                      </Text>
+                    )}
+
                     <Button
                       colorScheme="red"
                       onClick={async () => {
@@ -1269,7 +1333,7 @@ const App = () => {
   const [partners] = useLocalStorage<Partner[]>('@EXAMPLE-PARA/partners', []);
   const [logo] = useLocalStorage('@EXAMPLE-PARA/logo', '');
   const [useTheme] = useLocalStorage('@EXAMPLE-PARA/useTheme', false);
-  const [isDarkTheme] = useLocalStorage('@EXAMPLE-PARA/useTheme', false);
+  const [isDarkTheme] = useLocalStorage('@EXAMPLE-PARA/isDarkTheme', false);
   const [foregroundColor] = useLocalStorage('@EXAMPLE-PARA/foregroundColor', '#FAFAFA');
   const [backgroundColor] = useLocalStorage('@EXAMPLE-PARA/backgroundColor', '#121212');
   const [borderRadius] = useLocalStorage('@EXAMPLE-PARA/borderRadius', 'sm');

@@ -209,6 +209,20 @@ describe('Client', () => {
       expect(mocks.post).toBeCalledWith('/users/init', body);
     });
 
+    it('getWalletBalance', async () => {
+      await client.getWalletBalance({
+        userId,
+        walletId,
+        rpcUrl: 'https://test.com',
+      });
+
+      expect(mocks.get).toBeCalledWith(`/users/${userId}/wallets/${walletId}/balance`, {
+        params: {
+          rpcUrl: 'https://test.com',
+        },
+      });
+    });
+
     it('createUser', async () => {
       await client.createUser({
         email,
@@ -814,9 +828,9 @@ describe('Client', () => {
     });
 
     it('getBackupKit', async () => {
-      await client.getBackupKit(userId);
+      await client.getBackupKit(userId, walletId);
 
-      expect(mocks.get).toBeCalledWith(`/download-backup-kit/${userId}`, {
+      expect(mocks.get).toBeCalledWith(`/users/${userId}/wallets/${walletId}/download-backup-kit`, {
         responseType: 'blob',
       });
     });
@@ -1329,6 +1343,16 @@ describe('Client', () => {
       await client.getUser(userId);
 
       expect(mocks.get).toBeCalledWith(`/users/${userId}`);
+    });
+
+    it('getAccountMetadata', async () => {
+      await client.getAccountMetadata(userId, partnerId);
+
+      expect(mocks.get).toBeCalledWith(`/users/${userId}/oauth/accounts`, {
+        params: {
+          partnerId,
+        },
+      });
     });
   });
 });

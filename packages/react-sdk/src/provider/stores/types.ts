@@ -37,6 +37,9 @@ export interface ModalSlice {
 }
 
 export interface WalletSlice {
+  rpcUrl?: string;
+  setRpcUrl: (_?: string) => void;
+
   selectedWalletId?: string;
   selectedWalletType?: WalletType;
   setSelectedWallet: (_?: string, __?: WalletType) => void;

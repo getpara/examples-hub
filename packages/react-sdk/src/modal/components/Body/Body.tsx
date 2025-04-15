@@ -34,6 +34,7 @@ import { AwaitingPasswordStep } from '../AwaitingPasswordStep/AwaitingPasswordSt
 import { IFrameStep } from '../IFrameStep/IFrameStep.js';
 import { useStore } from '../../../provider/stores/useStore.js';
 import { ExternalWalletVerificationStep } from '../ExternalWalletVerificationStep/ExternalWalletVerificationStep.js';
+import { NetworkSpeedBanner } from '@getpara/react-common';
 
 interface BodyProps {
   oAuthMethods?: OAuthMethod[];
@@ -141,7 +142,7 @@ export const Body = ({ oAuthMethods, twoFactorAuthEnabled, disableEmailLogin, di
       case ModalStep.ADD_FUNDS_BUY:
       case ModalStep.ADD_FUNDS_RECEIVE:
       case ModalStep.ADD_FUNDS_WITHDRAW: {
-        return <AddFunds />;
+        return <AddFunds data-testid="add-funds" />;
       }
       case ModalStep.ADD_FUNDS_AWAITING: {
         return <AddFundsAwaiting />;
@@ -225,6 +226,7 @@ export const Body = ({ oAuthMethods, twoFactorAuthEnabled, disableEmailLogin, di
               $step={currentStep}
               $isIFrameStep={IFrameSteps.includes(currentStep)}
             >
+              <NetworkSpeedBanner fontSize="12px" iconSize="16px" />
               {Content()}
               {onRampConfig?.testMode &&
                 [

@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 
 .env
+
+# Ignore AI assistant guidance files
+CLAUDE.md

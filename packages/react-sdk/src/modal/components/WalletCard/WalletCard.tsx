@@ -18,7 +18,7 @@ export const ExternalWalletCard = ({ address, showAddFunds }: Pick<SharedWalletC
 
   return (
     <SharedWalletCard
-      address={truncateAddress(wallet.address, wallet.type)}
+      address={wallet.ensName ?? truncateAddress(wallet.address, wallet.type)}
       identiconHash={para.getIdenticonHash(wallet.id, wallet.type) ?? ''}
       showAddFunds={showAddFunds}
     />
@@ -47,7 +47,7 @@ export const WalletCard = ({ id, type, showAddFunds }: WalletCardProps) => {
     <SharedWalletCard
       id={wallet.id}
       type={wallet.type}
-      address={truncateAddress(address, type, { prefix: para.cosmosPrefix })}
+      address={wallet.ensName ?? truncateAddress(address, type, { prefix: para.cosmosPrefix })}
       name={wallet.name ?? `${appName ? `${appName} ` : ''}Wallet`}
       identiconHash={para.getIdenticonHash(wallet.id, type) ?? ''}
       showAddFunds={showAddFunds}

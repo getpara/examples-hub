@@ -8,7 +8,7 @@
   "sideEffects": false,
   "dependencies": {
     "@getpara/core-sdk": "2.0.0-alpha.0",
-    "@solana/web3.js": "^1.95.8"
+    "@solana/web3.js": "^1.98.0"
   },
   "scripts": {
     "build": "rm -rf dist && node ./scripts/build.mjs && yarn build:types",

@@ -237,6 +237,12 @@ export const AuthenticationConfigurator: React.FC = () => {
     const solValues = Object.values(SolanaWallet) as string[];
     const cosmosValues = Object.values(CosmosWallet) as string[];
 
+    console.log('Available EVM wallets:', evmValues);
+    console.log('Available Solana wallets:', solValues);
+    console.log('Available Cosmos wallets:', cosmosValues);
+    console.log('Current networks:', networksConfig.networks);
+    console.log('All wallets before filtering:', wallets);
+
     const filtered = wallets.filter(wallet => {
       const isEvmWallet = evmValues.includes(wallet);
       const isSolWallet = solValues.includes(wallet);
@@ -249,9 +255,20 @@ export const AuthenticationConfigurator: React.FC = () => {
       const shouldInclude =
         (isEvmWallet && hasEthereumNetwork) || (isSolWallet && hasSolanaNetwork) || (isCosmosWallet && hasCosmosNetwork);
 
+      console.log(`Wallet ${wallet}:`, {
+        isEvmWallet,
+        isSolWallet,
+        isCosmosWallet,
+        hasEthereumNetwork,
+        hasSolanaNetwork,
+        hasCosmosNetwork,
+        shouldInclude,
+      });
+
       return shouldInclude;
     });
 
+    console.log('Filtered wallets:', filtered);
     return filtered;
   };
 

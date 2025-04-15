@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { UsersTableDataResponse } from '../../../types/api';
 import { getApiKeyUsersTableData } from '../../../api/apiKeys/queries';
 import { useParams } from 'react-router-dom';
+import { useIsValidKey, useIsValidOrg, useIsValidProject } from '../../useIsValidOrgConfig';
 
 export const ORGANIZATIONS_KEY_USERS_TABLE_DATA_QUERY_KEY = 'organizationKeyUsersTableData';
 
@@ -14,9 +15,12 @@ export const useOrganizationKeyUsersTableDataQuery = <T>(
   limit?: number,
 ) => {
   const { organizationId } = useParams();
+  const isOrgValid = useIsValidOrg(organizationId);
+  const isProjectValid = useIsValidProject(projectId);
+  const isKeyValid = useIsValidKey(projectId, keyId);
 
   return useQuery({
-    enabled: !!organizationId && !!projectId,
+    enabled: isOrgValid && isProjectValid && isKeyValid,
     queryKey: [ORGANIZATIONS_KEY_USERS_TABLE_DATA_QUERY_KEY, organizationId, projectId, keyId, env, offset, limit],
     queryFn: async () => {
       const { data } = await getApiKeyUsersTableData(organizationId ?? '', projectId, keyId, env, offset, limit);

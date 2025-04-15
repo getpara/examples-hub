@@ -4,10 +4,10 @@ import { Environment } from '../../src/types/index.js';
 import { initClient } from '../../src/external/userManagementClient.js';
 import { mockTempTransmission, mockTempTransmissionInit } from '../mocks/mockUserManagementClient.js';
 import { TEMP_TRANSMISSION_INIT_ID } from '../constants.js';
-import * as eutils from 'ethereumjs-util';
+import * as eutils from '@ethereumjs/util';
 
 // Workaround for vi.spyOn issue: https://github.com/aelbore/esbuild-jest/issues/26#issuecomment-968853688
-vi.mock('ethereumjs-util', async importOriginal => {
+vi.mock('@ethereumjs/util', async importOriginal => {
   const actual = await importOriginal();
   return {
     __esModule: true,

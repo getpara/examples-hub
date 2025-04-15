@@ -5,6 +5,9 @@
 
 :host {
   display: flex;
-
+  flex-direction: var(--direction, row);
+  align-items: var(--align);
+  justify-content: var(--justify);
+  gap: var(--gap);
   flex-wrap: wrap;
 }

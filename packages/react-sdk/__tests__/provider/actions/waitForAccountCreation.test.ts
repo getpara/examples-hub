@@ -18,7 +18,7 @@ describe('waitForAccountCreation', () => {
   });
   describe('fail', () => {
     it('no para', async () => {
-      expect(waitForAccountCreation(undefined)).rejects.toThrowError();
+      await expect(waitForAccountCreation(undefined)).rejects.toThrowError();
     });
   });
 });

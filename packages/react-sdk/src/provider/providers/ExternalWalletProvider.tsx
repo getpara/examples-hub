@@ -25,6 +25,7 @@ export const defaultExternalWallet = {
   setChainIdSwitchingTo: () => {},
   connectEmbeddedToExternalConnectors: () => Promise.resolve(),
   verifyWalletSignature: () => Promise.resolve({} as unknown as any),
+  getWalletBalance: () => Promise.resolve(undefined),
   isExternalWalletVerifying: false,
 };
 
@@ -49,6 +50,7 @@ export const ExternalWalletContext = createContext<{
   setChainIdSwitchingTo: (chainId?: string) => void;
   connectEmbeddedToExternalConnectors: () => Promise<void>;
   verifyWalletSignature: () => Promise<VerifyExternalWalletParams | undefined>;
+  getWalletBalance: () => Promise<string | undefined>;
   isExternalWalletVerifying?: boolean;
 }>(defaultExternalWallet);
 
@@ -69,6 +71,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     avatar: evmAvatar,
     connectParaEmbedded: evmConnectParaEmbedded,
     signVerificationMessage: evmSignVerificationMessage,
+    getWalletBalance: evmGetWalletBalance,
   } = useContext(evmContext);
   const {
     wallets: solanaWallets,
@@ -130,6 +133,19 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
       setQrUri(undefined);
     }
   }, [wallet]);
+
+  const getWalletBalance = useCallback(async () => {
+    const walletType = Object.values(para.externalWallets || {})[0]?.type;
+
+    switch (walletType) {
+      case WalletType.EVM: {
+        return await evmGetWalletBalance();
+      }
+      default: {
+        return undefined;
+      }
+    }
+  }, [evmGetWalletBalance, selectedExternalWalletId]);
 
   const chains: CommonChain[] = useMemo(() => {
     const walletType = Object.values(para.externalWallets || {})[0]?.type;
@@ -462,6 +478,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
           connectEmbeddedToExternalConnectors,
           verifyWalletSignature,
           isExternalWalletVerifying,
+          getWalletBalance,
         }),
         [
           wallets,
@@ -480,6 +497,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
           connectEmbeddedToExternalConnectors,
           verifyWalletSignature,
           isExternalWalletVerifying,
+          getWalletBalance,
         ],
       )}
     >

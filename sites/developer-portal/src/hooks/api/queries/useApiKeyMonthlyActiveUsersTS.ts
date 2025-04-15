@@ -5,6 +5,7 @@ import { TODAY } from '../../../utils/constants';
 import { getApiKeyMonthlyActiveUsersTS } from '../../../api/apiKeys/queries';
 import { formatTSData } from '../../../utils/analyticsDataFormatters';
 import { useParams } from 'react-router-dom';
+import { useIsValidKey, useIsValidOrg, useIsValidProject } from '../../useIsValidOrgConfig';
 
 export const API_KEY_MONTHLY_ACTIVE_USERS_TS_QUERY_KEY = 'apiKeyMonthlyActiveUsersTS';
 
@@ -20,9 +21,12 @@ export const useApiKeyMonthlyActiveUsersTSQuery = <T>(
   select: (data: ApiKeyMonthlyActiveUsersTSResponse) => T,
 ) => {
   const { organizationId } = useParams();
+  const isOrgValid = useIsValidOrg(organizationId);
+  const isProjectValid = useIsValidProject(projectId);
+  const isKeyValid = useIsValidKey(projectId, keyId);
 
   return useQuery({
-    enabled: !!organizationId && !!projectId && !!keyId,
+    enabled: isOrgValid && isProjectValid && isKeyValid,
     queryKey: [API_KEY_MONTHLY_ACTIVE_USERS_TS_QUERY_KEY, organizationId, projectId, keyId, env, startDate, endDate],
     queryFn: async () => {
       const { data } = await getApiKeyMonthlyActiveUsersTS(organizationId ?? '', projectId, keyId, env, startDate, endDate);

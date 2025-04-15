@@ -3,8 +3,11 @@
 :host {
   display: block;
 
+  --filter: auto;
   --height: 24px;
   --width: 24px;
+  --svg-height: calc(var(--height) - (2 * var(--inset)));
+  --svg-width: calc(var(--width) - (2 * var(--inset)));
 
   --icon-color: currentColor;
   --icon-fill-color: currentColor;
@@ -25,7 +28,8 @@
 
 :host div {
   display: flex;
-
+  justify-content: center;
+  align-items: center;
   width: 100%;
   height: 100%;
 
@@ -33,8 +37,9 @@
 }
 
 :host svg {
-  width: 100%;
-  height: 100%;
+  width: var(--svg-width, '100%');
+  height: var(--svg-height, '100%');
+  filter: var(--filter);
 
   & .background-16 {
     fill: var(--cpsl-color-background-16);

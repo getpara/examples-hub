@@ -1,138 +1,51 @@
-import {
-  EnabledFlow,
-  getOnRampAssets,
-  getOnRampNetworks,
-  Network,
-  OnRampAsset,
-  OnRampConfig,
-  OnRampProvider,
-  OnRampPurchaseType,
-  toAssetInfoArray,
-  WalletType,
-} from '@getpara/web-sdk';
-import { CpslTabsCustomEvent, IconType, TabsChangedEventDetail } from '@getpara/core-components';
-import { CenteredText, FilledDisabledInput, Heading, InnerStepContainer, QRContainer, StepContainer } from '../common.js';
-import {
-  CpslButton,
-  CpslDivider,
-  CpslIcon,
-  CpslIdenticon,
-  CpslQrCode,
-  CpslSpinner,
-  CpslTab,
-  CpslTabs,
-  CpslText,
-} from '@getpara/react-components';
-import { useModalStore } from '../../stores/index.js';
-import { ReactNode, useEffect, useMemo } from 'react';
-import { OnRampProviderButton } from '../OnRampComponents/OnRampProviderButton.js';
-import { isMobile } from '@getpara/web-sdk';
-import { getAddFundsStep, ModalStep } from '../../utils/steps.js';
-import { motion, AnimatePresence } from 'framer-motion';
-import { getNetworkFromChainId, getNetworkOrMainNetEquivalent, useCopyToClipboard } from '@getpara/react-common';
-import { formatNetworkList } from '../../utils/stringFormatters.js';
+import { EnabledFlow } from '@getpara/web-sdk';
+import { CpslTabsCustomEvent, TabsChangedEventDetail } from '@getpara/core-components';
+import { InnerStepContainer, StepContainer } from '../common.js';
+import { CpslIcon, CpslSpinner, CpslTab, CpslTabs } from '@getpara/react-components';
+import { OnRampStep } from '../../stores/index.js';
+import { useModalStore } from '../../stores/modal/useModalStore.js';
+import { useEffect, useMemo } from 'react';
+import { getAddFundsStep } from '../../utils/steps.js';
 import styled from 'styled-components';
-import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
-import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 import { useWallet } from '../../../provider/index.js';
-import { useStore } from '../../../provider/stores/useStore.js';
-
-export type Tab = EnabledFlow;
-
-const TABS: [
-  Tab,
-  keyof Pick<OnRampConfig, 'isBuyEnabled' | 'isReceiveEnabled' | 'isWithdrawEnabled'>,
-  IconType,
-  ReactNode,
-][] = [
-  [EnabledFlow.BUY, 'isBuyEnabled', 'creditCard', 'Buy'],
-  [EnabledFlow.RECEIVE, 'isReceiveEnabled', 'qrCode', 'Receive'],
-  [EnabledFlow.WITHDRAW, 'isWithdrawEnabled', 'arrowCircleBrokenDownLeft', 'Withdraw'],
-];
-
-const GENERIC_WALLET = {
-  [WalletType.EVM]: 'Ethereum or EVM-based L2s',
-  [WalletType.SOLANA]: 'Solana',
-  [WalletType.COSMOS]: 'Cosmos',
-};
+import { AddFundsProvider } from './AddFundsProvider.js';
+import { AddFundsReceive } from './AddFundsReceive.js';
+import { AddFundsContextProvider, Tab, TABS } from './AddFundsContext.js';
+import { AnimatePresence } from 'framer-motion';
+import { AddFundsSettings } from './AddFundsSettings.js';
 
 export const AddFunds = () => {
-  const [isCopied, copy] = useCopyToClipboard();
-  const para = useInternalClient();
   const onRampConfig = useModalStore(state => state.onRampConfig);
-  const hideWallets = useStore(state => state.modalConfig?.hideWallets);
-  const appName = useStore(state => state.appName);
+  const onRampStep = useModalStore(state => state.onRampStep);
   const storedTab = useModalStore(state => state.accountAddFundTab);
-  const setStep = useModalStore(state => state.setStep);
+  const setModalStep = useModalStore(state => state.setStep);
   const setOnRampPurchase = useModalStore(state => state.setOnRampPurchase);
-  const { chainId } = useExternalWallets();
 
   const { data: activeWallet } = useWallet();
 
   const tabs = TABS.filter(([, key]) => !!onRampConfig?.[key]);
+  const tab = storedTab ?? tabs[0][0];
   const isMultiFlow = tabs.length > 1;
 
-  const tab = storedTab ?? tabs[0][0];
-
-  const address = useMemo(
-    () => (activeWallet ? para.getDisplayAddress(activeWallet.id, { addressType: activeWallet.type }) : ''),
-    [para, activeWallet?.id, activeWallet?.type],
-  );
-
   const onSetTab = (event: CpslTabsCustomEvent<TabsChangedEventDetail>) => {
-    setStep(getAddFundsStep(event.detail.tab as Tab));
-  };
-  const onCopy = () => {
-    copy(address);
+    setModalStep(getAddFundsStep(event.detail.tab as Tab));
   };
 
-  const [allowedNetworks, allowedAssets, isProviderAllowed] = useMemo(() => {
-    if (!onRampConfig || !activeWallet) {
-      return [[], [], {}];
+  const Content = useMemo(() => {
+    switch (tab) {
+      case EnabledFlow.BUY:
+      case EnabledFlow.WITHDRAW: {
+        switch (onRampStep) {
+          case OnRampStep.SETTINGS:
+            return <AddFundsSettings />;
+          case OnRampStep.PROVIDER:
+            return <AddFundsProvider />;
+        }
+      }
+      default:
+        return <AddFundsReceive />;
     }
-    const action = tab === EnabledFlow.BUY ? OnRampPurchaseType.BUY : OnRampPurchaseType.SELL;
-
-    const detectedNetwork = getNetworkFromChainId(chainId);
-    const isExternal = activeWallet.isExternal && !!detectedNetwork;
-    const allowedNetworks = isExternal
-      ? [getNetworkOrMainNetEquivalent(detectedNetwork, onRampConfig.testMode)]
-      : getOnRampNetworks(onRampConfig.assetInfo, {
-          walletType: activeWallet.type,
-          allowed: onRampConfig.allowedAssets ? (Object.keys(onRampConfig.allowedAssets) as Network[]) : undefined,
-        });
-
-    const allowedAssetsLookup: Partial<Record<Network, OnRampAsset[]>> = allowedNetworks.reduce((acc, network) => {
-      const configValue = onRampConfig.allowedAssets?.[network];
-
-      const allowed = configValue === true ? undefined : configValue;
-
-      return {
-        ...acc,
-        [network]: getOnRampAssets(onRampConfig.assetInfo, { walletType: activeWallet.type, network, allowed }),
-      };
-    }, {});
-
-    const isProviderAllowed = onRampConfig.providers.reduce(
-      (acc: Record<OnRampProvider, boolean>, id) => {
-        const hasMatch = toAssetInfoArray(onRampConfig.assetInfo).some(([type, network, asset, validProviders]) => {
-          return (
-            type === activeWallet.type &&
-            allowedNetworks.includes(network) &&
-            (!allowedAssetsLookup[network] || allowedAssetsLookup[network].includes(asset)) &&
-            !!validProviders[id]?.[1]?.[action]
-          );
-        });
-
-        return {
-          ...acc,
-          [id]: hasMatch,
-        };
-      },
-      {} as Record<OnRampProvider, boolean>,
-    );
-
-    return [allowedNetworks, [...new Set(Object.values(allowedAssetsLookup).flat())], isProviderAllowed];
-  }, [activeWallet?.type, activeWallet?.isExternal, tab, onRampConfig?.assetInfo, onRampConfig?.allowedAssets, chainId]);
+  }, [onRampStep, tab]);
 
   useEffect(() => {
     setOnRampPurchase(undefined);
@@ -160,124 +73,15 @@ export const AddFunds = () => {
           </CpslTabs>
         </InnerStepContainer>
       )}
-      <>
-        {[EnabledFlow.BUY, EnabledFlow.WITHDRAW].includes(tab) ? (
-          <>
-            <Heading variant="headingS" weight="bold">
-              Choose Provider
-            </Heading>
-            <$InnerStepContainer>
-              <NoProviders isHidden={Object.values(isProviderAllowed).some(v => !!v)} variant="bodyM">
-                No providers are available for this {hideWallets ? 'account' : 'wallet'}
-              </NoProviders>
-              <AnimatePresence>
-                {onRampConfig.providers.map((id, index) => {
-                  return isProviderAllowed[id] ? (
-                    <motion.div
-                      key={id}
-                      style={{ width: '100%' }}
-                      layout
-                      initial={{ opacity: 0, transform: 'translateX(25px)' }}
-                      animate={{ opacity: 1, transform: 'none' }}
-                      exit={{ opacity: 0, transform: 'translateX(-25px)' }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <OnRampProviderButton
-                        config={onRampConfig}
-                        index={index}
-                        key={id}
-                        onClick={async () => {
-                          if (!activeWallet?.type) return;
-
-                          const isPopup = id !== OnRampProvider.RAMP;
-
-                          const { onRampPurchase: newOnRampPurchase } = await para.initiateOnRampTransaction({
-                            walletId: activeWallet.isExternal ? undefined : activeWallet.id,
-                            externalWalletAddress: activeWallet.isExternal ? activeWallet.id : undefined,
-                            shouldOpenPopup: isPopup,
-                            params: {
-                              type: tab === EnabledFlow.BUY ? OnRampPurchaseType.BUY : OnRampPurchaseType.SELL,
-                              walletType: activeWallet.type,
-                              provider: id,
-                              networks: allowedNetworks,
-                              assets: allowedAssets,
-                              defaultNetwork: onRampConfig.defaultOnRampNetwork,
-                              defaultAsset: onRampConfig.defaultOnRampAsset,
-                              fiatQuantity: onRampConfig.defaultBuyAmount?.[0],
-                              testMode: onRampConfig.testMode,
-                            },
-                          });
-
-                          setOnRampPurchase({ ...newOnRampPurchase, fiat: 'USD' });
-
-                          !isPopup && setStep(ModalStep.ADD_FUNDS_AWAITING);
-                        }}
-                      />
-                    </motion.div>
-                  ) : null;
-                })}
-              </AnimatePresence>
-            </$InnerStepContainer>
-          </>
-        ) : (
-          <>
-            <InnerStepContainer>
-              <FilledDisabledInput noAutoDisable key={address} readonly placeholder={address}>
-                <CpslIdenticon slot="start" size="32px" hash={para.getIdenticonHash(activeWallet.id, activeWallet.type)} />
-                <CpslButton slot="end" variant="ghost" onClick={onCopy}>
-                  <CpslIcon icon={isCopied ? 'check' : 'copy'} />
-                </CpslButton>
-              </FilledDisabledInput>
-            </InnerStepContainer>
-            {!isMobile() && (
-              <>
-                <CpslDivider>or</CpslDivider>
-                <InnerStepContainer>
-                  <QRContainer>
-                    {!address ? <CpslSpinner size={100} /> : <CpslQrCode key={address} url={address} />}
-                  </QRContainer>
-                  <CpslText weight="semiBold" color="secondary">
-                    Scan with your crypto wallet
-                  </CpslText>
-                </InnerStepContainer>
-              </>
-            )}
-            <InnerStepContainer>
-              <CenteredText weight="semiBold">
-                {(!!onRampConfig.allowedAssets && allowedNetworks.length > 0) || hideWallets
-                  ? (appName ?? 'This App')
-                  : 'This Wallet'}{' '}
-                Only Supports:
-              </CenteredText>
-              <CenteredText weight="medium" color="secondary">
-                {!!onRampConfig.allowedAssets && allowedNetworks.length > 0
-                  ? formatNetworkList(allowedNetworks)
-                  : GENERIC_WALLET[activeWallet?.type ?? WalletType.EVM]}
-              </CenteredText>
-            </InnerStepContainer>
-          </>
-        )}
-      </>
+      <AnimatePresence mode="wait">
+        <AddFundsContextProvider data-testid="add-funds" tab={tab}>
+          {Content}
+        </AddFundsContextProvider>
+      </AnimatePresence>
     </StepContainer>
   );
 };
 
 const SpinnerContainer = styled(StepContainer)`
   margin: 50% 0;
-`;
-
-const $InnerStepContainer = styled(InnerStepContainer)`
-  position: relative;
-  min-height: 270px;
-`;
-
-const NoProviders = styled(CpslText)<{ isHidden?: boolean }>`
-  width: 100%;
-  text-align: center;
-  visibility: ${({ isHidden }) => (isHidden ? 'hidden' : 'visible')};
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  transition: visibility 0.2s;
 `;

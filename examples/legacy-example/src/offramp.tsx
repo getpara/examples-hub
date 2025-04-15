@@ -70,6 +70,8 @@ export function OfframpSend({
         <Select value={asset} onChange={e => setAsset([network, e.currentTarget.value as OnRampAsset])}>
           <option value={OnRampAsset.ETHEREUM}>ETH</option>
           <option value={OnRampAsset.USDC}>USDC</option>
+          <option value={OnRampAsset.TETHER}>USDT</option>
+          <option value={OnRampAsset.SOLANA}>SOL</option>
         </Select>
         <Select value={network} onChange={e => setAsset([e.currentTarget.value as Network, asset])}>
           <option value={Network.ETHEREUM}>Ethereum</option>
@@ -79,6 +81,8 @@ export function OfframpSend({
           <option value={Network.OPTIMISM}>Optimism</option>
           <option value={Network.POLYGON}>Polygon</option>
           <option value={Network.CELO}>Celo</option>
+          <option value={Network.SOLANA}>Solana</option>
+          <option value={Network.SOLANA_DEVNET}>Solana Devnet</option>
         </Select>
       </HStack>
       <HStack w="100%">
@@ -127,14 +131,22 @@ export function OfframpSend({
                   })) as SuccessfulSignatureRes
                 )?.signature;
                 break;
+              case WalletType.SOLANA:
+                signature = (
+                  (await para.signMessage({ walletId, messageBase64: generated.message })) as SuccessfulSignatureRes
+                )?.signature;
+                break;
 
               default:
                 throw new Error(`unsupported wallet type: ${walletType}`);
             }
 
+            setStatus('Broadcasting tx...');
+
             sent = await para.ctx.client.sendOffRampTx(para.getUserId(), {
               tx: generated.tx,
               signature: walletType === 'EVM' ? `0x${signature}` : signature,
+              sourceAddress: para.getDisplayAddress(walletId, { addressType: walletType }),
               network,
               walletId,
               walletType,

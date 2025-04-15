@@ -11,6 +11,7 @@ import { BetaBannerNoChakra } from './BetaBannerNoChakra';
 import { Theme } from '@getpara/web-sdk';
 import { usePara } from './ParaContext';
 import { ModalLoading } from './ModalLoading';
+import { NetworkSpeedBanner } from '@getpara/react-common';
 
 const DEFAULT_THEME = {
   foregroundColor: '#000',
@@ -140,6 +141,7 @@ export const ModalLayout = () => {
   return (
     <>
       <BetaBannerNoChakra />
+      <NetworkSpeedBanner maxWidth="75%" />
       <OuterContainer isBranded={isBranded}>
         <Suspense fallback={<ModalLoading noText />}>
           <Outlet context={{ partner, homepageUrl, isDark, toggleBranding }} />

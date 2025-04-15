@@ -11,6 +11,7 @@ import { NativePasskeyConfiguration } from './NativePasskeyConfiguration/NativeP
 import { SupportedWalletTypesConfiguration } from './SupportedWalletTypesConfiguration';
 import { PopupConfiguration } from './PopupConfiguration/PopupConfiguration';
 import { SupportedAuthMethodsConfiguration } from './SupportedAuthMethodsConfiguration/SupportedAuthMethodsConfiguration';
+import { SessionLengthConfiguration } from './SessionLengthConfiguration/SessionLengthConfiguration';
 
 export const ConfigurationTab = () => {
   const { apiKey, env, projectId } = useParams();
@@ -23,6 +24,7 @@ export const ConfigurationTab = () => {
       <NativePasskeyConfiguration />
       <PregenConfiguration />
       <PopupConfiguration />
+      <SessionLengthConfiguration />
       <SupportedAuthMethodsConfiguration />
       <SupportedWalletTypesConfiguration />
       <OnRampFlowsConfiguration />

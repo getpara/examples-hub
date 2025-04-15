@@ -29,6 +29,7 @@ export enum Network {
   COSMOS = 'COSMOS',
   CELO = 'CELO',
   NOBLE = 'NOBLE',
+  SOLANA_DEVNET = 'SOLANA_DEVNET',
 }
 
 export type WalletRef = 'walletId' | 'externalWalletAddress';
@@ -72,6 +73,8 @@ export interface WalletEntity {
   lastUsedAt: string | null;
   lastUsedPartnerId?: string;
   lastUsedPartner?: PartnerEntity;
+  ensName?: string | null;
+  ensAvatar?: string | null;
 }
 
 export type CurrentWalletIds = Partial<Record<WalletType, string[]>>;

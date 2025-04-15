@@ -1,0 +1,13 @@
+import { vi } from 'vitest';
+import { RECOVERY_SHARE } from '../constants.js';
+
+export const mockDistributeNewShare = vi.fn(() => RECOVERY_SHARE);
+
+vi.mock('@getpara/core-sdk', async importOriginal => {
+  const actual = await importOriginal();
+  return {
+    ...(actual as any),
+    distributeNewShare: mockDistributeNewShare,
+    waitUntilTrue: vi.fn(() => Promise.resolve(true)),
+  };
+});

@@ -22,7 +22,7 @@ export class ServerUtils implements PlatformUtils {
     signer: string;
     walletId: string;
   }> {
-    return keygen(ctx, userId, type, secretKey, true, sessionCookie, emailProps);
+    return keygen(ctx, userId, type, secretKey, sessionCookie, emailProps);
   }
 
   refresh(

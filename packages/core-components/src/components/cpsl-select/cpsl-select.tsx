@@ -240,7 +240,13 @@ export class CpslSelect {
     }
   };
 
-  private handleClick = () => {
+  private handleClick = (e: MouseEvent) => {
+    const targetId = (e.target as any).id ?? '';
+
+    if (targetId === 'ignore-click') {
+      return;
+    }
+
     if (!this.disabled) {
       this.hasFocus = true;
       typeof window !== 'undefined' && window.addEventListener('click', this.handleClickOutside);
@@ -248,7 +254,7 @@ export class CpslSelect {
   };
 
   render() {
-    const selectedValueAsString = typeof this.selectedValue === 'string' ? this.selectedValue : this.selectedValue.join(', ');
+    const selectedValueAsString = Array.isArray(this.selectedValue) ? this.selectedValue.join(', ') : this.selectedValue;
 
     return (
       <Host id={this.id} class={{ 'disabled': this.disabled, 'focused': this.hasFocus, 'has-value': this.hasSelectedItem }}>

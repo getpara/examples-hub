@@ -2,6 +2,16 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
+  module: {
+    rules: [
+      {
+        test: /\.m?js/,
+        resolve: {
+          fullySpecified: false,
+        },
+      },
+    ],
+  },
   entry: {
     mpcWorker: './dist/worker.js',
   },
@@ -14,6 +24,8 @@ module.exports = {
   },
   optimization: {
     minimize: true,
+    splitChunks: false,
+    runtimeChunk: false,
   },
   plugins: [
     new webpack.EnvironmentPlugin({
@@ -23,12 +35,16 @@ module.exports = {
     new webpack.ProvidePlugin({
       process: 'process/browser',
     }),
+    new webpack.optimize.LimitChunkCountPlugin({
+      maxChunks: 1,
+    }),
   ],
   resolve: {
     fallback: {
       assert: require.resolve('assert'),
       crypto: require.resolve('crypto-browserify'),
       stream: require.resolve('stream-browserify'),
+      vm: false,
     },
   },
   mode: 'production',

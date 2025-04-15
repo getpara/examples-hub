@@ -1,18 +1,37 @@
 {
   "$schema": "node_modules/nx/schemas/nx-schema.json",
+  "namedInputs": {
+    "default": [
+      "{projectRoot}/**/*",
+      "!{projectRoot}/**/*.spec.ts",
+      "!{projectRoot}/**/*.test.ts",
+      "!{projectRoot}/**/*.spec.tsx",
+      "!{projectRoot}/**/*.test.tsx",
+      "{workspaceRoot}/tsconfig.json",
+      "{workspaceRoot}/nx.json",
+      "{workspaceRoot}/package.json"
+    ],
+    "withTests": [
+      "{projectRoot}/**/*",
+      "{workspaceRoot}/tsconfig.json",
+      "{workspaceRoot}/nx.json",
+      "{workspaceRoot}/package.json"
+    ]
+  },
   "targetDefaults": {
     "build": {
       "cache": true,
       "dependsOn": ["^build"],
-      "inputs": [
-        {
-          "env": "REACT_APP_ENV"
-        }
-      ],
+      "inputs": ["default", "^default"],
       "outputs": ["{projectRoot}/dist"]
     },
     "start": {
       "dependsOn": ["^build"]
+    },
+    "test": {
+      "cache": true,
+      "inputs": ["withTests", "^default"],
+      "outputs": ["{projectRoot}/coverage"]
     }
   }
 }

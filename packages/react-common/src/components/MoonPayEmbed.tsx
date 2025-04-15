@@ -1,6 +1,6 @@
-import { OnRampProvider, OnRampPurchaseStatus } from '@getpara/web-sdk';
+import { getNetworkPrefix, OnRampProvider, OnRampPurchaseStatus } from '@getpara/web-sdk';
 import { lazy, useCallback, useEffect, useMemo, useState } from 'react';
-import { getCurrencyCodes, reverseCurrencyLookup, offRampSend } from '../utils/index.js';
+import { reverseCurrencyLookup, offRampSend, getCurrencyCode } from '../utils/index.js';
 import styled from 'styled-components';
 import { Props } from '../types/index.js';
 import type { MoonPayBuyWidget, MoonPaySellWidget } from '@moonpay/moonpay-react';
@@ -40,7 +40,7 @@ export const MoonPayEmbed = ({ para, isDark, isEmbedded, onRampConfig, onRampPur
       const res = await para.ctx.client.signMoonPayUrl(para.getUserId()!, {
         url,
         type: onRampPurchase.walletType,
-        cosmosPrefix: para.cosmosPrefix,
+        cosmosPrefix: getNetworkPrefix(onRampPurchase.network),
         testMode: onRampPurchase.testMode,
         walletId: onRampPurchase.walletId || undefined,
         externalWalletAddress: onRampPurchase.externalWalletAddress || undefined,
@@ -49,16 +49,6 @@ export const MoonPayEmbed = ({ para, isDark, isEmbedded, onRampConfig, onRampPur
       return res.data.signature;
     },
     [onRampPurchase.walletId, onRampPurchase.walletType, para.cosmosPrefix, onRampPurchase.testMode, para],
-  );
-
-  const { currencyCodes, defaultCurrencyCode } = useMemo(
-    () =>
-      getCurrencyCodes(onRampConfig, {
-        provider: OnRampProvider.MOONPAY,
-        walletType: onRampPurchase.walletType,
-        purchaseType: onRampPurchase.type,
-      }),
-    [onRampPurchase.walletType, onRampPurchase.type, onRampConfig.assetInfo, onRampConfig?.allowedAssets],
   );
 
   const onTransactionCompleted = useCallback<Parameters<typeof MoonPayBuyWidget>[0]['onTransactionCompleted']>(
@@ -127,18 +117,19 @@ export const MoonPayEmbed = ({ para, isDark, isEmbedded, onRampConfig, onRampPur
       return null;
     }
 
-    const walletAddresses = currencyCodes.reduce((acc, code) => {
-      return { ...acc, [code.toLowerCase()]: onRampPurchase.address };
-    }, {});
+    const currencyCode = getCurrencyCode(onRampConfig, {
+      network: onRampPurchase.network,
+      asset: onRampPurchase.asset,
+      provider: OnRampProvider.MOONPAY,
+    });
 
     return onRampPurchase.type === 'BUY' ? (
       <LazyMoonPayBuyWidget
         variant="embedded"
         baseCurrencyCode={onRampPurchase.fiat}
         baseCurrencyAmount={onRampPurchase.fiatQuantity}
-        showOnlyCurrencies={currencyCodes.join(',')}
-        defaultCurrencyCode={defaultCurrencyCode}
-        walletAddresses={JSON.stringify(walletAddresses)}
+        currencyCode={currencyCode}
+        walletAddress={onRampPurchase.address}
         visible
         theme={isDark ? 'dark' : 'light'}
         style={{
@@ -154,7 +145,6 @@ export const MoonPayEmbed = ({ para, isDark, isEmbedded, onRampConfig, onRampPur
     ) : (
       <LazyMoonPaySellWidget
         variant="embedded"
-        refundWalletAddresses={JSON.stringify(walletAddresses)}
         visible
         theme={isDark ? 'dark' : 'light'}
         style={{
@@ -164,8 +154,8 @@ export const MoonPayEmbed = ({ para, isDark, isEmbedded, onRampConfig, onRampPur
           borderRadius: 0,
           margin: 0,
         }}
-        showOnlyCurrencies={currencyCodes.join(',')}
-        defaultCurrencyCode={currencyCodes[0]}
+        baseCurrencyCode={currencyCode}
+        refundWalletAddress={onRampPurchase.address}
         onInitiateDeposit={onInitiateDeposit}
         onTransactionCompleted={onTransactionCompleted}
         onUrlSignatureRequested={onUrlSignatureRequested}
@@ -176,8 +166,7 @@ export const MoonPayEmbed = ({ para, isDark, isEmbedded, onRampConfig, onRampPur
     onRampPurchase.address,
     onRampPurchase.walletId,
     onRampPurchase.walletType,
-    defaultCurrencyCode,
-    currencyCodes,
+    onRampPurchase.asset,
     onInitiateDeposit,
     onTransactionCompleted,
     onUrlSignatureRequested,

@@ -6,14 +6,17 @@ import { ENV_VARS } from '../../../utils/constants';
 import { useCallback } from 'react';
 import { useGetOrganizationSubscriptionPlan } from './useOrganizationSubscription';
 import { useParams } from 'react-router-dom';
+import { useIsValidOrg, useIsValidProject } from '../../useIsValidOrgConfig';
 
 export const ORGANIZATIONS_KEYS_QUERY_KEY = 'organizationKeys';
 
 export const useOrganizationKeysQuery = <T>(projectId: string, select: (data: ApiKey[]) => T) => {
   const { organizationId } = useParams();
+  const isOrgValid = useIsValidOrg(organizationId);
+  const isProjectValid = useIsValidProject(projectId);
 
   return useQuery({
-    enabled: !!organizationId && !!projectId,
+    enabled: isOrgValid && isProjectValid,
     queryKey: [ORGANIZATIONS_KEYS_QUERY_KEY, organizationId, projectId],
     queryFn: async () => {
       if (!organizationId || !projectId) {
@@ -94,4 +97,11 @@ export const useGetAvailableKeyEnvs = (projectId: string) => {
       [plan],
     ),
   );
+};
+
+export const useGetKeyIsValid = (projectId?: string, keyId?: string) => {
+  return useOrganizationKeysQuery(projectId ?? '', data => {
+    const key = data.find(k => k.id === keyId);
+    return !!key && !key.archived;
+  });
 };

@@ -25,3 +25,4 @@ export const hasPregenWallet = generateAction('hasPregenWalletV2');
 export const updatePregenWalletIdentifier = generateAction('updatePregenWalletIdentifierV2');
 export const signMessage = generateAction('signMessage');
 export const signTransaction = generateAction('signTransaction');
+export const getWalletBalance = generateAction('getWalletBalance');

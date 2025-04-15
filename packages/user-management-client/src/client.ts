@@ -8,6 +8,8 @@ import axios, {
 import { AxiosRequestConfig } from 'axios';
 import qs from 'qs';
 import {
+  AccountMetadata,
+  AccountMetadataKey,
   Auth,
   AuthIdentifier,
   AuthMethod,
@@ -49,7 +51,7 @@ import {
   WalletType,
   VerifyExternalWalletParams,
 } from './types/index.js';
-import { extractWalletRef } from './utils.js';
+import { extractWalletRef, fromAccountMetadata } from './utils.js';
 import { SESSION_COOKIE_HEADER_NAME, VERSION_HEADER_NAME, PARTNER_ID_HEADER_NAME, API_KEY_HEADER_NAME } from './consts.js';
 import { ParaApiError } from './error.js';
 
@@ -177,6 +179,10 @@ interface updatePregenWalletBody {
 interface createWalletRes {
   protocolId: string;
   walletId: string;
+}
+
+interface GetWalletBalanceRes {
+  balance: string;
 }
 
 interface createPregenWalletBody {
@@ -756,9 +762,11 @@ class Client {
     return res.data.share;
   };
 
-  // GET /download-backup-kit/:userId
-  getBackupKit = async (userId: string): Promise<any> => {
-    const res = await this.baseRequest.get<Blob>(`/download-backup-kit/${userId}`, { responseType: 'blob' });
+  // GET /users/:userId/wallets/:walletId/download-backup-kit
+  getBackupKit = async (userId: string, walletId: string): Promise<any> => {
+    const res = await this.baseRequest.get<Blob>(`/users/${userId}/wallets/${walletId}/download-backup-kit`, {
+      responseType: 'blob',
+    });
     return res;
   };
 
@@ -922,40 +930,16 @@ class Client {
 
   async createOnRampPurchase({
     userId,
-    params: {
-      type,
-      walletType,
-      address,
-      provider,
-      networks,
-      assets,
-      defaultNetwork,
-      defaultAsset,
-      fiat,
-      fiatQuantity,
-      testMode = false,
-    },
-    ...params
+    params,
+    ...walletParams
   }: {
     userId: string;
     params: OnRampPurchaseCreateParams;
   } & WalletParams): Promise<OnRampPurchase> {
-    const [key, identifier] = extractWalletRef(params);
+    const [key, identifier] = extractWalletRef(walletParams);
     const walletString = key === 'walletId' ? `wallets/${identifier}` : `external-wallets/${identifier}`;
 
-    const res = await this.baseRequest.post<OnRampPurchase>(`/users/${userId}/${walletString}/purchases`, {
-      type,
-      provider,
-      walletType,
-      address,
-      networks,
-      assets,
-      defaultAsset,
-      defaultNetwork,
-      fiat,
-      fiatQuantity,
-      testMode,
-    });
+    const res = await this.baseRequest.post<OnRampPurchase>(`/users/${userId}/${walletString}/purchases`, params);
 
     return res.data;
   }
@@ -1024,7 +1008,7 @@ class Client {
     return res;
   }
 
-  async generateOffRampTx<ReturnType = { tx: string; asset: OnRampAsset; network: Network }>(
+  async generateOffRampTx<ReturnType = { tx: string; message?: string; asset: OnRampAsset; network: Network }>(
     userId: string,
     {
       provider,
@@ -1068,12 +1052,14 @@ class Client {
     {
       tx,
       signature,
+      sourceAddress,
       network,
       walletId,
       walletType,
     }: {
       tx: string;
       signature: string;
+      sourceAddress?: string;
       network: Network;
       walletId: string;
       walletType: WalletType;
@@ -1082,6 +1068,7 @@ class Client {
     const res = await this.baseRequest.post<ReturnType>(`/users/${userId}/wallets/${walletId}/offramp-send`, {
       tx,
       signature,
+      sourceAddress,
       network,
       walletType,
     });
@@ -1225,6 +1212,37 @@ class Client {
     const res = await this.baseRequest.get<any>(`/users/${userId}`);
     return res.data;
   }
+
+  // GET /users/:userId/accounts
+  async getAccountMetadata(userId: string, partnerId: string): Promise<{ accountMetadata: AccountMetadata }> {
+    const res = await this.baseRequest.get<{
+      accountMetadata: Partial<Record<AccountMetadataKey, { date: string; metadata: object }>>;
+    }>(`/users/${userId}/oauth/accounts`, {
+      params: { partnerId },
+    });
+
+    return {
+      accountMetadata: fromAccountMetadata(res.data.accountMetadata),
+    };
+  }
+
+  // GET /users/:userId/wallets/:walletId/balance
+  getWalletBalance = async ({
+    userId,
+    walletId,
+    rpcUrl,
+  }: {
+    userId: string;
+    walletId: string;
+    rpcUrl?: string;
+  }): Promise<GetWalletBalanceRes> => {
+    const res = await this.baseRequest.get<GetWalletBalanceRes>(`/users/${userId}/wallets/${walletId}/balance`, {
+      params: {
+        rpcUrl,
+      },
+    });
+    return res.data;
+  };
 }
 
 export default Client;

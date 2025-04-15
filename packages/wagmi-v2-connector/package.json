@@ -15,14 +15,14 @@
   },
   "devDependencies": {
     "typescript": "5.1.6",
-    "viem": "2.x",
-    "wagmi": "2.x"
+    "viem": "^2.24.2",
+    "wagmi": "^2.14.16"
   },
   "peerDependencies": {
     "react": "*",
     "react-dom": "*",
-    "viem": "2.x",
-    "wagmi": "2.x"
+    "viem": "^2.24.2",
+    "wagmi": "^2.14.16"
   },
   "files": [
     "dist",

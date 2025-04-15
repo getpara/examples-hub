@@ -2,14 +2,16 @@ import { useQuery } from '@tanstack/react-query';
 import { getOrganizationSubscription } from '../../../api/organizations/queries';
 import { Subscription } from '../../../types/api';
 import { useParams } from 'react-router-dom';
+import { useIsValidOrg } from '../../useIsValidOrgConfig';
 
 export const ORGANIZATIONS_SUBSCRIPTION_QUERY_KEY = 'organizationSubscription';
 
 export const useOrganizationSubscriptionQuery = <T>(select: (data: Subscription | undefined) => T) => {
   const { organizationId } = useParams();
+  const isOrgValid = useIsValidOrg(organizationId);
 
   return useQuery({
-    enabled: !!organizationId,
+    enabled: isOrgValid,
     queryKey: [ORGANIZATIONS_SUBSCRIPTION_QUERY_KEY, organizationId],
     queryFn: async () => {
       if (!organizationId) {

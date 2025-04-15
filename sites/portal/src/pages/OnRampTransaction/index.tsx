@@ -175,7 +175,7 @@ export function OnRampTransaction() {
       default:
         return null;
     }
-  }, [onRampPurchase?.provider, isAwaitingPassword]);
+  }, [para, onRampConfig, onRampPurchase, isAwaitingPassword, isDark]);
 
   useEffect(() => {
     performSetup();

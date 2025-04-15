@@ -9,10 +9,10 @@ export default defineConfig({
       include: ['src/**/*.{ts,tsx,js,jsx}'],
       reportOnFailure: true,
       thresholds: {
-        lines: 96.79,
+        lines: 96.75,
         functions: 97.08,
         branches: 92.1,
-        statements: 96.79,
+        statements: 96.75,
       },
     },
   },

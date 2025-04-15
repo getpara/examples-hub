@@ -147,7 +147,14 @@ export function AuthProvider({
             },
             {
               onSuccess: () => {
-                createWallets();
+                if (para.isNoWalletConfig) {
+                  onLoginComplete({
+                    on2faSetupOrError: () => setStep(ModalStep.LOGIN_DONE),
+                    on2faNotSetup: () => setStep(ModalStep.SETUP_2FA),
+                  });
+                } else {
+                  createWallets();
+                }
               },
               onError: () => {
                 if (
@@ -217,7 +224,7 @@ export function AuthProvider({
           },
           {
             onSuccess: ({ needsWallet }) => {
-              if (needsWallet) {
+              if (needsWallet && !para.isNoWalletConfig) {
                 createWallets();
               } else {
                 onLoginComplete({
@@ -454,7 +461,7 @@ export function AuthProvider({
 
       onLoginComplete();
     } catch (e) {}
-  }, [isRecoverySecretStepEnabled, overrides?.createWallets]);
+  }, [para, isRecoverySecretStepEnabled, overrides?.createWallets]);
 
   const logout = () => {
     mutateLogout();

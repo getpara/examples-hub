@@ -1,10 +1,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Jersey+15&family=Jersey+25&family=Open+Sans&family=Inter&family=Poppins&family=Merriweather&family=Space+Mono&family=Cormorant&family=Source+Sans+Pro&family=Source+Serif+Pro&family=Roboto&family=Rubik&display=swap');
 
+html, body, #root {
+  height: 100%;
+}
+
 html {
   font-family: 'Inter', sans-serif;
   --cpsl-default-font: 'Inter', sans-serif;
 }
 
 body {
-  margin: 0px;
+  background-color: #F9F9F9;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  background-color: #F9F9F9;
 }

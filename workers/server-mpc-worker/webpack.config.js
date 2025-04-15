@@ -14,10 +14,15 @@ module.exports = {
   },
   optimization: {
     minimize: true,
+    splitChunks: false,
+    runtimeChunk: false,
   },
   plugins: [
     new webpack.EnvironmentPlugin({
       NODE_DEBUG: 'false',
+    }),
+    new webpack.optimize.LimitChunkCountPlugin({
+      maxChunks: 1,
     }),
   ],
   resolve: {

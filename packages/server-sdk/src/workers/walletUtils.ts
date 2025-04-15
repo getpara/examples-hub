@@ -219,7 +219,7 @@ export async function preKeygen(
     )) as string;
     return { signer: newSigner, walletId };
   } catch (e) {
-    throw new Error(`error creating account of type ${type} with  walletId ${walletId}`);
+    throw new Error(`error creating account of type ${type} with walletId ${walletId}`);
   }
 }
 
@@ -243,7 +243,7 @@ export async function signMessage(
   const signMessageFn = ctx.useDKLS ? global.dklsSignMessage : global.signMessage;
 
   try {
-    return new Promise((resolve, reject) =>
+    return await new Promise((resolve, reject) =>
       signMessageFn(share, serverUrl, message, protocolId, (err, result) => {
         if (err) {
           reject(err);
@@ -279,7 +279,7 @@ export async function signTransaction(
   const signTransactionFn = ctx.useDKLS ? global.dklsSendTransaction : global.sendTransaction;
 
   try {
-    return new Promise((resolve, reject) =>
+    return await new Promise((resolve, reject) =>
       signTransactionFn(share, serverUrl, tx, chainId, protocolId, (err, result) => {
         if (err) {
           reject(err);
@@ -315,7 +315,7 @@ export async function sendTransaction(
   const sendTransactionFn = ctx.useDKLS ? global.dklsSendTransaction : global.sendTransaction;
 
   try {
-    return new Promise((resolve, reject) =>
+    return await new Promise((resolve, reject) =>
       sendTransactionFn(share, serverUrl, tx, chainId, protocolId, (err, result) => {
         if (err) {
           reject(err);
@@ -336,7 +336,7 @@ export async function refresh(ctx: Ctx, share: string, walletId: string, userId:
   const refreshFn = ctx.useDKLS ? global.dklsRefresh : global.refresh;
 
   try {
-    return new Promise((resolve, reject) =>
+    return await new Promise((resolve, reject) =>
       refreshFn(share, serverUrl, protocolId, (err, result) => {
         if (err) {
           reject(err);
@@ -357,7 +357,7 @@ export async function getPrivateKey(ctx: Ctx, share: string, walletId: string, u
   }
 
   try {
-    return new Promise((resolve, reject) =>
+    return await new Promise((resolve, reject) =>
       global.getPrivateKey(share, paraShare, (err, result) => {
         if (err) {
           reject(err);

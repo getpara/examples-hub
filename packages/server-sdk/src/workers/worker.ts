@@ -26,7 +26,7 @@ interface Message {
   workId: string;
 }
 
-async function requestWasmWithRetries(ctx: Ctx, retries = 3) {
+export async function requestWasmWithRetries(ctx: Ctx, retries = 3) {
   for (let i = 0; i < retries; i++) {
     try {
       return await axios.get(`${getPortalBaseURL(ctx, true, true)}/static/js/main.wasm`, { responseType: 'arraybuffer' });
@@ -35,6 +35,7 @@ async function requestWasmWithRetries(ctx: Ctx, retries = 3) {
         throw e;
       }
     }
+    /* v8 ignore next 2 */
   }
 }
 
@@ -74,7 +75,8 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
     }
     case 'REFRESH': {
       const { share, walletId, userId } = params;
-      return walletUtils.refresh(ctx, share, walletId, userId);
+      const signer = await walletUtils.refresh(ctx, share, walletId, userId);
+      return { signer };
     }
     case 'PREKEYGEN': {
       const { email, partnerId, secretKey, type = WalletType.EVM } = params;
@@ -89,7 +91,8 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
     }
     case 'GET_PRIVATE_KEY': {
       const { share, walletId, userId } = params;
-      return await walletUtils.getPrivateKey(ctx, share, walletId, userId);
+      const privateKey = await walletUtils.getPrivateKey(ctx, share, walletId, userId);
+      return { privateKey };
     }
     case 'ED25519_KEYGEN': {
       const { userId } = params;

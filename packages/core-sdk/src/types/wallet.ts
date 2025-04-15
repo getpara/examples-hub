@@ -27,6 +27,8 @@ export interface Wallet {
   lastUsedPartnerId?: string;
   isExternal?: boolean;
   isExternalWithParaAuth?: boolean;
+  ensName?: string | null;
+  ensAvatar?: string | null;
 }
 
 /** @deprecated */

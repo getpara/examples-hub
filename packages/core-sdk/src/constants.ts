@@ -7,6 +7,7 @@ export const LOCAL_STORAGE_PHONE = `${PREFIX}phone`;
 export const LOCAL_STORAGE_COUNTRY_CODE = `${PREFIX}countryCode`;
 export const LOCAL_STORAGE_FARCASTER_USERNAME = `${PREFIX}farcasterUsername`;
 export const LOCAL_STORAGE_TELEGRAM_USER_ID = `${PREFIX}telegramUserId`;
+export const LOCAL_STORAGE_EXTERNAL_WALLET_USER_ID = `${PREFIX}externalWalletUserId`;
 export const LOCAL_STORAGE_USER_ID = `${PREFIX}userId`;
 export const LOCAL_STORAGE_ED25519_WALLETS = `${PREFIX}ed25519Wallets`;
 export const LOCAL_STORAGE_WALLETS = `${PREFIX}wallets`;

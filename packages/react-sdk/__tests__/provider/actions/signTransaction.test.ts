@@ -22,10 +22,10 @@ describe('signTransaction', () => {
   });
   describe('fail', () => {
     it('no para', async () => {
-      expect(signTransaction(undefined)).rejects.toThrowError();
+      await expect(signTransaction(undefined)).rejects.toThrowError();
     });
     it('no args', async () => {
-      expect(signTransaction(paraClient, undefined)).rejects.toThrowError();
+      await expect(signTransaction(paraClient, undefined)).rejects.toThrowError();
     });
   });
 });

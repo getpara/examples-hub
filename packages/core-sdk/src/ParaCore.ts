@@ -53,6 +53,7 @@ import {
   PrimaryAuth,
   PrimaryAuthType,
   isExternalWallet,
+  AccountMetadata,
 } from '@getpara/user-management-client';
 import type { pki as pkiType, jsbn as jsbnType } from 'node-forge';
 import forge from 'node-forge';
@@ -362,6 +363,10 @@ export abstract class ParaCore implements CoreInterface {
 
   private disableProviderModal?: boolean;
 
+  get isNoWalletConfig(): boolean {
+    return !!this.#partner?.supportedWalletTypes && this.#partner.supportedWalletTypes.length === 0;
+  }
+
   get supportedWalletTypes(): SupportedWalletTypes {
     return this.#partner?.supportedWalletTypes ?? [];
   }
@@ -559,13 +564,18 @@ export abstract class ParaCore implements CoreInterface {
    */
   getDisplayAddress(
     walletId: string,
-    options: { truncate?: boolean; addressType?: WalletTypeProp | undefined } | undefined = {},
+    options:
+      | { truncate?: boolean; addressType?: WalletTypeProp | undefined; cosmosPrefix?: string; targetLength?: number }
+      | undefined = {},
   ): string {
     if (this.externalWallets[walletId]) {
       const wallet = this.externalWallets[walletId];
 
       return options.truncate
-        ? truncateAddress(wallet.address, wallet.type, { prefix: this.#partner?.cosmosPrefix })
+        ? truncateAddress(wallet.address, wallet.type, {
+            prefix: this.#partner?.cosmosPrefix,
+            targetLength: options.targetLength,
+          })
         : wallet.address;
     }
 
@@ -576,17 +586,20 @@ export abstract class ParaCore implements CoreInterface {
     }
 
     let str: string;
+    let prefix: string;
 
     switch (wallet.type) {
       case WalletType.COSMOS:
-        str = getCosmosAddress(wallet.publicKey!, this.#partner?.cosmosPrefix ?? 'cosmos');
+        prefix = options.cosmosPrefix ?? this.#partner?.cosmosPrefix ?? 'cosmos';
+        str = getCosmosAddress(wallet.publicKey!, prefix);
         break;
       default:
+        prefix = this.cosmosPrefix;
         str = wallet.address;
         break;
     }
 
-    return options.truncate ? truncateAddress(str, wallet.type, { prefix: this.#partner?.cosmosPrefix }) : str;
+    return options.truncate ? truncateAddress(str, wallet.type, { prefix, targetLength: options.targetLength }) : str;
   }
 
   /**
@@ -1451,6 +1464,21 @@ export abstract class ParaCore implements CoreInterface {
   }
 
   /**
+   * Fetches the most recent OAuth account metadata for the signed-in user.
+   * If applicable, this will include the user's most recent metadata from their Google, Apple, Facebook, X, Discord, Farcaster, or Telegram account, the last time they signed in to your app.
+   * @returns {Promise<AccountMetadata>} the user's account metadata.
+   */
+  async getAccountMetadata(): Promise<AccountMetadata> {
+    if (!(await this.isSessionActive()) || !this.userId) {
+      throw new Error('no signed-in user');
+    }
+    const { partnerId } = await this.touchSession();
+    const { accountMetadata } = await this.ctx.client.getAccountMetadata(this.userId, partnerId);
+
+    return accountMetadata;
+  }
+
+  /**
    * Validates that a wallet ID is present on the instance, usable, and matches the desired filters.
    * If no ID is passed, this will instead return the first valid, usable wallet ID that matches the filters.
    * @param {string} [walletId] the wallet ID to validate.
@@ -1851,6 +1879,7 @@ export abstract class ParaCore implements CoreInterface {
       // If the wallet isn't using full Para auth we want to track the login here
       shouldTrackUser: !wallet.withFullParaAuth,
     });
+
     await this.setExternalWallet(wallet);
     await this.setUserId(res.userId);
 
@@ -1877,7 +1906,7 @@ export abstract class ParaCore implements CoreInterface {
     cosmosSigner,
   }: VerifyExternalWalletV1): Promise<string> {
     await this.ctx.client.verifyExternalWallet(this.userId, { address, signedMessage, cosmosPublicKeyHex, cosmosSigner });
-    return this.getSetUpBiometricsURL();
+    return this.getSetUpBiometricsURL({ authType: 'externalWallet' });
   }
 
   /**
@@ -2142,8 +2171,9 @@ export abstract class ParaCore implements CoreInterface {
 
     return (
       isSessionActive &&
-      this.currentWalletIdsArray.length > 0 &&
-      this.currentWalletIdsArray.reduce((acc, [id]) => acc && !!this.wallets[id], true)
+      (this.isNoWalletConfig ||
+        (this.currentWalletIdsArray.length > 0 &&
+          this.currentWalletIdsArray.reduce((acc, [id]) => acc && !!this.wallets[id], true)))
     );
   }
 
@@ -2404,6 +2434,15 @@ export abstract class ParaCore implements CoreInterface {
    * @returns {string} the URL for the user to log in with OAuth.
    */
   async getOAuthURL({ method, deeplinkUrl }: { method: OAuthMethod; deeplinkUrl?: string }): Promise<string> {
+    // Validate deeplink URL if provided and not empty
+    if (deeplinkUrl) {
+      try {
+        new URL(deeplinkUrl);
+      } catch {
+        throw new Error('Invalid deeplink URL');
+      }
+    }
+
     await this.logout();
     const { sessionLookupId } = await this.touchSession(true);
 
@@ -3019,6 +3058,13 @@ export abstract class ParaCore implements CoreInterface {
       return undefined;
     }
 
+    const missingWallets = pregenWallets.filter(wallet => !this.wallets[wallet.id]);
+    if (missingWallets.length > 0) {
+      throw new Error(
+        `Cannot claim pregen wallets because wallet data is missing. Please call setUserShare first to load the wallet data for the following wallet IDs: ${missingWallets.map(w => w.id).join(', ')}`,
+      );
+    }
+
     let newRecoverySecret: string | undefined;
 
     const { walletIds } = await this.ctx.client.claimPregenWallets({
@@ -3235,6 +3281,17 @@ export abstract class ParaCore implements CoreInterface {
       },
     });
   }
+
+  getWalletBalance = async ({
+    walletId,
+    rpcUrl,
+  }: CoreMethodParams<'getWalletBalance'>): CoreMethodResponse<'getWalletBalance'> => {
+    if (!this.userId) {
+      throw new Error('a user id is required to get a wallet balance');
+    }
+
+    return (await this.ctx.client.getWalletBalance({ userId: this.userId, walletId, rpcUrl })).balance;
+  };
 
   /**
    * Signs a message using one of the current wallets.
@@ -3550,17 +3607,25 @@ export abstract class ParaCore implements CoreInterface {
 
   /**
    * Serialize the current session for import by another Para instance.
+   * @param {boolean} excludeSigners - whether or not to exclude the signer from the exported wallets.
    * @returns {string} the serialized session
    */
-  exportSession(): CoreMethodResponse<'exportSession'> {
+  exportSession({ excludeSigners = false }: CoreMethodParams<'exportSession'> = {}): CoreMethodResponse<'exportSession'> {
     const sessionInfo = {
       authInfo: this.#authInfo,
       userId: this.userId,
-      wallets: this.wallets,
+      wallets: structuredClone(this.wallets),
       currentWalletIds: this.currentWalletIds,
       sessionCookie: this.retrieveSessionCookie(),
       externalWallets: this.externalWallets,
     };
+
+    if (excludeSigners) {
+      for (const wallet of Object.values(sessionInfo.wallets)) {
+        delete wallet.signer;
+      }
+    }
+
     return Buffer.from(JSON.stringify(sessionInfo)).toString('base64');
   }
 
@@ -3820,6 +3885,14 @@ export abstract class ParaCore implements CoreInterface {
     deeplinkUrl,
     ...params
   }: CoreMethodParams<'getOAuthUrlV2'>): CoreMethodResponse<'getOAuthUrlV2'> {
+    if (deeplinkUrl) {
+      try {
+        new URL(deeplinkUrl);
+      } catch {
+        throw new Error('Invalid deeplink URL');
+      }
+    }
+
     const sessionLookupId = params.sessionLookupId ?? (await this.#prepareLogin());
 
     return constructUrl({

@@ -2,6 +2,8 @@ name: PR Format
 on:
   pull_request:
     types: [opened, synchronize, reopened, edited]
+  issue_comment:
+    types: [created, edited, deleted]
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -9,6 +11,7 @@ concurrency:
 jobs:
   check-checklist:
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
     steps:
       - name: Get PR description
         id: get-pr-description
@@ -34,7 +37,39 @@ jobs:
 
   validate-pr-title:
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
     steps:
       - uses: amannn/action-semantic-pull-request@v5.5.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  comment-for-examples-docs:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event_name == 'issue_comment'
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Fetch PR comments
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER=${{ github.event.issue.number || github.event.pull_request.number }}
+          COMMENTS=$(gh api repos/${{ github.repository }}/issues/${PR_NUMBER}/comments --jq '.[].body')
+
+          echo "Checking PR comments..."
+          echo "$COMMENTS"
+
+          if echo "$COMMENTS" | grep -q -E 'NO EXAMPLES NEEDED|https://github.com/getpara/examples-hub/pull/'; then
+            echo "Valid comment found for examples ✅"
+          else
+            echo "❌ Link with https://github.com/getpara/examples-hub/pull/ or comment with \"NO EXAMPLES NEEDED\" needed for this PR."
+            exit 1
+          fi
+
+          if echo "$COMMENTS" | grep -q -E 'NO DOCS NEEDED|https://github.com/capsule-org/docs-mintlify/pull/'; then
+            echo "Valid comment found for docs ✅"
+          else
+            echo "❌ Link with https://github.com/capsule-org/docs-mintlify/pull/ or comment with \"NO DOCS NEEDED\" needed for this PR."
+            exit 1
+          fi

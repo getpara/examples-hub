@@ -32,7 +32,7 @@ describe('checkIfUserExists', () => {
       expect(checkIfUserExists(undefined, { email: 'test@test.com' })).rejects.toThrowError();
     });
     it('no args', async () => {
-      expect(checkIfUserExists(paraClient, undefined)).rejects.toThrowError();
+      await expect(checkIfUserExists(paraClient, undefined)).rejects.toThrowError();
     });
   });
 });

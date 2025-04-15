@@ -1,6 +1,6 @@
 import { Encrypt as ECIESEncrypt, Decrypt as ECIESDecrypt } from '@celo/utils/lib/ecies.js';
 import { Buffer } from 'buffer';
-import * as eutil from 'ethereumjs-util';
+import * as eutil from '@ethereumjs/util';
 import Client from '@getpara/user-management-client';
 import { randomBytes } from 'crypto';
 

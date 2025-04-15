@@ -18,10 +18,10 @@ describe('waitForLoginAndSetup', () => {
   });
   describe('fail', () => {
     it('no para', async () => {
-      expect(waitForLoginAndSetup(undefined)).rejects.toThrowError();
+      await expect(waitForLoginAndSetup(undefined)).rejects.toThrowError();
     });
     it('no args', async () => {
-      expect(waitForLoginAndSetup(paraClient, undefined)).rejects.toThrowError();
+      await expect(waitForLoginAndSetup(paraClient, undefined)).rejects.toThrowError();
     });
   });
 });

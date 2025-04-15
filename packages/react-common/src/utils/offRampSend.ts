@@ -23,7 +23,7 @@ export async function offRampSend(
   }
 
   try {
-    const { tx, network, asset } = await para.ctx.client.generateOffRampTx(para.getUserId(), {
+    const { tx, message, network, asset } = await para.ctx.client.generateOffRampTx(para.getUserId(), {
       walletId,
       walletType,
       provider,
@@ -47,6 +47,10 @@ export async function offRampSend(
         )?.signature;
         break;
 
+      case WalletType.SOLANA:
+        signature = ((await para.signMessage({ walletId, messageBase64: message })) as SuccessfulSignatureRes)?.signature;
+        break;
+
       default:
         throw new Error(`Unsupported wallet type: ${walletType}`);
     }
@@ -54,6 +58,7 @@ export async function offRampSend(
     const { txHash } = await para.ctx.client.sendOffRampTx(para.getUserId(), {
       tx,
       signature: walletType === 'EVM' ? `0x${signature}` : signature,
+      sourceAddress: address,
       network,
       walletId,
       walletType,

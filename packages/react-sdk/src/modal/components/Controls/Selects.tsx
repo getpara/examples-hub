@@ -1,13 +1,14 @@
-import { CpslIdenticon, CpslSelect, CpslSelectItem, CpslText } from '@getpara/react-components';
+import { CpslButton, CpslIcon, CpslIdenticon, CpslText } from '@getpara/react-components';
 import styled from 'styled-components';
 import ParaWeb, { truncateAddress, WalletType } from '@getpara/web-sdk';
 import { useEffect, useRef } from 'react';
 import { useDropdownPosition } from '../AuthInput/hooks/useDropdownPosition.js';
-import { MOBILE_SIZE } from '../../constants/constants.js';
 import { useAccount, useWallet, useWalletState } from '../../../provider/index.js';
+import { HeaderSelect, HeaderSelectContainer, HeaderSelectItem } from '../common.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 import { useStore } from '../../../provider/stores/useStore.js';
+import { useCopyToClipboard } from '@getpara/react-common';
 
 const getValue = (id?: string, type?: WalletType) => {
   return id && type ? `${id}~${type}` : undefined;
@@ -45,8 +46,8 @@ export const ChainSelect = () => {
 
   return (
     <Container>
-      <SelectContainer ref={containerRef} id="inputContainer">
-        <StyledSelect
+      <HeaderSelectContainer ref={containerRef} id="inputContainer">
+        <HeaderSelect
           selectedValue={chainIdToUse?.toString() ?? ''}
           onCpslSelectValueChange={e => {
             handleChainChange(e.detail);
@@ -67,14 +68,14 @@ export const ChainSelect = () => {
             </ChainName>
           )}
           {chains?.map(chain => (
-            <StyledSelectItem key={chain.id} slot="items" value={chain.id.toString()}>
+            <HeaderSelectItem key={chain.id} slot="items" value={chain.id.toString()}>
               <ChainName variant="bodyXS" color="contrast">
                 {chain.name}
               </ChainName>
-            </StyledSelectItem>
+            </HeaderSelectItem>
           ))}
-        </StyledSelect>
-      </SelectContainer>
+        </HeaderSelect>
+      </HeaderSelectContainer>
     </Container>
   );
 };
@@ -107,6 +108,7 @@ export const AccountSelect = () => {
   const para = useInternalClient();
   const containerRef = useRef<HTMLDivElement>(null);
   const { dropdownMaxHeight, dropdownWidth, mobileAnchor, resize } = useDropdownPosition(containerRef);
+  const [isCopied, copy] = useCopyToClipboard();
 
   const { setSelectedWallet } = useWalletState();
   const { data: activeWallet } = useWallet();
@@ -114,16 +116,35 @@ export const AccountSelect = () => {
 
   const availableWallets = account?.wallets;
 
+  const handleCopy = () => {
+    copy(activeWallet?.address ? para.getDisplayAddress(activeWallet.id, { addressType: activeWallet.type }) : '');
+  };
+
   const ActiveWalletNode = activeWallet ? (
     <FlexRow slot="selected-item">
-      <CpslIdenticon variant="avatar" size="14px" hash={para.getIdenticonHash(activeWallet.id, activeWallet.type)} />
+      <CpslIdenticon variant="avatar" size="24px" hash={para.getIdenticonHash(activeWallet.id, activeWallet.type)} />
       <WalletName variant="bodyXS" color="contrast">
         {getName(para, { ...activeWallet, hideWallets })}
       </WalletName>
       {!hideWallets && (
-        <CpslText variant="bodyXS" color="secondary">
-          {para.getDisplayAddress(activeWallet.id, { truncate: true, addressType: activeWallet.type })}
-        </CpslText>
+        <>
+          <CpslText variant="bodyXS" color="secondary">
+            {activeWallet.ensName ??
+              para.getDisplayAddress(activeWallet.id, { truncate: true, addressType: activeWallet.type })}
+          </CpslText>
+          <CpslButton
+            id="ignore-click"
+            size="small"
+            variant="ghost"
+            onClick={e => {
+              e.stopPropagation();
+              e.preventDefault();
+              handleCopy();
+            }}
+          >
+            <CpslIcon id="ignore-click" slot="start" icon={isCopied ? 'check' : 'copy'} />
+          </CpslButton>
+        </>
       )}
     </FlexRow>
   ) : null;
@@ -136,9 +157,9 @@ export const AccountSelect = () => {
 
   return (
     <Container>
-      <SelectContainer ref={containerRef} id="addressInputContainer">
+      <HeaderSelectContainer ref={containerRef} id="addressInputContainer">
         {availableWallets && availableWallets.length > 1 ? (
-          <StyledSelect
+          <HeaderSelect
             selectedValue={getValue(activeWallet?.id, activeWallet?.type)}
             onCpslSelectValueChange={e => {
               const [id, type] = e.detail.split('~');
@@ -159,7 +180,7 @@ export const AccountSelect = () => {
               const key = getValue(id, type);
               const name = _name ?? getName(para, { type, isExternal, isMenu: true, hideWallets });
               return (
-                <StyledSelectItem key={key} slot="items" value={key}>
+                <HeaderSelectItem key={key} slot="items" value={key}>
                   <FlexRow>
                     <CpslIdenticon size="40px" hash={para.getIdenticonHash(id, type)} />
                     <FlexCol>
@@ -175,14 +196,14 @@ export const AccountSelect = () => {
                       )}
                     </FlexCol>
                   </FlexRow>
-                </StyledSelectItem>
+                </HeaderSelectItem>
               );
             })}
-          </StyledSelect>
+          </HeaderSelect>
         ) : (
           ActiveWalletNode
         )}
-      </SelectContainer>
+      </HeaderSelectContainer>
     </Container>
   );
 };
@@ -210,16 +231,6 @@ const WalletName = styled(CpslText)`
   white-space: nowrap;
 `;
 
-const SelectContainer = styled.div`
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border-radius: 1000px;
-  background-color: var(--cpsl-color-background-8);
-  padding: 8px;
-`;
-
 const ChainName = styled(CpslText)`
   max-width: 150px;
   text-transform: capitalize;
@@ -229,47 +240,4 @@ const ChainName = styled(CpslText)`
     text-overflow: ellipsis;
     overflow: hidden;
   }
-`;
-
-const StyledSelect = styled(CpslSelect)<{ $width: number; $top?: number }>`
-  --container-height: auto;
-  --container-border-width: 0px;
-  --container-padding-end: 0px;
-  --container-padding-start: 0px;
-  --container-background-color: transparent;
-  --container-box-shadow: none;
-  --container-gap: 2px;
-  --icon-width: 16px;
-  --icon-height: 16px;
-
-  &::part(selected-text) {
-    white-space: nowrap;
-  }
-
-  &::part(dropdown) {
-    min-width: ${({ $width }) => `${$width - 2}px`};
-  }
-
-  &::part(popover) {
-    /* Have to adjust the top of the popover here since we're using a transform on the modal which causes fixed position items to not be relative to the viewport */
-    @media (max-width: ${MOBILE_SIZE}px) {
-      top: ${({ $top }) => ($top ? `${$top}px` : '0px')};
-      bottom: 16px;
-    }
-    cpsl-auth-modal.force-mobile-media & {
-      top: ${({ $top }) => ($top ? `${$top}px` : '0px')};
-      bottom: 16px;
-    }
-  }
-
-  &::part(icon) {
-    --icon-color: var(--cpsl-color-contrast);
-  }
-`;
-
-const StyledSelectItem = styled(CpslSelectItem)`
-  --outer-container-padding-start: 4px;
-  --outer-container-padding-end: 4px;
-  --outer-container-padding-top: 4px;
-  --outer-container-padding-bottom: 4px;
 `;

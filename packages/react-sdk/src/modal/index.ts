@@ -8,7 +8,7 @@ export {
   ON_RAMP_ASSETS,
   NETWORKS,
   getAssetIcon,
-  getAssetName,
+  getAssetCode,
   getNetworkIcon,
   getNetworkName,
 } from './constants/constants.js';

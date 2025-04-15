@@ -1,5 +1,8 @@
-import { CpslIcon, CpslInput, CpslText, CpslTileButton } from '@getpara/react-components';
+import { CpslIcon, CpslInput, CpslSelect, CpslSelectItem, CpslText, CpslTileButton } from '@getpara/react-components';
 import { styled } from 'styled-components';
+import { MOBILE_SIZE, NETWORKS, ON_RAMP_ASSETS } from '../constants/constants.js';
+import { Network, OnRampAsset } from '@getpara/web-sdk';
+import { useStore } from '../../provider/stores/useStore.js';
 
 export const SpinnerContainer = styled.div`
   display: flex;
@@ -78,6 +81,82 @@ export const HeroIcon = styled(CpslIcon)`
   --icon-color: var(--cpsl-color-text-primary);
 `;
 
+export const HeaderSelect = styled(CpslSelect)<{ $width: number; $top?: number }>`
+  --container-height: 26px;
+  --container-border-width: 0px;
+  --container-padding-end: 0px;
+  --container-padding-start: 0px;
+  --container-background-color: transparent;
+  --container-box-shadow: none;
+  --container-gap: 2px;
+  --icon-width: 16px;
+  --icon-height: 16px;
+  position: relative;
+
+  &::part(selected-text) {
+    white-space: nowrap;
+  }
+
+  &::part(dropdown) {
+    min-width: ${({ $width }) => `${$width - 2}px`};
+  }
+
+  &::part(popover) {
+    /* Have to adjust the top of the popover here since we're using a transform on the modal which causes fixed position items to not be relative to the viewport */
+    @media (max-width: ${MOBILE_SIZE}px) {
+      top: ${({ $top }) => ($top ? `${$top}px` : '0px')};
+      bottom: 16px;
+    }
+    cpsl-auth-modal.force-mobile-media & {
+      top: ${({ $top }) => ($top ? `${$top}px` : '0px')};
+      bottom: 16px;
+    }
+  }
+
+  &::part(icon) {
+    --icon-color: var(--cpsl-color-contrast);
+  }
+`;
+
+export const HeaderSelectItem = styled(CpslSelectItem)`
+  --outer-container-padding-start: 4px;
+  --outer-container-padding-end: 4px;
+  --outer-container-padding-top: 4px;
+  --outer-container-padding-bottom: 4px;
+`;
+
+export const HeaderSelectContainer = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 1000px;
+  background-color: var(--cpsl-color-background-8);
+  padding: 4px;
+`;
+
+const StyledIcon = styled(CpslIcon)`
+  background: var(--cpsl-color-background-0);
+  border-radius: 100%;
+`;
+
+export function AssetIcon({ asset, size }: { asset: OnRampAsset; size?: string }) {
+  const isDark = useStore(state => state.modalConfig?.theme?.mode === 'dark');
+  const data = ON_RAMP_ASSETS[asset];
+
+  return (
+    <StyledIcon size={size} icon={data.icon} inset={data.isCircular ? undefined : '15%'} invert={isDark && data.isDark} />
+  );
+}
+
+export function NetworkIcon({ network, size }: { network: Network; size?: string }) {
+  const isDark = useStore(state => state.modalConfig?.theme?.mode === 'dark');
+  const data = NETWORKS[network];
+
+  return (
+    <StyledIcon size={size} icon={data.icon} inset={data.isCircular ? undefined : '15%'} invert={isDark && data.isDark} />
+  );
+}
 export const ErrorContainer = styled.div`
   display: flex;
   align-items: center;

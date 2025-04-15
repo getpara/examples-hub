@@ -14,4 +14,17 @@ describe('ParaServer', () => {
       expect(para.wallets).toEqual({});
     });
   });
+
+  describe('claimPregenWallets', () => {
+    it('throws an error when called from server SDK', async () => {
+      const para = new Para(Environment.DEV, 'api-key-123');
+
+      await expect(
+        para.claimPregenWallets({
+          pregenIdentifier: 'test-user',
+          pregenIdentifierType: 'EMAIL',
+        }),
+      ).rejects.toThrow('claimPregenWallets is not available in the server SDK');
+    });
+  });
 });

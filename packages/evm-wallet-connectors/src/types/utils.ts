@@ -45,6 +45,7 @@ export type WalletProviderFlags =
   | 'isPortal'
   | 'isRabby'
   | 'isRainbow'
+  | 'isSafe'
   | 'isStatus'
   | 'isTally'
   | 'isTokenPocket'

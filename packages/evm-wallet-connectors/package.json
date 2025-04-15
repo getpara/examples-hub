@@ -12,8 +12,8 @@
     "@coinbase/wallet-sdk": "4.3.0",
     "@getpara/wagmi-v2-connector": "2.0.0-alpha.0",
     "@getpara/web-sdk": "^2.0.0-alpha.0",
-    "viem": "2.x",
-    "wagmi": "2.x",
+    "viem": "^2.24.2",
+    "wagmi": "^2.14.16",
     "zustand": "^4.5.2",
     "zustand-sync-tabs": "^0.2.2"
   },

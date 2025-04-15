@@ -36,6 +36,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
   const { isOpen: storedIsOpen, closeModal } = useModal();
   const para = useInternalClient();
   const { setSelectedWallet, updateSelectedWallet } = useWalletState();
+  const setAuthStepRoute = useModalStore(state => state.setAuthStepRoute);
 
   const [isModalMounted, setIsModalMounted] = useState(false);
   const [isInit, setIsInit] = useState(false);
@@ -90,6 +91,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
       if (currentStep !== ModalStep.AUTH_MAIN && currentStep !== ModalStep.SECRET) {
         setStep(ModalStep.AUTH_MAIN);
         setAuthState();
+        setAuthStepRoute();
       }
 
       // Disconnect external wallets if the user is not longer logged in

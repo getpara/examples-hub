@@ -86,3 +86,24 @@ export const getApiKeyMonthlyActiveUsersTS = async (
     },
   });
 };
+
+/**
+ * Checks if the given API key's Apple Passkey configuration is verified
+ * using the teamId and bundleIdentifier stored in the API key.
+ */
+export const checkApplePasskeyVerification = async (
+  organizationId: string,
+  projectId: string,
+  keyId: string,
+  env: string,
+): Promise<boolean> => {
+  try {
+    // Call our backend endpoint using the organizationProjectApiKeyRouter
+    const url = `/organizations/${organizationId}/projects/${projectId}/${env}/keys/${keyId}/apple-passkey-verification`;
+    const response = await axiosClient.get(url);
+    return response.data.verified === true;
+  } catch (error) {
+    console.error('Error checking Apple passkey verification:', error);
+    return false;
+  }
+};

@@ -12,6 +12,7 @@ export const defaultEvmExternalWallet: EvmExternalWalletContextType = {
   connectParaEmbedded: () => Promise.resolve({}),
   signMessage: () => Promise.resolve({}),
   signVerificationMessage: () => Promise.resolve({}),
+  getWalletBalance: () => Promise.resolve(undefined),
 };
 
 export const EvmExternalWalletContext = createContext<EvmExternalWalletContextType>(defaultEvmExternalWallet);

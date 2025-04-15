@@ -17,7 +17,7 @@
     "build:types": "rm -rf dist/types && tsc --module es6 --declarationDir dist/types --emitDeclarationOnly --declaration"
   },
   "devDependencies": {
-    "ethers": "6.x",
+    "ethers": "^6.13.5",
     "typescript": "5.1.6"
   },
   "peerDependencies": {

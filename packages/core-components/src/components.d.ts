@@ -161,6 +161,9 @@ export namespace Components {
         "type"?: 'number' | 'string';
     }
     interface CpslCol {
+        "align"?: React.CSSProperties['alignItems'];
+        "gap"?: React.CSSProperties['gap'];
+        "justify"?: React.CSSProperties['justifyContent'];
         /**
           * The amount to offset the column, in terms of how many columns it should shift to the end of the total available.
          */
@@ -390,6 +393,14 @@ export namespace Components {
          */
         "icon"?: IconType;
         /**
+          * The CSS length to inset the icon.
+         */
+        "inset": string;
+        /**
+          * Whether to invert the icon's colors.
+         */
+        "invert"?: boolean;
+        /**
           * The CSS size of the icon.
          */
         "size"?: string;
@@ -463,6 +474,10 @@ export namespace Components {
           * Error text to show below the input. If this is provided the input will enter an error state.
          */
         "errorText"?: string;
+        /**
+          * Update the native input size to match the text content
+         */
+        "fitContent": boolean;
         /**
           * Helper text to show below the input. If `"errorText"` is provided that will take precedence.
          */
@@ -737,6 +752,10 @@ export namespace Components {
         "checked": boolean;
     }
     interface CpslRow {
+        "align"?: React.CSSProperties['alignItems'];
+        "col": boolean;
+        "gap"?: React.CSSProperties['gap'];
+        "justify"?: React.CSSProperties['justifyContent'];
     }
     interface CpslSelect {
         /**
@@ -1678,6 +1697,9 @@ declare namespace LocalJSX {
         "type"?: 'number' | 'string';
     }
     interface CpslCol {
+        "align"?: React.CSSProperties['alignItems'];
+        "gap"?: React.CSSProperties['gap'];
+        "justify"?: React.CSSProperties['justifyContent'];
         /**
           * The amount to offset the column, in terms of how many columns it should shift to the end of the total available.
          */
@@ -1931,6 +1953,14 @@ declare namespace LocalJSX {
          */
         "icon"?: IconType;
         /**
+          * The CSS length to inset the icon.
+         */
+        "inset"?: string;
+        /**
+          * Whether to invert the icon's colors.
+         */
+        "invert"?: boolean;
+        /**
           * The CSS size of the icon.
          */
         "size"?: string;
@@ -2004,6 +2034,10 @@ declare namespace LocalJSX {
           * Error text to show below the input. If this is provided the input will enter an error state.
          */
         "errorText"?: string;
+        /**
+          * Update the native input size to match the text content
+         */
+        "fitContent"?: boolean;
         /**
           * Helper text to show below the input. If `"errorText"` is provided that will take precedence.
          */
@@ -2334,6 +2368,10 @@ declare namespace LocalJSX {
         "onCpslRadioChanged"?: (event: CpslRadioCustomEvent<boolean>) => void;
     }
     interface CpslRow {
+        "align"?: React.CSSProperties['alignItems'];
+        "col"?: boolean;
+        "gap"?: React.CSSProperties['gap'];
+        "justify"?: React.CSSProperties['justifyContent'];
     }
     interface CpslSelect {
         /**

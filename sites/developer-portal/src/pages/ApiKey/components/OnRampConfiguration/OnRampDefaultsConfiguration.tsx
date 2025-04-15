@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useOnRampAllAssets } from '../../../../hooks/api/queries/useOnRampAssets';
-import { getAssetIcon, getAssetName, getNetworkName, Network, OnRampAsset, toAssetInfoArray } from '@getpara/react-sdk';
+import { getAssetCode, getAssetIcon, getNetworkName, Network, OnRampAsset, toAssetInfoArray } from '@getpara/react-sdk';
 import { OptionDisplay } from './common';
 import { GreenSwitch, SectionCard } from '../common';
 import { CpslIcon, CpslInput, CpslSelect, CpslSelectItem } from '@getpara/react-components';
@@ -9,7 +9,7 @@ import { OnRampAssets } from '../../../../types/api';
 import { useOnRampConfigFormData } from '../../hooks/useOnRampConfigFormData';
 
 function getComboName(network: Network, asset: OnRampAsset): string {
-  return `${getAssetName(asset)}${[OnRampAsset.USDC, OnRampAsset.TETHER, OnRampAsset.ETHEREUM, OnRampAsset.POLYGON].includes(asset) ? ` (${getNetworkName(network)})` : ''}`;
+  return `${getAssetCode(asset)}${[OnRampAsset.USDC, OnRampAsset.TETHER, OnRampAsset.ETHEREUM, OnRampAsset.POLYGON].includes(asset) ? ` (${getNetworkName(network)})` : ''}`;
 }
 
 function getComboId(network: Network, asset: OnRampAsset): string {

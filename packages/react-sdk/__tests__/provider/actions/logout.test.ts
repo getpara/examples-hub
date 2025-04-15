@@ -18,7 +18,7 @@ describe('logout', () => {
   });
   describe('fail', () => {
     it('no para', async () => {
-      expect(logout(undefined)).rejects.toThrowError();
+      await expect(logout(undefined)).rejects.toThrowError();
     });
   });
 });

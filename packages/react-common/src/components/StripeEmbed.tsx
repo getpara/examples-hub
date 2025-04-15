@@ -9,7 +9,7 @@ import { Props } from '../types/index.js';
 export const STRIPE_PUBLISHABLE_KEY =
   'pk_live_51MvquNGrzDeP5yP9EgVSMBPQbrbg0oHDjPIIXypePd0jzOFjbadyfO7wBKLHhUtbKIUiEUVC3YYcTJyAmJ8xA7JE00T2UDfYKz';
 export const STRIPE_PUBLISHABLE_KEY_TEST =
-  'pk_test_51Q2z5k2epVn9Kq0ZSbUzuetKb4azH6E6UPcvWmjRxvHmxLAJbIK0pwDbPQo63W9OyDng337ntNu3ZXx3AJ7MhFmR00XgfRmPgP';
+  'pk_test_51MvquNGrzDeP5yP98WgPaAUgQ50I3OpfPhVfiLO47FBHepJnZRPO62IzZY2uxT5ovhSS10RwcTcnaVil1mcJOzIi00dHapODdS';
 
 const AssetCodes = {
   eth: OnRampAsset.ETHEREUM,

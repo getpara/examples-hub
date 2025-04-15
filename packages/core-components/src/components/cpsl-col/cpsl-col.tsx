@@ -11,6 +11,12 @@ const BREAKPOINTS = ['', 'xs', 'sm', 'md', 'lg', 'xl'];
   shadow: true,
 })
 export class CpslCol {
+  @Prop() align?: React.CSSProperties['alignItems'] = 'center';
+
+  @Prop() justify?: React.CSSProperties['justifyContent'] = 'center';
+
+  @Prop() gap?: React.CSSProperties['gap'] = '8px';
+
   /**
    * The amount to offset the column, in terms of how many columns it should shift to the end
    * of the total available.

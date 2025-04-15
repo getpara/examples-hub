@@ -64,6 +64,7 @@ export const App = () => {
         }}
         config={{
           appName: 'Para External Wallet Example',
+          rpcUrl: 'https://sepolia.drpc.org',
         }}
         paraModalConfig={{
           oAuthMethods: oAuthMethods,

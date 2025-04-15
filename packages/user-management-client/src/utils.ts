@@ -9,7 +9,7 @@ import {
   WalletParams,
   WalletRef,
 } from './types/index.js';
-import { PregenAuth, PregenAuthInfo, PregenAuthType } from './types/auth.js';
+import { AccountMetadata, AccountMetadataKey, PregenAuth, PregenAuthInfo, PregenAuthType } from './types/auth.js';
 import { PregenIds, TPregenIdentifierType } from './types/wallet.js';
 
 export function isWalletId(params: WalletParams): params is { walletId: string } {
@@ -343,4 +343,19 @@ export function toPregenIds(auth: PregenAuth): PregenIds {
   const [pregenIdentifierType, pregenIdentifier] = toPregenTypeAndId(auth);
 
   return { [pregenIdentifierType]: [pregenIdentifier] };
+}
+
+export function fromAccountMetadata(
+  obj: Partial<Record<AccountMetadataKey, { date: string; metadata: object }>> | undefined,
+): AccountMetadata {
+  return Object.entries(obj || {}).reduce(
+    (acc: AccountMetadata, [method, obj]) => ({
+      ...acc,
+      [method]: {
+        ...obj,
+        date: new Date(obj.date),
+      },
+    }),
+    {},
+  );
 }

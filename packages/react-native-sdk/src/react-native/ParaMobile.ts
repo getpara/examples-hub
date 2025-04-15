@@ -23,7 +23,7 @@ import {
   PasskeyGetRequest,
   PasskeyGetResult,
 } from 'react-native-passkey';
-import { PublicKeyStatus, WalletScheme } from '@getpara/user-management-client';
+import { CurrentWalletIds, PublicKeyStatus, WalletScheme } from '@getpara/user-management-client';
 import { setEnv } from '../config.js';
 import base64url from 'base64url';
 import { webcrypto } from 'crypto';
@@ -195,7 +195,7 @@ export class ParaMobile extends ParaCore {
       resultJson = result;
     }
 
-    const { partnerId } = await this.ctx.client.touchSession();
+    const { partnerId, sessionLookupId } = await this.ctx.client.touchSession();
     const publicKey = resultJson.id;
     const verifyWebChallengeResult = await this.ctx.client.verifyWebChallenge(partnerId, {
       publicKey,
@@ -254,6 +254,16 @@ export class ParaMobile extends ParaCore {
       };
     }
 
+    const currentWalletIds: CurrentWalletIds = {};
+    for (const wallet of Object.values(walletsToInsert)) {
+      const { id, type } = wallet;
+      const currentIdsForType = currentWalletIds[type || 'EVM'] || [];
+      currentWalletIds[type || 'EVM'] = [...currentIdsForType, id];
+    }
+
     await this.setWallets(walletsToInsert);
+    await this.setCurrentWalletIds(currentWalletIds, {
+      sessionLookupId,
+    });
   }
 }

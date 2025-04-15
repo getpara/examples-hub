@@ -21,10 +21,10 @@ describe('signMessage', () => {
   });
   describe('fail', () => {
     it('no para', async () => {
-      expect(signMessage(undefined)).rejects.toThrowError();
+      await expect(signMessage(undefined)).rejects.toThrowError();
     });
     it('no args', async () => {
-      expect(signMessage(paraClient, undefined)).rejects.toThrowError();
+      await expect(signMessage(paraClient, undefined)).rejects.toThrowError();
     });
   });
 });

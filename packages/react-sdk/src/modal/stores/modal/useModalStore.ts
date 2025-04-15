@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { ModalStep } from '../../utils/steps.js';
 import { getActions } from './actions.js';
 import { OnRampConfig as OnRampConfigBase, OnRampPurchase, WalletType } from '@getpara/web-sdk';
-import { Tab as AddFundsTabType } from '../../components/AddFunds/AddFunds.js';
+import { Tab as AddFundsTabType } from '../../components/AddFunds/AddFundsContext.js';
 import { AuthStateLogin, AuthStateSignup, AuthState, AuthStateVerify } from '@getpara/core-sdk';
 import { AuthLayout, TAuthLayout } from '../../types/modalProps.js';
 import { createRef, MutableRefObject } from 'react';
@@ -12,6 +12,11 @@ import { Setup2faResponse } from '@getpara/user-management-client';
 type Flow = AuthStateSignup['stage'] | AuthStateLogin['stage'] | 'account';
 
 type ActiveWallet = [string | undefined, WalletType | undefined];
+
+export enum OnRampStep {
+  SETTINGS = 0,
+  PROVIDER = 1,
+}
 
 export type OnRampConfig = OnRampConfigBase & { testMode?: boolean };
 export interface OnModalStepChangeValue {
@@ -29,6 +34,7 @@ interface ModalState {
   onModalStepChange?: (value: OnModalStepChangeValue) => void | undefined;
   onRampConfig: OnRampConfig | undefined;
   onRampPurchase: Partial<OnRampPurchase> | undefined;
+  onRampStep: OnRampStep;
   isFullyLoggedIn: boolean;
   accountAddFundTab?: AddFundsTabType;
   selectedExternalWalletId?: string;
@@ -66,6 +72,7 @@ export interface ModalActions {
   setOnModalStepChange: (fn?: (value: OnModalStepChangeValue) => void) => void;
   setOnRampConfig: (_: OnRampConfig | undefined) => void;
   setOnRampPurchase: (_: Partial<OnRampPurchase> | undefined) => void;
+  setOnRampStep: (_: OnRampStep) => void;
   setIsFullyLoggedIn: (isFullyLoggedIn: boolean) => void;
   setAccountAddFundTab: (accountAddFundTab?: AddFundsTabType) => void;
   setSelectedExternalWalletId: (id?: string) => void;
@@ -92,6 +99,7 @@ export const DEFAULT_MODAL_STATE: Omit<ModalState, 'step' | 'onRampConfig'> = {
   authState: undefined,
   onModalStepChange: undefined,
   onRampPurchase: undefined,
+  onRampStep: OnRampStep.SETTINGS,
   isFullyLoggedIn: false,
   accountAddFundTab: undefined,
   isExternalWalletConnecting: false,

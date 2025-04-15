@@ -6,6 +6,7 @@ import { TODAY } from '../../../utils/constants';
 import { formatDateInUTC } from '../../../utils/formatDate';
 import { formatTSData } from '../../../utils/analyticsDataFormatters';
 import { useParams } from 'react-router-dom';
+import { useIsValidOrg } from '../../useIsValidOrgConfig';
 
 export const ORGANIZATIONS_MONTHLY_ACTIVE_USERS_TS_QUERY_KEY = 'organizationMonthlyActiveUsersTS';
 
@@ -18,9 +19,10 @@ export const useOrganizationMonthlyActiveUsersTSQuery = <T>(
   select: (data: OrganizationMonthlyActiveUsersTSResponse) => T,
 ) => {
   const { organizationId } = useParams();
+  const isOrgValid = useIsValidOrg(organizationId);
 
   return useQuery({
-    enabled: !!organizationId,
+    enabled: isOrgValid,
     queryKey: [ORGANIZATIONS_MONTHLY_ACTIVE_USERS_TS_QUERY_KEY, organizationId, startDate, endDate],
     queryFn: async () => {
       const { data } = await getOrganizationMonthlyActiveUsersTS(organizationId ?? '', startDate, endDate);

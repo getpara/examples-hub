@@ -9,6 +9,7 @@ import {
   useSignMessage,
   useSwitchAccount,
   useConnections,
+  useBalance,
 } from 'wagmi';
 import { WagmiConnectorInstance } from '../types/Wallet.js';
 import { isEIP6963Connector } from '../utils/isEIP6963Connector.js';
@@ -17,6 +18,7 @@ import { normalize } from 'viem/ens';
 import { useExternalWalletStore } from '../stores/useStore.js';
 import type { CommonChain, CommonWallet, TExternalWallet } from '@getpara/react-common';
 import ParaWeb, { AuthState, isMobile, Wallet, WalletType } from '@getpara/web-sdk';
+import { etherUnits, formatUnits } from 'viem';
 
 const defaultEvmExternalWallet = {
   wallets: [],
@@ -24,11 +26,13 @@ const defaultEvmExternalWallet = {
   chainId: undefined,
   username: undefined,
   avatar: undefined,
+  balance: undefined,
   disconnect: () => Promise.resolve(),
   switchChain: () => Promise.resolve({}),
   connectParaEmbedded: () => Promise.resolve({}),
   signMessage: () => Promise.resolve({}),
   signVerificationMessage: () => Promise.resolve({}),
+  getWalletBalance: () => Promise.resolve(undefined),
 };
 
 export type EvmExternalWalletContextType = {
@@ -37,11 +41,13 @@ export type EvmExternalWalletContextType = {
   chainId?: number;
   username?: string;
   avatar?: string;
+  balance?: string;
   disconnect: () => Promise<void>;
   switchChain: (chainId: number) => Promise<{ error?: string[] }>;
   connectParaEmbedded: () => Promise<{ result?: unknown; error?: string }>;
   signMessage: (message: string) => Promise<{ signature?: string; error?: string }>;
   signVerificationMessage: () => Promise<{ address?: string; signature?: string; error?: string }>;
+  getWalletBalance: () => Promise<string | undefined>;
 };
 
 export const EvmExternalWalletContext = createContext<EvmExternalWalletContextType>(defaultEvmExternalWallet);
@@ -73,11 +79,14 @@ export function EvmExternalWalletProvider({
   const { switchAccount: wagmiSwitchAccount } = useSwitchAccount();
   const { chains, switchChainAsync } = useSwitchChain();
   const { disconnectAsync } = useDisconnect();
-  const { data: ensName } = useEnsName({ address: wagmiAddress });
-  const { data: ensAvatar } = useEnsAvatar({ name: normalize(ensName) });
+  const { data: ensName, refetch: refetchEnsName } = useEnsName({ address: wagmiAddress });
+  const { data: ensAvatar, refetch: refetchEnsAvatar } = useEnsAvatar({
+    name: normalize(ensName),
+  });
   const { signMessageAsync } = useSignMessage();
 
   const verificationMessage = useRef<string>();
+  const { refetch: getBalance } = useBalance({ address: wagmiAddress });
 
   const isLocalConnecting = useExternalWalletStore(state => state.isConnecting);
   const updateExternalWalletState = useExternalWalletStore(state => state.updateState);
@@ -105,6 +114,15 @@ export function EvmExternalWalletProvider({
       wagmiSwitchAccount({ connector });
     },
     [connections, wagmiSwitchAccount],
+  );
+
+  const getWalletBalance = useCallback(
+    // Format from wei to eth
+    async () => {
+      const { data: balance } = await getBalance();
+      return balance ? formatUnits(balance.value, etherUnits.wei) : undefined;
+    },
+    [chainId, wagmiAddress, getBalance],
   );
 
   useEffect(() => {
@@ -239,12 +257,17 @@ export function EvmExternalWalletProvider({
     connectorName?: string;
   }) => {
     try {
+      refetchEnsName();
+      refetchEnsAvatar();
+
       return await para.loginExternalWalletV2({
         externalWallet: {
           address,
           type: WalletType.EVM,
           provider: connectorName,
           withFullParaAuth: walletsWithFullAuth?.includes((walletId?.toUpperCase() ?? '') as TExternalWallet),
+          ensName,
+          ensAvatar,
         },
       });
     } catch (err) {
@@ -442,6 +465,7 @@ export function EvmExternalWalletProvider({
         connectParaEmbedded,
         signMessage,
         signVerificationMessage,
+        getWalletBalance,
       }}
     >
       {children}

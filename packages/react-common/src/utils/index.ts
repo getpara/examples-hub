@@ -12,6 +12,13 @@ import {
   WalletType,
 } from '@getpara/web-sdk';
 
+export function getCurrencyCode(
+  { assetInfo }: OnRampConfig,
+  { network, asset, provider }: { network: Network; asset: OnRampAsset; provider: OnRampProvider },
+): string | undefined {
+  return Object.values(assetInfo).reduce((acc, record) => ({ ...acc, ...record }), {})[network]?.[asset]?.[provider]?.[0];
+}
+
 export function getCurrencyCodes(
   { assetInfo, allowedAssets, defaultOnRampNetwork, defaultOnRampAsset }: OnRampConfig,
   {
@@ -61,7 +68,10 @@ export function reverseCurrencyLookup(
   return [row?.[1], row?.[2]];
 }
 
-export const TestNetworks: { main: Network; test: Network }[] = [{ main: Network.ETHEREUM, test: Network.SEPOLIA }];
+export const TestNetworks: { main: Network; test: Network }[] = [
+  { main: Network.ETHEREUM, test: Network.SEPOLIA },
+  { main: Network.SOLANA, test: Network.SOLANA_DEVNET },
+];
 
 export function getNetworkTestEquivalent(network: Network): Network | undefined {
   return TestNetworks.find(({ main }) => main === network)?.test;
@@ -99,7 +109,9 @@ export const NetworkAssetAddresses: { network: Network; asset: OnRampAsset; addr
   { network: Network.ARBITRUM, asset: OnRampAsset.USDC, address: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831' },
   { network: Network.OPTIMISM, asset: OnRampAsset.USDC, address: '0x0b2c639c533813f4aa9d7837caf62653d097ff85' },
   { network: Network.SOLANA, asset: OnRampAsset.USDC, address: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' },
+  { network: Network.SOLANA_DEVNET, asset: OnRampAsset.USDC, address: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU' },
   { network: Network.SEPOLIA, asset: OnRampAsset.USDC, address: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238' },
+  { network: Network.SOLANA_DEVNET, asset: OnRampAsset.TETHER, address: 'EJwZgeZrdC8TXTQbQBoL6bfuAnFUUy1PVCMB4DYPzVaS' },
 ];
 
 export function getAssetFromContractAddress(network: Network, contractAddress: string): OnRampAsset | undefined {

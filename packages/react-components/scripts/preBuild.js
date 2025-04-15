@@ -45,4 +45,33 @@ async function fixExtensions() {
     process.exit(1);
   }
 }
-fixExtensions();
+
+async function fixFunctionTyping() {
+  try {
+    const indexFile = './lib/components/stencil-generated/react-component-lib/index.ts';
+    const brokenFile = './lib/components/stencil-generated/react-component-lib/createOverlayComponent.tsx';
+    const indexContentToFix = `export { createOverlayComponent } from './createOverlayComponent.js';`;
+
+    const indexContent = await fs.readFile(indexFile, 'utf-8');
+    await fs.writeFile(indexFile, indexContent.replace(indexContentToFix, ''), 'utf-8');
+    try {
+      await fs.unlink(brokenFile);
+    } catch (error) {
+      console.error('Error deleting broken file:', error);
+    }
+
+    const utilsFile = './lib/components/stencil-generated/react-component-lib/utils/index.tsx';
+    const utilsContentToFix = 'return React.forwardRef(forwardRef);'
+    const utilsFixedContent = 'return React.forwardRef<any, any>(forwardRef);';
+
+    const utilsContent = await fs.readFile(utilsFile, 'utf-8');
+    await fs.writeFile(utilsFile, utilsContent.replace(utilsContentToFix, utilsFixedContent), 'utf-8');
+
+    console.log('Function typing fixed successfully!');
+  } catch (error) {
+    console.error('Error fixing file types:', error);
+    process.exit(1);
+  }
+}
+
+fixExtensions().then(fixFunctionTyping);

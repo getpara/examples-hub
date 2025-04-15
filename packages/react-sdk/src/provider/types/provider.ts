@@ -50,6 +50,10 @@ export type ParaProviderConfig = {
    * Disables the ParaModal that's provided by ParaProvider. Use this is you're providing a separate modal in another location in your app.
    */
   disableEmbeddedModal?: boolean;
+  /**
+   * RPC url to use for retrieving the embedded wallet balance
+   */
+  rpcUrl?: string;
 };
 
 export type ExternalWalletConfig<

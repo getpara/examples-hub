@@ -209,6 +209,8 @@ export type ExternalWalletInfo = {
   provider?: string;
   addressBech32?: string;
   withFullParaAuth?: boolean;
+  ensName?: string | null;
+  ensAvatar?: string | null;
 };
 
 export type VerifyExternalWalletParams = {
@@ -259,3 +261,7 @@ export type Setup2faResponse =
        */
       uri: string;
     };
+
+export type AccountMetadataKey = Lowercase<Exclude<OAuthMethod, OAuthMethod.TWITTER> | 'X'>;
+
+export type AccountMetadata = Partial<Record<AccountMetadataKey, { date: Date; metadata: Record<string, any> }>>;

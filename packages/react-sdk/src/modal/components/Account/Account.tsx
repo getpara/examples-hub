@@ -1,12 +1,14 @@
 import styled from 'styled-components';
 import { InnerStepContainer, StepContainer, StyledCpslTileButton } from '../common.js';
 import { CpslButton, CpslIcon, CpslSpinner, CpslText } from '@getpara/react-components';
-import { useModalStore } from '../../stores/index.js';
+import { OnRampStep, useModalStore } from '../../stores/index.js';
 import { useState } from 'react';
 import { ModalStep } from '../../utils/steps.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 import { useStore } from '../../../provider/stores/useStore.js';
+import { formatBalanceString } from '../../utils/stringFormatters.js';
+import { useWalletBalance } from '../../../provider/index.js';
 
 interface AccountProps {
   onClose: () => void;
@@ -15,15 +17,18 @@ interface AccountProps {
 export const Account = ({ onClose }: AccountProps) => {
   const onRampConfig = useModalStore(state => state.onRampConfig);
   const setStep = useModalStore(state => state.setStep);
+  const setOnRampStep = useModalStore(state => state.setOnRampStep);
   const hideWallets = useStore(state => state.modalConfig?.hideWallets);
   const { disconnectExternalWallet } = useExternalWallets();
   const para = useInternalClient();
+  const { data: balance, isLoading: isBalanceLoading } = useWalletBalance();
 
   const [isDisconnecting, setIsDisconnecting] = useState(false);
 
   const isOnRampLoaded = !!onRampConfig;
 
   const handleBuyClick = () => {
+    setOnRampStep(OnRampStep.SETTINGS);
     setStep(ModalStep.ADD_FUNDS_BUY);
   };
 
@@ -32,6 +37,7 @@ export const Account = ({ onClose }: AccountProps) => {
   };
 
   const handleSellClick = () => {
+    setOnRampStep(OnRampStep.SETTINGS);
     setStep(ModalStep.ADD_FUNDS_WITHDRAW);
   };
 
@@ -47,6 +53,19 @@ export const Account = ({ onClose }: AccountProps) => {
   return (
     <StepContainer $wide>
       <InnerStepContainer>
+        {isBalanceLoading ? (
+          <BalanceContainer>
+            <CpslSpinner size={39} />
+          </BalanceContainer>
+        ) : (
+          balance !== undefined && (
+            <BalanceContainer>
+              <CpslText variant="headingS" weight="medium">
+                {formatBalanceString(balance)}
+              </CpslText>
+            </BalanceContainer>
+          )
+        )}
         <ButtonContainer>
           {isOnRampLoaded ? (
             <>
@@ -108,4 +127,12 @@ const OptionButton = styled(StyledCpslTileButton)`
 
 const DisconnectButton = styled(CpslButton)`
   --button-border-width: 0px;
+`;
+
+const BalanceContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 8px;
+  padding-bottom: 24px;
 `;

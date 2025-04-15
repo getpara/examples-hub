@@ -24,6 +24,7 @@ import {
   LeapIcon,
   KeplrIcon,
   RabbyIcon,
+  SafeIcon,
 } from '../assets';
 import {
   AuthMethod,
@@ -59,6 +60,7 @@ export const EXTERNAL_WALLET_CONFIGS: Partial<Record<CustomExternalWallet, Dragg
   [ExternalWallet.WALLETCONNECT]: { logo: WalletConnectIcon, label: 'WalletConnect' },
   [ExternalWallet.ZERION]: { logo: ZerionIcon, label: 'Zerion' },
   [ExternalWallet.RABBY]: { logo: RabbyIcon, label: 'Rabby' },
+  [ExternalWallet.SAFE]: { logo: SafeIcon, label: 'Safe' },
   [ExternalWallet.PHANTOM]: { logo: PhantomIcon, label: 'Phantom' },
   [ExternalWallet.GLOW]: { logo: GlowIcon, label: 'Glow' },
   [ExternalWallet.BACKPACK]: { logo: BackpackIcon, label: 'Backpack' },
@@ -85,7 +87,7 @@ export const MODAL_BUILDER_DEFAULT_CONFIG: ModalBuilderConfig = {
     disableEmailLogin: false,
     disablePhoneLogin: false,
     authLayout: ['AUTH:FULL', 'EXTERNAL:FULL'] as TAuthLayout[],
-    externalWallets: [ExternalWallet.METAMASK, ExternalWallet.PHANTOM],
+    externalWallets: [ExternalWallet.METAMASK, ExternalWallet.PHANTOM, ExternalWallet.SAFE],
     isWeb2AuthEnabled: true,
     isWeb3AuthEnabled: true,
   },

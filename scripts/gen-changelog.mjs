@@ -1,6 +1,6 @@
 import { execSync } from 'child_process';
 import fs from 'fs';
-import glob from 'glob';
+import * as glob from 'glob';
 
 const CHANGELOG_FILE = './CHANGELOG.md';
 const ALPHA_CHANGELOG_FILE = './ALPHA-CHANGELOG.md';

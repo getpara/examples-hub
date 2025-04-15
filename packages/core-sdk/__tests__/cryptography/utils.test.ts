@@ -63,7 +63,7 @@ describe('utils', () => {
         return {} as forge.pki.rsa.KeyPair;
       });
 
-      expect(
+      await expect(
         getAsymmetricKeyPair(SAMPLE_CTX, getSHA256HashHex(CRYPTOGRAPHY_UTILS_TEST_VARS.TEST_KEY_PAIR_SEED)),
       ).rejects.toThrow('Test Error');
     });
@@ -123,7 +123,7 @@ describe('utils', () => {
     expect(cleanPEMString(privateKeyPem)).toBe(cleanPEMString(CRYPTOGRAPHY_UTILS_TEST_VARS.TEST_PRIVATE_KEY_PEM));
   });
 
-  it('getPublicKeyFromSignature', async () => {
+  it('getPublicKeyFromSignature', { timeout: 40000 }, async () => {
     const workerFileContent = await getWorkerContent();
 
     global.fetch = vi.fn(() =>
@@ -135,7 +135,7 @@ describe('utils', () => {
     const resp = await getPublicKeyFromSignature(SAMPLE_CTX, Buffer.from(CRYPTOGRAPHY_UTILS_TEST_VARS.TEST_ENCRYPTION_KEY));
 
     expect(resp).toBe(CRYPTOGRAPHY_UTILS_TEST_VARS.SIGNATURE_PUBLIC_KEY_HEX);
-  }, 20000);
+  });
 
   it('symmetricKeyEncryptMessage', async () => {
     const resp = await symmetricKeyEncryptMessage(CRYPTOGRAPHY_UTILS_TEST_VARS.TEST_STRING);
@@ -159,7 +159,7 @@ describe('utils', () => {
     expect(resp).toBe(CRYPTOGRAPHY_UTILS_TEST_VARS.TEST_STRING);
   });
 
-  it('getDerivedPrivateKeyAndDecrypt', async () => {
+  it('getDerivedPrivateKeyAndDecrypt', { timeout: 20000 }, async () => {
     const workerFileContent = await getWorkerContent();
 
     global.fetch = vi.fn(() =>

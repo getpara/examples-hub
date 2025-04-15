@@ -23,8 +23,8 @@
     "css/"
   ],
   "scripts": {
-    "old-build": "node scripts/fixExtensions.js && yarn copy && yarn tsc",
-    "build": "node scripts/fixExtensions.js && yarn copy && rm -rf dist && node ./scripts/build.mjs && yarn typegen",
+    "old-build": "node scripts/preBuild.js && yarn copy && yarn tsc",
+    "build": "node scripts/preBuild.js && yarn copy && rm -rf dist && node ./scripts/build.mjs && yarn typegen",
     "typegen": "tsc --emitDeclarationOnly",
     "tsc": "tsc -p . --outDir ./dist",
     "copy": "node scripts/copy.cjs"

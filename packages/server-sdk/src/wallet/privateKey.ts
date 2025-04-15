@@ -14,7 +14,7 @@ export async function getPrivateKey(
     const worker = await setupWorker(
       ctx,
       async res => {
-        resolve(res);
+        resolve(res.privateKey);
       },
       workId,
     );

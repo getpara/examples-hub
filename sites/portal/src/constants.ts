@@ -7,6 +7,10 @@ export const ENV = import.meta.env.VITE_ENVIRONMENT
 
 export const DEFAULT_API_KEY = import.meta.env.VITE_CAPSULE_API_KEY ?? 'PLACEHOLDER';
 
+export const PARA_PORTAL_ID = import.meta.env.VITE_PARA_PORTAL_ID
+  ? (import.meta.env.VITE_PARA_PORTAL_ID as string)
+  : '4bdd84d3-7606-406f-8321-19721cac17a1';
+
 export const DEFAULT_PARTNER: Partner = {
   id: 'id',
   displayName: 'Para',

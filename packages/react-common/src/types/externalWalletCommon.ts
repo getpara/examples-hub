@@ -53,6 +53,7 @@ export enum EvmWallet {
   COINBASE = 'COINBASE',
   WALLETCONNECT = 'WALLETCONNECT',
   ZERION = 'ZERION',
+  SAFE = 'SAFE',
   RABBY = 'RABBY',
 }
 

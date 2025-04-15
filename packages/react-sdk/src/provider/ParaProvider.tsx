@@ -29,6 +29,12 @@ export const ParaProvider = forwardRef<
   const modalConfig = useStore(state => state.modalConfig);
   const setAppName = useStore(state => state.setAppName);
   const appName = useStore(state => state.appName);
+  const rpcUrl = useStore(state => state.rpcUrl);
+  const setRpcUrl = useStore(state => state.setRpcUrl);
+
+  useEffect(() => {
+    if (rpcUrl !== config.rpcUrl) setRpcUrl(config.rpcUrl);
+  }, [config.rpcUrl]);
 
   useEffect(() => {
     if (appName !== config.appName) setAppName(config.appName);

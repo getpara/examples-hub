@@ -1,0 +1,46 @@
+version: 0.2
+
+env:
+  variables:
+    NODE_VERSION: "20.15.1"
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 20.15.1
+    commands:
+      - echo "Checking environment variables:"
+      - env
+      - echo "Updating package lists..."
+      - apt-get update
+      - echo "Installing Yarn dependencies..."
+      - yarn install --frozen-lockfile
+      - |
+        echo "Parsing S3_FILES: $S3_FILES"
+        if [ "$S3_FILES" != "[]" ]; then
+          echo "$S3_FILES" | jq -c '.[]' | while read file; do
+            src=$(echo "$file" | jq -r '.source')
+            dst=$(echo "$file" | jq -r '.destination')
+            echo "Copying from $src to $dst"
+            aws s3 cp "$src" "$dst"
+          done
+        else
+          echo "No S3 files to copy"
+        fi
+  build:
+    commands:
+      - echo "Navigating to $REPO_DIR_PATH and building site for $ENV..."
+      - cd $REPO_DIR_PATH
+      - export NODE_OPTIONS="--max-old-space-size=4096"
+      - yarn build-$ENV
+      - echo "Deploying site to s3://$S3_BUCKET_NAME for $ENV..."
+      - aws s3 sync $BUILD_PATH s3://$S3_BUCKET_NAME --delete
+      - |
+        echo "CloudFront cache check for $ENV..."
+        if [ "$ENV" = "sandbox" ]; then
+          echo "Invalidating cloudfront cache $CLOUDFRONT_DISTRIBUTION_ID for $ENV..."
+          aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/index.html"
+        else
+          echo "Skipping CloudFront invalidation (ENV=$ENV)"
+        fi
+      - echo "Deploy to $ENV finished."

@@ -88,7 +88,9 @@ const WalletButton = ({ wallet, disabled, onClick, isClaimable, isNew, isSelecte
               {isClaimable && <WalletClaimable>Claimable</WalletClaimable>}
             </WalletName>
             {wallet.address && (
-              <WalletAddress>{para.getDisplayAddress(wallet.id, { addressType, truncate: true })}</WalletAddress>
+              <WalletAddress>
+                {wallet.ensName ?? para.getDisplayAddress(wallet.id, { addressType, truncate: true })}
+              </WalletAddress>
             )}
           </WalletInfo>
         </WalletButtonUpper>

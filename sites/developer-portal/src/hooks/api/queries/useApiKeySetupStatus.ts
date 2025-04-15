@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ApiKeySetupStatusResponse } from '../../../types/api';
 import { getApiKeySetupStatus } from '../../../api/apiKeys/queries';
 import { useParams } from 'react-router-dom';
+import { useIsValidKey, useIsValidOrg, useIsValidProject } from '../../useIsValidOrgConfig';
 
 export const API_KEY_SETUP_STATUS_QUERY_KEY = 'setupStatus';
 
@@ -12,9 +13,12 @@ export const useApiKeySetupStatusQuery = <T>(
   select: (data: ApiKeySetupStatusResponse | undefined) => T,
 ) => {
   const { organizationId } = useParams();
+  const isOrgValid = useIsValidOrg(organizationId);
+  const isProjectValid = useIsValidProject(projectId);
+  const isKeyValid = useIsValidKey(projectId, keyId);
 
   return useQuery({
-    enabled: !!organizationId && !!projectId && !!keyId,
+    enabled: isOrgValid && isProjectValid && isKeyValid,
     queryKey: [API_KEY_SETUP_STATUS_QUERY_KEY, organizationId, projectId, keyId, env],
     queryFn: async () => {
       if (!organizationId) {

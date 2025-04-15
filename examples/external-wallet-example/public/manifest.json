@@ -1,0 +1,10 @@
+{
+    "name": "Para Example",
+    "description": "Para Example Description",
+    "iconPath": "/favicon.ico",
+    "version": "1.0.0",
+    "safe_apps_permissions": [],
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET",
+    "Access-Control-Allow-Headers": "X-Requested-With, content-type, Authorization"
+}

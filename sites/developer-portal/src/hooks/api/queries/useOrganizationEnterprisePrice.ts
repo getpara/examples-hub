@@ -1,14 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
 import { getOrganizationEnterprisePrice } from '../../../api/organizations/queries';
 import { useParams } from 'react-router-dom';
+import { useIsValidOrg } from '../../useIsValidOrgConfig';
 
 export const ORGANIZATIONS_ENTERPRISE_PRICE_QUERY_KEY = 'organizationEnterprisePrice';
 
 export const useOrganizationEnterprisePriceQuery = <T>(select: (data: number | undefined) => T) => {
   const { organizationId } = useParams();
+  const isOrgValid = useIsValidOrg(organizationId);
 
   return useQuery({
-    enabled: !!organizationId,
+    enabled: isOrgValid,
     queryKey: [ORGANIZATIONS_ENTERPRISE_PRICE_QUERY_KEY, organizationId],
     queryFn: async () => {
       if (!organizationId) {

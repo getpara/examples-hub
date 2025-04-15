@@ -17,11 +17,12 @@ test.describe('para modal', () => {
     const webExamplePage = new WebExamplePage(page);
     await webExamplePage.visit();
 
-    const { email, credential, clipboardText } = await webExamplePage.createUser({
+    const { emailOrPhone, credential, clipboardText } = await webExamplePage.createUser({
       context,
       openModalText: OPEN_MODAL_TEXT,
       isRecoverySecretEnabled: true,
       password: PASSWORD,
+      usePhoneNumber: true,
     });
 
     expect(await webExamplePage.page.getByText('You are logged in!').textContent()).toBeTruthy();
@@ -33,7 +34,13 @@ test.describe('para modal', () => {
       .trim();
 
     await webExamplePage.logout({ openModalText: OPEN_MODAL_TEXT });
-    await webExamplePage.login({ context, credential, email, openModalText: OPEN_MODAL_TEXT, password: PASSWORD });
+    await webExamplePage.login({
+      context,
+      credential,
+      emailOrPhone,
+      openModalText: OPEN_MODAL_TEXT,
+      password: PASSWORD,
+    });
 
     const loginAddress = (await webExamplePage.page.getByText(ADDRESS_IDENTIFIER).textContent())
       ?.split(ADDRESS_IDENTIFIER)[1]
