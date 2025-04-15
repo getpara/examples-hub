@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@getpara/web-sdk": "1.8.0",
+    "@getpara/web-sdk": "1.10.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

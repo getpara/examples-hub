@@ -1,0 +1,11 @@
+{
+  "name": "examples-hub",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "web/*/*",
+    "mobile/*",
+    "server/*",
+    "specialized/*"
+  ]
+}
