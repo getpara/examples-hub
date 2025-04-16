@@ -11,9 +11,9 @@ export default function Home() {
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold tracking-tight mb-4">Para + Viem v2 Demo</h1>
+        <h1 className="text-4xl font-bold tracking-tight mb-4">Para + Viem v1 Demo</h1>
         <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-          Explore signing different transaction types using Para with Viem v2. Reference the
+          Explore signing different transaction types using Para with Viem v1. Reference the
           <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md">
             /src/components/ParaProvider.tsx
           </code>
