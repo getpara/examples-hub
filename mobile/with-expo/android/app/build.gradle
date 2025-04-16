@@ -86,9 +86,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.usecapsule.example.expo'
+    namespace 'com.getpara.example'
     defaultConfig {
-        applicationId 'com.usecapsule.example.expo'
+        applicationId 'com.getpara.example'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

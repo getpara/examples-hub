@@ -54,7 +54,9 @@ export async function cosmjsSessionSignHandler(req: Request, res: Response, next
       value: message,
     };
 
-    const signResult = await stargateClient.sign(fromAddress, [demoTxMessage], fee, memo);
+    const signResult = await stargateClient.signAndBroadcast(fromAddress, [demoTxMessage], fee, memo);
+
+    
 
     res.status(200).json({
       message: "Transaction signed using CosmJS + Para (session-based wallet).",

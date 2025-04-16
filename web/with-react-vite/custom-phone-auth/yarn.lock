@@ -623,37 +623,37 @@
     "@ethersproject/properties" "^5.7.0"
     "@ethersproject/strings" "^5.7.0"
 
-"@getpara/core-sdk@1.8.0":
-  version "1.8.0"
-  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.8.0.tgz#c27e49835d8873e8894371356954097ccd307a09"
-  integrity sha512-oqLzKgEhig32Ui+fiJAm4w0eZ/vvUPPgKaC9zVl6ptGHwfxA6ig9LPT9mXM9Ik4NcTq56IAOEkImUii5fgmKYA==
+"@getpara/core-sdk@1.10.0":
+  version "1.10.0"
+  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.10.0.tgz#a2fc0e134849bcb2b1ca64a4224e0e084cd4a824"
+  integrity sha512-8PQ78ebckPk7ukV50tSzOjZKnUBmaf6reLYndX5QimNQ4xg80b1qNvBgX2076ziwMkvOHFYi13teOSd8fIeDDg==
   dependencies:
     "@celo/utils" "^8.0.2"
     "@cosmjs/encoding" "^0.32.4"
     "@ethereumjs/util" "^9.1.0"
-    "@getpara/user-management-client" "1.8.0"
+    "@getpara/user-management-client" "1.10.0"
     "@noble/hashes" "^1.5.0"
     base64url "^3.0.1"
     libphonenumber-js "1.11.2"
     node-forge "^1.3.1"
     qs "^6.12.0"
 
-"@getpara/user-management-client@1.8.0":
-  version "1.8.0"
-  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.8.0.tgz#3f914e3c55c1897d9f062b0120825051466aa947"
-  integrity sha512-kBWByP9qIN6oQiAarNYQiesp6VW8LIFOrD2fPuC4pq8jiw2H6oSlXLpv6I7sqDKkK5v6n1VrXCfsIg9bJLD5CA==
+"@getpara/user-management-client@1.10.0":
+  version "1.10.0"
+  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.10.0.tgz#f53b18a0ffbad7998d3365478c8856d9db97afc0"
+  integrity sha512-fGH5A+GDVvwJnAACnFH3Sc9J3HUF79NjHT2WHwjbhYpuL+E8lZkmdLlcAqmYd5MeWobtORuyq9cEUpqLcrkusw==
   dependencies:
     axios "^1.8.4"
     libphonenumber-js "1.11.2"
     qs "^6.12.0"
 
-"@getpara/web-sdk@1.8.0":
-  version "1.8.0"
-  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-1.8.0.tgz#4c956b384b7c3364f5941b33dd4677ac9468a57c"
-  integrity sha512-4+urGiqj+rp1ZCODJQjgk9OBuRxGXq0mQ6SzWvM2ckiuXTAb381KEP2bqkKObRNyqJjKhKnDjM0cmSQNlcLoGw==
+"@getpara/web-sdk@1.10.0":
+  version "1.10.0"
+  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-1.10.0.tgz#456ec003532baf3368d20c4459aceaaeeb24e518"
+  integrity sha512-6DvpfyF3FGyA1ZvN9ijMkqfPUCYixMrQ33KOXFhHdBmh9qDDAkz+g0QDhI89MRip8Z/F0l9qbhnZoexHcZlElQ==
   dependencies:
-    "@getpara/core-sdk" "1.8.0"
-    "@getpara/user-management-client" "1.8.0"
+    "@getpara/core-sdk" "1.10.0"
+    "@getpara/user-management-client" "1.10.0"
     "@sentry/browser" "^9.1.0"
     assert "^2.1.0"
     base64url "3.0.1"
