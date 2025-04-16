@@ -123,54 +123,6 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
     }
   }
 
-  // --- Farcaster Logic (Commented out - Requires V2 Refactor in SDK) ---
-  /*
-  Future<void> _handleFarcasterLogin() async {
-    if (!mounted) return;
-
-    setState(() {
-      _isLoading = true;
-      _loadingProvider = 'Farcaster'; // Use a unique identifier
-    });
-
-    try {
-      _log("Starting Farcaster connect...");
-      // TODO: Replace with V2 Farcaster flow when available in SDK
-      final farcasterResponse = await para.farcasterConnect();
-      _log("Farcaster connect finished. User exists: ${farcasterResponse.userExists}");
-
-      // TODO: The logic below needs replacement with V2 AuthState handling
-      if (farcasterResponse.userExists) {
-        // await _handlePasskeyLogin(farcasterResponse.username); // Old V1 helper
-         _log("Farcaster login path needs V2 update.");
-         throw UnimplementedError("Farcaster login path needs V2 update.");
-      } else {
-        // await _handleNewUserSetup(farcasterResponse.username); // Old V1 helper
-         _log("Farcaster signup path needs V2 update.");
-         throw UnimplementedError("Farcaster signup path needs V2 update.");
-      }
-       // Fetch wallets and navigate home on success...
-    } catch (e) {
-      _log('Error during Farcaster connect: ${e.toString()}', isWarning: true);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Farcaster Error: ${e.toString()}')),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _loadingProvider = null;
-        });
-      }
-    }
-  }
-  */
-
-  // --- Removed V1 Helper Functions ---
-  // _handleNewUserSetup and _handlePasskeyLogin(String email) are no longer needed
-  // as their logic is encapsulated within para.handleOAuth
-
   Widget _buildOAuthButton({
     required OAuthMethod provider,
     required String label,
@@ -297,34 +249,6 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
                 backgroundColor: const Color(0xFF5865F2),
                 textColor: Colors.white,
               ),
-              // --- Farcaster Button (Commented out) ---
-              /*
-              const SizedBox(height: 32),
-              const Row(
-                children: [
-                  Expanded(child: Divider()),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Text('OR', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500)),
-                  ),
-                  Expanded(child: Divider()),
-                ],
-              ),
-              const SizedBox(height: 32),
-              ElevatedButton.icon(
-                 icon: const Icon(Icons.qr_code), // Example icon
-                 label: const Text('Connect with Farcaster'),
-                 onPressed: _isLoading ? null : _handleFarcasterLogin,
-                 style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                 ),
-              ),
-              if (_isLoading && _loadingProvider == 'Farcaster')
-                 const Padding(
-                    padding: EdgeInsets.only(top: 8.0),
-                    child: Center(child: CircularProgressIndicator()),
-                 ),
-              */
             ],
           ),
         ),

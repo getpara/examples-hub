@@ -37,28 +37,44 @@ class _ParaExternalWalletExampleState extends State<ParaExternalWalletExample> {
       _isLoading = true;
     });
 
-    if (provider == ExternalWalletProvider.phantom) {
-      await phantomConnector.connect();
+    try {
+      if (provider == ExternalWalletProvider.phantom) {
+        await phantomConnector.connect();
+        if (!mounted) return;
+        _navigateToPhantomDemo();
+      }
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const DemoPhantom()),
-      );
-    }
-
-    if (provider == ExternalWalletProvider.metamask) {
-      await metamaskConnector.connect();
+      if (provider == ExternalWalletProvider.metamask) {
+        await metamaskConnector.connect();
+        if (!mounted) return;
+        setState(() {
+          _isLoading = false;
+        });
+        _navigateToMetaMaskDemo();
+      }
+    } catch (e) {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const DemoMetaMask()),
-      );
+      rethrow;
     }
 
     if (provider == ExternalWalletProvider.other) {}
+  }
+
+  void _navigateToPhantomDemo() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const DemoPhantom()),
+    );
+  }
+
+  void _navigateToMetaMaskDemo() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const DemoMetaMask()),
+    );
   }
 
   Widget _buildExternalWalletButton({

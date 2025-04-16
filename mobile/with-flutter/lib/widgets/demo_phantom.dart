@@ -40,16 +40,15 @@ class DemoPhantomState extends State<DemoPhantom> {
     await phantomConnector.signTransaction(transaction);
   }
 
-  void _signMessage() {
-    phantomConnector
-        .signMessage("Message to sign! Hello World")
-        .then((onValue) => {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Message signed: $onValue'),
-                ),
-              )
-            });
+  Future<void> _signMessage() async {
+    final result =
+        await phantomConnector.signMessage("Message to sign! Hello World");
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Message signed: $result'),
+      ),
+    );
   }
 
   @override
