@@ -80,10 +80,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.15.1'
-      - name: Install jq
-        run: |
-          which jq || (apt-get update && apt-get install -y jq) || (apk update && apk add --no-cache jq) || echo "Failed to install jq, but continuing as it might already be available"
+          node-version: '20.19.0'
       - name: Build projects
         run: |
           PROJECTS=()
@@ -141,10 +138,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.15.1'
-      - name: Install jq
-        run: |
-          which jq || (apt-get update && apt-get install -y jq) || (apk update && apk add --no-cache jq) || echo "Failed to install jq, but continuing as it might already be available"
+          node-version: '20.19.0'
       - name: Build projects
         run: |
           PROJECTS=()
@@ -202,10 +196,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.15.1'
-      - name: Install jq
-        run: |
-          which jq || (apt-get update && apt-get install -y jq) || (apk update && apk add --no-cache jq) || echo "Failed to install jq, but continuing as it might already be available"
+          node-version: '20.19.0'
       - name: Build projects
         run: |
           PROJECTS=()
@@ -263,10 +254,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20.15.1"
-      - name: Install jq
-        run: |
-          which jq || (apt-get update && apt-get install -y jq) || (apk update && apk add --no-cache jq) || echo "Failed to install jq, but continuing as it might already be available"
+          node-version: "20.19.0"
       - name: Build projects
         run: |
           PROJECTS=()
