@@ -69,6 +69,7 @@ jobs:
           node-version: '20.19.0'
       - name: Build projects
         run: |
+          set +e
           PROJECTS=()
           for DIR in "$PROJECT_DIR"/*; do
             if [ -d "$DIR" ] && [ -f "$DIR/package.json" ]; then
@@ -125,6 +126,7 @@ jobs:
           node-version: '20.19.0'
       - name: Build projects
         run: |
+          set +e
           PROJECTS=()
           for DIR in "$PROJECT_DIR"/*; do
             if [ -d "$DIR" ] && [ -f "$DIR/package.json" ]; then
@@ -181,6 +183,7 @@ jobs:
           node-version: '20.19.0'
       - name: Build projects
         run: |
+          set +e
           PROJECTS=()
           for DIR in "$PROJECT_DIR"/*; do
             if [ -d "$DIR" ] && [ -f "$DIR/package.json" ]; then
@@ -237,6 +240,7 @@ jobs:
           node-version: "20.19.0"
       - name: Build projects
         run: |
+          set +e
           PROJECTS=()
           for DIR in "$PROJECT_DIR"/*; do
             if [ -d "$DIR" ] && [ -f "$DIR/package.json" ]; then
