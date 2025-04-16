@@ -89,7 +89,9 @@ jobs:
               cd "$GITHUB_WORKSPACE/$PROJECT"
               yarn install
               yarn build
+              BUILD_EXIT_CODE=$?
               rm -rf node_modules .next dist build out
+              exit $BUILD_EXIT_CODE
             )
             if [ $? -eq 0 ]; then
               echo "✅ Successfully built $PROJECT"
@@ -147,7 +149,9 @@ jobs:
               cd "$GITHUB_WORKSPACE/$PROJECT"
               yarn install
               yarn build
+              BUILD_EXIT_CODE=$?
               rm -rf node_modules .next dist build out
+              exit $BUILD_EXIT_CODE
             )
             if [ $? -eq 0 ]; then
               echo "✅ Successfully built $PROJECT"
@@ -205,7 +209,9 @@ jobs:
               cd "$GITHUB_WORKSPACE/$PROJECT"
               yarn install
               yarn build
+              BUILD_EXIT_CODE=$?
               rm -rf node_modules .next dist build out
+              exit $BUILD_EXIT_CODE
             )
             if [ $? -eq 0 ]; then
               echo "✅ Successfully built $PROJECT"
@@ -263,7 +269,9 @@ jobs:
               cd "$GITHUB_WORKSPACE/$PROJECT"
               yarn install
               yarn build
+              BUILD_EXIT_CODE=$?
               rm -rf node_modules .next dist build out
+              exit $BUILD_EXIT_CODE
             )
             if [ $? -eq 0 ]; then
               echo "✅ Successfully built $PROJECT"
