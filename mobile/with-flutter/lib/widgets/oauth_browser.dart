@@ -29,7 +29,8 @@ class _OAuthBrowserState extends State<OAuthBrowser> {
     return NavigationActionPolicy.ALLOW;
   }
 
-  void _handleMainFrameError(InAppWebViewController controller, Uri? uri, int code, String message) {
+  void _handleMainFrameError(
+      InAppWebViewController controller, Uri? uri, int code, String message) {
     setState(() {
       _errorMessage = message;
     });
@@ -75,7 +76,8 @@ class _OAuthBrowserState extends State<OAuthBrowser> {
                       allowsInlineMediaPlayback: true,
                       useShouldOverrideUrlLoading: true,
                       userAgent: widget.userAgent,
-                      mixedContentMode: MixedContentMode.MIXED_CONTENT_ALWAYS_ALLOW,
+                      mixedContentMode:
+                          MixedContentMode.MIXED_CONTENT_ALWAYS_ALLOW,
                       safeBrowsingEnabled: false,
                     ),
                     shouldOverrideUrlLoading: _handleNavigationAction,
@@ -97,8 +99,10 @@ class _OAuthBrowserState extends State<OAuthBrowser> {
 
                       final currentUrl = url?.toString() ?? '';
 
-                      if ((currentUrl.contains('/auth/') && currentUrl.contains('/callback')) ||
-                          RegExp(r'https://api\..*\.usepara\.com/').hasMatch(currentUrl)) {
+                      if ((currentUrl.contains('/auth/') &&
+                              currentUrl.contains('/callback')) ||
+                          RegExp(r'https://api\..*\.usepara\.com/')
+                              .hasMatch(currentUrl)) {
                         widget.onBrowserClosed(false);
                         if (mounted) {
                           Navigator.of(context).pop();
@@ -173,7 +177,10 @@ class _OAuthBrowserState extends State<OAuthBrowser> {
                             const SizedBox(height: 16),
                             Text(
                               'Failed to load page',
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
                                     color: Theme.of(context).colorScheme.error,
                                   ),
                             ),
@@ -181,7 +188,10 @@ class _OAuthBrowserState extends State<OAuthBrowser> {
                             Text(
                               _errorMessage!,
                               textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
                                     color: Theme.of(context).colorScheme.error,
                                   ),
                             ),

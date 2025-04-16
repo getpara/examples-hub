@@ -15,7 +15,7 @@ class DemoMetaMaskState extends State<DemoMetaMask> {
     super.initState();
   }
 
-  void _sendTransaction() {
+  Future<void> _sendTransaction() async {
     final transaction = Transaction(
       from: EthereumAddress.fromHex(metamaskConnector.accounts.first),
       to: EthereumAddress.fromHex('0x13158486860B81Dee9e43Dd0391e61c2F82B577F'),
@@ -24,28 +24,27 @@ class DemoMetaMaskState extends State<DemoMetaMask> {
       gasPrice: EtherAmount.inWei(BigInt.from(1000000000)),
     );
 
-    metamaskConnector
-        .sendTransaction(transaction, metamaskConnector.accounts.first)
-        .then((onValue) => {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Transaction signed: $onValue'),
-                ),
-              )
-            });
+    final result = await metamaskConnector.sendTransaction(
+        transaction, metamaskConnector.accounts.first);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Transaction signed: $result'),
+      ),
+    );
   }
 
-  void _signMessage() {
-    metamaskConnector
-        .signMessage(
-            "Message to sign! Hello World", metamaskConnector.accounts.first)
-        .then((onValue) => {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Message signed: $onValue'),
-                ),
-              )
-            });
+  Future<void> _signMessage() async {
+    final result = await metamaskConnector.signMessage(
+      "Message to sign! Hello World",
+      metamaskConnector.accounts.first,
+    );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Message signed: $result'),
+      ),
+    );
   }
 
   @override

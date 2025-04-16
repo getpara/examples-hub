@@ -129,8 +129,7 @@ class _SolanaSignExampleState extends State<SolanaSignExample> {
       final signedTransaction =
           await _solanaSigner.signTransaction(compiledMessage);
 
-      final sendTransaction =
-          await _solanaSigner.sendTransaction(signedTransaction);
+      await _solanaSigner.sendTransaction(signedTransaction);
 
       setState(() {
         _lastSignature = signedTransaction.signatures.first.toString();
