@@ -8,20 +8,6 @@ on:
 env:
   # Node.js settings
   NODE_OPTIONS: "--max-old-space-size=4096"
-  CI: true
-  NODE_ENV: "production"
-  
-  # Framework telemetry/feature flags
-  NEXT_TELEMETRY_DISABLED: 1
-  BUILD_CONCURRENCY: 4
-  DISABLE_ESLINT_PLUGIN: true
-  GENERATE_SOURCEMAP: false
-  
-  # Yarn settings to avoid network issues
-  YARN_NETWORK_TIMEOUT: 300000
-  YARN_NETWORK_CONCURRENCY: 1
-  YARN_REGISTRY: "https://registry.npmjs.org/"
-  npm_config_registry: "https://registry.npmjs.org/"
   
   # API keys (placeholders for CI)
   PARA_API_KEY: test-build-key
