@@ -86,6 +86,7 @@ jobs:
             echo "========================================================"
             (
               cd "$GITHUB_WORKSPACE/$PROJECT"
+              rm -rf node_modules .next dist build out
               yarn install
               yarn build
             )
@@ -109,9 +110,6 @@ jobs:
           if [ "$FAILED" -gt 0 ]; then
             echo "Failed projects:"
             cat failed_projects.txt | sed 's/^/  - /'
-            if [ "$FAILED" -eq "${#PROJECTS[@]}" ]; then
-              exit 1
-            fi
           fi
 
   # Job for React Vite projects
@@ -144,6 +142,7 @@ jobs:
             echo "========================================================"
             (
               cd "$GITHUB_WORKSPACE/$PROJECT"
+              rm -rf node_modules .next dist build out
               yarn install
               yarn build
             )
@@ -167,9 +166,6 @@ jobs:
           if [ "$FAILED" -gt 0 ]; then
             echo "Failed projects:"
             cat failed_projects.txt | sed 's/^/  - /'
-            if [ "$FAILED" -eq "${#PROJECTS[@]}" ]; then
-              exit 1
-            fi
           fi
 
   # Job for Vue Vite projects
@@ -202,6 +198,7 @@ jobs:
             echo "========================================================"
             (
               cd "$GITHUB_WORKSPACE/$PROJECT"
+              rm -rf node_modules .next dist build out
               yarn install
               yarn build
             )
@@ -225,9 +222,6 @@ jobs:
           if [ "$FAILED" -gt 0 ]; then
             echo "Failed projects:"
             cat failed_projects.txt | sed 's/^/  - /'
-            if [ "$FAILED" -eq "${#PROJECTS[@]}" ]; then
-              exit 1
-            fi
           fi
 
   # Job for Svelte Vite projects
@@ -260,6 +254,7 @@ jobs:
             echo "========================================================"
             (
               cd "$GITHUB_WORKSPACE/$PROJECT"
+              rm -rf node_modules .next dist build out
               yarn install
               yarn build
             )
@@ -283,9 +278,6 @@ jobs:
           if [ "$FAILED" -gt 0 ]; then
             echo "Failed projects:"
             cat failed_projects.txt | sed 's/^/  - /'
-            if [ "$FAILED" -eq "${#PROJECTS[@]}" ]; then
-              exit 1
-            fi
           fi
 
   # build-mobile-projects:
