@@ -111,6 +111,7 @@ jobs:
           if [ "$FAILED" -gt 0 ]; then
             echo "Failed projects:"
             cat failed_projects.txt | sed 's/^/  - /'
+            exit 1
           fi
 
   # Job for React Vite projects
@@ -168,6 +169,7 @@ jobs:
           if [ "$FAILED" -gt 0 ]; then
             echo "Failed projects:"
             cat failed_projects.txt | sed 's/^/  - /'
+            exit 1
           fi
 
   # Job for Vue Vite projects
@@ -225,6 +227,7 @@ jobs:
           if [ "$FAILED" -gt 0 ]; then
             echo "Failed projects:"
             cat failed_projects.txt | sed 's/^/  - /'
+            exit 1
           fi
 
   # Job for Svelte Vite projects
@@ -282,6 +285,7 @@ jobs:
           if [ "$FAILED" -gt 0 ]; then
             echo "Failed projects:"
             cat failed_projects.txt | sed 's/^/  - /'
+            exit 1
           fi
 
   # build-mobile-projects:
