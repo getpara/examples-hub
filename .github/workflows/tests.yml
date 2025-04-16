@@ -90,46 +90,30 @@ jobs:
         run: |
           # Find all projects in the specified directory
           PROJECTS=()
-          
           for DIR in "$PROJECT_DIR"/*; do
             if [ -d "$DIR" ] && [ -f "$DIR/package.json" ]; then
               PROJECTS+=("$DIR")
             fi
           done
-          
           echo "Found $(echo ${#PROJECTS[@]}) projects to build:"
           printf "  - %s\n" "${PROJECTS[@]}"
-          
-          # Create tracking files
           touch success_projects.txt
           touch failed_projects.txt
-          
-          # Build each project sequentially
           for PROJECT in "${PROJECTS[@]}"; do
             echo ""
             echo "========================================================"
             echo "Building $PROJECT"
             echo "========================================================"
-                        
-            # Ensure node_modules/.bin is in the PATH
-            export PATH="$PWD/node_modules/.bin:$PATH"
-            
-            # Install and build
-            if cd "$GITHUB_WORKSPACE/$PROJECT" && yarn install && yarn build; then
+            if (cd "$GITHUB_WORKSPACE/$PROJECT" && yarn install && yarn build); then
               echo "✅ Successfully built $PROJECT"
               echo "$PROJECT" >> $GITHUB_WORKSPACE/success_projects.txt
             else
               echo "❌ Failed to build $PROJECT"
               echo "$PROJECT" >> $GITHUB_WORKSPACE/failed_projects.txt
             fi
-            
-            cd "$GITHUB_WORKSPACE"
           done
-          
-          # Summary
           SUCCESSFUL=$(cat success_projects.txt | wc -l)
           FAILED=$(cat failed_projects.txt | wc -l)
-          
           echo ""
           echo "========================================================"
           echo "Build Summary for $PROJECT_DIR"
@@ -137,7 +121,6 @@ jobs:
           echo "Total projects: ${#PROJECTS[@]}"
           echo "Successful: $SUCCESSFUL"
           echo "Failed: $FAILED"
-          
           if [ "$FAILED" -gt 0 ]; then
             echo "Failed projects:"
             cat failed_projects.txt | sed 's/^/  - /'
@@ -166,46 +149,30 @@ jobs:
         run: |
           # Find all projects in the specified directory
           PROJECTS=()
-          
           for DIR in "$PROJECT_DIR"/*; do
             if [ -d "$DIR" ] && [ -f "$DIR/package.json" ]; then
               PROJECTS+=("$DIR")
             fi
           done
-          
           echo "Found $(echo ${#PROJECTS[@]}) projects to build:"
           printf "  - %s\n" "${PROJECTS[@]}"
-          
-          # Create tracking files
           touch success_projects.txt
           touch failed_projects.txt
-          
-          # Build each project sequentially
           for PROJECT in "${PROJECTS[@]}"; do
             echo ""
             echo "========================================================"
             echo "Building $PROJECT"
             echo "========================================================"
-            
-            # Ensure node_modules/.bin is in the PATH
-            export PATH="$PWD/node_modules/.bin:$PATH"
-            
-            # Install and build
-            if cd "$GITHUB_WORKSPACE/$PROJECT" && yarn install && yarn build; then
+            if (cd "$GITHUB_WORKSPACE/$PROJECT" && yarn install && yarn build); then
               echo "✅ Successfully built $PROJECT"
               echo "$PROJECT" >> $GITHUB_WORKSPACE/success_projects.txt
             else
               echo "❌ Failed to build $PROJECT"
               echo "$PROJECT" >> $GITHUB_WORKSPACE/failed_projects.txt
             fi
-            
-            cd "$GITHUB_WORKSPACE"
           done
-          
-          # Summary
           SUCCESSFUL=$(cat success_projects.txt | wc -l)
           FAILED=$(cat failed_projects.txt | wc -l)
-          
           echo ""
           echo "========================================================"
           echo "Build Summary for $PROJECT_DIR"
@@ -213,7 +180,6 @@ jobs:
           echo "Total projects: ${#PROJECTS[@]}"
           echo "Successful: $SUCCESSFUL"
           echo "Failed: $FAILED"
-          
           if [ "$FAILED" -gt 0 ]; then
             echo "Failed projects:"
             cat failed_projects.txt | sed 's/^/  - /'
@@ -242,46 +208,30 @@ jobs:
         run: |
           # Find all projects in the specified directory
           PROJECTS=()
-          
           for DIR in "$PROJECT_DIR"/*; do
             if [ -d "$DIR" ] && [ -f "$DIR/package.json" ]; then
               PROJECTS+=("$DIR")
             fi
           done
-          
           echo "Found $(echo ${#PROJECTS[@]}) projects to build:"
           printf "  - %s\n" "${PROJECTS[@]}"
-          
-          # Create tracking files
           touch success_projects.txt
           touch failed_projects.txt
-          
-          # Build each project sequentially
           for PROJECT in "${PROJECTS[@]}"; do
             echo ""
             echo "========================================================"
             echo "Building $PROJECT"
             echo "========================================================"
-                        
-            # Ensure node_modules/.bin is in the PATH
-            export PATH="$PWD/node_modules/.bin:$PATH"
-            
-            # Install and build
-            if cd "$GITHUB_WORKSPACE/$PROJECT" && yarn install && yarn build; then
+            if (cd "$GITHUB_WORKSPACE/$PROJECT" && yarn install && yarn build); then
               echo "✅ Successfully built $PROJECT"
               echo "$PROJECT" >> $GITHUB_WORKSPACE/success_projects.txt
             else
               echo "❌ Failed to build $PROJECT"
               echo "$PROJECT" >> $GITHUB_WORKSPACE/failed_projects.txt
             fi
-            
-            cd "$GITHUB_WORKSPACE"
           done
-          
-          # Summary
           SUCCESSFUL=$(cat success_projects.txt | wc -l)
           FAILED=$(cat failed_projects.txt | wc -l)
-          
           echo ""
           echo "========================================================"
           echo "Build Summary for $PROJECT_DIR"
@@ -289,7 +239,6 @@ jobs:
           echo "Total projects: ${#PROJECTS[@]}"
           echo "Successful: $SUCCESSFUL"
           echo "Failed: $FAILED"
-          
           if [ "$FAILED" -gt 0 ]; then
             echo "Failed projects:"
             cat failed_projects.txt | sed 's/^/  - /'
@@ -318,48 +267,30 @@ jobs:
         run: |
           # Find all projects in the specified directory
           PROJECTS=()
-          
           for DIR in "$PROJECT_DIR"/*; do
             if [ -d "$DIR" ] && [ -f "$DIR/package.json" ]; then
               PROJECTS+=("$DIR")
             fi
           done
-          
           echo "Found $(echo ${#PROJECTS[@]}) projects to build:"
           printf "  - %s\n" "${PROJECTS[@]}"
-          
-          # Create tracking files
           touch success_projects.txt
           touch failed_projects.txt
-          
-          # Build each project sequentially
           for PROJECT in "${PROJECTS[@]}"; do
             echo ""
             echo "========================================================"
             echo "Building $PROJECT"
             echo "========================================================"
-            
-            
-            
-            # Ensure node_modules/.bin is in the PATH
-            export PATH="$PWD/node_modules/.bin:$PATH"
-            
-            # Install and build
-            if cd "$GITHUB_WORKSPACE/$PROJECT" && yarn install && yarn build; then
+            if (cd "$GITHUB_WORKSPACE/$PROJECT" && yarn install && yarn build); then
               echo "✅ Successfully built $PROJECT"
               echo "$PROJECT" >> $GITHUB_WORKSPACE/success_projects.txt
             else
               echo "❌ Failed to build $PROJECT"
               echo "$PROJECT" >> $GITHUB_WORKSPACE/failed_projects.txt
             fi
-            
-            cd "$GITHUB_WORKSPACE"
           done
-          
-          # Summary
           SUCCESSFUL=$(cat success_projects.txt | wc -l)
           FAILED=$(cat failed_projects.txt | wc -l)
-          
           echo ""
           echo "========================================================"
           echo "Build Summary for $PROJECT_DIR"
@@ -367,7 +298,6 @@ jobs:
           echo "Total projects: ${#PROJECTS[@]}"
           echo "Successful: $SUCCESSFUL"
           echo "Failed: $FAILED"
-          
           if [ "$FAILED" -gt 0 ]; then
             echo "Failed projects:"
             cat failed_projects.txt | sed 's/^/  - /'
