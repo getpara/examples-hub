@@ -87,9 +87,9 @@ jobs:
             echo "========================================================"
             (
               cd "$GITHUB_WORKSPACE/$PROJECT"
-              rm -rf node_modules .next dist build out
               yarn install
               yarn build
+              rm -rf node_modules .next dist build out
             )
             if [ $? -eq 0 ]; then
               echo "✅ Successfully built $PROJECT"
@@ -145,9 +145,9 @@ jobs:
             echo "========================================================"
             (
               cd "$GITHUB_WORKSPACE/$PROJECT"
-              rm -rf node_modules .next dist build out
               yarn install
               yarn build
+              rm -rf node_modules .next dist build out
             )
             if [ $? -eq 0 ]; then
               echo "✅ Successfully built $PROJECT"
@@ -203,9 +203,9 @@ jobs:
             echo "========================================================"
             (
               cd "$GITHUB_WORKSPACE/$PROJECT"
-              rm -rf node_modules .next dist build out
               yarn install
               yarn build
+              rm -rf node_modules .next dist build out
             )
             if [ $? -eq 0 ]; then
               echo "✅ Successfully built $PROJECT"
@@ -261,9 +261,9 @@ jobs:
             echo "========================================================"
             (
               cd "$GITHUB_WORKSPACE/$PROJECT"
-              rm -rf node_modules .next dist build out
               yarn install
               yarn build
+              rm -rf node_modules .next dist build out
             )
             if [ $? -eq 0 ]; then
               echo "✅ Successfully built $PROJECT"
