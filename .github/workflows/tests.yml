@@ -103,7 +103,12 @@ jobs:
             echo "========================================================"
             echo "Building $PROJECT"
             echo "========================================================"
-            if (cd "$GITHUB_WORKSPACE/$PROJECT" && yarn install && export PATH="$PWD/node_modules/.bin:$PATH" && yarn build); then
+            (
+              cd "$GITHUB_WORKSPACE/$PROJECT"
+              yarn install
+              yarn build
+            )
+            if [ $? -eq 0 ]; then
               echo "✅ Successfully built $PROJECT"
               echo "$PROJECT" >> $GITHUB_WORKSPACE/success_projects.txt
             else
@@ -161,7 +166,12 @@ jobs:
             echo "========================================================"
             echo "Building $PROJECT"
             echo "========================================================"
-            if (cd "$GITHUB_WORKSPACE/$PROJECT" && yarn install && export PATH="$PWD/node_modules/.bin:$PATH" && yarn build); then
+            (
+              cd "$GITHUB_WORKSPACE/$PROJECT"
+              yarn install
+              yarn build
+            )
+            if [ $? -eq 0 ]; then
               echo "✅ Successfully built $PROJECT"
               echo "$PROJECT" >> $GITHUB_WORKSPACE/success_projects.txt
             else
@@ -219,7 +229,12 @@ jobs:
             echo "========================================================"
             echo "Building $PROJECT"
             echo "========================================================"
-            if (cd "$GITHUB_WORKSPACE/$PROJECT" && yarn install && export PATH="$PWD/node_modules/.bin:$PATH" && yarn build); then
+            (
+              cd "$GITHUB_WORKSPACE/$PROJECT"
+              yarn install
+              yarn build
+            )
+            if [ $? -eq 0 ]; then
               echo "✅ Successfully built $PROJECT"
               echo "$PROJECT" >> $GITHUB_WORKSPACE/success_projects.txt
             else
@@ -277,7 +292,12 @@ jobs:
             echo "========================================================"
             echo "Building $PROJECT"
             echo "========================================================"
-            if (cd "$GITHUB_WORKSPACE/$PROJECT" && yarn install && export PATH="$PWD/node_modules/.bin:$PATH" && yarn build); then
+            (
+              cd "$GITHUB_WORKSPACE/$PROJECT"
+              yarn install
+              yarn build
+            )
+            if [ $? -eq 0 ]; then
               echo "✅ Successfully built $PROJECT"
               echo "$PROJECT" >> $GITHUB_WORKSPACE/success_projects.txt
             else
