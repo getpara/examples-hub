@@ -393,6 +393,12 @@ jobs:
             echo "========================================================"
             (
               cd "$GITHUB_WORKSPACE/$PROJECT"
+              # Cache dependencies first
+              echo "Caching dependencies..."
+              if [ -f "deno.json" ] && grep -q '"imports":' deno.json; then
+                deno cache --reload server.ts || true
+              fi
+              
               if [ -f "deno.json" ] && grep -q '"tasks":' deno.json && grep -q '"build"' deno.json; then
                 deno task build
               else
@@ -406,6 +412,10 @@ jobs:
                 fi
               fi
               BUILD_EXIT_CODE=$?
+              # Clean up Deno cache if needed
+              if [ -d "$HOME/.cache/deno" ]; then
+                rm -rf "$HOME/.cache/deno/npm"
+              fi
               exit $BUILD_EXIT_CODE
             )
             if [ $? -eq 0 ]; then
@@ -468,7 +478,10 @@ jobs:
             echo "========================================================"
             (
               cd "$GITHUB_WORKSPACE/$PROJECT"
+              echo "Installing dependencies..."
               bun install
+              
+              # Run build task if present
               if grep -q '"build"' package.json; then
                 bun run build
               else
@@ -487,7 +500,10 @@ jobs:
                 fi
               fi
               BUILD_EXIT_CODE=$?
-              rm -rf node_modules dist build
+              
+              # Clean up after build
+              echo "Cleaning up build artifacts..."
+              rm -rf node_modules dist build .bun
               exit $BUILD_EXIT_CODE
             )
             if [ $? -eq 0 ]; then
