@@ -43,7 +43,7 @@ export class WebExamplePage {
     password?: string;
     usePhoneNumber?: boolean;
   }) {
-    await this.page.waitForTimeout(700);
+    await this.page.waitForTimeout(1000);
     await this.page.getByRole('button', { name: openModalText }).click();
     await this.page.waitForTimeout(1000);
 
@@ -121,12 +121,7 @@ export class WebExamplePage {
     password?: string;
   }) {
     await this.page.reload();
-    await this.page.waitForTimeout(500);
-    await this.page.getByRole('button', { name: openModalText }).click();
-    await this.page.waitForTimeout(750);
-
-    await this.page.reload();
-    await this.page.waitForTimeout(500);
+    await this.page.waitForTimeout(1000);
     await this.page.getByRole('button', { name: openModalText }).click();
     await this.page.waitForTimeout(750);
 
