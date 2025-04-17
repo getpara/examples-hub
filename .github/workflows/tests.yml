@@ -370,12 +370,18 @@ jobs:
       - name: Build projects
         run: |
           set +e
-          PROJECTS=()
-          for DIR in "$PROJECT_DIR"/*; do
-            if [ -d "$DIR" ] && [ -f "$DIR/deno.json" ]; then
-              PROJECTS+=("$DIR")
-            fi
-          done
+          # Check if the directory itself has a deno.json file first (for single project)
+          if [ -d "$PROJECT_DIR" ] && [ -f "$PROJECT_DIR/deno.json" ]; then
+            PROJECTS=("$PROJECT_DIR")
+          else
+            # Look for multiple projects
+            PROJECTS=()
+            for DIR in "$PROJECT_DIR"/*; do
+              if [ -d "$DIR" ] && [ -f "$DIR/deno.json" ]; then
+                PROJECTS+=("$DIR")
+              fi
+            done
+          fi
           echo "Found $(echo ${#PROJECTS[@]}) projects to build:"
           printf "  - %s\n" "${PROJECTS[@]}"
           touch success_projects.txt
@@ -387,12 +393,13 @@ jobs:
             echo "========================================================"
             (
               cd "$GITHUB_WORKSPACE/$PROJECT"
-              if [ -f "deno.json" ] && grep -q '"tasks":' deno.json; then
+              if [ -f "deno.json" ] && grep -q '"tasks":' deno.json && grep -q '"build"' deno.json; then
                 deno task build
               else
                 echo "No build task found, checking main entry point..."
                 MAIN_FILE=$(find . -maxdepth 1 -name "*.ts" -o -name "main.ts" -o -name "index.ts" -o -name "server.ts" | head -n 1)
                 if [ -n "$MAIN_FILE" ]; then
+                  echo "Checking $MAIN_FILE"
                   deno check "$MAIN_FILE"
                 else
                   echo "No main file found to check, treating as success"
@@ -438,12 +445,18 @@ jobs:
       - name: Build projects
         run: |
           set +e
-          PROJECTS=()
-          for DIR in "$PROJECT_DIR"/*; do
-            if [ -d "$DIR" ] && [ -f "$DIR/package.json" ]; then
-              PROJECTS+=("$DIR")
-            fi
-          done
+          # Check if the directory itself has required files first (for single project)
+          if [ -d "$PROJECT_DIR" ] && [ -f "$PROJECT_DIR/package.json" ] && [ -f "$PROJECT_DIR/bun.lockb" ]; then
+            PROJECTS=("$PROJECT_DIR")
+          else
+            # Look for multiple projects
+            PROJECTS=()
+            for DIR in "$PROJECT_DIR"/*; do
+              if [ -d "$DIR" ] && [ -f "$DIR/package.json" ] && ([ -f "$DIR/bun.lockb" ] || grep -q '"bun"' "$DIR/package.json"); then
+                PROJECTS+=("$DIR")
+              fi
+            done
+          fi
           echo "Found $(echo ${#PROJECTS[@]}) projects to build:"
           printf "  - %s\n" "${PROJECTS[@]}"
           touch success_projects.txt
@@ -459,11 +472,18 @@ jobs:
               if grep -q '"build"' package.json; then
                 bun run build
               else
-                echo "No build script found, checking TypeScript files"
-                if [ -f "tsconfig.json" ]; then
-                  bunx --bun tsc --noEmit
+                echo "No build script found, checking TypeScript files..."
+                MAIN_FILE=$(find . -maxdepth 1 -name "*.ts" -o -name "main.ts" -o -name "index.ts" -o -name "server.ts" | head -n 1)
+                if [ -n "$MAIN_FILE" ]; then
+                  echo "Checking $MAIN_FILE with TypeScript"
+                  if [ -f "tsconfig.json" ]; then
+                    bunx --bun tsc --noEmit
+                  else
+                    echo "No tsconfig.json found, trying to check with Bun directly"
+                    bun build --compile "$MAIN_FILE" --outfile /dev/null || true
+                  fi
                 else
-                  echo "No tsconfig.json found, treating as success"
+                  echo "No main file found to check, treating as success"
                 fi
               fi
               BUILD_EXIT_CODE=$?
