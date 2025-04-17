@@ -24,7 +24,7 @@ export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
   const isLogin = useModalStore(state => state.isLogin());
   const setStep = useModalStore(state => state.setStep);
   const twoFactorStatus = useModalStore(state => state.twoFactorStatus);
-  const { enable2faV2, isPending } = useEnable2fa();
+  const { enable2fa, isPending } = useEnable2fa();
   const isVerifying = useModalStore(state => state.step === ModalStep.VERIFY_2FA);
   const [copied, copy] = useCopyToClipboard();
 
@@ -70,7 +70,7 @@ export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
 
   const handleSubmitCode = async () => {
     if (code.length === 6 && /^\d+$/.test(code)) {
-      enable2faV2(
+      enable2fa(
         { verificationCode: code },
         {
           onSuccess: () => {

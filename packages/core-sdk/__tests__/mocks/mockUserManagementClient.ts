@@ -22,7 +22,6 @@ import {
 } from '../constants';
 import Client, {
   ServerAuthStateLogin,
-  SessionInfo,
   ServerAuthStateSignup,
   ServerAuthStateVerify,
   WalletType,
@@ -86,7 +85,7 @@ export const getLoginState = (auth: PrimaryAuth): ServerAuthStateLogin => ({
 
 export const mockLoginExternalWallet = vi.fn();
 export const mockVerifyExternalWallet = vi.fn();
-export const mockSignUpOrLogIn = vi.fn<Parameters<Client['signUpOrLogIn']>, ReturnType<Client['signUpOrLogIn']>>();
+export const mockSignUpOrLogIn = vi.fn();
 export const mockCreateUser = vi.fn();
 export const mockCheckUserExists = vi.fn();
 export const mockVerifyNewAccount = vi.fn();
@@ -98,7 +97,7 @@ export const mockSetCurrentWalletIds = vi.fn();
 export const mockAddSessionPublicKey = vi.fn();
 export const mockAddSessionPasswordPublicKey = vi.fn();
 export const mockLogout = vi.fn();
-export const mockTouchSession = vi.fn<never, SessionInfo>();
+export const mockTouchSession = vi.fn();
 export const mockTempTransmissionInit = vi.fn();
 export const mockTempTransmission = vi.fn();
 export const mockInitializeFarcasterLogin = vi.fn();
@@ -121,7 +120,7 @@ export const mockVerify2FAForPhone = vi.fn();
 export const mockGetPasswords = vi.fn();
 export const mockGetSupportedAuthMethods = vi.fn();
 export const mockGetBiometricLocationHints = vi.fn();
-export const mockVerifyTelegramV2 = vi.fn<Parameters<Client['verifyTelegramV2']>, ReturnType<Client['verifyTelegramV2']>>();
+export const mockVerifyTelegramV2 = vi.fn();
 export const mockKeepSessionAlive = vi.fn();
 export const mockCreateOnRampPurchase = vi.fn();
 export const mockGetPendingTransaction = vi.fn();
@@ -194,8 +193,8 @@ vi.mock('@getpara/user-management-client', async importOriginal => {
     ...actual,
     default: vi.fn().mockImplementation(() => ({
       ...actual.default,
-      loginExternalWalletV2: mockLoginExternalWallet,
-      verifyExternalWalletV2: mockVerifyExternalWallet,
+      loginExternalWallet: mockLoginExternalWallet,
+      verifyExternalWallet: mockVerifyExternalWallet,
       signUpOrLogIn: mockSignUpOrLogIn,
       setCurrentWalletIds: mockSetCurrentWalletIds,
       createUser: mockCreateUser,
@@ -212,7 +211,7 @@ vi.mock('@getpara/user-management-client', async importOriginal => {
       tempTrasmissionInit: mockTempTransmissionInit,
       tempTrasmission: mockTempTransmission,
       initializeFarcasterLogin: mockInitializeFarcasterLogin,
-      getFarcasterAuthStatusV2: mockGetFarcasterAuthStatus,
+      getFarcasterAuthStatus: mockGetFarcasterAuthStatus,
       getPregenWallets: mockGetPregenWallets,
       getWallets: mockGetWallets,
       getSessionPublicKeys: mockGetSessionPublicKeys,
@@ -232,12 +231,11 @@ vi.mock('@getpara/user-management-client', async importOriginal => {
       getPasswords: mockGetPasswords,
       persistRecoveryPublicKeys: mockPersistRecoveryPublicKeys,
       getSupportedAuthMethods: mockGetSupportedAuthMethods,
-      verifyTelegramV2: mockVerifyTelegramV2,
+      verifyTelegram: mockVerifyTelegramV2,
       keepSessionAlive: mockKeepSessionAlive,
       createOnRampPurchase: mockCreateOnRampPurchase,
       getBiometricLocationHints: mockGetBiometricLocationHints,
       getPendingTransaction: mockGetPendingTransaction,
-      verifyExternalWallet: mockVerifyExternalWallet,
       getWalletBalance: mockGetWalletBalance,
       resendVerificationCode: mockResendVerificationCode,
       resendVerificationCodeByPhone: mockResendVerificationCodeByPhone,

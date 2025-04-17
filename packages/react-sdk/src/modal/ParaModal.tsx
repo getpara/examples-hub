@@ -178,7 +178,6 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
 
     if (para) {
       await initModal();
-      para.exitLoops();
     }
 
     setIsInit(false);

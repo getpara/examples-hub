@@ -76,7 +76,7 @@ const Recovery2FAStep: React.FC = () => {
         onClick={async () => {
           if (verificationCode.length === 6 && /^\d+$/.test(verificationCode)) {
             try {
-              const { initiatedAt, status, userId, wallets } = await para.verify2FA({ email, verificationCode });
+              const { initiatedAt, status, userId, wallets } = await para.verify2fa({ auth: { email }, verificationCode });
               setWallets(wallets);
               setInitiatedAt(initiatedAt);
               setStatus(status);

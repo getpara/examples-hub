@@ -77,8 +77,8 @@ const Recovery2FAPhoneStep: React.FC = () => {
         onClick={async () => {
           if (verificationCode.length === 6 && /^\d+$/.test(verificationCode)) {
             try {
-              const { initiatedAt, status, userId, wallets } = await para.verify2FAForPhone({
-                phone: formatPhoneNumber(phone, countryCode),
+              const { initiatedAt, status, userId, wallets } = await para.verify2fa({
+                auth: { phone: formatPhoneNumber(phone, countryCode) },
                 verificationCode,
               });
               setWallets(wallets);

@@ -162,7 +162,7 @@ describe('wallets', () => {
               wallets: [newWallet],
             });
 
-            await para.createPregenWalletV2({
+            await para.createPregenWallet({
               pregenId,
               type,
             });
@@ -213,7 +213,7 @@ describe('wallets', () => {
           wallets: [dklsWallet, ed25519Wallet],
         });
 
-        await para.createPregenWalletPerTypeV2({
+        await para.createPregenWalletPerType({
           pregenId,
           types: PARTNER.supportedWalletTypes.map(({ type }) => type),
         });
@@ -239,7 +239,7 @@ describe('wallets', () => {
       it(`updates for ${pregenIdentifierType}`, async () => {
         const { evmPregenId } = await prepareMock(para, { withoutAuth: true });
 
-        await para.updatePregenWalletIdentifierV2({
+        await para.updatePregenWalletIdentifier({
           walletId: evmPregenId,
           newPregenId,
         });
@@ -293,17 +293,17 @@ describe('wallets', () => {
     });
   });
 
-  it('hasPregenWallets succeeds', async () => {
+  it('hasPregenWallet succeeds', async () => {
     const { evmPregenId, evmPregenUnclaimedId } = await prepareMock(para, { withoutAuth: true });
 
     mockGetPregenWallets.mockResolvedValue({ wallets: [para.wallets[evmPregenId], para.wallets[evmPregenUnclaimedId]] });
 
-    expect(await para.hasPregenWalletV2({ pregenId: { email: USER_EMAIL } })).toBe(true);
+    expect(await para.hasPregenWallet({ pregenId: { email: USER_EMAIL } })).toBe(true);
     expect(
-      await para.hasPregenWalletV2({ pregenId: { customId: para.wallets[evmPregenUnclaimedId].pregenIdentifier! } }),
+      await para.hasPregenWallet({ pregenId: { customId: para.wallets[evmPregenUnclaimedId].pregenIdentifier! } }),
     ).toBe(true);
-    expect(await para.hasPregenWalletV2({ pregenId: { phone: USER_PHONE } })).toBe(false);
-    expect(await para.hasPregenWalletV2({ pregenId: { farcasterUsername: USER_FARCASTER_USERNAME } })).toBe(false);
+    expect(await para.hasPregenWallet({ pregenId: { phone: USER_PHONE } })).toBe(false);
+    expect(await para.hasPregenWallet({ pregenId: { farcasterUsername: USER_FARCASTER_USERNAME } })).toBe(false);
   });
 
   it('helpers', async () => {

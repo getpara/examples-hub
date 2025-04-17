@@ -63,7 +63,7 @@ export function SolanaExternalWalletProvider({
 
   const login = async ({ address, providerName }: { address: string; providerName?: string }) => {
     try {
-      return await para.loginExternalWalletV2({
+      return await para.loginExternalWallet({
         externalWallet: {
           address,
           type: WalletType.SOLANA,

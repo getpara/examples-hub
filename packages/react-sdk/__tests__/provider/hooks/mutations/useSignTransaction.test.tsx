@@ -2,7 +2,7 @@ import { describe, vi, afterEach, it, expect } from 'vitest';
 import { MockPara } from '../../../mocks/mockCorePara';
 import { Environment } from '@getpara/web-sdk';
 import { API_KEY } from '../../../constants';
-import { useSignTransaction } from '../../../../src/provider/hooks/mutations/useSignTransaction';
+import { useSignTransaction } from '../../../../src/provider/hooks';
 import { renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -16,9 +16,13 @@ const { action } = vi.hoisted(() => {
   return { action: vi.fn() };
 });
 
-vi.mock('../../../../src/provider/actions/signTransaction', () => ({
-  signTransaction: action,
-}));
+vi.mock('../../../../src/provider/actions', async importOriginal => {
+  const actual = await importOriginal();
+  return {
+    ...(actual as any),
+    signTransaction: action,
+  };
+});
 
 describe('useSignTransaction', async () => {
   it('invokes signTransaction', async () => {

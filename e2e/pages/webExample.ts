@@ -43,12 +43,12 @@ export class WebExamplePage {
     password?: string;
     usePhoneNumber?: boolean;
   }) {
-    await this.page.waitForTimeout(1000);
+    await this.page.waitForTimeout(3000);
     await this.page.getByRole('button', { name: openModalText }).click();
     await this.page.waitForTimeout(1000);
 
     const emailOrPhone = usePhoneNumber ? getRandomPhoneNumber() : getRandomEmail();
-    const enterEmailOrPhoneInput = await this.page.getByRole('textbox', { name: 'Enter email or phone' }).elementHandle();
+    const enterEmailOrPhoneInput = await this.page.getByRole('textbox', { name: /Enter/ }).elementHandle();
     await enterEmailOrPhoneInput.click();
     await this.page.waitForTimeout(300);
     for (let i = 0; i < emailOrPhone.length; i++) {
@@ -121,11 +121,11 @@ export class WebExamplePage {
     password?: string;
   }) {
     await this.page.reload();
-    await this.page.waitForTimeout(1000);
+    await this.page.waitForTimeout(3000);
     await this.page.getByRole('button', { name: openModalText }).click();
-    await this.page.waitForTimeout(750);
+    await this.page.waitForTimeout(1000);
 
-    const enterEmailOrPhoneInput = await this.page.getByRole('textbox', { name: 'Enter email or phone' }).elementHandle();
+    const enterEmailOrPhoneInput = await this.page.getByRole('textbox', { name: /Enter/ }).elementHandle();
     await enterEmailOrPhoneInput.click();
     await this.page.waitForTimeout(300);
     for (let i = 0; i < emailOrPhone.length; i++) {

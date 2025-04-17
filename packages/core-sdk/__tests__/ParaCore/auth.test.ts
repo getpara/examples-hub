@@ -31,6 +31,7 @@ import {
   EXTERNAL_WALLET,
   TWOFA_URI,
   TWOFA_VERIFY_RESP,
+  COMMON_SEARCH_PARAMS,
 } from '../constants';
 import { MockPara } from '../mocks/mockParaCore.js';
 import {
@@ -69,15 +70,6 @@ import {
 import '../mocks/mockCryptographyUtils.js';
 import _ from 'lodash';
 import { faker } from '@faker-js/faker';
-
-const COMMON_SEARCH_PARAMS = {
-  partnerId: PARTNER.id,
-  portalAccentColor: PARTNER.accentColor,
-  portalBackgroundColor: PARTNER.backgroundColor,
-  portalFont: PARTNER.font,
-  portalForegroundColor: PARTNER.foregroundColor,
-  portalThemeMode: PARTNER.themeMode,
-};
 
 const emailAuthInfo: AuthInfo<'email'> = {
   auth: { email: USER_EMAIL },
@@ -126,7 +118,7 @@ function testLoginUrl(para: MockPara, str: string, authMethod: AuthMethod) {
   expect(url.pathname).toEqual(authMethod === AuthMethod.PASSKEY ? '/web/biometrics/login' : '/web/passwords/login');
   expectSearchParams(url, {
     ...COMMON_SEARCH_PARAMS,
-    ...para.authInfo!.auth,
+    authInfo: JSON.stringify(para.authInfo),
     apiKey: PARTNER.apiKey!,
     encryptionKey: getPublicKeyHex(para.loginEncryptionKeyPair!),
     sessionId: SESSION_LOOKUP_ID,
@@ -143,7 +135,7 @@ function testCreateUrl(para: MockPara, str: string, authMethod: AuthMethod) {
   );
   expectSearchParams(url, {
     ...COMMON_SEARCH_PARAMS,
-    ...para.authInfo!.auth,
+    authInfo: JSON.stringify(para.authInfo),
     apiKey: PARTNER.apiKey,
   });
 }
@@ -154,18 +146,18 @@ const initiateLogin = async (para: MockPara, authInfo: PrimaryAuthInfo): Promise
     case isVerifiedAuth(authInfo.auth):
       mockSignUpOrLogIn.mockResolvedValueOnce(getLoginState(authInfo.auth));
 
-      authState = <AuthStateLogin>await para.signUpOrLogInV2({ auth: authInfo.auth });
+      authState = <AuthStateLogin>await para.signUpOrLogIn({ auth: authInfo.auth });
       break;
 
     case authInfo.authType === 'farcaster':
       mockGetFarcasterAuthStatus.mockResolvedValue(getLoginState(farcasterAuthInfo.auth));
 
-      authState = <AuthStateLogin>await para.verifyFarcasterV2({ onConnectUri: vi.fn() });
+      authState = <AuthStateLogin>await para.verifyFarcaster({ onConnectUri: vi.fn() });
       break;
     case authInfo.authType === 'telegram':
       mockVerifyTelegramV2.mockResolvedValue(getLoginState(telegramAuthInfo.auth));
 
-      authState = <AuthStateLogin>await para.verifyTelegramV2({ telegramAuthResponse: USER_TELEGRAM_AUTH_OBJECT });
+      authState = <AuthStateLogin>await para.verifyTelegram({ telegramAuthResponse: USER_TELEGRAM_AUTH_OBJECT });
       break;
   }
 
@@ -218,17 +210,17 @@ const completeSignup = async (para: MockPara, authInfo: PrimaryAuthInfo, cancel 
     case isVerifiedAuth(authInfo.auth):
       mockSignUpOrLogIn.mockResolvedValueOnce(getVerifyState(authInfo.auth));
 
-      await para.signUpOrLogInV2({ auth: authInfo.auth });
+      await para.signUpOrLogIn({ auth: authInfo.auth });
 
       mockVerifyNewAccount.mockResolvedValueOnce(getSignupState(authInfo.auth));
 
-      await para.verifyNewAccountV2({ verificationCode: '123456' });
+      await para.verifyNewAccount({ verificationCode: '123456' });
       break;
     case authInfo.authType === 'farcaster':
-      await para.verifyFarcasterV2({ onConnectUri: vi.fn() });
+      await para.verifyFarcaster({ onConnectUri: vi.fn() });
       break;
     case authInfo.authType === 'telegram':
-      await para.verifyTelegramV2({ telegramAuthResponse: USER_TELEGRAM_AUTH_OBJECT });
+      await para.verifyTelegram({ telegramAuthResponse: USER_TELEGRAM_AUTH_OBJECT });
       break;
   }
 
@@ -250,7 +242,7 @@ const completeSignup = async (para: MockPara, authInfo: PrimaryAuthInfo, cancel 
   const cancelFn = vi.fn().mockReturnValue(cancel ? true : false);
 
   if (cancel) {
-    expect(() => para.waitForWalletCreationV2({ isCanceled: cancelFn })).rejects.toThrow('canceled');
+    expect(() => para.waitForWalletCreation({ isCanceled: cancelFn })).rejects.toThrow('canceled');
     throw new Error();
   } else {
     setAuthenticated({ evmId, solanaId });
@@ -261,7 +253,7 @@ const completeSignup = async (para: MockPara, authInfo: PrimaryAuthInfo, cancel 
     solanaId,
     evmSigner,
     solanaSigner,
-    result: await para.waitForWalletCreationV2({
+    result: await para.waitForWalletCreation({
       isCanceled: cancelFn,
     }),
   };
@@ -278,7 +270,7 @@ const completeLogin = async (para: MockPara, authInfo: PrimaryAuthInfo, expectWa
   const cancelFn = vi.fn().mockReturnValue(cancel ? true : false);
 
   if (cancel) {
-    expect(async () => await para.waitForLoginV2({ isCanceled: cancelFn })).rejects.toThrow('canceled');
+    expect(async () => await para.waitForLogin({ isCanceled: cancelFn })).rejects.toThrow('canceled');
     expect(cancelFn).toHaveBeenCalled();
     throw new Error();
   }
@@ -306,7 +298,7 @@ const completeLogin = async (para: MockPara, authInfo: PrimaryAuthInfo, expectWa
     setAuthenticated({ evmId: expectWallets[0].id, solanaId: expectWallets[1].id });
   }
 
-  return { signers, shares, result: await para.waitForLoginV2({ isCanceled: cancelFn }) };
+  return { signers, shares, result: await para.waitForLogin({ isCanceled: cancelFn }) };
 };
 
 const createPregens = async (para: MockPara, auth: PregenAuth): Promise<Wallet[]> => {
@@ -327,7 +319,7 @@ const createPregens = async (para: MockPara, auth: PregenAuth): Promise<Wallet[]
   mockEd25519PreKeygen.mockResolvedValue({ walletId: solanaId, signer: solanaSigner });
   mockGetPregenWallets.mockResolvedValue({ wallets });
 
-  await para.createPregenWalletPerTypeV2({
+  await para.createPregenWalletPerType({
     pregenId: auth,
     types: [WalletType.EVM, WalletType.SOLANA],
   });
@@ -533,7 +525,7 @@ describe('ParaCore - authentication', () => {
 
           mockSignUpOrLogIn.mockResolvedValueOnce(getVerifyState(auth));
 
-          const authState = await para.signUpOrLogInV2({ auth });
+          const authState = await para.signUpOrLogIn({ auth });
 
           expect(mockSignUpOrLogIn).toHaveBeenCalledWith(auth);
 
@@ -583,30 +575,30 @@ describe('ParaCore - authentication', () => {
         it('invalid auth', async () => {
           if (para) (para as unknown as any).isNativePasskey = isNativePasskey;
 
-          await para.signUpOrLogInV2({ auth });
+          await para.signUpOrLogIn({ auth });
 
           await para.setAuth({ telegramUserId: USER_TELEGRAM_USER_ID });
 
-          expect(() => para.verifyNewAccountV2({ verificationCode: VERIFICATION_CODE })).rejects.toThrow(
+          expect(() => para.verifyNewAccount({ verificationCode: VERIFICATION_CODE })).rejects.toThrow(
             'invalid auth type, expected email, phone',
           );
         });
         it('failure', async () => {
           if (para) (para as unknown as any).isNativePasskey = isNativePasskey;
 
-          await para.signUpOrLogInV2({ auth });
+          await para.signUpOrLogIn({ auth });
 
           mockVerifyNewAccount.mockRejectedValueOnce('invalid');
 
-          expect(() => para.verifyNewAccountV2({ verificationCode: VERIFICATION_CODE })).rejects.toThrow('invalid');
+          expect(() => para.verifyNewAccount({ verificationCode: VERIFICATION_CODE })).rejects.toThrow('invalid');
         });
         it('success', async () => {
           if (para) (para as unknown as any).isNativePasskey = isNativePasskey;
 
           mockVerifyNewAccount.mockResolvedValueOnce(getSignupState(auth));
-          await para.signUpOrLogInV2({ auth });
+          await para.signUpOrLogIn({ auth });
 
-          const signupState = await para.verifyNewAccountV2({ verificationCode: VERIFICATION_CODE });
+          const signupState = await para.verifyNewAccount({ verificationCode: VERIFICATION_CODE });
 
           expect(signupState).toStrictEqual({
             ..._.omit(getSignupState(auth), ['signupAuthMethods']),
@@ -669,9 +661,9 @@ describe('ParaCore - authentication', () => {
           para = new MockPara(Environment.DEV, API_KEY);
         });
 
-        describe('setup2faV2', () => {
+        describe('setup2fa', () => {
           it('no userId', async () => {
-            expect(() => para.setup2faV2()).rejects.toThrow();
+            expect(() => para.setup2fa()).rejects.toThrow();
           });
 
           it('initial', async () => {
@@ -679,7 +671,7 @@ describe('ParaCore - authentication', () => {
 
             mockSetup2FA.mockResolvedValueOnce({ isSetup: false, uri: TWOFA_URI });
 
-            const res = await para.setup2faV2();
+            const res = await para.setup2fa();
             expect(res).toStrictEqual({ isSetup: false, uri: TWOFA_URI });
           });
 
@@ -688,29 +680,29 @@ describe('ParaCore - authentication', () => {
 
             mockSetup2FA.mockResolvedValueOnce({ isSetup: true });
 
-            const res = await para.setup2faV2();
+            const res = await para.setup2fa();
             expect(res).toStrictEqual({ isSetup: true });
           });
         });
 
-        describe('enable2faV2', () => {
+        describe('enable2fa', () => {
           it('no userId', async () => {
-            expect(() => para.enable2faV2({ verificationCode: VERIFICATION_CODE })).rejects.toThrow();
+            expect(() => para.enable2fa({ verificationCode: VERIFICATION_CODE })).rejects.toThrow();
           });
 
           it('success', async () => {
             await prepareMock(para, { auth });
 
-            await para.enable2faV2({ verificationCode: VERIFICATION_CODE });
+            await para.enable2fa({ verificationCode: VERIFICATION_CODE });
 
             expect(mockEnable2FA).toHaveBeenCalledWith(USER_ID, VERIFICATION_CODE);
           });
         });
 
-        it('verify2faV2', async () => {
+        it('verify2fa', async () => {
           await prepareMock(para, { auth });
 
-          const res = await para.verify2faV2({ auth, verificationCode: VERIFICATION_CODE });
+          const res = await para.verify2fa({ auth, verificationCode: VERIFICATION_CODE });
 
           expect(mockVerify2FA).toHaveBeenCalledWith(auth, VERIFICATION_CODE);
           expect(res).toEqual(TWOFA_VERIFY_RESP);
@@ -751,12 +743,12 @@ describe('ParaCore - authentication', () => {
       describe('verify', () => {
         [false, true].forEach(withCallback => {
           describe(withCallback ? 'with onOAuthUrl' : 'without onOAuthUrl', () => {
-            const prepare = async (method: Parameters<typeof para.verifyOAuthV2>[0]['method']) => {
+            const prepare = async (method: Parameters<typeof para.verifyOAuth>[0]['method']) => {
               let url: URL, authState: AuthState;
               if (withCallback) {
                 const onOAuthUrl = vi.fn();
 
-                authState = await para.verifyOAuthV2({
+                authState = await para.verifyOAuth({
                   method,
                   onOAuthUrl,
                 });
@@ -767,9 +759,9 @@ describe('ParaCore - authentication', () => {
                 const oAuthUrl = onOAuthUrl.mock.calls[0][0];
                 url = new URL(oAuthUrl);
               } else {
-                const oAuthUrl = await para.getOAuthUrlV2({ method });
+                const oAuthUrl = await para.getOAuthUrl({ method });
 
-                authState = await para.verifyOAuthV2({ method });
+                authState = await para.verifyOAuth({ method });
 
                 url = new URL(oAuthUrl);
               }
@@ -836,7 +828,7 @@ describe('ParaCore - authentication', () => {
                 {
                   const onConnectUri = vi.fn();
 
-                  authState = await para.verifyFarcasterV2({
+                  authState = await para.verifyFarcaster({
                     onConnectUri,
                   });
 
@@ -846,7 +838,7 @@ describe('ParaCore - authentication', () => {
                 break;
               case 'telegram':
                 {
-                  authState = await para.verifyTelegramV2({
+                  authState = await para.verifyTelegram({
                     telegramAuthResponse: USER_TELEGRAM_AUTH_OBJECT,
                   });
                 }
@@ -944,7 +936,7 @@ describe('ParaCore - authentication', () => {
     describe('login', () => {
       it('new user', async () => {
         mockLoginExternalWallet.mockResolvedValueOnce(getVerifyState({ externalWalletAddress: EXTERNAL_WALLET.address }));
-        const authState = await para.loginExternalWalletV2({
+        const authState = await para.loginExternalWallet({
           externalWallet: EXTERNAL_WALLET,
         });
 
@@ -954,7 +946,7 @@ describe('ParaCore - authentication', () => {
       it('returning user', async () => {
         mockLoginExternalWallet.mockResolvedValueOnce(getLoginState({ externalWalletAddress: EXTERNAL_WALLET.address }));
 
-        const authState = (await para.loginExternalWalletV2({
+        const authState = (await para.loginExternalWallet({
           externalWallet: EXTERNAL_WALLET,
         })) as AuthStateLogin;
 
@@ -973,7 +965,7 @@ describe('ParaCore - authentication', () => {
     it('verify', async () => {
       mockVerifyExternalWallet.mockResolvedValueOnce(getSignupState({ externalWalletAddress: EXTERNAL_WALLET.address }));
 
-      const authState = await para.verifyExternalWalletV2({
+      const authState = await para.verifyExternalWallet({
         externalWallet: EXTERNAL_WALLET,
         signedMessage: 'signedMessage',
         cosmosPublicKeyHex: 'cosmosPublicKeyHex',
@@ -995,7 +987,7 @@ describe('ParaCore - authentication', () => {
     it('logout', async () => {
       const { address, type, provider } = EXTERNAL_WALLET;
 
-      await para.loginExternalWalletV2({ externalWallet: { address, type, provider } });
+      await para.loginExternalWallet({ externalWallet: { address, type, provider } });
 
       await para.logout();
 

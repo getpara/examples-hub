@@ -126,8 +126,8 @@ const RecoveryEmailCollectionStep: React.FC = () => {
               }
               para.clearStorage();
 
-              const userExists = await para.checkIfUserExists({ email: inputEmail });
-              if (userExists) {
+              const { exists } = await para.ctx.client.checkUserExists({ email: inputEmail });
+              if (exists) {
                 setEmail(inputEmail);
                 setCurrentStep(ModalStep.VERIFICATION_CODE);
                 await para.ctx.client.initializeRecovery(inputEmail);
@@ -168,7 +168,7 @@ const RecoveryEmailCollectionStep: React.FC = () => {
 
               para.clearStorage();
 
-              const userExists = await para.checkIfUserExistsByPhone({
+              const userExists = await para.ctx.client.checkUserExists({
                 phone: formatPhoneNumber(inputPhone, inputCountryCode),
               });
               if (userExists) {

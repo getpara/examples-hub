@@ -36,22 +36,22 @@ import { WalletTypeProp } from './config.js';
 
 export const PARA_CORE_METHODS = [
   'getAuthInfo',
-  'signUpOrLogInV2',
-  'verifyNewAccountV2',
-  'waitForLoginV2',
-  'waitForSignupV2',
-  'waitForWalletCreationV2',
-  'getOAuthUrlV2',
-  'verifyOAuthV2',
-  'getFarcasterConnectUriV2',
-  'verifyFarcasterV2',
-  'verifyTelegramV2',
+  'signUpOrLogIn',
+  'verifyNewAccount',
+  'waitForLogin',
+  'waitForSignup',
+  'waitForWalletCreation',
+  'getOAuthUrl',
+  'verifyOAuth',
+  'getFarcasterConnectUri',
+  'verifyFarcaster',
+  'verifyTelegram',
   'resendVerificationCode',
-  'loginExternalWalletV2',
-  'verifyExternalWalletV2',
-  'setup2faV2',
-  'enable2faV2',
-  'verify2faV2',
+  'loginExternalWallet',
+  'verifyExternalWallet',
+  'setup2fa',
+  'enable2fa',
+  'verify2fa',
   'logout',
   'clearStorage',
   'isSessionActive',
@@ -66,12 +66,12 @@ export const PARA_CORE_METHODS = [
   'fetchWallets',
   'createWallet',
   'createWalletPerType',
-  'getPregenWalletsV2',
-  'hasPregenWalletV2',
-  'updatePregenWalletIdentifierV2',
-  'createPregenWalletV2',
-  'createPregenWalletPerTypeV2',
-  'claimPregenWalletsV2',
+  'getPregenWallets',
+  'hasPregenWallet',
+  'updatePregenWalletIdentifier',
+  'createPregenWallet',
+  'createPregenWalletPerType',
+  'claimPregenWallets',
   'distributeNewWalletShare',
   'getUserShare',
   'setUserShare',
@@ -114,7 +114,7 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
     response: CoreAuthInfo | undefined;
     sync: true;
   };
-  signUpOrLogInV2: {
+  signUpOrLogIn: {
     params: WithCustomTheme &
       WithUseShortUrls & {
         /**
@@ -124,7 +124,7 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
       };
     response: AuthStateVerify | AuthStateLogin;
   };
-  verifyNewAccountV2: {
+  verifyNewAccount: {
     params: WithCustomTheme &
       WithUseShortUrls & {
         /**
@@ -134,7 +134,7 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
       };
     response: AuthStateSignup;
   };
-  waitForLoginV2: {
+  waitForLogin: {
     params: PollParams & {
       /**
        * Whether to skip the session refresh
@@ -156,7 +156,7 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
       partnerId?: string;
     };
   };
-  waitForSignupV2: {
+  waitForSignup: {
     params: PollParams & {
       /**
        * A function returning a boolean, indicating whether the signup process should be cancelled.
@@ -165,7 +165,7 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
     };
     response: true;
   };
-  waitForWalletCreationV2: {
+  waitForWalletCreation: {
     params: PollParams & {
       /**
        * A function returning a boolean, indicating whether wallet creation should be cancelled.
@@ -183,11 +183,11 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
       recoverySecret?: string;
     };
   };
-  getOAuthUrlV2: {
+  getOAuthUrl: {
     params: OAuthUrlParams & { sessionLookupId?: string };
     response: string;
   };
-  verifyOAuthV2: {
+  verifyOAuth: {
     params: AuthStateBaseParams &
       OAuthUrlParams &
       PollParams & {
@@ -203,11 +203,11 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
       };
     response: OAuthResponse;
   };
-  getFarcasterConnectUriV2: {
+  getFarcasterConnectUri: {
     params: void;
     response: string;
   };
-  verifyFarcasterV2: {
+  verifyFarcaster: {
     params: AuthStateBaseParams &
       PollParams & {
         /**
@@ -222,7 +222,7 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
       };
     response: OAuthResponse;
   };
-  verifyTelegramV2: {
+  verifyTelegram: {
     params: AuthStateBaseParams & {
       /**
        * The response received from the Telegram login bot.
@@ -231,7 +231,7 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
     };
     response: OAuthResponse;
   };
-  loginExternalWalletV2: {
+  loginExternalWallet: {
     params: AuthStateBaseParams & {
       /**
        * The external wallet information to use for login.
@@ -240,7 +240,7 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
     };
     response: AuthStateVerifyOrLogin;
   };
-  verifyExternalWalletV2: {
+  verifyExternalWallet: {
     params: AuthStateBaseParams & VerifyExternalWalletParams;
     response: AuthStateSignup;
   };
@@ -297,11 +297,11 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
     params: void;
     response: string;
   };
-  setup2faV2: {
+  setup2fa: {
     params: void;
     response: Setup2faResponse;
   };
-  enable2faV2: {
+  enable2fa: {
     params: {
       /**
        * The two-factor authentication code entered by the user.
@@ -310,7 +310,7 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
     };
     response: void;
   };
-  verify2faV2: {
+  verify2fa: {
     params: {
       /**
        * The email or phone number for the user to verify, in the form `{ email: '...' } | { phone: '+1...' }`
@@ -370,7 +370,7 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
       recoverySecret?: string;
     };
   };
-  getPregenWalletsV2: {
+  getPregenWallets: {
     params: {
       /**
        * The pregen ID for the wallets to fetch. If not provided, all available wallets will be retrieved.
@@ -379,7 +379,7 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
     };
     response: WalletEntity[];
   };
-  updatePregenWalletIdentifierV2: {
+  updatePregenWalletIdentifier: {
     params: {
       /**
        * The ID of the pregen wallet to update.
@@ -392,7 +392,7 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
     };
     response: void;
   };
-  hasPregenWalletV2: {
+  hasPregenWallet: {
     params: {
       /**
        * The pregen ID for the wallet to check.
@@ -401,7 +401,7 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
     };
     response: boolean;
   };
-  createPregenWalletV2: {
+  createPregenWallet: {
     params: {
       /**
        * The type of wallet to create, 'EVM' | 'SOLANA' | 'COSMOS'
@@ -414,7 +414,7 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
     };
     response: Wallet;
   };
-  createPregenWalletPerTypeV2: {
+  createPregenWalletPerType: {
     params: {
       /**
        * The wallet types to create. If not provided, defaults to your application's `supportedWalletTypes` setting.
@@ -427,7 +427,7 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
     };
     response: Wallet[];
   };
-  claimPregenWalletsV2: {
+  claimPregenWallets: {
     params: {
       /**
        * The pregen identifier for the wallet to claim. If not provided, will attempt to claim all wallets in storage.

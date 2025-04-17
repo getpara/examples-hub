@@ -134,7 +134,7 @@ const AuthLoginBase = ({ authMethod }) => {
       await para.setLoginEncryptionKeyPair(keyPair);
     }
 
-    const url = await para.constructPortalUrlV2('loginAuth', {
+    const url = await para.constructPortalUrl('loginAuth', {
       thisDevice: {
         sessionId,
         encryptionKey,
@@ -196,14 +196,13 @@ const AuthLoginBase = ({ authMethod }) => {
         reset();
         return;
       }
-      const { userId } = await para.touchSession();
-      await para.setUserId(userId);
+
       const fetchedWallets = await para.fetchWallets();
       const temporaryShares = (await para.getTransmissionKeyShares({ isForNewDevice: true })).data.temporaryShares;
 
       if (temporaryShares.length >= fetchedWallets.length) {
-        const authCreationURL = await para.getSetUpBiometricsURL({ isForNewDevice: true });
-        window.location.href = authCreationURL;
+        const { url } = await para.getNewCredentialAndUrl({ isForNewDevice: true });
+        window.location.href = url;
       } else {
         reset();
       }

@@ -8,8 +8,8 @@ import axios, {
 import { AxiosRequestConfig } from 'axios';
 import qs from 'qs';
 import {
-  AccountMetadata,
   AccountMetadataKey,
+  AccountMetadata,
   Auth,
   AuthIdentifier,
   AuthMethod,
@@ -69,20 +69,6 @@ type ClientConfig = {
   persistSessionCookie?: (cookie: string) => void;
 };
 
-interface ExternalWalletLoginBody {
-  externalAddress: string;
-  type: 'EVM' | 'SOLANA' | 'COSMOS';
-  externalWalletProvider?: string;
-  shouldTrackUser?: boolean;
-}
-
-export interface ExternalWalletLoginRes {
-  userId: string;
-  userExists: boolean;
-  isVerified: boolean;
-  signatureVerificationMessage: string;
-}
-
 interface createUserIdRes {
   protocolId: string;
   userId: string;
@@ -90,13 +76,6 @@ interface createUserIdRes {
 
 interface verifyBody {
   verificationCode: string;
-}
-
-interface verifyExternalWalletBody {
-  address: string;
-  signedMessage: string;
-  cosmosPublicKeyHex?: string;
-  cosmosSigner?: string;
 }
 
 interface getWebChallengeRes {
@@ -371,22 +350,7 @@ class Client {
     return res;
   };
 
-  checkUserExistsV2 = async (auth: VerifiedAuth): Promise<{ exists: boolean }> => {
-    const res = await this.baseRequest.get<{ exists: boolean }>('/users/exists', {
-      params: { ...auth },
-    });
-    return res.data;
-  };
-
-  verifyTelegram = async (authObject: TelegramAuthResponse): Promise<VerifyTelegramRes> => {
-    return (
-      await this.baseRequest.post<VerifyTelegramRes>('/users/telegram', {
-        authObject,
-      })
-    ).data;
-  };
-
-  verifyTelegramV2 = async (authObject: TelegramAuthResponse): Promise<VerifyTelegramResponse> => {
+  verifyTelegram = async (authObject: TelegramAuthResponse): Promise<VerifyTelegramResponse> => {
     return (
       await this.baseRequest.post<VerifyTelegramResponse>('/users/telegram/v2', {
         authObject,
@@ -400,12 +364,7 @@ class Client {
     return res.data;
   };
 
-  externalWalletLogin = async (body: ExternalWalletLoginBody): Promise<ExternalWalletLoginRes> => {
-    const res = await this.baseRequest.post<ExternalWalletLoginRes>(`/users/external-wallets/login`, body);
-    return res.data;
-  };
-
-  loginExternalWalletV2 = async ({
+  loginExternalWallet = async ({
     externalWallet,
     shouldTrackUser,
   }: {
@@ -441,12 +400,7 @@ class Client {
     return res;
   };
 
-  verifyExternalWallet = async (userId: string, body: verifyExternalWalletBody): Promise<any> => {
-    const res = await this.baseRequest.post<any>(`/users/${userId}/external-wallets/verify`, body);
-    return res;
-  };
-
-  verifyExternalWalletV2 = async (userId: string, body: VerifyExternalWalletParams): Promise<ServerAuthStateSignup> => {
+  verifyExternalWallet = async (userId: string, body: VerifyExternalWalletParams): Promise<ServerAuthStateSignup> => {
     const res = await this.baseRequest.post<ServerAuthStateSignup>(`/users/${userId}/external-wallets/verify/v2`, body);
     return res.data;
   };
@@ -547,20 +501,7 @@ class Client {
     return res.data;
   };
 
-  // GET /wallets/pregen?pregenIdentifier={pregenIdentifier}&pregenIdentifierType={pregenIdentifierType}
-  getPregenWallets = async <ReturnType = { wallets: WalletEntity[] }>(
-    pregenIds: PregenIds,
-    isPortal = false,
-    userId?: string,
-  ): Promise<ReturnType> => {
-    const res = await this.baseRequest.get<ReturnType>('/wallets/pregen', {
-      params: { ids: pregenIds, expand: isPortal, userId },
-    });
-
-    return res.data;
-  };
-
-  getPregenWalletsV2 = async (
+  getPregenWallets = async (
     pregenIds: PregenIds,
     isPortal = false,
     userId?: string,
@@ -572,14 +513,7 @@ class Client {
     return res.data;
   };
 
-  // POST /wallets/pregen/claim
-  claimPregenWallets = async <ReturnType = { walletIds?: string[] }>(body?: claimPreGenWalletsBody): Promise<ReturnType> => {
-    const res = await this.baseRequest.post<ReturnType>(`/wallets/pregen/claim`, body);
-
-    return res.data;
-  };
-
-  claimPregenWalletsV2 = async (body?: claimPreGenWalletsBody): Promise<{ walletIds: string[] }> => {
+  claimPregenWallets = async (body?: claimPreGenWalletsBody): Promise<{ walletIds: string[] }> => {
     const res = await this.baseRequest.post<{ walletIds: string[] }>(`/wallets/pregen/claim`, body);
 
     return res.data;
@@ -800,13 +734,7 @@ class Client {
     return res;
   }
 
-  // POST '/2fa/users/:userId/setup'
-  async setup2FA(userId: string) {
-    const res = await this.baseRequest.post<any>(`/2fa/users/${userId}/setup`);
-    return res;
-  }
-
-  async setup2FAV2(userId: string): Promise<Setup2faResponse> {
+  async setup2FA(userId: string): Promise<Setup2faResponse> {
     const res = await this.baseRequest.post<Setup2faResponse>(`/2fa/users/${userId}/setup`);
     return res.data;
   }
@@ -823,13 +751,7 @@ class Client {
     return res;
   }
 
-  // POST /auth/farcaster/status
   async getFarcasterAuthStatus() {
-    const res = await this.baseRequest.post<any>(`/auth/farcaster/status`);
-    return res;
-  }
-
-  async getFarcasterAuthStatusV2() {
     const res = await this.baseRequest.post<VerifyFarcasterResponse>(`/auth/farcaster/status/v2`);
     return res.data;
   }
@@ -869,14 +791,7 @@ class Client {
     return res;
   }
 
-  // POST /2fa/verify
-  async verify2FA(email: string, verificationCode: string) {
-    const body = { email, verificationCode };
-    const res = await this.baseRequest.post<any>('/2fa/verify', body);
-    return res;
-  }
-
-  async verify2FAV2(auth: VerifiedAuth, verificationCode: string) {
+  async verify2FA(auth: VerifiedAuth, verificationCode: string) {
     const body = { ...auth, verificationCode };
     const res = await this.baseRequest.post<any>('/2fa/verify', body);
     return res.data;

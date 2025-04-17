@@ -39,7 +39,7 @@ type Value = {
   verifyNewAccount: (_: string) => void;
   isVerifyNewAccountPending: boolean;
   verifyNewAccountError: Error | null;
-  verifyOAuth: (_: CoreMethodParams<'verifyOAuthV2'>['method']) => void;
+  verifyOAuth: (_: CoreMethodParams<'verifyOAuth'>['method']) => void;
   verifyFarcaster: () => void;
   verifyTelegram: (_: TelegramAuthResponse) => void;
   onNewAuthState: (_: AuthState) => void;
@@ -326,7 +326,7 @@ export function AuthProvider({
     );
   };
 
-  const verifyOAuth = async (method: CoreMethodParams<'verifyOAuthV2'>['method']) => {
+  const verifyOAuth = async (method: CoreMethodParams<'verifyOAuth'>['method']) => {
     setStep(ModalStep.AWAITING_OAUTH);
 
     mutateVerifyOAuth(

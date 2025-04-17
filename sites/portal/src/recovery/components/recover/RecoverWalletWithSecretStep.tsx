@@ -1,13 +1,12 @@
 import { VStack, Spacer, HStack, Button, Box, Text, Textarea } from '@chakra-ui/react';
 import { useContext, useState } from 'react';
-import { KeyContainer } from '@getpara/web-sdk';
+import { formatPhoneNumber, KeyContainer } from '@getpara/web-sdk';
 import EmailContext from '../../contexts/EmailContext';
 import RecoveryStepContext from '../../contexts/RecoveryStepContext';
 import { ModalStep } from '../../steps/recoverySteps';
 import UserContext from '../../contexts/UserContext';
 import WalletContext from '../../contexts/WalletContext';
 import VerifyCode from '../../../assets/verifyCode';
-import { RecoveryAttemptContext, RecoveryType } from '../../contexts/RecoveryAttemptContext';
 import PhoneContext from '../../contexts/PhoneContext';
 import { usePara } from '../../../components/ParaContext';
 
@@ -22,7 +21,6 @@ const RecoverWalletWithSecretStep: React.FC<RecoverWalletWithSecretStepProps> = 
 }) => {
   const para = usePara();
   const { setCurrentRecoveryStep } = useContext(RecoveryStepContext);
-  const { type } = useContext(RecoveryAttemptContext);
   const { phone, countryCode } = useContext(PhoneContext);
   const { email } = useContext(EmailContext);
   const { wallets } = useContext(WalletContext);
@@ -116,16 +114,26 @@ const RecoverWalletWithSecretStep: React.FC<RecoverWalletWithSecretStepProps> = 
             }
             setUserShares(userShares);
             setIncorrectCode(false);
-            await para.setEmail(email);
-            await para.setPhoneNumber(phone, countryCode);
-            await para.setUserId(userId);
-            let link;
-            if (type === RecoveryType.PHONE) {
-              link = await para.getSetUpBiometricsURLForPhone();
-            } else {
-              link = await para.getSetUpBiometricsURL();
+
+            let auth;
+            switch (true) {
+              case !!email:
+                auth = { email };
+                break;
+              case !!phone:
+                auth = { phone: formatPhoneNumber(phone, countryCode) };
+                break;
             }
-            setWebAuthURLForCreate(link);
+
+            if (!auth) {
+              throw new Error('No auth found');
+            }
+
+            await para.setAuth(auth, { userId });
+
+            const { url } = await para.getNewCredentialAndUrl();
+
+            setWebAuthURLForCreate(url);
             setCurrentRecoveryStep(ModalStep.BIOMETRIC);
           } catch (error) {
             setIncorrectCode(true);

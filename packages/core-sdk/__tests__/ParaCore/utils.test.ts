@@ -138,6 +138,20 @@ describe('ParaCore - utils', () => {
     ]);
   });
 
+  it('findWalletByAddress', async () => {
+    para = new MockPara(Environment.DEV, API_KEY);
+    const { solanaId, solanaAddress } = await prepareMock(para);
+
+    const wallet = para.findWalletByAddress(solanaAddress);
+    expect(wallet).toBeDefined();
+    expect(wallet.id).toEqual(solanaId);
+
+    expect(() => para.findWalletByAddress('notAnAddress')).toThrowError();
+    expect(() => para.findWalletByAddress(solanaAddress, { type: [WalletType.EVM] })).toThrowError(
+      `wallet with id ${solanaId} and type SOLANA cannot be selected`,
+    );
+  });
+
   describe('getDisplayAddress', () => {
     beforeEach(async () => {
       para = new MockPara(Environment.DEV, API_KEY);

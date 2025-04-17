@@ -19,11 +19,6 @@ export class MockPara extends ParaCore {
   isProviderModalDisabled = super.isProviderModalDisabled;
   supportedAuthMethods = super.supportedAuthMethods;
   getUserBiometricLocationHints = super.getUserBiometricLocationHints;
-  exitLoops = super.exitLoops;
-  exitLogin = super.exitLogin;
-  exitAccountCreation = super.exitAccountCreation;
-  exitOAuth = super.exitOAuth;
-  exitFarcaster = super.exitFarcaster;
 }
 
 export class MockParaAsync extends MockPara {

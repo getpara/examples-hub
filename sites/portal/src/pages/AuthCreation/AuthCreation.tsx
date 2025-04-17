@@ -45,10 +45,10 @@ export const AuthCreation = () => {
         console.error('Error creating passkey: ', err);
       }
     }
-  }, [params]);
+  }, [params, authInfo]);
 
   useEffect(() => {
-    if (params.biometricId && !!extractAuthInfo(params) && params.userId) {
+    if (params.biometricId && !!authInfo && params.userId) {
       // In development this will trigger a 'request is already pending.' error due to duplicate renders caused by React.StrictMode.
       // See ref: https://legacy.reactjs.org/docs/strict-mode.html#detecting-unexpected-side-effects
       setUpBiometrics();

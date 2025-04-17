@@ -54,6 +54,7 @@ import { http, parseEther } from 'viem';
 import { sepolia } from 'viem/chains';
 import { paraConnector } from '@getpara/wagmi-v2-integration';
 import { coinbaseWallet, walletConnect } from 'wagmi/connectors';
+import { PregenAuth } from '@getpara/user-management-client';
 
 const queryClient = new QueryClient();
 
@@ -441,6 +442,20 @@ function getParaOpts(env: Environment, useDKLS: boolean): ConstructorOpts {
     default:
       throw new Error(`invalid environment: ${env}`);
   }
+}
+
+export function toPregenAuth(type: TPregenIdentifierType, identifier: string): PregenAuth {
+  const authKey = {
+    EMAIL: 'email',
+    PHONE: 'phone',
+    CUSTOM_ID: 'customId',
+    DISCORD: 'discordUsername',
+    TWITTER: 'xUsername',
+    TELEGRAM: 'telegramUserId',
+    FARCASTER: 'farcasterUsername',
+  }[type];
+
+  return { [authKey]: identifier } as PregenAuth;
 }
 
 function AppInner({
@@ -987,8 +1002,7 @@ function AppInner({
                       colorScheme="teal"
                       onClick={async () => {
                         await para?.createPregenWalletPerType({
-                          pregenIdentifier,
-                          pregenIdentifierType,
+                          pregenId: toPregenAuth(pregenIdentifierType, pregenIdentifier),
                           types: pregenWalletType === 'missing' ? undefined : [pregenWalletType],
                         });
 
@@ -1135,9 +1149,8 @@ function AppInner({
                           colorScheme="teal"
                           onClick={async () => {
                             await para?.updatePregenWalletIdentifier({
-                              newPregenIdentifier: updatePregenIdentifier,
+                              newPregenId: toPregenAuth(updatePregenIdentifierType, updatePregenIdentifier),
                               walletId,
-                              newPregenIdentifierType: updatePregenIdentifierType,
                             });
 
                             updateToString();

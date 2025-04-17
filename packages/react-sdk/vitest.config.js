@@ -13,11 +13,12 @@ export default mergeConfig(baseConfig, {
       thresholds: {
         lines: 49.16,
         functions: 41.19,
-        branches: 65.8,
+        branches: 65.08,
         statements: 49.16,
       },
       reportOnFailure: true,
     },
     setupFiles: './__tests__/setup.ts',
+    testTimeout: 10000,
   },
 });

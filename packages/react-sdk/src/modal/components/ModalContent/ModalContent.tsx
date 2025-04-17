@@ -89,7 +89,6 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
       init();
       return () => {
         window.clearTimeout(refs.poll.current?.timeout);
-        para.exitLoops();
       };
     }, []);
 

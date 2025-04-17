@@ -1,4 +1,10 @@
-import ParaCore, { PlatformUtils, ConstructorOpts, Environment, TPregenIdentifierType } from '@getpara/core-sdk';
+import ParaCore, {
+  PlatformUtils,
+  ConstructorOpts,
+  Environment,
+  CoreMethodParams,
+  CoreMethodResponse,
+} from '@getpara/core-sdk';
 import * as Sentry from '@sentry/node';
 import { ServerUtils } from './ServerUtils.js';
 
@@ -32,10 +38,7 @@ export class Para extends ParaCore {
    * @param {TPregenIdentifierType} opts.pregenIdentifierType - the type of the identifier.
    * @returns {Promise<string | undefined>} A promise that rejects with an error.
    */
-  async claimPregenWallets({}: {
-    pregenIdentifier?: string;
-    pregenIdentifierType?: TPregenIdentifierType;
-  } = {}): Promise<string | undefined> {
+  async claimPregenWallets(_: CoreMethodParams<'claimPregenWallets'>): CoreMethodResponse<'claimPregenWallets'> {
     throw new Error(
       'claimPregenWallets is not available in the server SDK. ' +
         'This function is only supported on the client side. ' +

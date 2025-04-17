@@ -43,18 +43,21 @@ async function createUserAndWallet(params: Params) {
   if (isPregen) {
     await para.createPregenWallet({
       type: useSolana ? WalletType.SOLANA : WalletType.EVM,
-      pregenIdentifier: email,
-      pregenIdentifierType: 'EMAIL',
+      pregenId: { email },
     });
   } else {
-    await para.createUser({ email: email || `server-test${uuid.v4()}@test.getpara.com` });
-    const webAuthURL = await para.verifyEmail({ verificationCode: '123456' });
+    const { stage } = await para.signUpOrLogIn({ auth: { email: email || `server-test${uuid.v4()}@test.getpara.com` } });
+
+    if (stage !== 'verify') {
+      return;
+    }
+
+    const { passkeyId } = await para.verifyNewAccount({ verificationCode: '123456' });
     // the steps between the `~~~~~~~` will happen in the portal and don't need to be manually performed
     // ~~~~~~~
     // @ts-ignore
     const userId = para.userId;
-    const biometricIdRegex = /\/biometrics\/(.*?)\?email/;
-    const biometricId = webAuthURL.match(biometricIdRegex)[1];
+    const biometricId = passkeyId!;
     const { partnerId } = await para.ctx.client.touchSession(false);
     await para.ctx.client.patchSessionPublicKey(partnerId, userId, biometricId, {
       publicKey: SAMPLE_PUBLIC_KEY,

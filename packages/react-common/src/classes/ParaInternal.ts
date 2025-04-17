@@ -9,12 +9,7 @@ export class ParaInternal extends ParaWeb {
   getPortalURL = super.getPortalURL;
   isProviderModalDisabled = super.isProviderModalDisabled;
   setAuth = super.setAuth;
-  constructPortalUrlV2 = super.constructPortalUrlV2;
   supportedAuthMethods = super.supportedAuthMethods;
-  getUserBiometricLocationHints = super.getUserBiometricLocationHints;
-  exitLoops = super.exitLoops;
-  exitLogin = super.exitLogin;
-  exitAccountCreation = super.exitAccountCreation;
-  exitOAuth = super.exitOAuth;
-  exitFarcaster = super.exitFarcaster;
+  constructPortalUrl = super.constructPortalUrl;
+  getNewCredentialAndUrl = super.getNewCredentialAndUrl;
 }

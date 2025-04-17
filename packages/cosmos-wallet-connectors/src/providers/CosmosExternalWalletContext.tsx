@@ -147,7 +147,7 @@ export function CosmosExternalWalletProvider({
 
   const login = async (bufferAddress: string, address: string, isFullAuthWallet?: boolean, providerName?: string) => {
     try {
-      return await para.loginExternalWalletV2({
+      return await para.loginExternalWallet({
         externalWallet: {
           address: bufferAddress,
           type: WalletType.COSMOS,

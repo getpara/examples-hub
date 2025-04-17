@@ -8,7 +8,6 @@ import WalletContext from '../../contexts/WalletContext';
 import VerifyCode from '../../../assets/verifyCode';
 import Console from '../../../assets/console';
 import TwoFactorContext from '../../contexts/TwoFactorContext';
-import { RecoveryAttemptContext, RecoveryType } from '../../contexts/RecoveryAttemptContext';
 import PhoneContext from '../../contexts/PhoneContext';
 import { usePara } from '../../../components/ParaContext';
 import { formatPhoneNumber } from '@getpara/web-sdk';
@@ -18,7 +17,6 @@ const RecoveryWallet2FAStep: React.FC = () => {
   const [verificationCode, setVerificationCode] = useState('');
   const [incorrectCode, setIncorrectCode] = useState(false);
   const { setCurrentRecoveryStep } = useContext(RecoveryStepContext);
-  const { type } = useContext(RecoveryAttemptContext);
   const { email } = useContext(EmailContext);
   const { setWallets } = useContext(WalletContext);
   const { phone, countryCode } = useContext(PhoneContext);
@@ -86,14 +84,25 @@ const RecoveryWallet2FAStep: React.FC = () => {
           if (verificationCode.length === 6 && /^\d+$/.test(verificationCode)) {
             try {
               let wallets, userId;
-              if (type === RecoveryType.PHONE) {
-                ({ wallets, userId } = await para.verify2FAForPhone({
-                  phone: formatPhoneNumber(phone, countryCode),
-                  verificationCode,
-                }));
-              } else {
-                ({ wallets, userId } = await para.verify2FA({ email, verificationCode }));
+              let auth;
+              switch (true) {
+                case !!email:
+                  auth = { email };
+                  break;
+                case !!phone:
+                  auth = { phone: formatPhoneNumber(phone, countryCode) };
+                  break;
               }
+
+              if (!auth) {
+                throw new Error('No auth found');
+              }
+
+              ({ wallets, userId } = await para.verify2fa({
+                auth,
+                verificationCode,
+              }));
+
               setWallets(wallets);
               setUserId(userId);
               setIncorrectCode(false);

@@ -260,7 +260,7 @@ export function EvmExternalWalletProvider({
       refetchEnsName();
       refetchEnsAvatar();
 
-      return await para.loginExternalWalletV2({
+      return await para.loginExternalWallet({
         externalWallet: {
           address,
           type: WalletType.EVM,
