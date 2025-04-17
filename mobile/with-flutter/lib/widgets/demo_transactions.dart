@@ -74,7 +74,8 @@ class DemoTransactions extends StatelessWidget {
                 context: context,
                 type: WalletType.evm,
                 title: 'EVM Transactions',
-                description: 'Sign Ethereum-compatible transactions and messages',
+                description:
+                    'Sign Ethereum-compatible transactions and messages',
                 icon: FontAwesomeIcons.ethereum,
               ),
               const SizedBox(height: 16),
@@ -111,7 +112,8 @@ class DemoTransactions extends StatelessWidget {
 
     return Card(
       child: InkWell(
-        onTap: hasWallet ? () => _navigateToSigningExample(context, type) : null,
+        onTap:
+            hasWallet ? () => _navigateToSigningExample(context, type) : null,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -121,13 +123,15 @@ class DemoTransactions extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: hasWallet
                       ? Theme.of(context).colorScheme.primaryContainer
-                      : Theme.of(context).disabledColor.withOpacity(0.1),
+                      : Theme.of(context).disabledColor.withAlpha(26),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   icon,
                   size: 24,
-                  color: hasWallet ? Theme.of(context).colorScheme.primary : Theme.of(context).disabledColor,
+                  color: hasWallet
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).disabledColor,
                 ),
               ),
               const SizedBox(width: 16),
@@ -140,7 +144,9 @@ class DemoTransactions extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        color: hasWallet ? Theme.of(context).colorScheme.onSurface : Theme.of(context).disabledColor,
+                        color: hasWallet
+                            ? Theme.of(context).colorScheme.onSurface
+                            : Theme.of(context).disabledColor,
                       ),
                     ),
                     const SizedBox(height: 4),

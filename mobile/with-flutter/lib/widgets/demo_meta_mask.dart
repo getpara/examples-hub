@@ -26,26 +26,28 @@ class DemoMetaMaskState extends State<DemoMetaMask> {
 
     metamaskConnector
         .sendTransaction(transaction, metamaskConnector.accounts.first)
-        .then((onValue) => {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Transaction signed: $onValue'),
-                ),
-              )
-            });
+        .then((onValue) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Transaction signed: $onValue'),
+        ),
+      );
+    });
   }
 
   void _signMessage() {
     metamaskConnector
         .signMessage(
             "Message to sign! Hello World", metamaskConnector.accounts.first)
-        .then((onValue) => {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Message signed: $onValue'),
-                ),
-              )
-            });
+        .then((onValue) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Message signed: $onValue'),
+        ),
+      );
+    });
   }
 
   @override

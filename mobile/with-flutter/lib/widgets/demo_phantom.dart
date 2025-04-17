@@ -17,12 +17,26 @@ class DemoPhantomState extends State<DemoPhantom> {
     super.initState();
   }
 
+  // ignore: unused_element
   Future<void> _copyAddress(String address) async {
     await Clipboard.setData(ClipboardData(text: address));
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Address copied to clipboard')),
     );
+  }
+
+  void _signMessage() {
+    phantomConnector
+        .signMessage("Message to sign! Hello World")
+        .then((onValue) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Message signed: $onValue'),
+        ),
+      );
+    });
   }
 
   Future<void> _signTransaction() async {
@@ -46,20 +60,19 @@ class DemoPhantomState extends State<DemoPhantom> {
           ),
         ]);
 
-    final signedTransaction =
-        await phantomConnector.signTransaction(transaction);
-  }
-
-  void _signMessage() {
-    phantomConnector
-        .signMessage("Message to sign! Hello World")
-        .then((onValue) => {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Message signed: $onValue'),
-                ),
-              )
-            });
+    try {
+      final signedTransaction =
+          await phantomConnector.signTransaction(transaction);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Transaction signed: $signedTransaction')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error signing transaction: $e')),
+      );
+    }
   }
 
   @override
