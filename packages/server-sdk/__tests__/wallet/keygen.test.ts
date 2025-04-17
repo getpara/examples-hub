@@ -1,5 +1,5 @@
 import { vi, describe, it, expect, afterEach, beforeAll } from 'vitest';
-import { Environment, WalletType } from '@getpara/core-sdk';
+import { Environment } from '@getpara/core-sdk';
 
 import { workerMessagePostSpy } from '../mocks/mockWorker.js';
 import {
@@ -95,7 +95,7 @@ describe('keygen', () => {
 
   describe('keygen', () => {
     it('success', async () => {
-      const resp = await keygen(TEST_CTX, USER.id, WalletType.EVM, SECRET_KEY, USER.sessionCookie);
+      const resp = await keygen(TEST_CTX, USER.id, 'EVM', SECRET_KEY, USER.sessionCookie);
 
       expect(resp).toStrictEqual({
         signer: WALLET.signer,
@@ -110,7 +110,7 @@ describe('keygen', () => {
         params: {
           userId: USER.id,
           secretKey: SECRET_KEY,
-          type: WalletType.EVM,
+          type: 'EVM',
         },
         functionType: 'KEYGEN',
         disableWorkers: false,
@@ -124,16 +124,7 @@ describe('keygen', () => {
   });
   describe('preKeygen', () => {
     it('success', async () => {
-      const resp = await preKeygen(
-        TEST_CTX,
-        USER.email,
-        'EMAIL',
-        WalletType.EVM,
-        SECRET_KEY,
-        false,
-        PARTNER.id,
-        USER.sessionCookie,
-      );
+      const resp = await preKeygen(TEST_CTX, USER.email, 'EMAIL', 'EVM', SECRET_KEY, false, PARTNER.id, USER.sessionCookie);
 
       expect(resp).toStrictEqual({
         signer: PREGEN_WALLET.signer,
@@ -148,7 +139,7 @@ describe('keygen', () => {
         params: {
           pregenIdentifier: USER.email,
           pregenIdentifierType: 'EMAIL',
-          type: WalletType.EVM,
+          type: 'EVM',
           secretKey: SECRET_KEY,
           partnerId: PARTNER.id,
           email: USER.email,

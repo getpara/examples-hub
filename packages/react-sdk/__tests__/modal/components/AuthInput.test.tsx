@@ -110,7 +110,7 @@ describe('ParaModal', () => {
   //       isOpen={true}
   //       para={para}
   //       appName="App Name"
-  //       oAuthMethods={[OAuthMethod.GOOGLE, OAuthMethod.FACEBOOK, OAuthMethod.APPLE]}
+  //       oAuthMethods={['GOOGLE', 'FACEBOOK', 'APPLE']}
   //       onClose={() => {}}
   //     />,
   //   );

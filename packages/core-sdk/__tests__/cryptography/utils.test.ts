@@ -25,7 +25,6 @@ import { Environment } from '../../src/types/index.js';
 import { initClient } from '../../src/external/userManagementClient.js';
 import { getWorkerContent } from '../utils.js';
 import forge from 'node-forge';
-import { WalletScheme } from '@getpara/user-management-client';
 
 // Remove white space from PEM strings to ensure values are compared accurately
 const cleanPEMString = (str: string) => str.replace(/\s+/g, '');
@@ -176,7 +175,7 @@ describe('utils', () => {
       [
         {
           walletId: '1',
-          walletScheme: WalletScheme.DKLS,
+          walletScheme: 'DKLS',
           encryptedShare: encrypted.encryptedMessageHex,
           encryptedKey: encrypted.encryptedKeyHex,
         },
@@ -203,7 +202,7 @@ describe('utils', () => {
         [
           {
             walletId: '1',
-            walletScheme: WalletScheme.DKLS,
+            walletScheme: 'DKLS',
             encryptedShare: encrypted.encryptedMessageHex,
             encryptedKey: encrypted.encryptedKeyHex,
           },
@@ -231,7 +230,7 @@ describe('utils', () => {
           [
             {
               walletId: '1',
-              walletScheme: WalletScheme.DKLS,
+              walletScheme: 'DKLS',
               encryptedShare: encrypted.encryptedMessageHex,
               encryptedKey: encrypted.encryptedKeyHex,
             },

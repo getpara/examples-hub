@@ -4,7 +4,7 @@ import * as uuid from 'uuid';
 import * as ethers from 'ethers';
 import { sepolia } from 'viem/chains';
 import { http } from 'viem';
-import { PublicKeyStatus, WalletType } from '@getpara/user-management-client';
+import { PublicKeyStatus } from '@getpara/user-management-client';
 import * as solana from '@solana/web3.js';
 import { ParaSolanaWeb3Signer } from '@getpara/solana-web3.js-v1-integration';
 
@@ -42,7 +42,7 @@ async function createUserAndWallet(params: Params) {
   await para.logout();
   if (isPregen) {
     await para.createPregenWallet({
-      type: useSolana ? WalletType.SOLANA : WalletType.EVM,
+      type: useSolana ? 'SOLANA' : 'EVM',
       pregenId: { email },
     });
   } else {

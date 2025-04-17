@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { useModalStore } from '../../stores/index.js';
 import { CpslButton, CpslIdenticon, CpslText } from '@getpara/react-components';
-import { truncateAddress, WalletType } from '@getpara/web-sdk';
+import { truncateAddress, TWalletType } from '@getpara/web-sdk';
 import { ModalStep } from '../../utils/steps.js';
 import { useWalletState } from '../../../provider/index.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
@@ -27,7 +27,7 @@ export const ExternalWalletCard = ({ address, showAddFunds }: Pick<SharedWalletC
 
 interface WalletCardProps {
   id: string;
-  type: WalletType;
+  type: TWalletType;
   showAddFunds?: boolean;
 }
 
@@ -58,7 +58,7 @@ export const WalletCard = ({ id, type, showAddFunds }: WalletCardProps) => {
 interface SharedWalletCardProps {
   address: string;
   id?: string;
-  type?: WalletType;
+  type?: TWalletType;
   name?: string;
   identiconHash: string;
   showAddFunds?: boolean;

@@ -16,7 +16,6 @@ import {
   WINDOW_INNER_WIDTH,
 } from './constants.js';
 import { documentElementMockValue, mockWindowOpen, TEST_CTX, windowMockValue } from './setup.js';
-import { WalletType } from '@getpara/user-management-client';
 import * as keygen from '../src/wallet/keygen.js';
 import * as signing from '../src/wallet/signing.js';
 import { LocalStorage } from '../src/LocalStorage.js';
@@ -92,7 +91,7 @@ describe('WebUtils', () => {
   it('keygen', async () => {
     const webUtils = new WebUtils();
 
-    const resp = await webUtils.keygen(TEST_CTX, USER.id, WalletType.EVM, SECRET_KEY, USER.sessionCookie);
+    const resp = await webUtils.keygen(TEST_CTX, USER.id, 'EVM', SECRET_KEY, USER.sessionCookie);
 
     expect(resp).toStrictEqual({
       signer: WALLET.signer,
@@ -100,7 +99,7 @@ describe('WebUtils', () => {
       recoveryShare: WALLET.share,
     });
     expect(keygenSpy).toBeCalledTimes(1);
-    expect(keygenSpy).toBeCalledWith(TEST_CTX, USER.id, WalletType.EVM, SECRET_KEY, true, USER.sessionCookie, {});
+    expect(keygenSpy).toBeCalledWith(TEST_CTX, USER.id, 'EVM', SECRET_KEY, true, USER.sessionCookie, {});
   });
   it('refresh', async () => {
     const webUtils = new WebUtils();
@@ -135,15 +134,7 @@ describe('WebUtils', () => {
   it('preKeygen', async () => {
     const webUtils = new WebUtils();
 
-    const resp = await webUtils.preKeygen(
-      TEST_CTX,
-      PARTNER.id,
-      USER.email,
-      'EMAIL',
-      WalletType.EVM,
-      SECRET_KEY,
-      USER.sessionCookie,
-    );
+    const resp = await webUtils.preKeygen(TEST_CTX, PARTNER.id, USER.email, 'EMAIL', 'EVM', SECRET_KEY, USER.sessionCookie);
 
     expect(resp).toStrictEqual({
       signer: WALLET.signer,
@@ -155,7 +146,7 @@ describe('WebUtils', () => {
       TEST_CTX,
       USER.email,
       'EMAIL',
-      WalletType.EVM,
+      'EVM',
       SECRET_KEY,
       false,
       PARTNER.id,

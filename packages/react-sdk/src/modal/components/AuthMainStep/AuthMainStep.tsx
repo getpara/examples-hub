@@ -1,12 +1,12 @@
 import styled from 'styled-components';
-import { OAuthMethod } from '@getpara/web-sdk';
+import { TOAuthMethod } from '@getpara/web-sdk';
 import { AuthMainStepContent } from './AuthMainStepContent.js';
 import { CenteredText } from '../common.js';
 import { useStore } from '../../../provider/stores/useStore.js';
 import { useModalStore } from '../../stores/index.js';
 
 interface AuthMainStepProps {
-  oAuthMethods?: OAuthMethod[];
+  oAuthMethods?: TOAuthMethod[];
   disableEmailLogin: boolean;
   disablePhoneLogin: boolean;
 }

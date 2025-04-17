@@ -1,6 +1,6 @@
 import { CpslButton, CpslIcon, CpslIdenticon, CpslText } from '@getpara/react-components';
 import styled from 'styled-components';
-import ParaWeb, { truncateAddress, WalletType } from '@getpara/web-sdk';
+import ParaWeb, { truncateAddress, TWalletType } from '@getpara/web-sdk';
 import { useEffect, useRef } from 'react';
 import { useDropdownPosition } from '../AuthInput/hooks/useDropdownPosition.js';
 import { useAccount, useWallet, useWalletState } from '../../../provider/index.js';
@@ -10,14 +10,14 @@ import { useExternalWallets } from '../../../provider/providers/ExternalWalletPr
 import { useStore } from '../../../provider/stores/useStore.js';
 import { useCopyToClipboard } from '@getpara/react-common';
 
-const getValue = (id?: string, type?: WalletType) => {
+const getValue = (id?: string, type?: TWalletType) => {
   return id && type ? `${id}~${type}` : undefined;
 };
 
 const WALLET_TYPES = {
-  [WalletType.EVM]: 'EVM',
-  [WalletType.SOLANA]: 'Solana',
-  [WalletType.COSMOS]: 'Cosmos',
+  EVM: 'EVM',
+  SOLANA: 'Solana',
+  COSMOS: 'Cosmos',
 };
 
 export const ChainSelect = () => {
@@ -37,7 +37,7 @@ export const ChainSelect = () => {
     await switchChain(chainId);
   };
 
-  if (!activeWallet || !activeWallet.isExternal || activeWallet.type === WalletType.SOLANA) {
+  if (!activeWallet || !activeWallet.isExternal || activeWallet.type === 'SOLANA') {
     return null;
   }
 
@@ -163,7 +163,7 @@ export const AccountSelect = () => {
             selectedValue={getValue(activeWallet?.id, activeWallet?.type)}
             onCpslSelectValueChange={e => {
               const [id, type] = e.detail.split('~');
-              setSelectedWallet({ id, type: type as WalletType });
+              setSelectedWallet({ id, type: type as TWalletType });
             }}
             showFormattedSelectedItem
             placeholder="Choose wallet..."

@@ -24,7 +24,6 @@ import Client, {
   ServerAuthStateLogin,
   ServerAuthStateSignup,
   ServerAuthStateVerify,
-  WalletType,
   isTelegram,
   isFarcaster,
   PrimaryAuth,
@@ -151,7 +150,7 @@ export function resetClientMocks() {
     isAuthenticated: true,
     supportedWalletTypes: PARTNER.supportedWalletTypes!,
     cosmosPrefix: PARTNER.cosmosPrefix,
-    currentWalletIds: { [WalletType.EVM]: [WALLET.id], [WalletType.SOLANA]: [SOLANA_WALLET.id] },
+    currentWalletIds: { EVM: [WALLET.id], SOLANA: [SOLANA_WALLET.id] },
     needsWallet: false,
   });
   mockTempTransmissionInit.mockResolvedValue({ data: { id: TEMP_TRANSMISSION_INIT_ID } });

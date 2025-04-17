@@ -9,7 +9,7 @@ import {
   toAssetInfoArray,
   ProviderAssetInfo,
   OnRampConfig,
-  WalletType,
+  TWalletType,
 } from '@getpara/web-sdk';
 
 export function getCurrencyCode(
@@ -25,7 +25,7 @@ export function getCurrencyCodes(
     provider,
     purchaseType,
     walletType,
-  }: { provider: OnRampProvider; purchaseType: OnRampPurchaseType; walletType: WalletType },
+  }: { provider: OnRampProvider; purchaseType: OnRampPurchaseType; walletType: TWalletType },
 ): { currencyCodes: string[]; defaultCurrencyCode?: string } {
   let defaultCurrencyCode: string | undefined;
 

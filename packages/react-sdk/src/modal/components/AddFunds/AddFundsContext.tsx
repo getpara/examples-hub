@@ -21,7 +21,7 @@ import {
   OnRampConfig,
   OnRampProvider,
   OnRampPurchaseType,
-  WalletType,
+  TWalletType,
 } from '@getpara/web-sdk';
 import { getNetworkFromChainId, getNetworkOrMainNetEquivalent } from '@getpara/react-common';
 import { IconType } from '@getpara/react-components';
@@ -71,7 +71,7 @@ const DEFAULT = {
 
 function isValid(
   onRampConfig: OnRampConfig | undefined,
-  walletType: WalletType | undefined,
+  walletType: TWalletType | undefined,
   network: Network | undefined,
   asset: OnRampAsset | undefined,
 ) {

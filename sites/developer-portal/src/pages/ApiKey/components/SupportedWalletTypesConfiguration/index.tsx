@@ -1,20 +1,21 @@
 import { CpslRow, CpslText, IconType } from '@getpara/react-components';
 import { Controller } from 'react-hook-form';
 import { useSupportedWalletTypesFormData } from '../../hooks/useSupportedWalletTypesFormData';
-import { SupportedWalletTypes, WalletType } from '@getpara/react-sdk';
+import { SupportedWalletTypes, TWalletType } from '@getpara/react-sdk';
 import { DOCS_LINK } from '../../../../utils/constants';
 import { ConfigurationCard } from '../ConfigurationCard';
 import { FormProvider } from 'react-hook-form';
 import { BrandIcon, InnerInput } from '../OnRampConfiguration/common';
 import { ArraySelect } from '../../../../components/ArraySelect';
 import styled from 'styled-components';
+import { WALLET_TYPES } from '@getpara/user-management-client';
 import { GreenSwitch, SectionCard } from '../common';
 import { ConfigurationActions } from '../ConfigurationActions';
 
-const WALLET_TYPES: Record<WalletType, { name: string; icon: IconType }> = {
-  [WalletType.EVM]: { name: 'EVM', icon: 'ethereum' },
-  [WalletType.SOLANA]: { name: 'Solana', icon: 'solana' },
-  [WalletType.COSMOS]: { name: 'Cosmos', icon: 'cosmos' },
+const WALLET_TYPES_LOOKUP: Record<TWalletType, { name: string; icon: IconType }> = {
+  EVM: { name: 'EVM', icon: 'ethereum' },
+  SOLANA: { name: 'Solana', icon: 'solana' },
+  COSMOS: { name: 'Cosmos', icon: 'cosmos' },
 };
 
 export const SupportedWalletTypesConfiguration = () => {
@@ -52,7 +53,7 @@ export const SupportedWalletTypesConfiguration = () => {
                 return (
                   (!!value &&
                     value.length > 0 &&
-                    value.every(({ type }) => !!WalletType[type]) &&
+                    value.every(({ type }) => WALLET_TYPES.includes(type)) &&
                     value.some(({ optional }) => !optional)) ||
                   'At least one non-optional wallet type is required.'
                 );
@@ -71,15 +72,15 @@ export const SupportedWalletTypesConfiguration = () => {
                 render={({ field: { onChange: setCosmosPrefix, onBlur, value: cosmosPrefix }, fieldState: { error } }) => {
                   const valueWithRemaining: SupportedWalletTypes = [
                     ...supportedWalletTypes,
-                    ...Object.keys(WalletType)
-                      .filter(key => !(supportedWalletTypes as SupportedWalletTypes).some(({ type }) => key === type))
-                      .map(type => ({ type })),
+                    ...WALLET_TYPES.filter(
+                      key => !(supportedWalletTypes as SupportedWalletTypes).some(({ type }) => key === type),
+                    ).map(type => ({ type })),
                   ];
 
                   return (
                     <SectionCard>
                       <Controls>
-                        <ArraySelect<WalletType, []>
+                        <ArraySelect<TWalletType, []>
                           ifEmpty={[]}
                           isOrderable
                           error={fieldState.error?.message}
@@ -104,9 +105,9 @@ export const SupportedWalletTypesConfiguration = () => {
                             return (
                               <Row>
                                 <Row>
-                                  <BrandIcon icon={WALLET_TYPES[type].icon} />
+                                  <BrandIcon icon={WALLET_TYPES_LOOKUP[type].icon} />
                                   <CpslText variant="bodyM" style={{ fontWeight: '600' }}>
-                                    {WALLET_TYPES[type].name}
+                                    {WALLET_TYPES_LOOKUP[type].name}
                                   </CpslText>
                                 </Row>
                                 <GreenSwitch
@@ -135,7 +136,7 @@ export const SupportedWalletTypesConfiguration = () => {
                             const [isIncluded, isMulti, isCosmos] = [
                               (supportedWalletTypes as SupportedWalletTypes).some(entry => entry.type === type),
                               supportedWalletTypes.length > 1,
-                              type === WalletType.COSMOS,
+                              type === 'COSMOS',
                             ];
 
                             if (isIncluded && (isMulti || isCosmos)) {

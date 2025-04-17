@@ -6,8 +6,8 @@ import {
   ServerAuthStateVerify,
   VerifiedAuth,
   AuthExtras,
-  OAuthMethod,
-  WalletType,
+  TOAuthMethod,
+  TWalletType,
 } from '@getpara/user-management-client';
 import { Theme } from './theme.js';
 import { RecoveryStatus } from './recovery.js';
@@ -18,9 +18,9 @@ type Device = {
   encryptionKey: string;
 };
 
-export type EmbeddedWalletType = Exclude<WalletType, never>;
+export type EmbeddedWalletType = Exclude<TWalletType, never>;
 
-export type ExternalWalletType = Exclude<WalletType, never>;
+export type ExternalWalletType = Exclude<TWalletType, never>;
 
 export type VerifyExternalWalletV1 = {
   address: string;
@@ -96,7 +96,7 @@ export type OAuthUrlParams = {
   /**
    * The third-party OAuth service.
    */
-  method: Exclude<OAuthMethod, 'TELEGRAM' | 'FARCASTER'>;
+  method: Exclude<TOAuthMethod, 'TELEGRAM' | 'FARCASTER'>;
   /**
    * The deeplink URL to redirect to after OAuth is complete.
    */

@@ -13,7 +13,7 @@ import {
 } from '@getpara/graz';
 import { useExternalWalletStore } from '../stores/useStore.js';
 import { WalletWithType } from '../types/Wallet.js';
-import ParaWeb, { AuthState, Wallet, WalletType } from '@getpara/web-sdk';
+import ParaWeb, { AuthState, Wallet } from '@getpara/web-sdk';
 import type { CommonChain, CommonWallet, TExternalWallet } from '@getpara/react-common';
 
 const defaultCosmosExternalWallet = {
@@ -136,7 +136,7 @@ export function CosmosExternalWalletProvider({
       const storedExternalWallet = para.externalWallets[changeResp.bufferAddress ?? ''];
       para.setExternalWallet({
         address: changeResp.bufferAddress,
-        type: WalletType.COSMOS,
+        type: 'COSMOS',
         provider: getProviderName(walletType),
         addressBech32: changeResp.address,
         withFullParaAuth: storedExternalWallet.isExternalWithParaAuth,
@@ -150,7 +150,7 @@ export function CosmosExternalWalletProvider({
       return await para.loginExternalWallet({
         externalWallet: {
           address: bufferAddress,
-          type: WalletType.COSMOS,
+          type: 'COSMOS',
           provider: providerName,
           addressBech32: address,
           withFullParaAuth: isFullAuthWallet,
@@ -187,7 +187,7 @@ export function CosmosExternalWalletProvider({
         !isConnecting &&
         !isReconnecting &&
         connectedWallet &&
-        connectedWallet.type === WalletType.COSMOS &&
+        connectedWallet.type === 'COSMOS' &&
         (connectedWallet.isExternal ? walletType !== connectedWallet.name?.toLowerCase() : walletType !== 'para')
       ) {
         const isLoggedIn = await para.isFullyLoggedIn();
@@ -332,7 +332,7 @@ export function CosmosExternalWalletProvider({
         connect: () => connect(wallet.grazType),
         connectMobile: () => connect(wallet.grazType),
         getQrUri: () => '',
-        type: WalletType.COSMOS,
+        type: 'COSMOS',
         ...wallet,
         installed: checkWallet(wallet.grazType),
       } as CommonWallet;

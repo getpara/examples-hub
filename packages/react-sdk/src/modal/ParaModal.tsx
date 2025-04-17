@@ -7,7 +7,6 @@ import { ModalStep, RESET_TO_ACCOUNT_STEPS, RESET_TO_AUTH_STEPS } from './utils/
 import { AuthLayout, ParaModalHandle, ParaModalProps } from './types/modalProps.js';
 import { DEFAULTS } from './constants/defaults.js';
 import { useGoBack } from './hooks/useGoBack.js';
-import { OAuthMethod } from '@getpara/web-sdk';
 import styled from 'styled-components';
 import { hasEmbeddedAuth, hasExternalWallet } from './utils/authLayoutHelpers.js';
 import { useModal, useWalletState } from '../provider/index.js';
@@ -48,7 +47,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
     theme,
     disableEmailLogin = false,
     disablePhoneLogin = false,
-    oAuthMethods = [OAuthMethod.GOOGLE, OAuthMethod.TWITTER],
+    oAuthMethods = ['GOOGLE', 'TWITTER'],
     bareModal = false,
     className,
     currentStepOverride,

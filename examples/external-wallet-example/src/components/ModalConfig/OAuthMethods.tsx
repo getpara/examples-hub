@@ -1,7 +1,7 @@
 import { useModalStateStore } from '../../stores/modalStateStore/useModalStateStore';
 import { CpslButton, CpslIcon, CpslText } from '@getpara/react-components';
-import { OAuthMethod } from '@getpara/react-sdk';
 import { DownIcon, FlexRow, LabelContainer, MethodRow, OptionRow } from './ModalConfig';
+import { OAUTH_METHODS } from '@getpara/react-sdk';
 
 export const OAuthMethods = () => {
   const updateState = useModalStateStore(state => state.updateState);
@@ -46,18 +46,16 @@ export const OAuthMethods = () => {
         </MethodRow>
       ))}
       <OptionRow>
-        {Object.values(OAuthMethod)
-          .filter(method => !oAuthMethods.includes(method))
-          .map(method => (
-            <CpslButton
-              size="small"
-              key={method}
-              variant={oAuthMethods.includes(method) ? 'primary' : 'secondary'}
-              onClick={() => updateState({ oAuthMethods: [...oAuthMethods, method] })}
-            >
-              {method}
-            </CpslButton>
-          ))}
+        {OAUTH_METHODS.filter(method => !oAuthMethods.includes(method)).map(method => (
+          <CpslButton
+            size="small"
+            key={method}
+            variant={oAuthMethods.includes(method) ? 'primary' : 'secondary'}
+            onClick={() => updateState({ oAuthMethods: [...oAuthMethods, method] })}
+          >
+            {method}
+          </CpslButton>
+        ))}
       </OptionRow>
     </LabelContainer>
   );

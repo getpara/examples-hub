@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAccount, useClient, useWallet } from '../index.js';
-import { GetWalletBalanceParams, WalletType } from '@getpara/web-sdk';
+import { GetWalletBalanceParams } from '@getpara/web-sdk';
 import { useStore } from '../../stores/useStore.js';
 import { getWalletBalance } from '../../actions/index.js';
 import { useExternalWallets } from '../../providers/ExternalWalletProvider.js';
@@ -19,8 +19,7 @@ export const useWalletBalance = (args?: Partial<GetWalletBalanceParams>) => {
   const { getWalletBalance: getExternalWalletBalance, chainId } = useExternalWallets();
 
   const queryFn = useCallback(async () => {
-    const skipGetBalance =
-      !selectedWallet || (selectedWallet.type && [WalletType.COSMOS, WalletType.SOLANA].includes(selectedWallet.type));
+    const skipGetBalance = !selectedWallet || (selectedWallet.type && ['COSMOS', 'SOLANA'].includes(selectedWallet.type));
 
     if (skipGetBalance) {
       return;

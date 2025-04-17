@@ -15,7 +15,7 @@ import {
   WALLET,
 } from '../constants.js';
 import { mockGoRun, mockWASMInit, TEST_CTX } from '../setup.js';
-import { Environment, WalletType } from '@getpara/core-sdk';
+import { Environment } from '@getpara/core-sdk';
 import * as coreSdk from '@getpara/core-sdk';
 
 const initClientSpy = vi.spyOn(coreSdk, 'initClient');
@@ -106,7 +106,7 @@ describe('worker', () => {
         handleMessage({
           data: {
             functionType: 'KEYGEN',
-            params: { userId: USER.id, secretKey: SECRET_KEY, type: WalletType.EVM },
+            params: { userId: USER.id, secretKey: SECRET_KEY, type: 'EVM' },
             ...TEST_CTX,
             env: 'FAKE_ENV' as Environment,
             workId: MOCK_WORK_ID,
@@ -128,7 +128,7 @@ describe('worker', () => {
       const resp = await handleMessage({
         data: {
           functionType: 'KEYGEN',
-          params: { userId: USER.id, secretKey: SECRET_KEY, type: WalletType.EVM },
+          params: { userId: USER.id, secretKey: SECRET_KEY, type: 'EVM' },
           ..._TEST_CTX,
           workId: MOCK_WORK_ID,
         },
@@ -143,7 +143,7 @@ describe('worker', () => {
       expect(keygenSpy).toBeCalledWith(
         { ..._TEST_CTX, mpcComputationClient: expect.any(Function) },
         USER.id,
-        WalletType.EVM,
+        'EVM',
         SECRET_KEY,
       );
       expect(mockGoRun).toBeCalledTimes(1);
@@ -160,7 +160,7 @@ describe('worker', () => {
       const resp = await handleMessage({
         data: {
           functionType: 'KEYGEN',
-          params: { userId: USER.id, secretKey: SECRET_KEY, type: WalletType.EVM },
+          params: { userId: USER.id, secretKey: SECRET_KEY, type: 'EVM' },
           ..._TEST_CTX,
           workId: MOCK_WORK_ID,
         },
@@ -172,7 +172,7 @@ describe('worker', () => {
         workId: MOCK_WORK_ID,
       });
       expect(keygenSpy).toBeCalledTimes(1);
-      expect(keygenSpy).toBeCalledWith({ ..._TEST_CTX }, USER.id, WalletType.EVM, SECRET_KEY);
+      expect(keygenSpy).toBeCalledWith({ ..._TEST_CTX }, USER.id, 'EVM', SECRET_KEY);
       expect(mockGoRun).toBeCalledTimes(1);
       expect(mockWASMInit).toBeCalledTimes(1);
     });
@@ -307,7 +307,7 @@ describe('worker', () => {
           params: {
             email: USER.email,
             secretKey: SECRET_KEY,
-            type: WalletType.EVM,
+            type: 'EVM',
             partnerId: PARTNER.id,
           },
           ..._TEST_CTX,
@@ -321,7 +321,7 @@ describe('worker', () => {
         workId: MOCK_WORK_ID,
       });
       expect(preKeygenSpy).toBeCalledTimes(1);
-      expect(preKeygenSpy).toBeCalledWith({ ..._TEST_CTX }, PARTNER.id, USER.email, 'EMAIL', WalletType.EVM, SECRET_KEY);
+      expect(preKeygenSpy).toBeCalledWith({ ..._TEST_CTX }, PARTNER.id, USER.email, 'EMAIL', 'EVM', SECRET_KEY);
       expect(mockGoRun).toBeCalledTimes(1);
       expect(mockWASMInit).toBeCalledTimes(1);
     });
@@ -340,7 +340,7 @@ describe('worker', () => {
             pregenIdentifier: USER.email,
             pregenIdentifierType: 'EMAIL',
             secretKey: SECRET_KEY,
-            type: WalletType.EVM,
+            type: 'EVM',
             partnerId: PARTNER.id,
           },
           ..._TEST_CTX,
@@ -354,7 +354,7 @@ describe('worker', () => {
         workId: MOCK_WORK_ID,
       });
       expect(preKeygenSpy).toBeCalledTimes(1);
-      expect(preKeygenSpy).toBeCalledWith({ ..._TEST_CTX }, PARTNER.id, USER.email, 'EMAIL', WalletType.EVM, SECRET_KEY);
+      expect(preKeygenSpy).toBeCalledWith({ ..._TEST_CTX }, PARTNER.id, USER.email, 'EMAIL', 'EVM', SECRET_KEY);
       expect(mockGoRun).toBeCalledTimes(1);
       expect(mockWASMInit).toBeCalledTimes(1);
     });

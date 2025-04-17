@@ -1,7 +1,7 @@
 import { PlatformUtils, TPregenIdentifierType } from '@getpara/web-sdk';
 import { Ctx } from '@getpara/web-sdk';
 import { SignatureRes } from '@getpara/web-sdk';
-import { BackupKitEmailProps, KeyShareType, WalletScheme, WalletType } from '@getpara/user-management-client';
+import { BackupKitEmailProps, KeyShareType, TWalletType } from '@getpara/user-management-client';
 import { NativeModules } from 'react-native';
 
 import { AsyncStorage } from '../AsyncStorage.js';
@@ -69,7 +69,7 @@ export class ReactNativeUtils implements PlatformUtils {
   async keygen(
     ctx: Ctx,
     userId: string,
-    type: Exclude<WalletType, WalletType.SOLANA>,
+    type: Exclude<TWalletType, 'SOLANA'>,
     _secretKey: string | null,
     _sessionCookie: string,
     _emailProps?: BackupKitEmailProps | undefined,
@@ -77,7 +77,7 @@ export class ReactNativeUtils implements PlatformUtils {
     const { walletId, protocolId } = await ctx.client.createWallet(userId, {
       type,
       useTwoSigners: true,
-      scheme: ctx.useDKLS ? WalletScheme.DKLS : WalletScheme.CGGMP,
+      scheme: ctx.useDKLS ? 'DKLS' : 'CGGMP',
     });
 
     if (ctx.mpcComputationClient && !ctx.useDKLS) {
@@ -220,8 +220,8 @@ export class ReactNativeUtils implements PlatformUtils {
     walletId: string;
   }> {
     const { walletId, protocolId } = await ctx.client.createWallet(userId, {
-      scheme: WalletScheme.ED25519,
-      type: WalletType.SOLANA,
+      scheme: 'ED25519',
+      type: 'SOLANA',
     });
 
     const signer = await ParaSignerModule.ed25519CreateAccount(walletId, protocolId);
@@ -240,8 +240,8 @@ export class ReactNativeUtils implements PlatformUtils {
     const { walletId, protocolId } = await ctx.client.createPregenWallet({
       pregenIdentifier,
       pregenIdentifierType,
-      scheme: WalletScheme.ED25519,
-      type: WalletType.SOLANA,
+      scheme: 'ED25519',
+      type: 'SOLANA',
     });
 
     const signer = await ParaSignerModule.ed25519CreateAccount(walletId, protocolId);
@@ -256,7 +256,7 @@ export class ReactNativeUtils implements PlatformUtils {
     base64Bytes: string,
     _sessionCookie: string,
   ): Promise<SignatureRes> {
-    const { protocolId } = await ctx.client.preSignMessage(userId, walletId, base64Bytes, WalletScheme.ED25519);
+    const { protocolId } = await ctx.client.preSignMessage(userId, walletId, base64Bytes, 'ED25519');
 
     const base64Sig = await ParaSignerModule.ed25519Sign(protocolId, share, base64Bytes);
     return { signature: base64Sig };

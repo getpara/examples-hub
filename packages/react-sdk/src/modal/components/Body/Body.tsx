@@ -6,7 +6,7 @@ import { useModalStore } from '../../stores/index.js';
 import { BiometricLoginStep } from '../BiometricLoginStep/BiometricLoginStep.js';
 import { Setup2FAStep } from '../Setup2FAStep/Setup2FAStep.js';
 import { LoginDoneStep } from '../LoginDoneStep/LoginDoneStep.js';
-import { EnabledFlow, OAuthMethod } from '@getpara/web-sdk';
+import { EnabledFlow, TOAuthMethod } from '@getpara/web-sdk';
 import { AwaitingBiometricsStep } from '../AwaitingBiometricsStep/AwaitingBiometricsStep.js';
 import { AwaitingWalletCreationStep } from '../AwaitingWalletCreationStep/AwaitingWalletCreationStep.js';
 import { WalletCreationDoneStep } from '../WalletCreationDoneStep/WalletCreationDoneStep.js';
@@ -37,7 +37,7 @@ import { ExternalWalletVerificationStep } from '../ExternalWalletVerificationSte
 import { NetworkSpeedBanner } from '@getpara/react-common';
 
 interface BodyProps {
-  oAuthMethods?: OAuthMethod[];
+  oAuthMethods?: TOAuthMethod[];
   twoFactorAuthEnabled?: boolean;
   disableEmailLogin: boolean;
   disablePhoneLogin: boolean;

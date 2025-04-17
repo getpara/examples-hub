@@ -3,23 +3,23 @@ import {
   SupportedWalletTypes,
   TPregenIdentifierType,
   WalletEntity,
-  WalletScheme,
-  WalletType,
+  TWalletScheme,
+  TWalletType,
 } from '@getpara/user-management-client';
-import { Wallet, WalletTypeProp } from '../types/index.js';
+import { Wallet } from '../types/index.js';
 import { formatPhoneNumber } from './phone.js';
 
-export const WalletSchemeTypeMap: Record<WalletScheme, Partial<Record<WalletType, true>>> = {
-  [WalletScheme.DKLS]: {
-    [WalletType.EVM]: true,
-    [WalletType.COSMOS]: true,
+export const WalletSchemeTypeMap: Record<TWalletScheme, Partial<Record<TWalletType, true>>> = {
+  DKLS: {
+    EVM: true,
+    COSMOS: true,
   },
-  [WalletScheme.CGGMP]: {
-    [WalletType.EVM]: true,
-    [WalletType.COSMOS]: true,
+  CGGMP: {
+    EVM: true,
+    COSMOS: true,
   },
-  [WalletScheme.ED25519]: {
-    [WalletType.SOLANA]: true,
+  ED25519: {
+    SOLANA: true,
   },
 };
 
@@ -43,20 +43,20 @@ export function isPregenIdentifierMatch(
   }
 }
 
-export function isWalletSupported(types: WalletType[], wallet: Omit<Wallet, 'signer'>): boolean {
-  return types.some((walletType: WalletType) => !!WalletSchemeTypeMap[wallet?.scheme]?.[walletType]);
+export function isWalletSupported(types: TWalletType[], wallet: Omit<Wallet, 'signer'>): boolean {
+  return types.some((walletType: TWalletType) => !!WalletSchemeTypeMap[wallet?.scheme]?.[walletType]);
 }
 
-export function getSchemes(types: WalletTypeProp[] | SupportedWalletTypes): WalletScheme[] {
-  return <WalletScheme[]>Object.keys(WalletSchemeTypeMap).filter(scheme => {
-    if (scheme === WalletScheme.CGGMP) {
+export function getSchemes(types: TWalletType[] | SupportedWalletTypes): TWalletScheme[] {
+  return <TWalletScheme[]>Object.keys(WalletSchemeTypeMap).filter(scheme => {
+    if (scheme === 'CGGMP') {
       return false;
     }
     return (Array.isArray(types) ? types : Object.keys(types)).some(type => WalletSchemeTypeMap[scheme][type]);
   });
 }
 
-export function getWalletTypes(schemes: WalletScheme[]): WalletType[] {
+export function getWalletTypes(schemes: TWalletScheme[]): TWalletType[] {
   return [
     ...new Set(
       schemes.reduce((acc, scheme) => {
@@ -66,15 +66,15 @@ export function getWalletTypes(schemes: WalletScheme[]): WalletType[] {
   ];
 }
 
-export function getEquivalentTypes(types: WalletTypeProp[] | WalletTypeProp): WalletType[] {
-  return getWalletTypes(getSchemes((Array.isArray(types) ? types : [types]).map(t => WalletType[t])));
+export function getEquivalentTypes(types: TWalletType[] | TWalletType): TWalletType[] {
+  return getWalletTypes(getSchemes(Array.isArray(types) ? types : [types]));
 }
 
 export function entityToWallet(w: WalletEntity): Omit<Wallet, 'signer'> {
   return {
     ...w,
-    scheme: w.scheme as WalletScheme,
-    type: w.type as WalletType,
+    scheme: w.scheme as TWalletScheme,
+    type: w.type as TWalletType,
     pregenIdentifierType: w.pregenIdentifierType as TPregenIdentifierType,
   };
 }
@@ -82,11 +82,11 @@ export function entityToWallet(w: WalletEntity): Omit<Wallet, 'signer'> {
 export function migrateWallet(obj: Record<string, unknown>): Wallet {
   if (['USER', 'PREGEN'].includes(obj.type as string)) {
     obj.isPregen = obj.type === 'PREGEN';
-    obj.type = obj.scheme === WalletScheme.ED25519 ? WalletType.SOLANA : WalletType.EVM;
+    obj.type = obj.scheme === 'ED25519' ? 'SOLANA' : 'EVM';
   }
 
   if (!!obj.scheme && !obj.type) {
-    obj.type = obj.scheme === WalletScheme.ED25519 ? WalletType.SOLANA : WalletType.EVM;
+    obj.type = obj.scheme === 'ED25519' ? 'SOLANA' : 'EVM';
   }
 
   return obj as unknown as Wallet;

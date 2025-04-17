@@ -5,7 +5,7 @@ import { useModalStore } from '../../stores/index.js';
 import styled from 'styled-components';
 import { useCopyToClipboard } from '@getpara/react-common';
 import { ModalStep } from '../../utils/steps.js';
-import { isMobile, isTablet, WalletType } from '@getpara/web-sdk';
+import { isMobile, isTablet } from '@getpara/web-sdk';
 import { routeMobileExternalWallet } from '../../utils/routeMobileExternalWallet.js';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 
@@ -91,10 +91,10 @@ export const ExternalWalletStep = () => {
     }
     if (showMobile) {
       // If Solana wallet or if on a mobile and NOT on a table, show the connection screen. Else show the QR code.
-      if (wallet.type === WalletType.SOLANA || (isMobile() && !isTablet())) {
+      if (wallet.type === 'SOLANA' || (isMobile() && !isTablet())) {
         // Checking if the wallet is installed only for Solana wallets since Solana MWA doesn't work on IOS Safari
         // https://docs.solanamobile.com/web/developing-for-web#ios-web
-        const isInstalled = wallet.type !== WalletType.SOLANA || wallet.installed;
+        const isInstalled = wallet.type !== 'SOLANA' || wallet.installed;
         return (
           <>
             <InnerStepContainer>

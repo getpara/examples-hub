@@ -8,8 +8,7 @@ import {
   PrimaryAuthInfo,
   toPregenTypeAndId,
   WalletEntity,
-  WalletScheme,
-  WalletType,
+  TWalletType,
 } from '@getpara/user-management-client';
 import { PARTNER, USER_CUSTOM_ID, USER_EMAIL, USER_ID, USER_PHONE, WALLET } from './constants';
 import { expect } from 'vitest';
@@ -28,7 +27,7 @@ export const getWallet = ({
   type,
   partnerId,
 }: {
-  type: WalletType;
+  type: TWalletType;
   address?: string;
   publicKey?: string;
   id?: string;
@@ -44,20 +43,20 @@ export const getWallet = ({
     publicKey: publicKey ?? faker.string.alphanumeric(64),
     ...(() => {
       switch (type) {
-        case WalletType.EVM:
+        case 'EVM':
           return {
-            type: WalletType.EVM,
-            scheme: WalletScheme.DKLS,
+            type: 'EVM',
+            scheme: 'DKLS',
           };
-        case WalletType.SOLANA:
+        case 'SOLANA':
           return {
-            type: WalletType.SOLANA,
-            scheme: WalletScheme.ED25519,
+            type: 'SOLANA',
+            scheme: 'ED25519',
           };
-        case WalletType.COSMOS:
+        case 'COSMOS':
           return {
-            type: WalletType.COSMOS,
-            scheme: WalletScheme.DKLS,
+            type: 'COSMOS',
+            scheme: 'DKLS',
           };
       }
     })(),
@@ -153,21 +152,21 @@ export async function prepareMockSession({
       : [
           ...(!withoutAuth
             ? [
-                getWallet({ id: evmId, address: evmAddress, publicKey: evmPublicKey, type: WalletType.EVM, partnerId }),
-                getWallet({ id: solanaId, address: solanaAddress, type: WalletType.SOLANA, partnerId }),
+                getWallet({ id: evmId, address: evmAddress, publicKey: evmPublicKey, type: 'EVM', partnerId }),
+                getWallet({ id: solanaId, address: solanaAddress, type: 'SOLANA', partnerId }),
               ]
             : []),
           ...(!excludePregen
             ? [
                 getWallet({
                   id: evmPregenId,
-                  type: WalletType.EVM,
+                  type: 'EVM',
                   partnerId,
                   auth: authInfo.authType === 'email' ? emailAuth : phoneAuth,
                 }),
                 getWallet({
                   id: solanaPregenId,
-                  type: WalletType.SOLANA,
+                  type: 'SOLANA',
                   partnerId,
                   auth: authInfo.authType === 'email' ? emailAuth : phoneAuth,
                 }),
@@ -175,21 +174,21 @@ export async function prepareMockSession({
             : []),
           ...(!excludeUnclaimed
             ? [
-                getWallet({ id: evmPregenUnclaimedId, type: WalletType.EVM, partnerId, auth: customIdAuth }),
-                getWallet({ id: solanaPregenUnclaimedId, type: WalletType.SOLANA, partnerId, auth: customIdAuth }),
+                getWallet({ id: evmPregenUnclaimedId, type: 'EVM', partnerId, auth: customIdAuth }),
+                getWallet({ id: solanaPregenUnclaimedId, type: 'SOLANA', partnerId, auth: customIdAuth }),
               ]
             : []),
           ...(!excludeUnclaimable
             ? [
                 getWallet({
                   id: evmPregenUnclaimableId,
-                  type: WalletType.EVM,
+                  type: 'EVM',
                   partnerId,
                   auth: authInfo.authType === 'email' ? phoneAuth : emailAuth,
                 }),
                 getWallet({
                   id: solanaPregenUnclaimableId,
-                  type: WalletType.SOLANA,
+                  type: 'SOLANA',
                   partnerId,
                   auth: authInfo.authType === 'email' ? phoneAuth : emailAuth,
                 }),
@@ -202,7 +201,7 @@ export async function prepareMockSession({
     ? {
         [externalWalletAddress]: getWallet({
           id: faker.string.uuid(),
-          type: WalletType.EVM,
+          type: 'EVM',
           address: externalWalletAddress,
           partnerId,
         }),
@@ -212,10 +211,7 @@ export async function prepareMockSession({
   const sessionInfo = {
     ...(withoutAuth ? {} : { authInfo, userId: USER_ID }),
     wallets,
-    currentWalletIds:
-      excludeAll || withoutAuth
-        ? {}
-        : { [WalletType.EVM]: [evmId], [WalletType.COSMOS]: [evmId], [WalletType.SOLANA]: [solanaId] },
+    currentWalletIds: excludeAll || withoutAuth ? {} : { EVM: [evmId], COSMOS: [evmId], SOLANA: [solanaId] },
     sessionCookie: 'session-cookie',
     externalWallets,
   };

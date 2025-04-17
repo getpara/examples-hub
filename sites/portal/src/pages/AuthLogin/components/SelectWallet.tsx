@@ -5,7 +5,7 @@ import { SaveRecoverySecret } from '@getpara/react-sdk';
 import { formatDistanceToNowStrict, parseISO } from 'date-fns';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { PARA_CONNECT_DOMAINS } from '../../../constants';
-import { Wallet, WalletType, CurrentWalletIds, WalletEntity, PartnerEntity, SupportedWalletTypes } from '@getpara/web-sdk';
+import { Wallet, TWalletType, CurrentWalletIds, WalletEntity, PartnerEntity, SupportedWalletTypes } from '@getpara/web-sdk';
 import { usePara } from '../../../components/ParaContext';
 import { useLogin } from './LoginProvider';
 import { ConnectDiagram, ParaIcon, HERO_HEIGHT, LayoutWithHero, PartnerIcon as PartnerIconRoot } from '../../../components';
@@ -15,7 +15,7 @@ import { CenteredText } from '@getpara/react-common';
 const GRADIENT = `linear-gradient(to right, #fe5330, #9400db)`;
 
 interface WalletButtonProps {
-  addressType: WalletType;
+  addressType: TWalletType;
   wallet: Wallet | WalletEntity;
   disabled?: boolean;
   onClick?: () => void;
@@ -24,12 +24,12 @@ interface WalletButtonProps {
   isSelected?: boolean;
 }
 
-type NewWallets = Partial<Record<WalletType, Wallet[]>>;
+type NewWallets = Partial<Record<TWalletType, Wallet[]>>;
 
-const WALLET_GROUPS: Record<WalletType, [string, IconType]> = {
-  [WalletType.EVM]: ['Ethereum', 'ethereum'],
-  [WalletType.SOLANA]: ['Solana', 'solana'],
-  [WalletType.COSMOS]: ['Cosmos', 'cosmos'],
+const WALLET_GROUPS: Record<TWalletType, [string, IconType]> = {
+  EVM: ['Ethereum', 'ethereum'],
+  SOLANA: ['Solana', 'solana'],
+  COSMOS: ['Cosmos', 'cosmos'],
 };
 
 const successIcon = (
@@ -192,7 +192,7 @@ export const SelectWallet = ({
   const onSubmit = useCallback(
     async (walletIds: CurrentWalletIds) => {
       setIsConnecting(true);
-      const toCreate = Object.keys(walletIds).filter(type => walletIds[type][0] === 'CREATE_NEW') as WalletType[];
+      const toCreate = Object.keys(walletIds).filter(type => walletIds[type][0] === 'CREATE_NEW') as TWalletType[];
       if (toCreate.length > 0) {
         if (!para.ctx.apiKey) {
           return;
@@ -259,7 +259,7 @@ export const SelectWallet = ({
                 {wallets.map(wallet =>
                   wallet ? (
                     <WalletButton
-                      addressType={walletType as WalletType}
+                      addressType={walletType as TWalletType}
                       key={`${wallet.id}-${walletType}`}
                       wallet={wallet}
                       disabled

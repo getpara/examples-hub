@@ -2,7 +2,7 @@ import { IconType } from '@getpara/react-components';
 import {
   AuthLayout,
   ParaModalProps,
-  OAuthMethod,
+  TOAuthMethod,
   ExternalWallet as SDKExternalWallet,
   TExternalWallet,
 } from '@getpara/react-sdk';
@@ -13,7 +13,7 @@ export type TAuthLayout = `${AuthLayout}`;
 export type ViewType = 'desktop' | 'mobile' | 'code';
 export type AuthSectionId = 'web2' | 'web3';
 
-export type AuthMethod = OAuthMethod | 'email-auth' | 'phone-auth';
+export type AuthMethod = TOAuthMethod | 'email-auth' | 'phone-auth';
 
 export type ExternalWallet = keyof typeof SDKExternalWallet;
 

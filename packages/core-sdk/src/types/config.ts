@@ -4,8 +4,8 @@ import Client, {
   Network,
   OnRampAsset,
   OnRampProvider,
-  WalletScheme,
-  WalletType,
+  TWalletScheme,
+  TWalletType,
 } from '@getpara/user-management-client';
 import { Theme } from './theme.js';
 
@@ -40,13 +40,9 @@ export type deprecated__NetworkProp = keyof typeof Network | Network;
 
 export type deprecated__OnRampProviderProp = keyof typeof OnRampProvider | OnRampProvider;
 
-export type WalletTypeProp = keyof typeof WalletType | WalletType;
-
-export type WalletSchemeProp = keyof typeof WalletScheme | WalletScheme;
-
 export type WalletFilters = {
-  type?: WalletTypeProp[];
-  scheme?: WalletSchemeProp[];
+  type?: TWalletType[];
+  scheme?: TWalletScheme[];
   forbidPregen?: boolean;
 };
 

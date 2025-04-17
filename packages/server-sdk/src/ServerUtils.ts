@@ -1,4 +1,4 @@
-import type { Ctx, SignatureRes, PlatformUtils, TPregenIdentifierType, WalletType } from '@getpara/core-sdk';
+import type { Ctx, SignatureRes, PlatformUtils, TPregenIdentifierType, TWalletType } from '@getpara/core-sdk';
 import { BackupKitEmailProps } from '@getpara/user-management-client';
 import { ServerLocalStorage } from './ServerLocalStorage.js';
 import { ServerSessionStorage } from './ServerSessionStorage.js';
@@ -14,7 +14,7 @@ export class ServerUtils implements PlatformUtils {
   keygen(
     ctx: Ctx,
     userId: string,
-    type: Exclude<WalletType, WalletType.SOLANA>,
+    type: Exclude<TWalletType, 'SOLANA'>,
     secretKey: string | null,
     sessionCookie: string,
     emailProps?: BackupKitEmailProps,
@@ -44,7 +44,7 @@ export class ServerUtils implements PlatformUtils {
     partnerId: string,
     pregenIdentifier: string,
     pregenIdentifierType: TPregenIdentifierType,
-    type: Exclude<WalletType, WalletType.SOLANA>,
+    type: Exclude<TWalletType, 'SOLANA'>,
     secretKey: string | null, // should be acceptable as null in RN as we don't pre-gen them
     sessionCookie: string,
   ): Promise<{

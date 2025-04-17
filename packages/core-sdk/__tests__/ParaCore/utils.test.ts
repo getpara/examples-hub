@@ -2,7 +2,7 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MockPara } from '../mocks/mockParaCore';
 import { getWorkerContent, prepareMock } from '../utils';
 import { API_KEY, USER_EMAIL, USER_ID } from '../constants';
-import { Environment, Wallet, WalletType } from '../../src';
+import { Environment, Wallet } from '../../src';
 import { faker } from '@faker-js/faker';
 
 describe('ParaCore - utils', () => {
@@ -39,9 +39,9 @@ describe('ParaCore - utils', () => {
 
         expect(para.findWalletId()).toStrictEqual(evmId);
 
-        expect(para.findWalletId(undefined, { type: [WalletType.EVM] })).toStrictEqual(evmId);
+        expect(para.findWalletId(undefined, { type: ['EVM'] })).toStrictEqual(evmId);
 
-        expect(para.findWalletId(undefined, { type: [WalletType.SOLANA] })).toStrictEqual(solanaId);
+        expect(para.findWalletId(undefined, { type: ['SOLANA'] })).toStrictEqual(solanaId);
       });
 
       describe('pregen wallets present', () => {
@@ -59,9 +59,9 @@ describe('ParaCore - utils', () => {
 
           expect(para.findWalletId()).toStrictEqual(evmPregenUnclaimedId);
 
-          expect(para.findWalletId(undefined, { type: [WalletType.EVM] })).toStrictEqual(evmPregenUnclaimedId);
+          expect(para.findWalletId(undefined, { type: ['EVM'] })).toStrictEqual(evmPregenUnclaimedId);
 
-          expect(para.findWalletId(undefined, { type: [WalletType.SOLANA] })).toStrictEqual(solanaPregenUnclaimedId);
+          expect(para.findWalletId(undefined, { type: ['SOLANA'] })).toStrictEqual(solanaPregenUnclaimedId);
 
           expect(() => para.findWalletId(undefined, { forbidPregen: true })).toThrow();
         });
@@ -74,33 +74,33 @@ describe('ParaCore - utils', () => {
 
       expect(para.findWalletId(evmId)).toStrictEqual(evmId);
 
-      expect(() => para.findWalletId(evmId, { type: [WalletType.SOLANA] })).toThrow();
+      expect(() => para.findWalletId(evmId, { type: ['SOLANA'] })).toThrow();
 
       expect(para.findWalletId(solanaId)).toStrictEqual(solanaId);
 
-      expect(() => para.findWalletId(solanaId, { type: [WalletType.EVM] })).toThrow();
+      expect(() => para.findWalletId(solanaId, { type: ['EVM'] })).toThrow();
 
       expect(para.findWalletId(evmPregenId)).toStrictEqual(evmPregenId);
 
-      expect(() => para.findWalletId(evmPregenId, { type: [WalletType.SOLANA] })).toThrow();
+      expect(() => para.findWalletId(evmPregenId, { type: ['SOLANA'] })).toThrow();
 
       expect(() => para.findWalletId(evmPregenId, { forbidPregen: true })).toThrow();
 
       expect(para.findWalletId(solanaPregenId)).toStrictEqual(solanaPregenId);
 
-      expect(() => para.findWalletId(solanaPregenId, { type: [WalletType.EVM] })).toThrow();
+      expect(() => para.findWalletId(solanaPregenId, { type: ['EVM'] })).toThrow();
 
       expect(() => para.findWalletId(solanaPregenId, { forbidPregen: true })).toThrow();
 
       expect(para.findWalletId(evmPregenUnclaimedId)).toStrictEqual(evmPregenUnclaimedId);
 
-      expect(() => para.findWalletId(evmPregenUnclaimedId, { type: [WalletType.SOLANA] })).toThrow();
+      expect(() => para.findWalletId(evmPregenUnclaimedId, { type: ['SOLANA'] })).toThrow();
 
       expect(() => para.findWalletId(evmPregenUnclaimedId, { forbidPregen: true })).toThrow();
 
       expect(para.findWalletId(solanaPregenUnclaimedId)).toStrictEqual(solanaPregenUnclaimedId);
 
-      expect(() => para.findWalletId(solanaPregenUnclaimedId, { type: [WalletType.EVM] })).toThrow();
+      expect(() => para.findWalletId(solanaPregenUnclaimedId, { type: ['EVM'] })).toThrow();
 
       expect(() => para.findWalletId(solanaPregenUnclaimedId, { forbidPregen: true })).toThrow();
 
@@ -117,7 +117,7 @@ describe('ParaCore - utils', () => {
     expect(wallet.id).toEqual(solanaId);
 
     expect(() => para.findWalletByAddress('notAnAddress')).toThrowError();
-    expect(() => para.findWalletByAddress(solanaAddress, { type: [WalletType.EVM] })).toThrowError(
+    expect(() => para.findWalletByAddress(solanaAddress, { type: ['EVM'] })).toThrowError(
       `wallet with id ${solanaId} and type SOLANA cannot be selected`,
     );
   });
@@ -126,12 +126,12 @@ describe('ParaCore - utils', () => {
     const { evmId, solanaId, evmPregenId, solanaPregenId, evmPregenUnclaimedId, solanaPregenUnclaimedId } =
       await prepareMock(para, { excludeUnclaimable: true });
 
-    expect(para.getWalletsByType(WalletType.EVM)).toMatchObject([
+    expect(para.getWalletsByType('EVM')).toMatchObject([
       para.wallets[evmId],
       para.wallets[evmPregenId],
       para.wallets[evmPregenUnclaimedId],
     ]);
-    expect(para.getWalletsByType(WalletType.SOLANA)).toMatchObject([
+    expect(para.getWalletsByType('SOLANA')).toMatchObject([
       para.wallets[solanaId],
       para.wallets[solanaPregenId],
       para.wallets[solanaPregenUnclaimedId],
@@ -147,7 +147,7 @@ describe('ParaCore - utils', () => {
     expect(wallet.id).toEqual(solanaId);
 
     expect(() => para.findWalletByAddress('notAnAddress')).toThrowError();
-    expect(() => para.findWalletByAddress(solanaAddress, { type: [WalletType.EVM] })).toThrowError(
+    expect(() => para.findWalletByAddress(solanaAddress, { type: ['EVM'] })).toThrowError(
       `wallet with id ${solanaId} and type SOLANA cannot be selected`,
     );
   });
@@ -202,7 +202,7 @@ describe('ParaCore - utils', () => {
 
       expect(para.getIdenticonHash(evmId)).toBe(`${evmId}-${evmAddress}-EVM`);
 
-      expect(para.getIdenticonHash(evmId, WalletType.COSMOS)).toBe(`${evmId}-${evmAddress}-COSMOS`);
+      expect(para.getIdenticonHash(evmId, 'COSMOS')).toBe(`${evmId}-${evmAddress}-COSMOS`);
     });
 
     it('Solana', async () => {
@@ -258,7 +258,7 @@ describe('ParaCore - utils', () => {
     const externalWallet = {
       id: 'external-wallet-id',
       signer: 'external-signer-secret',
-      type: WalletType.EVM,
+      type: 'EVM',
       address: '0xexternal',
     };
 

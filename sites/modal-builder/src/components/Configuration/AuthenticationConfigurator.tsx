@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import {
-  OAuthMethod,
+  TOAuthMethod,
   ExternalWallet as SDKExternalWallet,
   EvmWallet,
   SolanaWallet,
   CosmosWallet,
   Network,
+  OAUTH_METHODS,
 } from '@getpara/react-sdk';
 import { AUTH_METHOD_CONFIGS, EXTERNAL_WALLET_CONFIGS, ALL_AUTH_METHODS, ALL_EXTERNAL_WALLETS } from '../../constants';
 import { AuthMethod, ExternalWallet, AuthSectionId, TAuthLayout } from '../../types';
@@ -124,7 +125,7 @@ export const AuthenticationConfigurator: React.FC = () => {
         } else {
           newAuthConfig.disableEmailLogin = false;
           newAuthConfig.disablePhoneLogin = false;
-          newAuthConfig.oAuthMethods = [OAuthMethod.GOOGLE];
+          newAuthConfig.oAuthMethods = ['GOOGLE'];
           if (!(newAuthConfig.authLayout ?? []).some(l => l === 'AUTH:FULL' || l === 'AUTH:CONDENSED')) {
             newAuthConfig.authLayout = ['AUTH:FULL' as TAuthLayout, ...(newAuthConfig.authLayout ?? [])];
           }
@@ -177,9 +178,9 @@ export const AuthenticationConfigurator: React.FC = () => {
       newAuthConfig.disableEmailLogin ? null : 'email-auth',
       newAuthConfig.disablePhoneLogin ? null : 'phone-auth',
       ...(newAuthConfig.oAuthMethods ?? []),
-    ].filter(Boolean) as (string | OAuthMethod)[];
+    ].filter(Boolean) as (string | TOAuthMethod)[];
     const isWeb2Method =
-      method === 'email-auth' || method === 'phone-auth' || Object.values(OAuthMethod).includes(method as OAuthMethod);
+      method === 'email-auth' || method === 'phone-auth' || OAUTH_METHODS.includes(method as TOAuthMethod);
     const removingLastWeb2 =
       isWeb2Method && currentlyEnabledWeb2Methods.length === 1 && currentlyEnabledWeb2Methods.includes(method);
     if (removingLastWeb2) {
@@ -195,10 +196,10 @@ export const AuthenticationConfigurator: React.FC = () => {
       newAuthConfig.disablePhoneLogin = !newAuthConfig.disablePhoneLogin;
     } else {
       const oAuthSet = new Set(newAuthConfig.oAuthMethods ?? []);
-      if (oAuthSet.has(method as OAuthMethod)) {
-        oAuthSet.delete(method as OAuthMethod);
+      if (oAuthSet.has(method as TOAuthMethod)) {
+        oAuthSet.delete(method as TOAuthMethod);
       } else {
-        oAuthSet.add(method as OAuthMethod);
+        oAuthSet.add(method as TOAuthMethod);
       }
       newAuthConfig.oAuthMethods = Array.from(oAuthSet).sort(
         (a, b) => authMethodsOrder.indexOf(a) - authMethodsOrder.indexOf(b),
@@ -299,11 +300,11 @@ export const AuthenticationConfigurator: React.FC = () => {
   function handleWeb2MethodsReorder(newOrder: AuthMethod[]) {
     const updatedOAuthMethods = newOrder.filter(m => m !== 'email-auth' && m !== 'phone-auth');
     const enabledOAuthSet = new Set(authenticationConfig.oAuthMethods ?? []);
-    const filtered = updatedOAuthMethods.filter(m => enabledOAuthSet.has(m as OAuthMethod));
+    const filtered = updatedOAuthMethods.filter(m => enabledOAuthSet.has(m as TOAuthMethod));
     setAuthMethodsOrder(newOrder);
     setAuthenticationConfig({
       ...authenticationConfig,
-      oAuthMethods: filtered as OAuthMethod[],
+      oAuthMethods: filtered as TOAuthMethod[],
     });
   }
 
@@ -371,7 +372,7 @@ export const AuthenticationConfigurator: React.FC = () => {
                 ? !authenticationConfig.disableEmailLogin
                 : id === 'phone-auth'
                   ? !authenticationConfig.disablePhoneLogin
-                  : (authenticationConfig.oAuthMethods ?? []).includes(id as OAuthMethod)
+                  : (authenticationConfig.oAuthMethods ?? []).includes(id as TOAuthMethod)
             }
             onToggle={() => toggleAuthMethod(id)}
             accordion={false}

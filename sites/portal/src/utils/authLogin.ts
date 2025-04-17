@@ -11,7 +11,7 @@ import {
 } from '@getpara/web-sdk';
 import { ParaPortal } from '../classes/ParaPortal';
 import { ENV } from '../constants';
-import { Auth, PregenIds, PrimaryAuth, WalletScheme } from '@getpara/user-management-client';
+import { Auth, PregenIds, PrimaryAuth } from '@getpara/user-management-client';
 import forge from 'node-forge';
 
 export type PortalAuthParams = {
@@ -149,7 +149,7 @@ export async function authUpdateKeyShares(
   const potentialSharesForPartnerToDecrypt = encryptedShares
     .filter(share => !para.currentWalletIds || para.currentWalletIdsUnique.includes(share.walletId))
     .filter(share => {
-      return share.walletScheme !== WalletScheme.DKLS || share.partnerId === partnerId;
+      return share.walletScheme !== 'DKLS' || share.partnerId === partnerId;
     });
 
   const sharesForPartnerToDecrypt = [];
@@ -157,7 +157,7 @@ export async function authUpdateKeyShares(
   // or if there are more, ensure it has a protocolId, otherwise we will refresh to ensure the refreshed share
   // has a protocolId
   potentialSharesForPartnerToDecrypt.forEach(share => {
-    if (share.walletScheme === WalletScheme.DKLS && share.partnerId === partnerId && tooManyKeySharesForSomePartner) {
+    if (share.walletScheme === 'DKLS' && share.partnerId === partnerId && tooManyKeySharesForSomePartner) {
       if (sharesForPartnerToDecrypt.some(s => s.walletId === share.walletId)) {
         return;
       }
@@ -236,7 +236,7 @@ export async function authUpdateKeyShares(
   // find the decrypted shares that are only relevant for the app being logged into
   // (decrypted shares with current partnerId and the newly refreshed shares)
   const decryptedSharesForApp = [
-    ...decryptedShares.filter(share => share.walletScheme !== WalletScheme.DKLS || share.partnerId === partnerId),
+    ...decryptedShares.filter(share => share.walletScheme !== 'DKLS' || share.partnerId === partnerId),
     ...refreshedShares,
   ];
 

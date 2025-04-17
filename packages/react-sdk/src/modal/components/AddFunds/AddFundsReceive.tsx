@@ -8,7 +8,7 @@ import {
   CpslText,
 } from '@getpara/react-components';
 import { CenteredText, FilledDisabledInput, InnerStepContainer, QRContainer } from '../common.js';
-import { isMobile, WalletType } from '@getpara/web-sdk';
+import { isMobile } from '@getpara/web-sdk';
 import { useModalStore } from '../../stores/index.js';
 import { useStore } from '../../../provider/stores/useStore.js';
 import { useCopyToClipboard } from '@getpara/react-common';
@@ -19,9 +19,9 @@ import { formatNetworkList } from '../../utils/stringFormatters.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 
 const GENERIC_WALLET = {
-  [WalletType.EVM]: 'Ethereum or EVM-based L2s',
-  [WalletType.SOLANA]: 'Solana',
-  [WalletType.COSMOS]: 'Cosmos',
+  EVM: 'Ethereum or EVM-based L2s',
+  SOLANA: 'SOLANA',
+  COSMOS: 'COSMOS',
 };
 
 export function AddFundsReceive() {

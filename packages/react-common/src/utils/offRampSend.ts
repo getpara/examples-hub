@@ -1,5 +1,5 @@
 import { OnRampPurchaseUpdateParams } from '@getpara/user-management-client';
-import Para, { hexStringToBase64, OnRampPurchase, SuccessfulSignatureRes, WalletType } from '@getpara/web-sdk';
+import Para, { hexStringToBase64, OnRampPurchase, SuccessfulSignatureRes } from '@getpara/web-sdk';
 
 export async function offRampSend(
   para: Para,
@@ -37,7 +37,7 @@ export async function offRampSend(
 
     let signature: string | undefined;
     switch (walletType) {
-      case WalletType.EVM:
+      case 'EVM':
         signature = (
           (await para.signTransaction({
             walletId,
@@ -47,7 +47,7 @@ export async function offRampSend(
         )?.signature;
         break;
 
-      case WalletType.SOLANA:
+      case 'SOLANA':
         signature = ((await para.signMessage({ walletId, messageBase64: message })) as SuccessfulSignatureRes)?.signature;
         break;
 

@@ -1,16 +1,26 @@
 import { PartnerEntity } from './partner.js';
 
+/** @deprecated use the string union type `TWalletScheme` instead */
 export enum WalletScheme {
   DKLS = 'DKLS',
   CGGMP = 'CGGMP',
   ED25519 = 'ED25519',
 }
 
+export const WALLET_SCHEMES = ['DKLS', 'CGGMP', 'ED25519'] as const;
+
+export type TWalletScheme = (typeof WALLET_SCHEMES)[number];
+
+/** @deprecated use the string union type `TWalletType` instead */
 export enum WalletType {
   EVM = 'EVM',
   SOLANA = 'SOLANA',
   COSMOS = 'COSMOS',
 }
+
+export const WALLET_TYPES = ['EVM', 'SOLANA', 'COSMOS'] as const;
+
+export type TWalletType = (typeof WALLET_TYPES)[number];
 
 export enum Chain {
   ETH = 'ETH',
@@ -36,9 +46,9 @@ export type WalletRef = 'walletId' | 'externalWalletAddress';
 
 export type WalletParams = Partial<{ walletId?: string; externalWalletAddress?: string }>;
 
-export type EmbeddedWalletType = Exclude<WalletType, never>;
+export type EmbeddedWalletType = Exclude<TWalletType, never>;
 
-export type ExternalWalletType = Exclude<WalletType, never>;
+export type ExternalWalletType = Exclude<TWalletType, never>;
 
 export const PREGEN_IDENTIFIER_TYPES = [
   'EMAIL',
@@ -67,7 +77,7 @@ export interface WalletEntity {
   partner?: PartnerEntity;
   publicKey: string | null;
   scheme: string;
-  type: WalletType;
+  type: TWalletType;
   updatedAt: string;
   userId: string | null;
   lastUsedAt: string | null;
@@ -77,8 +87,8 @@ export interface WalletEntity {
   ensAvatar?: string | null;
 }
 
-export type CurrentWalletIds = Partial<Record<WalletType, string[]>>;
+export type CurrentWalletIds = Partial<Record<TWalletType, string[]>>;
 
-export const NON_ED25519 = [WalletScheme.DKLS, WalletScheme.CGGMP];
+export const NON_ED25519 = ['DKLS', 'CGGMP'];
 
-export type SupportedWalletTypes = { type: WalletType; optional?: boolean }[];
+export type SupportedWalletTypes = { type: TWalletType; optional?: boolean }[];

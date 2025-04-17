@@ -1,7 +1,5 @@
-import { WalletType } from '@getpara/web-sdk';
-
 export const EXTERNAL_WALLET_PACKAGE_BY_TYPE = {
-  [WalletType.EVM]: 'Wagmi',
-  [WalletType.COSMOS]: 'Graz',
-  [WalletType.SOLANA]: '@solana/wallet-adapter-react',
+  EVM: 'Wagmi',
+  COSMOS: 'Graz',
+  SOLANA: '@solana/wallet-adapter-react',
 };

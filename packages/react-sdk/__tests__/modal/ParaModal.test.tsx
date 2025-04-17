@@ -1,7 +1,7 @@
 import { beforeAll, afterAll, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import Para, { Environment, OAuthMethod, ParaProvider, setIsOpen } from '../../src/index.js';
-import { OnRampAssetInfo, OnRampConfig } from '@getpara/user-management-client';
+import Para, { Environment, ParaProvider, setIsOpen } from '../../src/index.js';
+import { OnRampAssetInfo } from '@getpara/user-management-client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const queryClient = new QueryClient();
@@ -26,7 +26,7 @@ describe('ParaModal', () => {
             getPartner: vi.fn(() => ({ data: {} })),
             createUser: vi.fn(() => ({ userId: '123' })),
             touchSession: vi.fn(() => ({})),
-            getOnRampConfig: vi.fn<never, Promise<OnRampConfig>>(async () => ({
+            getOnRampConfig: vi.fn(async () => ({
               isBuyEnabled: false,
               isReceiveEnabled: false,
               isWithdrawEnabled: false,
@@ -66,7 +66,7 @@ describe('ParaModal', () => {
           paraClientConfig={para}
           config={{ appName: 'App Name' }}
           paraModalConfig={{
-            oAuthMethods: [OAuthMethod.GOOGLE, OAuthMethod.FACEBOOK, OAuthMethod.APPLE],
+            oAuthMethods: ['GOOGLE', 'FACEBOOK', 'APPLE'],
           }}
         />
       </QueryClientProvider>,
@@ -98,7 +98,7 @@ describe('ParaModal', () => {
   //       isOpen={true}
   //       para={para}
   //       appName="App Name"
-  //       oAuthMethods={[OAuthMethod.GOOGLE, OAuthMethod.FACEBOOK, OAuthMethod.APPLE]}
+  //       oAuthMethods={['GOOGLE', 'FACEBOOK', 'APPLE']}
   //       onClose={() => {}}
   //     />,
   //   );

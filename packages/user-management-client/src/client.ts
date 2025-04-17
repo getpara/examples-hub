@@ -47,8 +47,8 @@ import {
   VerifyThirdPartyAuth,
   WalletEntity,
   WalletParams,
-  WalletScheme,
-  WalletType,
+  TWalletScheme,
+  TWalletType,
   VerifyExternalWalletParams,
 } from './types/index.js';
 import { extractWalletRef, fromAccountMetadata } from './utils.js';
@@ -145,8 +145,8 @@ interface PasswordEntity {
 
 interface createWalletBody {
   useTwoSigners?: boolean;
-  scheme: WalletScheme;
-  type: WalletType;
+  scheme: TWalletScheme;
+  type: TWalletType;
   cosmosPrefix?: string;
 }
 
@@ -167,8 +167,8 @@ interface GetWalletBalanceRes {
 interface createPregenWalletBody {
   pregenIdentifier: string;
   pregenIdentifierType: TPregenIdentifierType;
-  scheme?: WalletScheme;
-  type: WalletType;
+  scheme?: TWalletScheme;
+  type: TWalletType;
   cosmosPrefix?: string;
 }
 
@@ -621,7 +621,7 @@ class Client {
     userId: string,
     walletId: string,
     message: string,
-    scheme?: WalletScheme,
+    scheme?: TWalletScheme,
     cosmosSignDoc?: string,
   ): Promise<any> => {
     const body = { message, scheme, cosmosSignDoc };
@@ -905,7 +905,7 @@ class Client {
       externalWalletAddress,
     }: {
       url: string;
-      type: WalletType;
+      type: TWalletType;
       cosmosPrefix: string;
       testMode?: boolean;
       walletId?: string;
@@ -941,7 +941,7 @@ class Client {
       contractAddress?: string;
       testMode?: boolean;
       walletId: string;
-      walletType: WalletType;
+      walletType: TWalletType;
       destinationAddress: string;
       sourceAddress?: string;
       assetQuantity: string | number;
@@ -977,7 +977,7 @@ class Client {
       sourceAddress?: string;
       network: Network;
       walletId: string;
-      walletType: WalletType;
+      walletType: TWalletType;
     },
   ): Promise<ReturnType> {
     const res = await this.baseRequest.post<ReturnType>(`/users/${userId}/wallets/${walletId}/offramp-send`, {

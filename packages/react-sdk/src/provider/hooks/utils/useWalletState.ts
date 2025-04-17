@@ -1,4 +1,4 @@
-import { WalletType } from '@getpara/web-sdk';
+import { TWalletType } from '@getpara/web-sdk';
 import { useStore } from '../../stores/useStore.js';
 import { useClient } from './useClient.js';
 import { useCallback } from 'react';
@@ -14,7 +14,7 @@ export const useWalletState = () => {
   const clearSelectedWallet = useStore(state => state.clearSelectedWallet);
 
   const setSelectedWallet = useCallback(
-    ({ id, type }: { id?: string; type?: WalletType }) => {
+    ({ id, type }: { id?: string; type?: TWalletType }) => {
       try {
         const validId = client?.findWalletId(id, type ? { type: [type] } : undefined);
 

@@ -42,7 +42,7 @@ import {
   mockSendTransaction,
   mockSignMessage,
 } from '../mocks/mockGlobalWalletUtils.js';
-import { Ctx, getBaseMPCNetworkUrl, WalletScheme, WalletType } from '@getpara/core-sdk';
+import { Ctx, getBaseMPCNetworkUrl } from '@getpara/core-sdk';
 import {
   mockCreateWallet,
   mockcreatePregenWallet,
@@ -66,8 +66,8 @@ describe('walletUtils', () => {
       expect(resp).toStrictEqual({ signer: WALLET.signer, walletId: WALLET.id });
       expect(mockCreateWallet).toBeCalledTimes(1);
       expect(mockCreateWallet).toBeCalledWith(USER.id, {
-        scheme: WalletScheme.ED25519,
-        type: WalletType.SOLANA,
+        scheme: 'ED25519',
+        type: 'SOLANA',
       });
       expect(mockEd25519CreateAccount).toBeCalledTimes(1);
       expect(mockEd25519CreateAccount).toBeCalledWith(
@@ -87,8 +87,8 @@ describe('walletUtils', () => {
       );
       expect(mockCreateWallet).toBeCalledTimes(1);
       expect(mockCreateWallet).toBeCalledWith(USER.id, {
-        scheme: WalletScheme.ED25519,
-        type: WalletType.SOLANA,
+        scheme: 'ED25519',
+        type: 'SOLANA',
       });
       expect(mockEd25519CreateAccount).toBeCalledTimes(1);
       expect(mockEd25519CreateAccount).toBeCalledWith(
@@ -108,8 +108,8 @@ describe('walletUtils', () => {
       expect(mockcreatePregenWallet).toBeCalledWith({
         pregenIdentifier: USER.email,
         pregenIdentifierType: 'EMAIL',
-        scheme: WalletScheme.ED25519,
-        type: WalletType.SOLANA,
+        scheme: 'ED25519',
+        type: 'SOLANA',
       });
       expect(mockEd25519CreateAccount).toBeCalledTimes(1);
       expect(mockEd25519CreateAccount).toBeCalledWith(
@@ -131,8 +131,8 @@ describe('walletUtils', () => {
       expect(mockcreatePregenWallet).toBeCalledWith({
         pregenIdentifier: USER.email,
         pregenIdentifierType: 'EMAIL',
-        scheme: WalletScheme.ED25519,
-        type: WalletType.SOLANA,
+        scheme: 'ED25519',
+        type: 'SOLANA',
       });
       expect(mockEd25519CreateAccount).toBeCalledTimes(1);
       expect(mockEd25519CreateAccount).toBeCalledWith(
@@ -149,7 +149,7 @@ describe('walletUtils', () => {
 
       expect(resp).toStrictEqual({ signature: BASE64_SIGNATURE });
       expect(mockPreSignMessage).toBeCalledTimes(1);
-      expect(mockPreSignMessage).toBeCalledWith(USER.id, WALLET.id, BASE64_BYTES, WalletScheme.ED25519);
+      expect(mockPreSignMessage).toBeCalledWith(USER.id, WALLET.id, BASE64_BYTES, 'ED25519');
       expect(mockEd25519Sign).toBeCalledTimes(1);
       expect(mockEd25519Sign).toBeCalledWith(WALLET.share, WALLET.protocolId, BASE64_BYTES, expect.any(Function));
     });
@@ -162,7 +162,7 @@ describe('walletUtils', () => {
         `error signing for account of type SOLANA with userId ${USER.id} and walletId ${WALLET.id}`,
       );
       expect(mockPreSignMessage).toBeCalledTimes(1);
-      expect(mockPreSignMessage).toBeCalledWith(USER.id, WALLET.id, BASE64_BYTES, WalletScheme.ED25519);
+      expect(mockPreSignMessage).toBeCalledWith(USER.id, WALLET.id, BASE64_BYTES, 'ED25519');
       expect(mockEd25519Sign).toBeCalledTimes(1);
       expect(mockEd25519Sign).toBeCalledWith(WALLET.share, WALLET.protocolId, BASE64_BYTES, expect.any(Function));
     });
@@ -170,14 +170,14 @@ describe('walletUtils', () => {
   describe('keygen', () => {
     describe('success', () => {
       it('EVM', async () => {
-        const resp = await keygen(TEST_CTX, USER.id, WalletType.EVM, SECRET_KEY);
+        const resp = await keygen(TEST_CTX, USER.id, 'EVM', SECRET_KEY);
 
         expect(resp).toStrictEqual({ signer: WALLET.signer, walletId: WALLET.id });
         expect(mockCreateWallet).toBeCalledTimes(1);
         expect(mockCreateWallet).toBeCalledWith(USER.id, {
           useTwoSigners: true,
-          scheme: WalletScheme.DKLS,
-          type: WalletType.EVM,
+          scheme: 'DKLS',
+          type: 'EVM',
           cosmosPrefix: undefined,
         });
         expect(mockDklsCreateAccount).toBeCalledTimes(1);
@@ -191,14 +191,14 @@ describe('walletUtils', () => {
         );
       });
       it('COSMOS', async () => {
-        const resp = await keygen(TEST_CTX, USER.id, WalletType.COSMOS, SECRET_KEY);
+        const resp = await keygen(TEST_CTX, USER.id, 'COSMOS', SECRET_KEY);
 
         expect(resp).toStrictEqual({ signer: WALLET.signer, walletId: WALLET.id });
         expect(mockCreateWallet).toBeCalledTimes(1);
         expect(mockCreateWallet).toBeCalledWith(USER.id, {
           useTwoSigners: true,
-          scheme: WalletScheme.DKLS,
-          type: WalletType.COSMOS,
+          scheme: 'DKLS',
+          type: 'COSMOS',
           cosmosPrefix: COSMOS_PREFIX,
         });
         expect(mockDklsCreateAccount).toBeCalledTimes(1);
@@ -213,14 +213,14 @@ describe('walletUtils', () => {
       });
       it('no DKLS', async () => {
         const _TEST_CTX: Ctx = { ...TEST_CTX, useDKLS: false, offloadMPCComputationURL: undefined };
-        const resp = await keygen(_TEST_CTX, USER.id, WalletType.EVM, SECRET_KEY);
+        const resp = await keygen(_TEST_CTX, USER.id, 'EVM', SECRET_KEY);
 
         expect(resp).toStrictEqual({ signer: WALLET.signer, walletId: WALLET.id });
         expect(mockCreateWallet).toBeCalledTimes(1);
         expect(mockCreateWallet).toBeCalledWith(USER.id, {
           useTwoSigners: true,
-          scheme: WalletScheme.CGGMP,
-          type: WalletType.EVM,
+          scheme: 'CGGMP',
+          type: 'EVM',
           cosmosPrefix: undefined,
         });
         expect(mockCreateAccountV2).toBeCalledTimes(1);
@@ -235,14 +235,14 @@ describe('walletUtils', () => {
       });
       it('no DKLS with offloadMPCComputationURL', async () => {
         const _TEST_CTX: Ctx = { ...TEST_CTX, useDKLS: false };
-        const resp = await keygen(_TEST_CTX, USER.id, WalletType.EVM, SECRET_KEY);
+        const resp = await keygen(_TEST_CTX, USER.id, 'EVM', SECRET_KEY);
 
         expect(resp).toStrictEqual({ signer: WALLET.signer, walletId: WALLET.id });
         expect(mockCreateWallet).toBeCalledTimes(1);
         expect(mockCreateWallet).toBeCalledWith(USER.id, {
           useTwoSigners: true,
-          scheme: WalletScheme.CGGMP,
-          type: WalletType.EVM,
+          scheme: 'CGGMP',
+          type: 'EVM',
           cosmosPrefix: undefined,
         });
         expect(mockMPCPost).toBeCalledTimes(1);
@@ -260,14 +260,14 @@ describe('walletUtils', () => {
         cb('test error', undefined);
       });
 
-      await expect(keygen(TEST_CTX, USER.id, WalletType.EVM, SECRET_KEY)).rejects.toThrowError(
-        `error creating account of type ${WalletType.EVM} with userId ${USER.id} and walletId ${WALLET.id}`,
+      await expect(keygen(TEST_CTX, USER.id, 'EVM', SECRET_KEY)).rejects.toThrowError(
+        `error creating account of type ${'EVM'} with userId ${USER.id} and walletId ${WALLET.id}`,
       );
       expect(mockCreateWallet).toBeCalledTimes(1);
       expect(mockCreateWallet).toBeCalledWith(USER.id, {
         useTwoSigners: true,
-        scheme: WalletScheme.DKLS,
-        type: WalletType.EVM,
+        scheme: 'DKLS',
+        type: 'EVM',
         cosmosPrefix: undefined,
       });
       expect(mockDklsCreateAccount).toBeCalledTimes(1);
@@ -284,14 +284,14 @@ describe('walletUtils', () => {
   describe('preKeygen', () => {
     describe('success', () => {
       it('EVM', async () => {
-        const resp = await preKeygen(TEST_CTX, PARTNER.id, USER.email, 'EMAIL', WalletType.EVM, SECRET_KEY);
+        const resp = await preKeygen(TEST_CTX, PARTNER.id, USER.email, 'EMAIL', 'EVM', SECRET_KEY);
 
         expect(resp).toStrictEqual({ signer: WALLET.signer, walletId: WALLET.id });
         expect(mockcreatePregenWallet).toBeCalledTimes(1);
         expect(mockcreatePregenWallet).toBeCalledWith({
           pregenIdentifier: USER.email,
           pregenIdentifierType: 'EMAIL',
-          type: WalletType.EVM,
+          type: 'EVM',
           cosmosPrefix: undefined,
         });
         expect(mockDklsCreateAccount).toBeCalledTimes(1);
@@ -305,14 +305,14 @@ describe('walletUtils', () => {
         );
       });
       it('COSMOS', async () => {
-        const resp = await preKeygen(TEST_CTX, PARTNER.id, USER.email, 'EMAIL', WalletType.COSMOS, SECRET_KEY);
+        const resp = await preKeygen(TEST_CTX, PARTNER.id, USER.email, 'EMAIL', 'COSMOS', SECRET_KEY);
 
         expect(resp).toStrictEqual({ signer: WALLET.signer, walletId: WALLET.id });
         expect(mockcreatePregenWallet).toBeCalledTimes(1);
         expect(mockcreatePregenWallet).toBeCalledWith({
           pregenIdentifier: USER.email,
           pregenIdentifierType: 'EMAIL',
-          type: WalletType.COSMOS,
+          type: 'COSMOS',
           cosmosPrefix: COSMOS_PREFIX,
         });
         expect(mockDklsCreateAccount).toBeCalledTimes(1);
@@ -331,14 +331,14 @@ describe('walletUtils', () => {
         cb('test error', undefined);
       });
 
-      await expect(preKeygen(TEST_CTX, PARTNER.id, USER.email, 'EMAIL', WalletType.EVM, SECRET_KEY)).rejects.toThrowError(
-        `error creating account of type ${WalletType.EVM} with walletId ${WALLET.id}`,
+      await expect(preKeygen(TEST_CTX, PARTNER.id, USER.email, 'EMAIL', 'EVM', SECRET_KEY)).rejects.toThrowError(
+        `error creating account of type ${'EVM'} with walletId ${WALLET.id}`,
       );
       expect(mockcreatePregenWallet).toBeCalledTimes(1);
       expect(mockcreatePregenWallet).toBeCalledWith({
         pregenIdentifier: USER.email,
         pregenIdentifierType: 'EMAIL',
-        type: WalletType.EVM,
+        type: 'EVM',
         cosmosPrefix: undefined,
       });
       expect(mockDklsCreateAccount).toBeCalledTimes(1);

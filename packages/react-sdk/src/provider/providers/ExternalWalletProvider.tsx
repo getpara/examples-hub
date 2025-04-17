@@ -6,7 +6,7 @@ import { ModalStep } from '../../modal/index.js';
 import { useModalStore } from '../../modal/stores/index.js';
 import { useVerifyExternalWallet, useWalletState } from '../hooks/index.js';
 import { CommonChain, CommonWallet, TExternalWallet } from '@getpara/react-common';
-import { WalletType, VerifyExternalWalletParams } from '@getpara/user-management-client';
+import { VerifyExternalWalletParams } from '@getpara/user-management-client';
 import { useAuthActions } from './AuthProvider.js';
 
 export const defaultExternalWallet = {
@@ -138,7 +138,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     const walletType = Object.values(para.externalWallets || {})[0]?.type;
 
     switch (walletType) {
-      case WalletType.EVM: {
+      case 'EVM': {
         return await evmGetWalletBalance();
       }
       default: {
@@ -151,10 +151,10 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     const walletType = Object.values(para.externalWallets || {})[0]?.type;
 
     switch (walletType) {
-      case WalletType.COSMOS: {
+      case 'COSMOS': {
         return cosmosChains;
       }
-      case WalletType.EVM: {
+      case 'EVM': {
         return evmChains;
       }
       default: {
@@ -167,10 +167,10 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     const walletType = Object.values(para.externalWallets || {})[0]?.type;
 
     switch (walletType) {
-      case WalletType.COSMOS: {
+      case 'COSMOS': {
         return cosmosChainId;
       }
-      case WalletType.EVM: {
+      case 'EVM': {
         return evmChainId?.toString();
       }
       default: {
@@ -190,12 +190,12 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
         setChainIdSwitchingTo(chainId);
 
         switch (walletType) {
-          case WalletType.COSMOS: {
+          case 'COSMOS': {
             setStep(ModalStep.CHAIN_SWITCH);
             resp = await cosmosSwitchChain(chainId);
             break;
           }
-          case WalletType.EVM: {
+          case 'EVM': {
             setStep(ModalStep.CHAIN_SWITCH);
             resp = await evmSwitchChain(parseInt(chainId));
             break;
@@ -226,7 +226,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     let verifyExternalWalletParams: VerifyExternalWalletParams | undefined;
 
     switch (walletType) {
-      case WalletType.COSMOS:
+      case 'COSMOS':
         {
           const { address, signature, error, cosmosPublicKeyHex, cosmosSigner } = await cosmosSignVerificationMessage();
 
@@ -236,7 +236,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
             // If signature is returned address, cosmosPublicKeyHex and cosmosSigner will also be returned
             verifyExternalWalletParams = {
               externalWallet: {
-                type: WalletType.COSMOS,
+                type: 'COSMOS',
                 address,
               },
               signedMessage: signature,
@@ -246,7 +246,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
           }
         }
         break;
-      case WalletType.EVM:
+      case 'EVM':
         {
           const { signature, error, address } = await evmSignVerificationMessage();
 
@@ -255,7 +255,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
           } else if (signature && address) {
             verifyExternalWalletParams = {
               externalWallet: {
-                type: WalletType.EVM,
+                type: 'EVM',
                 address,
               },
               signedMessage: signature,
@@ -263,7 +263,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
           }
         }
         break;
-      case WalletType.SOLANA:
+      case 'SOLANA':
         {
           const { signature, error, address } = await solanaSignVerificationMessage();
 
@@ -272,7 +272,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
           } else if (signature && address) {
             verifyExternalWalletParams = {
               externalWallet: {
-                type: WalletType.SOLANA,
+                type: 'SOLANA',
                 address,
               },
               signedMessage: signature,
@@ -371,12 +371,12 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     // Show the extension screen if on web and the wallet is an extension and installed or the wallet isn't a mobile wallet
     // Also show the extension connection if on desktop for a solana wallet (no walletConnect)
     showExtension:
-      !isMobile() && ((wallet?.isExtension && wallet?.installed) || !wallet?.isMobile || wallet?.type === WalletType.SOLANA),
+      !isMobile() && ((wallet?.isExtension && wallet?.installed) || !wallet?.isMobile || wallet?.type === 'SOLANA'),
     // Show the mobile screen if on mobile and the wallet is a mobile wallet or if on desktop and the wallet isn't installed
     showMobile: (isMobile() && wallet?.isMobile) || (!isMobile() && !wallet?.installed),
 
-    isSolanaMobileIOS: isIOS() && isMobile() && !isIOSWebview() && wallet?.type === WalletType.SOLANA,
-    isCosmosMobileWallet: wallet?.type === WalletType.COSMOS && !!isUsingMobileConnector,
+    isSolanaMobileIOS: isIOS() && isMobile() && !isIOSWebview() && wallet?.type === 'SOLANA',
+    isCosmosMobileWallet: wallet?.type === 'COSMOS' && !!isUsingMobileConnector,
   };
 
   const username: string | undefined = useMemo(() => {
@@ -386,7 +386,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     if (storedExternalWallet) {
       const walletType = storedExternalWallet?.type;
       switch (walletType) {
-        case WalletType.EVM: {
+        case 'EVM': {
           // If evmUsername is an EVM address, format it, else return it since it should be an ENS name
           username = evmUsername
             ? evmUsername.startsWith('0x')
@@ -413,7 +413,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
 
     if (walletType) {
       switch (walletType) {
-        case WalletType.EVM: {
+        case 'EVM': {
           return evmAvatar;
         }
         default: {
@@ -429,9 +429,9 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
       if (error) {
         console.warn('Failed to connect Para EVM wallet to Wagmi:', error);
       } else {
-        const wallet = para.findWallet(undefined, undefined, { type: [WalletType.EVM] });
+        const wallet = para.findWallet(undefined, undefined, { type: ['EVM'] });
         if (wallet) {
-          setSelectedWallet({ id: wallet.id, type: WalletType.EVM });
+          setSelectedWallet({ id: wallet.id, type: 'EVM' });
         }
       }
     } catch (err) {
@@ -442,9 +442,9 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
       if (error) {
         console.warn('Failed to connect Para Cosmos wallet to Graz:', error);
       } else {
-        const wallet = para.findWallet(undefined, undefined, { type: [WalletType.COSMOS] });
+        const wallet = para.findWallet(undefined, undefined, { type: ['COSMOS'] });
         if (wallet) {
-          setSelectedWallet({ id: wallet.id, type: WalletType.COSMOS });
+          setSelectedWallet({ id: wallet.id, type: 'COSMOS' });
         }
       }
     } catch (err) {

@@ -1,7 +1,7 @@
 import { IconType } from '@getpara/react-components';
-import { OAuthMethod } from '@getpara/web-sdk';
+import { TOAuthMethod } from '@getpara/web-sdk';
 
-export const brandedOAuthLogos: { [key in OAuthMethod]: IconType } = {
+export const brandedOAuthLogos: { [key in TOAuthMethod]: IconType } = {
   GOOGLE: 'googleBrand',
   TWITTER: 'twitter',
   APPLE: 'apple',
@@ -11,7 +11,7 @@ export const brandedOAuthLogos: { [key in OAuthMethod]: IconType } = {
   TELEGRAM: 'telegramBrand',
 };
 
-export const oAuthLogos: { [key in OAuthMethod]: IconType } = {
+export const oAuthLogos: { [key in TOAuthMethod]: IconType } = {
   GOOGLE: 'google',
   TWITTER: 'twitter',
   APPLE: 'apple',

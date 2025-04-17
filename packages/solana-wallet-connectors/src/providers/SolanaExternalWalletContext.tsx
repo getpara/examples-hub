@@ -1,7 +1,7 @@
 import { PropsWithChildren, createContext, useEffect, useMemo, useRef } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Adapter, WalletReadyState } from '@solana/wallet-adapter-base';
-import ParaWeb, { AuthState, WalletType } from '@getpara/web-sdk';
+import ParaWeb, { AuthState } from '@getpara/web-sdk';
 import { WalletList } from '../types/Wallet.js';
 import { TExternalWallet, type CommonWallet } from '@getpara/react-common';
 import bs58 from 'bs58';
@@ -66,7 +66,7 @@ export function SolanaExternalWalletProvider({
       return await para.loginExternalWallet({
         externalWallet: {
           address,
-          type: WalletType.SOLANA,
+          type: 'SOLANA',
           provider: providerName,
           withFullParaAuth: walletsWithFullAuth?.includes(
             (getWallet(providerName ?? '')?.id.toUpperCase() ?? '') as TExternalWallet,
@@ -112,7 +112,7 @@ export function SolanaExternalWalletProvider({
     if (
       !connecting &&
       (!wallet || wallet?.adapter.connected) &&
-      storedExternalWallet?.type === WalletType.SOLANA &&
+      storedExternalWallet?.type === 'SOLANA' &&
       storedExternalWallet?.address !== solanaAddress?.toString()
     ) {
       switchWallet(solanaAddress?.toString());
@@ -127,7 +127,7 @@ export function SolanaExternalWalletProvider({
       return {
         externalWallet: {
           address: solanaAddress.toString(),
-          type: WalletType.SOLANA,
+          type: 'SOLANA',
           provider: wallet?.adapter?.name,
         },
         signature: bs58.encode(signature),
@@ -207,7 +207,7 @@ export function SolanaExternalWalletProvider({
       connect: () => connect(adapter),
       connectMobile: () => connect(adapter),
       getQrUri: () => '',
-      type: WalletType.SOLANA,
+      type: 'SOLANA',
       installed:
         adapter && (adapter?.readyState === WalletReadyState.Installed || adapter?.readyState === WalletReadyState.Loadable),
       ...metaData,

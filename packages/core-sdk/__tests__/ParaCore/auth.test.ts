@@ -57,7 +57,6 @@ import {
   mockGetAccountMetadata,
 } from '../mocks/mockUserManagementClient';
 import { getWallet, prepareMock } from '../utils.js';
-import { WalletType } from '@getpara/user-management-client';
 import { getWorkerContent } from '../utils.js';
 import {
   mockEd25519Keygen,
@@ -171,7 +170,7 @@ const setAuthenticated = ({ evmId, solanaId }: { evmId: string; solanaId: string
     ...SESSION,
     userId: USER_ID,
     isAuthenticated: true,
-    currentWalletIds: { [WalletType.EVM]: [evmId], [WalletType.COSMOS]: [evmId], [WalletType.SOLANA]: [solanaId] },
+    currentWalletIds: { EVM: [evmId], COSMOS: [evmId], SOLANA: [solanaId] },
     needsWallet: false,
   });
 };
@@ -235,7 +234,7 @@ const completeSignup = async (para: MockPara, authInfo: PrimaryAuthInfo, cancel 
   mockEd25519Keygen.mockResolvedValue({ walletId: solanaId, signer: solanaSigner });
   mockGetWallets.mockResolvedValue({
     data: {
-      wallets: [getWallet({ id: evmId, type: WalletType.EVM }), getWallet({ id: solanaId, type: WalletType.SOLANA })],
+      wallets: [getWallet({ id: evmId, type: 'EVM' }), getWallet({ id: solanaId, type: 'SOLANA' })],
     },
   });
 
@@ -310,10 +309,7 @@ const createPregens = async (para: MockPara, auth: PregenAuth): Promise<Wallet[]
     faker.string.alphanumeric(32),
   ];
 
-  const wallets = [
-    getWallet({ id: evmId, auth, type: WalletType.EVM }),
-    getWallet({ id: solanaId, auth, type: WalletType.SOLANA }),
-  ];
+  const wallets = [getWallet({ id: evmId, auth, type: 'EVM' }), getWallet({ id: solanaId, auth, type: 'SOLANA' })];
 
   mockPreKeygen.mockResolvedValue({ walletId: evmId, signer: evmSigner });
   mockEd25519PreKeygen.mockResolvedValue({ walletId: solanaId, signer: solanaSigner });
@@ -321,7 +317,7 @@ const createPregens = async (para: MockPara, auth: PregenAuth): Promise<Wallet[]
 
   await para.createPregenWalletPerType({
     pregenId: auth,
-    types: [WalletType.EVM, WalletType.SOLANA],
+    types: ['EVM', 'SOLANA'],
   });
 
   return wallets.map((wallet, index) => {
@@ -370,8 +366,8 @@ const testInitialLogin = async (para: MockPara, authInfo: PrimaryAuthInfo, cance
 };
 
 const testReturningLogin = async (para: MockPara, authInfo: PrimaryAuthInfo, cancel = false) => {
-  const evmWallet = getWallet({ type: WalletType.EVM });
-  const solanaWallet = getWallet({ type: WalletType.SOLANA });
+  const evmWallet = getWallet({ type: 'EVM' });
+  const solanaWallet = getWallet({ type: 'SOLANA' });
 
   try {
     const { signers } = await completeLogin(para, authInfo, [evmWallet, solanaWallet], cancel);
@@ -778,7 +774,7 @@ describe('ParaCore - authentication', () => {
               return authState;
             };
 
-            ['google', 'apple', 'facebook', 'discord', 'twitter'].forEach(method => {
+            ['GOOGLE', 'APPLE', 'FACEBOOK', 'DISCORD', 'TWITTER'].forEach(method => {
               describe(method, async () => {
                 it('new user', async () => {
                   const authState = await prepare(method as any);

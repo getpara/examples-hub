@@ -23,7 +23,7 @@ import {
   PasskeyGetRequest,
   PasskeyGetResult,
 } from 'react-native-passkey';
-import { CurrentWalletIds, PublicKeyStatus, WalletScheme } from '@getpara/user-management-client';
+import { CurrentWalletIds, PublicKeyStatus, TWalletScheme } from '@getpara/user-management-client';
 import { setEnv } from '../config.js';
 import base64url from 'base64url';
 import { webcrypto } from 'crypto';
@@ -249,7 +249,7 @@ export class ParaMobile extends ParaCore {
         signer: decryptedShare.signer,
         address: desiredWallet.address || undefined,
         publicKey: desiredWallet.publicKey || undefined,
-        scheme: desiredWallet.scheme as WalletScheme,
+        scheme: desiredWallet.scheme as TWalletScheme,
         type: desiredWallet.type || undefined,
       };
     }

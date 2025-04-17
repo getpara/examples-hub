@@ -1,4 +1,4 @@
-import { CoreMethodName, CoreMethodParams, Environment, OAuthMethod, WalletType } from '@getpara/web-sdk';
+import { CoreMethodName, CoreMethodParams, Environment } from '@getpara/web-sdk';
 import * as actions from '../../../src/provider/actions/index.js';
 import { CoreAction } from '../../../src/provider/actions/utils.js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -39,7 +39,7 @@ const testSuites: TestSuites = {
   },
   verifyOAuth: {
     action: actions.verifyOAuth,
-    args: { method: OAuthMethod.GOOGLE, isCanceled: () => true },
+    args: { method: 'GOOGLE', isCanceled: () => true },
   },
   verifyFarcaster: {
     action: actions.verifyFarcaster,
@@ -87,15 +87,15 @@ const testSuites: TestSuites = {
   },
   createWalletPerType: {
     action: actions.createWalletPerType,
-    args: { types: [WalletType.EVM] },
+    args: { types: ['EVM'] },
   },
   createPregenWallet: {
     action: actions.createPregenWallet,
-    args: { pregenId: emailAuth, type: WalletType.EVM },
+    args: { pregenId: emailAuth, type: 'EVM' },
   },
   createPregenWalletPerType: {
     action: actions.createPregenWalletPerType,
-    args: { pregenId: emailAuth, types: [WalletType.EVM] },
+    args: { pregenId: emailAuth, types: ['EVM'] },
   },
   claimPregenWallets: {
     action: actions.claimPregenWallets,

@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom';
 import { useGetOrganizationKey } from '../../../hooks/api/queries/useOrganizationKeys';
 import { Environment } from '../../../types/environment';
 import { UpdateApiKeyBody } from '../../../types/api';
-import { WalletType } from '@getpara/react-sdk';
 
 export type UpdateApiKeyOnRampConfig<T extends keyof UpdateApiKeyBody> = Pick<UpdateApiKeyBody, T>;
 
@@ -15,7 +14,7 @@ export const useSupportedWalletTypesFormData = () => {
     mode: 'onChange',
     reValidateMode: 'onChange',
     defaultValues: {
-      supportedWalletTypes: apiKeyData?.supportedWalletTypes ?? [{ type: WalletType.EVM, optional: false }],
+      supportedWalletTypes: apiKeyData?.supportedWalletTypes ?? [{ type: 'EVM', optional: false }],
       cosmosPrefix: apiKeyData?.cosmosPrefix ?? 'cosmos',
     },
   });

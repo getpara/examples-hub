@@ -1,4 +1,4 @@
-import { Network, WalletType } from './wallet.js';
+import { Network, TWalletType } from './wallet.js';
 
 export enum OnRampProvider {
   RAMP = 'RAMP',
@@ -34,7 +34,7 @@ export interface OnRampPurchase {
   userId: string;
   type?: OnRampPurchaseType;
   walletId?: string | null;
-  walletType?: WalletType;
+  walletType?: TWalletType;
   externalWalletAddress?: string | null;
   address?: string | null;
   status?: OnRampPurchaseStatus;
@@ -60,7 +60,7 @@ export type OnRampPurchaseUpdateParams = Omit<OnRampPurchase, 'id' | 'userId'>;
 type ProviderAssetInfo = [string, Partial<Record<OnRampPurchaseType, boolean>>];
 
 export type OnRampAssetInfo = Record<
-  WalletType,
+  TWalletType,
   Partial<Record<Network, Partial<Record<OnRampAsset, Partial<Record<OnRampProvider, ProviderAssetInfo>>>>>>
 >;
 

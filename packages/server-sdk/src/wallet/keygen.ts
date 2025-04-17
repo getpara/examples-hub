@@ -1,7 +1,7 @@
 import * as uuid from 'uuid';
 import { waitUntilTrue, Ctx, TPregenIdentifierType } from '@getpara/core-sdk';
 import { setupWorker } from '../workers/workerWrapper.js';
-import { BackupKitEmailProps, WalletType } from '@getpara/user-management-client';
+import { BackupKitEmailProps, TWalletType } from '@getpara/user-management-client';
 
 export async function isKeygenComplete(ctx: Ctx, userId: string, walletId: string): Promise<boolean> {
   const wallets = await ctx.client.getWallets(userId);
@@ -23,7 +23,7 @@ export async function isPreKeygenComplete(
 export function keygen(
   ctx: Ctx,
   userId: string,
-  type: WalletType,
+  type: TWalletType,
   secretKey: string | null,
   sessionCookie?: string,
   _emailProps: BackupKitEmailProps = {},
@@ -67,7 +67,7 @@ export function preKeygen(
   ctx: Ctx,
   pregenIdentifier: string,
   pregenIdentifierType: TPregenIdentifierType,
-  type: WalletType,
+  type: TWalletType,
   secretKey: string | null,
   _skipDistribute = false,
   partnerId: string,

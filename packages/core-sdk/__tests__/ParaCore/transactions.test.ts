@@ -1,7 +1,7 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MockPara } from '../mocks/mockParaCore';
 import { expectSearchParams, getWorkerContent, prepareMock } from '../utils';
-import { Environment, WalletScheme } from '../../src';
+import { Environment } from '../../src';
 import { API_KEY, PARTNER, TIMEOUT_MS, TRANSACTION_ID, USER_EMAIL, USER_ID } from '../constants';
 import { resetPlatformMocks } from '../mocks/mockPlatformUtils';
 import { resetClientMocks } from '../mocks/mockUserManagementClient';
@@ -26,7 +26,7 @@ describe('ParaCore - transactions', () => {
   });
 
   describe('signMessage', () => {
-    [WalletScheme.DKLS, WalletScheme.ED25519].forEach(scheme => {
+    ['DKLS', 'ED25519'].forEach(scheme => {
       describe(scheme, () => {
         ['embedded', 'pregen'].forEach(source => {
           it(source, async () => {
@@ -36,16 +36,16 @@ describe('ParaCore - transactions', () => {
 
             let walletId;
             switch (true) {
-              case source === 'embedded' && scheme === WalletScheme.DKLS:
+              case source === 'embedded' && scheme === 'DKLS':
                 walletId = evmId;
                 break;
-              case source === 'embedded' && scheme === WalletScheme.ED25519:
+              case source === 'embedded' && scheme === 'ED25519':
                 walletId = solanaId;
                 break;
-              case source === 'pregen' && scheme === WalletScheme.DKLS:
+              case source === 'pregen' && scheme === 'DKLS':
                 walletId = evmPregenId;
                 break;
-              case source === 'pregen' && scheme === WalletScheme.ED25519:
+              case source === 'pregen' && scheme === 'ED25519':
                 walletId = solanaPregenId;
                 break;
             }
@@ -59,7 +59,7 @@ describe('ParaCore - transactions', () => {
             expect(res).toStrictEqual({ signature: 'signature' });
 
             switch (scheme) {
-              case WalletScheme.DKLS:
+              case 'DKLS':
                 expect((para as unknown as any).platformUtils.signMessage).toHaveBeenCalledWith(
                   para.ctx,
                   source === 'pregen' ? undefined : USER_ID,
@@ -71,7 +71,7 @@ describe('ParaCore - transactions', () => {
                   'cosmosSignDoc',
                 );
                 break;
-              case WalletScheme.ED25519:
+              case 'ED25519':
                 expect((para as unknown as any).platformUtils.ed25519Sign).toHaveBeenCalledWith(
                   para.ctx,
                   source === 'pregen' ? undefined : USER_ID,

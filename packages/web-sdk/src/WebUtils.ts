@@ -4,7 +4,7 @@ import { LocalStorage } from './LocalStorage.js';
 import { SessionStorage } from './SessionStorage.js';
 import { keygen, preKeygen, ed25519Keygen, ed25519PreKeygen, refresh } from './wallet/keygen.js';
 import { signMessage, sendTransaction, signTransaction, ed25519Sign } from './wallet/signing.js';
-import { BackupKitEmailProps, WalletType } from '@getpara/user-management-client';
+import { BackupKitEmailProps, TWalletType } from '@getpara/user-management-client';
 import { getPrivateKey } from './wallet/privateKey.js';
 import { TPregenIdentifierType } from '@getpara/core-sdk';
 
@@ -16,7 +16,7 @@ export class WebUtils implements PlatformUtils {
   keygen(
     ctx: Ctx,
     userId: string,
-    type: Exclude<WalletType, WalletType.SOLANA>,
+    type: Exclude<TWalletType, 'SOLANA'>,
     secretKey: string | null, // should be acceptable as null in RN as we don't pre-gen them
     sessionCookie: string,
     emailProps: BackupKitEmailProps = {},
@@ -47,7 +47,7 @@ export class WebUtils implements PlatformUtils {
     partnerId: string | undefined,
     pregenIdentifier: string,
     pregenIdentifierType: TPregenIdentifierType,
-    type: Exclude<WalletType, WalletType.SOLANA>,
+    type: Exclude<TWalletType, 'SOLANA'>,
     secretKey: string | null, // should be acceptable as null in RN as we don't pre-gen them
     sessionCookie: string,
   ): Promise<{

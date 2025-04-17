@@ -1,4 +1,4 @@
-import { BackupKitEmailProps, TPregenIdentifierType, WalletType } from '@getpara/user-management-client';
+import { BackupKitEmailProps, TPregenIdentifierType, TWalletType } from '@getpara/user-management-client';
 import { Ctx, PopupType, SignatureRes } from './types/index.js';
 import { StorageUtils } from './StorageUtils.js';
 
@@ -8,7 +8,7 @@ export interface PlatformUtils {
   keygen(
     ctx: Ctx,
     userId: string,
-    type: Exclude<WalletType, WalletType.SOLANA>,
+    type: Exclude<TWalletType, 'SOLANA'>,
     secretKey: string | null, // should be acceptable as null in RN as we don't pre-gen them
     sessionCookie: string,
     emailProps?: BackupKitEmailProps,
@@ -36,7 +36,7 @@ export interface PlatformUtils {
     partnerId: string,
     pregenIdentifier: string,
     pregenIdentifierType: TPregenIdentifierType,
-    type: Exclude<WalletType, WalletType.SOLANA>,
+    type: Exclude<TWalletType, 'SOLANA'>,
     secretKey: string | null, // should be acceptable as null in RN as we don't pre-gen them
     sessionCookie: string,
   ): Promise<{

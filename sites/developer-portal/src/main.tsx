@@ -12,7 +12,7 @@ import './index.css';
 import '@getpara/react-components/css/capsule-core.css';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from './components/Toast/ToastContainer';
-import { Environment, OAuthMethod, ParaProvider } from '@getpara/react-sdk';
+import { Environment, ParaProvider } from '@getpara/react-sdk';
 import { paraLogo } from './assets/paraLogo';
 
 defineCustomElements();
@@ -34,7 +34,7 @@ const App = () => {
         disableEmbeddedModal: true,
       }}
       paraModalConfig={{
-        oAuthMethods: [OAuthMethod.GOOGLE],
+        oAuthMethods: ['GOOGLE'],
         disablePhoneLogin: true,
         logo: paraLogo,
         bareModal: true,

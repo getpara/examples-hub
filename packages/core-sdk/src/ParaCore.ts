@@ -20,8 +20,7 @@ import {
   PublicKeyStatus,
   PublicKeyType,
   VerificationEmailProps,
-  WalletType,
-  WalletScheme,
+  TWalletType,
   WalletParams,
   PregenIds,
   extractWalletRef,
@@ -48,6 +47,7 @@ import {
   PrimaryAuthType,
   isExternalWallet,
   AccountMetadata,
+  WALLET_TYPES,
 } from '@getpara/user-management-client';
 import type { pki as pkiType, jsbn as jsbnType } from 'node-forge';
 import forge from 'node-forge';
@@ -68,7 +68,6 @@ import {
   WalletCreatedResponse,
   PregenWalletClaimedResponse,
   WalletFilters,
-  WalletTypeProp,
   Wallet,
   PortalUrlOptions,
   ConstructorOpts,
@@ -211,7 +210,7 @@ export abstract class ParaCore implements CoreInterface {
    */
   currentWalletIds: CurrentWalletIds = {};
 
-  get currentWalletIdsArray(): [string, WalletType][] {
+  get currentWalletIdsArray(): [string, TWalletType][] {
     return (this.#partner?.supportedWalletTypes ?? Object.keys(this.currentWalletIds).map(type => ({ type }))).reduce(
       (acc, { type }) => {
         return [
@@ -361,7 +360,7 @@ export abstract class ParaCore implements CoreInterface {
     return this.#partner?.cosmosPrefix;
   }
 
-  get isWalletTypeEnabled(): Partial<Record<WalletType, boolean>> {
+  get isWalletTypeEnabled(): Partial<Record<TWalletType, boolean>> {
     return (this.#partner?.supportedWalletTypes || []).reduce((acc, { type }) => {
       return { ...acc, [type]: true };
     }, {});
@@ -545,13 +544,13 @@ export abstract class ParaCore implements CoreInterface {
    * @param {string} walletId the ID of the wallet address to display.
    * @param {object} options additional options for formatting the address.
    * @param {boolean} options.truncate whether to truncate the address.
-   * @param {WalletType} options.addressType the type of address to display.
+   * @param {TWalletType} options.addressType the type of address to display.
    * @returns the formatted address
    */
   getDisplayAddress(
     walletId: string,
     options:
-      | { truncate?: boolean; addressType?: WalletTypeProp | undefined; cosmosPrefix?: string; targetLength?: number }
+      | { truncate?: boolean; addressType?: TWalletType | undefined; cosmosPrefix?: string; targetLength?: number }
       | undefined = {},
   ): string {
     if (this.externalWallets[walletId]) {
@@ -575,7 +574,7 @@ export abstract class ParaCore implements CoreInterface {
     let prefix: string;
 
     switch (wallet.type) {
-      case WalletType.COSMOS:
+      case 'COSMOS':
         prefix = options.cosmosPrefix ?? this.#partner?.cosmosPrefix ?? 'cosmos';
         str = getCosmosAddress(wallet.publicKey!, prefix);
         break;
@@ -594,7 +593,7 @@ export abstract class ParaCore implements CoreInterface {
    * @param {boolean} options.addressType used to format the hash for another wallet type.
    * @returns the identicon hash string
    */
-  getIdenticonHash(walletId: string, overrideType?: WalletType): string | undefined {
+  getIdenticonHash(walletId: string, overrideType?: TWalletType): string | undefined {
     if (this.externalWallets[walletId]) {
       const wallet = this.externalWallets[walletId];
 
@@ -899,7 +898,7 @@ export abstract class ParaCore implements CoreInterface {
           const fromJson = JSON.parse(_currentWalletIds);
 
           return Array.isArray(fromJson)
-            ? Object.keys(WalletType).reduce((acc: CurrentWalletIds, type: WalletType) => {
+            ? WALLET_TYPES.reduce((acc: CurrentWalletIds, type: TWalletType) => {
                 const wallet = Object.values(this.wallets).find(
                   w => fromJson.includes(w.id) && WalletSchemeTypeMap[w.scheme][type],
                 );
@@ -948,7 +947,7 @@ export abstract class ParaCore implements CoreInterface {
           const fromJson = JSON.parse(_currentWalletIds);
 
           return Array.isArray(fromJson)
-            ? Object.keys(WalletType).reduce((acc: CurrentWalletIds, type: WalletType) => {
+            ? WALLET_TYPES.reduce((acc: CurrentWalletIds, type: TWalletType) => {
                 const wallet = Object.values(this.wallets).find(
                   w => fromJson.includes(w.id) && WalletSchemeTypeMap[w.scheme][type],
                 );
@@ -1105,7 +1104,7 @@ export abstract class ParaCore implements CoreInterface {
           const fromJson = JSON.parse(_currentWalletIds);
 
           return Array.isArray(fromJson)
-            ? Object.keys(WalletType).reduce((acc: CurrentWalletIds, type: WalletType) => {
+            ? WALLET_TYPES.reduce((acc: CurrentWalletIds, type: TWalletType) => {
                 const wallet = Object.values(this.wallets).find(
                   w => fromJson.includes(w.id) && WalletSchemeTypeMap[w.scheme][type],
                 );
@@ -1420,7 +1419,7 @@ export abstract class ParaCore implements CoreInterface {
         id => this.wallets[id].type === type && this.isPregenWalletClaimable(this.wallets[id]),
       );
       [...walletIds, ...pregenWalletIds].forEach(id => {
-        if (address.toLowerCase() === this.getDisplayAddress(id, { addressType: <WalletType>type }).toLowerCase()) {
+        if (address.toLowerCase() === this.getDisplayAddress(id, { addressType: <TWalletType>type }).toLowerCase()) {
           wallet = this.wallets[id];
         }
       });
@@ -1437,7 +1436,7 @@ export abstract class ParaCore implements CoreInterface {
 
   findWallet(
     idOrAddress?: string,
-    overrideType?: WalletTypeProp,
+    overrideType?: TWalletType,
     filter: WalletFilters = {},
   ): Omit<Wallet, 'signer'> | undefined {
     // Only default to the external wallet if we're not using external wallet auth
@@ -1460,7 +1459,7 @@ export abstract class ParaCore implements CoreInterface {
 
         return {
           ...wallet,
-          type: WalletType[type],
+          type,
         };
       }
     } catch (e) {
@@ -1471,7 +1470,7 @@ export abstract class ParaCore implements CoreInterface {
   get availableWallets(): Pick<Wallet, 'id' | 'type' | 'name' | 'address' | 'isExternal'>[] {
     return [
       ...this.currentWalletIdsArray
-        .map(([address, type]): [string, WalletType, boolean] => [address, type, false])
+        .map(([address, type]): [string, TWalletType, boolean] => [address, type, false])
         .map(([id, type]) => {
           const wallet = this.findWallet(id, type);
 
@@ -1502,24 +1501,24 @@ export abstract class ParaCore implements CoreInterface {
     this.isWalletUsable(walletId, condition, true);
   }
 
-  private async assertIsValidWalletType(type: string, walletTypes?: WalletType[]): Promise<WalletType> {
+  private async assertIsValidWalletType(type: string, walletTypes?: TWalletType[]): Promise<TWalletType> {
     const { supportedWalletTypes } = await this.#assertPartner();
 
     if (
       !type ||
-      !Object.values(WalletType).includes(<WalletType>type) ||
-      !(walletTypes ?? supportedWalletTypes.map(({ type }) => type)).includes(<WalletType>type)
+      !WALLET_TYPES.includes(<TWalletType>type) ||
+      !(walletTypes ?? supportedWalletTypes.map(({ type }) => type)).includes(<TWalletType>type)
     ) {
       throw new Error(`wallet type ${type} is not supported`);
     }
 
-    return <WalletType>type;
+    return <TWalletType>type;
   }
 
-  private async getMissingTypes(): Promise<WalletType[]> {
+  private async getMissingTypes(): Promise<TWalletType[]> {
     const { supportedWalletTypes } = await this.#assertPartner();
 
-    return <WalletType[]>(
+    return <TWalletType[]>(
       supportedWalletTypes
         .filter(
           ({ type: t, optional }) =>
@@ -1529,17 +1528,15 @@ export abstract class ParaCore implements CoreInterface {
     );
   }
 
-  private async getTypesToCreate(types?: Uppercase<WalletType>[]): Promise<WalletType[]> {
+  private async getTypesToCreate(types?: Uppercase<TWalletType>[]): Promise<TWalletType[]> {
     const { supportedWalletTypes } = await this.#assertPartner();
 
     return getSchemes(types ?? (await this.getMissingTypes())).map(scheme => {
       switch (scheme) {
-        case WalletScheme.ED25519:
-          return WalletType.SOLANA;
+        case 'ED25519':
+          return 'SOLANA';
         default:
-          return supportedWalletTypes.some(({ type, optional }) => type === WalletType.COSMOS && !optional)
-            ? WalletType.COSMOS
-            : WalletType.EVM;
+          return supportedWalletTypes.some(({ type, optional }) => type === 'COSMOS' && !optional) ? 'COSMOS' : 'EVM';
       }
     });
   }
@@ -1581,7 +1578,7 @@ export abstract class ParaCore implements CoreInterface {
     }
 
     // We can only build the private key for DKLS wallets
-    if (wallet.scheme !== WalletScheme.DKLS) {
+    if (wallet.scheme !== 'DKLS') {
       throw new Error('invalid wallet scheme');
     }
 
@@ -1642,7 +1639,7 @@ export abstract class ParaCore implements CoreInterface {
    * Logs in or creates a new user using an external wallet address.
    * @param {Object} opts the options object
    * @param {string} opts.address the external wallet address to use for identification.
-   * @param {WalletType} opts.type type of external wallet to use for identification.
+   * @param {TWalletType} opts.type type of external wallet to use for identification.
    * @param {string} opts.provider the name of the provider for the external wallet.
    */
   async loginExternalWallet({
@@ -1945,7 +1942,7 @@ export abstract class ParaCore implements CoreInterface {
    * Generates a URL for the user to log in with OAuth using a desire method.
    *
    * @param {Object} opts the options object
-   * @param {OAuthMethod} opts.method the third-party service to use for OAuth.
+   * @param {TOAuthMethod} opts.method the third-party service to use for OAuth.
    * @param {string} [opts.deeplinkUrl] the deeplink to redirect to after the OAuth flow. This is for mobile only.
    * @returns {string} the URL for the user to log in with OAuth.
    */
@@ -2303,7 +2300,7 @@ export abstract class ParaCore implements CoreInterface {
    *
    * @param {Object} [opts] the options object.
    * @param {boolean} [opts.skipDistribute] if `true`, the wallets' recovery share will not be distributed.
-   * @param {WalletType[]} [opts.types] the types of wallets to create.
+   * @param {TWalletType[]} [opts.types] the types of wallets to create.
    * @returns {Object} the wallets created, their ids, and the recovery secret.
    **/
   async createWalletPerType({
@@ -2378,7 +2375,7 @@ export abstract class ParaCore implements CoreInterface {
   /**
    * Creates a new wallet.
    * @param {Object} opts the options object.
-   * @param {WalletType} opts.type the type of wallet to create.
+   * @param {TWalletType} opts.type the type of wallet to create.
    * @param {boolean} opts.skipDistribute - if true, recovery share will not be distributed.
    * @returns {[Wallet, string | null]} `[wallet, recoveryShare]` - the wallet object and the new recovery share.
    **/
@@ -2397,7 +2394,7 @@ export abstract class ParaCore implements CoreInterface {
     let keygenRes;
 
     switch (walletType) {
-      case WalletType.SOLANA: {
+      case 'SOLANA': {
         keygenRes = await this.platformUtils.ed25519Keygen(
           this.ctx,
           this.userId,
@@ -2425,7 +2422,7 @@ export abstract class ParaCore implements CoreInterface {
     this.wallets[walletId] = {
       id: walletId,
       signer,
-      scheme: walletType === WalletType.SOLANA ? WalletScheme.ED25519 : WalletScheme.DKLS,
+      scheme: walletType === 'SOLANA' ? 'ED25519' : 'DKLS',
       type: walletType,
     };
     wallet = this.wallets[walletId];
@@ -2465,7 +2462,7 @@ export abstract class ParaCore implements CoreInterface {
    * @param {Object} opts the options object.
    * @param {string} opts.pregenIdentifier the identifier associated with the new wallet.
    * @param {TPregenIdentifierType} [opts.pregenIdentifierType] the identifier type. Defaults to `EMAIL`.
-   * @param {WalletType} [opts.type] the type of wallet to create. Defaults to the first non-optional type in the instance's `supportedWalletTypes` array.
+   * @param {TWalletType} [opts.type] the type of wallet to create. Defaults to the first non-optional type in the instance's `supportedWalletTypes` array.
    * @returns {Wallet} the created wallet.
    **/
   async createPregenWallet(opts: CoreMethodParams<'createPregenWallet'>): CoreMethodResponse<'createPregenWallet'> {
@@ -2479,7 +2476,7 @@ export abstract class ParaCore implements CoreInterface {
 
     let keygenRes;
     switch (walletType) {
-      case WalletType.SOLANA:
+      case 'SOLANA':
         keygenRes = await this.platformUtils.ed25519PreKeygen(
           this.ctx,
           pregenIdentifier,
@@ -2505,7 +2502,7 @@ export abstract class ParaCore implements CoreInterface {
     this.wallets[walletId] = {
       id: walletId,
       signer,
-      scheme: walletType === WalletType.SOLANA ? WalletScheme.ED25519 : WalletScheme.DKLS,
+      scheme: walletType === 'SOLANA' ? 'ED25519' : 'DKLS',
       type: walletType,
       isPregen: true,
       pregenIdentifier,
@@ -2525,7 +2522,7 @@ export abstract class ParaCore implements CoreInterface {
    * @param {Object} opts the options object.
    * @param {string} opts.pregenIdentifier the identifier to associate each wallet with.
    * @param {TPregenIdentifierType} opts.pregenIdentifierType - either `'EMAIL'` or `'PHONE'`.
-   * @param {WalletType[]} [opts.types] the wallet types to create. Defaults to any types the instance supports that are not already present.
+   * @param {TWalletType[]} [opts.types] the wallet types to create. Defaults to any types the instance supports that are not already present.
    * @returns {Wallet[]} an array containing the created wallets.
    **/
   async createPregenWalletPerType({
@@ -2577,7 +2574,7 @@ export abstract class ParaCore implements CoreInterface {
       const wallet = this.wallets[walletId];
       let refreshedShare;
 
-      if (wallet.scheme === WalletScheme.ED25519) {
+      if (wallet.scheme === 'ED25519') {
         const distributeRes = await distributeNewShare({
           ctx: this.ctx,
           userId: this.userId,
@@ -2866,7 +2863,7 @@ export abstract class ParaCore implements CoreInterface {
     let signRes;
 
     switch (wallet.scheme) {
-      case WalletScheme.ED25519:
+      case 'ED25519':
         signRes = await this.platformUtils.ed25519Sign(
           this.ctx,
           signerId,
@@ -2884,7 +2881,7 @@ export abstract class ParaCore implements CoreInterface {
           wallet.signer,
           messageBase64,
           this.retrieveSessionCookie(),
-          wallet.scheme === WalletScheme.DKLS,
+          wallet.scheme === 'DKLS',
           cosmosSignDocBase64,
         );
         break;
@@ -2925,7 +2922,7 @@ export abstract class ParaCore implements CoreInterface {
       rlpEncodedTxBase64,
       chainId,
       this.retrieveSessionCookie(),
-      wallet.scheme === WalletScheme.DKLS,
+      wallet.scheme === 'DKLS',
     );
 
     let timeStart = Date.now();
@@ -2963,7 +2960,7 @@ export abstract class ParaCore implements CoreInterface {
         rlpEncodedTxBase64,
         chainId,
         this.retrieveSessionCookie(),
-        wallet.scheme === WalletScheme.DKLS,
+        wallet.scheme === 'DKLS',
       );
 
       if ((signRes as DeniedSignatureRes).pendingTransactionId) {

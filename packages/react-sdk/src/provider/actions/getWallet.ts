@@ -1,6 +1,6 @@
-import ParaWeb, { WalletType } from '@getpara/web-sdk';
+import ParaWeb, { TWalletType } from '@getpara/web-sdk';
 
-export const getWallet = async (para?: ParaWeb, selectedWallet?: { id?: string; type?: WalletType }) => {
+export const getWallet = async (para?: ParaWeb, selectedWallet?: { id?: string; type?: TWalletType }) => {
   const isLoggedIn = await para?.isFullyLoggedIn();
 
   if (!para || !isLoggedIn) {

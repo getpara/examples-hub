@@ -2,7 +2,7 @@ import { PropsWithChildren, createContext, useCallback, useContext, useEffect, u
 import * as utils from '../../../utils/authLogin';
 import { AuthLoginParams } from '../../../utils/authLogin';
 import { usePara } from '../../../components/ParaContext';
-import { CoreAuthInfo, entityToWallet, isWalletSupported, WalletEntity, WalletType } from '@getpara/core-sdk';
+import { CoreAuthInfo, entityToWallet, isWalletSupported, WalletEntity, TWalletType } from '@getpara/core-sdk';
 import { formatISO } from 'date-fns';
 import { useCloseWindow } from '../../../hooks/useCloseWindow';
 import { AuthExtras, AuthInfo, AuthParams, BiometricLocationHint, extractAuthInfo } from '@getpara/user-management-client';
@@ -12,7 +12,7 @@ const NOOP = () => {
   throw new Error();
 };
 
-export type Wallets = Partial<Record<WalletType, WalletEntity[]>>;
+export type Wallets = Partial<Record<TWalletType, WalletEntity[]>>;
 
 export type LoginRes = Awaited<ReturnType<typeof utils.authLogin>>;
 

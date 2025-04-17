@@ -4,15 +4,7 @@
 
 import '../wasm/wasm_exec.js';
 import * as walletUtils from './walletUtils.js';
-import {
-  Ctx,
-  Environment,
-  getPortalBaseURL,
-  initClient,
-  mpcComputationClient,
-  paraVersion,
-  WalletType,
-} from '@getpara/core-sdk';
+import { Ctx, Environment, getPortalBaseURL, initClient, mpcComputationClient, paraVersion } from '@getpara/core-sdk';
 
 export interface Message {
   env: Environment;
@@ -55,7 +47,7 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
 
   switch (functionType) {
     case 'KEYGEN': {
-      const { userId, secretKey, type = WalletType.EVM } = params;
+      const { userId, secretKey, type = 'EVM' } = params;
       const keygenRes = await walletUtils.keygen(ctx, userId, type, secretKey);
       return keygenRes;
     }
@@ -85,7 +77,7 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
       return returnObject ? { protocolId, signer } : signer;
     }
     case 'PREKEYGEN': {
-      const { email, partnerId, secretKey, type = WalletType.EVM } = params;
+      const { email, partnerId, secretKey, type = 'EVM' } = params;
       let { pregenIdentifier, pregenIdentifierType } = params;
       if (email !== 'null' && email !== 'undefined' && email !== '' && email != null) {
         pregenIdentifier = email;

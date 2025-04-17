@@ -1,4 +1,4 @@
-import { OAuthMethod } from '@getpara/web-sdk';
+import { TOAuthMethod } from '@getpara/web-sdk';
 import { styled } from 'styled-components';
 import { useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
@@ -9,7 +9,7 @@ import { useStore } from '../../../provider/stores/useStore.js';
 import { useAuthActions } from '../../../provider/providers/AuthProvider.js';
 
 interface OAuthProps {
-  methods: OAuthMethod[];
+  methods: TOAuthMethod[];
 }
 
 const HAS_MORE_LENGTH = 3;
@@ -29,7 +29,7 @@ export const OAuth = ({ methods }: OAuthProps) => {
     setStep(ModalStep.AUTH_MORE);
   };
 
-  const handleMethodClick = (method: OAuthMethod) => async () => {
+  const handleMethodClick = (method: TOAuthMethod) => async () => {
     switch (method) {
       case 'FARCASTER':
         verifyFarcaster();
@@ -38,7 +38,7 @@ export const OAuth = ({ methods }: OAuthProps) => {
         setStep(ModalStep.TELEGRAM_OAUTH);
         break;
       default:
-        verifyOAuth(method as Exclude<OAuthMethod, 'FARCASTER' | 'TELEGRAM'>);
+        verifyOAuth(method as Exclude<TOAuthMethod, 'FARCASTER' | 'TELEGRAM'>);
         break;
     }
   };

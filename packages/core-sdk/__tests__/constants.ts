@@ -1,7 +1,7 @@
 import {
   AuthMethod,
   WalletEntity,
-  WalletType,
+  TWalletType,
   TelegramAuthResponse,
   VerifyFarcasterResponse,
   BiometricLocationHint,
@@ -73,9 +73,9 @@ export const PARTNER = {
   foregroundColor: 'black',
   backgroundColor: 'white',
   supportedWalletTypes: [
-    { type: WalletType.EVM, optional: false },
-    { type: WalletType.SOLANA, optional: false },
-    { type: WalletType.COSMOS, optional: false },
+    { type: 'EVM', optional: false },
+    { type: 'SOLANA', optional: false },
+    { type: 'COSMOS', optional: false },
   ],
   supportedAuthMethods: [AuthMethod.PASSKEY, AuthMethod.PASSWORD],
   cosmosPrefix: 'cosmos',
@@ -85,7 +85,7 @@ export const PARTNER = {
 
 export const EXTERNAL_WALLET = {
   address: '0x1aD2B053b8c6b1592cB645DEfadf105F34d8C6e1',
-  type: WalletType.EVM,
+  type: 'EVM' as TWalletType,
   provider: 'metamask',
 };
 
@@ -132,7 +132,7 @@ export const WALLET: WalletEntity = {
   partner: PARTNER as PartnerEntity,
   publicKey: '0x1aD2B053b8c6b1592cB645DEfadf105F34d8C6p1',
   scheme: 'DKLS',
-  type: WalletType.EVM,
+  type: 'EVM',
   updatedAt: '2024-10-22T00:00:00.000Z',
   userId: USER_ID,
   lastUsedAt: '2024-10-22T00:00:00.000Z',
@@ -149,7 +149,7 @@ export const SOLANA_WALLET = {
   address: '0x1aD2B053b8c6b1592cB645DEfadf105F34d8C6t9',
   id: 'ef3bf91c-fc1e-4d18-afe2-f2654c9556t9',
   name: 'Test Solana Wallet',
-  type: WalletType.SOLANA,
+  type: 'SOLANA',
   scheme: 'ED25519',
 };
 export const SOLANA_WALLET_KEYGEN_RES = {
@@ -171,7 +171,7 @@ export const PREGEN_WALLET_EMAIL: WalletEntity = {
   partner: PARTNER as PartnerEntity,
   publicKey: '0x1aD2B053b8c6b1592cB645DEfadf105F34d8C6p4',
   scheme: 'DKLS',
-  type: WalletType.EVM,
+  type: 'EVM',
   updatedAt: '2024-10-22T00:00:00.000Z',
   userId: USER_ID,
   lastUsedAt: '2024-10-22T00:00:00.000Z',
@@ -183,7 +183,7 @@ export const SOLANA_PREGEN_WALLET_EMAIL: WalletEntity = {
   address: '0x1aD2B053b8c6b1592cB645DEfadf105F34d8C6e5',
   id: 'ef3bf91c-fc1e-4d18-afe2-f2654c9556e5',
   name: 'Test Solana Pregen Wallet',
-  type: WalletType.SOLANA,
+  type: 'SOLANA',
   scheme: 'ED25519',
 };
 export const SOLANA_PREGEN_WALLET_KEYGEN_RES = {
@@ -207,7 +207,7 @@ export const PREGEN_WALLET_PHONE: WalletEntity = {
   partner: PARTNER as PartnerEntity,
   publicKey: '0x1aD2B053b8c6b1592cB645DEfadf105F34d8C6p6',
   scheme: 'DKLS',
-  type: WalletType.EVM,
+  type: 'EVM',
   updatedAt: '2024-10-22T00:00:00.000Z',
   userId: USER_ID,
   lastUsedAt: '2024-10-22T00:00:00.000Z',
@@ -223,7 +223,7 @@ export const SOLANA_PREGEN_WALLET_PHONE: WalletEntity = {
   address: '0x1aD2B053b8c6b1592cB645DEfadf105F34d8C6e5',
   id: 'ef3bf91c-fc1e-4d18-afe2-f2654c9556e5',
   name: 'Test Solana Pregen Wallet',
-  type: WalletType.SOLANA,
+  type: 'SOLANA',
   scheme: 'ED25519',
 };
 export const PREGEN_WALLETS_EMAIL: WalletEntity[] = [PREGEN_WALLET_EMAIL, SOLANA_PREGEN_WALLET_EMAIL];
@@ -277,8 +277,8 @@ export const TIMEOUT_MS = 15000;
 
 export const WALLET_ID = UUID;
 export const CURRENT_WALLET_IDS = {
-  [WalletType.EVM]: [WALLET.id],
-  [WalletType.SOLANA]: [SOLANA_WALLET.id],
+  EVM: [WALLET.id],
+  SOLANA: [SOLANA_WALLET.id],
 };
 
 export const CRYPTOGRAPHY_UTILS_TEST_VARS = {

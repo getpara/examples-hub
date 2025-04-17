@@ -1,4 +1,4 @@
-import { Network, OnRampAsset, OnRampProvider, OnRampPurchaseType, WalletType } from '@getpara/user-management-client';
+import { Network, OnRampAsset, OnRampProvider, OnRampPurchaseType, TWalletType } from '@getpara/user-management-client';
 import { OnRampAssetInfoRow, OnRampAssetInfo } from '../types/index.js';
 
 export function toAssetInfoArray(data: OnRampAssetInfo): OnRampAssetInfoRow[] {
@@ -30,7 +30,7 @@ export function getOnRampNetworks(
     providers,
     action,
   }: {
-    walletType?: WalletType;
+    walletType?: TWalletType;
     allowed?: Network[];
     assets?: OnRampAsset[];
     providers?: OnRampProvider[];
@@ -61,7 +61,7 @@ export function getOnRampAssets(
     providers,
     action,
   }: {
-    walletType?: WalletType;
+    walletType?: TWalletType;
     network?: Network;
     allowed?: OnRampAsset[];
     providers?: OnRampProvider[];

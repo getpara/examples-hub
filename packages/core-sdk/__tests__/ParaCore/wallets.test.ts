@@ -2,7 +2,7 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MockPara } from '../mocks/mockParaCore';
 import { getWallet, getWorkerContent, prepareMock } from '../utils';
 import { faker } from '@faker-js/faker';
-import { PREGEN_IDENTIFIER_TYPES, PregenAuth, WalletScheme, WalletType } from '@getpara/user-management-client';
+import { PREGEN_IDENTIFIER_TYPES, PregenAuth, WALLET_TYPES, TWalletType } from '@getpara/user-management-client';
 import {
   API_KEY,
   PARTNER,
@@ -55,7 +55,7 @@ describe('wallets', () => {
   });
 
   describe('createWallet succeeds', () => {
-    Object.values(WalletType).forEach(type => {
+    WALLET_TYPES.forEach(type => {
       it(type, async () => {
         await prepareMock(para);
 
@@ -63,7 +63,7 @@ describe('wallets', () => {
         const newWallet = getWallet({ id: newId, type });
 
         switch (type) {
-          case WalletType.SOLANA:
+          case 'SOLANA':
             mockEd25519Keygen.mockResolvedValue({ walletId: newId, signer: newSigner });
             break;
           default:
@@ -91,19 +91,16 @@ describe('wallets', () => {
   it('createWalletPerType succeeds', async () => {
     const { evmId, solanaId, partnerId } = await prepareMock(para);
 
-    const [[dklsId, dklsSigner, dklsWallet], [ed25519Id, ed25519Signer, ed25519Wallet]] = [
-      WalletScheme.DKLS,
-      WalletScheme.ED25519,
-    ].map(scheme => {
+    const [[dklsId, dklsSigner, dklsWallet], [ed25519Id, ed25519Signer, ed25519Wallet]] = ['DKLS', 'ED25519'].map(scheme => {
       const [newId, newSigner] = [faker.string.uuid(), faker.string.alphanumeric(32)];
       const newWallet = getWallet({
         id: newId,
         type:
-          scheme === WalletScheme.DKLS
-            ? PARTNER.supportedWalletTypes.some(({ type }) => type === WalletType.COSMOS)
-              ? WalletType.COSMOS
-              : WalletType.EVM
-            : WalletType.SOLANA,
+          scheme === 'DKLS'
+            ? PARTNER.supportedWalletTypes.some(({ type }) => type === 'COSMOS')
+              ? 'COSMOS'
+              : 'EVM'
+            : 'SOLANA',
         partnerId,
       });
 
@@ -120,19 +117,19 @@ describe('wallets', () => {
     });
 
     await para.createWalletPerType({
-      types: PARTNER.supportedWalletTypes.map(({ type }) => type),
+      types: PARTNER.supportedWalletTypes.map(({ type }) => type as TWalletType),
     });
 
-    expect(para.currentWalletIds[WalletType.EVM]).toStrictEqual([evmId]);
-    expect(para.currentWalletIds[WalletType.COSMOS]).toStrictEqual([evmId, dklsId]);
-    expect(para.currentWalletIds[WalletType.SOLANA]).toStrictEqual([solanaId, ed25519Id]);
+    expect(para.currentWalletIds['EVM']).toStrictEqual([evmId]);
+    expect(para.currentWalletIds['COSMOS']).toStrictEqual([evmId, dklsId]);
+    expect(para.currentWalletIds['SOLANA']).toStrictEqual([solanaId, ed25519Id]);
 
     expect(para.wallets[dklsId]).toStrictEqual({ ...dklsWallet, signer: dklsSigner });
     expect(para.wallets[ed25519Id]).toStrictEqual({ ...ed25519Wallet, signer: ed25519Signer });
   });
 
   describe('createPregenWallet', async () => {
-    Object.values(WalletType).forEach(type => {
+    WALLET_TYPES.forEach(type => {
       describe(type, () => {
         PREGEN_IDENTIFIER_TYPES.forEach(pregenIdentifierType => {
           it(`creates wallet for ${pregenIdentifierType}`, async () => {
@@ -150,7 +147,7 @@ describe('wallets', () => {
             const newWallet = getWallet({ id: newId, type, auth: pregenId });
 
             switch (type) {
-              case WalletType.SOLANA:
+              case 'SOLANA':
                 mockEd25519PreKeygen.mockResolvedValue({ walletId: newId, signer: newSigner });
                 break;
               default:
@@ -187,24 +184,23 @@ describe('wallets', () => {
           TWITTER: xAuth,
         }[pregenIdentifierType];
 
-        const [[dklsId, dklsSigner, dklsWallet], [ed25519Id, ed25519Signer, ed25519Wallet]] = [
-          WalletScheme.DKLS,
-          WalletScheme.ED25519,
-        ].map(scheme => {
-          const [newId, newSigner] = [faker.string.uuid(), faker.string.alphanumeric(32)];
-          const newWallet = getWallet({
-            id: newId,
-            auth: pregenId,
-            type:
-              scheme === WalletScheme.DKLS
-                ? PARTNER.supportedWalletTypes.some(({ type }) => type === WalletType.COSMOS)
-                  ? WalletType.COSMOS
-                  : WalletType.EVM
-                : WalletType.SOLANA,
-          });
+        const [[dklsId, dklsSigner, dklsWallet], [ed25519Id, ed25519Signer, ed25519Wallet]] = ['DKLS', 'ED25519'].map(
+          scheme => {
+            const [newId, newSigner] = [faker.string.uuid(), faker.string.alphanumeric(32)];
+            const newWallet = getWallet({
+              id: newId,
+              auth: pregenId,
+              type:
+                scheme === 'DKLS'
+                  ? PARTNER.supportedWalletTypes.some(({ type }) => type === 'COSMOS')
+                    ? 'COSMOS'
+                    : 'EVM'
+                  : 'SOLANA',
+            });
 
-          return [newId, newSigner, newWallet];
-        });
+            return [newId, newSigner, newWallet];
+          },
+        );
 
         mockEd25519PreKeygen.mockResolvedValue({ walletId: ed25519Id, signer: ed25519Signer });
         mockPreKeygen.mockResolvedValue({ walletId: dklsId, signer: dklsSigner });
@@ -215,7 +211,7 @@ describe('wallets', () => {
 
         await para.createPregenWalletPerType({
           pregenId,
-          types: PARTNER.supportedWalletTypes.map(({ type }) => type),
+          types: PARTNER.supportedWalletTypes.map(({ type }) => type as TWalletType),
         });
 
         expect(para.wallets[dklsId]).toStrictEqual({ ...dklsWallet, signer: dklsSigner });
@@ -310,9 +306,9 @@ describe('wallets', () => {
     const { evmId, solanaId } = await prepareMock(para);
 
     expect(para.currentWalletIds).toEqual({
-      [WalletType.EVM]: [evmId],
-      [WalletType.SOLANA]: [solanaId],
-      [WalletType.COSMOS]: [evmId],
+      EVM: [evmId],
+      SOLANA: [solanaId],
+      COSMOS: [evmId],
     });
 
     expect(para.currentWalletIdsArray).toEqual([
@@ -325,7 +321,7 @@ describe('wallets', () => {
       _.pick(para.wallets[evmId], ['id', 'type', 'name', 'address', 'isExternal']),
       {
         ..._.pick(para.wallets[evmId], ['id', 'name', 'isExternal']),
-        type: WalletType.COSMOS,
+        type: 'COSMOS',
         address: para.getDisplayAddress(evmId, { addressType: 'COSMOS' }),
       },
       _.pick(para.wallets[solanaId], ['id', 'type', 'name', 'address', 'isExternal']),

@@ -1,14 +1,14 @@
 import { ReactNode, useMemo } from 'react';
 import styled from 'styled-components';
 import { OAuth } from '../OAuth/OAuth.js';
-import { OAuthMethod } from '@getpara/web-sdk';
+import { TOAuthMethod } from '@getpara/web-sdk';
 import { AuthInput } from '../AuthInput/AuthInput.js';
 import { useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 
 interface AuthOptionsProps {
-  oAuthMethods?: OAuthMethod[];
+  oAuthMethods?: TOAuthMethod[];
   disableEmailLogin: boolean;
   disablePhoneLogin: boolean;
 }

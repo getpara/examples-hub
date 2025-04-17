@@ -138,6 +138,7 @@ export interface EncryptedKeyShare {
   protocolId?: string;
 }
 
+/** @deprecated use the string union type `TOAuthMethod` instead */
 export enum OAuthMethod {
   GOOGLE = 'GOOGLE',
   TWITTER = 'TWITTER',
@@ -147,6 +148,10 @@ export enum OAuthMethod {
   FARCASTER = 'FARCASTER',
   TELEGRAM = 'TELEGRAM',
 }
+
+export const OAUTH_METHODS = ['GOOGLE', 'TWITTER', 'APPLE', 'DISCORD', 'FACEBOOK', 'FARCASTER', 'TELEGRAM'] as const;
+
+export type TOAuthMethod = (typeof OAUTH_METHODS)[number];
 
 export enum AuthMethod {
   PASSWORD = 'PASSWORD',
@@ -262,6 +267,6 @@ export type Setup2faResponse =
       uri: string;
     };
 
-export type AccountMetadataKey = Lowercase<Exclude<OAuthMethod, OAuthMethod.TWITTER> | 'X'>;
+export type AccountMetadataKey = Lowercase<Exclude<TOAuthMethod, 'TWITTER'> | 'X'>;
 
 export type AccountMetadata = Partial<Record<AccountMetadataKey, { date: Date; metadata: Record<string, any> }>>;

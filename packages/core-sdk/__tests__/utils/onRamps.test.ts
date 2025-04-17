@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { getOnRampAssets, getOnRampNetworks, toAssetInfoArray } from '../../src/utils/index.js';
-import { Network, OnRampAsset, WalletType } from '@getpara/user-management-client';
+import { Network, OnRampAsset } from '@getpara/user-management-client';
 
 describe('definitions', () => {
   describe('toAssetInfoArray', () => {
@@ -11,9 +11,7 @@ describe('definitions', () => {
         COSMOS: {},
       });
 
-      expect(resp).toStrictEqual([
-        [WalletType.EVM, Network.ETHEREUM, Network.ETHEREUM, { STRIPE: ['test', { BUY: true }] }],
-      ]);
+      expect(resp).toStrictEqual([['EVM', Network.ETHEREUM, Network.ETHEREUM, { STRIPE: ['test', { BUY: true }] }]]);
     });
   });
   describe('getOnRampNetworks', () => {
@@ -24,7 +22,7 @@ describe('definitions', () => {
           SOLANA: {},
           COSMOS: {},
         },
-        { walletType: WalletType.EVM, allowed: [Network.ETHEREUM] },
+        { walletType: 'EVM', allowed: [Network.ETHEREUM] },
       );
 
       expect(resp).toStrictEqual([Network.ETHEREUM]);
@@ -36,7 +34,7 @@ describe('definitions', () => {
           SOLANA: {},
           COSMOS: {},
         },
-        { walletType: WalletType.EVM, allowed: [Network.SEPOLIA] },
+        { walletType: 'EVM', allowed: [Network.SEPOLIA] },
       );
 
       expect(resp).toStrictEqual([]);
@@ -48,7 +46,7 @@ describe('definitions', () => {
           SOLANA: {},
           COSMOS: {},
         },
-        { walletType: WalletType.SOLANA, allowed: [Network.SOLANA] },
+        { walletType: 'SOLANA', allowed: [Network.SOLANA] },
       );
 
       expect(resp).toStrictEqual([]);
@@ -83,7 +81,7 @@ describe('definitions', () => {
           SOLANA: {},
           COSMOS: {},
         },
-        { walletType: WalletType.SOLANA },
+        { walletType: 'SOLANA' },
       );
 
       expect(resp).toStrictEqual([]);

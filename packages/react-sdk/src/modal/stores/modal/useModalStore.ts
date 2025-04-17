@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { ModalStep } from '../../utils/steps.js';
 import { getActions } from './actions.js';
-import { OnRampConfig as OnRampConfigBase, OnRampPurchase, WalletType } from '@getpara/web-sdk';
+import { OnRampConfig as OnRampConfigBase, OnRampPurchase, TWalletType } from '@getpara/web-sdk';
 import { Tab as AddFundsTabType } from '../../components/AddFunds/AddFundsContext.js';
 import { AuthStateLogin, AuthStateSignup, AuthState, AuthStateVerify } from '@getpara/core-sdk';
 import { AuthLayout, TAuthLayout } from '../../types/modalProps.js';
@@ -11,7 +11,7 @@ import { Setup2faResponse } from '@getpara/user-management-client';
 
 type Flow = AuthStateSignup['stage'] | AuthStateLogin['stage'] | 'account';
 
-type ActiveWallet = [string | undefined, WalletType | undefined];
+type ActiveWallet = [string | undefined, TWalletType | undefined];
 
 export enum OnRampStep {
   SETTINGS = 0,

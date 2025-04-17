@@ -3,7 +3,7 @@ import { sha256 } from '@noble/hashes/sha256';
 import { ripemd160 } from '@noble/hashes/ripemd160';
 
 import elliptic from 'elliptic';
-import { WalletTypeProp } from '../types/index.js';
+import { TWalletType } from '@getpara/user-management-client';
 
 const secp256k1 = new elliptic.ec('secp256k1');
 
@@ -76,7 +76,7 @@ export function getCosmosAddress(publicKey: string, prefix: string) {
 
 export function truncateAddress(
   str: string,
-  addressType: WalletTypeProp,
+  addressType: TWalletType,
   {
     prefix = addressType === 'COSMOS' ? 'cosmos' : undefined,
     targetLength,

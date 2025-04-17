@@ -1,4 +1,4 @@
-import ParaWeb, { CurrentWalletIds, OAuthMethod } from '@getpara/web-sdk';
+import ParaWeb, { CurrentWalletIds, TOAuthMethod } from '@getpara/web-sdk';
 import { Theme } from '@getpara/react-components';
 import { OnModalStepChangeValue } from '../stores/index.js';
 import { ModalStep, ModalStepProp } from '../utils/steps.js';
@@ -60,7 +60,7 @@ export interface ParaModalProps {
    * Which OAuth methods (if any) to show.
    * Defaults to `true`.
    */
-  oAuthMethods?: OAuthMethod[];
+  oAuthMethods?: TOAuthMethod[];
   /**
    * Whether or not to allow for email login. If true, only OAuth login will be available.
    * Defaults to `false`.

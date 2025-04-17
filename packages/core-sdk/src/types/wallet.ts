@@ -3,7 +3,7 @@ import {
   ExternalWalletType,
   PartnerEntity,
   TPregenIdentifierType,
-  WalletScheme,
+  TWalletScheme,
 } from '@getpara/user-management-client';
 
 export interface Wallet {
@@ -14,7 +14,7 @@ export interface Wallet {
   address?: string;
   addressSecondary?: string;
   publicKey?: string;
-  scheme?: WalletScheme;
+  scheme?: TWalletScheme;
   type?: EmbeddedWalletType | ExternalWalletType;
   isPregen?: boolean;
   pregenIdentifier?: string;

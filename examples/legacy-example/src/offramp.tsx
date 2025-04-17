@@ -4,7 +4,7 @@ import {
   OnRampAsset,
   OnRampProvider,
   SuccessfulSignatureRes,
-  WalletType,
+  TWalletType,
   hexStringToBase64,
 } from '@getpara/core-sdk';
 import { getContractAddressFromAsset, getChainId } from '@getpara/react-common';
@@ -20,7 +20,7 @@ export function OfframpSend({
   setTestMode,
 }: {
   para: ParaWeb;
-  walletType: WalletType;
+  walletType: TWalletType;
   walletId: string;
   testMode: boolean;
   setTestMode: Dispatch<SetStateAction<boolean>>;
@@ -122,7 +122,7 @@ export function OfframpSend({
 
             let signature: string | undefined;
             switch (walletType) {
-              case WalletType.EVM:
+              case 'EVM':
                 signature = (
                   (await para.signTransaction({
                     walletId,
@@ -131,7 +131,7 @@ export function OfframpSend({
                   })) as SuccessfulSignatureRes
                 )?.signature;
                 break;
-              case WalletType.SOLANA:
+              case 'SOLANA':
                 signature = (
                   (await para.signMessage({ walletId, messageBase64: generated.message })) as SuccessfulSignatureRes
                 )?.signature;

@@ -1,7 +1,7 @@
 import { Fragment, ReactNode, useMemo } from 'react';
 import { CpslButton, CpslDivider, CpslIconGroup, IconType } from '@getpara/react-components';
 import styled from 'styled-components';
-import { OAuthMethod } from '@getpara/web-sdk';
+import { TOAuthMethod } from '@getpara/web-sdk';
 import { ExternalWallets } from '../ExternalWallets/ExternalWallets.js';
 import { useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
@@ -12,7 +12,7 @@ import { useExternalWallets } from '../../../provider/providers/ExternalWalletPr
 import { useStore } from '../../../provider/stores/useStore.js';
 
 interface AuthMainStepContentProps {
-  oAuthMethods?: OAuthMethod[];
+  oAuthMethods?: TOAuthMethod[];
   disableEmailLogin: boolean;
   disablePhoneLogin: boolean;
 }

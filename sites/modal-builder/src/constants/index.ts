@@ -1,4 +1,4 @@
-import { OAuthMethod, ExternalWallet, Network, OnRampProvider } from '@getpara/react-sdk';
+import { OAUTH_METHODS, ExternalWallet, Network, OnRampProvider } from '@getpara/react-sdk';
 import { Network as CosmosNetwork } from '@delphi-labs/shuttle';
 import {
   MailIcon,
@@ -35,7 +35,7 @@ import {
   TAuthLayout,
 } from '../types';
 
-export const ALL_AUTH_METHODS: AuthMethod[] = ['email-auth', 'phone-auth', ...Object.values(OAuthMethod)];
+export const ALL_AUTH_METHODS: AuthMethod[] = ['email-auth', 'phone-auth', ...OAUTH_METHODS] as const;
 
 export const ALL_EXTERNAL_WALLETS: CustomExternalWallet[] = Object.keys(ExternalWallet) as CustomExternalWallet[];
 
@@ -44,13 +44,13 @@ export const AUTH_SECTION_IDS = ['web2', 'web3'] as const;
 export const AUTH_METHOD_CONFIGS: Partial<Record<AuthMethod, DraggableItemHeaderConfig>> = {
   'email-auth': { logo: MailIcon, label: 'Email' },
   'phone-auth': { logo: PhoneIcon, label: 'Phone' },
-  [OAuthMethod.GOOGLE]: { logo: GoogleIcon, label: 'Google' },
-  [OAuthMethod.TWITTER]: { logo: TwitterIcon, label: 'Twitter' },
-  [OAuthMethod.DISCORD]: { logo: DiscordIcon, label: 'Discord' },
-  [OAuthMethod.FARCASTER]: { logo: FarcasterIcon, label: 'Farcaster' },
-  [OAuthMethod.FACEBOOK]: { logo: FacebookIcon, label: 'Facebook' },
-  [OAuthMethod.APPLE]: { logo: AppleIcon, label: 'Apple' },
-  [OAuthMethod.TELEGRAM]: { logo: TelegramIcon, label: 'Telegram' },
+  'GOOGLE': { logo: GoogleIcon, label: 'Google' },
+  'TWITTER': { logo: TwitterIcon, label: 'Twitter' },
+  'DISCORD': { logo: DiscordIcon, label: 'Discord' },
+  'FARCASTER': { logo: FarcasterIcon, label: 'Farcaster' },
+  'FACEBOOK': { logo: FacebookIcon, label: 'Facebook' },
+  'APPLE': { logo: AppleIcon, label: 'Apple' },
+  'TELEGRAM': { logo: TelegramIcon, label: 'Telegram' },
 };
 
 export const EXTERNAL_WALLET_CONFIGS: Partial<Record<CustomExternalWallet, DraggableItemHeaderConfig>> = {
@@ -83,7 +83,7 @@ export const MODAL_BUILDER_DEFAULT_CONFIG: ModalBuilderConfig = {
     networks: [Network.ETHEREUM, Network.SOLANA, Network.COSMOS],
   },
   authentication: {
-    oAuthMethods: [OAuthMethod.GOOGLE, OAuthMethod.FARCASTER],
+    oAuthMethods: ['GOOGLE', 'FARCASTER'],
     disableEmailLogin: false,
     disablePhoneLogin: false,
     authLayout: ['AUTH:FULL', 'EXTERNAL:FULL'] as TAuthLayout[],

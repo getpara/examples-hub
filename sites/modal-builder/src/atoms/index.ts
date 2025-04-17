@@ -1,5 +1,5 @@
 import { atom, WritableAtom } from 'jotai';
-import { getClient, OAuthMethod } from '@getpara/react-sdk';
+import { getClient, TOAuthMethod } from '@getpara/react-sdk';
 import qs from 'qs';
 import merge from 'lodash.merge';
 import { getModalCodeString } from '../utils/codeGenerator';
@@ -12,7 +12,7 @@ export const viewAtom = atom<ViewType>('desktop');
 export const isLoggedInAtom = atom<boolean>(false);
 
 interface PreviousWeb2State {
-  oAuthMethods: OAuthMethod[];
+  oAuthMethods: TOAuthMethod[];
   disableEmailLogin: boolean;
   disablePhoneLogin: boolean;
   authLayoutWeb2?: TAuthLayout;

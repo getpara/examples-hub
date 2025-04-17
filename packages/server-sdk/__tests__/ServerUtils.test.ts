@@ -3,7 +3,7 @@ import { ServerUtils } from '../src/ServerUtils.js';
 import * as privateKey from '../src/wallet/privateKey.js';
 import { BASE64_BYTES, CHAIN, MESSAGE, PARTNER, SECRET_KEY, SIGNATURE, TX, USER, WALLET } from './constants.js';
 import { TEST_CTX } from './setup.js';
-import { EmailTheme, WalletType } from '@getpara/user-management-client';
+import { EmailTheme } from '@getpara/user-management-client';
 import * as keygen from '../src/wallet/keygen.js';
 import * as signing from '../src/wallet/signing.js';
 import { ServerLocalStorage } from '../src/ServerLocalStorage.js';
@@ -78,14 +78,14 @@ describe('ServerUtils', () => {
       theme: EmailTheme.LIGHT,
     };
 
-    const resp = await serverUtils.keygen(TEST_CTX, USER.id, WalletType.EVM, SECRET_KEY, USER.sessionCookie, emailProps);
+    const resp = await serverUtils.keygen(TEST_CTX, USER.id, 'EVM', SECRET_KEY, USER.sessionCookie, emailProps);
 
     expect(resp).toMatchObject({
       signer: WALLET.signer,
       walletId: WALLET.id,
     });
     expect(keygenSpy).toBeCalledTimes(1);
-    expect(keygenSpy).toBeCalledWith(TEST_CTX, USER.id, WalletType.EVM, SECRET_KEY, USER.sessionCookie, emailProps);
+    expect(keygenSpy).toBeCalledWith(TEST_CTX, USER.id, 'EVM', SECRET_KEY, USER.sessionCookie, emailProps);
   });
 
   it('refresh throws error', async () => {
@@ -104,7 +104,7 @@ describe('ServerUtils', () => {
       PARTNER.id,
       USER.email,
       'EMAIL',
-      WalletType.EVM,
+      'EVM',
       SECRET_KEY,
       USER.sessionCookie,
     );
@@ -118,7 +118,7 @@ describe('ServerUtils', () => {
       TEST_CTX,
       USER.email,
       'EMAIL',
-      WalletType.EVM,
+      'EVM',
       SECRET_KEY,
       false,
       PARTNER.id,

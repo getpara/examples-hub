@@ -9,7 +9,6 @@ import { ethers } from 'ethers';
 import * as solana from '@solana/web3.js';
 import Para from '@getpara/web-sdk';
 import {
-  OAuthMethod,
   ModalStep,
   ModalStepProp,
   ParaProvider,
@@ -23,7 +22,7 @@ import ParaCore, {
   Environment,
   ConstructorOpts,
   getBaseUrl,
-  WalletType,
+  TWalletType,
   TPregenIdentifierType,
   PREGEN_IDENTIFIER_TYPES,
   TransactionReviewDenied,
@@ -486,7 +485,7 @@ function AppInner({
 
   const [pregenIdentifier, setPregenIdentifier] = useState('');
   const [pregenIdentifierType, setPregenIdentifierType] = useState<TPregenIdentifierType>('EMAIL');
-  const [pregenWalletType, setPregenWalletType] = useLocalStorage<WalletType | 'missing'>(
+  const [pregenWalletType, setPregenWalletType] = useLocalStorage<TWalletType | 'missing'>(
     '@EXAMPLE-PARA/pregenWalletType',
     'missing',
   );
@@ -529,7 +528,7 @@ function AppInner({
 
   const isMultiWallet = Object.values(para?.supportedWalletTypes ?? []).length > 1;
 
-  const [[walletType, walletId, isPregen], setWallet] = useState<[WalletType | undefined, string | undefined, boolean]>(
+  const [[walletType, walletId, isPregen], setWallet] = useState<[TWalletType | undefined, string | undefined, boolean]>(
     (() => {
       try {
         if (para) {
@@ -1081,7 +1080,7 @@ function AppInner({
                         onChange={e => {
                           const [walletType, walletId] = e.target.value.split('~');
 
-                          setWallet([walletType as WalletType, walletId, false]);
+                          setWallet([walletType as TWalletType, walletId, false]);
                         }}
                       >
                         {Object.entries(para?.currentWalletIds ?? {}).map(([type, ids]) => (
@@ -1388,15 +1387,7 @@ const App = () => {
           twoFactorAuthEnabled: true,
           hideWallets,
           onRampTestMode,
-          oAuthMethods: [
-            OAuthMethod.GOOGLE,
-            OAuthMethod.TELEGRAM,
-            OAuthMethod.FACEBOOK,
-            OAuthMethod.APPLE,
-            OAuthMethod.TWITTER,
-            OAuthMethod.DISCORD,
-            OAuthMethod.FARCASTER,
-          ],
+          oAuthMethods: ['GOOGLE', 'TELEGRAM', 'FACEBOOK', 'APPLE', 'TWITTER', 'DISCORD', 'FARCASTER'],
         }}
       >
         <AppInner currentStepOverride={currentStepOverride} setCurrentStepOverride={setCurrentStepOverride} />

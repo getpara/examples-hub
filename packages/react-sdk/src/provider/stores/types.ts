@@ -1,5 +1,5 @@
 import { Context, MutableRefObject } from 'react';
-import ParaWeb, { WalletType } from '@getpara/web-sdk';
+import ParaWeb, { TWalletType } from '@getpara/web-sdk';
 import { EvmExternalWalletContextType, ParaEvmProvider, WalletList as EvmWalletList } from '@getpara/evm-wallet-connectors';
 import {
   CosmosExternalWalletContextType,
@@ -41,8 +41,8 @@ export interface WalletSlice {
   setRpcUrl: (_?: string) => void;
 
   selectedWalletId?: string;
-  selectedWalletType?: WalletType;
-  setSelectedWallet: (_?: string, __?: WalletType) => void;
+  selectedWalletType?: TWalletType;
+  setSelectedWallet: (_?: string, __?: TWalletType) => void;
   clearSelectedWallet: () => void;
 }
 export interface ExternalWalletsSlice {

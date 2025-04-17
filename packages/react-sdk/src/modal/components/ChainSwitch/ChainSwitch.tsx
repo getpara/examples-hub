@@ -7,7 +7,6 @@ import { useCopyToClipboard } from '@getpara/react-common';
 import { ModalStep } from '../../utils/steps.js';
 import { routeMobileExternalWallet } from '../../utils/routeMobileExternalWallet.js';
 import { NETWORK_NOT_SUPPORTED_ERROR } from '../../constants/constants.js';
-import { WalletType } from '@getpara/web-sdk';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 
 export const ChainSwitch = () => {
@@ -18,7 +17,7 @@ export const ChainSwitch = () => {
   const { switchChain, wallet, qrUri, chainIdSwitchingTo, walletDisplayHelpers } = useExternalWallets();
 
   useEffect(() => {
-    if (wallet?.type === WalletType.COSMOS) {
+    if (wallet?.type === 'COSMOS') {
       routeMobileExternalWallet(qrUri);
     }
   }, [qrUri, wallet]);

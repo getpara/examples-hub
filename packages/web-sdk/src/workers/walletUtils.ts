@@ -1,4 +1,4 @@
-import { Ctx, getBaseMPCNetworkUrl, TPregenIdentifierType, SignatureRes, WalletScheme, WalletType } from '@getpara/core-sdk';
+import { Ctx, getBaseMPCNetworkUrl, TPregenIdentifierType, SignatureRes, TWalletType } from '@getpara/core-sdk';
 
 const configCGGMPBase = (serverUrl: string, walletId: string, id: string) =>
   `{"ServerUrl":"${serverUrl}", "WalletId": "${walletId}", "Id":"${id}", "Ids":["USER","CAPSULE"], "Threshold":1}`;
@@ -52,8 +52,8 @@ async function sendTransactionRequest(
 
 export async function ed25519Keygen(ctx: Ctx, userId: string): Promise<{ signer: string; walletId: string }> {
   const { walletId, protocolId } = await ctx.client.createWallet(userId, {
-    scheme: WalletScheme.ED25519,
-    type: WalletType.SOLANA,
+    scheme: 'ED25519',
+    type: 'SOLANA',
   });
   const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
 
@@ -80,8 +80,8 @@ export async function ed25519PreKeygen(
   const { walletId, protocolId } = await ctx.client.createPregenWallet({
     pregenIdentifier,
     pregenIdentifierType,
-    scheme: WalletScheme.ED25519,
-    type: WalletType.SOLANA,
+    scheme: 'ED25519',
+    type: 'SOLANA',
   });
 
   const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
@@ -108,7 +108,7 @@ export async function ed25519Sign(
   walletId: string,
   base64Bytes: string,
 ): Promise<{ signature: string }> {
-  const { protocolId } = await ctx.client.preSignMessage(userId, walletId, base64Bytes, WalletScheme.ED25519);
+  const { protocolId } = await ctx.client.preSignMessage(userId, walletId, base64Bytes, 'ED25519');
 
   try {
     const base64Sig = (await new Promise((resolve, reject) =>
@@ -128,14 +128,14 @@ export async function ed25519Sign(
 export async function keygen(
   ctx: Ctx,
   userId: string,
-  type: Exclude<WalletType, WalletType.SOLANA>,
+  type: Exclude<TWalletType, 'SOLANA'>,
   secretKey: string | null,
 ): Promise<{ signer: string; walletId: string }> {
   const { walletId, protocolId } = await ctx.client.createWallet(userId, {
     useTwoSigners: true,
-    scheme: ctx.useDKLS ? WalletScheme.DKLS : WalletScheme.CGGMP,
+    scheme: ctx.useDKLS ? 'DKLS' : 'CGGMP',
     type,
-    cosmosPrefix: type === WalletType.COSMOS ? ctx.cosmosPrefix : undefined,
+    cosmosPrefix: type === 'COSMOS' ? ctx.cosmosPrefix : undefined,
   });
 
   if (ctx.offloadMPCComputationURL && !ctx.useDKLS) {
@@ -177,14 +177,14 @@ export async function preKeygen(
   _partnerId: string | undefined,
   pregenIdentifier: string,
   pregenIdentifierType: TPregenIdentifierType,
-  type: Exclude<WalletType, WalletType.SOLANA>,
+  type: Exclude<TWalletType, 'SOLANA'>,
   secretKey: string | null,
 ): Promise<{ signer: string; walletId: string }> {
   const { walletId, protocolId } = await ctx.client.createPregenWallet({
     pregenIdentifier,
     pregenIdentifierType,
     type,
-    cosmosPrefix: type === WalletType.COSMOS ? ctx.cosmosPrefix : undefined,
+    cosmosPrefix: type === 'COSMOS' ? ctx.cosmosPrefix : undefined,
   });
 
   const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);

@@ -17,7 +17,7 @@ import { getWalletConnectUri } from '../utils/getWalletConnectUri.js';
 import { normalize } from 'viem/ens';
 import { useExternalWalletStore } from '../stores/useStore.js';
 import type { CommonChain, CommonWallet, TExternalWallet } from '@getpara/react-common';
-import ParaWeb, { AuthState, isMobile, Wallet, WalletType } from '@getpara/web-sdk';
+import ParaWeb, { AuthState, isMobile, Wallet } from '@getpara/web-sdk';
 import { etherUnits, formatUnits } from 'viem';
 
 const defaultEvmExternalWallet = {
@@ -148,7 +148,7 @@ export function EvmExternalWalletProvider({
       !isLocalConnecting &&
       !isConnecting &&
       !isReconnecting &&
-      storedExternalWallet?.type === WalletType.EVM &&
+      storedExternalWallet?.type === 'EVM' &&
       storedExternalWallet?.address !== wagmiAddress &&
       connectedConnector?.id !== 'para'
     ) {
@@ -163,7 +163,7 @@ export function EvmExternalWalletProvider({
       !isReconnecting &&
       connectedWallet &&
       connectedConnector &&
-      connectedWallet.type === WalletType.EVM &&
+      connectedWallet.type === 'EVM' &&
       connectedConnector.name !== connectedWallet.name
     ) {
       switchAccount(connectedWallet.isExternal ? connectedWallet.name : 'Para');
@@ -263,7 +263,7 @@ export function EvmExternalWalletProvider({
       return await para.loginExternalWallet({
         externalWallet: {
           address,
-          type: WalletType.EVM,
+          type: 'EVM',
           provider: connectorName,
           withFullParaAuth: walletsWithFullAuth?.includes((walletId?.toUpperCase() ?? '') as TExternalWallet),
           ensName,
@@ -422,7 +422,7 @@ export function EvmExternalWalletProvider({
       ...connector,
       connect: () => connect(connector),
       connectMobile: isManualWalletConnect => connectMobile(connector, isManualWalletConnect),
-      type: WalletType.EVM,
+      type: 'EVM',
       getQrUri: getQrUri(connector),
     } as CommonWallet;
   });

@@ -1,7 +1,7 @@
 import { vi, describe, it, expect, afterEach, beforeEach } from 'vitest';
 
 import { ed25519Keygen, ed25519PreKeygen, keygen, preKeygen, refresh } from '../../src/wallet/keygen.js';
-import { Environment, WalletType } from '@getpara/core-sdk';
+import { Environment } from '@getpara/core-sdk';
 import {
   COSMOS_PREFIX,
   OFFLOAD_MPC_COMPUTATION_URL,
@@ -34,7 +34,7 @@ describe('keygen', () => {
 
   describe('keygen', () => {
     it('success', async () => {
-      const resp = await keygen(TEST_CTX, USER.id, WalletType.EVM, SECRET_KEY, false, USER.sessionCookie);
+      const resp = await keygen(TEST_CTX, USER.id, 'EVM', SECRET_KEY, false, USER.sessionCookie);
 
       expect(resp).toStrictEqual({
         signer: WALLET.signer,
@@ -51,7 +51,7 @@ describe('keygen', () => {
         params: {
           userId: USER.id,
           secretKey: SECRET_KEY,
-          type: WalletType.EVM,
+          type: 'EVM',
         },
         functionType: 'KEYGEN',
         offloadMPCComputationURL: OFFLOAD_MPC_COMPUTATION_URL,
@@ -63,7 +63,7 @@ describe('keygen', () => {
       });
     });
     it('success - skip distribute', async () => {
-      const resp = await keygen(TEST_CTX, USER.id, WalletType.EVM, SECRET_KEY, true, USER.sessionCookie);
+      const resp = await keygen(TEST_CTX, USER.id, 'EVM', SECRET_KEY, true, USER.sessionCookie);
 
       expect(resp).toStrictEqual({
         signer: WALLET.signer,
@@ -80,7 +80,7 @@ describe('keygen', () => {
         params: {
           userId: USER.id,
           secretKey: SECRET_KEY,
-          type: WalletType.EVM,
+          type: 'EVM',
         },
         functionType: 'KEYGEN',
         offloadMPCComputationURL: OFFLOAD_MPC_COMPUTATION_URL,
@@ -94,16 +94,7 @@ describe('keygen', () => {
   });
   describe('preKeygen', () => {
     it('success', async () => {
-      const resp = await preKeygen(
-        TEST_CTX,
-        USER.email,
-        'EMAIL',
-        WalletType.EVM,
-        SECRET_KEY,
-        false,
-        PARTNER.id,
-        USER.sessionCookie,
-      );
+      const resp = await preKeygen(TEST_CTX, USER.email, 'EMAIL', 'EVM', SECRET_KEY, false, PARTNER.id, USER.sessionCookie);
 
       expect(resp).toStrictEqual({
         signer: PREGEN_WALLET.signer,
@@ -119,7 +110,7 @@ describe('keygen', () => {
         params: {
           pregenIdentifier: USER.email,
           pregenIdentifierType: 'EMAIL',
-          type: WalletType.EVM,
+          type: 'EVM',
           secretKey: SECRET_KEY,
           partnerId: PARTNER.id,
           email: USER.email,

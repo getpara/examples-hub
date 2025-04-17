@@ -11,7 +11,7 @@ import {
   VerifyExternalWalletParams,
   WalletEntity,
   WalletParams,
-  WalletType,
+  TWalletType,
 } from '@getpara/user-management-client';
 import {
   AuthStateLogin,
@@ -32,7 +32,6 @@ import {
 } from './methods.js';
 import { ParaCore } from '../ParaCore.js';
 import { FullSignatureRes, Wallet } from './wallet.js';
-import { WalletTypeProp } from './config.js';
 
 export const PARA_CORE_METHODS = [
   'getAuthInfo',
@@ -329,7 +328,7 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
     sync: true;
   };
   getWalletsByType: {
-    params: WalletTypeProp;
+    params: TWalletType;
     response: Wallet[];
     sync: true;
   };
@@ -339,7 +338,7 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
   };
   createWallet: {
     params: {
-      type?: Uppercase<WalletType>;
+      type?: Uppercase<TWalletType>;
       skipDistribute?: boolean;
     };
     response: [Wallet, string | undefined];
@@ -349,7 +348,7 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
       /**
        * Array of the wallet types to create
        */
-      types?: Uppercase<WalletType>[];
+      types?: Uppercase<TWalletType>[];
       /**
        * If `true`, skip distributing the new wallets shares.
        */
@@ -406,7 +405,7 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
       /**
        * The type of wallet to create, 'EVM' | 'SOLANA' | 'COSMOS'
        */
-      type: WalletType;
+      type: TWalletType;
       /**
        * The pregen identifier for the wallet, in the form: `{ email: string } | { phone: string } | { telegramUserId: string } | { farcasterUsername: string } | { xUsername: string } | { discordUsername: string } | { customId: string }`
        */
@@ -419,7 +418,7 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
       /**
        * The wallet types to create. If not provided, defaults to your application's `supportedWalletTypes` setting.
        */
-      types?: WalletType[];
+      types?: TWalletType[];
       /**
        * The pregen identifier for the wallets, in the form: `{ email: string } | { phone: string } | { telegramUserId: string } | { farcasterUsername: string } | { xUsername: string } | { discordUsername: string } | { customId: string }`
        */

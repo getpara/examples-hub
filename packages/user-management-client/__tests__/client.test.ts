@@ -13,8 +13,8 @@ import {
   PasswordStatus,
   PublicKeyStatus,
   PublicKeyType,
-  WalletScheme,
-  WalletType,
+  TWalletScheme,
+  TWalletType,
 } from '../src';
 
 const email = 'email@test.com';
@@ -287,7 +287,7 @@ describe('Client', () => {
       const body = {
         externalWallet: {
           address: 'external-address',
-          type: WalletType.EVM,
+          type: 'EVM' as TWalletType,
           provider: 'metamask',
         },
       };
@@ -310,19 +310,10 @@ describe('Client', () => {
 
     it('verifyExternalWallet', async () => {
       const body = {
-        address: 'external-address',
-        signedMessage: 'signedMessage',
-      };
-
-      await client.verifyExternalWallet(userId, body);
-      expect(mocks.post).toBeCalledWith(`/users/${userId}/external-wallets/verify/v2`, body);
-    });
-
-    it('verifyExternalWallet', async () => {
-      const body = {
         externalWallet: {
-          address: 'external-address',
-          type: WalletType.EVM,
+          address: externalWalletAddress,
+          type: 'EVM' as TWalletType,
+          provider: 'metamask',
         },
         signedMessage: 'signedMessage',
       };
@@ -486,9 +477,9 @@ describe('Client', () => {
 
     it('createWallet', async () => {
       const body = {
-        type: WalletType.EVM,
+        type: 'EVM' as TWalletType,
         network: Network.ETHEREUM,
-        scheme: WalletScheme.DKLS,
+        scheme: 'DKLS' as TWalletScheme,
         address: 'address',
         publicKey: 'public-key',
         chainId: 'chain-id',
@@ -503,9 +494,9 @@ describe('Client', () => {
 
     it('createPregenWallet', async () => {
       const body = {
-        type: WalletType.EVM,
+        type: 'EVM',
         network: Network.ETHEREUM,
-        scheme: WalletScheme.DKLS,
+        scheme: 'DKLS',
         address: 'address',
         publicKey: 'public-key',
         chainId: 'chain-id',
@@ -690,11 +681,11 @@ describe('Client', () => {
     });
 
     it('preSignMessage', async () => {
-      await client.preSignMessage(userId, walletId, 'message', WalletScheme.DKLS, 'cosmosSignDoc');
+      await client.preSignMessage(userId, walletId, 'message', 'DKLS', 'cosmosSignDoc');
 
       expect(mocks.post).toBeCalledWith(`/users/${userId}/wallets/${walletId}/messages/sign`, {
         message: 'message',
-        scheme: WalletScheme.DKLS,
+        scheme: 'DKLS',
         cosmosSignDoc: 'cosmosSignDoc',
       });
     });
@@ -993,7 +984,7 @@ describe('Client', () => {
     it('createOnRampPurchase', async () => {
       const params = {
         type: OnRampPurchaseType.BUY,
-        walletType: WalletType.EVM,
+        walletType: 'EVM' as TWalletType,
         address: 'address',
         provider: OnRampProvider.MOONPAY,
         networks: [Network.ETHEREUM],
@@ -1054,7 +1045,7 @@ describe('Client', () => {
       const externalWalletAddress = 'external-wallet-address';
       const params = {
         url: 'url',
-        type: WalletType.EVM,
+        type: 'EVM' as TWalletType,
         cosmosPrefix: 'cosmos',
         testMode: false,
       };
@@ -1079,7 +1070,7 @@ describe('Client', () => {
         contractAddress: 'contract-address',
         testMode: false,
         walletId,
-        walletType: WalletType.EVM,
+        walletType: 'EVM' as TWalletType,
         destinationAddress: 'destination-address',
         assetQuantity: '100',
       };
@@ -1096,7 +1087,7 @@ describe('Client', () => {
         tx: 'tx',
         signature: 'signature',
         network: Network.ETHEREUM,
-        walletType: WalletType.EVM,
+        walletType: 'EVM' as TWalletType,
       };
 
       await client.sendOffRampTx(userId, { ...params, walletId });
