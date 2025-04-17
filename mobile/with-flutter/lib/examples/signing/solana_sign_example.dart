@@ -40,25 +40,21 @@ class _SolanaSignExampleState extends State<SolanaSignExample> {
   @override
   void initState() {
     super.initState();
-
     _solanaClient =
         web3.SolanaClient(rpcUrl: devnetRpcUrl, websocketUrl: devnetWsUrl);
     _solanaSigner =
         ParaSolanaWeb3Signer(para: para, solanaClient: _solanaClient);
-
     _checkBalance();
   }
 
   void _checkBalance() async {
     final balance =
         await _solanaClient.rpcClient.getBalance(widget.wallet.address!);
-
     setState(() {
       _balanceSol = balance.value / web3.lamportsPerSol;
     });
   }
 
-// This method assumes usage of solana (https://pub.dev/packages/solana) package.
   Future<void> _signTransaction() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -128,7 +124,6 @@ class _SolanaSignExampleState extends State<SolanaSignExample> {
           recentBlockhash: blockhash.blockhash, feePayer: publicKey);
       final signedTransaction =
           await _solanaSigner.signTransaction(compiledMessage);
-
       final sendTransaction =
           await _solanaSigner.sendTransaction(signedTransaction);
 
@@ -249,47 +244,17 @@ class _SolanaSignExampleState extends State<SolanaSignExample> {
                   const SizedBox(height: 24),
                   Text(
                     _error!,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.red),
                   ),
                 ],
                 if (_lastSignature != null) ...[
                   const SizedBox(height: 24),
                   const Text(
-                    'Transaction Signature:',
+                    'Last Signature:',
                     style: TextStyle(fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              _lastSignature!,
-                              style: const TextStyle(fontFamily: 'monospace'),
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.copy),
-                            onPressed: () {
-                              Clipboard.setData(
-                                  ClipboardData(text: _lastSignature!));
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content:
-                                        Text('Signature copied to clipboard')),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  Text(_lastSignature!),
                 ],
               ],
             ),

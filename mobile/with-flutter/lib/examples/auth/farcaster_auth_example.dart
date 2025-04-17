@@ -36,7 +36,8 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
 
   // Helper for logging within the state
   void _log(String message, {bool isWarning = false}) {
-     debugPrint('ParaFarcasterAuthExample: ${isWarning ? "WARNING: " : ""}$message');
+    debugPrint(
+        'ParaFarcasterAuthExample: ${isWarning ? "WARNING: " : ""}$message');
   }
 
   Future<void> _checkLoginStatus() async {
@@ -54,24 +55,24 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
           //   MaterialPageRoute(builder: (context) => const DemoHome()),
           // );
         } else {
-           _log("Logged in but no wallets found.");
+          _log("Logged in but no wallets found.");
         }
       }
     } catch (e) {
       _log('Error checking login status: ${e.toString()}', isWarning: true);
     } finally {
-       if (mounted) setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   // Helper to update wallet state consistently
   void _updateWalletState(Wallet wallet) {
-     setState(() {
-        _wallet = wallet;
-        _address = wallet.address;
-        // If CreateWalletResult was used and had recoveryShare:
-        // _recoveryShare = createResult.recoveryShare;
-     });
+    setState(() {
+      _wallet = wallet;
+      _address = wallet.address;
+      // If CreateWalletResult was used and had recoveryShare:
+      // _recoveryShare = createResult.recoveryShare;
+    });
   }
 
   // Updated Farcaster handler using anticipated V2 SDK method
@@ -113,23 +114,27 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
       // --- Temporary Simulation ---
       // Simulate getting the URI and waiting - REMOVE THIS WHEN SDK IS UPDATED
       _log("Simulating Farcaster flow - Displaying dummy QR and waiting...");
-      setState(() { _farcasterConnectUri = "https://warpcast.com/~/sign-in?uri=dummy-uri-for-testing"; });
-      await Future.delayed(const Duration(seconds: 10)); // Simulate waiting time
+      setState(() {
+        _farcasterConnectUri =
+            "https://warpcast.com/~/sign-in?uri=dummy-uri-for-testing";
+      });
+      await Future.delayed(
+          const Duration(seconds: 10)); // Simulate waiting time
       if (_farcasterFlowCancelled) {
-         throw Exception("Farcaster flow cancelled by user.");
+        throw Exception("Farcaster flow cancelled by user.");
       }
       _log("Simulated Farcaster flow complete (assuming success).");
       // --- End Temporary Simulation ---
-
 
       _log("Farcaster flow completed successfully.");
 
       // Fetch wallets to update state after successful login/signup
       final wallets = await para.fetchWallets();
       if (wallets.isNotEmpty) {
-         _updateWalletState(wallets.first);
+        _updateWalletState(wallets.first);
       } else {
-         _log("Farcaster successful but no wallets found after flow.", isWarning: true);
+        _log("Farcaster successful but no wallets found after flow.",
+            isWarning: true);
       }
 
       if (mounted) {
@@ -139,7 +144,6 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
           MaterialPageRoute(builder: (context) => const DemoHome()),
         );
       }
-
     } catch (e) {
       _log('Error during Farcaster auth: ${e.toString()}', isWarning: true);
       if (!mounted) return;
@@ -178,7 +182,8 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
             horizontal: 24,
             vertical: 16,
           ),
-           shape: RoundedRectangleBorder( // Added for consistency
+          shape: RoundedRectangleBorder(
+            // Added for consistency
             borderRadius: BorderRadius.circular(8.0),
           ),
         ),
@@ -198,15 +203,16 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
             const Expanded(
               child: Text(
                 'Continue with Farcaster',
-                 textAlign: TextAlign.center,
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ),
-             if (isLoading)
-              Container( // Ensure indicator doesn't push text
+            if (isLoading)
+              Container(
+                // Ensure indicator doesn't push text
                 alignment: Alignment.centerRight,
                 width: 32, // Give indicator space
                 child: const SizedBox(
@@ -237,7 +243,8 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
         children: [
           const Text("Scan with Warpcast App", style: TextStyle(fontSize: 16)),
           const SizedBox(height: 16),
-          QrImageView( // Use qr_flutter package
+          QrImageView(
+            // Use qr_flutter package
             data: _farcasterConnectUri!,
             version: QrVersions.auto,
             size: 200.0,
@@ -265,7 +272,7 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Farcaster Example (V2)'), // Updated title
+        title: const Text('Farcaster Auth Example'),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -274,7 +281,7 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Text(
-                'Farcaster Authentication', // Updated title
+                'Farcaster Authentication',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -282,7 +289,7 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
               ),
               const SizedBox(height: 12),
               const Text(
-                'Example implementation of Farcaster authentication using Para SDK V2.', // Updated description
+                'Example implementation of Farcaster authentication using Para SDK.',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.black87,
@@ -291,16 +298,18 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
               const SizedBox(height: 48),
               // Show QR code if URI is available, otherwise show button
               if (_farcasterConnectUri != null)
-                 _buildQrCodeDisplay()
+                _buildQrCodeDisplay()
               else
-                 _buildFarcasterButton(),
+                _buildFarcasterButton(),
 
               // Display loading indicator separately if needed, or handle within button
-              if (_isLoading && _farcasterConnectUri == null) // Show general loading only if QR isn't shown
-                 const Padding(
-                    padding: EdgeInsets.only(top: 16.0),
-                    child: Center(child: CircularProgressIndicator()),
-                 ),
+              if (_isLoading &&
+                  _farcasterConnectUri ==
+                      null) // Show general loading only if QR isn't shown
+                const Padding(
+                  padding: EdgeInsets.only(top: 16.0),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
             ],
           ),
         ),

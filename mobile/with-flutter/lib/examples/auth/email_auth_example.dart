@@ -48,7 +48,8 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
     try {
       final isLoggedIn = await para.isFullyLoggedIn(); // Await the ParaFuture
       if (isLoggedIn && mounted) {
-        final wallets = await para.fetchWallets(); // Use fetchWallets for consistency
+        final wallets =
+            await para.fetchWallets(); // Use fetchWallets for consistency
 
         if (wallets.isNotEmpty) {
           _updateWalletState(wallets.first); // Use helper to update state
@@ -57,29 +58,29 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
             MaterialPageRoute(builder: (context) => const DemoHome()),
           );
         } else {
-           _log("Logged in but no wallets found.");
+          _log("Logged in but no wallets found.");
         }
       }
     } catch (e) {
       _log('Error checking login status: ${e.toString()}', isWarning: true);
     } finally {
-       if (mounted) setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   // Helper to update wallet state consistently
   void _updateWalletState(Wallet wallet) {
-     setState(() {
-        _wallet = wallet;
-        _address = wallet.address;
-        // If CreateWalletResult was used and had recoveryShare:
-        // _recoveryShare = createResult.recoveryShare;
-     });
+    setState(() {
+      _wallet = wallet;
+      _address = wallet.address;
+      // If CreateWalletResult was used and had recoveryShare:
+      // _recoveryShare = createResult.recoveryShare;
+    });
   }
 
   // Helper for logging within the state
   void _log(String message, {bool isWarning = false}) {
-     debugPrint('ParaEmailExample: ${isWarning ? "WARNING: " : ""}$message');
+    debugPrint('ParaEmailExample: ${isWarning ? "WARNING: " : ""}$message');
   }
 
   // Renamed function to reflect V2 flow (handles signup or login)
@@ -110,23 +111,25 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
                     onVerify: _handleOtpVerification,
                   ),
                 ),
-              ) ?? false;
+              ) ??
+              false;
 
           if (verificationSuccess) {
-             _log("OTP Verification successful, navigating home.");
-             if (mounted) {
-                Navigator.pushReplacement(
-                   context,
-                   MaterialPageRoute(builder: (context) => const DemoHome()),
-                );
-             }
+            _log("OTP Verification successful, navigating home.");
+            if (mounted) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const DemoHome()),
+              );
+            }
           } else {
-             _log("OTP Verification failed or was cancelled.");
-             if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                   const SnackBar(content: Text('Verification failed or cancelled.')),
-                );
-             }
+            _log("OTP Verification failed or was cancelled.");
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text('Verification failed or cancelled.')),
+              );
+            }
           }
           break;
 
@@ -147,8 +150,10 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
           break;
 
         case AuthStage.signup: // Correct enum usage
-           _log("Received unexpected 'signup' stage from signUpOrLogIn.", isWarning: true);
-           throw Exception("Unexpected authentication stage: signup received directly from signUpOrLogIn.");
+          _log("Received unexpected 'signup' stage from signUpOrLogIn.",
+              isWarning: true);
+          throw Exception(
+              "Unexpected authentication stage: signup received directly from signUpOrLogIn.");
       }
     } catch (e) {
       _log('Error during email auth: ${e.toString()}', isWarning: true);
@@ -164,48 +169,51 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
 
   // Separate handler for OTP verification logic
   Future<bool> _handleOtpVerification(String code) async {
-     setState(() => _isLoading = true);
-     final email = _emailController.text.trim();
-     try {
-        _log("Calling verifyNewAccount with code: $code");
-        // Correct method name and usage
-        final authState = await para.verifyNewAccount(verificationCode: code);
-        _log("verifyNewAccount returned stage: ${authState.stage}");
+    setState(() => _isLoading = true);
+    final email = _emailController.text.trim();
+    try {
+      _log("Calling verifyNewAccount with code: $code");
+      // Correct method name and usage
+      final authState = await para.verifyNewAccount(verificationCode: code);
+      _log("verifyNewAccount returned stage: ${authState.stage}");
 
-        // Correct enum usage
-        if (authState.stage == AuthStage.signup) {
-           if (authState.passkeyId == null) {
-              throw Exception("Signup stage reached, but no passkeyId provided.");
-           }
-           _log("Proceeding to generate passkey with id: ${authState.passkeyId}");
-           // Correct method call with named arguments
-           await para.generatePasskey(
-              identifier: email,
-              biometricsId: authState.passkeyId!,
-           );
-           _log("Passkey generated, creating wallet...");
-           // Correct handling of createWallet result
-           final createResult = await para.createWallet(skipDistribute: false);
-           _log("Wallet created successfully.");
-           _updateWalletState(createResult); // Pass the Wallet object from the result
-           setState(() => _isLoading = false);
-           return true;
-        } else {
-           _log("Unexpected stage after verifyNewAccount: ${authState.stage}", isWarning: true);
-           throw Exception("Verification succeeded but resulted in unexpected stage: ${authState.stage}");
+      // Correct enum usage
+      if (authState.stage == AuthStage.signup) {
+        if (authState.passkeyId == null) {
+          throw Exception("Signup stage reached, but no passkeyId provided.");
         }
-     } catch (e) {
-        _log("Error during OTP verification/signup: ${e.toString()}", isWarning: true);
-         if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-               SnackBar(content: Text('Verification Error: ${e.toString()}')),
-            );
-         }
+        _log("Proceeding to generate passkey with id: ${authState.passkeyId}");
+        // Correct method call with named arguments
+        await para.generatePasskey(
+          identifier: email,
+          biometricsId: authState.passkeyId!,
+        );
+        _log("Passkey generated, creating wallet...");
+        // Correct handling of createWallet result
+        final createResult = await para.createWallet(skipDistribute: false);
+        _log("Wallet created successfully.");
+        _updateWalletState(
+            createResult); // Pass the Wallet object from the result
         setState(() => _isLoading = false);
-        return false;
-     }
+        return true;
+      } else {
+        _log("Unexpected stage after verifyNewAccount: ${authState.stage}",
+            isWarning: true);
+        throw Exception(
+            "Verification succeeded but resulted in unexpected stage: ${authState.stage}");
+      }
+    } catch (e) {
+      _log("Error during OTP verification/signup: ${e.toString()}",
+          isWarning: true);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Verification Error: ${e.toString()}')),
+        );
+      }
+      setState(() => _isLoading = false);
+      return false;
+    }
   }
-
 
   Future<void> _handlePasskeyLogin() async {
     setState(() => _isLoading = true);
