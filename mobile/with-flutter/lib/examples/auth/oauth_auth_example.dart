@@ -32,7 +32,7 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
 
   // Helper for logging within the state
   void _log(String message, {bool isWarning = false}) {
-     debugPrint('ParaOAuthExample: ${isWarning ? "WARNING: " : ""}$message');
+    debugPrint('ParaOAuthExample: ${isWarning ? "WARNING: " : ""}$message');
   }
 
   Future<void> _checkLoginStatus() async {
@@ -49,24 +49,24 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
           //   MaterialPageRoute(builder: (context) => const DemoHome()),
           // );
         } else {
-           _log("Logged in but no wallets found.");
+          _log("Logged in but no wallets found.");
         }
       }
     } catch (e) {
       _log('Error checking login status: ${e.toString()}', isWarning: true);
     } finally {
-       if (mounted) setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   // Helper to update wallet state consistently
   void _updateWalletState(Wallet wallet) {
-     setState(() {
-        _wallet = wallet;
-        _address = wallet.address;
-        // If CreateWalletResult was used and had recoveryShare:
-        // _recoveryShare = createResult.recoveryShare;
-     });
+    setState(() {
+      _wallet = wallet;
+      _address = wallet.address;
+      // If CreateWalletResult was used and had recoveryShare:
+      // _recoveryShare = createResult.recoveryShare;
+    });
   }
 
   // Updated OAuth handler using V2 SDK method
@@ -75,7 +75,8 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
 
     setState(() {
       _isLoading = true;
-      _loadingProvider = provider.value; // Keep track of which button is loading
+      _loadingProvider =
+          provider.value; // Keep track of which button is loading
     });
 
     try {
@@ -84,19 +85,22 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
       // "paraflutter" should be your registered URL scheme.
       final AuthState authState = await para.handleOAuth(
         provider: provider,
-        deeplinkUrl: "paraflutter", // Replace with your actual registered scheme if different
+        deeplinkUrl:
+            "paraflutter", // Replace with your actual registered scheme if different
         // No need to pass AuthController/WebAuthSession here, SDK handles it
       );
 
-      _log("OAuth flow completed successfully. Final stage: ${authState.stage}");
+      _log(
+          "OAuth flow completed successfully. Final stage: ${authState.stage}");
 
       // Fetch wallets to update state after successful login/signup
       final wallets = await para.fetchWallets();
       if (wallets.isNotEmpty) {
-         _updateWalletState(wallets.first);
+        _updateWalletState(wallets.first);
       } else {
-         _log("OAuth successful but no wallets found after flow.", isWarning: true);
-         // This might happen if wallet creation failed silently, investigate SDK logs if necessary
+        _log("OAuth successful but no wallets found after flow.",
+            isWarning: true);
+        // This might happen if wallet creation failed silently, investigate SDK logs if necessary
       }
 
       if (mounted) {
@@ -106,7 +110,6 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
           MaterialPageRoute(builder: (context) => const DemoHome()),
         );
       }
-
     } catch (e) {
       _log('Error during OAuth: ${e.toString()}', isWarning: true);
       if (!mounted) return;
@@ -192,7 +195,8 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
             horizontal: 24,
             vertical: 16,
           ),
-          shape: RoundedRectangleBorder( // Added for consistency
+          shape: RoundedRectangleBorder(
+            // Added for consistency
             borderRadius: BorderRadius.circular(8.0),
           ),
         ),
@@ -221,7 +225,8 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
             ),
             // Keep loading indicator at the end
             if (isLoading)
-              Container( // Ensure indicator doesn't push text
+              Container(
+                // Ensure indicator doesn't push text
                 alignment: Alignment.centerRight,
                 width: 32, // Give indicator space
                 child: const SizedBox(
@@ -229,7 +234,8 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
                   width: 20,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white), // Assuming white text
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                        Colors.white), // Assuming white text
                   ),
                 ),
               )

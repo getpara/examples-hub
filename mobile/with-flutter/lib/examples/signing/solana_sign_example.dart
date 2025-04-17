@@ -133,7 +133,7 @@ class _SolanaSignExampleState extends State<SolanaSignExample> {
           await _solanaSigner.sendTransaction(signedTransaction);
 
       setState(() {
-        _lastSignature = signedTransaction.signatures.first.toString();
+        _lastSignature = sendTransaction;
         _isLoading = false;
       });
     } catch (e) {
