@@ -296,5 +296,202 @@ jobs:
             exit 1
           fi
 
+  # Job for Node.js server projects
+  build-server-node:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_DIR: "server/with-node"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.19.0'
+      - name: Build projects
+        run: |
+          set +e
+          PROJECTS=()
+          for DIR in "$PROJECT_DIR"/*; do
+            if [ -d "$DIR" ] && [ -f "$DIR/package.json" ]; then
+              PROJECTS+=("$DIR")
+            fi
+          done
+          echo "Found $(echo ${#PROJECTS[@]}) projects to build:"
+          printf "  - %s\n" "${PROJECTS[@]}"
+          touch success_projects.txt
+          touch failed_projects.txt
+          for PROJECT in "${PROJECTS[@]}"; do
+            echo ""
+            echo "========================================================"
+            echo "Building $PROJECT"
+            echo "========================================================"
+            (
+              cd "$GITHUB_WORKSPACE/$PROJECT"
+              yarn install
+              yarn build
+              BUILD_EXIT_CODE=$?
+              rm -rf node_modules dist build
+              exit $BUILD_EXIT_CODE
+            )
+            if [ $? -eq 0 ]; then
+              echo "✅ Successfully built $PROJECT"
+              echo "$PROJECT" >> $GITHUB_WORKSPACE/success_projects.txt
+            else
+              echo "❌ Failed to build $PROJECT"
+              echo "$PROJECT" >> $GITHUB_WORKSPACE/failed_projects.txt
+            fi
+          done
+          SUCCESSFUL=$(cat success_projects.txt | wc -l)
+          FAILED=$(cat failed_projects.txt | wc -l)
+          echo ""
+          echo "========================================================"
+          echo "Build Summary for $PROJECT_DIR"
+          echo "========================================================"
+          echo "Total projects: ${#PROJECTS[@]}"
+          echo "Successful: $SUCCESSFUL"
+          echo "Failed: $FAILED"
+          if [ "$FAILED" -gt 0 ]; then
+            echo "Failed projects:"
+            cat failed_projects.txt | sed 's/^/  - /'
+            exit 1
+          fi
+
+  # Job for Deno server projects
+  build-server-deno:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_DIR: "server/with-deno"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+      - name: Build projects
+        run: |
+          set +e
+          PROJECTS=()
+          for DIR in "$PROJECT_DIR"/*; do
+            if [ -d "$DIR" ] && [ -f "$DIR/deno.json" ]; then
+              PROJECTS+=("$DIR")
+            fi
+          done
+          echo "Found $(echo ${#PROJECTS[@]}) projects to build:"
+          printf "  - %s\n" "${PROJECTS[@]}"
+          touch success_projects.txt
+          touch failed_projects.txt
+          for PROJECT in "${PROJECTS[@]}"; do
+            echo ""
+            echo "========================================================"
+            echo "Building $PROJECT"
+            echo "========================================================"
+            (
+              cd "$GITHUB_WORKSPACE/$PROJECT"
+              if [ -f "deno.json" ] && grep -q '"tasks":' deno.json; then
+                deno task build
+              else
+                echo "No build task found, checking main entry point..."
+                MAIN_FILE=$(find . -maxdepth 1 -name "*.ts" -o -name "main.ts" -o -name "index.ts" -o -name "server.ts" | head -n 1)
+                if [ -n "$MAIN_FILE" ]; then
+                  deno check "$MAIN_FILE"
+                else
+                  echo "No main file found to check, treating as success"
+                fi
+              fi
+              BUILD_EXIT_CODE=$?
+              exit $BUILD_EXIT_CODE
+            )
+            if [ $? -eq 0 ]; then
+              echo "✅ Successfully built $PROJECT"
+              echo "$PROJECT" >> $GITHUB_WORKSPACE/success_projects.txt
+            else
+              echo "❌ Failed to build $PROJECT"
+              echo "$PROJECT" >> $GITHUB_WORKSPACE/failed_projects.txt
+            fi
+          done
+          SUCCESSFUL=$(cat success_projects.txt | wc -l)
+          FAILED=$(cat failed_projects.txt | wc -l)
+          echo ""
+          echo "========================================================"
+          echo "Build Summary for $PROJECT_DIR"
+          echo "========================================================"
+          echo "Total projects: ${#PROJECTS[@]}"
+          echo "Successful: $SUCCESSFUL"
+          echo "Failed: $FAILED"
+          if [ "$FAILED" -gt 0 ]; then
+            echo "Failed projects:"
+            cat failed_projects.txt | sed 's/^/  - /'
+            exit 1
+          fi
+
+  # Job for Bun server projects
+  build-server-bun:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_DIR: "server/with-bun"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - name: Build projects
+        run: |
+          set +e
+          PROJECTS=()
+          for DIR in "$PROJECT_DIR"/*; do
+            if [ -d "$DIR" ] && [ -f "$DIR/package.json" ]; then
+              PROJECTS+=("$DIR")
+            fi
+          done
+          echo "Found $(echo ${#PROJECTS[@]}) projects to build:"
+          printf "  - %s\n" "${PROJECTS[@]}"
+          touch success_projects.txt
+          touch failed_projects.txt
+          for PROJECT in "${PROJECTS[@]}"; do
+            echo ""
+            echo "========================================================"
+            echo "Building $PROJECT"
+            echo "========================================================"
+            (
+              cd "$GITHUB_WORKSPACE/$PROJECT"
+              bun install
+              if grep -q '"build"' package.json; then
+                bun run build
+              else
+                echo "No build script found, checking TypeScript files"
+                if [ -f "tsconfig.json" ]; then
+                  bunx --bun tsc --noEmit
+                else
+                  echo "No tsconfig.json found, treating as success"
+                fi
+              fi
+              BUILD_EXIT_CODE=$?
+              rm -rf node_modules dist build
+              exit $BUILD_EXIT_CODE
+            )
+            if [ $? -eq 0 ]; then
+              echo "✅ Successfully built $PROJECT"
+              echo "$PROJECT" >> $GITHUB_WORKSPACE/success_projects.txt
+            else
+              echo "❌ Failed to build $PROJECT"
+              echo "$PROJECT" >> $GITHUB_WORKSPACE/failed_projects.txt
+            fi
+          done
+          SUCCESSFUL=$(cat success_projects.txt | wc -l)
+          FAILED=$(cat failed_projects.txt | wc -l)
+          echo ""
+          echo "========================================================"
+          echo "Build Summary for $PROJECT_DIR"
+          echo "========================================================"
+          echo "Total projects: ${#PROJECTS[@]}"
+          echo "Successful: $SUCCESSFUL"
+          echo "Failed: $FAILED"
+          if [ "$FAILED" -gt 0 ]; then
+            echo "Failed projects:"
+            cat failed_projects.txt | sed 's/^/  - /'
+            exit 1
+          fi
+
   # build-mobile-projects:
   # ... existing code ...
