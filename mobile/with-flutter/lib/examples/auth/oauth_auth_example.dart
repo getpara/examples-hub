@@ -1,5 +1,3 @@
-// ignore_for_file: unused_field, unused_local_variable, use_build_context_synchronously
-
 import 'dart:async';
 // Import the SDK package
 import 'package:para/para.dart';
@@ -19,9 +17,6 @@ class ParaOAuthExample extends StatefulWidget {
 class _ParaOAuthExampleState extends State<ParaOAuthExample> {
   bool _isLoading = false;
   String? _loadingProvider;
-  // Wallet info
-  Wallet? _wallet;
-  String? _address;
   // String? _recoveryShare; // Adjust if needed
 
   @override
@@ -62,8 +57,6 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
   // Helper to update wallet state consistently
   void _updateWalletState(Wallet wallet) {
     setState(() {
-      _wallet = wallet;
-      _address = wallet.address;
       // If CreateWalletResult was used and had recoveryShare:
       // _recoveryShare = createResult.recoveryShare;
     });
@@ -125,50 +118,6 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
       }
     }
   }
-
-  // --- Farcaster Logic (Commented out - Requires V2 Refactor in SDK) ---
-  /*
-  Future<void> _handleFarcasterLogin() async {
-    if (!mounted) return;
-
-    setState(() {
-      _isLoading = true;
-      _loadingProvider = 'Farcaster'; // Use a unique identifier
-    });
-
-    try {
-      _log("Starting Farcaster connect...");
-      // TODO: Replace with V2 Farcaster flow when available in SDK
-      final farcasterResponse = await para.farcasterConnect();
-      _log("Farcaster connect finished. User exists: ${farcasterResponse.userExists}");
-
-      // TODO: The logic below needs replacement with V2 AuthState handling
-      if (farcasterResponse.userExists) {
-        // await _handlePasskeyLogin(farcasterResponse.username); // Old V1 helper
-         _log("Farcaster login path needs V2 update.");
-         throw UnimplementedError("Farcaster login path needs V2 update.");
-      } else {
-        // await _handleNewUserSetup(farcasterResponse.username); // Old V1 helper
-         _log("Farcaster signup path needs V2 update.");
-         throw UnimplementedError("Farcaster signup path needs V2 update.");
-      }
-       // Fetch wallets and navigate home on success...
-    } catch (e) {
-      _log('Error during Farcaster connect: ${e.toString()}', isWarning: true);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Farcaster Error: ${e.toString()}')),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _loadingProvider = null;
-        });
-      }
-    }
-  }
-  */
 
   // --- Removed V1 Helper Functions ---
   // _handleNewUserSetup and _handlePasskeyLogin(String email) are no longer needed

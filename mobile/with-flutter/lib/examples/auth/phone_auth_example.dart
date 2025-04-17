@@ -46,13 +46,14 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
 
   // Helper for logging within the state
   void _log(String message, {bool isWarning = false}) {
-     debugPrint('ParaPhoneExample: ${isWarning ? "WARNING: " : ""}$message');
+    debugPrint('ParaPhoneExample: ${isWarning ? "WARNING: " : ""}$message');
   }
 
   // Helper to get the fully formatted phone number using the SDK utility
   String get _formattedPhoneNumber {
-     // Use the SDK's formatter
-     return para.formatPhoneNumber(_phoneController.text, _countryCodeController.text);
+    // Use the SDK's formatter
+    return para.formatPhoneNumber(
+        _phoneController.text, _countryCodeController.text);
   }
 
   Future<void> _checkLoginStatus() async {
@@ -69,24 +70,24 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
             MaterialPageRoute(builder: (context) => const DemoHome()),
           );
         } else {
-           _log("Logged in but no wallets found.");
+          _log("Logged in but no wallets found.");
         }
       }
     } catch (e) {
       _log('Error checking login status: ${e.toString()}', isWarning: true);
     } finally {
-       if (mounted) setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   // Helper to update wallet state consistently
   void _updateWalletState(Wallet wallet) {
-     setState(() {
-        _wallet = wallet;
-        _address = wallet.address;
-        // If CreateWalletResult was used and had recoveryShare:
-        // _recoveryShare = createResult.recoveryShare;
-     });
+    setState(() {
+      _wallet = wallet;
+      _address = wallet.address;
+      // If CreateWalletResult was used and had recoveryShare:
+      // _recoveryShare = createResult.recoveryShare;
+    });
   }
 
   // Renamed function to reflect V2 flow
@@ -116,37 +117,46 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
                     onVerify: _handlePhoneOtpVerification,
                     // Pass the correct resend function
                     onResendCode: () async {
-                       try {
-                          // Use the generic resend method (confirm if phone-specific exists/is needed)
-                          await para.resendVerificationCode();
-                          _log("Resend code request sent.");
-                          if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Resend request sent.')));
-                          return true;
-                       } catch (e) {
-                          _log("Error resending code: $e", isWarning: true);
-                          if(mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error resending code: $e')));
-                          return false;
-                       }
+                      try {
+                        // Use the generic resend method (confirm if phone-specific exists/is needed)
+                        await para.resendVerificationCode();
+                        _log("Resend code request sent.");
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Resend request sent.')));
+                        }
+                        return true;
+                      } catch (e) {
+                        _log("Error resending code: $e", isWarning: true);
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text('Error resending code: $e')));
+                        }
+                        return false;
+                      }
                     },
                   ),
                 ),
-              ) ?? false;
+              ) ??
+              false;
 
           if (verificationSuccess) {
-             _log("OTP Verification successful, navigating home.");
-             if (mounted) {
-                Navigator.pushReplacement(
-                   context,
-                   MaterialPageRoute(builder: (context) => const DemoHome()),
-                );
-             }
+            _log("OTP Verification successful, navigating home.");
+            if (mounted) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const DemoHome()),
+              );
+            }
           } else {
-             _log("OTP Verification failed or was cancelled.");
-             if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                   const SnackBar(content: Text('Verification failed or cancelled.')),
-                );
-             }
+            _log("OTP Verification failed or was cancelled.");
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text('Verification failed or cancelled.')),
+              );
+            }
           }
           break;
 
@@ -155,9 +165,9 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
           final wallet = await para.loginWithPasskey(
             // Provide phone auth info as a hint
             authInfo: PhoneAuthInfo(
-                phone: _phoneController.text, // Pass unformatted phone? Check SDK needs
-                countryCode: _countryCodeController.text
-            ),
+                phone: _phoneController
+                    .text, // Pass unformatted phone? Check SDK needs
+                countryCode: _countryCodeController.text),
           );
           _log("Passkey login successful.");
           _updateWalletState(wallet);
@@ -170,8 +180,10 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
           break;
 
         case AuthStage.signup:
-           _log("Received unexpected 'signup' stage from signUpOrLogIn.", isWarning: true);
-           throw Exception("Unexpected authentication stage: signup received directly from signUpOrLogIn.");
+          _log("Received unexpected 'signup' stage from signUpOrLogIn.",
+              isWarning: true);
+          throw Exception(
+              "Unexpected authentication stage: signup received directly from signUpOrLogIn.");
       }
     } catch (e) {
       _log('Error during phone auth: ${e.toString()}', isWarning: true);
@@ -187,43 +199,46 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
 
   // Separate handler for OTP verification logic for phone
   Future<bool> _handlePhoneOtpVerification(String code) async {
-     setState(() => _isLoading = true);
-     final formattedPhone = _formattedPhoneNumber; // Get formatted number again
-     try {
-        _log("Calling verifyNewAccount with code: $code");
-        final authState = await para.verifyNewAccount(verificationCode: code);
-        _log("verifyNewAccount returned stage: ${authState.stage}");
+    setState(() => _isLoading = true);
+    final formattedPhone = _formattedPhoneNumber; // Get formatted number again
+    try {
+      _log("Calling verifyNewAccount with code: $code");
+      final authState = await para.verifyNewAccount(verificationCode: code);
+      _log("verifyNewAccount returned stage: ${authState.stage}");
 
-        if (authState.stage == AuthStage.signup) {
-           if (authState.passkeyId == null) {
-              throw Exception("Signup stage reached, but no passkeyId provided.");
-           }
-           _log("Proceeding to generate passkey with id: ${authState.passkeyId}");
-           // Use formatted phone number as the identifier for passkey registration
-           await para.generatePasskey(
-              identifier: formattedPhone,
-              biometricsId: authState.passkeyId!,
-           );
-           _log("Passkey generated, creating wallet...");
-           final createResult = await para.createWallet(skipDistribute: false);
-           _log("Wallet created successfully.");
-           _updateWalletState(createResult); // Pass the Wallet object
-           setState(() => _isLoading = false);
-           return true;
-        } else {
-           _log("Unexpected stage after verifyNewAccount: ${authState.stage}", isWarning: true);
-           throw Exception("Verification succeeded but resulted in unexpected stage: ${authState.stage}");
+      if (authState.stage == AuthStage.signup) {
+        if (authState.passkeyId == null) {
+          throw Exception("Signup stage reached, but no passkeyId provided.");
         }
-     } catch (e) {
-        _log("Error during OTP verification/signup: ${e.toString()}", isWarning: true);
-         if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-               SnackBar(content: Text('Verification Error: ${e.toString()}')),
-            );
-         }
+        _log("Proceeding to generate passkey with id: ${authState.passkeyId}");
+        // Use formatted phone number as the identifier for passkey registration
+        await para.generatePasskey(
+          identifier: formattedPhone,
+          biometricsId: authState.passkeyId!,
+        );
+        _log("Passkey generated, creating wallet...");
+        final createResult = await para.createWallet(skipDistribute: false);
+        _log("Wallet created successfully.");
+        _updateWalletState(createResult); // Pass the Wallet object
         setState(() => _isLoading = false);
-        return false;
-     }
+        return true;
+      } else {
+        _log("Unexpected stage after verifyNewAccount: ${authState.stage}",
+            isWarning: true);
+        throw Exception(
+            "Verification succeeded but resulted in unexpected stage: ${authState.stage}");
+      }
+    } catch (e) {
+      _log("Error during OTP verification/signup: ${e.toString()}",
+          isWarning: true);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Verification Error: ${e.toString()}')),
+        );
+      }
+      setState(() => _isLoading = false);
+      return false;
+    }
   }
 
   Future<void> _handlePasskeyLogin() async {
@@ -257,7 +272,7 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Phone + Passkey Example (V2)'), // Updated title
+        title: const Text('Phone + Passkey Example'),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -276,7 +291,7 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
                 ),
                 const SizedBox(height: 12),
                 const Text(
-                  'Example implementation of phone-based authentication using Para SDK V2.', // Updated description
+                  'Example implementation of phone authentication using Para SDK.',
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.black87,
@@ -284,54 +299,47 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
                 ),
                 const SizedBox(height: 48),
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
-                      width: 100, // Adjusted width for better layout
+                    Expanded(
+                      flex: 2,
                       child: TextFormField(
                         controller: _countryCodeController,
                         decoration: const InputDecoration(
-                          labelText: 'Code', // Added label
-                          hintText: '1',
-                          prefixText: '+', // Use prefixText for '+'
-                          // prefixIcon: Icon(Icons.add), // Removed icon for cleaner look
+                          labelText: 'Country Code',
+                          prefixText: '+',
                         ),
                         keyboardType: TextInputType.phone,
-                        textInputAction: TextInputAction.next,
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(3),
                         ],
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Req'; // Shorter error
+                            return 'Required';
                           }
                           return null;
                         },
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 16),
                     Expanded(
+                      flex: 8,
                       child: TextFormField(
                         controller: _phoneController,
                         decoration: const InputDecoration(
-                          labelText: 'Phone Number', // Added label
+                          labelText: 'Phone Number',
                           hintText: 'Enter your phone number',
-                          prefixIcon: Icon(Icons.phone_outlined),
+                          prefixIcon: Icon(Icons.phone),
                         ),
                         keyboardType: TextInputType.phone,
-                        textInputAction: TextInputAction.done,
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(15),
                         ],
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter a phone number';
                           }
-                          // Basic length check, adjust as needed
-                          if (value.length < 7) {
-                            return 'Enter a valid number';
+                          if (value.length < 10) {
+                            return 'Please enter a valid phone number';
                           }
                           return null;
                         },
@@ -341,7 +349,6 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
-                  // Updated onPressed handler and text
                   onPressed: _isLoading ? null : _handlePhoneAuth,
                   child: _isLoading
                       ? const SizedBox(
@@ -349,40 +356,18 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Continue with Phone'), // Updated text
+                      : const Text('Continue with Phone'),
                 ),
-                const SizedBox(height: 32),
-                const Row(
-                  children: [
-                    Expanded(child: Divider()),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'OR',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    Expanded(child: Divider()),
-                  ],
-                ),
-                const SizedBox(height: 32),
-                OutlinedButton(
+                const SizedBox(height: 24),
+                ElevatedButton(
                   onPressed: _isLoading ? null : _handlePasskeyLogin,
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
                   child: _isLoading
                       ? const SizedBox(
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Login with Any Passkey'), // Updated text
+                      : const Text('Continue with Passkey'),
                 ),
               ],
             ),
