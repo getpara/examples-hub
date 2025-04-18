@@ -24,9 +24,12 @@
   },
   "devDependencies": {
     "@getpara/react-common": "^2.0.0-alpha.0",
+    "@tanstack/react-query": ">=5.0.0",
     "@types/react": "^18.0.31",
     "@types/react-dom": "^18.2.7",
-    "typescript": "^5.4.3"
+    "typescript": "^5.4.3",
+    "viem": "2.x",
+    "wagmi": "2.x"
   },
   "peerDependencies": {
     "react": ">=18",
