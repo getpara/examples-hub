@@ -40,7 +40,7 @@ type SidebarItem = {
 const PROJECT_ITEMS: SidebarItem[] = [
   {
     text: 'Setup',
-    path: '',
+    path: '/setup',
     Icon: Settings,
   },
   {

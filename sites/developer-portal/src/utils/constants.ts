@@ -63,6 +63,7 @@ export const LINKEDIN_URL = 'https://www.linkedin.com/company/parahq';
 export const SUPPORT_URL = 'mailto:support@getpara.com';
 export const SCHEDULE_MEETING_LINK = 'https://getpara.com/talk-to-us';
 export const MODAL_DESIGNER_LINK = 'https://demo.getpara.com';
+export const MODAL_CONFIG_LINK = 'https://docs.getpara.com/customize-para/modal-customization';
 
 export const FRAMEWORK_OPTIONS: Framework[] = [
   Framework.REACT,

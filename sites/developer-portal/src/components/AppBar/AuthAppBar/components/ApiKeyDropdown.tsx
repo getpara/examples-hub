@@ -39,9 +39,20 @@ export const ApiKeyDropdown = () => {
     <>
       <NavSeparator />
       <NavDropdown
-        selected={{ id: apiKeyData.id, name: formatEnvName(apiKeyData.environment) ?? '', env: env as Environment }}
-        options={apiKeys.map(key => ({ id: key.id, name: formatEnvName(key.environment) ?? '', env: key.environment }))}
+        selected={{
+          id: apiKeyData.id,
+          name: formatEnvName(apiKeyData.environment) ?? '',
+          env: env as Environment,
+          badge: apiKeyData?.archived ? 'Archived' : undefined,
+        }}
+        options={apiKeys.map(key => ({
+          id: key.id,
+          name: formatEnvName(key.environment) ?? '',
+          env: key.environment,
+          badge: key?.archived ? 'Archived' : undefined,
+        }))}
         pathPrefix={`/${organizationId}/project/${projectId}/key/${env}/`}
+        pathSuffix="/setup"
         isOpen={isNavOpen}
         setIsOpen={setIsNavOpen}
       >

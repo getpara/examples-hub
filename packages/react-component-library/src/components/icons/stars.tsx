@@ -1,5 +1,5 @@
-import clsx from 'clsx';
 import { IconProps } from './types';
+import { cn } from '@/lib/utils';
 
 export const StarsFilled = ({ ...props }: IconProps) => (
   <svg
@@ -8,7 +8,7 @@ export const StarsFilled = ({ ...props }: IconProps) => (
     stroke="none"
     xmlns="http://www.w3.org/2000/svg"
     {...props}
-    className={clsx('para:size-6', props.className)}
+    className={cn('para:size-6', props.className)}
   >
     <g id="stars-01">
       <g id="Solid">

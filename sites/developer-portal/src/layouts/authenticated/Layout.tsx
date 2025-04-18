@@ -10,7 +10,7 @@ export const Layout = () => {
   return (
     <AuthenticatedWrapper requireOrgs>
       <AuthAppBar />
-      <SidebarProvider className="para:h-[calc(100svh-57px)] para:min-h-0">
+      <SidebarProvider className="para:min-h-0">
         <SentryErrorBoundary
           fallback={({ error, resetError }) => (
             <ErrorBoundary
@@ -22,20 +22,22 @@ export const Layout = () => {
           )}
         >
           <AppSidebar />
-          <main className="para:md:p-6 para:overflow-auto para:flex-1">
-            <SentryErrorBoundary
-              fallback={({ error, resetError }) => (
-                <ErrorBoundary
-                  onResetError={resetError}
-                  variant="error"
-                  errorWithNav
-                  containerType="authenticated"
-                  errorMessage={(error as Error)?.message}
-                />
-              )}
-            >
-              <Outlet />
-            </SentryErrorBoundary>
+          <main className="para:md:p-6 para:p-4 para:overflow-auto para:flex-1">
+            <div className="para:max-w-[1400px] para:m-auto">
+              <SentryErrorBoundary
+                fallback={({ error, resetError }) => (
+                  <ErrorBoundary
+                    onResetError={resetError}
+                    variant="error"
+                    errorWithNav
+                    containerType="authenticated"
+                    errorMessage={(error as Error)?.message}
+                  />
+                )}
+              >
+                <Outlet />
+              </SentryErrorBoundary>
+            </div>
           </main>
         </SentryErrorBoundary>
       </SidebarProvider>

@@ -1,7 +1,7 @@
-import styled from 'styled-components';
 import { CodeBlock as ReactCodeBlock, github } from 'react-code-blocks';
-import { CpslButton, CpslIcon } from '@getpara/react-components';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
+import { Button } from '@getpara/react-component-library';
+import { Check, Copy } from 'lucide-react';
 
 interface CodeBlockProps {
   snippet: string;
@@ -64,7 +64,7 @@ export const CodeBlock = ({ snippet }: CodeBlockProps) => {
   };
 
   return (
-    <Container>
+    <div className="para:font-[IBM_Plex_Mono] para:flex para:gap-2 para:items-start para:rounded-sm para:bg-muted para:px-3 para:py-4 para:[&>span]:text-base para:[&>span]:leading-[24px] para:[&>span]:select-auto para:[&>span]:cursor-text para:[&>span]:flex-1">
       <ReactCodeBlock
         text={snippet}
         language="javascript"
@@ -72,26 +72,13 @@ export const CodeBlock = ({ snippet }: CodeBlockProps) => {
         showLineNumbers={false}
         wrapLongLines
       />
-      <CpslButton variant="ghost" onClick={handleCopyCodeSnippetString}>
-        <CpslIcon icon={isCopied ? 'check' : 'copy'} />
-      </CpslButton>
-    </Container>
+      <Button
+        variant="ghost"
+        className="para:h-auto para:p-0 para:has-[>svg]:px-0 para:[&_svg]:stroke-muted-foreground para:hover:[&_svg]:stroke-foreground"
+        onClick={handleCopyCodeSnippetString}
+      >
+        {isCopied ? <Check className="para:size-6" /> : <Copy className="para:size-6" />}
+      </Button>
+    </div>
   );
 };
-
-const Container = styled.div`
-  padding: 16px 12px;
-  display: flex;
-  gap: 8px;
-  align-items: flex-start;
-  border-radius: 16px;
-  background: var(--cpsl-color-background-4);
-  font-family: 'IBM Plex Mono';
-
-  & span {
-    font-size: 16px !important;
-    line-height: 24px !important;
-    user-select: auto !important;
-    cursor: text;
-  }
-`;

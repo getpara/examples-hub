@@ -5,6 +5,7 @@ import { Environment } from '../types/environment';
 import { getKeyColor } from '../utils/apiKey';
 import { PropsWithChildren } from 'react';
 import clsx from 'clsx';
+import { Card } from '@getpara/react-component-library';
 
 export const LINEAR_GRADIENT = `linear-gradient(
   90deg,
@@ -118,4 +119,8 @@ export const VerticalCenteredContainer = ({ children, className }: PropsWithChil
   <div className={clsx('para:flex para:flex-col para:justify-center para:w-full para:items-center', className)}>
     {children}
   </div>
+);
+
+export const FlatCard = ({ children, className }: PropsWithChildren & { className?: string }) => (
+  <Card className={clsx('para:shadow-none para:p-8', className)}>{children}</Card>
 );

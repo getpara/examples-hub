@@ -79,7 +79,7 @@ export type Project = {
 export type ProjectResponse = { project: Project };
 export type ProjectsResponse = { projects: Project[] };
 export type ProjectTotalUsersResponse = { totalUsers: number };
-export type UpdateProjectBody = Omit<Project, 'id' | 'archived'>;
+export type UpdateProjectBody = Nullable<Partial<Omit<Project, 'id' | 'archived'>>>;
 
 // *********************
 // Organization Members
@@ -115,6 +115,14 @@ export enum ThemeMode {
   LIGHT = 'LIGHT',
   DARK = 'DARK',
 }
+
+export type ApiKeyOnboarding = {
+  isSkipped?: boolean;
+  isComplete?: boolean;
+  step?: number;
+  version?: number;
+  framework?: string;
+};
 
 export type ApiKey = {
   id: string;
@@ -163,6 +171,7 @@ export type ApiKey = {
   androidPackageName: string | null;
   supportedAuthMethods: string[] | null;
   sessionMaxAge: string | null;
+  onboarding: ApiKeyOnboarding | null;
 };
 
 export type ApiKeyResponse = { key: ApiKey };
@@ -225,6 +234,7 @@ export type UpdateApiKeyBody = Nullable<
       | 'androidPackageName'
       | 'supportedAuthMethods'
       | 'sessionMaxAge'
+      | 'onboarding'
     >
   >
 >;

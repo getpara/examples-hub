@@ -1,5 +1,5 @@
-import clsx from 'clsx';
 import { IconProps } from './types';
+import { cn } from '@/lib/utils';
 
 export const ParaBrand = ({ ...props }: IconProps) => (
   <svg
@@ -9,7 +9,7 @@ export const ParaBrand = ({ ...props }: IconProps) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     {...props}
-    className={clsx('para:size-6', props.className)}
+    className={cn('para:size-6', props.className)}
   >
     <path
       d="M60 0H144C183.764 0 216 32.2355 216 72C216 111.765 183.764 144 144 144H96C82.7452 144 72 154.745 72 168V204H0V132H36C49.2548 132 60 121.255 60 108L60 0Z"
@@ -42,7 +42,7 @@ export const ParaIconBrand = ({ ...props }: IconProps) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     {...props}
-    className={clsx('para:size-6', props.className)}
+    className={cn('para:size-6', props.className)}
   >
     <path
       d="M60 0H144C183.764 0 216 32.2355 216 72C216 111.765 183.764 144 144 144H96C82.7452 144 72 154.745 72 168V204H0V132H36C49.2548 132 60 121.255 60 108L60 0Z"

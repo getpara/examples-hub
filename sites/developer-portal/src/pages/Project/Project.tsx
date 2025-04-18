@@ -33,7 +33,7 @@ export const Project = () => {
 
   const handleViewClick = useCallback(
     (id: string, env: string) => () => {
-      navigate(`key/${env}/${id}`);
+      navigate(`key/${env}/${id}/setup`);
     },
     [navigate],
   );

@@ -83,8 +83,7 @@ export const NavDropdown = ({
           </div>
         </Button>
       </DropdownMenuTrigger>
-      {/* TODO: this zindex can change once the side nav changes */}
-      <DropdownMenuContent className="para:z-[100000] para:rounded-sm" align="start">
+      <DropdownMenuContent className="para:rounded-sm" align="start">
         {options.map((o, i) => (
           <Fragment key={o.id}>
             <Link to={`${pathPrefix}${o.id}${pathSuffix ?? ''}`}>

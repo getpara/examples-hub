@@ -3,6 +3,7 @@ import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/lib/utils';
+import { Loader } from './loader';
 
 const buttonVariants = cva(
   'para:inline-flex para:items-center para:justify-center para:gap-2 para:whitespace-nowrap para:rounded-md para:text-sm para:font-medium para:transition-[color,box-shadow] para:disabled:pointer-events-none para:disabled:opacity-50 para:[&_svg]:pointer-events-none para:[&_svg:not([class*=size-])]:size-4 para:[&_svg]:shrink-0 para:outline-none para:focus-visible:border-ring para:focus-visible:ring-ring/50 para:focus-visible:ring-[3px] para:aria-invalid:ring-destructive/20 para:dark:aria-invalid:ring-destructive/40 para:aria-invalid:border-destructive',
@@ -38,16 +39,25 @@ const Button = React.forwardRef(function Button(
     variant,
     size,
     asChild = false,
+    isLoading = false,
     ...props
   }: React.ComponentProps<'button'> &
     VariantProps<typeof buttonVariants> & {
       asChild?: boolean;
+      isLoading?: boolean;
     },
   ref: React.Ref<HTMLButtonElement>,
 ) {
   const Comp = asChild ? Slot : 'button';
 
-  return <Comp data-slot="button" className={cn(buttonVariants({ variant, size, className }))} {...props} ref={ref} />;
+  return (
+    <Comp data-slot="button" className={cn(buttonVariants({ variant, size, className }))} type="button" {...props} ref={ref}>
+      <>
+        {isLoading && <Loader className="para:stroke-current" />}
+        {props.children}
+      </>
+    </Comp>
+  );
 });
 
 export { Button, buttonVariants };

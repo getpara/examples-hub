@@ -29,8 +29,18 @@ export const ProjectDropdown = () => {
     <>
       <NavSeparator />
       <NavDropdown
-        selected={{ id: project.id, name: project.name, iconUrl: project.iconUrl }}
-        options={projects.map(project => ({ id: project.id, name: project.name, iconUrl: project.iconUrl }))}
+        selected={{
+          id: project.id,
+          name: project.name,
+          iconUrl: project.iconUrl,
+          badge: project?.archived ? 'Archived' : undefined,
+        }}
+        options={projects.map(project => ({
+          id: project.id,
+          name: project.name,
+          iconUrl: project.iconUrl,
+          badge: project?.archived ? 'Archived' : undefined,
+        }))}
         pathPrefix={`/${organizationId}/project/`}
         isOpen={isNavOpen}
         setIsOpen={setIsNavOpen}
