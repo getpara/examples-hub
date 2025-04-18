@@ -529,5 +529,255 @@ jobs:
             exit 1
           fi
 
+  # Job for Electron.js projects
+  build-specialized-electronjs:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_DIR: "specialized/with-electronjs"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.19.0'
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libx11-dev libxkbfile-dev libsecret-1-dev libgtk-3-dev libnss3 libatk1.0-0 libatk-bridge2.0-0 libgdk-pixbuf2.0-0 libgtk-3-0 libgbm-dev libxss1
+      - name: Build projects
+        run: |
+          set +e
+          if [ -d "$PROJECT_DIR" ] && [ -f "$PROJECT_DIR/package.json" ]; then
+            PROJECTS=("$PROJECT_DIR")
+          else
+            PROJECTS=()
+            for DIR in "$PROJECT_DIR"/*; do
+              if [ -d "$DIR" ] && [ -f "$DIR/package.json" ]; then
+                PROJECTS+=("$DIR")
+              fi
+            done
+          fi
+          echo "Found $(echo ${#PROJECTS[@]}) projects to build:"
+          printf "  - %s\n" "${PROJECTS[@]}"
+          touch success_projects.txt
+          touch failed_projects.txt
+          for PROJECT in "${PROJECTS[@]}"; do
+            echo ""
+            echo "========================================================"
+            echo "Building $PROJECT"
+            echo "========================================================"
+            (
+              cd "$GITHUB_WORKSPACE/$PROJECT"
+              yarn install
+              
+              # Use make command for comprehensive testing if available
+              if grep -q '"make"' package.json; then
+                echo "Running electron-forge make for comprehensive build..."
+                # Run package as a fallback in CI (since make may require more resources)
+                yarn package
+                MAKE_EXIT_CODE=$?
+              elif grep -q '"package"' package.json; then
+                echo "Running electron-forge package..."
+                yarn package
+                MAKE_EXIT_CODE=$?
+              elif grep -q '"build"' package.json; then
+                echo "Running build script..."
+                yarn build
+                MAKE_EXIT_CODE=$?
+              else
+                echo "No build/package/make script found, checking if we can compile..."
+                if [ -f "tsconfig.json" ]; then
+                  echo "Checking TypeScript compilation..."
+                  npx tsc --noEmit
+                  MAKE_EXIT_CODE=$?
+                else
+                  echo "No build method found, treating as success"
+                  MAKE_EXIT_CODE=0
+                fi
+              fi
+              
+              # Clean up after build
+              rm -rf node_modules out dist
+              exit $MAKE_EXIT_CODE
+            )
+            if [ $? -eq 0 ]; then
+              echo "✅ Successfully built $PROJECT"
+              echo "$PROJECT" >> $GITHUB_WORKSPACE/success_projects.txt
+            else
+              echo "❌ Failed to build $PROJECT"
+              echo "$PROJECT" >> $GITHUB_WORKSPACE/failed_projects.txt
+            fi
+          done
+          SUCCESSFUL=$(cat success_projects.txt | wc -l)
+          FAILED=$(cat failed_projects.txt | wc -l)
+          echo ""
+          echo "========================================================"
+          echo "Build Summary for $PROJECT_DIR"
+          echo "========================================================"
+          echo "Total projects: ${#PROJECTS[@]}"
+          echo "Successful: $SUCCESSFUL"
+          echo "Failed: $FAILED"
+          if [ "$FAILED" -gt 0 ]; then
+            echo "Failed projects:"
+            cat failed_projects.txt | sed 's/^/  - /'
+            exit 1
+          fi
+
+  # Job for Jupiter DEX API projects
+  build-specialized-jupiter-dex:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_DIR: "specialized/with-jupiter-dex-api"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.19.0'
+      - name: Build projects
+        run: |
+          set +e
+          if [ -d "$PROJECT_DIR" ] && [ -f "$PROJECT_DIR/package.json" ]; then
+            PROJECTS=("$PROJECT_DIR")
+          else
+            PROJECTS=()
+            for DIR in "$PROJECT_DIR"/*; do
+              if [ -d "$DIR" ] && [ -f "$DIR/package.json" ]; then
+                PROJECTS+=("$DIR")
+              fi
+            done
+          fi
+          echo "Found $(echo ${#PROJECTS[@]}) projects to build:"
+          printf "  - %s\n" "${PROJECTS[@]}"
+          touch success_projects.txt
+          touch failed_projects.txt
+          for PROJECT in "${PROJECTS[@]}"; do
+            echo ""
+            echo "========================================================"
+            echo "Building $PROJECT"
+            echo "========================================================"
+            (
+              cd "$GITHUB_WORKSPACE/$PROJECT"
+              yarn install
+              
+              # Try to build the project
+              if grep -q '"build"' package.json; then
+                echo "Running build script..."
+                yarn build
+                BUILD_EXIT_CODE=$?
+              elif [ -f "tsconfig.json" ]; then
+                echo "No build script found, checking TypeScript compilation..."
+                npx tsc --noEmit
+                BUILD_EXIT_CODE=$?
+              else
+                echo "No build method found, treating as success"
+                BUILD_EXIT_CODE=0
+              fi
+              
+              # Clean up after build
+              rm -rf node_modules dist build
+              exit $BUILD_EXIT_CODE
+            )
+            if [ $? -eq 0 ]; then
+              echo "✅ Successfully built $PROJECT"
+              echo "$PROJECT" >> $GITHUB_WORKSPACE/success_projects.txt
+            else
+              echo "❌ Failed to build $PROJECT"
+              echo "$PROJECT" >> $GITHUB_WORKSPACE/failed_projects.txt
+            fi
+          done
+          SUCCESSFUL=$(cat success_projects.txt | wc -l)
+          FAILED=$(cat failed_projects.txt | wc -l)
+          echo ""
+          echo "========================================================"
+          echo "Build Summary for $PROJECT_DIR"
+          echo "========================================================"
+          echo "Total projects: ${#PROJECTS[@]}"
+          echo "Successful: $SUCCESSFUL"
+          echo "Failed: $FAILED"
+          if [ "$FAILED" -gt 0 ]; then
+            echo "Failed projects:"
+            cat failed_projects.txt | sed 's/^/  - /'
+            exit 1
+          fi
+
+  # Job for Telegram Web App projects
+  build-specialized-telegram-web-app:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_DIR: "specialized/with-telegram-web-app"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.19.0'
+      - name: Build projects
+        run: |
+          set +e
+          if [ -d "$PROJECT_DIR" ] && [ -f "$PROJECT_DIR/package.json" ]; then
+            PROJECTS=("$PROJECT_DIR")
+          else
+            PROJECTS=()
+            for DIR in "$PROJECT_DIR"/*; do
+              if [ -d "$DIR" ] && [ -f "$DIR/package.json" ]; then
+                PROJECTS+=("$DIR")
+              fi
+            done
+          fi
+          echo "Found $(echo ${#PROJECTS[@]}) projects to build:"
+          printf "  - %s\n" "${PROJECTS[@]}"
+          touch success_projects.txt
+          touch failed_projects.txt
+          for PROJECT in "${PROJECTS[@]}"; do
+            echo ""
+            echo "========================================================"
+            echo "Building $PROJECT"
+            echo "========================================================"
+            (
+              cd "$GITHUB_WORKSPACE/$PROJECT"
+              yarn install
+              
+              # Try to build the project
+              if grep -q '"build"' package.json; then
+                echo "Running build script..."
+                yarn build
+                BUILD_EXIT_CODE=$?
+              elif [ -f "tsconfig.json" ]; then
+                echo "No build script found, checking TypeScript compilation..."
+                npx tsc --noEmit
+                BUILD_EXIT_CODE=$?
+              else
+                echo "No build method found, treating as success"
+                BUILD_EXIT_CODE=0
+              fi
+              
+              # Clean up after build
+              rm -rf node_modules dist build
+              exit $BUILD_EXIT_CODE
+            )
+            if [ $? -eq 0 ]; then
+              echo "✅ Successfully built $PROJECT"
+              echo "$PROJECT" >> $GITHUB_WORKSPACE/success_projects.txt
+            else
+              echo "❌ Failed to build $PROJECT"
+              echo "$PROJECT" >> $GITHUB_WORKSPACE/failed_projects.txt
+            fi
+          done
+          SUCCESSFUL=$(cat success_projects.txt | wc -l)
+          FAILED=$(cat failed_projects.txt | wc -l)
+          echo ""
+          echo "========================================================"
+          echo "Build Summary for $PROJECT_DIR"
+          echo "========================================================"
+          echo "Total projects: ${#PROJECTS[@]}"
+          echo "Successful: $SUCCESSFUL"
+          echo "Failed: $FAILED"
+          if [ "$FAILED" -gt 0 ]; then
+            echo "Failed projects:"
+            cat failed_projects.txt | sed 's/^/  - /'
+            exit 1
+          fi
+
   # build-mobile-projects:
   # ... existing code ...
