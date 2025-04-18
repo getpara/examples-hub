@@ -86,6 +86,7 @@ export function AuthProvider({
   const refs = useModalStore(state => state.refs);
   const currentStep = useModalStore(state => state.step);
   const setStep = useModalStore(state => state.setStep);
+  const setFlow = useModalStore(state => state.setFlow);
   const setAuthStepRoute = useModalStore(state => state.setAuthStepRoute);
   const setIFrameUrl = useModalStore(state => state.setIFrameUrl);
   const iFrameUrl = useModalStore(state => state.iFrameUrl);
@@ -278,6 +279,7 @@ export function AuthProvider({
 
     switch (authState.stage) {
       case 'verify':
+        setFlow('signup');
         if (isExternalWallet(authState.auth) && authState.signatureVerificationMessage) {
           setStep(ModalStep.EXTERNAL_WALLET_VERIFICATION);
         } else {
@@ -285,10 +287,12 @@ export function AuthProvider({
         }
         break;
       case 'login':
+        setFlow(authState.stage);
         login();
         break;
       case 'signup':
         {
+          setFlow(authState.stage);
           const isPassword = !!authState.passwordUrl,
             isPasswordOnly = isPassword && !authState.passkeyUrl;
 

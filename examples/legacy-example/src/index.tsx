@@ -471,6 +471,7 @@ function AppInner({
   const [partners, setPartners] = useLocalStorage<Partner[]>('@EXAMPLE-PARA/partners', []);
   const [homepageUrl, setHomepageUrl] = useLocalStorage('@EXAMPLE-PARA/homepageUrl', 'https://www.para.com');
 
+  const [defaultIdentifier, setDefaultIdentifier] = useLocalStorage('@EXAMPLE-PARA/defaultIdentifier', '');
   const [logo, setLogo] = useLocalStorage('@EXAMPLE-PARA/logo', '');
   const [useTheme, setUseTheme] = useLocalStorage('@EXAMPLE-PARA/useTheme', false);
   const [isDarkTheme, setIsDarkTheme] = useLocalStorage('@EXAMPLE-PARA/isDarkTheme', false);
@@ -802,6 +803,18 @@ function AppInner({
           )}
           {selectedView === 'OLD_VIEW' && (
             <VStack align="left" spacing={5}>
+              <HStack>
+                <Text width={'15%'}>
+                  <strong>Default Identifier:</strong>
+                </Text>
+                <Input
+                  placeholder="Default Identifier"
+                  onChange={e => {
+                    setDefaultIdentifier(e.target.value);
+                  }}
+                  value={defaultIdentifier || ''}
+                />
+              </HStack>
               <HStack>
                 <Text width={'15%'}>
                   <strong>Set Modal Logo:</strong>
@@ -1353,6 +1366,7 @@ const App = () => {
   const [logoVariant] = useLocalStorage('@EXAMPLE-PARA/logoVariant', 'branded');
   const [onRampTestMode] = useLocalStorage('@EXAMPLE-PARA/onRampTestMode', true);
   const [hideWallets] = useLocalStorage('@EXAMPLE-PARA/hideWallets', false);
+  const [defaultIdentifier] = useLocalStorage('@EXAMPLE-PARA/defaultIdentifier', undefined);
 
   const [currentStepOverride, setCurrentStepOverride] = useState<ModalStepProp | undefined>(undefined);
 
@@ -1372,6 +1386,7 @@ const App = () => {
           disableEmbeddedModal: selectedView === 'WAGMI',
         }}
         paraModalConfig={{
+          defaultAuthIdentifier: defaultIdentifier,
           currentStepOverride,
           logo: logo !== '' ? logo : undefined,
           theme: useTheme

@@ -13,6 +13,9 @@ import { useModal, useWalletState } from '../provider/index.js';
 import { useInternalClient } from '../provider/hooks/utils/useInternalClient.js';
 import { useExternalWallets } from '../provider/providers/ExternalWalletProvider.js';
 import { useStore } from '../provider/stores/useStore.js';
+import parsePhoneNumberFromString from 'libphonenumber-js';
+import { useAuthActions } from '../provider/providers/AuthProvider.js';
+import { validateAuth } from './utils/authInputHelpers.js';
 
 defineCustomElements();
 
@@ -36,6 +39,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
   const para = useInternalClient();
   const { setSelectedWallet, updateSelectedWallet } = useWalletState();
   const setAuthStepRoute = useModalStore(state => state.setAuthStepRoute);
+  const { signUpOrLogIn } = useAuthActions();
 
   const [isModalMounted, setIsModalMounted] = useState(false);
   const [isInit, setIsInit] = useState(false);
@@ -55,6 +59,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
     embeddedModal,
     onModalStepChange,
     onClose,
+    defaultAuthIdentifier,
     ...rest
   } = { ...storedModalConfig, ...props };
 
@@ -78,7 +83,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
   }, [hasPreviousStep, currentStep]);
 
   // This will run on mount and on isOpen change but won't cause a rerender unless step or email changes
-  const initModal = async () => {
+  const initModal = async (shouldAutoLogin?: boolean) => {
     const isAccount = await para.isFullyLoggedIn();
     if (currentStepOverride) {
       setStep(ModalStep[currentStepOverride.toUpperCase()]);
@@ -88,6 +93,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
       setIsFullyLoggedIn(true);
     } else {
       if (currentStep !== ModalStep.AUTH_MAIN && currentStep !== ModalStep.SECRET) {
+        setFlow(undefined);
         setStep(ModalStep.AUTH_MAIN);
         setAuthState();
         setAuthStepRoute();
@@ -97,6 +103,25 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
       await disconnectExternalWallet();
       setSelectedWallet({ id: undefined, type: undefined });
       setIsFullyLoggedIn(false);
+
+      if (shouldAutoLogin) {
+        if (defaultAuthIdentifier && para.authInfo?.identifier !== defaultAuthIdentifier) {
+          const number = parsePhoneNumberFromString(defaultAuthIdentifier);
+
+          try {
+            const auth = validateAuth(
+              number ? number.nationalNumber : defaultAuthIdentifier,
+              number?.countryCallingCode ? `+${number?.countryCallingCode}` : undefined,
+              number ? 'phone' : 'email',
+            );
+            para.setAuth(number ? { phone: defaultAuthIdentifier as `+${number}` } : { email: defaultAuthIdentifier });
+
+            signUpOrLogIn(auth);
+          } catch (err) {
+            console.error('invalid user identifier:', err.message);
+          }
+        }
+      }
     }
 
     switch (true) {
@@ -149,7 +174,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
   // Init modal with proper steps on isOpen change
   useEffect(() => {
     if (isOpen && para) {
-      initModal();
+      initModal(true);
     }
   }, [isOpen]);
 

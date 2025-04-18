@@ -107,6 +107,10 @@ export interface ParaModalProps {
    */
   authLayout?: TAuthLayout[];
   /**
+   * Default email or phone number (formatted like: +15555555555) to pre-populate the input field.
+   */
+  defaultAuthIdentifier?: string;
+  /**
    * Called when the modal step changes
    */
   onModalStepChange?: (value: OnModalStepChangeValue) => void;

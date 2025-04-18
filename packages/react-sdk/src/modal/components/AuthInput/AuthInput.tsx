@@ -17,16 +17,17 @@ import {
 import { CountryCallingCode } from 'libphonenumber-js';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
-import countryCodes from './countryCodes.js';
-import { EMAIL_REGEX, MOBILE_SIZE } from '../../constants/constants.js';
+import countryCodes from '../../utils/countryCodes.js';
+import { MOBILE_SIZE } from '../../constants/constants.js';
 import { useDropdownPosition } from './hooks/useDropdownPosition.js';
 import { defaultPhoneMask, phoneMasks } from './phoneMasks.js';
-import { formatPhoneNumber } from '@getpara/web-sdk';
 import { Auth, AuthType } from '@getpara/user-management-client';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 import parsePhoneNumberFromString from 'libphonenumber-js';
 import { NationalNumber } from 'libphonenumber-js';
 import { useAuthActions } from '../../../provider/providers/AuthProvider.js';
+import { useStore } from '../../../provider/stores/useStore.js';
+import { isCcMatch, validateAuth } from '../../utils/authInputHelpers.js';
 
 interface AuthInputProps {
   disableEmailLogin?: boolean;
@@ -35,13 +36,10 @@ interface AuthInputProps {
 
 const DEFAULT_COUNTRY = { label: 'United States', value: '+1', selectedLabel: 'US', icon: 'US' as IconType };
 
-function isCcMatch(countryCode: string, option: (typeof countryCodes)[number]) {
-  return countryCode === '+1' ? option.selectedLabel === 'US' : option.value === countryCode;
-}
-
 export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputProps) => {
   const inputRef = useRef<HTMLCpslInputElement>(null);
   const { dropdownMaxHeight, dropdownWidth } = useDropdownPosition(inputRef);
+  const defaultAuthIdentifier = useStore(state => state.modalConfig?.defaultAuthIdentifier);
 
   const para = useInternalClient();
   const { signUpOrLogIn, isSignUpOrLogInPending } = useAuthActions();
@@ -83,6 +81,31 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
   const [isPending, setIsPending] = useState(isSignUpOrLogInPending);
   const [search, setSearch] = useState('');
 
+  const setCountryCodes = (countyCodeInput: DropdownInputEventDetail) => {
+    setCountryCode(countyCodeInput.value as CountryCallingCode);
+    setMatchedCountryCode(countyCodeInput);
+  };
+
+  useEffect(() => {
+    // Only set input to the default if authInfo hasn't been set yet, else use what the user has set.
+    if (defaultAuthIdentifier && !authInfo) {
+      const number = parsePhoneNumberFromString(defaultAuthIdentifier);
+
+      if (number) {
+        const countryCode = `+${number.countryCallingCode}`;
+        const countryCodeInputMatch = countryCodes.find(option => isCcMatch(countryCode, option));
+
+        if (countryCodeInputMatch) {
+          setCountryCodes(countryCodeInputMatch);
+        }
+      }
+
+      handleIdentifierInput({
+        detail: { value: number ? number.nationalNumber : defaultAuthIdentifier },
+      } as CpslInputCustomEvent<InputInputEventDetail>);
+    }
+  }, [authInfo]);
+
   const isEmail = identifierType === 'email';
   const isPhone = identifierType === 'phone';
   const isUnknown = !identifierType;
@@ -108,8 +131,7 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
     if (!disablePhoneLogin) {
       const countryCodeInputMatch = countryCodes.find(option => isCcMatch(newIdentifier, option));
       if (countryCodeInputMatch) {
-        setCountryCode(countryCodeInputMatch.value as CountryCallingCode);
-        setMatchedCountryCode(countryCodeInputMatch);
+        setCountryCodes(countryCodeInputMatch);
         setIdentifierType('phone');
 
         setIdentifier('');
@@ -130,8 +152,7 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
   const handleCountryCodeInput = (ev: CpslSelectCustomEvent<string>) => {
     const matchedCountryCode = countryCodes.find(code => code.selectedLabel === ev.detail);
     if (matchedCountryCode) {
-      setCountryCode(matchedCountryCode.value as CountryCallingCode);
-      setMatchedCountryCode(matchedCountryCode);
+      setCountryCodes(matchedCountryCode);
     }
   };
 
@@ -140,32 +161,12 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
 
     let auth: Auth<'email'> | Auth<'phone'>;
 
-    switch (true) {
-      case isEmail:
-        if (!EMAIL_REGEX.test(identifier)) {
-          setError('Please enter a valid email!');
-          return;
-        }
-        auth = { email: identifier };
-        break;
-      case isPhone:
-        {
-          const validatedPhone = formatPhoneNumber(identifier, countryCode);
-
-          if (!validatedPhone) {
-            setError('Please enter a valid phone number!');
-            return;
-          }
-
-          auth = { phone: validatedPhone };
-        }
-        break;
-      default:
-        setError('Please enter a valid email or phone number!');
-        return;
+    try {
+      auth = validateAuth(identifier, countryCode, identifierType);
+      signUpOrLogIn(auth);
+    } catch (err) {
+      setError(err.message);
     }
-
-    signUpOrLogIn(auth);
   };
 
   useEffect(() => {

@@ -42,7 +42,12 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
     }
 
     if (prevStep) {
-      set({ authStepRoute: undefined, step: prevStep, stepDirection: -1 });
+      set({
+        authStepRoute: undefined,
+        step: prevStep,
+        stepDirection: -1,
+        ...(prevStep === ModalStep.AUTH_MAIN && { flow: undefined }),
+      });
 
       onModalStepChange?.({ previousStep: currentStep, currentStep: prevStep, canGoBack: get().hasPreviousStep() });
     }
