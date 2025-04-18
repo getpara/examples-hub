@@ -3,82 +3,62 @@ import { getKeyShareInDB } from "../db/keySharesDB";
 import { decrypt } from "../utils/encryption-utils";
 import { ParaEthersSigner } from "@getpara/ethers-v6-integration";
 import { ethers } from "ethers";
-import type { TransactionRequest } from "ethers";
 
 export const signWithEthers = async (req: Request): Promise<Response> => {
-  const { email }: { email: string } = await req.json();
-
-  if (!email) {
-    return new Response("Email is required in the request body", { status: 400 });
-  }
-
-  const PARA_API_KEY = Bun.env.PARA_API_KEY;
-  if (!PARA_API_KEY) {
-    console.error("Server configuration error: PARA_API_KEY not set");
-    return new Response("Server configuration error", { status: 500 });
-  }
-
-  const para = new ParaServer(Environment.BETA, PARA_API_KEY, { disableWebSockets: true, disableWorkers: true });
-  const provider = new ethers.JsonRpcProvider("https://ethereum-sepolia-rpc.publicnode.com");
-
   try {
+    const { email }: { email: string } = await req.json();
+
+    if (!email) {
+      return new Response("Email is required in the request body", { status: 400 });
+    }
+
+    const paraApiKey = Bun.env.PARA_API_KEY;
+    if (!paraApiKey) {
+      return new Response("Server configuration error", { status: 500 });
+    }
+
+    const env = (Bun.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
+    const para = new ParaServer(env, paraApiKey, { disableWebSockets: true });
+
     const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
+
+    console.log(`Checking if wallet exists for ${email}: ${hasPregenWallet}`);
+
     if (!hasPregenWallet) {
       return new Response(`Pregenerated wallet does not exist for ${email}`, { status: 404 });
     }
 
-    const keyShare = getKeyShareInDB(email);
+    const keyShare = await getKeyShareInDB(email);
     if (!keyShare) {
       return new Response(`Key share not found in DB for ${email}`, { status: 404 });
     }
 
-    let decryptedKeyShare: string;
-    try {
-      decryptedKeyShare = await decrypt(keyShare);
-    } catch (decryptionError) {
-      console.error(`Failed to decrypt key share for ${email}:`, decryptionError);
-      return new Response("Failed to process key share", { status: 500 });
-    }
-
+    const decryptedKeyShare = await decrypt(keyShare);
     await para.setUserShare(decryptedKeyShare);
 
-    if (!para.wallets || Object.keys(para.wallets).length === 0) {
-      throw new Error("Failed to load wallet details after setting user share.");
-    }
+    const ethersProvider = new ethers.JsonRpcProvider("https://ethereum-sepolia-rpc.publicnode.com");
+    const paraEthersSigner = new ParaEthersSigner(para, ethersProvider);
 
-    const paraEthersSigner = new ParaEthersSigner(para, provider);
     const address = await paraEthersSigner.getAddress();
-    if (!address) {
-      throw new Error("Failed to get address from ParaEthersSigner.");
-    }
+    const feeData = await ethersProvider.getFeeData();
+    const nonce = await ethersProvider.getTransactionCount(address);
 
-    const nonce = await provider.getTransactionCount(address);
-    const feeData = await provider.getFeeData();
-    const gasPrice = feeData.gasPrice;
-
-    if (gasPrice === null) {
-      throw new Error("Failed to retrieve gas price from provider.");
-    }
-
-    const demoTx: TransactionRequest = {
+    const tx = {
       to: address,
-      from: address,
-      value: ethers.parseEther("0.001"),
+      value: ethers.parseEther("0.0001"),
       nonce: nonce,
       gasLimit: 21000,
-      gasPrice: gasPrice,
-      chainId: 11155111,
+      gasPrice: feeData.gasPrice,
     };
 
-    const signTransactionResult = await paraEthersSigner.signTransaction(demoTx);
+    const signedTx = await paraEthersSigner.signTransaction(tx);
 
-    return new Response(JSON.stringify({ route: "signWithEthers", signTransactionResult }), {
+    return new Response(JSON.stringify({ route: "signWithEthers", signedTx }), {
       headers: { "Content-Type": "application/json" },
       status: 200,
     });
   } catch (error) {
-    console.error(`Error during signWithEthers process for ${email}:`, error);
-    return new Response(`Failed to sign with Ethers: ${error instanceof Error ? error.message : "Unknown error"}`, {
+    return new Response(`Error: ${error instanceof Error ? error.message : "Unknown error"}`, {
       status: 500,
     });
   }

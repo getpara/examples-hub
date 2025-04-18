@@ -4,8 +4,14 @@
   "main": "server.ts",
   "module": "server.ts",
   "scripts": {
-    "dev": "bun run server.ts",
-    "test": "bun test"
+    "install:all": "bun install && cd test-ui && bun install",
+    "build:ui": "cd test-ui && bun run build",
+    "copy:ui": "rm -rf public/* && cp -r test-ui/dist/* public/",
+    "build:dev": "bun run build:ui && bun run copy:ui",
+    "dev:server": "bun run server.ts",
+    "dev": "bun run build:dev && bun run dev:server",
+    "test": "bun test",
+    "build": "bun build ./server.ts --outdir ./dist --target node"
   },
   "dependencies": {
     "@alchemy/aa-core": "3.19.0",

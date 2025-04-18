@@ -5,87 +5,56 @@ import { ParaSolanaWeb3Signer } from "@getpara/solana-web3.js-v1-integration";
 import { Connection, clusterApiUrl, Transaction, SystemProgram, LAMPORTS_PER_SOL } from "@solana/web3.js";
 
 export const signWithSolanaWeb3 = async (req: Request): Promise<Response> => {
-  const { email }: { email: string } = await req.json();
-
-  if (!email) {
-    return new Response("Email is required in the request body", { status: 400 });
-  }
-
-  const PARA_API_KEY = Bun.env.PARA_API_KEY;
-  if (!PARA_API_KEY) {
-    console.error("Server configuration error: PARA_API_KEY not set");
-    return new Response("Server configuration error", { status: 500 });
-  }
-
-  const para = new ParaServer(Environment.BETA, PARA_API_KEY, { disableWebSockets: true, disableWorkers: true });
-  const connection = new Connection(clusterApiUrl("testnet"), "confirmed");
-
   try {
+    const { email }: { email: string } = await req.json();
+
+    if (!email) {
+      return new Response("Email is required in the request body", { status: 400 });
+    }
+
+    const paraApiKey = Bun.env.PARA_API_KEY;
+    if (!paraApiKey) {
+      console.error("Server configuration error: PARA_API_KEY not set");
+      return new Response("Server configuration error", { status: 500 });
+    }
+
+    const env = (Bun.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
+    const para = new ParaServer(env, paraApiKey, { disableWebSockets: true });
+
     const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
     if (!hasPregenWallet) {
       return new Response(`Pregenerated wallet does not exist for ${email}`, { status: 404 });
     }
 
-    const keyShare = getKeyShareInDB(email);
+    const keyShare = await getKeyShareInDB(email);
     if (!keyShare) {
       return new Response(`Key share not found in DB for ${email}`, { status: 404 });
     }
 
-    let decryptedKeyShare: string;
-    try {
-      decryptedKeyShare = await decrypt(keyShare);
-    } catch (decryptionError) {
-      console.error(`Failed to decrypt key share for ${email}:`, decryptionError);
-      return new Response("Failed to process key share", { status: 500 });
-    }
-
+    const decryptedKeyShare = await decrypt(keyShare);
     await para.setUserShare(decryptedKeyShare);
 
-    if (!para.wallets || Object.keys(para.wallets).length === 0) {
-      throw new Error("Failed to load wallet details after setting user share.");
-    }
+    const connection = new Connection(clusterApiUrl("testnet"));
+    const solanaSigner = new ParaSolanaWeb3Signer(para, connection);
 
-    const signer = new ParaSolanaWeb3Signer(para, connection);
-
-    const senderPubKey = signer.sender;
-
-    if (!senderPubKey) {
-      throw new Error("Failed to get sender public key from ParaSolanaWeb3Signer after initialization.");
+    if (!solanaSigner.sender) {
+      return new Response("Failed to initialize Solana sender address from Para wallet.", { status: 500 });
     }
 
     const demoTx = new Transaction().add(
       SystemProgram.transfer({
-        fromPubkey: senderPubKey,
-        toPubkey: senderPubKey,
-        lamports: LAMPORTS_PER_SOL / 1000,
+        fromPubkey: solanaSigner.sender,
+        toPubkey: solanaSigner.sender,
+        lamports: LAMPORTS_PER_SOL / 1000, // Example: 0.001 SOL
       })
     );
 
-    demoTx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-    demoTx.feePayer = senderPubKey;
-
-    const txSignature = await signer.sendTransaction(demoTx);
-
-    if (!txSignature) {
-      throw new Error("sendTransaction did not return a signature.");
-    }
-
-    let receipt = null;
-
-    while (!receipt) {
-      receipt = await connection?.getSignatureStatus(txSignature, { searchTransactionHistory: true });
-      if (receipt?.value?.confirmationStatus === "confirmed" || receipt?.value?.confirmationStatus === "finalized") {
-        break;
-      }
-      await new Promise((resolve) => setTimeout(resolve, 500));
-    }
+    const signedTransaction = await solanaSigner.signTransaction(demoTx);
 
     return new Response(
       JSON.stringify({
         route: "signWithSolanaWeb3",
-        status: "success",
-        signature: txSignature,
-        confirmationStatus: receipt?.value?.confirmationStatus,
+        signedTransaction,
       }),
       {
         headers: { "Content-Type": "application/json" },
@@ -93,12 +62,6 @@ export const signWithSolanaWeb3 = async (req: Request): Promise<Response> => {
       }
     );
   } catch (error) {
-    console.error(`Error during signWithSolanaWeb3 process for ${email}:`, error);
-    return new Response(
-      `Failed to send/confirm Solana transaction: ${error instanceof Error ? error.message : "Unknown error"}`,
-      {
-        status: 500,
-      }
-    );
+    return new Response(`Error: ${error instanceof Error ? error.message : "Unknown error"}`, { status: 500 });
   }
 };
