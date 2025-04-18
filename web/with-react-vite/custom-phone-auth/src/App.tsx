@@ -48,7 +48,7 @@ export default function Home() {
         const popupWindow = window.open(webAuthUrlForLogin, "loginPopup", "popup=true");
         if (!popupWindow) throw new Error("Popup was blocked");
 
-        const { isComplete, needsWallet } = await para.waitForLoginAndSetup({ popupWindow });
+        const { needsWallet } = await para.waitForLoginAndSetup({ popupWindow });
 
         if (needsWallet) {
           await para.createWallet({ type: WalletType.EVM, skipDistribute: false });

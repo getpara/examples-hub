@@ -58,7 +58,7 @@ export default function EthTransferDemo() {
 
     return tx;
   };
-  const validateTransaction = async (toAddress: string, ethAmount: string): Promise<boolean> => {
+  const validateTransaction = async (_toAddress: string, ethAmount: string): Promise<boolean> => {
     if (!address || !provider) throw new Error("No sender address or provider available");
 
     try {

@@ -1,6 +1,6 @@
 import { usePara } from "../components/ParaProvider";
 import { useState, useEffect } from "react";
-import { formatEther, parseEther, Contract, MaxUint256 } from "ethers";
+import { formatEther, Contract, MaxUint256 } from "ethers";
 import { PARA_TEST_TOKEN_CONTRACT_ADDRESS, PARA_TEST_TOKEN_CONTRACT_OWNER } from ".";
 import ParaTestToken from "../contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
 
@@ -77,8 +77,7 @@ export default function PermitSigningDemo() {
       // Calculate deadline (1 hour from now)
       const deadline = Math.floor(Date.now() / 1000) + 3600;
 
-      // Get domain separator
-      const domainSeparator = await contract.DOMAIN_SEPARATOR();
+      // Get the name
       const name = await contract.name();
 
       // Prepare permit data

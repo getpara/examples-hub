@@ -40,7 +40,6 @@ export default function TokenTransferDemo() {
 
       // Fetch token balance
       const tokenContract = new Contract(contractAddress, ERC20_ABI, provider);
-      const decimals = await tokenContract.decimals();
       const balance = await tokenContract.balanceOf(address);
       const symbol = await tokenContract.symbol();
 
