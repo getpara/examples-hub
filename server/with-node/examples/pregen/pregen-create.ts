@@ -19,15 +19,15 @@ export async function createPregenWalletHandler(req: Request, res: Response, nex
       return;
     }
 
-    const env = process.env.PARA_ENVIRONMENT as Environment || Environment.BETA;
+    const env = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
     const para = new ParaServer(env, paraApiKey);
 
     const walletExists = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
 
-    if (walletExists) {
-      res.status(409).send("A pre-generated wallet already exists for this email.");
-      return;
-    }
+    // if (walletExists) {
+    //   res.status(409).send("A pre-generated wallet already exists for this email.");
+    //   return;
+    // }
 
     const wallets = await para.createPregenWalletPerType({
       types: [WalletType.EVM, WalletType.SOLANA, WalletType.COSMOS], // Select the wallet type you want to create or use createPregenWallet() to create a single type.

@@ -64,7 +64,7 @@ export const signWithAlchemy = async (req: Request): Promise<Response> => {
       return new Response("Missing required environment variables", { status: 500 });
     }
 
-    const para = new ParaServer(Environment.BETA, paraApiKey, { disableWebSockets: true });
+    const para = new ParaServer(env, paraApiKey, { disableWebSockets: true });
 
     const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
     if (!hasPregenWallet) {

@@ -10,23 +10,21 @@ export const createWallet = async (req: Request): Promise<Response> => {
       return new Response("Email is required in the request body", { status: 400 });
     }
 
-    const PARA_API_KEY = Bun.env.PARA_API_KEY;
+    const paraApiKey = Bun.env.PARA_API_KEY;
+    const env = (Bun.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
 
-    if (!PARA_API_KEY) {
+    if (!paraApiKey) {
       return new Response("Server configuration error: PARA_API_KEY not set", { status: 500 });
     }
 
-    const para = new ParaServer(Environment.BETA, PARA_API_KEY, { disableWebSockets: true, disableWorkers: false });
+    const para = new ParaServer(env, paraApiKey, { disableWebSockets: true });
 
     const hasPregenWallet = await para.hasPregenWallet({
       pregenIdentifier: email,
       pregenIdentifierType: "EMAIL",
     });
 
-    console.log(`Checking if wallet exists for ${email}: ${hasPregenWallet}`);
-
     if (hasPregenWallet) {
-      console.warn(`Wallet creation attempt for existing email: ${email}`);
       return new Response(`Wallet already exists for ${email}`, { status: 409 });
     }
 
@@ -36,8 +34,6 @@ export const createWallet = async (req: Request): Promise<Response> => {
       pregenIdentifierType: "EMAIL",
     });
 
-    console.log(`Wallet creation result for ${email}:`, wallets);
-
     if (!wallets) {
       console.error(`Para SDK returned no wallet object for ${email}, but no error was thrown.`);
       return new Response("Failed to create wallet (unknown reason)", { status: 500 });
@@ -45,15 +41,11 @@ export const createWallet = async (req: Request): Promise<Response> => {
 
     const keyShare = para.getUserShare();
 
-    console.log(`Key share for ${email}:`, keyShare);
-
     if (!keyShare) {
       return new Response("Failed to retrieve key share after wallet creation", { status: 500 });
     }
 
     const encryptedKeyShare = await encrypt(keyShare);
-
-    console.log(`Encrypted key share for ${email}:`, encryptedKeyShare);
 
     setKeyShareInDB(email, encryptedKeyShare);
 

@@ -31,7 +31,6 @@ const AuthFlowUI: React.FC = () => {
     { id: "cosmjs", name: "CosmJS" },
     { id: "solana-web3", name: "Solana Web3" },
     { id: "alchemy", name: "Alchemy AA" },
-    { id: "zerodev", name: "ZeroDev AA" },
   ];
 
   const handleAuthTypeSelect = (type: string) => {

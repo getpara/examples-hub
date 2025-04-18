@@ -49,6 +49,9 @@ export const signWithSolanaWeb3 = async (req: Request): Promise<Response> => {
       })
     );
 
+    demoTx.feePayer = solanaSigner.sender;
+    demoTx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+
     const signedTransaction = await solanaSigner.signTransaction(demoTx);
 
     return new Response(
