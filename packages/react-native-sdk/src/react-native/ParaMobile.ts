@@ -172,7 +172,7 @@ export class ParaMobile extends ParaCore {
    * @param {AuthParams} params - The authentication parameters.
    * @returns {Promise<void>}
    */
-  async login(): Promise<void> {
+  async loginWithPasskey(): Promise<void> {
     this.assertIsAuthSet();
     const userId = this.assertUserId();
 
