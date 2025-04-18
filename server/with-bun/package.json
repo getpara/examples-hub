@@ -4,20 +4,25 @@
   "main": "server.ts",
   "module": "server.ts",
   "scripts": {
-    "dev": "bun run server.ts",
-    "test": "bun test"
+    "install:all": "bun install && cd test-ui && bun install",
+    "build:ui": "cd test-ui && bun run build",
+    "copy:ui": "rm -rf public/* && cp -r test-ui/dist/* public/",
+    "build:dev": "bun run build:ui && bun run copy:ui",
+    "dev:server": "bun run server.ts",
+    "dev": "bun run build:dev && bun run dev:server",
+    "test": "bun test",
+    "build": "bun build ./server.ts --outdir ./dist --target node"
   },
   "dependencies": {
     "@alchemy/aa-core": "3.19.0",
     "@alchemy/aa-alchemy": "3.19.0",
     "@cosmjs/stargate": "0.33.1",
-    "@ethereumjs/rlp": "5.0.2",
     "@solana/web3.js": "1.98.0",
-    "@getpara/cosmjs-v0-integration": "1.7.0",
-    "@getpara/ethers-v6-integration": "1.7.0",
-    "@getpara/server-sdk": "1.7.0",
-    "@getpara/solana-web3.js-v1-integration": "1.7.0",
-    "@getpara/viem-v2-integration": "1.7.0",
+    "@getpara/cosmjs-v0-integration": "1.11.0",
+    "@getpara/ethers-v6-integration": "1.11.0",
+    "@getpara/server-sdk": "1.11.0",
+    "@getpara/solana-web3.js-v1-integration": "1.11.0",
+    "@getpara/viem-v2-integration": "1.11.0",
     "ethers": "6.13.5",
     "viem": "2.8.6"
   },
