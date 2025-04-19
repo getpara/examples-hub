@@ -1142,16 +1142,8 @@ class Client {
   }
 
   // GET /users/:userId/wallets/:walletId/balance
-  getWalletBalance = async ({
-    userId,
-    walletId,
-    rpcUrl,
-  }: {
-    userId: string;
-    walletId: string;
-    rpcUrl?: string;
-  }): Promise<GetWalletBalanceRes> => {
-    const res = await this.baseRequest.get<GetWalletBalanceRes>(`/users/${userId}/wallets/${walletId}/balance`, {
+  getWalletBalance = async ({ walletId, rpcUrl }: { walletId: string; rpcUrl?: string }): Promise<GetWalletBalanceRes> => {
+    const res = await this.baseRequest.get<GetWalletBalanceRes>(`/wallets/${walletId}/balance`, {
       params: {
         rpcUrl,
       },

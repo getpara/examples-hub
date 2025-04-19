@@ -48,6 +48,7 @@ import {
   isExternalWallet,
   AccountMetadata,
   WALLET_TYPES,
+  PregenOrGuestAuth,
 } from '@getpara/user-management-client';
 import type { pki as pkiType, jsbn as jsbnType } from 'node-forge';
 import forge from 'node-forge';
@@ -103,6 +104,7 @@ import {
   isWalletSupported,
   jsonParse,
   migrateWallet,
+  newUuid,
   setupListeners,
   supportedWalletTypesEq,
   truncateAddress,
@@ -226,6 +228,35 @@ export abstract class ParaCore implements CoreInterface {
 
   get currentWalletIdsUnique(): string[] {
     return [...new Set(Object.values(this.currentWalletIds).flat())];
+  }
+
+  get #guestWalletIds(): CurrentWalletIds {
+    const guestId = this.pregenIds?.GUEST_ID?.[0];
+    return !!guestId
+      ? Object.entries(this.wallets).reduce((acc, [id, wallet]) => {
+          if (
+            wallet.isPregen &&
+            !wallet.userId &&
+            wallet.pregenIdentifierType === 'GUEST_ID' &&
+            wallet.pregenIdentifier === guestId
+          ) {
+            return {
+              ...acc,
+              ...getEquivalentTypes(wallet.type).reduce(
+                (acc, eqType) => ({ ...acc, [eqType]: [...new Set([...(acc[eqType] ?? []), id])] }),
+                {},
+              ),
+            };
+          }
+          return acc;
+        }, {})
+      : {};
+  }
+
+  get #guestWalletIdsArray(): [string, TWalletType][] {
+    return Object.entries(this.#guestWalletIds).reduce((acc, [type, ids]) => {
+      return [...acc, ...ids.map(id => [id, type])];
+    }, []);
   }
 
   /**
@@ -1469,7 +1500,7 @@ export abstract class ParaCore implements CoreInterface {
 
   get availableWallets(): Pick<Wallet, 'id' | 'type' | 'name' | 'address' | 'isExternal'>[] {
     return [
-      ...this.currentWalletIdsArray
+      ...[...this.currentWalletIdsArray, ...this.#guestWalletIdsArray]
         .map(([address, type]): [string, TWalletType, boolean] => [address, type, false])
         .map(([id, type]) => {
           const wallet = this.findWallet(id, type);
@@ -1762,6 +1793,10 @@ export abstract class ParaCore implements CoreInterface {
       return true;
     }
 
+    if (this.isGuestMode) {
+      return true;
+    }
+
     const isSessionActive = await this.isSessionActive();
 
     return (
@@ -1770,6 +1805,10 @@ export abstract class ParaCore implements CoreInterface {
         (this.currentWalletIdsArray.length > 0 &&
           this.currentWalletIdsArray.reduce((acc, [id]) => acc && !!this.wallets[id], true)))
     );
+  }
+
+  get isGuestMode(): boolean {
+    return !this.userId && this.#guestWalletIdsArray.length > 0;
   }
 
   protected async supportedAuthMethods(auth: Auth<PrimaryAuthType | 'userId'>): Promise<Set<AuthMethod>> {
@@ -2465,7 +2504,10 @@ export abstract class ParaCore implements CoreInterface {
    * @param {TWalletType} [opts.type] the type of wallet to create. Defaults to the first non-optional type in the instance's `supportedWalletTypes` array.
    * @returns {Wallet} the created wallet.
    **/
-  async createPregenWallet(opts: CoreMethodParams<'createPregenWallet'>): CoreMethodResponse<'createPregenWallet'> {
+  async #createPregenWallet(opts: {
+    pregenId: PregenOrGuestAuth;
+    type: TWalletType;
+  }): CoreMethodResponse<'createPregenWallet'> {
     const { supportedWalletTypes } = await this.#assertPartner();
     const { type: _type = supportedWalletTypes.find(({ optional }) => !optional)?.type, pregenId } = opts;
     this.requireApiKey();
@@ -2513,6 +2555,10 @@ export abstract class ParaCore implements CoreInterface {
     await this.populatePregenWalletAddresses();
 
     return this.wallets[walletId];
+  }
+
+  async createPregenWallet(opts: CoreMethodParams<'createPregenWallet'>): CoreMethodResponse<'createPregenWallet'> {
+    return await this.#createPregenWallet(opts);
   }
 
   /**
@@ -2691,6 +2737,26 @@ export abstract class ParaCore implements CoreInterface {
     return res.wallets.filter(w => this.isWalletSupported(entityToWallet(w)));
   }
 
+  async createGuestWallets(): CoreMethodResponse<'createGuestWallets'> {
+    if (this.isGuestMode) {
+      throw new Error('Guest wallets already created');
+    }
+
+    const { supportedWalletTypes } = await this.#assertPartner();
+    const wallets = [];
+    const guestId = newUuid();
+
+    for (const type of await this.getTypesToCreate(
+      supportedWalletTypes.filter(({ optional }) => !optional).map(({ type }) => type),
+    )) {
+      const wallet = await this.#createPregenWallet({ type, pregenId: { guestId } });
+
+      wallets.push(wallet);
+    }
+
+    return wallets;
+  }
+
   private encodeWalletBase64(wallet: Wallet): string {
     const walletJson = JSON.stringify(wallet);
     const base64Wallet = Buffer.from(walletJson).toString('base64');
@@ -2763,11 +2829,7 @@ export abstract class ParaCore implements CoreInterface {
     walletId,
     rpcUrl,
   }: CoreMethodParams<'getWalletBalance'>): CoreMethodResponse<'getWalletBalance'> => {
-    if (!this.userId) {
-      throw new Error('a user id is required to get a wallet balance');
-    }
-
-    return (await this.ctx.client.getWalletBalance({ userId: this.userId, walletId, rpcUrl })).balance;
+    return (await this.ctx.client.getWalletBalance({ walletId, rpcUrl })).balance;
   };
 
   /**
@@ -3179,9 +3241,11 @@ export abstract class ParaCore implements CoreInterface {
       supportedWalletTypes: this.#partner?.supportedWalletTypes,
       cosmosPrefix: this.#partner?.cosmosPrefix,
       authInfo: this.#authInfo,
+      isGuestMode: this.isGuestMode,
       userId: this.userId,
       pregenIds: this.pregenIds,
       currentWalletIds: this.currentWalletIds,
+      guestWalletIds: this.#guestWalletIds,
       wallets: redactedWallets,
       externalWallets: redactedExternalWallets,
       loginEncryptionKeyPair: this.loginEncryptionKeyPair ? '[REDACTED]' : undefined,

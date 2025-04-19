@@ -131,7 +131,7 @@ describe('wallets', () => {
   describe('createPregenWallet', async () => {
     WALLET_TYPES.forEach(type => {
       describe(type, () => {
-        PREGEN_IDENTIFIER_TYPES.forEach(pregenIdentifierType => {
+        PREGEN_IDENTIFIER_TYPES.filter(type => type !== 'GUEST_ID').forEach(pregenIdentifierType => {
           it(`creates wallet for ${pregenIdentifierType}`, async () => {
             const pregenId = {
               EMAIL: emailAuth,
@@ -172,7 +172,7 @@ describe('wallets', () => {
   });
 
   describe('createPregenWalletPerType', async () => {
-    PREGEN_IDENTIFIER_TYPES.forEach(pregenIdentifierType => {
+    PREGEN_IDENTIFIER_TYPES.filter(type => type !== 'GUEST_ID').forEach(pregenIdentifierType => {
       it(`creates wallets for ${pregenIdentifierType}`, async () => {
         const pregenId = {
           EMAIL: emailAuth,
@@ -221,7 +221,7 @@ describe('wallets', () => {
   });
 
   describe('updatePregenWalletIdentifier', () => {
-    PREGEN_IDENTIFIER_TYPES.forEach(async pregenIdentifierType => {
+    PREGEN_IDENTIFIER_TYPES.filter(type => type !== 'GUEST_ID').forEach(async pregenIdentifierType => {
       const [newPregenId, pregenIdentifier] = {
         EMAIL: [emailAuth, USER_EMAIL],
         PHONE: [phoneAuth, USER_PHONE],

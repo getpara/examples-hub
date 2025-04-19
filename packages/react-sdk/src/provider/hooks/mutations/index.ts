@@ -27,5 +27,6 @@ export const useUpdatePregenWalletIdentifier = generateHook(
   'updatePregenWalletIdentifier',
   actions.updatePregenWalletIdentifier,
 );
+export const useCreateGuestWallets = generateHook('createGuestWallets', actions.createGuestWallets);
 export const useSignMessage = generateHook('signMessage', actions.signMessage);
 export const useSignTransaction = generateHook('signTransaction', actions.signTransaction);

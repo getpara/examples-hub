@@ -1,3 +1,4 @@
+import * as uuid from 'uuid';
 import {
   CurrentWalletIds,
   SupportedWalletTypes,
@@ -105,4 +106,8 @@ export function mergeCurrentWalletIds(original: CurrentWalletIds, additional: Cu
       [key]: [...new Set([...(original[key] || []), ...(additional[key] || [])])],
     };
   }, {});
+}
+
+export function newUuid(): string {
+  return uuid.v4();
 }

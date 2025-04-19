@@ -284,6 +284,8 @@ describe('ParaCore - utils', () => {
         useDKLS: true,
       },
       currentWalletIds: para.currentWalletIds,
+      guestWalletIds: {},
+      isGuestMode: false,
       externalWallets: Object.fromEntries(
         Object.entries(para.externalWallets).map(([id, wallet]) => [
           id,

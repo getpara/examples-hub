@@ -19,6 +19,7 @@ describe('getAccount', () => {
       authType: 'email',
       identifier: TEST_EMAIL,
       isConnected: true,
+      isGuestMode: false,
       email: TEST_EMAIL,
       wallets: [TEST_WALLET],
       userId: TEST_USER_ID,

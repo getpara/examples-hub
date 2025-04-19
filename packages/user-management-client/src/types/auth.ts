@@ -11,6 +11,7 @@ export const AUTH_TYPES = [
   'discord',
   'x',
   'customId',
+  'guestId',
 ] as const;
 
 export type AuthType =
@@ -23,7 +24,8 @@ export type AuthType =
   | 'externalWallet'
   | 'discord'
   | 'x'
-  | 'customId';
+  | 'customId'
+  | 'guestId';
 
 export type PrimaryAuthType = Extract<AuthType, 'email' | 'phone' | 'farcaster' | 'telegram' | 'externalWallet'>;
 
@@ -73,13 +75,17 @@ export type Auth<T extends AuthType = AuthType> = T extends 'email'
                 ? { discordUsername: AuthIdentifier<'discord'> }
                 : T extends 'customId'
                   ? { customId: AuthIdentifier<'customId'> }
-                  : { userId: AuthIdentifier<'userId'> };
+                  : T extends 'guestId'
+                    ? { guestId: AuthIdentifier<'guestId'> }
+                    : { userId: AuthIdentifier<'userId'> };
 
 export type PrimaryAuth = Auth<PrimaryAuthType>;
 
 export type VerifiedAuth = Auth<VerifiedAuthType>;
 
 export type PregenAuth = Auth<PregenAuthType>;
+
+export type PregenOrGuestAuth = Auth<PregenAuthType | 'guestId'>;
 
 export type AuthExtras = {
   /**

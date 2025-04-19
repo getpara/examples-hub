@@ -211,12 +211,11 @@ describe('Client', () => {
 
     it('getWalletBalance', async () => {
       await client.getWalletBalance({
-        userId,
         walletId,
         rpcUrl: 'https://test.com',
       });
 
-      expect(mocks.get).toBeCalledWith(`/users/${userId}/wallets/${walletId}/balance`, {
+      expect(mocks.get).toBeCalledWith(`/wallets/${walletId}/balance`, {
         params: {
           rpcUrl: 'https://test.com',
         },

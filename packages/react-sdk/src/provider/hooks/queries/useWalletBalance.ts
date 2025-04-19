@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useAccount, useClient, useWallet } from '../index.js';
+import { useAccount, useClient, useWallet, useWalletState } from '../index.js';
 import { GetWalletBalanceParams } from '@getpara/web-sdk';
 import { useStore } from '../../stores/useStore.js';
 import { getWalletBalance } from '../../actions/index.js';
@@ -14,12 +14,15 @@ export const WALLET_BALANCE_BASE_KEY = 'PARA_WALLET_BALANCE';
 export const useWalletBalance = (args?: Partial<GetWalletBalanceParams>) => {
   const client = useClient();
   const { data: selectedWallet } = useWallet();
+  const {
+    selectedWallet: { type: selectedWalletType },
+  } = useWalletState();
   const { data: account } = useAccount();
   const rpcUrl = useStore(state => state.rpcUrl);
   const { getWalletBalance: getExternalWalletBalance, chainId } = useExternalWallets();
 
   const queryFn = useCallback(async () => {
-    const skipGetBalance = !selectedWallet || (selectedWallet.type && ['COSMOS', 'SOLANA'].includes(selectedWallet.type));
+    const skipGetBalance = !selectedWallet || (selectedWalletType && ['COSMOS', 'SOLANA'].includes(selectedWalletType));
 
     if (skipGetBalance) {
       return;
@@ -30,15 +33,16 @@ export const useWalletBalance = (args?: Partial<GetWalletBalanceParams>) => {
         return await getExternalWalletBalance();
       } else {
         const completeArgs: GetWalletBalanceParams = { walletId: selectedWallet?.id ?? '', rpcUrl: rpcUrl, ...args };
+
         return await getWalletBalance(client, completeArgs);
       }
     } catch (err) {
       console.error('Error fetching wallet balance: ', err);
     }
-  }, [selectedWallet, rpcUrl, getExternalWalletBalance]);
+  }, [account, selectedWallet, selectedWalletType, rpcUrl, getExternalWalletBalance]);
 
   return useQuery({
-    queryKey: [WALLET_BALANCE_BASE_KEY, client?.getUserId(), selectedWallet?.id, selectedWallet?.isExternal ? chainId : ''],
+    queryKey: [WALLET_BALANCE_BASE_KEY, selectedWallet?.id, selectedWalletType, selectedWallet?.isExternal ? chainId : ''],
     queryFn: queryFn,
     enabled: !!selectedWallet && !!rpcUrl && !!account?.isConnected,
   });

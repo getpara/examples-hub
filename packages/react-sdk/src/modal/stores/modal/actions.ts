@@ -75,7 +75,20 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
   isLogin: () => get().flow === 'login',
   isAccount: () => get().flow === 'account',
   setAuthState: authState => {
-    const newFlow = authState?.stage === 'signup' || authState?.stage === 'login' ? authState.stage : undefined;
+    let newFlow;
+
+    switch (authState?.stage) {
+      case 'login':
+        newFlow = 'login';
+        break;
+      case 'signup':
+      case 'verify':
+        newFlow = 'signup';
+        break;
+      default:
+        break;
+    }
+
     set({ authState, ...(newFlow ? { flow: newFlow } : {}) });
   },
   getVerifyState: () => {

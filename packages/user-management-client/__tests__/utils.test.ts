@@ -22,6 +22,7 @@ const xUsername = 'xUsername';
 const discordUsername = 'discordUsername';
 const customId = 'customId';
 const userId = 'userId';
+const guestId = 'guestId';
 const externalWalletAddress = 'externalWalletAddress';
 
 const emailAuth = { email, foo: 'bar', phone: 'undefined' };
@@ -140,6 +141,16 @@ describe('utils', () => {
         auth: { customId },
         authType: 'customId',
         identifier: customId,
+      });
+    });
+
+    it('extracts guestId auth', () => {
+      expect(extractAuthInfo({ guestId })).toEqual(undefined);
+
+      expect(extractAuthInfo({ guestId }, { allowPregen: true })).toEqual({
+        auth: { guestId },
+        authType: 'guestId',
+        identifier: guestId,
       });
     });
 

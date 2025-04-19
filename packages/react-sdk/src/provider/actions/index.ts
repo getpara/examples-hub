@@ -23,6 +23,7 @@ export const createPregenWalletPerType = generateAction('createPregenWalletPerTy
 export const claimPregenWallets = generateAction('claimPregenWallets');
 export const hasPregenWallet = generateAction('hasPregenWallet');
 export const updatePregenWalletIdentifier = generateAction('updatePregenWalletIdentifier');
+export const createGuestWallets = generateAction('createGuestWallets');
 export const signMessage = generateAction('signMessage');
 export const signTransaction = generateAction('signTransaction');
 export const getWalletBalance = generateAction('getWalletBalance');

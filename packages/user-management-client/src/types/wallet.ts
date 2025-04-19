@@ -54,6 +54,7 @@ export const PREGEN_IDENTIFIER_TYPES = [
   'EMAIL',
   'PHONE',
   'CUSTOM_ID',
+  'GUEST_ID',
   'DISCORD',
   'TWITTER',
   'TELEGRAM',

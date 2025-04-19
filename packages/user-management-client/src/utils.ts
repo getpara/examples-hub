@@ -9,7 +9,14 @@ import {
   WalletParams,
   WalletRef,
 } from './types/index.js';
-import { AccountMetadata, AccountMetadataKey, PregenAuth, PregenAuthInfo, PregenAuthType } from './types/auth.js';
+import {
+  AccountMetadata,
+  AccountMetadataKey,
+  PregenAuth,
+  PregenAuthInfo,
+  PregenAuthType,
+  PregenOrGuestAuth,
+} from './types/auth.js';
 import { PregenIds, TPregenIdentifierType } from './types/wallet.js';
 
 export function isWalletId(params: WalletParams): params is { walletId: string } {
@@ -173,6 +180,21 @@ export function isCustomId(params: AuthParams | undefined): params is Auth<'cust
   );
 }
 
+export function isGuestId(params: AuthParams | undefined): params is Auth<'guestId'> {
+  return (
+    !!params &&
+    isValid(params.guestId) &&
+    !isValid(params.email) &&
+    !isValid(params.phone) &&
+    !isValid(params.countryCode) &&
+    !isValid(params.farcasterUsername) &&
+    !isValid(params.xUsername) &&
+    !isValid(params.discordUsername) &&
+    !isValid(params.customId) &&
+    !isValid(params.externalWalletAddress)
+  );
+}
+
 export function isUserId(params: AuthParams | undefined): params is Auth<'userId'> {
   return (
     !!params &&
@@ -307,6 +329,12 @@ export function extractAuthInfo(
         authType: 'customId',
         identifier: obj.customId,
       };
+    case allowPregen && isGuestId(obj):
+      return {
+        auth: { guestId: obj.guestId },
+        authType: 'guestId',
+        identifier: obj.guestId,
+      };
     case isUserId(obj) && allowUserId:
       return {
         auth: { userId: obj.userId },
@@ -323,10 +351,10 @@ export function extractAuthInfo(
   return undefined;
 }
 
-export function toPregenTypeAndId(auth: PregenAuth): [TPregenIdentifierType, string] {
+export function toPregenTypeAndId(auth: PregenOrGuestAuth): [TPregenIdentifierType, string] {
   const { authType, identifier: pregenIdentifier } = extractAuthInfo(auth, { isRequired: true, allowPregen: true });
 
-  const pregenIdentifierType = (<Record<PregenAuthType, TPregenIdentifierType>>{
+  const pregenIdentifierType = (<Record<PregenAuthType | 'guestId', TPregenIdentifierType>>{
     email: 'EMAIL',
     phone: 'PHONE',
     farcaster: 'FARCASTER',
@@ -334,6 +362,7 @@ export function toPregenTypeAndId(auth: PregenAuth): [TPregenIdentifierType, str
     discord: 'DISCORD',
     x: 'TWITTER',
     customId: 'CUSTOM_ID',
+    guestId: 'GUEST_ID',
   })[authType];
 
   return [pregenIdentifierType, pregenIdentifier];

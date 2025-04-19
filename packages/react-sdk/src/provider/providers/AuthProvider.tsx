@@ -13,6 +13,7 @@ import {
   useVerifyTelegram,
   useSetup2fa,
   useLogout,
+  useCreateGuestWallets,
 } from '../index.js';
 import { DEFAULTS } from '../../modal/constants/defaults.js';
 import { openPopup } from '../../modal/utils/openPopup.js';
@@ -46,6 +47,8 @@ type Value = {
   presentSignupUi: (_: AuthMethod, __: AuthStateSignup) => void;
   presentLoginUi: (_: AuthMethod, __: AuthStateLogin) => void;
   isSetup2faPending: boolean;
+  createGuestWallets: () => void;
+  isCreateGuestWalletsPending: boolean;
   logout: () => void;
   biometricHints?: BiometricHints;
 };
@@ -72,6 +75,8 @@ export const AuthContext = createContext<Value>({
   isSetup2faPending: false,
   presentSignupUi: () => {},
   presentLoginUi: () => {},
+  createGuestWallets: () => {},
+  isCreateGuestWalletsPending: false,
   logout: () => {},
 });
 
@@ -83,10 +88,10 @@ export function AuthProvider({
 }: Props) {
   const para = useInternalClient();
   const onLoginRef = useStore(state => state.onLoginRef);
+  const setIsOpen = useStore(state => state.setIsOpen);
   const refs = useModalStore(state => state.refs);
   const currentStep = useModalStore(state => state.step);
   const setStep = useModalStore(state => state.setStep);
-  const setFlow = useModalStore(state => state.setFlow);
   const setAuthStepRoute = useModalStore(state => state.setAuthStepRoute);
   const setIFrameUrl = useModalStore(state => state.setIFrameUrl);
   const iFrameUrl = useModalStore(state => state.iFrameUrl);
@@ -115,6 +120,7 @@ export function AuthProvider({
   const { mutate: mutateWaitForSignup } = useWaitForSignup();
   const { mutateAsync: mutateAsyncWaitForWalletCreation } = useWaitForWalletCreation();
   const { mutate: mutateSetup2fa, isPending: isSetup2faPending } = useSetup2fa();
+  const { mutate: mutateCreateGuestWallets, isPending: isCreateGuestWalletsPending } = useCreateGuestWallets();
   const { mutate: mutateLogout } = useLogout();
 
   const goBackIfPopupClosedOnSteps = (steps: ModalStep[]) => {
@@ -279,7 +285,6 @@ export function AuthProvider({
 
     switch (authState.stage) {
       case 'verify':
-        setFlow('signup');
         if (isExternalWallet(authState.auth) && authState.signatureVerificationMessage) {
           setStep(ModalStep.EXTERNAL_WALLET_VERIFICATION);
         } else {
@@ -287,12 +292,10 @@ export function AuthProvider({
         }
         break;
       case 'login':
-        setFlow(authState.stage);
         login();
         break;
       case 'signup':
         {
-          setFlow(authState.stage);
           const isPassword = !!authState.passwordUrl,
             isPasswordOnly = isPassword && !authState.passkeyUrl;
 
@@ -467,6 +470,15 @@ export function AuthProvider({
     } catch (e) {}
   }, [para, isRecoverySecretStepEnabled, overrides?.createWallets]);
 
+  const createGuestWallets = () => {
+    setIsOpen(false);
+
+    mutateCreateGuestWallets(undefined, {
+      onSuccess: () => {},
+      onSettled: () => {},
+    });
+  };
+
   const logout = () => {
     mutateLogout();
   };
@@ -487,6 +499,8 @@ export function AuthProvider({
       verifyTelegram,
       onNewAuthState,
       isSetup2faPending,
+      createGuestWallets,
+      isCreateGuestWalletsPending,
       logout,
       biometricHints,
     }),
@@ -504,6 +518,8 @@ export function AuthProvider({
       verifyTelegram,
       onNewAuthState,
       isSetup2faPending,
+      createGuestWallets,
+      isCreateGuestWalletsPending,
       logout,
       biometricHints,
     ],

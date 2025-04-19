@@ -71,6 +71,7 @@ export const PARA_CORE_METHODS = [
   'createPregenWallet',
   'createPregenWalletPerType',
   'claimPregenWallets',
+  'createGuestWallets',
   'distributeNewWalletShare',
   'getUserShare',
   'setUserShare',
@@ -434,6 +435,10 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
       pregenId?: PregenAuth;
     };
     response: string | undefined;
+  };
+  createGuestWallets: {
+    params: void;
+    response: Wallet[];
   };
   distributeNewWalletShare: {
     params: {
