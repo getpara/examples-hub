@@ -75,12 +75,13 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
     try {
       _log("Starting OAuth flow with provider: ${provider.value}");
       // Call the single V2 method.
-      // "paraflutter" should be your registered URL scheme.
+      // You MUST register this URL scheme in your app:
+      // - iOS: Add to Info.plist URL types
+      // - Android: Add intent filter in AndroidManifest.xml
       final AuthState authState = await para.handleOAuth(
         provider: provider,
         deeplinkUrl:
-            "paraflutter", // Replace with your actual registered scheme if different
-        // No need to pass AuthController/WebAuthSession here, SDK handles it
+            "paraflutter", // Just the scheme name, SDK handles formatting
       );
 
       _log(
