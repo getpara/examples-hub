@@ -8,6 +8,7 @@ import 'package:para_flutter/widgets/demo_home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:qr_flutter/qr_flutter.dart'; // Import a QR code package
+import 'package:url_launcher/url_launcher.dart';
 
 class ParaFarcasterAuthExample extends StatefulWidget {
   const ParaFarcasterAuthExample({super.key});
@@ -22,7 +23,6 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
   // Wallet info
   Wallet? _wallet;
   String? _address;
-  // String? _recoveryShare; // Adjust if needed
 
   // --- Farcaster Specific State ---
   String? _farcasterConnectUri; // To store the URI for the QR code
@@ -41,7 +41,6 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
   }
 
   Future<void> _checkLoginStatus() async {
-    // ... (Keep existing _checkLoginStatus - no changes needed here) ...
     setState(() => _isLoading = true);
     try {
       final isLoggedIn = await para.isFullyLoggedIn();
@@ -70,12 +69,10 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
     setState(() {
       _wallet = wallet;
       _address = wallet.address;
-      // If CreateWalletResult was used and had recoveryShare:
-      // _recoveryShare = createResult.recoveryShare;
     });
   }
 
-  // Updated Farcaster handler using anticipated V2 SDK method
+  // Updated Farcaster handler for V2 SDK
   Future<void> _handleFarcasterAuth() async {
     if (!mounted) return;
 
@@ -88,45 +85,65 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
     try {
       _log("Starting Farcaster V2 flow...");
 
-      // --- SDK V2 Placeholder ---
-      // This method needs to be implemented in the Para SDK (lib/src/para.dart)
-      // It should internally call getFarcasterConnectURL, then verifyFarcaster,
-      // and process the resulting AuthState (triggering login/signup).
-      /*
-      await para.handleFarcasterConnect(
-        onConnectUri: (uri) {
-          // Callback to display the QR code
-          if (mounted) {
-            setState(() {
-              _farcasterConnectUri = uri;
-            });
-          }
-        },
-        isCanceled: () {
-          // Callback for the SDK to check if the user cancelled
-          // (e.g., closed the QR code dialog)
-          return _farcasterFlowCancelled;
-        },
-      );
-      */
-      // --- End SDK V2 Placeholder ---
+      // Step 1: Get the Farcaster connect URI
+      final connectUri = await para.getFarcasterConnectURI();
 
-      // --- Temporary Simulation ---
-      // Simulate getting the URI and waiting - REMOVE THIS WHEN SDK IS UPDATED
-      _log("Simulating Farcaster flow - Displaying dummy QR and waiting...");
+      if (!mounted) return;
+
       setState(() {
-        _farcasterConnectUri =
-            "https://warpcast.com/~/sign-in?uri=dummy-uri-for-testing";
+        _farcasterConnectUri = connectUri;
       });
-      await Future.delayed(
-          const Duration(seconds: 10)); // Simulate waiting time
-      if (_farcasterFlowCancelled) {
-        throw Exception("Farcaster flow cancelled by user.");
-      }
-      _log("Simulated Farcaster flow complete (assuming success).");
-      // --- End Temporary Simulation ---
 
-      _log("Farcaster flow completed successfully.");
+      _log("Displaying QR code with Farcaster connect URI");
+
+      // Step 2: Use the SDK's handleFarcaster method, but we need to launch the URI automatically
+      // since we're displaying it as a QR code
+      AuthState? authState;
+
+      try {
+        // We need to use the SDK's built-in polling for verification
+        authState = await para.handleFarcaster(
+          // We just use the isCanceled callback to check our local state
+          isCanceled: () => _farcasterFlowCancelled,
+        );
+      } catch (e) {
+        // Catch any errors from handleFarcaster
+        if (_farcasterFlowCancelled) {
+          throw Exception('Farcaster authentication canceled by user');
+        } else {
+          rethrow;
+        }
+      }
+
+      _log(
+          "Farcaster authentication successful, stage: ${authState.stage.name}");
+
+      // Process the authentication result based on the stage
+      if (authState.stage == AuthStage.login) {
+        _log("Processing Farcaster LOGIN stage");
+        if (authState.passkeyUrl != null) {
+          // Open the passkey URL in an external browser
+          final passkeyUri = Uri.parse(authState.passkeyUrl!);
+          await launchUrl(passkeyUri, mode: LaunchMode.externalApplication);
+
+          // Wait for login to complete using the para SDK method
+          await para.waitForLogin(
+            isCanceled: () => _farcasterFlowCancelled,
+          );
+        }
+      } else if (authState.stage == AuthStage.signup) {
+        _log("Processing Farcaster SIGNUP stage");
+        if (authState.passkeyUrl != null) {
+          // Open the passkey URL in an external browser
+          final passkeyUri = Uri.parse(authState.passkeyUrl!);
+          await launchUrl(passkeyUri, mode: LaunchMode.externalApplication);
+
+          // Wait for wallet creation using the para SDK method
+          await para.waitForWalletCreation(
+            isCanceled: () => _farcasterFlowCancelled,
+          );
+        }
+      }
 
       // Fetch wallets to update state after successful login/signup
       final wallets = await para.fetchWallets();
@@ -159,9 +176,6 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
       }
     }
   }
-
-  // --- Removed V1 Helper Functions ---
-  // _handleNewUserSetup and _handlePasskeyLogin(String identifier) are no longer needed
 
   Widget _buildFarcasterButton() {
     final isLoading = _isLoading;
@@ -257,8 +271,6 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
               setState(() {
                 _farcasterFlowCancelled = true;
                 _farcasterConnectUri = null;
-                // Optionally, you might need to signal the SDK's polling loop to stop
-                // This depends on how handleFarcasterConnect is implemented
               });
             },
             child: const Text("Cancel", style: TextStyle(color: Colors.red)),
@@ -272,7 +284,7 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Farcaster Auth Example'),
+        title: const Text('Farcaster Example (V2)'), // Updated title
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -281,7 +293,7 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Text(
-                'Farcaster Authentication',
+                'Farcaster Authentication', // Updated title
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -289,7 +301,7 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
               ),
               const SizedBox(height: 12),
               const Text(
-                'Example implementation of Farcaster authentication using Para SDK.',
+                'Example implementation of Farcaster authentication using Para SDK V2.', // Updated description
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.black87,
