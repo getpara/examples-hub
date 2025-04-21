@@ -1,7 +1,7 @@
 import { ParaWeb, Environment, CoreMethodName, PARA_CORE_METHODS } from '@getpara/web-sdk';
 import { logger, formatError } from './logging';
 import { coreMethodHandlers, bridgeMethodHandlers } from './bridgeMethodHandlers';
-import { BridgeResponse, Platform } from './types';
+import { BridgeResponse, Platform, ParaInitArgs } from './types';
 
 let platform: Platform;
 let version: string | undefined;
@@ -60,10 +60,10 @@ window.addEventListener('message', event => {
       case 'Para#init': {
         logNetworkInformation();
         logger.info('Initializing Para with args:', data['arguments']);
-        const initArgs = data['arguments'] ?? {};
-        initPara(initArgs['environment'], initArgs['apiKey']);
-        platform = Platform[initArgs['platform'] as keyof typeof Platform] ?? Platform.flutter;
-        version = initArgs['version'];
+        const initArgs = data['arguments'] ?? ({} as ParaInitArgs);
+        initPara(initArgs.environment, initArgs.apiKey);
+        platform = Platform[initArgs.platform as keyof typeof Platform] ?? Platform.flutter;
+        version = initArgs.version;
         logger.info('Para initialized successfully. Platform:', platform, 'Version:', version);
         sendResponse(data['messageType'], requestId, true);
         break;
@@ -115,7 +115,7 @@ function initPara(environment: string, apiKey: string) {
   }
 }
 
-async function invokeParaMethod(methodName: string, args: any[], requestId: string) {
+async function invokeParaMethod(methodName: string, args: any, requestId: string) {
   const startTime = performance.now();
   try {
     const para = window['para'] as ParaWeb;

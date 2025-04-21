@@ -12,14 +12,11 @@ import {
 } from '@getpara/core-sdk';
 import { PublicKeyStatus } from '@getpara/user-management-client';
 import { logger, formatError } from './logging';
+import { GeneratePasskeyArgs, GeneratePasskeyV2Args, VerifyWebChallengeArgs, LoginArgs, LoginV2Args } from './types';
 
-export async function generatePasskey(para: ParaWeb, args: any[]) {
+export async function generatePasskey(para: ParaWeb, args: GeneratePasskeyArgs) {
   try {
-    const attestationObject = args[0];
-    const clientDataJson = args[1];
-    const credentialsId = args[2];
-    const userHandle = args[3] as Uint8Array;
-    const biometricsId = args[4];
+    const { attestationObject, clientDataJson, credentialsId, userHandle, biometricsId } = args;
 
     logger.info('generatePasskey called with credentialsId:', credentialsId, 'and biometricsId:', biometricsId);
 
@@ -83,13 +80,9 @@ export async function generatePasskey(para: ParaWeb, args: any[]) {
   }
 }
 
-export async function generatePasskeyV2(para: ParaWeb, args: any[]) {
+export async function generatePasskeyV2(para: ParaWeb, args: GeneratePasskeyV2Args) {
   try {
-    const attestationObject = args[0];
-    const clientDataJson = args[1];
-    const credentialsId = args[2] as string;
-    const userHandle = args[3] as string;
-    const biometricsId = args[4] as string;
+    const { attestationObject, clientDataJson, credentialsId, userHandle, biometricsId } = args;
 
     logger.info('generatePasskeyV2 called with credentialsId:', credentialsId, 'and biometricsId:', biometricsId);
 
@@ -175,12 +168,9 @@ export async function generatePasskeyV2(para: ParaWeb, args: any[]) {
   }
 }
 
-export async function verifyWebChallenge(para: ParaWeb, args: any[]) {
+export async function verifyWebChallenge(para: ParaWeb, args: VerifyWebChallengeArgs) {
   try {
-    const publicKey = args[0];
-    const authenticatorData = args[1];
-    const clientDataJSON = args[2];
-    const signature = args[3];
+    const { publicKey, authenticatorData, clientDataJSON, signature } = args;
 
     logger.info('verifyWebChallenge called with publicKey:', publicKey);
 
@@ -209,11 +199,9 @@ export async function verifyWebChallenge(para: ParaWeb, args: any[]) {
   }
 }
 
-export async function login(para: ParaWeb, args: any[]) {
+export async function login(para: ParaWeb, args: LoginArgs) {
   try {
-    const userId = args[0];
-    const signatureId = args[1];
-    const userHandle = args[2];
+    const { userId, signatureId, userHandle } = args;
 
     logger.info('login called with userId:', userId, 'signatureId:', signatureId);
 
@@ -295,11 +283,9 @@ export async function login(para: ParaWeb, args: any[]) {
   }
 }
 
-export async function loginV2(para: ParaWeb, args: any[]) {
+export async function loginV2(para: ParaWeb, args: LoginV2Args) {
   try {
-    const userId = args[0];
-    const credentialsId = args[1];
-    const userHandle = args[2];
+    const { userId, credentialsId, userHandle } = args;
 
     logger.info('loginV2 called with userId:', userId, 'credentialsId:', credentialsId);
 

@@ -48,3 +48,112 @@ export interface Ctx {
   disableWebSockets: boolean;
   wasmOverride?: ArrayBuffer;
 }
+
+// Init Args
+export interface ParaInitArgs {
+  environment: string;
+  apiKey: string;
+  platform?: keyof typeof Platform;
+  version?: string;
+}
+
+// Signer Interfaces
+export interface EthersSignerInitArgs {
+  walletId: string;
+  providerUrl: string;
+}
+
+export interface SolanaSignerInitArgs {
+  walletId: string;
+  rpcUrl: string;
+}
+
+export interface CosmJsSignersInitArgs {
+  walletId: string;
+  prefix?: string;
+  messageSigningTimeoutMs?: number;
+}
+
+export interface EthersSignMessageArgs {
+  message: string;
+}
+
+export interface EthersSignTransactionArgs {
+  b64EncodedTx: string;
+}
+
+export interface EthersSendTransactionArgs {
+  b64EncodedTx: string;
+}
+
+export interface EthersSignTypedDataArgs {
+  domain: any;
+  types: any;
+  value: any;
+}
+
+export interface SolanaSignTransactionArgs {
+  b64EncodedTx: string;
+}
+
+export interface SolanaSignVersionedTransactionArgs {
+  b64EncodedTx: string;
+}
+
+export interface SolanaSendTransactionArgs {
+  b64EncodedTx: string;
+}
+
+export interface CosmJsSignDirectArgs {
+  signerAddress: string;
+  signDocBase64: string;
+}
+
+export interface CosmJsSignAminoArgs {
+  signerAddress: string;
+  signDocBase64: string;
+}
+
+// Auth Interfaces
+export interface GeneratePasskeyArgs {
+  attestationObject: any;
+  clientDataJson: any;
+  credentialsId: string;
+  userHandle: Uint8Array;
+  biometricsId: string;
+}
+
+export interface GeneratePasskeyV2Args {
+  attestationObject: any;
+  clientDataJson: any;
+  credentialsId: string;
+  userHandle: string;
+  biometricsId: string;
+}
+
+export interface VerifyWebChallengeArgs {
+  publicKey: string;
+  authenticatorData: any;
+  clientDataJSON: any;
+  signature: any;
+}
+
+export interface LoginArgs {
+  userId: string;
+  signatureId: string;
+  userHandle: string;
+}
+
+export interface LoginV2Args {
+  userId: string;
+  credentialsId: string;
+  userHandle: string;
+}
+
+export interface GetWebChallengeArgs {
+  email: string;
+}
+
+export interface SetEmailArgs {
+  email: string;
+}

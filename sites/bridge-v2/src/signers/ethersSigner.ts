@@ -3,11 +3,17 @@ import { base64ToBytes } from '@metamask/utils';
 import { ParaWeb } from '@getpara/web-sdk';
 import { ParaEthersSigner } from '@getpara/ethers-v6-integration';
 import { logger, formatError } from '../logging';
+import {
+  EthersSignerInitArgs,
+  EthersSignMessageArgs,
+  EthersSignTransactionArgs,
+  EthersSendTransactionArgs,
+  EthersSignTypedDataArgs,
+} from '../types';
 
-export async function initEthersSigner(para: ParaWeb, args: any[]) {
+export async function initEthersSigner(para: ParaWeb, args: EthersSignerInitArgs) {
   try {
-    const walletId = args[0];
-    const providerUrl = args[1];
+    const { walletId, providerUrl } = args;
 
     logger.info('initEthersSigner called with walletId:', walletId, 'providerUrl:', providerUrl);
 
@@ -36,9 +42,9 @@ export async function initEthersSigner(para: ParaWeb, args: any[]) {
   }
 }
 
-export async function ethersSignMessage(args: any[]) {
+export async function ethersSignMessage(args: EthersSignMessageArgs) {
   try {
-    const message = args[0];
+    const { message } = args;
     logger.info('ethersSignMessage called with message:', message);
 
     const ethersSigner = window['ethersSigner'] as ParaEthersSigner;
@@ -64,9 +70,9 @@ export async function ethersSignMessage(args: any[]) {
   }
 }
 
-export async function ethersSignTransaction(args: any[]) {
+export async function ethersSignTransaction(args: EthersSignTransactionArgs) {
   try {
-    const b64EncodedTx = args[0];
+    const { b64EncodedTx } = args;
     logger.info('ethersSignTransaction called with base64 transaction:', b64EncodedTx);
 
     let txBytes;
@@ -105,9 +111,9 @@ export async function ethersSignTransaction(args: any[]) {
   }
 }
 
-export async function ethersSendTransaction(args: any[]) {
+export async function ethersSendTransaction(args: EthersSendTransactionArgs) {
   try {
-    const b64EncodedTx = args[0];
+    const { b64EncodedTx } = args;
     logger.info('ethersSendTransaction called with base64 transaction:', b64EncodedTx);
 
     let txBytes;
@@ -146,11 +152,9 @@ export async function ethersSendTransaction(args: any[]) {
   }
 }
 
-export async function ethersSignTypedData(args: any[]) {
+export async function ethersSignTypedData(args: EthersSignTypedDataArgs) {
   try {
-    const domain = args[0];
-    const types = args[1];
-    const value = args[2];
+    const { domain, types, value } = args;
 
     logger.info('ethersSignTypedData called with domain:', domain, 'types:', types, 'value:', value);
 

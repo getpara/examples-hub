@@ -4,12 +4,11 @@ import { base64ToBytes } from '@metamask/utils';
 import { logger, formatError } from '../logging';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { StdSignDoc } from '@cosmjs/amino';
+import { CosmJsSignersInitArgs, CosmJsSignDirectArgs, CosmJsSignAminoArgs } from '../types';
 
-export async function initCosmJsSigners(para: ParaWeb, args: any[]) {
+export async function initCosmJsSigners(para: ParaWeb, args: CosmJsSignersInitArgs) {
   try {
-    const walletId = args[0];
-    const prefix = args[1] || 'cosmos';
-    const messageSigningTimeoutMs = args[2];
+    const { walletId, prefix = 'cosmos', messageSigningTimeoutMs } = args;
 
     logger.info(
       'initCosmJsSigners called with walletId:',
@@ -47,10 +46,9 @@ export async function initCosmJsSigners(para: ParaWeb, args: any[]) {
   }
 }
 
-export async function cosmJsSignDirect(args: any[]) {
+export async function cosmJsSignDirect(args: CosmJsSignDirectArgs) {
   try {
-    const signerAddress = args[0];
-    const signDocBase64 = args[1];
+    const { signerAddress, signDocBase64 } = args;
 
     logger.info('cosmJsSignDirect called with signerAddress:', signerAddress);
 
@@ -86,10 +84,9 @@ export async function cosmJsSignDirect(args: any[]) {
   }
 }
 
-export async function cosmJsSignAmino(args: any[]) {
+export async function cosmJsSignAmino(args: CosmJsSignAminoArgs) {
   try {
-    const signerAddress = args[0];
-    const signDocBase64 = args[1];
+    const { signerAddress, signDocBase64 } = args;
 
     logger.info('cosmJsSignAmino called with signerAddress:', signerAddress);
 

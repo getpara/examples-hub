@@ -3,11 +3,16 @@ import { base64ToBytes } from '@metamask/utils';
 import { ParaSolanaWeb3Signer } from '@getpara/solana-web3.js-v1-integration';
 import { ParaWeb } from '@getpara/web-sdk';
 import { logger, formatError } from '../logging';
+import {
+  SolanaSignerInitArgs,
+  SolanaSignTransactionArgs,
+  SolanaSignVersionedTransactionArgs,
+  SolanaSendTransactionArgs,
+} from '../types';
 
-export async function initSolanaWeb3Signer(para: ParaWeb, args: any[]) {
+export async function initSolanaWeb3Signer(para: ParaWeb, args: SolanaSignerInitArgs) {
   try {
-    const walletId = args[0];
-    const rpcUrl = args[1];
+    const { walletId, rpcUrl } = args;
     logger.info('initSolanaSigner called with walletId:', walletId, 'rpcUrl:', rpcUrl);
 
     let connection;
@@ -35,9 +40,9 @@ export async function initSolanaWeb3Signer(para: ParaWeb, args: any[]) {
   }
 }
 
-export async function solanaWeb3SignTransaction(args: any[]) {
+export async function solanaWeb3SignTransaction(args: SolanaSignTransactionArgs) {
   try {
-    const b64EncodedTx = args[0];
+    const { b64EncodedTx } = args;
     logger.info('solanaSignTransaction called with base64 transaction:', b64EncodedTx);
 
     let txBytes;
@@ -81,9 +86,9 @@ export async function solanaWeb3SignTransaction(args: any[]) {
   }
 }
 
-export async function solanaWeb3SignVersionedTransaction(args: any[]) {
+export async function solanaWeb3SignVersionedTransaction(args: SolanaSignVersionedTransactionArgs) {
   try {
-    const b64EncodedTx = args[0];
+    const { b64EncodedTx } = args;
     logger.info('solanaSignVersionedTransaction called with base64 transaction:', b64EncodedTx);
 
     let txBytes;
@@ -127,9 +132,9 @@ export async function solanaWeb3SignVersionedTransaction(args: any[]) {
   }
 }
 
-export async function solanaWeb3SendTransaction(args: any[]) {
+export async function solanaWeb3SendTransaction(args: SolanaSendTransactionArgs) {
   try {
-    const b64EncodedTx = args[0];
+    const { b64EncodedTx } = args;
     logger.info('solanaSendTransaction called with base64 transaction:', b64EncodedTx);
 
     let txBytes;
