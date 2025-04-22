@@ -232,6 +232,10 @@ export abstract class ParaCore implements CoreInterface {
   }
 
   get #guestWalletIds(): CurrentWalletIds {
+    if (!this.#partner?.supportedWalletTypes) {
+      return {};
+    }
+
     const guestId = this.pregenIds?.GUEST_ID?.[0];
     return !!guestId
       ? Object.entries(this.wallets).reduce((acc, [id, wallet]) => {
@@ -243,10 +247,9 @@ export abstract class ParaCore implements CoreInterface {
           ) {
             return {
               ...acc,
-              ...getEquivalentTypes(wallet.type).reduce(
-                (acc, eqType) => ({ ...acc, [eqType]: [...new Set([...(acc[eqType] ?? []), id])] }),
-                {},
-              ),
+              ...getEquivalentTypes(wallet.type)
+                .filter(type => this.#partner.supportedWalletTypes.some(entry => entry.type === type))
+                .reduce((acc, eqType) => ({ ...acc, [eqType]: [...new Set([...(acc[eqType] ?? []), id])] }), {}),
             };
           }
           return acc;
@@ -296,7 +299,7 @@ export abstract class ParaCore implements CoreInterface {
    * Whether the instance has multiple wallets connected.
    */
   get isMultiWallet(): boolean {
-    return this.currentWalletIdsArray.length > 1;
+    return this.currentWalletIdsArray.length > 1 || this.#guestWalletIdsArray.length > 1;
   }
 
   /**
@@ -1824,7 +1827,12 @@ export abstract class ParaCore implements CoreInterface {
   }
 
   get isGuestMode(): boolean {
-    return !this.userId && this.#guestWalletIdsArray.length > 0;
+    return (
+      this.#guestWalletIdsArray.length > 0 &&
+      Object.values(this.wallets).every(
+        ({ userId, partnerId }) => partnerId === this.#partner?.id && (!userId || userId !== this.userId),
+      )
+    );
   }
 
   protected async supportedAuthMethods(auth: Auth<PrimaryAuthType | 'userId'>): Promise<Set<AuthMethod>> {
@@ -2753,24 +2761,50 @@ export abstract class ParaCore implements CoreInterface {
     return res.wallets.filter(w => this.isWalletSupported(entityToWallet(w)));
   }
 
+  #isCreateGuestWalletsPending = false;
+
   async createGuestWallets(): CoreMethodResponse<'createGuestWallets'> {
+    let error: Error;
+
+    if (this.#isCreateGuestWalletsPending) {
+      error = new Error('Guest wallets creation already in progress');
+      dispatchEvent(ParaEvent.GUEST_WALLETS_CREATED, null, error.message);
+      throw error;
+    }
+
     if (this.isGuestMode) {
-      throw new Error('Guest wallets already created');
+      error = new Error('Guest wallets already created');
+      dispatchEvent(ParaEvent.GUEST_WALLETS_CREATED, null, error.message);
+      throw error;
     }
 
-    const { supportedWalletTypes } = await this.#assertPartner();
-    const wallets = [];
-    const guestId = newUuid();
+    try {
+      this.#isCreateGuestWalletsPending = true;
 
-    for (const type of await this.getTypesToCreate(
-      supportedWalletTypes.filter(({ optional }) => !optional).map(({ type }) => type),
-    )) {
-      const wallet = await this.#createPregenWallet({ type, pregenId: { guestId } });
+      const { supportedWalletTypes } = await this.#assertPartner();
+      const wallets = [];
+      const guestId = newUuid();
 
-      wallets.push(wallet);
+      for (const type of await this.getTypesToCreate(
+        supportedWalletTypes.filter(({ optional }) => !optional).map(({ type }) => type),
+      )) {
+        const wallet = await this.#createPregenWallet({ type, pregenId: { guestId } });
+
+        wallets.push(wallet);
+      }
+
+      dispatchEvent(ParaEvent.GUEST_WALLETS_CREATED, wallets);
+
+      this.#isCreateGuestWalletsPending = false;
+
+      return wallets;
+    } catch (e) {
+      dispatchEvent(ParaEvent.GUEST_WALLETS_CREATED, null, error?.message);
+
+      this.#isCreateGuestWalletsPending = false;
+
+      throw error;
     }
-
-    return wallets;
   }
 
   private encodeWalletBase64(wallet: Wallet): string {

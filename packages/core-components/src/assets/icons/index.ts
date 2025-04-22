@@ -146,6 +146,7 @@ import Solana from './solana.svg';
 import SpacingHeight from './spacing-height.svg';
 import Star04Filled from './star-04-filled.svg';
 import Stars01Filled from './stars-01-filled.svg';
+import Stars02 from './stars-02.svg';
 import Stars from './stars.svg';
 import StopSquare from './stop-square.svg';
 import StripeBrand from './stripe-brand.svg';
@@ -549,6 +550,7 @@ export const Icons = {
   spacingHeight: SpacingHeight,
   star04Filled: Star04Filled,
   stars01Filled: Stars01Filled,
+  stars02: Stars02,
   stars: Stars,
   stopSquare: StopSquare,
   stripeBrand: StripeBrand,

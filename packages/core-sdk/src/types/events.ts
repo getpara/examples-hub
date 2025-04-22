@@ -1,6 +1,7 @@
 import { CurrentWalletIds } from '@getpara/user-management-client';
 import { FullSignatureRes } from './wallet.js';
 import { Wallet } from './wallet.js';
+import { CoreMethodResponse } from './coreApi.js';
 
 const EVENT_PREFIX = 'para';
 
@@ -15,6 +16,7 @@ export enum ParaEvent {
   WALLETS_CHANGE_EVENT = `${EVENT_PREFIX}WalletsChange`,
   WALLET_CREATED = `${EVENT_PREFIX}WalletCreated`,
   PREGEN_WALLET_CLAIMED = `${EVENT_PREFIX}PregenWalletClaimed`,
+  GUEST_WALLETS_CREATED = `${EVENT_PREFIX}GuestWalletsCreated`,
 }
 
 export type BaseEvent<T> = {
@@ -45,3 +47,5 @@ export type WalletCreatedEvent = CustomEventInit<BaseEvent<WalletCreatedResponse
 
 export type PregenWalletClaimedResponse = { wallet: Omit<Wallet, 'signer'>; recoverySecret?: string };
 export type PregenWalletClaimedEvent = CustomEventInit<BaseEvent<WalletCreatedResponse>>;
+
+export type GuestWalletsCreatedEvent = CustomEventInit<BaseEvent<CoreMethodResponse<'createGuestWallets'>>>;
