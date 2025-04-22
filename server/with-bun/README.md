@@ -10,10 +10,11 @@ Web3, and Alchemy Account Abstraction (AA).
 Before running the server, ensure that you have a `.env` file properly configured based on `.env.example`. The following
 environment variables are required:
 
-- `ENCRYPTION_KEY=your_encryption_key_here`
 - `PARA_API_KEY=your_para_api_key_here`
+- `ENCRYPTION_KEY=your_encryption_key_here`
 - `ALCHEMY_API_KEY=your_alchemy_api_key_here`
 - `ALCHEMY_GAS_POLICY_ID=your_alchemy_gas_policy_id_here`
+- `ARBITRUM_SEPOLIA_RPC=your_arbitrum_sepolia_rpc_here`
 
 ## Running the Server
 

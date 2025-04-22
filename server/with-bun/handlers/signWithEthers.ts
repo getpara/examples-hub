@@ -22,8 +22,6 @@ export const signWithEthers = async (req: Request): Promise<Response> => {
 
     const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
 
-    console.log(`Checking if wallet exists for ${email}: ${hasPregenWallet}`);
-
     if (!hasPregenWallet) {
       return new Response(`Pregenerated wallet does not exist for ${email}`, { status: 404 });
     }

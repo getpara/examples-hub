@@ -61,19 +61,28 @@ export const signWithAlchemy = async (req: Request): Promise<Response> => {
     const env = (Bun.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
 
     if (!paraApiKey || !alchemyApiKey || !alchemyGasPolicyId || !rpcUrl) {
-      return new Response("Missing required environment variables", { status: 500 });
+      return new Response(JSON.stringify({ error: "Missing required environment variables" }), {
+        headers: { "Content-Type": "application/json" },
+        status: 500,
+      });
     }
 
     const para = new ParaServer(env, paraApiKey, { disableWebSockets: true });
 
     const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
     if (!hasPregenWallet) {
-      return new Response(`Pregenerated wallet does not exist for ${email}`, { status: 404 });
+      return new Response(JSON.stringify({ error: `Pregenerated wallet does not exist for ${email}` }), {
+        headers: { "Content-Type": "application/json" },
+        status: 404,
+      });
     }
 
     const keyShare = await getKeyShareInDB(email);
     if (!keyShare) {
-      return new Response(`Key share not found in DB for ${email}`, { status: 404 });
+      return new Response(JSON.stringify({ error: `Key share not found in DB for ${email}` }), {
+        headers: { "Content-Type": "application/json" },
+        status: 404,
+      });
     }
 
     const decryptedKeyShare = await decrypt(keyShare);
@@ -89,7 +98,7 @@ export const signWithAlchemy = async (req: Request): Promise<Response> => {
 
     viemClient.signMessage = async ({ message }) => customSignMessage(para, message);
 
-    const walletClientSigner = new WalletClientSigner(viemClient as any, "para");
+    const walletClientSigner = new WalletClientSigner(viemClient, "para");
 
     const alchemyClient = await createModularAccountAlchemyClient({
       apiKey: alchemyApiKey,
@@ -116,6 +125,8 @@ export const signWithAlchemy = async (req: Request): Promise<Response> => {
       status: 200,
     });
   } catch (error) {
-    return new Response(`Error: ${error instanceof Error ? error.message : "Unknown error"}`, {});
+    return new Response(`Error: ${error instanceof Error ? error.message : "Unknown error"}`, {
+      status: 500,
+    });
   }
 };

@@ -37,12 +37,12 @@ export const signWithCosmJS = async (req: Request): Promise<Response> => {
     await para.setUserShare(decryptedKeyShare);
 
     const paraProtoSigner = new ParaProtoSigner(para, "cosmos");
+
     const stargateClient = await SigningStargateClient.connectWithSigner(
-      "https://rpc-t.cosmos.nodestake.top",
+      "https://cosmoshub-testnet.rpc.kjnodes.com/",
       paraProtoSigner
     );
 
-    const toAddress = "cosmos1c4k24jzduc365kywrsvf5ujz4ya6mwymy8vq4q";
     const fromAddress = paraProtoSigner.address;
     const amount: Coin = {
       denom: "uatom",
@@ -56,7 +56,7 @@ export const signWithCosmJS = async (req: Request): Promise<Response> => {
 
     const message: MsgSend = {
       fromAddress,
-      toAddress,
+      toAddress: fromAddress,
       amount: [amount],
     };
 
