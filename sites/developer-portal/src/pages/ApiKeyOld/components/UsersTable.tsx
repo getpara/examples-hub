@@ -11,8 +11,8 @@ import {
   useOrganizationKeyUsersTotalRows,
 } from '../../../hooks/api/queries/useOrganizationKeyUsersTableData';
 import { Loader } from '../../../components/Loader';
-import { formatWalletAddress } from '../utils/formatWalletAddress';
 import { LOGIN_METHOD_LABELS } from '../../../utils/constants';
+import { formatWalletAddress } from '../../../utils/formatWalletAddress';
 
 const PAGE_SIZE = 25;
 

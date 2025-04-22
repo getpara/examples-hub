@@ -2,7 +2,7 @@ import { Button, Typography, useFormContext } from '@getpara/react-component-lib
 import { ConfigCard } from '../../../components/ConfigCard';
 import { SquareArrowOutUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { SetupForm } from '../../../hooks/useSetupForm';
+import { SetupForm } from '../hooks/useSetupForm';
 import {
   formatFrameworkName,
   getFrameworkCodeSnippet,

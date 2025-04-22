@@ -18,7 +18,7 @@ export const AuthAppBar = ({}: AuthAppBarProps) => {
 
   return (
     <>
-      <nav className="para:w-full para:fixed para:h-[57px] para:border-b para:border-border para:bg-background para:py-2 para:px-6 para:flex para:items-center para:justify-between para:z-[100]">
+      <nav className="para:w-full para:fixed para:h-[57px] para:border-b para:border-border para:bg-background para:py-2 para:px-6 para:flex para:items-center para:justify-between para:z-[50]">
         <div className="para:h-full para:flex para:gap-4 para:items-center">
           <Link to={`/${organizationId}/dashboard`}>
             <ParaIconBrand className="para:w-[22px] para:h-5" />

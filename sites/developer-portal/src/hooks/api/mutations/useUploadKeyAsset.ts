@@ -6,12 +6,16 @@ import { PartnerAssetType } from '../../../types/api';
 import { useParams } from 'react-router-dom';
 
 export const useUploadKeyAsset = (
-  assetType: PartnerAssetType,
   options?: MutationOptions<string, Error, { projectId: string; keyId: string; file: File; env: string }, unknown>,
 ) => {
   const { organizationId } = useParams();
 
-  return useMutation<string, Error, { projectId: string; keyId: string; file: File; env: string }, unknown>({
+  return useMutation<
+    string,
+    Error,
+    { projectId: string; keyId: string; file: File; env: string; assetType: PartnerAssetType },
+    unknown
+  >({
     mutationFn: async vars => {
       const fileExt = vars.file.name.split('.').pop();
 
@@ -22,7 +26,7 @@ export const useUploadKeyAsset = (
       const postData = new FormData();
 
       const { url, fields } = await getKeyAssetUploadUrl({
-        assetType,
+        assetType: vars.assetType,
         organizationId: organizationId ?? '',
         projectId: vars.projectId,
         keyId: vars.keyId,

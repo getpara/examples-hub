@@ -193,7 +193,7 @@ function Sidebar({
 
   return (
     <div
-      className={'para:group para:peer para:text-sidebar-foreground para:hidden para:md:block'}
+      className={'para:group para:peer para:text-sidebar-foreground'}
       data-state={state}
       data-collapsible={state === 'collapsed' ? collapsible : ''}
       data-variant={variant}
@@ -213,7 +213,7 @@ function Sidebar({
       />
       <div
         className={cn(
-          'para:fixed para:inset-y-0 para:z-10 para:hidden para:h-svh para:w-(--sidebar-width) para:transition-[left,right,width] para:duration-200 para:ease-linear para:md:flex',
+          'para:fixed para:inset-y-0 para:z-10 para:h-svh para:w-(--sidebar-width) para:transition-[left,right,width] para:duration-200 para:ease-linear para:md:flex',
           side === 'left'
             ? 'para:left-0 para:group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]'
             : 'para:right-0 para:group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]',

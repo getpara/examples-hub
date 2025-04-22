@@ -122,5 +122,5 @@ export const VerticalCenteredContainer = ({ children, className }: PropsWithChil
 );
 
 export const FlatCard = ({ children, className }: PropsWithChildren & { className?: string }) => (
-  <Card className={clsx('para:shadow-none para:p-8', className)}>{children}</Card>
+  <Card className={clsx('para:shadow-none para:p-8 para:rounded-lg', className)}>{children}</Card>
 );

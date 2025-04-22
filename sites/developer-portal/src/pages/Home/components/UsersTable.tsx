@@ -3,12 +3,12 @@ import { Table, TableData } from '../../../components/Table/Table';
 import { formatDate } from '../../../utils/formatDate';
 import { Loader } from '../../../components/Loader';
 import { LOGIN_METHOD_LABELS } from '../../../utils/constants';
-import { formatWalletAddress } from '../../ApiKey/utils/formatWalletAddress';
 import {
   useOrganizationUsersTableData,
   useOrganizationUsersTotalRows,
 } from '../../../hooks/api/queries/useOrganizationUsersTableData';
 import { Environment } from '../../../types/environment';
+import { formatWalletAddress } from '../../../utils/formatWalletAddress';
 
 const PAGE_SIZE = 25;
 

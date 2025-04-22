@@ -15,7 +15,7 @@ function RadioGroupItem({ className, ...props }: React.ComponentProps<typeof Rad
     <RadioGroupPrimitive.Item
       data-slot="radio-group-item"
       className={cn(
-        'para:border-input para:text-primary para:focus-visible:border-ring para:focus-visible:ring-ring/50 para:aria-invalid:ring-destructive/20 para:dark:aria-invalid:ring-destructive/40 para:aria-invalid:border-destructive para:aspect-square para:size-4 para:shrink-0 para:rounded-full para:border para:shadow-xs para:transition-[color,box-shadow] para:outline-none para:focus-visible:ring-[3px] para:disabled:cursor-not-allowed para:disabled:opacity-50',
+        'para:border-primary para:text-primary para:focus-visible:border-ring para:focus-visible:ring-ring/50 para:aria-invalid:ring-destructive/20 para:dark:aria-invalid:ring-destructive/40 para:aria-invalid:border-destructive para:aspect-square para:size-4 para:shrink-0 para:rounded-full para:border para:shadow-xs para:transition-[color,box-shadow] para:outline-none para:focus-visible:ring-[3px] para:disabled:cursor-not-allowed para:disabled:opacity-50',
         className,
       )}
       {...props}
@@ -26,7 +26,7 @@ function RadioGroupItem({ className, ...props }: React.ComponentProps<typeof Rad
       >
         <CircleIcon
           className={
-            'para:fill-primary para:absolute para:top-1/2 para:left-1/2 para:size-2 para:-translate-x-1/2 para:-translate-y-1/2'
+            'para:fill-primary para:absolute para:top-1/2 para:left-1/2 para:size-3.5 para:-translate-x-1/2 para:-translate-y-1/2'
           }
         />
       </RadioGroupPrimitive.Indicator>

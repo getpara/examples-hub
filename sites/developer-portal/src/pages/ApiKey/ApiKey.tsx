@@ -1,45 +1,17 @@
-import { useNavigate, useParams } from 'react-router-dom';
-import { Header } from './components/Header';
-import { KeyData } from './components/KeyData';
-import { MainContent } from './components/MainContent';
-import { Environment } from '../../types/environment';
-import { useGetOrganizationKey } from '../../hooks/api/queries/useOrganizationKeys';
-import { Loader } from '../../components/Loader';
-import { triggerToast } from '../../utils/toasts';
-import { useGetApiKeySetupStatus } from '../../hooks/api/queries/useApiKeySetupStatus';
+import { useParams } from 'react-router-dom';
+import { ApiKeySetup } from './pages';
+import { Typography } from '@getpara/react-component-library';
+import { ApiKeyBranding } from './pages/ApiKeyBranding/ApiKeyBranding';
 
 export const ApiKey = () => {
-  const navigate = useNavigate();
-  const { organizationId, projectId, apiKey, env } = useParams();
-  const { data: apiKeyData, isLoading: isApiKeyDataLoading } = useGetOrganizationKey(
-    projectId ?? '',
-    apiKey ?? '',
-    env as Environment,
-  );
-  const { isLoading: isStatusLoading } = useGetApiKeySetupStatus(projectId ?? '', apiKey ?? '', env ?? '');
+  const { apiKeyPage } = useParams();
 
-  if (!apiKey || !env) {
-    navigate(`/${organizationId}/project/${projectId}`);
+  switch (apiKeyPage) {
+    case 'setup':
+      return <ApiKeySetup />;
+    case 'branding':
+      return <ApiKeyBranding />;
+    default:
+      return <Typography>Not Implemented</Typography>;
   }
-
-  if (!isApiKeyDataLoading && !apiKeyData) {
-    navigate(`/${organizationId}/project/${projectId}`);
-    triggerToast({
-      variant: 'error',
-      title: 'Failed to Load Key',
-    });
-    return null;
-  }
-
-  if (isApiKeyDataLoading || isStatusLoading) {
-    return <Loader />;
-  }
-
-  return (
-    <>
-      <Header />
-      <KeyData />
-      <MainContent />
-    </>
-  );
 };

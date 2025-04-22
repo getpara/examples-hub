@@ -1,4 +1,8 @@
-import { FormControl as BaseFormControl, FormDescription as BaseFormDescription } from '@getpara/react-component-library';
+import {
+  FormControl as BaseFormControl,
+  FormDescription as BaseFormDescription,
+  FormMessage as BaseFormMessage,
+} from '@getpara/react-component-library';
 import clsx from 'clsx';
 import { PropsWithChildren } from 'react';
 
@@ -11,3 +15,5 @@ export const FormDescription = ({ children, className }: PropsWithChildren & { c
     {children}
   </BaseFormDescription>
 );
+
+export const FormMessage = () => <BaseFormMessage className="para:text-xs para:text-destructive" />;

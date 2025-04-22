@@ -35,6 +35,8 @@ export const REACT_NATIVE_SETUP_DOCS_LINK =
   'https://docs.getpara.com/getting-started/initial-setup/react-native#project-setup';
 export const EXPO_SETUP_DOCS_LINK = 'https://docs.getpara.com/getting-started/initial-setup/expo#project-setup';
 export const FLUTTER_SETUP_DOCS_LINK = 'https://docs.getpara.com/getting-started/initial-setup/flutter-setup#project-setup';
+export const ADVANCED_MODAL_THEME_DOCS_LINK =
+  'https://docs.getpara.com/customize-para/modal-customization#advanced-theme-customization';
 
 export const NEXT_EXTRA_DOCS_LINK = 'https://docs.getpara.com/troubleshooting/nextjs';
 export const VITE_EXTRA_DOCS_LINK = 'https://docs.getpara.com/troubleshooting/react-vite';

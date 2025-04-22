@@ -20,7 +20,7 @@ interface AssetUploadProps {
 export const AssetUpload = ({ fieldName, assetType, label, recommendedSize }: AssetUploadProps) => {
   const { apiKey, env, projectId } = useParams();
   const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
-  const { mutateAsync: uploadImage } = useUploadKeyAsset(assetType);
+  const { mutateAsync: uploadImage } = useUploadKeyAsset();
   const { getValues, setValue } = useFormContext<UpdateApiKeyBranding>();
 
   const handleRemoveImage = () => {
@@ -29,7 +29,7 @@ export const AssetUpload = ({ fieldName, assetType, label, recommendedSize }: As
 
   const handleUploadImage = async (file: File) => {
     const url = await uploadImage(
-      { projectId: projectId!, keyId: apiKey!, env: env!, file },
+      { projectId: projectId!, keyId: apiKey!, env: env!, file, assetType },
       {
         onError: () => {
           triggerToast({
