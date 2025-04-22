@@ -17,6 +17,7 @@ interface AccountProps {
 export const Account = ({ onClose }: AccountProps) => {
   const onRampConfig = useModalStore(state => state.onRampConfig);
   const setStep = useModalStore(state => state.setStep);
+  const setFlow = useModalStore(state => state.setFlow);
   const setOnRampStep = useModalStore(state => state.setOnRampStep);
   const hideWallets = useStore(state => state.modalConfig?.hideWallets);
   const { disconnectExternalWallet } = useExternalWallets();
@@ -26,6 +27,7 @@ export const Account = ({ onClose }: AccountProps) => {
   const [isDisconnecting, setIsDisconnecting] = useState(false);
 
   const isOnRampLoaded = !!onRampConfig;
+  const canBuyAndWithdraw = !!para.userId;
 
   const handleBuyClick = () => {
     setOnRampStep(OnRampStep.SETTINGS);
@@ -47,6 +49,7 @@ export const Account = ({ onClose }: AccountProps) => {
     await disconnectExternalWallet();
     onClose();
     setStep(ModalStep.AUTH_MAIN);
+    setFlow(undefined);
     setIsDisconnecting(false);
   };
 
@@ -58,7 +61,8 @@ export const Account = ({ onClose }: AccountProps) => {
             <CpslSpinner size={39} />
           </BalanceContainer>
         ) : (
-          balance !== undefined && (
+          balance !== undefined &&
+          balance !== null && (
             <BalanceContainer>
               <CpslText variant="headingS" weight="medium">
                 {formatBalanceString(balance)}
@@ -69,7 +73,7 @@ export const Account = ({ onClose }: AccountProps) => {
         <ButtonContainer>
           {isOnRampLoaded ? (
             <>
-              {onRampConfig.isBuyEnabled && (
+              {canBuyAndWithdraw && onRampConfig.isBuyEnabled && (
                 <OptionButton icon="creditCard" onClick={handleBuyClick}>
                   <CpslText variant="bodyXS" color="secondary" weight="medium">
                     Buy Crypto
@@ -83,7 +87,7 @@ export const Account = ({ onClose }: AccountProps) => {
                   </CpslText>
                 </OptionButton>
               )}
-              {onRampConfig.isWithdrawEnabled && (
+              {canBuyAndWithdraw && onRampConfig.isWithdrawEnabled && (
                 <OptionButton icon="arrowCircleBrokenDownLeft" onClick={handleSellClick}>
                   <CpslText variant="bodyXS" color="secondary" weight="medium">
                     Withdraw

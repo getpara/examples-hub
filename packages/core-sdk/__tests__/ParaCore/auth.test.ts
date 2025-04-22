@@ -69,6 +69,7 @@ import {
 import '../mocks/mockCryptographyUtils.js';
 import _ from 'lodash';
 import { faker } from '@faker-js/faker';
+import { EXTERNAL_WALLET_CONNECTION_ONLY_USER_ID } from '../../src/constants.js';
 
 const emailAuthInfo: AuthInfo<'email'> = {
   auth: { email: USER_EMAIL },
@@ -955,6 +956,20 @@ describe('ParaCore - authentication', () => {
 
         testLoginUrl(para, authState.passkeyUrl!, AuthMethod.PASSKEY);
         testLoginUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD);
+      });
+
+      it('connection only', async () => {
+        para = new MockPara(Environment.DEV, API_KEY, { externalWalletConnectionOnly: true });
+
+        const testExWallet = { ...EXTERNAL_WALLET, withFullParaAuth: true };
+
+        const authState = await para.loginExternalWallet({
+          externalWallet: testExWallet,
+        });
+
+        expect(Object.values(para.externalWallets)[0].isExternalWithParaAuth).toBeFalsy();
+        expect(authState).toStrictEqual({ userId: EXTERNAL_WALLET_CONNECTION_ONLY_USER_ID });
+        expect(para.externalWalletConnectionType).toBe('CONNECTION_ONLY');
       });
     });
 

@@ -1,5 +1,5 @@
 import { useModalStateStore } from '../../stores/modalStateStore/useModalStateStore';
-import { CpslInput, CpslSelect, CpslSelectItem, CpslText } from '@getpara/react-components';
+import { CpslCheckbox, CpslInput, CpslSelect, CpslSelectItem, CpslText } from '@getpara/react-components';
 import { LabelContainer } from './ModalConfig';
 
 export const Theme = () => {
@@ -9,10 +9,20 @@ export const Theme = () => {
   const foregroundColor = useModalStateStore(state => state.foregroundColor);
   const accentColor = useModalStateStore(state => state.accentColor);
   const mode = useModalStateStore(state => state.mode);
+  const externalWalletConnectionOnly = useModalStateStore(state => state.externalWalletConnectionOnly);
 
   return (
     <>
       <LabelContainer>
+        <CpslText variant="bodyL" weight="semiBold">
+          Connection Only
+        </CpslText>
+        <CpslCheckbox
+          checked={externalWalletConnectionOnly}
+          onCpslCheckboxChanged={(e: any) => {
+            updateState({ externalWalletConnectionOnly: e.detail ?? false });
+          }}
+        />
         <CpslText variant="bodyL" weight="semiBold">
           Logo
         </CpslText>

@@ -51,8 +51,18 @@ export const ParaProvider = forwardRef<
   }, [externalWalletConfig?.wallets]);
 
   useEffect(() => {
-    if (externalWalletsWithFullAuth !== externalWalletConfig?.walletsWithParaAuth)
-      setExternalWalletsWithFullAuth(externalWalletConfig?.walletsWithParaAuth ?? []);
+    if (externalWalletsWithFullAuth !== externalWalletConfig?.walletsWithParaAuth) {
+      if (
+        isConfigType(paraClientConfig)
+          ? paraClientConfig.opts?.externalWalletConnectionOnly
+          : paraClientConfig.externalWalletConnectionOnly
+      ) {
+        console.warn('walletsWithParaAuth has no effect when using externalWalletConnectionOnly');
+        setExternalWalletsWithFullAuth([]);
+      } else {
+        setExternalWalletsWithFullAuth(externalWalletConfig?.walletsWithParaAuth ?? []);
+      }
+    }
   }, [externalWalletConfig?.walletsWithParaAuth]);
 
   useEffect(() => {

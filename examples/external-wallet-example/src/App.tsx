@@ -53,6 +53,7 @@ export const App = () => {
   const selectedCosmosChainId = useCosmosStore(state => state.selectedChainId);
   const updateCosmosState = useCosmosStore(state => state.updateState);
   const externalWallets = useModalStateStore(state => state.externalWallets);
+  const externalWalletConnectionOnly = useModalStateStore(state => state.externalWalletConnectionOnly);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -60,7 +61,9 @@ export const App = () => {
         paraClientConfig={{
           env: import.meta.env.VITE_ENVIRONMENT,
           apiKey: import.meta.env.VITE_PARA_API_KEY,
-          // opts: {}
+          opts: {
+            externalWalletConnectionOnly: externalWalletConnectionOnly,
+          },
         }}
         config={{
           appName: 'Para External Wallet Example',

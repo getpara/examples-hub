@@ -13,6 +13,7 @@ import { AddFundsReceive } from './AddFundsReceive.js';
 import { AddFundsContextProvider, Tab, TABS } from './AddFundsContext.js';
 import { AnimatePresence } from 'framer-motion';
 import { AddFundsSettings } from './AddFundsSettings.js';
+import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 
 export const AddFunds = () => {
   const onRampConfig = useModalStore(state => state.onRampConfig);
@@ -20,10 +21,17 @@ export const AddFunds = () => {
   const storedTab = useModalStore(state => state.accountAddFundTab);
   const setModalStep = useModalStore(state => state.setStep);
   const setOnRampPurchase = useModalStore(state => state.setOnRampPurchase);
+  const para = useInternalClient();
 
   const { data: activeWallet } = useWallet();
 
-  const tabs = TABS.filter(([, key]) => !!onRampConfig?.[key]);
+  const canBuyAndWithdraw = !!para.userId;
+  const tabs = TABS.filter(
+    ([, key]) =>
+      !!onRampConfig?.[key] &&
+      ((['isBuyEnabled', 'isWithdrawEnabled'].includes(key) && canBuyAndWithdraw) ||
+        !['isBuyEnabled', 'isWithdrawEnabled'].includes(key)),
+  );
   const tab = storedTab ?? tabs[0][0];
   const isMultiFlow = tabs.length > 1;
 

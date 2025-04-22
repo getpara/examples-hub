@@ -25,24 +25,30 @@ export const useWalletBalance = (args?: Partial<GetWalletBalanceParams>) => {
     const skipGetBalance = !selectedWallet || (selectedWalletType && ['COSMOS', 'SOLANA'].includes(selectedWalletType));
 
     if (skipGetBalance) {
-      return;
+      return null;
     }
 
     try {
       if (selectedWallet.isExternal) {
-        return await getExternalWalletBalance();
+        return (await getExternalWalletBalance()) ?? null;
       } else {
         const completeArgs: GetWalletBalanceParams = { walletId: selectedWallet?.id ?? '', rpcUrl: rpcUrl, ...args };
-
-        return await getWalletBalance(client, completeArgs);
+        return (await getWalletBalance(client, completeArgs)) ?? null;
       }
     } catch (err) {
       console.error('Error fetching wallet balance: ', err);
+      return null;
     }
   }, [account, selectedWallet, selectedWalletType, rpcUrl, getExternalWalletBalance]);
 
   return useQuery({
-    queryKey: [WALLET_BALANCE_BASE_KEY, selectedWallet?.id, selectedWalletType, selectedWallet?.isExternal ? chainId : ''],
+    queryKey: [
+      WALLET_BALANCE_BASE_KEY,
+      client?.userId,
+      selectedWallet?.id,
+      selectedWallet?.type,
+      selectedWallet?.isExternal ? chainId : '',
+    ],
     queryFn: queryFn,
     enabled: !!selectedWallet && !!rpcUrl && !!account?.isConnected,
   });

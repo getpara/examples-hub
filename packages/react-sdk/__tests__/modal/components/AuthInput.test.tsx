@@ -1,5 +1,5 @@
-import { afterAll, describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { AuthInput } from '../../../src/modal/components/AuthInput/AuthInput.js';
 import { defineCustomElements } from '@getpara/react-components';
@@ -38,16 +38,24 @@ async function setup() {
   };
 }
 
+const DEFAULT_STORE_RESP = {
+  client: new MockPara(Environment.DEV, API_KEY),
+};
+
+const mocks = vi.hoisted(() => {
+  return {
+    useStore: vi.fn(getter => getter(DEFAULT_STORE_RESP)),
+  };
+});
+
 vi.mock('../../../src/provider/stores/useStore.js', () => ({
-  useStore: getter =>
-    getter({
-      client: new MockPara(Environment.DEV, API_KEY),
-    }),
+  useStore: mocks.useStore,
 }));
 
 describe('ParaModal', () => {
-  afterAll(() => {
+  afterEach(() => {
     vi.clearAllMocks();
+    cleanup();
   });
 
   it('renders input', async () => {
@@ -101,6 +109,35 @@ describe('ParaModal', () => {
     expect(screen.queryByLabelText('email')).toBeDefined();
     expect(screen.queryByLabelText('phone')).toBeNull();
   }, 20000);
+
+  describe('default identifier', () => {
+    it('email', async () => {
+      vi.spyOn(MockPara.prototype, 'authInfo', 'get').mockReturnValue(undefined);
+
+      mocks.useStore.mockImplementationOnce(getter =>
+        getter({ ...DEFAULT_STORE_RESP, modalConfig: { defaultAuthIdentifier: 'test@test.com' } }),
+      );
+
+      const { input } = await setup();
+
+      expect(input).toBeDefined();
+      expect(input().value).toEqual('test@test.com');
+    }, 20000);
+
+    it('phone', async () => {
+      vi.spyOn(MockPara.prototype, 'authInfo', 'get').mockReturnValue(undefined);
+
+      mocks.useStore.mockImplementationOnce(getter =>
+        getter({ ...DEFAULT_STORE_RESP, modalConfig: { defaultAuthIdentifier: '+15555555555' } }),
+      );
+
+      const { input, countryCodeSelect } = await setup();
+
+      expect(input).toBeDefined();
+      expect(countryCodeSelect().value).toEqual('US');
+      expect(input().value).toEqual('(555) 555-5555');
+    }, 20000);
+  });
 
   // TODO: add data-testid as optional field to all components and reimpliment using data-testid selector
   // it('can continue with email', async () => {

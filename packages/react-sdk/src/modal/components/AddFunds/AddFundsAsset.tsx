@@ -124,6 +124,8 @@ const AssetList = styled.ul`
   flex-direction: column;
   width: 100%;
   gap: 8px;
+  list-style-type: none;
+  padding: 0px;
 `;
 
 const AssetButton = styled(comp.CpslButton)`

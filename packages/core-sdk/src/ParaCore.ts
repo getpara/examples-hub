@@ -154,6 +154,7 @@ export abstract class ParaCore implements CoreInterface {
     if (this.isExternalWalletAuth) {
       return 'AUTHENTICATED';
     } else if (!!Object.keys(this.externalWallets).length) {
+      // CONNECTION_ONLY applies for both externalWalletConnectionOnly and standard external wallet connection with Para tracking
       return 'CONNECTION_ONLY';
     }
 
@@ -376,6 +377,11 @@ export abstract class ParaCore implements CoreInterface {
    * @deprecated configure theming through the developer portal
    */
   portalTheme?: Theme;
+
+  /**
+   * Whether or not to treat external wallets as connections only, skipping all Para functionality.
+   */
+  externalWalletConnectionOnly?: boolean;
 
   private disableProviderModal?: boolean;
 
@@ -808,6 +814,8 @@ export abstract class ParaCore implements CoreInterface {
       isE2E = true;
       env = Environment.SANDBOX;
     }
+
+    this.externalWalletConnectionOnly = opts.externalWalletConnectionOnly;
 
     this.emailPrimaryColor = opts.emailPrimaryColor;
     this.emailTheme = opts.emailTheme;
@@ -1677,6 +1685,14 @@ export abstract class ParaCore implements CoreInterface {
     externalWallet,
     ...urlOptions
   }: CoreMethodParams<'loginExternalWallet'>): CoreMethodResponse<'loginExternalWallet'> {
+    if (this.externalWalletConnectionOnly) {
+      // withFullParaAuth cannot be used if using connection only wallets
+      externalWallet.withFullParaAuth = false;
+      await this.setExternalWallet(externalWallet);
+      return Promise.resolve({
+        userId: constants.EXTERNAL_WALLET_CONNECTION_ONLY_USER_ID,
+      }) as CoreMethodResponse<'loginExternalWallet'>;
+    }
     this.requireApiKey();
 
     const serverAuthState = await this.ctx.client.loginExternalWallet({ externalWallet });

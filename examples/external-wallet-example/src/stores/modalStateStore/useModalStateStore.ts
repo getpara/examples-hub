@@ -11,6 +11,7 @@ interface ModalStateState {
   foregroundColor: string;
   accentColor: string;
   mode: 'dark' | 'light';
+  externalWalletConnectionOnly: boolean;
 }
 
 export interface ModalStateActions {
@@ -28,6 +29,7 @@ const DEFAULT_STATE: ModalStateState = {
   foregroundColor: 'white',
   accentColor: 'red',
   mode: 'dark',
+  externalWalletConnectionOnly: false,
 };
 
 export const useModalStateStore = create<ModalStateStore>()(
@@ -49,6 +51,7 @@ export const useModalStateStore = create<ModalStateStore>()(
         foregroundColor: state.foregroundColor,
         accentColor: state.accentColor,
         mode: state.mode,
+        externalWalletConnectionOnly: state.externalWalletConnectionOnly,
       }),
     },
   ),

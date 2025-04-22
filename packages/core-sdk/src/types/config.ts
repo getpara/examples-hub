@@ -93,6 +93,7 @@ export type SupportedWalletTypeConfig = {
   optional?: boolean;
 };
 export interface ConstructorOpts {
+  externalWalletConnectionOnly?: boolean;
   useStorageOverrides?: boolean;
   disableWorkers?: boolean;
   offloadMPCComputationURL?: string;
