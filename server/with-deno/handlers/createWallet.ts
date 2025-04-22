@@ -25,7 +25,7 @@ export const createWallet: Handler = async (req: Request): Promise<Response> => 
       });
     }
 
-    const para = new ParaServer(env, paraApiKey, { disableWebSockets: true });
+    const para = new ParaServer(env, paraApiKey, { disableWebSockets: true, disableWorkers: true });
 
     const hasPregenWallet = await para.hasPregenWallet({
       pregenIdentifier: email,

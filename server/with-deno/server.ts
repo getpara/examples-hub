@@ -4,7 +4,6 @@ import { routes } from "./routes.ts";
 const __dirname = new URL(".", import.meta.url).pathname;
 const publicDir = join(__dirname, "public");
 
-// Map file extensions to content types
 const contentTypeMap: Record<string, string> = {
   ".html": "text/html",
   ".js": "text/javascript",
