@@ -107,7 +107,7 @@ const testSuites: TestSuites = {
   },
   updatePregenWalletIdentifier: {
     action: actions.updatePregenWalletIdentifier,
-    args: { newPregenId: emailAuth, newIdentifier: 'newIdentifier' },
+    args: { newPregenId: emailAuth, walletId: 'walletId' },
   },
   signMessage: {
     action: actions.signMessage,
@@ -116,6 +116,10 @@ const testSuites: TestSuites = {
   signTransaction: {
     action: actions.signTransaction,
     args: { walletId: 'walletId', chainId: '1', rlpEncodedTxBase64: 'transaction' },
+  },
+  createGuestWallets: {
+    action: actions.createGuestWallets,
+    args: undefined,
   },
 };
 

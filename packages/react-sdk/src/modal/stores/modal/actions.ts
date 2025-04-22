@@ -1,7 +1,23 @@
 import { StoreApi } from 'zustand';
-import { DEFAULT_MODAL_STATE, ModalActions, ModalStore } from './useModalStore.js';
-import { AccountPreviousStep, LoginPreviousStep, ModalStep, SignUpPreviousStep } from '../../utils/steps.js';
+import { DEFAULT_MODAL_STATE, Flow, ModalActions, ModalStore } from './useModalStore.js';
+import {
+  AccountPreviousStep,
+  GuestPreviousStep,
+  LoginPreviousStep,
+  ModalStep,
+  SignUpPreviousStep,
+} from '../../utils/steps.js';
 import { TAuthLayout } from '../../types/modalProps.js';
+
+function getPreviousStep(flow: Flow, step: ModalStep): ModalStep | undefined {
+  return flow === 'account'
+    ? AccountPreviousStep[step]
+    : flow === 'login'
+      ? LoginPreviousStep[step]
+      : flow === 'guest'
+        ? GuestPreviousStep[step]
+        : SignUpPreviousStep[step];
+}
 
 export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<ModalStore>['getState']): ModalActions => ({
   resetState: () => set(DEFAULT_MODAL_STATE),
@@ -18,20 +34,23 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
   decrementStep: () => {
     const currentStep = get().step;
     const onRampStep = get().onRampStep;
+    const flow = get().flow;
 
     if ([ModalStep.ADD_FUNDS_BUY, ModalStep.ADD_FUNDS_WITHDRAW].includes(currentStep) && onRampStep > 0) {
       set({ onRampStep: onRampStep - 1 });
       return;
     }
 
+    if (!flow) {
+      return;
+    }
+
     const onModalStepChange = get().onModalStepChange;
-    const isLogin = get().flow === 'login';
-    const isAccount = get().flow === 'account';
     const signupState = get().getSignupState();
     const iFrameUrl = get().iFrameUrl;
     const refs = get().refs;
 
-    let prevStep = (isAccount ? AccountPreviousStep : isLogin ? LoginPreviousStep : SignUpPreviousStep)[currentStep];
+    let prevStep = getPreviousStep(flow, currentStep);
 
     if (currentStep === ModalStep.PASSWORD_CREATION && iFrameUrl && !signupState?.passkeyUrl) {
       prevStep = ModalStep.AUTH_MAIN;
@@ -56,8 +75,7 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
     refs.popupWindow.current = null;
   },
   hasPreviousStep: () => {
-    const isLogin = get().flow === 'login';
-    const isAccount = get().flow === 'account';
+    const flow = get().flow;
     const currentStep = get().step;
     const onRampStep = get().onRampStep;
 
@@ -65,17 +83,14 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
       return true;
     }
 
-    return !!(isAccount
-      ? AccountPreviousStep[currentStep]
-      : isLogin
-        ? LoginPreviousStep[currentStep]
-        : SignUpPreviousStep[currentStep]);
+    return !!flow && !!getPreviousStep(flow, currentStep);
   },
   setFlow: flow => set({ flow }),
   isLogin: () => get().flow === 'login',
   isAccount: () => get().flow === 'account',
   setAuthState: authState => {
-    let newFlow;
+    let flow = get().flow,
+      newFlow;
 
     switch (authState?.stage) {
       case 'login':
@@ -83,7 +98,7 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
         break;
       case 'signup':
       case 'verify':
-        newFlow = 'signup';
+        newFlow = flow === 'guest' ? 'guest' : 'signup';
         break;
       default:
         break;
@@ -109,6 +124,7 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
   setOnRampStep: onRampStep => set({ onRampStep }),
   setIsFullyLoggedIn: isFullyLoggedIn => set({ isFullyLoggedIn }),
   setAccountAddFundTab: accountAddFundTab => set({ accountAddFundTab }),
+  setGuestAddFundsTab: guestAddFundsTab => set({ guestAddFundsTab }),
   setSelectedExternalWalletId: selectedExternalWalletId => set({ selectedExternalWalletId }),
   setIsExternalWalletConnecting: isExternalWalletConnecting => set({ isExternalWalletConnecting }),
   setExternalWalletError: externalWalletError => set({ externalWalletError }),

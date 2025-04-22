@@ -3,6 +3,8 @@ import { EnabledFlow } from '@getpara/web-sdk';
 export enum ModalStep {
   AUTH_MAIN = 'AUTH_MAIN',
   AUTH_MORE = 'AUTH_MORE',
+  AUTH_GUEST_SIGNUP = 'AUTH_GUEST_SIGNUP',
+  AWAITING_GUEST_WALLET_CREATION = 'AWAITING_GUEST_WALLET_CREATION',
   EX_WALLET_MORE = 'EX_WALLET_MORE',
   EX_WALLET_SELECTED = 'EX_WALLET_SELECTED',
   VERIFICATIONS = 'VERIFICATIONS',
@@ -42,6 +44,7 @@ export type ModalStepProp = ModalStepPropU | ModalStepPropL;
 
 enum AccountStep {
   ACCOUNT_MAIN = 'ACCOUNT_MAIN',
+  AUTH_GUEST_SIGNUP = 'AUTH_GUEST_SIGNUP',
   ADD_FUNDS_BUY = 'ADD_FUNDS_BUY',
   ADD_FUNDS_RECEIVE = 'ADD_FUNDS_RECEIVE',
   ADD_FUNDS_WITHDRAW = 'ADD_FUNDS_WITHDRAW',
@@ -76,6 +79,7 @@ export const RESET_TO_AUTH_STEPS = [
 ];
 
 export const RESET_TO_ACCOUNT_STEPS = [
+  ModalStep.AUTH_GUEST_SIGNUP,
   ModalStep.ADD_FUNDS_BUY,
   ModalStep.ADD_FUNDS_RECEIVE,
   ModalStep.ADD_FUNDS_WITHDRAW,
@@ -89,6 +93,7 @@ export const AccountPreviousStep: {
   [key in AccountStep]: ModalStep | undefined;
 } = {
   [AccountStep.ACCOUNT_MAIN]: undefined,
+  [AccountStep.AUTH_GUEST_SIGNUP]: ModalStep.ACCOUNT_MAIN,
   [AccountStep.ADD_FUNDS_BUY]: ModalStep.ACCOUNT_MAIN,
   [AccountStep.ADD_FUNDS_WITHDRAW]: ModalStep.ACCOUNT_MAIN,
   [AccountStep.ADD_FUNDS_RECEIVE]: ModalStep.ACCOUNT_MAIN,
@@ -155,6 +160,18 @@ export const SignUpPreviousStep: {
   [SignUpModalStep.ADD_FUNDS_SUCCESS]: undefined,
   [SignUpModalStep.ADD_FUNDS_FAILURE]: undefined,
 };
+
+export const GuestPreviousStep: {
+  [key in AccountStep]: ModalStep | undefined;
+} = Object.fromEntries([
+  ...Object.entries(SignUpPreviousStep).map(([key, value]) => {
+    if (value === ModalStep.AUTH_MAIN) {
+      return [key, ModalStep.AUTH_GUEST_SIGNUP];
+    }
+    return [key, value];
+  }),
+  ...Object.entries(AccountPreviousStep),
+]);
 
 enum LoginModalStep {
   AUTH_MAIN = 'AUTH_MAIN',

@@ -39,7 +39,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
   const para = useInternalClient();
   const { setSelectedWallet, updateSelectedWallet } = useWalletState();
   const setAuthStepRoute = useModalStore(state => state.setAuthStepRoute);
-  const { signUpOrLogIn } = useAuthActions();
+  const { signUpOrLogIn, isCreateGuestWalletsPending } = useAuthActions();
 
   const [isModalMounted, setIsModalMounted] = useState(false);
   const [isInit, setIsInit] = useState(false);
@@ -51,6 +51,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
     theme,
     disableEmailLogin = false,
     disablePhoneLogin = false,
+    isGuestModeEnabled = false,
     oAuthMethods = ['GOOGLE', 'TWITTER'],
     bareModal = false,
     className,
@@ -84,54 +85,56 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
 
   // This will run on mount and on isOpen change but won't cause a rerender unless step or email changes
   const initModal = async (shouldAutoLogin?: boolean) => {
-    const isAccount = await para.isFullyLoggedIn();
-    if (currentStepOverride) {
-      setStep(ModalStep[currentStepOverride.toUpperCase()]);
-    } else if (isAccount) {
-      setFlow('account');
-      setStep(ModalStep.ACCOUNT_MAIN);
-      setIsFullyLoggedIn(true);
-    } else {
-      if (currentStep !== ModalStep.AUTH_MAIN && currentStep !== ModalStep.SECRET) {
-        setFlow(undefined);
-        setStep(ModalStep.AUTH_MAIN);
-        setAuthState();
-        setAuthStepRoute();
-      }
-
-      // Disconnect external wallets if the user is not longer logged in
-      await disconnectExternalWallet();
-      setSelectedWallet({ id: undefined, type: undefined });
-      setIsFullyLoggedIn(false);
-
-      if (shouldAutoLogin) {
-        if (defaultAuthIdentifier && para.authInfo?.identifier !== defaultAuthIdentifier) {
-          const number = parsePhoneNumberFromString(defaultAuthIdentifier);
-
-          try {
-            const auth = validateAuth(
-              number ? number.nationalNumber : defaultAuthIdentifier,
-              number?.countryCallingCode ? `+${number?.countryCallingCode}` : undefined,
-              number ? 'phone' : 'email',
-            );
-            para.setAuth(number ? { phone: defaultAuthIdentifier as `+${number}` } : { email: defaultAuthIdentifier });
-
-            signUpOrLogIn(auth);
-          } catch (err) {
-            console.error('invalid user identifier:', err.message);
-          }
-        }
-      }
-    }
+    const isAccount = await para.isFullyLoggedIn(),
+      isGuest = (isAccount && para.isGuestMode) || isCreateGuestWalletsPending;
 
     switch (true) {
-      case para.isTelegram:
-        if (!isAccount) {
-          setStep(ModalStep.TELEGRAM_OAUTH);
+      case !!currentStepOverride:
+        setStep(ModalStep[currentStepOverride.toUpperCase()]);
+        break;
+      case isGuest:
+        setFlow('guest');
+        setStep(isCreateGuestWalletsPending ? ModalStep.AWAITING_GUEST_WALLET_CREATION : ModalStep.ACCOUNT_MAIN);
+        setIsFullyLoggedIn(true);
+        break;
+      case isAccount:
+        setFlow('account');
+        setStep(ModalStep.ACCOUNT_MAIN);
+        setIsFullyLoggedIn(true);
+        break;
+      default:
+        if (currentStep !== ModalStep.AUTH_MAIN && currentStep !== ModalStep.SECRET) {
+          setFlow(undefined);
+          setStep(para.isTelegram ? ModalStep.TELEGRAM_OAUTH : ModalStep.AUTH_MAIN);
+          setAuthState();
+          setAuthStepRoute();
+        }
+
+        // Disconnect external wallets if the user is not longer logged in
+        await disconnectExternalWallet();
+        setSelectedWallet({ id: undefined, type: undefined });
+        setIsFullyLoggedIn(false);
+
+        if (shouldAutoLogin) {
+          if (defaultAuthIdentifier && para.authInfo?.identifier !== defaultAuthIdentifier) {
+            const number = parsePhoneNumberFromString(defaultAuthIdentifier);
+
+            try {
+              const auth = validateAuth(
+                number ? number.nationalNumber : defaultAuthIdentifier,
+                number?.countryCallingCode ? `+${number?.countryCallingCode}` : undefined,
+                number ? 'phone' : 'email',
+              );
+              para.setAuth(number ? { phone: defaultAuthIdentifier as `+${number}` } : { email: defaultAuthIdentifier });
+
+              signUpOrLogIn(auth);
+            } catch (err) {
+              console.error('invalid user identifier:', err.message);
+            }
+          }
         }
         break;
     }
-
     setIsInit(true);
   };
 
@@ -255,6 +258,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
           oAuthMethods={oAuthMethods}
           disableEmailLogin={disableEmailLogin}
           disablePhoneLogin={disablePhoneLogin}
+          isGuestModeEnabled={isGuestModeEnabled}
           onClose={handleClose}
           {...rest}
         />

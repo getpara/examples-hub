@@ -14,6 +14,7 @@ export const useStepTitle = () => {
     () => ({
       [ModalStep.AUTH_MAIN]: '',
       [ModalStep.AUTH_MORE]: 'Sign Up or Log In',
+      [ModalStep.AUTH_GUEST_SIGNUP]: 'Complete Account Setup',
       [ModalStep.EX_WALLET_MORE]: 'Connect Wallet',
       [ModalStep.VERIFICATIONS]: 'Sign Up',
       [ModalStep.AWAITING_OAUTH]: isLogin ? 'Login' : 'Sign Up',

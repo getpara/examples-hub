@@ -41,6 +41,7 @@ interface BodyProps {
   twoFactorAuthEnabled?: boolean;
   disableEmailLogin: boolean;
   disablePhoneLogin: boolean;
+  isGuestModeEnabled?: boolean;
   onClose: () => void;
 }
 
@@ -56,7 +57,14 @@ const PADDING_BOTTOM = {
   [ModalStep.TELEGRAM_OAUTH]: '16px',
 };
 
-export const Body = ({ oAuthMethods, twoFactorAuthEnabled, disableEmailLogin, disablePhoneLogin, onClose }: BodyProps) => {
+export const Body = ({
+  oAuthMethods,
+  twoFactorAuthEnabled,
+  disableEmailLogin,
+  disablePhoneLogin,
+  isGuestModeEnabled = false,
+  onClose,
+}: BodyProps) => {
   const currentStep = useModalStore(state => state.step);
   const onRampConfig = useModalStore(state => state.onRampConfig);
   const stepDirection = useModalStore(state => state.stepDirection);
@@ -76,18 +84,24 @@ export const Body = ({ oAuthMethods, twoFactorAuthEnabled, disableEmailLogin, di
             oAuthMethods={oAuthMethods}
             disableEmailLogin={disableEmailLogin}
             disablePhoneLogin={disablePhoneLogin}
+            isGuestModeEnabled={isGuestModeEnabled}
           />
         );
       }
       case ModalStep.EX_WALLET_MORE: {
         return <ExternalWallets />;
       }
-      case ModalStep.AUTH_MORE: {
+      case ModalStep.AWAITING_GUEST_WALLET_CREATION: {
+        return <AwaitingWalletCreationStep isGuestMode />;
+      }
+      case ModalStep.AUTH_MORE:
+      case ModalStep.AUTH_GUEST_SIGNUP: {
         return (
           <AuthOptions
             oAuthMethods={oAuthMethods}
             disableEmailLogin={disableEmailLogin}
             disablePhoneLogin={disablePhoneLogin}
+            isGuestModeEnabled={isGuestModeEnabled}
           />
         );
       }

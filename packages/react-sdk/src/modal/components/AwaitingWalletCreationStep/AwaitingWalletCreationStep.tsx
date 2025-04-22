@@ -3,11 +3,17 @@ import { InfoBoxContent, InfoBoxHeader, StepContainer } from '../common.js';
 import { useEffect, useRef, useState } from 'react';
 import { Waiting } from '../Waiting/Waiting.js';
 import { useStore } from '../../../provider/stores/useStore.js';
+import { useAccount } from '../../../provider/index.js';
 
-export const AwaitingWalletCreationStep = () => {
+type Props = {
+  isGuestMode?: boolean;
+};
+
+export const AwaitingWalletCreationStep = ({ isGuestMode = false }: Props) => {
   const hideWallets = useStore(state => state.modalConfig?.hideWallets);
   const [showInfoBox, setShowInfoBox] = useState(false);
   const showInfoBoxTimeout = useRef<number>();
+  const { data: account } = useAccount();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -22,7 +28,17 @@ export const AwaitingWalletCreationStep = () => {
   return (
     <StepContainer $wide>
       <Waiting
-        heading={hideWallets ? 'Creating Your Account' : 'Creating Your Wallet'}
+        heading={
+          isGuestMode
+            ? 'Creating Guest Account'
+            : account?.isGuestMode
+              ? hideWallets
+                ? 'Linking Guest Account'
+                : 'Linking Guest Wallet'
+              : hideWallets
+                ? 'Creating Your Account'
+                : 'Creating Your Wallet'
+        }
         subheading="This should only take a couple of seconds."
       />
       {showInfoBox && (

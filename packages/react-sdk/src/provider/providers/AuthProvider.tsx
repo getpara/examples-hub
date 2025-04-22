@@ -539,6 +539,12 @@ export function AuthProvider({
   }, [currentStep]);
 
   useEffect(() => {
+    if (refs.currentStep.current === ModalStep.AWAITING_GUEST_WALLET_CREATION && !isCreateGuestWalletsPending) {
+      setStep(ModalStep.ACCOUNT_MAIN);
+    }
+  }, [isCreateGuestWalletsPending]);
+
+  useEffect(() => {
     return () => {
       window?.clearTimeout(refs.poll.current?.timeout);
     };

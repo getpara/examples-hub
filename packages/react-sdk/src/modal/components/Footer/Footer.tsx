@@ -4,15 +4,17 @@ import { useModalStore } from '../../stores/index.js';
 import { PARA_CONNECT, PARA_TERMS_AND_CONDITIONS } from '../../constants/constants.js';
 import { useMemo } from 'react';
 import { getStepHasFooter } from '../../utils/steps.js';
+import { useAccount } from '../../../provider/index.js';
 
 export const Footer = () => {
-  const isAccount = useModalStore(state => state.isAccount());
+  const { data: account } = useAccount();
   const currentStep = useModalStore(state => state.step);
 
-  const showFooter = isAccount || getStepHasFooter(currentStep);
+  const accountFooter = account?.isConnected && !account.isGuestMode;
+  const showFooter = accountFooter || getStepHasFooter(currentStep);
 
   const Content = useMemo(() => {
-    if (isAccount) {
+    if (accountFooter) {
       return (
         <ConnectContainer>
           <ConnectText variant="bodyS" color="secondary" weight="medium">
@@ -48,7 +50,7 @@ export const Footer = () => {
         </PoweredByContainer>
       </>
     );
-  }, [isAccount]);
+  }, [account]);
 
   if (!showFooter) {
     return null;

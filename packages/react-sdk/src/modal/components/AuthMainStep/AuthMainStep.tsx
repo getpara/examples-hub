@@ -9,9 +9,15 @@ interface AuthMainStepProps {
   oAuthMethods?: TOAuthMethod[];
   disableEmailLogin: boolean;
   disablePhoneLogin: boolean;
+  isGuestModeEnabled?: boolean;
 }
 
-export const AuthMainStep = ({ oAuthMethods, disableEmailLogin, disablePhoneLogin }: AuthMainStepProps) => {
+export const AuthMainStep = ({
+  oAuthMethods,
+  disableEmailLogin,
+  disablePhoneLogin,
+  isGuestModeEnabled = false,
+}: AuthMainStepProps) => {
   const authLayout = useModalStore(state => state.authLayout);
   const embeddedModal = useStore(state => state.modalConfig?.embeddedModal);
   const logo = useStore(state => state.modalConfig?.logo);
@@ -31,6 +37,7 @@ export const AuthMainStep = ({ oAuthMethods, disableEmailLogin, disablePhoneLogi
       <AuthMainStepContent
         disableEmailLogin={disableEmailLogin}
         disablePhoneLogin={disablePhoneLogin}
+        isGuestModeEnabled={isGuestModeEnabled}
         oAuthMethods={oAuthMethods}
       />
     </>

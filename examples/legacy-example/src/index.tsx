@@ -54,6 +54,7 @@ import { sepolia } from 'viem/chains';
 import { paraConnector } from '@getpara/wagmi-v2-integration';
 import { coinbaseWallet, walletConnect } from 'wagmi/connectors';
 import { PregenAuth } from '@getpara/user-management-client';
+import { toast } from 'react-toastify';
 
 const queryClient = new QueryClient();
 
@@ -482,6 +483,7 @@ function AppInner({
   const [logoVariant, setLogoVariant] = useLocalStorage('@EXAMPLE-PARA/logoVariant', 'branded');
 
   const [onRampTestMode, setOnRampTestMode] = useLocalStorage('@EXAMPLE-PARA/onRampTestMode', true);
+  const [isGuestModeEnabled, setIsGuestModeEnabled] = useLocalStorage('@EXAMPLE-PARA/isGuestModeEnabled', false);
   const [hideWallets, setHideWallets] = useLocalStorage('@EXAMPLE-PARA/hideWallets', false);
 
   const [pregenIdentifier, setPregenIdentifier] = useState('');
@@ -907,6 +909,12 @@ function AppInner({
               </VStack>
               <HStack>
                 <Text width={'15%'}>
+                  <strong>Guest Mode:</strong>
+                </Text>
+                <Checkbox isChecked={isGuestModeEnabled} onChange={e => setIsGuestModeEnabled(e.currentTarget.checked)} />
+              </HStack>
+              <HStack>
+                <Text width={'15%'}>
                   <strong>On-Ramp Test Mode:</strong>
                 </Text>
                 <Checkbox isChecked={onRampTestMode} onChange={e => setOnRampTestMode(e.currentTarget.checked)} />
@@ -942,7 +950,7 @@ function AppInner({
                 <Button colorScheme="green" isDisabled={!para} onClick={openModal}>
                   Open Modal
                 </Button>
-                {paraAccount.isConnected && (
+                {paraAccount.isConnected && !paraAccount.isGuestMode && (
                   <>
                     <Button
                       colorScheme="green"
@@ -1087,7 +1095,7 @@ function AppInner({
                       Fetch Account Metadata
                     </Button>
 
-                    {Object.entries(para?.wallets ?? {}).length > 0 && (
+                    {para.availableWallets.length > 0 && (
                       <Select
                         value={`${walletType}~${walletId}`}
                         onChange={e => {
@@ -1096,24 +1104,11 @@ function AppInner({
                           setWallet([walletType as TWalletType, walletId, false]);
                         }}
                       >
-                        {Object.entries(para?.currentWalletIds ?? {}).map(([type, ids]) => (
-                          <>
-                            {ids.map(id => (
-                              <option key={id} value={`${type}~${id}`}>
-                                {type}: {id}
-                              </option>
-                            ))}
-                          </>
+                        {para.availableWallets.map(({ id, type }) => (
+                          <option key={id} value={`${type}~${id}`}>
+                            {type}: {id}
+                          </option>
                         ))}
-                        {Object.values(para?.wallets)
-                          .filter(w => !w.userId || (w.isPregen && !!w.pregenIdentifier))
-                          .map(w => {
-                            return (
-                              <option key={w.id} value={`${w.type}~${w.id}`}>
-                                {w.type}: {w.id}
-                              </option>
-                            );
-                          })}
                       </Select>
                     )}
 
@@ -1365,6 +1360,7 @@ const App = () => {
   const [font] = useLocalStorage('@EXAMPLE-PARA/font', 'inter');
   const [logoVariant] = useLocalStorage('@EXAMPLE-PARA/logoVariant', 'branded');
   const [onRampTestMode] = useLocalStorage('@EXAMPLE-PARA/onRampTestMode', true);
+  const [isGuestModeEnabled] = useLocalStorage('@EXAMPLE-PARA/isGuestModeEnabled', true);
   const [hideWallets] = useLocalStorage('@EXAMPLE-PARA/hideWallets', false);
   const [defaultIdentifier] = useLocalStorage('@EXAMPLE-PARA/defaultIdentifier', undefined);
 
@@ -1384,6 +1380,7 @@ const App = () => {
           appName: (partners || []).find(({ apiKey }) => apiKey === selectedApiKey)?.displayName || 'Example',
           // Since Wagmi uses a separate provider we want to not use this modal for wagmi
           disableEmbeddedModal: selectedView === 'WAGMI',
+          rpcUrl: 'https://sepolia.drpc.org',
         }}
         paraModalConfig={{
           defaultAuthIdentifier: defaultIdentifier,
@@ -1402,7 +1399,13 @@ const App = () => {
           twoFactorAuthEnabled: true,
           hideWallets,
           onRampTestMode,
+          isGuestModeEnabled,
           oAuthMethods: ['GOOGLE', 'TELEGRAM', 'FACEBOOK', 'APPLE', 'TWITTER', 'DISCORD', 'FARCASTER'],
+        }}
+        callbacks={{
+          onGuestWalletsCreated: () => {
+            toast('Guest wallets created!');
+          },
         }}
       >
         <AppInner currentStepOverride={currentStepOverride} setCurrentStepOverride={setCurrentStepOverride} />

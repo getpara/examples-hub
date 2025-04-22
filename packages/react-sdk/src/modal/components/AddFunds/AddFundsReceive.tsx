@@ -20,8 +20,8 @@ import { useInternalClient } from '../../../provider/hooks/utils/useInternalClie
 
 const GENERIC_WALLET = {
   EVM: 'Ethereum or EVM-based L2s',
-  SOLANA: 'SOLANA',
-  COSMOS: 'COSMOS',
+  SOLANA: 'Solana',
+  COSMOS: 'Cosmos',
 };
 
 export function AddFundsReceive() {

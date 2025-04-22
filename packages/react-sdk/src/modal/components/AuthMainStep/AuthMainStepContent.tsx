@@ -10,19 +10,30 @@ import { brandedOAuthLogos, oAuthLogos } from '../../constants/oAuthLogos.js';
 import { AuthOptions } from '../AuthOptions/AuthOptions.js';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 import { useStore } from '../../../provider/stores/useStore.js';
+import { useAuthActions } from '../../../provider/providers/AuthProvider.js';
+import { useAccount } from '../../../provider/index.js';
 
 interface AuthMainStepContentProps {
   oAuthMethods?: TOAuthMethod[];
   disableEmailLogin: boolean;
   disablePhoneLogin: boolean;
+  isGuestModeEnabled?: boolean;
 }
 
-export const AuthMainStepContent = ({ oAuthMethods, disableEmailLogin, disablePhoneLogin }: AuthMainStepContentProps) => {
+export const AuthMainStepContent = ({
+  oAuthMethods,
+  disableEmailLogin,
+  disablePhoneLogin,
+  isGuestModeEnabled = false,
+}: AuthMainStepContentProps) => {
   const { wallets } = useExternalWallets();
+  const { createGuestWallets } = useAuthActions();
+  const { data: account } = useAccount();
   const authLayout = useModalStore(state => state.authLayout);
   const setStep = useModalStore(state => state.setStep);
   const oAuthLogoVariant = useStore(state => state.oAuthLogoVariant);
-  const isDark = useStore(state => state.isDarkTheme);
+  const isDark = useStore(state => state.modalConfig?.theme?.mode === 'dark');
+  const isGuestMode = account?.isConnected && account.isGuestMode;
 
   const useBrandedLogos = oAuthLogoVariant === 'default';
   const useDarkLogos = useBrandedLogos ? isDark : oAuthLogoVariant !== 'dark';
@@ -47,6 +58,7 @@ export const AuthMainStepContent = ({ oAuthMethods, disableEmailLogin, disablePh
               oAuthMethods={oAuthMethods}
               disableEmailLogin={disableEmailLogin}
               disablePhoneLogin={disablePhoneLogin}
+              isGuestModeEnabled={isGuestModeEnabled}
             />,
             layout,
           ]);
@@ -107,9 +119,25 @@ export const AuthMainStepContent = ({ oAuthMethods, disableEmailLogin, disablePh
         ))}
       </>
     );
-  }, [oAuthMethods, disableEmailLogin, disablePhoneLogin, wallets, authLayout]);
+  }, [oAuthMethods, disableEmailLogin, disablePhoneLogin, isGuestModeEnabled, wallets, authLayout]);
 
-  return <Container data-testid="main-auth-step-content">{Content}</Container>;
+  return (
+    <Container data-testid="main-auth-step-content">
+      {Content}
+      {isGuestModeEnabled && !isGuestMode && (
+        <GuestMode
+          href="#"
+          isDark={isDark}
+          onClick={e => {
+            e.preventDefault();
+            createGuestWallets();
+          }}
+        >
+          Continue as Guest
+        </GuestMode>
+      )}
+    </Container>
+  );
 };
 
 const Container = styled.div`
@@ -133,5 +161,21 @@ const CondensedButton = styled(CpslButton)`
 
   &::part(button-native) {
     max-height: 50px;
+  }
+`;
+
+const GuestMode = styled.a<{ isDark?: boolean }>`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 50px;
+  color: ${({ isDark }) => (isDark ? 'white' : 'black')};
+  text-decoration: underline;
+  font-size: 16px;
+  font-weight: 500;
+
+  &:hover {
+    text-decoration: underline;
   }
 `;

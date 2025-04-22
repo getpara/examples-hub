@@ -21,7 +21,18 @@ export type ModalContentHandle = {
 };
 
 export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
-  ({ twoFactorAuthEnabled = false, oAuthMethods, disableEmailLogin, disablePhoneLogin, onClose, onRampTestMode }, ref) => {
+  (
+    {
+      twoFactorAuthEnabled = false,
+      oAuthMethods,
+      disableEmailLogin,
+      disablePhoneLogin,
+      isGuestModeEnabled = false,
+      onClose,
+      onRampTestMode,
+    },
+    ref,
+  ) => {
     const para = useInternalClient();
     const refs = useModalStore(state => state.refs);
     const onRampConfig = useModalStore(state => state.onRampConfig);
@@ -99,6 +110,7 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
           twoFactorAuthEnabled={twoFactorAuthEnabled}
           disableEmailLogin={!!disableEmailLogin}
           disablePhoneLogin={!!disablePhoneLogin}
+          isGuestModeEnabled={isGuestModeEnabled}
           onClose={handleClose}
         />
         <Footer />

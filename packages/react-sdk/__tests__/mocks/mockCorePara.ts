@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
 import { ParaInternal } from '@getpara/react-common';
-import { TEST_EMAIL, TEST_WALLETS, TEST_WALLET, TEST_USER_ID, TEST_CURRENT_WALLET_IDS } from '../constants';
+import { TEST_WALLETS, TEST_WALLET, TEST_USER_ID, TEST_CURRENT_WALLET_IDS } from '../constants';
 
 export const mockCheckIfUserExists = vi.fn();
 export const mockCheckIfUserExistsByPhone = vi.fn();
@@ -38,6 +38,7 @@ export const mockCreatePregenWalletPerType = vi.fn();
 export const mockClaimPregenWallets = vi.fn();
 export const mockHasPregenWallet = vi.fn();
 export const mockUpdatePregenWalletIdentifier = vi.fn();
+export const mockCreateGuestWallets = vi.fn();
 export class MockPara extends ParaInternal {
   checkIfUserExists = mockCheckIfUserExists;
   checkIfUserExistsByPhone = mockCheckIfUserExistsByPhone;
@@ -75,6 +76,7 @@ export class MockPara extends ParaInternal {
   claimPregenWallets = mockClaimPregenWallets;
   hasPregenWallet = mockHasPregenWallet;
   updatePregenWalletIdentifier = mockUpdatePregenWalletIdentifier;
+  createGuestWallets = mockCreateGuestWallets;
 
   wallets = TEST_WALLETS;
   userId = TEST_USER_ID;
@@ -82,10 +84,3 @@ export class MockPara extends ParaInternal {
 
   getOAuthURL = vi.fn().mockResolvedValue('https://example.com');
 }
-
-vi.spyOn(MockPara.prototype, 'email', 'get').mockReturnValue(TEST_EMAIL);
-vi.spyOn(MockPara.prototype, 'authInfo', 'get').mockReturnValue({
-  auth: { email: TEST_EMAIL },
-  authType: 'email',
-  identifier: TEST_EMAIL,
-});

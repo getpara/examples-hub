@@ -88,10 +88,12 @@ function getName(
     name,
     isMenu = false,
     hideWallets = false,
-  }: Pick<(typeof para.availableWallets)[0], 'type' | 'isExternal' | 'name'> & {
-    isMenu?: boolean;
-    hideWallets?: boolean;
-  },
+  }: Partial<
+    Pick<(typeof para.availableWallets)[0], 'type' | 'isExternal' | 'name'> & {
+      isMenu?: boolean;
+      hideWallets?: boolean;
+    }
+  >,
 ) {
   if (para.isMultiWallet) {
     return (
@@ -116,15 +118,19 @@ export const AccountSelect = () => {
 
   const availableWallets = account?.wallets;
 
+  const isGuest = para.isGuestMode && activeWallet?.pregenIdentifierType === 'GUEST_ID';
+
   const handleCopy = () => {
     copy(activeWallet?.address ? para.getDisplayAddress(activeWallet.id, { addressType: activeWallet.type }) : '');
   };
 
   const ActiveWalletNode = activeWallet ? (
-    <FlexRow slot="selected-item">
-      <CpslIdenticon variant="avatar" size="24px" hash={para.getIdenticonHash(activeWallet.id, activeWallet.type)} />
-      <WalletName variant="bodyXS" color="contrast">
-        {getName(para, { ...activeWallet, hideWallets })}
+    <FlexRow slot="selected-item" style={{ height: '24px' }}>
+      {!isGuest && (
+        <CpslIdenticon variant="avatar" size="24px" hash={para.getIdenticonHash(activeWallet.id, activeWallet.type)} />
+      )}
+      <WalletName variant="bodyXS" color="contrast" style={{ marginLeft: isGuest ? '8px' : '0px' }}>
+        {isGuest ? 'Guest' : getName(para, { ...activeWallet, hideWallets })}
       </WalletName>
       {!hideWallets && (
         <>

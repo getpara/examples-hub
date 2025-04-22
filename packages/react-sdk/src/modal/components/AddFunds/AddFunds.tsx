@@ -7,13 +7,12 @@ import { useModalStore } from '../../stores/modal/useModalStore.js';
 import { useEffect, useMemo } from 'react';
 import { getAddFundsStep } from '../../utils/steps.js';
 import styled from 'styled-components';
-import { useWallet } from '../../../provider/index.js';
+import { useAccount, useWallet } from '../../../provider/index.js';
 import { AddFundsProvider } from './AddFundsProvider.js';
 import { AddFundsReceive } from './AddFundsReceive.js';
 import { AddFundsContextProvider, Tab, TABS } from './AddFundsContext.js';
 import { AnimatePresence } from 'framer-motion';
 import { AddFundsSettings } from './AddFundsSettings.js';
-import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 
 export const AddFunds = () => {
   const onRampConfig = useModalStore(state => state.onRampConfig);
@@ -21,16 +20,13 @@ export const AddFunds = () => {
   const storedTab = useModalStore(state => state.accountAddFundTab);
   const setModalStep = useModalStore(state => state.setStep);
   const setOnRampPurchase = useModalStore(state => state.setOnRampPurchase);
-  const para = useInternalClient();
 
   const { data: activeWallet } = useWallet();
+  const { data: account } = useAccount();
 
-  const canBuyAndWithdraw = !!para.userId;
+  const isGuestMode = account?.isConnected && account.isGuestMode;
   const tabs = TABS.filter(
-    ([, key]) =>
-      !!onRampConfig?.[key] &&
-      ((['isBuyEnabled', 'isWithdrawEnabled'].includes(key) && canBuyAndWithdraw) ||
-        !['isBuyEnabled', 'isWithdrawEnabled'].includes(key)),
+    ([enabledFlow, key]) => !!onRampConfig?.[key] && (!isGuestMode || enabledFlow === EnabledFlow.RECEIVE),
   );
   const tab = storedTab ?? tabs[0][0];
   const isMultiFlow = tabs.length > 1;

@@ -118,6 +118,10 @@ export interface ParaModalProps {
    * Called when the modal is closed
    */
   onClose?: () => void;
+  /**
+   * Whether to enable guest login. A guest user will be provisioned embedded wallets that they will then claim upon signing up through your app.
+   */
+  isGuestModeEnabled?: boolean;
   loginTransitionOverride?: (para: ParaWeb) => Promise<void>;
   createWalletOverride?: (para: ParaWeb) => Promise<{ recoverySecret?: string; walletIds: CurrentWalletIds }>;
 }

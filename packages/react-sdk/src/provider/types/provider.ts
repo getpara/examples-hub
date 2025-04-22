@@ -12,6 +12,7 @@ import ParaWeb, {
   SignTransactionEvent,
   WalletCreatedEvent,
   WalletsChangeEvent,
+  GuestWalletsCreatedEvent,
 } from '@getpara/web-sdk';
 import { PropsWithChildren } from 'react';
 import { Chain, Transport } from 'viem';
@@ -35,6 +36,7 @@ export type Callbacks = {
   onWalletsChange?: (event: WalletsChangeEvent) => void;
   onWalletCreated?: (event: WalletCreatedEvent) => void;
   onPregenWalletClaimed?: (event: PregenWalletClaimedEvent) => void;
+  onGuestWalletsCreated?: (event: GuestWalletsCreatedEvent) => void;
 };
 
 export type ParaProviderConfig = {

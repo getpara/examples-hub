@@ -5,6 +5,7 @@ import {
   AccountCreationEvent,
   AccountSetupEvent,
   ExternalWalletChangeEvent,
+  GuestWalletsCreatedEvent,
   LoginEvent,
   LogoutEvent,
   ParaEvent,
@@ -30,6 +31,7 @@ export const useEventListeners = ({
   onPregenWalletClaimed,
   onExternalWalletChange,
   onWalletsChange,
+  onGuestWalletsCreated,
 }: Callbacks = {}) => {
   const queryClient = useQueryClient();
   const clearSelectedWallet = useStore(state => state.clearSelectedWallet);
@@ -118,6 +120,13 @@ export const useEventListeners = ({
     [onPregenWalletClaimed],
   );
 
+  const guestWalletsCreatedListener = useCallback(
+    (event: GuestWalletsCreatedEvent) => {
+      onGuestWalletsCreated?.(event);
+    },
+    [onGuestWalletsCreated],
+  );
+
   useEffect(() => {
     window.addEventListener(ParaEvent.LOGIN_EVENT, loginListener);
     window.addEventListener(ParaEvent.ACCOUNT_SETUP_EVENT, accountSetupListener);
@@ -129,6 +138,7 @@ export const useEventListeners = ({
     window.addEventListener(ParaEvent.EXTERNAL_WALLET_CHANGE_EVENT, externalWalletChangeListener);
     window.addEventListener(ParaEvent.WALLET_CREATED, walletCreatedListener);
     window.addEventListener(ParaEvent.PREGEN_WALLET_CLAIMED, pregenWalletClaimedListener);
+    window.addEventListener(ParaEvent.GUEST_WALLETS_CREATED, guestWalletsCreatedListener);
 
     return () => {
       window.removeEventListener(ParaEvent.LOGIN_EVENT, loginListener);
@@ -141,6 +151,7 @@ export const useEventListeners = ({
       window.removeEventListener(ParaEvent.EXTERNAL_WALLET_CHANGE_EVENT, externalWalletChangeListener);
       window.removeEventListener(ParaEvent.WALLET_CREATED, walletCreatedListener);
       window.removeEventListener(ParaEvent.PREGEN_WALLET_CLAIMED, pregenWalletClaimedListener);
+      window.removeEventListener(ParaEvent.GUEST_WALLETS_CREATED, guestWalletsCreatedListener);
     };
   }, [
     loginListener,
@@ -153,5 +164,6 @@ export const useEventListeners = ({
     externalWalletChangeListener,
     walletCreatedListener,
     pregenWalletClaimedListener,
+    guestWalletsCreatedListener,
   ]);
 };

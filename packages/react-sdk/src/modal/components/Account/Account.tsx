@@ -8,7 +8,8 @@ import { useInternalClient } from '../../../provider/hooks/utils/useInternalClie
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 import { useStore } from '../../../provider/stores/useStore.js';
 import { formatBalanceString } from '../../utils/stringFormatters.js';
-import { useWalletBalance } from '../../../provider/index.js';
+import { useAccount, useWalletBalance } from '../../../provider/index.js';
+import { EnabledFlow } from '@getpara/web-sdk';
 
 interface AccountProps {
   onClose: () => void;
@@ -18,20 +19,28 @@ export const Account = ({ onClose }: AccountProps) => {
   const onRampConfig = useModalStore(state => state.onRampConfig);
   const setStep = useModalStore(state => state.setStep);
   const setFlow = useModalStore(state => state.setFlow);
+  const setGuestAddFundsTab = useModalStore(state => state.setGuestAddFundsTab);
   const setOnRampStep = useModalStore(state => state.setOnRampStep);
   const hideWallets = useStore(state => state.modalConfig?.hideWallets);
   const { disconnectExternalWallet } = useExternalWallets();
   const para = useInternalClient();
+  const { data: account } = useAccount();
   const { data: balance, isLoading: isBalanceLoading } = useWalletBalance();
 
   const [isDisconnecting, setIsDisconnecting] = useState(false);
 
+  const isGuestMode = account?.isConnected && account.isGuestMode;
   const isOnRampLoaded = !!onRampConfig;
   const canBuyAndWithdraw = !!para.userId;
 
   const handleBuyClick = () => {
-    setOnRampStep(OnRampStep.SETTINGS);
-    setStep(ModalStep.ADD_FUNDS_BUY);
+    if (isGuestMode) {
+      setGuestAddFundsTab(EnabledFlow.BUY);
+      setStep(ModalStep.AUTH_GUEST_SIGNUP);
+    } else {
+      setOnRampStep(OnRampStep.SETTINGS);
+      setStep(ModalStep.ADD_FUNDS_BUY);
+    }
   };
 
   const handleReceiveClick = () => {
@@ -39,8 +48,13 @@ export const Account = ({ onClose }: AccountProps) => {
   };
 
   const handleSellClick = () => {
-    setOnRampStep(OnRampStep.SETTINGS);
-    setStep(ModalStep.ADD_FUNDS_WITHDRAW);
+    if (isGuestMode) {
+      setGuestAddFundsTab(EnabledFlow.WITHDRAW);
+      setStep(ModalStep.AUTH_GUEST_SIGNUP);
+    } else {
+      setOnRampStep(OnRampStep.SETTINGS);
+      setStep(ModalStep.ADD_FUNDS_WITHDRAW);
+    }
   };
 
   const handleDisconnectClick = async () => {
@@ -69,6 +83,26 @@ export const Account = ({ onClose }: AccountProps) => {
               </CpslText>
             </BalanceContainer>
           )
+        )}
+        {isGuestMode && (
+          <>
+            {balance && parseFloat(balance) > 0 && (
+              <Alert>
+                <CpslIcon icon="alertTriangle" size="24px" style={{ color: 'var(--cpsl-color-utility-yellow)' }} />
+                You've funded this account - complete account setup to maintain access.
+              </Alert>
+            )}
+            <CpslButton
+              fullWidth
+              variant="primary"
+              onClick={() => {
+                setStep(ModalStep.AUTH_GUEST_SIGNUP);
+              }}
+            >
+              <CpslIcon icon="stars02" />
+              Complete Account Setup
+            </CpslButton>
+          </>
         )}
         <ButtonContainer>
           {isOnRampLoaded ? (
@@ -99,16 +133,18 @@ export const Account = ({ onClose }: AccountProps) => {
             <CpslSpinner />
           )}
         </ButtonContainer>
-        <DisconnectButton variant="destructive" fullWidth onClick={handleDisconnectClick} disabled={isDisconnecting}>
-          {isDisconnecting ? (
-            <CpslSpinner size={16} />
-          ) : (
-            <>
-              {hideWallets ? 'Logout' : 'Disconnect Wallet'}
-              <CpslIcon icon="logOut" slot="end" />
-            </>
-          )}
-        </DisconnectButton>
+        {!isGuestMode && (
+          <DisconnectButton variant="destructive" fullWidth onClick={handleDisconnectClick} disabled={isDisconnecting}>
+            {isDisconnecting ? (
+              <CpslSpinner size={16} />
+            ) : (
+              <>
+                {hideWallets ? 'Logout' : 'Disconnect Wallet'}
+                <CpslIcon icon="logOut" slot="end" />
+              </>
+            )}
+          </DisconnectButton>
+        )}
       </InnerStepContainer>
     </StepContainer>
   );
@@ -139,4 +175,20 @@ const BalanceContainer = styled.div`
   align-items: center;
   padding-top: 8px;
   padding-bottom: 24px;
+`;
+
+const Alert = styled.div`
+  --icon-color: var(--cpsl-color-utility-yellow);
+  --icon-stroke-color: var(--cpsl-color-utility-yellow);
+  --icon-fill-color: var(--cpsl-color-utility-yellow);
+
+  display: flex;
+  padding: 8px;
+  align-items: flex-start;
+  gap: 8px;
+  align-self: stretch;
+  border-radius: var(--cpsl-border-radius-alert);
+  border: 1px solid var(--cpsl-color-utility-yellow);
+  background: var(--cpsl-color-utility-yellow-light);
+  font-size: 14px;
 `;

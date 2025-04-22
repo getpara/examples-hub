@@ -9,7 +9,7 @@ import { AuthLayout, TAuthLayout } from '../../types/modalProps.js';
 import { createRef, MutableRefObject } from 'react';
 import { Setup2faResponse } from '@getpara/user-management-client';
 
-type Flow = AuthStateSignup['stage'] | AuthStateLogin['stage'] | 'account';
+export type Flow = AuthStateSignup['stage'] | AuthStateLogin['stage'] | 'account' | 'guest';
 
 type ActiveWallet = [string | undefined, TWalletType | undefined];
 
@@ -37,6 +37,7 @@ interface ModalState {
   onRampStep: OnRampStep;
   isFullyLoggedIn: boolean;
   accountAddFundTab?: AddFundsTabType;
+  guestAddFundsTab?: AddFundsTabType;
   selectedExternalWalletId?: string;
   isUsingMobileConnector?: boolean;
   isExternalWalletConnecting?: boolean;
@@ -60,6 +61,7 @@ export interface ModalActions {
   resetState: () => void;
   setRecoveryShare: (recoveryShare: string | null) => void;
   setStep: (step: ModalStep) => void;
+  setGuestAddFundsTab: (tab?: AddFundsTabType | undefined) => void;
   decrementStep: () => void;
   hasPreviousStep: () => boolean;
   setFlow: (flow?: Flow) => void;
@@ -102,6 +104,7 @@ export const DEFAULT_MODAL_STATE: Omit<ModalState, 'step' | 'onRampConfig'> = {
   onRampStep: OnRampStep.SETTINGS,
   isFullyLoggedIn: false,
   accountAddFundTab: undefined,
+  guestAddFundsTab: undefined,
   isExternalWalletConnecting: false,
   externalWalletError: undefined,
   activeWallet: [undefined, undefined],

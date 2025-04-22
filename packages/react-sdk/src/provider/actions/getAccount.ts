@@ -7,50 +7,65 @@ type AccountValue = CoreAuthInfo & {
   telegramUserId?: string;
   externalWalletAddress?: string;
   wallets: (typeof ParaWeb.prototype)['availableWallets'];
-  userId: string;
-  isGuestMode: boolean;
+  userId?: string;
 };
 
 export type Account =
   | ({
       isConnected: false;
+      isGuestMode?: false;
     } & {
       [key in keyof AccountValue]?: undefined;
     })
   | ({
       isConnected: true;
+      isGuestMode: true;
+    } & Pick<AccountValue, 'wallets'> & {
+        [key in keyof Omit<AccountValue, 'wallets'>]?: undefined;
+      })
+  | ({
+      isConnected: true;
+      isGuestMode: false;
     } & AccountValue);
 
 export const getAccount = async (para?: ParaWeb): Promise<Account> => {
-  const isLoggedIn = await para?.isFullyLoggedIn();
+  if (!!para && para.isGuestMode) {
+    return {
+      isConnected: true,
+      isGuestMode: true,
+      wallets: para.availableWallets,
+    };
+  }
 
-  const isConnected = !!para && !!isLoggedIn;
+  const isConnected = !!para && (await para?.isFullyLoggedIn());
 
   if (isConnected) {
+    const authInfo = para.authInfo;
+
     const value: Account = {
-      ...para.authInfo!,
-      userId: para.userId!,
+      ...(authInfo || {}),
+      userId: para.userId,
       wallets: para.availableWallets,
       isConnected: true,
-      isGuestMode: para.isGuestMode,
-    };
+      isGuestMode: false,
+    } as Account;
 
-    if (para.authInfo) {
-      switch (para.authInfo.authType) {
+    if (authInfo) {
+      switch (authInfo.authType) {
         case 'email':
-          value.email = para.authInfo.identifier;
+          value.email = authInfo.identifier;
           break;
         case 'phone':
-          value.phone = para.authInfo.identifier as `+${number}`;
+          value.phone = authInfo.identifier as `+${number}`;
           break;
         case 'farcaster':
-          value.farcasterUsername = para.authInfo.identifier;
+          value.farcasterUsername = authInfo.identifier;
           break;
         case 'telegram':
-          value.telegramUserId = para.authInfo.identifier;
+          value.telegramUserId = authInfo.identifier;
           break;
         case 'externalWallet':
-          value.externalWalletAddress = para.authInfo.identifier;
+          value.externalWalletAddress = authInfo.identifier;
           break;
         default:
           break;
