@@ -4,10 +4,10 @@
     "build:ui": "cd test-ui && yarn build",
     "copy:ui": "mkdir -p public && cp -r test-ui/dist/* public/",
     "build:dev": "deno task build:ui && deno task copy:ui",
-    "dev:server": "deno serve --watch --allow-env --env-file=.env --allow-ffi --allow-sys --allow-write --allow-net --allow-run --allow-read --unstable-net --unstable-worker-options --unstable-node-globals --unstable-detect-cjs server.ts",
+    "dev:server": "deno serve --watch --allow-env --env-file=.env --allow-ffi --allow-sys --allow-write --allow-net --allow-run --allow-read --unstable-net --unstable-worker-options --unstable-node-globals --unstable-detect-cjs --no-check server.ts",
     "dev": "deno task build:dev && deno task dev:server",
     "test": "deno test",
-    "build": "deno compile --allow-net --allow-read --allow-env --output ./dist/server server.ts"
+    "build": "deno compile --allow-env --env-file=.env --allow-ffi --allow-sys --allow-write --allow-net --allow-run --allow-read --unstable-net --unstable-worker-options --unstable-node-globals --unstable-detect-cjs --no-check --output ./dist/server server.ts"
   },
   "imports": {
     "@alchemy/aa-alchemy": "npm:@alchemy/aa-alchemy@3.19.0",
