@@ -239,13 +239,13 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
                 backgroundColor: Colors.black, // Common Apple button style
                 textColor: Colors.white,
               ),
-              // _buildOAuthButton( // Twitter/X might not be supported or need specific setup
-              //   provider: OAuthMethod.twitter,
-              //   label: 'X.com',
-              //   icon: FontAwesomeIcons.xTwitter,
-              //   backgroundColor: const Color(0xFF000000), // Updated X color
-              //   textColor: Colors.white,
-              // ),
+              _buildOAuthButton(
+                provider: OAuthMethod.twitter,
+                label: 'X.com',
+                icon: FontAwesomeIcons.xTwitter,
+                backgroundColor: const Color(0xFF000000), // Updated X color
+                textColor: Colors.white,
+              ),
               _buildOAuthButton(
                 provider: OAuthMethod.discord,
                 label: 'Discord',
@@ -253,34 +253,6 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
                 backgroundColor: const Color(0xFF5865F2),
                 textColor: Colors.white,
               ),
-              // --- Farcaster Button (Commented out) ---
-              /*
-              const SizedBox(height: 32),
-              const Row(
-                children: [
-                  Expanded(child: Divider()),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Text('OR', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500)),
-                  ),
-                  Expanded(child: Divider()),
-                ],
-              ),
-              const SizedBox(height: 32),
-              ElevatedButton.icon(
-                 icon: const Icon(Icons.qr_code), // Example icon
-                 label: const Text('Connect with Farcaster'),
-                 onPressed: _isLoading ? null : _handleFarcasterLogin,
-                 style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                 ),
-              ),
-              if (_isLoading && _loadingProvider == 'Farcaster')
-                 const Padding(
-                    padding: EdgeInsets.only(top: 8.0),
-                    child: Center(child: CircularProgressIndicator()),
-                 ),
-              */
             ],
           ),
         ),
