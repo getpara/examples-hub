@@ -1,4 +1,4 @@
-// ignore_for_file: unused_field, unused_local_variable, use_build_context_synchronously
+// ignore_for_file:
 
 import 'dart:async';
 // Import the SDK package
@@ -21,8 +21,6 @@ class ParaFarcasterAuthExample extends StatefulWidget {
 class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
   bool _isLoading = false;
   // Wallet info
-  Wallet? _wallet;
-  String? _address;
 
   // --- Farcaster Specific State ---
   String? _farcasterConnectUri; // To store the URI for the QR code
@@ -66,10 +64,7 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
 
   // Helper to update wallet state consistently
   void _updateWalletState(Wallet wallet) {
-    setState(() {
-      _wallet = wallet;
-      _address = wallet.address;
-    });
+    setState(() {});
   }
 
   // Updated Farcaster handler for V2 SDK
