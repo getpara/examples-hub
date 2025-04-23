@@ -73,7 +73,7 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
   }
 
   // Updated Farcaster handler for V2 SDK
-  Future<void> _handleFarcasterAuth() async {
+  Future<void> _verifyFarcasterAuth() async {
     if (!mounted) return;
 
     setState(() {
@@ -102,12 +102,12 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
 
       try {
         // We need to use the SDK's built-in polling for verification
-        authState = await para.handleFarcaster(
+        authState = await para.verifyFarcaster(
           // We just use the isCanceled callback to check our local state
           isCanceled: () => _farcasterFlowCancelled,
         );
       } catch (e) {
-        // Catch any errors from handleFarcaster
+        // Catch any errors from verifyFarcaster
         if (_farcasterFlowCancelled) {
           throw Exception('Farcaster authentication canceled by user');
         } else {
@@ -187,7 +187,7 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
       padding: const EdgeInsets.only(bottom: 16),
       child: ElevatedButton(
         // Calls the new V2 handler
-        onPressed: _isLoading ? null : _handleFarcasterAuth,
+        onPressed: _isLoading ? null : _verifyFarcasterAuth,
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor,
           foregroundColor: textColor,

@@ -78,7 +78,7 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
       // You MUST register this URL scheme in your app:
       // - iOS: Add to Info.plist URL types
       // - Android: Add intent filter in AndroidManifest.xml
-      final AuthState authState = await para.handleOAuth(
+      final AuthState authState = await para.verifyOAuth(
         provider: provider,
         deeplinkUrl:
             "paraflutter", // Just the scheme name, SDK handles formatting
