@@ -86,7 +86,7 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
       _log("Starting Farcaster V2 flow...");
 
       // Step 1: Get the Farcaster connect URI
-      final connectUri = await para.getFarcasterConnectURI();
+      final connectUri = await para.getFarcasterConnectUri();
 
       if (!mounted) return;
 

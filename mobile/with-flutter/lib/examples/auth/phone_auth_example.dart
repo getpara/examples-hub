@@ -50,7 +50,8 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
   }
 
   // Helper to get the fully formatted phone number using the SDK utility
-  String get _formattedPhoneNumber {
+  // Returns null if formatting fails.
+  String? get _formattedPhoneNumber {
     // Use the SDK's formatter
     return para.formatPhoneNumber(
         _phoneController.text, _countryCodeController.text);
@@ -96,6 +97,19 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
 
     setState(() => _isLoading = true);
     final formattedPhone = _formattedPhoneNumber; // Use the formatted number
+
+    // Handle null case from formatter
+    if (formattedPhone == null) {
+      _log('Invalid phone number or country code entered.', isWarning: true);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Invalid phone number or country code.')),
+        );
+      }
+      setState(() => _isLoading = false);
+      return;
+    }
 
     try {
       // Step 1: Call signUpOrLogIn
@@ -202,6 +216,21 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
   Future<bool> _handlePhoneOtpVerification(String code) async {
     setState(() => _isLoading = true);
     final formattedPhone = _formattedPhoneNumber; // Get formatted number again
+
+    // Handle null case from formatter
+    if (formattedPhone == null) {
+      _log('Cannot verify OTP, invalid phone number or country code stored.',
+          isWarning: true);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Internal error: Invalid phone number.')),
+        );
+      }
+      setState(() => _isLoading = false);
+      return false;
+    }
+
     try {
       _log("Calling verifyNewAccount with code: $code");
       final authState = await para.verifyNewAccount(verificationCode: code);
