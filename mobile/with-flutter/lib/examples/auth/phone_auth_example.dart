@@ -100,7 +100,8 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
     try {
       // Step 1: Call signUpOrLogIn
       _log("Calling signUpOrLogIn for phone: $formattedPhone");
-      final authState = await para.signUpOrLogIn(phone: formattedPhone);
+      final authState =
+          await para.signUpOrLogIn(auth: {'phone': formattedPhone});
       _currentAuthState = authState;
 
       _log("signUpOrLogIn returned stage: ${authState.stage}");

@@ -94,7 +94,7 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
       // Step 1: Call signUpOrLogIn
       _log("Calling signUpOrLogIn for email: $email");
       // Corrected method name
-      final authState = await para.signUpOrLogIn(email: email);
+      final authState = await para.signUpOrLogIn(auth: {'email': email});
       _currentAuthState = authState;
 
       _log("signUpOrLogIn returned stage: ${authState.stage}");
