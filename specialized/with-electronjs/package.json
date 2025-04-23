@@ -8,6 +8,7 @@
     "start": "NODE_ENV=development electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
+    "build": "yarn make",
     "publish": "electron-forge publish",
     "lint": "eslint --ext .js,.jsx ."
   },

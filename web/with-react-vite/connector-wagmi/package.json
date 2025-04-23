@@ -14,7 +14,7 @@
     "@getpara/wagmi-v2-integration": "1.10.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "wagmi": "2.14.9"
+    "wagmi": "^2.14.16"
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",

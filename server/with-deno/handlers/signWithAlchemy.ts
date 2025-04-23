@@ -113,7 +113,10 @@ export const signWithAlchemy: Handler = async (req: Request): Promise<Response> 
 
 async function customSignMessage(para: ParaServer, message: SignableMessage): Promise<Hash> {
   const hashedMessage = hashMessage(message);
-  const res = await para.signMessage(Object.values(para.wallets!)[0]!.id, hexStringToBase64(hashedMessage));
+  const res = await para.signMessage({
+    walletId: Object.values(para.wallets!)[0]!.id,
+    messageBase64: hexStringToBase64(hashedMessage),
+  });
 
   let signature = (res as SuccessfulSignatureRes).signature;
 
