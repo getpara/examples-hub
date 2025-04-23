@@ -37,6 +37,7 @@ export const EXPO_SETUP_DOCS_LINK = 'https://docs.getpara.com/getting-started/in
 export const FLUTTER_SETUP_DOCS_LINK = 'https://docs.getpara.com/getting-started/initial-setup/flutter-setup#project-setup';
 export const ADVANCED_MODAL_THEME_DOCS_LINK =
   'https://docs.getpara.com/customize-para/modal-customization#advanced-theme-customization';
+export const TX_POPUPS_DOCS_LINK = 'https://docs.getpara.com/integration-guides/transaction-prompts';
 
 export const NEXT_EXTRA_DOCS_LINK = 'https://docs.getpara.com/troubleshooting/nextjs';
 export const VITE_EXTRA_DOCS_LINK = 'https://docs.getpara.com/troubleshooting/react-vite';
@@ -153,3 +154,14 @@ export const TOS = 'https://www.getpara.com/terms-of-service';
 export const ZAPIER_WEBHOOK_URL = IS_PROD
   ? 'https://hooks.zapier.com/hooks/catch/20717871/2ib0ip3/'
   : 'https://hooks.zapier.com/hooks/catch/20717871/2ibwxti/';
+
+export const AUTH_METHODS = [
+  {
+    label: 'Passkeys',
+    value: 'PASSKEY',
+  },
+  {
+    label: 'Passwords',
+    value: 'PASSWORD',
+  },
+];

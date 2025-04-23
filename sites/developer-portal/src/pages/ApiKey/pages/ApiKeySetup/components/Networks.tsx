@@ -31,7 +31,7 @@ export const Networks = () => {
   return (
     <ConfigCard
       title="Networks"
-      subtitle="Required networks will ensure that users connect at least 1 wallet of that type when logging in."
+      subtitle="Turn on the networks that you would like your app to support. Required networks will ensure that users connect at least 1 wallet of that type when logging in."
     >
       <>
         <FormField

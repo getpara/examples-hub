@@ -163,14 +163,14 @@ export type ApiKey = {
   accentColor: string | null;
   themeMode: ThemeMode | null;
   transactionPopupsEnabled: boolean;
-  forceTransactionPopups: boolean;
-  origins: string[] | null;
+  forceTransactionPopups?: boolean;
+  origins?: string[] | null;
   supportedWalletTypes: SupportedWalletTypes;
   cosmosPrefix: string;
   androidSha256CertFingerprints: string[] | null;
   androidPackageName: string | null;
-  supportedAuthMethods: string[] | null;
-  sessionMaxAge: string | null;
+  supportedAuthMethods?: string[] | null;
+  sessionMaxAge?: string | null;
   onboarding: ApiKeyOnboarding | null;
 };
 
@@ -239,9 +239,12 @@ export type UpdateApiKeyBody = Nullable<
   >
 >;
 // Overriding string[] types here to allow for textfield inputs in the forms. Data will be formatted back before submit.
-export type UpdateApiKeyFormData = Partial<Omit<UpdateApiKeyBody, 'origins' | 'androidSha256CertFingerprints'>> & {
+export type UpdateApiKeyFormData = Partial<
+  Omit<UpdateApiKeyBody, 'origins' | 'androidSha256CertFingerprints' | 'sessionMaxAge'>
+> & {
   androidSha256CertFingerprints: string | null;
-  origins: string | null;
+  origins?: string | null;
+  sessionMaxAge?: number | null;
 };
 
 export enum PartnerAssetType {

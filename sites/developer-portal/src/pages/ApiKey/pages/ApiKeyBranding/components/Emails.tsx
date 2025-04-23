@@ -2,7 +2,7 @@ import { FormField, FormItem, FormLabel, Input, RadioGroup, useFormContext } fro
 import { FormControl, FormDescription, FormMessage } from '../../../../../components/formComponents';
 import { ConfigCard } from '../../../components/ConfigCard';
 import { BrandingForm } from '../hooks/useBrandingForm';
-import { EmailRadioGroupItem } from './EmailRadioGroupItem';
+import { RadioGroupItem } from '../../../components/RadioGroupItem';
 
 export const Emails = () => {
   const form = useFormContext<BrandingForm>();
@@ -63,17 +63,17 @@ export const Emails = () => {
           disabled={formState.disabled}
           className="para:gap-4"
         >
-          <EmailRadioGroupItem
+          <RadioGroupItem
             value="welcome"
             label="Welcome Email Only"
             subLabel="Only a welcome email will be sent to users."
           />
-          <EmailRadioGroupItem
+          <RadioGroupItem
             value="both"
             label="Welcome Email + Backup Kit"
             subLabel="A welcome email and a backup kit email will be sent to users."
           />
-          <EmailRadioGroupItem value="none" label="No Email" subLabel="No emails will be sent to users." />
+          <RadioGroupItem value="none" label="No Email" subLabel="No emails will be sent to users." />
         </RadioGroup>
       </div>
     </ConfigCard>

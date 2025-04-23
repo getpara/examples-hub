@@ -33,7 +33,7 @@ export type BrandingForm = Pick<
   | 'twitterUrl'
   | 'linkedinUrl'
   | 'homepageUrl'
-> & { iconFile?: File; uploadedIcon?: string; logoFile?: File; uploadedLogo?: string };
+>;
 
 const zodHexColor = z
   .union([
