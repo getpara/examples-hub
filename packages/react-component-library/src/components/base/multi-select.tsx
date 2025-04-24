@@ -402,7 +402,7 @@ function MultiSelect({
     >
       <div
         className={cn(
-          'para:rounded para:border para:border-border para:text-base para:ring-offset-background para:md:text-sm para:flex para:flex-col',
+          'para:rounded-md para:border para:border-border para:text-base para:ring-offset-background para:md:text-sm para:flex para:flex-col',
           {
             'para:pl-3 para:py-2': selected.length !== 0,
             'para:cursor-text': !disabled && selected.length !== 0,

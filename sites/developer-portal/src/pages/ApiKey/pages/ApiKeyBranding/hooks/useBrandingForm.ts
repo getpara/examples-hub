@@ -1,14 +1,10 @@
-import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { useGetOrganizationKey } from '../../../../../hooks/api/queries/useOrganizationKeys';
 import { Environment } from '../../../../../types/environment';
 import { ThemeMode, UpdateApiKeyFormData } from '../../../../../types/api';
 import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { SchemaFromInterface } from '../../../../../types/helpers';
 import { useUpdateApiKey } from '../../../../../hooks/api/mutations/useUpdateApiKey';
-import { triggerToast } from '../../../../../utils/toasts';
-import { useIsValidKey, useIsValidProject } from '../../../../../hooks/useIsValidOrgConfig';
 import {
   GITHUB_URL_REGEX,
   HEX_COLOR_REGEX,
@@ -16,6 +12,7 @@ import {
   LINKEDIN_URL_REGEX,
   TWITTER_URL_REGEX,
 } from '../../../../../utils/regex';
+import { SubmitVars, useForm } from '../../../hooks/useForm';
 
 export type BrandingForm = Pick<
   UpdateApiKeyFormData,
@@ -84,41 +81,32 @@ const formSchema = z.object({
 export const useBrandingForm = () => {
   const { apiKey, env, projectId } = useParams();
   const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
-  const isValidKey = useIsValidKey(projectId, apiKey);
-  const isValidProject = useIsValidProject(projectId);
   const { mutateAsync: updateKey } = useUpdateApiKey();
 
-  const form = useForm<BrandingForm>({
-    mode: 'onChange',
-    reValidateMode: 'onChange',
-    resolver: zodResolver(formSchema),
-    defaultValues: apiKeyData,
-    disabled: !isValidKey || !isValidProject,
-  });
-
-  const onSubmit = async (updateData: BrandingForm) => {
-    if (projectId && apiKey && env) {
-      try {
-        await updateKey({
-          projectId,
-          keyId: apiKey,
-          env,
-          data: updateData,
-        });
-        form.reset(form.getValues());
-        triggerToast({
-          variant: 'success',
-          title: 'Config Saved!',
-        });
-      } catch (err) {
-        triggerToast({
-          variant: 'error',
-          title: 'Failed to Save Config',
-          body: 'Please correct any errors. If the problem persists, contact Para support.',
-        });
-      }
-    }
+  const defaultData: BrandingForm = {
+    ...apiKeyData,
+    logoUrl: apiKeyData?.logoUrl ?? '',
+    iconUrl: apiKeyData?.iconUrl ?? '',
+    backgroundColor: apiKeyData?.backgroundColor ?? '',
+    foregroundColor: apiKeyData?.foregroundColor ?? '',
+    accentColor: apiKeyData?.accentColor ?? '',
+    verifyUrl: apiKeyData?.verifyUrl ?? '',
+    githubUrl: apiKeyData?.githubUrl ?? '',
+    twitterUrl: apiKeyData?.twitterUrl ?? '',
+    linkedinUrl: apiKeyData?.linkedinUrl ?? '',
+    homepageUrl: apiKeyData?.homepageUrl ?? '',
   };
 
-  return { form, onSubmit };
+  const onSubmit = async (updateData: BrandingForm, { projectId, apiKey, env }: SubmitVars) => {
+    await updateKey({
+      projectId,
+      keyId: apiKey,
+      env,
+      data: updateData,
+    });
+  };
+
+  const { form, submitForm } = useForm<BrandingForm>({ formSchema, defaultValues: defaultData, onSubmit });
+
+  return { form, submitForm };
 };

@@ -1,4 +1,3 @@
-import { Header } from '../../components/Header';
 import { Form } from '@getpara/react-component-library';
 import { ContentWrapper } from '../../components/ContentWrapper';
 import { useBrandingForm } from './hooks/useBrandingForm';
@@ -10,13 +9,12 @@ import { Emails } from './components/Emails';
 import { Links } from './components/Links';
 
 export const ApiKeyBranding = () => {
-  const { form, onSubmit } = useBrandingForm();
+  const { form, submitForm } = useBrandingForm();
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form onSubmit={form.handleSubmit(submitForm)}>
         <ContentWrapper>
-          <Header />
           <ModalStyleAlert />
           <Logos />
           <Theme />

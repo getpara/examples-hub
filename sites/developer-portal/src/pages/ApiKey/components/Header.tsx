@@ -19,7 +19,7 @@ const PAGE_SUBTITLES: Record<string, string> = {
     'These settings will be applied to Capsule Portal and Emails only. Customizing your Capsule Modal is done with the Capsule SDK.',
   'security':
     'These settings determine the level of security your users will have. These settings only apply to users whose accounts your app originates and not to users who have created their account somewhere else.',
-  'on-off-ramps': '',
+  'on-off-ramps': 'Configure how users add and withdraw funds from their account.',
   'permissions': '',
 };
 

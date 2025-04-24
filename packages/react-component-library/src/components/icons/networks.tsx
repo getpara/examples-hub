@@ -54,8 +54,8 @@ export const Solana = ({ ...props }: IconProps) => (
         y2="19.0217"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#00FFA3" />
-        <stop offset="1" stop-color="#DC1FFF" />
+        <stop stopColor="#00FFA3" />
+        <stop offset="1" stopColor="#DC1FFF" />
       </linearGradient>
       <linearGradient
         id="paint1_linear_3482_10088"
@@ -65,8 +65,8 @@ export const Solana = ({ ...props }: IconProps) => (
         y2="19.0217"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#00FFA3" />
-        <stop offset="1" stop-color="#DC1FFF" />
+        <stop stopColor="#00FFA3" />
+        <stop offset="1" stopColor="#DC1FFF" />
       </linearGradient>
       <linearGradient
         id="paint2_linear_3482_10088"
@@ -76,8 +76,8 @@ export const Solana = ({ ...props }: IconProps) => (
         y2="19.0217"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#00FFA3" />
-        <stop offset="1" stop-color="#DC1FFF" />
+        <stop stopColor="#00FFA3" />
+        <stop offset="1" stopColor="#DC1FFF" />
       </linearGradient>
     </defs>
   </svg>

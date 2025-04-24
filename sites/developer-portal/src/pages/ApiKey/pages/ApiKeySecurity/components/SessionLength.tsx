@@ -52,10 +52,10 @@ export const SessionLength = () => {
                       className={clsx('para:flex para:gap-1', {
                         'para:flex-1': isCustom,
                       })}
+                      key={button.value}
                     >
                       <Button
                         className="para:h-12"
-                        key={button.value}
                         variant={isSelected || (!isAnotherSelected && isCustom) ? 'default' : 'outline'}
                         onClick={() => {
                           if (isCustom) {
@@ -72,7 +72,7 @@ export const SessionLength = () => {
                         <Input
                           className="para:flex-1 para:min-w-[200px]"
                           {...field}
-                          value={field.value ?? undefined}
+                          value={field.value ?? ''}
                           placeholder="Enter custom length in minutes"
                           type="number"
                           onChange={e => {

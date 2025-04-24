@@ -13,7 +13,7 @@ import { AUTH_APP_BAR_SPACING_CN } from '../../../components/AppBar/AuthAppBar/A
 import {
   ArrowUpDown,
   BarChart,
-  LockKeyhole,
+  // LockKeyhole,
   LucideIcon,
   PaintbrushVertical,
   Palette,
@@ -71,11 +71,12 @@ const CONFIG_ITEMS: SidebarItem[] = [
     path: '/on-off-ramps',
     Icon: ArrowUpDown,
   },
-  {
-    text: 'Permissions',
-    path: '/permissions',
-    Icon: LockKeyhole,
-  },
+  // TODO: add this back once we allow for permission configs on the api key
+  // {
+  //   text: 'Permissions',
+  //   path: '/permissions',
+  //   Icon: LockKeyhole,
+  // },
   {
     text: 'Modal Designer',
     path: MODAL_DESIGNER_LINK,

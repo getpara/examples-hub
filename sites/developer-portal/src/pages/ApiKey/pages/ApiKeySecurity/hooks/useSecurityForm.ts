@@ -1,15 +1,12 @@
-import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { useGetOrganizationKey } from '../../../../../hooks/api/queries/useOrganizationKeys';
 import { Environment } from '../../../../../types/environment';
 import { UpdateApiKeyFormData } from '../../../../../types/api';
 import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { SchemaFromInterface } from '../../../../../types/helpers';
 import { useUpdateApiKey } from '../../../../../hooks/api/mutations/useUpdateApiKey';
-import { triggerToast } from '../../../../../utils/toasts';
-import { useIsValidKey, useIsValidProject } from '../../../../../hooks/useIsValidOrgConfig';
 import { AUTH_METHODS } from '../../../../../utils/constants';
+import { SubmitVars, useForm } from '../../../hooks/useForm';
 
 export type SecurityForm = Pick<
   UpdateApiKeyFormData,
@@ -45,54 +42,31 @@ const formSchema = z.object({
   forceTransactionPopups: z.boolean().optional().nullable(),
 }) satisfies SchemaFromInterface<SecurityForm>;
 
-export const useBrandingForm = () => {
+export const useSecurityForm = () => {
   const { apiKey, env, projectId } = useParams();
   const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
-  const isValidKey = useIsValidKey(projectId, apiKey);
-  const isValidProject = useIsValidProject(projectId);
   const { mutateAsync: updateKey } = useUpdateApiKey();
 
-  const form = useForm<SecurityForm>({
-    mode: 'onChange',
-    reValidateMode: 'onChange',
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      ...apiKeyData,
-      origins: apiKeyData?.origins?.join(', '),
-      sessionMaxAge: apiKeyData?.sessionMaxAge ? parseInt(apiKeyData.sessionMaxAge) : null,
-    },
-    disabled: !isValidKey || !isValidProject,
-  });
-
-  const onSubmit = async (updateData: SecurityForm) => {
-    if (projectId && apiKey && env) {
-      try {
-        await updateKey({
-          projectId,
-          keyId: apiKey,
-          env,
-          data: {
-            ...updateData,
-            ...(updateData.origins ? { origins: updateData.origins.split(',').map(v => v.trim()) } : { origins: [] }),
-            ...(updateData.sessionMaxAge
-              ? { sessionMaxAge: updateData.sessionMaxAge.toString(10) }
-              : { sessionMaxAge: null }),
-          },
-        });
-        form.reset(form.getValues());
-        triggerToast({
-          variant: 'success',
-          title: 'Config Saved!',
-        });
-      } catch (err) {
-        triggerToast({
-          variant: 'error',
-          title: 'Failed to Save Config',
-          body: 'Please correct any errors. If the problem persists, contact Para support.',
-        });
-      }
-    }
+  const defaultData = {
+    ...apiKeyData,
+    origins: apiKeyData?.origins?.join(', ') ?? '',
+    sessionMaxAge: apiKeyData?.sessionMaxAge ? parseInt(apiKeyData.sessionMaxAge) : null,
   };
 
-  return { form, onSubmit };
+  const onSubmit = async (updateData: SecurityForm, { projectId, apiKey, env }: SubmitVars) => {
+    await updateKey({
+      projectId,
+      keyId: apiKey,
+      env,
+      data: {
+        ...updateData,
+        ...(updateData.origins ? { origins: updateData.origins.split(',').map(v => v.trim()) } : { origins: [] }),
+        ...(updateData.sessionMaxAge ? { sessionMaxAge: updateData.sessionMaxAge.toString(10) } : { sessionMaxAge: null }),
+      },
+    });
+  };
+
+  const { form, submitForm } = useForm<SecurityForm>({ formSchema, defaultValues: defaultData, onSubmit });
+
+  return { form, submitForm };
 };

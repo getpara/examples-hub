@@ -15,7 +15,7 @@ import { CreateProductionKeyModal } from '../../../CreateProductionKeyModal/Crea
 import { IS_BETA, IS_PROD } from '../../../../utils/constants';
 
 export const ApiKeyDropdown = () => {
-  const { organizationId, projectId, apiKey, env } = useParams();
+  const { organizationId, projectId, apiKey, env, apiKeyPage } = useParams();
   const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
   const { data: apiKeys } = useGetAllOrganizationKeys(projectId ?? '');
   const { data: availableKeyEnvs } = useGetAvailableKeyEnvs(projectId ?? '');
@@ -52,7 +52,7 @@ export const ApiKeyDropdown = () => {
           badge: key?.archived ? 'Archived' : undefined,
         }))}
         pathPrefix={`/${organizationId}/project/${projectId}/key/${env}/`}
-        pathSuffix="/setup"
+        pathSuffix={apiKeyPage ? `/${apiKeyPage}` : '/setup'}
         isOpen={isNavOpen}
         setIsOpen={setIsNavOpen}
       >
