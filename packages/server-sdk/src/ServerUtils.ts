@@ -1,5 +1,5 @@
 import type { Ctx, SignatureRes, PlatformUtils, TPregenIdentifierType, TWalletType } from '@getpara/core-sdk';
-import { BackupKitEmailProps } from '@getpara/user-management-client';
+import { BackupKitEmailProps, SDKType } from '@getpara/user-management-client';
 import { ServerLocalStorage } from './ServerLocalStorage.js';
 import { ServerSessionStorage } from './ServerSessionStorage.js';
 import { keygen, preKeygen, ed25519Keygen, ed25519PreKeygen } from './wallet/keygen.js';
@@ -7,6 +7,8 @@ import { signMessage, sendTransaction, signTransaction, ed25519Sign } from './wa
 import { getPrivateKey } from './wallet/privateKey.js';
 
 export class ServerUtils implements PlatformUtils {
+  sdkType: SDKType = 'SERVER';
+
   getPrivateKey(ctx: Ctx, userId: string, walletId: string, share: string, sessionCookie: string): Promise<string> {
     return getPrivateKey(ctx, userId, walletId, share, sessionCookie);
   }

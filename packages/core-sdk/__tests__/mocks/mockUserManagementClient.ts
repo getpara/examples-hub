@@ -127,6 +127,7 @@ export const mockGetWalletBalance = vi.fn().mockResolvedValue({ balance: '1000' 
 export const mockResendVerificationCode = vi.fn();
 export const mockResendVerificationCodeByPhone = vi.fn();
 export const mockGetAccountMetadata = vi.fn();
+export const mockTrackError = vi.fn();
 
 export function resetClientMocks() {
   mockLoginExternalWallet.mockResolvedValue(getVerifyState({ externalWalletAddress: EXTERNAL_WALLET.address }));
@@ -182,6 +183,7 @@ export function resetClientMocks() {
   });
   mockKeepSessionAlive.mockResolvedValue({});
   mockCreateOnRampPurchase.mockImplementation(({ params }) => ({ id: 'id', userId: USER_ID, ...params }));
+  mockTrackError.mockResolvedValue({});
 }
 
 resetClientMocks();
@@ -239,6 +241,7 @@ vi.mock('@getpara/user-management-client', async importOriginal => {
       resendVerificationCode: mockResendVerificationCode,
       resendVerificationCodeByPhone: mockResendVerificationCodeByPhone,
       getAccountMetadata: mockGetAccountMetadata,
+      trackError: mockTrackError,
     })),
   };
 });

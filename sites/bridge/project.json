@@ -1,0 +1,10 @@
+{
+  "name": "bridge",
+  "sourceRoot": "sites/bridge/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "inputs": ["default", "^default"]
+    }
+  }
+} 

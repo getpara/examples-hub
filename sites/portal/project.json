@@ -1,0 +1,10 @@
+{
+  "name": "portal",
+  "sourceRoot": "sites/portal/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "inputs": ["default", "^default"]
+    }
+  }
+} 

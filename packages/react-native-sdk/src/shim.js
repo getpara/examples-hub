@@ -8,6 +8,7 @@ import { Buffer } from '@craftzdog/react-native-buffer';
 import process from 'process';
 import 'react-native-url-polyfill/auto';
 import { TextEncoder, TextDecoder } from 'text-encoding';
+import structuredClone from '@ungap/structured-clone';
 
 const setupProcessPolyfill = () => {
   if (typeof globalThis.process === 'undefined') {
@@ -67,8 +68,15 @@ const setupTextEncodingPolyfills = () => {
   globalThis.TextDecoder = TextDecoder;
 };
 
+const setupStructuredClonePolyfill = () => {
+  if (typeof globalThis.structuredClone === 'undefined') {
+    globalThis.structuredClone = structuredClone;
+  }
+};
+
 setupProcessPolyfill();
 setupBufferPolyfill();
 setupBase64Polyfills();
 setupCryptoPolyfills();
 setupTextEncodingPolyfills();
+setupStructuredClonePolyfill();

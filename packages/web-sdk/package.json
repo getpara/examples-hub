@@ -11,7 +11,6 @@
     "@getpara/core-sdk": "2.0.0-alpha.0",
     "@getpara/user-management-client": "2.0.0-alpha.0",
     "@sentry/browser": "^9.1.0",
-    "assert": "^2.1.0",
     "base64url": "3.0.1",
     "buffer": "6.0.3",
     "cbor-web": "8.1.0",

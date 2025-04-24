@@ -1,0 +1,81 @@
+name: Merge Freeze Enforcement
+
+on:
+  pull_request:
+    types: [opened, labeled, unlabeled, synchronize, reopened, edited]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  enforce-merge-freeze:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Check if this PR has merge-freeze label
+        id: label-check
+        run: |
+          echo "GITHUB_EVENT_PATH: $GITHUB_EVENT_PATH"
+          cat "$GITHUB_EVENT_PATH"
+          
+          labels=$(jq -r '.pull_request.labels[].name // empty' "$GITHUB_EVENT_PATH" 2>/dev/null || echo "")
+          echo "Labels found: $labels"
+
+          if echo "$labels" | grep -qi "^merge-freeze$"; then
+            echo "found_freeze=true" >> $GITHUB_ENV
+          else
+            echo "found_freeze=false" >> $GITHUB_ENV
+          fi
+
+      - name: Check if any open is a publish PR
+        id: publish-check
+        run: |
+          echo "Checking for 'chore: Publish' PRs..."
+          
+          # Get PR titles in a simpler way
+          pr_json=$(gh pr list --state open --json title)
+          echo "PR JSON data: $pr_json"
+          
+          # Extract titles using jq
+          titles=$(echo "$pr_json" | jq -r '.[].title')
+          echo "Extracted PR titles: $titles"
+          
+          found_publish="false"
+          while IFS= read -r title; do
+            if [[ -n "$title" ]]; then
+              echo "Checking title: '$title'"
+              if [[ "$title" == "chore: Publish" ]]; then
+                echo "Found matching PR with title 'chore: Publish'"
+                found_publish="true"
+                break
+              fi
+            fi
+          done <<< "$titles"
+          
+          echo "found_publish=$found_publish" >> $GITHUB_ENV
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fail if merge freeze active
+        run: |
+          echo "found_freeze=${{ env.found_freeze }}"
+          echo "found_publish=${{ env.found_publish }}"
+
+          if [[ "${{ env.found_freeze }}" == "true" && "${{ env.found_publish }}" == "true" ]]; then
+            echo "❌ Merge freeze active AND publish PR open. Blocking merge for multiple reasons."
+            exit 1
+          elif [[ "${{ env.found_freeze }}" == "true" ]]; then
+            echo "❌ Merge freeze label is active on this PR. Blocking merge."
+            exit 1
+          elif [[ "${{ env.found_publish }}" == "true" ]]; then
+            echo "❌ A 'chore: Publish' PR is currently open. Blocking merge."
+            exit 1
+          else
+            echo "✅ No freeze active. Allowing merge."
+          fi

@@ -12,7 +12,7 @@
     "@getpara/core-sdk": "2.0.0-alpha.0",
     "@getpara/user-management-client": "2.0.0-alpha.0",
     "@sentry/node": "^9.1.0",
-    "uuid": "^9.0.1",
+    "uuid": "^11.1.0",
     "ws": "^8.14.2"
   },
   "scripts": {

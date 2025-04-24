@@ -107,6 +107,8 @@ function initPara(environment: string, apiKey: string) {
     });
 
     para.init();
+    // @ts-ignore
+    para.platformUtils.sdkType = 'BRIDGE';
     window['para'] = para;
   } catch (err) {
     const errStr = formatError(err);

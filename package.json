@@ -14,7 +14,9 @@
   },
   "scripts": {
     "setup-worker": "lerna run setup-worker --scope=para-portal && cd workers/mpc-worker && yarn build && cd ../..",
-    "dev": "yarn build; concurrently \"yarn start\" \"lerna watch -- lerna run build --scope=capsule-legacy-example --scope=para-portal --include-dependents\"",
+    "build:dev": "lerna run build --scope=@getpara/* --scope=capsule-mpc-worker --scope=capsule-mpc-worker-server --concurrency 4",
+    "watch:affected": "node scripts/watch-affected.js",
+    "dev": "yarn build:dev; concurrently \"yarn start\" \"yarn watch:affected\"",
     "build": "lerna run build --parallel --concurrency 2",
     "lint": "eslint --config eslint.config.js './**/*.{js,jsx,ts,tsx}'",
     "lint-fix": "eslint --config eslint.config.js --fix './**/*.{js,jsx,ts,tsx}'",

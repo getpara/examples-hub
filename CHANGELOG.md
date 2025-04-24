@@ -1,3 +1,82 @@
+# Release (Thu Apr 24 2025)
+
+## Package Versions
+- @getpara/web-sdk@1.12.0
+- @getpara/wagmi-v2-integration@1.12.0
+- @getpara/wagmi-v1-integration@1.12.0
+- @getpara/viem-v2-integration@1.12.0
+- @getpara/viem-v1-integration@1.12.0
+- @getpara/user-management-client@1.12.0
+- @getpara/solana-web3.js-v1-integration@1.12.0
+- @getpara/solana-wallet-connectors@1.12.0
+- @getpara/server-sdk@1.12.0
+- @getpara/react-sdk@1.12.0
+- @getpara/react-native-wallet@1.12.0
+- @getpara/react-components@1.12.0
+- @getpara/react-common@1.12.0
+- @getpara/evm-wallet-connectors@1.12.0
+- @getpara/ethers-v6-integration@1.12.0
+- @getpara/ethers-v5-integration@1.12.0
+- @getpara/cosmos-wallet-connectors@1.12.0
+- @getpara/cosmjs-v0-integration@1.12.0
+- @getpara/core-sdk@1.12.0
+- @getpara/core-components@1.12.0
+
+### Features
+-  Connection only external wallets (#874) - b62e055e2
+
+### Fixes
+-  add in missing sdk dependencies (#882) - 0aa7c7df6
+-  Modal builder asset screen CSS issue (#883) - d7659cc0b
+-  fix vulnerabilities check to work with publish PR (#865) - 72ef58786
+
+### Chores
+-  remove assert dependency (#878) - a9a7ddd0f
+-  improve sdk error tracking (#849) - aeeb8f796
+-  improved hot reload for running example and web portal locally (#855) - ec4301704
+
+# Release (Thu Apr 17 2025)
+
+## Package Versions
+- @getpara/web-sdk@1.11.0
+- @getpara/wagmi-v2-integration@1.11.0
+- @getpara/wagmi-v1-integration@1.11.0
+- @getpara/viem-v2-integration@1.11.0
+- @getpara/viem-v1-integration@1.11.0
+- @getpara/user-management-client@1.11.0
+- @getpara/solana-web3.js-v1-integration@1.11.0
+- @getpara/solana-wallet-connectors@1.11.0
+- @getpara/server-sdk@1.11.0
+- @getpara/react-sdk@1.11.0
+- @getpara/react-native-wallet@1.11.0
+- @getpara/react-components@1.11.0
+- @getpara/react-common@1.11.0
+- @getpara/evm-wallet-connectors@1.11.0
+- @getpara/ethers-v6-integration@1.11.0
+- @getpara/ethers-v5-integration@1.11.0
+- @getpara/cosmos-wallet-connectors@1.11.0
+- @getpara/cosmjs-v0-integration@1.11.0
+- @getpara/core-sdk@1.11.0
+- @getpara/core-components@1.11.0
+
+### Features
+-  Add `createGuestWallets` method and helpers (#851) - 6a28527d3
+-  banner warning potential impact of slow wifi (#812) - b475c399b
+
+### Fixes
+-  add structuredClone shim (#856) - 187af96b0
+-  Prevent unnecessary Apple passkey verification API calls (#848) - dcb87ac92
+-  Truncate receive address display (#844) - e8248f5cb
+
+### Chores
+-  Basic readme updates (#766) - 034e76d88
+-  Remove `qs` from sdk bundle (#857) - 410003e13
+-  update test email domain from test.usecapsule.com to test.getpara.com (#685) - 4ac2d04c7
+-  fix wagmi v2 version to latest (#850) - 5460779fa
+
+### Tests
+-  web portal unit tests (#840) - d40439016
+
 # Release (Thu Apr 10 2025)
 
 ## Package Versions

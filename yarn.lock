@@ -5237,15 +5237,15 @@
     inputmask "5.0.9"
     qrcode-with-logos "1.1.1"
 
-"@getpara/core-sdk@1.10.0":
-  version "1.10.0"
-  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.10.0.tgz#a2fc0e134849bcb2b1ca64a4224e0e084cd4a824"
-  integrity sha512-8PQ78ebckPk7ukV50tSzOjZKnUBmaf6reLYndX5QimNQ4xg80b1qNvBgX2076ziwMkvOHFYi13teOSd8fIeDDg==
+"@getpara/core-sdk@1.11.0":
+  version "1.11.0"
+  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.11.0.tgz#586160a4baae14a8f5b6374c2feff72975f046e4"
+  integrity sha512-lto6zkllfhUYwf0TVxcfdsBu4+eh33MKdtGIF17K5+Z/8I5MDga03R9WZugWSzu61bwPHADk2h+O/5F3/66yLQ==
   dependencies:
     "@celo/utils" "^8.0.2"
     "@cosmjs/encoding" "^0.32.4"
     "@ethereumjs/util" "^9.1.0"
-    "@getpara/user-management-client" "1.10.0"
+    "@getpara/user-management-client" "1.11.0"
     "@noble/hashes" "^1.5.0"
     base64url "^3.0.1"
     libphonenumber-js "1.11.2"
@@ -5267,12 +5267,12 @@
     node-forge "^1.3.1"
     qs "^6.12.0"
 
-"@getpara/cosmjs-v0-integration@1.10.0":
-  version "1.10.0"
-  resolved "https://registry.yarnpkg.com/@getpara/cosmjs-v0-integration/-/cosmjs-v0-integration-1.10.0.tgz#aeb6ba88dafeb140dae788743b6dfeb1e6ab732f"
-  integrity sha512-9GpFebI5xMFA9kIKVR9Q56S1cxVWl1ufCpt0CunQP1cPRdYDF+IvvITMN2S/O/FWJNecUOjB4N5jjvy1Ce9JoA==
+"@getpara/cosmjs-v0-integration@1.11.0":
+  version "1.11.0"
+  resolved "https://registry.yarnpkg.com/@getpara/cosmjs-v0-integration/-/cosmjs-v0-integration-1.11.0.tgz#e2c1498145e91dc78cf5b1fc0d408f2b6d96f5b3"
+  integrity sha512-vEL6QqkO33663p7t46Swj36taHmlPJzEjSS6Hiw1V3lQQHxusQ0V7T2cYeShHRC5sdOe6YasN3YSEoEURwNqtQ==
   dependencies:
-    "@getpara/core-sdk" "1.10.0"
+    "@getpara/core-sdk" "1.11.0"
 
 "@getpara/cosmjs-v0-integration@>=1.0.0":
   version "1.7.1"
@@ -5281,12 +5281,12 @@
   dependencies:
     "@getpara/core-sdk" "1.7.1"
 
-"@getpara/ethers-v6-integration@1.10.0":
-  version "1.10.0"
-  resolved "https://registry.yarnpkg.com/@getpara/ethers-v6-integration/-/ethers-v6-integration-1.10.0.tgz#55c0444a0918a425531f32348eb7621e662d9a1b"
-  integrity sha512-o9OWsjU2AysBGiQyXYfTvUfgZmeVKhZG92mx7g/eYbgg7yrrFi0dzDfud430V98uQVJc1yYdmJKkPdcBzx9Ctg==
+"@getpara/ethers-v6-integration@1.11.0":
+  version "1.11.0"
+  resolved "https://registry.yarnpkg.com/@getpara/ethers-v6-integration/-/ethers-v6-integration-1.11.0.tgz#98bff127a0fb439ddc200b82a08dd8a5e92b7cde"
+  integrity sha512-THodStaCUdh7yfgv5xpXXjgXwdTdEQBVHwEjdRgH5IjV2c1ZkSTc7hjnOTgvg+eNtLmuhjlavERc7Cp4jLE1WQ==
   dependencies:
-    "@getpara/core-sdk" "1.10.0"
+    "@getpara/core-sdk" "1.11.0"
 
 "@getpara/graz@^1.0.0-dev.2":
   version "1.0.0-dev.2"
@@ -5348,22 +5348,21 @@
     zustand "^4.5.2"
     zustand-sync-tabs "^0.2.2"
 
-"@getpara/solana-web3.js-v1-integration@1.10.0":
-  version "1.10.0"
-  resolved "https://registry.yarnpkg.com/@getpara/solana-web3.js-v1-integration/-/solana-web3.js-v1-integration-1.10.0.tgz#7c072abe3eb599a73b3789ec4116a2a0a1ca0370"
-  integrity sha512-c2ITwx83bNJGI1lo/O7+1lX7NVQZdDKt6XcDomnhRbMM0VuSwC66Nl7gQH/yM5K4TvlOTZ1lPv0fvajkhCh+sQ==
+"@getpara/solana-web3.js-v1-integration@1.11.0":
+  version "1.11.0"
+  resolved "https://registry.yarnpkg.com/@getpara/solana-web3.js-v1-integration/-/solana-web3.js-v1-integration-1.11.0.tgz#131fbd7d0392c937cbeb9d4cdc42cca7f50070a9"
+  integrity sha512-wev01pK1nVilQL4iDgRPGiB4nAxkrGsIyT0hF0KjRheGmtON8TX4F/8i0M/7rgElAHKEc4IH/D54fO4jSzSLNw==
   dependencies:
-    "@getpara/core-sdk" "1.10.0"
-    "@solana/web3.js" "^1.95.8"
+    "@getpara/core-sdk" "1.11.0"
+    "@solana/web3.js" "^1.98.0"
 
-"@getpara/user-management-client@1.10.0":
-  version "1.10.0"
-  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.10.0.tgz#f53b18a0ffbad7998d3365478c8856d9db97afc0"
-  integrity sha512-fGH5A+GDVvwJnAACnFH3Sc9J3HUF79NjHT2WHwjbhYpuL+E8lZkmdLlcAqmYd5MeWobtORuyq9cEUpqLcrkusw==
+"@getpara/user-management-client@1.11.0":
+  version "1.11.0"
+  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.11.0.tgz#b044b14a92dbb8cab9c23508e1613229bfb44020"
+  integrity sha512-dXXwhhraK0drPpn22qJYeJZ3+4g7fAg3v/3sg9AiyJlDdOSyT3tW7V/GgFfpsoULS6ZDKFEFI/lGmKss18KCDA==
   dependencies:
     axios "^1.8.4"
     libphonenumber-js "1.11.2"
-    qs "^6.12.0"
 
 "@getpara/user-management-client@1.7.1":
   version "1.7.1"
@@ -5374,13 +5373,13 @@
     libphonenumber-js "1.11.2"
     qs "^6.12.0"
 
-"@getpara/web-sdk@1.10.0":
-  version "1.10.0"
-  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-1.10.0.tgz#456ec003532baf3368d20c4459aceaaeeb24e518"
-  integrity sha512-6DvpfyF3FGyA1ZvN9ijMkqfPUCYixMrQ33KOXFhHdBmh9qDDAkz+g0QDhI89MRip8Z/F0l9qbhnZoexHcZlElQ==
+"@getpara/web-sdk@1.11.0":
+  version "1.11.0"
+  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-1.11.0.tgz#12f84ecb0c529f2bf52a3da679bfa59ceb0f9030"
+  integrity sha512-BJ9ErKDCga2WvfWXlCLuJIUlIUAxcB8b2Qs2ROtNmw9WbxnG0McmQ5KWQX1M7mB3tjabkdymVtUbrAXoeefRaA==
   dependencies:
-    "@getpara/core-sdk" "1.10.0"
-    "@getpara/user-management-client" "1.10.0"
+    "@getpara/core-sdk" "1.11.0"
+    "@getpara/user-management-client" "1.11.0"
     "@sentry/browser" "^9.1.0"
     assert "^2.1.0"
     base64url "3.0.1"
@@ -7508,9 +7507,9 @@
   integrity sha512-lp4qAiMTD4sNWW4DbKLBkfiMZ4jbAboJIGOQr5DvciMRI494OapieI9qiODpOt0XBr1LjIDy1xAGAnVs5supTA==
 
 "@opentelemetry/semantic-conventions@^1.27.0", "@opentelemetry/semantic-conventions@^1.28.0":
-  version "1.30.0"
-  resolved "https://registry.yarnpkg.com/@opentelemetry/semantic-conventions/-/semantic-conventions-1.30.0.tgz#3a42c4c475482f2ec87c12aad98832dc0087dc9a"
-  integrity sha512-4VlGgo32k2EQ2wcCY3vEU28A0O13aOtHz3Xt2/2U5FAh9EfhD6t6DqL5Z6yAnRCntbTFDU4YfbpyzSlHNWycPw==
+  version "1.32.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/semantic-conventions/-/semantic-conventions-1.32.0.tgz#a15e8f78f32388a7e4655e7f539570e40958ca3f"
+  integrity sha512-s0OpmpQFSfMrmedAn9Lhg4KWJELHCU6uU9dtIJ28N8UGhf9Y55im5X8fEzwhwDwiSqN+ZPSNrDJF7ivf/AuRPQ==
 
 "@opentelemetry/sql-common@^0.40.1":
   version "0.40.1"
@@ -9428,7 +9427,7 @@
     "@solana/wallet-standard-core" "^1.1.1"
     "@solana/wallet-standard-wallet-adapter" "^1.1.2"
 
-"@solana/web3.js@1.98.0", "@solana/web3.js@^1.95.8", "@solana/web3.js@^1.98.0":
+"@solana/web3.js@1.98.0", "@solana/web3.js@^1.98.0":
   version "1.98.0"
   resolved "https://registry.yarnpkg.com/@solana/web3.js/-/web3.js-1.98.0.tgz#21ecfe8198c10831df6f0cfde7f68370d0405917"
   integrity sha512-nz3Q5OeyGFpFCR+erX2f6JPt3sKhzhYcSycBCSPkWjzSVDh/Rr1FqTVMRe58FKO16/ivTUcuJjeS5MyBvpkbzA==
@@ -11581,9 +11580,9 @@
     "@types/pg" "*"
 
 "@types/pg@*":
-  version "8.11.11"
-  resolved "https://registry.yarnpkg.com/@types/pg/-/pg-8.11.11.tgz#3bdce0580e521a62a62339a53d110458d9eae6df"
-  integrity sha512-kGT1qKM8wJQ5qlawUrEkXgvMSXoV213KfMGXcwfDwUIfUHXqXYXOfS1nE1LINRJVVVx5wCm70XnFlMHaIcQAfw==
+  version "8.11.13"
+  resolved "https://registry.yarnpkg.com/@types/pg/-/pg-8.11.13.tgz#ab785528b173d9bf8623406d7611ee0c0c715914"
+  integrity sha512-6kXByGkvRvwXLuyaWzsebs2du6+XuAB2CuMsuzP7uaihQahshVgSmB22Pmh0vQMkQ1h5+PZU0d+Di1o+WpVWJg==
   dependencies:
     "@types/node" "*"
     pg-protocol "*"
@@ -24720,9 +24719,9 @@ pg-numeric@1.0.2:
   integrity sha512-BM/Thnrw5jm2kKLE5uJkXqqExRUY/toLHda65XgFTBTFYZyopbKjBe29Ii3RbkvlsMoFwD+tHeGaCjjv0gHlyw==
 
 pg-protocol@*:
-  version "1.7.1"
-  resolved "https://registry.yarnpkg.com/pg-protocol/-/pg-protocol-1.7.1.tgz#aad61a6f927b51e89dcf721408b76c0e536d43dc"
-  integrity sha512-gjTHWGYWsEgy9MsY0Gp6ZJxV24IjDqdpTW7Eh0x+WfJLFsm/TJx1MzL6T0D88mBvkpxotCQ6TwW6N+Kko7lhgQ==
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/pg-protocol/-/pg-protocol-1.9.0.tgz#d2a1f4289df6e969ff6c29753c05a4f88ca08911"
+  integrity sha512-6AkqYKbOwHVlDnXrOZlSkpvn9zBA4y87HGlrPhnSPLkcLRnTPcXm2C/CNrOkQB2T7QKYv+IzCcmW0K974n3z9Q==
 
 pg-types@^2.2.0:
   version "2.2.0"
@@ -25535,9 +25534,9 @@ postgres-array@~2.0.0:
   integrity sha512-VpZrUqU5A69eQyW2c5CA1jtLecCsN2U/bD6VilrFDWq5+5UIEVO7nazS3TEcHf1zuPYO/sqGvUvW62g86RXZuA==
 
 postgres-array@~3.0.1:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/postgres-array/-/postgres-array-3.0.2.tgz#68d6182cb0f7f152a7e60dc6a6889ed74b0a5f98"
-  integrity sha512-6faShkdFugNQCLwucjPcY5ARoW1SlbnrZjmGl0IrrqewpvxvhSLHimCVzqeuULCbG0fQv7Dtk1yDbG3xv7Veog==
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/postgres-array/-/postgres-array-3.0.4.tgz#4efcaf4d2c688d8bcaa8620ed13f35f299f7528c"
+  integrity sha512-nAUSGfSDGOaOAEGwqsRY27GPOea7CNipJPOA7lPbdEpx5Kg3qzdP0AaWC5MlhTWV9s4hFX39nomVZ+C4tnGOJQ==
 
 postgres-bytea@~1.0.0:
   version "1.0.0"
@@ -27023,9 +27022,9 @@ require-from-string@^2.0.2:
   integrity sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==
 
 require-in-the-middle@^7.1.1:
-  version "7.5.1"
-  resolved "https://registry.yarnpkg.com/require-in-the-middle/-/require-in-the-middle-7.5.1.tgz#9b995014ece7f62d734dcaf822064240d125a659"
-  integrity sha512-fgZEz/t3FDrU9o7EhI+iNNq1pNNpJImOvX72HUd6RoFiw8MaKd8/gR5tLuc8A0G0e55LMbP6ImjnmXY6zrTmjw==
+  version "7.5.2"
+  resolved "https://registry.yarnpkg.com/require-in-the-middle/-/require-in-the-middle-7.5.2.tgz#dc25b148affad42e570cf0e41ba30dc00f1703ec"
+  integrity sha512-gAZ+kLqBdHarXB64XpAe2VCjB7rIRv+mU8tfRWziHRJ5umKsIHN2tLLv6EtMw7WCdP19S0ERVMldNvxYCHnhSQ==
   dependencies:
     debug "^4.3.5"
     module-details-from-path "^1.0.3"
@@ -30226,6 +30225,11 @@ uuid@^10.0.0:
   version "10.0.0"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-10.0.0.tgz#5a95aa454e6e002725c79055fd42aaba30ca6294"
   integrity sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==
+
+uuid@^11.1.0:
+  version "11.1.0"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-11.1.0.tgz#9549028be1753bb934fc96e2bca09bb4105ae912"
+  integrity sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==
 
 uuid@^8.3.2:
   version "8.3.2"

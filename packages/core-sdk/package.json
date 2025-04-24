@@ -15,10 +15,10 @@
     "base64url": "^3.0.1",
     "libphonenumber-js": "1.11.2",
     "node-forge": "^1.3.1",
-    "qs": "^6.12.0"
+    "uuid": "^11.1.0"
   },
   "scripts": {
-    "build": "rm -rf dist && node ./scripts/build.mjs && yarn build:types && yarn post-build",
+    "build": "rm -rf dist && node ./scripts/build.mjs && yarn build:types",
     "old-build": "yarn build:cjs && yarn build:esm && yarn build:types; yarn post-build",
     "post-build": "./scripts/set-version.sh",
     "build:cjs": "rm -rf dist/cjs && tsc --module commonjs --outDir dist/cjs && printf '{\"type\":\"commonjs\"}' > dist/cjs/package.json",

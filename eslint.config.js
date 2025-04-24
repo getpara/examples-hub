@@ -41,6 +41,7 @@ module.exports = [
       '**/build/**',
       '**/preBuild.js',
       '**/appendLoaderExports.ts',
+      'scripts/**',
     ],
     languageOptions: {
       ecmaVersion: 2015,

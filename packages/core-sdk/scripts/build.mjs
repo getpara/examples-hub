@@ -19,6 +19,9 @@ const entryPoints = await glob('src/**/*.{ts,tsx,js,jsx}');
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const distDir = resolve(__dirname, '../dist');
 
+const pkgRaw = await fs.readFile(resolve(__dirname, '../package.json'), 'utf-8');
+const pkg = JSON.parse(pkgRaw);
+
 await fs.mkdir(`${distDir}/cjs`, { recursive: true });
 await fs.writeFile(`${distDir}/cjs/package.json`, JSON.stringify({ type: 'commonjs' }, null, 2));
 
@@ -49,7 +52,10 @@ await esbuild.build({
     //   modules: ['stream', 'process', 'buffer', 'crypto'],
     // }),
   ],
-  define: { 'process.env.NODE_DEBUG': '""' },
+  define: {
+    'process.env.NODE_DEBUG': '""',
+    'process.env.PARA_CORE_VERSION': JSON.stringify(pkg.version),
+  },
   // external: externals,
   packages: 'external',
 });
@@ -68,4 +74,7 @@ await esbuild.build({
   minify: false,
   target: ['es2015'],
   packages: 'external',
+  define: {
+    'process.env.PARA_CORE_VERSION': JSON.stringify(pkg.version),
+  },
 });

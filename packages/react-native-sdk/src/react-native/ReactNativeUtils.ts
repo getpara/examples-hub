@@ -1,7 +1,7 @@
 import { PlatformUtils, TPregenIdentifierType } from '@getpara/web-sdk';
 import { Ctx } from '@getpara/web-sdk';
 import { SignatureRes } from '@getpara/web-sdk';
-import { BackupKitEmailProps, KeyShareType, TWalletType } from '@getpara/user-management-client';
+import { BackupKitEmailProps, KeyShareType, TWalletType, SDKType } from '@getpara/user-management-client';
 import { NativeModules } from 'react-native';
 
 import { AsyncStorage } from '../AsyncStorage.js';
@@ -55,6 +55,7 @@ async function sendTransactionRequest(
 }
 
 export class ReactNativeUtils implements PlatformUtils {
+  sdkType: SDKType = 'REACT_NATIVE';
   disableProviderModal?: boolean | undefined;
   localStorage = new AsyncStorage();
   sessionStorage = new AsyncStorage();

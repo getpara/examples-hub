@@ -1299,5 +1299,25 @@ describe('Client', () => {
         },
       });
     });
+
+    it('trackError', async () => {
+      const methodName = 'testMethod';
+      const error = { name: 'TestError', message: 'Test error message' };
+      const sdkType = 'WEB';
+
+      await client.trackError({
+        methodName,
+        error,
+        sdkType,
+        userId,
+      });
+
+      expect(mocks.post).toBeCalledWith('/errors/sdk', {
+        methodName,
+        error,
+        sdkType,
+        userId,
+      });
+    });
   });
 });

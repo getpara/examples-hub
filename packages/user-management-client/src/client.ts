@@ -6,7 +6,6 @@ import axios, {
   InternalAxiosRequestConfig,
 } from 'axios';
 import { AxiosRequestConfig } from 'axios';
-import qs from 'qs';
 import {
   AccountMetadataKey,
   AccountMetadata,
@@ -201,6 +200,8 @@ interface sessionPasswordBody {
   encryptedWalletPrivateKey?: string;
   encryptionKeyHash?: string;
 }
+
+export type SDKType = 'WEB' | 'SERVER' | 'BRIDGE' | 'REACT_NATIVE';
 
 export type VerifyTelegramRes =
   | {
@@ -1055,10 +1056,10 @@ class Client {
 
   // GET /users/:userId/wallets/:walletId/refresh-done
   async isRefreshDone(userId: string, walletId: string, partnerId?: string, protocolId?: string): Promise<{ isDone: true }> {
-    const queryParams = {};
-    if (partnerId) queryParams['partnerId'] = partnerId;
-    if (protocolId) queryParams['protocolId'] = protocolId;
-    const query = qs.stringify(queryParams);
+    const query = new URLSearchParams({
+      ...(partnerId ? { partnerId } : {}),
+      ...(protocolId ? { protocolId } : {}),
+    }).toString();
 
     const res = await this.baseRequest.get<any>(`/users/${userId}/wallets/${walletId}/refresh-done?${query}`);
     return res.data;
@@ -1115,9 +1116,7 @@ class Client {
   }
 
   async getEncryptedWalletPrivateKey(passwordId: string): Promise<any> {
-    const queryParams = {};
-    queryParams['passwordId'] = passwordId;
-    const query = qs.stringify(queryParams);
+    const query = new URLSearchParams({ passwordId }).toString();
     const res = await this.baseRequest.get<any>(`/encrypted-wallet-private-keys?${query}`);
     return res;
   }
@@ -1150,19 +1149,15 @@ class Client {
     });
     return res.data;
   };
+
+  trackError = async (opts: {
+    methodName: string;
+    error: { name: string; message: string };
+    sdkType: SDKType;
+    userId: string;
+  }) => {
+    await this.baseRequest.post<any>('/errors/sdk', opts);
+  };
 }
 
 export default Client;
-
-// GET /users/:userId/wallets/:walletId/send (NOTE: endpoint not found in server)
-
-// NOT USED IN DEMO
-
-// POST /users/:userId/wallets/:walletId/presign
-// POST /users/:userId/wallets/:walletId/presign-online
-// POST /auth/signup/web
-// GET /logout
-// POST /users/:userId/wallets/:walletId/key
-// GET /users/:userId/wallets/:walletId/key
-// GET /users/:userId/configurations
-// GET /

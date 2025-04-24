@@ -1,8 +1,9 @@
-import { BackupKitEmailProps, TPregenIdentifierType, TWalletType } from '@getpara/user-management-client';
+import { BackupKitEmailProps, TPregenIdentifierType, TWalletType, SDKType } from '@getpara/user-management-client';
 import { Ctx, PopupType, SignatureRes } from './types/index.js';
 import { StorageUtils } from './StorageUtils.js';
 
 export interface PlatformUtils {
+  sdkType: SDKType;
   getPrivateKey(ctx: Ctx, userId: string, walletId: string, share: string, sessionCookie: string): Promise<string>;
 
   keygen(

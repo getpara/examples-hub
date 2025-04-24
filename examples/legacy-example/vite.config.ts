@@ -3,12 +3,20 @@ import react from '@vitejs/plugin-react';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import path from 'path';
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), nodePolyfills()],
   resolve: {
     alias: {
       '@tanstack/react-query': path.resolve(__dirname, '../../node_modules/@tanstack/react-query'),
+    },
+  },
+  server: {
+    hmr: true,
+    watch: {
+      ignored: ['!../packages/*/dist/**'],
+    },
+    fs: {
+      allow: [path.resolve(__dirname, '../../packages'), path.resolve(__dirname, './src')],
     },
   },
 });

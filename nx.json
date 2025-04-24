@@ -7,9 +7,13 @@
       "!{projectRoot}/**/*.test.ts",
       "!{projectRoot}/**/*.spec.tsx",
       "!{projectRoot}/**/*.test.tsx",
+      "!{projectRoot}/dist/**/*",
       "{workspaceRoot}/tsconfig.json",
       "{workspaceRoot}/nx.json",
       "{workspaceRoot}/package.json"
+    ],
+    "projectBoundaries": [
+      "{projectRoot}/dist/**/*.d.ts"
     ],
     "withTests": [
       "{projectRoot}/**/*",
@@ -22,7 +26,7 @@
     "build": {
       "cache": true,
       "dependsOn": ["^build"],
-      "inputs": ["default", "^default"],
+      "inputs": ["default", "^projectBoundaries"],
       "outputs": ["{projectRoot}/dist"]
     },
     "start": {

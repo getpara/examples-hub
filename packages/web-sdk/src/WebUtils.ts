@@ -4,11 +4,13 @@ import { LocalStorage } from './LocalStorage.js';
 import { SessionStorage } from './SessionStorage.js';
 import { keygen, preKeygen, ed25519Keygen, ed25519PreKeygen, refresh } from './wallet/keygen.js';
 import { signMessage, sendTransaction, signTransaction, ed25519Sign } from './wallet/signing.js';
-import { BackupKitEmailProps, TWalletType } from '@getpara/user-management-client';
+import { BackupKitEmailProps, TWalletType, SDKType } from '@getpara/user-management-client';
 import { getPrivateKey } from './wallet/privateKey.js';
 import { TPregenIdentifierType } from '@getpara/core-sdk';
 
 export class WebUtils implements PlatformUtils {
+  sdkType: SDKType = 'WEB';
+
   getPrivateKey(ctx: Ctx, userId: string, walletId: string, share: string, sessionCookie: string): Promise<string> {
     return getPrivateKey(ctx, userId, walletId, share, sessionCookie);
   }

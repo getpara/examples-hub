@@ -115,6 +115,16 @@ import {
 import { TransactionReviewDenied, TransactionReviewTimeout } from './errors.js';
 import * as constants from './constants.js';
 
+type WritableMethodKeys<T> = {
+  [K in keyof T]-?: IfEquals<
+    { [P in K]: T[K] },
+    { -readonly [P in K]: T[K] },
+    T[K] extends (...args: any[]) => any ? K : never
+  >;
+}[keyof T];
+
+type IfEquals<X, Y, A = X, B = never> = X extends Y ? (Y extends X ? A : B) : B;
+
 export abstract class ParaCore implements CoreInterface {
   static version?: string = constants.PARA_CORE_VERSION;
 
@@ -892,7 +902,59 @@ export abstract class ParaCore implements CoreInterface {
 
     // Auto bind all functions to the instance so the instance can be destructured i.e. in the react-sdk
     autoBind(this);
+
+    // start with non-prod to make sure error tracking is working properly
+    if (env !== Environment.PROD) {
+      this.wrapMethodsWithErrorTracking([
+        'signUpOrLogIn',
+        'verifyNewAccount',
+        'waitForLogin',
+        'waitForSignup',
+        'waitForWalletCreation',
+        'verifyOAuth',
+        'verifyTelegram',
+        'verifyFarcaster',
+        'createPregenWallet',
+        'claimPregenWallets',
+        'signMessage',
+        'signTransaction',
+      ]);
+    }
   }
+
+  private trackError = async (methodName: string, err: Error) => {
+    try {
+      await this.ctx.client.trackError({
+        methodName,
+        sdkType: this.platformUtils.sdkType,
+        userId: this.userId,
+        error: {
+          name: err.name,
+          message: err.message,
+        },
+      });
+    } catch (e) {
+      console.error('error tracking error:', e);
+    }
+
+    throw err;
+  };
+
+  private wrapMethodsWithErrorTracking = (methodNames: WritableMethodKeys<ParaCore>[]) => {
+    for (const methodName of methodNames) {
+      const original = this[methodName];
+      if (typeof original === 'function') {
+        this[methodName] = (...args: any[]) => {
+          try {
+            const result = original.apply(this, args);
+            return result instanceof Promise ? result.catch(err => this.trackError(methodName, err)) : result;
+          } catch (err) {
+            return this.trackError(methodName, err);
+          }
+        };
+      }
+    }
+  };
 
   private initializeFromStorage = () => {
     // Loading external wallets before auth so we can check for any full auth wallets

@@ -1,0 +1,10 @@
+{
+  "name": "external-wallet-example",
+  "sourceRoot": "examples/external-wallet-example/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "inputs": ["default", "^default"]
+    }
+  }
+}

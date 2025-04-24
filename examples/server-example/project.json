@@ -1,0 +1,10 @@
+{
+  "name": "server-example",
+  "sourceRoot": "examples/server-example/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "inputs": ["default", "^default"]
+    }
+  }
+}

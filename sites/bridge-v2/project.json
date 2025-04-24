@@ -1,0 +1,10 @@
+{
+  "name": "bridge-v2",
+  "sourceRoot": "sites/bridge-v2/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "inputs": ["default", "^default"]
+    }
+  }
+}

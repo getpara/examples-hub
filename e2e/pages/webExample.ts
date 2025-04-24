@@ -50,6 +50,7 @@ export class WebExamplePage {
     const emailOrPhone = usePhoneNumber ? getRandomPhoneNumber() : getRandomEmail();
     const enterEmailOrPhoneInput = await this.page.getByRole('textbox', { name: /Enter/ }).elementHandle();
     await enterEmailOrPhoneInput.click();
+
     await this.page.waitForTimeout(300);
     for (let i = 0; i < emailOrPhone.length; i++) {
       await enterEmailOrPhoneInput.press(emailOrPhone[i]);

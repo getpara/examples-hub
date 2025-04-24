@@ -1,0 +1,10 @@
+{
+  "name": "server-mpc-worker",
+  "sourceRoot": "workers/server-mpc-worker/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "inputs": ["default", "^default"]
+    }
+  }
+} 

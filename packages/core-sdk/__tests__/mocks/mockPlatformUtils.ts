@@ -6,6 +6,7 @@ import {
   SOLANA_WALLET_KEYGEN_RES,
   WALLET_KEYGEN_RES,
 } from '../constants.js';
+import { SDKType } from '@getpara/user-management-client';
 
 class MockLocalStorage implements StorageUtils {
   private localStorage = {};
@@ -83,6 +84,8 @@ export class MockPlatformUtils implements PlatformUtils {
   constructor(isAsyncStorage = false) {
     this.isSyncStorage = !isAsyncStorage;
   }
+
+  sdkType: SDKType = 'WEB';
 
   refresh = mockRefresh;
 
