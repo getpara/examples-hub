@@ -14,7 +14,7 @@ import {
   solanaWeb3SignVersionedTransaction,
 } from './signers/solanaWeb3Signer';
 import { initCosmJsSigners, cosmJsSignAmino, cosmJsSignDirect } from './signers/cosmjsSigner';
-import { login, loginV2, generatePasskey, generatePasskeyV2, verifyWebChallenge } from './bridgeAuth';
+import { loginWithPasskey, generatePasskey, verifyWebChallenge } from './bridgeAuth';
 import {
   CosmJsSignAminoArgs,
   CosmJsSignDirectArgs,
@@ -24,10 +24,8 @@ import {
   EthersSignTypedDataArgs,
   EthersSignerInitArgs,
   GeneratePasskeyArgs,
-  GeneratePasskeyV2Args,
   GetWebChallengeArgs,
-  LoginArgs,
-  LoginV2Args,
+  LoginWithPasskeyArgs,
   SetEmailArgs,
   SolanaSendTransactionArgs,
   SolanaSignTransactionArgs,
@@ -100,12 +98,6 @@ export const bridgeMethodHandlers: Record<string, (para: ParaWeb, args: any) => 
     logger.info('Passkey generated successfully.');
     return result;
   },
-  generatePasskeyV2: async (para, args: GeneratePasskeyV2Args) => {
-    logger.info('Generating passkey V2...');
-    const result = await generatePasskeyV2(para, args);
-    logger.info('Passkey V2 generated successfully.');
-    return result;
-  },
   getEmail: async (para, _) => {
     logger.info('Getting email...');
     return para.email;
@@ -131,17 +123,11 @@ export const bridgeMethodHandlers: Record<string, (para: ParaWeb, args: any) => 
     const result = await initCosmJsSigners(para, args);
     return result;
   },
-  login: async (para, args: LoginArgs) => {
-    logger.info('Logging in...');
-    const desiredWallet = await login(para, args);
-    logger.info('Login successful. Desired wallet:', desiredWallet);
+  loginWithPasskey: async (para, args: LoginWithPasskeyArgs) => {
+    logger.info('Logging in with passkey...');
+    const desiredWallet = await loginWithPasskey(para, args);
+    logger.info('Login with passkey successful. Desired wallet:', desiredWallet);
     return desiredWallet;
-  },
-  loginV2: async (para, args: LoginV2Args) => {
-    logger.info('Logging in V2...');
-    const desiredWallet2 = await loginV2(para, args);
-    logger.info('Login V2 successful. Desired wallet:', desiredWallet2);
-    return desiredWallet2;
   },
   logout: async (para, _) => {
     logger.info('Logging out...');

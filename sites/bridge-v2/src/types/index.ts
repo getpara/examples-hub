@@ -119,14 +119,6 @@ export interface GeneratePasskeyArgs {
   attestationObject: any;
   clientDataJson: any;
   credentialsId: string;
-  userHandle: Uint8Array;
-  biometricsId: string;
-}
-
-export interface GeneratePasskeyV2Args {
-  attestationObject: any;
-  clientDataJson: any;
-  credentialsId: string;
   userHandle: string;
   biometricsId: string;
 }
@@ -138,13 +130,7 @@ export interface VerifyWebChallengeArgs {
   signature: any;
 }
 
-export interface LoginArgs {
-  userId: string;
-  signatureId: string;
-  userHandle: string;
-}
-
-export interface LoginV2Args {
+export interface LoginWithPasskeyArgs {
   userId: string;
   credentialsId: string;
   userHandle: string;
