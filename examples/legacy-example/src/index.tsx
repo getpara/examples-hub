@@ -524,8 +524,8 @@ function AppInner({
   const para = useClient();
 
   useEffect(() => {
-    if (para && para.ctx.isE2E !== (process?.env?.VITE_APP_IS_E2E === 'true')) {
-      para.ctx.isE2E = process?.env?.VITE_APP_IS_E2E === 'true';
+    if (para && para.ctx.isE2E !== (import.meta.env.VITE_APP_IS_E2E === 'true')) {
+      para.ctx.isE2E = import.meta.env.VITE_APP_IS_E2E === 'true';
     }
   }, [para]);
 

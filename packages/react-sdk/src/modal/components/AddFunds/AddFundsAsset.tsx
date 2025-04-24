@@ -124,7 +124,9 @@ const AssetList = styled.ul`
   flex-direction: column;
   width: 100%;
   gap: 8px;
-  list-style-type: none;
+  list-style: none;
+  padding-inline-start: 0;
+  margin: 0;
   padding: 0px;
 `;
 
