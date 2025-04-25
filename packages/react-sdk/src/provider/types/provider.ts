@@ -133,7 +133,7 @@ export type ExternalWalletConfig<
    *
    * NOTE: Any wallets that are detected as installed will be sorted first, followed by those that are not detected or not installed.
    */
-  wallets: TExternalWallet[];
+  wallets?: TExternalWallet[];
   /**
    * Which external wallets will include full verification and Para auth.
    */
