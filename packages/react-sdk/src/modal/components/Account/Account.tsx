@@ -30,8 +30,10 @@ export const Account = ({ onClose }: AccountProps) => {
   const [isDisconnecting, setIsDisconnecting] = useState(false);
 
   const isGuestMode = account?.isConnected && account.isGuestMode;
+  // Users using external wallets with connection only can't buy or withdraw
+  // CONNECTION_ONLY wallets with no userId are wallets that have skipped Para and can't buy or withdraw
+  const cantBuyAndWithdraw = para.externalWalletConnectionType === 'CONNECTION_ONLY' && !para.userId;
   const isOnRampLoaded = !!onRampConfig;
-  const canBuyAndWithdraw = !!para.userId;
 
   const handleBuyClick = () => {
     if (isGuestMode) {
@@ -107,7 +109,7 @@ export const Account = ({ onClose }: AccountProps) => {
         <ButtonContainer>
           {isOnRampLoaded ? (
             <>
-              {canBuyAndWithdraw && onRampConfig.isBuyEnabled && (
+              {onRampConfig.isBuyEnabled && !cantBuyAndWithdraw && (
                 <OptionButton icon="creditCard" onClick={handleBuyClick}>
                   <CpslText variant="bodyXS" color="secondary" weight="medium">
                     Buy Crypto
@@ -121,7 +123,7 @@ export const Account = ({ onClose }: AccountProps) => {
                   </CpslText>
                 </OptionButton>
               )}
-              {canBuyAndWithdraw && onRampConfig.isWithdrawEnabled && (
+              {onRampConfig.isWithdrawEnabled && !cantBuyAndWithdraw && (
                 <OptionButton icon="arrowCircleBrokenDownLeft" onClick={handleSellClick}>
                   <CpslText variant="bodyXS" color="secondary" weight="medium">
                     Withdraw

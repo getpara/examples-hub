@@ -38,3 +38,15 @@ export function formatPhoneNumber(
 export function displayPhoneNumber(phone: string, countryCode?: string): string {
   return formatPhoneNumber(phone, countryCode, { forDisplay: true });
 }
+
+export function splitPhoneNumber(phone: `+${number}`): { phone: string; countryCode: string } {
+  const parsedNumber = parsePhoneNumberFromString(phone);
+  if (parsedNumber?.isValid()) {
+    return {
+      phone: parsedNumber.nationalNumber.replace(/\D/g, ''),
+      countryCode: `+${parsedNumber.countryCallingCode}`,
+    };
+  }
+
+  throw new Error('Invalid phone number');
+}

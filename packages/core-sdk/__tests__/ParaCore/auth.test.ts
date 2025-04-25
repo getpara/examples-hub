@@ -4,13 +4,14 @@ import { describe, vi, expect, it, beforeAll, beforeEach } from 'vitest';
 import {
   AuthInfo,
   AuthMethod,
+  isPhone,
   isVerifiedAuth,
   PregenAuth,
   PrimaryAuthInfo,
   toPregenTypeAndId,
   WalletEntity,
 } from '@getpara/user-management-client';
-import ParaCore, { getPublicKeyHex } from '../../src/index.js';
+import ParaCore, { getPublicKeyHex, splitPhoneNumber } from '../../src/index.js';
 import { Environment, AuthStateLogin, AuthStateSignup, CoreAuthInfo, AuthState, Wallet } from '../../src/types/index.js';
 import {
   API_KEY,
@@ -114,11 +115,16 @@ function expectSearchParams(url: URL, expected: Record<string, string>): void {
 function testLoginUrl(para: MockPara, str: string, authMethod: AuthMethod) {
   const url = new URL(str);
 
+  const authInfo = para.authInfo!;
+
   expect(url.origin).toEqual(PARTNER.portalUrl);
   expect(url.pathname).toEqual(authMethod === AuthMethod.PASSKEY ? '/web/biometrics/login' : '/web/passwords/login');
   expectSearchParams(url, {
     ...COMMON_SEARCH_PARAMS,
-    authInfo: JSON.stringify(para.authInfo),
+    authInfo: JSON.stringify(authInfo),
+    ...(isPhone(authInfo.auth) ? splitPhoneNumber(authInfo.auth.phone) : authInfo.auth),
+    ...(authInfo.displayName ? { displayName: authInfo!.displayName } : {}),
+    ...(authInfo.pfpUrl ? { pfpUrl: authInfo!.pfpUrl } : {}),
     apiKey: PARTNER.apiKey!,
     encryptionKey: getPublicKeyHex(para.loginEncryptionKeyPair!),
     sessionId: SESSION_LOOKUP_ID,
@@ -129,13 +135,18 @@ function testLoginUrl(para: MockPara, str: string, authMethod: AuthMethod) {
 function testCreateUrl(para: MockPara, str: string, authMethod: AuthMethod) {
   const url = new URL(str);
 
+  const authInfo = para.authInfo!;
+
   expect(url.origin).toEqual(PARTNER.portalUrl);
   expect(url.pathname).toEqual(
     `/web/users/${USER_ID}/${authMethod === AuthMethod.PASSKEY ? 'biometrics' : 'passwords'}/${SESSION_LOOKUP_ID}`,
   );
   expectSearchParams(url, {
     ...COMMON_SEARCH_PARAMS,
-    authInfo: JSON.stringify(para.authInfo),
+    authInfo: JSON.stringify(authInfo),
+    ...(isPhone(authInfo.auth) ? splitPhoneNumber(authInfo.auth.phone) : authInfo.auth),
+    ...(authInfo.displayName ? { displayName: authInfo!.displayName } : {}),
+    ...(authInfo.pfpUrl ? { pfpUrl: authInfo!.pfpUrl } : {}),
     apiKey: PARTNER.apiKey,
   });
 }

@@ -111,6 +111,7 @@ import {
   WalletSchemeTypeMap,
   shortenUrl,
   isServerAuthState,
+  splitPhoneNumber,
 } from './utils/index.js';
 import { TransactionReviewDenied, TransactionReviewTimeout } from './errors.js';
 import * as constants from './constants.js';
@@ -745,7 +746,14 @@ export abstract class ParaCore implements CoreInterface {
       portalTextColor: this.portalTextColor,
       portalPrimaryButtonTextColor: this.portalPrimaryButtonTextColor,
       isForNewDevice: opts.isForNewDevice ? opts.isForNewDevice.toString() : undefined,
-      ...(isCreate || isLogin ? { authInfo: JSON.stringify(this.authInfo) } : {}),
+      ...(isCreate || isLogin
+        ? {
+            authInfo: JSON.stringify(this.authInfo),
+            ...(isPhone(this.authInfo.auth) ? splitPhoneNumber(this.authInfo.auth.phone) : this.authInfo.auth),
+            pfpUrl: this.authInfo.pfpUrl,
+            displayName: this.authInfo.displayName,
+          }
+        : {}),
       ...(isOnRamp ? { sessionId } : {}),
       ...(isLogin
         ? {
