@@ -1,131 +1,138 @@
-import { Handler } from "@std/http";
-import { simulateVerifyToken } from "../utils/auth-utils.ts";
-import { Para as ParaServer, hexStringToBase64, SuccessfulSignatureRes, Environment } from "@getpara/server-sdk";
-import { getKeyShareInDB } from "../db/keySharesDB.ts";
+// deno-lint-ignore-file require-await no-explicit-any
+import { Para as ParaServer, hexStringToBase64, Environment } from "@getpara/server-sdk";
+import type { SuccessfulSignatureRes } from "@getpara/server-sdk";
 import { decrypt } from "../utils/encryption-utils.ts";
-import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integration";
-import { http, WalletClient, LocalAccount, SignableMessage, Hash, Chain } from "viem";
+import { getKeyShareInDB } from "../db/keySharesDB.ts";
+import { createParaAccount, createParaViemClient } from "npm:@getpara/viem-v2-integration@1.11.0";
+import { http, encodeFunctionData, hashMessage } from "npm:viem@2.8.6";
+import type { WalletClient, SignableMessage, Hash, Chain, LocalAccount } from "npm:viem@2.8.6";
 import { createModularAccountAlchemyClient } from "@alchemy/aa-alchemy";
 import { WalletClientSigner, arbitrumSepolia } from "@alchemy/aa-core";
-import { hashMessage } from "viem";
 import Example from "../artifacts/Example.json" with { type: "json" };
-import { BatchUserOperationCallData, SendUserOperationResult } from "@alchemy/aa-core";
-import { encodeFunctionData } from "viem";
+import type { BatchUserOperationCallData } from "@alchemy/aa-core";
+import { Handler } from "@std/http";
 
-interface RequestBody {
-  email: string;
-}
-
-
-export const signWithAlchemy: Handler = async (req: Request): Promise<Response> => {
-  const authHeader = req.headers.get("Authorization");
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return new Response("Unauthorized", { status: 401 });
-  }
-
-  const token = authHeader.split(" ")[1];
-
-  const user = simulateVerifyToken(token);
-
-  if (!user) {
-    return new Response("Unauthorized", { status: 401 });
-  }
-
-  const { email }: RequestBody = await req.json();
-
-  if (user.email !== email) {
-    return new Response("Forbidden", { status: 403 });
-  }
-
-  const PARA_API_KEY = Deno.env.get("PARA_API_KEY");
-
-  if (!PARA_API_KEY) {
-    return new Response("PARA_API_KEY not set", { status: 500 });
-  }
-
-  const para = new ParaServer(Environment.BETA, PARA_API_KEY);
-
-  const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
-
-  if (!hasPregenWallet) {
-    return new Response("Wallet does not exist", { status: 400 });
-  }
-
-  const keyShare = getKeyShareInDB(email);
-
-  if (!keyShare) {
-    return new Response("Key share does not exist", { status: 400 });
-  }
-
-  const decryptedKeyShare = decrypt(keyShare);
-
-  await para.setUserShare(decryptedKeyShare);
-
-  const viemParaAccount: LocalAccount = await createParaAccount(para);
-
-  const viemClient: WalletClient = createParaViemClient(para, {
-    account: viemParaAccount,
-    chain: arbitrumSepolia as Chain,
-    transport: http("https://ethereum-sepolia-rpc.publicnode.com"),
-  });
-
-  // This is a workaround to fix the v value of the signature on signMessage. This method overrides the default signMessage method with a custom implementation. See the customSignMessage function below.
-  viemClient.signMessage = async ({ message }: { message: SignableMessage }): Promise<Hash> => {
-    return customSignMessage(para, message);
-  };
-
-  const walletClientSigner: WalletClientSigner = new WalletClientSigner(viemClient, "para");
-
-  const ALCHEMY_API_KEY = Deno.env.get("ALCHEMY_API_KEY");
-  const ALCHEMY_GAS_POLICY_ID = Deno.env.get("ALCHEMY_GAS_POLICY_ID");
-
-  if (!ALCHEMY_API_KEY || !ALCHEMY_GAS_POLICY_ID) {
-    return new Response("ALCHEMY_API_KEY or ALCHEMY_GAS_POLICY_ID not set", { status: 500 });
-  }
-
-  const alchemyClient = await createModularAccountAlchemyClient({
-    apiKey: ALCHEMY_API_KEY,
-    chain: arbitrumSepolia,
-    signer: walletClientSigner,
-    gasManagerConfig: {
-      policyId: ALCHEMY_GAS_POLICY_ID,
-    },
-  });
-
-  const demoUserOperations: BatchUserOperationCallData = [1, 2, 3, 4, 5].map((x) => {
-    return {
-      target: "0x7920b6d8b07f0b9a3b96f238c64e022278db1419",
-      data: encodeFunctionData({
-        abi: Example["contracts"]["contracts/Example.sol:Example"]["abi"],
-        functionName: "changeX",
-        args: [x],
-      }),
-    };
-  });
-
-  const userOperationResult: SendUserOperationResult = await alchemyClient.sendUserOperation({
-    uo: demoUserOperations,
-  });
-
-  return new Response(JSON.stringify({route:"signWithAlchemy", userOperationResult}), { status: 200 });
-};
+const EXAMPLE_CONTRACT_ADDRESS = "0x7920b6d8b07f0b9a3b96f238c64e022278db1419";
+const EXAMPLE_ABI = Example["contracts"]["contracts/Example.sol:Example"]["abi"];
 
 async function customSignMessage(para: ParaServer, message: SignableMessage): Promise<Hash> {
+  const wallet = para.wallets ? Object.values(para.wallets)[0] : null;
+  if (!wallet) {
+    throw new Error("Para wallet not available for signing.");
+  }
+
   const hashedMessage = hashMessage(message);
+  const messagePayload = hashedMessage.startsWith("0x") ? hashedMessage.substring(2) : hashedMessage;
+  const messageBase64 = hexStringToBase64(messagePayload);
+
   const res = await para.signMessage({
-    walletId: Object.values(para.wallets!)[0]!.id,
-    messageBase64: hexStringToBase64(hashedMessage),
+    walletId: wallet.id,
+    messageBase64: messageBase64,
   });
+
+  if (!("signature" in res)) {
+    throw new Error(`Signature failed or unexpected response: ${JSON.stringify(res)}`);
+  }
 
   let signature = (res as SuccessfulSignatureRes).signature;
 
-  // Fix the v value of the signature
-  const lastByte = parseInt(signature.slice(-2), 16);
-  if (lastByte < 27) {
-    const adjustedV = (lastByte + 27).toString(16).padStart(2, "0");
-    signature = signature.slice(0, -2) + adjustedV;
+  const vHex = signature.slice(-2);
+  const v = parseInt(vHex, 16);
+  if (!isNaN(v) && v < 27) {
+    const adjustedVHex = (v + 27).toString(16).padStart(2, "0");
+    signature = signature.slice(0, -2) + adjustedVHex;
+  } else if (isNaN(v)) {
+    console.warn("Could not parse 'v' value from signature for adjustment:", vHex);
   }
 
   return `0x${signature}`;
 }
+
+export const signWithAlchemy: Handler = async (req: Request): Promise<Response> => {
+  try {
+    const { email }: { email: string } = await req.json();
+
+    if (!email) {
+      return new Response("Email is required in the request body", { status: 400 });
+    }
+
+    const paraApiKey = Deno.env.get("PARA_API_KEY");
+    const alchemyApiKey = Deno.env.get("ALCHEMY_API_KEY");
+    const alchemyGasPolicyId = Deno.env.get("ALCHEMY_GAS_POLICY_ID");
+    const rpcUrl = Deno.env.get("ARBITRUM_SEPOLIA_RPC") || "https://ethereum-sepolia-rpc.publicnode.com";
+    const envString = Deno.env.get("PARA_ENVIRONMENT") || "BETA";
+    const env = envString as Environment;
+
+    if (!paraApiKey || !alchemyApiKey || !alchemyGasPolicyId) {
+      return new Response(JSON.stringify({ error: "Missing required environment variables" }), {
+        headers: { "Content-Type": "application/json" },
+        status: 500,
+      });
+    }
+
+    const para = new ParaServer(env, paraApiKey, { disableWebSockets: true });
+
+    const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
+    if (!hasPregenWallet) {
+      return new Response(JSON.stringify({ error: `Pregenerated wallet does not exist for ${email}` }), {
+        headers: { "Content-Type": "application/json" },
+        status: 404,
+      });
+    }
+
+    const keyShare = await getKeyShareInDB(email);
+    if (!keyShare) {
+      return new Response(JSON.stringify({ error: `Key share not found in DB for ${email}` }), {
+        headers: { "Content-Type": "application/json" },
+        status: 404,
+      });
+    }
+
+    const decryptedKeyShare = await decrypt(keyShare);
+    await para.setUserShare(decryptedKeyShare);
+ 
+    const viemParaAccount: LocalAccount = await createParaAccount(para);
+
+    const viemClient: WalletClient = createParaViemClient(para, {
+      account: viemParaAccount,
+      chain: arbitrumSepolia as Chain,
+      transport: http(rpcUrl),
+    });
+
+    viemClient.signMessage = async ({ message }: { message: SignableMessage }) => customSignMessage(para, message);
+
+    const walletClientSigner = new WalletClientSigner(viemClient as any, "para");
+
+    const alchemyClient = await createModularAccountAlchemyClient({
+      apiKey: alchemyApiKey,
+      chain: arbitrumSepolia,
+      signer: walletClientSigner,
+      gasManagerConfig: {
+        policyId: alchemyGasPolicyId,
+      },
+    });
+
+    const demoUserOperations: BatchUserOperationCallData = [1, 2, 3, 4, 5].map((x) => ({
+      target: EXAMPLE_CONTRACT_ADDRESS,
+      data: encodeFunctionData({
+        abi: EXAMPLE_ABI,
+        functionName: "changeX",
+        args: [x],
+      }),
+    }));
+
+    const userOperationResult = await alchemyClient.sendUserOperation({ uo: demoUserOperations });
+
+    return new Response(JSON.stringify({ route: "signWithAlchemy", userOperationResult }), {
+      headers: { "Content-Type": "application/json" },
+      status: 200,
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ 
+      error: error instanceof Error ? error.message : "Unknown error" 
+    }), {
+      headers: { "Content-Type": "application/json" },
+      status: 500,
+    });
+  }
+};

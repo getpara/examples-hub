@@ -1,51 +1,93 @@
-import { Aes } from "https://deno.land/x/crypto@v0.10.1/aes.ts";
-import { Cbc, Padding } from "https://deno.land/x/crypto@v0.10.1/block-modes.ts";
+const ALGORITHM = "AES-GCM";
+const IV_LENGTH = 12;
 
-const ENCRYPTION_KEY = Deno.env.get("ENCRYPTION_KEY");
-
-if (!ENCRYPTION_KEY || ENCRYPTION_KEY.length !== 16) {
-  throw new Error("ENCRYPTION_KEY must be set and be 16 bytes long");
+function getEncryptionKey(): string {
+  const encryptionKey = Deno.env.get("ENCRYPTION_KEY");
+  if (!encryptionKey || encryptionKey.length !== 32) {
+    throw new Error("ENCRYPTION_KEY must be set and be 32 bytes long");
+  }
+  return encryptionKey;
 }
 
-const IV_LENGTH = 16;
-
-const textEncoder = new TextEncoder();
-const textDecoder = new TextDecoder();
-
-function getKey(): Uint8Array {
-  return textEncoder.encode(ENCRYPTION_KEY);
+async function importSecretKey(keyString: string): Promise<CryptoKey> {
+  try {
+    const keyBuffer = new TextEncoder().encode(keyString);
+    return await crypto.subtle.importKey("raw", keyBuffer, { name: ALGORITHM }, false, ["encrypt", "decrypt"]);
+  } catch (error) {
+    throw new Error(`Failed to import secret key: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }
 
-function toHex(buffer: Uint8Array): string {
-  return Array.from(buffer)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+export async function encrypt(text: string): Promise<string> {
+  if (!text) {
+    throw new Error("Text to encrypt must be provided");
+  }
+
+  try {
+    const keyString = getEncryptionKey();
+    const cryptoKey = await importSecretKey(keyString);
+    const iv = crypto.getRandomValues(new Uint8Array(IV_LENGTH));
+    const encodedText = new TextEncoder().encode(text);
+
+    const encryptedBuffer = await crypto.subtle.encrypt({ name: ALGORITHM, iv: iv }, cryptoKey, encodedText);
+
+    // Convert to base64 in Deno
+    const ivBase64 = btoa(String.fromCharCode(...iv));
+    const encryptedBase64 = btoa(String.fromCharCode(...new Uint8Array(encryptedBuffer)));
+
+    return `${ivBase64}:${encryptedBase64}`;
+  } catch (error) {
+    throw new Error(`Encryption process failed: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }
 
-function fromHex(hex: string): Uint8Array {
-  return new Uint8Array(hex.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16)));
-}
+export async function decrypt(encryptedText: string): Promise<string> {
+  if (!encryptedText || !encryptedText.includes(":")) {
+    throw new Error("Encrypted text must be in the format 'IV(base64):Ciphertext(base64)'");
+  }
 
-export function encrypt(text: string): string {
-  const iv = crypto.getRandomValues(new Uint8Array(IV_LENGTH));
-  const key = getKey();
-  const data = textEncoder.encode(text);
+  const parts = encryptedText.split(":");
 
-  const cipher = new Cbc(Aes, key, iv, Padding.PKCS7);
-  const encrypted = cipher.encrypt(data);
+  if (parts.length !== 2 || !parts[0] || !parts[1]) {
+    throw new Error("Encrypted text format is invalid. Expected 'IV(base64):Ciphertext(base64)'.");
+  }
 
-  return `${toHex(iv)}:${toHex(encrypted)}`;
-}
+  const [ivBase64, encryptedDataBase64] = parts;
 
-export function decrypt(encryptedText: string): string {
-  const [ivHex, encryptedDataHex] = encryptedText.split(":");
-  const iv = fromHex(ivHex);
-  const encryptedData = fromHex(encryptedDataHex);
+  let iv: Uint8Array;
+  let encryptedBuffer: ArrayBuffer;
+  let cryptoKey: CryptoKey;
 
-  const key = getKey();
+  try {
+    // Convert from base64 in Deno
+    const ivString = atob(ivBase64);
+    const encryptedString = atob(encryptedDataBase64);
 
-  const decipher = new Cbc(Aes, key, iv, Padding.PKCS7);
-  const decrypted = decipher.decrypt(encryptedData);
+    iv = new Uint8Array(ivString.split("").map((c) => c.charCodeAt(0)));
+    encryptedBuffer = new Uint8Array(encryptedString.split("").map((c) => c.charCodeAt(0))).buffer;
 
-  return textDecoder.decode(decrypted);
+    if (iv.byteLength !== IV_LENGTH) {
+      throw new Error(`Invalid IV length. Expected ${IV_LENGTH} bytes, got ${iv.byteLength}`);
+    }
+
+    const keyString = getEncryptionKey();
+    cryptoKey = await importSecretKey(keyString);
+  } catch (error) {
+    throw new Error(
+      `Failed to prepare components for decryption: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+
+  try {
+    const decryptedBuffer = await crypto.subtle.decrypt({ name: ALGORITHM, iv: iv }, cryptoKey, encryptedBuffer);
+
+    const decryptedText = new TextDecoder().decode(decryptedBuffer);
+    return decryptedText;
+  } catch (error) {
+    throw new Error(
+      `Decryption failed. Key may be incorrect or data corrupted: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
 }
