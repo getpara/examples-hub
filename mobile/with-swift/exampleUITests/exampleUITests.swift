@@ -244,7 +244,7 @@ class ExampleUITests: XCTestCase {
         waitForWalletsView()
     }
     
-    func test04PasskeyLoginFlow() throws {
+    func test04PhonePasskeyLoginFlow() throws {
         // Start phone authentication
         let phoneButton = app.buttons["phoneAuthButton"]
         XCTAssertTrue(phoneButton.exists)

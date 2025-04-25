@@ -10,6 +10,7 @@ import ParaSwift
 
 struct WalletsView: View {
     @EnvironmentObject var paraManager: ParaManager
+    @EnvironmentObject var appRootManager: AppRootManager
     
     @State private var selectedWalletType: WalletType = .evm
     @State private var showSelectCreateWalletTypeView = false
@@ -105,6 +106,15 @@ struct WalletsView: View {
                     }
                     .accessibilityIdentifier("createWalletButton")
                 }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Logout") {
+                        Task {
+                            try! await paraManager.logout()
+                            appRootManager.currentRoot = .authentication
+                        }
+                    }
+                    .accessibilityIdentifier("logoutButton")
+                }
             }
             .confirmationDialog("Wallet Type", isPresented: $showSelectCreateWalletTypeView) {
                 Button("EVM") {
@@ -144,4 +154,5 @@ struct WalletsView: View {
     let mockParaManager = ParaManager(environment: .sandbox, apiKey: "preview-key")
     WalletsView()
         .environmentObject(mockParaManager)
+        .environmentObject(AppRootManager())
 }
