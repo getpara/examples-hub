@@ -10,7 +10,7 @@ import { signerToEcdsaValidator } from "@zerodev/ecdsa-validator";
 import { createKernelAccount, createKernelAccountClient, createZeroDevPaymasterClient } from "@zerodev/sdk";
 import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants";
 
-import Example from "../../artifacts/Example.json" assert { type: "json" };
+import Example from "../../artifacts/Example.json" with { type: "json" };
 
 const EXAMPLE_CONTRACT_ADDRESS = "0x7920b6d8b07f0b9a3b96f238c64e022278db1419";
 const EXAMPLE_ABI = Example["contracts"]["contracts/Example.sol:Example"]["abi"];
@@ -62,7 +62,7 @@ export async function zerodevSessionSignHandler(req: Request, res: Response, nex
     const bundlerRpc = process.env.ZERODEV_BUNDLER_RPC;
     const paymasterRpc = process.env.ZERODEV_PAYMASTER_RPC;
     const rpcUrl = process.env.ARBITRUM_SEPOLIA_RPC;
-    const env = process.env.PARA_ENVIRONMENT as Environment || Environment.BETA;
+    const env = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
 
     if (!paraApiKey || !projectId || !bundlerRpc || !paymasterRpc || !rpcUrl) {
       res

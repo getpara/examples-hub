@@ -21,7 +21,7 @@ export async function viemPregenSignHandler(req: Request, res: Response, next: N
       return;
     }
 
-    const env = process.env.PARA_ENVIRONMENT as Environment || Environment.BETA;
+    const env = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
     const para = new ParaServer(env, paraApiKey);
 
     const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
@@ -49,7 +49,7 @@ export async function viemPregenSignHandler(req: Request, res: Response, next: N
       account: viemParaAccount,
       to: viemParaAccount.address,
       value: parseEther("0.0001"),
-      gas: 21000n,
+      gas: BigInt(21000),
       maxFeePerGas: parseGwei("20"),
       maxPriorityFeePerGas: parseGwei("3"),
       chain: sepolia,

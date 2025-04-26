@@ -10,8 +10,8 @@
     "start": "next start"
   },
   "dependencies": {
-    "@getpara/cosmjs-v0-integration": "1.10.0",
-    "@getpara/react-sdk": "1.10.0",
+    "@getpara/cosmjs-v0-integration": "1.12.0",
+    "@getpara/react-sdk": "1.12.0",
     "@cosmjs/stargate": "0.33.1",
     "@cosmjs/cosmwasm-stargate": "0.33.1",
     "next": "15.1.5",

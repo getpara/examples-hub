@@ -12,7 +12,7 @@ import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants";
 
 import { getKeyShareInDB } from "../../db/keySharesDB.js";
 import { decrypt } from "../../utils/encryption-utils.js";
-import Example from "../../artifacts/Example.json" assert { type: "json" };
+import Example from "../../artifacts/Example.json" with { type: "json" };
 
 const EXAMPLE_CONTRACT_ADDRESS = "0x7920b6d8b07f0b9a3b96f238c64e022278db1419";
 const EXAMPLE_ABI = Example["contracts"]["contracts/Example.sol:Example"]["abi"];
@@ -74,7 +74,7 @@ export async function zerodevPregenSignHandler(req: Request, res: Response, next
       return;
     }
 
-    const env = process.env.PARA_ENVIRONMENT as Environment || Environment.BETA;
+    const env = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
     const para = new ParaServer(env, paraApiKey);
 
     const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });

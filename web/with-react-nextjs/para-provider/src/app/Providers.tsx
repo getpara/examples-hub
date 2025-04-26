@@ -1,7 +1,7 @@
 "use client";
-
+import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Environment, ParaProvider } from "@getpara/react-sdk";
+import {  ParaProvider } from "@getpara/react-sdk";
 import { API_KEY, ENVIRONMENT } from "@/constants";
 
 const queryClient = new QueryClient();
@@ -15,8 +15,8 @@ export function Providers({
     <QueryClientProvider client={queryClient}>
       <ParaProvider
         paraClientConfig={{
-          apiKey: "dd4d7071735029ce97dce17969e82ad6",
-          env: Environment.BETA,
+          apiKey: API_KEY,
+          env: ENVIRONMENT,
         }}>
         {children}
       </ParaProvider>

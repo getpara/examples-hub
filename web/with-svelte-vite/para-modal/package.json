@@ -10,7 +10,7 @@
     "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
   },
   "dependencies": {
-    "@getpara/react-sdk": "1.5.0",
+    "@getpara/react-sdk": "1.12.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

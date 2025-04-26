@@ -2,7 +2,6 @@ import type { NextFunction, Request, Response } from "express";
 import { Para as ParaServer, Environment } from "@getpara/server-sdk";
 import { SigningStargateClient } from "@cosmjs/stargate";
 import type { StdFee, Coin, MsgSendEncodeObject } from "@cosmjs/stargate";
-import { MsgSend } from "cosmjs-types/cosmos/bank/v1beta1/tx";
 import { ParaProtoSigner } from "@getpara/cosmjs-v0-integration";
 import { getKeyShareInDB } from "../../db/keySharesDB.js";
 import { decrypt } from "../../utils/encryption-utils.js";
@@ -22,7 +21,7 @@ export async function cosmjsPregenSignHandler(req: Request, res: Response, next:
       return;
     }
 
-    const env = process.env.PARA_ENVIRONMENT as Environment || Environment.BETA;
+    const env = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
     const para = new ParaServer(env, paraApiKey);
 
     const hasPregenWallet = await para.hasPregenWallet({ pregenIdentifier: email, pregenIdentifierType: "EMAIL" });
@@ -58,7 +57,7 @@ export async function cosmjsPregenSignHandler(req: Request, res: Response, next:
     };
     const memo = "Signed with Para";
 
-    const message: MsgSend = {
+    const message = {
       fromAddress,
       toAddress,
       amount: [amount],

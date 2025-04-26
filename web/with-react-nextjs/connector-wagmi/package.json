@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.64.2",
-    "@getpara/react-sdk": "1.10.0",
-    "@getpara/wagmi-v2-integration": "1.10.0",
+    "@getpara/react-sdk": "1.12.0",
+    "@getpara/wagmi-v2-integration": "1.12.0",
     "next": "15.1.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
