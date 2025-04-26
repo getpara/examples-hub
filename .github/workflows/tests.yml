@@ -2,20 +2,20 @@ name: Tests
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 env:
   # Node.js settings
   NODE_OPTIONS: "--max-old-space-size=4096"
-  
+
   # API keys (placeholders for CI)
   PARA_API_KEY: test-build-key
   VITE_PARA_API_KEY: test-build-key-vite
   NEXT_PUBLIC_PARA_API_KEY: test-build-key-next
   ENCRYPTION_KEY: test-encryption-key
   NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: test-wc-id
-  
+
   # Web3/blockchain configs
   REACT_APP_NETWORK: "testnet"
   NEXT_PUBLIC_NETWORK: "testnet"
@@ -26,17 +26,17 @@ env:
   NEXT_PUBLIC_ALCHEMY_KEY: "test-alchemy-key"
   REACT_APP_ALCHEMY_KEY: "test-alchemy-key"
   VITE_ALCHEMY_KEY: "test-alchemy-key"
-  
+
   # EVM chain settings
   NEXT_PUBLIC_DEFAULT_CHAIN: "sepolia"
   REACT_APP_DEFAULT_CHAIN: "sepolia"
   VITE_DEFAULT_CHAIN: "sepolia"
-  
+
   # Auth providers
   NEXT_PUBLIC_AUTH_PROVIDERS: "email,wallet"
   VITE_AUTH_PROVIDERS: "email,wallet"
   REACT_APP_AUTH_PROVIDERS: "email,wallet"
-  
+
   # Solana configs
   NEXT_PUBLIC_SOLANA_NETWORK: "devnet"
   REACT_APP_SOLANA_NETWORK: "devnet"
@@ -44,12 +44,12 @@ env:
   NEXT_PUBLIC_SOLANA_RPC_URL: "https://api.devnet.solana.com"
   REACT_APP_SOLANA_RPC_URL: "https://api.devnet.solana.com"
   VITE_SOLANA_RPC_URL: "https://api.devnet.solana.com"
-  
+
   # Cosmos configs
   NEXT_PUBLIC_COSMOS_CHAIN_ID: "theta-testnet-001"
   REACT_APP_COSMOS_CHAIN_ID: "theta-testnet-001"
   VITE_COSMOS_CHAIN_ID: "theta-testnet-001"
-  
+
   # IPFS/Arweave settings
   NEXT_PUBLIC_IPFS_GATEWAY: "https://ipfs.io/ipfs/"
   REACT_APP_IPFS_GATEWAY: "https://ipfs.io/ipfs/"
@@ -65,7 +65,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.19.0'
+          node-version: "20.19.0"
       - name: Build projects
         run: |
           set +e
@@ -124,7 +124,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.19.0'
+          node-version: "20.19.0"
       - name: Build projects
         run: |
           set +e
@@ -183,7 +183,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.19.0'
+          node-version: "20.19.0"
       - name: Build projects
         run: |
           set +e
@@ -301,7 +301,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.19.0'
+          node-version: "20.19.0"
       - name: Build projects
         run: |
           set +e
@@ -358,9 +358,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup Deno
-        uses: denoland/setup-deno@v1
+        uses: denoland/setup-deno@v2
         with:
-          deno-version: v1.x
+          deno-version: vx.x.x
       - name: Build projects
         run: |
           set +e
@@ -531,7 +531,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.19.0'
+          node-version: "20.19.0"
       - name: Install system dependencies
         run: |
           sudo apt-get update
@@ -624,7 +624,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.19.0'
+          node-version: "20.19.0"
       - name: Build projects
         run: |
           set +e
@@ -701,7 +701,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.19.0'
+          node-version: "20.19.0"
       - name: Build projects
         run: |
           set +e
@@ -778,7 +778,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.19.0'
+          node-version: "20.19.0"
       - name: Build projects
         run: |
           set +e

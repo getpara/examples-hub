@@ -6,7 +6,7 @@ import type { WalletClient, LocalAccount, SignableMessage, Hash } from "viem";
 import { createModularAccountAlchemyClient } from "@alchemy/aa-alchemy";
 import { BatchUserOperationCallData, WalletClientSigner, arbitrumSepolia } from "@alchemy/aa-core";
 import { encodeFunctionData } from "viem";
-import Example from "../../artifacts/Example.json" assert { type: "json" };
+import Example from "../../artifacts/Example.json" with { type: "json" };
 
 const EXAMPLE_CONTRACT_ADDRESS = "0x7920b6d8b07f0b9a3b96f238c64e022278db1419";
 const EXAMPLE_ABI = Example["contracts"]["contracts/Example.sol:Example"]["abi"];
@@ -57,7 +57,7 @@ export async function alchemySessionSignHandler(req: Request, res: Response, nex
     const alchemyApiKey = process.env.ALCHEMY_API_KEY;
     const alchemyGasPolicyId = process.env.ALCHEMY_GAS_POLICY_ID;
     const rpcUrl = process.env.ARBITRUM_SEPOLIA_RPC;
-    const env = process.env.PARA_ENVIRONMENT as Environment || Environment.BETA;
+    const env = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
 
     if (!paraApiKey || !alchemyApiKey || !alchemyGasPolicyId || !rpcUrl) {
       res

@@ -1,8 +1,8 @@
 "use client";
 
 import { usePara } from "@/components/ParaProvider";
-import { useState, useEffect } from "react";
-import { ethers, Transaction } from "ethers";
+import React, { useState, useEffect } from "react";
+import { ethers } from "ethers";
 
 export default function EthTransferDemo() {
   const [to, setTo] = useState("");
@@ -40,7 +40,10 @@ export default function EthTransferDemo() {
     }
   }, [address]);
 
-  const constructTransaction = async (toAddress: string, ethAmount: string): Promise<Transaction> => {
+  const constructTransaction = async (
+    toAddress: string,
+    ethAmount: string
+  ): Promise<ethers.providers.TransactionRequest> => {
     if (!address || !provider) throw new Error("No sender address or provider available");
 
     const nonce = await provider.getTransactionCount(address);
@@ -48,7 +51,7 @@ export default function EthTransferDemo() {
     const gasLimit = ethers.BigNumber.from(21000);
     const value = ethers.utils.parseEther(ethAmount);
 
-    const tx: Transaction = {
+    const tx: ethers.providers.TransactionRequest = {
       to: toAddress,
       value: value,
       nonce: nonce,

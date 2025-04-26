@@ -2,7 +2,6 @@ import type { NextFunction, Request, Response } from "express";
 import { Para as ParaServer, Environment } from "@getpara/server-sdk";
 import { SigningStargateClient } from "@cosmjs/stargate";
 import type { StdFee, Coin, MsgSendEncodeObject } from "@cosmjs/stargate";
-import { MsgSend } from "cosmjs-types/cosmos/bank/v1beta1/tx";
 import { ParaProtoSigner } from "@getpara/cosmjs-v0-integration";
 
 export async function cosmjsSessionSignHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -20,7 +19,7 @@ export async function cosmjsSessionSignHandler(req: Request, res: Response, next
       return;
     }
 
-    const env = process.env.PARA_ENVIRONMENT as Environment || Environment.BETA;
+    const env = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
     const para = new ParaServer(env, paraApiKey);
     await para.importSession(session);
 
@@ -43,7 +42,7 @@ export async function cosmjsSessionSignHandler(req: Request, res: Response, next
     };
     const memo = "Signed with Para";
 
-    const message: MsgSend = {
+    const message = {
       fromAddress,
       toAddress,
       amount: [amount],
@@ -55,8 +54,6 @@ export async function cosmjsSessionSignHandler(req: Request, res: Response, next
     };
 
     const signResult = await stargateClient.signAndBroadcast(fromAddress, [demoTxMessage], fee, memo);
-
-    
 
     res.status(200).json({
       message: "Transaction signed using CosmJS + Para (session-based wallet).",

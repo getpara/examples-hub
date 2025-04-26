@@ -10,8 +10,8 @@
     "start": "next start"
   },
   "dependencies": {
-    "@getpara/viem-v1-integration": "1.10.0",
-    "@getpara/react-sdk": "1.10.0",
+    "@getpara/viem-v1-integration": "1.12.0",
+    "@getpara/react-sdk": "1.12.0",
     "viem": "1.21.4",
     "next": "15.1.5",
     "react": "^19.0.0",

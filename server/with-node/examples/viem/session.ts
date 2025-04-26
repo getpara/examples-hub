@@ -19,7 +19,7 @@ export async function viemSessionSignHandler(req: Request, res: Response, next: 
       return;
     }
 
-    const env = process.env.PARA_ENVIRONMENT as Environment || Environment.BETA;
+    const env = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
     const para = new ParaServer(env, paraApiKey);
     await para.importSession(session);
 
@@ -34,7 +34,7 @@ export async function viemSessionSignHandler(req: Request, res: Response, next: 
       account: viemParaAccount,
       to: viemParaAccount.address,
       value: parseEther("0.0001"),
-      gas: 21000n,
+      gas: BigInt(21000),
       maxFeePerGas: parseGwei("20"),
       maxPriorityFeePerGas: parseGwei("3"),
       chain: sepolia,
