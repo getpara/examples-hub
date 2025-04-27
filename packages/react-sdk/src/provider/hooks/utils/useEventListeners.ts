@@ -122,9 +122,11 @@ export const useEventListeners = ({
 
   const guestWalletsCreatedListener = useCallback(
     (event: GuestWalletsCreatedEvent) => {
+      queryClient.refetchQueries({ queryKey: [ACCOUNT_BASE_KEY] });
+      updateSelectedWallet();
       onGuestWalletsCreated?.(event);
     },
-    [onGuestWalletsCreated],
+    [queryClient, updateSelectedWallet, onGuestWalletsCreated],
   );
 
   useEffect(() => {

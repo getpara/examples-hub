@@ -563,7 +563,7 @@ export abstract class ParaCore implements CoreInterface {
 
       const [isUnclaimed, isOwned] = [this.isPregenWalletUnclaimed(wallet), this.isWalletOwned(wallet)];
 
-      if (forbidPregen && isUnclaimed) {
+      if (forbidPregen && isUnclaimed && wallet.pregenIdentifierType !== 'GUEST_ID') {
         error = `pre-generated wallet with id ${wallet?.id} cannot be selected`;
       } else if (!isOwned && !isUnclaimed) {
         error = `wallet with id ${wallet?.id} is not owned by the current user`;

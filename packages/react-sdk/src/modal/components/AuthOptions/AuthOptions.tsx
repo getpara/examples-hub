@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useMemo } from 'react';
+import { ReactNode, useMemo } from 'react';
 import styled from 'styled-components';
 import { OAuth } from '../OAuth/OAuth.js';
 import { TOAuthMethod } from '@getpara/web-sdk';
@@ -24,7 +24,6 @@ export const AuthOptions = ({
   const { wallets } = useExternalWallets();
   const isDark = useStore(state => state.modalConfig?.theme?.mode === 'dark');
   const guestAddFundsTab = useModalStore(state => state.guestAddFundsTab);
-  const setGuestAddFundsTab = useModalStore(state => state.setGuestAddFundsTab);
 
   const Content = useMemo(() => {
     const Methods: ReactNode[] = [];
@@ -39,12 +38,6 @@ export const AuthOptions = ({
 
     return <>{Methods}</>;
   }, [oAuthMethods, disableEmailLogin, disablePhoneLogin, isGuestModeEnabled, wallets]);
-
-  useEffect(() => {
-    return () => {
-      setGuestAddFundsTab();
-    };
-  }, []);
 
   return (
     <Container>

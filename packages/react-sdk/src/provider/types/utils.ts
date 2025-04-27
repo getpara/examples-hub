@@ -1,6 +1,6 @@
 import { CoreMethodName, CoreMethodParams, CoreMethodResponse, CoreMethods } from '@getpara/web-sdk';
 import { UseMutationReturnType } from './query.js';
-import { UseMutateFunction, UseMutateAsyncFunction } from '@tanstack/react-query';
+import { UseMutateFunction, UseMutateAsyncFunction, MutationState, Mutation } from '@tanstack/react-query';
 
 export type Compute<type> = { [key in keyof type]: type[key] } & unknown;
 
@@ -28,8 +28,32 @@ type AsyncHook<method extends CoreMethodName & keyof CoreMethods> = {
   >;
 };
 
+export type CoreMethodUseMutationReturnType<method extends CoreMethodName & keyof CoreMethods> = UseMutationReturnType<
+  Awaited<CoreMethodResponse<method>>,
+  Error,
+  CoreMethodParams<method> | void,
+  unknown
+>;
+
+export type CoreMethodMutation<method extends CoreMethodName & keyof CoreMethods> = Mutation<
+  Awaited<CoreMethodResponse<method>>,
+  Error,
+  CoreMethodParams<method> | void,
+  unknown
+>;
+
+export type CoreMethodMutationState<method extends CoreMethodName & keyof CoreMethods> = MutationState<
+  Awaited<CoreMethodResponse<method>>,
+  Error,
+  CoreMethodParams<method> | void,
+  unknown
+>;
+
 export type CoreMethodHook<method extends CoreMethodName & keyof CoreMethods> = Compute<
-  UseMutationReturnType<CoreMethods[method]['response'], Error, CoreMethods[method]['params'] | void, unknown> &
-    SyncHook<method> &
-    AsyncHook<method>
+  CoreMethodUseMutationReturnType<method> & SyncHook<method> & AsyncHook<method>
+>;
+
+export type CoreMethodStateHook<method extends CoreMethodName & keyof CoreMethods> = () => Omit<
+  CoreMethodUseMutationReturnType<method>,
+  'reset'
 >;

@@ -15,6 +15,7 @@ import {
   useModal,
   useClient,
   useAccount as useParaAccount,
+  useCreateGuestWalletsState,
 } from '@getpara/react-sdk';
 import { ParaProtoSigner, createTestTransaction as createTestTransactionCosmos } from '@getpara/cosmjs-v0-integration';
 import { ParaEthersSigner, createTestTransaction as createTestTransactionEvm } from '@getpara/ethers-v6-integration';
@@ -519,6 +520,7 @@ function AppInner({
   const [testTxSignature, setTestTxSignature] = useState('');
 
   const { data: paraAccount, isLoading: isAccountLoading } = useParaAccount();
+  const { isPending: isCreateGuestWalletsPending } = useCreateGuestWalletsState();
 
   const { openModal } = useModal();
   const para = useClient();
@@ -714,6 +716,10 @@ function AppInner({
       }
     }
   }, [walletId, para?.currentWalletIds, para?.wallets]);
+
+  useEffect(() => {
+    if (isCreateGuestWalletsPending) toast('Creating guest wallets...');
+  }, [isCreateGuestWalletsPending]);
 
   const [isEvm, isSolana] = [
     !!walletId && para?.wallets[walletId]?.scheme !== 'ED25519',

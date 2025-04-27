@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { InnerStepContainer, StepContainer, StyledCpslTileButton } from '../common.js';
 import { CpslButton, CpslIcon, CpslSpinner, CpslText } from '@getpara/react-components';
 import { OnRampStep, useModalStore } from '../../stores/index.js';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ModalStep } from '../../utils/steps.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
@@ -68,6 +68,10 @@ export const Account = ({ onClose }: AccountProps) => {
     setFlow(undefined);
     setIsDisconnecting(false);
   };
+
+  useEffect(() => {
+    setGuestAddFundsTab();
+  }, []);
 
   return (
     <StepContainer $wide>

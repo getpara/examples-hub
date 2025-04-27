@@ -1,5 +1,5 @@
 import * as actions from '../../actions/index.js';
-import { generateHook } from './utils.js';
+import { generateHook, generateStateHook } from './utils.js';
 
 export const useSignUpOrLogIn = generateHook('signUpOrLogIn', actions.signUpOrLogIn);
 export const useVerifyNewAccount = generateHook('verifyNewAccount', actions.verifyNewAccount);
@@ -30,3 +30,5 @@ export const useUpdatePregenWalletIdentifier = generateHook(
 export const useCreateGuestWallets = generateHook('createGuestWallets', actions.createGuestWallets);
 export const useSignMessage = generateHook('signMessage', actions.signMessage);
 export const useSignTransaction = generateHook('signTransaction', actions.signTransaction);
+
+export const useCreateGuestWalletsState = generateStateHook('createGuestWallets');
