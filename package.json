@@ -31,7 +31,7 @@
     "lerna-publish": "lerna publish from-package --no-private",
     "lerna-publish-dev": "lerna publish preminor --preid dev --dist-tag dev",
     "alpha-version": "lerna version prerelease --preid alpha --no-push --no-git-tag-version && yarn gen-changelog-alpha",
-    "alpha-publish": "lerna publish --dist-tag alpha --no-private",
+    "alpha-publish": "lerna publish from-package --no-private --dist-tag alpha",
     "test": "lerna run test",
     "e2e": "playwright test --headed",
     "gen-changelog": "node ./scripts/gen-changelog.mjs --branch main",

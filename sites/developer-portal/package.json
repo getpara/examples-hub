@@ -1,7 +1,7 @@
 {
   "name": "developer-portal",
   "private": true,
-  "version": "2.0.0-alpha.0",
+  "version": "2.0.0-alpha.11",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -17,17 +17,17 @@
     "legacy-deploy-prod": "yarn && VITE_STATSIG_CLIENT_KEY=client-6FzowqF52cFdzNeMY1hTDz7iTZtnjSoB7VU85ybV2fK VITE_ENVIRONMENT=PROD VITE_CAPSULE_API_KEY=36e481099ebcaad4beed4bed1ce98566 yarn build && aws s3 sync dist/ s3://capsule-prod-dev-portal --profile prod --delete"
   },
   "dependencies": {
-    "@getpara/react-common": "2.0.0-alpha.0",
-    "@getpara/react-components": "2.0.0-alpha.0",
-    "@getpara/react-sdk": "2.0.0-alpha.0",
-    "@getpara/react-component-library": "1.0.0-alpha.0",
+    "@getpara/react-common": "2.0.0-alpha.11",
+    "@getpara/react-component-library": "1.0.0-alpha.6",
+    "@getpara/react-components": "2.0.0-alpha.11",
+    "@getpara/react-sdk": "2.0.0-alpha.11",
     "@hookform/resolvers": "5.0.1",
     "@sentry/react": "^9.12.0",
     "@tanstack/react-query": "^5.74.0",
     "@typeform/embed-react": "^4.1.0",
     "axios": "^1.8.4",
-    "color2k": "^2.0.3",
     "clsx": "^2.1.1",
+    "color2k": "^2.0.3",
     "date-fns": "^3.6.0",
     "framer-motion": "^11.3.31",
     "libphonenumber-js": "^1.11.7",
