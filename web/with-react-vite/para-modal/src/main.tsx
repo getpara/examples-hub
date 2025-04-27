@@ -44,6 +44,7 @@ createRoot(document.getElementById("root")!).render(
           logo: "/para.svg",
           recoverySecretStepEnabled: true,
           twoFactorAuthEnabled: false,
+          isGuestModeEnabled: true,
         }}
       >
         <App />

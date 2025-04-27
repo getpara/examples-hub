@@ -14,8 +14,8 @@
     "postinstall": "yarn setup-para"
   },
   "dependencies": {
-    "@getpara/react-sdk": "2.0.0-dev.0",
-    "@getpara/solana-web3.js-v1-integration": "2.0.0-dev.0",
+    "@getpara/react-sdk": "2.0.0-alpha.11",
+    "@getpara/solana-web3.js-v1-integration": "2.0.0-alpha.11",
     "@solana/kit": "2.1.0",
     "@solana/spl-token": "0.4.13",
     "@solana/web3.js": "1.98.0",

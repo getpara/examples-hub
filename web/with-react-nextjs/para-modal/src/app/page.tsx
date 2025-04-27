@@ -1,6 +1,6 @@
 "use client";
 
-import { useModal, useWallet, useAccount } from "@getpara/react-sdk";
+import { useAccount, useCreateGuestWalletsState, useModal, useWallet } from "@getpara/react-sdk";
 import "@getpara/react-sdk/styles.css";
 import { WalletDisplay } from "@/components/WalletDisplay";
 
@@ -8,6 +8,7 @@ export default function Home() {
   const { openModal } = useModal();
   const { data: wallet } = useWallet();
   const { data: account, isLoading, error } = useAccount();
+  const { isPending: isCreateGuestWalletsPending } = useCreateGuestWalletsState();
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen gap-6 p-8">
@@ -16,7 +17,7 @@ export default function Home() {
         This minimal example demonstrates how to integrate the Para Modal in a
         Next.js (App Router) project.
       </p>
-      {account?.isConnected ? (
+      {isCreateGuestWalletsPending ? <p>Creating guest wallets...</p> : account?.isConnected ? (
         <WalletDisplay walletAddress={wallet?.address} />
       ) : (
         <p className="text-center">You are not logged in.</p>
