@@ -10,8 +10,8 @@
     "postinstall": "yarn setup-para"
   },
   "dependencies": {
-    "@getpara/react-sdk": "2.0.0-dev.0",
-    "@getpara/solana-wallet-connectors": "2.0.0-dev.0",
+    "@getpara/react-sdk": "2.0.0-alpha.11",
+    "@getpara/solana-wallet-connectors": "2.0.0-alpha.11",
     "@solana/web3.js": "^1.98.0",
     "@tanstack/react-query": "^5.0.0",
     "next": "15.1.5",

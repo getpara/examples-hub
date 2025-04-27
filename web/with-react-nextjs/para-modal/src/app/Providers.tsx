@@ -46,6 +46,7 @@ export function Providers({
           logo: "/para.svg",
           recoverySecretStepEnabled: true,
           twoFactorAuthEnabled: false,
+          isGuestModeEnabled: true,
         }}
       >
         {children}
