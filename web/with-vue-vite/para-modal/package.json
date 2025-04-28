@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "postinstall": "yarn setup-para"
   },
   "dependencies": {
     "@getpara/react-sdk": "2.0.0-alpha.11",
