@@ -8,6 +8,7 @@
 import SwiftUI
 import ParaSwift
 import AuthenticationServices
+import os
 
 struct OAuthView: View {
     @EnvironmentObject var paraManager: ParaManager
@@ -17,43 +18,61 @@ struct OAuthView: View {
     @Environment(\.authorizationController) private var authorizationController
     @Environment(\.webAuthenticationSession) private var webAuthenticationSession
     
-    @State private var email = ""
-    @State private var shouldNavigateToVerificationView = false
-    @State private var error: Error?
+    @State private var isLoading = false
+    @State private var errorMessage: String?
     @State private var showError = false
+    @State private var debugInfo: String?
+    
+    private let logger = Logger(subsystem: "com.example", category: "OAuthView")
     
     private func login(provider: OAuthProvider) {
+        isLoading = true
+        errorMessage = nil
+        debugInfo = "Starting OAuth flow for provider: \(provider.rawValue)"
+        
         Task {
-            do {
-                let email = try await paraManager.oAuthConnect(provider: provider, webAuthenticationSession: webAuthenticationSession)
-                handleLogin(email: email)
-            } catch {
-                self.error = error
+            // Use the new handleOAuth method that encapsulates the entire flow
+            let result = await paraManager.handleOAuth(
+                provider: provider,
+                webAuthenticationSession: webAuthenticationSession,
+                authorizationController: authorizationController
+            )
+            
+            if result.success {
+                logger.debug("OAuth authentication successful")
+                debugInfo = "Authentication successful"
+                appRootManager.currentRoot = .home
+            } else {
+                logger.error("OAuth error: \(result.errorMessage ?? "Unknown error")")
+                errorMessage = result.errorMessage
             }
-        }
-    }
-    
-    private func handleLogin(email: String) {
-        Task {
-            self.email = email
-            let authState = try await paraManager.signUpOrLogInV2(auth: (email: email))
-
-            switch (authState['stage']) {
-                case "verify":
-                    isLoading = false
-                    shouldNavigateToVerificationView = true
-                    break
-                case "login":
-                    isLoading = false
-                    try await paraManager.login(authorizationController: authorizationController, authState: authState)
-                    appRootManager.currentRoot = .home
-                    break
-            }
+            
+            isLoading = false
         }
     }
     
     var body: some View {
         VStack {
+            if isLoading {
+                ProgressView("Processing...")
+                    .padding()
+            }
+            
+            if let errorMessage = errorMessage {
+                Text(errorMessage)
+                    .foregroundColor(.red)
+                    .multilineTextAlignment(.center)
+                    .padding()
+            }
+            
+            if let debugInfo = debugInfo {
+                Text(debugInfo)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding()
+            }
+            
             Button {
                 login(provider: .google)
             } label: {
@@ -71,6 +90,7 @@ struct OAuthView: View {
             .tint(.primary)
             .foregroundStyle(.background)
             .accessibilityIdentifier("googleOAuthButton")
+            .disabled(isLoading)
             
             Button {
                 login(provider: .discord)
@@ -87,6 +107,7 @@ struct OAuthView: View {
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
             .tint(Color(uiColor: UIColor(rgb: 0x5865F2)))
+            .disabled(isLoading)
             
             Button {
                 login(provider: .apple)
@@ -102,16 +123,7 @@ struct OAuthView: View {
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
-        }
-        .alert("Connection Error", isPresented: $showError) {
-            Button("OK", role: .cancel) { }
-        } message: {
-            Text(error?.localizedDescription ?? "Unknown error occurred")
-        }
-        .navigationDestination(isPresented: $shouldNavigateToVerificationView) {
-            VerifyEmailView(email: email)
-                .environmentObject(paraManager)
-                .environmentObject(appRootManager)
+            .disabled(isLoading)
         }
         .padding()
         .navigationTitle("OAuth + Passkey")

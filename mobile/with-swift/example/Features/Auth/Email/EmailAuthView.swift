@@ -68,25 +68,29 @@ struct EmailAuthView: View {
                 
                 isLoading = true
                 Task {
-                    do {
-                        let userExists = try await paraManager.checkIfUserExists(email: email)
-                        if userExists {
-                            isLoading = false
-                            try await paraManager.login(authorizationController: authorizationController, authInfo: EmailAuthInfo(email: email))
-                            appRootManager.currentRoot = .home
-                        } else {
-                            try await paraManager.createUser(email: email)
-                            isLoading = false
-                            shouldNavigateToVerifyEmail = true
-                        }
-                    } catch {
-                        print(error.localizedDescription)
-                        errorMessage = "Failed to create user: \(error.localizedDescription)"
-                        isLoading = false
+                    let result = await paraManager.handleEmailAuth(
+                        email: email,
+                        authorizationController: authorizationController
+                    )
+                    
+                    isLoading = false
+                    
+                    switch result.status {
+                    case .success:
+                        // Authentication successful, navigate to home
+                        appRootManager.currentRoot = .home
+                        
+                    case .needsVerification:
+                        // User needs to verify email
+                        shouldNavigateToVerifyEmail = true
+                        
+                    case .error:
+                        // Error occurred
+                        errorMessage = result.errorMessage
                     }
                 }
             } label: {
-                Text("Sign Up")
+                Text("Continue")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
@@ -107,7 +111,7 @@ struct EmailAuthView: View {
             
             Button {
                 Task {
-                    try await paraManager.login(authorizationController: authorizationController, authInfo: nil)
+                    try await paraManager.loginWithPasskey(authorizationController: authorizationController, authInfo: nil)
                     appRootManager.currentRoot = .home
                 }
             } label: {

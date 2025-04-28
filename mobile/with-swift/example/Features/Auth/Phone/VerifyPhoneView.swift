@@ -1,11 +1,12 @@
 import SwiftUI
 import ParaSwift
 
-struct VerifyEmailView: View {
+struct VerifyPhoneView: View {
     @EnvironmentObject var paraManager: ParaManager
     @EnvironmentObject var appRootManager: AppRootManager
     
-    let email: String
+    let phoneNumber: String
+    let countryCode: String
     
     @State private var code = ""
     @State private var isLoading = false
@@ -16,7 +17,7 @@ struct VerifyEmailView: View {
     
     var body: some View {
         VStack(spacing: 20) {
-            Text("A verification code was sent to your email. Enter it below to verify.")
+            Text("A verification code was sent to your phone number. Enter it below to verify.")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -27,15 +28,13 @@ struct VerifyEmailView: View {
                 .textFieldStyle(.roundedBorder)
                 .padding(.horizontal)
                 .disabled(isLoading)
-                .accessibilityIdentifier("codeInput-0")
-                .accessibilityLabel("Verification Code")
+                .accessibilityIdentifier("verificationCodeField")
             
             if let errorMessage = errorMessage {
                 Text(errorMessage)
                     .foregroundColor(.red)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
-                    .accessibilityIdentifier("errorMessage")
             }
             
             if isLoading {
@@ -53,19 +52,34 @@ struct VerifyEmailView: View {
                 }
                 isLoading = true
                 errorMessage = nil
-                loadingStateText = "Verifying..."
+                loadingStateText = "Creating wallet..."
+                
                 Task {
-                    do {
-                        let biometricsId = try await paraManager.verify(verificationCode: code)
-                        loadingStateText = "Generating Passkey..."
-                        try await paraManager.generatePasskey(identifier: email, biometricsId: biometricsId, authorizationController: authorizationController)
-                        loadingStateText = "Creating Wallet..."
-                        try await paraManager.createWallet(type: .evm, skipDistributable: false)
-                        isLoading = false
+                    // Clean up phone number and country code
+                    let cleanPhoneNumber = phoneNumber.replacingOccurrences(of: " ", with: "")
+                    let cleanCountryCode = countryCode.replacingOccurrences(of: "+", with: "")
+                    
+                    let result = await paraManager.handlePhoneAuth(
+                        phoneNumber: cleanPhoneNumber,
+                        countryCode: cleanCountryCode,
+                        verificationCode: code,
+                        authorizationController: authorizationController
+                    )
+                    
+                    isLoading = false
+                    
+                    switch result.status {
+                    case .success:
+                        // Authentication successful, navigate to home
                         appRootManager.currentRoot = .home
-                    } catch {
-                        isLoading = false
-                        errorMessage = "Verification failed: \(error.localizedDescription)"
+                        
+                    case .needsVerification:
+                        // This shouldn't happen when verification code is provided
+                        errorMessage = "Unexpected verification required"
+                        
+                    case .error:
+                        // Error occurred
+                        errorMessage = result.errorMessage
                     }
                 }
             } label: {
@@ -81,26 +95,29 @@ struct VerifyEmailView: View {
             .buttonStyle(.borderedProminent)
             .disabled(isLoading || code.isEmpty)
             .padding(.horizontal)
-            .accessibilityIdentifier("verifyButton")
-            .accessibilityLabel("Verify Button")
+            .accessibilityLabel("verifyButton")
             
             Button("Resend Code") {
-                // Add resend code functionality
+                Task {
+                    do {
+                        try await paraManager.resendVerificationCode()
+                    } catch {
+                        errorMessage = "Failed to resend code: \(error.localizedDescription)"
+                    }
+                }
             }
             .padding(.top)
-            .accessibilityIdentifier("resendCodeButton")
             
             Spacer()
         }
         .padding()
-        .navigationTitle("Verify Email")
-        .accessibilityIdentifier("verifyEmailView")
+        .navigationTitle("Verify Phone")
     }
 }
 
 #Preview {
     NavigationStack {
-        VerifyEmailView(email: "test@example.com")
+        VerifyPhoneView(phoneNumber: "1234567890", countryCode: "+1")
             .environmentObject(ParaManager(environment: .sandbox, apiKey: "preview-key"))
             .environmentObject(AppRootManager())
     }

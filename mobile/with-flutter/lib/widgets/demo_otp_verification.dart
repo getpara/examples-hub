@@ -1,4 +1,3 @@
-import 'package:para_flutter/util/random.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -27,7 +26,8 @@ class _DemoOtpVerificationState extends State<DemoOtpVerification> {
   @override
   void initState() {
     super.initState();
-    _otpController.text = randomTestOTP(length: _otpLength, allowZeroStart: true);
+    // _otpController.text = randomTestOTP(length: _otpLength, allowZeroStart: true);
+    _otpController.text = '123456'; // Set the OTP code directly
   }
 
   @override
@@ -136,7 +136,10 @@ class _DemoOtpVerificationState extends State<DemoOtpVerification> {
               ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: _isLoading || _otpController.text.length != _otpLength ? null : _handleVerification,
+                onPressed:
+                    _isLoading || _otpController.text.length != _otpLength
+                        ? null
+                        : _handleVerification,
                 child: _isLoading
                     ? const SizedBox(
                         height: 20,

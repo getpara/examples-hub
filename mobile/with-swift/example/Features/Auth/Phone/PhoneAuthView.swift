@@ -133,21 +133,31 @@ struct PhoneAuthView: View {
                 isLoading = true
                 errorMessage = nil
                 Task {
-                    do {
-                        let userExists = try await paraManager.checkIfUserExistsByPhone(phoneNumber: phoneNumber.replacingOccurrences(of: " ", with: ""), countryCode: countryCode)
+                    // Clean up phone number and country code
+                    let cleanPhoneNumber = phoneNumber.replacingOccurrences(of: " ", with: "")
+                    let cleanCountryCode = countryCode.replacingOccurrences(of: "+", with: "")
+                    
+                    // Use the new handlePhoneAuth method
+                    let result = await paraManager.handlePhoneAuth(
+                        phoneNumber: cleanPhoneNumber,
+                        countryCode: cleanCountryCode,
+                        authorizationController: authorizationController
+                    )
+                    
+                    isLoading = false
+                    
+                    switch result.status {
+                    case .success:
+                        // Authentication successful, navigate to home
+                        appRootManager.currentRoot = .home
                         
-                        if userExists {
-                            try await paraManager.login(authorizationController: authorizationController, authInfo: PhoneAuthInfo(phone: phoneNumber.replacingOccurrences(of: " ", with: ""), countryCode: countryCode))
-                            appRootManager.currentRoot = .home
-                            return
-                        }
-                        
-                        try await paraManager.createUserByPhone(phoneNumber: phoneNumber.replacingOccurrences(of: " ", with: ""), countryCode: countryCode)
-                        isLoading = false
+                    case .needsVerification:
+                        // User needs to verify phone number
                         shouldNavigateToVerifyPhoneView = true
-                    } catch {
-                        errorMessage = "Failed to create user: \(error.localizedDescription)"
-                        isLoading = false
+                        
+                    case .error:
+                        // Error occurred
+                        errorMessage = result.errorMessage
                     }
                 }
             } label: {
@@ -156,7 +166,7 @@ struct PhoneAuthView: View {
             }
             .buttonStyle(.borderedProminent)
             .disabled(isLoading || phoneNumber.isEmpty)
-            .accessibilityLabel("continueButton")
+            .accessibilityIdentifier("continueButton")
             .navigationDestination(isPresented: $shouldNavigateToVerifyPhoneView) {
                 VerifyPhoneView(phoneNumber: phoneNumber.replacingOccurrences(of: " ", with: ""), countryCode: countryCode)
             }
@@ -169,7 +179,7 @@ struct PhoneAuthView: View {
             
             Button {
                 Task.init {
-                    try await paraManager.login(authorizationController: authorizationController, authInfo: nil)
+                    try await paraManager.loginWithPasskey(authorizationController: authorizationController, authInfo: nil)
                     appRootManager.currentRoot = .home
                 }
             } label: {

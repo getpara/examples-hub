@@ -136,46 +136,46 @@ The example implements multiple authentication flows, each supporting passkey fu
 
 ```dart
 // Sign up or log in
-var authState = await para.signUpOrLogInV2(auth: (email: email));
+var authState = await para.signUpOrLogIn(auth: {'email': email});
 
 // First-time user setup
-if (authState.stage == 'verify') {
-
-  // Verify email with OTP
-  authState = await para.verifyNewAccount({ verificationCode: code });
-
-  // Set up passkey
-  await para.generatePasskey({ email: email, biometricsId: signupState.passkeyId });
-
-  // Create wallet
-  final result = await para.createWallet({ skipDistribute: false });
-}
-
-// Login with passkey
-final wallet = await para.login();
-```
-
-**Phone Authentication Flow**
-
-```dart
-// Sign up or log in - phone is an international format like `+13105551234`
-var authState = await para.signUpOrLogInV2(auth: (phone: phone));
-
-// First-time user setup
-if (authState.stage == 'verify') {
+if (authState.stage == AuthStage.verify) {
 
   // Verify email with OTP
   authState = await para.verifyNewAccount(verificationCode: code);
 
   // Set up passkey
-  await para.generatePasskey(phone: phone, biometricsId: signupState.passkeyId);
+  await para.generatePasskey(identifier: email, biometricsId: signupState.passkeyId);
 
   // Create wallet
   final result = await para.createWallet(skipDistribute: false);
 }
 
 // Login with passkey
-final wallet = await para.login();
+final wallet = await para.loginWithPasskey();
+```
+
+**Phone Authentication Flow**
+
+```dart
+// Sign up or log in - phone is an international format like `+13105551234`
+var authState = await para.signUpOrLogIn(auth: {'phone': phone});
+
+// First-time user setup
+if (authState.stage == AuthStage.verify) {
+
+  // Verify email with OTP
+  authState = await para.verifyNewAccount(verificationCode: code);
+
+  // Set up passkey
+  await para.generatePasskey(identifier: phone, biometricsId: signupState.passkeyId);
+
+  // Create wallet
+  final result = await para.createWallet(skipDistribute: false);
+}
+
+// Login with passkey
+final wallet = await para.loginWithPasskey();
 ```
 
 **Third-Party Authentication Flows**
@@ -183,65 +183,67 @@ With third-party flows, verification via a one-time code is bypassed:
 ***OAuth***
 ```dart
 // Verify via an OAuth service
-final authState = await para.verifyOAuthV2({
-  onOAuthUrl: (String oAuthUrl) {
-    // handle the OAuth URL, for example, opening it in a WebView
-  }
-  isCanceled: () {
-    // cancel if some change occurs in your UI
-  }
-})
+final authState = await para.verifyOAuth(
+  provider: OAuthMethod.google,
+  deeplinkUrl: 'your-app-scheme'
+);
 
 // First-time user setup
-if (authState.stage === 'signup') {
-  await para.generatePasskey(authState);
+if (authState.stage == AuthStage.signup) {
+  await para.generatePasskey(
+    identifier: authState.userId,
+    biometricsId: authState.passkeyId!
+  );
 
   await para.createWallet(skipDistribute: false);
 }
 
 // Log in user
-final wallet = await para.login();
+final wallet = await para.loginWithPasskey();
 ```
 
 ***Farcaster***
 ```dart
-final authState = await para.verifyFarcasterV2(
-  onConnectUri: (String connectUri) {
-    // handle the Farcaster URI
-  }
+final authState = await para.verifyFarcaster(
   isCanceled: () {
     // cancel if some change occurs in your UI
     return false;
   }
-)
+);
 
 // First-time user setup
-if (authState.stage === 'signup') {
-  await para.generatePasskey(authState);
+if (authState.stage == AuthStage.signup) {
+  await para.generatePasskey(
+    identifier: authState.userId,
+    biometricsId: authState.passkeyId!
+  );
 
   await para.createWallet(skipDistribute: false);
 }
 
 // Log in user
-final wallet = await para.login();
+final wallet = await para.loginWithPasskey();
 ```
 
 ***Telegram***
 ```dart
-final authState = await para.verifyTelegramV2(
+final authState = await para.verifyTelegram(
   // Refer to the Telegram docs for information on bot authentication
   telegramAuthObject: telegramAuthObject,
 );
 
 // First-time user setup
-if (authState.stage === 'signup') {
-  await para.generatePasskey(authState);
+if (authState.stage == AuthStage.signup) {
+  await para.generatePasskey(
+    identifier: authState.userId,
+    biometricsId: authState.passkeyId!
+  );
 
   await para.createWallet(skipDistribute: false);
 }
 
 // Log in user
-final wallet = await para.login();
+final wallet = await para.loginWithPasskey();
 ```
 
 ### Wallet Management

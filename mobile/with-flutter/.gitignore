@@ -46,3 +46,6 @@ app.*.map.json
 
 
 *.env
+pubspec.override.yaml
+
+../CLAUDE.md

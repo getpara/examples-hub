@@ -11,6 +11,7 @@
 		8FA007862D57F1AA009EF0C3 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA007842D57F1AA009EF0C3 /* Extensions.swift */; };
 		8FA007882D581F0D009EF0C3 /* ExternalWalletAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA007872D581F08009EF0C3 /* ExternalWalletAuthView.swift */; };
 		8FA0078B2D5A7841009EF0C3 /* MetaMaskDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA0078A2D5A7841009EF0C3 /* MetaMaskDemoView.swift */; };
+		8FC8B8FD2D8B7AE10046C3DC /* LaunchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FC8B8FB2D8B7AE10046C3DC /* LaunchView.swift */; };
 		E8315DD82D5548F100FFF8C8 /* WalletsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8315DD72D5548F100FFF8C8 /* WalletsView.swift */; };
 		E8315DDA2D55717300FFF8C8 /* SolanaWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8315DD92D55717300FFF8C8 /* SolanaWalletView.swift */; };
 		E8315DDC2D55717F00FFF8C8 /* CosmosWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8315DDB2D55717F00FFF8C8 /* CosmosWalletView.swift */; };
@@ -25,7 +26,7 @@
 		E8F93B2C2C21EBED006AA3F6 /* ExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8F93B2B2C21EBED006AA3F6 /* ExampleApp.swift */; };
 		E8F93B302C21EBEE006AA3F6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E8F93B2F2C21EBEE006AA3F6 /* Assets.xcassets */; };
 		E8F93B332C21EBEE006AA3F6 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E8F93B322C21EBEE006AA3F6 /* Preview Assets.xcassets */; };
-		E8F93B3E2C21ECFB006AA3F6 /* UserAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8F93B3D2C21ECFB006AA3F6 /* UserAuthView.swift */; };
+		E8F93B3E2C21ECFB006AA3F6 /* AuthOptionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8F93B3D2C21ECFB006AA3F6 /* AuthOptionsView.swift */; };
 		E8F93B402C21ED00006AA3F6 /* VerifyEmailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8F93B3F2C21ED00006AA3F6 /* VerifyEmailView.swift */; };
 		E8F93B422C21ED05006AA3F6 /* EVMWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8F93B412C21ED05006AA3F6 /* EVMWalletView.swift */; };
 /* End PBXBuildFile section */
@@ -47,6 +48,7 @@
 		8FA007872D581F08009EF0C3 /* ExternalWalletAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalWalletAuthView.swift; sourceTree = "<group>"; };
 		8FA007892D58387F009EF0C3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8FA0078A2D5A7841009EF0C3 /* MetaMaskDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetaMaskDemoView.swift; sourceTree = "<group>"; };
+		8FC8B8FB2D8B7AE10046C3DC /* LaunchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchView.swift; sourceTree = "<group>"; };
 		8FE93AA72D80F58C00CE018E /* exampleUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = exampleUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8315DD72D5548F100FFF8C8 /* WalletsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletsView.swift; sourceTree = "<group>"; };
 		E8315DD92D55717300FFF8C8 /* SolanaWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SolanaWalletView.swift; sourceTree = "<group>"; };
@@ -61,7 +63,7 @@
 		E8F93B2B2C21EBED006AA3F6 /* ExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleApp.swift; sourceTree = "<group>"; };
 		E8F93B2F2C21EBEE006AA3F6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E8F93B322C21EBEE006AA3F6 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		E8F93B3D2C21ECFB006AA3F6 /* UserAuthView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserAuthView.swift; sourceTree = "<group>"; };
+		E8F93B3D2C21ECFB006AA3F6 /* AuthOptionsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthOptionsView.swift; sourceTree = "<group>"; };
 		E8F93B3F2C21ED00006AA3F6 /* VerifyEmailView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VerifyEmailView.swift; sourceTree = "<group>"; };
 		E8F93B412C21ED05006AA3F6 /* EVMWalletView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EVMWalletView.swift; sourceTree = "<group>"; };
 		E8F93B432C21ED67006AA3F6 /* example.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = example.entitlements; sourceTree = "<group>"; };
@@ -91,16 +93,32 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8F1708C42DA99E420070FE20 /* Email */ = {
+			isa = PBXGroup;
+			children = (
+				E86A473E2D0CA0A400546CC2 /* EmailAuthView.swift */,
+				E8F93B3F2C21ED00006AA3F6 /* VerifyEmailView.swift */,
+			);
+			path = Email;
+			sourceTree = "<group>";
+		};
+		8F1708C52DA99E4E0070FE20 /* Phone */ = {
+			isa = PBXGroup;
+			children = (
+				E86A475A2D1F13CB00546CC2 /* PhoneAuthView.swift */,
+				E8C5B8652D272DCD00B151C4 /* VerifyPhoneView.swift */,
+			);
+			path = Phone;
+			sourceTree = "<group>";
+		};
 		8FA0077C2D56ECC9009EF0C3 /* Auth */ = {
 			isa = PBXGroup;
 			children = (
+				E8F93B3D2C21ECFB006AA3F6 /* AuthOptionsView.swift */,
+				8F1708C42DA99E420070FE20 /* Email */,
+				8F1708C52DA99E4E0070FE20 /* Phone */,
 				8FA007872D581F08009EF0C3 /* ExternalWalletAuthView.swift */,
-				E8F93B3D2C21ECFB006AA3F6 /* UserAuthView.swift */,
-				E86A473E2D0CA0A400546CC2 /* EmailAuthView.swift */,
-				E86A475A2D1F13CB00546CC2 /* PhoneAuthView.swift */,
 				E84DDFA82D593E1F007C6E39 /* OAuthView.swift */,
-				E8F93B3F2C21ED00006AA3F6 /* VerifyEmailView.swift */,
-				E8C5B8652D272DCD00B151C4 /* VerifyPhoneView.swift */,
 				8FA0078A2D5A7841009EF0C3 /* MetaMaskDemoView.swift */,
 			);
 			path = Auth;
@@ -133,12 +151,12 @@
 			path = Managers;
 			sourceTree = "<group>";
 		};
-		8FA007822D57EB0D009EF0C3 /* Config */ = {
+		8FA007822D57EB0D009EF0C3 /* Configuration */ = {
 			isa = PBXGroup;
 			children = (
 				8FA007812D57EB0D009EF0C3 /* ParaConfig.swift */,
 			);
-			path = Config;
+			path = Configuration;
 			sourceTree = "<group>";
 		};
 		8FA007852D57F1AA009EF0C3 /* Utils */ = {
@@ -147,6 +165,41 @@
 				8FA007842D57F1AA009EF0C3 /* Extensions.swift */,
 			);
 			path = Utils;
+			sourceTree = "<group>";
+		};
+		8FC8B8FC2D8B7AE10046C3DC /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				8FC8B8FB2D8B7AE10046C3DC /* LaunchView.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		8FE94DE12DA9AC1E009CBD28 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				E8F93B2B2C21EBED006AA3F6 /* ExampleApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		8FE94DE22DA9AC31009CBD28 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				8FA007822D57EB0D009EF0C3 /* Configuration */,
+				8FA007802D56ED9D009EF0C3 /* Managers */,
+				8FA007852D57F1AA009EF0C3 /* Utils */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		8FE94DE32DA9ACDA009CBD28 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				8FA0077C2D56ECC9009EF0C3 /* Auth */,
+				8FA0077D2D56ECDA009EF0C3 /* Wallet */,
+			);
+			path = Features;
 			sourceTree = "<group>";
 		};
 		E8F93B1F2C21EBED006AA3F6 = {
@@ -172,14 +225,12 @@
 		E8F93B2A2C21EBED006AA3F6 /* example */ = {
 			isa = PBXGroup;
 			children = (
+				8FE94DE32DA9ACDA009CBD28 /* Features */,
+				8FE94DE22DA9AC31009CBD28 /* Core */,
+				8FC8B8FC2D8B7AE10046C3DC /* UI */,
 				8FA007892D58387F009EF0C3 /* Info.plist */,
-				8FA007852D57F1AA009EF0C3 /* Utils */,
-				8FA007822D57EB0D009EF0C3 /* Config */,
-				8FA007802D56ED9D009EF0C3 /* Managers */,
 				E8F93B432C21ED67006AA3F6 /* example.entitlements */,
-				E8F93B2B2C21EBED006AA3F6 /* ExampleApp.swift */,
-				8FA0077C2D56ECC9009EF0C3 /* Auth */,
-				8FA0077D2D56ECDA009EF0C3 /* Wallet */,
+				8FE94DE12DA9AC1E009CBD28 /* App */,
 				E8F93B2F2C21EBEE006AA3F6 /* Assets.xcassets */,
 				E8F93B312C21EBEE006AA3F6 /* Preview Content */,
 				8FA0077F2D56ECFB009EF0C3 /* Resources */,
@@ -261,6 +312,7 @@
 				TargetAttributes = {
 					8FE93AA62D80F58C00CE018E = {
 						CreatedOnToolsVersion = 16.2;
+						LastSwiftMigration = 1620;
 						TestTargetID = E8F93B272C21EBED006AA3F6;
 					};
 					E8F93B272C21EBED006AA3F6 = {
@@ -328,9 +380,10 @@
 				E8F93B402C21ED00006AA3F6 /* VerifyEmailView.swift in Sources */,
 				E8C5B8662D272DCD00B151C4 /* VerifyPhoneView.swift in Sources */,
 				E8F93B422C21ED05006AA3F6 /* EVMWalletView.swift in Sources */,
+				8FC8B8FD2D8B7AE10046C3DC /* LaunchView.swift in Sources */,
 				E8315DDC2D55717F00FFF8C8 /* CosmosWalletView.swift in Sources */,
 				E8F93B2C2C21EBED006AA3F6 /* ExampleApp.swift in Sources */,
-				E8F93B3E2C21ECFB006AA3F6 /* UserAuthView.swift in Sources */,
+				E8F93B3E2C21ECFB006AA3F6 /* AuthOptionsView.swift in Sources */,
 				8FA007882D581F0D009EF0C3 /* ExternalWalletAuthView.swift in Sources */,
 				8FA007862D57F1AA009EF0C3 /* Extensions.swift in Sources */,
 				E86A475B2D1F13CB00546CC2 /* PhoneAuthView.swift in Sources */,
@@ -356,6 +409,7 @@
 		8FE93AAF2D80F58C00CE018E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = FF9U73RS48;
@@ -366,6 +420,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = NO;
 				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "exampleUITests/exampleUITests-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = example;
@@ -375,6 +431,7 @@
 		8FE93AB02D80F58C00CE018E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = FF9U73RS48;
@@ -385,6 +442,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = NO;
 				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "exampleUITests/exampleUITests-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = example;
@@ -631,7 +689,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/getpara/swift-sdk";
 			requirement = {
-				branch = main;
+				branch = "2.0.0-alpha";
 				kind = branch;
 			};
 		};

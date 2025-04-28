@@ -1,11 +1,7 @@
 import SwiftUI
 import ParaSwift
 
-enum NavigationDestination {
-    case verifyEmail, wallet
-}
-
-struct UserAuthView: View {
+struct AuthOptionsView: View {
     @EnvironmentObject var paraManager: ParaManager
     
     var body: some View {
@@ -77,6 +73,6 @@ struct AuthTypeView: View {
 }
 
 #Preview {
-    UserAuthView()
+    AuthOptionsView()
         .environmentObject(ParaManager(environment: .sandbox, apiKey: "preview-key"))
 }

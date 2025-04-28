@@ -1,11 +1,11 @@
-// ignore_for_file: unused_field, unused_local_variable
 import 'dart:async';
+// Import the SDK package
+import 'package:para/para.dart';
+import 'package:para_flutter/client/para.dart'; // Assuming 'para' instance is globally available or passed via context
 import 'package:para_flutter/widgets/demo_home.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:para/para.dart';
-import 'package:para_flutter/client/para.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_svg/flutter_svg.dart'; // Keep for icons
 
 class ParaOAuthExample extends StatefulWidget {
   const ParaOAuthExample({super.key});
@@ -17,9 +17,7 @@ class ParaOAuthExample extends StatefulWidget {
 class _ParaOAuthExampleState extends State<ParaOAuthExample> {
   bool _isLoading = false;
   String? _loadingProvider;
-  Wallet? _wallet;
-  String? _address;
-  String? _recoveryShare;
+  // String? _recoveryShare; // Adjust if needed
 
   @override
   void initState() {
@@ -27,138 +25,109 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
     _checkLoginStatus();
   }
 
+  // Helper for logging within the state
+  void _log(String message, {bool isWarning = false}) {
+    debugPrint('ParaOAuthExample: ${isWarning ? "WARNING: " : ""}$message');
+  }
+
   Future<void> _checkLoginStatus() async {
+    setState(() => _isLoading = true);
     try {
       final isLoggedIn = await para.isFullyLoggedIn();
       if (isLoggedIn && mounted) {
-        final wallets = await para.getWallets();
+        final wallets = await para.fetchWallets();
         if (wallets.isNotEmpty) {
-          setState(() {
-            _wallet = wallets.values.first;
-            _address = wallets.values.first.address;
-            _recoveryShare = "";
-          });
+          _updateWalletState(wallets.first);
+          // Optionally navigate home if already logged in
+          // Navigator.pushReplacement(
+          //   context,
+          //   MaterialPageRoute(builder: (context) => const DemoHome()),
+          // );
+        } else {
+          _log("Logged in but no wallets found.");
         }
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Error checking login status: ${e.toString()}')));
-      }
-    }
-  }
-
-  Future<void> _handleOAuthLogin(OAuthMethod provider) async {
-    if (!mounted) return;
-
-    setState(() {
-      _isLoading = true;
-      _loadingProvider = provider.value;
-    });
-
-    try {
-      final oAuthResponse = await para.oAuthConnect(provider, "paraflutter");
-
-      if (oAuthResponse.userExists) {
-        await _handlePasskeyLogin(oAuthResponse.email!);
-      } else {
-        await _handleNewUserSetup(oAuthResponse.email!);
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _loadingProvider = null;
-        });
-      }
-    }
-  }
-
-  Future<void> _handleFarcasterLogin() async {
-    if (!mounted) return;
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final farcasterResponse = await para.farcasterConnect();
-
-      if (farcasterResponse.userExists) {
-        await _handlePasskeyLogin(farcasterResponse.username);
-      } else {
-        await _handleNewUserSetup(farcasterResponse.username);
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _handleNewUserSetup(String identifier) async {
-    final biometricsId = await para.verifyOAuth();
-    await para.generatePasskey(identifier, biometricsId);
-    final result = await para.createWallet(skipDistribute: false);
-
-    if (!mounted) return;
-
-    setState(() {
-      _wallet = result.wallet;
-      _address = result.wallet.address;
-      _recoveryShare = result.recoveryShare;
-    });
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const DemoHome()),
-    );
-  }
-
-  Future<void> _handlePasskeyLogin(String email) async {
-    setState(() => _isLoading = true);
-
-    try {
-      final wallet = await para.login(email: email);
-
-      if (!mounted) return;
-
-      setState(() {
-        _wallet = wallet;
-        _address = wallet.address;
-        _recoveryShare = "";
-      });
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const DemoHome()),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
-      );
+      _log('Error checking login status: ${e.toString()}', isWarning: true);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
+  // Helper to update wallet state consistently
+  void _updateWalletState(Wallet wallet) {
+    setState(() {
+      // If CreateWalletResult was used and had recoveryShare:
+      // _recoveryShare = createResult.recoveryShare;
+    });
+  }
+
+  // Updated OAuth handler using V2 SDK method
+  Future<void> _handleOAuthLogin(OAuthMethod provider) async {
+    if (!mounted) return;
+
+    setState(() {
+      _isLoading = true;
+      _loadingProvider =
+          provider.value; // Keep track of which button is loading
+    });
+
+    try {
+      _log("Starting OAuth flow with provider: ${provider.value}");
+      // Call the single V2 method.
+      // You MUST register this URL scheme in your app:
+      // - iOS: Add to Info.plist URL types
+      // - Android: Add intent filter in AndroidManifest.xml
+      final AuthState authState = await para.verifyOAuth(
+        provider: provider,
+        deeplinkUrl:
+            "paraflutter", // Just the scheme name, SDK handles formatting
+      );
+
+      _log(
+          "OAuth flow completed successfully. Final stage: ${authState.stage}");
+
+      // Fetch wallets to update state after successful login/signup
+      final wallets = await para.fetchWallets();
+      if (wallets.isNotEmpty) {
+        _updateWalletState(wallets.first);
+      } else {
+        _log("OAuth successful but no wallets found after flow.",
+            isWarning: true);
+        // This might happen if wallet creation failed silently, investigate SDK logs if necessary
+      }
+
+      if (mounted) {
+        // Navigate to home screen after successful OAuth flow
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const DemoHome()),
+        );
+      }
+    } catch (e) {
+      _log('Error during OAuth: ${e.toString()}', isWarning: true);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('OAuth Error: ${e.toString()}')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _loadingProvider = null; // Clear loading provider
+        });
+      }
+    }
+  }
+
+  // --- Removed V1 Helper Functions ---
+  // _handleNewUserSetup and _handlePasskeyLogin(String email) are no longer needed
+  // as their logic is encapsulated within para.handleOAuth
+
   Widget _buildOAuthButton({
     required OAuthMethod provider,
     required String label,
-    required dynamic icon,
+    required dynamic icon, // Can be IconData or String asset path
     required Color backgroundColor,
     required Color textColor,
   }) {
@@ -176,37 +145,52 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
             horizontal: 24,
             vertical: 16,
           ),
+          shape: RoundedRectangleBorder(
+            // Added for consistency
+            borderRadius: BorderRadius.circular(8.0),
+          ),
         ),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.center, // Center content
           children: [
             if (icon is IconData)
-              Icon(icon)
+              Icon(icon, size: 20) // Slightly smaller icon
             else if (icon is String)
               SvgPicture.asset(
                 icon,
-                width: 24,
-                height: 24,
+                width: 20, // Slightly smaller icon
+                height: 20,
                 colorFilter: ColorFilter.mode(textColor, BlendMode.srcIn),
               ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 12), // Adjusted spacing
             Expanded(
               child: Text(
                 'Continue with $label',
+                textAlign: TextAlign.center, // Center text
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ),
+            // Keep loading indicator at the end
             if (isLoading)
-              const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              Container(
+                // Ensure indicator doesn't push text
+                alignment: Alignment.centerRight,
+                width: 32, // Give indicator space
+                child: const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                        Colors.white), // Assuming white text
+                  ),
                 ),
-              ),
+              )
+            else
+              const SizedBox(width: 32), // Keep space consistent
           ],
         ),
       ),
@@ -217,7 +201,7 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('OAuth Example'),
+        title: const Text('OAuth Example (V2)'), // Updated title
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -234,7 +218,7 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
               ),
               const SizedBox(height: 12),
               const Text(
-                'Example implementation of OAuth authentication using Para SDK with various providers.',
+                'Example implementation of OAuth authentication using Para SDK V2.', // Updated description
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.black87,
@@ -252,14 +236,14 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
                 provider: OAuthMethod.apple,
                 label: 'Apple',
                 icon: FontAwesomeIcons.apple,
-                backgroundColor: Colors.white,
-                textColor: Colors.black87,
+                backgroundColor: Colors.black, // Common Apple button style
+                textColor: Colors.white,
               ),
               _buildOAuthButton(
                 provider: OAuthMethod.twitter,
                 label: 'X.com',
                 icon: FontAwesomeIcons.xTwitter,
-                backgroundColor: const Color(0xFF1DA1F2),
+                backgroundColor: const Color(0xFF000000), // Updated X color
                 textColor: Colors.white,
               ),
               _buildOAuthButton(
