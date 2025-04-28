@@ -1,3 +1,31 @@
+# Release (Mon Apr 28 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.12
+- @getpara/wagmi-v2-integration@2.0.0-alpha.12
+- @getpara/wagmi-v2-connector@2.0.0-alpha.12
+- @getpara/viem-v2-integration@2.0.0-alpha.12
+- @getpara/viem-v1-integration@2.0.0-alpha.12
+- @getpara/user-management-client@2.0.0-alpha.12
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.12
+- @getpara/solana-wallet-connectors@2.0.0-alpha.12
+- @getpara/server-sdk@2.0.0-alpha.12
+- @getpara/react-sdk@2.0.0-alpha.12
+- @getpara/react-native-wallet@2.0.0-alpha.12
+- @getpara/react-components@2.0.0-alpha.12
+- @getpara/react-component-library@1.0.0-alpha.7
+- @getpara/react-common@2.0.0-alpha.12
+- @getpara/evm-wallet-connectors@2.0.0-alpha.12
+- @getpara/ethers-v6-integration@2.0.0-alpha.12
+- @getpara/ethers-v5-integration@2.0.0-alpha.12
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.12
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.12
+- @getpara/core-sdk@2.0.0-alpha.12
+- @getpara/core-components@2.0.0-alpha.12
+
+### Features
+-  Add guest login to modal builder (#895) - 0eb945713
+
 # Release (Sat Apr 26 2025)
 
 ## Package Versions

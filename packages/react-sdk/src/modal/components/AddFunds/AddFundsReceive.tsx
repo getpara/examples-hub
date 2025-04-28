@@ -19,9 +19,9 @@ import { formatNetworkList } from '../../utils/stringFormatters.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 
 const GENERIC_WALLET = {
-  EVM: 'Ethereum or EVM-based L2s',
-  SOLANA: 'Solana',
-  COSMOS: 'Cosmos',
+  EVM: 'Ethereum or EVM-based networks',
+  SOLANA: 'Solana or SVM-based networks',
+  COSMOS: 'Cosmos networks',
 };
 
 export function AddFundsReceive() {
