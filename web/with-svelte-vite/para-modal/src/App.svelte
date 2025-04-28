@@ -2,11 +2,13 @@
   import { onMount } from 'svelte';
   import { para } from './client/para';
   import "@getpara/react-sdk/styles.css";
-  import { AuthLayout, OAuthMethod, ParaModal } from "@getpara/react-sdk";
+  import { AuthLayout, ParaProvider } from "@getpara/react-sdk";
   import { sveltify } from "svelte-preprocess-react";
   import WalletDisplay from "./lib/WalletDisplay.svelte";
+  import { QueryClientProvider } from "@tanstack/react-query";
+  import { queryClient } from './client/queryClient';
 
-  const react = sveltify({ ParaModal });
+  const react = sveltify({ ParaProvider, QueryClientProvider });
 
   let isOpen = false;
   let isConnected = false;
@@ -70,36 +72,44 @@
     <p class="text-red-500 text-sm text-center">{error}</p>
   {/if}
 
-  <react.ParaModal
-    para={para}
-    isOpen={isOpen}
-    onClose={closeModal}
-    disableEmailLogin={false}
-    disablePhoneLogin={false}
-    authLayout={[AuthLayout.AUTH_FULL]}
-    oAuthMethods={[
-      OAuthMethod.APPLE,
-      OAuthMethod.DISCORD,
-      OAuthMethod.FACEBOOK,
-      OAuthMethod.FARCASTER,
-      OAuthMethod.GOOGLE,
-      OAuthMethod.TWITTER,
-    ]}
-    onRampTestMode={true}
-    theme={{
-      foregroundColor: "#2D3648",
-      backgroundColor: "#FFFFFF",
-      accentColor: "#0066CC",
-      darkForegroundColor: "#E8EBF2",
-      darkBackgroundColor: "#1A1F2B",
-      darkAccentColor: "#4D9FFF",
-      mode: "light",
-      borderRadius: "none",
-      font: "Inter",
-    }}
-    appName="Para Modal Example"
-    logo="/para.svg"
-    recoverySecretStepEnabled={true}
-    twoFactorAuthEnabled={false}
-  />
+  <react.QueryClientProvider client={queryClient}>
+    <react.ParaProvider
+      paraClientConfig={para}
+      config={{appName: "Para Modal Example"}}
+      paraModalConfig={{
+        isOpen,
+        onClose: closeModal,
+        logo: "/para.svg",
+        disableEmailLogin: false,
+        disablePhoneLogin: false,
+        authLayout: [AuthLayout.AUTH_FULL],
+        oAuthMethods: [
+          "APPLE",
+          "DISCORD",
+          "FACEBOOK",
+          "FARCASTER",
+          "GOOGLE",
+          "TWITTER",
+        ],
+        onRampTestMode: true,
+        recoverySecretStepEnabled: true,
+        twoFactorAuthEnabled: false,
+        theme: {
+          foregroundColor: "#2D3648",
+          backgroundColor: "#FFFFFF",
+          accentColor: "#0066CC",
+          darkForegroundColor: "#E8EBF2",
+          darkBackgroundColor: "#1A1F2B",
+          darkAccentColor: "#4D9FFF",
+          mode: "light",
+          borderRadius: "none",
+          font: "Inter",
+        },
+      }}
+      externalWalletConfig={{
+        wallets: []
+      }}
+    />
+  </react.QueryClientProvider>
+  
 </main>
