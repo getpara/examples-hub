@@ -26,7 +26,7 @@ createRoot(document.getElementById("root")!).render(
             ExternalWallet.ZERION,
             ExternalWallet.RABBY,
           ],
-          walletsWithParaAuth: [ExternalWallet.METAMASK],
+          createLinkedEmbeddedForExternalWallets: [ExternalWallet.METAMASK],
           evmConnector: {
             config: {
               chains: [mainnet, polygon, sepolia, celo],

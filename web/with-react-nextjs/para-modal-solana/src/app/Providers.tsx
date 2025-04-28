@@ -29,7 +29,7 @@ export function Providers({
             ExternalWallet.PHANTOM,
             ExternalWallet.BACKPACK,
           ],
-          walletsWithParaAuth: [ExternalWallet.GLOW],
+          createLinkedEmbeddedForExternalWallets: [ExternalWallet.GLOW],
           solanaConnector: {
             config: {
               endpoint,
