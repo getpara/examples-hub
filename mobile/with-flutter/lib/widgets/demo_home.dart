@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:para/para.dart';
 import 'package:para_flutter/client/para.dart';
+import 'package:para_flutter/widgets/demo_auth_selector.dart';
 
 class DemoHome extends StatefulWidget {
   const DemoHome({super.key});
@@ -58,6 +59,32 @@ class _DemoHomeState extends State<DemoHome> {
       );
     } finally {
       if (mounted) setState(() => _creatingWallet[type] = false);
+    }
+  }
+
+  Future<void> _logout() async {
+    try {
+      await para.logout();
+      setState(() {
+        _wallets = []; // Clear wallets on logout
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Successfully logged out')),
+        );
+        // Navigate back to DemoAuthSelector and remove all previous routes
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const DemoAuthSelector()),
+          (Route<dynamic> route) => false, // Remove all routes
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error logging out: ${e.toString()}')),
+        );
+      }
     }
   }
 
@@ -119,7 +146,8 @@ class _DemoHomeState extends State<DemoHome> {
                 children: [
                   Expanded(
                     child: Text(
-                      type == WalletType.cosmos && wallet!.addressSecondary != null
+                      type == WalletType.cosmos &&
+                              wallet!.addressSecondary != null
                           ? wallet.addressSecondary!
                           : wallet!.address!,
                       style: const TextStyle(
@@ -131,7 +159,8 @@ class _DemoHomeState extends State<DemoHome> {
                   IconButton(
                     icon: const Icon(Icons.copy),
                     onPressed: () => _copyAddress(
-                      type == WalletType.cosmos && wallet.addressSecondary != null
+                      type == WalletType.cosmos &&
+                              wallet.addressSecondary != null
                           ? wallet.addressSecondary!
                           : wallet.address!,
                     ),
@@ -162,6 +191,13 @@ class _DemoHomeState extends State<DemoHome> {
       appBar: AppBar(
         title: const Text('Your Wallets'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: _logout,
+          ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -188,7 +224,8 @@ class _DemoHomeState extends State<DemoHome> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => DemoTransactions(wallets: _wallets),
+                                  builder: (context) =>
+                                      DemoTransactions(wallets: _wallets),
                                 ),
                               );
                             },
