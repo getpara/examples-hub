@@ -171,9 +171,10 @@ const GuestMode = styled.a<{ isDark?: boolean }>`
   width: 100%;
   height: 50px;
   color: ${({ isDark }) => (isDark ? 'white' : 'black')};
-  text-decoration: underline;
+  text-decoration: none;
   font-size: 16px;
   font-weight: 500;
+  font-family: var(--cpsl-font-family);
 
   &:hover {
     text-decoration: underline;

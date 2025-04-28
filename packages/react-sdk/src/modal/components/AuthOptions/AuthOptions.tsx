@@ -5,8 +5,7 @@ import { TOAuthMethod } from '@getpara/web-sdk';
 import { AuthInput } from '../AuthInput/AuthInput.js';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 import { useModalStore } from '../../stores/index.js';
-import { CpslIcon } from '@getpara/react-components';
-import { useStore } from '../../../provider/stores/useStore.js';
+import { CpslIcon, CpslText } from '@getpara/react-components';
 
 interface AuthOptionsProps {
   oAuthMethods?: TOAuthMethod[];
@@ -22,7 +21,6 @@ export const AuthOptions = ({
   isGuestModeEnabled = false,
 }: AuthOptionsProps) => {
   const { wallets } = useExternalWallets();
-  const isDark = useStore(state => state.modalConfig?.theme?.mode === 'dark');
   const guestAddFundsTab = useModalStore(state => state.guestAddFundsTab);
 
   const Content = useMemo(() => {
@@ -42,10 +40,12 @@ export const AuthOptions = ({
   return (
     <Container>
       {guestAddFundsTab && (
-        <CompleteAccountSetup isDark={isDark}>
-          <CpslIcon icon="stars02" size="16px" />
-          Complete account setup to{' '}
-          {guestAddFundsTab === 'BUY' ? 'buy assets' : guestAddFundsTab === 'WITHDRAW' ? 'sell assets' : 'continue'}.
+        <CompleteAccountSetup>
+          <CompleteAccountIcon icon="stars02" size="16px" />
+          <CpslText variant="bodyS" weight="bold">
+            Complete account setup to{' '}
+            {guestAddFundsTab === 'BUY' ? 'buy assets' : guestAddFundsTab === 'WITHDRAW' ? 'sell assets' : 'continue'}.
+          </CpslText>
         </CompleteAccountSetup>
       )}
       {Content}
@@ -59,12 +59,15 @@ const Container = styled.div`
   gap: 8px;
 `;
 
-const CompleteAccountSetup = styled.div<{ isDark?: boolean }>`
+const CompleteAccountSetup = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  color: ${({ isDark }) => (isDark ? 'white' : 'black')};
-  font-weight: 500;
-  font-size: 14px;
+  color: var(--cpsl-color-text-primary);
+  margin-bottom: 8px;
+`;
+
+const CompleteAccountIcon = styled(CpslIcon)`
+  --icon-color: var(--cpsl-color-text-primary);
 `;

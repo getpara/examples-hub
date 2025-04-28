@@ -5,7 +5,8 @@ import {
   AppearanceConfigurator,
   AuthenticationConfigurator,
   DepositCryptoConfigurator,
-  NetworksConfigurator,
+  GuestLoginConfigurator,
+  // NetworksConfigurator,
   OffRampsConfigurator,
   OnRampsConfigurator,
   SecurityConfigurator,
@@ -14,15 +15,17 @@ import {
 import { Accordion, AnnouncementBanner, AccountActionButtons, MoreQuestions, Text, ErrorFallback } from './UI';
 import { CodePreviewDisplay, ModalPreviewDisplay, PreviewControls } from './Preview';
 import { useAtom } from 'jotai';
-import { isLoggedInAtom, viewAtom } from '../atoms';
+import { viewAtom } from '../atoms';
 import { NavBar } from './UI/Nav';
 import { CpslIcon } from '@getpara/react-components';
 import { ErrorBoundary } from 'react-error-boundary';
+import { useAccount } from '@getpara/react-sdk';
 
 export const ModalDesigner: React.FC = () => {
   const [view] = useAtom(viewAtom);
-  const [isLoggedIn] = useAtom(isLoggedInAtom);
   const [isMobileOverlayVisible, setIsMobileOverlayVisible] = useState(false);
+
+  const { data: account } = useAccount();
 
   useEffect(() => {
     const handleResize = () => {
@@ -63,9 +66,10 @@ export const ModalDesigner: React.FC = () => {
               <AnnouncementBanner />
               <Accordion defaultActive="appearance">
                 <AppearanceConfigurator />
-                <NetworksConfigurator />
+                {/* <NetworksConfigurator /> */}
                 <WalletsConfigurator />
                 <AuthenticationConfigurator />
+                <GuestLoginConfigurator />
                 <SecurityConfigurator />
                 <OnRampsConfigurator />
                 <OffRampsConfigurator />
@@ -78,7 +82,7 @@ export const ModalDesigner: React.FC = () => {
             <ErrorBoundary FallbackComponent={ErrorFallback}>
               <PreviewControlsRow>
                 <PreviewControls />
-                {isLoggedIn && (
+                {account?.isConnected && (
                   <FadeInWrapper>
                     <AccountActionButtons />
                   </FadeInWrapper>

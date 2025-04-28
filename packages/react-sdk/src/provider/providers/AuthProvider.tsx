@@ -89,7 +89,9 @@ export function AuthProvider({
   const para = useInternalClient();
   const onLoginRef = useStore(state => state.onLoginRef);
   const setIsOpen = useStore(state => state.setIsOpen);
+  const bareModal = useStore(state => state.modalConfig?.bareModal);
   const refs = useModalStore(state => state.refs);
+  const setFlow = useModalStore(state => state.setFlow);
   const currentStep = useModalStore(state => state.step);
   const setStep = useModalStore(state => state.setStep);
   const setAuthStepRoute = useModalStore(state => state.setAuthStepRoute);
@@ -471,7 +473,12 @@ export function AuthProvider({
   }, [para, isRecoverySecretStepEnabled, overrides?.createWallets]);
 
   const createGuestWallets = () => {
-    setIsOpen(false);
+    if (bareModal) {
+      setFlow('guest');
+      setStep(ModalStep.AWAITING_GUEST_WALLET_CREATION);
+    } else {
+      setIsOpen(false);
+    }
 
     mutateCreateGuestWallets(undefined, {
       onSuccess: () => {},

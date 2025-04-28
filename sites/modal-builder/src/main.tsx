@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { useAtom } from 'jotai';
 import { useHydrateAtoms } from 'jotai/utils';
 import { createRoot } from 'react-dom/client';
@@ -11,13 +11,13 @@ import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { clusterApiUrl } from '@solana/web3.js';
 import { axelar, cosmoshub, osmosis, sommelier, stargaze } from '@getpara/graz/chains';
 
-import { PARA_API_KEY, WALLET_CONNECT_PROJECT_ID } from './constants';
+import { PARA_API_KEY, PARA_ENVIRONMENT, WALLET_CONNECT_PROJECT_ID } from './constants';
 import { ModalDesigner } from './components/ModalDesigner';
-import { checkLoginStatusAtom, initializeAppAtom, modalConfigAtom, viewAtom } from './atoms';
+import { initializeAppAtom, modalConfigAtom, viewAtom } from './atoms';
 
 import '@getpara/react-components/css/capsule-core.css';
 import './index.css';
-import { Environment, ParaProvider } from '@getpara/react-sdk';
+import { ParaProvider } from '@getpara/react-sdk';
 import { PlaceHolderLogo } from './assets';
 import { calculateBrightness } from './utils';
 
@@ -56,18 +56,13 @@ const App = () => {
   const [selectedCosmosChain, setSelectedCosmosChain] = useState(cosmoshub.chainId);
   const [modalConfig] = useAtom(modalConfigAtom);
   const [view] = useAtom(viewAtom);
-  const [, checkLoginStatus] = useAtom(checkLoginStatusAtom);
-
-  const handleClose = useCallback(() => {
-    checkLoginStatus(null);
-  }, [checkLoginStatus]);
 
   return (
     <QueryClientProvider client={queryClient}>
       <ParaProvider
         config={{ disableEmbeddedModal: true, appName: APP_NAME }}
         paraClientConfig={{
-          env: Environment.BETA,
+          env: PARA_ENVIRONMENT,
           apiKey: PARA_API_KEY,
         }}
         externalWalletConfig={{
@@ -90,7 +85,6 @@ const App = () => {
         paraModalConfig={{
           bareModal: true,
           isOpen: true,
-          onClose: handleClose,
           logo: modalConfig.appearance.logo || PlaceHolderLogo,
           theme: {
             ...modalConfig.appearance.theme,
@@ -106,6 +100,7 @@ const App = () => {
           hideWallets: modalConfig.wallets.hideWallets,
           onRampTestMode: modalConfig.onRamps.onRampTestMode,
           className: view === 'mobile' ? 'force-mobile-media include-mobile-styling' : '',
+          isGuestModeEnabled: !!modalConfig.authentication.isGuestModeEnabled,
         }}
       >
         <ModalDesigner />

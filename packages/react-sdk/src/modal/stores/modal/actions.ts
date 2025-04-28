@@ -9,7 +9,7 @@ import {
 } from '../../utils/steps.js';
 import { TAuthLayout } from '../../types/modalProps.js';
 
-function getPreviousStep(flow: Flow, step: ModalStep): ModalStep | undefined {
+function getPreviousStep(flow: Flow | undefined, step: ModalStep): ModalStep | undefined {
   return flow === 'account'
     ? AccountPreviousStep[step]
     : flow === 'login'
@@ -83,7 +83,7 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
       return true;
     }
 
-    return !!flow && !!getPreviousStep(flow, currentStep);
+    return !!getPreviousStep(flow, currentStep);
   },
   setFlow: flow => set({ flow }),
   isLogin: () => get().flow === 'login',

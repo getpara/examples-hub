@@ -41,7 +41,10 @@ type NetworkProp = keyof typeof Network | Network;
 export type NetworksConfig = { networks: NetworkProp[] };
 
 export interface AuthenticationConfig
-  extends Pick<ParaModalProps, 'oAuthMethods' | 'disableEmailLogin' | 'disablePhoneLogin' | 'authLayout'> {
+  extends Pick<
+    ParaModalProps,
+    'oAuthMethods' | 'disableEmailLogin' | 'disablePhoneLogin' | 'authLayout' | 'isGuestModeEnabled'
+  > {
   externalWallets: TExternalWallet[];
   isWeb2AuthEnabled: boolean;
   isWeb3AuthEnabled: boolean;

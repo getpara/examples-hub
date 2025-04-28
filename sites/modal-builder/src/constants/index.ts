@@ -1,4 +1,4 @@
-import { OAUTH_METHODS, ExternalWallet, Network, OnRampProvider } from '@getpara/react-sdk';
+import { OAUTH_METHODS, ExternalWallet, Network, OnRampProvider, Environment } from '@getpara/react-sdk';
 import { Network as CosmosNetwork } from '@delphi-labs/shuttle';
 import {
   MailIcon,
@@ -90,6 +90,7 @@ export const MODAL_BUILDER_DEFAULT_CONFIG: ModalBuilderConfig = {
     externalWallets: [ExternalWallet.METAMASK, ExternalWallet.PHANTOM, ExternalWallet.SAFE],
     isWeb2AuthEnabled: true,
     isWeb3AuthEnabled: true,
+    isGuestModeEnabled: true,
   },
   security: {
     twoFactorAuthEnabled: false,
@@ -124,6 +125,7 @@ export const COSMOS_CHAINS: CosmosNetwork[] = [
 
 export const WALLET_CONNECT_PROJECT_ID: string = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
 export const PARA_API_KEY: string = import.meta.env.VITE_CAPSULE_API_KEY;
+export const PARA_ENVIRONMENT: Environment = import.meta.env.VITE_PARA_ENVIRONMENT ?? Environment.BETA;
 
 export const BORDER_RADIUS_OPTIONS: DropdownOption[] = [
   { label: 'None', value: 'none' },

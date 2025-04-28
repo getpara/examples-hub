@@ -9,7 +9,7 @@ import { DEFAULTS } from './constants/defaults.js';
 import { useGoBack } from './hooks/useGoBack.js';
 import styled from 'styled-components';
 import { hasEmbeddedAuth, hasExternalWallet } from './utils/authLayoutHelpers.js';
-import { useModal, useWalletState } from '../provider/index.js';
+import { useAccount, useModal, useWalletState } from '../provider/index.js';
 import { useInternalClient } from '../provider/hooks/utils/useInternalClient.js';
 import { useExternalWallets } from '../provider/providers/ExternalWalletProvider.js';
 import { useStore } from '../provider/stores/useStore.js';
@@ -22,13 +22,14 @@ defineCustomElements();
 export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref) => {
   const storedModalConfig = useStore(state => state.modalConfig);
   const modalContentRef = useRef<ModalContentHandle>(null);
+  const refs = useModalStore(state => state.refs);
+  const flow = useModalStore(state => state.flow);
   const currentStep = useModalStore(state => state.step);
   const setAuthState = useModalStore(state => state.setAuthState);
   const setOnModalStepChange = useModalStore(state => state.setOnModalStepChange);
   const setStep = useModalStore(state => state.setStep);
   const hasPreviousStep = useModalStore(state => state.hasPreviousStep());
   const setFlow = useModalStore(state => state.setFlow);
-  const setIsFullyLoggedIn = useModalStore(state => state.setIsFullyLoggedIn);
   const goBack = useGoBack();
   const setAuthLayout = useModalStore(state => state.setAuthLayout);
   const storedAuthLayout = useModalStore(state => state.authLayout);
@@ -40,6 +41,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
   const { setSelectedWallet, updateSelectedWallet } = useWalletState();
   const setAuthStepRoute = useModalStore(state => state.setAuthStepRoute);
   const { signUpOrLogIn, isCreateGuestWalletsPending } = useAuthActions();
+  const { data: account } = useAccount();
 
   const [isModalMounted, setIsModalMounted] = useState(false);
   const [isInit, setIsInit] = useState(false);
@@ -95,12 +97,10 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
       case isGuest:
         setFlow('guest');
         setStep(isCreateGuestWalletsPending ? ModalStep.AWAITING_GUEST_WALLET_CREATION : ModalStep.ACCOUNT_MAIN);
-        setIsFullyLoggedIn(true);
         break;
       case isAccount:
         setFlow('account');
         setStep(ModalStep.ACCOUNT_MAIN);
-        setIsFullyLoggedIn(true);
         break;
       default:
         if (currentStep !== ModalStep.AUTH_MAIN && currentStep !== ModalStep.SECRET) {
@@ -113,7 +113,6 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
         // Disconnect external wallets if the user is not longer logged in
         await disconnectExternalWallet();
         setSelectedWallet({ id: undefined, type: undefined });
-        setIsFullyLoggedIn(false);
 
         if (shouldAutoLogin) {
           if (defaultAuthIdentifier && para.authInfo?.identifier !== defaultAuthIdentifier) {
@@ -184,6 +183,18 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
   useEffect(() => {
     updateSelectedWallet();
   }, [para]);
+
+  useEffect(() => {
+    if (
+      bareModal &&
+      account &&
+      !account.isConnected &&
+      !['signup', 'login'].includes(flow ?? '') &&
+      refs.currentStep.current !== ModalStep.AUTH_MAIN
+    ) {
+      setStep(ModalStep.AUTH_MAIN);
+    }
+  }, [bareModal, flow, account]);
 
   const handleClose = () => {
     closeModal();

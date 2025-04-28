@@ -6,6 +6,7 @@ import { AccountSelect, ChainSelect } from './Selects.js';
 import { ModalStep } from '../../utils/steps.js';
 import { HeaderButton } from '@getpara/react-common';
 import { useStore } from '../../../provider/stores/useStore.js';
+import { useAccount } from '../../../provider/index.js';
 
 interface ControlsProps {
   onClose: () => void;
@@ -15,8 +16,8 @@ export const Controls = ({ onClose }: ControlsProps) => {
   const bareModal = useStore(state => state.modalConfig?.bareModal);
   const hasPreviousStep = useModalStore(state => state.hasPreviousStep());
   const step = useModalStore(state => state.step);
-  const isFullyLoggedIn = useModalStore(state => state.isFullyLoggedIn);
   const goBack = useGoBack();
+  const { data: account } = useAccount();
 
   const shouldShowSelects = [
     ModalStep.ACCOUNT_MAIN,
@@ -42,7 +43,7 @@ export const Controls = ({ onClose }: ControlsProps) => {
         <CpslIcon icon="arrow" />
       </BackButton>
       <MiddleContainer>
-        {shouldShowSelects && isFullyLoggedIn && (
+        {shouldShowSelects && account?.isConnected && (
           <>
             <ChainSelect />
             <AccountSelect />

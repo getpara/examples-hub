@@ -1,5 +1,5 @@
 import { atom, WritableAtom } from 'jotai';
-import { getClient, TOAuthMethod } from '@getpara/react-sdk';
+import { TOAuthMethod } from '@getpara/react-sdk';
 import qs from 'qs';
 import merge from 'lodash.merge';
 import { getModalCodeString } from '../utils/codeGenerator';
@@ -9,7 +9,6 @@ import { logError } from '../utils/';
 
 export const modalConfigAtom = atom<ModalBuilderConfig>(MODAL_BUILDER_DEFAULT_CONFIG);
 export const viewAtom = atom<ViewType>('desktop');
-export const isLoggedInAtom = atom<boolean>(false);
 
 interface PreviousWeb2State {
   oAuthMethods: TOAuthMethod[];
@@ -116,21 +115,9 @@ export const getCodeStringAtom = atom<string>(get => {
   return codeString;
 });
 
-export const checkLoginStatusAtom: WritableAtom<void, [null], Promise<void>> = atom(null, async (_, set) => {
-  const para = getClient();
-  try {
-    const loggedIn = await para?.isFullyLoggedIn();
-    set(isLoggedInAtom, !!loggedIn);
-  } catch (error) {
-    logError('Error checking login status:', error);
-    set(isLoggedInAtom, false);
-  }
-});
-
 export const initializeAppAtom: WritableAtom<void, [unknown], void> = atom(null, (_get, set) => {
   try {
     set(initializeConfigAtom, null);
-    set(checkLoginStatusAtom, null);
   } catch (error) {
     logError('Failed to initialize application:', error);
   }

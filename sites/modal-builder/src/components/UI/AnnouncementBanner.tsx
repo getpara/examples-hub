@@ -5,12 +5,11 @@ import { Text } from './StyledText';
 import { Button } from './StyledButton';
 import { Card } from './StyledCard';
 import { useAtom } from 'jotai';
-import { checkLoginStatusAtom, copyShareUrlAtom, getCodeStringAtom, resetConfigAtom } from '../../atoms';
+import { copyShareUrlAtom, getCodeStringAtom, resetConfigAtom } from '../../atoms';
 import { useClient } from '@getpara/react-sdk';
 
 export const AnnouncementBanner: React.FC = () => {
   const para = useClient();
-  const [, checkLoginStatus] = useAtom(checkLoginStatusAtom);
   const [, resetConfig] = useAtom(resetConfigAtom);
   const [getCodeString] = useAtom(getCodeStringAtom);
   const [, copyShareUrl] = useAtom(copyShareUrlAtom);
@@ -22,7 +21,6 @@ export const AnnouncementBanner: React.FC = () => {
   const handleLogout = async () => {
     try {
       await para?.logout();
-      checkLoginStatus(null);
     } catch (error) {
       console.error('Error logging out:', error);
     }

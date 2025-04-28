@@ -5,18 +5,17 @@ import '@getpara/react-sdk/styles.css';
 
 import iPhoneImage from '../../assets/iphone.png';
 import { useAtom } from 'jotai';
-import { isLoggedInAtom, viewAtom } from '../../atoms';
+import { viewAtom } from '../../atoms';
 
 interface ModalPreviewDisplayProps {}
 
 export const ModalPreviewDisplay: React.FC<ModalPreviewDisplayProps> = () => {
   const [view] = useAtom(viewAtom);
-  const [isLoggedIn] = useAtom(isLoggedInAtom);
 
   return (
     <IPhoneOuterContainer $isMobile={view === 'mobile'}>
       <ModalContainer $isMobile={view === 'mobile'}>
-        <ParaModal key={`modal-${view}-${isLoggedIn}`} />
+        <ParaModal key={`modal-${view}`} />
       </ModalContainer>
       <StyledIPhoneImage $isMobile={view === 'mobile'} src={iPhoneImage} alt="iPhone" />
     </IPhoneOuterContainer>

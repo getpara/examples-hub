@@ -17,7 +17,9 @@ interface WalletCreationDoneStepProps {
 export const WalletCreationDoneStep = ({ twoFactorAuthEnabled, onClose }: WalletCreationDoneStepProps) => {
   const { isSetup2faPending } = useAuthActions();
   const hideWallets = useStore(state => state.modalConfig?.hideWallets);
+  const bareModal = useStore(state => state.modalConfig?.bareModal);
   const setStep = useModalStore(state => state.setStep);
+  const setFlow = useModalStore(state => state.setFlow);
   const isLogin = useModalStore(state => state.isLogin());
   const twoFactorStatus = useModalStore(state => state.twoFactorStatus);
   const onRampConfig = useModalStore(state => state.onRampConfig);
@@ -31,7 +33,12 @@ export const WalletCreationDoneStep = ({ twoFactorAuthEnabled, onClose }: Wallet
     if (isLogin) {
       setStep(ModalStep.LOGIN_DONE); // Proceed to login done if 2FA is not enabled and this is a login flow
     } else {
-      onClose();
+      if (bareModal) {
+        setFlow('account');
+        setStep(ModalStep.ACCOUNT_MAIN);
+      } else {
+        onClose();
+      }
     }
   };
 

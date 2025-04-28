@@ -2,18 +2,16 @@ import React from 'react';
 import styled from 'styled-components';
 import { Button } from '.';
 import { useAtom } from 'jotai';
-import { checkLoginStatusAtom, resetConfigAtom } from '../../atoms';
+import { resetConfigAtom } from '../../atoms';
 import { useClient } from '@getpara/react-sdk';
 
 export const AccountActionButtons: React.FC = () => {
   const para = useClient();
-  const [, checkLoginStatus] = useAtom(checkLoginStatusAtom);
   const [, resetConfig] = useAtom(resetConfigAtom);
 
   const handleLogout = async () => {
     try {
-      await para?.logout();
-      checkLoginStatus(null);
+      await para?.logout({ clearPregenWallets: true });
     } catch (error) {
       console.error('Error logging out:', error);
     }
@@ -22,7 +20,9 @@ export const AccountActionButtons: React.FC = () => {
     try {
       resetConfig(null);
       await handleLogout();
-      await para?.ctx.client.deleteSelf(para?.getUserId()!);
+      if (para?.userId) {
+        await para?.ctx.client.deleteSelf(para.userId);
+      }
     } catch (error) {
       console.error('Error deleting account:', error);
     }
@@ -31,10 +31,10 @@ export const AccountActionButtons: React.FC = () => {
   return (
     <ButtonContainer>
       <Button variant="secondary" onClick={handleLogout}>
-        Log out
+        Log Out
       </Button>
       <Button variant="secondary" onClick={handleDeleteAndReset}>
-        Delete account & Reset demo
+        Delete Account & Reset Demo
       </Button>
     </ButtonContainer>
   );
