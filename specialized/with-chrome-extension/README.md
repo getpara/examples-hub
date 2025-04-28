@@ -1,7 +1,7 @@
-# Para Modal Example
+# Para Modal Chrome Extension Example
 
-This example demonstrates integrating the Para Modal for user authentication. It provides a minimal setup showing how to
-configure and trigger the modal for login flows using the Para React SDK.
+This example demonstrates integrating the Para Modal for user authentication in a Chrome Extension. It provides a
+minimal setup showing how to configure and trigger the modal for login flows using the Para React SDK.
 
 ## Prerequisites
 
