@@ -1,12 +1,12 @@
 import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthLayout, OAuthMethod, ParaProvider } from "@getpara/react-sdk";
+import { AuthLayout, ParaProvider } from "@getpara/react-sdk";
 import { para } from "./client/para";
 import "@getpara/react-sdk/styles.css";
 
 const queryClient = new QueryClient();
 
-export function ReactComponent({ onClose, isOpen }) {
+export function ParaReactComponent({ onClose, isOpen }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ParaProvider

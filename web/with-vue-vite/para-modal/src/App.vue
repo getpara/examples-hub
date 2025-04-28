@@ -27,11 +27,10 @@
 import WalletDisplay from "./components/WalletDisplay.vue";
 import { ref, onMounted, onUnmounted, watch } from "vue";
 import { para } from "./client/para";
-import { createParaModalConnector } from "./para-modal-connector";
 import { AuthLayout, OAuthMethod } from "@getpara/react-sdk";
 import { createElement } from "react";
 import ReactDOM from "react-dom/client";
-import { ReactComponent } from "./react-component.jsx";
+import { ParaReactComponent } from "./para-react-component.jsx";
 
 const isOpen = ref(false);
 const isConnected = ref(false);
@@ -41,8 +40,6 @@ const error = ref("");
 
 const reactRoot = ref(null);
 let root = null;
-
-let modalConnector: ReturnType<typeof createParaModalConnector> | null = null;
 
 async function handleCheckIfAuthenticated() {
   isLoading.value = true;
@@ -72,7 +69,7 @@ onMounted(async () => {
 
   root = ReactDOM.createRoot(reactRoot.value);
   root.render(
-    createElement(ReactComponent, {
+    createElement(ParaReactComponent, {
       isOpen: false,
       onClose: handleClose,
     })
@@ -82,7 +79,7 @@ onMounted(async () => {
 watch(isOpen, (newIsOpen) => {
   if (root) {
     root.render(
-      createElement(ReactComponent, {
+      createElement(ParaReactComponent, {
         isOpen: newIsOpen,
         onClose: handleClose,
       })
@@ -91,11 +88,10 @@ watch(isOpen, (newIsOpen) => {
 });
 
 onUnmounted(() => {
-  modalConnector?.unmount();
+  root.unmount();
 });
 
 function openModal() {
   isOpen.value = true;
-  modalConnector?.open();
 }
 </script>
