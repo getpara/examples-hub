@@ -45,7 +45,7 @@ createRoot(document.getElementById("root")!).render(
             ExternalWallet.PHANTOM,
             ExternalWallet.BACKPACK,
           ],
-          walletsWithParaAuth: [ExternalWallet.METAMASK],
+          createLinkedEmbeddedForExternalWallets: [ExternalWallet.METAMASK],
           evmConnector: {
             config: {
               chains: [mainnet, polygon, sepolia, celo],
