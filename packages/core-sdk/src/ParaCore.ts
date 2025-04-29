@@ -200,7 +200,7 @@ export abstract class ParaCore implements CoreInterface {
   }
 
   get isExternalWalletAuth(): boolean {
-    return isExternalWallet(this.#authInfo?.auth);
+    return isExternalWallet(this.#authInfo?.auth) && !!this.#authInfo?.externalWallet?.withFullParaAuth;
   }
 
   get partnerId(): string | undefined {

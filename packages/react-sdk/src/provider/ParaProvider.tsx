@@ -51,19 +51,23 @@ export const ParaProvider = forwardRef<
   }, [externalWalletConfig?.wallets]);
 
   useEffect(() => {
-    if (externalWalletsWithFullAuth !== externalWalletConfig?.walletsWithParaAuth) {
+    if (externalWalletsWithFullAuth !== externalWalletConfig?.createLinkedEmbeddedForExternalWallets) {
       if (
         isConfigType(paraClientConfig)
           ? paraClientConfig.opts?.externalWalletConnectionOnly
           : paraClientConfig.externalWalletConnectionOnly
       ) {
-        console.warn('walletsWithParaAuth has no effect when using externalWalletConnectionOnly');
+        console.warn('createLinkedEmbeddedForExternalWallets has no effect when using externalWalletConnectionOnly');
         setExternalWalletsWithFullAuth([]);
       } else {
-        setExternalWalletsWithFullAuth(externalWalletConfig?.walletsWithParaAuth ?? []);
+        setExternalWalletsWithFullAuth(
+          externalWalletConfig?.createLinkedEmbeddedForExternalWallets === 'ALL'
+            ? Object.values(ExternalWallet)
+            : (externalWalletConfig?.createLinkedEmbeddedForExternalWallets ?? []),
+        );
       }
     }
-  }, [externalWalletConfig?.walletsWithParaAuth]);
+  }, [externalWalletConfig?.createLinkedEmbeddedForExternalWallets]);
 
   useEffect(() => {
     if (!isConfigType(paraClientConfig) && !isParaWeb(paraClientConfig)) {

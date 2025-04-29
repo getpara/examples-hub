@@ -135,9 +135,11 @@ export type ExternalWalletConfig<
    */
   wallets?: TExternalWallet[];
   /**
-   * Which external wallets will include full verification and Para auth.
+   * Array of external wallets that will also include linked embedded wallets.
+   *
+   * You can also pass `ALL` to include linked embedded wallets for all external wallets.
    */
-  walletsWithParaAuth?: TExternalWallet[];
+  createLinkedEmbeddedForExternalWallets?: TExternalWallet[] | 'ALL';
 };
 
 export interface ParaProviderProps<
