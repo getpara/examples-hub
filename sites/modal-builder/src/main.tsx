@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useAtom } from 'jotai';
 import { useHydrateAtoms } from 'jotai/utils';
 import { createRoot } from 'react-dom/client';
@@ -57,14 +57,19 @@ const App = () => {
   const [modalConfig] = useAtom(modalConfigAtom);
   const [view] = useAtom(viewAtom);
 
+  const paraClientConfig = useMemo(
+    () => ({
+      env: PARA_ENVIRONMENT,
+      apiKey: PARA_API_KEY,
+    }),
+    [PARA_ENVIRONMENT, PARA_API_KEY],
+  );
+
   return (
     <QueryClientProvider client={queryClient}>
       <ParaProvider
-        config={{ disableEmbeddedModal: true, appName: APP_NAME }}
-        paraClientConfig={{
-          env: PARA_ENVIRONMENT,
-          apiKey: PARA_API_KEY,
-        }}
+        config={{ disableEmbeddedModal: true, appName: APP_NAME, rpcUrl: 'https://sepolia.drpc.org' }}
+        paraClientConfig={paraClientConfig}
         externalWalletConfig={{
           wallets: modalConfig.authentication.externalWallets ?? [],
           walletConnect: { projectId: WALLET_CONNECT_PROJECT_ID },
