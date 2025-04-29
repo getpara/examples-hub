@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8F6AE66A2DC151040098F76B /* ChooseSignupMethodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F6AE6692DC151040098F76B /* ChooseSignupMethodView.swift */; };
 		8FA007832D57EB0D009EF0C3 /* ParaConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA007812D57EB0D009EF0C3 /* ParaConfig.swift */; };
 		8FA007862D57F1AA009EF0C3 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA007842D57F1AA009EF0C3 /* Extensions.swift */; };
 		8FA007882D581F0D009EF0C3 /* ExternalWalletAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA007872D581F08009EF0C3 /* ExternalWalletAuthView.swift */; };
@@ -42,6 +43,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8F6AE6692DC151040098F76B /* ChooseSignupMethodView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChooseSignupMethodView.swift; sourceTree = "<group>"; };
 		8F924CB92D824A1700938496 /* Example.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; name = Example.xctestplan; path = exampleUITests/Example.xctestplan; sourceTree = "<group>"; };
 		8FA007812D57EB0D009EF0C3 /* ParaConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParaConfig.swift; sourceTree = "<group>"; };
 		8FA007842D57F1AA009EF0C3 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
@@ -96,6 +98,7 @@
 		8F1708C42DA99E420070FE20 /* Email */ = {
 			isa = PBXGroup;
 			children = (
+				8F6AE6692DC151040098F76B /* ChooseSignupMethodView.swift */,
 				E86A473E2D0CA0A400546CC2 /* EmailAuthView.swift */,
 				E8F93B3F2C21ED00006AA3F6 /* VerifyEmailView.swift */,
 			);
@@ -385,6 +388,7 @@
 				E8F93B2C2C21EBED006AA3F6 /* ExampleApp.swift in Sources */,
 				E8F93B3E2C21ECFB006AA3F6 /* AuthOptionsView.swift in Sources */,
 				8FA007882D581F0D009EF0C3 /* ExternalWalletAuthView.swift in Sources */,
+				8F6AE66A2DC151040098F76B /* ChooseSignupMethodView.swift in Sources */,
 				8FA007862D57F1AA009EF0C3 /* Extensions.swift in Sources */,
 				E86A475B2D1F13CB00546CC2 /* PhoneAuthView.swift in Sources */,
 				8FA007832D57EB0D009EF0C3 /* ParaConfig.swift in Sources */,

@@ -56,30 +56,6 @@ struct ExampleApp: App {
                 logger.debug("Received deep link URL: \(url.absoluteString)")
                 metaMaskConnector.handleURL(url)
             }
-//             .onChange(of: paraManager.sessionState) { newState in
-//                 switch newState {
-//                 case .activeLoggedIn:
-//                     appRootManager.currentRoot = .home
-//                 case .inactive:
-//                     appRootManager.currentRoot = .authentication
-//                 case .active:
-//                     // Handle partially active state if needed
-//                     appRootManager.currentRoot = .authentication
-//                 case .unknown:
-//                     // Keep showing launch view until we know the state
-//                     break
-//                 }
-//             }
-//            .task {
-//                // Add a minimum delay to show launch screen
-//                try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
-//                
-//                // If we're still in launch state after the delay and session state is known,
-//                // transition to the appropriate screen
-//                if appRootManager.currentRoot == .launch && paraManager.sessionState != .unknown {
-//                    appRootManager.currentRoot = paraManager.sessionState == .activeLoggedIn ? .home : .authentication
-//                }
-//            }
         }
     }
 }

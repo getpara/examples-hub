@@ -1,5 +1,6 @@
 import SwiftUI
 import ParaSwift
+import AuthenticationServices
 
 struct EmailAuthView: View {
     @EnvironmentObject var paraManager: ParaManager
@@ -13,6 +14,7 @@ struct EmailAuthView: View {
     @State private var errorMessage: String?
     
     @Environment(\.authorizationController) private var authorizationController
+    @Environment(\.webAuthenticationSession) private var webAuthenticationSession
     
     private func validateEmail() -> Bool {
         if email.isEmpty {
@@ -33,7 +35,7 @@ struct EmailAuthView: View {
     
     var body: some View {
         VStack(spacing: 20) {
-            Text("Enter your email address to create or log in with a passkey.")
+            Text("Enter your email address to create or log in.")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             
@@ -70,7 +72,9 @@ struct EmailAuthView: View {
                 Task {
                     let result = await paraManager.handleEmailAuth(
                         email: email,
-                        authorizationController: authorizationController
+                        authMethod: .passkey,
+                        authorizationController: authorizationController,
+                        webAuthenticationSession: webAuthenticationSession
                     )
                     
                     isLoading = false
@@ -111,7 +115,7 @@ struct EmailAuthView: View {
             
             Button {
                 Task {
-                    try await paraManager.loginWithPasskey(authorizationController: authorizationController, authInfo: nil)
+                    try await paraManager.loginWithPasskey(authorizationController: authorizationController, authInfo: EmailAuthInfo(email: email))
                     appRootManager.currentRoot = .home
                 }
             } label: {
@@ -125,7 +129,7 @@ struct EmailAuthView: View {
             
         }
         .padding()
-        .navigationTitle("Email + Passkey")
+        .navigationTitle("Email Authentication")
     }
 }
 

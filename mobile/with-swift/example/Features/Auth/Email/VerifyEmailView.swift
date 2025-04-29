@@ -1,5 +1,6 @@
 import SwiftUI
 import ParaSwift
+import AuthenticationServices
 
 struct VerifyEmailView: View {
     @EnvironmentObject var paraManager: ParaManager
@@ -9,10 +10,12 @@ struct VerifyEmailView: View {
     
     @State private var code = ""
     @State private var isLoading = false
-    @State private var loadingStateText = ""
     @State private var errorMessage: String?
+    @State private var shouldNavigateToChooseMethod = false
+    @State private var verifiedAuthState: AuthState? = nil
     
     @Environment(\.authorizationController) private var authorizationController
+    @Environment(\.webAuthenticationSession) private var webAuthenticationSession
     
     var body: some View {
         VStack(spacing: 20) {
@@ -29,7 +32,7 @@ struct VerifyEmailView: View {
                 .padding(.horizontal)
                 .disabled(isLoading)
                 .accessibilityIdentifier("verificationCodeField")
-                
+            
             if let errorMessage = errorMessage {
                 Text(errorMessage)
                     .foregroundColor(.red)
@@ -40,10 +43,6 @@ struct VerifyEmailView: View {
             }
             
             if isLoading {
-                if !loadingStateText.isEmpty {
-                    Text(loadingStateText)
-                        .foregroundColor(.secondary)
-                }
                 ProgressView()
             }
             
@@ -55,30 +54,27 @@ struct VerifyEmailView: View {
                 }
                 isLoading = true
                 errorMessage = nil
-                loadingStateText = "Creating wallet..."
                 
                 Task {
-                    let result = await paraManager.handleEmailAuth(
-                        email: email,
-                        verificationCode: code,
-                        authorizationController: authorizationController
-                    )
-                    
-                    isLoading = false
-                    
-                    switch result.status {
-                    case .success:
-                        // Authentication successful, navigate to home
-                        appRootManager.currentRoot = .home
+                    do {
+                        let authState = try await paraManager.verifyNewAccount(verificationCode: code)
                         
-                    case .needsVerification:
-                        // This shouldn't happen when verification code is provided
-                        errorMessage = "Unexpected verification required"
+                        if authState.stage == .signup {
+                            // Verification successful for a new account
+                            verifiedAuthState = authState
+                            shouldNavigateToChooseMethod = true
+                        } else {
+                            // Handle unexpected state (e.g., already logged in, etc.)
+                            errorMessage = "Unexpected account state after verification: \(authState.stage). Please try logging in again."
+                        }
                         
-                    case .error:
-                        // Error occurred
-                        errorMessage = result.errorMessage
+                    } catch let error as ParaError {
+                        errorMessage = error.description
+                    } catch {
+                        errorMessage = "An unexpected error occurred during verification: \(error.localizedDescription)"
                     }
+
+                    isLoading = false
                 }
             } label: {
                 Group {
@@ -108,6 +104,14 @@ struct VerifyEmailView: View {
             .padding(.top)
             .accessibilityIdentifier("resendCodeButton")
             
+            .navigationDestination(isPresented: $shouldNavigateToChooseMethod) {
+                if let authState = verifiedAuthState {
+                    ChooseSignupMethodView(authState: authState)
+                        .environmentObject(paraManager)
+                        .environmentObject(appRootManager)
+                }
+            }
+
             Spacer()
         }
         .padding()
