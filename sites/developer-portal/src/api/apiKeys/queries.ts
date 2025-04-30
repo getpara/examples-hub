@@ -8,6 +8,7 @@ import {
   ApiKeysResponse,
   UsersTableDataResponse,
 } from '../../types/api';
+import { LoginMethod } from '../../types/loginMethod';
 
 export const getApiKeys = async (organizationId: string, projectId: string, env: string) => {
   const endpoint = `/organizations/${organizationId}/projects/${projectId}/${env}/keys`;
@@ -28,6 +29,7 @@ export const getApiKeyUsersTableData = async (
   env: string,
   offset?: number,
   limit?: number,
+  methods?: LoginMethod[],
 ) => {
   const endpoint = `/organizations/${organizationId}/projects/${projectId}/${env}/keys/${keyId}/analytics/users-table-data`;
 
@@ -35,6 +37,7 @@ export const getApiKeyUsersTableData = async (
     params: {
       offset,
       limit,
+      methods,
     },
   });
 };
@@ -106,4 +109,15 @@ export const checkApplePasskeyVerification = async (
     console.error('Error checking Apple passkey verification:', error);
     return false;
   }
+};
+
+export const getUsersCSV = async (organizationId: string, projectId: string, keyId: string, env: string) => {
+  const endpoint = `/organizations/${organizationId}/projects/${projectId}/${env}/keys/${keyId}/analytics/export-users`;
+
+  return axiosClient.get<Blob>(endpoint, {
+    responseType: 'blob',
+    params: {
+      key: new Date().getTime(),
+    },
+  });
 };

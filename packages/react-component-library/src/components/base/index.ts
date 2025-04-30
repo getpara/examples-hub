@@ -28,6 +28,8 @@ export * from './skeleton';
 export * from './slottedInput';
 export * from './sonner';
 export * from './switch';
+export * from './table';
+export * from './table-pagination';
 export * from './tabs';
 export * from './textarea';
 export * from './tooltip';

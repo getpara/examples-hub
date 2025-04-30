@@ -1,5 +1,8 @@
-import { Button, Typography, useFormContext } from '@getpara/react-component-library';
+import { Typography } from '@getpara/react-component-library';
+import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
+import { SettingsHeaderAction } from './SettingsHeaderAction';
+import { UsersHeaderAction } from './UsersHeaderAction';
 
 const PAGE_TITLES: Record<string, string> = {
   'setup': 'Setup',
@@ -25,21 +28,32 @@ const PAGE_SUBTITLES: Record<string, string> = {
 
 export const Header = () => {
   const { apiKeyPage } = useParams();
-  const form = useFormContext();
-
-  const { isDirty, isValid, disabled, isSubmitting } = form.formState;
-  const canSave = isDirty && isValid && !disabled;
 
   const title = PAGE_TITLES[apiKeyPage ?? ''];
   const subtitle = PAGE_SUBTITLES[apiKeyPage ?? ''];
 
+  const ActionComponent = useMemo(() => {
+    switch (apiKeyPage) {
+      case 'setup':
+      case 'branding':
+      case 'security':
+      case 'on-off-ramps':
+      case 'permissions': {
+        return <SettingsHeaderAction />;
+      }
+      case 'users': {
+        return <UsersHeaderAction />;
+      }
+      default:
+        return null;
+    }
+  }, [apiKeyPage]);
+
   return (
-    <div className="para:flex para:flex-col para:flex-1">
+    <div className="para:flex para:flex-col">
       <div className="para:flex para:justify-between para:items-center">
         <Typography className="para:text-2xl para:font-semibold">{title}</Typography>
-        <Button variant="neutral" disabled={!canSave || isSubmitting} isLoading={isSubmitting} type="submit">
-          Save Changes
-        </Button>
+        {ActionComponent}
       </div>
       {subtitle && (
         <Typography color="secondary" className="para:text-sm para:font-medium para:mt-2">

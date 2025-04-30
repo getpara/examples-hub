@@ -1,4 +1,3 @@
-import { SubmitHandler, useForm, useWatch } from 'react-hook-form';
 import { triggerToast } from '../../utils/toasts';
 import { useCreateProject } from '../../hooks/api/mutations/useCreateProject';
 import { Framework } from '../../types/framework';
@@ -30,6 +29,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SubmitHandler,
+  useForm,
+  useWatch,
 } from '@getpara/react-component-library';
 
 interface CreateProjectModalProps {

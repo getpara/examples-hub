@@ -1,10 +1,10 @@
-import { FieldValues, useForm as useRHForm, DefaultValues } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { triggerToast } from '../../../utils/toasts';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useIsValidKey, useIsValidProject } from '../../../hooks/useIsValidOrgConfig';
 import { useEffect } from 'react';
+import { DefaultValues, FieldValues, useForm as useRHForm } from '@getpara/react-component-library';
 
 export type SubmitVars = { projectId: string; apiKey: string; env: string };
 

@@ -2,12 +2,11 @@ import * as React from 'react';
 import { ChevronLeftIcon, ChevronRightIcon, MoreHorizontalIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
-import { Button, buttonVariants } from './button';
+import { Button } from './button';
 
-function Pagination({ className, ...props }: React.ComponentProps<'nav'>) {
+function TablePagination({ className, ...props }: React.ComponentProps<'div'>) {
   return (
-    <nav
-      role="navigation"
+    <div
       aria-label="pagination"
       data-slot="pagination"
       className={cn('para:mx-auto para:flex para:w-full para:justify-center', className)}
@@ -16,7 +15,7 @@ function Pagination({ className, ...props }: React.ComponentProps<'nav'>) {
   );
 }
 
-function PaginationContent({ className, ...props }: React.ComponentProps<'ul'>) {
+function TablePaginationContent({ className, ...props }: React.ComponentProps<'ul'>) {
   return (
     <ul
       data-slot="pagination-content"
@@ -26,62 +25,60 @@ function PaginationContent({ className, ...props }: React.ComponentProps<'ul'>) 
   );
 }
 
-function PaginationItem({ ...props }: React.ComponentProps<'li'>) {
+function TablePaginationItem({ ...props }: React.ComponentProps<'li'>) {
   return <li data-slot="pagination-item" {...props} />;
 }
 
-type PaginationLinkProps = {
+type TablePaginationButtonProps = {
   isActive?: boolean;
-} & Pick<React.ComponentProps<typeof Button>, 'size'> &
-  React.ComponentProps<'a'>;
+} & React.ComponentProps<typeof Button>;
 
-function PaginationLink({ className, isActive, size = 'icon', ...props }: PaginationLinkProps) {
+function TablePaginationButton({ className, isActive, ...props }: TablePaginationButtonProps) {
   return (
-    <a
+    <Button
       aria-current={isActive ? 'page' : undefined}
       data-slot="pagination-link"
       data-active={isActive}
-      className={cn(
-        buttonVariants({
-          variant: isActive ? 'outline' : 'ghost',
-          size,
-        }),
-        className,
-      )}
+      className={className}
+      variant={isActive ? 'outline' : 'ghost'}
       {...props}
     />
   );
 }
 
-function PaginationPrevious({ className, ...props }: React.ComponentProps<typeof PaginationLink>) {
+type TablePaginationPrevNextProps = {
+  hideLabel?: boolean;
+} & React.ComponentProps<typeof TablePaginationButton>;
+
+function TablePaginationPrevious({ className, hideLabel, ...props }: TablePaginationPrevNextProps) {
   return (
-    <PaginationLink
+    <TablePaginationButton
       aria-label="Go to previous page"
       size="default"
       className={cn('para:gap-1 para:px-2.5 para:sm:pl-2.5', className)}
       {...props}
     >
       <ChevronLeftIcon />
-      <span className={'para:sm:block'}>Previous</span>
-    </PaginationLink>
+      <span className={cn('para:sm:block', { 'para:hidden': hideLabel })}>Previous</span>
+    </TablePaginationButton>
   );
 }
 
-function PaginationNext({ className, ...props }: React.ComponentProps<typeof PaginationLink>) {
+function TablePaginationNext({ className, hideLabel, ...props }: TablePaginationPrevNextProps) {
   return (
-    <PaginationLink
+    <TablePaginationButton
       aria-label="Go to next page"
       size="default"
       className={cn('para:gap-1 para:px-2.5 para:sm:pr-2.5', className)}
       {...props}
     >
-      <span className={'para:sm:block'}>Next</span>
+      <span className={cn('para:sm:block', { 'para:hidden': hideLabel })}>Next</span>
       <ChevronRightIcon />
-    </PaginationLink>
+    </TablePaginationButton>
   );
 }
 
-function PaginationEllipsis({ className, ...props }: React.ComponentProps<'span'>) {
+function TablePaginationEllipsis({ className, ...props }: React.ComponentProps<'span'>) {
   return (
     <span
       aria-hidden
@@ -96,11 +93,11 @@ function PaginationEllipsis({ className, ...props }: React.ComponentProps<'span'
 }
 
 export {
-  Pagination,
-  PaginationContent,
-  PaginationLink,
-  PaginationItem,
-  PaginationPrevious,
-  PaginationNext,
-  PaginationEllipsis,
+  TablePagination,
+  TablePaginationContent,
+  TablePaginationButton,
+  TablePaginationItem,
+  TablePaginationPrevious,
+  TablePaginationNext,
+  TablePaginationEllipsis,
 };
