@@ -78,7 +78,7 @@ export function CosmosExternalWalletProvider({
     isReconnecting,
     isConnected,
   } = useAccount({
-    chainId: multiChain ? chains.map(c => c.chainId) : selectedChainId,
+    chainId: multiChain ? chains.map(c => c.chainId) : (selectedChainId ?? ''),
     multiChain,
   });
   const { connectAsync } = useConnect();
