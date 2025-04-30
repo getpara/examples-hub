@@ -25,7 +25,7 @@
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="para-expo"/>
-        <data android:scheme="com.usecapsule.example.expo"/>
+        <data android:scheme="com.getpara.example"/>
       </intent-filter>
     </activity>
   </application>

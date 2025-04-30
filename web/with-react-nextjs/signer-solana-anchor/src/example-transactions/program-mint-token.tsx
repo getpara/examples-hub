@@ -39,6 +39,7 @@ export default function ProgramMintToken() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
+<<<<<<< HEAD
   const { signer } = useParaSigner();
   const { data: account } = useAccount();
   const { data: wallet } = useWallet();
@@ -46,6 +47,9 @@ export default function ProgramMintToken() {
   const address = wallet?.address;
   const walletId = wallet?.id;
   const isConnected = account?.isConnected;
+=======
+  const { isConnected, walletId, address, signer, connection, anchorProvider } = usePara();
+>>>>>>> main
 
   const fetchBalances = async () => {
     if (!address || !connection || !signer) return;
@@ -166,6 +170,7 @@ export default function ProgramMintToken() {
       const mintPubkey = new anchor.web3.PublicKey(mintAccount);
       const recipientPubkey = new anchor.web3.PublicKey(recipient);
 
+<<<<<<< HEAD
       // Create an Anchor provider
       const provider = new anchor.AnchorProvider(
         connection,
@@ -188,10 +193,15 @@ export default function ProgramMintToken() {
         },
         { commitment: "confirmed" }
       );
+=======
+      if (!anchorProvider) {
+        throw new Error("Anchor provider is not initialized. Please reconnect your wallet.");
+      }
+>>>>>>> main
 
-      anchor.setProvider(provider);
+      anchor.setProvider(anchorProvider);
 
-      const program = new anchor.Program(idl as TransferTokens, provider);
+      const program = new anchor.Program(idl as TransferTokens, anchorProvider);
 
       const signature = await program.methods
         .mintToken(new anchor.BN(amountValue))

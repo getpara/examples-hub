@@ -1,0 +1,32 @@
+{
+  "name": "para-provider-nextjs",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "postinstall": "yarn setup-para"
+  },
+  "dependencies": {
+<<<<<<< HEAD:web/with-react-nextjs/signer-para/package.json
+    "@getpara/react-sdk": "2.0.0-alpha.11",
+    "@tanstack/react-query": "^5.0.0",
+=======
+    "@getpara/react-sdk": "1.12.0",
+    "@tanstack/react-query": "5.66.5",
+>>>>>>> main:web/with-react-nextjs/para-provider/package.json
+    "next": "15.1.5",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}

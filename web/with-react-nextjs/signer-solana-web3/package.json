@@ -1,5 +1,5 @@
 {
-  "name": "signer-solana-web3",
+  "name": "signer-solana-web3-nextjs",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -14,8 +14,13 @@
     "postinstall": "yarn setup-para"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@getpara/react-sdk": "2.0.0-alpha.11",
     "@getpara/solana-web3.js-v1-integration": "2.0.0-alpha.11",
+=======
+    "@getpara/react-sdk": "1.12.0",
+    "@getpara/solana-web3.js-v1-integration": "1.12.0",
+>>>>>>> main
     "@solana/kit": "2.1.0",
     "@solana/spl-token": "0.4.13",
     "@solana/web3.js": "1.98.0",

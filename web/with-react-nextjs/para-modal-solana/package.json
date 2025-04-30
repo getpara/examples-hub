@@ -1,5 +1,5 @@
 {
-  "name": "para-modal-solana",
+  "name": "para-modal-solana-nextjs",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -10,10 +10,21 @@
     "postinstall": "yarn setup-para"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@getpara/react-sdk": "2.0.0-alpha.11",
     "@getpara/solana-wallet-connectors": "2.0.0-alpha.11",
     "@solana/web3.js": "^1.98.0",
     "@tanstack/react-query": "^5.0.0",
+=======
+    "@solana-mobile/wallet-adapter-mobile": "2.1.5",
+    "@solana/wallet-adapter-base": "0.9.24",
+    "@solana/wallet-adapter-react": "0.15.36",
+    "@solana/wallet-adapter-walletconnect": "0.1.17",
+    "@solana/web3.js": "1.98.0",
+    "@tanstack/react-query": "5.71.5",
+    "@getpara/react-sdk": "1.12.0",
+    "@getpara/solana-wallet-connectors": "1.12.0",
+>>>>>>> main
     "next": "15.1.5",
     "react": "19.0.0",
     "react-dom": "19.0.0"

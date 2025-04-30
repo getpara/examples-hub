@@ -5,30 +5,28 @@ import { Connection, clusterApiUrl, Transaction, SystemProgram, LAMPORTS_PER_SOL
 
 export async function solanaSessionSignHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { session } = req.body as { session?: string };
+    const session = req.body.session as string | undefined;
+
     if (!session) {
-      res
-        .status(400)
-        .send(
-          "Provide `session` in the request body. This session should be previously exported from the client side."
-        );
+      res.status(400).send("Provide `session` in the request body.");
       return;
     }
 
-    const PARA_API_KEY = process.env.PARA_API_KEY;
-    if (!PARA_API_KEY) {
-      res.status(500).send("Set PARA_API_KEY in the environment before using this handler.");
+    const paraApiKey = process.env.PARA_API_KEY;
+    if (!paraApiKey) {
+      res.status(500).send("PARA_API_KEY is not set.");
       return;
     }
 
-    const para = new ParaServer(Environment.BETA, PARA_API_KEY);
+    const env = process.env.PARA_ENVIRONMENT as Environment || Environment.BETA;
+    const para = new ParaServer(env, paraApiKey);
     await para.importSession(session);
 
     const connection = new Connection(clusterApiUrl("testnet"));
     const solanaSigner = new ParaSolanaWeb3Signer(para, connection);
 
     if (!solanaSigner.sender) {
-      res.status(500).send("Failed to retrieve the Solana sender address from the session-based wallet.");
+      res.status(500).send("Failed to initialize Solana sender address from Para session.");
       return;
     }
 
@@ -36,15 +34,15 @@ export async function solanaSessionSignHandler(req: Request, res: Response, next
       SystemProgram.transfer({
         fromPubkey: solanaSigner.sender,
         toPubkey: solanaSigner.sender,
-        lamports: LAMPORTS_PER_SOL / 100,
+        lamports: LAMPORTS_PER_SOL / 1000,
       })
     );
 
-    const signatureResult = await solanaSigner.signTransaction(demoTx);
+    const signedTransaction = await solanaSigner.signTransaction(demoTx);
 
     res.status(200).json({
       message: "Transaction signed using Solana-Web3 + Para (session-based wallet).",
-      signatureResult,
+      signedTransaction: signedTransaction,
     });
   } catch (error) {
     console.error("Error in solanaSessionSignHandler:", error);

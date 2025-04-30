@@ -1,4 +1,4 @@
-import "./shim";
+import "@getpara/react-native-wallet/dist/shim";
 
 import { AppRegistry } from "react-native";
 import App from "./app/App";

@@ -1,50 +1,36 @@
-# React + TypeScript + Vite
+# Para with Rainbowkit Example
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project demonstrates integrating the Para RainbowKit Wallet connector within a Vite application. It provides a
+minimal example of connecting a user's wallet via RainbowKit using Para's Rainbowkit wallet connector.
 
-Currently, two official plugins are available:
+## Prerequisites
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Para API Key**: Obtain your API key from the [Para Developer Portal](https://developer.getpara.com/). Create a
+  `.env` file in the project root (you can copy `.env.example`) and add your key, prefixing with `VITE_` to expose it to
+  client-side code:
+  ```env
+  VITE_PARA_API_KEY=your_api_key_here
+  ```
 
-## Expanding the ESLint configuration
+## Installation
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+1. Install project dependencies using your preferred package manager: `bash npm install # or yarn install # or pnpm
+   install ```
 
-- Configure the top-level `parserOptions` property like this:
+## Running the Example
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+1.  Start the Vite development server:
+    ```bash
+    npm run dev
+    # or
+    yarn dev
+    # or
+    pnpm dev
+    ```
+2.  Open the local address provided by Vite (usually `http://localhost:5173` or similar) with your browser to see the
+    result and interact with the RainbowKit connector.
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+## Learn More
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+For comprehensive guidance on using the Para SDK, setup details, and advanced features, please refer to the official
+documentation: [Para SDK documentation](https://docs.usepara.com/welcome)

@@ -1,0 +1,32 @@
+{
+  "name": "signer-viem-v2-nextjs",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "compile": "hardhat compile",
+    "dev": "next dev",
+    "lint": "next lint",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@getpara/viem-v2-integration": "1.12.0",
+    "@getpara/react-sdk": "1.12.0",
+    "viem": "2.26.3",
+    "next": "15.1.5",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-ethers": "^3.0.8",
+    "@openzeppelin/contracts": "^5.2.0",
+    "@types/node": "^22.10.10",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "hardhat": "^2.22.18",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  }
+}

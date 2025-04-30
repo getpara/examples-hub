@@ -1,0 +1,41 @@
+{
+  "name": "signer-cosmjs-nextjs",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "compile": "hardhat compile",
+    "dev": "next dev",
+    "lint": "next lint",
+    "start": "next start",
+    "postinstall": "yarn setup-para"
+  },
+  "dependencies": {
+<<<<<<< HEAD:web/with-react-nextjs/signer-ethers/package.json
+    "@getpara/ethers-v6-integration": "2.0.0-alpha.11",
+    "@getpara/react-sdk": "2.0.0-alpha.11",
+    "@tanstack/react-query": "^5.0.0",
+    "ethers": "^6.13.5",
+=======
+    "@getpara/cosmjs-v0-integration": "1.12.0",
+    "@getpara/react-sdk": "1.12.0",
+    "@cosmjs/stargate": "0.33.1",
+    "@cosmjs/cosmwasm-stargate": "0.33.1",
+>>>>>>> main:web/with-react-nextjs/signer-cosmjs/package.json
+    "next": "15.1.5",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-ethers": "^3.0.8",
+    "@openzeppelin/contracts": "^5.2.0",
+    "@types/node": "^22.10.10",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "hardhat": "^2.22.18",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  }
+}

@@ -20,6 +20,13 @@ const authMethods = [
     icon: "phone",
     route: "PhoneAuth",
   },
+  {
+    type: "oauth",
+    title: "OAuth Authentication",
+    description: "Test OAuth-based authentication flow",
+    icon: "lock",
+    route: "OauthAuth",
+  },
 ] as const;
 
 export default function AuthSelectionScreen() {

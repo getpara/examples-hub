@@ -1,5 +1,5 @@
 {
-  "name": "para-modal",
+  "name": "para-modal-vue",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,8 +10,12 @@
     "postinstall": "yarn setup-para"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@getpara/react-sdk": "2.0.0-alpha.11",
     "@tanstack/react-query": "^5.74.7",
+=======
+    "@getpara/react-sdk": "1.12.0",
+>>>>>>> main
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "vue": "^3.5.13"

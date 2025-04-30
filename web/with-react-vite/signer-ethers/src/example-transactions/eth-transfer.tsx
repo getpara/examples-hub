@@ -75,12 +75,17 @@ export default function EthTransferDemo() {
 
     return tx;
   };
+<<<<<<< HEAD
   const validateTransaction = async (
     toAddress: string,
     ethAmount: string
   ): Promise<boolean> => {
     if (!address || !provider)
       throw new Error("No sender address or provider available");
+=======
+  const validateTransaction = async (_toAddress: string, ethAmount: string): Promise<boolean> => {
+    if (!address || !provider) throw new Error("No sender address or provider available");
+>>>>>>> main
 
     try {
       // Get current balance

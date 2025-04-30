@@ -1,0 +1,38 @@
+{
+  "name": "para-provider",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "postinstall": "yarn setup-para"
+  },
+  "dependencies": {
+<<<<<<< HEAD:web/with-react-vite/signer-para/package.json
+    "@getpara/react-sdk": "2.0.0-alpha.11",
+    "@tanstack/react-query": "^5.0.0",
+=======
+    "@getpara/react-sdk": "1.12.0",
+>>>>>>> main:web/with-react-vite/para-provider/package.json
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.19.0",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^9.19.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.18",
+    "globals": "^15.14.0",
+    "typescript": "~5.7.2",
+    "typescript-eslint": "^8.22.0",
+    "vite": "^6.1.0",
+    "vite-plugin-node-polyfills": "0.23.0",
+    "tailwindcss": "4.0.6",
+    "@tailwindcss/vite": "4.0.6"
+  }
+}

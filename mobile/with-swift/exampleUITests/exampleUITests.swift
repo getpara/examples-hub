@@ -244,7 +244,11 @@ class ExampleUITests: XCTestCase {
         waitForWalletsView()
     }
     
+<<<<<<< HEAD
     func test04PhonePasskeyLoginFlow() throws {
+=======
+    func test04PasskeyLoginFlow() throws {
+>>>>>>> main
         // Start phone authentication
         let phoneButton = app.buttons["phoneAuthButton"]
         XCTAssertTrue(phoneButton.exists)
@@ -378,10 +382,14 @@ class ExampleUITests: XCTestCase {
         // Wait for the signing process to complete and verify success alert
         let alert = app.alerts.firstMatch
         XCTAssertTrue(alert.waitForExistence(timeout: TestConstants.longTimeout), "Alert should appear after signing")
+<<<<<<< HEAD
         
         // Verify we got a success message, not an error
         XCTAssertTrue(alert.staticTexts["Success"].exists, "Message signing should succeed")
         XCTAssertFalse(alert.staticTexts["Error"].exists, "Message signing should not fail")
+=======
+        XCTAssertTrue(alert.staticTexts["Success"].exists || alert.staticTexts["Error"].exists, "Alert should have success or error title")
+>>>>>>> main
         
         // Dismiss alert
         alert.buttons["OK"].tap()
@@ -399,6 +407,7 @@ class ExampleUITests: XCTestCase {
         let alert = app.alerts.firstMatch
         XCTAssertTrue(alert.waitForExistence(timeout: TestConstants.longTimeout), "Alert should appear after transaction")
         
+<<<<<<< HEAD
         // In a test environment, this might fail due to network issues or insufficient funds
         // We'll check for either outcome but log which one occurred
         if alert.staticTexts["Success"].exists {
@@ -409,6 +418,11 @@ class ExampleUITests: XCTestCase {
         } else {
             XCTFail("Alert should have either Success or Error title")
         }
+=======
+        // Note: In a test environment, this will likely result in an error due to network issues or insufficient funds
+        // We just verify that an alert appears, regardless of success or failure
+        XCTAssertTrue(alert.staticTexts["Success"].exists || alert.staticTexts["Error"].exists, "Alert should have success or error title")
+>>>>>>> main
         
         // Dismiss alert
         alert.buttons["OK"].tap()
@@ -425,10 +439,14 @@ class ExampleUITests: XCTestCase {
         // Wait for the signing process to complete and verify alert
         let alert = app.alerts.firstMatch
         XCTAssertTrue(alert.waitForExistence(timeout: TestConstants.longTimeout), "Alert should appear after signing")
+<<<<<<< HEAD
         
         // Verify we got a success message, not an error
         XCTAssertTrue(alert.staticTexts["Success"].exists, "Transaction signing should succeed")
         XCTAssertFalse(alert.staticTexts["Error"].exists, "Transaction signing should not fail")
+=======
+        XCTAssertTrue(alert.staticTexts["Success"].exists || alert.staticTexts["Error"].exists, "Alert should have success or error title")
+>>>>>>> main
         
         // Dismiss alert
         alert.buttons["OK"].tap()

@@ -46,7 +46,7 @@ const connector = paraConnector({
   queryClient,
 });
 
-const config: CreateConfigParameters = {
+const config = {
   chains: [sepolia, mainnet],
   connectors: [
     connector,
@@ -61,6 +61,6 @@ const config: CreateConfigParameters = {
     [sepolia.id]: http(),
     [mainnet.id]: http(),
   },
-};
+} as CreateConfigParameters;
 
 export const wagmiConfig = createConfig(config);
