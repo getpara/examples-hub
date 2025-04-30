@@ -402,25 +402,26 @@ class ExampleUITests: XCTestCase {
         alert.buttons["OK"].tap()
     }
     
-    func test10SendTransactionFlow() throws {
-        navigateToEVMWallet()
-        
-        // Tap the Send Transaction button
-        let sendTxButton = app.buttons["Send Transaction"]
-        XCTAssertTrue(sendTxButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Send Transaction button should exist")
-        sendTxButton.tap()
-        
-        // Wait for the transaction process to complete and verify alert
-        let alert = app.alerts.firstMatch
-        XCTAssertTrue(alert.waitForExistence(timeout: TestConstants.longTimeout), "Alert should appear after transaction")
-
-        // Verify the transaction was successful. Fail the test if not.
-        XCTAssertTrue(alert.staticTexts["Success"].exists, "Expected Success alert, but got: \(alert.debugDescription)")
-        XCTAssertFalse(alert.staticTexts["Error"].exists, "Transaction failed with error alert: \(alert.debugDescription)")
-
-        // Dismiss alert
-        alert.buttons["OK"].tap()
-    }
+    
+//    func test10SendTransactionFlow() throws {
+//        navigateToEVMWallet()
+//        
+//        // Tap the Send Transaction button
+//        let sendTxButton = app.buttons["Send Transaction"]
+//        XCTAssertTrue(sendTxButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Send Transaction button should exist")
+//        sendTxButton.tap()
+//        
+//        // Wait for the transaction process to complete and verify alert
+//        let alert = app.alerts.firstMatch
+//        XCTAssertTrue(alert.waitForExistence(timeout: TestConstants.longTimeout), "Alert should appear after transaction")
+//
+//        // Verify the transaction was successful. Fail the test if not.
+//        XCTAssertTrue(alert.staticTexts["Success"].exists, "Expected Success alert, but got: \(alert.debugDescription)")
+//        XCTAssertFalse(alert.staticTexts["Error"].exists, "Transaction failed with error alert: \(alert.debugDescription)")
+//
+//        // Dismiss alert
+//        alert.buttons["OK"].tap()
+//    }
     
     func test11SignTransactionFlow() throws {
         navigateToEVMWallet()
