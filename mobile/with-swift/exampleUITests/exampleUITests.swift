@@ -53,7 +53,7 @@ class ExampleUITests: XCTestCase {
     private func waitForMainScreen() {
         // Wait for either email or phone auth button to appear, indicating the main screen is loaded
         let emailButton = app.buttons["emailAuthButton"]
-        let phoneButton = app.buttons["phoneAuthButton"]
+        let phoneButton = app.buttons["phoneAuthButton"] // Changed identifier likely?
         
         // Wait for at least one of the buttons to appear
         let predicate = NSPredicate(format: "exists == true")
@@ -81,7 +81,7 @@ class ExampleUITests: XCTestCase {
     }
     
     private func enterVerificationCode(_ code: String, fieldIdentifier: String) {
-        let codeInput = app.textFields[fieldIdentifier]
+        let codeInput = app.textFields[fieldIdentifier] // Verification codes often use SecureTextFields
         XCTAssertTrue(codeInput.waitForExistence(timeout: TestConstants.defaultTimeout), "Verification code input field should exist")
         codeInput.tap()
         codeInput.typeText(code)
@@ -115,7 +115,7 @@ class ExampleUITests: XCTestCase {
             return // Stop execution of this helper if email is missing
         }
 
-        let emailField = app.textFields["emailInputField"]
+        let emailField = app.textFields["emailInputField"] // Corrected identifier
         // Wait for the field to exist
         XCTAssertTrue(emailField.waitForExistence(timeout: TestConstants.defaultTimeout), "Email input field should exist")
         emailField.tap()
@@ -169,18 +169,25 @@ class ExampleUITests: XCTestCase {
         
         // Verify email verification view
         let verifyNavBar = app.navigationBars["Verify Email"]
-        XCTAssertTrue(verifyNavBar.waitForExistence(timeout: 5.0), "Verification view should appear")
+        XCTAssertTrue(verifyNavBar.waitForExistence(timeout: TestConstants.defaultTimeout), "Verify Email view should appear")
         
         // Enter verification code
-        enterVerificationCode(TestConstants.verificationCode, fieldIdentifier: "Verification Code")
+        enterVerificationCode(TestConstants.verificationCode, fieldIdentifier: "verificationCodeField")
         
         // Complete verification
         let verifyButton = app.buttons["verifyButton"]
-        XCTAssertTrue(verifyButton.waitForExistence(timeout: 5.0), "Verify button should exist")
+        XCTAssertTrue(verifyButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Verify button should exist")
         verifyButton.tap()
         
-        // Perform biometric authentication
-        performBiometricAuthentication(offsetFromBottom: 100)
+        // Choose Passkey on ChooseSignupMethodView
+        let chooseMethodNavBar = app.navigationBars["Secure Your Account"]
+        XCTAssertTrue(chooseMethodNavBar.waitForExistence(timeout: TestConstants.defaultTimeout), "Secure Your Account view should appear")
+        let createPasskeyButton = app.buttons["passkeyButton"]
+        XCTAssertTrue(createPasskeyButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Passkey button should exist")
+        createPasskeyButton.tap()
+
+        // Perform biometric authentication for Passkey creation
+        performBiometricAuthentication(offsetFromBottom: 100) // Adjust offset if needed
         
         // Verify successful authentication
         waitForWalletsView()
@@ -196,25 +203,33 @@ class ExampleUITests: XCTestCase {
         let phoneNumber = TestConstants.generateTestPhoneNumber()
         TestConstants.savedPhoneNumber = phoneNumber
         
-        let phoneField = app.textFields["phoneInputField"]
+        let phoneField = app.textFields["phoneNumberField"] // Updated identifier from diff
+        XCTAssertTrue(phoneField.waitForExistence(timeout: TestConstants.defaultTimeout), "Phone input field should exist")
         phoneField.tap()
         phoneField.typeText(phoneNumber)
         app.buttons["continueButton"].tap()
         
         // Verify email verification view
         let verifyNavBar = app.navigationBars["Verify Phone"]
-        XCTAssertTrue(verifyNavBar.waitForExistence(timeout: 5.0), "Verification view should appear")
+        XCTAssertTrue(verifyNavBar.waitForExistence(timeout: TestConstants.defaultTimeout), "Verify Phone view should appear")
         
         // Enter verification code
-        enterVerificationCode(TestConstants.verificationCode, fieldIdentifier: "Verification Code")
+        enterVerificationCode(TestConstants.verificationCode, fieldIdentifier: "verificationCodeField")
         
         // Complete verification
         let verifyButton = app.buttons["verifyButton"]
-        XCTAssertTrue(verifyButton.waitForExistence(timeout: 5.0), "Verify button should exist")
+        XCTAssertTrue(verifyButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Verify button should exist")
         verifyButton.tap()
         
-        // Perform biometric authentication
-        performBiometricAuthentication(offsetFromBottom: 100)
+        // Choose Passkey on ChooseSignupMethodView
+        let chooseMethodNavBar = app.navigationBars["Secure Your Account"]
+        XCTAssertTrue(chooseMethodNavBar.waitForExistence(timeout: TestConstants.defaultTimeout), "Secure Your Account view should appear")
+        let createPasskeyButton = app.buttons["passkeyButton"]
+        XCTAssertTrue(createPasskeyButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Passkey button should exist")
+        createPasskeyButton.tap()
+
+        // Perform biometric authentication for Passkey creation
+        performBiometricAuthentication(offsetFromBottom: 100) // Adjust offset if needed
         
         // Verify successful authentication
         waitForWalletsView()
@@ -256,7 +271,7 @@ class ExampleUITests: XCTestCase {
             return
         }
         
-        let phoneField = app.textFields["phoneInputField"]
+        let phoneField = app.textFields["phoneNumberField"] // Corrected identifier
         phoneField.tap()
         phoneField.typeText(savedPhoneNumber)
         app.buttons["continueButton"].tap()
@@ -398,18 +413,11 @@ class ExampleUITests: XCTestCase {
         // Wait for the transaction process to complete and verify alert
         let alert = app.alerts.firstMatch
         XCTAssertTrue(alert.waitForExistence(timeout: TestConstants.longTimeout), "Alert should appear after transaction")
-        
-        // In a test environment, this might fail due to network issues or insufficient funds
-        // We'll check for either outcome but log which one occurred
-        if alert.staticTexts["Success"].exists {
-            print("Transaction was successful")
-        } else if alert.staticTexts["Error"].exists {
-            print("Transaction failed - this is expected in test environment due to network/funds limitations")
-            // We don't fail the test here since this is an expected condition in test environment
-        } else {
-            XCTFail("Alert should have either Success or Error title")
-        }
-        
+
+        // Verify the transaction was successful. Fail the test if not.
+        XCTAssertTrue(alert.staticTexts["Success"].exists, "Expected Success alert, but got: \(alert.debugDescription)")
+        XCTAssertFalse(alert.staticTexts["Error"].exists, "Transaction failed with error alert: \(alert.debugDescription)")
+
         // Dismiss alert
         alert.buttons["OK"].tap()
     }
