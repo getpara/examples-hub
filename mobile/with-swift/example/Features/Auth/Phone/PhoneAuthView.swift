@@ -113,7 +113,6 @@ struct PhoneAuthView: View {
                     .accessibilityLabel("phoneInputField")
                     .onReceive(Just(phoneNumber)) { _ in
                         applyPatternOnNumbers(&phoneNumber, pattern: countryPattern, replacementCharacter: "#")
-                        print(phoneNumber)
                     }
                     .accessibilityIdentifier("phoneNumberField")
             }
