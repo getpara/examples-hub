@@ -16,7 +16,7 @@ struct ExampleApp: App {
         let bundleId = Bundle.main.bundleIdentifier ?? ""
         
         // Initialize Para manager
-        let paraManager = ParaManager(environment: config.environment, apiKey: config.apiKey)
+        let paraManager = ParaManager(environment: config.environment, apiKey: config.apiKey, deepLink: bundleId)
         _paraManager = StateObject(wrappedValue: paraManager)
         
         // Initialize EVM signer
