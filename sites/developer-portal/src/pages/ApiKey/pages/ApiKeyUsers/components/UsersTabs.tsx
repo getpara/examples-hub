@@ -23,7 +23,7 @@ export const UsersTabs = ({ value, onChange }: UsersTabsProps) => {
       onValueChange={val => onChange(val as UsersTabValue)}
       className={clsx('para:gap-4', { 'para:gap-0': value === 'all' })}
     >
-      <TabsList className="para:w-full">
+      <TabsList className="para:max-w-[554px] para:w-full">
         {ASSET_TABS.map(tab => (
           <TabsTrigger key={tab.value} value={tab.value}>
             {tab.Icon}

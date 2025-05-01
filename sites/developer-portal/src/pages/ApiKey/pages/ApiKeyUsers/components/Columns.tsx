@@ -1,6 +1,6 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { UsersTableData } from '../../../../../types/api';
-import { LOGIN_METHOD_LABELS } from '../../../../../utils/constants';
+import { LOGIN_METHOD_CONFIG } from '../../../../../utils/constants';
 import { formatDate } from '../../../../../utils/formatDate';
 import { Badge, Skeleton } from '@getpara/react-component-library';
 import { formatWalletAddress } from '../../../../../utils/formatWalletAddress';
@@ -25,7 +25,7 @@ export const getColumns = (isLoading?: boolean): ColumnDef<UsersTableData>[] => 
       }),
     },
     {
-      accessorFn: d => LOGIN_METHOD_LABELS[d.lastMethod],
+      accessorFn: d => LOGIN_METHOD_CONFIG[d.lastMethod].label,
       header: 'Last Login Method',
       ...(isLoading && {
         cell: () => <Skeleton className={clsx(baseSkeleton, 'para:w-24')} />,

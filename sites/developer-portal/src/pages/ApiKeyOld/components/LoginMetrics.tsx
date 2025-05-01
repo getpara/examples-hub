@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { CpslText } from '@getpara/react-components';
 import { AnalyticsCard } from '../../../components/AnalyticsCard/AnalyticsCard';
 import { useOrganizationKeyUsersLoginMetrics } from '../../../hooks/api/queries/useOrganizationKeyUsersLoginMetrics';
-import { LOGIN_METHOD_LABELS } from '../../../utils/constants';
+import { LOGIN_METHOD_CONFIG } from '../../../utils/constants';
 
 export const LoginMetrics = () => {
   const { apiKey, env, projectId } = useParams();
@@ -20,7 +20,7 @@ export const LoginMetrics = () => {
             <AnalyticsCard
               key={key}
               title={value < 0.01 ? '< 1%' : value > 0.99 && value < 1 ? '> 99%' : `${Math.round(value * 100)}%`}
-              subtitle={LOGIN_METHOD_LABELS[key]}
+              subtitle={LOGIN_METHOD_CONFIG[key].label}
             />
           ))}
       </Container>

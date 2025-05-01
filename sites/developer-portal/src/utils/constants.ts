@@ -125,17 +125,19 @@ export const PLAN_PERMISSIONS: Record<
 };
 export const TODAY = startOfDay(new Date());
 
-export const LOGIN_METHOD_LABELS: Record<string, string> = {
-  EMAIL: 'Email',
-  PHONE: 'Phone',
-  EXTERNAL_WALLET: 'External Wallet',
-  GOOGLE: 'Google',
-  DISCORD: 'Discord',
-  APPLE: 'Apple',
-  FACEBOOK: 'Facebook',
-  TWITTER: 'Twitter',
-  FARCASTER: 'Farcaster',
-  PREGEN: 'Pregen',
+export const LOGIN_METHOD_CONFIG: Record<string, { label: string; color: string }> = {
+  EMAIL: { label: 'Email', color: 'var(--para-color-slate-500)' },
+  PHONE: { label: 'Phone', color: 'var(--para-color-shadowstone-500)' },
+  EXTERNAL_WALLET: { label: 'Ext Wallet', color: 'var(--para-color-sundrop-500)' },
+  GOOGLE: { label: 'Google', color: 'var(--para-color-magnetica-500)' },
+  DISCORD: { label: 'Discord', color: 'var(--para-color-periwave-500)' },
+  APPLE: { label: 'Apple', color: 'var(--para-color-mist-500)' },
+  FACEBOOK: { label: 'Facebook', color: 'var(--para-color-red-500)' },
+  TWITTER: { label: 'X(Twitter)', color: 'var(--para-color-pink-500)' },
+  FARCASTER: { label: 'Farcaster', color: 'var(--para-color-lime-500)' },
+  PREGEN: { label: 'Pregen', color: 'var(--para-color-blue-500)' },
+  GUEST_MODE: { label: 'Guest Mode', color: 'var(--para-color-cyan-500)' },
+  OTHER: { label: 'Other', color: 'var(--para-color-fuchsia-500)' },
 };
 export const MOST_POPULAR_PLAN_SLUG = PlanSlug.GROWTH;
 export const ENTERPRISE_PLAN_SLUG = PlanSlug.ENTERPRISE;

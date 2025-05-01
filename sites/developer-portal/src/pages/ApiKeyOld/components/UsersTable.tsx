@@ -11,7 +11,7 @@ import {
   useOrganizationKeyUsersTotalRows,
 } from '../../../hooks/api/queries/useOrganizationKeyUsersTableData';
 import { Loader } from '../../../components/Loader';
-import { LOGIN_METHOD_LABELS } from '../../../utils/constants';
+import { LOGIN_METHOD_CONFIG } from '../../../utils/constants';
 import { formatWalletAddress } from '../../../utils/formatWalletAddress';
 
 const PAGE_SIZE = 25;
@@ -78,7 +78,7 @@ export const UsersTable = () => {
             },
             {
               key: 'lastMethod',
-              value: LOGIN_METHOD_LABELS[d.lastMethod],
+              value: LOGIN_METHOD_CONFIG[d.lastMethod].label,
             },
             {
               key: 'firstCreated',

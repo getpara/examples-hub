@@ -339,6 +339,28 @@ export type OrganizationTotalUserCountResponse = {
 // *********************
 // API Key Analytics
 // *********************
+export type ApiKeyLoginMethodsTotalResponse = {
+  data: {
+    method: string;
+    percent: number;
+    count: number;
+    userCount: number;
+  }[];
+};
+
+export type ApiKeyLoginPlatformsTotalResponse = {
+  data: {
+    platform: string;
+    percent: number;
+    count: number;
+  }[];
+};
+
+export type ApiKeyTotalUserCountResponse = {
+  count: number;
+  lowerEnvCount: number;
+};
+
 export type ApiKeyTotalUsersTSResponse = {
   data: {
     date: number;

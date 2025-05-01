@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { ApiKeyBranding, ApiKeyOnOffRamps, ApiKeySecurity, ApiKeySetup, ApiKeyUsers } from './pages';
+import { ApiKeyAnalytics, ApiKeyBranding, ApiKeyOnOffRamps, ApiKeySecurity, ApiKeySetup, ApiKeyUsers } from './pages';
 import { Typography } from '@getpara/react-component-library';
 
 export const ApiKey = () => {
@@ -16,6 +16,8 @@ export const ApiKey = () => {
       return <ApiKeyOnOffRamps />;
     case 'users':
       return <ApiKeyUsers />;
+    case 'analytics':
+      return <ApiKeyAnalytics />;
     default:
       return <Typography>Not Implemented</Typography>;
   }

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Table, TableData } from '../../../components/Table/Table';
 import { formatDate } from '../../../utils/formatDate';
 import { Loader } from '../../../components/Loader';
-import { LOGIN_METHOD_LABELS } from '../../../utils/constants';
+import { LOGIN_METHOD_CONFIG } from '../../../utils/constants';
 import {
   useOrganizationUsersTableData,
   useOrganizationUsersTotalRows,
@@ -41,7 +41,7 @@ export const UsersTable = () => {
             },
             {
               key: 'lastMethod',
-              value: LOGIN_METHOD_LABELS[d.lastMethod],
+              value: LOGIN_METHOD_CONFIG[d.lastMethod].label,
             },
             {
               key: 'firstCreated',

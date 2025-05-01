@@ -1,7 +1,7 @@
 import { PieChart, Pie, Cell } from 'recharts';
 import { PieChartCard } from '../../../components/ChartCards/PieChartCard';
 import { useOrganizationLoginMethodsTotal } from '../../../hooks/api/queries/useOrganizationLoginMethodsTotal';
-import { LOGIN_METHOD_LABELS } from '../../../utils/constants';
+import { LOGIN_METHOD_CONFIG } from '../../../utils/constants';
 import { pluralize } from '../../../utils/pluralize';
 
 export const LoginMethodsTotalChart = () => {
@@ -17,7 +17,7 @@ export const LoginMethodsTotalChart = () => {
     <PieChartCard
       heading={`${totalMethods} Login ${pluralize(totalMethods, 'Method')}`}
       legendData={loginMethods.map(lm => ({
-        label: LOGIN_METHOD_LABELS[lm.method] || lm.method,
+        label: LOGIN_METHOD_CONFIG[lm.method].label || lm.method,
         totalCount: lm.count,
         value: lm.percent,
       }))}

@@ -1,8 +1,11 @@
 import { axiosClient } from '../../clients/axios';
 import {
+  ApiKeyLoginMethodsTotalResponse,
+  ApiKeyLoginPlatformsTotalResponse,
   ApiKeyMonthlyActiveUsersTSResponse,
   ApiKeyResponse,
   ApiKeySetupStatusResponse,
+  ApiKeyTotalUserCountResponse,
   ApiKeyTotalUsersTSResponse,
   ApiKeyUsersLoginMetricsResponse,
   ApiKeysResponse,
@@ -52,6 +55,29 @@ export const getApiKeySetupStatus = async (organizationId: string, projectId: st
   const endpoint = `/organizations/${organizationId}/projects/${projectId}/${env}/keys/${keyId}/setup-status`;
 
   return axiosClient.get<ApiKeySetupStatusResponse>(endpoint);
+};
+
+export const getApiKeyLoginMethodsTotal = async (organizationId: string, projectId: string, keyId: string, env: string) => {
+  const endpoint = `/organizations/${organizationId}/projects/${projectId}/${env}/keys/${keyId}/analytics/all-time/login-methods`;
+
+  return axiosClient.get<ApiKeyLoginMethodsTotalResponse>(endpoint);
+};
+
+export const getApiKeyLoginPlatformsTotal = async (
+  organizationId: string,
+  projectId: string,
+  keyId: string,
+  env: string,
+) => {
+  const endpoint = `/organizations/${organizationId}/projects/${projectId}/${env}/keys/${keyId}/analytics/all-time/login-platforms`;
+
+  return axiosClient.get<ApiKeyLoginPlatformsTotalResponse>(endpoint);
+};
+
+export const getApiKeyTotalUserCount = async (organizationId: string, projectId: string, keyId: string, env: string) => {
+  const endpoint = `/organizations/${organizationId}/projects/${projectId}/${env}/keys/${keyId}/analytics/all-time/user-count`;
+
+  return axiosClient.get<ApiKeyTotalUserCountResponse>(endpoint);
 };
 
 export const getApiKeyTotalUsersTS = async (
