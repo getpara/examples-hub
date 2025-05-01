@@ -13,7 +13,7 @@ export const NavLink = ({ to, Icon, text }: NavLinkProps) => {
     <Link
       to={to}
       target="_blank"
-      className="para:flex para:items-center para:gap-1 para:focus-visible:border-ring para:focus-visible:ring-ring/50 para:focus-visible:ring-[3px] para:outline-none"
+      className="para:hidden para:lg:flex para:items-center para:gap-1 para:focus-visible:border-ring para:focus-visible:ring-ring/50 para:focus-visible:ring-[3px] para:outline-none"
     >
       <Icon className="para:size-4 para:stroke-secondary-foreground" />
       <Typography color="secondary" className="para:text-sm para:font-medium">

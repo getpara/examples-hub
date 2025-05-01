@@ -22,8 +22,10 @@
   --cpsl-color-background-48: #9590a1 !important;
   --cpsl-color-background-64: #6c6977 !important;
   --cpsl-color-background-80: #423f4b !important;
-  --cpsl-color-background-96: #18161e !important
-;
+  --cpsl-color-background-96: #18161e !important;
+
+  --appbar-height: 57px;
+  --appbar-height-mobile: 48px;
 }
 
 body {

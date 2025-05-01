@@ -1,4 +1,4 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@getpara/react-component-library';
+import { ScrollArea, ScrollBar, Tabs, TabsContent, TabsList, TabsTrigger } from '@getpara/react-component-library';
 import { Globe, Settings2 } from 'lucide-react';
 import { ReactNode } from 'react';
 import clsx from 'clsx';
@@ -25,12 +25,17 @@ export const AssetTabs = ({ disabled, value, CustomContent, onChange }: AssetTab
       className={clsx('para:gap-4', { 'para:gap-0': value === 'all' })}
     >
       <TabsList className="para:w-full">
-        {ASSET_TABS.map(tab => (
-          <TabsTrigger key={tab.value} value={tab.value} disabled={disabled}>
-            {tab.Icon}
-            {tab.label}
-          </TabsTrigger>
-        ))}
+        <ScrollArea className="para:w-full">
+          <div className="para:flex">
+            {ASSET_TABS.map(tab => (
+              <TabsTrigger key={tab.value} value={tab.value} disabled={disabled}>
+                {tab.Icon}
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </div>
+          <ScrollBar className="para:invisible" orientation="horizontal" />
+        </ScrollArea>
       </TabsList>
       {ASSET_TABS.map(tab => (
         <TabsContent key={tab.value} value={tab.value}>

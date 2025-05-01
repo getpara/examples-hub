@@ -4,12 +4,13 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from '@getpara/react-component-library';
 import clsx from 'clsx';
-import { AUTH_APP_BAR_SPACING_CN } from '../../../components/AppBar/AuthAppBar/AuthAppBar';
 import {
   ArrowUpDown,
   BarChart,
@@ -24,6 +25,8 @@ import {
 } from 'lucide-react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { MODAL_DESIGNER_LINK } from '../../../utils/constants';
+import { OrganizationDropdown } from '../../../components/NavComponents/OrganizationDropdown';
+import { useEffect } from 'react';
 
 type TSidebarGroup = {
   title: string;
@@ -93,6 +96,13 @@ const GROUPS: TSidebarGroup[] = [
 export const AppSidebar = () => {
   const { organizationId, projectId, apiKey, env } = useParams();
   const { pathname } = useLocation();
+  const { setOpenMobile, isMobile } = useSidebar();
+
+  useEffect(() => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  }, [isMobile, pathname, setOpenMobile]);
 
   if (!projectId || !apiKey || !env) {
     return null;
@@ -101,7 +111,17 @@ export const AppSidebar = () => {
   const pathPrefix = `/${organizationId}/project/${projectId}/key/${env}/${apiKey}`;
 
   return (
-    <Sidebar className={clsx(AUTH_APP_BAR_SPACING_CN, 'para:h-[calc(100svh-57px)]')}>
+    <Sidebar
+      className={clsx(
+        'para:mt-[var(--appbar-height-mobile)] para:lg:mt-[var(--appbar-height)]',
+        'para:h-[calc(100svh-var(--appbar-height-mobile))] para:lg:h-[calc(100svh-var(--appbar-height))]',
+      )}
+      noMobileOverlay
+      mobileSheetContentClassName="para:border-border para:shadow-none para:h-[calc(100svh-var(--appbar-height-mobile))] para:lg:h-[calc(100svh-var(--appbar-height))] para:mt-[var(--appbar-height-mobile)] para:lg:mt-[var(--appbar-height)]"
+    >
+      <SidebarHeader className="para:block para:md:hidden">
+        <OrganizationDropdown />
+      </SidebarHeader>
       <SidebarContent>
         {GROUPS.map(group => (
           <SidebarGroup key={group.title}>

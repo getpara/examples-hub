@@ -9,20 +9,20 @@ import { AuthAppBar } from '../../components/AppBar/AuthAppBar/AuthAppBar';
 export const Layout = () => {
   return (
     <AuthenticatedWrapper requireOrgs>
-      <AuthAppBar />
-      <SidebarProvider className="para:min-h-0">
-        <SentryErrorBoundary
-          fallback={({ error, resetError }) => (
-            <ErrorBoundary
-              onResetError={resetError}
-              variant="error"
-              containerType="authenticated"
-              errorMessage={(error as Error)?.message}
-            />
-          )}
-        >
+      <SentryErrorBoundary
+        fallback={({ error, resetError }) => (
+          <ErrorBoundary
+            onResetError={resetError}
+            variant="error"
+            containerType="authenticated"
+            errorMessage={(error as Error)?.message}
+          />
+        )}
+      >
+        <SidebarProvider className="para:min-h-0">
+          <AuthAppBar />
           <AppSidebar />
-          <main className="para:md:p-6 para:p-4 para:overflow-auto para:flex-1">
+          <main className="para:md:p-6 para:p-4 para:overflow-auto para:flex-1 para:mt-[var(--appbar-height-mobile)] para:lg:mt-[var(--appbar-height)]">
             <div className="para:max-w-[1400px] para:m-auto">
               <SentryErrorBoundary
                 fallback={({ error, resetError }) => (
@@ -39,8 +39,8 @@ export const Layout = () => {
               </SentryErrorBoundary>
             </div>
           </main>
-        </SentryErrorBoundary>
-      </SidebarProvider>
+        </SidebarProvider>
+      </SentryErrorBoundary>
     </AuthenticatedWrapper>
   );
 };

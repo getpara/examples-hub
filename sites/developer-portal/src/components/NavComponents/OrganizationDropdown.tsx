@@ -1,13 +1,14 @@
 import { Button, DropdownMenuSeparator } from '@getpara/react-component-library';
-import {
-  useGetAllOrganizationsWithAccess,
-  useGetSelectedOrganization,
-} from '../../../../hooks/api/queries/useOrganizations';
+import { useGetAllOrganizationsWithAccess, useGetSelectedOrganization } from '../../hooks/api/queries/useOrganizations';
 import { NavDropdown } from './NavDropdown';
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 
-export const OrganizationDropdown = () => {
+type OrganizationDropdownProps = {
+  className?: string;
+};
+
+export const OrganizationDropdown = ({ className }: OrganizationDropdownProps) => {
   const { data: organization } = useGetSelectedOrganization();
   const { data: orgsWithAccess } = useGetAllOrganizationsWithAccess();
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -29,6 +30,7 @@ export const OrganizationDropdown = () => {
       pathSuffix="/dashboard"
       isOpen={isNavOpen}
       setIsOpen={setIsNavOpen}
+      className={className}
     >
       <>
         <DropdownMenuSeparator />

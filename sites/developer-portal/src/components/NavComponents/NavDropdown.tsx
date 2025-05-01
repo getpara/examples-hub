@@ -8,14 +8,14 @@ import {
   DropdownMenuTrigger,
   Typography,
 } from '@getpara/react-component-library';
-import { OrganizationAvatar } from '../../../OgranizationAvatar';
+import { OrganizationAvatar } from '../OgranizationAvatar';
 import { ChevronsUpDown } from 'lucide-react';
 import { Fragment } from 'react/jsx-runtime';
 import { Link } from 'react-router-dom';
 import { PropsWithChildren } from 'react';
 import clsx from 'clsx';
-import { Environment } from '../../../../types/environment';
-import { EnvIcon } from '../../../common';
+import { Environment } from '../../types/environment';
+import { EnvIcon } from '../common';
 
 type Option = {
   id: string;
@@ -32,6 +32,7 @@ type NavDropdownProps = {
   pathSuffix?: string;
   isOpen: boolean;
   setIsOpen: (_: boolean) => void;
+  className?: string;
 };
 
 export const NavDropdown = ({
@@ -42,10 +43,11 @@ export const NavDropdown = ({
   children,
   isOpen,
   setIsOpen,
+  className,
 }: NavDropdownProps & PropsWithChildren) => {
   return (
     <DropdownMenu onOpenChange={setIsOpen} open={isOpen}>
-      <DropdownMenuTrigger className="para:rounded-sm">
+      <DropdownMenuTrigger className={clsx('para:rounded-sm para:min-w-0', className)}>
         <Button
           asChild
           variant="ghost"
@@ -56,8 +58,8 @@ export const NavDropdown = ({
             },
           )}
         >
-          <div className="para:flex para:gap-4 para:items-center">
-            <div className="para:flex para:gap-2 para:items-center">
+          <div className="para:flex para:gap-2 para:md:gap-4 para:items-center">
+            <div className="para:flex para:gap-2 para:items-center para:min-w-0">
               {selected.env ? (
                 <div className="para:size-6 para:flex para:items-center para:justify-center">
                   <EnvIcon $environment={selected.env} />
@@ -69,11 +71,11 @@ export const NavDropdown = ({
                   url={selected.iconUrl}
                 />
               )}
-              <Typography className="para:text-sm para:font-semibold">{selected.name}</Typography>
+              <Typography className="para:text-sm para:font-semibold para:truncate">{selected.name}</Typography>
               {selected.badge && (
                 <Badge
                   variant="outline"
-                  className="para:border-border para:bg-muted para:rounded-xs para:text-2xs para:font-medium para:uppercase"
+                  className="para:border-border para:bg-muted para:rounded-xs para:text-2xs para:font-medium para:uppercase para:hidden para:md:inline-flex"
                 >
                   {selected.badge}
                 </Badge>

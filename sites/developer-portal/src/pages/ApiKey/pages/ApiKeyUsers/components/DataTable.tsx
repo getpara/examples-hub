@@ -8,7 +8,7 @@ interface DataTableProps<TData> {
 
 export function DataTable<TData>({ table }: DataTableProps<TData>) {
   return (
-    <div className="para:bg-background para:overflow-hidden para:border para:border-border para:rounded-lg para:flex para:flex-col para:h-[calc(100vh-57px-48px-36px-32px-36px)] para:min-h-[500px]">
+    <div className="para:bg-background para:overflow-hidden para:border para:border-border para:rounded-lg para:flex para:flex-col para:h-[calc(100vh-var(--appbar-height-mobile)-48px-36px-32px-36px)] para:lg:h-[calc(100vh-var(--appbar-height)-48px-36px-32px-36px)] para:min-h-[500px]">
       <Table>
         <TableHeader className="para:bg-background para:sticky para:top-0">
           {table.getHeaderGroups().map(headerGroup => (

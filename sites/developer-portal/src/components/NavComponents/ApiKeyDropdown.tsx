@@ -4,15 +4,15 @@ import {
   useGetAllOrganizationKeys,
   useGetAvailableKeyEnvs,
   useGetOrganizationKey,
-} from '../../../../hooks/api/queries/useOrganizationKeys';
-import { Environment } from '../../../../types/environment';
+} from '../../hooks/api/queries/useOrganizationKeys';
+import { Environment } from '../../types/environment';
 import { NavSeparator } from './NavSeparator';
 import { Button, DropdownMenuSeparator } from '@getpara/react-component-library';
 import { SquareArrowUpRight } from 'lucide-react';
-import { formatEnvName } from '../../../../utils/apiKey';
+import { formatEnvName } from '../../utils/apiKey';
 import { useState } from 'react';
-import { CreateProductionKeyModal } from '../../../CreateProductionKeyModal/CreateProductionKeyModal';
-import { IS_BETA, IS_PROD } from '../../../../utils/constants';
+import { CreateProductionKeyModal } from '../CreateProductionKeyModal/CreateProductionKeyModal';
+import { IS_BETA, IS_PROD } from '../../utils/constants';
 
 export const ApiKeyDropdown = () => {
   const { organizationId, projectId, apiKey, env, apiKeyPage } = useParams();

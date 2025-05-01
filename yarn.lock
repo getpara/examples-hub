@@ -5237,20 +5237,20 @@
     inputmask "5.0.9"
     qrcode-with-logos "1.1.1"
 
-"@getpara/core-sdk@1.11.0":
-  version "1.11.0"
-  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.11.0.tgz#586160a4baae14a8f5b6374c2feff72975f046e4"
-  integrity sha512-lto6zkllfhUYwf0TVxcfdsBu4+eh33MKdtGIF17K5+Z/8I5MDga03R9WZugWSzu61bwPHADk2h+O/5F3/66yLQ==
+"@getpara/core-sdk@1.12.0":
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.12.0.tgz#2c88cbc796f6a432bb014a0f865ea932bbb2e5a9"
+  integrity sha512-r6UXdyqYPswIF96tDNB+hIFWRjAVrZTWcK64Zdlt1imLn7MqtwsQ1devvJ9D8xEBxjCB0lg1a0Uk9myRsAHV9A==
   dependencies:
     "@celo/utils" "^8.0.2"
     "@cosmjs/encoding" "^0.32.4"
     "@ethereumjs/util" "^9.1.0"
-    "@getpara/user-management-client" "1.11.0"
+    "@getpara/user-management-client" "1.12.0"
     "@noble/hashes" "^1.5.0"
     base64url "^3.0.1"
     libphonenumber-js "1.11.2"
     node-forge "^1.3.1"
-    qs "^6.12.0"
+    uuid "^11.1.0"
 
 "@getpara/core-sdk@1.7.1":
   version "1.7.1"
@@ -5267,12 +5267,13 @@
     node-forge "^1.3.1"
     qs "^6.12.0"
 
-"@getpara/cosmjs-v0-integration@1.11.0":
-  version "1.11.0"
-  resolved "https://registry.yarnpkg.com/@getpara/cosmjs-v0-integration/-/cosmjs-v0-integration-1.11.0.tgz#e2c1498145e91dc78cf5b1fc0d408f2b6d96f5b3"
-  integrity sha512-vEL6QqkO33663p7t46Swj36taHmlPJzEjSS6Hiw1V3lQQHxusQ0V7T2cYeShHRC5sdOe6YasN3YSEoEURwNqtQ==
+"@getpara/cosmjs-v0-integration@1.12.0":
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/@getpara/cosmjs-v0-integration/-/cosmjs-v0-integration-1.12.0.tgz#00894acfb8e23290202b985e5725dcc246b2ae64"
+  integrity sha512-roHZOZ/MVgXk+wT6QIIVC1C7uqKi4fcNHSPdE5gO66rQEQHxeb/l5JqTZ8Iwe3OXIKf2G/u2U4LkqSNxxLcRMA==
   dependencies:
-    "@getpara/core-sdk" "1.11.0"
+    "@cosmjs/stargate" "<=0.33.1"
+    "@getpara/core-sdk" "1.12.0"
 
 "@getpara/cosmjs-v0-integration@>=1.0.0":
   version "1.7.1"
@@ -5281,12 +5282,12 @@
   dependencies:
     "@getpara/core-sdk" "1.7.1"
 
-"@getpara/ethers-v6-integration@1.11.0":
-  version "1.11.0"
-  resolved "https://registry.yarnpkg.com/@getpara/ethers-v6-integration/-/ethers-v6-integration-1.11.0.tgz#98bff127a0fb439ddc200b82a08dd8a5e92b7cde"
-  integrity sha512-THodStaCUdh7yfgv5xpXXjgXwdTdEQBVHwEjdRgH5IjV2c1ZkSTc7hjnOTgvg+eNtLmuhjlavERc7Cp4jLE1WQ==
+"@getpara/ethers-v6-integration@1.12.0":
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/@getpara/ethers-v6-integration/-/ethers-v6-integration-1.12.0.tgz#ddf41e98286e169da092e05764c58129f02e5916"
+  integrity sha512-Rvc1a246LU0e5ZAzlvXUdeJOb+mczdpNHYjNRXBoRiKY9wBHYwTtKi82pm0+AGLWzzoCM1MvVYi21SzTmnaeuQ==
   dependencies:
-    "@getpara/core-sdk" "1.11.0"
+    "@getpara/core-sdk" "1.12.0"
 
 "@getpara/graz@^1.0.0-dev.2":
   version "1.0.0-dev.2"
@@ -5348,18 +5349,18 @@
     zustand "^4.5.2"
     zustand-sync-tabs "^0.2.2"
 
-"@getpara/solana-web3.js-v1-integration@1.11.0":
-  version "1.11.0"
-  resolved "https://registry.yarnpkg.com/@getpara/solana-web3.js-v1-integration/-/solana-web3.js-v1-integration-1.11.0.tgz#131fbd7d0392c937cbeb9d4cdc42cca7f50070a9"
-  integrity sha512-wev01pK1nVilQL4iDgRPGiB4nAxkrGsIyT0hF0KjRheGmtON8TX4F/8i0M/7rgElAHKEc4IH/D54fO4jSzSLNw==
+"@getpara/solana-web3.js-v1-integration@1.12.0":
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/@getpara/solana-web3.js-v1-integration/-/solana-web3.js-v1-integration-1.12.0.tgz#b936d5a0208ff3d12efa25a6db7fb0cc8e6af45b"
+  integrity sha512-/jCRW19D1GMbyUDRYnofwIMD/6azfRc0OuPumYKEagA00/v45oBuXoWeUtwwUV1IJu0kfG7jZoi+kLFSKFiQlw==
   dependencies:
-    "@getpara/core-sdk" "1.11.0"
+    "@getpara/core-sdk" "1.12.0"
     "@solana/web3.js" "^1.98.0"
 
-"@getpara/user-management-client@1.11.0":
-  version "1.11.0"
-  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.11.0.tgz#b044b14a92dbb8cab9c23508e1613229bfb44020"
-  integrity sha512-dXXwhhraK0drPpn22qJYeJZ3+4g7fAg3v/3sg9AiyJlDdOSyT3tW7V/GgFfpsoULS6ZDKFEFI/lGmKss18KCDA==
+"@getpara/user-management-client@1.12.0":
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.12.0.tgz#25dcb3d40c2e0cfabdbf21afe98609510ae2ac91"
+  integrity sha512-fs/V+I+dDmApbLpfKKRssabHpA5E7k4bgbMSMlr2c4ALC9ZnmP68dt78Jkd5f2kcEwNj3+N8S3SPMso2uqtMuA==
   dependencies:
     axios "^1.8.4"
     libphonenumber-js "1.11.2"
@@ -5373,15 +5374,13 @@
     libphonenumber-js "1.11.2"
     qs "^6.12.0"
 
-"@getpara/web-sdk@1.11.0":
-  version "1.11.0"
-  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-1.11.0.tgz#12f84ecb0c529f2bf52a3da679bfa59ceb0f9030"
-  integrity sha512-BJ9ErKDCga2WvfWXlCLuJIUlIUAxcB8b2Qs2ROtNmw9WbxnG0McmQ5KWQX1M7mB3tjabkdymVtUbrAXoeefRaA==
+"@getpara/web-sdk@1.12.0":
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-1.12.0.tgz#10c33a9a0f7096bf98c82ab66bce0b28e8093e85"
+  integrity sha512-AxV7BmvKazbTP1z+jpNORZ0Wx9Kl6FB92DbHEyeqnF0SmSGCAohEIvlrolwHvCPqtr+98XRGEIHqEAvmZr/PXQ==
   dependencies:
-    "@getpara/core-sdk" "1.11.0"
-    "@getpara/user-management-client" "1.11.0"
-    "@sentry/browser" "^9.1.0"
-    assert "^2.1.0"
+    "@getpara/core-sdk" "1.12.0"
+    "@getpara/user-management-client" "1.12.0"
     base64url "3.0.1"
     buffer "6.0.3"
     cbor-web "8.1.0"
@@ -7755,6 +7754,11 @@
   resolved "https://registry.yarnpkg.com/@radix-ui/number/-/number-1.1.0.tgz#1e95610461a09cdf8bb05c152e76ca1278d5da46"
   integrity sha512-V3gRzhVNU1ldS5XhAPTom1fOIo4ccrjjJgmE+LI2h/WaFpHmx0MQApT+KZHnx8abG6Avtfcz4WoEciMnpFT3HQ==
 
+"@radix-ui/number@1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@radix-ui/number/-/number-1.1.1.tgz#7b2c9225fbf1b126539551f5985769d0048d9090"
+  integrity sha512-MkKCwxlXTgz6CFoJx3pCwn07GKp36+aZyu/u2Ln2VrA5DcdyCZkASEDBTd8x5whTQQL5CiYf4prXKLcgQdv29g==
+
 "@radix-ui/primitive@1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@radix-ui/primitive/-/primitive-1.1.0.tgz#42ef83b3b56dccad5d703ae8c42919a68798bbe2"
@@ -7885,6 +7889,11 @@
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@radix-ui/react-direction/-/react-direction-1.1.0.tgz#a7d39855f4d077adc2a1922f9c353c5977a09cdc"
   integrity sha512-BUuBvgThEiAXh2DWu93XsT+a3aWrGqolGlqqw5VU1kG7p/ZH2cuDlM1sRLNnY3QcBS69UIz2mcKhMxDsdewhjg==
+
+"@radix-ui/react-direction@1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-direction/-/react-direction-1.1.1.tgz#39e5a5769e676c753204b792fbe6cf508e550a14"
+  integrity sha512-1UEWRX6jnOA2y4H5WczZ44gOOjTEmlqv1uNW4GAJEO5+bauCBhv8snY65Iw5/VOS/ghKN9gr2KjnLKxrsvoMVw==
 
 "@radix-ui/react-dismissable-layer@1.1.5":
   version "1.1.5"
@@ -8083,6 +8092,14 @@
     "@radix-ui/react-compose-refs" "1.1.2"
     "@radix-ui/react-use-layout-effect" "1.1.1"
 
+"@radix-ui/react-presence@1.1.4":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-presence/-/react-presence-1.1.4.tgz#253ac0ad4946c5b4a9c66878335f5cf07c967ced"
+  integrity sha512-ueDqRbdc4/bkaQT3GIpLQssRlFgWaL/U2z/S31qRwwLWoxHLgry3SIfCwhxeQNbirEUXFa+lq3RL3oBYXtcmIA==
+  dependencies:
+    "@radix-ui/react-compose-refs" "1.1.2"
+    "@radix-ui/react-use-layout-effect" "1.1.1"
+
 "@radix-ui/react-primitive@2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@radix-ui/react-primitive/-/react-primitive-2.0.0.tgz#fe05715faa9203a223ccc0be15dc44b9f9822884"
@@ -8101,6 +8118,13 @@
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/@radix-ui/react-primitive/-/react-primitive-2.0.3.tgz#13c654dc4754558870a9c769f6febe5980a1bad8"
   integrity sha512-Pf/t/GkndH7CQ8wE2hbkXA+WyZ83fhQQn5DDmwDiDo6AwN/fhaH8oqZ0jRjMrO2iaMhDi6P1HRx6AZwyMinY1g==
+  dependencies:
+    "@radix-ui/react-slot" "1.2.0"
+
+"@radix-ui/react-primitive@2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-primitive/-/react-primitive-2.1.0.tgz#9233e17a22d0010195086f8b5eb1808ebbca8437"
+  integrity sha512-/J/FhLdK0zVcILOwt5g+dH4KnkonCtkVJsa2G6JmvbbtZfBEI1gMsO3QMjseL4F/SwfAMt1Vc/0XKYKq+xJ1sw==
   dependencies:
     "@radix-ui/react-slot" "1.2.0"
 
@@ -8142,6 +8166,21 @@
     "@radix-ui/react-primitive" "2.0.2"
     "@radix-ui/react-use-callback-ref" "1.1.0"
     "@radix-ui/react-use-controllable-state" "1.1.0"
+
+"@radix-ui/react-scroll-area@^1.2.2":
+  version "1.2.6"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-scroll-area/-/react-scroll-area-1.2.6.tgz#cd4b113e812e92f63ef6959f609ac7e8eaadb1aa"
+  integrity sha512-lj8OMlpPERXrQIHlEQdlXHJoRT52AMpBrgyPYylOhXYq5e/glsEdtOc/kCQlsTdtgN5U0iDbrrolDadvektJGQ==
+  dependencies:
+    "@radix-ui/number" "1.1.1"
+    "@radix-ui/primitive" "1.1.2"
+    "@radix-ui/react-compose-refs" "1.1.2"
+    "@radix-ui/react-context" "1.1.2"
+    "@radix-ui/react-direction" "1.1.1"
+    "@radix-ui/react-presence" "1.1.4"
+    "@radix-ui/react-primitive" "2.1.0"
+    "@radix-ui/react-use-callback-ref" "1.1.1"
+    "@radix-ui/react-use-layout-effect" "1.1.1"
 
 "@radix-ui/react-select@^2.1.5":
   version "2.1.6"

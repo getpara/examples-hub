@@ -33,7 +33,7 @@ export const ApiKeyUsers = () => {
   }, [tab]);
 
   return (
-    <ContentWrapper className="para:h-[calc(100vh-57px-48px)] para:min-h-[500px]">
+    <ContentWrapper className="para:h-[calc(100vh-var(--appbar-height-mobile)-48px)] para:lg:h-[calc(100vh-var(--appbar-height)-48px)] para:min-h-[500px]">
       <UsersTabs value={tab} onChange={setTab} />
       <UsersTable methods={methods} />
     </ContentWrapper>

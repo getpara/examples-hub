@@ -1,11 +1,11 @@
 import { useParams } from 'react-router-dom';
-import { useGetAllProjects, useGetProject } from '../../../../hooks/api/queries/useProjects';
+import { useGetAllProjects, useGetProject } from '../../hooks/api/queries/useProjects';
 import { NavDropdown } from './NavDropdown';
 import { NavSeparator } from './NavSeparator';
 import { Button, DropdownMenuSeparator } from '@getpara/react-component-library';
-import { useCanCreateProject } from '../../../../hooks/subscriptionGating/useCanCreateProject';
+import { useCanCreateProject } from '../../hooks/subscriptionGating/useCanCreateProject';
 import { useState } from 'react';
-import { CreateProjectModal } from '../../../CreateProjectModal/CreateProjectModal';
+import { CreateProjectModal } from '../CreateProjectModal/CreateProjectModal';
 import { Plus } from 'lucide-react';
 
 export const ProjectDropdown = () => {
@@ -27,7 +27,7 @@ export const ProjectDropdown = () => {
 
   return (
     <>
-      <NavSeparator />
+      <NavSeparator className="para:hidden para:md:block" />
       <NavDropdown
         selected={{
           id: project.id,

@@ -143,11 +143,17 @@ function Sidebar({
   collapsible = 'offcanvas',
   className,
   children,
+  noMobileOverlay,
+  mobileSheetContentClassName,
+  mobileSheetChildrenClassName,
   ...props
 }: React.ComponentProps<'div'> & {
   side?: 'left' | 'right';
   variant?: 'sidebar' | 'floating' | 'inset';
   collapsible?: 'offcanvas' | 'icon' | 'none';
+  noMobileOverlay?: boolean;
+  mobileSheetContentClassName?: string;
+  mobileSheetChildrenClassName?: string;
 }) {
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
 
@@ -173,19 +179,25 @@ function Sidebar({
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
-          className={'para:bg-sidebar para:text-sidebar-foreground para:w-(--sidebar-width) para:p-0 para:[&>button]:hidden'}
+          className={cn(
+            'para:bg-sidebar para:text-sidebar-foreground para:w-(--sidebar-width) para:p-0 para:[&>button]:hidden',
+            mobileSheetContentClassName,
+          )}
           style={
             {
               '--sidebar-width': SIDEBAR_WIDTH_MOBILE,
             } as React.CSSProperties
           }
           side={side}
+          noOverlay={noMobileOverlay}
         >
           <SheetHeader className={'para:sr-only'}>
             <SheetTitle>Sidebar</SheetTitle>
             <SheetDescription>Displays the mobile sidebar.</SheetDescription>
           </SheetHeader>
-          <div className={'para:flex para:h-full para:w-full para:flex-col'}>{children}</div>
+          <div className={cn('para:flex para:h-full para:w-full para:flex-col', mobileSheetChildrenClassName)}>
+            {children}
+          </div>
         </SheetContent>
       </Sheet>
     );
