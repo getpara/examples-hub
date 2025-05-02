@@ -7,31 +7,13 @@ struct EmailAuthView: View {
     @EnvironmentObject var appRootManager: AppRootManager
     
     @State private var email = ""
-    @State private var shouldNavigateToVerifyEmail = false
-    
-    // New states for error handling and loading
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @State private var shouldNavigateToVerifyEmail = false
+    @State private var authState: AuthState?
     
     @Environment(\.authorizationController) private var authorizationController
     @Environment(\.webAuthenticationSession) private var webAuthenticationSession
-    
-    private func validateEmail() -> Bool {
-        if email.isEmpty {
-            errorMessage = "Please enter an email address."
-            return false
-        }
-        
-        // Basic email format validation
-        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
-        let emailPredicate = NSPredicate(format:"SELF MATCHES %@", emailRegex)
-        if !emailPredicate.evaluate(with: email) {
-            errorMessage = "Please enter a valid email address."
-            return false
-        }
-        
-        return true
-    }
     
     var body: some View {
         VStack(spacing: 20) {
@@ -70,28 +52,39 @@ struct EmailAuthView: View {
                 
                 isLoading = true
                 Task {
-                    let result = await paraManager.handleEmailAuth(
-                        email: email,
-                        authMethod: .passkey,
-                        authorizationController: authorizationController,
-                        webAuthenticationSession: webAuthenticationSession
-                    )
+                    do {
+                        let state = try await paraManager.initiateAuthFlow(auth: .email(email))
+                        self.authState = state
+                        
+                        switch state.stage {
+                        case .verify:
+                            // User needs to verify email
+                            shouldNavigateToVerifyEmail = true
+                            
+                        case .login:
+                            // Existing user - determine and use preferred login method
+                            if let preferredMethod = paraManager.determinePreferredLoginMethod(authState: state) {
+                                // Use the preferred login method based on user history
+                                try await paraManager.handleLoginMethod(
+                                    authState: state,
+                                    method: preferredMethod,
+                                    authorizationController: authorizationController,
+                                    webAuthenticationSession: webAuthenticationSession
+                                )
+                                appRootManager.currentRoot = .home
+                            } else {
+                                errorMessage = "No login methods available for this account."
+                            }
+                            
+                        case .signup:
+                            // This shouldn't happen directly from email input
+                            errorMessage = "Unexpected authentication state. Please try again."
+                        }
+                    } catch {
+                        errorMessage = error.localizedDescription
+                    }
                     
                     isLoading = false
-                    
-                    switch result.status {
-                    case .success:
-                        // Authentication successful, navigate to home
-                        appRootManager.currentRoot = .home
-                        
-                    case .needsVerification:
-                        // User needs to verify email
-                        shouldNavigateToVerifyEmail = true
-                        
-                    case .error:
-                        // Error occurred
-                        errorMessage = result.errorMessage
-                    }
                 }
             } label: {
                 Text("Continue")
@@ -102,34 +95,34 @@ struct EmailAuthView: View {
             .padding(.horizontal)
             .accessibilityIdentifier("continueButton")
             .navigationDestination(isPresented: $shouldNavigateToVerifyEmail) {
-                VerifyEmailView(email: email)
-                    .environmentObject(paraManager)
-                    .environmentObject(appRootManager)
-            }
-            
-            HStack {
-                Rectangle().frame(height: 1)
-                Text("Or")
-                Rectangle().frame(height: 1)
-            }.padding(.vertical)
-            
-            Button {
-                Task {
-                    try await paraManager.loginWithPasskey(authorizationController: authorizationController, authInfo: EmailAuthInfo(email: email))
-                    appRootManager.currentRoot = .home
+                if let state = authState {
+                    VerifyEmailView(authState: state)
+                        .environmentObject(paraManager)
+                        .environmentObject(appRootManager)
                 }
-            } label: {
-                Text("Log In with Passkey")
-                    .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.bordered)
-            .accessibilityIdentifier("passkeyAuthButton")
             
             Spacer()
-            
         }
         .padding()
         .navigationTitle("Email Authentication")
+    }
+    
+    private func validateEmail() -> Bool {
+        if email.isEmpty {
+            errorMessage = "Please enter an email address."
+            return false
+        }
+        
+        // Basic email format validation
+        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+        let emailPredicate = NSPredicate(format:"SELF MATCHES %@", emailRegex)
+        if !emailPredicate.evaluate(with: email) {
+            errorMessage = "Please enter a valid email address."
+            return false
+        }
+        
+        return true
     }
 }
 
@@ -140,4 +133,3 @@ struct EmailAuthView: View {
             .environmentObject(AppRootManager())
     }
 }
-

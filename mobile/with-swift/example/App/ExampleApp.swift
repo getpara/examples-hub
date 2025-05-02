@@ -20,12 +20,8 @@ struct ExampleApp: App {
         _paraManager = StateObject(wrappedValue: paraManager)
         
         // Initialize EVM signer
-        do {
-            let signer = try ParaEvmSigner(paraManager: paraManager, rpcUrl: config.rpcUrl, walletId: nil)
-            _paraEvmSigner = StateObject(wrappedValue: signer)
-        } catch {
-            fatalError("Failed to initialize Para EVM signer: \(error)")
-        }
+        let signer = try! ParaEvmSigner(paraManager: paraManager, rpcUrl: config.rpcUrl, walletId: nil)
+        _paraEvmSigner = StateObject(wrappedValue: signer)
         
         // Initialize MetaMask Connector with configuration
         let metaMaskConfig = MetaMaskConfig(appName: "ExampleApp", appId: bundleId, apiVersion: "1.0")

@@ -6,25 +6,13 @@ struct ChooseSignupMethodView: View {
     @EnvironmentObject var paraManager: ParaManager
     @EnvironmentObject var appRootManager: AppRootManager
     
-    let authState: AuthState // Received from VerifyEmailView/VerifyPhoneView
+    let authState: AuthState // Received from VerifyEmailView
     
     @State private var isLoading = false
     @State private var errorMessage: String?
     
     @Environment(\.authorizationController) private var authorizationController
     @Environment(\.webAuthenticationSession) private var webAuthenticationSession
-    
-    // Helper to get the primary identifier (email/phone)
-    private var identifier: String {
-        switch authState.authIdentity {
-        case let emailIdentity as EmailIdentity:
-            return emailIdentity.email
-        case let phoneIdentity as PhoneIdentity:
-            return paraManager.formatPhoneNumber(phoneNumber: phoneIdentity.phone, countryCode: phoneIdentity.countryCode)
-        default:
-            return authState.userId
-        }
-    }
     
     var body: some View {
         VStack(spacing: 30) {
@@ -42,7 +30,7 @@ struct ChooseSignupMethodView: View {
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
                     .accessibilityIdentifier("errorMessage")
-                    .lineLimit(4, reservesSpace: true) // Reserve space to prevent layout shifts
+                    .lineLimit(4, reservesSpace: true)
             }
             
             if isLoading {
@@ -51,11 +39,7 @@ struct ChooseSignupMethodView: View {
             
             // MARK: - Passkey Button
             Button {
-                guard let passkeyId = authState.passkeyId else {
-                    errorMessage = "Passkey information missing from verification step."
-                    return
-                }
-                setupAccount(method: .passkey(passkeyId: passkeyId))
+                setupAccount(method: .passkey)
             } label: {
                 VStack {
                     Image(systemName: "person.badge.key.fill")
@@ -69,16 +53,12 @@ struct ChooseSignupMethodView: View {
                 .frame(maxWidth: .infinity)
             }
             .buttonStyle(.bordered)
-            .disabled(isLoading || authState.passkeyId == nil) // Disable if passkey setup isn't possible
+            .disabled(isLoading || authState.passkeyId == nil)
             .accessibilityIdentifier("passkeyButton")
             
             // MARK: - Password Button
             Button {
-                guard let passwordUrl = authState.passwordUrl else {
-                    errorMessage = "Password setup information missing from verification step."
-                    return
-                }
-                setupAccount(method: .password(url: passwordUrl))
+                setupAccount(method: .password)
             } label: {
                 VStack {
                     Image(systemName: "lock.rectangle.stack.fill")
@@ -92,68 +72,38 @@ struct ChooseSignupMethodView: View {
                 .frame(maxWidth: .infinity)
             }
             .buttonStyle(.bordered)
-            .disabled(isLoading || authState.passwordUrl == nil) // Disable if password setup isn't possible
+            .disabled(isLoading || authState.passwordUrl == nil)
             .accessibilityIdentifier("passwordButton")
             
             Spacer()
         }
         .padding()
         .navigationTitle("Secure Your Account")
-        .navigationBarBackButtonHidden(isLoading) // Prevent back navigation during critical setup
+        .navigationBarBackButtonHidden(isLoading)
     }
     
     // MARK: - Account Setup Logic
     
-    private enum SetupMethod {
-        case passkey(passkeyId: String)
-        case password(url: String)
-    }
-    
-    private func setupAccount(method: SetupMethod) {
+    private func setupAccount(method: ParaManager.SignupMethod) {
         isLoading = true
         errorMessage = nil
         
         Task {
             do {
-                switch method {
-                case .passkey(let passkeyId):
-                    // 1. Generate Passkey
-                    try await paraManager.generatePasskey(
-                        identifier: self.identifier, // Use helper to get email/phone
-                        biometricsId: passkeyId,
-                        authorizationController: authorizationController
-                    )
-                    
-                    // 2. Create Wallet (implicit after passkey generation for now)
-                    //    Assuming generatePasskey triggers necessary backend setup
-                    
-                case .password(let url):
-                    // 1. Present Password URL
-                    guard let _ = try await paraManager.presentPasswordUrl(
-                        url,
-                        webAuthenticationSession: webAuthenticationSession,
-                        isSignup: true // Important: This is a signup flow
-                    ) else {
-                        throw ParaError.error("Password setup flow did not complete successfully.")
-                    }
-                    // Polling and session update happens within presentPasswordUrl
-                }
+                try await paraManager.handleSignupMethod(
+                    authState: authState,
+                    method: method,
+                    authorizationController: authorizationController,
+                    webAuthenticationSession: webAuthenticationSession
+                )
                 
-                // 3. Explicitly Create Wallet *after* successful setup (Passkey or Password)
-                //    This ensures the SDK state reflects the new wallet correctly.
-                _ = try await paraManager.createWallet(type: .evm, skipDistributable: false)
-                
-                // 4. Navigate Home
+                // If we reach here, signup was successful and wallet was created
                 appRootManager.currentRoot = .home
                 
-            } catch let error as ParaError {
-                errorMessage = error.description
-                isLoading = false
             } catch {
-                errorMessage = "An unexpected error occurred during account setup: \(error.localizedDescription)"
+                errorMessage = "Account setup failed: \(error.localizedDescription)"
                 isLoading = false
             }
-            // isLoading is implicitly false on success due to navigation
         }
     }
 }
@@ -165,10 +115,10 @@ struct ChooseSignupMethodView: View {
     let sampleAuthState = AuthState(
         stage: .signup,
         userId: "preview-user-id",
-        authIdentity: EmailIdentity(email: "test@example.com"), // Example email identity
-        passkeyUrl: "https://example.com/passkey", // Dummy URL
-        passkeyId: "preview-passkey-id",           // Dummy ID
-        passwordUrl: "https://example.com/password" // Dummy URL
+        authIdentity: EmailIdentity(email: "test@example.com"),
+        passkeyUrl: "https://example.com/passkey",
+        passkeyId: "preview-passkey-id",
+        passwordUrl: "https://example.com/password"
     )
     
     return NavigationStack {
@@ -176,4 +126,4 @@ struct ChooseSignupMethodView: View {
             .environmentObject(ParaManager(environment: .sandbox, apiKey: "preview-key"))
             .environmentObject(AppRootManager())
     }
-} 
+}
