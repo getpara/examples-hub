@@ -133,7 +133,7 @@ struct PhoneAuthView: View {
                 
                 Task {
                     do {
-                        let formattedPhone = paraManager.formatPhoneNumber(phoneNumber: phoneNumber, countryCode: countryCode)
+                        let formattedPhone = ParaFormatting.formatPhoneNumber(phoneNumber: phoneNumber, countryCode: countryCode)
                         let state = try await paraManager.initiateAuthFlow(auth: .phone(formattedPhone))
                         self.authState = state
                         

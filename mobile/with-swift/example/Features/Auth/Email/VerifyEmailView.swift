@@ -13,17 +13,11 @@ struct VerifyEmailView: View {
     @State private var errorMessage: String?
     @State private var shouldNavigateToChooseMethod = false
     @State private var verifiedAuthState: AuthState? = nil
-    @State private var resendInProgress = false
-    @State private var justResent = false
-    
-    @Environment(\.authorizationController) private var authorizationController
-    @Environment(\.webAuthenticationSession) private var webAuthenticationSession
+    @State private var showResendSuccess = false
     
     // Helper to get the email from the auth state
     private var emailDisplay: String {
-        if let email = authState.email {
-            return email
-        } else if let emailIdentity = authState.authIdentity as? EmailIdentity {
+        if let emailIdentity = authState.authIdentity as? EmailIdentity {
             return emailIdentity.email
         } else {
             return "your email"
@@ -31,93 +25,84 @@ struct VerifyEmailView: View {
     }
     
     var body: some View {
-        VStack(spacing: 20) {
-            Text("A verification code was sent to \(emailDisplay). Enter it below to verify.")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
+        VStack(spacing: 25) {
+            // Verification header
+            Image(systemName: "checkmark.shield.fill")
+                .font(.system(size: 50))
+                .foregroundColor(.green)
+                .padding(.bottom)
             
-            TextField("Verification Code", text: $code)
-                .textInputAutocapitalization(.never)
-                .disableAutocorrection(true)
-                .textFieldStyle(.roundedBorder)
-                .padding(.horizontal)
+            // Instructions
+            Text("Check your inbox")
+                .font(.headline)
+            
+            Text("We've sent a verification code to\n\(emailDisplay)")
+                .multilineTextAlignment(.center)
+                .foregroundColor(.secondary)
+            
+            // Code input field
+            TextField("Enter verification code", text: $code)
                 .keyboardType(.numberPad)
-                .disabled(isLoading)
+                .padding()
+                .frame(minHeight: 50)
+                .background(Color(.systemGray6))
+                .cornerRadius(10)
+                .padding(.horizontal)
                 .accessibilityIdentifier("verificationCodeField")
             
+            // Error message display
             if let errorMessage = errorMessage {
                 Text(errorMessage)
                     .foregroundColor(.red)
+                    .font(.callout)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
                     .accessibilityIdentifier("errorMessage")
-                    .lineLimit(4, reservesSpace: true)
             }
             
-            if isLoading {
-                ProgressView()
-            }
-            
-            if justResent {
-                Text("Verification code resent")
+            // Resend success message
+            if showResendSuccess {
+                Text("Code resent!")
                     .foregroundColor(.green)
                     .font(.subheadline)
-                    .padding(.top, 4)
+                    .padding(6)
+                    .background(Color.green.opacity(0.1))
+                    .cornerRadius(5)
             }
             
+            // Verify button
             Button {
-                guard !code.isEmpty else {
-                    errorMessage = "Please enter the verification code."
-                    return
-                }
-                isLoading = true
-                errorMessage = nil
-                
-                Task {
-                    do {
-                        let resultState = try await paraManager.handleVerificationCode(verificationCode: code)
-                        
-                        if resultState.stage == .signup {
-                            // Verification successful for a new account
-                            verifiedAuthState = resultState
-                            shouldNavigateToChooseMethod = true
-                        } else {
-                            // Handle unexpected state (e.g., already logged in, etc.)
-                            errorMessage = "Unexpected account state after verification: \(resultState.stage). Please try logging in again."
-                        }
-                    } catch {
-                        errorMessage = "Verification failed: \(error.localizedDescription)"
-                    }
-                    
-                    isLoading = false
-                }
+                verifyCode()
             } label: {
-                Text("Verify")
-                    .frame(maxWidth: .infinity)
+                if isLoading {
+                    ProgressView().tint(.white)
+                } else {
+                    Text("Verify")
+                        .fontWeight(.semibold)
+                }
             }
-            .buttonStyle(.borderedProminent)
-            .disabled(isLoading || code.isEmpty)
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color.blue)
+            .foregroundColor(.white)
+            .cornerRadius(10)
             .padding(.horizontal)
+            .disabled(isLoading || code.isEmpty)
             .accessibilityIdentifier("verifyButton")
             
-            Button {
-                Task {
-                    await resendVerificationCode()
-                }
-            } label: {
-                Text("Resend Code")
-                    .foregroundColor(resendInProgress ? .gray : .blue)
+            // Resend button
+            Button("Didn't receive code? Resend") {
+                resendCode()
             }
-            .disabled(resendInProgress)
-            .padding(.top)
+            .font(.subheadline)
+            .disabled(isLoading)
+            .padding(.top, 5)
             .accessibilityIdentifier("resendCodeButton")
             
+            // Navigation
             .navigationDestination(isPresented: $shouldNavigateToChooseMethod) {
                 if let verifiedState = verifiedAuthState {
                     ChooseSignupMethodView(authState: verifiedState)
-                        .environmentObject(paraManager)
-                        .environmentObject(appRootManager)
                 }
             }
             
@@ -127,39 +112,66 @@ struct VerifyEmailView: View {
         .navigationTitle("Verify Email")
     }
     
-    // MARK: - Helper Methods
-    
-    @MainActor
-    private func resendVerificationCode() async {
-        guard !resendInProgress else { return }
-        
-        resendInProgress = true
-        errorMessage = nil
-        
-        do {
-            try await paraManager.resendVerificationCode()
-            
-            // Show success message temporarily
-            withAnimation {
-                justResent = true
-            }
-            
-            // Hide the message after 3 seconds
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                withAnimation {
-                    justResent = false
-                }
-            }
-        } catch {
-            errorMessage = "Failed to resend code: \(error.localizedDescription)"
+    // Verify the code entered by user
+    private func verifyCode() {
+        guard !code.isEmpty else {
+            errorMessage = "Please enter the verification code"
+            return
         }
         
-        resendInProgress = false
+        isLoading = true
+        errorMessage = nil
+        
+        Task {
+            do {
+                let resultState = try await paraManager.handleVerificationCode(verificationCode: code)
+                
+                if resultState.stage == .signup {
+                    verifiedAuthState = resultState
+                    shouldNavigateToChooseMethod = true
+                } else {
+                    errorMessage = "Unexpected verification result"
+                }
+            } catch {
+                errorMessage = "Verification failed: \(error.localizedDescription)"
+            }
+            
+            isLoading = false
+        }
+    }
+    
+    // Resend verification code
+    private func resendCode() {
+        guard !isLoading else { return }
+        
+        isLoading = true
+        errorMessage = nil
+        
+        Task {
+            do {
+                try await paraManager.resendVerificationCode()
+                
+                // Show success message
+                withAnimation {
+                    showResendSuccess = true
+                }
+                
+                // Hide after 3 seconds
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                    withAnimation {
+                        showResendSuccess = false
+                    }
+                }
+            } catch {
+                errorMessage = "Failed to resend code"
+            }
+            
+            isLoading = false
+        }
     }
 }
 
 #Preview {
-    // Create a sample AuthState for previewing
     let sampleAuthState = AuthState(
         stage: .verify,
         userId: "preview-user-id",

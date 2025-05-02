@@ -6,7 +6,7 @@ struct ChooseSignupMethodView: View {
     @EnvironmentObject var paraManager: ParaManager
     @EnvironmentObject var appRootManager: AppRootManager
     
-    let authState: AuthState // Received from VerifyEmailView
+    let authState: AuthState // Received from verification
     
     @State private var isLoading = false
     @State private var errorMessage: String?
@@ -15,65 +15,63 @@ struct ChooseSignupMethodView: View {
     @Environment(\.webAuthenticationSession) private var webAuthenticationSession
     
     var body: some View {
-        VStack(spacing: 30) {
-            Text("Verification successful!")
+        VStack(spacing: 20) {
+            // Success icon
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 60))
+                .foregroundColor(.green)
+                .padding(.bottom, 10)
+            
+            Text("Account Verified!")
                 .font(.title2)
+                .fontWeight(.bold)
             
-            Text("Choose how you want to secure your new account:")
-                .font(.subheadline)
+            Text("Choose how to secure your account")
                 .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
             
+            // Error message if needed
             if let errorMessage = errorMessage {
                 Text(errorMessage)
                     .foregroundColor(.red)
-                    .multilineTextAlignment(.center)
+                    .padding()
+                    .background(Color.red.opacity(0.1))
+                    .cornerRadius(8)
                     .padding(.horizontal)
                     .accessibilityIdentifier("errorMessage")
-                    .lineLimit(4, reservesSpace: true)
             }
             
+            // Progress indicator during setup
             if isLoading {
-                ProgressView("Setting up account...")
+                ProgressView()
+                    .padding()
             }
             
-            // MARK: - Passkey Button
-            Button {
-                setupAccount(method: .passkey)
-            } label: {
-                VStack {
-                    Image(systemName: "person.badge.key.fill")
-                        .font(.title)
-                    Text("Secure with Passkey")
-                        .fontWeight(.semibold)
-                    Text("Recommended. Uses Face ID / Touch ID.")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.bordered)
-            .disabled(isLoading || authState.passkeyId == nil)
-            .accessibilityIdentifier("passkeyButton")
+            Spacer()
+                .frame(height: 20)
             
-            // MARK: - Password Button
-            Button {
-                setupAccount(method: .password)
-            } label: {
-                VStack {
-                    Image(systemName: "lock.rectangle.stack.fill")
-                        .font(.title)
-                    Text("Secure with Password")
-                        .fontWeight(.semibold)
-                    Text("Uses a traditional password.")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                .frame(maxWidth: .infinity)
+            // Security method options
+            VStack(spacing: 16) {
+                // Passkey option
+                securityOptionButton(
+                    icon: "faceid",
+                    title: "Use Face ID / Touch ID",
+                    description: "Quick and secure biometric login",
+                    isDisabled: authState.passkeyId == nil,
+                    action: { setupAccount(method: .passkey) }
+                )
+                .accessibilityIdentifier("passkeyButton")
+                
+                // Password option
+                securityOptionButton(
+                    icon: "key.fill",
+                    title: "Use Password",
+                    description: "Traditional password-based login",
+                    isDisabled: authState.passwordUrl == nil,
+                    action: { setupAccount(method: .password) }
+                )
+                .accessibilityIdentifier("passwordButton")
             }
-            .buttonStyle(.bordered)
-            .disabled(isLoading || authState.passwordUrl == nil)
-            .accessibilityIdentifier("passwordButton")
+            .padding(.horizontal)
             
             Spacer()
         }
@@ -82,14 +80,53 @@ struct ChooseSignupMethodView: View {
         .navigationBarBackButtonHidden(isLoading)
     }
     
-    // MARK: - Account Setup Logic
+    // Reusable security option button
+    private func securityOptionButton(
+        icon: String,
+        title: String,
+        description: String,
+        isDisabled: Bool,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            HStack {
+                Image(systemName: icon)
+                    .font(.title2)
+                    .frame(width: 30)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(.headline)
+                    
+                    Text(description)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+                
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding()
+            .frame(maxWidth: .infinity)
+            .background(Color(.systemGray6))
+            .cornerRadius(12)
+        }
+        .buttonStyle(.plain)
+        .disabled(isLoading || isDisabled)
+        .opacity(isDisabled ? 0.5 : 1.0)
+    }
     
+    // Handle account setup with the selected method
     private func setupAccount(method: ParaManager.SignupMethod) {
         isLoading = true
         errorMessage = nil
         
         Task {
             do {
+                // Set up the account with Para SDK
                 try await paraManager.handleSignupMethod(
                     authState: authState,
                     method: method,
@@ -97,21 +134,19 @@ struct ChooseSignupMethodView: View {
                     webAuthenticationSession: webAuthenticationSession
                 )
                 
-                // If we reach here, signup was successful and wallet was created
+                // Navigate to home screen on success
                 appRootManager.currentRoot = .home
-                
             } catch {
-                errorMessage = "Account setup failed: \(error.localizedDescription)"
+                // Handle any errors
+                errorMessage = "Setup failed: \(error.localizedDescription)"
                 isLoading = false
             }
         }
     }
 }
 
-// MARK: - Preview
-
+// Preview
 #Preview {
-    // Create a sample AuthState for previewing
     let sampleAuthState = AuthState(
         stage: .signup,
         userId: "preview-user-id",

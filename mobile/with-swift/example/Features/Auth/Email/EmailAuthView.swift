@@ -17,88 +17,61 @@ struct EmailAuthView: View {
     
     var body: some View {
         VStack(spacing: 20) {
-            Text("Enter your email address to create or log in.")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
+            // Header
+            Image(systemName: "envelope.fill")
+                .font(.system(size: 50))
+                .foregroundColor(.blue)
+                .padding(.bottom, 10)
             
-            TextField("Email Address", text: $email)
+            Text("Enter your email address")
+                .font(.headline)
+            
+            // Email input field
+            TextField("email@example.com", text: $email)
                 .textInputAutocapitalization(.never)
-                .disableAutocorrection(true)
-                .textFieldStyle(.roundedBorder)
                 .keyboardType(.emailAddress)
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(10)
                 .padding(.horizontal)
                 .accessibilityIdentifier("emailInputField")
             
+            // Error message (if any)
             if let errorMessage = errorMessage {
                 Text(errorMessage)
                     .foregroundColor(.red)
+                    .font(.callout)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
                     .accessibilityIdentifier("errorMessage")
             }
             
-            if isLoading {
-                ProgressView("Processing...")
-            }
-            
+            // Submit button with loading indicator
             Button {
-                // Clear any previous error message
-                errorMessage = nil
-                
-                // Validate email first
-                guard validateEmail() else {
-                    return
-                }
-                
-                isLoading = true
-                Task {
-                    do {
-                        let state = try await paraManager.initiateAuthFlow(auth: .email(email))
-                        self.authState = state
-                        
-                        switch state.stage {
-                        case .verify:
-                            // User needs to verify email
-                            shouldNavigateToVerifyEmail = true
-                            
-                        case .login:
-                            // Existing user - determine and use preferred login method
-                            if let preferredMethod = paraManager.determinePreferredLoginMethod(authState: state) {
-                                // Use the preferred login method based on user history
-                                try await paraManager.handleLoginMethod(
-                                    authState: state,
-                                    method: preferredMethod,
-                                    authorizationController: authorizationController,
-                                    webAuthenticationSession: webAuthenticationSession
-                                )
-                                appRootManager.currentRoot = .home
-                            } else {
-                                errorMessage = "No login methods available for this account."
-                            }
-                            
-                        case .signup:
-                            // This shouldn't happen directly from email input
-                            errorMessage = "Unexpected authentication state. Please try again."
-                        }
-                    } catch {
-                        errorMessage = error.localizedDescription
-                    }
-                    
-                    isLoading = false
-                }
+                submitEmail()
             } label: {
-                Text("Continue")
-                    .frame(maxWidth: .infinity)
+                if isLoading {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+                        .tint(.white)
+                } else {
+                    Text("Continue")
+                        .fontWeight(.semibold)
+                }
             }
-            .buttonStyle(.borderedProminent)
-            .disabled(isLoading)
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color.blue)
+            .foregroundColor(.white)
+            .cornerRadius(10)
             .padding(.horizontal)
+            .disabled(isLoading)
             .accessibilityIdentifier("continueButton")
+            
+            // Navigation to verification screen
             .navigationDestination(isPresented: $shouldNavigateToVerifyEmail) {
                 if let state = authState {
                     VerifyEmailView(authState: state)
-                        .environmentObject(paraManager)
-                        .environmentObject(appRootManager)
                 }
             }
             
@@ -108,21 +81,55 @@ struct EmailAuthView: View {
         .navigationTitle("Email Authentication")
     }
     
-    private func validateEmail() -> Bool {
-        if email.isEmpty {
-            errorMessage = "Please enter an email address."
-            return false
+    // Submit email and handle authentication flow
+    private func submitEmail() {
+        // Clear previous errors
+        errorMessage = nil
+        
+        // Basic validation
+        guard !email.isEmpty else {
+            errorMessage = "Please enter an email address"
+            return
         }
         
-        // Basic email format validation
-        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
-        let emailPredicate = NSPredicate(format:"SELF MATCHES %@", emailRegex)
-        if !emailPredicate.evaluate(with: email) {
-            errorMessage = "Please enter a valid email address."
-            return false
-        }
+        isLoading = true
         
-        return true
+        Task {
+            do {
+                // Start authentication flow with Para SDK
+                let state = try await paraManager.initiateAuthFlow(auth: .email(email))
+                self.authState = state
+                
+                switch state.stage {
+                case .verify:
+                    // New user - navigate to verification
+                    shouldNavigateToVerifyEmail = true
+                    
+                case .login:
+                    // Existing user - log them in
+                    if let preferredMethod = paraManager.determinePreferredLoginMethod(authState: state) {
+                        try await paraManager.handleLoginMethod(
+                            authState: state,
+                            method: preferredMethod,
+                            authorizationController: authorizationController,
+                            webAuthenticationSession: webAuthenticationSession
+                        )
+                        appRootManager.currentRoot = .home
+                    } else {
+                        errorMessage = "No login methods available"
+                    }
+                    
+                case .signup:
+                    // This shouldn't happen directly
+                    errorMessage = "Unexpected authentication state"
+                }
+            } catch {
+                // Handle any errors
+                errorMessage = error.localizedDescription
+            }
+            
+            isLoading = false
+        }
     }
 }
 
