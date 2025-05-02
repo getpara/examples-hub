@@ -2,34 +2,7 @@ import SwiftUI
 import ParaSwift
 import Combine
 import AuthenticationServices
-
-struct CPData: Codable, Identifiable {
-    let id: String
-    let name: String
-    let flag: String
-    let code: String
-    let dial_code: String
-    let pattern: String
-    let limit: Int
-    
-    static let allCountry: [CPData] = Bundle.main.decode("CountryNumbers.json")
-    static let example = allCountry[0]
-}
-
-func applyPatternOnNumbers(_ stringvar: inout String, pattern: String, replacementCharacter: Character) {
-    var pureNumber = stringvar.replacingOccurrences( of: "[^0-9]", with: "", options: .regularExpression)
-    for index in 0 ..< pattern.count {
-        guard index < pureNumber.count else {
-            stringvar = pureNumber
-            return
-        }
-        let stringIndex = String.Index(utf16Offset: index, in: pattern)
-        let patternCharacter = pattern[stringIndex]
-        guard patternCharacter != replacementCharacter else { continue }
-        pureNumber.insert(patternCharacter, at: stringIndex)
-    }
-    stringvar = pureNumber
-}
+import Foundation
 
 struct PhoneAuthView: View {
     @EnvironmentObject var paraManager: ParaManager
@@ -106,7 +79,7 @@ struct PhoneAuthView: View {
                     .padding(.horizontal)
                     .accessibilityLabel("phoneInputField")
                     .onReceive(Just(phoneNumber)) { _ in
-                        applyPatternOnNumbers(&phoneNumber, pattern: countryPattern, replacementCharacter: "#")
+                        PhoneFormatter.applyPatternOnNumbers(&phoneNumber, pattern: countryPattern, replacementCharacter: "#")
                     }
                     .accessibilityIdentifier("phoneNumberField")
             }
@@ -133,7 +106,7 @@ struct PhoneAuthView: View {
                 
                 Task {
                     do {
-                        let formattedPhone = ParaFormatting.formatPhoneNumber(phoneNumber: phoneNumber, countryCode: countryCode)
+                        let formattedPhone = PhoneFormatter.formatForAPI(phoneNumber: phoneNumber, countryCode: countryCode)
                         let state = try await paraManager.initiateAuthFlow(auth: .phone(formattedPhone))
                         self.authState = state
                         

@@ -7,124 +7,129 @@ struct EmailAuthView: View {
     @EnvironmentObject var appRootManager: AppRootManager
     
     @State private var email = ""
+    @State private var shouldNavigateToVerifyEmail = false
+    
+    // New states for error handling and loading
     @State private var isLoading = false
     @State private var errorMessage: String?
-    @State private var shouldNavigateToVerifyEmail = false
-    @State private var authState: AuthState?
     
     @Environment(\.authorizationController) private var authorizationController
     @Environment(\.webAuthenticationSession) private var webAuthenticationSession
     
+    private func validateEmail() -> Bool {
+        if email.isEmpty {
+            errorMessage = "Please enter an email address."
+            return false
+        }
+        
+        // Basic email format validation
+        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+        let emailPredicate = NSPredicate(format:"SELF MATCHES %@", emailRegex)
+        if !emailPredicate.evaluate(with: email) {
+            errorMessage = "Please enter a valid email address."
+            return false
+        }
+        
+        return true
+    }
+    
     var body: some View {
         VStack(spacing: 20) {
-            // Header
-            Image(systemName: "envelope.fill")
-                .font(.system(size: 50))
-                .foregroundColor(.blue)
-                .padding(.bottom, 10)
+            Text("Enter your email address to create or log in.")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
             
-            Text("Enter your email address")
-                .font(.headline)
-            
-            // Email input field
-            TextField("email@example.com", text: $email)
+            TextField("Email Address", text: $email)
                 .textInputAutocapitalization(.never)
+                .disableAutocorrection(true)
+                .textFieldStyle(.roundedBorder)
                 .keyboardType(.emailAddress)
-                .padding()
-                .background(Color(.systemGray6))
-                .cornerRadius(10)
                 .padding(.horizontal)
                 .accessibilityIdentifier("emailInputField")
             
-            // Error message (if any)
             if let errorMessage = errorMessage {
                 Text(errorMessage)
                     .foregroundColor(.red)
-                    .font(.callout)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
                     .accessibilityIdentifier("errorMessage")
             }
             
-            // Submit button with loading indicator
+            if isLoading {
+                ProgressView("Processing...")
+            }
+            
             Button {
-                submitEmail()
-            } label: {
-                if isLoading {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle())
-                        .tint(.white)
-                } else {
-                    Text("Continue")
-                        .fontWeight(.semibold)
-                }
-            }
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color.blue)
-            .foregroundColor(.white)
-            .cornerRadius(10)
-            .padding(.horizontal)
-            .disabled(isLoading)
-            .accessibilityIdentifier("continueButton")
-            
-            // Navigation to verification screen
-            .navigationDestination(isPresented: $shouldNavigateToVerifyEmail) {
-                if let state = authState {
-                    VerifyEmailView(authState: state)
-                }
-            }
-            
-            Spacer()
-        }
-        .padding()
-        .navigationTitle("Email Authentication")
-    }
-    
-    // Submit email and handle authentication flow
-    private func submitEmail() {
-        // Clear previous errors
-        errorMessage = nil
-        
-        // Basic validation
-        guard !email.isEmpty else {
-            errorMessage = "Please enter an email address"
-            return
-        }
-        
-        isLoading = true
-        
-        Task {
-            do {
-                // Start authentication flow with Para SDK
-                let state = try await paraManager.initiateAuthFlow(auth: .email(email))
-                self.authState = state
+                // Clear any previous error message
+                errorMessage = nil
                 
-                switch state.stage {
-                case .verify:
-                    // New user - navigate to verification
-                    shouldNavigateToVerifyEmail = true
-                    
-                case .login:
-                    // Existing user - log them in with automatic method selection
-                    try await paraManager.handleLogin(
-                        authState: state,
+                // Validate email first
+                guard validateEmail() else {
+                    return
+                }
+                
+                isLoading = true
+                Task {
+                    let result = await paraManager.handleEmailAuth(
+                        email: email,
+                        authMethod: .passkey,
                         authorizationController: authorizationController,
                         webAuthenticationSession: webAuthenticationSession
                     )
-                    appRootManager.currentRoot = .home
                     
-                case .signup:
-                    // This shouldn't happen directly
-                    errorMessage = "Unexpected authentication state"
+                    isLoading = false
+                    
+                    switch result.status {
+                    case .success:
+                        // Authentication successful, navigate to home
+                        appRootManager.currentRoot = .home
+                        
+                    case .needsVerification:
+                        // User needs to verify email
+                        shouldNavigateToVerifyEmail = true
+                        
+                    case .error:
+                        // Error occurred
+                        errorMessage = result.errorMessage
+                    }
                 }
-            } catch {
-                // Handle any errors
-                errorMessage = error.localizedDescription
+            } label: {
+                Text("Continue")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(isLoading)
+            .padding(.horizontal)
+            .accessibilityIdentifier("continueButton")
+            .navigationDestination(isPresented: $shouldNavigateToVerifyEmail) {
+                VerifyEmailView(email: email)
+                    .environmentObject(paraManager)
+                    .environmentObject(appRootManager)
             }
             
-            isLoading = false
+            HStack {
+                Rectangle().frame(height: 1)
+                Text("Or")
+                Rectangle().frame(height: 1)
+            }.padding(.vertical)
+            
+            Button {
+                Task {
+                    try await paraManager.loginWithPasskey(authorizationController: authorizationController, authInfo: EmailAuthInfo(email: email))
+                    appRootManager.currentRoot = .home
+                }
+            } label: {
+                Text("Log In with Passkey")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+            .accessibilityIdentifier("passkeyAuthButton")
+            
+            Spacer()
+            
         }
+        .padding()
+        .navigationTitle("Email Authentication")
     }
 }
 
@@ -135,3 +140,4 @@ struct EmailAuthView: View {
             .environmentObject(AppRootManager())
     }
 }
+
