@@ -56,7 +56,7 @@ struct ChooseSignupMethodView: View {
                     icon: "faceid",
                     title: "Use Face ID / Touch ID",
                     description: "Quick and secure biometric login",
-                    isDisabled: authState.passkeyId == nil,
+                    isDisabled: !paraManager.isSignupMethodAvailable(method: .passkey, authState: authState),
                     action: { setupAccount(method: .passkey) }
                 )
                 .accessibilityIdentifier("passkeyButton")
@@ -66,7 +66,7 @@ struct ChooseSignupMethodView: View {
                     icon: "key.fill",
                     title: "Use Password",
                     description: "Traditional password-based login",
-                    isDisabled: authState.passwordUrl == nil,
+                    isDisabled: !paraManager.isSignupMethodAvailable(method: .password, authState: authState),
                     action: { setupAccount(method: .password) }
                 )
                 .accessibilityIdentifier("passwordButton")
@@ -119,15 +119,15 @@ struct ChooseSignupMethodView: View {
         .opacity(isDisabled ? 0.5 : 1.0)
     }
     
-    // Handle account setup with the selected method
+    // Handle account setup with specified method
     private func setupAccount(method: ParaManager.SignupMethod) {
         isLoading = true
         errorMessage = nil
         
         Task {
             do {
-                // Set up the account with Para SDK
-                try await paraManager.handleSignupMethod(
+                // Set up the account with Para SDK using the chosen method
+                try await paraManager.handleSignup(
                     authState: authState,
                     method: method,
                     authorizationController: authorizationController,

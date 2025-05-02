@@ -106,18 +106,13 @@ struct EmailAuthView: View {
                     shouldNavigateToVerifyEmail = true
                     
                 case .login:
-                    // Existing user - log them in
-                    if let preferredMethod = paraManager.determinePreferredLoginMethod(authState: state) {
-                        try await paraManager.handleLoginMethod(
-                            authState: state,
-                            method: preferredMethod,
-                            authorizationController: authorizationController,
-                            webAuthenticationSession: webAuthenticationSession
-                        )
-                        appRootManager.currentRoot = .home
-                    } else {
-                        errorMessage = "No login methods available"
-                    }
+                    // Existing user - log them in with automatic method selection
+                    try await paraManager.handleLogin(
+                        authState: state,
+                        authorizationController: authorizationController,
+                        webAuthenticationSession: webAuthenticationSession
+                    )
+                    appRootManager.currentRoot = .home
                     
                 case .signup:
                     // This shouldn't happen directly

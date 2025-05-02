@@ -143,19 +143,13 @@ struct PhoneAuthView: View {
                             shouldNavigateToVerifyPhone = true
                             
                         case .login:
-                            // Existing user - determine and use preferred login method
-                            if let preferredMethod = paraManager.determinePreferredLoginMethod(authState: state) {
-                                // Use the preferred login method based on user history
-                                try await paraManager.handleLoginMethod(
-                                    authState: state,
-                                    method: preferredMethod,
-                                    authorizationController: authorizationController,
-                                    webAuthenticationSession: webAuthenticationSession
-                                )
-                                appRootManager.currentRoot = .home
-                            } else {
-                                errorMessage = "No login methods available for this account."
-                            }
+                            // Existing user - automatically determine and use preferred login method
+                            try await paraManager.handleLogin(
+                                authState: state,
+                                authorizationController: authorizationController,
+                                webAuthenticationSession: webAuthenticationSession
+                            )
+                            appRootManager.currentRoot = .home
                             
                         case .signup:
                             // This shouldn't happen directly from phone input
