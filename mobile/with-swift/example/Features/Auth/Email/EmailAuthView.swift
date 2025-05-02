@@ -78,7 +78,7 @@ struct EmailAuthView: View {
             Spacer()
         }
         .padding()
-        .navigationTitle("Email Authentication")
+        .navigationTitle("Email")
     }
     
     // Submit email and handle authentication flow

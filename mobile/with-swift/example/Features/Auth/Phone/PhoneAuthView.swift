@@ -153,7 +153,7 @@ struct PhoneAuthView: View {
             Spacer()
         }
         .padding()
-        .navigationTitle("Phone Authentication")
+        .navigationTitle("Phone")
     }
 }
 
