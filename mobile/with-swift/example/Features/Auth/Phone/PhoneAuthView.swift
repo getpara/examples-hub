@@ -1,10 +1,3 @@
-//
-//  PhoneAuthView.swift
-//  example
-//
-//  Created by Brian Corbin on 12/27/24.
-//
-
 import SwiftUI
 import ParaSwift
 import Combine
@@ -43,12 +36,13 @@ struct PhoneAuthView: View {
     @EnvironmentObject var appRootManager: AppRootManager
     
     @State private var phoneNumber = ""
-    @State private var countryCode = "+1" // Default to US
+    @State private var countryCode = "1" // Default to US
     @State private var countryFlag = "🇺🇸"
     @State private var countryPattern = "### ### ####"
     @State private var shouldNavigateToVerifyPhone = false
+    @State private var authState: AuthState?
     
-    // New states for error handling and loading
+    // States for error handling and loading
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var presentCountryCodeSelection = false
@@ -78,7 +72,7 @@ struct PhoneAuthView: View {
                 Button {
                     presentCountryCodeSelection = true
                 } label: {
-                    Text("\(countryFlag) \(countryCode)")
+                    Text("\(countryFlag) +\(countryCode)")
                 }
                 .buttonStyle(.bordered)
                 .sheet(isPresented: $presentCountryCodeSelection) {
@@ -122,6 +116,7 @@ struct PhoneAuthView: View {
                     .foregroundColor(.red)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
+                    .accessibilityIdentifier("errorMessage")
             }
             
             if isLoading {
@@ -135,30 +130,42 @@ struct PhoneAuthView: View {
                 }
                 isLoading = true
                 errorMessage = nil
+                
                 Task {
-                    let result = await paraManager.handlePhoneAuth(
-                        phoneNumber: phoneNumber,
-                        countryCode: countryCode,
-                        authMethod: .passkey,
-                        authorizationController: authorizationController,
-                        webAuthenticationSession: webAuthenticationSession
-                    )
+                    do {
+                        let formattedPhone = paraManager.formatPhoneNumber(phoneNumber: phoneNumber, countryCode: countryCode)
+                        let state = try await paraManager.initiateAuthFlow(auth: .phone(formattedPhone))
+                        self.authState = state
+                        
+                        switch state.stage {
+                        case .verify:
+                            // User needs to verify phone number
+                            shouldNavigateToVerifyPhone = true
+                            
+                        case .login:
+                            // Existing user - determine and use preferred login method
+                            if let preferredMethod = paraManager.determinePreferredLoginMethod(authState: state) {
+                                // Use the preferred login method based on user history
+                                try await paraManager.handleLoginMethod(
+                                    authState: state,
+                                    method: preferredMethod,
+                                    authorizationController: authorizationController,
+                                    webAuthenticationSession: webAuthenticationSession
+                                )
+                                appRootManager.currentRoot = .home
+                            } else {
+                                errorMessage = "No login methods available for this account."
+                            }
+                            
+                        case .signup:
+                            // This shouldn't happen directly from phone input
+                            errorMessage = "Unexpected authentication state. Please try again."
+                        }
+                    } catch {
+                        errorMessage = error.localizedDescription
+                    }
                     
                     isLoading = false
-                    
-                    switch result.status {
-                    case .success:
-                        // Authentication successful, navigate to home
-                        appRootManager.currentRoot = .home
-                        
-                    case .needsVerification:
-                        // User needs to verify phone number
-                        shouldNavigateToVerifyPhone = true
-                        
-                    case .error:
-                        // Error occurred
-                        errorMessage = result.errorMessage
-                    }
                 }
             } label: {
                 Text("Continue")
@@ -169,33 +176,14 @@ struct PhoneAuthView: View {
             .padding(.horizontal)
             .accessibilityIdentifier("continueButton")
             .navigationDestination(isPresented: $shouldNavigateToVerifyPhone) {
-                VerifyPhoneView(phoneNumber: phoneNumber, countryCode: countryCode)
-                    .environmentObject(paraManager)
-                    .environmentObject(appRootManager)
-            }
-            
-            HStack {
-                Rectangle().frame(height: 1)
-                Text("Or")
-                Rectangle().frame(height: 1)
-            }.padding(.vertical)
-            
-            Button {
-                Task {
-                    // Ensure PhoneAuthInfo is used if available
-                    let authInfo = PhoneAuthInfo(phone: phoneNumber, countryCode: countryCode)
-                    try await paraManager.loginWithPasskey(authorizationController: authorizationController, authInfo: authInfo)
-                    appRootManager.currentRoot = .home
+                if let state = authState {
+                    VerifyPhoneView(authState: state)
+                        .environmentObject(paraManager)
+                        .environmentObject(appRootManager)
                 }
-            } label: {
-                Text("Log In with Passkey")
-                    .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.bordered)
-            .accessibilityIdentifier("passkeyAuthButton")
             
             Spacer()
-            
         }
         .padding()
         .navigationTitle("Phone Authentication")
