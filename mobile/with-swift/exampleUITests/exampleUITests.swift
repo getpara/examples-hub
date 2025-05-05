@@ -559,7 +559,7 @@ class ExampleUITests: XCTestCase {
         XCTAssertTrue(webView.waitForExistence(timeout: TestConstants.longTimeout), "Password creation web view should appear")
         
         // Set a valid password (8+ chars, no spaces)
-        let passwordToSet = "deb0nair"
+        let passwordToSet = "ParaTestPassword"
         TestConstants.savedPassword = passwordToSet
         
         // Find password fields using the exact placeholders
