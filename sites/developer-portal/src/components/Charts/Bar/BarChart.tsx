@@ -3,8 +3,8 @@ import { useState } from 'react';
 import { Bar, BarChart as RechartsBar, CartesianGrid, Cell, Rectangle, XAxis, YAxis } from 'recharts';
 import { CategoricalChartState } from 'recharts/types/chart/types';
 import { BarChartTooltip } from './BarChartTooltip';
-import { truncateNumber } from '../../../../../utils/formatNumber';
-import { ChartContainer } from './ChartContainer';
+import { truncateNumber } from '../../../utils/formatNumber';
+import { ChartContainer } from '../ChartContainer';
 
 type DataType<XKey extends string, XValue, YKey extends string, YValue> = {
   [K in XKey]: XValue;

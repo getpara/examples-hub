@@ -1,6 +1,6 @@
 import { ChartConfig, ChartContainer as BaseChartContainer, Typography, Loader } from '@getpara/react-component-library';
 import { ResponsiveContainer } from 'recharts';
-import { FlatCard } from '../../../../../components/common';
+import { FlatCard } from '../common';
 import clsx from 'clsx';
 import { ReactNode } from 'react';
 

@@ -121,6 +121,8 @@ export const VerticalCenteredContainer = ({ children, className }: PropsWithChil
   </div>
 );
 
-export const FlatCard = ({ children, className }: PropsWithChildren & { className?: string }) => (
-  <Card className={clsx('para:shadow-none para:p-8 para:rounded-lg', className)}>{children}</Card>
+export const FlatCard = ({ children, className, ...rest }: React.ComponentProps<'div'>) => (
+  <Card className={clsx('para:shadow-none para:p-8 para:rounded-lg', className)} {...rest}>
+    {children}
+  </Card>
 );

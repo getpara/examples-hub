@@ -1,5 +1,5 @@
 import { Loader, Typography } from '@getpara/react-component-library';
-import { FlatCard } from '../../../../../components/common';
+import { FlatCard } from '../../common';
 import { LucideIcon } from 'lucide-react';
 import clsx from 'clsx';
 

@@ -1,79 +1,56 @@
-import { CpslCard, CpslIcon, CpslText } from '@getpara/react-components';
 import { Project } from '../../../types/api';
-import styled from 'styled-components';
 import { useProjectTotalUsersCount } from '../../../hooks/api/queries/useProjectTotalUsersCount';
 import { truncateNumber } from '../../../utils/formatNumber';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
+import { FlatCard } from '../../../components/common';
+import { Badge, Typography } from '@getpara/react-component-library';
+import { OrganizationAvatar } from '../../../components/OgranizationAvatar';
+import { formatFrameworkName, getFrameworkColors, getFrameworkIcon } from '../../../utils/framework';
+import { Framework } from '../../../types/framework';
+import clsx from 'clsx';
 
 interface ProjectCardProps {
   project: Project;
 }
 
 export const ProjectCard = ({ project }: ProjectCardProps) => {
-  const navigate = useNavigate();
   const { organizationId } = useParams();
 
   const { data: totalUsers } = useProjectTotalUsersCount(project.id);
 
-  const handleClick = () => {
-    navigate(`/${organizationId}/project/${project.id}`);
-  };
+  const Icon = getFrameworkIcon(project.framework as Framework);
+  const frameworkColors = getFrameworkColors(project.framework as Framework);
 
   return (
-    <StyledCard onClick={handleClick}>
-      <Container>
-        {project.iconUrl && <ProjectIcon src={project.iconUrl} />}
-        <NameContainer>
-          <CpslText variant="bodyL" weight="semiBold">
-            {project.name}
-          </CpslText>
-          {project.description && (
-            <CpslText variant="bodyS" color="secondary" weight="medium">
-              {project.description}
-            </CpslText>
-          )}
-        </NameContainer>
-        <DataContainer>
-          <CpslText variant="bodyXS" color="tertiary" weight="medium">
-            {totalUsers !== undefined ? truncateNumber(totalUsers) : '--'} Users
-          </CpslText>
-        </DataContainer>
-      </Container>
-    </StyledCard>
+    <Link to={`/${organizationId}/project/${project.id}/key`} className="para:h-[240px] para:min-w-[200px]">
+      <FlatCard className="para:h-full para:w-full">
+        <div className="para:flex para:flex-col para:gap-4 para:h-full">
+          <OrganizationAvatar
+            className="para:size-6 para:rounded-sm para:bg-background"
+            name={project.name}
+            url={project.iconUrl}
+          />
+          <div className="para:flex para:flex-col para:gap-2">
+            <Typography className="para:text-lg para:font-semibold">{project.name}</Typography>
+            {project.description && (
+              <Typography className="para:text-sm para:font-medium" color="secondary">
+                {project.description}
+              </Typography>
+            )}
+            {project.framework && (
+              <Badge variant="outline" className={clsx(frameworkColors?.bg, frameworkColors?.border)}>
+                {Icon && <Icon className="para:size-3" />}
+                {formatFrameworkName(project.framework as Framework)}
+              </Badge>
+            )}
+          </div>
+          <div className="para:flex para:mt-auto">
+            <Typography className="para:text-xs para:font-medium" color="muted">
+              {totalUsers !== undefined ? truncateNumber(totalUsers) : '--'} Users
+            </Typography>
+          </div>
+        </div>
+      </FlatCard>
+    </Link>
   );
 };
-
-const StyledCard = styled(CpslCard)`
-  --card-padding-bottom: 16px;
-  --card-padding-end: 36px;
-
-  cursor: pointer;
-
-  &::part(card-container) {
-    height: 240px;
-    width: 240px;
-  }
-`;
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  height: 100%;
-`;
-
-const NameContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-`;
-
-const DataContainer = styled.div`
-  margin-top: auto;
-  display: flex;
-`;
-
-const ProjectIcon = styled(CpslIcon)`
-  --height: 44px;
-  --width: 44px;
-`;

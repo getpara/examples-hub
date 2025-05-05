@@ -1,11 +1,12 @@
-import { LoginMethodsChart } from './LoginMethodsChart';
-import { MauChart } from './MauChart';
+import { ChartsContainer } from '../../../../../components/Analytics/charts/ChartsContainer';
+import { LoginMethodsChartWrapper } from './LoginMethodsChartWrapper';
+import { MauChartWrapper } from './MauChartWrapper';
 
 export const Charts = () => {
   return (
-    <div className="para:flex para:gap-2 para:flex-col para:xl:flex-row">
-      <MauChart />
-      <LoginMethodsChart />
-    </div>
+    <ChartsContainer>
+      <MauChartWrapper />
+      <LoginMethodsChartWrapper />
+    </ChartsContainer>
   );
 };

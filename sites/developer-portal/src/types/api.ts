@@ -320,6 +320,7 @@ export type OrganizationLoginMethodsTotalResponse = {
     method: string;
     percent: number;
     count: number;
+    userCount: number;
   }[];
 };
 

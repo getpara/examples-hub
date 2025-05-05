@@ -1,3 +1,4 @@
+import { Flutter, Next, React, Svelte, Swift, Vue } from '@getpara/react-component-library';
 import { Framework } from '../types/framework';
 import { REACT_CODE_SNIPPET, SERVER_CODE_SNIPPET, WEB_CODE_SNIPPET } from './codeSnippets';
 import {
@@ -205,5 +206,43 @@ export const getFrameworkCodeSnippet = (framework: Framework) => {
     case Framework.VUE: {
       return WEB_CODE_SNIPPET;
     }
+  }
+};
+
+export const getFrameworkIcon = (framework: Framework) => {
+  switch (framework.toUpperCase()) {
+    case Framework.REACT:
+    case Framework.REACT_NATIVE:
+      return React;
+    case Framework.NEXT:
+      return Next;
+    case Framework.SWIFT:
+      return Swift;
+    case Framework.FLUTTER:
+      return Flutter;
+    case Framework.SVELTE:
+      return Svelte;
+    case Framework.VUE:
+      return Vue;
+    default:
+      return null;
+  }
+};
+
+export const getFrameworkColors = (framework: Framework) => {
+  switch (framework.toUpperCase()) {
+    case Framework.REACT:
+    case Framework.REACT_NATIVE:
+    case Framework.FLUTTER:
+      return { bg: 'para:bg-sky-50', border: 'para:border-sky-600' };
+    case Framework.NEXT:
+      return { bg: 'para:bg-neutral-50', border: 'para:border-neutral-600' };
+    case Framework.SWIFT:
+    case Framework.SVELTE:
+      return { bg: 'para:bg-orange-50', border: 'para:border-orange-600' };
+    case Framework.VUE:
+      return { bg: 'para:bg-green-50', border: 'para:border-green-600' };
+    default:
+      return null;
   }
 };

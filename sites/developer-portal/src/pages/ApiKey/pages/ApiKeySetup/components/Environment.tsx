@@ -11,7 +11,7 @@ import {
 } from '@getpara/react-component-library';
 import { FormControl } from '../../../../../components/formComponents';
 import { FRAMEWORK_OPTIONS, PACKAGE_MANAGER_OPTIONS } from '../../../../../utils/constants';
-import { formatFrameworkName } from '../../../../../utils/framework';
+import { formatFrameworkName, getFrameworkIcon } from '../../../../../utils/framework';
 import { formatPackageManagerName } from '../../../../../utils/packageManager';
 import { ConfigCard } from '../../../components/ConfigCard';
 import { SetupForm } from '../hooks/useSetupForm';
@@ -35,11 +35,16 @@ export const Environment = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {FRAMEWORK_OPTIONS.map(o => (
-                    <SelectItem key={o} value={o}>
-                      {formatFrameworkName(o)}
-                    </SelectItem>
-                  ))}
+                  {FRAMEWORK_OPTIONS.map(o => {
+                    const Icon = getFrameworkIcon(o);
+
+                    return (
+                      <SelectItem key={o} value={o}>
+                        {Icon && <Icon className="para:size-4" />}
+                        {formatFrameworkName(o)}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </FormItem>

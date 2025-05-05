@@ -1,9 +1,10 @@
-import { NewUsersOverview } from './NewUsersOverview';
+import { OverviewContainer } from '../../../../../components/Analytics/Overview/OverviewContainer';
+import { NewUsersOverviewWrapper } from './NewUsersOverviewWrapper';
 
 export const Overview = () => {
   return (
-    <div className="para:flex para:flex-wrap para:gap-2">
-      <NewUsersOverview />
-    </div>
+    <OverviewContainer>
+      <NewUsersOverviewWrapper />
+    </OverviewContainer>
   );
 };
