@@ -1158,6 +1158,10 @@ class Client {
   }) => {
     await this.baseRequest.post<any>('/errors/sdk', opts);
   };
+
+  trackReactSdkAnalytics = async (opts: { props: object; reactSdkVersion: string }) => {
+    await this.baseRequest.post<{ success: boolean }>('/partners/analytics/react-sdk', opts);
+  };
 }
 
 export default Client;

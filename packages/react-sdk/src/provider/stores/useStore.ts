@@ -1,5 +1,11 @@
 import { createStore, StoreApi, useStore as useZustandStore } from 'zustand';
-import { createClientSlice, createExternalWalletsSlice, createModalSlice, createWalletSlice } from './slices/index.js';
+import {
+  createAnalyticsSlice,
+  createClientSlice,
+  createExternalWalletsSlice,
+  createModalSlice,
+  createWalletSlice,
+} from './slices/index.js';
 import { Store } from './types.js';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { createConfigSlice } from './slices/config.js';
@@ -12,6 +18,7 @@ export const vanillaStore = createStore<Store>()(
       ...createWalletSlice(...a),
       ...createExternalWalletsSlice(...a),
       ...createConfigSlice(...a),
+      ...createAnalyticsSlice(...a),
     }),
     {
       version: 1,

@@ -154,3 +154,5 @@ export const BODY_MOTION_VARIANTS: Variants = {
 export const BODY_TRANSITION: Transition = {
   duration: 0.2,
 };
+
+export const SDK_VERSION = process.env.PARA_REACT_SDK_VERSION ?? '';

@@ -16,6 +16,9 @@ const entryPoints = await glob('src/**/*.{ts,tsx,js,jsx}');
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const distDir = resolve(__dirname, '../dist');
 
+const pkgRaw = await fs.readFile(resolve(__dirname, '../package.json'), 'utf-8');
+const pkg = JSON.parse(pkgRaw);
+
 await fs.mkdir(distDir, { recursive: true });
 await fs.writeFile(`${distDir}/package.json`, JSON.stringify({ type: 'module', sideEffects: ['*.css'] }, null, 2));
 
@@ -41,4 +44,7 @@ await esbuild.build({
   target: ['es2015'],
   // external: externals,
   packages: 'external',
+  define: {
+    'process.env.PARA_REACT_SDK_VERSION': JSON.stringify(pkg.version),
+  },
 });

@@ -31,6 +31,17 @@ export const ParaProvider = forwardRef<
   const appName = useStore(state => state.appName);
   const rpcUrl = useStore(state => state.rpcUrl);
   const setRpcUrl = useStore(state => state.setRpcUrl);
+  const setProviderProps = useStore(state => state.setProviderProps);
+
+  useEffect(() => {
+    setProviderProps({
+      ...config,
+      ...externalWalletConfig,
+      ...paraModalConfig,
+      // Redacting walletConnect to avoid exposing project id
+      walletConnect: undefined,
+    });
+  }, [config, externalWalletConfig, paraModalConfig]);
 
   useEffect(() => {
     if (rpcUrl !== config.rpcUrl) setRpcUrl(config.rpcUrl);

@@ -16,6 +16,7 @@ import { useStore } from '../provider/stores/useStore.js';
 import parsePhoneNumberFromString from 'libphonenumber-js';
 import { useAuthActions } from '../provider/providers/AuthProvider.js';
 import { validateAuth } from './utils/authInputHelpers.js';
+import { SDK_VERSION } from './constants/constants.js';
 
 defineCustomElements();
 
@@ -46,6 +47,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
   const [isModalMounted, setIsModalMounted] = useState(false);
   const [isInit, setIsInit] = useState(false);
   const externalWallets = useStore(state => state.externalWallets);
+  const providerProps = useStore(state => state.providerProps);
 
   // Merge props stored on the provider with props passed to the modal, favoring props passed to modal
   const {
@@ -65,6 +67,36 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
     defaultAuthIdentifier,
     ...rest
   } = { ...storedModalConfig, ...props };
+
+  useEffect(() => {
+    const trackAnalytics = async () => {
+      try {
+        await para.ctx.client.trackReactSdkAnalytics({
+          props: {
+            ...providerProps,
+            theme,
+            disableEmailLogin,
+            disablePhoneLogin,
+            isGuestModeEnabled,
+            oAuthMethods,
+            bareModal,
+            className,
+            currentStepOverride,
+            authLayout,
+            embeddedModal,
+            onModalStepChange,
+            onClose,
+            defaultAuthIdentifier,
+            ...rest,
+          },
+          reactSdkVersion: SDK_VERSION,
+        });
+      } catch (_) {
+        // fail silently
+      }
+    };
+    trackAnalytics();
+  }, []);
 
   const isOpen = configIsOpen ?? storedIsOpen;
 

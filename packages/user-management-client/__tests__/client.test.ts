@@ -209,6 +209,18 @@ describe('Client', () => {
       expect(mocks.post).toBeCalledWith('/users/init', body);
     });
 
+    it('trackReactSdkAnalytics', async () => {
+      await client.trackReactSdkAnalytics({
+        reactSdkVersion: '1.0.0',
+        props: { test: true },
+      });
+
+      expect(mocks.post).toBeCalledWith('/partners/analytics/react-sdk', {
+        reactSdkVersion: '1.0.0',
+        props: { test: true },
+      });
+    });
+
     it('getWalletBalance', async () => {
       await client.getWalletBalance({
         walletId,

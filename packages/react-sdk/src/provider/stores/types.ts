@@ -25,6 +25,11 @@ export interface ConfigSlice {
   setAppName: (_: string) => void;
 }
 
+export interface AnalyticsSlice {
+  providerProps: object;
+  setProviderProps: (_: object) => void;
+}
+
 export interface ModalSlice {
   modalConfig?: ParaModalProps;
   setModalConfig: (_?: ParaModalProps) => void;
@@ -82,4 +87,4 @@ export interface ExternalWalletsSlice {
   onLoginRef: MutableRefObject<(() => Promise<void>) | null>;
 }
 
-export type Store = ClientSlice & ModalSlice & WalletSlice & ExternalWalletsSlice & ConfigSlice;
+export type Store = ClientSlice & ModalSlice & WalletSlice & ExternalWalletsSlice & ConfigSlice & AnalyticsSlice;
