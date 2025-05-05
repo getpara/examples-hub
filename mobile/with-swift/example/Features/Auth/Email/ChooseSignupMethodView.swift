@@ -80,7 +80,6 @@ struct ChooseSignupMethodView: View {
         .navigationBarBackButtonHidden(isLoading)
     }
     
-    // Reusable security option button
     private func securityOptionButton(
         icon: String,
         title: String,
@@ -145,7 +144,6 @@ struct ChooseSignupMethodView: View {
     }
 }
 
-// Preview
 #Preview {
     let sampleAuthState = AuthState(
         stage: .signup,
