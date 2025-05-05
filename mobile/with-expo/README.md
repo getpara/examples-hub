@@ -1,3 +1,9 @@
+```markdown
+![ADB](https://img.shields.io/badge/ADB-1.0.41-blue) ![Java](https://img.shields.io/badge/Java-21.0.5-orange)
+![Gradle](https://img.shields.io/badge/Gradle-8.13-brightgreen)![Xcode](https://img.shields.io/badge/Xcode-16.3-lightgrey)![CocoaPods](https://img.shields.io/badge/CocoaPods-1.16.2-red)![Watchman](https://img.shields.io/badge/Watchman-2025.03.03.00-yellow)
+![Ruby](https://img.shields.io/badge/Ruby-3.3.4-red) ![Expo CLI](https://img.shields.io/badge/Expo%20CLI-0.22.26-black)
+```
+
 # Para Expo Example
 
 This example demonstrates integrating the Para SDK with an Expo application for iOS and Android. It showcases core
@@ -31,9 +37,10 @@ npm install
 # Or using yarn
 yarn install
 ```
-<<<<<<< HEAD
+
 EXPO_PUBLIC_PARA_API_KEY=your-para-api-key
-```
+
+````
 
 This environment variable is utilized in `client/para.ts` to initialize the `ParaMobile` client.
 
@@ -49,9 +56,9 @@ these methods:
   npx expo run:ios
   # or
   npx expo run:android
-  ```
+````
 
-  > **Note**: If you encounter issues, try `npx expo prebuild --clean` for a fresh build.
+> **Note**: If you encounter issues, try `npx expo prebuild --clean` for a fresh build.
 
 - **Option B**: Start Metro bundler in development build mode:
 
@@ -111,8 +118,8 @@ For production or custom package names:
   login. New user creation triggers automatic OTP email delivery, followed by passkey registration via
   `registerPasskey`.
 
-- **Phone**: Implementation in [`app/auth/with-phone.tsx`](./app/auth/with-phone.tsx) follows largely the same flow as email
-  authentication, differing only in the argument passed to `signUpOrLogInV2`.
+- **Phone**: Implementation in [`app/auth/with-phone.tsx`](./app/auth/with-phone.tsx) follows largely the same flow as
+  email authentication, differing only in the argument passed to `signUpOrLogInV2`.
 
 > **Note**: The example utilizes test credential generation functions from `./util/random.ts` to create test email
 > addresses, phone numbers, and OTP values. This accelerates testing by bypassing actual email/SMS delivery, but should
@@ -163,8 +170,6 @@ the signer object functions identically to native library implementations.
 > Guides documentation for detailed library usage instructions.
 
 ---
-=======
->>>>>>> main
 
 ## Running the Example
 

@@ -17,7 +17,8 @@ export function Providers({
         paraClientConfig={{
           apiKey: API_KEY,
           env: ENVIRONMENT,
-        }}>
+        }}
+        >
         {children}
       </ParaProvider>
     </QueryClientProvider>
