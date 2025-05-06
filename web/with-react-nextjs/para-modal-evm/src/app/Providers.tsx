@@ -1,7 +1,7 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthLayout, ExternalWallet, ParaProvider } from "@getpara/react-sdk";
+import { ExternalWallet, ParaProvider } from "@getpara/react-sdk";
 import { API_KEY, ENVIRONMENT } from "@/constants";
 import { sepolia, celo, mainnet, polygon } from "wagmi/chains";
 
@@ -28,7 +28,7 @@ export function Providers({
             ExternalWallet.ZERION,
             ExternalWallet.RABBY,
           ],
-          createLinkedEmbeddedForExternalWallets: [ExternalWallet.METAMASK],
+          walletsWithParaAuth: [ExternalWallet.METAMASK],
           evmConnector: {
             config: {
               chains: [mainnet, polygon, sepolia, celo],
@@ -42,7 +42,7 @@ export function Providers({
         paraModalConfig={{
           disableEmailLogin: false,
           disablePhoneLogin: false,
-          authLayout: [AuthLayout.EXTERNAL_FULL],
+          authLayout: ["EXTERNAL:FULL"],
           onRampTestMode: true,
           theme: {
             foregroundColor: "#2D3648",
@@ -58,8 +58,7 @@ export function Providers({
           logo: "/para.svg",
           recoverySecretStepEnabled: true,
           twoFactorAuthEnabled: false,
-        }}
-      >
+        }}>
         {children}
       </ParaProvider>
     </QueryClientProvider>
