@@ -195,7 +195,7 @@ export default function ProgramDeploymentDemo() {
                   placeholder="e.g. My Test Token"
                   required
                   disabled={isCreateTokenLoading}
-                  className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+                  className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
                 />
               </div>
               <div className="space-y-2">
@@ -212,7 +212,7 @@ export default function ProgramDeploymentDemo() {
                   placeholder="e.g. MTT"
                   required
                   disabled={isCreateTokenLoading}
-                  className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+                  className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
                 />
               </div>{" "}
               <button
