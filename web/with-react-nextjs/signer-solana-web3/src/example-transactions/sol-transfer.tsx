@@ -1,14 +1,8 @@
 "use client";
 
-import { connection } from "@/client/solana";
 import { useParaSigner } from "@/components/ParaSignerProvider";
 import { useAccount, useWallet } from "@getpara/react-sdk";
-import {
-  LAMPORTS_PER_SOL,
-  PublicKey,
-  SystemProgram,
-  Transaction,
-} from "@solana/web3.js";
+import { LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { useState, useEffect } from "react";
 
 export default function EthTransferDemo() {
@@ -24,12 +18,11 @@ export default function EthTransferDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { signer } = useParaSigner();
+  const { signer, connection } = useParaSigner();
   const { data: account } = useAccount();
   const { data: wallet } = useWallet();
 
   const address = wallet?.address;
-  const walletId = wallet?.id;
   const isConnected = account?.isConnected;
 
   const fetchBalance = async () => {
@@ -53,12 +46,8 @@ export default function EthTransferDemo() {
     }
   }, [address]);
 
-  const constructTransaction = async (
-    toAddress: string,
-    solAmount: string
-  ): Promise<Transaction> => {
-    if (!address || !connection)
-      throw new Error("No sender address or connection available");
+  const constructTransaction = async (toAddress: string, solAmount: string): Promise<Transaction> => {
+    if (!address || !connection) throw new Error("No sender address or connection available");
 
     try {
       const fromPubKey = signer?.sender;
@@ -75,9 +64,7 @@ export default function EthTransferDemo() {
         })
       );
 
-      transaction.recentBlockhash = (
-        await connection.getLatestBlockhash()
-      ).blockhash;
+      transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
       transaction.feePayer = fromPubKey!;
 
       return transaction;
@@ -87,12 +74,8 @@ export default function EthTransferDemo() {
     }
   };
 
-  const validateTransaction = async (
-    toAddress: string,
-    solAmount: string
-  ): Promise<boolean> => {
-    if (!address || !connection)
-      throw new Error("No sender address or provider available");
+  const validateTransaction = async (toAddress: string, solAmount: string): Promise<boolean> => {
+    if (!address || !connection) throw new Error("No sender address or provider available");
 
     try {
       const balanceLamports = await connection.getBalance(signer?.sender!);
@@ -101,8 +84,7 @@ export default function EthTransferDemo() {
 
       const estimatedGas = await transaction.getEstimatedFee(connection);
 
-      const totalCost =
-        parseFloat(solAmount) * LAMPORTS_PER_SOL + estimatedGas!;
+      const totalCost = parseFloat(solAmount) * LAMPORTS_PER_SOL + estimatedGas!;
 
       if (totalCost > balanceLamports) {
         const requiredSol = (totalCost / LAMPORTS_PER_SOL).toFixed(4);
@@ -124,8 +106,6 @@ export default function EthTransferDemo() {
     setStatus({ show: false, type: "success", message: "" });
     setTxSignature("");
 
-    if (!signer) return;
-
     try {
       if (!isConnected) {
         setStatus({
@@ -136,16 +116,15 @@ export default function EthTransferDemo() {
         return;
       }
 
-      if (!walletId) {
+      if (!signer) {
         setStatus({
           show: true,
           type: "error",
-          message: "No wallet ID found. Please reconnect your wallet.",
+          message: "No signer found. Please reconnect your wallet.",
         });
         return;
       }
 
-      // Validate address format
       if (!to || !PublicKey.isOnCurve(to)) {
         setStatus({
           show: true,
@@ -155,7 +134,6 @@ export default function EthTransferDemo() {
         return;
       }
 
-      // Validate amount
       const amountFloat = parseFloat(amount);
       if (isNaN(amountFloat) || amountFloat <= 0) {
         setStatus({
@@ -187,10 +165,7 @@ export default function EthTransferDemo() {
         receipt = await connection?.getSignatureStatus(txResponse, {
           searchTransactionHistory: true,
         });
-        if (
-          receipt?.value?.confirmationStatus === "confirmed" ||
-          receipt?.value?.confirmationStatus === "finalized"
-        ) {
+        if (receipt?.value?.confirmationStatus === "confirmed" || receipt?.value?.confirmationStatus === "finalized") {
           break;
         }
         await new Promise((resolve) => setTimeout(resolve, 500));
@@ -212,10 +187,7 @@ export default function EthTransferDemo() {
       setStatus({
         show: true,
         type: "error",
-        message:
-          error instanceof Error
-            ? error.message
-            : "Failed to send transaction. Please try again.",
+        message: error instanceof Error ? error.message : "Failed to send transaction. Please try again.",
       });
     } finally {
       setIsLoading(false);
@@ -224,15 +196,11 @@ export default function EthTransferDemo() {
   return (
     <div className="container mx-auto px-4">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold tracking-tight mb-6">
-          SOL Transfer Demo
-        </h1>
+        <h1 className="text-4xl font-bold tracking-tight mb-6">SOL Transfer Demo</h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Send SOL with your connected wallet. This demonstrates a basic SOL
-          transfer using the Para SDK with solana-web3.js integration via the{" "}
-          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md">
-            ParaSolanaWeb3Signer
-          </code>{" "}
+          Send SOL with your connected wallet. This demonstrates a basic SOL transfer using the Para SDK with
+          solana-web3.js integration via the{" "}
+          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md">ParaSolanaWeb3Signer</code>{" "}
           provider.
         </p>
       </div>
@@ -240,28 +208,17 @@ export default function EthTransferDemo() {
       <div className="max-w-xl mx-auto">
         <div className="mb-8 rounded-none border border-gray-200">
           <div className="flex justify-between items-center px-6 py-3 bg-gray-50 border-b border-gray-200">
-            <h3 className="text-sm font-medium text-gray-900">
-              Current Balance:
-            </h3>
+            <h3 className="text-sm font-medium text-gray-900">Current Balance:</h3>
             <button
               onClick={fetchBalance}
               disabled={isBalanceLoading || !address}
               className="p-1 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
-              title="Refresh balance"
-            >
-              <span
-                className={`inline-block ${
-                  isBalanceLoading ? "animate-spin" : ""
-                }`}
-              >
-                🔄
-              </span>
+              title="Refresh balance">
+              <span className={`inline-block ${isBalanceLoading ? "animate-spin" : ""}`}>🔄</span>
             </button>
           </div>
           <div className="px-6 py-3">
-            <p className="text-sm text-gray-500 bg-gray-100 p-2 rounded-md">
-              Network: Devnet
-            </p>
+            <p className="text-sm text-gray-500 bg-gray-100 p-2 rounded-md">Network: Devnet</p>
             <p className="text-lg font-medium text-gray-900">
               {!address
                 ? "Please connect your wallet"
@@ -282,18 +239,18 @@ export default function EthTransferDemo() {
                 : status.type === "error"
                 ? "bg-red-50 border-red-500 text-red-700"
                 : "bg-blue-50 border-blue-500 text-blue-700"
-            }`}
-          >
+            }`}>
             <p className="px-6 py-4 break-words">{status.message}</p>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4">
           <div className="space-y-3">
             <label
               htmlFor="to"
-              className="block text-sm font-medium text-gray-700"
-            >
+              className="block text-sm font-medium text-gray-700">
               Recipient Address
             </label>
             <input
@@ -304,15 +261,14 @@ export default function EthTransferDemo() {
               placeholder="5jHY..."
               required
               disabled={isLoading}
-              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
           </div>
 
           <div className="space-y-3">
             <label
               htmlFor="amount"
-              className="block text-sm font-medium text-gray-700"
-            >
+              className="block text-sm font-medium text-gray-700">
               Amount (SOL)
             </label>
             <input
@@ -324,30 +280,26 @@ export default function EthTransferDemo() {
               step="0.01"
               required
               disabled={isLoading}
-              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
           </div>
 
           <button
             type="submit"
             className="w-full rounded-none bg-blue-900 px-6 py-3 text-sm font-medium text-white hover:bg-blue-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!to || !amount || isLoading}
-          >
+            disabled={!to || !amount || isLoading}>
             {isLoading ? "Sending Transaction..." : "Send Transaction"}
           </button>
 
           {txSignature && (
             <div className="mt-8 rounded-none border border-gray-200">
               <div className="flex justify-between items-center px-6 py-4 bg-gray-50 border-b border-gray-200">
-                <h3 className="text-sm font-medium text-gray-900">
-                  Transaction Signature:
-                </h3>
+                <h3 className="text-sm font-medium text-gray-900">Transaction Signature:</h3>
                 <a
                   href={`https://solscan.io/tx/${txSignature}?cluster=devnet`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-1 text-sm bg-blue-900 text-white hover:bg-blue-950 transition-colors rounded-none"
-                >
+                  className="px-3 py-1 text-sm bg-blue-900 text-white hover:bg-blue-950 transition-colors rounded-none">
                   View on Solscan
                 </a>
               </div>

@@ -1,10 +1,9 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthLayout, OAuthMethod, ParaProvider } from "@getpara/react-sdk";
-import { para } from "@/client/para";
+import { ParaProvider } from "@getpara/react-sdk";
 import { ParaSignerProvider } from "@/components/ParaSignerProvider";
-import "@getpara/react-sdk/styles.css";
+import { para } from "@/client/para";
 
 const queryClient = new QueryClient();
 
@@ -21,15 +20,8 @@ export function Providers({
         paraModalConfig={{
           disableEmailLogin: false,
           disablePhoneLogin: false,
-          authLayout: [AuthLayout.AUTH_FULL],
-          oAuthMethods: [
-            OAuthMethod.APPLE,
-            OAuthMethod.DISCORD,
-            OAuthMethod.FACEBOOK,
-            OAuthMethod.FARCASTER,
-            OAuthMethod.GOOGLE,
-            OAuthMethod.TWITTER,
-          ],
+          authLayout: ["AUTH:FULL"],
+          oAuthMethods: ["APPLE", "DISCORD", "FACEBOOK", "FARCASTER", "GOOGLE", "TWITTER"],
           onRampTestMode: true,
           theme: {
             foregroundColor: "#2D3648",
@@ -45,8 +37,7 @@ export function Providers({
           logo: "/para.svg",
           recoverySecretStepEnabled: true,
           twoFactorAuthEnabled: false,
-        }}
-      >
+        }}>
         <ParaSignerProvider>{children}</ParaSignerProvider>
       </ParaProvider>
     </QueryClientProvider>
