@@ -8,7 +8,7 @@
     "compile": "hardhat compile",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "postinstall": "yarn setup-para"
+    "postinstall": "npx setup-para"
   },
   "dependencies": {
 <<<<<<< HEAD

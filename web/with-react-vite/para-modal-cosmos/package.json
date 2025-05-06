@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc -b && vite build",
     "dev": "vite",
-    "postinstall": "yarn graz --generate && yarn setup-para",
+    "postinstall": "yarn graz --generate && npx setup-para",
     "preview": "vite preview"
   },
   "dependencies": {
