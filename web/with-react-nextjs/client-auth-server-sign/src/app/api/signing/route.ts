@@ -17,8 +17,7 @@ export async function POST(request: NextRequest) {
     if (!session || !transaction) {
       return NextResponse.json(
         {
-          error:
-            "Provide both `session` and `transaction` in the request body.",
+          error: "Provide both `session` and `transaction` in the request body.",
         },
         { status: 400 }
       );
@@ -31,16 +30,13 @@ export async function POST(request: NextRequest) {
     const tx = ethers.Transaction.from(txParsed);
 
     const para = new ParaServer(
-      (process.env.NEXT_PUBLIC_PARA_ENVIRONMENT as Environment) ??
-        Environment.BETA,
+      (process.env.NEXT_PUBLIC_PARA_ENVIRONMENT as Environment) ?? Environment.BETA,
       PARA_API_KEY
     );
 
     await para.importSession(session);
 
-    const ethersProvider = new ethers.JsonRpcProvider(
-      "https://ethereum-sepolia-rpc.publicnode.com"
-    );
+    const ethersProvider = new ethers.JsonRpcProvider("https://ethereum-sepolia-rpc.publicnode.com");
 
     const paraEthersSigner = new ParaEthersSigner(para, ethersProvider);
 

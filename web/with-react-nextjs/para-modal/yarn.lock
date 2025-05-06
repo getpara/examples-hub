@@ -298,6 +298,7 @@
     "@ethersproject/properties" "^5.7.0"
     "@ethersproject/strings" "^5.7.0"
 
+<<<<<<< Updated upstream
 <<<<<<< HEAD
 "@getpara/core-components@2.0.0-dev.0":
   version "2.0.0-dev.0"
@@ -309,6 +310,12 @@
   resolved "https://registry.yarnpkg.com/@getpara/core-components/-/core-components-1.12.0.tgz#7b594b7d336fb32b8d488519d997aa235bf0e52f"
   integrity sha512-q9y1WXQn5StIR0foBlCssCfB1md++agdsk7D3pZcfz9Yr5UXYkXvNpjR2Bjw/Q07mu4eqfibRgqkPK4/0GAr2Q==
 >>>>>>> main
+=======
+"@getpara/core-components@1.13.0":
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/@getpara/core-components/-/core-components-1.13.0.tgz#d01c9279c18d9e0e695304fbee5f005db295579b"
+  integrity sha512-/jhF6LtKluLuKbR4b4CdcA9BWhG5mzDN6XFVfiXebftA5JaCltARXZNOIWNvf5UmhmoTF5st/9yXbSZPjRO8Ww==
+>>>>>>> Stashed changes
   dependencies:
     "@stencil/core" "^4.7.0"
     color-blend "^4.0.0"
@@ -317,6 +324,7 @@
     inputmask "5.0.9"
     qrcode-with-logos "1.1.1"
 
+<<<<<<< Updated upstream
 <<<<<<< HEAD
 "@getpara/core-sdk@2.0.0-dev.0":
   version "2.0.0-dev.0"
@@ -328,6 +336,12 @@
   resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.12.0.tgz#2c88cbc796f6a432bb014a0f865ea932bbb2e5a9"
   integrity sha512-r6UXdyqYPswIF96tDNB+hIFWRjAVrZTWcK64Zdlt1imLn7MqtwsQ1devvJ9D8xEBxjCB0lg1a0Uk9myRsAHV9A==
 >>>>>>> main
+=======
+"@getpara/core-sdk@1.13.0":
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.13.0.tgz#6f70541536f1e923d3f317b792a63e7b655c8ad8"
+  integrity sha512-KHN1/wkiN7VDd4P4Q5/LapOYmeCW+sk+zg2aqsT8svAkNDDzJw9d8aVEmuz5m9cpYBYc1umdr2SNhIe4XNsxvw==
+>>>>>>> Stashed changes
   dependencies:
     "@celo/utils" "^8.0.2"
     "@cosmjs/encoding" "^0.32.4"
@@ -335,14 +349,19 @@
     "@getpara/user-management-client" "2.0.0-dev.0"
 =======
     "@ethereumjs/util" "^9.1.0"
+<<<<<<< Updated upstream
     "@getpara/user-management-client" "1.12.0"
 >>>>>>> main
+=======
+    "@getpara/user-management-client" "1.13.0"
+>>>>>>> Stashed changes
     "@noble/hashes" "^1.5.0"
     base64url "^3.0.1"
     libphonenumber-js "1.11.2"
     node-forge "^1.3.1"
     uuid "^11.1.0"
 
+<<<<<<< Updated upstream
 <<<<<<< HEAD
 "@getpara/react-common@2.0.0-dev.0":
   version "2.0.0-dev.0"
@@ -360,6 +379,15 @@
     "@getpara/react-components" "1.12.0"
     "@getpara/web-sdk" "1.12.0"
 >>>>>>> main
+=======
+"@getpara/react-common@1.13.0":
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/@getpara/react-common/-/react-common-1.13.0.tgz#08ae53a090879cdebac8db88c099ef3e90bfd0ab"
+  integrity sha512-QCCzsNSa8wAoIWLPLZ7wog4u1rb4SCuOmPusbGPE9DgBjLe7ml+JFBuqCiqFrAKrY0JgtnpfP2UDQCIX0gf+yA==
+  dependencies:
+    "@getpara/react-components" "1.13.0"
+    "@getpara/web-sdk" "1.13.0"
+>>>>>>> Stashed changes
     "@moonpay/moonpay-react" "^1.8.3"
     "@ramp-network/ramp-instant-sdk" "^4.0.5"
     "@stripe/crypto" "^0.0.4"
@@ -368,6 +396,7 @@
     styled-components "^6.1.8"
     ua-parser-js "^2.0.2"
 
+<<<<<<< Updated upstream
 <<<<<<< HEAD
 "@getpara/react-components@2.0.0-dev.0":
   version "2.0.0-dev.0"
@@ -389,18 +418,30 @@
   version "1.12.0"
   resolved "https://registry.yarnpkg.com/@getpara/react-components/-/react-components-1.12.0.tgz#1bb1902cbb614d4dcf7891009ed53dc9cea45fdf"
   integrity sha512-leuTJF1MHtJG0XARI901MPhpTEHaPXjL1HKnD4xlL/JbVRLlYzRKtO5ccZ0iWf2+h0IOU97l3+iQ/fGrC2TGpg==
+=======
+"@getpara/react-components@1.13.0":
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/@getpara/react-components/-/react-components-1.13.0.tgz#758cade9c33f321ae68a3d574558fded300091e0"
+  integrity sha512-vNdyHMrSbbN67z2iOLQGq1wmMpbMy41hz40qFsymwKFD+Mh5+3wPyBopT7LwGt49b7TMWrktYZhg1DbeknXNkQ==
+>>>>>>> Stashed changes
   dependencies:
-    "@getpara/core-components" "1.12.0"
+    "@getpara/core-components" "1.13.0"
 
-"@getpara/react-sdk@1.12.0":
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/@getpara/react-sdk/-/react-sdk-1.12.0.tgz#87e47f00ac57d63fb1592906cc2ef4419a2cd7e2"
-  integrity sha512-mqUrENr/5gr+u2bTEXmZqUZY2eTl5bo9JU8bKRW/yWlpqUkv7dxNXraUv41JUUQV7ixn671TDigLh438mD+Ugg==
+"@getpara/react-sdk@1.13.0":
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/@getpara/react-sdk/-/react-sdk-1.13.0.tgz#fbdd388d112c4cee796b6d47bdcb6bf44b2e23e6"
+  integrity sha512-vTQPdjBqn3uxLksN/MppNM+fiIcuB9FKTgyQn/f0K9nk6wVBFHUnOoAymkCuYHO0NiUsxVo/0xxbqgtURwRX3Q==
   dependencies:
+<<<<<<< Updated upstream
     "@getpara/react-common" "1.12.0"
     "@getpara/react-components" "1.12.0"
     "@getpara/web-sdk" "1.12.0"
 >>>>>>> main
+=======
+    "@getpara/react-common" "1.13.0"
+    "@getpara/react-components" "1.13.0"
+    "@getpara/web-sdk" "1.13.0"
+>>>>>>> Stashed changes
     "@tanstack/react-query" "^5.0.0"
     date-fns "^3.6.0"
     framer-motion "11.3.28"
@@ -409,6 +450,7 @@
     zustand "^4.5.2"
     zustand-sync-tabs "^0.2.2"
 
+<<<<<<< Updated upstream
 <<<<<<< HEAD
 "@getpara/user-management-client@2.0.0-dev.0":
   version "2.0.0-dev.0"
@@ -420,10 +462,17 @@
   resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.12.0.tgz#25dcb3d40c2e0cfabdbf21afe98609510ae2ac91"
   integrity sha512-fs/V+I+dDmApbLpfKKRssabHpA5E7k4bgbMSMlr2c4ALC9ZnmP68dt78Jkd5f2kcEwNj3+N8S3SPMso2uqtMuA==
 >>>>>>> main
+=======
+"@getpara/user-management-client@1.13.0":
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.13.0.tgz#3c8777b78059d3637983a29022f199506e04f6a8"
+  integrity sha512-4rS5Sx5R4fICKl16wMdk5Ua+5Uh+x+7hmmhdN5NaimljhB0no0v40JHAOiDbSQDF0+tptROIruDSX3+NKuH0dA==
+>>>>>>> Stashed changes
   dependencies:
     axios "^1.8.4"
     libphonenumber-js "1.11.2"
 
+<<<<<<< Updated upstream
 <<<<<<< HEAD
 "@getpara/web-sdk@2.0.0-dev.0":
   version "2.0.0-dev.0"
@@ -443,6 +492,15 @@
     "@getpara/core-sdk" "1.12.0"
     "@getpara/user-management-client" "1.12.0"
 >>>>>>> main
+=======
+"@getpara/web-sdk@1.13.0":
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-1.13.0.tgz#fca5dc023654222314b841831e21e149a5ca40ca"
+  integrity sha512-2aEUwEKCGFCWW7zdTJKrhxJNUsANunlb2iJ0C6vrondiB2KljT06niPyK0RvqWOCQQEpuqsc3l0H5M3htWIGiQ==
+  dependencies:
+    "@getpara/core-sdk" "1.13.0"
+    "@getpara/user-management-client" "1.13.0"
+>>>>>>> Stashed changes
     base64url "3.0.1"
     buffer "6.0.3"
     cbor-web "8.1.0"
