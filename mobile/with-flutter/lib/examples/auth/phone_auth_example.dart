@@ -4,7 +4,8 @@
 import 'dart:async'; // Keep for Future
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart'; // Added import
+// Hide WebAuthenticationSession from flutter_inappwebview to avoid conflict
+import 'package:flutter_inappwebview/flutter_inappwebview.dart' hide WebAuthenticationSession;
 
 // Import the SDK package
 import 'package:para/para.dart';
@@ -13,6 +14,7 @@ import 'package:para_flutter/util/random.dart';
 import 'package:para_flutter/widgets/choose_signup_method.dart'; // Needed for signup flow
 import 'package:para_flutter/widgets/demo_home.dart';
 import 'package:para_flutter/widgets/demo_otp_verification.dart';
+import 'package:phone_form_field/phone_form_field.dart'; // For phone input
 
 class ParaPhoneExample extends StatefulWidget {
   const ParaPhoneExample({super.key});
@@ -36,10 +38,18 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
   // InAppBrowser instance for password flow
   final InAppBrowser _browser = InAppBrowser();
 
+  // Define your app's custom URL scheme
+  final String _callbackScheme = 'com.usecapsule.example.flutter'; // Used by FlutterWebAuthSession
+
+  // Add instance of FlutterWebAuthSession from the para package
+  late final WebAuthenticationSession _webAuthSession; // Use the abstract class type
+
   @override
   void initState() {
     super.initState();
     _phoneController.text = randomTestPhone();
+    // Initialize FlutterWebAuthSession (implementation from para package)
+    _webAuthSession = FlutterWebAuthSession(callbackUrlScheme: _callbackScheme.split('://').first);
     _checkLoginStatus();
   }
 
@@ -309,28 +319,28 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
     }
 
     try {
-      _log("Calling verifyNewAccount with code: $code");
+      _log("Verifying phone code: $code");
       final authState = await para.verifyNewAccount(verificationCode: code);
-      _log("verifyNewAccount returned stage: ${authState.stage}");
+      _log("Verification successful. Stage: ${authState.stage}");
 
       if (authState.stage == AuthStage.signup) {
         _log("Navigating to ChooseSignupMethod screen.");
-        // Navigate to the security method selection screen
         if (mounted) {
-          await Navigator.push(
+          // Pass the webAuthSession to ChooseSignupMethod
+          final signupResult = await Navigator.push<bool>(
             context,
             MaterialPageRoute(
               builder: (context) => ChooseSignupMethod(
-                authState: authState, // Pass the AuthState from verification
+                authState: authState,
+                webAuthenticationSession: _webAuthSession, // Pass the session
               ),
             ),
           );
-          // Assume flow completed or cancelled after ChooseSignupMethod pops
-          return true; // Signal success to DemoOtpVerification
+          return signupResult ?? false; // Return whether signup was successful
         }
-        return false; // Should not happen if mounted check passes
+        return false;
       } else {
-        _log("Unexpected stage after verifyNewAccount: ${authState.stage}", isWarning: true);
+        _log("Unexpected stage after verification: ${authState.stage}", isWarning: true);
         throw Exception("Verification succeeded but resulted in unexpected stage: ${authState.stage}");
       }
     } catch (e) {

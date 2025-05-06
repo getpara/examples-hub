@@ -1,143 +1,30 @@
 // /Users/tyson/dev/examples-hub/mobile/with-flutter/lib/widgets/choose_signup_method.dart
 import 'dart:async'; // Added for Completer
-import 'package:flutter/foundation.dart'; // Added for defaultTargetPlatform
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart'; // Added import
 import 'package:para/para.dart'; // Added import for SDK types
 import 'package:para_flutter/client/para.dart';
 import 'package:para_flutter/widgets/demo_home.dart';
 
-// Define SignupMethod enum locally if not exported by SDK
-enum SignupMethod { passkey, password }
+// SignupMethod enum is now imported from 'package:para/para.dart'
+// enum SignupMethod { passkey, password }
 
 class ChooseSignupMethod extends StatefulWidget {
   final AuthState authState;
+  final WebAuthenticationSession webAuthenticationSession;
 
   const ChooseSignupMethod({
     super.key,
     required this.authState,
+    required this.webAuthenticationSession,
   });
 
   @override
   State<ChooseSignupMethod> createState() => _ChooseSignupMethodState();
 }
 
-// --- Custom InAppBrowser for Password Setup ---
-class _PasswordSetupBrowser extends InAppBrowser {
-  final Completer<bool> completer;
-  final String callbackScheme;
-  final Function(String, {bool isWarning}) logCallback;
-  bool passwordFlowCompleted = false; // This flag indicates if the browser logic detected a successful callback
-
-  _PasswordSetupBrowser({
-    required this.completer,
-    required this.callbackScheme,
-    required this.logCallback,
-  });
-
-  @override
-  Future<void> onLoadStop(Uri? url) async {
-    logCallback("Browser onLoadStop: ${url?.toString() ?? '''null'''}");
-    if (url?.scheme == callbackScheme) {
-      logCallback("Callback URL $url detected directly in onLoadStop!");
-      if (!completer.isCompleted) {
-        passwordFlowCompleted = true;
-        close(); // Close the browser
-        completer.complete(true);
-      }
-    }
-  }
-
-  @override
-  void onExit() {
-    logCallback("Browser onExit event.");
-    if (!completer.isCompleted) {
-      logCallback("Browser closed before callback or recognized redirect. Completing with false.");
-      completer.complete(false); // Complete with false if closed manually
-    }
-  }
-
-  @override
-  Future<void> onLoadError(Uri? url, int code, String message) async {
-    logCallback("Browser onLoadError: Url: $url, Code: $code, Message: $message", isWarning: true);
-
-    if (url?.scheme == callbackScheme) {
-      if (defaultTargetPlatform == TargetPlatform.iOS && code == -1002) {
-        logCallback("iOS: Detected expected -1002 error for callback scheme $url. Treating as successful redirect.");
-        if (!completer.isCompleted) {
-          passwordFlowCompleted = true;
-          close();
-          completer.complete(true);
-        }
-        return; // iOS specific handling done
-      } else if (defaultTargetPlatform == TargetPlatform.android &&
-          code == -10 /* типичный код для ERR_UNKNOWN_URL_SCHEME */) {
-        logCallback(
-            "Android: Detected error $code for callback scheme $url. Allowing onReceivedError or onLoadStop to handle.");
-        // Do NOT complete here for Android. Let onReceivedError or onLoadStop handle it,
-        // as the intent filter should ideally prevent this from being a fatal webview error page.
-        return; // Android specific pass-through
-      }
-      // For other platforms or other error codes for our callback scheme not specifically handled above
-      logCallback(
-          "Callback scheme $url encountered an error (Code: $code, Platform: ${defaultTargetPlatform.toString()}). Completing with false.",
-          isWarning: true);
-      if (!completer.isCompleted) {
-        completer.complete(false);
-      }
-      return; // Processed callback scheme error
-    }
-
-    // For any other errors not related to our callback scheme
-    if (!completer.isCompleted) {
-      logCallback("Error for unrelated URL ${url?.toString()} (Code: $code). Completing with false.");
-      completer.complete(false);
-    }
-  }
-
-  @override
-  void onReceivedError(WebResourceRequest request, WebResourceError error) {
-    final requestUri = request.url; // WebUri
-    logCallback("Browser onReceivedError: URL: $requestUri, Type: ${error.type}, Desc: ${error.description}",
-        isWarning: true);
-
-    if (requestUri.scheme == callbackScheme) {
-      // This is a key handler, especially after an intent filter allows the OS to recognize the scheme.
-      // WebResourceErrorType.UNSUPPORTED_SCHEME is a common way this manifests.
-      if (error.type == WebResourceErrorType.UNSUPPORTED_SCHEME) {
-        logCallback(
-            "Detected UNSUPPORTED_SCHEME error for callback scheme ${requestUri.toString()}. Treating as successful redirect.");
-        if (!completer.isCompleted) {
-          passwordFlowCompleted = true;
-          close();
-          completer.complete(true);
-        }
-      } else {
-        logCallback(
-            "Callback scheme ${requestUri.toString()} received an unexpected error type: ${error.type.toString()}. Completing with false.",
-            isWarning: true);
-        if (!completer.isCompleted) {
-          completer.complete(false);
-        }
-      }
-      return; // Processed callback scheme error
-    }
-
-    // For other URLs/resources that are not our callback scheme.
-    if (!completer.isCompleted) {
-      logCallback(
-          "Error for unrelated resource ${requestUri.toString()} (Type: ${error.type.toString()}). Completing with false.");
-      completer.complete(false);
-    }
-  }
-}
-
 class _ChooseSignupMethodState extends State<ChooseSignupMethod> {
   bool _isLoading = false;
   String? _errorMessage;
-
-  bool _passwordFlowCompletedViaCallback = false;
-  final String _callbackScheme = 'com.usecapsule.example.flutter';
 
   @override
   void dispose() {
@@ -148,59 +35,7 @@ class _ChooseSignupMethodState extends State<ChooseSignupMethod> {
     debugPrint('ChooseSignupMethod: ${isWarning ? "WARN: " : ""}$message');
   }
 
-  // --- Helper to add callback URL ---
-  Uri _prepareUrlWithCallback(String originalUrl) {
-    final uri = Uri.parse(originalUrl);
-    final queryParams = Map<String, String>.from(uri.queryParameters);
-    queryParams['nativeCallbackUrl'] = 'com.usecapsule.example.flutter://';
-    return uri.replace(queryParameters: queryParams);
-  }
-
-  // --- Function to launch browser and listen for callback ---
-  Future<bool> _launchPasswordSetupWebView(String url) async {
-    final completer = Completer<bool>();
-    final finalUrl = _prepareUrlWithCallback(url);
-
-    // Create instance of the custom browser
-    final browser = _PasswordSetupBrowser(
-      completer: completer,
-      callbackScheme: _callbackScheme,
-      logCallback: _log, // Pass the log function
-    );
-
-    try {
-      _log("Opening browser with URL: $finalUrl");
-      await browser.openUrlRequest(
-        urlRequest: URLRequest(url: WebUri.uri(finalUrl)),
-        settings: InAppBrowserClassSettings(
-          browserSettings: InAppBrowserSettings(
-            presentationStyle: ModalPresentationStyle.PAGE_SHEET,
-          ),
-          webViewSettings: InAppWebViewSettings(
-              // Add any webview specific settings if needed
-              ),
-        ),
-      );
-    } catch (e) {
-      _log("Error opening browser: $e", isWarning: true);
-      if (!completer.isCompleted) {
-        completer.completeError(e); // Propagate error
-      }
-    }
-
-    // Await the completer result (which is completed by onLoadStop or onExit)
-    final result = await completer.future;
-
-    // Use the flag from the browser instance if needed, or just the result
-    _passwordFlowCompletedViaCallback = browser.passwordFlowCompleted;
-
-    _log("Password setup flow completed with result: $result, via callback: $_passwordFlowCompletedViaCallback");
-
-    // Return true only if completed successfully AND via the callback
-    return result && _passwordFlowCompletedViaCallback;
-  }
-
-  Future<void> _setupAccount(SignupMethod method) async {
+  Future<void> _setupAccount(SignupMethod method /* This will now be the SDK's SignupMethod */) async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -216,78 +51,27 @@ class _ChooseSignupMethodState extends State<ChooseSignupMethod> {
     }
 
     try {
-      _log('Starting setup for method: $method');
-      Wallet? createdWallet; // To store the result
-
-      if (method == SignupMethod.passkey) {
-        if (widget.authState.passkeyId == null) {
-          throw Exception('Passkey signup option unavailable (missing passkeyId)');
-        }
-        _log('Generating passkey with ID: ${widget.authState.passkeyId}');
-        await para.generatePasskey(
-          identifier: widget.authState.auth.value,
-          biometricsId: widget.authState.passkeyId!,
+      _log('Starting setup for method: $method using para.handleSignup');
+      await para.handleSignup(
+        authState: widget.authState,
+        method: method,
+        webAuthenticationSession: widget.webAuthenticationSession,
+      );
+      _log('para.handleSignup successful for method: $method. Navigating to DemoHome.');
+      if (mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const DemoHome()),
+          (Route<dynamic> route) => false,
         );
-        _log('Passkey generated. Creating wallet...');
-        createdWallet = await para.createWallet(type: WalletType.evm, skipDistribute: false);
-        _log('Wallet created successfully (Passkey). Wallet ID: ${createdWallet.id}');
-      } else if (method == SignupMethod.password) {
-        if (widget.authState.passwordUrl == null) {
-          throw Exception('Password signup option unavailable (missing passwordUrl)');
-        }
-        _log('Password URL found: ${widget.authState.passwordUrl}');
-        _log('Launching password setup web view...');
-
-        // --- Launch Password Setup Web View and wait for callback ---
-        final bool setupSuccess = await _launchPasswordSetupWebView(widget.authState.passwordUrl!);
-
-        if (setupSuccess) {
-          _log('Password setup successful via callback. Creating wallet...');
-          // Add a small delay in case the backend needs a moment
-          await Future.delayed(const Duration(milliseconds: 500));
-          createdWallet = await para.createWallet(type: WalletType.evm, skipDistribute: false);
-          _log('Wallet created successfully (Password). Wallet ID: ${createdWallet.id}');
-        } else {
-          _log('Password setup flow did not complete successfully (closed without callback or error).');
-          // Check if an error message was already set by the browser error handlers
-          if (_errorMessage == null) {
-            setState(() {
-              _errorMessage = "Password setup cancelled or failed.";
-            });
-          }
-          // No need to throw here, just let it proceed to the 'wallet not created' check
-        }
-      }
-
-      // --- Navigate Home on Success (if wallet was created) ---
-      if (createdWallet != null) {
-        _log('Setup successful, navigating to DemoHome.');
-        if (mounted) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const DemoHome()),
-            (Route<dynamic> route) => false,
-          );
-        }
-      } else {
-        // This handles both the case where setupSuccess was false,
-        // and any other unexpected case where wallet wasn't created.
-        _log('Wallet was not created, setup incomplete.', isWarning: true);
-        setState(() {
-          // Keep existing error message if set, otherwise use generic one
-          _errorMessage ??= 'Account setup incomplete. Please try again.';
-          _isLoading = false; // Ensure loading is stopped
-        });
       }
     } catch (e) {
-      _log('Error caught during setup: $e', isWarning: true);
+      _log('Error caught during setup with para.handleSignup: $e', isWarning: true);
       setState(() {
         _errorMessage = 'Setup failed: $e';
-        _isLoading = false;
       });
     } finally {
-      if (mounted && _isLoading) {
-        // Ensure loading state is reset if component still mounted
+      if (mounted) {
         setState(() {
           _isLoading = false;
         });
@@ -359,8 +143,8 @@ class _ChooseSignupMethodState extends State<ChooseSignupMethod> {
   Widget build(BuildContext context) {
     // Build method remains largely the same
     final isSignupStage = widget.authState.stage == AuthStage.signup;
-    final isPasskeyAvailable = isSignupStage && widget.authState.passkeyId != null;
-    final isPasswordAvailable = isSignupStage && widget.authState.passwordUrl != null;
+    final isPasskeyAvailable = isSignupStage && para.isSignupMethodAvailable(SignupMethod.passkey, widget.authState);
+    final isPasswordAvailable = isSignupStage && para.isSignupMethodAvailable(SignupMethod.password, widget.authState);
 
     _log('Build - Auth State Stage: ${widget.authState.stage}');
     _log('Build - Passkey Available: $isPasskeyAvailable');
