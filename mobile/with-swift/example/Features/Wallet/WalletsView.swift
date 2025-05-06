@@ -24,6 +24,7 @@ struct WalletsView: View {
         Task {
             do {
                 try await paraManager.createWallet(type: type, skipDistributable: false)
+                
                 await MainActor.run {
                     showSelectCreateWalletTypeView = false
                 }

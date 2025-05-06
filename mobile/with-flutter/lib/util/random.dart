@@ -6,11 +6,9 @@ String randomTestEmail({
   bool includeNumbers = true,
 }) {
   final random = Random();
-  final chars =
-      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ${includeNumbers ? "0123456789" : ""}";
+  final chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ${includeNumbers ? "0123456789" : ""}";
 
-  final result =
-      List.generate(length, (_) => chars[random.nextInt(chars.length)]).join();
+  final result = List.generate(length, (_) => chars[random.nextInt(chars.length)]).join();
 
   return "$result@$domain";
 }

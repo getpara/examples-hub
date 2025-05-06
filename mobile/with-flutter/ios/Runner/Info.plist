@@ -29,7 +29,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>paraflutter</string>
+				<string>com.usecapsule.example.flutter</string>
 			</array>
 		</dict>
 	</array>

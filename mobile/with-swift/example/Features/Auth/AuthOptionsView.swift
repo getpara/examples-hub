@@ -7,45 +7,83 @@ struct AuthOptionsView: View {
     var body: some View {
         NavigationStack {
             List {
-                NavigationLink {
-                    EmailAuthView()
-                } label: {
-                    AuthTypeView(
-                        image: Image(systemName: "envelope"),
-                        title: "Email + Passkey",
-                        description: "Use your email to create or sign in with a passkey."
-                    )
+                // Email authentication option
+                NavigationLink(destination: EmailAuthView()) {
+                    HStack {
+                        Image(systemName: "envelope")
+                            .font(.title2)
+                            .foregroundColor(.blue)
+                            .frame(width: 35)
+                        
+                        VStack(alignment: .leading) {
+                            Text("Email")
+                                .font(.headline)
+                            Text("Sign in or register with email")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .padding(.vertical, 4)
                 }
                 .accessibilityIdentifier("emailAuthButton")
                 
-                NavigationLink {
-                    PhoneAuthView()
-                } label: {
-                    AuthTypeView(
-                        image: Image(systemName: "phone"),
-                        title: "Phone + Passkey",
-                        description: "Use your phone number to create or sign in with a passkey."
-                    )
+                // Phone authentication option
+                NavigationLink(destination: PhoneAuthView()) {
+                    HStack {
+                        Image(systemName: "phone")
+                            .font(.title2)
+                            .foregroundColor(.green)
+                            .frame(width: 35)
+                        
+                        VStack(alignment: .leading) {
+                            Text("Phone")
+                                .font(.headline)
+                            Text("Sign in or register with phone number")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .padding(.vertical, 4)
                 }
                 .accessibilityIdentifier("phoneAuthButton")
                 
+                // OAuth authentication option
                 NavigationLink(destination: OAuthView()) {
-                    AuthTypeView(
-                        image: Image(systemName: "xmark.triangle.circle.square"),
-                        title: "OAuth + Passkey",
-                        description: "Use different OAuth providers to create or sign in with a passkey"
-                    )
+                    HStack {
+                        Image(systemName: "person.crop.circle")
+                            .font(.title2)
+                            .foregroundColor(.purple)
+                            .frame(width: 35)
+                        
+                        VStack(alignment: .leading) {
+                            Text("OAuth")
+                                .font(.headline)
+                            Text("Sign in with social accounts")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .padding(.vertical, 4)
                 }
                 .accessibilityIdentifier("oauthAuthButton")
                 
-                NavigationLink {
-                    ExternalWalletAuthView()
-                } label: {
-                    AuthTypeView(
-                        image: Image(systemName: "wallet.pass"),
-                        title: "External Wallet",
-                        description: "Login as an external wallet."
-                    )
+                // External wallet option
+                NavigationLink(destination: ExternalWalletAuthView()) {
+                    HStack {
+                        Image(systemName: "wallet.pass")
+                            .font(.title2)
+                            .foregroundColor(.orange)
+                            .frame(width: 35)
+                        
+                        VStack(alignment: .leading) {
+                            Text("External Wallet")
+                                .font(.headline)
+                            Text("Connect with crypto wallet")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .padding(.vertical, 4)
                 }
                 .accessibilityIdentifier("externalWalletButton")
             }
@@ -53,22 +91,6 @@ struct AuthOptionsView: View {
             .listStyle(.insetGrouped)
         }
         .accessibilityIdentifier("authenticationView")
-    }
-}
-
-struct AuthTypeView: View {
-    let image: Image
-    let title: String
-    let description: String
-    
-    var body: some View {
-        VStack (alignment: .leading) {
-            HStack {
-                image.font(.title).foregroundStyle(.red).padding(.trailing)
-                Text(title).font(.title)
-            }
-            Text(description)
-        }
     }
 }
 

@@ -67,7 +67,7 @@ struct EVMWalletView: View {
         isLoading = true
         Task {
             let (duration, error) = await measureTime {
-                try await paraEvmSigner.signTransaction(transactionB64: transaction.b64Encoded())
+                _ = try await paraEvmSigner.signTransaction(transactionB64: transaction.b64Encoded())
             }
             
             if let error = error {
@@ -85,7 +85,7 @@ struct EVMWalletView: View {
         isLoading = true
         Task {
             let (duration, error) = await measureTime {
-                try await paraEvmSigner.sendTransaction(transactionB64: transaction.b64Encoded())
+                _ = try await paraEvmSigner.sendTransaction(transactionB64: transaction.b64Encoded())
             }
             
             if let error = error {

@@ -136,10 +136,7 @@ class _DemoOtpVerificationState extends State<DemoOtpVerification> {
               ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed:
-                    _isLoading || _otpController.text.length != _otpLength
-                        ? null
-                        : _handleVerification,
+                onPressed: _isLoading || _otpController.text.length != _otpLength ? null : _handleVerification,
                 child: _isLoading
                     ? const SizedBox(
                         height: 20,

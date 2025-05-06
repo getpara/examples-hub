@@ -40,16 +40,13 @@ class _SolanaSignExampleState extends State<SolanaSignExample> {
   @override
   void initState() {
     super.initState();
-    _solanaClient =
-        web3.SolanaClient(rpcUrl: devnetRpcUrl, websocketUrl: devnetWsUrl);
-    _solanaSigner =
-        ParaSolanaWeb3Signer(para: para, solanaClient: _solanaClient);
+    _solanaClient = web3.SolanaClient(rpcUrl: devnetRpcUrl, websocketUrl: devnetWsUrl);
+    _solanaSigner = ParaSolanaWeb3Signer(para: para, solanaClient: _solanaClient);
     _checkBalance();
   }
 
   void _checkBalance() async {
-    final balance =
-        await _solanaClient.rpcClient.getBalance(widget.wallet.address!);
+    final balance = await _solanaClient.rpcClient.getBalance(widget.wallet.address!);
     setState(() {
       _balanceSol = balance.value / web3.lamportsPerSol;
     });
@@ -65,24 +62,18 @@ class _SolanaSignExampleState extends State<SolanaSignExample> {
     });
 
     try {
-      final publicKey =
-          web3.Ed25519HDPublicKey.fromBase58(widget.wallet.address!);
-      final blockhash =
-          (await _solanaClient.rpcClient.getLatestBlockhash()).value;
-      final lamports =
-          web3.lamportsPerSol * double.parse(_amountController.text);
+      final publicKey = web3.Ed25519HDPublicKey.fromBase58(widget.wallet.address!);
+      final blockhash = (await _solanaClient.rpcClient.getLatestBlockhash()).value;
+      final lamports = web3.lamportsPerSol * double.parse(_amountController.text);
 
       final instruction = web3.SystemInstruction.transfer(
           fundingAccount: publicKey,
-          recipientAccount:
-              web3.Ed25519HDPublicKey.fromBase58(_recipientController.text),
+          recipientAccount: web3.Ed25519HDPublicKey.fromBase58(_recipientController.text),
           lamports: lamports.toInt());
 
       final message = web3.Message(instructions: [instruction]);
-      final compiledMessage = message.compile(
-          recentBlockhash: blockhash.blockhash, feePayer: publicKey);
-      final signedTransaction =
-          await _solanaSigner.signTransaction(compiledMessage);
+      final compiledMessage = message.compile(recentBlockhash: blockhash.blockhash, feePayer: publicKey);
+      final signedTransaction = await _solanaSigner.signTransaction(compiledMessage);
 
       setState(() {
         _lastSignature = signedTransaction.signatures.first.toString();
@@ -106,26 +97,19 @@ class _SolanaSignExampleState extends State<SolanaSignExample> {
     });
 
     try {
-      final publicKey =
-          web3.Ed25519HDPublicKey.fromBase58(widget.wallet.address!);
-      final blockhash =
-          (await _solanaClient.rpcClient.getLatestBlockhash()).value;
-      final lamports =
-          web3.lamportsPerSol * double.parse(_amountController.text);
+      final publicKey = web3.Ed25519HDPublicKey.fromBase58(widget.wallet.address!);
+      final blockhash = (await _solanaClient.rpcClient.getLatestBlockhash()).value;
+      final lamports = web3.lamportsPerSol * double.parse(_amountController.text);
 
       final instruction = web3.SystemInstruction.transfer(
           fundingAccount: publicKey,
-          recipientAccount:
-              web3.Ed25519HDPublicKey.fromBase58(_recipientController.text),
+          recipientAccount: web3.Ed25519HDPublicKey.fromBase58(_recipientController.text),
           lamports: lamports.toInt());
 
       final message = web3.Message(instructions: [instruction]);
-      final compiledMessage = message.compile(
-          recentBlockhash: blockhash.blockhash, feePayer: publicKey);
-      final signedTransaction =
-          await _solanaSigner.signTransaction(compiledMessage);
-      final sendTransaction =
-          await _solanaSigner.sendTransaction(signedTransaction);
+      final compiledMessage = message.compile(recentBlockhash: blockhash.blockhash, feePayer: publicKey);
+      final signedTransaction = await _solanaSigner.signTransaction(compiledMessage);
+      final sendTransaction = await _solanaSigner.sendTransaction(signedTransaction);
 
       setState(() {
         _lastSignature = sendTransaction;
@@ -202,8 +186,7 @@ class _SolanaSignExampleState extends State<SolanaSignExample> {
                     hintText: 'Enter amount in SOL',
                     prefixIcon: Icon(Icons.attach_money),
                   ),
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
                   ],
