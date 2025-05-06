@@ -1,10 +1,11 @@
 "use client";
 
-import { usePara } from "@/components/ParaProvider";
 import { useState, useEffect } from "react";
 import { PARA_TEST_TOKEN_CONTRACT_ADDRESS } from ".";
 import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
 import { formatEther, getContract } from "viem";
+import { useParaSigner } from "@/components/ParaSignerProvider";
+import { useAccount } from "@getpara/react-sdk";
 
 type TokenAttestation = {
   holder: string;
@@ -34,7 +35,11 @@ export default function TypedDataSigningDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { isConnected, address, publicClient, walletClient } = usePara();
+  const { data: account } = useAccount();
+  const { walletClient, publicClient, viemAccount } = useParaSigner();
+
+  const isConnected = account?.isConnected;
+  const address = viemAccount?.address;
 
   const fetchTokenData = async () => {
     if (!address) return;
@@ -118,7 +123,6 @@ export default function TypedDataSigningDemo() {
         message: "Please sign the attestation message in your wallet...",
       });
 
-      // Sign the typed data
       const sig = await walletClient!.signTypedData({
         account: address,
         domain,

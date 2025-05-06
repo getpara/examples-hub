@@ -1,12 +1,14 @@
 "use client";
 
+import { useAccount, useModal, useWallet } from "@getpara/react-sdk";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { usePara } from "./ParaProvider";
 
 export default function Header() {
   const pathname = usePathname();
-  const { isConnected, openModal, address } = usePara();
+  const { openModal } = useModal();
+  const { data: account } = useAccount();
+  const { data: wallet } = useWallet();
 
   return (
     <header className="border-b border-gray-200">
@@ -21,11 +23,12 @@ export default function Header() {
           )}
         </nav>
         <div>
-          {isConnected ? (
+          {account?.isConnected ? (
             <button
               onClick={openModal}
               className="px-4 py-2 bg-green-700 text-white rounded-none hover:bg-green-800 transition-colors">
-              Connected: {address?.slice(0, 6)}...{address?.slice(-4)}
+              Connected: {wallet?.address?.slice(0, 6)}...
+              {wallet?.address?.slice(-4)}
             </button>
           ) : (
             <button

@@ -1,9 +1,10 @@
 "use client";
 
-import { usePara } from "@/components/ParaProvider";
 import { useState, useEffect } from "react";
 import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
 import { formatEther } from "viem";
+import { useParaSigner } from "@/components/ParaSignerProvider";
+import { useAccount } from "@getpara/react-sdk";
 
 export default function ContractDeploymentDemo() {
   const [isLoading, setIsLoading] = useState(false);
@@ -20,7 +21,11 @@ export default function ContractDeploymentDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { isConnected, walletId, address, publicClient, walletClient } = usePara();
+  const { data: account } = useAccount();
+  const { walletClient, publicClient, viemAccount } = useParaSigner();
+
+  const isConnected = account?.isConnected;
+  const address = viemAccount?.address;
 
   const fetchBalance = async () => {
     if (!address) return;
@@ -53,10 +58,6 @@ export default function ContractDeploymentDemo() {
     try {
       if (!isConnected) {
         throw new Error("Please connect your wallet to deploy the contract.");
-      }
-
-      if (!walletId) {
-        throw new Error("No wallet ID found. Please reconnect your wallet.");
       }
 
       setStatus({

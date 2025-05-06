@@ -1,9 +1,10 @@
 "use client";
 
-import { usePara } from "@/components/ParaProvider";
 import { useState, useEffect } from "react";
 import { PARA_TEST_TOKEN_CONTRACT_ADDRESS } from ".";
 import { formatEther, getContract, parseEther } from "viem";
+import { useParaSigner } from "@/components/ParaSignerProvider";
+import { useAccount } from "@getpara/react-sdk";
 
 const ERC20_ABI = [
   "function transfer(address to, uint256 amount) returns (bool)",
@@ -28,27 +29,28 @@ export default function TokenTransferDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { isConnected, walletId, address, walletClient, publicClient } = usePara();
+  const { data: account } = useAccount();
+  const { walletClient, publicClient, viemAccount } = useParaSigner();
+
+  const isConnected = account?.isConnected;
+  const address = viemAccount?.address;
 
   const fetchBalances = async () => {
     if (!address || !publicClient) return;
 
     setIsBalanceLoading(true);
     try {
-      // Fetch ETH balance
       const ethBalanceWei = await publicClient.getBalance({
         address: address,
       });
       setEthBalance(formatEther(ethBalanceWei));
 
-      // Fetch token balance
       const tokenContract = getContract({
         address: contractAddress as `0x${string}`,
         abi: ERC20_ABI,
         publicClient: publicClient!,
       });
 
-      const decimals = await tokenContract.read.decimals();
       const balance = await tokenContract.read.balanceOf([address]);
       const symbol = await tokenContract.read.symbol();
 
@@ -80,22 +82,15 @@ export default function TokenTransferDemo() {
         throw new Error("Please connect your wallet to send tokens.");
       }
 
-      if (!walletId) {
-        throw new Error("No wallet ID found. Please reconnect your wallet.");
-      }
-
-      // Validate address format
       if (!to.match(/^0x[a-fA-F0-9]{40}$/)) {
         throw new Error("Invalid recipient address format.");
       }
 
-      // Validate amount
       const amountFloat = parseFloat(amount);
       if (isNaN(amountFloat) || amountFloat <= 0) {
         throw new Error("Please enter a valid amount greater than 0.");
       }
 
-      // Create contract instance with both clients
       const tokenContract = getContract({
         address: contractAddress as `0x${string}`,
         abi: ERC20_ABI,
@@ -134,7 +129,6 @@ export default function TokenTransferDemo() {
         message: "Tokens transferred successfully!",
       });
 
-      // Refresh balances after confirmed transaction
       await fetchBalances();
 
       setTo("");
@@ -249,7 +243,7 @@ export default function TokenTransferDemo() {
               placeholder="0x..."
               required
               disabled={isLoading}
-              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
           </div>
 
@@ -267,7 +261,7 @@ export default function TokenTransferDemo() {
               placeholder="0x..."
               required
               disabled={isLoading}
-              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
           </div>
 
@@ -286,7 +280,7 @@ export default function TokenTransferDemo() {
               step="0.01"
               required
               disabled={isLoading}
-              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
           </div>
 
