@@ -1,0 +1,34 @@
+{
+  "name": "connector-wagmi-vue",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@getpara/react-sdk": "1.12.0",
+    "@getpara/wagmi-v2-integration": "1.12.0",
+    "@tanstack/vue-query": "^5.74.3",
+    "@wagmi/vue": "^0.1.15",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "viem": "2.x",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "4.0.6",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "@vitejs/plugin-react": "^4.3.4",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "@vue/tsconfig": "^0.7.0",
+    "tailwindcss": "4.0.6",
+    "typescript": "~5.7.2",
+    "vite": "^6.1.0",
+    "vite-plugin-node-polyfills": "0.23.0",
+    "vue-tsc": "^2.2.0"
+  }
+}

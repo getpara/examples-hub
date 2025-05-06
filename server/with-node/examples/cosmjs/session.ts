@@ -2,28 +2,25 @@ import type { NextFunction, Request, Response } from "express";
 import { Para as ParaServer, Environment } from "@getpara/server-sdk";
 import { SigningStargateClient } from "@cosmjs/stargate";
 import type { StdFee, Coin, MsgSendEncodeObject } from "@cosmjs/stargate";
-import { MsgSend } from "cosmjs-types/cosmos/bank/v1beta1/tx";
 import { ParaProtoSigner } from "@getpara/cosmjs-v0-integration";
 
 export async function cosmjsSessionSignHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { session } = req.body as { session?: string };
+    const session = req.body.session as string | undefined;
+
     if (!session) {
-      res
-        .status(400)
-        .send(
-          "Provide `session` in the request body. This session should be previously exported from the client side."
-        );
+      res.status(400).send("Provide `session` in the request body.");
       return;
     }
 
-    const PARA_API_KEY = process.env.PARA_API_KEY;
-    if (!PARA_API_KEY) {
-      res.status(500).send("Set PARA_API_KEY in the environment before using this handler.");
+    const paraApiKey = process.env.PARA_API_KEY;
+    if (!paraApiKey) {
+      res.status(500).send("PARA_API_KEY is not set.");
       return;
     }
 
-    const para = new ParaServer(Environment.BETA, PARA_API_KEY);
+    const env = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
+    const para = new ParaServer(env, paraApiKey);
     await para.importSession(session);
 
     const paraProtoSigner = new ParaProtoSigner(para, "cosmos");
@@ -39,13 +36,13 @@ export async function cosmjsSessionSignHandler(req: Request, res: Response, next
       denom: "uatom",
       amount: "1000",
     };
-
     const fee: StdFee = {
       amount: [{ denom: "uatom", amount: "500" }],
       gas: "200000",
     };
+    const memo = "Signed with Para";
 
-    const message: MsgSend = {
+    const message = {
       fromAddress,
       toAddress,
       amount: [amount],
@@ -56,9 +53,7 @@ export async function cosmjsSessionSignHandler(req: Request, res: Response, next
       value: message,
     };
 
-    const memo = "Signed with Para";
-
-    const signResult = await stargateClient.sign(fromAddress, [demoTxMessage], fee, memo);
+    const signResult = await stargateClient.signAndBroadcast(fromAddress, [demoTxMessage], fee, memo);
 
     res.status(200).json({
       message: "Transaction signed using CosmJS + Para (session-based wallet).",

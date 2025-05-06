@@ -1,20 +1,13 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthLayout, ExternalWallet, ParaProvider } from "@getpara/react-sdk";
+import { ExternalWallet, ParaProvider } from "@getpara/react-sdk";
 import { API_KEY, ENVIRONMENT } from "@/constants";
-import { cosmoshub } from "@getpara/graz/chains";
+import { cosmoshub, osmosis, noble } from "graz/chains";
 
 const queryClient = new QueryClient();
 
-// Example chain config for Cosmos Hub; you can add more as needed.
-const cosmosChains = [
-  {
-    ...cosmoshub,
-    rpc: "https://rpc.cosmos.directory/cosmoshub",
-    rest: "https://rest.cosmos.directory/cosmoshub",
-  },
-];
+const cosmosChains = [cosmoshub, osmosis, noble];
 
 export function Providers({
   children,
@@ -46,7 +39,7 @@ export function Providers({
         paraModalConfig={{
           disableEmailLogin: false,
           disablePhoneLogin: false,
-          authLayout: [AuthLayout.EXTERNAL_FULL],
+          authLayout: ["EXTERNAL:FULL"],
           onRampTestMode: true,
           theme: {
             foregroundColor: "#2D3648",
@@ -62,8 +55,7 @@ export function Providers({
           logo: "/para.svg",
           recoverySecretStepEnabled: true,
           twoFactorAuthEnabled: false,
-        }}
-      >
+        }}>
         {children}
       </ParaProvider>
     </QueryClientProvider>

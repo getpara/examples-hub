@@ -27,52 +27,12 @@ Ensure that you configure the \***\*`.env`\*\*** file using \***\*`.env.example`
 The server starts on port `8000`, and the following routes are available for interacting with the wallet functionality.
 Each route requires an `email` in the body of the request.
 
+#### Example Requests
+
 - **Create Wallet**
 
   ```bash
   curl -X POST http://localhost:8000/wallets/create -H "Content-Type: application/json" -d '{"email": "user@example.com"}'
-  ```
-
-- **Sign with Para Pre-Generated Wallet**
-
-  ```bash
-  curl -X POST http://localhost:8000/wallets/sign/paraPreGen -H "Content-Type: application/json" -d '{"email": "user@example.com"}'
-  ```
-
-- **Sign with Para Session**
-
-  ```bash
-  curl -X POST http://localhost:8000/wallets/sign/paraSession -H "Content-Type: application/json" -d '{"email": "user@example.com"}'
-  ```
-
-- **Sign with Ethers**
-
-  ```bash
-  curl -X POST http://localhost:8000/wallets/sign/ethers -H "Content-Type: application/json" -d '{"email": "user@example.com"}'
-  ```
-
-- **Sign with Viem**
-
-  ```bash
-  curl -X POST http://localhost:8000/wallets/sign/viem -H "Content-Type: application/json" -d '{"email": "user@example.com"}'
-  ```
-
-- **Sign with CosmJS**
-
-  ```bash
-  curl -X POST http://localhost:8000/wallets/sign/cosmjs -H "Content-Type: application/json" -d '{"email": "user@example.com"}'
-  ```
-
-- **Sign with Solana Web3**
-
-  ```bash
-  curl -X POST http://localhost:8000/wallets/sign/solana-web3 -H "Content-Type: application/json" -d '{"email": "user@example.com"}'
-  ```
-
-- **Sign with Alchemy**
-
-  ```bash
-  curl -X POST http://localhost:8000/wallets/sign/alchemy -H "Content-Type: application/json" -d '{"email": "user@example.com"}'
   ```
 
 For more details, visit the [Para SDK documentation](https://docs.usepara.com/welcome).

@@ -154,10 +154,16 @@ struct PhoneAuthView: View {
                     case .needsVerification:
                         // User needs to verify phone number
                         shouldNavigateToVerifyPhoneView = true
+<<<<<<< HEAD:mobile/with-swift/example/Features/Auth/Phone/PhoneAuthView.swift
                         
                     case .error:
                         // Error occurred
                         errorMessage = result.errorMessage
+=======
+                    } catch {
+                        errorMessage = String(describing: error)
+                        isLoading = false
+>>>>>>> main:mobile/with-swift/example/Auth/PhoneAuthView.swift
                     }
                 }
             } label: {

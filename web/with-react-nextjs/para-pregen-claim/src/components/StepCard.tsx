@@ -21,7 +21,7 @@ export function StepCard({
   children,
 }: StepCardProps) {
   return (
-    <div className="flex flex-col w-full max-w-md p-4 border rounded border-gray-300 gap-2">
+    <div className="flex flex-col w-full max-w-md p-4 border rounded-sm border-gray-300 gap-2">
       <div className="flex items-center">
         <div
           className={`w-8 h-8 flex items-center justify-center rounded-full text-white ${

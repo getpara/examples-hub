@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { para } from "@/client/para";
-import { AuthStateSignup, formatPhoneNumber, WalletType } from "@getpara/web-sdk";
+import { formatPhoneNumber } from "@getpara/web-sdk";
 import { PhoneInput } from "@/components/PhoneInput";
 import { OTPInput } from "@/components/OTPInput";
 import { AuthButton } from "@/components/AuthButton";
@@ -22,112 +22,109 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [wallet, setWallet] = useState<string>("");
   const [error, setError] = useState<string>("");
+
   const popupWindow = useRef<Window | null>(null);
 
   const openPopup = (...args: Parameters<typeof window.open>) => {
-    if (popupWindow.current) {
-      popupWindow.current.close();
-    }
+    popupWindow.current?.close();
+    return (popupWindow.current = window?.open(...args));
+  };
 
-    popupWindow.current = window?.open(...args);
-
-    return popupWindow.current;
-  }
-
-  const handleCheckIfAuthenticated = async () => {
-    setIsLoading(true);
-    setError("");
-    try {
-      const isAuthenticated = await para.isFullyLoggedIn();
-      if (isAuthenticated) {
-        const wallets = Object.values(await para.getWallets());
-        if (wallets?.length) {
-          setWallet(wallets[0].address || "unknown");
-        }
-        setStep(Steps.COMPLETE);
-      }
-    } catch (err: any) {
-      setError(err.message || "An error occurred during authentication");
-    }
-    setIsLoading(false);
+  const getFirstWalletAddress = async (): Promise<string> => {
+    const wallets = Object.values(await para.getWallets());
+    return wallets?.[0]?.address || "unknown";
   };
 
   useEffect(() => {
-    handleCheckIfAuthenticated();
+    const checkAuthentication = async () => {
+      setIsLoading(true);
+      setError("");
+
+      try {
+        const isAuthenticated = await para.isFullyLoggedIn();
+        if (isAuthenticated) {
+          setWallet(await getFirstWalletAddress());
+          setStep(Steps.COMPLETE);
+        }
+      } catch (err: any) {
+        setError(err.message || "Authentication check failed");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuthentication();
   }, []);
 
   const handleAuthenticateUser = async () => {
     setIsLoading(true);
     setError("");
+
     try {
-      const authState = await para.signUpOrLogInV2({ auth: { phone: formatPhoneNumber(phoneNumber, countryCode) }});
+      const formattedPhoneNumber = formatPhoneNumber(phoneNumber, countryCode);
 
-      switch (authState.stage) {
-        case 'verify':
-          setStep(Steps.VERIFY);
-          break;
-  
-        case 'login': {
-          const { passkeyUrl } = authState;
+      if (!formattedPhoneNumber) {
+        setError("Invalid phone number");
+        return;
+      }
 
-          openPopup(passkeyUrl, "loginPopup", "popup=true");
+      const authState = await para.signUpOrLogIn({
+        auth: { phone: formattedPhoneNumber },
+      });
 
-          const { needsWallet } = await para.waitForLogin({
-            isCanceled: () => popupWindow.closed,
+      if (authState.stage === "verify") {
+        setStep(Steps.VERIFY);
+        return;
+      }
+
+      if (authState.stage === "login") {
+        openPopup(authState.passkeyUrl, "loginPopup", "popup=true");
+
+        const { needsWallet } = await para.waitForLogin({
+          isCanceled: () => Boolean(popupWindow.current?.closed),
+        });
+
+        if (needsWallet) {
+          await para.createWallet({
+            type: "EVM",
+            skipDistribute: false,
           });
-
-          if (needsWallet) {
-            await para.createWallet({ type: WalletType.EVM, skipDistribute: false });
-          }
-
-          const wallets = Object.values(await para.getWallets());
-          if (wallets?.length) {
-            setWallet(wallets[0].address || "unknown");
-          }
-
-          setStep(Steps.COMPLETE);
         }
-        break;
+
+        setWallet(await getFirstWalletAddress());
+        setStep(Steps.COMPLETE);
       }
     } catch (err: any) {
-      setError(err.message || "An error occurred during authentication");
+      setError(err.message || "Authentication failed");
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const handleVerifyAndCreateWallet = async () => {
     setIsLoading(true);
     setError("");
 
-    let authState: AuthStateSignup;
-
     try {
-      authState = await para.verifyNewAccount({ verificationCode });
-    } catch (e) {
-      setError("Verification code incorrect or expired");
-      setIsLoading(false);
-      return;
-    }
+      const authState = await para.verifyNewAccount({ verificationCode });
 
-    openPopup(authState.passkeyUrl, "signUpPopup", "popup=true");
+      openPopup(authState.passkeyUrl, "signUpPopup", "popup=true");
 
-    try {
-    await para.waitForWalletCreation({
-        isCanceled: () => popupWindow.current?.closed,
-      })
+      await para.waitForWalletCreation({
+        isCanceled: () => Boolean(popupWindow.current?.closed),
+      });
 
-      const wallets = Object.values(await para.getWallets());
-
-      if (wallets?.length) {
-        setWallet(wallets[0].address || "unknown");
-      }
-
-      setStep(2);
+      setWallet(await getFirstWalletAddress());
+      setStep(Steps.COMPLETE);
     } catch (err: any) {
-      setError(err.message || "An error occurred during verification");
+      setError(
+        err.message === "Invalid verification code"
+          ? "Verification code incorrect or expired"
+          : err.message || "Verification failed"
+      );
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   return (

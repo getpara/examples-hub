@@ -60,16 +60,16 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
 
 SPEC CHECKSUMS:
-  app_links: 3da4c36b46cac3bf24eb897f1a6ce80bda109874
+  app_links: e7a6750a915a9e161c58d91bc610e8cd1d4d0ad0
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  flutter_inappwebview_ios: b89ba3482b96fb25e00c967aae065701b66e9b99
-  flutter_web_auth_2: 5c8d9dcd7848b5a9efb086d24e7a9adcae979c80
+  flutter_inappwebview_ios: 6f63631e2c62a7c350263b13fa5427aedefe81d4
+  flutter_web_auth_2: 06d500582775790a0d4c323222fcb6d7990f9603
   OrderedSet: e539b66b644ff081c73a262d24ad552a69be3a94
-  package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
-  passkeys_ios: 939d7d44f825048c8dffd4644f52444164c80ecd
-  path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
-  ua_client_hints: 0b48eae1134283f5b131ee0871fa878377f07a01
-  url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
+  package_info_plus: c0502532a26c7662a62a356cebe2692ec5fe4ec4
+  passkeys_ios: fdae8c06e2178a9fcb9261a6cb21fb9a06a81d53
+  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
+  ua_client_hints: 46bb5817a868f9e397c0ba7e3f2f5c5d90c35156
+  url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
 
 PODFILE CHECKSUM: 819463e6a0290f5a72f145ba7cde16e8b6ef0796
 

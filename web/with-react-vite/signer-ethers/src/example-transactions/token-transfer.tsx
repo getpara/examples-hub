@@ -50,7 +50,6 @@ export default function TokenTransferDemo() {
 
       // Fetch token balance
       const tokenContract = new Contract(contractAddress, ERC20_ABI, provider);
-      const decimals = await tokenContract.decimals();
       const balance = await tokenContract.balanceOf(address);
       const symbol = await tokenContract.symbol();
 
@@ -120,7 +119,7 @@ export default function TokenTransferDemo() {
       });
 
       // Wait for transaction to be mined
-      const receipt = await tx.wait();
+       await tx.wait();
       console.log("Transaction confirmed:", receipt);
 
       setStatus({

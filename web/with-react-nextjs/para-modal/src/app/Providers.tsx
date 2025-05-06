@@ -1,7 +1,7 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthLayout, OAuthMethod, ParaProvider } from "@getpara/react-sdk";
+import { ParaProvider } from "@getpara/react-sdk";
 import { API_KEY, ENVIRONMENT } from "@/constants";
 
 const queryClient = new QueryClient();
@@ -22,15 +22,8 @@ export function Providers({
         paraModalConfig={{
           disableEmailLogin: false,
           disablePhoneLogin: false,
-          authLayout: [AuthLayout.AUTH_FULL],
-          oAuthMethods: [
-            OAuthMethod.APPLE,
-            OAuthMethod.DISCORD,
-            OAuthMethod.FACEBOOK,
-            OAuthMethod.FARCASTER,
-            OAuthMethod.GOOGLE,
-            OAuthMethod.TWITTER,
-          ],
+          authLayout: ["AUTH:FULL"],
+          oAuthMethods: ["APPLE", "DISCORD", "FACEBOOK", "FARCASTER", "GOOGLE", "TWITTER"],
           onRampTestMode: true,
           theme: {
             foregroundColor: "#2D3648",
@@ -47,8 +40,7 @@ export function Providers({
           recoverySecretStepEnabled: true,
           twoFactorAuthEnabled: false,
           isGuestModeEnabled: true,
-        }}
-      >
+        }}>
         {children}
       </ParaProvider>
     </QueryClientProvider>

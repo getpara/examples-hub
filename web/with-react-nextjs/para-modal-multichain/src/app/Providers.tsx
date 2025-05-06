@@ -4,19 +4,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthLayout, ExternalWallet, ParaProvider } from "@getpara/react-sdk";
 import { API_KEY, ENVIRONMENT } from "@/constants";
 import { sepolia, celo, mainnet, polygon } from "wagmi/chains";
-import { cosmoshub } from "@getpara/graz/chains";
+import { cosmoshub, osmosis, noble } from "graz/chains";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { clusterApiUrl } from "@solana/web3.js";
 
 const queryClient = new QueryClient();
 
-const cosmosChains = [
-  {
-    ...cosmoshub,
-    rpc: "https://rpc.cosmos.directory/cosmoshub",
-    rest: "https://rest.cosmos.directory/cosmoshub",
-  },
-];
+const cosmosChains = [cosmoshub, osmosis, noble];
 
 const solanaNetwork = WalletAdapterNetwork.Devnet;
 const endpoint = clusterApiUrl(solanaNetwork);
@@ -47,7 +41,7 @@ export function Providers({
             ExternalWallet.PHANTOM,
             ExternalWallet.BACKPACK,
           ],
-          createLinkedEmbeddedForExternalWallets: [ExternalWallet.METAMASK],
+          walletsWithParaAuth: [ExternalWallet.METAMASK],
           evmConnector: {
             config: {
               chains: [mainnet, polygon, sepolia, celo],
@@ -68,10 +62,7 @@ export function Providers({
               endpoint,
               chain: solanaNetwork,
               appIdentity: {
-                uri:
-                  typeof window !== "undefined"
-                    ? `${window.location.protocol}//${window.location.host}`
-                    : "",
+                uri: typeof window !== "undefined" ? `${window.location.protocol}//${window.location.host}` : "",
               },
             },
           },
@@ -99,8 +90,7 @@ export function Providers({
           logo: "/para.svg",
           recoverySecretStepEnabled: true,
           twoFactorAuthEnabled: false,
-        }}
-      >
+        }}>
         {children}
       </ParaProvider>
     </QueryClientProvider>

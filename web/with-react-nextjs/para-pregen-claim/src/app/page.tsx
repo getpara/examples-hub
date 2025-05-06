@@ -68,34 +68,36 @@ export default function Home() {
       }
 
       // retrieve the userShare for the pregen wallet from the server
-      const retrievalResponse = await fetch(
-        `/api/wallet/retrieve?uuid=${pregenUuid}`
-      );
+      const retrievalResponse = await fetch(`/api/wallet/retrieve?uuid=${pregenUuid}`);
 
       const retrievalData = await retrievalResponse.json();
+
       if (!retrievalData.success) {
-        setClaimMessage(
-          retrievalData.error || "Failed to retrieve wallet data."
-        );
+        setClaimMessage(retrievalData.error || "Failed to retrieve wallet data.");
         setIsClaiming(false);
         return;
       }
 
       const { userShare, walletId } = retrievalData;
 
+      if (!userShare) {
+        setClaimMessage("No user share found.");
+        setIsClaiming(false);
+        return;
+      }
+
       await para?.setUserShare(userShare);
 
-
-      await para.claimPregenWalletsV2({
-        pregenId: { email: userEmail },
-      await para?.claimPregenWallets({
-        pregenIdentifier: userEmail,
-        pregenIdentifierType: "EMAIL",
+      await para.updatePregenWalletIdentifier({
+        walletId,
+        newPregenId: { email: userEmail },
       });
 
-      setClaimMessage(
-        "Claim successful! The wallet has been merged into your account."
-      );
+      await para.claimPregenWallets({
+        pregenId: { email: userEmail },
+      });
+
+      setClaimMessage("Claim successful! The wallet has been merged into your account.");
     } catch (e: any) {
       setClaimMessage(e.message || "Error while claiming");
     }
@@ -106,8 +108,7 @@ export default function Home() {
     <main className="flex flex-col items-center justify-center min-h-screen gap-6 p-8">
       <h1 className="text-2xl font-bold">Para Pregen Wallet Claim Demo</h1>
       <p className="max-w-md text-center">
-        A demonstration of generating and claiming pre-generated wallets using
-        Para.
+        A demonstration of generating and claiming pre-generated wallets using Para.
       </p>
       <div className="w-full flex flex-col items-center gap-6 mt-6">
         <StepCard
@@ -117,8 +118,7 @@ export default function Home() {
           buttonLabel={isGenerating ? "Generating..." : "Generate Wallet"}
           disabled={isGenerating || !!account?.isConnected}
           onClick={handleGeneratePregenWallet}
-          isComplete={!!pregenUuid}
-        >
+          isComplete={!!pregenUuid}>
           {pregenUuid && (
             <div className="text-sm mt-2">
               <p>UUID: {pregenUuid}</p>
@@ -142,20 +142,13 @@ export default function Home() {
           buttonLabel="Claim Wallet"
           disabled={!account?.isConnected || !pregenUuid || isClaiming}
           onClick={handleClaimPregenWallet}
-          isComplete={claimMessage.includes("Claim successful")}
-        >
+          isComplete={claimMessage.includes("Claim successful")}>
           {claimMessage && <p className="text-sm mt-2">{claimMessage}</p>}
         </StepCard>
-        <div className="mt-6">
-          {account?.isConnected ? (
-            <WalletDisplay walletAddress={wallet?.address} />
-          ) : null}
-        </div>
+        <div className="mt-6">{account?.isConnected ? <WalletDisplay walletAddress={wallet?.address} /> : null}</div>
       </div>
       {(error?.message || !!pregenError) && (
-        <p className="text-red-500 text-sm text-center mt-4">
-          {error?.message || pregenError}
-        </p>
+        <p className="text-red-500 text-sm text-center mt-4">{error?.message || pregenError}</p>
       )}
     </main>
   );

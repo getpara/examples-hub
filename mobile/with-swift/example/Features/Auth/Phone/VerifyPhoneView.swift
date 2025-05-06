@@ -72,6 +72,7 @@ struct VerifyPhoneView: View {
                     case .success:
                         // Authentication successful, navigate to home
                         appRootManager.currentRoot = .home
+<<<<<<< HEAD:mobile/with-swift/example/Features/Auth/Phone/VerifyPhoneView.swift
                         
                     case .needsVerification:
                         // This shouldn't happen when verification code is provided
@@ -80,6 +81,11 @@ struct VerifyPhoneView: View {
                     case .error:
                         // Error occurred
                         errorMessage = result.errorMessage
+=======
+                    } catch {
+                        isLoading = false
+                        errorMessage = String(describing: error)
+>>>>>>> main:mobile/with-swift/example/Auth/VerifyPhoneView.swift
                     }
                 }
             } label: {

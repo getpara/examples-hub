@@ -167,11 +167,16 @@
 			path = Utils;
 			sourceTree = "<group>";
 		};
+<<<<<<< HEAD
 		8FC8B8FC2D8B7AE10046C3DC /* UI */ = {
+=======
+		8FC8B8FC2D8B7AE10046C3DC /* Views */ = {
+>>>>>>> main
 			isa = PBXGroup;
 			children = (
 				8FC8B8FB2D8B7AE10046C3DC /* LaunchView.swift */,
 			);
+<<<<<<< HEAD
 			path = UI;
 			sourceTree = "<group>";
 		};
@@ -200,6 +205,9 @@
 				8FA0077D2D56ECDA009EF0C3 /* Wallet */,
 			);
 			path = Features;
+=======
+			path = Views;
+>>>>>>> main
 			sourceTree = "<group>";
 		};
 		E8F93B1F2C21EBED006AA3F6 = {
@@ -225,9 +233,13 @@
 		E8F93B2A2C21EBED006AA3F6 /* example */ = {
 			isa = PBXGroup;
 			children = (
+<<<<<<< HEAD
 				8FE94DE32DA9ACDA009CBD28 /* Features */,
 				8FE94DE22DA9AC31009CBD28 /* Core */,
 				8FC8B8FC2D8B7AE10046C3DC /* UI */,
+=======
+				8FC8B8FC2D8B7AE10046C3DC /* Views */,
+>>>>>>> main
 				8FA007892D58387F009EF0C3 /* Info.plist */,
 				E8F93B432C21ED67006AA3F6 /* example.entitlements */,
 				8FE94DE12DA9AC1E009CBD28 /* App */,

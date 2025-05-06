@@ -1,11 +1,21 @@
+<<<<<<< HEAD
+=======
+import { Routes, Route } from "react-router-dom";
+import { usePara } from "./components/ParaProvider";
+>>>>>>> main
 import { Card } from "./components/Card";
 import { transactionTypes } from "./example-transactions";
 import { useAccount, useModal } from "@getpara/react-sdk";
 import "@getpara/react-sdk/styles.css";
 
+<<<<<<< HEAD
 export default function Home() {
   const { openModal } = useModal();
   const { data: account } = useAccount();
+=======
+function HomePage() {
+  const { isConnected, openModal } = usePara();
+>>>>>>> main
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -36,11 +46,19 @@ export default function Home() {
             path={transaction.path}
           >
             <div>
+<<<<<<< HEAD
               {account?.isConnected ? (
                 <a
                   href={`/demo/${id}`}
                   className="inline-flex w-full items-center justify-center rounded-none bg-blue-900 px-4 py-2 text-sm font-medium text-white hover:bg-blue-950 transition-colors mt-auto"
                 >
+=======
+              {isConnected ? (
+                // Use the path from the config for the href
+                <a
+                  href={transaction.path}
+                  className="inline-flex w-full items-center justify-center rounded-none bg-blue-900 px-4 py-2 text-sm font-medium text-white hover:bg-blue-950 transition-colors mt-auto">
+>>>>>>> main
                   View Demo
                 </a>
               ) : (
@@ -56,5 +74,23 @@ export default function Home() {
         ))}
       </div>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route
+        path="/"
+        element={<HomePage />}
+      />
+      {Object.entries(transactionTypes).map(([id, config]) => (
+        <Route
+          key={id}
+          path={config.path}
+          element={<config.component />}
+        />
+      ))}
+    </Routes>
   );
 }

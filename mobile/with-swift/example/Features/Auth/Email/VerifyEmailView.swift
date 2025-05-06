@@ -70,6 +70,7 @@ struct VerifyEmailView: View {
                     case .success:
                         // Authentication successful, navigate to home
                         appRootManager.currentRoot = .home
+<<<<<<< HEAD:mobile/with-swift/example/Features/Auth/Email/VerifyEmailView.swift
                         
                     case .needsVerification:
                         // This shouldn't happen when verification code is provided
@@ -78,6 +79,11 @@ struct VerifyEmailView: View {
                     case .error:
                         // Error occurred
                         errorMessage = result.errorMessage
+=======
+                    } catch {
+                        isLoading = false
+                        errorMessage = String(describing: error)
+>>>>>>> main:mobile/with-swift/example/Auth/VerifyEmailView.swift
                     }
                 }
             } label: {

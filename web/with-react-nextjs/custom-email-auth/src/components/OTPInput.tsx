@@ -81,7 +81,7 @@ export const OTPInput: React.FC<OTPInputProps> = ({
             onKeyDown={(e) => handleKeyDown(index, e)}
             onPaste={handlePaste}
             disabled={disabled}
-            className="w-12 h-12 text-center border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
+            className="w-12 h-12 text-center border border-gray-300 rounded-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
             autoComplete="off"
           />
         ))}

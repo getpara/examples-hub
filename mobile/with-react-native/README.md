@@ -1,35 +1,21 @@
 # Para React Native Example
 
-This repository demonstrates the integration of the [Para SDK](https://docs.getpara.com/) with a **vanilla React Native** application for iOS and Android platforms. The example showcases these essential features:
+This example showcases integrating the Para SDK into a vanilla React Native application for iOS and Android. It
+demonstrates key features like email and phone passkey authentication, multi-chain wallet management (EVM, Cosmos,
+Solana), and transaction signing using common libraries (Ethers, Viem, CosmJS, Solana Web3.js). Use this as a foundation
+for building your React Native app with Para.
 
-- **Authentication** through Email or Phone using passkey-based verification
-- **Wallet creation** and management supporting EVM, Cosmos, and Solana networks
-- **Transaction signing** implemented with various blockchain libraries ([Ethers](https://docs.ethers.org/), [Viem](https://viem.sh/), [CosmJS](https://cosmos.github.io/cosmjs/), and [Solana Web3.js](https://solana-labs.github.io/solana-web3.js/))
+## Key Files/Folders
 
-> **Important**: This example uses a placeholder **bundle identifier** and **package name** (e.g., `com.getpara.example.reactnative`). For iOS passkey functionality, you must possess a valid Apple Developer Team ID associated with your chosen bundle ID. See the [iOS Setup](#ios-setup) section for detailed instructions.
-
----
-
-## Table of Contents
-
-- [Prerequisites](#prerequisites)
-- [Project Structure](#project-structure)
-- [Installation & Setup](#installation--setup)
-  - [.env File](#env-file)
-  - [iOS Setup](#ios-setup)
-  - [Android Setup](#android-setup)
-- [Key Features](#key-features)
-  - [Authentication (Email & Phone)](#authentication-email--phone)
-  - [Wallet Creation & Querying](#wallet-creation--querying)
-  - [Transaction Signing](#transaction-signing)
-- [Running the Example](#running-the-example)
-- [Documentation](#documentation)
-- [Troubleshooting](#troubleshooting)
-
----
+- `app/auth/`: Contains email and phone authentication flows.
+- `app/sign/`: Examples for signing transactions on EVM, Cosmos, and Solana.
+- `client/para.ts`: Para SDK client initialization.
+- `.env.example`: Template for environment variables.
+- `metro.config.js`: Required bundler configuration for polyfills.
 
 ## Prerequisites
 
+<<<<<<< HEAD
 Before beginning, ensure you have:
 
 1. **React Native CLI** development environment properly configured with:
@@ -143,84 +129,49 @@ For custom package names:
 
   ```ts
   await para.createWallet(type, false);
+=======
+- **React Native CLI Environment**: Ensure your development setup for React Native (including Xcode for iOS and/or
+  Android Studio for Android) is complete.
+- **Para API Key**: Obtain your API key from [developer.getpara.com](https://developer.getpara.com). Create a `.env`
+  file in the project root and add your key:
+  ```
+  PARA_API_KEY=your_api_key_here
+>>>>>>> main
   ```
 
-  This creates a single wallet of the specified type. Ensure the type matches your developer portal enabled wallet types.
+## Installation
 
-- **Create All Supported Wallets**: Generate wallets for all enabled types simultaneously:
-
-  ```ts
-  await para.createWalletPerType();
-  ```
-
-- **Query Wallets by Type**: Retrieve wallets filtered by type:
-
-  ```ts
-  const wallet = para.getWalletsByType(WalletType.EVM)[0];
-  ```
-
-  This approach is recommended for network-specific wallet queries.
-
-- **Query All Wallets**: Retrieve all wallets regardless of type:
-
-  ```ts
-  const wallets = para.getWallets();
-  ```
-
-### Transaction Signing
-
-Each blockchain network utilizes its own web3 library for blockchain interactions. The Para SDK wraps these libraries' signing processes, maintaining their familiar interfaces while handling signing operations internally. Once configured, the signer object functions identically to native library implementations.
-
-- **with-evm**: Shows EVM transaction execution using [Ethers](https://docs.ethers.io/) or [Viem](https://viem.sh/)
-- **with-cosmos**: Demonstrates Cosmos transaction signing using [CosmJS](https://cosmos.github.io/cosmjs/)
-- **with-solana**: Implements Solana transactions using [Solana Web3.js](https://solana-labs.github.io/solana-web3.js/)
-
-> **Note**: These libraries maintain consistent behavior between React Native and Web environments. Refer to our Integration Guides documentation for detailed library usage instructions.
-
----
+1.  Install Node.js dependencies:
+    ```bash
+    npm install
+    # or
+    yarn install
+    ```
+2.  Install iOS dependencies (if developing for iOS):
+    ```bash
+    cd ios
+    bundle install
+    bundle exec pod install
+    cd ..
+    ```
 
 ## Running the Example
 
-1. **Configure** your `.env` file with a valid `PARA_API_KEY`
-2. **Install** all dependencies via `npm install` or `yarn install`
-3. **(iOS only)** Inside the `ios/` folder, run:
-   ```bash
-   bundle install
-   bundle exec pod install
-   ```
-4. **Launch** the Metro bundler in a separate terminal:
-   ```bash
-   npx react-native start
-   ```
-5. **Run** the application:
-   ```bash
-   # For Android
-   npx react-native run-android
-   
-   # For iOS
-   npx react-native run-ios
-   ```
-6. **Test** the authentication flows (Email & Phone) and signing capabilities (EVM, Cosmos, Solana)
+1.  Start the Metro bundler in a separate terminal:
+    ```bash
+    npx react-native start
+    ```
+2.  Run the application on your target platform:
 
-## Documentation
+    ```bash
+    # For Android
+    npx react-native run-android
 
-For comprehensive guidance on Para SDK implementation in React Native, consult:
+    # For iOS
+    npx react-native run-ios
+    ```
 
-- [Para Docs: React Native Setup](https://docs.getpara.com/getting-started/initial-setup/react-native)
-- [Example code in this repo](https://github.com/para-org/examples-hub)
+## Learn More
 
----
-
-## Troubleshooting
-
-Common issues and solutions:
-
-- **Native Module Missing**: Verify proper iOS pod installation and native module version compatibility
-- **Passkey Domain Issues**: Allow up to 24 hours for domain association; iOS requires valid Team ID and bundle ID
-- **API Key Recognition**: Verify your environment variable configuration and `.env` file setup
-- **Android Signature Mismatch**: Confirm your SHA-256 fingerprint matches your keystore configuration
-- **Dependency Conflicts**: Run `npx react-native doctor` to identify version incompatibilities
-- **Creation Options Unavailable**: Verify device security requirements (screen lock, biometrics) and Google account status for Android
-- **Invalid API Key**: Confirm `.env` configuration and API key validity with correct Para client Environment
-- **Incorrect Wallet Display**: Verify wallet enablement in your developer portal
-- **Missing Method Errors**: Ensure `@getpara/react-native-wallet/dist/shim` polyfill import appears first in your entry file
+For more detailed information on usage and configuration, please refer to the
+[Para Documentation](https://docs.getpara.com/).

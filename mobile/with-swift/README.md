@@ -1,6 +1,11 @@
 # Para Swift SDK Example App
 
+<<<<<<< HEAD
 This directory contains an example iOS application demonstrating the integration and usage of the [Para Swift SDK](https://github.com/getpara/swift-sdk).
+=======
+A simple example app demonstrating Para Swift SDK integration. For detailed setup instructions, see the
+[official Para documentation](https://docs.getpara.com/).
+>>>>>>> main
 
 ## Features Demonstrated
 
@@ -26,6 +31,7 @@ This directory contains an example iOS application demonstrating the integration
   - Sending transactions (`sendTransaction` using `EVMTransaction`).
 - **UI:** Basic SwiftUI views for authentication and wallet interaction.
 
+<<<<<<< HEAD
 ## Setup Instructions
 
 1.  **Clone the Repository:**
@@ -34,10 +40,32 @@ This directory contains an example iOS application demonstrating the integration
     git clone https://github.com/getpara/examples-hub.git
     cd examples-hub/mobile/with-swift
     ```
+=======
+Required variables:
+
+```
+PARA_API_KEY=your_api_key_here    # Your Para API key
+PARA_ENVIRONMENT=beta             # Options: "dev", "sandbox", "beta", "prod"
+```
+
+Optional variables:
+
+```
+PARA_RPC_URL                     # Custom RPC URL for EVM operations (defaults to Sepolia testnet)
+```
+
+Development-only variables (when PARA_ENVIRONMENT=dev):
+
+```
+PARA_DEV_RELYING_PARTY_ID        # Custom relying party ID for dev environment
+PARA_DEV_JS_BRIDGE_URL           # Custom JS bridge URL for dev environment
+```
+>>>>>>> main
 
 2.  **Configure Environment Variables:**
     This project uses environment variables for configuration. You need to set these in your Xcode scheme:
 
+<<<<<<< HEAD
     - Go to **Product** -> **Scheme** -> **Edit Scheme...**
     - Select the **Run** phase in the left sidebar.
     - Go to the **Arguments** tab.
@@ -108,3 +136,18 @@ This directory contains an example iOS application demonstrating the integration
 - **Deep Link Handling:** `.onOpenURL` in `ExampleApp.swift` directs URLs to `MetaMaskConnector`.
 - **EVM Operations:** `Features/Wallet/EVMWalletView.swift` uses `ParaEvmSigner` for signing/sending and `web3swift` for balance fetching.
 - **MetaMask Operations:** `Features/Auth/MetaMaskDemoView.swift` uses `MetaMaskConnector` for signing and sending transactions.
+=======
+## Features
+
+- User authentication with passkeys
+- Wallet management
+- EVM signing (using Sepolia testnet)
+
+## Beta Testing Credentials
+
+When using the `beta` environment:
+
+- Email: any address ending in `@test.getpara.com` (e.g. dev@test.getpara.com)
+- Phone: US numbers (+1) in format `(area code)-555-xxxx` (e.g. (425)-555-1234)
+- Any OTP code will work for verification
+>>>>>>> main

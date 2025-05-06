@@ -24,21 +24,14 @@ export function Providers({
           env: ENVIRONMENT,
         }}
         externalWalletConfig={{
-          wallets: [
-            ExternalWallet.GLOW,
-            ExternalWallet.PHANTOM,
-            ExternalWallet.BACKPACK,
-          ],
-          createLinkedEmbeddedForExternalWallets: [ExternalWallet.GLOW],
+          wallets: [ExternalWallet.GLOW, ExternalWallet.PHANTOM, ExternalWallet.BACKPACK],
+          walletsWithParaAuth: [ExternalWallet.GLOW],
           solanaConnector: {
             config: {
               endpoint,
               chain: solanaNetwork,
               appIdentity: {
-                uri:
-                  typeof window !== "undefined"
-                    ? `${window.location.protocol}//${window.location.host}`
-                    : "",
+                uri: typeof window !== "undefined" ? `${window.location.protocol}//${window.location.host}` : "",
               },
             },
           },
@@ -66,8 +59,7 @@ export function Providers({
           logo: "/para.svg",
           recoverySecretStepEnabled: true,
           twoFactorAuthEnabled: false,
-        }}
-      >
+        }}>
         {children}
       </ParaProvider>
     </QueryClientProvider>

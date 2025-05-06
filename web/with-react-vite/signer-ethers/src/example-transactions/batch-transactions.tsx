@@ -138,7 +138,7 @@ export default function BatchedTransactionDemo() {
       });
 
       // Wait for transaction to be mined
-      const receipt = await tx.wait();
+       await tx.wait();
       console.log("Transaction confirmed:", receipt);
 
       setStatus({
