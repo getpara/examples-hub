@@ -13,8 +13,7 @@ class ParaExternalWalletExample extends StatefulWidget {
   const ParaExternalWalletExample({super.key});
 
   @override
-  State<ParaExternalWalletExample> createState() =>
-      _ParaExternalWalletExampleState();
+  State<ParaExternalWalletExample> createState() => _ParaExternalWalletExampleState();
 }
 
 class _ParaExternalWalletExampleState extends State<ParaExternalWalletExample> {
@@ -29,8 +28,7 @@ class _ParaExternalWalletExampleState extends State<ParaExternalWalletExample> {
     super.initState();
   }
 
-  Future<void> _handleExternalWalletLogin(
-      ExternalWalletProvider provider) async {
+  Future<void> _handleExternalWalletLogin(ExternalWalletProvider provider) async {
     if (!mounted) return;
 
     setState(() {
@@ -84,8 +82,7 @@ class _ParaExternalWalletExampleState extends State<ParaExternalWalletExample> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: ElevatedButton(
-        onPressed:
-            _isLoading ? null : () => _handleExternalWalletLogin(provider),
+        onPressed: _isLoading ? null : () => _handleExternalWalletLogin(provider),
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor,
           foregroundColor: textColor,

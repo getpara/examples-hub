@@ -24,9 +24,7 @@ class DemoMetaMaskState extends State<DemoMetaMask> {
       gasPrice: EtherAmount.inWei(BigInt.from(1000000000)),
     );
 
-    metamaskConnector
-        .sendTransaction(transaction, metamaskConnector.accounts.first)
-        .then((onValue) {
+    metamaskConnector.sendTransaction(transaction, metamaskConnector.accounts.first).then((onValue) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -37,10 +35,7 @@ class DemoMetaMaskState extends State<DemoMetaMask> {
   }
 
   void _signMessage() {
-    metamaskConnector
-        .signMessage(
-            "Message to sign! Hello World", metamaskConnector.accounts.first)
-        .then((onValue) {
+    metamaskConnector.signMessage("Message to sign! Hello World", metamaskConnector.accounts.first).then((onValue) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

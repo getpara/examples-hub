@@ -2,7 +2,6 @@
 // ignore_for_file: unused_field, unused_local_variable, use_build_context_synchronously
 
 import 'dart:async'; // Keep for Future and async operations
-import 'dart:ui'; // Added for VoidCallback
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart'; // Added import
 
@@ -33,7 +32,7 @@ class MyAuthBrowser extends InAppBrowser {
 
   @override
   Future<void> onLoadStop(Uri? url) async {
-    logCallback("Browser onLoadStop: ${url?.toString() ?? 'null'}");
+    logCallback("Browser onLoadStop: ${url ?? '''null'''}");
     if (url?.scheme == callbackScheme) {
       logCallback("Callback URL detected!");
       if (!completer.isCompleted) {
@@ -140,7 +139,11 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
   }
 
   void _log(String message, {bool isWarning = false}) {
-    debugPrint('ParaEmailExample: ${isWarning ? "WARNING: " : ""}$message');
+    String prefix = 'ParaEmailExample: ';
+    if (isWarning) {
+      prefix += 'WARNING: ';
+    }
+    debugPrint(prefix + message);
   }
 
   // --- Helper to add callback URL ---
@@ -148,7 +151,7 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
     final uri = Uri.parse(originalUrl);
     final queryParams = Map<String, String>.from(uri.queryParameters);
     // Add the nativeCallbackUrl parameter expected by the web app
-    queryParams['nativeCallbackUrl'] = '$_callbackScheme';
+    queryParams['nativeCallbackUrl'] = _callbackScheme;
     return uri.replace(queryParameters: queryParams);
   }
 
@@ -174,11 +177,14 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
       _log("Opening browser with URL: $finalUrl");
       await myAuthBrowser.openUrlRequest(
         urlRequest: URLRequest(url: WebUri.uri(finalUrl)),
-        options: InAppBrowserClassOptions(
-          crossPlatform: InAppBrowserOptions(),
-          ios: IOSInAppBrowserOptions(
-            presentationStyle: IOSUIModalPresentationStyle.PAGE_SHEET,
+        settings: InAppBrowserClassSettings(
+          browserSettings: InAppBrowserSettings(
+            presentationStyle: ModalPresentationStyle.PAGE_SHEET,
           ),
+          webViewSettings: InAppWebViewSettings(
+              // Add any webview specific settings if needed, e.g.:
+              // javaScriptEnabled: true,
+              ),
         ),
       );
       browserOpenedSuccessfully = true;
@@ -199,9 +205,7 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
 
     // The result directly reflects if the flow completed via callback,
     // using the flag set within MyAuthBrowser instance
-    return browserOpenedSuccessfully &&
-        result &&
-        myAuthBrowser.flowCompletedViaCallback;
+    return browserOpenedSuccessfully && result && myAuthBrowser.flowCompletedViaCallback;
   }
 
   Future<void> _handleEmailAuth() async {
@@ -233,14 +237,12 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
               false;
 
           if (verificationSuccess) {
-            _log(
-                "OTP Verification successful, flow continues in ChooseSignupMethod.");
+            _log("OTP Verification successful, flow continues in ChooseSignupMethod.");
           } else {
             _log("OTP Verification failed or was cancelled.");
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Verification failed or cancelled.')),
+                const SnackBar(content: Text('Verification failed or cancelled.')),
               );
             }
           }
@@ -252,12 +254,10 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
           if (authState.passwordUrl != null) {
             _log("Password login available. Launching web view...");
             // --- Launch Password Web View and wait for callback ---
-            final bool loginSuccess =
-                await _launchPasswordWebView(authState.passwordUrl!);
+            final bool loginSuccess = await _launchPasswordWebView(authState.passwordUrl!);
 
             if (loginSuccess) {
-              _log(
-                  "Password flow successful via callback. Verifying login status...");
+              _log("Password flow successful via callback. Verifying login status...");
               // Short delay might be needed for backend session propagation
               await Future.delayed(const Duration(milliseconds: 500));
               bool loggedIn = await para.isFullyLoggedIn();
@@ -273,32 +273,25 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
                   );
                 }
               } else {
-                _log("Login status check failed after password callback.",
-                    isWarning: true);
+                _log("Login status check failed after password callback.", isWarning: true);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text(
-                            'Login verification failed after password entry.')),
+                    const SnackBar(content: Text('Login verification failed after password entry.')),
                   );
                 }
               }
             } else {
-              _log(
-                  "Password flow did not complete successfully (closed without callback).");
+              _log("Password flow did not complete successfully (closed without callback).");
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('Password login cancelled or failed.')),
+                  const SnackBar(content: Text('Password login cancelled or failed.')),
                 );
               }
             }
-          } else if (authState.passkeyUrl != null ||
-              authState.passkeyKnownDeviceUrl != null) {
+          } else if (authState.passkeyUrl != null || authState.passkeyKnownDeviceUrl != null) {
             _log("Password URL not found, attempting passkey login.");
             try {
-              final wallet = await para.loginWithPasskey(
-                  authInfo: EmailAuthInfo(email: email));
+              final wallet = await para.loginWithPasskey(authInfo: EmailAuthInfo(email: email));
               _log("Passkey login successful.");
               _updateWalletState(wallet);
               if (mounted) {
@@ -311,29 +304,25 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
               _log("Passkey login failed: $passkeyError", isWarning: true);
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                      content: Text('Passkey login failed: $passkeyError')),
+                  SnackBar(content: Text('Passkey login failed: $passkeyError')),
                 );
               }
             }
           } else {
-            _log("No password URL or passkey options found in AuthState.",
-                isWarning: true);
+            _log("No password URL or passkey options found in AuthState.", isWarning: true);
             throw Exception("No available login methods found for this user.");
           }
           break;
 
         case AuthStage.signup:
-          _log("Received unexpected 'signup' stage from auth flow",
-              isWarning: true);
-          throw Exception(
-              "Unexpected authentication stage: signup received directly from auth flow");
+          _log("Received unexpected 'signup' stage from auth flow", isWarning: true);
+          throw Exception("Unexpected authentication stage: signup received directly from auth flow");
       }
     } catch (e) {
       _log('Error during email auth: ${e.toString()}', isWarning: true);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
+          SnackBar(content: Text('Error: $e')),
         );
       }
     } finally {
@@ -388,10 +377,8 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
         }
         return false;
       } else {
-        _log("Unexpected stage after verification: ${authState.stage}",
-            isWarning: true);
-        throw Exception(
-            "Verification resulted in unexpected state: ${authState.stage}");
+        _log("Unexpected stage after verification: ${authState.stage}", isWarning: true);
+        throw Exception("Verification resulted in unexpected state: ${authState.stage}");
       }
     } catch (e) {
       _log("Error during verification: $e", isWarning: true);
@@ -421,7 +408,7 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
       _log('Error during passkey login: ${e.toString()}', isWarning: true);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Passkey Login Error: ${e.toString()}')),
+        SnackBar(content: Text('Passkey Login Error: $e')),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -490,8 +477,7 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
                 const SizedBox(height: 24),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 16), // Make button taller
+                    padding: const EdgeInsets.symmetric(vertical: 16), // Make button taller
                   ),
                   onPressed: _isLoading ? null : _handleEmailAuth,
                   child: _isLoading
@@ -500,8 +486,7 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
                           width: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
                       : const Text('Continue'),
@@ -528,8 +513,7 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
                   icon: const Icon(Icons.fingerprint), // Added icon
                   label: const Text('Login with Any Passkey'),
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 16), // Make button taller
+                    padding: const EdgeInsets.symmetric(vertical: 16), // Make button taller
                     side: BorderSide(
                       color: Theme.of(context).colorScheme.primary,
                     ),

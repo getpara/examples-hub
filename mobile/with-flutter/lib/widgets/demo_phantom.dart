@@ -27,9 +27,7 @@ class DemoPhantomState extends State<DemoPhantom> {
   }
 
   void _signMessage() {
-    phantomConnector
-        .signMessage("Message to sign! Hello World")
-        .then((onValue) {
+    phantomConnector.signMessage("Message to sign! Hello World").then((onValue) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -43,26 +41,21 @@ class DemoPhantomState extends State<DemoPhantom> {
     final cluster = Cluster.mainnet;
     final connection = Connection(cluster);
 
-    final BlockhashWithExpiryBlockHeight blockhash =
-        await connection.getLatestBlockhash();
+    final BlockhashWithExpiryBlockHeight blockhash = await connection.getLatestBlockhash();
 
     final transaction = Transaction.v0(
-        payer:
-            Pubkey.fromBase58("Ez9MDm59vRftZS63KSbTdM4ujUEwftRC3wkRmMxu5XWz"),
+        payer: Pubkey.fromBase58("Ez9MDm59vRftZS63KSbTdM4ujUEwftRC3wkRmMxu5XWz"),
         recentBlockhash: blockhash.blockhash,
         instructions: [
           SystemProgram.transfer(
-            fromPubkey: Pubkey.fromBase58(
-                "Ez9MDm59vRftZS63KSbTdM4ujUEwftRC3wkRmMxu5XWz"),
-            toPubkey: Pubkey.fromBase58(
-                "HVMgc1okoZ1fzkpSAABoirViU83rqNRnVcEisjtgdNZC"),
+            fromPubkey: Pubkey.fromBase58("Ez9MDm59vRftZS63KSbTdM4ujUEwftRC3wkRmMxu5XWz"),
+            toPubkey: Pubkey.fromBase58("HVMgc1okoZ1fzkpSAABoirViU83rqNRnVcEisjtgdNZC"),
             lamports: solToLamports(0.5),
           ),
         ]);
 
     try {
-      final signedTransaction =
-          await phantomConnector.signTransaction(transaction);
+      final signedTransaction = await phantomConnector.signTransaction(transaction);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Transaction signed: $signedTransaction')),

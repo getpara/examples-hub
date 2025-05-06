@@ -59,8 +59,7 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
   // Returns null if formatting fails.
   String? get _formattedPhoneNumber {
     // Use the SDK's formatter
-    return para.formatPhoneNumber(
-        _phoneController.text, _countryCodeController.text);
+    return para.formatPhoneNumber(_phoneController.text, _countryCodeController.text);
   }
 
   Future<void> _checkLoginStatus() async {
@@ -107,8 +106,7 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
       _log('Invalid phone number or country code entered.', isWarning: true);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Invalid phone number or country code.')),
+          const SnackBar(content: Text('Invalid phone number or country code.')),
         );
       }
       setState(() => _isLoading = false);
@@ -118,8 +116,7 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
     try {
       // Step 1: Call signUpOrLogIn
       _log("Calling signUpOrLogIn for phone: $formattedPhone");
-      final authState =
-          await para.signUpOrLogIn(auth: {'phone': formattedPhone});
+      final authState = await para.signUpOrLogIn(auth: {'phone': formattedPhone});
       _currentAuthState = authState;
 
       _log("signUpOrLogIn returned stage: ${authState.stage}");
@@ -134,23 +131,20 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
                 MaterialPageRoute(
                   builder: (context) => DemoOtpVerification(
                     onVerify: _handlePhoneOtpVerification,
-                    onResendCode:
-                        _handleResendVerificationCode, // Pass resend handler
+                    onResendCode: _handleResendVerificationCode, // Pass resend handler
                   ),
                 ),
               ) ??
               false;
 
           if (verificationSuccess) {
-            _log(
-                "OTP Verification successful, flow continues in ChooseSignupMethod.");
+            _log("OTP Verification successful, flow continues in ChooseSignupMethod.");
             // Navigation to DemoHome is handled within ChooseSignupMethod
           } else {
             _log("OTP Verification failed or was cancelled.");
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Verification failed or cancelled.')),
+                const SnackBar(content: Text('Verification failed or cancelled.')),
               );
             }
           }
@@ -169,28 +163,22 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
               // --- Launch Password Web View using InAppBrowser ---
               await _browser.openUrlRequest(
                 urlRequest: URLRequest(url: WebUri(authState.passwordUrl!)),
-                options: InAppBrowserClassOptions(
-                  crossPlatform: InAppBrowserOptions(
-                      // Add cross-platform options here if needed
-                      // e.g., hideUrlBar: true, toolbarTopBackgroundColor: Colors.blue
-                      ),
-                  // *** CORRECTED: Place iOS options here ***
-                  ios: IOSInAppBrowserOptions(
-                    presentationStyle: IOSUIModalPresentationStyle.PAGE_SHEET,
-                    // Add other iOS options if needed
+                settings: InAppBrowserClassSettings(
+                  browserSettings: InAppBrowserSettings(
+                    presentationStyle: ModalPresentationStyle.PAGE_SHEET,
                   ),
-                  // android: AndroidInAppBrowserOptions(...) // Add Android options if needed
+                  webViewSettings: InAppWebViewSettings(
+                      // Add any webview specific settings if needed
+                      ),
                 ),
               );
               passwordFlowCompleted = true;
               _log("Password web view closed.");
             } catch (e) {
-              _log("Error launching/handling password browser: $e",
-                  isWarning: true);
+              _log("Error launching/handling password browser: $e", isWarning: true);
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                      content: Text('Password login failed: ${e.toString()}')),
+                  SnackBar(content: Text('Password login failed: $e')),
                 );
               }
               setState(() => _isLoading = false);
@@ -210,8 +198,7 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
                   loggedIn = await para.isFullyLoggedIn();
                   _log("Polling login status: $loggedIn");
                 } catch (pollError) {
-                  _log("Error polling login status: $pollError",
-                      isWarning: true);
+                  _log("Error polling login status: $pollError", isWarning: true);
                 }
                 attempts++;
               }
@@ -227,27 +214,22 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
                   );
                 }
               } else {
-                _log("Login did not complete after password flow.",
-                    isWarning: true);
+                _log("Login did not complete after password flow.", isWarning: true);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Login timed out after password entry.')),
+                    const SnackBar(content: Text('Login timed out after password entry.')),
                   );
                 }
               }
             }
             // Check if passkey login is available
-          } else if (authState.passkeyUrl != null ||
-              authState.passkeyKnownDeviceUrl != null) {
+          } else if (authState.passkeyUrl != null || authState.passkeyKnownDeviceUrl != null) {
             _log("Password URL not found, attempting passkey login.");
             try {
               // Use the actual SDK method
               final wallet = await para.loginWithPasskey(
                 // Provide phone auth info as a hint if needed by SDK, otherwise null
-                authInfo: PhoneAuthInfo(
-                    phone: formattedPhone,
-                    countryCode: _countryCodeController.text),
+                authInfo: PhoneAuthInfo(phone: formattedPhone, countryCode: _countryCodeController.text),
               );
               _log("Passkey login successful.");
               _updateWalletState(wallet);
@@ -261,29 +243,25 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
               _log("Passkey login failed: $passkeyError", isWarning: true);
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                      content: Text('Passkey login failed: $passkeyError')),
+                  SnackBar(content: Text('Passkey login failed: $passkeyError')),
                 );
               }
             }
           } else {
-            _log("No password URL or passkey options found in AuthState.",
-                isWarning: true);
+            _log("No password URL or passkey options found in AuthState.", isWarning: true);
             throw Exception("No available login methods found for this user.");
           }
           break; // End of AuthStage.login case
 
         case AuthStage.signup:
-          _log("Received unexpected 'signup' stage from signUpOrLogIn.",
-              isWarning: true);
-          throw Exception(
-              "Unexpected authentication stage: signup received directly from signUpOrLogIn.");
+          _log("Received unexpected 'signup' stage from signUpOrLogIn.", isWarning: true);
+          throw Exception("Unexpected authentication stage: signup received directly from signUpOrLogIn.");
       }
     } catch (e) {
       _log('Error during phone auth: ${e.toString()}', isWarning: true);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
+          SnackBar(content: Text('Error: $e')),
         );
       }
     } finally {
@@ -300,16 +278,14 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
       await para.resendVerificationCode();
       _log("Resend code request sent.");
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Resend request sent.')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Resend request sent.')));
       }
       setState(() => _isLoading = false);
       return true;
     } catch (e) {
       _log("Error resending code: $e", isWarning: true);
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Error resending code: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error resending code: $e')));
       }
       setState(() => _isLoading = false);
       return false;
@@ -323,12 +299,10 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
 
     // Handle null case from formatter
     if (formattedPhone == null) {
-      _log('Cannot verify OTP, invalid phone number or country code stored.',
-          isWarning: true);
+      _log('Cannot verify OTP, invalid phone number or country code stored.', isWarning: true);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Internal error: Invalid phone number.')),
+          const SnackBar(content: Text('Internal error: Invalid phone number.')),
         );
       }
       return false; // Indicate failure
@@ -356,17 +330,14 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
         }
         return false; // Should not happen if mounted check passes
       } else {
-        _log("Unexpected stage after verifyNewAccount: ${authState.stage}",
-            isWarning: true);
-        throw Exception(
-            "Verification succeeded but resulted in unexpected stage: ${authState.stage}");
+        _log("Unexpected stage after verifyNewAccount: ${authState.stage}", isWarning: true);
+        throw Exception("Verification succeeded but resulted in unexpected stage: ${authState.stage}");
       }
     } catch (e) {
-      _log("Error during OTP verification/signup: ${e.toString()}",
-          isWarning: true);
+      _log("Error during OTP verification/signup: ${e.toString()}", isWarning: true);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Verification Error: ${e.toString()}')),
+          SnackBar(content: Text('Verification Error: $e')),
         );
       }
       return false; // Indicate failure
@@ -393,7 +364,7 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
       _log('Error during passkey login: ${e.toString()}', isWarning: true);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Passkey Login Error: ${e.toString()}')),
+        SnackBar(content: Text('Passkey Login Error: $e')),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -439,8 +410,7 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
                 ),
                 const SizedBox(height: 48),
                 Row(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start, // Align items top
+                  crossAxisAlignment: CrossAxisAlignment.start, // Align items top
                   children: [
                     SizedBox(
                       // Constrain width of country code
@@ -505,8 +475,7 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
                           width: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
                       : const Text('Continue with Phone'),

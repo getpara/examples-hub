@@ -146,8 +146,7 @@ class _DemoHomeState extends State<DemoHome> {
                 children: [
                   Expanded(
                     child: Text(
-                      type == WalletType.cosmos &&
-                              wallet!.addressSecondary != null
+                      type == WalletType.cosmos && wallet!.addressSecondary != null
                           ? wallet.addressSecondary!
                           : wallet!.address!,
                       style: const TextStyle(
@@ -159,8 +158,7 @@ class _DemoHomeState extends State<DemoHome> {
                   IconButton(
                     icon: const Icon(Icons.copy),
                     onPressed: () => _copyAddress(
-                      type == WalletType.cosmos &&
-                              wallet.addressSecondary != null
+                      type == WalletType.cosmos && wallet.addressSecondary != null
                           ? wallet.addressSecondary!
                           : wallet.address!,
                     ),
@@ -224,8 +222,7 @@ class _DemoHomeState extends State<DemoHome> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) =>
-                                      DemoTransactions(wallets: _wallets),
+                                  builder: (context) => DemoTransactions(wallets: _wallets),
                                 ),
                               );
                             },

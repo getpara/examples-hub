@@ -14,8 +14,7 @@ class ParaFarcasterAuthExample extends StatefulWidget {
   const ParaFarcasterAuthExample({super.key});
 
   @override
-  State<ParaFarcasterAuthExample> createState() =>
-      _ParaFarcasterAuthExampleState();
+  State<ParaFarcasterAuthExample> createState() => _ParaFarcasterAuthExampleState();
 }
 
 class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
@@ -34,8 +33,7 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
 
   // Helper for logging within the state
   void _log(String message, {bool isWarning = false}) {
-    debugPrint(
-        'ParaFarcasterAuthExample: ${isWarning ? "WARNING: " : ""}$message');
+    debugPrint('ParaFarcasterAuthExample: ${isWarning ? "WARNING: " : ""}$message');
   }
 
   Future<void> _checkLoginStatus() async {
@@ -110,8 +108,7 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
         }
       }
 
-      _log(
-          "Farcaster authentication successful, stage: ${authState.stage.name}");
+      _log("Farcaster authentication successful, stage: ${authState.stage.name}");
 
       // Process the authentication result based on the stage
       if (authState.stage == AuthStage.login) {
@@ -145,8 +142,7 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
       if (wallets.isNotEmpty) {
         _updateWalletState(wallets.first);
       } else {
-        _log("Farcaster successful but no wallets found after flow.",
-            isWarning: true);
+        _log("Farcaster successful but no wallets found after flow.", isWarning: true);
       }
 
       if (mounted) {
@@ -304,15 +300,10 @@ class _ParaFarcasterAuthExampleState extends State<ParaFarcasterAuthExample> {
               ),
               const SizedBox(height: 48),
               // Show QR code if URI is available, otherwise show button
-              if (_farcasterConnectUri != null)
-                _buildQrCodeDisplay()
-              else
-                _buildFarcasterButton(),
+              if (_farcasterConnectUri != null) _buildQrCodeDisplay() else _buildFarcasterButton(),
 
               // Display loading indicator separately if needed, or handle within button
-              if (_isLoading &&
-                  _farcasterConnectUri ==
-                      null) // Show general loading only if QR isn't shown
+              if (_isLoading && _farcasterConnectUri == null) // Show general loading only if QR isn't shown
                 const Padding(
                   padding: EdgeInsets.only(top: 16.0),
                   child: Center(child: CircularProgressIndicator()),

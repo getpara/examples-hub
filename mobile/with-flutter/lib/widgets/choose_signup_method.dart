@@ -27,19 +27,17 @@ class _PasswordSetupBrowser extends InAppBrowser {
   final Completer<bool> completer;
   final String callbackScheme;
   final Function(String, {bool isWarning}) logCallback;
-  bool passwordFlowCompleted =
-      false; // This flag indicates if the browser logic detected a successful callback
+  bool passwordFlowCompleted = false; // This flag indicates if the browser logic detected a successful callback
 
   _PasswordSetupBrowser({
     required this.completer,
     required this.callbackScheme,
     required this.logCallback,
-    super.webViewEnvironment, // Pass environment if needed
   });
 
   @override
   Future<void> onLoadStop(Uri? url) async {
-    logCallback("Browser onLoadStop: ${url?.toString() ?? 'null'}");
+    logCallback("Browser onLoadStop: ${url?.toString() ?? '''null'''}");
     if (url?.scheme == callbackScheme) {
       logCallback("Callback URL $url detected directly in onLoadStop!");
       if (!completer.isCompleted) {
@@ -54,22 +52,18 @@ class _PasswordSetupBrowser extends InAppBrowser {
   void onExit() {
     logCallback("Browser onExit event.");
     if (!completer.isCompleted) {
-      logCallback(
-          "Browser closed before callback or recognized redirect. Completing with false.");
+      logCallback("Browser closed before callback or recognized redirect. Completing with false.");
       completer.complete(false); // Complete with false if closed manually
     }
   }
 
   @override
   Future<void> onLoadError(Uri? url, int code, String message) async {
-    logCallback(
-        "Browser onLoadError: Url: ${url?.toString()}, Code: $code, Message: $message",
-        isWarning: true);
+    logCallback("Browser onLoadError: Url: $url, Code: $code, Message: $message", isWarning: true);
 
     if (url?.scheme == callbackScheme) {
       if (defaultTargetPlatform == TargetPlatform.iOS && code == -1002) {
-        logCallback(
-            "iOS: Detected expected -1002 error for callback scheme $url. Treating as successful redirect.");
+        logCallback("iOS: Detected expected -1002 error for callback scheme $url. Treating as successful redirect.");
         if (!completer.isCompleted) {
           passwordFlowCompleted = true;
           close();
@@ -96,8 +90,7 @@ class _PasswordSetupBrowser extends InAppBrowser {
 
     // For any other errors not related to our callback scheme
     if (!completer.isCompleted) {
-      logCallback(
-          "Error for unrelated URL ${url?.toString()} (Code: $code). Completing with false.");
+      logCallback("Error for unrelated URL ${url?.toString()} (Code: $code). Completing with false.");
       completer.complete(false);
     }
   }
@@ -105,8 +98,7 @@ class _PasswordSetupBrowser extends InAppBrowser {
   @override
   void onReceivedError(WebResourceRequest request, WebResourceError error) {
     final requestUri = request.url; // WebUri
-    logCallback(
-        "Browser onReceivedError: URL: ${requestUri.toString()}, Type: ${error.type.toString()}, Desc: ${error.description}",
+    logCallback("Browser onReceivedError: URL: $requestUri, Type: ${error.type}, Desc: ${error.description}",
         isWarning: true);
 
     if (requestUri.scheme == callbackScheme) {
@@ -180,11 +172,13 @@ class _ChooseSignupMethodState extends State<ChooseSignupMethod> {
       _log("Opening browser with URL: $finalUrl");
       await browser.openUrlRequest(
         urlRequest: URLRequest(url: WebUri.uri(finalUrl)),
-        options: InAppBrowserClassOptions(
-          crossPlatform: InAppBrowserOptions(),
-          ios: IOSInAppBrowserOptions(
-            presentationStyle: IOSUIModalPresentationStyle.PAGE_SHEET,
+        settings: InAppBrowserClassSettings(
+          browserSettings: InAppBrowserSettings(
+            presentationStyle: ModalPresentationStyle.PAGE_SHEET,
           ),
+          webViewSettings: InAppWebViewSettings(
+              // Add any webview specific settings if needed
+              ),
         ),
       );
     } catch (e) {
@@ -200,8 +194,7 @@ class _ChooseSignupMethodState extends State<ChooseSignupMethod> {
     // Use the flag from the browser instance if needed, or just the result
     _passwordFlowCompletedViaCallback = browser.passwordFlowCompleted;
 
-    _log(
-        "Password setup flow completed with result: $result, via callback: $_passwordFlowCompletedViaCallback");
+    _log("Password setup flow completed with result: $result, via callback: $_passwordFlowCompletedViaCallback");
 
     // Return true only if completed successfully AND via the callback
     return result && _passwordFlowCompletedViaCallback;
@@ -218,8 +211,7 @@ class _ChooseSignupMethodState extends State<ChooseSignupMethod> {
         _errorMessage = 'Invalid state: Expected signup stage.';
         _isLoading = false;
       });
-      _log(
-          'Error: Incorrect AuthStage (${widget.authState.stage}) passed to ChooseSignupMethod.');
+      _log('Error: Incorrect AuthStage (${widget.authState.stage}) passed to ChooseSignupMethod.');
       return;
     }
 
@@ -229,8 +221,7 @@ class _ChooseSignupMethodState extends State<ChooseSignupMethod> {
 
       if (method == SignupMethod.passkey) {
         if (widget.authState.passkeyId == null) {
-          throw Exception(
-              'Passkey signup option unavailable (missing passkeyId)');
+          throw Exception('Passkey signup option unavailable (missing passkeyId)');
         }
         _log('Generating passkey with ID: ${widget.authState.passkeyId}');
         await para.generatePasskey(
@@ -238,33 +229,26 @@ class _ChooseSignupMethodState extends State<ChooseSignupMethod> {
           biometricsId: widget.authState.passkeyId!,
         );
         _log('Passkey generated. Creating wallet...');
-        createdWallet = await para.createWallet(
-            type: WalletType.evm, skipDistribute: false);
-        _log(
-            'Wallet created successfully (Passkey). Wallet ID: ${createdWallet.id}');
+        createdWallet = await para.createWallet(type: WalletType.evm, skipDistribute: false);
+        _log('Wallet created successfully (Passkey). Wallet ID: ${createdWallet.id}');
       } else if (method == SignupMethod.password) {
         if (widget.authState.passwordUrl == null) {
-          throw Exception(
-              'Password signup option unavailable (missing passwordUrl)');
+          throw Exception('Password signup option unavailable (missing passwordUrl)');
         }
         _log('Password URL found: ${widget.authState.passwordUrl}');
         _log('Launching password setup web view...');
 
         // --- Launch Password Setup Web View and wait for callback ---
-        final bool setupSuccess =
-            await _launchPasswordSetupWebView(widget.authState.passwordUrl!);
+        final bool setupSuccess = await _launchPasswordSetupWebView(widget.authState.passwordUrl!);
 
         if (setupSuccess) {
           _log('Password setup successful via callback. Creating wallet...');
           // Add a small delay in case the backend needs a moment
           await Future.delayed(const Duration(milliseconds: 500));
-          createdWallet = await para.createWallet(
-              type: WalletType.evm, skipDistribute: false);
-          _log(
-              'Wallet created successfully (Password). Wallet ID: ${createdWallet.id}');
+          createdWallet = await para.createWallet(type: WalletType.evm, skipDistribute: false);
+          _log('Wallet created successfully (Password). Wallet ID: ${createdWallet.id}');
         } else {
-          _log(
-              'Password setup flow did not complete successfully (closed without callback or error).');
+          _log('Password setup flow did not complete successfully (closed without callback or error).');
           // Check if an error message was already set by the browser error handlers
           if (_errorMessage == null) {
             setState(() {
@@ -296,9 +280,9 @@ class _ChooseSignupMethodState extends State<ChooseSignupMethod> {
         });
       }
     } catch (e) {
-      _log('Error caught during setup: ${e.toString()}', isWarning: true);
+      _log('Error caught during setup: $e', isWarning: true);
       setState(() {
-        _errorMessage = 'Setup failed: ${e.toString()}';
+        _errorMessage = 'Setup failed: $e';
         _isLoading = false;
       });
     } finally {
@@ -334,9 +318,7 @@ class _ChooseSignupMethodState extends State<ChooseSignupMethod> {
                 Icon(
                   icon,
                   size: 30,
-                  color: isDisabled
-                      ? Colors.grey
-                      : Theme.of(context).colorScheme.primary,
+                  color: isDisabled ? Colors.grey : Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -348,9 +330,7 @@ class _ChooseSignupMethodState extends State<ChooseSignupMethod> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: isDisabled
-                              ? Colors.grey.shade600
-                              : Colors.black87,
+                          color: isDisabled ? Colors.grey.shade600 : Colors.black87,
                         ),
                       ),
                       Text(
@@ -365,8 +345,7 @@ class _ChooseSignupMethodState extends State<ChooseSignupMethod> {
                 ),
                 Icon(
                   Icons.chevron_right,
-                  color:
-                      isDisabled ? Colors.grey.shade400 : Colors.grey.shade600,
+                  color: isDisabled ? Colors.grey.shade400 : Colors.grey.shade600,
                 ),
               ],
             ),
@@ -380,10 +359,8 @@ class _ChooseSignupMethodState extends State<ChooseSignupMethod> {
   Widget build(BuildContext context) {
     // Build method remains largely the same
     final isSignupStage = widget.authState.stage == AuthStage.signup;
-    final isPasskeyAvailable =
-        isSignupStage && widget.authState.passkeyId != null;
-    final isPasswordAvailable =
-        isSignupStage && widget.authState.passwordUrl != null;
+    final isPasskeyAvailable = isSignupStage && widget.authState.passkeyId != null;
+    final isPasswordAvailable = isSignupStage && widget.authState.passwordUrl != null;
 
     _log('Build - Auth State Stage: ${widget.authState.stage}');
     _log('Build - Passkey Available: $isPasskeyAvailable');
@@ -449,8 +426,7 @@ class _ChooseSignupMethodState extends State<ChooseSignupMethod> {
                 icon: Icons.fingerprint,
                 title: 'Use Biometrics (Passkey)',
                 description: 'Quick and secure biometric login',
-                isDisabled:
-                    !isPasskeyAvailable || _isLoading, // Disable while loading
+                isDisabled: !isPasskeyAvailable || _isLoading, // Disable while loading
                 onTap: () => _setupAccount(SignupMethod.passkey),
               ),
               const SizedBox(height: 16),
@@ -458,8 +434,7 @@ class _ChooseSignupMethodState extends State<ChooseSignupMethod> {
                 icon: Icons.password,
                 title: 'Use Password',
                 description: 'Traditional password-based login',
-                isDisabled:
-                    !isPasswordAvailable || _isLoading, // Disable while loading
+                isDisabled: !isPasswordAvailable || _isLoading, // Disable while loading
                 onTap: () => _setupAccount(SignupMethod.password),
               ),
             ],
