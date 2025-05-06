@@ -50,7 +50,7 @@ export function ParaSignerProvider({ children }: { children: React.ReactNode }) 
     return () => {
       clearEthers();
     };
-  }, []);
+  }, [account]);
 
   return (
     <ParaContext.Provider

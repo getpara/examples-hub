@@ -61,7 +61,7 @@ export function ParaSignerProvider({ children }: { children: React.ReactNode }) 
     return () => {
       clearCosmjs();
     };
-  }, []);
+  }, [account]);
 
   return (
     <SignerContext.Provider
