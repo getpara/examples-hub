@@ -7,6 +7,7 @@ final apiKey = dotenv.env['PARA_API_KEY'] ?? (throw Exception('PARA_API_KEY not 
 final para = Para(
   environment: environment == 'sandbox' ? Environment.sandbox : Environment.beta,
   apiKey: apiKey,
+  deepLinkScheme: 'com.usecapsule.example.flutter',
 );
 
 final phantomConnector = ParaPhantomConnector(para: para, appUrl: "https://usecapsule.com", deepLink: "paraflutter");
