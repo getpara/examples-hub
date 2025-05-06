@@ -1,5 +1,3 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import { ParaProvider } from "@/components/ParaProvider";
 import Header from "@/components/Header";
 import "./globals.css";
@@ -26,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body>
         <ParaProvider>
           <Header />
           <main>{children}</main>
