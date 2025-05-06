@@ -15,8 +15,8 @@
   },
   "dependencies": {
 <<<<<<< HEAD
-    "@getpara/react-sdk": "2.0.0-alpha.11",
-    "@getpara/solana-web3.js-v1-integration": "2.0.0-alpha.11",
+    "@getpara/react-sdk": "alpha",
+    "@getpara/solana-web3.js-v1-integration": "alpha",
 =======
     "@getpara/react-sdk": "1.12.0",
     "@getpara/solana-web3.js-v1-integration": "1.12.0",

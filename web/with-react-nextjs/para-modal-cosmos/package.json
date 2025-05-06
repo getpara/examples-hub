@@ -7,7 +7,7 @@
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start",
-    "postinstall": "yarn graz --generate && npx setup-para"
+    "postinstall": "npx graz --generate && npx setup-para"
   },
   "dependencies": {
     "@getpara/cosmos-wallet-connectors": "alpha",

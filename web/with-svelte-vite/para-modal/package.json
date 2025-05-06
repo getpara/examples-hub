@@ -12,7 +12,7 @@
   },
   "dependencies": {
 <<<<<<< HEAD
-    "@getpara/react-sdk": "2.0.0-alpha.11",
+    "@getpara/react-sdk": "alpha",
     "@tanstack/react-query": "^5.0.0",
 =======
     "@getpara/react-sdk": "1.12.0",

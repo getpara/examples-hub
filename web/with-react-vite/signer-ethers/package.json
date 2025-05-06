@@ -12,8 +12,8 @@
   },
   "dependencies": {
 <<<<<<< HEAD
-    "@getpara/ethers-v6-integration": "2.0.0-alpha.11",
-    "@getpara/react-sdk": "2.0.0-alpha.11",
+    "@getpara/ethers-v6-integration": "alpha",
+    "@getpara/react-sdk": "alpha",
     "@tanstack/react-query": "^5.0.0",
 =======
     "@getpara/ethers-v6-integration": "1.12.0",

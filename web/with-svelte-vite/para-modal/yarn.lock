@@ -420,9 +420,9 @@
     "@ethersproject/strings" "^5.7.0"
 
 <<<<<<< HEAD
-"@getpara/core-components@2.0.0-alpha.11":
-  version "2.0.0-alpha.11"
-  resolved "https://registry.yarnpkg.com/@getpara/core-components/-/core-components-2.0.0-alpha.11.tgz#980a64d7f6f50873505f2e2a682002ef71d508b9"
+"@getpara/core-components@alpha":
+  version "alpha"
+  resolved "https://registry.yarnpkg.com/@getpara/core-components/-/core-components-alpha.tgz#980a64d7f6f50873505f2e2a682002ef71d508b9"
   integrity sha512-RREcaGV0syHjRClUBcJFWPMmKylJxrGVwK22YY8K8GTpOzydIwqoSkG70KKWGRS6LQSKoRzZiIkWQdQfQ8Os/Q==
 =======
 "@getpara/core-components@1.12.0":
@@ -439,9 +439,9 @@
     qrcode-with-logos "1.1.1"
 
 <<<<<<< HEAD
-"@getpara/core-sdk@2.0.0-alpha.11":
-  version "2.0.0-alpha.11"
-  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-2.0.0-alpha.11.tgz#ece7e7f873d69629541a354e8ca5182dba9175a0"
+"@getpara/core-sdk@alpha":
+  version "alpha"
+  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-alpha.tgz#ece7e7f873d69629541a354e8ca5182dba9175a0"
   integrity sha512-CxoUnfiOu+apLsB0gvMbZ9bEa//3K1gFwU6/lWTt7JNfebF5UzMyqrDTsoklwWKzednkh0hsyC1lpabB2T+Spw==
 =======
 "@getpara/core-sdk@1.12.0":
@@ -454,7 +454,7 @@
     "@cosmjs/encoding" "^0.32.4"
     "@ethereumjs/util" "^9.1.0"
 <<<<<<< HEAD
-    "@getpara/user-management-client" "2.0.0-alpha.11"
+    "@getpara/user-management-client" "alpha"
 =======
     "@getpara/user-management-client" "1.12.0"
 >>>>>>> main
@@ -465,13 +465,13 @@
     uuid "^11.1.0"
 
 <<<<<<< HEAD
-"@getpara/react-common@2.0.0-alpha.11":
-  version "2.0.0-alpha.11"
-  resolved "https://registry.yarnpkg.com/@getpara/react-common/-/react-common-2.0.0-alpha.11.tgz#d57566763b028dc604fe4ae59350da750094040c"
+"@getpara/react-common@alpha":
+  version "alpha"
+  resolved "https://registry.yarnpkg.com/@getpara/react-common/-/react-common-alpha.tgz#d57566763b028dc604fe4ae59350da750094040c"
   integrity sha512-cxJSu1Us8q90vh7TNr4Yni3aSv5QFWIOYAoASQ2kUqgumNFhbPfPvVQ8S++kbJEJlUe8QbeD7t9vmMTR0VBtIw==
   dependencies:
-    "@getpara/react-components" "2.0.0-alpha.11"
-    "@getpara/web-sdk" "2.0.0-alpha.11"
+    "@getpara/react-components" "alpha"
+    "@getpara/web-sdk" "alpha"
 =======
 "@getpara/react-common@1.12.0":
   version "1.12.0"
@@ -490,21 +490,21 @@
     ua-parser-js "^2.0.2"
 
 <<<<<<< HEAD
-"@getpara/react-components@2.0.0-alpha.11":
-  version "2.0.0-alpha.11"
-  resolved "https://registry.yarnpkg.com/@getpara/react-components/-/react-components-2.0.0-alpha.11.tgz#eccde5b31389394a15ed54f5cb69dbf293079fb2"
+"@getpara/react-components@alpha":
+  version "alpha"
+  resolved "https://registry.yarnpkg.com/@getpara/react-components/-/react-components-alpha.tgz#eccde5b31389394a15ed54f5cb69dbf293079fb2"
   integrity sha512-W6m2tjf2wZYmrsIpSZq5+SuOdcTB43mrf0YOHDgRQV/kwhOkIUXPH8PYHQC19uWHKZ3VAGbRS2gvSPTCNc0RFQ==
   dependencies:
-    "@getpara/core-components" "2.0.0-alpha.11"
+    "@getpara/core-components" "alpha"
 
-"@getpara/react-sdk@2.0.0-alpha.11":
-  version "2.0.0-alpha.11"
-  resolved "https://registry.yarnpkg.com/@getpara/react-sdk/-/react-sdk-2.0.0-alpha.11.tgz#7790c049189959cc85395280d87c0ef0f972212c"
+"@getpara/react-sdk@alpha":
+  version "alpha"
+  resolved "https://registry.yarnpkg.com/@getpara/react-sdk/-/react-sdk-alpha.tgz#7790c049189959cc85395280d87c0ef0f972212c"
   integrity sha512-QGAWMqNHlU0axrfYlUKve5lYeHLLv/FIj5EBF6NR2a39zYejDApsZZvQcmDktjNN8421tW7qFWztjsICLryrnw==
   dependencies:
-    "@getpara/react-common" "2.0.0-alpha.11"
-    "@getpara/react-components" "2.0.0-alpha.11"
-    "@getpara/web-sdk" "2.0.0-alpha.11"
+    "@getpara/react-common" "alpha"
+    "@getpara/react-components" "alpha"
+    "@getpara/web-sdk" "alpha"
 =======
 "@getpara/react-components@1.12.0":
   version "1.12.0"
@@ -531,9 +531,9 @@
     zustand-sync-tabs "^0.2.2"
 
 <<<<<<< HEAD
-"@getpara/user-management-client@2.0.0-alpha.11":
-  version "2.0.0-alpha.11"
-  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-2.0.0-alpha.11.tgz#0b5ce0d234e048fafcb9677fcacdc801acb329a7"
+"@getpara/user-management-client@alpha":
+  version "alpha"
+  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-alpha.tgz#0b5ce0d234e048fafcb9677fcacdc801acb329a7"
   integrity sha512-5UVFqRGHXJ5WrGZ1oV/XgN2AQnGG8n5BZi2M1j/Rhhyk6EJ+n02M7DHgTWnK52618H95R79XSLLo6mwj5aLMzw==
 =======
 "@getpara/user-management-client@1.12.0":
@@ -546,13 +546,13 @@
     libphonenumber-js "1.11.2"
 
 <<<<<<< HEAD
-"@getpara/web-sdk@2.0.0-alpha.11":
-  version "2.0.0-alpha.11"
-  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-2.0.0-alpha.11.tgz#906eb73892f80e3ceb6d9b8c7347883deb134219"
+"@getpara/web-sdk@alpha":
+  version "alpha"
+  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-alpha.tgz#906eb73892f80e3ceb6d9b8c7347883deb134219"
   integrity sha512-QTvwHVhW0WJrR49G5sj9Q+c9QkQDn8Te0skLQ+p8Ywn2jKCJMA7Sy56AmDUXngNeJ+5SxPYOl79U0Nz913TwTA==
   dependencies:
-    "@getpara/core-sdk" "2.0.0-alpha.11"
-    "@getpara/user-management-client" "2.0.0-alpha.11"
+    "@getpara/core-sdk" "alpha"
+    "@getpara/user-management-client" "alpha"
     "@sentry/browser" "^9.1.0"
 =======
 "@getpara/web-sdk@1.12.0":

@@ -10,8 +10,8 @@
     "postinstall": "npx setup-para"
   },
   "dependencies": {
-    "@getpara/react-sdk": "2.0.0-alpha.11",
-    "@getpara/solana-wallet-connectors": "2.0.0-alpha.11",
+    "@getpara/react-sdk": "alpha",
+    "@getpara/solana-wallet-connectors": "alpha",
     "@solana/web3.js": "^1.98.0",
 <<<<<<< HEAD
     "@tanstack/react-query": "^5.0.0",

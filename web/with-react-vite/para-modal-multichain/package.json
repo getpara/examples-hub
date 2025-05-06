@@ -6,15 +6,15 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "postinstall": "yarn graz --generate && npx setup-para",
+    "postinstall": "npx graz --generate && npx setup-para",
     "preview": "vite preview"
   },
   "dependencies": {
 <<<<<<< HEAD
-    "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.11",
-    "@getpara/evm-wallet-connectors": "2.0.0-alpha.11",
-    "@getpara/react-sdk": "2.0.0-alpha.11",
-    "@getpara/solana-wallet-connectors": "2.0.0-alpha.11",
+    "@getpara/cosmos-wallet-connectors": "alpha",
+    "@getpara/evm-wallet-connectors": "alpha",
+    "@getpara/react-sdk": "alpha",
+    "@getpara/solana-wallet-connectors": "alpha",
 =======
     "@cosmjs/cosmwasm-stargate": "0.33.0",
     "@cosmjs/launchpad": "0.27.1",
