@@ -14,7 +14,6 @@ import 'package:para_flutter/util/random.dart';
 import 'package:para_flutter/widgets/choose_signup_method.dart'; // Needed for signup flow
 import 'package:para_flutter/widgets/demo_home.dart';
 import 'package:para_flutter/widgets/demo_otp_verification.dart';
-import 'package:phone_form_field/phone_form_field.dart'; // For phone input
 
 class ParaPhoneExample extends StatefulWidget {
   const ParaPhoneExample({super.key});
