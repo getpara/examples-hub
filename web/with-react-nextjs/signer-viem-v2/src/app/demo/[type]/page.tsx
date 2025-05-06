@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { usePara } from "@/components/ParaProvider";
+import { usePara } from "@/components/ParaSignerProvider";
 import { transactionTypes, TransactionID } from "@/example-transactions";
 
 export default function DemoPage() {

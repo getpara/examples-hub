@@ -1,10 +1,11 @@
 "use client";
 
-import { usePara } from "@/components/ParaProvider";
 import { useState, useEffect } from "react";
 import { PARA_TEST_TOKEN_CONTRACT_ADDRESS } from ".";
 import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
 import { encodeFunctionData, formatEther, getContract, parseEther } from "viem";
+import { useAccount } from "@getpara/react-sdk";
+import { useParaSigner } from "@/components/ParaSignerProvider";
 
 type Operation = {
   type: "mint" | "transfer";
@@ -24,7 +25,11 @@ export default function BatchedTransactionDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { isConnected, address, walletClient, publicClient } = usePara();
+  const { data: account } = useAccount();
+  const { walletClient, publicClient, viemAccount } = useParaSigner();
+
+  const isConnected = account?.isConnected;
+  const address = viemAccount?.address;
 
   const fetchTokenData = async () => {
     if (!address) return;

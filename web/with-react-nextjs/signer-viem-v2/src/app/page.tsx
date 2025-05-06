@@ -1,12 +1,13 @@
 "use client";
 
-import { usePara } from "@/components/ParaProvider";
 import { Card } from "@/components/Card";
 import Link from "next/link";
 import { transactionTypes } from "@/example-transactions";
+import { useAccount, useModal } from "@getpara/react-sdk";
 
 export default function Home() {
-  const { isConnected, openModal } = usePara();
+  const { data: account } = useAccount();
+  const { openModal } = useModal();
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -15,10 +16,10 @@ export default function Home() {
         <p className="text-lg text-gray-600 max-w-3xl mx-auto">
           Explore signing different transaction types using Para with Viem v2. Reference the
           <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md">
-            /src/components/ParaProvider.tsx
+            /src/components/ParaSignerProvider.tsx
           </code>
-          file to see how we provide Para globally to the app and create the Para compatible
-          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md">WalletClient</code>.
+          file to see how we provide Para globally to the app and create the
+          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md">createParaViemClient</code>.
         </p>
       </div>
 
@@ -30,7 +31,7 @@ export default function Home() {
             description={transaction.description}
             path={transaction.path}>
             <div>
-              {isConnected ? (
+              {account?.isConnected ? (
                 <Link
                   href={`/demo/${id}`}
                   className="inline-flex w-full items-center justify-center rounded-none bg-blue-900 px-4 py-2 text-sm font-medium text-white hover:bg-blue-950 transition-colors mt-auto">

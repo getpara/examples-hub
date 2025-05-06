@@ -1,11 +1,12 @@
 "use client";
 
-import { usePara } from "@/components/ParaProvider";
 import { useState, useEffect } from "react";
 import { PARA_TEST_TOKEN_CONTRACT_ADDRESS, PARA_TEST_TOKEN_CONTRACT_OWNER } from ".";
 
 import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
 import { formatEther, getContract, maxUint256 } from "viem";
+import { useAccount } from "@getpara/react-sdk";
+import { useParaSigner } from "@/components/ParaSignerProvider";
 
 export default function PermitSigningDemo() {
   const [isLoading, setIsLoading] = useState(false);
@@ -25,7 +26,11 @@ export default function PermitSigningDemo() {
     s: string;
   } | null>(null);
 
-  const { isConnected, walletId, address, walletClient, publicClient } = usePara();
+  const { data: account } = useAccount();
+  const { walletClient, publicClient, viemAccount } = useParaSigner();
+
+  const isConnected = account?.isConnected;
+  const address = viemAccount?.address;
 
   const fetchTokenData = async () => {
     if (!address) return;
@@ -68,10 +73,6 @@ export default function PermitSigningDemo() {
         throw new Error("Please connect your wallet to sign the permit.");
       }
 
-      if (!walletId) {
-        throw new Error("No wallet ID found. Please reconnect your wallet.");
-      }
-
       const contract = getContract({
         address: PARA_TEST_TOKEN_CONTRACT_ADDRESS,
         abi: ParaTestToken.abi,
@@ -82,7 +83,7 @@ export default function PermitSigningDemo() {
 
       const deadline = Math.floor(Date.now() / 1000) + 3600;
 
-      const domainSeparator = await contract.read.DOMAIN_SEPARATOR();
+      // const domainSeparator = await contract.read.DOMAIN_SEPARATOR();
 
       const name = await contract.read.name();
 
@@ -117,7 +118,6 @@ export default function PermitSigningDemo() {
         message: "Please sign the permit message in your wallet...",
       });
 
-      // Sign the permit with viem's signTypedData
       const signature = await walletClient!.signTypedData({
         account: address,
         domain,
@@ -146,7 +146,6 @@ export default function PermitSigningDemo() {
           "Permit signed successfully! The contract owner can now use this signature to approve token transfers.",
       });
 
-      // Refresh token data
       await fetchTokenData();
     } catch (error) {
       console.error("Error signing permit:", error);

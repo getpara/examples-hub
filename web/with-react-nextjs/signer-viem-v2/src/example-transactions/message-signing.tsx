@@ -1,6 +1,7 @@
 "use client";
 
-import { usePara } from "@/components/ParaProvider";
+import { useParaSigner } from "@/components/ParaSignerProvider";
+import { useAccount } from "@getpara/react-sdk";
 import { useState } from "react";
 import { verifyMessage } from "viem";
 
@@ -15,7 +16,11 @@ export default function MessageSigningDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { isConnected, walletId, walletClient, address } = usePara();
+  const { data: account } = useAccount();
+  const { walletClient, viemAccount } = useParaSigner();
+
+  const isConnected = account?.isConnected;
+  const address = viemAccount?.address;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,15 +35,6 @@ export default function MessageSigningDemo() {
           show: true,
           type: "error",
           message: "Please connect your wallet to sign a message.",
-        });
-        return;
-      }
-
-      if (!walletId) {
-        setStatus({
-          show: true,
-          type: "error",
-          message: "No wallet ID found. Please reconnect your wallet.",
         });
         return;
       }
@@ -128,7 +124,7 @@ export default function MessageSigningDemo() {
               placeholder="Enter a message to sign"
               required
               disabled={isLoading}
-              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
           </div>
 
