@@ -67,6 +67,8 @@ export const SUPPORT_URL = 'mailto:support@getpara.com';
 export const SCHEDULE_MEETING_LINK = 'https://getpara.com/talk-to-us';
 export const MODAL_DESIGNER_LINK = 'https://demo.getpara.com';
 export const MODAL_CONFIG_LINK = 'https://docs.getpara.com/customize-para/modal-customization';
+export const EXAMPLES_HUB_LINK = 'https://github.com/getpara/examples-hub';
+export const CALENDLY_LINK = 'https://calendly.com/d/ynr-2s7-g5f/capsule-partner-call';
 
 export const FRAMEWORK_OPTIONS: Framework[] = [
   Framework.REACT,

@@ -5,6 +5,8 @@ import { triggerToast } from '../../../utils/toasts';
 import { ProjectCard } from './ProjectCard';
 import { CreateProjectButton } from './CreateProjectButton';
 
+const SHOW_ALL_THRESHOLD = 6;
+
 type ProjectsProps = {
   onShowAllClick: () => void;
 };
@@ -28,7 +30,7 @@ export const Projects = ({ onShowAllClick }: ProjectsProps) => {
     return null;
   }
 
-  const first6Projects = projects.slice(0, 6);
+  const first6Projects = projects.slice(0, SHOW_ALL_THRESHOLD);
 
   return (
     <div className="para:flex para:flex-col para:gap-2 para:pb-6">
@@ -37,9 +39,11 @@ export const Projects = ({ onShowAllClick }: ProjectsProps) => {
           <Typography className="para:text-2xl para:font-semibold">
             {projects.length} {pluralize(projects.length, 'Project')}
           </Typography>
-          <Button variant="outline" onClick={onShowAllClick} className="para:px-3">
-            See All
-          </Button>
+          {projects.length > SHOW_ALL_THRESHOLD && (
+            <Button variant="outline" onClick={onShowAllClick} className="para:px-3">
+              See All
+            </Button>
+          )}
         </div>
         <CreateProjectButton />
       </div>

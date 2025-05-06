@@ -24,4 +24,17 @@ export const getActions = (set: StoreApi<AppStore>['setState'], get: StoreApi<Ap
   getSelectedOrganization: (userId?: string) => {
     return get().userSelectedOrganizationId[userId ?? ''];
   },
+  dismissNotification: (orgId: string, notificationId: string) => {
+    set({
+      clearedNotifications: {
+        ...get().clearedNotifications,
+        [orgId]: {
+          ...get().clearedNotifications[orgId],
+          [notificationId]: true,
+        },
+      },
+    });
+  },
+  hasDismissedNotification: (orgId: string, notificationId: string) =>
+    get().clearedNotifications[orgId]?.[notificationId] ?? false,
 });
