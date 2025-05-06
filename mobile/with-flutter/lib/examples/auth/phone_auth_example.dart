@@ -1,11 +1,16 @@
+// /Users/tyson/dev/examples-hub/mobile/with-flutter/lib/examples/auth/phone_auth_example.dart
 // ignore_for_file: unused_field, unused_local_variable, use_build_context_synchronously
 
-import 'package:para_flutter/util/random.dart';
+import 'dart:async'; // Keep for Future
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart'; // Added import
+
 // Import the SDK package
 import 'package:para/para.dart';
 import 'package:para_flutter/client/para.dart'; // Assuming 'para' instance is globally available or passed via context
+import 'package:para_flutter/util/random.dart';
+import 'package:para_flutter/widgets/choose_signup_method.dart'; // Needed for signup flow
 import 'package:para_flutter/widgets/demo_home.dart';
 import 'package:para_flutter/widgets/demo_otp_verification.dart';
 
@@ -27,12 +32,13 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
   // Wallet info
   Wallet? _wallet;
   String? _address;
-  // String? _recoveryShare; // Adjust if needed based on createWallet V2 result
+
+  // InAppBrowser instance for password flow
+  final InAppBrowser _browser = InAppBrowser();
 
   @override
   void initState() {
     super.initState();
-    // _countryCodeController.text = '1'; // Already set in declaration
     _phoneController.text = randomTestPhone();
     _checkLoginStatus();
   }
@@ -86,8 +92,6 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
     setState(() {
       _wallet = wallet;
       _address = wallet.address;
-      // If CreateWalletResult was used and had recoveryShare:
-      // _recoveryShare = createResult.recoveryShare;
     });
   }
 
@@ -130,40 +134,17 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
                 MaterialPageRoute(
                   builder: (context) => DemoOtpVerification(
                     onVerify: _handlePhoneOtpVerification,
-                    // Pass the correct resend function
-                    onResendCode: () async {
-                      try {
-                        // Use the generic resend method (confirm if phone-specific exists/is needed)
-                        await para.resendVerificationCode();
-                        _log("Resend code request sent.");
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text('Resend request sent.')));
-                        }
-                        return true;
-                      } catch (e) {
-                        _log("Error resending code: $e", isWarning: true);
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text('Error resending code: $e')));
-                        }
-                        return false;
-                      }
-                    },
+                    onResendCode:
+                        _handleResendVerificationCode, // Pass resend handler
                   ),
                 ),
               ) ??
               false;
 
           if (verificationSuccess) {
-            _log("OTP Verification successful, navigating home.");
-            if (mounted) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const DemoHome()),
-              );
-            }
+            _log(
+                "OTP Verification successful, flow continues in ChooseSignupMethod.");
+            // Navigation to DemoHome is handled within ChooseSignupMethod
           } else {
             _log("OTP Verification failed or was cancelled.");
             if (mounted) {
@@ -176,23 +157,121 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
           break;
 
         case AuthStage.login:
-          _log("User exists, proceeding with passkey login.");
-          final wallet = await para.loginWithPasskey(
-            // Provide phone auth info as a hint
-            authInfo: PhoneAuthInfo(
-                phone: _phoneController
-                    .text, // Pass unformatted phone? Check SDK needs
-                countryCode: _countryCodeController.text),
-          );
-          _log("Passkey login successful.");
-          _updateWalletState(wallet);
-          if (mounted) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const DemoHome()),
-            );
+          _log("User exists, proceeding with login.");
+
+          // Check if password login is available via passwordUrl
+          if (authState.passwordUrl != null) {
+            _log("Password login available. URL: ${authState.passwordUrl}");
+            _log("Launching password web view...");
+
+            bool passwordFlowCompleted = false;
+            try {
+              // --- Launch Password Web View using InAppBrowser ---
+              await _browser.openUrlRequest(
+                urlRequest: URLRequest(url: WebUri(authState.passwordUrl!)),
+                options: InAppBrowserClassOptions(
+                  crossPlatform: InAppBrowserOptions(
+                      // Add cross-platform options here if needed
+                      // e.g., hideUrlBar: true, toolbarTopBackgroundColor: Colors.blue
+                      ),
+                  // *** CORRECTED: Place iOS options here ***
+                  ios: IOSInAppBrowserOptions(
+                    presentationStyle: IOSUIModalPresentationStyle.PAGE_SHEET,
+                    // Add other iOS options if needed
+                  ),
+                  // android: AndroidInAppBrowserOptions(...) // Add Android options if needed
+                ),
+              );
+              passwordFlowCompleted = true;
+              _log("Password web view closed.");
+            } catch (e) {
+              _log("Error launching/handling password browser: $e",
+                  isWarning: true);
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                      content: Text('Password login failed: ${e.toString()}')),
+                );
+              }
+              setState(() => _isLoading = false);
+              return;
+            }
+
+            // --- Check Login Status After Web View ---
+            if (passwordFlowCompleted) {
+              _log("Checking login status after password flow...");
+              setState(() => _isLoading = true);
+              bool loggedIn = false;
+              int attempts = 0;
+              while (attempts < 20 && !loggedIn) {
+                // Poll for ~40 seconds
+                await Future.delayed(const Duration(seconds: 2));
+                try {
+                  loggedIn = await para.isFullyLoggedIn();
+                  _log("Polling login status: $loggedIn");
+                } catch (pollError) {
+                  _log("Error polling login status: $pollError",
+                      isWarning: true);
+                }
+                attempts++;
+              }
+
+              if (loggedIn) {
+                _log("Login successful after password flow.");
+                final wallets = await para.fetchWallets();
+                if (wallets.isNotEmpty) _updateWalletState(wallets.first);
+                if (mounted) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const DemoHome()),
+                  );
+                }
+              } else {
+                _log("Login did not complete after password flow.",
+                    isWarning: true);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Login timed out after password entry.')),
+                  );
+                }
+              }
+            }
+            // Check if passkey login is available
+          } else if (authState.passkeyUrl != null ||
+              authState.passkeyKnownDeviceUrl != null) {
+            _log("Password URL not found, attempting passkey login.");
+            try {
+              // Use the actual SDK method
+              final wallet = await para.loginWithPasskey(
+                // Provide phone auth info as a hint if needed by SDK, otherwise null
+                authInfo: PhoneAuthInfo(
+                    phone: formattedPhone,
+                    countryCode: _countryCodeController.text),
+              );
+              _log("Passkey login successful.");
+              _updateWalletState(wallet);
+              if (mounted) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const DemoHome()),
+                );
+              }
+            } catch (passkeyError) {
+              _log("Passkey login failed: $passkeyError", isWarning: true);
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                      content: Text('Passkey login failed: $passkeyError')),
+                );
+              }
+            }
+          } else {
+            _log("No password URL or passkey options found in AuthState.",
+                isWarning: true);
+            throw Exception("No available login methods found for this user.");
           }
-          break;
+          break; // End of AuthStage.login case
 
         case AuthStage.signup:
           _log("Received unexpected 'signup' stage from signUpOrLogIn.",
@@ -212,9 +291,34 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
     }
   }
 
+  // Handle resending verification code
+  Future<bool> _handleResendVerificationCode() async {
+    setState(() => _isLoading = true);
+    try {
+      // Use the specific phone resend method if available, otherwise generic
+      // Assuming generic resend works for phone too based on SDK structure
+      await para.resendVerificationCode();
+      _log("Resend code request sent.");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Resend request sent.')));
+      }
+      setState(() => _isLoading = false);
+      return true;
+    } catch (e) {
+      _log("Error resending code: $e", isWarning: true);
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Error resending code: $e')));
+      }
+      setState(() => _isLoading = false);
+      return false;
+    }
+  }
+
   // Separate handler for OTP verification logic for phone
   Future<bool> _handlePhoneOtpVerification(String code) async {
-    setState(() => _isLoading = true);
+    // No need to set _isLoading here, DemoOtpVerification handles its own state
     final formattedPhone = _formattedPhoneNumber; // Get formatted number again
 
     // Handle null case from formatter
@@ -227,8 +331,7 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
               content: Text('Internal error: Invalid phone number.')),
         );
       }
-      setState(() => _isLoading = false);
-      return false;
+      return false; // Indicate failure
     }
 
     try {
@@ -237,21 +340,21 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
       _log("verifyNewAccount returned stage: ${authState.stage}");
 
       if (authState.stage == AuthStage.signup) {
-        if (authState.passkeyId == null) {
-          throw Exception("Signup stage reached, but no passkeyId provided.");
+        _log("Navigating to ChooseSignupMethod screen.");
+        // Navigate to the security method selection screen
+        if (mounted) {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChooseSignupMethod(
+                authState: authState, // Pass the AuthState from verification
+              ),
+            ),
+          );
+          // Assume flow completed or cancelled after ChooseSignupMethod pops
+          return true; // Signal success to DemoOtpVerification
         }
-        _log("Proceeding to generate passkey with id: ${authState.passkeyId}");
-        // Use formatted phone number as the identifier for passkey registration
-        await para.generatePasskey(
-          identifier: formattedPhone,
-          biometricsId: authState.passkeyId!,
-        );
-        _log("Passkey generated, creating wallet...");
-        final createResult = await para.createWallet(skipDistribute: false);
-        _log("Wallet created successfully.");
-        _updateWalletState(createResult); // Pass the Wallet object
-        setState(() => _isLoading = false);
-        return true;
+        return false; // Should not happen if mounted check passes
       } else {
         _log("Unexpected stage after verifyNewAccount: ${authState.stage}",
             isWarning: true);
@@ -266,8 +369,7 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
           SnackBar(content: Text('Verification Error: ${e.toString()}')),
         );
       }
-      setState(() => _isLoading = false);
-      return false;
+      return false; // Indicate failure
     }
   }
 
@@ -312,39 +414,52 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const Icon(
+                  Icons.phone_android_outlined,
+                  size: 50,
+                  color: Colors.green, // Or use Theme color
+                ),
+                const SizedBox(height: 24),
                 const Text(
                   'Phone Authentication',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                   ),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 12),
                 const Text(
-                  'Example implementation of phone authentication using Para SDK.',
+                  'Sign in or register with your phone number.', // Updated text
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.black87,
+                    color: Colors.black87, // Or use Theme color
                   ),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 48),
                 Row(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start, // Align items top
                   children: [
-                    Expanded(
-                      flex: 2,
+                    SizedBox(
+                      // Constrain width of country code
+                      width: 80,
                       child: TextFormField(
                         controller: _countryCodeController,
                         decoration: const InputDecoration(
-                          labelText: 'Country Code',
+                          labelText: 'Code',
                           prefixText: '+',
+                          border: OutlineInputBorder(),
                         ),
                         keyboardType: TextInputType.phone,
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(4), // Limit length
                         ],
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Required';
+                            return 'Req'; // Short error
                           }
                           return null;
                         },
@@ -352,13 +467,13 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      flex: 8,
                       child: TextFormField(
                         controller: _phoneController,
                         decoration: const InputDecoration(
                           labelText: 'Phone Number',
                           hintText: 'Enter your phone number',
                           prefixIcon: Icon(Icons.phone),
+                          border: OutlineInputBorder(),
                         ),
                         keyboardType: TextInputType.phone,
                         inputFormatters: [
@@ -368,7 +483,8 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
                           if (value == null || value.isEmpty) {
                             return 'Please enter a phone number';
                           }
-                          if (value.length < 10) {
+                          // Basic length check, adjust as needed
+                          if (value.length < 7) {
                             return 'Please enter a valid phone number';
                           }
                           return null;
@@ -379,25 +495,50 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
                   onPressed: _isLoading ? null : _handlePhoneAuth,
                   child: _isLoading
                       ? const SizedBox(
                           height: 20,
                           width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
                         )
                       : const Text('Continue with Phone'),
                 ),
-                const SizedBox(height: 24),
-                ElevatedButton(
+                const SizedBox(height: 32),
+                const Row(
+                  children: [
+                    Expanded(child: Divider()),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'OR',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    Expanded(child: Divider()),
+                  ],
+                ),
+                const SizedBox(height: 32),
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.fingerprint),
+                  label: const Text('Login with Any Passkey'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    side: BorderSide(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
                   onPressed: _isLoading ? null : _handlePasskeyLogin,
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Continue with Passkey'),
                 ),
               ],
             ),

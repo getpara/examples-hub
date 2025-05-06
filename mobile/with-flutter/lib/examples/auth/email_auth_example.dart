@@ -1,13 +1,80 @@
+// /Users/tyson/dev/examples-hub/mobile/with-flutter/lib/examples/auth/email_auth_example.dart
 // ignore_for_file: unused_field, unused_local_variable, use_build_context_synchronously
 
-// Import the SDK package
+import 'dart:async'; // Keep for Future and async operations
+import 'dart:ui'; // Added for VoidCallback
+import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart'; // Added import
+
+// Import the SDK package with all necessary exports
 import 'package:para/para.dart';
 import 'package:para_flutter/client/para.dart'; // Assuming 'para' instance is globally available or passed via context
 import 'package:para_flutter/util/random.dart';
+import 'package:para_flutter/widgets/choose_signup_method.dart';
 import 'package:para_flutter/widgets/demo_home.dart';
 import 'package:para_flutter/widgets/demo_otp_verification.dart';
-import 'package:flutter/material.dart';
-// No need to import 'package:para/para.dart' again if already imported above
+
+// --- Define the custom InAppBrowser class ---
+class MyAuthBrowser extends InAppBrowser {
+  final Completer<bool> completer;
+  final String callbackScheme;
+  final VoidCallback? onExitCallback; // Optional callback for exit logic
+  final Function(String, {bool isWarning}) logCallback; // For logging
+  bool flowCompletedViaCallback = false;
+
+  MyAuthBrowser({
+    required this.completer,
+    required this.callbackScheme,
+    required this.logCallback,
+    this.onExitCallback, // Pass optional exit callback
+    super.webViewEnvironment, // Pass environment if needed
+    super.windowId, // Pass windowId if needed
+  });
+
+  @override
+  Future<void> onLoadStop(Uri? url) async {
+    logCallback("Browser onLoadStop: ${url?.toString() ?? 'null'}");
+    if (url?.scheme == callbackScheme) {
+      logCallback("Callback URL detected!");
+      if (!completer.isCompleted) {
+        flowCompletedViaCallback = true;
+        await close(); // Close the browser programmatically
+        completer.complete(true); // Signal success
+      }
+    }
+  }
+
+  @override
+  void onExit() {
+    logCallback("Browser onExit event.");
+    // Call the optional exit callback if provided
+    onExitCallback?.call();
+    if (!completer.isCompleted) {
+      logCallback("Browser closed without callback.");
+      completer.complete(false); // Signal manual close / failure
+    }
+  }
+
+  // Optional: Override other methods if needed, e.g., onBrowserCreated, onLoadStart
+  // @override
+  // Future<void> onBrowserCreated() async {
+  //   logCallback("Custom Browser Created!");
+  // }
+
+  // @override
+  // Future<void> onLoadStart(Uri? url) async {
+  //   logCallback("Custom Browser Started $url");
+  // }
+
+  // @override
+  // void onReceivedError(WebResourceRequest request, WebResourceError error) {
+  //   logCallback("Custom Browser Can't load ${request.url}.. Error: ${error.description}", isWarning: true);
+  //   if (!completer.isCompleted) {
+  //     completer.completeError(WebResourceError); // Or complete with false? Decide error handling
+  //   }
+  // }
+}
+// --- End of custom InAppBrowser class ---
 
 class ParaEmailExample extends StatefulWidget {
   const ParaEmailExample({super.key});
@@ -20,14 +87,12 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
   final _emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
-  // Keep track of the AuthState for multi-step flows
   AuthState? _currentAuthState;
-
-  // Wallet info - maybe manage this in a separate state manager (Riverpod, Provider, etc.)
   Wallet? _wallet;
   String? _address;
-  // CreateWalletResult might contain recoveryShare, handle if needed
-  // String? _recoveryShare;
+
+  // Define your app's custom URL scheme
+  final String _callbackScheme = 'com.usecapsule.example.flutter://';
 
   @override
   void initState() {
@@ -39,20 +104,19 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
   @override
   void dispose() {
     _emailController.dispose();
+    // Cancel the subscription when the widget is disposed
+    // _browserEventsSubscription?.cancel();
     super.dispose();
   }
 
   Future<void> _checkLoginStatus() async {
-    // Check if already logged in when the screen loads
     setState(() => _isLoading = true);
     try {
-      final isLoggedIn = await para.isFullyLoggedIn(); // Await the ParaFuture
+      final isLoggedIn = await para.isFullyLoggedIn();
       if (isLoggedIn && mounted) {
-        final wallets =
-            await para.fetchWallets(); // Use fetchWallets for consistency
-
+        final wallets = await para.fetchWallets();
         if (wallets.isNotEmpty) {
-          _updateWalletState(wallets.first); // Use helper to update state
+          _updateWalletState(wallets.first);
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const DemoHome()),
@@ -68,22 +132,78 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
     }
   }
 
-  // Helper to update wallet state consistently
   void _updateWalletState(Wallet wallet) {
     setState(() {
       _wallet = wallet;
       _address = wallet.address;
-      // If CreateWalletResult was used and had recoveryShare:
-      // _recoveryShare = createResult.recoveryShare;
     });
   }
 
-  // Helper for logging within the state
   void _log(String message, {bool isWarning = false}) {
     debugPrint('ParaEmailExample: ${isWarning ? "WARNING: " : ""}$message');
   }
 
-  // Renamed function to reflect V2 flow (handles signup or login)
+  // --- Helper to add callback URL ---
+  Uri _prepareUrlWithCallback(String originalUrl) {
+    final uri = Uri.parse(originalUrl);
+    final queryParams = Map<String, String>.from(uri.queryParameters);
+    // Add the nativeCallbackUrl parameter expected by the web app
+    queryParams['nativeCallbackUrl'] = '$_callbackScheme';
+    return uri.replace(queryParameters: queryParams);
+  }
+
+  // --- Function to launch browser and listen for callback ---
+  Future<bool> _launchPasswordWebView(String url) async {
+    // _passwordFlowCompletedViaCallback = false; // Reset flag - Handled in MyAuthBrowser instance
+    final completer = Completer<bool>();
+    final finalUrl = _prepareUrlWithCallback(url);
+
+    // Create instance of our custom browser class
+    final myAuthBrowser = MyAuthBrowser(
+      completer: completer,
+      callbackScheme: _callbackScheme,
+      logCallback: _log, // Pass the state's log function
+      // Optional: Add onExitCallback if specific state cleanup is needed on exit
+      // onExitCallback: () {
+      //   // e.g., setState(() => someUiFlag = false);
+      // },
+    );
+
+    bool browserOpenedSuccessfully = false;
+    try {
+      _log("Opening browser with URL: $finalUrl");
+      await myAuthBrowser.openUrlRequest(
+        urlRequest: URLRequest(url: WebUri.uri(finalUrl)),
+        options: InAppBrowserClassOptions(
+          crossPlatform: InAppBrowserOptions(),
+          ios: IOSInAppBrowserOptions(
+            presentationStyle: IOSUIModalPresentationStyle.PAGE_SHEET,
+          ),
+        ),
+      );
+      browserOpenedSuccessfully = true;
+      // Don't complete the completer here, wait for onLoadStop or onExit in MyAuthBrowser
+    } catch (e) {
+      _log("Error opening browser: $e", isWarning: true);
+      if (!completer.isCompleted) {
+        completer.completeError(e); // Signal error
+      }
+    }
+
+    // Wait for the completer (callback detected or browser closed via MyAuthBrowser overrides)
+    final result = await completer.future;
+
+    // // Clean up listeners/handlers - REMOVED (No listeners/handlers assigned directly here anymore)
+    // _browser.onLoadStop = null;
+    // _browser.onExit = null;
+
+    // The result directly reflects if the flow completed via callback,
+    // using the flag set within MyAuthBrowser instance
+    return browserOpenedSuccessfully &&
+        result &&
+        myAuthBrowser.flowCompletedViaCallback;
+  }
+
   Future<void> _handleEmailAuth() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -91,37 +211,30 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
     final email = _emailController.text.trim();
 
     try {
-      // Step 1: Call signUpOrLogIn
-      _log("Calling signUpOrLogIn for email: $email");
-      // Corrected method name
+      _log("Starting auth flow for email: $email");
       final authState = await para.signUpOrLogIn(auth: {'email': email});
       _currentAuthState = authState;
 
-      _log("signUpOrLogIn returned stage: ${authState.stage}");
+      _log("Auth flow initiated. Resulting stage: ${authState.stage}");
 
-      // Step 2: Handle the returned AuthState
       switch (authState.stage) {
-        case AuthStage.verify: // Correct enum usage
-          _log("Navigating to OTP verification screen.");
+        case AuthStage.verify:
+          _log("Navigating to OTP verification screen for new user.");
           if (!mounted) return;
           final bool verificationSuccess = await Navigator.push<bool>(
                 context,
                 MaterialPageRoute(
                   builder: (context) => DemoOtpVerification(
                     onVerify: _handleOtpVerification,
+                    onResendCode: _handleResendVerificationCode,
                   ),
                 ),
               ) ??
               false;
 
           if (verificationSuccess) {
-            _log("OTP Verification successful, navigating home.");
-            if (mounted) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const DemoHome()),
-              );
-            }
+            _log(
+                "OTP Verification successful, flow continues in ChooseSignupMethod.");
           } else {
             _log("OTP Verification failed or was cancelled.");
             if (mounted) {
@@ -133,27 +246,88 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
           }
           break;
 
-        case AuthStage.login: // Correct enum usage
-          _log("User exists, proceeding with passkey login.");
-          // Correct method name and usage
-          final wallet = await para.loginWithPasskey(
-            authInfo: EmailAuthInfo(email: email), // Correct type usage
-          );
-          _log("Passkey login successful.");
-          _updateWalletState(wallet);
-          if (mounted) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const DemoHome()),
-            );
+        case AuthStage.login:
+          _log("User exists, proceeding with login.");
+
+          if (authState.passwordUrl != null) {
+            _log("Password login available. Launching web view...");
+            // --- Launch Password Web View and wait for callback ---
+            final bool loginSuccess =
+                await _launchPasswordWebView(authState.passwordUrl!);
+
+            if (loginSuccess) {
+              _log(
+                  "Password flow successful via callback. Verifying login status...");
+              // Short delay might be needed for backend session propagation
+              await Future.delayed(const Duration(milliseconds: 500));
+              bool loggedIn = await para.isFullyLoggedIn();
+
+              if (loggedIn) {
+                _log("Login confirmed after password flow.");
+                final wallets = await para.fetchWallets();
+                if (wallets.isNotEmpty) _updateWalletState(wallets.first);
+                if (mounted) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const DemoHome()),
+                  );
+                }
+              } else {
+                _log("Login status check failed after password callback.",
+                    isWarning: true);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text(
+                            'Login verification failed after password entry.')),
+                  );
+                }
+              }
+            } else {
+              _log(
+                  "Password flow did not complete successfully (closed without callback).");
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text('Password login cancelled or failed.')),
+                );
+              }
+            }
+          } else if (authState.passkeyUrl != null ||
+              authState.passkeyKnownDeviceUrl != null) {
+            _log("Password URL not found, attempting passkey login.");
+            try {
+              final wallet = await para.loginWithPasskey(
+                  authInfo: EmailAuthInfo(email: email));
+              _log("Passkey login successful.");
+              _updateWalletState(wallet);
+              if (mounted) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const DemoHome()),
+                );
+              }
+            } catch (passkeyError) {
+              _log("Passkey login failed: $passkeyError", isWarning: true);
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                      content: Text('Passkey login failed: $passkeyError')),
+                );
+              }
+            }
+          } else {
+            _log("No password URL or passkey options found in AuthState.",
+                isWarning: true);
+            throw Exception("No available login methods found for this user.");
           }
           break;
 
-        case AuthStage.signup: // Correct enum usage
-          _log("Received unexpected 'signup' stage from signUpOrLogIn.",
+        case AuthStage.signup:
+          _log("Received unexpected 'signup' stage from auth flow",
               isWarning: true);
           throw Exception(
-              "Unexpected authentication stage: signup received directly from signUpOrLogIn.");
+              "Unexpected authentication stage: signup received directly from auth flow");
       }
     } catch (e) {
       _log('Error during email auth: ${e.toString()}', isWarning: true);
@@ -167,47 +341,24 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
     }
   }
 
-  // Separate handler for OTP verification logic
-  Future<bool> _handleOtpVerification(String code) async {
+  Future<bool> _handleResendVerificationCode() async {
+    // This function remains largely the same
     setState(() => _isLoading = true);
-    final email = _emailController.text.trim();
     try {
-      _log("Calling verifyNewAccount with code: $code");
-      // Correct method name and usage
-      final authState = await para.verifyNewAccount(verificationCode: code);
-      _log("verifyNewAccount returned stage: ${authState.stage}");
-
-      // Correct enum usage
-      if (authState.stage == AuthStage.signup) {
-        if (authState.passkeyId == null) {
-          throw Exception("Signup stage reached, but no passkeyId provided.");
-        }
-        _log("Proceeding to generate passkey with id: ${authState.passkeyId}");
-        // Correct method call with named arguments
-        await para.generatePasskey(
-          identifier: email,
-          biometricsId: authState.passkeyId!,
-        );
-        _log("Passkey generated, creating wallet...");
-        // Correct handling of createWallet result
-        final createResult = await para.createWallet(skipDistribute: false);
-        _log("Wallet created successfully.");
-        _updateWalletState(
-            createResult); // Pass the Wallet object from the result
-        setState(() => _isLoading = false);
-        return true;
-      } else {
-        _log("Unexpected stage after verifyNewAccount: ${authState.stage}",
-            isWarning: true);
-        throw Exception(
-            "Verification succeeded but resulted in unexpected stage: ${authState.stage}");
-      }
-    } catch (e) {
-      _log("Error during OTP verification/signup: ${e.toString()}",
-          isWarning: true);
+      await para.resendVerificationCode();
+      _log("Resend verification code request successful.");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Verification Error: ${e.toString()}')),
+          const SnackBar(content: Text('Verification code resent.')),
+        );
+      }
+      setState(() => _isLoading = false);
+      return true;
+    } catch (e) {
+      _log("Error resending verification code: $e", isWarning: true);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error resending code: $e')),
         );
       }
       setState(() => _isLoading = false);
@@ -215,19 +366,53 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
     }
   }
 
-  Future<void> _handlePasskeyLogin() async {
-    setState(() => _isLoading = true);
+  Future<bool> _handleOtpVerification(String code) async {
+    // This function remains largely the same
+    try {
+      _log("Verifying code: $code");
+      final authState = await para.verifyNewAccount(verificationCode: code);
+      _log("Verification successful. Stage: ${authState.stage}");
 
+      if (authState.stage == AuthStage.signup) {
+        _log("Navigating to ChooseSignupMethod screen.");
+        if (mounted) {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChooseSignupMethod(
+                authState: authState,
+              ),
+            ),
+          );
+          return true;
+        }
+        return false;
+      } else {
+        _log("Unexpected stage after verification: ${authState.stage}",
+            isWarning: true);
+        throw Exception(
+            "Verification resulted in unexpected state: ${authState.stage}");
+      }
+    } catch (e) {
+      _log("Error during verification: $e", isWarning: true);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Verification error: $e')),
+        );
+      }
+      return false;
+    }
+  }
+
+  Future<void> _handlePasskeyLogin() async {
+    // This function remains the same
+    setState(() => _isLoading = true);
     try {
       _log("Attempting generic passkey login...");
-      // Correct method name
       final wallet = await para.loginWithPasskey(authInfo: null);
       _log("Generic passkey login successful.");
-
       if (!mounted) return;
-
       _updateWalletState(wallet);
-
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const DemoHome()),
@@ -245,10 +430,10 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
 
   @override
   Widget build(BuildContext context) {
-    // ... rest of the build method remains the same ...
+    // Build method remains the same
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Email + Passkey Example (V2)'), // Updated title
+        title: const Text('Email Authentication'),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -258,20 +443,28 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const Icon(
+                  Icons.email_outlined,
+                  size: 50,
+                  color: Colors.blue, // Or use Theme color
+                ),
+                const SizedBox(height: 24),
                 const Text(
                   'Email Authentication',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                   ),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 12),
                 const Text(
-                  'Example implementation of email-based authentication using Para SDK V2.', // Updated description
+                  'Sign in or register with your email address.',
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.black87,
+                    color: Colors.black87, // Or use Theme color
                   ),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 48),
                 TextFormField(
@@ -280,6 +473,7 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
                     labelText: 'Email Address',
                     hintText: 'Enter your email',
                     prefixIcon: Icon(Icons.email_outlined),
+                    border: OutlineInputBorder(), // Added border for clarity
                   ),
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.done,
@@ -295,15 +489,22 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
-                  // Updated onPressed handler and text
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16), // Make button taller
+                  ),
                   onPressed: _isLoading ? null : _handleEmailAuth,
                   child: _isLoading
                       ? const SizedBox(
                           height: 20,
                           width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
                         )
-                      : const Text('Continue with Email'), // Updated text
+                      : const Text('Continue'),
                 ),
                 const SizedBox(height: 32),
                 const Row(
@@ -323,20 +524,17 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
                   ],
                 ),
                 const SizedBox(height: 32),
-                OutlinedButton(
-                  onPressed: _isLoading ? null : _handlePasskeyLogin,
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.fingerprint), // Added icon
+                  label: const Text('Login with Any Passkey'),
                   style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16), // Make button taller
                     side: BorderSide(
                       color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Login with Any Passkey'), // Clarified text
+                  onPressed: _isLoading ? null : _handlePasskeyLogin,
                 ),
               ],
             ),
