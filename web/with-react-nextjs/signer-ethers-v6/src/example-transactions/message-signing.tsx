@@ -137,7 +137,7 @@ export default function MessageSigningDemo() {
               placeholder="Enter a message to sign"
               required
               disabled={isLoading}
-              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
           </div>
 

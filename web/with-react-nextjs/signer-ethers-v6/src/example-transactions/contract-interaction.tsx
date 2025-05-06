@@ -6,7 +6,6 @@ import { PARA_TEST_TOKEN_CONTRACT_ADDRESS } from ".";
 import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
 import { useParaSigner } from "@/components/ParaSignerProvider";
 import { useAccount, useWallet } from "@getpara/react-sdk";
-import { provider } from "@/client/ethers";
 
 export default function ContractInteractionDemo() {
   const [amount, setAmount] = useState("");
@@ -22,12 +21,11 @@ export default function ContractInteractionDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { signer } = useParaSigner();
+  const { signer, provider } = useParaSigner();
   const { data: account } = useAccount();
   const { data: wallet } = useWallet();
 
   const address = wallet?.address;
-  const walletId = wallet?.id;
   const isConnected = account?.isConnected;
 
   const fetchContractData = async () => {
@@ -37,15 +35,12 @@ export default function ContractInteractionDemo() {
     try {
       const contract = new Contract(PARA_TEST_TOKEN_CONTRACT_ADDRESS, ParaTestToken.abi, provider);
 
-      // Get token balance
       const balance = await contract.balanceOf(address);
       setTokenBalance(formatEther(balance));
 
-      // Get minted amount for address
       const minted = await contract.mintedAmount(address);
       setMintedAmount(formatEther(minted));
 
-      // Get mint limit
       const limit = await contract.MINT_LIMIT();
       setMintLimit(formatEther(limit));
     } catch (error) {
@@ -77,17 +72,11 @@ export default function ContractInteractionDemo() {
         throw new Error("Please connect your wallet to mint tokens.");
       }
 
-      if (!walletId) {
-        throw new Error("No wallet ID found. Please reconnect your wallet.");
-      }
-
-      // Validate amount
       const amountFloat = parseFloat(amount);
       if (isNaN(amountFloat) || amountFloat <= 0) {
         throw new Error("Please enter a valid amount greater than 0.");
       }
 
-      // Check if mint would exceed limit
       if (mintedAmount && mintLimit) {
         const currentMinted = parseFloat(mintedAmount);
         const limit = parseFloat(mintLimit);
@@ -109,7 +98,6 @@ export default function ContractInteractionDemo() {
         message: "Transaction submitted. Waiting for confirmation...",
       });
 
-      // Wait for transaction to be mined
       await tx.wait();
 
       setStatus({
@@ -214,7 +202,7 @@ export default function ContractInteractionDemo() {
               step="0.01"
               required
               disabled={isLoading}
-              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
           </div>
 

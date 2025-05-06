@@ -6,7 +6,6 @@ import { PARA_TEST_TOKEN_CONTRACT_ADDRESS } from ".";
 import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
 import { useParaSigner } from "@/components/ParaSignerProvider";
 import { useAccount, useWallet } from "@getpara/react-sdk";
-import { provider } from "@/client/ethers";
 
 type Operation = {
   type: "mint" | "transfer";
@@ -26,10 +25,9 @@ export default function BatchedTransactionDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { signer } = useParaSigner();
+  const { signer, provider } = useParaSigner();
   const { data: account } = useAccount();
   const { data: wallet } = useWallet();
-
   const address = wallet?.address;
   const isConnected = account?.isConnected;
 
@@ -97,7 +95,6 @@ export default function BatchedTransactionDemo() {
 
       const iface = new Interface(ParaTestToken.abi);
 
-      // Prepare calldata for each operation
       const calldata = operations.map((op) => {
         if (op.type === "mint") {
           return iface.encodeFunctionData("mint", [parseEther(op.amount)]);
@@ -122,9 +119,7 @@ export default function BatchedTransactionDemo() {
         message: "Transaction submitted. Waiting for confirmation...",
       });
 
-      // Wait for transaction to be mined
       await tx.wait();
-      console.log("Transaction confirmed:", receipt);
 
       setStatus({
         show: true,
@@ -132,7 +127,6 @@ export default function BatchedTransactionDemo() {
         message: "Batched operations executed successfully!",
       });
 
-      // Reset form and refresh data
       setOperations([{ type: "mint", recipient: "", amount: "" }]);
       await fetchTokenData();
     } catch (error) {
