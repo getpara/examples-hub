@@ -1,10 +1,11 @@
 "use client";
 
-import { usePara } from "@/components/ParaProvider";
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { PARA_TEST_TOKEN_CONTRACT_ADDRESS, PARA_TEST_TOKEN_CONTRACT_OWNER } from ".";
 import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
+import { useParaSigner } from "@/components/ParaSignerProvider";
+import { useAccount, useWallet } from "@getpara/react-sdk";
 
 export default function PermitSigningDemo() {
   const [isLoading, setIsLoading] = useState(false);
@@ -24,10 +25,12 @@ export default function PermitSigningDemo() {
     s: string;
   } | null>(null);
 
-  const { isConnected, walletId, address, signer, provider } = usePara();
+  const { provider, signer } = useParaSigner();
+  const { data: account } = useAccount();
+  const { data: wallet } = useWallet();
 
   const fetchTokenData = async () => {
-    if (!address) return;
+    if (!wallet?.address) return;
 
     setIsBalanceLoading(true);
     try {
@@ -36,11 +39,11 @@ export default function PermitSigningDemo() {
       const contract = new ethers.Contract(PARA_TEST_TOKEN_CONTRACT_ADDRESS, ParaTestToken.abi, provider);
 
       // Get token balance
-      const balance = await contract.balanceOf(address);
+      const balance = await contract.balanceOf(wallet?.address);
       setTokenBalance(ethers.utils.formatEther(balance));
 
       // Get current allowance
-      const allowance = await contract.allowance(address, PARA_TEST_TOKEN_CONTRACT_OWNER);
+      const allowance = await contract.allowance(wallet?.address, PARA_TEST_TOKEN_CONTRACT_OWNER);
       setCurrentAllowance(ethers.utils.formatEther(allowance));
     } catch (error) {
       console.error("Error fetching token data:", error);
@@ -52,10 +55,10 @@ export default function PermitSigningDemo() {
   };
 
   useEffect(() => {
-    if (address) {
+    if (wallet?.address) {
       fetchTokenData();
     }
-  }, [address]);
+  }, [wallet]);
 
   const signPermit = async () => {
     setIsLoading(true);
@@ -65,24 +68,17 @@ export default function PermitSigningDemo() {
     if (!signer) return;
 
     try {
-      if (!isConnected || !address || !provider) {
+      if (!account?.isConnected || !wallet?.address || !provider) {
         throw new Error("Please connect your wallet to sign the permit.");
-      }
-
-      if (!walletId) {
-        throw new Error("No wallet ID found. Please reconnect your wallet.");
       }
 
       const contract = new ethers.Contract(PARA_TEST_TOKEN_CONTRACT_ADDRESS, ParaTestToken.abi, provider);
 
-      // Get the current nonce for the owner
-      const nonce = await contract.nonces(address);
+      const nonce = await contract.nonces(wallet?.address);
 
-      // Calculate deadline (1 hour from now)
       const deadline = Math.floor(Date.now() / 1000) + 3600;
 
-      // Get domain separator
-      const domainSeparator = await contract.DOMAIN_SEPARATOR();
+      // const domainSeparator = await contract.DOMAIN_SEPARATOR();
       const name = await contract.name();
 
       // Prepare permit data
@@ -104,7 +100,7 @@ export default function PermitSigningDemo() {
       };
 
       const value = {
-        owner: address,
+        owner: wallet?.address,
         spender: PARA_TEST_TOKEN_CONTRACT_OWNER,
         value: ethers.constants.MaxUint256,
         nonce: nonce,
@@ -170,7 +166,7 @@ export default function PermitSigningDemo() {
             <h3 className="text-sm font-medium text-gray-900">Token Information:</h3>
             <button
               onClick={fetchTokenData}
-              disabled={isBalanceLoading || !address}
+              disabled={isBalanceLoading || !wallet?.address}
               className="p-1 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
               title="Refresh data">
               <span className={`inline-block ${isBalanceLoading ? "animate-spin" : ""}`}>🔄</span>
@@ -180,7 +176,7 @@ export default function PermitSigningDemo() {
             <div>
               <p className="text-sm text-gray-600">Your CTT Balance:</p>
               <p className="text-lg font-medium text-gray-900">
-                {!address
+                {!wallet?.address
                   ? "Please connect your wallet"
                   : isBalanceLoading
                   ? "Loading..."
@@ -192,7 +188,7 @@ export default function PermitSigningDemo() {
             <div>
               <p className="text-sm text-gray-600">Current Owner Allowance:</p>
               <p className="text-lg font-medium text-gray-900">
-                {!address
+                {!wallet?.address
                   ? "Please connect your wallet"
                   : isBalanceLoading
                   ? "Loading..."
@@ -220,7 +216,7 @@ export default function PermitSigningDemo() {
         <button
           onClick={signPermit}
           className="w-full rounded-none bg-blue-900 px-6 py-3 text-sm font-medium text-white hover:bg-blue-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-4"
-          disabled={!isConnected || isLoading}>
+          disabled={!account?.isConnected || isLoading}>
           {isLoading ? "Signing Permit..." : "Sign Permit"}
         </button>
 

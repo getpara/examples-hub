@@ -1,8 +1,9 @@
 "use client";
 
-import { usePara } from "@/components/ParaProvider";
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
+import { useParaSigner } from "@/components/ParaSignerProvider";
+import { useAccount, useWallet } from "@getpara/react-sdk";
 
 export default function EthTransferDemo() {
   const [to, setTo] = useState("");
@@ -17,14 +18,16 @@ export default function EthTransferDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { isConnected, walletId, address, signer, provider } = usePara();
+  const { provider, signer } = useParaSigner();
+  const { data: account } = useAccount();
+  const { data: wallet } = useWallet();
 
   const fetchBalance = async () => {
-    if (!address || !provider) return;
+    if (!wallet?.address || !provider) return;
 
     setIsBalanceLoading(true);
     try {
-      const balanceWei = await provider.getBalance(address);
+      const balanceWei = await provider.getBalance(wallet?.address);
       setBalance(ethers.utils.formatEther(balanceWei));
     } catch (error) {
       console.error("Error fetching balance:", error);
@@ -35,18 +38,18 @@ export default function EthTransferDemo() {
   };
 
   useEffect(() => {
-    if (address) {
+    if (wallet?.address) {
       fetchBalance();
     }
-  }, [address]);
+  }, [wallet]);
 
   const constructTransaction = async (
     toAddress: string,
     ethAmount: string
   ): Promise<ethers.providers.TransactionRequest> => {
-    if (!address || !provider) throw new Error("No sender address or provider available");
+    if (!wallet?.address || !provider) throw new Error("No sender address or provider available");
 
-    const nonce = await provider.getTransactionCount(address);
+    const nonce = await provider.getTransactionCount(wallet?.address);
     const feeData = await provider.getFeeData();
     const gasLimit = ethers.BigNumber.from(21000);
     const value = ethers.utils.parseEther(ethAmount);
@@ -64,25 +67,20 @@ export default function EthTransferDemo() {
 
     return tx;
   };
-  const validateTransaction = async (toAddress: string, ethAmount: string): Promise<boolean> => {
-    if (!address || !provider) throw new Error("No sender address or provider available");
+  const validateTransaction = async (ethAmount: string): Promise<boolean> => {
+    if (!wallet?.address || !provider) throw new Error("No sender address or provider available");
 
     try {
-      // Get current balance
-      const balanceWei = await provider.getBalance(address);
+      const balanceWei = await provider.getBalance(wallet?.address);
 
-      // Get gas estimate
       const feeData = await provider.getFeeData();
       const gasLimit = ethers.BigNumber.from(21000);
 
-      // Calculate maximum possible gas fee
       const maxGasFee = gasLimit.mul(feeData.maxFeePerGas ?? ethers.BigNumber.from(0));
 
-      // Calculate total cost (amount + maximum gas fee)
       const amountWei = ethers.utils.parseEther(ethAmount);
       const totalCost = amountWei.add(maxGasFee);
 
-      // Check if balance is sufficient
       if (totalCost > balanceWei) {
         const requiredEth = ethers.utils.formatEther(totalCost);
         const availableEth = ethers.utils.formatEther(balanceWei);
@@ -106,20 +104,11 @@ export default function EthTransferDemo() {
     if (!signer) return;
 
     try {
-      if (!isConnected) {
+      if (!account?.isConnected) {
         setStatus({
           show: true,
           type: "error",
           message: "Please connect your wallet to send a transaction.",
-        });
-        return;
-      }
-
-      if (!walletId) {
-        setStatus({
-          show: true,
-          type: "error",
-          message: "No wallet ID found. Please reconnect your wallet.",
         });
         return;
       }
@@ -146,7 +135,7 @@ export default function EthTransferDemo() {
       }
 
       // Validate balance and fees
-      await validateTransaction(to, amount);
+      await validateTransaction(amount);
 
       // Construct and send transaction
       const tx = await constructTransaction(to, amount);
@@ -206,7 +195,7 @@ export default function EthTransferDemo() {
             <h3 className="text-sm font-medium text-gray-900">Current Balance:</h3>
             <button
               onClick={fetchBalance}
-              disabled={isBalanceLoading || !address}
+              disabled={isBalanceLoading || !wallet?.address}
               className="p-1 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
               title="Refresh balance">
               <span className={`inline-block ${isBalanceLoading ? "animate-spin" : ""}`}>🔄</span>
@@ -215,7 +204,7 @@ export default function EthTransferDemo() {
           <div className="px-6 py-3">
             <p className="text-sm text-gray-500 bg-gray-100 p-2 rounded-md">Network: Holesky</p>
             <p className="text-lg font-medium text-gray-900">
-              {!address
+              {!wallet?.address
                 ? "Please connect your wallet"
                 : isBalanceLoading
                 ? "Loading..."
@@ -256,7 +245,7 @@ export default function EthTransferDemo() {
               placeholder="0x..."
               required
               disabled={isLoading}
-              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
           </div>
 
@@ -275,7 +264,7 @@ export default function EthTransferDemo() {
               step="0.01"
               required
               disabled={isLoading}
-              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
           </div>
 

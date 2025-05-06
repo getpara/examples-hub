@@ -1,10 +1,11 @@
 "use client";
 
-import { usePara } from "@/components/ParaProvider";
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { PARA_TEST_TOKEN_CONTRACT_ADDRESS } from ".";
 import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
+import { useParaSigner } from "@/components/ParaSignerProvider";
+import { useAccount, useWallet } from "@getpara/react-sdk";
 
 type Operation = {
   type: "mint" | "transfer";
@@ -24,16 +25,18 @@ export default function BatchedTransactionDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { isConnected, address, signer, provider } = usePara();
+  const { provider, signer } = useParaSigner();
+  const { data: account } = useAccount();
+  const { data: wallet } = useWallet();
 
   const fetchTokenData = async () => {
-    if (!address || !provider) return;
+    if (!wallet?.address || !provider) return;
 
     setIsBalanceLoading(true);
     try {
       const contract = new ethers.Contract(PARA_TEST_TOKEN_CONTRACT_ADDRESS, ParaTestToken.abi, provider);
 
-      const balance = await contract.balanceOf(address);
+      const balance = await contract.balanceOf(wallet?.address);
       setTokenBalance(ethers.utils.formatEther(balance));
     } catch (error) {
       console.error("Error fetching token data:", error);
@@ -44,10 +47,10 @@ export default function BatchedTransactionDemo() {
   };
 
   useEffect(() => {
-    if (address) {
+    if (wallet?.address) {
       fetchTokenData();
     }
-  }, [address]);
+  }, [wallet]);
 
   const addOperation = () => {
     setOperations([...operations, { type: "mint", recipient: "", amount: "" }]);
@@ -82,7 +85,7 @@ export default function BatchedTransactionDemo() {
     if (!signer) return;
 
     try {
-      if (!isConnected || !address) {
+      if (!account?.isConnected || !wallet?.address) {
         throw new Error("Please connect your wallet.");
       }
 
@@ -90,7 +93,6 @@ export default function BatchedTransactionDemo() {
 
       const iface = new ethers.utils.Interface(ParaTestToken.abi);
 
-      // Prepare calldata for each operation
       const calldata = operations.map((op) => {
         if (op.type === "mint") {
           return iface.encodeFunctionData("mint", [ethers.utils.parseEther(op.amount)]);
@@ -115,9 +117,7 @@ export default function BatchedTransactionDemo() {
         message: "Transaction submitted. Waiting for confirmation...",
       });
 
-      // Wait for transaction to be mined
-      const receipt = await tx.wait();
-      console.log("Transaction confirmed:", receipt);
+      await tx.wait();
 
       setStatus({
         show: true,
@@ -157,7 +157,7 @@ export default function BatchedTransactionDemo() {
             <h3 className="text-sm font-medium text-gray-900">Token Balance:</h3>
             <button
               onClick={fetchTokenData}
-              disabled={isBalanceLoading || !address}
+              disabled={isBalanceLoading || !wallet?.address}
               className="p-1 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
               title="Refresh balance">
               <span className={`inline-block ${isBalanceLoading ? "animate-spin" : ""}`}>🔄</span>
@@ -166,7 +166,7 @@ export default function BatchedTransactionDemo() {
           <div className="px-6 py-3">
             <p className="text-sm text-gray-500 bg-gray-100 p-2 rounded-md">Network: Holesky</p>
             <p className="text-lg font-medium text-gray-900">
-              {!address
+              {!wallet?.address
                 ? "Please connect your wallet"
                 : isBalanceLoading
                 ? "Loading..."
@@ -257,7 +257,7 @@ export default function BatchedTransactionDemo() {
           <button
             onClick={executeMulticall}
             disabled={
-              !isConnected ||
+              !account?.isConnected ||
               isLoading ||
               operations.some((op) => !op.amount || (op.type === "transfer" && !op.recipient))
             }

@@ -1,11 +1,11 @@
 "use client";
 
-import { usePara } from "@/components/ParaProvider";
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { PARA_TEST_TOKEN_CONTRACT_ADDRESS } from ".";
+import { useParaSigner } from "@/components/ParaSignerProvider";
+import { useAccount, useWallet } from "@getpara/react-sdk";
 
-// ERC20 minimal ABI for transfer function
 const ERC20_ABI = [
   "function transfer(address to, uint256 amount) returns (bool)",
   "function balanceOf(address account) view returns (uint256)",
@@ -29,21 +29,23 @@ export default function TokenTransferDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { isConnected, walletId, address, signer, provider } = usePara();
+  const { provider, signer } = useParaSigner();
+  const { data: account } = useAccount();
+  const { data: wallet } = useWallet();
 
   const fetchBalances = async () => {
-    if (!address || provider === null) return;
+    if (!wallet?.address || provider === null) return;
 
     setIsBalanceLoading(true);
     try {
       // Fetch ETH balance
-      const ethBalanceWei = await provider.getBalance(address);
+      const ethBalanceWei = await provider.getBalance(wallet?.address);
       setEthBalance(ethers.utils.formatEther(ethBalanceWei));
 
       // Fetch token balance
       const tokenContract = new ethers.Contract(contractAddress, ERC20_ABI, provider);
       const decimals = await tokenContract.decimals();
-      const balance = await tokenContract.balanceOf(address);
+      const balance = await tokenContract.balanceOf(wallet?.address);
       const symbol = await tokenContract.symbol();
 
       setTokenSymbol(symbol);
@@ -58,10 +60,10 @@ export default function TokenTransferDemo() {
   };
 
   useEffect(() => {
-    if (address && contractAddress) {
+    if (wallet?.address && contractAddress) {
       fetchBalances();
     }
-  }, [address, contractAddress]);
+  }, [wallet, contractAddress]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,26 +74,19 @@ export default function TokenTransferDemo() {
     if (!signer) return;
 
     try {
-      if (!isConnected) {
+      if (!account?.isConnected) {
         throw new Error("Please connect your wallet to send tokens.");
       }
 
-      if (!walletId) {
-        throw new Error("No wallet ID found. Please reconnect your wallet.");
-      }
-
-      // Validate address format
       if (!to.match(/^0x[a-fA-F0-9]{40}$/)) {
         throw new Error("Invalid recipient address format.");
       }
 
-      // Validate amount
       const amountFloat = parseFloat(amount);
       if (isNaN(amountFloat) || amountFloat <= 0) {
         throw new Error("Please enter a valid amount greater than 0.");
       }
 
-      // Create contract instance with signer
       const tokenContract = new ethers.Contract(contractAddress, ERC20_ABI, signer);
 
       setStatus({
@@ -100,7 +95,6 @@ export default function TokenTransferDemo() {
         message: "Please confirm the transaction in your wallet...",
       });
 
-      // Send transfer transaction
       const tx = await tokenContract.transfer(to, ethers.utils.parseEther(amount));
       console.log("Transaction submitted:", tx);
 
@@ -111,9 +105,7 @@ export default function TokenTransferDemo() {
         message: "Transaction submitted. Waiting for confirmation...",
       });
 
-      // Wait for transaction to be mined
-      const receipt = await tx.wait();
-      console.log("Transaction confirmed:", receipt);
+      await tx.wait();
 
       setStatus({
         show: true,
@@ -121,7 +113,6 @@ export default function TokenTransferDemo() {
         message: "Tokens transferred successfully!",
       });
 
-      // Refresh balances after confirmed transaction
       await fetchBalances();
 
       setTo("");
@@ -155,7 +146,7 @@ export default function TokenTransferDemo() {
               <h3 className="text-sm font-medium text-gray-900">Current Balances:</h3>
               <button
                 onClick={fetchBalances}
-                disabled={isBalanceLoading || !address}
+                disabled={isBalanceLoading || !wallet?.address}
                 className="p-1 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
                 title="Refresh balances">
                 <span className={`inline-block ${isBalanceLoading ? "animate-spin" : ""}`}>🔄</span>
@@ -166,7 +157,7 @@ export default function TokenTransferDemo() {
               <div>
                 <p className="text-sm text-gray-600">ETH Balance (for gas fees):</p>
                 <p className="text-lg font-medium text-gray-900">
-                  {!address
+                  {!wallet?.address
                     ? "Please connect your wallet"
                     : isBalanceLoading
                     ? "Loading..."
@@ -179,7 +170,7 @@ export default function TokenTransferDemo() {
                 <p className="text-sm text-gray-600">{tokenSymbol} Balance:</p>
                 <div className="space-y-2">
                   <p className="text-lg font-medium text-gray-900">
-                    {!address
+                    {!wallet?.address
                       ? "Please connect your wallet"
                       : isBalanceLoading
                       ? "Loading..."
@@ -236,7 +227,7 @@ export default function TokenTransferDemo() {
               placeholder="0x..."
               required
               disabled={isLoading}
-              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
           </div>
 
@@ -254,7 +245,7 @@ export default function TokenTransferDemo() {
               placeholder="0x..."
               required
               disabled={isLoading}
-              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
           </div>
 
@@ -273,7 +264,7 @@ export default function TokenTransferDemo() {
               step="0.01"
               required
               disabled={isLoading}
-              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
           </div>
 

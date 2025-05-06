@@ -35,11 +35,7 @@ export default function ContractInteractionDemo() {
 
     setIsBalanceLoading(true);
     try {
-      const contract = new Contract(
-        PARA_TEST_TOKEN_CONTRACT_ADDRESS,
-        ParaTestToken.abi,
-        provider
-      );
+      const contract = new Contract(PARA_TEST_TOKEN_CONTRACT_ADDRESS, ParaTestToken.abi, provider);
 
       // Get token balance
       const balance = await contract.balanceOf(address);
@@ -98,17 +94,11 @@ export default function ContractInteractionDemo() {
         const requestedAmount = amountFloat;
 
         if (currentMinted + requestedAmount > limit) {
-          throw new Error(
-            `Minting ${requestedAmount} tokens would exceed your limit of ${limit} tokens.`
-          );
+          throw new Error(`Minting ${requestedAmount} tokens would exceed your limit of ${limit} tokens.`);
         }
       }
 
-      const contract = new Contract(
-        PARA_TEST_TOKEN_CONTRACT_ADDRESS,
-        ParaTestToken.abi,
-        signer
-      );
+      const contract = new Contract(PARA_TEST_TOKEN_CONTRACT_ADDRESS, ParaTestToken.abi, signer);
       const tx = await contract.mint(parseEther(amount));
 
       setTxHash(tx.hash);
@@ -120,7 +110,7 @@ export default function ContractInteractionDemo() {
       });
 
       // Wait for transaction to be mined
-      const receipt = await tx.wait();
+      await tx.wait();
 
       setStatus({
         show: true,
@@ -136,10 +126,7 @@ export default function ContractInteractionDemo() {
       setStatus({
         show: true,
         type: "error",
-        message:
-          error instanceof Error
-            ? error.message
-            : "Failed to mint tokens. Please try again.",
+        message: error instanceof Error ? error.message : "Failed to mint tokens. Please try again.",
       });
     } finally {
       setIsLoading(false);
@@ -149,35 +136,23 @@ export default function ContractInteractionDemo() {
   return (
     <div className="container mx-auto px-4">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold tracking-tight mb-6">
-          Contract Interaction Demo
-        </h1>
+        <h1 className="text-4xl font-bold tracking-tight mb-6">Contract Interaction Demo</h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          This demo shows how to interact with a deployed contract. Mint CTT
-          tokens by interacting with the smart contract. Each address can mint
-          up to 10 CTT tokens.
+          This demo shows how to interact with a deployed contract. Mint CTT tokens by interacting with the smart
+          contract. Each address can mint up to 10 CTT tokens.
         </p>
       </div>
 
       <div className="max-w-xl mx-auto">
         <div className="mb-8 rounded-none border border-gray-200">
           <div className="flex justify-between items-center px-6 py-3 bg-gray-50 border-b border-gray-200">
-            <h3 className="text-sm font-medium text-gray-900">
-              Contract Information:
-            </h3>
+            <h3 className="text-sm font-medium text-gray-900">Contract Information:</h3>
             <button
               onClick={fetchContractData}
               disabled={isBalanceLoading || !address}
               className="p-1 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
-              title="Refresh data"
-            >
-              <span
-                className={`inline-block ${
-                  isBalanceLoading ? "animate-spin" : ""
-                }`}
-              >
-                🔄
-              </span>
+              title="Refresh data">
+              <span className={`inline-block ${isBalanceLoading ? "animate-spin" : ""}`}>🔄</span>
             </button>
           </div>
           <div className="px-6 py-3 space-y-2">
@@ -201,9 +176,7 @@ export default function ContractInteractionDemo() {
                   : isBalanceLoading
                   ? "Loading..."
                   : mintedAmount && mintLimit
-                  ? `${parseFloat(mintedAmount).toFixed(4)} / ${parseFloat(
-                      mintLimit
-                    ).toFixed(4)} CTT`
+                  ? `${parseFloat(mintedAmount).toFixed(4)} / ${parseFloat(mintLimit).toFixed(4)} CTT`
                   : "Unable to fetch minted amount"}
               </p>
             </div>
@@ -218,18 +191,18 @@ export default function ContractInteractionDemo() {
                 : status.type === "error"
                 ? "bg-red-50 border-red-500 text-red-700"
                 : "bg-blue-50 border-blue-500 text-blue-700"
-            }`}
-          >
+            }`}>
             <p className="px-6 py-4 break-words">{status.message}</p>
           </div>
         )}
 
-        <form onSubmit={handleMint} className="space-y-4">
+        <form
+          onSubmit={handleMint}
+          className="space-y-4">
           <div className="space-y-3">
             <label
               htmlFor="amount"
-              className="block text-sm font-medium text-gray-700"
-            >
+              className="block text-sm font-medium text-gray-700">
               Amount to Mint (CTT)
             </label>
             <input
@@ -248,23 +221,19 @@ export default function ContractInteractionDemo() {
           <button
             type="submit"
             className="w-full rounded-none bg-blue-900 px-6 py-3 text-sm font-medium text-white hover:bg-blue-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!amount || isLoading || !isConnected}
-          >
+            disabled={!amount || isLoading || !isConnected}>
             {isLoading ? "Minting Tokens..." : "Mint Tokens"}
           </button>
 
           {txHash && (
             <div className="mt-8 rounded-none border border-gray-200">
               <div className="flex justify-between items-center px-6 py-4 bg-gray-50 border-b border-gray-200">
-                <h3 className="text-sm font-medium text-gray-900">
-                  Transaction Hash:
-                </h3>
+                <h3 className="text-sm font-medium text-gray-900">Transaction Hash:</h3>
                 <a
                   href={`https://holesky.etherscan.io/tx/${txHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-1 text-sm bg-blue-900 text-white hover:bg-blue-950 transition-colors rounded-none"
-                >
+                  className="px-3 py-1 text-sm bg-blue-900 text-white hover:bg-blue-950 transition-colors rounded-none">
                   View on Etherscan
                 </a>
               </div>
@@ -276,23 +245,17 @@ export default function ContractInteractionDemo() {
             </div>
           )}
 
-          {mintedAmount &&
-            mintLimit &&
-            parseFloat(mintedAmount) >= parseFloat(mintLimit) && (
-              <div className="mt-4 bg-yellow-50 border border-yellow-200 p-4 text-yellow-800">
-                <p>
-                  You have reached your minting limit. No more tokens can be
-                  minted to this address.
-                </p>
-              </div>
-            )}
+          {mintedAmount && mintLimit && parseFloat(mintedAmount) >= parseFloat(mintLimit) && (
+            <div className="mt-4 bg-yellow-50 border border-yellow-200 p-4 text-yellow-800">
+              <p>You have reached your minting limit. No more tokens can be minted to this address.</p>
+            </div>
+          )}
         </form>
 
         <div className="mt-8 text-center">
           <a
             href="/demo/token-transfer"
-            className="text-blue-900 hover:text-blue-950 text-sm font-medium"
-          >
+            className="text-blue-900 hover:text-blue-950 text-sm font-medium">
             → Go to Token Transfer Demo
           </a>
         </div>
