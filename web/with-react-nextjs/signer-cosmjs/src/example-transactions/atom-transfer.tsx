@@ -1,7 +1,8 @@
 "use client";
 
-import { usePara } from "@/components/ParaProvider";
+import { useParaSigner } from "@/components/ParaSignerProvider";
 import { Coin, MsgSendEncodeObject, StdFee } from "@cosmjs/stargate";
+import { useAccount, useWallet } from "@getpara/react-sdk";
 import { MsgSend } from "cosmjs-types/cosmos/bank/v1beta1/tx";
 import { useState, useEffect } from "react";
 
@@ -18,14 +19,16 @@ export default function EthTransferDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { isConnected, walletId, address, stargateClient } = usePara();
+  const { stargateClient } = useParaSigner();
+  const { data: account } = useAccount();
+  const { data: wallet } = useWallet();
 
   const fetchBalance = async () => {
-    if (!address || !stargateClient) return;
+    if (!wallet?.addressSecondary || !stargateClient) return;
 
     setIsBalanceLoading(true);
     try {
-      const balances = await stargateClient.getAllBalances(address);
+      const balances = await stargateClient.getAllBalances(wallet.addressSecondary);
       const atomBalance = balances.find((b) => b.denom === "uatom")?.amount || "0";
       setBalance((parseInt(atomBalance) / 1_000_000).toString());
     } catch (error) {
@@ -37,13 +40,13 @@ export default function EthTransferDemo() {
   };
 
   useEffect(() => {
-    if (address) {
+    if (account?.isConnected && wallet?.addressSecondary) {
       fetchBalance();
     }
-  }, [address]);
+  }, [account, wallet]);
 
   const constructTransaction = async (toAddress: string, atomAmount: string): Promise<MsgSendEncodeObject> => {
-    if (!address || !stargateClient) throw new Error("No sender address or client available");
+    if (!wallet?.addressSecondary || !stargateClient) throw new Error("No sender address or client available");
 
     const microAmount = Math.floor(parseFloat(atomAmount) * 1_000_000).toString();
 
@@ -54,7 +57,7 @@ export default function EthTransferDemo() {
 
     // Create the message
     const message: MsgSend = {
-      fromAddress: address,
+      fromAddress: wallet?.addressSecondary,
       toAddress: toAddress,
       amount: [amount],
     };
@@ -69,11 +72,11 @@ export default function EthTransferDemo() {
   };
 
   const validateTransaction = async (toAddress: string, atomAmount: string): Promise<boolean> => {
-    if (!address || !stargateClient) throw new Error("No sender address or client available");
+    if (!wallet?.addressSecondary || !stargateClient) throw new Error("No sender address or client available");
 
     try {
       // Get current balance
-      const balances = await stargateClient.getAllBalances(address);
+      const balances = await stargateClient.getAllBalances(wallet?.addressSecondary);
       const atomBalance = balances.find((b) => b.denom === "uatom");
 
       if (!atomBalance) {
@@ -114,7 +117,7 @@ export default function EthTransferDemo() {
     setTxHash("");
 
     try {
-      if (!isConnected) {
+      if (!account?.isConnected) {
         setStatus({
           show: true,
           type: "error",
@@ -123,7 +126,7 @@ export default function EthTransferDemo() {
         return;
       }
 
-      if (!address) {
+      if (!wallet?.addressSecondary) {
         setStatus({
           show: true,
           type: "error",
@@ -163,7 +166,7 @@ export default function EthTransferDemo() {
       };
 
       const result = await stargateClient!.signAndBroadcast(
-        address,
+        wallet?.addressSecondary,
         [msgSend],
         fee,
         "Transaction via Para SDK with CosmJS"
@@ -222,7 +225,7 @@ export default function EthTransferDemo() {
             <h3 className="text-sm font-medium text-gray-900">Current Balance:</h3>
             <button
               onClick={fetchBalance}
-              disabled={isBalanceLoading || !address}
+              disabled={isBalanceLoading || !wallet?.addressSecondary}
               className="p-1 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
               title="Refresh balance">
               <span className={`inline-block ${isBalanceLoading ? "animate-spin" : ""}`}>🔄</span>
@@ -231,7 +234,7 @@ export default function EthTransferDemo() {
           <div className="px-6 py-3">
             <p className="text-sm text-gray-500 bg-gray-100 p-2 rounded-md">Network: Provider Testnet</p>
             <p className="text-lg font-medium text-gray-900">
-              {!address
+              {!wallet?.addressSecondary
                 ? "Please connect your wallet"
                 : isBalanceLoading
                 ? "Loading..."
@@ -272,7 +275,7 @@ export default function EthTransferDemo() {
               placeholder="0x..."
               required
               disabled={isLoading}
-              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
           </div>
 
@@ -291,7 +294,7 @@ export default function EthTransferDemo() {
               step="0.01"
               required
               disabled={isLoading}
-              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
           </div>
 
