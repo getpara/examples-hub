@@ -3,11 +3,13 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthLayout, ExternalWallet, ParaProvider } from "@getpara/react-sdk";
 import { API_KEY, ENVIRONMENT } from "@/constants";
+import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { clusterApiUrl } from "@solana/web3.js";
 
 const queryClient = new QueryClient();
 
-const endpoint = clusterApiUrl("devnet");
+const solanaNetwork = WalletAdapterNetwork.Devnet;
+const endpoint = clusterApiUrl(solanaNetwork);
 
 export function Providers({
   children,
@@ -27,6 +29,7 @@ export function Providers({
           solanaConnector: {
             config: {
               endpoint,
+              chain: solanaNetwork,
               appIdentity: {
                 uri: typeof window !== "undefined" ? `${window.location.protocol}//${window.location.host}` : "",
               },
