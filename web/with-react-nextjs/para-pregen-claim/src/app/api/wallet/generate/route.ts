@@ -1,25 +1,33 @@
 import { v4 as uuidv4 } from "uuid";
-import { Environment, Para, WalletType } from "@getpara/server-sdk";
+import { Environment, Para } from "@getpara/server-sdk";
 import { walletStore } from "@/lib/store";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
     if (!process.env.NEXT_PUBLIC_PARA_API_KEY) {
-      throw new Error(
-        "NEXT_PUBLIC_PARA_API_KEY is not defined in the environment variables"
-      );
+      throw new Error("NEXT_PUBLIC_PARA_API_KEY is not defined in the environment variables");
     }
 
     const para = new Para(
-      (process.env.NEXT_PUBLIC_PARA_ENVIRONMENT as Environment) ??
-        Environment.BETA,
+      (process.env.NEXT_PUBLIC_PARA_ENVIRONMENT as Environment) ?? Environment.BETA,
       process.env.NEXT_PUBLIC_PARA_API_KEY
     );
     const uuid = uuidv4();
 
-    const wallet = await para.createPregenWalletV2({
-      type: WalletType.EVM,
+    const hasPregenWallet = await para.hasPregenWallet({
+      pregenId: { customId: uuid },
+    });
+
+    if (hasPregenWallet) {
+      return NextResponse.json({
+        success: false,
+        error: "Wallet already exists",
+      });
+    }
+
+    const wallet = await para.createPregenWallet({
+      type: "EVM",
       pregenId: { customId: uuid },
     });
 
@@ -39,9 +47,6 @@ export async function GET() {
       },
     });
   } catch (error) {
-    return NextResponse.json(
-      { success: false, error: (error as Error).message },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: (error as Error).message }, { status: 500 });
   }
 }
