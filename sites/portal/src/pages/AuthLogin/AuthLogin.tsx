@@ -10,6 +10,7 @@ import { SelectWallet } from './components/SelectWallet';
 import { useModalOutletContext } from '../../hooks/useModalOutletContext';
 import { useCloseWindow } from '../../hooks/useCloseWindow';
 import { AuthMethod, isPasskeySupported } from '@getpara/web-sdk';
+import { validateCallbackUrl } from '../../utils/validateCallbackUrl';
 
 const AuthLoginBase = ({ authMethod }) => {
   const para = usePara();
@@ -34,6 +35,16 @@ const AuthLoginBase = ({ authMethod }) => {
 
   const postLogin = async ({ fromKnownDevice, loginRes }: { fromKnownDevice?: boolean; loginRes?: LoginRes }) => {
     await para.userSetupAfterLogin();
+
+    // Check for native callback URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const nativeCallbackUrl = urlParams.get('nativeCallbackUrl');
+
+    if (nativeCallbackUrl && validateCallbackUrl(nativeCallbackUrl)) {
+      // Redirect to the native callback URL if it exists and is valid
+      window.location.href = nativeCallbackUrl;
+      return; // Exit early after redirect
+    }
 
     if (fromKnownDevice) {
       if (!(await isPasskeySupported())) {

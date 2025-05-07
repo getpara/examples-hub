@@ -9,6 +9,7 @@ import { ModalSuccess } from '../../components/ModalSuccess';
 import { useModalOutletContext } from '../../hooks/useModalOutletContext';
 import { usePara } from '../../components';
 import { useExtractedParams } from '../../hooks/useExtractedParams';
+import { validateCallbackUrl } from '../../utils/validateCallbackUrl';
 
 export const PasswordCreation = () => {
   const para = usePara();
@@ -72,9 +73,19 @@ export const PasswordCreation = () => {
 
       setPasswordCreated(true);
 
-      setTimeout(function () {
-        window.close();
-      }, REDIRECT_TIMEOUT);
+      // Check for native callback URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const nativeCallbackUrl = urlParams.get('nativeCallbackUrl');
+
+      if (nativeCallbackUrl && validateCallbackUrl(nativeCallbackUrl)) {
+        // Redirect to the native callback URL if it exists and is valid
+        window.location.href = nativeCallbackUrl;
+      } else {
+        // Otherwise, close the window after a delay
+        setTimeout(() => {
+          window.close();
+        }, REDIRECT_TIMEOUT);
+      }
     } catch (e) {
       console.error(e);
       setIsProcessing(false);

@@ -1,4 +1,5 @@
 import { CoreAction, CoreMethod, CoreMethodName, CoreMethodParams, PARA_CORE_METHODS, ParaWeb } from '@getpara/web-sdk';
+import { VerifiedAuth, isEmail, isPhone } from '@getpara/user-management-client';
 import { logger } from './logging';
 import {
   initEthersSigner,
@@ -104,7 +105,20 @@ export const bridgeMethodHandlers: Record<string, (para: ParaWeb, args: any) => 
   },
   getWebChallenge: async (para, args: GetWebChallengeArgs) => {
     logger.info('Getting web challenge...');
-    const getWebChallengeResult = await para.ctx.client.getWebChallenge({ email: args.email });
+
+    let authArg: VerifiedAuth | undefined;
+
+    if (isEmail(args)) {
+      authArg = args;
+      logger.info('Using email for web challenge:', args.email);
+    } else if (isPhone(args)) {
+      authArg = args;
+      logger.info('Using phone for web challenge:', args.phone);
+    } else {
+      logger.warn('Invalid arguments for getWebChallenge: neither email nor phone provided.', args);
+    }
+
+    const getWebChallengeResult = await para.ctx.client.getWebChallenge(authArg);
     logger.info('Web challenge result:', getWebChallengeResult);
     return getWebChallengeResult;
   },

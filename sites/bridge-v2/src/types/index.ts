@@ -1,4 +1,4 @@
-import Client from '@getpara/user-management-client';
+import Client, { Auth } from '@getpara/user-management-client';
 import { Environment } from '@getpara/web-sdk';
 import { AxiosInstance } from 'axios';
 
@@ -136,9 +136,8 @@ export interface LoginWithPasskeyArgs {
   userHandle: string;
 }
 
-export interface GetWebChallengeArgs {
-  email: string;
-}
+// Arguments coming *from* the native side
+export type GetWebChallengeArgs = Auth<'email' | 'phone'>;
 
 export interface SetEmailArgs {
   email: string;
