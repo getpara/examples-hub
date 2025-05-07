@@ -1,7 +1,7 @@
 {
   "name": "@getpara/react-component-library",
   "private": true,
-  "version": "1.0.0-alpha.7",
+  "version": "1.0.0-alpha.8",
   "type": "module",
   "module": "./dist/index.es.js",
   "types": "./dist/index.d.ts",

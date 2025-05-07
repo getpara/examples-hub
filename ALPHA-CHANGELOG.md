@@ -1,3 +1,43 @@
+# Release (Tue May 06 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.13
+- @getpara/wagmi-v2-integration@2.0.0-alpha.13
+- @getpara/wagmi-v2-connector@2.0.0-alpha.13
+- @getpara/viem-v2-integration@2.0.0-alpha.13
+- @getpara/viem-v1-integration@2.0.0-alpha.13
+- @getpara/user-management-client@2.0.0-alpha.13
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.13
+- @getpara/solana-wallet-connectors@2.0.0-alpha.13
+- @getpara/server-sdk@2.0.0-alpha.13
+- @getpara/react-sdk@2.0.0-alpha.13
+- @getpara/react-native-wallet@2.0.0-alpha.13
+- @getpara/react-components@2.0.0-alpha.13
+- @getpara/react-component-library@1.0.0-alpha.8
+- @getpara/react-common@2.0.0-alpha.13
+- @getpara/evm-wallet-connectors@2.0.0-alpha.13
+- @getpara/ethers-v6-integration@2.0.0-alpha.13
+- @getpara/ethers-v5-integration@2.0.0-alpha.13
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.13
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.13
+- @getpara/core-sdk@2.0.0-alpha.13
+- @getpara/core-components@2.0.0-alpha.13
+
+### Features
+-  Dev Portal - finish org home updates (#922) - d9cf53b20
+-  Dev Portal - base org home page (#915) - 557f042d0
+-  Dev Portal  - mobile layout (#912) - b3a6a8768
+-  Dev Portal - api key analytics (#910) - e05d3dfa7
+-  Add base chart components (#911) - 4b3ff2cf8
+-  Dev Portal - api key users (#887) - f1bbc6302
+
+### Fixes
+-  Modal builder bug (#902) - fccf61be6
+
+### Chores
+-  add react prop tracking (#918) - 24a19b777
+-  External wallet link embedded (#896) - dfb32654e
+
 # Release (Mon Apr 28 2025)
 
 ## Package Versions
