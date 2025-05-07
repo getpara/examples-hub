@@ -4,8 +4,8 @@ import { useStore } from '../../stores/useStore.js';
 /**
  * Hook for retrieving the Para client
  */
-export const useClient = (): ParaWeb | undefined => {
+export const useClient = <Para extends ParaWeb = ParaWeb>(): Para | undefined => {
   const client = useStore(state => state.client);
 
-  return client as ParaWeb;
+  return client as Para;
 };

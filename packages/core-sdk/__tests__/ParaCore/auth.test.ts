@@ -557,6 +557,7 @@ describe('ParaCore - authentication', () => {
 
           expect(authState).toStrictEqual({
             ..._.omit(getLoginState(auth), 'loginAuthMethods'),
+            isPasskeySupported: true,
             ...(isNativePasskey
               ? {}
               : {
@@ -610,6 +611,7 @@ describe('ParaCore - authentication', () => {
 
           expect(signupState).toStrictEqual({
             ..._.omit(getSignupState(auth), ['signupAuthMethods']),
+            isPasskeySupported: true,
             passkeyId: expect.any(String),
             ...(isNativePasskey
               ? {}
@@ -793,6 +795,7 @@ describe('ParaCore - authentication', () => {
 
                   expect(authState).toStrictEqual({
                     ..._.omit(getSignupState(emailAuthInfo.auth), 'signupAuthMethods'),
+                    isPasskeySupported: true,
                     passkeyId: expect.any(String),
                     passkeyUrl: expect.stringMatching(''),
                     passwordId: expect.any(String),
@@ -811,6 +814,7 @@ describe('ParaCore - authentication', () => {
                   expect(para.loginEncryptionKeyPair).toBeDefined();
                   expect(authState).toStrictEqual({
                     ..._.omit(getLoginState(emailAuthInfo.auth), 'loginAuthMethods'),
+                    isPasskeySupported: true,
                     passkeyUrl: expect.stringMatching(''),
                     passkeyKnownDeviceUrl: expect.stringMatching(''),
                     passwordUrl: expect.stringMatching(''),
@@ -861,6 +865,7 @@ describe('ParaCore - authentication', () => {
 
             expect(authState).toStrictEqual({
               ..._.omit(getSignupState(authInfo.auth), 'signupAuthMethods'),
+              isPasskeySupported: true,
               passkeyId: expect.stringMatching(''),
               passkeyUrl: expect.stringMatching(''),
               passwordId: expect.stringMatching(''),
@@ -886,6 +891,7 @@ describe('ParaCore - authentication', () => {
             expect(para.loginEncryptionKeyPair).toBeDefined();
             expect(authState).toStrictEqual({
               ..._.omit(getLoginState(authInfo.auth), 'loginAuthMethods'),
+              isPasskeySupported: true,
               passkeyUrl: expect.stringMatching(''),
               passkeyKnownDeviceUrl: expect.stringMatching(''),
               passwordUrl: expect.stringMatching(''),
@@ -960,6 +966,7 @@ describe('ParaCore - authentication', () => {
 
         expect(authState).toStrictEqual({
           ..._.omit(getLoginState({ externalWalletAddress: EXTERNAL_WALLET.address }), 'loginAuthMethods'),
+          isPasskeySupported: true,
           passkeyUrl: expect.stringMatching(''),
           passkeyKnownDeviceUrl: expect.stringMatching(''),
           passwordUrl: expect.stringMatching(''),
@@ -996,6 +1003,7 @@ describe('ParaCore - authentication', () => {
 
       expect(authState).toStrictEqual({
         ..._.omit(getSignupState({ externalWalletAddress: EXTERNAL_WALLET.address }), 'signupAuthMethods'),
+        isPasskeySupported: true,
         passkeyId: expect.stringMatching(''),
         passwordId: expect.stringMatching(''),
         passkeyUrl: expect.stringMatching(''),

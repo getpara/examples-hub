@@ -86,6 +86,10 @@ export class ParaMobile extends ParaCore {
     return new ReactNativeUtils();
   }
 
+  async isPasskeySupported(): Promise<boolean> {
+    return Passkey.isSupported();
+  }
+
   /**
    * Registers a passkey for the user.
    * @param {Auth<'email'> | Auth<'phone'>} auth - The user's authentication details

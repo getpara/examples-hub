@@ -11,22 +11,22 @@ export const BiometricLoginStep = () => {
   const loginState = useModalStore(state => state.getLoginState());
   const para = useInternalClient();
   const { biometricHints, presentLoginUi } = useAuthActions();
-  const isPasskeySupported = useModalStore(state => state.isPasskeySupported);
-
-  const [isPasskey, isPassword, hasHints, isPasskeyOnKnownDevice] = [
-    !!loginState?.passkeyUrl,
-    !!loginState?.passwordUrl,
-    loginState?.biometricHints?.length,
-    isPasskeySupported && !!biometricHints?.isOnKnownDevice,
-  ];
-
-  const knownDeviceLink = loginState?.passkeyKnownDeviceUrl;
-  const isPasskeyUnavailable = (hasHints && !biometricHints?.isOnKnownDevice) || !isPasskeySupported;
-  const displayWelcomeBack = hasHints || isPasskeyOnKnownDevice || isPassword;
 
   if (!loginState) {
     return null;
   }
+
+  const { passkeyUrl, passkeyKnownDeviceUrl, passwordUrl, isPasskeySupported } = loginState;
+  const { isOnKnownDevice = false, formattedHints } = biometricHints || {};
+
+  const isPasskey = !!passkeyUrl,
+    isPassword = !!passwordUrl,
+    isNeither = !isPasskey && !isPassword,
+    hasHints = formattedHints?.length ?? 0 > 0,
+    isPasskeyOnKnownDevice = isPasskeySupported && isOnKnownDevice,
+    isPasskeyUnavailable = (hasHints && !isOnKnownDevice) || !isPasskeySupported || isNeither,
+    displayKnownDevices = isPasskeyUnavailable && !!biometricHints && (hasHints || !!passkeyKnownDeviceUrl),
+    displayWelcomeBack = isPasskeyOnKnownDevice || isPassword;
 
   return (
     <StepContainer $wide>
@@ -44,25 +44,24 @@ export const BiometricLoginStep = () => {
             Login
           </CpslButton>
         )}
-
-        {isPasskey && !!knownDeviceLink && (
+        {isPasskey && (
           <>
-            {isPasskeyUnavailable && !!biometricHints && <KnownDevices hints={biometricHints} link={knownDeviceLink} />}
-            {isPasskeySupported && (
+            {displayKnownDevices && (
               <>
-                {isPasskeyUnavailable && <CpslDivider>or</CpslDivider>}
-                <CpslButton fullWidth onClick={() => presentLoginUi(AuthMethod.PASSKEY, loginState)}>
-                  {isPasskeyUnavailable ? (
-                    'Continue anyway'
-                  ) : (
-                    <>
-                      <CpslIcon slot="start" icon="key" />
-                      Login with passkey
-                    </>
-                  )}
-                </CpslButton>
+                <KnownDevices hints={biometricHints} link={passkeyKnownDeviceUrl} />
+                <CpslDivider>or</CpslDivider>
               </>
             )}
+            <CpslButton fullWidth onClick={() => presentLoginUi(AuthMethod.PASSKEY, loginState)}>
+              {isPasskeyUnavailable ? (
+                'Continue anyway'
+              ) : (
+                <>
+                  <CpslIcon slot="start" icon="key" />
+                  Login with passkey
+                </>
+              )}
+            </CpslButton>
           </>
         )}
       </MainContainer>

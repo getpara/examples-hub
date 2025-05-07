@@ -1,4 +1,4 @@
-import { BiometricHints, formatBiometricHints } from '@getpara/react-common';
+import { BiometricHints, useUserAgent } from '@getpara/react-common';
 import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo } from 'react';
 import { useModalStore } from '../../modal/stores/index.js';
 import { ModalStep } from '../../modal/utils/steps.js';
@@ -33,6 +33,7 @@ import { useGoBack } from '../../modal/hooks/useGoBack.js';
 import { isExternalWallet, TelegramAuthResponse, VerifiedAuth } from '@getpara/user-management-client';
 import { routeMobileExternalWallet } from '../../modal/utils/routeMobileExternalWallet.js';
 import { useStore } from '../stores/useStore.js';
+import { useFormattedBiometricHints } from '../hooks/utils/useFormattedBiometricHints.js';
 
 type Value = {
   signUpOrLogIn: (_: VerifiedAuth) => void;
@@ -87,6 +88,7 @@ export function AuthProvider({
   overrides = {},
 }: Props) {
   const para = useInternalClient();
+  const userAgent = useUserAgent();
   const onLoginRef = useStore(state => state.onLoginRef);
   const setIsOpen = useStore(state => state.setIsOpen);
   const bareModal = useStore(state => state.modalConfig?.bareModal);
@@ -105,9 +107,7 @@ export function AuthProvider({
   const setRecoveryShare = useModalStore(state => state.setRecoveryShare);
   const authStepRoute = useModalStore(state => state.authStepRoute);
   const isIFrameReady = useModalStore(state => state.isIFrameReady);
-
   const goBack = useGoBack();
-  const biometricHints = useMemo(() => formatBiometricHints(loginState?.biometricHints ?? []), [loginState?.biometricHints]);
 
   const { mutate: mutateSignUpOrLogIn, isPending: isSignUpOrLogInPending } = useSignUpOrLogIn();
   const {
@@ -124,6 +124,7 @@ export function AuthProvider({
   const { mutate: mutateSetup2fa, isPending: isSetup2faPending } = useSetup2fa();
   const { mutate: mutateCreateGuestWallets, isPending: isCreateGuestWalletsPending } = useCreateGuestWallets();
   const { mutate: mutateLogout } = useLogout();
+  const { data: biometricHints } = useFormattedBiometricHints();
 
   const goBackIfPopupClosedOnSteps = (steps: ModalStep[]) => {
     if (refs.popupWindow.current?.closed && (!refs.currentStep.current || steps.includes(refs.currentStep.current))) {
@@ -299,7 +300,9 @@ export function AuthProvider({
       case 'signup':
         {
           const isPassword = !!authState.passwordUrl,
-            isPasswordOnly = isPassword && !authState.passkeyUrl;
+            isPasswordOnly =
+              isPassword &&
+              (!authState.passkeyUrl || (userAgent?.device.type === 'mobile' && !authState.isPasskeySupported));
 
           if (isPassword) {
             setIFrameUrl(authState.passwordUrl!);
@@ -328,7 +331,7 @@ export function AuthProvider({
 
   const verifyNewAccount = async (verificationCode: string) => {
     mutateVerifyNewAccount(
-      { verificationCode },
+      { verificationCode, useShortUrls: true },
       {
         onSuccess: onNewAuthState,
       },
@@ -509,7 +512,7 @@ export function AuthProvider({
       createGuestWallets,
       isCreateGuestWalletsPending,
       logout,
-      biometricHints,
+      biometricHints: biometricHints || undefined,
     }),
     [
       presentSignupUi,

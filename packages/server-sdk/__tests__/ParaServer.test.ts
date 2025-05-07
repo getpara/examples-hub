@@ -4,7 +4,7 @@ import Para, { Environment } from '../src/index.js';
 
 describe('ParaServer', () => {
   describe('constructor', () => {
-    it('creates a new instance of ParaServer with correct fields', () => {
+    it('creates a new instance of ParaServer with correct fields', async () => {
       const apiKey = 'api-key-123';
       const para = new Para(Environment.DEV, apiKey, {});
 
@@ -12,6 +12,7 @@ describe('ParaServer', () => {
       expect(para.ctx.env).toBe(Environment.DEV);
       expect(para.ctx.apiKey).toBe(apiKey);
       expect(para.wallets).toEqual({});
+      expect(await para.isPasskeySupported()).toBe(false);
     });
   });
 

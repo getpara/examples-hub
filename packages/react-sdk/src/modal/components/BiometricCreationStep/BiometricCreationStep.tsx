@@ -14,7 +14,6 @@ export const BiometricCreationStep = () => {
   const { presentSignupUi } = useAuthActions();
   const signupState = useModalStore(state => state.getSignupState());
   const authStepRoute = useModalStore(state => state.authStepRoute);
-  const isPasskeySupported = useModalStore(state => state.isPasskeySupported);
   const [isCopied, copy] = useCopyToClipboard();
 
   const handleCopy = () => {
@@ -50,7 +49,7 @@ export const BiometricCreationStep = () => {
       </InnerStepContainer>
 
       <InnerStepContainer>
-        {isPasskeySupported ? (
+        {signupState?.isPasskeySupported ? (
           <CpslButton fullWidth onClick={onClick(AuthMethod.PASSKEY)}>
             <CpslIcon slot="start" icon="key" />
             {isBoth ? 'Create Passkey' : 'Create'}

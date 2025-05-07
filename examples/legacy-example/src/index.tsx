@@ -56,6 +56,7 @@ import { paraConnector } from '@getpara/wagmi-v2-integration';
 import { coinbaseWallet, walletConnect } from 'wagmi/connectors';
 import { PregenAuth } from '@getpara/user-management-client';
 import { toast } from 'react-toastify';
+import { ParaLegacyExample } from './ParaLegacyExample';
 
 const queryClient = new QueryClient();
 
@@ -350,7 +351,7 @@ function WagmiProfileComponent(): JSX.Element {
 }
 
 function WagmiComponent(): JSX.Element {
-  const para = useClient();
+  const para = useClient<ParaLegacyExample>();
   const chains = [sepolia] as any;
 
   const config = useMemo(() => {
@@ -483,6 +484,7 @@ function AppInner({
   const [font, setFont] = useLocalStorage('@EXAMPLE-PARA/font', 'inter');
   const [logoVariant, setLogoVariant] = useLocalStorage('@EXAMPLE-PARA/logoVariant', 'branded');
 
+  const [simulateNoPasskey, setSimulateNoPasskey] = useLocalStorage('@EXAMPLE-PARA/simulateNoPasskey', false);
   const [onRampTestMode, setOnRampTestMode] = useLocalStorage('@EXAMPLE-PARA/onRampTestMode', true);
   const [isGuestModeEnabled, setIsGuestModeEnabled] = useLocalStorage('@EXAMPLE-PARA/isGuestModeEnabled', false);
   const [hideWallets, setHideWallets] = useLocalStorage('@EXAMPLE-PARA/hideWallets', false);
@@ -523,7 +525,7 @@ function AppInner({
   const { isPending: isCreateGuestWalletsPending } = useCreateGuestWalletsState();
 
   const { openModal } = useModal();
-  const para = useClient();
+  const para = useClient<ParaLegacyExample>();
 
   useEffect(() => {
     if (para && para.ctx.isE2E !== (import.meta.env.VITE_APP_IS_E2E === 'true')) {
@@ -921,6 +923,12 @@ function AppInner({
               </HStack>
               <HStack>
                 <Text width={'15%'}>
+                  <strong>Simulate No Passkey:</strong>
+                </Text>
+                <Checkbox isChecked={simulateNoPasskey} onChange={e => setSimulateNoPasskey(e.currentTarget.checked)} />
+              </HStack>
+              <HStack>
+                <Text width={'15%'}>
                   <strong>On-Ramp Test Mode:</strong>
                 </Text>
                 <Checkbox isChecked={onRampTestMode} onChange={e => setOnRampTestMode(e.currentTarget.checked)} />
@@ -956,23 +964,32 @@ function AppInner({
                 <Button colorScheme="green" isDisabled={!para} onClick={openModal}>
                   Open Modal
                 </Button>
-                {paraAccount.isConnected && !paraAccount.isGuestMode && (
+                {paraAccount.isConnected && (
                   <>
                     <Button
                       colorScheme="green"
                       onClick={async () => {
-                        await para?.logout();
+                        await para?.logout({ clearPregenWallets: paraAccount.isGuestMode ? true : false });
                       }}
                     >
                       Log Out
                     </Button>
-                    <Button colorScheme="red" variant="solid" disabled={deleteButtonDisabled} onClick={handleDeleteClick}>
-                      Delete User
-                    </Button>
-                    {!deletedEmail && secondsToDelete > 0 && deleteButtonDisabled && emailPendingDeletion && (
-                      <Text>
-                        {emailPendingDeletion} will be deleted in {secondsToDelete}...
-                      </Text>
+                    {!paraAccount.isGuestMode && (
+                      <>
+                        <Button
+                          colorScheme="red"
+                          variant="solid"
+                          disabled={deleteButtonDisabled}
+                          onClick={handleDeleteClick}
+                        >
+                          Delete User
+                        </Button>
+                        {!deletedEmail && secondsToDelete > 0 && deleteButtonDisabled && emailPendingDeletion && (
+                          <Text>
+                            {emailPendingDeletion} will be deleted in {secondsToDelete}...
+                          </Text>
+                        )}
+                      </>
                     )}
                   </>
                 )}
@@ -1365,6 +1382,7 @@ const App = () => {
   const [borderRadius] = useLocalStorage('@EXAMPLE-PARA/borderRadius', 'sm');
   const [font] = useLocalStorage('@EXAMPLE-PARA/font', 'inter');
   const [logoVariant] = useLocalStorage('@EXAMPLE-PARA/logoVariant', 'branded');
+  const [simulateNoPasskey] = useLocalStorage('@EXAMPLE-PARA/simulateNoPasskey', false);
   const [onRampTestMode] = useLocalStorage('@EXAMPLE-PARA/onRampTestMode', true);
   const [isGuestModeEnabled] = useLocalStorage('@EXAMPLE-PARA/isGuestModeEnabled', true);
   const [hideWallets] = useLocalStorage('@EXAMPLE-PARA/hideWallets', false);
@@ -1372,16 +1390,19 @@ const App = () => {
 
   const [currentStepOverride, setCurrentStepOverride] = useState<ModalStepProp | undefined>(undefined);
 
+  const para = useMemo(
+    () =>
+      new ParaLegacyExample(selectedEnv, selectedApiKey, {
+        ...getParaOpts(selectedEnv, useDKLS),
+        simulateNoPasskey,
+      }),
+    [selectedEnv, selectedApiKey, useDKLS, simulateNoPasskey],
+  );
+
   return (
     <QueryClientProvider client={queryClient}>
       <ParaProvider
-        paraClientConfig={{
-          env: selectedEnv,
-          apiKey: selectedApiKey,
-          opts: {
-            ...getParaOpts(selectedEnv, useDKLS),
-          },
-        }}
+        paraClientConfig={para}
         config={{
           appName: (partners || []).find(({ apiKey }) => apiKey === selectedApiKey)?.displayName || 'Example',
           // Since Wagmi uses a separate provider we want to not use this modal for wagmi

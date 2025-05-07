@@ -27,6 +27,10 @@ export class Para extends ParaCore {
     return new ServerUtils();
   }
 
+  async isPasskeySupported(): Promise<boolean> {
+    return false;
+  }
+
   /**
    * Claims a pregenerated wallet.
    *

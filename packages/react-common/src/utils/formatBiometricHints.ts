@@ -25,7 +25,7 @@ const formatStringToUUID = (str): string => {
   return `${str.slice(0, 8)}-${str.slice(8, 12)}-${str.slice(12, 16)}-${str.slice(16, 20)}-${str.slice(20)}`;
 };
 
-export const formatBiometricHints = (hints: BiometricLocationHint[]): BiometricHints => {
+export const formatBiometricHints = (hints: BiometricLocationHint[], isPasskeySupported = false): BiometricHints => {
   let hasMobileDevice = false,
     isOnKnownDevice = false;
 
@@ -50,6 +50,7 @@ export const formatBiometricHints = (hints: BiometricLocationHint[]): BiometricH
 
       if (deviceParsedUA) {
         if (
+          isPasskeySupported &&
           deviceParsedUA.browser.name === parsedUA.browser.name &&
           deviceParsedUA.device.type === parsedUA.device.type &&
           deviceParsedUA.device.vendor === parsedUA.device.vendor &&

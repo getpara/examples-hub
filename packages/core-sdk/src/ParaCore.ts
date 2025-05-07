@@ -666,6 +666,8 @@ export abstract class ParaCore implements CoreInterface {
 
   protected abstract getPlatformUtils(): PlatformUtils;
 
+  abstract isPasskeySupported(): Promise<boolean>;
+
   protected async constructPortalUrl(type: PortalUrlType, opts: PortalUrlOptions = {}) {
     const [isCreate, isLogin, isOnRamp] = [
       ['createAuth', 'createPassword'].includes(type),
@@ -3543,9 +3545,14 @@ export abstract class ParaCore implements CoreInterface {
   ): Promise<AuthStateLogin> {
     const { loginAuthMethods, ...authState } = loginState;
 
+    const isPasskeySupported = await this.isPasskeySupported(),
+      isPasskeyPossible = loginAuthMethods.includes(AuthMethod.PASSKEY) && !this.isNativePasskey,
+      isPasswordPossible = loginAuthMethods.includes(AuthMethod.PASSWORD);
+
     return {
       ...authState,
-      ...(!this.isNativePasskey && loginAuthMethods.includes(AuthMethod.PASSKEY)
+      isPasskeySupported,
+      ...(isPasskeyPossible
         ? {
             passkeyUrl: await this.getLoginUrl({ sessionId: sessionLookupId, shorten, portalTheme }),
             passkeyKnownDeviceUrl: await this.constructPortalUrl('loginAuth', {
@@ -3559,7 +3566,7 @@ export abstract class ParaCore implements CoreInterface {
             }),
           }
         : {}),
-      ...(loginAuthMethods.includes(AuthMethod.PASSWORD)
+      ...(isPasswordPossible
         ? {
             passwordUrl: await this.constructPortalUrl('loginPassword', {
               sessionId: sessionLookupId,
@@ -3577,9 +3584,11 @@ export abstract class ParaCore implements CoreInterface {
   ): Promise<AuthStateSignup> {
     const { signupAuthMethods, ...authState } = serverSignupState;
 
+    const isPasskeySupported = await this.isPasskeySupported();
+
     const [isPasskey, isPassword] = [
       signupAuthMethods.includes(AuthMethod.PASSKEY),
-      signupAuthMethods.includes(AuthMethod.PASSWORD),
+      signupAuthMethods.includes(AuthMethod.PASSWORD) || !isPasskeySupported,
     ];
 
     if (!isPasskey && !isPassword) {
@@ -3588,7 +3597,7 @@ export abstract class ParaCore implements CoreInterface {
       );
     }
 
-    const signupState: Partial<AuthStateSignup> = authState;
+    const signupState: Partial<AuthStateSignup> = { ...authState, isPasskeySupported };
 
     if (isPasskey) {
       const { url: passkeyUrl, credentialId: passkeyId } = await this.getNewCredentialAndUrl({

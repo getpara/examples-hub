@@ -6,6 +6,8 @@ export class MockPara extends ParaCore {
     return new MockPlatformUtils();
   }
 
+  isPasskeySupported = () => Promise.resolve(true);
+
   retrieveSessionCookie = () => 'session-cookie';
 
   persistSessionCookie = (_: string) => {};

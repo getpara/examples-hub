@@ -70,6 +70,13 @@ export type WithShorten = {
   shorten?: boolean;
 };
 
+export type WithIsPasskeySupported = {
+  /**
+   * Whether the current device supports WebAuth passkeys.
+   */
+  isPasskeySupported: boolean;
+};
+
 export type PollParams = {
   /**
    * A callback function that will be invoked on each method poll.
@@ -107,39 +114,41 @@ export type AuthStateBaseParams = WithCustomTheme & WithUseShortUrls;
 
 export type AuthStateVerify = ServerAuthStateVerify;
 
-export type AuthStateLogin = Omit<ServerAuthStateLogin, 'loginAuthMethods'> & {
-  /**
-   * A Para Portal URL for logging in via a WebAuth passkey. For best compatibility, you should open this URL in a new window or tab.
-   */
-  passkeyUrl?: string;
-  /**
-   * A Para Portal URL for authorizing a new device using a WebAuth passkey located elsewhere, to be visited using that other device.
-   */
-  passkeyKnownDeviceUrl?: string;
-  /**
-   * A Para Portal URL for logging in via a password.
-   */
-  passwordUrl?: string;
-};
+export type AuthStateLogin = Omit<ServerAuthStateLogin, 'loginAuthMethods'> &
+  WithIsPasskeySupported & {
+    /**
+     * A Para Portal URL for logging in via a WebAuth passkey. For best compatibility, you should open this URL in a new window or tab.
+     */
+    passkeyUrl?: string;
+    /**
+     * A Para Portal URL for authorizing a new device using a WebAuth passkey located elsewhere, to be visited using that other device.
+     */
+    passkeyKnownDeviceUrl?: string;
+    /**
+     * A Para Portal URL for logging in via a password.
+     */
+    passwordUrl?: string;
+  };
 
-export type AuthStateSignup = Omit<ServerAuthStateSignup, 'signupAuthMethods'> & {
-  /**
-   * A Para Portal URL for creating a new WebAuth passkey.
-   */
-  passkeyUrl?: string;
-  /**
-   * A Para Portal URL for creating a new user password.
-   */
-  passwordUrl?: string;
-  /**
-   * The Para system ID for the newly generated passkey.
-   */
-  passkeyId?: string;
-  /**
-   * The Para system ID for the newly generated password.
-   */
-  passwordId?: string;
-};
+export type AuthStateSignup = Omit<ServerAuthStateSignup, 'signupAuthMethods'> &
+  WithIsPasskeySupported & {
+    /**
+     * A Para Portal URL for creating a new WebAuth passkey.
+     */
+    passkeyUrl?: string;
+    /**
+     * A Para Portal URL for creating a new user password.
+     */
+    passwordUrl?: string;
+    /**
+     * The Para system ID for the newly generated passkey.
+     */
+    passkeyId?: string;
+    /**
+     * The Para system ID for the newly generated password.
+     */
+    passwordId?: string;
+  };
 
 export type AuthStateVerifyOrLogin = AuthStateVerify | AuthStateLogin;
 

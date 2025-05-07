@@ -1,6 +1,7 @@
 import * as Sentry from '@sentry/browser';
 import ParaCore, { ConstructorOpts, Environment } from '@getpara/core-sdk';
 import { WebUtils } from './WebUtils.js';
+import { isPasskeySupported } from './utils/isPasskeySupported.js';
 
 export class Para extends ParaCore {
   constructor(env: Environment, apiKey?: string, opts?: ConstructorOpts) {
@@ -18,5 +19,15 @@ export class Para extends ParaCore {
   }
   protected getPlatformUtils() {
     return new WebUtils();
+  }
+
+  #isPasskeySupported: boolean | undefined = undefined;
+
+  async isPasskeySupported() {
+    if (this.#isPasskeySupported === undefined) {
+      this.#isPasskeySupported = await isPasskeySupported();
+    }
+
+    return this.#isPasskeySupported;
   }
 }
