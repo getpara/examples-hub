@@ -65,7 +65,7 @@ export default function MainAuthScreen() {
         } else {
           await para.createUser(emailCredentials);
           router.navigate({
-            pathname: "/auth/otp",
+            pathname: "/auth/otp-verification",
             params: { email, inputType },
           });
         }
@@ -89,12 +89,13 @@ export default function MainAuthScreen() {
     if (!provider || !para) return;
 
     if (provider === OAuthMethod.FARCASTER) {
+      console.log("Farcaster login selected");
       handleFarcasterLogin();
       return;
     }
-
-    const oauthUrl = await para.getOAuthURL({ method: provider, deeplinkUrl: APP_SCHEME });
-
+    console.log("OAuth provider selected:", provider);
+    const oauthUrl = await para.getOAuthURL({ method: provider, deeplinkUrl: `${APP_SCHEME}://` });
+    console.log("OAuth URL:", oauthUrl);
     await openAuthSessionAsync(oauthUrl, APP_SCHEME, {
       preferEphemeralSession: false,
     });
@@ -119,7 +120,7 @@ export default function MainAuthScreen() {
     if (!para) return;
 
     const farcasterUrl = await para.getFarcasterConnectURL();
-    ``;
+
     await openURL(farcasterUrl);
     const { userExists, username } = await para.waitForFarcasterStatus();
 

@@ -1,42 +1,56 @@
-import { Theme, ThemeProvider, DefaultTheme, DarkTheme } from "@react-navigation/native";
-import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import * as React from "react";
-import { NAV_THEME } from "~/lib/constants";
-import { useColorScheme } from "~/lib/useColorScheme";
-import { RootNavigation } from "@/navigation";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect } from "react";
+import { Stack } from "expo-router";
+import ErrorIndicator from "@/components/ErrorIndicator";
 import { ParaProvider } from "@/providers/para/paraContext";
-import { PortalHost } from "@rn-primitives/portal";
+import { usePara } from "@/providers/para/usePara";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const LIGHT_THEME: Theme = {
-  ...DefaultTheme,
-  colors: NAV_THEME.light,
-};
-
-const DARK_THEME: Theme = {
-  ...DarkTheme,
-  colors: NAV_THEME.dark,
-};
-
-export { ErrorBoundary } from "expo-router";
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const { isDarkColorScheme } = useColorScheme();
+  return (
+    <ParaProvider>
+      <StatusBar style="dark" />
+      <RootStack />
+    </ParaProvider>
+  );
+}
+
+function RootStack() {
+  const { isInitializing, isInitialized, hasError, error, isAuthenticated } = usePara();
+
+  useEffect(() => {
+    if (!isInitializing && isInitialized) {
+      console.log("App initialized");
+      SplashScreen.hideAsync();
+    }
+  }, [isInitializing, isInitialized]);
+
+  if (isInitializing || !isInitialized) {
+    return null;
+  }
+
+  if (hasError) {
+    return (
+      <ErrorIndicator
+        title="Initialization error"
+        message={error?.message}
+      />
+    );
+  }
 
   return (
-    <>
-      <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-        <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
-        <ParaProvider>
-          <RootNavigation>
-            <SafeAreaView className="flex-1">
-              <Stack screenOptions={{ headerShown: false }} />
-            </SafeAreaView>
-          </RootNavigation>
-        </ParaProvider>
-      </ThemeProvider>
-      <PortalHost />
-    </>
+    <SafeAreaView style={{ flex: 1 }}>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Protected guard={!isAuthenticated}>
+          <Stack.Screen name="auth" />
+        </Stack.Protected>
+        <Stack.Protected guard={isAuthenticated}>
+          <Stack.Screen name="home" />
+        </Stack.Protected>
+      </Stack>
+    </SafeAreaView>
   );
 }

@@ -25,7 +25,7 @@ export function OAuthProviders({ onSelect }: OAuthProvidersProps) {
       accessibilityLabel={`Sign in with ${PROVIDER_INFO[provider].name}`}
       onPress={() => onSelect(provider)}
       className="flex-1 h-14 items-center justify-center rounded-xl
-                 border border-input bg-white shadow-sm
+                 border border-input bg-white
                  active:opacity-80">
       <Image
         source={PROVIDER_INFO[provider].logo}

@@ -19,7 +19,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./public/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#FCF9F7"
       },
       "package": "com.getpara.example"
     },
@@ -31,7 +31,7 @@
           "image": "./public/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#FCF9F7"
         }
       ],
       "expo-secure-store"
