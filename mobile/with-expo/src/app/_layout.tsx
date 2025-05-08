@@ -6,20 +6,25 @@ import ErrorIndicator from "@/components/ErrorIndicator";
 import { ParaProvider } from "@/providers/para/paraContext";
 import { usePara } from "@/providers/para/usePara";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { WalletProvider } from "@/providers/wallet/walletContext";
+import { PortalHost } from "@rn-primitives/portal";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   return (
     <ParaProvider>
-      <StatusBar style="dark" />
-      <RootStack />
+      <WalletProvider>
+        <StatusBar style="dark" />
+        <RootStack />
+        <PortalHost />
+      </WalletProvider>
     </ParaProvider>
   );
 }
 
 function RootStack() {
-  const { isInitializing, isInitialized, hasError, error, isAuthenticated } = usePara();
+  const { isInitializing, isInitialized, isAuthenticated } = usePara();
 
   useEffect(() => {
     if (!isInitializing && isInitialized) {
@@ -30,15 +35,6 @@ function RootStack() {
 
   if (isInitializing || !isInitialized) {
     return null;
-  }
-
-  if (hasError) {
-    return (
-      <ErrorIndicator
-        title="Initialization error"
-        message={error?.message}
-      />
-    );
   }
 
   return (

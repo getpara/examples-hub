@@ -4,50 +4,17 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { Text } from "~/components/ui/text";
 import { usePara } from "@/providers/para/usePara";
 import { CheckCircle } from "@/components/icons";
-import { AuthNavigationParamsWithBiometrics, SetupStep, STORAGE_KEYS } from "@/types";
-import * as SecureStore from "expo-secure-store";
+import { AuthNavigationParamsWithBiometrics, PreserveTypes, SetupStep } from "@/types";
+import { paramsToCreds } from "@/util/authHelpers";
 
 export default function AccountSetupScreen() {
-  const { para } = usePara();
+  const { para, registerPasskey } = usePara();
   const router = useRouter();
-  const { biometricsId, inputType, email, phoneNumber, countryCode } =
-    useLocalSearchParams<Record<keyof AuthNavigationParamsWithBiometrics, string>>();
+  const routeParams = useLocalSearchParams<PreserveTypes<AuthNavigationParamsWithBiometrics, "authType">>();
+  const creds = paramsToCreds(routeParams)!;
 
   const [setupStep, setSetupStep] = useState<SetupStep>(SetupStep.INITIALIZING);
   const [error, setError] = useState<string | null>(null);
-
-  const storeCredentials = async () => {
-    try {
-      if (inputType === "email" && email) {
-        await SecureStore.setItemAsync(STORAGE_KEYS.USER_EMAIL, email);
-      } else if (inputType === "phone" && phoneNumber && countryCode) {
-        await SecureStore.setItemAsync(STORAGE_KEYS.USER_PHONE, phoneNumber);
-        await SecureStore.setItemAsync(STORAGE_KEYS.USER_COUNTRY_CODE, countryCode);
-      }
-    } catch (error) {
-      console.error("Error storing credentials:", error);
-    }
-  };
-
-  const registerPasskey = async () => {
-    if (!para || !biometricsId) return;
-
-    setSetupStep(SetupStep.REGISTERING_PASSKEY);
-    setError(null);
-
-    try {
-      await para.registerPasskey({
-        email: email,
-        biometricsId: biometricsId,
-      });
-      await storeCredentials();
-      createWallet();
-    } catch (error) {
-      console.error("Error registering passkey:", error);
-      setError("Failed to register passkey. Please try again.");
-      setSetupStep(SetupStep.PASSKEY_ERROR);
-    }
-  };
 
   const createWallet = async () => {
     if (!para) return;
@@ -67,11 +34,16 @@ export default function AccountSetupScreen() {
     }
   };
 
-  useEffect(() => {
-    if (para && biometricsId) {
-      registerPasskey();
+  const setupAccount = async () => {
+    if (para && routeParams.biometricsId) {
+      await registerPasskey({ ...creds, biometricsId: routeParams.biometricsId });
+      await createWallet();
     }
-  }, [para, biometricsId]);
+  };
+
+  useEffect(() => {
+    setupAccount();
+  }, [para, routeParams.biometricsId]);
 
   const renderStepContent = () => {
     switch (setupStep) {
@@ -105,7 +77,7 @@ export default function AccountSetupScreen() {
           <View className="items-center">
             <Text className="text-center text-red-500 mb-4">{error}</Text>
             <Pressable
-              onPress={registerPasskey}
+              onPress={setupAccount}
               accessibilityRole="button"
               accessibilityLabel="Retry passkey registration"
               className="bg-primary py-3 px-6 rounded-lg">
@@ -132,8 +104,8 @@ export default function AccountSetupScreen() {
         return (
           <View className="items-center">
             <CheckCircle
-              size={64}
               className="text-green-500 mb-4"
+              size={64}
             />
             <Text className="text-center text-lg font-bold mb-2">Account Created Successfully!</Text>
             <Text className="text-center text-muted-foreground">Your passkey and wallet have been set up.</Text>
@@ -149,9 +121,7 @@ export default function AccountSetupScreen() {
         <Text className="text-5xl font-bold text-foreground">Account Setup</Text>
         <Text className="mt-4 text-lg text-muted-foreground">Setting up your account and wallet. Please wait...</Text>
       </View>
-
       <View className="flex-1 justify-center items-center pt-12">{renderStepContent()}</View>
-
       <View className="pb-6">
         <Text className="text-center text-muted-foreground text-sm">
           This is a demo application showcasing the Para React Native Wallet SDK usage.

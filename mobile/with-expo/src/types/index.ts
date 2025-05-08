@@ -1,11 +1,15 @@
 import { OAuthMethod, Wallet, WalletType } from "@getpara/react-native-wallet";
 import { SlotProps } from "input-otp-native";
 
-export type InputType = "" | "email" | "phone";
+export type AuthType = "email" | "phone";
+
+export type EmailAuth = { type: "email"; email: string };
+export type PhoneAuth = { type: "phone"; phone: string; countryCode: string };
+export type AuthCreds = EmailAuth | PhoneAuth;
 
 export interface SmartInputProps {
-  inputType: InputType;
-  onInputTypeChange: (type: InputType) => void;
+  inputType: AuthType;
+  onInputTypeChange: (type: AuthType) => void;
   onSubmit: () => void;
   placeholder?: string;
   label?: string;
@@ -27,11 +31,15 @@ export interface OAuthProvidersProps {
 }
 
 export interface AuthNavigationParams {
-  inputType: InputType;
+  authType: AuthType;
   email?: string;
   phoneNumber?: string;
   countryCode?: string;
 }
+
+export type PreserveTypes<T, K extends keyof T> = {
+  [P in keyof T]: P extends K ? T[P] : string;
+};
 
 export type AuthNavigationParamsWithBiometrics = AuthNavigationParams & {
   biometricsId: string;

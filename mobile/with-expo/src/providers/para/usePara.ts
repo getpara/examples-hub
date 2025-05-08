@@ -19,6 +19,8 @@ export const usePara = () => {
     isReady: state.isInitialized && !state.error,
     hasError:
       !!state.error && state.error.message !== "Missing required environment variable: EXPO_PUBLIC_PARA_API_KEY",
-    checkAuthState: actions.checkAuthState,
+    login: actions.login,
+    logout: actions.logout,
+    registerPasskey: actions.registerPasskey,
   };
 };

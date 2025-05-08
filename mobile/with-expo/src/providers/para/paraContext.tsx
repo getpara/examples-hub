@@ -1,6 +1,9 @@
 import React, { createContext, useEffect, useState, ReactNode, useCallback } from "react";
 import { ParaMobile } from "@getpara/react-native-wallet";
 import { PARA_API_KEY, PARA_ENVIRONMENT } from "@/constants";
+import { AuthCreds } from "@/types";
+import { clearCreds, saveCreds } from "@/util/credentialStore";
+import { credsToParaAuth } from "@/util/authHelpers";
 
 interface ParaContextState {
   para: ParaMobile | null;
@@ -11,7 +14,9 @@ interface ParaContextState {
 }
 
 interface ParaContextActions {
-  checkAuthState: () => Promise<boolean>;
+  login(args: AuthCreds): Promise<void>;
+  logout(): Promise<void>;
+  registerPasskey(args: AuthCreds & { biometricsId: string }): Promise<void>;
 }
 
 export const ParaContext = createContext<{ state: ParaContextState; actions: ParaContextActions } | undefined>(
@@ -35,13 +40,13 @@ export const ParaProvider: React.FC<ParaProviderProps> = ({ children }) => {
     const initializePara = async () => {
       if (!PARA_API_KEY) {
         const error = new Error("Missing required environment variable: EXPO_PUBLIC_PARA_API_KEY");
-        setState((prevState) => ({ ...prevState, error }));
+        setState((prevState) => ({ ...prevState, error: error }));
         throw error;
       }
 
       if (!PARA_ENVIRONMENT) {
         const error = new Error("Missing required environment variable: EXPO_PUBLIC_PARA_ENVIRONMENT");
-        setState((prevState) => ({ ...prevState, error }));
+        setState((prevState) => ({ ...prevState, error: error as Error | null }));
         throw error;
       }
 
@@ -77,21 +82,56 @@ export const ParaProvider: React.FC<ParaProviderProps> = ({ children }) => {
     initializePara();
   }, []);
 
-  const checkAuthState = useCallback(async () => {
-    if (!state.para) return false;
+  const login = useCallback(
+    async (args: AuthCreds) => {
+      if (!state.para) throw new Error("Para instance is not initialized");
 
-    const isAuthenticated = await state.para.isFullyLoggedIn();
+      try {
+        await state.para.login(credsToParaAuth(args));
+        setState((prevState) => ({ ...prevState, isAuthenticated: true }));
+        saveCreds(args);
+      } catch (error) {
+        clearCreds();
+        throw error;
+      }
+    },
+    [state.para]
+  );
 
-    setState((prevState) => ({
-      ...prevState,
-      isAuthenticated,
-    }));
+  const logout = useCallback(async () => {
+    if (!state.para) throw new Error("Para instance is not initialized");
 
-    return isAuthenticated;
+    try {
+      await state.para.logout();
+      setState((prevState) => ({ ...prevState, isAuthenticated: false }));
+      clearCreds();
+    } catch (error) {
+      setState((prevState) => ({ ...prevState, error: error as Error | null }));
+      throw error;
+    }
   }, [state.para]);
 
+  const registerPasskey = useCallback(
+    async (args: AuthCreds & { biometricsId: string }) => {
+      if (!state.para) throw new Error("Para instance is not initialized");
+
+      try {
+        await state.para.registerPasskey({
+          ...args,
+        });
+        setState((prevState) => ({ ...prevState, isAuthenticated: true }));
+      } catch (error) {
+        setState((prevState) => ({ ...prevState, error: error as Error | null }));
+        throw error;
+      }
+    },
+    [state.para]
+  );
+
   const actions: ParaContextActions = {
-    checkAuthState,
+    login,
+    logout,
+    registerPasskey,
   };
 
   return <ParaContext.Provider value={{ state, actions }}>{children}</ParaContext.Provider>;

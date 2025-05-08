@@ -7,9 +7,12 @@ import { ActionButtons } from "~/components/ActionButtons";
 import { WalletType } from "@getpara/react-native-wallet";
 import { useWallet } from "@/providers/wallet/useWallet";
 import { WalletWithBalance } from "@/types";
+import { Button } from "@/components/ui/button";
+import { usePara } from "@/providers/para/usePara";
 
 export default function HomeScreen() {
   const { wallets } = useWallet();
+  const { logout } = usePara();
   const [selectedWallet, setSelectedWallet] = useState<WalletWithBalance | null>(null);
 
   const allWallets = useMemo(() => {
@@ -74,10 +77,6 @@ export default function HomeScreen() {
 
   return (
     <View className="flex-1 bg-background px-6">
-      <View className="pt-8">
-        <Text className="text-3xl font-bold text-foreground">Wallet</Text>
-      </View>
-
       <View className="flex-1 items-center justify-center">
         <WalletSelect
           wallets={allWallets}
@@ -91,6 +90,11 @@ export default function HomeScreen() {
           isPositive={currentBalance.isPositive}
         />
         <ActionButtons />
+        <Button
+          onPress={logout}
+          className="mt-4">
+          <Text>Logout</Text>
+        </Button>
       </View>
     </View>
   );

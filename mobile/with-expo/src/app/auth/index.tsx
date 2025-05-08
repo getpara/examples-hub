@@ -1,87 +1,93 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { ScrollView, View, Text } from "react-native";
-import * as SecureStore from "expo-secure-store";
 import { openAuthSessionAsync } from "expo-web-browser";
 import { openURL } from "expo-linking";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { OAuthMethod } from "@getpara/react-native-wallet";
+
 import { SmartInput } from "@/components/SmartInput";
 import { OAuthProviders } from "@/components/OAuthProviders";
 import { Separator } from "@/components/ui/separator";
 import { usePara } from "@/providers/para/usePara";
-import { InputType, STORAGE_KEYS } from "@/types";
+import { AuthType } from "@/types";
 import { APP_SCHEME } from "@/constants";
+import { clearCreds, getCreds } from "@/util/credentialStore";
 
 export default function MainAuthScreen() {
+  const { para, login } = usePara();
   const router = useRouter();
-  const { para } = usePara();
-  const param = useLocalSearchParams<{ email?: string }>();
-  const [email, setEmail] = useState(param.email || "");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const { method, email: oauthEmail } = useLocalSearchParams<{
+    method?: string;
+    email?: string;
+  }>();
+
+  console.log("MainAuthScreen", { method, oauthEmail });
+
   const [countryCode, setCountryCode] = useState("+1");
-  const [inputType, setInputType] = useState<InputType>("email");
+  const [email, setEmail] = useState("");
+  const [inputType, setInputType] = useState<AuthType>("email");
+  const [phoneNumber, setPhoneNumber] = useState("");
+
+  const handleEmailFlow = useCallback(
+    async (targetEmail: string) => {
+      const emailCredentials = { email: targetEmail };
+      const userExists = await para!.checkIfUserExists(emailCredentials);
+
+      if (userExists) {
+        await login({ type: "email", email: targetEmail });
+      } else {
+        await para!.createUser(emailCredentials);
+        router.navigate({
+          pathname: "/auth/otp-verification",
+          params: { email: targetEmail, inputType: "email" },
+        });
+      }
+    },
+    [login, para, router]
+  );
+
+  const handlePhoneFlow = useCallback(
+    async (phone: string, code: string) => {
+      const phoneCredentials = { phone, countryCode: code };
+      const userExists = await para!.checkIfUserExistsByPhone(phoneCredentials);
+
+      if (userExists) {
+        await login({ type: "phone", phone, countryCode: code });
+      } else {
+        await para!.createUserByPhone(phoneCredentials);
+        router.navigate({
+          pathname: "/home",
+          params: { phoneNumber: phone, countryCode: code, inputType: "phone" },
+        });
+      }
+    },
+    [login, para, router]
+  );
 
   useEffect(() => {
-    const attemptAutoLogin = async () => {
-      if (!para) return;
-
+    (async () => {
       try {
-        const [storedEmail, storedPhone, storedCountryCode] = await Promise.all([
-          SecureStore.getItemAsync(STORAGE_KEYS.USER_EMAIL),
-          SecureStore.getItemAsync(STORAGE_KEYS.USER_PHONE),
-          SecureStore.getItemAsync(STORAGE_KEYS.USER_COUNTRY_CODE),
-        ]);
-
-        const loginParams =
-          storedEmail || email
-            ? { email: storedEmail ?? email }
-            : storedPhone && storedCountryCode
-            ? { phone: storedPhone, countryCode: storedCountryCode }
-            : null;
-
-        if (loginParams) {
-          await para.login(loginParams);
-          router.navigate("/home");
-        }
-      } catch (error) {
-        console.error("Auto-login error:", error);
+        const cached = await getCreds();
+        if (cached) await login(cached);
+      } catch {
+        clearCreds();
       }
-    };
+    })();
+  }, [login]);
 
-    attemptAutoLogin();
-  }, [para, router]);
+  useEffect(() => {
+    if (para && method === "login" && oauthEmail) {
+      handleEmailFlow(oauthEmail as string);
+    }
+  }, [method, oauthEmail, para, handleEmailFlow, router]);
 
   const handleContinue = async () => {
-    if ((!email && inputType === "email") || (!phoneNumber && inputType === "phone") || !para) return;
+    if (!para) return;
 
-    try {
-      if (inputType === "email") {
-        const emailCredentials = { email };
-        const userExists = await para.checkIfUserExists(emailCredentials);
-
-        if (userExists) {
-          await para.login(emailCredentials);
-          router.navigate("/home");
-        } else {
-          await para.createUser(emailCredentials);
-          router.navigate({
-            pathname: "/auth/otp-verification",
-            params: { email, inputType },
-          });
-        }
-      } else {
-        const phoneCredentials = { phone: phoneNumber, countryCode };
-        const userExists = await para.checkIfUserExistsByPhone(phoneCredentials);
-
-        if (userExists) {
-          await para.login(phoneCredentials);
-          router.navigate({ pathname: "/home", params: { phoneNumber, countryCode, inputType } });
-        } else {
-          await para.createUserByPhone(phoneCredentials);
-        }
-      }
-    } catch (error) {
-      console.error("Error:", error);
+    if (inputType === "email" && email) {
+      await handleEmailFlow(email);
+    } else if (inputType === "phone" && phoneNumber) {
+      await handlePhoneFlow(phoneNumber, countryCode);
     }
   };
 
@@ -89,48 +95,41 @@ export default function MainAuthScreen() {
     if (!provider || !para) return;
 
     if (provider === OAuthMethod.FARCASTER) {
-      console.log("Farcaster login selected");
       handleFarcasterLogin();
       return;
     }
-    console.log("OAuth provider selected:", provider);
-    const oauthUrl = await para.getOAuthURL({ method: provider, deeplinkUrl: `${APP_SCHEME}://` });
-    console.log("OAuth URL:", oauthUrl);
+
+    const oauthUrl = await para.getOAuthURL({
+      method: provider,
+      deeplinkUrl: APP_SCHEME,
+    });
+
     await openAuthSessionAsync(oauthUrl, APP_SCHEME, {
       preferEphemeralSession: false,
     });
-
-    const { email, userExists } = await para.waitForOAuth();
-
-    if (userExists) {
-      await para.login({ email: email! });
-      router.navigate("/home");
-    } else {
-      const biometricsId = await para.getSetUpBiometricsURL({ isForNewDevice: false, authType: "email" });
-      if (!biometricsId) return;
-
-      router.navigate({
-        pathname: "/auth/account-setup",
-        params: { biometricsId, email, inputType: "email" },
-      });
-    }
   };
 
   const handleFarcasterLogin = async () => {
     if (!para) return;
 
     const farcasterUrl = await para.getFarcasterConnectURL();
-
     await openURL(farcasterUrl);
+
     const { userExists, username } = await para.waitForFarcasterStatus();
 
     if (userExists) {
       await para.login({ email: username! });
       router.navigate("../home");
     } else {
-      const biometricId = await para.getSetUpBiometricsURL({ isForNewDevice: false, authType: "email" });
+      const biometricId = await para.getSetUpBiometricsURL({
+        isForNewDevice: false,
+        authType: "email",
+      });
       if (biometricId) {
-        await para.registerPasskey({ email: username!, biometricsId: biometricId });
+        await para.registerPasskey({
+          email: username!,
+          biometricsId: biometricId,
+        });
         router.navigate("../home");
       }
     }
@@ -160,11 +159,13 @@ export default function MainAuthScreen() {
             onPhoneNumberChange={setPhoneNumber}
             onCountryCodeChange={setCountryCode}
           />
+
           <View className="flex-row items-center gap-x-2">
             <Separator className="flex-1" />
             <Text className="text-center text-muted-foreground">or continue with</Text>
             <Separator className="flex-1" />
           </View>
+
           <OAuthProviders onSelect={handleOauthLogin} />
         </View>
 
