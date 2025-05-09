@@ -3290,6 +3290,12 @@ export abstract class ParaCore implements CoreInterface {
     return sessionLookupId;
   }
 
+  async issueJwt({ keyIndex = 0 }: CoreMethodParams<'issueJwt'> = {}): CoreMethodResponse<'issueJwt'> {
+    const res = await this.ctx.client.issueJwt({ keyIndex });
+
+    return res;
+  }
+
   /**
    * Logs the user out.
    * @param {Object} opts the options object.

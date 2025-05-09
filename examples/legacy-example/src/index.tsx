@@ -1106,7 +1106,7 @@ function AppInner({
                     <Text>{paraAccount.isConnected ? 'Fully Logged In!' : 'Log In Pending...'}</Text>
 
                     <Button
-                      isDisabled={paraAccount.isConnected}
+                      isDisabled={!paraAccount.isConnected}
                       colorScheme="teal"
                       onClick={async () => {
                         if (para) {
@@ -1116,6 +1116,19 @@ function AppInner({
                       }}
                     >
                       Fetch Account Metadata
+                    </Button>
+
+                    <Button
+                      isDisabled={!paraAccount.isConnected || paraAccount.isGuestMode}
+                      colorScheme="teal"
+                      onClick={async () => {
+                        if (para) {
+                          const jwtResponse = await para.issueJwt();
+                          console.log(jwtResponse);
+                        }
+                      }}
+                    >
+                      Issue JWT
                     </Button>
 
                     {para.availableWallets.length > 0 && (

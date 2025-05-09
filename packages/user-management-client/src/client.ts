@@ -49,6 +49,8 @@ import {
   TWalletScheme,
   TWalletType,
   VerifyExternalWalletParams,
+  IssueJwtParams,
+  IssueJwtResponse,
 } from './types/index.js';
 import { extractWalletRef, fromAccountMetadata } from './utils.js';
 import { SESSION_COOKIE_HEADER_NAME, VERSION_HEADER_NAME, PARTNER_ID_HEADER_NAME, API_KEY_HEADER_NAME } from './consts.js';
@@ -1147,6 +1149,12 @@ class Client {
         rpcUrl,
       },
     });
+    return res.data;
+  };
+
+  issueJwt = async ({ keyIndex = 0 }: IssueJwtParams = {}): Promise<IssueJwtResponse> => {
+    const res = await this.baseRequest.post<IssueJwtResponse>(`/auth/jwt`, { keyIndex });
+
     return res.data;
   };
 

@@ -41,10 +41,6 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
       return;
     }
 
-    if (!flow) {
-      return;
-    }
-
     const onModalStepChange = get().onModalStepChange;
     const signupState = get().getSignupState();
     const iFrameUrl = get().iFrameUrl;

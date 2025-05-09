@@ -276,3 +276,21 @@ export type Setup2faResponse =
 export type AccountMetadataKey = Lowercase<Exclude<TOAuthMethod, 'TWITTER'> | 'X'>;
 
 export type AccountMetadata = Partial<Record<AccountMetadataKey, { date: Date; metadata: Record<string, any> }>>;
+
+export type IssueJwtParams = {
+  /**
+   * The index of the Para RSA keypair to use for signing the JWT. Defaults to `0`.
+   */
+  keyIndex?: number;
+};
+
+export type IssueJwtResponse = {
+  /**
+   * The Para JWT token.
+   */
+  token: string;
+  /**
+   * The `keyid`` / `kid` of the keypair used to sign the JWT.
+   */
+  keyId: string;
+};

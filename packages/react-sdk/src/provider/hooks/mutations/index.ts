@@ -30,5 +30,6 @@ export const useUpdatePregenWalletIdentifier = generateHook(
 export const useCreateGuestWallets = generateHook('createGuestWallets', actions.createGuestWallets);
 export const useSignMessage = generateHook('signMessage', actions.signMessage);
 export const useSignTransaction = generateHook('signTransaction', actions.signTransaction);
+export const useIssueJwt = generateHook('issueJwt', actions.issueJwt);
 
 export const useCreateGuestWalletsState = generateStateHook('createGuestWallets');

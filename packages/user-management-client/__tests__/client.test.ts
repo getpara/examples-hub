@@ -1312,6 +1312,12 @@ describe('Client', () => {
       });
     });
 
+    it('issueJwt', async () => {
+      await client.issueJwt({ keyIndex: 1 });
+
+      expect(mocks.post).toBeCalledWith(`/auth/jwt`, { keyIndex: 1 });
+    });
+
     it('trackError', async () => {
       const methodName = 'testMethod';
       const error = { name: 'TestError', message: 'Test error message' };

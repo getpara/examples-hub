@@ -12,6 +12,8 @@ import {
   WalletEntity,
   WalletParams,
   TWalletType,
+  IssueJwtParams,
+  IssueJwtResponse,
 } from '@getpara/user-management-client';
 import {
   AuthStateLogin,
@@ -80,6 +82,7 @@ export const PARA_CORE_METHODS = [
   'signTransaction',
   'initiateOnRampTransaction',
   'getWalletBalance',
+  'issueJwt',
 ] as const;
 
 export type CoreMethodName = (typeof PARA_CORE_METHODS)[number];
@@ -561,6 +564,10 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
   getWalletBalance: {
     params: GetWalletBalanceParams;
     response: GetWalletBalanceResponse;
+  };
+  issueJwt: {
+    params: IssueJwtParams;
+    response: IssueJwtResponse;
   };
 };
 
