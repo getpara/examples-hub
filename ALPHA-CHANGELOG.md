@@ -1,3 +1,60 @@
+# Release (Fri May 09 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.15
+- @getpara/wagmi-v2-integration@2.0.0-alpha.15
+- @getpara/wagmi-v2-connector@2.0.0-alpha.15
+- @getpara/viem-v2-integration@2.0.0-alpha.15
+- @getpara/viem-v1-integration@2.0.0-alpha.15
+- @getpara/user-management-client@2.0.0-alpha.15
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.15
+- @getpara/solana-wallet-connectors@2.0.0-alpha.15
+- @getpara/server-sdk@2.0.0-alpha.15
+- @getpara/react-sdk@2.0.0-alpha.15
+- @getpara/react-native-wallet@2.0.0-alpha.15
+- @getpara/react-components@2.0.0-alpha.15
+- @getpara/react-component-library@1.0.0-alpha.10
+- @getpara/react-common@2.0.0-alpha.15
+- @getpara/evm-wallet-connectors@2.0.0-alpha.15
+- @getpara/ethers-v6-integration@2.0.0-alpha.15
+- @getpara/ethers-v5-integration@2.0.0-alpha.15
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.15
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.15
+- @getpara/core-sdk@2.0.0-alpha.15
+- @getpara/core-components@2.0.0-alpha.15
+
+### Features
+-  Add `issueJwt` method (#898) - 9946985d9
+-  Password fallback for signup/login (#924) - d0a6182fd
+
+# Release (Fri May 09 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.14
+- @getpara/wagmi-v2-integration@2.0.0-alpha.14
+- @getpara/wagmi-v2-connector@2.0.0-alpha.14
+- @getpara/viem-v2-integration@2.0.0-alpha.14
+- @getpara/viem-v1-integration@2.0.0-alpha.14
+- @getpara/user-management-client@2.0.0-alpha.14
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.14
+- @getpara/solana-wallet-connectors@2.0.0-alpha.14
+- @getpara/server-sdk@2.0.0-alpha.14
+- @getpara/react-sdk@2.0.0-alpha.14
+- @getpara/react-native-wallet@2.0.0-alpha.14
+- @getpara/react-components@2.0.0-alpha.14
+- @getpara/react-component-library@1.0.0-alpha.9
+- @getpara/react-common@2.0.0-alpha.14
+- @getpara/evm-wallet-connectors@2.0.0-alpha.14
+- @getpara/ethers-v6-integration@2.0.0-alpha.14
+- @getpara/ethers-v5-integration@2.0.0-alpha.14
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.14
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.14
+- @getpara/core-sdk@2.0.0-alpha.14
+- @getpara/core-components@2.0.0-alpha.14
+
+### Features
+-  Password fallback for signup/login (#924) - d0a6182fd
+
 # Release (Tue May 06 2025)
 
 ## Package Versions
