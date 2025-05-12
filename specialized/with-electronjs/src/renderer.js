@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { ParaWeb, Environment, ParaModal } from "@getpara/react-sdk";
-import "@usepara/react-sdk/styles.css";
+import "@getpara/react-sdk/styles.css";
 import "./index.css";
 
 const PARA_API_KEY = "YOUR_API_KEY";

@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
 import { formatEther, Contract, MaxUint256 } from "ethers";
+<<<<<<< HEAD
 import {
   PARA_TEST_TOKEN_CONTRACT_ADDRESS,
   PARA_TEST_TOKEN_CONTRACT_OWNER,
 } from ".";
+=======
+import { PARA_TEST_TOKEN_CONTRACT_ADDRESS, PARA_TEST_TOKEN_CONTRACT_OWNER } from ".";
+>>>>>>> main
 import ParaTestToken from "../contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
 import { useAccount, useWallet } from "@getpara/react-sdk";
 import { provider } from "../client/ethers";
@@ -99,8 +103,7 @@ export default function PermitSigningDemo() {
       // Calculate deadline (1 hour from now)
       const deadline = Math.floor(Date.now() / 1000) + 3600;
 
-      // Get domain separator
-      const domainSeparator = await contract.DOMAIN_SEPARATOR();
+      // Get the name
       const name = await contract.name();
 
       // Prepare permit data

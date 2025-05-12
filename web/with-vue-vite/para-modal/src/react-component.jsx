@@ -44,6 +44,9 @@ export function ReactComponent({ onClose, isOpen }) {
             font: "Inter",
           },
         }}
+        externalWalletConfig={{
+          wallets: [],
+        }}
       />
     </QueryClientProvider>
   );

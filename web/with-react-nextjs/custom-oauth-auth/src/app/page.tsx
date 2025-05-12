@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { OAuthButtons } from "@/components/OAuthButtons";
 import { WalletDisplay } from "@/components/WalletDisplay";
 import { para } from "@/client/para";
-import { OAuthMethod, AuthStateLogin, AuthStateSignup } from "@getpara/web-sdk";
+import { AuthStateLogin, AuthStateSignup, TOAuthMethod } from "@getpara/web-sdk";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
@@ -14,70 +14,72 @@ export default function Home() {
   const popupWindow = useRef<Window | null>(null);
 
   const openPopup = (...args: Parameters<typeof window.open>) => {
-    if (popupWindow.current) {
-      popupWindow.current.close();
-    }
+    popupWindow.current?.close();
+    return (popupWindow.current = window?.open(...args));
+  };
 
-    popupWindow.current = window?.open(...args);
-
-    return popupWindow.current;
-  }
-
-  const handleAuthState = async (authState: AuthStateLogin | AuthStateSignup) => {
-    switch (authState.stage) {
-      case 'signup': {
-        openPopup(authState.passkeyUrl, "signUpPopup", "popup=true");
-
-        const { needsWallet } = await para.waitForWalletCreation({
-          isCanceled: () => popupWindow.current?.closed,
-        });
-
-        if (needsWallet) {
-          await para.createWallet();
-        }
-      }
-      break;
-
-      case 'login': {
-        openPopup(authState.passkeyUrl, "loginPopup", "popup=true");
-
-        await para.waitForLogin({
-          isCanceled: () => popupWindow.current?.closed,
-        });
-      }
-      break;
-    }
-  }
-
-  const handleCheckIfAuthenticated = async () => {
-    setIsLoading(true);
-    setError("");
-    try {
-      const isAuthenticated = await para.isFullyLoggedIn();
-      setIsConnected(isAuthenticated);
-      if (isAuthenticated) {
-        const wallets = Object.values(await para.getWallets());
-        if (wallets?.length) {
-          setWallet(wallets[0].address || "unknown");
-        }
-      }
-    } catch (err: any) {
-      setError(err.message || "An error occurred during authentication");
-    }
-    setIsLoading(false);
+  const getFirstWalletAddress = async (): Promise<string> => {
+    const wallets = Object.values(await para.getWallets());
+    return wallets?.[0]?.address || "unknown";
   };
 
   useEffect(() => {
-    handleCheckIfAuthenticated();
+    const checkAuthentication = async () => {
+      setIsLoading(true);
+      setError("");
+
+      try {
+        const isAuthenticated = await para.isFullyLoggedIn();
+        setIsConnected(isAuthenticated);
+
+        if (isAuthenticated) {
+          setWallet(await getFirstWalletAddress());
+        }
+      } catch (err: any) {
+        setError(err.message || "Authentication check failed");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuthentication();
   }, []);
 
-  const handleAuthentication = async (method: OAuthMethod) => {
+  const handleAuthState = async (authState: AuthStateLogin | AuthStateSignup) => {
+    const popupConfig = {
+      isCanceled: () => Boolean(popupWindow.current?.closed),
+    };
+
+    if (authState.stage === "signup") {
+      openPopup(authState.passkeyUrl, "signUpPopup", "popup=true");
+
+      const { walletIds, recoverySecret } = await para.waitForWalletCreation(popupConfig);
+      // check if walletids or recoverySecret is null
+      if (!walletIds || !recoverySecret) {
+        setError("Failed to create wallet");
+        return;
+      }
+    }
+
+    if (authState.stage === "login") {
+      openPopup(authState.passkeyUrl, "loginPopup", "popup=true");
+      await para.waitForLogin(popupConfig);
+    }
+  };
+
+  const handleAuthentication = async (method: TOAuthMethod) => {
     setIsLoading(true);
     try {
-      if (method === OAuthMethod.FARCASTER) {
-        await handleFarcasterAuth();
-      } else {
-        await handleRegularOAuth(method);
+      switch (method) {
+        case "FARCASTER":
+          await handleFarcasterAuth();
+          break;
+        case "TELEGRAM":
+          console.error("Telegram authentication is not supported in this example.");
+          break;
+        default:
+          await handleRegularOAuth(method);
+          break;
       }
     } catch (error) {
       console.error("Authentication error:", error);
@@ -87,33 +89,35 @@ export default function Home() {
   };
 
   const handleFarcasterAuth = async () => {
-    try { 
-      const authState = await para.verifyFarcaster({
-        onConnectUri: connectUri => {
+    try {
+      const popupConfig = {
+        onConnectUri: (connectUri: string) => {
           openPopup(connectUri, "farcasterConnectPopup", "popup=true");
         },
-        isCanceled: () => popupWindow.current?.closed,
-      });
+        isCanceled: () => Boolean(popupWindow.current?.closed),
+      };
 
-      handleAuthState(authState);
-
-    } catch (e) {
-      console.error("Farcaster auth error:", e);
+      const authState = await para.verifyFarcaster(popupConfig);
+      await handleAuthState(authState);
+    } catch (error) {
+      console.error("Farcaster auth error:", error);
     }
   };
 
-  const handleRegularOAuth = async (method: OAuthMethod) => {
-    try { 
-      const authState = await para.verifyOAuth({
-        onOAuthUrl: oAuthUrl => {
+  const handleRegularOAuth = async (method: Exclude<TOAuthMethod, "TELEGRAM" | "FARCASTER">) => {
+    try {
+      const popupConfig = {
+        method,
+        onOAuthUrl: (oAuthUrl: string) => {
           openPopup(oAuthUrl, "oAuthPopup", "popup=true");
         },
-        isCanceled: () => popupWindow.current?.closed,
-      });
+        isCanceled: () => Boolean(popupWindow.current?.closed),
+      };
 
-      handleAuthState(authState);
-    } catch (e) {
-      console.error("Regular OAuth error:", e);
+      const authState = await para.verifyOAuth(popupConfig);
+      await handleAuthState(authState);
+    } catch (error) {
+      console.error("Regular OAuth error:", error);
     }
   };
 

@@ -1,3 +1,3 @@
-// Ensure the shim is imported before the expo-router entry point
-import "@getpara/react-native-wallet/dist/shim";
+import "@getpara/react-native-wallet/shim";
 import "expo-router/entry";
+import "./global.css";

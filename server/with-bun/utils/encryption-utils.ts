@@ -1,76 +1,95 @@
-import CryptoJS from "crypto-js";
+const ALGORITHM = "AES-GCM";
+const IV_LENGTH = 12;
 
-/**
- * Retrieves the encryption key from the environment, ensuring it is valid.
- *
- * @returns {string} - The encryption key.
- * @throws {Error} - If the encryption key is not set or not 32 bytes long.
- */
 function getEncryptionKey(): string {
   const encryptionKey = process.env.ENCRYPTION_KEY;
-
   if (!encryptionKey || encryptionKey.length !== 32) {
     throw new Error("ENCRYPTION_KEY must be set and be 32 bytes long");
   }
-
   return encryptionKey;
 }
 
-/**
- * Encrypts a given text using AES with CBC mode and PKCS7 padding.
- *
- * @param {string} text - The text to encrypt.
- * @returns {string} - The encrypted text in the format "IV:Ciphertext".
- */
-export function encrypt(text: string): string {
+async function importSecretKey(keyString: string): Promise<CryptoKey> {
+  try {
+    const keyBuffer = Buffer.from(keyString, "utf-8");
+    return await crypto.subtle.importKey("raw", keyBuffer, { name: ALGORITHM }, false, ["encrypt", "decrypt"]);
+  } catch (error) {
+    throw new Error(`Failed to import secret key: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+export async function encrypt(text: string): Promise<string> {
   if (!text) {
     throw new Error("Text to encrypt must be provided");
   }
 
-  const iv = CryptoJS.lib.WordArray.random(16);
-  const key = CryptoJS.enc.Utf8.parse(getEncryptionKey());
+  try {
+    const keyString = getEncryptionKey();
+    const cryptoKey = await importSecretKey(keyString);
+    const iv = crypto.getRandomValues(new Uint8Array(IV_LENGTH));
+    const encodedText = new TextEncoder().encode(text);
 
-  const encrypted = CryptoJS.AES.encrypt(text, key, {
-    iv: iv,
-    mode: CryptoJS.mode.CBC,
-    padding: CryptoJS.pad.Pkcs7,
-  });
+    const encryptedBuffer = await crypto.subtle.encrypt({ name: ALGORITHM, iv: iv }, cryptoKey, encodedText);
 
-  return `${CryptoJS.enc.Hex.stringify(iv)}:${encrypted.ciphertext.toString()}`;
+    const ivBase64 = Buffer.from(iv.buffer).toString("base64");
+    const encryptedBase64 = Buffer.from(encryptedBuffer).toString("base64");
+
+    return `${ivBase64}:${encryptedBase64}`;
+  } catch (error) {
+    throw new Error(`Encryption process failed: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }
 
-/**
- * Decrypts the provided encrypted text.
- *
- * @param {string} encryptedText - The encrypted text in the format "IV:Ciphertext".
- * @returns {string} - The decrypted plaintext.
- * @throws {Error} - If decryption fails.
- */
-export function decrypt(encryptedText: string): string {
+export async function decrypt(encryptedText: string): Promise<string> {
   if (!encryptedText || !encryptedText.includes(":")) {
-    throw new Error("Encrypted text must be in the format 'IV:Ciphertext'");
+    throw new Error("Encrypted text must be in the format 'IV(base64):Ciphertext(base64)'");
   }
 
-  const [ivHex, encryptedDataHex] = encryptedText.split(":");
-  const iv = CryptoJS.enc.Hex.parse(ivHex);
-  const encryptedData = CryptoJS.enc.Hex.parse(encryptedDataHex);
-  const key = CryptoJS.enc.Utf8.parse(getEncryptionKey());
+  const parts = encryptedText.split(":");
 
-  const cipherParams = CryptoJS.lib.CipherParams.create({
-    ciphertext: encryptedData,
-  });
-
-  const decrypted = CryptoJS.AES.decrypt(cipherParams, key, {
-    iv: iv,
-    mode: CryptoJS.mode.CBC,
-    padding: CryptoJS.pad.Pkcs7,
-  });
-
-  const decryptedText = decrypted.toString(CryptoJS.enc.Utf8);
-
-  if (!decryptedText) {
-    throw new Error("Failed to decrypt text. The provided key may be incorrect.");
+  if (parts.length !== 2 || !parts[0] || !parts[1]) {
+    throw new Error("Encrypted text format is invalid. Expected 'IV(base64):Ciphertext(base64)'.");
   }
 
-  return decryptedText;
+  const [ivBase64, encryptedDataBas64] = parts;
+
+  let iv: Uint8Array;
+  let encryptedBuffer: ArrayBuffer;
+  let cryptoKey: CryptoKey;
+
+  try {
+    const ivBuf = Buffer.from(ivBase64, "base64");
+    const encryptedBuf = Buffer.from(encryptedDataBas64, "base64");
+
+    iv = new Uint8Array(ivBuf);
+
+    encryptedBuffer = encryptedBuf.buffer.slice(
+      encryptedBuf.byteOffset,
+      encryptedBuf.byteOffset + encryptedBuf.byteLength
+    );
+
+    if (iv.byteLength !== IV_LENGTH) {
+      throw new Error(`Invalid IV length. Expected ${IV_LENGTH} bytes, got ${iv.byteLength}`);
+    }
+
+    const keyString = getEncryptionKey();
+    cryptoKey = await importSecretKey(keyString);
+  } catch (error) {
+    throw new Error(
+      `Failed to prepare components for decryption: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+
+  try {
+    const decryptedBuffer = await crypto.subtle.decrypt({ name: ALGORITHM, iv: iv }, cryptoKey, encryptedBuffer);
+
+    const decryptedText = new TextDecoder().decode(decryptedBuffer);
+    return decryptedText;
+  } catch (error) {
+    throw new Error(
+      `Decryption failed. Key may be incorrect or data corrupted: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
 }

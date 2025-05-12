@@ -27,7 +27,6 @@
 import WalletDisplay from "./components/WalletDisplay.vue";
 import { ref, onMounted, onUnmounted, watch } from "vue";
 import { para } from "./client/para";
-import { createParaModalConnector } from "./para-modal-connector";
 import { AuthLayout, OAuthMethod } from "@getpara/react-sdk";
 import { createElement } from "react";
 import ReactDOM from "react-dom/client";
@@ -41,8 +40,6 @@ const error = ref("");
 
 const reactRoot = ref(null);
 let root = null;
-
-let modalConnector: ReturnType<typeof createParaModalConnector> | null = null;
 
 async function handleCheckIfAuthenticated() {
   isLoading.value = true;
@@ -91,11 +88,10 @@ watch(isOpen, (newIsOpen) => {
 });
 
 onUnmounted(() => {
-  modalConnector?.unmount();
+  root?.unmount();
 });
 
 function openModal() {
   isOpen.value = true;
-  modalConnector?.open();
 }
 </script>

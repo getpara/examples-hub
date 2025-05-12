@@ -1,50 +1,28 @@
 # Para Flutter Example
 
-This repository demonstrates the integration of the Para SDK with a Flutter application for iOS and Android platforms.
-The example showcases these essential features:
+This example demonstrates integrating the Para SDK with a Flutter application for both iOS and Android platforms. It
+showcases essential Para features, including multi-method authentication (email, phone, OAuth) with passkeys,
+cross-chain wallet management (EVM, Cosmos, Solana), and transaction signing. Use this project as a starting point for
+building your Flutter application with Para.
 
-- **Authentication** through multiple methods with passkey-based verification:
-  - Email authentication
-  - Phone number verification
-  - OAuth providers (Google, Apple, X/Twitter, Discord)
-- **Wallet creation** and management supporting EVM, Cosmos, and Solana networks
-- **Transaction signing** implemented across multiple blockchain networks
+## Key Files/Folders
 
-> **Important**: For iOS passkey functionality, you must possess a valid Apple Developer Team ID associated with your
-> chosen bundle ID. Configure your unique Team ID in your developer portal account and register it with Para. See the
-> [iOS Setup](#ios-setup) section for detailed instructions.
-
----
-
-## Table of Contents
-
-- [Prerequisites](#prerequisites)
-- [Project Structure](#project-structure)
-- [Installation & Setup](#installation--setup)
-  - [.env File](#env-file)
-  - [iOS Setup](#ios-setup)
-  - [Android Setup](#android-setup)
-- [Key Features](#key-features)
-  - [Authentication Methods](#authentication-methods)
-  - [Wallet Management](#wallet-management)
-  - [Transaction Signing](#transaction-signing)
-- [Running the Example](#running-the-example)
-- [Documentation](#documentation)
-- [Troubleshooting](#troubleshooting)
-
----
+- `lib/examples`: Contains the core Flutter application logic demonstrating Para SDK usage.
+- `.env.example`: Template for environment variables.
 
 ## Prerequisites
 
-Before beginning, ensure you have:
+- **Flutter SDK**: Ensure Flutter is installed and configured correctly.
+- **Platform IDEs**: Xcode for iOS development and/or Android Studio for Android development.
+- **Para API Key**: Obtain your API key from [developer.getpara.com](https://developer.getpara.com). Create a `.env`
+  file in the project root and add your key:
+  ```
+  PARA_BETA_API_KEY=your_api_key_here
+  ```
 
-1. **Flutter SDK** properly installed and configured on your development environment
-2. **Development environment** set up with:
-   - [Xcode](https://developer.apple.com/xcode/) for iOS development (macOS required)
-   - [Android Studio](https://developer.android.com/studio) for Android development
-3. **Para API Key** obtained from [developer.getpara.com](https://developer.getpara.com/)
-4. **.env file** configured with your environment variables (detailed below)
+## Installation
 
+<<<<<<< HEAD
 > **Note**: Full passkey functionality on iOS requires a valid Apple Developer Account and a registered bundle ID
 > matching the Team ID provided to Para. For Android, passkey functionality requires a device with secure lock screen
 > and biometric authentication enabled, plus Google Play Services with an active Google account.
@@ -300,42 +278,22 @@ if (result is SuccessfulSignatureResult) {
 > packages. The core integration point remains Para's `signMessage` method.
 
 ---
+=======
+1.  Install Flutter dependencies:
+    ```bash
+    flutter pub get
+    ```
+>>>>>>> main
 
 ## Running the Example
 
-1. **Configure** your `.env` file with a valid `PARA_BETA_API_KEY`
-2. **Install** Flutter dependencies via `flutter pub get`
-3. **(iOS only)** Install pods in the `ios/` directory:
-   ```bash
-   pod install
-   ```
-4. **Launch** an emulator or connect a device:
+1.  Ensure an emulator is running or a device is connected (`flutter devices`).
+2.  Run the application:
+    ```bash
+    flutter run -d <your_device_id>
+    ```
 
-   ```bash
-   # List available devices
-   flutter devices
+## Learn More
 
-   # Run on specific device
-   flutter run -d <device_id>
-   ```
-
-## Documentation
-
-For comprehensive guidance on Para SDK implementation in Flutter, consult:
-
-- [Para Docs: Flutter Setup](https://docs.getpara.com/getting-started/initial-setup/flutter)
-- [Example code in this repo](https://github.com/getpara/examples-hub)
-
----
-
-## Troubleshooting
-
-Common issues and solutions:
-
-- **Passkey Domain Issues**: Allow up to 24 hours for domain association; iOS requires valid Team ID and bundle ID
-- **API Key Recognition**: Verify your environment variable configuration and `.env` file setup
-- **Android Signature Mismatch**: Confirm your SHA-256 fingerprint matches your keystore configuration
-- **Creation Options Unavailable**: Verify device security requirements (screen lock, biometrics) and Google account
-  status for Android
-- **Invalid API Key**: Confirm `.env` configuration and API key validity with correct Para client Environment
-- **Incorrect Wallet Display**: Verify wallet enablement in your developer portal
+For more detailed documentation and API references, visit the official
+[Para SDK documentation](https://docs.usepara.com/welcome).

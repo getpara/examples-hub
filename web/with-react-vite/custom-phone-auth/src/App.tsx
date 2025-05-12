@@ -68,8 +68,12 @@ export default function Home() {
         case 'login': {
           const { passkeyUrl } = authState;
 
+<<<<<<< HEAD
           const popupWindow = window.open(passkeyUrl, "loginPopup", "popup=true");
           if (!popupWindow) throw new Error("Popup was blocked");  
+=======
+        const { needsWallet } = await para.waitForLoginAndSetup({ popupWindow });
+>>>>>>> main
 
           const { needsWallet } = await para.waitForLogin({
             isCanceled: () => popupWindow.closed,

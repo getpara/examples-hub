@@ -1,47 +1,47 @@
 import React from "react";
-import { OAuthMethod } from "@getpara/web-sdk";
+import { TOAuthMethod } from "@getpara/web-sdk";
 
 interface OAuthOption {
-  method: OAuthMethod;
+  method: TOAuthMethod;
   label: string;
   icon: string;
 }
 
 const oAuthOptions: OAuthOption[] = [
   {
-    method: OAuthMethod.GOOGLE,
+    method: "GOOGLE",
     label: "Continue with Google",
     icon: "/google.svg",
   },
   {
-    method: OAuthMethod.TWITTER,
+    method: "TWITTER",
     label: "Continue with Twitter",
     icon: "/twitter.svg",
   },
   {
-    method: OAuthMethod.APPLE,
+    method: "APPLE",
     label: "Continue with Apple",
     icon: "/apple.svg",
   },
   {
-    method: OAuthMethod.DISCORD,
+    method: "DISCORD",
     label: "Continue with Discord",
     icon: "/discord.svg",
   },
   {
-    method: OAuthMethod.FACEBOOK,
+    method: "FACEBOOK",
     label: "Continue with Facebook",
     icon: "/facebook.svg",
   },
   {
-    method: OAuthMethod.FARCASTER,
+    method: "FARCASTER",
     label: "Continue with Farcaster",
     icon: "/farcaster.svg",
   },
 ];
 
 interface OAuthButtonsProps {
-  onSelect: (method: OAuthMethod) => void;
+  onSelect: (method: TOAuthMethod) => void;
   isLoading: boolean;
   disabled?: boolean;
 }

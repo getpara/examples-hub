@@ -1,16 +1,11 @@
 "use client";
-
-import { Card } from "@/components/Card";
 import { useState, useEffect } from "react";
-import {
-  parseEther,
-  type TransactionRequest,
-  toBigInt,
-  formatEther,
-} from "ethers";
 import { useAccount, useClient, useModal, useWallet } from "@getpara/react-sdk";
+import { Card } from "@/components/Card";
 import { provider } from "@/client/ethers";
+import { parseEther, formatEther, toBigInt, type TransactionRequest } from "ethers";
 import "@getpara/react-sdk/styles.css";
+
 
 export default function Home() {
   const [to, setTo] = useState("");
@@ -55,12 +50,8 @@ export default function Home() {
     }
   }, [address, isConnected]);
 
-  const constructTransaction = async (
-    toAddress: string,
-    ethAmount: string
-  ): Promise<TransactionRequest> => {
-    if (!address || !provider)
-      throw new Error("No sender address or provider available");
+  const constructTransaction = async (toAddress: string, ethAmount: string): Promise<TransactionRequest> => {
+    if (!address || !provider) throw new Error("No sender address or provider available");
 
     const nonce = await provider.getTransactionCount(address);
     const feeData = await provider.getFeeData();
@@ -80,12 +71,8 @@ export default function Home() {
     return tx;
   };
 
-  const validateTransaction = async (
-    toAddress: string,
-    ethAmount: string
-  ): Promise<boolean> => {
-    if (!address || !provider)
-      throw new Error("No sender address or provider available");
+  const validateTransaction = async (toAddress: string, ethAmount: string): Promise<boolean> => {
+    if (!address || !provider) throw new Error("No sender address or provider available");
 
     try {
       const balanceWei = await provider.getBalance(address);
@@ -180,17 +167,13 @@ export default function Home() {
         },
         body: JSON.stringify({
           session,
-          transaction: JSON.stringify(tx, (key, value) =>
-            typeof value === "bigint" ? value.toString() : value
-          ),
+          transaction: JSON.stringify(tx, (key, value) => (typeof value === "bigint" ? value.toString() : value)),
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(
-          errorData.error || "Failed to sign and broadcast transaction"
-        );
+        throw new Error(errorData.error || "Failed to sign and broadcast transaction");
       }
 
       const data = await response.json();
@@ -205,10 +188,7 @@ export default function Home() {
         message: "Transaction submitted. Waiting for confirmation...",
       });
 
-      const receipt = await provider!.waitForTransaction(
-        data.transactionHash,
-        1
-      );
+      const receipt = await provider!.waitForTransaction(data.transactionHash, 1);
 
       setTxHash(data.transactionHash);
       setStatus({
@@ -226,10 +206,7 @@ export default function Home() {
       setStatus({
         show: true,
         type: "error",
-        message:
-          error instanceof Error
-            ? error.message
-            : "Failed to send transaction. Please try again.",
+        message: error instanceof Error ? error.message : "Failed to send transaction. Please try again.",
       });
     } finally {
       setIsLoading(false);
@@ -239,13 +216,10 @@ export default function Home() {
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold tracking-tight mb-4">
-          Para Signing Demo
-        </h1>
+        <h1 className="text-4xl font-bold tracking-tight mb-4">Para Signing Demo</h1>
         <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-          Send ETH with your connected wallet using server-side signing. This
-          demonstrates using the Para SDK with ethers.js integration to
-          construct transactions client-side and sign them server-side.
+          Send ETH with your connected wallet using server-side signing. This demonstrates using the Para SDK with
+          ethers.js integration to construct transactions client-side and sign them server-side.
         </p>
       </div>
 
@@ -253,12 +227,10 @@ export default function Home() {
         <div className="max-w-xl mx-auto">
           <Card
             title="ETH Transfer"
-            description="Send ETH from your wallet to any address using server-side signing"
-          >
+            description="Send ETH from your wallet to any address using server-side signing">
             <button
               onClick={openModal}
-              className="w-full rounded-none bg-blue-900 px-4 py-2 text-sm font-medium text-white hover:bg-blue-950 transition-colors"
-            >
+              className="w-full rounded-none bg-blue-900 px-4 py-2 text-sm font-medium text-white hover:bg-blue-950 transition-colors">
               Connect Wallet
             </button>
           </Card>
@@ -267,28 +239,17 @@ export default function Home() {
         <div className="max-w-xl mx-auto">
           <div className="mb-8 rounded-none border border-gray-200">
             <div className="flex justify-between items-center px-6 py-3 bg-gray-50 border-b border-gray-200">
-              <h3 className="text-sm font-medium text-gray-900">
-                Current Balance:
-              </h3>
+              <h3 className="text-sm font-medium text-gray-900">Current Balance:</h3>
               <button
                 onClick={fetchBalance}
                 disabled={isBalanceLoading || !address}
                 className="p-1 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
-                title="Refresh balance"
-              >
-                <span
-                  className={`inline-block ${
-                    isBalanceLoading ? "animate-spin" : ""
-                  }`}
-                >
-                  🔄
-                </span>
+                title="Refresh balance">
+                <span className={`inline-block ${isBalanceLoading ? "animate-spin" : ""}`}>🔄</span>
               </button>
             </div>
             <div className="px-6 py-3">
-              <p className="text-sm text-gray-500 bg-gray-100 p-2 rounded-md">
-                Network: Sepolia
-              </p>
+              <p className="text-sm text-gray-500 bg-gray-100 p-2 rounded-md">Network: Sepolia</p>
               <p className="text-lg font-medium text-gray-900">
                 {isBalanceLoading
                   ? "Loading..."
@@ -307,18 +268,18 @@ export default function Home() {
                   : status.type === "error"
                   ? "bg-red-50 border-red-500 text-red-700"
                   : "bg-blue-50 border-blue-500 text-blue-700"
-              }`}
-            >
+              }`}>
               <p className="px-6 py-4 break-words">{status.message}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-4">
             <div className="space-y-3">
               <label
                 htmlFor="to"
-                className="block text-sm font-medium text-gray-700"
-              >
+                className="block text-sm font-medium text-gray-700">
                 Recipient Address
               </label>
               <input
@@ -329,15 +290,14 @@ export default function Home() {
                 placeholder="0x..."
                 required
                 disabled={isLoading}
-                className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+                className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
               />
             </div>
 
             <div className="space-y-3">
               <label
                 htmlFor="amount"
-                className="block text-sm font-medium text-gray-700"
-              >
+                className="block text-sm font-medium text-gray-700">
                 Amount (ETH)
               </label>
               <input
@@ -349,30 +309,26 @@ export default function Home() {
                 step="0.01"
                 required
                 disabled={isLoading}
-                className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+                className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
               />
             </div>
 
             <button
               type="submit"
               className="w-full rounded-none bg-blue-900 px-6 py-3 text-sm font-medium text-white hover:bg-blue-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={!to || !amount || isLoading}
-            >
+              disabled={!to || !amount || isLoading}>
               {isLoading ? "Sending Transaction..." : "Send Transaction"}
             </button>
 
             {txHash && (
               <div className="mt-8 rounded-none border border-gray-200">
                 <div className="flex justify-between items-center px-6 py-4 bg-gray-50 border-b border-gray-200">
-                  <h3 className="text-sm font-medium text-gray-900">
-                    Transaction Hash:
-                  </h3>
+                  <h3 className="text-sm font-medium text-gray-900">Transaction Hash:</h3>
                   <a
                     href={`https://sepolia.etherscan.io/tx/${txHash}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-3 py-1 text-sm bg-blue-900 text-white hover:bg-blue-950 transition-colors rounded-none"
-                  >
+                    className="px-3 py-1 text-sm bg-blue-900 text-white hover:bg-blue-950 transition-colors rounded-none">
                     View on Etherscan
                   </a>
                 </div>

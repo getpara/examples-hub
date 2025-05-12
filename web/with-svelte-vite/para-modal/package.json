@@ -1,5 +1,5 @@
 {
-  "name": "para-modal",
+  "name": "para-modal-svelte",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -7,10 +7,16 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
+    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json",
+    "postinstall": "npx setup-para"
   },
   "dependencies": {
-    "@getpara/react-sdk": "1.5.0",
+<<<<<<< HEAD
+    "@getpara/react-sdk": "alpha",
+    "@tanstack/react-query": "^5.0.0",
+=======
+    "@getpara/react-sdk": "1.12.0",
+>>>>>>> main
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
