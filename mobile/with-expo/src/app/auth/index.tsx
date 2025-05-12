@@ -56,7 +56,7 @@ export default function MainAuthScreen() {
       } else {
         await para!.createUserByPhone(phoneCredentials);
         router.navigate({
-          pathname: "/home",
+          pathname: "/auth/otp-verification",
           params: { phoneNumber: phone, countryCode: code, inputType: "phone" },
         });
       }
