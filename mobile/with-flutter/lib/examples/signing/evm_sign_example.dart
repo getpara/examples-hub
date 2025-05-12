@@ -9,6 +9,12 @@ import 'package:web3dart/web3dart.dart';
 import 'package:http/http.dart';
 import 'contract_definitions.dart';
 
+enum TransactionType {
+  legacy,
+  eip1559,
+  contract,
+}
+
 class EvmSignExample extends StatefulWidget {
   final para_sdk.Wallet wallet;
 
@@ -21,9 +27,6 @@ class EvmSignExample extends StatefulWidget {
   State<EvmSignExample> createState() => _EvmSignExampleState();
 }
 
-<<<<<<< HEAD
-class _EVMSignExampleState extends State<EVMSignExample> {
-=======
 class _EvmSignExampleState extends State<EvmSignExample> {
   final _formKey = GlobalKey<FormState>();
   final _recipientController = TextEditingController();
@@ -289,7 +292,6 @@ class _EvmSignExampleState extends State<EvmSignExample> {
     }
   }
 
->>>>>>> main
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -539,10 +541,4 @@ class _EvmSignExampleState extends State<EvmSignExample> {
       ),
     );
   }
-}
-
-enum TransactionType {
-  legacy,
-  eip1559,
-  contract,
 }
