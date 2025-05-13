@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { ScrollView, View, Text } from "react-native";
+import { ScrollView, View } from "react-native";
 import { openAuthSessionAsync } from "expo-web-browser";
 import { openURL } from "expo-linking";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -12,6 +12,7 @@ import { usePara } from "@/providers/para/usePara";
 import { AuthType } from "@/types";
 import { APP_SCHEME } from "@/constants";
 import { clearCreds, getCreds } from "@/util/credentialStore";
+import { Text } from "@/components/ui/text";
 
 export default function MainAuthScreen() {
   const { para, login } = usePara();
@@ -20,8 +21,6 @@ export default function MainAuthScreen() {
     method?: string;
     email?: string;
   }>();
-
-  console.log("MainAuthScreen", { method, oauthEmail });
 
   const [countryCode, setCountryCode] = useState("+1");
   const [email, setEmail] = useState("");
@@ -141,8 +140,8 @@ export default function MainAuthScreen() {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ flexGrow: 1 }}>
         <View className="pt-6 pb-8">
-          <Text className="text-5xl font-bold text-left text-foreground font-figtree">Sign in</Text>
-          <Text className="mt-2 text-left text-lg text-muted-foreground font-nunito-sans">
+          <Text className="text-5xl  text-left text-foreground font-figtree-bold">Sign In</Text>
+          <Text className="mt-2 text-left text-lg text-muted-foreground">
             Welcome to the Para Wallet Demo. Sign in to explore seamless authentication and wallet integration.
           </Text>
         </View>

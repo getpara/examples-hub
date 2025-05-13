@@ -1,4 +1,4 @@
-const { hairlineWidth } = require("nativewind/theme");
+const { hairlineWidth, platformSelect } = require("nativewind/theme");
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -7,6 +7,24 @@ module.exports = {
   presets: [require("nativewind/preset")],
   theme: {
     extend: {
+      fontFamily: {
+        "figtree": platformSelect({
+          ios: ["Figtree-Regular"],
+          android: ["Figtree_400Regular"],
+        }),
+        "figtree-bold": platformSelect({
+          ios: ["Figtree-Bold"],
+          android: ["Figtree_700Bold"],
+        }),
+        "nunito": platformSelect({
+          ios: ["NunitoSans12pt-Regular"],
+          android: ["NunitoSans_400Regular"],
+        }),
+        "nunito-bold": platformSelect({
+          ios: ["NunitoSans12pt-Bold"],
+          android: ["NunitoSans_700Bold"],
+        }),
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

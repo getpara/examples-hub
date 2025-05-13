@@ -2,7 +2,6 @@ import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { Stack } from "expo-router";
-import ErrorIndicator from "@/components/ErrorIndicator";
 import { ParaProvider } from "@/providers/para/paraContext";
 import { usePara } from "@/providers/para/usePara";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -28,7 +27,6 @@ function RootStack() {
 
   useEffect(() => {
     if (!isInitializing && isInitialized) {
-      console.log("App initialized");
       SplashScreen.hideAsync();
     }
   }, [isInitializing, isInitialized]);
@@ -39,12 +37,32 @@ function RootStack() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Stack screenOptions={{ headerShown: false }}>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: "slide_from_right",
+          contentStyle: { backgroundColor: "#ffffff" },
+          gestureEnabled: true,
+          gestureDirection: "horizontal",
+          presentation: "card",
+          fullScreenGestureEnabled: true,
+        }}>
         <Stack.Protected guard={!isAuthenticated}>
-          <Stack.Screen name="auth" />
+          <Stack.Screen
+            name="auth"
+            options={{
+              gestureEnabled: false,
+              animation: "fade",
+            }}
+          />
         </Stack.Protected>
         <Stack.Protected guard={isAuthenticated}>
-          <Stack.Screen name="home" />
+          <Stack.Screen
+            name="home"
+            options={{
+              animation: "slide_from_right",
+            }}
+          />
         </Stack.Protected>
       </Stack>
     </SafeAreaView>

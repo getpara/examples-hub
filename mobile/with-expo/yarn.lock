@@ -1172,6 +1172,16 @@
     "@ethersproject/properties" "^5.8.0"
     "@ethersproject/strings" "^5.8.0"
 
+"@expo-google-fonts/figtree@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@expo-google-fonts/figtree/-/figtree-0.3.0.tgz#6ea58c36e677fb31413035590fedb5deceb24cb0"
+  integrity sha512-9vx7ezCDWw2+hjsj18TxHuLXpt59wkNR3NeZoR/MNpl3u8brcmjq1i18T4+jgllrWLPfR6jV+n+Se8E5RdKt0A==
+
+"@expo-google-fonts/nunito-sans@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@expo-google-fonts/nunito-sans/-/nunito-sans-0.3.0.tgz#bb9959ccf6c8af6830725554ed0fefb0678709cc"
+  integrity sha512-UVaflOLO0axrZ1WDT0TCAByvXeHSknSFIbEiNKBho9S6Lk28UWtvUcxqA8z8QJdKi430BJhZkNaSkDuc2PFvIA==
+
 "@expo/cli@0.24.12":
   version "0.24.12"
   resolved "https://registry.yarnpkg.com/@expo/cli/-/cli-0.24.12.tgz#815911d8cb0f769ffe5d09225ee0b6d9c4c01ab4"
@@ -1499,80 +1509,80 @@
   resolved "https://registry.yarnpkg.com/@floating-ui/utils/-/utils-0.2.9.tgz#50dea3616bc8191fb8e112283b49eaff03e78429"
   integrity sha512-MDWhGtE+eHw5JW7lq4qhc5yRLS11ERl1c7Z6Xd0a58DozHES6EnNNwUWbMiG4J9Cgj053Bhk8zvlhFYKVhULwg==
 
-"@getpara/core-sdk@1.13.1":
-  version "1.13.1"
-  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.13.1.tgz#6d7837fcd8b35530f4cfcb4907d4961ce9c474d0"
-  integrity sha512-33sAPs/csO2vBv/ROh/YG9eTr265vqBvHYLKIvWOlxo6Eh0lToAnOo8IHrcZs6mYCOctn3xLX7510/K8lKyqhQ==
+"@getpara/core-sdk@1.14.2":
+  version "1.14.2"
+  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.14.2.tgz#aa1c6510dc6b105ca35f77759355ad35c90860f6"
+  integrity sha512-5HVN/0Sv4cJF0qwfjDujk2Aw0PAJQsYoOD0qT3eYjfl7u9V/3lk9nuEOF0zt7KCzjbDUsHRb5luRG2SciuTetQ==
   dependencies:
     "@celo/utils" "^8.0.2"
     "@cosmjs/encoding" "^0.32.4"
     "@ethereumjs/util" "^9.1.0"
-    "@getpara/user-management-client" "1.13.1"
+    "@getpara/user-management-client" "1.14.2"
     "@noble/hashes" "^1.5.0"
     base64url "^3.0.1"
     libphonenumber-js "1.11.2"
     node-forge "^1.3.1"
     uuid "^11.1.0"
 
-"@getpara/cosmjs-v0-integration@1.13.1":
-  version "1.13.1"
-  resolved "https://registry.yarnpkg.com/@getpara/cosmjs-v0-integration/-/cosmjs-v0-integration-1.13.1.tgz#d09c47f70533efd875b08effbcb0f0cc53f03972"
-  integrity sha512-msegv3jdHMZ7fY/gaWVfDxR4STBwZEs9egSgC1a+BeYln3PGMDWC7JdBtt6dUtOYNtMS75ex9EEzDLdj3V5dXw==
+"@getpara/cosmjs-v0-integration@1.14.2":
+  version "1.14.2"
+  resolved "https://registry.yarnpkg.com/@getpara/cosmjs-v0-integration/-/cosmjs-v0-integration-1.14.2.tgz#c0c79b4f4a0d090d83bfe5252f013b8ac21cc06e"
+  integrity sha512-uoc4tHz8OHUwhuLZ8DYgYxw8pps1wuMkHKNAbAwp97QOQ0zt1/qjwCOyeCGj2fNPPgICM1uj8/P3Lgs52ql+FA==
   dependencies:
     "@cosmjs/stargate" "<=0.33.1"
-    "@getpara/core-sdk" "1.13.1"
+    "@getpara/core-sdk" "1.14.2"
 
-"@getpara/ethers-v6-integration@1.13.1":
-  version "1.13.1"
-  resolved "https://registry.yarnpkg.com/@getpara/ethers-v6-integration/-/ethers-v6-integration-1.13.1.tgz#0c6133668ee6a0c532778e9b16065777137ee331"
-  integrity sha512-yXNwgHLDrDx5h9FIxToQe4i4jrtPmSSJ/O9sVX8mJh4pKYXaS5t7L4V4o69pp2cF+PxU9eXtOZiRYsxi4tqzHg==
+"@getpara/ethers-v6-integration@1.14.2":
+  version "1.14.2"
+  resolved "https://registry.yarnpkg.com/@getpara/ethers-v6-integration/-/ethers-v6-integration-1.14.2.tgz#6ab8423fb4f9dba1e90abe8dcecbfa978d7bcde0"
+  integrity sha512-3uHKxoHa1EY1wqfhxd9SyIVcqUVtWQ562ORmYofGp+PsnQwl1Rpkww0roaWrzc9mtaIpooa9vE9MWmFKHZuZyg==
   dependencies:
-    "@getpara/core-sdk" "1.13.1"
+    "@getpara/core-sdk" "1.14.2"
 
-"@getpara/react-native-wallet@1.14.0-dev.0":
-  version "1.14.0-dev.0"
-  resolved "https://registry.yarnpkg.com/@getpara/react-native-wallet/-/react-native-wallet-1.14.0-dev.0.tgz#594be4f62b61ad1924062caa1e8f19e3fa8d6b27"
-  integrity sha512-va796xtMB+dkb9nlJIn/CLKo1azB6Yp6dtiJb0Eoo9fR7wYK2VfbmO1wezga9CDTGg9HIwCxolU9+IZLfPjglg==
+"@getpara/react-native-wallet@1.15.0-dev.0":
+  version "1.15.0-dev.0"
+  resolved "https://registry.yarnpkg.com/@getpara/react-native-wallet/-/react-native-wallet-1.15.0-dev.0.tgz#b18a9c2c4dee1eb465f8e0d849e4317ed4155cf4"
+  integrity sha512-zfDD7ZXQ4HmCDegMeg+UqOTIPvobbso4UoZiWamXZgBFHX9RaEgE0eJEk2pWGHyCh80Lp98OYmskOMo3JLlcTg==
   dependencies:
-    "@getpara/core-sdk" "1.13.1"
-    "@getpara/user-management-client" "1.13.1"
-    "@getpara/web-sdk" "1.13.1"
+    "@getpara/core-sdk" "1.14.2"
+    "@getpara/user-management-client" "1.14.2"
+    "@getpara/web-sdk" "1.14.2"
     "@peculiar/webcrypto" "^1.5.0"
     "@ungap/structured-clone" "1.3.0"
     node-forge "1.3.1"
     react-native-url-polyfill "2.0.0"
     text-encoding "0.7.0"
 
-"@getpara/solana-web3.js-v1-integration@1.13.1":
-  version "1.13.1"
-  resolved "https://registry.yarnpkg.com/@getpara/solana-web3.js-v1-integration/-/solana-web3.js-v1-integration-1.13.1.tgz#5ae57ddf292b2bc0543f32ee9a46a803f0453162"
-  integrity sha512-xEQJL1oRAK/azwt9XKVnq2lfaXZqqCLQdThqjEkZkeeN4qz2fU4s+msOHn3PlFWbDw4HNgPsd6mx1YOYcRJHsA==
+"@getpara/solana-web3.js-v1-integration@1.14.2":
+  version "1.14.2"
+  resolved "https://registry.yarnpkg.com/@getpara/solana-web3.js-v1-integration/-/solana-web3.js-v1-integration-1.14.2.tgz#8c7d2b3fb7681ec911d04d7e05ee072ee7099246"
+  integrity sha512-qvInRT4+V3ctLXmet9BSVJRORN0LnEod28iw1Kw5uyAooWkzQzjPwJbGv2tN19hJkFOVN6qREWFvA2AI+70cdw==
   dependencies:
-    "@getpara/core-sdk" "1.13.1"
+    "@getpara/core-sdk" "1.14.2"
     "@solana/web3.js" "^1.98.0"
 
-"@getpara/user-management-client@1.13.1":
-  version "1.13.1"
-  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.13.1.tgz#28b425bee51875b51d01e53596831fb542fa5212"
-  integrity sha512-wM3RucVqE4yR4kcbXUO47GjPFCOqfOCDLaUROYdLYJWo+LhIT57t/rLTHsTB1WM3QwHgJL0Kt5XWYk4JJah43Q==
+"@getpara/user-management-client@1.14.2":
+  version "1.14.2"
+  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.14.2.tgz#81828839c333a87ce773dabf83ad3b3590476d2a"
+  integrity sha512-O2l0aHfTjz4C4/xsAyneYXVEwz9C4qDxAyD+OJ9OMrxFgaOLazWpsuItn/S2tBqMhTOJeMwl+ANi51PM/9r6CA==
   dependencies:
     axios "^1.8.4"
     libphonenumber-js "1.11.2"
 
-"@getpara/viem-v2-integration@1.13.1":
-  version "1.13.1"
-  resolved "https://registry.yarnpkg.com/@getpara/viem-v2-integration/-/viem-v2-integration-1.13.1.tgz#9233f9b106d9e2b819d8f0ca142409b4c5f4ffd0"
-  integrity sha512-s+w66asBE19m7wjkJgY/H/hIt9uhRUIym1gaH9Wz9SkExAWdhcJXdHcP7gyEYFP8rd1YQshRHkyrGMNnIR8ADA==
+"@getpara/viem-v2-integration@1.14.2":
+  version "1.14.2"
+  resolved "https://registry.yarnpkg.com/@getpara/viem-v2-integration/-/viem-v2-integration-1.14.2.tgz#382fbc33bf5200f41876d194700394fc53c2225b"
+  integrity sha512-B29zJykNKRwAJcKUxOWQYrUWVKWHBerV4xXzB3XNeFXGyDC36MBxkzr7thSfCy+MB3h9GZ7Xaaym1NK3vDosNQ==
   dependencies:
-    "@getpara/core-sdk" "1.13.1"
+    "@getpara/core-sdk" "1.14.2"
 
-"@getpara/web-sdk@1.13.1":
-  version "1.13.1"
-  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-1.13.1.tgz#5d2b7ff12f458701f2ca64fb487c9b6d0cd167a5"
-  integrity sha512-znFkew8CG8WOMu4A4gD4Obut2mFqxb5irWX9K0lKg7bJ5QUMrlRqqdblGjmyb4a2NQRGysKFS9c+OOYr12DVMw==
+"@getpara/web-sdk@1.14.2":
+  version "1.14.2"
+  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-1.14.2.tgz#c107f3e8ee424efd92a2ba5ff49b15bee736922e"
+  integrity sha512-3exJaJys+vrU8L1jv4Y/qsk/IfDq3pWiDvLHOuUngZIdoVTsxJrpHSF5oiZU8+rBNQ3Y5XbkhHeigKBLjwC4Nw==
   dependencies:
-    "@getpara/core-sdk" "1.13.1"
-    "@getpara/user-management-client" "1.13.1"
+    "@getpara/core-sdk" "1.14.2"
+    "@getpara/user-management-client" "1.14.2"
     base64url "3.0.1"
     buffer "6.0.3"
     cbor-web "8.1.0"
@@ -4103,7 +4113,7 @@ expo-file-system@~18.1.9:
   resolved "https://registry.yarnpkg.com/expo-file-system/-/expo-file-system-18.1.9.tgz#0fa1f6bd491ef820abfb00dd9d5fac9c2dc7c4b0"
   integrity sha512-2i8IpaXpLVSI/dmT6TBfvRkl1+YkbWI07NCsQX1Myh33AF8xaJ4jv3Hz6WK1JArqDagCmrQUB2mW9SYnWYqLHg==
 
-expo-font@~13.3.1:
+expo-font@^13.3.1, expo-font@~13.3.1:
   version "13.3.1"
   resolved "https://registry.yarnpkg.com/expo-font/-/expo-font-13.3.1.tgz#ed69ae14f263a4c447efb2615b60d9e045372e68"
   integrity sha512-d+xrHYvSM9WB42wj8vP9OOFWyxed5R1evphfDb6zYBmC1dA9Hf89FpT7TNFtj2Bk3clTnpmVqQTCYbbA2P3CLg==

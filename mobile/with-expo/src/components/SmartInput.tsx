@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import { Mail, ChevronRight, AlertCircle } from "@/components/icons";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import { Text } from "~/components/ui/text";
+
 import { CountryCodeDropdown } from "./CountryCodeDropdown";
 import { SmartInputProps } from "@/types";
 import { AsYouType, parsePhoneNumberFromString } from "libphonenumber-js";
@@ -242,7 +244,7 @@ export function SmartInput({
           keyboardType={inputType === "phone" ? "phone-pad" : "default"}
           autoCapitalize="none"
           autoCorrect={false}
-          className="flex-1 h-14 text-base text-foreground border-0 bg-transparent"
+          className="flex-1 h-14 text-base text-foreground border-0 bg-transparent font-nunito"
           placeholderTextColor="#9CA3AF"
         />
 
@@ -263,7 +265,7 @@ export function SmartInput({
         )}
       </View>
 
-      {displayValue !== "" && inputType !== "" && !error && (
+      {displayValue !== "" && inputType !== undefined && !error && (
         <Text className="pl-2 text-xs text-muted-foreground">
           {inputType === "phone" ? `Continuing with phone (${countryCode})` : `Continuing with ${inputType}`}
         </Text>

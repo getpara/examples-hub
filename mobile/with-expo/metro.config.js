@@ -9,4 +9,6 @@ config.resolver.extraNodeModules = {
   stream: require.resolve("readable-stream"),
 };
 
+config.resolver.unstable_enablePackageExports = true;
+
 module.exports = withNativeWind(config, { input: "./global.css" });
