@@ -34,7 +34,7 @@ function App(): React.JSX.Element {
     const initializePara = async () => {
       try {
         // Replace YOUR_API_KEY with your actual API key when ready
-        const para = new ParaMobile(Environment.BETA, 'YOUR_API_KEY');
+        const para = new ParaMobile(Environment.SANDBOX, '12e3517d125169ea9847d0da5bdcd9c9');
         setParaInitialized(true);
         console.log('Para SDK initialized successfully');
       } catch (err) {
