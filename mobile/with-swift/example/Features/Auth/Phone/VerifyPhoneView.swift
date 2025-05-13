@@ -21,8 +21,8 @@ struct VerifyPhoneView: View {
     
     // Helper to get phone information from the auth state for display
     private var phoneDisplay: String {
-        if let phoneIdentity = authState.authIdentity as? PhoneIdentity {
-            return phoneIdentity.identifier
+        if let phone = authState.phone {
+            return phone
         } else {
             return "your phone"
         }
@@ -162,7 +162,7 @@ struct VerifyPhoneView: View {
     let sampleAuthState = AuthState(
         stage: .verify,
         userId: "preview-user-id",
-        authIdentity: PhoneIdentity(phone: "+15551234")
+        phone: "+15551234"
     )
     
     NavigationStack {

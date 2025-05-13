@@ -17,8 +17,8 @@ struct VerifyEmailView: View {
     
     // Helper to get the email from the auth state
     private var emailDisplay: String {
-        if let emailIdentity = authState.authIdentity as? EmailIdentity {
-            return emailIdentity.email
+        if let email = authState.email {
+            return email
         } else {
             return "your email"
         }
@@ -175,7 +175,7 @@ struct VerifyEmailView: View {
     let sampleAuthState = AuthState(
         stage: .verify,
         userId: "preview-user-id",
-        authIdentity: EmailIdentity(email: "test@example.com")
+        email: "test@example.com"
     )
     
     return NavigationStack {

@@ -148,7 +148,7 @@ struct ChooseSignupMethodView: View {
     let sampleAuthState = AuthState(
         stage: .signup,
         userId: "preview-user-id",
-        authIdentity: EmailIdentity(email: "test@example.com"),
+        email: "test@example.com",
         passkeyUrl: "https://example.com/passkey",
         passkeyId: "preview-passkey-id",
         passwordUrl: "https://example.com/password"
