@@ -15,57 +15,23 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import AuthSelection from './AuthSelection';
 import EmailAuth from './auth/with-email';
 import PhoneAuthScreen from './auth/with-phone';
+import HomeScreen from './Home';
+
+// Import sign screens
+import EVMSendScreen from './sign/with-evm';
+import CosmosSendScreen from './sign/with-cosmos';
+import SolanaSendScreen from './sign/with-solana';
 
 import {RootStackParamList} from '../types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
-
-function HomeScreen({navigation}: any) {
-  const [paraInitialized, setParaInitialized] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const initializePara = async () => {
-      try {
-        // Para is already initialized in client/para.ts
-        setParaInitialized(true);
-        console.log('Para SDK initialized successfully');
-      } catch (err) {
-        console.error('Failed to initialize Para SDK:', err);
-        setError('Failed to initialize Para SDK');
-      }
-    };
-
-    initializePara();
-  }, []);
-
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Para React Native Demo</Text>
-
-      {error ? (
-        <Text style={styles.errorText}>{error}</Text>
-      ) : (
-        <Text style={styles.statusText}>
-          Para SDK status: {paraInitialized ? 'Initialized' : 'Initializing...'}
-        </Text>
-      )}
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate('AuthSelection')}>
-        <Text style={styles.buttonText}>Get Started</Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
 
 function App(): React.JSX.Element {
   return (
     <SafeAreaProvider>
       <NavigationContainer>
         <Stack.Navigator
-          initialRouteName="Home"
+          initialRouteName="AuthSelection"
           screenOptions={{
             headerShown: false,
           }}>
@@ -73,6 +39,9 @@ function App(): React.JSX.Element {
           <Stack.Screen name="AuthSelection" component={AuthSelection} />
           <Stack.Screen name="EmailAuth" component={EmailAuth} />
           <Stack.Screen name="PhoneAuth" component={PhoneAuthScreen} />
+          <Stack.Screen name="SignEVM" component={EVMSendScreen} />
+          <Stack.Screen name="SignCosmos" component={CosmosSendScreen} />
+          <Stack.Screen name="SignSolana" component={SolanaSendScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
