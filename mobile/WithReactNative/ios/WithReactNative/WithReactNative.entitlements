@@ -6,7 +6,7 @@
 	<array>
 		<string>webcredentials:app.beta.usecapsule.com</string>
 		<string>webcredentials:app.usecapsule.com</string>
-		<string>webcredentials:app.sandbox.usecapsule.com</string>
+		<string>webcredentials:app.sandbox.usecapsule.com?mode=developer</string>
 	</array>
 </dict>
 </plist>
