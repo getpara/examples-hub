@@ -1,27 +1,23 @@
 import React from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ArrowLeft } from "@/components/icons/ArrowLeft";
 import { CustomOTPInput } from "@/components/OtpInput";
 import { Text } from "~/components/ui/text";
 import { usePara } from "@/providers/para/usePara";
-import { AuthNavigationParams, InputType } from "@/types";
+import { AuthNavigationParams, PreserveTypes } from "@/types";
+import { paramsToCreds } from "@/util/authHelpers";
 
 export default function OtpVerificationScreen() {
   const { para } = usePara();
   const router = useRouter();
-  const params = useLocalSearchParams<Record<keyof AuthNavigationParams, string>>();
-  const inputType = params.inputType as InputType;
-
-  const handleBack = () => {
-    router.back();
-  };
+  const routeParams = useLocalSearchParams<PreserveTypes<AuthNavigationParams, "authType">>();
+  const creds = paramsToCreds(routeParams)!;
 
   const handleComplete = async (code: string) => {
     if (!para) return;
 
     try {
-      const biometricsId = await (inputType === "email"
+      const biometricsId = await (creds.authType === "email"
         ? para.verifyEmailBiometricsId({ verificationCode: code })
         : para.verifyPhoneBiometricsId({ verificationCode: code }));
 
@@ -32,7 +28,7 @@ export default function OtpVerificationScreen() {
 
       router.navigate({
         pathname: "/auth/account-setup",
-        params: { biometricsId, ...params },
+        params: { ...creds, biometricsId },
       });
     } catch (error) {
       console.error("Error verifying code:", error);
@@ -42,7 +38,7 @@ export default function OtpVerificationScreen() {
   const handleResend = async () => {
     if (!para) return;
     try {
-      await (inputType === "email" ? para.resendVerificationCode() : para.resendVerificationCodeByPhone());
+      await (creds.authType === "email" ? para.resendVerificationCode() : para.resendVerificationCodeByPhone());
     } catch (error) {
       console.error("Error resending verification code:", error);
     }
@@ -53,21 +49,10 @@ export default function OtpVerificationScreen() {
       <ScrollView
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ flexGrow: 1 }}>
-        <View className="pt-6">
-          <Pressable
-            onPress={handleBack}
-            className="mb-6 p-2"
-            accessibilityRole="button"
-            accessibilityLabel="Go back">
-            <ArrowLeft
-              size={24}
-              className="text-muted-foreground"
-            />
-          </Pressable>
-
-          <Text className="text-5xl font-bold text-foreground">Verification</Text>
-          <Text className="mt-4 text-lg text-muted-foreground">
-            Enter the verification code we sent to your device.
+        <View className="pt-6 pb-8">
+          <Text className="text-5xl  text-left text-foreground font-figtree-bold">Verification</Text>
+          <Text className="mt-2 text-left text-lg text-muted-foreground">
+            Enter the verification code sent to your {creds.authType === "email" ? "email" : "phone"}.
           </Text>
         </View>
 

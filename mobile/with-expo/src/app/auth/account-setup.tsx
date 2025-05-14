@@ -16,6 +16,21 @@ export default function AccountSetupScreen() {
   const [setupStep, setSetupStep] = useState<SetupStep>(SetupStep.INITIALIZING);
   const [error, setError] = useState<string | null>(null);
 
+  const setupAccount = async () => {
+    if (!para || !routeParams.biometricsId) return;
+    setSetupStep(SetupStep.REGISTERING_PASSKEY);
+    setError(null);
+
+    try {
+      await registerPasskey({ ...creds, biometricsId: routeParams.biometricsId });
+      await createWallet();
+    } catch (error) {
+      console.error("Error registering passkey:", error);
+      setError("Failed to register passkey. Please try again.");
+      setSetupStep(SetupStep.PASSKEY_ERROR);
+    }
+  };
+
   const createWallet = async () => {
     if (!para) return;
     setSetupStep(SetupStep.CREATING_WALLET);
@@ -34,15 +49,10 @@ export default function AccountSetupScreen() {
     }
   };
 
-  const setupAccount = async () => {
-    if (para && routeParams.biometricsId) {
-      await registerPasskey({ ...creds, biometricsId: routeParams.biometricsId });
-      await createWallet();
-    }
-  };
-
   useEffect(() => {
-    setupAccount();
+    if (para && routeParams.biometricsId) {
+      setupAccount();
+    }
   }, [para, routeParams.biometricsId]);
 
   const renderStepContent = () => {
@@ -117,9 +127,11 @@ export default function AccountSetupScreen() {
 
   return (
     <View className="flex-1 bg-background px-6">
-      <View className="pt-6">
-        <Text className="text-5xl font-bold text-foreground">Account Setup</Text>
-        <Text className="mt-4 text-lg text-muted-foreground">Setting up your account and wallet. Please wait...</Text>
+      <View className="pt-6 pb-8">
+        <Text className="text-5xl text-left text-foreground font-figtree-bold">Account Setup</Text>
+        <Text className="mt-2 text-left text-lg text-muted-foreground">
+          We're setting up your account and wallet. This may take a moment.
+        </Text>
       </View>
       <View className="flex-1 justify-center items-center pt-12">{renderStepContent()}</View>
       <View className="pb-6">

@@ -13,6 +13,7 @@ import { AuthType } from "@/types";
 import { APP_SCHEME } from "@/constants";
 import { clearCreds, getCreds } from "@/util/credentialStore";
 import { Text } from "@/components/ui/text";
+import { credsToParaAuth } from "@/util/authHelpers";
 
 export default function MainAuthScreen() {
   const { para, login } = usePara();
@@ -33,12 +34,12 @@ export default function MainAuthScreen() {
       const userExists = await para!.checkIfUserExists(emailCredentials);
 
       if (userExists) {
-        await login({ type: "email", email: targetEmail });
+        await login({ authType: "email", email: targetEmail });
       } else {
         await para!.createUser(emailCredentials);
         router.navigate({
           pathname: "/auth/otp-verification",
-          params: { email: targetEmail, inputType: "email" },
+          params: { authType: "email", ...emailCredentials },
         });
       }
     },
@@ -51,12 +52,12 @@ export default function MainAuthScreen() {
       const userExists = await para!.checkIfUserExistsByPhone(phoneCredentials);
 
       if (userExists) {
-        await login({ type: "phone", phone, countryCode: code });
+        await login({ authType: "phone", phone, countryCode: code });
       } else {
         await para!.createUserByPhone(phoneCredentials);
         router.navigate({
           pathname: "/auth/otp-verification",
-          params: { phoneNumber: phone, countryCode: code, inputType: "phone" },
+          params: { authType: "phone", ...phoneCredentials },
         });
       }
     },

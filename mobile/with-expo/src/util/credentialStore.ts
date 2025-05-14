@@ -3,7 +3,7 @@ import { AuthCreds, STORAGE_KEYS } from "@/types";
 
 export async function saveCreds(c: AuthCreds): Promise<void> {
   try {
-    if (c.type === "email") {
+    if (c.authType === "email") {
       await SecureStore.setItemAsync(STORAGE_KEYS.USER_EMAIL, c.email);
       await Promise.all([
         SecureStore.deleteItemAsync(STORAGE_KEYS.USER_PHONE),
@@ -29,8 +29,8 @@ export async function getCreds(): Promise<AuthCreds | null> {
       SecureStore.getItemAsync(STORAGE_KEYS.USER_COUNTRY_CODE),
     ]);
 
-    if (email) return { type: "email", email };
-    if (phone && countryCode) return { type: "phone", phone, countryCode };
+    if (email) return { authType: "email", email };
+    if (phone && countryCode) return { authType: "phone", phone, countryCode };
     return null;
   } catch (err) {
     console.error("Secure-store read error:", err);

@@ -3,8 +3,8 @@ import { SlotProps } from "input-otp-native";
 
 export type AuthType = "email" | "phone";
 
-export type EmailAuth = { type: "email"; email: string };
-export type PhoneAuth = { type: "phone"; phone: string; countryCode: string };
+export type EmailAuth = { authType: "email"; email: string };
+export type PhoneAuth = { authType: "phone"; phone: string; countryCode: string };
 export type AuthCreds = EmailAuth | PhoneAuth;
 
 export interface SmartInputProps {

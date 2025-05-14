@@ -7,18 +7,28 @@ import { usePara } from "@/providers/para/usePara";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { WalletProvider } from "@/providers/wallet/walletContext";
 import { PortalHost } from "@rn-primitives/portal";
+import { Toaster } from "sonner-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   return (
-    <ParaProvider>
-      <WalletProvider>
-        <StatusBar style="dark" />
-        <RootStack />
-        <PortalHost />
-      </WalletProvider>
-    </ParaProvider>
+    <GestureHandlerRootView>
+      <ParaProvider>
+        <WalletProvider>
+          <StatusBar style="dark" />
+          <RootStack />
+          <PortalHost />
+          <Toaster
+            position="top-center"
+            duration={1500}
+            swipeToDismissDirection="up"
+            closeButton={true}
+          />
+        </WalletProvider>
+      </ParaProvider>
+    </GestureHandlerRootView>
   );
 }
 

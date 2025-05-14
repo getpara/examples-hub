@@ -25,9 +25,10 @@ export function BalanceDisplay({ total, change, percentage, isPositive }: Balanc
   });
 
   return (
-    <View className="items-center mb-8">
-      <Text className="text-5xl native:text-7xl font-bold text-foreground mb-4">{formattedBalance}</Text>
-
+    <View className="items-center gap-2 w-full px-4">
+      <View className="w-full items-center">
+        <Text className="text-5xl font-bold text-foreground font-figtree">{formattedBalance}</Text>
+      </View>
       <View className={`rounded-full px-4 py-1 ${isPositive ? "bg-green-100 " : "bg-red-100"}`}>
         <Text className={isPositive ? "text-green-700" : "text-red-700"}>
           {isPositive ? "+" : ""}

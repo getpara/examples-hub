@@ -3,6 +3,7 @@ import { View, Pressable } from "react-native";
 import { Text } from "~/components/ui/text";
 import { ArrowDownToLine, ArrowUpFromLine, ArrowLeftRight } from "@/components/icons";
 import { useRouter } from "expo-router";
+import { toast } from "sonner-native";
 
 interface ActionButtonProps {
   icon: React.ReactNode;
@@ -15,7 +16,7 @@ function ActionButton({ icon, label, onPress }: ActionButtonProps) {
     <Pressable
       onPress={onPress}
       className="items-center gap-3">
-      <View className="w-14 h-14 bg-muted rounded-lg items-center justify-center">{icon}</View>
+      <View className="w-14 h-14 bg-white border border-border rounded-lg items-center justify-center">{icon}</View>
       <Text className="text-foreground">{label}</Text>
     </Pressable>
   );
@@ -25,19 +26,23 @@ export function ActionButtons() {
   const router = useRouter();
 
   const handleReceive = () => {
-    // Handle receive action
+    toast.info("Receive not implemented yet", {
+      description: "This feature is not yet implemented.",
+    });
   };
 
   const handleSend = () => {
-    // Handle send action
+    router.navigate("/home/transaction/token");
   };
 
   const handleSwap = () => {
-    // Handle swap action
+    toast.info("Swap not implemented yet", {
+      description: "This feature is not yet implemented.",
+    });
   };
 
   return (
-    <View className="flex-row justify-around w-full px-8 py-6">
+    <View className="flex-row justify-center w-full gap-8">
       <ActionButton
         icon={
           <ArrowDownToLine
