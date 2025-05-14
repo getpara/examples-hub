@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {SafeAreaView, StyleSheet, ScrollView, View} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {SafeAreaView, StyleSheet, ScrollView, View, Alert} from 'react-native';
 import {Input, Button, Text} from '@rneui/themed';
 import {useNavigation, NavigationProp} from '@react-navigation/native';
 import OTPVerificationComponent from '../../components/OTPVerificationComponent';
@@ -11,48 +11,123 @@ export default function EmailAuthScreen() {
   const [email, setEmail] = useState(randomTestEmail());
   const [showOTP, setShowOTP] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isParaInitialized, setIsParaInitialized] = useState(false);
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+
+  useEffect(() => {
+    const initPara = async () => {
+      try {
+        await para.init();
+        setIsParaInitialized(true);
+      } catch (error) {
+        const errorMsg =
+          error instanceof Error
+            ? error.message
+            : 'Failed to initialize Para SDK';
+        setErrorMessage(errorMsg);
+        Alert.alert('Initialization Error', errorMsg);
+      }
+    };
+
+    initPara();
+  }, []);
 
   const handleContinue = async () => {
     if (!email) return;
+    if (!isParaInitialized) {
+      setErrorMessage('Para SDK not initialized. Please try again.');
+      return;
+    }
+
     setIsLoading(true);
+    setErrorMessage(null);
+
     try {
+      // Try to sign up or log in
       const authState = await para.signUpOrLogIn({auth: {email}});
 
-      switch (authState.stage) {
-        case 'verify':
-          setShowOTP(true);
-          break;
-        case 'login':
-          await para.login(authState);
+      if (authState?.stage === 'verify') {
+        // New user flow
+        setShowOTP(true);
+      } else if (authState?.stage === 'login') {
+        // Existing user - use passkey login
+        try {
+          await para.loginWithPasskey();
           navigation.navigate('Home');
-          break;
+        } catch (error) {
+          console.error('Detailed error:', error);
+          const errorMsg =
+            error instanceof Error ? error.message : 'Passkey login failed';
+          setErrorMessage(errorMsg);
+          Alert.alert('Login Error', errorMsg);
+        }
+      } else {
+        setErrorMessage('Unexpected authentication state');
       }
     } catch (error) {
-      console.error('Error:', error);
+      const errorMsg =
+        error instanceof Error ? error.message : 'Authentication failed';
+      setErrorMessage(errorMsg);
+      Alert.alert('Authentication Error', errorMsg);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const handleVerify = async (verificationCode: string) => {
     if (!verificationCode) return;
+    if (!isParaInitialized) {
+      setErrorMessage('Para SDK not initialized. Please try again.');
+      return;
+    }
+
+    setIsLoading(true);
+    setErrorMessage(null);
+
     try {
       const authState = await para.verifyNewAccount({verificationCode});
+
       if (authState?.passkeyId) {
-        await para.registerPasskey(authState);
-        navigation.navigate('Home');
+        try {
+          await para.registerPasskey(authState);
+          navigation.navigate('Home');
+        } catch (error) {
+          setErrorMessage('Failed to register passkey');
+          Alert.alert('Passkey Error', 'Failed to register passkey');
+        }
+      } else {
+        setErrorMessage('Missing passkey ID in authentication state');
+        Alert.alert(
+          'Verification Error',
+          'Missing passkey ID in authentication state',
+        );
       }
     } catch (error) {
-      if (error instanceof Error) {
-        console.error('Verification error:', error.message, error.stack);
-      } else {
-        console.error('Verification error:', error);
-      }
+      const errorMsg =
+        error instanceof Error ? error.message : 'Verification failed';
+      setErrorMessage(errorMsg);
+      Alert.alert('Verification Error', errorMsg);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const resendOTP = async () => {
-    await para.resendVerificationCode();
+    if (!isParaInitialized) {
+      setErrorMessage('Para SDK not initialized. Please try again.');
+      return;
+    }
+
+    try {
+      await para.resendVerificationCode();
+    } catch (error) {
+      const errorMsg =
+        error instanceof Error
+          ? error.message
+          : 'Failed to resend verification code';
+      Alert.alert('Resend Error', errorMsg);
+    }
   };
 
   return (
@@ -71,7 +146,11 @@ export default function EmailAuthScreen() {
           </Text>
         </View>
 
-        {!showOTP ? (
+        {errorMessage && <Text style={styles.errorText}>{errorMessage}</Text>}
+
+        {!isParaInitialized ? (
+          <Text style={styles.statusText}>Initializing Para SDK...</Text>
+        ) : !showOTP ? (
           <>
             <Input
               label="Test Email"
@@ -127,6 +206,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666666',
     lineHeight: 22,
+  },
+  errorText: {
+    color: '#d32f2f',
+    marginBottom: 16,
+    fontSize: 14,
+  },
+  statusText: {
+    color: '#666666',
+    marginBottom: 16,
+    fontSize: 16,
+    textAlign: 'center',
   },
   inputContainer: {
     paddingHorizontal: 0,

@@ -1,17 +1,17 @@
 import React from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, View, Text } from 'react-native';
-import { Button } from '@rneui/themed';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../types';
+import {SafeAreaView, ScrollView, StyleSheet, View, Text} from 'react-native';
+import {Button} from '@rneui/themed';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {RootStackParamList} from '../types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AuthSelection'>;
 
-export default function AuthSelection({ navigation }: Props) {
+export default function AuthSelection({navigation}: Props) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={styles.title}>Authentication Methods</Text>
-        <Text style={styles.subtitle}>Choose your preferred way to authenticate</Text>
+        <Text style={styles.title}>Authentication</Text>
+        <Text style={styles.subtitle}>Authenticate with your email</Text>
 
         <View style={styles.buttonsContainer}>
           <Button
@@ -20,17 +20,9 @@ export default function AuthSelection({ navigation }: Props) {
             buttonStyle={styles.button}
             containerStyle={styles.buttonContainer}
           />
-          
           <Button
             title="Phone Authentication"
             onPress={() => navigation.navigate('PhoneAuth')}
-            buttonStyle={styles.button}
-            containerStyle={styles.buttonContainer}
-          />
-          
-          <Button
-            title="OAuth Authentication"
-            onPress={() => navigation.navigate('OauthAuth')}
             buttonStyle={styles.button}
             containerStyle={styles.buttonContainer}
           />

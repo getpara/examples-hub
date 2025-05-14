@@ -15,7 +15,7 @@ export const randomTestPhone = ({
     .toString()
     .padStart(4, "0");
 
-  return `+1${areaCode}${exchange}${subscriber}`;
+  return `${areaCode}${exchange}${subscriber}`;
 };
 
 export const randomTestOTP = ({ length = 6, allowZeroStart = true } = {}) => {

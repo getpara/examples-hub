@@ -11,14 +11,10 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 
-// Import the Para instance from the client folder
-import {para} from '../client/para';
-
 // Import auth screens
 import AuthSelection from './AuthSelection';
 import EmailAuth from './auth/with-email';
-import PhoneAuth from './auth/with-phone';
-import OauthAuth from './auth/with-oauth';
+import PhoneAuthScreen from './auth/with-phone';
 
 import {RootStackParamList} from '../types';
 
@@ -76,8 +72,7 @@ function App(): React.JSX.Element {
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="AuthSelection" component={AuthSelection} />
           <Stack.Screen name="EmailAuth" component={EmailAuth} />
-          <Stack.Screen name="PhoneAuth" component={PhoneAuth} />
-          <Stack.Screen name="OauthAuth" component={OauthAuth} />
+          <Stack.Screen name="PhoneAuth" component={PhoneAuthScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
