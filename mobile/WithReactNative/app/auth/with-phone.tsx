@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {SafeAreaView, StyleSheet, ScrollView, View, Alert} from 'react-native';
+import {SafeAreaView, StyleSheet, ScrollView, View, Alert, Linking, AlertButton} from 'react-native';
 import {Input, Button, Text} from '@rneui/themed';
 import {useNavigation, NavigationProp} from '@react-navigation/native';
 import OTPVerificationComponent from '../../components/OTPVerificationComponent';
@@ -8,6 +8,9 @@ import {RootStackParamList} from '../../types';
 import {randomTestPhone} from '../../util/random';
 import {parsePhoneNumberFromString} from 'libphonenumber-js';
 import {useParaSDK} from '../../providers/ParaProvider';
+import InAppBrowser from 'react-native-inappbrowser-reborn';
+
+const APP_SCHEME_REDIRECT_URL = 'com.usecapsule.example.reactnative://';
 
 export default function PhoneAuthScreen() {
   const [countryCode, setCountryCode] = useState('+1');
@@ -19,7 +22,9 @@ export default function PhoneAuthScreen() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   const handleContinue = async () => {
-    if (!countryCode || !phone) {return;}
+    if (!countryCode || !phone) {
+      return;
+    }
     if (!isInitialized) {
       setErrorMessage('Para SDK not initialized. Please try again.');
       return;
@@ -48,16 +53,85 @@ export default function PhoneAuthScreen() {
       if (authState?.stage === 'verify') {
         setShowOTP(true);
       } else if (authState?.stage === 'login') {
-        // Existing user - use passkey login (assuming similar flow to email)
-        try {
-          await para.loginWithPasskey(); // Or appropriate passkey/login method for phone
-          navigation.navigate('Home');
-        } catch (error) {
-          console.error('Detailed error:', error);
-          const errorMsg = error instanceof Error ? error.message : 'Passkey login failed';
-          setErrorMessage(errorMsg);
-          Alert.alert('Login Error', errorMsg);
+        // Existing user - give option for passkey or password
+        const {passwordUrl} = authState; // Assuming loginWithPasskey is native
+
+        const loginOptions: AlertButton[] = [
+          {
+            text: 'Login with Passkey',
+            onPress: async () => {
+              setIsLoading(true);
+              setErrorMessage(null);
+              try {
+                await para.loginWithPasskey();
+                navigation.navigate('Home');
+              } catch (error) {
+                console.error('Passkey login error:', error);
+                const errorMsg = error instanceof Error ? error.message : 'Passkey login failed';
+                setErrorMessage(errorMsg);
+                Alert.alert('Login Error', errorMsg);
+              } finally {
+                setIsLoading(false);
+              }
+            },
+          },
+        ];
+
+        if (passwordUrl) {
+          loginOptions.push({
+            text: 'Login with Password',
+            onPress: async () => {
+              setIsLoading(true);
+              setErrorMessage(null);
+              try {
+                if (await InAppBrowser.isAvailable()) {
+                  const originalUrl = new URL(passwordUrl);
+                  originalUrl.searchParams.append('nativeCallbackUrl', APP_SCHEME_REDIRECT_URL);
+                  const finalPasswordUrl = originalUrl.toString();
+
+                  await InAppBrowser.openAuth(finalPasswordUrl, APP_SCHEME_REDIRECT_URL, {
+                    dismissButtonStyle: 'cancel',
+                    animated: true,
+                    enableUrlBarHiding: true,
+                    enableDefaultShare: false,
+                  });
+                  await para.waitForLogin({});
+                  navigation.navigate('Home');
+                } else {
+                  Linking.openURL(passwordUrl);
+                  Alert.alert('Redirecting...', 'Please complete login in your browser and return to the app.');
+                }
+              } catch (error) {
+                console.error('Password login error:', error);
+                const errorMsg = error instanceof Error ? error.message : 'Password login failed';
+                setErrorMessage(errorMsg);
+                Alert.alert('Login Error', errorMsg);
+              } finally {
+                setIsLoading(false);
+              }
+            },
+          });
         }
+
+        loginOptions.push({
+          text: 'Cancel',
+          style: 'cancel',
+          onPress: () => setIsLoading(false),
+        });
+
+        if (loginOptions.length > 1) {
+          // More than just 'Cancel' or only Passkey
+          Alert.alert('Login Options', 'How would you like to log in?', loginOptions);
+        } else if (loginOptions.length === 1 && loginOptions[0].text !== 'Cancel') {
+          // Only one login option (Passkey), proceed directly - though current logic always adds Cancel
+          // This path might not be hit with current AlertButton construction, but kept for logical completeness
+          // Or, if we decide to not show alert for single option, trigger it here.
+          // For now, Alert is always shown if any method is present.
+        } else {
+          setErrorMessage('No login methods available.');
+          Alert.alert('Login Error', 'No login methods available.');
+        }
+        // Fallback to setIsLoading(false) is in the Alert onPress for Cancel or in finally blocks
       } else {
         setErrorMessage('Unexpected authentication state');
         Alert.alert('Authentication Error', 'Unexpected authentication state');
@@ -72,7 +146,9 @@ export default function PhoneAuthScreen() {
   };
 
   const handleVerify = async (verificationCode: string) => {
-    if (!verificationCode) {return;}
+    if (!verificationCode) {
+      return;
+    }
     if (!isInitialized) {
       setErrorMessage('Para SDK not initialized. Please try again.');
       return;
@@ -84,18 +160,125 @@ export default function PhoneAuthScreen() {
     try {
       const authState = await para.verifyNewAccount({verificationCode});
 
-      if (authState?.passkeyId) {
+      const {passwordUrl, passkeyId, isPasskeySupported} = authState;
+
+      const isPasskeyOptionAvailable = passkeyId && isPasskeySupported;
+      const isPasswordOptionAvailable = !!passwordUrl;
+
+      if (isPasskeyOptionAvailable && isPasswordOptionAvailable) {
+        // Both options available, show alert
+        const setupOptions: AlertButton[] = [
+          {
+            text: 'Set up Passkey',
+            onPress: async () => {
+              setIsLoading(true);
+              setErrorMessage(null);
+              try {
+                await para.registerPasskey(authState); // Native passkey registration
+                navigation.navigate('Home');
+              } catch (error) {
+                console.error('Native Passkey registration error:', error);
+                const errorMsg = error instanceof Error ? error.message : 'Failed to register passkey';
+                setErrorMessage(errorMsg);
+                Alert.alert('Passkey Setup Error', errorMsg);
+              } finally {
+                setIsLoading(false);
+              }
+            },
+          },
+          {
+            text: 'Set up Password',
+            onPress: async () => {
+              setIsLoading(true);
+              setErrorMessage(null);
+              try {
+                if (await InAppBrowser.isAvailable()) {
+                  const originalUrl = new URL(passwordUrl!);
+                  originalUrl.searchParams.append('nativeCallbackUrl', APP_SCHEME_REDIRECT_URL);
+                  const finalPasswordUrl = originalUrl.toString();
+
+                  await InAppBrowser.openAuth(finalPasswordUrl, APP_SCHEME_REDIRECT_URL, {
+                    dismissButtonStyle: 'cancel',
+                    animated: true,
+                    enableUrlBarHiding: true,
+                    enableDefaultShare: false,
+                  });
+                  await para.waitForWalletCreation({});
+                  navigation.navigate('Home');
+                } else {
+                  Linking.openURL(passwordUrl!);
+                  Alert.alert(
+                    'Redirecting...',
+                    'Please complete password setup in your browser and return to the app.',
+                  );
+                }
+              } catch (error) {
+                console.error('Password setup error:', error);
+                const errorMsg = error instanceof Error ? error.message : 'Failed to set up password';
+                setErrorMessage(errorMsg);
+                Alert.alert('Password Setup Error', errorMsg);
+              } finally {
+                setIsLoading(false);
+              }
+            },
+          },
+          {
+            text: 'Cancel',
+            style: 'cancel',
+            onPress: () => setIsLoading(false),
+          },
+        ];
+        Alert.alert('Secure Your Account', 'Choose a method to secure your account:', setupOptions);
+      } else if (isPasskeyOptionAvailable) {
+        // Only Passkey option available, proceed directly
+        setIsLoading(true);
+        setErrorMessage(null);
         try {
-          await para.registerPasskey(authState);
+          await para.registerPasskey(authState); // Native passkey registration
           navigation.navigate('Home');
         } catch (error) {
+          console.error('Native Passkey registration error:', error);
           const errorMsg = error instanceof Error ? error.message : 'Failed to register passkey';
           setErrorMessage(errorMsg);
-          Alert.alert('Passkey Error', errorMsg);
+          Alert.alert('Passkey Setup Error', errorMsg);
+        } finally {
+          setIsLoading(false);
+        }
+      } else if (isPasswordOptionAvailable) {
+        // Only Password option available, proceed directly
+        setIsLoading(true);
+        setErrorMessage(null);
+        try {
+          if (await InAppBrowser.isAvailable()) {
+            const originalUrl = new URL(passwordUrl!);
+            originalUrl.searchParams.append('nativeCallbackUrl', APP_SCHEME_REDIRECT_URL);
+            const finalPasswordUrl = originalUrl.toString();
+
+            await InAppBrowser.openAuth(finalPasswordUrl, APP_SCHEME_REDIRECT_URL, {
+              dismissButtonStyle: 'cancel',
+              animated: true,
+              enableUrlBarHiding: true,
+              enableDefaultShare: false,
+            });
+            await para.waitForWalletCreation({});
+            navigation.navigate('Home');
+          } else {
+            Linking.openURL(passwordUrl!);
+            Alert.alert('Redirecting...', 'Please complete password setup in your browser and return to the app.');
+          }
+        } catch (error) {
+          console.error('Password setup error:', error);
+          const errorMsg = error instanceof Error ? error.message : 'Failed to set up password';
+          setErrorMessage(errorMsg);
+          Alert.alert('Password Setup Error', errorMsg);
+        } finally {
+          setIsLoading(false);
         }
       } else {
-        setErrorMessage('Missing passkey ID in authentication state');
-        Alert.alert('Verification Error', 'Missing passkey ID in authentication state');
+        // Neither option available
+        setErrorMessage('No account setup options available. Please check your Para configuration.');
+        Alert.alert('Setup Error', 'No account setup options available.');
+        setIsLoading(false);
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Verification failed';
