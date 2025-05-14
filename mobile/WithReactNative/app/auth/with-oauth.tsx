@@ -26,7 +26,9 @@ export default function OauthAuthScreen() {
 
   // OAuth login handler using the app-wide initialized SDK
   const handleOauthLogin = async (provider: OAuthMethod) => {
-    if (!provider) return;
+    if (!provider) {
+      return;
+    }
 
     // Check SDK initialization from the context
     if (!isInitialized) {
@@ -85,21 +87,21 @@ export default function OauthAuthScreen() {
       let cancelled = false;
 
       if (isInAppBrowserAvailable) {
-        addLog(`Opening URL in InAppBrowser`);
+        addLog('Opening URL in InAppBrowser');
         const result = await InAppBrowser.openAuth(oauthUrl, APP_SCHEME, {});
         cancelled = result.type !== 'success';
       } else {
-        addLog(`InAppBrowser not available, using Linking`);
+        addLog('InAppBrowser not available, using Linking');
         Linking.openURL(oauthUrl);
       }
 
       if (cancelled) {
-        addLog(`Browser result was not success`);
+        addLog('Browser result was not success');
         throw new Error('User cancelled OAuth flow');
       }
 
       // Now verify the OAuth result
-      addLog(`Verifying OAuth result`);
+      addLog('Verifying OAuth result');
       const authStateResponse = await para.verifyOAuth({
         method: providerString as any,
         deeplinkUrl: `${APP_SCHEME}://oauth-callback`,
@@ -116,7 +118,7 @@ export default function OauthAuthScreen() {
 
       // Process based on auth state, similar to email/phone authentication
       if (authState.stage === 'login') {
-        addLog(`Auth stage: login`);
+        addLog('Auth stage: login');
 
         // Handle login - similar to email/phone examples
         try {
@@ -129,7 +131,7 @@ export default function OauthAuthScreen() {
           throw error;
         }
       } else if (authState.stage === 'signup') {
-        addLog(`Auth stage: signup`);
+        addLog('Auth stage: signup');
 
         if (authState.passkeyId) {
           addLog(`Got passkeyId: ${authState.passkeyId}`);
@@ -179,7 +181,7 @@ export default function OauthAuthScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={{flexGrow: 1}}>
+      <ScrollView contentContainerStyle={styles.flexGrow}>
         <View style={styles.headerContainer}>
           <Text h2 h2Style={styles.title}>
             OAuth Authentication Demo
@@ -301,4 +303,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'monospace',
   },
+  flexGrow: {flexGrow: 1},
 });

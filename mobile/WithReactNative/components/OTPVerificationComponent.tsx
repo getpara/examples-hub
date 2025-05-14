@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { View, StyleSheet } from "react-native";
-import { Input, Button, Text } from "@rneui/themed";
-import { randomTestOTP } from "../util/random";
+import React, { useState } from 'react';
+import { View, StyleSheet } from 'react-native';
+import { Input, Button, Text } from '@rneui/themed';
+import { randomTestOTP } from '../util/random';
 
 interface OTPVerificationProps {
   onVerify: (code: string) => Promise<void>;
@@ -11,15 +11,15 @@ interface OTPVerificationProps {
 export default function OTPVerificationComponent({ onVerify, resendOTP }: OTPVerificationProps) {
   const [otp, setOtp] = useState(randomTestOTP());
   const [isVerifying, setIsVerifying] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   const handleVerify = async () => {
     setIsVerifying(true);
-    setError("");
+    setError('');
     try {
       await onVerify(otp);
     } catch (err) {
-      setError("Invalid OTP. Please try again.");
+      setError('Invalid OTP. Please try again.');
     }
     setIsVerifying(false);
   };
@@ -27,9 +27,9 @@ export default function OTPVerificationComponent({ onVerify, resendOTP }: OTPVer
   const handleResend = async () => {
     try {
       await resendOTP();
-      setError("");
+      setError('');
     } catch (err) {
-      setError("Failed to resend OTP. Please try again.");
+      setError('Failed to resend OTP. Please try again.');
     }
   };
 
@@ -67,7 +67,7 @@ export default function OTPVerificationComponent({ onVerify, resendOTP }: OTPVer
 const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
-    color: "#666666",
+    color: '#666666',
     lineHeight: 22,
     marginBottom: 24,
   },
@@ -77,28 +77,28 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: "#e0e0e0",
+    borderColor: '#e0e0e0',
     borderRadius: 8,
     paddingHorizontal: 12,
   },
   error: {
-    color: "#dc3545",
+    color: '#dc3545',
     marginBottom: 16,
     fontSize: 14,
   },
   button: {
-    backgroundColor: "#ff3c22",
+    backgroundColor: '#ff3c22',
     borderRadius: 8,
     paddingVertical: 12,
   },
   buttonContainer: {
-    width: "100%",
+    width: '100%',
   },
   resendButton: {
     marginTop: 16,
   },
   resendButtonText: {
-    color: "#ff3c22",
+    color: '#ff3c22',
     fontSize: 14,
   },
 });

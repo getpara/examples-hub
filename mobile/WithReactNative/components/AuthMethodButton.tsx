@@ -1,7 +1,7 @@
-import React from "react";
-import { StyleSheet, View } from "react-native";
-import { Button, Text } from "@rneui/themed";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import React from 'react';
+import { StyleSheet, View } from 'react-native';
+import { Button, Text } from '@rneui/themed';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 interface AuthMethodButtonProps {
   type: string;
@@ -52,17 +52,17 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   button: {
-    backgroundColor: "#ffffff",
+    backgroundColor: '#ffffff',
     paddingHorizontal: 12,
     paddingVertical: 16,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: "#f0f0f0",
+    borderColor: '#f0f0f0',
   },
   content: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
     gap: 8,
   },
   icon: {
@@ -73,13 +73,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: "bold",
-    color: "#333333",
+    fontWeight: 'bold',
+    color: '#333333',
     letterSpacing: 0.1,
   },
   description: {
     fontSize: 14,
-    color: "#666666",
+    color: '#666666',
   },
   chevron: {
     marginLeft: 12,

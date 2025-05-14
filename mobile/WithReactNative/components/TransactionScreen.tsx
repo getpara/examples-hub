@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { SafeAreaView, ScrollView, View, StyleSheet } from "react-native";
-import { Text, Input, Button } from "@rneui/themed";
-import { SelectList } from "react-native-dropdown-select-list";
-import { WalletType } from "@getpara/react-native-wallet";
+import React, {useState} from 'react';
+import {SafeAreaView, ScrollView, View, StyleSheet} from 'react-native';
+import {Text, Input, Button} from '@rneui/themed';
+import {SelectList} from 'react-native-dropdown-select-list';
+import {WalletType} from '@getpara/react-native-wallet';
 
 interface SigningOption {
   key: string;
@@ -30,10 +30,10 @@ export default function TransactionScreen({
   onSign,
   onBack,
 }: TransactionScreenProps) {
-  const [toAddress, setToAddress] = useState("");
-  const [amount, setAmount] = useState("");
+  const [toAddress, setToAddress] = useState('');
+  const [amount, setAmount] = useState('');
   const [signingMethod, setSigningMethod] = useState(defaultSigningMethod);
-  const [signature, setSignature] = useState("");
+  const [signature, _setSignature] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleSend = async () => {
@@ -49,12 +49,8 @@ export default function TransactionScreen({
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        keyboardShouldPersistTaps="handled">
-        <Text
-          h2
-          h2Style={styles.title}>
+      <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+        <Text h2 h2Style={styles.title}>
           {title}
         </Text>
 
@@ -92,7 +88,7 @@ export default function TransactionScreen({
           <SelectList
             setSelected={setSigningMethod}
             data={signingOptions}
-            defaultOption={signingOptions.find((option) => option.key === defaultSigningMethod)}
+            defaultOption={signingOptions.find(option => option.key === defaultSigningMethod)}
             save="value"
             search={false}
             boxStyles={styles.dropdown}
@@ -132,16 +128,16 @@ export default function TransactionScreen({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: '#f0f0f0',
   },
   scrollContainer: {
     paddingHorizontal: 20,
     paddingVertical: 24,
   },
   title: {
-    color: "#333333",
-    textAlign: "left",
-    fontWeight: "bold",
+    color: '#333333',
+    textAlign: 'left',
+    fontWeight: 'bold',
     fontSize: 32,
     marginBottom: 16,
   },
@@ -151,51 +147,51 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: "#e0e0e0",
+    borderColor: '#e0e0e0',
     borderRadius: 8,
     paddingHorizontal: 12,
   },
   inputLabel: {
-    color: "#333333",
+    color: '#333333',
     fontSize: 14,
     marginBottom: 4,
   },
   dropdown: {
     marginBottom: 16,
-    borderColor: "#86939e",
+    borderColor: '#86939e',
     borderWidth: 1,
     borderRadius: 8,
-    backgroundColor: "#ffffff",
+    backgroundColor: '#ffffff',
   },
   signButtonContainer: {
-    width: "100%",
+    width: '100%',
     marginVertical: 8,
   },
   signButton: {
-    backgroundColor: "#fc6c58",
+    backgroundColor: '#fc6c58',
     borderRadius: 8,
     paddingVertical: 12,
   },
   backButton: {
-    borderColor: "#fc6c58",
+    borderColor: '#fc6c58',
     borderWidth: 1,
     borderRadius: 8,
   },
   backButtonTitle: {
-    color: "#fc6c58",
+    color: '#fc6c58',
   },
   signatureContainer: {
     marginTop: 20,
     padding: 10,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: '#f0f0f0',
     borderRadius: 8,
   },
   signatureTitle: {
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 5,
-    color: "#333333",
+    color: '#333333',
   },
   signatureText: {
-    color: "#666666",
+    color: '#666666',
   },
 });

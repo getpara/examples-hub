@@ -19,7 +19,7 @@ export default function PhoneAuthScreen() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   const handleContinue = async () => {
-    if (!countryCode || !phone) return;
+    if (!countryCode || !phone) {return;}
     if (!isInitialized) {
       setErrorMessage('Para SDK not initialized. Please try again.');
       return;
@@ -72,7 +72,7 @@ export default function PhoneAuthScreen() {
   };
 
   const handleVerify = async (verificationCode: string) => {
-    if (!verificationCode) return;
+    if (!verificationCode) {return;}
     if (!isInitialized) {
       setErrorMessage('Para SDK not initialized. Please try again.');
       return;
