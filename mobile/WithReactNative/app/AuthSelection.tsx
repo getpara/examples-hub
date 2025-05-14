@@ -26,6 +26,12 @@ export default function AuthSelection({navigation}: Props) {
             buttonStyle={styles.button}
             containerStyle={styles.buttonContainer}
           />
+          <Button
+            title="OAuth Authentication"
+            onPress={() => navigation.navigate('OauthAuth')}
+            buttonStyle={styles.button}
+            containerStyle={styles.buttonContainer}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>

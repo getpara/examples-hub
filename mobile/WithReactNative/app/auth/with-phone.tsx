@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {SafeAreaView, StyleSheet, ScrollView, View, Alert} from 'react-native';
 import {Input, Button, Text} from '@rneui/themed';
 import {useNavigation, NavigationProp} from '@react-navigation/native';
@@ -7,6 +7,7 @@ import {para} from '../../client/para';
 import {RootStackParamList} from '../../types';
 import {randomTestPhone} from '../../util/random';
 import {parsePhoneNumberFromString} from 'libphonenumber-js';
+import {useParaSDK} from '../../providers/ParaProvider';
 
 export default function PhoneAuthScreen() {
   const [countryCode, setCountryCode] = useState('+1');
@@ -14,30 +15,12 @@ export default function PhoneAuthScreen() {
   const [showOTP, setShowOTP] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isParaInitialized, setIsParaInitialized] = useState(false);
+  const {isInitialized} = useParaSDK();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-
-  useEffect(() => {
-    const initPara = async () => {
-      try {
-        await para.init();
-        setIsParaInitialized(true);
-      } catch (error) {
-        const errorMsg =
-          error instanceof Error
-            ? error.message
-            : 'Failed to initialize Para SDK';
-        setErrorMessage(errorMsg);
-        Alert.alert('Initialization Error', errorMsg);
-      }
-    };
-
-    initPara();
-  }, []);
 
   const handleContinue = async () => {
     if (!countryCode || !phone) return;
-    if (!isParaInitialized) {
+    if (!isInitialized) {
       setErrorMessage('Para SDK not initialized. Please try again.');
       return;
     }
@@ -49,13 +32,8 @@ export default function PhoneAuthScreen() {
     const phoneNumberInstance = parsePhoneNumberFromString(fullPhoneNumber);
 
     if (!phoneNumberInstance || !phoneNumberInstance.isValid()) {
-      setErrorMessage(
-        'Invalid phone number. Please check the country code and number.',
-      );
-      Alert.alert(
-        'Input Error',
-        'Invalid phone number. Please check the country code and number.',
-      );
+      setErrorMessage('Invalid phone number. Please check the country code and number.');
+      Alert.alert('Input Error', 'Invalid phone number. Please check the country code and number.');
       setIsLoading(false);
       return;
     }
@@ -76,8 +54,7 @@ export default function PhoneAuthScreen() {
           navigation.navigate('Home');
         } catch (error) {
           console.error('Detailed error:', error);
-          const errorMsg =
-            error instanceof Error ? error.message : 'Passkey login failed';
+          const errorMsg = error instanceof Error ? error.message : 'Passkey login failed';
           setErrorMessage(errorMsg);
           Alert.alert('Login Error', errorMsg);
         }
@@ -86,8 +63,7 @@ export default function PhoneAuthScreen() {
         Alert.alert('Authentication Error', 'Unexpected authentication state');
       }
     } catch (error) {
-      const errorMsg =
-        error instanceof Error ? error.message : 'Authentication failed';
+      const errorMsg = error instanceof Error ? error.message : 'Authentication failed';
       setErrorMessage(errorMsg);
       Alert.alert('Authentication Error', errorMsg);
     } finally {
@@ -97,7 +73,7 @@ export default function PhoneAuthScreen() {
 
   const handleVerify = async (verificationCode: string) => {
     if (!verificationCode) return;
-    if (!isParaInitialized) {
+    if (!isInitialized) {
       setErrorMessage('Para SDK not initialized. Please try again.');
       return;
     }
@@ -113,23 +89,16 @@ export default function PhoneAuthScreen() {
           await para.registerPasskey(authState);
           navigation.navigate('Home');
         } catch (error) {
-          const errorMsg =
-            error instanceof Error
-              ? error.message
-              : 'Failed to register passkey';
+          const errorMsg = error instanceof Error ? error.message : 'Failed to register passkey';
           setErrorMessage(errorMsg);
           Alert.alert('Passkey Error', errorMsg);
         }
       } else {
         setErrorMessage('Missing passkey ID in authentication state');
-        Alert.alert(
-          'Verification Error',
-          'Missing passkey ID in authentication state',
-        );
+        Alert.alert('Verification Error', 'Missing passkey ID in authentication state');
       }
     } catch (error) {
-      const errorMsg =
-        error instanceof Error ? error.message : 'Verification failed';
+      const errorMsg = error instanceof Error ? error.message : 'Verification failed';
       setErrorMessage(errorMsg);
       Alert.alert('Verification Error', errorMsg);
     } finally {
@@ -138,7 +107,7 @@ export default function PhoneAuthScreen() {
   };
 
   const resendOTP = async () => {
-    if (!isParaInitialized) {
+    if (!isInitialized) {
       setErrorMessage('Para SDK not initialized. Please try again.');
       return;
     }
@@ -146,10 +115,7 @@ export default function PhoneAuthScreen() {
       await para.resendVerificationCode();
       Alert.alert('Code Resent', 'A new verification code has been sent.');
     } catch (error) {
-      const errorMsg =
-        error instanceof Error
-          ? error.message
-          : 'Failed to resend verification code';
+      const errorMsg = error instanceof Error ? error.message : 'Failed to resend verification code';
       setErrorMessage(errorMsg);
       Alert.alert('Resend Error', errorMsg);
     }
@@ -157,9 +123,7 @@ export default function PhoneAuthScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
         <View style={styles.headerContainer}>
           <Text h2 h2Style={styles.title}>
             {showOTP ? 'Enter Verification Code' : 'Phone Authentication Demo'}
@@ -173,8 +137,8 @@ export default function PhoneAuthScreen() {
 
         {errorMessage && <Text style={styles.errorText}>{errorMessage}</Text>}
 
-        {!isParaInitialized ? (
-          <Text style={styles.statusText}>Initializing Para SDK...</Text>
+        {!isInitialized ? (
+          <Text style={styles.statusText}>Waiting for Para SDK initialization...</Text>
         ) : !showOTP ? (
           <>
             <View style={styles.phoneInputContainer}>
@@ -207,10 +171,7 @@ export default function PhoneAuthScreen() {
             />
           </>
         ) : (
-          <OTPVerificationComponent
-            onVerify={handleVerify}
-            resendOTP={resendOTP}
-          />
+          <OTPVerificationComponent onVerify={handleVerify} resendOTP={resendOTP} />
         )}
       </ScrollView>
     </SafeAreaView>

@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {SafeAreaView, StyleSheet, ScrollView, View, Alert} from 'react-native';
 import {Input, Button, Text} from '@rneui/themed';
 import {useNavigation, NavigationProp} from '@react-navigation/native';
@@ -6,36 +6,19 @@ import OTPVerificationComponent from '../../components/OTPVerificationComponent'
 import {para} from '../../client/para';
 import {randomTestEmail} from '../../util/random';
 import {RootStackParamList} from '../../types';
+import {useParaSDK} from '../../providers/ParaProvider';
 
 export default function EmailAuthScreen() {
   const [email, setEmail] = useState(randomTestEmail());
   const [showOTP, setShowOTP] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isParaInitialized, setIsParaInitialized] = useState(false);
+  const {isInitialized} = useParaSDK();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-
-  useEffect(() => {
-    const initPara = async () => {
-      try {
-        await para.init();
-        setIsParaInitialized(true);
-      } catch (error) {
-        const errorMsg =
-          error instanceof Error
-            ? error.message
-            : 'Failed to initialize Para SDK';
-        setErrorMessage(errorMsg);
-        Alert.alert('Initialization Error', errorMsg);
-      }
-    };
-
-    initPara();
-  }, []);
 
   const handleContinue = async () => {
     if (!email) return;
-    if (!isParaInitialized) {
+    if (!isInitialized) {
       setErrorMessage('Para SDK not initialized. Please try again.');
       return;
     }
@@ -57,8 +40,7 @@ export default function EmailAuthScreen() {
           navigation.navigate('Home');
         } catch (error) {
           console.error('Detailed error:', error);
-          const errorMsg =
-            error instanceof Error ? error.message : 'Passkey login failed';
+          const errorMsg = error instanceof Error ? error.message : 'Passkey login failed';
           setErrorMessage(errorMsg);
           Alert.alert('Login Error', errorMsg);
         }
@@ -66,8 +48,7 @@ export default function EmailAuthScreen() {
         setErrorMessage('Unexpected authentication state');
       }
     } catch (error) {
-      const errorMsg =
-        error instanceof Error ? error.message : 'Authentication failed';
+      const errorMsg = error instanceof Error ? error.message : 'Authentication failed';
       setErrorMessage(errorMsg);
       Alert.alert('Authentication Error', errorMsg);
     } finally {
@@ -77,7 +58,7 @@ export default function EmailAuthScreen() {
 
   const handleVerify = async (verificationCode: string) => {
     if (!verificationCode) return;
-    if (!isParaInitialized) {
+    if (!isInitialized) {
       setErrorMessage('Para SDK not initialized. Please try again.');
       return;
     }
@@ -98,14 +79,10 @@ export default function EmailAuthScreen() {
         }
       } else {
         setErrorMessage('Missing passkey ID in authentication state');
-        Alert.alert(
-          'Verification Error',
-          'Missing passkey ID in authentication state',
-        );
+        Alert.alert('Verification Error', 'Missing passkey ID in authentication state');
       }
     } catch (error) {
-      const errorMsg =
-        error instanceof Error ? error.message : 'Verification failed';
+      const errorMsg = error instanceof Error ? error.message : 'Verification failed';
       setErrorMessage(errorMsg);
       Alert.alert('Verification Error', errorMsg);
     } finally {
@@ -114,7 +91,7 @@ export default function EmailAuthScreen() {
   };
 
   const resendOTP = async () => {
-    if (!isParaInitialized) {
+    if (!isInitialized) {
       setErrorMessage('Para SDK not initialized. Please try again.');
       return;
     }
@@ -122,19 +99,14 @@ export default function EmailAuthScreen() {
     try {
       await para.resendVerificationCode();
     } catch (error) {
-      const errorMsg =
-        error instanceof Error
-          ? error.message
-          : 'Failed to resend verification code';
+      const errorMsg = error instanceof Error ? error.message : 'Failed to resend verification code';
       Alert.alert('Resend Error', errorMsg);
     }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
         <View style={styles.headerContainer}>
           <Text h2 h2Style={styles.title}>
             {showOTP ? 'Enter Verification Code' : 'Email Authentication Demo'}
@@ -148,8 +120,8 @@ export default function EmailAuthScreen() {
 
         {errorMessage && <Text style={styles.errorText}>{errorMessage}</Text>}
 
-        {!isParaInitialized ? (
-          <Text style={styles.statusText}>Initializing Para SDK...</Text>
+        {!isInitialized ? (
+          <Text style={styles.statusText}>Waiting for Para SDK initialization...</Text>
         ) : !showOTP ? (
           <>
             <Input
@@ -172,10 +144,7 @@ export default function EmailAuthScreen() {
             />
           </>
         ) : (
-          <OTPVerificationComponent
-            onVerify={handleVerify}
-            resendOTP={resendOTP}
-          />
+          <OTPVerificationComponent onVerify={handleVerify} resendOTP={resendOTP} />
         )}
       </ScrollView>
     </SafeAreaView>

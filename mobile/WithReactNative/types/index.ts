@@ -1,8 +1,9 @@
 export type RootStackParamList = {
   AuthSelection: undefined;
-  Home: undefined;
   EmailAuth: undefined;
   PhoneAuth: undefined;
+  OauthAuth: undefined;
+  Home: undefined;
   SignEVM: undefined;
   SignCosmos: undefined;
   SignSolana: undefined;
