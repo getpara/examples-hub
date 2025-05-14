@@ -1,4 +1,3 @@
-import { triggerToast } from '../../utils/toasts';
 import { IS_BETA, IS_PROD } from '../../utils/constants';
 import { HTTPS_URL_REGEX } from '../../utils/regex';
 import { useCreateApiKey } from '../../hooks/api/mutations/useCreateApiKey';
@@ -21,6 +20,7 @@ import {
   FormMessage,
   Input,
   SubmitHandler,
+  toast,
   useForm,
 } from '@getpara/react-component-library';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -71,10 +71,7 @@ export const CreateProductionKeyModal = ({ open, setIsOpen }: CreateProductionKe
         {
           onSuccess: () => {
             setIsOpen(false);
-            triggerToast({
-              variant: 'success',
-              title: 'Key Created!',
-            });
+            toast.success('Key Created!');
           },
           onError: err => {
             let body = 'Please try again. If the problem persists, contact Para support.';
@@ -83,10 +80,8 @@ export const CreateProductionKeyModal = ({ open, setIsOpen }: CreateProductionKe
               body = `You've reached the max number of ${formatEnvName(availableKeyEnv)} API keys allowed on this project. Archive another key or create another project to add more API keys.`;
             }
 
-            triggerToast({
-              variant: 'error',
-              title: 'Failed to Create Key',
-              body,
+            toast.error('Failed to Create Key', {
+              description: body,
             });
           },
         },

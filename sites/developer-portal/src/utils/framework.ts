@@ -1,4 +1,4 @@
-import { Flutter, Next, React, Svelte, Swift, Vue } from '@getpara/react-component-library';
+import { Bun, Deno, Expo, Flutter, Next, Node, React, Svelte, Swift, Vite, Vue } from '@getpara/react-component-library';
 import { Framework } from '../types/framework';
 import { REACT_CODE_SNIPPET, SERVER_CODE_SNIPPET, WEB_CODE_SNIPPET } from './codeSnippets';
 import {
@@ -31,8 +31,8 @@ export const frameworkHasPackageManager: Record<Framework, boolean> = {
   [Framework.BUN]: true,
 };
 
-export const formatFrameworkName = (framework: Framework) => {
-  switch (framework.toUpperCase()) {
+export const formatFrameworkName = (framework?: Framework) => {
+  switch (framework?.toUpperCase()) {
     case Framework.REACT: {
       return 'React';
     }
@@ -69,11 +69,14 @@ export const formatFrameworkName = (framework: Framework) => {
     case Framework.BUN: {
       return 'Bun';
     }
+    default: {
+      return '';
+    }
   }
 };
 
-export const getFrameworkDocsLink = (framework: Framework) => {
-  switch (framework.toUpperCase()) {
+export const getFrameworkDocsLink = (framework?: Framework) => {
+  switch (framework?.toUpperCase()) {
     default:
     case Framework.REACT:
     case Framework.VITE:
@@ -104,24 +107,25 @@ export const getFrameworkDocsLink = (framework: Framework) => {
   }
 };
 
-export const getFrameworkNativePasskeyDocsLink = (framework: Framework) => {
-  switch (framework.toUpperCase()) {
+export const getFrameworkNativePasskeyDocsLink = (framework?: Framework) => {
+  switch (framework?.toUpperCase()) {
     case Framework.FLUTTER: {
       return FLUTTER_SETUP_DOCS_LINK;
     }
     case Framework.EXPO: {
       return EXPO_SETUP_DOCS_LINK;
     }
-    case Framework.REACT_NATIVE:
-    default: {
+    case Framework.REACT_NATIVE: {
       return REACT_NATIVE_SETUP_DOCS_LINK;
+    }
+    default: {
+      return undefined;
     }
   }
 };
 
-export const getFrameworkExtraSetupLink = (framework: Framework) => {
-  switch (framework.toUpperCase()) {
-    default:
+export const getFrameworkExtraSetupLink = (framework?: Framework) => {
+  switch (framework?.toUpperCase()) {
     case Framework.REACT:
     case Framework.SVELTE:
     case Framework.VUE:
@@ -148,12 +152,14 @@ export const getFrameworkExtraSetupLink = (framework: Framework) => {
     case Framework.SWIFT: {
       return SWIFT_DOCS_LINK;
     }
+    default: {
+      return undefined;
+    }
   }
 };
 
-export const getFrameworkPackages = (framework: Framework) => {
-  switch (framework.toUpperCase()) {
-    default:
+export const getFrameworkPackages = (framework?: Framework) => {
+  switch (framework?.toUpperCase()) {
     case Framework.REACT:
     case Framework.VITE:
     case Framework.NEXT: {
@@ -180,12 +186,14 @@ export const getFrameworkPackages = (framework: Framework) => {
     case Framework.VUE: {
       return '@getpara/web-sdk';
     }
+    default: {
+      return '';
+    }
   }
 };
 
-export const getFrameworkCodeSnippet = (framework: Framework) => {
-  switch (framework.toUpperCase()) {
-    default:
+export const getFrameworkCodeSnippet = (framework?: Framework) => {
+  switch (framework?.toUpperCase()) {
     case Framework.REACT:
     case Framework.VITE:
     case Framework.NEXT: {
@@ -206,11 +214,14 @@ export const getFrameworkCodeSnippet = (framework: Framework) => {
     case Framework.VUE: {
       return WEB_CODE_SNIPPET;
     }
+    default: {
+      return undefined;
+    }
   }
 };
 
-export const getFrameworkIcon = (framework: Framework) => {
-  switch (framework.toUpperCase()) {
+export const getFrameworkIcon = (framework?: Framework) => {
+  switch (framework?.toUpperCase()) {
     case Framework.REACT:
     case Framework.REACT_NATIVE:
       return React;
@@ -224,24 +235,41 @@ export const getFrameworkIcon = (framework: Framework) => {
       return Svelte;
     case Framework.VUE:
       return Vue;
+    case Framework.BUN:
+      return Bun;
+    case Framework.DENO:
+      return Deno;
+    case Framework.VITE:
+      return Vite;
+    case Framework.EXPO:
+      return Expo;
+    case Framework.NODE:
+      return Node;
     default:
       return null;
   }
 };
 
-export const getFrameworkColors = (framework: Framework) => {
-  switch (framework.toUpperCase()) {
+export const getFrameworkColors = (framework?: Framework) => {
+  switch (framework?.toUpperCase()) {
     case Framework.REACT:
     case Framework.REACT_NATIVE:
     case Framework.FLUTTER:
       return { bg: 'para:bg-sky-50', border: 'para:border-sky-600' };
     case Framework.NEXT:
+    case Framework.DENO:
+    case Framework.EXPO:
       return { bg: 'para:bg-neutral-50', border: 'para:border-neutral-600' };
     case Framework.SWIFT:
     case Framework.SVELTE:
       return { bg: 'para:bg-orange-50', border: 'para:border-orange-600' };
     case Framework.VUE:
+    case Framework.NODE:
       return { bg: 'para:bg-green-50', border: 'para:border-green-600' };
+    case Framework.BUN:
+      return { bg: 'para:bg-rose-50', border: 'para:border-rose-600' };
+    case Framework.VITE:
+      return { bg: 'para:bg-purple-50', border: 'para:border-purple-600' };
     default:
       return null;
   }

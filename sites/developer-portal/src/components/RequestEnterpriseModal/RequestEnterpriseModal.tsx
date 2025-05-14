@@ -3,8 +3,8 @@ import { InlineText } from '../common';
 import styled from 'styled-components';
 import { GradientCTAButton } from '../GradientCTAButton/GradientCTAButton';
 import { useUpgradePlan } from '../../hooks/api/mutations/useUpgradePlan';
-import { triggerToast } from '../../utils/toasts';
 import { ENTERPRISE_PLAN_SLUG } from '../../utils/constants';
+import { toast } from '@getpara/react-component-library';
 
 interface RequestEnterpriseModalProps {
   open: boolean;
@@ -19,19 +19,15 @@ export const RequestEnterpriseModal = ({ open, onClose, onSuccess }: RequestEnte
       { newPlanSlug: ENTERPRISE_PLAN_SLUG },
       {
         onSuccess: () => {
-          triggerToast({
-            variant: 'success',
-            title: 'Upgrade Requested!',
-            body: 'We will be in touch!',
+          toast.success('Upgrade Requested!', {
+            description: 'We will be in touch!',
           });
           onClose();
           onSuccess?.();
         },
         onError: () => {
-          triggerToast({
-            variant: 'error',
-            title: 'Error Requesting Upgrade',
-            body: 'Please try again. If the problem persists, contact Para support.',
+          toast.error('Error Requesting Upgrade', {
+            description: 'Please try again. If the problem persists, contact Para support.',
           });
         },
       },

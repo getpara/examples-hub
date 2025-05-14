@@ -1,10 +1,9 @@
 import { useParams } from 'react-router-dom';
-import { triggerToast } from '../../../utils/toasts';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useIsValidKey, useIsValidProject } from '../../../hooks/useIsValidOrgConfig';
 import { useEffect } from 'react';
-import { DefaultValues, FieldValues, useForm as useRHForm } from '@getpara/react-component-library';
+import { DefaultValues, FieldValues, toast, useForm as useRHForm } from '@getpara/react-component-library';
 
 export type SubmitVars = { projectId: string; apiKey: string; env: string };
 
@@ -48,15 +47,10 @@ export const useForm = <T extends FieldValues>({
         sanitizeFormData(updateData);
         await onSubmit(updateData, { projectId, apiKey, env });
         form.reset(form.getValues());
-        triggerToast({
-          variant: 'success',
-          title: 'Config Saved!',
-        });
+        toast.success('Config Saved!');
       } catch (err) {
-        triggerToast({
-          variant: 'error',
-          title: 'Failed to Save Config',
-          body: 'Please correct any errors. If the problem persists, contact Para support.',
+        toast.error('Config Saved!', {
+          description: 'Please correct any errors. If the problem persists, contact Para support.',
         });
       }
     }

@@ -9,6 +9,8 @@ import { SchemaFromInterface } from '../../../../../types/helpers';
 import { useUpdateApiKey } from '../../../../../hooks/api/mutations/useUpdateApiKey';
 import { useUpdateProject } from '../../../../../hooks/api/mutations/useUpdateProject';
 import { SubmitVars, useForm } from '../../../hooks/useForm';
+import { Framework } from '../../../../../types/framework';
+import { PackageManager } from '../../../../../types/packageManager';
 
 export type SetupForm = Pick<UpdateApiKeyFormData, 'cosmosPrefix'> &
   Pick<UpdateProjectBody, 'framework' | 'packageManager'> & {
@@ -39,6 +41,8 @@ export const useSetupForm = () => {
     supportedWalletTypes: apiKeyData?.supportedWalletTypes ?? [],
     ...project,
     name: project?.name ?? '',
+    framework: project?.framework ?? Framework.REACT,
+    packageManager: project?.packageManager ?? PackageManager.YARN,
   };
 
   const onSubmit = async (
@@ -47,18 +51,19 @@ export const useSetupForm = () => {
       cosmosPrefix,
       framework,
       packageManager,
-    }: Pick<SetupForm, 'supportedWalletTypes' | 'cosmosPrefix' | 'framework' | 'packageManager'>,
+      name,
+    }: Pick<SetupForm, 'supportedWalletTypes' | 'cosmosPrefix' | 'framework' | 'packageManager' | 'name'>,
     { projectId, apiKey, env }: SubmitVars,
   ) => {
     await updateKey({
       projectId,
       keyId: apiKey,
       env,
-      data: { supportedWalletTypes, cosmosPrefix },
+      data: { supportedWalletTypes, cosmosPrefix, displayName: name, name },
     });
     await updateProject({
       projectId,
-      data: { framework, packageManager },
+      data: { framework, packageManager, name },
     });
   };
 

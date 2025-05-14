@@ -1,9 +1,8 @@
 import { OrganizationInvite } from '../../../types/api';
 import { useAcceptInvite } from '../../../hooks/api/mutations/useAcceptInvite';
-import { triggerToast } from '../../../utils/toasts';
 import { useLogout } from '../../../hooks/useLogout';
 import { useSetSelectedOrganizationWithNavigation } from '../../../hooks/useSetSelectedOrganizationWithNavigation';
-import { Avatar, AvatarImage, Button, Card, CardContent, Typography } from '@getpara/react-component-library';
+import { Avatar, AvatarImage, Button, Card, CardContent, toast, Typography } from '@getpara/react-component-library';
 
 interface OrgCardProps {
   organization: OrganizationInvite;
@@ -19,11 +18,10 @@ export const OrgCard = ({ organization }: OrgCardProps) => {
       await acceptInvite({ organizationId: organization.id });
       await setSelectedOrganization();
     } catch (e) {
-      triggerToast({
-        variant: 'error',
-        title: 'Error Accepting Invitation',
-        body: 'Please try to login again. If the problem persists, contact Para support.',
+      toast.error('Error Accepting Invitations', {
+        description: 'Please try again. If the problem persists, contact Para support.',
       });
+
       await logout();
       return;
     }

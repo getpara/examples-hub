@@ -5,25 +5,20 @@ import { NavSeparator } from './NavSeparator';
 import { Button, DropdownMenuSeparator } from '@getpara/react-component-library';
 import { useCanCreateProject } from '../../hooks/subscriptionGating/useCanCreateProject';
 import { useState } from 'react';
-import { CreateProjectModal } from '../CreateProjectModal/CreateProjectModal';
 import { Plus } from 'lucide-react';
+import { useCreateProjectAndKey } from '../../hooks/useCreateProjectAndKey';
 
 export const ProjectDropdown = () => {
   const { organizationId, projectId } = useParams();
   const { data: projects } = useGetAllProjects();
   const { data: project } = useGetProject(projectId ?? '');
   const { canCreateProject } = useCanCreateProject();
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(false);
+  const createProjectAndKey = useCreateProjectAndKey();
 
   if (!project || !projects?.length) {
     return null;
   }
-
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-    setIsNavOpen(false);
-  };
 
   return (
     <>
@@ -49,7 +44,7 @@ export const ProjectDropdown = () => {
           <>
             <DropdownMenuSeparator />
             <div className="para:p-1">
-              <Button variant="outline" size="sm" className="para:w-full" onClick={handleOpenModal}>
+              <Button variant="outline" size="sm" className="para:w-full" onClick={createProjectAndKey}>
                 <Plus className="para:size-4 para:stroke-foreground" />
                 Create Project
               </Button>
@@ -57,7 +52,6 @@ export const ProjectDropdown = () => {
           </>
         )}
       </NavDropdown>
-      <CreateProjectModal open={isModalOpen} setIsOpen={setIsModalOpen} />
     </>
   );
 };

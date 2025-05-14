@@ -10,8 +10,8 @@ import { usePlans } from '../../hooks/api/queries/usePlans';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { AUTH_MIN_APP_BAR_HEIGHT } from '../AppBar/AuthMinAppBar';
 import { useGetInvite } from '../../hooks/api/queries/useUserInvite';
-import { triggerToast } from '../../utils/toasts';
 import { useAccount } from '@getpara/react-sdk';
+import { toast } from '@getpara/react-component-library';
 
 interface AuthenticatedWrapperProps extends PropsWithChildren {
   requireOrgs?: boolean;
@@ -39,10 +39,8 @@ export const AuthenticatedWrapper = ({ requireOrgs, children }: AuthenticatedWra
     if (isInvite && !isLoadingLoggedIn) {
       if (account?.isConnected && !isLoadingInvite) {
         if (!inviteId || (inviteId && !invite)) {
-          triggerToast({
-            variant: 'error',
-            title: 'Invite not found',
-            body: 'Please try again. If the problem persists, contact Para support.',
+          toast.error('Invite not found', {
+            description: 'Please try again. If the problem persists, contact Para support.',
           });
           setSelectedOrganization();
         }

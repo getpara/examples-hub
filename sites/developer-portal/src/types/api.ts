@@ -194,6 +194,7 @@ export type UpdateApiKeyBody = Nullable<
   Partial<
     Pick<
       ApiKey,
+      | 'name'
       | 'displayName'
       | 'verifyUrl'
       | 'portalUrl'

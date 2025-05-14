@@ -1,8 +1,8 @@
 import { CpslButton, CpslText } from '@getpara/react-components';
 import { Modal } from '../../../components/Modal/Modal';
-import { triggerToast } from '../../../utils/toasts';
 import { useUpgradeSubscription } from '../../../hooks/api/mutations/useUpgradeSubscription';
 import { usePlanMetadata } from '../../../hooks/configs/usePlanMetadata';
+import { toast } from '@getpara/react-component-library';
 
 interface UpgradeModalProps {
   open: boolean;
@@ -22,16 +22,11 @@ export const UpgradeModal = ({ open, planSlug, onClose }: UpgradeModalProps) => 
       {
         onSettled: () => {
           onClose();
-          triggerToast({
-            variant: 'success',
-            title: 'Subscription Updated!',
-          });
+          toast.success('Subscription Updated!');
         },
         onError: () => {
-          triggerToast({
-            variant: 'error',
-            title: 'Failed to Upgrade Subscription',
-            body: 'Please try again. If the problem persists, contact Para support.',
+          toast.error('Failed to Upgrade Subscription', {
+            description: 'Please try again. If the problem persists, contact Para support.',
           });
         },
       },

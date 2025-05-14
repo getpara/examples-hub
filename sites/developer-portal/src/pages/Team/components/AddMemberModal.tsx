@@ -3,8 +3,8 @@ import { Modal } from '../../../components/Modal/Modal';
 import { Controller, useForm } from 'react-hook-form';
 import { EMAIL_REGEX } from '../../../utils/regex';
 import { useInviteMember } from '../../../hooks/api/mutations/useInviteMember';
-import { triggerToast } from '../../../utils/toasts';
 import { useGetSelectedOrganizationIsValid } from '../../../hooks/api/queries/useOrganizations';
+import { toast } from '@getpara/react-component-library';
 
 interface AddMemberModalProps {
   open: boolean;
@@ -35,16 +35,11 @@ export const AddMemberModal = ({ open, onClose }: AddMemberModalProps) => {
         {
           onSuccess: () => {
             onClose();
-            triggerToast({
-              variant: 'success',
-              title: 'Member Invited!',
-            });
+            toast.success('Member Invited!');
           },
           onError: () => {
-            triggerToast({
-              variant: 'error',
-              title: 'Failed to Invite Member',
-              body: 'Please try again. If the problem persists, contact Para support.',
+            toast.error('Failed to Invite Member', {
+              description: 'Please try again. If the problem persists, contact Para support.',
             });
           },
         },

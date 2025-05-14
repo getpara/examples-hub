@@ -1,8 +1,7 @@
-import { Button } from '@getpara/react-component-library';
+import { Button, toast } from '@getpara/react-component-library';
 import { useParams } from 'react-router-dom';
 import { useApiKeyUsersCSV } from '../../../hooks/api/queries/useApiKeyUsersCSV';
 import { FileDown } from 'lucide-react';
-import { triggerToast } from '../../../utils/toasts';
 import { AxiosError } from 'axios';
 
 export const UsersHeaderAction = () => {
@@ -19,10 +18,8 @@ export const UsersHeaderAction = () => {
           ? 'Rate limit exceeded, try again in a few minutes.'
           : 'If the problem persists, contact Para support.';
 
-      triggerToast({
-        variant: 'error',
-        title: 'Failed to Download File',
-        body: errorText,
+      toast.error('Failed to Download File', {
+        description: errorText,
       });
       return;
     }

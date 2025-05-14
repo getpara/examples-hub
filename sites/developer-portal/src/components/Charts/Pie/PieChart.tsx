@@ -1,7 +1,6 @@
 import { ChartConfig, ChartTooltip, ChartTooltipContent, Typography } from '@getpara/react-component-library';
 import { PieChart as RechartsPieChart, Pie, Label } from 'recharts';
 import { ChartContainer } from '../ChartContainer';
-import { Key } from 'react';
 
 type DataType<DataKey extends string, DataValue, NameKey extends string, NameValue> = {
   [K in DataKey]: DataValue;
@@ -44,7 +43,7 @@ export const PieChart = <DataKey extends string, DataValue, NameKey extends stri
             const formattedVal = typeof val === 'number' ? val.toLocaleString() : val;
 
             return (
-              <div key={d[dataKey] as Key} className="para:flex para:gap-2 para:items-center">
+              <div key={chartConfig[d[nameKey]].label?.toString()} className="para:flex para:gap-2 para:items-center">
                 <div
                   className="para:py-1.5 para:px-3 para:rounded-md para:w-[57px]"
                   style={{ backgroundColor: chartConfig[d[nameKey]].color }}

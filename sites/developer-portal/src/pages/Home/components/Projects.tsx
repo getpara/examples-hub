@@ -1,7 +1,6 @@
-import { Button, Loader, Typography } from '@getpara/react-component-library';
+import { Button, Loader, toast, Typography } from '@getpara/react-component-library';
 import { useGetAllProjects } from '../../../hooks/api/queries/useProjects';
 import { pluralize } from '../../../utils/pluralize';
-import { triggerToast } from '../../../utils/toasts';
 import { ProjectCard } from './ProjectCard';
 import { CreateProjectButton } from './CreateProjectButton';
 
@@ -15,11 +14,7 @@ export const Projects = ({ onShowAllClick }: ProjectsProps) => {
   const { data: projects, isLoading: isLoadingProjects, error: projectsError } = useGetAllProjects();
 
   if (projectsError) {
-    triggerToast({
-      variant: 'error',
-      title: 'Error Loading Projects',
-      body: 'Please try to login again. If the problem persists, contact Para support.',
-    });
+    toast.error('Error Loading Projects');
   }
 
   if (isLoadingProjects) {

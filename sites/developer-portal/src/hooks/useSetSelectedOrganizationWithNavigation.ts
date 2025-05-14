@@ -1,9 +1,9 @@
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useAppStore } from '../stores/app/useAppStore';
-import { triggerToast } from '../utils/toasts';
 import { useGetAllOrganizations } from './api/queries/useOrganizations';
 import { useLogout } from './useLogout';
 import { useAccount } from '@getpara/react-sdk';
+import { toast } from '@getpara/react-component-library';
 
 export const useSetSelectedOrganizationWithNavigation = (shouldRefetch: boolean) => {
   const { data: account } = useAccount();
@@ -31,10 +31,8 @@ export const useSetSelectedOrganizationWithNavigation = (shouldRefetch: boolean)
     }
 
     if (_allUserOrgsError) {
-      triggerToast({
-        variant: 'error',
-        title: 'Error Loading Organizations',
-        body: 'Please try to login again. If the problem persists, contact Para support.',
+      toast.error('Error Loading Organizations', {
+        description: 'Please try to login again. If the problem persists, contact Para support.',
       });
       await logout();
     }

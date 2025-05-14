@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { triggerToast } from '../utils/toasts';
 import { useCreateCheckoutSession } from './api/mutations/useCreateCheckoutSession';
 import { useCreatePortalSession } from './api/mutations/useCreatePortalSession';
 import { useHasStripeSubscription } from './api/queries/useOrganizationSubscription';
 import { CustomerPortalFlow } from '../api/organizations/mutations';
+import { toast } from '@getpara/react-component-library';
 
 export const useStripePlan = () => {
   const { mutateAsync: createCheckoutSession } = useCreateCheckoutSession();
@@ -30,19 +30,15 @@ export const useStripePlan = () => {
             window.location.assign(data.sessionUrl);
           } else {
             setIsCreatingStripeSession(false);
-            triggerToast({
-              variant: 'error',
-              title: 'Failed to Create Stripe Customer Portal',
-              body: 'Please try again. If the problem persists, contact Para support.',
+            toast.error('Failed to Create Stripe Customer Portal', {
+              description: 'Please try again. If the problem persists, contact Para support.',
             });
           }
         },
         onError: () => {
           setIsCreatingStripeSession(false);
-          triggerToast({
-            variant: 'error',
-            title: 'Failed to Create Stripe Customer Portal',
-            body: 'Please try again. If the problem persists, contact Para support.',
+          toast.error('Failed to Create Stripe Customer Portal', {
+            description: 'Please try again. If the problem persists, contact Para support.',
           });
         },
       },
@@ -64,19 +60,15 @@ export const useStripePlan = () => {
               window.location.assign(data.sessionUrl);
             } else {
               setIsCreatingStripeSession(false);
-              triggerToast({
-                variant: 'error',
-                title: 'Failed to Create Stripe Checkout',
-                body: 'Please try again. If the problem persists, contact Para support.',
+              toast.error('Failed to Create Stripe Checkout', {
+                description: 'Please try again. If the problem persists, contact Para support.',
               });
             }
           },
           onError: () => {
             setIsCreatingStripeSession(false);
-            triggerToast({
-              variant: 'error',
-              title: 'Failed to Create Stripe Checkout',
-              body: 'Please try again. If the problem persists, contact Para support.',
+            toast.error('Failed to Create Stripe Checkout', {
+              description: 'Please try again. If the problem persists, contact Para support.',
             });
           },
         },

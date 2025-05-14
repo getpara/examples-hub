@@ -10,10 +10,9 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './clients/queryClient';
 import './index.css';
 import '@getpara/react-components/css/capsule-core.css';
-import 'react-toastify/dist/ReactToastify.css';
-import { ToastContainer } from './components/Toast/ToastContainer';
 import { Environment, ParaProvider } from '@getpara/react-sdk';
 import { paraLogo } from './assets/paraLogo';
+import { Toaster } from '@getpara/react-component-library';
 
 defineCustomElements();
 
@@ -43,7 +42,7 @@ const App = () => {
       externalWalletConfig={{ wallets: [] }}
     >
       <RouterProvider router={router} />
-      <ToastContainer />
+      <Toaster />
     </ParaProvider>
   );
 };

@@ -2,7 +2,6 @@ import { CpslButton, CpslInput, CpslSelect, CpslSelectItem, CpslText } from '@ge
 import styled from 'styled-components';
 import { Modal } from '../../../components/Modal/Modal';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import { triggerToast } from '../../../utils/toasts';
 import { useCreateProject } from '../../../hooks/api/mutations/useCreateProject';
 import { Framework } from '../../../types/framework';
 import { PackageManager } from '../../../types/packageManager';
@@ -15,6 +14,7 @@ import { useCreateApiKey } from '../../../hooks/api/mutations/useCreateApiKey';
 import { Environment } from '../../../types/environment';
 import { useCanCreateProject } from '../../../hooks/subscriptionGating/useCanCreateProject';
 import { AxiosError } from 'axios';
+import { toast } from '@getpara/react-component-library';
 
 interface CreateProjectModalProps {
   open: boolean;
@@ -63,11 +63,7 @@ export const CreateProjectModal = ({ open, onClose }: CreateProjectModalProps) =
                   "You've reached the max number of projects allowed on your current plan level. Upgrade to add more projects.";
               }
 
-              triggerToast({
-                variant: 'error',
-                title: 'Failed to Create Project',
-                body,
-              });
+              toast.error('Failed to Create Project', { description: body });
             },
           },
         );
@@ -81,19 +77,14 @@ export const CreateProjectModal = ({ open, onClose }: CreateProjectModalProps) =
             },
             {
               onError: () => {
-                triggerToast({
-                  variant: 'error',
-                  title: 'Failed to Create Key',
-                  body: 'Please try again. If the problem persists, contact Para support.',
+                toast.error('Failed to Create Key', {
+                  description: 'Please try again. If the problem persists, contact Para support.',
                 });
               },
             },
           );
         }
-        triggerToast({
-          variant: 'success',
-          title: 'Project Created!',
-        });
+        toast.success('Project Created!');
       } finally {
         onClose();
       }

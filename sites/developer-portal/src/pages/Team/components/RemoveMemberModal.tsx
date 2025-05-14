@@ -1,8 +1,8 @@
 import { CpslButton, CpslInput } from '@getpara/react-components';
 import { Modal } from '../../../components/Modal/Modal';
 import { useRemoveMember } from '../../../hooks/api/mutations/useRemoveMember';
-import { triggerToast } from '../../../utils/toasts';
 import { useGetSelectedOrganizationIsValid } from '../../../hooks/api/queries/useOrganizations';
+import { toast } from '@getpara/react-component-library';
 
 interface RemoveMemberModalProps {
   open: boolean;
@@ -23,16 +23,11 @@ export const RemoveMemberModal = ({ open, memberEmail, memberId, onClose, onExit
         {
           onSuccess: () => {
             onClose();
-            triggerToast({
-              variant: 'success',
-              title: 'Member Removed!',
-            });
+            toast.success('Member Removed!');
           },
           onError: () => {
-            triggerToast({
-              variant: 'error',
-              title: 'Failed to Remove Member',
-              body: 'Please try again. If the problem persists, contact Para support.',
+            toast.error('Failed to Remove Member', {
+              description: 'Please try again. If the problem persists, contact Para support.',
             });
           },
         },

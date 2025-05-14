@@ -1,6 +1,5 @@
 import { ENTERPRISE_PLAN_SLUG, FREE_PLAN_SLUG, ZAPIER_WEBHOOK_URL } from '../../../utils/constants';
 import { useCreateOrganization } from '../../../hooks/api/mutations/useCreateOrganization';
-import { triggerToast } from '../../../utils/toasts';
 import { useOnboardingStore } from '../../../stores/onboarding/useOnboardingStore';
 import { useStripePlan } from '../../../hooks/useStripePlan';
 import { useSetSelectedOrganizationWithNavigation } from '../../../hooks/useSetSelectedOrganizationWithNavigation';
@@ -10,6 +9,7 @@ import { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import axios from 'axios';
 import { useAccount } from '@getpara/react-sdk';
+import { toast } from '@getpara/react-component-library';
 
 export const useSubmitOnboarding = () => {
   const { data: account } = useAccount();
@@ -67,17 +67,13 @@ export const useSubmitOnboarding = () => {
         resetUser(userId);
         await changePlan(planSlug, organizationId, location.origin);
       } catch (e) {
-        triggerToast({
-          variant: 'error',
-          title: 'Error Updating Your Organization',
-          body: "If your organization data isn't correct, contact Para support.",
+        toast.error('Error Updating Your Organization', {
+          description: "If your organization data isn't correct, contact Para support.",
         });
       }
     } catch (e) {
-      triggerToast({
-        variant: 'error',
-        title: 'Error Creating Your Organization',
-        body: 'Please try again. If the problem persists, contact Para support.',
+      toast.error('Error Creating Your Organization', {
+        description: 'Please try again. If the problem persists, contact Para support.',
       });
     } finally {
       setIsSubmitting(false);

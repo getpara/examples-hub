@@ -23,28 +23,30 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
 
   return (
     <Link to={`/${organizationId}/project/${project.id}/key`} className="para:h-[240px] para:min-w-[200px]">
-      <FlatCard className="para:h-full para:w-full">
-        <div className="para:flex para:flex-col para:gap-4 para:h-full">
-          <OrganizationAvatar
-            className="para:size-6 para:rounded-sm para:bg-background"
-            name={project.name}
-            url={project.iconUrl}
-          />
-          <div className="para:flex para:flex-col para:gap-2">
-            <Typography className="para:text-lg para:font-semibold">{project.name}</Typography>
-            {project.description && (
-              <Typography className="para:text-sm para:font-medium" color="secondary">
-                {project.description}
-              </Typography>
-            )}
-            {project.framework && (
-              <Badge variant="outline" className={clsx(frameworkColors?.bg, frameworkColors?.border)}>
-                {Icon && <Icon className="para:size-3" />}
-                {formatFrameworkName(project.framework as Framework)}
-              </Badge>
-            )}
+      <FlatCard className="para:p-6 para:h-full para:w-full para:hover:shadow-md para:transition-shadow para:duration-200 para:ease-out para:group">
+        <div className="para:flex para:flex-col para:gap-4 para:h-full para:justify-between">
+          <div className="para:flex para:flex-col para:gap-4">
+            <OrganizationAvatar
+              className="para:size-6 para:rounded-sm para:bg-background"
+              name={project.name}
+              url={project.iconUrl}
+            />
+            <div className="para:flex para:flex-col para:gap-2">
+              <Typography className="para:text-lg para:font-semibold">{project.name}</Typography>
+              {project.description && (
+                <Typography className="para:text-sm para:font-medium" color="secondary">
+                  {project.description}
+                </Typography>
+              )}
+              {project.framework && (
+                <Badge variant="outline" className={clsx(frameworkColors?.bg, frameworkColors?.border)}>
+                  {Icon && <Icon className="para:size-3" />}
+                  {formatFrameworkName(project.framework as Framework)}
+                </Badge>
+              )}
+            </div>
           </div>
-          <div className="para:flex para:mt-auto">
+          <div className="para:transition-all para:flex para:group-hover:opacity-100 para:opacity-100 para:md:opacity-0 para:group-hover:top-0 para:top-0 para:md:top-2 para:relative">
             <Typography className="para:text-xs para:font-medium" color="muted">
               {totalUsers !== undefined ? truncateNumber(totalUsers) : '--'} Users
             </Typography>

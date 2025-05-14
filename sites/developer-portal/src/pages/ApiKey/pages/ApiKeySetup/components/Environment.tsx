@@ -12,7 +12,7 @@ import {
 import { FormControl } from '../../../../../components/formComponents';
 import { FRAMEWORK_OPTIONS, PACKAGE_MANAGER_OPTIONS } from '../../../../../utils/constants';
 import { formatFrameworkName, getFrameworkIcon } from '../../../../../utils/framework';
-import { formatPackageManagerName } from '../../../../../utils/packageManager';
+import { formatPackageManagerName, getPackageManagerIcon } from '../../../../../utils/packageManager';
 import { ConfigCard } from '../../../components/ConfigCard';
 import { SetupForm } from '../hooks/useSetupForm';
 
@@ -63,11 +63,16 @@ export const Environment = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {PACKAGE_MANAGER_OPTIONS.map(o => (
-                    <SelectItem key={o} value={o}>
-                      {formatPackageManagerName(o)}
-                    </SelectItem>
-                  ))}
+                  {PACKAGE_MANAGER_OPTIONS.map(o => {
+                    const Icon = getPackageManagerIcon(o);
+
+                    return (
+                      <SelectItem key={o} value={o}>
+                        {Icon && <Icon className="para:size-4" />}
+                        {formatPackageManagerName(o)}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </FormItem>

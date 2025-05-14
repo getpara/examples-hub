@@ -7,10 +7,10 @@ import { RequestedAccessModal } from './RequestedAccessModal';
 import { RequestEnterpriseModal } from '../../../components/RequestEnterpriseModal/RequestEnterpriseModal';
 import { useGetOrganizationEarlyAccess, useGetSelectedOrganization } from '../../../hooks/api/queries/useOrganizations';
 import { useRequestEarlyAccess } from '../../../hooks/api/mutations/useRequestEarlyAccess';
-import { triggerToast } from '../../../utils/toasts';
 import { CpslText } from '@getpara/react-components';
 import { useStripePlan } from '../../../hooks/useStripePlan';
 import { useGetOrganizationSubscription } from '../../../hooks/api/queries/useOrganizationSubscription';
+import { toast } from '@getpara/react-component-library';
 
 export const MainContent = () => {
   const { earlyAccessItems } = useEarlyAccess();
@@ -32,10 +32,8 @@ export const MainContent = () => {
           setRequestedSlug(slug);
         },
         onError: () => {
-          triggerToast({
-            variant: 'error',
-            title: 'Error Requesting Early Access',
-            body: 'Please try again. If the problem persists, contact Para support.',
+          toast.error('Error Requesting Early Access', {
+            description: 'Please try again. If the problem persists, contact Para support.',
           });
         },
       },

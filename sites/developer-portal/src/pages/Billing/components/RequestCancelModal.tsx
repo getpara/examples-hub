@@ -1,7 +1,7 @@
 import { CpslButton, CpslText } from '@getpara/react-components';
 import { Modal } from '../../../components/Modal/Modal';
 import { useCancelPlan } from '../../../hooks/api/mutations/useCancelPlan';
-import { triggerToast } from '../../../utils/toasts';
+import { toast } from '@getpara/react-component-library';
 
 interface RequestCancelModalProps {
   open: boolean;
@@ -15,16 +15,11 @@ export const RequestCancelModal = ({ open, onClose }: RequestCancelModalProps) =
     cancelPlan(null, {
       onSettled: () => {
         onClose();
-        triggerToast({
-          variant: 'success',
-          title: 'Cancel Request Sent!',
-        });
+        toast.success('Cancel Request Sent!');
       },
       onError: () => {
-        triggerToast({
-          variant: 'error',
-          title: 'Failed to Send Cancel Request',
-          body: 'Please try again. If the problem persists, contact Para support.',
+        toast.error('Failed to Send Cancel Request', {
+          description: 'Please try again. If the problem persists, contact Para support.',
         });
       },
     });

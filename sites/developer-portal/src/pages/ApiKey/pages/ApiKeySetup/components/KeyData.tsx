@@ -17,7 +17,7 @@ export const KeyData = () => {
             <FormItem className="para:flex-1">
               <FormLabel>Project Name</FormLabel>
               <FormControl>
-                <Input {...field} value={field.value ?? undefined} disabled className="para:disabled:opacity-100" />
+                <Input {...field} value={field.value ?? undefined} className="para:disabled:opacity-100" />
               </FormControl>
               <FormDescription>Your project name will be shown to users</FormDescription>
             </FormItem>
