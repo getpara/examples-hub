@@ -5,9 +5,9 @@ PODS:
   - FBLazyVector (0.76.9)
   - fmt (11.0.2)
   - glog (0.3.5)
-  - hermes-engine (0.76.5):
-    - hermes-engine/Pre-built (= 0.76.5)
-  - hermes-engine/Pre-built (0.76.5)
+  - hermes-engine (0.76.9):
+    - hermes-engine/Pre-built (= 0.76.9)
+  - hermes-engine/Pre-built (0.76.9)
   - OpenSSL-Universal (3.3.2000)
   - para-react-native-wallet (1.4.4):
     - RCT-Folly
@@ -2087,7 +2087,7 @@ SPEC CHECKSUMS:
   FBLazyVector: 7605ea4810e0e10ae4815292433c09bf4324ba45
   fmt: 01b82d4ca6470831d1cc0852a1af644be019e8f6
   glog: 08b301085f15bcbb6ff8632a8ebaf239aae04e6a
-  hermes-engine: 06a9c6900587420b90accc394199527c64259db4
+  hermes-engine: 9e868dc7be781364296d6ee2f56d0c1a9ef0bb11
   OpenSSL-Universal: b60a3702c9fea8b3145549d421fdb018e53ab7b4
   para-react-native-wallet: 12af365bd151ec5b4ac0d9148e2f7d1e1e62ee53
   RCT-Folly: ea9d9256ba7f9322ef911169a9f696e5857b9e17
