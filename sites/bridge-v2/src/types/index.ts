@@ -2,7 +2,34 @@ import Client, { Auth } from '@getpara/user-management-client';
 import { Environment } from '@getpara/web-sdk';
 import { AxiosInstance } from 'axios';
 
+type MessageType = 'Para#init' | 'Para#invokeMethod';
+
+export type MessageArguments<T extends MessageType | string = string> = T extends 'Para#init'
+  ? {
+      environment: Environment;
+      apiKey: string;
+      platform?: keyof typeof Platform;
+      version?: string;
+      isPasskeySupported?: boolean;
+    }
+  : T extends 'Para#invokeMethod'
+    ? Record<string, any>
+    : never;
+
+type Message<T extends MessageType | string = string> = {
+  data: {
+    requestId: string;
+    messageType: T;
+    methodName: T extends 'Para#invokeMethod' ? string : never;
+    arguments: MessageArguments<T>;
+  };
+};
+
 declare global {
+  interface WindowEventMap {
+    message: Message;
+  }
+
   interface NetworkInformation extends EventTarget {
     readonly downlink: number;
     readonly downlinkMax?: number;

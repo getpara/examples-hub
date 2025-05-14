@@ -1,7 +1,8 @@
 import { ParaWeb, Environment, CoreMethodName, PARA_CORE_METHODS } from '@getpara/web-sdk';
 import { logger, formatError } from './logging';
 import { coreMethodHandlers, bridgeMethodHandlers } from './bridgeMethodHandlers';
-import { BridgeResponse, Platform, ParaInitArgs } from './types';
+import { BridgeResponse, MessageArguments, Platform } from './types';
+import { ParaBridge } from './classes/ParaBridge';
 
 let platform: Platform;
 let version: string | undefined;
@@ -53,28 +54,25 @@ window.addEventListener('message', event => {
   try {
     logger.info('Received message from event:', event.data);
     const data = event.data;
-    const requestId = data['requestId'];
 
-    switch (data['messageType']) {
-      case 'Capsule#init':
+    switch (data.messageType) {
       case 'Para#init': {
         logNetworkInformation();
-        logger.info('Initializing Para with args:', data['arguments']);
-        const initArgs = data['arguments'] ?? ({} as ParaInitArgs);
-        initPara(initArgs.environment, initArgs.apiKey);
-        platform = Platform[initArgs.platform as keyof typeof Platform] ?? Platform.flutter;
-        version = initArgs.version;
+
+        logger.info('Initializing Para with args:', data.arguments);
+        initPara(data.arguments);
+
         logger.info('Para initialized successfully. Platform:', platform, 'Version:', version);
-        sendResponse(data['messageType'], requestId, true);
+        sendResponse(data.messageType, data.requestId, true);
+
         break;
       }
-      case 'Capsule#invokeMethod':
       case 'Para#invokeMethod':
-        logger.info('Invoking method:', data['methodName'], 'with args:', data['arguments']);
-        invokeParaMethod(data['methodName'], data['arguments'], requestId);
+        logger.info('Invoking method:', data.methodName, 'with args:', data.arguments);
+        invokeParaMethod(data.methodName, data.arguments, data.requestId);
         break;
       default:
-        logger.warn('Unknown message type:', data['messageType']);
+        logger.warn('Unknown message type:', data.messageType);
         break;
     }
   } catch (err) {
@@ -96,18 +94,22 @@ function sendResponse(method: string, requestId: string, responseData: any, erro
   }
 }
 
-function initPara(environment: string, apiKey: string) {
+function initPara({ environment, apiKey, isPasskeySupported, ...metadata }: MessageArguments<'Para#init'>) {
   try {
     if (window['para'] != null) {
       throw new Error('Para already initialized');
     }
-    const para = new ParaWeb(environment as Environment, apiKey, {
+    const para = new ParaBridge(environment as Environment, apiKey, {
       disableWorkers: false,
       disableWebSockets: false, // should this be true?
+      isPasskeySupported: isPasskeySupported === false ? false : true,
     });
 
     para.init();
     window['para'] = para;
+
+    platform = Platform[metadata.platform ?? 'flutter'];
+    version = metadata.version;
   } catch (err) {
     const errStr = formatError(err);
     logger.error('Error initializing Para:', errStr);
