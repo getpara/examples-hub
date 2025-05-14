@@ -7,7 +7,7 @@ export default function HomeLayout() {
         headerShown: false,
       }}>
       <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="Transaction" />
+      <Stack.Screen name="transaction" />
     </Stack>
   );
 }

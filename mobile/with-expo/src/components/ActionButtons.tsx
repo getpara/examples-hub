@@ -15,9 +15,11 @@ function ActionButton({ icon, label, onPress }: ActionButtonProps) {
   return (
     <Pressable
       onPress={onPress}
-      className="items-center gap-3">
-      <View className="w-14 h-14 bg-white border border-border rounded-lg items-center justify-center">{icon}</View>
-      <Text className="text-foreground">{label}</Text>
+      className="items-center gap-2"
+      accessibilityRole="button"
+      accessibilityLabel={label}>
+      <View className="w-14 h-14 bg-card border border-border rounded-lg items-center justify-center">{icon}</View>
+      <Text className="text-sm font-medium text-foreground">{label}</Text>
     </Pressable>
   );
 }
@@ -42,22 +44,12 @@ export function ActionButtons() {
   };
 
   return (
-    <View className="flex-row justify-center w-full gap-8">
-      <ActionButton
-        icon={
-          <ArrowDownToLine
-            size={24}
-            className="text-foreground"
-          />
-        }
-        label="Receive"
-        onPress={handleReceive}
-      />
+    <View className="flex-row justify-center w-full gap-8 pt-2">
       <ActionButton
         icon={
           <ArrowUpFromLine
             size={24}
-            className="text-foreground"
+            className="text-primary"
           />
         }
         label="Send"
@@ -65,9 +57,19 @@ export function ActionButtons() {
       />
       <ActionButton
         icon={
+          <ArrowDownToLine
+            size={24}
+            className="text-primary"
+          />
+        }
+        label="Receive"
+        onPress={handleReceive}
+      />
+      <ActionButton
+        icon={
           <ArrowLeftRight
             size={24}
-            className="text-foreground"
+            className="text-primary"
           />
         }
         label="Swap"
