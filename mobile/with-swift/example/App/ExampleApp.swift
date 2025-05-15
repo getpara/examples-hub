@@ -16,16 +16,12 @@ struct ExampleApp: App {
         let bundleId = Bundle.main.bundleIdentifier ?? ""
         
         // Initialize Para manager
-        let paraManager = ParaManager(environment: config.environment, apiKey: config.apiKey)
+        let paraManager = ParaManager(environment: config.environment, apiKey: config.apiKey, deepLink: bundleId)
         _paraManager = StateObject(wrappedValue: paraManager)
         
         // Initialize EVM signer
-        do {
-            let signer = try ParaEvmSigner(paraManager: paraManager, rpcUrl: config.rpcUrl, walletId: nil)
-            _paraEvmSigner = StateObject(wrappedValue: signer)
-        } catch {
-            fatalError("Failed to initialize Para EVM signer: \(error)")
-        }
+        let signer = try! ParaEvmSigner(paraManager: paraManager, rpcUrl: config.rpcUrl, walletId: nil)
+        _paraEvmSigner = StateObject(wrappedValue: signer)
         
         // Initialize MetaMask Connector with configuration
         let metaMaskConfig = MetaMaskConfig(appName: "ExampleApp", appId: bundleId, apiVersion: "1.0")
@@ -56,30 +52,6 @@ struct ExampleApp: App {
                 logger.debug("Received deep link URL: \(url.absoluteString)")
                 metaMaskConnector.handleURL(url)
             }
-//             .onChange(of: paraManager.sessionState) { newState in
-//                 switch newState {
-//                 case .activeLoggedIn:
-//                     appRootManager.currentRoot = .home
-//                 case .inactive:
-//                     appRootManager.currentRoot = .authentication
-//                 case .active:
-//                     // Handle partially active state if needed
-//                     appRootManager.currentRoot = .authentication
-//                 case .unknown:
-//                     // Keep showing launch view until we know the state
-//                     break
-//                 }
-//             }
-//            .task {
-//                // Add a minimum delay to show launch screen
-//                try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
-//                
-//                // If we're still in launch state after the delay and session state is known,
-//                // transition to the appropriate screen
-//                if appRootManager.currentRoot == .launch && paraManager.sessionState != .unknown {
-//                    appRootManager.currentRoot = paraManager.sessionState == .activeLoggedIn ? .home : .authentication
-//                }
-//            }
         }
     }
 }

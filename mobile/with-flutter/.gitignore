@@ -47,5 +47,8 @@ app.*.map.json
 
 *.env
 pubspec.override.yaml
+pubspec_overrides.yaml
 
 ../CLAUDE.md
+
+android/app/.cxx/

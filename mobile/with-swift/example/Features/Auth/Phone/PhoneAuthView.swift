@@ -1,58 +1,27 @@
-//
-//  PhoneAuthView.swift
-//  example
-//
-//  Created by Brian Corbin on 12/27/24.
-//
-
 import SwiftUI
 import ParaSwift
 import Combine
-
-struct CPData: Codable, Identifiable {
-    let id: String
-    let name: String
-    let flag: String
-    let code: String
-    let dial_code: String
-    let pattern: String
-    let limit: Int
-    
-    static let allCountry: [CPData] = Bundle.main.decode("CountryNumbers.json")
-    static let example = allCountry[0]
-}
-
-func applyPatternOnNumbers(_ stringvar: inout String, pattern: String, replacementCharacter: Character) {
-    var pureNumber = stringvar.replacingOccurrences( of: "[^0-9]", with: "", options: .regularExpression)
-    for index in 0 ..< pattern.count {
-        guard index < pureNumber.count else {
-            stringvar = pureNumber
-            return
-        }
-        let stringIndex = String.Index(utf16Offset: index, in: pattern)
-        let patternCharacter = pattern[stringIndex]
-        guard patternCharacter != replacementCharacter else { continue }
-        pureNumber.insert(patternCharacter, at: stringIndex)
-    }
-    stringvar = pureNumber
-}
+import AuthenticationServices
+import Foundation
 
 struct PhoneAuthView: View {
     @EnvironmentObject var paraManager: ParaManager
     @EnvironmentObject var appRootManager: AppRootManager
     
     @State private var phoneNumber = ""
-    @State private var countryCode = "+1"
+    @State private var countryCode = "1" // Default to US
     @State private var countryFlag = "🇺🇸"
     @State private var countryPattern = "### ### ####"
-    @State private var shouldNavigateToVerifyPhoneView = false
+    @State private var shouldNavigateToVerifyPhone = false
+    @State private var authState: AuthState?
     
-    // New states for error handling and loading
+    // States for error handling and loading
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var presentCountryCodeSelection = false
     
     @Environment(\.authorizationController) private var authorizationController
+    @Environment(\.webAuthenticationSession) private var webAuthenticationSession
     
     @State private var searchCountry = ""
     private var countries: [CPData] = Bundle.main.decode("CountryNumbers.json")
@@ -67,15 +36,16 @@ struct PhoneAuthView: View {
     
     var body: some View {
         VStack(spacing: 20) {
-            Text("Enter your phone number to create or log in with a passkey.")
+            Text("Enter your phone number to create or log in.")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
             
             HStack {
                 Button {
                     presentCountryCodeSelection = true
                 } label: {
-                    Text("\(countryFlag) \(countryCode)")
+                    Text("\(countryFlag) +\(countryCode)")
                 }
                 .buttonStyle(.bordered)
                 .sheet(isPresented: $presentCountryCodeSelection) {
@@ -109,9 +79,9 @@ struct PhoneAuthView: View {
                     .padding(.horizontal)
                     .accessibilityLabel("phoneInputField")
                     .onReceive(Just(phoneNumber)) { _ in
-                        applyPatternOnNumbers(&phoneNumber, pattern: countryPattern, replacementCharacter: "#")
-                        print(phoneNumber)
+                        PhoneFormatter.applyPatternOnNumbers(&phoneNumber, pattern: countryPattern, replacementCharacter: "#")
                     }
+                    .accessibilityIdentifier("phoneNumberField")
             }
             
             if let errorMessage = errorMessage {
@@ -119,6 +89,7 @@ struct PhoneAuthView: View {
                     .foregroundColor(.red)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
+                    .accessibilityIdentifier("errorMessage")
             }
             
             if isLoading {
@@ -132,74 +103,57 @@ struct PhoneAuthView: View {
                 }
                 isLoading = true
                 errorMessage = nil
+                
                 Task {
-                    // Clean up phone number and country code
-                    let cleanPhoneNumber = phoneNumber.replacingOccurrences(of: " ", with: "")
-                    let cleanCountryCode = countryCode.replacingOccurrences(of: "+", with: "")
-                    
-                    // Use the new handlePhoneAuth method
-                    let result = await paraManager.handlePhoneAuth(
-                        phoneNumber: cleanPhoneNumber,
-                        countryCode: cleanCountryCode,
-                        authorizationController: authorizationController
-                    )
+                    do {
+                        let formattedPhone = PhoneFormatter.formatForAPI(phoneNumber: phoneNumber, countryCode: countryCode)
+                        let state = try await paraManager.initiateAuthFlow(auth: .phone(formattedPhone))
+                        self.authState = state
+                        
+                        switch state.stage {
+                        case .verify:
+                            // User needs to verify phone number
+                            shouldNavigateToVerifyPhone = true
+                            
+                        case .login:
+                            // Existing user - automatically determine and use preferred login method
+                            try await paraManager.handleLogin(
+                                authState: state,
+                                authorizationController: authorizationController,
+                                webAuthenticationSession: webAuthenticationSession
+                            )
+                            appRootManager.currentRoot = .home
+                            
+                        case .signup:
+                            // This shouldn't happen directly from phone input
+                            errorMessage = "Unexpected authentication state. Please try again."
+                        }
+                    } catch {
+                        errorMessage = error.localizedDescription
+                    }
                     
                     isLoading = false
-                    
-                    switch result.status {
-                    case .success:
-                        // Authentication successful, navigate to home
-                        appRootManager.currentRoot = .home
-                        
-                    case .needsVerification:
-                        // User needs to verify phone number
-                        shouldNavigateToVerifyPhoneView = true
-<<<<<<< HEAD:mobile/with-swift/example/Features/Auth/Phone/PhoneAuthView.swift
-                        
-                    case .error:
-                        // Error occurred
-                        errorMessage = result.errorMessage
-=======
-                    } catch {
-                        errorMessage = String(describing: error)
-                        isLoading = false
->>>>>>> main:mobile/with-swift/example/Auth/PhoneAuthView.swift
-                    }
                 }
             } label: {
-                Text("Sign Up")
+                Text("Continue")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
             .disabled(isLoading || phoneNumber.isEmpty)
+            .padding(.horizontal)
             .accessibilityIdentifier("continueButton")
-            .navigationDestination(isPresented: $shouldNavigateToVerifyPhoneView) {
-                VerifyPhoneView(phoneNumber: phoneNumber.replacingOccurrences(of: " ", with: ""), countryCode: countryCode)
-            }
-            
-            HStack {
-                Rectangle().frame(height: 1)
-                Text("Or")
-                Rectangle().frame(height: 1)
-            }.padding(.vertical)
-            
-            Button {
-                Task.init {
-                    try await paraManager.loginWithPasskey(authorizationController: authorizationController, authInfo: nil)
-                    appRootManager.currentRoot = .home
+            .navigationDestination(isPresented: $shouldNavigateToVerifyPhone) {
+                if let state = authState {
+                    VerifyPhoneView(authState: state)
+                        .environmentObject(paraManager)
+                        .environmentObject(appRootManager)
                 }
-            } label: {
-                Text("Log In with Passkey")
-                    .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.bordered)
-            
             
             Spacer()
-            
         }
         .padding()
-        .navigationTitle("Phone + Passkey")
+        .navigationTitle("Phone")
     }
 }
 

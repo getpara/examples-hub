@@ -1,23 +1,36 @@
 import SwiftUI
 import ParaSwift
+import AuthenticationServices
 
 struct VerifyPhoneView: View {
     @EnvironmentObject var paraManager: ParaManager
     @EnvironmentObject var appRootManager: AppRootManager
     
-    let phoneNumber: String
-    let countryCode: String
+    let authState: AuthState
     
     @State private var code = ""
     @State private var isLoading = false
-    @State private var loadingStateText = ""
     @State private var errorMessage: String?
+    @State private var shouldNavigateToChooseMethod = false
+    @State private var verifiedAuthState: AuthState? = nil
+    @State private var resendInProgress = false
+    @State private var justResent = false
     
     @Environment(\.authorizationController) private var authorizationController
+    @Environment(\.webAuthenticationSession) private var webAuthenticationSession
+    
+    // Helper to get phone information from the auth state for display
+    private var phoneDisplay: String {
+        if let phone = authState.phone {
+            return phone
+        } else {
+            return "your phone"
+        }
+    }
     
     var body: some View {
         VStack(spacing: 20) {
-            Text("A verification code was sent to your phone number. Enter it below to verify.")
+            Text("A verification code was sent to \(phoneDisplay). Enter it below to verify.")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -27,6 +40,7 @@ struct VerifyPhoneView: View {
                 .disableAutocorrection(true)
                 .textFieldStyle(.roundedBorder)
                 .padding(.horizontal)
+                .keyboardType(.numberPad)
                 .disabled(isLoading)
                 .accessibilityIdentifier("verificationCodeField")
             
@@ -35,14 +49,19 @@ struct VerifyPhoneView: View {
                     .foregroundColor(.red)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
+                    .accessibilityIdentifier("errorMessage")
+                    .lineLimit(4, reservesSpace: true)
             }
             
             if isLoading {
-                if !loadingStateText.isEmpty {
-                    Text(loadingStateText)
-                        .foregroundColor(.secondary)
-                }
                 ProgressView()
+            }
+            
+            if justResent {
+                Text("Verification code resent")
+                    .foregroundColor(.green)
+                    .font(.subheadline)
+                    .padding(.top, 4)
             }
             
             Button {
@@ -52,80 +71,103 @@ struct VerifyPhoneView: View {
                 }
                 isLoading = true
                 errorMessage = nil
-                loadingStateText = "Creating wallet..."
                 
                 Task {
-                    // Clean up phone number and country code
-                    let cleanPhoneNumber = phoneNumber.replacingOccurrences(of: " ", with: "")
-                    let cleanCountryCode = countryCode.replacingOccurrences(of: "+", with: "")
-                    
-                    let result = await paraManager.handlePhoneAuth(
-                        phoneNumber: cleanPhoneNumber,
-                        countryCode: cleanCountryCode,
-                        verificationCode: code,
-                        authorizationController: authorizationController
-                    )
+                    do {
+                        // Use new API method
+                        let resultState = try await paraManager.handleVerificationCode(verificationCode: code)
+                        
+                        if resultState.stage == .signup {
+                            // Verification successful for a new account
+                            verifiedAuthState = resultState
+                            shouldNavigateToChooseMethod = true
+                        } else {
+                            // Handle unexpected state (e.g., already logged in, etc.)
+                            errorMessage = "Unexpected account state after verification: \(resultState.stage). Please try logging in again."
+                        }
+                    } catch {
+                        errorMessage = "Verification failed: \(error.localizedDescription)"
+                    }
                     
                     isLoading = false
-                    
-                    switch result.status {
-                    case .success:
-                        // Authentication successful, navigate to home
-                        appRootManager.currentRoot = .home
-<<<<<<< HEAD:mobile/with-swift/example/Features/Auth/Phone/VerifyPhoneView.swift
-                        
-                    case .needsVerification:
-                        // This shouldn't happen when verification code is provided
-                        errorMessage = "Unexpected verification required"
-                        
-                    case .error:
-                        // Error occurred
-                        errorMessage = result.errorMessage
-=======
-                    } catch {
-                        isLoading = false
-                        errorMessage = String(describing: error)
->>>>>>> main:mobile/with-swift/example/Auth/VerifyPhoneView.swift
-                    }
                 }
             } label: {
-                Group {
-                    if isLoading {
-                        Text("Working...")
-                    } else {
-                        Text("Verify")
-                    }
-                }
-                .frame(maxWidth: .infinity)
+                Text("Verify")
+                    .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
             .disabled(isLoading || code.isEmpty)
             .padding(.horizontal)
-            .accessibilityLabel("verifyButton")
+            .accessibilityIdentifier("verifyButton")
             
-            Button("Resend Code") {
+            Button {
                 Task {
-                    do {
-                        try await paraManager.resendVerificationCode()
-                    } catch {
-                        errorMessage = "Failed to resend code: \(error.localizedDescription)"
-                    }
+                    await resendVerificationCode()
+                }
+            } label: {
+                Text("Resend Code")
+                    .foregroundColor(resendInProgress ? .gray : .blue)
+            }
+            .disabled(resendInProgress)
+            .padding(.top)
+            .accessibilityIdentifier("resendCodeButton")
+            
+            .navigationDestination(isPresented: $shouldNavigateToChooseMethod) {
+                if let verifiedState = verifiedAuthState {
+                    ChooseSignupMethodView(authState: verifiedState)
+                        .environmentObject(paraManager)
+                        .environmentObject(appRootManager)
                 }
             }
-            .padding(.top)
             
             Spacer()
         }
         .padding()
         .navigationTitle("Verify Phone")
     }
+    
+    // MARK: - Helper Methods
+    
+    @MainActor
+    private func resendVerificationCode() async {
+        guard !resendInProgress else { return }
+        
+        resendInProgress = true
+        errorMessage = nil
+        
+        do {
+            try await paraManager.resendVerificationCode()
+            
+            // Show success message temporarily
+            withAnimation {
+                justResent = true
+            }
+            
+            // Hide the message after 3 seconds
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                withAnimation {
+                    justResent = false
+                }
+            }
+        } catch {
+            errorMessage = "Failed to resend code: \(error.localizedDescription)"
+        }
+        
+        resendInProgress = false
+    }
 }
 
 #Preview {
+    // Create a sample AuthState for previewing
+    let sampleAuthState = AuthState(
+        stage: .verify,
+        userId: "preview-user-id",
+        phone: "+15551234"
+    )
+    
     NavigationStack {
-        VerifyPhoneView(phoneNumber: "1234567890", countryCode: "+1")
+        VerifyPhoneView(authState: sampleAuthState)
             .environmentObject(ParaManager(environment: .sandbox, apiKey: "preview-key"))
             .environmentObject(AppRootManager())
     }
 }
-

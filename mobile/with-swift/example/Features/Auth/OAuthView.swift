@@ -126,7 +126,7 @@ struct OAuthView: View {
             .disabled(isLoading)
         }
         .padding()
-        .navigationTitle("OAuth + Passkey")
+        .navigationTitle("OAuth")
     }
 }
 

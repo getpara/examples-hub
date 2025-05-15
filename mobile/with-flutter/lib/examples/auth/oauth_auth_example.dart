@@ -68,8 +68,7 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
 
     setState(() {
       _isLoading = true;
-      _loadingProvider =
-          provider.value; // Keep track of which button is loading
+      _loadingProvider = provider.value; // Keep track of which button is loading
     });
 
     try {
@@ -80,20 +79,17 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
       // - Android: Add intent filter in AndroidManifest.xml
       final AuthState authState = await para.verifyOAuth(
         provider: provider,
-        deeplinkUrl:
-            "paraflutter", // Just the scheme name, SDK handles formatting
+        deeplinkUrl: "paraflutter", // Just the scheme name, SDK handles formatting
       );
 
-      _log(
-          "OAuth flow completed successfully. Final stage: ${authState.stage}");
+      _log("OAuth flow completed successfully. Final stage: ${authState.stage}");
 
       // Fetch wallets to update state after successful login/signup
       final wallets = await para.fetchWallets();
       if (wallets.isNotEmpty) {
         _updateWalletState(wallets.first);
       } else {
-        _log("OAuth successful but no wallets found after flow.",
-            isWarning: true);
+        _log("OAuth successful but no wallets found after flow.", isWarning: true);
         // This might happen if wallet creation failed silently, investigate SDK logs if necessary
       }
 
@@ -184,8 +180,7 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
                   width: 20,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                        Colors.white), // Assuming white text
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white), // Assuming white text
                   ),
                 ),
               )
