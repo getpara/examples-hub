@@ -157,7 +157,7 @@ export function resetClientMocks() {
   mockTempTransmissionInit.mockResolvedValue({ data: { id: TEMP_TRANSMISSION_INIT_ID } });
   mockTempTransmission.mockResolvedValue({ data: { message: 'test' } });
   mockInitializeFarcasterLogin.mockResolvedValue({
-    data: { connect_uri: FARCASTER_CONNECT_URI },
+    connect_uri: FARCASTER_CONNECT_URI,
   });
   mockGetFarcasterAuthStatus.mockResolvedValue(USER_FARCASTER_SIGNUP_STAGE);
   mockGetPregenWallets.mockResolvedValue({ wallets: [] });

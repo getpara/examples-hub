@@ -2014,15 +2014,12 @@ export abstract class ParaCore implements CoreInterface {
   }
 
   /**
-   * Initiates a Farcaster login attempt and return the URI for the user to connect.
+   * Initiates a Farcaster login attempt and returns the URL for the user to connect.
    * You can create a QR code with this URI that works with Farcaster's mobile app.
    * @return {string} the Farcaster connect URI
    */
-  async getFarcasterConnectUri(): CoreMethodResponse<'getFarcasterConnectUri'> {
-    const {
-      data: { connect_uri: connectUri },
-    } = await this.ctx.client.initializeFarcasterLogin();
-
+  async getFarcasterConnectUri({ appScheme }: { appScheme?: string } = {}): CoreMethodResponse<'getFarcasterConnectUri'> {
+    const { connect_uri: connectUri } = await this.ctx.client.initializeFarcasterLogin({ appScheme });
     return connectUri;
   }
 

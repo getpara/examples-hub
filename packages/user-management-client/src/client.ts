@@ -749,9 +749,9 @@ class Client {
   }
 
   // POST /auth/farcaster/init
-  async initializeFarcasterLogin() {
-    const res = await this.baseRequest.post<any>(`/auth/farcaster/init`);
-    return res;
+  async initializeFarcasterLogin({ appScheme }: { appScheme?: string } = {}) {
+    const res = await this.baseRequest.post<any>(`/auth/farcaster/init`, { deeplinkUrl: appScheme });
+    return res.data;
   }
 
   async getFarcasterAuthStatus() {

@@ -866,9 +866,10 @@ describe('Client', () => {
     });
 
     it('initializeFarcasterLogin', async () => {
-      await client.initializeFarcasterLogin();
+      const scheme = 'com.usecapsule.flutter';
+      await client.initializeFarcasterLogin({ appScheme: scheme });
 
-      expect(mocks.post).toBeCalledWith(`/auth/farcaster/init`);
+      expect(mocks.post).toBeCalledWith(`/auth/farcaster/init`, { deeplinkUrl: scheme });
     });
 
     it('getFarcasterAuthStatusV2', async () => {
