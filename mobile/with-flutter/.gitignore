@@ -52,3 +52,9 @@ pubspec_overrides.yaml
 ../CLAUDE.md
 
 android/app/.cxx/
+
+# Rider
+.idea
+
+# Overrides
+pubspec_overrides.yaml

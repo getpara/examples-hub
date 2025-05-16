@@ -238,7 +238,7 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
               // Use the actual SDK method
               final wallet = await para.loginWithPasskey(
                 // Provide phone auth info as a hint if needed by SDK, otherwise null
-                authInfo: PhoneAuthInfo(phone: formattedPhone, countryCode: _countryCodeController.text),
+                phone: formattedPhone,
               );
               _log("Passkey login successful.");
               _updateWalletState(wallet);
@@ -358,7 +358,7 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
 
     try {
       _log("Attempting generic passkey login...");
-      final wallet = await para.loginWithPasskey(authInfo: null);
+      final wallet = await para.loginWithPasskey();
       _log("Generic passkey login successful.");
 
       if (!mounted) return;

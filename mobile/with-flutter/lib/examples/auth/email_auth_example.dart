@@ -261,7 +261,7 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
     setState(() => _isLoading = true);
     try {
       _log("Attempting generic passkey login...");
-      final wallet = await para.loginWithPasskey(authInfo: null);
+      final wallet = await para.loginWithPasskey();
       _log("Generic passkey login successful.");
       if (!mounted) return;
       _updateWalletState(wallet);
