@@ -1,67 +1,65 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { openAuthSessionAsync } from "expo-web-browser";
-import { openURL } from "expo-linking";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { OAuthMethod } from "@getpara/react-native-wallet";
-
-import { SmartInput } from "@/components/SmartInput";
-import { OAuthProviders } from "@/components/OAuthProviders";
-import { Separator } from "@/components/ui/separator";
-import { usePara } from "@/providers/para/usePara";
-import { AuthType } from "@/types";
 import { APP_SCHEME } from "@/constants";
-import { clearCreds, getCreds } from "@/util/credentialStore";
+import { LoginIdentifierInput } from "@/components/auth/LoginIdentifierInput";
+import { SocialLoginOptions } from "@/components/auth/SocialLoginOptions";
+import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/text";
-import { credsToParaAuth } from "@/util/authHelpers";
+import { usePara } from "@/hooks/usePara";
+import { AuthType } from "@/types";
+import { getCreds } from "@/util/credentialStore";
 
 export default function MainAuthScreen() {
-  const { para, login } = usePara();
+  const { paraClient, login, isLoggingIn, isLoginError, loginError } = usePara();
   const router = useRouter();
   const { method, email: oauthEmail } = useLocalSearchParams<{
     method?: string;
     email?: string;
   }>();
-
   const [countryCode, setCountryCode] = useState("+1");
   const [email, setEmail] = useState("");
   const [inputType, setInputType] = useState<AuthType>("email");
   const [phoneNumber, setPhoneNumber] = useState("");
 
+  if (!paraClient) return null;
+
   const handleEmailFlow = useCallback(
     async (targetEmail: string) => {
       const emailCredentials = { email: targetEmail };
-      const userExists = await para!.checkIfUserExists(emailCredentials);
+      const userExists = await paraClient.checkIfUserExists(emailCredentials);
 
       if (userExists) {
         await login({ authType: "email", email: targetEmail });
       } else {
-        await para!.createUser(emailCredentials);
+        await paraClient.createUser(emailCredentials);
         router.navigate({
           pathname: "/auth/otp-verification",
           params: { authType: "email", ...emailCredentials },
         });
       }
     },
-    [login, para, router]
+    [login, paraClient, router]
   );
 
   const handlePhoneFlow = useCallback(
     async (phone: string, code: string) => {
       const phoneCredentials = { phone, countryCode: code };
-      const userExists = await para!.checkIfUserExistsByPhone(phoneCredentials);
+      const userExists = await paraClient.checkIfUserExistsByPhone(phoneCredentials);
 
       if (userExists) {
         await login({ authType: "phone", phone, countryCode: code });
       } else {
-        await para!.createUserByPhone(phoneCredentials);
+        await paraClient.createUserByPhone(phoneCredentials);
         router.navigate({
           pathname: "/auth/otp-verification",
           params: { authType: "phone", ...phoneCredentials },
         });
       }
     },
-    [login, para, router]
+    [login, paraClient, router]
   );
 
   useEffect(() => {
@@ -69,21 +67,19 @@ export default function MainAuthScreen() {
       try {
         const cached = await getCreds();
         if (cached) await login(cached);
-      } catch {
-        clearCreds();
+      } catch (error) {
+        console.error("Failed to load cached credentials:", error);
       }
     })();
   }, [login]);
 
   useEffect(() => {
-    if (para && method === "login" && oauthEmail) {
-      handleEmailFlow(oauthEmail as string);
+    if (paraClient && method === "login" && oauthEmail) {
+      handleEmailFlow(oauthEmail);
     }
-  }, [method, oauthEmail, para, handleEmailFlow, router]);
+  }, [method, oauthEmail, paraClient, handleEmailFlow, router]);
 
   const handleContinue = async () => {
-    if (!para) return;
-
     if (inputType === "email" && email) {
       await handleEmailFlow(email);
     } else if (inputType === "phone" && phoneNumber) {
@@ -92,14 +88,9 @@ export default function MainAuthScreen() {
   };
 
   const handleOauthLogin = async (provider: OAuthMethod) => {
-    if (!provider || !para) return;
+    if (!provider) return;
 
-    if (provider === OAuthMethod.FARCASTER) {
-      handleFarcasterLogin();
-      return;
-    }
-
-    const oauthUrl = await para.getOAuthURL({
+    const oauthUrl = await paraClient.getOAuthURL({
       method: provider,
       deeplinkUrl: APP_SCHEME,
     });
@@ -109,31 +100,11 @@ export default function MainAuthScreen() {
     });
   };
 
-  const handleFarcasterLogin = async () => {
-    if (!para) return;
-
-    const farcasterUrl = await para.getFarcasterConnectURL();
-    await openURL(farcasterUrl);
-
-    const { userExists, username } = await para.waitForFarcasterStatus();
-
-    if (userExists) {
-      await para.login({ email: username! });
-      router.navigate("../home");
-    } else {
-      const biometricId = await para.getSetUpBiometricsURL({
-        isForNewDevice: false,
-        authType: "email",
-      });
-      if (biometricId) {
-        await para.registerPasskey({
-          email: username!,
-          biometricsId: biometricId,
-        });
-        router.navigate("../home");
-      }
+  useEffect(() => {
+    if (isLoginError && loginError) {
+      console.error("Login error:", loginError.message);
     }
-  };
+  }, [isLoginError, loginError]);
 
   return (
     <View className="flex-1 bg-background px-6">
@@ -141,14 +112,14 @@ export default function MainAuthScreen() {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ flexGrow: 1 }}>
         <View className="pt-6 pb-8">
-          <Text className="text-5xl  text-left text-foreground font-figtree-bold">Sign In</Text>
+          <Text className="text-5xl text-left text-foreground font-figtree-bold">Sign In</Text>
           <Text className="mt-2 text-left text-lg text-muted-foreground">
             Welcome to the Para Wallet Demo. Sign in to explore seamless authentication and wallet integration.
           </Text>
         </View>
 
         <View className="flex-1 pb-8 gap-y-6">
-          <SmartInput
+          <LoginIdentifierInput
             inputType={inputType}
             onInputTypeChange={setInputType}
             onSubmit={handleContinue}
@@ -158,6 +129,7 @@ export default function MainAuthScreen() {
             countryCode={countryCode}
             onPhoneNumberChange={setPhoneNumber}
             onCountryCodeChange={setCountryCode}
+            isLoading={isLoggingIn}
           />
 
           <View className="flex-row items-center gap-x-2">
@@ -166,7 +138,10 @@ export default function MainAuthScreen() {
             <Separator className="flex-1" />
           </View>
 
-          <OAuthProviders onSelect={handleOauthLogin} />
+          <SocialLoginOptions
+            onSelect={handleOauthLogin}
+            disabled={isLoggingIn}
+          />
         </View>
 
         <View className="pb-4">

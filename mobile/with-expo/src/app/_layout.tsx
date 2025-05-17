@@ -1,47 +1,44 @@
-import { StatusBar } from "expo-status-bar";
-import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
-import { Stack } from "expo-router";
-import { ParaProvider } from "@/providers/para/paraContext";
-import { usePara } from "@/providers/para/usePara";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { WalletProvider } from "@/providers/wallet/walletContext";
 import { PortalHost } from "@rn-primitives/portal";
-import { Toaster } from "sonner-native";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Toaster } from "sonner-native";
+import { useEffect } from "react";
+import { usePara } from "@/hooks/usePara";
 
 SplashScreen.preventAutoHideAsync();
 
+const queryClient = new QueryClient();
+
 export default function RootLayout() {
   return (
-    <GestureHandlerRootView>
-      <ParaProvider>
-        <WalletProvider>
-          <StatusBar style="dark" />
-          <RootStack />
-          <PortalHost />
-          <Toaster
-            position="top-center"
-            duration={1500}
-            swipeToDismissDirection="up"
-            closeButton={true}
-          />
-        </WalletProvider>
-      </ParaProvider>
-    </GestureHandlerRootView>
+    <QueryClientProvider client={queryClient}>
+      <GestureHandlerRootView>
+        <RootStack />
+        <PortalHost />
+        <Toaster
+          position="top-center"
+          duration={1500}
+          swipeToDismissDirection="up"
+          closeButton={true}
+        />
+      </GestureHandlerRootView>
+    </QueryClientProvider>
   );
 }
 
 function RootStack() {
-  const { isInitializing, isInitialized, isAuthenticated } = usePara();
+  const { isClientLoading, isClientReady, isAuthenticated } = usePara();
 
   useEffect(() => {
-    if (!isInitializing && isInitialized) {
+    if (!isClientLoading && isClientReady) {
       SplashScreen.hideAsync();
     }
-  }, [isInitializing, isInitialized]);
+  }, [isClientLoading, isClientReady]);
 
-  if (isInitializing || !isInitialized) {
+  if (isClientLoading || !isClientReady) {
     return null;
   }
 

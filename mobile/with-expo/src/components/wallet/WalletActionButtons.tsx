@@ -24,7 +24,7 @@ function ActionButton({ icon, label, onPress }: ActionButtonProps) {
   );
 }
 
-export function ActionButtons() {
+export function WalletActionButtons() {
   const router = useRouter();
 
   const handleReceive = () => {

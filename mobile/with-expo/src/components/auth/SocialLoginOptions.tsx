@@ -2,10 +2,14 @@ import React, { useMemo, useState } from "react";
 import { View, Image, Pressable } from "react-native";
 import { Grip, X } from "@/components/icons";
 import { OAuthMethod } from "@getpara/react-native-wallet";
-import { OAuthProvidersProps } from "@/types";
 import { PROVIDER_INFO, INITIAL_PROVIDERS, ADDITIONAL_PROVIDERS, MAX_PROVIDERS_PER_ROW } from "@/lib/constants";
 
-export function OAuthProviders({ onSelect }: OAuthProvidersProps) {
+interface SocialLoginOptionsProps {
+  onSelect(provider: OAuthMethod): void;
+  disabled?: boolean;
+}
+
+export function SocialLoginOptions({ onSelect, disabled }: SocialLoginOptionsProps) {
   const [expanded, setExpanded] = useState(false);
 
   const providers = expanded ? [...INITIAL_PROVIDERS, ...ADDITIONAL_PROVIDERS] : INITIAL_PROVIDERS;
@@ -18,22 +22,25 @@ export function OAuthProviders({ onSelect }: OAuthProvidersProps) {
     return rows;
   }, [providers]);
 
-  const renderProvider = (provider: OAuthMethod) => (
-    <Pressable
-      key={provider}
-      accessibilityRole="button"
-      accessibilityLabel={`Sign in with ${PROVIDER_INFO[provider].name}`}
-      onPress={() => onSelect(provider)}
-      className="flex-1 h-14 items-center justify-center rounded-xl
-                 border border-border bg-white
-                 active:opacity-80">
-      <Image
-        source={PROVIDER_INFO[provider].logo}
-        resizeMode="contain"
-        className="h-8 w-8"
-      />
-    </Pressable>
-  );
+  const renderProvider = (provider: OAuthMethod) => {
+    if (provider === OAuthMethod.FARCASTER) return null;
+    return (
+      <Pressable
+        key={provider}
+        accessibilityRole="button"
+        accessibilityLabel={`Sign in with ${PROVIDER_INFO[provider].name}`}
+        onPress={() => onSelect(provider)}
+        className="flex-1 h-14 items-center justify-center rounded-xl
+                   border border-border bg-white
+                   active:opacity-80">
+        <Image
+          source={PROVIDER_INFO[provider].logo}
+          resizeMode="contain"
+          className="h-8 w-8"
+        />
+      </Pressable>
+    );
+  };
 
   const renderToggle = () => (
     <Pressable

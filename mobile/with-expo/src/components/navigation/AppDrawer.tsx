@@ -1,13 +1,13 @@
 import React from "react";
 import { View } from "react-native";
-import { Text } from "./ui/text";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
+import { Text } from "@/components/ui/text";
 
 interface DrawerContentProps {
   onLogout: () => Promise<void> | void;
 }
 
-export function DrawerContent({ onLogout }: DrawerContentProps) {
+export function AppDrawer({ onLogout }: DrawerContentProps) {
   return (
     <View className="flex-1 pt-5 px-4 justify-between bg-background">
       <View>

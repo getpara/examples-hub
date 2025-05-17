@@ -19,15 +19,12 @@ export interface SmartInputProps {
   countryCode?: string;
   onPhoneNumberChange?: (value: string) => void;
   onCountryCodeChange?: (value: string) => void;
+  isLoading?: boolean;
 }
 
 export interface OAuthProviderInfo {
   name: string;
   logo: any;
-}
-
-export interface OAuthProvidersProps {
-  onSelect(provider: OAuthMethod): void;
 }
 
 export interface AuthNavigationParams {

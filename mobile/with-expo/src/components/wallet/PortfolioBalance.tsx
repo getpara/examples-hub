@@ -5,7 +5,7 @@ import { useWallet } from "@/providers/wallet/useWallet";
 import { toast } from "sonner-native";
 import { RefreshCcw } from "@/components/icons/Refresh";
 
-export function BalanceDisplay() {
+export function PortfolioBalance() {
   const { evmWallets, solanaWallets, prices, isRefreshing, refreshPrices } = useWallet();
 
   const { totalBalance, hasPriceData, hasMissingPrices, hasAnyWalletWithBalance } = React.useMemo(() => {

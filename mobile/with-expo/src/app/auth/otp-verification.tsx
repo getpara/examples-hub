@@ -1,25 +1,25 @@
 import React from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { CustomOTPInput } from "@/components/OtpInput";
+import { VerificationCodeInput } from "@/components/auth/VerificationCodeInput";
 import { Text } from "~/components/ui/text";
-import { usePara } from "@/providers/para/usePara";
+import { usePara } from "@/hooks/usePara";
 import { AuthNavigationParams, PreserveTypes } from "@/types";
 import { paramsToCreds } from "@/util/authHelpers";
 
 export default function OtpVerificationScreen() {
-  const { para } = usePara();
+  const { paraClient } = usePara();
   const router = useRouter();
   const routeParams = useLocalSearchParams<PreserveTypes<AuthNavigationParams, "authType">>();
   const creds = paramsToCreds(routeParams)!;
 
-  const handleComplete = async (code: string) => {
-    if (!para) return;
+  if (!paraClient) return null;
 
+  const handleComplete = async (code: string) => {
     try {
       const biometricsId = await (creds.authType === "email"
-        ? para.verifyEmailBiometricsId({ verificationCode: code })
-        : para.verifyPhoneBiometricsId({ verificationCode: code }));
+        ? paraClient.verifyEmailBiometricsId({ verificationCode: code })
+        : paraClient.verifyPhoneBiometricsId({ verificationCode: code }));
 
       if (!biometricsId) {
         console.error("Verification failed, biometrics ID not returned.");
@@ -36,9 +36,10 @@ export default function OtpVerificationScreen() {
   };
 
   const handleResend = async () => {
-    if (!para) return;
     try {
-      await (creds.authType === "email" ? para.resendVerificationCode() : para.resendVerificationCodeByPhone());
+      await (creds.authType === "email"
+        ? paraClient.resendVerificationCode()
+        : paraClient.resendVerificationCodeByPhone());
     } catch (error) {
       console.error("Error resending verification code:", error);
     }
@@ -50,14 +51,14 @@ export default function OtpVerificationScreen() {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ flexGrow: 1 }}>
         <View className="pt-6 pb-8">
-          <Text className="text-5xl  text-left text-foreground font-figtree-bold">Verification</Text>
+          <Text className="text-5xl text-left text-foreground font-figtree-bold">Verification</Text>
           <Text className="mt-2 text-left text-lg text-muted-foreground">
             Enter the verification code sent to your {creds.authType === "email" ? "email" : "phone"}.
           </Text>
         </View>
 
         <View className="flex-1 pt-12">
-          <CustomOTPInput
+          <VerificationCodeInput
             maxLength={6}
             onComplete={handleComplete}
             onClear={() => {}}

@@ -1,20 +1,20 @@
-import { View, Text, Alert } from "react-native";
+import { useRef } from "react";
+import { useEffect } from "react";
+import { View } from "react-native";
+import { Text } from "@/components/ui/text";
+import { cn } from "@/lib/utils";
+import { CustomOTPInputProps, FakeCaretProps, SlotComponentProps } from "@/types";
 import { OTPInput } from "input-otp-native";
 import type { OTPInputRef } from "input-otp-native";
-import { useRef } from "react";
-
 import Animated, {
   useAnimatedStyle,
+  useSharedValue,
   withRepeat,
   withSequence,
   withTiming,
-  useSharedValue,
 } from "react-native-reanimated";
-import { useEffect } from "react";
-import { cn } from "@/lib/utils";
-import { CustomOTPInputProps, FakeCaretProps, SlotComponentProps } from "@/types";
 
-export function CustomOTPInput({
+export function VerificationCodeInput({
   maxLength = 5,
   onComplete,
   slotClassName = "border border-gray-200 rounded-lg bg-white",

@@ -2,13 +2,18 @@ import React, { useEffect, useState } from "react";
 import { Pressable, View, ActivityIndicator } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Text } from "~/components/ui/text";
-import { usePara } from "@/providers/para/usePara";
+import { usePara } from "@/hooks/usePara";
+import { useWallets } from "@/hooks/useWallets";
 import { CheckCircle } from "@/components/icons";
 import { AuthNavigationParamsWithBiometrics, PreserveTypes, SetupStep } from "@/types";
 import { paramsToCreds } from "@/util/authHelpers";
+import { WalletType } from "@getpara/react-native-wallet";
 
 export default function AccountSetupScreen() {
-  const { para, registerPasskey } = usePara();
+  const { paraClient, registerPasskey, registerPasskeyError, resetRegisterPasskey } = usePara();
+
+  const { createWalletsPerType, isCreatingWalletsPerType, createWalletsPerTypeError } = useWallets();
+
   const router = useRouter();
   const routeParams = useLocalSearchParams<PreserveTypes<AuthNavigationParamsWithBiometrics, "authType">>();
   const creds = paramsToCreds(routeParams)!;
@@ -16,14 +21,16 @@ export default function AccountSetupScreen() {
   const [setupStep, setSetupStep] = useState<SetupStep>(SetupStep.INITIALIZING);
   const [error, setError] = useState<string | null>(null);
 
+  if (!paraClient) return null;
+
   const setupAccount = async () => {
-    if (!para || !routeParams.biometricsId) return;
+    if (!routeParams.biometricsId) return;
     setSetupStep(SetupStep.REGISTERING_PASSKEY);
     setError(null);
 
     try {
       await registerPasskey({ ...creds, biometricsId: routeParams.biometricsId });
-      await createWallet();
+      createWallet();
     } catch (error) {
       console.error("Error registering passkey:", error);
       setError("Failed to register passkey. Please try again.");
@@ -32,16 +39,14 @@ export default function AccountSetupScreen() {
   };
 
   const createWallet = async () => {
-    if (!para) return;
     setSetupStep(SetupStep.CREATING_WALLET);
     setError(null);
 
     try {
-      await para.createWalletPerType();
-      setSetupStep(SetupStep.SUCCESS);
-      setTimeout(() => {
-        router.navigate("/home");
-      }, 1000);
+      createWalletsPerType({
+        types: [WalletType.EVM, WalletType.SOLANA],
+        skipDistribute: false,
+      });
     } catch (error) {
       console.error("Error creating wallet:", error);
       setError("Failed to create wallet. Please try again.");
@@ -49,11 +54,32 @@ export default function AccountSetupScreen() {
     }
   };
 
+  // Monitor wallet creation status
   useEffect(() => {
-    if (para && routeParams.biometricsId) {
+    if (createWalletsPerTypeError) {
+      setError("Failed to create wallet. Please try again.");
+      setSetupStep(SetupStep.WALLET_ERROR);
+    }
+  }, [createWalletsPerTypeError]);
+
+  // Initial setup
+  useEffect(() => {
+    if (paraClient && routeParams.biometricsId) {
       setupAccount();
     }
-  }, [para, routeParams.biometricsId]);
+  }, [paraClient, routeParams.biometricsId]);
+
+  // Handle successful wallet creation
+  useEffect(() => {
+    if (setupStep === SetupStep.CREATING_WALLET && !isCreatingWalletsPerType) {
+      if (!createWalletsPerTypeError) {
+        setSetupStep(SetupStep.SUCCESS);
+        setTimeout(() => {
+          router.navigate("/home");
+        }, 1000);
+      }
+    }
+  }, [isCreatingWalletsPerType, createWalletsPerTypeError, setupStep]);
 
   const renderStepContent = () => {
     switch (setupStep) {

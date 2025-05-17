@@ -9,7 +9,7 @@ import { CountryCodeDropdown } from "./CountryCodeDropdown";
 import { SmartInputProps } from "@/types";
 import { AsYouType, parsePhoneNumberFromString } from "libphonenumber-js";
 
-export function SmartInput({
+export function LoginIdentifierInput({
   inputType,
   onInputTypeChange,
   onSubmit,
@@ -21,6 +21,7 @@ export function SmartInput({
   countryCode = "+1",
   onPhoneNumberChange,
   onCountryCodeChange,
+  isLoading
 }: SmartInputProps) {
   const [error, setError] = useState("");
   const [displayValue, setDisplayValue] = useState("");
@@ -248,21 +249,19 @@ export function SmartInput({
           placeholderTextColor="#9CA3AF"
         />
 
-        {showSubmitButton && (
-          <View className="flex h-full items-center justify-center pr-2">
-            <Button
-              size="icon"
-              variant="default"
-              onPress={handleSubmit}
-              accessibilityLabel="Continue"
-              className="flex h-10 w-10 items-center justify-center rounded-md bg-primary p-0">
-              <ChevronRight
-                size={20}
-                className="text-primary-foreground"
-              />
-            </Button>
-          </View>
-        )}
+        <View className="flex h-full items-center justify-center pr-2">
+          <Button
+            size="icon"
+            variant="default"
+            onPress={handleSubmit}
+            accessibilityLabel="Continue"
+            className="flex h-10 w-10 items-center justify-center rounded-md bg-primary p-0">
+            <ChevronRight
+              size={20}
+              className="text-primary-foreground"
+            />
+          </Button>
+        </View>
       </View>
 
       {displayValue !== "" && inputType !== undefined && !error && (

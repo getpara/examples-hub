@@ -20,21 +20,15 @@ export const NAV_THEME = {
   },
 };
 
-export const PROVIDER_INFO: Record<OAuthMethod, OAuthProviderInfo> = {
+export const PROVIDER_INFO: Record<Exclude<OAuthMethod, OAuthMethod.FARCASTER>, OAuthProviderInfo> = {
   [OAuthMethod.GOOGLE]: { name: "Google", logo: require("../assets/google-logo.png") },
   [OAuthMethod.TWITTER]: { name: "Twitter", logo: require("../assets/twitter-logo.png") },
   [OAuthMethod.APPLE]: { name: "Apple", logo: require("../assets/apple-logo.png") },
   [OAuthMethod.DISCORD]: { name: "Discord", logo: require("../assets/discord-logo.png") },
   [OAuthMethod.FACEBOOK]: { name: "Facebook", logo: require("../assets/facebook-logo.png") },
-  [OAuthMethod.FARCASTER]: { name: "Farcaster", logo: require("../assets/farcaster-logo.png") },
   [OAuthMethod.TELEGRAM]: { name: "Telegram", logo: require("../assets/telegram-logo.png") },
 };
 
 export const INITIAL_PROVIDERS = [OAuthMethod.GOOGLE, OAuthMethod.FACEBOOK, OAuthMethod.APPLE];
-export const ADDITIONAL_PROVIDERS = [
-  OAuthMethod.TWITTER,
-  OAuthMethod.DISCORD,
-  OAuthMethod.FARCASTER,
-  OAuthMethod.TELEGRAM,
-];
+export const ADDITIONAL_PROVIDERS = [OAuthMethod.TWITTER, OAuthMethod.DISCORD, OAuthMethod.TELEGRAM];
 export const MAX_PROVIDERS_PER_ROW = 3;

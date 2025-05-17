@@ -1,5 +1,8 @@
-import { Header } from "@/components/NavigationHeader";
+import React from "react";
+import { Pressable } from "react-native";
 import { Stack } from "expo-router";
+import { AppHeader } from "@/components/navigation/AppHeader";
+import { ArrowLeft } from "@/components/icons/ArrowLeft";
 
 export default function AuthLayout() {
   return (
@@ -20,7 +23,22 @@ export default function AuthLayout() {
         options={{
           headerShown: true,
           gestureEnabled: false,
-          header: (props) => <Header {...props} />,
+          header: (props) => (
+            <AppHeader>
+              <AppHeader.Left>
+                <Pressable
+                  onPress={() => props.navigation.goBack()}
+                  className="p-2 -ml-2"
+                  accessibilityRole="button"
+                  accessibilityLabel="Go back">
+                  <ArrowLeft
+                    size={24}
+                    className="text-muted-foreground"
+                  />
+                </Pressable>
+              </AppHeader.Left>
+            </AppHeader>
+          ),
         }}
       />
       <Stack.Screen

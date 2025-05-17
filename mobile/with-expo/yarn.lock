@@ -1179,12 +1179,12 @@
     "@ethersproject/properties" "^5.8.0"
     "@ethersproject/strings" "^5.8.0"
 
-"@expo-google-fonts/figtree@^0.3.0":
+"@expo-google-fonts/figtree@0.3.0":
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/@expo-google-fonts/figtree/-/figtree-0.3.0.tgz#6ea58c36e677fb31413035590fedb5deceb24cb0"
   integrity sha512-9vx7ezCDWw2+hjsj18TxHuLXpt59wkNR3NeZoR/MNpl3u8brcmjq1i18T4+jgllrWLPfR6jV+n+Se8E5RdKt0A==
 
-"@expo-google-fonts/nunito-sans@^0.3.0":
+"@expo-google-fonts/nunito-sans@0.3.0":
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/@expo-google-fonts/nunito-sans/-/nunito-sans-0.3.0.tgz#bb9959ccf6c8af6830725554ed0fefb0678709cc"
   integrity sha512-UVaflOLO0axrZ1WDT0TCAByvXeHSknSFIbEiNKBho9S6Lk28UWtvUcxqA8z8QJdKi430BJhZkNaSkDuc2PFvIA==
@@ -1516,80 +1516,80 @@
   resolved "https://registry.yarnpkg.com/@floating-ui/utils/-/utils-0.2.9.tgz#50dea3616bc8191fb8e112283b49eaff03e78429"
   integrity sha512-MDWhGtE+eHw5JW7lq4qhc5yRLS11ERl1c7Z6Xd0a58DozHES6EnNNwUWbMiG4J9Cgj053Bhk8zvlhFYKVhULwg==
 
-"@getpara/core-sdk@1.14.2":
-  version "1.14.2"
-  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.14.2.tgz#aa1c6510dc6b105ca35f77759355ad35c90860f6"
-  integrity sha512-5HVN/0Sv4cJF0qwfjDujk2Aw0PAJQsYoOD0qT3eYjfl7u9V/3lk9nuEOF0zt7KCzjbDUsHRb5luRG2SciuTetQ==
+"@getpara/core-sdk@1.15.0":
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.15.0.tgz#9d0491562bfdc0ed618cdf8ad6fd331711e39eef"
+  integrity sha512-aS5ZHLuw8LJSuiKexHcLfgm69dCReSRv+cVUszA4F/91IpU4Eyl6LMPTskDFX5XBfnrFy7Mg5zKz++lCgHkP2A==
   dependencies:
     "@celo/utils" "^8.0.2"
     "@cosmjs/encoding" "^0.32.4"
     "@ethereumjs/util" "^9.1.0"
-    "@getpara/user-management-client" "1.14.2"
+    "@getpara/user-management-client" "1.15.0"
     "@noble/hashes" "^1.5.0"
     base64url "^3.0.1"
     libphonenumber-js "1.11.2"
     node-forge "^1.3.1"
     uuid "^11.1.0"
 
-"@getpara/cosmjs-v0-integration@1.14.2":
-  version "1.14.2"
-  resolved "https://registry.yarnpkg.com/@getpara/cosmjs-v0-integration/-/cosmjs-v0-integration-1.14.2.tgz#c0c79b4f4a0d090d83bfe5252f013b8ac21cc06e"
-  integrity sha512-uoc4tHz8OHUwhuLZ8DYgYxw8pps1wuMkHKNAbAwp97QOQ0zt1/qjwCOyeCGj2fNPPgICM1uj8/P3Lgs52ql+FA==
+"@getpara/cosmjs-v0-integration@1.15.0":
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/@getpara/cosmjs-v0-integration/-/cosmjs-v0-integration-1.15.0.tgz#5da56cae47c9bd2877bf2a6ac2ac48ae4d994287"
+  integrity sha512-A61JPz4rk0plrdWtSJtAnHGKofGakY/w3cktRc9CA2rOIbVc2ads0TMxVJVF5c3v/IDnXCp3mFcEANSw2eyvZQ==
   dependencies:
     "@cosmjs/stargate" "<=0.33.1"
-    "@getpara/core-sdk" "1.14.2"
+    "@getpara/core-sdk" "1.15.0"
 
-"@getpara/ethers-v6-integration@1.14.2":
-  version "1.14.2"
-  resolved "https://registry.yarnpkg.com/@getpara/ethers-v6-integration/-/ethers-v6-integration-1.14.2.tgz#6ab8423fb4f9dba1e90abe8dcecbfa978d7bcde0"
-  integrity sha512-3uHKxoHa1EY1wqfhxd9SyIVcqUVtWQ562ORmYofGp+PsnQwl1Rpkww0roaWrzc9mtaIpooa9vE9MWmFKHZuZyg==
+"@getpara/ethers-v6-integration@1.15.0":
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/@getpara/ethers-v6-integration/-/ethers-v6-integration-1.15.0.tgz#a03f0351a865e084be90c23ea0a69c36142a97c4"
+  integrity sha512-GMf8rIuQ20VVs5Wevk1gMetogwUmhUsBGLMsFMbI8Q5mblG0qmISRZ5UVSuVAQpyWK8RrbZ0fD9L/hKF4NwSFQ==
   dependencies:
-    "@getpara/core-sdk" "1.14.2"
+    "@getpara/core-sdk" "1.15.0"
 
-"@getpara/react-native-wallet@1.15.0-dev.0":
-  version "1.15.0-dev.0"
-  resolved "https://registry.yarnpkg.com/@getpara/react-native-wallet/-/react-native-wallet-1.15.0-dev.0.tgz#b18a9c2c4dee1eb465f8e0d849e4317ed4155cf4"
-  integrity sha512-zfDD7ZXQ4HmCDegMeg+UqOTIPvobbso4UoZiWamXZgBFHX9RaEgE0eJEk2pWGHyCh80Lp98OYmskOMo3JLlcTg==
+"@getpara/react-native-wallet@1.15.0":
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/@getpara/react-native-wallet/-/react-native-wallet-1.15.0.tgz#d9281b889dcacea42f1f47947a34fcb895ef3834"
+  integrity sha512-9tnJkg6BzvfrtJqZ2Tf/JGg5BeFbfK9pUN3GGOavLm8lnmtS/gF+aNrVPOzk2V9YqiGFnBUttXShcSvF9Fw5ng==
   dependencies:
-    "@getpara/core-sdk" "1.14.2"
-    "@getpara/user-management-client" "1.14.2"
-    "@getpara/web-sdk" "1.14.2"
+    "@getpara/core-sdk" "1.15.0"
+    "@getpara/user-management-client" "1.15.0"
+    "@getpara/web-sdk" "1.15.0"
     "@peculiar/webcrypto" "^1.5.0"
     "@ungap/structured-clone" "1.3.0"
     node-forge "1.3.1"
     react-native-url-polyfill "2.0.0"
     text-encoding "0.7.0"
 
-"@getpara/solana-web3.js-v1-integration@1.14.2":
-  version "1.14.2"
-  resolved "https://registry.yarnpkg.com/@getpara/solana-web3.js-v1-integration/-/solana-web3.js-v1-integration-1.14.2.tgz#8c7d2b3fb7681ec911d04d7e05ee072ee7099246"
-  integrity sha512-qvInRT4+V3ctLXmet9BSVJRORN0LnEod28iw1Kw5uyAooWkzQzjPwJbGv2tN19hJkFOVN6qREWFvA2AI+70cdw==
+"@getpara/solana-web3.js-v1-integration@1.15.0":
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/@getpara/solana-web3.js-v1-integration/-/solana-web3.js-v1-integration-1.15.0.tgz#3944fd50104d59a35c628930b9abaf764eeb122c"
+  integrity sha512-QcfHKC1NFPxmlJiduDyZtthYy09PyBtA0VKjJ0AcFZ2cWyg7OV06h94ac6itWxUKdfARu8U+7rGjjw+YuR7RlQ==
   dependencies:
-    "@getpara/core-sdk" "1.14.2"
+    "@getpara/core-sdk" "1.15.0"
     "@solana/web3.js" "^1.98.0"
 
-"@getpara/user-management-client@1.14.2":
-  version "1.14.2"
-  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.14.2.tgz#81828839c333a87ce773dabf83ad3b3590476d2a"
-  integrity sha512-O2l0aHfTjz4C4/xsAyneYXVEwz9C4qDxAyD+OJ9OMrxFgaOLazWpsuItn/S2tBqMhTOJeMwl+ANi51PM/9r6CA==
+"@getpara/user-management-client@1.15.0":
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.15.0.tgz#f412e4850a82ba11b6df68c97200295a8f7ded38"
+  integrity sha512-X18YzkeKKG8DzNxu6ncgF/Elh2F0FG6m/t5+AHiPo3XCGb0TNTZdkPxaMtc/QtNsBX7s2dYsb2TMXKYpa5DdPQ==
   dependencies:
     axios "^1.8.4"
     libphonenumber-js "1.11.2"
 
-"@getpara/viem-v2-integration@1.14.2":
-  version "1.14.2"
-  resolved "https://registry.yarnpkg.com/@getpara/viem-v2-integration/-/viem-v2-integration-1.14.2.tgz#382fbc33bf5200f41876d194700394fc53c2225b"
-  integrity sha512-B29zJykNKRwAJcKUxOWQYrUWVKWHBerV4xXzB3XNeFXGyDC36MBxkzr7thSfCy+MB3h9GZ7Xaaym1NK3vDosNQ==
+"@getpara/viem-v2-integration@1.15.0":
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/@getpara/viem-v2-integration/-/viem-v2-integration-1.15.0.tgz#fc497cc75557544f920122079ebb3d1a4e4e486f"
+  integrity sha512-6dY0Da9y8cKbuCec2a0pqF7JdefYMJSB1opujlsXpqcskqsCkc2hjPCih27TM3QMUlW8EHUaYjpLolzEIDE9PQ==
   dependencies:
-    "@getpara/core-sdk" "1.14.2"
+    "@getpara/core-sdk" "1.15.0"
 
-"@getpara/web-sdk@1.14.2":
-  version "1.14.2"
-  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-1.14.2.tgz#c107f3e8ee424efd92a2ba5ff49b15bee736922e"
-  integrity sha512-3exJaJys+vrU8L1jv4Y/qsk/IfDq3pWiDvLHOuUngZIdoVTsxJrpHSF5oiZU8+rBNQ3Y5XbkhHeigKBLjwC4Nw==
+"@getpara/web-sdk@1.15.0":
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-1.15.0.tgz#d3420388e6ccc71987d8eeee6170f0112db89f6b"
+  integrity sha512-fYCVb2AyJI42zrt9M9m0AhAkO7ngQtrWQVvBiUn6ipfsiMJb8F0LiYULD7FwRTELgs/dTW8MxTy1F7rXK7+sUw==
   dependencies:
-    "@getpara/core-sdk" "1.14.2"
-    "@getpara/user-management-client" "1.14.2"
+    "@getpara/core-sdk" "1.15.0"
+    "@getpara/user-management-client" "1.15.0"
     base64url "3.0.1"
     buffer "6.0.3"
     cbor-web "8.1.0"
@@ -2609,6 +2609,18 @@
   integrity sha512-5IKx/Y13RsYd+sauPb2x+U/xZikHjolzfuDgTAl/Tdf3Q8rslRvC19NKDLgAJQ6wsqADk10ntlv08nPFw/gO/A==
   dependencies:
     tslib "^2.8.0"
+
+"@tanstack/query-core@5.76.0":
+  version "5.76.0"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.76.0.tgz#3b4d5d34ce307ba0cf7d1a3e90d7adcdc6c46be0"
+  integrity sha512-FN375hb8ctzfNAlex5gHI6+WDXTNpe0nbxp/d2YJtnP+IBM6OUm7zcaoCW6T63BawGOYZBbKC0iPvr41TteNVg==
+
+"@tanstack/react-query@^5.76.1":
+  version "5.76.1"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.76.1.tgz#ac8a19f99dfec1452a44fe22d46680c396c21152"
+  integrity sha512-YxdLZVGN4QkT5YT1HKZQWiIlcgauIXEIsMOTSjvyD5wLYK8YVvKZUPAysMqossFJJfDpJW3pFn7WNZuPOqq+fw==
+  dependencies:
+    "@tanstack/query-core" "5.76.0"
 
 "@types/babel__core@^7.1.14":
   version "7.20.5"
