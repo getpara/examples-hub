@@ -1,6 +1,6 @@
 import { PropsWithChildren, ReactNode } from 'react';
 import { Typography } from '@getpara/react-component-library';
-import clsx from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 export type ConfigCardContentProps = {
   title?: string;
@@ -27,7 +27,7 @@ export const ConfigCardContent = ({ title, subtitle, ActionComponent, children, 
           )}
         </div>
       )}
-      <div className={clsx('para:flex para:flex-col para:md:flex-row para:gap-4', className)}>{children}</div>
+      <div className={twMerge('para:flex para:flex-col para:md:flex-row para:gap-4', className)}>{children}</div>
     </div>
   );
 };

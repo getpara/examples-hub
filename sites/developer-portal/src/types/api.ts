@@ -127,6 +127,7 @@ export type ApiKeyOnboarding = {
 export type ApiKey = {
   id: string;
   apiKey: string;
+  secretApiKey: string;
   name: string;
   displayName: string;
   environment: Environment;

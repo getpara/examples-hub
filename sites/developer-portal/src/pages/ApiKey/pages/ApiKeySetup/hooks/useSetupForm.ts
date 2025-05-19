@@ -15,6 +15,7 @@ import { PackageManager } from '../../../../../types/packageManager';
 export type SetupForm = Pick<UpdateApiKeyFormData, 'cosmosPrefix'> &
   Pick<UpdateProjectBody, 'framework' | 'packageManager'> & {
     apiKey: string;
+    secretApiKey: string;
     name: string;
     supportedWalletTypes: SupportedWalletTypes;
   };
@@ -26,6 +27,7 @@ const formSchema = z.object({
   framework: z.string().optional().nullable(),
   packageManager: z.string().optional().nullable(),
   apiKey: z.string(),
+  secretApiKey: z.string(),
 }) satisfies SchemaFromInterface<SetupForm>;
 
 export const useSetupForm = () => {
@@ -38,6 +40,7 @@ export const useSetupForm = () => {
   const defaultData: SetupForm = {
     ...apiKeyData,
     apiKey: apiKeyData?.apiKey ?? '',
+    secretApiKey: apiKeyData?.secretApiKey ?? '',
     supportedWalletTypes: apiKeyData?.supportedWalletTypes ?? [],
     ...project,
     name: project?.name ?? '',

@@ -8,13 +8,13 @@ export const KeyData = () => {
   const form = useFormContext<SetupForm>();
 
   return (
-    <ConfigCard>
+    <ConfigCard className="para:md:flex-col">
       <>
         <FormField
           control={form.control}
           name="name"
           render={({ field }) => (
-            <FormItem className="para:flex-1">
+            <FormItem className="para:w-full para:flex-1">
               <FormLabel>Project Name</FormLabel>
               <FormControl>
                 <Input {...field} value={field.value ?? undefined} className="para:disabled:opacity-100" />
@@ -27,7 +27,7 @@ export const KeyData = () => {
           control={form.control}
           name="apiKey"
           render={({ field }) => (
-            <FormItem className="para:flex-1">
+            <FormItem className="para:w-full para:flex-1">
               <FormLabel>API Key</FormLabel>
               <FormControl>
                 <VisibilityInput
@@ -37,6 +37,26 @@ export const KeyData = () => {
                   showCopyButton
                 />
               </FormControl>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="secretApiKey"
+          render={({ field }) => (
+            <FormItem className="para:w-full para:flex-1">
+              <FormLabel>Secret API Key</FormLabel>
+              <FormControl>
+                <VisibilityInput
+                  {...field}
+                  disabled
+                  inputClassName="para:disabled:opacity-100 para:text-ellipsis"
+                  showCopyButton
+                />
+              </FormControl>
+              <FormDescription>
+                The Secret API Key is for use on your back-end services only. Be sure to keep it confidential.
+              </FormDescription>
             </FormItem>
           )}
         />
