@@ -2,8 +2,8 @@ import { ParaMobile } from "@getpara/react-native-wallet";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AuthCreds } from "@/types";
 import { createParaClient } from "@/client/para";
-import { credsToParaAuth } from "@/util/authHelpers";
-import { clearCreds, saveCreds } from "@/util/credentialStore";
+import { credsToParaAuth } from "@/utils/authUtils";
+import { clearCreds, saveCreds } from "@/utils/credentialStoreUtils";
 
 export const usePara = () => {
   const queryClient = useQueryClient();
@@ -28,7 +28,7 @@ export const usePara = () => {
     refetch: refreshAuthStatus,
   } = useQuery({
     queryKey: ["paraAuthStatus"],
-    queryFn: () => (paraClient ? paraClient.isFullyLoggedIn() : false),
+    queryFn: async () => await paraClient?.isFullyLoggedIn(),
     enabled: !!paraClient,
   });
 

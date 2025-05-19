@@ -1,8 +1,7 @@
 import { CountryCodeDropdownProps, CountryOption } from "@/types";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Text, View } from "react-native";
 import CountryFlag from "react-native-country-flag";
-import * as countryCodes from "country-codes-list";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -10,31 +9,11 @@ import {
   DropdownMenuItem,
 } from "~/components/ui/dropdown-menu";
 
-export function CountryCodeDropdown({ value, onChange }: CountryCodeDropdownProps) {
-  const [countryOptions, setCountryOptions] = useState<CountryOption[]>([]);
-
-  useEffect(() => {
-    const allCountries = countryCodes.all();
-
-    const topCountryCodes = ["US", "GB", "CA", "AU", "IN"];
-
-    const options = allCountries
-      .filter((country) => topCountryCodes.includes(country.countryCode))
-      .map((country) => ({
-        dialCode: `+${country.countryCallingCode}`,
-        name: country.countryNameEn,
-        isoCode: country.countryCode.toLowerCase(),
-      }));
-
-    options.sort((a, b) => a.name.localeCompare(b.name));
-
-    setCountryOptions(options);
-  }, []);
-
-  const handleSelect = (dialCode: string) => {
-    onChange(dialCode);
-  };
-
+export function CountryCodeDropdown({
+  value,
+  onChange,
+  countryOptions,
+}: CountryCodeDropdownProps & { countryOptions: CountryOption[] }) {
   return (
     <DropdownMenu className="w-full h-full flex items-center justify-center">
       <DropdownMenuTrigger className="w-full h-full flex items-center justify-center">
@@ -44,7 +23,7 @@ export function CountryCodeDropdown({ value, onChange }: CountryCodeDropdownProp
         {countryOptions.map((option) => (
           <DropdownMenuItem
             key={option.isoCode}
-            onPress={() => handleSelect(option.dialCode)}>
+            onPress={() => onChange(option.dialCode)}>
             <View className="flex-row items-center">
               <CountryFlag
                 isoCode={option.isoCode}

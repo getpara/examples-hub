@@ -43,7 +43,7 @@ const EMPTY_BALANCES: BalancesBySupportedType = {
   [WalletType.SOLANA]: {},
 };
 
-export const useWalletBalances = () => {
+export const useBalances = () => {
   const { wallets, hasEvmWallets, hasSolanaWallets } = useWallets();
   const {
     ethereumProvider,

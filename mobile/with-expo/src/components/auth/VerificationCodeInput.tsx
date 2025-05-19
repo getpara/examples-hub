@@ -3,9 +3,8 @@ import { useEffect } from "react";
 import { View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
-import { CustomOTPInputProps, FakeCaretProps, SlotComponentProps } from "@/types";
 import { OTPInput } from "input-otp-native";
-import type { OTPInputRef } from "input-otp-native";
+import type { OTPInputRef, SlotProps } from "input-otp-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -13,6 +12,21 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
+
+interface VerificationCodeInputProps {
+  maxLength?: number;
+  onComplete: (code: string) => void;
+  onClear?: () => void;
+  slotClassName?: string;
+  activeSlotClassName?: string;
+  slotSize?: number;
+  slotTextClassName?: string;
+  caretColor?: string;
+  caretHeight?: number;
+  caretWidth?: number;
+  gap?: number;
+  autoComplete?: boolean;
+}
 
 export function VerificationCodeInput({
   maxLength = 5,
@@ -25,7 +39,7 @@ export function VerificationCodeInput({
   caretHeight = 28,
   caretWidth = 2,
   autoComplete = true,
-}: CustomOTPInputProps) {
+}: VerificationCodeInputProps) {
   const ref = useRef<OTPInputRef>(null);
 
   const handleComplete = (code: string) => {
@@ -61,6 +75,16 @@ export function VerificationCodeInput({
   );
 }
 
+export interface SlotComponentProps extends SlotProps {
+  slotClassName?: string;
+  activeSlotClassName?: string;
+  slotSize?: number;
+  slotTextClassName?: string;
+  caretColor?: string;
+  caretHeight?: number;
+  caretWidth?: number;
+}
+
 function Slot({
   char,
   isActive,
@@ -91,6 +115,12 @@ function Slot({
       </View>
     </View>
   );
+}
+
+export interface FakeCaretProps {
+  color?: string;
+  height?: number;
+  width?: number;
 }
 
 function FakeCaret({ color = "#000", height = 28, width = 2 }: FakeCaretProps) {

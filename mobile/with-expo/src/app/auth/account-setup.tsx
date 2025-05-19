@@ -6,14 +6,13 @@ import { usePara } from "@/hooks/usePara";
 import { useWallets } from "@/hooks/useWallets";
 import { CheckCircle } from "@/components/icons";
 import { AuthNavigationParamsWithBiometrics, PreserveTypes, SetupStep } from "@/types";
-import { paramsToCreds } from "@/util/authHelpers";
+import { paramsToCreds } from "@/utils/authUtils";
 import { WalletType } from "@getpara/react-native-wallet";
 
 export default function AccountSetupScreen() {
-  const { paraClient, registerPasskey, registerPasskeyError, resetRegisterPasskey } = usePara();
-
-  const { createWalletsPerType, isCreatingWalletsPerType, createWalletsPerTypeError } = useWallets();
-
+  const { paraClient, registerPasskey, registerPasskeyError, isRegisteringPasskey, resetRegisterPasskey } = usePara();
+  const { createWalletsPerType, isCreatingWalletsPerType, createWalletsPerTypeError, resetCreateWalletsPerType } =
+    useWallets();
   const router = useRouter();
   const routeParams = useLocalSearchParams<PreserveTypes<AuthNavigationParamsWithBiometrics, "authType">>();
   const creds = paramsToCreds(routeParams)!;
@@ -28,6 +27,8 @@ export default function AccountSetupScreen() {
     setSetupStep(SetupStep.REGISTERING_PASSKEY);
     setError(null);
 
+    resetRegisterPasskey();
+
     try {
       await registerPasskey({ ...creds, biometricsId: routeParams.biometricsId });
       createWallet();
@@ -41,6 +42,8 @@ export default function AccountSetupScreen() {
   const createWallet = async () => {
     setSetupStep(SetupStep.CREATING_WALLET);
     setError(null);
+    // Reset any previous wallet creation errors
+    resetCreateWalletsPerType();
 
     try {
       createWalletsPerType({
@@ -54,22 +57,26 @@ export default function AccountSetupScreen() {
     }
   };
 
-  // Monitor wallet creation status
+  useEffect(() => {
+    if (registerPasskeyError) {
+      setError(registerPasskeyError.message || "Failed to register passkey. Please try again.");
+      setSetupStep(SetupStep.PASSKEY_ERROR);
+    }
+  }, [registerPasskeyError]);
+
   useEffect(() => {
     if (createWalletsPerTypeError) {
-      setError("Failed to create wallet. Please try again.");
+      setError(createWalletsPerTypeError.message || "Failed to create wallet. Please try again.");
       setSetupStep(SetupStep.WALLET_ERROR);
     }
   }, [createWalletsPerTypeError]);
 
-  // Initial setup
   useEffect(() => {
     if (paraClient && routeParams.biometricsId) {
       setupAccount();
     }
   }, [paraClient, routeParams.biometricsId]);
 
-  // Handle successful wallet creation
   useEffect(() => {
     if (setupStep === SetupStep.CREATING_WALLET && !isCreatingWalletsPerType) {
       if (!createWalletsPerTypeError) {
@@ -92,7 +99,9 @@ export default function AccountSetupScreen() {
               color="#6366f1"
               className="mb-4"
             />
-            <Text className="text-center text-muted-foreground">Registering your passkey...</Text>
+            <Text className="text-center text-muted-foreground">
+              {isRegisteringPasskey ? "Registering your passkey..." : "Initializing..."}
+            </Text>
           </View>
         );
 
@@ -113,7 +122,10 @@ export default function AccountSetupScreen() {
           <View className="items-center">
             <Text className="text-center text-red-500 mb-4">{error}</Text>
             <Pressable
-              onPress={setupAccount}
+              onPress={() => {
+                resetRegisterPasskey();
+                setupAccount();
+              }}
               accessibilityRole="button"
               accessibilityLabel="Retry passkey registration"
               className="bg-primary py-3 px-6 rounded-lg">
@@ -127,7 +139,10 @@ export default function AccountSetupScreen() {
           <View className="items-center">
             <Text className="text-center text-red-500 mb-4">{error}</Text>
             <Pressable
-              onPress={createWallet}
+              onPress={() => {
+                resetCreateWalletsPerType();
+                createWallet();
+              }}
               accessibilityRole="button"
               accessibilityLabel="Retry wallet creation"
               className="bg-primary py-3 px-6 rounded-lg">

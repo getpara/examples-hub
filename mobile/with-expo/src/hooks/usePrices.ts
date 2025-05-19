@@ -1,5 +1,5 @@
+import { COINGECKO_API_KEY } from "@/constants/envs";
 import { useQuery } from "@tanstack/react-query";
-import { COINGECKO_API_KEY } from "@/constants";
 
 export interface AssetPrice {
   usd: number;

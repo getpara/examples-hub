@@ -1,7 +1,8 @@
 import React from "react";
 import { View, Image, Pressable, ActivityIndicator } from "react-native";
 import { Text } from "~/components/ui/text";
-import { AlertCircle } from "@/components/icons/AlertCircle";
+import { AlertCircle } from "@/components/icons";
+import { formatUsdValue, formatCryptoValue } from "@/utils/formattingUtils";
 
 export interface TokenAssetListItemProps {
   id: string;
@@ -28,17 +29,8 @@ export function TokenAssetListItem({
   hasPriceData,
   onPress,
 }: TokenAssetListItemProps) {
-  const formattedUsdBalance =
-    balance !== null
-      ? balance.toLocaleString("en-US", {
-          style: "currency",
-          currency: "USD",
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })
-      : "--";
-
-  const formattedTokenBalance = tokenBalance.toFixed(6);
+  const formattedUsdBalance = balance !== null ? formatUsdValue(balance) : "--";
+  const formattedTokenBalance = formatCryptoValue(tokenBalance, ticker);
 
   return (
     <Pressable
@@ -60,7 +52,7 @@ export function TokenAssetListItem({
             <View className="flex-row items-center">
               <AlertCircle
                 size={14}
-                className="text-yellow-500 mr-1"
+                className="text-muted-foreground mr-1"
               />
               <Text className="text-base font-medium text-foreground">Price unavailable</Text>
             </View>
@@ -70,9 +62,7 @@ export function TokenAssetListItem({
         </View>
         <View className="flex-row justify-between items-center mt-1">
           <Text className="text-sm text-muted-foreground">{ticker}</Text>
-          <Text className="text-sm text-muted-foreground">
-            {formattedTokenBalance} {ticker}
-          </Text>
+          <Text className="text-sm text-muted-foreground">{formattedTokenBalance}</Text>
         </View>
       </View>
     </Pressable>

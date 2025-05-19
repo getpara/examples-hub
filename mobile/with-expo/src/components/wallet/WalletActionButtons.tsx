@@ -2,8 +2,6 @@ import React from "react";
 import { View, Pressable } from "react-native";
 import { Text } from "~/components/ui/text";
 import { ArrowDownToLine, ArrowUpFromLine, ArrowLeftRight } from "@/components/icons";
-import { useRouter } from "expo-router";
-import { toast } from "sonner-native";
 
 interface ActionButtonProps {
   icon: React.ReactNode;
@@ -24,25 +22,13 @@ function ActionButton({ icon, label, onPress }: ActionButtonProps) {
   );
 }
 
-export function WalletActionButtons() {
-  const router = useRouter();
+interface WalletActionButtonsProps {
+  onSend: () => void;
+  onReceive: () => void;
+  onSwap: () => void;
+}
 
-  const handleReceive = () => {
-    toast.info("Receive not implemented yet", {
-      description: "This feature is not yet implemented.",
-    });
-  };
-
-  const handleSend = () => {
-    router.navigate("/home/transaction/token");
-  };
-
-  const handleSwap = () => {
-    toast.info("Swap not implemented yet", {
-      description: "This feature is not yet implemented.",
-    });
-  };
-
+export function WalletActionButtons({ onSend, onReceive, onSwap }: WalletActionButtonsProps) {
   return (
     <View className="flex-row justify-center w-full gap-8 pt-2">
       <ActionButton
@@ -53,7 +39,7 @@ export function WalletActionButtons() {
           />
         }
         label="Send"
-        onPress={handleSend}
+        onPress={onSend}
       />
       <ActionButton
         icon={
@@ -63,7 +49,7 @@ export function WalletActionButtons() {
           />
         }
         label="Receive"
-        onPress={handleReceive}
+        onPress={onReceive}
       />
       <ActionButton
         icon={
@@ -73,7 +59,7 @@ export function WalletActionButtons() {
           />
         }
         label="Swap"
-        onPress={handleSwap}
+        onPress={onSwap}
       />
     </View>
   );

@@ -1,5 +1,5 @@
 import { ParaMobile } from "@getpara/react-native-wallet";
-import { PARA_API_KEY, PARA_ENVIRONMENT } from "@/constants";
+import { PARA_API_KEY, PARA_ENVIRONMENT } from "@/constants/envs";
 
 export async function createParaClient(): Promise<ParaMobile> {
   if (!PARA_API_KEY) {

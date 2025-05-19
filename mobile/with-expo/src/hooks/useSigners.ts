@@ -5,7 +5,7 @@ import { ParaEthersSigner } from "@getpara/ethers-v6-integration";
 import { ParaSolanaWeb3Signer } from "@getpara/solana-web3.js-v1-integration";
 import { usePara } from "./usePara";
 import { useWallets } from "./useWallets";
-import { ALCHEMY_ETHEREUM_RPC_URL, ALCHEMY_SOLANA_RPC_URL } from "@/constants";
+import { ALCHEMY_ETHEREUM_RPC_URL, ALCHEMY_SOLANA_RPC_URL } from "@/constants/envs";
 
 interface SignersResult {
   ethereumProvider: ethers.JsonRpcProvider | null;
@@ -22,7 +22,7 @@ const EMPTY_SIGNERS: SignersResult = {
 };
 
 export const useSigners = () => {
-  const { client, isAuthenticated, isClientReady } = usePara();
+  const { paraClient, isAuthenticated, isClientReady } = usePara();
   const { hasEvmWallets, hasSolanaWallets } = useWallets();
 
   const {
@@ -34,7 +34,7 @@ export const useSigners = () => {
   } = useQuery<SignersResult>({
     queryKey: ["blockchainSigners"],
     queryFn: async () => {
-      if (!client || !isAuthenticated) {
+      if (!paraClient || !isAuthenticated) {
         throw new Error("Para client not initialized or not authenticated");
       }
 
@@ -43,7 +43,7 @@ export const useSigners = () => {
       if (hasEvmWallets && ALCHEMY_ETHEREUM_RPC_URL) {
         try {
           const provider = new ethers.JsonRpcProvider(ALCHEMY_ETHEREUM_RPC_URL);
-          const signer = new ParaEthersSigner(client, provider);
+          const signer = new ParaEthersSigner(paraClient, provider);
           result.ethereumProvider = provider;
           result.ethereumSigner = signer;
         } catch (error) {
@@ -54,7 +54,7 @@ export const useSigners = () => {
       if (hasSolanaWallets && ALCHEMY_SOLANA_RPC_URL) {
         try {
           const connection = new Connection(ALCHEMY_SOLANA_RPC_URL, "confirmed");
-          const signer = new ParaSolanaWeb3Signer(client, connection);
+          const signer = new ParaSolanaWeb3Signer(paraClient, connection);
           result.solanaConnection = connection;
           result.solanaSigner = signer;
         } catch (error) {

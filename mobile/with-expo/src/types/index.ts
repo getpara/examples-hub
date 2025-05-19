@@ -1,31 +1,10 @@
 import { OAuthMethod, Wallet, WalletType } from "@getpara/react-native-wallet";
-import { SlotProps } from "input-otp-native";
 
 export type AuthType = "email" | "phone";
 
 export type EmailAuth = { authType: "email"; email: string };
 export type PhoneAuth = { authType: "phone"; phone: string; countryCode: string };
 export type AuthCreds = EmailAuth | PhoneAuth;
-
-export interface SmartInputProps {
-  inputType: AuthType;
-  onInputTypeChange: (type: AuthType) => void;
-  onSubmit: () => void;
-  placeholder?: string;
-  label?: string;
-  email?: string;
-  onEmailChange?: (value: string) => void;
-  phoneNumber?: string;
-  countryCode?: string;
-  onPhoneNumberChange?: (value: string) => void;
-  onCountryCodeChange?: (value: string) => void;
-  isLoading?: boolean;
-}
-
-export interface OAuthProviderInfo {
-  name: string;
-  logo: any;
-}
 
 export interface AuthNavigationParams {
   authType: AuthType;
@@ -41,36 +20,6 @@ export type PreserveTypes<T, K extends keyof T> = {
 export type AuthNavigationParamsWithBiometrics = AuthNavigationParams & {
   biometricsId: string;
 };
-
-export interface CustomOTPInputProps {
-  maxLength?: number;
-  onComplete: (code: string) => void;
-  onClear?: () => void;
-  slotClassName?: string;
-  activeSlotClassName?: string;
-  slotSize?: number;
-  slotTextClassName?: string;
-  caretColor?: string;
-  caretHeight?: number;
-  caretWidth?: number;
-  gap?: number;
-  autoComplete?: boolean;
-}
-export interface SlotComponentProps extends SlotProps {
-  slotClassName?: string;
-  activeSlotClassName?: string;
-  slotSize?: number;
-  slotTextClassName?: string;
-  caretColor?: string;
-  caretHeight?: number;
-  caretWidth?: number;
-}
-
-export interface FakeCaretProps {
-  color?: string;
-  height?: number;
-  width?: number;
-}
 
 export interface CountryCodeDropdownProps {
   value: string;
@@ -110,3 +59,15 @@ export interface WalletWithBalance extends Wallet {
 }
 
 export type WalletsWithBalances = Record<WalletType, WalletWithBalance[]>;
+
+export interface SocialLoginProviderInfo {
+  name: string;
+  logo: any;
+}
+export type SocialLoginProvidersMap = Partial<Record<OAuthMethod, SocialLoginProviderInfo>>;
+
+export const SUPPORTED_WALLET_TYPES = [WalletType.EVM, WalletType.SOLANA] as const;
+export type SupportedWalletType = (typeof SUPPORTED_WALLET_TYPES)[number];
+export type WalletsBySupportedType = {
+  [K in SupportedWalletType]: Wallet[];
+};

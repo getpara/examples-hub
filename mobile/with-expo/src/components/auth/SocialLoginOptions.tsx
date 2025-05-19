@@ -1,40 +1,53 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { View, Image, Pressable } from "react-native";
 import { Grip, X } from "@/components/icons";
+import { SocialLoginProvidersMap } from "@/types";
+import { generateProviderRows } from "@/utils/socialLoginUtils";
 import { OAuthMethod } from "@getpara/react-native-wallet";
-import { PROVIDER_INFO, INITIAL_PROVIDERS, ADDITIONAL_PROVIDERS, MAX_PROVIDERS_PER_ROW } from "@/lib/constants";
 
 interface SocialLoginOptionsProps {
+  initialProviders: OAuthMethod[];
+  additionalProviders: OAuthMethod[];
+  providerInfo: SocialLoginProvidersMap;
+  maxProvidersPerRow: number;
   onSelect(provider: OAuthMethod): void;
   disabled?: boolean;
+  excludeProviders?: OAuthMethod[];
 }
 
-export function SocialLoginOptions({ onSelect, disabled }: SocialLoginOptionsProps) {
+export function SocialLoginOptions({
+  initialProviders,
+  additionalProviders,
+  providerInfo,
+  maxProvidersPerRow,
+  onSelect,
+  disabled,
+  excludeProviders = [],
+}: SocialLoginOptionsProps) {
   const [expanded, setExpanded] = useState(false);
 
-  const providers = expanded ? [...INITIAL_PROVIDERS, ...ADDITIONAL_PROVIDERS] : INITIAL_PROVIDERS;
+  const providers = expanded ? [...initialProviders, ...additionalProviders] : initialProviders;
 
-  const providerRows = useMemo(() => {
-    const rows: OAuthMethod[][] = [];
-    for (let i = 0; i < providers.length; i += MAX_PROVIDERS_PER_ROW) {
-      rows.push(providers.slice(i, i + MAX_PROVIDERS_PER_ROW));
-    }
-    return rows;
-  }, [providers]);
+  const filteredProviders = providers.filter((provider) => !excludeProviders.includes(provider));
+
+  const providerRows = generateProviderRows(filteredProviders, maxProvidersPerRow);
 
   const renderProvider = (provider: OAuthMethod) => {
-    if (provider === OAuthMethod.FARCASTER) return null;
+    const info = providerInfo[provider];
+    if (!info) return null;
+
     return (
       <Pressable
         key={provider}
         accessibilityRole="button"
-        accessibilityLabel={`Sign in with ${PROVIDER_INFO[provider].name}`}
+        accessibilityLabel={`Sign in with ${info.name}`}
         onPress={() => onSelect(provider)}
+        disabled={disabled}
         className="flex-1 h-14 items-center justify-center rounded-xl
                    border border-border bg-white
                    active:opacity-80">
         <Image
-          source={PROVIDER_INFO[provider].logo}
+          source={info.logo}
           resizeMode="contain"
           className="h-8 w-8"
         />

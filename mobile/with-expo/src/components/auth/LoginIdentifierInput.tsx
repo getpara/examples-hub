@@ -1,220 +1,123 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React from "react";
 import { View } from "react-native";
 import { Mail, ChevronRight, AlertCircle } from "@/components/icons";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
-
 import { CountryCodeDropdown } from "./CountryCodeDropdown";
-import { SmartInputProps } from "@/types";
-import { AsYouType, parsePhoneNumberFromString } from "libphonenumber-js";
+import { AuthType, CountryOption } from "@/types";
+import {
+  formatPhoneNumberWithCountryCode,
+  validateEmail,
+  validatePhoneNumber,
+  determineInputType,
+} from "@/utils/loginIdentifierUtils";
+
+interface LoginIdentifierInputProps {
+  inputType: AuthType;
+  onInputTypeChange: (type: AuthType) => void;
+  onSubmit: () => void;
+  email: string;
+  phoneNumber: string;
+  countryCode: string;
+  error: string;
+  onEmailChange: (value: string) => void;
+  onPhoneNumberChange: (value: string) => void;
+  countryOptions: CountryOption[];
+  onCountryCodeChange?: (value: string) => void;
+  onValidate?: (error: string) => void;
+  placeholder?: string;
+  label?: string;
+  isLoading?: boolean;
+}
 
 export function LoginIdentifierInput({
   inputType,
   onInputTypeChange,
   onSubmit,
-  placeholder = "Enter email or phone number",
-  label = "Email or phone number",
-  email = "",
   onEmailChange,
+  onPhoneNumberChange,
+  email = "",
   phoneNumber = "",
   countryCode = "+1",
-  onPhoneNumberChange,
+  error = "",
+  countryOptions,
   onCountryCodeChange,
-  isLoading
-}: SmartInputProps) {
-  const [error, setError] = useState("");
-  const [displayValue, setDisplayValue] = useState("");
-  const [rawValue, setRawValue] = useState("");
-  const [previousInputType, setPreviousInputType] = useState(inputType);
-
-  const emailStrictReg = useMemo(
-    () =>
-      /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/i,
-    []
-  );
-  3;
-
-  const formatPhoneNumber = (digits: string) => {
-    const countryCodeWithoutPlus = countryCode.replace("+", "");
-    const formatter = new AsYouType({ defaultCallingCode: countryCodeWithoutPlus });
-    return formatter.input(digits);
-  };
-
-  useEffect(() => {
-    if (inputType === "email" && email) {
-      setRawValue(email);
-      setDisplayValue(email);
-    } else if (inputType === "phone" && phoneNumber) {
-      const numericValue = phoneNumber.replace(/\D/g, "");
-      setRawValue(numericValue);
-      setDisplayValue(formatPhoneNumber(numericValue));
-    }
-  }, []);
-
-  useEffect(() => {
-    if (inputType !== previousInputType) {
-      if (inputType === "phone" && previousInputType === "email") {
-        const numericValue = rawValue.replace(/\D/g, "");
-        if (numericValue) {
-          setDisplayValue(formatPhoneNumber(numericValue));
-        }
-      } else if (inputType === "email" && previousInputType === "phone") {
-        setDisplayValue(rawValue);
-      }
-
-      setPreviousInputType(inputType);
-    }
-  }, [inputType, previousInputType, rawValue, countryCode]);
-
-  const determineInputType = (text: string): "email" | "phone" | "" => {
-    const raw = text.trim();
-    if (raw === "") return "";
-
-    const hasAtSymbol = raw.includes("@");
-    const hasLetters = /[a-zA-Z]/.test(raw);
-    const phoneCharsOnly = /^[\d\s+\-\(\)\.]+$/.test(raw);
-    const digitCount = (raw.match(/\d/g) || []).length;
-
-    if (hasAtSymbol || (hasLetters && !phoneCharsOnly)) {
-      return "email";
-    } else if (digitCount >= 4 && phoneCharsOnly) {
-      return "phone";
-    } else if (hasLetters) {
-      return "email";
-    } else if (phoneCharsOnly && digitCount > 0) {
-      return "phone";
-    }
-
-    return "email";
-  };
+  onValidate,
+  placeholder = "Enter email or phone number",
+  label = "Email or phone number",
+  isLoading = false,
+}: LoginIdentifierInputProps) {
+  const displayValue = inputType === "email" ? email : formatPhoneNumberWithCountryCode(phoneNumber, countryCode);
 
   const handleChange = (newValue: string) => {
-    if (error) {
-      setError("");
-    }
-
     if (newValue.length < displayValue.length) {
-      if (inputType === "phone") {
-        if (displayValue.length > 0 && newValue.length === displayValue.length - 1) {
-          const lastChar = displayValue[displayValue.length - 1];
-          if (!/\d/.test(lastChar)) {
-            const newRaw = rawValue.slice(0, -1);
-            setRawValue(newRaw);
-            setDisplayValue(formatPhoneNumber(newRaw));
-            onPhoneNumberChange?.(formatPhoneNumber(newRaw));
-            return;
-          }
-        }
-
-        const newRaw = rawValue.slice(0, -1);
-        setRawValue(newRaw);
-
-        if (newRaw.length === 0) {
-          setDisplayValue("");
-          onPhoneNumberChange?.("");
-          onInputTypeChange("email");
-          return;
-        }
-
-        setDisplayValue(formatPhoneNumber(newRaw));
-        onPhoneNumberChange?.(formatPhoneNumber(newRaw));
-        return;
-      } else {
-        setRawValue(newValue);
-        setDisplayValue(newValue);
-        onEmailChange?.(newValue);
-        return;
-      }
+      handleBackspace(newValue);
+      return;
     }
 
     const newChar = newValue.charAt(newValue.length - 1);
 
-    const newInputType = determineInputType(newValue);
+    const detectedType = determineInputType(newValue);
+    if (detectedType !== inputType && detectedType !== "") {
+      onInputTypeChange(detectedType);
 
-    if (newInputType !== inputType && newInputType !== "") {
-      onInputTypeChange(newInputType);
-
-      if (newInputType === "email") {
-        const updatedRaw = rawValue + newChar;
-        setRawValue(updatedRaw);
-        setDisplayValue(updatedRaw);
-        onEmailChange?.(updatedRaw);
-      } else if (newInputType === "phone") {
-        const digitsOnly = (rawValue + newChar).replace(/\D/g, "");
-        setRawValue(digitsOnly);
-        const formatted = formatPhoneNumber(digitsOnly);
-        setDisplayValue(formatted);
-        onPhoneNumberChange?.(formatted);
+      if (detectedType === "email") {
+        onEmailChange(newValue);
+      } else if (detectedType === "phone") {
+        const digitsOnly = (phoneNumber + newChar).replace(/\D/g, "");
+        onPhoneNumberChange(digitsOnly);
       }
     } else {
       if (inputType === "phone") {
         if (/\d/.test(newChar)) {
-          const updatedRaw = rawValue + newChar;
-          setRawValue(updatedRaw);
-          const formatted = formatPhoneNumber(updatedRaw);
-          setDisplayValue(formatted);
-          onPhoneNumberChange?.(formatted);
+          const updatedRaw = phoneNumber + newChar;
+          onPhoneNumberChange(updatedRaw);
         }
       } else {
-        setRawValue(newValue);
-        setDisplayValue(newValue);
-        onEmailChange?.(newValue);
+        onEmailChange(newValue);
       }
+    }
+  };
+
+  const handleBackspace = (newValue: string) => {
+    if (inputType === "phone") {
+      const newRaw = phoneNumber.slice(0, -1);
+
+      if (newRaw.length === 0) {
+        onPhoneNumberChange("");
+        onInputTypeChange("email");
+        return;
+      }
+
+      onPhoneNumberChange(newRaw);
+    } else {
+      onEmailChange(newValue);
     }
   };
 
   const handleSubmit = () => {
+    let validationError = "";
     if (inputType === "email") {
-      if (rawValue.trim() === "") {
-        setError("Please enter your email address");
-        return;
-      }
-
-      if (!emailStrictReg.test(rawValue.trim())) {
-        setError("Please enter a valid email address");
-        return;
-      }
+      validationError = validateEmail(email);
     } else if (inputType === "phone") {
-      if (rawValue.trim() === "") {
-        setError("Please enter your phone number");
-        return;
-      }
-
-      try {
-        const fullNumber = countryCode + rawValue;
-        const parsedPhoneNumber = parsePhoneNumberFromString(fullNumber);
-        const isValid = parsedPhoneNumber?.isValid() ?? false;
-
-        if (!isValid) {
-          setError("Please enter a valid phone number for this country");
-          return;
-        }
-      } catch (error) {
-        setError("Please enter a valid phone number");
-        return;
-      }
+      validationError = validatePhoneNumber(phoneNumber, countryCode);
     } else {
-      setError("Could not determine input type. Please enter a valid email or phone.");
-      return;
+      validationError = "Could not determine input type. Please enter a valid email or phone.";
     }
-
-    setError("");
-    onSubmit();
+    if (onValidate) {
+      onValidate(validationError);
+    }
+    if (!validationError) {
+      onSubmit();
+    }
   };
 
   const handleCountryCodeChange = (code: string) => {
     onCountryCodeChange?.(code);
-
-    // When country code changes, reformat the phone number
-    if (inputType === "phone" && rawValue) {
-      const formatted = formatPhoneNumber(rawValue);
-      setDisplayValue(formatted);
-      onPhoneNumberChange?.(formatted);
-    }
   };
 
-  const showSubmitButton = displayValue.trim() !== "";
+  const showHelperText = displayValue.trim() !== "" && inputType !== undefined && !error;
 
   return (
     <View className="gap-y-2">
@@ -234,6 +137,7 @@ export function LoginIdentifierInput({
             <CountryCodeDropdown
               value={countryCode}
               onChange={handleCountryCodeChange}
+              countryOptions={countryOptions}
             />
           ) : null}
         </View>
@@ -255,6 +159,7 @@ export function LoginIdentifierInput({
             variant="default"
             onPress={handleSubmit}
             accessibilityLabel="Continue"
+            disabled={isLoading || displayValue.trim() === ""}
             className="flex h-10 w-10 items-center justify-center rounded-md bg-primary p-0">
             <ChevronRight
               size={20}
@@ -264,7 +169,7 @@ export function LoginIdentifierInput({
         </View>
       </View>
 
-      {displayValue !== "" && inputType !== undefined && !error && (
+      {showHelperText && (
         <Text className="pl-2 text-xs text-muted-foreground">
           {inputType === "phone" ? `Continuing with phone (${countryCode})` : `Continuing with ${inputType}`}
         </Text>

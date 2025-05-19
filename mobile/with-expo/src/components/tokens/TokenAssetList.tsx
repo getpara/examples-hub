@@ -16,7 +16,7 @@ export function TokenAssetList({ assets, isLoading, onAssetPress }: AssetSection
   return (
     <View className="mt-6">
       <View className="flex-row items-center justify-between mb-2">
-        <Text className="text-xl font-figtree font-medium text-foreground">Your Assets</Text>
+        <Text className="text-xl font-medium text-foreground">Your Assets</Text>
       </View>
       <Tabs
         value={activeTab}

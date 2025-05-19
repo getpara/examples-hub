@@ -30,15 +30,15 @@ export default function RootLayout() {
 }
 
 function RootStack() {
-  const { isClientLoading, isClientReady, isAuthenticated } = usePara();
+  const { isClientLoading, isClientReady, isAuthenticated, isAuthStatusLoading } = usePara();
 
   useEffect(() => {
-    if (!isClientLoading && isClientReady) {
+    if (!isClientLoading && isClientReady && !isAuthStatusLoading) {
       SplashScreen.hideAsync();
     }
-  }, [isClientLoading, isClientReady]);
+  }, [isClientLoading, isClientReady, isAuthStatusLoading]);
 
-  if (isClientLoading || !isClientReady) {
+  if (isClientLoading || !isClientReady || isAuthStatusLoading) {
     return null;
   }
 

@@ -6,7 +6,7 @@ import ReanimatedDrawerLayout, {
   DrawerPosition,
   DrawerLayoutMethods,
 } from "react-native-gesture-handler/ReanimatedDrawerLayout";
-import { usePara } from "@/providers/para/usePara";
+import { usePara } from "@/hooks/usePara";
 import { Home } from "@/components/icons/Home";
 import { Menu } from "@/components/icons/Menu";
 import { Text } from "@/components/ui/text";

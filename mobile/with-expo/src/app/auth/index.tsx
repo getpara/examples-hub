@@ -3,17 +3,25 @@ import { ScrollView, View } from "react-native";
 import { openAuthSessionAsync } from "expo-web-browser";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { OAuthMethod } from "@getpara/react-native-wallet";
-import { APP_SCHEME } from "@/constants";
+import { APP_SCHEME } from "@/constants/envs";
+import { COUNTRY_OPTIONS } from "@/constants/countryOptions";
+import {
+  ADDITIONAL_PROVIDERS,
+  INITIAL_PROVIDERS,
+  MAX_PROVIDERS_PER_ROW,
+  PROVIDER_INFO,
+} from "@/constants/socialProviders";
 import { LoginIdentifierInput } from "@/components/auth/LoginIdentifierInput";
 import { SocialLoginOptions } from "@/components/auth/SocialLoginOptions";
 import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/text";
 import { usePara } from "@/hooks/usePara";
 import { AuthType } from "@/types";
-import { getCreds } from "@/util/credentialStore";
+import { getCreds } from "@/utils/credentialStoreUtils";
 
 export default function MainAuthScreen() {
-  const { paraClient, login, isLoggingIn, isLoginError, loginError } = usePara();
+  const { paraClient, login, isLoggingIn, isLoginError, loginError, resetLogin, isAuthenticated, isAuthStatusLoading } =
+    usePara();
   const router = useRouter();
   const { method, email: oauthEmail } = useLocalSearchParams<{
     method?: string;
@@ -23,55 +31,72 @@ export default function MainAuthScreen() {
   const [email, setEmail] = useState("");
   const [inputType, setInputType] = useState<AuthType>("email");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [error, setError] = useState("");
 
   if (!paraClient) return null;
 
   const handleEmailFlow = useCallback(
     async (targetEmail: string) => {
-      const emailCredentials = { email: targetEmail };
-      const userExists = await paraClient.checkIfUserExists(emailCredentials);
+      setError("");
+      resetLogin();
 
-      if (userExists) {
-        await login({ authType: "email", email: targetEmail });
-      } else {
-        await paraClient.createUser(emailCredentials);
-        router.navigate({
-          pathname: "/auth/otp-verification",
-          params: { authType: "email", ...emailCredentials },
-        });
+      try {
+        const emailCredentials = { email: targetEmail };
+        const userExists = await paraClient.checkIfUserExists(emailCredentials);
+
+        if (userExists) {
+          await login({ authType: "email", email: targetEmail });
+        } else {
+          await paraClient.createUser(emailCredentials);
+          router.navigate({
+            pathname: "/auth/otp-verification",
+            params: { authType: "email", ...emailCredentials },
+          });
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to process email login");
       }
     },
-    [login, paraClient, router]
+    [login, paraClient, router, resetLogin]
   );
 
   const handlePhoneFlow = useCallback(
     async (phone: string, code: string) => {
-      const phoneCredentials = { phone, countryCode: code };
-      const userExists = await paraClient.checkIfUserExistsByPhone(phoneCredentials);
+      setError("");
+      resetLogin();
 
-      if (userExists) {
-        await login({ authType: "phone", phone, countryCode: code });
-      } else {
-        await paraClient.createUserByPhone(phoneCredentials);
-        router.navigate({
-          pathname: "/auth/otp-verification",
-          params: { authType: "phone", ...phoneCredentials },
-        });
+      try {
+        const phoneCredentials = { phone, countryCode: code };
+        const userExists = await paraClient.checkIfUserExistsByPhone(phoneCredentials);
+
+        if (userExists) {
+          await login({ authType: "phone", phone, countryCode: code });
+        } else {
+          await paraClient.createUserByPhone(phoneCredentials);
+          router.navigate({
+            pathname: "/auth/otp-verification",
+            params: { authType: "phone", ...phoneCredentials },
+          });
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to process phone login");
       }
     },
-    [login, paraClient, router]
+    [login, paraClient, router, resetLogin]
   );
 
   useEffect(() => {
+    if (isAuthStatusLoading || isAuthenticated) return;
+
     (async () => {
       try {
         const cached = await getCreds();
         if (cached) await login(cached);
-      } catch (error) {
-        console.error("Failed to load cached credentials:", error);
+      } catch (err) {
+        console.error("Failed to load cached credentials:", err);
       }
     })();
-  }, [login]);
+  }, [isAuthStatusLoading, isAuthenticated, login]);
 
   useEffect(() => {
     if (paraClient && method === "login" && oauthEmail) {
@@ -79,7 +104,29 @@ export default function MainAuthScreen() {
     }
   }, [method, oauthEmail, paraClient, handleEmailFlow, router]);
 
+  useEffect(() => {
+    if (isLoginError && loginError) {
+      console.error("Login error:", loginError.message);
+      setError(loginError.message);
+    }
+  }, [isLoginError, loginError]);
+
+  useEffect(() => {
+    return () => {
+      resetLogin();
+    };
+  }, [resetLogin]);
+
+  useEffect(() => {
+    if (error) {
+      setError("");
+      resetLogin();
+    }
+  }, [inputType, resetLogin]);
+
   const handleContinue = async () => {
+    setError("");
+
     if (inputType === "email" && email) {
       await handleEmailFlow(email);
     } else if (inputType === "phone" && phoneNumber) {
@@ -90,21 +137,27 @@ export default function MainAuthScreen() {
   const handleOauthLogin = async (provider: OAuthMethod) => {
     if (!provider) return;
 
-    const oauthUrl = await paraClient.getOAuthURL({
-      method: provider,
-      deeplinkUrl: APP_SCHEME,
-    });
+    setError("");
+    resetLogin();
 
-    await openAuthSessionAsync(oauthUrl, APP_SCHEME, {
-      preferEphemeralSession: false,
-    });
+    try {
+      const oauthUrl = await paraClient.getOAuthURL({
+        method: provider,
+        deeplinkUrl: APP_SCHEME,
+      });
+
+      await openAuthSessionAsync(oauthUrl, APP_SCHEME, {
+        preferEphemeralSession: false,
+      });
+    } catch (err) {
+      const providerName = PROVIDER_INFO[provider]?.name || provider;
+      setError(`Failed to sign in with ${providerName}`);
+    }
   };
 
-  useEffect(() => {
-    if (isLoginError && loginError) {
-      console.error("Login error:", loginError.message);
-    }
-  }, [isLoginError, loginError]);
+  const handleValidation = (validationError: string) => {
+    setError(validationError);
+  };
 
   return (
     <View className="flex-1 bg-background px-6">
@@ -130,6 +183,9 @@ export default function MainAuthScreen() {
             onPhoneNumberChange={setPhoneNumber}
             onCountryCodeChange={setCountryCode}
             isLoading={isLoggingIn}
+            error={error}
+            onValidate={handleValidation}
+            countryOptions={COUNTRY_OPTIONS}
           />
 
           <View className="flex-row items-center gap-x-2">
@@ -141,6 +197,11 @@ export default function MainAuthScreen() {
           <SocialLoginOptions
             onSelect={handleOauthLogin}
             disabled={isLoggingIn}
+            initialProviders={INITIAL_PROVIDERS}
+            additionalProviders={ADDITIONAL_PROVIDERS}
+            providerInfo={PROVIDER_INFO}
+            maxProvidersPerRow={MAX_PROVIDERS_PER_ROW}
+            excludeProviders={[OAuthMethod.FARCASTER]}
           />
         </View>
 

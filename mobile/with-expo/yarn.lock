@@ -1888,12 +1888,41 @@
   resolved "https://registry.yarnpkg.com/@radix-ui/primitive/-/primitive-1.1.2.tgz#83f415c4425f21e3d27914c12b3272a32e3dae65"
   integrity sha512-XnbHrrprsNqZKQhStrSwgRUQzoCI1glLzdw79xiZPoofhGICeZRSQ3dIxAKH1gb3OHfNf4d6f+vAv3kil2eggA==
 
+"@radix-ui/react-accordion@^1.2.0":
+  version "1.2.10"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-accordion/-/react-accordion-1.2.10.tgz#7a83b368c809015514f75e21316633a73ac9a30c"
+  integrity sha512-x+URzV1siKmeXPSUIQ22L81qp2eOhjpy3tgteF+zOr4d1u0qJnFuyBF4MoQRhmKP6ivDxlvDAvqaF77gh7DOIw==
+  dependencies:
+    "@radix-ui/primitive" "1.1.2"
+    "@radix-ui/react-collapsible" "1.1.10"
+    "@radix-ui/react-collection" "1.1.6"
+    "@radix-ui/react-compose-refs" "1.1.2"
+    "@radix-ui/react-context" "1.1.2"
+    "@radix-ui/react-direction" "1.1.1"
+    "@radix-ui/react-id" "1.1.1"
+    "@radix-ui/react-primitive" "2.1.2"
+    "@radix-ui/react-use-controllable-state" "1.2.2"
+
 "@radix-ui/react-arrow@1.1.6":
   version "1.1.6"
   resolved "https://registry.yarnpkg.com/@radix-ui/react-arrow/-/react-arrow-1.1.6.tgz#4b460fdbc1ac097a4964e04ca404c25c2f6d7d3f"
   integrity sha512-2JMfHJf/eVnwq+2dewT3C0acmCWD3XiVA1Da+jTDqo342UlU13WvXtqHhG+yJw5JeQmu4ue2eMy6gcEArLBlcw==
   dependencies:
     "@radix-ui/react-primitive" "2.1.2"
+
+"@radix-ui/react-collapsible@1.1.10":
+  version "1.1.10"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-collapsible/-/react-collapsible-1.1.10.tgz#a0e75e5cd9666e8c8100d539a9f57c50d113e38b"
+  integrity sha512-O2mcG3gZNkJ/Ena34HurA3llPOEA/M4dJtIRMa6y/cknRDC8XY5UZBInKTsUwW5cUue9A4k0wi1XU5fKBzKe1w==
+  dependencies:
+    "@radix-ui/primitive" "1.1.2"
+    "@radix-ui/react-compose-refs" "1.1.2"
+    "@radix-ui/react-context" "1.1.2"
+    "@radix-ui/react-id" "1.1.1"
+    "@radix-ui/react-presence" "1.1.4"
+    "@radix-ui/react-primitive" "2.1.2"
+    "@radix-ui/react-use-controllable-state" "1.2.2"
+    "@radix-ui/react-use-layout-effect" "1.1.1"
 
 "@radix-ui/react-collection@1.1.6":
   version "1.1.6"
@@ -2363,6 +2392,16 @@
   dependencies:
     nanoid "^3.3.11"
 
+"@rn-primitives/accordion@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@rn-primitives/accordion/-/accordion-1.1.0.tgz#a6a77db03f31d49d4eeae9c1954144eef3443e04"
+  integrity sha512-CzqseeoPfw+NT+cb9+Z8ejd6YGM9dJK2YDjD4ODoiYe/eSSbE+AwOaEs4J5hU6nMS1awraDZmBLqUNw7FCDBRA==
+  dependencies:
+    "@radix-ui/react-accordion" "^1.2.0"
+    "@rn-primitives/hooks" "1.1.0"
+    "@rn-primitives/slot" "1.1.0"
+    "@rn-primitives/types" "1.1.0"
+
 "@rn-primitives/dropdown-menu@1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@rn-primitives/dropdown-menu/-/dropdown-menu-1.1.0.tgz#deda32f14ae830278d13bc162d1ebbf23fec814c"
@@ -2615,7 +2654,7 @@
   resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.76.0.tgz#3b4d5d34ce307ba0cf7d1a3e90d7adcdc6c46be0"
   integrity sha512-FN375hb8ctzfNAlex5gHI6+WDXTNpe0nbxp/d2YJtnP+IBM6OUm7zcaoCW6T63BawGOYZBbKC0iPvr41TteNVg==
 
-"@tanstack/react-query@^5.76.1":
+"@tanstack/react-query@5.76.1":
   version "5.76.1"
   resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.76.1.tgz#ac8a19f99dfec1452a44fe22d46680c396c21152"
   integrity sha512-YxdLZVGN4QkT5YT1HKZQWiIlcgauIXEIsMOTSjvyD5wLYK8YVvKZUPAysMqossFJJfDpJW3pFn7WNZuPOqq+fw==

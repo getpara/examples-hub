@@ -1,12 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Wallet, WalletType, CurrentWalletIds } from "@getpara/react-native-wallet";
 import { usePara } from "./usePara";
-
-export const SUPPORTED_WALLET_TYPES = [WalletType.EVM, WalletType.SOLANA] as const;
-
-export type WalletsBySupportedType = {
-  [K in (typeof SUPPORTED_WALLET_TYPES)[number]]: Wallet[];
-};
+import { SUPPORTED_WALLET_TYPES, WalletsBySupportedType } from "@/types";
 
 const EMPTY_WALLETS: WalletsBySupportedType = {
   [WalletType.EVM]: [],
@@ -14,7 +9,7 @@ const EMPTY_WALLETS: WalletsBySupportedType = {
 };
 
 export const useWallets = () => {
-  const { client, isAuthenticated, isClientLoading } = usePara();
+  const { paraClient, isAuthenticated, isClientLoading } = usePara();
   const queryClient = useQueryClient();
   const WALLETS_QUERY_KEY = ["paraWallets"];
 
@@ -27,7 +22,7 @@ export const useWallets = () => {
   } = useQuery<WalletsBySupportedType, Error>({
     queryKey: WALLETS_QUERY_KEY,
     queryFn: () => {
-      if (!client || !isAuthenticated) {
+      if (!paraClient || !isAuthenticated) {
         return EMPTY_WALLETS;
       }
 
@@ -35,7 +30,7 @@ export const useWallets = () => {
         const result = { ...EMPTY_WALLETS };
 
         for (const type of SUPPORTED_WALLET_TYPES) {
-          result[type] = client.getWalletsByType(type).map((wallet) => ({
+          result[type] = paraClient.getWalletsByType(type).map((wallet) => ({
             ...wallet,
             type,
           }));
@@ -46,7 +41,7 @@ export const useWallets = () => {
         throw error instanceof Error ? error : new Error("Failed to fetch wallets");
       }
     },
-    enabled: !!client && isAuthenticated,
+    enabled: !!paraClient && isAuthenticated,
     staleTime: Infinity,
     gcTime: Infinity,
   });
@@ -57,10 +52,10 @@ export const useWallets = () => {
     { type?: WalletType; skipDistribute?: boolean }
   >({
     mutationFn: async (options) => {
-      if (!client || !isAuthenticated) {
+      if (!paraClient || !isAuthenticated) {
         throw new Error("Client not initialized or not authenticated");
       }
-      return client.createWallet(options);
+      return paraClient.createWallet(options);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: WALLETS_QUERY_KEY });
@@ -73,10 +68,10 @@ export const useWallets = () => {
     { skipDistribute?: boolean; types?: WalletType[] }
   >({
     mutationFn: async (options) => {
-      if (!client || !isAuthenticated) {
+      if (!paraClient || !isAuthenticated) {
         throw new Error("Client not initialized or not authenticated");
       }
-      return client.createWalletPerType(options);
+      return paraClient.createWalletPerType(options);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: WALLETS_QUERY_KEY });

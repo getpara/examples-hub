@@ -1,11 +1,11 @@
-import React from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import React, { useState } from "react";
+import { Pressable, ScrollView, View, ActivityIndicator } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { VerificationCodeInput } from "@/components/auth/VerificationCodeInput";
 import { Text } from "~/components/ui/text";
 import { usePara } from "@/hooks/usePara";
 import { AuthNavigationParams, PreserveTypes } from "@/types";
-import { paramsToCreds } from "@/util/authHelpers";
+import { paramsToCreds } from "@/utils/authUtils";
 
 export default function OtpVerificationScreen() {
   const { paraClient } = usePara();
@@ -13,16 +13,25 @@ export default function OtpVerificationScreen() {
   const routeParams = useLocalSearchParams<PreserveTypes<AuthNavigationParams, "authType">>();
   const creds = paramsToCreds(routeParams)!;
 
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [resendSuccess, setResendSuccess] = useState(false);
+
   if (!paraClient) return null;
 
   const handleComplete = async (code: string) => {
+    setIsVerifying(true);
+    setError(null);
+    setResendSuccess(false);
+
     try {
       const biometricsId = await (creds.authType === "email"
         ? paraClient.verifyEmailBiometricsId({ verificationCode: code })
         : paraClient.verifyPhoneBiometricsId({ verificationCode: code }));
 
       if (!biometricsId) {
-        console.error("Verification failed, biometrics ID not returned.");
+        setError("Verification failed, biometrics ID not returned.");
         return;
       }
 
@@ -32,16 +41,27 @@ export default function OtpVerificationScreen() {
       });
     } catch (error) {
       console.error("Error verifying code:", error);
+      setError(error instanceof Error ? error.message : "Verification failed. Please try again.");
+    } finally {
+      setIsVerifying(false);
     }
   };
 
   const handleResend = async () => {
+    setIsResending(true);
+    setError(null);
+    setResendSuccess(false);
+
     try {
       await (creds.authType === "email"
         ? paraClient.resendVerificationCode()
         : paraClient.resendVerificationCodeByPhone());
+      setResendSuccess(true);
     } catch (error) {
       console.error("Error resending verification code:", error);
+      setError(error instanceof Error ? error.message : "Failed to resend code. Please try again.");
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -61,19 +81,48 @@ export default function OtpVerificationScreen() {
           <VerificationCodeInput
             maxLength={6}
             onComplete={handleComplete}
-            onClear={() => {}}
+            onClear={() => {
+              setError(null);
+              setResendSuccess(false);
+            }}
             autoComplete={false}
           />
 
+          {isVerifying && (
+            <View className="mt-4 items-center">
+              <ActivityIndicator
+                size="small"
+                color="#0000ff"
+              />
+              <Text className="mt-2 text-center text-muted-foreground">Verifying...</Text>
+            </View>
+          )}
+
+          {error && <Text className="mt-4 text-center text-red-500">{error}</Text>}
+
+          {resendSuccess && (
+            <Text className="mt-4 text-center text-green-500">Verification code has been resent successfully.</Text>
+          )}
+
           <View className="mt-8 items-center">
             <Text className="text-center text-muted-foreground mb-4">Didn't receive the code?</Text>
-            <Pressable
-              onPress={handleResend}
-              accessibilityRole="button"
-              accessibilityLabel="Resend verification code"
-              className="p-2">
-              <Text className="text-primary font-bold text-lg">Resend Code</Text>
-            </Pressable>
+
+            {isResending ? (
+              <View className="p-2">
+                <ActivityIndicator
+                  size="small"
+                  color="#0000ff"
+                />
+              </View>
+            ) : (
+              <Pressable
+                onPress={handleResend}
+                accessibilityRole="button"
+                accessibilityLabel="Resend verification code"
+                className="p-2">
+                <Text className="text-primary font-bold text-lg">Resend Code</Text>
+              </Pressable>
+            )}
           </View>
         </View>
 
