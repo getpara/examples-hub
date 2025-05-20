@@ -9,9 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@getpara/react-sdk": "1.12.0",
-    "@getpara/solana-web3.js-v1-integration": "1.12.0",
-    "@solana/web3.js": "1.98.0",
+    "@getpara/react-sdk": "1.15.1",
+    "@getpara/solana-web3.js-v1-integration": "1.15.1",
+    "@solana/web3.js": "1.98.2",
     "lucide-react": "0.483.0",
     "next": "15.1.5",
     "react": "^19.0.0",
