@@ -46,6 +46,7 @@
     "typescript": "^5"
   },
   "resolutions": {
+    "@getpara/react-sdk": "1.15.1",
     "@getpara/react-common": "1.15.1"
   }
 }
