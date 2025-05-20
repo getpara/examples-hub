@@ -1,0 +1,7 @@
+{
+  "name": "deno-server-workaround",
+  "private": true,
+  "dependencies": {
+    "@sentry/node": "9.19.0"
+  }
+}

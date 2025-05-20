@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "install:all": "echo 'Deno does not require explicit installation, dependencies are downloaded on first use'",
+    "install:all": "npm install && echo 'Deno dependencies are downloaded on first use'",
     "build:ui": "cd test-ui && yarn build",
     "copy:ui": "mkdir -p public && cp -r test-ui/dist/* public/",
     "build:dev": "deno task build:ui && deno task copy:ui",
@@ -23,6 +23,8 @@
     "@getpara/viem-v2-integration": "npm:@getpara/viem-v2-integration@1.11.0",
     "cosmjs-types": "npm:cosmjs-types@0.9.0",
     "ethers": "npm:ethers@6.13.5",
-    "viem": "npm:viem@2.8.6"
-  }
+    "viem": "npm:viem@2.8.6",
+    "@sentry/node": "node:@sentry/node"
+  },
+  "nodeModulesDir": true
 }

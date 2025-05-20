@@ -361,6 +361,10 @@ jobs:
         uses: denoland/setup-deno@v2
         with:
           deno-version: vx.x.x
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
       - name: Build projects
         run: |
           set +e
@@ -387,6 +391,37 @@ jobs:
             echo "========================================================"
             (
               cd "$GITHUB_WORKSPACE/$PROJECT"
+              
+              # Add package.json if it doesn't exist
+              if [ ! -f "package.json" ]; then
+                echo '{
+                  "name": "deno-server-workaround",
+                  "private": true,
+                  "dependencies": {
+                    "@sentry/node": "9.19.0"
+                  }
+                }' > package.json
+              fi
+              
+              # Install npm dependencies to handle @sentry/node
+              echo "Installing npm dependencies..."
+              npm install
+              
+              # Update deno.json to use node modules for Sentry
+              if [ -f "deno.json" ]; then
+                # Check if nodeModulesDir is already set
+                if ! grep -q "nodeModulesDir" deno.json; then
+                  # Add nodeModulesDir true
+                  sed -i 's/}/,\n  "nodeModulesDir": true\n}/' deno.json
+                fi
+                
+                # Check if @sentry/node is already mapped
+                if ! grep -q '"@sentry/node"' deno.json; then
+                  # Add @sentry/node mapping
+                  sed -i 's/"imports": {/"imports": {\n    "@sentry\/node": "node:@sentry\/node",/' deno.json
+                fi
+              fi
+              
               # Cache dependencies first
               echo "Caching dependencies..."
               if [ -f "deno.json" ] && grep -q '"imports":' deno.json; then
