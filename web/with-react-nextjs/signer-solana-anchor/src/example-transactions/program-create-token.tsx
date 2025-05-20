@@ -3,11 +3,10 @@
 import { usePara } from "@/components/ParaProvider";
 import { useState, useEffect } from "react";
 import * as anchor from "@coral-xyz/anchor";
-import { Transaction, LAMPORTS_PER_SOL, SystemProgram, VersionedTransaction } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL, SystemProgram } from "@solana/web3.js";
 import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
-import { TransferTokens } from "../../target/types/transfer_tokens";
-
-import idl from "../../target/idl/transfer_tokens.json" assert { type: "json" };
+import { TransferTokens } from "../idl/transfer_tokens";
+import idl from "../idl/transfer_tokens.json" assert { type: "json" };
 
 export default function ProgramDeploymentDemo() {
   const [isCreateTokenLoading, setIsCreateTokenLoading] = useState(false);
