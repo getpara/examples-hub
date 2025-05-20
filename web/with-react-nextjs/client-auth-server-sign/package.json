@@ -9,9 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@getpara/react-sdk": "1.12.0",
-    "@getpara/server-sdk": "1.12.0",
-    "@getpara/ethers-v6-integration": "1.12.0",
+    "@getpara/react-sdk": "1.15.1",
+    "@getpara/server-sdk": "1.15.1",
+    "@getpara/ethers-v6-integration": "1.15.1",
     "ethers": "6.13.5",
     "next": "15.1.5",
     "react": "^19.0.0",
