@@ -393,6 +393,12 @@ jobs:
                 deno cache --reload server.ts || true
               fi
               
+              # Create dist directory if it doesn't exist
+              mkdir -p dist
+              
+              # Create empty .env file if it doesn't exist
+              touch .env
+              
               if [ -f "deno.json" ] && grep -q '"tasks":' deno.json && grep -q '"build"' deno.json; then
                 deno task build
               else

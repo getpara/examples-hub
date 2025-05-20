@@ -25,5 +25,6 @@
     "ethers": "npm:ethers@6.13.5",
     "viem": "npm:viem@2.8.6",
     "@sentry/node": "npm:@sentry/node@9.21.0"
-  }
+  },
+  "nodeModulesDir": "auto"
 }
