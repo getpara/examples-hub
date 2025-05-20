@@ -7,7 +7,7 @@
     "ios": "react-native run-ios",
     "start": "react-native start",
     "postinstall": "cd ios && pod install && cd ..",
-    "build": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output /dev/null && react-native bundle --platform ios --dev false --entry-file index.js --bundle-output /dev/null"
+    "build": "npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output /dev/null && npx react-native bundle --platform ios --dev false --entry-file index.js --bundle-output /dev/null"
   },
   "dependencies": {
     "@cosmjs/stargate": "0.33.1",
