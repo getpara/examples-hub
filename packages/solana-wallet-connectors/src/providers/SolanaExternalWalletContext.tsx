@@ -125,11 +125,7 @@ export function SolanaExternalWalletProvider({
       const signature = await solanaSignMessage(encodedMessage);
 
       return {
-        externalWallet: {
-          address: solanaAddress.toString(),
-          type: 'SOLANA',
-          provider: wallet?.adapter?.name,
-        },
+        address: solanaAddress.toString(),
         signature: bs58.encode(signature),
       };
     } catch (e) {
