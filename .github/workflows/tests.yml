@@ -350,18 +350,30 @@ jobs:
             cat failed_projects.txt | sed 's/^/  - /'
             exit 1
           fi
-
   build-server-deno:
     runs-on: ubuntu-latest
     env:
       PROJECT_DIR: "server/with-deno"
+      NODE_OPTIONS: "--max-old-space-size=4096"
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup Deno
         uses: denoland/setup-deno@v2
+        id: deno-setup
         with:
-          deno-version: vx.x.x
+          deno-version: "2.2.11"
+          cache: true
+
+      - name: Debug Deno
+        run: |
+          echo "Deno version: $(deno --version)"
+          echo "Deno binary path: $(which deno)"
+          echo "Release channel: ${{ steps.deno-setup.outputs.release-channel }}"
+          echo "Installed version: ${{ steps.deno-setup.outputs.deno-version }}"
+
       - name: Build projects
+        timeout-minutes: 15 #
         run: |
           set +e
           # Check if the directory itself has a deno.json file first (for single project)
@@ -387,14 +399,32 @@ jobs:
             echo "========================================================"
             (
               cd "$GITHUB_WORKSPACE/$PROJECT"
-              # Cache dependencies first
+              # Create dist directory if it doesn't exist
+              mkdir -p dist
+              chmod 755 dist
+              
+              # Create empty .env file if it doesn't exist
+              touch .env
+              
+              # Cache dependencies first - with retries
               echo "Caching dependencies..."
               if [ -f "deno.json" ] && grep -q '"imports":' deno.json; then
-                deno cache --reload server.ts || true
+                for ATTEMPT in {1..3}; do
+                  echo "Dependency cache attempt $ATTEMPT..."
+                  deno cache --reload server.ts && break || sleep 5
+                done
               fi
               
               if [ -f "deno.json" ] && grep -q '"tasks":' deno.json && grep -q '"build"' deno.json; then
-                deno task build
+                # Try to build with retries
+                for ATTEMPT in {1..3}; do
+                  echo "Build attempt $ATTEMPT..."
+                  deno task build && break || {
+                    echo "Build failed, retrying after clearing cache..."
+                    rm -rf "$HOME/.cache/deno/npm" || true
+                    sleep 5
+                  }
+                done
               else
                 echo "No build task found, checking main entry point..."
                 MAIN_FILE=$(find . -maxdepth 1 -name "*.ts" -o -name "main.ts" -o -name "index.ts" -o -name "server.ts" | head -n 1)
@@ -407,7 +437,8 @@ jobs:
               fi
               BUILD_EXIT_CODE=$?
               # Clean up Deno cache if needed
-              if [ -d "$HOME/.cache/deno" ]; then
+              if [ $BUILD_EXIT_CODE -ne 0 ] && [ -d "$HOME/.cache/deno" ]; then
+                echo "Build failed, cleaning up cache..."
                 rm -rf "$HOME/.cache/deno/npm"
               fi
               exit $BUILD_EXIT_CODE
