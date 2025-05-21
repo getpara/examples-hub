@@ -2,13 +2,13 @@ import { getNetworkPrefix, OnRampProvider, OnRampPurchaseStatus } from '@getpara
 import { lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import { reverseCurrencyLookup, offRampSend, getCurrencyCode } from '../utils/index.js';
 import styled from 'styled-components';
-import { Props } from '../types/index.js';
+import { OnRampProps } from '../types/index.js';
 import type { MoonPayBuyWidget, MoonPaySellWidget } from '@moonpay/moonpay-react';
 
 const MOONPAY_PUBLISHABLE_KEY = 'pk_live_EQva4LydtNDE0Rwd9X7SG9w58wqOzbux';
 const MOONPAY_PUBLISHABLE_KEY_TEST = 'pk_test_HYobzemmTBXxcSStVA4dSED6jT';
 
-export const MoonPayEmbed = ({ para, isDark, isEmbedded, onRampConfig, onRampPurchase, setOnRampPurchase }: Props) => {
+export const MoonPayEmbed = ({ para, isDark, isEmbedded, onRampConfig, onRampPurchase, setOnRampPurchase }: OnRampProps) => {
   const [LazyMoonPayBuyWidget, setLazyMoonPayBuyWidget] = useState<React.FC<Parameters<typeof MoonPayBuyWidget>[0]>>(null);
   const [LazyMoonPaySellWidget, setLazyMoonPaySellWidget] =
     useState<React.FC<Parameters<typeof MoonPaySellWidget>[0]>>(null);

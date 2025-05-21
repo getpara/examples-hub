@@ -8,7 +8,7 @@ import {
   reverseCurrencyLookup,
   offRampSend,
 } from '../utils/index.js';
-import { Props } from '../types/index.js';
+import { OnRampProps } from '../types/index.js';
 
 const TEST_MODE_FORBIDDEN = ['ETH_ETH', 'ETH_USDC'];
 
@@ -21,7 +21,7 @@ export const RampEmbed = ({
   apiKey,
   onClose,
   setOnRampPurchase,
-}: Props & { apiKey: string }) => {
+}: OnRampProps & { apiKey: string }) => {
   const { currencyCodes } = getCurrencyCodes(onRampConfig, {
     provider: OnRampProvider.RAMP,
     purchaseType: onRampPurchase.type,

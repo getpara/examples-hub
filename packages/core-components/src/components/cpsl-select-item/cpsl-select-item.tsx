@@ -29,7 +29,14 @@ export class CpslSelectItem {
   render() {
     return (
       <Host>
-        <div part="outer-container" class="outer-container" onClick={this.handleItemClick}>
+        <div
+          part="outer-container"
+          class="outer-container"
+          onClick={e => {
+            this.handleItemClick();
+            e.stopPropagation();
+          }}
+        >
           <div part="inner-container" class={{ 'inner-container': true, 'selected': this.selected }}>
             <slot></slot>
           </div>

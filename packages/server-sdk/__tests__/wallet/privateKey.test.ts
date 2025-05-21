@@ -2,6 +2,7 @@ import { vi, describe, it, expect, afterEach, beforeEach } from 'vitest';
 import { Environment } from '@getpara/core-sdk';
 
 import { workerMessagePostSpy } from '../mocks/mockWorker.js';
+import * as workerWrapper from '../../src/workers/workerWrapper.js';
 import { getPrivateKey } from '../../src/wallet/privateKey.js';
 import { COSMOS_PREFIX, PARTNER, USER, WALLET } from '../constants.js';
 import { TEST_CTX } from '../setup.js';
@@ -17,6 +18,7 @@ describe('privateKey', () => {
 
   afterEach(() => {
     vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('getPrivateKey', () => {
@@ -24,7 +26,6 @@ describe('privateKey', () => {
       const resp = await getPrivateKey(TEST_CTX, USER.id, WALLET.id, WALLET.share, USER.sessionCookie);
 
       expect(resp).toEqual(WALLET.privateKey);
-
       expect(workerMessagePostSpy).toBeCalledTimes(1);
       expect(workerMessagePostSpy).toBeCalledWith({
         env: Environment.DEV,
@@ -44,6 +45,30 @@ describe('privateKey', () => {
         wasmOverride: undefined,
         workId: expect.any(String),
       });
+    });
+
+    it('should handle errors during worker setup', async () => {
+      const setupWorkerSpy = vi.spyOn(workerWrapper, 'setupWorker');
+      setupWorkerSpy.mockRejectedValueOnce(new Error('Worker setup error'));
+
+      await expect(getPrivateKey(TEST_CTX, USER.id, WALLET.id, WALLET.share)).rejects.toThrow('Worker setup error');
+    });
+
+    it('should handle worker onError callback directly', async () => {
+      let capturedOnError: Function;
+      const mockWorker = { postMessage: vi.fn() };
+      const setupWorkerSpy = vi.spyOn(workerWrapper, 'setupWorker');
+      setupWorkerSpy.mockImplementation((ctx, _onMessage, onError) => {
+        capturedOnError = onError;
+        return Promise.resolve(mockWorker as any);
+      });
+
+      const privateKeyPromise = getPrivateKey(TEST_CTX, USER.id, WALLET.id, WALLET.share);
+      await vi.waitFor(() => expect(setupWorkerSpy).toHaveBeenCalled());
+
+      const testError = new Error('Worker error callback test');
+      capturedOnError(testError);
+      await expect(privateKeyPromise).rejects.toThrow('Worker error callback test');
     });
   });
 });

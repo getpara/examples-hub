@@ -145,6 +145,7 @@ import Snapchat from './snapchat.svg';
 import Solana from './solana.svg';
 import SpacingHeight from './spacing-height.svg';
 import Star04Filled from './star-04-filled.svg';
+import Star05 from './star-05.svg';
 import Stars01Filled from './stars-01-filled.svg';
 import Stars02 from './stars-02.svg';
 import Stars from './stars.svg';
@@ -549,6 +550,7 @@ export const Icons = {
   solana: Solana,
   spacingHeight: SpacingHeight,
   star04Filled: Star04Filled,
+  star05: Star05,
   stars01Filled: Stars01Filled,
   stars02: Stars02,
   stars: Stars,

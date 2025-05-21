@@ -11,11 +11,21 @@ export async function signTransaction(
   sessionCookie?: string,
   isDKLS?: boolean,
 ): Promise<SignatureRes> {
-  return await new Promise(async resolve => {
-    const worker = await setupWorker(ctx, async sendTransactionRes => {
-      resolve(sendTransactionRes);
-      worker.terminate();
-    });
+  return new Promise(async (resolve, reject) => {
+    let worker = null;
+
+    worker = await setupWorker(
+      ctx,
+      async sendTransactionRes => {
+        resolve(sendTransactionRes);
+        worker?.terminate();
+      },
+      error => {
+        worker?.terminate();
+        reject(error);
+      },
+    );
+
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,
@@ -42,11 +52,21 @@ export async function sendTransaction(
   sessionCookie?: string,
   isDKLS?: boolean,
 ): Promise<SignatureRes> {
-  return await new Promise(async resolve => {
-    const worker = await setupWorker(ctx, async sendTransactionRes => {
-      resolve(sendTransactionRes);
-      worker.terminate();
-    });
+  return new Promise(async (resolve, reject) => {
+    let worker = null;
+
+    worker = await setupWorker(
+      ctx,
+      async sendTransactionRes => {
+        resolve(sendTransactionRes);
+        worker?.terminate();
+      },
+      error => {
+        worker?.terminate();
+        reject(error);
+      },
+    );
+
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,
@@ -73,11 +93,22 @@ export async function signMessage(
   isDKLS?: boolean,
   cosmosSignDoc?: string,
 ): Promise<SignatureRes> {
-  return await new Promise(async resolve => {
-    const worker = await setupWorker(ctx, async signMessageRes => {
-      resolve(signMessageRes);
-      worker.terminate();
-    });
+  return new Promise(async (resolve, reject) => {
+    let worker = null;
+
+    worker = await setupWorker(
+      ctx,
+      async signMessageRes => {
+        resolve(signMessageRes);
+        worker?.terminate();
+      },
+      error => {
+        console.error(`Worker error in signMessage for userId ${userId}, walletId ${walletId}:`, error);
+        worker?.terminate();
+        reject(error);
+      },
+    );
+
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,
@@ -102,11 +133,22 @@ export async function ed25519Sign(
   base64Bytes: string,
   sessionCookie: string,
 ): Promise<SignatureRes> {
-  return await new Promise(async resolve => {
-    const worker = await setupWorker(ctx, async signMessageRes => {
-      resolve(signMessageRes);
-      worker.terminate();
-    });
+  return new Promise(async (resolve, reject) => {
+    let worker = null;
+
+    worker = await setupWorker(
+      ctx,
+      async signMessageRes => {
+        resolve(signMessageRes);
+        worker?.terminate();
+      },
+      error => {
+        console.error(`Worker error in ed25519Sign for userId ${userId}, walletId ${walletId}:`, error);
+        worker?.terminate();
+        reject(error);
+      },
+    );
+
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,

@@ -196,38 +196,17 @@ export class CpslPopover {
       default:
         triggerCallbacks = [
           {
-            eventName: 'mousedown',
-            callback: e => {
+            eventName: 'click',
+            callback: (e: Event) => {
               const targetId = (e.target as any).id ?? '';
 
               if (targetId === 'ignore-click') {
                 return;
-              }
-
-              if (this.preventBlur) {
-                e.preventDefault();
               }
 
               if (!this.open) {
                 this.present();
-              } else if (e.target === this.triggerEl) {
-                this.close();
               }
-            },
-          },
-          {
-            eventName: 'touchstart',
-            callback: e => {
-              const targetId = (e.target as any).id ?? '';
-
-              if (targetId === 'ignore-click') {
-                return;
-              }
-
-              if (this.preventBlur) {
-                e.preventDefault();
-              }
-              this.present();
             },
           },
         ];

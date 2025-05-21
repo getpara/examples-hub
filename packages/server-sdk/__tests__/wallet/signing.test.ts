@@ -6,6 +6,7 @@ import { workerMessagePostSpy } from '../mocks/mockWorker.js';
 import { signTransaction, sendTransaction, signMessage, ed25519Sign } from '../../src/wallet/signing.js';
 import { COSMOS_PREFIX, PARTNER, USER, WALLET, SHARE, TX, CHAIN, MESSAGE, BASE64_BYTES, SIGNATURE } from '../constants.js';
 import { TEST_CTX } from '../setup.js';
+import * as workerWrapper from '../../src/workers/workerWrapper.js';
 
 describe('signing', () => {
   beforeAll(async () => {
@@ -46,6 +47,27 @@ describe('signing', () => {
         workId: expect.any(String),
       });
     });
+
+    it('handles worker errors', async () => {
+      const mockWorkerError = new Error('Mock worker error');
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, _onSuccess, onError, _workId) => {
+        setTimeout(() => onError(mockWorkerError), 0);
+        return Promise.resolve({ postMessage: vi.fn() }) as any;
+      });
+      await expect(
+        signTransaction(TEST_CTX, USER.id, WALLET.id, SHARE.id, TX, CHAIN, USER.sessionCookie, true),
+      ).rejects.toThrow(mockWorkerError);
+    });
+
+    it('handles setup errors', async () => {
+      const setupWorkerError = new Error('Setup worker failed');
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, _onSuccess, _onError, _workId) => {
+        throw setupWorkerError;
+      });
+      await expect(
+        signTransaction(TEST_CTX, USER.id, WALLET.id, SHARE.id, TX, CHAIN, USER.sessionCookie, true),
+      ).rejects.toThrow(setupWorkerError);
+    });
   });
 
   describe('sendTransaction', () => {
@@ -75,6 +97,27 @@ describe('signing', () => {
         workId: expect.any(String),
       });
     });
+
+    it('handles worker errors', async () => {
+      const mockWorkerError = new Error('Mock worker error');
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, _onSuccess, onError, _workId) => {
+        setTimeout(() => onError(mockWorkerError), 0);
+        return Promise.resolve({ postMessage: vi.fn() }) as any;
+      });
+      await expect(
+        sendTransaction(TEST_CTX, USER.id, WALLET.id, SHARE.id, TX, CHAIN, USER.sessionCookie, true),
+      ).rejects.toThrow(mockWorkerError);
+    });
+
+    it('handles setup errors', async () => {
+      const setupWorkerError = new Error('Setup worker failed');
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, _onSuccess, _onError, _workId) => {
+        throw setupWorkerError;
+      });
+      await expect(
+        sendTransaction(TEST_CTX, USER.id, WALLET.id, SHARE.id, TX, CHAIN, USER.sessionCookie, true),
+      ).rejects.toThrow(setupWorkerError);
+    });
   });
 
   describe('signMessage', () => {
@@ -103,6 +146,27 @@ describe('signing', () => {
         workId: expect.any(String),
       });
     });
+
+    it('handles worker errors', async () => {
+      const mockWorkerError = new Error('Mock worker error');
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, _onSuccess, onError, _workId) => {
+        setTimeout(() => onError(mockWorkerError), 0);
+        return Promise.resolve({ postMessage: vi.fn() }) as any;
+      });
+      await expect(signMessage(TEST_CTX, USER.id, WALLET.id, SHARE.id, MESSAGE, USER.sessionCookie, true)).rejects.toThrow(
+        mockWorkerError,
+      );
+    });
+
+    it('handles setup errors', async () => {
+      const setupWorkerError = new Error('Setup worker failed');
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, _onSuccess, _onError, _workId) => {
+        throw setupWorkerError;
+      });
+      await expect(signMessage(TEST_CTX, USER.id, WALLET.id, SHARE.id, MESSAGE, USER.sessionCookie, true)).rejects.toThrow(
+        setupWorkerError,
+      );
+    });
   });
 
   describe('ed25519Sign', () => {
@@ -129,6 +193,27 @@ describe('signing', () => {
         wasmOverride: undefined,
         workId: expect.any(String),
       });
+    });
+
+    it('handles worker errors', async () => {
+      const mockWorkerError = new Error('Mock worker error');
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, _onSuccess, onError, _workId) => {
+        setTimeout(() => onError(mockWorkerError), 0);
+        return Promise.resolve({ postMessage: vi.fn() }) as any;
+      });
+      await expect(ed25519Sign(TEST_CTX, USER.id, WALLET.id, SHARE.id, BASE64_BYTES, USER.sessionCookie)).rejects.toThrow(
+        mockWorkerError,
+      );
+    });
+
+    it('handles setup errors', async () => {
+      const setupWorkerError = new Error('Setup worker failed');
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, _onSuccess, _onError, _workId) => {
+        throw setupWorkerError;
+      });
+      await expect(ed25519Sign(TEST_CTX, USER.id, WALLET.id, SHARE.id, BASE64_BYTES, USER.sessionCookie)).rejects.toThrow(
+        setupWorkerError,
+      );
     });
   });
 });

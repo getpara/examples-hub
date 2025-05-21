@@ -1,4 +1,4 @@
-import { setupWorker } from '../workers/workerWrapper.js';
+import { setupWorker, SyncWorker } from '../workers/workerWrapper.js';
 import { Ctx, distributeNewShare, waitUntilTrue, TPregenIdentifierType } from '@getpara/core-sdk';
 import { BackupKitEmailProps, TWalletType } from '@getpara/user-management-client';
 
@@ -43,33 +43,43 @@ export function keygen(
   walletId: string;
   recoveryShare: string | null;
 }> {
-  return new Promise(async resolve => {
-    const worker = await setupWorker(ctx, async res => {
-      await waitUntilTrue(async () => isKeygenComplete(ctx, userId, res.walletId), 15000, 1000);
-      if (skipDistribute) {
+  return new Promise(async (resolve, reject) => {
+    let worker: Worker | SyncWorker | null = null;
+
+    worker = await setupWorker(
+      ctx,
+      async res => {
+        await waitUntilTrue(async () => isKeygenComplete(ctx, userId, res.walletId), 15000, 1000);
+        if (skipDistribute) {
+          resolve({
+            signer: res.signer,
+            walletId: res.walletId,
+            recoveryShare: null,
+          });
+          worker?.terminate();
+          return;
+        }
+
+        const recoveryShare = await distributeNewShare({
+          ctx,
+          userId,
+          walletId: res.walletId,
+          userShare: res.signer,
+          emailProps,
+        });
         resolve({
           signer: res.signer,
           walletId: res.walletId,
-          recoveryShare: null,
+          recoveryShare,
         });
-        worker.terminate();
-        return;
-      }
+        worker?.terminate();
+      },
+      error => {
+        worker?.terminate();
+        reject(error);
+      },
+    );
 
-      const recoveryShare = await distributeNewShare({
-        ctx,
-        userId,
-        walletId: res.walletId,
-        userShare: res.signer,
-        emailProps,
-      });
-      resolve({
-        signer: res.signer,
-        walletId: res.walletId,
-        recoveryShare,
-      });
-      worker.terminate();
-    });
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,
@@ -100,21 +110,31 @@ export function preKeygen(
   walletId: string;
   recoveryShare: string | null;
 }> {
-  return new Promise(async resolve => {
-    const worker = await setupWorker(ctx, async res => {
-      await waitUntilTrue(
-        async () => isPreKeygenComplete(ctx, pregenIdentifier, pregenIdentifierType, res.walletId),
-        15000,
-        1000,
-      );
+  return new Promise(async (resolve, reject) => {
+    let worker: Worker | SyncWorker | null = null;
 
-      resolve({
-        signer: res.signer,
-        walletId: res.walletId,
-        recoveryShare: null,
-      });
-      worker.terminate();
-    });
+    worker = await setupWorker(
+      ctx,
+      async res => {
+        await waitUntilTrue(
+          async () => isPreKeygenComplete(ctx, pregenIdentifier, pregenIdentifierType, res.walletId),
+          15000,
+          1000,
+        );
+
+        resolve({
+          signer: res.signer,
+          walletId: res.walletId,
+          recoveryShare: null,
+        });
+        worker?.terminate();
+      },
+      error => {
+        worker?.terminate();
+        reject(error);
+      },
+    );
+
     const email: string | undefined = undefined;
     const params = { pregenIdentifier, pregenIdentifierType, type, secretKey, partnerId, email };
     if (pregenIdentifierType === 'EMAIL') {
@@ -124,7 +144,7 @@ export function preKeygen(
       env: ctx.env,
       apiKey: ctx.apiKey,
       cosmosPrefix: ctx.cosmosPrefix,
-      params: params,
+      params,
       functionType: 'PREKEYGEN',
       offloadMPCComputationURL: ctx.offloadMPCComputationURL,
       disableWorkers: ctx.disableWorkers,
@@ -149,21 +169,33 @@ export function refresh(
   signer: string;
   protocolId: string;
 }> {
-  return new Promise(async resolve => {
-    const worker = await setupWorker(ctx, async res => {
-      /* v8 ignore next 3 */
-      if (!(await waitUntilTrue(async () => isRefreshComplete(ctx, userId, walletId, newPartnerId), 15000, 1000))) {
-        throw new Error('refresh failed');
-      }
+  return new Promise(async (resolve, reject) => {
+    let worker: Worker | SyncWorker | null = null;
 
-      const { protocolId, signer } = res;
+    worker = await setupWorker(
+      ctx,
+      async res => {
+        /* v8 ignore next 5 */
+        if (!(await waitUntilTrue(async () => isRefreshComplete(ctx, userId, walletId, newPartnerId), 15000, 1000))) {
+          worker?.terminate();
+          reject(new Error('refresh failed'));
+          return;
+        }
 
-      resolve({
-        signer,
-        protocolId,
-      });
-      worker.terminate();
-    });
+        const { protocolId, signer } = res;
+
+        resolve({
+          signer,
+          protocolId,
+        });
+        worker?.terminate();
+      },
+      error => {
+        worker?.terminate();
+        reject(error);
+      },
+    );
+
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,
@@ -189,16 +221,26 @@ export function ed25519Keygen(
   walletId: string;
   recoveryShare: string | null;
 }> {
-  return new Promise(async resolve => {
-    const worker = await setupWorker(ctx, async res => {
-      await waitUntilTrue(async () => isKeygenComplete(ctx, userId, res.walletId), 15000, 1000);
-      resolve({
-        signer: res.signer,
-        walletId: res.walletId,
-        recoveryShare: null,
-      });
-      worker.terminate();
-    });
+  return new Promise(async (resolve, reject) => {
+    let worker: Worker | SyncWorker | null = null;
+
+    worker = await setupWorker(
+      ctx,
+      async res => {
+        await waitUntilTrue(async () => isKeygenComplete(ctx, userId, res.walletId), 15000, 1000);
+        resolve({
+          signer: res.signer,
+          walletId: res.walletId,
+          recoveryShare: null,
+        });
+        worker?.terminate();
+      },
+      error => {
+        worker?.terminate();
+        reject(error);
+      },
+    );
+
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,
@@ -223,20 +265,29 @@ export function ed25519PreKeygen(
   walletId: string;
   recoveryShare: string | null;
 }> {
-  return new Promise(async resolve => {
-    const worker = await setupWorker(ctx, async res => {
-      await waitUntilTrue(
-        async () => isPreKeygenComplete(ctx, pregenIdentifier, pregenIdentifierType, res.walletId),
-        15000,
-        1000,
-      );
-      resolve({
-        signer: res.signer,
-        walletId: res.walletId,
-        recoveryShare: null,
-      });
-      worker.terminate();
-    });
+  return new Promise(async (resolve, reject) => {
+    let worker: Worker | SyncWorker | null = null;
+
+    worker = await setupWorker(
+      ctx,
+      async res => {
+        await waitUntilTrue(
+          async () => isPreKeygenComplete(ctx, pregenIdentifier, pregenIdentifierType, res.walletId),
+          15000,
+          1000,
+        );
+        resolve({
+          signer: res.signer,
+          walletId: res.walletId,
+          recoveryShare: null,
+        });
+        worker?.terminate();
+      },
+      error => {
+        worker?.terminate();
+        reject(error);
+      },
+    );
 
     const email: string | undefined = undefined;
     const params = { pregenIdentifier, pregenIdentifierType, email };
@@ -247,7 +298,7 @@ export function ed25519PreKeygen(
       env: ctx.env,
       apiKey: ctx.apiKey,
       cosmosPrefix: ctx.cosmosPrefix,
-      params: params,
+      params,
       functionType: 'ED25519_PREKEYGEN',
       disableWorkers: ctx.disableWorkers,
       sessionCookie,

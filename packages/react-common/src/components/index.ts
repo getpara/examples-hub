@@ -1,6 +1,5 @@
 export * from './MoonPayEmbed.js';
 export * from './RampEmbed.js';
-export * from './StripeEmbed.js';
 export * from './common.js';
 export * from './HeroSpinner.js';
 export * from './KnownDevices.js';

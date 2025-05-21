@@ -265,7 +265,7 @@ export class CpslSelect {
             {!this.required && this.showOptionalLabel ? <span class="optional-label">(optional)</span> : ''}
           </label>
         )}
-        <div part="select-container" id="select-container" class={{ 'select-container': true, 'error-container': Boolean(this.errorText) }} onMouseDown={this.handleClick}>
+        <div part="select-container" id="select-container" class={{ 'select-container': true, 'error-container': Boolean(this.errorText) }} onClick={this.handleClick}>
           {this.hasSelectedItem && this.showFormattedSelectedItem && <slot name="selected-item"></slot>}
           <div class={{ 'selected-container-content': true, 'hidden': this.hasSelectedItem && this.showFormattedSelectedItem }} id="selected-container-content" style={{}}>
             {(!this.hasSelectedItem || !this.showFormattedSelectedItem) && (

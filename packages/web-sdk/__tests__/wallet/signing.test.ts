@@ -18,6 +18,7 @@ import { getWorkerContent } from '../utils.js';
 import { TEST_CTX } from '../setup.js';
 import { workerMessagePostSpy, workerTerminateSpy } from '../mocks/mockWorker.js';
 import { ed25519Sign, sendTransaction, signMessage, signTransaction } from '../../src/wallet/signing.js';
+import * as workerWrapper from '../../src/workers/workerWrapper.js';
 
 describe('signing', () => {
   beforeEach(async () => {
@@ -63,7 +64,19 @@ describe('signing', () => {
         wasmOverride: undefined,
       });
     });
+
+    it('handles worker errors', async () => {
+      const mockWorkerError = new Error('Mock worker error');
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, _onSuccess, onError) => {
+        setTimeout(() => onError(mockWorkerError), 0);
+        return Promise.resolve({ postMessage: vi.fn(), terminate: vi.fn() }) as any;
+      });
+      await expect(
+        signTransaction(TEST_CTX, USER.id, WALLET.id, WALLET.share, TX, CHAIN, USER.sessionCookie, true),
+      ).rejects.toThrow(mockWorkerError);
+    });
   });
+
   describe('sendTransaction', () => {
     it('success', async () => {
       const resp = await sendTransaction(TEST_CTX, USER.id, WALLET.id, WALLET.share, TX, CHAIN, USER.sessionCookie, true);
@@ -93,7 +106,19 @@ describe('signing', () => {
         wasmOverride: undefined,
       });
     });
+
+    it('handles worker errors', async () => {
+      const mockWorkerError = new Error('Mock worker error');
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, _onSuccess, onError) => {
+        setTimeout(() => onError(mockWorkerError), 0);
+        return Promise.resolve({ postMessage: vi.fn(), terminate: vi.fn() }) as any;
+      });
+      await expect(
+        sendTransaction(TEST_CTX, USER.id, WALLET.id, WALLET.share, TX, CHAIN, USER.sessionCookie, true),
+      ).rejects.toThrow(mockWorkerError);
+    });
   });
+
   describe('signMessage', () => {
     it('success', async () => {
       const resp = await signMessage(
@@ -132,7 +157,19 @@ describe('signing', () => {
         wasmOverride: undefined,
       });
     });
+
+    it('handles worker errors', async () => {
+      const mockWorkerError = new Error('Mock worker error');
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, _onSuccess, onError) => {
+        setTimeout(() => onError(mockWorkerError), 0);
+        return Promise.resolve({ postMessage: vi.fn(), terminate: vi.fn() }) as any;
+      });
+      await expect(
+        signMessage(TEST_CTX, USER.id, WALLET.id, WALLET.share, MESSAGE, USER.sessionCookie, true, COSMOS_SIGN_DOC),
+      ).rejects.toThrow(mockWorkerError);
+    });
   });
+
   describe('ed25519Sign', () => {
     it('success', async () => {
       const resp = await ed25519Sign(TEST_CTX, USER.id, WALLET.id, WALLET.share, BASE64_BYTES, USER.sessionCookie);
@@ -158,6 +195,17 @@ describe('signing', () => {
         disableWebSockets: false,
         wasmOverride: undefined,
       });
+    });
+
+    it('handles worker errors', async () => {
+      const mockWorkerError = new Error('Mock worker error');
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, _onSuccess, onError) => {
+        setTimeout(() => onError(mockWorkerError), 0);
+        return Promise.resolve({ postMessage: vi.fn(), terminate: vi.fn() }) as any;
+      });
+      await expect(
+        ed25519Sign(TEST_CTX, USER.id, WALLET.id, WALLET.share, BASE64_BYTES, USER.sessionCookie),
+      ).rejects.toThrow(mockWorkerError);
     });
   });
 });

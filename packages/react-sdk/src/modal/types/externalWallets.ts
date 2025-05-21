@@ -6,6 +6,7 @@ export enum EvmWallet {
   ZERION = 'ZERION',
   SAFE = 'SAFE',
   RABBY = 'RABBY',
+  OKX = 'OKX',
 }
 
 export enum SolanaWallet {

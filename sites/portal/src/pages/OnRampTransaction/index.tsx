@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { MoonPayEmbed, StripeEmbed } from '@getpara/react-common';
+import { MoonPayEmbed } from '@getpara/react-common';
 import { usePara } from '../../components/ParaContext';
+import { StripeEmbed } from '../../components/StripeEmbed';
 import { authLogin, authLoginWithPassword, authUpdateKeyShares } from '../../utils/authLogin';
 import { useModalOutletContext } from '../../hooks/useModalOutletContext';
 import { CurrentWalletIds, OnRampConfig, OnRampProvider, OnRampPurchase } from '@getpara/user-management-client';

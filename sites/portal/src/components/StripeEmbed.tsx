@@ -2,9 +2,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { OnrampSession, OnrampSessionResult, StripeOnramp, loadStripeOnramp } from '@stripe/crypto';
 import { Network, OnRampAsset, OnRampProvider, OnRampPurchaseStatus } from '@getpara/web-sdk';
 import { CpslSpinner } from '@getpara/react-components';
-import { SpinnerContainer } from './common.js';
+import { OnRampProps, SpinnerContainer } from '@getpara/react-common';
 import styled from 'styled-components';
-import { Props } from '../types/index.js';
 
 export const STRIPE_PUBLISHABLE_KEY =
   'pk_live_51MvquNGrzDeP5yP9EgVSMBPQbrbg0oHDjPIIXypePd0jzOFjbadyfO7wBKLHhUtbKIUiEUVC3YYcTJyAmJ8xA7JE00T2UDfYKz';
@@ -40,7 +39,7 @@ const useOnrampSessionListener = (type, session, callback) => {
   }, [session, callback, type]);
 };
 
-export const StripeEmbed = ({ para, isDark, isEmbedded, onRampPurchase, setOnRampPurchase }: Props) => {
+export const StripeEmbed = ({ para, isDark, isEmbedded, onRampPurchase, setOnRampPurchase }: OnRampProps) => {
   const [isReady, setIsReady] = useState(false);
 
   const isStripeEmbed = useMemo(() => onRampPurchase.provider === OnRampProvider.STRIPE, [onRampPurchase]);

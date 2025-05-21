@@ -13,6 +13,8 @@ import {
 import { COSMOS_PREFIX, PARTNER, PREGEN_WALLET, SECRET_KEY, USER, WALLET } from '../constants.js';
 import { TEST_CTX } from '../setup.js';
 import { mockGetPregenWallets, mockGetWallets } from '../mocks/mockUserManagementClient.js';
+import * as workerWrapper from '../../src/workers/workerWrapper.js';
+import * as coreSdk from '@getpara/core-sdk';
 
 describe('keygen', () => {
   beforeAll(async () => {
@@ -121,7 +123,37 @@ describe('keygen', () => {
         workId: expect.any(String),
       });
     });
+
+    it('handles worker errors', async () => {
+      const mockWorkerError = new Error('Mock worker error');
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, _onSuccess, onError, _workId) => {
+        setTimeout(() => onError(mockWorkerError), 0);
+        return Promise.resolve({ postMessage: vi.fn() }) as any;
+      });
+      await expect(keygen(TEST_CTX, USER.id, 'EVM', SECRET_KEY, USER.sessionCookie)).rejects.toThrow(mockWorkerError);
+    });
+
+    it('handles setup errors', async () => {
+      const setupWorkerError = new Error('Setup worker failed');
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, _onSuccess, _onError, _workId) => {
+        throw setupWorkerError;
+      });
+      await expect(keygen(TEST_CTX, USER.id, 'EVM', SECRET_KEY, USER.sessionCookie)).rejects.toThrow(setupWorkerError);
+    });
+
+    it('handles waitUntilTrue errors', async () => {
+      const waitUntilTrueError = new Error('waitUntilTrue failed');
+      vi.spyOn(coreSdk, 'waitUntilTrue').mockRejectedValueOnce(waitUntilTrueError);
+
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, onSuccess, _onError, _workId) => {
+        setTimeout(() => onSuccess({ signer: WALLET.signer, walletId: WALLET.id }), 0);
+        return Promise.resolve({ postMessage: vi.fn() }) as any;
+      });
+
+      await expect(keygen(TEST_CTX, USER.id, 'EVM', SECRET_KEY, USER.sessionCookie)).rejects.toThrow(waitUntilTrueError);
+    });
   });
+
   describe('preKeygen', () => {
     it('success', async () => {
       const resp = await preKeygen(TEST_CTX, USER.email, 'EMAIL', 'EVM', SECRET_KEY, false, PARTNER.id, USER.sessionCookie);
@@ -153,7 +185,43 @@ describe('keygen', () => {
         workId: expect.any(String),
       });
     });
+
+    it('handles worker errors', async () => {
+      const mockWorkerError = new Error('Mock worker error');
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, _onSuccess, onError, _workId) => {
+        setTimeout(() => onError(mockWorkerError), 0);
+        return Promise.resolve({ postMessage: vi.fn() }) as any;
+      });
+      await expect(
+        preKeygen(TEST_CTX, USER.email, 'EMAIL', 'EVM', SECRET_KEY, false, PARTNER.id, USER.sessionCookie),
+      ).rejects.toThrow(mockWorkerError);
+    });
+
+    it('handles setup errors', async () => {
+      const setupWorkerError = new Error('Setup worker failed');
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, _onSuccess, _onError, _workId) => {
+        throw setupWorkerError;
+      });
+      await expect(
+        preKeygen(TEST_CTX, USER.email, 'EMAIL', 'EVM', SECRET_KEY, false, PARTNER.id, USER.sessionCookie),
+      ).rejects.toThrow(setupWorkerError);
+    });
+
+    it('handles waitUntilTrue errors', async () => {
+      const waitUntilTrueError = new Error('waitUntilTrue failed');
+      vi.spyOn(coreSdk, 'waitUntilTrue').mockRejectedValueOnce(waitUntilTrueError);
+
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, onSuccess, _onError, _workId) => {
+        setTimeout(() => onSuccess({ signer: PREGEN_WALLET.signer, walletId: PREGEN_WALLET.id }), 0);
+        return Promise.resolve({ postMessage: vi.fn() }) as any;
+      });
+
+      await expect(
+        preKeygen(TEST_CTX, USER.email, 'EMAIL', 'EVM', SECRET_KEY, false, PARTNER.id, USER.sessionCookie),
+      ).rejects.toThrow(waitUntilTrueError);
+    });
   });
+
   describe('ed25519Keygen', () => {
     it('success', async () => {
       const resp = await ed25519Keygen(TEST_CTX, USER.id, USER.sessionCookie, {});
@@ -177,7 +245,37 @@ describe('keygen', () => {
         workId: expect.any(String),
       });
     });
+
+    it('handles worker errors', async () => {
+      const mockWorkerError = new Error('Mock worker error');
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, _onSuccess, onError, _workId) => {
+        setTimeout(() => onError(mockWorkerError), 0);
+        return Promise.resolve({ postMessage: vi.fn() }) as any;
+      });
+      await expect(ed25519Keygen(TEST_CTX, USER.id, USER.sessionCookie, {})).rejects.toThrow(mockWorkerError);
+    });
+
+    it('handles setup errors', async () => {
+      const setupWorkerError = new Error('Setup worker failed');
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, _onSuccess, _onError, _workId) => {
+        throw setupWorkerError;
+      });
+      await expect(ed25519Keygen(TEST_CTX, USER.id, USER.sessionCookie, {})).rejects.toThrow(setupWorkerError);
+    });
+
+    it('handles waitUntilTrue errors', async () => {
+      const waitUntilTrueError = new Error('waitUntilTrue failed');
+      vi.spyOn(coreSdk, 'waitUntilTrue').mockRejectedValueOnce(waitUntilTrueError);
+
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, onSuccess, _onError, _workId) => {
+        setTimeout(() => onSuccess({ signer: WALLET.signer, walletId: WALLET.id }), 0);
+        return Promise.resolve({ postMessage: vi.fn() }) as any;
+      });
+
+      await expect(ed25519Keygen(TEST_CTX, USER.id, USER.sessionCookie, {})).rejects.toThrow(waitUntilTrueError);
+    });
   });
+
   describe('ed25519PreKeygen', () => {
     it('success', async () => {
       const resp = await ed25519PreKeygen(TEST_CTX, USER.email, 'EMAIL', USER.sessionCookie);
@@ -204,6 +302,35 @@ describe('keygen', () => {
         wasmOverride: undefined,
         workId: expect.any(String),
       });
+    });
+
+    it('handles worker errors', async () => {
+      const mockWorkerError = new Error('Mock worker error');
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, _onSuccess, onError, _workId) => {
+        setTimeout(() => onError(mockWorkerError), 0);
+        return Promise.resolve({ postMessage: vi.fn() }) as any;
+      });
+      await expect(ed25519PreKeygen(TEST_CTX, USER.email, 'EMAIL', USER.sessionCookie)).rejects.toThrow(mockWorkerError);
+    });
+
+    it('handles setup errors', async () => {
+      const setupWorkerError = new Error('Setup worker failed');
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, _onSuccess, _onError, _workId) => {
+        throw setupWorkerError;
+      });
+      await expect(ed25519PreKeygen(TEST_CTX, USER.email, 'EMAIL', USER.sessionCookie)).rejects.toThrow(setupWorkerError);
+    });
+
+    it('handles waitUntilTrue errors', async () => {
+      const waitUntilTrueError = new Error('waitUntilTrue failed');
+      vi.spyOn(coreSdk, 'waitUntilTrue').mockRejectedValueOnce(waitUntilTrueError);
+
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, onSuccess, _onError, _workId) => {
+        setTimeout(() => onSuccess({ signer: PREGEN_WALLET.signer, walletId: PREGEN_WALLET.id }), 0);
+        return Promise.resolve({ postMessage: vi.fn() }) as any;
+      });
+
+      await expect(ed25519PreKeygen(TEST_CTX, USER.email, 'EMAIL', USER.sessionCookie)).rejects.toThrow(waitUntilTrueError);
     });
   });
 });

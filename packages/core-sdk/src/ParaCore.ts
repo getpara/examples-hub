@@ -2079,15 +2079,6 @@ export abstract class ParaCore implements CoreInterface {
    * @returns {string} the URL for the user to log in with OAuth.
    */
   async getOAuthUrl({ method, deeplinkUrl, ...params }: CoreMethodParams<'getOAuthUrl'>): CoreMethodResponse<'getOAuthUrl'> {
-    // Validate deeplink URL if provided and not empty
-    if (deeplinkUrl) {
-      try {
-        new URL(deeplinkUrl);
-      } catch {
-        throw new Error('Invalid deeplink URL');
-      }
-    }
-
     const sessionLookupId = params.sessionLookupId ?? (await this.#prepareLogin());
 
     return constructUrl({

@@ -50,6 +50,6 @@ export const useWalletBalance = (args?: Partial<GetWalletBalanceParams>) => {
       selectedWallet?.isExternal ? chainId : '',
     ],
     queryFn: queryFn,
-    enabled: !!selectedWallet && !!rpcUrl && !!account?.isConnected,
+    enabled: !!client && !!selectedWallet && !!rpcUrl && !!account?.isConnected,
   });
 };

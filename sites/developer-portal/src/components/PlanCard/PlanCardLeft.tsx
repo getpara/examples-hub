@@ -52,10 +52,8 @@ export const PlanCardLeft = ({
   // Else if its the enterprise option show their enterprise price if applicable or set to 0 to show the "Ask Us" CTA
   // Default to the default plan price from Stripe
   const monthlyCostString = isSubscribed ? planPrice : isEnterprise ? (enterprisePrice ?? 0) : planPrice;
-  const allowanceStringWithTier = isTieredPrice ? `0-${(tiers?.[0].upTo ?? 0).toLocaleString()} Users/mo*` : allowanceString;
-  const footnoteWithTier = isTieredPrice
-    ? `*Additional users above the limit are charged at $${tierUnitPrice} per user.`
-    : footnote;
+  const allowanceStringWithTier = isTieredPrice ? `Up to ${(tiers?.[0].upTo ?? 0).toLocaleString()} MAUs*` : allowanceString;
+  const additionalCharge = isTieredPrice ? `$${tierUnitPrice} per additional MAU` : '';
 
   const handleUpgradePlanClick = () => {
     onUpgradeClick(slug);
@@ -84,9 +82,14 @@ export const PlanCardLeft = ({
                 /mo
               </Typography>
             </span>
-            <Typography color="secondary" className="para:text-sm">
+            <Typography color="muted" className="para:text-sm para:font-medium">
               {allowanceStringWithTier}
             </Typography>
+            {additionalCharge && (
+              <Typography color="muted" className="para:text-sm para:font-medium">
+                {additionalCharge}
+              </Typography>
+            )}
           </>
         )}
         {isHigherPlanActive ? null : isActive ? (
@@ -118,10 +121,10 @@ export const PlanCardLeft = ({
           </Button>
         )}
       </div>
-      {footnoteWithTier && (
+      {footnote && (
         <div className="para:flex para:flex-1 para:items-end">
           <Typography color="muted" className="para:text-2xs para:font-medium">
-            {footnoteWithTier}
+            {footnote}
           </Typography>
         </div>
       )}

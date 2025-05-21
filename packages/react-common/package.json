@@ -15,8 +15,6 @@
     "@getpara/web-sdk": "2.0.0-alpha.15",
     "@moonpay/moonpay-react": "^1.8.3",
     "@ramp-network/ramp-instant-sdk": "^4.0.5",
-    "@stripe/crypto": "^0.0.4",
-    "@stripe/stripe-js": "^3.4.0",
     "libphonenumber-js": "^1.11.1",
     "styled-components": "^6.1.8",
     "ua-parser-js": "^2.0.2"

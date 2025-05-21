@@ -16,6 +16,7 @@ import { getWorkerContent } from '../utils.js';
 import { mockDistributeNewShare } from '../mocks/mockCoreSdk.js';
 import { workerMessagePostSpy, workerTerminateSpy } from '../mocks/mockWorker.js';
 import { TEST_CTX } from '../setup.js';
+import * as workerWrapper from '../../src/workers/workerWrapper.js';
 
 describe('keygen', () => {
   beforeEach(async () => {
@@ -91,6 +92,14 @@ describe('keygen', () => {
         wasmOverride: undefined,
       });
     });
+    it('handles worker errors', async () => {
+      const mockWorkerError = new Error('Mock worker error');
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, _onSuccess, onError) => {
+        setTimeout(() => onError(mockWorkerError), 0);
+        return Promise.resolve({ postMessage: vi.fn(), terminate: vi.fn() }) as any;
+      });
+      await expect(keygen(TEST_CTX, USER.id, 'EVM', SECRET_KEY, false, USER.sessionCookie)).rejects.toThrow(mockWorkerError);
+    });
   });
   describe('preKeygen', () => {
     it('success', async () => {
@@ -123,6 +132,17 @@ describe('keygen', () => {
         disableWebSockets: false,
         wasmOverride: undefined,
       });
+    });
+
+    it('handles worker errors', async () => {
+      const mockWorkerError = new Error('Mock worker error');
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, _onSuccess, onError) => {
+        setTimeout(() => onError(mockWorkerError), 0);
+        return Promise.resolve({ postMessage: vi.fn(), terminate: vi.fn() }) as any;
+      });
+      await expect(
+        preKeygen(TEST_CTX, USER.email, 'EMAIL', 'EVM', SECRET_KEY, false, PARTNER.id, USER.sessionCookie),
+      ).rejects.toThrow(mockWorkerError);
     });
   });
   describe('refresh', () => {
@@ -164,6 +184,26 @@ describe('keygen', () => {
         returnObject: true,
       });
     });
+
+    it('handles worker errors', async () => {
+      const mockWorkerError = new Error('Mock worker error');
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, _onSuccess, onError) => {
+        setTimeout(() => onError(mockWorkerError), 0);
+        return Promise.resolve({ postMessage: vi.fn(), terminate: vi.fn() }) as any;
+      });
+      await expect(
+        refresh(
+          TEST_CTX,
+          USER.sessionCookie,
+          USER.id,
+          WALLET.id,
+          WALLET.share,
+          PARTNER.id,
+          PARTNER.id,
+          WALLET.preExistingProtocolId,
+        ),
+      ).rejects.toThrow(mockWorkerError);
+    });
   });
   describe('ed25519Keygen', () => {
     it('success', async () => {
@@ -187,6 +227,15 @@ describe('keygen', () => {
         disableWebSockets: false,
         wasmOverride: undefined,
       });
+    });
+
+    it('handles worker errors', async () => {
+      const mockWorkerError = new Error('Mock worker error');
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, _onSuccess, onError) => {
+        setTimeout(() => onError(mockWorkerError), 0);
+        return Promise.resolve({ postMessage: vi.fn(), terminate: vi.fn() }) as any;
+      });
+      await expect(ed25519Keygen(TEST_CTX, USER.id, USER.sessionCookie, {})).rejects.toThrow(mockWorkerError);
     });
   });
   describe('ed25519PreKeygen', () => {
@@ -215,6 +264,15 @@ describe('keygen', () => {
         disableWebSockets: false,
         wasmOverride: undefined,
       });
+    });
+
+    it('handles worker errors', async () => {
+      const mockWorkerError = new Error('Mock worker error');
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, _onSuccess, onError) => {
+        setTimeout(() => onError(mockWorkerError), 0);
+        return Promise.resolve({ postMessage: vi.fn(), terminate: vi.fn() }) as any;
+      });
+      await expect(ed25519PreKeygen(TEST_CTX, USER.email, 'EMAIL', USER.sessionCookie)).rejects.toThrow(mockWorkerError);
     });
   });
 });

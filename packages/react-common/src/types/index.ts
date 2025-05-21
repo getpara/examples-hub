@@ -3,7 +3,7 @@ import ParaWeb, { type OnRampConfig, type OnRampPurchase } from '@getpara/web-sd
 
 export * from './externalWalletCommon.js';
 
-export type Props = {
+export type OnRampProps = {
   appName?: string;
   para: ParaWeb;
   isDark?: boolean;

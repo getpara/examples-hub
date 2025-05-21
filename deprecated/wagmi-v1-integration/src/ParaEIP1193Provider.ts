@@ -56,6 +56,7 @@ export class ParaEIP1193Provider extends EventEmitter implements EIP1193Provider
   private walletClient: WalletClient;
   private chainTransportSubscribe?: WebSocketTransportSubscribeFn;
   private chains: Record<Hex, AddEthereumChainParameter>;
+  private viemChains: Record<Hex, Chain>;
   private para: ParaWeb;
   private disableModal: boolean;
   private storage: Pick<Storage, 'setItem' | 'getItem'>;
@@ -70,6 +71,10 @@ export class ParaEIP1193Provider extends EventEmitter implements EIP1193Provider
     this.para = opts.para;
     this.modalProps = { ...opts };
     this.disableModal = !!opts.disableModal;
+    this.viemChains = opts.chains.reduce((acc, curChain) => {
+      acc[decimalToHex(`${curChain.id}`)] = curChain;
+      return acc;
+    }, {});
     this.chains = this.wagmiChainsToAddEthereumChainParameters(opts.chains);
     this.setCurrentChain(decimalToHex(chainId));
 
@@ -94,8 +99,9 @@ export class ParaEIP1193Provider extends EventEmitter implements EIP1193Provider
   };
 
   private wagmiChainToAddEthereumChainParameters = (chain: Chain): [Hex, AddEthereumChainParameter] => {
-    const hexChainId = decimalToHex(`${chain.id}`);
-    const viemChain = getViemChain(`${chain.id}`);
+    const chainIdStr = `${chain.id}`;
+    const hexChainId = decimalToHex(chainIdStr);
+    const viemChain = this.viemChains[hexChainId] || getViemChain(chainIdStr);
 
     return [
       hexChainId,
@@ -124,7 +130,7 @@ export class ParaEIP1193Provider extends EventEmitter implements EIP1193Provider
     const chain = this.chains[chainId];
     this.setChainId(chainId);
 
-    const viemChain = getViemChain(hexToDecimal(chainId));
+    const viemChain = this.viemChains[chainId] || getViemChain(hexToDecimal(chainId));
     let transport: Transport;
     if (chain.rpcUrls[0].startsWith('ws')) {
       transport = webSocket(chain.rpcUrls[0]);
@@ -263,7 +269,7 @@ export class ParaEIP1193Provider extends EventEmitter implements EIP1193Provider
       }
       case 'wallet_switchEthereumChain': {
         if (!this.chains[params[0].chainId]) {
-          const chain = getViemChain(hexToDecimal(params[0].chainId));
+          const chain = this.viemChains[params[0].chainId] || getViemChain(hexToDecimal(params[0].chainId));
           const [hexChainId, addEthereumChainParameter] = this.wagmiChainToAddEthereumChainParameters(chain);
           this.chains[hexChainId] = addEthereumChainParameter;
 

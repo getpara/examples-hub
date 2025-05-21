@@ -8,11 +8,21 @@ export async function getPrivateKey(
   share: string,
   sessionCookie?: string,
 ): Promise<string> {
-  return await new Promise(async resolve => {
-    const worker = await setupWorker(ctx, async res => {
-      resolve(res);
-      worker.terminate();
-    });
+  return new Promise(async (resolve, reject) => {
+    let worker = null;
+
+    worker = await setupWorker(
+      ctx,
+      async res => {
+        resolve(res);
+        worker?.terminate();
+      },
+      error => {
+        worker?.terminate();
+        reject(error);
+      },
+    );
+
     worker.postMessage({
       env: ctx.env,
       apiKey: ctx.apiKey,

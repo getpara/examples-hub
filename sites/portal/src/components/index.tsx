@@ -10,5 +10,6 @@ export * from './ModalSuccess';
 export * from './ParaContext';
 export * from './PartnerIcon';
 export * from './PortalModalWrapper';
+export * from './StripeEmbed';
 
 export * from './common';

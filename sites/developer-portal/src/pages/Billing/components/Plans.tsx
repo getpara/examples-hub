@@ -3,12 +3,14 @@ import { usePlanMetadata } from '../../../hooks/configs/usePlanMetadata';
 import { RequestEnterpriseModal } from '../../../components/RequestEnterpriseModal/RequestEnterpriseModal';
 import { useGetSelectedOrganization } from '../../../hooks/api/queries/useOrganizations';
 import { useGetOrganizationEnterprisePrice } from '../../../hooks/api/queries/useOrganizationEnterprisePrice';
-import { CpslText } from '@getpara/react-components';
+import { CpslIcon, CpslText } from '@getpara/react-components';
 import { useGetOrganizationSubscription } from '../../../hooks/api/queries/useOrganizationSubscription';
 import { PlanCard } from '../../../components/PlanCard/PlanCard';
 import { UpgradeModal } from './UpgradeModal';
 import { useStripePlan } from '../../../hooks/useStripePlan';
-import { FREE_PLAN_SLUG } from '../../../utils/constants';
+import { FREE_PLAN_SLUG, MOBILE_SIZE } from '../../../utils/constants';
+import { styled } from 'styled-components';
+import { BaseCard } from '../../../components/common';
 
 export const Plans = () => {
   const { planMeta } = usePlanMetadata();
@@ -48,6 +50,15 @@ export const Plans = () => {
       <CpslText variant="bodyL" weight="semiBold">
         Plans
       </CpslText>
+      <InfoContainer>
+        <InfoContent>
+          <Icon icon="star05" />
+          <CpslText variant="bodyM" weight="medium">
+            All plans include up to 50 users in your Beta Environment where all Para features from all plan tiers are
+            available.
+          </CpslText>
+        </InfoContent>
+      </InfoContainer>
       {planMeta?.map((planMetadata, index) => (
         <PlanCard
           key={planMetadata.slug}
@@ -64,3 +75,22 @@ export const Plans = () => {
     </>
   );
 };
+
+const InfoContainer = styled(BaseCard)`
+  @media (min-width: ${MOBILE_SIZE + 1}px) {
+    width: 848px;
+  }
+
+  max-width: 848px;
+
+  --card-border-color: #ff4e00;
+`;
+
+const InfoContent = styled.div`
+  display: flex;
+  gap: 16px;
+`;
+
+const Icon = styled(CpslIcon)`
+  --icon-color: #ff4e00;
+`;

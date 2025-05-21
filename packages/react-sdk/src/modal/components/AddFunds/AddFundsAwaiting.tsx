@@ -3,7 +3,7 @@ import { OnRampProvider, OnRampPurchase } from '@getpara/web-sdk';
 import { useModalStore } from '../../stores/index.js';
 import { lazy, useEffect, useMemo, useState } from 'react';
 import { ModalStep } from '../../utils/steps.js';
-import { MoonPayEmbed as CommonMoonPayEmbed, RampEmbed, StripeEmbed } from '@getpara/react-common';
+import { MoonPayEmbed as CommonMoonPayEmbed, RampEmbed } from '@getpara/react-common';
 import styled from 'styled-components';
 import { useGoBack } from '../../hooks/useGoBack.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
@@ -50,14 +50,14 @@ export const AddFundsAwaiting = () => {
       return null;
     }
     switch (onRampPurchase?.provider) {
-      case OnRampProvider.STRIPE:
-        return <StripeEmbed {...props} onRampConfig={props.onRampConfig} />;
       case OnRampProvider.MOONPAY:
         return !MoonPayEmbed || typeof window === 'undefined' ? null : (
           <MoonPayEmbed {...props} onRampConfig={props.onRampConfig} />
         );
       case OnRampProvider.RAMP:
         return <RampEmbed {...props} apiKey={props.onRampConfig?.rampApiKey ?? ''} onRampConfig={props.onRampConfig} />;
+      default:
+        return null;
     }
   }, [onRampPurchase?.provider, MoonPayEmbed]);
 

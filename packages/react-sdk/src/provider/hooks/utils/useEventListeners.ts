@@ -19,6 +19,7 @@ import { ACCOUNT_BASE_KEY } from '../queries/useAccount.js';
 import { useStore } from '../../stores/useStore.js';
 import { WALLET_BASE_KEY } from '../queries/useWallet.js';
 import { Callbacks } from '../../types/provider.js';
+import { WALLET_BALANCE_BASE_KEY } from '../queries/useWalletBalance.js';
 
 export const useEventListeners = ({
   onLogin,
@@ -40,6 +41,7 @@ export const useEventListeners = ({
   const loginOrSetupListener = useCallback(() => {
     queryClient.refetchQueries({ queryKey: [ACCOUNT_BASE_KEY] });
     queryClient.refetchQueries({ queryKey: [WALLET_BASE_KEY] });
+    queryClient.invalidateQueries({ queryKey: [WALLET_BALANCE_BASE_KEY], exact: false });
   }, [queryClient]);
 
   const loginListener = useCallback(

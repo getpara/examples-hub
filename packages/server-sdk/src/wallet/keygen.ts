@@ -32,34 +32,54 @@ export function keygen(
   walletId: string;
   recoveryShare: string | null;
 }> {
-  return new Promise(async resolve => {
+  return new Promise(async (resolve, reject) => {
     const workId = uuid.v4();
-    const worker = await setupWorker(
-      ctx,
-      async res => {
-        await waitUntilTrue(async () => isKeygenComplete(ctx, userId, res.walletId), 15000, 1000);
-        resolve({
-          signer: res.signer,
-          walletId: res.walletId,
-          recoveryShare: null,
-        });
-      },
-      workId,
-    );
-    worker.postMessage({
-      env: ctx.env,
-      apiKey: ctx.apiKey,
-      cosmosPrefix: ctx.cosmosPrefix,
-      params: { userId, secretKey, type },
-      functionType: 'KEYGEN',
-      offloadMPCComputationURL: ctx.offloadMPCComputationURL,
-      disableWorkers: ctx.disableWorkers,
-      sessionCookie,
-      useDKLS: ctx.useDKLS,
-      disableWebSockets: ctx.disableWebSockets,
-      wasmOverride: ctx.wasmOverride,
-      workId,
-    });
+
+    try {
+      const worker = await setupWorker(
+        ctx,
+        async res => {
+          try {
+            await waitUntilTrue(async () => isKeygenComplete(ctx, userId, res.walletId), 15000, 1000);
+            resolve({
+              signer: res.signer,
+              walletId: res.walletId,
+              recoveryShare: null,
+            });
+          } catch (error) {
+            reject(error);
+          }
+        },
+        error => {
+          reject(error);
+        },
+        workId,
+        {
+          userId,
+          type,
+          functionType: 'KEYGEN',
+          disableWorkers: ctx.disableWorkers,
+          disableWebSockets: ctx.disableWebSockets,
+        },
+      );
+
+      worker.postMessage({
+        env: ctx.env,
+        apiKey: ctx.apiKey,
+        cosmosPrefix: ctx.cosmosPrefix,
+        params: { userId, secretKey, type },
+        functionType: 'KEYGEN',
+        offloadMPCComputationURL: ctx.offloadMPCComputationURL,
+        disableWorkers: ctx.disableWorkers,
+        sessionCookie,
+        useDKLS: ctx.useDKLS,
+        disableWebSockets: ctx.disableWebSockets,
+        wasmOverride: ctx.wasmOverride,
+        workId,
+      });
+    } catch (error) {
+      reject(error);
+    }
   });
 }
 
@@ -77,44 +97,65 @@ export function preKeygen(
   walletId: string;
   recoveryShare: string | null;
 }> {
-  return new Promise(async resolve => {
+  return new Promise(async (resolve, reject) => {
     const workId = uuid.v4();
-    const worker = await setupWorker(
-      ctx,
-      async res => {
-        await waitUntilTrue(
-          async () => isPreKeygenComplete(ctx, pregenIdentifier, pregenIdentifierType, res.walletId),
-          15000,
-          1000,
-        );
 
-        resolve({
-          signer: res.signer,
-          walletId: res.walletId,
-          recoveryShare: null,
-        });
-      },
-      workId,
-    );
-    const email: string | undefined = undefined;
-    const params = { pregenIdentifier, pregenIdentifierType, secretKey, partnerId, email, type };
-    if (pregenIdentifierType === 'EMAIL') {
-      params.email = pregenIdentifier;
+    try {
+      const email: string | undefined = undefined;
+      const params = { pregenIdentifier, pregenIdentifierType, secretKey, partnerId, email, type };
+      if (pregenIdentifierType === 'EMAIL') {
+        params.email = pregenIdentifier;
+      }
+
+      const worker = await setupWorker(
+        ctx,
+        async res => {
+          try {
+            await waitUntilTrue(
+              async () => isPreKeygenComplete(ctx, pregenIdentifier, pregenIdentifierType, res.walletId),
+              15000,
+              1000,
+            );
+
+            resolve({
+              signer: res.signer,
+              walletId: res.walletId,
+              recoveryShare: null,
+            });
+          } catch (error) {
+            reject(error);
+          }
+        },
+        error => {
+          reject(error);
+        },
+        workId,
+        {
+          ...params,
+          secretKey: null,
+          functionType: 'PREKEYGEN',
+          disableWorkers: ctx.disableWorkers,
+          disableWebSockets: ctx.disableWebSockets,
+        },
+      );
+
+      worker.postMessage({
+        env: ctx.env,
+        apiKey: ctx.apiKey,
+        cosmosPrefix: ctx.cosmosPrefix,
+        params: params,
+        functionType: 'PREKEYGEN',
+        offloadMPCComputationURL: ctx.offloadMPCComputationURL,
+        disableWorkers: ctx.disableWorkers,
+        sessionCookie,
+        useDKLS: ctx.useDKLS,
+        disableWebSockets: ctx.disableWebSockets,
+        wasmOverride: ctx.wasmOverride,
+        workId,
+      });
+    } catch (error) {
+      reject(error);
     }
-    worker.postMessage({
-      env: ctx.env,
-      apiKey: ctx.apiKey,
-      cosmosPrefix: ctx.cosmosPrefix,
-      params: params,
-      functionType: 'PREKEYGEN',
-      offloadMPCComputationURL: ctx.offloadMPCComputationURL,
-      disableWorkers: ctx.disableWorkers,
-      sessionCookie,
-      useDKLS: ctx.useDKLS,
-      disableWebSockets: ctx.disableWebSockets,
-      wasmOverride: ctx.wasmOverride,
-      workId,
-    });
   });
 }
 
@@ -128,32 +169,50 @@ export function ed25519Keygen(
   walletId: string;
   recoveryShare: string | null;
 }> {
-  return new Promise(async resolve => {
+  return new Promise(async (resolve, reject) => {
     const workId = uuid.v4();
-    const worker = await setupWorker(
-      ctx,
-      async res => {
-        await waitUntilTrue(async () => isKeygenComplete(ctx, userId, res.walletId), 15000, 1000);
-        resolve({
-          signer: res.signer,
-          walletId: res.walletId,
-          recoveryShare: null,
-        });
-      },
-      workId,
-    );
-    worker.postMessage({
-      env: ctx.env,
-      apiKey: ctx.apiKey,
-      cosmosPrefix: ctx.cosmosPrefix,
-      params: { userId },
-      functionType: 'ED25519_KEYGEN',
-      disableWorkers: ctx.disableWorkers,
-      sessionCookie,
-      disableWebSockets: ctx.disableWebSockets,
-      wasmOverride: ctx.wasmOverride,
-      workId,
-    });
+
+    try {
+      const worker = await setupWorker(
+        ctx,
+        async res => {
+          try {
+            await waitUntilTrue(async () => isKeygenComplete(ctx, userId, res.walletId), 15000, 1000);
+            resolve({
+              signer: res.signer,
+              walletId: res.walletId,
+              recoveryShare: null,
+            });
+          } catch (error) {
+            reject(error);
+          }
+        },
+        error => {
+          reject(error);
+        },
+        workId,
+        {
+          userId,
+          functionType: 'ED25519_KEYGEN',
+          disableWorkers: ctx.disableWorkers,
+          disableWebSockets: ctx.disableWebSockets,
+        },
+      );
+      worker.postMessage({
+        env: ctx.env,
+        apiKey: ctx.apiKey,
+        cosmosPrefix: ctx.cosmosPrefix,
+        params: { userId },
+        functionType: 'ED25519_KEYGEN',
+        disableWorkers: ctx.disableWorkers,
+        sessionCookie,
+        disableWebSockets: ctx.disableWebSockets,
+        wasmOverride: ctx.wasmOverride,
+        workId,
+      });
+    } catch (error) {
+      reject(error);
+    }
   });
 }
 
@@ -167,40 +226,60 @@ export function ed25519PreKeygen(
   walletId: string;
   recoveryShare: string | null;
 }> {
-  return new Promise(async resolve => {
+  return new Promise(async (resolve, reject) => {
     const workId = uuid.v4();
-    const worker = await setupWorker(
-      ctx,
-      async res => {
-        await waitUntilTrue(
-          async () => isPreKeygenComplete(ctx, pregenIdentifier, pregenIdentifierType, res.walletId),
-          15000,
-          1000,
-        );
-        resolve({
-          signer: res.signer,
-          walletId: res.walletId,
-          recoveryShare: null,
-        });
-      },
-      workId,
-    );
-    const email: string | undefined = undefined;
-    const params = { pregenIdentifier, pregenIdentifierType, email };
-    if (pregenIdentifierType === 'EMAIL') {
-      params.email = pregenIdentifier;
+
+    try {
+      const email: string | undefined = undefined;
+      const params = { pregenIdentifier, pregenIdentifierType, email };
+      if (pregenIdentifierType === 'EMAIL') {
+        params.email = pregenIdentifier;
+      }
+
+      const worker = await setupWorker(
+        ctx,
+        async res => {
+          try {
+            await waitUntilTrue(
+              async () => isPreKeygenComplete(ctx, pregenIdentifier, pregenIdentifierType, res.walletId),
+              15000,
+              1000,
+            );
+            resolve({
+              signer: res.signer,
+              walletId: res.walletId,
+              recoveryShare: null,
+            });
+          } catch (error) {
+            reject(error);
+          }
+        },
+        error => {
+          reject(error);
+        },
+        workId,
+        {
+          params,
+          functionType: 'ED25519_PREKEYGEN',
+          disableWorkers: ctx.disableWorkers,
+          disableWebSockets: ctx.disableWebSockets,
+        },
+      );
+
+      worker.postMessage({
+        env: ctx.env,
+        apiKey: ctx.apiKey,
+        cosmosPrefix: ctx.cosmosPrefix,
+        params: params,
+        functionType: 'ED25519_PREKEYGEN',
+        disableWorkers: ctx.disableWorkers,
+        sessionCookie,
+        disableWebSockets: ctx.disableWebSockets,
+        wasmOverride: ctx.wasmOverride,
+        workId,
+      });
+    } catch (error) {
+      reject(error);
     }
-    worker.postMessage({
-      env: ctx.env,
-      apiKey: ctx.apiKey,
-      cosmosPrefix: ctx.cosmosPrefix,
-      params: params,
-      functionType: 'ED25519_PREKEYGEN',
-      disableWorkers: ctx.disableWorkers,
-      sessionCookie,
-      disableWebSockets: ctx.disableWebSockets,
-      wasmOverride: ctx.wasmOverride,
-      workId,
-    });
   });
 }

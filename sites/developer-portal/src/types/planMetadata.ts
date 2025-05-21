@@ -2,6 +2,7 @@ export type PlanIncludes = {
   title: string;
   subtitle: string;
   includes: string[];
+  excludes: string[];
   comingSoon: string[];
 };
 
