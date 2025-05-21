@@ -103,6 +103,17 @@ export const bridgeMethodHandlers: Record<string, (para: ParaWeb, args: any) => 
     logger.info('Getting email...');
     return para.email;
   },
+  getCurrentSessionDetails: async (para, _) => {
+    logger.info('Getting current session details...');
+
+    const result = {
+      authInfo: para.authInfo,
+      userId: para.userId,
+    };
+
+    logger.info('Session details retrieved:', result.userId ? 'User authenticated' : 'No active session');
+    return result;
+  },
   getWebChallenge: async (para, args: GetWebChallengeArgs) => {
     logger.info('Getting web challenge...');
 
