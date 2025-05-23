@@ -1,0 +1,27 @@
+name: para_flutter_e2e_tests
+description: End-to-end tests for Para Flutter demo app using Appium
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.3
+
+dependencies:
+  # Core test dependencies
+  test: ^1.24.0
+  appium_driver: ^0.7.1
+  
+  # Utilities
+  http: ^1.2.0
+  path: ^1.8.0
+  dotenv: ^4.2.0
+
+dev_dependencies:
+  # Linting
+  lints: ^3.0.0
+
+# Configuration for different test environments
+flutter:
+  uses-material-design: false
