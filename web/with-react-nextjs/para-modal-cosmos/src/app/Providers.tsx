@@ -23,7 +23,7 @@ export function Providers({
         }}
         externalWalletConfig={{
           wallets: [ExternalWallet.KEPLR, ExternalWallet.LEAP],
-          walletsWithParaAuth: [ExternalWallet.KEPLR],
+          createLinkedEmbeddedForExternalWallets: [ExternalWallet.KEPLR],
           cosmosConnector: {
             config: {
               chains: cosmosChains,
@@ -55,7 +55,8 @@ export function Providers({
           logo: "/para.svg",
           recoverySecretStepEnabled: true,
           twoFactorAuthEnabled: false,
-        }}>
+        }}
+      >
         {children}
       </ParaProvider>
     </QueryClientProvider>
