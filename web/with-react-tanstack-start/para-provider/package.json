@@ -10,7 +10,7 @@
     "start": "vinxi start"
   },
   "dependencies": {
-    "@getpara/react-sdk": "1.15.1",
+    "@getpara/react-sdk": "1.16.0",
     "@tanstack/react-query": "5.76.0",
     "@tanstack/react-router": "^1.120.3",
     "@tanstack/react-router-devtools": "^1.120.3",
