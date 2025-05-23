@@ -1,7 +1,7 @@
 {
   "name": "developer-portal",
   "private": true,
-  "version": "2.0.0-alpha.15",
+  "version": "2.0.0-alpha.16",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -17,10 +17,10 @@
     "legacy-deploy-prod": "yarn && VITE_STATSIG_CLIENT_KEY=client-6FzowqF52cFdzNeMY1hTDz7iTZtnjSoB7VU85ybV2fK VITE_ENVIRONMENT=PROD VITE_CAPSULE_API_KEY=36e481099ebcaad4beed4bed1ce98566 yarn build && aws s3 sync dist/ s3://capsule-prod-dev-portal --profile prod --delete"
   },
   "dependencies": {
-    "@getpara/react-common": "2.0.0-alpha.15",
-    "@getpara/react-component-library": "1.0.0-alpha.10",
-    "@getpara/react-components": "2.0.0-alpha.15",
-    "@getpara/react-sdk": "2.0.0-alpha.15",
+    "@getpara/react-common": "2.0.0-alpha.16",
+    "@getpara/react-component-library": "1.0.0-alpha.11",
+    "@getpara/react-components": "2.0.0-alpha.16",
+    "@getpara/react-sdk": "2.0.0-alpha.16",
     "@hookform/resolvers": "5.0.1",
     "@sentry/react": "^9.12.0",
     "@tanstack/react-query": "^5.74.0",

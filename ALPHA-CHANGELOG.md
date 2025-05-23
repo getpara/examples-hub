@@ -1,3 +1,41 @@
+# Release (Fri May 23 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.16
+- @getpara/wagmi-v2-integration@2.0.0-alpha.16
+- @getpara/wagmi-v2-connector@2.0.0-alpha.16
+- @getpara/viem-v2-integration@2.0.0-alpha.16
+- @getpara/viem-v1-integration@2.0.0-alpha.16
+- @getpara/user-management-client@2.0.0-alpha.16
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.16
+- @getpara/solana-wallet-connectors@2.0.0-alpha.16
+- @getpara/server-sdk@2.0.0-alpha.16
+- @getpara/react-sdk@2.0.0-alpha.16
+- @getpara/react-native-wallet@2.0.0-alpha.16
+- @getpara/react-components@2.0.0-alpha.16
+- @getpara/react-component-library@1.0.0-alpha.11
+- @getpara/react-common@2.0.0-alpha.16
+- @getpara/evm-wallet-connectors@2.0.0-alpha.16
+- @getpara/ethers-v6-integration@2.0.0-alpha.16
+- @getpara/ethers-v5-integration@2.0.0-alpha.16
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.16
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.16
+- @getpara/core-sdk@2.0.0-alpha.16
+- @getpara/core-components@2.0.0-alpha.16
+
+### Features
+-  Add secret API key to dev portal (#951) - a64961361
+-  Dev Portal - update create project and all toasts (#923) - f71e6aa3e
+
+### Fixes
+-  Solana verification response (#953) - 7db5bb3ab
+-  Farcaster redirect (Alpha) (#939) - 2536884c9
+-  Instantiate bridge sdk with `isPasskeySupported` boolean (#944) - 8cfff291d
+
+### Chores
+-  Add AuthInfo getter for mobile SDKs (#958) - fbea9b1b0
+-  Merge main into 2.0.0-alpha (#941) - acefd0315
+
 # Release (Fri May 09 2025)
 
 ## Package Versions
