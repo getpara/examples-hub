@@ -7,6 +7,7 @@ import {
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { clusterApiUrl } from "@solana/web3.js";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { para } from "../client/para";
 
 type Props = {
   children: React.ReactNode;
