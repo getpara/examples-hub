@@ -9,8 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@getpara/react-sdk": "1.16.1",
-    "@getpara/server-sdk": "1.16.1",
+    "@getpara/react-sdk": "1.16.0",
+    "@getpara/server-sdk": "1.16.0",
     "@tanstack/react-query": "^5.0.0",
     "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-accordion": "1.2.2",

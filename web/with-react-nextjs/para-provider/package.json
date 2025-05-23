@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@getpara/react-sdk": "1.16.1",
+    "@getpara/react-sdk": "1.16.0",
     "@tanstack/react-query": "5.66.5",
     "next": "15.1.5",
     "react": "^19.0.0",

@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.64.2",
-    "@getpara/evm-wallet-connectors": "1.16.1",
-    "@getpara/react-sdk": "1.16.1",
+    "@getpara/evm-wallet-connectors": "1.16.0",
+    "@getpara/react-sdk": "1.16.0",
     "next": "15.1.5",
     "react": "19.0.0",
     "react-dom": "19.0.0",
