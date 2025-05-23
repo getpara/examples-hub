@@ -34,10 +34,24 @@ void main(List<String> args) async {
     
     switch (testType) {
       case 'email':
-        testArgs.addAll(['--name', 'Email Authentication Flow']);
+        // Run both email signup and login tests
+        testArgs.addAll(['--name', 'Email Authentication']);
         break;
       case 'phone':
-        testArgs.addAll(['--name', 'Phone Authentication Flow']);
+        // Run both phone signup and login tests  
+        testArgs.addAll(['--name', 'Phone Authentication']);
+        break;
+      case 'email-signup':
+        testArgs.addAll(['--name', '01 Email Authentication Signup Flow']);
+        break;
+      case 'email-login':
+        testArgs.addAll(['--name', '02 Email Passkey Login Flow']);
+        break;
+      case 'phone-signup':
+        testArgs.addAll(['--name', '03 Phone Authentication Signup Flow']);
+        break;
+      case 'phone-login':
+        testArgs.addAll(['--name', '04 Phone Passkey Login Flow']);
         break;
       case 'all':
       default:

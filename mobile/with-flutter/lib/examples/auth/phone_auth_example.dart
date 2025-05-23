@@ -46,7 +46,6 @@ class _ParaPhoneExampleState extends State<ParaPhoneExample> {
   @override
   void initState() {
     super.initState();
-    _phoneController.text = randomTestPhone();
     // Initialize FlutterWebAuthSession (implementation from para package)
     _webAuthSession = FlutterWebAuthSession(callbackUrlScheme: _callbackScheme.split('://').first);
     _checkLoginStatus();

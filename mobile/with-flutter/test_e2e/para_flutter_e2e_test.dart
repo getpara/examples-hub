@@ -7,6 +7,10 @@ import 'package:test/test.dart';
 import 'package:appium_driver/async_io.dart';
 import 'package:dotenv/dotenv.dart';
 
+// Test state management (similar to Swift TestConstants)
+String? savedEmail;
+String? savedPhoneNumber;
+
 void main() {
   group('Para Flutter E2E Tests', () {
     late AppiumWebDriver driver;
@@ -96,24 +100,25 @@ void main() {
       throw Exception('Text element with content "$searchText" not found');
     }
 
-    Future<void> enterTextInField(String text, {bool checkPrePopulated = true}) async {
+    Future<void> enterTextInField(String text) async {
       final textFields = await driver.findElements(AppiumBy.className('XCUIElementTypeTextField')).toList();
       if (textFields.isEmpty) {
         throw Exception('No text fields found');
       }
       
-      if (checkPrePopulated) {
-        final currentValue = await textFields.first.text;
-        if (currentValue.isEmpty) {
-          await textFields.first.click();
-          await textFields.first.sendKeys(text);
-        } else {
-          print('Field already pre-populated with existing value');
-        }
-      } else {
-        await textFields.first.click();
-        await textFields.first.sendKeys(text);
+      await textFields.first.click();
+      await textFields.first.sendKeys(text);
+    }
+
+    Future<void> enterPhoneNumber(String phoneNumber) async {
+      final textFields = await driver.findElements(AppiumBy.className('XCUIElementTypeTextField')).toList();
+      if (textFields.length < 2) {
+        throw Exception('Phone form requires at least 2 text fields (country code + phone)');
       }
+      
+      // Click the second field (phone number field, not country code)
+      await textFields[1].click();
+      await textFields[1].sendKeys(phoneNumber);
     }
 
     Future<void> dismissKeyboard() async {
@@ -136,29 +141,13 @@ void main() {
       final secureFields = await driver.findElements(AppiumBy.className('XCUIElementTypeSecureTextField')).toList();
       final allFields = [...verificationFields, ...secureFields];
       
-      // Check if any field already has content
-      bool hasPrefilledCode = false;
-      for (final field in allFields) {
-        try {
-          final value = await field.text;
-          if (value.isNotEmpty) {
-            hasPrefilledCode = true;
-            break;
-          }
-        } catch (e) {
-          // Continue checking
-        }
+      if (allFields.isEmpty) {
+        throw Exception('No verification code fields found');
       }
       
-      if (!hasPrefilledCode) {
-        // Only enter verification code if fields are empty
-        for (int i = 0; i < allFields.length && i < code.length; i++) {
-          await allFields[i].click();
-          await allFields[i].sendKeys(code[i]);
-        }
-      } else {
-        print('Verification code already pre-populated');
-      }
+      // Enter the verification code in the first field (single field input)
+      await allFields.first.click();
+      await allFields.first.sendKeys(code);
     }
 
     Future<void> performBiometricAuth() async {
@@ -288,15 +277,17 @@ void main() {
       }
     }
 
-    test('Email Authentication Flow', () async {
-      // Generate unique email
-      final email = 'test_${DateTime.now().millisecondsSinceEpoch}@test.usecapsule.com';
+    test('01 Email Authentication Signup Flow', () async {
+      // Generate unique email and save it (simple format)
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final email = 'test$timestamp@test.usecapsule.com';
+      savedEmail = email;
       
       // Click Email Authentication
       await Future.delayed(Duration(seconds: 2));
       await clickTextElementByContent('Email + Passkey Authentication');
       
-      // Enter email (check for pre-population)
+      // Enter email
       await Future.delayed(Duration(seconds: 1));
       await enterTextInField(email);
       
@@ -305,13 +296,12 @@ void main() {
       await Future.delayed(Duration(seconds: 1));
       await clickButtonByText('continue');
       
-      // Enter verification code
+      // Enter verification code (auto-verifies when 6 digits entered)
       await Future.delayed(Duration(seconds: 2));
       await enterVerificationCode('123456');
       
-      // Tap Verify
-      await Future.delayed(Duration(seconds: 1));
-      await clickButtonByText('verify');
+      // Wait for auto-verification to complete
+      await Future.delayed(Duration(seconds: 3));
       
       // Choose Passkey
       await Future.delayed(Duration(seconds: 2));
@@ -325,12 +315,43 @@ void main() {
       expect(foundWallets, true, reason: 'Should reach wallets view after authentication');
     });
 
-    test('Phone Authentication Flow', () async {
+    test('02 Email Passkey Login Flow', () async {
       // Logout if needed
       await performLogout();
       
-      // Generate unique phone number
+      // Verify we have a saved email from signup
+      if (savedEmail == null) {
+        throw Exception('No saved email found. Run Email Authentication Signup Flow first.');
+      }
+      
+      // Click Email Authentication
+      await Future.delayed(Duration(seconds: 2));
+      await clickTextElementByContent('Email + Passkey Authentication');
+      
+      // Enter the saved email (should be recognized as existing user)
+      await Future.delayed(Duration(seconds: 1));
+      await enterTextInField(savedEmail!);
+      
+      // Dismiss keyboard and tap Continue
+      await dismissKeyboard();
+      await Future.delayed(Duration(seconds: 1));
+      await clickButtonByText('continue');
+      
+      // Should go directly to biometric authentication (no verification code needed for login)
+      await performBiometricAuth();
+      
+      // Wait for wallets view
+      final foundWallets = await waitForWalletsView();
+      expect(foundWallets, true, reason: 'Should reach wallets view after login');
+    });
+
+    test('03 Phone Authentication Signup Flow', () async {
+      // Logout if needed
+      await performLogout();
+      
+      // Generate unique phone number and save it
       final phoneNumber = '408555${1000 + Random().nextInt(9000)}';
+      savedPhoneNumber = phoneNumber;
       
       // Click Phone Authentication
       await Future.delayed(Duration(seconds: 2));
@@ -343,22 +364,21 @@ void main() {
         await clickTextElementByContent('Phone + Passkey Authentication');
       }
       
-      // Enter phone number (check for pre-population)
+      // Enter phone number (in the phone field, not country code field)
       await Future.delayed(Duration(seconds: 1));
-      await enterTextInField(phoneNumber);
+      await enterPhoneNumber(phoneNumber);
       
       // Dismiss keyboard and tap Continue
       await dismissKeyboard();
       await Future.delayed(Duration(seconds: 1));
       await clickButtonByText('continue');
       
-      // Enter verification code
+      // Enter verification code (auto-verifies when 6 digits entered)
       await Future.delayed(Duration(seconds: 2));
       await enterVerificationCode('123456');
       
-      // Tap Verify
-      await Future.delayed(Duration(seconds: 1));
-      await clickButtonByText('verify');
+      // Wait for auto-verification to complete
+      await Future.delayed(Duration(seconds: 3));
       
       // Choose Passkey
       await Future.delayed(Duration(seconds: 2));
@@ -370,6 +390,36 @@ void main() {
       // Wait for wallets view
       final foundWallets = await waitForWalletsView();
       expect(foundWallets, true, reason: 'Should reach wallets view after authentication');
+    });
+
+    test('04 Phone Passkey Login Flow', () async {
+      // Logout if needed
+      await performLogout();
+      
+      // Verify we have a saved phone number from signup
+      if (savedPhoneNumber == null) {
+        throw Exception('No saved phone number found. Run Phone Authentication Signup Flow first.');
+      }
+      
+      // Click Phone Authentication
+      await Future.delayed(Duration(seconds: 2));
+      await clickTextElementByContent('Phone + Passkey Authentication');
+      
+      // Enter the saved phone number (should be recognized as existing user)
+      await Future.delayed(Duration(seconds: 1));
+      await enterPhoneNumber(savedPhoneNumber!);
+      
+      // Dismiss keyboard and tap Continue
+      await dismissKeyboard();
+      await Future.delayed(Duration(seconds: 1));
+      await clickButtonByText('continue');
+      
+      // Should go directly to biometric authentication (no verification code needed for login)
+      await performBiometricAuth();
+      
+      // Wait for wallets view
+      final foundWallets = await waitForWalletsView();
+      expect(foundWallets, true, reason: 'Should reach wallets view after login');
     });
   });
 }
