@@ -1,4 +1,9 @@
-import { backpackWallet, ParaSolanaProvider, glowWallet, phantomWallet } from "@getpara/solana-wallet-connectors";
+import {
+  backpackWallet,
+  ParaSolanaProvider,
+  glowWallet,
+  phantomWallet,
+} from "@getpara/solana-wallet-connectors";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { clusterApiUrl } from "@solana/web3.js";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -20,8 +25,13 @@ export const ParaProviders: React.FC<Props> = ({ children }) => {
         chain={solanaNetwork}
         appIdentity={{
           name: "Your App Name",
-          uri: typeof window !== "undefined" ? `${window.location.protocol}//${window.location.host}` : "",
-        }}>
+          uri:
+            typeof window !== "undefined"
+              ? `${window.location.protocol}//${window.location.host}`
+              : "",
+        }}
+        para={para}
+      >
         {children}
       </ParaSolanaProvider>
     </QueryClientProvider>

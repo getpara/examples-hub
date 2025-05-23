@@ -10,8 +10,8 @@
     "start": "next start"
   },
   "dependencies": {
-    "@getpara/ethers-v5-integration": "1.15.1",
-    "@getpara/react-sdk": "1.15.1",
+    "@getpara/ethers-v5-integration": "1.16.1",
+    "@getpara/react-sdk": "1.16.1",
     "ethers": "5.8.0",
     "next": "15.1.5",
     "react": "^19.0.0",

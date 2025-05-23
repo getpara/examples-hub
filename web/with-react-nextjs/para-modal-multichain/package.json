@@ -22,13 +22,13 @@
     "@solana/wallet-adapter-walletconnect": "0.1.17",
     "@solana/web3.js": "1.98.0",
     "@tanstack/react-query": "5.71.5",
-    "@getpara/core-sdk": "1.15.1",
-    "@getpara/cosmos-wallet-connectors": "1.15.1",
-    "@getpara/evm-wallet-connectors": "1.15.1",
+    "@getpara/core-sdk": "1.16.0",
+    "@getpara/cosmos-wallet-connectors": "1.16.0",
+    "@getpara/evm-wallet-connectors": "1.16.0",
     "@getpara/graz": "0.1.0",
-    "@getpara/react-sdk": "1.15.1",
-    "@getpara/solana-wallet-connectors": "1.15.1",
-    "@getpara/user-management-client": "1.15.1",
+    "@getpara/react-sdk": "1.16.0",
+    "@getpara/solana-wallet-connectors": "1.16.0",
+    "@getpara/user-management-client": "1.16.0",
     "long": "5.2.4",
     "next": "15.1.5",
     "react": "19.0.0",
@@ -46,7 +46,7 @@
     "typescript": "^5"
   },
   "resolutions": {
-    "@getpara/react-sdk": "1.15.1",
-    "@getpara/react-common": "1.15.1"
+    "@getpara/react-sdk": "1.16.0",
+    "@getpara/react-common": "1.16.0"
   }
 }
