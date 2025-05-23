@@ -26,8 +26,7 @@ class _DemoOtpVerificationState extends State<DemoOtpVerification> {
   @override
   void initState() {
     super.initState();
-    // _otpController.text = randomTestOTP(length: _otpLength, allowZeroStart: true);
-    _otpController.text = '123456'; // Set the OTP code directly
+    // Start with empty OTP field
   }
 
   @override

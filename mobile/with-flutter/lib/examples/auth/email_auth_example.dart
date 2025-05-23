@@ -36,7 +36,6 @@ class _ParaEmailExampleState extends State<ParaEmailExample> {
   @override
   void initState() {
     super.initState();
-    _emailController.text = randomTestEmail();
     // Initialize FlutterWebAuthSession
     _webAuthSession = FlutterWebAuthSession(callbackUrlScheme: _callbackScheme.split('://').first);
     _checkLoginStatus();
