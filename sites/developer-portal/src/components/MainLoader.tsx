@@ -1,26 +1,9 @@
-import { CpslSpinner } from '@getpara/react-components';
-import styled from 'styled-components';
+import { Loader } from '@getpara/react-component-library';
 
-interface MainLoaderProps {
-  headerHeight: number;
-}
-
-export const MainLoader = ({ headerHeight }: MainLoaderProps) => {
+export const MainLoader = () => {
   return (
-    <Container $headerHeight={headerHeight}>
-      <StyledSpinner />
-    </Container>
+    <div className="para:flex para:justify-center para:items-center para:w-full para:h-[calc(100vh-var(--appbar-height-mobile))] para:lg:h-[calc(100vh-var(--appbar-height))]">
+      <Loader className="para:mx-auto para:size-14  " />
+    </div>
   );
 };
-
-const Container = styled.div<{ $headerHeight: number }>`
-  width: 100%;
-  height: calc(100vh - ${({ $headerHeight }) => `${$headerHeight}px`});
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-
-const StyledSpinner = styled(CpslSpinner)`
-  --background-color: var(--cpsl-color-background-4);
-`;

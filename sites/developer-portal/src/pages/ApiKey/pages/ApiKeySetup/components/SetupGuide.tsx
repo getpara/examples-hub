@@ -1,7 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useGetApiKeySetupStatus } from '../../../../../hooks/api/queries/useApiKeySetupStatus';
-import { Button, Typography } from '@getpara/react-component-library';
-import clsx from 'clsx';
+import { Button, cn, Typography } from '@getpara/react-component-library';
 import { ONBOARDING_STEPS, ONBOARDING_VERSION, OnboardingStep, OnboardingStepButton } from '../config';
 import { useCallback, useMemo, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
@@ -126,7 +125,7 @@ export const SetupGuide = () => {
       <Typography className="para:text-xl para:font-semibold">Setup Guide</Typography>
       <div>
         <Typography
-          className={clsx('para:text-xl para:font-semibold', {
+          className={cn('para:text-xl para:font-semibold', {
             'para:text-amber-500': stepNumber < maxSteps,
             'para:text-green-600': stepNumber === maxSteps,
           })}

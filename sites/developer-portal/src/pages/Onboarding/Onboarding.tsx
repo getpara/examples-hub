@@ -3,7 +3,6 @@ import { useGetAllOrganizations } from '../../hooks/api/queries/useOrganizations
 import { PlanSelect } from './components/PlanSelect';
 import { useEffect } from 'react';
 import { MainLoader } from '../../components/MainLoader';
-import { AUTH_MIN_APP_BAR_HEIGHT } from '../../components/AppBar/AuthMinAppBar';
 import { AboutYou } from './components/AboutYou';
 import { AboutProject } from './components/AboutProject';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -53,7 +52,7 @@ export const Onboarding = () => {
   }
 
   if (isOrgsLoading) {
-    return <MainLoader headerHeight={AUTH_MIN_APP_BAR_HEIGHT} />;
+    return <MainLoader />;
   }
 
   const Content = {

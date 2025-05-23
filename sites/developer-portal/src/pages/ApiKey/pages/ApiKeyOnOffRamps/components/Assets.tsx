@@ -1,5 +1,6 @@
 import {
   Button,
+  cn,
   FormField,
   FormItem,
   FormLabel,
@@ -16,7 +17,6 @@ import { useOnRampAllAssets } from '../../../../../hooks/api/queries/useOnRampAs
 import { getAssetCode, getOnRampAssets, OnRampAsset, Network as TNetwork } from '@getpara/react-sdk';
 import { Trash2 } from 'lucide-react';
 import { FormControl } from '../../../../../components/formComponents';
-import clsx from 'clsx';
 
 type AssetsProps = {
   network: TNetwork;
@@ -60,7 +60,7 @@ export const Assets = ({ network }: AssetsProps) => {
                 <SlottedInput
                   value={getAssetCode(asset)}
                   disabled
-                  className={clsx({
+                  className={cn({
                     'para:mt-0': index !== 0,
                     'para:mt-1': index === 0,
                   })}
@@ -92,7 +92,7 @@ export const Assets = ({ network }: AssetsProps) => {
                 >
                   <FormControl>
                     <SelectTrigger
-                      className={clsx('para:w-full para:mb-0!', {
+                      className={cn('para:w-full para:mb-0!', {
                         'para:mt-0': !!networkAssets.length,
                       })}
                     >

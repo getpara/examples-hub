@@ -1,8 +1,7 @@
-import { Button, FormField, FormItem, Input, useFormContext } from '@getpara/react-component-library';
+import { Button, cn, FormField, FormItem, Input, useFormContext } from '@getpara/react-component-library';
 import { FormControl, FormMessage } from '../../../../../components/formComponents';
 import { ConfigCard } from '../../../components/ConfigCard';
 import { SecurityForm } from '../hooks/useSecurityForm';
-import clsx from 'clsx';
 import { Cog } from 'lucide-react';
 
 const BUTTONS = [
@@ -49,7 +48,7 @@ export const SessionLength = () => {
                   const isAnotherSelected = !!BUTTONS.find(b => b.value === field.value);
                   return (
                     <div
-                      className={clsx('para:flex para:gap-1', {
+                      className={cn('para:flex para:gap-1', {
                         'para:flex-1': isCustom,
                       })}
                       key={button.value}

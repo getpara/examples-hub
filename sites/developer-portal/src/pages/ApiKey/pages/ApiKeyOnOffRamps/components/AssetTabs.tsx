@@ -1,7 +1,6 @@
-import { ScrollArea, ScrollBar, Tabs, TabsContent, TabsList, TabsTrigger } from '@getpara/react-component-library';
+import { cn, ScrollArea, ScrollBar, Tabs, TabsContent, TabsList, TabsTrigger } from '@getpara/react-component-library';
 import { Globe, Settings2 } from 'lucide-react';
 import { ReactNode } from 'react';
-import clsx from 'clsx';
 
 type AssetTabValue = 'all' | 'custom';
 
@@ -22,7 +21,7 @@ export const AssetTabs = ({ disabled, value, CustomContent, onChange }: AssetTab
     <Tabs
       value={value}
       onValueChange={val => onChange(val as AssetTabValue)}
-      className={clsx('para:gap-4', { 'para:gap-0': value === 'all' })}
+      className={cn('para:gap-4', { 'para:gap-0': value === 'all' })}
     >
       <TabsList className="para:w-full">
         <ScrollArea className="para:w-full">

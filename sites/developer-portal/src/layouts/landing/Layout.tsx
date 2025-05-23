@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { MainLoader } from '../../components/MainLoader';
 import { ErrorBoundary as SentryErrorBoundary } from '@sentry/react';
 import { ErrorBoundary } from '../../components/ErrorBoundary/ErrorBoundary';
-import { LANDING_APP_BAR_HEIGHT, LandingAppBar } from '../../components/AppBar/LandingAppBar';
+import { LandingAppBar } from '../../components/AppBar/LandingAppBar';
 import { useSetSelectedOrganizationWithNavigation } from '../../hooks/useSetSelectedOrganizationWithNavigation';
 import { useAccount } from '@getpara/react-sdk';
 
@@ -29,7 +29,7 @@ export const Layout = () => {
   }, [isLoggedIn, isLoadingOrgs, navigate, setSelectedOrganization, allOrgs?.length, isRefetchingOrgs, searchParams]);
 
   if (isLoadingLoggedIn || isLoadingOrgs || isRefetchingOrgs) {
-    return <MainLoader headerHeight={LANDING_APP_BAR_HEIGHT} />;
+    return <MainLoader />;
   }
 
   if (isLoggedIn) {

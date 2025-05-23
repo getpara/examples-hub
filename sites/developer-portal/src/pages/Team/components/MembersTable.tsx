@@ -1,131 +1,60 @@
-import { useMemo, useState } from 'react';
-import { Table, TableData } from '../../../components/Table/Table';
-import { formatDate } from '../../../utils/formatDate';
-import { CpslButton, CpslIcon } from '@getpara/react-components';
-import { GradientButton } from '../../../components/common';
-import { useIsMobile } from '../../../hooks/useIsMobile';
-import { RemoveMemberModal } from './RemoveMemberModal';
-import { AddMemberModal } from './AddMemberModal';
+import { getCoreRowModel, getFilteredRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table';
 import { useGetAllOrganizationMembers } from '../../../hooks/api/queries/useOrganizationMembers';
-import { Loader } from '../../../components/Loader';
-import { useGetSelectedOrganizationIsValid } from '../../../hooks/api/queries/useOrganizations';
-import { useIsOwner } from '../../../hooks/api/queries/useOrganizationMember';
+import { OrganizationMember, User } from '../../../types/api';
+import { DataTable } from '../../../components/DataTable/DataTable';
+import { getColumns } from './Columns';
+import { MemberSheet } from './MemberSheet';
+import { useState } from 'react';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 25;
+
+const LOADING_DATA: OrganizationMember[] = new Array(PAGE_SIZE).fill({
+  id: '',
+  email: '',
+  joinedAt: new Date(),
+  role: 'ORG_MEMBER',
+  owner: false,
+  permissions: [],
+  user: {} as User,
+} as OrganizationMember);
 
 export const MembersTable = () => {
-  const [page, setPage] = useState(0);
-  const isMobile = useIsMobile();
   const { data: members, isLoading: isMembersLoading } = useGetAllOrganizationMembers();
-  const { data: orgValid } = useGetSelectedOrganizationIsValid();
-  const { data: isOwner } = useIsOwner();
+  const [selectedMemberId, setSelectedMemberId] = useState<string | undefined>();
+  const [isOpen, setIsOpen] = useState(false);
 
-  const [selectedMemberId, setSelectedMemberId] = useState('');
-  const [selectedMemberEmail, setSelectedMemberEmail] = useState('');
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-
-  const handleRemoveMemberClick = (MemberId: string, MemberEmail: string) => () => {
-    if (isOwner) {
-      setSelectedMemberId(MemberId);
-      setSelectedMemberEmail(MemberEmail);
-    }
+  const handleSheetClose = () => {
+    setIsOpen(false);
+    // Clear member after animation
+    setTimeout(() => {
+      setSelectedMemberId(undefined);
+    }, 150);
   };
 
-  const handleCloseRemoveMemberModal = () => {
-    setSelectedMemberId('');
-  };
-
-  const handleRemoveMemberModalExited = () => {
-    setSelectedMemberEmail('');
-  };
-
-  const handleCreateClick = () => {
-    if (isOwner) {
-      setIsAddModalOpen(true);
-    }
-  };
-
-  const handleCloseAddMemberModal = () => {
-    setIsAddModalOpen(false);
-  };
-
-  const totalPages = Math.ceil((members?.length ?? 0) / PAGE_SIZE);
-
-  const formattedData: TableData[] = useMemo(
-    () =>
-      members?.map(
-        d =>
-          ({
-            key: d.id,
-            data: [
-              {
-                key: 'name',
-                value: d.user?.name ?? '',
-              },
-              {
-                key: 'email',
-                value: d.user?.email ?? d.pendingEmail ?? '',
-              },
-              {
-                key: 'joinedAt',
-                value: d.joinedAt ? formatDate(d.joinedAt) : 'Pending',
-              },
-              {
-                key: 'delete',
-                value: isOwner ? (
-                  <CpslButton
-                    variant="destructive"
-                    size="small"
-                    onClick={handleRemoveMemberClick(d.id, d.user?.email ?? d.pendingEmail)}
-                    disabled={d.owner || !orgValid}
-                  >
-                    Remove
-                  </CpslButton>
-                ) : null,
-                fitWidth: true,
-              },
-            ],
-          }) as TableData,
-      ) ?? [],
-    [isOwner, members, orgValid],
-  );
-
-  const handlePageChange = (page: number) => {
-    setPage(page);
-  };
-
-  if (isMembersLoading) {
-    return <Loader />;
-  }
+  const table = useReactTable({
+    data: isMembersLoading ? LOADING_DATA : (members ?? []),
+    columns: getColumns(isMembersLoading),
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    initialState: {
+      pagination: {
+        pageSize: PAGE_SIZE,
+      },
+    },
+  });
 
   return (
     <>
-      <Table
-        page={page}
-        totalPages={totalPages}
-        title="Members"
-        subtitle="These are the people that currently have access to your Para instance"
-        data={formattedData}
-        onPageChange={handlePageChange}
-        headers={[{ headerName: 'Name' }, { headerName: 'Email' }, { headerName: 'Date Joined', colSpan: 2 }]}
-        ActionButton={
-          isOwner ? (
-            <GradientButton onClick={handleCreateClick} size={isMobile ? 'small' : 'medium'} disabled={!orgValid}>
-              <CpslIcon slot="start" icon="plusCircle" />
-              Invite Member
-            </GradientButton>
-          ) : undefined
-        }
-        noContentTitle="No Members Yet"
+      <DataTable
+        table={table}
+        className="para:h-[calc(100vh-var(--appbar-height-mobile)-64px-36px-16px)] para:lg:h-[calc(100vh-var(--appbar-height)-64px-36px-16px)]"
+        onRowClick={row => {
+          setSelectedMemberId(row.original.id);
+          setIsOpen(true);
+        }}
       />
-      <RemoveMemberModal
-        open={!!selectedMemberId}
-        onClose={handleCloseRemoveMemberModal}
-        onExited={handleRemoveMemberModalExited}
-        memberId={selectedMemberId}
-        memberEmail={selectedMemberEmail}
-      />
-      <AddMemberModal open={isAddModalOpen} onClose={handleCloseAddMemberModal} />
+      <MemberSheet isOpen={isOpen} memberId={selectedMemberId} onClose={handleSheetClose} />
     </>
   );
 };

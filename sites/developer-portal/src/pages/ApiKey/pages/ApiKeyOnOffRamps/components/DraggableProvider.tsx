@@ -1,4 +1,5 @@
 import {
+  cn,
   FormField,
   FormItem,
   FormLabel,
@@ -14,7 +15,6 @@ import { OnRampProvider } from '@getpara/react-sdk';
 import { FlatCard } from '../../../../../components/common';
 import { GripHorizontal } from 'lucide-react';
 import { Reorder, useDragControls } from 'framer-motion';
-import clsx from 'clsx';
 import { memo } from 'react';
 import { OnOffRampsForm } from '../hooks/useOnOffRampsForm';
 import { FormControl, FormMessage } from '../../../../../components/formComponents';
@@ -69,7 +69,7 @@ export const DraggableProvider = memo(
             <div className="para:flex para:gap-4 para:items-center para:justify-between">
               <div className="para:flex para:gap-4 para:items-center">
                 <GripHorizontal
-                  className={clsx('para:stroke-muted-foreground', {
+                  className={cn('para:stroke-muted-foreground', {
                     'para:cursor-grab': isProviderDragEnabled,
                     'para:cursor-not-allowed': !isProviderDragEnabled,
                   })}

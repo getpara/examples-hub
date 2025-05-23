@@ -27,7 +27,6 @@
     "@tanstack/react-table": "8.21.3",
     "@typeform/embed-react": "^4.1.0",
     "axios": "^1.8.4",
-    "clsx": "^2.1.1",
     "color2k": "^2.0.3",
     "date-fns": "^3.6.0",
     "framer-motion": "^11.3.31",

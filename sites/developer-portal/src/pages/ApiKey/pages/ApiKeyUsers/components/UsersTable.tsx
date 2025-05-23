@@ -5,11 +5,11 @@ import {
   usePrefetchOrganizationKeyUsersTableDataQuery,
 } from '../../../../../hooks/api/queries/useOrganizationKeyUsersTableData';
 import { getColumns } from './Columns';
-import { DataTable } from './DataTable';
 import { useParams } from 'react-router-dom';
 import { getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { UsersTableData } from '../../../../../types/api';
 import { LoginMethod } from '../../../../../types/loginMethod';
+import { DataTable } from '../../../../../components/DataTable/DataTable';
 
 const PAGE_SIZE = 25;
 
@@ -80,5 +80,10 @@ export const UsersTable = ({ methods }: UsersTableProps) => {
     onPaginationChange: setPagination,
   });
 
-  return <DataTable table={table} />;
+  return (
+    <DataTable
+      table={table}
+      className="para:h-[calc(100vh-var(--appbar-height-mobile)-64px-36px-32px-36px)] para:lg:h-[calc(100vh-var(--appbar-height)-64px-36px-32px-36px)]"
+    />
+  );
 };

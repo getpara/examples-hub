@@ -1,6 +1,5 @@
 import { VerticalCenteredContainer } from '../../components/common';
 import { MainLoader } from '../../components/MainLoader';
-import { AUTH_MIN_APP_BAR_HEIGHT } from '../../components/AppBar/AuthMinAppBar';
 import { useGetInvite } from '../../hooks/api/queries/useUserInvite';
 import { OrgCard } from './components/OrgCard';
 import { OnboardingStep, useOnboardingStore } from '../../stores/onboarding/useOnboardingStore';
@@ -24,7 +23,7 @@ export const Invite = ({ isOnboarding }: InviteProps) => {
   const { data: invite, isLoading: isLoadingInvite } = useGetInvite(inviteOrgId, inviteMemberId);
 
   if (isLoadingInvite) {
-    return <MainLoader headerHeight={AUTH_MIN_APP_BAR_HEIGHT} />;
+    return <MainLoader />;
   }
 
   if (!invite) {

@@ -4,11 +4,9 @@ import { useLogout } from '../../hooks/useLogout';
 import { useOrganizationMember } from '../../hooks/api/queries/useOrganizationMember';
 import { MainLoader } from '../MainLoader';
 import { useSetSelectedOrganizationWithNavigation } from '../../hooks/useSetSelectedOrganizationWithNavigation';
-import { AUTH_APP_BAR_HEIGHT } from '../AppBar/AuthAppBar/AuthAppBar';
 import { useGetOrganizationSubscription } from '../../hooks/api/queries/useOrganizationSubscription';
 import { usePlans } from '../../hooks/api/queries/usePlans';
 import { useLocation, useSearchParams } from 'react-router-dom';
-import { AUTH_MIN_APP_BAR_HEIGHT } from '../AppBar/AuthMinAppBar';
 import { useGetInvite } from '../../hooks/api/queries/useUserInvite';
 import { useAccount } from '@getpara/react-sdk';
 import { toast } from '@getpara/react-component-library';
@@ -81,10 +79,8 @@ export const AuthenticatedWrapper = ({ requireOrgs, children }: AuthenticatedWra
     setSelectedOrganization,
   ]);
 
-  const appBarHeight = isInvite || isOnboarding ? AUTH_MIN_APP_BAR_HEIGHT : AUTH_APP_BAR_HEIGHT;
-
   if (isLoadingLoggedIn || isLoadingOrgs || isLoadingMember || isLoadingSubscription || isLoadingPlans || isLoadingInvite) {
-    return <MainLoader headerHeight={appBarHeight} />;
+    return <MainLoader />;
   }
 
   if (!account?.isConnected) {

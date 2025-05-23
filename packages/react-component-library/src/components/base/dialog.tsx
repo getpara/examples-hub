@@ -30,7 +30,7 @@ const DialogOverlay = React.forwardRef(function DialogOverlay(
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        'para:data-[state=open]:animate-in para:data-[state=closed]:animate-out para:data-[state=closed]:fade-out-0 para:data-[state=open]:fade-in-0 para:fixed para:inset-0 para:z-50 para:bg-black/80',
+        'para:data-[state=open]:animate-in para:data-[state=closed]:animate-out para:data-[state=closed]:fade-out-0 para:data-[state=open]:fade-in-0 para:fixed para:inset-0 para:z-50 para:bg-linear-180 para:from-black/14 para:to-black/70',
         className,
       )}
       {...props}
@@ -46,7 +46,7 @@ function DialogContent({ className, children, ...props }: React.ComponentProps<t
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          'para:bg-background para:data-[state=open]:animate-in para:data-[state=closed]:animate-out para:data-[state=closed]:fade-out-0 para:data-[state=open]:fade-in-0 para:data-[state=closed]:zoom-out-95 para:data-[state=open]:zoom-in-95 para:fixed para:top-[50%] para:left-[50%] para:z-50 para:grid para:w-full para:max-w-[calc(100%-2rem)] para:translate-x-[-50%] para:translate-y-[-50%] para:gap-4 para:rounded-lg para:border para:p-6 para:shadow-lg para:duration-200 para:sm:max-w-lg',
+          'para:bg-background para:data-[state=open]:animate-in para:data-[state=closed]:animate-out para:data-[state=closed]:fade-out-0 para:data-[state=open]:fade-in-0 para:data-[state=closed]:zoom-out-95 para:data-[state=open]:zoom-in-95 para:fixed para:top-[50%] para:left-[50%] para:z-50 para:grid para:grid-cols-[minmax(0,1fr)] para:w-full para:max-w-[calc(100%-2rem)] para:translate-x-[-50%] para:translate-y-[-50%] para:gap-4 para:rounded-lg para:border para:border-border para:p-6 para:shadow-lg para:duration-200 para:sm:max-w-lg',
           className,
         )}
         {...props}
@@ -65,7 +65,7 @@ function DialogHeader({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn('para:flex para:flex-col para:gap-2 para:text-center para:sm:text-left', className)}
+      className={cn('para:flex para:flex-col para:gap-1.5 para:sm:text-left', className)}
       {...props}
     />
   );
@@ -85,7 +85,7 @@ function DialogTitle({ className, ...props }: React.ComponentProps<typeof Dialog
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn('para:text-lg para:leading-none para:font-semibold', className)}
+      className={cn('para:text-foreground para:text-lg para:leading-none para:font-semibold', className)}
       {...props}
     />
   );

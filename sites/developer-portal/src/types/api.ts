@@ -84,6 +84,31 @@ export type UpdateProjectBody = Nullable<Partial<Omit<Project, 'id' | 'archived'
 // *********************
 // Organization Members
 // *********************
+export enum MemberRole {
+  ORG_OWNER = 'ORG_OWNER',
+  ORG_MEMBER = 'ORG_MEMBER',
+  PROJECT_MEMBER = 'PROJECT_MEMBER',
+}
+export type MemberRoleType = `${MemberRole}`;
+
+export type MemberCapabilities = {
+  canCreateProjects: boolean;
+  canViewProjects: boolean;
+  canUpdateProjects: boolean;
+  canDeleteProjects: boolean;
+  canInviteMembers: boolean;
+  canViewMembers: boolean;
+  canUpdateMembers: boolean;
+  canDeleteMembers: boolean;
+  canViewOrganization: boolean;
+  canUpdateOrganization: boolean;
+  canViewOrganizationAnalytics: boolean;
+  canViewOrganizationBilling: boolean;
+  canUpdateOrganizationBilling: boolean;
+  canUpdateOrganizationPlan: boolean;
+  assignableRoles: MemberRole[];
+};
+
 export type OrganizationMember = {
   id: string;
   pendingEmail?: string;
@@ -92,6 +117,8 @@ export type OrganizationMember = {
   owner: boolean;
   permissions: string[];
   user: OrganizationMemberUser;
+  role: MemberRoleType;
+  projects?: Project[];
 };
 
 export type OrganizationMemberUser = {
@@ -102,9 +129,11 @@ export type OrganizationMemberUser = {
   name?: string;
 };
 
-export type OrganizationMemberResponse = { member: OrganizationMember };
+export type OrganizationMemberResponse = { member: OrganizationMember; capabilities: MemberCapabilities };
 export type OrganizationMembersResponse = { members: OrganizationMember[] };
-export type UpdateOrganizationMemberBody = Pick<OrganizationMember, 'owner' | 'permissions'>;
+export type UpdateOrganizationMemberBody = Pick<OrganizationMember, 'owner' | 'permissions' | 'role'> & {
+  projectIds?: string[];
+};
 
 // *********************
 // API Keys

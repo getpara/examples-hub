@@ -27,7 +27,7 @@ function SheetOverlay({ className, ...props }: React.ComponentProps<typeof Sheet
     <SheetPrimitive.Overlay
       data-slot="sheet-overlay"
       className={cn(
-        'para:data-[state=open]:animate-in para:data-[state=closed]:animate-out para:data-[state=closed]:fade-out-0 para:data-[state=open]:fade-in-0 para:fixed para:inset-0 para:z-50 para:bg-black/80',
+        'para:data-[state=open]:animate-in para:data-[state=closed]:animate-out para:data-[state=closed]:fade-out-0 para:data-[state=open]:fade-in-0 para:fixed para:inset-0 para:z-50 para:bg-linear-180 para:from-black/14 para:to-black/70',
         className,
       )}
       {...props}
@@ -51,7 +51,7 @@ function SheetContent({
       <SheetPrimitive.Content
         data-slot="sheet-content"
         className={cn(
-          'para:bg-background para:data-[state=open]:animate-in para:data-[state=closed]:animate-out para:fixed para:z-50 para:flex para:flex-col para:gap-4 para:shadow-lg para:transition para:ease-in-out para:data-[state=closed]:duration-300 para:data-[state=open]:duration-500',
+          'para:border-border para:bg-background para:data-[state=open]:animate-in para:data-[state=closed]:animate-out para:fixed para:z-50 para:flex para:flex-col para:gap-4 para:shadow-lg para:transition para:ease-in-out para:data-[state=closed]:duration-300 para:data-[state=open]:duration-500',
           side === 'right' &&
             'para:data-[state=closed]:slide-out-to-right para:data-[state=open]:slide-in-from-right para:inset-y-0 para:right-0 para:h-full para:w-3/4 para:border-l para:sm:max-w-sm',
           side === 'left' &&
@@ -80,7 +80,7 @@ function SheetContent({
 
 function SheetHeader({ className, ...props }: React.ComponentProps<'div'>) {
   return (
-    <div data-slot="sheet-header" className={cn('para:flex para:flex-col para:gap-1.5 para:p-4', className)} {...props} />
+    <div data-slot="sheet-header" className={cn('para:flex para:flex-col para:gap-1.5 para:p-6', className)} {...props} />
   );
 }
 
@@ -88,7 +88,7 @@ function SheetFooter({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="sheet-footer"
-      className={cn('para:mt-auto para:flex para:flex-col para:gap-2 para:p-4', className)}
+      className={cn('para:mt-auto para:flex para:flex-col para:gap-2 para:p-6', className)}
       {...props}
     />
   );

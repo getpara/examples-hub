@@ -1,6 +1,7 @@
 import {
   Badge,
   Button,
+  cn,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -8,12 +9,11 @@ import {
   DropdownMenuTrigger,
   Typography,
 } from '@getpara/react-component-library';
-import { OrganizationAvatar } from '../OgranizationAvatar';
+import { OrganizationAvatar } from '../OrganizationAvatar';
 import { ChevronsUpDown } from 'lucide-react';
 import { Fragment } from 'react/jsx-runtime';
 import { Link } from 'react-router-dom';
 import { PropsWithChildren } from 'react';
-import clsx from 'clsx';
 import { Environment } from '../../types/environment';
 import { EnvIcon } from '../common';
 
@@ -47,11 +47,11 @@ export const NavDropdown = ({
 }: NavDropdownProps & PropsWithChildren) => {
   return (
     <DropdownMenu onOpenChange={setIsOpen} open={isOpen}>
-      <DropdownMenuTrigger className={clsx('para:rounded-sm para:min-w-0', className)}>
+      <DropdownMenuTrigger className={cn('para:rounded-sm para:min-w-0', className)}>
         <Button
           asChild
           variant="ghost"
-          className={clsx(
+          className={cn(
             'para:border para:border-transparent para:hover:border-border para:hover:bg-transparent para:rounded-sm para:p-1',
             {
               'para:border-border': isOpen,

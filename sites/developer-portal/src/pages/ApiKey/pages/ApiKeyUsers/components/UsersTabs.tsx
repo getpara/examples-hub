@@ -1,7 +1,6 @@
-import { ScrollArea, ScrollBar, Tabs, TabsList, TabsTrigger } from '@getpara/react-component-library';
+import { cn, ScrollArea, ScrollBar, Tabs, TabsList, TabsTrigger } from '@getpara/react-component-library';
 import { Globe, User, Wand } from 'lucide-react';
 import { ReactNode } from 'react';
-import clsx from 'clsx';
 
 export type UsersTabValue = 'all' | 'standard' | 'pregen';
 
@@ -21,7 +20,7 @@ export const UsersTabs = ({ value, onChange }: UsersTabsProps) => {
     <Tabs
       value={value}
       onValueChange={val => onChange(val as UsersTabValue)}
-      className={clsx('para:gap-4', { 'para:gap-0': value === 'all' })}
+      className={cn('para:gap-4', { 'para:gap-0': value === 'all' })}
     >
       <TabsList className="para:w-full">
         <ScrollArea className="para:w-full">

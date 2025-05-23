@@ -1,4 +1,5 @@
 import {
+  cn,
   Sidebar,
   SidebarContent,
   SidebarGroup,
@@ -10,7 +11,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@getpara/react-component-library';
-import clsx from 'clsx';
 import {
   ArrowUpDown,
   BarChart,
@@ -112,7 +112,7 @@ export const AppSidebar = () => {
 
   return (
     <Sidebar
-      className={clsx(
+      className={cn(
         'para:mt-[var(--appbar-height-mobile)] para:lg:mt-[var(--appbar-height)]',
         'para:h-[calc(100svh-var(--appbar-height-mobile))] para:lg:h-[calc(100svh-var(--appbar-height))]',
       )}

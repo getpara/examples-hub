@@ -2,9 +2,8 @@ import { ColumnDef } from '@tanstack/react-table';
 import { UsersTableData } from '../../../../../types/api';
 import { LOGIN_METHOD_CONFIG } from '../../../../../utils/constants';
 import { formatDate } from '../../../../../utils/formatDate';
-import { Badge, Skeleton } from '@getpara/react-component-library';
+import { Badge, cn, Skeleton } from '@getpara/react-component-library';
 import { formatWalletAddress } from '../../../../../utils/formatWalletAddress';
-import clsx from 'clsx';
 
 const baseSkeleton = 'para:h-3.5 para:w-2xs para:rounded para:bg-foreground/10';
 
@@ -28,21 +27,21 @@ export const getColumns = (isLoading?: boolean): ColumnDef<UsersTableData>[] => 
       accessorFn: d => LOGIN_METHOD_CONFIG[d.lastMethod].label,
       header: 'Last Login Method',
       ...(isLoading && {
-        cell: () => <Skeleton className={clsx(baseSkeleton, 'para:w-24')} />,
+        cell: () => <Skeleton className={cn(baseSkeleton, 'para:w-24')} />,
       }),
     },
     {
       accessorFn: d => formatDate(d.firstCreated),
       header: 'Created',
       ...(isLoading && {
-        cell: () => <Skeleton className={clsx(baseSkeleton, 'para:w-24')} />,
+        cell: () => <Skeleton className={cn(baseSkeleton, 'para:w-24')} />,
       }),
     },
     {
       accessorKey: 'walletAddresses',
       header: () => <div className="para:text-right">Address</div>,
       cell: isLoading
-        ? () => <Skeleton className={clsx(baseSkeleton, 'para:w-24 para:h-[22px] para:ml-auto')} />
+        ? () => <Skeleton className={cn(baseSkeleton, 'para:w-24 para:h-[22px] para:ml-auto')} />
         : ({ row }) => {
             const addresses = row.getValue<string[]>('walletAddresses').filter(a => !!a);
 

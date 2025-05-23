@@ -1,6 +1,5 @@
-import { Switch, SwitchProps, Typography } from '@getpara/react-component-library';
+import { cn, Switch, SwitchProps, Typography } from '@getpara/react-component-library';
 import { FlatCard } from '../../../components/common';
-import clsx from 'clsx';
 
 type SwitchCardProps = {
   label: string;
@@ -12,7 +11,7 @@ export const SwitchCard = ({ label, checked, ...rest }: SwitchCardProps) => {
       <span>
         <Typography className="para:font-medium para:inline">{label}: </Typography>
         <Typography
-          className={clsx('para:font-medium para:inline', {
+          className={cn('para:font-medium para:inline', {
             'para:text-destructive': !checked,
             'para:text-green-600': checked,
           })}

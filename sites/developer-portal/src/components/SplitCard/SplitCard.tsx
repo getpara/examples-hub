@@ -1,8 +1,7 @@
 import styled from 'styled-components';
 import { ReactNode } from 'react';
 import { LINEAR_GRADIENT } from '../common';
-import { Card, CardContent } from '@getpara/react-component-library';
-import clsx from 'clsx';
+import { Card, CardContent, cn } from '@getpara/react-component-library';
 
 interface SplitCardProps {
   LeftContent?: ReactNode;
@@ -16,7 +15,7 @@ interface SplitCardProps {
 export const SplitCard = ({ LeftContent, RightContent, isSelected, highlighted, onClick }: SplitCardProps) => {
   const Content = (
     <Card
-      className={clsx('para:shadow-none para:rounded-2xl para:border-border para:max-w-[1200px] para:w-full', {
+      className={cn('para:shadow-none para:rounded-2xl para:border-border para:max-w-[1200px] para:w-full', {
         'para:hover:bg-muted para:cursor-pointer': !!onClick,
         'para:border-foreground': isSelected,
       })}

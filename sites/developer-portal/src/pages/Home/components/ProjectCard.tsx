@@ -3,11 +3,10 @@ import { useProjectTotalUsersCount } from '../../../hooks/api/queries/useProject
 import { truncateNumber } from '../../../utils/formatNumber';
 import { Link, useParams } from 'react-router-dom';
 import { FlatCard } from '../../../components/common';
-import { Badge, Typography } from '@getpara/react-component-library';
-import { OrganizationAvatar } from '../../../components/OgranizationAvatar';
+import { Badge, cn, Typography } from '@getpara/react-component-library';
+import { OrganizationAvatar } from '../../../components/OrganizationAvatar';
 import { formatFrameworkName, getFrameworkColors, getFrameworkIcon } from '../../../utils/framework';
 import { Framework } from '../../../types/framework';
-import clsx from 'clsx';
 
 interface ProjectCardProps {
   project: Project;
@@ -39,7 +38,7 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
                 </Typography>
               )}
               {project.framework && (
-                <Badge variant="outline" className={clsx(frameworkColors?.bg, frameworkColors?.border)}>
+                <Badge variant="outline" className={cn(frameworkColors?.bg, frameworkColors?.border)}>
                   {Icon && <Icon className="para:size-3" />}
                   {formatFrameworkName(project.framework as Framework)}
                 </Badge>

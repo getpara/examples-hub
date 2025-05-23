@@ -1,10 +1,9 @@
-import { FormField, FormItem, FormLabel, Typography, useFormContext } from '@getpara/react-component-library';
+import { cn, FormField, FormItem, FormLabel, Typography, useFormContext } from '@getpara/react-component-library';
 import { FormControl, FormMessage } from '../../../../../components/formComponents';
 import { BrandingForm } from '../hooks/useBrandingForm';
 import { useUploadKeyAsset } from '../../../../../hooks/api/mutations/useUploadKeyAsset';
 import { PartnerAssetType } from '../../../../../types/api';
 import { useParams } from 'react-router-dom';
-import clsx from 'clsx';
 import { useUpdateApiKey } from '../../../../../hooks/api/mutations/useUpdateApiKey';
 import { UploadButton } from '../../../../../components/UploadButton';
 
@@ -76,7 +75,7 @@ export const AssetUpload = ({ formKey }: AssetUploadProps) => {
               }}
               isLoading={isUploadingAsset}
               error={!!error}
-              buttonClassName={clsx({
+              buttonClassName={cn({
                 'para:w-[80px]': isIcon,
                 'para:w-[200px]': isLogo,
               })}

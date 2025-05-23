@@ -26,7 +26,7 @@ function DrawerOverlay({ className, ...props }: React.ComponentProps<typeof Draw
     <DrawerPrimitive.Overlay
       data-slot="drawer-overlay"
       className={cn(
-        'para:data-[state=open]:animate-in para:data-[state=closed]:animate-out para:data-[state=closed]:fade-out-0 para:data-[state=open]:fade-in-0 para:fixed para:inset-0 para:z-50 para:bg-black/80',
+        'para:data-[state=open]:animate-in para:data-[state=closed]:animate-out para:data-[state=closed]:fade-out-0 para:data-[state=open]:fade-in-0 para:fixed para:inset-0 para:z-50 para:bg-linear-180 para:from-black/14 para:to-black/70',
 
         className,
       )}

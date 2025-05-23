@@ -1,5 +1,4 @@
-import { Button, Input, Loader, Typography } from '@getpara/react-component-library';
-import clsx from 'clsx';
+import { Button, cn, Input, Loader, Typography } from '@getpara/react-component-library';
 import { CircleAlert, Plus } from 'lucide-react';
 import { ChangeEvent, ComponentProps } from 'react';
 
@@ -30,7 +29,7 @@ export const UploadButton = ({
         onClick={() => {
           document.getElementById(`${idPrefix}-input`)?.click();
         }}
-        className={clsx(
+        className={cn(
           'para:relative para:p-0 para:overflow-hidden para:h-[80px] para:w-[80px] para:flex para:items-center para:justify-center para:border para:border-dashed para:border-border para:bg-muted para:disabled:opacity-100',
           {
             'para:border-solid': !!value,

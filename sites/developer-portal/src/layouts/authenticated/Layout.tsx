@@ -22,7 +22,7 @@ export const Layout = () => {
         <SidebarProvider className="para:min-h-0">
           <AuthAppBar />
           <AppSidebar />
-          <main className="para:md:p-6 para:p-4 para:overflow-auto para:flex-1 para:mt-[var(--appbar-height-mobile)] para:lg:mt-[var(--appbar-height)]">
+          <main className="para:md:p-8 para:p-8 para:overflow-auto para:flex-1 para:mt-[var(--appbar-height-mobile)] para:lg:mt-[var(--appbar-height)]">
             <div className="para:max-w-[1400px] para:m-auto">
               <SentryErrorBoundary
                 fallback={({ error, resetError }) => (

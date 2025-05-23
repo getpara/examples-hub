@@ -1,5 +1,5 @@
 import { axiosClient } from '../../clients/axios';
-import { UpdateOrganizationMemberBody } from '../../types/api';
+import { MemberRoleType, UpdateOrganizationMemberBody } from '../../types/api';
 
 export type RemoveMemberVars = {
   organizationId: string;
@@ -22,9 +22,9 @@ export const updateMember = async ({ organizationId, memberId, data }: UpdateMem
   return (await axiosClient.patch<boolean>(endpoint, data)).data;
 };
 
-export type InviteMemberVars = { organizationId: string; email: string };
-export const inviteMember = async ({ organizationId, email }: InviteMemberVars) => {
+export type InviteMemberVars = { organizationId: string; email: string; role: MemberRoleType; projectIds?: string[] };
+export const inviteMember = async ({ organizationId, email, role, projectIds }: InviteMemberVars) => {
   const endpoint = `/organizations/${organizationId}/members/invite`;
 
-  return (await axiosClient.post<boolean>(endpoint, { email })).data;
+  return (await axiosClient.post<boolean>(endpoint, { email, role, projectIds })).data;
 };

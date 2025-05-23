@@ -4,8 +4,7 @@ import { BRAND_COLORS, MOBILE_SIZE } from '../utils/constants';
 import { Environment } from '../types/environment';
 import { getKeyColor } from '../utils/apiKey';
 import { PropsWithChildren } from 'react';
-import clsx from 'clsx';
-import { Card } from '@getpara/react-component-library';
+import { Card, cn } from '@getpara/react-component-library';
 
 export const LINEAR_GRADIENT = `linear-gradient(
   90deg,
@@ -116,13 +115,13 @@ export const LinkText = styled(CpslText)<{ $centered?: boolean }>`
 `;
 
 export const VerticalCenteredContainer = ({ children, className }: PropsWithChildren & { className?: string }) => (
-  <div className={clsx('para:flex para:flex-col para:justify-center para:w-full para:items-center', className)}>
+  <div className={cn('para:flex para:flex-col para:justify-center para:w-full para:items-center', className)}>
     {children}
   </div>
 );
 
 export const FlatCard = ({ children, className, ...rest }: React.ComponentProps<'div'>) => (
-  <Card className={clsx('para:shadow-none para:p-8 para:rounded-lg', className)} {...rest}>
+  <Card className={cn('para:shadow-none para:p-8 para:rounded-lg', className)} {...rest}>
     {children}
   </Card>
 );

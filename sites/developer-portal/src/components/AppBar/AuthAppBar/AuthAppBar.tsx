@@ -1,13 +1,12 @@
 import { DOCS_LINK } from '../../../utils/constants';
 import { Link, useParams } from 'react-router-dom';
-import { Button, ParaIconBrand, useSidebar } from '@getpara/react-component-library';
+import { Button, cn, ParaIconBrand, useSidebar } from '@getpara/react-component-library';
 import { FileText, HelpCircle, PanelLeftClose } from 'lucide-react';
 import { OrganizationDropdown } from '../../NavComponents/OrganizationDropdown';
 import { ProjectDropdown } from '../../NavComponents/ProjectDropdown';
 import { ApiKeyDropdown } from '../../NavComponents/ApiKeyDropdown';
 import { AccountDropdown } from './components/AccountDropdown';
 import { NavLink } from './components/NavLink';
-import clsx from 'clsx';
 
 export const AUTH_APP_BAR_HEIGHT = 57;
 
@@ -28,7 +27,7 @@ export const AuthAppBar = ({}: AuthAppBarProps) => {
             <Button
               variant="ghost"
               size="icon"
-              className={clsx('para:size-6 para:mr-4 para:hidden para:md:hidden', {
+              className={cn('para:size-6 para:mr-4 para:hidden para:md:hidden', {
                 'para:block': !!apiKey,
               })}
               onClick={toggleSidebar}
@@ -36,7 +35,7 @@ export const AuthAppBar = ({}: AuthAppBarProps) => {
               <PanelLeftClose className="para:size-6" />
             </Button>
             <OrganizationDropdown
-              className={clsx('para:block para:md:block para:min-w-0', {
+              className={cn('para:block para:md:block para:min-w-0', {
                 'para:hidden': !!projectId,
               })}
             />

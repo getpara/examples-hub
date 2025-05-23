@@ -1,7 +1,6 @@
-import { Loader, Typography } from '@getpara/react-component-library';
+import { cn, Loader, Typography } from '@getpara/react-component-library';
 import { FlatCard } from '../../common';
 import { LucideIcon } from 'lucide-react';
-import clsx from 'clsx';
 
 type OverviewCardProps = {
   title: string;
@@ -30,7 +29,7 @@ export const OverviewCard = ({ title, Icon, change, value, isLoading }: Overview
           <>
             <Typography className="para:text-2xl para:font-bold para:text-card-foreground">{value ?? 'No Data'}</Typography>
             <Typography
-              className={clsx('para:text-xs para:text-emerald-600', {
+              className={cn('para:text-xs para:text-emerald-600', {
                 'para:text-destructive': change.value < 0,
               })}
             >

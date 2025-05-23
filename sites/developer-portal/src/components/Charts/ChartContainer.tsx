@@ -1,7 +1,6 @@
-import { ChartConfig, ChartContainer as BaseChartContainer, Typography, Loader } from '@getpara/react-component-library';
+import { ChartConfig, ChartContainer as BaseChartContainer, Typography, Loader, cn } from '@getpara/react-component-library';
 import { ResponsiveContainer } from 'recharts';
 import { FlatCard } from '../common';
-import clsx from 'clsx';
 import { ReactNode } from 'react';
 
 type ChartContainerProps = {
@@ -38,7 +37,7 @@ export const ChartContainer = ({
         </div>
       ) : (
         <div
-          className={clsx(
+          className={cn(
             'para:flex-1 para:w-full para:flex para:flex-col para:md:flex-row para:md:h-[240px] para:md:max-h-[240px]',
             {
               ['para:px-6']: !fullWidth,
@@ -48,7 +47,7 @@ export const ChartContainer = ({
         >
           <BaseChartContainer
             config={chartConfig}
-            className={clsx('para:max-h-[240px] para:flex-1 para:aspect-square', {
+            className={cn('para:max-h-[240px] para:flex-1 para:aspect-square', {
               ['para:max-w-[240px]']: !fullWidth,
             })}
           >

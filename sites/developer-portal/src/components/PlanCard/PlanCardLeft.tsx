@@ -8,8 +8,7 @@ import { useStripePlan } from '../../hooks/useStripePlan';
 import { PlanMetadata } from '../../types/planMetadata';
 import { ENTERPRISE_PLAN_SLUG, MOST_POPULAR_PLAN_SLUG } from '../../utils/constants';
 import { PlanCardType } from './PlanCard';
-import clsx from 'clsx';
-import { Badge, Button, Typography } from '@getpara/react-component-library';
+import { Badge, Button, cn, Typography } from '@getpara/react-component-library';
 
 interface PlanCardLeftProps extends Pick<PlanMetadata, 'name' | 'allowanceString' | 'footnote' | 'monthlyCost' | 'slug'> {
   isActive?: boolean;
@@ -96,7 +95,7 @@ export const PlanCardLeft = ({
           <>
             <Badge
               variant="outline"
-              className={clsx({
+              className={cn({
                 'para:border-destructive para:text-destructive': willSubscriptionCancel,
                 'para:border-border para:text-secondary-foreground': !willSubscriptionCancel,
               })}
