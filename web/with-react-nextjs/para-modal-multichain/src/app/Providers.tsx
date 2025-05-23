@@ -41,7 +41,10 @@ export function Providers({
             ExternalWallet.PHANTOM,
             ExternalWallet.BACKPACK,
           ],
-          walletsWithParaAuth: [ExternalWallet.METAMASK],
+          createLinkedEmbeddedForExternalWallets: [
+            ExternalWallet.METAMASK,
+            ExternalWallet.PHANTOM,
+          ],
           evmConnector: {
             config: {
               chains: [mainnet, polygon, sepolia, celo],
@@ -62,7 +65,10 @@ export function Providers({
               endpoint,
               chain: solanaNetwork,
               appIdentity: {
-                uri: typeof window !== "undefined" ? `${window.location.protocol}//${window.location.host}` : "",
+                uri:
+                  typeof window !== "undefined"
+                    ? `${window.location.protocol}//${window.location.host}`
+                    : "",
               },
             },
           },
@@ -90,7 +96,8 @@ export function Providers({
           logo: "/para.svg",
           recoverySecretStepEnabled: true,
           twoFactorAuthEnabled: false,
-        }}>
+        }}
+      >
         {children}
       </ParaProvider>
     </QueryClientProvider>
