@@ -1,13 +1,17 @@
-import { PlanMetrics } from './PlanMetrics';
 import { Plans } from './Plans';
-import { FooterCard } from './FooterCard';
 import { PaymentMethod } from './PaymentMethod';
+import { Overviews } from './Overviews';
+import { ManagePlan } from './ManagePlan';
+import { CancelWarning } from './CancelWarning';
+import { FooterCard } from './FooterCard';
 
 export const BillingContent = () => {
   return (
     <>
-      <PlanMetrics />
+      <CancelWarning />
+      <Overviews />
       <PaymentMethod />
+      <ManagePlan />
       <Plans />
       <FooterCard />
     </>

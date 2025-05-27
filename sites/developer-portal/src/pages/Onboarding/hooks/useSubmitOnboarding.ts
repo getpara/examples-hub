@@ -22,7 +22,7 @@ export const useSubmitOnboarding = () => {
   const { mutateAsync: createOrganization } = useCreateOrganization();
   const { mutateAsync: updateOrganization } = useUpdateOrganization();
   const { mutateAsync: uploadLogo } = useUploadOrganizationLogo();
-  const { changePlan, isCreatingStripeSession } = useStripePlan();
+  const { createSubscription, isCreatingStripeSession } = useStripePlan();
   const { setSelectedOrganization } = useSetSelectedOrganizationWithNavigation(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -65,7 +65,7 @@ export const useSubmitOnboarding = () => {
           return;
         }
         resetUser(userId);
-        await changePlan(planSlug, organizationId, location.origin);
+        await createSubscription(planSlug, organizationId, location.origin);
       } catch (e) {
         toast.error('Error Updating Your Organization', {
           description: "If your organization data isn't correct, contact Para support.",

@@ -1,6 +1,6 @@
 import { PlanIncludes } from '../../types/planMetadata';
 import { Typography } from '@getpara/react-component-library';
-import { CheckIcon, X } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 
 type PlanCardRightProps = PlanIncludes;
 
@@ -13,9 +13,17 @@ export const PlanCardRight = ({ title, subtitle, includes, excludes, comingSoon 
           {subtitle}
         </Typography>
       )}
-      {includes.map(item => (
+      {includes?.map(item => (
         <div className="para:flex para:items-center para:gap-2" key={item}>
-          <CheckIcon className="para:size-4 para:stroke-foreground" />
+          <Check className="para:size-4 para:stroke-foreground" />
+          <Typography color="secondary" className="para:text-sm">
+            {item}
+          </Typography>
+        </div>
+      ))}
+      {excludes?.map(item => (
+        <div className="para:flex para:items-center para:gap-2" key={item}>
+          <X className="para:size-4 para:stroke-foreground" />
           <Typography color="secondary" className="para:text-sm">
             {item}
           </Typography>

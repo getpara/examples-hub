@@ -474,6 +474,19 @@ export type OrganizationSubscriptionResponse = {
 };
 
 // *********************
+// Organization Premium Features
+// *********************
+type PremiumFeatures = {
+  isUsingPhoneAuth: boolean;
+  isUsingPregen: boolean;
+  isUsingNativePasskeys: boolean;
+};
+export type OrganizationPremiumFeaturesResponse = {
+  prodFeatures: PremiumFeatures;
+  betaFeatures: PremiumFeatures;
+};
+
+// *********************
 // Plan
 // *********************
 export type Plan = {

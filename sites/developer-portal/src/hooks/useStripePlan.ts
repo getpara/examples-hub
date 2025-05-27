@@ -29,54 +29,56 @@ export const useStripePlan = () => {
           if (data.sessionUrl) {
             window.location.assign(data.sessionUrl);
           } else {
-            setIsCreatingStripeSession(false);
             toast.error('Failed to Create Stripe Customer Portal', {
               description: 'Please try again. If the problem persists, contact Para support.',
             });
           }
         },
         onError: () => {
-          setIsCreatingStripeSession(false);
           toast.error('Failed to Create Stripe Customer Portal', {
             description: 'Please try again. If the problem persists, contact Para support.',
           });
+        },
+        onSettled: () => {
+          setIsCreatingStripeSession(false);
         },
       },
     );
   };
 
-  const changePlan = async (planSlug: string, orgIdOverride?: string, successUrlOverride?: string) => {
+  const createSubscription = async (planSlug: string, orgIdOverride?: string, successUrlOverride?: string) => {
     if (isSubscriptionLoading || isSubscriptionError) {
       return;
     }
 
+    if (hasSubscription) {
+      return;
+    }
+
     setIsCreatingStripeSession(true);
-    if (!hasSubscription) {
-      await createCheckoutSession(
-        { planSlug, orgIdOverride, successUrlOverride },
-        {
-          onSuccess: data => {
-            if (data.sessionUrl) {
-              window.location.assign(data.sessionUrl);
-            } else {
-              setIsCreatingStripeSession(false);
-              toast.error('Failed to Create Stripe Checkout', {
-                description: 'Please try again. If the problem persists, contact Para support.',
-              });
-            }
-          },
-          onError: () => {
-            setIsCreatingStripeSession(false);
+    await createCheckoutSession(
+      { planSlug, orgIdOverride, successUrlOverride },
+      {
+        onSuccess: data => {
+          if (data.sessionUrl) {
+            window.location.assign(data.sessionUrl);
+          } else {
             toast.error('Failed to Create Stripe Checkout', {
               description: 'Please try again. If the problem persists, contact Para support.',
             });
-          },
+          }
         },
-      );
-    } else {
-      await createCustomerPortalSession({ planSlug, flow: 'subscriptionUpdateConfirm' });
-    }
+        onError: () => {
+          toast.error('Failed to Create Stripe Checkout', {
+            description: 'Please try again. If the problem persists, contact Para support.',
+          });
+        },
+        onSettled: () => {
+          setIsCreatingStripeSession(false);
+        },
+      },
+    );
   };
 
-  return { isCreatingStripeSession, changePlan, createCustomerPortalSession };
+  return { isCreatingStripeSession, createSubscription, createCustomerPortalSession };
 };

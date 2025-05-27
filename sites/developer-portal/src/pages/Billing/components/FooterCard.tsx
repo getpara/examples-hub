@@ -1,66 +1,35 @@
-import styled from 'styled-components';
-import { BaseCard } from '../../../components/common';
-import { CpslButton, CpslText } from '@getpara/react-components';
-import { SCHEDULE_MEETING_LINK, SUPPORT_URL } from '../../../utils/constants';
-import {
-  useHasStripeSubscription,
-  useWillStripeSubscriptionCancel,
-} from '../../../hooks/api/queries/useOrganizationSubscription';
+import { Button, Typography } from '@getpara/react-component-library';
+import { useTranslation } from 'react-i18next';
+import { FlatCard } from '../../../components/common';
+import { PlanSlug, SUPPORT_URL } from '../../../utils/constants';
+import { useBillingStore } from '../store/useBillingStore';
+import { Link } from 'react-router-dom';
 
 export const FooterCard = () => {
-  const { data: willSubscriptionCancel } = useWillStripeSubscriptionCancel();
-  const { data: hasSubscription } = useHasStripeSubscription();
+  const openChangeModal = useBillingStore(state => state.openChangeModal);
+  const { t } = useTranslation(['billing', 'error']);
+
+  const handleDowngradeClick = () => {
+    openChangeModal(PlanSlug.FREE);
+  };
 
   return (
-    <>
-      <Container>
-        <BaseCard>
-          <InnerContainer>
-            <Text variant="bodyS" weight="medium">
-              Not finding the features or plan you are looking for? We’d love to hear about what you need!
-            </Text>
-            <ButtonContainer>
-              <CpslButton size="small" as="a" href={SUPPORT_URL}>
-                Get In Touch
-              </CpslButton>
-              {hasSubscription && (
-                <CpslButton
-                  disabled={willSubscriptionCancel}
-                  variant="destructive"
-                  size="small"
-                  as="a"
-                  href={SCHEDULE_MEETING_LINK}
-                  target="_blank"
-                >
-                  Cancel Plan
-                </CpslButton>
-              )}
-            </ButtonContainer>
-          </InnerContainer>
-        </BaseCard>
-      </Container>
-    </>
+    <FlatCard className="para:md:flex-row">
+      <Typography className="para:font-medium para:flex-1 para:whitespace-pre-line">{t('footer.title')}</Typography>
+      <div className="para:flex para:gap-2 para:sm:flex-row para:flex-col">
+        <div>
+          <Link to={SUPPORT_URL} target="_blank" rel="noopener noreferrer">
+            <Button variant="neutral" className="para:w-full para:sm:w-auto">
+              {t('footer.buttons.contact')}
+            </Button>
+          </Link>
+        </div>
+        <div>
+          <Button variant="secondary" className="para:w-full para:sm:w-auto" onClick={handleDowngradeClick}>
+            {t('footer.buttons.downgrade')}
+          </Button>
+        </div>
+      </div>
+    </FlatCard>
   );
 };
-
-const Container = styled.div`
-  max-width: 840px;
-`;
-
-const InnerContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 24px;
-`;
-
-const ButtonContainer = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`;
-
-const Text = styled(CpslText)`
-  flex-basis: 450px;
-`;

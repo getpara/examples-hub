@@ -15,12 +15,12 @@ export const TransactionPopups = () => {
       title="Transaction Pop-ups"
       subtitle="Control if you want users to manually confirm transactions via a pop-up window."
       ActionComponent={
-        <Button>
-          <Link to={TX_POPUPS_DOCS_LINK} className="para:flex para:gap-2 para:items-center">
+        <Link to={TX_POPUPS_DOCS_LINK} className="para:flex para:gap-2 para:items-center">
+          <Button>
             Learn More
             <ArrowRight />
-          </Link>
-        </Button>
+          </Button>
+        </Link>
       }
     >
       <FormField

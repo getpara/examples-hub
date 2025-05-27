@@ -1,14 +1,10 @@
 import { usePlan } from '../../hooks/api/queries/usePlans';
-import {
-  useGetOrganizationSubscription,
-  useHasStripeSubscription,
-  useWillStripeSubscriptionCancel,
-} from '../../hooks/api/queries/useOrganizationSubscription';
-import { useStripePlan } from '../../hooks/useStripePlan';
+import { useGetOrganizationSubscription } from '../../hooks/api/queries/useOrganizationSubscription';
 import { PlanMetadata } from '../../types/planMetadata';
 import { ENTERPRISE_PLAN_SLUG, MOST_POPULAR_PLAN_SLUG } from '../../utils/constants';
 import { PlanCardType } from './PlanCard';
-import { Badge, Button, cn, Typography } from '@getpara/react-component-library';
+import { Badge, Button, Typography } from '@getpara/react-component-library';
+import { Trans, useTranslation } from 'react-i18next';
 
 interface PlanCardLeftProps extends Pick<PlanMetadata, 'name' | 'allowanceString' | 'footnote' | 'monthlyCost' | 'slug'> {
   isActive?: boolean;
@@ -31,10 +27,8 @@ export const PlanCardLeft = ({
   type,
   onUpgradeClick,
 }: PlanCardLeftProps) => {
+  const { t } = useTranslation(['billing']);
   const { data: subscription } = useGetOrganizationSubscription();
-  const { data: willSubscriptionCancel } = useWillStripeSubscriptionCancel();
-  const { data: hasStripeSubscription } = useHasStripeSubscription();
-  const { createCustomerPortalSession } = useStripePlan();
   const { data: plan, isLoading: isPriceLoading } = usePlan(slug);
 
   const isBillingType = type === 'billing';
@@ -51,15 +45,15 @@ export const PlanCardLeft = ({
   // Else if its the enterprise option show their enterprise price if applicable or set to 0 to show the "Ask Us" CTA
   // Default to the default plan price from Stripe
   const monthlyCostString = isSubscribed ? planPrice : isEnterprise ? (enterprisePrice ?? 0) : planPrice;
-  const allowanceStringWithTier = isTieredPrice ? `Up to ${(tiers?.[0].upTo ?? 0).toLocaleString()} MAUs*` : allowanceString;
-  const additionalCharge = isTieredPrice ? `$${tierUnitPrice} per additional MAU` : '';
+  const allowanceStringWithTier = isTieredPrice
+    ? t('plans.plan.allowance', {
+        allowance: (tiers?.[0].upTo ?? 0).toLocaleString(),
+      })
+    : allowanceString;
+  const overageCost = isTieredPrice ? t('plans.plan.overageCost', { cost: tierUnitPrice }) : '';
 
   const handleUpgradePlanClick = () => {
     onUpgradeClick(slug);
-  };
-
-  const handleManagePlanClick = async () => {
-    createCustomerPortalSession({});
   };
 
   return (
@@ -67,58 +61,49 @@ export const PlanCardLeft = ({
       <div className="para:flex para:flex-col para:gap-2">
         <div className="para:flex para:items-center para:gap-2">
           <Typography className="para:text-xl para:font-semibold">{name}</Typography>
-          {!isBillingType && isMostPopular && <Badge>Most Popular</Badge>}
+          {!isBillingType && isMostPopular && <Badge>{t('plans.plan.popular')}</Badge>}
         </div>
         {isEnterprise && !enterprisePrice ? (
-          <Typography className="para:text-3xl para:font-bold">Ask Us!</Typography>
+          <Typography className="para:text-3xl para:font-bold">{t('plans.plan.enterpriseCTA')}</Typography>
         ) : (
           <>
-            <span>
-              <Typography className="para:text-3xl para:font-bold para:inline">
-                {isPriceLoading ? '-' : `$${monthlyCostString}`}
-              </Typography>
-              <Typography color="secondary" className="para:text-sm para:inline">
-                /mo
-              </Typography>
-            </span>
-            <Typography color="muted" className="para:text-sm para:font-medium">
+            <Typography color="secondary" className="para:text-sm para:inline">
+              {isPriceLoading ? (
+                '-'
+              ) : (
+                <Trans
+                  t={t}
+                  i18nKey="plans.plan.monthlyPrice"
+                  values={{ price: monthlyCostString }}
+                  components={{ bold: <Typography className="para:text-3xl para:font-bold para:inline" /> }}
+                />
+              )}
+            </Typography>
+            <Typography color="secondary" className="para:text-sm">
               {allowanceStringWithTier}
             </Typography>
-            {additionalCharge && (
-              <Typography color="muted" className="para:text-sm para:font-medium">
-                {additionalCharge}
+            {isTieredPrice && (
+              <Typography color="secondary" className="para:text-sm">
+                {overageCost}
               </Typography>
             )}
           </>
         )}
-        {isHigherPlanActive ? null : isActive ? (
-          <>
-            <Badge
-              variant="outline"
-              className={cn({
-                'para:border-destructive para:text-destructive': willSubscriptionCancel,
-                'para:border-border para:text-secondary-foreground': !willSubscriptionCancel,
-              })}
-            >
-              {willSubscriptionCancel ? 'Pending Cancellation' : 'CURRENT PLAN'}
-            </Badge>
-            {hasStripeSubscription && (
-              <Button size="lg" className="para:w-fit" variant="neutral" onClick={handleManagePlanClick}>
-                {willSubscriptionCancel ? 'Renew Plan' : 'Manage Plan'}
-              </Button>
-            )}
-          </>
-        ) : (
-          <Button
-            size="lg"
-            className="para:w-fit"
-            variant={isBillingType || isMostPopular ? 'default' : 'neutral'}
-            onClick={handleUpgradePlanClick}
-            disabled={disabled}
-          >
-            {isBillingType ? 'Upgrade' : 'Choose'}
-          </Button>
-        )}
+        <Button
+          size="lg"
+          className="para:w-fit"
+          variant={(isBillingType && !isHigherPlanActive) || isMostPopular ? 'default' : 'neutral'}
+          onClick={handleUpgradePlanClick}
+          disabled={disabled || isActive}
+        >
+          {isActive
+            ? t('plans.plan.buttons.current')
+            : isEnterprise && !enterprisePrice
+              ? t('plans.plan.buttons.enterpriseCTA')
+              : isBillingType && !isHigherPlanActive
+                ? t('plans.plan.buttons.upgrade')
+                : t('plans.plan.buttons.downgrade')}
+        </Button>
       </div>
       {footnote && (
         <div className="para:flex para:flex-1 para:items-end">

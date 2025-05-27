@@ -1,4 +1,4 @@
-import { OverviewCard } from './OverviewCard';
+import { OverviewCard } from '../../OverviewCard';
 import { Users } from 'lucide-react';
 import { getPercentChange } from '../../../utils/getPercentChange';
 
@@ -26,10 +26,8 @@ export const NewUsersOverview = ({ data, isLoading }: NewUsersOverviewProps) => 
       title="New Users"
       Icon={Users}
       value={!!data ? numNew.toLocaleString() : undefined}
-      change={{
-        label: changeLabel,
-        value: percentChange,
-      }}
+      valueLabel={changeLabel}
+      changeValue={percentChange}
       isLoading={isLoading}
     />
   );

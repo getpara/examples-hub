@@ -1,6 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { ApiKeyLayout, AuthenticatedLayout, InviteLayout, OnboardingLayout, UnauthenticatedLayout } from './layouts';
-import { ApiKey, Billing, EarlyAccess, Home, Invite, Landing, Onboarding, Team } from './pages';
+import { ApiKey, Billing, Home, Invite, Landing, Onboarding, Team } from './pages';
 import { ErrorBoundary } from './components/ErrorBoundary/ErrorBoundary';
 import { ProjectLayout } from './layouts/ProjectLayout';
 
@@ -51,7 +51,6 @@ export const router = createBrowserRouter([
       { path: 'dashboard', element: <Home /> },
       { path: 'billing', element: <Billing /> },
       { path: 'team', element: <Team /> },
-      { path: 'early-access', element: <EarlyAccess /> },
       {
         path: 'project',
         element: <ProjectLayout />,

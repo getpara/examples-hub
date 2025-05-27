@@ -1,7 +1,7 @@
-import { SplitCard } from '../../components/SplitCard/SplitCard';
 import { PlanCardLeft } from './PlanCardLeft';
 import { PlanCardRight } from './PlanCardRight';
 import { PlanMetadata } from '../../types/planMetadata';
+import { FlatCard } from '../common';
 
 export type PlanCardType = 'billing' | 'onboarding';
 
@@ -25,21 +25,19 @@ export const PlanCard = ({
   onUpgradeClick,
 }: PlanCardProps) => {
   return (
-    <div className="para:flex para:shrink para:w-[848px] para:min-w-0 para:max-w-full">
-      <SplitCard
-        LeftContent={
-          <PlanCardLeft
-            {...planMetadata}
-            isActive={isActive}
-            isHigherPlanActive={isHigherPlanActive}
-            disabled={disabled}
-            enterprisePrice={enterprisePrice}
-            type={type}
-            onUpgradeClick={onUpgradeClick}
-          />
-        }
-        RightContent={<PlanCardRight {...planMetadata.includes} />}
-      />
-    </div>
+    <FlatCard className="para:p-6">
+      <div className={'para:flex para:flex-col para:gap-4 para:md:flex-row para:md:gap-6'}>
+        <PlanCardLeft
+          {...planMetadata}
+          isActive={isActive}
+          isHigherPlanActive={isHigherPlanActive}
+          disabled={disabled}
+          enterprisePrice={enterprisePrice}
+          type={type}
+          onUpgradeClick={onUpgradeClick}
+        />
+        <PlanCardRight {...planMetadata.includes} />
+      </div>
+    </FlatCard>
   );
 };

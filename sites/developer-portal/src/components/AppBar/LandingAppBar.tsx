@@ -37,11 +37,11 @@ export const LandingAppBar = () => {
             ) : (
               <div className="para:flex para:gap-6 para:items-center">
                 {LANDING_HEADER_LINKS.map(({ label, url }) => (
-                  <Button key={url} asChild className="para:px-0 para:text-foreground" variant="link">
-                    <Link to={url} target="_blank">
+                  <Link to={url} target="_blank">
+                    <Button key={url} className="para:px-0 para:text-foreground para:no-underline!" variant="link">
                       {label}
-                    </Link>
-                  </Button>
+                    </Button>
+                  </Link>
                 ))}
               </div>
             )}
@@ -58,11 +58,11 @@ export const LandingAppBar = () => {
                 key={'container'}
               >
                 {LANDING_HEADER_LINKS.map(({ label, url }) => (
-                  <Button key={url} asChild className="para:px-0 para:pt-6 para:text-foreground" variant="link">
-                    <Link to={url} target="_blank">
+                  <Link to={url} target="_blank">
+                    <Button key={url} className="para:px-0 para:pt-6 para:text-foreground para:no-underline!" variant="link">
                       {label}
-                    </Link>
-                  </Button>
+                    </Button>
+                  </Link>
                 ))}
               </motion.div>
             )}

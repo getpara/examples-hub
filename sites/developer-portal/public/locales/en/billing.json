@@ -1,0 +1,98 @@
+{
+  "title": "Billing",
+  "downgradeWarning": {
+    "title": "Your organization will be downgraded to the <bold>Free Tier</bold> in {{daysRemaining}}.",
+    "buttonText": "Stay On Current Plan"
+  },
+  "overviewCards": {
+    "plan": {
+      "title": "Current Plan",
+      "price": "${{price}}/mo"
+    },
+    "maus": {
+      "title": "Monthly Active Users"
+    },
+    "totalUsers": {
+      "title": "Total Users",
+      "change": "{{changeSign}}{{change}}% from last month"
+    },
+    "billingCycle": {
+      "title": "Time left in this cycle"
+    }
+  },
+  "paymentMethod": {
+    "title": "Payment Method",
+    "card": {
+      "buttonText": "Update Card",
+      "details": "<bold>{{cardName}}</bold> ending <bold>{{last4}}</bold>",
+      "expiration": "Expires <bold>{{- date}}</bold>"
+    },
+    "bank": {
+      "buttonText": "Update Account",
+      "details": "Account ending in <bold>{{last4}}</bold>"
+    },
+    "default": {
+      "buttonText": "Update Payment"
+    }
+  },
+  "managePlan": {
+    "label": "Download invoices, update payment details and more in your Stripe Portal.",
+    "buttonText": "Manage Plan"
+  },
+  "plans": {
+    "title": "Plans",
+    "betaUsersDisclosure": "All plans include up to 50 users in your Development Environment where all Para features from all plan tiers are available.",
+    "plan": {
+      "name": "{{name}} Plan",
+      "monthlyPrice": "<bold>${{price}}</bold>/mo",
+      "overageCost": "${{cost}} per additional MA",
+      "allowance": "Up to {{allowance}} Users/mo*",
+      "popular": "Most Popular",
+      "enterpriseCTA": "Ask Us!",
+      "buttons": {
+        "enterpriseCTA": "Book a call",
+        "current": "Current Plan",
+        "upgrade": "Upgrade",
+        "downgrade": "Choose"
+      }
+    }
+  },
+  "changePlanDialog": {
+    "plan": {
+      "name": "{{name}} Plan",
+      "monthlyPrice": "${{price}}/mo",
+      "overageCost": "+ ${{cost}} per additional user",
+      "allowance": "Up to {{allowance}} Monthly Active Users"
+    },
+    "change": {
+      "title": "Change Plan",
+      "alert": {
+        "title": "Are you sure?",
+        "description": "You are currently using features that are not supported on the <bold>{{planName}}</bold>. Changing to this plan may cause errors in your app."
+      }
+    },
+    "upgrade": {
+      "title": "Upgrade Plan",
+      "alert": {
+        "title": "Is this the right plan for you?",
+        "description": "You are currently using features on your development keys that are not supported on the <bold>{{planName}}</bold>. We recommend upgrading to the <bold>{{recommendedPlanName}}</bold> to avoid any disruptions.",
+        "buttonText": "Upgrade To {{recommendedPlanName}}"
+      }
+    },
+    "archiveProjects": {
+      "title": "Archive Projects",
+      "description": "The <bold>{{planName}}</bold> allows you to have <bold>{{projectCount}}</bold>. Select which projects you would like to archive.",
+      "checkboxLabel": "Archive"
+    },
+    "description": "Your current user counts for this billing cycle will be billed in accordance to your new plan.",
+    "downgradeDescription": "<bold>Changes to your plan will take effect at the end of the billing cycle.</bold><br/><br/>Your current user counts for this billing cycle will be billed in accordance to your new plan.",
+    "buttonText": "Confirm"
+  },
+  "footer": {
+    "title": "Not finding the features or plan you are looking for?\nWe'd love to hear about what you need!",
+    "buttons": {
+      "contact": "Tell Us What You Need",
+      "downgrade": "Downgrade to Free Tier"
+    }
+  }
+}

@@ -32,15 +32,14 @@ export const useGetAllProjects = () => {
   });
 };
 
-export const useGetProject = (projectId: string) => {
+export const useGetAllActiveProjects = () => {
   return useProjectsQuery(data => {
-    return data.find(p => p.id === projectId);
+    return data.filter(p => !p.archived);
   });
 };
 
-export const useGetProjectIsValid = (projectId?: string) => {
+export const useGetProject = (projectId: string) => {
   return useProjectsQuery(data => {
-    const project = data.find(p => p.id === projectId);
-    return !!project && !project.archived;
+    return data.find(p => p.id === projectId);
   });
 };

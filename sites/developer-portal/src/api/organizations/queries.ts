@@ -10,6 +10,7 @@ import {
   OrganizationSubscriptionResponse,
   OrganizationTotalUserCountResponse,
   UsersTableDataResponse,
+  OrganizationPremiumFeaturesResponse,
 } from '../../types/api';
 
 export const getOrganization = async (organizationId: string) => {
@@ -96,4 +97,10 @@ export const getOrganizationUsersTableData = async (
       env,
     },
   });
+};
+
+export const getOrganizationPremiumFeatures = async (organizationId: string) => {
+  const endpoint = `/organizations/${organizationId}/premium-features`;
+
+  return axiosClient.get<OrganizationPremiumFeaturesResponse>(endpoint);
 };

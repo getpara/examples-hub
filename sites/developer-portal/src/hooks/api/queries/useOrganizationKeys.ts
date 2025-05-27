@@ -102,6 +102,6 @@ export const useGetAvailableKeyEnvs = (projectId: string) => {
 export const useGetKeyIsValid = (projectId?: string, keyId?: string) => {
   return useOrganizationKeysQuery(projectId ?? '', data => {
     const key = data.find(k => k.id === keyId);
-    return !!key && !key.archived;
+    return key;
   });
 };

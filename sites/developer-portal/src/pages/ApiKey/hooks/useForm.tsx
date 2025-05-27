@@ -25,8 +25,8 @@ export const useForm = <T extends FieldValues>({
   onSubmit: (updateData: T, vars: SubmitVars) => Promise<void>;
 }) => {
   const { apiKey, env, projectId } = useParams();
-  const isValidKey = useIsValidKey(projectId, apiKey);
-  const isValidProject = useIsValidProject(projectId);
+  const isValidKey = useIsValidKey(projectId, apiKey, true);
+  const isValidProject = useIsValidProject(projectId, true);
 
   const form = useRHForm<T>({
     mode: 'onChange',

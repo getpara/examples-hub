@@ -1,8 +1,8 @@
-import { Typography } from '@getpara/react-component-library';
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { SettingsHeaderAction } from './SettingsHeaderAction';
 import { UsersHeaderAction } from './UsersHeaderAction';
+import { PageHeader } from '../../../components/PageHeader';
 
 const PAGE_TITLES: Record<string, string> = {
   'setup': 'Setup',
@@ -49,17 +49,5 @@ export const Header = () => {
     }
   }, [apiKeyPage]);
 
-  return (
-    <div className="para:flex para:flex-col">
-      <div className="para:flex para:justify-between para:items-center">
-        <Typography className="para:text-2xl para:font-semibold">{title}</Typography>
-        {ActionComponent}
-      </div>
-      {subtitle && (
-        <Typography color="secondary" className="para:text-sm para:font-medium para:mt-2">
-          {subtitle}
-        </Typography>
-      )}
-    </div>
-  );
+  return <PageHeader title={title} subtitle={subtitle} ActionComponent={ActionComponent} />;
 };

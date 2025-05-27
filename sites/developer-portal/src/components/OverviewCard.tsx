@@ -1,21 +1,28 @@
 import { cn, Loader, Typography } from '@getpara/react-component-library';
-import { FlatCard } from '../../common';
+import { FlatCard } from './common';
 import { LucideIcon } from 'lucide-react';
 
 type OverviewCardProps = {
   title: string;
   Icon: LucideIcon;
   value?: string;
-  change: {
-    label: string;
-    value: number;
-  };
+  valueLabel?: string;
+  changeValue?: number;
   isLoading?: boolean;
+  className?: string;
 };
 
-export const OverviewCard = ({ title, Icon, change, value, isLoading }: OverviewCardProps) => {
+export const OverviewCard = ({
+  title,
+  Icon,
+  valueLabel,
+  changeValue = 0,
+  value,
+  isLoading,
+  className,
+}: OverviewCardProps) => {
   return (
-    <FlatCard className="para:p-6 para:gap-2 para:w-[290px]">
+    <FlatCard className={cn('para:p-6 para:gap-2 para:w-[290px]', className)}>
       <div className="para:flex para:justify-between para:items-center">
         <Typography className="para:text-sm para:font-medium para:text-card-foreground">{title}</Typography>
         <Icon className="para:size-4" />
@@ -28,13 +35,16 @@ export const OverviewCard = ({ title, Icon, change, value, isLoading }: Overview
         ) : (
           <>
             <Typography className="para:text-2xl para:font-bold para:text-card-foreground">{value ?? 'No Data'}</Typography>
-            <Typography
-              className={cn('para:text-xs para:text-emerald-600', {
-                'para:text-destructive': change.value < 0,
-              })}
-            >
-              {change.label}
-            </Typography>
+            {valueLabel && (
+              <Typography
+                className={cn('para:text-xs para:text-muted-foreground', {
+                  'para:text-destructive': changeValue < 0,
+                  'para:text-emerald-600': changeValue > 0,
+                })}
+              >
+                {valueLabel}
+              </Typography>
+            )}
           </>
         )}
       </div>

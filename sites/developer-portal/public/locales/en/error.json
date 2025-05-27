@@ -1,0 +1,15 @@
+{
+  "api": {
+    "defaultMessage": "Please try again. If the problem persists, contact Para support.",
+    "organization": {
+      "plan": {
+        "change": {
+          "error": "Failed to change plan."
+        },
+        "reinstate": {
+          "error": "Failed to reinstate plan."
+        }
+      }
+    }
+  }
+}

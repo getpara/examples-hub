@@ -1,6 +1,6 @@
 import { useGetKeyIsValid } from './api/queries/useOrganizationKeys';
 import { useGetOrganizationIsValid } from './api/queries/useOrganizations';
-import { useGetProjectIsValid } from './api/queries/useProjects';
+import { useGetProject } from './api/queries/useProjects';
 
 export const useIsValidOrg = (organizationId?: string) => {
   const { data: isValidOrg, isLoading: isLoadingValidOrg } = useGetOrganizationIsValid(organizationId);
@@ -8,14 +8,14 @@ export const useIsValidOrg = (organizationId?: string) => {
   return !!organizationId && !isLoadingValidOrg && !!isValidOrg;
 };
 
-export const useIsValidProject = (projectId?: string) => {
-  const { data: isValidProject, isLoading: isLoadingValidProject } = useGetProjectIsValid(projectId);
+export const useIsValidProject = (projectId?: string, excludeArchived?: boolean) => {
+  const { data: project, isLoading: isLoadingValidProject } = useGetProject(projectId ?? '');
 
-  return !!projectId && !isLoadingValidProject && !!isValidProject;
+  return !!projectId && !isLoadingValidProject && !!project && (excludeArchived ? !project.archived : true);
 };
 
-export const useIsValidKey = (projectId?: string, keyId?: string) => {
-  const { data: isValidKey, isLoading: isLoadingValidKey } = useGetKeyIsValid(projectId, keyId);
+export const useIsValidKey = (projectId?: string, keyId?: string, excludeArchived?: boolean) => {
+  const { data: key, isLoading: isLoadingValidKey } = useGetKeyIsValid(projectId, keyId);
 
-  return !!keyId && !isLoadingValidKey && !!isValidKey;
+  return !!keyId && !isLoadingValidKey && !!key && (excludeArchived ? !key.archived : true);
 };

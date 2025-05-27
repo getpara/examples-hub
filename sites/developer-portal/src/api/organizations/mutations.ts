@@ -16,23 +16,25 @@ export const updateOrganization = async ({ organizationId, data }: UpdateOrganiz
   return (await axiosClient.patch<boolean>(endpoint, data)).data;
 };
 
-export type ChangePlanVars = { organizationId: string; newPlanSlug: string };
-export const upgradePlan = async ({ organizationId, newPlanSlug }: ChangePlanVars) => {
-  const endpoint = `/organizations/${organizationId}/upgrade-plan`;
+export type ChangePlanVars = { organizationId: string; planSlug: string; remainingProjectIds: string[] };
+export const changePlan = async ({ organizationId, planSlug, remainingProjectIds }: ChangePlanVars) => {
+  const endpoint = `/organizations/${organizationId}/stripe/subscription/change`;
 
-  return (await axiosClient.post<boolean>(endpoint, { newPlanSlug })).data;
+  return (await axiosClient.post<{ success: boolean }>(endpoint, { planSlug, remainingProjectIds })).data;
 };
 
-export const downgradePlan = async ({ organizationId, newPlanSlug }: ChangePlanVars) => {
-  const endpoint = `/organizations/${organizationId}/downgrade-plan`;
+export type CancelPlanVars = { organizationId: string; remainingProjectIds: string[] };
+export const cancelPlan = async ({ organizationId, remainingProjectIds }: CancelPlanVars) => {
+  const endpoint = `/organizations/${organizationId}/stripe/subscription/cancel`;
 
-  return (await axiosClient.post<boolean>(endpoint, { newPlanSlug })).data;
+  return (await axiosClient.post<{ success: boolean }>(endpoint, { remainingProjectIds })).data;
 };
 
-export const cancelPlan = async ({ organizationId }: { organizationId: string }) => {
-  const endpoint = `/organizations/${organizationId}/cancel-plan`;
+export type ReinstatePlanVars = { organizationId: string };
+export const reinstatePlan = async ({ organizationId }: ReinstatePlanVars) => {
+  const endpoint = `/organizations/${organizationId}/stripe/subscription/reinstate`;
 
-  return (await axiosClient.post<boolean>(endpoint)).data;
+  return (await axiosClient.post<{ success: boolean }>(endpoint)).data;
 };
 
 export type RequestEarlyAccessVars = { organizationId: string; slug: string };

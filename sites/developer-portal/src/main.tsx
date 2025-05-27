@@ -1,5 +1,5 @@
 import './clients/sentry';
-import React from 'react';
+import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { defineCustomElements } from '@getpara/react-components';
 import { RouterProvider } from 'react-router-dom';
@@ -13,6 +13,7 @@ import '@getpara/react-components/css/capsule-core.css';
 import { Environment, ParaProvider } from '@getpara/react-sdk';
 import { paraLogo } from './assets/paraLogo';
 import { Toaster } from '@getpara/react-component-library';
+import './i18n';
 
 defineCustomElements();
 
@@ -49,17 +50,19 @@ const App = () => {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <StatsigProvider
-        user={{}}
-        sdkKey={ENV_VARS.statsigClientKey}
-        waitForInitialization={true}
-        options={{
-          environment: { tier: ENV_VARS.statsigEnv },
-        }}
-      >
-        <App />
-      </StatsigProvider>
-    </QueryClientProvider>
+    <Suspense fallback={null}>
+      <QueryClientProvider client={queryClient}>
+        <StatsigProvider
+          user={{}}
+          sdkKey={ENV_VARS.statsigClientKey}
+          waitForInitialization={true}
+          options={{
+            environment: { tier: ENV_VARS.statsigEnv },
+          }}
+        >
+          <App />
+        </StatsigProvider>
+      </QueryClientProvider>
+    </Suspense>
   </React.StrictMode>,
 );
