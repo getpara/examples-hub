@@ -59,4 +59,6 @@ The tests automatically handle:
 - ✅ App building and installation
 - ✅ Biometric enrollment
 - ✅ Authentication flows (email/phone + passkey)
-- ✅ Wallet creation verification
+- ✅ Wallet management (creation, refresh, address copying)
+- ✅ Transaction signing (EVM and Solana)
+- ✅ Session management and logout
