@@ -298,10 +298,10 @@
     "@ethersproject/properties" "^5.7.0"
     "@ethersproject/strings" "^5.7.0"
 
-"@getpara/core-components@1.15.1":
-  version "1.15.1"
-  resolved "https://registry.yarnpkg.com/@getpara/core-components/-/core-components-1.15.1.tgz#db6e215ff1570ccdb2f5a5c27fb34acf24056df4"
-  integrity sha512-mnFe5stXazDmQMP+Dt6cG5qDPwUn9v/1cnL9a1mlrMDCrpYgpAFtLjyoBj+U4Dwi3UHbD5bBP5BIbvMOGPeJBg==
+"@getpara/core-components@1.16.0":
+  version "1.16.0"
+  resolved "https://registry.yarnpkg.com/@getpara/core-components/-/core-components-1.16.0.tgz#a086cc37bf0a03ed434b78495708b90daffa279a"
+  integrity sha512-puq9uP6nsqjiXIR6Cr+bZ+xs+FAPDqjYThtfVhmAbHtHEoulmBVPHrRzBxzThbWTwvbecVHeUUu0giUOCxAQXA==
   dependencies:
     "@stencil/core" "^4.7.0"
     color-blend "^4.0.0"
@@ -310,49 +310,49 @@
     inputmask "5.0.9"
     qrcode-with-logos "1.1.1"
 
-"@getpara/core-sdk@1.15.1":
-  version "1.15.1"
-  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.15.1.tgz#c59f62c3f1fe0d208d499915a65d7c1e97ea2bfe"
-  integrity sha512-eEkKgO2APJhzwKyKQ9Pv9iFhRfn0WPEXKnH5K1ov08/Zc8udUQ2rlpBysgC8D4W7MzfbgFXpd5aEErDKudNpxw==
+"@getpara/core-sdk@1.16.0":
+  version "1.16.0"
+  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.16.0.tgz#d7a2d026158a68dddd6009f6bf4e749117a8d907"
+  integrity sha512-jrFPM3heDsSUcAtui1YU8aX5AX1hCm8qC8DTOyPmcDr+OgjuJyTEbWh4xvkJ8e8t4cT3QSjf7HwhK5d0HMSIRg==
   dependencies:
     "@celo/utils" "^8.0.2"
     "@cosmjs/encoding" "^0.32.4"
     "@ethereumjs/util" "^9.1.0"
-    "@getpara/user-management-client" "1.15.1"
+    "@getpara/user-management-client" "1.16.0"
     "@noble/hashes" "^1.5.0"
     base64url "^3.0.1"
     libphonenumber-js "1.11.2"
     node-forge "^1.3.1"
     uuid "^11.1.0"
 
-"@getpara/react-common@1.15.1":
-  version "1.15.1"
-  resolved "https://registry.yarnpkg.com/@getpara/react-common/-/react-common-1.15.1.tgz#39a93f6790676aad621ed4e11c65e6203b3703fa"
-  integrity sha512-Rh2wJfTRTPUjaHOAWv0NYcgfS92xfhYTNCKlN+fQtiI9OuBtzyyC/oC+wPSLTZ7xQsXROd5Q23Ujnz7ofz48Qg==
+"@getpara/react-common@1.16.0":
+  version "1.16.0"
+  resolved "https://registry.yarnpkg.com/@getpara/react-common/-/react-common-1.16.0.tgz#a3880404d008e186a82055365a8cf6624513a0f8"
+  integrity sha512-R5LS/KVTd9/3Jq/1ITIimsBavNbJzhkKnSdwJg0/lSXkKKD86GSRXu1kF8o5Wt2WeOSyEA3RQH57q5j9CO9Ybw==
   dependencies:
-    "@getpara/react-components" "1.15.1"
-    "@getpara/web-sdk" "1.15.1"
+    "@getpara/react-components" "1.16.0"
+    "@getpara/web-sdk" "1.16.0"
     "@moonpay/moonpay-react" "^1.8.3"
     "@ramp-network/ramp-instant-sdk" "^4.0.5"
     libphonenumber-js "^1.11.1"
     styled-components "^6.1.8"
     ua-parser-js "^2.0.2"
 
-"@getpara/react-components@1.15.1":
-  version "1.15.1"
-  resolved "https://registry.yarnpkg.com/@getpara/react-components/-/react-components-1.15.1.tgz#7048252ad06159b67d333a88c6447c1d823b6772"
-  integrity sha512-va3xLJpAu+Jey23r+jqEh+gmpSISyUyyD+JPA05aVSKu3IJL7BPwmVON3rpfhViPntXXNZI2n44itlhI3XLrSA==
+"@getpara/react-components@1.16.0":
+  version "1.16.0"
+  resolved "https://registry.yarnpkg.com/@getpara/react-components/-/react-components-1.16.0.tgz#419b770337b529751d4deafda37375884a54157c"
+  integrity sha512-aULcP70HYbC6B9VsGij050s/TrioL0MZoIdtCtD+6Hz/NsO2jBMPoKMkgcMoetsKhVsxWkP4hb0ACHYoI32s9g==
   dependencies:
-    "@getpara/core-components" "1.15.1"
+    "@getpara/core-components" "1.16.0"
 
-"@getpara/react-sdk@1.15.1":
-  version "1.15.1"
-  resolved "https://registry.yarnpkg.com/@getpara/react-sdk/-/react-sdk-1.15.1.tgz#68570ac5c10d68781b38dffa43168998fddc9176"
-  integrity sha512-NRLwt7nJlwiZXrjSt+nxzdsOwfgs2TwQE8pGQxoa3jEFCrTMDsjYsWNN5zsz+6MeoVsHFqR+K41UVhavvIDEQQ==
+"@getpara/react-sdk@1.16.0":
+  version "1.16.0"
+  resolved "https://registry.yarnpkg.com/@getpara/react-sdk/-/react-sdk-1.16.0.tgz#fde77dc4cc49facf8e585f548d123d71a5e6d599"
+  integrity sha512-aw63PHkSJ3ieMUjnmpbTdtD3wfJ9d+6lB9QgFGeG/AoEwlX2m126vDFwkEqmBfQFFx6l827cw7C+Yj0LT/zUEw==
   dependencies:
-    "@getpara/react-common" "1.15.1"
-    "@getpara/react-components" "1.15.1"
-    "@getpara/web-sdk" "1.15.1"
+    "@getpara/react-common" "1.16.0"
+    "@getpara/react-components" "1.16.0"
+    "@getpara/web-sdk" "1.16.0"
     "@tanstack/react-query" "^5.0.0"
     date-fns "^3.6.0"
     framer-motion "11.3.28"
@@ -361,21 +361,21 @@
     zustand "^4.5.2"
     zustand-sync-tabs "^0.2.2"
 
-"@getpara/user-management-client@1.15.1":
-  version "1.15.1"
-  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.15.1.tgz#5cdbf69c2845ad590803cee64a2268189267b74b"
-  integrity sha512-DFt9FbQbh6xCiLZY0wZimIo4YVh3C6prXxDOEd5jAvgU8HKoZWMt1AQ2yCG1ez1dgxjq3s4DsuEsX5K1T24VYA==
+"@getpara/user-management-client@1.16.0":
+  version "1.16.0"
+  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.16.0.tgz#958fe8f8c6fde014cae8004d3cf0e536cd80886b"
+  integrity sha512-NzQuIA0mTcBSWa5+mbe5fQXV/QNxjLz/mf9pj1Dz7+YBoYtmSw/0IpJlBreOo6nS3Q6E4zrO0c2Az6vtcjYJRA==
   dependencies:
     axios "^1.8.4"
     libphonenumber-js "1.11.2"
 
-"@getpara/web-sdk@1.15.1":
-  version "1.15.1"
-  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-1.15.1.tgz#8b370e8a8a063652f94bdc2d93907a3613c39353"
-  integrity sha512-ITEjE7W8FGdGp1EkeYbZsRlj71dSSMFdXvWfSEIWWPGh/Fp6DhfOdMdvqYbNe3mL5Ic18gVOzMmxVBf5DEv9oQ==
+"@getpara/web-sdk@1.16.0":
+  version "1.16.0"
+  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-1.16.0.tgz#7788faabf2dc6d735d8915bc5c155c9afcff06e5"
+  integrity sha512-ihMvGZNx8HfvvMsbKgEHDrIY4J1SP79LhwuTySVm/peU5B/JZt2Yw180aqpfqjNBEZy9c+AHTjklv4asoz35YA==
   dependencies:
-    "@getpara/core-sdk" "1.15.1"
-    "@getpara/user-management-client" "1.15.1"
+    "@getpara/core-sdk" "1.16.0"
+    "@getpara/user-management-client" "1.16.0"
     base64url "3.0.1"
     buffer "6.0.3"
     cbor-web "8.1.0"

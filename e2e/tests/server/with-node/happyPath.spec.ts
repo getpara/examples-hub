@@ -8,7 +8,7 @@ const MOCK_EMAIL = 'teste2e+node@test.getpara.com';
 const MOCK_CREDENTIAL = {
   credentialId: '3IObcR06qEP2aLNik33r+Wxi75yJuYuV2B5/AjYcyFI=',
   isResidentCredential: true,
-  rpId: 'localhost',
+  rpId: 'app.sandbox.usecapsule.com',
   privateKey:
     'MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgOG6YXvNzsqeJ+rs/C4W4lFOsN5Fen7XrEXvra+yRAtihRANCAAR+fA+MAG9iGVubgUub+CqojrSTXX+g5uqA3u02GsJum2YAxJAl7qhd+h88MgMBzo64lvqNjarJvms+iVSatjF5',
   userHandle: 'e5XeO+i1zARiVXLp/WHo7a5P7LxVW7BgqO8a5pjFPhU=',

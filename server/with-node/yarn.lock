@@ -1511,68 +1511,68 @@
   resolved "https://registry.yarnpkg.com/@gar/promisify/-/promisify-1.1.3.tgz#555193ab2e3bb3b6adc3d551c9c030d9e860daf6"
   integrity sha512-k2Ty1JcVojjJFwrg/ThKi2ujJ7XNLYaFGNB/bWT9wGR+oSMJHMa5w+CUq6p/pVrKeNNgA7pCqEcjSnHVoqJQFw==
 
-"@getpara/core-sdk@1.15.1":
-  version "1.15.1"
-  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.15.1.tgz#c59f62c3f1fe0d208d499915a65d7c1e97ea2bfe"
-  integrity sha512-eEkKgO2APJhzwKyKQ9Pv9iFhRfn0WPEXKnH5K1ov08/Zc8udUQ2rlpBysgC8D4W7MzfbgFXpd5aEErDKudNpxw==
+"@getpara/core-sdk@1.16.0":
+  version "1.16.0"
+  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.16.0.tgz#d7a2d026158a68dddd6009f6bf4e749117a8d907"
+  integrity sha512-jrFPM3heDsSUcAtui1YU8aX5AX1hCm8qC8DTOyPmcDr+OgjuJyTEbWh4xvkJ8e8t4cT3QSjf7HwhK5d0HMSIRg==
   dependencies:
     "@celo/utils" "^8.0.2"
     "@cosmjs/encoding" "^0.32.4"
     "@ethereumjs/util" "^9.1.0"
-    "@getpara/user-management-client" "1.15.1"
+    "@getpara/user-management-client" "1.16.0"
     "@noble/hashes" "^1.5.0"
     base64url "^3.0.1"
     libphonenumber-js "1.11.2"
     node-forge "^1.3.1"
     uuid "^11.1.0"
 
-"@getpara/cosmjs-v0-integration@1.15.1":
-  version "1.15.1"
-  resolved "https://registry.yarnpkg.com/@getpara/cosmjs-v0-integration/-/cosmjs-v0-integration-1.15.1.tgz#3d39827704807d04cbcf4c522de8554b5c1aa6f2"
-  integrity sha512-Uq5mlIEglRMWW/ndidbtCBxKv3aRF9dQprNYm7l3Prp2GLC2sLAZvjRJOjRQolKKBtvMZv2OvYvRCKkA4579Vg==
+"@getpara/cosmjs-v0-integration@1.16.0":
+  version "1.16.0"
+  resolved "https://registry.yarnpkg.com/@getpara/cosmjs-v0-integration/-/cosmjs-v0-integration-1.16.0.tgz#c9c4faca855e9f32822e5ee827ebc9aeca4ef7a7"
+  integrity sha512-ZVYzVlRruy6vdl3CmTAQWT+6p80xxa9kxQEUVDDev7c2VroP1NcitQwO+KOAhYgTlB9iqFvqDN5VKqsJumidsg==
   dependencies:
     "@cosmjs/stargate" "<=0.33.1"
-    "@getpara/core-sdk" "1.15.1"
+    "@getpara/core-sdk" "1.16.0"
 
-"@getpara/ethers-v6-integration@1.15.1":
-  version "1.15.1"
-  resolved "https://registry.yarnpkg.com/@getpara/ethers-v6-integration/-/ethers-v6-integration-1.15.1.tgz#a5d40c07b97538cdbb9e541d391a924a0e7595bf"
-  integrity sha512-0bJ1mAK+7w0ZH+7F9x7R8prrjppMw7s+cByuM+PPWaGQefQzLf3pZ9XJ7YbAQ0S2eRsQz3uvauP0zny7RpHiBQ==
+"@getpara/ethers-v6-integration@1.16.0":
+  version "1.16.0"
+  resolved "https://registry.yarnpkg.com/@getpara/ethers-v6-integration/-/ethers-v6-integration-1.16.0.tgz#089434ca2065240c28322e8c2cd7bc2db23c87a2"
+  integrity sha512-VgPqvESwgKB3+49JT6K0oCHnSPO428Um6oZzGN/4UeMKPJiRvwW1oQxMSfZlJ4waYbjIKgqzeCEH/Vk3f81juA==
   dependencies:
-    "@getpara/core-sdk" "1.15.1"
+    "@getpara/core-sdk" "1.16.0"
 
-"@getpara/server-sdk@1.15.1":
-  version "1.15.1"
-  resolved "https://registry.yarnpkg.com/@getpara/server-sdk/-/server-sdk-1.15.1.tgz#f223642f0738f1b90bbc8b4b38c6e2b038d291f0"
-  integrity sha512-3mkVt1tuOYp00vln4XfhR/5tMwq2Cfq0WSOOjwpOUsIiAcuTlm5C5XtoIzxjpLHCGyXEzXJuQjw6zqi4xVOPsA==
+"@getpara/server-sdk@1.16.0":
+  version "1.16.0"
+  resolved "https://registry.yarnpkg.com/@getpara/server-sdk/-/server-sdk-1.16.0.tgz#b3f499f8088e61583a085fa73714647f256143ce"
+  integrity sha512-K5GM94OjOQdKgvunwZHC9JwZTeaEa+6+sZ0bFJ1epgd2VIcFUCnNddIl0CnOlln9ksFvBltD9vUdd39FL6sEPQ==
   dependencies:
-    "@getpara/core-sdk" "1.15.1"
-    "@getpara/user-management-client" "1.15.1"
+    "@getpara/core-sdk" "1.16.0"
+    "@getpara/user-management-client" "1.16.0"
     uuid "^11.1.0"
     ws "^8.14.2"
 
-"@getpara/solana-web3.js-v1-integration@1.15.1":
-  version "1.15.1"
-  resolved "https://registry.yarnpkg.com/@getpara/solana-web3.js-v1-integration/-/solana-web3.js-v1-integration-1.15.1.tgz#c99111f52e8d466599441f541302862b0ebd66f0"
-  integrity sha512-6oF/yosM8uDPN14KSbHPhDTbUS/l3prl38qBQMGxE2i+TpsUqs+hLaFDERAg0NH5v5tJnEVjh4F3z4hkRe67qw==
+"@getpara/solana-web3.js-v1-integration@1.16.0":
+  version "1.16.0"
+  resolved "https://registry.yarnpkg.com/@getpara/solana-web3.js-v1-integration/-/solana-web3.js-v1-integration-1.16.0.tgz#7922aea6d3670d9ec8331319e219368bbd611811"
+  integrity sha512-HJt3E2IAyhlJDtR0SA5mV9lGM2qduAkWeMp4yQ63Gcxj4wjNra0+qJ5a8Zwe+dpEplg7Za6hpnojHfSYriQvlA==
   dependencies:
-    "@getpara/core-sdk" "1.15.1"
+    "@getpara/core-sdk" "1.16.0"
     "@solana/web3.js" "^1.98.0"
 
-"@getpara/user-management-client@1.15.1":
-  version "1.15.1"
-  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.15.1.tgz#5cdbf69c2845ad590803cee64a2268189267b74b"
-  integrity sha512-DFt9FbQbh6xCiLZY0wZimIo4YVh3C6prXxDOEd5jAvgU8HKoZWMt1AQ2yCG1ez1dgxjq3s4DsuEsX5K1T24VYA==
+"@getpara/user-management-client@1.16.0":
+  version "1.16.0"
+  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.16.0.tgz#958fe8f8c6fde014cae8004d3cf0e536cd80886b"
+  integrity sha512-NzQuIA0mTcBSWa5+mbe5fQXV/QNxjLz/mf9pj1Dz7+YBoYtmSw/0IpJlBreOo6nS3Q6E4zrO0c2Az6vtcjYJRA==
   dependencies:
     axios "^1.8.4"
     libphonenumber-js "1.11.2"
 
-"@getpara/viem-v2-integration@1.15.1":
-  version "1.15.1"
-  resolved "https://registry.yarnpkg.com/@getpara/viem-v2-integration/-/viem-v2-integration-1.15.1.tgz#fafbc40f7fad6d4388445a43a3d6a26e6e753706"
-  integrity sha512-xqczyR+kemsIb/PxBXzrOKe/5K5nlPTUxUUyvHQu1MZsbSGMaMr6Z9svuXvrV2dUpqVhBMNrpd1dbjXMn7ymeA==
+"@getpara/viem-v2-integration@1.16.0":
+  version "1.16.0"
+  resolved "https://registry.yarnpkg.com/@getpara/viem-v2-integration/-/viem-v2-integration-1.16.0.tgz#68dec509ac09e137e77e22b3c9bc051bba6ff0da"
+  integrity sha512-8f/rOPH46jNe3QEy9Bro6EW9Nc3Iix7Rle0omd0wWVVxIB8wMlFJZ/Lvr9INeKagCp1jwuY1wNdF0aQQZWWxZA==
   dependencies:
-    "@getpara/core-sdk" "1.15.1"
+    "@getpara/core-sdk" "1.16.0"
 
 "@hapi/hoek@^9.0.0", "@hapi/hoek@^9.3.0":
   version "9.3.0"

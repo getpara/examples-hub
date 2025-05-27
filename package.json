@@ -1,10 +1,11 @@
 {
   "dependencies": {
-    "@tanstack/react-query": "^5.74.4"
+    "@tanstack/react-query": "^5.74.4",
+    "ethers": "^6.14.3"
   },
   "devDependencies": {
-    "@types/node": "^22.15.21",
     "@playwright/test": "1.52.0",
+    "@types/node": "^22.15.21",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },

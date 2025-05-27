@@ -1,6 +1,5 @@
 import { execSync } from 'child_process';
 import path from 'path';
-import fs from 'fs';
 import crypto from 'crypto';
 
 const SANDBOX_API_KEY_EVM = 'dfb222ff8b602eb492974a6ed68c35b2';
@@ -56,8 +55,6 @@ const APP_PATHS: Record<
 };
 
 const EXAMPLES_REPO_PATH = process.env.GITHUB_WORKSPACE || process.cwd();
-// const ROOT_DIR = path.dirname(MONOREPO_PATH);
-// const EXAMPLES_REPO_PATH = path.resolve(ROOT_DIR, 'examples-hub');
 
 let testFailed = false;
 
@@ -73,20 +70,7 @@ const runCommand = (cmd: string, cwd?: string) => {
   }
 };
 
-
-// // step 1: link all monorepo packages globally
-// const packagesPath = path.join(MONOREPO_PATH, 'packages');
-// const packages = fs.readdirSync(packagesPath);
-
-// packages.forEach(pkg => {
-//   const pkgPath = path.join(packagesPath, pkg);
-//   const packageJsonPath = path.join(pkgPath, 'package.json');
-
-//   if (!fs.existsSync(packageJsonPath)) return;
-//   runCommand(`yarn link`, pkgPath);
-// });
-
-// step 2: run tests for each example app
+// run tests for each example app
 for (const [appPath, opts] of Object.entries(APP_PATHS)) {
   const { envVars, installCommand } = opts;
   const appFullPath = path.resolve(EXAMPLES_REPO_PATH, appPath);
@@ -94,17 +78,6 @@ for (const [appPath, opts] of Object.entries(APP_PATHS)) {
 
   // install example app dependencies
   runCommand(installCommand || 'yarn install', appFullPath);
-
-  // make the example app link to the local sdk packages
-  // packages.forEach(pkg => {
-  //   const packageJsonPath = path.join(packagesPath, pkg, 'package.json');
-  //   if (fs.existsSync(packageJsonPath)) {
-  //     const pkgJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-  //     const packageName = pkgJson.name;
-
-  //     runCommand(`yarn link "${packageName}"`, appFullPath);
-  //   }
-  // });
 
   // set environment variables for the app
   for (const [key, value] of Object.entries(envVars)) {
