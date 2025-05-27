@@ -22,11 +22,20 @@ export const CosmosWalletWrapper = ({
   const externalWalletsWithFullAuth = useStore(state => state.externalWalletsWithFullAuth);
   const wallets = useStore(state => state.externalWallets);
   const isUsing = wallets.some(w => w in CosmosWallet);
+  const connectionOnly = useStore(state => state.connectionOnly);
+  const includeWalletVerification = useStore(state => state.includeWalletVerification);
 
   return (
     <CosmosExternalWalletProvider
       config={cosmosConnectorConfig}
-      internalConfig={{ onSwitchWallet, para, walletsWithFullAuth: externalWalletsWithFullAuth, connectedWallet: wallet }}
+      internalConfig={{
+        onSwitchWallet,
+        para,
+        walletsWithFullAuth: externalWalletsWithFullAuth,
+        connectedWallet: wallet,
+        connectionOnly,
+        includeWalletVerification,
+      }}
       grazProviderProps={grazProviderProps}
       isUsing={isUsing}
       wallets={wallets}

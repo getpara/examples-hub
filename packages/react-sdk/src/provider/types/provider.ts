@@ -135,11 +135,23 @@ export type ExternalWalletConfig<
    */
   wallets?: TExternalWallet[];
   /**
-   * Array of external wallets that will also include linked embedded wallets.
+   * Array of external wallets that will also include linked embedded wallets. Also includes a wallet verification step.
    *
    * You can also pass `ALL` to include linked embedded wallets for all external wallets.
    */
   createLinkedEmbeddedForExternalWallets?: TExternalWallet[] | 'ALL';
+  /**
+   * Whether or not to validate a signature from the connected external wallet and create a Para session.
+   *
+   * All wallets using createLinkedEmbeddedForExternalWallets automatically include wallet verification.
+   */
+  includeWalletVerification?: boolean;
+  /**
+   * Whether or not to treat external wallets as connections only, skipping all Para functionality.
+   *
+   * This prop will override the createLinkedEmbeddedForExternalWallets and includeWalletVerification props
+   */
+  connectionOnly?: boolean;
 };
 
 export interface ParaProviderProps<

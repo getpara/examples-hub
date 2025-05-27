@@ -15,6 +15,7 @@ import { useExternalWalletStore } from '../stores/useStore.js';
 import { WalletWithType } from '../types/Wallet.js';
 import ParaWeb, { AuthState, Wallet } from '@getpara/web-sdk';
 import type { CommonChain, CommonWallet, TExternalWallet } from '@getpara/react-common';
+import { formatEthHexAddress } from '../utils/formatEthHexAddress.js';
 
 const defaultCosmosExternalWallet = {
   wallets: [],
@@ -41,6 +42,7 @@ export type CosmosExternalWalletContextType = {
     cosmosPublicKeyHex?: string;
     cosmosSigner?: string;
     error?: string;
+    addressBech32?: string;
   }>;
 };
 
@@ -48,6 +50,8 @@ export type CosmosExternalWalletProviderConfig = {
   onSwitchWallet?: (args: { address?: string; error?: string }) => void;
   para: ParaWeb;
   walletsWithFullAuth: TExternalWallet[];
+  includeWalletVerification?: boolean;
+  connectionOnly?: boolean;
   connectedWallet?: Omit<Wallet, 'signer'> | null;
 };
 
@@ -70,6 +74,8 @@ export function CosmosExternalWalletProvider({
   para,
   walletsWithFullAuth,
   connectedWallet,
+  includeWalletVerification,
+  connectionOnly,
 }: CosmosExternalWalletProviderConfigFull & PropsWithChildren) {
   const { suggestAndConnectAsync } = useSuggestChainAndConnect();
   const {
@@ -87,7 +93,9 @@ export function CosmosExternalWalletProvider({
   const isLocalConnecting = useExternalWalletStore(state => state.isConnecting);
   const updateExternalWalletState = useExternalWalletStore(state => state.updateState);
 
-  const bufferAddress = multiChain ? account?.[selectedChainId]?.address.toString() : account?.address.toString();
+  const ethAddress = multiChain
+    ? account?.[selectedChainId]?.ethereumHexAddress?.toLowerCase()
+    : account?.ethereumHexAddress?.toLowerCase();
   const address = multiChain ? account?.[selectedChainId]?.bech32Address : account?.bech32Address;
 
   const verificationMessage = useRef<string>();
@@ -100,7 +108,7 @@ export function CosmosExternalWalletProvider({
   const switchChain = async (chainId: string) => {
     let error: string[];
 
-    let changeResp: { address?: string; bufferAddress?: string; error?: string } = {};
+    let changeResp: { address?: string; ethAddress?: string; error?: string } = {};
 
     try {
       let chainInfo;
@@ -119,7 +127,7 @@ export function CosmosExternalWalletProvider({
         : connectAsync({ walletType, chainId }));
 
       changeResp.address = connectedWallet.accounts[chainId].bech32Address;
-      changeResp.bufferAddress = connectedWallet.accounts[chainId].address.toString();
+      changeResp.ethAddress = formatEthHexAddress(connectedWallet.accounts[chainId].address);
     } catch (err) {
       if (err.message === 'No wallet exists') {
         changeResp.error = err.message;
@@ -133,27 +141,31 @@ export function CosmosExternalWalletProvider({
     if (!changeResp.error) {
       onSwitchChain(chainId);
 
-      const storedExternalWallet = para.externalWallets[changeResp.bufferAddress ?? ''];
+      const storedExternalWallet = para.externalWallets[changeResp.ethAddress ?? ''];
       para.setExternalWallet({
-        address: changeResp.bufferAddress,
+        address: changeResp.ethAddress,
         type: 'COSMOS',
         provider: getProviderName(walletType),
         addressBech32: changeResp.address,
         withFullParaAuth: storedExternalWallet.isExternalWithParaAuth,
+        withVerification: includeWalletVerification,
+        isConnectionOnly: connectionOnly,
       });
     }
     return { error };
   };
 
-  const login = async (bufferAddress: string, address: string, isFullAuthWallet?: boolean, providerName?: string) => {
+  const login = async (ethAddress: string, address: string, isFullAuthWallet?: boolean, providerName?: string) => {
     try {
       return await para.loginExternalWallet({
         externalWallet: {
-          address: bufferAddress,
+          address: ethAddress,
           type: 'COSMOS',
           provider: providerName,
           addressBech32: address,
           withFullParaAuth: isFullAuthWallet,
+          withVerification: includeWalletVerification,
+          isConnectionOnly: connectionOnly,
         },
       });
     } catch (err) {
@@ -164,14 +176,14 @@ export function CosmosExternalWalletProvider({
   };
 
   useEffect(() => {
-    const storedExternalWallet = para.externalWallets[bufferAddress ?? ''];
+    const storedExternalWallet = para.externalWallets[ethAddress ?? ''];
 
     if (
       isConnected &&
       !isConnecting &&
       !isReconnecting &&
       !isLocalConnecting &&
-      !!bufferAddress &&
+      !!ethAddress &&
       !storedExternalWallet &&
       walletType !== GrazWalletType.PARA
     ) {
@@ -220,7 +232,8 @@ export function CosmosExternalWalletProvider({
       const signature = await wallet.signArbitrary(selectedChainId, address, message);
 
       return {
-        address: bufferAddress,
+        address: ethAddress,
+        addressBech32: address,
         signature: signature.signature,
         cosmosPublicKeyHex: Buffer.from(publicKey).toString('hex'),
         cosmosSigner: address,
@@ -242,7 +255,7 @@ export function CosmosExternalWalletProvider({
   const connect = async (
     walletType: GrazWalletType,
     chainId?: string | string[],
-  ): Promise<{ authState?: AuthState; address?: string; bufferAddress?: string; error?: string }> => {
+  ): Promise<{ authState?: AuthState; address?: string; ethAddress?: string; error?: string }> => {
     updateExternalWalletState({ isConnecting: true });
 
     const walletId = getWallet(walletType)?.id;
@@ -261,7 +274,7 @@ export function CosmosExternalWalletProvider({
     }
 
     let address: string | undefined;
-    let bufferAddress: string | undefined;
+    let ethAddress: string | undefined;
     let error: string | undefined;
     let authState: AuthState | undefined;
 
@@ -294,15 +307,15 @@ export function CosmosExternalWalletProvider({
         const firstChain = !chainId ? selectedChainId : typeof _chainId === 'string' ? _chainId : _chainId[0];
 
         address = connectedWallet.accounts[firstChain].bech32Address;
-        bufferAddress = connectedWallet.accounts[firstChain].address.toString();
+        ethAddress = formatEthHexAddress(connectedWallet.accounts[firstChain].address);
 
         if (connectedWallet.accounts[firstChain]) {
           try {
-            authState = await login(bufferAddress, address, isFullAuthWallet, getProviderName(walletType));
+            authState = await login(ethAddress, address, isFullAuthWallet, getProviderName(walletType));
             verificationMessage.current = authState.stage === 'verify' ? authState.signatureVerificationMessage : undefined;
           } catch (err) {
             authState = undefined;
-            bufferAddress = undefined;
+            ethAddress = undefined;
             address = undefined;
             error = err;
           }
@@ -318,7 +331,7 @@ export function CosmosExternalWalletProvider({
     }
 
     updateExternalWalletState({ isConnecting: false });
-    return { authState, address, bufferAddress, error };
+    return { authState, address, ethAddress, error };
   };
 
   const getWallet = (walletType: GrazWalletType) =>

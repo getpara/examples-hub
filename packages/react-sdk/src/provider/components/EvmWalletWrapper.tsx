@@ -25,13 +25,22 @@ export const EvmWalletWrapper = <
   const { data: wallet } = useWallet();
   const externalWalletsWithFullAuth = useStore(state => state.externalWalletsWithFullAuth);
   const wallets = useStore(state => state.externalWallets);
+  const connectionOnly = useStore(state => state.connectionOnly);
+  const includeWalletVerification = useStore(state => state.includeWalletVerification);
 
   const isUsing = wallets.some(w => w in EvmWallet);
 
   return (
     <EvmExternalWalletProvider
       config={evmProviderConfig}
-      internalConfig={{ onSwitchWallet, para, walletsWithFullAuth: externalWalletsWithFullAuth, connectedWallet: wallet }}
+      internalConfig={{
+        onSwitchWallet,
+        para,
+        walletsWithFullAuth: externalWalletsWithFullAuth,
+        connectedWallet: wallet,
+        connectionOnly,
+        includeWalletVerification,
+      }}
       wagmiProviderProps={wagmiProviderProps}
       isUsing={isUsing}
       wallets={wallets}

@@ -965,15 +965,8 @@ describe('ParaCore - authentication', () => {
         })) as AuthStateLogin;
 
         expect(authState).toStrictEqual({
-          ..._.omit(getLoginState({ externalWalletAddress: EXTERNAL_WALLET.address }), 'loginAuthMethods'),
-          isPasskeySupported: true,
-          passkeyUrl: expect.stringMatching(''),
-          passkeyKnownDeviceUrl: expect.stringMatching(''),
-          passwordUrl: expect.stringMatching(''),
+          ...getLoginState({ externalWalletAddress: EXTERNAL_WALLET.address }),
         });
-
-        testLoginUrl(para, authState.passkeyUrl!, AuthMethod.PASSKEY);
-        testLoginUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD);
       });
 
       it('connection only', async () => {
@@ -1001,17 +994,7 @@ describe('ParaCore - authentication', () => {
         cosmosSigner: 'cosmosSigner',
       });
 
-      expect(authState).toStrictEqual({
-        ..._.omit(getSignupState({ externalWalletAddress: EXTERNAL_WALLET.address }), 'signupAuthMethods'),
-        isPasskeySupported: true,
-        passkeyId: expect.stringMatching(''),
-        passwordId: expect.stringMatching(''),
-        passkeyUrl: expect.stringMatching(''),
-        passwordUrl: expect.stringMatching(''),
-      });
-
-      testCreateUrl(para, authState.passkeyUrl!, AuthMethod.PASSKEY);
-      testCreateUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD);
+      expect(authState).toStrictEqual(getSignupState({ externalWalletAddress: EXTERNAL_WALLET.address }));
     });
 
     it('logout', async () => {

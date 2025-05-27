@@ -30,15 +30,16 @@ export type WalletMetadata = {
 };
 
 export type CommonWallet = {
-  connect: () => Promise<{
+  connect: (isConnectionOnly?: boolean) => Promise<{
     address?: string;
-    bufferAddress?: string;
+    ethAddress?: string;
     error?: string;
     authState?: AuthStateLogin | AuthStateVerify;
   }>;
   connectMobile: (
     isManualWalletConnect?: boolean,
-  ) => Promise<{ address?: string; bufferAddress?: string; error?: string; authState?: AuthStateLogin | AuthStateVerify }>;
+    isConnectionOnly?: boolean,
+  ) => Promise<{ address?: string; ethAddress?: string; error?: string; authState?: AuthStateLogin | AuthStateVerify }>;
   type: TWalletType;
 } & WalletMetadata;
 

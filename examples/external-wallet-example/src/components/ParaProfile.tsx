@@ -58,6 +58,28 @@ export const ParaProfile = () => {
             </CpslButton>
           </>
         )}
+        <CpslButton
+          disabled={!account?.isConnected}
+          onClick={async () => {
+            if (paraClient) {
+              const jwtResponse = await paraClient.issueJwt();
+              console.log(jwtResponse);
+            }
+          }}
+        >
+          Issue JWT
+        </CpslButton>
+        <CpslButton
+          disabled={!account?.isConnected}
+          onClick={async () => {
+            if (paraClient) {
+              const sess = await paraClient.getVerificationToken();
+              console.log(sess);
+            }
+          }}
+        >
+          Export Session
+        </CpslButton>
       </ProfileInnerContainer>
     </Card>
   );

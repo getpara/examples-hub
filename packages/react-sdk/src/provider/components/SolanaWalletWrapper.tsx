@@ -16,6 +16,8 @@ export const SolanaWalletWrapper = ({
   const externalWalletsWithFullAuth = useStore(state => state.externalWalletsWithFullAuth);
   const para = useInternalClient();
   const wallets = useStore(state => state.externalWallets);
+  const connectionOnly = useStore(state => state.connectionOnly);
+  const includeWalletVerification = useStore(state => state.includeWalletVerification);
 
   const isUsing = wallets.some(w => w in SolanaWallet);
   if (!solanaProviderConfig) {
@@ -29,7 +31,13 @@ export const SolanaWalletWrapper = ({
   return (
     <SolanaExternalWalletProvider
       config={solanaProviderConfig}
-      internalConfig={{ onSwitchWallet, para, walletsWithFullAuth: externalWalletsWithFullAuth }}
+      internalConfig={{
+        onSwitchWallet,
+        para,
+        walletsWithFullAuth: externalWalletsWithFullAuth,
+        connectionOnly,
+        includeWalletVerification,
+      }}
       isUsing={isUsing}
       wallets={wallets}
     >

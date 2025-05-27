@@ -54,6 +54,12 @@ export interface ExternalWalletsSlice {
   externalWallets: TExternalWallet[];
   setExternalWallets: (_: TExternalWallet[]) => void;
 
+  connectionOnly: boolean;
+  setConnectionOnly: (_: boolean) => void;
+
+  includeWalletVerification: boolean;
+  setIncludeWalletVerification: (_: boolean) => void;
+
   externalWalletsWithFullAuth: TExternalWallet[];
   setExternalWalletsWithFullAuth: (_: TExternalWallet[]) => void;
 

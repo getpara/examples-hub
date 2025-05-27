@@ -12,6 +12,12 @@ export const createExternalWalletsSlice: StateCreator<Store, [], [], ExternalWal
   externalWalletsWithFullAuth: [],
   setExternalWalletsWithFullAuth: externalWalletsWithFullAuth => set({ externalWalletsWithFullAuth }),
 
+  includeWalletVerification: false,
+  setIncludeWalletVerification: includeWalletVerification => set({ includeWalletVerification }),
+
+  connectionOnly: false,
+  setConnectionOnly: connectionOnly => set({ connectionOnly }),
+
   evmContext: EvmExternalWalletContext,
   setEvmContext: evmContext => set({ evmContext }),
   EvmProvider: undefined,

@@ -25,6 +25,10 @@ export const ParaProvider = forwardRef<
   const externalWallets = useStore(state => state.externalWallets);
   const setExternalWalletsWithFullAuth = useStore(state => state.setExternalWalletsWithFullAuth);
   const externalWalletsWithFullAuth = useStore(state => state.externalWalletsWithFullAuth);
+  const setIncludeWalletVerification = useStore(state => state.setIncludeWalletVerification);
+  const includeWalletVerification = useStore(state => state.includeWalletVerification);
+  const setConnectionOnly = useStore(state => state.setConnectionOnly);
+  const connectionOnly = useStore(state => state.connectionOnly);
   const setModalConfig = useStore(state => state.setModalConfig);
   const modalConfig = useStore(state => state.modalConfig);
   const setAppName = useStore(state => state.setAppName);
@@ -56,6 +60,28 @@ export const ParaProvider = forwardRef<
   }, [paraModalConfig]);
 
   useEffect(() => {
+    if (connectionOnly !== externalWalletConfig?.connectionOnly) {
+      setConnectionOnly(externalWalletConfig?.connectionOnly ?? false);
+    }
+  }, [externalWalletConfig?.connectionOnly]);
+
+  useEffect(() => {
+    if (includeWalletVerification !== externalWalletConfig?.includeWalletVerification) {
+      if (
+        externalWalletConfig?.connectionOnly ||
+        (isConfigType(paraClientConfig)
+          ? paraClientConfig.opts?.externalWalletConnectionOnly
+          : paraClientConfig.externalWalletConnectionOnly)
+      ) {
+        console.warn('includeWalletVerification has no effect when using connection only external wallets');
+        setIncludeWalletVerification(false);
+      } else {
+        setIncludeWalletVerification(externalWalletConfig?.includeWalletVerification ?? false);
+      }
+    }
+  }, [externalWalletConfig?.includeWalletVerification]);
+
+  useEffect(() => {
     if (externalWallets !== externalWalletConfig?.wallets) {
       setExternalWallets(externalWalletConfig?.wallets ?? Object.values(ExternalWallet));
     }
@@ -64,11 +90,12 @@ export const ParaProvider = forwardRef<
   useEffect(() => {
     if (externalWalletsWithFullAuth !== externalWalletConfig?.createLinkedEmbeddedForExternalWallets) {
       if (
-        isConfigType(paraClientConfig)
+        externalWalletConfig?.connectionOnly ||
+        (isConfigType(paraClientConfig)
           ? paraClientConfig.opts?.externalWalletConnectionOnly
-          : paraClientConfig.externalWalletConnectionOnly
+          : paraClientConfig.externalWalletConnectionOnly)
       ) {
-        console.warn('createLinkedEmbeddedForExternalWallets has no effect when using externalWalletConnectionOnly');
+        console.warn('createLinkedEmbeddedForExternalWallets has no effect when using connection only external wallets');
         setExternalWalletsWithFullAuth([]);
       } else {
         setExternalWalletsWithFullAuth(

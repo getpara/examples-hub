@@ -189,6 +189,7 @@ export type SessionInfo = {
   cosmosPrefix?: string;
   origin?: string;
   email?: string;
+  verifiedExternalWalletAddresses?: string[];
 };
 
 export type ServerAuthStateBase = AuthExtras & {
@@ -222,6 +223,8 @@ export type ExternalWalletInfo = {
   withFullParaAuth?: boolean;
   ensName?: string | null;
   ensAvatar?: string | null;
+  isConnectionOnly?: boolean;
+  withVerification?: boolean;
 };
 
 export type VerifyExternalWalletParams = {

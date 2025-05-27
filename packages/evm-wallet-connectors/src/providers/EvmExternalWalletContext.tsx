@@ -56,6 +56,8 @@ export type EvmExternalWalletProviderConfig = {
   onSwitchWallet?: (args: { address?: string; error?: string }) => void;
   para: ParaWeb;
   walletsWithFullAuth: TExternalWallet[];
+  includeWalletVerification?: boolean;
+  connectionOnly?: boolean;
   connectedWallet?: Omit<Wallet, 'signer'> | null;
 };
 
@@ -65,6 +67,8 @@ export function EvmExternalWalletProvider({
   para,
   walletsWithFullAuth,
   connectedWallet,
+  includeWalletVerification,
+  connectionOnly,
 }: EvmExternalWalletProviderConfig & PropsWithChildren) {
   const { connectAsync, connectors: untypedConnectors } = useConnect();
   const connections = useConnections();
@@ -268,6 +272,8 @@ export function EvmExternalWalletProvider({
           withFullParaAuth: walletsWithFullAuth?.includes((walletId?.toUpperCase() ?? '') as TExternalWallet),
           ensName,
           ensAvatar,
+          isConnectionOnly: connectionOnly,
+          withVerification: includeWalletVerification,
         },
       });
     } catch (err) {
@@ -286,7 +292,7 @@ export function EvmExternalWalletProvider({
     if (!address) {
       await para.logout();
     } else {
-      if (para.isExternalWalletAuth) {
+      if (para.isExternalWalletAuth || para.isExternalWalletWithVerification) {
         await reset();
       } else {
         try {
@@ -329,7 +335,11 @@ export function EvmExternalWalletProvider({
 
       if (address) {
         try {
-          authState = await login({ address, connectorName: connector.name, walletId: connector.paraDetails.id });
+          authState = await login({
+            address,
+            connectorName: connector.name,
+            walletId: connector.paraDetails.id,
+          });
           verificationMessage.current = authState.stage === 'verify' ? authState.signatureVerificationMessage : undefined;
         } catch (err) {
           address = undefined;

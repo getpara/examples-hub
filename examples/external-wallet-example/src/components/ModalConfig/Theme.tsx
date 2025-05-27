@@ -10,6 +10,7 @@ export const Theme = () => {
   const accentColor = useModalStateStore(state => state.accentColor);
   const mode = useModalStateStore(state => state.mode);
   const externalWalletConnectionOnly = useModalStateStore(state => state.externalWalletConnectionOnly);
+  const externalWalletIncludeVerification = useModalStateStore(state => state.externalWalletIncludeVerification);
 
   return (
     <>
@@ -21,6 +22,15 @@ export const Theme = () => {
           checked={externalWalletConnectionOnly}
           onCpslCheckboxChanged={(e: any) => {
             updateState({ externalWalletConnectionOnly: e.detail ?? false });
+          }}
+        />
+        <CpslText variant="bodyL" weight="semiBold">
+          With Verification
+        </CpslText>
+        <CpslCheckbox
+          checked={externalWalletIncludeVerification}
+          onCpslCheckboxChanged={(e: any) => {
+            updateState({ externalWalletIncludeVerification: e.detail ?? false });
           }}
         />
         <CpslText variant="bodyL" weight="semiBold">

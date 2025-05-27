@@ -30,6 +30,8 @@ export type SolanaExternalWalletProviderConfig = {
   onSwitchWallet?: (args: { address?: string; error?: string }) => void;
   para: ParaWeb;
   walletsWithFullAuth: TExternalWallet[];
+  includeWalletVerification?: boolean;
+  connectionOnly?: boolean;
 };
 
 type SolanaExternalWalletProviderConfigFull = {
@@ -42,6 +44,8 @@ export function SolanaExternalWalletProvider({
   onSwitchWallet,
   para,
   walletsWithFullAuth,
+  includeWalletVerification,
+  connectionOnly,
 }: SolanaExternalWalletProviderConfigFull & PropsWithChildren) {
   const {
     wallets: adapters,
@@ -71,6 +75,8 @@ export function SolanaExternalWalletProvider({
           withFullParaAuth: walletsWithFullAuth?.includes(
             (getWallet(providerName ?? '')?.id.toUpperCase() ?? '') as TExternalWallet,
           ),
+          withVerification: includeWalletVerification,
+          isConnectionOnly: connectionOnly,
         },
       });
     } catch (err) {
@@ -87,10 +93,17 @@ export function SolanaExternalWalletProvider({
     if (!address) {
       await para.logout();
     } else {
-      try {
-        await login({ address, providerName: wallet?.adapter?.name });
-      } catch (err) {
-        error = err;
+      if (para.isExternalWalletAuth || para.isExternalWalletWithVerification) {
+        await reset();
+      } else {
+        try {
+          await login({
+            address,
+            providerName: wallet?.adapter?.name,
+          });
+        } catch (err) {
+          error = err;
+        }
       }
     }
 

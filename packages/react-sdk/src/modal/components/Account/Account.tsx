@@ -32,7 +32,9 @@ export const Account = ({ onClose }: AccountProps) => {
   const isGuestMode = account?.isConnected && account.isGuestMode;
   // Users using external wallets with connection only can't buy or withdraw
   // CONNECTION_ONLY wallets with no userId are wallets that have skipped Para and can't buy or withdraw
-  const cantBuyAndWithdraw = para.externalWalletConnectionType === 'CONNECTION_ONLY' && !para.userId;
+  const cantBuyAndWithdraw =
+    (para.externalWalletConnectionType === 'CONNECTION_ONLY' || para.externalWalletConnectionType === 'VERIFICATION') &&
+    !para.userId;
   const isOnRampLoaded = !!onRampConfig;
 
   const handleBuyClick = () => {

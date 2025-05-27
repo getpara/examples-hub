@@ -164,6 +164,8 @@ export abstract class ParaCore implements CoreInterface {
   get externalWalletConnectionType(): ExternalWalletConnectionType {
     if (this.isExternalWalletAuth) {
       return 'AUTHENTICATED';
+    } else if (this.isExternalWalletWithVerification) {
+      return 'VERIFICATION';
     } else if (!!Object.keys(this.externalWallets).length) {
       // CONNECTION_ONLY applies for both externalWalletConnectionOnly and standard external wallet connection with Para tracking
       return 'CONNECTION_ONLY';
@@ -201,6 +203,10 @@ export abstract class ParaCore implements CoreInterface {
 
   get isExternalWalletAuth(): boolean {
     return isExternalWallet(this.#authInfo?.auth) && !!this.#authInfo?.externalWallet?.withFullParaAuth;
+  }
+
+  get isExternalWalletWithVerification(): boolean {
+    return isExternalWallet(this.#authInfo?.auth) && !!this.#authInfo?.externalWallet?.withVerification;
   }
 
   get partnerId(): string | undefined {
@@ -1344,7 +1350,15 @@ export abstract class ParaCore implements CoreInterface {
    * @param externalAddress - External wallet address to set.
    * @param externalType - Type of external wallet to set.
    */
-  async setExternalWallet({ address, type, provider, addressBech32, withFullParaAuth }: ExternalWalletInfo): Promise<void> {
+  async setExternalWallet({
+    address,
+    type,
+    provider,
+    addressBech32,
+    withFullParaAuth,
+    isConnectionOnly,
+    withVerification,
+  }: ExternalWalletInfo): Promise<void> {
     // Can change this to continue storing existing external wallets if/when we want to allow multiple connected external wallets
     this.externalWallets = {
       [address]: {
@@ -1355,6 +1369,8 @@ export abstract class ParaCore implements CoreInterface {
         isExternal: true,
         isExternalWithParaAuth: withFullParaAuth,
         signer: '',
+        isExternalConnectionOnly: isConnectionOnly,
+        isExternalWithVerification: withVerification,
       },
     };
     this.setExternalWallets(this.externalWallets);
@@ -1760,7 +1776,7 @@ export abstract class ParaCore implements CoreInterface {
     externalWallet,
     ...urlOptions
   }: CoreMethodParams<'loginExternalWallet'>): CoreMethodResponse<'loginExternalWallet'> {
-    if (this.externalWalletConnectionOnly) {
+    if (this.externalWalletConnectionOnly || externalWallet.isConnectionOnly) {
       // withFullParaAuth cannot be used if using connection only wallets
       externalWallet.withFullParaAuth = false;
       await this.setExternalWallet(externalWallet);
@@ -1771,6 +1787,10 @@ export abstract class ParaCore implements CoreInterface {
     this.requireApiKey();
 
     const serverAuthState = await this.ctx.client.loginExternalWallet({ externalWallet });
+
+    if (!externalWallet.withFullParaAuth && externalWallet.withVerification) {
+      await this.touchSession(true);
+    }
 
     return this.#prepareAuthState(serverAuthState, urlOptions);
   }
@@ -1870,7 +1890,16 @@ export abstract class ParaCore implements CoreInterface {
       return true;
     }
 
-    const { isAuthenticated } = await this.touchSession();
+    const { isAuthenticated, verifiedExternalWalletAddresses } = await this.touchSession();
+
+    if (this.externalWalletConnectionType === 'VERIFICATION') {
+      if (!verifiedExternalWalletAddresses) {
+        return false;
+      }
+
+      const externalAddresses = Object.values(this.externalWallets).map(w => w.id);
+      return externalAddresses.every(address => verifiedExternalWalletAddresses.includes(address));
+    }
 
     return !!isAuthenticated;
   }
@@ -1889,6 +1918,10 @@ export abstract class ParaCore implements CoreInterface {
     }
 
     const isSessionActive = await this.isSessionActive();
+
+    if (this.externalWalletConnectionType === 'VERIFICATION') {
+      return isSessionActive;
+    }
 
     return (
       isSessionActive &&
@@ -3504,9 +3537,19 @@ export abstract class ParaCore implements CoreInterface {
         authState = serverAuthState;
         break;
       case 'login':
+        if (externalWallet && !externalWallet?.withFullParaAuth) {
+          authState = serverAuthState;
+          break;
+        }
+
         authState = await this.#prepareLoginState(serverAuthState, { ...opts, sessionLookupId: opts.sessionLookupId! });
         break;
       case 'signup':
+        if (externalWallet && !externalWallet?.withFullParaAuth) {
+          authState = serverAuthState;
+          break;
+        }
+
         authState = await this.#prepareSignUpState(serverAuthState, opts);
         break;
     }
