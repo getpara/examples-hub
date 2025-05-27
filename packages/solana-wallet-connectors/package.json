@@ -1,6 +1,6 @@
 {
   "name": "@getpara/solana-wallet-connectors",
-  "version": "2.0.0-alpha.16",
+  "version": "2.0.0-alpha.17",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,7 +14,7 @@
     "test": "vitest run --coverage"
   },
   "dependencies": {
-    "@getpara/web-sdk": "2.0.0-alpha.16",
+    "@getpara/web-sdk": "2.0.0-alpha.17",
     "@solana-mobile/wallet-adapter-mobile": "2.1.3",
     "@solana/wallet-adapter-base": "0.9.23",
     "@solana/wallet-adapter-react": "0.15.35",
@@ -22,7 +22,7 @@
     "bs58": "6.0.0"
   },
   "devDependencies": {
-    "@getpara/react-common": "2.0.0-alpha.16",
+    "@getpara/react-common": "2.0.0-alpha.17",
     "@types/react": "^18.0.31",
     "@types/react-dom": "^18.2.7",
     "typescript": "^5.4.3"

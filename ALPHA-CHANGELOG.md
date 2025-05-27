@@ -1,3 +1,32 @@
+# Release (Tue May 27 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.17
+- @getpara/wagmi-v2-integration@2.0.0-alpha.17
+- @getpara/wagmi-v2-connector@2.0.0-alpha.17
+- @getpara/viem-v2-integration@2.0.0-alpha.17
+- @getpara/viem-v1-integration@2.0.0-alpha.17
+- @getpara/user-management-client@2.0.0-alpha.17
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.17
+- @getpara/solana-wallet-connectors@2.0.0-alpha.17
+- @getpara/server-sdk@2.0.0-alpha.17
+- @getpara/react-sdk@2.0.0-alpha.17
+- @getpara/react-native-wallet@2.0.0-alpha.17
+- @getpara/react-components@2.0.0-alpha.17
+- @getpara/react-component-library@1.0.0-alpha.12
+- @getpara/react-common@2.0.0-alpha.17
+- @getpara/evm-wallet-connectors@2.0.0-alpha.17
+- @getpara/ethers-v6-integration@2.0.0-alpha.17
+- @getpara/ethers-v5-integration@2.0.0-alpha.17
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.17
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.17
+- @getpara/core-sdk@2.0.0-alpha.17
+- @getpara/core-components@2.0.0-alpha.17
+
+### Features
+-  external wallet verification (#945) - 347ed718c
+-  Dev Portal - Team management (#952) - 1fa10494c
+
 # Release (Fri May 23 2025)
 
 ## Package Versions

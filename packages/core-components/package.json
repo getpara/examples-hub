@@ -1,6 +1,6 @@
 {
   "name": "@getpara/core-components",
-  "version": "2.0.0-alpha.16",
+  "version": "2.0.0-alpha.17",
   "description": "Capsule Core Components",
   "main": "dist/index.js",
   "type": "module",
