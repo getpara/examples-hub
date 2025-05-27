@@ -1,11 +1,8 @@
 import * as crypto from 'node:crypto';
 import { BrowserContext, Page } from '@playwright/test';
 import { Protocol } from 'playwright-core/types/protocol';
-import { verifyMessage } from 'ethers';
 
 import { AuthPortalPage } from './authPortal';
-
-const MESSAGE_TO_SIGN = 'hello world';
 
 function getRandomPhoneNumber() {
   const last4 = `${Math.floor(Math.random() * 10000)}`.padStart(4, '0');
@@ -156,45 +153,6 @@ export class WebExamplePage {
       await this.page.getByRole('button', { name: 'Skip' }).click();
       await this.page.waitForTimeout(2100);
     }
-  }
-
-  async switchToWagmiView(skipClickCapsule = false) {
-    await this.page.waitForTimeout(1000);
-    await this.page
-      .locator('div')
-      .filter({ hasText: /^Old ViewWagmi View$/ })
-      .getByRole('combobox')
-      .selectOption('WAGMI');
-    await this.page.waitForTimeout(1000);
-    await this.page.reload();
-    await this.page.waitForTimeout(1000);
-    if (!skipClickCapsule) {
-      await this.page.getByRole('button', { name: 'Para' }).click();
-      await this.page.waitForTimeout(300);
-      await this.page.reload();
-    }
-  }
-
-  async switchToDefaultView() {
-    await this.page
-      .locator('div')
-      .filter({ hasText: /^Old ViewWagmi View$/ })
-      .getByRole('combobox')
-      .selectOption('OLD_VIEW');
-  }
-
-  async signWagmiMessage() {
-    await this.page.getByPlaceholder('message to sign').click();
-    await this.page.getByPlaceholder('message to sign').fill(MESSAGE_TO_SIGN);
-    await this.page.waitForTimeout(250);
-    await this.page.getByRole('button', { name: 'Sign Message' }).click();
-    const address = (await this.page.getByText('Address is:').textContent())?.split('Address is:')[1].trim();
-    const signature = (await this.page.getByText('Message Signature:').textContent())?.split('Message Signature:')[1].trim();
-    const recoveredAddress = verifyMessage(MESSAGE_TO_SIGN, signature!);
-    return {
-      address,
-      recoveredAddress,
-    };
   }
 
   async logout({ openModalText = 'Open Modal' }: { openModalText?: string }) {
