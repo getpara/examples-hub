@@ -13,9 +13,18 @@ import {
   walletConnectWallet,
   zerionWallet,
 } from "@getpara/evm-wallet-connectors";
-import { ParaCosmosProvider, keplrWallet, leapWallet } from "@getpara/cosmos-wallet-connectors";
+import {
+  ParaCosmosProvider,
+  keplrWallet,
+  leapWallet,
+} from "@getpara/cosmos-wallet-connectors";
 import { cosmoshub } from "@getpara/graz/chains";
-import { backpackWallet, ParaSolanaProvider, glowWallet, phantomWallet } from "@getpara/solana-wallet-connectors";
+import {
+  backpackWallet,
+  ParaSolanaProvider,
+  glowWallet,
+  phantomWallet,
+} from "@getpara/solana-wallet-connectors";
 
 type Props = {
   children: React.ReactNode;
@@ -41,9 +50,17 @@ export const ParaProviders: React.FC<Props> = ({ children }) => {
           projectId: import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID || "",
           appName: "Para EVM Wallet Connect",
           chains: [mainnet, polygon, sepolia, celo],
-          wallets: [metaMaskWallet, rainbowWallet, walletConnectWallet, zerionWallet, coinbaseWallet, rabbyWallet],
+          wallets: [
+            metaMaskWallet,
+            rainbowWallet,
+            walletConnectWallet,
+            zerionWallet,
+            coinbaseWallet,
+            rabbyWallet,
+          ],
           para: para,
-        }}>
+        }}
+      >
         <ParaCosmosProvider
           chains={cosmosChains}
           wallets={[keplrWallet, leapWallet]}
@@ -51,15 +68,21 @@ export const ParaProviders: React.FC<Props> = ({ children }) => {
           multiChain={false}
           onSwitchChain={(chainId) => {
             console.log("Switched chain to:", chainId);
-          }}>
+          }}
+        >
           <ParaSolanaProvider
             endpoint={endpoint}
             wallets={[glowWallet, phantomWallet, backpackWallet]}
             chain={solanaNetwork}
             appIdentity={{
               name: "Your App Name",
-              uri: typeof window !== "undefined" ? `${window.location.protocol}//${window.location.host}` : "",
-            }}>
+              uri:
+                typeof window !== "undefined"
+                  ? `${window.location.protocol}//${window.location.host}`
+                  : "",
+            }}
+            para={para}
+          >
             {children}
           </ParaSolanaProvider>
         </ParaCosmosProvider>
