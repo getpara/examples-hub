@@ -235,17 +235,16 @@ export default function Home() {
   }
 
   return (
-    <>
-      <div className="container max-w-4xl mx-auto px-4 mb-6">
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="container max-w-4xl mx-auto px-4">
         <div className="flex items-start justify-center space-x-6">
-          {/* Left column: alert */}
           <div className="w-1/3">
             <Alert className="border-blue-400 bg-blue-50">
               <Info className="w-5 h-5 text-blue-500 mr-2 flex-shrink-0" />
               <div>
                 <AlertTitle>Testnet USDC & Gas Required</AlertTitle>
                 <AlertDescription>
-                  For this demo you’ll need testnet USDC (grab it via{" "}
+                  For this demo you'll need testnet USDC (grab it via{" "}
                   <a
                     href="https://faucet.circle.com/"
                     target="_blank"
@@ -259,7 +258,6 @@ export default function Home() {
             </Alert>
           </div>
 
-          {/* Right column: bridge form */}
           <div className="flex-1">
             <BridgeForm
               isConnected={account?.isConnected || false}
@@ -340,6 +338,6 @@ export default function Home() {
         recoverySecretStepEnabled={true}
         twoFactorAuthEnabled={false}
       />
-    </>
+    </div>
   );
 }
