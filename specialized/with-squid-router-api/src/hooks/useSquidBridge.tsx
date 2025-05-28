@@ -3,8 +3,18 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useSquidClient } from "./useSquidClient";
 import { useSigners } from "./useSigners";
 import { NETWORK_CONFIG, SupportedNetwork } from "@/constants";
-import { parseUnits } from "viem";
-import { ethers } from "ethers";
+import { ethers, TransactionResponse } from "ethers";
+import {
+  DepositAddressResponse,
+  GetStatus,
+  OnChainExecutionData,
+  RouteResponse,
+  SolanaTxResponse,
+  TransactionResponses,
+} from "@0xsquid/sdk/dist/types";
+import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
+import { Transaction, VersionedTransaction } from "@solana/web3.js";
+import { Wallet } from "@project-serum/anchor";
 
 interface QuoteParams {
   originNetwork: SupportedNetwork | null;
@@ -14,30 +24,24 @@ interface QuoteParams {
   destAddress: string | null;
 }
 
-interface RouteResponse {
-  route: any;
-  requestId: string;
-  quoteId: string;
-}
-
 export function useSquidBridge() {
   const squid = useSquidClient();
-  const { ethereumViem, baseViem, solanaSvm } = useSigners();
+  const { ethereumEthers, baseEthers, solanaSvm } = useSigners();
 
   const getNetworkClients = useCallback(
     (network: SupportedNetwork) => {
       switch (network) {
         case "ethereum":
-          return ethereumViem;
+          return ethereumEthers;
         case "base":
-          return baseViem;
+          return baseEthers;
         case "solana":
           return solanaSvm;
         default:
           throw new Error(`Unsupported network: ${network}`);
       }
     },
-    [ethereumViem, baseViem, solanaSvm]
+    [ethereumEthers, baseEthers, solanaSvm]
   );
 
   const fetchQuote = async (params: QuoteParams): Promise<RouteResponse> => {
@@ -50,11 +54,11 @@ export function useSquidBridge() {
 
     const originConfig = NETWORK_CONFIG[originNetwork];
     const destConfig = NETWORK_CONFIG[destNetwork];
-    const amountInWei = parseUnits(amount, 6).toString();
+    const amountInWei = ethers.parseUnits(amount, 6).toString();
 
     const squidParams = {
-      fromChain: originConfig.chainId,
-      toChain: destConfig.chainId,
+      fromChain: originConfig.chainId.toString(),
+      toChain: destConfig.chainId.toString(),
       fromToken: originConfig.usdcContractAddress,
       toToken: destConfig.usdcContractAddress,
       fromAmount: amountInWei,
@@ -64,10 +68,8 @@ export function useSquidBridge() {
       quoteOnly: true,
     };
 
-    const { route, requestId } = await squid.getRoute(squidParams);
-    const quoteId = route.quoteId || "";
-
-    return { route, requestId, quoteId };
+    const response = await squid.getRoute(squidParams);
+    return response;
   };
 
   const useQuote = (params: QuoteParams) => {
@@ -90,22 +92,80 @@ export function useSquidBridge() {
     });
   };
 
-  const simulateTransaction = async (route: any, signer: any) => {
+  const simulateTransaction = async (
+    route: RouteResponse["route"],
+    provider: ethers.JsonRpcProvider,
+    from: string
+  ): Promise<{ success: boolean; error?: any }> => {
     try {
-      const provider = signer.provider || signer;
-      const tx = route.transactionRequest;
+      if (!route.transactionRequest) {
+        console.warn("No transactionRequest in route, skipping simulation");
+        return { success: true };
+      }
+      if ("request" in route.transactionRequest) {
+        return { success: true };
+      }
 
-      await provider.call({
-        to: tx.target || tx.targetAddress,
-        data: tx.data,
-        value: tx.value,
-        from: signer.address,
-      });
+      if ("target" in route.transactionRequest && "data" in route.transactionRequest) {
+        const tx = route.transactionRequest as OnChainExecutionData;
 
+        if (!tx.target || !tx.data) {
+          throw new Error("Invalid transaction data: missing target or data");
+        }
+
+        const callParams: ethers.TransactionRequest = {
+          to: tx.target,
+          data: tx.data,
+          from: from,
+        };
+
+        if (tx.value && tx.value !== "0") {
+          callParams.value = tx.value;
+        }
+
+        if (tx.gasLimit) {
+          callParams.gasLimit = tx.gasLimit;
+        }
+
+        if (tx.maxFeePerGas && tx.maxPriorityFeePerGas) {
+          callParams.maxFeePerGas = tx.maxFeePerGas;
+          callParams.maxPriorityFeePerGas = tx.maxPriorityFeePerGas;
+        } else if (tx.gasPrice) {
+          callParams.gasPrice = tx.gasPrice;
+        }
+
+        await provider.call(callParams);
+        return { success: true };
+      }
+
+      console.warn("Unknown transaction request type, proceeding without simulation");
       return { success: true };
     } catch (error) {
+      console.error("Transaction simulation failed:", error);
       return { success: false, error };
     }
+  };
+
+  const getTransactionHash = (tx: TransactionResponses, originNetwork: SupportedNetwork): string => {
+    const networkCategory = NETWORK_CONFIG[originNetwork].networkCategory;
+
+    if (networkCategory === "evm") {
+      const ethTx = tx as TransactionResponse;
+      return ethTx.hash;
+    } else if (networkCategory === "svm") {
+      const solanaTx = tx as SolanaTxResponse;
+      return solanaTx.tx;
+    } else if ("depositAddress" in tx) {
+      const depositTx = tx as DepositAddressResponse;
+      return depositTx.chainflipStatusTrackingId;
+    } else if ("bodyBytes" in tx) {
+      const cosmosTx = tx as TxRaw;
+      const txBytes = cosmosTx.bodyBytes;
+      const hash = ethers.keccak256(txBytes);
+      return hash;
+    }
+
+    return "unknown";
   };
 
   const executeMutation = useMutation({
@@ -123,85 +183,200 @@ export function useSquidBridge() {
 
       const originClients = getNetworkClients(originNetwork);
       const originConfig = NETWORK_CONFIG[originNetwork];
-      let signer;
 
       if (originConfig.networkCategory === "evm") {
-        if (!("walletClient" in originClients) || !originClients.walletClient) {
+        if (
+          !("provider" in originClients) ||
+          !("signer" in originClients) ||
+          !originClients.signer ||
+          !originClients.provider
+        ) {
           throw new Error("EVM wallet not initialized");
         }
 
-        const walletClient = originClients.walletClient;
-        const provider = new ethers.providers.JsonRpcProvider(originConfig.rpcUrl);
+        const signer = originClients.signer;
+        const provider = originClients.provider;
+        const address = originClients.address;
 
-        signer = new ethers.Wallet(await walletClient.account.signMessage({ message: "dummy" }), provider);
-      } else {
-        throw new Error("Solana support needs implementation");
-      }
+        if (!address) {
+          throw new Error("No address found");
+        }
 
-      const simulation = await simulateTransaction(quote.route, signer);
-      if (!simulation.success) {
-        throw new Error("Transaction simulation failed");
-      }
+        const simulation = await simulateTransaction(quote.route, provider, address);
+        if (!simulation.success) {
+          throw new Error("Transaction simulation failed");
+        }
 
-      const tx = await squid.executeRoute({
-        signer,
-        route: quote.route,
-      });
+        const tx = await squid.executeRoute({
+          signer,
+          route: quote.route,
+        });
 
-      if (onProgress) {
-        const pollStatus = async () => {
-          try {
-            const status = await squid.getStatus({
-              transactionId: tx.hash,
-              requestId: quote.requestId,
-              fromChainId: originConfig.chainId,
-              toChainId: quote.route.params.toChain,
-              quoteId: quote.quoteId,
-            });
+        const txHash = getTransactionHash(tx, originNetwork);
 
-            const squidStatus = status.squidTransactionStatus;
+        if (onProgress) {
+          const pollStatus = async () => {
+            try {
+              const statusParams: GetStatus = {
+                transactionId: txHash,
+                requestId: quote.requestId,
+                integratorId: quote.integratorId,
+              };
 
-            if (squidStatus === "success") {
-              onProgress({
-                steps: [{ items: [{ status: "complete" }] }],
-                currentStep: { id: "complete" },
-              });
-              return true;
-            } else if (squidStatus === "partial_success" || squidStatus === "refund" || squidStatus === "not_found") {
-              onProgress({
-                error: { message: `Transaction ${squidStatus}` },
-                currentStep: { id: "failed" },
-              });
-              return true;
-            } else if (squidStatus === "needs_gas") {
-              onProgress({
-                error: { message: "Transaction needs more gas" },
-                currentStep: { id: "failed" },
-              });
-              return true;
+              const status = await squid.getStatus(statusParams);
+
+              const squidStatus = status.squidTransactionStatus;
+
+              if (squidStatus === "success") {
+                onProgress({
+                  steps: [{ items: [{ status: "complete" }] }],
+                  currentStep: { id: "complete" },
+                  txHashes: [{ txHash }],
+                });
+                return true;
+              } else if (squidStatus === "partial_success" || squidStatus === "refund" || squidStatus === "not_found") {
+                onProgress({
+                  error: { message: `Transaction ${squidStatus}` },
+                  currentStep: { id: "failed" },
+                });
+                return true;
+              } else if (squidStatus === "needs_gas") {
+                onProgress({
+                  error: { message: "Transaction needs more gas" },
+                  currentStep: { id: "failed" },
+                });
+                return true;
+              }
+
+              return false;
+            } catch (error) {
+              console.error("Status check error:", error);
+              return false;
             }
+          };
 
-            return false;
-          } catch (error) {
-            console.error("Status check error:", error);
-            return false;
+          const checkInterval = setInterval(async () => {
+            const isDone = await pollStatus();
+            if (isDone) {
+              clearInterval(checkInterval);
+            }
+          }, 5000);
+
+          if (originConfig.networkCategory === "evm" && "wait" in tx && typeof tx.wait === "function") {
+            tx.wait().then(() => {
+              clearInterval(checkInterval);
+              pollStatus();
+            });
+          } else {
+            setTimeout(() => {
+              clearInterval(checkInterval);
+              pollStatus();
+            }, 60000);
           }
+        }
+
+        return tx;
+      } else if (originConfig.networkCategory === "svm") {
+        // Type guard to check if this is a Solana client
+        if (!("connection" in originClients) || !originClients.connection || !originClients.signer) {
+          throw new Error("Solana wallet not initialized");
+        }
+
+        const solanaSigner = originClients.signer;
+        const connection = originClients.connection;
+        const address = originClients.address;
+
+        if (!address || !solanaSigner.sender) {
+          throw new Error("No Solana address found");
+        }
+
+        const solanaWallet = {
+          publicKey: solanaSigner.sender,
+          signTransaction: async <T extends Transaction | VersionedTransaction>(tx: T): Promise<T> => {
+            return await solanaSigner.signTransaction(tx);
+          },
+          signAllTransactions: async <T extends Transaction | VersionedTransaction>(txs: T[]): Promise<T[]> => {
+            return await Promise.all(txs.map((tx) => solanaSigner.signTransaction(tx)));
+          },
         };
 
-        const checkInterval = setInterval(async () => {
-          const isDone = await pollStatus();
-          if (isDone) {
-            clearInterval(checkInterval);
-          }
-        }, 5000);
-
-        tx.wait().then(() => {
-          clearInterval(checkInterval);
-          pollStatus();
+        const tx = await squid.executeRoute({
+          signer: solanaWallet as Wallet,
+          route: quote.route,
+          signerAddress: address,
         });
-      }
 
-      return tx;
+        const txHash = getTransactionHash(tx, originNetwork);
+
+        if (onProgress) {
+          onProgress({
+            steps: [{ items: [{ status: "pending" }] }],
+            currentStep: { id: "deposit" },
+            txHashes: [{ txHash }],
+          });
+
+          const pollStatus = async () => {
+            try {
+              const statusParams: GetStatus = {
+                transactionId: txHash,
+                requestId: quote.requestId,
+                integratorId: quote.integratorId,
+              };
+
+              const status = await squid.getStatus(statusParams);
+              const squidStatus = status.squidTransactionStatus;
+
+              if (squidStatus === "success") {
+                onProgress({
+                  steps: [{ items: [{ status: "complete" }] }],
+                  currentStep: { id: "complete" },
+                  txHashes: [{ txHash }],
+                });
+                return true;
+              } else if (squidStatus === "partial_success" || squidStatus === "refund" || squidStatus === "not_found") {
+                onProgress({
+                  error: { message: `Transaction ${squidStatus}` },
+                  currentStep: { id: "failed" },
+                });
+                return true;
+              } else if (squidStatus === "needs_gas") {
+                onProgress({
+                  error: { message: "Transaction needs more gas" },
+                  currentStep: { id: "failed" },
+                });
+                return true;
+              }
+
+              onProgress({
+                steps: [{ items: [{ status: "pending" }] }],
+                currentStep: { id: "fill" },
+                txHashes: [{ txHash }],
+              });
+
+              return false;
+            } catch (error) {
+              console.error("Status check error:", error);
+              return false;
+            }
+          };
+
+          const checkInterval = setInterval(async () => {
+            const isDone = await pollStatus();
+            if (isDone) {
+              clearInterval(checkInterval);
+            }
+          }, 5000);
+
+          setTimeout(() => {
+            clearInterval(checkInterval);
+            pollStatus();
+          }, 180000);
+        }
+
+        return tx;
+      } else {
+        throw new Error("Unsupported network category");
+      }
     },
   });
 

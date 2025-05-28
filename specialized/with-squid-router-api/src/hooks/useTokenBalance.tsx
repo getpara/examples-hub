@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { NETWORK_CONFIG, SupportedNetwork } from "@/constants";
 import { PublicKey } from "@solana/web3.js";
-import { parseAbi, formatUnits, PublicClient } from "viem";
+import { ethers } from "ethers";
 import { useSigners } from "./useSigners";
 
-const ERC20_ABI = parseAbi([
+const ERC20_ABI = [
   "function balanceOf(address owner) view returns (uint256)",
   "function decimals() view returns (uint8)",
-]);
+];
 
 const TOKEN_PROGRAM_ID = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
 const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
@@ -17,7 +17,7 @@ interface UseTokenBalanceProps {
 }
 
 export function useTokenBalance({ network }: UseTokenBalanceProps) {
-  const { ethereumViem, baseViem, solanaSvm } = useSigners();
+  const { ethereumEthers, baseEthers, solanaSvm } = useSigners();
 
   const fetchBalance = async () => {
     if (!network) {
@@ -27,20 +27,20 @@ export function useTokenBalance({ network }: UseTokenBalanceProps) {
     const config = NETWORK_CONFIG[network];
 
     let address: string | null = null;
-    let publicClient: PublicClient | null = null;
+    let provider: ethers.JsonRpcProvider | null = null;
     let connection = null;
     let isInitialized = false;
 
     switch (network) {
       case "ethereum":
-        address = ethereumViem.address;
-        publicClient = ethereumViem.publicClient;
-        isInitialized = ethereumViem.isInitialized;
+        address = ethereumEthers.address;
+        provider = ethereumEthers.provider;
+        isInitialized = ethereumEthers.isInitialized;
         break;
       case "base":
-        address = baseViem.address;
-        publicClient = baseViem.publicClient;
-        isInitialized = baseViem.isInitialized;
+        address = baseEthers.address;
+        provider = baseEthers.provider;
+        isInitialized = baseEthers.isInitialized;
         break;
       case "solana":
         address = solanaSvm.address;
@@ -53,15 +53,11 @@ export function useTokenBalance({ network }: UseTokenBalanceProps) {
       return "0";
     }
 
-    if (config.networkCategory === "evm" && publicClient) {
+    if (config.networkCategory === "evm" && provider) {
       try {
-        const balance = await publicClient.readContract({
-          address: config.usdcContractAddress as `0x${string}`,
-          abi: ERC20_ABI,
-          functionName: "balanceOf",
-          args: [address as `0x${string}`],
-        });
-        return formatUnits(balance, 6);
+        const contract = new ethers.Contract(config.usdcContractAddress, ERC20_ABI, provider);
+        const balance = await contract.balanceOf(address);
+        return ethers.formatUnits(balance, 6);
       } catch (error) {
         console.error("Error fetching EVM balance:", error);
         return "0";
@@ -88,7 +84,7 @@ export function useTokenBalance({ network }: UseTokenBalanceProps) {
         }
 
         const balance = dataBuffer.readBigUInt64LE(64);
-        return formatUnits(balance, 6);
+        return ethers.formatUnits(balance, 6);
       } catch (error) {
         console.error("Error fetching SVM balance:", error);
         return "0";
@@ -103,9 +99,9 @@ export function useTokenBalance({ network }: UseTokenBalanceProps) {
 
     switch (network) {
       case "ethereum":
-        return ethereumViem.isInitialized;
+        return ethereumEthers.isInitialized;
       case "base":
-        return baseViem.isInitialized;
+        return baseEthers.isInitialized;
       case "solana":
         return solanaSvm.isInitialized;
       default:
@@ -118,9 +114,9 @@ export function useTokenBalance({ network }: UseTokenBalanceProps) {
 
     switch (network) {
       case "ethereum":
-        return ethereumViem.address;
+        return ethereumEthers.address;
       case "base":
-        return baseViem.address;
+        return baseEthers.address;
       case "solana":
         return solanaSvm.address;
       default:

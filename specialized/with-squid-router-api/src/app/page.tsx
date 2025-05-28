@@ -24,7 +24,7 @@ export default function Home() {
   const { openModal } = useModal();
   const { data: account } = useAccount();
   const { useQuote, executeBridge, isExecuting } = useSquidBridge();
-  const { ethereumViem, baseViem, solanaSvm } = useSigners();
+  const { ethereumEthers, baseEthers, solanaSvm } = useSigners();
 
   const [originNetwork, setOriginNetwork] = useState<SupportedNetwork | null>(null);
   const [destNetwork, setDestNetwork] = useState<SupportedNetwork | null>(null);
@@ -40,16 +40,16 @@ export default function Home() {
       if (!networkId) return null;
       switch (networkId) {
         case "ethereum":
-          return ethereumViem.address;
+          return ethereumEthers.address;
         case "base":
-          return baseViem.address;
+          return baseEthers.address;
         case "solana":
           return solanaSvm.address;
         default:
           return null;
       }
     },
-    [ethereumViem.address, baseViem.address, solanaSvm.address]
+    [ethereumEthers.address, baseEthers.address, solanaSvm.address]
   );
 
   const originAddress = getNetworkAddress(originNetwork);
@@ -82,7 +82,7 @@ export default function Home() {
   const bridgeFee = route?.estimate?.feeCosts?.[0]?.amount
     ? (parseFloat(route.estimate.feeCosts[0].amount) / 1e6).toFixed(6)
     : "0";
-  const gasFee = route?.estimate?.gasCosts?.[0]?.amountUSD || "0";
+  const gasFee = route?.estimate?.gasCosts?.[0]?.amountUsd || "0";
   const bridgeFeeCurrency = route?.estimate?.feeCosts?.[0]?.token?.symbol || "USDC";
   const gasFeeCurrency = "USD";
   const estimatedTime = route?.estimate?.estimatedRouteDuration
@@ -241,8 +241,8 @@ export default function Home() {
   }
 
   return (
-    <>
-      <div className="container max-w-4xl mx-auto px-4 mb-6">
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="container max-w-4xl mx-auto px-4">
         <div className="flex items-start justify-center space-x-6">
           <div className="w-1/3">
             <Alert className="border-orange-400 bg-orange-50">
@@ -250,8 +250,8 @@ export default function Home() {
               <div>
                 <AlertTitle>⚠️ MAINNET - Real Funds Required</AlertTitle>
                 <AlertDescription>
-                  This uses REAL MAINNET funds. Ensure you have: • USDC on your source chain • Native tokens for gas
-                  fees • Double-check addresses before sending
+                  This uses REAL MAINNET funds. SQUID only supports mainnet. Ensure you have: • USDC on your source
+                  chain • Native tokens for gas fees • Double-check addresses before sending
                 </AlertDescription>
               </div>
             </Alert>
@@ -337,6 +337,6 @@ export default function Home() {
         recoverySecretStepEnabled={true}
         twoFactorAuthEnabled={false}
       />
-    </>
+    </div>
   );
 }

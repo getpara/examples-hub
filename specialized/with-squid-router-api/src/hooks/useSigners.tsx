@@ -1,22 +1,21 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAccount, useClient } from "@getpara/react-sdk";
-import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integration";
-import { createPublicClient, http, PublicClient, WalletClient } from "viem";
-import { sepolia, baseSepolia } from "viem/chains";
+import { ParaEthersSigner } from "@getpara/ethers-v6-integration";
+import { ethers } from "ethers";
 import { ParaSolanaWeb3Signer } from "@getpara/solana-web3.js-v1-integration";
 import { Connection } from "@solana/web3.js";
 import { NETWORK_CONFIG } from "@/constants";
 
 interface SignerData {
-  ethereumViem: {
-    publicClient: PublicClient | null;
-    walletClient: WalletClient | null;
+  ethereumEthers: {
+    provider: ethers.JsonRpcProvider | null;
+    signer: ParaEthersSigner | null;
     address: string | null;
     isInitialized: boolean;
   };
-  baseViem: {
-    publicClient: PublicClient | null;
-    walletClient: WalletClient | null;
+  baseEthers: {
+    provider: ethers.JsonRpcProvider | null;
+    signer: ParaEthersSigner | null;
     address: string | null;
     isInitialized: boolean;
   };
@@ -32,8 +31,8 @@ const SIGNERS_QUERY_KEY = ["globalSigners"];
 
 async function initializeSigners(para: any, account: any): Promise<SignerData> {
   const signerData: SignerData = {
-    ethereumViem: { publicClient: null, walletClient: null, address: null, isInitialized: false },
-    baseViem: { publicClient: null, walletClient: null, address: null, isInitialized: false },
+    ethereumEthers: { provider: null, signer: null, address: null, isInitialized: false },
+    baseEthers: { provider: null, signer: null, address: null, isInitialized: false },
     solanaSvm: { signer: null, connection: null, address: null, isInitialized: false },
   };
 
@@ -42,23 +41,15 @@ async function initializeSigners(para: any, account: any): Promise<SignerData> {
   }
 
   try {
-    const ethereumChain = sepolia;
     const ethereumConfig = NETWORK_CONFIG.ethereum;
-    const ethereumAccount = createParaAccount(para);
-    const ethereumWalletClient = createParaViemClient(para, {
-      account: ethereumAccount,
-      chain: ethereumChain,
-      transport: http(ethereumConfig.rpcUrl),
-    });
-    const ethereumPublicClient = createPublicClient({
-      chain: ethereumChain,
-      transport: http(ethereumConfig.rpcUrl),
-    });
+    const ethereumProvider = new ethers.JsonRpcProvider(ethereumConfig.rpcUrl);
+    const ethereumSigner = new ParaEthersSigner(para, ethereumProvider);
+    const ethereumAddress = await ethereumSigner.getAddress();
 
-    signerData.ethereumViem = {
-      walletClient: ethereumWalletClient,
-      publicClient: ethereumPublicClient as PublicClient,
-      address: ethereumAccount.address,
+    signerData.ethereumEthers = {
+      provider: ethereumProvider,
+      signer: ethereumSigner,
+      address: ethereumAddress,
       isInitialized: true,
     };
   } catch (error) {
@@ -66,23 +57,15 @@ async function initializeSigners(para: any, account: any): Promise<SignerData> {
   }
 
   try {
-    const baseChain = baseSepolia;
     const baseConfig = NETWORK_CONFIG.base;
-    const baseAccount = createParaAccount(para);
-    const baseWalletClient = createParaViemClient(para, {
-      account: baseAccount,
-      chain: baseChain,
-      transport: http(baseConfig.rpcUrl),
-    });
-    const basePublicClient = createPublicClient({
-      chain: baseChain,
-      transport: http(baseConfig.rpcUrl),
-    });
+    const baseProvider = new ethers.JsonRpcProvider(baseConfig.rpcUrl);
+    const baseSigner = new ParaEthersSigner(para, baseProvider);
+    const baseAddress = await baseSigner.getAddress();
 
-    signerData.baseViem = {
-      walletClient: baseWalletClient,
-      publicClient: basePublicClient as PublicClient,
-      address: baseAccount.address,
+    signerData.baseEthers = {
+      provider: baseProvider,
+      signer: baseSigner,
+      address: baseAddress,
       isInitialized: true,
     };
   } catch (error) {
@@ -117,8 +100,8 @@ export function useSigners() {
 
   const {
     data: signers = {
-      ethereumViem: { publicClient: null, walletClient: null, address: null, isInitialized: false },
-      baseViem: { publicClient: null, walletClient: null, address: null, isInitialized: false },
+      ethereumEthers: { provider: null, signer: null, address: null, isInitialized: false },
+      baseEthers: { provider: null, signer: null, address: null, isInitialized: false },
       solanaSvm: { signer: null, connection: null, address: null, isInitialized: false },
     } as SignerData,
   } = useQuery({
@@ -131,8 +114,8 @@ export function useSigners() {
 
   const clearSigners = () => {
     queryClient.setQueryData(SIGNERS_QUERY_KEY, {
-      ethereumViem: { publicClient: null, walletClient: null, address: null, isInitialized: false },
-      baseViem: { publicClient: null, walletClient: null, address: null, isInitialized: false },
+      ethereumEthers: { provider: null, signer: null, address: null, isInitialized: false },
+      baseEthers: { provider: null, signer: null, address: null, isInitialized: false },
       solanaSvm: { signer: null, connection: null, address: null, isInitialized: false },
     });
   };
