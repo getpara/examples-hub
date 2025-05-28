@@ -15,6 +15,8 @@ import { ReceiveAmount } from "@/components/ReceiveAmount";
 import { TransactionDetails } from "@/components/TransactionDetails";
 import type { ProgressData } from "@reservoir0x/relay-sdk";
 import { useSigners } from "@/hooks/useSigners";
+import { Info } from "lucide-react";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 type TransactionState = "idle" | "sending" | "checking" | "complete" | "failed";
 type StepType = "approve" | "deposit" | "fill" | "complete" | "failed";
@@ -37,7 +39,6 @@ export default function Home() {
   const getNetworkAddress = useCallback(
     (networkId: SupportedNetwork | null): string | null => {
       if (!networkId) return null;
-
       switch (networkId) {
         case "ethereum":
           return ethereumViem.address;
@@ -68,22 +69,17 @@ export default function Home() {
     originAddress,
     destAddress,
   });
-
   const { data: quote, isLoading: isQuoting, error: quoteError } = quoteQuery;
 
   const destAmount =
     quote?.details?.currencyOut?.amountFormatted || (parsedAmount > 0 ? (parsedAmount * 0.97).toFixed(6) : "0");
-
   const usdValue = parsedAmount > 0 ? parsedAmount.toFixed(2) : "0.00";
-
   const rate = quote?.details?.rate || "1";
   const impactPercent = quote?.details?.totalImpact?.percent || "0";
-
   const bridgeFee = quote?.fees?.relayer?.amountFormatted || "0";
   const gasFee = quote?.fees?.gas?.amountFormatted || "0";
   const bridgeFeeCurrency = quote?.fees?.relayer?.currency?.symbol || "USDC";
   const gasFeeCurrency = quote?.fees?.gas?.currency?.symbol || "ETH";
-
   const estimatedTime = quote?.details?.timeEstimate
     ? `${Math.round(quote.details.timeEstimate / 1000)} seconds`
     : "60-90 seconds";
@@ -146,25 +142,19 @@ export default function Home() {
           setTransactionState("failed");
           setCurrentStep("failed");
           setErrorMessage("Transaction was refunded. Please try again.");
-          console.error("Transaction was refunded");
           return;
         }
-
         if (error) {
           setTransactionState("failed");
           setCurrentStep("failed");
           setErrorMessage(error.message || "Transaction failed");
-          console.error("Transaction error:", error);
           return;
         }
-
         if (txHashes && txHashes.length > 0) {
           setTransactionHash(txHashes[0].txHash);
         }
-
         if (currentProgressStep) {
           const stepId = currentProgressStep.id;
-
           if (stepId === "approve" || stepId.includes("approve")) {
             setCurrentStep("approve");
             setTransactionState("sending");
@@ -175,25 +165,20 @@ export default function Home() {
             setCurrentStep("fill");
             setTransactionState("checking");
           }
-
           if (currentProgressStep.error) {
             setTransactionState("failed");
             setCurrentStep("failed");
             setErrorMessage(currentProgressStep.error);
-            console.error("Step error:", currentProgressStep.error);
             return;
           }
         }
-
         if (currentStepItem) {
           if (currentStepItem.error) {
             setTransactionState("failed");
             setCurrentStep("failed");
             setErrorMessage(currentStepItem.error);
-            console.error("Step item error:", currentStepItem.error);
             return;
           }
-
           if (currentStepItem.checkStatus) {
             switch (currentStepItem.checkStatus) {
               case "refund":
@@ -214,10 +199,8 @@ export default function Home() {
             }
           }
         }
-
-        const allComplete = steps?.every((step) => step.items?.every((item) => item.status === "complete"));
-
-        if (allComplete && steps && steps.length > 0) {
+        const allComplete = steps?.every((step) => step.items?.every((item) => item.status === "complete")) ?? false;
+        if (allComplete && steps.length > 0) {
           setTransactionState("complete");
           setCurrentStep("complete");
         }
@@ -239,7 +222,7 @@ export default function Home() {
     return (
       <TransactionProcessing
         amount={amount}
-        asset={ASSET_DETAILS["usdc"]}
+        asset={ASSET_DETAILS.usdc}
         originNetwork={getNetwork(originNetwork)}
         destNetwork={getNetwork(destNetwork)}
         transactionHash={transactionHash}
@@ -253,54 +236,81 @@ export default function Home() {
 
   return (
     <>
-      <BridgeForm
-        isConnected={account?.isConnected || false}
-        isValid={isBridgeStateValid()}
-        onConnect={() => {
-          openModal();
-        }}
-        onBridge={handleBridge}>
-        <AssetDisplay asset={ASSET_DETAILS["usdc"]} />
+      <div className="container max-w-4xl mx-auto px-4 mb-6">
+        <div className="flex items-start justify-center space-x-6">
+          {/* Left column: alert */}
+          <div className="w-1/3">
+            <Alert className="border-blue-400 bg-blue-50">
+              <Info className="w-5 h-5 text-blue-500 mr-2 flex-shrink-0" />
+              <div>
+                <AlertTitle>Testnet USDC & Gas Required</AlertTitle>
+                <AlertDescription>
+                  For this demo you’ll need testnet USDC (grab it via{" "}
+                  <a
+                    href="https://faucet.circle.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline hover:text-blue-600">
+                    Circle Faucet
+                  </a>
+                  ), plus some Base Sepolia tokens to cover gas.
+                </AlertDescription>
+              </div>
+            </Alert>
+          </div>
 
-        <NetworkSelector
-          originNetwork={originNetwork}
-          destNetwork={destNetwork}
-          originAddress={originAddress}
-          destAddress={destAddress}
-          originBalance={originBalance}
-          destBalance={destBalance}
-          isConnected={account?.isConnected || false}
-          onOriginChange={setOriginNetwork}
-          onDestChange={setDestNetwork}
-        />
+          {/* Right column: bridge form */}
+          <div className="flex-1">
+            <BridgeForm
+              isConnected={account?.isConnected || false}
+              isValid={isBridgeStateValid()}
+              onConnect={openModal}
+              onBridge={handleBridge}>
+              <AssetDisplay asset={ASSET_DETAILS.usdc} />
 
-        <AmountInput
-          amount={amount}
-          usdValue={usdValue}
-          isConnected={account?.isConnected || false}
-          onAmountChange={setAmount}
-          onMaxClick={handleMaxClick}
-        />
+              <NetworkSelector
+                originNetwork={originNetwork}
+                destNetwork={destNetwork}
+                originAddress={originAddress}
+                destAddress={destAddress}
+                originBalance={originBalance}
+                destBalance={destBalance}
+                isConnected={account?.isConnected || false}
+                onOriginChange={setOriginNetwork}
+                onDestChange={setDestNetwork}
+              />
 
-        {amount && parsedAmount > 0 && (
-          <ReceiveAmount
-            destAmount={destAmount}
-            asset={ASSET_DETAILS["usdc"]}
-            rate={rate}
-            impactPercent={impactPercent}
-          />
-        )}
+              <AmountInput
+                amount={amount}
+                usdValue={usdValue}
+                isConnected={account?.isConnected || false}
+                onAmountChange={setAmount}
+                onMaxClick={handleMaxClick}
+              />
 
-        <TransactionDetails
-          isOpen={isDetailsOpen}
-          onOpenChange={setIsDetailsOpen}
-          bridgeFee={bridgeFee}
-          gasFee={gasFee}
-          estimatedTime={estimatedTime}
-          bridgeFeeCurrency={bridgeFeeCurrency}
-          gasFeeCurrency={gasFeeCurrency}
-        />
-      </BridgeForm>
+              {amount && parsedAmount > 0 && (
+                <ReceiveAmount
+                  destAmount={destAmount}
+                  asset={ASSET_DETAILS.usdc}
+                  rate={rate}
+                  impactPercent={impactPercent}
+                />
+              )}
+
+              <TransactionDetails
+                isOpen={isDetailsOpen}
+                onOpenChange={setIsDetailsOpen}
+                bridgeFee={bridgeFee}
+                gasFee={gasFee}
+                estimatedTime={estimatedTime}
+                bridgeFeeCurrency={bridgeFeeCurrency}
+                gasFeeCurrency={gasFeeCurrency}
+              />
+            </BridgeForm>
+          </div>
+        </div>
+      </div>
+
       <ParaModal
         disableEmailLogin={false}
         disablePhoneLogin={false}
