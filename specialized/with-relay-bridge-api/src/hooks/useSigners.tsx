@@ -65,7 +65,6 @@ async function initializeSigners(para: any, account: any): Promise<SignerData> {
     console.error("[Global Signers] Ethereum initialization error:", error);
   }
 
-  // Initialize Base signer
   try {
     const baseChain = baseSepolia;
     const baseConfig = NETWORK_CONFIG.base;
