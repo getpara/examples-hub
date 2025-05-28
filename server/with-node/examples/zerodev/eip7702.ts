@@ -61,7 +61,10 @@ export async function zerodevEip7702SignHandler(req: Request, res: Response, nex
     const session = req.body.session as string | undefined;
 
     if (!session) {
-      res.status(400).send("Provide `session` in the request body.");
+      res.status(400).json({
+        error: "Missing session",
+        message: "Provide `session` in the request body.",
+      });
       return;
     }
 
@@ -73,11 +76,11 @@ export async function zerodevEip7702SignHandler(req: Request, res: Response, nex
     const env = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
 
     if (!paraApiKey || !projectId || !bundlerRpc || !paymasterRpc || !rpcUrl) {
-      res
-        .status(500)
-        .send(
-          "Missing required environment variables (PARA_API_KEY, ZERODEV_PROJECT_ID, ZERODEV_BUNDLER_RPC, ZERODEV_PAYMASTER_RPC, ARBITRUM_SEPOLIA_RPC)."
-        );
+      res.status(500).json({
+        error: "Missing environment variables",
+        message:
+          "Missing required environment variables (PARA_API_KEY, ZERODEV_PROJECT_ID, ZERODEV_BUNDLER_RPC, ZERODEV_PAYMASTER_RPC, ARBITRUM_SEPOLIA_RPC).",
+      });
       return;
     }
 
@@ -97,6 +100,8 @@ export async function zerodevEip7702SignHandler(req: Request, res: Response, nex
     const kernelVersion = KERNEL_V3_3; // Use latest kernel version for 7702
     const entryPoint = getEntryPoint("0.7");
 
+    console.log("Creating 7702 Kernel Account for EOA:", viemParaAccount.address);
+
     // Create 7702 Kernel Account (ZeroDev will automatically create the authorization)
     // The viemParaAccount is the EOA we want to upgrade to a smart account
     const kernelAccount = await create7702KernelAccount(publicClient, {
@@ -104,6 +109,8 @@ export async function zerodevEip7702SignHandler(req: Request, res: Response, nex
       entryPoint,
       kernelVersion,
     });
+
+    console.log("7702 Kernel Account created (EOA upgraded):", kernelAccount.address);
 
     const paymasterClient = createZeroDevPaymasterClient({
       chain: arbitrumSepolia,
@@ -118,6 +125,8 @@ export async function zerodevEip7702SignHandler(req: Request, res: Response, nex
       client: publicClient,
     });
 
+    console.log("7702 Kernel Account Client created");
+
     const calls = Array.from({ length: 5 }, (_, i) => i + 1).map((x) => ({
       to: EXAMPLE_CONTRACT_ADDRESS as `0x${string}`,
       value: 0n,
@@ -128,17 +137,23 @@ export async function zerodevEip7702SignHandler(req: Request, res: Response, nex
       }),
     }));
 
+    console.log("Sending batch transaction with EIP-7702...");
+
     const userOpHash = await kernelAccountClient.sendUserOperation({
       calls,
     });
+
+    console.log("User operation sent:", userOpHash);
 
     const receipt = await kernelAccountClient.waitForUserOperationReceipt({
       hash: userOpHash,
       timeout: 30000,
     });
 
+    console.log("User operation confirmed:", receipt);
+
     res.status(200).json({
-      message: "User operation batch sent using ZeroDev EIP-7702 + Para (pregen-based) with viem signer.",
+      message: "User operation batch sent using ZeroDev EIP-7702 + Para (session-based) with viem signer.",
       accountAddress: kernelAccount.address,
       originalEOA: viemParaAccount.address,
       userOpHash,
@@ -146,6 +161,10 @@ export async function zerodevEip7702SignHandler(req: Request, res: Response, nex
         transactionHash: receipt.receipt.transactionHash,
         blockNumber: receipt.receipt.blockNumber,
         gasUsed: receipt.receipt.gasUsed,
+      },
+      eip7702Info: {
+        note: "Your EOA has been temporarily upgraded to a smart account using EIP-7702",
+        sameAddress: kernelAccount.address === viemParaAccount.address,
       },
     });
   } catch (error) {

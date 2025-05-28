@@ -60,7 +60,10 @@ export async function alchemyEip7702SignHandler(req: Request, res: Response, nex
     const session = req.body.session as string | undefined;
 
     if (!session) {
-      res.status(400).send("Session is required.");
+      res.status(400).json({
+        error: "Missing session",
+        message: "Session is required.",
+      });
       return;
     }
 
@@ -71,11 +74,11 @@ export async function alchemyEip7702SignHandler(req: Request, res: Response, nex
     const env = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
 
     if (!paraApiKey || !alchemyApiKey || !alchemyGasPolicyId || !rpcUrl) {
-      res
-        .status(500)
-        .send(
-          "Missing required environment variables (PARA_API_KEY, ALCHEMY_API_KEY, ALCHEMY_GAS_POLICY_ID, ARBITRUM_SEPOLIA_RPC)."
-        );
+      res.status(500).json({
+        error: "Missing environment variables",
+        message:
+          "Missing required environment variables (PARA_API_KEY, ALCHEMY_API_KEY, ALCHEMY_GAS_POLICY_ID, ARBITRUM_SEPOLIA_RPC).",
+      });
       return;
     }
 
@@ -93,6 +96,8 @@ export async function alchemyEip7702SignHandler(req: Request, res: Response, nex
     });
 
     const walletClientSigner = new WalletClientSigner(viemClient, "para");
+
+    console.log("Creating Alchemy Modular Account V2 with EIP-7702 for EOA:", viemParaAccount.address);
 
     const alchemyClient = await createModularAccountV2Client({
       transport: alchemy({
@@ -119,11 +124,17 @@ export async function alchemyEip7702SignHandler(req: Request, res: Response, nex
       }),
     }));
 
+    console.log("Sending batch user operations with Alchemy EIP-7702...");
+
     const userOperationResult = await alchemyClient.sendUserOperation({
       uo: demoUserOperations,
     });
 
+    console.log("User operation sent:", userOperationResult);
+
     const txHash = await alchemyClient.waitForUserOperationTransaction(userOperationResult);
+
+    console.log("Transaction confirmed:", txHash);
 
     res.status(200).json({
       message: "Sent user operation using Alchemy + Para with EIP-7702 (session-based wallet, viem-based).",
@@ -131,10 +142,26 @@ export async function alchemyEip7702SignHandler(req: Request, res: Response, nex
       smartAccountAddress,
       userOperationResult,
       transactionHash: txHash,
-      note: "The EOA has been delegated to Modular Account V2 using EIP-7702. Future transactions will benefit from smart account features without changing the address.",
+      eip7702Info: {
+        note: "The EOA has been delegated to Modular Account V2 using EIP-7702. Future transactions will benefit from smart account features without changing the address.",
+        sameAddress: smartAccountAddress === eoaAddress,
+        provider: "Alchemy Account Kit",
+      },
     });
   } catch (error) {
-    console.error("Error in alchemyEIP7702SessionSignHandler:", error);
-    next(error);
+    console.error("Error in alchemyEip7702SignHandler:", error);
+
+    if (error instanceof Error) {
+      res.status(500).json({
+        error: "Alchemy EIP-7702 transaction failed",
+        message: error.message,
+        stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+      });
+    } else {
+      res.status(500).json({
+        error: "Unknown error occurred",
+        details: String(error),
+      });
+    }
   }
 }

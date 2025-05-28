@@ -144,18 +144,18 @@ const AuthFlowUI: React.FC = () => {
   };
 
   const getPayload = (apiId: string, authType: string) => {
-    // EIP-7702 routes only support pregen flow (email-based)
+    // EIP-7702 routes only support session flow
     if (apiId.includes("/eip7702")) {
-      return { email };
+      return { session };
     }
     // Regular routes support both session and pregen
     return authType === "session" ? { session } : { email };
   };
 
   const isApiCompatible = (apiId: string, authType: string) => {
-    // EIP-7702 routes only work with pregen flow
+    // EIP-7702 routes only work with session flow
     if (apiId.includes("/eip7702")) {
-      return authType === "pregen";
+      return authType === "session";
     }
     // All other APIs work with both flows
     return true;
@@ -171,8 +171,7 @@ const AuthFlowUI: React.FC = () => {
     if (!isApiCompatible(selectedAPI, authType)) {
       setResult({
         success: false,
-        message:
-          "EIP-7702 routes only support the Pre-Generated wallet flow. Please restart and select Pre-Generated flow.",
+        message: "EIP-7702 routes only support the Session flow. Please restart and select Session authentication.",
       });
       return;
     }
@@ -190,7 +189,7 @@ const AuthFlowUI: React.FC = () => {
     setError("");
     setResult(null);
 
-    const endpoint = getEndpoint(selectedAPI!, authType!);
+    const endpoint = getEndpoint(selectedAPI!, authType);
     const payload = getPayload(selectedAPI, authType);
 
     try {
@@ -233,9 +232,7 @@ const AuthFlowUI: React.FC = () => {
   };
 
   const getFilteredApiOptions = () => {
-    if (authType === "pregen") {
-      return apiOptions.filter((api) => !api.id.includes("/eip7702"));
-    }
+    // All flows now support all APIs
     return apiOptions;
   };
 
@@ -321,7 +318,7 @@ const AuthFlowUI: React.FC = () => {
                 <div>
                   <h3 className="font-medium">Pre-Generated Wallet Flow</h3>
                   <p className="text-sm text-gray-600">Server creates/uses wallet based on email</p>
-                  <p className="text-xs text-orange-600 mt-1">⚠ EIP-7702 not supported in pregen flow</p>
+                  <p className="text-xs text-blue-600 mt-1">✓ Supports all APIs</p>
                 </div>
                 <ArrowRight
                   className="text-gray-400"
