@@ -5,7 +5,7 @@ import 'dart:io';
 import 'dart:math';
 import 'package:test/test.dart';
 import 'package:appium_driver/async_io.dart';
-import 'package:dotenv/dotenv.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 // Test state management (similar to Swift TestConstants)
 String? savedEmail;
@@ -18,10 +18,10 @@ void main() {
     
     setUpAll(() async {
       // Load environment variables from .env file
-      final env = DotEnv()..load(['.env']);
+      await dotenv.load(fileName: '.env');
       
       // Check for API key in environment variables or .env file
-      final apiKey = Platform.environment['PARA_API_KEY'] ?? env['PARA_API_KEY'];
+      final apiKey = Platform.environment['PARA_API_KEY'] ?? dotenv.env['PARA_API_KEY'];
       if (apiKey == null || apiKey.isEmpty) {
         throw Exception('PARA_API_KEY must be set in environment variables or .env file');
       }
@@ -361,36 +361,37 @@ void main() {
       await Future.delayed(Duration(seconds: 2));
     }
     
-    Future<void> navigateToSolanaSigningScreen() async {
-      await navigateToTransactionScreen();
-      
-      // Click on Solana Transactions option
-      await clickTextElementByContent('Solana Transactions');
-      await Future.delayed(Duration(seconds: 2));
-    }
-    
-    Future<void> signTransaction() async {
-      // This assumes we're already on a signing screen
-      // Enter recipient and amount
-      final textFields = await driver.findElements(AppiumBy.className('XCUIElementTypeTextField')).toList();
-      if (textFields.length >= 2) {
-        // Enter recipient address (using a test address)
-        await textFields[0].click();
-        await textFields[0].sendKeys('0x71C7656EC7ab88b098defB751B7401B5f6d8976F');
-        await dismissKeyboard();
-        
-        // Enter amount
-        await textFields[1].click();
-        await textFields[1].sendKeys('0.001');
-        await dismissKeyboard();
-      }
-      
-      // Click Sign Transaction button
-      await clickButtonByText('Sign Transaction');
-      
-      // Wait for signing to complete
-      await Future.delayed(Duration(seconds: 5));
-    }
+    // Commented out unused methods to pass flutter analyze
+    // Future<void> navigateToSolanaSigningScreen() async {
+    //   await navigateToTransactionScreen();
+    //   
+    //   // Click on Solana Transactions option
+    //   await clickTextElementByContent('Solana Transactions');
+    //   await Future.delayed(Duration(seconds: 2));
+    // }
+    // 
+    // Future<void> signTransaction() async {
+    //   // This assumes we're already on a signing screen
+    //   // Enter recipient and amount
+    //   final textFields = await driver.findElements(AppiumBy.className('XCUIElementTypeTextField')).toList();
+    //   if (textFields.length >= 2) {
+    //     // Enter recipient address (using a test address)
+    //     await textFields[0].click();
+    //     await textFields[0].sendKeys('0x71C7656EC7ab88b098defB751B7401B5f6d8976F');
+    //     await dismissKeyboard();
+    //     
+    //     // Enter amount
+    //     await textFields[1].click();
+    //     await textFields[1].sendKeys('0.001');
+    //     await dismissKeyboard();
+    //   }
+    //   
+    //   // Click Sign Transaction button
+    //   await clickButtonByText('Sign Transaction');
+    //   
+    //   // Wait for signing to complete
+    //   await Future.delayed(Duration(seconds: 5));
+    // }
     
     Future<void> checkForAlert() async {
       try {
@@ -579,16 +580,14 @@ void main() {
       final window = await driver.window;
       final size = await window.size;
       
-      final startX = size.width / 2;
+      final centerX = size.width / 2;
       final startY = size.height / 3;
-      final endY = startY + 200;
       
-      await driver.touchActions()
-        .down(startX, startY)
-        .wait(100)
-        .moveTo(startX, endY)
-        .release()
-        .perform();
+      // Use simpler approach for pull-to-refresh
+      await driver.mouse.moveTo(xOffset: centerX.toInt(), yOffset: startY.toInt());
+      await driver.mouse.down();
+      await driver.mouse.moveTo(xOffset: centerX.toInt(), yOffset: (startY + 200).toInt());
+      await driver.mouse.up();
       
       // Wait for refresh to complete
       await Future.delayed(Duration(seconds: 5));
