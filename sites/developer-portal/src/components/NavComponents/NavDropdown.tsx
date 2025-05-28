@@ -62,7 +62,7 @@ export const NavDropdown = ({
             <div className="para:flex para:gap-2 para:items-center para:min-w-0">
               {selected.env ? (
                 <div className="para:size-6 para:flex para:items-center para:justify-center">
-                  <EnvIcon $environment={selected.env} />
+                  <EnvIcon environment={selected.env} />
                 </div>
               ) : (
                 <OrganizationAvatar
@@ -93,7 +93,7 @@ export const NavDropdown = ({
                 <div className="para:flex para:gap-2 para:items-center">
                   {o.env ? (
                     <div className="para:size-6 para:flex para:items-center para:justify-center">
-                      <EnvIcon $environment={o.env} />
+                      <EnvIcon environment={o.env} />
                     </div>
                   ) : (
                     <OrganizationAvatar

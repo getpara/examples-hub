@@ -2,7 +2,6 @@ import { CpslButton, CpslCard, CpslText } from '@getpara/react-components';
 import styled, { css } from 'styled-components';
 import { BRAND_COLORS, MOBILE_SIZE } from '../utils/constants';
 import { Environment } from '../types/environment';
-import { getKeyColor } from '../utils/apiKey';
 import { PropsWithChildren } from 'react';
 import { Card, cn } from '@getpara/react-component-library';
 
@@ -55,14 +54,6 @@ export const GradientText = styled(CpslText)`
   &::part(text-element) {
     color: transparent;
   }
-`;
-
-export const EnvIcon = styled.span<{ $environment: Environment }>`
-  width: 8px;
-  height: 8px;
-  border-radius: 8px;
-
-  background-color: ${({ $environment }) => getKeyColor($environment)};
 `;
 
 export const BaseCard = styled(CpslCard)`
@@ -124,4 +115,24 @@ export const FlatCard = ({ children, className, ...rest }: React.ComponentProps<
   <Card className={cn('para:shadow-none para:p-8 para:rounded-lg', className)} {...rest}>
     {children}
   </Card>
+);
+
+export const EnvIcon = ({
+  children,
+  className,
+  environment,
+  ...rest
+}: React.ComponentProps<'span'> & { environment: Environment }) => (
+  <span
+    className={cn(
+      'para:size-2 para:rounded-full para:bg-amber-500',
+      {
+        'para:bg-emerald-500': environment === Environment.PROD,
+      },
+      className,
+    )}
+    {...rest}
+  >
+    {children}
+  </span>
 );

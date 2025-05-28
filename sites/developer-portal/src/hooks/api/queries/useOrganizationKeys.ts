@@ -43,7 +43,7 @@ export const useGetOrganizationKey = (projectId: string, id: string, env: Enviro
   });
 };
 
-export const useGetAvailableKeyEnvs = (projectId: string) => {
+export const useGetAvailableKeyEnv = (projectId: string) => {
   const { data: plan } = useGetOrganizationSubscriptionPlan();
 
   return useOrganizationKeysQuery(
@@ -51,48 +51,19 @@ export const useGetAvailableKeyEnvs = (projectId: string) => {
     useCallback(
       data => {
         const unArchivedKeys = data.filter(d => !d.archived);
-        const availableOptions: Environment[] = [];
+        const env = ENV_VARS.environment as Environment;
+        const hasKey = !!unArchivedKeys.find(d => d.environment.toUpperCase() === env);
 
-        switch (ENV_VARS.environment as Environment) {
-          case Environment.PROD: {
-            const hasProdKey = !!unArchivedKeys.find(d => d.environment.toUpperCase() === Environment.PROD);
-            const hasBetaKey = !!unArchivedKeys.find(d => d.environment.toUpperCase() === Environment.BETA);
+        const isProdOrBeta = env === Environment.PROD || env === Environment.BETA;
 
-            if (!hasProdKey && plan?.canCreateProdKeys) {
-              availableOptions.push(Environment.PROD);
-            }
-            if (!hasBetaKey) {
-              availableOptions.push(Environment.BETA);
-            }
-            break;
-          }
-          case Environment.BETA: {
-            const hasBetaKey = !!unArchivedKeys.find(d => d.environment.toUpperCase() === Environment.BETA);
-            const hasSandboxKey = !!unArchivedKeys.find(d => d.environment.toUpperCase() === Environment.SANDBOX);
-
-            if (!hasBetaKey && plan?.canCreateProdKeys) {
-              availableOptions.push(Environment.BETA);
-            }
-            if (!hasSandboxKey) {
-              availableOptions.push(Environment.SANDBOX);
-            }
-            break;
-          }
-          default: {
-            const hasKey = !!unArchivedKeys.length;
-
-            if (!hasKey) {
-              availableOptions.push(ENV_VARS.environment as Environment);
-            }
-
-            // Always make sandbox an option on sandbox and dev envs for testing
-            availableOptions.push(Environment.SANDBOX);
-
-            break;
-          }
+        if (!isProdOrBeta) {
+          return env;
         }
 
-        return availableOptions;
+        if (!hasKey && plan?.canCreateProdKeys) {
+          return env;
+        }
+        return undefined;
       },
       [plan],
     ),

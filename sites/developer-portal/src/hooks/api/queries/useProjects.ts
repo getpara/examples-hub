@@ -3,12 +3,14 @@ import { Project } from '../../../types/api';
 import { getProjects } from '../../../api/projects/queries';
 import { useParams } from 'react-router-dom';
 import { useIsValidOrg } from '../../useIsValidOrgConfig';
+import { useGetSelectedOrganization } from './useOrganizations';
 
 export const PROJECTS_QUERY_KEY = 'projects';
 
 export const useProjectsQuery = <T>(select: (data: Project[]) => T) => {
   const { organizationId } = useParams();
   const isOrgValid = useIsValidOrg(organizationId);
+  const { data: org } = useGetSelectedOrganization();
 
   return useQuery({
     enabled: isOrgValid,
@@ -19,6 +21,12 @@ export const useProjectsQuery = <T>(select: (data: Project[]) => T) => {
       }
 
       const { data } = await getProjects(organizationId);
+
+      for (const project of data.projects) {
+        if (!project.iconUrl) {
+          project.iconUrl = org?.logoUrl;
+        }
+      }
 
       return data.projects;
     },

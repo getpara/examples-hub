@@ -155,12 +155,15 @@ export type ApiKeyOnboarding = {
 
 export type ApiKey = {
   id: string;
+  projectId: string;
+  organizationId: string;
   apiKey: string;
   secretApiKey: string;
   name: string;
   displayName: string;
   environment: Environment;
   createdAt: Date;
+  updatedAt: Date;
   verifyUrl: string | null;
   portalUrl: string | null;
   logoUrl: string | null;

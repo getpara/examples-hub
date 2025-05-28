@@ -62,7 +62,7 @@ export const UploadButton = ({
         value=""
         onChange={onInputChange}
         type="file"
-        accept="image/jpg,image/jpeg,image/png,image/gif"
+        accept="image/jpg,image/jpeg,image/png,image/gif,image/webp"
       />
     </div>
   );
