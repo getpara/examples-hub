@@ -76,7 +76,7 @@ struct WalletsView: View {
                         case .evm:
                             EVMWalletView(selectedWallet: wallet)
                         case .solana:
-                            SolanaWalletView()
+                            SolanaWalletView(selectedWallet: wallet)
                         case .cosmos:
                             CosmosWalletView()
                         }

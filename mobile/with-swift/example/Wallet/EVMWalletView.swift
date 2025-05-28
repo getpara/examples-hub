@@ -9,7 +9,7 @@ struct EVMWalletView: View {
     @EnvironmentObject var paraEvmSigner: ParaEvmSigner
     @EnvironmentObject var appRootManager: AppRootManager
     
-    let selectedWallet: Wallet
+    let selectedWallet: ParaSwift.Wallet
     
     @State private var messageToSign = ""
     @State private var result: (title: String, message: String)?
@@ -32,7 +32,7 @@ struct EVMWalletView: View {
         }
     }
     
-    init(selectedWallet: Wallet) {
+    init(selectedWallet: ParaSwift.Wallet) {
         self.selectedWallet = selectedWallet
         // Initialize web3 with error handling in the view
         if let url = URL(string: "https://sepolia.infura.io/v3/961364684c7346c080994baab1469ea8") {
@@ -384,7 +384,7 @@ private struct AlertItem: Identifiable {
 
 #Preview {
     let mockParaManager = ParaManager(environment: .sandbox, apiKey: "preview-key")
-    let mockWallet = Wallet(
+    let mockWallet = ParaSwift.Wallet(
         id: "preview-wallet-id",
         signer: "mock-signer",
         address: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",

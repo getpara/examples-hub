@@ -9,7 +9,7 @@ A simple example app demonstrating Para Swift SDK integration. For detailed setu
 
 ## Features Demonstrated
 
-- **Initialization:** Setting up `ParaManager`, `ParaEvmSigner`, and `MetaMaskConnector`.
+- **Initialization:** Setting up `ParaManager`, `ParaEvmSigner`, `ParaSolanaSigner`, and `MetaMaskConnector`.
 - **Configuration:** Loading API keys and environment settings securely (using environment variables).
 - **Authentication:**
   - Email + Passkey flow (`handleEmailAuth`) including verification.
@@ -18,12 +18,17 @@ A simple example app demonstrating Para Swift SDK integration. For detailed setu
   - Direct Passkey Login (`loginWithPasskey`).
   - External Wallet Login via MetaMask (`MetaMaskConnector.connect`).
 - **Session Management:** Basic app flow based on `ParaManager.sessionState`, logout.
-- **Wallet Management:** Creating EVM wallets (`createWallet`), fetching and displaying wallets (`fetchWallets`).
+- **Wallet Management:** Creating EVM/Solana/Cosmos wallets (`createWallet`), fetching and displaying wallets (`fetchWallets`).
 - **EVM Operations (`ParaEvmSigner`):**
   - Selecting a wallet (`selectWallet`).
   - Signing messages (`signMessage`).
   - Signing transactions (`signTransaction` - demonstrated via `sendTransaction`).
   - Sending transactions (`sendTransaction` using `EVMTransaction`).
+- **Solana Operations (`ParaSolanaSigner`):**
+  - Fetching SOL balance (`getBalance`).
+  - Signing arbitrary messages (`signArbitraryMessage`).
+  - Signing transactions (`signTransaction`).
+  - Sending transactions (`sendTransaction`).
 - **MetaMask Integration (`MetaMaskConnector`):**
   - Connecting to MetaMask (`connect`).
   - Handling deep links (`handleURL`).
@@ -142,6 +147,8 @@ PARA_DEV_JS_BRIDGE_URL           # Custom JS bridge URL for dev environment
 - User authentication with passkeys
 - Wallet management
 - EVM signing (using Sepolia testnet)
+- Solana signing and transaction operations
+- Multi-chain wallet support
 
 ## Beta Testing Credentials
 

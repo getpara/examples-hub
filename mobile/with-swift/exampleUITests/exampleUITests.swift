@@ -154,7 +154,13 @@ class ExampleUITests: XCTestCase {
         // 1. Login via email and wait for the wallets view
         loginWithEmailAndWaitForWalletsView()
         
-        // 2. Tap on the first wallet to navigate to EVMWalletView
+        // 2. Select EVM wallet type if not already selected
+        let evmSegment = app.buttons["EVM"]
+        if evmSegment.exists {
+            evmSegment.tap()
+        }
+        
+        // 3. Tap on the first wallet to navigate to EVMWalletView
         let firstWalletCell = app.cells.element(boundBy: 0)
         // Ensure the cell exists and is hittable before tapping
         // waitForWalletsView should ensure existence, but checking hittable is good practice
@@ -162,9 +168,46 @@ class ExampleUITests: XCTestCase {
         XCTAssertTrue(firstWalletCell.isHittable, "First wallet cell should be hittable")
         firstWalletCell.tap()
         
-        // 3. Verify we're on the EVM Wallet screen
+        // 4. Verify we're on the EVM Wallet screen
         let walletTitle = app.navigationBars["EVM Wallet"]
         XCTAssertTrue(walletTitle.waitForExistence(timeout: TestConstants.defaultTimeout), "EVM Wallet view navigation bar should appear after tapping wallet")
+    }
+    
+    private func navigateToSolanaWallet() {
+        // 1. Login via email and wait for the wallets view
+        loginWithEmailAndWaitForWalletsView()
+        
+        // 2. First create a Solana wallet if none exists
+        let solanaSegment = app.buttons["Solana"]
+        XCTAssertTrue(solanaSegment.waitForExistence(timeout: TestConstants.defaultTimeout), "Solana segment should exist")
+        solanaSegment.tap()
+        
+        // 3. Check if a Solana wallet exists, if not create one
+        let solanaWalletCells = app.cells
+        if solanaWalletCells.count == 0 {
+            // Create a Solana wallet first
+            let createButton = app.buttons["createWalletButton"]
+            XCTAssertTrue(createButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Create button should exist")
+            createButton.tap()
+            
+            // Select Solana wallet type
+            let solanaButton = app.buttons["solanaWalletButton"]
+            XCTAssertTrue(solanaButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Solana button should exist")
+            solanaButton.tap()
+            
+            // Wait for the new wallet to appear
+            XCTAssertTrue(solanaWalletCells.element(boundBy: 0).waitForExistence(timeout: TestConstants.longTimeout), "New Solana wallet should appear")
+        }
+        
+        // 4. Tap on the first Solana wallet to navigate to SolanaWalletView
+        let firstSolanaWalletCell = solanaWalletCells.element(boundBy: 0)
+        XCTAssertTrue(firstSolanaWalletCell.exists, "First Solana wallet cell should exist")
+        XCTAssertTrue(firstSolanaWalletCell.isHittable, "First Solana wallet cell should be hittable")
+        firstSolanaWalletCell.tap()
+        
+        // 5. Verify we're on the Solana Wallet screen
+        let walletTitle = app.navigationBars["Solana Wallet"]
+        XCTAssertTrue(walletTitle.waitForExistence(timeout: TestConstants.defaultTimeout), "Solana Wallet view navigation bar should appear after tapping wallet")
     }
     
     // MARK: - Test Methods
@@ -627,5 +670,139 @@ class ExampleUITests: XCTestCase {
         // Verify successful authentication by waiting for the wallets view
         waitForWalletsView()
     }
+    
+    // MARK: - Solana Wallet Tests
+    
+    func test17CreateSolanaWalletFlow() throws {
+        // Log in via email and wait for wallets view
+        loginWithEmailAndWaitForWalletsView()
+        
+        // Switch to Solana tab
+        let solanaSegment = app.buttons["Solana"]
+        XCTAssertTrue(solanaSegment.waitForExistence(timeout: TestConstants.defaultTimeout), "Solana segment should exist")
+        solanaSegment.tap()
+        
+        // Find and tap the create wallet button
+        let createButton = app.buttons["createWalletButton"]
+        XCTAssertTrue(createButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Create button should exist")
+        createButton.tap()
+        
+        // Select Solana wallet type
+        let solanaButton = app.buttons["solanaWalletButton"]
+        XCTAssertTrue(solanaButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Solana button should exist")
+        solanaButton.tap()
+        
+        // Wait for the new Solana wallet to appear in the list
+        let walletCells = app.cells
+        XCTAssertTrue(walletCells.element(boundBy: 0).waitForExistence(timeout: TestConstants.longTimeout), "New Solana wallet should appear in the list")
+        
+        // Verify that the new wallet is tappable
+        let newSolanaWalletCell = walletCells.element(boundBy: 0)
+        XCTAssertTrue(newSolanaWalletCell.isHittable, "New Solana wallet cell should be tappable")
+    }
+    
+    func test18CopySolanaWalletAddressFlow() throws {
+        navigateToSolanaWallet()
+        
+        // Find and tap the copy button using accessibility identifier
+        let copyButton = app.buttons["copyAddressButton"]
+        XCTAssertTrue(copyButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Copy address button should exist")
+        copyButton.tap()
+        
+        // Verify success alert appears
+        let alert = app.alerts.firstMatch
+        XCTAssertTrue(alert.waitForExistence(timeout: TestConstants.defaultTimeout), "Success alert should appear")
+        XCTAssertTrue(alert.staticTexts["Success"].exists, "Alert should have 'Success' title")
+        XCTAssertTrue(alert.staticTexts["Address copied to clipboard"].exists, "Alert should show success message")
+        
+        // Dismiss alert
+        alert.buttons["OK"].tap()
+    }
+    
+    func test19FetchSolanaBalanceFlow() throws {
+        navigateToSolanaWallet()
+        
+        // Wait for balance to appear automatically
+        let balanceText = app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'SOL'")).firstMatch
+        XCTAssertTrue(balanceText.waitForExistence(timeout: TestConstants.longTimeout), "SOL balance should appear")
+        
+        // Find and tap the refresh balance button using accessibility identifier
+        let refreshBalanceButton = app.buttons["refreshBalanceButton"]
+        XCTAssertTrue(refreshBalanceButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Balance refresh button should exist")
+        refreshBalanceButton.tap()
+        
+        // Wait briefly to ensure balance refreshes
+        sleep(2)
+        
+        // Verify balance text still exists after refresh
+        XCTAssertTrue(balanceText.exists, "SOL balance should still be visible after refresh")
+    }
+    
+    func test20SignSolanaMessageFlow() throws {
+        navigateToSolanaWallet()
+        
+        // Enter a message to sign
+        let messageField = app.textFields["Enter a message to sign"]
+        XCTAssertTrue(messageField.waitForExistence(timeout: TestConstants.defaultTimeout), "Message field should exist")
+        messageField.tap()
+        messageField.typeText("Hello, Solana blockchain!")
+        
+        // Tap the Sign Message button
+        let signMessageButton = app.buttons["Sign Message"]
+        XCTAssertTrue(signMessageButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Sign Message button should exist")
+        signMessageButton.tap()
+        
+        // Wait for the signing process to complete and verify success alert
+        let alert = app.alerts.firstMatch
+        XCTAssertTrue(alert.waitForExistence(timeout: TestConstants.longTimeout), "Alert should appear after signing")
+        
+        // Verify we got a success message, not an error
+        XCTAssertTrue(alert.staticTexts["Success"].exists, "Solana message signing should succeed")
+        XCTAssertFalse(alert.staticTexts["Error"].exists, "Solana message signing should not fail")
+        
+        // Dismiss alert
+        alert.buttons["OK"].tap()
+    }
+    
+    func test21SignSolanaTransactionFlow() throws {
+        navigateToSolanaWallet()
+        
+        // Tap the Sign Transaction button
+        let signTxButton = app.buttons["Sign Transaction"]
+        XCTAssertTrue(signTxButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Sign Transaction button should exist")
+        signTxButton.tap()
+        
+        // Wait for the signing process to complete and verify alert
+        let alert = app.alerts.firstMatch
+        XCTAssertTrue(alert.waitForExistence(timeout: TestConstants.longTimeout), "Alert should appear after signing")
+        
+        // Verify we got a success message, not an error
+        XCTAssertTrue(alert.staticTexts["Success"].exists, "Solana transaction signing should succeed")
+        XCTAssertFalse(alert.staticTexts["Error"].exists, "Solana transaction signing should not fail")
+        
+        // Dismiss alert
+        alert.buttons["OK"].tap()
+    }
+    
+    // Disabled until we find a way to fund the Solana wallet
+    //    func test22SendSolanaTransactionFlow() throws {
+    //        navigateToSolanaWallet()
+    //
+    //        // Tap the Send Transaction button
+    //        let sendTxButton = app.buttons["Send Transaction"]
+    //        XCTAssertTrue(sendTxButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Send Transaction button should exist")
+    //        sendTxButton.tap()
+    //
+    //        // Wait for the transaction process to complete and verify alert
+    //        let alert = app.alerts.firstMatch
+    //        XCTAssertTrue(alert.waitForExistence(timeout: TestConstants.longTimeout), "Alert should appear after transaction")
+    //
+    //        // Verify the transaction was successful. Fail the test if not.
+    //        XCTAssertTrue(alert.staticTexts["Success"].exists, "Expected Success alert for Solana transaction")
+    //        XCTAssertFalse(alert.staticTexts["Error"].exists, "Solana transaction failed with error alert")
+    //
+    //        // Dismiss alert
+    //        alert.buttons["OK"].tap()
+    //    }
 }
 
