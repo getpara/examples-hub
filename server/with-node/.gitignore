@@ -23,5 +23,3 @@ Thumbs.db
 *.db
 
 dist/
-
-test-ui

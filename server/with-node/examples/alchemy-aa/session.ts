@@ -1,12 +1,23 @@
 import type { NextFunction, Request, Response } from "express";
+
+import { alchemy } from "@account-kit/infra";
+import { createModularAccountAlchemyClient } from "@account-kit/smart-contracts";
+import { BatchUserOperationCallData, WalletClientSigner } from "@aa-sdk/core";
 import { Para as ParaServer, Environment, SuccessfulSignatureRes, hexStringToBase64 } from "@getpara/server-sdk";
 import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integration";
-import { hashMessage, http } from "viem";
-import type { WalletClient, LocalAccount, SignableMessage, Hash } from "viem";
-import { createModularAccountAlchemyClient } from "@alchemy/aa-alchemy";
-import { BatchUserOperationCallData, WalletClientSigner, arbitrumSepolia } from "@alchemy/aa-core";
-import { encodeFunctionData } from "viem";
-import Example from "../../artifacts/Example.json" with { type: "json" };
+
+import { arbitrumSepolia } from "viem/chains";
+import {
+  encodeFunctionData,
+  hashMessage,
+  http,
+  type Hash,
+  type LocalAccount,
+  type SignableMessage,
+  type WalletClient,
+} from "viem";
+
+import Example from "../../artifacts/Example.json";
 
 const EXAMPLE_CONTRACT_ADDRESS = "0x7920b6d8b07f0b9a3b96f238c64e022278db1419";
 const EXAMPLE_ABI = Example["contracts"]["contracts/Example.sol:Example"]["abi"];
@@ -72,23 +83,24 @@ export async function alchemySessionSignHandler(req: Request, res: Response, nex
     await para.importSession(session);
 
     const viemParaAccount: LocalAccount = createParaAccount(para);
+
+    viemParaAccount.signMessage = async ({ message }) => customSignMessage(para, message);
+
     const viemClient: WalletClient = createParaViemClient(para, {
       account: viemParaAccount,
       chain: arbitrumSepolia,
       transport: http(rpcUrl),
     });
 
-    viemClient.signMessage = async ({ message }) => customSignMessage(para, message);
-
     const walletClientSigner = new WalletClientSigner(viemClient, "para");
 
     const alchemyClient = await createModularAccountAlchemyClient({
-      apiKey: alchemyApiKey,
+      transport: alchemy({
+        apiKey: alchemyApiKey,
+      }),
       chain: arbitrumSepolia,
       signer: walletClientSigner,
-      gasManagerConfig: {
-        policyId: alchemyGasPolicyId,
-      },
+      policyId: alchemyGasPolicyId,
     });
 
     const demoUserOperations: BatchUserOperationCallData = Array.from({ length: 5 }, (_, i) => i + 1).map((x) => ({

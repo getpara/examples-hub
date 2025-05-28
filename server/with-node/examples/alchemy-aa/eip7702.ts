@@ -1,15 +1,13 @@
 import type { NextFunction, Request, Response } from "express";
 
-import { signerToEcdsaValidator } from "@zerodev/ecdsa-validator";
-import { createKernelAccount, createKernelAccountClient, createZeroDevPaymasterClient } from "@zerodev/sdk";
-import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants";
-
-import { Para as ParaServer, Environment, hexStringToBase64, SuccessfulSignatureRes } from "@getpara/server-sdk";
+import { alchemy } from "@account-kit/infra";
+import { createModularAccountV2Client } from "@account-kit/smart-contracts";
+import { BatchUserOperationCallData, WalletClientSigner } from "@aa-sdk/core";
+import { Para as ParaServer, Environment, SuccessfulSignatureRes, hexStringToBase64 } from "@getpara/server-sdk";
 import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integration";
 
 import { arbitrumSepolia } from "viem/chains";
 import {
-  createPublicClient,
   encodeFunctionData,
   hashMessage,
   http,
@@ -57,27 +55,26 @@ async function customSignMessage(para: ParaServer, message: SignableMessage): Pr
   return `0x${signature}`;
 }
 
-export async function zerodevSessionSignHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
+export async function alchemyEip7702SignHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const session = req.body.session as string | undefined;
 
     if (!session) {
-      res.status(400).send("Provide `session` in the request body.");
+      res.status(400).send("Session is required.");
       return;
     }
 
     const paraApiKey = process.env.PARA_API_KEY;
-    const projectId = process.env.ZERODEV_PROJECT_ID;
-    const bundlerRpc = process.env.ZERODEV_BUNDLER_RPC;
-    const paymasterRpc = process.env.ZERODEV_PAYMASTER_RPC;
+    const alchemyApiKey = process.env.ALCHEMY_API_KEY;
+    const alchemyGasPolicyId = process.env.ALCHEMY_GAS_POLICY_ID;
     const rpcUrl = process.env.ARBITRUM_SEPOLIA_RPC;
     const env = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
 
-    if (!paraApiKey || !projectId || !bundlerRpc || !paymasterRpc || !rpcUrl) {
+    if (!paraApiKey || !alchemyApiKey || !alchemyGasPolicyId || !rpcUrl) {
       res
         .status(500)
         .send(
-          "Missing required environment variables (PARA_API_KEY, ZERODEV_PROJECT_ID, ZERODEV_BUNDLER_RPC, ZERODEV_PAYMASTER_RPC, ARBITRUM_SEPOLIA_RPC)."
+          "Missing required environment variables (PARA_API_KEY, ALCHEMY_API_KEY, ALCHEMY_GAS_POLICY_ID, ARBITRUM_SEPOLIA_RPC)."
         );
       return;
     }
@@ -95,44 +92,26 @@ export async function zerodevSessionSignHandler(req: Request, res: Response, nex
       transport: http(rpcUrl),
     });
 
-    const publicClient = createPublicClient({
+    const walletClientSigner = new WalletClientSigner(viemClient, "para");
+
+    const alchemyClient = await createModularAccountV2Client({
+      transport: alchemy({
+        apiKey: alchemyApiKey,
+      }),
       chain: arbitrumSepolia,
-      transport: http(rpcUrl),
+      signer: walletClientSigner,
+      mode: "7702",
+      policyId: alchemyGasPolicyId,
     });
 
-    const signer = viemParaAccount;
-    const entryPoint = getEntryPoint("0.7");
-    const kernelVersion = KERNEL_V3_1;
+    const eoaAddress = viemParaAccount.address;
+    console.log("EOA Address:", eoaAddress);
 
-    const ecdsaValidator = await signerToEcdsaValidator(viemClient, {
-      signer,
-      entryPoint,
-      kernelVersion,
-    });
+    const smartAccountAddress = alchemyClient.account.address;
+    console.log("Smart Account Address (should match EOA):", smartAccountAddress);
 
-    const account = await createKernelAccount(publicClient, {
-      plugins: { sudo: ecdsaValidator },
-      entryPoint,
-      kernelVersion,
-    });
-
-    const zerodevPaymaster = createZeroDevPaymasterClient({
-      chain: arbitrumSepolia,
-      transport: http(paymasterRpc),
-    });
-
-    const kernelClient = createKernelAccountClient({
-      account,
-      chain: arbitrumSepolia,
-      bundlerTransport: http(bundlerRpc),
-      paymaster: {
-        getPaymasterData: (userOperation) => zerodevPaymaster.sponsorUserOperation({ userOperation }),
-      },
-    });
-
-    const calls = Array.from({ length: 5 }, (_, i) => i + 1).map((x) => ({
-      to: EXAMPLE_CONTRACT_ADDRESS as `0x${string}`,
-      value: 0n,
+    const demoUserOperations: BatchUserOperationCallData = Array.from({ length: 5 }, (_, i) => i + 1).map((x) => ({
+      target: EXAMPLE_CONTRACT_ADDRESS,
       data: encodeFunctionData({
         abi: EXAMPLE_ABI,
         functionName: "changeX",
@@ -140,22 +119,22 @@ export async function zerodevSessionSignHandler(req: Request, res: Response, nex
       }),
     }));
 
-    const userOpHash = await kernelClient.sendUserOperation({
-      callData: await kernelClient.account.encodeCalls(calls),
+    const userOperationResult = await alchemyClient.sendUserOperation({
+      uo: demoUserOperations,
     });
 
-    await kernelClient.waitForUserOperationReceipt({
-      hash: userOpHash,
-      timeout: 30000,
-    });
+    const txHash = await alchemyClient.waitForUserOperationTransaction(userOperationResult);
 
     res.status(200).json({
-      message: "User operation batch sent using ZeroDev + Para (pregen-based) with viem signer.",
-      accountAddress: kernelClient.account.address,
-      userOpHash,
+      message: "Sent user operation using Alchemy + Para with EIP-7702 (session-based wallet, viem-based).",
+      eoaAddress,
+      smartAccountAddress,
+      userOperationResult,
+      transactionHash: txHash,
+      note: "The EOA has been delegated to Modular Account V2 using EIP-7702. Future transactions will benefit from smart account features without changing the address.",
     });
   } catch (error) {
-    console.error("Error in zerodevSessionSignHandler:", error);
+    console.error("Error in alchemyEIP7702SessionSignHandler:", error);
     next(error);
   }
 }

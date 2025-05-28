@@ -1,11 +1,11 @@
 import type { NextFunction, Request, Response } from "express";
 
-import { signerToEcdsaValidator } from "@zerodev/ecdsa-validator";
-import { createKernelAccount, createKernelAccountClient, createZeroDevPaymasterClient } from "@zerodev/sdk";
-import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants";
+import { create7702KernelAccount, create7702KernelAccountClient } from "@zerodev/ecdsa-validator";
+import { createZeroDevPaymasterClient } from "@zerodev/sdk";
+import { getEntryPoint, KERNEL_V3_3 } from "@zerodev/sdk/constants";
 
 import { Para as ParaServer, Environment, hexStringToBase64, SuccessfulSignatureRes } from "@getpara/server-sdk";
-import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integration";
+import { createParaAccount } from "@getpara/viem-v2-integration";
 
 import { arbitrumSepolia } from "viem/chains";
 import {
@@ -16,7 +16,6 @@ import {
   type Hash,
   type LocalAccount,
   type SignableMessage,
-  type WalletClient,
 } from "viem";
 
 import Example from "../../artifacts/Example.json";
@@ -57,7 +56,7 @@ async function customSignMessage(para: ParaServer, message: SignableMessage): Pr
   return `0x${signature}`;
 }
 
-export async function zerodevSessionSignHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
+export async function zerodevEip7702SignHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const session = req.body.session as string | undefined;
 
@@ -89,45 +88,34 @@ export async function zerodevSessionSignHandler(req: Request, res: Response, nex
 
     viemParaAccount.signMessage = async ({ message }) => customSignMessage(para, message);
 
-    const viemClient: WalletClient = createParaViemClient(para, {
-      account: viemParaAccount,
-      chain: arbitrumSepolia,
-      transport: http(rpcUrl),
-    });
-
     const publicClient = createPublicClient({
       chain: arbitrumSepolia,
       transport: http(rpcUrl),
     });
 
-    const signer = viemParaAccount;
+    // EIP-7702 Configuration
+    const kernelVersion = KERNEL_V3_3; // Use latest kernel version for 7702
     const entryPoint = getEntryPoint("0.7");
-    const kernelVersion = KERNEL_V3_1;
 
-    const ecdsaValidator = await signerToEcdsaValidator(viemClient, {
-      signer,
+    // Create 7702 Kernel Account (ZeroDev will automatically create the authorization)
+    // The viemParaAccount is the EOA we want to upgrade to a smart account
+    const kernelAccount = await create7702KernelAccount(publicClient, {
+      signer: viemParaAccount,
       entryPoint,
       kernelVersion,
     });
 
-    const account = await createKernelAccount(publicClient, {
-      plugins: { sudo: ecdsaValidator },
-      entryPoint,
-      kernelVersion,
-    });
-
-    const zerodevPaymaster = createZeroDevPaymasterClient({
+    const paymasterClient = createZeroDevPaymasterClient({
       chain: arbitrumSepolia,
       transport: http(paymasterRpc),
     });
 
-    const kernelClient = createKernelAccountClient({
-      account,
+    const kernelAccountClient = create7702KernelAccountClient({
+      account: kernelAccount,
       chain: arbitrumSepolia,
       bundlerTransport: http(bundlerRpc),
-      paymaster: {
-        getPaymasterData: (userOperation) => zerodevPaymaster.sponsorUserOperation({ userOperation }),
-      },
+      paymaster: paymasterClient,
+      client: publicClient,
     });
 
     const calls = Array.from({ length: 5 }, (_, i) => i + 1).map((x) => ({
@@ -140,22 +128,40 @@ export async function zerodevSessionSignHandler(req: Request, res: Response, nex
       }),
     }));
 
-    const userOpHash = await kernelClient.sendUserOperation({
-      callData: await kernelClient.account.encodeCalls(calls),
+    const userOpHash = await kernelAccountClient.sendUserOperation({
+      calls,
     });
 
-    await kernelClient.waitForUserOperationReceipt({
+    const receipt = await kernelAccountClient.waitForUserOperationReceipt({
       hash: userOpHash,
       timeout: 30000,
     });
 
     res.status(200).json({
-      message: "User operation batch sent using ZeroDev + Para (pregen-based) with viem signer.",
-      accountAddress: kernelClient.account.address,
+      message: "User operation batch sent using ZeroDev EIP-7702 + Para (pregen-based) with viem signer.",
+      accountAddress: kernelAccount.address,
+      originalEOA: viemParaAccount.address,
       userOpHash,
+      receipt: {
+        transactionHash: receipt.receipt.transactionHash,
+        blockNumber: receipt.receipt.blockNumber,
+        gasUsed: receipt.receipt.gasUsed,
+      },
     });
   } catch (error) {
-    console.error("Error in zerodevSessionSignHandler:", error);
-    next(error);
+    console.error("Error in zerodevEip7702SignHandler:", error);
+
+    if (error instanceof Error) {
+      res.status(500).json({
+        error: "EIP-7702 transaction failed",
+        message: error.message,
+        stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+      });
+    } else {
+      res.status(500).json({
+        error: "Unknown error occurred",
+        details: String(error),
+      });
+    }
   }
 }

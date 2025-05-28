@@ -1,18 +1,27 @@
 import type { NextFunction, Request, Response } from "express";
 
-import { Para as ParaServer, Environment, hexStringToBase64, SuccessfulSignatureRes } from "@getpara/server-sdk";
-import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integration";
-
-import { http, encodeFunctionData, hashMessage, SignableMessage, Hash, LocalAccount, WalletClient } from "viem";
-import { arbitrumSepolia } from "viem/chains";
-
 import { signerToEcdsaValidator } from "@zerodev/ecdsa-validator";
 import { createKernelAccount, createKernelAccountClient, createZeroDevPaymasterClient } from "@zerodev/sdk";
 import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants";
 
+import { Para as ParaServer, Environment, hexStringToBase64, SuccessfulSignatureRes } from "@getpara/server-sdk";
+import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integration";
+
+import { arbitrumSepolia } from "viem/chains";
+import {
+  createPublicClient,
+  encodeFunctionData,
+  hashMessage,
+  http,
+  type Hash,
+  type LocalAccount,
+  type SignableMessage,
+  type WalletClient,
+} from "viem";
+
+import Example from "../../artifacts/Example.json";
 import { getKeyShareInDB } from "../../db/keySharesDB.js";
 import { decrypt } from "../../utils/encryption-utils.js";
-import Example from "../../artifacts/Example.json" with { type: "json" };
 
 const EXAMPLE_CONTRACT_ADDRESS = "0x7920b6d8b07f0b9a3b96f238c64e022278db1419";
 const EXAMPLE_ABI = Example["contracts"]["contracts/Example.sol:Example"]["abi"];
@@ -101,16 +110,22 @@ export async function zerodevPregenSignHandler(req: Request, res: Response, next
       transport: http(rpcUrl),
     });
 
+    const publicClient = createPublicClient({
+      chain: arbitrumSepolia,
+      transport: http(rpcUrl),
+    });
+
+    const signer = viemParaAccount;
     const entryPoint = getEntryPoint("0.7");
     const kernelVersion = KERNEL_V3_1;
 
     const ecdsaValidator = await signerToEcdsaValidator(viemClient, {
-      signer: viemParaAccount,
+      signer,
       entryPoint,
       kernelVersion,
     });
 
-    const account = await createKernelAccount(viemClient, {
+    const account = await createKernelAccount(publicClient, {
       plugins: { sudo: ecdsaValidator },
       entryPoint,
       kernelVersion,
