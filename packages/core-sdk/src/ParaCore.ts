@@ -2175,7 +2175,6 @@ export abstract class ParaCore implements CoreInterface {
             }
             onPoll?.();
           } catch (err) {
-            console.error(err);
             onPoll?.();
           }
         }
