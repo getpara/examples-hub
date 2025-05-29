@@ -11,7 +11,9 @@
     "dev": "yarn build:dev && yarn dev:server"
   },
   "dependencies": {
-    "@alchemy/aa-alchemy": "3.19.0",
+    "@aa-sdk/core": "^4.35.1",
+    "@account-kit/infra": "^4.35.1",
+    "@account-kit/smart-contracts": "^4.35.1",
     "@cosmjs/stargate": "0.33.1",
     "@ethereumjs/rlp": "5.0.2",
     "@getpara/cosmjs-v0-integration": "1.16.0",
@@ -20,15 +22,15 @@
     "@getpara/solana-web3.js-v1-integration": "1.16.0",
     "@getpara/viem-v2-integration": "1.16.0",
     "@solana/web3.js": "1.98.0",
-    "@zerodev/ecdsa-validator": "5.4.5",
-    "@zerodev/sdk": "5.4.28",
+    "@zerodev/ecdsa-validator": "5.4.9",
+    "@zerodev/sdk": "5.4.36",
     "cosmjs-types": "^0.9.0",
-    "dotenv": "16.4.7",
-    "ethers": "6.13.5",
+    "dotenv": "16.5.0",
+    "ethers": "6.14.3",
     "express": "4.21.2",
     "sqlite": "5.1.1",
     "sqlite3": "5.1.7",
-    "viem": "2.28.0"
+    "viem": "2.30.5"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
@@ -49,7 +51,6 @@
     "typescript": "^5.0.0"
   },
   "resolutions": {
-    "viem": "2.28.0",
     "@solana/web3.js": "1.98.0"
   }
 }
