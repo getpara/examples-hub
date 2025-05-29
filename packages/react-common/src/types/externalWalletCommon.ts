@@ -62,6 +62,7 @@ export enum SolanaWallet {
   PHANTOM = 'PHANTOM',
   GLOW = 'GLOW',
   BACKPACK = 'BACKPACK',
+  SOLFLARE = 'SOLFLARE',
 }
 
 export enum CosmosWallet {

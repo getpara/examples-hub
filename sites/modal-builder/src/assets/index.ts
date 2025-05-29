@@ -29,3 +29,4 @@ export { default as LeapIcon } from './leap.svg';
 export { default as KeplrIcon } from './keplr.svg';
 export { default as RabbyIcon } from './rabby.svg';
 export { default as SafeIcon } from './safe.svg';
+export { default as SolflareIcon } from './solana.svg';

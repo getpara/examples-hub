@@ -25,6 +25,7 @@ import {
   KeplrIcon,
   RabbyIcon,
   SafeIcon,
+  SolflareIcon,
 } from '../assets';
 import {
   AuthMethod,
@@ -64,6 +65,7 @@ export const EXTERNAL_WALLET_CONFIGS: Partial<Record<CustomExternalWallet, Dragg
   [ExternalWallet.PHANTOM]: { logo: PhantomIcon, label: 'Phantom' },
   [ExternalWallet.GLOW]: { logo: GlowIcon, label: 'Glow' },
   [ExternalWallet.BACKPACK]: { logo: BackpackIcon, label: 'Backpack' },
+  [ExternalWallet.SOLFLARE]: { logo: SolflareIcon, label: 'Solflare' },
   [ExternalWallet.LEAP]: { logo: LeapIcon, label: 'Leap' },
   [ExternalWallet.KEPLR]: { logo: KeplrIcon, label: 'Keplr' },
 };
