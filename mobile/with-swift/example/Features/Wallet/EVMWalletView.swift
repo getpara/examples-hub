@@ -6,7 +6,6 @@ import BigInt
 
 struct EVMWalletView: View {
     @EnvironmentObject var paraManager: ParaManager
-    @EnvironmentObject var paraEvmSigner: ParaEvmSigner
     @EnvironmentObject var appRootManager: AppRootManager
     
     let selectedWallet: ParaSwift.Wallet
@@ -19,7 +18,12 @@ struct EVMWalletView: View {
     @State private var isLoading = false
     @State private var balance: String?
     
+    @State private var paraEvmSigner: ParaEvmSigner?
+    
     private let web3: Web3
+    
+    // Sepolia RPC URL (testnet for testing)
+    private let rpcUrl = "https://sepolia.infura.io/v3/961364684c7346c080994baab1469ea8"
     
     // Helper function to measure operation time
     private func measureTime(_ operation: () async throws -> Void) async -> (TimeInterval, Error?) {
@@ -63,11 +67,15 @@ struct EVMWalletView: View {
     
     private func signTransaction() {
         guard let transaction = createTransaction(value: "1000000000") else { return }
+        guard let signer = paraEvmSigner else {
+            result = ("Error", "EVM signer not initialized")
+            return
+        }
         
         isLoading = true
         Task {
             let (duration, error) = await measureTime {
-                try await paraEvmSigner.signTransaction(transactionB64: transaction.b64Encoded())
+                try await signer.signTransaction(transactionB64: transaction.b64Encoded())
             }
             
             if let error = error {
@@ -81,6 +89,10 @@ struct EVMWalletView: View {
     
     private func sendTransaction() {
         guard let transaction = createTransaction(value: "100000000000000") else { return }
+        guard let signer = paraEvmSigner else {
+            result = ("Error", "EVM signer not initialized")
+            return
+        }
         
         // Check if we have balance info and sufficient funds
         if let balanceString = balance {
@@ -109,7 +121,7 @@ struct EVMWalletView: View {
         isLoading = true
         Task {
             let (duration, error) = await measureTime {
-                try await paraEvmSigner.sendTransaction(transactionB64: transaction.b64Encoded())
+                try await signer.sendTransaction(transactionB64: transaction.b64Encoded())
             }
             
             if let error = error {
@@ -419,10 +431,22 @@ struct EVMWalletView: View {
             Task {
                 isLoading = true
                 do {
-                    try await paraEvmSigner.selectWallet(walletId: selectedWallet.id)
-                    fetchBalance()
+                    // Initialize Para EVM signer
+                    let signer = try ParaEvmSigner(
+                        paraManager: paraManager,
+                        rpcUrl: rpcUrl,
+                        walletId: nil
+                    )
+                    
+                    // Select the wallet for this signer
+                    try await signer.selectWallet(walletId: selectedWallet.id)
+                    
+                    await MainActor.run {
+                        self.paraEvmSigner = signer
+                        fetchBalance()
+                    }
                 } catch {
-                    result = ("Error", "Failed to select wallet: \(error.localizedDescription)")
+                    result = ("Error", "Failed to initialize EVM signer: \(error.localizedDescription)")
                 }
                 isLoading = false
             }
@@ -459,11 +483,6 @@ private struct AlertItem: Identifiable {
     NavigationStack {
         EVMWalletView(selectedWallet: mockWallet)
             .environmentObject(mockParaManager)
-            .environmentObject(try! ParaEvmSigner(
-                paraManager: mockParaManager,
-                rpcUrl: "https://sepolia.infura.io/v3/961364684c7346c080994baab1469ea8",
-                walletId: mockWallet.id
-            ))
             .environmentObject(AppRootManager())
     }
 }
