@@ -4,6 +4,9 @@ import { coreMethodHandlers, bridgeMethodHandlers } from './bridgeMethodHandlers
 import { BridgeResponse, MessageArguments, Platform } from './types';
 import { ParaBridge } from './classes/ParaBridge';
 
+// Immediate console log to verify bridge is loaded
+console.log('[BRIDGE] Bridge script loaded at', new Date().toISOString());
+
 let platform: Platform;
 let version: string | undefined;
 
@@ -52,16 +55,20 @@ function logNetworkInformation() {
 
 window.addEventListener('message', event => {
   try {
+    console.log('[BRIDGE] Received message from event:', JSON.stringify(event.data, null, 2));
     logger.info('Received message from event:', event.data);
     const data = event.data;
 
     switch (data.messageType) {
       case 'Para#init': {
+        console.log('[BRIDGE] Para#init received');
         logNetworkInformation();
 
+        console.log('[BRIDGE] Initializing Para with args:', JSON.stringify(data.arguments, null, 2));
         logger.info('Initializing Para with args:', data.arguments);
         initPara(data.arguments);
 
+        console.log('[BRIDGE] Para initialized successfully. Platform:', platform, 'Version:', version);
         logger.info('Para initialized successfully. Platform:', platform, 'Version:', version);
         sendResponse(data.messageType, data.requestId, true);
 
@@ -83,6 +90,7 @@ window.addEventListener('message', event => {
 
 function sendResponse(method: string, requestId: string, responseData: any, error?: string) {
   const payload: BridgeResponse = { method, requestId, responseData, error };
+  console.log('[BRIDGE] Sending response:', JSON.stringify(payload, null, 2));
   logger.info('Sending response:', payload);
   switch (platform) {
     case Platform.flutter:
@@ -95,21 +103,26 @@ function sendResponse(method: string, requestId: string, responseData: any, erro
 }
 
 function initPara({ environment, apiKey, isPasskeySupported, ...metadata }: MessageArguments<'Para#init'>) {
+  logger.info('initPara called with:', { environment, apiKey, isPasskeySupported, metadata });
   try {
     if (window['para'] != null) {
+      logger.warn('Para already initialized, aborting init.');
       throw new Error('Para already initialized');
     }
+    logger.info('Creating ParaBridge instance...');
     const para = new ParaBridge(environment as Environment, apiKey, {
       disableWorkers: false,
       disableWebSockets: false, // should this be true?
       isPasskeySupported: isPasskeySupported === false ? false : true,
     });
 
+    logger.info('Calling para.init()...');
     para.init();
     window['para'] = para;
 
     platform = Platform[metadata.platform ?? 'flutter'];
     version = metadata.version;
+    logger.info('ParaBridge initialized. Platform:', platform, 'Version:', version);
   } catch (err) {
     const errStr = formatError(err);
     logger.error('Error initializing Para:', errStr);
