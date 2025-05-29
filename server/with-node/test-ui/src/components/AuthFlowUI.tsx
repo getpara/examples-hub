@@ -330,7 +330,7 @@ const AuthFlowUI: React.FC = () => {
                 disabled={loading}
                 className="w-full p-4 bg-white border-2 border-gray-200 rounded-lg flex items-center justify-between hover:border-blue-500 transition-colors disabled:opacity-50">
                 <div>
-                  <h3 className="font-medium">Session Flow</h3>
+                  <h3 className="font-medium">Session Flow Client</h3>
                   <p className="text-sm text-gray-600">Client authenticates via email popup</p>
                   <p className="text-xs text-blue-600 mt-1">✓ Supports all APIs including EIP-7702</p>
                 </div>
@@ -482,7 +482,7 @@ const AuthFlowUI: React.FC = () => {
                       onClick={callSelectedAPI}
                       disabled={loading}
                       className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center">
-                      {`Call ${getApiDisplayName(selectedAPI)} Again`}
+                      {`Call ${getApiDisplayName(selectedAPI)} API Again`}
                     </button>
                   </div>
                 )}
@@ -501,7 +501,7 @@ const AuthFlowUI: React.FC = () => {
                       onClick={callSelectedAPI}
                       disabled={loading}
                       className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center">
-                      {`Call ${getApiDisplayName(selectedAPI)}`}
+                      {`Call ${getApiDisplayName(selectedAPI)} API`}
                     </button>
                   </div>
                 )}
