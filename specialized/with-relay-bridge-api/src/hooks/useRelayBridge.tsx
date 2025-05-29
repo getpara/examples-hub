@@ -119,7 +119,7 @@ export function useRelayBridge() {
 
         wallet = adaptSolanaWallet(
           originClients.address,
-          originConfig.chainId,
+          originConfig.chainId as number,
           originClients.connection,
           async (transaction, options) => {
             const signature = await originClients.signer!.sendTransaction(transaction, options);
