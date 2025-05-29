@@ -13,7 +13,7 @@ export type SupportedNetwork = (typeof SUPPORTED_NETWORKS)[number];
 type NetworkConfig = {
   name: string;
   icon: string;
-  chainId: number | string;
+  chainId: number;
   usdcContractAddress: string;
   rpcUrl: string;
   networkType: "mainnet" | "testnet" | "devnet";
