@@ -5,6 +5,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   # Node.js settings
   NODE_OPTIONS: "--max-old-space-size=4096"
@@ -56,6 +60,36 @@ env:
   VITE_IPFS_GATEWAY: "https://ipfs.io/ipfs/"
 
 jobs:
+  example-hub-e2e-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout monorepo
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.19.0"
+
+      - name: Install packages
+        run: yarn install
+
+      - name: Install Playwright Browsers
+        run: npx playwright install chromium
+
+      - name: Run Examples Hub E2Es
+        shell: bash
+        run: xvfb-run yarn e2e-examples-hub-script
+
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 1
+
   build-web-react-nextjs:
     runs-on: ubuntu-latest
     env:
