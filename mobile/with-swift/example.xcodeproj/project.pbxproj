@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8F4302572DE8DE9000186768 /* EVMWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F4302562DE8DE9000186768 /* EVMWalletView.swift */; };
 		8F6AE66A2DC151040098F76B /* ChooseSignupMethodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F6AE6692DC151040098F76B /* ChooseSignupMethodView.swift */; };
 		8FA007832D57EB0D009EF0C3 /* ParaConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA007812D57EB0D009EF0C3 /* ParaConfig.swift */; };
 		8FA007862D57F1AA009EF0C3 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA007842D57F1AA009EF0C3 /* Extensions.swift */; };
@@ -30,7 +31,6 @@
 		E8F93B332C21EBEE006AA3F6 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E8F93B322C21EBEE006AA3F6 /* Preview Assets.xcassets */; };
 		E8F93B3E2C21ECFB006AA3F6 /* AuthOptionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8F93B3D2C21ECFB006AA3F6 /* AuthOptionsView.swift */; };
 		E8F93B402C21ED00006AA3F6 /* VerifyEmailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8F93B3F2C21ED00006AA3F6 /* VerifyEmailView.swift */; };
-		E8F93B422C21ED05006AA3F6 /* EVMWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8F93B412C21ED05006AA3F6 /* EVMWalletView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,6 +44,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8F4302562DE8DE9000186768 /* EVMWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EVMWalletView.swift; sourceTree = "<group>"; };
 		8F6AE6692DC151040098F76B /* ChooseSignupMethodView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChooseSignupMethodView.swift; sourceTree = "<group>"; };
 		8F924CB92D824A1700938496 /* Example.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; name = Example.xctestplan; path = exampleUITests/Example.xctestplan; sourceTree = "<group>"; };
 		8FA007812D57EB0D009EF0C3 /* ParaConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParaConfig.swift; sourceTree = "<group>"; };
@@ -69,7 +70,6 @@
 		E8F93B322C21EBEE006AA3F6 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		E8F93B3D2C21ECFB006AA3F6 /* AuthOptionsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthOptionsView.swift; sourceTree = "<group>"; };
 		E8F93B3F2C21ED00006AA3F6 /* VerifyEmailView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VerifyEmailView.swift; sourceTree = "<group>"; };
-		E8F93B412C21ED05006AA3F6 /* EVMWalletView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EVMWalletView.swift; sourceTree = "<group>"; };
 		E8F93B432C21ED67006AA3F6 /* example.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = example.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -133,9 +133,9 @@
 			isa = PBXGroup;
 			children = (
 				E8315DD72D5548F100FFF8C8 /* WalletsView.swift */,
-				E8F93B412C21ED05006AA3F6 /* EVMWalletView.swift */,
 				E8315DD92D55717300FFF8C8 /* SolanaWalletView.swift */,
 				E8315DDB2D55717F00FFF8C8 /* CosmosWalletView.swift */,
+				8F4302562DE8DE9000186768 /* EVMWalletView.swift */,
 			);
 			path = Wallet;
 			sourceTree = "<group>";
@@ -393,9 +393,9 @@
 				E8315DDA2D55717300FFF8C8 /* SolanaWalletView.swift in Sources */,
 				E8F93B402C21ED00006AA3F6 /* VerifyEmailView.swift in Sources */,
 				E8C5B8662D272DCD00B151C4 /* VerifyPhoneView.swift in Sources */,
-				E8F93B422C21ED05006AA3F6 /* EVMWalletView.swift in Sources */,
 				8FC8B8FD2D8B7AE10046C3DC /* LaunchView.swift in Sources */,
 				E8315DDC2D55717F00FFF8C8 /* CosmosWalletView.swift in Sources */,
+				8F4302572DE8DE9000186768 /* EVMWalletView.swift in Sources */,
 				E8F93B2C2C21EBED006AA3F6 /* ExampleApp.swift in Sources */,
 				E8F93B3E2C21ECFB006AA3F6 /* AuthOptionsView.swift in Sources */,
 				8FA007882D581F0D009EF0C3 /* ExternalWalletAuthView.swift in Sources */,
