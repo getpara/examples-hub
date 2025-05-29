@@ -1,0 +1,16 @@
+{
+  "name": "examples-hub",
+  "dependencies": {
+    "@tanstack/react-query": "^5.74.4"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.52.0",
+    "@types/node": "^22.15.21",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "e2e-examples-hub-script": "ts-node e2e/scripts/runExampleHubTests.ts",
+    "single-example-hub-e2e": "playwright test --headed --config=e2e/example-hub-playwright.config.ts"
+  }
+}
