@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { StepIndicator } from "@/components/StepIndicator";
 import { AlertCircle } from "lucide-react";
-import { SupportedNetwork } from "@/constants";
 
 interface Network {
   name: string;
@@ -25,28 +24,7 @@ interface TransactionProcessingProps {
   transactionState: TransactionState;
   onReset: () => void;
   errorMessage?: string;
-  originNetworkKey: SupportedNetwork | null;
 }
-
-// Helper function to get explorer URL based on network
-const getExplorerUrl = (network: SupportedNetwork, txHash: string): string => {
-  switch (network) {
-    case "ethereum":
-      return `https://sepolia.etherscan.io/tx/${txHash}`;
-    case "base":
-      return `https://sepolia.basescan.org/tx/${txHash}`;
-    case "solana":
-      return `https://explorer.solana.com/tx/${txHash}?cluster=devnet`;
-    default:
-      return "#";
-  }
-};
-
-const formatTxHash = (txHash: string, network: SupportedNetwork): string => {
-  const issolana = network === "solana";
-  const prefixLength = issolana ? 8 : 10;
-  return `${txHash.substring(0, prefixLength)}...`;
-};
 
 export function TransactionProcessing({
   amount,
@@ -58,7 +36,6 @@ export function TransactionProcessing({
   transactionState,
   onReset,
   errorMessage,
-  originNetworkKey,
 }: TransactionProcessingProps) {
   // Determine which steps to show based on the quote
   const steps = [
@@ -68,12 +45,10 @@ export function TransactionProcessing({
   ];
 
   // Add approve step if needed (you might want to pass this info from the quote)
-  const needsApproval = asset.symbol !== "ETH" && originNetworkKey !== "solana"; // Solana doesn't need approve
+  const needsApproval = asset.symbol !== "ETH"; // Example logic
   if (needsApproval && currentStep === "approve") {
     steps.unshift({ id: "approve", label: "Approve", description: "Approving token spend" });
   }
-
-  const explorerUrl = originNetworkKey && transactionHash ? getExplorerUrl(originNetworkKey, transactionHash) : "#";
 
   return (
     <div className="container max-w-xl mx-auto py-8 px-4">
@@ -96,15 +71,15 @@ export function TransactionProcessing({
                 {originNetwork?.name} → {destNetwork?.name}
               </span>
             </div>
-            {transactionHash && originNetworkKey && (
+            {transactionHash && (
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Transaction</span>
                 <a
-                  href={explorerUrl}
+                  href={`https://sepolia.etherscan.io/tx/${transactionHash}`}
                   className="text-sm font-mono text-blue-600 hover:text-blue-700"
                   target="_blank"
                   rel="noopener noreferrer">
-                  {formatTxHash(transactionHash, originNetworkKey)}
+                  {transactionHash.substring(0, 10)}...
                 </a>
               </div>
             )}
