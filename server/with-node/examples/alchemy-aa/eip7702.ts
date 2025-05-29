@@ -1,68 +1,31 @@
-import type { NextFunction, Request, Response } from "express";
+import type { Request, Response } from "express";
 
 import { alchemy } from "@account-kit/infra";
 import { createModularAccountV2Client } from "@account-kit/smart-contracts";
 import { BatchUserOperationCallData, WalletClientSigner } from "@aa-sdk/core";
-import { Para as ParaServer, Environment, SuccessfulSignatureRes, hexStringToBase64 } from "@getpara/server-sdk";
+import { Para as ParaServer, Environment } from "@getpara/server-sdk";
 import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integration";
 
-import { arbitrumSepolia } from "viem/chains";
-import {
-  encodeFunctionData,
-  hashMessage,
-  http,
-  type Hash,
-  type LocalAccount,
-  type SignableMessage,
-  type WalletClient,
-} from "viem";
+import { arbitrumSepolia } from "@account-kit/infra";
+import { encodeFunctionData, http, type LocalAccount, type WalletClient } from "viem";
 
 import Example from "../../artifacts/Example.json";
+import { customSignAuthorization, customSignMessage } from "../../utils/signature-utils.js";
 
 const EXAMPLE_CONTRACT_ADDRESS = "0x7920b6d8b07f0b9a3b96f238c64e022278db1419";
 const EXAMPLE_ABI = Example["contracts"]["contracts/Example.sol:Example"]["abi"];
 
-async function customSignMessage(para: ParaServer, message: SignableMessage): Promise<Hash> {
-  const wallet = para.wallets ? Object.values(para.wallets)[0] : null;
-  if (!wallet) {
-    throw new Error("Para wallet not available for signing.");
-  }
+export async function alchemyEip7702SignHandler(req: Request, res: Response): Promise<void> {
+  console.log("=== Starting EIP-7702 Transaction Handler ===");
 
-  const hashedMessage = hashMessage(message);
-  const messagePayload = hashedMessage.startsWith("0x") ? hashedMessage.substring(2) : hashedMessage;
-  const messageBase64 = hexStringToBase64(messagePayload);
-
-  const res = await para.signMessage({
-    walletId: wallet.id,
-    messageBase64: messageBase64,
-  });
-
-  if (!("signature" in res)) {
-    throw new Error(`Signature failed or unexpected response: ${JSON.stringify(res)}`);
-  }
-
-  let signature = (res as SuccessfulSignatureRes).signature;
-
-  const vHex = signature.slice(-2);
-  const v = parseInt(vHex, 16);
-  if (!isNaN(v) && v < 27) {
-    const adjustedVHex = (v + 27).toString(16).padStart(2, "0");
-    signature = signature.slice(0, -2) + adjustedVHex;
-  } else if (isNaN(v)) {
-    console.warn("Could not parse 'v' value from signature for adjustment:", vHex);
-  }
-
-  return `0x${signature}`;
-}
-
-export async function alchemyEip7702SignHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const session = req.body.session as string | undefined;
+    console.log("Session received:", session ? "Yes" : "No");
 
     if (!session) {
       res.status(400).json({
         error: "Missing session",
-        message: "Session is required.",
+        message: "Provide `session` in the request body.",
       });
       return;
     }
@@ -70,51 +33,74 @@ export async function alchemyEip7702SignHandler(req: Request, res: Response, nex
     const paraApiKey = process.env.PARA_API_KEY;
     const alchemyApiKey = process.env.ALCHEMY_API_KEY;
     const alchemyGasPolicyId = process.env.ALCHEMY_GAS_POLICY_ID;
-    const rpcUrl = process.env.ARBITRUM_SEPOLIA_RPC;
+    const rpcUrl = process.env.ALCHEMY_ARBITRUM_SEPOLIA_RPC;
     const env = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
+
+    console.log("Environment variables check:", {
+      paraApiKey: paraApiKey ? "Present" : "Missing",
+      alchemyApiKey: alchemyApiKey ? "Present" : "Missing",
+      alchemyGasPolicyId: alchemyGasPolicyId ? "Present" : "Missing",
+      rpcUrl: rpcUrl ? "Present" : "Missing",
+      environment: env,
+    });
 
     if (!paraApiKey || !alchemyApiKey || !alchemyGasPolicyId || !rpcUrl) {
       res.status(500).json({
         error: "Missing environment variables",
         message:
-          "Missing required environment variables (PARA_API_KEY, ALCHEMY_API_KEY, ALCHEMY_GAS_POLICY_ID, ARBITRUM_SEPOLIA_RPC).",
+          "Missing required environment variables (PARA_API_KEY, ALCHEMY_API_KEY, ALCHEMY_GAS_POLICY_ID, ALCHEMY_ARBITRUM_SEPOLIA_RPC).",
       });
       return;
     }
 
+    console.log("1. Initializing Para Server...");
     const para = new ParaServer(env, paraApiKey);
-    await para.importSession(session);
 
+    console.log("2. Importing session...");
+    await para.importSession(session);
+    console.log("   Session imported successfully");
+
+    console.log("3. Creating Para Viem Account...");
     const viemParaAccount: LocalAccount = createParaAccount(para);
+    console.log("   Account address:", viemParaAccount.address);
 
     viemParaAccount.signMessage = async ({ message }) => customSignMessage(para, message);
+    viemParaAccount.signAuthorization = async (authorization) => {
+      console.log("   Signing authorization:", authorization);
+      return customSignAuthorization(para, authorization);
+    };
 
+    console.log("4. Creating Para Viem Client...");
     const viemClient: WalletClient = createParaViemClient(para, {
       account: viemParaAccount,
       chain: arbitrumSepolia,
       transport: http(rpcUrl),
     });
+    console.log("   Client created for chain:", arbitrumSepolia.name);
 
+    console.log("5. Creating Wallet Client Signer...");
     const walletClientSigner = new WalletClientSigner(viemClient, "para");
+    console.log("   Signer created");
 
-    console.log("Creating Alchemy Modular Account V2 with EIP-7702 for EOA:", viemParaAccount.address);
+    console.log("6. Creating Alchemy Modular Account Client...");
+    console.log("   Mode: 7702");
+    console.log("   Policy ID:", alchemyGasPolicyId);
 
     const alchemyClient = await createModularAccountV2Client({
+      mode: "7702",
       transport: alchemy({
-        apiKey: alchemyApiKey,
+        rpcUrl: rpcUrl,
       }),
       chain: arbitrumSepolia,
       signer: walletClientSigner,
-      mode: "7702",
       policyId: alchemyGasPolicyId,
     });
 
-    const eoaAddress = viemParaAccount.address;
-    console.log("EOA Address:", eoaAddress);
+    console.log("   Alchemy client created");
+    console.log("   Account address:", alchemyClient.account.address);
+    console.log("   Is same as EOA?", alchemyClient.account.address === viemParaAccount.address);
 
-    const smartAccountAddress = alchemyClient.account.address;
-    console.log("Smart Account Address (should match EOA):", smartAccountAddress);
-
+    console.log("7. Preparing batch user operations...");
     const demoUserOperations: BatchUserOperationCallData = Array.from({ length: 5 }, (_, i) => i + 1).map((x) => ({
       target: EXAMPLE_CONTRACT_ADDRESS,
       data: encodeFunctionData({
@@ -124,40 +110,68 @@ export async function alchemyEip7702SignHandler(req: Request, res: Response, nex
       }),
     }));
 
-    console.log("Sending batch user operations with Alchemy EIP-7702...");
-
-    const userOperationResult = await alchemyClient.sendUserOperation({
-      uo: demoUserOperations,
+    console.log("   Batch operations prepared:");
+    demoUserOperations.forEach((op, index) => {
+      console.log(`   Operation ${index + 1}: changeX(${index + 1}) to ${op.target}`);
     });
 
-    console.log("User operation sent:", userOperationResult);
+    console.log("8. Sending user operation...");
+    const userOperationResult = await alchemyClient.sendUserOperation({
+      uo: demoUserOperations,
+      value: 0n,
+      data: "0x",
+    });
+    console.log("   User operation sent successfully");
+    console.log("   UserOp Hash:", userOperationResult.hash);
 
+    console.log("9. Waiting for transaction confirmation...");
     const txHash = await alchemyClient.waitForUserOperationTransaction(userOperationResult);
+    console.log("   Transaction confirmed!");
+    console.log("   Transaction Hash:", txHash);
 
-    console.log("Transaction confirmed:", txHash);
+    console.log("=== EIP-7702 Transaction Successful ===");
 
     res.status(200).json({
-      message: "Sent user operation using Alchemy + Para with EIP-7702 (session-based wallet, viem-based).",
-      eoaAddress,
-      smartAccountAddress,
-      userOperationResult,
-      transactionHash: txHash,
+      message: "User operation batch sent using Alchemy + Para (session-based) with EIP-7702.",
+      accountAddress: alchemyClient.account.address,
+      originalEOA: viemParaAccount.address,
+      userOpHash: userOperationResult.hash,
+      receipt: {
+        transactionHash: txHash,
+        blockNumber: "",
+        gasUsed: "",
+      },
       eip7702Info: {
-        note: "The EOA has been delegated to Modular Account V2 using EIP-7702. Future transactions will benefit from smart account features without changing the address.",
-        sameAddress: smartAccountAddress === eoaAddress,
-        provider: "Alchemy Account Kit",
+        note: "Your EOA has been temporarily upgraded to a smart account using EIP-7702",
+        sameAddress: alchemyClient.account.address === viemParaAccount.address,
       },
     });
   } catch (error) {
-    console.error("Error in alchemyEip7702SignHandler:", error);
+    console.error("=== EIP-7702 Transaction Failed ===");
+    console.error("Error details:", error);
 
     if (error instanceof Error) {
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+
+      // Log additional error properties if they exist
+      if ("code" in error) {
+        console.error("Error code:", (error as any).code);
+      }
+      if ("data" in error) {
+        console.error("Error data:", JSON.stringify((error as any).data, null, 2));
+      }
+      if ("cause" in error) {
+        console.error("Error cause:", (error as any).cause);
+      }
+
       res.status(500).json({
-        error: "Alchemy EIP-7702 transaction failed",
+        error: "EIP-7702 transaction failed",
         message: error.message,
         stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
       });
     } else {
+      console.error("Unknown error type:", typeof error);
       res.status(500).json({
         error: "Unknown error occurred",
         details: String(error),
