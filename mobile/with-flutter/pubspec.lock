@@ -197,10 +197,10 @@ packages:
     dependency: transitive
     description:
       name: device_info_plus
-      sha256: "0c6396126421b590089447154c5f98a5de423b70cfb15b1578fd018843ee6f53"
+      sha256: "77f757b789ff68e4eaf9c56d1752309bd9f7ad557cb105b938a7f8eb89e59110"
       url: "https://pub.dev"
     source: hosted
-    version: "11.4.0"
+    version: "9.1.2"
   device_info_plus_platform_interface:
     dependency: transitive
     description:
@@ -632,10 +632,10 @@ packages:
     dependency: transitive
     description:
       name: passkeys
-      sha256: "5ebfc2f28c203e47992a64bad72f4c4632690317d20175391e23f3c8f339c232"
+      sha256: "075a5dbaa16b76b10219cd1d9665bc9235d15eb218ac3c329560cf7b31d43640"
       url: "https://pub.dev"
     source: hosted
-    version: "2.9.0"
+    version: "2.8.2"
   passkeys_android:
     dependency: transitive
     description:
@@ -644,14 +644,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.7.1"
-  passkeys_doctor:
-    dependency: transitive
-    description:
-      name: passkeys_doctor
-      sha256: bfd0b3fe7de6b742ecaacff51289ae6f9dcc80d55eb6ddf39622b379182607ab
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0"
   passkeys_ios:
     dependency: transitive
     description:
@@ -1237,10 +1229,10 @@ packages:
     dependency: transitive
     description:
       name: win32_registry
-      sha256: "6f1b564492d0147b330dd794fee8f512cec4977957f310f9951b5f9d83618dae"
+      sha256: "21ec76dfc731550fd3e2ce7a33a9ea90b828fdf19a5c3bcf556fa992cfa99852"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.0"
+    version: "1.1.5"
   window_to_front:
     dependency: transitive
     description:

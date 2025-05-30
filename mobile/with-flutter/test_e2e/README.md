@@ -11,54 +11,40 @@ End-to-end tests for the Para Flutter example app using Appium.
    ```
 
 2. **Environment Setup**:
-   - API key is automatically loaded from `.env` file
+   - Set `PARA_API_KEY` in `.env` file or environment variable
    - iOS Simulator must be available
 
 ## Quick Start
 
-**One-time setup:**
 ```bash
-dart pub get
-dart run tool/setup.dart
+# Run all tests
+dart test para_flutter_e2e_test.dart --timeout 300s
+
+# Run single test
+dart run tool/run_single_test.dart 01
 ```
 
-**Run tests:**
-```bash
-# All tests
-dart run tool/run_tests.dart
+## Test Coverage (9 Tests)
 
-# Email test only  
-dart run tool/run_tests.dart email
+1. **Email Authentication** - Signup and login with passkey
+2. **Phone Authentication** - Signup and login with passkey  
+3. **Wallet Verification** - Verify existing wallets and addresses
+4. **Copy Wallet Address** - Test address copying functionality
+5. **Sign Message** - EVM transaction signing
+6. **Sign Transaction** - EVM transaction with gas fees
+7. **Check Session** - Verify session validity
+8. **Logout** - Test logout functionality
+9. **Solana Signing** - Solana transaction signing
 
-# Phone test only
-dart run tool/run_tests.dart phone
-```
+## Architecture
 
-## Manual Testing
+- All tests can run independently (isolated)
+- Each test performs authentication if needed
+- Tests validate real wallet and signing functionality
+- Simplified codebase following "less is more" philosophy
 
-If you prefer manual control:
+## Troubleshooting
 
-```bash
-# Start Appium manually
-appium --port 4723
-
-# Run tests (in separate terminal)
-dart test                                    # All tests
-dart test -t "Email Authentication Flow"     # Email only
-dart test -t "Phone Authentication Flow"     # Phone only
-```
-
-## Test Structure
-
-- `para_flutter_e2e_test.dart` - Main test file with helper methods
-- `tool/setup.dart` - Build script for the Flutter app
-- `tool/run_tests.dart` - Test runner with Appium management
-- `.env` - Environment variables (API key)
-
-The tests automatically handle:
-- ✅ App building and installation
-- ✅ Biometric enrollment
-- ✅ Authentication flows (email/phone + passkey)
-- ✅ Wallet management (creation, refresh, address copying)
-- ✅ Transaction signing (EVM and Solana)
-- ✅ Session management and logout
+- **Tests timing out**: Use `--timeout 300s` flag
+- **Simulator issues**: Ensure iOS Simulator is running
+- **Appium errors**: Check `appium driver list --installed`

@@ -29,8 +29,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## E2E Testing
 - E2E tests located in `test_e2e/` directory
-- Use Dart tool scripts in `test_e2e/tool/` for automation
 - Tests use Appium with iOS Simulator for authentication flows
 - Setup: `cd test_e2e && dart run tool/setup.dart`
 - Run all: `cd test_e2e && dart run tool/run_tests.dart`
-- Run specific: `cd test_e2e && dart run tool/run_tests.dart email`
+- Run email tests: `cd test_e2e && dart run tool/run_tests.dart email`
+- Run phone tests: `cd test_e2e && dart run tool/run_tests.dart phone`
