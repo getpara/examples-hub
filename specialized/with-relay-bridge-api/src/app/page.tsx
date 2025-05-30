@@ -230,6 +230,7 @@ export default function Home() {
         transactionState={transactionState}
         onReset={resetToBridge}
         errorMessage={errorMessage}
+        originNetworkKey={originNetwork as SupportedNetwork}
       />
     );
   }
