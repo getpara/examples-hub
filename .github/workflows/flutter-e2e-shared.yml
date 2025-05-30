@@ -20,6 +20,9 @@ jobs:
   run-flutter-e2e:
     runs-on: macos-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -62,7 +65,7 @@ jobs:
           dependency_overrides:
             para:
               git:
-                url: https://github.com/getpara/flutter-sdk.git
+                url: https://github.com/capsule-org/flutter-sdk.git
                 ref: ${{ inputs.flutter-sdk-override }}
           EOF
           echo "📄 Created pubspec_overrides.yaml:"
