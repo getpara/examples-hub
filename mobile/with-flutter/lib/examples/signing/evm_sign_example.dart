@@ -521,14 +521,6 @@ class _EvmSignExampleState extends State<EvmSignExample> {
                               );
                             },
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.open_in_new),
-                            onPressed: () {
-                              // Open transaction in block explorer
-                              // TODO: Launch URL using url_launcher or other method
-                              // final url = 'https://holesky.etherscan.io/tx/$_txHash';
-                            },
-                          ),
                         ],
                       ),
                     ),
