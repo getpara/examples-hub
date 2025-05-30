@@ -18,7 +18,17 @@ import { Info } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 type TransactionState = "idle" | "sending" | "checking" | "complete" | "failed";
-type StepType = "approve" | "deposit" | "fill" | "complete" | "failed";
+type StepType =
+  | "approve"
+  | "deposit"
+  | "processing"
+  | "fill"
+  | "complete"
+  | "failed"
+  | "partial"
+  | "refunded"
+  | "needs_gas"
+  | "timeout";
 
 export default function Home() {
   const { openModal } = useModal();
@@ -34,6 +44,7 @@ export default function Home() {
   const [transactionHash, setTransactionHash] = useState<string>("");
   const [currentStep, setCurrentStep] = useState<StepType>("deposit");
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [axelarScanUrl, setAxelarScanUrl] = useState<string>("");
 
   const getNetworkAddress = useCallback(
     (networkId: SupportedNetwork | null): string | null => {
@@ -130,89 +141,71 @@ export default function Home() {
   }, []);
 
   const handleBridge = useCallback(async () => {
-    if (!originNetwork || !quote) return;
+    if (!originNetwork || !destNetwork || !quote) return;
 
     setTransactionState("sending");
     setCurrentStep("deposit");
     setTransactionHash("");
     setErrorMessage("");
+    setAxelarScanUrl("");
 
     executeBridge({
       quote,
       originNetwork,
+      destNetwork,
       onProgress: (progressData: any) => {
-        const { steps, currentStep: currentProgressStep, currentStepItem, txHashes, error, refunded } = progressData;
+        const { steps, currentStep: progressStep, txHashes, error, axelarScanUrl: scanUrl } = progressData;
 
-        if (refunded) {
-          setTransactionState("failed");
-          setCurrentStep("failed");
-          setErrorMessage("Transaction was refunded. Please try again.");
-          return;
-        }
-        if (error) {
-          setTransactionState("failed");
-          setCurrentStep("failed");
-          setErrorMessage(error.message || "Transaction failed");
-          return;
-        }
         if (txHashes && txHashes.length > 0) {
           setTransactionHash(txHashes[0].txHash);
         }
-        if (currentProgressStep) {
-          const stepId = currentProgressStep.id;
-          if (stepId === "approve" || stepId.includes("approve")) {
-            setCurrentStep("approve");
-            setTransactionState("sending");
-          } else if (stepId === "deposit" || stepId === "send") {
-            setCurrentStep("deposit");
-            setTransactionState("sending");
-          } else if (stepId === "swap" || stepId === "complete") {
-            setCurrentStep("fill");
-            setTransactionState("checking");
-          }
-          if (currentProgressStep.error) {
-            setTransactionState("failed");
+
+        if (error) {
+          setTransactionState("failed");
+          setErrorMessage(error.message || "Transaction failed");
+
+          if (progressStep?.id === "needs_gas") {
+            setCurrentStep("needs_gas");
+            if (scanUrl) setAxelarScanUrl(scanUrl);
+          } else if (progressStep?.id === "partial") {
+            setCurrentStep("partial");
+          } else if (progressStep?.id === "refunded") {
+            setCurrentStep("refunded");
+          } else if (progressStep?.id === "timeout") {
+            setCurrentStep("timeout");
+          } else {
             setCurrentStep("failed");
-            setErrorMessage(currentProgressStep.error);
-            return;
           }
+          return;
         }
-        if (currentStepItem) {
-          if (currentStepItem.error) {
-            setTransactionState("failed");
-            setCurrentStep("failed");
-            setErrorMessage(currentStepItem.error);
-            return;
-          }
-          if (currentStepItem.checkStatus) {
-            switch (currentStepItem.checkStatus) {
-              case "refund":
-                setTransactionState("failed");
-                setCurrentStep("failed");
-                setErrorMessage("Transaction was refunded");
-                break;
-              case "failure":
-                setTransactionState("failed");
-                setCurrentStep("failed");
-                setErrorMessage("Transaction failed");
-                break;
-              case "delayed":
-                console.warn("Transaction is delayed");
-                break;
-              case "success":
-                break;
-            }
-          }
-        }
-        const allComplete =
-          steps?.every((step: any) => step.items?.every((item: any) => item.status === "complete")) ?? false;
-        if (allComplete && steps.length > 0) {
+
+        if (progressStep?.id === "complete") {
           setTransactionState("complete");
           setCurrentStep("complete");
+          return;
+        }
+
+        if (progressStep?.id) {
+          switch (progressStep.id) {
+            case "deposit":
+              setCurrentStep("deposit");
+              setTransactionState("sending");
+              break;
+            case "processing":
+              setCurrentStep("processing");
+              setTransactionState("checking");
+              break;
+            case "fill":
+              setCurrentStep("fill");
+              setTransactionState("checking");
+              break;
+            default:
+              break;
+          }
         }
       },
     });
-  }, [originNetwork, quote, executeBridge]);
+  }, [originNetwork, destNetwork, quote, executeBridge]);
 
   const resetToBridge = useCallback(() => {
     setTransactionState("idle");
@@ -222,6 +215,7 @@ export default function Home() {
     setDestNetwork(null);
     setTransactionHash("");
     setErrorMessage("");
+    setAxelarScanUrl("");
   }, []);
 
   if (transactionState !== "idle") {
@@ -236,6 +230,7 @@ export default function Home() {
         transactionState={transactionState}
         onReset={resetToBridge}
         errorMessage={errorMessage}
+        axelarScanUrl={axelarScanUrl}
       />
     );
   }

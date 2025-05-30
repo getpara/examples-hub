@@ -50,7 +50,7 @@ export const NETWORK_CONFIG: Record<SupportedNetwork, NetworkConfig> = {
   solana: {
     name: "Solana",
     icon: "/solana.png",
-    chainId: "792703809",
+    chainId: "solana-mainnet-beta",
     usdcContractAddress: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
     rpcUrl: process.env.NEXT_PUBLIC_SOLANA_RPC_URL ?? "https://solana-rpc.publicnode.com",
     networkType: "mainnet",

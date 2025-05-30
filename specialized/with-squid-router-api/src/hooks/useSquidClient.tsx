@@ -15,7 +15,7 @@ export function useSquidClient() {
 
     const initSquid = async () => {
       const squid = new Squid({
-        baseUrl: "https://v2.api.squidrouter.com",
+        baseUrl: "https://apiplus.squidrouter.com",
         integratorId: SQUID_INTEGRATOR_ID,
       });
       await squid.init();

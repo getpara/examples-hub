@@ -4,16 +4,9 @@ import { useSquidClient } from "./useSquidClient";
 import { useSigners } from "./useSigners";
 import { NETWORK_CONFIG, SupportedNetwork } from "@/constants";
 import { ethers, TransactionResponse } from "ethers";
-import {
-  DepositAddressResponse,
-  GetStatus,
-  OnChainExecutionData,
-  RouteResponse,
-  SolanaTxResponse,
-  TransactionResponses,
-} from "@0xsquid/sdk/dist/types";
+import { DepositAddressResponse, RouteResponse, SolanaTxResponse, TransactionResponses } from "@0xsquid/sdk/dist/types";
 import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
-import { Transaction, VersionedTransaction } from "@solana/web3.js";
+import { Transaction, VersionedTransaction, Connection } from "@solana/web3.js";
 import { Wallet } from "@project-serum/anchor";
 
 interface QuoteParams {
@@ -22,6 +15,11 @@ interface QuoteParams {
   amount: string;
   originAddress: string | null;
   destAddress: string | null;
+}
+
+interface TransactionHashResult {
+  hash: string;
+  isChainflip?: boolean;
 }
 
 export function useSquidBridge() {
@@ -65,7 +63,8 @@ export function useSquidBridge() {
       fromAddress: originAddress,
       toAddress: destAddress,
       slippage: 1,
-      quoteOnly: true,
+      quoteOnly: false,
+      enableBoost: true,
     };
 
     const response = await squid.getRoute(squidParams);
@@ -92,7 +91,7 @@ export function useSquidBridge() {
     });
   };
 
-  const simulateTransaction = async (
+  const simulateEvmTransaction = async (
     route: RouteResponse["route"],
     provider: ethers.JsonRpcProvider,
     from: string
@@ -102,80 +101,103 @@ export function useSquidBridge() {
         console.warn("No transactionRequest in route, skipping simulation");
         return { success: true };
       }
-      if ("request" in route.transactionRequest) {
+
+      const tx = route.transactionRequest;
+
+      if (!("targetAddress" in tx) || !("data" in tx)) {
+        console.warn("Missing targetAddress or data in transactionRequest");
         return { success: true };
       }
 
-      if ("target" in route.transactionRequest && "data" in route.transactionRequest) {
-        const tx = route.transactionRequest as OnChainExecutionData;
-
-        if (!tx.target || !tx.data) {
-          throw new Error("Invalid transaction data: missing target or data");
-        }
-
-        const callParams: ethers.TransactionRequest = {
-          to: tx.target,
+      const result = await provider.send("eth_call", [
+        {
+          to: tx.targetAddress,
           data: tx.data,
+          value: tx.value || "0x0",
+          gas: tx.gasLimit,
           from: from,
-        };
+        },
+        "latest",
+      ]);
 
-        if (tx.value && tx.value !== "0") {
-          callParams.value = tx.value;
-        }
-
-        if (tx.gasLimit) {
-          callParams.gasLimit = tx.gasLimit;
-        }
-
-        if (tx.maxFeePerGas && tx.maxPriorityFeePerGas) {
-          callParams.maxFeePerGas = tx.maxFeePerGas;
-          callParams.maxPriorityFeePerGas = tx.maxPriorityFeePerGas;
-        } else if (tx.gasPrice) {
-          callParams.gasPrice = tx.gasPrice;
-        }
-
-        await provider.call(callParams);
-        return { success: true };
-      }
-
-      console.warn("Unknown transaction request type, proceeding without simulation");
       return { success: true };
     } catch (error) {
-      console.error("Transaction simulation failed:", error);
+      console.error("EVM transaction simulation failed:", error);
       return { success: false, error };
     }
   };
 
-  const getTransactionHash = (tx: TransactionResponses, originNetwork: SupportedNetwork): string => {
+  const simulateSolanaTransaction = async (
+    route: RouteResponse["route"],
+    connection: Connection
+  ): Promise<{ success: boolean; error?: any }> => {
+    try {
+      if (!route.transactionRequest) {
+        console.warn("No transaction request for Solana simulation");
+        return { success: true };
+      }
+
+      if ("depositAddress" in route.transactionRequest) {
+        console.warn("Chainflip deposit address transaction, skipping simulation");
+        return { success: true };
+      }
+
+      if (!("data" in route.transactionRequest)) {
+        console.warn("No transaction data for Solana simulation");
+        return { success: true };
+      }
+
+      const txData = route.transactionRequest.data;
+      const tx = VersionedTransaction.deserialize(Buffer.from(txData, "base64"));
+
+      const simulation = await connection.simulateTransaction(tx, {
+        commitment: "processed",
+        replaceRecentBlockhash: true,
+      });
+
+      if (simulation.value.err) {
+        return { success: false, error: simulation.value.err };
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error("Solana transaction simulation failed:", error);
+      return { success: false, error };
+    }
+  };
+
+  const getTransactionHash = (tx: TransactionResponses, originNetwork: SupportedNetwork): TransactionHashResult => {
     const networkCategory = NETWORK_CONFIG[originNetwork].networkCategory;
 
     if (networkCategory === "evm") {
       const ethTx = tx as TransactionResponse;
-      return ethTx.hash;
+      return { hash: ethTx.hash };
     } else if (networkCategory === "svm") {
       const solanaTx = tx as SolanaTxResponse;
-      return solanaTx.tx;
+      return { hash: solanaTx.tx };
     } else if ("depositAddress" in tx) {
       const depositTx = tx as DepositAddressResponse;
-      return depositTx.chainflipStatusTrackingId;
+      return { hash: depositTx.chainflipStatusTrackingId, isChainflip: true };
     } else if ("bodyBytes" in tx) {
       const cosmosTx = tx as TxRaw;
       const txBytes = cosmosTx.bodyBytes;
       const hash = ethers.keccak256(txBytes);
-      return hash;
+      return { hash };
     }
 
-    return "unknown";
+    return { hash: "unknown" };
   };
 
   const executeMutation = useMutation({
     mutationFn: async ({
       quote,
       originNetwork,
+      destNetwork,
       onProgress,
     }: {
       quote: RouteResponse;
       originNetwork: SupportedNetwork;
+      destNetwork: SupportedNetwork;
       onProgress?: (status: any) => void;
     }) => {
       if (!squid) throw new Error("Squid client not initialized");
@@ -183,6 +205,134 @@ export function useSquidBridge() {
 
       const originClients = getNetworkClients(originNetwork);
       const originConfig = NETWORK_CONFIG[originNetwork];
+
+      // Helper function for status polling with improved error handling
+      const createStatusPoller = (txHashResult: TransactionHashResult, estimatedDuration: number) => {
+        if (!onProgress) return null;
+
+        let notFoundRetries = 0;
+        const MAX_NOT_FOUND_RETRIES = 3;
+
+        const pollStatus = async () => {
+          try {
+            if (txHashResult.isChainflip) {
+              console.warn("Chainflip transaction detected. Status tracking may be limited.");
+            }
+
+            const statusParams: any = {
+              transactionId: txHashResult.hash,
+              requestId: quote.requestId,
+              integratorId: quote.integratorId,
+            };
+
+            const quoteId = (quote.route as any).quoteId || (quote as any).quoteId;
+            if (quoteId) {
+              statusParams.quoteId = quoteId;
+            }
+
+            const status = await squid.getStatus(statusParams);
+            const squidStatus = status.squidTransactionStatus;
+
+            if (squidStatus === "success") {
+              onProgress?.({
+                steps: [{ items: [{ status: "complete" }] }],
+                currentStep: { id: "complete" },
+                txHashes: [{ txHash: txHashResult.hash }],
+              });
+              return true;
+            }
+
+            if (squidStatus === "partial_success") {
+              onProgress?.({
+                error: {
+                  message:
+                    "Transaction partially completed. Funds received on destination chain but final swap may have failed. Please check your destination wallet.",
+                },
+                currentStep: { id: "partial" },
+                txHashes: [{ txHash: txHashResult.hash }],
+              });
+              return true;
+            }
+
+            if (squidStatus === "refund") {
+              onProgress?.({
+                error: {
+                  message:
+                    "Transaction failed and funds have been refunded to your wallet. This may take up to 10 minutes.",
+                },
+                currentStep: { id: "refunded" },
+                txHashes: [{ txHash: txHashResult.hash }],
+              });
+              return true;
+            }
+
+            if (squidStatus === "not_found") {
+              notFoundRetries++;
+              if (notFoundRetries >= MAX_NOT_FOUND_RETRIES) {
+                onProgress?.({
+                  error: {
+                    message:
+                      "Transaction not found after multiple attempts. Please check the transaction hash on a block explorer.",
+                  },
+                  currentStep: { id: "failed" },
+                  txHashes: [{ txHash: txHashResult.hash }],
+                });
+                return true;
+              }
+              return false;
+            }
+
+            if (squidStatus === "needs_gas") {
+              onProgress?.({
+                error: {
+                  message:
+                    "Transaction needs more gas to complete. Please visit Axelarscan to add gas to your transaction.",
+                },
+                currentStep: { id: "needs_gas" },
+                axelarScanUrl: status.axelarTransactionUrl,
+                txHashes: [{ txHash: txHashResult.hash }],
+              });
+              return true;
+            }
+
+            if (squidStatus === "ongoing") {
+              onProgress?.({
+                steps: [{ items: [{ status: "pending" }] }],
+                currentStep: { id: "processing" },
+                txHashes: [{ txHash: txHashResult.hash }],
+              });
+              return false;
+            }
+
+            return false;
+          } catch (error) {
+            console.error("Status check error:", error);
+            return false;
+          }
+        };
+
+        const checkInterval = setInterval(async () => {
+          const isDone = await pollStatus();
+          if (isDone) {
+            clearInterval(checkInterval);
+          }
+        }, 5000);
+
+        const maxWaitTime = Math.max(15 * 60 * 1000, estimatedDuration * 2 * 1000);
+
+        setTimeout(() => {
+          clearInterval(checkInterval);
+          onProgress?.({
+            error: {
+              message: "Transaction timeout. Please check the transaction status manually.",
+            },
+            currentStep: { id: "timeout" },
+            txHashes: [{ txHash: txHashResult.hash }],
+          });
+        }, maxWaitTime);
+
+        return checkInterval;
+      };
 
       if (originConfig.networkCategory === "evm") {
         if (
@@ -202,7 +352,7 @@ export function useSquidBridge() {
           throw new Error("No address found");
         }
 
-        const simulation = await simulateTransaction(quote.route, provider, address);
+        const simulation = await simulateEvmTransaction(quote.route, provider, address);
         if (!simulation.success) {
           throw new Error("Transaction simulation failed");
         }
@@ -212,72 +362,22 @@ export function useSquidBridge() {
           route: quote.route,
         });
 
-        const txHash = getTransactionHash(tx, originNetwork);
+        const txHashResult = getTransactionHash(tx, originNetwork);
 
         if (onProgress) {
-          const pollStatus = async () => {
-            try {
-              const statusParams: GetStatus = {
-                transactionId: txHash,
-                requestId: quote.requestId,
-                integratorId: quote.integratorId,
-              };
+          const estimatedDuration = quote.route.estimate?.estimatedRouteDuration || 960;
+          const checkInterval = createStatusPoller(txHashResult, estimatedDuration);
 
-              const status = await squid.getStatus(statusParams);
-
-              const squidStatus = status.squidTransactionStatus;
-
-              if (squidStatus === "success") {
-                onProgress({
-                  steps: [{ items: [{ status: "complete" }] }],
-                  currentStep: { id: "complete" },
-                  txHashes: [{ txHash }],
-                });
-                return true;
-              } else if (squidStatus === "partial_success" || squidStatus === "refund" || squidStatus === "not_found") {
-                onProgress({
-                  error: { message: `Transaction ${squidStatus}` },
-                  currentStep: { id: "failed" },
-                });
-                return true;
-              } else if (squidStatus === "needs_gas") {
-                onProgress({
-                  error: { message: "Transaction needs more gas" },
-                  currentStep: { id: "failed" },
-                });
-                return true;
-              }
-
-              return false;
-            } catch (error) {
-              console.error("Status check error:", error);
-              return false;
-            }
-          };
-
-          const checkInterval = setInterval(async () => {
-            const isDone = await pollStatus();
-            if (isDone) {
-              clearInterval(checkInterval);
-            }
-          }, 5000);
-
-          if (originConfig.networkCategory === "evm" && "wait" in tx && typeof tx.wait === "function") {
+          if ("wait" in tx && typeof tx.wait === "function") {
             tx.wait().then(() => {
-              clearInterval(checkInterval);
-              pollStatus();
+              if (checkInterval) clearInterval(checkInterval);
+              createStatusPoller(txHashResult, estimatedDuration);
             });
-          } else {
-            setTimeout(() => {
-              clearInterval(checkInterval);
-              pollStatus();
-            }, 60000);
           }
         }
 
         return tx;
       } else if (originConfig.networkCategory === "svm") {
-        // Type guard to check if this is a Solana client
         if (!("connection" in originClients) || !originClients.connection || !originClients.signer) {
           throw new Error("Solana wallet not initialized");
         }
@@ -288,6 +388,11 @@ export function useSquidBridge() {
 
         if (!address || !solanaSigner.sender) {
           throw new Error("No Solana address found");
+        }
+
+        const simulation = await simulateSolanaTransaction(quote.route, connection);
+        if (!simulation.success) {
+          throw new Error(`Solana transaction simulation failed: ${JSON.stringify(simulation.error)}`);
         }
 
         const solanaWallet = {
@@ -306,71 +411,17 @@ export function useSquidBridge() {
           signerAddress: address,
         });
 
-        const txHash = getTransactionHash(tx, originNetwork);
+        const txHashResult = getTransactionHash(tx, originNetwork);
 
         if (onProgress) {
           onProgress({
             steps: [{ items: [{ status: "pending" }] }],
             currentStep: { id: "deposit" },
-            txHashes: [{ txHash }],
+            txHashes: [{ txHash: txHashResult.hash }],
           });
 
-          const pollStatus = async () => {
-            try {
-              const statusParams: GetStatus = {
-                transactionId: txHash,
-                requestId: quote.requestId,
-                integratorId: quote.integratorId,
-              };
-
-              const status = await squid.getStatus(statusParams);
-              const squidStatus = status.squidTransactionStatus;
-
-              if (squidStatus === "success") {
-                onProgress({
-                  steps: [{ items: [{ status: "complete" }] }],
-                  currentStep: { id: "complete" },
-                  txHashes: [{ txHash }],
-                });
-                return true;
-              } else if (squidStatus === "partial_success" || squidStatus === "refund" || squidStatus === "not_found") {
-                onProgress({
-                  error: { message: `Transaction ${squidStatus}` },
-                  currentStep: { id: "failed" },
-                });
-                return true;
-              } else if (squidStatus === "needs_gas") {
-                onProgress({
-                  error: { message: "Transaction needs more gas" },
-                  currentStep: { id: "failed" },
-                });
-                return true;
-              }
-
-              onProgress({
-                steps: [{ items: [{ status: "pending" }] }],
-                currentStep: { id: "fill" },
-                txHashes: [{ txHash }],
-              });
-
-              return false;
-            } catch (error) {
-              console.error("Status check error:", error);
-              return false;
-            }
-          };
-
-          const checkInterval = setInterval(async () => {
-            const isDone = await pollStatus();
-            if (isDone) {
-              clearInterval(checkInterval);
-            }
-          }, 5000);
-
-          setTimeout(() => {
-            clearInterval(checkInterval);
-            pollStatus();
-          }, 180000);
+          const estimatedDuration = quote.route.estimate?.estimatedRouteDuration || 180;
+          createStatusPoller(txHashResult, estimatedDuration);
         }
 
         return tx;
