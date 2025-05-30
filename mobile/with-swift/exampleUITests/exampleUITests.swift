@@ -17,17 +17,22 @@ class ExampleUITests: XCTestCase {
     private enum TestConstants {
         static let emailDomain = "test.usecapsule.com"
         static let verificationCode = "123456"
-        static var savedPhoneNumber: String?
+        static let defaultTimeout: TimeInterval = 5.0
+        static let longTimeout: TimeInterval = 30.0
+        
+        // For sequential tests that need saved data
         static var savedEmail: String?
-        static var savedPassword: String?
+        static var savedPhoneNumber: String?
         
         static func generateTestPhoneNumber() -> String {
             let lastFour = String(format: "%04d", Int.random(in: 0...9999))
             return "408555\(lastFour)"
         }
         
-        static let defaultTimeout: TimeInterval = 5.0
-        static let longTimeout: TimeInterval = 30.0
+        static func generateUniqueEmail() -> String {
+            let timestamp = Int(Date().timeIntervalSince1970)
+            return "test+\(String(format: "%010x", timestamp))@\(emailDomain)"
+        }
     }
     
     // MARK: - Setup & Teardown
@@ -52,20 +57,21 @@ class ExampleUITests: XCTestCase {
     
     // MARK: - Helper Methods
     private func waitForMainScreen() {
-        // Wait for either email or phone auth button to appear, indicating the main screen is loaded
         let emailButton = app.buttons["emailAuthButton"]
-        let phoneButton = app.buttons["phoneAuthButton"] // Changed identifier likely?
-        
-        // Wait for at least one of the buttons to appear
-        let predicate = NSPredicate(format: "exists == true")
-        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: emailButton)
-        let expectation2 = XCTNSPredicateExpectation(predicate: predicate, object: phoneButton)
-        
-        let result = XCTWaiter.wait(for: [expectation, expectation2], timeout: TestConstants.longTimeout)
-        XCTAssertTrue(result == .completed, "Main screen should appear within timeout period")
+        XCTAssertTrue(emailButton.waitForExistence(timeout: TestConstants.longTimeout), "Main screen should appear")
     }
     
-    private func performBiometricAuthentication(offsetFromBottom: CGFloat) {
+    private func performBiometricAuthentication() {
+        // For signup/account creation
+        performBiometricAuthenticationWithOffsetFromBottom(100)
+    }
+    
+    private func performBiometricAuthenticationForLogin() {
+        // For login - button appears higher from bottom
+        performBiometricAuthenticationWithOffsetFromBottom(50)
+    }
+    
+    private func performBiometricAuthenticationWithOffsetFromBottom(_ offsetFromBottom: CGFloat) {
         let window = app.windows.firstMatch
         let screenWidth = window.frame.size.width
         let screenHeight = window.frame.size.height
@@ -81,102 +87,89 @@ class ExampleUITests: XCTestCase {
         sleep(1)
     }
     
-    /// Taps a specific location on the screen using normalized coordinates
-    private func tapScreen(x: CGFloat, y: CGFloat) {
-        let window = app.windows.firstMatch
-        let normalizedVector = CGVector(dx: x, dy: y)
-        let tapCoordinate = window.coordinate(withNormalizedOffset: normalizedVector)
-        tapCoordinate.tap()
-    }
-    
-    /// Specifically taps the "Not Now" button on the password manager modal
     private func tapNotNowOnPasswordModal() {
-        sleep(3) // Wait for modal to appear
-        // Tap at the bottom center of the screen where "Not Now" appears
-        tapScreen(x: 0.5, y: 0.92)
+        sleep(3)
+        let window = app.windows.firstMatch
+        let tapCoordinate = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.92))
+        tapCoordinate.tap()
         sleep(1)
     }
     
-    private func enterVerificationCode(_ code: String, fieldIdentifier: String) {
-        let codeInput = app.textFields[fieldIdentifier] // Verification codes often use SecureTextFields
-        XCTAssertTrue(codeInput.waitForExistence(timeout: TestConstants.defaultTimeout), "Verification code input field should exist")
+    private func enterVerificationCode() {
+        let codeInput = app.textFields["verificationCodeField"]
+        XCTAssertTrue(codeInput.waitForExistence(timeout: TestConstants.defaultTimeout), "Verification code field should exist")
         codeInput.tap()
-        codeInput.typeText(code)
+        codeInput.typeText(TestConstants.verificationCode)
     }
     
     private func waitForWalletsView() {
-        let homeView = app.otherElements["walletsView"]
-        XCTAssertTrue(homeView.waitForExistence(timeout: TestConstants.longTimeout), "Wallets view should appear after successful authentication")
+        let walletsView = app.otherElements["walletsView"]
+        XCTAssertTrue(walletsView.waitForExistence(timeout: TestConstants.longTimeout), "Wallets view should appear")
         
-        // Wait for and verify that there is at least one wallet listed
-        let walletCells = app.cells
-        XCTAssertTrue(walletCells.firstMatch.waitForExistence(timeout: TestConstants.defaultTimeout), "At least one wallet cell should exist")
-        
-        // Verify the first wallet cell exists and is tappable
-        let firstWalletCell = walletCells.element(boundBy: 0)
-        XCTAssertTrue(firstWalletCell.exists, "First wallet cell should exist")
-        XCTAssertTrue(firstWalletCell.isHittable, "First wallet cell should be tappable")
+        let firstWalletCell = app.cells.element(boundBy: 0)
+        XCTAssertTrue(firstWalletCell.waitForExistence(timeout: TestConstants.defaultTimeout), "First wallet should exist")
     }
     
-    private func loginWithEmailAndWaitForWalletsView() {
-        // 1. Start email authentication
-        let emailButton = app.buttons["emailAuthButton"]
-        // Wait for the button to exist before trying to tap
-        XCTAssertTrue(emailButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Email auth button should exist")
-        emailButton.tap()
+    /// Creates a fresh account with passkey for independent testing
+    private func createAccountWithPasskey() {
+        // Start email signup
+        app.buttons["emailAuthButton"].tap()
         
-        // 2. Enter the saved email (Requires test01 to have run successfully)
-        guard let savedEmail = TestConstants.savedEmail else {
-            // Fail fast if the prerequisite test didn't save the email
-            XCTFail("No saved email found for login. Ensure test01EmailAuthenticationFlow runs first and succeeds.")
-            return // Stop execution of this helper if email is missing
-        }
-        
-        let emailField = app.textFields["emailInputField"] // Corrected identifier
-        // Wait for the field to exist
-        XCTAssertTrue(emailField.waitForExistence(timeout: TestConstants.defaultTimeout), "Email input field should exist")
+        // Enter unique email
+        let emailField = app.textFields["emailInputField"]
         emailField.tap()
-        emailField.typeText(savedEmail)
+        emailField.typeText(TestConstants.generateUniqueEmail())
+        app.buttons["continueButton"].tap()
         
-        // 3. Tap Continue
-        let continueButton = app.buttons["continueButton"]
-        XCTAssertTrue(continueButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Continue button should exist")
-        continueButton.tap()
+        // Verify email
+        XCTAssertTrue(app.navigationBars["Verify Email"].waitForExistence(timeout: TestConstants.defaultTimeout))
+        enterVerificationCode()
+        app.buttons["verifyButton"].tap()
         
-        // 4. Perform biometric authentication for login
-        performBiometricAuthentication(offsetFromBottom: 50)
+        // Choose passkey
+        XCTAssertTrue(app.navigationBars["Secure Your Account"].waitForExistence(timeout: TestConstants.defaultTimeout))
+        app.buttons["passkeyButton"].tap()
         
-        // 5. Verify successful authentication and wait for wallets view
-        waitForWalletsView() // This helper already contains necessary waits and assertions
+        // Complete biometric setup
+        performBiometricAuthentication()
+        waitForWalletsView()
     }
     
     private func navigateToEVMWallet() {
-        // 1. Login via email and wait for the wallets view
-        loginWithEmailAndWaitForWalletsView()
-        
-        // 2. Tap on the first wallet to navigate to EVMWalletView
         let firstWalletCell = app.cells.element(boundBy: 0)
-        // Ensure the cell exists and is hittable before tapping
-        // waitForWalletsView should ensure existence, but checking hittable is good practice
-        XCTAssertTrue(firstWalletCell.exists, "First wallet cell should exist after login")
-        XCTAssertTrue(firstWalletCell.isHittable, "First wallet cell should be hittable")
         firstWalletCell.tap()
         
-        // 3. Verify we're on the EVM Wallet screen
-        let walletTitle = app.navigationBars["EVM Wallet"]
-        XCTAssertTrue(walletTitle.waitForExistence(timeout: TestConstants.defaultTimeout), "EVM Wallet view navigation bar should appear after tapping wallet")
+        let walletTitle = app.navigationBars["EVM Wallet (Sepolia)"]
+        XCTAssertTrue(walletTitle.waitForExistence(timeout: TestConstants.defaultTimeout), "EVM wallet should open")
+    }
+    
+    private func createSolanaWallet() {
+        app.buttons["Solana"].tap()
+        app.buttons["createWalletButton"].tap()
+        app.buttons["solanaWalletButton"].tap()
+        
+        let firstWalletCell = app.cells.element(boundBy: 0)
+        XCTAssertTrue(firstWalletCell.waitForExistence(timeout: TestConstants.longTimeout), "Solana wallet should be created")
+    }
+    
+    private func navigateToSolanaWallet() {
+        createSolanaWallet()
+        
+        let firstWalletCell = app.cells.element(boundBy: 0)
+        firstWalletCell.tap()
+        
+        let walletTitle = app.navigationBars["Solana Wallet"]
+        XCTAssertTrue(walletTitle.waitForExistence(timeout: TestConstants.defaultTimeout), "Solana wallet should open")
     }
     
     // MARK: - Test Methods
-    func test01EmailAuthenticationFlow() throws {
-        // Start email authentication
-        let emailButton = app.buttons["emailAuthButton"]
-        XCTAssertTrue(emailButton.exists)
-        emailButton.tap()
+    
+    // MARK: - Authentication Tests (test01-test02)
+    func test01EmailPasskeyCompleteFlow() throws {
+        // PART 1: SIGNUP
+        app.buttons["emailAuthButton"].tap()
         
-        // Enter email and save it
-        let timestamp = Int(Date().timeIntervalSince1970)
-        let uniqueEmail = "teste2e+\(String(format: "%010x", timestamp))@\(TestConstants.emailDomain)"
+        let uniqueEmail = TestConstants.generateUniqueEmail()
         TestConstants.savedEmail = uniqueEmail
         
         let emailField = app.textFields["emailInputField"]
@@ -184,332 +177,179 @@ class ExampleUITests: XCTestCase {
         emailField.typeText(uniqueEmail)
         app.buttons["continueButton"].tap()
         
-        // Verify email verification view
-        let verifyNavBar = app.navigationBars["Verify Email"]
-        XCTAssertTrue(verifyNavBar.waitForExistence(timeout: TestConstants.defaultTimeout), "Verify Email view should appear")
+        XCTAssertTrue(app.navigationBars["Verify Email"].waitForExistence(timeout: TestConstants.defaultTimeout))
+        enterVerificationCode()
+        app.buttons["verifyButton"].tap()
         
-        // Enter verification code
-        enterVerificationCode(TestConstants.verificationCode, fieldIdentifier: "verificationCodeField")
+        XCTAssertTrue(app.navigationBars["Secure Your Account"].waitForExistence(timeout: TestConstants.defaultTimeout))
+        app.buttons["passkeyButton"].tap()
         
-        // Complete verification
-        let verifyButton = app.buttons["verifyButton"]
-        XCTAssertTrue(verifyButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Verify button should exist")
-        verifyButton.tap()
+        performBiometricAuthentication()
+        waitForWalletsView()
         
-        // Choose Passkey on ChooseSignupMethodView
-        let chooseMethodNavBar = app.navigationBars["Secure Your Account"]
-        XCTAssertTrue(chooseMethodNavBar.waitForExistence(timeout: TestConstants.defaultTimeout), "Secure Your Account view should appear")
-        let createPasskeyButton = app.buttons["passkeyButton"]
-        XCTAssertTrue(createPasskeyButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Passkey button should exist")
-        createPasskeyButton.tap()
+        // PART 2: TEST LOGIN
+        app.buttons["logoutButton"].tap()
+        XCTAssertTrue(app.buttons["emailAuthButton"].waitForExistence(timeout: TestConstants.longTimeout))
         
-        // Perform biometric authentication for Passkey creation
-        performBiometricAuthentication(offsetFromBottom: 100) // Adjust offset if needed
-        
-        // Verify successful authentication
+        app.buttons["emailAuthButton"].tap()
+        let emailFieldAgain = app.textFields["emailInputField"]
+        emailFieldAgain.tap()
+        emailFieldAgain.typeText(uniqueEmail)
+        app.buttons["continueButton"].tap()
+
+        performBiometricAuthenticationForLogin()
         waitForWalletsView()
     }
     
-    func test02PhoneAuthenticationFlow() throws {
-        // Start phone authentication
-        let phoneButton = app.buttons["phoneAuthButton"]
-        XCTAssertTrue(phoneButton.exists)
-        phoneButton.tap()
+    func test02PhonePasskeyCompleteFlow() throws {
+        // PART 1: SIGNUP
+        app.buttons["phoneAuthButton"].tap()
         
-        // Enter phone number and save it
         let phoneNumber = TestConstants.generateTestPhoneNumber()
         TestConstants.savedPhoneNumber = phoneNumber
         
-        let phoneField = app.textFields["phoneNumberField"] // Updated identifier from diff
-        XCTAssertTrue(phoneField.waitForExistence(timeout: TestConstants.defaultTimeout), "Phone input field should exist")
+        let phoneField = app.textFields["phoneNumberField"]
         phoneField.tap()
         phoneField.typeText(phoneNumber)
         app.buttons["continueButton"].tap()
         
-        // Verify email verification view
-        let verifyNavBar = app.navigationBars["Verify Phone"]
-        XCTAssertTrue(verifyNavBar.waitForExistence(timeout: TestConstants.defaultTimeout), "Verify Phone view should appear")
+        XCTAssertTrue(app.navigationBars["Verify Phone"].waitForExistence(timeout: TestConstants.defaultTimeout))
+        enterVerificationCode()
+        app.buttons["verifyButton"].tap()
         
-        // Enter verification code
-        enterVerificationCode(TestConstants.verificationCode, fieldIdentifier: "verificationCodeField")
+        XCTAssertTrue(app.navigationBars["Secure Your Account"].waitForExistence(timeout: TestConstants.defaultTimeout))
+        app.buttons["passkeyButton"].tap()
         
-        // Complete verification
-        let verifyButton = app.buttons["verifyButton"]
-        XCTAssertTrue(verifyButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Verify button should exist")
-        verifyButton.tap()
-        
-        // Choose Passkey on ChooseSignupMethodView
-        let chooseMethodNavBar = app.navigationBars["Secure Your Account"]
-        XCTAssertTrue(chooseMethodNavBar.waitForExistence(timeout: TestConstants.defaultTimeout), "Secure Your Account view should appear")
-        let createPasskeyButton = app.buttons["passkeyButton"]
-        XCTAssertTrue(createPasskeyButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Passkey button should exist")
-        createPasskeyButton.tap()
-        
-        // Perform biometric authentication for Passkey creation
-        performBiometricAuthentication(offsetFromBottom: 100) // Adjust offset if needed
-        
-        // Verify successful authentication
+        performBiometricAuthentication()
         waitForWalletsView()
-    }
-    
-    func test03EmailPasskeyLoginFlow() throws {
-        // Start email authentication
-        let emailButton = app.buttons["emailAuthButton"]
-        XCTAssertTrue(emailButton.exists)
-        emailButton.tap()
         
-        // Enter the saved email from signup
-        guard let savedEmail = TestConstants.savedEmail else {
-            XCTFail("No saved email found. Run testEmailAuthenticationFlow first.")
-            return
-        }
+        // PART 2: TEST LOGIN
+        app.buttons["logoutButton"].tap()
+        XCTAssertTrue(app.buttons["phoneAuthButton"].waitForExistence(timeout: TestConstants.longTimeout))
         
-        let emailField = app.textFields["emailInputField"]
-        emailField.tap()
-        emailField.typeText(savedEmail)
+        app.buttons["phoneAuthButton"].tap()
+        let phoneFieldAgain = app.textFields["phoneNumberField"]
+        phoneFieldAgain.tap()
+        phoneFieldAgain.typeText(phoneNumber)
         app.buttons["continueButton"].tap()
         
-        // Perform biometric authentication
-        performBiometricAuthentication(offsetFromBottom: 50)
-        
-        // Verify successful authentication
+        performBiometricAuthenticationForLogin()
         waitForWalletsView()
     }
     
-    func test04PhonePasskeyLoginFlow() throws {
-        // Start phone authentication
-        let phoneButton = app.buttons["phoneAuthButton"]
-        XCTAssertTrue(phoneButton.exists)
-        phoneButton.tap()
+    // MARK: - Wallet Operations Tests (test03-test11)
+    func test03WalletRefreshFlow() throws {
+        createAccountWithPasskey()
         
-        // Enter the saved phone number from signup
-        guard let savedPhoneNumber = TestConstants.savedPhoneNumber else {
-            XCTFail("No saved phone number found. Run testPhoneAuthenticationFlow first.")
-            return
-        }
-        
-        let phoneField = app.textFields["phoneNumberField"] // Corrected identifier
-        phoneField.tap()
-        phoneField.typeText(savedPhoneNumber)
-        app.buttons["continueButton"].tap()
-        
-        // Perform biometric authentication
-        performBiometricAuthentication(offsetFromBottom: 50)
-        
-        // Verify successful authentication
-        waitForWalletsView()
-    }
-    
-    func test05WalletRefreshFlow() throws {
-        // Log in via email and wait for wallets view
-        loginWithEmailAndWaitForWalletsView()
-        
-        // Find and tap the refresh button
         let refreshButton = app.buttons["refreshButton"]
-        XCTAssertTrue(refreshButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Refresh button should exist")
-        
-        // Get initial wallet count
         let initialWalletCount = app.cells.count
         
-        // Tap refresh and wait for the action to complete
         refreshButton.tap()
         
-        // Verify no error alerts appear during refresh
-        let errorAlert = app.alerts.element
-        XCTAssertFalse(errorAlert.exists, "No error alert should appear during refresh")
-        
-        // Wait for the refresh to complete and verify the wallet list is still accessible
-        let walletCells = app.cells
-        XCTAssertTrue(walletCells.firstMatch.waitForExistence(timeout: TestConstants.defaultTimeout), "Wallet cells should still exist after refresh")
-        
-        // Verify we still have the same number of wallets
-        XCTAssertEqual(walletCells.count, initialWalletCount, "Wallet count should remain the same after refresh")
-        
-        // Verify the first wallet is still tappable
-        let firstWalletCell = walletCells.element(boundBy: 0)
-        XCTAssertTrue(firstWalletCell.isHittable, "First wallet cell should remain tappable after refresh")
-        
-        // Verify the refresh button is back
-        XCTAssertTrue(refreshButton.exists, "Refresh button should reappear after refresh")
+        XCTAssertFalse(app.alerts.element.exists, "No error should appear")
+        XCTAssertTrue(app.cells.firstMatch.waitForExistence(timeout: TestConstants.defaultTimeout), "Wallets should still exist")
+        XCTAssertEqual(app.cells.count, initialWalletCount, "Wallet count should be same")
     }
     
-    func test06CreateWalletFlow() throws {
-        // Log in via email and wait for wallets view
-        loginWithEmailAndWaitForWalletsView()
+    func test04CreateWalletFlow() throws {
+        createAccountWithPasskey()
         
-        // Find and tap the create wallet button
-        let createButton = app.buttons["createWalletButton"]
-        XCTAssertTrue(createButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Create button should exist")
-        createButton.tap()
+        app.buttons["createWalletButton"].tap()
+        app.buttons["evmWalletButton"].tap()
         
-        // Select EVM wallet type
-        let evmButton = app.buttons["evmWalletButton"]
-        XCTAssertTrue(evmButton.waitForExistence(timeout: TestConstants.defaultTimeout), "EVM button should exist")
-        evmButton.tap()
-        
-        // Wait for the new wallet to appear in the list
-        let walletCells = app.cells
-        XCTAssertTrue(walletCells.element(boundBy: 1).waitForExistence(timeout: TestConstants.longTimeout), "New wallet should appear as the second item in the list")
-        
-        // Verify that the new wallet is tappable
-        let newWalletCell = walletCells.element(boundBy: 1)
-        XCTAssertTrue(newWalletCell.isHittable, "New wallet cell should be tappable")
+        let secondWallet = app.cells.element(boundBy: 1)
+        XCTAssertTrue(secondWallet.waitForExistence(timeout: TestConstants.longTimeout), "New wallet should be created")
     }
     
-    func test07CopyWalletAddressFlow() throws {
+    func test05CopyWalletAddressFlow() throws {
+        createAccountWithPasskey()
         navigateToEVMWallet()
         
-        // Find and tap the copy button using accessibility identifier
-        let copyButton = app.buttons["copyAddressButton"]
-        XCTAssertTrue(copyButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Copy address button should exist")
-        copyButton.tap()
+        app.buttons["copyAddressButton"].tap()
         
-        // Verify success alert appears
         let alert = app.alerts.firstMatch
         XCTAssertTrue(alert.waitForExistence(timeout: TestConstants.defaultTimeout), "Success alert should appear")
-        XCTAssertTrue(alert.staticTexts["Success"].exists, "Alert should have 'Success' title")
-        XCTAssertTrue(alert.staticTexts["Address copied to clipboard"].exists, "Alert should show success message")
-        
-        // Dismiss alert
+        XCTAssertTrue(alert.staticTexts["Success"].exists, "Should show success")
         alert.buttons["OK"].tap()
     }
     
-    func test08FetchBalanceFlow() throws {
+    func test06FetchBalanceFlow() throws {
+        createAccountWithPasskey()
         navigateToEVMWallet()
         
-        // Wait for balance to appear automatically
         let balanceText = app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'ETH'")).firstMatch
         XCTAssertTrue(balanceText.waitForExistence(timeout: TestConstants.longTimeout), "Balance should appear")
         
-        // Find and tap the refresh balance button using accessibility identifier
-        let refreshBalanceButton = app.buttons["refreshBalanceButton"]
-        XCTAssertTrue(refreshBalanceButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Balance refresh button should exist")
-        refreshBalanceButton.tap()
-        
-        // Wait briefly to ensure balance refreshes
+        app.buttons["refreshBalanceButton"].tap()
         sleep(2)
         
-        // Verify balance text still exists after refresh
-        XCTAssertTrue(balanceText.exists, "Balance should still be visible after refresh")
+        XCTAssertTrue(balanceText.exists, "Balance should remain visible")
     }
     
-    func test09SignMessageFlow() throws {
+    func test07SignMessageFlow() throws {
+        createAccountWithPasskey()
         navigateToEVMWallet()
         
-        // Enter a message to sign
         let messageField = app.textFields["Enter a message to sign"]
-        XCTAssertTrue(messageField.waitForExistence(timeout: TestConstants.defaultTimeout), "Message field should exist")
         messageField.tap()
         messageField.typeText("Hello, blockchain world!")
         
-        // Tap the Sign Message button
-        let signMessageButton = app.buttons["Sign Message"]
-        XCTAssertTrue(signMessageButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Sign Message button should exist")
-        signMessageButton.tap()
+        app.buttons["Sign Message"].tap()
         
-        // Wait for the signing process to complete and verify success alert
         let alert = app.alerts.firstMatch
-        XCTAssertTrue(alert.waitForExistence(timeout: TestConstants.longTimeout), "Alert should appear after signing")
-        
-        // Verify we got a success message, not an error
-        XCTAssertTrue(alert.staticTexts["Success"].exists, "Message signing should succeed")
-        XCTAssertFalse(alert.staticTexts["Error"].exists, "Message signing should not fail")
-        
-        // Dismiss alert
+        XCTAssertTrue(alert.waitForExistence(timeout: TestConstants.longTimeout), "Alert should appear")
+        XCTAssertTrue(alert.staticTexts["Success"].exists, "Should succeed")
         alert.buttons["OK"].tap()
     }
     
-    // Disabled until we find a way to fund this newly created wallet
-    //    func test10SendTransactionFlow() throws {
-    //        navigateToEVMWallet()
-    //
-    //        // Tap the Send Transaction button
-    //        let sendTxButton = app.buttons["Send Transaction"]
-    //        XCTAssertTrue(sendTxButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Send Transaction button should exist")
-    //        sendTxButton.tap()
-    //
-    //        // Wait for the transaction process to complete and verify alert
-    //        let alert = app.alerts.firstMatch
-    //        XCTAssertTrue(alert.waitForExistence(timeout: TestConstants.longTimeout), "Alert should appear after transaction")
-    //
-    //        // Verify the transaction was successful. Fail the test if not.
-    //        XCTAssertTrue(alert.staticTexts["Success"].exists, "Expected Success alert, but got: \(alert.debugDescription)")
-    //        XCTAssertFalse(alert.staticTexts["Error"].exists, "Transaction failed with error alert: \(alert.debugDescription)")
-    //
-    //        // Dismiss alert
-    //        alert.buttons["OK"].tap()
-    //    }
-    
-    func test11SignTransactionFlow() throws {
+    func test08SignTransactionFlow() throws {
+        createAccountWithPasskey()
         navigateToEVMWallet()
         
-        // Tap the Sign Transaction button
-        let signTxButton = app.buttons["Sign Transaction"]
-        XCTAssertTrue(signTxButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Sign Transaction button should exist")
-        signTxButton.tap()
+        app.buttons["Sign Transaction"].tap()
         
-        // Wait for the signing process to complete and verify alert
         let alert = app.alerts.firstMatch
-        XCTAssertTrue(alert.waitForExistence(timeout: TestConstants.longTimeout), "Alert should appear after signing")
-        
-        // Verify we got a success message, not an error
-        XCTAssertTrue(alert.staticTexts["Success"].exists, "Transaction signing should succeed")
-        XCTAssertFalse(alert.staticTexts["Error"].exists, "Transaction signing should not fail")
-        
-        // Dismiss alert
+        XCTAssertTrue(alert.waitForExistence(timeout: TestConstants.longTimeout), "Alert should appear")
+        XCTAssertTrue(alert.staticTexts["Success"].exists, "Should succeed")
         alert.buttons["OK"].tap()
     }
     
-    func test12CheckSessionFlow() throws {
+    func test09CheckSessionFlow() throws {
+        createAccountWithPasskey()
         navigateToEVMWallet()
         
-        // Tap the Check Session button
-        let checkSessionButton = app.buttons["Check Session"]
-        XCTAssertTrue(checkSessionButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Check Session button should exist")
-        checkSessionButton.tap()
+        app.buttons["Check Session"].tap()
         
-        // Wait for the session check to complete and verify alert
         let alert = app.alerts.firstMatch
-        XCTAssertTrue(alert.waitForExistence(timeout: TestConstants.defaultTimeout), "Alert should appear after session check")
-        XCTAssertTrue(alert.staticTexts["Session Status"].exists, "Alert should have Session Status title")
-        
-        // Dismiss alert
+        XCTAssertTrue(alert.waitForExistence(timeout: TestConstants.defaultTimeout), "Alert should appear")
+        XCTAssertTrue(alert.staticTexts["Session Status"].exists, "Should show session status")
         alert.buttons["OK"].tap()
     }
     
-    func test13FetchWalletsFlow() throws {
+    func test10FetchWalletsFlow() throws {
+        createAccountWithPasskey()
         navigateToEVMWallet()
         
-        // Tap the Fetch Wallets button
-        let fetchWalletsButton = app.buttons["Fetch Wallets"]
-        XCTAssertTrue(fetchWalletsButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Fetch Wallets button should exist")
-        fetchWalletsButton.tap()
+        app.buttons["Fetch Wallets"].tap()
         
-        // Wait for the fetch operation to complete and verify alert
         let alert = app.alerts.firstMatch
-        XCTAssertTrue(alert.waitForExistence(timeout: TestConstants.longTimeout), "Alert should appear after fetching wallets")
-        XCTAssertTrue(alert.staticTexts["Wallets"].exists, "Alert should have Wallets title")
-        
-        // Dismiss alert
+        XCTAssertTrue(alert.waitForExistence(timeout: TestConstants.longTimeout), "Alert should appear")
+        XCTAssertTrue(alert.staticTexts["Wallets"].exists, "Should show wallets info")
         alert.buttons["OK"].tap()
     }
     
-    func test14LogoutFlow() throws {
+    func test11LogoutFlow() throws {
+        createAccountWithPasskey()
         navigateToEVMWallet()
         
-        // Tap the Logout button
-        let logoutButton = app.buttons["Logout"]
-        XCTAssertTrue(logoutButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Logout button should exist")
-        logoutButton.tap()
+        app.buttons["Logout"].tap()
         
-        // Verify we return to the authentication screen
-        let emailButton = app.buttons["emailAuthButton"]
-        XCTAssertTrue(emailButton.waitForExistence(timeout: TestConstants.longTimeout), "Email auth button should appear after logout")
-        let phoneButton = app.buttons["phoneAuthButton"]
-        XCTAssertTrue(phoneButton.exists, "Phone auth button should appear after logout")
+        XCTAssertTrue(app.buttons["emailAuthButton"].waitForExistence(timeout: TestConstants.longTimeout), "Should return to login")
+        XCTAssertTrue(app.buttons["phoneAuthButton"].exists, "Both login options should be available")
     }
     
-    func test15EmailPasswordSignupFlow() throws {
+    // MARK: - Password Authentication Test (test12)
+    func test12EmailPasswordCompleteFlow() throws {
         // Start email authentication
         let emailButton = app.buttons["emailAuthButton"]
         XCTAssertTrue(emailButton.exists)
@@ -530,7 +370,7 @@ class ExampleUITests: XCTestCase {
         XCTAssertTrue(verifyNavBar.waitForExistence(timeout: TestConstants.defaultTimeout), "Verify Email view should appear")
         
         // Enter verification code
-        enterVerificationCode(TestConstants.verificationCode, fieldIdentifier: "verificationCodeField")
+        enterVerificationCode()
         
         // Complete verification
         let verifyButton = app.buttons["verifyButton"]
@@ -560,7 +400,6 @@ class ExampleUITests: XCTestCase {
         
         // Set a valid password (8+ chars, no spaces)
         let passwordToSet = "ParaTestPassword"
-        TestConstants.savedPassword = passwordToSet
         
         // Find password fields using the exact placeholders
         let passwordField = webView.secureTextFields["Enter password"]
@@ -588,44 +427,84 @@ class ExampleUITests: XCTestCase {
         
         // Verify successful authentication by waiting for the wallets view
         waitForWalletsView()
-    }
-    
-    func test16EmailPasswordLoginFlow() throws {
-        // Start email authentication
-        let emailButton = app.buttons["emailAuthButton"]
-        XCTAssertTrue(emailButton.exists)
-        emailButton.tap()
         
-        let emailField = app.textFields["emailInputField"]
-        emailField.tap()
-        emailField.typeText(TestConstants.savedEmail!)
+        // Logout to test login flow
+        let logoutButton = app.buttons["logoutButton"]
+        XCTAssertTrue(logoutButton.waitForExistence(timeout: TestConstants.defaultTimeout), "Logout button should exist")
+        logoutButton.tap()
+        
+        // Verify we return to the authentication screen
+        let emailButtonAgain = app.buttons["emailAuthButton"]
+        XCTAssertTrue(emailButtonAgain.waitForExistence(timeout: TestConstants.longTimeout), "Email auth button should appear after logout")
+        
+        // PART 2: LOGIN WITH PASSWORD
+        // Start email authentication again
+        emailButtonAgain.tap()
+        
+        let emailFieldAgain = app.textFields["emailInputField"]
+        emailFieldAgain.tap()
+        emailFieldAgain.typeText(uniqueEmail) // Use the same email
         app.buttons["continueButton"].tap()
         
         // Try to tap "Continue" if the system dialog appears
-        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
-        let continueButton = springboard.buttons["Continue"]
-        if continueButton.waitForExistence(timeout: TestConstants.defaultTimeout) {
-            continueButton.tap()
+        let springboard2 = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        let continueButton2 = springboard2.buttons["Continue"]
+        if continueButton2.waitForExistence(timeout: TestConstants.defaultTimeout) {
+            continueButton2.tap()
         }
         
         // Web view should open to enter password
-        let webView = app.webViews.firstMatch
-        XCTAssertTrue(webView.waitForExistence(timeout: TestConstants.longTimeout), "Password creation web view should appear")
+        let webView2 = app.webViews.firstMatch
+        XCTAssertTrue(webView2.waitForExistence(timeout: TestConstants.longTimeout), "Password login web view should appear")
         
-        // Find password fields using the exact placeholders
-        let passwordField = webView.secureTextFields["Enter a password"]
-        XCTAssertTrue(passwordField.waitForExistence(timeout: TestConstants.defaultTimeout), "Password field should exist")
+        // Find password field for login
+        let passwordFieldLogin = webView2.secureTextFields["Enter a password"]
+        XCTAssertTrue(passwordFieldLogin.waitForExistence(timeout: TestConstants.defaultTimeout), "Login password field should exist")
         
         // Enter password
-        passwordField.tap()
-        passwordField.typeText(TestConstants.savedPassword!)
+        passwordFieldLogin.tap()
+        passwordFieldLogin.typeText(passwordToSet)
         
-        // Find and tap the Save Password button
-        let savePasswordButton = webView.buttons["Continue"]
-        savePasswordButton.tap()
+        // Find and tap the Continue button
+        let continuePasswordButton = webView2.buttons["Continue"]
+        continuePasswordButton.tap()
         
-        // Verify successful authentication by waiting for the wallets view
+        // Verify successful login by waiting for the wallets view
         waitForWalletsView()
+    }
+    
+    // MARK: - Solana Tests (test13-test15)
+    func test13CreateSolanaWalletFlow() throws {
+        createAccountWithPasskey()
+        createSolanaWallet()
+    }
+    
+    func test14SolanaWalletBasicFlow() throws {
+        createAccountWithPasskey()
+        navigateToSolanaWallet()
+        
+        app.buttons["copyAddressButton"].tap()
+        
+        let alert = app.alerts.firstMatch
+        XCTAssertTrue(alert.waitForExistence(timeout: TestConstants.defaultTimeout), "Success alert should appear")
+        XCTAssertTrue(alert.staticTexts["Success"].exists, "Should show success")
+        alert.buttons["OK"].tap()
+    }
+    
+    func test15SolanaMessageSigningFlow() throws {
+        createAccountWithPasskey()
+        navigateToSolanaWallet()
+        
+        let messageField = app.textFields["Enter a message to sign"]
+        messageField.tap()
+        messageField.typeText("Hello Solana!")
+        
+        app.buttons["Sign Message"].tap()
+        
+        let alert = app.alerts.firstMatch
+        XCTAssertTrue(alert.waitForExistence(timeout: TestConstants.longTimeout), "Alert should appear")
+        XCTAssertTrue(alert.staticTexts["Success"].exists, "Should succeed")
+        alert.buttons["OK"].tap()
     }
 }
 

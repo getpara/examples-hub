@@ -6,7 +6,6 @@ import os
 struct ExampleApp: App {
     private let logger = Logger(subsystem: "com.usecapsule.example.swift", category: "ExampleApp")
     @StateObject private var paraManager: ParaManager
-    @StateObject private var paraEvmSigner: ParaEvmSigner
     @StateObject private var appRootManager = AppRootManager()
     @StateObject private var metaMaskConnector: MetaMaskConnector
     
@@ -18,10 +17,6 @@ struct ExampleApp: App {
         // Initialize Para manager
         let paraManager = ParaManager(environment: config.environment, apiKey: config.apiKey, deepLink: bundleId)
         _paraManager = StateObject(wrappedValue: paraManager)
-        
-        // Initialize EVM signer
-        let signer = try! ParaEvmSigner(paraManager: paraManager, rpcUrl: config.rpcUrl, walletId: nil)
-        _paraEvmSigner = StateObject(wrappedValue: signer)
         
         // Initialize MetaMask Connector with configuration
         let metaMaskConfig = MetaMaskConfig(appName: "ExampleApp", appId: bundleId, apiVersion: "1.0")
@@ -44,7 +39,6 @@ struct ExampleApp: App {
                     WalletsView()
                         .environmentObject(paraManager)
                         .environmentObject(appRootManager)
-                        .environmentObject(paraEvmSigner)
                         .environmentObject(metaMaskConnector)
                 }
             }

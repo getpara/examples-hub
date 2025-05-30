@@ -6,10 +6,9 @@ import BigInt
 
 struct EVMWalletView: View {
     @EnvironmentObject var paraManager: ParaManager
-    @EnvironmentObject var paraEvmSigner: ParaEvmSigner
     @EnvironmentObject var appRootManager: AppRootManager
     
-    let selectedWallet: Wallet
+    let selectedWallet: ParaSwift.Wallet
     
     @State private var messageToSign = ""
     @State private var result: (title: String, message: String)?
@@ -19,7 +18,12 @@ struct EVMWalletView: View {
     @State private var isLoading = false
     @State private var balance: String?
     
+    @State private var paraEvmSigner: ParaEvmSigner?
+    
     private let web3: Web3
+    
+    // Sepolia RPC URL (testnet for testing)
+    private let rpcUrl = "https://sepolia.infura.io/v3/961364684c7346c080994baab1469ea8"
     
     // Helper function to measure operation time
     private func measureTime(_ operation: () async throws -> Void) async -> (TimeInterval, Error?) {
@@ -32,7 +36,7 @@ struct EVMWalletView: View {
         }
     }
     
-    init(selectedWallet: Wallet) {
+    init(selectedWallet: ParaSwift.Wallet) {
         self.selectedWallet = selectedWallet
         // Initialize web3 with error handling in the view
         if let url = URL(string: "https://sepolia.infura.io/v3/961364684c7346c080994baab1469ea8") {
@@ -63,11 +67,15 @@ struct EVMWalletView: View {
     
     private func signTransaction() {
         guard let transaction = createTransaction(value: "1000000000") else { return }
+        guard let signer = paraEvmSigner else {
+            result = ("Error", "EVM signer not initialized")
+            return
+        }
         
         isLoading = true
         Task {
             let (duration, error) = await measureTime {
-                _ = try await paraEvmSigner.signTransaction(transactionB64: transaction.b64Encoded())
+                try await signer.signTransaction(transactionB64: transaction.b64Encoded())
             }
             
             if let error = error {
@@ -81,17 +89,61 @@ struct EVMWalletView: View {
     
     private func sendTransaction() {
         guard let transaction = createTransaction(value: "100000000000000") else { return }
+        guard let signer = paraEvmSigner else {
+            result = ("Error", "EVM signer not initialized")
+            return
+        }
+        
+        // Check if we have balance info and sufficient funds
+        if let balanceString = balance {
+            // Extract numeric value from balance string (e.g., "0.0001 ETH" -> 0.0001)
+            let balanceValue = balanceString.replacingOccurrences(of: " ETH", with: "")
+            if let balanceDouble = Double(balanceValue) {
+                let transactionETH = 0.0001 // Amount being sent
+                let estimatedGas = 0.00006 // Estimated gas fee (~21000 gas * 3 gwei)
+                let requiredETH = transactionETH + estimatedGas
+                
+                if balanceDouble < requiredETH {
+                    result = ("Insufficient Balance", 
+                             "You need at least \(String(format: "%.6f", requiredETH)) ETH to send this transaction.\n\n" +
+                             "Current balance: \(balanceString)\n" +
+                             "Transaction amount: \(String(format: "%.4f", transactionETH)) ETH\n" +
+                             "Estimated gas fee: \(String(format: "%.6f", estimatedGas)) ETH\n\n" +
+                             "To fund your wallet on Sepolia:\n" +
+                             "1. Copy your wallet address\n" +
+                             "2. Visit a Sepolia faucet\n" +
+                             "3. Request test ETH")
+                    return
+                }
+            }
+        }
         
         isLoading = true
         Task {
             let (duration, error) = await measureTime {
-                _ = try await paraEvmSigner.sendTransaction(transactionB64: transaction.b64Encoded())
+                try await signer.sendTransaction(transactionB64: transaction.b64Encoded())
             }
             
             if let error = error {
-                self.result = ("Error", "Failed to send transaction: \(error.localizedDescription)\nDuration: \(String(format: "%.2f", duration))s")
+                let errorMessage = error.localizedDescription
+                if errorMessage.contains("insufficient") || errorMessage.contains("balance") || errorMessage.contains("funds") {
+                    self.result = ("Insufficient Balance", 
+                                 "Transaction failed due to insufficient balance.\n\n" +
+                                 "To fund your wallet on Sepolia:\n" +
+                                 "1. Copy your wallet address\n" +
+                                 "2. Visit https://sepoliafaucet.com\n" +
+                                 "3. Paste your address and request ETH\n\n" +
+                                 "Other faucets:\n" +
+                                 "• https://www.alchemy.com/faucets/ethereum-sepolia\n" +
+                                 "• https://faucets.chain.link/sepolia\n\n" +
+                                 "Duration: \(String(format: "%.2f", duration))s")
+                } else {
+                    self.result = ("Error", "Failed to send transaction: \(errorMessage)\nDuration: \(String(format: "%.2f", duration))s")
+                }
             } else {
                 self.result = ("Success", "Transaction sent successfully\nDuration: \(String(format: "%.2f", duration))s")
+                // Refresh balance after successful transaction
+                fetchBalance()
             }
             isLoading = false
         }
@@ -165,11 +217,11 @@ struct EVMWalletView: View {
                     .background(Color(.systemGray6))
                     .cornerRadius(10)
                     
-                    if balance != nil {
+                    if let balanceString = balance {
                         HStack {
                             Text("Balance:")
                                 .foregroundColor(.secondary)
-                            Text(balance!)
+                            Text(balanceString)
                                 .bold()
                             Spacer()
                             Button(action: fetchBalance) {
@@ -179,6 +231,31 @@ struct EVMWalletView: View {
                             .accessibilityIdentifier("refreshBalanceButton")
                         }
                         .padding(.vertical, 8)
+                        
+                        // Show fund wallet button if balance is zero or very low
+                        let balanceValue = balanceString.replacingOccurrences(of: " ETH", with: "")
+                        if let balanceDouble = Double(balanceValue), balanceDouble < 0.001 {
+                            Button(action: {
+                                if let address = selectedWallet.address {
+                                    UIPasteboard.general.string = address
+                                    result = ("Wallet Address Copied", 
+                                             "Your address has been copied to clipboard.\n\n" +
+                                             "To fund your wallet on Sepolia testnet:\n" +
+                                             "1. Visit https://sepoliafaucet.com\n" +
+                                             "2. Paste your address: \(address)\n" +
+                                             "3. Request test ETH\n\n" +
+                                             "Alternative faucets:\n" +
+                                             "• https://www.alchemy.com/faucets/ethereum-sepolia\n" +
+                                             "• https://faucets.chain.link/sepolia\n\n" +
+                                             "Note: Sepolia ETH has no real value")
+                                }
+                            }) {
+                                Label("Fund Wallet (Sepolia)", systemImage: "plus.circle.fill")
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .controlSize(.small)
+                            .frame(maxWidth: .infinity)
+                        }
                     } else {
                         Button("Fetch Balance") {
                             fetchBalance()
@@ -339,7 +416,7 @@ struct EVMWalletView: View {
             }
             .padding()
         }
-        .navigationTitle("EVM Wallet")
+        .navigationTitle("EVM Wallet (Sepolia)")
         .alert(item: Binding(
             get: { result.map { AlertItem(title: $0.title, message: $0.message) } },
             set: { _ in result = nil }
@@ -354,10 +431,22 @@ struct EVMWalletView: View {
             Task {
                 isLoading = true
                 do {
-                    try await paraEvmSigner.selectWallet(walletId: selectedWallet.id)
-                    fetchBalance()
+                    // Initialize Para EVM signer
+                    let signer = try ParaEvmSigner(
+                        paraManager: paraManager,
+                        rpcUrl: rpcUrl,
+                        walletId: nil
+                    )
+                    
+                    // Select the wallet for this signer
+                    try await signer.selectWallet(walletId: selectedWallet.id)
+                    
+                    await MainActor.run {
+                        self.paraEvmSigner = signer
+                        fetchBalance()
+                    }
                 } catch {
-                    result = ("Error", "Failed to select wallet: \(error.localizedDescription)")
+                    result = ("Error", "Failed to initialize EVM signer: \(error.localizedDescription)")
                 }
                 isLoading = false
             }
@@ -384,7 +473,7 @@ private struct AlertItem: Identifiable {
 
 #Preview {
     let mockParaManager = ParaManager(environment: .sandbox, apiKey: "preview-key")
-    let mockWallet = Wallet(
+    let mockWallet = ParaSwift.Wallet(
         id: "preview-wallet-id",
         signer: "mock-signer",
         address: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
@@ -394,11 +483,6 @@ private struct AlertItem: Identifiable {
     NavigationStack {
         EVMWalletView(selectedWallet: mockWallet)
             .environmentObject(mockParaManager)
-            .environmentObject(try! ParaEvmSigner(
-                paraManager: mockParaManager,
-                rpcUrl: "https://sepolia.infura.io/v3/961364684c7346c080994baab1469ea8",
-                walletId: mockWallet.id
-            ))
             .environmentObject(AppRootManager())
     }
 }
