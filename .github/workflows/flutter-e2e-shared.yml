@@ -1,0 +1,110 @@
+name: Flutter E2E Tests (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        required: false
+        type: string
+        default: 'mobile/with-flutter'
+      flutter-sdk-override:
+        required: false
+        type: string
+        default: ''
+        description: 'Git branch/ref to override flutter-sdk dependency'
+    secrets:
+      PARA_API_KEY:
+        required: true
+
+jobs:
+  run-flutter-e2e:
+    runs-on: macos-latest
+    steps:
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
+          
+      - name: Setup iOS Simulator
+        run: |
+          echo "📱 Starting iOS Simulator..."
+          # List available devices and find iPhone 16 Pro
+          DEVICE_ID=$(xcrun simctl list devices | grep "iPhone 16 Pro" | grep -v "unavailable" | head -n 1 | grep -o "[A-F0-9-]\{36\}" || true)
+          if [ -z "$DEVICE_ID" ]; then
+            echo "⚠️ iPhone 16 Pro not found, using default iOS device"
+            DEVICE_ID=$(xcrun simctl list devices | grep "iPhone" | grep -v "unavailable" | head -n 1 | grep -o "[A-F0-9-]\{36\}")
+          fi
+          echo "🚀 Booting device: $DEVICE_ID"
+          xcrun simctl boot "$DEVICE_ID" || true
+          sleep 10
+          xcrun simctl list devices | grep Booted
+          
+      - name: Install Appium
+        run: |
+          echo "🔧 Installing Appium and XCUITest driver..."
+          npm install -g appium@2.0.0
+          appium driver install xcuitest
+          appium driver list --installed
+          
+      - name: Start Appium Server
+        run: |
+          echo "🌐 Starting Appium server..."
+          appium server --port 4723 --log-level info &
+          sleep 5
+          echo "✅ Appium server started on port 4723"
+          
+      - name: Override Flutter SDK dependency (if specified)
+        if: ${{ inputs.flutter-sdk-override != '' }}
+        working-directory: ${{ inputs.working-directory }}
+        run: |
+          echo "🔄 Overriding Flutter SDK dependency to: ${{ inputs.flutter-sdk-override }}"
+          cat > pubspec_overrides.yaml << EOF
+          dependency_overrides:
+            para:
+              git:
+                url: https://github.com/getpara/flutter-sdk.git
+                ref: ${{ inputs.flutter-sdk-override }}
+          EOF
+          echo "📄 Created pubspec_overrides.yaml:"
+          cat pubspec_overrides.yaml
+          
+      - name: Flutter Dependencies & Analysis
+        working-directory: ${{ inputs.working-directory }}
+        run: |
+          echo "📦 Installing Flutter dependencies..."
+          flutter pub get
+          echo "🔍 Running Flutter analysis..."
+          flutter analyze
+          
+      - name: Verify Flutter SDK Override
+        if: ${{ inputs.flutter-sdk-override != '' }}
+        working-directory: ${{ inputs.working-directory }}
+        run: |
+          echo "🔍 Verifying Flutter SDK dependency override..."
+          flutter pub deps | grep -A 5 "para" || true
+          
+      - name: Run Flutter E2E Tests
+        working-directory: ${{ inputs.working-directory }}/test_e2e
+        env:
+          PARA_API_KEY: ${{ secrets.PARA_API_KEY }}
+        run: |
+          echo "🧪 Running Flutter E2E tests..."
+          dart run tool/run_tests.dart
+          
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-e2e-results-${{ github.run_id }}
+          path: |
+            ${{ inputs.working-directory }}/test_e2e/test-results/
+            ${{ inputs.working-directory }}/test_e2e/*.log
+          retention-days: 30
+          
+      - name: Upload Test Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-e2e-screenshots-${{ github.run_id }}
+          path: ${{ inputs.working-directory }}/test_e2e/screenshots/
+          retention-days: 7

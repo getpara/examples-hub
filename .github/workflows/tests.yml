@@ -3,6 +3,12 @@ name: Tests
 on:
   pull_request:
     branches: [main]
+    paths:
+      - 'mobile/with-flutter/**'
+      - 'web/**'
+      - 'server/**'
+      - 'specialized/**'
+      - '.github/workflows/**'
   workflow_dispatch:
 
 env:
@@ -836,3 +842,59 @@ jobs:
             cat failed_projects.txt | sed 's/^/  - /'
             exit 1
           fi
+
+  build-mobile-flutter-e2e:
+    runs-on: macos-latest
+    env:
+      PROJECT_DIR: "mobile/with-flutter"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
+      - name: Setup iOS Simulator
+        run: |
+          echo "📱 Starting iOS Simulator..."
+          # List available devices and find iPhone 16 Pro
+          DEVICE_ID=$(xcrun simctl list devices | grep "iPhone 16 Pro" | grep -v "unavailable" | head -n 1 | grep -o "[A-F0-9-]\{36\}" || true)
+          if [ -z "$DEVICE_ID" ]; then
+            echo "⚠️ iPhone 16 Pro not found, using default iOS device"
+            DEVICE_ID=$(xcrun simctl list devices | grep "iPhone" | grep -v "unavailable" | head -n 1 | grep -o "[A-F0-9-]\{36\}")
+          fi
+          echo "🚀 Booting device: $DEVICE_ID"
+          xcrun simctl boot "$DEVICE_ID" || true
+          sleep 10
+          xcrun simctl list devices | grep Booted
+      - name: Install Appium
+        run: |
+          echo "🔧 Installing Appium and XCUITest driver..."
+          npm install -g appium@2.0.0
+          appium driver install xcuitest
+          appium driver list --installed
+      - name: Start Appium Server
+        run: |
+          echo "🌐 Starting Appium server..."
+          appium server --port 4723 --log-level info &
+          sleep 5
+          echo "✅ Appium server started on port 4723"
+      - name: Flutter Dependencies & Analysis
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: |
+          echo "📦 Installing Flutter dependencies..."
+          flutter pub get
+          echo "🔍 Running Flutter analysis..."
+          flutter analyze
+      - name: Run Flutter E2E Tests
+        working-directory: ${{ env.PROJECT_DIR }}/test_e2e
+        env:
+          PARA_API_KEY: ${{ secrets.PARA_API_KEY }}
+        run: |
+          echo "🧪 Running Flutter E2E tests..."
+          dart run tool/run_tests.dart
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-e2e-results
+          path: ${{ env.PROJECT_DIR }}/test_e2e/test-results/
