@@ -1,4 +1,4 @@
-import { Connection, Transaction, VersionedTransaction } from '@solana/web3.js';
+import { Connection, Transaction, VersionedTransaction, PublicKey } from '@solana/web3.js';
 import { base64ToBytes } from '@metamask/utils';
 import { ParaSolanaWeb3Signer } from '@getpara/solana-web3.js-v1-integration';
 import { ParaWeb } from '@getpara/web-sdk';
@@ -178,6 +178,88 @@ export async function solanaWeb3SendTransaction(args: SolanaSendTransactionArgs)
     return signature;
   } catch (err) {
     logger.error('solanaSendTransaction - Error:', formatError(err));
+    throw err;
+  }
+}
+
+export async function solanaWeb3GetBalance(args: { address: string }) {
+  try {
+    const { address } = args;
+    logger.info('solanaWeb3GetBalance called for address:', address);
+
+    const solanaSigner = window['solanaSigner'] as ParaSolanaWeb3Signer;
+    if (!solanaSigner) {
+      const errorMsg = 'solanaWeb3GetBalance - No solanaSigner found in window.';
+      logger.error(errorMsg);
+      throw new Error(errorMsg);
+    }
+
+    // Access the connection from the signer
+    const connection = (solanaSigner as any).connection;
+    if (!connection) {
+      const errorMsg = 'solanaWeb3GetBalance - No connection found in solanaSigner.';
+      logger.error(errorMsg);
+      throw new Error(errorMsg);
+    }
+
+    let publicKey;
+    try {
+      publicKey = new PublicKey(address);
+    } catch (pkErr) {
+      logger.error('Error creating PublicKey in solanaWeb3GetBalance:', formatError(pkErr));
+      throw pkErr;
+    }
+
+    let balance;
+    try {
+      balance = await connection.getBalance(publicKey);
+    } catch (balErr) {
+      logger.error('Error getting balance in solanaWeb3GetBalance:', formatError(balErr));
+      throw balErr;
+    }
+
+    logger.info('solanaWeb3GetBalance completed successfully. Balance:', balance);
+    return balance.toString();
+  } catch (err) {
+    logger.error('solanaWeb3GetBalance - Error:', formatError(err));
+    throw err;
+  }
+}
+
+export async function solanaWeb3GetRecentBlockhash() {
+  try {
+    logger.info('solanaWeb3GetRecentBlockhash called');
+
+    const solanaSigner = window['solanaSigner'] as ParaSolanaWeb3Signer;
+    if (!solanaSigner) {
+      const errorMsg = 'solanaWeb3GetRecentBlockhash - No solanaSigner found in window.';
+      logger.error(errorMsg);
+      throw new Error(errorMsg);
+    }
+
+    // Access the connection from the signer
+    const connection = (solanaSigner as any).connection;
+    if (!connection) {
+      const errorMsg = 'solanaWeb3GetRecentBlockhash - No connection found in solanaSigner.';
+      logger.error(errorMsg);
+      throw new Error(errorMsg);
+    }
+
+    let result;
+    try {
+      result = await connection.getLatestBlockhash('finalized');
+    } catch (bhErr) {
+      logger.error('Error getting blockhash in solanaWeb3GetRecentBlockhash:', formatError(bhErr));
+      throw bhErr;
+    }
+
+    logger.info('solanaWeb3GetRecentBlockhash completed successfully. Blockhash:', result.blockhash);
+    return {
+      blockhash: result.blockhash,
+      lastValidBlockHeight: result.lastValidBlockHeight,
+    };
+  } catch (err) {
+    logger.error('solanaWeb3GetRecentBlockhash - Error:', formatError(err));
     throw err;
   }
 }

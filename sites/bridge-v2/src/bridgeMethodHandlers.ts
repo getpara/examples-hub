@@ -13,6 +13,8 @@ import {
   solanaWeb3SendTransaction,
   solanaWeb3SignTransaction,
   solanaWeb3SignVersionedTransaction,
+  solanaWeb3GetBalance,
+  solanaWeb3GetRecentBlockhash,
 } from './signers/solanaWeb3Signer';
 import { initCosmJsSigners, cosmJsSignAmino, cosmJsSignDirect } from './signers/cosmjsSigner';
 import { loginWithPasskey, generatePasskey, verifyWebChallenge } from './bridgeAuth';
@@ -178,6 +180,16 @@ export const bridgeMethodHandlers: Record<string, (para: ParaWeb, args: any) => 
     logger.info('Signing Solana versioned transaction...');
     const txResponse = await solanaWeb3SignVersionedTransaction(args);
     return txResponse;
+  },
+  solanaWeb3GetBalance: async (_, args: { address: string }) => {
+    logger.info('Getting Solana balance...');
+    const balance = await solanaWeb3GetBalance(args);
+    return balance;
+  },
+  solanaWeb3GetRecentBlockhash: async () => {
+    logger.info('Getting Solana recent blockhash...');
+    const result = await solanaWeb3GetRecentBlockhash();
+    return result;
   },
   verifyWebChallenge: async (para, args: VerifyWebChallengeArgs) => {
     logger.info('Verifying web challenge...');
