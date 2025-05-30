@@ -515,10 +515,10 @@
   resolved "https://registry.yarnpkg.com/@floating-ui/utils/-/utils-0.2.9.tgz#50dea3616bc8191fb8e112283b49eaff03e78429"
   integrity sha512-MDWhGtE+eHw5JW7lq4qhc5yRLS11ERl1c7Z6Xd0a58DozHES6EnNNwUWbMiG4J9Cgj053Bhk8zvlhFYKVhULwg==
 
-"@getpara/core-components@1.16.0":
-  version "1.16.0"
-  resolved "https://registry.yarnpkg.com/@getpara/core-components/-/core-components-1.16.0.tgz#a086cc37bf0a03ed434b78495708b90daffa279a"
-  integrity sha512-puq9uP6nsqjiXIR6Cr+bZ+xs+FAPDqjYThtfVhmAbHtHEoulmBVPHrRzBxzThbWTwvbecVHeUUu0giUOCxAQXA==
+"@getpara/core-components@1.17.0":
+  version "1.17.0"
+  resolved "https://registry.yarnpkg.com/@getpara/core-components/-/core-components-1.17.0.tgz#da867602cd9acb4c8650cc8a8f285c10424fa7a7"
+  integrity sha512-KAKnyDgZAldGHF5nVvp0DYfTN0ED0zHiJxpM+ToMeY4fIefg7cs7UcZRcomQu8eNItT7c7bTqXPIcrMGoD+EUw==
   dependencies:
     "@stencil/core" "^4.7.0"
     color-blend "^4.0.0"
@@ -527,56 +527,56 @@
     inputmask "5.0.9"
     qrcode-with-logos "1.1.1"
 
-"@getpara/core-sdk@1.16.0":
-  version "1.16.0"
-  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.16.0.tgz#d7a2d026158a68dddd6009f6bf4e749117a8d907"
-  integrity sha512-jrFPM3heDsSUcAtui1YU8aX5AX1hCm8qC8DTOyPmcDr+OgjuJyTEbWh4xvkJ8e8t4cT3QSjf7HwhK5d0HMSIRg==
+"@getpara/core-sdk@1.17.0":
+  version "1.17.0"
+  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.17.0.tgz#70676c278e59b664826d4e85f0e2b1ff15ff6a0b"
+  integrity sha512-tPRO14w3VFswVvMIlAqGUYxGoOeV+omkeJ4tAI6tPxIjqnAgmTQUihqNeRimhihPUuCsucAPYLYXWY0IcxChbw==
   dependencies:
     "@celo/utils" "^8.0.2"
     "@cosmjs/encoding" "^0.32.4"
     "@ethereumjs/util" "^9.1.0"
-    "@getpara/user-management-client" "1.16.0"
+    "@getpara/user-management-client" "1.17.0"
     "@noble/hashes" "^1.5.0"
     base64url "^3.0.1"
     libphonenumber-js "1.11.2"
     node-forge "^1.3.1"
     uuid "^11.1.0"
 
-"@getpara/ethers-v6-integration@1.16.0":
-  version "1.16.0"
-  resolved "https://registry.yarnpkg.com/@getpara/ethers-v6-integration/-/ethers-v6-integration-1.16.0.tgz#089434ca2065240c28322e8c2cd7bc2db23c87a2"
-  integrity sha512-VgPqvESwgKB3+49JT6K0oCHnSPO428Um6oZzGN/4UeMKPJiRvwW1oQxMSfZlJ4waYbjIKgqzeCEH/Vk3f81juA==
+"@getpara/ethers-v6-integration@1.17.0":
+  version "1.17.0"
+  resolved "https://registry.yarnpkg.com/@getpara/ethers-v6-integration/-/ethers-v6-integration-1.17.0.tgz#e17ea2780facf53cb473900d299d7d19d0cf7f23"
+  integrity sha512-HdeUjOJgX/99R84AoLQXLIIcXV1OYZ8YtRE28eW+gqqS4z/YsxnlLq66ZS5KpD5kw0odwtIY13prYta9KKKjqw==
   dependencies:
-    "@getpara/core-sdk" "1.16.0"
+    "@getpara/core-sdk" "1.17.0"
 
-"@getpara/react-common@1.16.0":
-  version "1.16.0"
-  resolved "https://registry.yarnpkg.com/@getpara/react-common/-/react-common-1.16.0.tgz#a3880404d008e186a82055365a8cf6624513a0f8"
-  integrity sha512-R5LS/KVTd9/3Jq/1ITIimsBavNbJzhkKnSdwJg0/lSXkKKD86GSRXu1kF8o5Wt2WeOSyEA3RQH57q5j9CO9Ybw==
+"@getpara/react-common@1.17.0":
+  version "1.17.0"
+  resolved "https://registry.yarnpkg.com/@getpara/react-common/-/react-common-1.17.0.tgz#e396fe88e32932c3ca0b088d24bf355e1c81ced6"
+  integrity sha512-X4adBxBK2Vugi5JkiigVhTkfQ5hxuUKzTU8IrsoSOe0vR5VaDqV2GKrCkg5GJ4d/Zz2V25JH5AYf079RoMt94g==
   dependencies:
-    "@getpara/react-components" "1.16.0"
-    "@getpara/web-sdk" "1.16.0"
+    "@getpara/react-components" "1.17.0"
+    "@getpara/web-sdk" "1.17.0"
     "@moonpay/moonpay-react" "^1.8.3"
     "@ramp-network/ramp-instant-sdk" "^4.0.5"
     libphonenumber-js "^1.11.1"
     styled-components "^6.1.8"
     ua-parser-js "^2.0.2"
 
-"@getpara/react-components@1.16.0":
-  version "1.16.0"
-  resolved "https://registry.yarnpkg.com/@getpara/react-components/-/react-components-1.16.0.tgz#419b770337b529751d4deafda37375884a54157c"
-  integrity sha512-aULcP70HYbC6B9VsGij050s/TrioL0MZoIdtCtD+6Hz/NsO2jBMPoKMkgcMoetsKhVsxWkP4hb0ACHYoI32s9g==
+"@getpara/react-components@1.17.0":
+  version "1.17.0"
+  resolved "https://registry.yarnpkg.com/@getpara/react-components/-/react-components-1.17.0.tgz#871c9cd1d330148c5cc33aeb52d229768f7fe0ca"
+  integrity sha512-p7urYRosVesYkpQAzd4nbcsAF3tg5Jn97Ygky4A0egn1/g6GMXb1VSKXfhkAHvEMZp6TwhJoqyzMx6sC8WiSxA==
   dependencies:
-    "@getpara/core-components" "1.16.0"
+    "@getpara/core-components" "1.17.0"
 
-"@getpara/react-sdk@^1.16.0":
-  version "1.16.0"
-  resolved "https://registry.yarnpkg.com/@getpara/react-sdk/-/react-sdk-1.16.0.tgz#fde77dc4cc49facf8e585f548d123d71a5e6d599"
-  integrity sha512-aw63PHkSJ3ieMUjnmpbTdtD3wfJ9d+6lB9QgFGeG/AoEwlX2m126vDFwkEqmBfQFFx6l827cw7C+Yj0LT/zUEw==
+"@getpara/react-sdk@1.17.0":
+  version "1.17.0"
+  resolved "https://registry.yarnpkg.com/@getpara/react-sdk/-/react-sdk-1.17.0.tgz#9b72af52894280595d1b85d471335aa457bc14ec"
+  integrity sha512-rBjWplMcgnkAe2ic1+4eYs8vXcOxfnC8Xg+Cnad/iT2AErzeN8Wh6ZdvPbxP+KxUmW/4MfM+URWzQrCPDNM6Vw==
   dependencies:
-    "@getpara/react-common" "1.16.0"
-    "@getpara/react-components" "1.16.0"
-    "@getpara/web-sdk" "1.16.0"
+    "@getpara/react-common" "1.17.0"
+    "@getpara/react-components" "1.17.0"
+    "@getpara/web-sdk" "1.17.0"
     "@tanstack/react-query" "^5.0.0"
     date-fns "^3.6.0"
     framer-motion "11.3.28"
@@ -585,29 +585,29 @@
     zustand "^4.5.2"
     zustand-sync-tabs "^0.2.2"
 
-"@getpara/solana-web3.js-v1-integration@^1.16.0":
-  version "1.16.0"
-  resolved "https://registry.yarnpkg.com/@getpara/solana-web3.js-v1-integration/-/solana-web3.js-v1-integration-1.16.0.tgz#7922aea6d3670d9ec8331319e219368bbd611811"
-  integrity sha512-HJt3E2IAyhlJDtR0SA5mV9lGM2qduAkWeMp4yQ63Gcxj4wjNra0+qJ5a8Zwe+dpEplg7Za6hpnojHfSYriQvlA==
+"@getpara/solana-web3.js-v1-integration@1.17.0":
+  version "1.17.0"
+  resolved "https://registry.yarnpkg.com/@getpara/solana-web3.js-v1-integration/-/solana-web3.js-v1-integration-1.17.0.tgz#ddec97723a6937d47049fd946f674fbf76cc3b78"
+  integrity sha512-9dijC3ifQr1C9m/eXptwnMR9oMa7v2cgMo2CHknYE4/QTuqQVNzKHga8Uo1Stw6CQ9qPSpgi4cihOjKqy2l+pw==
   dependencies:
-    "@getpara/core-sdk" "1.16.0"
+    "@getpara/core-sdk" "1.17.0"
     "@solana/web3.js" "^1.98.0"
 
-"@getpara/user-management-client@1.16.0":
-  version "1.16.0"
-  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.16.0.tgz#958fe8f8c6fde014cae8004d3cf0e536cd80886b"
-  integrity sha512-NzQuIA0mTcBSWa5+mbe5fQXV/QNxjLz/mf9pj1Dz7+YBoYtmSw/0IpJlBreOo6nS3Q6E4zrO0c2Az6vtcjYJRA==
+"@getpara/user-management-client@1.17.0":
+  version "1.17.0"
+  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.17.0.tgz#3d35fe7c82d0ac48b72aef9a00df8ad0521cd0ba"
+  integrity sha512-66gfcKKf12v62w/WcFMW8d9o4X3Knj4AS7VWnKGDv4TLxWHZ8fE8CgolMKeT2QWGS2Wb4Kzmhwi8lONdR9ciYg==
   dependencies:
     axios "^1.8.4"
     libphonenumber-js "1.11.2"
 
-"@getpara/web-sdk@1.16.0":
-  version "1.16.0"
-  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-1.16.0.tgz#7788faabf2dc6d735d8915bc5c155c9afcff06e5"
-  integrity sha512-ihMvGZNx8HfvvMsbKgEHDrIY4J1SP79LhwuTySVm/peU5B/JZt2Yw180aqpfqjNBEZy9c+AHTjklv4asoz35YA==
+"@getpara/web-sdk@1.17.0":
+  version "1.17.0"
+  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-1.17.0.tgz#997d976e0acc03c92029ef39ec7f231495ee9936"
+  integrity sha512-cOYLZC3tABST8+8NF3yMazcGzELH3nJgLw5R2YCHYccsNr+2JucqgSeFYwKYm9t7vCnjmp3JPlTUzNBK83hr7g==
   dependencies:
-    "@getpara/core-sdk" "1.16.0"
-    "@getpara/user-management-client" "1.16.0"
+    "@getpara/core-sdk" "1.17.0"
+    "@getpara/user-management-client" "1.17.0"
     base64url "3.0.1"
     buffer "6.0.3"
     cbor-web "8.1.0"

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { StepIndicator } from "@/components/StepIndicator";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, ExternalLink } from "lucide-react";
 
 interface Network {
   name: string;
@@ -12,7 +12,17 @@ interface Asset {
 }
 
 type TransactionState = "idle" | "sending" | "checking" | "complete" | "failed";
-type StepType = "approve" | "deposit" | "fill" | "complete" | "failed";
+type StepType =
+  | "approve"
+  | "deposit"
+  | "processing"
+  | "fill"
+  | "complete"
+  | "failed"
+  | "partial"
+  | "refunded"
+  | "needs_gas"
+  | "timeout";
 
 interface TransactionProcessingProps {
   amount: string;
@@ -24,6 +34,7 @@ interface TransactionProcessingProps {
   transactionState: TransactionState;
   onReset: () => void;
   errorMessage?: string;
+  axelarScanUrl?: string;
 }
 
 export function TransactionProcessing({
@@ -36,19 +47,85 @@ export function TransactionProcessing({
   transactionState,
   onReset,
   errorMessage,
+  axelarScanUrl,
 }: TransactionProcessingProps) {
-  // Determine which steps to show based on the quote
   const steps = [
     { id: "deposit", label: "Deposit", description: "Sending funds to bridge" },
-    { id: "fill", label: "Bridge", description: "Processing cross-chain transfer" },
+    { id: "processing", label: "Processing", description: "Validating transaction" },
+    { id: "fill", label: "Bridge", description: "Cross-chain transfer" },
     { id: "complete", label: "Complete", description: "Transaction confirmed" },
   ];
 
-  // Add approve step if needed (you might want to pass this info from the quote)
-  const needsApproval = asset.symbol !== "ETH"; // Example logic
-  if (needsApproval && currentStep === "approve") {
-    steps.unshift({ id: "approve", label: "Approve", description: "Approving token spend" });
-  }
+  const getDisplayStep = () => {
+    switch (currentStep) {
+      case "deposit":
+        return "deposit";
+      case "processing":
+        return "processing";
+      case "fill":
+        return "fill";
+      case "complete":
+        return "complete";
+      case "partial":
+      case "refunded":
+      case "needs_gas":
+      case "failed":
+      case "timeout":
+        return "fill"; // Show as stuck at fill step
+      default:
+        return "deposit";
+    }
+  };
+
+  const getStatusMessage = () => {
+    switch (currentStep) {
+      case "partial":
+        return {
+          title: "Partially Completed",
+          message:
+            "Funds received on destination chain but final swap may have failed. Please check your destination wallet.",
+          type: "warning" as const,
+        };
+      case "refunded":
+        return {
+          title: "Transaction Refunded",
+          message: "Your funds have been refunded to your wallet. This may take up to 10 minutes to appear.",
+          type: "warning" as const,
+        };
+      case "needs_gas":
+        return {
+          title: "Additional Gas Required",
+          message: "Your transaction needs more gas to complete. Please visit Axelarscan to add gas.",
+          type: "error" as const,
+        };
+      case "timeout":
+        return {
+          title: "Transaction Timeout",
+          message: "The transaction has timed out. Please check the status manually using the transaction hash.",
+          type: "error" as const,
+        };
+      case "failed":
+        return {
+          title: "Transaction Failed",
+          message: errorMessage || "The transaction has failed. Please try again.",
+          type: "error" as const,
+        };
+      case "complete":
+        return {
+          title: "Transaction Complete!",
+          message: `Your ${asset.symbol} has been successfully bridged to ${destNetwork?.name}`,
+          type: "success" as const,
+        };
+      default:
+        return {
+          title: "Processing Transaction",
+          message: "Please wait while we process your transaction. This may take a few minutes.",
+          type: "info" as const,
+        };
+    }
+  };
+
+  const status = getStatusMessage();
 
   return (
     <div className="container max-w-xl mx-auto py-8 px-4">
@@ -75,7 +152,7 @@ export function TransactionProcessing({
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Transaction</span>
                 <a
-                  href={`https://sepolia.etherscan.io/tx/${transactionHash}`}
+                  href={`https://etherscan.io/tx/${transactionHash}`}
                   className="text-sm font-mono text-blue-600 hover:text-blue-700"
                   target="_blank"
                   rel="noopener noreferrer">
@@ -87,32 +164,36 @@ export function TransactionProcessing({
 
           <div className="py-4">
             <StepIndicator
-              currentStep={currentStep}
+              currentStep={getDisplayStep()}
               steps={steps}
             />
           </div>
 
           <div className="text-center space-y-2">
-            {transactionState === "complete" ? (
-              <>
-                <div className="text-green-600 font-semibold">Transaction Completed Successfully!</div>
-                <div className="text-sm text-gray-600">
-                  Your {asset.symbol} has been bridged to {destNetwork?.name}
-                </div>
-              </>
-            ) : transactionState === "failed" ? (
-              <>
-                <div className="flex items-center justify-center gap-2 text-red-600 font-semibold">
-                  <AlertCircle className="w-5 h-5" />
-                  Transaction Failed
-                </div>
-                {errorMessage && <div className="text-sm text-gray-600">{errorMessage}</div>}
-                <div className="text-sm text-gray-500">Please try again or contact support if the issue persists.</div>
-              </>
-            ) : (
-              <div className="text-sm text-gray-600">
-                Please wait while we process your transaction. This may take a few minutes.
-              </div>
+            <div
+              className={`font-semibold ${
+                status.type === "success"
+                  ? "text-green-600"
+                  : status.type === "error"
+                  ? "text-red-600"
+                  : status.type === "warning"
+                  ? "text-orange-600"
+                  : "text-gray-600"
+              }`}>
+              {status.type === "error" && <AlertCircle className="w-5 h-5 inline mr-2" />}
+              {status.title}
+            </div>
+            <div className="text-sm text-gray-600">{status.message}</div>
+
+            {axelarScanUrl && currentStep === "needs_gas" && (
+              <a
+                href={axelarScanUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 mt-2">
+                Add Gas on Axelarscan
+                <ExternalLink className="w-4 h-4" />
+              </a>
             )}
           </div>
         </CardContent>
