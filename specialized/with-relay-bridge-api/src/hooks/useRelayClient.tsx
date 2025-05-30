@@ -1,18 +1,16 @@
 import { useEffect, useState } from "react";
 import { createClient, TESTNET_RELAY_API, RelayClient } from "@reservoir0x/relay-sdk";
-import { NETWORK_CONFIG } from "@/constants";
 
 export function useRelayClient() {
   const [client, setClient] = useState<RelayClient | null>(null);
 
   useEffect(() => {
-    const initializeClient = async () => {
+    const setupClient = async () => {
       try {
-        const response = await fetch(`${TESTNET_RELAY_API}/chains`);
+        const response = await fetch("https://api.testnets.relay.link/chains");
         const data = await response.json();
 
-        const supportedChainIds = Object.values(NETWORK_CONFIG).map((config) => config.chainId);
-
+        const supportedChainIds = [11155111, 84532, 1936682084];
         const supportedChains = data.chains.filter((chain: any) => supportedChainIds.includes(chain.id));
 
         const relayClient = createClient({
@@ -23,11 +21,11 @@ export function useRelayClient() {
 
         setClient(relayClient);
       } catch (error) {
-        console.error("Failed to initialize Relay client:", error);
+        console.error("Failed to setup Relay client:", error);
       }
     };
 
-    initializeClient();
+    setupClient();
   }, []);
 
   return client;
