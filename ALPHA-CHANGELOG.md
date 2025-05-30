@@ -1,3 +1,36 @@
+# Release (Fri May 30 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.18
+- @getpara/wagmi-v2-integration@2.0.0-alpha.18
+- @getpara/wagmi-v2-connector@2.0.0-alpha.18
+- @getpara/viem-v2-integration@2.0.0-alpha.18
+- @getpara/viem-v1-integration@2.0.0-alpha.18
+- @getpara/user-management-client@2.0.0-alpha.18
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.18
+- @getpara/solana-wallet-connectors@2.0.0-alpha.18
+- @getpara/server-sdk@2.0.0-alpha.18
+- @getpara/react-sdk@2.0.0-alpha.18
+- @getpara/react-native-wallet@2.0.0-alpha.18
+- @getpara/react-components@2.0.0-alpha.18
+- @getpara/react-component-library@1.0.0-alpha.13
+- @getpara/react-common@2.0.0-alpha.18
+- @getpara/evm-wallet-connectors@2.0.0-alpha.18
+- @getpara/ethers-v6-integration@2.0.0-alpha.18
+- @getpara/ethers-v5-integration@2.0.0-alpha.18
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.18
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.18
+- @getpara/core-sdk@2.0.0-alpha.18
+- @getpara/core-components@2.0.0-alpha.18
+
+### Features
+-  Alpha - Add Solflare  (#970) - cba18ea7a
+-  Dev portal - key copy & creation (#963) - 681e6f9f1
+-  Dev portal - billing (#942) - 1aefa98be
+
+### Fixes
+-  Remove oauth polling error (#975) - 7528cf9aa
+
 # Release (Tue May 27 2025)
 
 ## Package Versions
