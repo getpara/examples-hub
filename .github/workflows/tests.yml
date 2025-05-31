@@ -836,3 +836,10 @@ jobs:
             cat failed_projects.txt | sed 's/^/  - /'
             exit 1
           fi
+
+  build-mobile-flutter-e2e:
+    uses: ./.github/workflows/flutter-e2e-shared.yml
+    with:
+      working-directory: 'mobile/with-flutter'
+    secrets:
+      PARA_API_KEY: ${{ secrets.PARA_API_KEY }}
