@@ -1,4 +1,13 @@
 {
+  "configurations" : [
+    {
+      "id" : "AAE20D5E-CD24-4038-B4C7-D5689EBB63D3",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
   "defaultOptions" : {
     "commandLineArgumentEntries" : [
       {
