@@ -7,7 +7,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   Form,
   FormField,
   FormItem,
@@ -20,12 +19,13 @@ import {
   SelectValue,
   Textarea,
 } from '@getpara/react-component-library';
-import { Check, UserPlus } from 'lucide-react';
-import { useInviteMembersForm } from '../hooks/useInviteMembersForm';
-import { FormControl, FormMessage } from '../../../components/formComponents';
-import { MemberRole } from '../../../types/api';
-import { formatRole } from '../../../utils/organizationMemberHelpers';
-import { useGetAllProjects } from '../../../hooks/api/queries/useProjects';
+import { Check } from 'lucide-react';
+import { useInviteMembersForm } from './hooks/useInviteMembersForm';
+import { FormControl, FormMessage } from '../formComponents';
+import { MemberRole } from '../../types/api';
+import { formatRole } from '../../utils/organizationMemberHelpers';
+import { useGetAllProjects } from '../../hooks/api/queries/useProjects';
+import { useOrganizationMemberCapabilities } from '../../hooks/api/queries/useOrganizationMember';
 
 type AddMemberDialogProps = {
   open: boolean;
@@ -33,6 +33,7 @@ type AddMemberDialogProps = {
 };
 
 export const AddMemberDialog = ({ open, setOpen }: AddMemberDialogProps) => {
+  const { data: capabilities } = useOrganizationMemberCapabilities();
   const { form, onSubmit } = useInviteMembersForm();
   const { data: projects } = useGetAllProjects();
 
@@ -51,14 +52,12 @@ export const AddMemberDialog = ({ open, setOpen }: AddMemberDialogProps) => {
     setOpen(open);
   };
 
+  if (!capabilities?.canViewMembers) {
+    return null;
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger className="para:ml-auto" asChild>
-        <Button variant="neutral">
-          <UserPlus />
-          Add Team Member
-        </Button>
-      </DialogTrigger>
       <DialogContent>
         <Form {...form}>
           <form

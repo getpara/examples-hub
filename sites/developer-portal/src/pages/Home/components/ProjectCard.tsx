@@ -1,5 +1,4 @@
 import { Project } from '../../../types/api';
-import { useProjectTotalUsersCount } from '../../../hooks/api/queries/useProjectTotalUsersCount';
 import { truncateNumber } from '../../../utils/formatNumber';
 import { Link, useParams } from 'react-router-dom';
 import { FlatCard } from '../../../components/common';
@@ -7,6 +6,7 @@ import { Badge, cn, Typography } from '@getpara/react-component-library';
 import { OrganizationAvatar } from '../../../components/OrganizationAvatar';
 import { formatFrameworkName, getFrameworkColors, getFrameworkIcon } from '../../../utils/framework';
 import { Framework } from '../../../types/framework';
+import { useOrganizationTotalUserCountByProject } from '../../../hooks/api/queries/useOrganizationTotalUserCountByProject';
 
 interface ProjectCardProps {
   project: Project;
@@ -15,14 +15,14 @@ interface ProjectCardProps {
 export const ProjectCard = ({ project }: ProjectCardProps) => {
   const { organizationId } = useParams();
 
-  const { data: totalUsers } = useProjectTotalUsersCount(project.id);
+  const { data: totalUsers } = useOrganizationTotalUserCountByProject(project.id);
 
   const Icon = getFrameworkIcon(project.framework as Framework);
   const frameworkColors = getFrameworkColors(project.framework as Framework);
 
   return (
     <Link to={`/${organizationId}/project/${project.id}/key`} className="para:h-[240px] para:min-w-[200px]">
-      <FlatCard className="para:p-6 para:h-full para:w-full para:hover:shadow-md para:transition-shadow para:duration-200 para:ease-out para:group">
+      <FlatCard className="para:p-6 para:h-full para:w-full para:hover:shadow-md para:transition-shadow para:duration-200 para:ease-out para:group para:cursor-pointer">
         <div className="para:flex para:flex-col para:gap-4 para:h-full para:justify-between">
           <div className="para:flex para:flex-col para:gap-4">
             <OrganizationAvatar
@@ -55,7 +55,7 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
           </div>
           <div className="para:transition-all para:flex para:group-hover:opacity-100 para:opacity-100 para:md:opacity-0 para:group-hover:top-0 para:top-0 para:md:top-2 para:relative">
             <Typography className="para:text-xs para:font-medium" color="muted">
-              {totalUsers !== undefined ? truncateNumber(totalUsers) : '--'} Users
+              {totalUsers !== undefined ? truncateNumber(totalUsers.count) : '--'} Users
             </Typography>
           </div>
         </div>

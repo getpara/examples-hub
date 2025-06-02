@@ -41,6 +41,7 @@ export type Organization = {
   enterpriseStripePriceId?: string | null;
   homepageUrl?: string | null;
   onboardingAnswersRaw?: object | null;
+  bypassBetaUserLimit?: boolean;
 };
 export type OrganizationInvite = Organization & { members: OrganizationMember[] };
 
@@ -370,6 +371,15 @@ export type OrganizationLoginPlatformsTotalResponse = {
 export type OrganizationTotalUserCountResponse = {
   count: number;
   lowerEnvCount: number;
+};
+
+export type OrganizationTotalUserCountByProjectResponse = {
+  projectCounts: {
+    projectId: string;
+    projectName: string;
+    count: number;
+    lowerEnvCount?: number;
+  }[];
 };
 
 // *********************

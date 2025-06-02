@@ -15,7 +15,7 @@ export const Analytics = () => {
 
   return (
     <>
-      <div className="para:h-[1px] para:bg-border para:max-w-screen para:w-[calc(100%+48px)] para:-ml-4 para:md:-ml-6" />{' '}
+      <div className="para:h-[1px] para:bg-border para:max-w-screen para:w-[100vw] para:md:w-[calc(100%+48px)] para:-ml-8 para:md:-ml-6" />
       <div className="para:pt-8 para:flex para:flex-col para:gap-4">
         <Typography className="para:text-2xl para:font-semibold">Analytics</Typography>
         <OverviewContainer>

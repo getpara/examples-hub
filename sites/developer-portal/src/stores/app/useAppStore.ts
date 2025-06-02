@@ -2,11 +2,16 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { getActions } from './actions.js';
 
-type NotificationType = 'providerMigration';
+export type NotificationType = 'providerMigration' | 'logo';
 
 interface AppState {
   userSelectedOrganizationId: { [k: string]: string | undefined };
-  clearedNotifications: {
+  dismissedNotifications: {
+    [k: string]: {
+      [k: string]: boolean;
+    };
+  };
+  dismissedOnboardingNotifications: {
     [k: string]: {
       [k: string]: boolean;
     };
@@ -18,15 +23,19 @@ export interface AppActions {
   setSelectedOrganization: (orgId?: string) => void;
   getSelectedOrganization: (_?: string) => string | undefined;
 
-  dismissNotification: (orgId: string, notificationType: NotificationType) => void;
-  hasDismissedNotification: (orgId: string, notificationType: NotificationType) => boolean;
+  dismissNotification: (orgId: string, notificationId: string) => void;
+  hasDismissedNotification: (orgId: string, notificationId: string) => boolean;
+
+  dismissOnboardingNotification: (orgId: string, notificationType: NotificationType) => void;
+  hasDismissedOnboardingNotification: (orgId: string, notificationType: NotificationType) => boolean;
 }
 
 export type AppStore = AppState & AppActions;
 
 export const DEFAULT_APP_STATE: AppState = {
   userSelectedOrganizationId: {},
-  clearedNotifications: {},
+  dismissedNotifications: {},
+  dismissedOnboardingNotifications: {},
 };
 
 export const useAppStore = create<AppStore>()(
@@ -39,8 +48,10 @@ export const useAppStore = create<AppStore>()(
       name: '@PARA-DEVELOPER-PORTAL/appState',
       partialize: state => ({
         userSelectedOrganizationId: state.userSelectedOrganizationId,
-        clearedNotifications: state.clearedNotifications,
+        dismissedNotifications: state.dismissedNotifications,
+        dismissedOnboardingNotifications: state.dismissedOnboardingNotifications,
       }),
+      version: 1,
     },
   ),
 );

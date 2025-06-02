@@ -49,6 +49,7 @@ export const router = createBrowserRouter([
     children: [
       { path: '', element: <Navigate to={'dashboard'} replace={true} /> },
       { path: 'dashboard', element: <Home /> },
+      { path: 'dashboard/settings', element: <Home /> },
       { path: 'billing', element: <Billing /> },
       { path: 'team', element: <Team /> },
       {

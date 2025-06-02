@@ -3,6 +3,7 @@ import { useGetAllProjects } from '../../../hooks/api/queries/useProjects';
 import { pluralize } from '../../../utils/pluralize';
 import { ProjectCard } from './ProjectCard';
 import { CreateProjectButton } from './CreateProjectButton';
+import { OrganizationSettingsButton } from './OrganizationSettingsButton';
 
 const SHOW_ALL_THRESHOLD = 6;
 
@@ -29,7 +30,7 @@ export const Projects = ({ onShowAllClick }: ProjectsProps) => {
 
   return (
     <div className="para:flex para:flex-col para:gap-2 para:pb-6">
-      <div className="para:flex para:items-center para:gap-2 para:justify-between">
+      <div className="para:flex para:flex-col para:md:flex-row para:items-center para:gap-2 para:justify-between">
         <div className="para:flex para:items-center para:gap-2">
           <Typography className="para:text-2xl para:font-semibold">
             {projects.length} {pluralize(projects.length, 'Project')}
@@ -40,7 +41,10 @@ export const Projects = ({ onShowAllClick }: ProjectsProps) => {
             </Button>
           )}
         </div>
-        <CreateProjectButton />
+        <div className="para:flex para:flex-col para:sm:flex-row  para:gap-2">
+          <OrganizationSettingsButton />
+          <CreateProjectButton />
+        </div>
       </div>
       <div className="para:grid para:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] para:gap-2">
         {first6Projects?.map(project => <ProjectCard key={project.id} project={project} />)}

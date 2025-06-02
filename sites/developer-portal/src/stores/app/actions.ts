@@ -1,5 +1,5 @@
 import { StoreApi } from 'zustand';
-import { AppStore, DEFAULT_APP_STATE, AppActions } from './useAppStore.js';
+import { AppStore, DEFAULT_APP_STATE, AppActions, NotificationType } from './useAppStore.js';
 import { getClient } from '@getpara/react-sdk';
 
 export const getActions = (set: StoreApi<AppStore>['setState'], get: StoreApi<AppStore>['getState']): AppActions => ({
@@ -26,15 +26,28 @@ export const getActions = (set: StoreApi<AppStore>['setState'], get: StoreApi<Ap
   },
   dismissNotification: (orgId: string, notificationId: string) => {
     set({
-      clearedNotifications: {
-        ...get().clearedNotifications,
+      dismissedNotifications: {
+        ...get().dismissedNotifications,
         [orgId]: {
-          ...get().clearedNotifications[orgId],
+          ...get().dismissedNotifications[orgId],
           [notificationId]: true,
         },
       },
     });
   },
   hasDismissedNotification: (orgId: string, notificationId: string) =>
-    get().clearedNotifications[orgId]?.[notificationId] ?? false,
+    get().dismissedNotifications[orgId]?.[notificationId] ?? false,
+  dismissOnboardingNotification: (orgId: string, notificationType: NotificationType) => {
+    set({
+      dismissedNotifications: {
+        ...get().dismissedNotifications,
+        [orgId]: {
+          ...get().dismissedNotifications[orgId],
+          [notificationType]: true,
+        },
+      },
+    });
+  },
+  hasDismissedOnboardingNotification: (orgId: string, notificationType: NotificationType) =>
+    get().dismissedNotifications[orgId]?.[notificationType] ?? false,
 });

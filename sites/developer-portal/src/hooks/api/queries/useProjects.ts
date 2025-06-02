@@ -4,6 +4,8 @@ import { getProjects } from '../../../api/projects/queries';
 import { useParams } from 'react-router-dom';
 import { useIsValidOrg } from '../../useIsValidOrgConfig';
 import { useGetSelectedOrganization } from './useOrganizations';
+import { Framework } from '../../../types/framework';
+import { PackageManager } from '../../../types/packageManager';
 
 export const PROJECTS_QUERY_KEY = 'projects';
 
@@ -25,6 +27,12 @@ export const useProjectsQuery = <T>(select: (data: Project[]) => T) => {
       for (const project of data.projects) {
         if (!project.iconUrl) {
           project.iconUrl = org?.logoUrl;
+        }
+        if (!project.framework) {
+          project.framework = Framework.REACT; // Default to React if no framework is set
+        }
+        if (!project.packageManager) {
+          project.packageManager = PackageManager.YARN; // Default to YARN if no package manager is set
         }
       }
 

@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@getpara/react-component-library';
 import { useAccount } from '@getpara/react-sdk';
-import { CreditCard, LogOut, LucideIcon, Users } from 'lucide-react';
+import { Building2, CreditCard, LogOut, LucideIcon, Users } from 'lucide-react';
 import { useState } from 'react';
 import { useLogout } from '../../../../hooks/useLogout';
 import { useOrganizationMemberCapabilities } from '../../../../hooks/api/queries/useOrganizationMember';
@@ -26,12 +26,12 @@ const MENU_ITEMS: {
   //   value: 'account',
   //   Icon: User,
   // },
-  // {
-  //   label: 'Organization',
-  //   value: 'organization',
-  //   Icon: Building2,
-  //   capabilityKey: 'canViewOrganization',
-  // },
+  {
+    label: 'Organization',
+    value: 'dashboard/settings',
+    Icon: Building2,
+    capabilityKey: 'canUpdateOrganization',
+  },
   {
     label: 'Billing',
     value: 'billing',

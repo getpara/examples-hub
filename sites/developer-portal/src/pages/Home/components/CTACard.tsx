@@ -1,9 +1,16 @@
 import { Button, Typography } from '@getpara/react-component-library';
 import { FlatCard } from '../../../components/common';
 import { ArrowRight } from 'lucide-react';
-import bgImage from './cta-bg.png';
+import bgImage from '../assets/cta-bg.png';
+import { useCreateProjectAndKey } from '../../../hooks/useCreateProjectAndKey';
+import { useCanCreateProject } from '../../../hooks/subscriptionGating/useCanCreateProject';
+import { useOrganizationMemberCapabilities } from '../../../hooks/api/queries/useOrganizationMember';
 
 export const CTACard = () => {
+  const createProjectAndKey = useCreateProjectAndKey();
+  const { canCreateProject } = useCanCreateProject();
+  const { data: capabilities } = useOrganizationMemberCapabilities();
+
   return (
     <FlatCard className="para:relative para:h-[275px] para:w-full para:items-center para:justify-center para:overflow-hidden para:border-0">
       <div className="para:absolute para:w-full para:h-full para:p-0 para:flex para:top-0">
@@ -18,7 +25,13 @@ export const CTACard = () => {
             Let’s create your first project.
           </Typography>
         </div>
-        <Button variant="outline" size="lg" className="para:w-[166px]">
+        <Button
+          variant="outline"
+          size="lg"
+          className="para:w-[166px]"
+          onClick={createProjectAndKey}
+          disabled={!canCreateProject || !capabilities?.canCreateProjects}
+        >
           Get Started
           <ArrowRight />
         </Button>

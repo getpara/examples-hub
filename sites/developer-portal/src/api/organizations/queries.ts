@@ -11,6 +11,7 @@ import {
   OrganizationTotalUserCountResponse,
   UsersTableDataResponse,
   OrganizationPremiumFeaturesResponse,
+  OrganizationTotalUserCountByProjectResponse,
 } from '../../types/api';
 
 export const getOrganization = async (organizationId: string) => {
@@ -80,6 +81,12 @@ export const getOrganizationTotalUserCount = async (organizationId: string) => {
   const endpoint = `/organizations/${organizationId}/analytics/all-time/user-count`;
 
   return axiosClient.get<OrganizationTotalUserCountResponse>(endpoint);
+};
+
+export const getOrganizationTotalUserCountByProject = async (organizationId: string) => {
+  const endpoint = `/organizations/${organizationId}/analytics/all-time/user-count-by-project`;
+
+  return axiosClient.get<OrganizationTotalUserCountByProjectResponse>(endpoint);
 };
 
 export const getOrganizationUsersTableData = async (
