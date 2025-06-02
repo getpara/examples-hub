@@ -14,7 +14,22 @@
         "argument" : "",
         "enabled" : false
       }
-    ]
+    ],
+    "environmentVariableEntries" : [
+      {
+        "key" : "PARA_ENVIRONMENT",
+        "value" : "$(PARA_ENVIRONMENT)"
+      },
+      {
+        "key" : "PARA_API_KEY",
+        "value" : "$(PARA_API_KEY)"
+      }
+    ],
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:example.xcodeproj",
+      "identifier" : "E8F93B272C21EBED006AA3F6",
+      "name" : "example"
+    }
   },
   "testTargets" : [
     {
