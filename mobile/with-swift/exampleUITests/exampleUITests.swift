@@ -17,8 +17,13 @@ class ExampleUITests: XCTestCase {
     private enum TestConstants {
         static let emailDomain = "test.usecapsule.com"
         static let verificationCode = "123456"
-        static let defaultTimeout: TimeInterval = 5.0
-        static let longTimeout: TimeInterval = 30.0
+        
+        // Detect if running in CI environment (GitHub Actions)
+        static let isRunningInCI = ProcessInfo.processInfo.environment["CI"] != nil
+        
+        // Adjust timeouts for CI environment (GitHub runners are much slower)
+        static let defaultTimeout: TimeInterval = isRunningInCI ? 30.0 : 5.0
+        static let longTimeout: TimeInterval = isRunningInCI ? 120.0 : 30.0
         
         // For sequential tests that need saved data
         static var savedEmail: String?
@@ -40,17 +45,20 @@ class ExampleUITests: XCTestCase {
         // Put setup code here. This method is called before the invocation of each test method in the class.
         continueAfterFailure = false
         
-        // Debug environment variables
-        print("=== UI TEST ENVIRONMENT DEBUG ===")
+        // Debug environment and timeout configuration
+        print("=== UI TEST CONFIGURATION ===")
         let paraApiKey = ProcessInfo.processInfo.environment["PARA_API_KEY"] ?? ""
         let paraEnvironment = ProcessInfo.processInfo.environment["PARA_ENVIRONMENT"] ?? "sandbox"
         let rpcUrl = ProcessInfo.processInfo.environment["RPC_URL"] ?? ""
         
+        print("Running in CI: \(TestConstants.isRunningInCI)")
+        print("Default timeout: \(TestConstants.defaultTimeout)s")
+        print("Long timeout: \(TestConstants.longTimeout)s")
         print("PARA_API_KEY length: \(paraApiKey.count)")
         print("PARA_API_KEY (first 8 chars): \(String(paraApiKey.prefix(8)))...")
         print("PARA_ENVIRONMENT: \(paraEnvironment)")
         print("RPC_URL: \(rpcUrl)")
-        print("=================================")
+        print("==============================")
         
         // Set up environment variables for testing
         app.launchEnvironment = [
@@ -64,6 +72,12 @@ class ExampleUITests: XCTestCase {
         print("=== LAUNCHING APP ===")
         app.launch()
         print("=== APP LAUNCHED ===")
+        
+        // Add extra delay for CI environment to let app stabilize
+        if TestConstants.isRunningInCI {
+            print("CI environment detected, adding stabilization delay...")
+            sleep(5)
+        }
         
         // Wait for the main screen to appear after launch
         waitForMainScreen()
