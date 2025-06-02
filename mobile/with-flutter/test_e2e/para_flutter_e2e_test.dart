@@ -45,8 +45,8 @@ void main() {
       
       final capabilities = <String, dynamic>{
         'platformName': 'iOS',
-        'platformVersion': '18.4',
-        'deviceName': 'iPhone 16',
+        'platformVersion': '18.2',
+        'deviceName': 'iPhone 16 Pro',
         'automationName': 'XCUITest',
         'bundleId': 'com.usecapsule.example.flutter',
         'app': appPath,
