@@ -624,9 +624,11 @@ packages:
   para:
     dependency: "direct main"
     description:
-      path: "/Users/tyson/para/flutter-sdk"
-      relative: false
-    source: path
+      path: "."
+      ref: "2.0.0-alpha"
+      resolved-ref: e0c81ef592eeeee53d94b19399e14677df007036
+      url: "https://github.com/capsule-org/flutter-sdk.git"
+    source: git
     version: "1.4.0-dev.1"
   passkeys:
     dependency: transitive

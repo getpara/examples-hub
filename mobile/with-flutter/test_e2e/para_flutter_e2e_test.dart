@@ -45,7 +45,7 @@ void main() {
       
       final capabilities = <String, dynamic>{
         'platformName': 'iOS',
-        'platformVersion': '18.2',
+        'platformVersion': '18.5',
         'deviceName': 'iPhone 16 Pro',
         'automationName': 'XCUITest',
         'bundleId': 'com.usecapsule.example.flutter',
@@ -78,6 +78,22 @@ void main() {
 
     tearDownAll(() async {
       await driver.quit();
+    });
+    
+    setUp(() async {
+      // Add small delay between tests for stability
+      await Future.delayed(Duration(seconds: 2));
+      print('🔄 Starting new test...');
+    });
+    
+    tearDown(() async {
+      // Cleanup after each test
+      try {
+        await Future.delayed(Duration(seconds: 1));
+        print('🧹 Test cleanup completed');
+      } catch (e) {
+        print('⚠️ Test cleanup had minor issues: $e');
+      }
     });
 
     // Helper Methods
@@ -196,28 +212,31 @@ void main() {
       }
     }
 
-    Future<bool> waitForWalletsView() async {
+    Future<void> waitForWalletsView() async {
       // Wait longer for wallet creation to complete
       await Future.delayed(longDelay);
       
-      for (int attempt = 0; attempt < 60; attempt++) {
+      List<String> lastAttemptFoundContent = [];
+      
+      // Reduced to 12 attempts to stay under test framework 30s timeout
+      for (int attempt = 0; attempt < 12; attempt++) {
+        lastAttemptFoundContent.clear();
         try {
           // Flutter text might be in buttons or other elements, not just StaticText
           final texts = await driver.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
           final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
           final navigationBars = await driver.findElements(AppiumBy.className('XCUIElementTypeNavigationBar')).toList();
           
-          final allFoundContent = <String>[];
-          
           // Check StaticText elements
           for (final text in texts) {
             try {
               final textContent = await text.text;
               if (textContent.isNotEmpty) {
-                allFoundContent.add('[Text] $textContent');
+                lastAttemptFoundContent.add('[Text] $textContent');
                 if (isWalletScreenText(textContent)) {
-                  print('✅ Found wallets screen via StaticText: "$textContent"');
-                  return true;
+                  print('✅ Found wallets screen via StaticText: "$textContent" (Attempt ${attempt + 1})');
+                  await Future.delayed(shortDelay); // Stabilization delay
+                  return; // Success - wallets view found
                 }
               }
             } catch (e) {
@@ -230,10 +249,11 @@ void main() {
             try {
               final label = await button.attributes['label'];
               if (label.isNotEmpty) {
-                allFoundContent.add('[Button] $label');
+                lastAttemptFoundContent.add('[Button] $label');
                 if (isWalletScreenText(label)) {
-                  print('✅ Found wallets screen via Button: "$label"');
-                  return true;
+                  print('✅ Found wallets screen via Button: "$label" (Attempt ${attempt + 1})');
+                  await Future.delayed(shortDelay); // Stabilization delay
+                  return; // Success - wallets view found
                 }
               }
             } catch (e) {
@@ -246,10 +266,11 @@ void main() {
             try {
               final title = await navBar.attributes['name'];
               if (title.isNotEmpty) {
-                allFoundContent.add('[NavBar] $title');
+                lastAttemptFoundContent.add('[NavBar] $title');
                 if (isWalletScreenText(title)) {
-                  print('✅ Found wallets screen via NavigationBar: "$title"');
-                  return true;
+                  print('✅ Found wallets screen via NavigationBar: "$title" (Attempt ${attempt + 1})');
+                  await Future.delayed(shortDelay); // Stabilization delay
+                  return; // Success - wallets view found
                 }
               }
             } catch (e) {
@@ -257,14 +278,21 @@ void main() {
             }
           }
           
+          if (attempt > 0 && (attempt + 1) % 5 == 0) { // Log every 5 attempts
+            print('Still waiting for wallets view... (Attempt ${attempt + 1}/12). Content seen this iteration: ${lastAttemptFoundContent.isEmpty ? "None" : lastAttemptFoundContent.join(" | ")}');
+          }
           
           await Future.delayed(Duration(seconds: 2));
         } catch (e) {
+          print('⚠️ Error in waitForWalletsView loop (Attempt ${attempt + 1}): $e. Content seen this iteration: ${lastAttemptFoundContent.isEmpty ? "None" : lastAttemptFoundContent.join(" | ")}');
           await Future.delayed(Duration(seconds: 2));
         }
       }
       
-      return false;
+      // If we reach here, we timed out - throw an exception to stop test execution
+      final errorMsg = '❌ Timed out waiting for wallets view after 12 attempts (~25 seconds). Last attempt saw: ${lastAttemptFoundContent.isEmpty ? "None" : lastAttemptFoundContent.join(" | ")}'; 
+      print(errorMsg);
+      throw Exception(errorMsg);
     }
 
     Future<void> performLogout() async {
@@ -290,10 +318,7 @@ void main() {
     
     Future<void> navigateToWalletHome() async {
       // Ensure we're logged in and on the wallet home screen
-      final foundWallets = await waitForWalletsView();
-      if (!foundWallets) {
-        throw Exception('Failed to navigate to wallet home screen');
-      }
+      await waitForWalletsView();
     }
     
     Future<void> createWallet(String walletType) async {
@@ -521,8 +546,7 @@ void main() {
       await performBiometricAuth();
       
       // Wait for wallets view
-      var foundWallets = await waitForWalletsView();
-      expect(foundWallets, true, reason: 'Should reach wallets view after email signup');
+      await waitForWalletsView();
       print('✅ Email signup completed successfully');
       
       // PART 2: LOGOUT + LOGIN
@@ -552,10 +576,9 @@ void main() {
       await performBiometricAuth();
       
       // Wait for wallets view
-      foundWallets = await waitForWalletsView();
-      expect(foundWallets, true, reason: 'Should reach wallets view after email login');
+      await waitForWalletsView();
       print('✅ Email login completed successfully');
-    });
+    }, timeout: Timeout(Duration(minutes: 2)));
 
     test('02 Phone Authentication: Signup + Login Flow', () async {
       print('🧪 Starting Phone Authentication: Signup + Login Flow...');
@@ -620,8 +643,7 @@ void main() {
       await performBiometricAuth();
       
       // Wait for wallets view
-      var foundWallets = await waitForWalletsView();
-      expect(foundWallets, true, reason: 'Should reach wallets view after phone signup');
+      await waitForWalletsView();
       print('✅ Phone signup completed successfully');
       
       // PART 2: LOGOUT + LOGIN
@@ -651,10 +673,9 @@ void main() {
       await performBiometricAuth();
       
       // Wait for wallets view
-      foundWallets = await waitForWalletsView();
-      expect(foundWallets, true, reason: 'Should reach wallets view after phone login');
+      await waitForWalletsView();
       print('✅ Phone login completed successfully');
-    });
+    }, timeout: Timeout(Duration(minutes: 2)));
     
     
     test('03 Wallet Verification Flow', () async {
@@ -707,8 +728,7 @@ void main() {
       print('Available wallet creation options: ${availableWalletTypes.join(", ")}');
       
       // Verify we're on a functional wallet screen (even if address isn't visible)
-      final foundWalletScreen = await waitForWalletsView();
-      expect(foundWalletScreen, true, reason: 'Should be on wallet screen');
+      await waitForWalletsView();
       
       print('✅ Wallet verification completed successfully');
     });
