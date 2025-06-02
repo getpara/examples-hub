@@ -21,7 +21,7 @@ import { useStripePlan } from '../../../hooks/useStripePlan';
 import { useChangePlan } from '../../../hooks/api/mutations/useChangePlan';
 import { ChangePlanDialogProjectArchive } from './ChangePlanDialogProjectArchive';
 import { ChangePlanDialogAlert } from './ChangePlanDialogAlert';
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useGetAllActiveProjects } from '../../../hooks/api/queries/useProjects';
 import { useCancelPlan } from '../../../hooks/api/mutations/useCancelPlan';
 import { useBillingStore } from '../store/useBillingStore';
@@ -46,13 +46,11 @@ export const ChangePlanDialog = () => {
   const selectedIndex = planMeta.findIndex(p => p.slug === newPlanSlug);
   const type = selectedIndex < activeIndex ? 'CHANGE' : 'UPGRADE';
 
-  const [remainingProjectIds, setRemainingProjectIds] = useState<string[]>(
-    allActiveProjects?.map(project => project.id) ?? [],
-  );
+  const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([]);
 
-  useEffect(() => {
-    setRemainingProjectIds(allActiveProjects?.map(project => project.id) ?? []);
-  }, [allActiveProjects]);
+  const remainingProjectIds = useMemo(() => {
+    return allActiveProjects?.filter(project => !selectedProjectIds.includes(project.id)).map(project => project.id) ?? [];
+  }, [allActiveProjects, selectedProjectIds]);
 
   const metadata = planMeta.find(p => p.slug === newPlanSlug);
   const isFreePlan = newPlanSlug?.toUpperCase() === FREE_PLAN_SLUG;
@@ -145,8 +143,8 @@ export const ChangePlanDialog = () => {
             <ChangePlanDialogProjectArchive
               plan={plan}
               planName={planName}
-              setRemainingProjectIds={setRemainingProjectIds}
-              remainingProjectIds={remainingProjectIds}
+              setSelectedProjectIds={setSelectedProjectIds}
+              selectedProjectIds={selectedProjectIds}
             />
           )}
         </DialogHeader>

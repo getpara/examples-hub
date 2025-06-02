@@ -150,7 +150,7 @@ export const AddMemberDialog = ({ open, setOpen }: AddMemberDialogProps) => {
               />
             )}
             <DialogFooter>
-              <div className="para:flex para:justify-end">
+              <div>
                 <Button
                   disabled={!canSave || isSubmitting || success}
                   isLoading={isSubmitting}

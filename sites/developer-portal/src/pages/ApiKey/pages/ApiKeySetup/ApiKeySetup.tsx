@@ -6,6 +6,7 @@ import { Install } from './components/Install';
 import { SideCard } from './components/SideCard';
 import { useSetupForm } from './hooks/useSetupForm';
 import { FormWrapper } from '../../components/FormWrapper';
+import { Mobile } from './components/Mobile';
 
 export const ApiKeySetup = () => {
   const { form, submitForm } = useSetupForm();
@@ -19,6 +20,7 @@ export const ApiKeySetup = () => {
             <Environment />
             <Networks />
             <Install />
+            <Mobile />
           </div>
           <SideCard />
         </div>

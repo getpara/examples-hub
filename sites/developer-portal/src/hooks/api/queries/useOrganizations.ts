@@ -30,7 +30,7 @@ export const useOrganizationsQuery = <T>(select: (data: Organization[]) => T, re
 
 export const useGetAllOrganizations = (retry?: boolean) => {
   return useOrganizationsQuery(data => {
-    return data;
+    return data.sort((a, b) => (a.archived && b.archived ? 0 : a.archived ? 1 : -1));
   }, retry);
 };
 

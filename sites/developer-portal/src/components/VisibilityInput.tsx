@@ -6,11 +6,15 @@ import { ComponentProps, forwardRef, useState } from 'react';
 type VisibilityInputProps = {
   inputClassName?: string;
   showCopyButton?: boolean;
+  defaultVisible?: boolean;
 } & ComponentProps<'input'>;
 
 export const VisibilityInput = forwardRef(
-  ({ className, inputClassName, showCopyButton, ...inputProps }: VisibilityInputProps, ref: React.Ref<HTMLInputElement>) => {
-    const [isVisible, setIsVisible] = useState(false);
+  (
+    { className, inputClassName, showCopyButton, defaultVisible, ...inputProps }: VisibilityInputProps,
+    ref: React.Ref<HTMLInputElement>,
+  ) => {
+    const [isVisible, setIsVisible] = useState(defaultVisible ? true : false);
     const [isCopied, copy] = useCopyToClipboard();
 
     const handleVisibilityChange = () => {

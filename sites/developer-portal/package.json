@@ -21,6 +21,7 @@
     "@getpara/react-component-library": "1.0.0-alpha.13",
     "@getpara/react-components": "2.0.0-alpha.18",
     "@getpara/react-sdk": "2.0.0-alpha.18",
+    "@getpara/user-management-client": "2.0.0-alpha.18",
     "@hookform/resolvers": "5.0.1",
     "@sentry/react": "^9.12.0",
     "@tanstack/react-query": "^5.74.0",

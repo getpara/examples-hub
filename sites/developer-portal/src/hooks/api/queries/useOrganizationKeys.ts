@@ -76,3 +76,9 @@ export const useGetKeyIsValid = (projectId?: string, keyId?: string) => {
     return key;
   });
 };
+
+export const useGetActiveOrganizationKeys = (projectId: string) => {
+  return useOrganizationKeysQuery(projectId, data => {
+    return data.filter(k => !k.archived);
+  });
+};

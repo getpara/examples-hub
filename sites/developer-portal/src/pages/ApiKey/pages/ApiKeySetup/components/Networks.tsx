@@ -12,9 +12,10 @@ import {
 } from '@getpara/react-component-library';
 import { SetupForm } from '../hooks/useSetupForm';
 import { ConfigCard } from '../../../components/ConfigCard';
-import { WALLET_TYPES, TWalletType } from '@getpara/react-sdk';
 import { FlatCard } from '../../../../../components/common';
 import { ReactNode } from 'react';
+import { FormMessage } from '../../../../../components/formComponents';
+import { TWalletType, WALLET_TYPES } from '@getpara/user-management-client';
 
 export const WALLET_TYPE_CONFIG: Record<TWalletType, { name: string; Icon: ReactNode }> = {
   EVM: {
@@ -91,6 +92,7 @@ export const Networks = () => {
                   );
                 })}
               </div>
+              <FormMessage />
             </FormItem>
           )}
         />

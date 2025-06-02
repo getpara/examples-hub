@@ -43,6 +43,14 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
                   {formatFrameworkName(project.framework as Framework)}
                 </Badge>
               )}
+              {project.archived && (
+                <Badge
+                  variant="outline"
+                  className="para:border-border para:bg-muted para:rounded-xs para:text-2xs para:font-medium para:uppercase para:hidden para:md:inline-flex"
+                >
+                  Archived
+                </Badge>
+              )}
             </div>
           </div>
           <div className="para:transition-all para:flex para:group-hover:opacity-100 para:opacity-100 para:md:opacity-0 para:group-hover:top-0 para:top-0 para:md:top-2 para:relative">

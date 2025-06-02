@@ -1,5 +1,6 @@
-import { Network, OnRampAsset, OnRampAssetInfo, OnRampProvider, SupportedWalletTypes } from '@getpara/react-sdk';
+import { Network, OnRampAsset, OnRampAssetInfo, OnRampProvider } from '@getpara/react-sdk';
 import { Environment } from './environment';
+import { SupportedWalletTypes } from '@getpara/user-management-client';
 
 type Nullable<T> = { [K in keyof T]: T[K] | null };
 
@@ -276,7 +277,7 @@ export type UpdateApiKeyBody = Nullable<
 export type UpdateApiKeyFormData = Partial<
   Omit<UpdateApiKeyBody, 'origins' | 'androidSha256CertFingerprints' | 'sessionMaxAge'>
 > & {
-  androidSha256CertFingerprints: string | null;
+  androidSha256CertFingerprints?: string | null;
   origins?: string | null;
   sessionMaxAge?: number | null;
 };

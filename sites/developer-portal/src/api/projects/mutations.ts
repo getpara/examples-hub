@@ -36,3 +36,23 @@ export const getLogoUploadUrl = async ({ organizationId, projectId, fileExt }: G
     })
   ).data;
 };
+
+export type ArchiveProjectVars = {
+  organizationId: string;
+  projectId: string;
+};
+export const archiveProject = async ({ organizationId, projectId }: ArchiveProjectVars) => {
+  const endpoint = `/organizations/${organizationId}/projects/${projectId}`;
+
+  return (await axiosClient.delete<boolean>(endpoint)).data;
+};
+
+export type RestoreProjectVars = {
+  organizationId: string;
+  projectId: string;
+};
+export const restoreProject = async ({ organizationId, projectId }: RestoreProjectVars) => {
+  const endpoint = `/organizations/${organizationId}/projects/${projectId}/restore`;
+
+  return (await axiosClient.patch<boolean>(endpoint)).data;
+};

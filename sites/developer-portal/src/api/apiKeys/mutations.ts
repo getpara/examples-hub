@@ -50,6 +50,18 @@ export const rotateApiKey = async ({ organizationId, projectId, keyId, env }: Ro
   return (await axiosClient.post<{ newKey: string }>(endpoint)).data.newKey;
 };
 
+export type RotateSecretApiKeyVars = {
+  organizationId: string;
+  projectId: string;
+  keyId: string;
+  env: string;
+};
+export const rotateSecretApiKey = async ({ organizationId, projectId, keyId, env }: RotateSecretApiKeyVars) => {
+  const endpoint = `/organizations/${organizationId}/projects/${projectId}/${env}/keys/${keyId}/rotate-secret-key`;
+
+  return (await axiosClient.post<{ newKey: string }>(endpoint)).data.newKey;
+};
+
 export type GetLogoUploadUrlVars = {
   assetType?: PartnerAssetType;
   organizationId: string;

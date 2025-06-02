@@ -16,7 +16,7 @@ export const SlottedInput = forwardRef(
     return (
       <div
         className={clsx(
-          'para:border para:border-border para:flex para:items-center para:gap-2 para:rounded-sm para:bg-muted para:pr-3 para:h-12 para:focus-within:border-ring para:focus-within:ring-ring/50',
+          'para:border para:border-border para:flex para:items-center para:gap-2 para:rounded-sm para:bg-muted para:pr-3 para:h-11 para:focus-within:border-ring para:focus-within:ring-ring/50',
           className,
         )}
       >

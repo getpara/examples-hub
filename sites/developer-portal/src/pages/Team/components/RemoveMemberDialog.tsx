@@ -74,7 +74,7 @@ export const RemoveMemberDialog = ({ memberId, open, setOpen, onSuccess }: Remov
           </Typography>
         </DialogHeader>
         <DialogFooter>
-          <div className="para:flex para:justify-end">
+          <div>
             <Button
               disabled={!canRemove || isRemoving}
               isLoading={isRemoving}

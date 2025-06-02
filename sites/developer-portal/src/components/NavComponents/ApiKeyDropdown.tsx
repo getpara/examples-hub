@@ -12,6 +12,7 @@ import { SquareArrowUpRight } from 'lucide-react';
 import { formatEnvName } from '../../utils/apiKey';
 import { useState } from 'react';
 import { useCopyToNewKey } from '../../hooks/useCopyToNewKey';
+import { useIsValidProject } from '../../hooks/useIsValidOrgConfig';
 
 export const ApiKeyDropdown = () => {
   const { organizationId, projectId, apiKey, env, apiKeyPage } = useParams();
@@ -19,6 +20,7 @@ export const ApiKeyDropdown = () => {
   const { data: apiKeys } = useGetAllOrganizationKeys(projectId ?? '');
   const { data: availableKeyEnv } = useGetAvailableKeyEnv(projectId ?? '');
   const { copyToNewKey, isCreatingKey } = useCopyToNewKey();
+  const isValidProject = useIsValidProject(projectId, true);
   const [isNavOpen, setIsNavOpen] = useState(false);
 
   if (!apiKeyData || !apiKeys?.length) {
@@ -61,7 +63,7 @@ export const ApiKeyDropdown = () => {
         isOpen={isNavOpen}
         setIsOpen={setIsNavOpen}
       >
-        {!!availableKeyEnv && (
+        {!!availableKeyEnv && isValidProject && (
           <>
             <DropdownMenuSeparator />
             <div className="para:p-1">

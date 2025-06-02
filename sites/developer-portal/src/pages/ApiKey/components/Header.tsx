@@ -34,7 +34,9 @@ export const Header = () => {
 
   const ActionComponent = useMemo(() => {
     switch (apiKeyPage) {
-      case 'setup':
+      case 'setup': {
+        return <SettingsHeaderAction isSetup />;
+      }
       case 'branding':
       case 'security':
       case 'on-off-ramps':

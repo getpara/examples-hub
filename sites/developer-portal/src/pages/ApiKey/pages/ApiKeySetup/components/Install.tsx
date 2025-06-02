@@ -5,16 +5,18 @@ import { Link } from 'react-router-dom';
 import { SetupForm } from '../hooks/useSetupForm';
 import {
   formatFrameworkName,
-  getFrameworkCodeSnippet,
   getFrameworkDocsLink,
   getFrameworkExtraSetupLink,
   getFrameworkPackages,
+  getIsFrameworkMobile,
 } from '../../../../../utils/framework';
 import { Framework } from '../../../../../types/framework';
 import { getPackageManagerInstallString } from '../../../../../utils/packageManager';
 import { PackageManager } from '../../../../../types/packageManager';
 import { CopyInput } from '../../../../../components/CopyInput';
-import { CodeBlock } from '../../../../../components/CodeBlock/CodeBlock';
+import { AppleSetup } from './AppleSetup';
+import { AndroidSetup } from './AndroidSetup';
+import { CodeSnippet } from './CodeSnippet';
 
 export const Install = () => {
   const form = useFormContext<SetupForm>();
@@ -25,8 +27,8 @@ export const Install = () => {
   const typedPackageManager = (packageManager as PackageManager) ?? PackageManager.NPM;
 
   const installString = `${getPackageManagerInstallString(typedPackageManager)} ${getFrameworkPackages(typedFramework)}`;
-  const codeSnippet = getFrameworkCodeSnippet(typedFramework);
   const extraSetupLink = getFrameworkExtraSetupLink(typedFramework);
+  const isMobileFramework = getIsFrameworkMobile((framework as Framework) ?? Framework.REACT);
 
   return (
     <ConfigCard
@@ -48,23 +50,19 @@ export const Install = () => {
             inputClassName="para:disabled:opacity-100 para:disabled:pointer-events-auto para:disabled:cursor-text"
           />
         </div>
-        {codeSnippet && (
-          <div className="para:flex para:flex-col para:gap-2">
-            <div className="para:flex para:flex-col para:gap-1">
-              <Typography className="para:text-sm para:font-semibold">Copy and Paste Code Snippet</Typography>
-              <Typography color="secondary" className="para:text-sm para:font-medium">
-                After you add this code, run your project to confirm that it is working correctly.
-              </Typography>
-            </div>
-            <CodeBlock snippet={codeSnippet} />
-          </div>
-        )}
+        <CodeSnippet />
         {extraSetupLink && (
           <Link to={extraSetupLink} target="_blank">
             <Button variant="outline">
               {formatFrameworkName(typedFramework)} requires extra setup. Follow our guide here <SquareArrowOutUpRight />
             </Button>
           </Link>
+        )}
+        {isMobileFramework && (
+          <>
+            <AppleSetup />
+            <AndroidSetup />
+          </>
         )}
       </div>
     </ConfigCard>

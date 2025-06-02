@@ -1,6 +1,6 @@
 import { Bun, Deno, Expo, Flutter, Next, Node, React, Svelte, Swift, Vite, Vue } from '@getpara/react-component-library';
 import { Framework } from '../types/framework';
-import { REACT_CODE_SNIPPET, SERVER_CODE_SNIPPET, WEB_CODE_SNIPPET } from './codeSnippets';
+import { REACT_CODE_SNIPPET, REACT_CODE_SNIPPET_1_X_X, SERVER_CODE_SNIPPET, WEB_CODE_SNIPPET } from './codeSnippets';
 import {
   EXPO_DOCS_LINK,
   EXPO_SETUP_DOCS_LINK,
@@ -192,11 +192,31 @@ export const getFrameworkPackages = (framework?: Framework) => {
   }
 };
 
-export const getFrameworkCodeSnippet = (framework?: Framework) => {
+export const getFrameworkVersions = (framework?: Framework) => {
   switch (framework?.toUpperCase()) {
     case Framework.REACT:
     case Framework.VITE:
     case Framework.NEXT: {
+      return [
+        { label: '1.x.x', value: '1.x.x' },
+        { label: 'Alpha 2.0', value: 'alpha' },
+      ];
+    }
+    default: {
+      return undefined;
+    }
+  }
+};
+
+export const getFrameworkCodeSnippet = (framework?: Framework, version?: string) => {
+  switch (framework?.toUpperCase()) {
+    case Framework.REACT:
+    case Framework.VITE:
+    case Framework.NEXT: {
+      if (version === '1.x.x') {
+        return REACT_CODE_SNIPPET_1_X_X;
+      }
+
       return REACT_CODE_SNIPPET;
     }
     case Framework.SWIFT:
@@ -272,5 +292,17 @@ export const getFrameworkColors = (framework?: Framework) => {
       return { bg: 'para:bg-purple-50', border: 'para:border-purple-600' };
     default:
       return null;
+  }
+};
+
+export const getIsFrameworkMobile = (framework?: Framework) => {
+  switch (framework?.toUpperCase()) {
+    case Framework.REACT_NATIVE:
+    case Framework.EXPO:
+    case Framework.FLUTTER:
+    case Framework.SWIFT:
+      return true;
+    default:
+      return false;
   }
 };

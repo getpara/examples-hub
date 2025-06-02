@@ -36,7 +36,7 @@ export const useProjectsQuery = <T>(select: (data: Project[]) => T) => {
 
 export const useGetAllProjects = () => {
   return useProjectsQuery(data => {
-    return data;
+    return data.sort((a, b) => (a.archived && b.archived ? 0 : a.archived ? 1 : -1));
   });
 };
 

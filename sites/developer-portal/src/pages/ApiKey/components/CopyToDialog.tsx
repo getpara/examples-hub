@@ -15,7 +15,7 @@ import {
   toast,
 } from '@getpara/react-component-library';
 import { useParams } from 'react-router-dom';
-import { useGetAllOrganizationKeys, useGetOrganizationKey } from '../../../hooks/api/queries/useOrganizationKeys';
+import { useGetActiveOrganizationKeys, useGetOrganizationKey } from '../../../hooks/api/queries/useOrganizationKeys';
 import { useUpdateApiKey } from '../../../hooks/api/mutations/useUpdateApiKey';
 import { useState } from 'react';
 import { formatEnvName } from '../../../utils/apiKey';
@@ -31,7 +31,7 @@ interface CopyToDialogProps {
 export const CopyToDialog = ({ open, setIsOpen }: CopyToDialogProps) => {
   const { projectId, apiKey, env } = useParams();
   const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
-  const { data: apiKeys, isLoading: isApiKeysLoading } = useGetAllOrganizationKeys(projectId ?? '');
+  const { data: apiKeys, isLoading: isApiKeysLoading } = useGetActiveOrganizationKeys(projectId ?? '');
   const { mutate: saveChanges, isPending: isUpdatingKey } = useUpdateApiKey();
   const [destinationKeyId, setDestinationKeyId] = useState<string>();
 

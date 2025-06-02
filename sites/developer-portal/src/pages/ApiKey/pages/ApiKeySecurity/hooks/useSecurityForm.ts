@@ -18,6 +18,7 @@ const formSchema = z.object({
     .string()
     .refine(
       v =>
+        v === '' ||
         v
           .split(',')
           .map(v => v.trim())
@@ -60,7 +61,7 @@ export const useSecurityForm = () => {
       env,
       data: {
         ...updateData,
-        ...(updateData.origins ? { origins: updateData.origins.split(',').map(v => v.trim()) } : { origins: [] }),
+        ...(updateData.origins ? { origins: updateData.origins.split(',').map(v => v.trim()) } : { origins: null }),
         ...(updateData.sessionMaxAge ? { sessionMaxAge: updateData.sessionMaxAge.toString(10) } : { sessionMaxAge: null }),
       },
     });
