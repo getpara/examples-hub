@@ -624,9 +624,11 @@ packages:
   para:
     dependency: "direct main"
     description:
-      path: "/Users/tyson/para/flutter-sdk"
-      relative: false
-    source: path
+      path: "."
+      ref: "test/e2e-workflow-trigger"
+      resolved-ref: "14354ffdb676b8f7f720c7fc9677175ce3c72f0a"
+      url: "https://github.com/capsule-org/flutter-sdk.git"
+    source: git
     version: "1.4.0-dev.1"
   passkeys:
     dependency: transitive
