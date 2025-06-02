@@ -40,16 +40,30 @@ class ExampleUITests: XCTestCase {
         // Put setup code here. This method is called before the invocation of each test method in the class.
         continueAfterFailure = false
         
+        // Debug environment variables
+        print("=== UI TEST ENVIRONMENT DEBUG ===")
+        let paraApiKey = ProcessInfo.processInfo.environment["PARA_API_KEY"] ?? ""
+        let paraEnvironment = ProcessInfo.processInfo.environment["PARA_ENVIRONMENT"] ?? "sandbox"
+        let rpcUrl = ProcessInfo.processInfo.environment["RPC_URL"] ?? ""
+        
+        print("PARA_API_KEY length: \(paraApiKey.count)")
+        print("PARA_API_KEY (first 8 chars): \(String(paraApiKey.prefix(8)))...")
+        print("PARA_ENVIRONMENT: \(paraEnvironment)")
+        print("RPC_URL: \(rpcUrl)")
+        print("=================================")
+        
         // Set up environment variables for testing
         app.launchEnvironment = [
-            "PARA_API_KEY": ProcessInfo.processInfo.environment["PARA_API_KEY"] ?? "",
-            "PARA_ENVIRONMENT": ProcessInfo.processInfo.environment["PARA_ENVIRONMENT"] ?? "sandbox",
-            "RPC_URL": ProcessInfo.processInfo.environment["RPC_URL"] ?? ""
+            "PARA_API_KEY": paraApiKey,
+            "PARA_ENVIRONMENT": paraEnvironment,
+            "RPC_URL": rpcUrl
         ]
         
         Biometrics.enrolled()
         
+        print("=== LAUNCHING APP ===")
         app.launch()
+        print("=== APP LAUNCHED ===")
         
         // Wait for the main screen to appear after launch
         waitForMainScreen()

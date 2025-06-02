@@ -41,7 +41,15 @@ struct ParaConfig {
     
     /// Loads the API key from PARA_API_KEY variable
     private static func loadApiKey() -> String {
-        guard let apiKey = ProcessInfo.processInfo.environment["PARA_API_KEY"], !apiKey.isEmpty else {
+        let apiKey = ProcessInfo.processInfo.environment["PARA_API_KEY"] ?? ""
+        print("=== PARA CONFIG DEBUG ===")
+        print("PARA_API_KEY length: \(apiKey.count)")
+        print("PARA_API_KEY (first 8 chars): \(String(apiKey.prefix(8)))...")
+        print("PARA_API_KEY isEmpty: \(apiKey.isEmpty)")
+        print("========================")
+        
+        guard !apiKey.isEmpty else {
+            print("FATAL: Missing required environment variable: PARA_API_KEY")
             fatalError("Missing required environment variable: PARA_API_KEY")
         }
         return apiKey
