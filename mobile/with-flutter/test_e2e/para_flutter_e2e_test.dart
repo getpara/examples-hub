@@ -45,7 +45,7 @@ void main() {
       
       final capabilities = <String, dynamic>{
         'platformName': 'iOS',
-        'platformVersion': '18.2',
+        'platformVersion': Platform.environment['IOS_VERSION'] ?? '18.5',
         'deviceName': 'iPhone 16 Pro',
         'automationName': 'XCUITest',
         'bundleId': 'com.usecapsule.example.flutter',
@@ -53,12 +53,17 @@ void main() {
         'newCommandTimeout': 300,
         'connectHardwareKeyboard': false,
         'useNewWDA': true,
-        'wdaLaunchTimeout': 60000,
-        'wdaConnectionTimeout': 60000,
+        'wdaLaunchTimeout': Platform.environment['GITHUB_ACTIONS'] != null ? 300000 : 120000,
+        'wdaConnectionTimeout': Platform.environment['GITHUB_ACTIONS'] != null ? 300000 : 120000,
         'allowTouchIdEnroll': true,
         'touchIdMatch': true,
         'simpleIsVisibleCheck': true,
       };
+      
+      print('🔧 Test configuration:');
+      print('  iOS Version: ${capabilities['platformVersion']}');
+      print('  GitHub Runner: ${Platform.environment['GITHUB_ACTIONS'] != null}');
+      print('  WDA Launch Timeout: ${capabilities['wdaLaunchTimeout']}ms');
       
       driver = await createDriver(
         uri: Uri.parse('http://127.0.0.1:4723/'),
@@ -438,7 +443,7 @@ void main() {
       await Future.delayed(mediumDelay);
       await enterVerificationCode(testVerificationCode);
       await Future.delayed(authFlowDelay);
-      await clickTextElementByContent('Use Biometrics');
+      await clickButtonByText('Login with Any Passkey');
       
       // Manual tap for Continue
       await Future.delayed(shortDelay);
@@ -498,7 +503,7 @@ void main() {
       
       // Choose Passkey - click on "Use Biometrics (Passkey)" option
       await Future.delayed(mediumDelay);
-      await clickTextElementByContent('Use Biometrics');
+      await clickButtonByText('Login with Any Passkey');
       print('✅ Passkey authentication method selected');
       
       // Manual tap for Continue button (system button not exposed to testing)
@@ -597,7 +602,7 @@ void main() {
       
       // Choose Passkey - click on "Use Biometrics (Passkey)" option
       await Future.delayed(mediumDelay);
-      await clickTextElementByContent('Use Biometrics');
+      await clickButtonByText('Login with Any Passkey');
       print('✅ Passkey authentication method selected');
       
       // Manual tap for Continue button (system button not exposed to testing)
