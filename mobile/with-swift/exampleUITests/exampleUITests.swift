@@ -43,7 +43,7 @@ class ExampleUITests: XCTestCase {
         // Set up environment variables for testing
         app.launchEnvironment = [
             "PARA_API_KEY": ProcessInfo.processInfo.environment["PARA_API_KEY"] ?? "",
-            "PARA_ENVIRONMENT": "sandbox",
+            "PARA_ENVIRONMENT": ProcessInfo.processInfo.environment["PARA_ENVIRONMENT"] ?? "sandbox",
             "RPC_URL": ProcessInfo.processInfo.environment["RPC_URL"] ?? ""
         ]
         
