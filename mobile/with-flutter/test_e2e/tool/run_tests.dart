@@ -39,11 +39,14 @@ void main(List<String> args) async {
       case 'phone':
         testArgs.addAll(['--name', '02 Phone Authentication']);
         break;
+      case 'password':
+        testArgs.addAll(['--name', '03 Email Password Authentication']);
+        break;
       case 'evm-signing':
-        testArgs.addAll(['--name', '05 EVM Transaction Signing']);
+        testArgs.addAll(['--name', '06 EVM Transaction Signing']);
         break;
       case 'solana-signing':
-        testArgs.addAll(['--name', '08 Solana Transaction Signing']);
+        testArgs.addAll(['--name', '09 Solana Transaction Signing']);
         break;
       case 'all':
       default:
