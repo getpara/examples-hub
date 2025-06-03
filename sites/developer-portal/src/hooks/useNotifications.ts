@@ -20,7 +20,7 @@ export const useNotifications = () => {
         const totalBetaUsers = project?.lowerEnvCount ?? 0;
         const maxBetaUsers = plan?.maxBetaUsers ?? 0;
         const hasReachedLimit = totalBetaUsers >= maxBetaUsers;
-        const isCloseToLimit = totalBetaUsers >= maxBetaUsers - 49;
+        const isCloseToLimit = totalBetaUsers >= maxBetaUsers - 10;
 
         if (hasReachedLimit) {
           const notification = betaUserLimit({

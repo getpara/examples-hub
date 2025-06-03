@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { FlatCard } from '../../../components/common';
+import { FlatCard } from '../../../components/FlatCard';
 import { X } from 'lucide-react';
 import { NotificationType, useAppStore } from '../../../stores/app/useAppStore';
 import { PropsWithChildren, useState } from 'react';

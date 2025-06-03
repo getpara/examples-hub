@@ -45,7 +45,7 @@
     "plan": {
       "name": "{{name}} Plan",
       "monthlyPrice": "<bold>${{price}}</bold>/mo",
-      "overageCost": "${{cost}} per additional MA",
+      "overageCost": "${{cost}} per additional MAU",
       "allowance": "Up to {{allowance}} Users/mo*",
       "popular": "Most Popular",
       "enterpriseCTA": "Ask Us!",

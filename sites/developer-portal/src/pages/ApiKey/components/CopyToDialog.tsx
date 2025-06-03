@@ -20,7 +20,7 @@ import { useUpdateApiKey } from '../../../hooks/api/mutations/useUpdateApiKey';
 import { useState } from 'react';
 import { formatEnvName } from '../../../utils/apiKey';
 import { getApiKeyCopyValues } from '../../../utils/getApiKeyCopyValues';
-import { EnvIcon } from '../../../components/common';
+import { EnvIcon } from '../../../components/EnvIcon';
 import { Environment } from '../../../types/environment';
 
 interface CopyToDialogProps {

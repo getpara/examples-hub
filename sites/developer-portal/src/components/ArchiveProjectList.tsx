@@ -1,7 +1,7 @@
 import { Checkbox, Label, Typography } from '@getpara/react-component-library';
 import { useTranslation } from 'react-i18next';
 import { useGetAllActiveProjects } from '../hooks/api/queries/useProjects';
-import { FlatCard } from './common';
+import { FlatCard } from './FlatCard';
 
 type ArchiveProjectListProps = {
   selectedProjectIds: string[];

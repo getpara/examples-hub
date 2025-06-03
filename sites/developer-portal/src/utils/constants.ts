@@ -15,11 +15,6 @@ export const ENV_VARS = {
         : 'production',
 };
 
-export const BRAND_COLORS = {
-  primary: '#FF754A',
-  secondary: '#9C1EFF',
-};
-
 export const DOCS_LINK = 'https://docs.getpara.com/';
 export const PREGEN_DOCS_LINK = 'https://docs.getpara.com/integration-guides/wallet-pregeneration';
 export const BRANDING_DOCS_LINK = 'https://docs.getpara.com/customize-capsule/required-customization';
@@ -140,6 +135,7 @@ export const LOGIN_METHOD_CONFIG: Record<string, { label: string; color: string 
   PREGEN: { label: 'Pregen', color: 'var(--para-color-blue-500)' },
   GUEST_MODE: { label: 'Guest Mode', color: 'var(--para-color-cyan-500)' },
   OTHER: { label: 'Other', color: 'var(--para-color-fuchsia-500)' },
+  TELEGRAM: { label: 'Telegram', color: 'var(--para-color-violet-500)' },
 };
 export const MOST_POPULAR_PLAN_SLUG = PlanSlug.GROWTH;
 export const ENTERPRISE_PLAN_SLUG = PlanSlug.ENTERPRISE;
@@ -169,3 +165,5 @@ export const AUTH_METHODS = [
     value: 'PASSWORD',
   },
 ];
+
+export const MAX_ORGS = 3;

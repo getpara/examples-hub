@@ -15,7 +15,7 @@ import { Fragment } from 'react/jsx-runtime';
 import { Link } from 'react-router-dom';
 import { PropsWithChildren } from 'react';
 import { Environment } from '../../types/environment';
-import { EnvIcon } from '../common';
+import { EnvIcon } from '../EnvIcon';
 
 type Option = {
   id: string;

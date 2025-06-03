@@ -1,7 +1,7 @@
 import { Project } from '../../../types/api';
 import { truncateNumber } from '../../../utils/formatNumber';
 import { Link, useParams } from 'react-router-dom';
-import { FlatCard } from '../../../components/common';
+import { FlatCard } from '../../../components/FlatCard';
 import { Badge, cn, Typography } from '@getpara/react-component-library';
 import { OrganizationAvatar } from '../../../components/OrganizationAvatar';
 import { formatFrameworkName, getFrameworkColors, getFrameworkIcon } from '../../../utils/framework';

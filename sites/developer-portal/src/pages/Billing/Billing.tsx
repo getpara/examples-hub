@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { BillingContent } from './components/BillingContent';
-import { useIsOwner } from '../../hooks/api/queries/useOrganizationMember';
+import { useOrganizationMemberCapabilities } from '../../hooks/api/queries/useOrganizationMember';
 import { useEffect } from 'react';
 import { PageHeader } from '../../components/PageHeader';
 import { useTranslation } from 'react-i18next';
@@ -10,15 +10,15 @@ import { ChangePlanDialog } from './components/ChangePlanDialog';
 
 export const Billing = () => {
   const navigate = useNavigate();
-  const { data: isOwner, isLoading: isMemberLoading } = useIsOwner();
+  const { data: capabilities, isLoading: isMemberLoading } = useOrganizationMemberCapabilities();
   const { isLoading: isLoadingSubscription } = useGetOrganizationSubscription();
   const { t } = useTranslation(['billing']);
 
   useEffect(() => {
-    if (!isMemberLoading && !isOwner) {
+    if (!isMemberLoading && !capabilities?.canViewOrganizationBilling) {
       navigate('/', { replace: true });
     }
-  }, [isMemberLoading, isOwner, navigate]);
+  }, [isMemberLoading, navigate]);
 
   if (isMemberLoading || isLoadingSubscription) {
     return <Loader className="para:m-auto para:size-14" />;

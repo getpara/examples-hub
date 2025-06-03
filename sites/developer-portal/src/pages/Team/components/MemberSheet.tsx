@@ -20,7 +20,7 @@ import {
   Switch,
 } from '@getpara/react-component-library';
 import { MemberRole } from '../../../types/api';
-import { FlatCard } from '../../../components/common';
+import { FlatCard } from '../../../components/FlatCard';
 import { formatDate } from '../../../utils/formatDate';
 import { useUpdateMemberForm } from '../hooks/useUpdateMemberForm';
 import { FormControl } from '../../../components/formComponents';

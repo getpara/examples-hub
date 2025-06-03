@@ -10,16 +10,16 @@ export const LogoCTA = () => {
   const { uploadLogo, isUploadingLogo } = useUploadLogo();
   const { data: capabilities } = useOrganizationMemberCapabilities();
 
-  if (!capabilities?.canUpdateOrganization) {
+  if (org?.logoUrl || !capabilities?.canUpdateOrganization) {
     return null;
   }
 
   const handleUpload = (file?: File | null) => {
-    if (!file) {
+    if (!file || !org) {
       return;
     }
 
-    uploadLogo(file);
+    uploadLogo(org.id, file);
   };
 
   return (

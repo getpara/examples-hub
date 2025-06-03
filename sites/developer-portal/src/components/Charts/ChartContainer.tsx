@@ -1,6 +1,6 @@
 import { ChartConfig, ChartContainer as BaseChartContainer, Typography, Loader, cn } from '@getpara/react-component-library';
 import { ResponsiveContainer } from 'recharts';
-import { FlatCard } from '../common';
+import { FlatCard } from '../FlatCard';
 import { ReactNode } from 'react';
 
 type ChartContainerProps = {

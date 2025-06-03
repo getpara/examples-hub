@@ -1,4 +1,4 @@
-import { DOCS_LINK } from '../../../utils/constants';
+import { DOCS_LINK, SUPPORT_URL } from '../../../utils/constants';
 import { Link, useParams } from 'react-router-dom';
 import { Button, cn, ParaIconBrand, useSidebar } from '@getpara/react-component-library';
 import { FileText, HelpCircle, PanelLeftClose } from 'lucide-react';
@@ -44,7 +44,7 @@ export const AuthAppBar = ({}: AuthAppBarProps) => {
           </div>
         </div>
         <div className="para:flex para:items-center para:gap-4">
-          <NavLink to="/" Icon={HelpCircle} text="Help" />
+          <NavLink to={SUPPORT_URL} Icon={HelpCircle} text="Help" />
           <NavLink to={DOCS_LINK} Icon={FileText} text="Docs" />
           <AccountDropdown />
         </div>

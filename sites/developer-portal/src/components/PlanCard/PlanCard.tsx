@@ -1,7 +1,7 @@
 import { PlanCardLeft } from './PlanCardLeft';
 import { PlanCardRight } from './PlanCardRight';
 import { PlanMetadata } from '../../types/planMetadata';
-import { FlatCard } from '../common';
+import { FlatCard } from '../FlatCard';
 
 export type PlanCardType = 'billing' | 'onboarding';
 

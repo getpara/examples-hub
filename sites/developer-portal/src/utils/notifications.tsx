@@ -22,7 +22,7 @@ export const betaUserLimit = ({
   id: `${id}-beta-user-limit`,
   title: `Development User Limit Reached for ${projectName}`,
   message: (
-    <Typography>{`You have reached the limit of ${maxBetaUsers} Development users for your organization. Please remove some users to continue using the Development environment.`}</Typography>
+    <Typography>{`You have reached the limit of ${maxBetaUsers} Development users for your project. Please remove some users to continue using the Development environment.`}</Typography>
   ),
   type: 'warning',
 });

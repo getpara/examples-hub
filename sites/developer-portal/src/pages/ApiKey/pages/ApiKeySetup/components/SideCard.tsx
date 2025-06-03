@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { FlatCard } from '../../../../../components/common';
+import { FlatCard } from '../../../../../components/FlatCard';
 import { useGetOrganizationKey } from '../../../../../hooks/api/queries/useOrganizationKeys';
 import { SetupGuide } from './SetupGuide';
 import { Environment } from '../../../../../types/environment';

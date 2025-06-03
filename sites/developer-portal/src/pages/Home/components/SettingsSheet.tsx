@@ -43,7 +43,7 @@ export const SettingsSheet = () => {
       return;
     }
 
-    uploadLogo(file, form);
+    uploadLogo(organizationId!, file, form);
   };
 
   return (

@@ -1,6 +1,6 @@
 import { cn, Typography } from '@getpara/react-component-library';
 import { useApplePasskeyVerification } from '../../../../../hooks/api/queries/useApplePasskeyVerification';
-import { FlatCard } from '../../../../../components/common';
+import { FlatCard } from '../../../../../components/FlatCard';
 
 type VerificationStatusProps = {
   platform: 'apple' | 'android';

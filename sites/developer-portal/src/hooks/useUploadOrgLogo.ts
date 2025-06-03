@@ -1,20 +1,20 @@
-import { useUpdateOrganization } from '../../../hooks/api/mutations/useUpdateOrganization';
-import { useUploadOrganizationLogo } from '../../../hooks/api/mutations/useUploadOrganizationLogo';
 import { UseFormReturn } from '@getpara/react-component-library';
-import { UpdateOrganizationSchema } from './useUpdateOrganizationForm';
-import { useGetSelectedOrganization } from '../../../hooks/api/queries/useOrganizations';
+import { useGetSelectedOrganization } from './api/queries/useOrganizations';
+import { useUploadOrganizationLogo } from './api/mutations/useUploadOrganizationLogo';
+import { useUpdateOrganization } from './api/mutations/useUpdateOrganization';
+import { UpdateOrganizationSchema } from '../pages/Home/hooks/useUpdateOrganizationForm';
 
-export const useUploadLogo = () => {
+export const useUploadOrgLogo = () => {
   const { mutateAsync: uploadOrgLogo, isPending: isUploadingLogo } = useUploadOrganizationLogo();
   const { mutate: updateOrganization, isPending: isUpdatingOrg } = useUpdateOrganization();
   const { data: org } = useGetSelectedOrganization();
 
-  const uploadLogo = async (organizationId: string, file?: File | null, form?: UseFormReturn<UpdateOrganizationSchema>) => {
+  const uploadLogo = (organizationId: string, file?: File | null, form?: UseFormReturn<UpdateOrganizationSchema>) => {
     if (!file) {
       return;
     }
 
-    await uploadOrgLogo(
+    uploadOrgLogo(
       { organizationId: organizationId!, file },
       {
         onSuccess: async url => {

@@ -1,5 +1,5 @@
 import { ArrowRight } from 'lucide-react';
-import { FlatCard } from '../../../components/common';
+import { FlatCard } from '../../../components/FlatCard';
 import { Typography } from '@getpara/react-component-library';
 import { useOrganizationMemberCapabilities } from '../../../hooks/api/queries/useOrganizationMember';
 import { useState } from 'react';

@@ -1,7 +1,6 @@
 import './clients/sentry';
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
-import { defineCustomElements } from '@getpara/react-components';
 import { RouterProvider } from 'react-router-dom';
 import { StatsigProvider } from 'statsig-react';
 import { router } from './router';
@@ -9,13 +8,11 @@ import { ENV_VARS, LINKEDIN_URL, SUPPORT_URL, TWITTER_URL } from './utils/consta
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './clients/queryClient';
 import './index.css';
-import '@getpara/react-components/css/capsule-core.css';
+import '@getpara/react-sdk/styles.css';
 import { Environment, ParaProvider } from '@getpara/react-sdk';
 import { paraLogo } from './assets/paraLogo';
 import { Toaster } from '@getpara/react-component-library';
 import './i18n';
-
-defineCustomElements();
 
 const App = () => {
   return (

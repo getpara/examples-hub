@@ -12,7 +12,7 @@ import {
 } from '@getpara/react-component-library';
 import { SetupForm } from '../hooks/useSetupForm';
 import { ConfigCard } from '../../../components/ConfigCard';
-import { FlatCard } from '../../../../../components/common';
+import { FlatCard } from '../../../../../components/FlatCard';
 import { ReactNode } from 'react';
 import { FormMessage } from '../../../../../components/formComponents';
 import { TWalletType, WALLET_TYPES } from '@getpara/user-management-client';

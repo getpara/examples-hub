@@ -34,12 +34,14 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
       to: MODAL_DESIGNER_LINK,
       Icon: PaintbrushVertical,
       target: '_blank',
+      isExternal: true,
     },
     secondaryButton: {
       text: 'Styling Guide',
       to: MODAL_CONFIG_LINK,
       Icon: FileText,
       target: '_blank',
+      isExternal: true,
     },
   },
   {
@@ -49,12 +51,14 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     primaryButton: {
       text: 'Configure Brand',
       to: '/branding',
+      isExternal: false,
     },
     secondaryButton: {
       text: 'Brand Guide',
       to: MODAL_CONFIG_LINK,
       Icon: FileText,
       target: '_blank',
+      isExternal: true,
     },
   },
   {
@@ -64,12 +68,14 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     primaryButton: {
       text: 'Security Settings',
       to: '/security',
+      isExternal: false,
     },
     secondaryButton: {
       text: 'Customize Para',
       to: MODAL_CONFIG_LINK,
       Icon: FileText,
       target: '_blank',
+      isExternal: true,
     },
   },
 ];

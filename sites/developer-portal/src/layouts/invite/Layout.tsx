@@ -3,13 +3,12 @@ import { AuthMinAppBar } from '../../components/AppBar/AuthMinAppBar';
 import { ErrorBoundary as SentryErrorBoundary } from '@sentry/react';
 import { ErrorBoundary } from '../../components/ErrorBoundary/ErrorBoundary';
 import { AuthenticatedWrapper } from '../../components/AuthenticatedWrapper/AuthenticatedWrapper';
-import { styled } from 'styled-components';
 
 export const Layout = () => {
   return (
     <AuthenticatedWrapper>
       <AuthMinAppBar />
-      <InviteMain>
+      <main className="para:flex para:justify-center para:box-border para:overflow-auto para:px-6 para:pb-6 para:pt-10">
         <SentryErrorBoundary
           fallback={({ error, resetError }) => (
             <ErrorBoundary
@@ -22,17 +21,7 @@ export const Layout = () => {
         >
           <Outlet />
         </SentryErrorBoundary>
-      </InviteMain>
+      </main>
     </AuthenticatedWrapper>
   );
 };
-
-const InviteMain = styled.main`
-  overflow: auto;
-
-  display: flex;
-  justify-content: center;
-  background-color: var(--cpsl-color-background-0);
-  box-sizing: border-box;
-  padding: 40px 24px 24px 24px;
-`;

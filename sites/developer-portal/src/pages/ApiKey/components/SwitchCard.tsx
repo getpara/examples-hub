@@ -1,5 +1,5 @@
 import { cn, Switch, SwitchProps, Typography } from '@getpara/react-component-library';
-import { FlatCard } from '../../../components/common';
+import { FlatCard } from '../../../components/FlatCard';
 
 type SwitchCardProps = {
   label: string;

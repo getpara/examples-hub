@@ -51,7 +51,7 @@ export const KeyData = () => {
                     <FormControl>
                       <VisibilityInput
                         {...field}
-                        disabled
+                        readOnly
                         inputClassName="para:disabled:opacity-100 para:text-ellipsis"
                         showCopyButton
                       />
@@ -75,14 +75,14 @@ export const KeyData = () => {
                   {!secretKey ? (
                     <Input
                       value="***********************************"
-                      disabled
+                      readOnly
                       className="para:disabled:opacity-100 para:text-ellipsis"
                       type="password"
                     />
                   ) : (
                     <VisibilityInput
                       value={secretKey}
-                      disabled
+                      readOnly
                       inputClassName="para:disabled:opacity-100 para:text-ellipsis"
                       showCopyButton
                       defaultVisible

@@ -1,6 +1,6 @@
 import { useGetOrganizationSubscription } from '../../../hooks/api/queries/useOrganizationSubscription';
 import { CARD_NAMES } from '../../../utils/paymentType';
-import { FlatCard } from '../../../components/common';
+import { FlatCard } from '../../../components/FlatCard';
 import { format } from 'date-fns';
 import { useStripePlan } from '../../../hooks/useStripePlan';
 import { Button, Typography } from '@getpara/react-component-library';

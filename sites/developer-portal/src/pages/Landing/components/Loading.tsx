@@ -1,9 +1,8 @@
-import styled from 'styled-components';
-import { CpslSpinner } from '@getpara/react-components';
 import { useSetSelectedOrganizationWithNavigation } from '../../../hooks/useSetSelectedOrganizationWithNavigation';
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useGetAllOrganizations } from '../../../hooks/api/queries/useOrganizations';
+import { Loader } from '@getpara/react-component-library';
 
 export const Loading = () => {
   const navigate = useNavigate();
@@ -24,9 +23,5 @@ export const Loading = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoadingOrgs, isRefetchingOrgs]);
 
-  return <StyledSpinner />;
+  return <Loader className="para:size-14" />;
 };
-
-const StyledSpinner = styled(CpslSpinner)`
-  --background-color: var(--cpsl-color-background-4);
-`;

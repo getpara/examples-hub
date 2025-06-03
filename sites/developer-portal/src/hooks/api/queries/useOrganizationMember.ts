@@ -35,12 +35,6 @@ export const useOrganizationMember = () => {
   });
 };
 
-export const useIsOwner = () => {
-  return useOrganizationMemberQuery(data => {
-    return data?.member.owner;
-  });
-};
-
 export const useOrganizationMemberCapabilities = () => {
   return useOrganizationMemberQuery(data => {
     return data?.capabilities;

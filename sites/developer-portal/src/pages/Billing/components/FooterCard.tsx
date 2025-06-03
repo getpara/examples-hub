@@ -1,6 +1,6 @@
 import { Button, Typography } from '@getpara/react-component-library';
 import { useTranslation } from 'react-i18next';
-import { FlatCard } from '../../../components/common';
+import { FlatCard } from '../../../components/FlatCard';
 import { PlanSlug, SUPPORT_URL } from '../../../utils/constants';
 import { useBillingStore } from '../store/useBillingStore';
 import { Link } from 'react-router-dom';

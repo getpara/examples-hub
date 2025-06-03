@@ -1,5 +1,5 @@
 import { Button, Typography } from '@getpara/react-component-library';
-import { FlatCard } from '../../../components/common';
+import { FlatCard } from '../../../components/FlatCard';
 import { ArrowRight } from 'lucide-react';
 import bgImage from '../assets/cta-bg.png';
 import { useCreateProjectAndKey } from '../../../hooks/useCreateProjectAndKey';

@@ -1,5 +1,5 @@
 import { CirclePlay, FileText, LayoutDashboard, LucideIcon } from 'lucide-react';
-import { FlatCard } from '../../../components/common';
+import { FlatCard } from '../../../components/FlatCard';
 import { Button, Typography } from '@getpara/react-component-library';
 import { DOCS_LINK, EXAMPLES_HUB_LINK, MODAL_DESIGNER_LINK } from '../../../utils/constants';
 import { Link } from 'react-router-dom';

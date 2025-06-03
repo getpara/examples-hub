@@ -1,5 +1,5 @@
 import { TriangleAlert, X } from 'lucide-react';
-import { FlatCard } from '../../../components/common';
+import { FlatCard } from '../../../components/FlatCard';
 import { cn, Typography } from '@getpara/react-component-library';
 import { motion } from 'framer-motion';
 import { useParams } from 'react-router-dom';

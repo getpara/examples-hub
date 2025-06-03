@@ -5,7 +5,7 @@ import { HTTPS_URL_REGEX } from '../../../utils/regex';
 export const aboutYouQuestions = [
   OnboardingAnswerOption.USER_NAME,
   OnboardingAnswerOption.TELEGRAM,
-  OnboardingAnswerOption.ROLE,
+  OnboardingAnswerOption.NAME,
   OnboardingAnswerOption.HOMEPAGE_URL,
 ];
 
@@ -79,6 +79,9 @@ export const questionRules: Record<
       value: HTTPS_URL_REGEX,
       message: 'Must be a secure (https) url.',
     },
+  },
+  [OnboardingAnswerOption.TELEGRAM]: {
+    required: false,
   },
   [OnboardingAnswerOption.USER_NAME]: {
     required: 'Name is required.',

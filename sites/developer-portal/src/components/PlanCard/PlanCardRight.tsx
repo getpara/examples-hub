@@ -21,14 +21,6 @@ export const PlanCardRight = ({ title, subtitle, includes, excludes, comingSoon 
           </Typography>
         </div>
       ))}
-      {excludes?.map(item => (
-        <div className="para:flex para:items-center para:gap-2" key={item}>
-          <X className="para:size-4 para:stroke-foreground" />
-          <Typography color="secondary" className="para:text-sm">
-            {item}
-          </Typography>
-        </div>
-      ))}
       {!!excludes?.length &&
         excludes?.map(item => (
           <div className="para:flex para:items-center para:gap-2" key={item}>

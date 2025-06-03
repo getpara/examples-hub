@@ -12,7 +12,7 @@ import {
 } from '@getpara/react-component-library';
 import { FormControl } from '../../../../../components/formComponents';
 import { OnOffRampsForm } from '../hooks/useOnOffRampsForm';
-import { FlatCard } from '../../../../../components/common';
+import { FlatCard } from '../../../../../components/FlatCard';
 import { useOnRampAllAssets } from '../../../../../hooks/api/queries/useOnRampAssets';
 import { getNetworkName, getOnRampNetworks, Network as TNetwork } from '@getpara/react-sdk';
 import { AssetTabs } from './AssetTabs';

@@ -1,9 +1,8 @@
-import { Loader } from '../../components/Loader';
 import { MembersTable } from './components/MembersTable';
 import { useOrganizationMemberCapabilities } from '../../hooks/api/queries/useOrganizationMember';
 import { PageHeader } from '../../components/PageHeader';
 import { useState } from 'react';
-import { Button } from '@getpara/react-component-library';
+import { Button, Loader } from '@getpara/react-component-library';
 import { UserPlus } from 'lucide-react';
 import { AddMemberDialog } from '../../components/AddMemberDialogContent/AddMemberDialogContent';
 
@@ -12,7 +11,7 @@ export const Team = () => {
   const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false);
 
   if (isMemberLoading) {
-    return <Loader />;
+    return <Loader className="para:m-auto para:size-14" />;
   }
 
   if (!capabilities?.canViewMembers) {

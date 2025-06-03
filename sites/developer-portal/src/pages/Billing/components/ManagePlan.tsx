@@ -1,5 +1,5 @@
 import { useGetOrganizationSubscription } from '../../../hooks/api/queries/useOrganizationSubscription';
-import { FlatCard } from '../../../components/common';
+import { FlatCard } from '../../../components/FlatCard';
 import { useStripePlan } from '../../../hooks/useStripePlan';
 import { Button, Typography } from '@getpara/react-component-library';
 import { useTranslation } from 'react-i18next';

@@ -1,5 +1,5 @@
 import { cn, Loader, Typography } from '@getpara/react-component-library';
-import { FlatCard } from './common';
+import { FlatCard } from './FlatCard';
 import { LucideIcon } from 'lucide-react';
 
 type OverviewCardProps = {

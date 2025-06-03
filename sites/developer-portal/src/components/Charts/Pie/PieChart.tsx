@@ -40,6 +40,10 @@ export const PieChart = <DataKey extends string, DataValue, NameKey extends stri
           {data?.map(d => {
             const val = d[dataKey];
 
+            if (!val) {
+              return null;
+            }
+
             const formattedVal = typeof val === 'number' ? val.toLocaleString() : val;
 
             return (

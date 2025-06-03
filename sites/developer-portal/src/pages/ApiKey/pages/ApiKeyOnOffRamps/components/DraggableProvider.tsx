@@ -12,7 +12,7 @@ import {
   useFormContext,
 } from '@getpara/react-component-library';
 import { OnRampProvider } from '@getpara/react-sdk';
-import { FlatCard } from '../../../../../components/common';
+import { FlatCard } from '../../../../../components/FlatCard';
 import { GripHorizontal } from 'lucide-react';
 import { Reorder, useDragControls } from 'framer-motion';
 import { memo } from 'react';

@@ -1,4 +1,4 @@
-import { FlatCard } from '../../../components/common';
+import { FlatCard } from '../../../components/FlatCard';
 import { ConfigCardContent, ConfigCardContentProps } from './ConfigCardContent';
 
 export const ConfigCard = (props: ConfigCardContentProps) => {

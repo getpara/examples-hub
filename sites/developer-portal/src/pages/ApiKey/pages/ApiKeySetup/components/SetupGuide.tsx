@@ -28,7 +28,7 @@ export const SetupGuide = () => {
         return;
       }
 
-      stepButton.to = stepButton.isExternal
+      stepButton.to = !stepButton.isExternal
         ? `/${organizationId}/project/${projectId}/key/${env}/${apiKey}${stepButton.to}`
         : stepButton.to;
     },
