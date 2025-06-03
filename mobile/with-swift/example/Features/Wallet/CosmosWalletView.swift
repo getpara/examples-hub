@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import ParaSwift
 
 struct CosmosWalletView: View {
     @EnvironmentObject var paraManager: ParaManager
@@ -335,5 +336,16 @@ struct CosmosWalletView: View {
 }
 
 #Preview {
-    CosmosWalletView()
+    CosmosWalletView(selectedWallet: ParaSwift.Wallet(
+        id: "preview-wallet-id",
+        address: "0x1234567890123456789012345678901234567890",
+        addressSecondary: "cosmos1ey69r37gfxvxg62sh4r0ktpuc46pzjrm873ae8",
+        type: .cosmos,
+        isDistributable: false,
+        isOwner: true,
+        scheme: nil,
+        publicKey: nil
+    ))
+    .environmentObject(ParaManager())
+    .environmentObject(AppRootManager())
 }
