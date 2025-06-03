@@ -418,13 +418,6 @@ struct SolanaWalletView: View {
     }
 }
 
-// Helper struct for alert binding
-private struct AlertItem: Identifiable {
-    let id = UUID()
-    let title: String
-    let message: String
-}
-
 #Preview {
     let mockParaManager = ParaManager(environment: .sandbox, apiKey: "preview-key")
     let mockWallet = ParaSwift.Wallet(

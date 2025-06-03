@@ -75,7 +75,7 @@ struct EVMWalletView: View {
         isLoading = true
         Task {
             let (duration, error) = await measureTime {
-                try await signer.signTransaction(transactionB64: transaction.b64Encoded())
+                _ = try await signer.signTransaction(transactionB64: transaction.b64Encoded())
             }
             
             if let error = error {
@@ -121,7 +121,7 @@ struct EVMWalletView: View {
         isLoading = true
         Task {
             let (duration, error) = await measureTime {
-                try await signer.sendTransaction(transactionB64: transaction.b64Encoded())
+                _ = try await signer.sendTransaction(transactionB64: transaction.b64Encoded())
             }
             
             if let error = error {
@@ -464,12 +464,6 @@ struct EVMWalletView: View {
     }
 }
 
-// Helper struct for alert binding
-private struct AlertItem: Identifiable {
-    let id = UUID()
-    let title: String
-    let message: String
-}
 
 #Preview {
     let mockParaManager = ParaManager(environment: .sandbox, apiKey: "preview-key")

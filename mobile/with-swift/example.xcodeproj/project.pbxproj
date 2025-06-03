@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8F200F542DEFB08100B39BB4 /* AlertItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F200F532DEFB08100B39BB4 /* AlertItem.swift */; };
 		8F4302572DE8DE9000186768 /* EVMWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F4302562DE8DE9000186768 /* EVMWalletView.swift */; };
 		8F6AE66A2DC151040098F76B /* ChooseSignupMethodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F6AE6692DC151040098F76B /* ChooseSignupMethodView.swift */; };
 		8FA007832D57EB0D009EF0C3 /* ParaConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA007812D57EB0D009EF0C3 /* ParaConfig.swift */; };
@@ -44,6 +45,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8F200F532DEFB08100B39BB4 /* AlertItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertItem.swift; sourceTree = "<group>"; };
 		8F4302562DE8DE9000186768 /* EVMWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EVMWalletView.swift; sourceTree = "<group>"; };
 		8F6AE6692DC151040098F76B /* ChooseSignupMethodView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChooseSignupMethodView.swift; sourceTree = "<group>"; };
 		8F924CB92D824A1700938496 /* Example.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; name = Example.xctestplan; path = exampleUITests/Example.xctestplan; sourceTree = "<group>"; };
@@ -167,6 +169,7 @@
 		8FA007852D57F1AA009EF0C3 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				8F200F532DEFB08100B39BB4 /* AlertItem.swift */,
 				8FA007842D57F1AA009EF0C3 /* Extensions.swift */,
 			);
 			path = Utils;
@@ -402,6 +405,7 @@
 				8FFEAD1A2DC5675100103C14 /* PhoneFormatter.swift in Sources */,
 				8F6AE66A2DC151040098F76B /* ChooseSignupMethodView.swift in Sources */,
 				8FA007862D57F1AA009EF0C3 /* Extensions.swift in Sources */,
+				8F200F542DEFB08100B39BB4 /* AlertItem.swift in Sources */,
 				E86A475B2D1F13CB00546CC2 /* PhoneAuthView.swift in Sources */,
 				8FA007832D57EB0D009EF0C3 /* ParaConfig.swift in Sources */,
 				E86A47412D0CA63700546CC2 /* AppRootManager.swift in Sources */,
