@@ -30,6 +30,8 @@ const checkForPackages = async () => {
       }
     }
   }
+
+  process.exit();
 };
 
 await checkForPackages();
