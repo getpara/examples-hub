@@ -11,14 +11,18 @@ export const ApiKeySecurity = () => {
 
   return (
     <FormWrapper {...form} submitForm={submitForm}>
-      <ContentWrapper>
-        <Origins />
-        <AuthMethods />
-        <TransactionPopups />
-        {/* TODO: add 2fa control once 2fa is configured on the key */}
-        {/* <TwoFactorAuth /> */}
-        <SessionLength />
-      </ContentWrapper>
+      <ContentWrapper
+        columnOne={
+          <>
+            <Origins />
+            <AuthMethods />
+            <TransactionPopups />
+            {/* TODO: add 2fa control once 2fa is configured on the key */}
+            {/* <TwoFactorAuth /> */}
+            <SessionLength />
+          </>
+        }
+      />
     </FormWrapper>
   );
 };

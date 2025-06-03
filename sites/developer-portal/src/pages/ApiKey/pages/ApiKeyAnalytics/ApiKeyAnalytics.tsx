@@ -4,9 +4,13 @@ import { Overview } from './components/Overview';
 
 export const ApiKeyAnalytics = () => {
   return (
-    <ContentWrapper>
-      <Overview />
-      <Charts />
-    </ContentWrapper>
+    <ContentWrapper
+      columnOne={
+        <>
+          <Overview />
+          <Charts />
+        </>
+      }
+    />
   );
 };

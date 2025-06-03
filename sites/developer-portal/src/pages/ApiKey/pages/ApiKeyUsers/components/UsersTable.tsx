@@ -10,6 +10,7 @@ import { getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { UsersTableData } from '../../../../../types/api';
 import { LoginMethod } from '../../../../../types/loginMethod';
 import { DataTable } from '../../../../../components/DataTable/DataTable';
+import { UserSheet } from './UserSheet';
 
 const PAGE_SIZE = 25;
 
@@ -31,6 +32,16 @@ export const UsersTable = ({ methods }: UsersTableProps) => {
     pageSize: PAGE_SIZE, //default page size
   });
   const { apiKey, env, projectId } = useParams();
+  const [selectedUser, setSelectedUser] = useState<UsersTableData | undefined>();
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleSheetClose = () => {
+    setIsOpen(false);
+    // Clear member after animation
+    setTimeout(() => {
+      setSelectedUser(undefined);
+    }, 150);
+  };
 
   const offset = pagination.pageIndex * pagination.pageSize;
   const limit = pagination.pageSize;
@@ -81,9 +92,18 @@ export const UsersTable = ({ methods }: UsersTableProps) => {
   });
 
   return (
-    <DataTable
-      table={table}
-      className="para:h-[calc(100vh-var(--appbar-height-mobile)-64px-36px-32px-36px)] para:lg:h-[calc(100vh-var(--appbar-height)-64px-36px-32px-36px)]"
-    />
+    <>
+      <DataTable
+        table={table}
+        className="para:h-[calc(100vh-var(--appbar-height-mobile)-64px-36px-32px-36px)] para:lg:h-[calc(100vh-var(--appbar-height)-64px-36px-32px-36px)]"
+        onRowClick={row => {
+          if (row.original.id) {
+            setSelectedUser(row.original);
+            setIsOpen(true);
+          }
+        }}
+      />
+      <UserSheet isOpen={isOpen} user={selectedUser} onClose={handleSheetClose} />
+    </>
   );
 };

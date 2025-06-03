@@ -93,10 +93,10 @@ export type DeleteApiKeyUserVars = {
   projectId: string;
   keyId: string;
   env: string;
-  userId: string;
+  id: string;
 };
-export const deleteApiKeyUser = async ({ organizationId, projectId, keyId, env, userId }: DeleteApiKeyUserVars) => {
-  const endpoint = `/organizations/${organizationId}/projects/${projectId}/${env}/keys/${keyId}/users/${userId}`;
+export const deleteApiKeyUser = async ({ organizationId, projectId, keyId, env, id }: DeleteApiKeyUserVars) => {
+  const endpoint = `/organizations/${organizationId}/projects/${projectId}/${env}/keys/${keyId}/users/${id}`;
 
   return !!(await axiosClient.delete<boolean>(endpoint)).data;
 };
@@ -106,10 +106,10 @@ export type DeletePregenWalletVars = {
   projectId: string;
   keyId: string;
   env: string;
-  walletId: string;
+  id: string;
 };
-export const deletePregenWallet = async ({ organizationId, projectId, keyId, env, walletId }: DeletePregenWalletVars) => {
-  const endpoint = `/organizations/${organizationId}/projects/${projectId}/${env}/keys/${keyId}/pregen/${walletId}`;
+export const deletePregenWallet = async ({ organizationId, projectId, keyId, env, id }: DeletePregenWalletVars) => {
+  const endpoint = `/organizations/${organizationId}/projects/${projectId}/${env}/keys/${keyId}/pregen/${id}`;
 
   return !!(await axiosClient.delete<boolean>(endpoint)).data;
 };

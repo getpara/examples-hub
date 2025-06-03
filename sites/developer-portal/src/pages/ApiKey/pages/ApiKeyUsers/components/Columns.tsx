@@ -10,7 +10,7 @@ const baseSkeleton = 'para:h-3.5 para:w-2xs para:rounded para:bg-foreground/10';
 export const getColumns = (isLoading?: boolean): ColumnDef<UsersTableData>[] => {
   return [
     {
-      accessorKey: 'id',
+      accessorFn: d => d.userId ?? d.pregenWalletId,
       header: 'UUID',
       ...(isLoading && {
         cell: () => <Skeleton className={baseSkeleton} />,

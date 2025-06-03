@@ -10,11 +10,15 @@ export const ApiKeyOnOffRamps = () => {
 
   return (
     <FormWrapper {...form} submitForm={submitForm}>
-      <ContentWrapper>
-        <Buy />
-        <Receive />
-        <Withdraw />
-      </ContentWrapper>
+      <ContentWrapper
+        columnOne={
+          <>
+            <Buy />
+            <Receive />
+            <Withdraw />
+          </>
+        }
+      />
     </FormWrapper>
   );
 };

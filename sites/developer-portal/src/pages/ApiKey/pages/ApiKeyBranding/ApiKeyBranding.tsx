@@ -13,14 +13,18 @@ export const ApiKeyBranding = () => {
 
   return (
     <FormWrapper {...form} submitForm={submitForm}>
-      <ContentWrapper>
-        <ModalStyleAlert />
-        <Logos />
-        <Theme />
-        <Font />
-        <Emails />
-        <Links />
-      </ContentWrapper>
+      <ContentWrapper
+        columnOne={
+          <>
+            <ModalStyleAlert />
+            <Logos />
+            <Theme />
+            <Font />
+            <Emails />
+            <Links />
+          </>
+        }
+      />
     </FormWrapper>
   );
 };

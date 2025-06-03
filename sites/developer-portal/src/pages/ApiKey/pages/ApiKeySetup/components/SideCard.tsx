@@ -16,7 +16,7 @@ export const SideCard = () => {
 
   return (
     <div>
-      <FlatCard className="para:p-6 para:xl:w-[352px] para-h-full para:gap-4">
+      <FlatCard className="para:p-6 para:xl:w-[var(--side-card-width)] para-h-full para:gap-4">
         <SetupGuide />
       </FlatCard>
     </div>

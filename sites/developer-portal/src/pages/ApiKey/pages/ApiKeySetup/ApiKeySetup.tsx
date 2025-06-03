@@ -13,18 +13,18 @@ export const ApiKeySetup = () => {
 
   return (
     <FormWrapper {...form} submitForm={submitForm}>
-      <ContentWrapper>
-        <div className="para:flex para:flex-col-reverse para:xl:flex-row para:gap-8">
-          <div className="para:flex para:flex-col para:gap-4 para:flex-1">
+      <ContentWrapper
+        columnOne={
+          <>
             <KeyData />
             <Environment />
             <Networks />
             <Install />
             <Mobile />
-          </div>
-          <SideCard />
-        </div>
-      </ContentWrapper>
+          </>
+        }
+        columnTwo={<SideCard />}
+      />
     </FormWrapper>
   );
 };

@@ -13,17 +13,17 @@ import {
 import { SetupForm } from '../hooks/useSetupForm';
 import { ConfigCard } from '../../../components/ConfigCard';
 import { FlatCard } from '../../../../../components/FlatCard';
-import { ReactNode } from 'react';
 import { FormMessage } from '../../../../../components/formComponents';
 import { TWalletType, WALLET_TYPES } from '@getpara/user-management-client';
+import { ComponentType } from 'react';
 
-export const WALLET_TYPE_CONFIG: Record<TWalletType, { name: string; Icon: ReactNode }> = {
+export const WALLET_TYPE_CONFIG: Record<TWalletType, { name: string; Icon: ComponentType<{ className?: string }> }> = {
   EVM: {
     name: 'Ethereum Virtual Machine (Includes Ethereum Layer 2s)',
-    Icon: <EVM className="para:size-5 para:min-w-5" />,
+    Icon: EVM,
   },
-  SOLANA: { name: 'Solana', Icon: <Solana className="para:size-5 para:min-w-5" /> },
-  COSMOS: { name: 'Cosmos', Icon: <Cosmos className="para:size-5 para:min-w-5" /> },
+  SOLANA: { name: 'Solana', Icon: Solana },
+  COSMOS: { name: 'Cosmos', Icon: Cosmos },
 };
 
 export const Networks = () => {
@@ -66,7 +66,7 @@ export const Networks = () => {
                             disabled={disabled}
                           />
                           <div className="para:flex para:items-center para:gap-2">
-                            {config.Icon}
+                            {<config.Icon className="para:size-5 para:min-w-5" />}
                             <Typography className="para:font-medium">{config.name}</Typography>
                           </div>
                         </div>
