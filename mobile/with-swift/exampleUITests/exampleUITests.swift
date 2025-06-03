@@ -506,5 +506,117 @@ class ExampleUITests: XCTestCase {
         XCTAssertTrue(alert.staticTexts["Success"].exists, "Should succeed")
         alert.buttons["OK"].tap()
     }
+    
+    // MARK: - Cosmos Tests (test16-test21)
+    
+    // MARK: - Helper Methods for Cosmos
+    private func createCosmosWallet() {
+        app.buttons["Cosmos"].tap()
+        app.buttons["createWalletButton"].tap()
+        app.buttons["cosmosWalletButton"].tap()
+        
+        let firstWalletCell = app.cells.element(boundBy: 0)
+        XCTAssertTrue(firstWalletCell.waitForExistence(timeout: TestConstants.longTimeout), "Cosmos wallet should be created")
+    }
+    
+    private func navigateToCosmosWallet() {
+        createCosmosWallet()
+        
+        let firstWalletCell = app.cells.element(boundBy: 0)
+        firstWalletCell.tap()
+        
+        let walletTitle = app.navigationBars["Cosmos Wallet"]
+        XCTAssertTrue(walletTitle.waitForExistence(timeout: TestConstants.defaultTimeout), "Cosmos wallet should open")
+    }
+    
+    func test16CreateCosmosWalletFlow() throws {
+        createAccountWithPasskey()
+        createCosmosWallet()
+    }
+    
+    func test17CosmosWalletBasicFlow() throws {
+        createAccountWithPasskey()
+        navigateToCosmosWallet()
+        
+        // Test copy address
+        app.buttons["copyAddressButton"].tap()
+        
+        let alert = app.alerts.firstMatch
+        XCTAssertTrue(alert.waitForExistence(timeout: TestConstants.defaultTimeout), "Success alert should appear")
+        XCTAssertTrue(alert.staticTexts["Success"].exists, "Should show success")
+        alert.buttons["OK"].tap()
+    }
+    
+    func test18CosmosMessageSigningFlow() throws {
+        createAccountWithPasskey()
+        navigateToCosmosWallet()
+        
+        let messageField = app.textFields["Enter a message to sign"]
+        messageField.tap()
+        messageField.typeText("Hello Cosmos!")
+        
+        app.buttons["Sign Message"].tap()
+        
+        let alert = app.alerts.firstMatch
+        XCTAssertTrue(alert.waitForExistence(timeout: TestConstants.longTimeout), "Alert should appear")
+        XCTAssertTrue(alert.staticTexts["Success"].exists, "Should succeed")
+        alert.buttons["OK"].tap()
+    }
+    
+    func test19CosmosTransactionSigningFlow() throws {
+        createAccountWithPasskey()
+        navigateToCosmosWallet()
+        
+        // Test transaction signing
+        app.buttons["Sign Transaction"].tap()
+        
+        let alert = app.alerts.firstMatch
+        XCTAssertTrue(alert.waitForExistence(timeout: TestConstants.longTimeout), "Alert should appear")
+        XCTAssertTrue(alert.staticTexts["Success"].exists || alert.staticTexts["Error"].exists, "Should show result")
+        alert.buttons["OK"].tap()
+    }
+    
+    func test20CosmosBalanceFetchingFlow() throws {
+        createAccountWithPasskey()
+        navigateToCosmosWallet()
+        
+        // Test balance fetching
+        app.buttons["Fetch Balance"].tap()
+        
+        let alert = app.alerts.firstMatch
+        XCTAssertTrue(alert.waitForExistence(timeout: TestConstants.longTimeout), "Alert should appear")
+        XCTAssertTrue(alert.staticTexts["Success"].exists || alert.staticTexts["Error"].exists, "Should show balance result")
+        alert.buttons["OK"].tap()
+    }
+    
+    func test21CosmosAddressFormatValidation() throws {
+        createAccountWithPasskey()
+        navigateToCosmosWallet()
+        
+        // Find the address text element (should start with "cosmos1")
+        let addressTexts = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'cosmos1'"))
+        XCTAssertTrue(addressTexts.firstMatch.waitForExistence(timeout: TestConstants.defaultTimeout), "Cosmos address should be displayed")
+        
+        // Verify the address format (cosmos1 + 38 characters total length is typical)
+        let addressText = addressTexts.firstMatch.label
+        XCTAssertTrue(addressText.hasPrefix("cosmos1"), "Address should start with cosmos1")
+        XCTAssertTrue(addressText.count >= 39, "Address should be valid bech32 length")
+        XCTAssertTrue(addressText.count <= 45, "Address should not be too long")
+    }
+}
+
+// MARK: - Helper Extensions
+extension XCUIElement {
+    func clearAndTypeText(_ text: String) {
+        guard let stringValue = self.value as? String else {
+            self.typeText(text)
+            return
+        }
+        
+        self.tap()
+        let deleteString = String(repeating: XCUIKeyboardKey.delete.rawValue, count: stringValue.count)
+        self.typeText(deleteString)
+        self.typeText(text)
+    }
 }
 

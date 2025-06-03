@@ -78,10 +78,16 @@ struct WalletsView: View {
                         case .solana:
                             SolanaWalletView(selectedWallet: wallet)
                         case .cosmos:
-                            CosmosWalletView()
+                            CosmosWalletView(selectedWallet: wallet)
                         }
                     } label: {
-                        Text(wallet.address ?? "unknown")
+                        if wallet.type == .cosmos {
+                            Text(wallet.addressSecondary ?? "unknown")
+                                .font(.system(.body, design: .monospaced))
+                        } else {
+                            Text(wallet.address ?? "unknown")
+                                .font(.system(.body, design: .monospaced))
+                        }
                     }
                 }
             }
