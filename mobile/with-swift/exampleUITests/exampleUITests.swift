@@ -603,6 +603,19 @@ class ExampleUITests: XCTestCase {
         XCTAssertTrue(addressText.count >= 39, "Address should be valid bech32 length")
         XCTAssertTrue(addressText.count <= 45, "Address should not be too long")
     }
+    
+    func test22CosmosUnifiedSigningFlow() throws {
+        createAccountWithPasskey()
+        navigateToCosmosWallet()
+        
+        // Test the unified signing flow that should work with both Amino and Proto
+        app.buttons["Sign Transaction"].tap()
+        
+        let alert = app.alerts.firstMatch
+        XCTAssertTrue(alert.waitForExistence(timeout: TestConstants.longTimeout), "Alert should appear after signing")
+        XCTAssertTrue(alert.staticTexts["Success"].exists, "Should show successful signing result")
+        alert.buttons["OK"].tap()
+    }
 }
 
 // MARK: - Helper Extensions

@@ -23,6 +23,7 @@ struct CosmosWalletView: View {
     @State private var balance: String?
     @State private var isFetchingBalance = false
     @State private var cosmosAddress: String?
+    @State private var selectedSigningMethod: CosmosSigningMethod = .proto // Default to Proto
     
     @State private var paraCosmosSigner: ParaCosmosSigner?
     
@@ -52,24 +53,22 @@ struct CosmosWalletView: View {
             return
         }
         
-        // Create a simple transfer transaction for demo purposes
-        // Using a valid Cosmos Hub address as the recipient
+        // Use the new unified sendTokens method that handles everything via bridge
         let toAddress = "cosmos1ey69r37gfxvxg62sh4r0ktpuc46pzjrm873ae8"
         
         isLoading = true
         Task {
             do {
-                let transaction = try await signer.createTransferTransaction(
-                    toAddress: toAddress,
+                _ = try await signer.sendTokens(
+                    to: toAddress,
                     amount: "1000000", // 1 ATOM
                     denom: "uatom",
-                    memo: "Test transaction from Para Swift SDK"
+                    memo: "Test transaction from Para Swift SDK",
+                    signingMethod: selectedSigningMethod
                 )
-                
-                _ = try await signer.signTransaction(transaction)
-                self.result = ("Success", "Transaction signed successfully")
+                self.result = ("Success", "Transaction signed successfully using \(selectedSigningMethod.rawValue.uppercased()) method")
             } catch {
-                result = ("Error", "Failed to create transaction: \(error.localizedDescription)")
+                result = ("Error", "Failed to sign transaction: \(error.localizedDescription)")
             }
             isLoading = false
         }
@@ -199,6 +198,20 @@ struct CosmosWalletView: View {
                     Text("Transaction Operations")
                         .font(.headline)
                         .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    // Signing Method Selection
+                    VStack(spacing: 8) {
+                        Text("Signing Method")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        
+                        Picker("Signing Method", selection: $selectedSigningMethod) {
+                            Text("Proto (Modern)").tag(CosmosSigningMethod.proto)
+                            Text("Amino (Legacy)").tag(CosmosSigningMethod.amino)
+                        }
+                        .pickerStyle(.segmented)
+                    }
                     
                     Button("Sign Transaction") {
                         createAndSignTransaction()
