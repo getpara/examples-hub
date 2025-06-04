@@ -26,6 +26,7 @@ import {
   RabbyIcon,
   SafeIcon,
   SolflareIcon,
+  OkxIcon,
 } from '../assets';
 import {
   AuthMethod,
@@ -62,6 +63,7 @@ export const EXTERNAL_WALLET_CONFIGS: Partial<Record<CustomExternalWallet, Dragg
   [ExternalWallet.ZERION]: { logo: ZerionIcon, label: 'Zerion' },
   [ExternalWallet.RABBY]: { logo: RabbyIcon, label: 'Rabby' },
   [ExternalWallet.SAFE]: { logo: SafeIcon, label: 'Safe' },
+  [ExternalWallet.OKX]: { logo: OkxIcon, label: 'Okx' },
   [ExternalWallet.PHANTOM]: { logo: PhantomIcon, label: 'Phantom' },
   [ExternalWallet.GLOW]: { logo: GlowIcon, label: 'Glow' },
   [ExternalWallet.BACKPACK]: { logo: BackpackIcon, label: 'Backpack' },
