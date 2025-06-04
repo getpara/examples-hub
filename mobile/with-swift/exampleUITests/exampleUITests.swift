@@ -80,7 +80,7 @@ class ExampleUITests: XCTestCase {
         let normalizedY = (screenHeight - offsetFromBottom) / screenHeight
         
         let tapCoordinate = window.coordinate(withNormalizedOffset: CGVector(dx: normalizedX, dy: normalizedY))
-        sleep(7)
+        sleep(5)
         tapCoordinate.tap()
         sleep(2)
         Biometrics.successfulAuthentication()
