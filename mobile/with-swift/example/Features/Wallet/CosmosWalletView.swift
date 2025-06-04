@@ -16,7 +16,6 @@ struct CosmosWalletView: View {
     
     @State private var messageToSign = ""
     @State private var result: (title: String, message: String)?
-    @State private var creatingWallet = false
     @State private var isSigning = false
     @State private var isFetching = false
     @State private var isLoading = false
@@ -53,7 +52,6 @@ struct CosmosWalletView: View {
             return
         }
         
-        // Use the new unified sendTokens method that handles everything via bridge
         let toAddress = "cosmos1ey69r37gfxvxg62sh4r0ktpuc46pzjrm873ae8"
         
         isLoading = true
@@ -312,20 +310,16 @@ struct CosmosWalletView: View {
             Task {
                 isLoading = true
                 do {
-                    // Initialize Para Cosmos signer with bridge pattern
                     let signer = try ParaCosmosSigner(
-                        paraManager: paraManager,
-                        chain: .cosmos // Just use Cosmos Hub by default
+                        paraManager: paraManager
                     )
                     
-                    // Explicitly select the wallet to ensure it's properly initialized
                     try await signer.selectWallet(walletId: selectedWallet.id)
                     
                     await MainActor.run {
                         self.paraCosmosSigner = signer
                     }
                     
-                    // Use the address from the wallet
                     await MainActor.run {
                         self.cosmosAddress = selectedWallet.addressSecondary ?? selectedWallet.address
                     }
