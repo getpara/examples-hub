@@ -95,7 +95,7 @@ struct WalletsView: View {
                     .multilineTextAlignment(.center)
                     .animation(.easeInOut(duration: 0.3), value: isCreatingWallet)
             }
-            .frame(width: 250, height: 250)
+            .frame(width: 250, height: 200)
             .padding(40)
             .background(Color.blue.opacity(0.1))
             .cornerRadius(16)
