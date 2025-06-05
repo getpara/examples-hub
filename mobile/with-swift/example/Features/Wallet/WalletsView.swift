@@ -19,17 +19,22 @@ struct WalletsView: View {
     @State private var showRefreshError = false
     @State private var createWalletError: Error?
     @State private var showCreateWalletError = false
+    @State private var isCreatingWallet = false
     
     private func createWallet(type: WalletType) {
+        isCreatingWallet = true
+        
         Task {
             do {
                 try await paraManager.createWallet(type: type, skipDistributable: false)
                 
                 await MainActor.run {
+                    isCreatingWallet = false
                     showSelectCreateWalletTypeView = false
                 }
             } catch {
                 await MainActor.run {
+                    isCreatingWallet = false
                     createWalletError = error
                     showCreateWalletError = true
                 }
@@ -70,18 +75,62 @@ struct WalletsView: View {
                 }
                 .pickerStyle(.segmented)
                 .padding(.horizontal)
-                List(paraManager.wallets.filter({ $0.type == selectedWalletType }), id: \.id) { wallet in
-                    NavigationLink {
-                        switch wallet.type! {
-                        case .evm:
-                            EVMWalletView(selectedWallet: wallet)
-                        case .solana:
-                            SolanaWalletView(selectedWallet: wallet)
-                        case .cosmos:
-                            CosmosWalletView()
+                
+                let filteredWallets = paraManager.wallets.filter({ $0.type == selectedWalletType })
+                
+                if filteredWallets.isEmpty {
+                    Spacer()
+                    
+                    Button(action: {
+                        createWallet(type: selectedWalletType)
+                    }) {
+                        VStack(spacing: 16) {
+                            Group {
+                                if isCreatingWallet {
+                                    ProgressView()
+                                        .progressViewStyle(.circular)
+                                        .controlSize(.large)
+                                        .tint(.blue)
+                                } else {
+                                    Image(systemName: "plus.circle.fill")
+                                        .font(.system(size: 60))
+                                        .foregroundColor(.blue)
+                                }
+                            }
+                            .frame(width: 60, height: 60)
+                            .animation(.easeInOut(duration: 0.3), value: isCreatingWallet)
+                            
+                            Text(isCreatingWallet ? "Creating..." : "Create Your First \(selectedWalletType.rawValue.uppercased()) Wallet")
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                                .multilineTextAlignment(.center)
+                                .animation(.easeInOut(duration: 0.3), value: isCreatingWallet)
                         }
-                    } label: {
-                        Text(wallet.address ?? "unknown")
+                        .frame(width: 250, height: 250)
+                        .padding(40)
+                        .background(Color.blue.opacity(0.1))
+                        .cornerRadius(16)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .disabled(isCreatingWallet)
+                    .padding(.horizontal, 20)
+                    .accessibilityIdentifier("createFirstWalletButton")
+                    
+                    Spacer()
+                } else {
+                    List(filteredWallets, id: \.id) { wallet in
+                        NavigationLink {
+                            switch wallet.type! {
+                            case .evm:
+                                EVMWalletView(selectedWallet: wallet)
+                            case .solana:
+                                SolanaWalletView(selectedWallet: wallet)
+                            case .cosmos:
+                                CosmosWalletView()
+                            }
+                        } label: {
+                            Text(wallet.address ?? "unknown")
+                        }
                     }
                 }
             }
@@ -100,12 +149,6 @@ struct WalletsView: View {
                     }
                     .disabled(isRefreshing)
                     .accessibilityIdentifier("refreshButton")
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Create") {
-                        showSelectCreateWalletTypeView = true
-                    }
-                    .accessibilityIdentifier("createWalletButton")
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Logout") {

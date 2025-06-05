@@ -106,8 +106,14 @@ class ExampleUITests: XCTestCase {
         let walletsView = app.otherElements["walletsView"]
         XCTAssertTrue(walletsView.waitForExistence(timeout: TestConstants.longTimeout), "Wallets view should appear")
         
+        // Check if we have wallets or the create first wallet button
         let firstWalletCell = app.cells.element(boundBy: 0)
-        XCTAssertTrue(firstWalletCell.waitForExistence(timeout: TestConstants.defaultTimeout), "First wallet should exist")
+        let createFirstWalletButton = app.buttons["createFirstWalletButton"]
+        
+        let hasWallets = firstWalletCell.waitForExistence(timeout: TestConstants.defaultTimeout)
+        let hasCreateButton = createFirstWalletButton.waitForExistence(timeout: TestConstants.defaultTimeout)
+        
+        XCTAssertTrue(hasWallets || hasCreateButton, "Either first wallet should exist or create wallet button should be visible")
     }
     
     /// Creates a fresh account with passkey for independent testing
@@ -133,6 +139,15 @@ class ExampleUITests: XCTestCase {
         // Complete biometric setup
         performBiometricAuthentication()
         waitForWalletsView()
+        
+        // Create first EVM wallet using the big button if no wallets exist
+        let createFirstWalletButton = app.buttons["createFirstWalletButton"]
+        if createFirstWalletButton.exists {
+            createFirstWalletButton.tap()
+            // Wait for wallet to be created
+            let firstWalletCell = app.cells.element(boundBy: 0)
+            XCTAssertTrue(firstWalletCell.waitForExistence(timeout: TestConstants.longTimeout), "First wallet should be created")
+        }
     }
     
     private func navigateToEVMWallet() {
@@ -145,8 +160,16 @@ class ExampleUITests: XCTestCase {
     
     private func createSolanaWallet() {
         app.buttons["Solana"].tap()
-        app.buttons["createWalletButton"].tap()
-        app.buttons["solanaWalletButton"].tap()
+        
+        // Check if we need to use the big create button or confirmation dialog
+        let createFirstWalletButton = app.buttons["createFirstWalletButton"]
+        if createFirstWalletButton.exists {
+            createFirstWalletButton.tap()
+        } else {
+            // If wallets already exist, we need an alternative way to create Solana wallet
+            // For now, assume this is called when no wallets exist
+            XCTFail("createSolanaWallet called when wallets already exist - need to update test logic")
+        }
         
         let firstWalletCell = app.cells.element(boundBy: 0)
         XCTAssertTrue(firstWalletCell.waitForExistence(timeout: TestConstants.longTimeout), "Solana wallet should be created")
@@ -254,11 +277,15 @@ class ExampleUITests: XCTestCase {
     func test04CreateWalletFlow() throws {
         createAccountWithPasskey()
         
-        app.buttons["createWalletButton"].tap()
-        app.buttons["evmWalletButton"].tap()
+        // Switch to a different wallet type to create another wallet
+        app.buttons["Solana"].tap()
         
-        let secondWallet = app.cells.element(boundBy: 1)
-        XCTAssertTrue(secondWallet.waitForExistence(timeout: TestConstants.longTimeout), "New wallet should be created")
+        let createFirstWalletButton = app.buttons["createFirstWalletButton"]
+        XCTAssertTrue(createFirstWalletButton.exists, "Should show create button for Solana wallets")
+        createFirstWalletButton.tap()
+        
+        let firstSolanaWallet = app.cells.element(boundBy: 0)
+        XCTAssertTrue(firstSolanaWallet.waitForExistence(timeout: TestConstants.longTimeout), "New Solana wallet should be created")
     }
     
     func test05CopyWalletAddressFlow() throws {
@@ -427,6 +454,15 @@ class ExampleUITests: XCTestCase {
         
         // Verify successful authentication by waiting for the wallets view
         waitForWalletsView()
+        
+        // Create first EVM wallet using the big button if no wallets exist
+        let createFirstWalletButton = app.buttons["createFirstWalletButton"]
+        if createFirstWalletButton.exists {
+            createFirstWalletButton.tap()
+            // Wait for wallet to be created
+            let firstWalletCell = app.cells.element(boundBy: 0)
+            XCTAssertTrue(firstWalletCell.waitForExistence(timeout: TestConstants.longTimeout), "First wallet should be created")
+        }
         
         // Logout to test login flow
         let logoutButton = app.buttons["logoutButton"]
