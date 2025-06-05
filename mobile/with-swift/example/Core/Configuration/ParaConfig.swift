@@ -1,11 +1,14 @@
 import Foundation
 import ParaSwift
+import os.log
 
 /// Configuration for the Para SDK and related services
 struct ParaConfig {
     let environment: ParaEnvironment
     let apiKey: String
     let rpcUrl: String
+    
+    private static let logger = Logger(subsystem: "com.para.example", category: "ParaConfig")
     
     /// Creates a configuration from environment variables
     static func fromEnvironment() -> ParaConfig {
@@ -18,7 +21,7 @@ struct ParaConfig {
     
     /// Loads the Para environment from PARA_ENVIRONMENT variable
     private static func loadEnvironment() -> ParaEnvironment {
-        let envName = ProcessInfo.processInfo.environment["PARA_ENVIRONMENT"]?.lowercased() ?? "beta"
+        let envName = ProcessInfo.processInfo.environment["PARA_ENVIRONMENT"]?.lowercased() ?? "sandbox"
         
         switch envName {
         case "dev":
@@ -39,12 +42,21 @@ struct ParaConfig {
         return .dev(relyingPartyId: relyingPartyId, jsBridgeUrl: jsBridgeUrl)
     }
     
-    /// Loads the API key from PARA_API_KEY variable
+    /// Loads the API key from runtime environment or build-time injection
     private static func loadApiKey() -> String {
-        guard let apiKey = ProcessInfo.processInfo.environment["PARA_API_KEY"], !apiKey.isEmpty else {
-            fatalError("Missing required environment variable: PARA_API_KEY")
+        // First try runtime environment (works for local development with Xcode schemes)
+        if let envApiKey = ProcessInfo.processInfo.environment["PARA_API_KEY"], !envApiKey.isEmpty {
+            logger.info("Using API key from runtime environment")
+            return envApiKey
         }
-        return apiKey
+        
+        // Fallback to build-time injected value (works for TestFlight builds)
+        if let bundleApiKey = Bundle.main.object(forInfoDictionaryKey: "APIKey") as? String, !bundleApiKey.isEmpty {
+            logger.info("Using API key from app bundle")
+            return bundleApiKey
+        }
+        
+        fatalError("Missing API key. Set PARA_API_KEY environment variable or ensure build-time injection is configured.")
     }
     
     /// Loads the RPC URL from PARA_RPC_URL variable or uses default
