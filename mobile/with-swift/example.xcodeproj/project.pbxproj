@@ -302,8 +302,8 @@
 			buildPhases = (
 				E8F93B242C21EBED006AA3F6 /* Sources */,
 				E8F93B252C21EBED006AA3F6 /* Frameworks */,
-				8FAB15162DF25AB2003DAC18 /* ShellScript */,
 				E8F93B262C21EBED006AA3F6 /* Resources */,
+				8FAB15162DF25AB2003DAC18 /* ShellScript */,
 			);
 			buildRules = (
 			);
