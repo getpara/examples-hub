@@ -18,7 +18,7 @@ struct ParaConfig {
     
     /// Loads the Para environment from PARA_ENVIRONMENT variable
     private static func loadEnvironment() -> ParaEnvironment {
-        let envName = ProcessInfo.processInfo.environment["PARA_ENVIRONMENT"]?.lowercased() ?? "beta"
+        let envName = ProcessInfo.processInfo.environment["PARA_ENVIRONMENT"]?.lowercased() ?? "sandbox"
         
         switch envName {
         case "dev":

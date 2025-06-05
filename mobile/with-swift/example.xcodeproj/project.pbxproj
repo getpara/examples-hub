@@ -276,6 +276,7 @@
 			buildPhases = (
 				8FE93AA32D80F58C00CE018E /* Sources */,
 				8FE93AA42D80F58C00CE018E /* Frameworks */,
+				8F200F552DF2006000B39BB4 /* ShellScript */,
 				8FE93AA52D80F58C00CE018E /* Resources */,
 			);
 			buildRules = (
@@ -376,6 +377,26 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		8F200F552DF2006000B39BB4 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "#!/bin/bash\n\n# Inject Xcode Cloud environment variable into Info.plist for TestFlight builds\nif [ -n \"$PARA_API_KEY\" ]; then\n    echo \"Injecting PARA_API_KEY into Info.plist for TestFlight build\"\n    \n    # Try to set the key, if it doesn't exist, add it\n    /usr/libexec/PlistBuddy -c \"Set :APIKey $PARA_API_KEY\" \"${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}\" 2>/dev/null || \\\n    /usr/libexec/PlistBuddy -c \"Add :APIKey string $PARA_API_KEY\" \"${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}\"\n    \n    echo \"API key injection completed\"\nelse\n    echo \"PARA_API_KEY not found - assuming local development build\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		8FE93AA32D80F58C00CE018E /* Sources */ = {
