@@ -1,11 +1,14 @@
 import Foundation
 import ParaSwift
+import os.log
 
 /// Configuration for the Para SDK and related services
 struct ParaConfig {
     let environment: ParaEnvironment
     let apiKey: String
     let rpcUrl: String
+    
+    private static let logger = Logger(subsystem: "com.para.example", category: "ParaConfig")
     
     /// Creates a configuration from environment variables
     static func fromEnvironment() -> ParaConfig {
@@ -43,13 +46,13 @@ struct ParaConfig {
     private static func loadApiKey() -> String {
         // First try runtime environment (works for local development with Xcode schemes)
         if let envApiKey = ProcessInfo.processInfo.environment["PARA_API_KEY"], !envApiKey.isEmpty {
-            print("Using API key from runtime environment")
+            logger.info("Using API key from runtime environment")
             return envApiKey
         }
         
         // Fallback to build-time injected value (works for TestFlight builds)
         if let bundleApiKey = Bundle.main.object(forInfoDictionaryKey: "APIKey") as? String, !bundleApiKey.isEmpty {
-            print("Using API key from app bundle")
+            logger.info("Using API key from app bundle")
             return bundleApiKey
         }
         
