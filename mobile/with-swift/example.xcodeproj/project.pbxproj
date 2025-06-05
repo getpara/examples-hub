@@ -730,7 +730,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/getpara/swift-sdk";
 			requirement = {
-				branch = "2.0.0-alpha";
+				branch = cosmos;
 				kind = branch;
 			};
 		};
