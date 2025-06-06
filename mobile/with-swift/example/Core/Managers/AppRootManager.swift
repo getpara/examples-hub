@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 enum AppRoot {
     case launch
@@ -7,5 +8,17 @@ enum AppRoot {
 }
 
 final class AppRootManager: ObservableObject {
-    @Published var currentRoot: AppRoot = .authentication
+    @AppStorage("isAuthenticated") private var isAuthenticated = false
+
+    @Published var currentRoot: AppRoot = .launch
+
+    init() {
+        // Set initial state based on stored authentication
+        currentRoot = isAuthenticated ? .home : .authentication
+    }
+
+    func setAuthenticated(_ authenticated: Bool) {
+        isAuthenticated = authenticated
+        currentRoot = authenticated ? .home : .authentication
+    }
 }
