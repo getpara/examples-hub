@@ -12,8 +12,15 @@
           {
             "key" : "PARA_API_KEY",
             "value" : "12e3517d125169ea9847d0da5bdcd9c9"
+          },
+          {
+            "key" : "RPC_URL",
+            "value" : "$(RPC_URL)"
           }
-        ]
+        ],
+        "maximumTestExecutionTimeAllowance" : 600,
+        "testExecutionOrdering" : "random",
+        "testTimeoutsEnabled" : true
       }
     }
   ],
@@ -31,14 +38,20 @@
       },
       {
         "key" : "PARA_API_KEY",
-        "value" : "\"$(PARA_API_KEY)\","
+        "value" : "$(PARA_API_KEY)"
+      },
+      {
+        "key" : "RPC_URL",
+        "value" : "$(RPC_URL)"
       }
     ],
+    "maximumTestExecutionTimeAllowance" : 600,
     "targetForVariableExpansion" : {
       "containerPath" : "container:example.xcodeproj",
       "identifier" : "E8F93B272C21EBED006AA3F6",
       "name" : "example"
-    }
+    },
+    "testTimeoutsEnabled" : true
   },
   "testTargets" : [
     {
