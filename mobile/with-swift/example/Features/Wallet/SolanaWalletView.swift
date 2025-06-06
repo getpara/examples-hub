@@ -1,12 +1,12 @@
-import SwiftUI
 import ParaSwift
+import SwiftUI
 
 struct SolanaWalletView: View {
     @EnvironmentObject var paraManager: ParaManager
     @EnvironmentObject var appRootManager: AppRootManager
-    
+
     let selectedWallet: ParaSwift.Wallet
-    
+
     @State private var messageToSign = ""
     @State private var result: (title: String, message: String)?
     @State private var creatingWallet = false
@@ -14,12 +14,12 @@ struct SolanaWalletView: View {
     @State private var isFetching = false
     @State private var isLoading = false
     @State private var balance: String?
-    
+
     @State private var paraSolanaSigner: ParaSolanaSigner?
-    
+
     // Solana RPC URL (devnet for testing)
     private let rpcUrl = "https://api.devnet.solana.com"
-    
+
     // Helper function to measure operation time
     private func measureTime(_ operation: () async throws -> Void) async -> (TimeInterval, Error?) {
         let start = Date()
@@ -30,53 +30,53 @@ struct SolanaWalletView: View {
             return (Date().timeIntervalSince(start), error)
         }
     }
-    
+
     private func fetchBalance() {
         guard let signer = paraSolanaSigner else {
             result = ("Error", "Solana signer not initialized")
             return
         }
-        
+
         Task {
             do {
                 let balanceInLamports = try await signer.getBalance()
                 let solBalance = Double(balanceInLamports) / 1_000_000_000 // lamportsPerSol conversion
-                self.balance = String(format: "%.4f SOL", solBalance)
+                balance = String(format: "%.4f SOL", solBalance)
             } catch {
                 result = ("Error", "Failed to fetch balance: \(error.localizedDescription)")
             }
         }
     }
-    
+
     private func signTransaction() {
-        guard let transaction = createTransaction(lamports: 1000000) else { return }
+        guard let transaction = createTransaction(lamports: 1_000_000) else { return }
         guard let signer = paraSolanaSigner else {
             result = ("Error", "Solana signer not initialized")
             return
         }
-        
+
         isLoading = true
         Task {
             let (duration, error) = await measureTime {
                 _ = try await signer.signTransaction(transaction)
             }
-            
-            if let error = error {
-                self.result = ("Error", "Failed to sign transaction: \(error.localizedDescription)\nDuration: \(String(format: "%.2f", duration))s")
+
+            if let error {
+                result = ("Error", "Failed to sign transaction: \(error.localizedDescription)\nDuration: \(String(format: "%.2f", duration))s")
             } else {
-                self.result = ("Success", "Transaction signed successfully\nDuration: \(String(format: "%.2f", duration))s")
+                result = ("Success", "Transaction signed successfully\nDuration: \(String(format: "%.2f", duration))s")
             }
             isLoading = false
         }
     }
-    
+
     private func sendTransaction() {
-        guard let transaction = createTransaction(lamports: 100000) else { return }
+        guard let transaction = createTransaction(lamports: 100_000) else { return }
         guard let signer = paraSolanaSigner else {
             result = ("Error", "Solana signer not initialized")
             return
         }
-        
+
         // Check if we have balance info and sufficient funds
         if let balanceString = balance {
             // Extract numeric value from balance string (e.g., "0.0000 SOL" -> 0.0)
@@ -84,61 +84,61 @@ struct SolanaWalletView: View {
             if let balanceDouble = Double(balanceValue) {
                 let requiredSOL = 0.0001 + 0.000005 // Transaction amount + estimated fee
                 if balanceDouble < requiredSOL {
-                    result = ("Insufficient Balance", 
-                             "You need at least \(String(format: "%.6f", requiredSOL)) SOL to send this transaction.\n\n" +
-                             "Current balance: \(balanceString)\n\n" +
-                             "To fund your wallet on Solana Devnet:\n" +
-                             "1. Copy your wallet address\n" +
-                             "2. Visit https://faucet.solana.com\n" +
-                             "3. Paste your address and request SOL")
+                    result = ("Insufficient Balance",
+                              "You need at least \(String(format: "%.6f", requiredSOL)) SOL to send this transaction.\n\n" +
+                                  "Current balance: \(balanceString)\n\n" +
+                                  "To fund your wallet on Solana Devnet:\n" +
+                                  "1. Copy your wallet address\n" +
+                                  "2. Visit https://faucet.solana.com\n" +
+                                  "3. Paste your address and request SOL")
                     return
                 }
             }
         }
-        
+
         isLoading = true
         Task {
             let (duration, error) = await measureTime {
                 _ = try await signer.sendTransaction(transaction)
             }
-            
-            if let error = error {
+
+            if let error {
                 let errorMessage = error.localizedDescription
                 if errorMessage.contains("insufficient") || errorMessage.contains("0x1") {
-                    self.result = ("Insufficient Balance", 
-                                 "Transaction failed due to insufficient balance.\n\n" +
-                                 "To fund your wallet on Solana Devnet:\n" +
-                                 "1. Copy your wallet address\n" +
-                                 "2. Visit https://faucet.solana.com\n" +
-                                 "3. Paste your address and request SOL\n\n" +
-                                 "Duration: \(String(format: "%.2f", duration))s")
+                    result = ("Insufficient Balance",
+                              "Transaction failed due to insufficient balance.\n\n" +
+                                  "To fund your wallet on Solana Devnet:\n" +
+                                  "1. Copy your wallet address\n" +
+                                  "2. Visit https://faucet.solana.com\n" +
+                                  "3. Paste your address and request SOL\n\n" +
+                                  "Duration: \(String(format: "%.2f", duration))s")
                 } else {
-                    self.result = ("Error", "Failed to send transaction: \(errorMessage)\nDuration: \(String(format: "%.2f", duration))s")
+                    result = ("Error", "Failed to send transaction: \(errorMessage)\nDuration: \(String(format: "%.2f", duration))s")
                 }
             } else {
-                self.result = ("Success", "Transaction sent successfully\nDuration: \(String(format: "%.2f", duration))s")
+                result = ("Success", "Transaction sent successfully\nDuration: \(String(format: "%.2f", duration))s")
                 // Refresh balance after successful transaction
                 fetchBalance()
             }
             isLoading = false
         }
     }
-    
+
     private func createTransaction(lamports: UInt64) -> SolanaTransaction? {
         // Create a simple transfer transaction for demo purposes
         let toAddress = "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
-        
+
         do {
             return try SolanaTransaction(
                 to: toAddress,
-                lamports: lamports
+                lamports: lamports,
             )
         } catch {
             result = ("Error", "Failed to create transaction: \(error.localizedDescription)")
             return nil
         }
     }
-    
+
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
@@ -148,15 +148,15 @@ struct SolanaWalletView: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    
+
                     HStack {
                         Text(selectedWallet.address ?? "No wallet found")
                             .font(.system(.footnote, design: .monospaced))
                             .lineLimit(1)
                             .truncationMode(.middle)
-                        
+
                         Spacer()
-                        
+
                         Button(action: {
                             if let address = selectedWallet.address {
                                 UIPasteboard.general.string = address
@@ -174,7 +174,7 @@ struct SolanaWalletView: View {
                     .padding()
                     .background(Color(.systemGray6))
                     .cornerRadius(10)
-                    
+
                     if let balanceString = balance {
                         HStack {
                             Text("Balance:")
@@ -189,20 +189,20 @@ struct SolanaWalletView: View {
                             .accessibilityIdentifier("refreshBalanceButton")
                         }
                         .padding(.vertical, 8)
-                        
+
                         // Show fund wallet button if balance is zero or very low
                         let balanceValue = balanceString.replacingOccurrences(of: " SOL", with: "")
                         if let balanceDouble = Double(balanceValue), balanceDouble < 0.001 {
                             Button(action: {
                                 if let address = selectedWallet.address {
                                     UIPasteboard.general.string = address
-                                    result = ("Wallet Address Copied", 
-                                             "Your address has been copied to clipboard.\n\n" +
-                                             "To fund your wallet:\n" +
-                                             "1. Visit https://faucet.solana.com\n" +
-                                             "2. Paste your address: \(address)\n" +
-                                             "3. Request SOL from the faucet\n\n" +
-                                             "Note: Devnet SOL has no real value")
+                                    result = ("Wallet Address Copied",
+                                              "Your address has been copied to clipboard.\n\n" +
+                                                  "To fund your wallet:\n" +
+                                                  "1. Visit https://faucet.solana.com\n" +
+                                                  "2. Paste your address: \(address)\n" +
+                                                  "3. Request SOL from the faucet\n\n" +
+                                                  "Note: Devnet SOL has no real value")
                                 }
                             }) {
                                 Label("Fund Wallet (Devnet)", systemImage: "plus.circle.fill")
@@ -223,19 +223,19 @@ struct SolanaWalletView: View {
                 .background(Color(.systemBackground))
                 .cornerRadius(16)
                 .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-                
+
                 // Signing Messages
                 VStack(spacing: 16) {
                     Text("Message Signing")
                         .font(.headline)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    
+
                     TextField("Enter a message to sign", text: $messageToSign)
                         .autocorrectionDisabled()
                         .padding()
                         .background(Color(.systemGray6))
                         .cornerRadius(10)
-                    
+
                     Button("Sign Message") {
                         guard !messageToSign.isEmpty else {
                             result = ("Error", "Please enter a message to sign.")
@@ -250,9 +250,9 @@ struct SolanaWalletView: View {
                                 }
                                 _ = try await paraManager.signMessage(walletId: selectedWallet.id, message: base64Message)
                             }
-                            
+
                             isSigning = false
-                            if let error = error {
+                            if let error {
                                 result = ("Error", "Failed to sign message: \(error.localizedDescription)\nDuration: \(String(format: "%.2f", duration))s")
                             } else {
                                 result = ("Success", "Message signed successfully\nDuration: \(String(format: "%.2f", duration))s")
@@ -272,20 +272,20 @@ struct SolanaWalletView: View {
                 .background(Color(.systemBackground))
                 .cornerRadius(16)
                 .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-                
+
                 // Transaction Operations
                 VStack(spacing: 16) {
                     Text("Transaction Operations")
                         .font(.headline)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    
+
                     HStack(spacing: 16) {
                         Button("Send Transaction") {
                             sendTransaction()
                         }
                         .buttonStyle(.bordered)
                         .frame(maxWidth: .infinity)
-                        
+
                         Button("Sign Transaction") {
                             signTransaction()
                         }
@@ -298,13 +298,13 @@ struct SolanaWalletView: View {
                 .background(Color(.systemBackground))
                 .cornerRadius(16)
                 .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-                
+
                 // Wallet Management
                 VStack(spacing: 16) {
                     Text("Wallet Management")
                         .font(.headline)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    
+
                     HStack(spacing: 16) {
                         Button("Check Session") {
                             isFetching = true
@@ -321,7 +321,7 @@ struct SolanaWalletView: View {
                         }
                         .buttonStyle(.bordered)
                         .frame(maxWidth: .infinity)
-                        
+
                         Button("Fetch Wallets") {
                             isFetching = true
                             Task {
@@ -350,7 +350,7 @@ struct SolanaWalletView: View {
                 .background(Color(.systemBackground))
                 .cornerRadius(16)
                 .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-                
+
                 // Logout
                 Button("Logout") {
                     Task {
@@ -374,12 +374,12 @@ struct SolanaWalletView: View {
         .navigationTitle("Solana Wallet")
         .alert(item: Binding(
             get: { result.map { AlertItem(title: $0.title, message: $0.message) } },
-            set: { _ in result = nil }
+            set: { _ in result = nil },
         )) { alert in
             Alert(
                 title: Text(alert.title),
                 message: Text(alert.message),
-                dismissButton: .default(Text("OK"))
+                dismissButton: .default(Text("OK")),
             )
         }
         .onAppear {
@@ -389,14 +389,14 @@ struct SolanaWalletView: View {
                     // Initialize Para Solana signer with bridge pattern
                     let signer = try ParaSolanaSigner(
                         paraManager: paraManager,
-                        rpcUrl: rpcUrl
+                        rpcUrl: rpcUrl,
                     )
-                    
+
                     // Explicitly select the wallet to ensure it's properly initialized
                     try await signer.selectWallet(walletId: selectedWallet.id)
-                    
+
                     await MainActor.run {
-                        self.paraSolanaSigner = signer
+                        paraSolanaSigner = signer
                         fetchBalance()
                     }
                 } catch {
@@ -424,9 +424,9 @@ struct SolanaWalletView: View {
         id: "preview-wallet-id",
         signer: "mock-signer",
         address: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
-        publicKey: "mock-public-key"
+        publicKey: "mock-public-key",
     )
-    
+
     NavigationStack {
         SolanaWalletView(selectedWallet: mockWallet)
             .environmentObject(mockParaManager)

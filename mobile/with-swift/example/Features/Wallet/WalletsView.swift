@@ -5,13 +5,13 @@
 //  Created by Brian Corbin on 2/6/25.
 //
 
-import SwiftUI
 import ParaSwift
+import SwiftUI
 
 struct WalletsView: View {
     @EnvironmentObject var paraManager: ParaManager
     @EnvironmentObject var appRootManager: AppRootManager
-    
+
     @State private var selectedWalletType: WalletType = .evm
     @State private var showSelectCreateWalletTypeView = false
     @State private var isRefreshing = false
@@ -20,14 +20,14 @@ struct WalletsView: View {
     @State private var createWalletError: Error?
     @State private var showCreateWalletError = false
     @State private var isCreatingWallet = false
-    
+
     private func createWallet(type: WalletType) {
         isCreatingWallet = true
-        
+
         Task {
             do {
                 try await paraManager.createWallet(type: type, skipDistributable: false)
-                
+
                 await MainActor.run {
                     isCreatingWallet = false
                     showSelectCreateWalletTypeView = false
@@ -41,12 +41,12 @@ struct WalletsView: View {
             }
         }
     }
-    
+
     private func refreshWallets() {
         guard !isRefreshing else { return }
         isRefreshing = true
         refreshError = nil
-        
+
         Task {
             do {
                 let wallets = try await paraManager.fetchWallets()
@@ -64,7 +64,7 @@ struct WalletsView: View {
             }
         }
     }
-    
+
     @ViewBuilder
     private var createWalletButtonIcon: some View {
         if isCreatingWallet {
@@ -78,7 +78,7 @@ struct WalletsView: View {
                 .foregroundColor(.blue)
         }
     }
-    
+
     @ViewBuilder
     private var createWalletButton: some View {
         Button(action: {
@@ -88,7 +88,7 @@ struct WalletsView: View {
                 createWalletButtonIcon
                     .frame(width: 60, height: 60)
                     .animation(.easeInOut(duration: 0.3), value: isCreatingWallet)
-                
+
                 Text(isCreatingWallet ? "Creating..." : "Create Your First \(selectedWalletType.rawValue.uppercased()) Wallet")
                     .font(.title2)
                     .fontWeight(.semibold)
@@ -105,7 +105,7 @@ struct WalletsView: View {
         .padding(.horizontal, 20)
         .accessibilityIdentifier("createFirstWalletButton")
     }
-    
+
     @ViewBuilder
     private var walletsList: some View {
         List(filteredWallets, id: \.id) { wallet in
@@ -116,7 +116,7 @@ struct WalletsView: View {
             }
         }
     }
-    
+
     @ViewBuilder
     private func walletDetailView(for wallet: Wallet) -> some View {
         switch wallet.type! {
@@ -128,7 +128,7 @@ struct WalletsView: View {
             CosmosWalletView(selectedWallet: wallet)
         }
     }
-    
+
     @ViewBuilder
     private func walletLabel(for wallet: Wallet) -> some View {
         if wallet.type == .cosmos {
@@ -139,7 +139,7 @@ struct WalletsView: View {
                 .font(.system(.body, design: .monospaced))
         }
     }
-    
+
     @ViewBuilder
     private var refreshButton: some View {
         Button {
@@ -155,11 +155,11 @@ struct WalletsView: View {
         .disabled(isRefreshing)
         .accessibilityIdentifier("refreshButton")
     }
-    
+
     private var filteredWallets: [Wallet] {
-        paraManager.wallets.filter({ $0.type == selectedWalletType })
+        paraManager.wallets.filter { $0.type == selectedWalletType }
     }
-    
+
     var body: some View {
         NavigationStack {
             VStack {
@@ -170,7 +170,7 @@ struct WalletsView: View {
                 }
                 .pickerStyle(.segmented)
                 .padding(.horizontal)
-                
+
                 if filteredWallets.isEmpty {
                     Spacer()
                     createWalletButton
@@ -188,7 +188,7 @@ struct WalletsView: View {
                     Button("Logout") {
                         Task {
                             try! await paraManager.logout()
-                            appRootManager.currentRoot = .authentication
+                            appRootManager.setAuthenticated(false)
                         }
                     }
                     .accessibilityIdentifier("logoutButton")
@@ -207,19 +207,19 @@ struct WalletsView: View {
                     createWallet(type: .cosmos)
                 }
                 .accessibilityIdentifier("cosmosWalletButton")
-                
+
                 Button("Cancel", role: .cancel) {
                     showSelectCreateWalletTypeView = false
                 }
                 .accessibilityIdentifier("cancelWalletButton")
             }
             .alert("Refresh Failed", isPresented: $showRefreshError) {
-                Button("OK", role: .cancel) { }
+                Button("OK", role: .cancel) {}
             } message: {
                 Text(refreshError?.localizedDescription ?? "An unknown error occurred")
             }
             .alert("Create Wallet Failed", isPresented: $showCreateWalletError) {
-                Button("OK", role: .cancel) { }
+                Button("OK", role: .cancel) {}
             } message: {
                 Text(createWalletError?.localizedDescription ?? "An unknown error occurred")
             }

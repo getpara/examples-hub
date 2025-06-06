@@ -5,15 +5,15 @@
 //  Created by Brian Corbin on 2/6/25.
 //
 
-import SwiftUI
 import ParaSwift
+import SwiftUI
 
 struct CosmosWalletView: View {
     @EnvironmentObject var paraManager: ParaManager
     @EnvironmentObject var appRootManager: AppRootManager
-    
+
     let selectedWallet: ParaSwift.Wallet
-    
+
     @State private var messageToSign = ""
     @State private var result: (title: String, message: String)?
     @State private var isSigning = false
@@ -23,37 +23,36 @@ struct CosmosWalletView: View {
     @State private var isFetchingBalance = false
     @State private var cosmosAddress: String?
     @State private var selectedSigningMethod: CosmosSigningMethod = .proto // Default to Proto
-    
+
     @State private var paraCosmosSigner: ParaCosmosSigner?
-    
-    
+
     private func fetchBalance() {
         guard let signer = paraCosmosSigner else {
             result = ("Error", "Cosmos signer not initialized")
             return
         }
-        
+
         isFetchingBalance = true
         Task {
             do {
                 let amount = try await signer.getBalance()
-                self.balance = amount
-                self.result = ("Success", "Balance fetched successfully")
+                balance = amount
+                result = ("Success", "Balance fetched successfully")
             } catch {
-                self.result = ("Error", "Failed to fetch balance: \(error.localizedDescription)")
+                result = ("Error", "Failed to fetch balance: \(error.localizedDescription)")
             }
             isFetchingBalance = false
         }
     }
-    
+
     private func createAndSignTransaction() {
         guard let signer = paraCosmosSigner else {
             result = ("Error", "Cosmos signer not initialized")
             return
         }
-        
+
         let toAddress = "cosmos1ey69r37gfxvxg62sh4r0ktpuc46pzjrm873ae8"
-        
+
         isLoading = true
         Task {
             do {
@@ -62,16 +61,16 @@ struct CosmosWalletView: View {
                     amount: "1000000", // 1 ATOM
                     denom: "uatom",
                     memo: "Test transaction from Para Swift SDK",
-                    signingMethod: selectedSigningMethod
+                    signingMethod: selectedSigningMethod,
                 )
-                self.result = ("Success", "Transaction signed successfully using \(selectedSigningMethod.rawValue.uppercased()) method")
+                result = ("Success", "Transaction signed successfully using \(selectedSigningMethod.rawValue.uppercased()) method")
             } catch {
                 result = ("Error", "Failed to sign transaction: \(error.localizedDescription)")
             }
             isLoading = false
         }
     }
-    
+
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
@@ -81,15 +80,15 @@ struct CosmosWalletView: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    
+
                     HStack {
                         Text(cosmosAddress ?? "Loading...")
                             .font(.system(.footnote, design: .monospaced))
                             .lineLimit(1)
                             .truncationMode(.middle)
-                        
+
                         Spacer()
-                        
+
                         Button(action: {
                             if let address = cosmosAddress {
                                 UIPasteboard.general.string = address
@@ -107,7 +106,7 @@ struct CosmosWalletView: View {
                     .padding()
                     .background(Color(.systemGray6))
                     .cornerRadius(10)
-                    
+
                     if let balanceString = balance {
                         HStack {
                             Text("Balance:")
@@ -121,7 +120,7 @@ struct CosmosWalletView: View {
                         .padding(.horizontal)
                         .padding(.top, 8)
                     }
-                    
+
                     Button(action: fetchBalance) {
                         HStack {
                             if isFetchingBalance {
@@ -141,30 +140,30 @@ struct CosmosWalletView: View {
                 .background(Color(.systemBackground))
                 .cornerRadius(16)
                 .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-                
+
                 // Message Signing
                 VStack(spacing: 16) {
                     Text("Message Signing")
                         .font(.headline)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    
+
                     TextField("Enter a message to sign", text: $messageToSign)
                         .autocorrectionDisabled()
                         .padding()
                         .background(Color(.systemGray6))
                         .cornerRadius(10)
-                    
+
                     Button("Sign Message") {
                         guard !messageToSign.isEmpty else {
                             result = ("Error", "Please enter a message to sign.")
                             return
                         }
-                        
+
                         guard let signer = paraCosmosSigner else {
                             result = ("Error", "Cosmos signer not initialized")
                             return
                         }
-                        
+
                         isSigning = true
                         Task {
                             do {
@@ -190,27 +189,27 @@ struct CosmosWalletView: View {
                 .background(Color(.systemBackground))
                 .cornerRadius(16)
                 .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-                
+
                 // Transaction Operations
                 VStack(spacing: 16) {
                     Text("Transaction Operations")
                         .font(.headline)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    
+
                     // Signing Method Selection
                     VStack(spacing: 8) {
                         Text("Signing Method")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                        
+
                         Picker("Signing Method", selection: $selectedSigningMethod) {
                             Text("Proto (Modern)").tag(CosmosSigningMethod.proto)
                             Text("Amino (Legacy)").tag(CosmosSigningMethod.amino)
                         }
                         .pickerStyle(.segmented)
                     }
-                    
+
                     Button("Sign Transaction") {
                         createAndSignTransaction()
                     }
@@ -222,13 +221,13 @@ struct CosmosWalletView: View {
                 .background(Color(.systemBackground))
                 .cornerRadius(16)
                 .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-                
+
                 // Wallet Management
                 VStack(spacing: 16) {
                     Text("Wallet Management")
                         .font(.headline)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    
+
                     HStack(spacing: 16) {
                         Button("Check Session") {
                             isFetching = true
@@ -245,7 +244,7 @@ struct CosmosWalletView: View {
                         }
                         .buttonStyle(.bordered)
                         .frame(maxWidth: .infinity)
-                        
+
                         Button("Fetch Wallets") {
                             isFetching = true
                             Task {
@@ -274,7 +273,7 @@ struct CosmosWalletView: View {
                 .background(Color(.systemBackground))
                 .cornerRadius(16)
                 .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-                
+
                 // Logout
                 Button("Logout") {
                     Task {
@@ -298,12 +297,12 @@ struct CosmosWalletView: View {
         .navigationTitle("Cosmos Wallet")
         .alert(item: Binding(
             get: { result.map { AlertItem(title: $0.title, message: $0.message) } },
-            set: { _ in result = nil }
+            set: { _ in result = nil },
         )) { alert in
             Alert(
                 title: Text(alert.title),
                 message: Text(alert.message),
-                dismissButton: .default(Text("OK"))
+                dismissButton: .default(Text("OK")),
             )
         }
         .onAppear {
@@ -311,17 +310,17 @@ struct CosmosWalletView: View {
                 isLoading = true
                 do {
                     let signer = try ParaCosmosSigner(
-                        paraManager: paraManager
+                        paraManager: paraManager,
                     )
-                    
+
                     try await signer.selectWallet(walletId: selectedWallet.id)
-                    
+
                     await MainActor.run {
-                        self.paraCosmosSigner = signer
+                        paraCosmosSigner = signer
                     }
-                    
+
                     await MainActor.run {
-                        self.cosmosAddress = selectedWallet.addressSecondary ?? selectedWallet.address
+                        cosmosAddress = selectedWallet.addressSecondary ?? selectedWallet.address
                     }
                 } catch {
                     result = ("Error", "Failed to initialize Cosmos signer: \(error.localizedDescription)")
@@ -348,6 +347,6 @@ struct CosmosWalletView: View {
         "address": "0x1234567890123456789012345678901234567890",
         "addressSecondary": "cosmos1ey69r37gfxvxg62sh4r0ktpuc46pzjrm873ae8",
         "type": "COSMOS",
-        "publicKey": "preview-public-key"
+        "publicKey": "preview-public-key",
     ]))
 }
