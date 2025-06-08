@@ -628,39 +628,36 @@
     "@ethersproject/properties" "^5.8.0"
     "@ethersproject/strings" "^5.8.0"
 
-"@getpara/core-sdk@1.10.0":
-  version "1.10.0"
-  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.10.0.tgz#a2fc0e134849bcb2b1ca64a4224e0e084cd4a824"
-  integrity sha512-8PQ78ebckPk7ukV50tSzOjZKnUBmaf6reLYndX5QimNQ4xg80b1qNvBgX2076ziwMkvOHFYi13teOSd8fIeDDg==
+"@getpara/core-sdk@1.15.1":
+  version "1.15.1"
+  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.15.1.tgz#c59f62c3f1fe0d208d499915a65d7c1e97ea2bfe"
+  integrity sha512-eEkKgO2APJhzwKyKQ9Pv9iFhRfn0WPEXKnH5K1ov08/Zc8udUQ2rlpBysgC8D4W7MzfbgFXpd5aEErDKudNpxw==
   dependencies:
     "@celo/utils" "^8.0.2"
     "@cosmjs/encoding" "^0.32.4"
     "@ethereumjs/util" "^9.1.0"
-    "@getpara/user-management-client" "1.10.0"
+    "@getpara/user-management-client" "1.15.1"
     "@noble/hashes" "^1.5.0"
     base64url "^3.0.1"
     libphonenumber-js "1.11.2"
     node-forge "^1.3.1"
-    qs "^6.12.0"
+    uuid "^11.1.0"
 
-"@getpara/user-management-client@1.10.0":
-  version "1.10.0"
-  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.10.0.tgz#f53b18a0ffbad7998d3365478c8856d9db97afc0"
-  integrity sha512-fGH5A+GDVvwJnAACnFH3Sc9J3HUF79NjHT2WHwjbhYpuL+E8lZkmdLlcAqmYd5MeWobtORuyq9cEUpqLcrkusw==
+"@getpara/user-management-client@1.15.1":
+  version "1.15.1"
+  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.15.1.tgz#5cdbf69c2845ad590803cee64a2268189267b74b"
+  integrity sha512-DFt9FbQbh6xCiLZY0wZimIo4YVh3C6prXxDOEd5jAvgU8HKoZWMt1AQ2yCG1ez1dgxjq3s4DsuEsX5K1T24VYA==
   dependencies:
     axios "^1.8.4"
     libphonenumber-js "1.11.2"
-    qs "^6.12.0"
 
-"@getpara/web-sdk@1.10.0":
-  version "1.10.0"
-  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-1.10.0.tgz#456ec003532baf3368d20c4459aceaaeeb24e518"
-  integrity sha512-6DvpfyF3FGyA1ZvN9ijMkqfPUCYixMrQ33KOXFhHdBmh9qDDAkz+g0QDhI89MRip8Z/F0l9qbhnZoexHcZlElQ==
+"@getpara/web-sdk@1.15.1":
+  version "1.15.1"
+  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-1.15.1.tgz#8b370e8a8a063652f94bdc2d93907a3613c39353"
+  integrity sha512-ITEjE7W8FGdGp1EkeYbZsRlj71dSSMFdXvWfSEIWWPGh/Fp6DhfOdMdvqYbNe3mL5Ic18gVOzMmxVBf5DEv9oQ==
   dependencies:
-    "@getpara/core-sdk" "1.10.0"
-    "@getpara/user-management-client" "1.10.0"
-    "@sentry/browser" "^9.1.0"
-    assert "^2.1.0"
+    "@getpara/core-sdk" "1.15.1"
+    "@getpara/user-management-client" "1.15.1"
     base64url "3.0.1"
     buffer "6.0.3"
     cbor-web "8.1.0"
@@ -948,52 +945,6 @@
   dependencies:
     "@noble/hashes" "~1.4.0"
     "@scure/base" "~1.1.6"
-
-"@sentry-internal/browser-utils@9.11.0":
-  version "9.11.0"
-  resolved "https://registry.yarnpkg.com/@sentry-internal/browser-utils/-/browser-utils-9.11.0.tgz#b4d89fbf1a41ee04ddf5a0058433b6b996d39a41"
-  integrity sha512-XS71kRf7lw5St/Jc9G2Viy1cKgqGoPHqUAykXEtFt38JVXdf1TY/dSbKv/PAgNqMvC1xvdTsN0HF/81o7DNUEA==
-  dependencies:
-    "@sentry/core" "9.11.0"
-
-"@sentry-internal/feedback@9.11.0":
-  version "9.11.0"
-  resolved "https://registry.yarnpkg.com/@sentry-internal/feedback/-/feedback-9.11.0.tgz#fefbfb318aef251c3dd02540ce524807dbb59bc3"
-  integrity sha512-50KiRmrF1Ldr+KoRawqcCYVk7TAVP8K/I81Jk9YWwlp1+Pu1ArpYDmTNCLXTgoyiyO38aHefKGZJX6AKFuSsUQ==
-  dependencies:
-    "@sentry/core" "9.11.0"
-
-"@sentry-internal/replay-canvas@9.11.0":
-  version "9.11.0"
-  resolved "https://registry.yarnpkg.com/@sentry-internal/replay-canvas/-/replay-canvas-9.11.0.tgz#56db491058dc7005291c45f3e1777afc87637db5"
-  integrity sha512-ZcRg8TWfF0ucjK2i+4TY/blRNJ7YKrgMpx19pFj6eCOJ1K8geSkAFPIfDHcQEwIU1ZTN+HiCwx0JvTI9YZxjfg==
-  dependencies:
-    "@sentry-internal/replay" "9.11.0"
-    "@sentry/core" "9.11.0"
-
-"@sentry-internal/replay@9.11.0":
-  version "9.11.0"
-  resolved "https://registry.yarnpkg.com/@sentry-internal/replay/-/replay-9.11.0.tgz#ef591263b516415a40b0954e17b29c7a1a83b4c0"
-  integrity sha512-0k24h58O/2VQw1dwT/zQiWvUzLNQxpxbrVN/MYPT7czSEhI+1bX8fxMHXZORl2JqhetImMXzxH3XkuHQPEqQMg==
-  dependencies:
-    "@sentry-internal/browser-utils" "9.11.0"
-    "@sentry/core" "9.11.0"
-
-"@sentry/browser@^9.1.0":
-  version "9.11.0"
-  resolved "https://registry.yarnpkg.com/@sentry/browser/-/browser-9.11.0.tgz#3126223289949d4b63bfad1fc2c0fc2fdc035cbe"
-  integrity sha512-DSDj8wQJoiLqqOcntl+7phjd8l8KN9A0vaV7mZNHWbrHU3MVwXqTyLyERRLC6wi0t7F5kqczqa3xLmKjK/fMZg==
-  dependencies:
-    "@sentry-internal/browser-utils" "9.11.0"
-    "@sentry-internal/feedback" "9.11.0"
-    "@sentry-internal/replay" "9.11.0"
-    "@sentry-internal/replay-canvas" "9.11.0"
-    "@sentry/core" "9.11.0"
-
-"@sentry/core@9.11.0":
-  version "9.11.0"
-  resolved "https://registry.yarnpkg.com/@sentry/core/-/core-9.11.0.tgz#4cedb0d549e98f4e259f9a48b129e3a46001aba4"
-  integrity sha512-qfb4ahGZubbrNh1MnbEqyHFp87rIwQIZapyQLCaYpudXrP1biEpLOV3mMDvDJWCdX460hoOwQ3SkwipV3We/7w==
 
 "@tailwindcss/node@4.1.3":
   version "4.1.3"
@@ -1303,7 +1254,7 @@ asn1.js@^4.10.1:
     inherits "^2.0.1"
     minimalistic-assert "^1.0.0"
 
-assert@^2.0.0, assert@^2.1.0:
+assert@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/assert/-/assert-2.1.0.tgz#6d92a238d05dc02e7427c881fb8be81c8448b2dd"
   integrity sha512-eLHpSK/Y4nhMJ07gDaAzoX/XAKS8PSaojml3M0DM4JpV1LAi5JOJ/p6H/XWrl8L+DzVEvVCW1z3vWAaB9oTsQw==
@@ -2921,7 +2872,7 @@ punycode@^2.1.0:
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.3.1.tgz#027422e2faec0b25e1549c3e1bd8309b9133b6e5"
   integrity sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==
 
-qs@^6.12.0, qs@^6.12.3:
+qs@^6.12.3:
   version "6.14.0"
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.14.0.tgz#c63fa40680d2c5c941412a0e899c89af60c0a930"
   integrity sha512-YWWTjgABSKcvs/nWBi9PycY/JiPJqOD4JA6o9Sej2AtvSGarXxKC3OQSk4pAarbdQlKAh5D4FCQkJNkW+GAn3w==
@@ -3361,6 +3312,11 @@ util@^0.12.4, util@^0.12.5:
     is-generator-function "^1.0.7"
     is-typed-array "^1.1.3"
     which-typed-array "^1.1.2"
+
+uuid@^11.1.0:
+  version "11.1.0"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-11.1.0.tgz#9549028be1753bb934fc96e2bca09bb4105ae912"
+  integrity sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==
 
 vite-plugin-node-polyfills@0.23.0:
   version "0.23.0"

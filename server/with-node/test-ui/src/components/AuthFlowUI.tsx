@@ -6,6 +6,7 @@ import { para } from "../client/para";
 interface ApiOption {
   id: string;
   name: string;
+  description?: string;
 }
 
 interface ResultData {
@@ -26,12 +27,14 @@ const AuthFlowUI: React.FC = () => {
   const [error, setError] = useState<string>("");
 
   const apiOptions: ApiOption[] = [
-    { id: "ethers", name: "Ethers.js" },
-    { id: "viem", name: "Viem" },
-    { id: "cosmjs", name: "CosmJS" },
-    { id: "solana-web3", name: "Solana Web3" },
-    { id: "alchemy", name: "Alchemy AA" },
-    { id: "zerodev", name: "ZeroDev AA" },
+    { id: "ethers", name: "Ethers.js", description: "Traditional Ethers.js integration" },
+    { id: "viem", name: "Viem", description: "Modern TypeScript-first library" },
+    { id: "cosmjs", name: "CosmJS", description: "Cosmos SDK integration" },
+    { id: "solana-web3", name: "Solana Web3", description: "Solana blockchain integration" },
+    { id: "alchemy", name: "Alchemy AA", description: "ERC-4337 Account Abstraction" },
+    { id: "zerodev", name: "ZeroDev AA", description: "ERC-4337 Account Abstraction" },
+    { id: "alchemy/eip7702", name: "Alchemy EIP-7702", description: "EIP-7702 EOA upgrade to smart account" },
+    { id: "zerodev/eip7702", name: "ZeroDev EIP-7702", description: "EIP-7702 EOA upgrade to smart account" },
   ];
 
   const handleAuthTypeSelect = (type: string) => {
@@ -131,12 +134,48 @@ const AuthFlowUI: React.FC = () => {
     setResult(null);
   };
 
+  const getEndpoint = (apiId: string, authType: string) => {
+    // Handle special EIP-7702 routes
+    if (apiId.includes("/eip7702")) {
+      return `/examples/${apiId}`;
+    }
+    // Handle regular routes
+    return `/examples/${apiId}/${authType}`;
+  };
+
+  const getPayload = (apiId: string, authType: string) => {
+    // EIP-7702 routes only support session flow
+    if (apiId.includes("/eip7702")) {
+      return { session };
+    }
+    // Regular routes support both session and pregen
+    return authType === "session" ? { session } : { email };
+  };
+
+  const isApiCompatible = (apiId: string, authType: string) => {
+    // EIP-7702 routes only work with session flow
+    if (apiId.includes("/eip7702")) {
+      return authType === "session";
+    }
+    // All other APIs work with both flows
+    return true;
+  };
+
   const callSelectedAPI = async () => {
     if (!selectedAPI || !authType) {
-      // Set error in result object for consistency as this error is tied to this action
       setResult({ success: false, message: "API or Auth Type not selected." });
       return;
     }
+
+    // Check compatibility
+    if (!isApiCompatible(selectedAPI, authType)) {
+      setResult({
+        success: false,
+        message: "EIP-7702 routes only support the Session flow. Please restart and select Session authentication.",
+      });
+      return;
+    }
+
     if (authType === "session" && !session) {
       setResult({ success: false, message: "Session not available. Please complete session authentication first." });
       return;
@@ -147,11 +186,11 @@ const AuthFlowUI: React.FC = () => {
     }
 
     setLoading(true);
-    setError(""); // Clear general errors when attempting API call
+    setError("");
     setResult(null);
 
-    const endpoint = `/examples/${selectedAPI}/${authType}`;
-    const payload = authType === "session" ? { session } : { email };
+    const endpoint = getEndpoint(selectedAPI!, authType);
+    const payload = getPayload(selectedAPI, authType);
 
     try {
       const response = await fetch(endpoint, {
@@ -167,11 +206,9 @@ const AuthFlowUI: React.FC = () => {
       }
 
       setResult({ success: true, data: responseData });
-      // setError(""); // Already cleared above
     } catch (err: any) {
       const errorMsg = `API call to ${endpoint} failed: ${err.message}`;
       console.error(`API Call Error (${endpoint}):`, err);
-      // Only set the result state for API call errors
       setResult({ success: false, message: errorMsg });
     } finally {
       setLoading(false);
@@ -189,8 +226,18 @@ const AuthFlowUI: React.FC = () => {
     setSession(null);
   };
 
+  const getApiDisplayName = (apiId: string) => {
+    const api = apiOptions.find((api) => api.id === apiId);
+    return api?.name || apiId;
+  };
+
+  const getFilteredApiOptions = () => {
+    // All flows now support all APIs
+    return apiOptions;
+  };
+
   return (
-    <div className="w-full max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
+    <div className="w-full max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
       <div className="mb-6 text-center">
         <h1 className="text-2xl font-bold">Para Server Examples</h1>
         <p className="text-gray-600 mt-2">Test Pre-Generated & Session Flows</p>
@@ -271,6 +318,7 @@ const AuthFlowUI: React.FC = () => {
                 <div>
                   <h3 className="font-medium">Pre-Generated Wallet Flow</h3>
                   <p className="text-sm text-gray-600">Server creates/uses wallet based on email</p>
+                  <p className="text-xs text-blue-600 mt-1">✓ Supports all APIs</p>
                 </div>
                 <ArrowRight
                   className="text-gray-400"
@@ -282,8 +330,9 @@ const AuthFlowUI: React.FC = () => {
                 disabled={loading}
                 className="w-full p-4 bg-white border-2 border-gray-200 rounded-lg flex items-center justify-between hover:border-blue-500 transition-colors disabled:opacity-50">
                 <div>
-                  <h3 className="font-medium">Session Flow</h3>
+                  <h3 className="font-medium">Session Flow Client</h3>
                   <p className="text-sm text-gray-600">Client authenticates via email popup</p>
+                  <p className="text-xs text-blue-600 mt-1">✓ Supports all APIs including EIP-7702</p>
                 </div>
                 <ArrowRight
                   className="text-gray-400"
@@ -356,18 +405,24 @@ const AuthFlowUI: React.FC = () => {
             </p>
 
             <div
-              className={`grid grid-cols-2 gap-3 mb-6 ${step === "call-api" ? "opacity-50 pointer-events-none" : ""}`}>
-              {apiOptions.map((api) => (
+              className={`grid grid-cols-1 md:grid-cols-2 gap-3 mb-6 ${
+                step === "call-api" ? "opacity-50 pointer-events-none" : ""
+              }`}>
+              {getFilteredApiOptions().map((api) => (
                 <button
                   key={api.id}
                   onClick={() => handleAPISelect(api.id)}
                   disabled={step === "call-api"}
-                  className={`p-3 bg-white border-2 rounded-lg text-center hover:border-blue-500 transition-colors ${
+                  className={`p-3 bg-white border-2 rounded-lg text-left hover:border-blue-500 transition-colors ${
                     selectedAPI === api.id && step === "call-api"
                       ? "border-blue-600 ring-2 ring-blue-300"
                       : "border-gray-200"
                   }`}>
-                  <span className="font-medium text-sm">{api.name}</span>
+                  <div className="font-medium text-sm mb-1">{api.name}</div>
+                  {api.description && <div className="text-xs text-gray-500">{api.description}</div>}
+                  {api.id.includes("/eip7702") && (
+                    <div className="text-xs text-blue-600 mt-1 font-medium">🆕 EIP-7702 EOA Upgrade</div>
+                  )}
                 </button>
               ))}
             </div>
@@ -376,8 +431,13 @@ const AuthFlowUI: React.FC = () => {
               <div className="mt-4">
                 <div className="bg-white p-4 rounded-lg border border-gray-200 mb-4">
                   <p className="text-sm">
-                    <span className="font-semibold">Calling Endpoint:</span> /examples/{selectedAPI}/{authType}
+                    <span className="font-semibold">Calling Endpoint:</span> {getEndpoint(selectedAPI!, authType!)}
                   </p>
+                  {selectedAPI.includes("/eip7702") && (
+                    <p className="text-xs text-blue-600 mt-2">
+                      ℹ️ This endpoint upgrades your EOA to a smart account using EIP-7702
+                    </p>
+                  )}
                 </div>
 
                 {result && (
@@ -422,7 +482,7 @@ const AuthFlowUI: React.FC = () => {
                       onClick={callSelectedAPI}
                       disabled={loading}
                       className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center">
-                      {`Call ${apiOptions.find((api) => api.id === selectedAPI)?.name} API Again`}
+                      {`Call ${getApiDisplayName(selectedAPI)} API Again`}
                     </button>
                   </div>
                 )}
@@ -441,7 +501,7 @@ const AuthFlowUI: React.FC = () => {
                       onClick={callSelectedAPI}
                       disabled={loading}
                       className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center">
-                      {`Call ${apiOptions.find((api) => api.id === selectedAPI)?.name} API`}
+                      {`Call ${getApiDisplayName(selectedAPI)} API`}
                     </button>
                   </div>
                 )}

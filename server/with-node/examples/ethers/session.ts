@@ -18,12 +18,12 @@ export async function ethersSessionSignHandler(req: Request, res: Response, next
       return;
     }
 
-    const env = process.env.PARA_ENVIRONMENT as Environment || Environment.BETA;
+    const env = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
     const para = new ParaServer(env, paraApiKey);
     await para.importSession(session);
 
     const ethersProvider = new ethers.JsonRpcProvider("https://ethereum-sepolia-rpc.publicnode.com");
-    const paraEthersSigner = new ParaEthersSigner(para, ethersProvider);
+    const paraEthersSigner = new ParaEthersSigner(para, ethersProvider as any);
 
     const address = await paraEthersSigner.getAddress();
     const feeData = await ethersProvider.getFeeData();

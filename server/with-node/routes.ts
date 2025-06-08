@@ -13,6 +13,8 @@ import { alchemyPregenSignHandler } from "./examples/alchemy-aa/pregen.js";
 import { alchemySessionSignHandler } from "./examples/alchemy-aa/session.js";
 import { zerodevPregenSignHandler } from "./examples/zerodev/pregen.js";
 import { zerodevSessionSignHandler } from "./examples/zerodev/session.js";
+import { alchemyEip7702SignHandler } from "./examples/alchemy-aa/eip7702.js";
+import { zerodevEip7702SignHandler } from "./examples/zerodev/eip7702.js";
 
 const router = Router();
 
@@ -27,7 +29,9 @@ router.post("/examples/solana-web3/pregen", solanaPregenSignHandler);
 router.post("/examples/solana-web3/session", solanaSessionSignHandler);
 router.post("/examples/alchemy/pregen", alchemyPregenSignHandler);
 router.post("/examples/alchemy/session", alchemySessionSignHandler);
+router.post("/examples/alchemy/eip7702", alchemyEip7702SignHandler);
 router.post("/examples/zerodev/pregen", zerodevPregenSignHandler);
 router.post("/examples/zerodev/session", zerodevSessionSignHandler);
+router.post("/examples/zerodev/eip7702", zerodevEip7702SignHandler);
 
 export default router;
