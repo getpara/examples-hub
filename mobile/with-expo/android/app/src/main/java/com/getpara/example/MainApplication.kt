@@ -1,4 +1,5 @@
 package com.getpara.example
+import com.facebook.react.common.assets.ReactFontManager
 
 import android.app.Application
 import android.content.res.Configuration
