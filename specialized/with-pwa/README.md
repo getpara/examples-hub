@@ -1,8 +1,6 @@
-# Para Provider Example
+# Para Provider PWA Example
 
-This example demonstrates integrating the `ParaProvider` component with the `ParaModal` for user authentication. It
-provides a minimal setup showing how to configure and trigger the modal for login flows using the hooks provided by the
-React SDK.
+This example demonstrates integrating the `ParaProvider` component with the `ParaModal` for user authentication in a Progressive Web App (PWA). It provides a minimal setup showing how to configure and trigger the modal for login flows using the hooks provided by the React SDK, with PWA-specific considerations for Para integration.
 
 ## Prerequisites
 
@@ -31,6 +29,17 @@ React SDK.
     ```
 2.  Open [http://localhost:3000](https://www.google.com/search?q=http://localhost:3000) (or the specified port) in your
     browser.
+
+## PWA Considerations for Para
+
+### Offline Functionality
+- **Important**: Offline functionality with Para authentication will not work as it requires active internet connection to communicate with Para's servers.
+- The PWA can cache static assets and provide offline UI, but authentication operations must be performed online.
+
+### Password Authentication for Better PWA Experience
+- For a fully integrated PWA solution without browser passkey popups interrupting the app experience, consider using Password authentication.
+- Enable Password authentication in the [Para Developer Portal](https://developer.getpara.com/) for your application.
+- This provides a more seamless PWA experience as password fields are handled within the web app context rather than triggering native browser dialogs.
 
 ## Learn More
 
