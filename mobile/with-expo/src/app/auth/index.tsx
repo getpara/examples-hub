@@ -16,7 +16,7 @@ import { SocialLoginOptions } from "@/components/auth/SocialLoginOptions";
 import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/text";
 import { usePara } from "@/hooks/usePara";
-import { AuthType } from "@/types";
+import { useLoginIdentifier } from "@/hooks/useLoginIdentifier";
 import { getCreds } from "@/utils/credentialStoreUtils";
 
 export default function MainAuthScreen() {
@@ -27,11 +27,20 @@ export default function MainAuthScreen() {
     method?: string;
     email?: string;
   }>();
-  const [countryCode, setCountryCode] = useState("+1");
-  const [email, setEmail] = useState("");
-  const [inputType, setInputType] = useState<AuthType>("email");
-  const [phoneNumber, setPhoneNumber] = useState("");
   const [error, setError] = useState("");
+  const {
+    displayValue,
+    inputType,
+    email,
+    phoneNumber,
+    countryCode,
+    error: validationError,
+    isValid,
+    handleChange,
+    setCountryCode,
+    validate,
+    reset,
+  } = useLoginIdentifier();
 
   if (!paraClient) return null;
 
@@ -124,8 +133,14 @@ export default function MainAuthScreen() {
     }
   }, [inputType, resetLogin]);
 
+  const showHelperText = displayValue.trim() !== "" && inputType !== undefined && !error && !validationError;
+
   const handleContinue = async () => {
     setError("");
+
+    if (!validate()) {
+      return;
+    }
 
     if (inputType === "email" && email) {
       await handleEmailFlow(email);
@@ -155,10 +170,6 @@ export default function MainAuthScreen() {
     }
   };
 
-  const handleValidation = (validationError: string) => {
-    setError(validationError);
-  };
-
   return (
     <View className="flex-1 bg-background px-6">
       <ScrollView
@@ -173,19 +184,17 @@ export default function MainAuthScreen() {
 
         <View className="flex-1 pb-8 gap-y-6">
           <LoginIdentifierInput
+            displayValue={displayValue}
             inputType={inputType}
-            onInputTypeChange={setInputType}
-            onSubmit={handleContinue}
-            email={email}
-            onEmailChange={setEmail}
-            phoneNumber={phoneNumber}
             countryCode={countryCode}
-            onPhoneNumberChange={setPhoneNumber}
+            error={error || validationError}
+            isValid={isValid}
+            showHelperText={showHelperText}
+            onChange={handleChange}
+            onSubmit={handleContinue}
             onCountryCodeChange={setCountryCode}
-            isLoading={isLoggingIn}
-            error={error}
-            onValidate={handleValidation}
             countryOptions={COUNTRY_OPTIONS}
+            isLoading={isLoggingIn}
           />
 
           <View className="flex-row items-center gap-x-2">

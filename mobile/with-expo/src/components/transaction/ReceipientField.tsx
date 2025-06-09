@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { View, TouchableOpacity } from "react-native";
 import { Text } from "~/components/ui/text";
 import { Input } from "~/components/ui/input";
 import { AlertCircle, CheckCircle } from "@/components/icons";
 import { Clipboard as ClipboardIcon } from "lucide-react-native";
-import { WalletType } from "@getpara/react-native-wallet";
 import * as ExpoClipboard from "expo-clipboard";
-import { isValidEvmAddress, isValidSolanaAddress } from "@/utils/transactionUtils";
 import { formatAddress } from "@/utils/formattingUtils";
 import { SupportedWalletType } from "@/types";
 
@@ -14,49 +12,27 @@ export interface RecipientFieldProps {
   value: string;
   onChange: (value: string) => void;
   networkType: SupportedWalletType;
-  onValidChange: (isValid: boolean) => void;
+  isValid: boolean;
+  errorMessage: string;
+  successMessage: string;
+  placeholder: string;
+  networkName: string;
   label?: string;
-  placeholder?: string;
-  hasError?: boolean;
-  errorMessage?: string;
 }
 
 export function RecipientField({
   value,
   onChange,
   networkType,
-  onValidChange,
+  isValid,
+  errorMessage,
+  successMessage,
+  placeholder,
+  networkName,
   label = "Recipient address",
-  placeholder = "Enter recipient address",
-  hasError = false,
-  errorMessage = "",
 }: RecipientFieldProps) {
   const [isFocused, setIsFocused] = useState(false);
   const [isPasting, setIsPasting] = useState(false);
-  const [isValid, setIsValid] = useState(false);
-
-  useEffect(() => {
-    validateAddress(value);
-  }, [value, networkType]);
-
-  const validateAddress = (address: string) => {
-    if (!address.trim()) {
-      setIsValid(false);
-      onValidChange(false);
-      return;
-    }
-
-    let validationResult = false;
-
-    if (networkType === WalletType.EVM) {
-      validationResult = isValidEvmAddress(address);
-    } else if (networkType === WalletType.SOLANA) {
-      validationResult = isValidSolanaAddress(address);
-    }
-
-    setIsValid(validationResult);
-    onValidChange(validationResult);
-  };
 
   const handlePaste = async () => {
     try {
@@ -72,7 +48,6 @@ export function RecipientField({
     }
   };
 
-  const networkPlaceholder = networkType === WalletType.EVM ? "0x..." : "Solana address...";
 
   return (
     <View className="mb-4">
@@ -80,7 +55,7 @@ export function RecipientField({
 
       <View
         className={`rounded-lg border ${
-          hasError
+          errorMessage
             ? "border-destructive"
             : isValid && value
             ? "border-green-500"
@@ -92,7 +67,7 @@ export function RecipientField({
           <Input
             value={value}
             onChangeText={onChange}
-            placeholder={placeholder || networkPlaceholder}
+            placeholder={placeholder}
             className="flex-1 border-0 h-14 text-base"
             autoCapitalize="none"
             autoCorrect={false}
@@ -113,38 +88,26 @@ export function RecipientField({
         </View>
       </View>
 
-      {value && isValid && (
+      {successMessage && (
         <View className="mt-2 flex-row items-center">
           <CheckCircle
             size={16}
             className="text-green-500 mr-2"
           />
           <Text className="text-sm text-muted-foreground">
-            Valid {networkType === WalletType.EVM ? "Ethereum" : "Solana"} address
+            {successMessage}
           </Text>
         </View>
       )}
 
-      {((hasError && errorMessage) || (value && !isValid)) && (
+      {errorMessage && (
         <View className="mt-2 flex-row items-center">
           <AlertCircle
             size={16}
             className="text-destructive mr-2"
           />
           <Text className="text-sm text-destructive">
-            {errorMessage || `Invalid ${networkType === WalletType.EVM ? "Ethereum" : "Solana"} address format`}
-          </Text>
-        </View>
-      )}
-
-      {((hasError && errorMessage) || (value && !isValid)) && (
-        <View className="mt-2 flex-row items-center">
-          <AlertCircle
-            size={16}
-            className="text-destructive mr-2"
-          />
-          <Text className="text-sm text-destructive">
-            {errorMessage || `Invalid ${networkType === WalletType.EVM ? "Ethereum" : "Solana"} address format`}
+            {errorMessage}
           </Text>
         </View>
       )}

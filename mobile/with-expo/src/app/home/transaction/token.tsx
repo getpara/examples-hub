@@ -6,13 +6,12 @@ import { WalletType } from "@getpara/react-native-wallet";
 import { Text } from "~/components/ui/text";
 import { Button } from "~/components/ui/button";
 import { TokenList } from "@/components/transaction/TokenList";
-import { TokenItemProps } from "@/components/transaction/TokenItem";
 import { useWallets } from "@/hooks/useWallets";
 import { useBalances } from "@/hooks/useBalances";
 import { usePrices } from "@/hooks/usePrices";
+import { useTokenFilter } from "@/hooks/useTokenFilter";
 import { formatTokenAmount } from "@/utils/formattingUtils";
-
-type TokenData = Omit<TokenItemProps, "isSelected" | "onSelect" | "disabled">;
+import { TokenData } from "@/utils/tokenUtils";
 
 export default function TokenSelectionScreen() {
   const router = useRouter();
@@ -22,7 +21,7 @@ export default function TokenSelectionScreen() {
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const tokens: TokenData[] = useMemo(() => {
+  const allTokens: TokenData[] = useMemo(() => {
     const list: TokenData[] = [];
     if (hasEvmWallets) {
       const amount = parseFloat(formatTokenAmount(totalEthBalance, 18));
@@ -55,6 +54,17 @@ export default function TokenSelectionScreen() {
     return list;
   }, [hasEvmWallets, hasSolanaWallets, totalEthBalance, totalSolBalance, prices, isBalancesLoading, isPricesLoading]);
 
+  const {
+    activeTab,
+    searchQuery,
+    filteredTokens,
+    groupedTokens,
+    hasResults,
+    emptyMessage,
+    setActiveTab,
+    setSearchQuery,
+  } = useTokenFilter(allTokens);
+
   const handleContinue = () => {
     if (!selectedId) return;
     const networkType = selectedId === "eth" ? WalletType.EVM : WalletType.SOLANA;
@@ -70,10 +80,17 @@ export default function TokenSelectionScreen() {
         <Text className="text-2xl font-bold text-foreground">Select Token</Text>
       </View>
       <TokenList
-        tokens={tokens}
         isLoading={isBalancesLoading || isPricesLoading}
         onSelectToken={setSelectedId}
         selectedTokenId={selectedId || undefined}
+        activeTab={activeTab}
+        searchQuery={searchQuery}
+        filteredTokens={filteredTokens}
+        groupedTokens={groupedTokens}
+        hasResults={hasResults}
+        emptyMessage={emptyMessage}
+        onTabChange={setActiveTab}
+        onSearchChange={setSearchQuery}
       />
       <View className="mt-6">
         <Button onPress={handleContinue} disabled={!selectedId}>

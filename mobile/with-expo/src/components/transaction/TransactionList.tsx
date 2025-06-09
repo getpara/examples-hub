@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React from "react";
 import { View, FlatList, ActivityIndicator, Pressable } from "react-native";
 import { Text } from "~/components/ui/text";
 import { Input } from "~/components/ui/input";
@@ -7,11 +7,13 @@ import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
 import { Search, SlidersHorizontal, RefreshCcw } from "@/components/icons";
 import { WalletType } from "@getpara/react-native-wallet";
-import { TransactionListItem, TransactionData, TransactionType } from "./TransactionListItem";
+import { TransactionListItem, TransactionData } from "./TransactionListItem";
+import { SortOption, FilterNetwork, FilterType } from "@/utils/transactionListUtils";
 
-type SortOption = "newest" | "oldest" | "highest" | "lowest";
-type FilterNetwork = "all" | WalletType.EVM | WalletType.SOLANA;
-type FilterType = "all" | TransactionType;
+interface SortOptionConfig {
+  label: string;
+  value: SortOption;
+}
 
 export interface TransactionListProps {
   transactions: TransactionData[];
@@ -21,6 +23,24 @@ export interface TransactionListProps {
   isRefreshing?: boolean;
   title?: string;
   showFilters?: boolean;
+  // Filter state
+  sortOption: SortOption;
+  filterNetwork: FilterNetwork;
+  filterType: FilterType;
+  searchQuery: string;
+  showFilterOptions: boolean;
+  sortOptions: SortOptionConfig[];
+  hasActiveFilters: boolean;
+  // Filter actions
+  onSortChange: (option: SortOption) => void;
+  onNetworkFilterChange: (network: FilterNetwork) => void;
+  onTypeFilterChange: (type: FilterType) => void;
+  onSearchChange: (query: string) => void;
+  onToggleFilters: () => void;
+  onResetFilters: () => void;
+  // Utilities
+  getEmptyMessage: () => string;
+  getEmptyDescription: () => string;
 }
 
 export function TransactionList({
@@ -31,70 +51,22 @@ export function TransactionList({
   isRefreshing = false,
   title = "Transaction History",
   showFilters = true,
+  sortOption,
+  filterNetwork,
+  filterType,
+  searchQuery,
+  showFilterOptions,
+  sortOptions,
+  hasActiveFilters,
+  onSortChange,
+  onNetworkFilterChange,
+  onTypeFilterChange,
+  onSearchChange,
+  onToggleFilters,
+  onResetFilters,
+  getEmptyMessage,
+  getEmptyDescription,
 }: TransactionListProps) {
-  const [sortOption, setSortOption] = useState<SortOption>("newest");
-  const [filterNetwork, setFilterNetwork] = useState<FilterNetwork>("all");
-  const [filterType, setFilterType] = useState<FilterType>("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showFilterOptions, setShowFilterOptions] = useState(false);
-
-  const filteredAndSortedTransactions = useMemo(() => {
-    let result = [...transactions];
-
-    if (filterNetwork !== "all") {
-      result = result.filter((tx) => tx.networkType === filterNetwork);
-    }
-
-    if (filterType !== "all") {
-      result = result.filter((tx) => tx.type === filterType);
-    }
-
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        (tx) =>
-          tx.counterpartyAddress.toLowerCase().includes(query) ||
-          tx.tokenName.toLowerCase().includes(query) ||
-          tx.hash.toLowerCase().includes(query) ||
-          tx.tokenTicker.toLowerCase().includes(query) ||
-          tx.counterpartyName?.toLowerCase().includes(query)
-      );
-    }
-
-    result.sort((a, b) => {
-      switch (sortOption) {
-        case "newest":
-          return b.timestamp - a.timestamp;
-        case "oldest":
-          return a.timestamp - b.timestamp;
-        case "highest": {
-          const aAmount = parseFloat(a.amount);
-          const bAmount = parseFloat(b.amount);
-          return bAmount - aAmount;
-        }
-        case "lowest": {
-          const aAmount = parseFloat(a.amount);
-          const bAmount = parseFloat(b.amount);
-          return aAmount - bAmount;
-        }
-        default:
-          return 0;
-      }
-    });
-
-    return result;
-  }, [transactions, sortOption, filterNetwork, filterType, searchQuery]);
-
-  const toggleFilterOptions = () => {
-    setShowFilterOptions(!showFilterOptions);
-  };
-
-  const resetFilters = () => {
-    setSortOption("newest");
-    setFilterNetwork("all");
-    setFilterType("all");
-    setSearchQuery("");
-  };
 
   const renderEmptyState = () => {
     if (isLoading) {
@@ -109,14 +81,14 @@ export function TransactionList({
       );
     }
 
-    if (searchQuery || filterNetwork !== "all" || filterType !== "all") {
+    if (hasActiveFilters) {
       return (
         <View className="flex-1 items-center justify-center py-10">
-          <Text className="text-center text-muted-foreground">No transactions match your filters</Text>
+          <Text className="text-center text-muted-foreground">{getEmptyMessage()}</Text>
           <Button
             variant="outline"
             className="mt-4"
-            onPress={resetFilters}>
+            onPress={onResetFilters}>
             <Text>Reset Filters</Text>
           </Button>
         </View>
@@ -125,18 +97,11 @@ export function TransactionList({
 
     return (
       <View className="flex-1 items-center justify-center py-10">
-        <Text className="text-center text-lg font-medium text-foreground mb-2">No transactions yet</Text>
-        <Text className="text-center text-muted-foreground mb-6">Your transaction history will appear here</Text>
+        <Text className="text-center text-lg font-medium text-foreground mb-2">{getEmptyMessage()}</Text>
+        <Text className="text-center text-muted-foreground mb-6">{getEmptyDescription()}</Text>
       </View>
     );
   };
-
-  const sortOptions = [
-    { label: "Newest first", value: "newest" },
-    { label: "Oldest first", value: "oldest" },
-    { label: "Highest amount", value: "highest" },
-    { label: "Lowest amount", value: "lowest" },
-  ];
 
   return (
     <View className="flex-1">
@@ -163,7 +128,7 @@ export function TransactionList({
               placeholder="Search transactions"
               className="pl-10 pr-4"
               value={searchQuery}
-              onChangeText={setSearchQuery}
+              onChangeText={onSearchChange}
             />
             <View className="absolute left-3 top-3">
               <Search
@@ -175,14 +140,14 @@ export function TransactionList({
 
           <View className="flex-row justify-between items-center mt-2">
             <Text className="text-sm text-muted-foreground">
-              {filteredAndSortedTransactions.length}{" "}
-              {filteredAndSortedTransactions.length === 1 ? "transaction" : "transactions"}
+              {transactions.length}{" "}
+              {transactions.length === 1 ? "transaction" : "transactions"}
             </Text>
 
             <Button
               variant="ghost"
               size="sm"
-              onPress={toggleFilterOptions}
+              onPress={onToggleFilters}
               className="h-8 px-2">
               <SlidersHorizontal
                 size={18}
@@ -198,7 +163,7 @@ export function TransactionList({
                 <Text className="text-sm font-medium text-foreground mb-2">Network</Text>
                 <Tabs
                   value={filterNetwork}
-                  onValueChange={(value) => setFilterNetwork(value as FilterNetwork)}
+                  onValueChange={(value) => onNetworkFilterChange(value as FilterNetwork)}
                   className="w-full">
                   <TabsList className="w-full h-9 bg-muted">
                     <TabsTrigger
@@ -224,7 +189,7 @@ export function TransactionList({
                 <Text className="text-sm font-medium text-foreground mb-2">Type</Text>
                 <Tabs
                   value={filterType}
-                  onValueChange={(value) => setFilterType(value as FilterType)}
+                  onValueChange={(value) => onTypeFilterChange(value as FilterType)}
                   className="w-full">
                   <TabsList className="w-full h-9 bg-muted">
                     <TabsTrigger
@@ -257,7 +222,7 @@ export function TransactionList({
                   {sortOptions.map((option) => (
                     <Pressable
                       key={option.value}
-                      onPress={() => setSortOption(option.value as SortOption)}
+                      onPress={() => onSortChange(option.value)}
                       className={`flex-row items-center justify-between p-3 rounded-md ${
                         sortOption === option.value
                           ? "bg-primary/10 border border-primary"
@@ -284,7 +249,7 @@ export function TransactionList({
               <Button
                 variant="outline"
                 className="w-full"
-                onPress={resetFilters}>
+                onPress={onResetFilters}>
                 <Text>Reset Filters</Text>
               </Button>
             </View>
@@ -293,7 +258,7 @@ export function TransactionList({
       )}
 
       <FlatList
-        data={filteredAndSortedTransactions}
+        data={transactions}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <TransactionListItem
@@ -304,7 +269,7 @@ export function TransactionList({
         ListEmptyComponent={renderEmptyState()}
         onRefresh={onRefresh}
         refreshing={isRefreshing}
-        contentContainerStyle={filteredAndSortedTransactions.length === 0 ? { flexGrow: 1 } : {}}
+        contentContainerStyle={transactions.length === 0 ? { flexGrow: 1 } : {}}
       />
     </View>
   );

@@ -1,82 +1,42 @@
-import React, { useState, useMemo } from "react";
+import React from "react";
 import { View, ScrollView, Image, ActivityIndicator } from "react-native";
 import { Text } from "~/components/ui/text";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { TokenItem, TokenItemProps } from "@/components/transaction/TokenItem";
+import { TokenItem } from "@/components/transaction/TokenItem";
 import { WalletType } from "@getpara/react-native-wallet";
 import { Input } from "~/components/ui/input";
 import { Search } from "lucide-react-native";
 import { SUPPORTED_WALLET_TYPES, SupportedWalletType } from "@/types";
+import { TokenData, getNetworkName, getNetworkIcon } from "@/utils/tokenUtils";
 
-type TokenData = Omit<TokenItemProps, "isSelected" | "onSelect" | "disabled">;
 
 interface TokenListProps {
-  tokens: TokenData[];
   isLoading: boolean;
   onSelectToken: (tokenId: string) => void;
   selectedTokenId?: string;
+  activeTab: "all" | SupportedWalletType;
+  searchQuery: string;
+  filteredTokens: TokenData[];
+  groupedTokens: Record<SupportedWalletType, TokenData[]>;
+  hasResults: boolean;
+  emptyMessage: string;
+  onTabChange: (value: "all" | SupportedWalletType) => void;
+  onSearchChange: (value: string) => void;
 }
 
-export function TokenList({ tokens, isLoading, onSelectToken, selectedTokenId }: TokenListProps) {
-  const [activeTab, setActiveTab] = useState<"all" | SupportedWalletType>("all");
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const filteredTokens = useMemo(() => {
-    let result = tokens;
-
-    // Filter by network type
-    if (activeTab !== "all") {
-      result = result.filter((token) => token.networkType === activeTab);
-    }
-
-    // Filter by search query
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        (token) => token.name.toLowerCase().includes(query) || token.ticker.toLowerCase().includes(query)
-      );
-    }
-
-    return result;
-  }, [tokens, activeTab, searchQuery]);
-
-  // Group tokens by network type
-  const groupedTokens = useMemo(() => {
-    const groups: Record<SupportedWalletType, TokenData[]> = {
-      [WalletType.EVM]: [],
-      [WalletType.SOLANA]: [],
-    };
-
-    filteredTokens.forEach((token) => {
-      if (SUPPORTED_WALLET_TYPES.includes(token.networkType)) {
-        groups[token.networkType].push(token);
-      }
-    });
-
-    return groups;
-  }, [filteredTokens]);
-
-  const getNetworkName = (networkType: SupportedWalletType): string => {
-    switch (networkType) {
-      case WalletType.EVM:
-        return "Ethereum";
-      case WalletType.SOLANA:
-        return "Solana";
-      default:
-        return "Unknown Network";
-    }
-  };
-
-  const getNetworkIcon = (networkType: SupportedWalletType) => {
-    switch (networkType) {
-      case WalletType.EVM:
-        return require("~/assets/ethereum.png");
-      case WalletType.SOLANA:
-        return require("~/assets/solana.png");
-      default:
-        return null;
-    }
-  };
+export function TokenList({
+  isLoading,
+  onSelectToken,
+  selectedTokenId,
+  activeTab,
+  searchQuery,
+  filteredTokens,
+  groupedTokens,
+  hasResults,
+  emptyMessage,
+  onTabChange,
+  onSearchChange,
+}: TokenListProps) {
 
   const renderTokenGroup = (networkType: SupportedWalletType, tokens: TokenData[]) => {
     if (!tokens.length) return null;
@@ -119,7 +79,7 @@ export function TokenList({ tokens, isLoading, onSelectToken, selectedTokenId }:
             placeholder="Search tokens"
             className="pl-10 pr-4"
             value={searchQuery}
-            onChangeText={setSearchQuery}
+            onChangeText={onSearchChange}
           />
           <View className="absolute left-3 top-3">
             <Search
@@ -132,7 +92,7 @@ export function TokenList({ tokens, isLoading, onSelectToken, selectedTokenId }:
 
       <Tabs
         value={activeTab}
-        onValueChange={(value) => setActiveTab(value as typeof activeTab)}
+        onValueChange={(value) => onTabChange(value as "all" | SupportedWalletType)}
         className="w-full mb-4">
         <TabsList className="w-full h-auto bg-card border border-border p-1 rounded-lg">
           <TabsTrigger
@@ -161,14 +121,10 @@ export function TokenList({ tokens, isLoading, onSelectToken, selectedTokenId }:
           />
           <Text className="mt-2 text-center text-muted-foreground">Loading tokens...</Text>
         </View>
-      ) : filteredTokens.length === 0 ? (
+      ) : !hasResults ? (
         <View className="flex-1 justify-center items-center">
           <Text className="text-center text-muted-foreground">
-            {searchQuery
-              ? "No tokens match your search"
-              : activeTab === "all"
-              ? "No tokens available"
-              : `No ${getNetworkName(activeTab)} tokens available`}
+            {emptyMessage}
           </Text>
         </View>
       ) : (

@@ -6,118 +6,38 @@ import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
 import { CountryCodeDropdown } from "./CountryCodeDropdown";
 import { AuthType, CountryOption } from "@/types";
-import {
-  formatPhoneNumberWithCountryCode,
-  validateEmail,
-  validatePhoneNumber,
-  determineInputType,
-} from "@/utils/loginIdentifierUtils";
 
 interface LoginIdentifierInputProps {
+  displayValue: string;
   inputType: AuthType;
-  onInputTypeChange: (type: AuthType) => void;
-  onSubmit: () => void;
-  email: string;
-  phoneNumber: string;
   countryCode: string;
   error: string;
-  onEmailChange: (value: string) => void;
-  onPhoneNumberChange: (value: string) => void;
+  isValid: boolean;
+  showHelperText: boolean;
+  onChange: (value: string) => void;
+  onSubmit: () => void;
+  onCountryCodeChange: (value: string) => void;
   countryOptions: CountryOption[];
-  onCountryCodeChange?: (value: string) => void;
-  onValidate?: (error: string) => void;
   placeholder?: string;
   label?: string;
   isLoading?: boolean;
 }
 
 export function LoginIdentifierInput({
+  displayValue,
   inputType,
-  onInputTypeChange,
+  countryCode,
+  error,
+  isValid,
+  showHelperText,
+  onChange,
   onSubmit,
-  onEmailChange,
-  onPhoneNumberChange,
-  email = "",
-  phoneNumber = "",
-  countryCode = "+1",
-  error = "",
-  countryOptions,
   onCountryCodeChange,
-  onValidate,
+  countryOptions,
   placeholder = "Enter email or phone number",
   label = "Email or phone number",
   isLoading = false,
 }: LoginIdentifierInputProps) {
-  const displayValue = inputType === "email" ? email : formatPhoneNumberWithCountryCode(phoneNumber, countryCode);
-
-  const handleChange = (newValue: string) => {
-    if (newValue.length < displayValue.length) {
-      handleBackspace(newValue);
-      return;
-    }
-
-    const newChar = newValue.charAt(newValue.length - 1);
-
-    const detectedType = determineInputType(newValue);
-    if (detectedType !== inputType && detectedType !== "") {
-      onInputTypeChange(detectedType);
-
-      if (detectedType === "email") {
-        onEmailChange(newValue);
-      } else if (detectedType === "phone") {
-        const digitsOnly = (phoneNumber + newChar).replace(/\D/g, "");
-        onPhoneNumberChange(digitsOnly);
-      }
-    } else {
-      if (inputType === "phone") {
-        if (/\d/.test(newChar)) {
-          const updatedRaw = phoneNumber + newChar;
-          onPhoneNumberChange(updatedRaw);
-        }
-      } else {
-        onEmailChange(newValue);
-      }
-    }
-  };
-
-  const handleBackspace = (newValue: string) => {
-    if (inputType === "phone") {
-      const newRaw = phoneNumber.slice(0, -1);
-
-      if (newRaw.length === 0) {
-        onPhoneNumberChange("");
-        onInputTypeChange("email");
-        return;
-      }
-
-      onPhoneNumberChange(newRaw);
-    } else {
-      onEmailChange(newValue);
-    }
-  };
-
-  const handleSubmit = () => {
-    let validationError = "";
-    if (inputType === "email") {
-      validationError = validateEmail(email);
-    } else if (inputType === "phone") {
-      validationError = validatePhoneNumber(phoneNumber, countryCode);
-    } else {
-      validationError = "Could not determine input type. Please enter a valid email or phone.";
-    }
-    if (onValidate) {
-      onValidate(validationError);
-    }
-    if (!validationError) {
-      onSubmit();
-    }
-  };
-
-  const handleCountryCodeChange = (code: string) => {
-    onCountryCodeChange?.(code);
-  };
-
-  const showHelperText = displayValue.trim() !== "" && inputType !== undefined && !error;
 
   return (
     <View className="gap-y-2">
@@ -136,7 +56,7 @@ export function LoginIdentifierInput({
           ) : inputType === "phone" ? (
             <CountryCodeDropdown
               value={countryCode}
-              onChange={handleCountryCodeChange}
+              onChange={onCountryCodeChange}
               countryOptions={countryOptions}
             />
           ) : null}
@@ -144,7 +64,7 @@ export function LoginIdentifierInput({
 
         <Input
           value={displayValue}
-          onChangeText={handleChange}
+          onChangeText={onChange}
           placeholder={placeholder}
           keyboardType={inputType === "phone" ? "phone-pad" : "default"}
           autoCapitalize="none"
@@ -157,9 +77,9 @@ export function LoginIdentifierInput({
           <Button
             size="icon"
             variant="default"
-            onPress={handleSubmit}
+            onPress={onSubmit}
             accessibilityLabel="Continue"
-            disabled={isLoading || displayValue.trim() === ""}
+            disabled={isLoading || !isValid}
             className="flex h-10 w-10 items-center justify-center rounded-md bg-primary p-0">
             <ChevronRight
               size={20}
