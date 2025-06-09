@@ -43,3 +43,5 @@ app-example
 .env.development
 .env.test
 .env.production
+
+CLAUDE.md

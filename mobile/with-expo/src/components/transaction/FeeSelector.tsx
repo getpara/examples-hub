@@ -5,9 +5,7 @@ import { Card, CardContent } from "~/components/ui/card";
 import { WalletType } from "@getpara/react-native-wallet";
 import { formatUsdValue } from "@/utils/formattingUtils";
 import { Zap, Clock, Coins } from "@/components/icons";
-
-export type FeeTier = "slow" | "average" | "fast";
-export type PriorityLevel = "none" | "low" | "medium" | "high";
+import { FeeTier, PriorityLevel, PriorityFeeOption, PRIORITY_FEE_OPTIONS } from "@/utils/feeUtils";
 
 export interface EvmFeeOption {
   tier: FeeTier;
@@ -25,13 +23,6 @@ export interface SolanaFeeOption {
   feeInUsd: number | null;
 }
 
-interface PriorityFeeOption {
-  level: PriorityLevel;
-  value: number;
-  label: string;
-  description: string;
-}
-
 export interface FeeSelectorProps {
   networkType: WalletType;
   gasLimit?: string;
@@ -42,6 +33,11 @@ export interface FeeSelectorProps {
   onFeeTierChange: (tier: FeeTier) => void;
   priorityFeeLevel?: PriorityLevel;
   onPriorityLevelChange?: (level: PriorityLevel, fee: number) => void;
+  // Calculated values from useFeeCalculation hook
+  selectedPriorityFee?: number;
+  totalSolanaFee?: string | null;
+  totalSolanaFeeUsd?: number | null;
+  priorityFeeOptions?: PriorityFeeOption[];
 }
 
 export function FeeSelector({
@@ -53,33 +49,11 @@ export function FeeSelector({
   onFeeTierChange,
   priorityFeeLevel = "none",
   onPriorityLevelChange,
+  selectedPriorityFee = 0,
+  totalSolanaFee = null,
+  totalSolanaFeeUsd = null,
+  priorityFeeOptions = PRIORITY_FEE_OPTIONS,
 }: FeeSelectorProps) {
-  const priorityFeeOptions: PriorityFeeOption[] = [
-    {
-      level: "none",
-      value: 0,
-      label: "Standard",
-      description: "No priority fee",
-    },
-    {
-      level: "low",
-      value: 10000,
-      label: "Low Priority",
-      description: "Slightly faster processing",
-    },
-    {
-      level: "medium",
-      value: 50000,
-      label: "Medium Priority",
-      description: "Faster processing",
-    },
-    {
-      level: "high",
-      value: 100000,
-      label: "High Priority",
-      description: "Fastest processing",
-    },
-  ];
 
   // Render EVM fee options
   const renderEvmFeeOptions = () => {
@@ -145,28 +119,6 @@ export function FeeSelector({
   const renderSolanaFeeOption = () => {
     if (!solanaFeeOption) return null;
 
-    const getSelectedPriorityFee = () => {
-      const option = priorityFeeOptions.find((o) => o.level === priorityFeeLevel);
-      return option ? option.value : 0;
-    };
-
-    const calculateTotalFee = () => {
-      const baseFee = solanaFeeOption.baseFee;
-      const priorityFee = getSelectedPriorityFee();
-      const totalLamports = baseFee + priorityFee;
-      return (totalLamports / 1_000_000_000).toFixed(9);
-    };
-
-    const calculateTotalFeeUsd = () => {
-      if (solanaFeeOption.feeInUsd === null || tokenPriceUsd === null) return null;
-
-      const priorityFee = getSelectedPriorityFee();
-      const priorityFeeInSol = priorityFee / 1_000_000_000;
-      const priorityFeeUsd = priorityFeeInSol * tokenPriceUsd;
-
-      return solanaFeeOption.feeInUsd + priorityFeeUsd;
-    };
-
     return (
       <Card className="border border-border">
         <CardContent className="p-4">
@@ -216,10 +168,10 @@ export function FeeSelector({
           <View className="flex-row justify-between pt-3 border-t border-border">
             <Text className="text-sm font-medium">Total Fee</Text>
             <View className="items-end">
-              <Text className="text-sm font-medium">{calculateTotalFee()} SOL</Text>
-              {calculateTotalFeeUsd() !== null && (
+              <Text className="text-sm font-medium">{totalSolanaFee || "0.000000000"} SOL</Text>
+              {totalSolanaFeeUsd !== null && (
                 <Text className="text-xs text-muted-foreground">
-                  {formatUsdValue(calculateTotalFeeUsd() as number)}
+                  {formatUsdValue(totalSolanaFeeUsd)}
                 </Text>
               )}
             </View>

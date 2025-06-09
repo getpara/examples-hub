@@ -1,15 +1,9 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { WalletType } from "@getpara/react-native-wallet";
-import {
-  validateAmount,
-  convertUsdToCrypto,
-  convertCryptoToUsd,
-  getDecimalPrecision,
-} from "@/utils/amountUtils";
+import { validateAmount, convertUsdToCrypto, convertCryptoToUsd } from "@/utils/amountUtils";
 
 interface UseAmountInputProps {
   tokenTicker: string;
-  tokenDecimals: number;
   availableBalance: number;
   usdPrice: number | null;
   networkType: WalletType;
@@ -18,7 +12,6 @@ interface UseAmountInputProps {
 
 export function useAmountInput({
   tokenTicker,
-  tokenDecimals,
   availableBalance,
   usdPrice,
   networkType,
@@ -29,13 +22,11 @@ export function useAmountInput({
   const [isUsdMode, setIsUsdMode] = useState(false);
   const [error, setError] = useState("");
 
-  // Validate amount whenever it changes
   useEffect(() => {
     const validationError = validateAmount(amount, availableBalance, tokenTicker, networkType);
     setError(validationError);
   }, [amount, availableBalance, tokenTicker, networkType]);
 
-  // Calculate USD value when crypto amount changes
   useEffect(() => {
     if (!isUsdMode && amount && usdPrice && usdPrice > 0) {
       const numAmount = parseFloat(amount);
@@ -45,37 +36,35 @@ export function useAmountInput({
     }
   }, [amount, usdPrice, isUsdMode]);
 
-  // Toggle between USD and crypto modes
   const toggleMode = useCallback(() => {
     setIsUsdMode((prev) => !prev);
   }, []);
 
-  // Handle USD input changes
-  const handleUsdChange = useCallback((newUsdValue: string) => {
-    setUsdValue(newUsdValue);
+  const handleUsdChange = useCallback(
+    (newUsdValue: string) => {
+      setUsdValue(newUsdValue);
 
-    if (newUsdValue && usdPrice && usdPrice > 0) {
-      const numValue = parseFloat(newUsdValue);
-      if (!isNaN(numValue)) {
-        setAmount(convertUsdToCrypto(numValue, usdPrice, networkType));
+      if (newUsdValue && usdPrice && usdPrice > 0) {
+        const numValue = parseFloat(newUsdValue);
+        if (!isNaN(numValue)) {
+          setAmount(convertUsdToCrypto(numValue, usdPrice, networkType));
+        }
+      } else {
+        setAmount("");
       }
-    } else {
-      setAmount("");
-    }
-  }, [usdPrice, networkType]);
+    },
+    [usdPrice, networkType]
+  );
 
-  // Handle crypto amount changes
   const handleAmountChange = useCallback((newAmount: string) => {
     setAmount(newAmount);
   }, []);
 
-  // Set maximum amount
   const setMaxAmount = useCallback(() => {
     const max = maxAmount !== undefined ? maxAmount : availableBalance;
     setAmount(max.toString());
   }, [maxAmount, availableBalance]);
 
-  // Get formatted conversion display
   const conversionDisplay = useMemo(() => {
     if (!usdPrice || usdPrice <= 0 || (!amount && !usdValue)) return "";
 
@@ -92,18 +81,15 @@ export function useAmountInput({
     }
   }, [amount, usdValue, isUsdMode, usdPrice, tokenTicker, networkType]);
 
-  // Check if current amount is valid
   const isValid = useMemo(() => {
     return !error && amount !== "";
   }, [error, amount]);
 
-  // Get numeric USD value
   const numericUsdValue = useMemo(() => {
     return usdValue ? parseFloat(usdValue) : null;
   }, [usdValue]);
 
   return {
-    // State
     amount,
     usdValue,
     isUsdMode,
@@ -111,8 +97,6 @@ export function useAmountInput({
     isValid,
     conversionDisplay,
     numericUsdValue,
-
-    // Actions
     handleAmountChange: isUsdMode ? handleUsdChange : handleAmountChange,
     toggleMode,
     setMaxAmount,

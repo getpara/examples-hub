@@ -1,9 +1,14 @@
 import { useQueries } from "@tanstack/react-query";
-import { ethers } from "ethers";
-import { PublicKey } from "@solana/web3.js";
 import { WalletType } from "@getpara/react-native-wallet";
-import { useWallets, SUPPORTED_WALLET_TYPES } from "./useWallets";
+import { useWallets } from "./useWallets";
 import { useSigners } from "./useSigners";
+import { SUPPORTED_WALLET_TYPES } from "@/types";
+import {
+  fetchEvmWalletBalance,
+  fetchSolanaWalletBalance,
+  calculateTotalEvmBalance,
+  calculateTotalSolanaBalance,
+} from "@/utils/balanceUtils";
 
 export interface TokenBalance {
   amount: string;
@@ -68,71 +73,36 @@ export const useBalances = () => {
 
         if (walletType === WalletType.EVM && ethereumProvider) {
           const results = await Promise.all(
-            walletsForType.map(async (wallet) => {
-              if (!wallet.address) return [wallet.id, null];
-
-              try {
-                const balance = await ethereumProvider.getBalance(wallet.address);
-                return [
-                  wallet.id,
-                  {
-                    amount: balance.toString(),
-                    symbol: config.symbol,
-                    decimals: config.decimals,
-                  },
-                ];
-              } catch (error) {
-                console.error(`Error fetching ${config.symbol} balance for ${wallet.address}:`, error);
-                return [
-                  wallet.id,
-                  {
-                    amount: "0",
-                    symbol: config.symbol,
-                    decimals: config.decimals,
-                  },
-                ];
-              }
-            })
+            walletsForType.map((wallet) =>
+              fetchEvmWalletBalance(
+                { ...wallet, address: wallet.address ?? null },
+                ethereumProvider,
+                config.symbol,
+                config.decimals
+              )
+            )
           );
 
-          for (const [id, balance] of results) {
-            if (balance) {
-              balances[id as string] = balance as TokenBalance;
+          for (const result of results) {
+            if (result.balance) {
+              balances[result.walletId] = result.balance;
             }
           }
         } else if (walletType === WalletType.SOLANA && solanaConnection) {
           const results = await Promise.all(
-            walletsForType.map(async (wallet) => {
-              if (!wallet.address) return [wallet.id, null];
-
-              try {
-                const publicKey = new PublicKey(wallet.address);
-                const balance = await solanaConnection.getBalance(publicKey);
-                return [
-                  wallet.id,
-                  {
-                    amount: balance.toString(),
-                    symbol: config.symbol,
-                    decimals: config.decimals,
-                  },
-                ];
-              } catch (error) {
-                console.error(`Error fetching ${config.symbol} balance for ${wallet.address}:`, error);
-                return [
-                  wallet.id,
-                  {
-                    amount: "0",
-                    symbol: config.symbol,
-                    decimals: config.decimals,
-                  },
-                ];
-              }
-            })
+            walletsForType.map((wallet) =>
+              fetchSolanaWalletBalance(
+                { ...wallet, address: wallet.address ?? null },
+                solanaConnection,
+                config.symbol,
+                config.decimals
+              )
+            )
           );
 
-          for (const [id, balance] of results) {
-            if (balance) {
-              balances[id as string] = balance as TokenBalance;
+          for (const result of results) {
+            if (result.balance) {
+              balances[result.walletId] = result.balance;
             }
           }
         }
@@ -190,30 +160,8 @@ export const useBalances = () => {
     return balances[walletType][walletId] || null;
   };
 
-  const calculateTotalEthBalance = (): string => {
-    let total = ethers.toBigInt(0);
-    const ethBalances = balances[WalletType.EVM];
-
-    for (const walletId in ethBalances) {
-      total += ethers.toBigInt(ethBalances[walletId].amount);
-    }
-
-    return total.toString();
-  };
-
-  const calculateTotalSolBalance = (): string => {
-    let total = BigInt(0);
-    const solBalances = balances[WalletType.SOLANA];
-
-    for (const walletId in solBalances) {
-      total += BigInt(solBalances[walletId].amount);
-    }
-
-    return total.toString();
-  };
-
-  const totalEthBalance = calculateTotalEthBalance();
-  const totalSolBalance = calculateTotalSolBalance();
+  const totalEthBalance = calculateTotalEvmBalance(balances[WalletType.EVM]);
+  const totalSolBalance = calculateTotalSolanaBalance(balances[WalletType.SOLANA]);
 
   const hasBalances = SUPPORTED_WALLET_TYPES.some((type) => Object.keys(balances[type]).length > 0);
 

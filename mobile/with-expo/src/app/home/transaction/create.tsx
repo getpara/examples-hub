@@ -42,7 +42,6 @@ export default function TransactionCreationScreen() {
   // Use hooks for form management
   const amountInput = useAmountInput({
     tokenTicker: ticker,
-    tokenDecimals: decimals,
     availableBalance,
     usdPrice,
     networkType: net,
