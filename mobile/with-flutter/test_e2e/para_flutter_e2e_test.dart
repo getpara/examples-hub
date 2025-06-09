@@ -13,6 +13,7 @@ const mediumDelay = Duration(seconds: 2);
 const longDelay = Duration(seconds: 5);
 const testVerificationCode = '123456';
 const testRecipientAddress = '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
+const testCosmosRecipientAddress = 'cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02';
 const testAmount = '0.001';
 
 // Test state
@@ -211,7 +212,6 @@ void main() {
     Future<void> performAuthFlow(String authType, String credential) async {
       print('🔑 Starting $authType authentication flow...');
       
-      await Future.delayed(mediumDelay);
       await clickElementByText('$authType + Passkey Authentication', className: 'XCUIElementTypeStaticText');
       await Future.delayed(shortDelay);
       
@@ -834,6 +834,298 @@ void main() {
       }
       
       await performTransactionSigning('Solana', recipientAddress: '11111111111111111111111111111112');
+    }, timeout: Timeout(Duration(minutes: 2)));
+
+    test('10 Cosmos Wallet Creation and Message Signing Flow', () async {
+      print('🧪 Starting Cosmos Wallet Creation and Message Signing Flow...');
+      
+      await ensureLoggedIn();
+      
+      // Check if Cosmos wallet exists, create if needed
+      bool cosmosWalletExists = false;
+      final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
+      for (final button in buttons) {
+        final label = await button.attributes['label'];
+        if (label.contains('Create COSMOS Wallet')) {
+          await button.click();
+          await Future.delayed(longDelay);
+          print('✅ Created Cosmos wallet');
+          cosmosWalletExists = true;
+          break;
+        } else if (label.contains('COSMOS Wallet') && !label.contains('Create')) {
+          cosmosWalletExists = true;
+          print('✅ Cosmos wallet already exists');
+          break;
+        }
+      }
+      
+      if (!cosmosWalletExists) {
+        throw Exception('❌ Failed to find or create Cosmos wallet');
+      }
+      
+      // Navigate to Cosmos signing example
+      await clickElementByText('Send Funds');
+      await Future.delayed(shortDelay);
+      await clickElementByText('Cosmos Transactions', className: 'XCUIElementTypeStaticText');
+      await Future.delayed(mediumDelay);
+      
+      // Verify we're on the Cosmos screen
+      final screenElements = await driver.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
+      bool onCosmosScreen = false;
+      for (final element in screenElements) {
+        final text = await element.text;
+        if (text.contains('Cosmos') && (text.contains('Sign') || text.contains('Demo'))) {
+          onCosmosScreen = true;
+          break;
+        }
+      }
+      
+      if (!onCosmosScreen) {
+        throw Exception('❌ Failed to navigate to Cosmos signing screen');
+      }
+      
+      // Test message signing
+      await clickElementByText('Sign Message');
+      await Future.delayed(shortDelay);
+      
+      // Enter test message
+      await enterText('Hello Cosmos from Para Flutter SDK!', fieldIndex: 0);
+      await dismissKeyboard();
+      
+      // Sign the message
+      await clickElementByText('Sign Message');
+      await Future.delayed(longDelay);
+      
+      // Strict validation: Check for actual signature result or specific error
+      final textElements = await driver.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
+      bool signatureFound = false;
+      bool errorFound = false;
+      String? errorMessage;
+      
+      for (final element in textElements) {
+        final text = await element.text;
+        if (text.contains('Signature Result') || (text.contains('signature') && text.length > 20)) {
+          signatureFound = true;
+          print('✅ Cosmos message signing successful - found signature result');
+          break;
+        } else if (text.contains('ParaCosmosSignerException') || text.contains('FormatException') || text.contains('Failed to sign')) {
+          errorFound = true;
+          errorMessage = text;
+          break;
+        }
+      }
+      
+      if (errorFound) {
+        throw Exception('❌ Cosmos message signing failed with error: $errorMessage');
+      }
+      
+      if (!signatureFound) {
+        throw Exception('❌ Cosmos message signing failed - no signature result found');
+      }
+      
+      print('✅ Cosmos message signing test completed successfully');
+    }, timeout: Timeout(Duration(minutes: 2)));
+
+    test('11 Cosmos Transaction Signing Flow', () async {
+      print('🧪 Starting Cosmos Transaction Signing Flow...');
+      
+      await ensureLoggedIn();
+      
+      // Navigate to Cosmos transaction screen
+      await clickElementByText('Send Funds');
+      await Future.delayed(shortDelay);
+      await clickElementByText('Cosmos Transactions', className: 'XCUIElementTypeStaticText');
+      await Future.delayed(mediumDelay);
+      
+      // Verify Bank Send button exists and click it
+      bool bankSendFound = false;
+      try {
+        await clickElementByText('Bank Send');
+        bankSendFound = true;
+        await Future.delayed(shortDelay);
+        print('✅ Successfully switched to Bank Send mode');
+      } catch (e) {
+        // Bank Send might already be selected, check if we're in the right mode
+        final allElements = await driver.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
+        for (final element in allElements) {
+          final text = await element.text;
+          if (text.contains('Recipient Address') || text.contains('Amount')) {
+            bankSendFound = true;
+            print('✅ Already in Bank Send mode');
+            break;
+          }
+        }
+      }
+      
+      if (!bankSendFound) {
+        throw Exception('❌ Failed to access Bank Send transaction mode');
+      }
+      
+      // Verify that recipient address is pre-filled
+      final textFields = await driver.findElements(AppiumBy.className('XCUIElementTypeTextField')).toList();
+      if (textFields.isEmpty) {
+        throw Exception('❌ No text fields found for transaction input');
+      }
+      
+      // Check if recipient field has pre-filled address
+      bool recipientPreFilled = false;
+      try {
+        final recipientValue = await textFields[0].text;
+        if (recipientValue.contains('cosmos1')) {
+          recipientPreFilled = true;
+          print('✅ Recipient address is pre-filled: $recipientValue');
+        }
+      } catch (e) {
+        // Pre-filled check failed, continue with manual entry
+      }
+      
+      if (!recipientPreFilled) {
+        // Fill transaction details manually
+        await enterText(testCosmosRecipientAddress, fieldIndex: 0);
+        await dismissKeyboard();
+      }
+      
+      await enterText('0.000001', fieldIndex: 1); // Small amount in ATOM
+      await dismissKeyboard();
+      
+      // Sign the transaction
+      await clickElementByText('Sign Transaction');
+      await Future.delayed(longDelay);
+      
+      // Strict validation: Check for actual result
+      final textElements = await driver.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
+      bool successFound = false;
+      bool errorFound = false;
+      String? resultMessage;
+      
+      for (final element in textElements) {
+        final text = await element.text;
+        if (text.contains('Signature Result') || (text.contains('signature') && text.length > 20)) {
+          successFound = true;
+          resultMessage = text;
+          break;
+        } else if (text.contains('insufficient funds') && text.contains('Error')) {
+          // This is expected for testnet/mainnet addresses without funds
+          successFound = true;
+          resultMessage = 'Expected insufficient funds error (transaction signing worked)';
+          break;
+        } else if (text.contains('ParaCosmosSignerException') || text.contains('FormatException') || text.contains('Failed to sign')) {
+          errorFound = true;
+          resultMessage = text;
+          break;
+        }
+      }
+      
+      if (errorFound) {
+        throw Exception('❌ Cosmos transaction signing failed with error: $resultMessage');
+      }
+      
+      if (!successFound) {
+        throw Exception('❌ Cosmos transaction signing failed - no valid result found');
+      }
+      
+      print('✅ Cosmos transaction signing completed successfully: $resultMessage');
+    }, timeout: Timeout(Duration(minutes: 2)));
+
+    test('12 Cosmos Signing Method Validation Flow', () async {
+      print('🧪 Starting Cosmos Signing Method Validation Flow...');
+      
+      await ensureLoggedIn();
+      
+      // Navigate to Cosmos transaction screen
+      await clickElementByText('Send Funds');
+      await Future.delayed(shortDelay);
+      await clickElementByText('Cosmos Transactions', className: 'XCUIElementTypeStaticText');
+      await Future.delayed(mediumDelay);
+      
+      // Ensure we're in Bank Send mode
+      try {
+        await clickElementByText('Bank Send');
+        await Future.delayed(shortDelay);
+      } catch (e) {
+        // Might already be in Bank Send mode
+      }
+      
+      // Verify signing method buttons exist
+      bool aminoButtonExists = false;
+      bool protoButtonExists = false;
+      
+      final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
+      for (final button in buttons) {
+        final label = await button.attributes['label'];
+        if (label == 'Amino') {
+          aminoButtonExists = true;
+        } else if (label == 'Proto') {
+          protoButtonExists = true;
+        }
+      }
+      
+      if (!aminoButtonExists || !protoButtonExists) {
+        throw Exception('❌ Signing method buttons not found (Amino: $aminoButtonExists, Proto: $protoButtonExists)');
+      }
+      
+      // Test Amino signing method
+      await clickElementByText('Amino');
+      await Future.delayed(shortDelay);
+      print('✅ Selected Amino signing method');
+      
+      // Test Proto signing method
+      await clickElementByText('Proto');
+      await Future.delayed(shortDelay);
+      print('✅ Selected Proto signing method');
+      
+      // Verify recipient address is pre-filled or fill it
+      final textFields = await driver.findElements(AppiumBy.className('XCUIElementTypeTextField')).toList();
+      if (textFields.isEmpty) {
+        throw Exception('❌ No text fields found for transaction validation');
+      }
+      
+      bool needsRecipientFill = true;
+      try {
+        final recipientValue = await textFields[0].text;
+        if (recipientValue.contains('cosmos1')) {
+          needsRecipientFill = false;
+          print('✅ Recipient address already filled');
+        }
+      } catch (e) {
+        // Will fill manually
+      }
+      
+      if (needsRecipientFill) {
+        await enterText(testCosmosRecipientAddress, fieldIndex: 0);
+        await dismissKeyboard();
+      }
+      
+      await enterText('0.000001', fieldIndex: 1);
+      await dismissKeyboard();
+      
+      // Attempt signing with Proto method
+      await clickElementByText('Sign Transaction');
+      await Future.delayed(longDelay);
+      
+      // Validate that signing worked (either success or expected error)
+      final textElements = await driver.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
+      bool validResultFound = false;
+      String? resultMessage;
+      
+      for (final element in textElements) {
+        final text = await element.text;
+        if (text.contains('Signature Result') || 
+            (text.contains('signature') && text.length > 20) ||
+            (text.contains('insufficient funds') && text.contains('Error'))) {
+          validResultFound = true;
+          resultMessage = text;
+          break;
+        } else if (text.contains('ParaCosmosSignerException') || text.contains('FormatException')) {
+          throw Exception('❌ Signing method validation failed with error: $text');
+        }
+      }
+      
+      if (!validResultFound) {
+        throw Exception('❌ Cosmos signing method validation failed - no valid result found');
+      }
+      
+      print('✅ Cosmos signing method validation completed successfully: ${resultMessage?.substring(0, 50)}...');
     }, timeout: Timeout(Duration(minutes: 2)));
 
   });

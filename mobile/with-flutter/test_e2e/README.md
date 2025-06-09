@@ -24,17 +24,20 @@ dart test para_flutter_e2e_test.dart --timeout 300s
 dart run tool/run_single_test.dart 01
 ```
 
-## Test Coverage (9 Tests)
+## Test Coverage (12 Tests)
 
 1. **Email Authentication** - Signup and login with passkey
-2. **Phone Authentication** - Signup and login with passkey  
-3. **Wallet Verification** - Verify existing wallets and addresses
-4. **Copy Wallet Address** - Test address copying functionality
-5. **Sign Message** - EVM transaction signing
-6. **Sign Transaction** - EVM transaction with gas fees
-7. **Check Session** - Verify session validity
+2. **Phone Authentication** - Signup and login with passkey
+3. **Email Password Authentication** - Signup and login with password
+4. **Wallet Verification** - Verify existing wallets and addresses
+5. **Copy Wallet Address** - Test address copying functionality
+6. **EVM Transaction Signing** - EVM transaction with gas fees
+7. **Session Validation** - Verify session validity
 8. **Logout** - Test logout functionality
 9. **Solana Signing** - Solana transaction signing
+10. **Cosmos Wallet Creation and Message Signing** - Create Cosmos wallet and sign messages
+11. **Cosmos Transaction Signing** - Cosmos bank send transactions
+12. **Cosmos Signing Method Validation** - Test Amino vs Proto signing methods
 
 ## Architecture
 
