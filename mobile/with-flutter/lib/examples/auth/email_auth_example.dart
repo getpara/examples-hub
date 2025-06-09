@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 // Import the SDK package with all necessary exports
 import 'package:para/para.dart';
 import 'package:para_flutter/client/para.dart'; // Assuming 'para' instance is globally available or passed via context
-import 'package:para_flutter/util/random.dart';
 import 'package:para_flutter/widgets/choose_signup_method.dart';
 import 'package:para_flutter/widgets/demo_home.dart';
 import 'package:para_flutter/widgets/demo_otp_verification.dart';

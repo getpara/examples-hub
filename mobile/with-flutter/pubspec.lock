@@ -89,6 +89,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.6"
+  blockchain_utils:
+    dependency: transitive
+    description:
+      name: blockchain_utils
+      sha256: fbddd2a7f1849d2244a35bf996b6fb00bf6bd557f0e13aed65ba0c16ad133cb7
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.0.0"
   boolean_selector:
     dependency: transitive
     description:
@@ -153,6 +161,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.2"
+  cosmos_sdk:
+    dependency: transitive
+    description:
+      name: cosmos_sdk
+      sha256: "78504e49ab7ccb0f82cef9818692975dfdfc8ecc3a4144003bdd66d5c3c0baf8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.7.0"
   coverage:
     dependency: transitive
     description:
@@ -624,11 +640,9 @@ packages:
   para:
     dependency: "direct main"
     description:
-      path: "."
-      ref: "2.0.0-alpha"
-      resolved-ref: e0c81ef592eeeee53d94b19399e14677df007036
-      url: "https://github.com/capsule-org/flutter-sdk.git"
-    source: git
+      path: "../../../flutter-sdk"
+      relative: true
+    source: path
     version: "1.4.0-dev.1"
   passkeys:
     dependency: transitive

@@ -10,7 +10,6 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart' hide WebAuthenti
 // Import the SDK package
 import 'package:para/para.dart';
 import 'package:para_flutter/client/para.dart'; // Assuming 'para' instance is globally available or passed via context
-import 'package:para_flutter/util/random.dart';
 import 'package:para_flutter/widgets/choose_signup_method.dart'; // Needed for signup flow
 import 'package:para_flutter/widgets/demo_home.dart';
 import 'package:para_flutter/widgets/demo_otp_verification.dart';
