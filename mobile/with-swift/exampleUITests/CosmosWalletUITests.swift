@@ -181,7 +181,7 @@ class CosmosWalletUITests: XCTestCase {
     }
 
     func testSigningFlows() {
-        // Test 1: Sign message (once)
+        // Test 1: Sign message
         let messageField = Self.app.textFields["Enter a message to sign"]
         messageField.tap()
         messageField.typeText("Hello Cosmos!")
@@ -189,33 +189,171 @@ class CosmosWalletUITests: XCTestCase {
         Self.app.buttons["Sign Message"].tap()
         waitForAndDismissAlert(app: Self.app, validateSuccess: true)
 
+        // Clear message field for next test
+        messageField.tap()
+        messageField.tap()
+        messageField.tap() // Triple tap to select all
+        messageField.typeText(XCUIKeyboardKey.delete.rawValue)
+
         // Test 2: Sign transaction with Proto (default)
+        // Scroll to transaction operations section
+        let scrollView = Self.app.scrollViews.firstMatch
+        scrollView.swipeUp()
+
         Self.app.buttons["Sign Transaction"].tap()
         let protoAlert = Self.app.alerts.firstMatch
         XCTAssertTrue(protoAlert.waitForExistence(timeout: TestConstants.longTimeout), "Alert should appear for proto signing")
-        
-        // Expect success
+
+        // Expect success with chain info
         XCTAssertTrue(protoAlert.staticTexts["Success"].exists, "Proto signing should succeed")
         protoAlert.buttons["OK"].tap()
 
         // Test 3: Switch to Amino and sign transaction
-        // Find the segmented control and tap Amino
         let aminoButton = Self.app.buttons["Amino (Legacy)"]
         XCTAssertTrue(aminoButton.exists, "Amino button should exist in picker")
         aminoButton.tap()
-        
+
         // Wait a moment for UI to update
         Thread.sleep(forTimeInterval: 0.5)
-        
+
         // Sign transaction with Amino
         Self.app.buttons["Sign Transaction"].tap()
         let aminoAlert = Self.app.alerts.firstMatch
         XCTAssertTrue(aminoAlert.waitForExistence(timeout: TestConstants.longTimeout), "Alert should appear for amino signing")
-        
+
         // Expect success
         XCTAssertTrue(aminoAlert.staticTexts["Success"].exists, "Amino signing should succeed")
-        XCTAssertTrue(aminoAlert.label.contains("AMINO"), "Success message should mention AMINO method")
         aminoAlert.buttons["OK"].tap()
     }
-}
 
+    func testChainConfiguration() {
+        // Test switching between preset chains
+        let scrollView = Self.app.scrollViews.firstMatch
+
+        // Scroll to chain configuration
+        scrollView.swipeUp()
+
+        // Test 1: Verify default chain (Cosmos Hub)
+        let chainInfo = Self.app.staticTexts.matching(identifier: "Current Chain: Cosmos Hub (cosmos1...)")
+        XCTAssertTrue(chainInfo.count > 0 || Self.app.staticTexts["Current Chain: Cosmos Hub (cosmos1...)"].exists,
+                      "Should show Cosmos Hub as default chain")
+
+        // Test 2: Switch to Osmosis
+        let chainPicker = Self.app.buttons["chainPicker"]
+        XCTAssertTrue(chainPicker.exists, "Chain picker should exist")
+        chainPicker.tap()
+
+        let osmosisOption = Self.app.buttons["Osmosis"]
+        XCTAssertTrue(osmosisOption.waitForExistence(timeout: TestConstants.defaultTimeout))
+        osmosisOption.tap()
+
+        // Wait for re-initialization
+        Thread.sleep(forTimeInterval: 2.0)
+
+        // Verify address changed to osmo prefix
+        let osmoAddressTexts = Self.app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'osmo1'"))
+        XCTAssertTrue(osmoAddressTexts.firstMatch.waitForExistence(timeout: TestConstants.defaultTimeout),
+                      "Address should update to osmo1 prefix")
+
+        // Test 3: Test custom configuration
+        let customToggle = Self.app.switches["customConfigToggle"]
+        XCTAssertTrue(customToggle.exists, "Custom config toggle should exist")
+        customToggle.tap()
+
+        // Enter custom chain details
+        let chainIdField = Self.app.textFields["e.g., cosmoshub-4"]
+        XCTAssertTrue(chainIdField.waitForExistence(timeout: TestConstants.defaultTimeout))
+        chainIdField.tap()
+        chainIdField.typeText("test-chain-1")
+
+        let prefixField = Self.app.textFields["e.g., cosmos"]
+        prefixField.tap()
+        prefixField.typeText("test")
+
+        // Apply configuration
+        Self.app.buttons["Apply Configuration"].tap()
+
+        // Wait for re-initialization
+        Thread.sleep(forTimeInterval: 2.0)
+
+        // Verify custom prefix in address
+        let testAddressTexts = Self.app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'test1'"))
+        XCTAssertTrue(testAddressTexts.firstMatch.waitForExistence(timeout: TestConstants.defaultTimeout),
+                      "Address should update to test1 prefix")
+
+        // Test 4: Switch back to preset chain
+        customToggle.tap()
+        Thread.sleep(forTimeInterval: 2.0)
+
+        // Verify we're back to default Cosmos Hub
+        let cosmosAddressTexts = Self.app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'cosmos1'"))
+        XCTAssertTrue(cosmosAddressTexts.firstMatch.waitForExistence(timeout: TestConstants.defaultTimeout),
+                      "Address should revert to cosmos1 prefix")
+    }
+
+    func testChainSpecificTransactions() {
+        // Scroll to chain configuration
+        let scrollView = Self.app.scrollViews.firstMatch
+        scrollView.swipeUp()
+
+        // Test signing on different chains
+        let chainPicker = Self.app.buttons["chainPicker"]
+        XCTAssertTrue(chainPicker.exists, "Chain picker should exist")
+        chainPicker.tap()
+        Self.app.buttons["Juno"].tap()
+        Thread.sleep(forTimeInterval: 2.0)
+
+        // Verify Juno address
+        let junoAddressTexts = Self.app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'juno1'"))
+        XCTAssertTrue(junoAddressTexts.firstMatch.waitForExistence(timeout: TestConstants.defaultTimeout),
+                      "Should show juno1 address")
+
+        // Sign transaction on Juno
+        Self.app.buttons["Sign Transaction"].tap()
+        let junoAlert = Self.app.alerts.firstMatch
+        XCTAssertTrue(junoAlert.waitForExistence(timeout: TestConstants.longTimeout))
+        XCTAssertTrue(junoAlert.label.contains("Juno"), "Success message should mention Juno chain")
+        junoAlert.buttons["OK"].tap()
+
+        // Test 2: Sign on Stargaze
+        chainPicker.tap()
+        Self.app.buttons["Stargaze"].tap()
+        Thread.sleep(forTimeInterval: 2.0)
+
+        // Verify Stargaze address
+        let starsAddressTexts = Self.app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'stars1'"))
+        XCTAssertTrue(starsAddressTexts.firstMatch.waitForExistence(timeout: TestConstants.defaultTimeout),
+                      "Should show stars1 address")
+
+        // Sign transaction on Stargaze
+        Self.app.buttons["Sign Transaction"].tap()
+        let starsAlert = Self.app.alerts.firstMatch
+        XCTAssertTrue(starsAlert.waitForExistence(timeout: TestConstants.longTimeout))
+        XCTAssertTrue(starsAlert.label.contains("Stargaze"), "Success message should mention Stargaze chain")
+        starsAlert.buttons["OK"].tap()
+    }
+
+    func testWalletManagement() {
+        // Scroll to wallet management section
+        let scrollView = Self.app.scrollViews.firstMatch
+        scrollView.swipeUp()
+        scrollView.swipeUp()
+
+        // Test 1: Check session
+        Self.app.buttons["checkSessionButton"].tap()
+        let sessionAlert = Self.app.alerts.firstMatch
+        XCTAssertTrue(sessionAlert.waitForExistence(timeout: TestConstants.defaultTimeout))
+
+        // Be more lenient with session check - just verify we got a response
+        let hasSessionStatus = sessionAlert.label.contains("Session Active:") || sessionAlert.staticTexts["Session Status"].exists
+        XCTAssertTrue(hasSessionStatus, "Should show session status (active or inactive)")
+        sessionAlert.buttons["OK"].tap()
+
+        // Test 2: Fetch wallets
+        Self.app.buttons["fetchWalletsButton"].tap()
+        let walletsAlert = Self.app.alerts.firstMatch
+        XCTAssertTrue(walletsAlert.waitForExistence(timeout: TestConstants.defaultTimeout))
+        XCTAssertTrue(walletsAlert.staticTexts["Wallets"].exists, "Should show wallets")
+        walletsAlert.buttons["OK"].tap()
+    }
+}

@@ -24,7 +24,22 @@ struct CosmosWalletView: View {
     @State private var cosmosAddress: String?
     @State private var selectedSigningMethod: CosmosSigningMethod = .proto // Default to Proto
 
+    // Chain configuration states
+    @State private var selectedChain = "cosmoshub-4"
+    @State private var customChainId = ""
+    @State private var customPrefix = ""
+    @State private var customRpcUrl = ""
+    @State private var useCustomConfig = false
+
     @State private var paraCosmosSigner: ParaCosmosSigner?
+
+    // Common Cosmos chains
+    private let commonChains = [
+        ("Cosmos Hub", "cosmoshub-4", "cosmos", "https://cosmos-rpc.polkachu.com"),
+        ("Osmosis", "osmosis-1", "osmo", "https://osmosis-rpc.polkachu.com"),
+        ("Juno", "juno-1", "juno", "https://juno-rpc.polkachu.com"),
+        ("Stargaze", "stargaze-1", "stars", "https://stargaze-rpc.polkachu.com"),
+    ]
 
     private func fetchBalance() {
         guard let signer = paraCosmosSigner else {
@@ -51,23 +66,38 @@ struct CosmosWalletView: View {
             return
         }
 
-        let toAddress = "cosmos1ey69r37gfxvxg62sh4r0ktpuc46pzjrm873ae8"
+        let (_, prefix, _) = getChainConfig()
+        let denom = getDenomForChain()
+
+        // Use a test address with the correct prefix
+        let toAddress = "\(prefix)1ey69r37gfxvxg62sh4r0ktpuc46pzjrm873ae8"
 
         isLoading = true
         Task {
             do {
                 _ = try await signer.sendTokens(
                     to: toAddress,
-                    amount: "1000000", // 1 ATOM
-                    denom: "uatom",
-                    memo: "Test transaction from Para Swift SDK",
+                    amount: "1000000", // 1 token in micro units
+                    denom: denom,
+                    memo: "Test transaction from Para Swift SDK - \(getCurrentChainInfo())",
                     signingMethod: selectedSigningMethod,
                 )
-                result = ("Success", "Transaction signed successfully using \(selectedSigningMethod.rawValue.uppercased()) method")
+                result = ("Success", "Transaction signed successfully using \(selectedSigningMethod.rawValue.uppercased()) method on \(getCurrentChainInfo())")
             } catch {
                 result = ("Error", "Failed to sign transaction: \(error.localizedDescription)")
             }
             isLoading = false
+        }
+    }
+
+    private func getDenomForChain() -> String {
+        let (chainId, _, _) = getChainConfig()
+        switch chainId {
+        case "cosmoshub-4": return "uatom"
+        case "osmosis-1": return "uosmo"
+        case "juno-1": return "ujuno"
+        case "stargaze-1": return "ustars"
+        default: return "uatom" // Default fallback
         }
     }
 
@@ -113,7 +143,7 @@ struct CosmosWalletView: View {
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                             Spacer()
-                            Text("\(balanceString) uATOM")
+                            Text("\(balanceString) \(getDenomForChain())")
                                 .font(.system(.subheadline, design: .monospaced))
                                 .foregroundColor(.primary)
                         }
@@ -190,6 +220,74 @@ struct CosmosWalletView: View {
                 .cornerRadius(16)
                 .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
 
+                // Chain Configuration
+                VStack(spacing: 16) {
+                    Text("Chain Configuration")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                    Toggle("Use Custom Configuration", isOn: $useCustomConfig)
+                        .accessibilityIdentifier("customConfigToggle")
+                        .onChange(of: useCustomConfig) { _ in
+                            reinitializeSigner()
+                        }
+
+                    if !useCustomConfig {
+                        // Preset chains picker
+                        Picker("Select Chain", selection: $selectedChain) {
+                            ForEach(commonChains, id: \.1) { chain in
+                                Text(chain.0).tag(chain.1)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .accessibilityIdentifier("chainPicker")
+                        .onChange(of: selectedChain) { _ in
+                            reinitializeSigner()
+                        }
+                    } else {
+                        // Custom configuration fields
+                        VStack(spacing: 12) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Chain ID")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                TextField("e.g., cosmoshub-4", text: $customChainId)
+                                    .textFieldStyle(.roundedBorder)
+                                    .autocapitalization(.none)
+                            }
+
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Address Prefix")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                TextField("e.g., cosmos", text: $customPrefix)
+                                    .textFieldStyle(.roundedBorder)
+                                    .autocapitalization(.none)
+                            }
+
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("RPC URL (Optional)")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                TextField("https://rpc.cosmos.network", text: $customRpcUrl)
+                                    .textFieldStyle(.roundedBorder)
+                                    .autocapitalization(.none)
+                                    .keyboardType(.URL)
+                            }
+
+                            Button("Apply Configuration") {
+                                reinitializeSigner()
+                            }
+                            .buttonStyle(.bordered)
+                            .disabled(customChainId.isEmpty || customPrefix.isEmpty)
+                        }
+                    }
+                }
+                .padding()
+                .background(Color(.systemBackground))
+                .cornerRadius(16)
+                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+
                 // Transaction Operations
                 VStack(spacing: 16) {
                     Text("Transaction Operations")
@@ -215,7 +313,16 @@ struct CosmosWalletView: View {
                     }
                     .buttonStyle(.bordered)
                     .frame(maxWidth: .infinity)
-                    .disabled(isLoading)
+                    .disabled(isLoading || paraCosmosSigner == nil)
+
+                    // Show current chain info
+                    if let signer = paraCosmosSigner {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Current Chain: \(getCurrentChainInfo())")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
                 }
                 .padding()
                 .background(Color(.systemBackground))
@@ -244,6 +351,7 @@ struct CosmosWalletView: View {
                         }
                         .buttonStyle(.bordered)
                         .frame(maxWidth: .infinity)
+                        .accessibilityIdentifier("checkSessionButton")
 
                         Button("Fetch Wallets") {
                             isFetching = true
@@ -261,6 +369,7 @@ struct CosmosWalletView: View {
                         }
                         .buttonStyle(.bordered)
                         .frame(maxWidth: .infinity)
+                        .accessibilityIdentifier("fetchWalletsButton")
                     }
                     .disabled(isFetching)
                     .overlay {
@@ -306,27 +415,7 @@ struct CosmosWalletView: View {
             )
         }
         .onAppear {
-            Task {
-                isLoading = true
-                do {
-                    let signer = try ParaCosmosSigner(
-                        paraManager: paraManager,
-                    )
-
-                    try await signer.selectWallet(walletId: selectedWallet.id)
-
-                    await MainActor.run {
-                        paraCosmosSigner = signer
-                    }
-
-                    await MainActor.run {
-                        cosmosAddress = selectedWallet.addressSecondary ?? selectedWallet.address
-                    }
-                } catch {
-                    result = ("Error", "Failed to initialize Cosmos signer: \(error.localizedDescription)")
-                }
-                isLoading = false
-            }
+            initializeSigner()
         }
         .overlay {
             if isLoading {
@@ -338,6 +427,60 @@ struct CosmosWalletView: View {
                 .ignoresSafeArea()
             }
         }
+    }
+
+    private func initializeSigner() {
+        Task {
+            isLoading = true
+            do {
+                let (chainId, prefix, rpcUrl) = getChainConfig()
+
+                let signer = try ParaCosmosSigner(
+                    paraManager: paraManager,
+                    chainId: chainId,
+                    rpcUrl: rpcUrl.isEmpty ? "https://rpc.cosmos.directory:443/cosmoshub" : rpcUrl,
+                    prefix: prefix,
+                )
+
+                try await signer.selectWallet(walletId: selectedWallet.id)
+
+                // Get the chain-specific address from the signer
+                let chainSpecificAddress = try await signer.getAddress()
+
+                await MainActor.run {
+                    paraCosmosSigner = signer
+                    cosmosAddress = chainSpecificAddress
+                }
+            } catch {
+                result = ("Error", "Failed to initialize Cosmos signer: \(error.localizedDescription)")
+            }
+            isLoading = false
+        }
+    }
+
+    private func reinitializeSigner() {
+        paraCosmosSigner = nil
+        initializeSigner()
+    }
+
+    private func getChainConfig() -> (chainId: String, prefix: String, rpcUrl: String) {
+        if useCustomConfig {
+            return (customChainId, customPrefix, customRpcUrl)
+        } else {
+            if let chain = commonChains.first(where: { $0.1 == selectedChain }) {
+                return (chain.1, chain.2, chain.3)
+            }
+            // Default to Cosmos Hub
+            return ("cosmoshub-4", "cosmos", "https://cosmos-rpc.polkachu.com")
+        }
+    }
+
+    private func getCurrentChainInfo() -> String {
+        let (chainId, prefix, _) = getChainConfig()
+        if let chainName = commonChains.first(where: { $0.1 == chainId })?.0 {
+            return "\(chainName) (\(prefix)1...)"
+        }
+        return "\(chainId) (\(prefix)1...)"
     }
 }
 
