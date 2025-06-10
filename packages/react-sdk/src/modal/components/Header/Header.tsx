@@ -1,4 +1,4 @@
-import { styled } from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { useStepTitle } from './hooks/useStepTitle.js';
 import { CenteredText } from '../common.js';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -31,7 +31,7 @@ export const Header = () => {
   );
 };
 
-const Container = styled(motion.div)`
+const Container = safeStyled(motion.div)`
   position: absolute;
   top: 16px;
   width: 100%;

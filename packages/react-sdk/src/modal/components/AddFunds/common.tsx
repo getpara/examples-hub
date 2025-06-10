@@ -1,5 +1,5 @@
 import { CpslText } from '@getpara/react-components';
-import styled from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 
 export const contentMotionProps = {
   transition: { duration: 0.2 },
@@ -8,7 +8,7 @@ export const contentMotionProps = {
   exit: { opacity: 0 },
 };
 
-export const NoProviders = styled(CpslText)<{ isHidden?: boolean }>`
+export const NoProviders = safeStyled(CpslText)<{ isHidden?: boolean }>`
   width: 100%;
   text-align: center;
   visibility: ${({ isHidden }) => (isHidden ? 'hidden' : 'visible')};

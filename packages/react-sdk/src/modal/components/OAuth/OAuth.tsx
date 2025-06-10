@@ -1,5 +1,5 @@
 import { TOAuthMethod } from '@getpara/web-sdk';
-import { styled } from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { getTileButtonFlex } from '../../utils/getTileButtonFlex.js';
@@ -72,14 +72,14 @@ export const OAuth = ({ methods }: OAuthProps) => {
   );
 };
 
-const OAuthContainer = styled.div`
+const OAuthContainer = safeStyled.div`
   display: flex;
   justify-content: center;
   gap: 8px;
   flex-wrap: wrap;
 `;
 
-const OAuthButton = styled(StyledCpslTileButton)<{ $isDark: boolean; $index: number; $totalItems: number }>`
+const OAuthButton = safeStyled(StyledCpslTileButton)<{ $isDark: boolean; $index: number; $totalItems: number }>`
   flex: ${({ $index, $totalItems }) => getTileButtonFlex($index, $totalItems)};
 
   --button-icon-color: ${({ $isDark }) => ($isDark ? 'white' : 'black')};

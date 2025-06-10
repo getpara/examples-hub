@@ -1,6 +1,6 @@
 import { CpslCodeInput, CpslSpinner, CpslText } from '@getpara/react-components';
 import { useEffect, useRef, useState } from 'react';
-import { styled } from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { CodeChangeEventDetail, CpslCodeInputCustomEvent } from '@getpara/core-components';
 import { Heading, InnerStepContainer, StepContainer } from '../common.js';
 import { displayPhoneNumber } from '@getpara/core-sdk';
@@ -137,16 +137,16 @@ export const VerificationCodeStep = () => {
   );
 };
 
-const StyledCodeInput = styled(CpslCodeInput)`
+const StyledCodeInput = safeStyled(CpslCodeInput)`
   align-self: center;
 `;
 
-const InlineText = styled(CpslText)`
+const InlineText = safeStyled(CpslText)`
   text-align: center;
   display: inline-block;
 `;
 
-const ClickableText = styled(InlineText)`
+const ClickableText = safeStyled(InlineText)`
   cursor: pointer;
   display: inline-block;
 `;

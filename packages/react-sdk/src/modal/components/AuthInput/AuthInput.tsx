@@ -16,7 +16,7 @@ import {
 } from '@getpara/react-components';
 import { CountryCallingCode } from 'libphonenumber-js';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import styled from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import countryCodes from '../../utils/countryCodes.js';
 import { MOBILE_SIZE } from '../../constants/constants.js';
 import { useDropdownPosition } from './hooks/useDropdownPosition.js';
@@ -259,7 +259,7 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
   );
 };
 
-const IconContainer = styled.div`
+const IconContainer = safeStyled.div`
   height: 100%;
   display: flex;
   align-items: center;
@@ -272,7 +272,7 @@ const IconContainer = styled.div`
   }
 `;
 
-const CountryCodeSelect = styled(CpslSelect)<{ $width: number }>`
+const CountryCodeSelect = safeStyled(CpslSelect)<{ $width: number }>`
   --container-height: 100%;
   --container-padding-start: 0px;
   --container-padding-end: 0px;
@@ -298,19 +298,19 @@ const CountryCodeSelect = styled(CpslSelect)<{ $width: number }>`
   }
 `;
 
-const StyledSelectItem = styled(CpslSelectItem)`
+const StyledSelectItem = safeStyled(CpslSelectItem)`
   &::part(inner-container) {
     justify-content: space-between;
   }
 `;
 
-const SelectedItem = styled.div`
+const SelectedItem = safeStyled.div`
   display: flex;
   gap: 4px;
   align-items: center;
 `;
 
-const StyledInput = styled(CpslInput)`
+const StyledInput = safeStyled(CpslInput)`
   --container-background-color: var(--cpsl-color-background-8);
   --input-background-color: var(--cpsl-color-background-8);
   --container-padding-end: 8px;

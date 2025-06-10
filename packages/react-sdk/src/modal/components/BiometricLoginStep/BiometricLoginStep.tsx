@@ -1,7 +1,7 @@
 import { CpslButton, CpslDivider, CpslIcon } from '@getpara/react-components';
 import { useModalStore } from '../../stores/index.js';
 import { Heading, StepContainer, InnerStepContainer } from '../common.js';
-import styled from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { AuthMethod } from '@getpara/web-sdk';
 import { KnownDevices, UserIdentifier } from '@getpara/react-common';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
@@ -69,6 +69,6 @@ export const BiometricLoginStep = () => {
   );
 };
 
-const MainContainer = styled(InnerStepContainer)`
+const MainContainer = safeStyled(InnerStepContainer)`
   gap: 16px;
 `;

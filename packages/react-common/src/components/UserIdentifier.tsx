@@ -1,7 +1,6 @@
 import { CpslAvatar, CpslIcon, CpslText, IconType } from '@getpara/react-components';
-import styled from 'styled-components';
 import { CoreAuthInfo, displayPhoneNumber } from '@getpara/web-sdk';
-import { getExternalWalletDisplayName } from '../utils/index.js';
+import { getExternalWalletDisplayName, safeStyled } from '../utils/index.js';
 
 function defaultDisplay(authInfo: CoreAuthInfo): { defaultName: string | null; defaultIcon: IconType | null } {
   const { authType, identifier, externalWallet } = authInfo;
@@ -47,7 +46,7 @@ export const UserIdentifier = ({ authInfo }: { authInfo?: CoreAuthInfo }) => {
   );
 };
 
-const Container = styled.div`
+const Container = safeStyled.div`
   padding: 8px 12px 8px 8px;
   border-radius: 1000px;
   background-color: var(--cpsl-color-background-4);
@@ -57,11 +56,11 @@ const Container = styled.div`
   gap: 4px;
 `;
 
-const IdentifierText = styled(CpslText)`
+const IdentifierText = safeStyled(CpslText)`
   --color-override: var(--cpsl-color-background-96);
 `;
 
-const IconContainer = styled.div`
+const IconContainer = safeStyled.div`
   display: flex;
   background: var(--cpsl-color-background-0);
   align-items: center;
@@ -71,11 +70,11 @@ const IconContainer = styled.div`
   height: 20px;
 `;
 
-const Icon = styled(CpslIcon)`
+const Icon = safeStyled(CpslIcon)`
   --icon-color: var(--cpsl-color-text-primary);
 `;
 
-const Avatar = styled(CpslAvatar)`
+const Avatar = safeStyled(CpslAvatar)`
   --container-border-width: 0;
   --container-padding: 0;
 `;

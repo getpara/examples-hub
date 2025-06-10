@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import React, { PropsWithChildren, useEffect, useRef, useState } from 'react';
-import styled from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 
 interface AnimatedHeightWrapperProps extends PropsWithChildren {
   className?: string;
@@ -35,6 +35,6 @@ export const AnimatedHeightWrapper: React.FC<AnimatedHeightWrapperProps> = ({ ch
   );
 };
 
-const Container = styled(motion.div)`
+const Container = safeStyled(motion.div)`
   overflow: hidden;
 `;

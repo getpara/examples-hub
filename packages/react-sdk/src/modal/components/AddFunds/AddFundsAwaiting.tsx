@@ -4,7 +4,7 @@ import { useModalStore } from '../../stores/index.js';
 import { lazy, useEffect, useMemo, useState } from 'react';
 import { ModalStep } from '../../utils/steps.js';
 import { MoonPayEmbed as CommonMoonPayEmbed, RampEmbed } from '@getpara/react-common';
-import styled from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { useGoBack } from '../../hooks/useGoBack.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 import { useStore } from '../../../provider/stores/useStore.js';
@@ -76,6 +76,6 @@ export const AddFundsAwaiting = () => {
   return <Container $wide>{onRampEmbed}</Container>;
 };
 
-const Container = styled(StepContainer)`
+const Container = safeStyled(StepContainer)`
   flex: 1;
 `;

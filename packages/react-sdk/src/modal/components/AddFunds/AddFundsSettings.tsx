@@ -6,7 +6,7 @@ import { getAssetCode, getNetworkName } from '../../constants/constants.js';
 import { EnabledFlow, getOnRampNetworks, Network, OnRampAsset, OnRampPurchaseType } from '@getpara/web-sdk';
 import { OnRampStep, useModalStore } from '../../stores/index.js';
 import { useStore } from '../../../provider/stores/useStore.js';
-import styled from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { contentMotionProps, NoProviders } from './common.js';
 import { AnimatePresence, motion, useIsPresent } from 'framer-motion';
 import { AddFundsAsset } from './AddFundsAsset.js';
@@ -242,7 +242,7 @@ export function AddFundsSettings() {
   return <AnimatePresence mode="wait">{content}</AnimatePresence>;
 }
 
-const Container = styled(motion.div)<{ isPresent?: boolean }>`
+const Container = safeStyled(motion.div)<{ isPresent?: boolean }>`
   width: 100%;
   height: 100%;
   align-self: center;
@@ -259,18 +259,18 @@ const Container = styled(motion.div)<{ isPresent?: boolean }>`
   }
 `;
 
-const AssetContainer = styled(Container)`
+const AssetContainer = safeStyled(Container)`
   gap: 8px;
 `;
 
-const CurrencySign = styled.div`
+const CurrencySign = safeStyled.div`
   font-size: 72px;
   color: var(--cpsl-color-text-primary);
   position: relative;
   right: -16px;
 `;
 
-const PresetButton = styled(CpslButton)`
+const PresetButton = safeStyled(CpslButton)`
   --button-color: var(--cpsl-color-text-contrast);
   --button-font-size: 24px;
   --button-secondary-background-color: var(--cpsl-color-background-8);
@@ -281,7 +281,7 @@ const PresetButton = styled(CpslButton)`
   flex: 1;
 `;
 
-const Input = styled(CpslInput)`
+const Input = safeStyled(CpslInput)`
   --container-background-color: transparent;
   --container-height: 90px;
   --container-border-width: 0;

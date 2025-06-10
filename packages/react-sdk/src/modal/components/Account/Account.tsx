@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { InnerStepContainer, StepContainer, StyledCpslTileButton } from '../common.js';
 import { CpslButton, CpslIcon, CpslSpinner, CpslText } from '@getpara/react-components';
 import { OnRampStep, useModalStore } from '../../stores/index.js';
@@ -158,7 +158,7 @@ export const Account = ({ onClose }: AccountProps) => {
   );
 };
 
-const ButtonContainer = styled.div`
+const ButtonContainer = safeStyled.div`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -167,17 +167,17 @@ const ButtonContainer = styled.div`
   height: 88px;
 `;
 
-const OptionButton = styled(StyledCpslTileButton)`
+const OptionButton = safeStyled(StyledCpslTileButton)`
   flex: 1;
 
   --button-icon-color: var(--cpsl-color-text-primary);
 `;
 
-const DisconnectButton = styled(CpslButton)`
+const DisconnectButton = safeStyled(CpslButton)`
   --button-border-width: 0px;
 `;
 
-const BalanceContainer = styled.div`
+const BalanceContainer = safeStyled.div`
   display: flex;
   justify-content: center;
   align-items: center;
@@ -185,7 +185,7 @@ const BalanceContainer = styled.div`
   padding-bottom: 24px;
 `;
 
-const Alert = styled.div`
+const Alert = safeStyled.div`
   --icon-color: var(--cpsl-color-utility-yellow);
   --icon-stroke-color: var(--cpsl-color-utility-yellow);
   --icon-fill-color: var(--cpsl-color-utility-yellow);

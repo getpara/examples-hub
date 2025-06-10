@@ -1,6 +1,6 @@
 import { CpslIcon, CpslSpinner, CpslText, IconType } from '@getpara/react-components';
 import { PropsWithChildren, ReactNode } from 'react';
-import styled from 'styled-components';
+import { safeStyled } from '../utils/index.js';
 
 type Status = 'loading' | 'error' | 'inactive';
 
@@ -25,7 +25,7 @@ export function HeroSpinner({
   );
 }
 
-const Root = styled.div`
+const Root = safeStyled.div`
   height: 276px;
   display: flex;
   flex-direction: column;
@@ -34,7 +34,7 @@ const Root = styled.div`
   gap: 16px;
 `;
 
-const Hero = styled.div`
+const Hero = safeStyled.div`
   width: 150px;
   height: 150px;
   margin: 16px 0;
@@ -44,14 +44,14 @@ const Hero = styled.div`
   position: relative;
 `;
 
-const Text = styled.div<{ status: Status }>`
+const Text = safeStyled.div<{ status: Status }>`
   display: flex;
   gap: 4px;
   align-items: center;
   color: ${({ status }) => (status === 'error' ? 'var(--cpsl-color-utility-red)' : 'auto')};
 `;
 
-const Spinner = styled(CpslSpinner)`
+const Spinner = safeStyled(CpslSpinner)`
   position: absolute;
   width: 150px;
   height: 150px;

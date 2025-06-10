@@ -1,4 +1,4 @@
-import { styled } from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { IFrameSteps, ModalStep } from '../../utils/steps.js';
 import { CpslAlert, CpslIcon } from '@getpara/react-components';
 import { VerificationCodeStep } from '../VerificationCodeStep/VerificationCodeStep.js';
@@ -272,15 +272,15 @@ export const Body = ({
   );
 };
 
-const Container = styled.div`
+const Container = safeStyled.div`
   position: relative;
 `;
 
-const AnimatedWrapper = styled(AnimatedHeightWrapper)`
+const AnimatedWrapper = safeStyled(AnimatedHeightWrapper)`
   margin-top: -16px;
 `;
 
-const BodyContainer = styled(motion.div)`
+const BodyContainer = safeStyled(motion.div)`
   position: relative;
   display: flex;
   flex-direction: column;
@@ -288,7 +288,7 @@ const BodyContainer = styled(motion.div)`
   will-change: auto !important;
 `;
 
-const InnerContainer = styled.div<{ $embeddedModal: boolean; $step: ModalStep; $isIFrameStep: boolean }>`
+const InnerContainer = safeStyled.div<{ $embeddedModal: boolean; $step: ModalStep; $isIFrameStep: boolean }>`
   z-index: 1;
   flex: 1;
   display: flex;
@@ -314,7 +314,7 @@ const InnerContainer = styled.div<{ $embeddedModal: boolean; $step: ModalStep; $
   }
 `;
 
-const TestModeAlert = styled(CpslAlert)`
+const TestModeAlert = safeStyled(CpslAlert)`
   --container-padding-end: 40px;
   position: absolute;
   bottom: 16px;
@@ -323,7 +323,7 @@ const TestModeAlert = styled(CpslAlert)`
   z-index: 1000;
 `;
 
-const CloseButton = styled.button`
+const CloseButton = safeStyled.button`
   background-color: transparent;
   border: none;
   padding: 4px;
@@ -333,6 +333,6 @@ const CloseButton = styled.button`
   right: 0;
 `;
 
-const CloseX = styled(CpslIcon)`
+const CloseX = safeStyled(CpslIcon)`
   --icon-color: var(--cpsl-color-foreground-0);
 `;

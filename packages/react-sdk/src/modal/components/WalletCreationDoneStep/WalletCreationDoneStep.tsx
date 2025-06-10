@@ -3,7 +3,7 @@ import { StepContainer, InnerStepContainer, HeroIcon } from '../common.js';
 import { useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { WalletCard, WalletCards } from '../WalletCard/WalletCard.js';
-import styled from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 import { useStore } from '../../../provider/stores/useStore.js';
 import { useAuthActions } from '../../../provider/providers/AuthProvider.js';
@@ -93,7 +93,7 @@ export const WalletCreationDoneStep = ({ twoFactorAuthEnabled, onClose }: Wallet
   );
 };
 
-const CardContainer = styled(InnerStepContainer)`
+const CardContainer = safeStyled(InnerStepContainer)`
   min-height: 196px;
   justify-content: center;
 `;

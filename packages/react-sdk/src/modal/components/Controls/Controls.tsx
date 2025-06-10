@@ -1,5 +1,5 @@
 import { CpslIcon } from '@getpara/react-components';
-import { styled } from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { useModalStore } from '../../stores/index.js';
 import { useGoBack } from '../../hooks/useGoBack.js';
 import { AccountSelect, ChainSelect } from './Selects.js';
@@ -57,7 +57,7 @@ export const Controls = ({ onClose }: ControlsProps) => {
   );
 };
 
-const Container = styled.div`
+const Container = safeStyled.div`
   position: absolute;
   width: 100%;
   top: 16px;
@@ -69,7 +69,7 @@ const Container = styled.div`
   gap: 8px;
 `;
 
-const MiddleContainer = styled.div`
+const MiddleContainer = safeStyled.div`
   flex: 1;
   display: flex;
   align-items: center;
@@ -77,11 +77,11 @@ const MiddleContainer = styled.div`
   gap: 4px;
 `;
 
-const CloseButton = styled(HeaderButton)<{ bareModal?: boolean }>`
+const CloseButton = safeStyled(HeaderButton)<{ bareModal?: boolean }>`
   transform: rotate(180deg);
   visibility: ${({ bareModal }) => (bareModal ? 'hidden' : 'visible')};
 `;
 
-const BackButton = styled(HeaderButton)`
+const BackButton = safeStyled(HeaderButton)`
   transform: rotate(180deg);
 `;

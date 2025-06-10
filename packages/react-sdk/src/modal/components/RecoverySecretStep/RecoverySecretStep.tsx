@@ -2,7 +2,7 @@ import { CpslButton, CpslText } from '@getpara/react-components';
 import { useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { Heading, InnerStepContainer, StepContainer, StyledCpslTileButton } from '../common.js';
-import { styled } from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { useCopyToClipboard } from '@getpara/react-common';
 import { getMailtoLink } from '../../utils/getMailtoLink.js';
 import { useState } from 'react';
@@ -111,13 +111,13 @@ export const RecoverySecretStep = () => {
   );
 };
 
-const ActionButton = styled(StyledCpslTileButton)`
+const ActionButton = safeStyled(StyledCpslTileButton)`
   flex: 1;
 
   --button-icon-color: var(--cpsl-color-text-primary);
 `;
 
-const ButtonContainer = styled.div`
+const ButtonContainer = safeStyled.div`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -125,7 +125,7 @@ const ButtonContainer = styled.div`
   width: 100%;
 `;
 
-const InlineText = styled(CpslText)`
+const InlineText = safeStyled(CpslText)`
   text-align: center;
   display: inline-block;
 `;

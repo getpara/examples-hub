@@ -1,4 +1,4 @@
-import { styled } from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { CpslButton, CpslIcon, CpslText } from '@getpara/react-components';
 import { useModalStore } from '../../stores/index.js';
 import { PARA_CONNECT, PARA_TERMS_AND_CONDITIONS } from '../../constants/constants.js';
@@ -63,7 +63,7 @@ export const Footer = () => {
   );
 };
 
-const FooterContainer = styled.div`
+const FooterContainer = safeStyled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -71,28 +71,28 @@ const FooterContainer = styled.div`
   padding: 8px 0px;
 `;
 
-const FooterContentContainer = styled.div`
+const FooterContentContainer = safeStyled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
 `;
 
-const PoweredByContainer = styled.div`
+const PoweredByContainer = safeStyled.div`
   display: flex;
   gap: 5px;
   align-items: center;
   justify-content: center;
 `;
 
-const ConnectContainer = styled.div`
+const ConnectContainer = safeStyled.div`
   display: flex;
   gap: 8px;
   align-items: center;
   justify-content: center;
 `;
 
-const RightChevron = styled(CpslIcon)`
+const RightChevron = safeStyled(CpslIcon)`
   transform: rotate(90deg);
 
   /* --icon-color: var(--cpsl-color-text-tertiary); */
@@ -100,21 +100,21 @@ const RightChevron = styled(CpslIcon)`
   --width: 24px;
 `;
 
-const InlineText = styled(CpslText)`
+const InlineText = safeStyled(CpslText)`
   text-align: center;
   display: inline-block;
 `;
 
-const ConnectText = styled(InlineText)`
+const ConnectText = safeStyled(InlineText)`
   line-height: 20px;
 `;
 
-const ClickableText = styled(InlineText)`
+const ClickableText = safeStyled(InlineText)`
   cursor: pointer;
   display: inline-block;
 `;
 
-const ParaLogo = styled(CpslIcon)`
+const ParaLogo = safeStyled(CpslIcon)`
   display: inline-block;
   --icon-color: var(--cpsl-color-text-secondary);
   --width: 49px;

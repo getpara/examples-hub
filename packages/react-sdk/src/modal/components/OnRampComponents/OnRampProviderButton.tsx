@@ -1,7 +1,7 @@
 import { OnRampConfig } from '@getpara/web-sdk';
 import { useState } from 'react';
 import { ON_RAMP_PROVIDERS, OnRampProviderConfig } from '../../constants/constants.js';
-import styled from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { CpslButton, CpslIcon, CpslSpinner, CpslText } from '@getpara/react-components';
 import { motion } from 'framer-motion';
 
@@ -50,7 +50,7 @@ export const OnRampProviderButton = ({ config, index, onClick: _onClick }: OnRam
   );
 };
 
-const StyledButton = styled(CpslButton)<{ $gradientColors: string[] }>`
+const StyledButton = safeStyled(CpslButton)<{ $gradientColors: string[] }>`
   width: 100%;
   --button-primary-background-color: ${({ $gradientColors }) =>
     `linear-gradient(90deg, ${$gradientColors[0]} 0%, ${$gradientColors[1]} 100%)`};
@@ -60,7 +60,7 @@ const StyledButton = styled(CpslButton)<{ $gradientColors: string[] }>`
     `linear-gradient(90deg, ${$gradientColors[0]} 0%, ${$gradientColors[0]} 100%)`};
 `;
 
-const Container = styled(motion.div)<{ $backgroundColor: string }>`
+const Container = safeStyled(motion.div)<{ $backgroundColor: string }>`
   display: flex;
   gap: 8px;
   flex: 1;
@@ -71,7 +71,7 @@ const Container = styled(motion.div)<{ $backgroundColor: string }>`
   }
 `;
 
-const ProviderInfoContainer = styled.div`
+const ProviderInfoContainer = safeStyled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -79,12 +79,12 @@ const ProviderInfoContainer = styled.div`
   gap: 2px;
 `;
 
-const ProviderInfoInnerContainer = styled.div`
+const ProviderInfoInnerContainer = safeStyled.div`
   display: flex;
   gap: 16px;
 `;
 
-const IconContainer = styled.span`
+const IconContainer = safeStyled.span`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -94,13 +94,13 @@ const IconContainer = styled.span`
   width: 48px;
 `;
 
-const Text = styled(CpslText)`
+const Text = safeStyled(CpslText)`
   &::part(text-element) {
     color: #fff;
   }
 `;
 
-const Chevron = styled(CpslIcon)`
+const Chevron = safeStyled(CpslIcon)`
   transform: rotate(90deg);
   --icon-color: #fff;
 `;

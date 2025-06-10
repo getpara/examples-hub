@@ -1,8 +1,7 @@
 import { CpslButton, CpslIcon, CpslText } from '@getpara/react-components';
-import styled from 'styled-components';
 import { CenteredColumnContainer, FullWidthFilledDisabledInput, CenteredText } from './common.js';
 import { QRCode } from './QRCode.js';
-import { BiometricHints, getDeviceLogo, getDeviceModelName } from '../utils/index.js';
+import { BiometricHints, getDeviceLogo, getDeviceModelName, safeStyled } from '../utils/index.js';
 import { useCopyToClipboard } from '../hooks/index.js';
 
 interface KnownDevicesProps {
@@ -64,11 +63,11 @@ export const KnownDevices = ({ hints, link, showCurrentDevice }: KnownDevicesPro
   );
 };
 
-const Container = styled(CenteredColumnContainer)`
+const Container = safeStyled(CenteredColumnContainer)`
   gap: 16px;
 `;
 
-const DevicesContainer = styled.div`
+const DevicesContainer = safeStyled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -78,13 +77,13 @@ const DevicesContainer = styled.div`
   border-radius: 16px;
 `;
 
-const DeviceListItem = styled.div`
+const DeviceListItem = safeStyled.div`
   display: flex;
   gap: 4px;
   align-items: center;
 `;
 
-const DeviceLogo = styled(CpslIcon)`
+const DeviceLogo = safeStyled(CpslIcon)`
   --icon-color: var(--cpsl-color-text-contrast);
   --height: 16px;
   --width: 16px;

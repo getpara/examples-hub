@@ -1,6 +1,6 @@
 import { CpslButton, CpslSpinner, CpslText } from '@getpara/react-components';
 import { useEffect } from 'react';
-import { styled } from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { useModalStore } from '../../stores/index.js';
 import { ErrorContainer, ErrorIcon, Heading, InnerStepContainer, StepContainer } from '../common.js';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
@@ -38,7 +38,7 @@ export const ExternalWalletVerificationStep = () => {
   );
 };
 
-const InlineText = styled(CpslText)`
+const InlineText = safeStyled(CpslText)`
   text-align: center;
   display: inline-block;
 `;

@@ -12,7 +12,7 @@ import { useModalStore } from '../../stores/index.js';
 import { Heading, QRContainer, FilledDisabledInput, StepContainer, InnerStepContainer } from '../common.js';
 import { ModalStep } from '../../utils/steps.js';
 import { CodeChangeEventDetail, CpslCodeInputCustomEvent } from '@getpara/core-components';
-import { styled } from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { useCopyToClipboard } from '@getpara/react-common';
 import { useEnable2fa } from '../../../provider/index.js';
 
@@ -164,11 +164,11 @@ export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
   );
 };
 
-const StyledCodeInput = styled(CpslCodeInput)`
+const StyledCodeInput = safeStyled(CpslCodeInput)`
   align-self: center;
 `;
 
-const SkipButton = styled(CpslButton)`
+const SkipButton = safeStyled(CpslButton)`
   margin-top: 8px;
   text-decoration: underline;
 `;

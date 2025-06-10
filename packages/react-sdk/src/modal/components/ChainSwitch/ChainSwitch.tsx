@@ -2,7 +2,7 @@ import { CpslButton, CpslIcon, CpslQrCode, CpslSpinner, CpslText } from '@getpar
 import { CenteredText, InnerStepContainer, QRContainer, StepContainer } from '../common.js';
 import { useEffect, useMemo } from 'react';
 import { useModalStore } from '../../stores/index.js';
-import styled from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { useCopyToClipboard } from '@getpara/react-common';
 import { ModalStep } from '../../utils/steps.js';
 import { routeMobileExternalWallet } from '../../utils/routeMobileExternalWallet.js';
@@ -103,19 +103,19 @@ export const ChainSwitch = () => {
   return <Container>{Content}</Container>;
 };
 
-const Container = styled(StepContainer)`
+const Container = safeStyled(StepContainer)`
   flex: 1;
   justify-content: space-between;
 `;
 
-const ErrorContainer = styled.div`
+const ErrorContainer = safeStyled.div`
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
 `;
 
-const ErrorIcon = styled(CpslIcon)`
+const ErrorIcon = safeStyled(CpslIcon)`
   --height: 16px;
   --width: 16px;
   --icon-color: var(--cpsl-color-text-error);

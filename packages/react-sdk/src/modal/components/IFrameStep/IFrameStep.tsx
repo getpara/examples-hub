@@ -1,6 +1,6 @@
 import { useModalStore } from '../../stores/index.js';
 import { IFrameSteps } from '../../utils/steps.js';
-import styled from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { SpinnerContainer } from '@getpara/react-common';
 import { CpslSpinner } from '@getpara/react-components';
 import { MOBILE_SIZE } from '../../constants/constants.js';
@@ -32,7 +32,7 @@ export const IFrameStep = () => {
   );
 };
 
-const OuterContainer = styled.div<{ $isVisible: boolean; $embeddedModal: boolean }>`
+const OuterContainer = safeStyled.div<{ $isVisible: boolean; $embeddedModal: boolean }>`
   height: ${({ $isVisible }) => ($isVisible ? '100%' : '0px')};
   width: ${({ $isVisible }) => ($isVisible ? '100%' : '0px')};
   flex: ${({ $isVisible }) => ($isVisible ? 1 : 'auto')};
@@ -47,7 +47,7 @@ const OuterContainer = styled.div<{ $isVisible: boolean; $embeddedModal: boolean
   }
 `;
 
-const Container = styled.div<{ $isReady: boolean }>`
+const Container = safeStyled.div<{ $isReady: boolean }>`
   height: 100%;
   width: 100%;
   display: ${({ $isReady }) => ($isReady ? 'block' : 'none')};

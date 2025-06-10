@@ -1,6 +1,6 @@
 import { Fragment, ReactNode, useMemo } from 'react';
 import { CpslButton, CpslDivider, CpslIconGroup, IconType } from '@getpara/react-components';
-import styled from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { TOAuthMethod } from '@getpara/web-sdk';
 import { ExternalWallets } from '../ExternalWallets/ExternalWallets.js';
 import { useModalStore } from '../../stores/index.js';
@@ -140,23 +140,23 @@ export const AuthMainStepContent = ({
   );
 };
 
-const Container = styled.div`
+const Container = safeStyled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
 `;
 
-const StyledIconGroup = styled(CpslIconGroup)<{ $isDark: boolean }>`
+const StyledIconGroup = safeStyled(CpslIconGroup)<{ $isDark: boolean }>`
   --icon-item-color: ${({ $isDark }) => ($isDark ? 'white' : 'black')};
   flex: 1;
   justify-content: flex-end;
 `;
 
-const IconGroupSpacer = styled(StyledIconGroup)`
+const IconGroupSpacer = safeStyled(StyledIconGroup)`
   visibility: hidden;
 `;
 
-const CondensedButton = styled(CpslButton)`
+const CondensedButton = safeStyled(CpslButton)`
   --button-justify-content: space-between;
 
   &::part(button-native) {
@@ -164,7 +164,7 @@ const CondensedButton = styled(CpslButton)`
   }
 `;
 
-const GuestMode = styled.a<{ isDark?: boolean }>`
+const GuestMode = safeStyled.a<{ isDark?: boolean }>`
   display: flex;
   justify-content: center;
   align-items: center;

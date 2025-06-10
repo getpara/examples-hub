@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { StyledCpslTileButton } from '../common.js';
 import { CpslButton, CpslIcon, CpslInput, CpslText } from '@getpara/react-components';
 import { useModalStore } from '../../stores/index.js';
@@ -117,7 +117,7 @@ export const ExternalWallets = () => {
   );
 };
 
-const Container = styled.div<{ $maxHeight: boolean }>`
+const Container = safeStyled.div<{ $maxHeight: boolean }>`
   position: relative;
   display: flex;
   justify-content: center;
@@ -134,11 +134,11 @@ const Container = styled.div<{ $maxHeight: boolean }>`
   scrollbar-width: none;
 `;
 
-const WalletTileButton = styled(StyledCpslTileButton)`
+const WalletTileButton = safeStyled(StyledCpslTileButton)`
   flex: 1;
 `;
 
-const WalletButtonOuterContainer = styled.div`
+const WalletButtonOuterContainer = safeStyled.div`
   width: 100%;
   display: flex;
   align-items: center;
@@ -146,7 +146,7 @@ const WalletButtonOuterContainer = styled.div`
   justify-content: space-between;
 `;
 
-const WalletButtonInnerContainer = styled.div`
+const WalletButtonInnerContainer = safeStyled.div`
   display: flex;
   align-items: center;
   gap: 8px;
@@ -161,7 +161,7 @@ const WalletButtonInnerContainer = styled.div`
   }
 `;
 
-const Badge = styled.div<{ $variant: 'installed' | 'mobile'; $show: boolean }>`
+const Badge = safeStyled.div<{ $variant: 'installed' | 'mobile'; $show: boolean }>`
   visibility: ${({ $show }) => ($show ? 'visible' : 'hidden')};
   padding: 2px 4px;
   border-radius: 4px;
@@ -176,24 +176,24 @@ const Badge = styled.div<{ $variant: 'installed' | 'mobile'; $show: boolean }>`
   }
 `;
 
-const InstalledIndicator = styled.span`
+const InstalledIndicator = safeStyled.span`
   width: 8px;
   height: 8px;
   border-radius: 100%;
   background-color: var(--cpsl-color-utility-green);
 `;
 
-const TileButtonInnerContainer = styled.div`
+const TileButtonInnerContainer = safeStyled.div`
   display: flex;
   gap: 4px;
   align-items: center;
 `;
 
-const SearchIcon = styled(CpslIcon)`
+const SearchIcon = safeStyled(CpslIcon)`
   --icon-color: var(--cpsl-color-contrast);
 `;
 
-const SearchInputWrapper = styled.div`
+const SearchInputWrapper = safeStyled.div`
   width: 100%;
   background-color: var(--cpsl-color-background-0);
 
@@ -203,13 +203,13 @@ const SearchInputWrapper = styled.div`
   margin-bottom: -4px;
 `;
 
-const SearchInput = styled(CpslInput)`
+const SearchInput = safeStyled(CpslInput)`
   width: 100%;
   --container-background-color: var(--cpsl-color-background-8);
   --input-background-color: var(--cpsl-color-background-8);
 `;
 
-const BlurContainer = styled.div`
+const BlurContainer = safeStyled.div`
   position: sticky;
   height: 56px;
   width: 100%;

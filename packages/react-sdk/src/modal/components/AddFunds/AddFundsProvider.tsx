@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { Heading, InnerStepContainer } from '../common.js';
 import { CpslText } from '@getpara/react-components';
 import { useAddFunds } from './AddFundsContext.js';
@@ -82,7 +82,7 @@ export function AddFundsProvider() {
   );
 }
 
-const Container = styled(motion.div)`
+const Container = safeStyled(motion.div)`
   width: 100%;
   height: 100%;
   align-self: center;
@@ -93,11 +93,11 @@ const Container = styled(motion.div)`
   height: 320px;
 `;
 
-const $InnerStepContainer = styled(InnerStepContainer)`
+const $InnerStepContainer = safeStyled(InnerStepContainer)`
   position: relative;
 `;
 
-const NoProviders = styled(CpslText)<{ isHidden?: boolean }>`
+const NoProviders = safeStyled(CpslText)<{ isHidden?: boolean }>`
   width: 100%;
   text-align: center;
   visibility: ${({ isHidden }) => (isHidden ? 'hidden' : 'visible')};

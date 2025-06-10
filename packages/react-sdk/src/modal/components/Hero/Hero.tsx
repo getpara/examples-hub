@@ -1,5 +1,5 @@
 import { CpslHero, CpslIcon, CpslIdenticon } from '@getpara/react-components';
-import styled from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { ModalStep } from '../../utils/steps.js';
 import { useModalStore } from '../../stores/index.js';
 import { NETWORK_NOT_SUPPORTED_ERROR } from '../../constants/constants.js';
@@ -114,7 +114,7 @@ export const Hero = () => {
   );
 };
 
-const Container = styled.div<{ $top: number }>`
+const Container = safeStyled.div<{ $top: number }>`
   display: flex;
   position: absolute;
   justify-content: center;
@@ -124,26 +124,26 @@ const Container = styled.div<{ $top: number }>`
   top: ${({ $top }) => `${$top}px`};
 `;
 
-const Spacer = styled.div<{ $height: number }>`
+const Spacer = safeStyled.div<{ $height: number }>`
   height: ${({ $height }) => `${$height}px`};
 `;
 
-const WalletLogo = styled(CpslIcon)`
+const WalletLogo = safeStyled(CpslIcon)`
   --height: 60px;
   --width: 60px;
 `;
 
-const Avatar = styled.img`
+const Avatar = safeStyled.img`
   width: 100%;
   height: 100%;
   object-fit: contain;
 `;
 
-const IconAvatar = styled(CpslIdenticon)`
+const IconAvatar = safeStyled(CpslIdenticon)`
   border-radius: 1000px;
 `;
 
-const StyledHero = styled(CpslHero)<{ $isAccount: boolean }>`
+const StyledHero = safeStyled(CpslHero)<{ $isAccount: boolean }>`
   ${({ $isAccount }) =>
     $isAccount &&
     `

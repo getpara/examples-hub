@@ -6,7 +6,7 @@ import { OnRampStep } from '../../stores/index.js';
 import { useModalStore } from '../../stores/modal/useModalStore.js';
 import { useEffect, useMemo } from 'react';
 import { getAddFundsStep } from '../../utils/steps.js';
-import styled from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { useAccount, useWallet } from '../../../provider/index.js';
 import { AddFundsProvider } from './AddFundsProvider.js';
 import { AddFundsReceive } from './AddFundsReceive.js';
@@ -86,6 +86,6 @@ export const AddFunds = () => {
   );
 };
 
-const SpinnerContainer = styled(StepContainer)`
+const SpinnerContainer = safeStyled(StepContainer)`
   margin: 50% 0;
 `;

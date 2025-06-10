@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { CpslIcon, CpslText } from '@getpara/react-components';
 import { PartnerEntity } from '@getpara/user-management-client';
 
@@ -22,7 +22,7 @@ export const PartnerIcon = ({ partner }: PartnerIconProps) => {
   );
 };
 
-const Container = styled.div<{ $backgroundColor?: string }>`
+const Container = safeStyled.div<{ $backgroundColor?: string }>`
   width: 14px;
   height: 14px;
   display: flex;
@@ -32,14 +32,14 @@ const Container = styled.div<{ $backgroundColor?: string }>`
   border-radius: 100%;
 `;
 
-const Text = styled(CpslText)<{ $color?: string }>`
+const Text = safeStyled(CpslText)<{ $color?: string }>`
   &::part(text-element) {
     line-height: 100%;
     color: ${({ $color }) => `${$color ?? 'var(--cpsl-color-foreground-0)'}`};
   }
 `;
 
-const Icon = styled(CpslIcon)`
+const Icon = safeStyled(CpslIcon)`
   --height: 14px;
   --width: 14px;
 `;

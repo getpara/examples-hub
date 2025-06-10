@@ -7,7 +7,7 @@ import { ModalStep, RESET_TO_ACCOUNT_STEPS, RESET_TO_AUTH_STEPS } from './utils/
 import { AuthLayout, ParaModalHandle, ParaModalProps } from './types/modalProps.js';
 import { DEFAULTS } from './constants/defaults.js';
 import { useGoBack } from './hooks/useGoBack.js';
-import styled from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { hasEmbeddedAuth, hasExternalWallet } from './utils/authLayoutHelpers.js';
 import { useAccount, useModal, useWalletState } from '../provider/index.js';
 import { useInternalClient } from '../provider/hooks/utils/useInternalClient.js';
@@ -310,7 +310,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
   );
 });
 
-const StyledAuthModal = styled(CpslAuthModal)<{ $embeddedModal: boolean }>`
+const StyledAuthModal = safeStyled(CpslAuthModal)<{ $embeddedModal: boolean }>`
   ${({ $embeddedModal }) =>
     $embeddedModal &&
     `

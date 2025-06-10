@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import styled from 'styled-components';
 import { CpslIcon } from '@getpara/react-components';
+import { safeStyled } from '../utils/index.js';
 
 interface NetworkInformation extends EventTarget {
   readonly downlink?: number;
@@ -18,7 +18,7 @@ interface NetworkInformation extends EventTarget {
   ): void;
 }
 
-const BannerContainerWrapper = styled.div`
+const BannerContainerWrapper = safeStyled.div`
   display: flex;
   justify-content: center;
   align-items: center;
@@ -26,7 +26,7 @@ const BannerContainerWrapper = styled.div`
   background-color: transparent;
 `;
 
-const BannerContainer = styled.div<{ $maxWidth?: string }>`
+const BannerContainer = safeStyled.div<{ $maxWidth?: string }>`
   display: flex;
   justify-content: center;
   align-items: center;
@@ -43,7 +43,7 @@ const BannerContainer = styled.div<{ $maxWidth?: string }>`
   overflow: hidden;
 `;
 
-const WarningIcon = styled(CpslIcon)<{ $size?: string }>`
+const WarningIcon = safeStyled(CpslIcon)<{ $size?: string }>`
   --icon-color: #fbbc04;
   --width: ${({ $size }) => $size || '24px'};
   --height: ${({ $size }) => $size || '24px'};
@@ -51,7 +51,7 @@ const WarningIcon = styled(CpslIcon)<{ $size?: string }>`
   flex-shrink: 0;
 `;
 
-const BannerText = styled.span<{ $fontSize?: string }>`
+const BannerText = safeStyled.span<{ $fontSize?: string }>`
   font-family: var(--cpsl-default-font);
   font-weight: 500;
   font-size: ${({ $fontSize }) => $fontSize || '14px'};

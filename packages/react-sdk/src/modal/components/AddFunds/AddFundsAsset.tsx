@@ -1,6 +1,6 @@
 import * as comp from '@getpara/react-components';
 import { getOnRampNetworks, OnRampAsset } from '@getpara/web-sdk';
-import styled from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { getAssetCode, getAssetName, ON_RAMP_ASSETS } from '../../constants/constants.js';
 import { useModalStore } from '../../stores/index.js';
 import { useRef, useState } from 'react';
@@ -102,7 +102,7 @@ export function AddFundsAsset() {
   );
 }
 
-const ScrollContainer = styled.div<{ isAtBottom; isAtTop }>`
+const ScrollContainer = safeStyled.div<{ isAtBottom; isAtTop }>`
   height: calc(100% - 56px);
   width: 100%;
   display: flex;
@@ -119,7 +119,7 @@ const ScrollContainer = styled.div<{ isAtBottom; isAtTop }>`
           : 'none'};
 `;
 
-const AssetList = styled.ul`
+const AssetList = safeStyled.ul`
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -130,7 +130,7 @@ const AssetList = styled.ul`
   padding: 0px;
 `;
 
-const AssetButton = styled(comp.CpslButton)`
+const AssetButton = safeStyled(comp.CpslButton)`
   display: flex;
   justify-content: center;
   align-items: center;
@@ -141,13 +141,13 @@ const AssetButton = styled(comp.CpslButton)`
   --button-secondary-hover-border-color: var(--cpsl-color-background-16);
 `;
 
-const Info = styled(comp.CpslCol)`
+const Info = safeStyled(comp.CpslCol)`
     text-align: left;
   `,
   Code = comp.CpslText,
   Name = comp.CpslText;
 
-const SearchInput = styled(comp.CpslInput)`
+const SearchInput = safeStyled(comp.CpslInput)`
   --container-background-color: var(--cpsl-color-background-8);
   --input-background-color: transparent;
 `;

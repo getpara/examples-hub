@@ -1,5 +1,5 @@
 import { ReactNode, useMemo } from 'react';
-import styled from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { OAuth } from '../OAuth/OAuth.js';
 import { TOAuthMethod } from '@getpara/web-sdk';
 import { AuthInput } from '../AuthInput/AuthInput.js';
@@ -53,13 +53,13 @@ export const AuthOptions = ({
   );
 };
 
-const Container = styled.div`
+const Container = safeStyled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
 `;
 
-const CompleteAccountSetup = styled.div`
+const CompleteAccountSetup = safeStyled.div`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -68,6 +68,6 @@ const CompleteAccountSetup = styled.div`
   margin-bottom: 8px;
 `;
 
-const CompleteAccountIcon = styled(CpslIcon)`
+const CompleteAccountIcon = safeStyled(CpslIcon)`
   --icon-color: var(--cpsl-color-text-primary);
 `;

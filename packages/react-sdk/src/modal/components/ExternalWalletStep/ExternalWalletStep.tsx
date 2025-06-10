@@ -2,7 +2,7 @@ import { CpslButton, CpslIcon, CpslQrCode, CpslSpinner, CpslText } from '@getpar
 import { CenteredText, ErrorContainer, ErrorIcon, InnerStepContainer, QRContainer, StepContainer } from '../common.js';
 import { useEffect, useMemo } from 'react';
 import { useModalStore } from '../../stores/index.js';
-import styled from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { useCopyToClipboard } from '@getpara/react-common';
 import { ModalStep } from '../../utils/steps.js';
 import { isMobile, isTablet } from '@getpara/web-sdk';
@@ -171,16 +171,16 @@ export const ExternalWalletStep = () => {
   return <Container>{Content}</Container>;
 };
 
-const Container = styled(StepContainer)`
+const Container = safeStyled(StepContainer)`
   flex: 1;
   justify-content: space-between;
 `;
 
-const Text = styled(CenteredText)`
+const Text = safeStyled(CenteredText)`
   white-space: pre-line;
 `;
 
-const ExternalButton = styled(CpslButton)`
+const ExternalButton = safeStyled(CpslButton)`
   display: flex;
   gap: 8px;
   align-items: center;
@@ -191,11 +191,11 @@ const ExternalButton = styled(CpslButton)`
   text-decoration: none;
 `;
 
-const ExternalIcon = styled(CpslIcon)`
+const ExternalIcon = safeStyled(CpslIcon)`
   --height: 20px;
   --width: 20px;
 `;
 
-const Link = styled.a`
+const Link = safeStyled.a`
   text-decoration: none;
 `;

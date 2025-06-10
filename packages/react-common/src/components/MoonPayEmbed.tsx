@@ -1,7 +1,6 @@
 import { getNetworkPrefix, OnRampProvider, OnRampPurchaseStatus } from '@getpara/web-sdk';
 import { lazy, useCallback, useEffect, useMemo, useState } from 'react';
-import { reverseCurrencyLookup, offRampSend, getCurrencyCode } from '../utils/index.js';
-import styled from 'styled-components';
+import { reverseCurrencyLookup, offRampSend, getCurrencyCode, safeStyled } from '../utils/index.js';
 import { OnRampProps } from '../types/index.js';
 import type { MoonPayBuyWidget, MoonPaySellWidget } from '@moonpay/moonpay-react';
 
@@ -190,7 +189,7 @@ export const MoonPayEmbed = ({ para, isDark, isEmbedded, onRampConfig, onRampPur
 
 export default MoonPayEmbed;
 
-const Container = styled.div<{ isEmbedded?: boolean }>`
+const Container = safeStyled.div<{ isEmbedded?: boolean }>`
   width: ${({ isEmbedded }) => (isEmbedded ? '100%' : '100vw')};
   height: ${({ isEmbedded }) => (isEmbedded ? '640px' : '100vh')};
 

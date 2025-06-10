@@ -1,5 +1,5 @@
 import { constructUrl, getPortalBaseURL } from '@getpara/web-sdk';
-import styled from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { useEffect, useRef, useState } from 'react';
 import { HeroSpinner } from '@getpara/react-common';
 import { TelegramAuthResponse } from '@getpara/user-management-client';
@@ -81,7 +81,7 @@ export function TelegramOAuthStep() {
   );
 }
 
-const Container = styled.div`
+const Container = safeStyled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -89,7 +89,7 @@ const Container = styled.div`
   width: 100%;
 `;
 
-const HeroContainer = styled.div`
+const HeroContainer = safeStyled.div`
   display: flex;
   min-height: 276px;
   flex-direction: column;
@@ -98,7 +98,7 @@ const HeroContainer = styled.div`
   flex: 1;
 `;
 
-const IFrame = styled.iframe`
+const IFrame = safeStyled.iframe`
   width: 100%;
   height: 52px;
   border: none;

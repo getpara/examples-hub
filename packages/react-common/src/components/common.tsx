@@ -1,13 +1,13 @@
 import { CpslButton, CpslInput, CpslText } from '@getpara/react-components';
-import styled from 'styled-components';
+import { safeStyled } from '../utils/index.js';
 
-export const SpinnerContainer = styled.div`
+export const SpinnerContainer = safeStyled.div`
   display: flex;
   align-items: center;
   justify-content: center;
 `;
 
-export const CenteredColumnContainer = styled.div`
+export const CenteredColumnContainer = safeStyled.div`
   width: 100%;
   height: 100%;
   align-self: center;
@@ -17,7 +17,7 @@ export const CenteredColumnContainer = styled.div`
   gap: 8px;
 `;
 
-export const FilledDisabledInput: typeof CpslInput = styled(CpslInput)`
+export const FilledDisabledInput: typeof CpslInput = safeStyled(CpslInput)`
   --container-border-color: var(--cpsl-color-input-border-placeholder);
   --container-background-color: var(--cpsl-color-background-0);
   --input-background-color: transparent;
@@ -25,16 +25,16 @@ export const FilledDisabledInput: typeof CpslInput = styled(CpslInput)`
   --input-color: var(--cpsl-color-text-secondary) !important;
 `;
 
-export const FullWidthFilledDisabledInput: typeof CpslInput = styled(FilledDisabledInput)`
+export const FullWidthFilledDisabledInput: typeof CpslInput = safeStyled(FilledDisabledInput)`
   width: 100%;
 `;
 
-export const CenteredText: typeof CpslText = styled(CpslText)`
+export const CenteredText: typeof CpslText = safeStyled(CpslText)`
   width: 100%;
   text-align: center;
 `;
 
-export const HeaderButton = styled(CpslButton)`
+export const HeaderButton = safeStyled(CpslButton)`
   flex: 0;
   --button-padding-top: 2px;
   --button-padding-bottom: 2px;

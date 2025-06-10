@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { useModalStore } from '../../stores/index.js';
 import { CpslButton, CpslIdenticon, CpslText } from '@getpara/react-components';
 import { truncateAddress, TWalletType } from '@getpara/web-sdk';
@@ -102,14 +102,14 @@ const SharedWalletCard = ({ address, name, identiconHash, showAddFunds, id, type
   );
 };
 
-export const WalletCards = styled.div`
+export const WalletCards = safeStyled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
   width: 100%;
 `;
 
-const Container = styled.div`
+const Container = safeStyled.div`
   width: 100%;
   padding: 24px;
   display: flex;
@@ -120,7 +120,7 @@ const Container = styled.div`
   border-radius: 16px;
 `;
 
-const InnerContainer = styled.div`
+const InnerContainer = safeStyled.div`
   display: flex;
   justify-content: flex-start;
   gap: 8px;
@@ -128,7 +128,7 @@ const InnerContainer = styled.div`
   overflow: hidden;
 `;
 
-const WalletNameContainer = styled.div`
+const WalletNameContainer = safeStyled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -138,7 +138,7 @@ const WalletNameContainer = styled.div`
   overflow: hidden;
 `;
 
-const Name = styled(CpslText)`
+const Name = safeStyled(CpslText)`
   width: 100%;
   &::part(text-element) {
     line-height: 100%;
@@ -148,7 +148,7 @@ const Name = styled(CpslText)`
   }
 `;
 
-const AddFundsButton = styled(CpslButton)`
+const AddFundsButton = safeStyled(CpslButton)`
   --button-primary-background-color: var(--cpsl-color-card-surface);
   --button-primary-hover-background-color: var(--cpsl-color-background-4);
   --button-primary-color: var(--cpsl-color-text-contrast);

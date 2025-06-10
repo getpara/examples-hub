@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import { TOAuthMethod } from '@getpara/web-sdk';
 import { AuthMainStepContent } from './AuthMainStepContent.js';
 import { CenteredText } from '../common.js';
@@ -44,7 +44,7 @@ export const AuthMainStep = ({
   );
 };
 
-const Logo = styled.img`
+const Logo = safeStyled.img`
   height: 100px;
   max-width: 260px;
   object-fit: contain;

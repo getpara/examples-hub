@@ -1,5 +1,5 @@
 import { CpslButton, CpslIcon, CpslIdenticon, CpslText } from '@getpara/react-components';
-import styled from 'styled-components';
+import { safeStyled } from '@getpara/react-common';
 import ParaWeb, { truncateAddress, TWalletType } from '@getpara/web-sdk';
 import { useEffect, useRef } from 'react';
 import { useDropdownPosition } from '../AuthInput/hooks/useDropdownPosition.js';
@@ -214,30 +214,30 @@ export const AccountSelect = () => {
   );
 };
 
-const Container = styled.div`
+const Container = safeStyled.div`
   flex: 0;
   width: 100%;
   display: flex;
   justify-content: center;
 `;
 
-const FlexRow = styled.div`
+const FlexRow = safeStyled.div`
   display: flex;
   align-items: center;
   gap: 8px;
 `;
 
-const FlexCol = styled.div`
+const FlexCol = safeStyled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 `;
 
-const WalletName = styled(CpslText)`
+const WalletName = safeStyled(CpslText)`
   white-space: nowrap;
 `;
 
-const ChainName = styled(CpslText)`
+const ChainName = safeStyled(CpslText)`
   max-width: 150px;
   text-transform: capitalize;
 
