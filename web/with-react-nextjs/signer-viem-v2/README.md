@@ -1,7 +1,7 @@
 # Para Signing with Ethers Example
 
-This example demonstrates how to use the Para SDK with Ethers.js for signing messages and transactions. It provides
-multiple example transaction types using the Para Ethers v6 signer. Authentication is handled through the ParaModal
+This example demonstrates how to use the Para SDK with viem for signing messages and transactions. It provides
+multiple example transaction types using the Para EVM signer. Authentication is handled through the ParaModal
 before being able to sign.
 
 ## Prerequisites
