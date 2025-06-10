@@ -521,6 +521,10 @@ function AppInner({
   const [solanaSignature, setSolanaSignature] = useState('');
   const [testTxSignature, setTestTxSignature] = useState('');
 
+  const [useFetchPregenWalletsOverride, setUseFetchPregenWalletsOverride] = useLocalStorage(
+    '@EXAMPLE-PARA/useFetchPregenWalletsOverride',
+    false,
+  );
   const { data: paraAccount, isLoading: isAccountLoading } = useParaAccount();
   const { isPending: isCreateGuestWalletsPending } = useCreateGuestWalletsState();
 
@@ -959,6 +963,15 @@ function AppInner({
                     </option>
                   ))}
                 </Select>
+              </HStack>
+              <HStack>
+                <Text width={'15%'}>
+                  <strong>Use Fetch Pregen Wallets Override:</strong>
+                </Text>
+                <Checkbox
+                  isChecked={useFetchPregenWalletsOverride}
+                  onChange={e => setUseFetchPregenWalletsOverride(e.currentTarget.checked)}
+                />
               </HStack>
               <HStack>
                 <Button colorScheme="green" isDisabled={!para} onClick={openModal}>
@@ -1401,13 +1414,20 @@ const App = () => {
   const [hideWallets] = useLocalStorage('@EXAMPLE-PARA/hideWallets', false);
   const [defaultIdentifier] = useLocalStorage('@EXAMPLE-PARA/defaultIdentifier', undefined);
 
+  const [pregenUserShare] = useLocalStorage('@EXAMPLE-PARA/pregenUserShare', undefined);
+  const [useFetchPregenWalletsOverride] = useLocalStorage('@EXAMPLE-PARA/useFetchPregenWalletsOverride', false);
   const [currentStepOverride, setCurrentStepOverride] = useState<ModalStepProp | undefined>(undefined);
+
+  async function fetchPregenWalletsOverride(_opts: { pregenId: PregenAuth }): Promise<{ userShare?: string }> {
+    return Promise.resolve({ userShare: pregenUserShare });
+  }
 
   const para = useMemo(
     () =>
       new ParaLegacyExample(selectedEnv, selectedApiKey, {
         ...getParaOpts(selectedEnv, useDKLS),
         simulateNoPasskey,
+        fetchPregenWalletsOverride: useFetchPregenWalletsOverride ? fetchPregenWalletsOverride : undefined,
       }),
     [selectedEnv, selectedApiKey, useDKLS, simulateNoPasskey],
   );

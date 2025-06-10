@@ -16,8 +16,13 @@ import {
   USER_X_USERNAME,
 } from '../constants';
 import { mockEd25519Keygen, mockEd25519PreKeygen, mockKeygen, mockPreKeygen } from '../mocks/mockPlatformUtils';
-import { mockGetPregenWallets, mockGetWallets, mockUpdatePregenWallet } from '../mocks/mockUserManagementClient';
-import { Environment } from '../../src';
+import {
+  mockGetPregenWallets,
+  mockGetWallets,
+  mockUpdatePregenWallet,
+  mockClaimPregenWallets,
+} from '../mocks/mockUserManagementClient';
+import { Environment, ParaEvent } from '../../src';
 import * as shareDistribution from '../../src/shares/shareDistribution.js';
 import _ from 'lodash';
 
@@ -300,6 +305,300 @@ describe('wallets', () => {
     ).toBe(true);
     expect(await para.hasPregenWallet({ pregenId: { phone: USER_PHONE } })).toBe(false);
     expect(await para.hasPregenWallet({ pregenId: { farcasterUsername: USER_FARCASTER_USERNAME } })).toBe(false);
+  });
+
+  describe('claimPregenWallets', () => {
+    it('returns undefined when no pregen wallets exist', async () => {
+      await prepareMock(para);
+
+      mockGetPregenWallets.mockResolvedValue({ wallets: [] });
+
+      const result = await para.claimPregenWallets();
+
+      expect(result).toBeUndefined();
+      expect(mockClaimPregenWallets).not.toHaveBeenCalled();
+    });
+
+    it('throws error when wallet data is missing', async () => {
+      await prepareMock(para);
+
+      const missingWalletId = faker.string.uuid();
+      const missingWallet = getWallet({ id: missingWalletId, type: 'EVM', auth: { email: USER_EMAIL } });
+
+      mockGetPregenWallets.mockResolvedValue({ wallets: [missingWallet] });
+
+      await expect(para.claimPregenWallets()).rejects.toThrow(
+        `Cannot claim pregen wallets because wallet data is missing. Please call setUserShare first to load the wallet data for the following wallet IDs: ${missingWalletId}`,
+      );
+    });
+
+    it('successfully claims DKLS pregen wallets without pregenId', async () => {
+      const { evmPregenId } = await prepareMock(para, { withoutAuth: true });
+      const pregenWallet = para.wallets[evmPregenId];
+
+      // Set auth to match the pregen wallet
+      await para.setEmail(USER_EMAIL);
+      // Ensure userId is set
+      await para.setUserId(USER_ID);
+
+      mockGetPregenWallets.mockResolvedValue({ wallets: [pregenWallet] });
+      mockClaimPregenWallets.mockResolvedValue({ walletIds: [evmPregenId] });
+
+      const mockRefreshShare = vi.spyOn(para, 'refreshShare');
+      mockRefreshShare.mockResolvedValue({
+        signer: 'new-signer',
+        recoverySecret: 'recovery-secret',
+        protocolId: 'protocol-id',
+      });
+
+      // Mock window.dispatchEvent
+      const mockDispatchEvent = vi.fn();
+      Object.defineProperty(globalThis.window, 'dispatchEvent', {
+        value: mockDispatchEvent,
+        configurable: true,
+      });
+
+      const result = await para.claimPregenWallets();
+
+      expect(mockClaimPregenWallets).toHaveBeenCalledWith({
+        userId: USER_ID,
+        walletIds: [evmPregenId],
+      });
+
+      expect(mockRefreshShare).toHaveBeenCalledWith({
+        walletId: evmPregenId,
+        share: pregenWallet.signer,
+        oldPartnerId: pregenWallet.partnerId,
+        newPartnerId: pregenWallet.partnerId,
+        redistributeBackupEncryptedShares: true,
+      });
+
+      expect(para.wallets[evmPregenId].userId).toBe(USER_ID);
+      expect(para.wallets[evmPregenId].pregenIdentifier).toBeUndefined();
+      expect(para.wallets[evmPregenId].pregenIdentifierType).toBeUndefined();
+      expect(para.wallets[evmPregenId].signer).toBe('new-signer');
+
+      expect(mockDispatchEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: ParaEvent.PREGEN_WALLET_CLAIMED,
+          detail: expect.objectContaining({
+            data: expect.objectContaining({
+              wallet: expect.objectContaining({
+                id: evmPregenId,
+                userId: USER_ID,
+              }),
+              recoverySecret: 'recovery-secret',
+            }),
+          }),
+        }),
+      );
+
+      expect(result).toBe('recovery-secret');
+
+      mockRefreshShare.mockRestore();
+    });
+
+    it('successfully claims ED25519 pregen wallets with pregenId', async () => {
+      const { solanaPregenId } = await prepareMock(para, { withoutAuth: true });
+      const pregenWallet = para.wallets[solanaPregenId];
+
+      // Set auth to match the pregen wallet
+      await para.setEmail(USER_EMAIL);
+      // Ensure userId is set
+      await para.setUserId(USER_ID);
+
+      mockGetPregenWallets.mockResolvedValue({ wallets: [pregenWallet] });
+      mockClaimPregenWallets.mockResolvedValue({ walletIds: [solanaPregenId] });
+
+      vi.mocked(shareDistribution.distributeNewShare).mockResolvedValueOnce('recovery-share-ed25519');
+
+      // Mock window.dispatchEvent
+      const mockDispatchEvent = vi.fn();
+      Object.defineProperty(globalThis.window, 'dispatchEvent', {
+        value: mockDispatchEvent,
+        configurable: true,
+      });
+
+      const result = await para.claimPregenWallets({ pregenId: { email: USER_EMAIL } });
+
+      expect(mockClaimPregenWallets).toHaveBeenCalledWith({
+        userId: USER_ID,
+        walletIds: [solanaPregenId],
+      });
+
+      expect(shareDistribution.distributeNewShare).toHaveBeenCalledWith({
+        ctx: para.ctx,
+        userId: USER_ID,
+        walletId: solanaPregenId,
+        userShare: pregenWallet.signer,
+        emailProps: (para as unknown as any).getBackupKitEmailProps(),
+        partnerId: pregenWallet.partnerId,
+      });
+
+      expect(para.wallets[solanaPregenId].userId).toBe(USER_ID);
+      expect(para.wallets[solanaPregenId].pregenIdentifier).toBeUndefined();
+      expect(para.wallets[solanaPregenId].pregenIdentifierType).toBeUndefined();
+      expect(para.wallets[solanaPregenId].signer).toBe(pregenWallet.signer);
+
+      expect(mockDispatchEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: ParaEvent.PREGEN_WALLET_CLAIMED,
+          detail: expect.objectContaining({
+            data: expect.objectContaining({
+              wallet: expect.objectContaining({
+                id: solanaPregenId,
+                userId: USER_ID,
+              }),
+              recoverySecret: 'recovery-share-ed25519',
+            }),
+          }),
+        }),
+      );
+
+      expect(result).toBe('recovery-share-ed25519');
+    });
+
+    it('successfully claims multiple pregen wallets', async () => {
+      const { evmPregenId, solanaPregenId } = await prepareMock(para, { withoutAuth: true });
+      const evmPregenWallet = para.wallets[evmPregenId];
+      const solanaPregenWallet = para.wallets[solanaPregenId];
+
+      // Set auth to match the pregen wallets
+      await para.setEmail(USER_EMAIL);
+      // Ensure userId is set
+      await para.setUserId(USER_ID);
+
+      mockGetPregenWallets.mockResolvedValue({
+        wallets: [evmPregenWallet, solanaPregenWallet],
+      });
+      mockClaimPregenWallets.mockResolvedValue({
+        walletIds: [evmPregenId, solanaPregenId],
+      });
+
+      const mockRefreshShare = vi.spyOn(para, 'refreshShare');
+      mockRefreshShare.mockResolvedValue({
+        signer: 'new-evm-signer',
+        recoverySecret: 'evm-recovery-secret',
+        protocolId: 'protocol-id',
+      });
+
+      vi.mocked(shareDistribution.distributeNewShare).mockResolvedValueOnce('solana-recovery-share');
+
+      // Mock window.dispatchEvent
+      const mockDispatchEvent = vi.fn();
+      Object.defineProperty(globalThis.window, 'dispatchEvent', {
+        value: mockDispatchEvent,
+        configurable: true,
+      });
+
+      const result = await para.claimPregenWallets();
+
+      expect(mockClaimPregenWallets).toHaveBeenCalledWith({
+        userId: USER_ID,
+        walletIds: [evmPregenId, solanaPregenId],
+      });
+
+      // Verify both wallets were processed
+      expect(para.wallets[evmPregenId].userId).toBe(USER_ID);
+      expect(para.wallets[solanaPregenId].userId).toBe(USER_ID);
+
+      expect(para.wallets[evmPregenId].pregenIdentifier).toBeUndefined();
+      expect(para.wallets[solanaPregenId].pregenIdentifier).toBeUndefined();
+
+      expect(para.wallets[evmPregenId].pregenIdentifierType).toBeUndefined();
+      expect(para.wallets[solanaPregenId].pregenIdentifierType).toBeUndefined();
+
+      // Should dispatch events for both wallets
+      expect(mockDispatchEvent).toHaveBeenCalledTimes(2);
+
+      // Last recovery secret should be returned (from solana wallet processing)
+      expect(result).toBe('solana-recovery-share');
+
+      mockRefreshShare.mockRestore();
+    });
+
+    it('handles DKLS wallet without recovery secret', async () => {
+      const { evmPregenId } = await prepareMock(para, { withoutAuth: true });
+      const pregenWallet = para.wallets[evmPregenId];
+
+      await para.setEmail(USER_EMAIL);
+      // Ensure userId is set
+      await para.setUserId(USER_ID);
+
+      mockGetPregenWallets.mockResolvedValue({ wallets: [pregenWallet] });
+      mockClaimPregenWallets.mockResolvedValue({ walletIds: [evmPregenId] });
+
+      const mockRefreshShare = vi.spyOn(para, 'refreshShare');
+      mockRefreshShare.mockResolvedValue({
+        signer: 'new-signer',
+        recoverySecret: undefined, // No recovery secret
+        protocolId: 'protocol-id',
+      });
+
+      const result = await para.claimPregenWallets();
+
+      expect(result).toBeUndefined();
+
+      mockRefreshShare.mockRestore();
+    });
+
+    it('handles ED25519 wallet with empty recovery secret', async () => {
+      const { solanaPregenId } = await prepareMock(para, { withoutAuth: true });
+      const pregenWallet = para.wallets[solanaPregenId];
+
+      await para.setEmail(USER_EMAIL);
+      // Ensure userId is set
+      await para.setUserId(USER_ID);
+
+      mockGetPregenWallets.mockResolvedValue({ wallets: [pregenWallet] });
+      mockClaimPregenWallets.mockResolvedValue({ walletIds: [solanaPregenId] });
+
+      vi.mocked(shareDistribution.distributeNewShare).mockResolvedValueOnce(''); // Empty string
+
+      const result = await para.claimPregenWallets({ pregenId: { email: USER_EMAIL } });
+
+      expect(result).toBeUndefined();
+    });
+
+    it('requires API key', async () => {
+      // Create a para instance with valid API key first, then remove it to test requireApiKey method
+      const paraForApiKeyTest = new MockPara(Environment.DEV, API_KEY);
+      // Remove the API key to test the requireApiKey validation
+      paraForApiKeyTest.ctx.apiKey = '';
+
+      await expect(paraForApiKeyTest.claimPregenWallets()).rejects.toThrow(
+        `in order to create a wallet or user with Para, you
+        must provide an API key to the Para instance`,
+      );
+    });
+
+    it('calls setWallets to persist changes', async () => {
+      const { evmPregenId } = await prepareMock(para, { withoutAuth: true });
+      const pregenWallet = para.wallets[evmPregenId];
+
+      await para.setEmail(USER_EMAIL);
+      // Ensure userId is set
+      await para.setUserId(USER_ID);
+
+      mockGetPregenWallets.mockResolvedValue({ wallets: [pregenWallet] });
+      mockClaimPregenWallets.mockResolvedValue({ walletIds: [evmPregenId] });
+
+      const mockRefreshShare = vi.spyOn(para, 'refreshShare');
+      mockRefreshShare.mockResolvedValue({
+        signer: 'new-signer',
+        recoverySecret: 'recovery-secret',
+        protocolId: 'protocol-id',
+      });
+
+      const mockSetWallets = vi.spyOn(para, 'setWallets');
+
+      await para.claimPregenWallets();
+
+      expect(mockSetWallets).toHaveBeenCalledWith(para.wallets);
+
+      mockRefreshShare.mockRestore();
+      mockSetWallets.mockRestore();
+    });
   });
 
   it('helpers', async () => {

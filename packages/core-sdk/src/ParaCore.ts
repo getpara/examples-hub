@@ -49,6 +49,7 @@ import {
   AccountMetadata,
   WALLET_TYPES,
   PregenOrGuestAuth,
+  isPregenAuth,
 } from '@getpara/user-management-client';
 import type { pki as pkiType, jsbn as jsbnType } from 'node-forge';
 import forge from 'node-forge';
@@ -404,6 +405,8 @@ export abstract class ParaCore implements CoreInterface {
   externalWalletConnectionOnly?: boolean;
 
   private disableProviderModal?: boolean;
+
+  private fetchPregenWalletsOverride?: ConstructorOpts['fetchPregenWalletsOverride'];
 
   get isNoWalletConfig(): boolean {
     return !!this.#partner?.supportedWalletTypes && this.#partner.supportedWalletTypes.length === 0;
@@ -862,6 +865,7 @@ export abstract class ParaCore implements CoreInterface {
 
     this.platformUtils = this.getPlatformUtils();
     this.disableProviderModal = this.platformUtils.disableProviderModal;
+    this.fetchPregenWalletsOverride = opts.fetchPregenWalletsOverride;
 
     if (opts.useStorageOverrides) {
       this.localStorageGetItem = opts.localStorageGetItemOverride;
@@ -3664,6 +3668,14 @@ export abstract class ParaCore implements CoreInterface {
       ...auth,
       ...this.getVerificationEmailProps(),
     });
+
+    const authInfo = serverAuthState.auth;
+    if (this.fetchPregenWalletsOverride && isPregenAuth(authInfo)) {
+      const { userShare } = await this.fetchPregenWalletsOverride({ pregenId: authInfo });
+      if (userShare) {
+        await this.setUserShare(userShare);
+      }
+    }
 
     return this.#prepareAuthState(serverAuthState, urlOptions);
   }

@@ -4,6 +4,7 @@ import Client, {
   Network,
   OnRampAsset,
   OnRampProvider,
+  PregenAuth,
   TWalletScheme,
   TWalletType,
 } from '@getpara/user-management-client';
@@ -177,4 +178,8 @@ export interface ConstructorOpts {
    * Partner ID set in the Para Portal to track analytics for legacy SDK versions. This variable is unused outside of the Para Portal.
    */
   portalPartnerId?: string;
+  /**
+   * An optional function that fetches the pregenerated wallets for a given identifier so a user can claim them on account creation.
+   */
+  fetchPregenWalletsOverride?: (opts: { pregenId: PregenAuth }) => Promise<{ userShare?: string }>;
 }
