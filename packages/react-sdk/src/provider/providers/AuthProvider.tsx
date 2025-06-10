@@ -214,8 +214,13 @@ export function AuthProvider({
     [isIFrameReady],
   );
 
-  const login = () => {
-    setStep(ModalStep.BIOMETRIC_LOGIN);
+  const login = (authState: AuthStateLogin) => {
+    if (authState.isWalletSelectionNeeded || authState.passkeyUrl) {
+      setStep(ModalStep.BIOMETRIC_LOGIN);
+    } else {
+      setIFrameUrl(authState.passwordUrl!);
+      setStep(ModalStep.EMBEDDED_PASSWORD_LOGIN);
+    }
 
     refs.poll.current = {
       action: 'login',
@@ -225,11 +230,16 @@ export function AuthProvider({
             isCanceled: () =>
               cancelIfExitedSteps([
                 ModalStep.BIOMETRIC_LOGIN,
+                ModalStep.EMBEDDED_PASSWORD_LOGIN,
                 ModalStep.AWAITING_BIOMETRIC_LOGIN,
                 ModalStep.AWAITING_PASSWORD_LOGIN,
               ]),
             onPoll: () => {
-              goBackIfPopupClosedOnSteps([ModalStep.AWAITING_BIOMETRIC_LOGIN, ModalStep.AWAITING_PASSWORD_LOGIN]);
+              goBackIfPopupClosedOnSteps([
+                ModalStep.AWAITING_BIOMETRIC_LOGIN,
+                ModalStep.AWAITING_PASSWORD_LOGIN,
+                ModalStep.EMBEDDED_PASSWORD_LOGIN,
+              ]);
             },
           },
           {
@@ -295,7 +305,7 @@ export function AuthProvider({
         }
         break;
       case 'login':
-        login();
+        login(authState);
         break;
       case 'signup':
         {

@@ -27,6 +27,7 @@ export const useStepTitle = () => {
       [ModalStep.WALLET_CREATION_DONE]: hideWallets ? 'Account Created' : 'Wallet Created',
       [ModalStep.SECRET]: isLogin ? 'Login' : 'Sign Up',
       [ModalStep.BIOMETRIC_LOGIN]: 'Login',
+      [ModalStep.EMBEDDED_PASSWORD_LOGIN]: 'Login',
       [ModalStep.AWAITING_PASSWORD_LOGIN]: 'Login',
       [ModalStep.AWAITING_BIOMETRIC_LOGIN]: 'Login',
       [ModalStep.LOGIN_DONE]: '',

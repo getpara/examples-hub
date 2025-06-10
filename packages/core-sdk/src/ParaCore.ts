@@ -3612,6 +3612,7 @@ export abstract class ParaCore implements CoreInterface {
               sessionId: sessionLookupId,
               shorten,
               portalTheme,
+              params: { isEmbedded: `${!loginState.isWalletSelectionNeeded}` },
             }),
           }
         : {}),

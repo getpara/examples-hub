@@ -27,6 +27,7 @@ export {
   type SupportedWalletTypes,
   type TPregenIdentifierType,
   type PregenIds,
+  type PregenAuth,
   NON_ED25519,
   PREGEN_IDENTIFIER_TYPES,
   WALLET_TYPES,

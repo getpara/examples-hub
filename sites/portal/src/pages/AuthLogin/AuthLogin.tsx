@@ -19,7 +19,7 @@ const AuthLoginBase = ({ authMethod }) => {
   const {
     fns: { authLogin, authLoginWithPassword, fetchWallets, authUpdateKeyShares },
     authInfo,
-    params: { sessionId, partnerId, encryptionKey, newDeviceSessionLookupId, skipAutoLogin },
+    params: { sessionId, partnerId, encryptionKey, newDeviceSessionLookupId, skipAutoLogin, isEmbedded },
     biometricLocationHints,
   } = useLogin();
   const [urlForNewDeviceLogin, setUrlForNewDeviceLogin] = useState<string>('');
@@ -238,8 +238,9 @@ const AuthLoginBase = ({ authMethod }) => {
   return (
     <Card>
       <CardContent>
-        {step !== AuthLoginStep.LOGIN_FAILED_TROUBLESHOOTING && <ModalHeader />}
+        {step !== AuthLoginStep.LOGIN_FAILED_TROUBLESHOOTING && !isEmbedded && <ModalHeader />}
         <Body
+          isEmbedded={isEmbedded}
           step={step}
           sessionLookupId={sessionId}
           addDeviceUrl={urlForNewDeviceLogin}

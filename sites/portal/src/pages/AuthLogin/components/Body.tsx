@@ -24,6 +24,7 @@ interface BodyProps {
   loginWithPasswordError?: string;
   isKnownDeviceLogin: boolean;
   isAddingDevice: boolean;
+  isEmbedded?: boolean;
 }
 
 export const Body = ({
@@ -38,6 +39,7 @@ export const Body = ({
   loginWithPasswordError,
   isKnownDeviceLogin,
   isAddingDevice,
+  isEmbedded,
 }: BodyProps) => {
   const { partner } = useModalOutletContext();
 
@@ -63,16 +65,24 @@ export const Body = ({
         return <ModalLoading heading={isAddingDevice ? 'Creating Passkey...' : 'Waiting for Passkey...'} />;
       }
       case AuthLoginStep.ENTER_PASSWORD: {
-        return <EnterPasswordStep error={loginWithPasswordError} onLoginClick={onLoginWithPasswordClick} />;
+        return (
+          <EnterPasswordStep
+            isEmbedded={isEmbedded}
+            error={loginWithPasswordError}
+            onLoginClick={onLoginWithPasswordClick}
+          />
+        );
       }
       case AuthLoginStep.SUCCESS: {
         return (
           <ModalSuccess
             heading="You’re Logged In!"
             subHeading={
-              isKnownDeviceLogin
-                ? 'You can close this window and return to your other device.'
-                : `If you are not automatically redirected, you can close this window and return to ${partner.displayName}.`
+              isEmbedded
+                ? ''
+                : isKnownDeviceLogin
+                  ? 'You can close this window and return to your other device.'
+                  : `If you are not automatically redirected, you can close this window and return to ${partner.displayName}.`
             }
           />
         );
@@ -86,7 +96,7 @@ export const Body = ({
   return (
     <Container>
       <InnerContainer $isTroubleshooting={step === AuthLoginStep.LOGIN_FAILED_TROUBLESHOOTING}>{Content()}</InnerContainer>
-      <ModalFooter step={step} setStep={setStep} />
+      {!isEmbedded && <ModalFooter step={step} setStep={setStep} />}
     </Container>
   );
 };

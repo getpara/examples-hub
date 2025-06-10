@@ -9,9 +9,10 @@ import { UserIdentifier } from '@getpara/react-common';
 interface EnterPasswordStepProps {
   error: string | undefined;
   onLoginClick: (password: string) => void;
+  isEmbedded?: boolean;
 }
 
-export const EnterPasswordStep = ({ error, onLoginClick }: EnterPasswordStepProps) => {
+export const EnterPasswordStep = ({ error, onLoginClick, isEmbedded }: EnterPasswordStepProps) => {
   const para = usePara();
   const [recoveryUrl, setRecoveryUrl] = useState<string | undefined>();
   const [password, setPassword] = useState<string>('');
@@ -53,21 +54,22 @@ export const EnterPasswordStep = ({ error, onLoginClick }: EnterPasswordStepProp
 
   return (
     <Container
+      $isEmbedded={isEmbedded}
       onSubmit={e => {
         e.preventDefault();
         onSubmit();
       }}
     >
-      <CpslText variant="headingS">Login</CpslText>
+      <CpslText variant="headingS">{isEmbedded ? 'Welcome back,' : 'Login'}</CpslText>
       <UserIdentifier authInfo={authInfo} />
       <ButtonContainer>
         <CpslInput
-          placeholder="Enter a password"
+          placeholder="Enter password"
           type={passwordVisible ? 'text' : 'password'}
           onCpslInput={handlePasswordInput}
           onKeyDown={async e => e.key === 'Enter' && onSubmit()}
           value={password}
-          style={{ width: '100%' }}
+          style={{ width: '100%', paddingTop: isEmbedded ? '24px' : '0px' }}
         >
           <ClickableIcon
             onClick={() => setPasswordVisible(!passwordVisible)}
@@ -84,10 +86,10 @@ export const EnterPasswordStep = ({ error, onLoginClick }: EnterPasswordStepProp
           </ErrorContainer>
         )}
         <CpslButton fullWidth disabled={isProcessing || password === ''} onClick={onSubmit}>
-          Continue
+          {isEmbedded ? 'Login' : 'Continue'}
         </CpslButton>
         <Link href={recoveryUrl}>
-          <LinkText>I’m having trouble logging into my wallet</LinkText>
+          <LinkText>{isEmbedded ? 'I’m having trouble logging in' : 'I’m having trouble logging into my wallet'}</LinkText>
         </Link>
       </ButtonContainer>
     </Container>
@@ -123,14 +125,15 @@ const ClickableIcon = styled(CpslIcon)`
   cursor: pointer;
 `;
 
-const Container = styled.form`
+const Container = styled.form<{ $isEmbedded?: boolean }>`
   flex: 1;
-  padding-left: 83px;
-  padding-right: 83px;
-  padding-top: 24px;
+  padding-left: ${({ $isEmbedded }) => ($isEmbedded ? '0px' : '83px')};
+  padding-right: ${({ $isEmbedded }) => ($isEmbedded ? '0px' : '83px')};
+  padding-top: ${({ $isEmbedded }) => ($isEmbedded ? '0px' : '24px')};
 
   display: flex;
   align-items: center;
   flex-direction: column;
-  gap: 24px;
+  gap: ${({ $isEmbedded }) => ($isEmbedded ? '4px' : '24px')};
+  width: ${({ $isEmbedded }) => ($isEmbedded ? '100%' : 'auto')};
 `;

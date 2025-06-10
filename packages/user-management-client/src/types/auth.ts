@@ -211,6 +211,7 @@ export type ServerAuthStateLogin = ServerAuthStateBase & {
   stage: 'login';
   biometricHints?: BiometricLocationHint[];
   loginAuthMethods: AuthMethod[];
+  isWalletSelectionNeeded?: boolean;
 };
 
 export type VerifyThirdPartyAuth = ServerAuthStateSignup | ServerAuthStateLogin;

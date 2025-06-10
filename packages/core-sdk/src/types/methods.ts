@@ -40,6 +40,7 @@ export type PortalUrlOptions = {
   portalTheme?: Theme;
   pathId?: string;
   shorten?: boolean;
+  isEmbedded?: boolean;
 };
 
 export type WithAuthMethod = {

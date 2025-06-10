@@ -112,7 +112,7 @@ function expectSearchParams(url: URL, expected: Record<string, string>): void {
   expect(searchParams).toEqual(expected);
 }
 
-function testLoginUrl(para: MockPara, str: string, authMethod: AuthMethod) {
+function testLoginUrl(para: MockPara, str: string, authMethod: AuthMethod, extraParams?: Record<string, string>) {
   const url = new URL(str);
 
   const authInfo = para.authInfo!;
@@ -129,6 +129,7 @@ function testLoginUrl(para: MockPara, str: string, authMethod: AuthMethod) {
     encryptionKey: getPublicKeyHex(para.loginEncryptionKeyPair!),
     sessionId: SESSION_LOOKUP_ID,
     pregenIds: '{}',
+    ...extraParams,
   });
 }
 
@@ -542,10 +543,10 @@ describe('ParaCore - authentication', () => {
           expect(authState).toStrictEqual(getVerifyState(auth));
         });
 
-        it('returning user', async () => {
+        it('returning user that needs wallet selection', async () => {
           if (para) (para as unknown as any).isNativePasskey = isNativePasskey;
 
-          mockSignUpOrLogIn.mockResolvedValueOnce(getLoginState(auth));
+          mockSignUpOrLogIn.mockResolvedValueOnce({ ...getLoginState(auth), isWalletSelectionNeeded: true });
 
           const authState = await initiateLogin(para, authInfo);
 
@@ -565,13 +566,14 @@ describe('ParaCore - authentication', () => {
                   passkeyKnownDeviceUrl: expect.stringMatching(''),
                 }),
             passwordUrl: expect.stringMatching(''),
+            isWalletSelectionNeeded: true,
           });
 
           if (!isNativePasskey) {
             testLoginUrl(para, authState.passkeyUrl!, AuthMethod.PASSKEY);
           }
 
-          testLoginUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD);
+          testLoginUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD, { isEmbedded: 'false' });
         });
       });
 
@@ -821,7 +823,7 @@ describe('ParaCore - authentication', () => {
                   });
 
                   testLoginUrl(para, authState.passkeyUrl!, AuthMethod.PASSKEY);
-                  testLoginUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD);
+                  testLoginUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD, { isEmbedded: 'true' });
                 });
               });
             });
@@ -898,7 +900,7 @@ describe('ParaCore - authentication', () => {
             });
 
             testLoginUrl(para, authState.passkeyUrl!, AuthMethod.PASSKEY);
-            testLoginUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD);
+            testLoginUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD, { isEmbedded: 'true' });
           });
         });
 

@@ -135,16 +135,13 @@ export class WebExamplePage {
     await this.page.waitForTimeout(250);
     await this.page.locator('.primary > .hydrated > div > svg').first().click();
 
-    const page2Promise = this.page.waitForEvent('popup');
-    await this.page.waitForTimeout(750);
     if (password) {
-      await this.page.getByRole('button', { name: 'Login' }).click();
-      const page2 = await page2Promise;
-      const authPortal = new AuthPortalPage(page2);
-      await authPortal.page.getByRole('textbox', { name: 'Enter a password' }).click();
-      await authPortal.page.getByRole('textbox', { name: 'Enter a password' }).fill(password);
-      await authPortal.page.getByRole('button', { name: 'Continue' }).click();
+      await this.page.frameLocator('#root iframe').getByRole('textbox', { name: 'Enter password' }).click();
+      await this.page.frameLocator('#root iframe').getByRole('textbox', { name: 'Enter password' }).fill(password);
+      await this.page.frameLocator('#root iframe').getByRole('button', { name: 'Login' }).click();
     } else {
+      const page2Promise = this.page.waitForEvent('popup');
+      await this.page.waitForTimeout(750);
       await this.page.getByText('Login with passkey').click();
       const page2 = await page2Promise;
       const authPortal = new AuthPortalPage(page2);

@@ -23,6 +23,7 @@ export type PortalAuthParams = {
   isForKnownDeviceLogin?: boolean;
   partnerId?: string;
   pregenIds?: PregenIds;
+  isEmbedded?: boolean;
 };
 
 export type AuthLoginParams = PortalAuthParams & {
