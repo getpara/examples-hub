@@ -31,4 +31,5 @@ export { default as RabbyIcon } from './rabby.svg';
 export { default as SafeIcon } from './safe.svg';
 export { default as SolflareIcon } from './solflare.svg';
 export { default as OkxIcon } from './okx.svg';
+export { default as CosmostationIcon } from './cosmostation.svg';
 export { default as HahaIcon } from './haha.svg';

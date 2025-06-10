@@ -27,6 +27,7 @@ import {
   SafeIcon,
   SolflareIcon,
   OkxIcon,
+  CosmostationIcon,
   HahaIcon,
 } from '../assets';
 import {
@@ -71,6 +72,7 @@ export const EXTERNAL_WALLET_CONFIGS: Partial<Record<CustomExternalWallet, Dragg
   [ExternalWallet.SOLFLARE]: { logo: SolflareIcon, label: 'Solflare' },
   [ExternalWallet.LEAP]: { logo: LeapIcon, label: 'Leap' },
   [ExternalWallet.KEPLR]: { logo: KeplrIcon, label: 'Keplr' },
+  [ExternalWallet.COSMOSTATION]: { logo: CosmostationIcon, label: 'Cosmostation' },
   [ExternalWallet.HAHA]: { logo: HahaIcon, label: 'HaHa' },
 };
 

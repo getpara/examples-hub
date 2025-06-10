@@ -71,6 +71,7 @@ export enum SolanaWallet {
 export enum CosmosWallet {
   KEPLR = 'KEPLR',
   LEAP = 'LEAP',
+  COSMOSTATION = 'COSMOSTATION',
 }
 
 export const ExternalWallet = {
