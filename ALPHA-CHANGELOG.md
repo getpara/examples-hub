@@ -1,3 +1,48 @@
+# Release (Tue Jun 10 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.19
+- @getpara/wagmi-v2-integration@2.0.0-alpha.19
+- @getpara/wagmi-v2-connector@2.0.0-alpha.19
+- @getpara/viem-v2-integration@2.0.0-alpha.19
+- @getpara/viem-v1-integration@2.0.0-alpha.19
+- @getpara/user-management-client@2.0.0-alpha.19
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.19
+- @getpara/solana-wallet-connectors@2.0.0-alpha.19
+- @getpara/server-sdk@2.0.0-alpha.19
+- @getpara/react-sdk@2.0.0-alpha.19
+- @getpara/react-native-wallet@2.0.0-alpha.19
+- @getpara/react-components@2.0.0-alpha.19
+- @getpara/react-component-library@1.0.0-alpha.14
+- @getpara/react-common@2.0.0-alpha.19
+- @getpara/evm-wallet-connectors@2.0.0-alpha.19
+- @getpara/ethers-v6-integration@2.0.0-alpha.19
+- @getpara/ethers-v5-integration@2.0.0-alpha.19
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.19
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.19
+- @getpara/core-sdk@2.0.0-alpha.19
+- @getpara/core-components@2.0.0-alpha.19
+
+### Features
+-  Add cosmostation wallet to cosmos connectors (#998) - 528acd2bd
+-  Haha and Backpack EVM wallets (#994) - 0184bae8d
+-  embedded iframe password login when wallet selection is not required (#990) - 36f2673d8
+-  add fetchPregenWalletsOverride to allow retrieval of pregen wallets during user onboarding (#993) - 5b7f618aa
+-  Dev Portal - User sheet (#986) - d7d61bd06
+-  Dev Portal - Finish Org Home (#976) - bacfba834
+-  Dev Portal - Finish Projects (#964) - 029d935d2
+-  Add Solana bridge methods and enhanced documentation (#978) - 9781916b8
+
+### Fixes
+-  styled-components module level ssr evaluation (#989) - eb0a79508
+-  Demo - fix missing wallets (#987) - f8a3432f8
+-  setup para cli exit (#983) - ebb44af02
+
+### Chores
+-  main merge (#996) - 2ee6b1f0f
+-  expose wagmi config (#995) - ca4b8be15
+-  Dev Portal - Cleanup (#981) - ce6657e51
+
 # Release (Fri May 30 2025)
 
 ## Package Versions
