@@ -7,6 +7,7 @@ import { computeWalletConnectMetaData } from '../utils/computeWalletConnectMetaD
 import { EvmExternalWalletProvider, EvmExternalWalletProviderConfig } from './EvmExternalWalletContext.js';
 import { InjectedParameters } from 'wagmi/connectors';
 import { paraConnector } from '@getpara/wagmi-v2-connector';
+import { setWagmiConfig } from '../stores/wagmiConfigStore.js';
 
 export interface ParaEvmProviderConfig<
   chains extends readonly [Chain, ...Chain[]],
@@ -85,7 +86,7 @@ export function ParaEvmProvider<
     });
   }, [para]);
 
-  // Memoizing the config with no deps here so it stays constant after the first render. If any config changes are made a refresh will be needed ()
+  // Memoizing the config with no deps here so it stays constant after the first render
   const config = useMemo(() => {
     const wcMetadata = computeWalletConnectMetaData({ appName, appDescription, appUrl, appIcon });
     const baseConnectors = connectorsForWallets(wallets, {
@@ -97,12 +98,17 @@ export function ParaEvmProvider<
       walletConnectParameters: { metadata: wcMetadata },
     });
     const allConnectors = [...baseConnectors, paraConnectorInstance];
-    return createConfig({
+    const createdConfig = createConfig({
       ...wagmiConfigParams,
       chains,
       transports: transports || createDefaultTransports(chains),
       connectors: allConnectors,
     } as CreateConfigParameters<chains, transports>);
+
+    // Set the config in the global store
+    setWagmiConfig(createdConfig);
+
+    return createdConfig;
   }, [wallets, paraConnectorInstance]);
 
   return (
