@@ -57,6 +57,8 @@ export enum EvmWallet {
   SAFE = 'SAFE',
   RABBY = 'RABBY',
   OKX = 'OKX',
+  HAHA = 'HAHA',
+  BACKPACK = 'BACKPACK',
 }
 
 export enum SolanaWallet {

@@ -27,6 +27,7 @@ import {
   SafeIcon,
   SolflareIcon,
   OkxIcon,
+  HahaIcon,
 } from '../assets';
 import {
   AuthMethod,
@@ -70,6 +71,7 @@ export const EXTERNAL_WALLET_CONFIGS: Partial<Record<CustomExternalWallet, Dragg
   [ExternalWallet.SOLFLARE]: { logo: SolflareIcon, label: 'Solflare' },
   [ExternalWallet.LEAP]: { logo: LeapIcon, label: 'Leap' },
   [ExternalWallet.KEPLR]: { logo: KeplrIcon, label: 'Keplr' },
+  [ExternalWallet.HAHA]: { logo: HahaIcon, label: 'HaHa' },
 };
 
 export const ONRAMPS_CONFIGS: Record<OnRampProvider, DraggableItemHeaderConfig> = {

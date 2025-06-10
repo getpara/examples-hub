@@ -6,6 +6,8 @@ import { zerionWallet } from './zerion/zerion.js';
 import { rabbyWallet } from './rabby/rabby.js';
 import { safeWallet } from './safe/safe.js';
 import { okxWallet } from './okx/okx.js';
+import { backpackWallet } from './backpack/backpack.js';
+import { hahaWallet } from './haha/haha.js';
 
 export {
   metaMaskWallet,
@@ -16,6 +18,8 @@ export {
   rabbyWallet,
   safeWallet,
   okxWallet,
+  backpackWallet,
+  hahaWallet,
 };
 
 export const allWallets = [
@@ -27,4 +31,6 @@ export const allWallets = [
   rabbyWallet,
   safeWallet,
   okxWallet,
+  backpackWallet,
+  hahaWallet,
 ];
