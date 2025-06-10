@@ -12,9 +12,6 @@
       "{workspaceRoot}/nx.json",
       "{workspaceRoot}/package.json"
     ],
-    "projectBoundaries": [
-      "{projectRoot}/dist/**/*.d.ts"
-    ],
     "withTests": [
       "{projectRoot}/**/*",
       "{workspaceRoot}/tsconfig.json",
@@ -26,7 +23,10 @@
     "build": {
       "cache": true,
       "dependsOn": ["^build"],
-      "inputs": ["default", "^projectBoundaries"],
+      "inputs": [
+        "default",
+        { "dependentTasksOutputFiles": "**/*.d.ts", "transitive": true }
+      ],
       "outputs": ["{projectRoot}/dist"]
     },
     "start": {

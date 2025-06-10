@@ -1,4 +1,5 @@
 import { Ctx, getBaseMPCNetworkUrl, TPregenIdentifierType, SignatureRes, TWalletType } from '@getpara/core-sdk';
+import * as uuid from 'uuid';
 
 const configCGGMPBase = (serverUrl: string, walletId: string, id: string) =>
   `{"ServerUrl":"${serverUrl}", "WalletId": "${walletId}", "Id":"${id}", "Ids":["USER","CAPSULE"], "Threshold":1}`;
@@ -108,21 +109,27 @@ export async function ed25519Sign(
   walletId: string,
   base64Bytes: string,
 ): Promise<{ signature: string }> {
-  const { protocolId } = await ctx.client.preSignMessage(userId, walletId, base64Bytes, 'ED25519');
+  const protocolId = uuid.v4();
+  const preSignMessageRes = ctx.client.preSignMessage(userId, walletId, base64Bytes, 'ED25519', undefined, protocolId);
 
-  try {
-    const base64Sig = (await new Promise((resolve, reject) =>
-      global.ed25519Sign(share, protocolId, base64Bytes, (err, result) => {
-        if (err) {
-          reject(err);
-        }
-        resolve(result);
-      }),
-    )) as string;
-    return { signature: base64Sig };
-  } catch (e) {
-    throw new Error(`error signing for account of type SOLANA with userId ${userId} and walletId ${walletId}`);
-  }
+  const signRes = (async function (): Promise<{ signature: string }> {
+    try {
+      const base64Sig = (await new Promise((resolve, reject) =>
+        global.ed25519Sign(share, protocolId, base64Bytes, (err, result) => {
+          if (err) {
+            reject(err);
+          }
+          resolve(result);
+        }),
+      )) as string;
+      return { signature: base64Sig };
+    } catch (e) {
+      throw new Error(`error signing for account of type SOLANA with userId ${userId} and walletId ${walletId}`);
+    }
+  })();
+
+  await preSignMessageRes;
+  return await signRes;
 }
 
 export async function keygen(
@@ -220,16 +227,8 @@ export async function signMessage(
   message: string,
   cosmosSignDoc?: string,
 ): Promise<SignatureRes> {
-  const { protocolId, pendingTransactionId } = await ctx.client.preSignMessage(
-    userId,
-    walletId,
-    message,
-    null,
-    cosmosSignDoc,
-  );
-  if (pendingTransactionId) {
-    return { pendingTransactionId };
-  }
+  const protocolId = uuid.v4();
+  const preSignMessageRes = ctx.client.preSignMessage(userId, walletId, message, null, cosmosSignDoc, protocolId);
 
   if (ctx.offloadMPCComputationURL && !ctx.useDKLS) {
     return signMessageRequest(ctx, userId, walletId, protocolId, message, share);
@@ -243,18 +242,25 @@ export async function signMessage(
     parsedShare.disableWebSockets = ctx.disableWebSockets;
   }
   share = JSON.stringify(parsedShare);
-  try {
-    return await new Promise((resolve, reject) =>
-      signMessageFn(share, serverUrl, message, protocolId, (err, result) => {
-        if (err) {
-          reject(err);
-        }
-        resolve({ signature: result });
-      }),
-    );
-  } catch (e) {
-    throw new Error(`error signing for account with userId ${userId} and walletId ${walletId}`);
+  const signMessageRes = (async function (): Promise<SignatureRes> {
+    try {
+      return await new Promise((resolve, reject) =>
+        signMessageFn(share, serverUrl, message, protocolId, (err, result) => {
+          if (err) {
+            reject(err);
+          }
+          resolve({ signature: result });
+        }),
+      );
+    } catch (e) {
+      throw new Error(`error signing for account with userId ${userId} and walletId ${walletId}`);
+    }
+  })();
+  const { pendingTransactionId } = await preSignMessageRes;
+  if (pendingTransactionId) {
+    return { pendingTransactionId };
   }
+  return await signMessageRes;
 }
 
 export async function signTransaction(
@@ -265,12 +271,8 @@ export async function signTransaction(
   tx: string,
   chainId: string,
 ): Promise<SignatureRes> {
-  const {
-    data: { protocolId, pendingTransactionId },
-  } = await ctx.client.signTransaction(userId, walletId, { transaction: tx, chainId });
-  if (pendingTransactionId) {
-    return { pendingTransactionId };
-  }
+  const protocolId = uuid.v4();
+  const signTransactionRes = ctx.client.signTransaction(userId, walletId, { transaction: tx, chainId, protocolId });
 
   if (ctx.offloadMPCComputationURL && !ctx.useDKLS) {
     return sendTransactionRequest(ctx, userId, walletId, protocolId, tx, share, chainId);
@@ -284,18 +286,27 @@ export async function signTransaction(
     parsedShare.disableWebSockets = ctx.disableWebSockets;
   }
   share = JSON.stringify(parsedShare);
-  try {
-    return await new Promise((resolve, reject) =>
-      signTransactionFn(share, serverUrl, tx, chainId, protocolId, (err, result) => {
-        if (err) {
-          reject(err);
-        }
-        resolve({ signature: result });
-      }),
-    );
-  } catch (e) {
-    throw new Error(`error signing transaction for account with userId ${userId} and walletId ${walletId}`);
+  const signTxRes = (async function (): Promise<SignatureRes> {
+    try {
+      return await new Promise((resolve, reject) =>
+        signTransactionFn(share, serverUrl, tx, chainId, protocolId, (err, result) => {
+          if (err) {
+            reject(err);
+          }
+          resolve({ signature: result });
+        }),
+      );
+    } catch (e) {
+      throw new Error(`error signing transaction for account with userId ${userId} and walletId ${walletId}`);
+    }
+  })();
+  const {
+    data: { pendingTransactionId },
+  } = await signTransactionRes;
+  if (pendingTransactionId) {
+    return { pendingTransactionId };
   }
+  return await signTxRes;
 }
 
 export async function sendTransaction(
@@ -306,12 +317,8 @@ export async function sendTransaction(
   tx: string,
   chainId: string,
 ): Promise<SignatureRes> {
-  const {
-    data: { protocolId, pendingTransactionId },
-  } = await ctx.client.sendTransaction(userId, walletId, { transaction: tx, chainId });
-  if (pendingTransactionId) {
-    return { pendingTransactionId };
-  }
+  const protocolId = uuid.v4();
+  const sendTransactionRes = ctx.client.sendTransaction(userId, walletId, { transaction: tx, chainId, protocolId });
 
   if (ctx.offloadMPCComputationURL && !ctx.useDKLS) {
     return sendTransactionRequest(ctx, userId, walletId, protocolId, tx, share, chainId);
@@ -325,18 +332,27 @@ export async function sendTransaction(
     parsedShare.disableWebSockets = ctx.disableWebSockets;
   }
   share = JSON.stringify(parsedShare);
-  try {
-    return await new Promise((resolve, reject) =>
-      sendTransactionFn(share, serverUrl, tx, chainId, protocolId, (err, result) => {
-        if (err) {
-          reject(err);
-        }
-        resolve({ signature: result });
-      }),
-    );
-  } catch (e) {
-    throw new Error(`error signing transaction to send for account with userId ${userId} and walletId ${walletId}`);
+  const sendTxRes = (async function (): Promise<SignatureRes> {
+    try {
+      return await new Promise((resolve, reject) =>
+        sendTransactionFn(share, serverUrl, tx, chainId, protocolId, (err, result) => {
+          if (err) {
+            reject(err);
+          }
+          resolve({ signature: result });
+        }),
+      );
+    } catch (e) {
+      throw new Error(`error signing transaction to send for account with userId ${userId} and walletId ${walletId}`);
+    }
+  })();
+  const {
+    data: { pendingTransactionId },
+  } = await sendTransactionRes;
+  if (pendingTransactionId) {
+    return { pendingTransactionId };
   }
+  return await sendTxRes;
 }
 
 export async function refresh(

@@ -37,7 +37,7 @@
     "gen-changelog": "node ./scripts/gen-changelog.mjs --branch main",
     "gen-changelog-alpha": "node ./scripts/gen-changelog.mjs --branch 2.0.0-alpha --alpha",
     "single-example-hub-e2e": "playwright test --headed --config=example-hub-playwright.config.ts",
-    "e2e-examples-hub-script": "yarn && yarn build && ts-node e2e/scripts/runExampleHubTests.ts",
+    "e2e-examples-hub-script": "yarn && yarn build:dev && ts-node e2e/scripts/runExampleHubTests.ts",
     "rm-getpara-yarn-links": "rm -rf ~/.config/yarn/link/@getpara"
   },
   "devDependencies": {

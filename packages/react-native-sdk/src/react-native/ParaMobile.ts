@@ -13,7 +13,6 @@ import {
   getSHA256HashHex,
   parseCredentialCreationRes,
 } from '@getpara/web-sdk';
-import * as Sentry from '@sentry/react-native';
 
 import { ReactNativeUtils } from './ReactNativeUtils.js';
 import {
@@ -51,15 +50,6 @@ export class ParaMobile extends ParaCore {
    */
   constructor(env: Environment, apiKey: string, relyingPartyId?: string, opts?: ConstructorOpts) {
     super(env, apiKey, opts);
-
-    // starting with non-prod to see what kind of errors we get and if sensitive data is tracked
-    // will turn on in prod after monitoring
-    if (env !== Environment.PROD && env !== Environment.DEV) {
-      Sentry.init({
-        environment: env.toLowerCase(),
-        dsn: 'https://59cea0cfbbb30a646c4e9f2feea06da4@o4504568036720640.ingest.us.sentry.io/4508850922323968',
-      });
-    }
 
     setEnv(env);
 
@@ -238,7 +228,7 @@ export class ParaMobile extends ParaCore {
       decryptedShares = await decryptPrivateKeyAndDecryptShare(
         resultJson.response.userHandle,
         encryptedSharesResult.data.keyShares,
-        encryptedPrivateKeys[0].encryptedPrivateKey,
+        encryptedPrivateKeys[0]!.encryptedPrivateKey,
       );
     }
 

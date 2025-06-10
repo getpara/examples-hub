@@ -54,7 +54,6 @@
     "@getpara/user-management-client": "2.0.0-alpha.18",
     "@getpara/web-sdk": "2.0.0-alpha.18",
     "@peculiar/webcrypto": "^1.5.0",
-    "@sentry/react-native": "^6.10.0",
     "@ungap/structured-clone": "1.3.0",
     "node-forge": "1.3.1",
     "react-native-url-polyfill": "2.0.0",
@@ -91,6 +90,7 @@
   },
   "scripts": {
     "build": "rm -rf dist && tsc",
-    "compile-signer": "bash ./scripts/compileSigner.sh"
+    "compile-signer": "bash ./scripts/compileSigner.sh",
+    "test": "vitest run --coverage"
   }
 }

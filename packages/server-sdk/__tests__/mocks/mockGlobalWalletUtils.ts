@@ -34,6 +34,9 @@ export const mockRefresh = vi.fn((_, __, ___, cb) => {
 export const mockGetPrivateKey = vi.fn((_, __, cb) => {
   cb(null, WALLET.privateKey);
 });
+export const mockInitWasm = vi.fn(cb => {
+  cb(null, null);
+});
 
 Object.defineProperty(globalThis, 'ed25519CreateAccount', {
   value: mockEd25519CreateAccount,
@@ -67,4 +70,9 @@ Object.defineProperty(globalThis, 'refresh', {
 });
 Object.defineProperty(globalThis, 'getPrivateKey', {
   value: mockGetPrivateKey,
+});
+Object.defineProperty(globalThis, 'initWasm', {
+  value: mockInitWasm,
+  writable: true,
+  configurable: true,
 });

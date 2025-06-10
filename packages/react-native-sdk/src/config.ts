@@ -66,3 +66,5 @@ function init() {
 }
 
 init();
+
+export { getBaseUrl, getPortalBaseURL };

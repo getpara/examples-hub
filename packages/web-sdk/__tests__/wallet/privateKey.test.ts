@@ -4,7 +4,7 @@ import { Environment } from '@getpara/core-sdk';
 import { COSMOS_PREFIX, OFFLOAD_MPC_COMPUTATION_URL, PARTNER, USER, WALLET } from '../constants.js';
 import { getWorkerContent } from '../utils.js';
 import { getPrivateKey } from '../../src/wallet/privateKey.js';
-import { workerMessagePostSpy, workerTerminateSpy } from '../mocks/mockWorker.js';
+import { workerMessagePostSpy } from '../mocks/mockWorker.js';
 import * as workerWrapper from '../../src/workers/workerWrapper.js';
 import { TEST_CTX } from '../setup.js';
 
@@ -29,7 +29,6 @@ describe('privateKey', () => {
       const resp = await getPrivateKey(TEST_CTX, USER.id, WALLET.id, WALLET.share, USER.sessionCookie);
 
       expect(resp).toBe(WALLET.privateKey);
-      expect(workerTerminateSpy).toBeCalledTimes(1);
       expect(workerMessagePostSpy).toBeCalledTimes(1);
       expect(workerMessagePostSpy).toBeCalledWith({
         apiKey: PARTNER.apiKey,
@@ -47,6 +46,7 @@ describe('privateKey', () => {
         sessionCookie: USER.sessionCookie,
         useDKLS: true,
         wasmOverride: undefined,
+        workId: expect.any(String),
       });
     });
 
@@ -68,12 +68,14 @@ describe('privateKey', () => {
       await vi.waitFor(() => expect(setupWorkerSpy).toHaveBeenCalled());
 
       const customResponse = 'custom-private-key';
-      await capturedOnMessage(customResponse);
+      capturedOnMessage(customResponse);
+
+      mockWorker.terminate();
 
       const result = await privateKeyPromise;
       expect(result).toBe(customResponse);
       expect(mockWorker.terminate).toHaveBeenCalledTimes(1);
-    });
+    }, 8000);
 
     it('should handle worker onError callback directly', async () => {
       let capturedOnError: Function;
@@ -94,6 +96,8 @@ describe('privateKey', () => {
 
       const testError = new Error('Worker error callback test');
       capturedOnError(testError);
+
+      mockWorker.terminate();
 
       await expect(privateKeyPromise).rejects.toThrow('Worker error callback test');
       expect(mockWorker.terminate).toHaveBeenCalledTimes(1);

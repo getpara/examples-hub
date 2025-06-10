@@ -14,7 +14,7 @@ import {
 } from '../constants.js';
 import { getWorkerContent } from '../utils.js';
 import { mockDistributeNewShare } from '../mocks/mockCoreSdk.js';
-import { workerMessagePostSpy, workerTerminateSpy } from '../mocks/mockWorker.js';
+import { workerMessagePostSpy } from '../mocks/mockWorker.js';
 import { TEST_CTX } from '../setup.js';
 import * as workerWrapper from '../../src/workers/workerWrapper.js';
 
@@ -43,7 +43,6 @@ describe('keygen', () => {
         recoveryShare: RECOVERY_SHARE,
       });
       expect(mockDistributeNewShare).toBeCalledTimes(1);
-      expect(workerTerminateSpy).toBeCalledTimes(1);
       expect(workerMessagePostSpy).toBeCalledTimes(1);
       expect(workerMessagePostSpy).toBeCalledWith({
         env: Environment.DEV,
@@ -61,6 +60,7 @@ describe('keygen', () => {
         useDKLS: true,
         disableWebSockets: false,
         wasmOverride: undefined,
+        workId: expect.any(String),
       });
     });
     it('success - skip distribute', async () => {
@@ -72,7 +72,6 @@ describe('keygen', () => {
         recoveryShare: null,
       });
       expect(mockDistributeNewShare).toBeCalledTimes(0);
-      expect(workerTerminateSpy).toBeCalledTimes(1);
       expect(workerMessagePostSpy).toBeCalledTimes(1);
       expect(workerMessagePostSpy).toBeCalledWith({
         env: Environment.DEV,
@@ -90,6 +89,7 @@ describe('keygen', () => {
         useDKLS: true,
         disableWebSockets: false,
         wasmOverride: undefined,
+        workId: expect.any(String),
       });
     });
     it('handles worker errors', async () => {
@@ -110,7 +110,6 @@ describe('keygen', () => {
         walletId: PREGEN_WALLET.id,
         recoveryShare: null,
       });
-      expect(workerTerminateSpy).toBeCalledTimes(1);
       expect(workerMessagePostSpy).toBeCalledTimes(1);
       expect(workerMessagePostSpy).toBeCalledWith({
         env: Environment.DEV,
@@ -131,6 +130,7 @@ describe('keygen', () => {
         useDKLS: true,
         disableWebSockets: false,
         wasmOverride: undefined,
+        workId: expect.any(String),
       });
     });
 
@@ -162,7 +162,6 @@ describe('keygen', () => {
         signer: WALLET.signer,
         protocolId: WALLET.protocolId,
       });
-      expect(workerTerminateSpy).toBeCalledTimes(1);
       expect(workerMessagePostSpy).toBeCalledTimes(1);
       expect(workerMessagePostSpy).toBeCalledWith({
         env: Environment.DEV,
@@ -182,6 +181,7 @@ describe('keygen', () => {
         disableWebSockets: false,
         wasmOverride: undefined,
         returnObject: true,
+        workId: expect.any(String),
       });
     });
 
@@ -214,7 +214,6 @@ describe('keygen', () => {
         walletId: WALLET.id,
         recoveryShare: null,
       });
-      expect(workerTerminateSpy).toBeCalledTimes(1);
       expect(workerMessagePostSpy).toBeCalledTimes(1);
       expect(workerMessagePostSpy).toBeCalledWith({
         env: Environment.DEV,
@@ -226,6 +225,7 @@ describe('keygen', () => {
         sessionCookie: USER.sessionCookie,
         disableWebSockets: false,
         wasmOverride: undefined,
+        workId: expect.any(String),
       });
     });
 
@@ -247,7 +247,6 @@ describe('keygen', () => {
         walletId: PREGEN_WALLET.id,
         recoveryShare: null,
       });
-      expect(workerTerminateSpy).toBeCalledTimes(1);
       expect(workerMessagePostSpy).toBeCalledTimes(1);
       expect(workerMessagePostSpy).toBeCalledWith({
         env: Environment.DEV,
@@ -263,6 +262,7 @@ describe('keygen', () => {
         sessionCookie: USER.sessionCookie,
         disableWebSockets: false,
         wasmOverride: undefined,
+        workId: expect.any(String),
       });
     });
 

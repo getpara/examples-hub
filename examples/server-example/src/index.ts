@@ -36,9 +36,11 @@ async function errorMiddleware(err: Error, _req: Request, res: Response, _next: 
   res.sendStatus(500);
 }
 
+let para: ParaServer;
+
 async function createUserAndWallet(params: Params) {
   const { email, isPregen, useSolana } = params;
-  const para = new ParaServer(Environment.SANDBOX, '2f938ac0c48ef356050a79bd66042a23');
+  para = new ParaServer(Environment.SANDBOX, '2f938ac0c48ef356050a79bd66042a23');
   await para.logout();
   if (isPregen) {
     await para.createPregenWallet({
@@ -116,12 +118,17 @@ async function createUserAndWallet(params: Params) {
   console.log('sign:', walletAddress, 'hello-world', await sign1);
   console.log('sign:', walletAddress, 'hello-world2', await sign2);
   console.log('sign:', walletAddress, 'hello-world3', await sign3);
+  for (let i = 0; i < 10; i++) {
+    const now = Date.now();
+    await ethersSigner.signMessage('hello-world');
+    console.log('time taken in ms:', Date.now() - now);
+  }
   console.log(walletAddress, 'keep session alive', await para.keepSessionAlive());
   console.log(walletAddress, 'session', para.retrieveSessionCookie());
 }
 
 async function signMessageWithImport(serializedInstance: string): Promise<void> {
-  const para = new ParaServer(Environment.SANDBOX, '2f938ac0c48ef356050a79bd66042a23');
+  para = new ParaServer(Environment.SANDBOX, '2f938ac0c48ef356050a79bd66042a23');
   console.log('importing session');
   await para.importSession(serializedInstance);
   // @ts-ignore
@@ -182,7 +189,6 @@ app.post('/wallets', async (req: Request, res: Response, next: NextFunction) => 
 
 app.post('/sign', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const para = new ParaServer(Environment.SANDBOX, '2f938ac0c48ef356050a79bd66042a23');
     const { message } = req.body;
     const provider = new ethers.JsonRpcProvider(ALCHEMY_SEPOLIA_PROVIDER, 'sepolia');
     const walletId = para.findWalletId(undefined, { type: ['EVM'] });
@@ -192,13 +198,17 @@ app.post('/sign', async (req: Request, res: Response, next: NextFunction) => {
       transport: http(ALCHEMY_SEPOLIA_PROVIDER),
     });
 
+    let now = Date.now();
     console.log(await ethersSigner.signMessage(message));
+    console.log('ethers signMessage time taken in ms:', Date.now() - now);
+    now = Date.now();
     console.log(
       await viemClient.signMessage({
         message,
         account: viemClient.account,
       }),
     );
+    console.log('viem signMessage time taken in ms:', Date.now() - now);
     res.send('200');
   } catch (e) {
     next(e);

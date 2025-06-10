@@ -472,7 +472,7 @@ function AppInner({
   const [selectedApiKey, setSelectedApiKey] = useLocalStorage('@EXAMPLE-PARA/selectedApiKey', API_KEY_WITH_BRANDING);
   const [useDKLS, setUseDKLS] = useLocalStorage('@EXAMPLE-PARA/useDKLS', true);
   const [partners, setPartners] = useLocalStorage<Partner[]>('@EXAMPLE-PARA/partners', []);
-  const [homepageUrl, setHomepageUrl] = useLocalStorage('@EXAMPLE-PARA/homepageUrl', 'https://www.para.com');
+  const [homepageUrl, setHomepageUrl] = useLocalStorage('@EXAMPLE-PARA/homepageUrl', 'https://www.getpara.com');
 
   const [defaultIdentifier, setDefaultIdentifier] = useLocalStorage('@EXAMPLE-PARA/defaultIdentifier', '');
   const [logo, setLogo] = useLocalStorage('@EXAMPLE-PARA/logo', '');
@@ -527,6 +527,8 @@ function AppInner({
   );
   const { data: paraAccount, isLoading: isAccountLoading } = useParaAccount();
   const { isPending: isCreateGuestWalletsPending } = useCreateGuestWalletsState();
+  const [evmSigningTimeTakenMs, setEvmSigningTimeTakenMs] = useState<number | undefined>();
+  const [testTxTimeTakenMs, setTestTxTimeTakenMs] = useState<number | undefined>();
 
   const { openModal } = useModal();
   const para = useClient<ParaLegacyExample>();
@@ -661,9 +663,14 @@ function AppInner({
       const provider = new ethers.JsonRpcProvider(ALCHEMY_SEPOLIA_PROVIDER, 'sepolia');
       const ethersSigner = new ParaEthersSigner(para, provider, para?.findWalletId(walletId, { type: ['EVM'] }));
       console.log('signing message..');
+      const now = Date.now();
       const messageSignature = await ethersSigner.signMessage(messageToSign);
+      const timeTakenMs = Date.now() - now;
+      console.log('time taken in ms:', timeTakenMs);
       console.log('message signature:', messageSignature);
+
       setEthersSignature(messageSignature);
+      setEvmSigningTimeTakenMs(timeTakenMs);
     } catch (error) {
       console.error(error);
     }
@@ -679,7 +686,11 @@ function AppInner({
           const ethersSigner = new ParaEthersSigner(para, provider, _walletId);
           const tx = await createTestTransactionEvm(para, _walletId);
 
+          const now = Date.now();
           _testTxSignature = await ethersSigner.signTransaction(tx);
+          const timeTakenMs = Date.now() - now;
+          console.log('test tx time taken in ms:', timeTakenMs);
+          setTestTxTimeTakenMs(timeTakenMs);
         }
         break;
       case 'SOLANA':
@@ -689,7 +700,11 @@ function AppInner({
           const solanaSigner = new ParaSolanaWeb3Signer(para, connection, walletId);
           const tx = await createTestTransactionSolana(para, walletId);
 
+          const now = Date.now();
           _testTxSignature = ((await solanaSigner.signTransaction(tx)).signature as Buffer).toString('base64');
+          const timeTakenMs = Date.now() - now;
+          console.log('test tx time taken in ms:', timeTakenMs);
+          setTestTxTimeTakenMs(timeTakenMs);
         }
         break;
       case 'COSMOS':
@@ -699,7 +714,11 @@ function AppInner({
           const cosmosSigner = new ParaProtoSigner(para);
           const signDoc = await createTestTransactionCosmos(para, walletId);
 
+          const now = Date.now();
           _testTxSignature = await cosmosSigner.signDirect(cosmosSigner.address, signDoc);
+          const timeTakenMs = Date.now() - now;
+          console.log('test tx time taken in ms:', timeTakenMs);
+          setTestTxTimeTakenMs(timeTakenMs);
         }
         break;
     }
@@ -1229,6 +1248,7 @@ function AppInner({
                     <Text>
                       Message Signature: <strong>{ethersSignature}</strong>
                     </Text>
+                    <Text>EVM Signing Time Taken: {evmSigningTimeTakenMs}ms</Text>
 
                     <Text>To Address:</Text>
                     <Input name="To Address" onChange={e => setTxToAddress(e.target.value)} value={txToAddress} />
@@ -1365,7 +1385,7 @@ function AppInner({
                         Test Tx Signature: <strong>{testTxSignature}</strong>
                       </Text>
                     )}
-
+                    <Text>Test Tx Time Taken: {testTxTimeTakenMs}ms</Text>
                     <Button
                       colorScheme="red"
                       onClick={async () => {

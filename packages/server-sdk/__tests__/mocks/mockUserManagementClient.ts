@@ -12,7 +12,7 @@ export const mockGetWallets = vi.fn().mockResolvedValue({ data: { wallets: WALLE
 export const mockGetSessionPublicKeys = vi.fn().mockResolvedValue({ data: { keys: SESSION_PUBLIC_KEYS } });
 export const mockGetPregenWallets = vi.fn().mockResolvedValue({ wallets: [PREGEN_WALLET] });
 export const mockIsRefreshDone = vi.fn().mockResolvedValue({ isDone: true });
-
+export const mockTrackError = vi.fn();
 vi.mock('@getpara/user-management-client', async importOriginal => {
   const actual = await importOriginal();
   return {
@@ -30,6 +30,7 @@ vi.mock('@getpara/user-management-client', async importOriginal => {
       getSessionPublicKeys: mockGetSessionPublicKeys,
       getPregenWallets: mockGetPregenWallets,
       isRefreshDone: mockIsRefreshDone,
+      trackError: mockTrackError,
     })),
   };
 });

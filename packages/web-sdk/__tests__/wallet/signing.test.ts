@@ -16,7 +16,7 @@ import {
 } from '../constants.js';
 import { getWorkerContent } from '../utils.js';
 import { TEST_CTX } from '../setup.js';
-import { workerMessagePostSpy, workerTerminateSpy } from '../mocks/mockWorker.js';
+import { workerMessagePostSpy } from '../mocks/mockWorker.js';
 import { ed25519Sign, sendTransaction, signMessage, signTransaction } from '../../src/wallet/signing.js';
 import * as workerWrapper from '../../src/workers/workerWrapper.js';
 
@@ -42,7 +42,6 @@ describe('signing', () => {
       expect(resp).toStrictEqual({
         signature: SIGNATURE,
       });
-      expect(workerTerminateSpy).toBeCalledTimes(1);
       expect(workerMessagePostSpy).toBeCalledTimes(1);
       expect(workerMessagePostSpy).toBeCalledWith({
         env: Environment.DEV,
@@ -62,6 +61,7 @@ describe('signing', () => {
         useDKLS: true,
         disableWebSockets: false,
         wasmOverride: undefined,
+        workId: expect.any(String),
       });
     });
 
@@ -84,7 +84,6 @@ describe('signing', () => {
       expect(resp).toStrictEqual({
         signature: SIGNATURE,
       });
-      expect(workerTerminateSpy).toBeCalledTimes(1);
       expect(workerMessagePostSpy).toBeCalledTimes(1);
       expect(workerMessagePostSpy).toBeCalledWith({
         env: Environment.DEV,
@@ -104,6 +103,7 @@ describe('signing', () => {
         useDKLS: true,
         disableWebSockets: false,
         wasmOverride: undefined,
+        workId: expect.any(String),
       });
     });
 
@@ -135,7 +135,6 @@ describe('signing', () => {
       expect(resp).toStrictEqual({
         signature: SIGNATURE,
       });
-      expect(workerTerminateSpy).toBeCalledTimes(1);
       expect(workerMessagePostSpy).toBeCalledTimes(1);
       expect(workerMessagePostSpy).toBeCalledWith({
         env: Environment.DEV,
@@ -155,6 +154,7 @@ describe('signing', () => {
         useDKLS: true,
         disableWebSockets: false,
         wasmOverride: undefined,
+        workId: expect.any(String),
       });
     });
 
@@ -177,7 +177,6 @@ describe('signing', () => {
       expect(resp).toStrictEqual({
         signature: SIGNATURE,
       });
-      expect(workerTerminateSpy).toBeCalledTimes(1);
       expect(workerMessagePostSpy).toBeCalledTimes(1);
       expect(workerMessagePostSpy).toBeCalledWith({
         env: Environment.DEV,
@@ -194,6 +193,7 @@ describe('signing', () => {
         sessionCookie: USER.sessionCookie,
         disableWebSockets: false,
         wasmOverride: undefined,
+        workId: expect.any(String),
       });
     });
 

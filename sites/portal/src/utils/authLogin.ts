@@ -205,7 +205,15 @@ export async function authUpdateKeyShares(
     decryptedShares = await getDerivedPrivateKeyAndDecrypt(para.ctx, userHandle, allSharesToDecrypt);
     const keyPair = await getAsymmetricKeyPair(para.ctx, userHandle);
     const encryptedPrivateKeyHex = await encryptPrivateKey(keyPair, userHandle);
-    await para.ctx.client.uploadEncryptedWalletPrivateKey(userId, encryptedPrivateKeyHex, encryptionKeyHash, signature.id);
+    const { encryptedWalletPrivateKey: createdEncryptedPrivateKey } = await para.ctx.client.uploadEncryptedWalletPrivateKey(
+      userId,
+      encryptedPrivateKeyHex,
+      encryptionKeyHash,
+      signature.id,
+    );
+    // add the created encrypted private key to the list of encrypted private keys in case we need to use it
+    // later in this function
+    encryptedPrivateKeys.push(createdEncryptedPrivateKey);
   } else {
     decryptedShares = await decryptPrivateKeyAndDecryptShare(
       userHandle,

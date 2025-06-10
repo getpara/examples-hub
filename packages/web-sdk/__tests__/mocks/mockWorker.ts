@@ -11,7 +11,7 @@ export class Worker {
     this.onmessage = () => {};
   }
   postMessage(msg: any): any {
-    const { functionType } = msg;
+    const { functionType, workId } = msg;
 
     switch (functionType) {
       case 'KEYGEN': {
@@ -19,6 +19,7 @@ export class Worker {
           data: {
             walletId: WALLET.id,
             signer: WALLET.signer,
+            workId,
           },
         });
         return;
@@ -28,6 +29,7 @@ export class Worker {
           data: {
             walletId: PREGEN_WALLET.id,
             signer: PREGEN_WALLET.signer,
+            workId,
           },
         });
         return;
@@ -38,6 +40,7 @@ export class Worker {
             data: {
               protocolId: WALLET.protocolId,
               signer: WALLET.signer,
+              workId,
             },
           });
           return;
@@ -52,6 +55,7 @@ export class Worker {
           data: {
             walletId: WALLET.id,
             signer: WALLET.signer,
+            workId,
           },
         });
         return;
@@ -61,13 +65,17 @@ export class Worker {
           data: {
             walletId: PREGEN_WALLET.id,
             signer: PREGEN_WALLET.signer,
+            workId,
           },
         });
         return;
       }
       case 'GET_PRIVATE_KEY': {
         this.onmessage({
-          data: WALLET.privateKey,
+          data: {
+            privateKey: WALLET.privateKey,
+            workId,
+          },
         });
         return;
       }
@@ -75,6 +83,7 @@ export class Worker {
         this.onmessage({
           data: {
             signature: SIGNATURE,
+            workId,
           },
         });
         return;
@@ -83,6 +92,7 @@ export class Worker {
         this.onmessage({
           data: {
             signature: SIGNATURE,
+            workId,
           },
         });
         return;
@@ -91,6 +101,7 @@ export class Worker {
         this.onmessage({
           data: {
             signature: SIGNATURE,
+            workId,
           },
         });
         return;
@@ -99,6 +110,7 @@ export class Worker {
         this.onmessage({
           data: {
             signature: SIGNATURE,
+            workId,
           },
         });
         return;

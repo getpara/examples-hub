@@ -6,31 +6,46 @@ export interface SyncWorker {
   terminate: () => void;
 }
 
+const CLEAR_WORKER_TIMEOUT_MS = 1000 * 90;
+
+let workerInstance: Worker | undefined;
+const resFunctionMap: Record<
+  string,
+  {
+    fn: (arg: any) => Promise<void>;
+    errorFn?: (error: Error) => void;
+    timeoutId: NodeJS.Timeout;
+    errorContext: object;
+  }
+> = {};
+
+function removeWorkId(workId: string, skipClearTimeout?: boolean) {
+  const { timeoutId } = resFunctionMap[workId];
+  delete resFunctionMap[workId];
+  if (skipClearTimeout) {
+    return;
+  }
+  clearTimeout(timeoutId);
+}
+
 export async function setupWorker(
   ctx: Ctx,
-  resFunction: (arg: any) => void,
+  resFunction: (arg: any) => Promise<void>,
   errorFunction: (err: Error) => void,
+  workId: string,
+  errorContext?: object,
 ): Promise<Worker | SyncWorker> {
-  const onmessage = event => {
-    if (event.data.functionType === 'CUSTOM') {
-      // safe to remove this block once this code is live in prod!
-      return;
-    }
-    resFunction(event.data);
-  };
-
-  const onerror = (error: ErrorEvent | Error) => {
-    errorFunction(error as Error);
-  };
-
   if (ctx.disableWorkers) {
     const syncWorker: SyncWorker = {
       postMessage: function (message) {
         (async function () {
           try {
+            const onmessage = event => {
+              resFunction(event.data);
+            };
             await handleMessage({ data: message }, data => onmessage({ data }), ctx.disableWorkers);
           } catch (error) {
-            onerror(error);
+            errorFunction(error);
           }
         })();
       },
@@ -42,20 +57,49 @@ export async function setupWorker(
     return syncWorker;
   }
 
-  // Don't wrap this in try-catch so that setup errors are thrown directly
-  let worker: Worker;
+  const timeoutId = setTimeout(() => {
+    removeWorkId(workId, true);
+  }, CLEAR_WORKER_TIMEOUT_MS);
+
+  resFunctionMap[workId] = {
+    fn: resFunction,
+    timeoutId,
+    errorFn: errorFunction,
+    errorContext: errorContext || {},
+  };
+
   if (ctx.useLocalFiles) {
     // worker = new Worker(new URL('./worker.ts', import.meta.url));
     throw new Error('useLocalFiles only supported locally');
-  } else {
+  } else if (!workerInstance) {
     const workerRes = await fetch(`${getPortalBaseURL(ctx)}/static/js/mpcWorker-bundle.js`);
     const workerBlob = new Blob([await workerRes.text()], { type: 'application/javascript' });
     const workerScriptURL = URL.createObjectURL(workerBlob);
-    worker = new Worker(workerScriptURL);
+    workerInstance = new Worker(workerScriptURL);
+
+    const onmessage = async (event: { data: { functionType: string; params: any; workId: string } }) => {
+      const { workId: messageWorkId } = event.data;
+      delete event.data.workId;
+
+      if (messageWorkId && resFunctionMap[messageWorkId]) {
+        await resFunctionMap[messageWorkId].fn(event.data);
+        removeWorkId(messageWorkId);
+      }
+    };
+    workerInstance.onmessage = onmessage;
+    workerInstance.onerror = err => {
+      console.error('worker error:', err);
+      Object.keys(resFunctionMap).forEach(id => {
+        if (resFunctionMap[id]) {
+          const errorMsg = `worker error with workId ${id} and opts ${JSON.stringify(resFunctionMap[id].errorContext)}: ${err.message}`;
+          resFunctionMap[id].errorFn(new Error(errorMsg));
+          removeWorkId(id);
+        }
+      });
+      workerInstance?.terminate();
+      workerInstance = undefined;
+    };
   }
 
-  worker.onmessage = onmessage;
-  worker.onerror = onerror;
-
-  return worker;
+  return workerInstance;
 }

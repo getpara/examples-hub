@@ -19,7 +19,10 @@ export interface Message {
   disableWebSockets?: boolean;
   wasmOverride?: ArrayBuffer;
   returnObject?: boolean;
+  workId?: string;
 }
+
+let wasmLoaded = false;
 
 async function loadWasm(ctx: Ctx, wasmOverride?: ArrayBuffer) {
   if (typeof self === 'undefined') {
@@ -53,15 +56,15 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
     }
     case 'SIGN_TRANSACTION': {
       const { share, walletId, userId, tx, chainId } = params;
-      return walletUtils.signTransaction(ctx, share, walletId, userId, tx, chainId);
+      return withRetry(() => walletUtils.signTransaction(ctx, share, walletId, userId, tx, chainId));
     }
     case 'SEND_TRANSACTION': {
       const { share, walletId, userId, tx, chainId } = params;
-      return walletUtils.sendTransaction(ctx, share, walletId, userId, tx, chainId);
+      return withRetry(() => walletUtils.sendTransaction(ctx, share, walletId, userId, tx, chainId));
     }
     case 'SIGN_MESSAGE': {
       const { share, walletId, userId, message, cosmosSignDoc } = params;
-      return walletUtils.signMessage(ctx, share, walletId, userId, message, cosmosSignDoc);
+      return withRetry(() => walletUtils.signMessage(ctx, share, walletId, userId, message, cosmosSignDoc));
     }
     case 'REFRESH': {
       const { share, walletId, userId, oldPartnerId, newPartnerId, keyShareProtocolId } = params;
@@ -97,7 +100,7 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
     }
     case 'ED25519_SIGN': {
       const { share, walletId, userId, base64Bytes } = params;
-      return walletUtils.ed25519Sign(ctx, share, userId, walletId, base64Bytes);
+      return withRetry(() => walletUtils.ed25519Sign(ctx, share, userId, walletId, base64Bytes));
     }
     case 'ED25519_PREKEYGEN': {
       const { email } = params;
@@ -110,6 +113,45 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
     }
     default: {
       throw new Error(`functionType: ${functionType} not supported`);
+    }
+  }
+}
+
+/**
+ * Executes an operation with retry capabilities
+ * @param operation The function to execute
+ * @param maxRetries Maximum number of retries (default: 2)
+ * @param timeoutMs Timeout in milliseconds (default: 10000)
+ * @returns The result of the operation
+ */
+export async function withRetry<T>(operation: () => Promise<T>, maxRetries = 2, timeoutMs = 10000): Promise<T> {
+  let retries = 0;
+
+  while (true) {
+    try {
+      // Create a promise that resolves with the operation result
+      const operationPromise = operation();
+
+      // Create a promise that rejects after the timeout
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        const timeoutId = setTimeout(() => {
+          reject(new Error(`Operation timed out after ${timeoutMs}ms`));
+        }, timeoutMs);
+
+        // Ensure the timeout is cleared if the operation completes before timeout
+        operationPromise.finally(() => clearTimeout(timeoutId));
+      });
+
+      // Race between the operation and the timeout
+      return await Promise.race([operationPromise, timeoutPromise]);
+    } catch (error) {
+      retries++;
+
+      if (retries > maxRetries) {
+        throw error;
+      }
+
+      console.warn(`Operation failed (attempt ${retries}/${maxRetries}), retrying...`, error);
     }
   }
 }
@@ -129,6 +171,7 @@ export async function handleMessage(
     useDKLS,
     disableWebSockets,
     wasmOverride,
+    workId,
   } = e.data;
   if (!env) {
     // this means a message we didn't send was received and we want to ignore it
@@ -154,11 +197,25 @@ export async function handleMessage(
     wasmOverride,
   };
 
-  if (!ctx.offloadMPCComputationURL || ctx.useDKLS) {
+  if (!wasmLoaded && (!ctx.offloadMPCComputationURL || ctx.useDKLS)) {
     await loadWasm(ctx, wasmOverride);
+    if (global.initWasm) {
+      await new Promise((resolve, reject) =>
+        global.initWasm?.((err, result) => {
+          if (err) {
+            reject(err);
+          }
+          resolve(result);
+        }),
+      );
+    }
+    wasmLoaded = true;
   }
 
   const result = await executeMessage(ctx, e.data);
+  if (workId) {
+    result.workId = workId;
+  }
   postMessage(result);
-  return false;
+  return !!workId;
 }

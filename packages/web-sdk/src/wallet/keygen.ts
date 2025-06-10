@@ -1,6 +1,7 @@
 import { setupWorker, SyncWorker } from '../workers/workerWrapper.js';
 import { Ctx, distributeNewShare, waitUntilTrue, TPregenIdentifierType } from '@getpara/core-sdk';
 import { BackupKitEmailProps, TWalletType } from '@getpara/user-management-client';
+import * as uuid from 'uuid';
 
 async function isKeygenComplete(ctx: Ctx, userId: string, walletId: string): Promise<boolean> {
   const wallets = await ctx.client.getWallets(userId);
@@ -44,6 +45,7 @@ export function keygen(
   recoveryShare: string | null;
 }> {
   return new Promise(async (resolve, reject) => {
+    const workId = uuid.v4();
     let worker: Worker | SyncWorker | null = null;
 
     worker = await setupWorker(
@@ -56,7 +58,6 @@ export function keygen(
             walletId: res.walletId,
             recoveryShare: null,
           });
-          worker?.terminate();
           return;
         }
 
@@ -72,12 +73,11 @@ export function keygen(
           walletId: res.walletId,
           recoveryShare,
         });
-        worker?.terminate();
       },
       error => {
-        worker?.terminate();
         reject(error);
       },
+      workId,
     );
 
     worker.postMessage({
@@ -92,6 +92,7 @@ export function keygen(
       useDKLS: ctx.useDKLS,
       disableWebSockets: ctx.disableWebSockets,
       wasmOverride: ctx.wasmOverride,
+      workId,
     });
   });
 }
@@ -111,6 +112,7 @@ export function preKeygen(
   recoveryShare: string | null;
 }> {
   return new Promise(async (resolve, reject) => {
+    const workId = uuid.v4();
     let worker: Worker | SyncWorker | null = null;
 
     worker = await setupWorker(
@@ -127,12 +129,11 @@ export function preKeygen(
           walletId: res.walletId,
           recoveryShare: null,
         });
-        worker?.terminate();
       },
       error => {
-        worker?.terminate();
         reject(error);
       },
+      workId,
     );
 
     const email: string | undefined = undefined;
@@ -152,6 +153,7 @@ export function preKeygen(
       useDKLS: ctx.useDKLS,
       disableWebSockets: ctx.disableWebSockets,
       wasmOverride: ctx.wasmOverride,
+      workId,
     });
   });
 }
@@ -170,14 +172,14 @@ export function refresh(
   protocolId: string;
 }> {
   return new Promise(async (resolve, reject) => {
+    const workId = uuid.v4();
     let worker: Worker | SyncWorker | null = null;
 
     worker = await setupWorker(
       ctx,
       async res => {
-        /* v8 ignore next 5 */
+        /* v8 ignore next 4 */
         if (!(await waitUntilTrue(async () => isRefreshComplete(ctx, userId, walletId, newPartnerId), 15000, 1000))) {
-          worker?.terminate();
           reject(new Error('refresh failed'));
           return;
         }
@@ -188,12 +190,11 @@ export function refresh(
           signer,
           protocolId,
         });
-        worker?.terminate();
       },
       error => {
-        worker?.terminate();
         reject(error);
       },
+      workId,
     );
 
     worker.postMessage({
@@ -207,6 +208,7 @@ export function refresh(
       disableWebSockets: ctx.disableWebSockets,
       wasmOverride: ctx.wasmOverride,
       returnObject: true,
+      workId,
     });
   });
 }
@@ -222,6 +224,7 @@ export function ed25519Keygen(
   recoveryShare: string | null;
 }> {
   return new Promise(async (resolve, reject) => {
+    const workId = uuid.v4();
     let worker: Worker | SyncWorker | null = null;
 
     worker = await setupWorker(
@@ -233,12 +236,11 @@ export function ed25519Keygen(
           walletId: res.walletId,
           recoveryShare: null,
         });
-        worker?.terminate();
       },
       error => {
-        worker?.terminate();
         reject(error);
       },
+      workId,
     );
 
     worker.postMessage({
@@ -251,6 +253,7 @@ export function ed25519Keygen(
       sessionCookie,
       disableWebSockets: ctx.disableWebSockets,
       wasmOverride: ctx.wasmOverride,
+      workId,
     });
   });
 }
@@ -266,6 +269,7 @@ export function ed25519PreKeygen(
   recoveryShare: string | null;
 }> {
   return new Promise(async (resolve, reject) => {
+    const workId = uuid.v4();
     let worker: Worker | SyncWorker | null = null;
 
     worker = await setupWorker(
@@ -281,12 +285,11 @@ export function ed25519PreKeygen(
           walletId: res.walletId,
           recoveryShare: null,
         });
-        worker?.terminate();
       },
       error => {
-        worker?.terminate();
         reject(error);
       },
+      workId,
     );
 
     const email: string | undefined = undefined;
@@ -304,6 +307,7 @@ export function ed25519PreKeygen(
       sessionCookie,
       disableWebSockets: ctx.disableWebSockets,
       wasmOverride: ctx.wasmOverride,
+      workId,
     });
   });
 }

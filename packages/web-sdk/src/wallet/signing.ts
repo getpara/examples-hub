@@ -1,5 +1,6 @@
 import { Ctx, SignatureRes } from '@getpara/core-sdk';
-import { setupWorker } from '../workers/workerWrapper.js';
+import { setupWorker, SyncWorker } from '../workers/workerWrapper.js';
+import * as uuid from 'uuid';
 
 export async function signTransaction(
   ctx: Ctx,
@@ -12,18 +13,18 @@ export async function signTransaction(
   isDKLS?: boolean,
 ): Promise<SignatureRes> {
   return new Promise(async (resolve, reject) => {
+    const workId = uuid.v4();
     let worker = null;
 
     worker = await setupWorker(
       ctx,
       async sendTransactionRes => {
         resolve(sendTransactionRes);
-        worker?.terminate();
       },
       error => {
-        worker?.terminate();
         reject(error);
       },
+      workId,
     );
 
     worker.postMessage({
@@ -38,6 +39,7 @@ export async function signTransaction(
       useDKLS: isDKLS,
       disableWebSockets: ctx.disableWebSockets,
       wasmOverride: ctx.wasmOverride,
+      workId,
     });
   });
 }
@@ -53,18 +55,18 @@ export async function sendTransaction(
   isDKLS?: boolean,
 ): Promise<SignatureRes> {
   return new Promise(async (resolve, reject) => {
+    const workId = uuid.v4();
     let worker = null;
 
     worker = await setupWorker(
       ctx,
       async sendTransactionRes => {
         resolve(sendTransactionRes);
-        worker?.terminate();
       },
       error => {
-        worker?.terminate();
         reject(error);
       },
+      workId,
     );
 
     worker.postMessage({
@@ -79,6 +81,7 @@ export async function sendTransaction(
       useDKLS: isDKLS,
       disableWebSockets: ctx.disableWebSockets,
       wasmOverride: ctx.wasmOverride,
+      workId,
     });
   });
 }
@@ -94,19 +97,19 @@ export async function signMessage(
   cosmosSignDoc?: string,
 ): Promise<SignatureRes> {
   return new Promise(async (resolve, reject) => {
-    let worker = null;
+    const workId = uuid.v4();
+    let worker: Worker | SyncWorker = null;
 
     worker = await setupWorker(
       ctx,
       async signMessageRes => {
         resolve(signMessageRes);
-        worker?.terminate();
       },
       error => {
         console.error(`Worker error in signMessage for userId ${userId}, walletId ${walletId}:`, error);
-        worker?.terminate();
         reject(error);
       },
+      workId,
     );
 
     worker.postMessage({
@@ -121,6 +124,7 @@ export async function signMessage(
       useDKLS: isDKLS,
       disableWebSockets: ctx.disableWebSockets,
       wasmOverride: ctx.wasmOverride,
+      workId,
     });
   });
 }
@@ -134,19 +138,19 @@ export async function ed25519Sign(
   sessionCookie: string,
 ): Promise<SignatureRes> {
   return new Promise(async (resolve, reject) => {
+    const workId = uuid.v4();
     let worker = null;
 
     worker = await setupWorker(
       ctx,
       async signMessageRes => {
         resolve(signMessageRes);
-        worker?.terminate();
       },
       error => {
         console.error(`Worker error in ed25519Sign for userId ${userId}, walletId ${walletId}:`, error);
-        worker?.terminate();
         reject(error);
       },
+      workId,
     );
 
     worker.postMessage({
@@ -159,6 +163,7 @@ export async function ed25519Sign(
       sessionCookie,
       disableWebSockets: ctx.disableWebSockets,
       wasmOverride: ctx.wasmOverride,
+      workId,
     });
   });
 }

@@ -151,9 +151,9 @@ describe('walletUtils', () => {
 
       expect(resp).toStrictEqual({ signature: BASE64_SIGNATURE });
       expect(mockPreSignMessage).toBeCalledTimes(1);
-      expect(mockPreSignMessage).toBeCalledWith(USER.id, WALLET.id, BASE64_BYTES, 'ED25519');
+      expect(mockPreSignMessage).toBeCalledWith(USER.id, WALLET.id, BASE64_BYTES, 'ED25519', undefined, expect.any(String));
       expect(mockEd25519Sign).toBeCalledTimes(1);
-      expect(mockEd25519Sign).toBeCalledWith(WALLET.share, WALLET.protocolId, BASE64_BYTES, expect.any(Function));
+      expect(mockEd25519Sign).toBeCalledWith(WALLET.share, expect.any(String), BASE64_BYTES, expect.any(Function));
     });
 
     it('throws correct error when signing fails', async () => {
@@ -165,9 +165,9 @@ describe('walletUtils', () => {
         `error signing for account of type SOLANA with userId ${USER.id} and walletId ${WALLET.id}`,
       );
       expect(mockPreSignMessage).toBeCalledTimes(1);
-      expect(mockPreSignMessage).toBeCalledWith(USER.id, WALLET.id, BASE64_BYTES, 'ED25519');
+      expect(mockPreSignMessage).toBeCalledWith(USER.id, WALLET.id, BASE64_BYTES, 'ED25519', undefined, expect.any(String));
       expect(mockEd25519Sign).toBeCalledTimes(1);
-      expect(mockEd25519Sign).toBeCalledWith(WALLET.share, WALLET.protocolId, BASE64_BYTES, expect.any(Function));
+      expect(mockEd25519Sign).toBeCalledWith(WALLET.share, expect.any(String), BASE64_BYTES, expect.any(Function));
     });
   });
 
@@ -419,13 +419,13 @@ describe('walletUtils', () => {
 
         expect(resp).toStrictEqual({ signature: SIGNATURE });
         expect(mockPreSignMessage).toBeCalledTimes(1);
-        expect(mockPreSignMessage).toBeCalledWith(USER.id, WALLET.id, MESSAGE);
+        expect(mockPreSignMessage).toBeCalledWith(USER.id, WALLET.id, MESSAGE, null, null, expect.any(String));
         expect(mockDklsSignMessage).toBeCalledTimes(1);
         expect(mockDklsSignMessage).toBeCalledWith(
           WALLET.share,
           getBaseMPCNetworkUrl(TEST_CTX.env, !TEST_CTX.disableWebSockets),
           MESSAGE,
-          WALLET.protocolId,
+          expect.any(String),
           expect.any(Function),
         );
       });
@@ -435,13 +435,13 @@ describe('walletUtils', () => {
         const resp = await signMessage(_TEST_CTX, WALLET.share, WALLET.id, USER.id, MESSAGE);
         expect(resp).toStrictEqual({ signature: SIGNATURE });
         expect(mockPreSignMessage).toBeCalledTimes(1);
-        expect(mockPreSignMessage).toBeCalledWith(USER.id, WALLET.id, MESSAGE);
+        expect(mockPreSignMessage).toBeCalledWith(USER.id, WALLET.id, MESSAGE, null, null, expect.any(String));
         expect(mockSignMessage).toBeCalledTimes(1);
         expect(mockSignMessage).toBeCalledWith(
           WALLET.share,
           getBaseMPCNetworkUrl(_TEST_CTX.env, !_TEST_CTX.disableWebSockets),
           MESSAGE,
-          WALLET.protocolId,
+          expect.any(String),
           expect.any(Function),
         );
       });
@@ -452,11 +452,11 @@ describe('walletUtils', () => {
 
         expect(resp).toStrictEqual({ signature: SIGNATURE });
         expect(mockPreSignMessage).toBeCalledTimes(1);
-        expect(mockPreSignMessage).toBeCalledWith(USER.id, WALLET.id, MESSAGE);
+        expect(mockPreSignMessage).toBeCalledWith(USER.id, WALLET.id, MESSAGE, null, null, expect.any(String));
         expect(mockMPCPost).toBeCalledTimes(1);
         expect(mockMPCPost).toBeCalledWith(`/wallets/${WALLET.id}/messages/sign`, {
           userId: USER.id,
-          protocolId: WALLET.protocolId,
+          protocolId: expect.any(String),
           message: MESSAGE,
           signer: WALLET.share,
         });
@@ -466,15 +466,15 @@ describe('walletUtils', () => {
 
       it('returns a pending transaction id when permissions block the transaction', async () => {
         mockPreSignMessage.mockResolvedValueOnce({
-          protocolId: WALLET.protocolId,
+          protocolId: expect.any(String),
           pendingTransactionId: WALLET.pendingTransactionId,
         });
         const resp = await signMessage(TEST_CTX, WALLET.share, WALLET.id, USER.id, MESSAGE);
 
         expect(resp).toStrictEqual({ pendingTransactionId: WALLET.pendingTransactionId });
         expect(mockPreSignMessage).toBeCalledTimes(1);
-        expect(mockPreSignMessage).toBeCalledWith(USER.id, WALLET.id, MESSAGE);
-        expect(mockDklsSignMessage).not.toBeCalled();
+        expect(mockPreSignMessage).toBeCalledWith(USER.id, WALLET.id, MESSAGE, null, null, expect.any(String));
+        expect(mockDklsSignMessage).toBeCalledTimes(1);
         expect(mockSignMessage).not.toBeCalled();
       });
     });
@@ -488,7 +488,7 @@ describe('walletUtils', () => {
         `error signing for account with userId ${USER.id} and walletId ${WALLET.id}`,
       );
       expect(mockPreSignMessage).toBeCalledTimes(1);
-      expect(mockPreSignMessage).toBeCalledWith(USER.id, WALLET.id, MESSAGE);
+      expect(mockPreSignMessage).toBeCalledWith(USER.id, WALLET.id, MESSAGE, null, null, expect.any(String));
     });
   });
 
@@ -499,14 +499,18 @@ describe('walletUtils', () => {
 
         expect(resp).toStrictEqual({ signature: SIGNATURE });
         expect(mockSignTransaction).toBeCalledTimes(1);
-        expect(mockSignTransaction).toBeCalledWith(USER.id, WALLET.id, { transaction: TX, chainId: CHAIN });
+        expect(mockSignTransaction).toBeCalledWith(USER.id, WALLET.id, {
+          transaction: TX,
+          chainId: CHAIN,
+          protocolId: expect.any(String),
+        });
         expect(mockDklsSendTransaction).toBeCalledTimes(1);
         expect(mockDklsSendTransaction).toBeCalledWith(
           WALLET.share,
           getBaseMPCNetworkUrl(TEST_CTX.env, !TEST_CTX.disableWebSockets),
           TX,
           CHAIN,
-          WALLET.protocolId,
+          expect.any(String),
           expect.any(Function),
         );
       });
@@ -516,14 +520,18 @@ describe('walletUtils', () => {
         const resp = await signTransaction(_TEST_CTX, WALLET.share, WALLET.id, USER.id, TX, CHAIN);
         expect(resp).toStrictEqual({ signature: SIGNATURE });
         expect(mockSignTransaction).toBeCalledTimes(1);
-        expect(mockSignTransaction).toBeCalledWith(USER.id, WALLET.id, { transaction: TX, chainId: CHAIN });
+        expect(mockSignTransaction).toBeCalledWith(USER.id, WALLET.id, {
+          transaction: TX,
+          chainId: CHAIN,
+          protocolId: expect.any(String),
+        });
         expect(mockSendTransaction).toBeCalledTimes(1);
         expect(mockSendTransaction).toBeCalledWith(
           WALLET.share,
           getBaseMPCNetworkUrl(_TEST_CTX.env, !_TEST_CTX.disableWebSockets),
           TX,
           CHAIN,
-          WALLET.protocolId,
+          expect.any(String),
           expect.any(Function),
         );
       });
@@ -535,11 +543,15 @@ describe('walletUtils', () => {
 
         expect(resp).toStrictEqual({ signature: SIGNATURE });
         expect(mockSignTransaction).toBeCalledTimes(1);
-        expect(mockSignTransaction).toBeCalledWith(USER.id, WALLET.id, { transaction: TX, chainId: CHAIN });
+        expect(mockSignTransaction).toBeCalledWith(USER.id, WALLET.id, {
+          transaction: TX,
+          chainId: CHAIN,
+          protocolId: expect.any(String),
+        });
         expect(mockMPCPost).toBeCalledTimes(1);
         expect(mockMPCPost).toBeCalledWith(`/wallets/${WALLET.id}/transactions/send`, {
           userId: USER.id,
-          protocolId: WALLET.protocolId,
+          protocolId: expect.any(String),
           transaction: TX,
           chainId: CHAIN,
           signer: WALLET.share,
@@ -559,8 +571,12 @@ describe('walletUtils', () => {
 
         expect(resp).toStrictEqual({ pendingTransactionId: WALLET.pendingTransactionId });
         expect(mockSignTransaction).toBeCalledTimes(1);
-        expect(mockSignTransaction).toBeCalledWith(USER.id, WALLET.id, { transaction: TX, chainId: CHAIN });
-        expect(mockDklsSendTransaction).not.toBeCalled();
+        expect(mockSignTransaction).toBeCalledWith(USER.id, WALLET.id, {
+          transaction: TX,
+          chainId: CHAIN,
+          protocolId: expect.any(String),
+        });
+        expect(mockDklsSendTransaction).toBeCalledTimes(1);
         expect(mockSendTransaction).not.toBeCalled();
       });
 
@@ -573,7 +589,11 @@ describe('walletUtils', () => {
           `error signing transaction for account with userId ${USER.id} and walletId ${WALLET.id}`,
         );
         expect(mockSignTransaction).toBeCalledTimes(1);
-        expect(mockSignTransaction).toBeCalledWith(USER.id, WALLET.id, { transaction: TX, chainId: CHAIN });
+        expect(mockSignTransaction).toBeCalledWith(USER.id, WALLET.id, {
+          transaction: TX,
+          chainId: CHAIN,
+          protocolId: expect.any(String),
+        });
       });
     });
   });
@@ -585,14 +605,18 @@ describe('walletUtils', () => {
 
         expect(resp).toStrictEqual({ signature: SIGNATURE });
         expect(mockSendTransactionUserManagement).toBeCalledTimes(1);
-        expect(mockSendTransactionUserManagement).toBeCalledWith(USER.id, WALLET.id, { transaction: TX, chainId: CHAIN });
+        expect(mockSendTransactionUserManagement).toBeCalledWith(USER.id, WALLET.id, {
+          transaction: TX,
+          chainId: CHAIN,
+          protocolId: expect.any(String),
+        });
         expect(mockDklsSendTransaction).toBeCalledTimes(1);
         expect(mockDklsSendTransaction).toBeCalledWith(
           WALLET.share,
           getBaseMPCNetworkUrl(TEST_CTX.env, !TEST_CTX.disableWebSockets),
           TX,
           CHAIN,
-          WALLET.protocolId,
+          expect.any(String),
           expect.any(Function),
         );
       });
@@ -602,14 +626,18 @@ describe('walletUtils', () => {
         const resp = await sendTransaction(_TEST_CTX, WALLET.share, WALLET.id, USER.id, TX, CHAIN);
         expect(resp).toStrictEqual({ signature: SIGNATURE });
         expect(mockSendTransactionUserManagement).toBeCalledTimes(1);
-        expect(mockSendTransactionUserManagement).toBeCalledWith(USER.id, WALLET.id, { transaction: TX, chainId: CHAIN });
+        expect(mockSendTransactionUserManagement).toBeCalledWith(USER.id, WALLET.id, {
+          transaction: TX,
+          chainId: CHAIN,
+          protocolId: expect.any(String),
+        });
         expect(mockSendTransaction).toBeCalledTimes(1);
         expect(mockSendTransaction).toBeCalledWith(
           WALLET.share,
           getBaseMPCNetworkUrl(_TEST_CTX.env, !_TEST_CTX.disableWebSockets),
           TX,
           CHAIN,
-          WALLET.protocolId,
+          expect.any(String),
           expect.any(Function),
         );
       });
@@ -621,11 +649,15 @@ describe('walletUtils', () => {
 
         expect(resp).toStrictEqual({ signature: SIGNATURE });
         expect(mockSendTransactionUserManagement).toBeCalledTimes(1);
-        expect(mockSendTransactionUserManagement).toBeCalledWith(USER.id, WALLET.id, { transaction: TX, chainId: CHAIN });
+        expect(mockSendTransactionUserManagement).toBeCalledWith(USER.id, WALLET.id, {
+          transaction: TX,
+          chainId: CHAIN,
+          protocolId: expect.any(String),
+        });
         expect(mockMPCPost).toBeCalledTimes(1);
         expect(mockMPCPost).toBeCalledWith(`/wallets/${WALLET.id}/transactions/send`, {
           userId: USER.id,
-          protocolId: WALLET.protocolId,
+          protocolId: expect.any(String),
           transaction: TX,
           chainId: CHAIN,
           signer: WALLET.share,
@@ -645,8 +677,12 @@ describe('walletUtils', () => {
 
         expect(resp).toStrictEqual({ pendingTransactionId: WALLET.pendingTransactionId });
         expect(mockSendTransactionUserManagement).toBeCalledTimes(1);
-        expect(mockSendTransactionUserManagement).toBeCalledWith(USER.id, WALLET.id, { transaction: TX, chainId: CHAIN });
-        expect(mockDklsSendTransaction).not.toBeCalled();
+        expect(mockSendTransactionUserManagement).toBeCalledWith(USER.id, WALLET.id, {
+          transaction: TX,
+          chainId: CHAIN,
+          protocolId: expect.any(String),
+        });
+        expect(mockDklsSendTransaction).toBeCalledTimes(1);
         expect(mockSendTransaction).not.toBeCalled();
       });
     });
@@ -660,7 +696,11 @@ describe('walletUtils', () => {
         `error signing transaction to send for account with userId ${USER.id} and walletId ${WALLET.id}`,
       );
       expect(mockSendTransactionUserManagement).toBeCalledTimes(1);
-      expect(mockSendTransactionUserManagement).toBeCalledWith(USER.id, WALLET.id, { transaction: TX, chainId: CHAIN });
+      expect(mockSendTransactionUserManagement).toBeCalledWith(USER.id, WALLET.id, {
+        transaction: TX,
+        chainId: CHAIN,
+        protocolId: expect.any(String),
+      });
     });
   });
 

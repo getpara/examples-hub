@@ -181,6 +181,7 @@ interface claimPreGenWalletsBody {
 interface signTransactionBody {
   transaction: string;
   chainId: string;
+  protocolId?: string;
 }
 
 // TODO: delete chain field and make chainId required
@@ -188,6 +189,7 @@ interface sendTransactionBody {
   transaction: string;
   chain?: Chain;
   chainId?: string;
+  protocolId?: string;
 }
 
 interface AcceptScopesBody {
@@ -201,6 +203,15 @@ interface sessionPasswordBody {
   salt?: string;
   encryptedWalletPrivateKey?: string;
   encryptionKeyHash?: string;
+}
+
+interface EncryptedWalletPrivateKey {
+  id: string;
+  userId: string;
+  encryptedPrivateKey: string;
+  encryptionKeyHash: string;
+  biometricPublicKey?: string;
+  passwordId?: string;
 }
 
 export type SDKType = 'WEB' | 'SERVER' | 'BRIDGE' | 'REACT_NATIVE';
@@ -626,8 +637,9 @@ class Client {
     message: string,
     scheme?: TWalletScheme,
     cosmosSignDoc?: string,
+    protocolId?: string,
   ): Promise<any> => {
-    const body = { message, scheme, cosmosSignDoc };
+    const body = { message, scheme, cosmosSignDoc, protocolId };
     const res = await this.baseRequest.post<any>(`/users/${userId}/wallets/${walletId}/messages/sign`, body);
     return res.data;
   };
@@ -1028,13 +1040,16 @@ class Client {
     encryptionKeyHash: string,
     biometricPublicKey?: string,
     passwordId?: string,
-  ) {
+  ): Promise<{ encryptedWalletPrivateKey: EncryptedWalletPrivateKey }> {
     const body = { encryptedWalletPrivateKey, encryptionKeyHash, biometricPublicKey, passwordId };
     const res = await this.baseRequest.post<any>(`/users/${userId}/encrypted-wallet-private-keys`, body);
     return res.data;
   }
 
-  async getEncryptedWalletPrivateKeys(userId: string, encryptionKeyHash: string) {
+  async getEncryptedWalletPrivateKeys(
+    userId: string,
+    encryptionKeyHash: string,
+  ): Promise<{ encryptedPrivateKeys: EncryptedWalletPrivateKey[] }> {
     const res = await this.baseRequest.get<any>(`/users/${userId}/encrypted-wallet-private-keys/${encryptionKeyHash}`);
     return res.data;
   }
@@ -1117,7 +1132,9 @@ class Client {
     return res;
   }
 
-  async getEncryptedWalletPrivateKey(passwordId: string): Promise<any> {
+  async getEncryptedWalletPrivateKey(
+    passwordId: string,
+  ): Promise<{ data: { encryptedWalletPrivateKey: EncryptedWalletPrivateKey } }> {
     const query = new URLSearchParams({ passwordId }).toString();
     const res = await this.baseRequest.get<any>(`/encrypted-wallet-private-keys?${query}`);
     return res;

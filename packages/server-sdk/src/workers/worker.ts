@@ -3,6 +3,7 @@ import { Ctx, Environment, getPortalBaseURL, initClient, mpcComputationClient, p
 import * as walletUtils from './walletUtils.js';
 
 let rawWasm: any;
+let wasmLoaded = false;
 
 interface Message {
   env: Environment;
@@ -55,15 +56,15 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
     }
     case 'SIGN_TRANSACTION': {
       const { share, walletId, userId, tx, chainId } = params;
-      return walletUtils.signTransaction(ctx, share, walletId, userId, tx, chainId);
+      return withRetry(() => walletUtils.signTransaction(ctx, share, walletId, userId, tx, chainId));
     }
     case 'SEND_TRANSACTION': {
       const { share, walletId, userId, tx, chainId } = params;
-      return walletUtils.sendTransaction(ctx, share, walletId, userId, tx, chainId);
+      return withRetry(() => walletUtils.sendTransaction(ctx, share, walletId, userId, tx, chainId));
     }
     case 'SIGN_MESSAGE': {
       const { share, walletId, userId, message } = params;
-      return walletUtils.signMessage(ctx, share, walletId, userId, message);
+      return withRetry(() => walletUtils.signMessage(ctx, share, walletId, userId, message));
     }
     case 'REFRESH': {
       const { share, walletId, userId } = params;
@@ -109,6 +110,45 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
   }
 }
 
+/**
+ * Executes an operation with retry capabilities
+ * @param operation The function to execute
+ * @param maxRetries Maximum number of retries (default: 2)
+ * @param timeoutMs Timeout in milliseconds (default: 10000)
+ * @returns The result of the operation
+ */
+export async function withRetry<T>(operation: () => Promise<T>, maxRetries = 2, timeoutMs = 10000): Promise<T> {
+  let retries = 0;
+
+  while (true) {
+    try {
+      // Create a promise that resolves with the operation result
+      const operationPromise = operation();
+
+      // Create a promise that rejects after the timeout
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        const timeoutId = setTimeout(() => {
+          reject(new Error(`Operation timed out after ${timeoutMs}ms`));
+        }, timeoutMs);
+
+        // Ensure the timeout is cleared if the operation completes before timeout
+        operationPromise.finally(() => clearTimeout(timeoutId));
+      });
+
+      // Race between the operation and the timeout
+      return await Promise.race([operationPromise, timeoutPromise]);
+    } catch (error) {
+      retries++;
+
+      if (retries > maxRetries) {
+        throw error;
+      }
+
+      console.warn(`Operation failed (attempt ${retries}/${maxRetries}), retrying...`, error);
+    }
+  }
+}
+
 export async function handleMessage(e: { data: Message }): Promise<any> {
   const {
     env,
@@ -134,8 +174,19 @@ export async function handleMessage(e: { data: Message }): Promise<any> {
     cosmosPrefix,
   };
 
-  if (!ctx.offloadMPCComputationURL || ctx.useDKLS) {
+  if (!wasmLoaded && (!ctx.offloadMPCComputationURL || ctx.useDKLS)) {
     await loadWasm(ctx);
+    if (global.initWasm) {
+      await new Promise((resolve, reject) =>
+        global.initWasm((err, result) => {
+          if (err) {
+            reject(err);
+          }
+          resolve(result);
+        }),
+      );
+    }
+    wasmLoaded = true;
   }
 
   const result = await executeMessage(ctx, e.data);
