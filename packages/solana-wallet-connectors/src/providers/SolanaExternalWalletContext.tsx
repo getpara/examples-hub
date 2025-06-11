@@ -54,7 +54,6 @@ export function SolanaExternalWalletProvider({
     publicKey: solanaAddress,
     wallet,
     connecting,
-    connected,
     signMessage: solanaSignMessage,
   } = useWallet();
 
@@ -229,11 +228,6 @@ export function SolanaExternalWalletProvider({
 
   const disconnect = async () => {
     await _disconnect();
-    // The solana library seems to keep some state hanging around that will auto receonnect the same wallet if the window isn't refreshed and the wallet connector is selected again in the modal.
-    // Refreshing here after a disconnect fixes the issue.
-    if (connected) {
-      typeof window !== undefined && window?.location.reload();
-    }
   };
 
   return (
