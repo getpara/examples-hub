@@ -33,6 +33,7 @@ export async function requestWasmWithRetries(ctx: Ctx, retries = 3) {
 }
 
 async function loadWasm(ctx: Ctx): Promise<void> {
+  // @ts-ignore
   await import('../wasm/wasm_exec.js');
   global.WebSocket = require('ws');
 

@@ -2,7 +2,6 @@
 // FILE IN THE PORTAL!
 // run `yarn build` to rebuild the worker file
 
-import '../wasm/wasm_exec.js';
 import * as walletUtils from './walletUtils.js';
 import { Ctx, Environment, getPortalBaseURL, initClient, mpcComputationClient, paraVersion } from '@getpara/core-sdk';
 
@@ -28,7 +27,8 @@ async function loadWasm(ctx: Ctx, wasmOverride?: ArrayBuffer) {
   if (typeof self === 'undefined') {
     return;
   }
-
+  // @ts-ignore
+  await import('../wasm/wasm_exec.js');
   // @ts-ignore
   const goWasm = new self.Go();
   let wasmArrayBuffer = wasmOverride;
