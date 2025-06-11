@@ -1,5 +1,6 @@
 import { Wallet } from '../../../types/Wallet.js';
 import { icon } from './glowIcon.js';
+import { isIosAndRedirectable } from '@solana/wallet-adapter-base';
 
 export const glowWallet = (): Wallet => {
   return {
@@ -8,7 +9,7 @@ export const glowWallet = (): Wallet => {
     iconUrl: icon,
     isExtension: true,
     isMobile: true,
-    getUri: () => '',
+    hasIosSafariExtension: isIosAndRedirectable(),
     downloadUrl: 'https://glow.app',
   };
 };

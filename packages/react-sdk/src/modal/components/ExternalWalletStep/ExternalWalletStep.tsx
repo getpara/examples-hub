@@ -8,10 +8,12 @@ import { ModalStep } from '../../utils/steps.js';
 import { isMobile, isTablet } from '@getpara/web-sdk';
 import { routeMobileExternalWallet } from '../../utils/routeMobileExternalWallet.js';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
+import { useStore } from '../../../provider/stores/useStore.js';
 
 export const ExternalWalletStep = () => {
   const [isCopied, copy] = useCopyToClipboard();
   const externalWalletError = useModalStore(state => state.externalWalletError);
+  const appName = useStore(state => state.appName);
   const setStep = useModalStore(state => state.setStep);
   const { connectExternalWallet, wallet, qrUri, walletDisplayHelpers } = useExternalWallets();
 
@@ -45,17 +47,13 @@ export const ExternalWalletStep = () => {
       </InnerStepContainer>;
     }
 
-    const { showExtension, showMobile, isSolanaMobileIOS } = walletDisplayHelpers;
+    const { showExtension, showMobile } = walletDisplayHelpers;
 
     // Fallback to not supported text
-    if ((!showMobile && !showExtension) || (isSolanaMobileIOS && !wallet.installed)) {
-      const text = isSolanaMobileIOS
-        ? "Solana wallets aren't available on mobile IOS browsers.\n\nPlease continue in the wallet app."
-        : `${wallet.name} isn't supported on mobile devices.\n\nPlease choose another wallet or continue on desktop.`;
-
+    if (!showMobile && !showExtension) {
       return (
         <InnerStepContainer>
-          <Text weight="semiBold">{text}</Text>
+          <Text weight="semiBold">{`${wallet.name} isn't supported on mobile devices.\n\nPlease choose another wallet or continue on desktop.`}</Text>
         </InnerStepContainer>
       );
     }
@@ -90,31 +88,38 @@ export const ExternalWalletStep = () => {
       );
     }
     if (showMobile) {
-      // If Solana wallet or if on a mobile and NOT on a table, show the connection screen. Else show the QR code.
+      // If Solana wallet or if on a mobile and NOT on a tablet, show the connection screen. Else show the QR code.
       if (wallet.type === 'SOLANA' || (isMobile() && !isTablet())) {
-        // Checking if the wallet is installed only for Solana wallets since Solana MWA doesn't work on IOS Safari
-        // https://docs.solanamobile.com/web/developing-for-web#ios-web
-        const isInstalled = wallet.type !== 'SOLANA' || wallet.installed;
         return (
           <>
-            <InnerStepContainer>
-              {!isInstalled && (
+            {wallet.type === 'SOLANA' && qrUri && (
+              <InnerStepContainer>
                 <CpslText weight="semiBold" color="error">
-                  {`${wallet.name} not detected`}
+                  {`Continue in the ${wallet.name} mobile app.`}
                 </CpslText>
-              )}
-            </InnerStepContainer>
+              </InnerStepContainer>
+            )}
             {wallet.id !== 'walletConnect' && (
               <InnerStepContainer>
-                <CpslButton onClick={() => routeMobileExternalWallet(qrUri)} fullWidth>
-                  Connect Wallet
-                </CpslButton>
-                <Link href={wallet.downloadUrl ?? ''} target="_blank">
-                  <ExternalButton variant="secondary">
-                    {`Get ${wallet.name}`}
-                    <ExternalIcon icon="linkExternal" />
-                  </ExternalButton>
-                </Link>
+                {(wallet.type === 'SOLANA' && qrUri && !wallet.hasIosSafariExtension) || wallet.type !== 'SOLANA' ? (
+                  <CpslButton onClick={() => routeMobileExternalWallet(qrUri)} fullWidth>
+                    Connect Wallet
+                  </CpslButton>
+                ) : (
+                  <Text weight="semiBold">
+                    {wallet.hasIosSafariExtension
+                      ? `Please install and use the ${wallet.name} extension for iOS Safari.`
+                      : `Please navigate to ${appName} in the ${wallet.name} wallet.`}
+                  </Text>
+                )}
+                {!wallet.hasIosSafariExtension && (
+                  <Link href={wallet.downloadUrl ?? ''} target="_blank">
+                    <ExternalButton variant="secondary">
+                      {`Get ${wallet.name}`}
+                      <ExternalIcon icon="linkExternal" />
+                    </ExternalButton>
+                  </Link>
+                )}
               </InnerStepContainer>
             )}
           </>

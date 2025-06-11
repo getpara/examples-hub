@@ -27,6 +27,7 @@ export type WalletMetadata = {
     linux?: string;
     desktop?: string;
   };
+  hasIosSafariExtension?: boolean;
 };
 
 export type CommonWallet = {

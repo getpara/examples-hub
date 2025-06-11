@@ -1,5 +1,5 @@
 import { PropsWithChildren, createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { isIOS, isIOSWebview, isMobile, truncateAddress } from '@getpara/web-sdk';
+import { isMobile, truncateAddress } from '@getpara/web-sdk';
 import { useInternalClient } from '../hooks/utils/useInternalClient.js';
 import { useStore } from '../stores/useStore.js';
 import { ModalStep } from '../../modal/index.js';
@@ -16,7 +16,7 @@ export const defaultExternalWallet = {
   wallet: undefined,
   qrUri: undefined,
   chainIdSwitchingTo: undefined,
-  walletDisplayHelpers: { showExtension: false, showMobile: false, isSolanaMobileIOS: false, isCosmosMobileWallet: false },
+  walletDisplayHelpers: { showExtension: false, showMobile: false, isCosmosMobileWallet: false },
   username: undefined,
   avatar: undefined,
   connectExternalWallet: () => Promise.resolve(),
@@ -39,7 +39,6 @@ export const ExternalWalletContext = createContext<{
   walletDisplayHelpers: {
     showExtension: boolean;
     showMobile: boolean;
-    isSolanaMobileIOS: boolean;
     isCosmosMobileWallet: boolean;
   };
   username?: string;
@@ -407,7 +406,6 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     // Show the mobile screen if on mobile and the wallet is a mobile wallet or if on desktop and the wallet isn't installed
     showMobile: (isMobile() && wallet?.isMobile) || (!isMobile() && !wallet?.installed),
 
-    isSolanaMobileIOS: isIOS() && isMobile() && !isIOSWebview() && wallet?.type === 'SOLANA',
     isCosmosMobileWallet: wallet?.type === 'COSMOS' && !!isUsingMobileConnector,
   };
 

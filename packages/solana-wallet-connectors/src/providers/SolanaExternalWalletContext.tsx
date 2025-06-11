@@ -1,6 +1,6 @@
 import { PropsWithChildren, createContext, useEffect, useMemo, useRef } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { Adapter, WalletReadyState } from '@solana/wallet-adapter-base';
+import { Adapter, isIosAndRedirectable, WalletReadyState } from '@solana/wallet-adapter-base';
 import ParaWeb, { AuthState } from '@getpara/web-sdk';
 import { WalletList } from '../types/Wallet.js';
 import { TExternalWallet, type CommonWallet } from '@getpara/react-common';
@@ -156,6 +156,11 @@ export function SolanaExternalWalletProvider({
   };
 
   const connect = async (adapter?: Adapter): Promise<{ address?: string; error?: string; authState?: AuthState }> => {
+    // If on iOS, rely on the redirect happening in the modal.
+    if (isIosAndRedirectable()) {
+      return;
+    }
+
     await _disconnect();
 
     if (!adapter) {
@@ -215,7 +220,6 @@ export function SolanaExternalWalletProvider({
     return {
       connect: () => connect(adapter),
       connectMobile: () => connect(adapter),
-      getQrUri: () => '',
       type: 'SOLANA',
       installed:
         adapter && (adapter?.readyState === WalletReadyState.Installed || adapter?.readyState === WalletReadyState.Loadable),
