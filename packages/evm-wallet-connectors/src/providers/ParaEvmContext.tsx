@@ -7,7 +7,9 @@ import { computeWalletConnectMetaData } from '../utils/computeWalletConnectMetaD
 import { EvmExternalWalletProvider, EvmExternalWalletProviderConfig } from './EvmExternalWalletContext.js';
 import { InjectedParameters } from 'wagmi/connectors';
 import { paraConnector } from '@getpara/wagmi-v2-connector';
-import { setWagmiConfig } from '../stores/wagmiConfigStore.js';
+import { setWagmiConfig, getWagmiConfig } from '../stores/wagmiConfigStore.js';
+import { TExternalWallet } from '@getpara/react-common';
+import { resolveWalletList } from '../utils/resolveWalletList.js';
 
 export interface ParaEvmProviderConfig<
   chains extends readonly [Chain, ...Chain[]],
@@ -21,7 +23,8 @@ export interface ParaEvmProviderConfig<
   appDescription?: string;
   appUrl?: string;
   appIcon?: string;
-  wallets?: WalletList;
+  // Either a list of wallet‑factory fns **OR** the Para wallet IDs
+  wallets?: WalletList | TExternalWallet[];
   projectId: string;
   paraConnectorOptions?: InjectedParameters;
 }
@@ -88,8 +91,15 @@ export function ParaEvmProvider<
 
   // Memoizing the config with no deps here so it stays constant after the first render
   const config = useMemo(() => {
+    // If a config already exists, return it to avoid re-creating
+    // This is for apps that use the createParaWagmiConfig factory function so they have access to the config outside of the provider lifecycle
+    const existing = getWagmiConfig();
+    if (existing) return existing;
+
+    // If no config exists, create a new one
     const wcMetadata = computeWalletConnectMetaData({ appName, appDescription, appUrl, appIcon });
-    const baseConnectors = connectorsForWallets(wallets, {
+    const walletFactories = resolveWalletList(wallets);
+    const baseConnectors = connectorsForWallets(walletFactories, {
       projectId,
       appName,
       appDescription,
@@ -105,7 +115,7 @@ export function ParaEvmProvider<
       connectors: allConnectors,
     } as CreateConfigParameters<chains, transports>);
 
-    // Set the config in the global store
+    // Set the config so it can be accessed outside of the hook lifecycle but still within the lifecycle of the provider
     setWagmiConfig(createdConfig);
 
     return createdConfig;

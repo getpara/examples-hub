@@ -15,6 +15,7 @@ test.describe('web sandbox', () => {
     await page
       .locator('div:nth-child(3) > .chakra-select__wrapper > .chakra-select')
       .selectOption('dfb222ff8b602eb492974a6ed68c35b2');
+    await page.reload();
 
     const { emailOrPhone, credential } = await webExamplePage.createUser({ context, is2FAEnabled: true });
 
