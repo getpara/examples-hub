@@ -7,18 +7,32 @@ import { ProjectDropdown } from '../../NavComponents/ProjectDropdown';
 import { ApiKeyDropdown } from '../../NavComponents/ApiKeyDropdown';
 import { AccountDropdown } from './components/AccountDropdown';
 import { NavLink } from './components/NavLink';
-
-export const AUTH_APP_BAR_HEIGHT = 57;
+import { useAppStore } from '../../../stores/app/useAppStore';
+import { useLayoutEffect, useRef } from 'react';
 
 interface AuthAppBarProps {}
 
 export const AuthAppBar = ({}: AuthAppBarProps) => {
   const { organizationId, projectId, apiKey } = useParams();
   const { toggleSidebar } = useSidebar();
+  const ref = useRef<HTMLElement | null>(null);
+  const setAppBarHeight = useAppStore(state => state.setAppBarHeight);
+
+  useLayoutEffect(() => {
+    function updateHeight() {
+      if (ref.current) setAppBarHeight(ref.current.offsetHeight);
+    }
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+    return () => window.removeEventListener('resize', updateHeight);
+  }, []);
 
   return (
     <>
-      <nav className="para:w-full para:fixed para:h-[var(--appbar-height-mobile)] para:lg:h-[var(--appbar-height)] para:border-b para:border-border para:bg-background para:py-2 para:px-2 para:lg:px-6 para:flex para:items-center para:justify-between para:z-[50]">
+      <nav
+        ref={ref}
+        className="para:w-full para:fixed para:h-[var(--appbar-height-mobile)] para:lg:h-[var(--appbar-height)] para:border-b para:border-border para:bg-background para:py-2 para:px-2 para:lg:px-6 para:flex para:items-center para:justify-between para:z-[50]"
+      >
         <div className="para:h-full para:flex para:gap-4 para:items-center para:min-w-0">
           <Link to={`/${organizationId}/dashboard`} className="para:hidden para:lg:flex">
             <ParaIconBrand className="para:w-[22px] para:h-5" />

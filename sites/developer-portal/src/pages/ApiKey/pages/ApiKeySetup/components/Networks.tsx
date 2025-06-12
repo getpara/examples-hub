@@ -17,7 +17,7 @@ import { FormMessage } from '../../../../../components/formComponents';
 import { TWalletType, WALLET_TYPES } from '@getpara/user-management-client';
 import { ComponentType } from 'react';
 
-export const WALLET_TYPE_CONFIG: Record<TWalletType, { name: string; Icon: ComponentType<{ className?: string }> }> = {
+export const WALLET_TYPE_CONFIG: Record<TWalletType, { name: string; Icon: ComponentType<{ className: string }> }> = {
   EVM: {
     name: 'Ethereum Virtual Machine (Includes Ethereum Layer 2s)',
     Icon: EVM,
@@ -40,7 +40,7 @@ export const Networks = () => {
           name="supportedWalletTypes"
           render={({ field: { ref: _, value, onChange, disabled } }) => (
             <FormItem className="para:flex-1">
-              <div className="para:flex para:flex-col para:gap-4">
+              <div className="para:flex para:flex-col para:gap-4 para:mb-1">
                 {WALLET_TYPES.map(type => {
                   const config = WALLET_TYPE_CONFIG[type];
                   const valIndex = value?.findIndex(v => v.type === type) ?? -1;

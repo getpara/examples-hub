@@ -30,8 +30,8 @@ export const Projects = ({ onShowAllClick }: ProjectsProps) => {
 
   return (
     <div className="para:flex para:flex-col para:gap-2 para:pb-6">
-      <div className="para:flex para:flex-col para:md:flex-row para:items-center para:gap-2 para:justify-between">
-        <div className="para:flex para:items-center para:gap-2">
+      <div className="para:flex para:flex-row para:gap-2 para:justify-between para:flex-wrap">
+        <div className="para:flex para:items-center para:gap-2 para:flex-wrap">
           <Typography className="para:text-2xl para:font-semibold">
             {projects.length} {pluralize(projects.length, 'Project')}
           </Typography>
@@ -41,9 +41,11 @@ export const Projects = ({ onShowAllClick }: ProjectsProps) => {
             </Button>
           )}
         </div>
-        <div className="para:flex para:flex-col para:sm:flex-row  para:gap-2">
+        <div className="para:flex para:gap-2 para:flex-wrap">
           <OrganizationSettingsButton />
-          <CreateProjectButton />
+          <div>
+            <CreateProjectButton />
+          </div>
         </div>
       </div>
       <div className="para:grid para:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] para:gap-2">

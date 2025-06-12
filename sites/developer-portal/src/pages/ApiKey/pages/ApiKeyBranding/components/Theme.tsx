@@ -26,7 +26,7 @@ export const Theme = () => {
             control={form.control}
             name="backgroundColor"
             render={({ field: { ref: _, ...restField } }) => (
-              <FormItem className="para:flex-1">
+              <FormItem className="para:flex-1 para:md:max-w-1/4">
                 <FormLabel>Primary</FormLabel>
                 <FormControl>
                   <ColorInput {...restField} value={restField.value ?? ''} />
@@ -39,7 +39,7 @@ export const Theme = () => {
             control={form.control}
             name="foregroundColor"
             render={({ field: { ref: _, ...restField } }) => (
-              <FormItem className="para:flex-1">
+              <FormItem className="para:flex-1 para:md:max-w-1/4">
                 <FormLabel>Secondary</FormLabel>
                 <FormControl>
                   <ColorInput {...restField} value={restField.value ?? ''} />
@@ -52,7 +52,7 @@ export const Theme = () => {
             control={form.control}
             name="accentColor"
             render={({ field: { ref: _, ...restField } }) => (
-              <FormItem className="para:flex-1">
+              <FormItem className="para:flex-1 para:md:max-w-1/4">
                 <FormLabel>{'Accent (Optional)'}</FormLabel>
                 <FormControl>
                   <ColorInput {...restField} value={restField.value ?? ''} />
@@ -66,7 +66,7 @@ export const Theme = () => {
           control={form.control}
           name="themeMode"
           render={({ field: { ref: ref, ...restField } }) => (
-            <FormItem className="para:w-full para:lg:w-[200px]">
+            <FormItem className="para:w-full para:md:max-w-1/4">
               <FormLabel>Theme</FormLabel>
               <Select {...restField} value={restField.value ?? ''} onValueChange={restField.onChange}>
                 <FormControl>

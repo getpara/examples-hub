@@ -40,7 +40,7 @@ export const ApiKeyUsers = () => {
           <UsersTable methods={methods} />
         </>
       }
-      className="para:h-[calc(100vh-var(--appbar-height-mobile)-48px)] para:lg:h-[calc(100vh-var(--appbar-height)-48px)] para:min-h-[500px] para:max-w-full"
+      className="para:min-h-[500px] para:max-w-full"
     />
   );
 };

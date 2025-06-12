@@ -50,4 +50,7 @@ export const getActions = (set: StoreApi<AppStore>['setState'], get: StoreApi<Ap
   },
   hasDismissedOnboardingNotification: (orgId: string, notificationType: NotificationType) =>
     get().dismissedNotifications[orgId]?.[notificationType] ?? false,
+  setAppBarHeight: appBarHeight => {
+    set({ appBarHeight });
+  },
 });

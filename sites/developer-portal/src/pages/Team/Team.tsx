@@ -26,7 +26,7 @@ export const Team = () => {
 
   return (
     <>
-      <div className="para:flex para:flex-col para:gap-4">
+      <div className="para:flex para:flex-col para:gap-4 para:w-full">
         <PageHeader
           title={'Team'}
           ActionComponent={

@@ -34,7 +34,9 @@ export const Plans = () => {
       <Typography className="para:text-2xl para:font-semibold">{t('plans.title')}</Typography>
       <div className="para:flex para:flex-col para:gap-4">
         <div className="para:p-4 para:w-full para:flex para:gap-2 para:bg-primary para:rounded-lg">
-          <Sparkle className="para:size-4 para:stroke-muted" />
+          <div>
+            <Sparkle className="para:size-4 para:stroke-muted" />
+          </div>
           <Typography className="para:text-sm para:font-medium para:text-muted">{t('plans.betaUsersDisclosure')}</Typography>
         </div>
         {planMeta?.map((planMetadata, index) => (

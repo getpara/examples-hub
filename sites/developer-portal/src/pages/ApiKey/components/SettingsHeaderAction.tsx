@@ -10,6 +10,9 @@ import { useRestoreProject } from '../../../hooks/api/mutations/useRestoreProjec
 import { useGetOrganizationSubscription } from '../../../hooks/api/queries/useOrganizationSubscription';
 import { usePlan } from '../../../hooks/api/queries/usePlans';
 import { RestoreProjectDialog } from './RestoreProjectDialog';
+import { useIsInView } from '../../../hooks/useIsInView';
+import { useAppStore } from '../../../stores/app/useAppStore';
+import { FloatingSaveButton } from './FloatingSaveButton';
 
 type SettingsHeaderActionProps = {
   isSetup?: boolean;
@@ -26,6 +29,9 @@ export const SettingsHeaderAction = ({ isSetup }: SettingsHeaderActionProps) => 
   const [isCopyToDialogOpen, setIsCopyToDialogOpen] = useState(false);
   const [isArchiveDialogOpen, setArchiveDialogOpen] = useState(false);
   const [isRestoreDialogOpen, setRestoreDialogOpen] = useState(false);
+  const appBarHeight = useAppStore(state => state.appBarHeight);
+
+  const { ref, isInView } = useIsInView<HTMLDivElement>({ rootMargin: `-${appBarHeight}px 0px 0px 0px` });
 
   const planMaxProjects = plan?.maxProjects ?? 1;
   const archiveButtonDisabled = isLoadingSub || isLoadingPlan || isLoadingProjects || isRestoringProject;
@@ -61,7 +67,7 @@ export const SettingsHeaderAction = ({ isSetup }: SettingsHeaderActionProps) => 
 
   return (
     <>
-      <div className="para:flex para:gap-2">
+      <div ref={ref} className="para:flex para:gap-2 para:flex-wrap">
         <Button variant="outline" onClick={handleCopyToClick}>
           <Copy />
           Copy to
@@ -86,6 +92,7 @@ export const SettingsHeaderAction = ({ isSetup }: SettingsHeaderActionProps) => 
       <CopyToDialog open={isCopyToDialogOpen} setIsOpen={setIsCopyToDialogOpen} />
       <ArchiveProjectDialog isOpen={isArchiveDialogOpen} setIsOpen={setArchiveDialogOpen} />
       <RestoreProjectDialog isOpen={isRestoreDialogOpen} setIsOpen={setRestoreDialogOpen} />
+      <FloatingSaveButton shouldShow={!isInView} />
     </>
   );
 };

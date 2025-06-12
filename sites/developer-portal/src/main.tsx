@@ -13,6 +13,7 @@ import { Environment, ParaProvider } from '@getpara/react-sdk';
 import { paraLogo } from './assets/paraLogo';
 import { Toaster } from '@getpara/react-component-library';
 import './i18n';
+import { CircleCheck } from 'lucide-react';
 
 const App = () => {
   return (
@@ -40,7 +41,12 @@ const App = () => {
       externalWalletConfig={{ wallets: [] }}
     >
       <RouterProvider router={router} />
-      <Toaster />
+      <Toaster
+        theme="light"
+        icons={{
+          success: <CircleCheck className="para:stroke-background para:fill-green-600 para:size-5" />,
+        }}
+      />
     </ParaProvider>
   );
 };

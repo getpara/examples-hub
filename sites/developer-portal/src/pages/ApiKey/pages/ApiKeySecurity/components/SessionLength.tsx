@@ -54,7 +54,7 @@ export const SessionLength = () => {
                       key={button.value}
                     >
                       <Button
-                        className="para:h-12"
+                        className="para:h-11"
                         variant={isSelected || (!isAnotherSelected && isCustom) ? 'default' : 'outline'}
                         onClick={() => {
                           if (isCustom) {

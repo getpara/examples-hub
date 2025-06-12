@@ -7,9 +7,16 @@ import { SideCard } from './components/SideCard';
 import { useSetupForm } from './hooks/useSetupForm';
 import { FormWrapper } from '../../components/FormWrapper';
 import { Mobile } from './components/Mobile';
+import { useParams } from 'react-router-dom';
+import { useGetOrganizationKey } from '../../../../hooks/api/queries/useOrganizationKeys';
+import { Environment as TEnvironment } from '../../../../types/environment';
 
 export const ApiKeySetup = () => {
   const { form, submitForm } = useSetupForm();
+  const { apiKey, env, projectId } = useParams();
+  const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as TEnvironment);
+
+  const isOnboardingComplete = !!apiKeyData?.onboarding?.isComplete || !!apiKeyData?.onboarding?.isSkipped;
 
   return (
     <FormWrapper {...form} submitForm={submitForm}>
@@ -23,7 +30,7 @@ export const ApiKeySetup = () => {
             <Mobile />
           </>
         }
-        columnTwo={<SideCard />}
+        columnTwo={!isOnboardingComplete ? <SideCard /> : undefined}
       />
     </FormWrapper>
   );

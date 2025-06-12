@@ -3,8 +3,11 @@ import { useParams } from 'react-router-dom';
 import { useApiKeyUsersCSV } from '../../../hooks/api/queries/useApiKeyUsersCSV';
 import { FileDown } from 'lucide-react';
 import { AxiosError } from 'axios';
+import { RemoveAllUsersDialog } from './RemoveAllUsersDialog';
+import { useState } from 'react';
 
 export const UsersHeaderAction = () => {
+  const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false);
   const { apiKey, env, projectId } = useParams();
 
   const { refetch, isFetching } = useApiKeyUsersCSV(projectId ?? '', apiKey ?? '', env ?? '');
@@ -39,9 +42,12 @@ export const UsersHeaderAction = () => {
   };
 
   return (
-    <Button variant="neutral" disabled={isFetching} isLoading={isFetching} onClick={handleClick}>
-      Download .csv
-      <FileDown />
-    </Button>
+    <div className="para:flex para:gap-2 para:flex-wrap">
+      <Button variant="neutral" disabled={isFetching} isLoading={isFetching} onClick={handleClick}>
+        Download .csv
+        <FileDown />
+      </Button>
+      <RemoveAllUsersDialog open={isRemoveDialogOpen} setOpen={setIsRemoveDialogOpen} />
+    </div>
   );
 };

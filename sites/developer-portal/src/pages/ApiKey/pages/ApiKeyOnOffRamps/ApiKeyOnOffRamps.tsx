@@ -4,6 +4,7 @@ import { Receive } from './components/Receive';
 import { Withdraw } from './components/Withdraw';
 import { Buy } from './components/Buy';
 import { FormWrapper } from '../../components/FormWrapper';
+import { Providers } from './components/Providers';
 
 export const ApiKeyOnOffRamps = () => {
   const { form, submitForm } = useOnOffRampsForm();
@@ -13,6 +14,7 @@ export const ApiKeyOnOffRamps = () => {
       <ContentWrapper
         columnOne={
           <>
+            <Providers />
             <Buy />
             <Receive />
             <Withdraw />

@@ -26,7 +26,7 @@ export const Font = () => {
           control={form.control}
           name="font"
           render={({ field: { ref: ref, ...restField } }) => (
-            <FormItem className="para:flex-1">
+            <FormItem className="para:flex-1 para:md:max-w-1/4">
               <FormLabel>Choose Font</FormLabel>
               <Select {...restField} value={restField.value ?? undefined} onValueChange={restField.onChange}>
                 <FormControl>
@@ -52,7 +52,7 @@ export const Font = () => {
           content={
             <span>
               Custom fonts can be used in the Para Modal.{' '}
-              <Link to={ADVANCED_MODAL_THEME_DOCS_LINK} target="_blank" className="para:underline">
+              <Link to={ADVANCED_MODAL_THEME_DOCS_LINK} target="_blank" className="para:underline para:underline-offset-3">
                 Learn More
               </Link>
             </span>

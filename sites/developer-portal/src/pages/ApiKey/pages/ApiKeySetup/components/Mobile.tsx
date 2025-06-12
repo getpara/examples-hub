@@ -3,7 +3,7 @@ import { AndroidSetup } from './AndroidSetup';
 import { AppleSetup } from './AppleSetup';
 import { SetupForm } from '../hooks/useSetupForm';
 import { useFormContext } from '@getpara/react-component-library';
-import { getIsFrameworkMobile } from '../../../../../utils/framework';
+import { getIsFrameworkIos, getIsFrameworkAndroid } from '../../../../../utils/framework';
 import { Framework } from '../../../../../types/framework';
 
 export const Mobile = () => {
@@ -11,9 +11,10 @@ export const Mobile = () => {
 
   const framework = form.watch('framework');
 
-  const isMobileFramework = getIsFrameworkMobile((framework as Framework) ?? Framework.REACT);
+  const isIosFramework = getIsFrameworkIos(framework as Framework);
+  const isAndroidFramework = getIsFrameworkAndroid(framework as Framework);
 
-  if (isMobileFramework) {
+  if (isIosFramework && isAndroidFramework) {
     return null;
   }
 
@@ -23,8 +24,8 @@ export const Mobile = () => {
       subtitle="If you are building a cross-platform app that will run on the web and on mobile you will need to supply additional, mobile specific details."
     >
       <div className="para:flex para:flex-col para:gap-4 para:flex-1">
-        <AppleSetup />
-        <AndroidSetup />
+        {!isIosFramework && <AppleSetup />}
+        {!isAndroidFramework && <AndroidSetup />}
       </div>
     </ConfigCard>
   );

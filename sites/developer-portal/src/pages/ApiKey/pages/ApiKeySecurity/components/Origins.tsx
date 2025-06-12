@@ -7,7 +7,10 @@ export const Origins = () => {
   const form = useFormContext<SecurityForm>();
 
   return (
-    <ConfigCard title="Allowed Origins">
+    <ConfigCard
+      title="Allowed Origins"
+      subtitle="This is the list of domains that are able to make requests on your Para instance. By default all domains are allowed. We recommend adding the domain’s of the apps where you will be integrating Para."
+    >
       <FormField
         control={form.control}
         name="origins"

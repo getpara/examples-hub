@@ -56,6 +56,9 @@ export const KeyData = () => {
                         showCopyButton
                       />
                     </FormControl>
+                    <FormDescription>
+                      This API key is safe to expose client-side and does not expose any confidential information.
+                    </FormDescription>
                   </FormItem>
                   <Button
                     className="para:px-4! para:mt-[22px] para:h-11"

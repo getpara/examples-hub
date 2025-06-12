@@ -16,7 +16,7 @@ export const AuthMethods = () => {
       subtitle="You can prompt users to create accounts using a passkey, a password, or let them choose. Enabling both the passkeys and passwords will allow the user to choose their method and Passkeys will be preferenced."
       ActionComponent={
         <Link to={DOCS_LINK} className="para:flex para:gap-2 para:items-center">
-          <Button>
+          <Button variant="outline">
             Learn More
             <ArrowRight />
           </Button>

@@ -3,14 +3,14 @@ import { ReactNode } from 'react';
 
 type PageHeader = {
   title: string;
-  subtitle?: string;
+  subtitle?: ReactNode;
   ActionComponent?: ReactNode;
 };
 
 export const PageHeader = ({ title, subtitle, ActionComponent }: PageHeader) => {
   return (
-    <div className="para:flex para:flex-col para:min-w-0 para:flex-1">
-      <div className="para:flex para:justify-between para:items-center">
+    <div className="para:flex para:flex-col para:min-w-0">
+      <div className="para:flex para:justify-between para:items-center para:flex-wrap para:gap-2">
         <Typography className="para:text-2xl para:font-semibold">{title}</Typography>
         {ActionComponent}
       </div>

@@ -65,8 +65,8 @@ export const DefaultAssetConfig = () => {
       const currentSelection = formatAssetOption(defaultOnRampAsset ?? '', defaultOnRampNetwork ?? '');
 
       if (!assetOptions.includes(currentSelection)) {
-        form.setValue('defaultOnRampNetwork', null);
-        form.setValue('defaultOnRampAsset', null);
+        form.setValue('defaultOnRampNetwork', null, { shouldDirty: true });
+        form.setValue('defaultOnRampAsset', null, { shouldDirty: true });
       }
     }
   }, [assetOptions, defaultOnRampAsset, defaultOnRampNetwork, form]);
@@ -90,14 +90,14 @@ export const DefaultAssetConfig = () => {
                 onValueChange={value => {
                   if (!value) {
                     restField.onChange(null);
-                    form.setValue('defaultOnRampNetwork', null);
+                    form.setValue('defaultOnRampNetwork', null, { shouldDirty: true });
                     return;
                   }
 
                   const { asset, network } = parseAssetOption(value);
 
                   restField.onChange(asset);
-                  form.setValue('defaultOnRampNetwork', network as Network);
+                  form.setValue('defaultOnRampNetwork', network as Network, { shouldDirty: true });
                 }}
               >
                 <FormControl>

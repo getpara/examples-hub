@@ -43,7 +43,7 @@ export const AssetUpload = ({ formKey }: AssetUploadProps) => {
           // If the image url hasn't ever been set, save the key config
           // If it has been set, updating the image in S3 is all we need to do
           if (url !== currentValue) {
-            form.setValue(formKey, url);
+            form.setValue(formKey, url, { shouldDirty: true });
             await updateKey({
               projectId: projectId!,
               keyId: apiKey!,

@@ -12,7 +12,7 @@ import { RemoveUserDialog } from './RemoveUserDialog';
 import { useState } from 'react';
 import { UsersTableData } from '../../../../../types/api';
 import { LOGIN_METHOD_CONFIG } from '../../../../../utils/constants';
-import { formatDate } from '../../../../../utils/formatDate';
+import { formatDatetime } from '../../../../../utils/formatDate';
 import { Link } from 'react-router-dom';
 import { GroupedCard, GroupedCards } from '../../../../../components/GroupedCards';
 import { truncateAddress, TWalletType } from '@getpara/react-sdk';
@@ -57,14 +57,14 @@ export const UserSheet = ({ isOpen, user, onClose }: UserSheetProps) => {
   return (
     <>
       <Sheet open={isOpen} onOpenChange={handleOpenChange}>
-        <SheetContent className="para:overflow-auto">
+        <SheetContent>
           <SheetHeader className="para:pb-0">
             <SheetTitle className="para:break-words">
               {user.email ?? user.phoneNumber ?? user.farcasterUsername ?? user.userId ?? user.pregenIdentifier ?? ''}
             </SheetTitle>
             <SheetDescription className="para:break-words">{user.userId ?? user.pregenWalletId ?? ''}</SheetDescription>
           </SheetHeader>
-          <div className="para:px-6 para:flex para:flex-col para:gap-4">
+          <div className="para:px-6 para:flex para:flex-col para:gap-4 para:overflow-auto">
             <GroupedCards>
               <GroupedCard>
                 <Typography className="para:text-sm para:font-medium" color="secondary">
@@ -79,7 +79,7 @@ export const UserSheet = ({ isOpen, user, onClose }: UserSheetProps) => {
                   Last Login
                 </Typography>
                 <Typography className="para:text-sm para:font-medium" color="secondary">
-                  {formatDate(user.lastSeen)}
+                  {formatDatetime(user.lastSeen)}
                 </Typography>
               </GroupedCard>
               <GroupedCard>
@@ -87,7 +87,7 @@ export const UserSheet = ({ isOpen, user, onClose }: UserSheetProps) => {
                   Created
                 </Typography>
                 <Typography className="para:text-sm para:font-medium" color="secondary">
-                  {formatDate(user.firstCreated)}
+                  {formatDatetime(user.firstCreated)}
                 </Typography>
               </GroupedCard>
             </GroupedCards>
@@ -101,7 +101,10 @@ export const UserSheet = ({ isOpen, user, onClose }: UserSheetProps) => {
                     const blockExplorer = blockExplorers[address.type];
 
                     return (
-                      <GroupedCard key={address.address} className="para:flex para:flex-row para:items-center para:gap-2">
+                      <GroupedCard
+                        key={address.address}
+                        className="para:flex para:flex-row para:items-center para:gap-2 para:flex-wrap"
+                      >
                         <div className="para:flex para:flex-row para:items-center para:gap-2">
                           <Icon className="para:size-4" />
                           <Typography className="para:text-sm para:font-medium" color="secondary">

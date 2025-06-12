@@ -5,9 +5,9 @@ import { ReactNode } from 'react';
 export type UsersTabValue = 'all' | 'standard' | 'pregen';
 
 export const USERS_TABS: { label: string; value: UsersTabValue; Icon: ReactNode }[] = [
-  { label: 'All Users', value: 'all', Icon: <Globe /> },
-  { label: 'Standard Users', value: 'standard', Icon: <User /> },
-  { label: 'Pregen Users', value: 'pregen', Icon: <Wand /> },
+  { label: 'All', value: 'all', Icon: <Globe /> },
+  { label: 'Standard', value: 'standard', Icon: <User /> },
+  { label: 'Pregen', value: 'pregen', Icon: <Wand /> },
 ];
 
 type UsersTabsProps = {

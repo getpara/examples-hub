@@ -8,7 +8,8 @@ import {
   getFrameworkDocsLink,
   getFrameworkExtraSetupLink,
   getFrameworkPackages,
-  getIsFrameworkMobile,
+  getIsFrameworkAndroid,
+  getIsFrameworkIos,
 } from '../../../../../utils/framework';
 import { Framework } from '../../../../../types/framework';
 import { getPackageManagerInstallString } from '../../../../../utils/packageManager';
@@ -23,12 +24,14 @@ export const Install = () => {
 
   const [framework, packageManager] = form.watch(['framework', 'packageManager']);
 
-  const typedFramework = (framework as Framework) ?? Framework.REACT;
-  const typedPackageManager = (packageManager as PackageManager) ?? PackageManager.NPM;
+  const typedFramework = framework as Framework;
+  const typedPackageManager = packageManager as PackageManager;
 
   const installString = `${getPackageManagerInstallString(typedPackageManager)} ${getFrameworkPackages(typedFramework)}`;
   const extraSetupLink = getFrameworkExtraSetupLink(typedFramework);
-  const isMobileFramework = getIsFrameworkMobile((framework as Framework) ?? Framework.REACT);
+
+  const isIosFramework = getIsFrameworkIos(framework as Framework);
+  const isAndroidFramework = getIsFrameworkAndroid(framework as Framework);
 
   return (
     <ConfigCard
@@ -46,24 +49,21 @@ export const Install = () => {
           <Typography className="para:text-sm para:font-medium">Install Package</Typography>
           <CopyInput
             value={installString}
-            disabled
+            readOnly
             inputClassName="para:disabled:opacity-100 para:disabled:pointer-events-auto para:disabled:cursor-text"
           />
         </div>
         <CodeSnippet />
         {extraSetupLink && (
           <Link to={extraSetupLink} target="_blank">
-            <Button variant="outline">
-              {formatFrameworkName(typedFramework)} requires extra setup. Follow our guide here <SquareArrowOutUpRight />
+            <Button variant="outline" className="para:whitespace-normal para:break-words para:h-auto">
+              {formatFrameworkName(typedFramework)} requires extra setup. Follow our guide here
+              <SquareArrowOutUpRight />
             </Button>
           </Link>
         )}
-        {isMobileFramework && (
-          <>
-            <AppleSetup />
-            <AndroidSetup />
-          </>
-        )}
+        {isIosFramework && <AppleSetup />}
+        {isAndroidFramework && <AndroidSetup />}
       </div>
     </ConfigCard>
   );

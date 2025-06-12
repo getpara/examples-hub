@@ -1,4 +1,13 @@
-import { cn, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@getpara/react-component-library';
+import {
+  cn,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  Typography,
+} from '@getpara/react-component-library';
 import { flexRender, Row, Table as TTable } from '@tanstack/react-table';
 import { DataTablePagination } from './DataTablePagination';
 
@@ -6,9 +15,13 @@ interface DataTableProps<TData> {
   table: TTable<TData>;
   className?: string;
   onRowClick?: (_: Row<TData>) => void;
+  isLoading?: boolean;
+  noResultsContent?: React.ReactNode;
 }
 
-export function DataTable<TData>({ table, className, onRowClick }: DataTableProps<TData>) {
+export function DataTable<TData>({ table, className, onRowClick, noResultsContent, isLoading }: DataTableProps<TData>) {
+  const hasData = !!table.getRowModel().rows.length;
+
   return (
     <div
       className={cn(
@@ -31,7 +44,7 @@ export function DataTable<TData>({ table, className, onRowClick }: DataTableProp
           ))}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows?.length ? (
+          {hasData &&
             table.getRowModel().rows.map(row => (
               <TableRow
                 key={row.id}
@@ -45,17 +58,15 @@ export function DataTable<TData>({ table, className, onRowClick }: DataTableProp
                   </TableCell>
                 ))}
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={table.getAllColumns().length} className="h-24 text-center">
-                No results.
-              </TableCell>
-            </TableRow>
-          )}
+            ))}
         </TableBody>
       </Table>
-      <DataTablePagination table={table} />
+      {hasData && <DataTablePagination table={table} />}
+      {!isLoading && !hasData && (
+        <div className="para:size-full para:flex para:items-center para:justify-center para:flex-1">
+          {noResultsContent ?? <Typography>No results.</Typography>}
+        </div>
+      )}
     </div>
   );
 }

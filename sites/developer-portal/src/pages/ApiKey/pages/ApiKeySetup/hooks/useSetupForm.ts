@@ -29,7 +29,12 @@ export type SetupForm = Pick<
 
 const formSchema = z.object({
   cosmosPrefix: z.string().optional().nullable(),
-  supportedWalletTypes: z.array(z.object({ type: z.enum(WALLET_TYPES), optional: z.boolean().optional() })).min(1),
+  supportedWalletTypes: z
+    .array(z.object({ type: z.enum(WALLET_TYPES), optional: z.boolean().optional() }))
+    .min(1, 'At least one network must be selected.')
+    .refine(arr => arr.some(item => item.optional === false), {
+      message: 'At least one network must be required.',
+    }),
   name: z.string(),
   framework: z.string().optional().nullable(),
   packageManager: z.string().optional().nullable(),

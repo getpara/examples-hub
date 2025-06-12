@@ -5,14 +5,15 @@ import {
   usePrefetchOrganizationKeyUsersTableDataQuery,
 } from '../../../../../hooks/api/queries/useOrganizationKeyUsersTableData';
 import { getColumns } from './Columns';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { UsersTableData } from '../../../../../types/api';
 import { LoginMethod } from '../../../../../types/loginMethod';
 import { DataTable } from '../../../../../components/DataTable/DataTable';
 import { UserSheet } from './UserSheet';
+import { Button, ParaUser, Typography } from '@getpara/react-component-library';
 
-const PAGE_SIZE = 25;
+export const PAGE_SIZE = 25;
 
 const LOADING_DATA: UsersTableData[] = new Array(PAGE_SIZE).fill({
   id: '',
@@ -31,9 +32,11 @@ export const UsersTable = ({ methods }: UsersTableProps) => {
     pageIndex: 0, //initial page index
     pageSize: PAGE_SIZE, //default page size
   });
-  const { apiKey, env, projectId } = useParams();
+  const { organizationId, apiKey, env, projectId } = useParams();
   const [selectedUser, setSelectedUser] = useState<UsersTableData | undefined>();
   const [isOpen, setIsOpen] = useState(false);
+
+  const setupLink = `/${organizationId}/project/${projectId}/key/${env}/${apiKey}/setup`;
 
   const handleSheetClose = () => {
     setIsOpen(false);
@@ -102,6 +105,21 @@ export const UsersTable = ({ methods }: UsersTableProps) => {
             setIsOpen(true);
           }
         }}
+        isLoading={isUsersLoading}
+        noResultsContent={
+          <div className="para:flex para:flex-col para:gap-4 para:justify-center para:items-center para:w-[192px]">
+            <ParaUser className="para:fill-primary" />
+            <div>
+              <Typography className="para:text-sm para:font-medium para:text-center">No Users Yet</Typography>
+              <Typography className="para:text-xs para:font-medium para:text-center" color="muted">
+                Onboard your first user by following the setup guide
+              </Typography>
+            </div>
+            <Button size="sm">
+              <Link to={setupLink}>Set Up</Link>
+            </Button>
+          </div>
+        }
       />
       <UserSheet isOpen={isOpen} user={selectedUser} onClose={handleSheetClose} />
     </>

@@ -20,7 +20,7 @@ export const Home = () => {
 
   return (
     <>
-      <div>
+      <div className="para:w-full">
         {!hasProjects ? (
           <EmptyState />
         ) : (

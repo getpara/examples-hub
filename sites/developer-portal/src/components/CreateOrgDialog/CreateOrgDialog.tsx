@@ -80,7 +80,7 @@ export const CreateOrgDialog = ({ open, setOpen }: CreateOrgDialogProps) => {
                 idPrefix="logoUrl"
                 onInputChange={ev => {
                   const file = ev.target?.files?.[0] ?? null;
-                  form.setValue('logoFile', file);
+                  form.setValue('logoFile', file, { shouldDirty: true });
 
                   if (file) {
                     const reader = new FileReader();

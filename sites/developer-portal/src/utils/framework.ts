@@ -14,6 +14,7 @@ import {
   SWIFT_DOCS_LINK,
   VITE_EXTRA_DOCS_LINK,
   WEB_DOCS_LINK,
+  WEB_PACKAGE_MANAGER_OPTIONS,
 } from './constants';
 
 export const frameworkHasPackageManager: Record<Framework, boolean> = {
@@ -192,6 +193,18 @@ export const getFrameworkPackages = (framework?: Framework) => {
   }
 };
 
+export const getFrameworkPackageManagers = (framework?: Framework) => {
+  switch (framework?.toUpperCase()) {
+    case Framework.SWIFT:
+    case Framework.FLUTTER: {
+      return [];
+    }
+    default: {
+      return WEB_PACKAGE_MANAGER_OPTIONS;
+    }
+  }
+};
+
 export const getFrameworkVersions = (framework?: Framework) => {
   switch (framework?.toUpperCase()) {
     case Framework.REACT:
@@ -301,6 +314,29 @@ export const getIsFrameworkMobile = (framework?: Framework) => {
     case Framework.EXPO:
     case Framework.FLUTTER:
     case Framework.SWIFT:
+      return true;
+    default:
+      return false;
+  }
+};
+
+export const getIsFrameworkIos = (framework?: Framework) => {
+  switch (framework?.toUpperCase()) {
+    case Framework.REACT_NATIVE:
+    case Framework.EXPO:
+    case Framework.SWIFT:
+    case Framework.FLUTTER:
+      return true;
+    default:
+      return false;
+  }
+};
+
+export const getIsFrameworkAndroid = (framework?: Framework) => {
+  switch (framework?.toUpperCase()) {
+    case Framework.REACT_NATIVE:
+    case Framework.EXPO:
+    case Framework.FLUTTER:
       return true;
     default:
       return false;

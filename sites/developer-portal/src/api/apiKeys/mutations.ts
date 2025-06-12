@@ -101,6 +101,18 @@ export const deleteApiKeyUser = async ({ organizationId, projectId, keyId, env, 
   return !!(await axiosClient.delete<boolean>(endpoint)).data;
 };
 
+export type DeleteApiKeyUsersVars = {
+  organizationId: string;
+  projectId: string;
+  keyId: string;
+  env: string;
+};
+export const deleteApiKeyUsers = async ({ organizationId, projectId, keyId, env }: DeleteApiKeyUsersVars) => {
+  const endpoint = `/organizations/${organizationId}/projects/${projectId}/${env}/keys/${keyId}/users/bulk-delete`;
+
+  return !!(await axiosClient.post<boolean>(endpoint)).data;
+};
+
 export type DeletePregenWalletVars = {
   organizationId: string;
   projectId: string;

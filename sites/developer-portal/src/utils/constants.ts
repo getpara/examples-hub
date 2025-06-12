@@ -33,6 +33,7 @@ export const FLUTTER_SETUP_DOCS_LINK = 'https://docs.getpara.com/getting-started
 export const ADVANCED_MODAL_THEME_DOCS_LINK =
   'https://docs.getpara.com/customize-para/modal-customization#advanced-theme-customization';
 export const TX_POPUPS_DOCS_LINK = 'https://docs.getpara.com/integration-guides/transaction-prompts';
+export const MODAL_CUSTOMIZATION_DOCS_LINK = 'https://docs.getpara.com/web/guides/customization/modal';
 
 export const NEXT_EXTRA_DOCS_LINK = 'https://docs.getpara.com/troubleshooting/nextjs';
 export const VITE_EXTRA_DOCS_LINK = 'https://docs.getpara.com/troubleshooting/react-vite';
@@ -80,7 +81,7 @@ export const FRAMEWORK_OPTIONS: Framework[] = [
   Framework.BUN,
 ];
 
-export const PACKAGE_MANAGER_OPTIONS: PackageManager[] = [PackageManager.NPM, PackageManager.YARN, PackageManager.PNPM];
+export const WEB_PACKAGE_MANAGER_OPTIONS: PackageManager[] = [PackageManager.NPM, PackageManager.YARN, PackageManager.PNPM];
 
 export enum PlanSlug {
   FREE = 'FREE',

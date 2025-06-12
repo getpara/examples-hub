@@ -35,6 +35,7 @@
   --color-sidebar-accent-foreground: var(--para-color-sidebar-accent-foreground);
   --color-sidebar-border: var(--para-color-sidebar-border);
   --color-sidebar-ring: var(--para-color-sidebar-ring);
+  --color-section-border: var(--para-color-section-border);
 
   --color-shadowstone-50: var(--para-color-shadowstone-50);
   --color-shadowstone-100: var(--para-color-shadowstone-100);

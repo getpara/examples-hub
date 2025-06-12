@@ -1,6 +1,6 @@
 import { TriangleAlert, X } from 'lucide-react';
 import { FlatCard } from '../../../components/FlatCard';
-import { cn, Typography } from '@getpara/react-component-library';
+import { Button, cn, Typography } from '@getpara/react-component-library';
 import { motion } from 'framer-motion';
 import { useParams } from 'react-router-dom';
 import { useAppStore } from '../../../stores/app/useAppStore';
@@ -77,6 +77,11 @@ export const Notification = React.forwardRef<HTMLDivElement, NotificationProps>(
               notification.message
             )}
           </div>
+          {notification.action && (
+            <div className="para:flex para:justify-end">
+              <Button onClick={notification.action.onClick}>{notification.action.text}</Button>
+            </div>
+          )}
         </FlatCard>
       </motion.div>
     );

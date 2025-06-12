@@ -21,7 +21,7 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
   const frameworkColors = getFrameworkColors(project.framework as Framework);
 
   return (
-    <Link to={`/${organizationId}/project/${project.id}/key`} className="para:h-[240px] para:min-w-[200px]">
+    <Link to={`/${organizationId}/project/${project.id}/key`} className="para:min-h-[240px] para:min-w-[200px]">
       <FlatCard className="para:p-6 para:h-full para:w-full para:hover:shadow-md para:transition-shadow para:duration-200 para:ease-out para:group para:cursor-pointer">
         <div className="para:flex para:flex-col para:gap-4 para:h-full para:justify-between">
           <div className="para:flex para:flex-col para:gap-4">
@@ -31,7 +31,7 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
               url={project.iconUrl}
             />
             <div className="para:flex para:flex-col para:gap-2">
-              <Typography className="para:text-lg para:font-semibold">{project.name}</Typography>
+              <Typography className="para:text-lg para:font-semibold para:break-words">{project.name}</Typography>
               {project.description && (
                 <Typography className="para:text-sm para:font-medium" color="secondary">
                   {project.description}

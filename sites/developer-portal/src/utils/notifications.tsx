@@ -7,8 +7,49 @@ export type Notification = {
   id: string;
   title: string | ReactElement;
   message: string | ReactElement;
+  action?: { text: string; onClick: () => void };
   type: NotificationType;
 };
+
+export const mauLimit = ({
+  id,
+  maxMaus,
+  onActionClick,
+}: {
+  id: string;
+  maxMaus: number;
+  onActionClick: () => void;
+}): Notification => ({
+  id: `${id}-mau-user-limit`,
+  title: `You have reached your ${maxMaus} MAU limit`,
+  message: 'Logins and sign ups are currently paused. Upgrade your plan now to restore service.',
+  type: 'error',
+  action: {
+    text: 'Upgrade',
+    onClick: onActionClick,
+  },
+});
+
+export const mauLimitClose = ({
+  id,
+  maxMaus,
+  totalMaus,
+  onActionClick,
+}: {
+  id: string;
+  maxMaus: number;
+  totalMaus: number;
+  onActionClick: () => void;
+}): Notification => ({
+  id: `${id}-mau-user-limit-close`,
+  title: `You have used ${totalMaus} of your ${maxMaus} MAU limit`,
+  message: 'Upgrade your plan to keep your app running smoothly.',
+  type: 'warning',
+  action: {
+    text: 'Upgrade',
+    onClick: onActionClick,
+  },
+});
 
 export const betaUserLimit = ({
   id,
@@ -24,7 +65,7 @@ export const betaUserLimit = ({
   message: (
     <Typography>{`You have reached the limit of ${maxBetaUsers} Development users for your project. Please remove some users to continue using the Development environment.`}</Typography>
   ),
-  type: 'warning',
+  type: 'error',
 });
 
 export const betaUserLimitClose = ({

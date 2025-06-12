@@ -16,6 +16,8 @@ interface AppState {
       [k: string]: boolean;
     };
   };
+
+  appBarHeight: number;
 }
 
 export interface AppActions {
@@ -28,6 +30,8 @@ export interface AppActions {
 
   dismissOnboardingNotification: (orgId: string, notificationType: NotificationType) => void;
   hasDismissedOnboardingNotification: (orgId: string, notificationType: NotificationType) => boolean;
+
+  setAppBarHeight: (_: number) => void;
 }
 
 export type AppStore = AppState & AppActions;
@@ -36,6 +40,8 @@ export const DEFAULT_APP_STATE: AppState = {
   userSelectedOrganizationId: {},
   dismissedNotifications: {},
   dismissedOnboardingNotifications: {},
+
+  appBarHeight: 0,
 };
 
 export const useAppStore = create<AppStore>()(

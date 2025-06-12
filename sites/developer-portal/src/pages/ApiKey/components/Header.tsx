@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { ReactNode, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { SettingsHeaderAction } from './SettingsHeaderAction';
 import { UsersHeaderAction } from './UsersHeaderAction';
@@ -14,12 +14,16 @@ const PAGE_TITLES: Record<string, string> = {
   'permissions': 'Permissions',
 };
 
-const PAGE_SUBTITLES: Record<string, string> = {
+const PAGE_SUBTITLES: Record<string, ReactNode | undefined> = {
   'setup': '',
   'users': '',
   'analytics': '',
-  'branding':
-    'These settings will be applied to Capsule Portal and Emails only. Customizing your Capsule Modal is done with the Capsule SDK.',
+  'branding': (
+    <span>
+      These settings will be applied to <strong>Capsule Portal and Emails only</strong>. Customizing your Capsule Modal is
+      done with the Capsule SDK.
+    </span>
+  ),
   'security':
     'These settings determine the level of security your users will have. These settings only apply to users whose accounts your app originates and not to users who have created their account somewhere else.',
   'on-off-ramps': 'Configure how users add and withdraw funds from their account.',

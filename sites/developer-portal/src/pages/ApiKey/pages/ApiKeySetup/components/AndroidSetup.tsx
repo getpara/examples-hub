@@ -1,4 +1,5 @@
 import {
+  Android,
   FormField,
   FormItem,
   FormLabel,
@@ -13,6 +14,7 @@ import { VerificationStatus } from './VerificationStatus';
 import { useGetOrganizationKey } from '../../../../../hooks/api/queries/useOrganizationKeys';
 import { Environment } from '../../../../../types/environment';
 import { useParams } from 'react-router-dom';
+import { CopyTextarea } from '../../../../../components/CopyTextarea';
 
 export const AndroidSetup = () => {
   const form = useFormContext<SetupForm>();
@@ -26,6 +28,10 @@ export const AndroidSetup = () => {
 
   return (
     <>
+      <div className="para:flex para:items-center para:gap-2">
+        <Android />
+        <Typography className="para:text-xl para:font-medium para:leading-none">Android</Typography>
+      </div>
       <div>
         <Typography className="para:font-semibold">Get Package Name and SHA256 Fingerprint</Typography>
         <Typography className="para:text-sm" color="secondary">
@@ -51,7 +57,7 @@ export const AndroidSetup = () => {
           <Typography className="para:text-sm" color="secondary">
             There are 2 ways to find your Package Name
           </Typography>
-          <span className="para:text-sm para:mt-2 para:text-secondary-foreground">
+          <span className="para:text-sm para:mt-2 para:text-secondary-foreground para:break-all">
             <strong>Android Studio</strong>
             <ol className="para:list-decimal para:list-inside">
               <li>
@@ -63,7 +69,7 @@ export const AndroidSetup = () => {
               </li>
             </ol>
           </span>
-          <span className="para:text-sm para:mt-2 para:text-secondary-foreground">
+          <span className="para:text-sm para:mt-2 para:text-secondary-foreground para:break-all">
             <strong>AndroidManifest</strong>
             <ol className="para:list-decimal para:list-inside">
               <li>
@@ -111,10 +117,11 @@ export const AndroidSetup = () => {
               <li>Use the Keytool command to extract the SHA-256 fingerprint from your keystore:</li>
             </ol>
           </span>
-          <Textarea
+          <CopyTextarea
             value={`keytool -list -v \\\n-keystore <keystore path> \\\n-alias <key alias> \\\n-storepass <store password> \\\n-keypass <keypassword>`}
+            className="para:mt-2"
             disabled
-            className="para:mt-2 para:disabled:opacity-100 para:disabled:cursor-text para:resize-none"
+            textareaClassName="para:disabled:opacity-100 para:disabled:cursor-text para:resize-none"
           />
         </div>
       </div>

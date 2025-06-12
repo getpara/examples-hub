@@ -99,6 +99,7 @@
   --para-color-sidebar-accent-foreground: var(--para-color-shadowstone-950);
   --para-color-sidebar-border: var(--para-color-shadowstone-200);
   --para-color-sidebar-ring: var(--para-color-shadowstone-400);
+  --para-color-section-border: var(--para-color-shadowstone-50);
 }
 
 .dark {
@@ -195,6 +196,7 @@
   --para-color-sidebar-accent-foreground: var(--para-color-shadowstone-100);
   --para-color-sidebar-border: var(--para-color-shadowstone-800);
   --para-color-sidebar-ring: var(--para-color-shadowstone-300);
+  --para-color-section-border: var(--para-color-shadowstone-900);
 }
 
 @layer base {

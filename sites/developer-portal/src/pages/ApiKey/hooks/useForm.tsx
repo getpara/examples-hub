@@ -47,9 +47,9 @@ export const useForm = <T extends FieldValues>({
         sanitizeFormData(updateData);
         await onSubmit(updateData, { projectId, apiKey, env });
         form.reset(form.getValues());
-        toast.success('Config Saved!');
+        toast.success('Changes Saved!');
       } catch (err) {
-        toast.error('Config Saved!', {
+        toast.error('Failed to Save Changes', {
           description: 'Please correct any errors. If the problem persists, contact Para support.',
         });
       }

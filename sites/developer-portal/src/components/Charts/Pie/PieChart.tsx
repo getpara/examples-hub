@@ -36,7 +36,7 @@ export const PieChart = <DataKey extends string, DataValue, NameKey extends stri
       title={title}
       chartConfig={chartConfig}
       RightContent={
-        <div className="para:grid para:grid-cols-2 para:gap-x-4 para:gap-y-2">
+        <div className="para:flex para:flex-wrap para:gap-x-4 para:gap-y-2">
           {data?.map(d => {
             const val = d[dataKey];
 

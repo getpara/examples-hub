@@ -1,4 +1,4 @@
-import { FormField, FormItem, FormLabel, Input, Typography, useFormContext } from '@getpara/react-component-library';
+import { FormField, FormItem, FormLabel, Input, IOS, Typography, useFormContext } from '@getpara/react-component-library';
 import { FormControl, FormMessage } from '../../../../../components/formComponents';
 import { SetupForm } from '../hooks/useSetupForm';
 import { VerificationStatus } from './VerificationStatus';
@@ -20,6 +20,10 @@ export const AppleSetup = () => {
 
   return (
     <>
+      <div className="para:flex para:items-center para:gap-2">
+        <IOS />
+        <Typography className="para:text-xl para:font-medium para:leading-none">iOS</Typography>
+      </div>
       <div>
         <Typography className="para:font-semibold">Get Team ID and Bundle Identifier</Typography>
         <Typography className="para:text-sm" color="secondary">
@@ -43,7 +47,7 @@ export const AppleSetup = () => {
             )}
           />
           <img src={teamIDImg} alt="Team ID" className="para:w-full" />
-          <Typography className="para:text-sm para:mt-2" color="secondary">
+          <Typography className="para:text-sm para:mt-2 para:break-all" color="secondary">
             You can find your Team ID at developer.app.com/account/resources/list.
           </Typography>
         </div>

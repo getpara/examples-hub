@@ -17,24 +17,24 @@ export const Emails = () => {
   const handleRadioChange = (value: string) => {
     switch (value) {
       case 'both': {
-        form.setValue('emailBackupKit', true);
-        form.setValue('emailWelcome', true);
+        form.setValue('emailBackupKit', true, { shouldDirty: true });
+        form.setValue('emailWelcome', true, { shouldDirty: true });
         break;
       }
       case 'welcome': {
-        form.setValue('emailBackupKit', false);
-        form.setValue('emailWelcome', true);
+        form.setValue('emailBackupKit', false, { shouldDirty: true });
+        form.setValue('emailWelcome', true, { shouldDirty: true });
         break;
       }
       case 'backupKit': {
-        form.setValue('emailBackupKit', true);
-        form.setValue('emailWelcome', false);
+        form.setValue('emailBackupKit', true, { shouldDirty: true });
+        form.setValue('emailWelcome', false, { shouldDirty: true });
         break;
       }
       default:
       case 'none': {
-        form.setValue('emailBackupKit', false);
-        form.setValue('emailWelcome', false);
+        form.setValue('emailBackupKit', false, { shouldDirty: true });
+        form.setValue('emailWelcome', false, { shouldDirty: true });
         break;
       }
     }

@@ -1,18 +1,19 @@
 import { FormField, FormItem, useFormContext } from '@getpara/react-component-library';
 import { FormControl, FormMessage } from '../../../../../components/formComponents';
 import { OnOffRampsForm } from '../hooks/useOnOffRampsForm';
-import { ConfigCardContent } from '../../../components/ConfigCardContent';
 import { OnRampProvider } from '@getpara/react-sdk';
 import { Reorder } from 'framer-motion';
 import { DraggableProvider } from './DraggableProvider';
+import { ConfigCard } from '../../../components/ConfigCard';
 
 export const Providers = () => {
   const form = useFormContext<OnOffRampsForm>();
 
   return (
-    <ConfigCardContent
+    <ConfigCard
       title="Providers"
       subtitle="Configure which providers to display in your modal. The provider buttons will be displayed in the order below, if they offer your specified assets and if the user's selected wallet is a qualifying type."
+      className="para:md:flex-col!"
     >
       <FormField
         control={form.control}
@@ -57,6 +58,6 @@ export const Providers = () => {
           );
         }}
       />
-    </ConfigCardContent>
+    </ConfigCard>
   );
 };

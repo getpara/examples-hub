@@ -71,6 +71,7 @@ export const CodeBlock = ({ snippet }: CodeBlockProps) => {
         theme={{ ...github, ...codeBlockTheme }}
         showLineNumbers={false}
         wrapLongLines
+        lineNumberContainerStyle={{ overflowWrap: 'anywhere' }}
       />
       <Button
         variant="ghost"
