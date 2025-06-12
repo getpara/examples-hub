@@ -63,8 +63,8 @@ struct CosmosWalletView: View {
         ScrollView {
             VStack(spacing: 24) {
                 walletAddressCard
-                messageSigningCard
                 chainConfigurationCard
+                messageSigningCard
                 transactionOperationsCard
                 walletManagementCard
                 logoutButton
@@ -217,7 +217,7 @@ struct CosmosWalletView: View {
 
                 HStack(spacing: 12) {
                     Button("Sign Proto", action: testSignDirect)
-                        .buttonStyle(.borderedProminent)
+                        .buttonStyle(.bordered)
                         .frame(maxWidth: .infinity)
                         .disabled(isLoading || paraCosmosSigner == nil)
 
