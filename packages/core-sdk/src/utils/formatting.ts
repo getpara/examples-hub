@@ -47,7 +47,7 @@ export function decimalToHex(decimal: string): Hex {
   return `0x${parseInt(decimal).toString(16)}`;
 }
 
-function compressPubkey(pubkey: Uint8Array): Uint8Array {
+export function compressPubkey(pubkey: Uint8Array): Uint8Array {
   switch (pubkey.length) {
     case 33:
       return pubkey;
@@ -58,7 +58,7 @@ function compressPubkey(pubkey: Uint8Array): Uint8Array {
   }
 }
 
-function rawSecp256k1PubkeyToRawAddress(pubkeyData: Uint8Array): Uint8Array {
+export function rawSecp256k1PubkeyToRawAddress(pubkeyData: Uint8Array): Uint8Array {
   if (pubkeyData.length !== 33) {
     throw new Error(`Invalid Secp256k1 pubkey length (compressed): ${pubkeyData.length}`);
   }

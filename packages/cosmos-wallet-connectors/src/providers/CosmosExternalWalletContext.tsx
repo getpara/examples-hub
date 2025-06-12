@@ -13,7 +13,7 @@ import {
 } from '@getpara/graz';
 import { useExternalWalletStore } from '../stores/useStore.js';
 import { WalletWithType } from '../types/Wallet.js';
-import ParaWeb, { AuthState, Wallet } from '@getpara/web-sdk';
+import ParaWeb, { AuthState, Wallet, rawSecp256k1PubkeyToRawAddress } from '@getpara/web-sdk';
 import type { CommonChain, CommonWallet, TExternalWallet } from '@getpara/react-common';
 import { formatEthHexAddress } from '../utils/formatEthHexAddress.js';
 
@@ -307,7 +307,17 @@ export function CosmosExternalWalletProvider({
         const firstChain = !chainId ? selectedChainId : typeof _chainId === 'string' ? _chainId : _chainId[0];
 
         address = connectedWallet.accounts[firstChain].bech32Address;
-        ethAddress = formatEthHexAddress(connectedWallet.accounts[firstChain].address);
+
+        let rawAddress;
+        const accountAddress = connectedWallet.accounts[firstChain].address;
+        if (!accountAddress || accountAddress.length === 0 || accountAddress.byteLength === 0) {
+          // If address is empty, use pubKey instead
+          const pubKey = connectedWallet.accounts[firstChain].pubKey;
+          rawAddress = rawSecp256k1PubkeyToRawAddress(pubKey);
+        } else {
+          rawAddress = accountAddress;
+        }
+        ethAddress = formatEthHexAddress(rawAddress);
 
         if (connectedWallet.accounts[firstChain]) {
           try {

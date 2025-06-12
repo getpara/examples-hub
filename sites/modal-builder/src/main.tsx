@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react';
 import { useAtom } from 'jotai';
-import { useHydrateAtoms } from 'jotai/utils';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { Provider as JotaiProvider } from 'jotai';
@@ -114,18 +113,21 @@ const App = () => {
   );
 };
 
-const AppWrapper = () => {
-  useHydrateAtoms([[initializeAppAtom, null]]);
+const AppWithInitialization = () => {
   const [, initialize] = useAtom(initializeAppAtom);
 
   React.useEffect(() => {
     initialize(null);
   }, [initialize]);
 
+  return <App />;
+};
+
+const AppWrapper = () => {
   return (
     <BrowserRouter>
       <JotaiProvider>
-        <App />
+        <AppWithInitialization />
       </JotaiProvider>
     </BrowserRouter>
   );

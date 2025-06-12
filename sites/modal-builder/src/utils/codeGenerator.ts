@@ -65,24 +65,7 @@ export const getModalCodeString = (config: ModalBuilderConfig): string => {
   </ParaProvider>
   
 `
-    .split('\n') // Split into lines
-    .filter(line => line.trim() !== '') // Remove empty lines
-    .join('\n'); // Join back into a string
+    .split('\n')
+    .filter(line => line.trim() !== '')
+    .join('\n');
 };
-
-// <ParaModal
-//   para={para}
-//   isOpen={isModalOpen}
-//   onClose={() => setIsModalOpen(false)}
-//   logo={${JSON.stringify(config.appearance.logo)}}
-//   theme={${JSON.stringify(config.appearance.theme)}}
-//   oAuthMethods={${JSON.stringify(config.authentication.oAuthMethods)}}
-//   ${!!config.authentication.disableEmailLogin ? 'disableEmailLogin' : ''}
-//   ${!!config.authentication.disablePhoneLogin ? 'disablePhoneLogin' : ''}
-//   authLayout={${JSON.stringify(config.authentication.authLayout)}}
-//   externalWallets={${JSON.stringify(config.authentication.externalWallets)}}
-//   ${!!config.security.twoFactorAuthEnabled ? 'twoFactorAuthEnabled' : ''}
-//   ${!!config.security.recoverySecretStepEnabled ? 'recoverySecretStepEnabled' : ''}
-//   ${!!config.wallets.hideWallets ? 'hideWallets' : ''}
-//   onRampTestMode={true}
-// />
