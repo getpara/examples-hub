@@ -1,9 +1,9 @@
-import SwiftUI
 import ParaSwift
+import SwiftUI
 
 struct AuthOptionsView: View {
     @EnvironmentObject var paraManager: ParaManager
-    
+
     var body: some View {
         NavigationStack {
             List {
@@ -14,7 +14,7 @@ struct AuthOptionsView: View {
                             .font(.title2)
                             .foregroundColor(.blue)
                             .frame(width: 35)
-                        
+
                         VStack(alignment: .leading) {
                             Text("Email")
                                 .font(.headline)
@@ -26,7 +26,7 @@ struct AuthOptionsView: View {
                     .padding(.vertical, 4)
                 }
                 .accessibilityIdentifier("emailAuthButton")
-                
+
                 // Phone authentication option
                 NavigationLink(destination: PhoneAuthView()) {
                     HStack {
@@ -34,7 +34,7 @@ struct AuthOptionsView: View {
                             .font(.title2)
                             .foregroundColor(.green)
                             .frame(width: 35)
-                        
+
                         VStack(alignment: .leading) {
                             Text("Phone")
                                 .font(.headline)
@@ -46,7 +46,7 @@ struct AuthOptionsView: View {
                     .padding(.vertical, 4)
                 }
                 .accessibilityIdentifier("phoneAuthButton")
-                
+
                 // OAuth authentication option
                 NavigationLink(destination: OAuthView()) {
                     HStack {
@@ -54,7 +54,7 @@ struct AuthOptionsView: View {
                             .font(.title2)
                             .foregroundColor(.purple)
                             .frame(width: 35)
-                        
+
                         VStack(alignment: .leading) {
                             Text("OAuth")
                                 .font(.headline)
@@ -66,7 +66,7 @@ struct AuthOptionsView: View {
                     .padding(.vertical, 4)
                 }
                 .accessibilityIdentifier("oauthAuthButton")
-                
+
                 // External wallet option
                 NavigationLink(destination: ExternalWalletAuthView()) {
                     HStack {
@@ -74,7 +74,7 @@ struct AuthOptionsView: View {
                             .font(.title2)
                             .foregroundColor(.orange)
                             .frame(width: 35)
-                        
+
                         VStack(alignment: .leading) {
                             Text("External Wallet")
                                 .font(.headline)

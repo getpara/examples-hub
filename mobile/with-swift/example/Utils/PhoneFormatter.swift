@@ -9,14 +9,13 @@ struct CPData: Codable, Identifiable {
     let dial_code: String
     let pattern: String
     let limit: Int
-    
+
     static let allCountry: [CPData] = Bundle.main.decode("CountryNumbers.json")
     static let example = allCountry[0]
 }
 
 /// Utility class for phone number formatting
 class PhoneFormatter {
-    
     /// Formats a phone number string according to a specified pattern for display
     /// - Parameters:
     ///   - stringvar: The phone number string to format (will be modified in-place)
@@ -36,7 +35,7 @@ class PhoneFormatter {
         }
         stringvar = pureNumber
     }
-    
+
     /// Formats a phone number for API use in the international format
     /// - Parameters:
     ///   - phoneNumber: The phone number to format (may contain formatting characters)
