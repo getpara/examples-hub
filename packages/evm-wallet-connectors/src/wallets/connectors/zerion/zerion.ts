@@ -20,6 +20,7 @@ export const zerionWallet = ({ projectId, walletConnectParameters }: ZerionWalle
 
   return {
     id: 'zerion',
+    internalId: 'ZERION',
     name: 'Zerion',
     rdns: 'io.zerion.wallet',
     iconUrl: icon,

@@ -1,4 +1,4 @@
-import { ExternalWallet, Network, OnRampProvider } from '@getpara/react-sdk';
+import { Network, OnRampProvider } from '@getpara/react-sdk';
 
 export const KEY_MAP: Record<string, string> = {
   appearance: 'a',
@@ -43,20 +43,20 @@ export const VALUE_MAPS: Record<string, Record<string | number, string>> = {
     [Network.OPTIMISM]: 'o',
   },
   externalWallets: {
-    [ExternalWallet.METAMASK]: 'mm',
-    [ExternalWallet.RAINBOW]: 'rb',
-    [ExternalWallet.COINBASE]: 'cb',
-    [ExternalWallet.WALLETCONNECT]: 'wc',
-    [ExternalWallet.ZERION]: 'zr',
-    [ExternalWallet.RABBY]: 'ry',
-    [ExternalWallet.SAFE]: 'sf',
-    [ExternalWallet.OKX]: 'ox',
-    [ExternalWallet.PHANTOM]: 'ph',
-    [ExternalWallet.GLOW]: 'gl',
-    [ExternalWallet.BACKPACK]: 'bp',
-    [ExternalWallet.SOLFLARE]: 'sl',
-    [ExternalWallet.LEAP]: 'lp',
-    [ExternalWallet.KEPLR]: 'kp',
+    METAMASK: 'mm',
+    RAINBOW: 'rb',
+    COINBASE: 'cb',
+    WALLETCONNECT: 'wc',
+    ZERION: 'zr',
+    RABBY: 'ry',
+    SAFE: 'sf',
+    OKX: 'ox',
+    PHANTOM: 'ph',
+    GLOW: 'gl',
+    BACKPACK: 'bp',
+    SOLFLARE: 'sl',
+    LEAP: 'lp',
+    KEPLR: 'kp',
   },
   oAuthMethods: {
     GOOGLE: 'g',

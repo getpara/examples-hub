@@ -1,10 +1,10 @@
-import { TOAuthMethod, ExternalWallet, AuthLayout } from '@getpara/react-sdk';
+import { TOAuthMethod, TExternalWallet, AuthLayout } from '@getpara/react-sdk';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 interface ModalStateState {
   oAuthMethods: TOAuthMethod[];
-  externalWallets: (keyof typeof ExternalWallet)[];
+  externalWallets: TExternalWallet[];
   authLayout: AuthLayout[];
   logo?: string;
   backgroundColor: string;
@@ -23,7 +23,7 @@ export type ModalStateStore = ModalStateState & ModalStateActions;
 
 const DEFAULT_STATE: ModalStateState = {
   oAuthMethods: ['GOOGLE', 'FACEBOOK', 'APPLE', 'TWITTER', 'DISCORD', 'FARCASTER'],
-  externalWallets: [ExternalWallet.RAINBOW, ExternalWallet.METAMASK, ExternalWallet.WALLETCONNECT],
+  externalWallets: ['RAINBOW', 'METAMASK', 'WALLETCONNECT'],
   authLayout: [AuthLayout.EXTERNAL_FULL, AuthLayout.AUTH_CONDENSED],
   logo: undefined,
   backgroundColor: '#141414',

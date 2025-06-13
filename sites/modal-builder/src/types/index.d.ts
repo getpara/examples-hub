@@ -1,11 +1,5 @@
 import { IconType } from '@getpara/react-components';
-import {
-  AuthLayout,
-  ParaModalProps,
-  TOAuthMethod,
-  ExternalWallet as SDKExternalWallet,
-  TExternalWallet,
-} from '@getpara/react-sdk';
+import { AuthLayout, ParaModalProps, TOAuthMethod, TExternalWallet } from '@getpara/react-sdk';
 import { Network } from '@getpara/user-management-client';
 
 export type TAuthLayout = `${AuthLayout}`;
@@ -15,9 +9,7 @@ export type AuthSectionId = 'web2' | 'web3';
 
 export type AuthMethod = TOAuthMethod | 'email-auth' | 'phone-auth';
 
-export type ExternalWallet = keyof typeof SDKExternalWallet;
-
-export type ReorderableType = AuthSectionId | AuthMethod | ExternalWallet | OnRampProvider;
+export type ReorderableType = AuthSectionId | AuthMethod | TExternalWallet | OnRampProvider;
 
 export interface DraggableItemHeaderConfig {
   logo: string;

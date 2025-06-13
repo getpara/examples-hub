@@ -3,7 +3,7 @@ import { ParaSolanaProviderConfigNoWallets } from '../types/externalWalletProvid
 import { SolanaExternalWalletProvider } from '../providers/SolanaExternalWalletProvider.js';
 import { useInternalClient } from '../hooks/utils/useInternalClient.js';
 import { useStore } from '../stores/useStore.js';
-import { SolanaWallet } from '@getpara/react-common';
+import { SOLANA_WALLETS } from '@getpara/web-sdk';
 
 export const SolanaWalletWrapper = ({
   children,
@@ -19,7 +19,7 @@ export const SolanaWalletWrapper = ({
   const connectionOnly = useStore(state => state.connectionOnly);
   const includeWalletVerification = useStore(state => state.includeWalletVerification);
 
-  const isUsing = wallets.some(w => w in SolanaWallet);
+  const isUsing = wallets.some(w => w in SOLANA_WALLETS);
   if (!solanaProviderConfig) {
     if (isUsing) {
       throw new Error('A valid solanaConnector config is required to use an external Solana wallet.');

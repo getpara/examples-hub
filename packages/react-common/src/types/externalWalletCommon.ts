@@ -1,7 +1,15 @@
-import { AuthStateLogin, AuthStateVerify, TWalletType } from '@getpara/web-sdk';
+import ParaWeb, {
+  AuthStateLogin,
+  AuthStateVerify,
+  ExternalWalletInfo,
+  TExternalWallet,
+  TWalletType,
+  Wallet,
+} from '@getpara/web-sdk';
 
 export type WalletMetadata = {
   id: string;
+  internalId: TExternalWallet;
   name: string;
   iconUrl: string;
   rdns?: string;
@@ -49,36 +57,54 @@ export type CommonChain = {
   name: string;
 };
 
-export enum EvmWallet {
-  METAMASK = 'METAMASK',
-  RAINBOW = 'RAINBOW',
-  COINBASE = 'COINBASE',
-  WALLETCONNECT = 'WALLETCONNECT',
-  ZERION = 'ZERION',
-  SAFE = 'SAFE',
-  RABBY = 'RABBY',
-  OKX = 'OKX',
-  HAHA = 'HAHA',
-  BACKPACK = 'BACKPACK',
-}
-
-export enum SolanaWallet {
-  PHANTOM = 'PHANTOM',
-  GLOW = 'GLOW',
-  BACKPACK = 'BACKPACK',
-  SOLFLARE = 'SOLFLARE',
-}
-
-export enum CosmosWallet {
-  KEPLR = 'KEPLR',
-  LEAP = 'LEAP',
-  COSMOSTATION = 'COSMOSTATION',
-}
-
-export const ExternalWallet = {
-  ...EvmWallet,
-  ...SolanaWallet,
-  ...CosmosWallet,
+export type SignArgs = {
+  message: string;
+  externalWallet?: ExternalWalletInfo;
 };
 
-export type TExternalWallet = keyof typeof ExternalWallet;
+export type SignResult = {
+  address?: string;
+  signature?: string;
+  error?: string;
+};
+
+export type SwitchChainResult = {
+  error: string[];
+} | void;
+
+export type ConnectParaEmbedded = {
+  connectParaEmbedded: () => Promise<{ result?: unknown; error?: string }>;
+};
+
+export type ChainManagement<ChainId, R extends SwitchChainResult = SwitchChainResult> = {
+  chains: CommonChain[];
+  chainId?: ChainId;
+  switchChain: (_: ChainId) => Promise<R>;
+};
+
+export type BalanceManagement<B = string> = {
+  balance?: B;
+  getWalletBalance: () => Promise<B | undefined>;
+};
+
+export type ExternalWalletContextType<S extends SignResult = SignResult> = {
+  wallets: CommonWallet[];
+  disconnect: () => Promise<void>;
+  signMessage: (_: SignArgs) => Promise<S>;
+  signVerificationMessage: () => Promise<S>;
+};
+
+export type ExternalWalletProviderConfigBase = {
+  onSwitchWallet?: (args: { address?: string; error?: string }) => void;
+  para: ParaWeb;
+  walletsWithFullAuth: TExternalWallet[];
+  includeWalletVerification?: boolean;
+  connectionOnly?: boolean;
+  connectedWallet?: Omit<Wallet, 'signer'> | null;
+};
+
+export type ExternalWalletProviderConfig<W, P = {}> = ExternalWalletProviderConfigBase & {
+  wallets: W[];
+} & P;
+
+export { type TExternalWallet };

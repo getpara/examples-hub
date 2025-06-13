@@ -6,6 +6,7 @@ import { isMobile } from '@getpara/web-sdk';
 export const cosmostationWallet = (): WalletWithType => {
   return {
     id: 'cosmostation',
+    internalId: 'COSMOSTATION',
     name: 'Cosmostation',
     iconUrl: icon,
     isExtension: true,

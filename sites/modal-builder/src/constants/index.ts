@@ -1,4 +1,4 @@
-import { OAUTH_METHODS, ExternalWallet, Network, OnRampProvider, Environment } from '@getpara/react-sdk';
+import { OAUTH_METHODS, TExternalWallet, Network, OnRampProvider, Environment } from '@getpara/react-sdk';
 import { Network as CosmosNetwork } from '@delphi-labs/shuttle';
 import {
   MailIcon,
@@ -30,18 +30,9 @@ import {
   CosmostationIcon,
   HahaIcon,
 } from '../assets';
-import {
-  AuthMethod,
-  ExternalWallet as CustomExternalWallet,
-  DropdownOption,
-  ModalBuilderConfig,
-  DraggableItemHeaderConfig,
-  TAuthLayout,
-} from '../types';
+import { AuthMethod, DropdownOption, ModalBuilderConfig, DraggableItemHeaderConfig, TAuthLayout } from '../types';
 
 export const ALL_AUTH_METHODS: AuthMethod[] = ['email-auth', 'phone-auth', ...OAUTH_METHODS] as const;
-
-export const ALL_EXTERNAL_WALLETS: CustomExternalWallet[] = Object.keys(ExternalWallet) as CustomExternalWallet[];
 
 export const AUTH_SECTION_IDS = ['web2', 'web3'] as const;
 
@@ -57,23 +48,23 @@ export const AUTH_METHOD_CONFIGS: Partial<Record<AuthMethod, DraggableItemHeader
   'TELEGRAM': { logo: TelegramIcon, label: 'Telegram' },
 };
 
-export const EXTERNAL_WALLET_CONFIGS: Partial<Record<CustomExternalWallet, DraggableItemHeaderConfig>> = {
-  [ExternalWallet.METAMASK]: { logo: MetaMaskIcon, label: 'MetaMask' },
-  [ExternalWallet.RAINBOW]: { logo: RainbowIcon, label: 'Rainbow' },
-  [ExternalWallet.COINBASE]: { logo: CoinbaseIcon, label: 'Coinbase' },
-  [ExternalWallet.WALLETCONNECT]: { logo: WalletConnectIcon, label: 'WalletConnect' },
-  [ExternalWallet.ZERION]: { logo: ZerionIcon, label: 'Zerion' },
-  [ExternalWallet.RABBY]: { logo: RabbyIcon, label: 'Rabby' },
-  [ExternalWallet.SAFE]: { logo: SafeIcon, label: 'Safe' },
-  [ExternalWallet.OKX]: { logo: OkxIcon, label: 'Okx' },
-  [ExternalWallet.PHANTOM]: { logo: PhantomIcon, label: 'Phantom' },
-  [ExternalWallet.GLOW]: { logo: GlowIcon, label: 'Glow' },
-  [ExternalWallet.BACKPACK]: { logo: BackpackIcon, label: 'Backpack' },
-  [ExternalWallet.SOLFLARE]: { logo: SolflareIcon, label: 'Solflare' },
-  [ExternalWallet.LEAP]: { logo: LeapIcon, label: 'Leap' },
-  [ExternalWallet.KEPLR]: { logo: KeplrIcon, label: 'Keplr' },
-  [ExternalWallet.COSMOSTATION]: { logo: CosmostationIcon, label: 'Cosmostation' },
-  [ExternalWallet.HAHA]: { logo: HahaIcon, label: 'HaHa' },
+export const EXTERNAL_WALLET_CONFIGS: Partial<Record<TExternalWallet, DraggableItemHeaderConfig>> = {
+  METAMASK: { logo: MetaMaskIcon, label: 'MetaMask' },
+  RAINBOW: { logo: RainbowIcon, label: 'Rainbow' },
+  COINBASE: { logo: CoinbaseIcon, label: 'Coinbase' },
+  WALLETCONNECT: { logo: WalletConnectIcon, label: 'WalletConnect' },
+  ZERION: { logo: ZerionIcon, label: 'Zerion' },
+  RABBY: { logo: RabbyIcon, label: 'Rabby' },
+  SAFE: { logo: SafeIcon, label: 'Safe' },
+  OKX: { logo: OkxIcon, label: 'OKX' },
+  PHANTOM: { logo: PhantomIcon, label: 'Phantom' },
+  GLOW: { logo: GlowIcon, label: 'Glow' },
+  BACKPACK: { logo: BackpackIcon, label: 'Backpack' },
+  SOLFLARE: { logo: SolflareIcon, label: 'Solflare' },
+  LEAP: { logo: LeapIcon, label: 'Leap' },
+  KEPLR: { logo: KeplrIcon, label: 'Keplr' },
+  COSMOSTATION: { logo: CosmostationIcon, label: 'Cosmostation' },
+  HAHA: { logo: HahaIcon, label: 'HaHa' },
 };
 
 export const ONRAMPS_CONFIGS: Record<OnRampProvider, DraggableItemHeaderConfig> = {
@@ -95,7 +86,7 @@ export const MODAL_BUILDER_DEFAULT_CONFIG: ModalBuilderConfig = {
     disableEmailLogin: false,
     disablePhoneLogin: false,
     authLayout: ['AUTH:FULL', 'EXTERNAL:FULL'] as TAuthLayout[],
-    externalWallets: [ExternalWallet.METAMASK, ExternalWallet.PHANTOM, ExternalWallet.SAFE],
+    externalWallets: ['METAMASK', 'PHANTOM', 'SAFE'],
     isWeb2AuthEnabled: true,
     isWeb3AuthEnabled: true,
     isGuestModeEnabled: true,

@@ -20,7 +20,7 @@
     "@cosmjs/tendermint-rpc": "<=0.31.3",
     "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.20",
     "@getpara/evm-wallet-connectors": "2.0.0-alpha.20",
-    "@getpara/graz": "^1.0.0-dev.2",
+    "@getpara/graz": "^2.0.0-alpha.1",
     "@getpara/react-components": "2.0.0-alpha.20",
     "@getpara/react-sdk": "2.0.0-alpha.20",
     "@getpara/solana-wallet-connectors": "2.0.0-alpha.20",

@@ -93,3 +93,24 @@ export type CurrentWalletIds = Partial<Record<TWalletType, string[]>>;
 export const NON_ED25519 = ['DKLS', 'CGGMP'];
 
 export type SupportedWalletTypes = { type: TWalletType; optional?: boolean }[];
+
+export const EVM_WALLETS = [
+  'METAMASK',
+  'RAINBOW',
+  'COINBASE',
+  'WALLETCONNECT',
+  'ZERION',
+  'SAFE',
+  'RABBY',
+  'OKX',
+  'HAHA',
+  'BACKPACK',
+] as const;
+
+export const SOLANA_WALLETS = ['PHANTOM', 'GLOW', 'BACKPACK', 'SOLFLARE'] as const;
+
+export const COSMOS_WALLETS = ['KEPLR', 'LEAP', 'COSMOSTATION'] as const;
+
+export const EXTERNAL_WALLET_TYPES = [...new Set([...EVM_WALLETS, ...SOLANA_WALLETS, ...COSMOS_WALLETS])] as const;
+
+export type TExternalWallet = (typeof EXTERNAL_WALLET_TYPES)[number];

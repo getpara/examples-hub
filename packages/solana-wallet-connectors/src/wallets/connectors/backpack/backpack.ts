@@ -5,6 +5,7 @@ import { icon } from './backpackIcon.js';
 export const backpackWallet = (): Wallet => {
   return {
     id: 'backpack',
+    internalId: 'BACKPACK',
     name: 'Backpack',
     iconUrl: icon,
     isExtension: true,

@@ -5,6 +5,7 @@ import { isIosAndRedirectable } from '@solana/wallet-adapter-base';
 export const glowWallet = (): Wallet => {
   return {
     id: 'glow',
+    internalId: 'GLOW',
     name: 'Glow',
     iconUrl: icon,
     isExtension: true,

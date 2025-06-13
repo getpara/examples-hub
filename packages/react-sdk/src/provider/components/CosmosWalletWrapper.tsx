@@ -4,7 +4,7 @@ import { CosmosExternalWalletProvider } from '../providers/CosmosExternalWalletP
 import { ParaGrazProviderProps } from '@getpara/cosmos-wallet-connectors';
 import { useInternalClient } from '../hooks/utils/useInternalClient.js';
 import { useStore } from '../stores/useStore.js';
-import { CosmosWallet } from '@getpara/react-common';
+import { COSMOS_WALLETS } from '@getpara/web-sdk';
 import { useWallet } from '../hooks/index.js';
 
 export const CosmosWalletWrapper = ({
@@ -21,7 +21,7 @@ export const CosmosWalletWrapper = ({
   const { data: wallet } = useWallet();
   const externalWalletsWithFullAuth = useStore(state => state.externalWalletsWithFullAuth);
   const wallets = useStore(state => state.externalWallets);
-  const isUsing = wallets.some(w => w in CosmosWallet);
+  const isUsing = wallets.some(w => w in COSMOS_WALLETS);
   const connectionOnly = useStore(state => state.connectionOnly);
   const includeWalletVerification = useStore(state => state.includeWalletVerification);
 

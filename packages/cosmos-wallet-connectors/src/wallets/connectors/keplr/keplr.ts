@@ -6,6 +6,7 @@ import { isMobile } from '@getpara/web-sdk';
 export const keplrWallet = (): WalletWithType => {
   return {
     id: 'keplr',
+    internalId: 'KEPLR',
     name: 'Keplr',
     iconUrl: icon,
     isExtension: true,

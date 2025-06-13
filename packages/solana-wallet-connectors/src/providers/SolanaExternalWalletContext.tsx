@@ -1,42 +1,32 @@
 import { PropsWithChildren, createContext, useEffect, useMemo, useRef } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Adapter, isIosAndRedirectable, WalletReadyState } from '@solana/wallet-adapter-base';
-import ParaWeb, { AuthState } from '@getpara/web-sdk';
-import { WalletList } from '../types/Wallet.js';
-import { TExternalWallet, type CommonWallet } from '@getpara/react-common';
+import { AuthState } from '@getpara/web-sdk';
+import { CreateWalletFn } from '../types/Wallet.js';
+import {
+  ExternalWalletContextType,
+  ExternalWalletProviderConfig,
+  ExternalWalletProviderConfigBase,
+  SignArgs,
+  TExternalWallet,
+  type CommonWallet,
+} from '@getpara/react-common';
 import bs58 from 'bs58';
 
-const defaultSolanaExternalWallet = {
+export const defaultSolanaExternalWallet = {
   wallets: [],
   disconnect: () => Promise.resolve(),
   signMessage: () => Promise.resolve({}),
   signVerificationMessage: () => Promise.resolve({}),
 };
 
-export type SolanaExternalWalletContextType = {
-  wallets: CommonWallet[];
-  disconnect: () => Promise<void>;
-  signMessage: (message: string) => Promise<{ signature?: string; error?: string }>;
-  signVerificationMessage: () => Promise<{
-    address?: string;
-    signature?: string;
-    error?: string;
-  }>;
-};
+export type SolanaExternalWalletContextType = ExternalWalletContextType;
 
 export const SolanaExternalWalletContext = createContext<SolanaExternalWalletContextType>(defaultSolanaExternalWallet);
 
-export type SolanaExternalWalletProviderConfig = {
-  onSwitchWallet?: (args: { address?: string; error?: string }) => void;
-  para: ParaWeb;
-  walletsWithFullAuth: TExternalWallet[];
-  includeWalletVerification?: boolean;
-  connectionOnly?: boolean;
-};
+export type SolanaExternalWalletProviderConfig = ExternalWalletProviderConfigBase;
 
-type SolanaExternalWalletProviderConfigFull = {
-  wallets: WalletList;
-} & SolanaExternalWalletProviderConfig;
+type SolanaExternalWalletProviderConfigFull = ExternalWalletProviderConfig<CreateWalletFn>;
 
 export function SolanaExternalWalletProvider({
   children,
@@ -131,7 +121,7 @@ export function SolanaExternalWalletProvider({
     }
   }, [solanaAddress, connecting, wallet]);
 
-  const signMessage = async (message: string) => {
+  const signMessage = async ({ message }: SignArgs) => {
     try {
       const encodedMessage = new TextEncoder().encode(message);
       const signature = await solanaSignMessage(encodedMessage);
@@ -149,7 +139,7 @@ export function SolanaExternalWalletProvider({
   };
 
   const signVerificationMessage = async () => {
-    const signature = await signMessage(verificationMessage.current);
+    const signature = await signMessage({ message: verificationMessage.current });
 
     return signature;
   };

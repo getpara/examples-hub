@@ -1,9 +1,10 @@
 import { atom, WritableAtom } from 'jotai';
+import { TExternalWallet, TOAuthMethod } from '@getpara/react-sdk';
 import qs from 'qs';
 import merge from 'lodash.merge';
 import debounce from 'lodash.debounce';
 import { getModalCodeString } from '../utils/codeGenerator';
-import { ModalBuilderConfig, ViewType, ExternalWallet, TAuthLayout } from '../types';
+import { ModalBuilderConfig, ViewType, TAuthLayout } from '../types';
 import { MODAL_BUILDER_DEFAULT_CONFIG } from '../constants';
 import { logError } from '../utils';
 import { getModalConfigDiff } from '../utils/configDiff';
@@ -18,13 +19,13 @@ export const modalConfigAtom = atom<ModalBuilderConfig>(MODAL_BUILDER_DEFAULT_CO
 export const viewAtom = atom<ViewType>('desktop');
 
 interface PreviousWeb2State {
-  oAuthMethods: any[];
+  oAuthMethods: TOAuthMethod[];
   disableEmailLogin: boolean;
   disablePhoneLogin: boolean;
   authLayoutWeb2?: TAuthLayout;
 }
 interface PreviousWeb3State {
-  externalWallets: ExternalWallet[];
+  externalWallets: TExternalWallet[];
   authLayoutWeb3?: TAuthLayout;
 }
 

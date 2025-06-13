@@ -13,52 +13,47 @@ import {
 } from '@getpara/graz';
 import { useExternalWalletStore } from '../stores/useStore.js';
 import { WalletWithType } from '../types/Wallet.js';
-import ParaWeb, { AuthState, Wallet, rawSecp256k1PubkeyToRawAddress } from '@getpara/web-sdk';
-import type { CommonChain, CommonWallet, TExternalWallet } from '@getpara/react-common';
+import { AuthState, rawSecp256k1PubkeyToRawAddress, TExternalWallet } from '@getpara/web-sdk';
+import type {
+  ChainManagement,
+  CommonChain,
+  CommonWallet,
+  ConnectParaEmbedded,
+  ExternalWalletContextType,
+  ExternalWalletProviderConfig,
+  ExternalWalletProviderConfigBase,
+  SignArgs,
+  SignResult,
+} from '@getpara/react-common';
 import { formatEthHexAddress } from '../utils/formatEthHexAddress.js';
 
-const defaultCosmosExternalWallet = {
+export const defaultCosmosExternalWallet = {
   wallets: [],
   chains: [],
   chainId: undefined,
   disconnect: () => Promise.resolve(),
-  switchChain: () => Promise.resolve({}),
+  switchChain: () => Promise.resolve(),
   connectParaEmbedded: () => Promise.resolve({}),
   signMessage: () => Promise.resolve({}),
   signVerificationMessage: () => Promise.resolve({}),
 };
 
-export type CosmosExternalWalletContextType = {
-  wallets: CommonWallet[];
-  chains: CommonChain[];
-  chainId?: string;
-  disconnect: () => Promise<void>;
-  switchChain: (chainId: string) => Promise<{ error?: string[] }>;
-  connectParaEmbedded: () => Promise<{ result?: unknown; error?: string }>;
-  signMessage: (message: string) => Promise<{ signature?: string; error?: string }>;
-  signVerificationMessage: () => Promise<{
-    address?: string;
-    signature?: string;
-    cosmosPublicKeyHex?: string;
-    cosmosSigner?: string;
-    error?: string;
-    addressBech32?: string;
-  }>;
+export type CosmosSignResult = SignResult & {
+  cosmosPublicKeyHex?: string;
+  cosmosSigner?: string;
+  addressBech32?: string;
 };
 
-export type CosmosExternalWalletProviderConfig = {
-  onSwitchWallet?: (args: { address?: string; error?: string }) => void;
-  para: ParaWeb;
-  walletsWithFullAuth: TExternalWallet[];
-  includeWalletVerification?: boolean;
-  connectionOnly?: boolean;
-  connectedWallet?: Omit<Wallet, 'signer'> | null;
-};
+export type CosmosExternalWalletContextType = ExternalWalletContextType<CosmosSignResult> &
+  ChainManagement<string> &
+  ConnectParaEmbedded;
 
-export type CosmosExternalWalletProviderConfigFull = {
-  wallets: WalletWithType[];
-} & Omit<ParaCosmosProviderConfig, 'wallets'> &
-  CosmosExternalWalletProviderConfig;
+export type CosmosExternalWalletProviderConfig = ExternalWalletProviderConfigBase;
+
+export type CosmosExternalWalletProviderConfigFull = ExternalWalletProviderConfig<
+  WalletWithType,
+  Omit<ParaCosmosProviderConfig, 'wallets'>
+>;
 
 export const CosmosExternalWalletContext = createContext<CosmosExternalWalletContextType>(defaultCosmosExternalWallet);
 
@@ -220,7 +215,7 @@ export function CosmosExternalWalletProvider({
     connect();
   }, [isLocalConnecting, isConnecting, isReconnecting, walletType, connectedWallet]);
 
-  const signMessage = async (message: string) => {
+  const signMessage = async ({ message }: SignArgs) => {
     const wallet = grazGetWallet(walletType);
 
     if (!wallet) {
@@ -247,7 +242,7 @@ export function CosmosExternalWalletProvider({
   };
 
   const signVerificationMessage = async () => {
-    const signature = await signMessage(verificationMessage.current);
+    const signature = await signMessage({ message: verificationMessage.current });
 
     return signature;
   };

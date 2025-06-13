@@ -2,15 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import {
   TOAuthMethod,
-  ExternalWallet as SDKExternalWallet,
-  EvmWallet,
-  SolanaWallet,
-  CosmosWallet,
+  TExternalWallet,
   Network,
   OAUTH_METHODS,
+  EVM_WALLETS,
+  SOLANA_WALLETS,
+  COSMOS_WALLETS,
+  EXTERNAL_WALLET_TYPES,
 } from '@getpara/react-sdk';
-import { AUTH_METHOD_CONFIGS, EXTERNAL_WALLET_CONFIGS, ALL_AUTH_METHODS, ALL_EXTERNAL_WALLETS } from '../../constants';
-import { AuthMethod, ExternalWallet, AuthSectionId, TAuthLayout } from '../../types';
+import { AUTH_METHOD_CONFIGS, EXTERNAL_WALLET_CONFIGS, ALL_AUTH_METHODS } from '../../constants';
+import { AuthMethod, AuthSectionId, TAuthLayout } from '../../types';
 import { AccordionContent, AccordionItem, AccordionTrigger, DraggableArea, DraggableItem, SegmentControl } from '../UI';
 import { authenticationConfigAtom, networksConfigAtom, previousWeb2StateAtom, previousWeb3StateAtom } from '../../atoms';
 
@@ -22,7 +23,7 @@ export const AuthenticationConfigurator: React.FC = () => {
 
   const [authSectionOrder, setAuthSectionOrder] = useState<AuthSectionId[]>(['web2', 'web3']);
   const [authMethodsOrder, setAuthMethodsOrder] = useState<AuthMethod[]>(ALL_AUTH_METHODS);
-  const [externalWalletsOrder, setExternalWalletsOrder] = useState<ExternalWallet[]>(ALL_EXTERNAL_WALLETS);
+  const [externalWalletsOrder, setExternalWalletsOrder] = useState<TExternalWallet[]>([...EXTERNAL_WALLET_TYPES]);
 
   useEffect(() => {
     if (!prevWeb2State) {
@@ -156,7 +157,7 @@ export const AuthenticationConfigurator: React.FC = () => {
             newAuthConfig.authLayout = [...(newAuthConfig.authLayout ?? []), layoutToAdd];
           }
         } else {
-          newAuthConfig.externalWallets = [SDKExternalWallet.METAMASK];
+          newAuthConfig.externalWallets = ['METAMASK'];
           if (!(newAuthConfig.authLayout ?? []).some(l => l === 'EXTERNAL:FULL' || l === 'EXTERNAL:CONDENSED')) {
             newAuthConfig.authLayout = [...(newAuthConfig.authLayout ?? []), 'EXTERNAL:FULL' as TAuthLayout];
           }
@@ -208,7 +209,7 @@ export const AuthenticationConfigurator: React.FC = () => {
     setAuthenticationConfig(newAuthConfig);
   };
 
-  const toggleExternalWallet = (wallet: ExternalWallet) => {
+  const toggleExternalWallet = (wallet: TExternalWallet) => {
     const newAuthConfig = { ...authenticationConfig };
     const externalWallets = new Set(newAuthConfig.externalWallets ?? []);
     const currentlyEnabledWeb3 = newAuthConfig.externalWallets ?? [];
@@ -233,15 +234,11 @@ export const AuthenticationConfigurator: React.FC = () => {
     setAuthenticationConfig(newAuthConfig);
   };
 
-  const filteredExternalWallets = (wallets: ExternalWallet[]) => {
-    const evmValues = Object.values(EvmWallet) as string[];
-    const solValues = Object.values(SolanaWallet) as string[];
-    const cosmosValues = Object.values(CosmosWallet) as string[];
-
+  const filteredExternalWallets = (wallets: TExternalWallet[]) => {
     const filtered = wallets.filter(wallet => {
-      const isEvmWallet = evmValues.includes(wallet);
-      const isSolWallet = solValues.includes(wallet);
-      const isCosmosWallet = cosmosValues.includes(wallet);
+      const isEvmWallet = ([...EVM_WALLETS] as string[]).includes(wallet);
+      const isSolWallet = ([...SOLANA_WALLETS] as string[]).includes(wallet);
+      const isCosmosWallet = ([...COSMOS_WALLETS] as string[]).includes(wallet);
 
       const hasEthereumNetwork = networksConfig.networks?.includes('ETHEREUM');
       const hasSolanaNetwork = networksConfig.networks?.includes('SOLANA');
@@ -291,7 +288,7 @@ export const AuthenticationConfigurator: React.FC = () => {
     });
   }
 
-  function handleExternalWalletsReorder(newOrder: ExternalWallet[]) {
+  function handleExternalWalletsReorder(newOrder: TExternalWallet[]) {
     const enabledSet = new Set(authenticationConfig.externalWallets ?? []);
     const filtered = newOrder.filter(wallet => enabledSet.has(wallet));
     setExternalWalletsOrder(newOrder);

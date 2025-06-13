@@ -1,6 +1,6 @@
 import { useModalStateStore } from '../../stores/modalStateStore/useModalStateStore';
 import { CpslButton, CpslIcon, CpslText } from '@getpara/react-components';
-import { ExternalWallet } from '@getpara/react-sdk';
+import { EXTERNAL_WALLET_TYPES } from '@getpara/react-sdk';
 import { DownIcon, FlexRow, LabelContainer, MethodRow, OptionRow } from './ModalConfig';
 
 export const ExternalWallets = () => {
@@ -46,18 +46,16 @@ export const ExternalWallets = () => {
         </MethodRow>
       ))}
       <OptionRow>
-        {Object.values(ExternalWallet)
-          .filter(method => !externalWallets.includes(method))
-          .map(method => (
-            <CpslButton
-              size="small"
-              key={method}
-              variant={externalWallets.includes(method) ? 'primary' : 'secondary'}
-              onClick={() => updateState({ externalWallets: [...externalWallets, method] })}
-            >
-              {method.toUpperCase()}
-            </CpslButton>
-          ))}
+        {EXTERNAL_WALLET_TYPES.filter(method => !externalWallets.includes(method)).map(method => (
+          <CpslButton
+            size="small"
+            key={method}
+            variant={externalWallets.includes(method) ? 'primary' : 'secondary'}
+            onClick={() => updateState({ externalWallets: [...externalWallets, method] })}
+          >
+            {method.toUpperCase()}
+          </CpslButton>
+        ))}
       </OptionRow>
     </LabelContainer>
   );

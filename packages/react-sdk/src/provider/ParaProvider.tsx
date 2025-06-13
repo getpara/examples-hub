@@ -9,7 +9,7 @@ import { ParaModal } from '../modal/ParaModal.js';
 import { ParaModalHandle } from '../modal/index.js';
 import { isConfigType, isParaWeb } from './utils/paraConfigTypeGuards.js';
 import ParaWeb from '@getpara/web-sdk';
-import { ExternalWallet } from '@getpara/react-common';
+import { EXTERNAL_WALLET_TYPES } from '@getpara/web-sdk';
 import { AuthProvider } from './providers/AuthProvider.js';
 
 export const ParaProvider = forwardRef<
@@ -83,7 +83,7 @@ export const ParaProvider = forwardRef<
 
   useEffect(() => {
     if (externalWallets !== externalWalletConfig?.wallets) {
-      setExternalWallets(externalWalletConfig?.wallets ?? Object.values(ExternalWallet));
+      setExternalWallets(externalWalletConfig?.wallets ?? [...EXTERNAL_WALLET_TYPES]);
     }
   }, [externalWalletConfig?.wallets]);
 
@@ -100,7 +100,7 @@ export const ParaProvider = forwardRef<
       } else {
         setExternalWalletsWithFullAuth(
           externalWalletConfig?.createLinkedEmbeddedForExternalWallets === 'ALL'
-            ? Object.values(ExternalWallet)
+            ? [...EXTERNAL_WALLET_TYPES]
             : (externalWalletConfig?.createLinkedEmbeddedForExternalWallets ?? []),
         );
       }

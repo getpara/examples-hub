@@ -15,6 +15,7 @@ export const coinbaseWallet = ({ appName, appIcon }: CoinbaseWalletOptions): Wal
 
   return {
     id: 'coinbase',
+    internalId: 'COINBASE',
     name: 'Coinbase Wallet',
     rdns: 'com.coinbase.wallet',
     iconUrl: icon,

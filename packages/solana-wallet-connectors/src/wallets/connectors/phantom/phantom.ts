@@ -5,6 +5,7 @@ import { icon } from './phantomIcon.js';
 export const phantomWallet = (): Wallet => {
   return {
     id: 'phantom',
+    internalId: 'PHANTOM',
     name: 'Phantom',
     iconUrl: icon,
     isExtension: true,

@@ -1,4 +1,4 @@
-import { CosmosWallet, EvmWallet, SolanaWallet } from '@getpara/react-sdk';
+import { COSMOS_WALLETS, EVM_WALLETS, SOLANA_WALLETS } from '@getpara/react-sdk';
 import { ModalBuilderConfig } from '../types';
 
 export const getModalCodeString = (config: ModalBuilderConfig): string => {
@@ -15,7 +15,7 @@ export const getModalCodeString = (config: ModalBuilderConfig): string => {
       wallets: ${JSON.stringify(config.authentication.externalWallets)},
       walletConnect: { projectId: YOUR_WALLET_CONNECT_PROJECT_ID },
       ${
-        config.authentication.externalWallets.some(w => w in CosmosWallet)
+        config.authentication.externalWallets.some(w => w in COSMOS_WALLETS)
           ? ` cosmosConnector: {
         config: {
           selectedChainId: SELECTED_CHAIN_FROM_YOUR_STATE,
@@ -26,7 +26,7 @@ export const getModalCodeString = (config: ModalBuilderConfig): string => {
           : ''
       }
       ${
-        config.authentication.externalWallets.some(w => w in EvmWallet)
+        config.authentication.externalWallets.some(w => w in EVM_WALLETS)
           ? `evmConnector: {
         config: {
           chains: YOUR_SUPPORTED_EVM_CHAINS,
@@ -35,7 +35,7 @@ export const getModalCodeString = (config: ModalBuilderConfig): string => {
           : ''
       }
       ${
-        config.authentication.externalWallets.some(w => w in SolanaWallet)
+        config.authentication.externalWallets.some(w => w in SOLANA_WALLETS)
           ? `solanaConnector: {
         config: {
           endpoint: ENDPOINT_FOR_SOLANA_CONNECTION,

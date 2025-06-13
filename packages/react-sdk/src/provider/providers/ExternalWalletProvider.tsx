@@ -5,9 +5,17 @@ import { useStore } from '../stores/useStore.js';
 import { ModalStep } from '../../modal/index.js';
 import { useModalStore } from '../../modal/stores/index.js';
 import { useVerifyExternalWallet, useWalletState } from '../hooks/index.js';
-import { CommonChain, CommonWallet, TExternalWallet } from '@getpara/react-common';
+import {
+  BalanceManagement,
+  ChainManagement,
+  CommonChain,
+  CommonWallet,
+  ExternalWalletContextType,
+  TExternalWallet,
+} from '@getpara/react-common';
 import { VerifyExternalWalletParams } from '@getpara/user-management-client';
 import { useAuthActions } from './AuthProvider.js';
+import { CosmosSignResult } from '@getpara/cosmos-wallet-connectors';
 
 export const defaultExternalWallet = {
   wallets: [],
@@ -29,29 +37,28 @@ export const defaultExternalWallet = {
   isExternalWalletVerifying: false,
 };
 
-export const ExternalWalletContext = createContext<{
-  wallets: CommonWallet[];
-  chains: CommonChain[];
-  chainId?: string;
-  wallet?: CommonWallet;
-  qrUri?: string;
-  chainIdSwitchingTo?: string;
-  walletDisplayHelpers: {
-    showExtension: boolean;
-    showMobile: boolean;
-    isCosmosMobileWallet: boolean;
+type Value = Omit<ExternalWalletContextType<CosmosSignResult>, 'signMessage' | 'disconnect' | 'signVerificationMessage'> &
+  ChainManagement<string, void> &
+  BalanceManagement & {
+    wallet?: CommonWallet;
+    qrUri?: string;
+    chainIdSwitchingTo?: string;
+    walletDisplayHelpers: {
+      showExtension: boolean;
+      showMobile: boolean;
+      isCosmosMobileWallet: boolean;
+    };
+    username?: string;
+    avatar?: string;
+    connectExternalWallet: (wallet: CommonWallet, isMobile?: boolean, isManualWalletConnect?: boolean) => Promise<void>;
+    disconnectExternalWallet: () => Promise<void>;
+    setChainIdSwitchingTo: (chainId?: string) => void;
+    connectEmbeddedToExternalConnectors: () => Promise<void>;
+    verifyWalletSignature: () => Promise<VerifyExternalWalletParams | undefined>;
+    isExternalWalletVerifying?: boolean;
   };
-  username?: string;
-  avatar?: string;
-  connectExternalWallet: (wallet: CommonWallet, isMobile?: boolean, isManualWalletConnect?: boolean) => Promise<void>;
-  disconnectExternalWallet: () => Promise<void>;
-  switchChain: (chainId: string) => Promise<void>;
-  setChainIdSwitchingTo: (chainId?: string) => void;
-  connectEmbeddedToExternalConnectors: () => Promise<void>;
-  verifyWalletSignature: () => Promise<VerifyExternalWalletParams | undefined>;
-  getWalletBalance: () => Promise<string | undefined>;
-  isExternalWalletVerifying?: boolean;
-}>(defaultExternalWallet);
+
+export const ExternalWalletContext = createContext<Value>(defaultExternalWallet);
 
 export function ExternalWalletProvider({ children }: PropsWithChildren) {
   const evmContext = useStore(state => state.evmContext);
@@ -185,7 +192,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
       const walletType = Object.values(para.externalWallets || {})[0]?.type;
 
       if (walletType) {
-        let resp: { error?: string[] };
+        let resp;
 
         setExternalWalletError();
         setChainIdSwitchingTo(chainId);

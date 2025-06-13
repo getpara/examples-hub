@@ -5,7 +5,7 @@ import { ParaEvmProviderConfigNoWallets } from '../types/externalWalletProviders
 import { ParaWagmiProviderProps } from '@getpara/evm-wallet-connectors';
 import { useInternalClient } from '../hooks/utils/useInternalClient.js';
 import { useStore } from '../stores/useStore.js';
-import { EvmWallet } from '@getpara/react-common';
+import { EVM_WALLETS } from '@getpara/web-sdk';
 import { useWallet } from '../hooks/index.js';
 
 export const EvmWalletWrapper = <
@@ -28,7 +28,7 @@ export const EvmWalletWrapper = <
   const connectionOnly = useStore(state => state.connectionOnly);
   const includeWalletVerification = useStore(state => state.includeWalletVerification);
 
-  const isUsing = wallets.some(w => w in EvmWallet);
+  const isUsing = wallets.some(w => w in EVM_WALLETS);
 
   return (
     <EvmExternalWalletProvider

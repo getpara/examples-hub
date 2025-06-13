@@ -1,4 +1,4 @@
-import { CurrentWalletIds, ExternalWalletType, SupportedWalletTypes } from './wallet.js';
+import { CurrentWalletIds, ExternalWalletType, SupportedWalletTypes, TExternalWallet } from './wallet.js';
 
 export const AUTH_TYPES = [
   'email',
@@ -220,6 +220,7 @@ export type ExternalWalletInfo = {
   address: string;
   type: ExternalWalletType;
   provider?: string;
+  providerId?: TExternalWallet;
   addressBech32?: string;
   withFullParaAuth?: boolean;
   ensName?: string | null;

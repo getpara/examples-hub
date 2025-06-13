@@ -92,7 +92,7 @@ export const connectorsForWallets = (
       };
     };
 
-    const isWalletConnectConnector = walletMeta.id === 'walletConnect';
+    const isWalletConnectConnector = walletMeta.internalId === 'WALLETCONNECT';
 
     if (isWalletConnectConnector && createConnector) {
       connectors.push(

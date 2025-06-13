@@ -1,5 +1,9 @@
 export { CosmosExternalWalletContext } from './providers/CosmosExternalWalletContext.js';
-export type { CosmosExternalWalletContextType } from './providers/CosmosExternalWalletContext.js';
+export {
+  type CosmosExternalWalletContextType,
+  type CosmosSignResult,
+  defaultCosmosExternalWallet,
+} from './providers/CosmosExternalWalletContext.js';
 export { ParaCosmosProvider } from './providers/ParaCosmosContext.js';
 export type {
   ParaCosmosProviderProps,

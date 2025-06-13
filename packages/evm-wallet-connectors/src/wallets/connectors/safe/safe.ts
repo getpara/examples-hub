@@ -5,6 +5,7 @@ import { icon } from './safeIcon.js';
 
 export const safeWallet = (): Wallet => ({
   id: 'safe',
+  internalId: 'SAFE',
   name: 'Safe',
   rdns: 'io.safe',
   iconUrl: icon,

@@ -6,6 +6,7 @@ import { isMobile } from '@getpara/web-sdk';
 export const leapWallet = (): WalletWithType => {
   return {
     id: 'leap',
+    internalId: 'LEAP',
     name: 'Leap',
     iconUrl: icon,
     isExtension: true,

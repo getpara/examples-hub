@@ -10,6 +10,7 @@ export const rabbyWallet = ({ projectId, walletConnectParameters }: RabbyWalletO
 
   return {
     id: 'rabby',
+    internalId: 'RABBY',
     name: 'Rabby Wallet',
     rdns: 'io.rabby',
     iconUrl: icon,

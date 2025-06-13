@@ -5,6 +5,7 @@ import { icon } from './solflareIcon.js';
 export const solflareWallet = (): Wallet => {
   return {
     id: 'solflare',
+    internalId: 'SOLFLARE',
     name: 'Solflare',
     iconUrl: icon,
     isExtension: true,

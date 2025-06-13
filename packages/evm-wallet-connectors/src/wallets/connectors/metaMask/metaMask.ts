@@ -82,6 +82,7 @@ export const metaMaskWallet = ({ projectId, walletConnectParameters }: MetaMaskW
 
   return {
     id: 'metaMask',
+    internalId: 'METAMASK',
     name: 'MetaMask',
     rdns: 'io.metamask',
     iconUrl: icon,

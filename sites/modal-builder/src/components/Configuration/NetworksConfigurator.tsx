@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
-import { CosmosWallet, EvmWallet, Network, SolanaWallet } from '@getpara/react-sdk';
+import { COSMOS_WALLETS, EVM_WALLETS, Network, SOLANA_WALLETS } from '@getpara/react-sdk';
 import CosmosLogo from '../../assets/cosmos.svg';
 import EthereumLogo from '../../assets/ethereum.svg';
 import SolanaLogo from '../../assets/solana.svg';
@@ -87,9 +87,9 @@ export const NetworksConfigurator: React.FC<NetworksConfiguratorProps> = () => {
   }
 
   function walletIsForNetwork(wallet: string, network: Network) {
-    const evmValues = Object.values(EvmWallet) as string[];
-    const solValues = Object.values(SolanaWallet) as string[];
-    const cosmosValues = Object.values(CosmosWallet) as string[];
+    const evmValues = EVM_WALLETS as unknown as string[];
+    const solValues = SOLANA_WALLETS as unknown as string[];
+    const cosmosValues = COSMOS_WALLETS as unknown as string[];
 
     if (network === Network.ETHEREUM && evmValues.includes(wallet)) return true;
     if (network === Network.SOLANA && solValues.includes(wallet)) return true;

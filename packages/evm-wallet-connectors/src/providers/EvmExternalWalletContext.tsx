@@ -16,11 +16,21 @@ import { isEIP6963Connector } from '../utils/isEIP6963Connector.js';
 import { getWalletConnectUri } from '../utils/getWalletConnectUri.js';
 import { normalize } from 'viem/ens';
 import { useExternalWalletStore } from '../stores/useStore.js';
-import type { CommonChain, CommonWallet, TExternalWallet } from '@getpara/react-common';
-import ParaWeb, { AuthState, isMobile, Wallet } from '@getpara/web-sdk';
+import type {
+  BalanceManagement,
+  ChainManagement,
+  CommonChain,
+  CommonWallet,
+  ConnectParaEmbedded,
+  ExternalWalletContextType,
+  ExternalWalletProviderConfigBase,
+  SignArgs,
+  TExternalWallet,
+} from '@getpara/react-common';
+import { AuthState, isMobile } from '@getpara/web-sdk';
 import { etherUnits, formatUnits } from 'viem';
 
-const defaultEvmExternalWallet = {
+export const defaultEvmExternalWallet = {
   wallets: [],
   chains: [],
   chainId: undefined,
@@ -28,38 +38,24 @@ const defaultEvmExternalWallet = {
   avatar: undefined,
   balance: undefined,
   disconnect: () => Promise.resolve(),
-  switchChain: () => Promise.resolve({}),
+  switchChain: () => Promise.resolve(),
   connectParaEmbedded: () => Promise.resolve({}),
   signMessage: () => Promise.resolve({}),
   signVerificationMessage: () => Promise.resolve({}),
   getWalletBalance: () => Promise.resolve(undefined),
 };
 
-export type EvmExternalWalletContextType = {
-  wallets: CommonWallet[];
-  chains: CommonChain[];
-  chainId?: number;
-  username?: string;
-  avatar?: string;
-  balance?: string;
-  disconnect: () => Promise<void>;
-  switchChain: (chainId: number) => Promise<{ error?: string[] }>;
-  connectParaEmbedded: () => Promise<{ result?: unknown; error?: string }>;
-  signMessage: (message: string) => Promise<{ signature?: string; error?: string }>;
-  signVerificationMessage: () => Promise<{ address?: string; signature?: string; error?: string }>;
-  getWalletBalance: () => Promise<string | undefined>;
-};
+export type EvmExternalWalletContextType = ExternalWalletContextType &
+  ChainManagement<number> &
+  BalanceManagement &
+  ConnectParaEmbedded & {
+    username?: string;
+    avatar?: string;
+  };
 
 export const EvmExternalWalletContext = createContext<EvmExternalWalletContextType>(defaultEvmExternalWallet);
 
-export type EvmExternalWalletProviderConfig = {
-  onSwitchWallet?: (args: { address?: string; error?: string }) => void;
-  para: ParaWeb;
-  walletsWithFullAuth: TExternalWallet[];
-  includeWalletVerification?: boolean;
-  connectionOnly?: boolean;
-  connectedWallet?: Omit<Wallet, 'signer'> | null;
-};
+export type EvmExternalWalletProviderConfig = ExternalWalletProviderConfigBase;
 
 export function EvmExternalWalletProvider({
   children,
@@ -193,7 +189,7 @@ export function EvmExternalWalletProvider({
     await para.logout();
   };
 
-  const signMessage = async (message: string) => {
+  const signMessage = async ({ message }: SignArgs) => {
     try {
       const signature = await signMessageAsync({
         message,
@@ -217,7 +213,7 @@ export function EvmExternalWalletProvider({
   };
 
   const signVerificationMessage = async () => {
-    const signature = await signMessage(verificationMessage.current);
+    const signature = await signMessage({ message: verificationMessage.current });
 
     return signature;
   };
@@ -353,7 +349,7 @@ export function EvmExternalWalletProvider({
           break;
         }
         case 'ResourceUnavailableRpcError': {
-          `${connector.name} not detected`;
+          error = `${connector.name} not detected`;
           break;
         }
         default: {

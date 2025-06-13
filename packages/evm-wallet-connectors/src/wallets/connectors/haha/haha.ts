@@ -15,6 +15,7 @@ export const hahaWallet = ({ projectId, walletConnectParameters }: HahaWalletOpt
 
   return {
     id: 'haha',
+    internalId: 'HAHA',
     name: 'HaHa',
     rdns: 'haha.me',
     iconUrl: icon,

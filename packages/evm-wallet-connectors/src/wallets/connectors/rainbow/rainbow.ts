@@ -21,6 +21,7 @@ export const rainbowWallet = ({ projectId, walletConnectParameters }: RainbowWal
 
   return {
     id: 'rainbow',
+    internalId: 'RAINBOW',
     name: 'Rainbow',
     rdns: 'me.rainbow',
     iconUrl: icon,

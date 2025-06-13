@@ -12,6 +12,7 @@ export const walletConnectWallet = ({ projectId, options }: WalletConnectWalletO
 
   return {
     id: 'walletConnect',
+    internalId: 'WALLETCONNECT',
     name: 'WalletConnect',
     installed: undefined,
     iconUrl: icon,

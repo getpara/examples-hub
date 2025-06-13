@@ -16,6 +16,7 @@ export const okxWallet = ({ projectId, walletConnectParameters }: OKXWalletOptio
 
   return {
     id: 'okx',
+    internalId: 'OKX',
     name: 'OKX Wallet',
     rdns: 'com.okex.wallet',
     iconUrl: icon,
