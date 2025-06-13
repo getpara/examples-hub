@@ -1,12 +1,12 @@
 // /Users/tyson/dev/examples-hub/mobile/with-flutter/lib/examples/auth/email_auth_example.dart
 // ignore_for_file: unused_field, unused_local_variable, use_build_context_synchronously
 
-import 'dart:async'; // Keep for Future and async operations
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 // Import the SDK package with all necessary exports
 import 'package:para/para.dart';
-import 'package:para_flutter/client/para.dart'; // Assuming 'para' instance is globally available or passed via context
+import 'package:para_flutter/client/para.dart';
 import 'package:para_flutter/widgets/choose_signup_method.dart';
 import 'package:para_flutter/widgets/demo_home.dart';
 import 'package:para_flutter/widgets/demo_otp_verification.dart';
