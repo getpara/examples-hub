@@ -454,31 +454,36 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
   }, [evmAvatar, wallet]);
 
   const connectEmbeddedToExternalConnectors = useCallback(async () => {
-    try {
-      const { error } = await evmConnectParaEmbedded();
-      if (error) {
-        console.warn('Failed to connect Para EVM wallet to Wagmi:', error);
-      } else {
-        const wallet = para.findWallet(undefined, undefined, { type: ['EVM'] });
-        if (wallet) {
-          setSelectedWallet({ id: wallet.id, type: 'EVM' });
+    const evmWallet = para.findWallet(undefined, undefined, { type: ['EVM'] });
+    const cosmosWallet = para.findWallet(undefined, undefined, { type: ['COSMOS'] });
+
+    if (evmWallet) {
+      try {
+        const { error } = await evmConnectParaEmbedded();
+        if (error) {
+          console.warn('Failed to connect Para EVM wallet to Wagmi:', error);
+        } else {
+          if (evmWallet) {
+            setSelectedWallet({ id: evmWallet.id, type: 'EVM' });
+          }
         }
+      } catch (err) {
+        console.warn('Error calling connectParaEvmWallet:', err);
       }
-    } catch (err) {
-      console.warn('Error calling connectParaEvmWallet:', err);
     }
-    try {
-      const { error } = await cosmosConnectParaEmbedded();
-      if (error) {
-        console.warn('Failed to connect Para Cosmos wallet to Graz:', error);
-      } else {
-        const wallet = para.findWallet(undefined, undefined, { type: ['COSMOS'] });
-        if (wallet) {
-          setSelectedWallet({ id: wallet.id, type: 'COSMOS' });
+    if (cosmosWallet) {
+      try {
+        const { error } = await cosmosConnectParaEmbedded();
+        if (error) {
+          console.warn('Failed to connect Para Cosmos wallet to Graz:', error);
+        } else {
+          if (cosmosWallet) {
+            setSelectedWallet({ id: cosmosWallet.id, type: 'COSMOS' });
+          }
         }
+      } catch (err) {
+        console.warn('Error calling connectParaCosmosWallet:', err);
       }
-    } catch (err) {
-      console.warn('Error calling connectParaCosmosWallet:', err);
     }
   }, [evmConnectParaEmbedded, cosmosConnectParaEmbedded]);
 

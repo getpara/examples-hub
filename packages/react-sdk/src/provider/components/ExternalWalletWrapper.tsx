@@ -122,6 +122,7 @@ export const ExternalWalletWrapper = <
               },
             ],
             onSwitchChain: () => {},
+            selectedChainId: 'theta-testnet-001',
           }
         : cosmosConnector.config,
     [cosmosConnector],
