@@ -1,7 +1,7 @@
 // /Users/tyson/dev/examples-hub/mobile/with-flutter/lib/examples/auth/phone_auth_example.dart
 // ignore_for_file: unused_field, unused_local_variable, use_build_context_synchronously
 
-import 'dart:async'; // Keep for Future
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 // Hide WebAuthenticationSession from flutter_inappwebview to avoid conflict
@@ -9,9 +9,8 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart' hide WebAuthenti
 
 // Import the SDK package
 import 'package:para/para.dart';
-import 'package:para_flutter/client/para.dart'; // Assuming 'para' instance is globally available or passed via context
-import 'package:para_flutter/util/random.dart';
-import 'package:para_flutter/widgets/choose_signup_method.dart'; // Needed for signup flow
+import 'package:para_flutter/client/para.dart';
+import 'package:para_flutter/widgets/choose_signup_method.dart';
 import 'package:para_flutter/widgets/demo_home.dart';
 import 'package:para_flutter/widgets/demo_otp_verification.dart';
 
