@@ -1,6 +1,6 @@
 {
   "name": "@getpara/core-sdk",
-  "version": "2.0.0-alpha.19",
+  "version": "2.0.0-alpha.20",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/types/index.d.ts",
@@ -10,7 +10,7 @@
     "@celo/utils": "^8.0.2",
     "@cosmjs/encoding": "^0.32.4",
     "@ethereumjs/util": "^9.1.0",
-    "@getpara/user-management-client": "2.0.0-alpha.19",
+    "@getpara/user-management-client": "2.0.0-alpha.20",
     "@noble/hashes": "^1.5.0",
     "base64url": "^3.0.1",
     "libphonenumber-js": "1.11.2",

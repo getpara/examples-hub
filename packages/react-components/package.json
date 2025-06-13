@@ -1,6 +1,6 @@
 {
   "name": "@getpara/react-components",
-  "version": "2.0.0-alpha.19",
+  "version": "2.0.0-alpha.20",
   "description": "Capsule Core React Components",
   "type": "module",
   "main": "dist/index.js",
@@ -30,7 +30,7 @@
     "copy": "node scripts/copy.cjs"
   },
   "dependencies": {
-    "@getpara/core-components": "2.0.0-alpha.19"
+    "@getpara/core-components": "2.0.0-alpha.20"
   },
   "devDependencies": {
     "@types/react": "^18.2.64",

@@ -1,3 +1,40 @@
+# Release (Thu Jun 12 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.20
+- @getpara/wagmi-v2-integration@2.0.0-alpha.20
+- @getpara/wagmi-v2-connector@2.0.0-alpha.20
+- @getpara/viem-v2-integration@2.0.0-alpha.20
+- @getpara/viem-v1-integration@2.0.0-alpha.20
+- @getpara/user-management-client@2.0.0-alpha.20
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.20
+- @getpara/solana-wallet-connectors@2.0.0-alpha.20
+- @getpara/server-sdk@2.0.0-alpha.20
+- @getpara/react-sdk@2.0.0-alpha.20
+- @getpara/react-native-wallet@2.0.0-alpha.20
+- @getpara/react-components@2.0.0-alpha.20
+- @getpara/react-component-library@1.0.0-alpha.15
+- @getpara/react-common@2.0.0-alpha.20
+- @getpara/evm-wallet-connectors@2.0.0-alpha.20
+- @getpara/ethers-v6-integration@2.0.0-alpha.20
+- @getpara/ethers-v5-integration@2.0.0-alpha.20
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.20
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.20
+- @getpara/core-sdk@2.0.0-alpha.20
+- @getpara/core-components@2.0.0-alpha.20
+
+### Features
+-  Dev Portal - Enhancements & Review fixes (#988) - 0226cb17f
+-  Add mobile iOS Solana (#999) - 873962748
+
+### Fixes
+-  use a createconfig factory function for wagmi to expose config outside provider (#1005) - ca2a33a87
+-  url handling for modal builder config and edge case for cosmos wallet raw address (#997) - 5422fadec
+-  worker import for wasm_exec (#1003) - 235ef55b7
+
+### Chores
+-  Remove solana reload on disconnect (#1001) - 176972785
+
 # Release (Tue Jun 10 2025)
 
 ## Package Versions
