@@ -2,22 +2,27 @@ import { CpslIcon, CpslSpinner, CpslText, IconType } from '@getpara/react-compon
 import { PropsWithChildren, ReactNode } from 'react';
 import { safeStyled } from '../utils/index.js';
 
-type Status = 'loading' | 'error' | 'inactive';
+type Status = 'pending' | 'error' | 'idle' | 'success';
 
 export function HeroSpinner({
   icon,
-  status = 'inactive',
+  status = 'idle',
   text,
-}: PropsWithChildren<{ icon?: IconType; status?: Status; text?: ReactNode }>) {
+}: PropsWithChildren<{ icon?: IconType | ReactNode; status?: Status; text?: ReactNode }>) {
   return (
     <Root>
       <Hero>
-        <Spinner size={150} barWidth={9} variant={status === 'loading' ? 'default' : status} />
-        {icon && <CpslIcon icon={icon} size="80px" />}
+        <Spinner size={155} barWidth={8} variant={status} />
+        {typeof icon === 'string' ? <CpslIcon icon={icon} size="80px" /> : icon}
       </Hero>
       <Text status={status}>
         {status === 'error' && <CpslIcon icon="alertCircle" size="16px" style={{ stroke: 'currentColor' }} />}
-        <CpslText variant="bodyM" weight="semiBold" color={status === 'error' ? 'error' : 'primary'}>
+        {status === 'success' && <CpslIcon icon="checkCircle" size="16px" style={{ stroke: 'currentColor' }} />}
+        <CpslText
+          variant="bodyM"
+          weight="semiBold"
+          color={status === 'error' ? 'error' : status === 'success' ? 'success' : 'primary'}
+        >
           {text}
         </CpslText>
       </Text>
@@ -26,12 +31,10 @@ export function HeroSpinner({
 }
 
 const Root = safeStyled.div`
-  height: 276px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 16px;
 `;
 
 const Hero = safeStyled.div`
@@ -48,7 +51,12 @@ const Text = safeStyled.div<{ status: Status }>`
   display: flex;
   gap: 4px;
   align-items: center;
-  color: ${({ status }) => (status === 'error' ? 'var(--cpsl-color-utility-red)' : 'auto')};
+  color: ${({ status }) =>
+    status === 'error'
+      ? 'var(--cpsl-color-utility-red)'
+      : status === 'success'
+        ? 'var(--cpsl-color-utility-green)'
+        : 'auto'};
 `;
 
 const Spinner = safeStyled(CpslSpinner)`
@@ -58,4 +66,5 @@ const Spinner = safeStyled(CpslSpinner)`
   top: 0;
   left: 0;
   right: 0;
+  transition: 0.2s color;
 `;

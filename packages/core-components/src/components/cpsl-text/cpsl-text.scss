@@ -97,6 +97,20 @@
   }
 }
 
+:host(.success) {
+  color: var(--color-override, var(--cpsl-color-utility-green));
+
+  > p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--color-override, var(--cpsl-color-utility-green));
+  }
+}
+
 :host(.contrast) {
   color: var(--color-override, var(--cpsl-color-text-contrast));
 

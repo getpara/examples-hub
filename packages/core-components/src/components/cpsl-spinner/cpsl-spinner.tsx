@@ -8,9 +8,9 @@ import { Component, Host, Prop, h } from '@stencil/core';
 export class CpslSpinner {
   /**
    * Variant of the spinner
-   * Default is 'default'.
+   * Default is 'pending'.
    */
-  @Prop() variant?: 'default' | 'inactive' | 'error' = 'default';
+  @Prop() variant?: 'idle' | 'pending' | 'error' | 'success' = 'pending';
 
   /**
    * Size of the spinner in pixels.

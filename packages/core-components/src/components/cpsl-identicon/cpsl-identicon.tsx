@@ -112,6 +112,8 @@ export class CpslIdenticon {
 
   @Prop() variant: 'default' | 'avatar' = 'default';
 
+  @Prop() arcWidth: string = '30%';
+
   render() {
     let props;
     const isEmpty = !this.hash;
@@ -132,6 +134,7 @@ export class CpslIdenticon {
         style={{
           width: this.size,
           height: this.size,
+          ['--identicon-arc-width']: this.arcWidth,
         }}
       >
         {props?.shapes &&

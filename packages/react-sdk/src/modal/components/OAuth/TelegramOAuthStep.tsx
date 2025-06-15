@@ -68,7 +68,7 @@ export function TelegramOAuthStep() {
       <HeroContainer>
         <HeroSpinner
           icon="telegramBrand"
-          status={isWaiting ? 'loading' : isError ? 'error' : 'inactive'}
+          status={isWaiting ? 'pending' : isError ? 'error' : 'idle'}
           text={isWaiting ? 'Follow the on-screen prompts.' : isError ? 'Login Failed' : undefined}
         />
       </HeroContainer>

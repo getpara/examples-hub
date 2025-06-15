@@ -11,6 +11,7 @@ import ArrowCircleDownFilled from './arrow-circle-down-filled.svg';
 import ArrowNarrow from './arrow-narrow.svg';
 import Arrow from './arrow.svg';
 import Asterisk from './asterisk.svg';
+import Backpack from './backpack.svg';
 import BackupKit from './backup-kit.svg';
 import Bank from './bank.svg';
 import BaseBrand from './base-brand.svg';
@@ -29,9 +30,11 @@ import Close from './close.svg';
 import ClubhouseBrand from './clubhouse-brand.svg';
 import Clubhouse from './clubhouse.svg';
 import Code from './code.svg';
+import Coinbase from './coinbase.svg';
 import Copy07 from './copy-07.svg';
 import Copy from './copy.svg';
 import Cosmos from './cosmos.svg';
+import Cosmostation from './cosmostation.svg';
 import CreditCard02 from './credit-card-02.svg';
 import CreditCard from './credit-card.svg';
 import Cube03 from './cube-03.svg';
@@ -66,9 +69,11 @@ import Folder from './folder.svg';
 import GithubBrand from './github-brand.svg';
 import Github from './github.svg';
 import Globe from './globe.svg';
+import Glow from './glow.svg';
 import GoogleBrand from './google-brand.svg';
 import Google from './google.svg';
 import GridDots from './grid-dots.svg';
+import Haha from './haha.svg';
 import HelpCircle from './help-circle.svg';
 import HeroAlertCircle from './hero-alert-circle.svg';
 import HeroCheckmarkCapsule from './hero-checkmark-capsule.svg';
@@ -87,8 +92,10 @@ import Image from './image.svg';
 import InfoCircle from './info-circle.svg';
 import InstagramBrand from './instagram-brand.svg';
 import Instagram from './instagram.svg';
+import Keplr from './keplr.svg';
 import Key from './key.svg';
 import Laptop from './laptop.svg';
+import Leap from './leap.svg';
 import Lenovo from './lenovo.svg';
 import Lg from './lg.svg';
 import Lightning01 from './lightning-01.svg';
@@ -100,11 +107,13 @@ import LockKeyholeCircle from './lock-keyhole-circle.svg';
 import LogOut from './log-out.svg';
 import Mail from './mail.svg';
 import Menu from './menu.svg';
+import Metamask from './metamask.svg';
 import Monitor from './monitor.svg';
 import MoonpayBrand from './moonpay-brand.svg';
 import MoreLoginOptions from './more-login-options.svg';
 import Motorola from './motorola.svg';
 import NobleBrand from './noble-brand.svg';
+import Okx from './okx.svg';
 import OptimismBrand from './optimism-brand.svg';
 import ParaBlackBg from './para-black-bg.svg';
 import ParaBrand from './para-brand.svg';
@@ -116,6 +125,7 @@ import ParaRingsDark from './para-rings-dark.svg';
 import ParaRings from './para-rings.svg';
 import Para from './para.svg';
 import Passcode from './passcode.svg';
+import Phantom from './phantom.svg';
 import Phone from './phone.svg';
 import PintrestBrand from './pintrest-brand.svg';
 import Pintrest from './pintrest.svg';
@@ -126,11 +136,14 @@ import Polygon from './polygon.svg';
 import PuzzlePiece from './puzzle-piece.svg';
 import QrCode02 from './qr-code-02.svg';
 import QrCode from './qr-code.svg';
+import Rabby from './rabby.svg';
+import Rainbow from './rainbow.svg';
 import RampNetworkBrand from './ramp-network-brand.svg';
 import RampNetwork from './ramp-network.svg';
 import RedditBrand from './reddit-brand.svg';
 import Reddit from './reddit.svg';
 import Refresh from './refresh.svg';
+import Safe from './safe.svg';
 import Samsung from './samsung.svg';
 import Search from './search.svg';
 import Send from './send.svg';
@@ -143,6 +156,7 @@ import Sliders from './sliders.svg';
 import SnapchatBrand from './snapchat-brand.svg';
 import Snapchat from './snapchat.svg';
 import Solana from './solana.svg';
+import Solflare from './solflare.svg';
 import SpacingHeight from './spacing-height.svg';
 import Star04Filled from './star-04-filled.svg';
 import Star05 from './star-05.svg';
@@ -163,11 +177,14 @@ import TwitterBrand from './twitter-brand.svg';
 import Twitter from './twitter.svg';
 import UsdcBrand from './usdc-brand.svg';
 import UserCircle from './user-circle.svg';
+import UserPlus from './user-plus.svg';
 import User from './user.svg';
+import WalletConnect from './wallet-connect.svg';
 import Wallet from './wallet.svg';
 import X from './x.svg';
 import YoutubeBrand from './youtube-brand.svg';
 import Youtube from './youtube.svg';
+import Zerion from './zerion.svg';
 import AD from './flags/AD.svg';
 import AE from './flags/AE.svg';
 import AF from './flags/AF.svg';
@@ -416,6 +433,7 @@ export const Icons = {
   arrowNarrow: ArrowNarrow,
   arrow: Arrow,
   asterisk: Asterisk,
+  backpack: Backpack,
   backupKit: BackupKit,
   bank: Bank,
   baseBrand: BaseBrand,
@@ -434,9 +452,11 @@ export const Icons = {
   clubhouseBrand: ClubhouseBrand,
   clubhouse: Clubhouse,
   code: Code,
+  coinbase: Coinbase,
   copy07: Copy07,
   copy: Copy,
   cosmos: Cosmos,
+  cosmostation: Cosmostation,
   creditCard02: CreditCard02,
   creditCard: CreditCard,
   cube03: Cube03,
@@ -471,9 +491,11 @@ export const Icons = {
   githubBrand: GithubBrand,
   github: Github,
   globe: Globe,
+  glow: Glow,
   googleBrand: GoogleBrand,
   google: Google,
   gridDots: GridDots,
+  haha: Haha,
   helpCircle: HelpCircle,
   heroAlertCircle: HeroAlertCircle,
   heroCheckmarkCapsule: HeroCheckmarkCapsule,
@@ -492,8 +514,10 @@ export const Icons = {
   infoCircle: InfoCircle,
   instagramBrand: InstagramBrand,
   instagram: Instagram,
+  keplr: Keplr,
   key: Key,
   laptop: Laptop,
+  leap: Leap,
   lenovo: Lenovo,
   lg: Lg,
   lightning01: Lightning01,
@@ -505,11 +529,13 @@ export const Icons = {
   logOut: LogOut,
   mail: Mail,
   menu: Menu,
+  metamask: Metamask,
   monitor: Monitor,
   moonpayBrand: MoonpayBrand,
   moreLoginOptions: MoreLoginOptions,
   motorola: Motorola,
   nobleBrand: NobleBrand,
+  okx: Okx,
   optimismBrand: OptimismBrand,
   paraBlackBg: ParaBlackBg,
   paraBrand: ParaBrand,
@@ -521,6 +547,7 @@ export const Icons = {
   paraRings: ParaRings,
   para: Para,
   passcode: Passcode,
+  phantom: Phantom,
   phone: Phone,
   pintrestBrand: PintrestBrand,
   pintrest: Pintrest,
@@ -531,11 +558,14 @@ export const Icons = {
   puzzlePiece: PuzzlePiece,
   qrCode02: QrCode02,
   qrCode: QrCode,
+  rabby: Rabby,
+  rainbow: Rainbow,
   rampNetworkBrand: RampNetworkBrand,
   rampNetwork: RampNetwork,
   redditBrand: RedditBrand,
   reddit: Reddit,
   refresh: Refresh,
+  safe: Safe,
   samsung: Samsung,
   search: Search,
   send: Send,
@@ -548,6 +578,7 @@ export const Icons = {
   snapchatBrand: SnapchatBrand,
   snapchat: Snapchat,
   solana: Solana,
+  solflare: Solflare,
   spacingHeight: SpacingHeight,
   star04Filled: Star04Filled,
   star05: Star05,
@@ -568,11 +599,14 @@ export const Icons = {
   twitter: Twitter,
   usdcBrand: UsdcBrand,
   userCircle: UserCircle,
+  userPlus: UserPlus,
   user: User,
+  walletConnect: WalletConnect,
   wallet: Wallet,
   x: X,
   youtubeBrand: YoutubeBrand,
   youtube: Youtube,
+  zerion: Zerion,
   AD: AD,
   AE: AE,
   AF: AF,

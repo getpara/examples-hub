@@ -13,7 +13,7 @@ export class CpslText {
    * Options are: `"primary"`, `"secondary", `"tertiary", `"subtle", `"inverted", `"error".
    * Default is: `"primary"`.
    */
-  @Prop() color?: 'primary' | 'secondary' | 'tertiary' | 'subtle' | 'inverted' | 'error' | 'contrast' = 'primary';
+  @Prop() color?: 'primary' | 'secondary' | 'tertiary' | 'subtle' | 'inverted' | 'error' | 'contrast' | 'success' = 'primary';
 
   /**
    * The variant of text.
@@ -95,6 +95,7 @@ export class CpslText {
           'inverted': this.color === 'inverted',
           'error': this.color === 'error',
           'contrast': this.color === 'contrast',
+          'success': this.color === 'success',
           // WEIGHTS
           'medium': this.weight === 'medium',
           'semi-bold': this.weight === 'semiBold',

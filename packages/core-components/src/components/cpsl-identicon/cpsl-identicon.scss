@@ -6,6 +6,7 @@
   --identicon-background-blue: linear-gradient(136deg, #476fff 6.86%, #47c8ff 93.78%);
   --identicon-background-purple: linear-gradient(136deg, #9747ff 6.86%, #da47ff 93.78%);
   --identicon-background-empty: linear-gradient(136deg, #aaaaaa 6.86%, #999999 93.78%);
+  --identicon-arc-width: 30%;
 
   display: block;
   aspect-ratio: 1;
@@ -16,7 +17,7 @@
   & > svg {
     fill: rgba(255, 255, 255, 0.6);
     position: absolute;
-    width: 30%;
+    width: var(--identicon-arc-width);
   }
 
   & > svg.rotate90 {

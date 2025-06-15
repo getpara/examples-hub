@@ -424,6 +424,7 @@ export namespace Components {
         "icons": (IconType | string)[];
     }
     interface CpslIdenticon {
+        "arcWidth": string;
         "hash"?: string | undefined;
         /**
           * The CSS width and height of the identicon. Default is: 40px.
@@ -893,9 +894,9 @@ export namespace Components {
          */
         "speed"?: number;
         /**
-          * Variant of the spinner Default is 'default'.
+          * Variant of the spinner Default is 'pending'.
          */
-        "variant"?: 'default' | 'inactive' | 'error';
+        "variant"?: 'idle' | 'pending' | 'error' | 'success';
     }
     interface CpslSwitch {
         /**
@@ -929,7 +930,7 @@ export namespace Components {
         /**
           * The color of text. Options are: `"primary"`, `"secondary", `"tertiary", `"subtle", `"inverted", `"error". Default is: `"primary"`.
          */
-        "color"?: 'primary' | 'secondary' | 'tertiary' | 'subtle' | 'inverted' | 'error' | 'contrast';
+        "color"?: 'primary' | 'secondary' | 'tertiary' | 'subtle' | 'inverted' | 'error' | 'contrast' | 'success';
         /**
           * The variant of text. Options are: `"body2XS"`, `"bodyXS", `"bodyS", `"bodyM", `"bodyL", `"bodyXL", `"headingXS", `"headingS", `"headingM", `"headingL", `"headingXL", `"heading2XL". Default is: `"bodyM"`.
          */
@@ -1984,6 +1985,7 @@ declare namespace LocalJSX {
         "icons"?: (IconType | string)[];
     }
     interface CpslIdenticon {
+        "arcWidth"?: string;
         "hash"?: string | undefined;
         /**
           * The CSS width and height of the identicon. Default is: 40px.
@@ -2533,9 +2535,9 @@ declare namespace LocalJSX {
          */
         "speed"?: number;
         /**
-          * Variant of the spinner Default is 'default'.
+          * Variant of the spinner Default is 'pending'.
          */
-        "variant"?: 'default' | 'inactive' | 'error';
+        "variant"?: 'idle' | 'pending' | 'error' | 'success';
     }
     interface CpslSwitch {
         /**
@@ -2589,7 +2591,7 @@ declare namespace LocalJSX {
         /**
           * The color of text. Options are: `"primary"`, `"secondary", `"tertiary", `"subtle", `"inverted", `"error". Default is: `"primary"`.
          */
-        "color"?: 'primary' | 'secondary' | 'tertiary' | 'subtle' | 'inverted' | 'error' | 'contrast';
+        "color"?: 'primary' | 'secondary' | 'tertiary' | 'subtle' | 'inverted' | 'error' | 'contrast' | 'success';
         /**
           * The variant of text. Options are: `"body2XS"`, `"bodyXS", `"bodyS", `"bodyM", `"bodyL", `"bodyXL", `"headingXS", `"headingS", `"headingM", `"headingL", `"headingXL", `"heading2XL". Default is: `"bodyM"`.
          */
