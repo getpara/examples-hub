@@ -56,6 +56,7 @@ import {
   getLoginState,
   mockKeepSessionAlive,
   mockGetAccountMetadata,
+  mockIssueJwt,
 } from '../mocks/mockUserManagementClient';
 import { getWallet, prepareMock } from '../utils.js';
 import { getWorkerContent } from '../utils.js';
@@ -1075,6 +1076,14 @@ describe('ParaCore - authentication', () => {
 
       await para.setTelegramUserId(USER_TELEGRAM_USER_ID);
       expect(para.telegramUserId).toEqual(USER_TELEGRAM_USER_ID);
+    });
+
+    it('issueJwt', async () => {
+      await para.issueJwt({ keyIndex: 1 });
+
+      expect(mockIssueJwt).toHaveBeenCalledWith({
+        keyIndex: 1,
+      });
     });
   });
 });

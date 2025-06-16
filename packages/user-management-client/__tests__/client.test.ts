@@ -13,6 +13,7 @@ import {
   PasswordStatus,
   PublicKeyStatus,
   PublicKeyType,
+  TLinkedAccountType,
   TWalletScheme,
   TWalletType,
 } from '../src';
@@ -1337,6 +1338,41 @@ describe('Client', () => {
         sdkType,
         userId,
       });
+    });
+
+    it('getLinkedAccounts', async () => {
+      await client.getLinkedAccounts({ userId });
+
+      expect(mocks.get).toBeCalledWith(`/users/${userId}/linked-accounts`);
+    });
+
+    it('linkAccount', async () => {
+      const body = {
+        type: 'TELEGRAM' as TLinkedAccountType,
+      };
+
+      await client.linkAccount({ userId, ...body });
+
+      expect(mocks.post).toBeCalledWith(`/users/${userId}/linked-accounts`, body);
+    });
+
+    it('verifyLink', async () => {
+      const linkedAccountId = 'linked-account-id';
+      const body = {
+        verificationCode: 'verification-code',
+      };
+
+      await client.verifyLink({ linkedAccountId, userId, ...body });
+
+      expect(mocks.post).toBeCalledWith(`/users/${userId}/linked-accounts/${linkedAccountId}/verify`, body);
+    });
+
+    it('unlinkAccount', async () => {
+      const linkedAccountId = 'linked-account-id';
+
+      await client.unlinkAccount({ linkedAccountId, userId });
+
+      expect(mocks.delete).toBeCalledWith(`/users/${userId}/linked-accounts/${linkedAccountId}`);
     });
   });
 });

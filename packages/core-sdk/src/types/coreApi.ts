@@ -6,7 +6,6 @@ import {
   OnRampPurchaseCreateParams,
   PregenAuth,
   Setup2faResponse,
-  TelegramAuthResponse,
   VerifiedAuth,
   VerifyExternalWalletParams,
   WalletEntity,
@@ -14,6 +13,8 @@ import {
   TWalletType,
   IssueJwtParams,
   IssueJwtResponse,
+  TLinkedAccountType,
+  LinkedAccounts,
 } from '@getpara/user-management-client';
 import {
   AuthStateLogin,
@@ -31,9 +32,13 @@ import {
   CoreAuthInfo,
   GetWalletBalanceParams,
   GetWalletBalanceResponse,
+  FarcasterParams,
+  TelegramParams,
+  OAuthParams,
 } from './methods.js';
 import { ParaCore } from '../ParaCore.js';
 import { FullSignatureRes, Wallet } from './wallet.js';
+import { AccountLinkInProgress } from './auth.js';
 
 export const PARA_CORE_METHODS = [
   'getAuthInfo',
@@ -83,6 +88,19 @@ export const PARA_CORE_METHODS = [
   'initiateOnRampTransaction',
   'getWalletBalance',
   'issueJwt',
+  'getLinkedAccounts',
+  'accountLinkInProgress',
+] as const;
+
+export const PARA_INTERNAL_METHODS = [
+  'linkAccount',
+  'unlinkAccount',
+  'verifyEmailOrPhoneLink',
+  'verifyOAuthLink',
+  'verifyFarcasterLink',
+  'verifyTelegramLink',
+  'verifyExternalWalletLink',
+  'accountLinkInProgress',
 ] as const;
 
 export type CoreMethodName = (typeof PARA_CORE_METHODS)[number];
@@ -93,6 +111,12 @@ export type CoreMethodParams<method extends CoreMethodName & keyof CoreMethods> 
   ? P
   : never;
 
+export type CoreMethodIsGetter<method extends CoreMethodName & keyof CoreMethods> = CoreMethods[method] extends {
+  isGetter: true;
+}
+  ? true
+  : false;
+
 export type CoreMethodResponse<method extends CoreMethodName & keyof CoreMethods> = CoreMethods[method] extends {
   response: infer R;
 }
@@ -102,16 +126,60 @@ export type CoreMethodResponse<method extends CoreMethodName & keyof CoreMethods
   : void;
 
 export type CoreMethod<method extends CoreMethodName & keyof CoreMethods> =
-  CoreMethodParams<method> extends void | never
-    ? () => CoreMethodResponse<method>
-    : (_?: CoreMethodParams<method>) => CoreMethodResponse<method>;
+  CoreMethodIsGetter<method> extends true
+    ? Awaited<CoreMethodResponse<method>>
+    : CoreMethodParams<method> extends void | never
+      ? () => CoreMethodResponse<method>
+      : (_?: CoreMethodParams<method>) => CoreMethodResponse<method>;
 
 export type CoreAction<method extends CoreMethodName & keyof CoreMethods> =
   CoreMethodParams<method> extends void | never
     ? (_?: ParaCore) => CoreMethodResponse<method>
     : (_?: ParaCore, __?: CoreMethodParams<method>) => CoreMethodResponse<method>;
 
+export type InternalMethodName = (typeof PARA_INTERNAL_METHODS)[number];
+
+export type InternalMethodParams<method extends InternalMethodName & keyof InternalMethods> =
+  InternalMethods[method] extends {
+    params: infer P;
+  }
+    ? P
+    : never;
+
+export type InternalMethodIsGetter<method extends InternalMethodName & keyof InternalMethods> =
+  InternalMethods[method] extends {
+    isGetter: true;
+  }
+    ? true
+    : false;
+
+export type InternalMethodResponse<method extends InternalMethodName & keyof InternalMethods> =
+  InternalMethods[method] extends {
+    response: infer R;
+  }
+    ? InternalMethods[method] extends { sync: true }
+      ? R
+      : Promise<R>
+    : void;
+
+export type InternalMethod<method extends InternalMethodName & keyof InternalMethods> =
+  InternalMethodIsGetter<method> extends true
+    ? Awaited<InternalMethodResponse<method>>
+    : InternalMethodParams<method> extends void | never
+      ? () => InternalMethodResponse<method>
+      : (_?: InternalMethodParams<method>) => InternalMethodResponse<method>;
+
+export type InternalAction<method extends InternalMethodName & keyof InternalMethods> =
+  InternalMethodParams<method> extends void | never
+    ? (_?: ParaCore) => InternalMethodResponse<method>
+    : (_?: ParaCore, __?: InternalMethodParams<method>) => InternalMethodResponse<method>;
+
 export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: unknown; sync?: true }> & {
+  accountLinkInProgress: {
+    params: never;
+    response: AccountLinkInProgress;
+    isGetter: true;
+  };
   getAuthInfo: {
     params: void;
     response: CoreAuthInfo | undefined;
@@ -137,6 +205,7 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
       };
     response: AuthStateSignup;
   };
+
   waitForLogin: {
     params: PollParams & {
       /**
@@ -191,47 +260,20 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
     response: string;
   };
   verifyOAuth: {
-    params: AuthStateBaseParams &
-      OAuthUrlParams &
-      PollParams & {
-        /**
-         * A function returning a boolean, indicating whether the OAuth process should be cancelled.
-         */
-        isCanceled?: () => boolean;
-        /**
-         * A callback function that will be invoked with the OAuth URL when it is available.
-         * For example, you can use this to open the URL in a new window or tab.
-         */
-        onOAuthUrl?: (url: string) => void;
-      };
+    params: AuthStateBaseParams & OAuthParams;
     response: OAuthResponse;
   };
+
   getFarcasterConnectUri: {
     params: void;
     response: string;
   };
   verifyFarcaster: {
-    params: AuthStateBaseParams &
-      PollParams & {
-        /**
-         * A function returning a boolean, indicating whether the Farcaster login process should be cancelled.
-         */
-        isCanceled?: () => boolean;
-        /**
-         * A callback function that will be invoked with the Farcaster Connect URI when it is available.
-         * You will need to display the URI as a QR code.
-         */
-        onConnectUri?: (uri: string) => void;
-      };
+    params: AuthStateBaseParams & FarcasterParams;
     response: OAuthResponse;
   };
   verifyTelegram: {
-    params: AuthStateBaseParams & {
-      /**
-       * The response received from the Telegram login bot.
-       */
-      telegramAuthResponse: TelegramAuthResponse;
-    };
+    params: AuthStateBaseParams & TelegramParams;
     response: OAuthResponse;
   };
   loginExternalWallet: {
@@ -248,7 +290,7 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
     response: AuthStateSignup;
   };
   resendVerificationCode: {
-    params: void;
+    params: { type?: 'SIGNUP' | 'LINK_ACCOUNT' } | undefined;
     response: void;
   };
   logout: {
@@ -569,8 +611,58 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
     params: IssueJwtParams;
     response: IssueJwtResponse;
   };
+  getLinkedAccounts: {
+    params: void;
+    response: LinkedAccounts;
+  };
+};
+
+export type InternalMethods = {
+  linkAccount: {
+    params:
+      | {
+          auth: VerifiedAuth;
+        }
+      | {
+          externalWallet: ExternalWalletInfo;
+        }
+      | {
+          type: TLinkedAccountType | 'X';
+        };
+    response: AccountLinkInProgress;
+  };
+  unlinkAccount: {
+    params: { linkedAccountId: string };
+    response: LinkedAccounts;
+  };
+  verifyEmailOrPhoneLink: {
+    params: {
+      verificationCode?: string;
+    };
+    response: LinkedAccounts;
+  };
+  verifyOAuthLink: {
+    params: OAuthParams;
+    response: LinkedAccounts;
+  };
+  verifyFarcasterLink: {
+    params: FarcasterParams;
+    response: LinkedAccounts;
+  };
+  verifyTelegramLink: {
+    params: TelegramParams;
+    response: LinkedAccounts;
+  };
+  verifyExternalWalletLink: {
+    params: Omit<VerifyExternalWalletParams, 'externalWallet'>;
+    response: LinkedAccounts;
+  };
 };
 
 export type CoreInterface = {
-  [key in keyof CoreMethods]: CoreMethod<key>;
+  [key in keyof CoreMethods]: Partial<CoreMethod<key>>;
+};
+
+export type InternalInterface = {
+  [key in keyof InternalMethods]: Partial<InternalMethod<key>>;
 };

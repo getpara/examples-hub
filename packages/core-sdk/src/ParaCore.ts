@@ -49,7 +49,15 @@ import {
   AccountMetadata,
   WALLET_TYPES,
   PregenOrGuestAuth,
+  LinkedAccounts,
+  VerifyLinkParams,
+  TLinkedAccountType,
+  LINKED_ACCOUNT_TYPES,
+  VerifiedAuth,
+  VerifyExternalWalletParams,
+  SupportedAccountLinks,
   isPregenAuth,
+  VerifiedAuthInfo,
 } from '@getpara/user-management-client';
 import type { pki as pkiType, jsbn as jsbnType } from 'node-forge';
 import forge from 'node-forge';
@@ -86,6 +94,11 @@ import {
   LoginUrlParams,
   CoreInterface,
   ExternalWalletConnectionType,
+  AccountLinkInProgress,
+  InternalMethodParams,
+  InternalMethodResponse,
+  AuthStateSignupOrLogin,
+  OAuthResponse,
 } from './types/index.js';
 import { PlatformUtils } from './PlatformUtils.js';
 import { sendRecoveryForShare } from './shares/recovery.js';
@@ -113,6 +126,7 @@ import {
   shortenUrl,
   isServerAuthState,
   splitPhoneNumber,
+  toAccountLinkError,
 } from './utils/index.js';
 import { TransactionReviewDenied, TransactionReviewTimeout } from './errors.js';
 import * as constants from './constants.js';
@@ -178,6 +192,7 @@ export abstract class ParaCore implements CoreInterface {
   #partner?: PartnerEntity;
 
   userId?: string;
+  accountLinkInProgress: AccountLinkInProgress | undefined = undefined;
 
   private sessionCookie?: string;
 
@@ -418,6 +433,10 @@ export abstract class ParaCore implements CoreInterface {
 
   get cosmosPrefix(): string | undefined {
     return this.#partner?.cosmosPrefix;
+  }
+
+  get supportedAccountLinks(): SupportedAccountLinks {
+    return this.#partner?.supportedAccountLinks ?? [...LINKED_ACCOUNT_TYPES];
   }
 
   get isWalletTypeEnabled(): Partial<Record<TWalletType, boolean>> {
@@ -699,7 +718,10 @@ export abstract class ParaCore implements CoreInterface {
       await this.setLoginEncryptionKeyPair();
     }
 
-    const base = type === 'onRamp' ? getPortalBaseURL(this.ctx) : await this.getPortalURL();
+    const base =
+      type === 'onRamp' || type === 'telegramLogin'
+        ? getPortalBaseURL(this.ctx, type === 'telegramLogin')
+        : await this.getPortalURL();
 
     let path: string;
     switch (type) {
@@ -725,6 +747,10 @@ export abstract class ParaCore implements CoreInterface {
       }
       case 'onRamp': {
         path = `/web/users/${this.userId}/on-ramp-transaction/${opts.pathId}`;
+        break;
+      }
+      case 'telegramLogin': {
+        path = `/auth/telegram`;
         break;
       }
       default: {
@@ -779,6 +805,7 @@ export abstract class ParaCore implements CoreInterface {
             pregenIds: JSON.stringify(this.pregenIds),
           }
         : {}),
+      ...(type === 'telegramLogin' ? { isEmbed: 'true' } : {}),
       ...(opts.params || {}),
     };
 
@@ -1297,7 +1324,7 @@ export abstract class ParaCore implements CoreInterface {
   }
 
   protected assertUserId(): string {
-    if (!this.userId) {
+    if (!this.userId || this.isGuestMode) {
       throw new Error('no userId is set');
     }
 
@@ -1358,6 +1385,7 @@ export abstract class ParaCore implements CoreInterface {
     address,
     type,
     provider,
+    providerId,
     addressBech32,
     withFullParaAuth,
     isConnectionOnly,
@@ -1372,6 +1400,7 @@ export abstract class ParaCore implements CoreInterface {
         name: provider,
         isExternal: true,
         isExternalWithParaAuth: withFullParaAuth,
+        externalProviderId: providerId,
         signer: '',
         isExternalConnectionOnly: isConnectionOnly,
         isExternalWithVerification: withVerification,
@@ -1601,7 +1630,7 @@ export abstract class ParaCore implements CoreInterface {
     }
   }
 
-  get availableWallets(): Pick<Wallet, 'id' | 'type' | 'name' | 'address' | 'isExternal'>[] {
+  get availableWallets(): Pick<Wallet, 'id' | 'type' | 'name' | 'address' | 'isExternal' | 'externalProviderId'>[] {
     return [
       ...[...this.currentWalletIdsArray, ...this.#guestWalletIdsArray]
         .map(([address, type]): [string, TWalletType, boolean] => [address, type, false])
@@ -1816,23 +1845,79 @@ export abstract class ParaCore implements CoreInterface {
     return this.#prepareAuthState(serverAuthState, urlOptions);
   }
 
+  protected async verifyExternalWalletLink(
+    opts: InternalMethodParams<'verifyExternalWalletLink'>,
+  ): InternalMethodResponse<'verifyExternalWalletLink'> {
+    const accountLinkInProgress = await this.#assertIsLinkingAccount(['EXTERNAL_WALLET']);
+
+    if (!accountLinkInProgress.externalWallet) {
+      throw new Error('no external wallet account link in progress');
+    }
+
+    const accounts = await this.verifyLink({
+      accountLinkInProgress,
+      externalWallet: accountLinkInProgress!.externalWallet,
+      ...opts,
+    });
+
+    return accounts;
+  }
+
+  protected async verifyTelegramProcess(
+    opts: CoreMethodParams<'verifyTelegram'> & { isLinkAccount: false },
+  ): CoreMethodResponse<'verifyTelegram'>;
+  protected async verifyTelegramProcess(
+    opts: InternalMethodParams<'verifyTelegramLink'> & { isLinkAccount: true },
+  ): InternalMethodResponse<'verifyTelegramLink'>;
+
   /**
    * Validates the response received from an attempted Telegram login for authenticity, then
    * creates or retrieves the corresponding Para user and prepares the Para instance to sign in with that user.
    * @param authResponse - the response JSON object received from the Telegram widget.
    * @returns `{ isValid: boolean; telegramUserId?: string; userId?: string; isNewUser?: boolean; supportedAuthMethods?: AuthMethod[]; biometricHints?: BiometricLocationHint[] }`
    */
-  async verifyTelegram({
+  protected async verifyTelegramProcess({
     telegramAuthResponse,
+    isLinkAccount,
     ...urlOptions
-  }: CoreMethodParams<'verifyTelegram'>): CoreMethodResponse<'verifyTelegram'> {
+  }: { isLinkAccount: boolean } & (
+    | CoreMethodParams<'verifyTelegram'>
+    | InternalMethodParams<'verifyTelegramLink'>
+  )): Promise<OAuthResponse | LinkedAccounts> {
     try {
-      const serverAuthState = await this.ctx.client.verifyTelegram(telegramAuthResponse);
+      switch (isLinkAccount) {
+        case false: {
+          const serverAuthState = await this.ctx.client.verifyTelegram(telegramAuthResponse);
 
-      return this.#prepareAuthState(serverAuthState, urlOptions);
+          return this.#prepareAuthState(serverAuthState, urlOptions);
+        }
+        case true: {
+          const accountLinkInProgress = await this.#assertIsLinkingAccountOrStart('TELEGRAM');
+
+          const accounts = await this.verifyLink({
+            accountLinkInProgress,
+            telegramAuthResponse,
+          });
+
+          return accounts;
+        }
+      }
     } catch (e) {
+      if (isLinkAccount) {
+        throw new Error(toAccountLinkError(e));
+      }
       throw new Error(e.message);
     }
+  }
+
+  async verifyTelegram(opts: CoreMethodParams<'verifyTelegram'>): CoreMethodResponse<'verifyTelegram'> {
+    return await this.verifyTelegramProcess({ ...opts, isLinkAccount: false });
+  }
+
+  protected async verifyTelegramLink(
+    opts: InternalMethodParams<'verifyTelegramLink'>,
+  ): InternalMethodResponse<'verifyTelegramLink'> {
+    return await this.verifyTelegramProcess({ ...opts, isLinkAccount: true });
   }
 
   /**
@@ -1878,9 +1963,35 @@ export abstract class ParaCore implements CoreInterface {
   /**
    * Resend a verification email for the current user.
    */
-  async resendVerificationCode(): CoreMethodResponse<'resendVerificationCode'> {
+  async resendVerificationCode({
+    type: reason = 'SIGNUP',
+  }: CoreMethodParams<'resendVerificationCode'>): CoreMethodResponse<'resendVerificationCode'> {
+    let type: 'EMAIL' | 'PHONE', linkedAccountId;
+    switch (reason) {
+      case 'SIGNUP':
+        {
+          const authInfo = this.assertIsAuthSet(['email', 'phone']) as VerifiedAuthInfo;
+          type = authInfo.authType.toUpperCase() as 'EMAIL' | 'PHONE';
+        }
+        break;
+      case 'LINK_ACCOUNT':
+        {
+          const accountLinkInProgress = this.#assertIsLinkingAccount(['EMAIL', 'PHONE']);
+          linkedAccountId = accountLinkInProgress.id;
+          type = accountLinkInProgress.type as 'EMAIL' | 'PHONE';
+        }
+        break;
+    }
+    const userId = this.assertUserId();
+
+    if (type !== 'EMAIL' && type !== 'PHONE') {
+      throw new Error('invalid auth type for verification code');
+    }
+
     await this.ctx.client.resendVerificationCode({
-      userId: this.userId,
+      userId,
+      type,
+      linkedAccountId,
       ...this.getVerificationEmailProps(),
     });
   }
@@ -1933,6 +2044,28 @@ export abstract class ParaCore implements CoreInterface {
         (this.currentWalletIdsArray.length > 0 &&
           this.currentWalletIdsArray.reduce((acc, [id]) => acc && !!this.wallets[id], true)))
     );
+  }
+
+  #assertIsLinkingAccount(types?: TLinkedAccountType[]): AccountLinkInProgress {
+    if (!this.accountLinkInProgress || this.accountLinkInProgress.isComplete) {
+      throw new Error('no account linking in progress');
+    }
+
+    if (types && !types.includes(this.accountLinkInProgress.type)) {
+      throw new Error(
+        `account linking in progress for type ${this.accountLinkInProgress.type}, expected one of ${types.join(', ')}`,
+      );
+    }
+
+    return this.accountLinkInProgress;
+  }
+
+  async #assertIsLinkingAccountOrStart(type: TLinkedAccountType): Promise<AccountLinkInProgress> {
+    if (this.accountLinkInProgress && !this.accountLinkInProgress.isComplete) {
+      return this.#assertIsLinkingAccount([type]);
+    }
+
+    return await this.linkAccount({ type });
   }
 
   get isGuestMode(): boolean {
@@ -2060,18 +2193,33 @@ export abstract class ParaCore implements CoreInterface {
     return connectUri;
   }
 
+  protected async verifyFarcasterProcess(
+    opts: CoreMethodParams<'verifyFarcaster'> & { isLinkAccount: false },
+  ): CoreMethodResponse<'verifyFarcaster'>;
+  protected async verifyFarcasterProcess(
+    opts: InternalMethodParams<'verifyFarcasterLink'> & { isLinkAccount: true },
+  ): InternalMethodResponse<'verifyFarcasterLink'>;
+
   /**
    * Awaits the response from a user's attempt to log in with Farcaster.
    * If successful, this returns the user's Farcaster username and profile picture and indicates whether the user already exists.
    * @return {Object} `{userExists: boolean; username: string; pfpUrl?: string | null }` - the user's information and whether the user already exists.
    */
-  async verifyFarcaster({
+  protected async verifyFarcasterProcess({
     isCanceled = () => false,
     onConnectUri,
     onCancel,
     onPoll,
+    isLinkAccount,
     ...urlOptions
-  }: CoreMethodParams<'verifyFarcaster'>): CoreMethodResponse<'verifyFarcaster'> {
+  }: (CoreMethodParams<'verifyFarcaster'> | InternalMethodParams<'verifyFarcasterLink'>) & {
+    isLinkAccount: boolean;
+  }): Promise<OAuthResponse | LinkedAccounts> {
+    let accountLinkInProgress;
+    if (isLinkAccount) {
+      accountLinkInProgress = await this.#assertIsLinkingAccountOrStart('FARCASTER');
+    }
+
     if (onConnectUri) {
       const connectUri = await this.getFarcasterConnectUri();
 
@@ -2085,26 +2233,55 @@ export abstract class ParaCore implements CoreInterface {
           try {
             if (isCanceled() || Date.now() - startedAt > constants.POLLING_TIMEOUT_MS) {
               onCancel?.();
-              return reject('canceled');
+              return reject('CANCELED');
             }
 
             await new Promise(_resolve => setTimeout(_resolve, constants.POLLING_INTERVAL_MS));
 
-            const serverAuthState = await this.ctx.client.getFarcasterAuthStatus();
+            switch (isLinkAccount) {
+              case false:
+                {
+                  const serverAuthState = await this.ctx.client.getFarcasterAuthStatus();
 
-            if (isServerAuthState(serverAuthState)) {
-              const authState = await this.#prepareAuthState(serverAuthState, urlOptions);
+                  if (isServerAuthState(serverAuthState)) {
+                    const authState = await this.#prepareAuthState(serverAuthState, urlOptions);
 
-              return resolve(authState);
+                    return resolve(authState);
+                  }
+                }
+                break;
+              case true: {
+                const result = await this.verifyLink({
+                  accountLinkInProgress,
+                });
+
+                if ('isConflict' in result) {
+                  throw new Error('CONFLICT');
+                }
+
+                return resolve(result);
+              }
             }
+
             onPoll?.();
           } catch (e) {
-            console.error(e);
-            return reject(e);
+            if (!isLinkAccount || e.message === 'CONFLICT') {
+              return reject(e.message);
+            }
           }
         }
       })();
     });
+  }
+
+  async verifyFarcaster(opts: CoreMethodParams<'verifyFarcaster'>): CoreMethodResponse<'verifyFarcaster'> {
+    return await this.verifyFarcasterProcess({ ...opts, isLinkAccount: false });
+  }
+
+  protected async verifyFarcasterLink(
+    opts: InternalMethodParams<'verifyFarcasterLink'>,
+  ): InternalMethodResponse<'verifyFarcasterLink'> {
+    return await this.verifyFarcasterProcess({ ...opts, isLinkAccount: true });
   }
 
   /**
@@ -2115,7 +2292,14 @@ export abstract class ParaCore implements CoreInterface {
    * @param {string} [opts.deeplinkUrl] the deeplink to redirect to after the OAuth flow. This is for mobile only.
    * @returns {string} the URL for the user to log in with OAuth.
    */
-  async getOAuthUrl({ method, deeplinkUrl, ...params }: CoreMethodParams<'getOAuthUrl'>): CoreMethodResponse<'getOAuthUrl'> {
+  async #getOAuthUrl({
+    method,
+    deeplinkUrl,
+    accountLinkInProgress,
+    ...params
+  }: CoreMethodParams<'getOAuthUrl'> & {
+    accountLinkInProgress?: AccountLinkInProgress;
+  }): CoreMethodResponse<'getOAuthUrl'> {
     const sessionLookupId = params.sessionLookupId ?? (await this.#prepareLogin());
 
     return constructUrl({
@@ -2125,9 +2309,25 @@ export abstract class ParaCore implements CoreInterface {
         apiKey: this.ctx.apiKey,
         sessionLookupId,
         deeplinkUrl,
+        ...(accountLinkInProgress
+          ? {
+              linkedAccountId: this.accountLinkInProgress.id,
+            }
+          : {}),
       },
     });
   }
+
+  async getOAuthUrl(opts: CoreMethodParams<'getOAuthUrl'>): CoreMethodResponse<'getOAuthUrl'> {
+    return this.#getOAuthUrl(opts);
+  }
+
+  protected verifyOAuthProcess(
+    _: InternalMethodParams<'verifyOAuthLink'> & { isLinkAccount: true },
+  ): InternalMethodResponse<'verifyOAuthLink'>;
+  protected verifyOAuthProcess(
+    _: CoreMethodParams<'verifyOAuth'> & { isLinkAccount: false },
+  ): CoreMethodResponse<'verifyOAuth'>;
 
   /**
    * Awaits the response from a user's attempt to log in with OAuth.
@@ -2137,21 +2337,29 @@ export abstract class ParaCore implements CoreInterface {
    * @param {Window} [opts.popupWindow] the popup window being used for login.
    * @return {Object} `{ email?: string; isError?: boolean; userExists: boolean; }` the result data
    */
-  async verifyOAuth({
+  protected async verifyOAuthProcess({
     method,
     deeplinkUrl,
     isCanceled = () => false,
     onCancel,
     onPoll,
     onOAuthUrl,
+    isLinkAccount,
     ...urlOptions
-  }: CoreMethodParams<'verifyOAuth'>): CoreMethodResponse<'verifyOAuth'> {
-    let sessionLookupId;
+  }: { isLinkAccount: boolean } & (CoreMethodParams<'verifyOAuth'> | InternalMethodParams<'verifyOAuthLink'>)): Promise<
+    AuthStateSignupOrLogin | LinkedAccounts
+  > {
+    let sessionLookupId, accountLinkInProgress;
 
     if (onOAuthUrl) {
-      sessionLookupId = await this.#prepareLogin();
+      if (isLinkAccount) {
+        accountLinkInProgress = await this.#assertIsLinkingAccountOrStart(method);
+        sessionLookupId = (await this.touchSession()).sessionLookupId;
+      } else {
+        sessionLookupId = await this.#prepareLogin();
+      }
 
-      const oAuthUrl = await this.getOAuthUrl({ method, deeplinkUrl, sessionLookupId });
+      const oAuthUrl = await this.#getOAuthUrl({ method, deeplinkUrl, sessionLookupId, accountLinkInProgress });
 
       onOAuthUrl(oAuthUrl);
     } else {
@@ -2165,25 +2373,51 @@ export abstract class ParaCore implements CoreInterface {
           try {
             if (isCanceled() || Date.now() - startedAt > constants.POLLING_TIMEOUT_MS) {
               onCancel?.();
-              return reject('canceled');
+
+              return reject('CANCELED');
             }
 
             await new Promise(_resolve => setTimeout(_resolve, constants.POLLING_INTERVAL_MS));
 
-            const serverAuthState = await this.ctx.client.verifyOAuth();
+            switch (isLinkAccount) {
+              case false:
+                {
+                  const serverAuthState = await this.ctx.client.verifyOAuth();
 
-            if (isServerAuthState(serverAuthState)) {
-              const authState = await this.#prepareAuthState(serverAuthState, { ...urlOptions, sessionLookupId });
+                  if (isServerAuthState(serverAuthState)) {
+                    const authState = await this.#prepareAuthState(serverAuthState, { ...urlOptions, sessionLookupId });
 
-              return resolve(authState);
+                    return resolve(authState);
+                  }
+                }
+                break;
+
+              case true: {
+                const accounts = await this.verifyLink({ accountLinkInProgress });
+
+                return resolve(accounts);
+              }
             }
+
             onPoll?.();
           } catch (err) {
+            const error = toAccountLinkError(err);
+            if (isLinkAccount && error === 'CONFLICT') {
+              return reject('CONFLICT');
+            }
             onPoll?.();
           }
         }
       })();
     });
+  }
+
+  async verifyOAuth(opts: CoreMethodParams<'verifyOAuth'>): CoreMethodResponse<'verifyOAuth'> {
+    return await this.verifyOAuthProcess({ ...opts, isLinkAccount: false });
+  }
+
+  protected async verifyOAuthLink(opts: InternalMethodParams<'verifyOAuthLink'>): InternalMethodResponse<'verifyOAuthLink'> {
+    return await this.verifyOAuthProcess({ ...opts, isLinkAccount: true });
   }
 
   /**
@@ -3343,23 +3577,11 @@ export abstract class ParaCore implements CoreInterface {
     this.externalWallets = {};
     this.loginEncryptionKeyPair = undefined;
     this.#authInfo = undefined;
+    this.accountLinkInProgress = undefined;
     this.userId = undefined;
     this.sessionCookie = undefined;
 
     dispatchEvent(ParaEvent.LOGOUT_EVENT, null);
-  }
-
-  /** @deprecated */
-  protected async getSupportedCreateAuthMethods(): Promise<Set<AuthMethod>> {
-    const partner = await this.#assertPartner();
-
-    let supportedAuthMethods = new Set<AuthMethod>();
-
-    for (const authMethod of partner.supportedAuthMethods) {
-      supportedAuthMethods.add(AuthMethod[authMethod]);
-    }
-
-    return supportedAuthMethods;
   }
 
   /**
@@ -3693,5 +3915,138 @@ export abstract class ParaCore implements CoreInterface {
     });
 
     return this.#prepareAuthState(serverAuthState, urlOptions);
+  }
+
+  async getLinkedAccounts(): CoreMethodResponse<'getLinkedAccounts'> {
+    const userId = this.assertUserId();
+
+    const { accounts } = await this.ctx.client.getLinkedAccounts({ userId });
+
+    return accounts;
+  }
+
+  protected async linkAccount(opts: InternalMethodParams<'linkAccount'>): InternalMethodResponse<'linkAccount'> {
+    const { supportedAccountLinks = [...LINKED_ACCOUNT_TYPES] } = await this.#assertPartner();
+
+    let type, identifier, externalWallet, isPermitted;
+    switch (true) {
+      case 'auth' in opts:
+        {
+          const authInfo = extractAuthInfo((opts as { auth: VerifiedAuth }).auth, { isRequired: true });
+
+          type = authInfo.authType.toUpperCase() as 'EMAIL' | 'PHONE';
+          identifier = authInfo.identifier;
+          isPermitted = supportedAccountLinks.includes(type);
+        }
+        break;
+
+      case 'externalWallet' in opts:
+        {
+          externalWallet = (opts as { externalWallet: ExternalWalletInfo }).externalWallet;
+          type = 'EXTERNAL_WALLET';
+          isPermitted =
+            supportedAccountLinks.includes('EXTERNAL_WALLET') || supportedAccountLinks.includes(externalWallet.providerId);
+        }
+        break;
+      case 'type' in opts:
+        {
+          type = (opts as { type: TLinkedAccountType | 'X' }).type;
+          if (type === 'X') {
+            type = 'TWITTER';
+          }
+          isPermitted = supportedAccountLinks.includes(type);
+        }
+        break;
+
+      default:
+        throw new Error('Invalid parameters for linking account, must pass `auth` or `type` or `externalWallet');
+    }
+
+    if (!isPermitted) {
+      throw new Error(`Account linking for type '${type}' is not supported by the current API key configuration`);
+    }
+
+    const userId = this.assertUserId();
+
+    const result = await this.ctx.client.linkAccount({
+      userId,
+      type,
+      ...(identifier ? { identifier } : {}),
+      ...(externalWallet ? { externalWallet } : {}),
+    });
+
+    if ('isConflict' in result) {
+      throw new Error('CONFLICT');
+    }
+
+    const { linkedAccountId, signatureVerificationMessage } = result;
+
+    this.accountLinkInProgress = {
+      id: linkedAccountId,
+      type,
+      isComplete: false,
+      ...(identifier ? { identifier } : {}),
+      ...(signatureVerificationMessage && externalWallet
+        ? {
+            externalWallet: {
+              ...externalWallet,
+              signatureVerificationMessage,
+            },
+          }
+        : {}),
+    };
+
+    return this.accountLinkInProgress;
+  }
+
+  protected async unlinkAccount({
+    linkedAccountId,
+  }: InternalMethodParams<'unlinkAccount'>): InternalMethodResponse<'unlinkAccount'> {
+    if (!linkedAccountId) {
+      throw new Error('No linked account ID provided');
+    }
+
+    const userId = this.assertUserId();
+
+    const accounts = await this.ctx.client.unlinkAccount({ linkedAccountId, userId });
+
+    return accounts;
+  }
+
+  protected async verifyLink({
+    accountLinkInProgress = this.#assertIsLinkingAccount(),
+    ...opts
+  }: { accountLinkInProgress?: AccountLinkInProgress } & Partial<
+    Pick<VerifyLinkParams, 'verificationCode' | 'telegramAuthResponse'> & VerifyExternalWalletParams
+  > = {}): Promise<LinkedAccounts> {
+    try {
+      const userId = this.assertUserId(),
+        result = await this.ctx.client.verifyLink({
+          linkedAccountId: accountLinkInProgress.id,
+          userId,
+          ...opts,
+        });
+
+      if ('isConflict' in result) {
+        throw new Error('CONFLICT');
+      }
+
+      this.accountLinkInProgress = undefined;
+
+      return result.accounts;
+    } catch (e) {
+      throw new Error(toAccountLinkError(e));
+    }
+  }
+
+  protected async verifyEmailOrPhoneLink({
+    verificationCode,
+  }: InternalMethodParams<'verifyEmailOrPhoneLink'>): InternalMethodResponse<'verifyEmailOrPhoneLink'> {
+    const accounts = await this.verifyLink({
+      accountLinkInProgress: this.#assertIsLinkingAccount(['EMAIL', 'PHONE']),
+      verificationCode,
+    });
+
+    return accounts;
   }
 }

@@ -8,6 +8,7 @@ import {
   AuthExtras,
   TOAuthMethod,
   TWalletType,
+  TelegramAuthResponse,
 } from '@getpara/user-management-client';
 import { Theme } from './theme.js';
 import { RecoveryStatus } from './recovery.js';
@@ -29,7 +30,14 @@ export type VerifyExternalWalletV1 = {
   cosmosSigner?: string;
 };
 
-export type PortalUrlType = 'createAuth' | 'createPassword' | 'loginAuth' | 'loginPassword' | 'txReview' | 'onRamp';
+export type PortalUrlType =
+  | 'createAuth'
+  | 'createPassword'
+  | 'loginAuth'
+  | 'loginPassword'
+  | 'txReview'
+  | 'onRamp'
+  | 'telegramLogin';
 
 export type PortalUrlOptions = {
   params?: Record<string, string | undefined | null>;
@@ -89,6 +97,25 @@ export type PollParams = {
   onCancel?: () => void;
 };
 
+export type FarcasterParams = PollParams & {
+  /**
+   * A function returning a boolean, indicating whether the Farcaster login process should be cancelled.
+   */
+  isCanceled?: () => boolean;
+  /**
+   * A callback function that will be invoked with the Farcaster Connect URI when it is available.
+   * You will need to display the URI as a QR code.
+   */
+  onConnectUri?: (uri: string) => void;
+};
+
+export type TelegramParams = {
+  /**
+   * The response received from the Telegram login bot.
+   */
+  telegramAuthResponse: TelegramAuthResponse;
+};
+
 export type LoginUrlParams = WithAuthMethod & WithCustomTheme & WithShorten & { sessionId?: string };
 
 export type NewCredentialUrlParams = WithAuthMethod &
@@ -110,6 +137,19 @@ export type OAuthUrlParams = {
    */
   deeplinkUrl?: string;
 };
+
+export type OAuthParams = OAuthUrlParams &
+  PollParams & {
+    /**
+     * A function returning a boolean, indicating whether the OAuth process should be cancelled.
+     */
+    isCanceled?: () => boolean;
+    /**
+     * A callback function that will be invoked with the OAuth URL when it is available.
+     * For example, you can use this to open the URL in a new window or tab.
+     */
+    onOAuthUrl?: (url: string) => void;
+  };
 
 export type AuthStateBaseParams = WithCustomTheme & WithUseShortUrls;
 

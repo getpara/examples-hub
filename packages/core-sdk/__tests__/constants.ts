@@ -6,6 +6,8 @@ import {
   VerifyFarcasterResponse,
   BiometricLocationHint,
   PartnerEntity,
+  ExternalWalletInfo,
+  LINKED_ACCOUNT_TYPES,
 } from '@getpara/user-management-client';
 
 export const UUID = 'ef3bf91c-fc1e-4d18-afe2-f2654c9531e5';
@@ -35,6 +37,17 @@ export const USER_TELEGRAM_AUTH_OBJECT: TelegramAuthResponse = {
   photo_url: USER_PFP_URL,
   auth_date: 1234567890,
   hash: 'test-hash',
+};
+
+export const LINKED_ACCOUNTS = {
+  primary: [
+    {
+      type: 'EMAIL',
+      identifier: USER_EMAIL,
+      displayName: USER_EMAIL,
+    },
+  ],
+  linked: [],
 };
 
 export const USER_FARCASTER_AUTH_STAGE: Partial<VerifyFarcasterResponse> = {
@@ -78,15 +91,17 @@ export const PARTNER = {
     { type: 'COSMOS', optional: false },
   ],
   supportedAuthMethods: [AuthMethod.PASSKEY, AuthMethod.PASSWORD],
+  supportedAccountLinks: [...LINKED_ACCOUNT_TYPES],
   cosmosPrefix: 'cosmos',
   displayName: 'Partner',
   policiesEnabled: true,
 };
 
-export const EXTERNAL_WALLET = {
+export const EXTERNAL_WALLET: ExternalWalletInfo = {
   address: '0x1aD2B053b8c6b1592cB645DEfadf105F34d8C6e1',
   type: 'EVM' as TWalletType,
   provider: 'metamask',
+  providerId: 'METAMASK',
 };
 
 export const STORED_EXTERNAL_WALLET = {

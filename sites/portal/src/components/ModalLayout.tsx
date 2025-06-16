@@ -49,6 +49,7 @@ export const ModalLayout = () => {
   const portalBorderRadius = searchParams.get('portalPrimaryButtonTextColor');
   const portalFont = searchParams.get('portalFont');
   const portalThemeMode = searchParams.get('portalThemeMode');
+  const isEmbed = searchParams.get('isEmbed') === 'true';
 
   const [partner, setPartner] = useState<Partner | undefined>();
   const [isDark, setIsDark] = useState<boolean>(false);
@@ -142,7 +143,7 @@ export const ModalLayout = () => {
     <>
       <BetaBannerNoChakra />
       <NetworkSpeedBanner maxWidth="75%" />
-      <OuterContainer isBranded={isBranded}>
+      <OuterContainer isBranded={isBranded} isEmbed={isEmbed}>
         <Suspense fallback={<ModalLoading noText />}>
           <Outlet context={{ partner, homepageUrl, isDark, toggleBranding }} />
         </Suspense>
@@ -151,8 +152,9 @@ export const ModalLayout = () => {
   );
 };
 
-const OuterContainer = styled.div<{ isBranded?: boolean }>`
-  background-color: ${({ isBranded }) => (isBranded ? 'var(--cpsl-color-modal-surface-footer)' : 'white')};
+const OuterContainer = styled.div<{ isBranded?: boolean; isEmbed?: boolean }>`
+  background-color: ${({ isBranded, isEmbed }) =>
+    isEmbed ? 'transparent' : isBranded ? 'var(--cpsl-color-modal-surface-footer)' : 'white'};
 
   height: 100vh;
   width: 100vw;

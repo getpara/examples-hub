@@ -1,9 +1,11 @@
 import { ParaCore } from './ParaCore.js';
 
 export {
+  type Auth,
   type AuthInfo,
   type PrimaryAuthInfo,
   type VerifiedAuthInfo,
+  type VerifiedAuth,
   AuthMethod,
   type AuthExtras,
   type CurrentWalletIds,
@@ -24,19 +26,25 @@ export {
   type OnRampPurchase,
   OAuthMethod,
   type TOAuthMethod,
+  type TLinkedAccountType,
+  type SupportedAccountLinks,
   type SupportedWalletTypes,
   type TPregenIdentifierType,
   type PregenIds,
+  type LinkedAccount,
+  type LinkedAccounts,
   type TExternalWallet,
   type ExternalWalletInfo,
   type PregenAuth,
   type Setup2faResponse,
   type TelegramAuthResponse,
+  type VerifyExternalWalletParams,
   NON_ED25519,
   PREGEN_IDENTIFIER_TYPES,
   WALLET_TYPES,
   WALLET_SCHEMES,
   OAUTH_METHODS,
+  LINKED_ACCOUNT_TYPES,
   EXTERNAL_WALLET_TYPES,
   EVM_WALLETS,
   SOLANA_WALLETS,
@@ -63,6 +71,10 @@ export {
   type Theme,
   type Wallet,
   type GetWalletBalanceParams,
+  type AccountLinkInProgress,
+  ACCOUNT_LINK_ERRORS,
+  type AccountLinkError,
+  type InternalInterface,
 } from './types/index.js';
 export * from './types/coreApi.js';
 export * from './types/events.js';

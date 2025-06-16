@@ -51,6 +51,9 @@ import {
   VerifyExternalWalletParams,
   IssueJwtParams,
   IssueJwtResponse,
+  LinkAccountParams,
+  LinkedAccounts,
+  ResendVerificationCodeParams,
 } from './types/index.js';
 import { extractWalletRef, fromAccountMetadata } from './utils.js';
 import { SESSION_COOKIE_HEADER_NAME, VERSION_HEADER_NAME, PARTNER_ID_HEADER_NAME, API_KEY_HEADER_NAME } from './consts.js';
@@ -397,6 +400,44 @@ class Client {
     return res.data;
   };
 
+  getLinkedAccounts = async ({ userId }: { userId: string }): Promise<{ accounts: LinkedAccounts }> => {
+    const res = await this.baseRequest.get<{ accounts: LinkedAccounts }>(`/users/${userId}/linked-accounts`);
+
+    return res.data;
+  };
+
+  linkAccount = async ({ userId, ...opts }: LinkAccountParams & { userId: string }) => {
+    const res = await this.baseRequest.post<
+      { linkedAccountId: string; signatureVerificationMessage?: string } | { isConflict: true }
+    >(`/users/${userId}/linked-accounts`, opts);
+
+    return res.data;
+  };
+
+  verifyLink = async ({
+    linkedAccountId,
+    userId,
+    ...opts
+  }: {
+    linkedAccountId: string;
+    userId: string;
+    telegramAuthResponse?: TelegramAuthResponse;
+    verificationCode?: string;
+  } & Partial<VerifyExternalWalletParams>) => {
+    const res = await this.baseRequest.post<{ accounts: LinkedAccounts } | { isConflict: true }>(
+      `/users/${userId}/linked-accounts/${linkedAccountId}/verify`,
+      opts,
+    );
+
+    return res.data;
+  };
+
+  unlinkAccount = async ({ linkedAccountId, userId }: { linkedAccountId: string; userId: string }) => {
+    const res = await this.baseRequest.delete<LinkedAccounts>(`/users/${userId}/linked-accounts/${linkedAccountId}`);
+
+    return res.data;
+  };
+
   // POST /users/:userId/verify-email
   /**
    * @deprecated
@@ -720,7 +761,7 @@ class Client {
   };
 
   // POST '/users/:userId/resend-verification-code
-  async resendVerificationCode({ userId, ...rest }: { userId: string } & VerificationEmailProps) {
+  async resendVerificationCode({ userId, ...rest }: ResendVerificationCodeParams) {
     const res = await this.baseRequest.post<any>(`/users/${userId}/resend-verification-code`, rest);
     return res;
   }

@@ -38,7 +38,11 @@ export class CpslIcon {
       <Host
         part="icon"
         role="img"
-        style={{ ['--inset']: this.inset, ...(this.size ? { ['--height']: this.size, ['--width']: this.size } : {}), ...(this.invert ? { ['--filter']: 'invert(100%)' } : {}) }}
+        style={{
+          ...(this.inset ? { ['--inset']: this.inset } : {}),
+          ...(this.size ? { ['--height']: this.size, ['--width']: this.size } : {}),
+          ...(this.invert ? { ['--filter']: 'invert(100%)' } : {}),
+        }}
       >
         {!this.icon ? <img src={this.src} /> : <div innerHTML={Icons[this.icon]} />}
       </Host>

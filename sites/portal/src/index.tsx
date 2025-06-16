@@ -52,7 +52,9 @@ export const App = () => {
           <Route element={<TransactionReview />} path="users/:userId/transaction-review/:pendingTransactionId" />
           <Route element={<OnRampTransaction />} path="users/:userId/on-ramp-transaction/:purchaseId" />
         </Route>
-        <Route element={<TelegramLogin />} path="/auth/telegram" />
+        <Route element={<ModalLayout />} path="/auth">
+          <Route element={<TelegramLogin />} path="telegram" />
+        </Route>
         <Route element={<ShortUrl />} path="/short/:shortenedUrl" />
       </Routes>
     </ParaProvider>

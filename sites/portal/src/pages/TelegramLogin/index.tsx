@@ -66,8 +66,11 @@ export function TelegramLogin() {
   };
 
   useEffect(() => {
+    document.body.style.backgroundColor = 'transparent';
+    document.getElementById('root').style.backgroundColor = 'transparent';
+
     const onMessage = async (message: MessageEvent<Event>) => {
-      if (message.data.type === 'TELEGRAM_FAILED') {
+      if (message.data.type === 'TELEGRAM_FAILED' || message.data.type === 'TELEGRAM_RETRY') {
         setIsWaiting(false);
         setIsSecondAttempt(true);
       }

@@ -22,3 +22,9 @@ export interface BackupKitEmailProps {
   supportUrl?: string;
   brandColor?: string;
 }
+
+export type ResendVerificationCodeParams = VerificationEmailProps & {
+  userId: string;
+  type?: 'EMAIL' | 'PHONE';
+  linkedAccountId?: string;
+};

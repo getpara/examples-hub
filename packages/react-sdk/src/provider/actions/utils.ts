@@ -1,3 +1,4 @@
+import { ParaInternal } from '@getpara/react-common';
 import ParaWeb, { CoreMethod, CoreMethodName, CoreMethodParams, CoreMethodResponse, CoreMethods } from '@getpara/web-sdk';
 
 export type CoreAction<method extends CoreMethodName & keyof CoreMethods> = (
@@ -6,11 +7,15 @@ export type CoreAction<method extends CoreMethodName & keyof CoreMethods> = (
 ) => Promise<Awaited<CoreMethodResponse<method>>>;
 
 export function generateAction<const method extends CoreMethodName & keyof CoreMethods>(method: method): CoreAction<method> {
-  return (async (para?: ParaWeb, ...args: [CoreMethodParams<method>] | []): Promise<CoreMethodResponse<method>> => {
-    if (!para) {
+  return (async (_para?: ParaWeb, ...args: [CoreMethodParams<method>] | []): Promise<CoreMethodResponse<method>> => {
+    if (!_para) {
       throw new Error('no para instance');
     }
 
-    return await (para[method] as CoreMethod<method>)(...args);
+    const para = _para as ParaInternal;
+
+    return typeof para[method] === 'function'
+      ? await (para[method] as CoreMethod<method> & Function)(...args)
+      : (para[method] as CoreMethodResponse<method>);
   }) as CoreAction<method>;
 }

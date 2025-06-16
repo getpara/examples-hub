@@ -1,4 +1,4 @@
-import { AuthMethod } from './auth.js';
+import { AuthMethod, SupportedAccountLinks } from './auth.js';
 import { SupportedWalletTypes } from './wallet.js';
 export interface PartnerEntity {
   id: string;
@@ -16,5 +16,6 @@ export interface PartnerEntity {
   portalUrl?: string;
   supportedAuthMethods?: AuthMethod[];
   supportedWalletTypes?: SupportedWalletTypes;
+  supportedAccountLinks?: SupportedAccountLinks;
   cosmosPrefix?: string;
 }

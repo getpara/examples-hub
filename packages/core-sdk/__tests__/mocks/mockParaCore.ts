@@ -13,7 +13,6 @@ export class MockPara extends ParaCore {
   persistSessionCookie = (_: string) => {};
 
   setAuth = super.setAuth;
-  getSupportedCreateAuthMethods = super.getSupportedCreateAuthMethods;
   getTransmissionKeyShares = super.getTransmissionKeyShares;
   userSetupAfterLogin = super.userSetupAfterLogin;
   setLoginEncryptionKeyPair = super.setLoginEncryptionKeyPair;

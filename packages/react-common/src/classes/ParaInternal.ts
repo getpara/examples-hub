@@ -1,6 +1,6 @@
-import ParaWeb from '@getpara/web-sdk';
+import ParaWeb, { InternalInterface } from '@getpara/web-sdk';
 
-export class ParaInternal extends ParaWeb {
+export class ParaInternal extends ParaWeb implements InternalInterface {
   setupAfterLogin = super.setupAfterLogin;
   getTransmissionKeyShares = super.getTransmissionKeyShares;
   userSetupAfterLogin = super.userSetupAfterLogin;
@@ -11,4 +11,12 @@ export class ParaInternal extends ParaWeb {
   supportedAuthMethods = super.supportedAuthMethods;
   constructPortalUrl = super.constructPortalUrl;
   getNewCredentialAndUrl = super.getNewCredentialAndUrl;
+
+  linkAccount = super.linkAccount;
+  unlinkAccount = super.unlinkAccount;
+  verifyEmailOrPhoneLink = super.verifyEmailOrPhoneLink;
+  verifyOAuthLink = super.verifyOAuthLink;
+  verifyTelegramLink = super.verifyTelegramLink;
+  verifyFarcasterLink = super.verifyFarcasterLink;
+  verifyExternalWalletLink = super.verifyExternalWalletLink;
 }

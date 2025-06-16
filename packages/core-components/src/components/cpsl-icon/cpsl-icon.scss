@@ -6,6 +6,7 @@
   --filter: auto;
   --height: 24px;
   --width: 24px;
+  --inset: 0px;
   --svg-height: calc(var(--height) - (2 * var(--inset)));
   --svg-width: calc(var(--width) - (2 * var(--inset)));
 

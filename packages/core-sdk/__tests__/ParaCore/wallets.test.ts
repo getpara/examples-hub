@@ -21,6 +21,7 @@ import {
   mockGetWallets,
   mockUpdatePregenWallet,
   mockClaimPregenWallets,
+  mockGetWalletBalance,
 } from '../mocks/mockUserManagementClient';
 import { Environment, ParaEvent } from '../../src';
 import * as shareDistribution from '../../src/shares/shareDistribution.js';
@@ -629,5 +630,19 @@ describe('wallets', () => {
     expect(para.getWallets()).toBe(para.wallets);
 
     expect(para.getAddress(evmId)).toBe(para.wallets[evmId].address);
+  });
+
+  it('getWalletBalance', async () => {
+    const { evmId } = await prepareMock(para);
+
+    await para.getWalletBalance({
+      walletId: evmId,
+      rpcUrl: 'https://example.com/rpc',
+    });
+
+    expect(mockGetWalletBalance).toHaveBeenCalledWith({
+      walletId: evmId,
+      rpcUrl: 'https://example.com/rpc',
+    });
   });
 });

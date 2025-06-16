@@ -2,6 +2,7 @@ import { vi } from 'vitest';
 import {
   EXTERNAL_WALLET,
   FARCASTER_CONNECT_URI,
+  LINKED_ACCOUNTS,
   PARTNER,
   RECOVERY_PUBLIC_KEYS,
   SESSION_ID,
@@ -18,6 +19,7 @@ import {
   USER_FARCASTER_USERNAME,
   USER_ID,
   USER_TELEGRAM_AUTH_OBJECT,
+  UUID,
   WALLET,
 } from '../constants';
 import Client, {
@@ -30,6 +32,7 @@ import Client, {
   AuthMethod,
   isExternalWallet,
   AuthExtras,
+  LinkAccountParams,
 } from '@getpara/user-management-client';
 
 export const authExtras = (auth?: PrimaryAuth | undefined): AuthExtras => {
@@ -128,6 +131,27 @@ export const mockResendVerificationCode = vi.fn();
 export const mockResendVerificationCodeByPhone = vi.fn();
 export const mockGetAccountMetadata = vi.fn();
 export const mockTrackError = vi.fn();
+export const mockGetLinkedAccounts = vi.fn().mockResolvedValue({
+  accounts: LINKED_ACCOUNTS,
+});
+export const mockLinkAccount = vi.fn();
+export const mockUnlinkAccount = vi.fn();
+export const mockVerifyLink = vi.fn();
+export const mockIssueJwt = vi.fn();
+
+mockLinkAccount.mockImplementation(async (args: LinkAccountParams) => {
+  switch (true) {
+    case 'externalWallet' in args: {
+      return {
+        linkedAccountId: UUID,
+        signatureVerificationMessage: UUID,
+      };
+    }
+    default: {
+      return { linkedAccountId: UUID };
+    }
+  }
+});
 
 export function resetClientMocks() {
   mockLoginExternalWallet.mockResolvedValue(getVerifyState({ externalWalletAddress: EXTERNAL_WALLET.address }));
@@ -242,6 +266,11 @@ vi.mock('@getpara/user-management-client', async importOriginal => {
       resendVerificationCodeByPhone: mockResendVerificationCodeByPhone,
       getAccountMetadata: mockGetAccountMetadata,
       trackError: mockTrackError,
+      getLinkedAccounts: mockGetLinkedAccounts,
+      linkAccount: mockLinkAccount,
+      unlinkAccount: mockUnlinkAccount,
+      verifyLink: mockVerifyLink,
+      issueJwt: mockIssueJwt,
     })),
   };
 });

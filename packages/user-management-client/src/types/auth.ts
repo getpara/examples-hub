@@ -159,6 +159,23 @@ export const OAUTH_METHODS = ['GOOGLE', 'TWITTER', 'APPLE', 'DISCORD', 'FACEBOOK
 
 export type TOAuthMethod = (typeof OAUTH_METHODS)[number];
 
+export const LINKED_ACCOUNT_TYPES = [
+  'EMAIL',
+  'PHONE',
+  'GOOGLE',
+  'FACEBOOK',
+  'APPLE',
+  'TWITTER',
+  'DISCORD',
+  'TELEGRAM',
+  'FARCASTER',
+  'EXTERNAL_WALLET',
+] as const;
+
+export type TLinkedAccountType = (typeof LINKED_ACCOUNT_TYPES)[number] | 'EXTERNAL_WALLET';
+
+export type SupportedAccountLinks = (TLinkedAccountType | TExternalWallet)[];
+
 export enum AuthMethod {
   PASSWORD = 'PASSWORD',
   PASSKEY = 'PASSKEY',
@@ -298,4 +315,30 @@ export type IssueJwtResponse = {
    * The `keyid`` / `kid` of the keypair used to sign the JWT.
    */
   keyId: string;
+};
+
+export type LinkedAccount = {
+  id?: string;
+  type: TLinkedAccountType;
+  identifier: string;
+  displayName: string;
+  externalWallet?: ExternalWalletInfo;
+};
+
+export type LinkedAccounts = {
+  primary: LinkedAccount[];
+  linked: LinkedAccount[];
+};
+
+export type LinkAccountParams = {
+  type: TLinkedAccountType;
+  identifier?: string;
+  externalWallet?: ExternalWalletInfo;
+};
+
+export type VerifyLinkParams = {
+  linkedAccountId: string;
+  userId: string;
+  telegramAuthResponse?: TelegramAuthResponse;
+  verificationCode?: string;
 };
