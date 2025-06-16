@@ -1,0 +1,471 @@
+import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useState } from 'react';
+import { useAccount, useAccountLinkInProgress, useModal } from '../index.js';
+import * as actions from '../actions/index.js';
+import { MutationStatus, useQueryClient } from '@tanstack/react-query';
+import {
+  AccountLinkError,
+  AccountLinkInProgress as CoreAccountLinkInProgress,
+  LinkedAccount,
+  LinkedAccounts,
+  LINKED_ACCOUNT_TYPES,
+  SupportedAccountLinks,
+  TelegramAuthResponse,
+  TExternalWallet,
+  TLinkedAccountType,
+  Auth,
+  toAccountLinkError,
+  AuthInfo,
+  InternalMethodParams,
+} from '@getpara/web-sdk';
+import { useModalStore } from '../../modal/stores/index.js';
+import { ModalStep, openPopup } from '../../modal/index.js';
+import { useGoBack } from '../../modal/hooks/useGoBack.js';
+import { useInternalClient } from '../hooks/utils/useInternalClient.js';
+import { generateInternalMutation } from '../hooks/mutations/utils.js';
+import { validateAuth } from '../../modal/utils/authInputHelpers.js';
+import { extractAuthInfo } from '@getpara/user-management-client';
+import { useStore } from '../stores/useStore.js';
+
+type AccountLinkInProgress = Partial<CoreAccountLinkInProgress & { pendingWalletType?: TExternalWallet }>;
+
+export type ModalLinkAccountArgs =
+  | undefined
+  | { auth: Auth<'email' | 'phone'> }
+  | {
+      type: Exclude<TLinkedAccountType, 'EXTERNAL_WALLET'> | 'X';
+    }
+  | {
+      externalWallet: TExternalWallet;
+    }
+  | {
+      options: SupportedAccountLinks;
+    };
+
+type Value = {
+  isEnabled: boolean;
+  accountLinkInProgress: AccountLinkInProgress | undefined;
+  accountLinkOptions: SupportedAccountLinks;
+  linkAccount: (_: ModalLinkAccountArgs) => Promise<void>;
+  isLinkAccountPending: boolean;
+  verifyEmailOrPhoneLink: (verificationCode: string) => void;
+  verifyOAuthLink: (method: InternalMethodParams<'verifyOAuthLink'>['method']) => void;
+  verifyFarcasterLink: () => void;
+  verifyTelegramLink: (telegramAuthResponse: TelegramAuthResponse) => void;
+  verifyLinkedAccount: (accountLinkInProgress: AccountLinkInProgress) => void;
+  linkAccountStatus: MutationStatus;
+  linkAccountError: AccountLinkError | null;
+  setLinkAccountError: (_: AccountLinkError | null) => void;
+  unlinkingAccount: LinkedAccount | undefined;
+  unlinkAccount: (linkedAccount: LinkedAccount) => void;
+  unlinkAccountConfirm: () => void;
+  isUnlinkAccountPending: boolean;
+  cancelLinkAccount: () => void;
+  onAccountLinked: (_: AccountLinkInProgress) => void;
+  onAccountLinkVerified: (_: LinkedAccounts) => void;
+  resetMutations: () => void;
+  // externalWalletQrUri: string | undefined;
+};
+
+export const AccountLinkContext = createContext<Value>({
+  isEnabled: false,
+  accountLinkInProgress: undefined,
+  accountLinkOptions: [...LINKED_ACCOUNT_TYPES],
+  linkAccount: () => Promise.resolve(),
+  isLinkAccountPending: false,
+  verifyEmailOrPhoneLink: () => {},
+  verifyOAuthLink: () => {},
+  verifyFarcasterLink: () => {},
+  verifyTelegramLink: () => {},
+  verifyLinkedAccount: () => {},
+  unlinkingAccount: undefined,
+  linkAccountStatus: 'idle',
+  linkAccountError: null,
+  setLinkAccountError: () => {},
+  unlinkAccount: () => {},
+  unlinkAccountConfirm: () => {},
+  isUnlinkAccountPending: false,
+  cancelLinkAccount: () => {},
+  onAccountLinked: () => {},
+  onAccountLinkVerified: () => {},
+  resetMutations: () => {},
+  // externalWalletQrUri: undefined,
+});
+
+const useLinkAccount = generateInternalMutation('linkAccount', actions.linkAccount);
+const useUnlinkAccount = generateInternalMutation('unlinkAccount', actions.unlinkAccount);
+const useVerifyOAuthLink = generateInternalMutation('verifyOAuthLink', actions.verifyOAuthLink, { delay: 500 });
+const useVerifyEmailOrPhoneLink = generateInternalMutation('verifyEmailOrPhoneLink', actions.verifyEmailOrPhoneLink);
+const useVerifyFarcasterLink = generateInternalMutation('verifyFarcasterLink', actions.verifyFarcasterLink, {
+  delay: 500,
+});
+const useVerifyTelegramLink = generateInternalMutation('verifyTelegramLink', actions.verifyTelegramLink);
+const useVerifyExternalWalletLink = generateInternalMutation('verifyExternalWalletLink', actions.verifyExternalWalletLink);
+
+export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
+  const para = useInternalClient();
+  const queryClient = useQueryClient();
+  const { data: account } = useAccount();
+  const { data: coreAccountLinkInProgress } = useAccountLinkInProgress();
+  const { isOpen, openModal } = useModal();
+  const includeWalletVerification = useStore(state => state.includeWalletVerification);
+  const setStep = useModalStore(state => state.setStep);
+  const setFarcasterConnectUri = useModalStore(state => state.setFarcasterConnectUri);
+  const refs = useModalStore(state => state.refs);
+  const externalWalletError = useModalStore(state => state.externalWalletError);
+  const accountLinkOptions = useModalStore(state => state.accountLinkOptions) || [...LINKED_ACCOUNT_TYPES];
+  const setAccountLinkOptions = useModalStore(state => state.setAccountLinkOptions);
+  const goBack = useGoBack();
+
+  const { mutateAsync: mutateLinkAccountAsync, isPending: isLinkAccountPending } = useLinkAccount();
+  const { mutate: mutateUnlinkAccount, isPending: isUnlinkAccountPending } = useUnlinkAccount();
+  const {
+    mutate: mutateVerifyEmailOrPhoneLink,
+    status: statusVerifyEmailOrPhoneLink,
+    reset: resetVerifyEmailOrPhoneLink,
+  } = useVerifyEmailOrPhoneLink();
+  const { mutate: mutateVerifyOAuthLink, status: statusVerifyOAuthLink, reset: resetVerifyOAuthLink } = useVerifyOAuthLink();
+  const {
+    mutate: mutateVerifyFarcasterLink,
+    status: statusVerifyFarcasterLink,
+    reset: resetVerifyFarcasterLink,
+  } = useVerifyFarcasterLink();
+  const {
+    mutateAsync: mutateVerifyTelegramLinkAsync,
+    status: statusVerifyTelegramLink,
+    reset: resetVerifyTelegramLink,
+  } = useVerifyTelegramLink();
+  const { status: statusVerifyExternalWalletLink, reset: resetVerifyExternalWalletLink } = useVerifyExternalWalletLink();
+
+  const isEnabled =
+    !!account?.isConnected && !account?.isGuestMode && (!account?.externalWallet || includeWalletVerification);
+
+  const [accountLinkInProgress, setAccountLinkInProgress] = useState<AccountLinkInProgress | undefined>(
+    coreAccountLinkInProgress,
+  );
+  const [unlinkingAccount, setUnlinkingAccount] = useState<LinkedAccount | undefined>(undefined);
+  const [linkAccountError, setLinkAccountError] = useState<AccountLinkError | null>(null);
+  const [linkAccountStatus, setLinkAccountStatus] = useState<MutationStatus>('pending');
+
+  const linkAccount = async (args?: ModalLinkAccountArgs) => {
+    if (!isEnabled) {
+      setLinkAccountError('NOT_AUTHENTICATED');
+
+      throw new Error('User is not signed in or is in guest mode');
+    }
+
+    setLinkAccountError(null);
+
+    switch (true) {
+      case !args:
+      case args && 'options' in args:
+        {
+          const options = args?.options || para?.supportedAccountLinks || [...LINKED_ACCOUNT_TYPES];
+
+          if (options.length < 2) {
+            throw new Error('Account linking options array must contain 2 or more items');
+          }
+
+          setAccountLinkOptions(options);
+
+          openModal({ step: ModalStep.ACCOUNT_PROFILE_LIST });
+        }
+        break;
+      case args && 'externalWallet' in args:
+        {
+          // to be implemented
+        }
+        break;
+      default: {
+        switch (true) {
+          case 'auth' in args:
+            {
+              validateAuth(args.auth);
+
+              const authInfo = extractAuthInfo(args.auth, { isRequired: true }) as AuthInfo<'email' | 'phone'>;
+
+              setAccountLinkInProgress({
+                type: authInfo.authType.toUpperCase() as 'EMAIL' | 'PHONE',
+                identifier: authInfo.identifier,
+              });
+            }
+            break;
+          case 'type' in args: {
+            if (args.type === 'EMAIL' || args.type === 'PHONE' || !isOpen) {
+              setAccountLinkInProgress({ type: args.type === 'X' ? 'TWITTER' : args.type });
+            }
+            break;
+          }
+        }
+
+        if (!isOpen) {
+          openModal({ step: ModalStep.ACCOUNT_PROFILE_ADD });
+        }
+
+        try {
+          const accountLinkInProgress = await mutateLinkAccountAsync(args);
+
+          await onAccountLinked(accountLinkInProgress);
+        } catch (e) {
+          setLinkAccountError(toAccountLinkError(e)!);
+        }
+      }
+    }
+  };
+
+  const onAccountLinked = async (accountLinkInProgress: CoreAccountLinkInProgress) => {
+    queryClient.setQueryData(['accountLinkInProgress'], accountLinkInProgress ?? null);
+
+    setStep(ModalStep.ACCOUNT_PROFILE_ADD);
+
+    switch (accountLinkInProgress.type) {
+      case 'EMAIL':
+      case 'PHONE':
+      case 'TELEGRAM':
+      case 'EXTERNAL_WALLET':
+        break;
+      case 'FARCASTER':
+        verifyFarcasterLink();
+        break;
+      default:
+        verifyLinkedAccount(accountLinkInProgress);
+    }
+  };
+
+  const verifyEmailOrPhoneLink = async (verificationCode: string) => {
+    mutateVerifyEmailOrPhoneLink(
+      { verificationCode },
+      {
+        onSuccess: onAccountLinkVerified,
+        onError: onAccountLinkError,
+      },
+    );
+  };
+
+  const verifyOAuthLink = async (method: InternalMethodParams<'verifyOAuthLink'>['method']) => {
+    mutateVerifyOAuthLink(
+      {
+        method,
+        isCanceled: () => !!refs.popupWindow.current?.closed,
+        onOAuthUrl: oAuthUrl => {
+          refs.popupWindow.current = openPopup({
+            url: oAuthUrl,
+            target: `${method}AuthPopup`,
+            type: 'OAUTH',
+            current: refs.popupWindow.current,
+          });
+        },
+      },
+      {
+        onSuccess: onAccountLinkVerified,
+        onError: onAccountLinkError,
+      },
+    );
+  };
+
+  const verifyFarcasterLink = async () => {
+    mutateVerifyFarcasterLink(
+      {
+        isCanceled: () => refs.currentStep.current !== ModalStep.ACCOUNT_PROFILE_ADD,
+        onConnectUri: connectUri => {
+          setFarcasterConnectUri(connectUri);
+        },
+      },
+      {
+        onSuccess: onAccountLinkVerified,
+        onError: () => {
+          if (refs.currentStep.current === ModalStep.ACCOUNT_PROFILE_ADD) {
+            goBack();
+          }
+        },
+      },
+    );
+  };
+
+  const verifyTelegramLink = async (telegramAuthResponse: TelegramAuthResponse) => {
+    try {
+      const accounts = await mutateVerifyTelegramLinkAsync({
+        telegramAuthResponse,
+      });
+
+      onAccountLinkVerified(accounts);
+    } catch (e) {
+      onAccountLinkError(e);
+
+      throw e;
+    }
+  };
+
+  const verifyLinkedAccount = ({ type }: CoreAccountLinkInProgress) => {
+    switch (type) {
+      case 'EMAIL':
+      case 'PHONE':
+      case 'TELEGRAM':
+      case 'EXTERNAL_WALLET':
+        break;
+      case 'FARCASTER':
+        verifyFarcasterLink();
+        break;
+      default:
+        verifyOAuthLink(type);
+        break;
+    }
+  };
+
+  const onAccountLinkVerified = (updatedAccounts: LinkedAccounts) => {
+    queryClient.setQueryData<LinkedAccounts>(['getLinkedAccounts'], () => updatedAccounts);
+
+    setTimeout(() => {
+      setStep(ModalStep.ACCOUNT_PROFILE);
+    }, 2000);
+  };
+
+  const onAccountLinkError = (e: Error) => {
+    setLinkAccountError(toAccountLinkError(e)!);
+  };
+
+  const unlinkAccount = (linkedAccount?: LinkedAccount) => {
+    setUnlinkingAccount(linkedAccount);
+
+    setStep(ModalStep.ACCOUNT_PROFILE_REMOVE);
+  };
+
+  const unlinkAccountConfirm = () => {
+    mutateUnlinkAccount(
+      {
+        linkedAccountId: unlinkingAccount!.id!,
+      },
+      {
+        onSuccess: updatedAccounts => {
+          queryClient.setQueryData<LinkedAccounts>(['getLinkedAccounts'], () => updatedAccounts);
+
+          setUnlinkingAccount(undefined);
+          setStep(ModalStep.ACCOUNT_PROFILE);
+        },
+      },
+    );
+  };
+
+  const cancelLinkAccount = () => {
+    mutateUnlinkAccount(undefined);
+  };
+
+  const resetMutations = () => {
+    resetVerifyEmailOrPhoneLink();
+    resetVerifyFarcasterLink();
+    resetVerifyOAuthLink();
+    resetVerifyTelegramLink();
+    resetVerifyExternalWalletLink();
+  };
+
+  useEffect(() => {
+    setAccountLinkInProgress(prev => {
+      return coreAccountLinkInProgress ?? prev;
+    });
+  }, [coreAccountLinkInProgress]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setLinkAccountError(null);
+      setAccountLinkInProgress(undefined);
+      setUnlinkingAccount(undefined);
+      resetMutations();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    setLinkAccountStatus(() => {
+      if (!isEnabled || !accountLinkInProgress) {
+        return 'idle';
+      }
+
+      if (
+        (accountLinkInProgress.type === 'EMAIL' || accountLinkInProgress.type === 'PHONE') &&
+        !accountLinkInProgress.identifier
+      ) {
+        return 'idle';
+      }
+
+      if (linkAccountError) return 'error';
+
+      switch (true) {
+        case accountLinkInProgress.type === 'TELEGRAM':
+          return statusVerifyTelegramLink;
+        case accountLinkInProgress.type === 'FARCASTER':
+          return statusVerifyFarcasterLink;
+        case accountLinkInProgress.type === 'EMAIL':
+        case accountLinkInProgress.type === 'PHONE':
+          return statusVerifyEmailOrPhoneLink;
+        case accountLinkInProgress.type === 'EXTERNAL_WALLET':
+          return externalWalletError && externalWalletError.length > 0
+            ? 'error'
+            : statusVerifyExternalWalletLink === 'idle'
+              ? 'pending'
+              : statusVerifyExternalWalletLink;
+        default:
+          return statusVerifyOAuthLink;
+      }
+    });
+  }, [
+    linkAccountError,
+    isEnabled,
+    accountLinkInProgress,
+    statusVerifyEmailOrPhoneLink,
+    statusVerifyFarcasterLink,
+    statusVerifyOAuthLink,
+    statusVerifyTelegramLink,
+    statusVerifyExternalWalletLink,
+    externalWalletError,
+  ]);
+
+  const value = useMemo<Value>(
+    () => ({
+      isEnabled,
+      accountLinkInProgress,
+      accountLinkOptions,
+      linkAccount,
+      isLinkAccountPending,
+      verifyOAuthLink,
+      verifyFarcasterLink,
+      verifyTelegramLink,
+      verifyEmailOrPhoneLink,
+      verifyLinkedAccount,
+      linkAccountStatus,
+      linkAccountError,
+      setLinkAccountError,
+      unlinkingAccount,
+      unlinkAccount,
+      unlinkAccountConfirm,
+      isUnlinkAccountPending,
+      cancelLinkAccount,
+      onAccountLinked,
+      onAccountLinkVerified,
+      resetMutations,
+    }),
+    [
+      isEnabled,
+      accountLinkInProgress,
+      accountLinkOptions,
+      linkAccount,
+      isLinkAccountPending,
+      verifyOAuthLink,
+      verifyFarcasterLink,
+      verifyTelegramLink,
+      verifyEmailOrPhoneLink,
+      verifyLinkedAccount,
+      linkAccountStatus,
+      linkAccountError,
+      setLinkAccountError,
+      unlinkAccount,
+      unlinkAccountConfirm,
+      isUnlinkAccountPending,
+      cancelLinkAccount,
+      onAccountLinked,
+      onAccountLinkVerified,
+      resetMutations,
+    ],
+  );
+
+  return <AccountLinkContext.Provider value={value}>{children}</AccountLinkContext.Provider>;
+};
+
+export const useAccountLinking = () => useContext(AccountLinkContext);

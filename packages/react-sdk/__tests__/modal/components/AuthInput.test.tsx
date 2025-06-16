@@ -6,16 +6,16 @@ import { defineCustomElements } from '@getpara/react-components';
 import { mockModalStore } from '../../utils.js';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MockPara } from '../../mocks/mockCorePara.js';
-import { Environment } from '@getpara/web-sdk';
+import { Auth, Environment } from '@getpara/web-sdk';
 import { API_KEY } from '../../constants.js';
 const queryClient = new QueryClient();
 
-async function setup() {
+async function setup(defaultAuth?: Auth<'email' | 'phone'>) {
   defineCustomElements(window);
 
   const renderer = render(
     <QueryClientProvider client={queryClient}>
-      <AuthInput />
+      <AuthInput onSubmit={vi.fn()} isSubmitting={false} defaultAuth={defaultAuth} />
     </QueryClientProvider>,
   );
   const host = screen.getByTestId('auth-input') as HTMLInputElement;
@@ -59,8 +59,6 @@ describe('ParaModal', () => {
   });
 
   it('renders input', async () => {
-    vi.spyOn(MockPara.prototype, 'authInfo', 'get').mockReturnValue(undefined);
-
     mockModalStore();
 
     const { input, countryCodeSelect } = await setup();
@@ -112,30 +110,22 @@ describe('ParaModal', () => {
 
   describe('default identifier', () => {
     it('email', async () => {
-      vi.spyOn(MockPara.prototype, 'authInfo', 'get').mockReturnValue(undefined);
-
       mocks.useStore.mockImplementationOnce(getter =>
         getter({ ...DEFAULT_STORE_RESP, modalConfig: { defaultAuthIdentifier: 'test@test.com' } }),
       );
 
-      const { input } = await setup();
+      const { input } = await setup({ email: 'test@test.com' });
 
       expect(input).toBeDefined();
       expect(input().value).toEqual('test@test.com');
     }, 20000);
 
     it('phone', async () => {
-      vi.spyOn(MockPara.prototype, 'authInfo', 'get').mockReturnValue(undefined);
-
-      mocks.useStore.mockImplementationOnce(getter =>
-        getter({ ...DEFAULT_STORE_RESP, modalConfig: { defaultAuthIdentifier: '+15555555555' } }),
-      );
-
-      const { input, countryCodeSelect } = await setup();
+      const { input, countryCodeSelect } = await setup({ phone: '+13105551234' });
 
       expect(input).toBeDefined();
       expect(countryCodeSelect().value).toEqual('US');
-      expect(input().value).toEqual('(555) 555-5555');
+      expect(input().value).toEqual('(310) 555-1234');
     }, 20000);
   });
 

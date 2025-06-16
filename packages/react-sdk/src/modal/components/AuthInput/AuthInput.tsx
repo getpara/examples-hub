@@ -15,47 +15,68 @@ import {
   CpslText,
 } from '@getpara/react-components';
 import { CountryCallingCode } from 'libphonenumber-js';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { safeStyled } from '@getpara/react-common';
 import countryCodes from '../../utils/countryCodes.js';
 import { MOBILE_SIZE } from '../../constants/constants.js';
 import { useDropdownPosition } from './hooks/useDropdownPosition.js';
 import { defaultPhoneMask, phoneMasks } from './phoneMasks.js';
-import { Auth, AuthType } from '@getpara/user-management-client';
-import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
+import { Auth, AuthType, extractAuthInfo, PrimaryAuthInfo } from '@getpara/user-management-client';
 import parsePhoneNumberFromString from 'libphonenumber-js';
 import { NationalNumber } from 'libphonenumber-js';
-import { useAuthActions } from '../../../provider/providers/AuthProvider.js';
-import { useStore } from '../../../provider/stores/useStore.js';
-import { isCcMatch, validateAuth } from '../../utils/authInputHelpers.js';
+import { isCcMatch, validateInput } from '../../utils/authInputHelpers.js';
 
-interface AuthInputProps {
+type ChildProps = {
+  isPending: boolean;
+  isSubmitting: boolean;
+  onSubmit: () => void;
+};
+
+type AuthInputProps = {
+  defaultAuth?: Auth<'email' | 'phone'>;
+  onSubmit: (_: Auth<'email' | 'phone'>) => void;
+  isSubmitting: boolean;
   disableEmailLogin?: boolean;
   disablePhoneLogin?: boolean;
-}
+  disableSubmitButton?: boolean;
+  children?: (_: ChildProps) => ReactNode;
+  error?: string | null;
+  sticky?: boolean;
+};
 
 const DEFAULT_COUNTRY = { label: 'United States', value: '+1', selectedLabel: 'US', icon: 'US' as IconType };
 
-export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputProps) => {
+export const AuthInput = ({
+  defaultAuth,
+  disableEmailLogin,
+  disablePhoneLogin,
+  onSubmit: _onSubmit,
+  isSubmitting,
+  disableSubmitButton,
+  children: Children,
+  error: propsError,
+  sticky = false,
+}: AuthInputProps) => {
   const inputRef = useRef<HTMLCpslInputElement>(null);
   const { dropdownMaxHeight, dropdownWidth } = useDropdownPosition(inputRef);
-  const defaultAuthIdentifier = useStore(state => state.modalConfig?.defaultAuthIdentifier);
 
-  const para = useInternalClient();
-  const { signUpOrLogIn, isSignUpOrLogInPending } = useAuthActions();
-  const authInfo = para.authInfo;
-
-  const [storedNationalNumber, storedCountryCode] = useMemo<
-    [NationalNumber | undefined, CountryCallingCode | undefined]
+  const [authInfo, storedNationalNumber, storedCountryCode] = useMemo<
+    [PrimaryAuthInfo | undefined, NationalNumber | undefined, CountryCallingCode | undefined]
   >(() => {
-    if (authInfo?.authType !== 'phone') {
-      return [undefined, undefined];
+    if (!defaultAuth) {
+      return [undefined, undefined, undefined];
+    }
+
+    const authInfo = extractAuthInfo(defaultAuth);
+
+    if (!authInfo || authInfo?.authType !== 'phone') {
+      return [authInfo, undefined, undefined];
     }
 
     const parsed = parsePhoneNumberFromString(authInfo.identifier);
 
-    return [parsed?.nationalNumber, parsed?.countryCallingCode];
-  }, [authInfo?.authType, authInfo?.identifier]);
+    return [authInfo, parsed?.nationalNumber, parsed?.countryCallingCode];
+  }, [defaultAuth]);
 
   const [countryCode, setCountryCode] = useState<CountryCallingCode>((storedCountryCode ?? '+1') as CountryCallingCode);
   const [identifier, setIdentifier] = useState(
@@ -77,34 +98,14 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
   const [matchedCountryCode, setMatchedCountryCode] = useState<DropdownInputEventDetail>(
     countryCodes.find(option => isCcMatch(countryCode, option)) ?? DEFAULT_COUNTRY,
   );
-  const [error, setError] = useState('');
-  const [isPending, setIsPending] = useState(isSignUpOrLogInPending);
+  const [error, setError] = useState<string | undefined>(propsError || undefined);
+  const [isPending, setIsPending] = useState(isSubmitting || false);
   const [search, setSearch] = useState('');
 
   const setCountryCodes = (countyCodeInput: DropdownInputEventDetail) => {
     setCountryCode(countyCodeInput.value as CountryCallingCode);
     setMatchedCountryCode(countyCodeInput);
   };
-
-  useEffect(() => {
-    // Only set input to the default if authInfo hasn't been set yet, else use what the user has set.
-    if (defaultAuthIdentifier && !authInfo) {
-      const number = parsePhoneNumberFromString(defaultAuthIdentifier);
-
-      if (number) {
-        const countryCode = `+${number.countryCallingCode}`;
-        const countryCodeInputMatch = countryCodes.find(option => isCcMatch(countryCode, option));
-
-        if (countryCodeInputMatch) {
-          setCountryCodes(countryCodeInputMatch);
-        }
-      }
-
-      handleIdentifierInput({
-        detail: { value: number ? number.nationalNumber : defaultAuthIdentifier },
-      } as CpslInputCustomEvent<InputInputEventDetail>);
-    }
-  }, [authInfo]);
 
   const isEmail = identifierType === 'email';
   const isPhone = identifierType === 'phone';
@@ -124,6 +125,9 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
   };
 
   const handleIdentifierInput = (ev: CpslInputCustomEvent<InputInputEventDetail>) => {
+    if (!sticky) {
+      setError(undefined);
+    }
     const newIdentifier = ev.detail.value ?? '';
     let isNewPhone = false,
       isNewEmail = false;
@@ -157,26 +161,34 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
   };
 
   const onSubmit = async () => {
-    setError('');
-
-    let auth: Auth<'email'> | Auth<'phone'>;
+    setError(undefined);
 
     try {
-      auth = validateAuth(identifier, countryCode, identifierType);
-      signUpOrLogIn(auth);
+      const auth = validateInput(identifier, countryCode, identifierType);
+      _onSubmit(auth);
     } catch (err) {
       setError(err.message);
     }
   };
 
   useEffect(() => {
-    if (isSignUpOrLogInPending) {
-      setIsPending(true);
-    }
-  }, [isSignUpOrLogInPending]);
+    setIsPending(isSubmitting);
+  }, [isSubmitting]);
 
   useEffect(() => {
-    setIsPending(false);
+    if (propsError === null || (propsError === undefined && !sticky)) {
+      setError(undefined);
+    }
+    if (propsError) {
+      setError(propsError);
+      setIsPending(false);
+    }
+  }, [propsError, sticky]);
+
+  useEffect(() => {
+    if (!sticky || isSubmitting) {
+      setIsPending(isSubmitting);
+    }
   }, [error]);
 
   if (disableEmailLogin && disablePhoneLogin) {
@@ -189,6 +201,7 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
         e.preventDefault();
         onSubmit();
       }}
+      style={{ width: '100%' }}
     >
       <StyledInput
         ref={inputRef}
@@ -249,12 +262,17 @@ export const AuthInput = ({ disableEmailLogin, disablePhoneLogin }: AuthInputPro
             </CountryCodeSelect>
           )}
         </IconContainer>
-        {identifier && (
+        {identifier && !disableSubmitButton && (
           <CpslButton slot="end" size="small" fullWidth disabled={isPending} onClick={onSubmit}>
             {isPending ? <CpslSpinner size={16} /> : <CpslIcon icon="arrowNarrow" />}
           </CpslButton>
         )}
       </StyledInput>
+      {Children && (
+        <ChildContainer>
+          <Children onSubmit={onSubmit} isPending={isPending} isSubmitting={isPending} />
+        </ChildContainer>
+      )}
     </form>
   );
 };
@@ -314,4 +332,15 @@ const StyledInput = safeStyled(CpslInput)`
   --container-background-color: var(--cpsl-color-background-8);
   --input-background-color: var(--cpsl-color-background-8);
   --container-padding-end: 8px;
+  width: 100%;
+`;
+
+const ChildContainer = safeStyled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+  width: 100%;
 `;

@@ -6,6 +6,10 @@ import { AuthInput } from '../AuthInput/AuthInput.js';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 import { useModalStore } from '../../stores/index.js';
 import { CpslIcon, CpslText } from '@getpara/react-components';
+import { useAuthActions } from '../../../provider/providers/AuthProvider.js';
+import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
+import { useStore } from '../../../provider/stores/useStore.js';
+import { isEmail, isPhone } from '@getpara/user-management-client';
 
 interface AuthOptionsProps {
   oAuthMethods?: TOAuthMethod[];
@@ -20,8 +24,19 @@ export const AuthOptions = ({
   disablePhoneLogin,
   isGuestModeEnabled = false,
 }: AuthOptionsProps) => {
+  const para = useInternalClient();
+  const defaultAuthIdentifier = useStore(state => state.modalConfig?.defaultAuthIdentifier);
+  const { signUpOrLogIn, isSignUpOrLogInPending } = useAuthActions();
   const { wallets } = useExternalWallets();
   const guestAddFundsTab = useModalStore(state => state.guestAddFundsTab);
+
+  const defaultAuth = defaultAuthIdentifier
+    ? /^\+\d+$/.test(defaultAuthIdentifier)
+      ? { phone: defaultAuthIdentifier as `+${number}` }
+      : { email: defaultAuthIdentifier }
+    : para.authInfo && (isEmail(para.authInfo?.auth) || isPhone(para.authInfo?.auth))
+      ? para.authInfo.auth
+      : undefined;
 
   const Content = useMemo(() => {
     const Methods: ReactNode[] = [];
@@ -31,7 +46,17 @@ export const AuthOptions = ({
     }
 
     if (!disableEmailLogin || !disablePhoneLogin) {
-      Methods.push(<AuthInput key="input" disableEmailLogin={disableEmailLogin} disablePhoneLogin={disablePhoneLogin} />);
+      Methods.push(
+        <AuthInput
+          sticky
+          key="input"
+          defaultAuth={defaultAuth}
+          disableEmailLogin={disableEmailLogin}
+          disablePhoneLogin={disablePhoneLogin}
+          onSubmit={signUpOrLogIn}
+          isSubmitting={isSignUpOrLogInPending}
+        />,
+      );
     }
 
     return <>{Methods}</>;

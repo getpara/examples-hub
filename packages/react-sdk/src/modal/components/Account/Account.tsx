@@ -10,6 +10,7 @@ import { useStore } from '../../../provider/stores/useStore.js';
 import { formatBalanceString } from '../../utils/stringFormatters.js';
 import { useAccount, useWalletBalance } from '../../../provider/index.js';
 import { EnabledFlow } from '@getpara/web-sdk';
+import { useAccountLinking } from '../../../provider/providers/AccountLinkProvider.js';
 
 interface AccountProps {
   onClose: () => void;
@@ -26,6 +27,7 @@ export const Account = ({ onClose }: AccountProps) => {
   const para = useInternalClient();
   const { data: account } = useAccount();
   const { data: balance, isLoading: isBalanceLoading } = useWalletBalance();
+  const { isEnabled } = useAccountLinking();
 
   const [isDisconnecting, setIsDisconnecting] = useState(false);
 
@@ -39,16 +41,16 @@ export const Account = ({ onClose }: AccountProps) => {
 
   const handleBuyClick = () => {
     if (isGuestMode) {
-      setGuestAddFundsTab(EnabledFlow.BUY);
-      setStep(ModalStep.AUTH_GUEST_SIGNUP);
+      if (onRampConfig?.isReceiveEnabled) {
+        setStep(ModalStep.ADD_FUNDS_RECEIVE);
+      } else {
+        setGuestAddFundsTab(EnabledFlow.BUY);
+        setStep(ModalStep.AUTH_GUEST_SIGNUP);
+      }
     } else {
       setOnRampStep(OnRampStep.SETTINGS);
       setStep(ModalStep.ADD_FUNDS_BUY);
     }
-  };
-
-  const handleReceiveClick = () => {
-    setStep(ModalStep.ADD_FUNDS_RECEIVE);
   };
 
   const handleSellClick = () => {
@@ -59,6 +61,10 @@ export const Account = ({ onClose }: AccountProps) => {
       setOnRampStep(OnRampStep.SETTINGS);
       setStep(ModalStep.ADD_FUNDS_WITHDRAW);
     }
+  };
+
+  const handleProfileClick = () => {
+    setStep(ModalStep.ACCOUNT_PROFILE);
   };
 
   const handleDisconnectClick = async () => {
@@ -118,13 +124,6 @@ export const Account = ({ onClose }: AccountProps) => {
               {onRampConfig.isBuyEnabled && !cantBuyAndWithdraw && (
                 <OptionButton icon="creditCard" onClick={handleBuyClick}>
                   <CpslText variant="bodyXS" color="secondary" weight="medium">
-                    Buy Crypto
-                  </CpslText>
-                </OptionButton>
-              )}
-              {onRampConfig.isReceiveEnabled && (
-                <OptionButton icon="qrCode02" onClick={handleReceiveClick}>
-                  <CpslText variant="bodyXS" color="secondary" weight="medium">
                     Receive
                   </CpslText>
                 </OptionButton>
@@ -136,6 +135,11 @@ export const Account = ({ onClose }: AccountProps) => {
                   </CpslText>
                 </OptionButton>
               )}
+              <OptionButton icon="user" onClick={handleProfileClick}>
+                <CpslText variant="bodyXS" color="secondary" weight="medium">
+                  {isEnabled ? 'Profile' : 'Settings'}
+                </CpslText>
+              </OptionButton>
             </>
           ) : (
             <CpslSpinner />

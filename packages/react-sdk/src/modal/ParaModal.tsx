@@ -15,13 +15,14 @@ import { useExternalWallets } from '../provider/providers/ExternalWalletProvider
 import { useStore } from '../provider/stores/useStore.js';
 import parsePhoneNumberFromString from 'libphonenumber-js';
 import { useAuthActions } from '../provider/providers/AuthProvider.js';
-import { validateAuth } from './utils/authInputHelpers.js';
+import { validateInput } from './utils/authInputHelpers.js';
 import { SDK_VERSION } from './constants/constants.js';
 
 defineCustomElements();
 
 export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref) => {
   const storedModalConfig = useStore(state => state.modalConfig);
+  const openedToStep = useStore(state => state.openedToStep);
   const modalContentRef = useRef<ModalContentHandle>(null);
   const refs = useModalStore(state => state.refs);
   const flow = useModalStore(state => state.flow);
@@ -48,6 +49,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
   const [isInit, setIsInit] = useState(false);
   const externalWallets = useStore(state => state.externalWallets);
   const providerProps = useStore(state => state.providerProps);
+  const setAccountLinkOptions = useModalStore(state => state.setAccountLinkOptions);
 
   // Merge props stored on the provider with props passed to the modal, favoring props passed to modal
   const {
@@ -65,6 +67,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
     onModalStepChange,
     onClose,
     defaultAuthIdentifier,
+    supportedAccountLinks: propsSupportedAccountLinks,
     ...rest
   } = { ...storedModalConfig, ...props };
 
@@ -132,7 +135,9 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
         break;
       case isAccount:
         setFlow('account');
-        setStep(ModalStep.ACCOUNT_MAIN);
+        if (!openedToStep.current) {
+          setStep(ModalStep.ACCOUNT_MAIN);
+        }
         break;
       default:
         if (currentStep !== ModalStep.AUTH_MAIN && currentStep !== ModalStep.SECRET) {
@@ -151,7 +156,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
             const number = parsePhoneNumberFromString(defaultAuthIdentifier);
 
             try {
-              const auth = validateAuth(
+              const auth = validateInput(
                 number ? number.nationalNumber : defaultAuthIdentifier,
                 number?.countryCallingCode ? `+${number?.countryCallingCode}` : undefined,
                 number ? 'phone' : 'email',
@@ -228,6 +233,10 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
     }
   }, [bareModal, flow, account]);
 
+  useEffect(() => {
+    setAccountLinkOptions(propsSupportedAccountLinks ?? para?.supportedAccountLinks);
+  }, [propsSupportedAccountLinks, para?.supportedAccountLinks]);
+
   const handleClose = () => {
     closeModal();
     onClose?.();
@@ -238,6 +247,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
   };
 
   const handleModalExited = async () => {
+    openedToStep.current = null;
     setIsModalMounted(false);
     if (RESET_TO_AUTH_STEPS.includes(currentStep)) {
       resetModalState();

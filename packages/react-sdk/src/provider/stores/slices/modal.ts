@@ -1,5 +1,7 @@
 import { StateCreator } from 'zustand';
 import { ModalSlice, Store } from '../types.js';
+import { createRef } from 'react';
+import { ModalStep } from '../../../modal/index.js';
 
 export const createModalSlice: StateCreator<Store, [], [], ModalSlice> = (set, get) => ({
   modalConfig: undefined,
@@ -10,4 +12,6 @@ export const createModalSlice: StateCreator<Store, [], [], ModalSlice> = (set, g
 
   isOpen: false,
   setIsOpen: isOpen => set({ isOpen }),
+
+  openedToStep: createRef<ModalStep | null>(),
 });

@@ -7,37 +7,42 @@ export function isCcMatch(countryCode: string, option: (typeof countryCodes)[num
   return countryCode === '+1' ? option.selectedLabel === 'US' : option.value === countryCode;
 }
 
-export function validateAuth(identifier: string, countryCode?: string, type?: 'email' | 'phone') {
+export function validateAuth(auth: Auth<'email' | 'phone'>): Auth<'email' | 'phone'> {
+  switch (true) {
+    case 'email' in auth:
+      if (!EMAIL_REGEX.test(auth.email)) {
+        throw new Error('Please enter a valid email address!');
+      }
+      break;
+
+    case 'phone' in auth:
+      {
+        if (!/^\+1\d{3}555\d{4}$/.test(auth.phone)) {
+          const formatted = formatPhoneNumber(auth.phone);
+
+          if (!formatted) {
+            throw new Error('Please enter a valid phone number!');
+          }
+        }
+      }
+      break;
+  }
+  return auth;
+}
+
+export function validateInput(identifier: string, countryCode?: string, type?: 'email' | 'phone') {
   const isEmail = type === 'email';
   const isPhone = type === 'phone';
 
-  let auth: Auth<'email'> | Auth<'phone'>;
+  const auth = isEmail
+    ? { email: identifier }
+    : isPhone
+      ? { phone: `${countryCode}${identifier}` as `+${number}` }
+      : undefined;
 
-  switch (true) {
-    case isEmail:
-      if (!EMAIL_REGEX.test(identifier)) {
-        throw new Error('Please enter a valid email!');
-      }
-      auth = { email: identifier };
-      break;
-    case isPhone:
-      if (countryCode === '+1' && identifier.slice(3, 6) === '555') {
-        auth = { phone: `${countryCode}${identifier}` as `+${number}` };
-        break;
-      }
-
-      const validatedPhone = formatPhoneNumber(identifier, countryCode);
-
-      if (!validatedPhone) {
-        throw new Error('Please enter a valid phone number!');
-      }
-
-      auth = { phone: validatedPhone };
-
-      break;
-    default:
-      throw new Error('Please enter a valid email or phone number!');
+  if (!auth) {
+    throw new Error('Please enter a valid email or phone number!');
   }
 
-  return auth;
+  return validateAuth(auth);
 }

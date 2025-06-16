@@ -2,12 +2,21 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { ModalStep } from '../../utils/steps.js';
 import { getActions } from './actions.js';
-import { OnRampConfig as OnRampConfigBase, OnRampPurchase, TWalletType } from '@getpara/web-sdk';
+import {
+  AuthStateLogin,
+  AuthStateSignup,
+  AuthState,
+  AuthStateVerify,
+  OnRampConfig as OnRampConfigBase,
+  OnRampPurchase,
+  TWalletType,
+  Setup2faResponse,
+  LINKED_ACCOUNT_TYPES,
+  SupportedAccountLinks,
+} from '@getpara/web-sdk';
 import { Tab as AddFundsTabType } from '../../components/AddFunds/AddFundsContext.js';
-import { AuthStateLogin, AuthStateSignup, AuthState, AuthStateVerify } from '@getpara/core-sdk';
 import { AuthLayout, TAuthLayout } from '../../types/modalProps.js';
 import { createRef, MutableRefObject } from 'react';
-import { Setup2faResponse } from '@getpara/user-management-client';
 
 export type Flow = AuthStateSignup['stage'] | AuthStateLogin['stage'] | 'account' | 'guest';
 
@@ -53,8 +62,10 @@ interface ModalState {
     popupWindow: MutableRefObject<Window | null>;
     poll: MutableRefObject<{ action: 'login' | 'signup'; timeout: number } | null>;
     currentStep: MutableRefObject<ModalStep | null>;
+    telegramIFrame: MutableRefObject<HTMLIFrameElement | null>;
   };
   isPasskeySupported: boolean;
+  accountLinkOptions: SupportedAccountLinks;
 }
 
 export interface ModalActions {
@@ -89,6 +100,7 @@ export interface ModalActions {
   setAuthLayout: (authLayout: TAuthLayout[]) => void;
   setAuthStepRoute: (_?: ModalStep) => void;
   setIsPasskeySupported: (_: boolean) => void;
+  setAccountLinkOptions: (_: SupportedAccountLinks) => void;
 }
 
 export type ModalStore = ModalState & ModalActions;
@@ -118,8 +130,10 @@ export const DEFAULT_MODAL_STATE: Omit<ModalState, 'step' | 'onRampConfig'> = {
     popupWindow: createRef(),
     poll: createRef(),
     currentStep: createRef(),
+    telegramIFrame: createRef(),
   },
   isPasskeySupported: true,
+  accountLinkOptions: [...LINKED_ACCOUNT_TYPES],
 };
 
 export const useModalStore = create<ModalStore>()(

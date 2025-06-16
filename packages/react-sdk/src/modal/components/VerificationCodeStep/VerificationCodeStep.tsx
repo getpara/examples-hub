@@ -4,20 +4,25 @@ import { safeStyled } from '@getpara/react-common';
 import { CodeChangeEventDetail, CpslCodeInputCustomEvent } from '@getpara/core-components';
 import { Heading, InnerStepContainer, StepContainer } from '../common.js';
 import { displayPhoneNumber } from '@getpara/core-sdk';
-import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 import { useAuthActions } from '../../../provider/providers/AuthProvider.js';
 import { useResendVerificationCode } from '../../../provider/index.js';
+import { AuthInfo } from '@getpara/user-management-client';
+import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
+import { MutationStatus } from '@tanstack/react-query';
 
-export const VerificationCodeStep = () => {
-  const para = useInternalClient();
-  const authInfo = para.authInfo;
-  const { verifyNewAccount, isVerifyNewAccountPending, verifyNewAccountError } = useAuthActions();
-  const { resendVerificationCode } = useResendVerificationCode();
+type Props = {
+  authInfo: AuthInfo<'email' | 'phone'>;
+  onSubmit: (_: string) => void;
+  onResend: () => void;
+  status: MutationStatus;
+  error?: Error | string | null;
+};
 
+export const VerificationCode = ({ authInfo, onResend, onSubmit, status, error }: Props) => {
   const inputRef = useRef<HTMLCpslCodeInputElement>(null);
 
   const [code, setCode] = useState('');
-  const [isPending, setIsPending] = useState(false);
+  const [isPending, setIsPending] = useState(status === 'pending');
   const [codeError, setCodeError] = useState<string | null>(null);
   const [resendDisabled, setResendDisabled] = useState(false);
 
@@ -39,22 +44,22 @@ export const VerificationCodeStep = () => {
   }, [code]);
 
   useEffect(() => {
-    if (isVerifyNewAccountPending) {
-      setIsPending(isVerifyNewAccountPending);
+    if (status === 'pending') {
+      setIsPending(true);
     }
-  }, [isVerifyNewAccountPending]);
+  }, [status]);
 
   const handleResendClick = async () => {
     if (!resendDisabled) {
       setResendDisabled(true);
 
-      resendVerificationCode(undefined, {
-        onSettled: () => {
-          setTimeout(() => {
-            setResendDisabled(false);
-          }, 3000);
-        },
-      });
+      try {
+        onResend();
+      } finally {
+        setTimeout(() => {
+          setResendDisabled(false);
+        }, 3000);
+      }
     }
   };
 
@@ -64,16 +69,16 @@ export const VerificationCodeStep = () => {
 
   const handleSubmitCode = async () => {
     if (code.length === 6 && /^\d+$/.test(code)) {
-      verifyNewAccount(code);
+      onSubmit(code);
     } else {
       setCodeError('Incorrect code.');
     }
   };
 
   useEffect(() => {
-    if (!!verifyNewAccountError) {
+    if (!!error) {
       setIsPending(false);
-      const status = (verifyNewAccountError as unknown as { status: number }).status;
+      const status = (error as unknown as { status: number }).status;
 
       switch (status) {
         case 429:
@@ -84,10 +89,10 @@ export const VerificationCodeStep = () => {
           break;
       }
     }
-  }, [verifyNewAccountError]);
+  }, [error]);
 
   return (
-    <StepContainer $wide>
+    <>
       <InnerStepContainer>
         <Heading variant="headingS" weight="bold">
           Verify {isEmail ? 'Email' : 'Phone Number'}
@@ -133,6 +138,31 @@ export const VerificationCodeStep = () => {
           </>
         )}
       </InnerStepContainer>
+    </>
+  );
+};
+
+export const VerificationCodeStep = () => {
+  const { verifyNewAccount, verifyNewAccountStatus, verifyNewAccountError } = useAuthActions();
+  const { mutateAsync: resendVerificationCode } = useResendVerificationCode();
+
+  const para = useInternalClient();
+
+  if (!para.authInfo) {
+    return null;
+  }
+
+  return (
+    <StepContainer $wide>
+      <VerificationCode
+        authInfo={para.authInfo as AuthInfo<'email' | 'phone'>}
+        onSubmit={verifyNewAccount}
+        onResend={() => {
+          resendVerificationCode({ type: 'SIGNUP' });
+        }}
+        status={verifyNewAccountStatus}
+        error={verifyNewAccountError}
+      />
     </StepContainer>
   );
 };

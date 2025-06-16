@@ -11,7 +11,7 @@ import {
   SolanaExternalWalletContextType,
   WalletList as SolanaWalletList,
 } from '@getpara/solana-wallet-connectors';
-import { ParaModalProps } from '../../modal/index.js';
+import { ModalStep, ParaModalProps } from '../../modal/index.js';
 import { OAuthLogoVariantType } from '../../modal/types/modalProps.js';
 import { type TExternalWallet } from '@getpara/react-common';
 
@@ -39,6 +39,8 @@ export interface ModalSlice {
 
   isOpen: boolean;
   setIsOpen: (_: boolean) => void;
+
+  openedToStep: MutableRefObject<ModalStep | null>;
 }
 
 export interface WalletSlice {

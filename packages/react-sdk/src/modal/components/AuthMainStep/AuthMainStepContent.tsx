@@ -6,7 +6,7 @@ import { ExternalWallets } from '../ExternalWallets/ExternalWallets.js';
 import { useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { AuthLayout } from '../../types/modalProps.js';
-import { brandedOAuthLogos, oAuthLogos } from '../../constants/oAuthLogos.js';
+import { ACCOUNT_TYPES } from '../../constants/oAuthLogos.js';
 import { AuthOptions } from '../AuthOptions/AuthOptions.js';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 import { useStore } from '../../../provider/stores/useStore.js';
@@ -68,7 +68,7 @@ export const AuthMainStepContent = ({
         case AuthLayout.AUTH_CONDENSED: {
           const icons: IconType[] = [];
 
-          oAuthMethods?.forEach(method => icons.push(useBrandedLogos ? brandedOAuthLogos[method] : oAuthLogos[method]));
+          oAuthMethods?.forEach(method => icons.push(ACCOUNT_TYPES[method][useBrandedLogos ? 'logoBranded' : 'logo']!));
 
           methods.push([
             <CondensedButton onClick={handleCondensedAuthClick} variant="tertiary" fullWidth key="authCondensed">

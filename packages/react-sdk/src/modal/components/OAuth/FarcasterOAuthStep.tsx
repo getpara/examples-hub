@@ -3,11 +3,11 @@ import { CenteredText, Heading, InnerStepContainer, QRContainer, StepContainer }
 import { useModalStore } from '../../stores/index.js';
 import { isMobile } from '@getpara/web-sdk';
 
-const FarcasterOAuthStep = () => {
+export function FarcasterConnectQR() {
   const farcasterConnectUri = useModalStore(state => state.farcasterConnectUri);
 
   return (
-    <StepContainer $wide>
+    <>
       {isMobile() ? (
         <InnerStepContainer>
           <CpslText weight="medium" color="secondary">
@@ -33,6 +33,14 @@ const FarcasterOAuthStep = () => {
           </InnerStepContainer>
         </>
       )}
+    </>
+  );
+}
+
+const FarcasterOAuthStep = () => {
+  return (
+    <StepContainer $wide>
+      <FarcasterConnectQR />
     </StepContainer>
   );
 };

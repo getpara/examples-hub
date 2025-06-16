@@ -1,4 +1,4 @@
-import ParaWeb, { CurrentWalletIds, TOAuthMethod } from '@getpara/web-sdk';
+import ParaWeb, { CurrentWalletIds, SupportedAccountLinks, TOAuthMethod } from '@getpara/web-sdk';
 import { Theme } from '@getpara/react-components';
 import { OnModalStepChangeValue } from '../stores/index.js';
 import { ModalStep, ModalStepProp } from '../utils/steps.js';
@@ -124,4 +124,9 @@ export interface ParaModalProps {
   isGuestModeEnabled?: boolean;
   loginTransitionOverride?: (para: ParaWeb) => Promise<void>;
   createWalletOverride?: (para: ParaWeb) => Promise<{ recoverySecret?: string; walletIds: CurrentWalletIds }>;
+  /**
+   * Which external accounts or wallets to allow your users to link to their accounts. The accounts will be displayed in this order in the modal account screen.
+   * If not provided, will default to your Developer Portal configuration or to all available account types.
+   */
+  supportedAccountLinks?: SupportedAccountLinks;
 }

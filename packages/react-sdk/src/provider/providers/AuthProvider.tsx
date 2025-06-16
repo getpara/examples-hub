@@ -34,16 +34,18 @@ import { isExternalWallet, TelegramAuthResponse, VerifiedAuth } from '@getpara/u
 import { routeMobileExternalWallet } from '../../modal/utils/routeMobileExternalWallet.js';
 import { useStore } from '../stores/useStore.js';
 import { useFormattedBiometricHints } from '../hooks/utils/useFormattedBiometricHints.js';
+import { MutationStatus } from '@tanstack/react-query';
 
 type Value = {
   signUpOrLogIn: (_: VerifiedAuth) => void;
   isSignUpOrLogInPending: boolean;
   verifyNewAccount: (_: string) => void;
-  isVerifyNewAccountPending: boolean;
+  verifyNewAccountStatus: MutationStatus;
   verifyNewAccountError: Error | null;
   verifyOAuth: (_: CoreMethodParams<'verifyOAuth'>['method']) => void;
   verifyFarcaster: () => void;
   verifyTelegram: (_: TelegramAuthResponse) => void;
+  verifyTelegramStatus: MutationStatus;
   onNewAuthState: (_: AuthState) => void;
   presentSignupUi: (_: AuthMethod, __: AuthStateSignup) => void;
   presentLoginUi: (_: AuthMethod, __: AuthStateLogin) => void;
@@ -67,11 +69,12 @@ export const AuthContext = createContext<Value>({
   signUpOrLogIn: () => {},
   isSignUpOrLogInPending: false,
   verifyNewAccount: () => {},
-  isVerifyNewAccountPending: false,
+  verifyNewAccountStatus: 'idle',
   verifyNewAccountError: null,
   verifyOAuth: () => {},
   verifyFarcaster: () => {},
   verifyTelegram: () => {},
+  verifyTelegramStatus: 'idle',
   onNewAuthState: () => {},
   isSetup2faPending: false,
   presentSignupUi: () => {},
@@ -112,12 +115,12 @@ export function AuthProvider({
   const { mutate: mutateSignUpOrLogIn, isPending: isSignUpOrLogInPending } = useSignUpOrLogIn();
   const {
     mutate: mutateVerifyNewAccount,
-    isPending: isVerifyNewAccountPending,
+    status: verifyNewAccountStatus,
     error: verifyNewAccountError,
   } = useVerifyNewAccount();
   const { mutate: mutateVerifyOAuth } = useVerifyOAuth();
   const { mutate: mutateVerifyFarcaster } = useVerifyFarcaster();
-  const { mutate: mutateVerifyTelegram } = useVerifyTelegram();
+  const { mutate: mutateVerifyTelegram, status: verifyTelegramStatus } = useVerifyTelegram();
   const { mutate: mutateWaitForLogin } = useWaitForLogin();
   const { mutate: mutateWaitForSignup } = useWaitForSignup();
   const { mutateAsync: mutateAsyncWaitForWalletCreation } = useWaitForWalletCreation();
@@ -512,11 +515,12 @@ export function AuthProvider({
       signUpOrLogIn,
       isSignUpOrLogInPending,
       verifyNewAccount,
-      isVerifyNewAccountPending: isVerifyNewAccountPending || isPasswordIFrameLoading,
+      verifyNewAccountStatus: isPasswordIFrameLoading ? 'pending' : verifyNewAccountStatus,
       verifyNewAccountError,
       verifyOAuth,
       verifyFarcaster,
       verifyTelegram,
+      verifyTelegramStatus,
       onNewAuthState,
       isSetup2faPending,
       createGuestWallets,
@@ -530,12 +534,13 @@ export function AuthProvider({
       signUpOrLogIn,
       isSignUpOrLogInPending,
       verifyNewAccount,
-      isVerifyNewAccountPending,
+      verifyNewAccountStatus,
       isPasswordIFrameLoading,
       verifyNewAccountError,
       verifyOAuth,
       verifyFarcaster,
       verifyTelegram,
+      verifyTelegramStatus,
       onNewAuthState,
       isSetup2faPending,
       createGuestWallets,

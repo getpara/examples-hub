@@ -57,6 +57,10 @@ const PADDING_BOTTOM = {
   [ModalStep.TELEGRAM_OAUTH]: '16px',
 };
 
+const PADDING_X = {
+  [ModalStep.ACCOUNT_PROFILE]: '32px',
+};
+
 export const Body = ({
   oAuthMethods,
   twoFactorAuthEnabled,
@@ -300,7 +304,7 @@ const InnerContainer = safeStyled.div<{ $embeddedModal: boolean; $step: ModalSte
       ? '0px'
       : $embeddedModal
         ? '12px 0px 0px'
-        : `${PADDING_TOP[$step] ?? '72px'} 72px ${PADDING_BOTTOM[$step] ?? '32px'}`};
+        : `${PADDING_TOP[$step] ?? '72px'} ${PADDING_X[$step] ?? '72px'} ${PADDING_BOTTOM[$step] ?? '32px'}`};
   min-height: ${({ $step }) => MIN_HEIGHT[$step] ?? 'auto'};
   height: ${({ $step }) => MIN_HEIGHT[$step] ?? 'auto'};
 

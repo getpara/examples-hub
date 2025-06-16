@@ -4,7 +4,7 @@ import { useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { getTileButtonFlex } from '../../utils/getTileButtonFlex.js';
 import { StyledCpslTileButton } from '../common.js';
-import { brandedOAuthLogos, oAuthLogos } from '../../constants/oAuthLogos.js';
+import { ACCOUNT_TYPES } from '../../constants/oAuthLogos.js';
 import { useStore } from '../../../provider/stores/useStore.js';
 import { useAuthActions } from '../../../provider/providers/AuthProvider.js';
 
@@ -53,7 +53,7 @@ export const OAuth = ({ methods }: OAuthProps) => {
         <OAuthButton
           $isDark={useDarkLogos}
           key={method}
-          icon={useBrandedLogos ? brandedOAuthLogos[method] : oAuthLogos[method]}
+          icon={ACCOUNT_TYPES[method][useBrandedLogos ? 'logoBranded' : 'logo']!}
           onClick={handleMethodClick(method)}
           $index={index}
           $totalItems={showMoreButton ? HAS_MORE_LENGTH : methodsToShow.length}

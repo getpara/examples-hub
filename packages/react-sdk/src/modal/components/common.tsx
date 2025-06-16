@@ -1,8 +1,10 @@
 import { CpslIcon, CpslInput, CpslSelect, CpslSelectItem, CpslText, CpslTileButton } from '@getpara/react-components';
 import { safeStyled } from '@getpara/react-common';
 import { MOBILE_SIZE, NETWORKS, ON_RAMP_ASSETS } from '../constants/constants.js';
-import { Network, OnRampAsset } from '@getpara/web-sdk';
+import { Network, OnRampAsset, TExternalWallet, TLinkedAccountType } from '@getpara/web-sdk';
 import { useStore } from '../../provider/stores/useStore.js';
+import { ACCOUNT_TYPES } from '../constants/oAuthLogos.js';
+import { PropsWithChildren, useEffect, useRef, useState } from 'react';
 
 export const SpinnerContainer = safeStyled.div`
   display: flex;
@@ -168,4 +170,113 @@ export const ErrorIcon = safeStyled(CpslIcon)`
   --height: 16px;
   --width: 16px;
   --icon-color: var(--cpsl-color-text-error);
+`;
+
+export function AccountTypeIcon({
+  accountType,
+  size,
+  inset,
+}: {
+  accountType?: TLinkedAccountType | TExternalWallet;
+  size?: string;
+  inset?: string;
+}) {
+  const isDark = useStore(state => state.modalConfig?.theme?.mode === 'dark');
+  const data = accountType ? ACCOUNT_TYPES[accountType] : null;
+
+  return data ? (
+    <CpslIcon size={size} inset={inset} icon={data.logoBranded ?? data.logo} invert={isDark && data.isDark} />
+  ) : null;
+}
+
+export function HeroAccountTypeIcon({ accountType }: { accountType: TLinkedAccountType | TExternalWallet }) {
+  if (accountType === 'EMAIL' || accountType === 'PHONE') {
+    return <HeroGenericIcon accountType={accountType} />;
+  }
+
+  return <AccountTypeIcon accountType={accountType} size="60px" />;
+}
+
+export function HeroSuccessIcon() {
+  return <CpslIcon icon="checkCircleFilled" size="80px" style={{ ['--icon-color']: 'var(--cpsl-color-utility-green' }} />;
+}
+
+export function GradientScroll({ height, gap, children }: PropsWithChildren<{ gap?: string; height?: string }>) {
+  const [isNotAtBottom, setIsNotAtBottom] = useState(false);
+  const [isNotAtTop, setIsNotAtTop] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  const onScroll = () => {
+    if (ref.current) {
+      const { scrollTop, scrollHeight, clientHeight } = ref.current;
+      if (height && scrollHeight <= parseInt(height)) {
+        setIsNotAtTop(false);
+        setIsNotAtBottom(false);
+      } else {
+        setIsNotAtTop(scrollTop > 30);
+        setIsNotAtBottom(scrollTop + clientHeight < scrollHeight - 30);
+      }
+    }
+  };
+
+  useEffect(() => {
+    onScroll();
+  }, []);
+
+  return (
+    <GradientScrollContainer
+      ref={ref}
+      height={height}
+      gap={gap}
+      isNotAtBottom={isNotAtBottom}
+      isNotAtTop={isNotAtTop}
+      onScroll={onScroll}
+    >
+      <div>{children}</div>
+    </GradientScrollContainer>
+  );
+}
+
+export const HeroGenericIcon = ({ accountType }: { accountType: 'EMAIL' | 'PHONE' }) => {
+  return (
+    <Avatar>
+      <AccountTypeIcon accountType={accountType} size="24px" />
+    </Avatar>
+  );
+};
+
+const GradientScrollContainer = safeStyled.div<{
+  height?: string;
+  gap?: string;
+  isNotAtBottom: boolean;
+  isNotAtTop: boolean;
+}>`
+  max-height: ${({ height }) => height || '100%'};
+  width: 100%;
+  overflow-y: auto;
+  mask-image: ${({ isNotAtBottom, isNotAtTop }) =>
+    isNotAtBottom && isNotAtTop
+      ? 'linear-gradient(to bottom, transparent 0%, black 24px, black calc(100% - 24px), transparent 100%)'
+      : isNotAtBottom
+        ? 'linear-gradient(to bottom, black calc(100% - 24px), transparent 100%)'
+        : isNotAtTop
+          ? 'linear-gradient(to top, black calc(100% - 24px), transparent 100%)'
+          : 'none'};
+
+  & > div {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: ${({ gap }) => gap || '8px'};
+  }
+`;
+
+const Avatar = safeStyled.div`
+  width: 80px;
+  height: 80px;
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--cpsl-color-background-8);
 `;

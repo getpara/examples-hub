@@ -3,12 +3,14 @@ import { useModalStore } from '../../../stores/modal/useModalStore.js';
 import { ModalStep } from '../../../utils/steps.js';
 import { useExternalWallets } from '../../../../provider/providers/ExternalWalletProvider.js';
 import { useStore } from '../../../../provider/stores/useStore.js';
+import { useAccountLinking } from '../../../../provider/providers/AccountLinkProvider.js';
 
 export const useStepTitle = () => {
   const hideWallets = useStore(state => state.modalConfig?.hideWallets);
   const isLogin = useModalStore(state => state.isLogin());
   const currentStep = useModalStore(state => state.step);
   const { chainId } = useExternalWallets();
+  const { isEnabled: isAccountLinkingEnabled } = useAccountLinking();
 
   const titles = useMemo(
     () => ({
@@ -42,6 +44,10 @@ export const useStepTitle = () => {
       [ModalStep.ADD_FUNDS_FAILURE]: '',
       [ModalStep.ACCOUNT_MAIN]: '',
       [ModalStep.CHAIN_SWITCH]: '',
+      [ModalStep.ACCOUNT_PROFILE]: isAccountLinkingEnabled ? 'Profile' : 'Settings',
+      [ModalStep.ACCOUNT_PROFILE_LIST]: 'Link Account',
+      [ModalStep.ACCOUNT_PROFILE_ADD]: 'Link Account',
+      [ModalStep.ACCOUNT_PROFILE_REMOVE]: 'Unlink Account',
     }),
     [isLogin, chainId, hideWallets],
   );

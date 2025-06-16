@@ -1,6 +1,6 @@
 import { CpslButton, CpslIcon, CpslIdenticon, CpslText } from '@getpara/react-components';
 import { safeStyled } from '@getpara/react-common';
-import ParaWeb, { truncateAddress, TWalletType } from '@getpara/web-sdk';
+import { truncateAddress, TWalletType } from '@getpara/web-sdk';
 import { useEffect, useRef } from 'react';
 import { useDropdownPosition } from '../AuthInput/hooks/useDropdownPosition.js';
 import { useAccount, useWallet, useWalletState } from '../../../provider/index.js';
@@ -9,15 +9,10 @@ import { useInternalClient } from '../../../provider/hooks/utils/useInternalClie
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 import { useStore } from '../../../provider/stores/useStore.js';
 import { useCopyToClipboard } from '@getpara/react-common';
+import { getWalletDisplayName } from '../../utils/getWalletDisplayName.js';
 
 const getValue = (id?: string, type?: TWalletType) => {
   return id && type ? `${id}~${type}` : undefined;
-};
-
-const WALLET_TYPES = {
-  EVM: 'EVM',
-  SOLANA: 'Solana',
-  COSMOS: 'Cosmos',
 };
 
 export const ChainSelect = () => {
@@ -80,31 +75,6 @@ export const ChainSelect = () => {
   );
 };
 
-function getName(
-  para: ParaWeb,
-  {
-    type,
-    isExternal,
-    name,
-    isMenu = false,
-    hideWallets = false,
-  }: Partial<
-    Pick<(typeof para.availableWallets)[0], 'type' | 'isExternal' | 'name'> & {
-      isMenu?: boolean;
-      hideWallets?: boolean;
-    }
-  >,
-) {
-  if (para.isMultiWallet) {
-    return (
-      name ??
-      `${isExternal ? 'External ' : ''}${type ? WALLET_TYPES[type] : ''}${!hideWallets && (isMenu || isExternal) ? ' Wallet' : ''}`
-    );
-  }
-
-  return hideWallets ? 'My Account' : name || 'My Wallet';
-}
-
 export const AccountSelect = () => {
   const hideWallets = useStore(state => state.modalConfig?.hideWallets);
   const para = useInternalClient();
@@ -130,7 +100,7 @@ export const AccountSelect = () => {
         <CpslIdenticon variant="avatar" size="24px" hash={para.getIdenticonHash(activeWallet.id, activeWallet.type)} />
       )}
       <WalletName variant="bodyXS" color="contrast" style={{ marginLeft: isGuest ? '8px' : '0px' }}>
-        {isGuest ? 'Guest' : getName(para, { ...activeWallet, hideWallets })}
+        {isGuest ? 'Guest' : getWalletDisplayName(para, { ...activeWallet, hideWallets })}
       </WalletName>
       {!hideWallets && (
         <>
@@ -184,7 +154,7 @@ export const AccountSelect = () => {
             {activeWallet && ActiveWalletNode}
             {availableWallets.map(({ address, name: _name, id, type, isExternal }) => {
               const key = getValue(id, type);
-              const name = _name ?? getName(para, { type, isExternal, isMenu: true, hideWallets });
+              const name = _name ?? getWalletDisplayName(para, { type, isExternal, isMenu: true, hideWallets });
               return (
                 <HeaderSelectItem key={key} slot="items" value={key}>
                   <FlexRow>

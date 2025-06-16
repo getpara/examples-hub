@@ -5,6 +5,23 @@ import { MockPara } from '../../mocks/mockCorePara.js';
 import { API_KEY } from '../../constants.js';
 import { Environment } from '@getpara/web-sdk';
 
+vi.mock('../../../src/modal/components/OAuth/TelegramOAuthStep.js', async importOriginal => {
+  const actual = await importOriginal();
+  return {
+    ...(actual as any),
+    TelegramIFrame: () => <></>,
+  };
+});
+
+vi.mock('../../../src/modal/hooks/useTelegramLogin.js', () => ({
+  useTelegramLogin: vi.fn(() => ({
+    url: 'https://example.com',
+    status: 'idle',
+    isLoaded: true,
+    setIsLoaded: vi.fn(),
+  })),
+}));
+
 vi.mock('@getpara/react-common', async importOriginal => {
   const actual = await importOriginal();
   return {
@@ -28,6 +45,9 @@ vi.mock('../../../src/modal/stores/index.js', () => ({
       setSupportedAuthMethods: vi.fn(),
       setPasswordURLForCreate: vi.fn(),
       setWebAuthURLForCreate: vi.fn(),
+      refs: {
+        telegramIFrame: { current: null },
+      },
     }),
   useUserInfoStore: getter =>
     getter({

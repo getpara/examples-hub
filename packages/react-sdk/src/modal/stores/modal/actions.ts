@@ -42,11 +42,16 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
     }
 
     const onModalStepChange = get().onModalStepChange;
+    const accountLinkOptions = get().accountLinkOptions || [];
     const signupState = get().getSignupState();
     const iFrameUrl = get().iFrameUrl;
     const refs = get().refs;
 
     let prevStep = getPreviousStep(flow, currentStep);
+
+    if (currentStep === ModalStep.ACCOUNT_PROFILE_ADD && accountLinkOptions.length < 2) {
+      prevStep = ModalStep.ACCOUNT_PROFILE;
+    }
 
     if (currentStep === ModalStep.PASSWORD_CREATION && iFrameUrl && !signupState?.passkeyUrl) {
       prevStep = ModalStep.AUTH_MAIN;
@@ -150,4 +155,5 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
   },
   setAuthStepRoute: authStepRoute => set({ authStepRoute }),
   setIsPasskeySupported: isPasskeySupported => set({ isPasskeySupported }),
+  setAccountLinkOptions: accountLinkOptions => set({ accountLinkOptions }),
 });

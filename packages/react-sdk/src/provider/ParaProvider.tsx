@@ -11,6 +11,7 @@ import { isConfigType, isParaWeb } from './utils/paraConfigTypeGuards.js';
 import ParaWeb from '@getpara/web-sdk';
 import { EXTERNAL_WALLET_TYPES } from '@getpara/web-sdk';
 import { AuthProvider } from './providers/AuthProvider.js';
+import { AccountLinkProvider } from './providers/AccountLinkProvider.js';
 
 export const ParaProvider = forwardRef<
   ParaModalHandle,
@@ -133,8 +134,10 @@ export const ParaProvider = forwardRef<
       }}
     >
       <ExternalWalletWrapper config={externalWalletConfig}>
-        {children}
-        {!config.disableEmbeddedModal && <ParaModal ref={ref} />}
+        <AccountLinkProvider>
+          {children}
+          {!config.disableEmbeddedModal && <ParaModal ref={ref} />}
+        </AccountLinkProvider>
       </ExternalWalletWrapper>
     </AuthProvider>
   );

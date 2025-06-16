@@ -1,24 +1,51 @@
-import { CoreMethodName, CoreMethodParams, CoreMethods } from '@getpara/web-sdk';
-import { CoreMethodHook, CoreMethodMutation, CoreMethodMutationState, CoreMethodStateHook } from '../../types/utils.js';
+import {
+  CoreMethodName,
+  CoreMethodParams,
+  CoreMethods,
+  InternalAction,
+  InternalMethodName,
+  InternalMethodParams,
+  InternalMethods,
+} from '@getpara/web-sdk';
+import {
+  CoreMethodMutationHook,
+  CoreMethodMutation,
+  CoreMethodMutationState,
+  CoreMethodMutationStateHook,
+  InternalMethodMutationHook,
+} from '../../types/utils.js';
 import { renameCoreMutations } from '../../utils/renameMutations.js';
 import { useClient } from '../utils/index.js';
 import { useMutation, useMutationState } from '@tanstack/react-query';
 import { CoreAction } from '../../actions/utils.js';
+import { useInternalClient } from '../utils/useInternalClient.js';
 
-export function generateHook<const method extends CoreMethodName & keyof CoreMethods>(
+export function generateCoreMutation<const method extends CoreMethodName & keyof CoreMethods>(
   method: method,
   action: CoreAction<method>,
-  defaultParams?: CoreMethodParams<method>,
-): () => CoreMethodHook<method> {
+  {
+    delay,
+    defaultParams,
+  }: {
+    delay?: number;
+    defaultParams?: CoreMethodParams<method>;
+  } = {},
+): () => CoreMethodMutationHook<method> {
   return () => {
     const para = useClient();
 
     const mutation = useMutation({
       mutationKey: [method],
       mutationFn: async (args?: CoreMethodParams<method>) => {
-        const result = await action(para, (args ?? defaultParams)!);
+        if (typeof delay === 'number') await new Promise(resolve => setTimeout(resolve, delay));
 
-        return result;
+        try {
+          const result = await action(para, (args ?? defaultParams)!);
+
+          return result;
+        } catch (error) {
+          throw error;
+        }
       },
     });
 
@@ -26,9 +53,42 @@ export function generateHook<const method extends CoreMethodName & keyof CoreMet
   };
 }
 
+export function generateInternalMutation<const method extends InternalMethodName & keyof InternalMethods>(
+  method: method,
+  action: InternalAction<method>,
+  {
+    delay,
+    defaultParams,
+  }: {
+    delay?: number;
+    defaultParams?: InternalMethodParams<method>;
+  } = {},
+): () => InternalMethodMutationHook<method> {
+  return () => {
+    const para = useInternalClient();
+
+    const mutation = useMutation({
+      mutationKey: [method],
+      mutationFn: async (args?: InternalMethodParams<method>) => {
+        if (typeof delay === 'number') await new Promise(resolve => setTimeout(resolve, delay));
+
+        try {
+          const result = await action(para, (args ?? defaultParams)!);
+
+          return result;
+        } catch (error) {
+          throw error;
+        }
+      },
+    });
+
+    return mutation as InternalMethodMutationHook<method>;
+  };
+}
+
 export function generateStateHook<const method extends CoreMethodName & keyof CoreMethods>(
   method: method,
-): CoreMethodStateHook<method> {
+): CoreMethodMutationStateHook<method> {
   return () => {
     const frames = useMutationState<CoreMethodMutationState<method>>({
       filters: { mutationKey: [method] },

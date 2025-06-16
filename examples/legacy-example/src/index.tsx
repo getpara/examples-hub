@@ -993,7 +993,7 @@ function AppInner({
                 />
               </HStack>
               <HStack>
-                <Button colorScheme="green" isDisabled={!para} onClick={openModal}>
+                <Button colorScheme="green" isDisabled={!para} onClick={() => openModal()}>
                   Open Modal
                 </Button>
                 {paraAccount.isConnected && (
