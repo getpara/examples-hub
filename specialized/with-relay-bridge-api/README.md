@@ -10,7 +10,7 @@ Follow these steps to set up and run the example:
 
 ### 1. Setup Environment
 
-Create your `.env` file based on `env.example`. Ensure you set:
+Create your `.env` file based on `.env.example`. Ensure you set:
 
 - Para API Key (`NEXT_PUBLIC_PARA_API_KEY`)
 - Para Environment (`NEXT_PUBLIC_PARA_ENVIRONMENT`)

@@ -5,8 +5,7 @@ This project is a simple example of using the Para Rainbowkit Wallet SDK with th
 ## Prerequisites
 
 - **Para API Key**: Obtain your API key from the Para developer portal. Create a `.env.local` file in the project root
-  (you can copy `.env.local.example` or `.env.example`) and add your key, prefixing with `NEXT_PUBLIC_` to expose it to
-  the browser:
+  (you can copy `.env.example`) and add your key, prefixing with `NEXT_PUBLIC_` to expose it to the browser:
   ```env
   NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
   ```
