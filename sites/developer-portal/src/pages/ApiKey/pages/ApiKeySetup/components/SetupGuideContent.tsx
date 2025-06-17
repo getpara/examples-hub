@@ -1,20 +1,37 @@
 import { Link, useParams } from 'react-router-dom';
 import { useGetApiKeySetupStatus } from '../../../../../hooks/api/queries/useApiKeySetupStatus';
-import { Button, SlottedInput } from '@getpara/react-component-library';
+import { Android, Button, IOS, SlottedInput, Typography, useFormContext } from '@getpara/react-component-library';
 import { OnboardingStep } from '../config';
 import { Check } from 'lucide-react';
 import { formatPhoneNumber } from '@getpara/react-sdk';
+import { VerificationStatus } from './VerificationStatus';
+import { useGetOrganizationKey } from '../../../../../hooks/api/queries/useOrganizationKeys';
+import { Environment } from '../../../../../types/environment';
+import { getIsFrameworkAndroid, getIsFrameworkIos } from '../../../../../utils/framework';
+import { SetupForm } from '../hooks/useSetupForm';
+import { Framework } from '../../../../../types/framework';
 
 type SetupGuideContentProps = {
-  stepNumber: number;
   step: OnboardingStep;
 };
 
-export const SetupGuideContent = ({ stepNumber, step }: SetupGuideContentProps) => {
-  const { apiKey, env, projectId } = useParams();
+export const SetupGuideContent = ({ step }: SetupGuideContentProps) => {
+  const form = useFormContext<SetupForm>();
+  const { organizationId, apiKey, env, projectId } = useParams();
   const { data: status } = useGetApiKeySetupStatus(projectId ?? '', apiKey ?? '', env ?? '');
+  const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
 
-  if (stepNumber === 0) {
+  const framework = form.watch('framework');
+
+  const { androidPackageName, androidSha256CertFingerprints, teamId, bundleIdentifier } = apiKeyData ?? {};
+
+  // Only show status if we have saved values
+  const isAppleConfigured = !!teamId && !!bundleIdentifier;
+  const isAndroidConfigured = !!androidPackageName && !!androidSha256CertFingerprints;
+  const isIosFramework = getIsFrameworkIos(framework as Framework);
+  const isAndroidFramework = getIsFrameworkAndroid(framework as Framework);
+
+  if (step.showUser) {
     const user = status?.firstUser?.user;
     let userValue: string | undefined;
     if (user) {
@@ -34,24 +51,55 @@ export const SetupGuideContent = ({ stepNumber, step }: SetupGuideContentProps) 
     );
   }
 
+  const primaryTo = step.primaryButton?.isExternal
+    ? step.primaryButton.to
+    : `/${organizationId}/project/${projectId}/key/${env}/${apiKey}${step.primaryButton?.to}`;
+  const secondaryTo = step.secondaryButton?.isExternal
+    ? step.secondaryButton.to
+    : `/${organizationId}/project/${projectId}/key/${env}/${apiKey}${step.secondaryButton?.to}`;
+
   return (
-    <div className="para:flex para:gap-4 para:items-center">
-      {step.primaryButton && (
-        <Link to={step.primaryButton.to} target={step.primaryButton.target}>
-          <Button size="sm" variant="neutral">
-            {step.primaryButton.Icon && <step.primaryButton.Icon className="para:size-4" />}
-            {step.primaryButton.text}
-          </Button>
-        </Link>
+    <div className="para:flex para:flex-col para:gap-4">
+      {step.showMobileStatus && (
+        <>
+          {isIosFramework && (
+            <>
+              <div className="para:flex para:items-center para:gap-2">
+                <IOS className="para:size-4" />
+                <Typography className="para:text-sm para:font-medium para:leading-none">iOS</Typography>
+              </div>
+              <VerificationStatus platform="apple" isConfigured={isAppleConfigured} isSmall />
+            </>
+          )}
+          {isAndroidFramework && (
+            <>
+              <div className="para:flex para:items-center para:gap-2">
+                <Android className="para:size-4" />
+                <Typography className="para:text-sm para:font-medium para:leading-none">Android</Typography>
+              </div>
+              <VerificationStatus platform="android" isConfigured={isAndroidConfigured} isSmall />
+            </>
+          )}
+        </>
       )}
-      {step.secondaryButton && (
-        <Link to={step.secondaryButton.to} target={step.secondaryButton.target}>
-          <Button size="sm" variant="ghost">
-            {step.secondaryButton.Icon && <step.secondaryButton.Icon className="para:size-4" />}
-            {step.secondaryButton.text}
-          </Button>
-        </Link>
-      )}
+      <div className="para:flex para:gap-4 para:items-center">
+        {step.primaryButton && (
+          <Link to={primaryTo} target={step.primaryButton.target}>
+            <Button size="sm" variant="neutral">
+              {step.primaryButton.Icon && <step.primaryButton.Icon className="para:size-4" />}
+              {step.primaryButton.text}
+            </Button>
+          </Link>
+        )}
+        {step.secondaryButton && (
+          <Link to={secondaryTo} target={step.secondaryButton.target}>
+            <Button size="sm" variant="ghost">
+              {step.secondaryButton.Icon && <step.secondaryButton.Icon className="para:size-4" />}
+              {step.secondaryButton.text}
+            </Button>
+          </Link>
+        )}
+      </div>
     </div>
   );
 };

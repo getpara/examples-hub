@@ -24,7 +24,7 @@ export const AndroidSetup = () => {
   const { androidPackageName, androidSha256CertFingerprints } = apiKeyData ?? {};
 
   // Only show status if we have saved values
-  const shouldShowStatus = !!androidPackageName && !!androidSha256CertFingerprints;
+  const isConfigured = !!androidPackageName && !!androidSha256CertFingerprints;
 
   return (
     <>
@@ -38,7 +38,7 @@ export const AndroidSetup = () => {
           You will need these identifiers to build your app.
         </Typography>
       </div>
-      {shouldShowStatus && <VerificationStatus platform="android" />}
+      <VerificationStatus platform="android" isConfigured={isConfigured} />
       <div className="para:flex para:flex-col para:md:flex-row para:gap-4">
         <div className="para:flex-1 para:flex-col para:gap-2">
           <FormField

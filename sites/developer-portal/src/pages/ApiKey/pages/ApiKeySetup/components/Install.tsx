@@ -35,6 +35,7 @@ export const Install = () => {
 
   return (
     <ConfigCard
+      id="install"
       title="Install"
       ActionComponent={
         <Link to={getFrameworkDocsLink(typedFramework)}>

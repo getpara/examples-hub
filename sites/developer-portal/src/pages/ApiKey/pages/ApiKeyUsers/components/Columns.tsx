@@ -44,9 +44,12 @@ export const getColumns = (isLoading?: boolean): ColumnDef<UsersTableData>[] => 
         ? () => <Skeleton className={cn(baseSkeleton, 'para:w-24 para:h-[22px] para:ml-auto')} />
         : ({ row }) => {
             const addresses = row.getValue<string[]>('walletAddresses').filter(a => !!a);
+            const externalAddress = row.original.externalWalletAddress;
 
-            const shownAddresses = addresses.slice(0, 2);
-            const numRemainingAddresses = addresses.length - 2;
+            const allAddresses = externalAddress ? [...addresses, externalAddress] : addresses;
+
+            const shownAddresses = allAddresses.slice(0, 2);
+            const numRemainingAddresses = allAddresses.length - 2;
 
             return (
               <div className="para:flex para:flex-wrap para:gap-1 para:justify-end">

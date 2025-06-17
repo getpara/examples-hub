@@ -1,8 +1,8 @@
 import { useParams } from 'react-router-dom';
 import { useGetApiKeySetupStatus } from '../../../../../hooks/api/queries/useApiKeySetupStatus';
-import { Button, cn, Typography } from '@getpara/react-component-library';
-import { ONBOARDING_STEPS, ONBOARDING_VERSION, OnboardingStep, OnboardingStepButton } from '../config';
-import { useCallback, useMemo, useState } from 'react';
+import { Button, cn, Typography, useFormContext } from '@getpara/react-component-library';
+import { ONBOARDING_VERSION, OnboardingStep } from '../config';
+import { useMemo, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { Environment } from '../../../../../types/environment';
 import { useGetOrganizationKey } from '../../../../../hooks/api/queries/useOrganizationKeys';
@@ -10,35 +10,29 @@ import { useUpdateApiKey } from '../../../../../hooks/api/mutations/useUpdateApi
 import { ApiKeyOnboarding } from '../../../../../types/api';
 import { SetupGuideContent } from './SetupGuideContent';
 import { useGetProject } from '../../../../../hooks/api/queries/useProjects';
+import { getFrameworkOnboarding } from '../../../../../utils/framework';
+import { Framework } from '../../../../../types/framework';
+import { SetupForm } from '../hooks/useSetupForm';
 
 export const SetupGuide = () => {
-  const { organizationId, apiKey, env, projectId } = useParams();
+  const { apiKey, env, projectId } = useParams();
   const { data: status } = useGetApiKeySetupStatus(projectId ?? '', apiKey ?? '', env ?? '');
   const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
   const { mutate: updateKey, isPending: isUpdatingKey } = useUpdateApiKey();
   const { data: project } = useGetProject(projectId ?? '');
   const [stepOverride, setStepOverride] = useState<number>();
+  const form = useFormContext<SetupForm>();
 
-  const maxSteps = ONBOARDING_STEPS.length - 1;
+  const framework = form.watch('framework');
+
+  const steps = getFrameworkOnboarding((framework as Framework) ?? Framework.REACT);
+  const maxSteps = steps.length - 1;
   const onboarding = apiKeyData?.onboarding;
-
-  const formatButtonLinkUrl = useCallback(
-    (stepButton?: OnboardingStepButton) => {
-      if (!stepButton) {
-        return;
-      }
-
-      stepButton.to = !stepButton.isExternal
-        ? `/${organizationId}/project/${projectId}/key/${env}/${apiKey}${stepButton.to}`
-        : stepButton.to;
-    },
-    [apiKey, env, organizationId, projectId],
-  );
 
   const { step, stepNumber } = useMemo(() => {
     const resp: { stepNumber: number; step: OnboardingStep } = {
       stepNumber: 0,
-      step: ONBOARDING_STEPS[0],
+      step: steps[0],
     };
 
     if (stepOverride !== undefined) {
@@ -57,12 +51,10 @@ export const SetupGuide = () => {
       }
     }
 
-    resp.step = ONBOARDING_STEPS[resp.stepNumber];
-    formatButtonLinkUrl(resp.step.primaryButton);
-    formatButtonLinkUrl(resp.step.secondaryButton);
+    resp.step = steps[resp.stepNumber];
 
     return resp;
-  }, [formatButtonLinkUrl, onboarding, project?.framework, stepOverride]);
+  }, [onboarding, project?.framework, stepOverride, steps]);
 
   const completeDisabled = (stepNumber === 0 && !status?.firstUser) || isUpdatingKey;
 
@@ -140,7 +132,7 @@ export const SetupGuide = () => {
           {step.body}
         </Typography>
       </div>
-      <SetupGuideContent stepNumber={stepNumber} step={step} />
+      <SetupGuideContent step={step} />
       <div className="para:flex para:justify-end">
         <Button disabled={completeDisabled} isLoading={isUpdatingKey} size="sm" onClick={handleCompleteStep()}>
           Complete

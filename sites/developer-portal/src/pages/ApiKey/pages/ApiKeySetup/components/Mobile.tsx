@@ -20,6 +20,7 @@ export const Mobile = () => {
 
   return (
     <ConfigCard
+      id="mobile-setup"
       title="Mobile Set Up"
       subtitle="If you are building a cross-platform app that will run on the web and on mobile you will need to supply additional, mobile specific details."
     >

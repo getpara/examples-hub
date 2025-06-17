@@ -5,8 +5,11 @@ import { ErrorBoundary } from '../../components/ErrorBoundary/ErrorBoundary';
 import { SidebarProvider } from '@getpara/react-component-library';
 import { AppSidebar } from './components/AppSidebar';
 import { AuthAppBar } from '../../components/AppBar/AuthAppBar/AuthAppBar';
+import { useScrollToAnchor } from '../../hooks/useScrollToAnchor';
 
 export const Layout = () => {
+  useScrollToAnchor();
+
   return (
     <AuthenticatedWrapper requireOrgs>
       <SentryErrorBoundary

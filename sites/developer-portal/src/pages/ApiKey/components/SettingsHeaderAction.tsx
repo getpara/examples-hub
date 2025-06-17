@@ -1,4 +1,4 @@
-import { Copy } from 'lucide-react';
+import { Copy, SquareArrowUpRight } from 'lucide-react';
 import { CopyToDialog } from './CopyToDialog';
 import { useState } from 'react';
 import { Button, toast, useFormContext } from '@getpara/react-component-library';
@@ -13,6 +13,10 @@ import { RestoreProjectDialog } from './RestoreProjectDialog';
 import { useIsInView } from '../../../hooks/useIsInView';
 import { useAppStore } from '../../../stores/app/useAppStore';
 import { FloatingSaveButton } from './FloatingSaveButton';
+import { useCopyToNewKey } from '../../../hooks/useCopyToNewKey';
+import { formatEnvName } from '../../../utils/apiKey';
+import { useGetAvailableKeyEnv } from '../../../hooks/api/queries/useOrganizationKeys';
+import { useIsValidProject } from '../../../hooks/useIsValidOrgConfig';
 
 type SettingsHeaderActionProps = {
   isSetup?: boolean;
@@ -30,6 +34,9 @@ export const SettingsHeaderAction = ({ isSetup }: SettingsHeaderActionProps) => 
   const [isArchiveDialogOpen, setArchiveDialogOpen] = useState(false);
   const [isRestoreDialogOpen, setRestoreDialogOpen] = useState(false);
   const appBarHeight = useAppStore(state => state.appBarHeight);
+  const { copyToNewKey, isCreatingKey } = useCopyToNewKey();
+  const { data: availableKeyEnv } = useGetAvailableKeyEnv(projectId ?? '');
+  const isValidProject = useIsValidProject(projectId, true);
 
   const { ref, isInView } = useIsInView<HTMLDivElement>({ rootMargin: `-${appBarHeight}px 0px 0px 0px` });
 
@@ -86,6 +93,12 @@ export const SettingsHeaderAction = ({ isSetup }: SettingsHeaderActionProps) => 
         {!project?.archived && (
           <Button variant="neutral" disabled={!canSave || isSubmitting} isLoading={isSubmitting} type="submit">
             Save Changes
+          </Button>
+        )}
+        {isSetup && !!availableKeyEnv && isValidProject && (
+          <Button onClick={copyToNewKey} disabled={isCreatingKey} isLoading={isCreatingKey}>
+            <SquareArrowUpRight className="para:size-4" />
+            {`Create ${formatEnvName(availableKeyEnv)} Instance`}
           </Button>
         )}
       </div>

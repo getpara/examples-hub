@@ -6,20 +6,15 @@ import {
   SheetTitle,
   Sheet,
   Typography,
-  Button,
 } from '@getpara/react-component-library';
 import { RemoveUserDialog } from './RemoveUserDialog';
 import { useState } from 'react';
 import { UsersTableData } from '../../../../../types/api';
 import { LOGIN_METHOD_CONFIG } from '../../../../../utils/constants';
 import { formatDatetime } from '../../../../../utils/formatDate';
-import { Link } from 'react-router-dom';
 import { GroupedCard, GroupedCards } from '../../../../../components/GroupedCards';
-import { truncateAddress, TWalletType } from '@getpara/react-sdk';
-import { WALLET_TYPE_CONFIG } from '../../ApiKeySetup/components/Networks';
-import { CopyButton } from '../../../../../components/CopyButton';
-import { blockExplorers } from '../../../../../utils/blockExplorers';
-import { ExternalLink } from 'lucide-react';
+import { TWalletType } from '@getpara/react-sdk';
+import { WalletInfoCard } from './WalletInfoCard';
 
 type UserSheetProps = {
   isOpen: boolean;
@@ -40,18 +35,40 @@ export const UserSheet = ({ isOpen, user, onClose }: UserSheetProps) => {
     return null;
   }
 
-  let walletAddresses: { address: string; type: TWalletType }[] = [];
+  const externalWalletAddresses = user.externalWalletAddress ? [user.externalWalletAddress] : [];
 
-  for (const wallet of user.walletAddresses ?? []) {
+  let wallets: { address: string; type: TWalletType }[] = [],
+    externalWallets: { address: string; type: TWalletType }[] = [];
+
+  const formatWallet = (address?: string): { address: string; type: TWalletType } | undefined => {
+    if (!address) {
+      return;
+    }
+
+    const isEth = address.startsWith('0x');
+    const isSolana = !isEth && /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address);
+
+    return { address: address, type: isEth ? 'EVM' : isSolana ? 'SOLANA' : 'COSMOS' };
+  };
+
+  for (const address of user.walletAddresses ?? []) {
+    const wallet = formatWallet(address);
+
     if (!wallet) {
       continue;
     }
 
-    const isEth = wallet.startsWith('0x');
+    wallets.push(wallet);
+  }
 
-    walletAddresses.push({ address: wallet, type: isEth ? 'EVM' : 'SOLANA' });
+  for (const address of externalWalletAddresses) {
+    const wallet = formatWallet(address);
 
-    // TODO: return more wallet data so the cosmos address can be derived if needed here
+    if (!wallet) {
+      continue;
+    }
+
+    externalWallets.push(wallet);
   }
 
   return (
@@ -91,38 +108,23 @@ export const UserSheet = ({ isOpen, user, onClose }: UserSheetProps) => {
                 </Typography>
               </GroupedCard>
             </GroupedCards>
-            {!!walletAddresses?.length && (
+            {!!wallets?.length && (
               <div className="para:flex para:flex-col para:gap-2">
                 <Typography className="para:text-sm para:font-semibold">Wallets</Typography>
                 <GroupedCards>
-                  {walletAddresses.map(address => {
-                    const Icon = WALLET_TYPE_CONFIG[address.type].Icon;
-
-                    const blockExplorer = blockExplorers[address.type];
-
-                    return (
-                      <GroupedCard
-                        key={address.address}
-                        className="para:flex para:flex-row para:items-center para:gap-2 para:flex-wrap"
-                      >
-                        <div className="para:flex para:flex-row para:items-center para:gap-2">
-                          <Icon className="para:size-4" />
-                          <Typography className="para:text-sm para:font-medium" color="secondary">
-                            {truncateAddress(address.address, address.type, { targetLength: 8 })}
-                          </Typography>
-                          <CopyButton value={address.address} className="para:size-4" />
-                        </div>
-                        {blockExplorer && (
-                          <Link to={`${blockExplorer.url}${address.address}`} target="_blank" rel="noopener noreferrer">
-                            <Button variant="link" className="para:!px-2">
-                              View on {blockExplorer.name}
-                              <ExternalLink />
-                            </Button>
-                          </Link>
-                        )}
-                      </GroupedCard>
-                    );
-                  })}
+                  {wallets.map(wallet => (
+                    <WalletInfoCard wallet={wallet} />
+                  ))}
+                </GroupedCards>
+              </div>
+            )}
+            {!!externalWallets?.length && (
+              <div className="para:flex para:flex-col para:gap-2">
+                <Typography className="para:text-sm para:font-semibold">External Wallets</Typography>
+                <GroupedCards>
+                  {externalWallets.map(wallet => (
+                    <WalletInfoCard wallet={wallet} />
+                  ))}
                 </GroupedCards>
               </div>
             )}

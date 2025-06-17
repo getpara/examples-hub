@@ -16,7 +16,7 @@ export const AppleSetup = () => {
   const { teamId, bundleIdentifier } = apiKeyData ?? {};
 
   // Only show status if we have saved values
-  const shouldShowStatus = !!teamId && !!bundleIdentifier;
+  const isConfigured = !!teamId && !!bundleIdentifier;
 
   return (
     <>
@@ -30,7 +30,7 @@ export const AppleSetup = () => {
           You will need these identifiers to build your app.
         </Typography>
       </div>
-      {shouldShowStatus && <VerificationStatus platform="apple" />}
+      <VerificationStatus platform="apple" isConfigured={isConfigured} />
       <div className="para:flex para:flex-col para:md:flex-row para:gap-4">
         <div className="para:flex-1 para:flex-col para:gap-2">
           <FormField

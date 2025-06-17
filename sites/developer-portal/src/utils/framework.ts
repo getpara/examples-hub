@@ -16,6 +16,11 @@ import {
   WEB_DOCS_LINK,
   WEB_PACKAGE_MANAGER_OPTIONS,
 } from './constants';
+import {
+  ONBOARDING_STEPS_MOBILE,
+  ONBOARDING_STEPS_SERVER,
+  ONBOARDING_STEPS_WEB,
+} from '../pages/ApiKey/pages/ApiKeySetup/config';
 
 export const frameworkHasPackageManager: Record<Framework, boolean> = {
   [Framework.REACT]: true,
@@ -340,5 +345,21 @@ export const getIsFrameworkAndroid = (framework?: Framework) => {
       return true;
     default:
       return false;
+  }
+};
+
+export const getFrameworkOnboarding = (framework?: Framework) => {
+  switch (framework?.toUpperCase()) {
+    case Framework.REACT_NATIVE:
+    case Framework.EXPO:
+    case Framework.FLUTTER:
+    case Framework.SWIFT:
+      return ONBOARDING_STEPS_MOBILE;
+    case Framework.NODE:
+    case Framework.DENO:
+    case Framework.BUN:
+      return ONBOARDING_STEPS_SERVER;
+    default:
+      return ONBOARDING_STEPS_WEB;
   }
 };
