@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8F200F542DEFB08100B39BB4 /* AlertItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F200F532DEFB08100B39BB4 /* AlertItem.swift */; };
 		8F4302572DE8DE9000186768 /* EVMWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F4302562DE8DE9000186768 /* EVMWalletView.swift */; };
 		8F6AE66A2DC151040098F76B /* ChooseSignupMethodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F6AE6692DC151040098F76B /* ChooseSignupMethodView.swift */; };
 		8FA007832D57EB0D009EF0C3 /* ParaConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA007812D57EB0D009EF0C3 /* ParaConfig.swift */; };
@@ -44,6 +45,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8F200F532DEFB08100B39BB4 /* AlertItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertItem.swift; sourceTree = "<group>"; };
 		8F4302562DE8DE9000186768 /* EVMWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EVMWalletView.swift; sourceTree = "<group>"; };
 		8F6AE6692DC151040098F76B /* ChooseSignupMethodView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChooseSignupMethodView.swift; sourceTree = "<group>"; };
 		8F924CB92D824A1700938496 /* Example.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; name = Example.xctestplan; path = exampleUITests/Example.xctestplan; sourceTree = "<group>"; };
@@ -167,6 +169,7 @@
 		8FA007852D57F1AA009EF0C3 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				8F200F532DEFB08100B39BB4 /* AlertItem.swift */,
 				8FA007842D57F1AA009EF0C3 /* Extensions.swift */,
 			);
 			path = Utils;
@@ -276,7 +279,6 @@
 			buildPhases = (
 				8FE93AA32D80F58C00CE018E /* Sources */,
 				8FE93AA42D80F58C00CE018E /* Frameworks */,
-				8F200F552DF2006000B39BB4 /* ShellScript */,
 				8FE93AA52D80F58C00CE018E /* Resources */,
 			);
 			buildRules = (
@@ -301,6 +303,7 @@
 				E8F93B242C21EBED006AA3F6 /* Sources */,
 				E8F93B252C21EBED006AA3F6 /* Frameworks */,
 				E8F93B262C21EBED006AA3F6 /* Resources */,
+				8FAB15162DF25AB2003DAC18 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -379,8 +382,9 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		8F200F552DF2006000B39BB4 /* ShellScript */ = {
+		8FAB15162DF25AB2003DAC18 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -394,7 +398,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "#!/bin/bash\n\n# Inject Xcode Cloud environment variable into Info.plist for TestFlight builds\nif [ -n \"$PARA_API_KEY\" ]; then\n    echo \"Injecting PARA_API_KEY into Info.plist for TestFlight build\"\n    \n    # Try to set the key, if it doesn't exist, add it\n    /usr/libexec/PlistBuddy -c \"Set :APIKey $PARA_API_KEY\" \"${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}\" 2>/dev/null || \\\n    /usr/libexec/PlistBuddy -c \"Add :APIKey string $PARA_API_KEY\" \"${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}\"\n    \n    echo \"API key injection completed\"\nelse\n    echo \"PARA_API_KEY not found - assuming local development build\"\nfi\n";
+			shellScript = "#!/bin/bash\n\nset -e\n\n# Inject Xcode Cloud environment variable into Info.plist for TestFlight builds\nif [ -n \"$PARA_API_KEY\" ]; then\n    echo \"Injecting PARA_API_KEY into Info.plist for TestFlight build\"\n    echo \"Target path: ${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}\"\n    \n    # Ensure the Info.plist exists and is accessible\n    if [ ! -f \"${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}\" ]; then\n        echo \"Error: Info.plist not found at expected location\"\n        exit 1\n    fi\n    \n    # Try to set the key, if it doesn't exist, add it\n    if /usr/libexec/PlistBuddy -c \"Set :APIKey '$PARA_API_KEY'\" \"${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}\" 2>/dev/null; then\n        echo \"Updated existing APIKey\"\n    else\n        /usr/libexec/PlistBuddy -c \"Add :APIKey string '$PARA_API_KEY'\" \"${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}\"\n        echo \"Added new APIKey\"\n    fi\n    \n    # Verify the injection worked\n    INJECTED_KEY=$(/usr/libexec/PlistBuddy -c \"Print :APIKey\" \"${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}\" 2>/dev/null || echo \"FAILED\")\n    echo \"Verification: APIKey = $INJECTED_KEY\"\n    \n    echo \"API key injection completed\"\nelse\n    echo \"PARA_API_KEY not found - assuming local development build\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -423,6 +427,7 @@
 				8FFEAD1A2DC5675100103C14 /* PhoneFormatter.swift in Sources */,
 				8F6AE66A2DC151040098F76B /* ChooseSignupMethodView.swift in Sources */,
 				8FA007862D57F1AA009EF0C3 /* Extensions.swift in Sources */,
+				8F200F542DEFB08100B39BB4 /* AlertItem.swift in Sources */,
 				E86A475B2D1F13CB00546CC2 /* PhoneAuthView.swift in Sources */,
 				8FA007832D57EB0D009EF0C3 /* ParaConfig.swift in Sources */,
 				E86A47412D0CA63700546CC2 /* AppRootManager.swift in Sources */,
@@ -523,7 +528,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -587,7 +592,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -620,6 +625,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = example/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Para;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -657,6 +663,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = example/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Para;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -726,7 +733,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/getpara/swift-sdk";
 			requirement = {
-				branch = "2.0.0-alpha";
+				branch = cosmos;
 				kind = branch;
 			};
 		};
