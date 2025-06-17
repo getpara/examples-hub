@@ -1,10 +1,12 @@
-import { useState, useMemo } from "react";
-import { SUPPORTED_WALLET_TYPES, SupportedWalletType } from "@/types";
-import { filterAndGroupTokens, TokenData } from "@/utils/tokenUtils";
+import { useState, useMemo } from 'react';
+import { SupportedWalletType } from '@/types';
+import { filterAndGroupTokens, TokenData } from '@/utils/tokenUtils';
 
 export function useTokenFilter(tokens: TokenData[]) {
-  const [activeTab, setActiveTab] = useState<"all" | SupportedWalletType>("all");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState<'all' | SupportedWalletType>(
+    'all'
+  );
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Filter and group tokens
   const { filteredTokens, groupedTokens } = useMemo(() => {
@@ -17,19 +19,19 @@ export function useTokenFilter(tokens: TokenData[]) {
   // Get empty state message
   const emptyMessage = useMemo(() => {
     if (searchQuery) {
-      return "No tokens match your search";
+      return 'No tokens match your search';
     }
-    if (activeTab === "all") {
-      return "No tokens available";
+    if (activeTab === 'all') {
+      return 'No tokens available';
     }
-    const networkName = activeTab === "EVM" ? "Ethereum" : "Solana";
+    const networkName = activeTab === 'EVM' ? 'Ethereum' : 'Solana';
     return `No ${networkName} tokens available`;
   }, [searchQuery, activeTab]);
 
   // Reset filters
   const resetFilters = () => {
-    setActiveTab("all");
-    setSearchQuery("");
+    setActiveTab('all');
+    setSearchQuery('');
   };
 
   return {

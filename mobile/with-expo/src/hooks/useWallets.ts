@@ -1,17 +1,25 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Wallet, WalletType, CurrentWalletIds } from "@getpara/react-native-wallet";
-import { usePara } from "./usePara";
-import { SUPPORTED_WALLET_TYPES, WalletsBySupportedType } from "@/types";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  Wallet,
+  WalletType,
+  CurrentWalletIds,
+} from '@getpara/react-native-wallet';
+import { usePara } from './usePara';
+import { SUPPORTED_WALLET_TYPES, WalletsBySupportedType } from '@/types';
+import { QUERY_KEYS, MUTATION_KEYS } from '@/constants/queryKeys';
+import {
+  createAuthDependentQueryOptions,
+  createMutationOptions,
+} from '@/utils/queryUtils';
 
 const EMPTY_WALLETS: WalletsBySupportedType = {
   [WalletType.EVM]: [],
   [WalletType.SOLANA]: [],
 };
 
-export const useWallets = () => {
+// Read-only hook for wallet list
+export const useWalletList = () => {
   const { paraClient, isAuthenticated, isClientLoading } = usePara();
-  const queryClient = useQueryClient();
-  const WALLETS_QUERY_KEY = ["paraWallets"];
 
   const {
     data = EMPTY_WALLETS,
@@ -19,64 +27,35 @@ export const useWallets = () => {
     isError,
     error,
     refetch,
-  } = useQuery<WalletsBySupportedType, Error>({
-    queryKey: WALLETS_QUERY_KEY,
-    queryFn: () => {
-      if (!paraClient || !isAuthenticated) {
-        return EMPTY_WALLETS;
-      }
-
-      try {
-        const result = { ...EMPTY_WALLETS };
-
-        for (const type of SUPPORTED_WALLET_TYPES) {
-          result[type] = paraClient.getWalletsByType(type).map((wallet) => ({
-            ...wallet,
-            type,
-          }));
+  } = useQuery<WalletsBySupportedType, Error>(
+    createAuthDependentQueryOptions(!!paraClient && isAuthenticated, {
+      queryKey: QUERY_KEYS.WALLETS,
+      queryFn: () => {
+        if (!paraClient || !isAuthenticated) {
+          return EMPTY_WALLETS;
         }
 
-        return result;
-      } catch (error) {
-        throw error instanceof Error ? error : new Error("Failed to fetch wallets");
-      }
-    },
-    enabled: !!paraClient && isAuthenticated,
-    staleTime: Infinity,
-    gcTime: Infinity,
-  });
+        try {
+          const result = { ...EMPTY_WALLETS };
 
-  const createWalletMutation = useMutation<
-    [Wallet, string | null],
-    Error,
-    { type?: WalletType; skipDistribute?: boolean }
-  >({
-    mutationFn: async (options) => {
-      if (!paraClient || !isAuthenticated) {
-        throw new Error("Client not initialized or not authenticated");
-      }
-      return paraClient.createWallet(options);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: WALLETS_QUERY_KEY });
-    },
-  });
+          for (const type of SUPPORTED_WALLET_TYPES) {
+            result[type] = paraClient.getWalletsByType(type).map((wallet) => ({
+              ...wallet,
+              type,
+            }));
+          }
 
-  const createWalletsPerTypeMutation = useMutation<
-    { wallets: Wallet[]; walletIds: CurrentWalletIds; recoverySecret?: string },
-    Error,
-    { skipDistribute?: boolean; types?: WalletType[] }
-  >({
-    mutationFn: async (options) => {
-      if (!paraClient || !isAuthenticated) {
-        throw new Error("Client not initialized or not authenticated");
-      }
-      return paraClient.createWalletPerType(options);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: WALLETS_QUERY_KEY });
-    },
-  });
+          return result;
+        } catch (error) {
+          throw error instanceof Error
+            ? error
+            : new Error('Failed to fetch wallets');
+        }
+      },
+      staleTime: Infinity,
+      gcTime: Infinity,
+    })
+  );
 
   const evmWallets = data[WalletType.EVM];
   const solanaWallets = data[WalletType.SOLANA];
@@ -94,6 +73,56 @@ export const useWallets = () => {
     isWalletsLoading: isLoading || (isClientLoading && !hasWallets),
     isWalletsError: isError,
     walletsError: error,
+    refetchWallets: refetch,
+  };
+};
+
+// Write operations hook for wallet actions
+export const useWalletActions = () => {
+  const { paraClient, isAuthenticated } = usePara();
+  const queryClient = useQueryClient();
+
+  const createWalletMutation = useMutation<
+    [Wallet, string | null],
+    Error,
+    { type?: WalletType; skipDistribute?: boolean }
+  >(
+    createMutationOptions({
+      mutationKey: MUTATION_KEYS.CREATE_WALLET,
+      mutationFn: async (options) => {
+        if (!paraClient || !isAuthenticated) {
+          throw new Error('Client not initialized or not authenticated');
+        }
+        return paraClient.createWallet(options);
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.WALLETS });
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.SIGNERS });
+      },
+    })
+  );
+
+  const createWalletsPerTypeMutation = useMutation<
+    { wallets: Wallet[]; walletIds: CurrentWalletIds; recoverySecret?: string },
+    Error,
+    { skipDistribute?: boolean; types?: WalletType[] }
+  >(
+    createMutationOptions({
+      mutationKey: MUTATION_KEYS.CREATE_WALLET,
+      mutationFn: async (options) => {
+        if (!paraClient || !isAuthenticated) {
+          throw new Error('Client not initialized or not authenticated');
+        }
+        return paraClient.createWalletPerType(options);
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.WALLETS });
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.SIGNERS });
+      },
+    })
+  );
+
+  return {
     createWallet: createWalletMutation.mutate,
     isCreatingWallet: createWalletMutation.isPending,
     createWalletError: createWalletMutation.error,
@@ -102,6 +131,16 @@ export const useWallets = () => {
     isCreatingWalletsPerType: createWalletsPerTypeMutation.isPending,
     createWalletsPerTypeError: createWalletsPerTypeMutation.error,
     resetCreateWalletsPerType: createWalletsPerTypeMutation.reset,
-    refetchWallets: refetch,
+  };
+};
+
+// Combined hook for backward compatibility
+export const useWallets = () => {
+  const walletList = useWalletList();
+  const walletActions = useWalletActions();
+
+  return {
+    ...walletList,
+    ...walletActions,
   };
 };

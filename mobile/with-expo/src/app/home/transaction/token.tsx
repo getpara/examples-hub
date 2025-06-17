@@ -1,17 +1,17 @@
-import React, { useMemo, useState } from "react";
-import { View } from "react-native";
-import { useRouter } from "expo-router";
-import { WalletType } from "@getpara/react-native-wallet";
+import React, { useMemo, useState } from 'react';
+import { View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { WalletType } from '@getpara/react-native-wallet';
 
-import { Text } from "~/components/ui/text";
-import { Button } from "~/components/ui/button";
-import { TokenList } from "@/components/transaction/TokenList";
-import { useWallets } from "@/hooks/useWallets";
-import { useBalances } from "@/hooks/useBalances";
-import { usePrices } from "@/hooks/usePrices";
-import { useTokenFilter } from "@/hooks/useTokenFilter";
-import { formatTokenAmount } from "@/utils/formattingUtils";
-import { TokenData } from "@/utils/tokenUtils";
+import { Text } from '~/components/ui/text';
+import { Button } from '~/components/ui/button';
+import { TokenList } from '@/components/transaction/TokenList';
+import { useWallets } from '@/hooks/useWallets';
+import { useBalances } from '@/hooks/useBalances';
+import { usePrices } from '@/hooks/usePrices';
+import { useTokenFilter } from '@/hooks/useTokenFilter';
+import { formatTokenAmount } from '@/utils';
+import { TokenData } from '@/utils/tokenUtils';
 
 export default function TokenSelectionScreen() {
   const router = useRouter();
@@ -21,38 +21,45 @@ export default function TokenSelectionScreen() {
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  // Using TokenItemProps type since we're passing to TokenItem component
   const allTokens: TokenData[] = useMemo(() => {
     const list: TokenData[] = [];
     if (hasEvmWallets) {
       const amount = parseFloat(formatTokenAmount(totalEthBalance, 18));
       list.push({
-        id: "eth",
-        name: "Ethereum",
-        ticker: "ETH",
-        logo: require("~/assets/ethereum.png"),
+        id: 'eth',
+        name: 'Ethereum',
+        ticker: 'ETH',
         networkType: WalletType.EVM,
-        networkLogo: require("~/assets/ethereum.png"),
         balance: amount,
-        usdValue: prices.ethereum?.usd ? amount * prices.ethereum.usd : null,
-        isLoading: isBalancesLoading || isPricesLoading,
+        balanceUsd: prices.ethereum?.usd ? amount * prices.ethereum.usd : null,
+        usdPrice: prices.ethereum?.usd || null,
+        change24h: null,
+        logoUri: undefined,
       });
     }
     if (hasSolanaWallets) {
       const amount = parseFloat(formatTokenAmount(totalSolBalance, 9));
       list.push({
-        id: "sol",
-        name: "Solana",
-        ticker: "SOL",
-        logo: require("~/assets/solana.png"),
+        id: 'sol',
+        name: 'Solana',
+        ticker: 'SOL',
         networkType: WalletType.SOLANA,
-        networkLogo: require("~/assets/solana.png"),
         balance: amount,
-        usdValue: prices.solana?.usd ? amount * prices.solana.usd : null,
-        isLoading: isBalancesLoading || isPricesLoading,
+        balanceUsd: prices.solana?.usd ? amount * prices.solana.usd : null,
+        usdPrice: prices.solana?.usd || null,
+        change24h: null,
+        logoUri: undefined,
       });
     }
     return list;
-  }, [hasEvmWallets, hasSolanaWallets, totalEthBalance, totalSolBalance, prices, isBalancesLoading, isPricesLoading]);
+  }, [
+    hasEvmWallets,
+    hasSolanaWallets,
+    totalEthBalance,
+    totalSolBalance,
+    prices,
+  ]);
 
   const {
     activeTab,
@@ -67,9 +74,10 @@ export default function TokenSelectionScreen() {
 
   const handleContinue = () => {
     if (!selectedId) return;
-    const networkType = selectedId === "eth" ? WalletType.EVM : WalletType.SOLANA;
+    const networkType =
+      selectedId === 'eth' ? WalletType.EVM : WalletType.SOLANA;
     router.navigate({
-      pathname: "/home/transaction/create",
+      pathname: '/home/transaction/create',
       params: { networkType },
     });
   };

@@ -1,79 +1,83 @@
-import { useState, useCallback, useMemo } from "react";
-import { AuthType } from "@/types";
+import { useState, useCallback, useMemo } from 'react';
+import { AuthType } from '@/types';
 import {
   formatPhoneNumberWithCountryCode,
   validateEmail,
   validatePhoneNumber,
   determineInputType,
-} from "@/utils/loginIdentifierUtils";
+} from '@/utils/loginIdentifierUtils';
 
-export function useLoginIdentifier(initialCountryCode: string = "+1") {
-  const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+export function useLoginIdentifier(initialCountryCode: string = '+1') {
+  const [email, setEmail] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [countryCode, setCountryCode] = useState(initialCountryCode);
-  const [inputType, setInputType] = useState<AuthType>("email");
-  const [error, setError] = useState("");
+  const [inputType, setInputType] = useState<AuthType>('email');
+  const [error, setError] = useState('');
 
   // Calculate display value based on input type
   const displayValue = useMemo(() => {
-    return inputType === "email"
+    return inputType === 'email'
       ? email
       : formatPhoneNumberWithCountryCode(phoneNumber, countryCode);
   }, [inputType, email, phoneNumber, countryCode]);
 
   // Handle input changes
-  const handleChange = useCallback((newValue: string) => {
-    // Handle backspace
-    if (newValue.length < displayValue.length) {
-      if (inputType === "phone") {
-        const newRaw = phoneNumber.slice(0, -1);
-        if (newRaw.length === 0) {
-          setPhoneNumber("");
-          setInputType("email");
-          return;
+  const handleChange = useCallback(
+    (newValue: string) => {
+      // Handle backspace
+      if (newValue.length < displayValue.length) {
+        if (inputType === 'phone') {
+          const newRaw = phoneNumber.slice(0, -1);
+          if (newRaw.length === 0) {
+            setPhoneNumber('');
+            setInputType('email');
+            return;
+          }
+          setPhoneNumber(newRaw);
+        } else {
+          setEmail(newValue);
         }
-        setPhoneNumber(newRaw);
-      } else {
-        setEmail(newValue);
+        return;
       }
-      return;
-    }
 
-    // Handle new character
-    const newChar = newValue.charAt(newValue.length - 1);
-    const detectedType = determineInputType(newValue);
+      // Handle new character
+      const newChar = newValue.charAt(newValue.length - 1);
+      const detectedType = determineInputType(newValue);
 
-    if (detectedType !== inputType && detectedType !== "") {
-      setInputType(detectedType);
+      if (detectedType !== inputType && detectedType !== '') {
+        setInputType(detectedType);
 
-      if (detectedType === "email") {
-        setEmail(newValue);
-      } else if (detectedType === "phone") {
-        const digitsOnly = (phoneNumber + newChar).replace(/\D/g, "");
-        setPhoneNumber(digitsOnly);
-      }
-    } else {
-      if (inputType === "phone") {
-        if (/\d/.test(newChar)) {
-          const updatedRaw = phoneNumber + newChar;
-          setPhoneNumber(updatedRaw);
+        if (detectedType === 'email') {
+          setEmail(newValue);
+        } else if (detectedType === 'phone') {
+          const digitsOnly = (phoneNumber + newChar).replace(/\D/g, '');
+          setPhoneNumber(digitsOnly);
         }
       } else {
-        setEmail(newValue);
+        if (inputType === 'phone') {
+          if (/\d/.test(newChar)) {
+            const updatedRaw = phoneNumber + newChar;
+            setPhoneNumber(updatedRaw);
+          }
+        } else {
+          setEmail(newValue);
+        }
       }
-    }
-  }, [displayValue, inputType, phoneNumber]);
+    },
+    [displayValue, inputType, phoneNumber]
+  );
 
   // Validate current input
   const validate = useCallback((): boolean => {
-    let validationError = "";
+    let validationError = '';
 
-    if (inputType === "email") {
+    if (inputType === 'email') {
       validationError = validateEmail(email);
-    } else if (inputType === "phone") {
+    } else if (inputType === 'phone') {
       validationError = validatePhoneNumber(phoneNumber, countryCode);
     } else {
-      validationError = "Could not determine input type. Please enter a valid email or phone.";
+      validationError =
+        'Could not determine input type. Please enter a valid email or phone.';
     }
 
     setError(validationError);
@@ -82,15 +86,15 @@ export function useLoginIdentifier(initialCountryCode: string = "+1") {
 
   // Reset the form
   const reset = useCallback(() => {
-    setEmail("");
-    setPhoneNumber("");
-    setInputType("email");
-    setError("");
+    setEmail('');
+    setPhoneNumber('');
+    setInputType('email');
+    setError('');
   }, []);
 
   // Get the current value based on input type
   const getValue = useCallback(() => {
-    return inputType === "email" ? email : countryCode + phoneNumber;
+    return inputType === 'email' ? email : countryCode + phoneNumber;
   }, [inputType, email, phoneNumber, countryCode]);
 
   return {
@@ -101,7 +105,7 @@ export function useLoginIdentifier(initialCountryCode: string = "+1") {
     phoneNumber,
     countryCode,
     error,
-    isValid: !error && displayValue.trim() !== "",
+    isValid: !error && displayValue.trim() !== '',
 
     // Actions
     handleChange,

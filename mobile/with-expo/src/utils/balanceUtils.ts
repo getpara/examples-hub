@@ -1,5 +1,5 @@
-import { ethers } from "ethers";
-import { PublicKey, Connection } from "@solana/web3.js";
+import { Provider, toBigInt } from 'ethers';
+import { PublicKey, Connection } from '@solana/web3.js';
 
 interface WalletInfo {
   id: string;
@@ -21,15 +21,15 @@ interface BalanceFetchResult {
  */
 export async function fetchEvmWalletBalance(
   wallet: WalletInfo,
-  provider: ethers.Provider,
-  symbol: string = "ETH",
+  provider: Provider,
+  symbol: string = 'ETH',
   decimals: number = 18
 ): Promise<BalanceFetchResult> {
   if (!wallet.address) {
     return {
       walletId: wallet.id,
       balance: null,
-      error: new Error("No wallet address provided"),
+      error: new Error('No wallet address provided'),
     };
   }
 
@@ -44,13 +44,17 @@ export async function fetchEvmWalletBalance(
       },
     };
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error(`Error fetching ${symbol} balance for ${wallet.address}:`, errorMessage);
-    
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    console.error(
+      `Error fetching ${symbol} balance for ${wallet.address}:`,
+      errorMessage
+    );
+
     return {
       walletId: wallet.id,
       balance: {
-        amount: "0",
+        amount: '0',
         symbol,
         decimals,
       },
@@ -65,14 +69,14 @@ export async function fetchEvmWalletBalance(
 export async function fetchSolanaWalletBalance(
   wallet: WalletInfo,
   connection: Connection,
-  symbol: string = "SOL",
+  symbol: string = 'SOL',
   decimals: number = 9
 ): Promise<BalanceFetchResult> {
   if (!wallet.address) {
     return {
       walletId: wallet.id,
       balance: null,
-      error: new Error("No wallet address provided"),
+      error: new Error('No wallet address provided'),
     };
   }
 
@@ -88,13 +92,17 @@ export async function fetchSolanaWalletBalance(
       },
     };
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error(`Error fetching ${symbol} balance for ${wallet.address}:`, errorMessage);
-    
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    console.error(
+      `Error fetching ${symbol} balance for ${wallet.address}:`,
+      errorMessage
+    );
+
     return {
       walletId: wallet.id,
       balance: {
-        amount: "0",
+        amount: '0',
         symbol,
         decimals,
       },
@@ -106,26 +114,30 @@ export async function fetchSolanaWalletBalance(
 /**
  * Calculates the total balance for EVM wallets
  */
-export function calculateTotalEvmBalance(balances: Record<string, { amount: string }>): string {
-  let total = ethers.toBigInt(0);
-  
+export function calculateTotalEvmBalance(
+  balances: Record<string, { amount: string }>
+): string {
+  let total = toBigInt(0);
+
   for (const walletId in balances) {
     try {
-      total += ethers.toBigInt(balances[walletId].amount);
+      total += toBigInt(balances[walletId].amount);
     } catch (error) {
       console.error(`Error adding balance for wallet ${walletId}:`, error);
     }
   }
-  
+
   return total.toString();
 }
 
 /**
  * Calculates the total balance for Solana wallets
  */
-export function calculateTotalSolanaBalance(balances: Record<string, { amount: string }>): string {
+export function calculateTotalSolanaBalance(
+  balances: Record<string, { amount: string }>
+): string {
   let total = BigInt(0);
-  
+
   for (const walletId in balances) {
     try {
       total += BigInt(balances[walletId].amount);
@@ -133,6 +145,6 @@ export function calculateTotalSolanaBalance(balances: Record<string, { amount: s
       console.error(`Error adding balance for wallet ${walletId}:`, error);
     }
   }
-  
+
   return total.toString();
 }

@@ -1,9 +1,9 @@
-import * as SecureStore from "expo-secure-store";
-import { AuthCreds, STORAGE_KEYS } from "@/types";
+import * as SecureStore from 'expo-secure-store';
+import { AuthCreds, STORAGE_KEYS } from '@/types';
 
 export async function saveCreds(c: AuthCreds): Promise<void> {
   try {
-    if (c.authType === "email") {
+    if (c.authType === 'email') {
       await SecureStore.setItemAsync(STORAGE_KEYS.USER_EMAIL, c.email);
       await Promise.all([
         SecureStore.deleteItemAsync(STORAGE_KEYS.USER_PHONE),
@@ -17,7 +17,7 @@ export async function saveCreds(c: AuthCreds): Promise<void> {
       ]);
     }
   } catch (err) {
-    console.error("Secure-store save error:", err);
+    console.error('Secure-store save error:', err);
   }
 }
 
@@ -29,11 +29,11 @@ export async function getCreds(): Promise<AuthCreds | null> {
       SecureStore.getItemAsync(STORAGE_KEYS.USER_COUNTRY_CODE),
     ]);
 
-    if (email) return { authType: "email", email };
-    if (phone && countryCode) return { authType: "phone", phone, countryCode };
+    if (email) return { authType: 'email', email };
+    if (phone && countryCode) return { authType: 'phone', phone, countryCode };
     return null;
   } catch (err) {
-    console.error("Secure-store read error:", err);
+    console.error('Secure-store read error:', err);
     return null;
   }
 }
@@ -46,6 +46,6 @@ export async function clearCreds(): Promise<void> {
       SecureStore.deleteItemAsync(STORAGE_KEYS.USER_COUNTRY_CODE),
     ]);
   } catch (err) {
-    console.error("Secure-store clear error:", err);
+    console.error('Secure-store clear error:', err);
   }
 }

@@ -1,5 +1,5 @@
-import { iconWithClassName } from "@/lib/iconWithClassName";
-import { AlertCircle } from "lucide-react-native";
+import { iconWithClassName } from '@/lib/iconWithClassName';
+import { AlertCircle } from 'lucide-react-native';
 
 iconWithClassName(AlertCircle);
 export { AlertCircle };

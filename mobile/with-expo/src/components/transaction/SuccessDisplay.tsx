@@ -1,15 +1,21 @@
-import React from "react";
-import { View, ScrollView } from "react-native";
-import { Text } from "~/components/ui/text";
-import { Card, CardContent } from "~/components/ui/card";
-import { Button } from "~/components/ui/button";
-import { WalletType } from "@getpara/react-native-wallet";
-import { formatUsdValue } from "@/utils/formattingUtils";
-import { formatAddress } from "@/utils/formattingUtils";
-import { CheckCircle, ArrowUpRight } from "@/components/icons";
-import { Separator } from "~/components/ui/separator";
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSequence, Easing } from "react-native-reanimated";
-import { SupportedWalletType } from "@/types";
+import React from 'react';
+import { View, ScrollView } from 'react-native';
+import { Text } from '~/components/ui/text';
+import { Card, CardContent } from '~/components/ui/card';
+import { Button } from '~/components/ui/button';
+import { WalletType } from '@getpara/react-native-wallet';
+import { formatUsdValue } from '@/utils/formattingUtils';
+import { formatAddress } from '@/utils/formattingUtils';
+import { CheckCircle, ArrowUpRight } from '@/components/icons';
+import { Separator } from '~/components/ui/separator';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSequence,
+  Easing,
+} from 'react-native-reanimated';
+import { SupportedWalletType } from '@/types';
 
 export interface SuccessDisplayProps {
   txHash: string;
@@ -39,7 +45,7 @@ export function SuccessDisplay({
   txHash,
   amount,
   tokenTicker,
-  tokenName,
+  tokenName: _tokenName,
   recipientAddress,
   recipientName,
   amountUsd,
@@ -68,6 +74,8 @@ export function SuccessDisplay({
     );
 
     opacity.value = withTiming(1, { duration: 500 });
+    // Note: scale and opacity are Reanimated shared values (refs) that don't change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const animatedStyle = useAnimatedStyle(() => {
@@ -88,11 +96,11 @@ export function SuccessDisplay({
     } else if (seconds < 3600) {
       const minutes = Math.floor(seconds / 60);
       const remainingSeconds = seconds % 60;
-      return `${minutes} min${minutes > 1 ? "s" : ""} ${remainingSeconds} sec${remainingSeconds !== 1 ? "s" : ""}`;
+      return `${minutes} min${minutes > 1 ? 's' : ''} ${remainingSeconds} sec${remainingSeconds !== 1 ? 's' : ''}`;
     } else {
       const hours = Math.floor(seconds / 3600);
       const minutes = Math.floor((seconds % 3600) / 60);
-      return `${hours} hr${hours > 1 ? "s" : ""} ${minutes} min${minutes > 1 ? "s" : ""}`;
+      return `${hours} hr${hours > 1 ? 's' : ''} ${minutes} min${minutes > 1 ? 's' : ''}`;
     }
   };
 
@@ -101,7 +109,9 @@ export function SuccessDisplay({
       {blockNumber !== undefined && (
         <View className="flex-row justify-between py-2">
           <Text className="text-sm text-muted-foreground">Block Number</Text>
-          <Text className="text-sm font-medium text-foreground">{blockNumber}</Text>
+          <Text className="text-sm font-medium text-foreground">
+            {blockNumber}
+          </Text>
         </View>
       )}
 
@@ -109,7 +119,8 @@ export function SuccessDisplay({
         <View className="flex-row justify-between py-2">
           <Text className="text-sm text-muted-foreground">Gas Used</Text>
           <Text className="text-sm font-medium text-foreground">
-            {gasUsed} / {gasLimit} ({((parseInt(gasUsed) / parseInt(gasLimit)) * 100).toFixed(0)}%)
+            {gasUsed} / {gasLimit} (
+            {((parseInt(gasUsed) / parseInt(gasLimit)) * 100).toFixed(0)}%)
           </Text>
         </View>
       )}
@@ -117,7 +128,9 @@ export function SuccessDisplay({
       {gasPrice && (
         <View className="flex-row justify-between py-2">
           <Text className="text-sm text-muted-foreground">Gas Price</Text>
-          <Text className="text-sm font-medium text-foreground">{gasPrice} Gwei</Text>
+          <Text className="text-sm font-medium text-foreground">
+            {gasPrice} Gwei
+          </Text>
         </View>
       )}
     </View>
@@ -134,8 +147,12 @@ export function SuccessDisplay({
 
       {computeUnitsUsed !== undefined && (
         <View className="flex-row justify-between py-2">
-          <Text className="text-sm text-muted-foreground">Compute Units Used</Text>
-          <Text className="text-sm font-medium text-foreground">{computeUnitsUsed}</Text>
+          <Text className="text-sm text-muted-foreground">
+            Compute Units Used
+          </Text>
+          <Text className="text-sm font-medium text-foreground">
+            {computeUnitsUsed}
+          </Text>
         </View>
       )}
 
@@ -145,7 +162,8 @@ export function SuccessDisplay({
           <Text
             className="text-sm font-medium text-foreground max-w-[200px]"
             numberOfLines={1}
-            ellipsizeMode="middle">
+            ellipsizeMode="middle"
+          >
             {signature}
           </Text>
         </View>
@@ -154,20 +172,17 @@ export function SuccessDisplay({
   );
 
   return (
-    <ScrollView
-      className="flex-1"
-      showsVerticalScrollIndicator={false}>
+    <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
       <View className="items-center mb-6">
         <Animated.View style={animatedStyle}>
           <View className="w-20 h-20 rounded-full bg-green-100 items-center justify-center mb-4">
-            <CheckCircle
-              size={48}
-              className="text-green-600"
-            />
+            <CheckCircle size={48} className="text-green-600" />
           </View>
         </Animated.View>
 
-        <Text className="text-2xl font-bold text-foreground text-center">Transaction Successful!</Text>
+        <Text className="text-2xl font-bold text-foreground text-center">
+          Transaction Successful!
+        </Text>
         <Text className="text-base text-muted-foreground text-center mt-2 px-6">
           Your transaction has been confirmed on the {networkName} network
         </Text>
@@ -176,25 +191,39 @@ export function SuccessDisplay({
       <Card className="border border-border mb-4">
         <CardContent className="p-4">
           <View className="mb-3">
-            <Text className="text-sm text-muted-foreground mb-1">Amount Sent</Text>
+            <Text className="text-sm text-muted-foreground mb-1">
+              Amount Sent
+            </Text>
             <View>
               <Text className="text-xl font-bold text-foreground">
                 {amount} {tokenTicker}
               </Text>
-              {amountUsd !== null && <Text className="text-sm text-muted-foreground">{formatUsdValue(amountUsd)}</Text>}
+              {amountUsd !== null && (
+                <Text className="text-sm text-muted-foreground">
+                  {formatUsdValue(amountUsd)}
+                </Text>
+              )}
             </View>
           </View>
 
           <Separator className="my-3" />
 
           <View>
-            <Text className="text-sm text-muted-foreground mb-1">Recipient</Text>
+            <Text className="text-sm text-muted-foreground mb-1">
+              Recipient
+            </Text>
             <View>
-              {recipientName && <Text className="text-sm font-medium mb-1">{recipientName}</Text>}
+              {recipientName && (
+                <Text className="text-sm font-medium mb-1">
+                  {recipientName}
+                </Text>
+              )}
               <Text className="text-sm font-medium text-foreground">
                 {formatAddress(recipientAddress, networkType)}
               </Text>
-              <Text className="text-xs text-muted-foreground mt-1 break-all">{recipientAddress}</Text>
+              <Text className="text-xs text-muted-foreground mt-1 break-all">
+                {recipientAddress}
+              </Text>
             </View>
           </View>
         </CardContent>
@@ -202,42 +231,63 @@ export function SuccessDisplay({
 
       <Card className="border border-border mb-4">
         <CardContent className="p-4">
-          <Text className="text-base font-medium text-foreground mb-3">Confirmation Details</Text>
+          <Text className="text-base font-medium text-foreground mb-3">
+            Confirmation Details
+          </Text>
 
           <View className="flex-row justify-between py-2">
             <Text className="text-sm text-muted-foreground">Status</Text>
             <View className="flex-row items-center">
               <View className="w-2 h-2 rounded-full bg-green-500 mr-2" />
-              <Text className="text-sm font-medium text-green-600">Confirmed</Text>
+              <Text className="text-sm font-medium text-green-600">
+                Confirmed
+              </Text>
             </View>
           </View>
 
           <View className="flex-row justify-between py-2">
-            <Text className="text-sm text-muted-foreground">Time Submitted</Text>
-            <Text className="text-sm font-medium text-foreground">{formatDate(submittedAt)}</Text>
+            <Text className="text-sm text-muted-foreground">
+              Time Submitted
+            </Text>
+            <Text className="text-sm font-medium text-foreground">
+              {formatDate(submittedAt)}
+            </Text>
           </View>
 
           <View className="flex-row justify-between py-2">
-            <Text className="text-sm text-muted-foreground">Time Confirmed</Text>
-            <Text className="text-sm font-medium text-foreground">{formatDate(confirmedAt)}</Text>
+            <Text className="text-sm text-muted-foreground">
+              Time Confirmed
+            </Text>
+            <Text className="text-sm font-medium text-foreground">
+              {formatDate(confirmedAt)}
+            </Text>
           </View>
 
           <View className="flex-row justify-between py-2">
-            <Text className="text-sm text-muted-foreground">Confirmation Time</Text>
-            <Text className="text-sm font-medium text-foreground">{formatDuration(confirmationDuration)}</Text>
+            <Text className="text-sm text-muted-foreground">
+              Confirmation Time
+            </Text>
+            <Text className="text-sm font-medium text-foreground">
+              {formatDuration(confirmationDuration)}
+            </Text>
           </View>
 
           <View className="flex-row justify-between py-2">
             <Text className="text-sm text-muted-foreground">Network</Text>
-            <Text className="text-sm font-medium text-foreground">{networkName}</Text>
+            <Text className="text-sm font-medium text-foreground">
+              {networkName}
+            </Text>
           </View>
 
           <View className="flex-row justify-between py-2">
-            <Text className="text-sm text-muted-foreground">Transaction Hash</Text>
+            <Text className="text-sm text-muted-foreground">
+              Transaction Hash
+            </Text>
             <Text
               className="text-sm font-medium text-foreground max-w-[200px]"
               numberOfLines={1}
-              ellipsizeMode="middle">
+              ellipsizeMode="middle"
+            >
               {txHash}
             </Text>
           </View>
@@ -245,7 +295,9 @@ export function SuccessDisplay({
           <Separator className="my-3" />
 
           {/* Network-specific details */}
-          {networkType === WalletType.EVM ? renderEvmConfirmationDetails() : renderSolanaConfirmationDetails()}
+          {networkType === WalletType.EVM
+            ? renderEvmConfirmationDetails()
+            : renderSolanaConfirmationDetails()}
         </CardContent>
       </Card>
 
@@ -253,7 +305,8 @@ export function SuccessDisplay({
         <Button
           className="flex-1"
           onPress={onReturn}
-          accessibilityLabel="Return to home">
+          accessibilityLabel="Return to home"
+        >
           <Text className="text-primary-foreground font-medium">Done</Text>
         </Button>
 
@@ -261,11 +314,9 @@ export function SuccessDisplay({
           variant="outline"
           className="flex-1"
           onPress={onViewExplorer}
-          accessibilityLabel="View transaction in blockchain explorer">
-          <ArrowUpRight
-            size={18}
-            className="text-foreground mr-2"
-          />
+          accessibilityLabel="View transaction in blockchain explorer"
+        >
+          <ArrowUpRight size={18} className="text-foreground mr-2" />
           <Text className="text-foreground font-medium">View in Explorer</Text>
         </Button>
       </View>

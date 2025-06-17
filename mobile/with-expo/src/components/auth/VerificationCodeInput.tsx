@@ -1,17 +1,17 @@
-import { useRef } from "react";
-import { useEffect } from "react";
-import { View } from "react-native";
-import { Text } from "@/components/ui/text";
-import { cn } from "@/lib/utils";
-import { OTPInput } from "input-otp-native";
-import type { OTPInputRef, SlotProps } from "input-otp-native";
+import { useRef } from 'react';
+import { useEffect } from 'react';
+import { View } from 'react-native';
+import { Text } from '@/components/ui/text';
+import { cn } from '@/lib/utils';
+import { OTPInput } from 'input-otp-native';
+import type { OTPInputRef, SlotProps } from 'input-otp-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
   withSequence,
   withTiming,
-} from "react-native-reanimated";
+} from 'react-native-reanimated';
 
 interface VerificationCodeInputProps {
   maxLength?: number;
@@ -31,11 +31,11 @@ interface VerificationCodeInputProps {
 export function VerificationCodeInput({
   maxLength = 5,
   onComplete,
-  slotClassName = "border border-gray-200 rounded-lg bg-white",
-  activeSlotClassName = "border-black border-2",
+  slotClassName = 'border border-gray-200 rounded-lg bg-white',
+  activeSlotClassName = 'border-black border-2',
   slotSize = 50,
-  slotTextClassName = "text-2xl font-medium text-gray-900",
-  caretColor = "#000",
+  slotTextClassName = 'text-2xl font-medium text-gray-900',
+  caretColor = '#000',
   caretHeight = 28,
   caretWidth = 2,
   autoComplete = true,
@@ -89,11 +89,11 @@ function Slot({
   char,
   isActive,
   hasFakeCaret,
-  slotClassName = "border border-border rounded-lg bg-white",
-  activeSlotClassName = "border-black border-2",
+  slotClassName = 'border border-border rounded-lg bg-white',
+  activeSlotClassName = 'border-black border-2',
   slotSize = 48,
-  slotTextClassName = "text-2xl font-medium text-gray-900",
-  caretColor = "#000",
+  slotTextClassName = 'text-2xl font-medium text-gray-900',
+  caretColor = '#000',
   caretHeight = 28,
   caretWidth = 2,
 }: SlotComponentProps) {
@@ -102,7 +102,8 @@ function Slot({
       className={cn(slotClassName, {
         [activeSlotClassName]: isActive,
       })}
-      style={{ width: slotSize, height: slotSize }}>
+      style={{ width: slotSize, height: slotSize }}
+    >
       <View className="w-full h-full items-center justify-center">
         {char !== null && <Text className={slotTextClassName}>{char}</Text>}
         {hasFakeCaret && (
@@ -123,12 +124,15 @@ export interface FakeCaretProps {
   width?: number;
 }
 
-function FakeCaret({ color = "#000", height = 28, width = 2 }: FakeCaretProps) {
+function FakeCaret({ color = '#000', height = 28, width = 2 }: FakeCaretProps) {
   const opacity = useSharedValue(1);
 
   useEffect(() => {
     opacity.value = withRepeat(
-      withSequence(withTiming(0, { duration: 500 }), withTiming(1, { duration: 500 })),
+      withSequence(
+        withTiming(0, { duration: 500 }),
+        withTiming(1, { duration: 500 })
+      ),
       -1,
       true
     );

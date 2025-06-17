@@ -1,11 +1,11 @@
-import React, { ReactNode } from "react";
-import { View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import React, { ReactNode } from 'react';
+import { View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const SLOTS = {
-  LEFT: "left",
-  CENTER: "center",
-  RIGHT: "right",
+  LEFT: 'left',
+  CENTER: 'center',
+  RIGHT: 'right',
 } as const;
 
 interface SlotProps {
@@ -23,7 +23,7 @@ export const AppHeader: React.FC<{
   children: ReactNode;
 }> &
   AppHeaderCompound = ({ children }) => {
-  const { top } = useSafeAreaInsets();
+  const { top: _top } = useSafeAreaInsets();
 
   const seenSlots = React.useRef<Record<string, boolean>>({}).current;
 
@@ -40,23 +40,31 @@ export const AppHeader: React.FC<{
   React.Children.forEach(children, (child) => {
     if (!React.isValidElement(child)) return;
 
-    const childType = child.type as any;
+    const childType = child.type as React.ComponentType<SlotProps> & {
+      __slot?: string;
+    };
 
     if (childType.__slot === SLOTS.LEFT) {
       if (__DEV__ && seenSlots[SLOTS.LEFT]) {
-        console.warn("Multiple AppHeader.Left components detected. Only the last one will be rendered.");
+        console.warn(
+          'Multiple AppHeader.Left components detected. Only the last one will be rendered.'
+        );
       }
       seenSlots[SLOTS.LEFT] = true;
       leftSlot = (child.props as SlotProps).children;
     } else if (childType.__slot === SLOTS.CENTER) {
       if (__DEV__ && seenSlots[SLOTS.CENTER]) {
-        console.warn("Multiple AppHeader.Center components detected. Only the last one will be rendered.");
+        console.warn(
+          'Multiple AppHeader.Center components detected. Only the last one will be rendered.'
+        );
       }
       seenSlots[SLOTS.CENTER] = true;
       centerSlot = (child.props as SlotProps).children;
     } else if (childType.__slot === SLOTS.RIGHT) {
       if (__DEV__ && seenSlots[SLOTS.RIGHT]) {
-        console.warn("Multiple AppHeader.Right components detected. Only the last one will be rendered.");
+        console.warn(
+          'Multiple AppHeader.Right components detected. Only the last one will be rendered.'
+        );
       }
       seenSlots[SLOTS.RIGHT] = true;
       rightSlot = (child.props as SlotProps).children;
@@ -74,17 +82,20 @@ export const AppHeader: React.FC<{
   );
 };
 
-const Left: React.FC<SlotProps> = ({ children }) => null;
-Left.displayName = "AppHeader.Left";
-(Left as any).__slot = SLOTS.LEFT;
+const Left: React.FC<SlotProps> = ({ children: _children }) => null;
+Left.displayName = 'AppHeader.Left';
+(Left as React.ComponentType<SlotProps> & { __slot?: string }).__slot =
+  SLOTS.LEFT;
 
-const Center: React.FC<SlotProps> = ({ children }) => null;
-Center.displayName = "AppHeader.Center";
-(Center as any).__slot = SLOTS.CENTER;
+const Center: React.FC<SlotProps> = ({ children: _children }) => null;
+Center.displayName = 'AppHeader.Center';
+(Center as React.ComponentType<SlotProps> & { __slot?: string }).__slot =
+  SLOTS.CENTER;
 
-const Right: React.FC<SlotProps> = ({ children }) => null;
-Right.displayName = "AppHeader.Right";
-(Right as any).__slot = SLOTS.RIGHT;
+const Right: React.FC<SlotProps> = ({ children: _children }) => null;
+Right.displayName = 'AppHeader.Right';
+(Right as React.ComponentType<SlotProps> & { __slot?: string }).__slot =
+  SLOTS.RIGHT;
 
 AppHeader.Left = Left;
 AppHeader.Center = Center;

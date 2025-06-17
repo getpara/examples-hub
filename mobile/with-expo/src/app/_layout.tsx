@@ -1,12 +1,12 @@
-import { PortalHost } from "@rn-primitives/portal";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Stack } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Toaster } from "sonner-native";
-import { useEffect } from "react";
-import { usePara } from "@/hooks/usePara";
+import { PortalHost } from '@rn-primitives/portal';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Toaster } from 'sonner-native';
+import { useEffect } from 'react';
+import { usePara } from '@/hooks/usePara';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -30,7 +30,12 @@ export default function RootLayout() {
 }
 
 function RootStack() {
-  const { isClientLoading, isClientReady, isAuthenticated, isAuthStatusLoading } = usePara();
+  const {
+    isClientLoading,
+    isClientReady,
+    isAuthenticated,
+    isAuthStatusLoading,
+  } = usePara();
 
   useEffect(() => {
     if (!isClientLoading && isClientReady && !isAuthStatusLoading) {
@@ -47,19 +52,20 @@ function RootStack() {
       <Stack
         screenOptions={{
           headerShown: false,
-          animation: "slide_from_right",
-          contentStyle: { backgroundColor: "#ffffff" },
+          animation: 'slide_from_right',
+          contentStyle: { backgroundColor: '#ffffff' },
           gestureEnabled: true,
-          gestureDirection: "horizontal",
-          presentation: "card",
+          gestureDirection: 'horizontal',
+          presentation: 'card',
           fullScreenGestureEnabled: true,
-        }}>
+        }}
+      >
         <Stack.Protected guard={!isAuthenticated}>
           <Stack.Screen
             name="auth"
             options={{
               gestureEnabled: false,
-              animation: "fade",
+              animation: 'fade',
             }}
           />
         </Stack.Protected>
@@ -67,7 +73,7 @@ function RootStack() {
           <Stack.Screen
             name="home"
             options={{
-              animation: "slide_from_right",
+              animation: 'slide_from_right',
             }}
           />
         </Stack.Protected>

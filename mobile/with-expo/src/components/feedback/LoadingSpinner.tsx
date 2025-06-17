@@ -1,34 +1,29 @@
-import React from "react";
-import { View, ActivityIndicator } from "react-native";
-import { Text } from "~/components/ui/text";
+import React from 'react';
+import { View, ActivityIndicator } from 'react-native';
+import { Text } from '~/components/ui/text';
 
 interface LoadingSpinnerProps {
-  size?: "small" | "large";
+  size?: 'small' | 'large';
   color?: string;
   text?: string;
   className?: string;
   fullScreen?: boolean;
 }
 
-export function LoadingSpinner({ 
-  size = "large", 
-  color = "#6366f1",
+export function LoadingSpinner({
+  size = 'large',
+  color = '#6366f1',
   text,
-  className = "",
-  fullScreen = false
+  className = '',
+  fullScreen = false,
 }: LoadingSpinnerProps) {
-  const spinnerSize = size === "small" ? "small" : "large";
-  
+  const spinnerSize = size === 'small' ? 'small' : 'large';
+
   const content = (
     <>
-      <ActivityIndicator 
-        size={spinnerSize} 
-        color={color}
-      />
+      <ActivityIndicator size={spinnerSize} color={color} />
       {text && (
-        <Text className="mt-2 text-center text-muted-foreground">
-          {text}
-        </Text>
+        <Text className="mt-2 text-center text-muted-foreground">{text}</Text>
       )}
     </>
   );

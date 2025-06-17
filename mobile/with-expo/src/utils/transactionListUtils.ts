@@ -1,16 +1,19 @@
-import { WalletType } from "@getpara/react-native-wallet";
-import { TransactionData, TransactionType } from "@/components/transaction/TransactionListItem";
+import { WalletType } from '@getpara/react-native-wallet';
+import {
+  TransactionData,
+  TransactionType,
+} from '@/components/transaction/TransactionListItem';
 
-export type SortOption = "newest" | "oldest" | "highest" | "lowest";
-export type FilterNetwork = "all" | WalletType.EVM | WalletType.SOLANA;
-export type FilterType = "all" | TransactionType;
+export type SortOption = 'newest' | 'oldest' | 'highest' | 'lowest';
+export type FilterNetwork = 'all' | WalletType.EVM | WalletType.SOLANA;
+export type FilterType = 'all' | TransactionType;
 
 // Filtering functions
 export function filterByNetwork(
   transactions: TransactionData[],
   networkType: FilterNetwork
 ): TransactionData[] {
-  if (networkType === "all") {
+  if (networkType === 'all') {
     return transactions;
   }
   return transactions.filter((tx) => tx.networkType === networkType);
@@ -20,7 +23,7 @@ export function filterByType(
   transactions: TransactionData[],
   type: FilterType
 ): TransactionData[] {
-  if (type === "all") {
+  if (type === 'all') {
     return transactions;
   }
   return transactions.filter((tx) => tx.type === type);
@@ -54,16 +57,16 @@ export function sortTransactions(
 
   sorted.sort((a, b) => {
     switch (sortOption) {
-      case "newest":
+      case 'newest':
         return b.timestamp - a.timestamp;
-      case "oldest":
+      case 'oldest':
         return a.timestamp - b.timestamp;
-      case "highest": {
+      case 'highest': {
         const aAmount = parseFloat(a.amount);
         const bAmount = parseFloat(b.amount);
         return bAmount - aAmount;
       }
-      case "lowest": {
+      case 'lowest': {
         const aAmount = parseFloat(a.amount);
         const bAmount = parseFloat(b.amount);
         return aAmount - bAmount;
@@ -96,8 +99,8 @@ export function filterAndSortTransactions(
 
 // Sort options configuration
 export const SORT_OPTIONS = [
-  { label: "Newest first", value: "newest" as SortOption },
-  { label: "Oldest first", value: "oldest" as SortOption },
-  { label: "Highest amount", value: "highest" as SortOption },
-  { label: "Lowest amount", value: "lowest" as SortOption },
+  { label: 'Newest first', value: 'newest' as SortOption },
+  { label: 'Oldest first', value: 'oldest' as SortOption },
+  { label: 'Highest amount', value: 'highest' as SortOption },
+  { label: 'Lowest amount', value: 'lowest' as SortOption },
 ];

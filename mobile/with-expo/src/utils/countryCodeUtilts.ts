@@ -1,7 +1,9 @@
-import * as countryCodes from "country-codes-list";
-import { CountryOption } from "@/types";
+import * as countryCodes from 'country-codes-list';
+import { CountryOption } from '@/types';
 
-export function getTopCountryOptions(priorityCodes = ["US", "GB", "CA", "AU", "IN"]): CountryOption[] {
+export function getTopCountryOptions(
+  priorityCodes = ['US', 'GB', 'CA', 'AU', 'IN']
+): CountryOption[] {
   const allCountries = countryCodes.all();
 
   const options = allCountries

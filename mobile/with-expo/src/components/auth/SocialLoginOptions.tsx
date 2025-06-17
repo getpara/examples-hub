@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { View, Image, Pressable } from "react-native";
-import { Grip, X } from "@/components/icons";
-import { SocialLoginProvidersMap } from "@/types";
-import { generateProviderRows } from "@/utils/socialLoginUtils";
-import { OAuthMethod } from "@getpara/react-native-wallet";
+import React, { useState } from 'react';
+import { View, Image, Pressable } from 'react-native';
+import { Grip, X } from '@/components/icons';
+import { SocialLoginProvidersMap } from '@/types';
+import { generateProviderRows } from '@/utils/socialLoginUtils';
+import { OAuthMethod } from '@getpara/react-native-wallet';
 
 interface SocialLoginOptionsProps {
   initialProviders: OAuthMethod[];
@@ -26,11 +26,18 @@ export function SocialLoginOptions({
 }: SocialLoginOptionsProps) {
   const [expanded, setExpanded] = useState(false);
 
-  const providers = expanded ? [...initialProviders, ...additionalProviders] : initialProviders;
+  const providers = expanded
+    ? [...initialProviders, ...additionalProviders]
+    : initialProviders;
 
-  const filteredProviders = providers.filter((provider) => !excludeProviders.includes(provider));
+  const filteredProviders = providers.filter(
+    (provider) => !excludeProviders.includes(provider)
+  );
 
-  const providerRows = generateProviderRows(filteredProviders, maxProvidersPerRow);
+  const providerRows = generateProviderRows(
+    filteredProviders,
+    maxProvidersPerRow
+  );
 
   const renderProvider = (provider: OAuthMethod) => {
     const info = providerInfo[provider];
@@ -45,12 +52,9 @@ export function SocialLoginOptions({
         disabled={disabled}
         className="flex-1 h-14 items-center justify-center rounded-xl
                    border border-border bg-white
-                   active:opacity-80">
-        <Image
-          source={info.logo}
-          resizeMode="contain"
-          className="h-8 w-8"
-        />
+                   active:opacity-80"
+      >
+        <Image source={info.logo} resizeMode="contain" className="h-8 w-8" />
       </Pressable>
     );
   };
@@ -58,21 +62,16 @@ export function SocialLoginOptions({
   const renderToggle = () => (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={expanded ? "Show fewer options" : "Show more options"}
+      accessibilityLabel={expanded ? 'Show fewer options' : 'Show more options'}
       onPress={() => setExpanded((v) => !v)}
       className="flex-1 h-14 items-center justify-center rounded-xl
                  border border-border bg-white
-                 active:opacity-80">
+                 active:opacity-80"
+    >
       {expanded ? (
-        <X
-          size={24}
-          className="text-muted-foreground"
-        />
+        <X size={24} className="text-muted-foreground" />
       ) : (
-        <Grip
-          size={24}
-          className="text-muted-foreground"
-        />
+        <Grip size={24} className="text-muted-foreground" />
       )}
     </Pressable>
   );
@@ -81,9 +80,7 @@ export function SocialLoginOptions({
     <View>
       <View className="gap-y-2">
         {providerRows.map((row, idx) => (
-          <View
-            key={idx}
-            className="flex-row gap-x-2">
+          <View key={idx} className="flex-row gap-x-2">
             {row.map(renderProvider)}
             {idx === providerRows.length - 1 && renderToggle()}
           </View>

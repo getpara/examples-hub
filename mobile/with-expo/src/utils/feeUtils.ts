@@ -1,7 +1,5 @@
-import { WalletType } from "@getpara/react-native-wallet";
-
-export type FeeTier = "slow" | "average" | "fast";
-export type PriorityLevel = "none" | "low" | "medium" | "high";
+export type FeeTier = 'slow' | 'average' | 'fast';
+export type PriorityLevel = 'none' | 'low' | 'medium' | 'high';
 
 export interface PriorityFeeOption {
   level: PriorityLevel;
@@ -13,51 +11,51 @@ export interface PriorityFeeOption {
 // Priority fee configuration
 export const PRIORITY_FEE_OPTIONS: PriorityFeeOption[] = [
   {
-    level: "none",
+    level: 'none',
     value: 0,
-    label: "Standard",
-    description: "No priority fee",
+    label: 'Standard',
+    description: 'No priority fee',
   },
   {
-    level: "low",
+    level: 'low',
     value: 10000,
-    label: "Low Priority",
-    description: "Slightly faster processing",
+    label: 'Low Priority',
+    description: 'Slightly faster processing',
   },
   {
-    level: "medium",
+    level: 'medium',
     value: 50000,
-    label: "Medium Priority",
-    description: "Faster processing",
+    label: 'Medium Priority',
+    description: 'Faster processing',
   },
   {
-    level: "high",
+    level: 'high',
     value: 100000,
-    label: "High Priority",
-    description: "Fastest processing",
+    label: 'High Priority',
+    description: 'Fastest processing',
   },
 ];
 
 // Fee tier styling configuration
 export function getFeeTierStyles(tier: FeeTier) {
   switch (tier) {
-    case "slow":
+    case 'slow':
       return {
-        bgColor: "bg-yellow-100",
-        iconColor: "text-yellow-600",
-        icon: "Clock" as const,
+        bgColor: 'bg-yellow-100',
+        iconColor: 'text-yellow-600',
+        icon: 'Clock' as const,
       };
-    case "average":
+    case 'average':
       return {
-        bgColor: "bg-green-100",
-        iconColor: "text-green-600",
-        icon: "Coins" as const,
+        bgColor: 'bg-green-100',
+        iconColor: 'text-green-600',
+        icon: 'Coins' as const,
       };
-    case "fast":
+    case 'fast':
       return {
-        bgColor: "bg-purple-100",
-        iconColor: "text-purple-600",
-        icon: "Zap" as const,
+        bgColor: 'bg-purple-100',
+        iconColor: 'text-purple-600',
+        icon: 'Zap' as const,
       };
   }
 }
@@ -67,7 +65,9 @@ export function calculateTotalSolanaFee(
   baseFee: number,
   priorityFeeLevel: PriorityLevel
 ): string {
-  const priorityFeeOption = PRIORITY_FEE_OPTIONS.find((o) => o.level === priorityFeeLevel);
+  const priorityFeeOption = PRIORITY_FEE_OPTIONS.find(
+    (o) => o.level === priorityFeeLevel
+  );
   const priorityFee = priorityFeeOption ? priorityFeeOption.value : 0;
   const totalLamports = baseFee + priorityFee;
   return (totalLamports / 1_000_000_000).toFixed(9);
@@ -80,7 +80,9 @@ export function calculateTotalSolanaFeeUsd(
 ): number | null {
   if (baseFeeUsd === null || solPriceUsd === null) return null;
 
-  const priorityFeeOption = PRIORITY_FEE_OPTIONS.find((o) => o.level === priorityFeeLevel);
+  const priorityFeeOption = PRIORITY_FEE_OPTIONS.find(
+    (o) => o.level === priorityFeeLevel
+  );
   const priorityFee = priorityFeeOption ? priorityFeeOption.value : 0;
   const priorityFeeInSol = priorityFee / 1_000_000_000;
   const priorityFeeUsd = priorityFeeInSol * solPriceUsd;

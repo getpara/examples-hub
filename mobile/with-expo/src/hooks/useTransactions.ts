@@ -1,139 +1,193 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useSigners } from "./useSigners";
-import { useWallets } from "./useWallets";
-import { usePrices } from "./usePrices";
-import { WalletType } from "@getpara/react-native-wallet";
-import { ethers, parseEther, formatEther } from "ethers";
-import { Connection, PublicKey, LAMPORTS_PER_SOL, SystemProgram, Transaction as SolTx } from "@solana/web3.js";
-import { v4 as uuid } from "uuid";
-import { TransactionData, EvmTransactionData } from "@/components/transaction/TransactionListItem";
-import { ALCHEMY_ETHEREUM_RPC_URL, ALCHEMY_SOLANA_RPC_URL } from "@/constants/envs";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useSigners } from './useSigners';
+import { useWallets } from './useWallets';
+import { usePrices } from './usePrices';
+import { WalletType } from '@getpara/react-native-wallet';
+import { parseEther, formatEther } from 'ethers';
+import {
+  PublicKey,
+  LAMPORTS_PER_SOL,
+  SystemProgram,
+  Transaction as SolTx,
+} from '@solana/web3.js';
+import {
+  TransactionData,
+  EvmTransactionData,
+  SolanaTransactionData,
+} from '@/components/transaction/TransactionListItem';
+import {
+  ALCHEMY_ETHEREUM_RPC_URL,
+  ALCHEMY_SOLANA_RPC_URL,
+} from '@/constants/envs';
+import {
+  fetchEvmTransfers,
+  fetchSolanaTransfers,
+  Transfer,
+} from '@/utils/api/transfersApi';
+import { QUERY_KEYS } from '@/constants/queryKeys';
+import { createTransactionQueryOptions } from '@/utils/queryUtils';
 
 type EvmArgs = { to: string; amount: string };
 type SolArgs = { to: string; amount: string };
 
-const fetchEvmTransfers = async (addr: string, price: number | null): Promise<TransactionData[]> => {
-  if (!ALCHEMY_ETHEREUM_RPC_URL) return [];
-  const transfers: TransactionData[] = [];
-  let pageKey: string | undefined;
-  do {
-    const body = {
-      jsonrpc: "2.0",
-      id: 1,
-      method: "alchemy_getAssetTransfers",
-      params: [
-        {
-          fromBlock: "0x0",
-          toBlock: "latest",
-          withMetadata: true,
-          excludeZeroValue: false,
-          category: ["external", "internal", "erc20"],
-          fromAddress: addr,
-          toAddress: undefined,
-          order: "desc",
-          maxCount: "0x3e8",
-          pageKey,
-        },
-      ],
-    };
-    const res = await fetch(ALCHEMY_ETHEREUM_RPC_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    }).then((r) => r.json());
-    const items = res.result.transfers as any[];
-    items.forEach((t) => {
-      const isSender = t.from.toLowerCase() === addr.toLowerCase();
-      const amt = t.value ? ethers.formatUnits(BigInt(t.value), 18) : "0";
-      transfers.push({
-        id: uuid(),
-        type: isSender ? "send" : "receive",
-        status: "confirmed",
-        timestamp: t.metadata?.blockTimestamp ? Date.parse(t.metadata.blockTimestamp) : Date.now(),
-        amount: amt,
-        tokenTicker: t.asset ?? "ETH",
-        tokenName: t.asset ?? "Ether",
-        amountUsd: price ? parseFloat(amt) * price : null,
-        networkType: WalletType.EVM,
-        counterpartyAddress: isSender ? t.to : t.from,
-        hash: t.hash,
-        blockNumber: parseInt(t.blockNum, 16),
-      } as EvmTransactionData);
-    });
-    pageKey = res.result.pageKey;
-  } while (pageKey);
-  return transfers;
-};
+// Transform Transfer to TransactionData format
+function transferToTransactionData(
+  transfer: Transfer,
+  price: number | null
+): TransactionData {
+  const amount = parseFloat(transfer.value);
+  const baseData = {
+    id: transfer.hash, // Use hash as ID for uniqueness
+    type: 'send' as const,
+    status: transfer.status,
+    timestamp: transfer.timestamp,
+    amount: transfer.value,
+    tokenTicker: transfer.symbol,
+    tokenName: transfer.symbol, // We don't have full name in Transfer
+    amountUsd: price ? amount * price : null,
+    counterpartyAddress: transfer.to,
+    hash: transfer.hash,
+  };
 
-const fetchSolTransfers = async (conn: Connection, addr: string, price: number | null): Promise<TransactionData[]> => {
-  const sigs = await conn.getSignaturesForAddress(new PublicKey(addr), {
-    limit: 20,
-  });
-  return sigs.map((s) => ({
-    id: uuid(),
-    type: "send",
-    status: s.confirmationStatus === "finalized" ? "confirmed" : "pending",
-    timestamp: (s.blockTime ?? Date.now() / 1000) * 1000,
-    amount: "0",
-    tokenTicker: "SOL",
-    tokenName: "Solana",
-    amountUsd: null,
-    networkType: WalletType.SOLANA,
-    counterpartyAddress: "",
-    hash: s.signature,
-    slot: s.slot,
-  })) as TransactionData[];
-};
+  if (transfer.network === WalletType.SOLANA) {
+    return {
+      ...baseData,
+      networkType: WalletType.SOLANA,
+      fee: transfer.fee,
+    } as SolanaTransactionData;
+  } else {
+    return {
+      ...baseData,
+      networkType: WalletType.EVM,
+      blockNumber: transfer.blockNumber,
+    } as EvmTransactionData;
+  }
+}
 
 export const useTransactions = () => {
   const qc = useQueryClient();
-  const { ethereumSigner, solanaSigner, solanaConnection } = useSigners();
+  const {
+    ethereumProvider,
+    ethereumSigner,
+    solanaSigner,
+    solanaConnection,
+    areSignersInitialized,
+  } = useSigners();
   const { wallets } = useWallets();
   const { ethPrice, solPrice } = usePrices();
 
-  const historyQuery = useQuery<TransactionData[], Error>({
-    queryKey: ["transactionHistory"],
-    queryFn: async () => {
-      const evmAddrs = wallets[WalletType.EVM].map((w) => w.address).filter(Boolean) as string[];
-      const solAddrs = wallets[WalletType.SOLANA].map((w) => w.address).filter(Boolean) as string[];
+  const allWallets = [
+    ...wallets[WalletType.EVM],
+    ...wallets[WalletType.SOLANA],
+  ];
+  const walletIds = allWallets.map((w) => w.id);
 
-      const evm = (await Promise.all(evmAddrs.map((a) => fetchEvmTransfers(a, ethPrice)))).flat();
-      const sol = (
-        await Promise.all(
-          solAddrs.map((a) => (solanaConnection ? fetchSolTransfers(solanaConnection, a, solPrice) : []))
-        )
-      ).flat();
-      return [...evm, ...sol].sort((a, b) => b.timestamp - a.timestamp);
-    },
-    enabled: !!ALCHEMY_ETHEREUM_RPC_URL || !!ALCHEMY_SOLANA_RPC_URL,
-  });
+  const historyQuery = useQuery<TransactionData[], Error>(
+    createTransactionQueryOptions({
+      queryKey: QUERY_KEYS.TRANSACTIONS_BY_WALLETS(walletIds),
+      queryFn: async () => {
+        if (allWallets.length === 0) {
+          return [];
+        }
 
-  const estimateEvmFee = useMutation<{ feeEth: string; feeUsd: number | null }, Error, EvmArgs>({
+        // Fetch transfers for each wallet type
+        const transferPromises: Promise<Transfer[]>[] = [];
+
+        // Fetch EVM transfers
+        if (wallets[WalletType.EVM].length > 0 && ethereumProvider) {
+          for (const wallet of wallets[WalletType.EVM]) {
+            transferPromises.push(fetchEvmTransfers(wallet, ethereumProvider));
+          }
+        }
+
+        // Fetch Solana transfers
+        if (wallets[WalletType.SOLANA].length > 0 && solanaConnection) {
+          for (const wallet of wallets[WalletType.SOLANA]) {
+            transferPromises.push(
+              fetchSolanaTransfers(wallet, solanaConnection)
+            );
+          }
+        }
+
+        // Use Promise.allSettled so one failure doesn't cancel all
+        const results = await Promise.allSettled(transferPromises);
+
+        // Collect all successful transfers
+        const allTransfers: Transfer[] = [];
+        results.forEach((result) => {
+          if (result.status === 'fulfilled') {
+            allTransfers.push(...result.value);
+          } else {
+            console.error('Failed to fetch transfers:', result.reason);
+          }
+        });
+
+        // Get current prices for conversion
+        const priceMap: Record<string, number | null> = {
+          ETH: ethPrice,
+          SOL: solPrice,
+          // Add more token prices as needed
+        };
+
+        // Transform transfers to transaction data
+        return allTransfers.map((transfer) => {
+          const price = priceMap[transfer.symbol] || null;
+          return transferToTransactionData(transfer, price);
+        });
+      },
+      enabled:
+        areSignersInitialized &&
+        allWallets.length > 0 &&
+        (!!ALCHEMY_ETHEREUM_RPC_URL || !!ALCHEMY_SOLANA_RPC_URL),
+    })
+  );
+
+  const estimateEvmFee = useMutation<
+    { feeEth: string; feeUsd: number | null },
+    Error,
+    EvmArgs
+  >({
     mutationFn: async ({ to, amount }) => {
-      if (!ethereumSigner) throw new Error("no evm signer");
+      if (!ethereumSigner || !ethereumSigner.provider) {
+        throw new Error('no evm signer or provider');
+      }
       const value = parseEther(amount);
       const limit = await ethereumSigner.estimateGas({ to, value });
-      const fd = await ethereumSigner.provider!.getFeeData();
-      const max = limit * (fd.maxFeePerGas ?? BigInt(0));
+      const fd = await ethereumSigner.provider.getFeeData();
+      // Use gasPrice as fallback for maxFeePerGas
+      const feePerGas = fd.maxFeePerGas ?? fd.gasPrice ?? BigInt(0);
+      const max = limit * feePerGas;
       const feeEth = formatEther(max);
-      return { feeEth, feeUsd: ethPrice ? parseFloat(feeEth) * ethPrice : null };
+      return {
+        feeEth,
+        feeUsd: ethPrice ? parseFloat(feeEth) * ethPrice : null,
+      };
     },
   });
 
-  const estimateSolFee = useMutation<{ feeSol: string; feeUsd: number | null }, Error, SolArgs>({
+  const estimateSolFee = useMutation<
+    { feeSol: string; feeUsd: number | null },
+    Error,
+    SolArgs
+  >({
     mutationFn: async () => {
       const lamports = 5000;
       const solFee = lamports / LAMPORTS_PER_SOL;
-      return { feeSol: solFee.toFixed(9), feeUsd: solPrice ? solFee * solPrice : null };
+      return {
+        feeSol: solFee.toFixed(9),
+        feeUsd: solPrice ? solFee * solPrice : null,
+      };
     },
   });
 
   const sendEvm = useMutation<string, Error, EvmArgs>({
     mutationFn: async ({ to, amount }) => {
-      if (!ethereumSigner) throw new Error("no evm signer");
+      if (!ethereumSigner || !ethereumSigner.provider) {
+        throw new Error('no evm signer or provider');
+      }
       const val = parseEther(amount);
       const limit = await ethereumSigner.estimateGas({ to, value: val });
-      const fd = await ethereumSigner.provider!.getFeeData();
+      const fd = await ethereumSigner.provider.getFeeData();
       const tx = await ethereumSigner.sendTransaction({
         to,
         value: val,
@@ -144,13 +198,17 @@ export const useTransactions = () => {
       const rec = await tx.wait();
       return rec?.hash ?? tx.hash;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["transactionHistory"] }),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: QUERY_KEYS.TRANSACTIONS }),
   });
 
   const sendSol = useMutation<string, Error, SolArgs>({
     mutationFn: async ({ to, amount }) => {
-      if (!solanaSigner || !solanaConnection) throw new Error("no sol signer");
-      const from = new PublicKey((solanaSigner as any).publicKey);
+      if (!solanaSigner || !solanaConnection) throw new Error('no sol signer');
+      if (!solanaSigner.sender) {
+        throw new Error('Solana signer not initialized');
+      }
+      const from = solanaSigner.sender;
       const tx = new SolTx().add(
         SystemProgram.transfer({
           fromPubkey: from,
@@ -163,12 +221,17 @@ export const useTransactions = () => {
       tx.feePayer = from;
       const sig = await solanaSigner.sendTransaction(tx);
       await solanaConnection.confirmTransaction(
-        { signature: sig, blockhash: latest.blockhash, lastValidBlockHeight: latest.lastValidBlockHeight },
-        "confirmed"
+        {
+          signature: sig,
+          blockhash: latest.blockhash,
+          lastValidBlockHeight: latest.lastValidBlockHeight,
+        },
+        'confirmed'
       );
       return sig;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["transactionHistory"] }),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: QUERY_KEYS.TRANSACTIONS }),
   });
 
   return {

@@ -1,33 +1,41 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { ScrollView, View } from "react-native";
-import { openAuthSessionAsync } from "expo-web-browser";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { OAuthMethod } from "@getpara/react-native-wallet";
-import { APP_SCHEME } from "@/constants/envs";
-import { COUNTRY_OPTIONS } from "@/constants/countryOptions";
+import React, { useCallback, useEffect, useState } from 'react';
+import { ScrollView, View } from 'react-native';
+import { openAuthSessionAsync } from 'expo-web-browser';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { OAuthMethod } from '@getpara/react-native-wallet';
+import { APP_SCHEME } from '@/constants/envs';
+import { COUNTRY_OPTIONS } from '@/constants/countryOptions';
 import {
   ADDITIONAL_PROVIDERS,
   INITIAL_PROVIDERS,
   MAX_PROVIDERS_PER_ROW,
   PROVIDER_INFO,
-} from "@/constants/socialProviders";
-import { LoginIdentifierInput } from "@/components/auth/LoginIdentifierInput";
-import { SocialLoginOptions } from "@/components/auth/SocialLoginOptions";
-import { Separator } from "@/components/ui/separator";
-import { Text } from "@/components/ui/text";
-import { usePara } from "@/hooks/usePara";
-import { useLoginIdentifier } from "@/hooks/useLoginIdentifier";
-import { getCreds } from "@/utils/credentialStoreUtils";
+} from '@/constants/socialProviders';
+import { LoginIdentifierInput } from '@/components/auth/LoginIdentifierInput';
+import { SocialLoginOptions } from '@/components/auth/SocialLoginOptions';
+import { Separator } from '@/components/ui/separator';
+import { Text } from '@/components/ui/text';
+import { usePara } from '@/hooks/usePara';
+import { useLoginIdentifier } from '@/hooks/useLoginIdentifier';
+import { getCreds } from '@/utils';
 
 export default function MainAuthScreen() {
-  const { paraClient, login, isLoggingIn, isLoginError, loginError, resetLogin, isAuthenticated, isAuthStatusLoading } =
-    usePara();
+  const {
+    paraClient,
+    login,
+    isLoggingIn,
+    isLoginError,
+    loginError,
+    resetLogin,
+    isAuthenticated,
+    isAuthStatusLoading,
+  } = usePara();
   const router = useRouter();
   const { method, email: oauthEmail } = useLocalSearchParams<{
     method?: string;
     email?: string;
   }>();
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const {
     displayValue,
     inputType,
@@ -39,31 +47,34 @@ export default function MainAuthScreen() {
     handleChange,
     setCountryCode,
     validate,
-    reset,
   } = useLoginIdentifier();
-
-  if (!paraClient) return null;
 
   const handleEmailFlow = useCallback(
     async (targetEmail: string) => {
-      setError("");
+      setError('');
       resetLogin();
 
       try {
+        if (!paraClient) {
+          setError('Authentication service not available');
+          return;
+        }
         const emailCredentials = { email: targetEmail };
         const userExists = await paraClient.checkIfUserExists(emailCredentials);
 
         if (userExists) {
-          await login({ authType: "email", email: targetEmail });
+          await login({ authType: 'email', email: targetEmail });
         } else {
           await paraClient.createUser(emailCredentials);
           router.navigate({
-            pathname: "/auth/otp-verification",
-            params: { authType: "email", ...emailCredentials },
+            pathname: '/auth/otp-verification',
+            params: { authType: 'email', ...emailCredentials },
           });
         }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to process email login");
+      } catch (_err) {
+        setError(
+          _err instanceof Error ? _err.message : 'Failed to process email login'
+        );
       }
     },
     [login, paraClient, router, resetLogin]
@@ -71,24 +82,31 @@ export default function MainAuthScreen() {
 
   const handlePhoneFlow = useCallback(
     async (phone: string, code: string) => {
-      setError("");
+      setError('');
       resetLogin();
 
       try {
+        if (!paraClient) {
+          setError('Authentication service not available');
+          return;
+        }
         const phoneCredentials = { phone, countryCode: code };
-        const userExists = await paraClient.checkIfUserExistsByPhone(phoneCredentials);
+        const userExists =
+          await paraClient.checkIfUserExistsByPhone(phoneCredentials);
 
         if (userExists) {
-          await login({ authType: "phone", phone, countryCode: code });
+          await login({ authType: 'phone', phone, countryCode: code });
         } else {
           await paraClient.createUserByPhone(phoneCredentials);
           router.navigate({
-            pathname: "/auth/otp-verification",
-            params: { authType: "phone", ...phoneCredentials },
+            pathname: '/auth/otp-verification',
+            params: { authType: 'phone', ...phoneCredentials },
           });
         }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to process phone login");
+      } catch (_err) {
+        setError(
+          _err instanceof Error ? _err.message : 'Failed to process phone login'
+        );
       }
     },
     [login, paraClient, router, resetLogin]
@@ -101,21 +119,21 @@ export default function MainAuthScreen() {
       try {
         const cached = await getCreds();
         if (cached) await login(cached);
-      } catch (err) {
-        console.error("Failed to load cached credentials:", err);
+      } catch (_err) {
+        console.error('Failed to load cached credentials:', _err);
       }
     })();
   }, [isAuthStatusLoading, isAuthenticated, login]);
 
   useEffect(() => {
-    if (paraClient && method === "login" && oauthEmail) {
+    if (paraClient && method === 'login' && oauthEmail) {
       handleEmailFlow(oauthEmail);
     }
   }, [method, oauthEmail, paraClient, handleEmailFlow, router]);
 
   useEffect(() => {
     if (isLoginError && loginError) {
-      console.error("Login error:", loginError.message);
+      console.error('Login error:', loginError.message);
       setError(loginError.message);
     }
   }, [isLoginError, loginError]);
@@ -128,23 +146,27 @@ export default function MainAuthScreen() {
 
   useEffect(() => {
     if (error) {
-      setError("");
+      setError('');
       resetLogin();
     }
-  }, [inputType, resetLogin]);
+  }, [error, inputType, resetLogin]);
 
-  const showHelperText = displayValue.trim() !== "" && inputType !== undefined && !error && !validationError;
+  const showHelperText =
+    displayValue.trim() !== '' &&
+    inputType !== undefined &&
+    !error &&
+    !validationError;
 
   const handleContinue = async () => {
-    setError("");
+    setError('');
 
     if (!validate()) {
       return;
     }
 
-    if (inputType === "email" && email) {
+    if (inputType === 'email' && email) {
       await handleEmailFlow(email);
-    } else if (inputType === "phone" && phoneNumber) {
+    } else if (inputType === 'phone' && phoneNumber) {
       await handlePhoneFlow(phoneNumber, countryCode);
     }
   };
@@ -152,10 +174,14 @@ export default function MainAuthScreen() {
   const handleOauthLogin = async (provider: OAuthMethod) => {
     if (!provider) return;
 
-    setError("");
+    setError('');
     resetLogin();
 
     try {
+      if (!paraClient) {
+        setError('Authentication service not available');
+        return;
+      }
       const oauthUrl = await paraClient.getOAuthURL({
         method: provider,
         deeplinkUrl: APP_SCHEME,
@@ -164,21 +190,27 @@ export default function MainAuthScreen() {
       await openAuthSessionAsync(oauthUrl, APP_SCHEME, {
         preferEphemeralSession: false,
       });
-    } catch (err) {
+    } catch {
       const providerName = PROVIDER_INFO[provider]?.name || provider;
       setError(`Failed to sign in with ${providerName}`);
     }
   };
 
+  if (!paraClient) return null;
+
   return (
     <View className="flex-1 bg-background px-6">
       <ScrollView
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ flexGrow: 1 }}>
+        contentContainerStyle={{ flexGrow: 1 }}
+      >
         <View className="pt-6 pb-8">
-          <Text className="text-5xl text-left text-foreground font-figtree-bold">Sign In</Text>
+          <Text className="text-5xl text-left text-foreground font-figtree-bold">
+            Sign In
+          </Text>
           <Text className="mt-2 text-left text-lg text-muted-foreground">
-            Welcome to the Para Wallet Demo. Sign in to explore seamless authentication and wallet integration.
+            Welcome to the Para Wallet Demo. Sign in to explore seamless
+            authentication and wallet integration.
           </Text>
         </View>
 
@@ -199,7 +231,9 @@ export default function MainAuthScreen() {
 
           <View className="flex-row items-center gap-x-2">
             <Separator className="flex-1" />
-            <Text className="text-center text-muted-foreground">or continue with</Text>
+            <Text className="text-center text-muted-foreground">
+              or continue with
+            </Text>
             <Separator className="flex-1" />
           </View>
 
@@ -216,7 +250,8 @@ export default function MainAuthScreen() {
 
         <View className="pb-4">
           <Text className="text-sm text-center text-muted-foreground">
-            This is a demo application showcasing the Para React Native Wallet SDK usage.
+            This is a demo application showcasing the Para React Native Wallet
+            SDK usage.
           </Text>
         </View>
       </ScrollView>

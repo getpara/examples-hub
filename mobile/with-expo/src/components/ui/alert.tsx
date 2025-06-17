@@ -29,20 +29,40 @@ const Alert = React.forwardRef<
       iconSize?: number;
       iconClassName?: string;
     }
->(({ className, variant, children, icon: Icon, iconSize = 16, iconClassName, ...props }, ref) => {
-  const { colors } = useTheme();
-  return (
-    <View ref={ref} role='alert' className={alertVariants({ variant, className })} {...props}>
-      <View className='absolute left-3.5 top-4 -translate-y-0.5'>
-        <Icon
-          size={iconSize}
-          color={variant === 'destructive' ? colors.notification : colors.text}
-        />
+>(
+  (
+    {
+      className,
+      variant,
+      children,
+      icon: Icon,
+      iconSize = 16,
+      iconClassName,
+      ...props
+    },
+    ref
+  ) => {
+    const { colors } = useTheme();
+    return (
+      <View
+        ref={ref}
+        role="alert"
+        className={alertVariants({ variant, className })}
+        {...props}
+      >
+        <View className="absolute left-3.5 top-4 -translate-y-0.5">
+          <Icon
+            size={iconSize}
+            color={
+              variant === 'destructive' ? colors.notification : colors.text
+            }
+          />
+        </View>
+        {children}
       </View>
-      {children}
-    </View>
-  );
-});
+    );
+  }
+);
 Alert.displayName = 'Alert';
 
 const AlertTitle = React.forwardRef<

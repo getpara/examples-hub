@@ -1,13 +1,12 @@
-import { useState, useCallback, useMemo } from "react";
-import { WalletType } from "@getpara/react-native-wallet";
+import { useState, useCallback, useMemo } from 'react';
+import { WalletType } from '@getpara/react-native-wallet';
 import {
   FeeTier,
   PriorityLevel,
   calculateTotalSolanaFee,
   calculateTotalSolanaFeeUsd,
-  getFeeTierStyles,
   PRIORITY_FEE_OPTIONS,
-} from "@/utils/feeUtils";
+} from '@/utils';
 
 interface UseFeeCalculationProps {
   networkType: WalletType;
@@ -22,8 +21,9 @@ export function useFeeCalculation({
   solanaBaseFee = 5000,
   solanaBaseFeeUsd = null,
 }: UseFeeCalculationProps) {
-  const [selectedFeeTier, setSelectedFeeTier] = useState<FeeTier>("average");
-  const [priorityFeeLevel, setPriorityFeeLevel] = useState<PriorityLevel>("none");
+  const [selectedFeeTier, setSelectedFeeTier] = useState<FeeTier>('average');
+  const [priorityFeeLevel, setPriorityFeeLevel] =
+    useState<PriorityLevel>('none');
 
   const handleFeeTierChange = useCallback((tier: FeeTier) => {
     setSelectedFeeTier(tier);
@@ -33,10 +33,6 @@ export function useFeeCalculation({
     setPriorityFeeLevel(level);
   }, []);
 
-  const getFeeTierStyle = useCallback((tier: FeeTier) => {
-    return getFeeTierStyles(tier);
-  }, []);
-
   const totalSolanaFee = useMemo(() => {
     if (networkType !== WalletType.SOLANA) return null;
     return calculateTotalSolanaFee(solanaBaseFee, priorityFeeLevel);
@@ -44,15 +40,17 @@ export function useFeeCalculation({
 
   const totalSolanaFeeUsd = useMemo(() => {
     if (networkType !== WalletType.SOLANA) return null;
-    return calculateTotalSolanaFeeUsd(solanaBaseFeeUsd, priorityFeeLevel, tokenPriceUsd);
+    return calculateTotalSolanaFeeUsd(
+      solanaBaseFeeUsd,
+      priorityFeeLevel,
+      tokenPriceUsd
+    );
   }, [networkType, solanaBaseFeeUsd, priorityFeeLevel, tokenPriceUsd]);
 
-  const priorityOptions = useMemo(() => {
-    return PRIORITY_FEE_OPTIONS;
-  }, []);
-
   const selectedPriorityFee = useMemo(() => {
-    const option = PRIORITY_FEE_OPTIONS.find((o) => o.level === priorityFeeLevel);
+    const option = PRIORITY_FEE_OPTIONS.find(
+      (o) => o.level === priorityFeeLevel
+    );
     return option ? option.value : 0;
   }, [priorityFeeLevel]);
 
@@ -61,10 +59,9 @@ export function useFeeCalculation({
     priorityFeeLevel,
     totalSolanaFee,
     totalSolanaFeeUsd,
-    priorityOptions,
+    priorityOptions: PRIORITY_FEE_OPTIONS, // Reference constant directly
     selectedPriorityFee,
     handleFeeTierChange,
     handlePriorityLevelChange,
-    getFeeTierStyle,
   };
 }

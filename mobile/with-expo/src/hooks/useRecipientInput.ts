@@ -1,19 +1,25 @@
-import { useState, useCallback, useEffect, useMemo } from "react";
-import { SupportedWalletType } from "@/types";
+import { useState, useCallback, useEffect } from 'react';
+import { SupportedWalletType } from '@/types';
 import {
   validateRecipientAddress,
   getNetworkPlaceholder,
   getNetworkDisplayName,
-} from "@/utils/recipientUtils";
+} from '@/utils';
 
 interface UseRecipientInputProps {
   networkType: SupportedWalletType;
   externalError?: string;
 }
 
-export function useRecipientInput({ networkType, externalError }: UseRecipientInputProps) {
-  const [address, setAddress] = useState("");
-  const [validationResult, setValidationResult] = useState({ isValid: false, errorMessage: "" });
+export function useRecipientInput({
+  networkType,
+  externalError,
+}: UseRecipientInputProps) {
+  const [address, setAddress] = useState('');
+  const [validationResult, setValidationResult] = useState({
+    isValid: false,
+    errorMessage: '',
+  });
 
   // Validate address whenever it changes or network type changes
   useEffect(() => {
@@ -28,35 +34,26 @@ export function useRecipientInput({ networkType, externalError }: UseRecipientIn
 
   // Clear address
   const clearAddress = useCallback(() => {
-    setAddress("");
+    setAddress('');
   }, []);
 
-  // Network-specific placeholder
-  const placeholder = useMemo(() => {
-    return getNetworkPlaceholder(networkType);
-  }, [networkType]);
+  // Network-specific placeholder - direct lookup, no memoization needed
+  const placeholder = getNetworkPlaceholder(networkType);
 
-  // Network display name
-  const networkName = useMemo(() => {
-    return getNetworkDisplayName(networkType);
-  }, [networkType]);
+  // Network display name - direct lookup, no memoization needed
+  const networkName = getNetworkDisplayName(networkType);
 
   // Combined error message (validation error or external error)
-  const errorMessage = useMemo(() => {
-    if (externalError) return externalError;
-    if (address && !validationResult.isValid) return validationResult.errorMessage;
-    return "";
-  }, [externalError, address, validationResult]);
+  const errorMessage =
+    externalError ||
+    (address && !validationResult.isValid ? validationResult.errorMessage : '');
 
   // Check if there's any error
-  const hasError = useMemo(() => {
-    return !!errorMessage;
-  }, [errorMessage]);
+  const hasError = !!errorMessage;
 
   // Success message
-  const successMessage = useMemo(() => {
-    return address && validationResult.isValid ? `Valid ${networkName} address` : "";
-  }, [address, validationResult.isValid, networkName]);
+  const successMessage =
+    address && validationResult.isValid ? `Valid ${networkName} address` : '';
 
   return {
     // State

@@ -1,90 +1,110 @@
-import { useQuery } from "@tanstack/react-query";
-import { ethers } from "ethers";
-import { Connection } from "@solana/web3.js";
-import { ParaEthersSigner } from "@getpara/ethers-v6-integration";
-import { ParaSolanaWeb3Signer } from "@getpara/solana-web3.js-v1-integration";
-import { usePara } from "./usePara";
-import { useWallets } from "./useWallets";
-import { ALCHEMY_ETHEREUM_RPC_URL, ALCHEMY_SOLANA_RPC_URL } from "@/constants/envs";
+import { useQuery } from '@tanstack/react-query';
+import { JsonRpcProvider } from 'ethers';
+import { Connection } from '@solana/web3.js';
+import { ParaEthersSigner } from '@getpara/ethers-v6-integration';
+import { ParaSolanaWeb3Signer } from '@getpara/solana-web3.js-v1-integration';
+import { usePara } from './usePara';
+import { useWallets } from './useWallets';
+import { QUERY_KEYS } from '@/constants/queryKeys';
+import { createAuthDependentQueryOptions } from '@/utils/queryUtils';
 
 interface SignersResult {
-  ethereumProvider: ethers.JsonRpcProvider | null;
+  ethereumProvider: JsonRpcProvider | null;
   ethereumSigner: ParaEthersSigner | null;
   solanaConnection: Connection | null;
   solanaSigner: ParaSolanaWeb3Signer | null;
 }
 
-const EMPTY_SIGNERS: SignersResult = {
-  ethereumProvider: null,
-  ethereumSigner: null,
-  solanaConnection: null,
-  solanaSigner: null,
-};
+interface SignersError {
+  error: string;
+  details?: unknown;
+}
 
 export const useSigners = () => {
   const { paraClient, isAuthenticated, isClientReady } = usePara();
-  const { hasEvmWallets, hasSolanaWallets } = useWallets();
+  const { wallets: _wallets, hasEvmWallets, hasSolanaWallets } = useWallets();
 
   const {
-    data = EMPTY_SIGNERS,
+    data,
     isLoading: isSignersLoading,
     isError: isSignersError,
     error: signersError,
     refetch: reinitializeSigners,
-  } = useQuery<SignersResult>({
-    queryKey: ["blockchainSigners"],
-    queryFn: async () => {
-      if (!paraClient || !isAuthenticated) {
-        throw new Error("Para client not initialized or not authenticated");
+  } = useQuery<SignersResult | SignersError>(
+    createAuthDependentQueryOptions(
+      isClientReady && isAuthenticated && (hasEvmWallets || hasSolanaWallets),
+      {
+        queryKey: QUERY_KEYS.SIGNERS,
+        queryFn: async (): Promise<SignersResult | SignersError> => {
+          if (!paraClient || !isAuthenticated) {
+            return {
+              error: 'Para client not initialized or not authenticated',
+            };
+          }
+
+          try {
+            let ethereumProvider: JsonRpcProvider | null = null;
+            let ethereumSigner: ParaEthersSigner | null = null;
+            let solanaConnection: Connection | null = null;
+            let solanaSigner: ParaSolanaWeb3Signer | null = null;
+
+            // Create Para signers for EVM wallets
+            if (hasEvmWallets && paraClient) {
+              const provider = new JsonRpcProvider('https://eth.llamarpc.com');
+              ethereumSigner = new ParaEthersSigner(paraClient, provider);
+              ethereumProvider = provider;
+            }
+
+            // Create Para signers for Solana wallets
+            if (hasSolanaWallets && paraClient) {
+              const connection = new Connection(
+                'https://api.mainnet-beta.solana.com',
+                'confirmed'
+              );
+              solanaSigner = new ParaSolanaWeb3Signer(paraClient, connection);
+              solanaConnection = connection;
+            }
+
+            return {
+              ethereumProvider,
+              ethereumSigner,
+              solanaConnection,
+              solanaSigner,
+            };
+          } catch (error) {
+            return {
+              error: 'Failed to initialize blockchain signers',
+              details: error,
+            };
+          }
+        },
       }
+    )
+  );
 
-      const result = { ...EMPTY_SIGNERS };
-
-      if (hasEvmWallets && ALCHEMY_ETHEREUM_RPC_URL) {
-        try {
-          const provider = new ethers.JsonRpcProvider(ALCHEMY_ETHEREUM_RPC_URL);
-          const signer = new ParaEthersSigner(paraClient, provider);
-          result.ethereumProvider = provider;
-          result.ethereumSigner = signer;
-        } catch (error) {
-          console.error("Error initializing Ethereum signer:", error);
-        }
-      }
-
-      if (hasSolanaWallets && ALCHEMY_SOLANA_RPC_URL) {
-        try {
-          const connection = new Connection(ALCHEMY_SOLANA_RPC_URL, "confirmed");
-          const signer = new ParaSolanaWeb3Signer(paraClient, connection);
-          result.solanaConnection = connection;
-          result.solanaSigner = signer;
-        } catch (error) {
-          console.error("Error initializing Solana signer:", error);
-        }
-      }
-
-      if (!result.ethereumSigner && !result.solanaSigner && (hasEvmWallets || hasSolanaWallets)) {
-        throw new Error("Failed to initialize any blockchain signers");
-      }
-
-      return result;
-    },
-    enabled: isClientReady && isAuthenticated && (hasEvmWallets || hasSolanaWallets),
-    staleTime: Infinity,
-    gcTime: Infinity,
-    retry: 1,
-  });
+  // Handle error state
+  const isError = !!(data && 'error' in data);
+  const ethereumProvider =
+    data && 'ethereumProvider' in data ? data.ethereumProvider : null;
+  const ethereumSigner =
+    data && 'ethereumSigner' in data ? data.ethereumSigner : null;
+  const solanaConnection =
+    data && 'solanaConnection' in data ? data.solanaConnection : null;
+  const solanaSigner =
+    data && 'solanaSigner' in data ? data.solanaSigner : null;
 
   return {
-    ethereumProvider: data.ethereumProvider,
-    ethereumSigner: data.ethereumSigner,
-    solanaConnection: data.solanaConnection,
-    solanaSigner: data.solanaSigner,
-    hasEthereumSigner: !!data.ethereumSigner,
-    hasSolanaSigner: !!data.solanaSigner,
-    areSignersInitialized: data !== EMPTY_SIGNERS,
+    ethereumProvider,
+    ethereumSigner,
+    solanaConnection,
+    solanaSigner,
+    hasEthereumSigner: !!ethereumSigner,
+    hasSolanaSigner: !!solanaSigner,
+    areSignersInitialized: !!ethereumSigner || !!solanaSigner,
     isSignersLoading,
-    isSignersError,
-    signersError,
+    isSignersError: isSignersError || isError,
+    signersError:
+      isError && data ? new Error((data as SignersError).error) : signersError,
     reinitializeSigners,
   };
 };

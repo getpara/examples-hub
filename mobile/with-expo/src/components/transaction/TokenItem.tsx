@@ -1,16 +1,22 @@
-import React from "react";
-import { View, Image, Pressable, ActivityIndicator } from "react-native";
-import { Text } from "~/components/ui/text";
-import { formatUsdValue, formatCryptoValue } from "@/utils/formattingUtils";
-import { SupportedWalletType } from "@/types";
+import React from 'react';
+import {
+  View,
+  Image,
+  Pressable,
+  ActivityIndicator,
+  ImageSourcePropType,
+} from 'react-native';
+import { Text } from '~/components/ui/text';
+import { formatUsdValue, formatCryptoValue } from '@/utils/formattingUtils';
+import { SupportedWalletType } from '@/types';
 
 export interface TokenItemProps {
   id: string;
   name: string;
   ticker: string;
-  logo: any;
+  logo: ImageSourcePropType;
   networkType: SupportedWalletType;
-  networkLogo: any;
+  networkLogo: ImageSourcePropType;
   balance: number;
   usdValue: number | null;
   isLoading: boolean;
@@ -24,7 +30,7 @@ export function TokenItem({
   name,
   ticker,
   logo,
-  networkType,
+  networkType: _networkType,
   networkLogo,
   balance,
   usdValue,
@@ -34,18 +40,19 @@ export function TokenItem({
   disabled = false,
 }: TokenItemProps) {
   const formattedBalance = formatCryptoValue(balance, ticker);
-  const formattedUsdValue = usdValue !== null ? formatUsdValue(usdValue) : "--";
+  const formattedUsdValue = usdValue !== null ? formatUsdValue(usdValue) : '--';
 
   return (
     <Pressable
       onPress={() => onSelect(id)}
       disabled={disabled || isLoading}
       className={`flex-row items-center p-4 rounded-lg border ${
-        isSelected ? "border-primary bg-primary/5" : "border-border bg-card"
-      } ${disabled ? "opacity-50" : ""}`}
+        isSelected ? 'border-primary bg-primary/5' : 'border-border bg-card'
+      } ${disabled ? 'opacity-50' : ''}`}
       accessibilityRole="button"
       accessibilityLabel={`Select ${name} token with balance of ${formattedBalance}`}
-      accessibilityState={{ selected: isSelected }}>
+      accessibilityState={{ selected: isSelected }}
+    >
       <View className="relative">
         <Image
           source={logo}
@@ -65,12 +72,16 @@ export function TokenItem({
           {isLoading ? (
             <ActivityIndicator size="small" />
           ) : (
-            <Text className="text-base font-medium text-foreground">{formattedUsdValue}</Text>
+            <Text className="text-base font-medium text-foreground">
+              {formattedUsdValue}
+            </Text>
           )}
         </View>
         <View className="flex-row justify-between items-center mt-1">
           <Text className="text-sm text-muted-foreground">{ticker}</Text>
-          <Text className="text-sm text-muted-foreground">{formattedBalance}</Text>
+          <Text className="text-sm text-muted-foreground">
+            {formattedBalance}
+          </Text>
         </View>
       </View>
     </Pressable>

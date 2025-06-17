@@ -1,9 +1,13 @@
-import { ParaMobile } from "@getpara/react-native-wallet";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AuthCreds } from "@/types";
-import { createParaClient } from "@/client/para";
-import { credsToParaAuth } from "@/utils/authUtils";
-import { clearCreds, saveCreds } from "@/utils/credentialStoreUtils";
+import { ParaMobile } from '@getpara/react-native-wallet';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { AuthCreds } from '@/types';
+import { createParaClient } from '@/client/para';
+import { credsToParaAuth, clearCreds, saveCreds } from '@/utils';
+import { QUERY_KEYS, MUTATION_KEYS } from '@/constants/queryKeys';
+import {
+  createAuthDependentQueryOptions,
+  createMutationOptions,
+} from '@/utils/queryUtils';
 
 export const usePara = () => {
   const queryClient = useQueryClient();
@@ -14,7 +18,7 @@ export const usePara = () => {
     isError: isClientError,
     error: paraClientError,
   } = useQuery<ParaMobile, Error>({
-    queryKey: ["paraClient"],
+    queryKey: ['paraClient'], // Keep separate as this is a singleton
     queryFn: createParaClient,
     staleTime: Infinity,
     gcTime: Infinity,
@@ -26,11 +30,12 @@ export const usePara = () => {
     error: authStatusError,
     isError: isAuthStatusError,
     refetch: refreshAuthStatus,
-  } = useQuery({
-    queryKey: ["paraAuthStatus"],
-    queryFn: async () => await paraClient?.isFullyLoggedIn(),
-    enabled: !!paraClient,
-  });
+  } = useQuery(
+    createAuthDependentQueryOptions(!!paraClient, {
+      queryKey: QUERY_KEYS.PARA_AUTH_STATUS,
+      queryFn: async () => await paraClient?.isFullyLoggedIn(),
+    })
+  );
 
   const {
     mutateAsync: login,
@@ -38,17 +43,24 @@ export const usePara = () => {
     error: loginError,
     isError: isLoginError,
     reset: resetLogin,
-  } = useMutation<void, Error, AuthCreds>({
-    mutationFn: async (credentials) => {
-      if (!paraClient) throw new Error("Para paraClient is not initialized");
-      await paraClient.login(credsToParaAuth(credentials));
-    },
-    onSuccess: (_, credentials) => {
-      queryClient.setQueryData(["paraAuthStatus"], true);
-      saveCreds(credentials);
-    },
-    onError: clearCreds,
-  });
+  } = useMutation<void, Error, AuthCreds>(
+    createMutationOptions({
+      mutationKey: MUTATION_KEYS.PARA_LOGIN,
+      mutationFn: async (credentials) => {
+        if (!paraClient) throw new Error('Para paraClient is not initialized');
+        await paraClient.login(credsToParaAuth(credentials));
+      },
+      onSuccess: async (_, credentials) => {
+        // Invalidate instead of setQueryData to ensure fresh state
+        await queryClient.invalidateQueries({
+          queryKey: QUERY_KEYS.PARA_AUTH_STATUS,
+        });
+        await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.WALLETS });
+        saveCreds(credentials);
+      },
+      onError: clearCreds,
+    })
+  );
 
   const {
     mutateAsync: logout,
@@ -56,16 +68,24 @@ export const usePara = () => {
     error: logoutError,
     isError: isLogoutError,
     reset: resetLogout,
-  } = useMutation<void, Error>({
-    mutationFn: async () => {
-      if (!paraClient) throw new Error("Para paraClient is not initialized");
-      await paraClient.logout();
-    },
-    onSuccess: () => {
-      queryClient.setQueryData(["paraAuthStatus"], false);
-      clearCreds();
-    },
-  });
+  } = useMutation<void, Error>(
+    createMutationOptions({
+      mutationKey: MUTATION_KEYS.PARA_LOGOUT,
+      mutationFn: async () => {
+        if (!paraClient) throw new Error('Para paraClient is not initialized');
+        await paraClient.logout();
+      },
+      onSuccess: async () => {
+        // Clear all auth-related queries
+        await queryClient.invalidateQueries({
+          queryKey: QUERY_KEYS.PARA_AUTH_STATUS,
+        });
+        await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.WALLETS });
+        await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.SIGNERS });
+        clearCreds();
+      },
+    })
+  );
 
   const {
     mutateAsync: registerPasskey,
@@ -73,16 +93,26 @@ export const usePara = () => {
     error: registerPasskeyError,
     isError: isRegisterPasskeyError,
     reset: resetRegisterPasskey,
-  } = useMutation<void, Error, AuthCreds & { biometricsId: string }>({
-    mutationFn: async (args) => {
-      if (!paraClient) throw new Error("Para paraClient is not initialized");
-      await paraClient.registerPasskey(args);
-    },
-    onSuccess: () => queryClient.setQueryData(["paraAuthStatus"], true),
-  });
+  } = useMutation<void, Error, AuthCreds & { biometricsId: string }>(
+    createMutationOptions({
+      mutationKey: MUTATION_KEYS.PARA_REGISTER_PASSKEY,
+      mutationFn: async (args) => {
+        if (!paraClient) throw new Error('Para paraClient is not initialized');
+        await paraClient.registerPasskey(args);
+      },
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: QUERY_KEYS.PARA_AUTH_STATUS,
+        });
+        await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.WALLETS });
+      },
+    })
+  );
 
   const isClientReady = !!paraClient && !isClientError;
-  const isEnvError = paraClientError?.message?.includes("Missing required environment variable");
+  const isEnvError = paraClientError?.message?.includes(
+    'Missing required environment variable'
+  );
 
   return {
     paraClient,

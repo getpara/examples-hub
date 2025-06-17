@@ -1,6 +1,9 @@
-import { WalletType } from "@getpara/react-native-wallet";
-import { SupportedWalletType } from "@/types";
-import { isValidEvmAddress, isValidSolanaAddress } from "@/utils/transactionUtils";
+import { WalletType } from '@getpara/react-native-wallet';
+import { SupportedWalletType } from '@/types';
+import {
+  isValidEvmAddress,
+  isValidSolanaAddress,
+} from '@/utils/transactionUtils';
 
 // Validate address based on network type
 export function validateRecipientAddress(
@@ -8,7 +11,7 @@ export function validateRecipientAddress(
   networkType: SupportedWalletType
 ): { isValid: boolean; errorMessage: string } {
   if (!address.trim()) {
-    return { isValid: false, errorMessage: "" };
+    return { isValid: false, errorMessage: '' };
   }
 
   let isValid = false;
@@ -19,19 +22,24 @@ export function validateRecipientAddress(
     isValid = isValidSolanaAddress(address);
   }
 
-  const errorMessage = !isValid && address
-    ? `Invalid ${networkType === WalletType.EVM ? "Ethereum" : "Solana"} address format`
-    : "";
+  const errorMessage =
+    !isValid && address
+      ? `Invalid ${networkType === WalletType.EVM ? 'Ethereum' : 'Solana'} address format`
+      : '';
 
   return { isValid, errorMessage };
 }
 
 // Get network-specific placeholder
-export function getNetworkPlaceholder(networkType: SupportedWalletType): string {
-  return networkType === WalletType.EVM ? "0x..." : "Solana address...";
+export function getNetworkPlaceholder(
+  networkType: SupportedWalletType
+): string {
+  return networkType === WalletType.EVM ? '0x...' : 'Solana address...';
 }
 
 // Get network display name
-export function getNetworkDisplayName(networkType: SupportedWalletType): string {
-  return networkType === WalletType.EVM ? "Ethereum" : "Solana";
+export function getNetworkDisplayName(
+  networkType: SupportedWalletType
+): string {
+  return networkType === WalletType.EVM ? 'Ethereum' : 'Solana';
 }

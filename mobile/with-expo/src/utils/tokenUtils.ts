@@ -1,5 +1,6 @@
-import { WalletType } from "@getpara/react-native-wallet";
-import { SUPPORTED_WALLET_TYPES, SupportedWalletType } from "@/types";
+import { WalletType } from '@getpara/react-native-wallet';
+import { ImageSourcePropType } from 'react-native';
+import { SUPPORTED_WALLET_TYPES, SupportedWalletType } from '@/types';
 
 export interface TokenData {
   id: string;
@@ -16,15 +17,18 @@ export interface TokenData {
 // Filtering functions
 export function filterTokensByNetwork(
   tokens: TokenData[],
-  networkType: "all" | SupportedWalletType
+  networkType: 'all' | SupportedWalletType
 ): TokenData[] {
-  if (networkType === "all") {
+  if (networkType === 'all') {
     return tokens;
   }
   return tokens.filter((token) => token.networkType === networkType);
 }
 
-export function searchTokens(tokens: TokenData[], searchQuery: string): TokenData[] {
+export function searchTokens(
+  tokens: TokenData[],
+  searchQuery: string
+): TokenData[] {
   if (!searchQuery) {
     return tokens;
   }
@@ -38,14 +42,18 @@ export function searchTokens(tokens: TokenData[], searchQuery: string): TokenDat
 }
 
 // Grouping functions
-export function groupTokensByNetwork(tokens: TokenData[]): Record<SupportedWalletType, TokenData[]> {
+export function groupTokensByNetwork(
+  tokens: TokenData[]
+): Record<SupportedWalletType, TokenData[]> {
   const groups: Record<SupportedWalletType, TokenData[]> = {
     [WalletType.EVM]: [],
     [WalletType.SOLANA]: [],
   };
 
   tokens.forEach((token) => {
-    if (SUPPORTED_WALLET_TYPES.includes(token.networkType as SupportedWalletType)) {
+    if (
+      SUPPORTED_WALLET_TYPES.includes(token.networkType as SupportedWalletType)
+    ) {
       groups[token.networkType as SupportedWalletType].push(token);
     }
   });
@@ -57,29 +65,42 @@ export function groupTokensByNetwork(tokens: TokenData[]): Record<SupportedWalle
 export function getNetworkName(networkType: SupportedWalletType): string {
   switch (networkType) {
     case WalletType.EVM:
-      return "Ethereum";
+      return 'Ethereum';
     case WalletType.SOLANA:
-      return "Solana";
+      return 'Solana';
     default:
-      return "Unknown Network";
+      return 'Unknown Network';
   }
 }
 
-export function getNetworkIcon(networkType: SupportedWalletType) {
+export function getNetworkIcon(
+  networkType: SupportedWalletType
+): ImageSourcePropType | undefined {
   switch (networkType) {
     case WalletType.EVM:
-      return require("~/assets/ethereum.png");
+      return require('~/assets/ethereum.png');
     case WalletType.SOLANA:
-      return require("~/assets/solana.png");
+      return require('~/assets/solana.png');
     default:
-      return null;
+      return undefined;
+  }
+}
+
+export function getTokenLogo(ticker: string): ImageSourcePropType {
+  switch (ticker.toUpperCase()) {
+    case 'ETH':
+      return require('~/assets/ethereum.png');
+    case 'SOL':
+      return require('~/assets/solana.png');
+    default:
+      return require('~/assets/ethereum.png');
   }
 }
 
 // Combined filter and group function
 export function filterAndGroupTokens(
   tokens: TokenData[],
-  networkType: "all" | SupportedWalletType,
+  networkType: 'all' | SupportedWalletType,
   searchQuery: string
 ): {
   filteredTokens: TokenData[];

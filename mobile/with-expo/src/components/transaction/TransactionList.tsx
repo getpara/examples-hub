@@ -1,14 +1,18 @@
-import React from "react";
-import { View, FlatList, ActivityIndicator, Pressable } from "react-native";
-import { Text } from "~/components/ui/text";
-import { Input } from "~/components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { Button } from "~/components/ui/button";
-import { Separator } from "~/components/ui/separator";
-import { Search, SlidersHorizontal, RefreshCcw } from "@/components/icons";
-import { WalletType } from "@getpara/react-native-wallet";
-import { TransactionListItem, TransactionData } from "./TransactionListItem";
-import { SortOption, FilterNetwork, FilterType } from "@/utils/transactionListUtils";
+import React from 'react';
+import { View, FlatList, ActivityIndicator, Pressable } from 'react-native';
+import { Text } from '~/components/ui/text';
+import { Input } from '~/components/ui/input';
+import { Tabs, TabsList, TabsTrigger } from '~/components/ui/tabs';
+import { Button } from '~/components/ui/button';
+import { Separator } from '~/components/ui/separator';
+import { Search, SlidersHorizontal, RefreshCcw } from '@/components/icons';
+import { WalletType } from '@getpara/react-native-wallet';
+import { TransactionListItem, TransactionData } from './TransactionListItem';
+import {
+  SortOption,
+  FilterNetwork,
+  FilterType,
+} from '@/utils/transactionListUtils';
 
 interface SortOptionConfig {
   label: string;
@@ -49,7 +53,7 @@ export function TransactionList({
   onTransactionPress,
   onRefresh,
   isRefreshing = false,
-  title = "Transaction History",
+  title = 'Transaction History',
   showFilters = true,
   sortOption,
   filterNetwork,
@@ -67,16 +71,14 @@ export function TransactionList({
   getEmptyMessage,
   getEmptyDescription,
 }: TransactionListProps) {
-
   const renderEmptyState = () => {
     if (isLoading) {
       return (
         <View className="flex-1 items-center justify-center py-10">
-          <ActivityIndicator
-            size="large"
-            color="#6366f1"
-          />
-          <Text className="text-center text-muted-foreground mt-4">Loading transactions...</Text>
+          <ActivityIndicator size="large" color="#6366f1" />
+          <Text className="text-center text-muted-foreground mt-4">
+            Loading transactions...
+          </Text>
         </View>
       );
     }
@@ -84,11 +86,10 @@ export function TransactionList({
     if (hasActiveFilters) {
       return (
         <View className="flex-1 items-center justify-center py-10">
-          <Text className="text-center text-muted-foreground">{getEmptyMessage()}</Text>
-          <Button
-            variant="outline"
-            className="mt-4"
-            onPress={onResetFilters}>
+          <Text className="text-center text-muted-foreground">
+            {getEmptyMessage()}
+          </Text>
+          <Button variant="outline" className="mt-4" onPress={onResetFilters}>
             <Text>Reset Filters</Text>
           </Button>
         </View>
@@ -97,8 +98,12 @@ export function TransactionList({
 
     return (
       <View className="flex-1 items-center justify-center py-10">
-        <Text className="text-center text-lg font-medium text-foreground mb-2">{getEmptyMessage()}</Text>
-        <Text className="text-center text-muted-foreground mb-6">{getEmptyDescription()}</Text>
+        <Text className="text-center text-lg font-medium text-foreground mb-2">
+          {getEmptyMessage()}
+        </Text>
+        <Text className="text-center text-muted-foreground mb-6">
+          {getEmptyDescription()}
+        </Text>
       </View>
     );
   };
@@ -114,7 +119,8 @@ export function TransactionList({
               variant="ghost"
               size="icon"
               onPress={onRefresh}
-              accessibilityLabel="Refresh transactions">
+              accessibilityLabel="Refresh transactions"
+            >
               <RefreshCcw className="text-muted-foreground" />
             </Button>
           )}
@@ -131,24 +137,22 @@ export function TransactionList({
               onChangeText={onSearchChange}
             />
             <View className="absolute left-3 top-3">
-              <Search
-                size={20}
-                className="text-muted-foreground"
-              />
+              <Search size={20} className="text-muted-foreground" />
             </View>
           </View>
 
           <View className="flex-row justify-between items-center mt-2">
             <Text className="text-sm text-muted-foreground">
-              {transactions.length}{" "}
-              {transactions.length === 1 ? "transaction" : "transactions"}
+              {transactions.length}{' '}
+              {transactions.length === 1 ? 'transaction' : 'transactions'}
             </Text>
 
             <Button
               variant="ghost"
               size="sm"
               onPress={onToggleFilters}
-              className="h-8 px-2">
+              className="h-8 px-2"
+            >
               <SlidersHorizontal
                 size={18}
                 className="text-muted-foreground mr-2"
@@ -160,25 +164,27 @@ export function TransactionList({
           {showFilterOptions && (
             <View className="mt-3 p-3 border border-border rounded-md bg-card">
               <View className="mb-3">
-                <Text className="text-sm font-medium text-foreground mb-2">Network</Text>
+                <Text className="text-sm font-medium text-foreground mb-2">
+                  Network
+                </Text>
                 <Tabs
                   value={filterNetwork}
-                  onValueChange={(value) => onNetworkFilterChange(value as FilterNetwork)}
-                  className="w-full">
+                  onValueChange={(value) =>
+                    onNetworkFilterChange(value as FilterNetwork)
+                  }
+                  className="w-full"
+                >
                   <TabsList className="w-full h-9 bg-muted">
-                    <TabsTrigger
-                      value="all"
-                      className="flex-1 h-7">
+                    <TabsTrigger value="all" className="flex-1 h-7">
                       <Text>All</Text>
                     </TabsTrigger>
-                    <TabsTrigger
-                      value={WalletType.EVM}
-                      className="flex-1 h-7">
+                    <TabsTrigger value={WalletType.EVM} className="flex-1 h-7">
                       <Text>Ethereum</Text>
                     </TabsTrigger>
                     <TabsTrigger
                       value={WalletType.SOLANA}
-                      className="flex-1 h-7">
+                      className="flex-1 h-7"
+                    >
                       <Text>Solana</Text>
                     </TabsTrigger>
                   </TabsList>
@@ -186,30 +192,27 @@ export function TransactionList({
               </View>
 
               <View className="mb-3">
-                <Text className="text-sm font-medium text-foreground mb-2">Type</Text>
+                <Text className="text-sm font-medium text-foreground mb-2">
+                  Type
+                </Text>
                 <Tabs
                   value={filterType}
-                  onValueChange={(value) => onTypeFilterChange(value as FilterType)}
-                  className="w-full">
+                  onValueChange={(value) =>
+                    onTypeFilterChange(value as FilterType)
+                  }
+                  className="w-full"
+                >
                   <TabsList className="w-full h-9 bg-muted">
-                    <TabsTrigger
-                      value="all"
-                      className="flex-1 h-7">
+                    <TabsTrigger value="all" className="flex-1 h-7">
                       <Text>All</Text>
                     </TabsTrigger>
-                    <TabsTrigger
-                      value="send"
-                      className="flex-1 h-7">
+                    <TabsTrigger value="send" className="flex-1 h-7">
                       <Text>Send</Text>
                     </TabsTrigger>
-                    <TabsTrigger
-                      value="receive"
-                      className="flex-1 h-7">
+                    <TabsTrigger value="receive" className="flex-1 h-7">
                       <Text>Receive</Text>
                     </TabsTrigger>
-                    <TabsTrigger
-                      value="swap"
-                      className="flex-1 h-7">
+                    <TabsTrigger value="swap" className="flex-1 h-7">
                       <Text>Swap</Text>
                     </TabsTrigger>
                   </TabsList>
@@ -217,7 +220,9 @@ export function TransactionList({
               </View>
 
               <View>
-                <Text className="text-sm font-medium text-foreground mb-2">Sort</Text>
+                <Text className="text-sm font-medium text-foreground mb-2">
+                  Sort
+                </Text>
                 <View className="space-y-2">
                   {sortOptions.map((option) => (
                     <Pressable
@@ -225,13 +230,17 @@ export function TransactionList({
                       onPress={() => onSortChange(option.value)}
                       className={`flex-row items-center justify-between p-3 rounded-md ${
                         sortOption === option.value
-                          ? "bg-primary/10 border border-primary"
-                          : "bg-background border border-border"
+                          ? 'bg-primary/10 border border-primary'
+                          : 'bg-background border border-border'
                       }`}
                       accessibilityRole="radio"
-                      accessibilityState={{ checked: sortOption === option.value }}>
+                      accessibilityState={{
+                        checked: sortOption === option.value,
+                      }}
+                    >
                       <Text
-                        className={`${sortOption === option.value ? "text-primary font-medium" : "text-foreground"}`}>
+                        className={`${sortOption === option.value ? 'text-primary font-medium' : 'text-foreground'}`}
+                      >
                         {option.label}
                       </Text>
                       {sortOption === option.value && (
@@ -249,7 +258,8 @@ export function TransactionList({
               <Button
                 variant="outline"
                 className="w-full"
-                onPress={onResetFilters}>
+                onPress={onResetFilters}
+              >
                 <Text>Reset Filters</Text>
               </Button>
             </View>

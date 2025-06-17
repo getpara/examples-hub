@@ -1,13 +1,13 @@
-import { CountryCodeDropdownProps, CountryOption } from "@/types";
-import React from "react";
-import { Text, View } from "react-native";
-import CountryFlag from "react-native-country-flag";
+import { CountryCodeDropdownProps, CountryOption } from '@/types';
+import React from 'react';
+import { Text, View } from 'react-native';
+import CountryFlag from 'react-native-country-flag';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-} from "~/components/ui/dropdown-menu";
+} from '~/components/ui/dropdown-menu';
 
 export function CountryCodeDropdown({
   value,
@@ -23,12 +23,10 @@ export function CountryCodeDropdown({
         {countryOptions.map((option) => (
           <DropdownMenuItem
             key={option.isoCode}
-            onPress={() => onChange(option.dialCode)}>
+            onPress={() => onChange(option.dialCode)}
+          >
             <View className="flex-row items-center">
-              <CountryFlag
-                isoCode={option.isoCode}
-                size={24}
-              />
+              <CountryFlag isoCode={option.isoCode} size={24} />
               <Text className="ml-2">
                 {option.name} ({option.dialCode})
               </Text>

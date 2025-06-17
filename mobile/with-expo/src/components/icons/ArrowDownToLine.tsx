@@ -1,5 +1,5 @@
-import { iconWithClassName } from "@/lib/iconWithClassName";
-import { ArrowDownToLine } from "lucide-react-native";
+import { iconWithClassName } from '@/lib/iconWithClassName';
+import { ArrowDownToLine } from 'lucide-react-native';
 
 iconWithClassName(ArrowDownToLine);
 export { ArrowDownToLine };

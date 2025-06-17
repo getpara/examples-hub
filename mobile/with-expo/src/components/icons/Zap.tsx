@@ -1,5 +1,5 @@
-import { iconWithClassName } from "@/lib/iconWithClassName";
-import { Zap } from "lucide-react-native";
+import { iconWithClassName } from '@/lib/iconWithClassName';
+import { Zap } from 'lucide-react-native';
 
 iconWithClassName(Zap);
 export { Zap };

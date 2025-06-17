@@ -1,9 +1,11 @@
-import { COINGECKO_API_KEY } from "@/constants/envs";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from '@tanstack/react-query';
+import { fetchTokenPrices, symbolsToCoinGeckoIds } from '@/utils/api/pricesApi';
+import { QUERY_KEYS } from '@/constants/queryKeys';
+import { createPriceQueryOptions } from '@/utils/queryUtils';
 
 export interface AssetPrice {
   usd: number;
-  lastUpdated: Date;
+  lastUpdated: Date | null;
 }
 
 export interface AssetPrices {
@@ -16,7 +18,11 @@ const EMPTY_PRICES: AssetPrices = {
   solana: null,
 };
 
+const TOKEN_SYMBOLS = ['ETH', 'SOL'];
+
 export const usePrices = () => {
+  const coinGeckoIds = symbolsToCoinGeckoIds(TOKEN_SYMBOLS);
+
   const {
     data = EMPTY_PRICES,
     isLoading: isPricesLoading,
@@ -24,61 +30,30 @@ export const usePrices = () => {
     error: pricesError,
     refetch: refetchPrices,
     dataUpdatedAt: pricesUpdatedAt,
-  } = useQuery<AssetPrices, Error>({
-    queryKey: ["cryptoPrices"],
-    queryFn: async () => {
-      try {
-        const baseUrl = "https://api.coingecko.com/api/v3/simple/price";
-        const params = new URLSearchParams({
-          ids: "ethereum,solana",
-          vs_currencies: "usd",
-          include_last_updated_at: "true",
-          x_cg_demo_api_key: COINGECKO_API_KEY || "",
-        });
+  } = useQuery<AssetPrices, Error>(
+    createPriceQueryOptions({
+      queryKey: QUERY_KEYS.PRICES_BY_TOKENS(coinGeckoIds),
+      queryFn: async () => {
+        const priceData = await fetchTokenPrices(coinGeckoIds);
 
-        const url = `${baseUrl}?${params.toString()}`;
-        const response = await fetch(url);
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error(`HTTP Error ${response.status}: ${errorText}`);
-
-          if (response.status === 429) {
-            throw new Error("Rate limit exceeded");
-          }
-
-          throw new Error(`HTTP Error: ${response.status}`);
-        }
-
-        const data = await response.json();
-
+        // Transform to our expected format
         return {
-          ethereum: data.ethereum
+          ethereum: priceData.ethereum
             ? {
-                usd: data.ethereum.usd,
-                lastUpdated: data.ethereum.last_updated_at
-                  ? new Date(data.ethereum.last_updated_at * 1000)
-                  : new Date(),
+                usd: priceData.ethereum.usd,
+                lastUpdated: priceData.ethereum.lastUpdated,
               }
             : null,
-          solana: data.solana
+          solana: priceData.solana
             ? {
-                usd: data.solana.usd,
-                lastUpdated: data.solana.last_updated_at ? new Date(data.solana.last_updated_at * 1000) : new Date(),
+                usd: priceData.solana.usd,
+                lastUpdated: priceData.solana.lastUpdated,
               }
             : null,
         };
-      } catch (error) {
-        console.error("Error fetching asset prices:", error);
-        throw error;
-      }
-    },
-    refetchInterval: 2 * 60 * 1000,
-    retry: 1,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-  });
+      },
+    })
+  );
 
   const ethPrice = data.ethereum?.usd ?? null;
   const solPrice = data.solana?.usd ?? null;

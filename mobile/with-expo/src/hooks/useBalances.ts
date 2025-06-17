@@ -1,46 +1,26 @@
-import { useQueries } from "@tanstack/react-query";
-import { WalletType } from "@getpara/react-native-wallet";
-import { useWallets } from "./useWallets";
-import { useSigners } from "./useSigners";
-import { SUPPORTED_WALLET_TYPES } from "@/types";
+import { useMemo } from 'react';
+import { useQueries } from '@tanstack/react-query';
+import { WalletType } from '@getpara/react-native-wallet';
+import { useWallets } from './useWallets';
+import { useSigners } from './useSigners';
 import {
   fetchEvmWalletBalance,
   fetchSolanaWalletBalance,
-  calculateTotalEvmBalance,
-  calculateTotalSolanaBalance,
-} from "@/utils/balanceUtils";
+} from '@/utils/api/balancesApi';
+import { QUERY_KEYS } from '@/constants/queryKeys';
+import { createBalanceQueryOptions } from '@/utils/queryUtils';
+import { SUPPORTED_WALLET_TYPES } from '@/types';
 
-export interface TokenBalance {
+interface WalletBalance {
   amount: string;
   symbol: string;
   decimals: number;
 }
 
-export type BalancesByWalletId = Record<string, TokenBalance>;
-export type BalancesBySupportedType = {
+type BalancesByWalletId = Record<string, WalletBalance>;
+
+type BalancesBySupportedType = {
   [K in (typeof SUPPORTED_WALLET_TYPES)[number]]: BalancesByWalletId;
-};
-
-interface NetworkConfig {
-  symbol: string;
-  decimals: number;
-  refetchInterval: number;
-  staleTime: number;
-}
-
-const NETWORK_CONFIG: Record<(typeof SUPPORTED_WALLET_TYPES)[number], NetworkConfig> = {
-  [WalletType.EVM]: {
-    symbol: "ETH",
-    decimals: 18,
-    refetchInterval: 60 * 1000,
-    staleTime: 30 * 1000,
-  },
-  [WalletType.SOLANA]: {
-    symbol: "SOL",
-    decimals: 9,
-    refetchInterval: 60 * 1000,
-    staleTime: 30 * 1000,
-  },
 };
 
 const EMPTY_BALANCES: BalancesBySupportedType = {
@@ -55,133 +35,167 @@ export const useBalances = () => {
     solanaConnection,
     isSignersLoading,
     areSignersInitialized,
-    hasEthereumSigner,
-    hasSolanaSigner,
   } = useSigners();
 
-  const queriesConfig = SUPPORTED_WALLET_TYPES.map((walletType) => {
-    const hasWallets = walletType === WalletType.EVM ? hasEvmWallets : hasSolanaWallets;
-    const hasSigner = walletType === WalletType.EVM ? hasEthereumSigner : hasSolanaSigner;
-    const provider = walletType === WalletType.EVM ? ethereumProvider : solanaConnection;
+  // Create stable query keys to avoid cache misses
+  const evmWalletIds = useMemo(
+    () => createStableWalletKey(wallets[WalletType.EVM].map((w) => w.id)),
+    [wallets]
+  );
+  const solanaWalletIds = useMemo(
+    () => createStableWalletKey(wallets[WalletType.SOLANA].map((w) => w.id)),
+    [wallets]
+  );
 
-    return {
-      queryKey: ["walletBalances", walletType, { walletIds: wallets[walletType].map((w) => w.id) }],
-      queryFn: async (): Promise<BalancesByWalletId> => {
-        const walletsForType = wallets[walletType];
-        const config = NETWORK_CONFIG[walletType];
-        const balances: BalancesByWalletId = {};
+  const queriesConfig = useMemo(() => {
+    return SUPPORTED_WALLET_TYPES.map((walletType) => {
+      const hasWallets =
+        walletType === WalletType.EVM ? hasEvmWallets : hasSolanaWallets;
+      const walletsForType = wallets[walletType];
+      const walletIds =
+        walletType === WalletType.EVM ? evmWalletIds : solanaWalletIds;
+      const provider = walletType === WalletType.EVM ? ethereumProvider : null;
+      const connection =
+        walletType === WalletType.SOLANA ? solanaConnection : null;
 
-        if (walletType === WalletType.EVM && ethereumProvider) {
-          const results = await Promise.all(
-            walletsForType.map((wallet) =>
-              fetchEvmWalletBalance(
-                { ...wallet, address: wallet.address ?? null },
-                ethereumProvider,
-                config.symbol,
-                config.decimals
-              )
-            )
-          );
+      // Check if we have the necessary provider/connection
+      const hasProvider =
+        walletType === WalletType.EVM ? !!provider : !!connection;
 
-          for (const result of results) {
-            if (result.balance) {
-              balances[result.walletId] = result.balance;
-            }
+      return createBalanceQueryOptions({
+        queryKey: QUERY_KEYS.BALANCES_BY_WALLETS(walletIds),
+        queryFn: async (): Promise<BalancesByWalletId> => {
+          if (walletsForType.length === 0) {
+            return {};
           }
-        } else if (walletType === WalletType.SOLANA && solanaConnection) {
-          const results = await Promise.all(
-            walletsForType.map((wallet) =>
-              fetchSolanaWalletBalance(
-                { ...wallet, address: wallet.address ?? null },
-                solanaConnection,
-                config.symbol,
-                config.decimals
-              )
-            )
-          );
 
-          for (const result of results) {
-            if (result.balance) {
-              balances[result.walletId] = result.balance;
+          const result: BalancesByWalletId = {};
+
+          // Fetch balances for each wallet
+          const balancePromises = walletsForType.map(async (wallet) => {
+            try {
+              if (walletType === WalletType.EVM && provider) {
+                const balances = await fetchEvmWalletBalance(wallet, provider);
+                return { walletId: wallet.id, balances };
+              } else if (walletType === WalletType.SOLANA && connection) {
+                const balances = await fetchSolanaWalletBalance(
+                  wallet,
+                  connection
+                );
+                return { walletId: wallet.id, balances };
+              }
+              return null;
+            } catch (error) {
+              console.error(
+                `Error fetching balance for wallet ${wallet.id}:`,
+                error
+              );
+              return null;
             }
-          }
-        }
+          });
 
-        return balances;
-      },
-      enabled: areSignersInitialized && hasWallets && hasSigner && !isSignersLoading && !!provider,
-      refetchInterval: NETWORK_CONFIG[walletType].refetchInterval,
-      retry: 2,
-      retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 10000),
-      staleTime: NETWORK_CONFIG[walletType].staleTime,
-      gcTime: 5 * 60 * 1000,
-    };
-  });
+          const balanceResults = await Promise.all(balancePromises);
+
+          // Process results
+          balanceResults.forEach((balanceResult) => {
+            if (
+              balanceResult &&
+              balanceResult.balances &&
+              balanceResult.balances.length > 0
+            ) {
+              // For now, we only handle native tokens (first balance)
+              const balance = balanceResult.balances[0];
+              result[balanceResult.walletId] = {
+                amount: balance.balance,
+                symbol: balance.symbol,
+                decimals: balance.decimals,
+              };
+            }
+          });
+
+          return result;
+        },
+        enabled:
+          areSignersInitialized &&
+          hasWallets &&
+          hasProvider &&
+          !isSignersLoading,
+        retry: false, // Don't retry auth-dependent queries
+      });
+    });
+  }, [
+    wallets,
+    evmWalletIds,
+    solanaWalletIds,
+    hasEvmWallets,
+    hasSolanaWallets,
+    ethereumProvider,
+    solanaConnection,
+    areSignersInitialized,
+    isSignersLoading,
+  ]);
 
   const results = useQueries({ queries: queriesConfig });
 
-  const balances: BalancesBySupportedType = { ...EMPTY_BALANCES };
+  const balances: BalancesBySupportedType = useMemo(() => {
+    const newBalances = { ...EMPTY_BALANCES };
 
-  results.forEach((result, index) => {
-    const walletType = SUPPORTED_WALLET_TYPES[index];
-    if (result.data) {
-      balances[walletType] = result.data;
-    }
-  });
+    results.forEach((result, index) => {
+      const walletType = SUPPORTED_WALLET_TYPES[index];
+      if (result.data) {
+        newBalances[walletType] = result.data;
+      }
+    });
 
-  const loadingStates = Object.fromEntries(
-    results.map((result, index) => [SUPPORTED_WALLET_TYPES[index], result.isLoading])
-  ) as Record<(typeof SUPPORTED_WALLET_TYPES)[number], boolean>;
+    return newBalances;
+  }, [results]);
 
-  const errorStates = Object.fromEntries(
-    results.map((result, index) => [SUPPORTED_WALLET_TYPES[index], result.isError])
-  ) as Record<(typeof SUPPORTED_WALLET_TYPES)[number], boolean>;
+  const isBalancesLoading = results.some((result) => result.isLoading);
+  const isBalancesError = results.some((result) => result.isError);
+  const balancesError = results.find((result) => result.error)?.error;
 
-  const errors = Object.fromEntries(
-    results.map((result, index) => [SUPPORTED_WALLET_TYPES[index], result.error])
-  ) as Record<(typeof SUPPORTED_WALLET_TYPES)[number], Error | null>;
+  // Calculate total balances
+  const totalEthBalance = useMemo(() => {
+    return calculateTotalBalance(balances[WalletType.EVM]);
+  }, [balances]);
 
-  const updatedAtTimestamps = results.map((result) => result.dataUpdatedAt).filter((timestamp) => timestamp > 0);
+  const totalSolBalance = useMemo(() => {
+    return calculateTotalBalance(balances[WalletType.SOLANA]);
+  }, [balances]);
 
-  const latestUpdatedAt = updatedAtTimestamps.length > 0 ? Math.max(...updatedAtTimestamps) : null;
-
-  const refetchFunctions = Object.fromEntries(
-    results.map((result, index) => [SUPPORTED_WALLET_TYPES[index], result.refetch])
-  ) as Record<(typeof SUPPORTED_WALLET_TYPES)[number], () => Promise<unknown>>;
-
-  const refetchAllBalances = async () => {
-    return Promise.all(results.map((result) => result.refetch()));
+  // Refetch all balances
+  const refetchBalances = async () => {
+    await Promise.all(results.map((result) => result.refetch()));
   };
-
-  const getWalletBalance = (
-    walletId: string,
-    walletType: (typeof SUPPORTED_WALLET_TYPES)[number]
-  ): TokenBalance | null => {
-    return balances[walletType][walletId] || null;
-  };
-
-  const totalEthBalance = calculateTotalEvmBalance(balances[WalletType.EVM]);
-  const totalSolBalance = calculateTotalSolanaBalance(balances[WalletType.SOLANA]);
-
-  const hasBalances = SUPPORTED_WALLET_TYPES.some((type) => Object.keys(balances[type]).length > 0);
-
-  const isBalancesLoading = Object.values(loadingStates).some((loading) => loading);
-
-  const isBalancesError = Object.values(errorStates).some((error) => error);
 
   return {
     balances,
-    getWalletBalance,
     totalEthBalance,
     totalSolBalance,
-    hasBalances,
+    areBalancesLoaded: !isBalancesLoading && !isSignersLoading,
     isBalancesLoading,
     isBalancesError,
-    loadingByNetwork: loadingStates,
-    errorByNetwork: errorStates,
-    errorsByNetwork: errors,
-    balancesUpdatedAt: latestUpdatedAt ? new Date(latestUpdatedAt) : null,
-    refetchBalances: refetchAllBalances,
-    refetchBalancesByNetwork: refetchFunctions,
+    balancesError,
+    refetchBalances,
   };
 };
+
+// Helper function to create a stable wallet key
+function createStableWalletKey(walletIds: string[]): string {
+  return walletIds.sort().join(',');
+}
+
+// Helper function to calculate total balance
+function calculateTotalBalance(balancesByWallet: BalancesByWalletId): string {
+  let total = BigInt(0);
+
+  for (const balance of Object.values(balancesByWallet)) {
+    try {
+      total += BigInt(balance.amount);
+    } catch (error) {
+      console.error('Error adding balance:', error);
+    }
+  }
+
+  return total.toString();
+}
