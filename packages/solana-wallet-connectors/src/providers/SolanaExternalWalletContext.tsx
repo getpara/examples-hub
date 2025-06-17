@@ -1,7 +1,7 @@
 import { PropsWithChildren, createContext, useEffect, useMemo, useRef } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Adapter, isIosAndRedirectable, WalletReadyState } from '@solana/wallet-adapter-base';
-import { AuthState } from '@getpara/web-sdk';
+import { AuthState, ExternalWalletInfo } from '@getpara/web-sdk';
 import { CreateWalletFn } from '../types/Wallet.js';
 import {
   ExternalWalletContextType,
@@ -18,6 +18,8 @@ export const defaultSolanaExternalWallet = {
   disconnect: () => Promise.resolve(),
   signMessage: () => Promise.resolve({}),
   signVerificationMessage: () => Promise.resolve({}),
+  requestInfo: () => Promise.resolve({} as ExternalWalletInfo),
+  disconnectBase: () => Promise.resolve(),
 };
 
 export type SolanaExternalWalletContextType = ExternalWalletContextType;
@@ -40,27 +42,47 @@ export function SolanaExternalWalletProvider({
   const {
     wallets: adapters,
     select: selectWallet,
-    disconnect: _disconnect,
+    disconnect,
     publicKey: solanaAddress,
     wallet,
     connecting,
     signMessage: solanaSignMessage,
   } = useWallet();
 
+  const isLinkingAccount = useRef(false);
+
+  const solanaSignMessageRef = useRef<typeof solanaSignMessage>(solanaSignMessage);
+  const solanaAddressRef = useRef<typeof solanaAddress | undefined>(solanaAddress);
   const verificationMessage = useRef<string>();
 
   const reset = async () => {
-    await _disconnect();
+    await disconnect();
     await para.logout();
   };
 
-  const login = async ({ address, providerName }: { address: string; providerName?: string }) => {
+  const _reset = async ({ logout = false }: { logout?: boolean } = {}) => {
+    await disconnect();
+    if (logout) {
+      await para.logout();
+    }
+  };
+
+  const login = async ({
+    address,
+    providerId,
+    providerName,
+  }: {
+    address: string;
+    providerId: TExternalWallet;
+    providerName?: string;
+  }) => {
     try {
       return await para.loginExternalWallet({
         externalWallet: {
           address,
           type: 'SOLANA',
           provider: providerName,
+          providerId,
           withFullParaAuth: walletsWithFullAuth?.includes(
             (getWallet(providerName ?? '')?.id.toUpperCase() ?? '') as TExternalWallet,
           ),
@@ -88,6 +110,7 @@ export function SolanaExternalWalletProvider({
         try {
           await login({
             address,
+            providerId: getWallet(wallet?.adapter?.name ?? '')?.internalId,
             providerName: wallet?.adapter?.name,
           });
         } catch (err) {
@@ -102,10 +125,18 @@ export function SolanaExternalWalletProvider({
   useEffect(() => {
     const storedExternalWallet = para.externalWallets[solanaAddress?.toString() ?? ''];
 
-    if (!!solanaAddress && !storedExternalWallet) {
+    if (!!solanaAddress && !storedExternalWallet && !isLinkingAccount.current) {
       reset();
     }
   }, []);
+
+  useEffect(() => {
+    solanaSignMessageRef.current = solanaSignMessage;
+  }, [solanaSignMessage]);
+
+  useEffect(() => {
+    solanaAddressRef.current = solanaAddress;
+  }, [solanaAddress]);
 
   useEffect(() => {
     const storedExternalWallet = Object.values(para.externalWallets || {})[0];
@@ -115,7 +146,8 @@ export function SolanaExternalWalletProvider({
       !connecting &&
       (!wallet || wallet?.adapter.connected) &&
       storedExternalWallet?.type === 'SOLANA' &&
-      storedExternalWallet?.address !== solanaAddress?.toString()
+      storedExternalWallet?.address !== solanaAddress?.toString() &&
+      !isLinkingAccount.current
     ) {
       switchWallet(solanaAddress?.toString());
     }
@@ -123,14 +155,27 @@ export function SolanaExternalWalletProvider({
 
   const signMessage = async ({ message }: SignArgs) => {
     try {
+      let solanaAddressNow = solanaAddressRef.current ?? solanaAddress,
+        solanaSignMessageNow = solanaSignMessageRef.current ?? solanaSignMessage;
+      while (!solanaAddressNow || !solanaSignMessageNow) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        solanaAddressNow = solanaAddressRef.current ?? solanaAddress;
+        solanaSignMessageNow = solanaSignMessageRef.current ?? solanaSignMessage;
+      }
+
       const encodedMessage = new TextEncoder().encode(message);
-      const signature = await solanaSignMessage(encodedMessage);
+      const signature = await solanaSignMessageNow(encodedMessage);
+
+      solanaAddressRef.current = undefined;
+      solanaSignMessageRef.current = undefined;
 
       return {
-        address: solanaAddress.toString(),
+        address: solanaAddressNow.toString(),
         signature: bs58.encode(signature),
       };
     } catch (e) {
+      console.error(e);
       if (e.message.includes('User rejected the request')) {
         return { error: 'Signature request rejected' };
       }
@@ -144,38 +189,57 @@ export function SolanaExternalWalletProvider({
     return signature;
   };
 
+  const connectBase = async (adapter?: Adapter, _switchWallet = false): Promise<string> => {
+    if (!adapter) {
+      throw new Error('Adapter not found.');
+    }
+
+    // if (switchWallet) {
+    selectWallet(adapter.name);
+    // Using a timeout here to ensure the selectWallet function sets the wallet completely before connecting.
+    // Without this there was a race condition where connect wasn't correctly listening to the adapters connect event.
+    await new Promise(resolve => setTimeout(resolve, 100));
+    // }
+
+    try {
+      await adapter.connect();
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      while (!adapter.publicKey) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+
+      const address = adapter.publicKey.toString();
+
+      return address;
+    } catch (e) {
+      console.error(e);
+      await adapter.disconnect();
+      throw e;
+    }
+  };
+
   const connect = async (adapter?: Adapter): Promise<{ address?: string; error?: string; authState?: AuthState }> => {
     // If on iOS, rely on the redirect happening in the modal.
     if (isIosAndRedirectable()) {
       return;
     }
 
-    await _disconnect();
-
-    if (!adapter) {
-      return { error: 'Adapter not found.' };
-    }
-
-    selectWallet(adapter.name);
-    // Using a timeout here to ensure the selectWallet function sets the wallet completely before connecting.
-    // Without this there was a race condition where connect wasn't correctly listening to the adapters connect event.
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await disconnect();
 
     let address: string | undefined;
     let error: string | undefined;
     let authState: AuthState | undefined;
 
     try {
-      await adapter.connect();
-
-      address = adapter.publicKey.toString();
+      address = await connectBase(adapter, true);
 
       if (address) {
         try {
-          authState = await login({ address, providerName: adapter.name });
+          authState = await login({ address, providerId: getWallet(adapter.name)?.internalId, providerName: adapter.name });
           verificationMessage.current = authState.stage === 'verify' ? authState.signatureVerificationMessage : undefined;
         } catch (err) {
-          await _disconnect();
+          await disconnect();
           address = undefined;
           error = err;
         }
@@ -197,6 +261,49 @@ export function SolanaExternalWalletProvider({
     return { address, error, authState };
   };
 
+  const requestInfo = async (providerId: TExternalWallet): Promise<ExternalWalletInfo> => {
+    const wallet = wallets.find(w => w.internalId === providerId);
+
+    const adapter = getAdapter(wallet.name ?? '');
+
+    isLinkingAccount.current = true;
+    try {
+      const address = await connectBase(adapter);
+
+      const externalWallet: ExternalWalletInfo = {
+        address,
+        type: 'SOLANA',
+        providerId: wallet.internalId,
+        provider: wallet.name,
+      };
+
+      return externalWallet;
+    } catch (e) {
+      // await disconnectBase(providerId);
+      console.error('Error linking account:', e);
+      throw new Error(e?.message ?? e);
+    }
+  };
+
+  const disconnectBase = async (providerId: TExternalWallet) => {
+    const wallet = wallets.find(w => w.internalId === providerId);
+
+    const adapter = getAdapter(wallet.name ?? '');
+
+    if (!adapter?.connected) {
+      return;
+    }
+
+    isLinkingAccount.current = true;
+
+    try {
+      await adapter.disconnect();
+    } catch (e) {
+      console.error('Error disconnecting wallet:', e);
+      throw new Error(e?.message ?? e);
+    }
+  };
+
   const getAdapter = (name: string) =>
     adapters.find(a => (a.adapter.name === 'Mobile Wallet Adapter' ? a : a.adapter.name === name ? a : false))?.adapter;
 
@@ -216,15 +323,11 @@ export function SolanaExternalWalletProvider({
     } as CommonWallet;
   });
 
-  const disconnect = async () => {
-    await _disconnect();
-  };
-
   return (
     <SolanaExternalWalletContext.Provider
       value={useMemo(
-        () => ({ wallets, disconnect, signMessage, signVerificationMessage }),
-        [wallets, disconnect, signMessage, signVerificationMessage],
+        () => ({ wallets, disconnect, signMessage, signVerificationMessage, requestInfo, disconnectBase }),
+        [wallets, disconnect, signMessage, signVerificationMessage, requestInfo, disconnectBase],
       )}
     >
       {children}

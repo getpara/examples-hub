@@ -72,8 +72,7 @@ export {
   type Wallet,
   type GetWalletBalanceParams,
   type AccountLinkInProgress,
-  ACCOUNT_LINK_ERRORS,
-  type AccountLinkError,
+  AccountLinkError,
   type InternalInterface,
 } from './types/index.js';
 export * from './types/coreApi.js';

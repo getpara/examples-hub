@@ -20,6 +20,14 @@ export class MockPara extends ParaCore {
   isProviderModalDisabled = super.isProviderModalDisabled;
   supportedAuthMethods = super.supportedAuthMethods;
   getUserBiometricLocationHints = super.getUserBiometricLocationHints;
+
+  linkAccount = super.linkAccount;
+  unlinkAccount = super.unlinkAccount;
+  verifyEmailOrPhoneLink = super.verifyEmailOrPhoneLink;
+  verifyTelegramLink = super.verifyTelegramLink;
+  verifyFarcasterLink = super.verifyFarcasterLink;
+  verifyExternalWalletLink = super.verifyExternalWalletLink;
+  verifyOAuthLink = super.verifyOAuthLink;
 }
 
 export class MockParaAsync extends MockPara {

@@ -4,6 +4,7 @@ import type { WalletDetailsParams, WalletList } from '../types/Wallet.js';
 import type { ParaWalletConnectParameters, Wallet } from '../types/Wallet.js';
 import { computeWalletConnectMetaData } from '../utils/computeWalletConnectMetaData.js';
 import { omitUndefinedValues } from '../utils/omitUndefinedValues.js';
+import { TExternalWallet } from '@getpara/react-common';
 
 export interface WalletListItem extends Wallet {
   index: number;
@@ -75,7 +76,7 @@ export const connectorsForWallets = (
     const walletMetaData = (
       // For now we should only use these as the additional parameters
       additionalParaParams?: Pick<WalletDetailsParams['paraDetails'], 'isWalletConnectModalConnector' | 'showQrModal'> & {
-        id?: string;
+        id?: TExternalWallet;
         rdns?: string;
       },
     ) => {

@@ -1,4 +1,11 @@
-import { TOAuthMethod, TExternalWallet, AuthLayout } from '@getpara/react-sdk';
+import {
+  TOAuthMethod,
+  TExternalWallet,
+  AuthLayout,
+  useLinkAccount,
+  OAUTH_METHODS,
+  EXTERNAL_WALLET_TYPES,
+} from '@getpara/react-sdk';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
@@ -13,6 +20,7 @@ interface ModalStateState {
   mode: 'dark' | 'light';
   externalWalletConnectionOnly: boolean;
   externalWalletIncludeVerification: boolean;
+  linkAccountArgs: Parameters<ReturnType<typeof useLinkAccount>['linkAccount']>[0];
 }
 
 export interface ModalStateActions {
@@ -22,8 +30,8 @@ export interface ModalStateActions {
 export type ModalStateStore = ModalStateState & ModalStateActions;
 
 const DEFAULT_STATE: ModalStateState = {
-  oAuthMethods: ['GOOGLE', 'FACEBOOK', 'APPLE', 'TWITTER', 'DISCORD', 'FARCASTER'],
-  externalWallets: ['RAINBOW', 'METAMASK', 'WALLETCONNECT'],
+  oAuthMethods: [...OAUTH_METHODS],
+  externalWallets: [...EXTERNAL_WALLET_TYPES],
   authLayout: [AuthLayout.EXTERNAL_FULL, AuthLayout.AUTH_CONDENSED],
   logo: undefined,
   backgroundColor: '#141414',
@@ -32,6 +40,7 @@ const DEFAULT_STATE: ModalStateState = {
   mode: 'dark',
   externalWalletConnectionOnly: false,
   externalWalletIncludeVerification: false,
+  linkAccountArgs: undefined,
 };
 
 export const useModalStateStore = create<ModalStateStore>()(

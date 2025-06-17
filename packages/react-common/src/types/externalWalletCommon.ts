@@ -92,6 +92,8 @@ export type ExternalWalletContextType<S extends SignResult = SignResult> = {
   disconnect: () => Promise<void>;
   signMessage: (_: SignArgs) => Promise<S>;
   signVerificationMessage: () => Promise<S>;
+  requestInfo: (_: TExternalWallet) => Promise<ExternalWalletInfo>;
+  disconnectBase: (_?: TExternalWallet) => Promise<void>;
 };
 
 export type ExternalWalletProviderConfigBase = {

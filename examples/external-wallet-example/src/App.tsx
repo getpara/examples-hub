@@ -78,6 +78,7 @@ export const App = () => {
           },
           logo: logo,
           onRampTestMode: true,
+          isGuestModeEnabled: true,
         }}
         callbacks={{
           onLogout: event => {

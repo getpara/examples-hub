@@ -4,7 +4,6 @@ import { ripemd160 } from '@noble/hashes/ripemd160';
 
 import elliptic from 'elliptic';
 import { TWalletType } from '@getpara/user-management-client';
-import { ACCOUNT_LINK_ERRORS, AccountLinkError } from '../types/auth.js';
 
 const secp256k1 = new elliptic.ec('secp256k1');
 
@@ -87,20 +86,4 @@ export function truncateAddress(
   const margin = targetLength !== undefined ? (targetLength - minimum) / 2 : 4;
 
   return `${str.slice(0, minimum + margin)}...${str.slice(-1 * margin)}`;
-}
-
-export function toAccountLinkError(e: unknown): AccountLinkError | undefined {
-  if (!e) {
-    return undefined;
-  }
-
-  let res: AccountLinkError = 'UNKNOWN';
-
-  if (e instanceof Error && ACCOUNT_LINK_ERRORS.includes(e.message as AccountLinkError)) {
-    res = e.message as AccountLinkError;
-  }
-  if (typeof e === 'string' && ACCOUNT_LINK_ERRORS.includes(e as AccountLinkError)) {
-    res = e as AccountLinkError;
-  }
-  return res;
 }

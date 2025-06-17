@@ -13,7 +13,7 @@ import {
 } from '@getpara/graz';
 import { useExternalWalletStore } from '../stores/useStore.js';
 import { WalletWithType } from '../types/Wallet.js';
-import { AuthState, rawSecp256k1PubkeyToRawAddress, TExternalWallet } from '@getpara/web-sdk';
+import { AuthState, ExternalWalletInfo, rawSecp256k1PubkeyToRawAddress, TExternalWallet } from '@getpara/web-sdk';
 import type {
   ChainManagement,
   CommonChain,
@@ -36,6 +36,8 @@ export const defaultCosmosExternalWallet = {
   connectParaEmbedded: () => Promise.resolve({}),
   signMessage: () => Promise.resolve({}),
   signVerificationMessage: () => Promise.resolve({}),
+  requestInfo: () => Promise.resolve({} as any),
+  disconnectBase: () => Promise.resolve(),
 };
 
 export type CosmosSignResult = SignResult & {
@@ -93,6 +95,7 @@ export function CosmosExternalWalletProvider({
     : account?.ethereumHexAddress?.toLowerCase();
   const address = multiChain ? account?.[selectedChainId]?.bech32Address : account?.bech32Address;
 
+  const isLinkingAccount = useRef(false);
   const verificationMessage = useRef<string>();
 
   const reset = async () => {
@@ -137,10 +140,12 @@ export function CosmosExternalWalletProvider({
       onSwitchChain(chainId);
 
       const storedExternalWallet = para.externalWallets[changeResp.ethAddress ?? ''];
+      const { provider, providerId } = getProvider(walletType);
       para.setExternalWallet({
         address: changeResp.ethAddress,
         type: 'COSMOS',
-        provider: getProviderName(walletType),
+        provider,
+        providerId,
         addressBech32: changeResp.address,
         withFullParaAuth: storedExternalWallet.isExternalWithParaAuth,
         withVerification: includeWalletVerification,
@@ -150,15 +155,22 @@ export function CosmosExternalWalletProvider({
     return { error };
   };
 
-  const login = async (ethAddress: string, address: string, isFullAuthWallet?: boolean, providerName?: string) => {
+  const login = async ({
+    address,
+    addressBech32,
+    withFullParaAuth,
+    providerId,
+    provider,
+  }: Pick<ExternalWalletInfo, 'address' | 'addressBech32' | 'withFullParaAuth' | 'provider' | 'providerId'>) => {
     try {
       return await para.loginExternalWallet({
         externalWallet: {
-          address: ethAddress,
+          address,
           type: 'COSMOS',
-          provider: providerName,
-          addressBech32: address,
-          withFullParaAuth: isFullAuthWallet,
+          provider,
+          providerId,
+          addressBech32,
+          withFullParaAuth,
           withVerification: includeWalletVerification,
           isConnectionOnly: connectionOnly,
         },
@@ -180,7 +192,8 @@ export function CosmosExternalWalletProvider({
       !isLocalConnecting &&
       !!ethAddress &&
       !storedExternalWallet &&
-      walletType !== GrazWalletType.PARA
+      walletType !== GrazWalletType.PARA &&
+      !isLinkingAccount.current
     ) {
       reset();
     }
@@ -195,7 +208,8 @@ export function CosmosExternalWalletProvider({
         !isReconnecting &&
         connectedWallet &&
         connectedWallet.type === 'COSMOS' &&
-        (connectedWallet.isExternal ? walletType !== connectedWallet.name?.toLowerCase() : walletType !== 'para')
+        (connectedWallet.isExternal ? walletType !== connectedWallet.name?.toLowerCase() : walletType !== 'para') &&
+        !isLinkingAccount.current
       ) {
         const isLoggedIn = await para.isFullyLoggedIn();
         if (!isLoggedIn) {
@@ -215,8 +229,19 @@ export function CosmosExternalWalletProvider({
     connect();
   }, [isLocalConnecting, isConnecting, isReconnecting, walletType, connectedWallet]);
 
-  const signMessage = async ({ message }: SignArgs) => {
-    const wallet = grazGetWallet(walletType);
+  const signMessage = async ({ message, externalWallet }: SignArgs) => {
+    let wallet, signAddress, signEthAddress;
+    if (externalWallet) {
+      const commonWallet = wallets.find(w => w.internalId === externalWallet.providerId);
+
+      wallet = grazGetWallet((commonWallet as unknown as WalletWithType)?.grazType as GrazWalletType);
+      signAddress = externalWallet.addressBech32;
+      signEthAddress = externalWallet.address;
+    } else {
+      wallet = grazGetWallet(walletType);
+      signAddress = address;
+      signEthAddress = ethAddress;
+    }
 
     if (!wallet) {
       return { error: 'Connected wallet not found' };
@@ -224,14 +249,14 @@ export function CosmosExternalWalletProvider({
 
     try {
       const publicKey = (await wallet.getKey(selectedChainId)).pubKey;
-      const signature = await wallet.signArbitrary(selectedChainId, address, message);
+      const signature = await wallet.signArbitrary(selectedChainId, signAddress, message);
 
       return {
-        address: ethAddress,
-        addressBech32: address,
+        address: signEthAddress,
+        addressBech32: signAddress,
         signature: signature.signature,
         cosmosPublicKeyHex: Buffer.from(publicKey).toString('hex'),
-        cosmosSigner: address,
+        cosmosSigner: signAddress,
       };
     } catch (e) {
       if (e.message.includes('Request rejected')) {
@@ -247,16 +272,7 @@ export function CosmosExternalWalletProvider({
     return signature;
   };
 
-  const connect = async (
-    walletType: GrazWalletType,
-    chainId?: string | string[],
-  ): Promise<{ authState?: AuthState; address?: string; ethAddress?: string; error?: string }> => {
-    updateExternalWalletState({ isConnecting: true });
-
-    const walletId = getWallet(walletType)?.id;
-    const isFullAuthWallet = walletsWithFullAuth.includes(walletId.toUpperCase() as TExternalWallet);
-
-    // chainID is passed in when switching chains, in that case we can skip disconnecting
+  const connectBase = async (walletType: GrazWalletType, chainId?: string | string[]): Promise<ExternalWalletInfo> => {
     if (!chainId) {
       await disconnectAsync();
     }
@@ -264,85 +280,114 @@ export function CosmosExternalWalletProvider({
     const _chainId = chainId ?? (multiChain ? chains.map(c => c.chainId) : selectedChainId);
 
     if (!_chainId) {
-      console.error('Chain id not provided.');
-      return;
+      throw new Error('Chain id not provided.');
     }
 
-    let address: string | undefined;
-    let ethAddress: string | undefined;
-    let error: string | undefined;
-    let authState: AuthState | undefined;
-
-    // The logic in the modal should prevent this from happening, logging for edge cases.
     if (!walletType) {
-      console.error('Graz wallet type not provided.');
-      return;
-    } else {
-      try {
-        let chainInfo;
+      throw new Error('Graz wallet type not provided.');
+    }
 
-        if (shouldUseSuggestChainAndConnect) {
-          if (typeof _chainId !== 'string') {
-            console.error('multiChain is not compatible with shouldUseSuggestChainAndConnect.');
-            return;
-          }
+    try {
+      let chainInfo;
 
-          chainInfo = getChainInfo({ chainId: _chainId });
-
-          if (!chainInfo) {
-            console.error('Chain not found.');
-            return;
-          }
+      if (shouldUseSuggestChainAndConnect) {
+        if (typeof _chainId !== 'string') {
+          console.error('multiChain is not compatible with shouldUseSuggestChainAndConnect.');
+          return;
         }
 
-        const connectedWallet = await (shouldUseSuggestChainAndConnect
-          ? suggestAndConnectAsync({ walletType, chainInfo })
-          : connectAsync({ walletType, chainId: _chainId }));
+        chainInfo = getChainInfo({ chainId: _chainId });
 
-        const firstChain = !chainId ? selectedChainId : typeof _chainId === 'string' ? _chainId : _chainId[0];
-
-        address = connectedWallet.accounts[firstChain].bech32Address;
-
-        let rawAddress;
-        const accountAddress = connectedWallet.accounts[firstChain].address;
-        if (!accountAddress || accountAddress.length === 0 || accountAddress.byteLength === 0) {
-          // If address is empty, use pubKey instead
-          const pubKey = connectedWallet.accounts[firstChain].pubKey;
-          rawAddress = rawSecp256k1PubkeyToRawAddress(pubKey);
-        } else {
-          rawAddress = accountAddress;
-        }
-        ethAddress = formatEthHexAddress(rawAddress);
-
-        if (connectedWallet.accounts[firstChain]) {
-          try {
-            authState = await login(ethAddress, address, isFullAuthWallet, getProviderName(walletType));
-            verificationMessage.current = authState.stage === 'verify' ? authState.signatureVerificationMessage : undefined;
-          } catch (err) {
-            authState = undefined;
-            ethAddress = undefined;
-            address = undefined;
-            error = err;
-          }
-        }
-      } catch (err) {
-        if (err.message === 'No wallet exists') {
-          error = err.message;
-        } else {
-          console.error('Graz connection error:', err);
-          error = 'An unknown error occurred.';
+        if (!chainInfo) {
+          console.error('Chain not found.');
+          return;
         }
       }
-    }
 
-    updateExternalWalletState({ isConnecting: false });
-    return { authState, address, ethAddress, error };
+      const connectedWallet = await (shouldUseSuggestChainAndConnect
+        ? suggestAndConnectAsync({ walletType, chainInfo })
+        : connectAsync({ walletType, chainId: _chainId }));
+
+      const firstChain = !chainId ? selectedChainId : typeof _chainId === 'string' ? _chainId : _chainId[0];
+
+      const addressBech32 = connectedWallet.accounts[firstChain].bech32Address;
+
+      let rawAddress;
+      const accountAddress = connectedWallet.accounts[firstChain].address;
+      if (!accountAddress || accountAddress.length === 0 || accountAddress.byteLength === 0) {
+        // If address is empty, use pubKey instead
+        const pubKey = connectedWallet.accounts[firstChain].pubKey;
+        rawAddress = rawSecp256k1PubkeyToRawAddress(pubKey);
+      } else {
+        rawAddress = accountAddress;
+      }
+      const address = formatEthHexAddress(rawAddress);
+
+      const { provider, providerId } = getProvider(walletType);
+
+      return {
+        type: 'COSMOS',
+        address,
+        addressBech32,
+        provider,
+        providerId,
+      };
+    } catch (e) {
+      let error;
+      if (e.message === 'No wallet exists') {
+        error = e.message;
+      } else {
+        error = `Graz connection error: ${e?.message ?? e}`;
+      }
+      throw error;
+    }
   };
+
+  const connect = async (
+    walletType: GrazWalletType,
+    chainId?: string | string[],
+  ): Promise<{ authState?: AuthState; address?: string; error?: string }> => {
+    updateExternalWalletState({ isConnecting: true });
+
+    const walletId = getWallet(walletType)?.id;
+    const isFullAuthWallet = walletsWithFullAuth.includes(walletId.toUpperCase() as TExternalWallet);
+
+    try {
+      const externalWallet = await connectBase(walletType, chainId);
+
+      const authState = await login({
+        ...externalWallet,
+        withFullParaAuth: isFullAuthWallet,
+      });
+
+      verificationMessage.current = authState.stage === 'verify' ? authState.signatureVerificationMessage : undefined;
+
+      return {
+        address: externalWallet.address,
+        authState,
+      };
+    } catch (e) {
+      return {
+        error: e?.message ?? e,
+      };
+    } finally {
+      updateExternalWalletState({ isConnecting: false });
+    }
+  };
+
+  // The logic in the modal should prevent this from happening, logging for edge cases.
 
   const getWallet = (walletType: GrazWalletType) =>
     incompleteWallets.find(w => w.grazType === walletType || w.grazMobileType === walletType);
 
-  const getProviderName = (walletType: GrazWalletType) => getWallet(walletType)?.name;
+  const getProvider = (walletType: GrazWalletType) => {
+    const wallet = getWallet(walletType);
+
+    return {
+      provider: wallet?.name,
+      providerId: wallet?.internalId,
+    };
+  };
 
   const wallets = incompleteWallets
     .map(wallet => {
@@ -379,6 +424,37 @@ export function CosmosExternalWalletProvider({
     }
   }, [para, multiChain, chains, selectedChainId]);
 
+  const requestInfo = async (providerId: TExternalWallet): Promise<ExternalWalletInfo> => {
+    const wallet = wallets.find(w => w.internalId === providerId);
+
+    if (!wallet) {
+      throw new Error(`Wallet for provider ${providerId} not found`);
+    }
+
+    isLinkingAccount.current = true;
+    try {
+      const externalWallet = await connectBase(
+        (wallet as any).grazType,
+        multiChain ? chains.map(c => c.chainId) : selectedChainId,
+      );
+
+      return externalWallet;
+    } catch (e) {
+      console.error('Error linking account:', e);
+      throw new Error(e?.message ?? e);
+    }
+  };
+
+  const disconnectBase = async (): Promise<void> => {
+    isLinkingAccount.current = true;
+    try {
+      await disconnectAsync();
+    } catch (e) {
+      console.error('Error linking account:', e);
+      throw new Error(e?.message ?? e);
+    }
+  };
+
   return (
     <CosmosExternalWalletContext.Provider
       value={useMemo(
@@ -391,6 +467,8 @@ export function CosmosExternalWalletProvider({
           connectParaEmbedded,
           signMessage,
           signVerificationMessage,
+          requestInfo,
+          disconnectBase,
         }),
         [
           wallets,
@@ -401,6 +479,8 @@ export function CosmosExternalWalletProvider({
           connectParaEmbedded,
           signMessage,
           signVerificationMessage,
+          requestInfo,
+          disconnectBase,
         ],
       )}
     >

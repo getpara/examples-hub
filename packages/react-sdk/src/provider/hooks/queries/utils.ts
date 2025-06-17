@@ -15,7 +15,7 @@ export function generateCoreQueryHook<const method extends CoreMethodName & keyo
       queryKey: [method],
       queryFn: async () => {
         if (!para) {
-          return undefined;
+          return null;
         }
 
         const result = await action(para);

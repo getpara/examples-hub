@@ -10,7 +10,7 @@ import {
   UUID,
   VERIFICATION_CODE,
 } from '../constants';
-import { Environment } from '../../src';
+import { AccountLinkError, Environment } from '../../src';
 import { LinkAccountParams, OAUTH_METHODS, TLinkedAccountType } from '@getpara/user-management-client';
 import {
   mockGetLinkedAccounts,
@@ -31,10 +31,6 @@ describe('account linking', () => {
     await prepareMock(para);
   });
 
-  // afterEach(() => {
-  //   vi.resetAllMocks();
-  // });
-
   it('fetches linked accounts', async () => {
     const accounts = await para.getLinkedAccounts();
 
@@ -42,7 +38,7 @@ describe('account linking', () => {
       userId: para.userId,
     });
 
-    expect(accounts).toBe(LINKED_ACCOUNTS);
+    expect(accounts).toStrictEqual(LINKED_ACCOUNTS);
   });
 
   it('rejects for invalid arguments', async () => {
@@ -87,7 +83,7 @@ describe('account linking', () => {
                     isConflict: true,
                   });
 
-                  await expect(para.linkAccount(args)).rejects.toThrow('CONFLICT');
+                  await expect(para.linkAccount(args)).rejects.toThrow(AccountLinkError.Conflict);
                 }
                 break;
               case false: {
@@ -181,7 +177,7 @@ describe('account linking', () => {
 
             switch (isConflict) {
               case true:
-                await expect(verify).rejects.toThrow('CONFLICT');
+                await expect(verify).rejects.toThrow(AccountLinkError.Conflict);
 
                 break;
               case false:

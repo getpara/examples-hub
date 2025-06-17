@@ -19,7 +19,7 @@ export function AccountProfileLinkOptions() {
   const para = useInternalClient();
   const { accountLinkOptions, linkAccount, isLinkAccountPending, linkAccountError, setLinkAccountError, resetMutations } =
     useAccountLinking();
-  const { wallets } = useExternalWallets();
+  const { wallet: connectedWallet, wallets } = useExternalWallets();
 
   const [isEmail, isPhone, externalWalletIndex, isOptions] = [
     accountLinkOptions.includes('EMAIL'),
@@ -41,10 +41,11 @@ export function AccountProfileLinkOptions() {
     return baseOptions.filter(option => {
       if (
         !isExternalWallet(option) ||
-        wallets.some(
-          ({ type, internalId, installed, isMobile }) =>
-            (installed || isMobile) && para?.supportedWalletTypes.some(obj => obj.type === type) && internalId === option,
-        )
+        (connectedWallet?.internalId !== option &&
+          wallets.some(
+            ({ type, internalId, installed, isMobile }) =>
+              (installed || isMobile) && para?.supportedWalletTypes.some(obj => obj.type === type) && internalId === option,
+          ))
       ) {
         return true;
       }

@@ -68,7 +68,8 @@ export const createParaConnector = ({
       disconnect: async () => {
         eip1193Provider.closeModal();
         await injectedObj.disconnect();
-        para.logout();
+        // Can't link external wallets with this uncommented
+        // para.logout();
       },
     };
   });

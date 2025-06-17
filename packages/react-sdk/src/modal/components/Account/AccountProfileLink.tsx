@@ -9,7 +9,10 @@ import { useTelegramLogin } from '../../hooks/useTelegramLogin.js';
 import { TelegramIFrame } from '../OAuth/TelegramOAuthStep.js';
 import { AuthInput } from '../AuthInput/AuthInput.js';
 import { useAccountLinking } from '../../../provider/providers/AccountLinkProvider.js';
+import { useWalletDisplayHelpers, useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
+import { ExternalWalletMobileConnect } from '../ExternalWalletStep/ExternalWalletStep.js';
 import { useResendVerificationCode } from '../../../provider/index.js';
+import { AccountLinkError } from '@getpara/web-sdk';
 
 export function AccountProfileLink() {
   const {
@@ -22,6 +25,7 @@ export function AccountProfileLink() {
       isLinkAccountPending,
       resetMutations,
     } = useAccountLinking(),
+    { wallets } = useExternalWallets(),
     { mutate: resendVerificationCode } = useResendVerificationCode(),
     accountLinkType = accountLinkInProgress?.type,
     externalWalletType = accountLinkInProgress?.pendingWalletType ?? accountLinkInProgress?.externalWallet?.providerId,
@@ -35,7 +39,13 @@ export function AccountProfileLink() {
     } = useTelegramLogin(
       isTelegram ? { isActive: isTelegram, status: linkAccountStatus, onSubmit: verifyTelegramLink } : { isActive: false },
     ),
-    status = accountLinkInProgress?.isComplete ? 'success' : isTelegram ? telegramStatus : linkAccountStatus;
+    status = accountLinkInProgress?.isComplete ? 'success' : isTelegram ? telegramStatus : linkAccountStatus,
+    commonWallet = useMemo(() => {
+      const wallet = wallets.find(w => w.internalId === externalWalletType);
+
+      return wallet;
+    }, [wallets]),
+    walletDisplayHelpers = useWalletDisplayHelpers(commonWallet);
 
   const { upper, lower } = useMemo<{ upper: ReactNode; lower: ReactNode }>(() => {
     let upper: ReactNode = null,
@@ -50,12 +60,14 @@ export function AccountProfileLink() {
         message = 'Account linked';
         break;
       case 'error':
-        message =
-          linkAccountError && linkAccountError === 'CONFLICT'
-            ? 'Account already linked'
-            : externalWalletType
-              ? 'Connection failed'
-              : 'Login failed';
+        switch (linkAccountError) {
+          case AccountLinkError.Conflict:
+            message = 'Account already linked';
+            break;
+          default:
+            message = accountLinkInProgress?.type === 'EXTERNAL_WALLET' ? 'Connection failed' : 'Login failed';
+            break;
+        }
         break;
       default:
         message = null;
@@ -155,6 +167,23 @@ export function AccountProfileLink() {
         upper = heroSpinner;
         switch (true) {
           case accountLinkType === 'EXTERNAL_WALLET':
+            {
+              if (commonWallet && walletDisplayHelpers.showMobile) {
+                upper =
+                  status === 'success' || status === 'error' ? (
+                    heroSpinner
+                  ) : (
+                    <ExternalWalletMobileConnect
+                      wallet={commonWallet}
+                      isSelfFetching
+                      onConnectWc={async w => {
+                        await linkAccount({ externalWallet: w.internalId });
+                      }}
+                    />
+                  );
+              }
+              lower = linkAccountError ? tryAgain : null;
+            }
             break;
 
           case accountLinkType === 'TELEGRAM':
@@ -179,6 +208,7 @@ export function AccountProfileLink() {
       lower,
     };
   }, [
+    linkAccountError,
     accountLinkType,
     accountLinkInProgress,
     telegramStatus,
@@ -188,6 +218,8 @@ export function AccountProfileLink() {
     status,
     isTelegram,
     externalWalletType,
+    commonWallet,
+    walletDisplayHelpers.showMobile,
   ]);
 
   useEffect(() => {

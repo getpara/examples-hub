@@ -40,6 +40,7 @@ export const USER_TELEGRAM_AUTH_OBJECT: TelegramAuthResponse = {
 };
 
 export const LINKED_ACCOUNTS = {
+  userId: USER_ID,
   primary: [
     {
       type: 'EMAIL',

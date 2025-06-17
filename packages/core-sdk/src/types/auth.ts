@@ -10,6 +10,9 @@ export type AccountLinkInProgress = {
   };
 };
 
-export const ACCOUNT_LINK_ERRORS = ['NOT_AUTHENTICATED', 'CONFLICT', 'CANCELED', 'UNKNOWN'] as const;
-
-export type AccountLinkError = (typeof ACCOUNT_LINK_ERRORS)[number];
+export enum AccountLinkError {
+  NotAuthenticated = 'No user is currently authenticated',
+  Conflict = 'Account already linked',
+  Canceled = 'Account linking was canceled',
+  Unknown = 'An unknown error occurred',
+}

@@ -326,6 +326,7 @@ export type LinkedAccount = {
 };
 
 export type LinkedAccounts = {
+  userId: string;
   primary: LinkedAccount[];
   linked: LinkedAccount[];
 };

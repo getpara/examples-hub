@@ -13,13 +13,13 @@ import {
   TExternalWallet,
   TLinkedAccountType,
   Auth,
-  toAccountLinkError,
   AuthInfo,
   InternalMethodParams,
 } from '@getpara/web-sdk';
 import { useModalStore } from '../../modal/stores/index.js';
 import { ModalStep, openPopup } from '../../modal/index.js';
 import { useGoBack } from '../../modal/hooks/useGoBack.js';
+import { useExternalWallets } from './ExternalWalletProvider.js';
 import { useInternalClient } from '../hooks/utils/useInternalClient.js';
 import { generateInternalMutation } from '../hooks/mutations/utils.js';
 import { validateAuth } from '../../modal/utils/authInputHelpers.js';
@@ -53,7 +53,7 @@ type Value = {
   verifyTelegramLink: (telegramAuthResponse: TelegramAuthResponse) => void;
   verifyLinkedAccount: (accountLinkInProgress: AccountLinkInProgress) => void;
   linkAccountStatus: MutationStatus;
-  linkAccountError: AccountLinkError | null;
+  linkAccountError: string | null;
   setLinkAccountError: (_: AccountLinkError | null) => void;
   unlinkingAccount: LinkedAccount | undefined;
   unlinkAccount: (linkedAccount: LinkedAccount) => void;
@@ -106,6 +106,14 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
   const queryClient = useQueryClient();
   const { data: account } = useAccount();
   const { data: coreAccountLinkInProgress } = useAccountLinkInProgress();
+  const {
+    wallet: connectedWallet,
+    wallets,
+    signMessage,
+    isSigningMessage,
+    requestInfo: externalWalletRequestInfo,
+    disconnectBase,
+  } = useExternalWallets();
   const { isOpen, openModal } = useModal();
   const includeWalletVerification = useStore(state => state.includeWalletVerification);
   const setStep = useModalStore(state => state.setStep);
@@ -134,7 +142,11 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
     status: statusVerifyTelegramLink,
     reset: resetVerifyTelegramLink,
   } = useVerifyTelegramLink();
-  const { status: statusVerifyExternalWalletLink, reset: resetVerifyExternalWalletLink } = useVerifyExternalWalletLink();
+  const {
+    mutateAsync: mutateAsyncVerifyExternalWalletLink,
+    status: statusVerifyExternalWalletLink,
+    reset: resetVerifyExternalWalletLink,
+  } = useVerifyExternalWalletLink();
 
   const isEnabled =
     !!account?.isConnected && !account?.isGuestMode && (!account?.externalWallet || includeWalletVerification);
@@ -143,14 +155,14 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
     coreAccountLinkInProgress,
   );
   const [unlinkingAccount, setUnlinkingAccount] = useState<LinkedAccount | undefined>(undefined);
-  const [linkAccountError, setLinkAccountError] = useState<AccountLinkError | null>(null);
+  const [linkAccountError, setLinkAccountError] = useState<string | null>(null);
   const [linkAccountStatus, setLinkAccountStatus] = useState<MutationStatus>('pending');
 
   const linkAccount = async (args?: ModalLinkAccountArgs) => {
     if (!isEnabled) {
-      setLinkAccountError('NOT_AUTHENTICATED');
+      setLinkAccountError(AccountLinkError.NotAuthenticated);
 
-      throw new Error('User is not signed in or is in guest mode');
+      throw new Error(AccountLinkError.NotAuthenticated);
     }
 
     setLinkAccountError(null);
@@ -172,7 +184,57 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
         break;
       case args && 'externalWallet' in args:
         {
-          // to be implemented
+          const providerId = args.externalWallet;
+
+          if (providerId === connectedWallet?.internalId) {
+            throw new Error(`Cannot link the currently connected external wallet: ${providerId}`);
+          }
+
+          setAccountLinkInProgress({ type: 'EXTERNAL_WALLET', pendingWalletType: providerId });
+
+          const linkWallet = wallets.find(w => w.internalId === providerId);
+
+          if (!linkWallet) {
+            throw new Error(`wallet not installed: ${providerId}`);
+          }
+
+          openModal({ step: ModalStep.ACCOUNT_PROFILE_ADD });
+
+          try {
+            const externalWallet = await externalWalletRequestInfo(providerId);
+
+            const accountLinkInProgress = await mutateLinkAccountAsync({ externalWallet });
+
+            await onAccountLinked(accountLinkInProgress);
+
+            const signatureVerificationMessage = accountLinkInProgress.externalWallet!.signatureVerificationMessage;
+
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            const {
+              signature: signedMessage,
+              cosmosPublicKeyHex,
+              cosmosSigner,
+            } = await signMessage({
+              message: signatureVerificationMessage,
+              externalWallet: accountLinkInProgress.externalWallet!,
+            });
+
+            const updatedAccounts = await mutateAsyncVerifyExternalWalletLink({
+              signedMessage: signedMessage!,
+              cosmosPublicKeyHex,
+              cosmosSigner,
+            });
+
+            await onAccountLinkVerified(updatedAccounts);
+          } catch (e) {
+            console.error(e);
+            setLinkAccountError(`Error authenticating external wallet: ${e.message}`);
+          } finally {
+            if (linkWallet.type === 'EVM' || linkWallet.type === 'SOLANA') {
+              await disconnectBase(providerId);
+            }
+          }
         }
         break;
       default: {
@@ -206,7 +268,7 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
 
           await onAccountLinked(accountLinkInProgress);
         } catch (e) {
-          setLinkAccountError(toAccountLinkError(e)!);
+          setLinkAccountError(e.message);
         }
       }
     }
@@ -319,8 +381,8 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
     }, 2000);
   };
 
-  const onAccountLinkError = (e: Error) => {
-    setLinkAccountError(toAccountLinkError(e)!);
+  const onAccountLinkError = (e: Error | string) => {
+    setLinkAccountError(e instanceof Error ? e.message : e);
   };
 
   const unlinkAccount = (linkedAccount?: LinkedAccount) => {
@@ -396,6 +458,8 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
         case accountLinkInProgress.type === 'PHONE':
           return statusVerifyEmailOrPhoneLink;
         case accountLinkInProgress.type === 'EXTERNAL_WALLET':
+          if (isSigningMessage) return 'pending';
+
           return externalWalletError && externalWalletError.length > 0
             ? 'error'
             : statusVerifyExternalWalletLink === 'idle'
@@ -415,6 +479,7 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
     statusVerifyTelegramLink,
     statusVerifyExternalWalletLink,
     externalWalletError,
+    isSigningMessage,
   ]);
 
   const value = useMemo<Value>(

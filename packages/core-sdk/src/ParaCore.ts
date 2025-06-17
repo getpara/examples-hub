@@ -99,6 +99,7 @@ import {
   InternalMethodResponse,
   AuthStateSignupOrLogin,
   OAuthResponse,
+  AccountLinkError,
 } from './types/index.js';
 import { PlatformUtils } from './PlatformUtils.js';
 import { sendRecoveryForShare } from './shares/recovery.js';
@@ -126,7 +127,6 @@ import {
   shortenUrl,
   isServerAuthState,
   splitPhoneNumber,
-  toAccountLinkError,
 } from './utils/index.js';
 import { TransactionReviewDenied, TransactionReviewTimeout } from './errors.js';
 import * as constants from './constants.js';
@@ -1903,9 +1903,6 @@ export abstract class ParaCore implements CoreInterface {
         }
       }
     } catch (e) {
-      if (isLinkAccount) {
-        throw new Error(toAccountLinkError(e));
-      }
       throw new Error(e.message);
     }
   }
@@ -2256,7 +2253,7 @@ export abstract class ParaCore implements CoreInterface {
                 });
 
                 if ('isConflict' in result) {
-                  throw new Error('CONFLICT');
+                  throw new Error(AccountLinkError.Conflict);
                 }
 
                 return resolve(result);
@@ -2265,7 +2262,7 @@ export abstract class ParaCore implements CoreInterface {
 
             onPoll?.();
           } catch (e) {
-            if (!isLinkAccount || e.message === 'CONFLICT') {
+            if (!isLinkAccount || e.message === AccountLinkError.Conflict) {
               return reject(e.message);
             }
           }
@@ -2374,7 +2371,7 @@ export abstract class ParaCore implements CoreInterface {
             if (isCanceled() || Date.now() - startedAt > constants.POLLING_TIMEOUT_MS) {
               onCancel?.();
 
-              return reject('CANCELED');
+              return reject(AccountLinkError.Canceled);
             }
 
             await new Promise(_resolve => setTimeout(_resolve, constants.POLLING_INTERVAL_MS));
@@ -2401,9 +2398,8 @@ export abstract class ParaCore implements CoreInterface {
 
             onPoll?.();
           } catch (err) {
-            const error = toAccountLinkError(err);
-            if (isLinkAccount && error === 'CONFLICT') {
-              return reject('CONFLICT');
+            if (isLinkAccount && err.message === AccountLinkError.Conflict) {
+              return reject(err.message);
             }
             onPoll?.();
           }
@@ -3922,7 +3918,10 @@ export abstract class ParaCore implements CoreInterface {
 
     const { accounts } = await this.ctx.client.getLinkedAccounts({ userId });
 
-    return accounts;
+    return {
+      userId,
+      ...accounts,
+    };
   }
 
   protected async linkAccount(opts: InternalMethodParams<'linkAccount'>): InternalMethodResponse<'linkAccount'> {
@@ -3933,6 +3932,10 @@ export abstract class ParaCore implements CoreInterface {
       case 'auth' in opts:
         {
           const authInfo = extractAuthInfo((opts as { auth: VerifiedAuth }).auth, { isRequired: true });
+
+          if (authInfo.auth === this.authInfo!.auth) {
+            throw new Error(AccountLinkError.Conflict);
+          }
 
           type = authInfo.authType.toUpperCase() as 'EMAIL' | 'PHONE';
           identifier = authInfo.identifier;
@@ -3976,7 +3979,7 @@ export abstract class ParaCore implements CoreInterface {
     });
 
     if ('isConflict' in result) {
-      throw new Error('CONFLICT');
+      throw new Error(AccountLinkError.Conflict);
     }
 
     const { linkedAccountId, signatureVerificationMessage } = result;
@@ -4028,14 +4031,14 @@ export abstract class ParaCore implements CoreInterface {
         });
 
       if ('isConflict' in result) {
-        throw new Error('CONFLICT');
+        throw new Error(AccountLinkError.Conflict);
       }
 
       this.accountLinkInProgress = undefined;
 
       return result.accounts;
     } catch (e) {
-      throw new Error(toAccountLinkError(e));
+      throw new Error(e.message === AccountLinkError.Conflict ? AccountLinkError.Conflict : e.message);
     }
   }
 

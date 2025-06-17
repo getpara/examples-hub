@@ -4,8 +4,11 @@ import { OAuthMethods } from './OAuthMethods';
 import { ExternalWallets } from './ExternalWallets';
 import { AuthLayouts } from './AuthLayouts';
 import { Theme } from './Theme';
+import { AccountLinking } from './AccountLinking';
+import { useAccount } from '@getpara/react-sdk';
 
 export const ModalConfig = () => {
+  const { data: account } = useAccount();
   return (
     <CpslCard>
       <CpslText variant="headingXS" weight="semiBold">
@@ -16,6 +19,7 @@ export const ModalConfig = () => {
         <OAuthMethods />
         <ExternalWallets />
         <AuthLayouts />
+        {account?.isConnected && !account?.isGuestMode && <AccountLinking />}
       </InnerContainer>
     </CpslCard>
   );

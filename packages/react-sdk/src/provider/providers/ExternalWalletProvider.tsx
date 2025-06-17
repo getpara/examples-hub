@@ -13,9 +13,30 @@ import {
   ExternalWalletContextType,
   TExternalWallet,
 } from '@getpara/react-common';
-import { VerifyExternalWalletParams } from '@getpara/user-management-client';
+import {
+  COSMOS_WALLETS,
+  EVM_WALLETS,
+  ExternalWalletInfo,
+  SOLANA_WALLETS,
+  VerifyExternalWalletParams,
+} from '@getpara/web-sdk';
 import { useAuthActions } from './AuthProvider.js';
 import { CosmosSignResult } from '@getpara/cosmos-wallet-connectors';
+
+export const useWalletDisplayHelpers = (wallet: CommonWallet | undefined) => {
+  const isUsingMobileConnector = useModalStore(state => state.isUsingMobileConnector);
+
+  return {
+    // Show the extension screen if on web and the wallet is an extension and installed or the wallet isn't a mobile wallet
+    // Also show the extension connection if on desktop for a solana wallet (no walletConnect)
+    showExtension:
+      !isMobile() && ((wallet?.isExtension && wallet?.installed) || !wallet?.isMobile || wallet?.type === 'SOLANA'),
+    // Show the mobile screen if on mobile and the wallet is a mobile wallet or if on desktop and the wallet isn't installed
+    showMobile: (isMobile() && wallet?.isMobile) || (!isMobile() && !wallet?.installed),
+
+    isCosmosMobileWallet: wallet?.type === 'COSMOS' && !!isUsingMobileConnector,
+  };
+};
 
 export const defaultExternalWallet = {
   wallets: [],
@@ -33,11 +54,15 @@ export const defaultExternalWallet = {
   setChainIdSwitchingTo: () => {},
   connectEmbeddedToExternalConnectors: () => Promise.resolve(),
   verifyWalletSignature: () => Promise.resolve({} as unknown as any),
+  signMessage: () => Promise.resolve({} as unknown as any),
+  isSigningMessage: false,
   getWalletBalance: () => Promise.resolve(undefined),
   isExternalWalletVerifying: false,
+  requestInfo: (_: TExternalWallet) => Promise.resolve({} as ExternalWalletInfo),
+  disconnectBase: (_: TExternalWallet) => Promise.resolve(),
 };
 
-type Value = Omit<ExternalWalletContextType<CosmosSignResult>, 'signMessage' | 'disconnect' | 'signVerificationMessage'> &
+type Value = Omit<ExternalWalletContextType<CosmosSignResult>, 'disconnect' | 'signVerificationMessage'> &
   ChainManagement<string, void> &
   BalanceManagement & {
     wallet?: CommonWallet;
@@ -54,6 +79,7 @@ type Value = Omit<ExternalWalletContextType<CosmosSignResult>, 'signMessage' | '
     disconnectExternalWallet: () => Promise<void>;
     setChainIdSwitchingTo: (chainId?: string) => void;
     connectEmbeddedToExternalConnectors: () => Promise<void>;
+    isSigningMessage: boolean;
     verifyWalletSignature: () => Promise<VerifyExternalWalletParams | undefined>;
     isExternalWalletVerifying?: boolean;
   };
@@ -78,13 +104,19 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     username: evmUsername,
     avatar: evmAvatar,
     connectParaEmbedded: evmConnectParaEmbedded,
+    signMessage: evmSignMessage,
     signVerificationMessage: evmSignVerificationMessage,
     getWalletBalance: evmGetWalletBalance,
+    requestInfo: evmRequestInfo,
+    disconnectBase: evmDisconnectBase,
   } = useContext(evmContext);
   const {
     wallets: solanaWallets,
     disconnect: solanaDisconnect,
+    signMessage: solanaSignMessage,
     signVerificationMessage: solanaSignVerificationMessage,
+    requestInfo: solanaRequestInfo,
+    disconnectBase: solanaDisconnectBase,
   } = useContext(solanaContext);
   const {
     wallets: cosmosWallets,
@@ -93,7 +125,10 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     chainId: cosmosChainId,
     switchChain: cosmosSwitchChain,
     connectParaEmbedded: cosmosConnectParaEmbedded,
+    signMessage: cosmosSignMessage,
     signVerificationMessage: cosmosSignVerificationMessage,
+    requestInfo: cosmosRequestInfo,
+    disconnectBase: cosmosDisconnectBase,
   } = useContext(cosmosContext);
   const onLoginRef = useStore(state => state.onLoginRef);
   const setStep = useModalStore(state => state.setStep);
@@ -104,7 +139,6 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
   const selectedExternalWalletId = useModalStore(state => state.selectedExternalWalletId);
   const setExternalWalletError = useModalStore(state => state.setExternalWalletError);
   const setIsUsingMobileConnector = useModalStore(state => state.setIsUsingMobileConnector);
-  const isUsingMobileConnector = useModalStore(state => state.isUsingMobileConnector);
   const para = useInternalClient();
   const { setSelectedWallet } = useWalletState();
   const { onNewAuthState } = useAuthActions();
@@ -113,6 +147,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
   const [qrUri, setQrUri] = useState<string>();
   const [chainIdSwitchingTo, setChainIdSwitchingTo] = useState<string>();
   const [isExternalWalletVerifying, setIsExternalWalletVerifying] = useState(false);
+  const [isSigningMessage, setIsSigningMessage] = useState(false);
 
   // Filter any wallets that aren't included in the sort array, sort by the array then sort by installed extensions
   const wallets = [...evmWallets, ...solanaWallets, ...cosmosWallets]
@@ -245,6 +280,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
       isConnectionOnly,
       withFullParaAuth,
       provider: wallet.name,
+      providerId: wallet.externalProviderId,
       isExternal: true,
     };
 
@@ -342,6 +378,70 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     return undefined;
   }, [cosmosSignVerificationMessage, evmSignVerificationMessage, solanaSignVerificationMessage, wallet]);
 
+  const signMessage = useCallback(
+    async ({ message, externalWallet: _externalWallet }: { message: string; externalWallet?: ExternalWalletInfo }) => {
+      setExternalWalletError();
+      setIsSigningMessage(true);
+      let externalWallet = _externalWallet;
+      const walletType = externalWallet?.type || Object.values(para.externalWallets || {})[0]?.type;
+
+      let response;
+      try {
+        switch (walletType) {
+          case 'COSMOS':
+            {
+              const { address, signature, error, cosmosPublicKeyHex, cosmosSigner } = await cosmosSignMessage({
+                message,
+                externalWallet,
+              });
+
+              if (error) {
+                throw new Error(error);
+              } else if (signature && address) {
+                // If signature is returned address, cosmosPublicKeyHex and cosmosSigner will also be returned
+                response = { address, signature, cosmosPublicKeyHex, cosmosSigner };
+              }
+            }
+            break;
+          case 'EVM':
+            {
+              const { address, signature, error } = await evmSignMessage({ message, externalWallet });
+
+              if (error) {
+                throw new Error(error);
+              } else if (signature && address) {
+                response = { address, signature };
+              }
+            }
+            break;
+          case 'SOLANA':
+            {
+              const { signature, error, address } = await solanaSignMessage({ message });
+
+              if (error) {
+                throw new Error(error);
+              } else if (signature && address) {
+                // If signature is returned address, cosmosPublicKeyHex and cosmosSigner will also be returned
+                response = { address, signature };
+              }
+            }
+            break;
+          default:
+            break;
+        }
+
+        setIsSigningMessage(false);
+
+        return response;
+      } catch (error) {
+        setIsSigningMessage(false);
+
+        throw error;
+      }
+    },
+    [cosmosSignMessage, evmSignMessage, solanaSignMessage],
+  );
+
   const connectExternalWallet = useCallback(
     async (
       wallet: CommonWallet,
@@ -396,6 +496,57 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     [isExternalWalletConnecting, externalWalletsWithFullAuth, connectionOnly, includeWalletVerification],
   );
 
+  const requestInfo = async (providerId: TExternalWallet) => {
+    const [isEvm, isSolana, _isCosmos] = [
+      EVM_WALLETS.includes(providerId as any),
+      SOLANA_WALLETS.includes(providerId as any),
+      COSMOS_WALLETS.includes(providerId as any),
+    ];
+
+    switch (true) {
+      case isEvm: {
+        const externalWallet = await evmRequestInfo(providerId);
+
+        return externalWallet;
+      }
+
+      case isSolana: {
+        const externalWallet = await solanaRequestInfo(providerId);
+
+        return externalWallet;
+      }
+
+      default: {
+        const externalWallet = await cosmosRequestInfo(providerId);
+
+        return externalWallet;
+      }
+    }
+  };
+
+  const disconnectBase = async (providerId: TExternalWallet) => {
+    const [isEvm, isSolana, _isCosmos] = [
+      EVM_WALLETS.includes(providerId as any),
+      SOLANA_WALLETS.includes(providerId as any),
+      COSMOS_WALLETS.includes(providerId as any),
+    ];
+
+    switch (true) {
+      case isEvm:
+        await evmDisconnectBase(providerId);
+        break;
+
+      case isSolana:
+        await solanaDisconnectBase(providerId);
+        break;
+
+      default: {
+        await cosmosDisconnectBase();
+        break;
+      }
+    }
+  };
+
   const disconnectExternalWallet = async () => {
     await para.logout();
     await evmDisconnect();
@@ -405,16 +556,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     await solanaDisconnect();
   };
 
-  const walletDisplayHelpers = {
-    // Show the extension screen if on web and the wallet is an extension and installed or the wallet isn't a mobile wallet
-    // Also show the extension connection if on desktop for a solana wallet (no walletConnect)
-    showExtension:
-      !isMobile() && ((wallet?.isExtension && wallet?.installed) || !wallet?.isMobile || wallet?.type === 'SOLANA'),
-    // Show the mobile screen if on mobile and the wallet is a mobile wallet or if on desktop and the wallet isn't installed
-    showMobile: (isMobile() && wallet?.isMobile) || (!isMobile() && !wallet?.installed),
-
-    isCosmosMobileWallet: wallet?.type === 'COSMOS' && !!isUsingMobileConnector,
-  };
+  const walletDisplayHelpers = useWalletDisplayHelpers(wallet);
 
   const username: string | undefined = useMemo(() => {
     let username: string | undefined;
@@ -518,9 +660,13 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
           switchChain,
           setChainIdSwitchingTo,
           connectEmbeddedToExternalConnectors,
+          signMessage,
+          isSigningMessage,
           verifyWalletSignature,
           isExternalWalletVerifying,
           getWalletBalance,
+          requestInfo,
+          disconnectBase,
         }),
         [
           wallets,
@@ -537,9 +683,13 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
           switchChain,
           setChainIdSwitchingTo,
           connectEmbeddedToExternalConnectors,
+          signMessage,
+          isSigningMessage,
           verifyWalletSignature,
           isExternalWalletVerifying,
           getWalletBalance,
+          requestInfo,
+          disconnectBase,
         ],
       )}
     >
