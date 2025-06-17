@@ -44,4 +44,5 @@ app-example
 .env.test
 .env.production
 
+# Project-specific documentation
 CLAUDE.md
