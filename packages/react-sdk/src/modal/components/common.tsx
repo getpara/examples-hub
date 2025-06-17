@@ -226,10 +226,10 @@ export function GradientScroll({ height, gap, children }: PropsWithChildren<{ ga
   return (
     <GradientScrollContainer
       ref={ref}
-      height={height}
-      gap={gap}
-      isNotAtBottom={isNotAtBottom}
-      isNotAtTop={isNotAtTop}
+      $height={height}
+      $gap={gap}
+      $isNotAtBottom={isNotAtBottom}
+      $isNotAtTop={isNotAtTop}
       onScroll={onScroll}
     >
       <div>{children}</div>
@@ -246,20 +246,20 @@ export const HeroGenericIcon = ({ accountType }: { accountType: 'EMAIL' | 'PHONE
 };
 
 const GradientScrollContainer = safeStyled.div<{
-  height?: string;
-  gap?: string;
-  isNotAtBottom: boolean;
-  isNotAtTop: boolean;
+  $height?: string;
+  $gap?: string;
+  $isNotAtBottom: boolean;
+  $isNotAtTop: boolean;
 }>`
-  max-height: ${({ height }) => height || '100%'};
+  max-height: ${({ $height }) => $height || '100%'};
   width: 100%;
   overflow-y: auto;
-  mask-image: ${({ isNotAtBottom, isNotAtTop }) =>
-    isNotAtBottom && isNotAtTop
+  mask-image: ${({ $isNotAtBottom, $isNotAtTop }) =>
+    $isNotAtBottom && $isNotAtTop
       ? 'linear-gradient(to bottom, transparent 0%, black 24px, black calc(100% - 24px), transparent 100%)'
-      : isNotAtBottom
+      : $isNotAtBottom
         ? 'linear-gradient(to bottom, black calc(100% - 24px), transparent 100%)'
-        : isNotAtTop
+        : $isNotAtTop
           ? 'linear-gradient(to top, black calc(100% - 24px), transparent 100%)'
           : 'none'};
 
@@ -267,7 +267,7 @@ const GradientScrollContainer = safeStyled.div<{
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: ${({ gap }) => gap || '8px'};
+    gap: ${({ $gap }) => $gap || '8px'};
   }
 `;
 

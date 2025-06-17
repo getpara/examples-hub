@@ -23,10 +23,12 @@ import { useExternalWallets } from './ExternalWalletProvider.js';
 import { useInternalClient } from '../hooks/utils/useInternalClient.js';
 import { generateInternalMutation } from '../hooks/mutations/utils.js';
 import { validateAuth } from '../../modal/utils/authInputHelpers.js';
-import { extractAuthInfo } from '@getpara/user-management-client';
+import { extractAuthInfo, TWalletType } from '@getpara/user-management-client';
 import { useStore } from '../stores/useStore.js';
 
-type AccountLinkInProgress = Partial<CoreAccountLinkInProgress & { pendingWalletType?: TExternalWallet }>;
+type AccountLinkInProgress = Partial<
+  CoreAccountLinkInProgress & { pendingWalletProvider?: TExternalWallet; pendingWalletType?: TWalletType }
+>;
 
 export type ModalLinkAccountArgs =
   | undefined
@@ -35,7 +37,7 @@ export type ModalLinkAccountArgs =
       type: Exclude<TLinkedAccountType, 'EXTERNAL_WALLET'> | 'X';
     }
   | {
-      externalWallet: TExternalWallet;
+      externalWallet: { internalId: TExternalWallet; type?: TWalletType };
     }
   | {
       options: SupportedAccountLinks;
@@ -184,13 +186,18 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
         break;
       case args && 'externalWallet' in args:
         {
-          const providerId = args.externalWallet;
+          const providerId = args.externalWallet.internalId;
+          const type = args.externalWallet.type;
 
           if (providerId === connectedWallet?.internalId) {
             throw new Error(`Cannot link the currently connected external wallet: ${providerId}`);
           }
 
-          setAccountLinkInProgress({ type: 'EXTERNAL_WALLET', pendingWalletType: providerId });
+          setAccountLinkInProgress({
+            type: 'EXTERNAL_WALLET',
+            pendingWalletProvider: providerId,
+            pendingWalletType: type,
+          });
 
           const linkWallet = wallets.find(w => w.internalId === providerId);
 
@@ -198,10 +205,14 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
             throw new Error(`wallet not installed: ${providerId}`);
           }
 
-          openModal({ step: ModalStep.ACCOUNT_PROFILE_ADD });
+          openModal({ step: !type ? ModalStep.EX_WALLET_NETWORK_SELECT : ModalStep.ACCOUNT_PROFILE_ADD });
+
+          if (!type) {
+            return;
+          }
 
           try {
-            const externalWallet = await externalWalletRequestInfo(providerId);
+            const externalWallet = await externalWalletRequestInfo(providerId, type);
 
             const accountLinkInProgress = await mutateLinkAccountAsync({ externalWallet });
 

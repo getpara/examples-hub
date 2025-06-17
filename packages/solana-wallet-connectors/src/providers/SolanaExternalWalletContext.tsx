@@ -179,6 +179,7 @@ export function SolanaExternalWalletProvider({
       if (e.message.includes('User rejected the request')) {
         return { error: 'Signature request rejected' };
       }
+      console.error('Solana signature error:', e.message);
       return { error: 'An unknown error occurred' };
     }
   };
@@ -201,15 +202,36 @@ export function SolanaExternalWalletProvider({
     await new Promise(resolve => setTimeout(resolve, 100));
     // }
 
+    let address: string | undefined;
+    let error: string | undefined;
     try {
       await adapter.connect();
-      await new Promise(resolve => setTimeout(resolve, 100));
 
-      while (!adapter.publicKey) {
-        await new Promise(resolve => setTimeout(resolve, 100));
+      if (adapter.publicKey) {
+        address = adapter.publicKey.toString();
+      } else {
+        // Await the connect event before proceeding
+        await new Promise<void>((resolve, reject) => {
+          adapter.once('connect', async () => {
+            try {
+              address = adapter.publicKey.toString();
+              resolve();
+            } catch (err) {
+              reject(err);
+            }
+          });
+
+          // Optionally, listen for disconnect or error events to reject early
+          adapter.once('error', (err: any) => {
+            error = err?.message || 'An unknown error occurred';
+            reject(err);
+          });
+          adapter.once('disconnect', () => {
+            error = 'Disconnected before connect event';
+            reject(new Error(error));
+          });
+        });
       }
-
-      const address = adapter.publicKey.toString();
 
       return address;
     } catch (e) {
@@ -244,7 +266,7 @@ export function SolanaExternalWalletProvider({
           error = err;
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       switch (err.message) {
         case 'User aborted.':
         case 'Approval Denied':
@@ -253,6 +275,7 @@ export function SolanaExternalWalletProvider({
           break;
         }
         default: {
+          console.error('Solana connection error:', err.message);
           error = 'An unknown error occurred';
           break;
         }

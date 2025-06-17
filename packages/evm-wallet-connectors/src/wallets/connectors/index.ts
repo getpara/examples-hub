@@ -8,6 +8,7 @@ import { safeWallet } from './safe/safe.js';
 import { okxWallet } from './okx/okx.js';
 import { backpackWallet } from './backpack/backpack.js';
 import { hahaWallet } from './haha/haha.js';
+import { phantomWallet } from './phantom/phantom.js';
 
 export {
   metaMaskWallet,
@@ -20,6 +21,7 @@ export {
   okxWallet,
   backpackWallet,
   hahaWallet,
+  phantomWallet,
 };
 
 export const allWallets = [
@@ -33,4 +35,5 @@ export const allWallets = [
   okxWallet,
   backpackWallet,
   hahaWallet,
+  phantomWallet,
 ];

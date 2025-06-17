@@ -38,19 +38,26 @@ export function AccountProfileLinkOptions() {
           ]
         : (accountLinkOptions as Option[]);
 
-    return baseOptions.filter(option => {
-      if (
-        !isExternalWallet(option) ||
-        (connectedWallet?.internalId !== option &&
-          wallets.some(
-            ({ type, internalId, installed, isMobile }) =>
-              (installed || isMobile) && para?.supportedWalletTypes.some(obj => obj.type === type) && internalId === option,
-          ))
-      ) {
-        return true;
-      }
-      return false;
-    });
+    return Array.from(
+      new Set(
+        baseOptions.filter(option => {
+          if (
+            !isExternalWallet(option) ||
+            (connectedWallet?.internalId !== option &&
+              wallets.some(({ type, internalId, installed, isMobile }) => {
+                return (
+                  (installed || isMobile) &&
+                  para?.supportedWalletTypes.some(obj => obj.type === type) &&
+                  internalId === option
+                );
+              }))
+          ) {
+            return true;
+          }
+          return false;
+        }),
+      ),
+    );
   }, [accountLinkOptions, externalWalletIndex, wallets]);
 
   useEffect(() => {
@@ -58,6 +65,15 @@ export function AccountProfileLinkOptions() {
 
     setLinkAccountError(null);
   }, []);
+
+  // Intentionally returning undefined if there is more than one option to indicate that the type selection screen is needed.
+  const getExternalWalletType = (internalId: string) => {
+    const allWallets = wallets.filter(wallet => wallet.internalId === internalId);
+    if (allWallets.length === 1) {
+      return allWallets[0].type;
+    }
+    return undefined;
+  };
 
   return (
     <StepContainer $wide>
@@ -96,7 +112,13 @@ export function AccountProfileLinkOptions() {
                     fullWidth
                     variant="tertiary"
                     key={option}
-                    onClick={() => linkAccount(isWallet ? { externalWallet: option } : { type: option })}
+                    onClick={() =>
+                      linkAccount(
+                        isWallet
+                          ? { externalWallet: { internalId: option, type: getExternalWalletType(option) } }
+                          : { type: option },
+                      )
+                    }
                   >
                     <AccountTypeIcon accountType={option} size="24px" />
                     <CpslText color="contrast" variant="bodyM">

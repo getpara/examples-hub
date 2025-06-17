@@ -394,6 +394,7 @@ export function EvmExternalWalletProvider({
           break;
         }
         default: {
+          console.error('Wagmi connection error:', e.message);
           error = 'An unknown error occurred';
           break;
         }

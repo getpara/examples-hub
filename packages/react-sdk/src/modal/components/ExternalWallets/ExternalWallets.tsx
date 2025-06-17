@@ -11,7 +11,7 @@ import { type CommonWallet } from '@getpara/react-common';
 const HAS_MORE_LENGTH = 3;
 
 export const ExternalWallets = () => {
-  const { wallets, connectExternalWallet } = useExternalWallets();
+  const { wallets: allWallets, connectExternalWallet } = useExternalWallets();
   const setSelectedExternalWalletId = useModalStore(state => state.setSelectedExternalWalletId);
   const setStep = useModalStore(state => state.setStep);
   const showAll = useModalStore(state => state.step === ModalStep.EX_WALLET_MORE);
@@ -19,13 +19,17 @@ export const ExternalWallets = () => {
 
   const [search, setSearch] = useState('');
 
-  const hasMore = wallets.length > HAS_MORE_LENGTH;
+  // Deduplicate wallets by ID and keep the first occurrence
+  const dedupedWallets = Array.from(new Set(allWallets.map(wallet => wallet.id))).map(id => {
+    return allWallets.find(wallet => wallet.id === id) as CommonWallet;
+  });
+  const hasMore = dedupedWallets.length > HAS_MORE_LENGTH;
   const walletsToShow =
     showAll || !hasMore
       ? search
-        ? wallets.filter(w => w.name.toLowerCase().includes(search.toLowerCase()))
-        : wallets
-      : wallets.slice(0, HAS_MORE_LENGTH);
+        ? dedupedWallets.filter(w => w.name.toLowerCase().includes(search.toLowerCase()))
+        : dedupedWallets
+      : dedupedWallets.slice(0, HAS_MORE_LENGTH);
   const showMoreButton = !showAll && hasMore;
 
   const handleShowAll = () => {
@@ -37,7 +41,15 @@ export const ExternalWallets = () => {
   };
 
   const handleWalletClick = (wallet: CommonWallet) => () => {
-    setSelectedExternalWalletId(wallet.id);
+    const shouldShowNetworkSelection = allWallets.filter(w => w.id === wallet.id).length > 1;
+
+    if (shouldShowNetworkSelection) {
+      setSelectedExternalWalletId(wallet.internalId);
+      setStep(ModalStep.EX_WALLET_NETWORK_SELECT);
+      return;
+    }
+
+    setSelectedExternalWalletId(wallet.internalId);
     setStep(ModalStep.EX_WALLET_SELECTED);
 
     if (wallet.installed) {

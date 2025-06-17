@@ -1,5 +1,5 @@
 import { PropsWithChildren, createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { isMobile, truncateAddress } from '@getpara/web-sdk';
+import { isMobile, truncateAddress, TWalletType } from '@getpara/web-sdk';
 import { useInternalClient } from '../hooks/utils/useInternalClient.js';
 import { useStore } from '../stores/useStore.js';
 import { ModalStep } from '../../modal/index.js';
@@ -62,7 +62,7 @@ export const defaultExternalWallet = {
   disconnectBase: (_: TExternalWallet) => Promise.resolve(),
 };
 
-type Value = Omit<ExternalWalletContextType<CosmosSignResult>, 'disconnect' | 'signVerificationMessage'> &
+type Value = Omit<ExternalWalletContextType<CosmosSignResult>, 'disconnect' | 'signVerificationMessage' | 'requestInfo'> &
   ChainManagement<string, void> &
   BalanceManagement & {
     wallet?: CommonWallet;
@@ -82,6 +82,7 @@ type Value = Omit<ExternalWalletContextType<CosmosSignResult>, 'disconnect' | 's
     isSigningMessage: boolean;
     verifyWalletSignature: () => Promise<VerifyExternalWalletParams | undefined>;
     isExternalWalletVerifying?: boolean;
+    requestInfo: (_: TExternalWallet, __: TWalletType) => Promise<ExternalWalletInfo>;
   };
 
 export const ExternalWalletContext = createContext<Value>(defaultExternalWallet);
@@ -142,7 +143,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
   const para = useInternalClient();
   const { setSelectedWallet } = useWalletState();
   const { onNewAuthState } = useAuthActions();
-  const { mutate: verifyExternalWallet } = useVerifyExternalWallet();
+  const { mutateAsync: verifyExternalWallet } = useVerifyExternalWallet();
 
   const [qrUri, setQrUri] = useState<string>();
   const [chainIdSwitchingTo, setChainIdSwitchingTo] = useState<string>();
@@ -159,7 +160,10 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     )
     .sort((a, b) => (a.installed === b.installed ? 0 : a.installed ? -1 : 1));
 
-  const wallet = useMemo(() => wallets.find(w => w.id === selectedExternalWalletId), [wallets, selectedExternalWalletId]);
+  const wallet = useMemo(
+    () => wallets.find(w => w.internalId === selectedExternalWalletId),
+    [wallets, selectedExternalWalletId],
+  );
 
   const updateQrUri = async () => {
     const uri = await wallet?.getQrUri?.();
@@ -354,22 +358,19 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
         return;
       }
 
-      verifyExternalWallet(verifyExternalWalletParams, {
-        onSuccess: d => {
-          if (wallet && externalWalletsWithFullAuth?.includes(wallet.name?.toUpperCase() as TExternalWallet)) {
-            onNewAuthState(d);
-          } else {
-            setStep(ModalStep.LOGIN_DONE);
-          }
-        },
-        onError: e => {
-          console.error('Error verifying signature:', e);
-          setExternalWalletError(['Signature verification failed.']);
-        },
-        onSettled: () => {
-          setIsExternalWalletVerifying(false);
-        },
-      });
+      try {
+        const d = await verifyExternalWallet(verifyExternalWalletParams);
+        if (wallet && externalWalletsWithFullAuth?.includes(wallet.name?.toUpperCase() as TExternalWallet)) {
+          onNewAuthState(d);
+        } else {
+          setStep(ModalStep.LOGIN_DONE);
+        }
+      } catch (e) {
+        console.error('Error verifying signature:', e);
+        setExternalWalletError(['Signature verification failed.']);
+      } finally {
+        setIsExternalWalletVerifying(false);
+      }
 
       return verifyExternalWalletParams;
     }
@@ -496,27 +497,21 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     [isExternalWalletConnecting, externalWalletsWithFullAuth, connectionOnly, includeWalletVerification],
   );
 
-  const requestInfo = async (providerId: TExternalWallet) => {
-    const [isEvm, isSolana, _isCosmos] = [
-      EVM_WALLETS.includes(providerId as any),
-      SOLANA_WALLETS.includes(providerId as any),
-      COSMOS_WALLETS.includes(providerId as any),
-    ];
-
-    switch (true) {
-      case isEvm: {
+  const requestInfo = async (providerId: TExternalWallet, type: TWalletType) => {
+    switch (type) {
+      case 'EVM': {
         const externalWallet = await evmRequestInfo(providerId);
 
         return externalWallet;
       }
 
-      case isSolana: {
+      case 'SOLANA': {
         const externalWallet = await solanaRequestInfo(providerId);
 
         return externalWallet;
       }
 
-      default: {
+      case 'COSMOS': {
         const externalWallet = await cosmosRequestInfo(providerId);
 
         return externalWallet;

@@ -28,8 +28,10 @@ export function AccountProfileLink() {
     { wallets } = useExternalWallets(),
     { mutate: resendVerificationCode } = useResendVerificationCode(),
     accountLinkType = accountLinkInProgress?.type,
-    externalWalletType = accountLinkInProgress?.pendingWalletType ?? accountLinkInProgress?.externalWallet?.providerId,
-    accountLinkIcon = externalWalletType ?? accountLinkType,
+    externalWalletProvider =
+      accountLinkInProgress?.pendingWalletProvider ?? accountLinkInProgress?.externalWallet?.providerId,
+    externalWalletType = accountLinkInProgress?.pendingWalletType ?? accountLinkInProgress?.externalWallet?.type,
+    accountLinkIcon = externalWalletProvider ?? accountLinkType,
     isTelegram = accountLinkType === 'TELEGRAM',
     {
       url,
@@ -41,7 +43,7 @@ export function AccountProfileLink() {
     ),
     status = accountLinkInProgress?.isComplete ? 'success' : isTelegram ? telegramStatus : linkAccountStatus,
     commonWallet = useMemo(() => {
-      const wallet = wallets.find(w => w.internalId === externalWalletType);
+      const wallet = wallets.find(w => w.internalId === externalWalletProvider && w.type === externalWalletType);
 
       return wallet;
     }, [wallets]),
@@ -80,12 +82,14 @@ export function AccountProfileLink() {
         text={message}
       />
     );
+    ``;
 
-    const onTryAgain = externalWalletType
-      ? () => linkAccount({ externalWallet: externalWalletType })
-      : accountLinkType && accountLinkType !== 'EXTERNAL_WALLET'
-        ? () => linkAccount({ type: accountLinkType })
-        : undefined;
+    const onTryAgain =
+      externalWalletProvider && externalWalletType
+        ? () => linkAccount({ externalWallet: { internalId: externalWalletProvider, type: externalWalletType } })
+        : accountLinkType && accountLinkType !== 'EXTERNAL_WALLET'
+          ? () => linkAccount({ type: accountLinkType })
+          : undefined;
 
     const tryAgain = onTryAgain ? (
       <CpslButton variant="secondary" fullWidth onClick={onTryAgain}>
@@ -177,7 +181,7 @@ export function AccountProfileLink() {
                       wallet={commonWallet}
                       isSelfFetching
                       onConnectWc={async w => {
-                        await linkAccount({ externalWallet: w.internalId });
+                        await linkAccount({ externalWallet: { internalId: w.internalId, type: w.type } });
                       }}
                     />
                   );

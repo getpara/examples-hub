@@ -51,6 +51,7 @@ export function createParaWagmiConfig<
   });
 
   const created = createConfig({
+    ssr: true,
     ...wagmiParams,
     chains,
     transports,

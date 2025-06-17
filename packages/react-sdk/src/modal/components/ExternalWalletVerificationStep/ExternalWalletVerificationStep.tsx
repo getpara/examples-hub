@@ -1,16 +1,22 @@
 import { CpslButton, CpslSpinner, CpslText } from '@getpara/react-components';
-import { useEffect } from 'react';
 import { safeStyled } from '@getpara/react-common';
 import { useModalStore } from '../../stores/index.js';
 import { ErrorContainer, ErrorIcon, Heading, InnerStepContainer, StepContainer } from '../common.js';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
+import { useEffect, useRef } from 'react';
 
 export const ExternalWalletVerificationStep = () => {
+  const effectRan = useRef(false);
+
   const { isExternalWalletVerifying, verifyWalletSignature } = useExternalWallets();
   const externalWalletError = useModalStore(state => state.externalWalletError);
 
   useEffect(() => {
-    verifyWalletSignature();
+    const hasRun = effectRan.current;
+    if (!hasRun) {
+      verifyWalletSignature();
+      effectRan.current = true;
+    }
   }, []);
 
   return (
@@ -32,7 +38,11 @@ export const ExternalWalletVerificationStep = () => {
         )}
       </InnerStepContainer>
       <InnerStepContainer>
-        {isExternalWalletVerifying ? <CpslSpinner /> : <CpslButton onClick={verifyWalletSignature}>Retry</CpslButton>}
+        {isExternalWalletVerifying || !effectRan.current ? (
+          <CpslSpinner />
+        ) : (
+          <CpslButton onClick={verifyWalletSignature}>Retry</CpslButton>
+        )}
       </InnerStepContainer>
     </StepContainer>
   );

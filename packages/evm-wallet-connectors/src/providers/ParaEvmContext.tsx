@@ -1,4 +1,4 @@
-import { PropsWithChildren, useMemo } from 'react';
+import { PropsWithChildren, useMemo, useRef } from 'react';
 import { createConfig, CreateConfigParameters, WagmiProvider, WagmiProviderProps } from 'wagmi';
 import { WalletList } from '../types/Wallet.js';
 import { connectorsForWallets } from '../wallets/connectorsForWallets.js';
@@ -64,6 +64,7 @@ export function ParaEvmProvider<
   config: _config,
   wagmiProviderProps,
 }: ParaEvmProviderProps<chains, transports> & PropsWithChildren) {
+  const prevWallets = useRef(null);
   const para = internalConfig.para;
 
   const {
@@ -91,10 +92,13 @@ export function ParaEvmProvider<
 
   // Memoizing the config with no deps here so it stays constant after the first render
   const config = useMemo(() => {
+    if (!prevWallets.current) {
+      prevWallets.current = wallets;
+    }
     // If a config already exists, return it to avoid re-creating
     // This is for apps that use the createParaWagmiConfig factory function so they have access to the config outside of the provider lifecycle
     const existing = getWagmiConfig();
-    if (existing) return existing;
+    if (existing && prevWallets.current === wallets) return existing;
 
     // If no config exists, create a new one
     const wcMetadata = computeWalletConnectMetaData({ appName, appDescription, appUrl, appIcon });
@@ -109,6 +113,7 @@ export function ParaEvmProvider<
     });
     const allConnectors = [...baseConnectors, paraConnectorInstance];
     const createdConfig = createConfig({
+      ssr: true,
       ...wagmiConfigParams,
       chains,
       transports: transports || createDefaultTransports(chains),
@@ -117,6 +122,7 @@ export function ParaEvmProvider<
 
     // Set the config so it can be accessed outside of the hook lifecycle but still within the lifecycle of the provider
     setWagmiConfig(createdConfig);
+    prevWallets.current = wallets;
 
     return createdConfig;
   }, [wallets, paraConnectorInstance]);

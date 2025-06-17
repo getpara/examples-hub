@@ -33,6 +33,7 @@ import Code from './code.svg';
 import Coinbase from './coinbase.svg';
 import Copy07 from './copy-07.svg';
 import Copy from './copy.svg';
+import CosmosCircle from './cosmos-circle.svg';
 import Cosmos from './cosmos.svg';
 import Cosmostation from './cosmostation.svg';
 import CreditCard02 from './credit-card-02.svg';
@@ -55,6 +56,7 @@ import Dribbble from './dribbble.svg';
 import Earth from './earth.svg';
 import Edit02 from './edit-02.svg';
 import EmptyCircle from './empty-circle.svg';
+import EthCircle from './eth-circle.svg';
 import Ethereum from './ethereum.svg';
 import EyeOff from './eye-off.svg';
 import Eye from './eye.svg';
@@ -155,6 +157,7 @@ import Signal from './signal.svg';
 import Sliders from './sliders.svg';
 import SnapchatBrand from './snapchat-brand.svg';
 import Snapchat from './snapchat.svg';
+import SolanaCircle from './solana-circle.svg';
 import Solana from './solana.svg';
 import Solflare from './solflare.svg';
 import SpacingHeight from './spacing-height.svg';
@@ -455,6 +458,7 @@ export const Icons = {
   coinbase: Coinbase,
   copy07: Copy07,
   copy: Copy,
+  cosmosCircle: CosmosCircle,
   cosmos: Cosmos,
   cosmostation: Cosmostation,
   creditCard02: CreditCard02,
@@ -477,6 +481,7 @@ export const Icons = {
   earth: Earth,
   edit02: Edit02,
   emptyCircle: EmptyCircle,
+  ethCircle: EthCircle,
   ethereum: Ethereum,
   eyeOff: EyeOff,
   eye: Eye,
@@ -577,6 +582,7 @@ export const Icons = {
   sliders: Sliders,
   snapchatBrand: SnapchatBrand,
   snapchat: Snapchat,
+  solanaCircle: SolanaCircle,
   solana: Solana,
   solflare: Solflare,
   spacingHeight: SpacingHeight,

@@ -105,6 +105,7 @@ export const EVM_WALLETS = [
   'OKX',
   'HAHA',
   'BACKPACK',
+  'PHANTOM',
 ] as const;
 
 export const SOLANA_WALLETS = ['PHANTOM', 'GLOW', 'BACKPACK', 'SOLFLARE'] as const;

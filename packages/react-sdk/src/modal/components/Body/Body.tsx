@@ -39,6 +39,7 @@ import { AccountProfile } from '../Account/AccountProfile.js';
 import { AccountProfileLinkOptions } from '../Account/AccountProfileLinkOptions.js';
 import { AccountProfileLink } from '../Account/AccountProfileLink.js';
 import { AccountProfileUnlink } from '../Account/AccountProfileUnlink.js';
+import { ExternalWalletNetworkSelectStep } from '../ExternalWalletNetworkSelectStep/ExternalWalletNetworkSelectStep.js';
 
 interface BodyProps {
   oAuthMethods?: TOAuthMethod[];
@@ -195,6 +196,9 @@ export const Body = ({
       }
       case ModalStep.CHAIN_SWITCH: {
         return <ChainSwitch />;
+      }
+      case ModalStep.EX_WALLET_NETWORK_SELECT: {
+        return <ExternalWalletNetworkSelectStep />;
       }
       default: {
         if (IFrameSteps.includes(currentStep)) {

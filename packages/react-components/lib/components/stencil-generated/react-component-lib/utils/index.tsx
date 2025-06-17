@@ -1,6 +1,6 @@
 import React from 'react';
 
-import type { StyleReactProps } from '../interfaces.js';
+import type { StyleReactProps } from '../interfaces';
 
 export type StencilReactExternalProps<PropType, ElementType> = PropType &
   Omit<React.HTMLAttributes<ElementType>, 'style'> &
@@ -37,7 +37,7 @@ export const createForwardRef = <PropType, ElementType>(ReactComponent: any, dis
   };
   forwardRef.displayName = displayName;
 
-  return React.forwardRef<any, any>(forwardRef);
+  return React.forwardRef(forwardRef);
 };
 
 export const defineCustomElement = (tagName: string, customElement: any) => {
@@ -46,5 +46,5 @@ export const defineCustomElement = (tagName: string, customElement: any) => {
   }
 };
 
-export * from './attachProps.js';
-export * from './case.js';
+export * from './attachProps';
+export * from './case';
