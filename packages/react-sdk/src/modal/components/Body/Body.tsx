@@ -35,6 +35,10 @@ import { IFrameStep } from '../IFrameStep/IFrameStep.js';
 import { useStore } from '../../../provider/stores/useStore.js';
 import { ExternalWalletVerificationStep } from '../ExternalWalletVerificationStep/ExternalWalletVerificationStep.js';
 import { NetworkSpeedBanner } from '@getpara/react-common';
+import { AccountProfile } from '../Account/AccountProfile.js';
+import { AccountProfileLinkOptions } from '../Account/AccountProfileLinkOptions.js';
+import { AccountProfileLink } from '../Account/AccountProfileLink.js';
+import { AccountProfileUnlink } from '../Account/AccountProfileUnlink.js';
 
 interface BodyProps {
   oAuthMethods?: TOAuthMethod[];
@@ -173,6 +177,18 @@ export const Body = ({
       }
       case ModalStep.ACCOUNT_MAIN: {
         return <Account onClose={onClose} />;
+      }
+      case ModalStep.ACCOUNT_PROFILE: {
+        return <AccountProfile />;
+      }
+      case ModalStep.ACCOUNT_PROFILE_LIST: {
+        return <AccountProfileLinkOptions />;
+      }
+      case ModalStep.ACCOUNT_PROFILE_ADD: {
+        return <AccountProfileLink />;
+      }
+      case ModalStep.ACCOUNT_PROFILE_REMOVE: {
+        return <AccountProfileUnlink />;
       }
       case ModalStep.EX_WALLET_SELECTED: {
         return <ExternalWalletStep />;
