@@ -1,3 +1,41 @@
+# Release (Tue Jun 17 2025)
+
+## Package Versions
+
+- @getpara/web-sdk@2.0.0-alpha.21
+- @getpara/wagmi-v2-integration@2.0.0-alpha.21
+- @getpara/wagmi-v2-connector@2.0.0-alpha.21
+- @getpara/viem-v2-integration@2.0.0-alpha.21
+- @getpara/viem-v1-integration@2.0.0-alpha.21
+- @getpara/user-management-client@2.0.0-alpha.21
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.21
+- @getpara/solana-wallet-connectors@2.0.0-alpha.21
+- @getpara/server-sdk@2.0.0-alpha.21
+- @getpara/react-sdk@2.0.0-alpha.21
+- @getpara/react-native-wallet@2.0.0-alpha.21
+- @getpara/react-components@2.0.0-alpha.21
+- @getpara/react-component-library@1.0.0-alpha.16
+- @getpara/react-common@2.0.0-alpha.21
+- @getpara/evm-wallet-connectors@2.0.0-alpha.21
+- @getpara/ethers-v6-integration@2.0.0-alpha.21
+- @getpara/ethers-v5-integration@2.0.0-alpha.21
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.21
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.21
+- @getpara/core-sdk@2.0.0-alpha.21
+- @getpara/core-components@2.0.0-alpha.21
+
+### Features
+-  External wallet multiple network selection (#1018) - 52d20b92e
+-  Update Developer Portal framework onboarding (#1010) - cf1ad213a
+-  Allow linking external accounts from the Para Modal (#1014) - 37fa73a12
+
+### Fixes
+-  Confusing Graz console errors (#1017) - 61f7c53ee
+
+### Chores
+-  Dev Portal - Update api key branding (#1019) - 3a25c8576
+-  Centralize external wallet types (#1012) - adbe4252d
+
 # Release (Thu Jun 12 2025)
 
 ## Package Versions
