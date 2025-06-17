@@ -11,6 +11,7 @@ export const ApiKeyAnalytics = () => {
           <Charts />
         </>
       }
+      className="para:max-w-full"
     />
   );
 };

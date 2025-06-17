@@ -15,11 +15,19 @@ import { useGetOrganizationKey } from '../../../../../hooks/api/queries/useOrgan
 import { Environment } from '../../../../../types/environment';
 import { useParams } from 'react-router-dom';
 import { CopyTextarea } from '../../../../../components/CopyTextarea';
+import { useGetOrganizationHasNativePasskeyAccess } from '../../../../../hooks/api/queries/useOrganizationSubscription';
 
 export const AndroidSetup = () => {
+  const { data: hasNativePasskeyAccess } = useGetOrganizationHasNativePasskeyAccess();
   const form = useFormContext<SetupForm>();
   const { apiKey, env, projectId } = useParams();
   const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
+
+  const hideAccess = env?.toUpperCase() === Environment.PROD && !hasNativePasskeyAccess;
+
+  if (hideAccess) {
+    return null;
+  }
 
   const { androidPackageName, androidSha256CertFingerprints } = apiKeyData ?? {};
 
@@ -122,6 +130,7 @@ export const AndroidSetup = () => {
             className="para:mt-2"
             disabled
             textareaClassName="para:disabled:opacity-100 para:disabled:cursor-text para:resize-none"
+            rows={5}
           />
         </div>
       </div>

@@ -34,9 +34,9 @@ export const DismissibleCTAWrapper = ({ type, children }: DismissibleCTAWrapperP
       }}
       className="para:overflow-hidden"
     >
-      <FlatCard className="para:relative para:pt-[26px] para:pl-8 para:pr-4 para:pb-[30px]">
+      <FlatCard className="para:relative para:pt-[13px] para:lg:pt-[26px] para:pl-4 para:lg:pl-8 para:pr-2 para:lg:pr-4 para:pb-[15px] para:lg:pb-[30px]">
         <X
-          className="para:size-4 para:absolute para:right-4 para:top-4 para:opacity-[70%] para:cursor-pointer"
+          className="para:size-4 para:absolute para:right-1 para:top-1 para:lg:right-4 para:lg:top-4 para:opacity-[70%] para:cursor-pointer"
           onClick={handleDismiss}
         />
         {children}

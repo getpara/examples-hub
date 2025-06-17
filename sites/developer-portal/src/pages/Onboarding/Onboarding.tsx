@@ -22,7 +22,9 @@ export const Onboarding = () => {
   const direction = useOnboardingStore(state => state.direction);
   const { data: allOrgs, isLoading: isOrgsLoading } = useGetAllOrganizations();
 
-  const aboutYouValues = form.watch(aboutYouQuestions.filter(q => q !== OnboardingAnswerOption.HOMEPAGE_URL)) as any[];
+  const aboutYouValues = form.watch(
+    aboutYouQuestions.filter(q => ![OnboardingAnswerOption.HOMEPAGE_URL, OnboardingAnswerOption.TELEGRAM].includes(q)),
+  ) as any[];
   const aboutYouComplete = aboutYouValues.every(v => !!v?.length);
   const aboutProjectValues = form.watch(aboutProjectQuestions) as any[];
   const aboutProjectComplete = aboutProjectValues.every(v => !!v?.length);

@@ -22,6 +22,7 @@ import { formatEnvName } from '../../../utils/apiKey';
 import { getApiKeyCopyValues } from '../../../utils/getApiKeyCopyValues';
 import { EnvIcon } from '../../../components/EnvIcon';
 import { Environment } from '../../../types/environment';
+import { useGetOrganizationHasNativePasskeyAccess } from '../../../hooks/api/queries/useOrganizationSubscription';
 
 interface CopyToDialogProps {
   open: boolean;
@@ -32,6 +33,7 @@ export const CopyToDialog = ({ open, setIsOpen }: CopyToDialogProps) => {
   const { projectId, apiKey, env } = useParams();
   const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
   const { data: apiKeys, isLoading: isApiKeysLoading } = useGetActiveOrganizationKeys(projectId ?? '');
+  const { data: hasNativePasskeyAccess } = useGetOrganizationHasNativePasskeyAccess();
   const { mutate: saveChanges, isPending: isUpdatingKey } = useUpdateApiKey();
   const [destinationKeyId, setDestinationKeyId] = useState<string>();
 
@@ -49,7 +51,7 @@ export const CopyToDialog = ({ open, setIsOpen }: CopyToDialogProps) => {
           projectId,
           keyId: destinationKey.id,
           env: destinationKey.environment,
-          data: getApiKeyCopyValues(apiKeyData),
+          data: getApiKeyCopyValues({ key: apiKeyData, nextEnv: destinationKey.environment, hasNativePasskeyAccess }),
         },
         {
           onSuccess: () => {

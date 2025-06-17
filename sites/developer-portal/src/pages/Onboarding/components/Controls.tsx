@@ -86,7 +86,7 @@ export const Controls = () => {
         disabled={!canGoNext || isLoading}
       >
         {nextText}
-        <ArrowRight className="para:size-4 para:stroke-foreground" />
+        <ArrowRight className="para:size-4" />
       </Button>
       {isLastStep && (
         <Button

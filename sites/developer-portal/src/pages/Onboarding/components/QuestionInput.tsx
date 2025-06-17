@@ -39,7 +39,7 @@ export const QuestionInput = ({ question }: QuestionInputProps) => {
           name={question}
           control={control}
           rules={questionRules[question]}
-          render={({ field: { onChange }, fieldState: { error } }) => (
+          render={({ field: { onChange, value }, fieldState: { error } }) => (
             <div className="para:w-full para:flex para:flex-col para:gap-2">
               <Label htmlFor={question}>{questionLabel[question]}</Label>
               <Select
@@ -49,6 +49,7 @@ export const QuestionInput = ({ question }: QuestionInputProps) => {
                     onChange(value);
                   }
                 }}
+                value={(value as string) ?? undefined}
               >
                 <SelectTrigger className="para:w-full para:h-12">
                   <SelectValue placeholder={questionPlaceholder[question]} />
@@ -61,11 +62,7 @@ export const QuestionInput = ({ question }: QuestionInputProps) => {
                   ))}
                 </SelectContent>
               </Select>
-              {!!error && (
-                <Typography color="destructive" className="para:text-xs">
-                  {error.message}
-                </Typography>
-              )}
+              {!!error && <Typography className="para:text-xs para:text-destructive">{error.message}</Typography>}
             </div>
           )}
         />
@@ -78,7 +75,7 @@ export const QuestionInput = ({ question }: QuestionInputProps) => {
           name={question}
           control={control}
           rules={questionRules[question]}
-          render={({ field: { onChange }, fieldState: { error } }) => (
+          render={({ field: { onChange, value }, fieldState: { error } }) => (
             <div className="para:w-full para:flex para:flex-col para:gap-2">
               <Label htmlFor={question}>{questionLabel[question]}</Label>
               <MultiSelect
@@ -96,12 +93,9 @@ export const QuestionInput = ({ question }: QuestionInputProps) => {
                   }
                 }}
                 hideClearAllButton
+                value={(value as string[])?.map(v => ({ value: v, label: v })) ?? undefined}
               />
-              {!!error && (
-                <Typography color="destructive" className="para:text-xs">
-                  {error.message}
-                </Typography>
-              )}
+              {!!error && <Typography className="para:text-xs para:text-destructive">{error.message}</Typography>}
             </div>
           )}
         />
@@ -114,7 +108,7 @@ export const QuestionInput = ({ question }: QuestionInputProps) => {
           name={question}
           control={control}
           rules={questionRules[question]}
-          render={({ field: { onChange, onBlur }, fieldState: { error } }) => (
+          render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
             <div className="para:w-full para:flex para:flex-col para:gap-2">
               <Label htmlFor={question}>{questionLabel[question]}</Label>
               <Input
@@ -129,12 +123,9 @@ export const QuestionInput = ({ question }: QuestionInputProps) => {
                   }
                 }}
                 onBlur={onBlur}
+                value={value ?? ''}
               />
-              {!!error && (
-                <Typography color="destructive" className="para:text-xs">
-                  {error.message}
-                </Typography>
-              )}
+              {!!error && <Typography className="para:text-xs para:text-destructive">{error.message}</Typography>}
             </div>
           )}
         />

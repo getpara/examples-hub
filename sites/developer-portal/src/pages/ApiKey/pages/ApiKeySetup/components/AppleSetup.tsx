@@ -7,11 +7,19 @@ import teamIDImg from '../assets/team-id.png';
 import { useParams } from 'react-router-dom';
 import { Environment } from '../../../../../types/environment';
 import { useGetOrganizationKey } from '../../../../../hooks/api/queries/useOrganizationKeys';
+import { useGetOrganizationHasNativePasskeyAccess } from '../../../../../hooks/api/queries/useOrganizationSubscription';
 
 export const AppleSetup = () => {
+  const { data: hasNativePasskeyAccess } = useGetOrganizationHasNativePasskeyAccess();
   const form = useFormContext<SetupForm>();
   const { apiKey, env, projectId } = useParams();
   const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
+
+  const hideAccess = env?.toUpperCase() === Environment.PROD && !hasNativePasskeyAccess;
+
+  if (hideAccess) {
+    return null;
+  }
 
   const { teamId, bundleIdentifier } = apiKeyData ?? {};
 

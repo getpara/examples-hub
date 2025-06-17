@@ -22,7 +22,7 @@ export const TeammateCTA = () => {
   return (
     <>
       <FlatCard
-        className="para:pt-[26px] para:px-8 para:pb-[30px] para:hover:shadow-md para:transition-shadow para:duration-200 para:ease-out para:cursor-pointer"
+        className="para:pt-[13px] para:lg:pt-[26px] para:px-4 para:lg:px-8 para:pb-[15px] para:lg:pb-[30px] para:hover:shadow-md para:transition-shadow para:duration-200 para:ease-out para:cursor-pointer"
         onClick={handleAddMemberClick}
       >
         <div className="para:flex para:items-center para:gap-2 para:justify-between para:w-full para:h-full">

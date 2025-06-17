@@ -1,6 +1,17 @@
 import { ApiKey } from '../types/api';
+import { Environment } from '../types/environment';
 
-export function getApiKeyCopyValues(obj: ApiKey) {
+export function getApiKeyCopyValues({
+  key,
+  nextEnv,
+  hasNativePasskeyAccess,
+}: {
+  key: ApiKey;
+  nextEnv: Environment;
+  hasNativePasskeyAccess?: boolean;
+}) {
+  const isNextEnvProd = nextEnv.toUpperCase() === Environment.PROD;
+
   const {
     environment: _environment,
     id: _id,
@@ -14,7 +25,16 @@ export function getApiKeyCopyValues(obj: ApiKey) {
     organizationId: _organizationId,
     isUsed: _isUsed,
     isInstalled: _isInstalled,
+
     ...rest
-  } = obj;
+  } = key;
+
+  if (!isNextEnvProd && !hasNativePasskeyAccess) {
+    rest.teamId = null;
+    rest.bundleIdentifier = null;
+    rest.androidPackageName = null;
+    rest.androidSha256CertFingerprints = null;
+  }
+
   return rest;
 }

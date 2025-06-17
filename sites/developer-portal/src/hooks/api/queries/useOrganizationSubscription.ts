@@ -50,3 +50,9 @@ export const useGetOrganizationSubscriptionPlan = () => {
     return data?.plan;
   });
 };
+
+export const useGetOrganizationHasNativePasskeyAccess = () => {
+  return useOrganizationSubscriptionQuery(data => {
+    return data?.plan?.canUseNativePasskeys;
+  });
+};

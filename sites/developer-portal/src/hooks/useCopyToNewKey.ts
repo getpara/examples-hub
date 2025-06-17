@@ -7,12 +7,14 @@ import { getApiKeyCopyValues } from '../utils/getApiKeyCopyValues';
 import { toast } from '@getpara/react-component-library';
 import { AxiosError } from 'axios';
 import { formatEnvName } from '../utils/apiKey';
+import { useGetOrganizationHasNativePasskeyAccess } from './api/queries/useOrganizationSubscription';
 
 export const useCopyToNewKey = () => {
   const { projectId, apiKey, env } = useParams();
   const { data: availableKeyEnv } = useGetAvailableKeyEnv(projectId ?? '');
   const { data: orgValid } = useGetSelectedOrganizationIsValid();
   const { data: org } = useGetSelectedOrganization();
+  const { data: hasNativePasskeyAccess } = useGetOrganizationHasNativePasskeyAccess();
   const { mutate: createApiKey, isPending: isCreatingKey } = useCreateApiKey();
   const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
   const navigate = useNavigate();
@@ -25,7 +27,7 @@ export const useCopyToNewKey = () => {
           env: availableKeyEnv,
           // Using default values here so we don't copy unsaved changes
           data: {
-            ...(apiKeyData && getApiKeyCopyValues(apiKeyData)),
+            ...(apiKeyData && getApiKeyCopyValues({ key: apiKeyData, nextEnv: availableKeyEnv, hasNativePasskeyAccess })),
             homepageUrl: apiKeyData?.homepageUrl ?? org?.homepageUrl ?? null,
           },
         },

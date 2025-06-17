@@ -14,7 +14,7 @@ export const EmptyState = () => {
   }
 
   return (
-    <div className="para:flex para:flex-col para:gap-4 para:h-full para:w-full">
+    <div className="para:flex para:flex-col para:gap-4 para:h-full para:w-full para:max-w-[880px] para:mx-auto">
       <CTACard />
       <LogoCTA />
       <MigrationCTA />

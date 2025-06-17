@@ -31,7 +31,7 @@ export const LogoCTA = () => {
             Upload a logo to represent your organization.
           </Typography>
         </div>
-        <div className="para:flex para:gap-2 para:items-center para:mr-10">
+        <div className="para:flex para:flex-col para:md:flex-row para:gap-2 para:items-center para:mr-10">
           <div className="para:flex para:flex-col para:gap-1">
             <Typography className="para:font-medium">Logo</Typography>
             <Typography color="muted" className="para:text-xs para:font-medium">

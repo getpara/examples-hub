@@ -9,7 +9,7 @@ export const CreateProjectButton = () => {
   const { canCreateProject } = useCanCreateProject();
   const { data: capabilities } = useOrganizationMemberCapabilities();
 
-  if (canCreateProject || !capabilities?.canCreateProjects) {
+  if (!canCreateProject || !capabilities?.canCreateProjects) {
     return null;
   }
 

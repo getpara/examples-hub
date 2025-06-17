@@ -36,7 +36,7 @@ export const ApiKeyDropdown = () => {
       <NavSeparator />
       <NavDropdown
         selected={{
-          id: apiKeyData.id,
+          id: `${apiKeyData.environment}/${apiKeyData.id}`,
           name: formatEnvName(apiKeyData.environment)
             ? `${formatEnvName(apiKeyData.environment)}${
                 !!apiKeys.find(k => k.environment === apiKeyData.environment && k.id !== apiKeyData.id)
@@ -48,7 +48,7 @@ export const ApiKeyDropdown = () => {
           badge: apiKeyData?.archived ? 'Archived' : undefined,
         }}
         options={apiKeys.map(key => ({
-          id: key.id,
+          id: `${key.environment}/${key.id}`,
           // If there are multiple keys available with the same env, append the last 4 of the key to distinguish them
           name: formatEnvName(key.environment)
             ? `${formatEnvName(key.environment)}${
@@ -58,7 +58,7 @@ export const ApiKeyDropdown = () => {
           env: key.environment,
           badge: key?.archived ? 'Archived' : undefined,
         }))}
-        pathPrefix={`/${organizationId}/project/${projectId}/key/${env}/`}
+        pathPrefix={`/${organizationId}/project/${projectId}/key/`}
         pathSuffix={apiKeyPage ? `/${apiKeyPage}` : '/setup'}
         isOpen={isNavOpen}
         setIsOpen={setIsNavOpen}

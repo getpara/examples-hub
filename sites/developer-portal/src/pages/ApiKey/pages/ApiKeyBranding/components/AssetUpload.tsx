@@ -114,7 +114,7 @@ export const AssetUpload = ({ formKey }: AssetUploadProps) => {
             <UploadButton
               idPrefix={formKey}
               onInputChange={ev => {
-                handleUpload(PartnerAssetType.ICONS, ev.target?.files?.[0]);
+                handleUpload(formKey === 'iconUrl' ? PartnerAssetType.ICONS : PartnerAssetType.LOGOS, ev.target?.files?.[0]);
               }}
               isLoading={isUploadingAsset}
               error={!!error}
