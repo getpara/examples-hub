@@ -1,3 +1,36 @@
+# Release (Wed Jun 18 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.22
+- @getpara/wagmi-v2-integration@2.0.0-alpha.22
+- @getpara/wagmi-v2-connector@2.0.0-alpha.22
+- @getpara/viem-v2-integration@2.0.0-alpha.22
+- @getpara/viem-v1-integration@2.0.0-alpha.22
+- @getpara/user-management-client@2.0.0-alpha.22
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.22
+- @getpara/solana-wallet-connectors@2.0.0-alpha.22
+- @getpara/server-sdk@2.0.0-alpha.22
+- @getpara/react-sdk@2.0.0-alpha.22
+- @getpara/react-native-wallet@2.0.0-alpha.22
+- @getpara/react-components@2.0.0-alpha.22
+- @getpara/react-component-library@1.0.0-alpha.17
+- @getpara/react-common@2.0.0-alpha.22
+- @getpara/evm-wallet-connectors@2.0.0-alpha.22
+- @getpara/ethers-v6-integration@2.0.0-alpha.22
+- @getpara/ethers-v5-integration@2.0.0-alpha.22
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.22
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.22
+- @getpara/core-sdk@2.0.0-alpha.22
+- @getpara/core-components@2.0.0-alpha.22
+
+
+### Fixes
+-  Evm disconnecting on refresh (#1028) - 362d64396
+-  allow uppercase letters in Apple bundle identifier validation (#1022) - 50ae788e8
+
+### Chores
+-  Dev portal - Final design and qa review (#1026) - bbb7db91c
+
 # Release (Tue Jun 17 2025)
 
 ## Package Versions
