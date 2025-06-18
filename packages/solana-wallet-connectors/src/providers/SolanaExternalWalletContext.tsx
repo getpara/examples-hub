@@ -4,6 +4,7 @@ import { Adapter, isIosAndRedirectable, WalletReadyState } from '@solana/wallet-
 import { AuthState, ExternalWalletInfo } from '@getpara/web-sdk';
 import { CreateWalletFn } from '../types/Wallet.js';
 import {
+  defaultSolanaExternalWallet,
   ExternalWalletContextType,
   ExternalWalletProviderConfig,
   ExternalWalletProviderConfigBase,
@@ -12,15 +13,6 @@ import {
   type CommonWallet,
 } from '@getpara/react-common';
 import bs58 from 'bs58';
-
-export const defaultSolanaExternalWallet = {
-  wallets: [],
-  disconnect: () => Promise.resolve(),
-  signMessage: () => Promise.resolve({}),
-  signVerificationMessage: () => Promise.resolve({}),
-  requestInfo: () => Promise.resolve({} as ExternalWalletInfo),
-  disconnectBase: () => Promise.resolve(),
-};
 
 export type SolanaExternalWalletContextType = ExternalWalletContextType;
 

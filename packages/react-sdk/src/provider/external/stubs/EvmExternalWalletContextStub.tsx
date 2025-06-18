@@ -1,4 +1,5 @@
 import { createContext } from 'react';
-import { defaultEvmExternalWallet, EvmExternalWalletContextType } from '@getpara/evm-wallet-connectors';
+import { type EvmExternalWalletContextType } from '@getpara/evm-wallet-connectors';
+import { defaultEvmExternalWallet } from '@getpara/react-common';
 
 export const EvmExternalWalletContext = createContext<EvmExternalWalletContextType>(defaultEvmExternalWallet);

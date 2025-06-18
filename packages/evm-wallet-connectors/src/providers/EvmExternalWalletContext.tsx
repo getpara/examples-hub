@@ -16,36 +16,20 @@ import { isEIP6963Connector } from '../utils/isEIP6963Connector.js';
 import { getWalletConnectUri } from '../utils/getWalletConnectUri.js';
 import { normalize } from 'viem/ens';
 import { useExternalWalletStore } from '../stores/useStore.js';
-import type {
-  BalanceManagement,
-  ChainManagement,
-  CommonChain,
-  CommonWallet,
-  ConnectParaEmbedded,
-  ExternalWalletContextType,
-  ExternalWalletProviderConfigBase,
-  SignArgs,
-  TExternalWallet,
+import {
+  defaultEvmExternalWallet,
+  type BalanceManagement,
+  type ChainManagement,
+  type CommonChain,
+  type CommonWallet,
+  type ConnectParaEmbedded,
+  type ExternalWalletContextType,
+  type ExternalWalletProviderConfigBase,
+  type SignArgs,
+  type TExternalWallet,
 } from '@getpara/react-common';
 import { AuthState, ExternalWalletInfo, isMobile } from '@getpara/web-sdk';
 import { etherUnits, formatUnits } from 'viem';
-
-export const defaultEvmExternalWallet = {
-  wallets: [],
-  chains: [],
-  chainId: undefined,
-  username: undefined,
-  avatar: undefined,
-  balance: undefined,
-  disconnect: () => Promise.resolve(),
-  switchChain: () => Promise.resolve(),
-  connectParaEmbedded: () => Promise.resolve({}),
-  signMessage: () => Promise.resolve({}),
-  signVerificationMessage: () => Promise.resolve({}),
-  getWalletBalance: () => Promise.resolve(undefined),
-  requestInfo: () => Promise.resolve({} as ExternalWalletInfo),
-  disconnectBase: () => Promise.resolve(),
-};
 
 type SignOptions = Partial<
   Pick<Parameters<ReturnType<typeof useSignMessage>['signMessageAsync']>[0], 'account' | 'connector'>

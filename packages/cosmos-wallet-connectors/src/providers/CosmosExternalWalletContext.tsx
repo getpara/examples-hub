@@ -14,31 +14,19 @@ import {
 import { useExternalWalletStore } from '../stores/useStore.js';
 import { WalletWithType } from '../types/Wallet.js';
 import { AuthState, ExternalWalletInfo, rawSecp256k1PubkeyToRawAddress, TExternalWallet } from '@getpara/web-sdk';
-import type {
-  ChainManagement,
-  CommonChain,
-  CommonWallet,
-  ConnectParaEmbedded,
-  ExternalWalletContextType,
-  ExternalWalletProviderConfig,
-  ExternalWalletProviderConfigBase,
-  SignArgs,
-  SignResult,
+import {
+  defaultCosmosExternalWallet,
+  type ChainManagement,
+  type CommonChain,
+  type CommonWallet,
+  type ConnectParaEmbedded,
+  type ExternalWalletContextType,
+  type ExternalWalletProviderConfig,
+  type ExternalWalletProviderConfigBase,
+  type SignArgs,
+  type SignResult,
 } from '@getpara/react-common';
 import { formatEthHexAddress } from '../utils/formatEthHexAddress.js';
-
-export const defaultCosmosExternalWallet = {
-  wallets: [],
-  chains: [],
-  chainId: undefined,
-  disconnect: () => Promise.resolve(),
-  switchChain: () => Promise.resolve(),
-  connectParaEmbedded: () => Promise.resolve({}),
-  signMessage: () => Promise.resolve({}),
-  signVerificationMessage: () => Promise.resolve({}),
-  requestInfo: () => Promise.resolve({} as any),
-  disconnectBase: () => Promise.resolve(),
-};
 
 export type CosmosSignResult = SignResult & {
   cosmosPublicKeyHex?: string;
