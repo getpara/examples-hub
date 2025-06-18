@@ -29,7 +29,8 @@ void main(List<String> args) async {
   await Future.delayed(Duration(seconds: 3));
 
   try {
-    // Run tests based on type
+    // Determine which test file to run
+    String testFile = 'para_flutter_e2e_test.dart';
     List<String> testArgs = ['test', '--timeout', '120s'];
     
     switch (testType) {
@@ -48,27 +49,64 @@ void main(List<String> args) async {
       case 'solana-signing':
         testArgs.addAll(['--name', '09 Solana Transaction Signing']);
         break;
+      case 'cosmos':
+        // Run cosmos wallet tests
+        testFile = 'cosmos_wallet_e2e_test.dart';
+        break;
+      case 'cosmos-wallet':
+        testFile = 'cosmos_wallet_e2e_test.dart';
+        testArgs.addAll(['--name', '01 Wallet Operations']);
+        break;
+      case 'cosmos-signing':
+        testFile = 'cosmos_wallet_e2e_test.dart';
+        testArgs.addAll(['--name', '02 Signing Flows']);
+        break;
+      case 'cosmos-chain':
+        testFile = 'cosmos_wallet_e2e_test.dart';
+        testArgs.addAll(['--name', '03 Chain Configuration']);
+        break;
       case 'all':
       default:
-        // Run all tests
+        // Run all tests from both files
+        print('🔄 Running main E2E tests...');
+        testArgs.add('para_flutter_e2e_test.dart');
+        final mainResult = await Process.run('dart', testArgs);
+        print(mainResult.stdout);
+        if (mainResult.stderr.isNotEmpty) {
+          print(mainResult.stderr);
+        }
+        
+        if (mainResult.exitCode != 0) {
+          print('\n❌ Main tests failed.');
+          exit(mainResult.exitCode);
+        }
+        
+        // Now run Cosmos tests
+        print('\n🔄 Running Cosmos E2E tests...');
+        testArgs = ['test', '--timeout', '120s', 'cosmos_wallet_e2e_test.dart'];
+        testFile = ''; // Mark as already handled
         break;
     }
 
-    testArgs.add('para_flutter_e2e_test.dart');
-
-    print('🔄 Running tests...');
-    final testResult = await Process.run('dart', testArgs);
-    
-    print(testResult.stdout);
-    if (testResult.stderr.isNotEmpty) {
-      print(testResult.stderr);
+    if (testFile.isNotEmpty) {
+      testArgs.add(testFile);
     }
 
-    if (testResult.exitCode == 0) {
-      print('\n✅ All tests passed!');
-    } else {
-      print('\n❌ Some tests failed.');
-      exit(testResult.exitCode);
+    if (testFile.isNotEmpty || testType == 'all') {
+      print('🔄 Running tests...');
+      final testResult = await Process.run('dart', testArgs);
+      
+      print(testResult.stdout);
+      if (testResult.stderr.isNotEmpty) {
+        print(testResult.stderr);
+      }
+
+      if (testResult.exitCode == 0) {
+        print('\n✅ All tests passed!');
+      } else {
+        print('\n❌ Some tests failed.');
+        exit(testResult.exitCode);
+      }
     }
 
   } finally {
