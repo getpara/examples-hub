@@ -36,27 +36,38 @@ export default function HomeScreen() {
     isPricesLoading ||
     isSignersLoading;
 
-  const refreshAllData = useCallback(async () => {
-    try {
-      await Promise.all([refetchWallets(), refetchBalances(), refetchPrices()]);
-      return true;
-    } catch (error) {
-      console.error('Error refreshing data:', error);
-      toast.error('Failed to refresh data', {
-        description: 'Please check your internet connection and try again.',
-      });
-      return false;
-    }
-  }, [refetchWallets, refetchBalances, refetchPrices]);
+  // Kept for potential future use with pull-to-refresh
+  // const refreshAllData = useCallback(async () => {
+  //   try {
+  //     await Promise.all([refetchWallets(), refetchBalances(), refetchPrices()]);
+  //     return true;
+  //   } catch (error) {
+  //     console.error('Error refreshing data:', error);
+  //     toast.error('Failed to refresh data', {
+  //       description: 'Please check your internet connection and try again.',
+  //     });
+  //     return false;
+  //   }
+  // }, [refetchWallets, refetchBalances, refetchPrices]);
 
   useEffect(() => {
-    refreshAllData().catch((error) => {
-      console.error('Error loading wallet data:', error);
-      toast.error('Failed to load wallet data', {
-        description: 'Please check your internet connection and try again.',
-      });
-    });
-  }, [refreshAllData]);
+    // Only refresh data once on mount, not when dependencies change
+    const loadInitialData = async () => {
+      try {
+        await Promise.all([
+          refetchWallets(),
+          refetchBalances(),
+          refetchPrices(),
+        ]);
+      } catch (error) {
+        console.error('Error loading wallet data:', error);
+        toast.error('Failed to load wallet data', {
+          description: 'Please check your internet connection and try again.',
+        });
+      }
+    };
+    loadInitialData();
+  }, []);
 
   const {
     formattedTotalBalance,

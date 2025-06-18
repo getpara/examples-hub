@@ -145,11 +145,10 @@ export default function MainAuthScreen() {
   }, [resetLogin]);
 
   useEffect(() => {
-    if (error) {
+    if (error && inputType) {
       setError('');
-      resetLogin();
     }
-  }, [error, inputType, resetLogin]);
+  }, [inputType]);
 
   const showHelperText =
     displayValue.trim() !== '' &&

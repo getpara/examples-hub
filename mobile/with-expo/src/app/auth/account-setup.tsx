@@ -36,6 +36,7 @@ export default function AccountSetupScreen() {
 
   const [setupStep, setSetupStep] = useState<SetupStep>(SetupStep.INITIALIZING);
   const [error, setError] = useState<string | null>(null);
+  const [hasStartedSetup, setHasStartedSetup] = useState(false);
 
   const createWallet = useCallback(async () => {
     setSetupStep(SetupStep.CREATING_WALLET);
@@ -102,10 +103,11 @@ export default function AccountSetupScreen() {
   }, [createWalletsPerTypeError]);
 
   useEffect(() => {
-    if (paraClient && routeParams.biometricsId) {
+    if (paraClient && routeParams.biometricsId && !hasStartedSetup) {
+      setHasStartedSetup(true);
       setupAccount();
     }
-  }, [paraClient, routeParams.biometricsId, setupAccount]);
+  }, [paraClient, routeParams.biometricsId, hasStartedSetup]);
 
   useEffect(() => {
     if (setupStep === SetupStep.CREATING_WALLET && !isCreatingWalletsPerType) {
@@ -152,6 +154,7 @@ export default function AccountSetupScreen() {
             <Pressable
               onPress={() => {
                 resetRegisterPasskey();
+                setError(null);
                 setupAccount();
               }}
               accessibilityRole="button"
@@ -172,6 +175,7 @@ export default function AccountSetupScreen() {
             <Pressable
               onPress={() => {
                 resetCreateWalletsPerType();
+                setError(null);
                 createWallet();
               }}
               accessibilityRole="button"

@@ -34,6 +34,7 @@ export default function TransactionStatusScreen() {
   const [elapsed, setElapsed] = useState(0);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [error, setError] = useState<TransactionError | null>(null);
+  const [hasSentTransaction, setHasSentTransaction] = useState(false);
 
   useEffect(() => {
     const id = setInterval(() => setElapsed((e) => e + 1), 1000);
@@ -41,7 +42,10 @@ export default function TransactionStatusScreen() {
   }, []);
 
   useEffect(() => {
+    if (hasSentTransaction) return;
+
     const send = async () => {
+      setHasSentTransaction(true);
       try {
         const hash =
           net === WalletType.EVM
@@ -59,7 +63,14 @@ export default function TransactionStatusScreen() {
       }
     };
     send();
-  }, [sendEvmTransaction, sendSolTransaction, net, to, amount]);
+  }, [
+    hasSentTransaction,
+    sendEvmTransaction,
+    sendSolTransaction,
+    net,
+    to,
+    amount,
+  ]);
 
   const explorer = txHash ? (
     <ExplorerLink
