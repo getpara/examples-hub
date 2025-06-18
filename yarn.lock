@@ -5260,15 +5260,15 @@
   dependencies:
     "@getpara/core-sdk" "1.12.0"
 
-"@getpara/graz@^2.0.0-alpha.1":
-  version "2.0.0-alpha-1"
-  resolved "https://registry.yarnpkg.com/@getpara/graz/-/graz-2.0.0-alpha-1.tgz#88805109650ac8690f48eab66e9299dfbfa04777"
-  integrity sha512-J6wvz2SDA4SYIDZtdnJYMaD6uIambqMjLHmYaXpF9qQZbb35nj+2axPY2j33P+X9kiQizHmY3PpYqFj3ZJ0yBQ==
+"@getpara/graz@2.0.0-alpha.2":
+  version "2.0.0-alpha.2"
+  resolved "https://registry.yarnpkg.com/@getpara/graz/-/graz-2.0.0-alpha.2.tgz#7d84cc569b73d39bcfecf82da791c6c91af67483"
+  integrity sha512-xhQSWQ8jjiOhxSebHoe+WF5t/lbvGn+tmBsBTQakOxlPGgK5184jZPdy0Jv+rALzL24k5dYI8eTDpd1f9NYkDw==
   dependencies:
     "@cosmsnap/snapper" "0.1.29"
     "@dao-dao/cosmiframe" "0.1.0"
-    "@getpara/cosmjs-v0-integration" "2.0.0-alpha.20"
-    "@getpara/react-sdk" "2.0.0-alpha.20"
+    "@getpara/cosmjs-v0-integration" "2.0.0-alpha.21"
+    "@getpara/react-sdk" "2.0.0-alpha.21"
     "@keplr-wallet/cosmos" "0.12.156"
     "@keplr-wallet/types" "0.12.156"
     "@metamask/providers" "12.0.0"

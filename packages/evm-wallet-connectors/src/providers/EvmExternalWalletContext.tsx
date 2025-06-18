@@ -165,7 +165,7 @@ export function EvmExternalWalletProvider({
     ) {
       reset();
     }
-  }, [isConnecting, isReconnecting, isLocalConnecting, wagmiAddress, connectedConnector]);
+  }, [isConnected, isLocalConnecting, wagmiAddress, connectedConnector]);
 
   useEffect(() => {
     const storedExternalWallet = Object.values(para.externalWallets || {})[0];
@@ -173,8 +173,7 @@ export function EvmExternalWalletProvider({
     // If the user is using an external EVM wallet we want to watch for wallet changes and log them in to a different user when the wallet changes
     if (
       !isLocalConnecting &&
-      !isConnecting &&
-      !isReconnecting &&
+      isConnected &&
       storedExternalWallet?.type === 'EVM' &&
       storedExternalWallet?.address !== wagmiAddress &&
       connectedConnector?.id !== 'para' &&
@@ -182,7 +181,7 @@ export function EvmExternalWalletProvider({
     ) {
       switchWallet(wagmiAddress);
     }
-  }, [isLocalConnecting, wagmiAddress, isReconnecting, isConnecting]);
+  }, [isLocalConnecting, wagmiAddress, isConnected]);
 
   useEffect(() => {
     if (

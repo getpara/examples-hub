@@ -20,7 +20,7 @@ export function generateCoreQueryHook<const method extends CoreMethodName & keyo
 
         const result = await action(para);
 
-        return result;
+        return result ?? null;
       },
     });
   };
