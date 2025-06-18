@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { ScrollView, View, Image } from 'react-native';
 import { openAuthSessionAsync } from 'expo-web-browser';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { OAuthMethod } from '@getpara/react-native-wallet';
@@ -204,6 +204,11 @@ export default function MainAuthScreen() {
         contentContainerStyle={{ flexGrow: 1 }}
       >
         <View className="pt-6 pb-8">
+          <Image
+            source={require('@/assets/para-horizontal.png')}
+            className="h-9 w-auto mb-10 self-center"
+            resizeMode="contain"
+          />
           <Text className="text-5xl text-left text-foreground font-figtree-bold">
             Sign In
           </Text>
@@ -228,7 +233,7 @@ export default function MainAuthScreen() {
             isLoading={isLoggingIn}
           />
 
-          <View className="flex-row items-center gap-x-2">
+          <View className="flex-row items-center gap-x-2 py-2">
             <Separator className="flex-1" />
             <Text className="text-center text-muted-foreground">
               or continue with

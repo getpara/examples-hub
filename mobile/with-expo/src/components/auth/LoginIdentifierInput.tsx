@@ -46,8 +46,8 @@ export function LoginIdentifierInput({
       >
         {label}
       </Text>
-      <View className="flex-row h-14 rounded-lg border border-border bg-white items-center">
-        <View className="h-full w-16 flex items-center justify-center border-r border-border">
+      <View className="flex-row h-14 rounded-lg border border-border/60 bg-white items-center">
+        <View className="h-full w-16 flex items-center justify-center border-r border-border/60">
           {inputType === 'email' ? (
             <Mail size={24} className="text-muted-foreground" />
           ) : inputType === 'phone' ? (
