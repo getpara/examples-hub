@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 const ALGORITHM = "AES-GCM";
 const IV_LENGTH = 12;
 

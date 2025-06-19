@@ -1,15 +1,12 @@
 "use client";
 
+import { usePara } from "@/components/ParaProvider";
 import { useState, useEffect } from "react";
 import * as anchor from "@coral-xyz/anchor";
 import { LAMPORTS_PER_SOL, SystemProgram } from "@solana/web3.js";
 import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
-import { TransferTokens } from "../../target/types/transfer_tokens";
-
-import idl from "../../target/idl/transfer_tokens.json" assert { type: "json" };
-import { useAccount, useWallet } from "@getpara/react-sdk";
-import { connection } from "@/client/solana";
-import { useParaSigner } from "@/components/ParaSignerProvider";
+import { TransferTokens } from "../idl/transfer_tokens";
+import idl from "../idl/transfer_tokens.json" assert { type: "json" };
 
 export default function ProgramDeploymentDemo() {
   const [isCreateTokenLoading, setIsCreateTokenLoading] = useState(false);
@@ -26,19 +23,14 @@ export default function ProgramDeploymentDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { signer, anchorProvider } = useParaSigner();
-  const { data: account } = useAccount();
-  const { data: wallet } = useWallet();
-
-  const address = wallet?.address;
-  const isConnected = account?.isConnected;
+  const { isConnected, walletId, address, signer, connection, anchorProvider } = usePara();
 
   const fetchBalance = async () => {
-    if (!address || !connection || !anchorProvider) return;
+    if (!address || !connection || !signer) return;
 
     setIsBalanceLoading(true);
     try {
-      const balanceInLamports = await connection.getBalance(signer?.sender!);
+      const balanceInLamports = await connection.getBalance(signer.sender!);
       setBalance((balanceInLamports / LAMPORTS_PER_SOL).toFixed(4));
     } catch (error) {
       console.error("Error fetching balance:", error);
@@ -74,12 +66,16 @@ export default function ProgramDeploymentDemo() {
         throw new Error("Please connect your wallet to create a token.");
       }
 
-      if (!anchorProvider) {
-        throw new Error("Anchor provider not available");
+      if (!walletId) {
+        throw new Error("No wallet ID found. Please reconnect your wallet.");
       }
 
       if (!tokenName || !tokenSymbol) {
         throw new Error("Please fill in all token details.");
+      }
+
+      if (!anchorProvider) {
+        throw new Error("Anchor provider is not initialized. Please reconnect your wallet.");
       }
 
       anchor.setProvider(anchorProvider);
@@ -195,7 +191,7 @@ export default function ProgramDeploymentDemo() {
                   placeholder="e.g. My Test Token"
                   required
                   disabled={isCreateTokenLoading}
-                  className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+                  className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
                 />
               </div>
               <div className="space-y-2">
@@ -212,7 +208,7 @@ export default function ProgramDeploymentDemo() {
                   placeholder="e.g. MTT"
                   required
                   disabled={isCreateTokenLoading}
-                  className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+                  className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
                 />
               </div>{" "}
               <button

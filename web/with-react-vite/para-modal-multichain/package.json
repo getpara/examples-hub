@@ -6,38 +6,32 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "postinstall": "npx graz --generate && npx setup-para",
+    "postinstall": "yarn graz --generate",
     "preview": "vite preview"
   },
   "dependencies": {
-<<<<<<< HEAD
-    "@getpara/cosmos-wallet-connectors": "alpha",
-    "@getpara/evm-wallet-connectors": "alpha",
-    "@getpara/react-sdk": "alpha",
-    "@getpara/solana-wallet-connectors": "alpha",
-=======
     "@cosmjs/cosmwasm-stargate": "0.33.0",
     "@cosmjs/launchpad": "0.27.1",
     "@cosmjs/proto-signing": "0.33.0",
     "@cosmjs/stargate": "0.33.0",
     "@cosmjs/tendermint-rpc": "0.33.0",
-    "@getpara/cosmos-wallet-connectors": "1.12.0",
-    "@getpara/evm-wallet-connectors": "1.12.0",
+    "@getpara/cosmos-wallet-connectors": "1.16.0",
+    "@getpara/evm-wallet-connectors": "1.16.0",
     "@getpara/graz": "0.1.0",
-    "@getpara/react-sdk": "1.12.0",
-    "@getpara/solana-wallet-connectors": "1.12.0",
+    "@getpara/react-sdk": "1.16.0",
+    "@getpara/solana-wallet-connectors": "1.16.0",
     "@leapwallet/cosmos-social-login-capsule-provider": "0.0.44",
     "@solana-mobile/wallet-adapter-mobile": "^2.1.4",
     "@solana/wallet-adapter-base": "^0.9.23",
     "@solana/wallet-adapter-react": "^0.15.35",
     "@solana/wallet-adapter-walletconnect": "^0.1.16",
->>>>>>> main
     "@solana/web3.js": "^1.98.0",
-    "@tanstack/react-query": "^5.0.0",
+    "@tanstack/react-query": "^5.64.2",
     "long": "5.2.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "starknet": "6.11.0"
+    "starknet": "6.11.0",
+    "wagmi": "^2.14.8"
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",
@@ -56,6 +50,6 @@
     "vite-plugin-node-polyfills": "0.23.0"
   },
   "resolutions": {
-    "@getpara/react-sdk": "1.12.0"
+    "@getpara/react-sdk": "1.16.0"
   }
 }

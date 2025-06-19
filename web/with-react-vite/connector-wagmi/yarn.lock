@@ -685,17 +685,10 @@
     "@ethersproject/properties" "^5.7.0"
     "@ethersproject/strings" "^5.7.0"
 
-<<<<<<< HEAD
-"@getpara/core-components@2.0.0-dev.0":
-  version "2.0.0-dev.0"
-  resolved "https://registry.yarnpkg.com/@getpara/core-components/-/core-components-2.0.0-dev.0.tgz#a85dae7baf5e543954328ac4c6fc0c4d8c6c20d0"
-  integrity sha512-PQ27WFvnFaJUU0bW90Y8pjzIPTIPCj9O5ObDHnS40zJeE6ig+NhOFyGfwJSf4yxRa0us7orN46D33IhiKrnZUA==
-=======
-"@getpara/core-components@1.12.0":
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/@getpara/core-components/-/core-components-1.12.0.tgz#7b594b7d336fb32b8d488519d997aa235bf0e52f"
-  integrity sha512-q9y1WXQn5StIR0foBlCssCfB1md++agdsk7D3pZcfz9Yr5UXYkXvNpjR2Bjw/Q07mu4eqfibRgqkPK4/0GAr2Q==
->>>>>>> main
+"@getpara/core-components@1.15.1":
+  version "1.15.1"
+  resolved "https://registry.yarnpkg.com/@getpara/core-components/-/core-components-1.15.1.tgz#db6e215ff1570ccdb2f5a5c27fb34acf24056df4"
+  integrity sha512-mnFe5stXazDmQMP+Dt6cG5qDPwUn9v/1cnL9a1mlrMDCrpYgpAFtLjyoBj+U4Dwi3UHbD5bBP5BIbvMOGPeJBg==
   dependencies:
     "@stencil/core" "^4.7.0"
     color-blend "^4.0.0"
@@ -704,90 +697,49 @@
     inputmask "5.0.9"
     qrcode-with-logos "1.1.1"
 
-<<<<<<< HEAD
-"@getpara/core-sdk@2.0.0-dev.0":
-  version "2.0.0-dev.0"
-  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-2.0.0-dev.0.tgz#9c66eddedfb1f0fe30ae61fe4f9f6fe12205cfca"
-  integrity sha512-8xu+s2ENHoflWkSISNpqA34JlMz6zw35U63Hvkd4G8/GNyfIrCCXmhSFpOHtFtOZR+ZytPlTfpKseTPv5gXFng==
-=======
-"@getpara/core-sdk@1.12.0":
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.12.0.tgz#2c88cbc796f6a432bb014a0f865ea932bbb2e5a9"
-  integrity sha512-r6UXdyqYPswIF96tDNB+hIFWRjAVrZTWcK64Zdlt1imLn7MqtwsQ1devvJ9D8xEBxjCB0lg1a0Uk9myRsAHV9A==
->>>>>>> main
+"@getpara/core-sdk@1.15.1":
+  version "1.15.1"
+  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.15.1.tgz#c59f62c3f1fe0d208d499915a65d7c1e97ea2bfe"
+  integrity sha512-eEkKgO2APJhzwKyKQ9Pv9iFhRfn0WPEXKnH5K1ov08/Zc8udUQ2rlpBysgC8D4W7MzfbgFXpd5aEErDKudNpxw==
   dependencies:
     "@celo/utils" "^8.0.2"
     "@cosmjs/encoding" "^0.32.4"
-<<<<<<< HEAD
-    "@getpara/user-management-client" "2.0.0-dev.0"
-=======
     "@ethereumjs/util" "^9.1.0"
-    "@getpara/user-management-client" "1.12.0"
->>>>>>> main
+    "@getpara/user-management-client" "1.15.1"
     "@noble/hashes" "^1.5.0"
     base64url "^3.0.1"
     libphonenumber-js "1.11.2"
     node-forge "^1.3.1"
     uuid "^11.1.0"
 
-<<<<<<< HEAD
-"@getpara/react-common@2.0.0-dev.0":
-  version "2.0.0-dev.0"
-  resolved "https://registry.yarnpkg.com/@getpara/react-common/-/react-common-2.0.0-dev.0.tgz#b9b118a2962be40b626b5c5a5416c2ad51ff48b5"
-  integrity sha512-kxsDyuXg99/+RpRMteW2iWGsP42iy3YCTF5E9sFZ6gbN0oBzOtiFd/cleySb7kA9IeZGUhXldGiO6RYJquYe6w==
+"@getpara/react-common@1.15.1":
+  version "1.15.1"
+  resolved "https://registry.yarnpkg.com/@getpara/react-common/-/react-common-1.15.1.tgz#39a93f6790676aad621ed4e11c65e6203b3703fa"
+  integrity sha512-Rh2wJfTRTPUjaHOAWv0NYcgfS92xfhYTNCKlN+fQtiI9OuBtzyyC/oC+wPSLTZ7xQsXROd5Q23Ujnz7ofz48Qg==
   dependencies:
-    "@getpara/react-components" "2.0.0-dev.0"
-    "@getpara/web-sdk" "2.0.0-dev.0"
-=======
-"@getpara/react-common@1.12.0":
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/@getpara/react-common/-/react-common-1.12.0.tgz#885471ca7bac3bdadb8fbc18a46d9594a95caf1f"
-  integrity sha512-e9kiVKlsCWe9MlSzHoMFEbVW4yN8FSmPC9xcah1IgtkyvwmD3Jglxd2wLmp6/GI7f87vpIALd6VHPDx8MRKGVw==
-  dependencies:
-    "@getpara/react-components" "1.12.0"
-    "@getpara/web-sdk" "1.12.0"
->>>>>>> main
+    "@getpara/react-components" "1.15.1"
+    "@getpara/web-sdk" "1.15.1"
     "@moonpay/moonpay-react" "^1.8.3"
     "@ramp-network/ramp-instant-sdk" "^4.0.5"
-    "@stripe/crypto" "^0.0.4"
-    "@stripe/stripe-js" "^3.4.0"
     libphonenumber-js "^1.11.1"
     styled-components "^6.1.8"
     ua-parser-js "^2.0.2"
 
-<<<<<<< HEAD
-"@getpara/react-components@2.0.0-dev.0":
-  version "2.0.0-dev.0"
-  resolved "https://registry.yarnpkg.com/@getpara/react-components/-/react-components-2.0.0-dev.0.tgz#7cf9b242937ff86d9dc21e2338e65ca0a001ec31"
-  integrity sha512-H7931GjISAKyGLMrtVOW7pXvhWjdAKARx4bUkw5PQ7ze7KanG8lCj7qSMFHFmwz41aorEIDx5UZKDMrOH60xdA==
+"@getpara/react-components@1.15.1":
+  version "1.15.1"
+  resolved "https://registry.yarnpkg.com/@getpara/react-components/-/react-components-1.15.1.tgz#7048252ad06159b67d333a88c6447c1d823b6772"
+  integrity sha512-va3xLJpAu+Jey23r+jqEh+gmpSISyUyyD+JPA05aVSKu3IJL7BPwmVON3rpfhViPntXXNZI2n44itlhI3XLrSA==
   dependencies:
-    "@getpara/core-components" "2.0.0-dev.0"
+    "@getpara/core-components" "1.15.1"
 
-"@getpara/react-sdk@2.0.0-dev.0":
-  version "2.0.0-dev.0"
-  resolved "https://registry.yarnpkg.com/@getpara/react-sdk/-/react-sdk-2.0.0-dev.0.tgz#d52d8603e4331baf59f49b6107d402d467895a32"
-  integrity sha512-DDMyjl8IrkYzI4DGfADs6OLb+QU+mF8Rhtav9oZm7vzwYx4XRRcnNruFRp+yvV5OewWJ24aO1oVuAc0T3YVI8w==
+"@getpara/react-sdk@1.15.1":
+  version "1.15.1"
+  resolved "https://registry.yarnpkg.com/@getpara/react-sdk/-/react-sdk-1.15.1.tgz#68570ac5c10d68781b38dffa43168998fddc9176"
+  integrity sha512-NRLwt7nJlwiZXrjSt+nxzdsOwfgs2TwQE8pGQxoa3jEFCrTMDsjYsWNN5zsz+6MeoVsHFqR+K41UVhavvIDEQQ==
   dependencies:
-    "@getpara/react-common" "2.0.0-dev.0"
-    "@getpara/react-components" "2.0.0-dev.0"
-    "@getpara/web-sdk" "2.0.0-dev.0"
-=======
-"@getpara/react-components@1.12.0":
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/@getpara/react-components/-/react-components-1.12.0.tgz#1bb1902cbb614d4dcf7891009ed53dc9cea45fdf"
-  integrity sha512-leuTJF1MHtJG0XARI901MPhpTEHaPXjL1HKnD4xlL/JbVRLlYzRKtO5ccZ0iWf2+h0IOU97l3+iQ/fGrC2TGpg==
-  dependencies:
-    "@getpara/core-components" "1.12.0"
-
-"@getpara/react-sdk@1.12.0":
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/@getpara/react-sdk/-/react-sdk-1.12.0.tgz#87e47f00ac57d63fb1592906cc2ef4419a2cd7e2"
-  integrity sha512-mqUrENr/5gr+u2bTEXmZqUZY2eTl5bo9JU8bKRW/yWlpqUkv7dxNXraUv41JUUQV7ixn671TDigLh438mD+Ugg==
-  dependencies:
-    "@getpara/react-common" "1.12.0"
-    "@getpara/react-components" "1.12.0"
-    "@getpara/web-sdk" "1.12.0"
->>>>>>> main
+    "@getpara/react-common" "1.15.1"
+    "@getpara/react-components" "1.15.1"
+    "@getpara/web-sdk" "1.15.1"
     "@tanstack/react-query" "^5.0.0"
     date-fns "^3.6.0"
     framer-motion "11.3.28"
@@ -796,78 +748,36 @@
     zustand "^4.5.2"
     zustand-sync-tabs "^0.2.2"
 
-<<<<<<< HEAD
-"@getpara/user-management-client@2.0.0-dev.0":
-  version "2.0.0-dev.0"
-  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-2.0.0-dev.0.tgz#bc1e65a14ed9b23f999fbb79d3acd2155f183be8"
-  integrity sha512-XCGOFjvxWTKIKrqziotxttvb9nPbvJSw2y2T1ixorfoG2R3yd8NqFGdb0DBeKo8O0AgZu9zxFfpKvF4CVGO8+A==
-=======
-"@getpara/user-management-client@1.12.0":
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.12.0.tgz#25dcb3d40c2e0cfabdbf21afe98609510ae2ac91"
-  integrity sha512-fs/V+I+dDmApbLpfKKRssabHpA5E7k4bgbMSMlr2c4ALC9ZnmP68dt78Jkd5f2kcEwNj3+N8S3SPMso2uqtMuA==
->>>>>>> main
+"@getpara/user-management-client@1.15.1":
+  version "1.15.1"
+  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.15.1.tgz#5cdbf69c2845ad590803cee64a2268189267b74b"
+  integrity sha512-DFt9FbQbh6xCiLZY0wZimIo4YVh3C6prXxDOEd5jAvgU8HKoZWMt1AQ2yCG1ez1dgxjq3s4DsuEsX5K1T24VYA==
   dependencies:
     axios "^1.8.4"
     libphonenumber-js "1.11.2"
 
-<<<<<<< HEAD
-"@getpara/viem-v2-integration@2.0.0-dev.0":
-  version "2.0.0-dev.0"
-  resolved "https://registry.yarnpkg.com/@getpara/viem-v2-integration/-/viem-v2-integration-2.0.0-dev.0.tgz#5fe7454591a82edd5517805b865c2e52c842fe06"
-  integrity sha512-7hpijXxGG4Z+55Y2pYTcax/JhWmqsNBLFvT4RFFp5TkChlETtB3WigJ2tkK+dyUiSMHDDB04KoaK94ikAeeQ8A==
+"@getpara/viem-v2-integration@1.15.1":
+  version "1.15.1"
+  resolved "https://registry.yarnpkg.com/@getpara/viem-v2-integration/-/viem-v2-integration-1.15.1.tgz#fafbc40f7fad6d4388445a43a3d6a26e6e753706"
+  integrity sha512-xqczyR+kemsIb/PxBXzrOKe/5K5nlPTUxUUyvHQu1MZsbSGMaMr6Z9svuXvrV2dUpqVhBMNrpd1dbjXMn7ymeA==
   dependencies:
-    "@getpara/core-sdk" "2.0.0-dev.0"
+    "@getpara/core-sdk" "1.15.1"
 
-"@getpara/wagmi-v2-connector@2.0.0-dev.0":
-  version "2.0.0-dev.0"
-  resolved "https://registry.yarnpkg.com/@getpara/wagmi-v2-connector/-/wagmi-v2-connector-2.0.0-dev.0.tgz#50ec79c87bcfbac669749f53e4f5a1fe84d76b7b"
-  integrity sha512-cp7QHiHIebqP1WBeUrdQaHYk6EcRPmkN9pfAuVOyHaIvn9X2/6/eW3ifBn/MG+0lXjFfIMfDKkesqbVmHF3yPQ==
+"@getpara/wagmi-v2-integration@1.15.1":
+  version "1.15.1"
+  resolved "https://registry.yarnpkg.com/@getpara/wagmi-v2-integration/-/wagmi-v2-integration-1.15.1.tgz#074c870ca22ff3fdb2ae91cdca1cefd020e1e381"
+  integrity sha512-lvi05OqccD1uqe0Hm8oeoQCQMxMXvRr+NgKnfMgx0pQXSXS4aGx2/eko5jJ0kFZvlN007ul4h799Nni/fezojQ==
   dependencies:
-    "@getpara/viem-v2-integration" "2.0.0-dev.0"
-    "@getpara/web-sdk" "2.0.0-dev.0"
+    "@getpara/react-sdk" "1.15.1"
+    "@getpara/viem-v2-integration" "1.15.1"
 
-"@getpara/wagmi-v2-integration@2.0.0-dev.0":
-  version "2.0.0-dev.0"
-  resolved "https://registry.yarnpkg.com/@getpara/wagmi-v2-integration/-/wagmi-v2-integration-2.0.0-dev.0.tgz#2e03e297e66e2f0de6d7e015bae33854e7cdc198"
-  integrity sha512-uuQO9WS3af3C+UT/5M1dt1Rx203rTrq/ybr3cKw+wc8TKbSHWqwBq0IhJucMB/Ck9t8AK+GQ9haoBY/NxkTvRg==
+"@getpara/web-sdk@1.15.1":
+  version "1.15.1"
+  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-1.15.1.tgz#8b370e8a8a063652f94bdc2d93907a3613c39353"
+  integrity sha512-ITEjE7W8FGdGp1EkeYbZsRlj71dSSMFdXvWfSEIWWPGh/Fp6DhfOdMdvqYbNe3mL5Ic18gVOzMmxVBf5DEv9oQ==
   dependencies:
-    "@getpara/react-sdk" "2.0.0-dev.0"
-    "@getpara/wagmi-v2-connector" "2.0.0-dev.0"
-
-"@getpara/web-sdk@2.0.0-dev.0":
-  version "2.0.0-dev.0"
-  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-2.0.0-dev.0.tgz#c38153372311fe4ce23dc554ba06979645d22153"
-  integrity sha512-f2B3LCxRn/Biz/3R5BL+haYOWNltlapZX+K/HDYQVzO5nt5nVKCaYHA0Tbs/9IhoNKL0YTRUdhV59vLEY1PVyg==
-  dependencies:
-    "@getpara/core-sdk" "2.0.0-dev.0"
-    "@getpara/user-management-client" "2.0.0-dev.0"
-    "@sentry/browser" "^9.1.0"
-    assert "^2.1.0"
-=======
-"@getpara/viem-v2-integration@1.12.0":
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/@getpara/viem-v2-integration/-/viem-v2-integration-1.12.0.tgz#a1b30ccfc9234417e43ff9c8ece93ccdacea5959"
-  integrity sha512-je9Uc0WPF7+jviUaHeHhdkZlai3esUfaYfY16zTFksFPJVWL74YJdEKI0V/puXcI6qDOwTdj4cO2KLXvngLcrg==
-  dependencies:
-    "@getpara/core-sdk" "1.12.0"
-
-"@getpara/wagmi-v2-integration@1.12.0":
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/@getpara/wagmi-v2-integration/-/wagmi-v2-integration-1.12.0.tgz#8081a56f52e44d6623e593f849dab58777070fd7"
-  integrity sha512-cEng/T0BFn83VNxRkCrTjUZYnqRYOa8duFLoZdlIeIke7fvZ0KqUgDRgNRP7OUMeDgS3Pe/u5ARmILaklyJ/9w==
-  dependencies:
-    "@getpara/react-sdk" "1.12.0"
-    "@getpara/viem-v2-integration" "1.12.0"
-
-"@getpara/web-sdk@1.12.0":
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-1.12.0.tgz#10c33a9a0f7096bf98c82ab66bce0b28e8093e85"
-  integrity sha512-AxV7BmvKazbTP1z+jpNORZ0Wx9Kl6FB92DbHEyeqnF0SmSGCAohEIvlrolwHvCPqtr+98XRGEIHqEAvmZr/PXQ==
-  dependencies:
-    "@getpara/core-sdk" "1.12.0"
-    "@getpara/user-management-client" "1.12.0"
->>>>>>> main
+    "@getpara/core-sdk" "1.15.1"
+    "@getpara/user-management-client" "1.15.1"
     base64url "3.0.1"
     buffer "6.0.3"
     cbor-web "8.1.0"
@@ -1515,16 +1425,6 @@
   resolved "https://registry.yarnpkg.com/@stencil/core/-/core-4.26.0.tgz#0e78a134239590d3a132f3dc03eb61948d321811"
   integrity sha512-+0Inu+dJ9/LgWSskcZwx7v17v4GILcwIYxNgD+OuK0U+D5z61WsxWw7yHkYG5OqGPBijsJMVssYRx/Tn+e7F9A==
 
-"@stripe/crypto@^0.0.4":
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/@stripe/crypto/-/crypto-0.0.4.tgz#51dbcb3750c75a6b8a6c8775381af82367359146"
-  integrity sha512-gcD/aG0N90ZrNVppWYf9ADPECptw6PVtF67VIeaFP7fhgd2NvNx8erkzlcvk3VIVSY+bZ6YGX7c7cASoySX74Q==
-
-"@stripe/stripe-js@^3.4.0":
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/@stripe/stripe-js/-/stripe-js-3.5.0.tgz#7fff3d9d931e972c24dcc8ee25f7481a58879b2b"
-  integrity sha512-pKS3wZnJoL1iTyGBXAvCwduNNeghJHY6QSRSNNvpYnrrQrLZ6Owsazjyynu0e0ObRgks0i7Rv+pe2M7/MBTZpQ==
-
 "@tailwindcss/node@^4.0.6":
   version "4.0.6"
   resolved "https://registry.yarnpkg.com/@tailwindcss/node/-/node-4.0.6.tgz#d07152f447b37c8ce68244b0ec1ce427f5ed856e"
@@ -1626,8 +1526,6 @@
   resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.66.4.tgz#44b87bff289466adbfa0de8daa5756cbd2d61c61"
   integrity sha512-skM/gzNX4shPkqmdTCSoHtJAPMTtmIJNS0hE+xwTTUVYwezArCT34NMermABmBVUg5Ls5aiUXEDXfqwR1oVkcA==
 
-<<<<<<< HEAD
-=======
 "@tanstack/react-query@5.64.2":
   version "5.64.2"
   resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.64.2.tgz#199c8a5a8ff92a8565f8cdd378747398347512a2"
@@ -1635,7 +1533,6 @@
   dependencies:
     "@tanstack/query-core" "5.64.2"
 
->>>>>>> main
 "@tanstack/react-query@^5.0.0":
   version "5.66.5"
   resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.66.5.tgz#a1c466c81837cb56b279b5189e1efd6d31754d46"

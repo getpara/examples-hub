@@ -1,14 +1,24 @@
 "use client";
 
+<<<<<<<< HEAD:web/with-react-nextjs/signer-viem-v1/src/example-transactions/message-signing.tsx
+import { useParaSigner } from "@/components/ParaSignerProvider";
 import { useAccount } from "@getpara/react-sdk";
 import { useState } from "react";
+import { verifyMessage } from "viem";
+========
+import { usePara } from "@/components/ParaProvider";
+import { useState } from "react";
 import { ethers } from "ethers";
-import { useParaSigner } from "@/components/ParaSignerProvider";
+>>>>>>>> main:web/with-react-nextjs/signer-ethers-v5/src/example-transactions/message-signing.tsx
 
 export default function MessageSigningDemo() {
   const [message, setMessage] = useState("");
   const [signature, setSignature] = useState("");
+<<<<<<<< HEAD:web/with-react-nextjs/signer-viem-v1/src/example-transactions/message-signing.tsx
+  const [recovered, setRecovered] = useState(false);
+========
   const [recoveredAddress, setRecoveredAddress] = useState("");
+>>>>>>>> main:web/with-react-nextjs/signer-ethers-v5/src/example-transactions/message-signing.tsx
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<{
     show: boolean;
@@ -16,18 +26,31 @@ export default function MessageSigningDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
+<<<<<<<< HEAD:web/with-react-nextjs/signer-viem-v1/src/example-transactions/message-signing.tsx
   const { data: account } = useAccount();
-  const { signer } = useParaSigner();
+  const { walletClient, viemAccount } = useParaSigner();
+
+  const isConnected = account?.isConnected;
+  const address = viemAccount?.address;
+========
+  const { isConnected, walletId, signer } = usePara();
+>>>>>>>> main:web/with-react-nextjs/signer-ethers-v5/src/example-transactions/message-signing.tsx
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+<<<<<<<< HEAD:web/with-react-nextjs/signer-viem-v1/src/example-transactions/message-signing.tsx
+    setRecovered(false);
+
+    if (!walletClient) return;
+========
     setRecoveredAddress("");
 
     if (!signer) return;
+>>>>>>>> main:web/with-react-nextjs/signer-ethers-v5/src/example-transactions/message-signing.tsx
 
     try {
-      if (!account?.isConnected) {
+      if (!isConnected) {
         setStatus({
           show: true,
           type: "error",
@@ -38,9 +61,16 @@ export default function MessageSigningDemo() {
 
       const messageToSign = message.trim();
 
+<<<<<<<< HEAD:web/with-react-nextjs/signer-viem-v1/src/example-transactions/message-signing.tsx
+      const signature = await walletClient.signMessage({ account: address!, message: messageToSign });
+
+      setSignature(`${signature}`);
+
+========
       const signature = await signer.signMessage(messageToSign);
       setSignature(`${signature}`);
 
+>>>>>>>> main:web/with-react-nextjs/signer-ethers-v5/src/example-transactions/message-signing.tsx
       setStatus({
         show: true,
         type: "success",
@@ -62,8 +92,13 @@ export default function MessageSigningDemo() {
     try {
       if (!message || !signature) return;
 
+<<<<<<<< HEAD:web/with-react-nextjs/signer-viem-v1/src/example-transactions/message-signing.tsx
+      const recovered = await verifyMessage({ address: address!, message, signature: signature as `0x${string}` });
+      setRecovered(recovered);
+========
       const recovered = ethers.utils.verifyMessage(message, signature);
       setRecoveredAddress(recovered);
+>>>>>>>> main:web/with-react-nextjs/signer-ethers-v5/src/example-transactions/message-signing.tsx
       setStatus({
         show: true,
         type: "success",
@@ -146,11 +181,19 @@ export default function MessageSigningDemo() {
                 <p className="text-sm font-mono break-all text-gray-600 bg-white p-4 border border-gray-200">
                   {signature}
                 </p>
+<<<<<<<< HEAD:web/with-react-nextjs/signer-viem-v1/src/example-transactions/message-signing.tsx
+                {recovered && (
+                  <div className="mt-4">
+                    <p className="text-sm font-medium text-gray-900 mb-2">Recovered:</p>
+                    <p className="text-sm font-mono break-all text-gray-600 bg-white p-4 border border-gray-200">
+                      {recovered}
+========
                 {recoveredAddress && (
                   <div className="mt-4">
                     <p className="text-sm font-medium text-gray-900 mb-2">Recovered Address:</p>
                     <p className="text-sm font-mono break-all text-gray-600 bg-white p-4 border border-gray-200">
                       {recoveredAddress}
+>>>>>>>> main:web/with-react-nextjs/signer-ethers-v5/src/example-transactions/message-signing.tsx
                     </p>
                   </div>
                 )}

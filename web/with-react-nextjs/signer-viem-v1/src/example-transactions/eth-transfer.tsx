@@ -1,7 +1,6 @@
 "use client";
 
-import { useParaSigner } from "@/components/ParaSignerProvider";
-import { useAccount } from "@getpara/react-sdk";
+import { usePara } from "@/components/ParaProvider";
 import { useState, useEffect } from "react";
 import { formatEther, parseEther, parseGwei } from "viem";
 import { holesky } from "viem/chains";
@@ -19,11 +18,7 @@ export default function EthTransferDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { data: account } = useAccount();
-  const { walletClient, publicClient, viemAccount } = useParaSigner();
-
-  const isConnected = account?.isConnected;
-  const address = viemAccount?.address;
+  const { isConnected, walletId, address, walletClient, publicClient, account } = usePara();
 
   const fetchBalance = async () => {
     if (!address || !publicClient) return;
@@ -87,11 +82,13 @@ export default function EthTransferDemo() {
     if (!walletClient) return;
 
     try {
-      if (!isConnected) {
+      if (!isConnected || !walletId) {
         setStatus({
           show: true,
           type: "error",
-          message: "Please connect your wallet to send ETH.",
+          message: !isConnected
+            ? "Please connect your wallet to send a transaction."
+            : "No wallet ID found. Please reconnect your wallet.",
         });
         return;
       }
@@ -118,7 +115,7 @@ export default function EthTransferDemo() {
       await validateTransaction(amount);
 
       const txHash = await walletClient.sendTransaction({
-        account: viemAccount!,
+        account: account!,
         to: to as `0x${string}`,
         value: parseEther(amount),
         maxFeePerGas: parseGwei("20"),
@@ -229,7 +226,7 @@ export default function EthTransferDemo() {
               placeholder="0x..."
               required
               disabled={isLoading}
-              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
           </div>
 
@@ -248,7 +245,7 @@ export default function EthTransferDemo() {
               step="0.01"
               required
               disabled={isLoading}
-              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
           </div>
 

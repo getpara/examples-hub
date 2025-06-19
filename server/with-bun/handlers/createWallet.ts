@@ -24,20 +24,6 @@ export const createWallet = async (req: Request): Promise<Response> => {
       pregenIdentifierType: "EMAIL",
     });
 
-<<<<<<< HEAD
-  // Check if a pre-generated wallet already exists
-  const hasPregenWallet = await para.hasPregenWalletV2({ pregenId: { email }});
-  if (hasPregenWallet) {
-    return new Response("Wallet already exists", { status: 400 });
-  }
-
-  // Create a new wallet
-  const wallet = await para.createPregenWalletV2({
-    type: WalletType.EVM,
-    pregenId: { email },
-  });
-  if (!wallet) {
-=======
     if (hasPregenWallet) {
       return new Response(`Wallet already exists for ${email}`, { status: 409 });
     }
@@ -72,7 +58,6 @@ export const createWallet = async (req: Request): Promise<Response> => {
     );
   } catch (error) {
     console.error("Error creating pre-generated wallet:", error);
->>>>>>> main
     return new Response("Failed to create wallet", { status: 500 });
   }
 };

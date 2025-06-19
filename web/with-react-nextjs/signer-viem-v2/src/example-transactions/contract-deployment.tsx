@@ -1,10 +1,9 @@
 "use client";
 
+import { usePara } from "@/components/ParaProvider";
 import { useState, useEffect } from "react";
 import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
 import { formatEther } from "viem";
-import { useParaSigner } from "@/components/ParaSignerProvider";
-import { useAccount } from "@getpara/react-sdk";
 
 export default function ContractDeploymentDemo() {
   const [isLoading, setIsLoading] = useState(false);
@@ -21,11 +20,7 @@ export default function ContractDeploymentDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { data: account } = useAccount();
-  const { walletClient, publicClient, viemAccount } = useParaSigner();
-
-  const isConnected = account?.isConnected;
-  const address = viemAccount?.address;
+  const { isConnected, walletId, address, publicClient, walletClient } = usePara();
 
   const fetchBalance = async () => {
     if (!address) return;
@@ -60,18 +55,23 @@ export default function ContractDeploymentDemo() {
         throw new Error("Please connect your wallet to deploy the contract.");
       }
 
+      if (!walletId) {
+        throw new Error("No wallet ID found. Please reconnect your wallet.");
+      }
+
       setStatus({
         show: true,
         type: "info",
         message: "Deploying contract. Please confirm the transaction in your wallet...",
       });
 
+      // Deploy the contract using viem
       const hash = await walletClient!.deployContract({
         abi: ParaTestToken.abi,
         bytecode: (ParaTestToken.bytecode.startsWith("0x")
           ? ParaTestToken.bytecode
           : `0x${ParaTestToken.bytecode}`) as `0x${string}`,
-        account: address!,
+        account: address,
         chain: publicClient!.chain,
       });
 
@@ -81,10 +81,12 @@ export default function ContractDeploymentDemo() {
         message: "Contract deployment transaction submitted. Waiting for confirmation...",
       });
 
+      // Wait for transaction receipt
       const receipt = await publicClient!.waitForTransactionReceipt({
         hash,
       });
 
+      // Get the deployed contract address from the receipt
       const contractAddress = receipt.contractAddress;
 
       if (!contractAddress) {
